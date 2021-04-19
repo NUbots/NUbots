@@ -6,7 +6,7 @@
 namespace utility {
 namespace clock {
     extern double custom_rtf;  // real time factor
-    extern std::chrono::steady_clock::time_point last_Update;
+    extern std::chrono::steady_clock::time_point last_update;
 }  // namespace clock
 }  // namespace utility
 

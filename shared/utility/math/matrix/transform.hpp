@@ -183,6 +183,13 @@ namespace math {
             return result;
         }
 
+        inline Eigen::Affine2d lookAt(const Eigen::Vector2d& from, const Eigen::Vector2d& to) {
+            Eigen::Affine2d result;
+            result.translation() = from;
+            result.linear() = Eigen::Rotation2Dd(utility::math::angle::vectorToBearing(to - from)).toRotationMatrix();
+            return result;
+        }
+      
     }  // namespace transform
 }  // namespace math
 }  // namespace utility

@@ -35,7 +35,6 @@
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
-
 namespace module {
 namespace motion {
     using utility::nusight::graph;
@@ -51,7 +50,6 @@ namespace motion {
     using utility::math::coordinates::sphericalToCartesian;
     using utility::motion::kinematics::calculateCameraLookJoints;
     using utility::motion::kinematics::calculateHeadJoints;
-    using utility::support::Expression;
 
     // internal only callback messages to start and stop our action
     struct ExecuteHeadController {};

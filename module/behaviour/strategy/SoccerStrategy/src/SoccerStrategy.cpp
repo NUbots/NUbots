@@ -19,9 +19,10 @@
 
 #include "SoccerStrategy.hpp"
 
+#include <Eigen/Geometry>
+
 #include "extension/Configuration.hpp"
 
-#include "message/behaviour/Look.hpp"
 #include "message/behaviour/MotionCommand.hpp"
 #include "message/behaviour/Nod.hpp"
 #include "message/behaviour/SoccerObjectPriority.hpp"
@@ -35,13 +36,9 @@
 #include "message/vision/Goal.hpp"
 
 #include "utility/behaviour/MotionCommand.hpp"
-#include "utility/input/ServoID.hpp"
-#include "utility/math/matrix/Rotation3D.hpp"
-#include "utility/math/matrix/Transform2D.hpp"
-#include "utility/math/matrix/Transform3D.hpp"
+#include "utility/math/matrix/transform.hpp"
 #include "utility/nusight/NUhelpers.hpp"
-#include "utility/support/eigen_armadillo.hpp"
-#include "utility/support/yaml_armadillo.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module {
 namespace behaviour {
@@ -52,7 +49,6 @@ namespace behaviour {
         using message::behaviour::Behaviour;
         using message::behaviour::FieldTarget;
         using message::behaviour::KickPlan;
-        using message::behaviour::Look;
         using KickType = message::behaviour::KickPlan::KickType;
         using message::behaviour::MotionCommand;
         using message::behaviour::Nod;
@@ -77,9 +73,9 @@ namespace behaviour {
         using VisionBalls = message::vision::Balls;
         using VisionGoals = message::vision::Goals;
 
-        using utility::math::matrix::Rotation3D;
-        using utility::math::matrix::Transform2D;
-        using utility::math::matrix::Transform3D;
+        using utility::support::Expression;
+
+        using utility::support::Expression;
 
         SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
@@ -102,8 +98,8 @@ namespace behaviour {
                 cfg_.localisation_duration = duration_cast<NUClear::clock::duration>(
                     duration<double>(config["localisation_duration"].as<double>()));
 
-                cfg_.start_position_offensive = config["start_position_offensive"].as<arma::vec2>();
-                cfg_.start_position_defensive = config["start_position_defensive"].as<arma::vec2>();
+                cfg_.start_position_offensive = config["start_position_offensive"].as<Expression>();
+                cfg_.start_position_defensive = config["start_position_defensive"].as<Expression>();
 
                 cfg_.is_goalie = config["goalie"].as<bool>();
 
@@ -121,7 +117,7 @@ namespace behaviour {
             });
 
             // TODO: unhack
-            emit(std::make_unique<KickPlan>(KickPlan(Eigen::Vector2d(4.5, 0), KickType::SCRIPTED)));
+            emit(std::make_unique<KickPlan>(KickPlan(Eigen::Vector2d(4.5, 0.0), KickType::SCRIPTED)));
 
 
             // For checking last seen times
@@ -263,7 +259,7 @@ namespace behaviour {
 
             on<Trigger<Field>, With<FieldDescription>>().then(
                 [this](const Field& field, const FieldDescription& fieldDescription) {
-                    Eigen::Vector2d kickTarget = convert(getKickPlan(field, fieldDescription));
+                    Eigen::Vector2d kickTarget = getKickPlan(field, fieldDescription);
                     emit(std::make_unique<KickPlan>(KickPlan(kickTarget, kickType)));
                 });
         }
@@ -304,7 +300,7 @@ namespace behaviour {
                         && (position.translation().norm() > 1)) {  // a long way away from centre
                         // walk to centre of field
                         find({FieldTarget(FieldTarget::Target::BALL)});
-                        walkTo(fieldDescription, arma::vec2({0, 0}));
+                        walkTo(fieldDescription, Eigen::Vector2d::Zero());
                         currentState = Behaviour::State::MOVE_TO_CENTRE;
                     }
                     else {
@@ -324,8 +320,9 @@ namespace behaviour {
 
             ResetRobotHypotheses::Self leftSide;
             // Start on goal line
-            leftSide.position << -fieldDescription.dimensions.field_length * 0.5,
-                fieldDescription.dimensions.field_width / 2;
+            leftSide.position =
+                Eigen::Vector2d(-fieldDescription.dimensions.field_length, fieldDescription.dimensions.field_width)
+                * 0.5;
             leftSide.position_cov = Eigen::Vector2d::Constant(0.01).asDiagonal();
             leftSide.heading      = 0;
             leftSide.heading_var  = 0.005;
@@ -333,8 +330,9 @@ namespace behaviour {
             reset->hypotheses.push_back(leftSide);
             ResetRobotHypotheses::Self rightSide;
             // Start on goal line
-            rightSide.position << -fieldDescription.dimensions.field_length * 0.5,
-                -fieldDescription.dimensions.field_width / 2;
+            rightSide.position =
+                Eigen::Vector2d(-fieldDescription.dimensions.field_length, -fieldDescription.dimensions.field_width)
+                * 0.5;
             rightSide.position_cov = Eigen::Vector2d::Constant(0.01).asDiagonal();
             rightSide.heading      = 0;
             rightSide.heading_var  = 0.005;
@@ -343,12 +341,12 @@ namespace behaviour {
             emit(std::move(reset));
         }
 
-        void SoccerStrategy::penaltyShootoutLocalisationReset(const FieldDescription& fieldDescription) {
+        void SoccerStrategy::penaltyShootoutLocalisationReset(const FieldDescription& /*fieldDescription*/) {
 
             auto reset = std::make_unique<ResetRobotHypotheses>();
 
             ResetRobotHypotheses::Self selfSideBaseLine;
-            selfSideBaseLine.position << 2.0, 0.0;
+            selfSideBaseLine.position     = Eigen::Vector2d(2.0, 0.0);
             selfSideBaseLine.position_cov = Eigen::Vector2d::Constant(0.01).asDiagonal();
             selfSideBaseLine.heading      = 0;
             selfSideBaseLine.heading_var  = 0.005;
@@ -361,15 +359,17 @@ namespace behaviour {
 
             auto reset = std::make_unique<ResetRobotHypotheses>();
             ResetRobotHypotheses::Self left;
-            left.position << -fieldDescription.penalty_robot_start, fieldDescription.dimensions.field_width * 0.5;
-            left.position_cov = Eigen::Vector2d(1, 0.01).asDiagonal();
+            left.position =
+                Eigen::Vector2d(-fieldDescription.penalty_robot_start, fieldDescription.dimensions.field_width * 0.5);
+            left.position_cov = Eigen::Vector2d(1.0, 0.01).asDiagonal();
             left.heading      = -M_PI_2;
             left.heading_var  = 0.005;
             reset->hypotheses.push_back(left);
 
             ResetRobotHypotheses::Self right;
-            right.position << -fieldDescription.penalty_robot_start, -fieldDescription.dimensions.field_width * 0.5;
-            right.position_cov = Eigen::Vector2d(1, 0.01).asDiagonal();
+            right.position =
+                Eigen::Vector2d(-fieldDescription.penalty_robot_start, -fieldDescription.dimensions.field_width * 0.5);
+            right.position_cov = Eigen::Vector2d(1.0, 0.01).asDiagonal();
             right.heading      = M_PI_2;
             right.heading_var  = 0.005;
             reset->hypotheses.push_back(right);
@@ -388,21 +388,18 @@ namespace behaviour {
                 throw std::runtime_error("SoccerStrategy::walkTo: Only FieldTarget::Target::BALL is supported.");
             }
 
-            arma::vec2 enemyGoal = {fieldDescription.dimensions.field_length * 0.5, 0};
+            Eigen::Vector2d enemyGoal(fieldDescription.dimensions.field_length * 0.5, 0.0);
 
             emit(std::make_unique<MotionCommand>(utility::behaviour::BallApproach(enemyGoal)));
         }
 
-        void SoccerStrategy::walkTo(const FieldDescription& fieldDescription, arma::vec position) {
-
-            arma::vec2 enemyGoal = {fieldDescription.dimensions.field_length * 0.5, 0};
-
-            auto goalState = Transform2D::lookAt(position, enemyGoal);
-            emit(std::make_unique<MotionCommand>(utility::behaviour::WalkToState(goalState)));
+        void SoccerStrategy::walkTo(const FieldDescription& fieldDescription, const Eigen::Vector2d& position) {
+            emit(std::make_unique<MotionCommand>(utility::behaviour::WalkToState(utility::math::transform::lookAt(
+                position,
+                Eigen::Vector2d(fieldDescription.dimensions.field_length * 0.5, 0.0)))));
         }
 
         bool SoccerStrategy::pickedUp(const Sensors& sensors) {
-
             bool feetOffGround = !sensors.feet[BodySide::LEFT].down && !sensors.feet[BodySide::RIGHT].down;
             return false && feetOffGround && !isGettingUp && sensors.Htw(2, 2) < 0.92 && sensors.Htw(2, 2) > 0.88;
         }
@@ -416,7 +413,6 @@ namespace behaviour {
         }
 
         void SoccerStrategy::find(const std::vector<FieldTarget>& fieldObjects) {
-
             // Create the soccer object priority pointer and initialise each value to 0.
             auto soccerObjectPriority  = std::make_unique<SoccerObjectPriority>();
             soccerObjectPriority->ball = 0;
@@ -442,11 +438,12 @@ namespace behaviour {
         }
 
         void SoccerStrategy::spinWalk() {
-            emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand({0, 0, 1})));
+            Eigen::Affine2d spin(Eigen::Affine2d::Identity());
+            spin.linear() = Eigen::Rotation2Dd(1.0).toRotationMatrix();
+            emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(spin)));
         }
 
-        arma::vec2 SoccerStrategy::getKickPlan(const Field& field, const FieldDescription& fieldDescription) {
-
+        Eigen::Vector2d SoccerStrategy::getKickPlan(const Field& field, const FieldDescription& fieldDescription) {
             // Defines the box within in which the kick target is changed from the centre
             // of the oppposition goal to the perpendicular distance from the robot to the goal
 
@@ -459,19 +456,19 @@ namespace behaviour {
             Eigen::Affine2d position(field.position);
             float xRobot = position.translation().x();
             float yRobot = position.translation().y();
-            arma::vec2 newTarget;
+            Eigen::Vector2d newTarget;
 
-            if ((fieldDescription.dimensions.field_length / 2) - xTakeOverBox < xRobot && -yTakeOverBox < yRobot
+            if ((fieldDescription.dimensions.field_length * 0.5) - xTakeOverBox < xRobot && -yTakeOverBox < yRobot
                 && yRobot < yTakeOverBox) {
                 // Aims for behind the point that gives the shortest distance
-                newTarget[0] =
-                    fieldDescription.dimensions.field_length / 2 + fieldDescription.dimensions.goal_depth / 2;
-                newTarget[1] = yRobot;
+                newTarget.x() =
+                    fieldDescription.dimensions.field_length * 0.5 + fieldDescription.dimensions.goal_depth * 0.5;
+                newTarget.y() = yRobot;
             }
             else {
                 // Aims for the centre of the goal
-                newTarget[0] = fieldDescription.dimensions.field_length / 2;
-                newTarget[1] = 0;
+                newTarget.x() = fieldDescription.dimensions.field_length * 0.5;
+                newTarget.y() = 0;
             }
             return newTarget;
         }
@@ -491,19 +488,22 @@ namespace behaviour {
                                       * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * fieldBearing),
                                                   cfg_.goalie_max_rotation_speed);
 
-                int signTranslation    = ball.position[1] > 0 ? 1 : -1;
+                int signTranslation    = ball.position.y() > 0 ? 1 : -1;
                 float translationSpeed = signTranslation
                                          * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.position[1]),
                                                      cfg_.goalie_max_translation_speed);
 
-                motionCommand =
-                    std::make_unique<MotionCommand>(utility::behaviour::DirectCommand({0, 0, rotationSpeed}));
+                Eigen::Affine2d cmd;
+                cmd.linear()      = Eigen::Rotation2Dd(rotationSpeed).matrix();
+                cmd.translation() = Eigen::Vector2d::Zero();
+                motionCommand     = std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(cmd));
                 if (std::fabs(fieldBearing) < cfg_.goalie_side_walk_angle_threshold) {
                     motionCommand->walkCommand.y() = translationSpeed;
                 }
             }
             else {
-                motionCommand = std::make_unique<MotionCommand>(utility::behaviour::DirectCommand({0, 0, 0}));
+                motionCommand =
+                    std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(Eigen::Affine2d::Identity()));
             }
             emit(std::move(motionCommand));
         }

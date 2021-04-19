@@ -121,7 +121,7 @@ namespace vision {
                     auto balls = std::make_unique<Balls>();
                     balls->balls.reserve(clusters.size());
 
-                    balls->camera_id = horizon.camera_id;
+                    balls->id        = horizon.id;
                     balls->timestamp = horizon.timestamp;
                     balls->Hcw       = horizon.Hcw;
 
@@ -261,7 +261,7 @@ namespace vision {
                         }
 
                         if (config.debug) {
-                            log<NUClear::DEBUG>(fmt::format("Camera {}", balls->camera_id));
+                            log<NUClear::DEBUG>(fmt::format("Camera {}", balls->id));
                             log<NUClear::DEBUG>(fmt::format("radius {}", b.cone.radius));
                             log<NUClear::DEBUG>(fmt::format("Axis {}", b.cone.axis.transpose()));
                             log<NUClear::DEBUG>(

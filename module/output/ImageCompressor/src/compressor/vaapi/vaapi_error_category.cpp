@@ -40,7 +40,6 @@ std::error_condition vaapi_error_category_t::default_error_condition(int code) c
         case VA_STATUS_ERROR_HW_BUSY: return std::error_condition(ve::HW_BUSY);
         case VA_STATUS_ERROR_UNSUPPORTED_MEMORY_TYPE: return std::error_condition(ve::UNSUPPORTED_MEMORY_TYPE);
         case VA_STATUS_ERROR_NOT_ENOUGH_BUFFER: return std::error_condition(ve::NOT_ENOUGH_BUFFER);
-        case VA_STATUS_ERROR_UNKNOWN: return std::error_condition(ve::UNKNOWN);
         default: return std::error_condition(ve::UNKNOWN);
     }
 }
@@ -82,7 +81,6 @@ std::string vaapi_error_category_t::message(int code) const noexcept {
         case VA_STATUS_ERROR_HW_BUSY: return "Hardware busy";
         case VA_STATUS_ERROR_UNSUPPORTED_MEMORY_TYPE: return "An unsupported memory type was supplied";
         case VA_STATUS_ERROR_NOT_ENOUGH_BUFFER: return "Allocated buffer size is not enough for input or output";
-        case VA_STATUS_ERROR_UNKNOWN: return "Unknown Error";
         default: return "Unknown error";
     }
 }

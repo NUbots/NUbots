@@ -15,8 +15,8 @@ namespace module::output::compressor::vaapi::operation {
 namespace markers {
 
     /// htons is used throughout the code to fix the endian issue
-    /// In JPEG all of the 16 bit numbers are big endian, conveniently this is the same byte order as "network order"
-    /// So we can use host to network short to ensure that the endianess of the bytes is correct
+    /// In JPEG all of the 16 bit numbers are big endian, conveniently this is the same byte order as "network
+    /// order" So we can use host to network short to ensure that the endianess of the bytes is correct
 
     // Start of image
     struct SOI {
@@ -45,7 +45,7 @@ namespace markers {
         uint8_t type               = 0xDB;
         uint16_t length            = htons(sizeof(DQT) - 2);
         uint8_t q_precision_q_type = 0;
-        std::array<uint8_t, 64> quant;
+        std::array<uint8_t, 64> quant{};
 
         DQT(const std::array<uint8_t, 64>& table, int quality) {
             // Normalise by quality and clamp between 1 and 255
@@ -161,9 +161,9 @@ std::pair<VABufferID, VABufferID> jpeg_header(VADisplay dpy,
     /// This jpeg header builder works using a c++ technique called placement new
     /// https://en.cppreference.com/w/cpp/language/new#Placement_new
     /// In placement new, the memory allocation is separated from the object construction.
-    /// By using this we can take our header as an std::vector, and continuously increase it's size and construct new
-    /// objects on it using placement new.
-    /// By doing this we can define easy to work with packed structs that place the data in the correct location
+    /// By using this we can take our header as an std::vector, and continuously increase it's size and construct
+    /// new objects on it using placement new. By doing this we can define easy to work with packed structs that
+    /// place the data in the correct location
 
     // The final location for header data
     std::vector<uint8_t> header;
@@ -213,7 +213,7 @@ std::pair<VABufferID, VABufferID> jpeg_header(VADisplay dpy,
     params.bit_length          = header.size() * 8;
     params.has_emulation_bytes = 0;
 
-    VABufferID paramid;
+    VABufferID paramid = 0;
     VAStatus va_status = vaCreateBuffer(dpy,
                                         context,
                                         VAEncPackedHeaderParameterBufferType,
@@ -225,7 +225,7 @@ std::pair<VABufferID, VABufferID> jpeg_header(VADisplay dpy,
         throw std::system_error(va_status, vaapi_error_category(), "Error creating the raw header parameter buffer");
     }
 
-    VABufferID rawid;
+    VABufferID rawid = 0;
     va_status = vaCreateBuffer(dpy, context, VAEncPackedHeaderDataBufferType, header.size(), 1, header.data(), &rawid);
     if (va_status != VA_STATUS_SUCCESS) {
         throw std::system_error(va_status, vaapi_error_category(), "Error creating the raw header buffer");

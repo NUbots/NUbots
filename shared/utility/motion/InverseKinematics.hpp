@@ -44,8 +44,8 @@ namespace utility {
 namespace motion {
     namespace kinematics {
 
-        using LimbID  = utility::input::LimbID;
-        using ServoID = utility::input::ServoID;
+        using utility::input::LimbID;
+        using utility::input::ServoID;
 
         /*! @brief Calculates the leg joints for a given input ankle position.
                 The robot coordinate system has origin a distance DISTANCE_FROM_BODY_TO_HIP_JOINT above the midpoint of
@@ -89,7 +89,8 @@ namespace motion {
 
         std::vector<std::pair<ServoID, float>> calculateCameraLookJoints(const message::motion::KinematicsModel& model,
                                                                          arma::vec3 cameraUnitVector);
-        std::vector<std::pair<ServoID, double>> calculateCameraLookJoints(const message::motion::KinematicsModel& model,
+
+        std::vector<std::pair<ServoID, double>> calculateCameraLookJoints(const KinematicsModel& model,
                                                                           const Eigen::Vector3d& cameraUnitVector);
 
         std::vector<std::pair<ServoID, float>> calculateHeadJoints(arma::vec3 cameraUnitVector);

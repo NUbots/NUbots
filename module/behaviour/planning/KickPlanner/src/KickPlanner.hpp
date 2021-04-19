@@ -20,9 +20,6 @@
 #ifndef MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_HPP
 #define MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_HPP
 
-#include <armadillo>
-#include <nuclear>
-
 #include "message/input/Sensors.hpp"
 #include "message/motion/KickCommand.hpp"
 namespace module {
@@ -35,7 +32,7 @@ namespace behaviour {
             explicit KickPlanner(std::unique_ptr<NUClear::Environment> environment);
 
         private:
-            bool kickValid(const arma::vec3& ballPos);
+            bool kickValid(const Eigen::Vector3d& ballPos);
             message::motion::KickPlannerConfig cfg;
             NUClear::clock::time_point ballLastSeen;
             NUClear::clock::time_point lastTimeValid;

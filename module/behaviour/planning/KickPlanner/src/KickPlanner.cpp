@@ -19,6 +19,9 @@
 
 #include "KickPlanner.hpp"
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/KickPlan.hpp"
@@ -34,11 +37,8 @@
 #include "utility/input/LimbID.hpp"
 #include "utility/localisation/transform.hpp"
 #include "utility/math/coordinates.hpp"
-#include "utility/math/matrix/Transform3D.hpp"
 #include "utility/motion/InverseKinematics.hpp"
 #include "utility/nusight/NUhelpers.hpp"
-#include "utility/support/eigen_armadillo.hpp"
-#include "utility/support/yaml_armadillo.hpp"
 
 
 namespace module {
@@ -65,8 +65,6 @@ namespace behaviour {
         using LimbID = utility::input::LimbID;
         using utility::localisation::fieldStateToTransform3D;
         using utility::math::coordinates::sphericalToCartesian;
-        using utility::math::matrix::Rotation2D;
-        using utility::math::matrix::Transform3D;
         using utility::motion::kinematics::legPoseValid;
         using utility::nusight::graph;
 
@@ -104,33 +102,40 @@ namespace behaviour {
                         std::chrono::duration_cast<std::chrono::microseconds>(now - ballLastSeen).count() * 1e-6;
 
                     // Compute target in robot coords
-                    // arma::vec2 kickTarget = {1,0,0}; //Kick forwards
+                    // Eigen::Vector3d kickTarget = Eigen::Vector3d::UnitX(); //Kick forwards
                     // TODO: The heading seems to judder here!!
                     // TODO: use sensors.Htw instead
-                    Transform3D Hfw = fieldStateToTransform3D(convert(field.position));
+                    Eigen::Affine2d position = Eigen::Affine2d(field.position);
+                    Eigen::Affine3d Hfw;
+                    Hfw.translation() = Eigen::Vector3d(position.translation().x(), position.translation().y(), 0);
+                    Hfw.linear() =
+                        Eigen::AngleAxisd(Eigen::Rotation2Dd(position.rotation()).angle(), Eigen::Vector3d::UnitZ())
+                            .toRotationMatrix();
 
-                    Transform3D Htw         = convert(sensors.Htw);
-                    arma::vec3 ballPosition = Htw.transformPoint({ball.position[0], ball.position[1], fd.ball_radius});
+                    Eigen::Affine3d Htw(sensors.Htw);
+                    Eigen::Vector3d ballPosition =
+                        (Htw * Eigen::Vector4d(ball.position.x(), ball.position.y(), fd.ball_radius, 1.0)).head<3>();
 
                     // Transform target from field to torso space
-                    Transform3D Htf       = (Htw * Hfw.i());
-                    arma::vec3 kickTarget = Htf.transformPoint(arma::vec3({kickPlan.target[0], kickPlan.target[1], 0}));
-                    float KickAngle       = std::fabs(std::atan2(kickTarget[1], kickTarget[0]));
+                    Eigen::Affine3d Htf = Htw * Hfw.inverse();
+                    Eigen::Vector3d kickTarget =
+                        (Htf * Eigen ::Vector4d(kickPlan.target.x(), kickPlan.target.y(), 0.0, 1.0)).head<3>();
+                    float KickAngle = std::fabs(std::atan2(kickTarget.y(), kickTarget.x()));
 
-                    // log("KickPlan target global",convert(kickPlan.target).t());
-                    // log("Target of Kick",kickTarget.t());
-                    // log("KickAngle",KickAngle);
+                    // log("KickPlan target global",kickPlan. target.transpose());
+                    // log("Target of Kick", kickTarget.transpose());
+                    // log("KickAngle", KickAngle);
 
                     // Check whether to kick
-                    // log("kickTarget",kickTarget.t());
-                    // log("KickAngle",KickAngle);
-                    // log("ballPosition",ballPosition);
-                    // log("secondsSinceLastSeen",secondsSinceLastSeen);
+                    // log("kickTarget", kickTarget.transpose());
+                    // log("KickAngle", KickAngle);
+                    // log("ballPosition", ballPosition);
+                    // log("secondsSinceLastSeen", secondsSinceLastSeen);
                     bool kickIsValid = kickValid(ballPosition);
                     if (kickIsValid) {
                         lastTimeValid = now;
                     }
-                    float timeSinceValid = (now - lastTimeValid).count() * (1 / double(NUClear::clock::period::den));
+                    float timeSinceValid = (now - lastTimeValid).count() * (1.0 / double(NUClear::clock::period::den));
 
                     // log("kick checks",secondsSinceLastSeen < cfg.seconds_not_seen_limit
                     //     , kickIsValid
@@ -141,30 +146,30 @@ namespace behaviour {
                         switch (kickPlan.kickType.value) {
                             case KickType::IK_KICK:
                                 // NUClear::log("ik_kick");
-                                if (ballPosition[1] > 0) {
+                                if (ballPosition.y() > 0.0) {
                                     emit(std::make_unique<KickCommand>(KickCommand(Eigen::Vector3d(0.1, 0.04, 0),
-                                                                                   Eigen::Vector3d(1.0, 0.0, 0.0),
+                                                                                   Eigen::Vector3d::UnitX(),
                                                                                    KickCommandType::NORMAL)));
                                     emit(std::make_unique<WantsToKick>(true));
                                 }
                                 else {
                                     emit(std::make_unique<KickCommand>(KickCommand(Eigen::Vector3d(0.1, -0.04, 0),
-                                                                                   Eigen::Vector3d(1.0, 0.0, 0.0),
+                                                                                   Eigen::Vector3d::UnitX(),
                                                                                    KickCommandType::NORMAL)));
                                     emit(std::make_unique<WantsToKick>(true));
                                 }
                                 break;
                             case KickType::SCRIPTED:
                                 // NUClear::log("scripted");
-                                if (ballPosition[1] > 0) {
+                                if (ballPosition.y() > 0.0) {
                                     emit(std::make_unique<KickScriptCommand>(
-                                        KickScriptCommand(Eigen::Vector3d(1.0, 0.0, 0.0), LimbID::LEFT_LEG)));
+                                        KickScriptCommand(Eigen::Vector3d::UnitX(), LimbID::LEFT_LEG)));
                                     emit(std::make_unique<WantsToKick>(true));
                                     ;
                                 }
                                 else {
                                     emit(std::make_unique<KickScriptCommand>(
-                                        KickScriptCommand(Eigen::Vector3d(1.0, 0.0, 0.0), LimbID::RIGHT_LEG)));
+                                        KickScriptCommand(Eigen::Vector3d::UnitX(), LimbID::RIGHT_LEG)));
                                     emit(std::make_unique<WantsToKick>(true));
                                     ;
                                 }
@@ -180,9 +185,9 @@ namespace behaviour {
         }
 
 
-        bool KickPlanner::kickValid(const arma::vec3& ballPos) {
-            return (ballPos[0] > 0) && (ballPos[0] < cfg.max_ball_distance)
-                   && (std::fabs(ballPos[1]) < cfg.kick_corridor_width / 2.0);
+        bool KickPlanner::kickValid(const Eigen::Vector3d& ballPos) {
+            return (ballPos.x() > 0.0) && (ballPos.x() < cfg.max_ball_distance)
+                   && (std::fabs(ballPos.y()) < cfg.kick_corridor_width * 0.5);
         }
     }  // namespace planning
 }  // namespace behaviour

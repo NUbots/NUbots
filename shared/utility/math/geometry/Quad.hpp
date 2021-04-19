@@ -45,7 +45,7 @@ namespace math {
             Quad(const T& bottomLeft, const T& topLeft, const T& topRight, const T& bottomRight)
                 : bl(bottomLeft), br(bottomRight), tr(topRight), tl(topLeft) {}
             Quad(const Scalar& left, const Scalar& top, const Scalar& right, const Scalar& bottom)
-                : bl({left, bottom}), br({right, bottom}), tr({right, top}), tl({left, top}) {}
+                : bl(left, bottom), br(right, bottom), tr(right, top), tl(left, top) {}
 
             /**
              * Sets the Quad as a screen aligned rectangle given the specified positions.
@@ -55,14 +55,14 @@ namespace math {
              * @param bottom   The bottom y pixel value.
              */
             void set(const Scalar& left, const Scalar& top, const Scalar& right, const Scalar& bottom) {
-                bl(0) = left;
-                bl(1) = bottom;
-                br(0) = right;
-                br(1) = bottom;
-                tl(0) = left;
-                tl(1) = top;
-                tr(0) = right;
-                tr(1) = top;
+                bl.x() = left;
+                bl.y() = bottom;
+                br.x() = right;
+                br.y() = bottom;
+                tl.x() = left;
+                tl.y() = top;
+                tr.x() = right;
+                tr.y() = top;
             }
 
             /**

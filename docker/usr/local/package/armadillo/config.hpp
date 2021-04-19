@@ -292,5 +292,5 @@
 // ARMA_AUX_LIBS lists the libraries required by Armadillo on this system, and
 // ARMA_AUX_INCDIRS lists the include directories required by Armadillo on this system.
 // Do not use these unless you know what you are doing.
-#define ARMA_AUX_LIBS / usr / local / lib64 / libopenblas.a
+#define ARMA_AUX_LIBS "/usr/local/lib/libopenblas.so"
 #define ARMA_AUX_INCDIRS
