@@ -19,6 +19,7 @@
 
 #include "SimpleWalkPathPlanner.hpp"
 
+#include <Eigen/Geometry>
 #include <cmath>
 
 #include "extension/Configuration.hpp"
@@ -39,10 +40,7 @@
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/localisation/transform.hpp"
-#include "utility/math/matrix/Transform2D.hpp"
-#include "utility/math/matrix/Transform3D.hpp"
 #include "utility/nusight/NUhelpers.hpp"
-#include "utility/support/eigen_armadillo.hpp"
 
 
 namespace module {
@@ -51,41 +49,34 @@ namespace behaviour {
 
         using extension::Configuration;
 
-        using LimbID  = utility::input::LimbID;
-        using ServoID = utility::input::ServoID;
-        using message::input::Sensors;
-
         using message::behaviour::KickPlan;
         using message::behaviour::MotionCommand;
         using message::behaviour::WantsToKick;
+        using message::input::Sensors;
+        using message::localisation::Ball;
+        using message::localisation::Field;
+        using message::motion::DisableWalkEngineCommand;
+        using message::motion::EnableWalkEngineCommand;
         using message::motion::KickFinished;
         using message::motion::StopCommand;
         using message::motion::WalkCommand;
+        using message::motion::WalkStopped;
+        using message::support::FieldDescription;
         using VisionBalls = message::vision::Balls;
-        using utility::localisation::fieldStateToTransform3D;
-        using utility::math::matrix::Rotation2D;
-        using utility::math::matrix::Transform2D;
-        using utility::math::matrix::Transform3D;
-        using utility::nusight::graph;
 
         using utility::behaviour::ActionPriorities;
         using utility::behaviour::RegisterAction;
-
-        using message::motion::DisableWalkEngineCommand;
-        using message::motion::EnableWalkEngineCommand;
-        using message::motion::WalkStopped;
-
-        using message::localisation::Ball;
-        using message::localisation::Field;
-        using message::support::FieldDescription;
-
+        using utility::input::LimbID;
+        using utility::input::ServoID;
+        using utility::localisation::fieldStateToTransform3D;
+        using utility::nusight::graph;
 
         SimpleWalkPathPlanner::SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment)
             : Reactor(std::move(environment))
             , latestCommand(utility::behaviour::StandStill())
             , subsumptionId(size_t(this) * size_t(this) - size_t(this))
-            , currentTargetPosition(arma::fill::zeros)
-            , currentTargetHeading(arma::fill::zeros)
+            , currentTargetPosition(Eigen::Vector2d::Zero())
+            , currentTargetHeading(Eigen::Vector2d::Zero())
             , targetHeading(Eigen::Vector2d::Zero(), KickPlan::KickType::SCRIPTED)
             , timeBallLastSeen(NUClear::clock::now()) {
 
@@ -192,18 +183,20 @@ namespace behaviour {
                         return;
                     }
 
-                    Transform3D Htw = convert(sensors.Htw);
-                    auto now        = NUClear::clock::now();
+                    Eigen::Affine3d Htw(sensors.Htw);
+
+                    auto now = NUClear::clock::now();
                     float timeSinceBallSeen =
                         std::chrono::duration_cast<std::chrono::nanoseconds>(now - timeBallLastSeen).count()
-                        * (1 / std::nano::den);
+                        * (1.0f / std::nano::den);
 
 
-                    arma::vec3 rBWw_temp = {ball.position[0], ball.position[1], fieldDescription.ball_radius};
-                    rBWw                 = timeSinceBallSeen < search_timeout ? rBWw_temp :  // Place last seen
-                               Htw.i().x() + Htw.i().translation();          // In front of the robot
-                    arma::vec3 pos       = Htw.transformPoint(rBWw);
-                    position             = pos.rows(0, 1);
+                    Eigen::Vector3d rBWw_temp(ball.position.x(), ball.position.y(), fieldDescription.ball_radius);
+                    rBWw                = timeSinceBallSeen < search_timeout ? rBWw_temp :  // Place last seen
+                               Htw.inverse().linear().leftCols<1>()
+                                   + Htw.inverse().translation();  // In front of the robot
+                    Eigen::Vector3d pos = (Htw * Eigen::Vector4d(rBWw.x(), rBWw.y(), rBWw.z(), 1.0)).head<3>();
+                    position            = pos.head<2>();
 
                     // Hack Planner:
                     float headingChange = 0;
@@ -212,29 +205,36 @@ namespace behaviour {
                     if (useLocalisation) {
 
                         // Transform kick target to torso space
-                        Transform3D Hfw = fieldStateToTransform3D(convert(field.position));
-                        Transform3D Htf = (Htw * Hfw.i());
-                        arma::vec3 kickTarget =
-                            Htf.transformPoint(arma::vec3({kickPlan.target[0], kickPlan.target[1], 0}));
+                        Eigen::Affine2d fieldPosition = Eigen::Affine2d(field.position);
+                        Eigen::Affine3d Hfw;
+                        Hfw.translation() =
+                            Eigen::Vector3d(fieldPosition.translation().x(), fieldPosition.translation().y(), 0);
+                        Hfw.linear() = Eigen::AngleAxisd(Eigen::Rotation2Dd(fieldPosition.rotation()).angle(),
+                                                         Eigen::Vector3d::UnitZ())
+                                           .toRotationMatrix();
+
+                        Eigen::Affine3d Htf = Htw * Hfw.inverse();
+                        Eigen::Vector3d kickTarget =
+                            (Htf * Eigen::Vector4d(kickPlan.target.x(), kickPlan.target.y(), 0.0, 1.0)).head<3>();
 
                         // //approach point:
-                        arma::vec2 ballToTarget = arma::normalise(kickTarget.rows(0, 1) - position);
-                        arma::vec2 kick_point   = position - ballToTarget * ball_approach_dist;
+                        Eigen::Vector2d ballToTarget = (kickTarget.head<2>() - position).normalized();
+                        Eigen::Vector2d kick_point   = position - ballToTarget * ball_approach_dist;
 
-                        if (arma::norm(position) > slowdown_distance) {
+                        if (position.norm() > slowdown_distance) {
                             position = kick_point;
                         }
                         else {
                             speedFactor   = slow_approach_factor;
-                            headingChange = std::atan2(ballToTarget[1], ballToTarget[0]);
+                            headingChange = std::atan2(ballToTarget.y(), ballToTarget.x());
                             sideStep      = 1;
                         }
                     }
-                    // arma::vec2 ball_world_position = WorldToRobotTransform(selfs.front().position,
+                    // Eigen::Vector2d ball_world_position = WorldToRobotTransform(selfs.front().position,
                     // selfs.front().heading, position);
 
 
-                    float angle = std::atan2(position[1], position[0]) + headingChange;
+                    float angle = std::atan2(position.y(), position.x()) + headingChange;
                     // log("ball bearing", angle);
                     angle = std::min(turnSpeed, std::max(angle, -turnSpeed));
                     // log("turnSpeed", turnSpeed);
@@ -244,14 +244,14 @@ namespace behaviour {
                     // log("loc heading", selfs.front().heading);
 
                     // Euclidean distance to ball
-                    float scaleF            = 2.0 / (1.0 + std::exp(-a * std::fabs(position[0]) + b)) - 1.0;
+                    float scaleF            = 2.0 / (1.0 + std::exp(-a * std::fabs(position.x()) + b)) - 1.0;
                     float scaleF2           = angle / M_PI;
                     float finalForwardSpeed = speedFactor * forwardSpeed * scaleF * (1.0 - scaleF2);
 
-                    float scaleS         = 2.0 / (1.0 + std::exp(-a * std::fabs(position[1]) + b)) - 1.0;
+                    float scaleS         = 2.0 / (1.0 + std::exp(-a * std::fabs(position.y()) + b)) - 1.0;
                     float scaleS2        = angle / M_PI;
-                    float finalSideSpeed = -speedFactor * ((0 < position[1]) - (position[1] < 0)) * sideStep * sideSpeed
-                                           * scaleS * (1.0 - scaleS2);
+                    float finalSideSpeed = -speedFactor * ((0.0 < position.y()) - (position.y() < 0.0)) * sideStep
+                                           * sideSpeed * scaleS * (1.0 - scaleS2);
                     // log("forwardSpeed1", forwardSpeed);
                     // log("scale", scale);
                     // log("distanceToBall", distanceToBall);
@@ -259,8 +259,8 @@ namespace behaviour {
 
 
                     std::unique_ptr<WalkCommand> command =
-                        std::make_unique<WalkCommand>(subsumptionId, convert(Transform2D({0, 0, 0})));
-                    command->command = convert(Transform2D({finalForwardSpeed, finalSideSpeed, angle}));
+                        std::make_unique<WalkCommand>(subsumptionId,
+                                                      Eigen::Vector3d(finalForwardSpeed, finalSideSpeed, angle));
 
                     emit(std::move(command));
                     emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));

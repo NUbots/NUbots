@@ -19,6 +19,9 @@
 #ifndef UTILITY_BEHAVIOUR_MOTIONCOMMAND_HPP
 #define UTILITY_BEHAVIOUR_MOTIONCOMMAND_HPP
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+
 #include "message/behaviour/MotionCommand.hpp"
 
 #include "utility/math/matrix/Transform2D.hpp"
@@ -43,10 +46,19 @@ namespace behaviour {
         return cmd;
     }
 
-    inline MotionCommand BallApproach(arma::vec2 kickTarget_) {
+    inline MotionCommand WalkToState(const Eigen::Affine2d& goalState_) {
+        MotionCommand cmd;
+        cmd.type      = MotionCommand::Type::Value::WalkToState;
+        cmd.goalState = Eigen::Vector3d(goalState_.translation().x(),
+                                        goalState_.translation().y(),
+                                        Eigen::Rotation2Dd(goalState_.linear()).angle());
+        return cmd;
+    }
+
+    inline MotionCommand BallApproach(const Eigen::Vector2d kickTarget_) {
         MotionCommand cmd;
         cmd.type       = MotionCommand::Type::Value::BallApproach;
-        cmd.kickTarget = convert(kickTarget_);
+        cmd.kickTarget = kickTarget_;
         return cmd;
     }
 
@@ -54,6 +66,15 @@ namespace behaviour {
         MotionCommand cmd;
         cmd.type        = MotionCommand::Type::Value::DirectCommand;
         cmd.walkCommand = convert(walkCommand_);
+        return cmd;
+    }
+
+    inline MotionCommand DirectCommand(const Eigen::Affine2d& walkCommand_) {
+        MotionCommand cmd;
+        cmd.type        = MotionCommand::Type::Value::DirectCommand;
+        cmd.walkCommand = Eigen::Vector3d(walkCommand_.translation().x(),
+                                          walkCommand_.translation().y(),
+                                          Eigen::Rotation2Dd(walkCommand_.linear()).angle());
         return cmd;
     }
 
