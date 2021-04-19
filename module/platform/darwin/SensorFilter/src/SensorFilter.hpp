@@ -117,7 +117,7 @@ namespace platform {
 
             // Foot to world in foot-flat rotation when the foot landed
             std::array<bool, 2> previous_foot_down = {false, false};
-            std::array<Eigen::Transform<double, 3, Eigen::Affine, Eigen::DontAlign>, 2> footlanding_Hwf;
+            std::array<Eigen::Affine3d, 2> footlanding_Hwf;
 
             // Storage for previous gyroscope values
             Eigen::Vector3d theta;
