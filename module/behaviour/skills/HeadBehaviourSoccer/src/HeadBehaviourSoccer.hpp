@@ -20,7 +20,6 @@
 #ifndef MODULES_BEHAVIOUR_REFLEX_HEADBEHAVIOURSOCCER_HPP
 #define MODULES_BEHAVIOUR_REFLEX_HEADBEHAVIOURSOCCER_HPP
 
-#include <armadillo>
 #include <nuclear>
 #include <set>
 

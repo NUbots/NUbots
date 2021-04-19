@@ -21,11 +21,6 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <armadillo>
-
-#include "utility/math/matrix/Transform2D.hpp"
-#include "utility/math/matrix/Transform3D.hpp"
-
 
 namespace utility {
 namespace localisation {

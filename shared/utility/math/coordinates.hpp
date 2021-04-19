@@ -21,7 +21,6 @@
 #define UTILITY_MATH_COORDINATES_HPP
 
 #include <Eigen/Core>
-#include <armadillo>
 #include <cmath>
 
 namespace utility {

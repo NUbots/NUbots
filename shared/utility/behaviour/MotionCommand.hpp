@@ -24,9 +24,6 @@
 
 #include "message/behaviour/MotionCommand.hpp"
 
-#include "utility/math/matrix/Transform2D.hpp"
-#include "utility/support/eigen_armadillo.hpp"
-
 namespace utility {
 namespace behaviour {
 

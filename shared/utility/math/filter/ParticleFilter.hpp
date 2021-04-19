@@ -22,7 +22,6 @@
 #ifndef UTILITY_MATH_FILTER_PARTICLEFILTER_HPP
 #define UTILITY_MATH_FILTER_PARTICLEFILTER_HPP
 
-#include <armadillo>
 #include <iostream>
 #include <nuclear>
 #include <random>

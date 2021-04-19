@@ -21,7 +21,6 @@
 #define UTILITY_MOTION_FORWARDKINEMATICS_HPP
 
 #include <Eigen/Geometry>
-#include <armadillo>
 #include <cmath>
 #include <nuclear>
 #include <vector>
@@ -33,9 +32,6 @@
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
-#include "utility/math/matrix/Rotation3D.hpp"
-#include "utility/math/matrix/Transform3D.hpp"
-#include "utility/support/eigen_armadillo.hpp"
 
 namespace utility {
 namespace motion {

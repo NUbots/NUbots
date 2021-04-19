@@ -21,7 +21,6 @@
 #define UTILITY_MATH_GEOMETRY_QUAD_HPP
 
 #include <Eigen/Core>
-#include <armadillo>
 #include <ostream>
 #include <vector>
 

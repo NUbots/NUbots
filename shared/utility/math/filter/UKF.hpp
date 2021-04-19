@@ -20,7 +20,6 @@
 #ifndef UTILITY_MATH_FILTER_UKF_HPP
 #define UTILITY_MATH_FILTER_UKF_HPP
 
-#include <armadillo>
 #include <nuclear>
 
 #include "utility/support/LazyEvaluation.hpp"

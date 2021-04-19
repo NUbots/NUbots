@@ -20,7 +20,6 @@
 #ifndef UTILITY_MATH_FILTER_MMUKF_HPP
 #define UTILITY_MATH_FILTER_MMUKF_HPP
 
-#include <armadillo>
 #include <nuclear>
 
 #include "UKF.hpp"

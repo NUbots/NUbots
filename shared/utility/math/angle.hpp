@@ -21,7 +21,6 @@
 #define UTILITY_MATH_ANGLE_HPP
 
 #include <Eigen/Core>
-#include <armadillo>
 #include <cmath>
 
 namespace utility {

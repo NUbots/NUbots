@@ -20,8 +20,6 @@
 #ifndef UTILITY_MATH_GEOMETRY_UNITQUATERNION_HPP
 #define UTILITY_MATH_GEOMETRY_UNITQUATERNION_HPP
 
-#include <armadillo>
-
 #include "utility/math/matrix/Rotation3D.hpp"
 
 namespace utility {

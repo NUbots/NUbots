@@ -22,7 +22,6 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <armadillo>
 #include <chrono>
 #include <cmath>
 #include <limits>

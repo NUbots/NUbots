@@ -21,7 +21,6 @@
 #define UTILITY_SUPPORT_yaml_expression_HPP
 
 #include <Eigen/Core>
-#include <armadillo>
 #include <fmt/format.h>
 #include <limits>
 #include <system_error>

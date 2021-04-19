@@ -21,8 +21,6 @@
 
 #include "NUsight.hpp"
 
-#include "utility/support/eigen_armadillo.hpp"
-
 namespace module {
 namespace support {
 

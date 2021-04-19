@@ -20,7 +20,6 @@
 #ifndef NUHELPERS_HPP
 #define NUHELPERS_HPP
 
-#include <armadillo>
 #include <nuclear>
 
 #include "message/support/nusight/DataPoint.hpp"
