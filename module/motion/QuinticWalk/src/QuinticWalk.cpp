@@ -12,7 +12,6 @@
 
 #include "utility/math/comparison.hpp"
 #include "utility/math/euler.hpp"
-#include "utility/math/matrix/Transform3D.hpp"
 #include "utility/motion/InverseKinematics.hpp"
 #include "utility/support/yaml_expression.hpp"
 

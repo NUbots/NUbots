@@ -36,7 +36,6 @@
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 #include "utility/math/coordinates.hpp"
-#include "utility/math/matrix/Transform3D.hpp"
 #include "utility/motion/ForwardKinematics.hpp"
 
 namespace utility {
