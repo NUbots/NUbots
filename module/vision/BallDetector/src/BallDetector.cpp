@@ -21,6 +21,7 @@
 
 #include <fmt/format.h>
 #include <fmt/ostream.h>
+#include <numeric>
 
 #include "extension/Configuration.hpp"
 
@@ -153,9 +154,8 @@ namespace vision {
                         // https://en.wikipedia.org/wiki/Angular_diameter
                         float distance = field.ball_radius / std::sqrt(1.0f - radius * radius);
 
-                        // Attach the measurement to the object (distance from camera to ball)
-                        b.measurements.push_back(Ball::Measurement());
-                        b.measurements.back().rBCc       = cartesianToSpherical(b.cone.axis * distance);
+                        | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~b.measurements.back().rBCc =
+                            cartesianToSpherical(b.cone.axis* distance);
                         b.measurements.back().covariance = config.ball_angular_cov;
 
                         // Angular positions from the camera
