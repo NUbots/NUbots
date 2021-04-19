@@ -16,7 +16,6 @@ output_file = "{}.yaml".format(hashlib.sha256(" ".join(sys.argv[2:]).encode("utf
 
 # Work out our arguments to call the clang-tidy binary with
 args = [clang_tidy_binary, "--export-fixes={}".format(os.path.join(output_folder, output_file)), *sys.argv[3:]]
-result = subprocess.run(args)
 
-# Pass the return code back to the caller
-exit(result.returncode)
+# Run clang-tidy and pass the return code back to the caller
+exit(subprocess.run(args).returncode)
