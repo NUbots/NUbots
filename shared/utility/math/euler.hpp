@@ -3,8 +3,8 @@ This code is largely based on the original code by Quentin "Leph" Rouxel and Tea
 The original files can be found at:
 https://github.com/Rhoban/model/
 */
-#ifndef UTILITY_MATH_EULER_H
-#define UTILITY_MATH_EULER_H
+#ifndef UTILITY_MATH_EULER_HPP
+#define UTILITY_MATH_EULER_HPP
 
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
