@@ -476,48 +476,6 @@ namespace motion {
             return inertia_tensor;
         }  // namespace kinematics
 
-
-        inline utility::math::matrix::Transform3D calculateBodyToGround(arma::vec3 groundNormal_body,
-                                                                        double bodyHeight) {
-            arma::vec3 X            = arma::vec{1, 0, 0};
-            double projectXOnNormal = groundNormal_body[0];
-
-            arma::vec3 groundMatrixX;
-            arma::vec3 groundMatrixY;
-
-            if (std::fabs(projectXOnNormal) == 1) {
-                // Then x is parallel to the ground normal and we need to use projection onto +/-z instead
-                // If x parallel to normal, then use -z, if x antiparallel use z
-                arma::vec3 Z            = arma::vec3{0, 0, (projectXOnNormal > 0 ? -1.0 : 1.0)};
-                double projectZOnNormal = arma::dot(Z, groundNormal_body);
-                groundMatrixX           = arma::normalise(Z - projectZOnNormal * groundNormal_body);
-                groundMatrixY           = arma::cross(groundNormal_body, groundMatrixX);
-            }
-            else {
-                groundMatrixX = arma::normalise(X - projectXOnNormal * groundNormal_body);
-                groundMatrixY = arma::cross(groundNormal_body, groundMatrixX);
-            }
-
-            utility::math::matrix::Transform3D groundToBody;
-            groundToBody.submat(0, 0, 2, 0) = groundMatrixX;
-            groundToBody.submat(0, 1, 2, 1) = groundMatrixY;
-            groundToBody.submat(0, 2, 2, 2) = groundNormal_body;
-            groundToBody.submat(0, 3, 2, 3) = arma::vec{0, 0, -bodyHeight};
-            return groundToBody.i();
-        }
-
-        inline arma::mat22 calculateRobotToIMU(math::matrix::Rotation3D orientation) {
-            arma::vec3 xRobotImu  = orientation.i().col(0);
-            arma::vec2 projXRobot = arma::normalise(xRobotImu.rows(0, 1));
-            arma::vec2 projYRobot = arma::vec2({-projXRobot(1), projXRobot(0)});
-
-            arma::mat22 robotToImu;
-            robotToImu.col(0) = projXRobot;
-            robotToImu.col(1) = projYRobot;
-
-            return robotToImu;
-        }
-
         inline Eigen::Matrix2d calculateRobotToIMU(const Eigen::Affine3d& orientation) {
             Eigen::Vector3d xRobotImu  = orientation.rotation().topRows<1>();
             Eigen::Vector2d projXRobot = xRobotImu.head<2>().normalized();
@@ -527,69 +485,6 @@ namespace motion {
             robotToImu << projXRobot, projYRobot;
 
             return robotToImu;
-        }
-
-        /*! @return matrix J such that \overdot{X} = J * \overdot{theta}
-         */
-        inline arma::mat33 calculateArmJacobian(const KinematicsModel& model, const arma::vec3& a, bool isLeft) {
-            int negativeIfRight = isLeft ? 1 : -1;
-
-            const arma::vec3 t1 = {model.arm.SHOULDER_LENGTH,
-                                   negativeIfRight * model.arm.SHOULDER_WIDTH,
-                                   -model.arm.SHOULDER_HEIGHT};
-            const arma::vec3 t2 = {model.arm.UPPER_ARM_X_OFFSET,
-                                   negativeIfRight * model.arm.UPPER_ARM_Y_OFFSET,
-                                   -model.arm.UPPER_ARM_LENGTH};
-            const arma::vec3 t3 = {model.arm.LOWER_ARM_LENGTH,
-                                   negativeIfRight * model.arm.LOWER_ARM_Y_OFFSET,
-                                   -model.arm.LOWER_ARM_Z_OFFSET};
-
-            arma::mat33 jRY1 = utility::math::matrix::Rotation3D::createRotationYJacobian(a[0] - M_PI_2);
-            arma::mat33 jRX2 = utility::math::matrix::Rotation3D::createRotationXJacobian(a[1]);
-            arma::mat33 jRY3 = utility::math::matrix::Rotation3D::createRotationXJacobian(a[2]);
-
-            arma::mat33 RY1 = utility::math::matrix::Rotation3D::createRotationY(a[0] - M_PI_2);
-            arma::mat33 RX2 = utility::math::matrix::Rotation3D::createRotationX(a[1]);
-            arma::mat33 RY3 = utility::math::matrix::Rotation3D::createRotationY(a[2]);
-
-            arma::mat33 RY_PI_2 = utility::math::matrix::Rotation3D::createRotationY(M_PI_2);
-
-            arma::vec3 col1 = jRY1 * RX2 * RY_PI_2 * RY3 * t3 + jRY1 * RX2 * t2 + jRY1 * t1;
-
-            arma::vec3 col2 = RY1 * jRX2 * RY_PI_2 * RY3 * t3 + RY1 * jRX2 * t2;
-
-            arma::vec3 col3 = RY1 * RX2 * RY_PI_2 * jRY3 * t3;
-
-            return arma::join_rows(col1, arma::join_rows(col2, col3));
-        }
-        /*! @return matrix J such that \overdot{X} = J * \overdot{theta}
-         */
-        inline arma::vec3 calculateArmPosition(const KinematicsModel& model, const arma::vec3& a, bool isLeft) {
-            int negativeIfRight = isLeft ? 1 : -1;
-
-            const arma::vec3 t0 = {model.arm.SHOULDER_X_OFFSET,
-                                   negativeIfRight * model.arm.DISTANCE_BETWEEN_SHOULDERS / 2.0,
-                                   model.arm.SHOULDER_Z_OFFSET};
-
-            const arma::vec3 t1 = {model.arm.SHOULDER_LENGTH,
-                                   negativeIfRight * model.arm.SHOULDER_WIDTH,
-                                   -model.arm.SHOULDER_HEIGHT};
-            const arma::vec3 t2 = {model.arm.UPPER_ARM_X_OFFSET,
-                                   negativeIfRight * model.arm.UPPER_ARM_Y_OFFSET,
-                                   -model.arm.UPPER_ARM_LENGTH};
-            const arma::vec3 t3 = {model.arm.LOWER_ARM_LENGTH,
-                                   negativeIfRight * model.arm.LOWER_ARM_Y_OFFSET,
-                                   -model.arm.LOWER_ARM_Z_OFFSET};
-
-            arma::mat33 RY_PI_2 = utility::math::matrix::Rotation3D::createRotationY(M_PI_2);
-
-            arma::mat33 RY1 = utility::math::matrix::Rotation3D::createRotationY(a[0] - M_PI_2);
-            arma::mat33 RX2 = utility::math::matrix::Rotation3D::createRotationX(a[1]);
-            arma::mat33 RY3 = utility::math::matrix::Rotation3D::createRotationY(a[2]);
-
-            arma::vec3 pos = RY1 * RX2 * RY_PI_2 * RY3 * t3 + RY1 * RX2 * t2 + RY1 * t1 + t0;
-
-            return pos;
         }
 
         template <typename T, typename Scalar = typename T::Scalar, typename MatrixType = typename T::LinearMatrixType>
