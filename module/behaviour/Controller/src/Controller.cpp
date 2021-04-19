@@ -24,14 +24,15 @@
 namespace module {
 namespace behaviour {
 
-    using LimbID  = utility::input::LimbID;
-    using ServoID = utility::input::ServoID;
     using message::behaviour::ServoCommand;
     using message::motion::ServoTarget;
+
     using utility::behaviour::ActionKill;
     using utility::behaviour::ActionPriorities;
     using utility::behaviour::ActionStart;
     using utility::behaviour::RegisterAction;
+    using utility::input::LimbID;
+    using utility::input::ServoID;
 
     // So we don't need a huge long type declaration everywhere...
     using iterators = std::pair<std::vector<std::reference_wrapper<RequestItem>>::iterator,

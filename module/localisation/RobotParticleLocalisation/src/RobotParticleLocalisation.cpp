@@ -1,5 +1,7 @@
 #include "RobotParticleLocalisation.hpp"
 
+#include <Eigen/Geometry>
+
 #include "extension/Configuration.hpp"
 
 #include "message/input/Sensors.hpp"

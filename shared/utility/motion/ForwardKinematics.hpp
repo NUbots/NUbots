@@ -59,9 +59,6 @@ namespace motion {
                                            model.head.NECK_BASE_POS_FROM_ORIGIN_Y,
                                            model.head.NECK_BASE_POS_FROM_ORIGIN_Z);
             const float NECK_LENGTH = model.head.NECK_LENGTH;
-            const Eigen::Vector3d NECK_TO_CAMERA(model.head.NECK_TO_CAMERA_X,
-                                                 model.head.NECK_TO_CAMERA_Y,
-                                                 model.head.NECK_TO_CAMERA_Z);
 
             // Translate to base of neck from origin
             runningTransform = runningTransform.translate(NECK_POS);
