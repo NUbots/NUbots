@@ -51,10 +51,6 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 list(APPEND CMAKE_INSTALL_RPATH /home/nubots/toolchain/)
 list(APPEND CMAKE_INSTALL_RPATH /usr/local/lib)
 
-# Disable armadillo bounds checking in release and min size release builds
-list(APPEND CMAKE_CXX_FLAGS_RELEASE "-DARMA_NO_DEBUG")
-list(APPEND CMAKE_CXX_FLAGS_MINSIZEREL "-DARMA_NO_DEBUG")
-
 # Default not to run the clang-tidy checks
 option(ENABLE_CLANG_TIDY "Enable building with clang-tidy checks." OFF)
 if(ENABLE_CLANG_TIDY)
