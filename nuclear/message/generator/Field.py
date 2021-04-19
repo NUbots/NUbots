@@ -159,13 +159,12 @@ class Field:
 
         # If it's a repeated field, and not a map, it's a vector
         if self.repeated and not self.map_type:
+            self.trivially_copyable = False
             # If we have a fixed size use std::array instead
             if self.array_size > 0:
                 t = "::std::array<{}, {}>".format(t, self.array_size)
-                self.trivially_copyable = False
             else:
                 t = "::std::vector<{}>".format(t)
-                self.trivially_copyable = False
 
         return t, special
 

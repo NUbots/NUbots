@@ -49,7 +49,7 @@ class Message:
             default_field_list = []
             field_set = []
             for v in self.fields:
-                # Work out if we should be copying a const reference or moving a trivial type
+                # Work out if we should be copying a trivial type from a const reference or moving a more complicated type
                 if v.trivially_copyable:
                     field_list.append("{} const& {}".format(v.cpp_type, v.name))
                     field_set.append("{0}({0})".format(v.name))
