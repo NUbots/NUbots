@@ -5,8 +5,8 @@
 
 #include "BallModel.hpp"
 
-#include "utility/math/filter/eigen/ParticleFilter.hpp"
-#include "utility/math/filter/eigen/UKF.hpp"
+#include "utility/math/filter/ParticleFilter.hpp"
+#include "utility/math/filter/UKF.hpp"
 
 namespace module {
 namespace localisation {
