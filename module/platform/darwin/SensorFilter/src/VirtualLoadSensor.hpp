@@ -139,7 +139,7 @@ namespace platform {
                 return output_state;
             }
 
-            Eigen::Matrix<Scalar, 2, 1, Eigen::DontAlign> state;
+            Eigen::Matrix<Scalar, 2, 1> state;
 
         public:
             enum Field { POSITION, VELOCITY, LOAD };
