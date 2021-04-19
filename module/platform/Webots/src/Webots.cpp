@@ -172,11 +172,15 @@ void Webots::setup_connection(const std::string& server_address, const std::stri
         }
         else if (strncmp(inital_message, "Refused", sizeof(inital_message)) == 0){
             log<NUClear::FATAL>(fmt::format("Connection to {}:{} refused: your ip is not white listed.", server_address, port));
-            // TODO(cameron) Halt and don't retry
+            // Halt and don't retry as reconnection is pointless.
+            close(fd);
+            powerplant.shutdown();
         }
         else {
             log<NUClear::FATAL>(fmt::format("{}:{} sent unknown initial message", server_address, port));
-            // TODO(cameron) Halt and don't retry
+            // Halt and don't retry
+            close(fd);
+            powerplant.shutdown();
         }
     }
     else {
