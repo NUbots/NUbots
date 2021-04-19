@@ -43,9 +43,9 @@ namespace math {
             double sin_phi   = sin(sphericalCoordinates[2]);
             arma::vec3 result;
 
-            result[0] = distance * cos_theta * cos_phi;
-            result[1] = distance * sin_theta * cos_phi;
-            result[2] = distance * sin_phi;
+            result[0] = distance * cos_theta * sin_phi;
+            result[1] = distance * sin_theta * sin_phi;
+            result[2] = distance * cos_phi;
 
             return result;
         }

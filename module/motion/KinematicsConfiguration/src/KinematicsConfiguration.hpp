@@ -20,7 +20,7 @@
 #ifndef MODULE_MOTION_KINEMATICSCONFIGURATION_HPP
 #define MODULE_MOTION_KINEMATICSCONFIGURATION_HPP
 
-#include <armadillo>
+#include <Eigen/Core>
 #include <nuclear>
 #include <yaml-cpp/yaml.h>
 
