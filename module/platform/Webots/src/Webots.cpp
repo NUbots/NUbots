@@ -236,6 +236,8 @@ void Webots::setup_connection(const std::string& server_address, const std::stri
 
     shutdown_handle = on<Shutdown>().then([this, fd] {
         // Disconnect the fd gracefully
+        shutdown(fd, SHUT_RDWR);
+        close(fd);
     });
 }
 
