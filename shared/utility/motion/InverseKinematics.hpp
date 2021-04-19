@@ -61,10 +61,6 @@ namespace motion {
             @param RobotKinematicsModel The class containing the leg model of the robot.
         */
 
-        bool legPoseValid(const message::motion::KinematicsModel& model,
-                          utility::math::matrix::Transform3D target,
-                          LimbID limb);
-
         std::vector<std::pair<ServoID, double>> calculateLegJoints(const message::motion::KinematicsModel& model,
                                                                    const Eigen::Affine3d& target,
                                                                    const LimbID& limb);

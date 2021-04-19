@@ -33,7 +33,6 @@ namespace motion {
     using utility::support::Expression;
 
     using utility::input::ServoID;
-    using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::calculateLegJoints;
 
     QuinticWalk::QuinticWalk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -253,8 +252,7 @@ namespace motion {
         Eigen::Matrix4d right_foot =
             walk_engine.getFootstep().isLeftSupport() ? Hft.matrix().cast<double>() : Hst.matrix().cast<double>();
 
-        auto joints =
-            calculateLegJoints(kinematicsModel, Transform3D(convert(left_foot)), Transform3D(convert(right_foot)));
+        auto joints = calculateLegJoints(kinematicsModel, left_foot, right_foot);
 
         auto waypoints = motionLegs(joints);
 

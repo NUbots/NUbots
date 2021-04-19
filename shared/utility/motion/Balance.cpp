@@ -93,9 +93,6 @@ namespace motion {
         // TODO: LEARN HOW TO COMPUTE THE INTEGRAL TERM CORRECTLY
         // footGoalErrorSum = footGoalErrorSum.slerp(goalQuaternion * footGoalErrorSum, 1.0/90.0);
 
-        // emit(graph("pid", Rotation3D(goalQuaternion).pitch(), Rotation3D(footGoalErrorSum).pitch(),
-        // Rotation3D(error).pitch()));
-
         // Apply the PID gains
         Eigen::AngleAxisf ankleRotation =
             Eigen::AngleAxisf(Eigen::Quaternion<float>::Identity().slerp(rotationPGain, errorQuaternion)
@@ -170,11 +167,6 @@ namespace motion {
                 translationPGainY * sensors.Htw(2, 3) * roll + translationDGainY * sensors.Htw(2, 3) * dRoll,
                 -translationPGainZ * total - translationDGainY * dTotal)
                 .cast<float>();
-
-        // //Rotate from world space to torso space
-        // Rotation3D yawLessOrientation =
-        // Rotation3D::createRotationZ(-Transform3D(convert(sensors.Htw)).rotation()).yaw()) *
-        // Transform3D(convert(sensors.Htw)).rotation();
 
         // Apply opposite translation to the foot position
         footToTorso = footToTorso.translate(-torsoAdjustment_world);
