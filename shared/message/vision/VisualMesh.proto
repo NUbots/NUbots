@@ -29,7 +29,7 @@ message VisualMesh {
         float phi      = 1;
         int32 segments = 2;
     }
-    uint32                    camera_id       = 1;
+    uint32                    id              = 1;
     fmat                      rays            = 2;
     imat                      neighbourhood   = 3;
     fmat                      classifications = 4;

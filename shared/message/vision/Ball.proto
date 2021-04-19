@@ -46,7 +46,7 @@ message Ball {
 }
 
 message Balls {
-    uint32                    camera_id = 1;
+    uint32                    id        = 1;
     google.protobuf.Timestamp timestamp = 2;
     mat4                      Hcw       = 3;
     repeated Ball             balls     = 4;

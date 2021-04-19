@@ -27,7 +27,7 @@ VABufferID quantization_matrix(VADisplay dpy, VAContextID context, const bool& m
     }
 
     // Upload to device
-    VABufferID bufferid;
+    VABufferID bufferid = 0;
     VAStatus va_status =
         vaCreateBuffer(dpy, context, VAQMatrixBufferType, sizeof(VAQMatrixBufferJPEG), 1, &params, &bufferid);
     if (va_status != VA_STATUS_SUCCESS) {

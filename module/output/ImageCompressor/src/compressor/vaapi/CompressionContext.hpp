@@ -16,23 +16,23 @@ struct CompressionContext {
         VADisplay dpy;
         /// The configuration we made for compressing jpegs
         VAConfigID config;
-    } va;
+    } va{};
 
     struct OpenCLContext {
         /// The OpenCL device we are executing on
-        cl_device_id device;
+        cl_device_id device{};
         /// The OpenCL context we will do operations on
         cl::context context;
         /// The OpenCL extension function that maps surfaces into opencl mem objects
-        clCreateFromVA_APIMediaSurfaceINTEL_fn mem_from_surface;
+        clCreateFromVA_APIMediaSurfaceINTEL_fn mem_from_surface{};
         /// The OpenCL extension function that acquires surfaces from VAAPI
-        clEnqueueAcquireVA_APIMediaSurfacesINTEL_fn acquire_surface;
+        clEnqueueAcquireVA_APIMediaSurfacesINTEL_fn acquire_surface{};
         /// The OpenCL extension function that releases surfaces back to VAAPI
-        clEnqueueReleaseVA_APIMediaSurfacesINTEL_fn release_surface;
+        clEnqueueReleaseVA_APIMediaSurfacesINTEL_fn release_surface{};
     } cl;
 
     /// The quality that this compressor is configured for
-    int quality;
+    int quality{};
 };
 
 }  // namespace module::output::compressor::vaapi

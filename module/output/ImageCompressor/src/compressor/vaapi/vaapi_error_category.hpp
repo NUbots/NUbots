@@ -51,13 +51,13 @@ struct is_error_condition_enum<module::output::compressor::vaapi::vaapi_error_co
 namespace module::output::compressor::vaapi {
 class vaapi_error_category_t : public std::error_category {
 public:
-    virtual const char* name() const noexcept;
+    [[nodiscard]] const char* name() const noexcept override;
 
-    virtual std::error_condition default_error_condition(int code) const noexcept;
+    [[nodiscard]] std::error_condition default_error_condition(int code) const noexcept override;
 
-    virtual bool equivalent(const std::error_code& code, int condition) const noexcept;
+    [[nodiscard]] bool equivalent(const std::error_code& code, int condition) const noexcept override;
 
-    virtual std::string message(int code) const noexcept;
+    [[nodiscard]] std::string message(int code) const noexcept override;
 };
 
 inline const std::error_category& vaapi_error_category() {
