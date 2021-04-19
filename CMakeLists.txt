@@ -58,7 +58,7 @@ if(ENABLE_CLANG_TIDY OR CI_BUILD)
             --remove-change-desc-files "${PROJECT_BINARY_DIR}/clang-tidy-fixes"
     COMMENT "Applying fixes from clang-tidy to the codebase."
   )
-endif(ENABLE_CLANG_TIDY OR CI_BUILD)
+endif()
 
 # If we are doing a CI build then we want to enable -Werror when compiling warnings are bad. We will also make it fail
 # if clang-tidy has an error
@@ -66,7 +66,7 @@ if(CI_BUILD)
   add_compile_options(-Werror)
   set(CMAKE_CXX_CLANG_TIDY ${CMAKE_CXX_CLANG_TIDY} -warnings-as-errors=*)
   set(CMAKE_C_CLANG_TIDY ${CMAKE_C_CLANG_TIDY} -warnings-as-errors=*)
-endif(CI_BUILD)
+endif()
 
 # Enable address sanitizer
 option(USE_ASAN "Enable address sanitization" OFF)
