@@ -25,31 +25,31 @@
 #include "message/motion/DiveCommand.hpp"
 
 namespace module {
-namespace behaviour {
-    namespace skills {
+    namespace behaviour {
+        namespace skills {
 
-        class GoalSaver : public NUClear::Reactor {
-        public:
-            /// @brief Called by the powerplant to build and setup the GoalSaver reactor.
-            explicit GoalSaver(std::unique_ptr<NUClear::Environment> environment);
+            class GoalSaver : public NUClear::Reactor {
+            public:
+                /// @brief Called by the powerplant to build and setup the GoalSaver reactor.
+                explicit GoalSaver(std::unique_ptr<NUClear::Environment> environment);
 
-        private:
-            const size_t id;
-            float DIVE_PRIORITY;
-            float EXECUTION_PRIORITY;
+            private:
+                const size_t id;
+                float DIVE_PRIORITY;
+                float EXECUTION_PRIORITY;
 
-            /**
-             * TODO DiveCommand seems incompleted?
-             * @Mingze
-             * DiveCommand returns vec2 direction to dive
-             */
-            message::motion::DiveCommand diveCommand;
+                /**
+                 * TODO DiveCommand seems incompleted?
+                 * @Mingze
+                 * DiveCommand returns vec2 direction to dive
+                 */
+                message::motion::DiveCommand diveCommand;
 
-            void updatePriority(const float& priority);
-            int getDirectionalQuadrant(float x, float y);
-        };
-    }  // namespace skills
-}  // namespace behaviour
+                void updatePriority(const float& priority);
+                int getDirectionalQuadrant(float x, float y);
+            };
+        }  // namespace skills
+    }      // namespace behaviour
 }  // namespace module
 
 

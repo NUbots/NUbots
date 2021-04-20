@@ -25,16 +25,16 @@
 #include "extension/Configuration.hpp"
 
 namespace module {
-namespace support {
-    namespace configuration {
+    namespace support {
+        namespace configuration {
 
-        class SoccerConfig : public NUClear::Reactor {
-        public:
-            /// @brief Called by the powerplant to build and setup the SoccerConfig reactor.
-            explicit SoccerConfig(std::unique_ptr<NUClear::Environment> environment);
-        };
-    }  // namespace configuration
-}  // namespace support
+            class SoccerConfig : public NUClear::Reactor {
+            public:
+                /// @brief Called by the powerplant to build and setup the SoccerConfig reactor.
+                explicit SoccerConfig(std::unique_ptr<NUClear::Environment> environment);
+            };
+        }  // namespace configuration
+    }      // namespace support
 }  // namespace module
 
 

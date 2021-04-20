@@ -32,106 +32,106 @@
 #include "utility/input/ServoID.hpp"
 
 namespace module {
-namespace behaviour {
-    namespace skills {
+    namespace behaviour {
+        namespace skills {
 
-        // internal only callback messages to start and stop our action
-        struct Falling {};
-        struct KillFalling {};
+            // internal only callback messages to start and stop our action
+            struct Falling {};
+            struct KillFalling {};
 
-        using extension::Configuration;
-        using extension::ExecuteScriptByName;
+            using extension::Configuration;
+            using extension::ExecuteScriptByName;
 
-        using message::input::Sensors;
+            using message::input::Sensors;
 
-        using utility::behaviour::ActionPriorities;
-        using utility::behaviour::RegisterAction;
-        using utility::input::LimbID;
-        using utility::input::ServoID;
+            using utility::behaviour::ActionPriorities;
+            using utility::behaviour::RegisterAction;
+            using utility::input::LimbID;
+            using utility::input::ServoID;
 
-        FallingRelax::FallingRelax(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment))
-            , id(size_t(this) * size_t(this) - size_t(this))
-            , falling(false)
-            , FALLING_ANGLE(0.0f)
-            , FALLING_ACCELERATION(0.0f)
-            , RECOVERY_ACCELERATION()
-            , PRIORITY(0.0f) {
+            FallingRelax::FallingRelax(std::unique_ptr<NUClear::Environment> environment)
+                : Reactor(std::move(environment))
+                , id(size_t(this) * size_t(this) - size_t(this))
+                , falling(false)
+                , FALLING_ANGLE(0.0f)
+                , FALLING_ACCELERATION(0.0f)
+                , RECOVERY_ACCELERATION()
+                , PRIORITY(0.0f) {
 
-            // do a little configurating
-            on<Configuration>("FallingRelax.yaml").then([this](const Configuration& config) {
-                // Store falling angle as a cosine so we can compare it directly to the z axis value
-                double fallingAngle = config["FALLING_ANGLE"].as<double>();
-                FALLING_ANGLE       = cos(fallingAngle);
+                // do a little configurating
+                on<Configuration>("FallingRelax.yaml").then([this](const Configuration& config) {
+                    // Store falling angle as a cosine so we can compare it directly to the z axis value
+                    double fallingAngle = config["FALLING_ANGLE"].as<double>();
+                    FALLING_ANGLE       = cos(fallingAngle);
 
-                // When falling the acceleration should drop below this value
-                FALLING_ACCELERATION = config["FALLING_ACCELERATION"].as<float>();
+                    // When falling the acceleration should drop below this value
+                    FALLING_ACCELERATION = config["FALLING_ACCELERATION"].as<float>();
 
-                // Once the acceleration has stabalized, we are no longer falling
-                RECOVERY_ACCELERATION = config["RECOVERY_ACCELERATION"].as<std::vector<float>>();
+                    // Once the acceleration has stabalized, we are no longer falling
+                    RECOVERY_ACCELERATION = config["RECOVERY_ACCELERATION"].as<std::vector<float>>();
 
-                PRIORITY = config["PRIORITY"].as<float>();
-            });
+                    PRIORITY = config["PRIORITY"].as<float>();
+                });
 
-            on<Last<5, Trigger<Sensors>>, Single>([this](const std::list<std::shared_ptr<const Sensors>>& sensors) {
-                if (!falling && !sensors.empty() && fabs(sensors.back()->Htw(2, 2)) < FALLING_ANGLE) {
+                on<Last<5, Trigger<Sensors>>, Single>([this](const std::list<std::shared_ptr<const Sensors>>& sensors) {
+                    if (!falling && !sensors.empty() && fabs(sensors.back()->Htw(2, 2)) < FALLING_ANGLE) {
 
-                    // We might be falling, check the accelerometer
-                    double magnitude = 0;
+                        // We might be falling, check the accelerometer
+                        double magnitude = 0;
 
-                    for (const auto& sensor : sensors) {
-                        magnitude += sensor->accelerometer.norm();
+                        for (const auto& sensor : sensors) {
+                            magnitude += sensor->accelerometer.norm();
+                        }
+
+                        magnitude /= sensors.size();
+
+                        if (magnitude < FALLING_ACCELERATION) {
+                            falling = true;
+                            updatePriority(PRIORITY);
+                        }
                     }
+                    else if (falling) {
+                        // We might be recovered, check the accelerometer
+                        double magnitude = 0;
 
-                    magnitude /= sensors.size();
+                        for (const auto& sensor : sensors) {
+                            magnitude += sensor->accelerometer.norm();
+                        }
 
-                    if (magnitude < FALLING_ACCELERATION) {
-                        falling = true;
-                        updatePriority(PRIORITY);
+                        magnitude /= sensors.size();
+
+                        // See if we recover
+                        if (magnitude > RECOVERY_ACCELERATION[0] && magnitude < RECOVERY_ACCELERATION[1]) {
+                            falling = false;
+                            updatePriority(0);
+                        }
                     }
-                }
-                else if (falling) {
-                    // We might be recovered, check the accelerometer
-                    double magnitude = 0;
+                });
 
-                    for (const auto& sensor : sensors) {
-                        magnitude += sensor->accelerometer.norm();
-                    }
+                on<Trigger<Falling>>().then([this] { emit(std::make_unique<ExecuteScriptByName>(id, "Relax.yaml")); });
 
-                    magnitude /= sensors.size();
+                on<Trigger<KillFalling>>().then([this] {
+                    falling = false;
+                    updatePriority(0);
+                });
 
-                    // See if we recover
-                    if (magnitude > RECOVERY_ACCELERATION[0] && magnitude < RECOVERY_ACCELERATION[1]) {
-                        falling = false;
-                        updatePriority(0);
-                    }
-                }
-            });
+                emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
+                    id,
+                    "Falling Relax",
+                    {std::pair<float, std::set<LimbID>>(
+                        0,
+                        {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
+                    [this](const std::set<LimbID>&) { emit(std::make_unique<Falling>()); },
+                    [this](const std::set<LimbID>&) { emit(std::make_unique<KillFalling>()); },
+                    [this](const std::set<ServoID>&) {
+                        // Ignore
+                    }}));
+            }
 
-            on<Trigger<Falling>>().then([this] { emit(std::make_unique<ExecuteScriptByName>(id, "Relax.yaml")); });
+            void FallingRelax::updatePriority(const float& priority) {
+                emit(std::make_unique<ActionPriorities>(ActionPriorities{id, {priority}}));
+            }
 
-            on<Trigger<KillFalling>>().then([this] {
-                falling = false;
-                updatePriority(0);
-            });
-
-            emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
-                id,
-                "Falling Relax",
-                {std::pair<float, std::set<LimbID>>(
-                    0,
-                    {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
-                [this](const std::set<LimbID>&) { emit(std::make_unique<Falling>()); },
-                [this](const std::set<LimbID>&) { emit(std::make_unique<KillFalling>()); },
-                [this](const std::set<ServoID>&) {
-                    // Ignore
-                }}));
-        }
-
-        void FallingRelax::updatePriority(const float& priority) {
-            emit(std::make_unique<ActionPriorities>(ActionPriorities{id, {priority}}));
-        }
-
-    }  // namespace skills
-}  // namespace behaviour
+        }  // namespace skills
+    }      // namespace behaviour
 }  // namespace module

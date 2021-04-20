@@ -24,38 +24,38 @@
 #include <vector>
 
 namespace module {
-namespace behaviour {
-    namespace tools {
+    namespace behaviour {
+        namespace tools {
 
-        /**
-         * Executes a series of scripts provided by the command line in order.
-         *
-         * @author Trent Houliston
-         */
-        class ScriptRunner : public NUClear::Reactor {
-        private:
-            /// The scripts to be executed
-            std::vector<std::string> scripts;
+            /**
+             * Executes a series of scripts provided by the command line in order.
+             *
+             * @author Trent Houliston
+             */
+            class ScriptRunner : public NUClear::Reactor {
+            private:
+                /// The scripts to be executed
+                std::vector<std::string> scripts;
 
-            /// Our ID for subsumption
-            const size_t id;
+                /// Our ID for subsumption
+                const size_t id;
 
-            // Script delay
-            uint script_delay;
+                // Script delay
+                uint script_delay;
 
-            // Default scripts
+                // Default scripts
 
-            // TODO
+                // TODO
 
-            /// Execute the next script in the list
-            void executeNextScript();
+                /// Execute the next script in the list
+                void executeNextScript();
 
-        public:
-            explicit ScriptRunner(std::unique_ptr<NUClear::Environment> environment);
-        };
+            public:
+                explicit ScriptRunner(std::unique_ptr<NUClear::Environment> environment);
+            };
 
-    }  // namespace tools
-}  // namespace behaviour
+        }  // namespace tools
+    }      // namespace behaviour
 }  // namespace module
 
 #endif  // MODULES_BEHAVIOURS_UTILITY_SCRIPTRUNNER_HPP

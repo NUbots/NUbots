@@ -30,51 +30,50 @@
 #include "utility/motion/Balance.hpp"
 
 namespace module {
-namespace motion {
+    namespace motion {
 
-    class IKKick : public NUClear::Reactor {
+        class IKKick : public NUClear::Reactor {
 
-    private:
-        // ID of support foot
-        utility::input::LimbID supportFoot;
-        // NEED the vector from the point on the surface of the ball where we want to kick to the front of the kick foot
-        // which is rightFootFront
-        // KickPlanner has to add the radius of the all to get the location of the centre of the ball
-        // point position of ball
-        Eigen::Vector3d ballPosition;
-        // direction we want to kick the ball
-        Eigen::Vector3d goalPosition;
+        private:
+            // ID of support foot
+            utility::input::LimbID supportFoot;
+            // NEED the vector from the point on the surface of the ball where we want to kick to the front of the kick
+            // foot which is rightFootFront KickPlanner has to add the radius of the all to get the location of the
+            // centre of the ball point position of ball
+            Eigen::Vector3d ballPosition;
+            // direction we want to kick the ball
+            Eigen::Vector3d goalPosition;
 
-        /// Subsumption ID key to access motors
-        const size_t subsumptionId;
+            /// Subsumption ID key to access motors
+            const size_t subsumptionId;
 
-        bool leftFootIsSupport;
+            bool leftFootIsSupport;
 
-        float foot_separation;
+            float foot_separation;
 
-        float KICK_PRIORITY;
-        float EXECUTION_PRIORITY;
+            float KICK_PRIORITY;
+            float EXECUTION_PRIORITY;
 
-        float gain_legs = 50;
-        float torque    = 100;
+            float gain_legs = 50;
+            float torque    = 100;
 
-        bool feedback_active;
-        utility::motion::Balancer feedbackBalancer;
+            bool feedback_active;
+            utility::motion::Balancer feedbackBalancer;
 
-        KickBalancer balancer;
-        Kicker kicker;
+            KickBalancer balancer;
+            Kicker kicker;
 
-        void updatePriority(const float& priority);
+            void updatePriority(const float& priority);
 
-        static constexpr size_t UPDATE_FREQUENCY = 90;
+            static constexpr size_t UPDATE_FREQUENCY = 90;
 
-        ReactionHandle updater;
+            ReactionHandle updater;
 
-    public:
-        /// @brief Called by the powerplant to build and setup the IKKick reactor.
-        explicit IKKick(std::unique_ptr<NUClear::Environment> environment);
-    };
-}  // namespace motion
+        public:
+            /// @brief Called by the powerplant to build and setup the IKKick reactor.
+            explicit IKKick(std::unique_ptr<NUClear::Environment> environment);
+        };
+    }  // namespace motion
 }  // namespace module
 
 

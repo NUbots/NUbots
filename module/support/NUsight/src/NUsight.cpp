@@ -29,79 +29,79 @@
 #include "utility/nusight/NUhelpers.hpp"
 
 namespace module {
-namespace support {
+    namespace support {
 
-    using extension::Configuration;
+        using extension::Configuration;
 
-    using message::support::SaveConfiguration;
-    using message::support::nusight::Command;
+        using message::support::SaveConfiguration;
+        using message::support::nusight::Command;
 
-    using utility::nusight::graph;
+        using utility::nusight::graph;
 
-    NUsight::NUsight(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment))
-        , max_image_duration()
-        , max_classified_image_duration()
-        , handles()
-        , actionRegisters() {
+        NUsight::NUsight(std::unique_ptr<NUClear::Environment> environment)
+            : Reactor(std::move(environment))
+            , max_image_duration()
+            , max_classified_image_duration()
+            , handles()
+            , actionRegisters() {
 
-        // These go first so the config can do things with them
-        provideOverview();
-        provideDataPoints();
-        provideSubsumption();
-        provideGameController();
-        provideLocalisation();
-        provideReactionStatistics();
-        provideSensors();
-        provideVision();
+            // These go first so the config can do things with them
+            provideOverview();
+            provideDataPoints();
+            provideSubsumption();
+            provideGameController();
+            provideLocalisation();
+            provideReactionStatistics();
+            provideSensors();
+            provideVision();
 
-        on<Configuration>("NUsight.yaml").then([this](const Configuration& config) {
-            using namespace std::chrono;
-            max_image_duration = duration_cast<NUClear::clock::duration>(
-                duration<double>(1.0 / config["output"]["network"]["max_image_fps"].as<double>()));
-            max_classified_image_duration = duration_cast<NUClear::clock::duration>(
-                duration<double>(1.0 / config["output"]["network"]["max_classified_image_fps"].as<double>()));
+            on<Configuration>("NUsight.yaml").then([this](const Configuration& config) {
+                using namespace std::chrono;
+                max_image_duration = duration_cast<NUClear::clock::duration>(
+                    duration<double>(1.0 / config["output"]["network"]["max_image_fps"].as<double>()));
+                max_classified_image_duration = duration_cast<NUClear::clock::duration>(
+                    duration<double>(1.0 / config["output"]["network"]["max_classified_image_fps"].as<double>()));
 
-            for (auto& setting : config["reaction_handles"].config) {
-                // Lowercase the name
-                std::string name = setting.first.as<std::string>();
-                std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+                for (auto& setting : config["reaction_handles"].config) {
+                    // Lowercase the name
+                    std::string name = setting.first.as<std::string>();
+                    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 
-                bool enabled = setting.second.as<bool>();
+                    bool enabled = setting.second.as<bool>();
 
-                bool found = false;
-                for (auto& handle : handles[name]) {
-                    if (enabled && !handle.enabled()) {
-                        handle.enable();
-                        found = true;
+                    bool found = false;
+                    for (auto& handle : handles[name]) {
+                        if (enabled && !handle.enabled()) {
+                            handle.enable();
+                            found = true;
+                        }
+
+                        else if (!enabled && handle.enabled()) {
+                            handle.disable();
+                            found = true;
+                        }
                     }
 
-                    else if (!enabled && handle.enabled()) {
-                        handle.disable();
-                        found = true;
+                    if (found) {
+                        if (enabled) {
+                            log<NUClear::INFO>("Enabled:", name);
+                        }
+                        else {
+                            log<NUClear::INFO>("Disabled:", name);
+                        }
                     }
                 }
+            });
 
-                if (found) {
-                    if (enabled) {
-                        log<NUClear::INFO>("Enabled:", name);
-                    }
-                    else {
-                        log<NUClear::INFO>("Disabled:", name);
-                    }
+
+            on<Network<Command>>().then("Network Command", [this](const Command& message) {
+                std::string command = message.command;
+                log<NUClear::INFO>("Received command:", command);
+                if (command == "get_subsumption") {
+                    sendSubsumption();
                 }
-            }
-        });
+            });
+        }
 
-
-        on<Network<Command>>().then("Network Command", [this](const Command& message) {
-            std::string command = message.command;
-            log<NUClear::INFO>("Received command:", command);
-            if (command == "get_subsumption") {
-                sendSubsumption();
-            }
-        });
-    }
-
-}  // namespace support
+    }  // namespace support
 }  // namespace module

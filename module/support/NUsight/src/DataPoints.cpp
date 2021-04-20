@@ -22,15 +22,15 @@
 #include "message/support/nusight/DataPoint.hpp"
 
 namespace module {
-namespace support {
-    using message::support::nusight::DataPoint;
+    namespace support {
+        using message::support::nusight::DataPoint;
 
-    void NUsight::provideDataPoints() {
+        void NUsight::provideDataPoints() {
 
-        handles["data_point"].push_back(
-            on<Trigger<DataPoint>>().then([this](std::shared_ptr<const DataPoint> dataPoint) {
-                powerplant.emit_shared<Scope::NETWORK>(std::move(dataPoint), "nusight", false);
-            }));
-    }
-}  // namespace support
+            handles["data_point"].push_back(
+                on<Trigger<DataPoint>>().then([this](std::shared_ptr<const DataPoint> dataPoint) {
+                    powerplant.emit_shared<Scope::NETWORK>(std::move(dataPoint), "nusight", false);
+                }));
+        }
+    }  // namespace support
 }  // namespace module
