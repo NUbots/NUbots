@@ -26,40 +26,40 @@
 #include <vector>
 
 namespace utility {
-namespace math {
-    namespace geometry {
+    namespace math {
+        namespace geometry {
 
-        template <typename Scalar>
-        class RotatedRectangle {
-            using AffineType   = Eigen::Transform<Scalar, 2, Eigen::Affine>;
-            using VectorType   = Eigen::Matrix<Scalar, 2, 1>;
-            using RotationType = Eigen::Rotation2D<Scalar>;
+            template <typename Scalar>
+            class RotatedRectangle {
+                using AffineType   = Eigen::Transform<Scalar, 2, Eigen::Affine>;
+                using VectorType   = Eigen::Matrix<Scalar, 2, 1>;
+                using RotationType = Eigen::Rotation2D<Scalar>;
 
-        private:
-            AffineType transform;
-            VectorType size;
+            private:
+                AffineType transform;
+                VectorType size;
 
-        public:
-            RotatedRectangle(const AffineType& trans, const VectorType& size) : transform(transform), size(size) {}
+            public:
+                RotatedRectangle(const AffineType& trans, const VectorType& size) : transform(transform), size(size) {}
 
-            AffineType getTransform() const {
-                return transform;
-            }
-            VectorType getSize() const {
-                return size;
-            }
-            VectorType getPosition() const {
-                return transform.translation();
-            }
-            Scalar getRotationAngle() const {
-                return getRotation().smallestAngle();
-            }
-            RotationType getRotation() const {
-                return RotationType(transform.rotation());
-            }
-        };
-    }  // namespace geometry
-}  // namespace math
+                AffineType getTransform() const {
+                    return transform;
+                }
+                VectorType getSize() const {
+                    return size;
+                }
+                VectorType getPosition() const {
+                    return transform.translation();
+                }
+                Scalar getRotationAngle() const {
+                    return getRotation().smallestAngle();
+                }
+                RotationType getRotation() const {
+                    return RotationType(transform.rotation());
+                }
+            };
+        }  // namespace geometry
+    }      // namespace math
 }  // namespace utility
 
 #endif  // UTILITY_MATH_GEOMETRY_ROTATEDRECTANGLE_HPP

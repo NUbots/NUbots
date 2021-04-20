@@ -33,44 +33,44 @@
 //#include "utility/input/ServoID.hpp"
 
 namespace utility {
-namespace motion {
+    namespace motion {
 
-    class Balancer {
-    private:
-        // Config
-        float rotationPGain = 0;
-        float rotationIGain = 0;
-        float rotationDGain = 0;
+        class Balancer {
+        private:
+            // Config
+            float rotationPGain = 0;
+            float rotationIGain = 0;
+            float rotationDGain = 0;
 
-        float translationPGainX = 0;
-        float translationPGainY = 0;
-        float translationPGainZ = 0;
+            float translationPGainX = 0;
+            float translationPGainY = 0;
+            float translationPGainZ = 0;
 
-        float translationDGainX = 0;
-        float translationDGainY = 0;
-        float translationDGainZ = 0;
+            float translationDGainX = 0;
+            float translationDGainY = 0;
+            float translationDGainZ = 0;
 
-        float ankleRotationScale = 0;
-        float hipRotationScale   = 0;
+            float ankleRotationScale = 0;
+            float hipRotationScale   = 0;
 
-        // State
-        float dPitch    = 0;
-        float dRoll     = 0;
-        float lastPitch = 0;
-        float lastRoll  = 0;
+            // State
+            float dPitch    = 0;
+            float dRoll     = 0;
+            float lastPitch = 0;
+            float lastRoll  = 0;
 
-        Eigen::Quaternion<float> lastErrorQuaternion;
-        NUClear::clock::time_point lastBalanceTime;
+            Eigen::Quaternion<float> lastErrorQuaternion;
+            NUClear::clock::time_point lastBalanceTime;
 
-    public:
-        Balancer() : lastErrorQuaternion(), lastBalanceTime() {}
-        void configure(const YAML::Node& config);
-        void balance(const message::motion::KinematicsModel& hip,
-                     Eigen::Affine3f& footToTorso,
-                     const utility::input::LimbID& leg,
-                     const message::input::Sensors& sensors);
-    };
-}  // namespace motion
+        public:
+            Balancer() : lastErrorQuaternion(), lastBalanceTime() {}
+            void configure(const YAML::Node& config);
+            void balance(const message::motion::KinematicsModel& hip,
+                         Eigen::Affine3f& footToTorso,
+                         const utility::input::LimbID& leg,
+                         const message::input::Sensors& sensors);
+        };
+    }  // namespace motion
 }  // namespace utility
 
 #endif

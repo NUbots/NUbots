@@ -4,15 +4,15 @@
 #include <nuclear>
 
 namespace module {
-namespace support {
+    namespace support {
 
-    class ReactionTimer : public NUClear::Reactor {
+        class ReactionTimer : public NUClear::Reactor {
 
-    public:
-        /// @brief Called by the powerplant to build and setup the ReactionTimer reactor.
-        explicit ReactionTimer(std::unique_ptr<NUClear::Environment> environment);
-    };
-}  // namespace support
+        public:
+            /// @brief Called by the powerplant to build and setup the ReactionTimer reactor.
+            explicit ReactionTimer(std::unique_ptr<NUClear::Environment> environment);
+        };
+    }  // namespace support
 }  // namespace module
 
 #endif  // MODULE_SUPPORT_REACTIONTIMER_HPP

@@ -23,14 +23,14 @@
 #include <nuclear>
 
 namespace module {
-namespace support {
+    namespace support {
 
-    class NUsightHarness : public NUClear::Reactor {
-    public:
-        explicit NUsightHarness(std::unique_ptr<NUClear::Environment> environment);
-    };
+        class NUsightHarness : public NUClear::Reactor {
+        public:
+            explicit NUsightHarness(std::unique_ptr<NUClear::Environment> environment);
+        };
 
-}  // namespace support
+    }  // namespace support
 }  // namespace module
 
 #endif  // MODULES_SUPPORT_NUSIGHTHARNESS_HPP

@@ -24,66 +24,66 @@
 #include <map>
 
 namespace utility {
-namespace support {
+    namespace support {
 
-    template <typename Index, typename T>
-    class Limiter {
-    private:
-        struct Range {
-            Range() : min(), max() {}
-            Range(const T& min, const T& max) : min(min), max(max) {}
-            T min;
-            T max;
-        };
+        template <typename Index, typename T>
+        class Limiter {
+        private:
+            struct Range {
+                Range() : min(), max() {}
+                Range(const T& min, const T& max) : min(min), max(max) {}
+                T min;
+                T max;
+            };
 
-        static T min(const T& x, const T& y) {
-            return x > y ? y : x;
-        }
-
-        static T max(const T& x, const T& y) {
-            return x < y ? y : x;
-        }
-
-        std::map<Index, Range> limits;
-        std::map<Index, float> alpha;
-        std::map<Index, T> lastValue;
-
-    public:
-        Limiter() : limits(), alpha(), lastValue() {}
-
-        void addLimit(Index i, T min, T max) {
-            limits[i] = Range({min, max});
-        }
-
-        void addSmoothing(Index i, float smoothing) {
-            alpha[i] = std::fmax(std::fmin(smoothing, 1), 0);
-        }
-
-        T clamp(Index i, T x) {
-            if (limits.count(i) > 0) {
-                Range& range = limits[i];
-                return min(max(x, range.min), range.max);
+            static T min(const T& x, const T& y) {
+                return x > y ? y : x;
             }
-            return x;
-        }
 
-        T clampAndSmooth(Index i, T x) {
-            // Todo: optimise these if-statements
-            T result = x;
-            if (limits.count(i) > 0) {
-                Range& range = limits[i];
-                result       = min(max(x, range.min), range.max);
+            static T max(const T& x, const T& y) {
+                return x < y ? y : x;
             }
-            if (alpha.count(i) > 0) {
-                if (lastValue.count(i) > 0) {
-                    result = alpha[i] * result + (1 - alpha[i]) * lastValue[i];
+
+            std::map<Index, Range> limits;
+            std::map<Index, float> alpha;
+            std::map<Index, T> lastValue;
+
+        public:
+            Limiter() : limits(), alpha(), lastValue() {}
+
+            void addLimit(Index i, T min, T max) {
+                limits[i] = Range({min, max});
+            }
+
+            void addSmoothing(Index i, float smoothing) {
+                alpha[i] = std::fmax(std::fmin(smoothing, 1), 0);
+            }
+
+            T clamp(Index i, T x) {
+                if (limits.count(i) > 0) {
+                    Range& range = limits[i];
+                    return min(max(x, range.min), range.max);
                 }
-                lastValue[i] = result;
+                return x;
             }
-            return result;
-        }
-    };
-}  // namespace support
+
+            T clampAndSmooth(Index i, T x) {
+                // Todo: optimise these if-statements
+                T result = x;
+                if (limits.count(i) > 0) {
+                    Range& range = limits[i];
+                    result       = min(max(x, range.min), range.max);
+                }
+                if (alpha.count(i) > 0) {
+                    if (lastValue.count(i) > 0) {
+                        result = alpha[i] * result + (1 - alpha[i]) * lastValue[i];
+                    }
+                    lastValue[i] = result;
+                }
+                return result;
+            }
+        };
+    }  // namespace support
 }  // namespace utility
 
 #endif
