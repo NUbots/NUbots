@@ -21,7 +21,6 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/behaviour/Look.hpp"
 #include "message/behaviour/MotionCommand.hpp"
 #include "message/behaviour/Nod.hpp"
 #include "message/behaviour/SoccerObjectPriority.hpp"
@@ -52,7 +51,6 @@ namespace behaviour {
         using message::behaviour::Behaviour;
         using message::behaviour::FieldTarget;
         using message::behaviour::KickPlan;
-        using message::behaviour::Look;
         using KickType = message::behaviour::KickPlan::KickType;
         using message::behaviour::MotionCommand;
         using message::behaviour::Nod;

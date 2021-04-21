@@ -25,7 +25,7 @@ import "google/protobuf/timestamp.proto";
 import "Vector.proto";
 
 message Line {
-    uint32                    camera_id = 1;
+    uint32                    id        = 1;
     google.protobuf.Timestamp timestamp = 2;
     ivec2                     start     = 3;
     ivec2                     end       = 4;
