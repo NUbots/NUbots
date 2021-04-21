@@ -220,6 +220,9 @@ void Webots::setup_connection(const std::string& server_address, const std::stri
 
         // Service the watchdog
         emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
+
+        // Tick the clock forward
+        Clock.tick();
     });
 
     send_loop = on<Every<10, std::chrono::milliseconds>>().then([this, fd]() {
