@@ -120,7 +120,7 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
             on<Watchdog<Webots, 5, std::chrono::seconds>>().then([this] {
                 // We haven't received any messages lately
             });
-            
+
             setup_connection(local_config["server_address"].as<std::string>(), local_config["port"].as<std::string>());
         });
 
@@ -162,7 +162,7 @@ void Webots::setup_connection(const std::string& server_address, const std::stri
     shutdown_handle.unbind();
 
     int fd = tcpip_connect(server_address, port);
-            
+
     char inital_message[8];
     int n = recv(fd, inital_message, sizeof(inital_message), 0);
 
@@ -222,7 +222,7 @@ void Webots::setup_connection(const std::string& server_address, const std::stri
         emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
     });
 
-    send_loop = on<Every<1, std::chrono::seconds>>().then([this, fd]() {
+    send_loop = on<Every<10, std::chrono::milliseconds>>().then([this, fd]() {
         // Sending
         std::vector<char> data = NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(to_send);
         uint32_t Nn            = htonl(data.size());
