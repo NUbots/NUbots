@@ -305,25 +305,17 @@ void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurem
     sensor_data->timestamp = NUClear::clock::now();
     // connect_time + std::chrono::milliseconds(sensor_measurements.time);
 
-    // Vector3 is a neutron of 3 doubles
-
     for (const auto& position : sensor_measurements.position_sensors) {
-        // string name
-        // double value
         translate_servo_id(position.name, sensor_data->servo).presentPosition = position.value;
     }
 
     for (const auto& accelerometer : sensor_measurements.accelerometers) {
-        // string name
-        // Vector3 value
         sensor_data->accelerometer.x = static_cast<float>(accelerometer.value.X);
         sensor_data->accelerometer.y = static_cast<float>(accelerometer.value.Y);
         sensor_data->accelerometer.z = static_cast<float>(accelerometer.value.Z);
     }
 
     for (const auto& gyro : sensor_measurements.gyros) {
-        // string name
-        // Vector3 value
         sensor_data->gyroscope.x = static_cast<float>(gyro.value.X);
         sensor_data->gyroscope.y = static_cast<float>(gyro.value.Y);
         sensor_data->gyroscope.z = static_cast<float>(gyro.value.Z);
