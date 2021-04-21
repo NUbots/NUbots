@@ -18,7 +18,6 @@
  */
 
 #include "Webots.hpp"
-#include "utility/input/ServoID.hpp"
 
 #include <chrono>
 #include <fmt/format.h>
@@ -32,6 +31,7 @@
 #include "message/platform/webots/messages.hpp"
 #include "message/support/GlobalConfig.hpp"
 
+#include "utility/input/ServoID.hpp"
 #include "utility/vision/fourcc.hpp"
 
 // Include headers needed for TCP connection
@@ -53,15 +53,54 @@ using message::platform::darwin::DarwinSensors;
 using message::platform::webots::ActuatorRequests;
 using message::platform::webots::ConnectRequest;
 using message::platform::webots::Message;
+using message::platform::webots::MotorPID;
 using message::platform::webots::MotorPosition;
 using message::platform::webots::MotorTorque;
 using message::platform::webots::MotorVelocity;
 using message::platform::webots::SensorMeasurements;
 
 using message::support::GlobalConfig;
-using utility::vision::fourcc;
 using utility::input::ServoID;
-using utility::platform::darwin::getDarwinServo;
+using utility::vision::fourcc;
+
+// Converts the NUgus.proto servo name to the equivalent DarwinSensor.proto name
+DarwinSensors::Servo& translate_servo_id(const std::string& name, DarwinSensors::Servos& servos) {
+    // clang-format off
+
+    // Left ankle
+    if (name == "left_ankle_roll_sensor") { return servos.lAnkleRoll; }
+    if (name == "left_ankle_pitch_sensor") { return servos.lAnklePitch; }
+    // Right ankle
+    if (name == "right_ankle_roll_sensor") { return servos.rAnkleRoll; }
+    if (name == "right_ankle_pitch_sensor") { return servos.rAnklePitch; }
+    // Knees
+    if (name == "right_knee_pitch_sensor") { return servos.rKnee; }
+    if (name == "left_knee_pitch_sensor") { return servos.lKnee; }
+    // Left hip
+    if (name == "left_hip_roll_sensor") { return servos.lHipRoll; }
+    if (name == "left_hip_pitch_sensor") { return servos.lHipPitch; }
+    if (name == "left_hip_yaw_sensor") { return servos.lHipYaw; }
+    // Right hip
+    if (name == "right_hip_roll_sensor") { return servos.rHipRoll; }
+    if (name == "right_hip_pitch_sensor") { return servos.rHipPitch; }
+    if (name == "right_hip_yaw_sensor") { return servos.rHipYaw; }
+    // Elbows
+    if (name == "left_elbow_pitch_sensor") { return servos.lElbow; }
+    if (name == "right_elbow_pitch_sensor") { return servos.rElbow; }
+    // Left shoulder
+    if (name == "left_shoulder_roll_sensor") { return servos.lShoulderRoll; }
+    if (name == "left_shoulder_pitch_sensor") { return servos.lShoulderPitch; }
+    // Right shoulder
+    if (name == "right_shoulder_roll_sensor") { return servos.rShoulderRoll; }
+    if (name == "right_shoulder_pitch_sensor") { return servos.rShoulderPitch; }
+    // Neck and head
+    if (name == "neck_yaw_sensor") { return servos.headPan; }
+    if (name == "head_pitch_sensor") { return servos.headTilt; }
+
+    // clang-format on
+
+    throw std::runtime_error("Unable to translate unknown NUgus.proto sensor name: " + name);
+}
 
 int Webots::tcpip_connect(const std::string& server_name, const std::string& port) {
     // Hints for the connection type
@@ -111,13 +150,13 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
             // Use configuration here from file webots.yaml
 
             // clang-format off
-        auto lvl = local_config["log_level"].as<std::string>();
-        if (lvl == "TRACE") { this->log_level = NUClear::TRACE; }
-        else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
-        else if (lvl == "INFO") { this->log_level = NUClear::INFO; }
-        else if (lvl == "WARN") { this->log_level = NUClear::WARN; }
-        else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
-        else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
+            auto lvl = local_config["log_level"].as<std::string>();
+            if (lvl == "TRACE") { this->log_level = NUClear::TRACE; }
+            else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
+            else if (lvl == "INFO") { this->log_level = NUClear::INFO; }
+            else if (lvl == "WARN") { this->log_level = NUClear::WARN; }
+            else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
+            else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
             // clang-format on
 
             on<Watchdog<Webots, 5, std::chrono::seconds>>().then([this] {
@@ -135,37 +174,36 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
         to_send.motor_torques.clear();
 
         // Store each ServoTarget to send in the next lot
-        for (const auto& command : commands.targets) {
+        for (const auto& target : commands.targets) {
             MotorPosition position_msg;
-            position_msg.name     = command.id;
-            position_msg.position = command.position;
+            position_msg.name     = target.id;
+            position_msg.position = target.position;
             to_send.motor_positions.push_back(position_msg);
 
             // TODO(cmurtagh) work out if gain is velocity or force
             MotorVelocity velocity_msg;
-            velocity_msg.name     = command.id;
-            velocity_msg.velocity = command.gain;
+            velocity_msg.name     = target.id;
+            velocity_msg.velocity = target.gain;
             to_send.motor_velocities.push_back(velocity_msg);
 
             MotorTorque torque_msg;
-            torque_msg.name   = command.id;
-            torque_msg.torque = command.torque;
+            torque_msg.name   = target.id;
+            torque_msg.torque = target.torque;
             to_send.motor_torques.push_back(torque_msg);
 
-            // MotorPID, only sending P gain, set I and D to zero
+            // MotorPID, only sending P gain. Set I and D to zero
             MotorPID motorpid_msg;
-            motorpid_msg.name = command.id;
-            motorpid_msg.PID.X = static_cast<double>(command.gain);
+            motorpid_msg.name  = target.id;
+            motorpid_msg.PID.X = static_cast<double>(target.gain);
             motorpid_msg.PID.Y = 0.0;
             motorpid_msg.PID.Z = 0.0;
             to_send.motor_pids.push_back(motorpid_msg);
-
         }
     });
 }
 
 void Webots::setup_connection(const std::string& server_address, const std::string& port) {
-    // Unbind the
+    // Unbind any previous reaction handles
     read_io.unbind();
     send_loop.unbind();
     error_io.unbind();
@@ -173,15 +211,18 @@ void Webots::setup_connection(const std::string& server_address, const std::stri
 
     int fd = tcpip_connect(server_address, port);
 
-    char inital_message[8];
-    int n = recv(fd, inital_message, sizeof(inital_message), 0);
+    char inital_message_arr[8];
+    int n = recv(fd, inital_message_arr, sizeof(inital_message_arr), 0);
 
-    if(n > 0){
-        if (strncmp(inital_message, "Welcome", sizeof(inital_message)) == 0){
-            //good
+    std::string inital_message(inital_message_arr);
+
+    if (n > 0) {
+        if (inital_message == "Welcome") {
+            // good
         }
-        else if (strncmp(inital_message, "Refused", sizeof(inital_message)) == 0){
-            log<NUClear::FATAL>(fmt::format("Connection to {}:{} refused: your ip is not white listed.", server_address, port));
+        else if (inital_message == "Refused") {
+            log<NUClear::FATAL>(
+                fmt::format("Connection to {}:{} refused: your ip is not white listed", server_address, port));
             // TODO(cameron) Halt and don't retry
         }
         else {
@@ -190,7 +231,7 @@ void Webots::setup_connection(const std::string& server_address, const std::stri
         }
     }
     else {
-        log<NUClear::FATAL>("Connection was closed.");
+        log<NUClear::FATAL>("Connection was closed");
     }
 
     connect_time = NUClear::clock::now();
@@ -200,9 +241,8 @@ void Webots::setup_connection(const std::string& server_address, const std::stri
     // Tell webots who we are
     // send_player_details(fd, global_config); Not needed? Set by the port we connect to?
 
+    // Receiving
     read_io = on<IO>(fd, IO::READ).then([this, fd]() {
-        // Receiving
-
         // Get the size of the message
         uint32_t Nn;
         if (recv(fd, &Nn, sizeof(Nn), 0 != sizeof(Nn))) {
@@ -228,14 +268,14 @@ void Webots::setup_connection(const std::string& server_address, const std::stri
         emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
     });
 
+    // Sending
     send_loop = on<Every<1, std::chrono::seconds>>().then([this, fd]() {
-        // Sending
         std::vector<char> data = NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(to_send);
         uint32_t Nn            = htonl(data.size());
-        if (send(fd, &Nn, sizeof(Nn), 0) == sizeof(Nn)){
+        if (send(fd, &Nn, sizeof(Nn), 0) == sizeof(Nn)) {
             log<NUClear::ERROR>(fmt::format("Error in sending actuator requests message size, {}", strerror(errno)));
         }
-        if(send(fd, data.data(), Nn, 0) == Nn){
+        if (send(fd, data.data(), Nn, 0) == Nn) {
             log<NUClear::ERROR>("Error in sending actuator requests message, {}", strerror(errno));
         }
     });
@@ -250,7 +290,7 @@ void Webots::setup_connection(const std::string& server_address, const std::stri
 }
 
 void Webots::send_player_details(const int& fd, const GlobalConfig& player_details) {
-    // TODO(cameron) resend if failes
+    // TODO(cameron) resend if fails
     std::vector<char> data = NUClear::util::serialise::Serialise<GlobalConfig>::serialise(player_details);
     uint32_t Nn            = htonl(data.size());
     send(fd, &Nn, sizeof(Nn), 0);
@@ -261,32 +301,32 @@ void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurem
     // Read each field of msg, translate it to our protobuf and emit the data
     auto sensor_data = std::make_unique<DarwinSensors>();
 
-    //TODO(cameron) Work out if it makes sense to combine simulation time with real time.
+    // TODO(cameron) Work out if it makes sense to combine simulation time with real time.
     sensor_data->timestamp = NUClear::clock::now();
-        //connect_time + std::chrono::milliseconds(sensor_measurements.time);
+    // connect_time + std::chrono::milliseconds(sensor_measurements.time);
 
     // Vector3 is a neutron of 3 doubles
 
     for (const auto& position : sensor_measurements.position_sensors) {
         // string name
         // double value
-        translate_servo_id(position.name, sensor_data.servo).presentPosition = position.value;
+        translate_servo_id(position.name, sensor_data->servo).presentPosition = position.value;
     }
 
     for (const auto& accelerometer : sensor_measurements.accelerometers) {
         // string name
         // Vector3 value
-        sensor_data.accelerometer.x = static_cast<float>(accelerometers.value.X);
-        sensor_data.accelerometer.y = static_cast<float>(accelerometers.value.Y);
-        sensor_data.accelerometer.z = static_cast<float>(accelerometers.value.Z);
+        sensor_data->accelerometer.x = static_cast<float>(accelerometer.value.X);
+        sensor_data->accelerometer.y = static_cast<float>(accelerometer.value.Y);
+        sensor_data->accelerometer.z = static_cast<float>(accelerometer.value.Z);
     }
 
     for (const auto& gyro : sensor_measurements.gyros) {
         // string name
         // Vector3 value
-        sensor_data.gyroscope.x = static_cast<float>(gyros.value.X);
-        sensor_data.gyroscope.y = static_cast<float>(gyros.value.Y);
-        sensor_data.gyroscope.z = static_cast<float>(gyros.value.Z);
+        sensor_data->gyroscope.x = static_cast<float>(gyro.value.X);
+        sensor_data->gyroscope.y = static_cast<float>(gyro.value.Y);
+        sensor_data->gyroscope.z = static_cast<float>(gyro.value.Z);
     }
 
     // Ignore as we don't have physical functionality for this
@@ -329,32 +369,5 @@ void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurem
     }
 }
 
-// Converts the NUgus.proto servo name to the equivalent DarwinSensor.proto name
-DarwinSensors::Servo& translate_servo_id(const std::string& name, const DarwinSensors::Servos& servos) {
-    switch(name){
-        case "right_shoulder_pitch_sensor": return servos.rShoulderPitch;
-        case "left_shoulder_pitch": return servos.lShoulderPitch;
-        case "right_shoulder_roll": return servos.rShoulderRoll;
-        case "left_shoulder_roll": return servos.lShoulderRoll;
-        case "right_elbow_pitch": return servos.rElbow;
-        case "left_elbow_pitch": return servos.lElbow;
-        case "right_hip_yaw": return servos.rHipYaw;
-        case "left_hip_yaw": return servos.lHipYaw;
-        case "right_hip_roll": return servos.rHipRoll;
-        case "left_hip_roll": return servos.lHipRoll;
-        case "right_hip_pitch": return servos.rHipPitch;
-        case "left_hip_pitch": return servos.lHipPitch;
-        case "right_knee_pitch": return servos.rKnee;
-        case "left_knee_pitch": return servos.lKnee;
-        case "right_ankle_pitch": return servos.rAnklePitch;
-        case "left_ankle_pitch": return servos.lAnklePitch;
-        case "right_ankle_roll": return servos.rAnkleRoll;
-        case "left_ankle_roll": return servos.lAnkleRoll;
-        case "neck_yaw": return servos.headPan;
-        case "head_pitch": return servos.headTilt;
-
-        default: throw std::runtime_error("Out of bounds on servo name");
-    }
-}
 
 }  // namespace module::platform
