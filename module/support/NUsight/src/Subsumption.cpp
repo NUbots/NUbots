@@ -25,102 +25,103 @@
 #include "utility/input/LimbID.hpp"
 
 namespace module {
-namespace support {
+    namespace support {
 
-    using message::behaviour::Subsumption;
+        using message::behaviour::Subsumption;
 
-    using utility::behaviour::ActionKill;
-    using utility::behaviour::ActionPriorities;
-    using utility::behaviour::ActionStart;
-    using utility::behaviour::RegisterAction;
-    using utility::input::LimbID;
+        using utility::behaviour::ActionKill;
+        using utility::behaviour::ActionPriorities;
+        using utility::behaviour::ActionStart;
+        using utility::behaviour::RegisterAction;
+        using utility::input::LimbID;
 
-    void NUsight::provideSubsumption() {
+        void NUsight::provideSubsumption() {
 
-        handles["subsumption"].push_back(on<Trigger<ActionStart>>().then([this](const ActionStart& actionStart) {
-            auto subsumption = std::make_unique<Subsumption>();
+            handles["subsumption"].push_back(on<Trigger<ActionStart>>().then([this](const ActionStart& actionStart) {
+                auto subsumption = std::make_unique<Subsumption>();
 
-            Subsumption::ActionStateChange actionStateChange;
-            actionStateChange.state = Subsumption::ActionStateChange::State::Value::START;
-            actionStateChange.name  = actionStart.name;
+                Subsumption::ActionStateChange actionStateChange;
+                actionStateChange.state = Subsumption::ActionStateChange::State::Value::START;
+                actionStateChange.name  = actionStart.name;
 
-            for (auto& limbID : actionStart.limbs) {
-                actionStateChange.limbs.push_back(limbID);
-            }
-
-            subsumption->action_state_change.push_back(actionStateChange);
-            emit<Scope::NETWORK>(subsumption, "nusight", true);
-        }));
-
-        handles["subsumption"].push_back(on<Trigger<ActionKill>>().then([this](const ActionKill& actionKill) {
-            auto subsumption = std::make_unique<Subsumption>();
-
-            Subsumption::ActionStateChange actionStateChange;
-            actionStateChange.state = Subsumption::ActionStateChange::State::Value::KILL;
-            actionStateChange.name  = actionKill.name;
-
-            for (auto& limbID : actionKill.limbs) {
-                actionStateChange.limbs.push_back(limbID);
-            }
-
-            subsumption->action_state_change.push_back(actionStateChange);
-            emit<Scope::NETWORK>(subsumption, "nusight", true);
-        }));
-
-        handles["subsumption"].push_back(on<Trigger<RegisterAction>>().then([this](const RegisterAction& action) {
-            auto subsumption = std::make_unique<Subsumption>();
-
-            Subsumption::ActionRegister actionRegister;
-            actionRegister.id   = action.id;
-            actionRegister.name = action.name;
-
-            for (const auto& set : action.limbSet) {
-                Subsumption::LimbSet limbSet;
-
-                limbSet.priority = set.first;
-
-                for (auto& limbID : set.second) {
-                    limbSet.limbs.push_back(limbID);
+                for (auto& limbID : actionStart.limbs) {
+                    actionStateChange.limbs.push_back(limbID);
                 }
 
-                actionRegister.limb_set.push_back(limbSet);
-            }
+                subsumption->action_state_change.push_back(actionStateChange);
+                emit<Scope::NETWORK>(subsumption, "nusight", true);
+            }));
 
-            subsumption->action_register.push_back(actionRegister);
-            actionRegisters.insert(std::make_pair(action.id, actionRegister));
-            emit<Scope::NETWORK>(subsumption, "nusight", true);
-        }));
+            handles["subsumption"].push_back(on<Trigger<ActionKill>>().then([this](const ActionKill& actionKill) {
+                auto subsumption = std::make_unique<Subsumption>();
 
-        handles["subsumption"].push_back(on<Trigger<ActionPriorities>>().then([this](const ActionPriorities& action) {
-            auto subsumption = std::make_unique<Subsumption>();
+                Subsumption::ActionStateChange actionStateChange;
+                actionStateChange.state = Subsumption::ActionStateChange::State::Value::KILL;
+                actionStateChange.name  = actionKill.name;
 
-            Subsumption::ActionPriorities actionPriorityChange;
-            actionPriorityChange.id = action.id;
+                for (auto& limbID : actionKill.limbs) {
+                    actionStateChange.limbs.push_back(limbID);
+                }
 
-            Subsumption::ActionRegister actionRegister = actionRegisters.find(action.id)->second;
+                subsumption->action_state_change.push_back(actionStateChange);
+                emit<Scope::NETWORK>(subsumption, "nusight", true);
+            }));
 
-            size_t index = 0;
-            for (const auto& priority : action.priorities) {
-                Subsumption::LimbSet limbSet = actionRegister.limb_set[index];
-                actionPriorityChange.priorities.push_back(priority);
-                limbSet.priority = priority;
-                index++;
-            }
+            handles["subsumption"].push_back(on<Trigger<RegisterAction>>().then([this](const RegisterAction& action) {
+                auto subsumption = std::make_unique<Subsumption>();
 
-            subsumption->action_priority_change.push_back(actionPriorityChange);
-            emit<Scope::NETWORK>(subsumption, "nusight", true);
-        }));
-    }
+                Subsumption::ActionRegister actionRegister;
+                actionRegister.id   = action.id;
+                actionRegister.name = action.name;
 
-    void NUsight::sendSubsumption() {
+                for (const auto& set : action.limbSet) {
+                    Subsumption::LimbSet limbSet;
 
-        auto subsumption = std::make_unique<Subsumption>();
+                    limbSet.priority = set.first;
 
-        for (const auto& actionRegister : actionRegisters) {
-            subsumption->action_register.push_back(actionRegister.second);
+                    for (auto& limbID : set.second) {
+                        limbSet.limbs.push_back(limbID);
+                    }
+
+                    actionRegister.limb_set.push_back(limbSet);
+                }
+
+                subsumption->action_register.push_back(actionRegister);
+                actionRegisters.insert(std::make_pair(action.id, actionRegister));
+                emit<Scope::NETWORK>(subsumption, "nusight", true);
+            }));
+
+            handles["subsumption"].push_back(
+                on<Trigger<ActionPriorities>>().then([this](const ActionPriorities& action) {
+                    auto subsumption = std::make_unique<Subsumption>();
+
+                    Subsumption::ActionPriorities actionPriorityChange;
+                    actionPriorityChange.id = action.id;
+
+                    Subsumption::ActionRegister actionRegister = actionRegisters.find(action.id)->second;
+
+                    size_t index = 0;
+                    for (const auto& priority : action.priorities) {
+                        Subsumption::LimbSet limbSet = actionRegister.limb_set[index];
+                        actionPriorityChange.priorities.push_back(priority);
+                        limbSet.priority = priority;
+                        index++;
+                    }
+
+                    subsumption->action_priority_change.push_back(actionPriorityChange);
+                    emit<Scope::NETWORK>(subsumption, "nusight", true);
+                }));
         }
 
-        emit<Scope::NETWORK>(subsumption, "nusight", true);
-    }
-}  // namespace support
+        void NUsight::sendSubsumption() {
+
+            auto subsumption = std::make_unique<Subsumption>();
+
+            for (const auto& actionRegister : actionRegisters) {
+                subsumption->action_register.push_back(actionRegister.second);
+            }
+
+            emit<Scope::NETWORK>(subsumption, "nusight", true);
+        }
+    }  // namespace support
 }  // namespace module

@@ -25,24 +25,24 @@
 #include "message/conversion/math_types.hpp"
 
 namespace module {
-namespace vision {
+    namespace vision {
 
-    class GoalDetector : public NUClear::Reactor {
-    private:
-        struct {
-            float confidence_threshold;
-            int cluster_points;
-            float disagreement_ratio;
-            message::conversion::math::fmat3 goal_angular_cov;
-            bool use_median;
-            bool debug;
-        } config;
+        class GoalDetector : public NUClear::Reactor {
+        private:
+            struct {
+                float confidence_threshold;
+                int cluster_points;
+                float disagreement_ratio;
+                message::conversion::math::fmat3 goal_angular_cov;
+                bool use_median;
+                bool debug;
+            } config;
 
-    public:
-        /// @brief Called by the powerplant to build and setup the GoalDetector reactor.
-        explicit GoalDetector(std::unique_ptr<NUClear::Environment> environment);
-    };
-}  // namespace vision
+        public:
+            /// @brief Called by the powerplant to build and setup the GoalDetector reactor.
+            explicit GoalDetector(std::unique_ptr<NUClear::Environment> environment);
+        };
+    }  // namespace vision
 }  // namespace module
 
 

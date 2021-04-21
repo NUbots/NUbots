@@ -20,62 +20,62 @@
 #include "extension/Configuration.hpp"
 
 namespace module {
-namespace network {
+    namespace network {
 
-    using extension::Configuration;
+        using extension::Configuration;
 
-    NUClearNet::NUClearNet(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+        NUClearNet::NUClearNet(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-        on<Configuration>("NUClearNet.yaml").then([this](const Configuration& config) {
-            auto netConfig              = std::make_unique<NUClear::message::NetworkConfiguration>();
-            netConfig->name             = config["name"].as<std::string>();
-            netConfig->announce_address = config["address"].as<std::string>();
-            netConfig->announce_port    = config["port"].as<uint16_t>();
-            emit<Scope::DIRECT>(netConfig);
-        });
+            on<Configuration>("NUClearNet.yaml").then([this](const Configuration& config) {
+                auto netConfig              = std::make_unique<NUClear::message::NetworkConfiguration>();
+                netConfig->name             = config["name"].as<std::string>();
+                netConfig->announce_address = config["address"].as<std::string>();
+                netConfig->announce_port    = config["port"].as<uint16_t>();
+                emit<Scope::DIRECT>(netConfig);
+            });
 
-        on<Trigger<NUClear::message::NetworkJoin>>().then([this](const NUClear::message::NetworkJoin& event) {
-            char c[255];
-            std::memset(c, 0, sizeof(c));
-            std::string addr;
-            int port;
+            on<Trigger<NUClear::message::NetworkJoin>>().then([this](const NUClear::message::NetworkJoin& event) {
+                char c[255];
+                std::memset(c, 0, sizeof(c));
+                std::string addr;
+                int port;
 
-            switch (event.address.sock.sa_family) {
-                case AF_INET:
-                    addr = inet_ntop(event.address.sock.sa_family, &event.address.ipv4.sin_addr, c, sizeof(c));
-                    port = ntohs(event.address.ipv4.sin_port);
-                    break;
+                switch (event.address.sock.sa_family) {
+                    case AF_INET:
+                        addr = inet_ntop(event.address.sock.sa_family, &event.address.ipv4.sin_addr, c, sizeof(c));
+                        port = ntohs(event.address.ipv4.sin_port);
+                        break;
 
-                case AF_INET6:
-                    addr = inet_ntop(event.address.sock.sa_family, &event.address.ipv6.sin6_addr, c, sizeof(c));
-                    port = ntohs(event.address.ipv6.sin6_port);
-                    break;
-            }
+                    case AF_INET6:
+                        addr = inet_ntop(event.address.sock.sa_family, &event.address.ipv6.sin6_addr, c, sizeof(c));
+                        port = ntohs(event.address.ipv6.sin6_port);
+                        break;
+                }
 
-            log<NUClear::INFO>("Connected to", event.name, "on", addr + ":" + std::to_string(port));
-        });
+                log<NUClear::INFO>("Connected to", event.name, "on", addr + ":" + std::to_string(port));
+            });
 
-        on<Trigger<NUClear::message::NetworkLeave>>().then([this](const NUClear::message::NetworkLeave& event) {
-            char c[255];
-            std::memset(c, 0, sizeof(c));
-            std::string addr;
-            int port;
+            on<Trigger<NUClear::message::NetworkLeave>>().then([this](const NUClear::message::NetworkLeave& event) {
+                char c[255];
+                std::memset(c, 0, sizeof(c));
+                std::string addr;
+                int port;
 
-            switch (event.address.sock.sa_family) {
-                case AF_INET:
-                    addr = inet_ntop(event.address.sock.sa_family, &event.address.ipv4.sin_addr, c, sizeof(c));
-                    port = ntohs(event.address.ipv4.sin_port);
-                    break;
+                switch (event.address.sock.sa_family) {
+                    case AF_INET:
+                        addr = inet_ntop(event.address.sock.sa_family, &event.address.ipv4.sin_addr, c, sizeof(c));
+                        port = ntohs(event.address.ipv4.sin_port);
+                        break;
 
-                case AF_INET6:
-                    addr = inet_ntop(event.address.sock.sa_family, &event.address.ipv6.sin6_addr, c, sizeof(c));
-                    port = ntohs(event.address.ipv6.sin6_port);
-                    break;
-            }
+                    case AF_INET6:
+                        addr = inet_ntop(event.address.sock.sa_family, &event.address.ipv6.sin6_addr, c, sizeof(c));
+                        port = ntohs(event.address.ipv6.sin6_port);
+                        break;
+                }
 
-            log<NUClear::INFO>("Disconnected from", event.name, "on", addr + ":" + std::to_string(port));
-        });
-    }
+                log<NUClear::INFO>("Disconnected from", event.name, "on", addr + ":" + std::to_string(port));
+            });
+        }
 
-}  // namespace network
+    }  // namespace network
 }  // namespace module

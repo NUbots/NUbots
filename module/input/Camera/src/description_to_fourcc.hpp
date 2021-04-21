@@ -6,12 +6,12 @@
 #include "utility/vision/fourcc.hpp"
 
 namespace module {
-namespace input {
+    namespace input {
 
-    inline uint32_t description_to_fourcc(const std::string& code) {
-        using namespace utility::vision;
+        inline uint32_t description_to_fourcc(const std::string& code) {
+            using namespace utility::vision;
 
-        // clang-format off
+            // clang-format off
              if (code == "Mono8")               return fourcc("GREY");
         else if (code == "Mono12Packed")        return fourcc("Y12 ");
         else if (code == "Mono12p")             return fourcc("Y12 ");
@@ -41,12 +41,12 @@ namespace input {
         else if (code == "YCbCr8_CbYCr")        return fourcc("YM24");
         else if (code == "YUYV")                return fourcc("YUYV");
         else if (code == "RGB8")                return fourcc("RGB3");
-        // clang-format on
+            // clang-format on
 
-        throw std::runtime_error("Could not find a fourcc for the given description");
-    }
+            throw std::runtime_error("Could not find a fourcc for the given description");
+        }
 
-}  // namespace input
+    }  // namespace input
 }  // namespace module
 
 #endif  // MODULE_INPUT_CAMERA_DESCRIPTION_TO_FOURCC_HPP

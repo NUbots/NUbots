@@ -4,26 +4,26 @@
 #include <nuclear>
 
 namespace module {
-namespace platform {
+    namespace platform {
 
-    class Gazebo : public NUClear::Reactor {
+        class Gazebo : public NUClear::Reactor {
 
-    public:
-        /// @brief Called by the powerplant to build and setup the Gazebo reactor.
-        explicit Gazebo(std::unique_ptr<NUClear::Environment> environment);
+        public:
+            /// @brief Called by the powerplant to build and setup the Gazebo reactor.
+            explicit Gazebo(std::unique_ptr<NUClear::Environment> environment);
 
-    private:
-        struct {
-            std::string simulator_name;
-            std::string model_name;
-            double clock_smoothing;
-        } config;
+        private:
+            struct {
+                std::string simulator_name;
+                std::string model_name;
+                double clock_smoothing;
+            } config;
 
-        double sim_time;
-        double real_time;
-    };
+            double sim_time;
+            double real_time;
+        };
 
-}  // namespace platform
+    }  // namespace platform
 }  // namespace module
 
 #endif  // MODULE_PLATFORM_GAZEBO_HPP

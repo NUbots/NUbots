@@ -27,26 +27,26 @@
 #ifndef NDEBUG
 
 namespace utility {
-namespace support {
-    namespace evil {
+    namespace support {
+        namespace evil {
 
-        struct StackFrame {
+            struct StackFrame {
 
-            StackFrame() : pc(), file(), lineno(), function() {}
+                StackFrame() : pc(), file(), lineno(), function() {}
 
-            StackFrame(uintptr_t pc, std::string file, int lineno, std::string function)
-                : pc(pc), file(file), lineno(lineno), function(function) {}
+                StackFrame(uintptr_t pc, std::string file, int lineno, std::string function)
+                    : pc(pc), file(file), lineno(lineno), function(function) {}
 
-            uintptr_t pc;
-            std::string file;
-            int lineno;
-            std::string function;
-        };
+                uintptr_t pc;
+                std::string file;
+                int lineno;
+                std::string function;
+            };
 
-        extern thread_local std::vector<StackFrame> stack;
-        extern thread_local std::string exception_name;
-    }  // namespace evil
-}  // namespace support
+            extern thread_local std::vector<StackFrame> stack;
+            extern thread_local std::string exception_name;
+        }  // namespace evil
+    }      // namespace support
 }  // namespace utility
 
 #endif  // NDEBUG

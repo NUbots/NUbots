@@ -23,15 +23,15 @@
 #include <nuclear>
 
 namespace module {
-namespace network {
+    namespace network {
 
-    class NUClearNet : public NUClear::Reactor {
-    public:
-        /// @brief Called by the powerplant to build and setup the NUClearNet reactor.
-        explicit NUClearNet(std::unique_ptr<NUClear::Environment> environment);
-    };
+        class NUClearNet : public NUClear::Reactor {
+        public:
+            /// @brief Called by the powerplant to build and setup the NUClearNet reactor.
+            explicit NUClearNet(std::unique_ptr<NUClear::Environment> environment);
+        };
 
-}  // namespace network
+    }  // namespace network
 }  // namespace module
 
 #endif  // MODULE_NETWORK_NUCLEARNET_HPP

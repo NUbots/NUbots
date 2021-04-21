@@ -5,8 +5,8 @@
 
 namespace module::output::compressor::vaapi::operation {
 
-int va_render_target_type_from_format(uint32_t format);
-VASurfaceID create_surface(VADisplay dpy, const uint32_t& width, const uint32_t& height, const uint32_t& format);
+    int va_render_target_type_from_format(uint32_t format);
+    VASurfaceID create_surface(VADisplay dpy, const uint32_t& width, const uint32_t& height, const uint32_t& format);
 
 }  // namespace module::output::compressor::vaapi::operation
 

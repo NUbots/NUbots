@@ -27,67 +27,67 @@
 #include "utility/vision/Vision.hpp"
 
 namespace module {
-namespace support {
+    namespace support {
 
-    using extension::Configuration;
+        using extension::Configuration;
 
-    using message::input::Image;
+        using message::input::Image;
 
-    using utility::support::Expression;
-    using utility::vision::FOURCC;
+        using utility::support::Expression;
+        using utility::vision::FOURCC;
 
-    VirtualCamera::VirtualCamera(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), emitImageHandle() {
+        VirtualCamera::VirtualCamera(std::unique_ptr<NUClear::Environment> environment)
+            : Reactor(std::move(environment)), emitImageHandle() {
 
-        emitImageHandle =
-            on<Every<30, Per<std::chrono::seconds>>, Single>().then("Simulated Images (VCamera)", [this]() {
-                auto msg       = std::make_unique<message::input::Image>();
-                msg->format    = FOURCC::BGGR;
-                msg->id        = 0;
-                msg->name      = "VirtualCamera";
-                msg->timestamp = NUClear::clock::now();
-                msg->Hcw       = Hcw;
-                msg->lens      = lens;
+            emitImageHandle =
+                on<Every<30, Per<std::chrono::seconds>>, Single>().then("Simulated Images (VCamera)", [this]() {
+                    auto msg       = std::make_unique<message::input::Image>();
+                    msg->format    = FOURCC::BGGR;
+                    msg->id        = 0;
+                    msg->name      = "VirtualCamera";
+                    msg->timestamp = NUClear::clock::now();
+                    msg->Hcw       = Hcw;
+                    msg->lens      = lens;
 
-                utility::vision::loadImage(imagePath, *msg);
-                emit(msg);
-            });
+                    utility::vision::loadImage(imagePath, *msg);
+                    emit(msg);
+                });
 
-        on<Configuration>("VirtualCamera.yaml").then([this](const Configuration& config) {
-            imagePath = config["image"]["path"].as<std::string>();
+            on<Configuration>("VirtualCamera.yaml").then([this](const Configuration& config) {
+                imagePath = config["image"]["path"].as<std::string>();
 
-            for (size_t row = 0; row < config["image"]["Hcw"].config.size(); row++) {
-                for (size_t col = 0; col < config["image"]["Hcw"][row].config.size(); col++) {
-                    Hcw(row, col) = config["image"]["Hcw"][row][col].as<double>();
+                for (size_t row = 0; row < config["image"]["Hcw"].config.size(); row++) {
+                    for (size_t col = 0; col < config["image"]["Hcw"][row].config.size(); col++) {
+                        Hcw(row, col) = config["image"]["Hcw"][row][col].as<double>();
+                    }
                 }
-            }
 
-            if (config["lens_type"].as<std::string>().compare("pinhole") == 0) {
-                // Pinhole specific
-                lens.projection   = Image::Lens::Projection::RECTILINEAR;
-                lens.fov          = config["FOV_X"].as<float>();
-                lens.focal_length = (config["imageWidth"].as<float>() * 0.5f) / std::tan(lens.fov * 0.5f);
-                lens.centre << 0.0f, 0.0f;
-            }
-            else if (config["lens_type"].as<std::string>().compare("radial") == 0) {
-                // Radial specific
-                lens.projection   = Image::Lens::Projection::EQUIDISTANT;
-                lens.fov          = config["FOV_X"].as<float>();
-                lens.focal_length = 1.0f / config["lens"]["radiansPerPixel"].as<float>();
-                lens.centre       = config["lens"]["centreOffset"].as<Expression>();
-            }
-            else {
-                log<NUClear::ERROR>("LENS TYPE UNDEFINED: choose from 'pinhole' or 'radial'");
-            }
+                if (config["lens_type"].as<std::string>().compare("pinhole") == 0) {
+                    // Pinhole specific
+                    lens.projection   = Image::Lens::Projection::RECTILINEAR;
+                    lens.fov          = config["FOV_X"].as<float>();
+                    lens.focal_length = (config["imageWidth"].as<float>() * 0.5f) / std::tan(lens.fov * 0.5f);
+                    lens.centre << 0.0f, 0.0f;
+                }
+                else if (config["lens_type"].as<std::string>().compare("radial") == 0) {
+                    // Radial specific
+                    lens.projection   = Image::Lens::Projection::EQUIDISTANT;
+                    lens.fov          = config["FOV_X"].as<float>();
+                    lens.focal_length = 1.0f / config["lens"]["radiansPerPixel"].as<float>();
+                    lens.centre       = config["lens"]["centreOffset"].as<Expression>();
+                }
+                else {
+                    log<NUClear::ERROR>("LENS TYPE UNDEFINED: choose from 'pinhole' or 'radial'");
+                }
 
-            bool emit_images = config["emit_images"].as<bool>();
-            if (emit_images) {
-                emitImageHandle.enable();
-            }
-            else {
-                emitImageHandle.disable();
-            }
-        });
-    }
-}  // namespace support
+                bool emit_images = config["emit_images"].as<bool>();
+                if (emit_images) {
+                    emitImageHandle.enable();
+                }
+                else {
+                    emitImageHandle.disable();
+                }
+            });
+        }
+    }  // namespace support
 }  // namespace module
