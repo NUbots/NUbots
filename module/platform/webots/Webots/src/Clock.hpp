@@ -9,11 +9,11 @@
 // Satisfies the Clock type trait
 // See https://en.cppreference.com/w/cpp/named_req/Clock
 
-namespace module::platform::Webots {
+namespace module::platform::webots {
 class Clock {
 public:
     using rep = int;
-    using period = std::ratio<simulation_tick_speed::value, 1000>; // Should be the same as the webots world
+    using period = std::ratio<1, 1000>; // Should be the same as the webots world
     using duration = std::chrono::duration<rep, period>;
     using time_point = std::chrono::time_point<Clock>;
 

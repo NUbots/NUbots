@@ -17,8 +17,8 @@
  * Copyright 2021 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULE_PLATFORM_WEBOTS_HPP
-#define MODULE_PLATFORM_WEBOTS_HPP
+#ifndef MODULE_PLATFORM_WEBOTS_WEBOTS_HPP
+#define MODULE_PLATFORM_WEBOTS_WEBOTS_HPP
 
 #include <nuclear>
 
@@ -26,7 +26,7 @@
 #include "message/platform/webots/messages.hpp"
 #include "message/support/GlobalConfig.hpp"
 
-namespace module::platform {
+namespace module::platform::webots {
 
 class Webots : public NUClear::Reactor {
 private:

@@ -1,6 +1,6 @@
 #include "Clock.hpp"
 
-namespace module::platform::Webots {
+namespace module::platform::webots {
     Clock::time_point Clock::now(){
         return time_point(current_tick);
     }

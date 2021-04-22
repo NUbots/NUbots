@@ -44,7 +44,7 @@ extern "C" {
 #include <unistd.h> /* definition of close */
 }
 
-namespace module::platform {
+namespace module::platform::webots {
 
 using extension::Configuration;
 using message::motion::ServoTargets;
