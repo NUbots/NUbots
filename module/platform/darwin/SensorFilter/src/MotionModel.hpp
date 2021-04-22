@@ -240,8 +240,6 @@ namespace module {
                     StateVec newState(state);
 
                     // Make sure the quaternion remains normalised
-                    // TODO(KipHamiltons): Should we just normalise the quaternion in the copy constructor?
-                    // we always seem to want it as a unit quaternion, so why not just do it there too?
                     newState.Rwt = newState.Rwt.normalized();
 
                     return newState;
