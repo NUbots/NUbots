@@ -32,236 +32,239 @@
 #include "utility/behaviour/Action.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
-#include "utility/math/matrix/Transform3D.hpp"
 #include "utility/motion/InverseKinematics.hpp"
 #include "utility/nusight/NUhelpers.hpp"
-#include "utility/support/eigen_armadillo.hpp"
-#include "utility/support/yaml_armadillo.hpp"
 
 namespace module {
-namespace motion {
+    namespace motion {
 
-    using extension::Configuration;
+        using extension::Configuration;
 
-    using message::input::Sensors;
-    using LimbID  = utility::input::LimbID;
-    using ServoID = utility::input::ServoID;
-    using message::behaviour::KickPlan;
-    using message::behaviour::ServoCommand;
-    using message::motion::IKKickParams;
-    using message::motion::KickCommand;
-    using message::motion::KickFinished;
-    using message::motion::StopCommand;
-    using KickType = message::behaviour::KickPlan::KickType;
-    using message::motion::KinematicsModel;
-    using message::support::FieldDescription;
+        using message::input::Sensors;
+        using LimbID  = utility::input::LimbID;
+        using ServoID = utility::input::ServoID;
+        using message::behaviour::KickPlan;
+        using message::behaviour::ServoCommand;
+        using message::motion::IKKickParams;
+        using message::motion::KickCommand;
+        using message::motion::KickFinished;
+        using message::motion::StopCommand;
+        using KickType = message::behaviour::KickPlan::KickType;
+        using message::motion::KinematicsModel;
+        using message::support::FieldDescription;
 
-    using utility::behaviour::ActionPriorities;
-    using utility::behaviour::RegisterAction;
-    using utility::math::matrix::Transform3D;
-    using utility::motion::kinematics::calculateLegJoints;
-    using utility::nusight::graph;
+        using utility::behaviour::ActionPriorities;
+        using utility::behaviour::RegisterAction;
+        using utility::motion::kinematics::calculateLegJoints;
+        using utility::nusight::graph;
 
-    struct ExecuteKick {};
-    struct FinishKick {};
+        struct ExecuteKick {};
+        struct FinishKick {};
 
-    IKKick::IKKick(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment))
-        , supportFoot()
-        , ballPosition(arma::fill::zeros)
-        , goalPosition(arma::fill::zeros)
-        , subsumptionId(size_t(this) * size_t(this) - size_t(this))
-        , leftFootIsSupport(false)
-        , foot_separation(0.0f)
-        , KICK_PRIORITY(0.0f)
-        , EXECUTION_PRIORITY(0.0f)
-        , feedback_active(false)
-        , feedbackBalancer()
-        , balancer()
-        , kicker()
-        , updater() {
+        IKKick::IKKick(std::unique_ptr<NUClear::Environment> environment)
+            : Reactor(std::move(environment))
+            , supportFoot()
+            , ballPosition(Eigen::Vector3d::Zero())
+            , goalPosition(Eigen::Vector3d::Zero())
+            , subsumptionId(size_t(this) * size_t(this) - size_t(this))
+            , leftFootIsSupport(false)
+            , foot_separation(0.0f)
+            , KICK_PRIORITY(0.0f)
+            , EXECUTION_PRIORITY(0.0f)
+            , feedback_active(false)
+            , feedbackBalancer()
+            , balancer()
+            , kicker()
+            , updater() {
 
-        on<Configuration>("IKKick.yaml").then([this](const Configuration& config) {
-            balancer.configure(config);
-            kicker.configure(config);
+            on<Configuration>("IKKick.yaml").then([this](const Configuration& config) {
+                balancer.configure(config);
+                kicker.configure(config);
 
-            KICK_PRIORITY      = config["kick_priority"].as<float>();
-            EXECUTION_PRIORITY = config["execution_priority"].as<float>();
+                KICK_PRIORITY      = config["kick_priority"].as<float>();
+                EXECUTION_PRIORITY = config["execution_priority"].as<float>();
 
-            foot_separation = config["balancer"]["foot_separation"].as<float>();
+                foot_separation = config["balancer"]["foot_separation"].as<float>();
 
-            gain_legs = config["servo"]["gain"].as<float>();
-            torque    = config["servo"]["torque"].as<float>();
+                gain_legs = config["servo"]["gain"].as<float>();
+                torque    = config["servo"]["torque"].as<float>();
 
-            auto& balanceConfig = config["active_balance"];
-            feedback_active     = balanceConfig["enabled"].as<bool>();
-            feedbackBalancer.configure(balanceConfig);
+                auto& balanceConfig = config["active_balance"];
+                feedback_active     = balanceConfig["enabled"].as<bool>();
+                feedbackBalancer.configure(balanceConfig);
 
-            // Emit useful info to KickPlanner
-            emit(std::make_unique<IKKickParams>(IKKickParams(config["balancer"]["stand_height"].as<float>())));
-        });
-
-        on<Startup>().then("IKKick Startup", [this] {
-            // Default kick plan at enemy goals
-            emit(std::make_unique<KickPlan>(KickPlan(Eigen::Vector2d(4.5, 0), KickPlan::KickType::IK_KICK)));
-        });
-
-        on<Trigger<KickCommand>>().then([this] {
-            // We want to kick!
-
-            emit(std::make_unique<StopCommand>(subsumptionId));  // Stop the walk
-
-            updatePriority(KICK_PRIORITY);
-        });
-
-        on<Trigger<ExecuteKick>, With<KickCommand, Sensors, KinematicsModel>>().then(
-            [this](const KickCommand& command, const Sensors& sensors, const KinematicsModel& kinematicsModel) {
-                // Enable our kick pather
-                updater.enable();
-                updatePriority(EXECUTION_PRIORITY);
-
-
-                // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
-                Transform3D leftFoot  = convert(sensors.Htx[ServoID::L_ANKLE_ROLL]);
-                Transform3D rightFoot = convert(sensors.Htx[ServoID::R_ANKLE_ROLL]);
-
-                // Work out which of our feet are going to be the support foot
-                // Store the support foot and kick foot
-                if (command.target[1] < 0) {
-                    supportFoot = LimbID::LEFT_LEG;
-                }
-                else {
-                    supportFoot = LimbID::RIGHT_LEG;
-                }
-
-                Transform3D torsoPose = (supportFoot == LimbID::LEFT_LEG) ? leftFoot.i() : rightFoot.i();
-
-                // Put the ball position from vision into torso coordinates
-                arma::vec3 targetTorso;  // = Transform3D(convert<double, 4,
-                                         // 4>(sensors.kinematicsBodyToGround)).i().transformPoint(convert<double,
-                                         // 3>(command.target)); //TODO fix
-                // Put the ball position into support foot coordinates
-                arma::vec3 targetSupportFoot = torsoPose.transformPoint(targetTorso);
-
-                // Put the goal from vision into torso coordinates
-                arma::vec3 directionTorso;  // = Transform3D(convert<double, 4,
-                                            // 4>(sensors.kinematicsBodyToGround)).i().transformVector(convert<double,
-                                            // 3>(command.direction)); //TODO fix
-                // Put the goal into support foot coordinates
-                arma::vec3 directionSupportFoot = torsoPose.transformVector(directionTorso);
-
-                arma::vec3 ballPosition = targetSupportFoot;
-                ballPosition[2]         = 0.05;  // TODO: figure out why ball height is unreliable
-                arma::vec3 goalPosition = directionSupportFoot;
-                goalPosition[2]         = 0.0;  // TODO: figure out why ball height is unreliable
-
-                balancer.setKickParameters(supportFoot, ballPosition, goalPosition);
-                kicker.setKickParameters(supportFoot, ballPosition, goalPosition);
-
-                balancer.start(kinematicsModel, sensors);
+                // Emit useful info to KickPlanner
+                emit(std::make_unique<IKKickParams>(IKKickParams(config["balancer"]["stand_height"].as<float>())));
             });
 
-        updater = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors, KinematicsModel>, Single>().then(
-            [this](const Sensors& sensors, const KinematicsModel& kinematicsModel) {
-                // Setup kick variables
-                LimbID kickFoot;
-                if (supportFoot == LimbID::RIGHT_LEG) {
-                    kickFoot = LimbID::LEFT_LEG;
-                }
-                else {
-                    kickFoot = LimbID::RIGHT_LEG;
-                }
-
-                int negativeIfKickRight = kickFoot == LimbID::RIGHT_LEG ? -1 : 1;
-
-                // State checker
-                if (balancer.isStable()) {
-                    kicker.start(kinematicsModel, sensors);
-                }
-
-                if (kicker.isStable()) {
-                    kicker.stop(sensors);
-                    balancer.stop(sensors);
-                }
-
-                if (balancer.isFinished()) {
-                    emit(std::move(std::make_unique<FinishKick>()));
-                }
-
-                // Do things based on current state
-
-                Transform3D kickFootGoal;
-                Transform3D supportFootGoal;
-
-                // Move torso over support foot
-                if (balancer.isRunning()) {
-                    Transform3D supportFootPose = balancer.getFootPose(sensors);
-                    supportFootGoal             = supportFootPose;
-                    kickFootGoal = supportFootPose.translate(arma::vec3({0, negativeIfKickRight * foot_separation, 0}));
-                }
-
-                // Move foot to ball to kick
-                if (kicker.isRunning()) {
-                    kickFootGoal *= kicker.getFootPose(sensors);
-                }
-
-                // Balance based on the IMU
-
-                if (feedback_active) {
-                    feedbackBalancer.balance(kinematicsModel, supportFootGoal, supportFoot, sensors);
-                }
-
-                // Calculate IK and send waypoints
-                std::vector<std::pair<ServoID, float>> joints;
-
-                // IK
-                auto kickJoints    = calculateLegJoints(kinematicsModel, kickFootGoal, kickFoot);
-                auto supportJoints = calculateLegJoints(kinematicsModel, supportFootGoal, supportFoot);
-
-                // Combine left and right legs
-                joints.insert(joints.end(), kickJoints.begin(), kickJoints.end());
-                joints.insert(joints.end(), supportJoints.begin(), supportJoints.end());
-
-                // Create message to send to servos
-                auto waypoints = std::make_unique<std::vector<ServoCommand>>();
-                waypoints->reserve(16);
-
-                // Goal time is by next frame
-                NUClear::clock::time_point time = NUClear::clock::now();
-
-                // Push back each servo command
-                for (auto& joint : joints) {
-                    waypoints->push_back(
-                        ServoCommand(subsumptionId, time, joint.first, joint.second, gain_legs, torque));
-                }
-
-                // Send message
-                emit(std::move(waypoints));
+            on<Startup>().then("IKKick Startup", [this] {
+                // Default kick plan at enemy goals
+                emit(std::make_unique<KickPlan>(KickPlan(Eigen::Vector2d(4.5, 0), KickPlan::KickType::IK_KICK)));
             });
 
-        updater.disable();
+            on<Trigger<KickCommand>>().then([this] {
+                // We want to kick!
 
-        on<Trigger<FinishKick>>().then([this] {
-            emit(std::move(std::make_unique<KickFinished>()));
+                emit(std::make_unique<StopCommand>(subsumptionId));  // Stop the walk
+
+                updatePriority(KICK_PRIORITY);
+            });
+
+            on<Trigger<ExecuteKick>, With<KickCommand, Sensors, KinematicsModel>>().then(
+                [this](const KickCommand& command, const Sensors& sensors, const KinematicsModel& kinematicsModel) {
+                    // Enable our kick pather
+                    updater.enable();
+                    updatePriority(EXECUTION_PRIORITY);
+
+
+                    // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
+                    Eigen::Affine3d leftFoot(sensors.Htx[ServoID::L_ANKLE_ROLL]);
+                    Eigen::Affine3d rightFoot(sensors.Htx[ServoID::R_ANKLE_ROLL]);
+
+                    // Work out which of our feet are going to be the support foot
+                    // Store the support foot and kick foot
+                    if (command.target[1] < 0) {
+                        supportFoot = LimbID::LEFT_LEG;
+                    }
+                    else {
+                        supportFoot = LimbID::RIGHT_LEG;
+                    }
+
+                    Eigen::Affine3d torsoPose =
+                        (supportFoot == LimbID::LEFT_LEG) ? leftFoot.inverse() : rightFoot.inverse();
+
+                    Eigen::Affine3d Htg = Eigen::Affine3d(sensors.Hgt).inverse();
+
+                    // Create the command target point object so we can transform it
+                    Eigen::Vector4d commandTargetPoint(command.target.x(), command.target.y(), command.target.z(), 1);
+
+                    // Put the ball position from vision into torso coordinates by transforming the command target point
+                    Eigen::Vector3d targetTorso = (Htg * commandTargetPoint).head<3>();
+
+                    // Put the ball position into support foot coordinates
+                    Eigen::Vector3d targetSupportFoot = torsoPose * targetTorso;
+
+                    // Put the goal from vision into torso coordinates
+                    Eigen::Vector3d directionTorso(Htg * command.direction);
+
+                    // Put the goal into support foot coordinates
+                    Eigen::Vector3d directionSupportFoot = torsoPose.rotation() * directionTorso;
+
+                    Eigen::Vector3d ballPosition = targetSupportFoot;
+                    ballPosition.z()             = 0.05;  // TODO: figure out why ball height is unreliable
+                    Eigen::Vector3d goalPosition = directionSupportFoot;
+                    goalPosition.z()             = 0.0;  // TODO: figure out why ball height is unreliable
+
+                    balancer.setKickParameters(supportFoot, ballPosition, goalPosition);
+                    kicker.setKickParameters(supportFoot, ballPosition, goalPosition);
+
+                    balancer.start(kinematicsModel, sensors);
+                });
+
+            updater =
+                on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, With<Sensors, KinematicsModel>, Single>().then(
+                    [this](const Sensors& sensors, const KinematicsModel& kinematicsModel) {
+                        // Setup kick variables
+                        LimbID kickFoot;
+                        if (supportFoot == LimbID::RIGHT_LEG) {
+                            kickFoot = LimbID::LEFT_LEG;
+                        }
+                        else {
+                            kickFoot = LimbID::RIGHT_LEG;
+                        }
+
+                        int negativeIfKickRight = kickFoot == LimbID::RIGHT_LEG ? -1 : 1;
+
+                        // State checker
+                        if (balancer.isStable()) {
+                            kicker.start(kinematicsModel, sensors);
+                        }
+
+                        if (kicker.isStable()) {
+                            kicker.stop(sensors);
+                            balancer.stop(sensors);
+                        }
+
+                        if (balancer.isFinished()) {
+                            emit(std::move(std::make_unique<FinishKick>()));
+                        }
+
+                        // Do things based on current state
+
+                        Eigen::Affine3d kickFootGoal;
+                        Eigen::Affine3d supportFootGoal;
+
+                        // Move torso over support foot
+                        if (balancer.isRunning()) {
+                            Eigen::Affine3d supportFootPose = balancer.getFootPose(sensors);
+                            supportFootGoal                 = supportFootPose;
+                            kickFootGoal =
+                                supportFootPose.translate(Eigen::Vector3d(0, negativeIfKickRight * foot_separation, 0));
+                        }
+
+                        // Move foot to ball to kick
+                        if (kicker.isRunning()) {
+                            kickFootGoal = kickFootGoal * kicker.getFootPose(sensors);
+                        }
+
+                        // Balance based on the IMU
+                        Eigen::Affine3f supportFootGoalFloat(supportFootGoal.cast<float>());
+                        if (feedback_active) {
+                            feedbackBalancer.balance(kinematicsModel, supportFootGoalFloat, supportFoot, sensors);
+                        }
+                        supportFootGoal = supportFootGoalFloat.cast<double>();  // yuk
+
+                        // Calculate IK and send waypoints
+                        std::vector<std::pair<ServoID, float>> joints;
+
+                        // IK
+                        auto kickJoints    = calculateLegJoints(kinematicsModel, kickFootGoal, kickFoot);
+                        auto supportJoints = calculateLegJoints(kinematicsModel, supportFootGoal, supportFoot);
+
+                        // Combine left and right legs
+                        joints.insert(joints.end(), kickJoints.begin(), kickJoints.end());
+                        joints.insert(joints.end(), supportJoints.begin(), supportJoints.end());
+
+                        // Create message to send to servos
+                        auto waypoints = std::make_unique<std::vector<ServoCommand>>();
+                        waypoints->reserve(16);
+
+                        // Goal time is by next frame
+                        NUClear::clock::time_point time = NUClear::clock::now();
+
+                        // Push back each servo command
+                        for (auto& joint : joints) {
+                            waypoints->push_back(
+                                ServoCommand(subsumptionId, time, joint.first, joint.second, gain_legs, torque));
+                        }
+
+                        // Send message
+                        emit(std::move(waypoints));
+                    });
+
             updater.disable();
-            updatePriority(0);
-        });
 
-        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
-            RegisterAction{subsumptionId,
-                           "IK Kick",
-                           {std::pair<float, std::set<LimbID>>(
-                               0,
-                               {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
-                           [this](const std::set<LimbID>&) { emit(std::make_unique<ExecuteKick>()); },
-                           [this](const std::set<LimbID>&) { emit(std::make_unique<FinishKick>()); },
-                           [this](const std::set<ServoID>&) {}}));
-    }
+            on<Trigger<FinishKick>>().then([this] {
+                emit(std::move(std::make_unique<KickFinished>()));
+                updater.disable();
+                updatePriority(0);
+            });
 
-    void IKKick::updatePriority(const float& priority) {
-        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {priority}}));
-    }
+            emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
+                RegisterAction{subsumptionId,
+                               "IK Kick",
+                               {std::pair<float, std::set<LimbID>>(
+                                   0,
+                                   {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
+                               [this](const std::set<LimbID>&) { emit(std::make_unique<ExecuteKick>()); },
+                               [this](const std::set<LimbID>&) { emit(std::make_unique<FinishKick>()); },
+                               [this](const std::set<ServoID>&) {}}));
+        }
+
+        void IKKick::updatePriority(const float& priority) {
+            emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {priority}}));
+        }
 
 
-}  // namespace motion
+    }  // namespace motion
 }  // namespace module

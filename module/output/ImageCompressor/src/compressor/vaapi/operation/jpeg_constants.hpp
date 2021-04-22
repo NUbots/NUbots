@@ -5,7 +5,7 @@
 #include <cstdint>
 
 namespace module::output::compressor::vaapi::operation {
-// clang-format off
+    // clang-format off
 
     //Luminance quantization table
     //Source: Jpeg Spec ISO/IEC 10918-1, Annex K, Table K.1
@@ -115,7 +115,7 @@ namespace module::output::compressor::vaapi::operation {
         0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8, 0xE9, 0xEA, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8,
         0xF9, 0xFA
     };
-// clang-format on
+    // clang-format on
 
 }  // namespace module::output::compressor::vaapi::operation
 

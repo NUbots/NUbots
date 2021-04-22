@@ -24,72 +24,65 @@
 #include "message/vision/Ball.hpp"
 #include "message/vision/Goal.hpp"
 #include "message/vision/GreenHorizon.hpp"
-#include "message/vision/Line.hpp"
 #include "message/vision/Obstacle.hpp"
 #include "message/vision/VisualMesh.hpp"
 
 namespace module {
-namespace support {
+    namespace support {
 
-    using message::input::Image;
-    using message::output::CompressedImage;
-    using message::vision::Balls;
-    using message::vision::Goals;
-    using message::vision::GreenHorizon;
-    using message::vision::Lines;
-    using message::vision::Obstacles;
-    using message::vision::VisualMesh;
+        using message::input::Image;
+        using message::output::CompressedImage;
+        using message::vision::Balls;
+        using message::vision::Goals;
+        using message::vision::GreenHorizon;
+        using message::vision::Obstacles;
+        using message::vision::VisualMesh;
 
-    void NUsight::provideVision() {
-        handles["image"].push_back(
-            on<Trigger<Image>, Single, Priority::LOW>().then([this](std::shared_ptr<const Image> image) {
-                // If we have never sent an image from this camera, or we
-                if (last_image.count(image->id) == 0
-                    || (NUClear::clock::now() - last_image[image->id] > max_image_duration)) {
-                    powerplant.emit_shared<Scope::NETWORK>(std::move(image), "nusight", false);
-                    last_image[image->id] = NUClear::clock::now();
-                }
-            }));
+        void NUsight::provideVision() {
+            handles["image"].push_back(
+                on<Trigger<Image>, Single, Priority::LOW>().then([this](std::shared_ptr<const Image> image) {
+                    // If we have never sent an image from this camera, or we
+                    if (last_image.count(image->id) == 0
+                        || (NUClear::clock::now() - last_image[image->id] > max_image_duration)) {
+                        powerplant.emit_shared<Scope::NETWORK>(std::move(image), "nusight", false);
+                        last_image[image->id] = NUClear::clock::now();
+                    }
+                }));
 
-        handles["compressed_image"].push_back(on<Trigger<CompressedImage>, Single, Priority::LOW>().then(
-            [this](std::shared_ptr<const CompressedImage> image) {
-                // If we have never sent an image from this camera, or we
-                if (last_image.count(image->id) == 0
-                    || (NUClear::clock::now() - last_image[image->id] > max_image_duration)) {
-                    powerplant.emit_shared<Scope::NETWORK>(std::move(image), "nusight", false);
-                    last_image[image->id] = NUClear::clock::now();
-                }
-            }));
+            handles["compressed_image"].push_back(on<Trigger<CompressedImage>, Single, Priority::LOW>().then(
+                [this](std::shared_ptr<const CompressedImage> image) {
+                    // If we have never sent an image from this camera, or we
+                    if (last_image.count(image->id) == 0
+                        || (NUClear::clock::now() - last_image[image->id] > max_image_duration)) {
+                        powerplant.emit_shared<Scope::NETWORK>(std::move(image), "nusight", false);
+                        last_image[image->id] = NUClear::clock::now();
+                    }
+                }));
 
-        handles["vision_object"].push_back(
-            on<Trigger<Balls>, Single, Priority::LOW>().then([this](std::shared_ptr<const Balls> balls) {
-                powerplant.emit_shared<Scope::NETWORK>(std::move(balls), "nusight", false);
-            }));
+            handles["vision_object"].push_back(
+                on<Trigger<Balls>, Single, Priority::LOW>().then([this](std::shared_ptr<const Balls> balls) {
+                    powerplant.emit_shared<Scope::NETWORK>(std::move(balls), "nusight", false);
+                }));
 
-        handles["vision_object"].push_back(
-            on<Trigger<Goals>, Single, Priority::LOW>().then([this](std::shared_ptr<const Goals> goals) {
-                powerplant.emit_shared<Scope::NETWORK>(std::move(goals), "nusight", false);
-            }));
+            handles["vision_object"].push_back(
+                on<Trigger<Goals>, Single, Priority::LOW>().then([this](std::shared_ptr<const Goals> goals) {
+                    powerplant.emit_shared<Scope::NETWORK>(std::move(goals), "nusight", false);
+                }));
 
-        handles["vision_object"].push_back(
-            on<Trigger<Lines>, Single, Priority::LOW>().then([this](std::shared_ptr<const Lines> lines) {
-                powerplant.emit_shared<Scope::NETWORK>(std::move(lines), "nusight", false);
-            }));
+            handles["vision_object"].push_back(on<Trigger<Obstacles>, Single, Priority::LOW>().then(
+                [this](std::shared_ptr<const Obstacles> obstacles) {
+                    powerplant.emit_shared<Scope::NETWORK>(std::move(obstacles), "nusight", false);
+                }));
 
-        handles["vision_object"].push_back(
-            on<Trigger<Obstacles>, Single, Priority::LOW>().then([this](std::shared_ptr<const Obstacles> obstacles) {
-                powerplant.emit_shared<Scope::NETWORK>(std::move(obstacles), "nusight", false);
-            }));
+            handles["visual_mesh"].push_back(
+                on<Trigger<VisualMesh>, Single, Priority::LOW>().then([this](std::shared_ptr<const VisualMesh> vm) {
+                    powerplant.emit_shared<Scope::NETWORK>(std::move(vm), "nusight", false);
+                }));
 
-        handles["visual_mesh"].push_back(
-            on<Trigger<VisualMesh>, Single, Priority::LOW>().then([this](std::shared_ptr<const VisualMesh> vm) {
-                powerplant.emit_shared<Scope::NETWORK>(std::move(vm), "nusight", false);
-            }));
-
-        handles["green_horizon"].push_back(
-            on<Trigger<GreenHorizon>, Single, Priority::LOW>().then([this](std::shared_ptr<const GreenHorizon> gh) {
-                powerplant.emit_shared<Scope::NETWORK>(std::move(gh), "nusight", false);
-            }));
-    }
-}  // namespace support
+            handles["green_horizon"].push_back(
+                on<Trigger<GreenHorizon>, Single, Priority::LOW>().then([this](std::shared_ptr<const GreenHorizon> gh) {
+                    powerplant.emit_shared<Scope::NETWORK>(std::move(gh), "nusight", false);
+                }));
+        }
+    }  // namespace support
 }  // namespace module

@@ -60,6 +60,7 @@ using message::platform::webots::MotorVelocity;
 using message::platform::webots::SensorMeasurements;
 
 using message::support::GlobalConfig;
+
 using utility::input::ServoID;
 using utility::vision::fourcc;
 
@@ -198,6 +199,7 @@ Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std:
             motorpid_msg.PID.Y = 0.0;
             motorpid_msg.PID.Z = 0.0;
             to_send.motor_pids.push_back(motorpid_msg);
+
         }
     });
 }
@@ -211,27 +213,29 @@ void Webots::setup_connection(const std::string& server_address, const std::stri
 
     int fd = tcpip_connect(server_address, port);
 
-    char inital_message_arr[8];
-    int n = recv(fd, inital_message_arr, sizeof(inital_message_arr), 0);
 
-    std::string inital_message(inital_message_arr);
+    char inital_message[8];
+    int n = recv(fd, inital_message, sizeof(inital_message), 0);
 
-    if (n > 0) {
-        if (inital_message == "Welcome") {
-            // good
+    if(n > 0){
+        if (strncmp(inital_message, "Welcome", sizeof(inital_message)) == 0){
+            //good
         }
-        else if (inital_message == "Refused") {
-            log<NUClear::FATAL>(
-                fmt::format("Connection to {}:{} refused: your ip is not white listed", server_address, port));
-            // TODO(cameron) Halt and don't retry
+        else if (strncmp(inital_message, "Refused", sizeof(inital_message)) == 0){
+            log<NUClear::FATAL>(fmt::format("Connection to {}:{} refused: your ip is not white listed.", server_address, port));
+            // Halt and don't retry as reconnection is pointless.
+            close(fd);
+            powerplant.shutdown();
         }
         else {
             log<NUClear::FATAL>(fmt::format("{}:{} sent unknown initial message", server_address, port));
-            // TODO(cameron) Halt and don't retry
+            // Halt and don't retry
+            close(fd);
+            powerplant.shutdown();
         }
     }
     else {
-        log<NUClear::FATAL>("Connection was closed");
+        log<NUClear::FATAL>("Connection was closed.");
     }
 
     connect_time = NUClear::clock::now();
@@ -240,7 +244,7 @@ void Webots::setup_connection(const std::string& server_address, const std::stri
 
     // Tell webots who we are
     // send_player_details(fd, global_config); Not needed? Set by the port we connect to?
-
+    
     // Receiving
     read_io = on<IO>(fd, IO::READ).then([this, fd]() {
         // Get the size of the message
@@ -266,16 +270,19 @@ void Webots::setup_connection(const std::string& server_address, const std::stri
 
         // Service the watchdog
         emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
+
+        // Tick the clock forward
+        Clock.tick();
     });
 
-    // Sending
-    send_loop = on<Every<1, std::chrono::seconds>>().then([this, fd]() {
+    send_loop = on<Every<10, std::chrono::milliseconds>>().then([this, fd]() {
+        // Sending
         std::vector<char> data = NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(to_send);
         uint32_t Nn            = htonl(data.size());
-        if (send(fd, &Nn, sizeof(Nn), 0) == sizeof(Nn)) {
+        if (send(fd, &Nn, sizeof(Nn), 0) == sizeof(Nn)){
             log<NUClear::ERROR>(fmt::format("Error in sending actuator requests message size, {}", strerror(errno)));
         }
-        if (send(fd, data.data(), Nn, 0) == Nn) {
+        if(send(fd, data.data(), Nn, 0) == Nn){
             log<NUClear::ERROR>("Error in sending actuator requests message, {}", strerror(errno));
         }
     });
@@ -286,6 +293,8 @@ void Webots::setup_connection(const std::string& server_address, const std::stri
 
     shutdown_handle = on<Shutdown>().then([this, fd] {
         // Disconnect the fd gracefully
+        shutdown(fd, SHUT_RDWR);
+        close(fd);
     });
 }
 
@@ -360,6 +369,5 @@ void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurem
         }
     }
 }
-
 
 }  // namespace module::platform
