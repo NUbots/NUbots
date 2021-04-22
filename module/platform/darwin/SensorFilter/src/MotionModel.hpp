@@ -137,7 +137,7 @@ namespace module {
                 // The velocity decay for x/y/z velocities (1.0 = no decay)
                 Eigen::Matrix<Scalar, 3, 1> timeUpdateVelocityDecay = Eigen::Matrix<Scalar, 3, 1>::Ones();
 
-                StateVec time(const StateVec& state, Scalar deltaT) {
+                Eigen::Matrix<Scalar, size, 1> time(const Eigen::Matrix<Scalar, size, 1>& state, Scalar deltaT) {
 
                     // Prepare our new state
                     StateVec newState(state);
@@ -147,7 +147,7 @@ namespace module {
                     // ********************************
 
                     // Add our velocity to our position
-                    newState.rTTw += state.vTw * deltaT;
+                    newState.rTWw += newState.vTw * deltaT;
 
                     // add velocity decay
                     newState.vTw = newState.vTw.cwiseProduct(timeUpdateVelocityDecay);
@@ -159,7 +159,7 @@ namespace module {
                     // Extract our unit quaternion rotation
                     // TODO(KipHamiltons) verify whether this assumes a unit quaternion and whether it is one, because
                     // eigen might not be guaranteed to be a unit quaternion...
-                    Eigen::Quaternion<Scalar> Rwt(state.Rwt);
+                    Eigen::Quaternion<Scalar> Rwt(newState.Rwt);
 
                     // Apply our rotational velocity to our orientation
                     // https://fgiesen.wordpress.com/2012/08/24/quaternion-differentiation/
@@ -168,14 +168,18 @@ namespace module {
                     // TODO(KipHamiltons) this could probably be cleaner...
                     newState.Rwt = Eigen::Quaternion<Scalar>(
                         Rwt.coeffs()
-                        + t_2 * (Eigen::Quaternion<Scalar>(0.0, state[WX], state[WY], state[WZ]) * Rwt).coeffs());
+                        + t_2
+                              * (Eigen::Quaternion<Scalar>(0.0, newState.Rwt.x(), newState.Rwt.y(), newState.Rwt.z())
+                                 * Rwt)
+                                    .coeffs());
 
                     return newState;
                 }
 
-                Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::ACCELEROMETER&) {
+                Eigen::Matrix<Scalar, 3, 1> predict(const Eigen::Matrix<Scalar, size, 1>& state,
+                                                    const MeasurementType::ACCELEROMETER&) {
                     // Extract our rotation quaternion
-                    Eigen::Matrix<Scalar, 3, 3> Rtw = state.Rwt.inverse().toRotationMatrix();
+                    Eigen::Matrix<Scalar, 3, 3> Rtw = StateVec(state).Rwt.inverse().toRotationMatrix();
 
                     // Make a world gravity vector and rotate it into torso space
                     // Where is world gravity with respect to robot orientation?
@@ -184,19 +188,21 @@ namespace module {
                     return Rtw.template rightCols<1>() * G;
                 }
 
-                Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::GYROSCOPE&) {
+                Eigen::Matrix<Scalar, 3, 1> predict(const Eigen::Matrix<Scalar, size, 1>& state,
+                                                    const MeasurementType::GYROSCOPE&) {
                     // Add predicted gyroscope bias to our predicted gyroscope
                     // TODO(KipHamiltons) should we be subtracting bias?
-                    return state.omegaTTt + state.omegaTTt_bias;
+                    return StateVec(state).omegaTTt + StateVec(state).omegaTTt_bias;
                 }
 
-                Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::FLAT_FOOT_ODOMETRY&) {
-                    return state.rTTw;
+                Eigen::Matrix<Scalar, 3, 1> predict(const Eigen::Matrix<Scalar, size, 1>& state,
+                                                    const MeasurementType::FLAT_FOOT_ODOMETRY&) {
+                    return StateVec(state).rTWw;
                 }
 
-                Eigen::Matrix<Scalar, 4, 1> predict(const StateVec& state,
+                Eigen::Matrix<Scalar, 4, 1> predict(const Eigen::Matrix<Scalar, size, 1>& state,
                                                     const MeasurementType::FLAT_FOOT_ORIENTATION&) {
-                    return state.Rwt.coeffs();
+                    return StateVec(state).Rwt.coeffs();
                 }
 
                 // This function is called to determine the difference between position, velocity, and acceleration
@@ -222,18 +228,18 @@ namespace module {
                     return diff.coeffs();
                 }
 
-                StateVec limit(const StateVec& state) {
-                    StateVec newState = state;
+                Eigen::Matrix<Scalar, size, 1> limit(const Eigen::Matrix<Scalar, size, 1>& state) {
+                    StateVec newState(state);
 
                     // Make sure the quaternion remains normalised
                     // TODO(KipHamiltons): Should we just normalise the quaternion in the copy constructor?
                     // we always seem to want it as a unit quaternion, so why not just do it there too?
                     newState.Rwt = newState.Rwt.normalized();
 
-                    return newState;
+                    return newState.getStateVec();
                 }
 
-                StateMat noise(const Scalar& deltaT) {
+                Eigen::Matrix<Scalar, size, size> noise(const Scalar& deltaT) {
                     // Return our process noise matrix
                     return process_noise.asDiagonal() * deltaT;
                 }
