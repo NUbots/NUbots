@@ -22,6 +22,8 @@
 #include <chrono>
 #include <fmt/format.h>
 
+#include "Clock.hpp"
+
 #include "extension/Configuration.hpp"
 
 #include "message/motion/ServoTarget.hpp"
@@ -43,7 +45,9 @@ extern "C" {
 #include <unistd.h> /* definition of close */
 }
 
-namespace module::platform {
+namespace module::platform::webots {
+
+
 
 using extension::Configuration;
 using message::motion::ServoTargets;
@@ -369,5 +373,4 @@ void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurem
         }
     }
 }
-
-}  // namespace module::platform
+}  // namespace module::platform::webots

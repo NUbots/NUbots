@@ -1,35 +1,34 @@
 #ifndef MODULE_PLATFORM_WEBOTS_CLOCK_HPP
 #define MODULE_PLATFORM_WEBOTS_CLOCK_HPP
 
-#include "CompileParams.hpp"
-
-#include <ratio>
 #include <chrono>
+#include <ratio>
+
 
 // Satisfies the Clock type trait
 // See https://en.cppreference.com/w/cpp/named_req/Clock
 
-namespace module::platform::Webots {
-class Clock {
-public:
-    using rep = int;
-    using period = std::ratio<simulation_tick_speed::value, 1000>; // Should be the same as the webots world
-    using duration = std::chrono::duration<rep, period>;
-    using time_point = std::chrono::time_point<Clock>;
 
-    static constexpr bool is_steady = false;
+namespace module::platform::webots {
+    class Clock {
+    public:
+        using rep        = int;
+        using period     = std::ratio<1, 1000>;  // Should be the same as the webots world
+        using duration   = std::chrono::duration<rep, period>;
+        using time_point = std::chrono::time_point<Clock>;
 
-    static time_point now();
+        static constexpr bool is_steady = false;
 
-    static void tick();
+        static time_point now();
 
-private:
-    static duration current_tick;
-};
+        static void tick();
 
-// C++20
-// At compile time check that this type actually does meet the Clock type trait
-//static_assert(std::chrono::is_clock<Clock>::value, "The Webots clock did not satisfy the clock type trait.");
-}
+        static duration current_tick;
+    };
 
-#endif //MODULE_PLATFORM_WEBOTS_CLOCK_HPP
+    // C++20
+    // At compile time check that this type actually does meet the Clock type trait
+    // static_assert(std::chrono::is_clock<Clock>::value, "The Webots clock did not satisfy the clock type trait.");
+}  // namespace module::platform::webots
+
+#endif  // MODULE_PLATFORM_WEBOTS_CLOCK_HPP
