@@ -7,5 +7,5 @@ nuclear_role(
   # Image Handling
   input::ImageDecompressor
   # Simulator Connection
-  platform::Webots
+  platform::webots::Webots
 )
