@@ -44,39 +44,22 @@ namespace module {
             class MotionModel {
             public:
                 struct StateVec {
-                    enum Values {
-                        // Our position in global space
-                        // rTWw
-                        PX = 0,
-                        PY = 1,
-                        PZ = 2,
 
-                        // Our velocity in global space
-                        // vTw
-                        VX = 3,
-                        VY = 4,
-                        VZ = 5,
+                    // Our position in global space
+                    Eigen::Matrix<Scalar, 3, 1> rTWw;
 
-                        // Our orientation from robot to world
-                        // Rwt
-                        QX = 6,
-                        QY = 7,
-                        QZ = 8,
-                        QW = 9,
+                    // Our velocity in global space
+                    Eigen::Matrix<Scalar, 3, 1> vTw;
 
-                        // Our rotational velocity in torso space
-                        // Gyroscope measures the angular velocity of the torso in torso space
-                        // omegaTTt
-                        WX = 10,
-                        WY = 11,
-                        WZ = 12,
+                    // Our orientation from robot to world
+                    Eigen::Quaternion<Scalar> Rwt;
 
-                        // Gyroscope Bias
-                        // omegaTTt
-                        BX = 13,
-                        BY = 14,
-                        BZ = 15,
-                    };
+                    // Our rotational velocity in torso space
+                    // Gyroscope measures the angular velocity of the torso in torso space
+                    Eigen::Matrix<Scalar, 3, 1> omegaTTt;
+
+                    // Gyroscope Bias
+                    Eigen::Matrix<Scalar, 3, 1> omegaTTt_bias;
 
                     static constexpr size_t size = 16;
 
@@ -84,13 +67,52 @@ namespace module {
                         return size;
                     }
 
-                    Eigen::Matrix<Scalar, 3, 1> rTWw;
-                    Eigen::Matrix<Scalar, 3, 1> vTw;
-                    Eigen::Quaternion<Scalar> Rwt;
-                    Eigen::Matrix<Scalar, 3, 1> omegaTTt;
-                    Eigen::Matrix<Scalar, 3, 1> omegaTTt_bias;
+                    enum Values {
+                        // rTWw
+                        PX = 0,
+                        PY = 1,
+                        PZ = 2,
+
+                        // vTw
+                        VX = 3,
+                        VY = 4,
+                        VZ = 5,
+
+                        // Rwt
+                        QX = 6,
+                        QY = 7,
+                        QZ = 8,
+                        QW = 9,
+
+                        // omegaTTt
+                        WX = 10,
+                        WY = 11,
+                        WZ = 12,
+
+                        // omegaTTt_bias
+                        BX = 13,
+                        BY = 14,
+                        BZ = 15,
+                    };
+
+                    // Default constructor initialises all vectors to zero, and the quaternion to the identity rotation
+                    StateVec()
+                        : rTWw(Eigen::Matrix<Scalar, 3, 1>::Zero())
+                        , vTw(Eigen::Matrix<Scalar, 3, 1>::Zero())
+                        , Rwt({1, 0, 0, 0})
+                        , omegaTTt(Eigen::Matrix<Scalar, 3, 1>::Zero())
+                        , omegaTTt_bias(Eigen::Matrix<Scalar, 3, 1>::Zero()) {}
+
+                    // Constructor from monolithic vector representation, normalising the quaternion in the process
+                    StateVec(const Eigen::Matrix<Scalar, size, 1>& state)
+                        : rTWw(state.template segment<3>(PX))
+                        , vTw(state.template segment<3>(VX))
+                        , Rwt(Eigen::Quaternion<Scalar>(state.template segment<4>(QX)).normalized())
+                        , omegaTTt(state.template segment<3>(WX))
+                        , omegaTTt_bias(state.template segment<3>(BX)) {}
 
                     // TODO(KipHamiltons): Should this return a ref?
+                    // Converts StateVec to monolithic vector representation
                     Eigen::Matrix<Scalar, size, 1> getStateVec() const {
                         Eigen::Matrix<Scalar, size, 1> state = Eigen::Matrix<Scalar, size, 1>::Zero();
                         state.template segment<3>(PX)        = rTWw;
@@ -101,27 +123,12 @@ namespace module {
                         return state;
                     }
 
-                    // Default constructor initialises all vectors to zero, and the quaternion to the identity rotation
-                    StateVec()
-                        : rTWw(Eigen::Matrix<Scalar, 3, 1>::Zero())
-                        , vTw(Eigen::Matrix<Scalar, 3, 1>::Zero())
-                        , Rwt({1, 0, 0, 0})
-                        , omegaTTt(Eigen::Matrix<Scalar, 3, 1>::Zero())
-                        , omegaTTt_bias(Eigen::Matrix<Scalar, 3, 1>::Zero()) {}
-
-                    // Constructor from monolithic vector representation
-                    StateVec(const Eigen::Matrix<Scalar, size, 1>& state)
-                        : rTWw(state.template segment<3>(PX))
-                        , vTw(state.template segment<3>(VX))
-                        , Rwt(state.template segment<4>(QX))
-                        , omegaTTt(state.template segment<3>(WX))
-                        , omegaTTt_bias(state.template segment<3>(BX)) {}
-
-                    // Wrapper for asDiagonal for the long vector representation
+                    // Wrapper for asDiagonal for monolithic vector representation
                     Eigen::Matrix<Scalar, size, size> asDiagonal() const {
                         return this->getStateVec().asDiagonal();
                     }
 
+                    // Operator for implicit conversion to monolithic vector representation
                     operator Eigen::Matrix<Scalar, size, 1>() const {
                         return this->getStateVec();
                     }
@@ -157,8 +164,6 @@ namespace module {
                     // ********************************
 
                     // Extract our unit quaternion rotation
-                    // TODO(KipHamiltons) verify whether this assumes a unit quaternion and whether it is one, because
-                    // eigen might not be guaranteed to be a unit quaternion...
                     Eigen::Quaternion<Scalar> Rwt(newState.Rwt);
 
                     // Apply our rotational velocity to our orientation
@@ -166,12 +171,15 @@ namespace module {
                     // Quaternions are stored internally as (x, y, z, w)
                     const Scalar t_2 = deltaT * Scalar(0.5);
                     // TODO(KipHamiltons) this could probably be cleaner...
-                    newState.Rwt = Eigen::Quaternion<Scalar>(
-                        Rwt.coeffs()
-                        + t_2
-                              * (Eigen::Quaternion<Scalar>(0.0, newState.Rwt.x(), newState.Rwt.y(), newState.Rwt.z())
-                                 * Rwt)
-                                    .coeffs());
+                    newState.Rwt = Eigen::Quaternion<Scalar>(Rwt.coeffs()
+                                                             + t_2
+                                                                   * (Eigen::Quaternion<Scalar>(0.0,
+                                                                                                newState.Rwt.x(),
+                                                                                                newState.Rwt.y(),
+                                                                                                newState.Rwt.z())
+                                                                      * Rwt)
+                                                                         .coeffs())
+                                       .normalized();
 
                     return newState;
                 }
@@ -179,7 +187,7 @@ namespace module {
                 Eigen::Matrix<Scalar, 3, 1> predict(const Eigen::Matrix<Scalar, size, 1>& state,
                                                     const MeasurementType::ACCELEROMETER&) {
                     // Extract our rotation quaternion
-                    Eigen::Matrix<Scalar, 3, 3> Rtw = StateVec(state).Rwt.inverse().toRotationMatrix();
+                    const Eigen::Matrix<Scalar, 3, 3> Rtw = StateVec(state).Rwt.inverse().toRotationMatrix();
 
                     // Make a world gravity vector and rotate it into torso space
                     // Where is world gravity with respect to robot orientation?
