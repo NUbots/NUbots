@@ -4,8 +4,6 @@
 #include <chrono>
 #include <ratio>
 
-#include "CompileParams.hpp"
-
 // Satisfies the Clock type trait
 // See https://en.cppreference.com/w/cpp/named_req/Clock
 
@@ -23,7 +21,6 @@ namespace module::platform::webots {
 
         static void tick();
 
-    private:
         static duration current_tick;
     };
 

@@ -8,4 +8,6 @@ namespace module::platform::webots {
     void Clock::tick() {
         current_tick++;
     }
+
+    Clock::duration Clock::current_tick = Clock::duration();
 }  // namespace module::platform::webots
