@@ -160,16 +160,17 @@ namespace module {
 
                 Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::GYROSCOPE&) {
                     // Add predicted gyroscope bias to our predicted gyroscope
-                    return state.template segment<3>(WX) + state.template segment<3>(BX);
+                    // TODO(KipHamiltons) should we be subtracting bias?
+                    return state.omegaTTt + state.omegaTTt_bias;
                 }
 
                 Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::FLAT_FOOT_ODOMETRY&) {
-                    return state.template segment<3>(PX);
+                    return state.rTTw;
                 }
 
                 Eigen::Matrix<Scalar, 4, 1> predict(const StateVec& state,
                                                     const MeasurementType::FLAT_FOOT_ORIENTATION&) {
-                    return state.template segment<4>(QX);
+                    return state.Rwt.coeffs();
                 }
 
                 // This function is called to determine the difference between position, velocity, and acceleration
