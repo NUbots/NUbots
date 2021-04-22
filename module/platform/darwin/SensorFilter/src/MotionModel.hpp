@@ -43,7 +43,7 @@ namespace module {
             template <typename Scalar>
             class MotionModel {
             public:
-                struct StateVec {
+                class StateVec {
 
                     enum Values {
                         // Our position in global space
@@ -79,60 +79,13 @@ namespace module {
                         BZ = 15,
                     };
 
-                    // The actual vector under the hood
-                    Eigen::Matrix<Scalar, size, 1> stateVec = Eigen::Matrix<Scalar, size, 1>::Zero();
+                    Eigen::Matrix<Scalar, 3, 1> rTTw          = Eigen::Matrix<Scalar, 3, 1>::Zero();
+                    Eigen::Matrix<Scalar, 3, 1> vTw           = Eigen::Matrix<Scalar, 3, 1>::Zero();
+                    Eigen::Matrix<Scalar, 4, 1> Rwt           = Eigen::Matrix<Scalar, 4, 1>::Zero();
+                    Eigen::Matrix<Scalar, 3, 1> omegaTTt      = Eigen::Matrix<Scalar, 3, 1>::Zero();
+                    Eigen::Matrix<Scalar, 3, 1> omegaTTt_bias = Eigen::Matrix<Scalar, 3, 1>::Zero();
 
-                    // Copy constructor
-                    StateVec(StateVec state&) {
-                        stateVec = state.stateVec;
-                    };
 
-                    void updatePosition(Scalar deltaT) {
-                        // Add our velocity * deltaT to the current position
-                        this.set_rTWw(this.get_rTWw() + (this.get_vTw() * deltaT));
-                    }
-
-                    // Getters/Setters
-
-                    Eigen::Matrix<Scalar, 3, 1>& get_rTWw() {
-                        return stateVec.template segment<3>(PX);
-                    }
-
-                    void set_rTWw(const Eigen::Matrix<Scalar, 3, 1>& _rTWw) {
-                        stateVec.template segment<3>(PX) = _rTWw;
-                    }
-
-                    Eigen::Matrix<Scalar, 3, 1>& get_vTw() {
-                        return stateVec.template segment<3>(VX);
-                    }
-
-                    void set_vTw(const Eigen::Matrix<Scalar, 3, 1>& _vTw) {
-                        stateVec.template segment<3>(VX) = _vTw;
-                    }
-
-                    Eigen::Matrix<Scalar, 4, 1>& get_RwT() {
-                        return stateVec.template segment<4>(QX);
-                    }
-
-                    void set_RwT(const Eigen::Matrix<Scalar, 4, 1>& _RwT) {
-                        stateVec.template segment<4>(QX) = _RwT;
-                    }
-
-                    Eigen::Matrix<Scalar, 3, 1>& get_omegaTTt() {
-                        return stateVec.template segment<3>(WX);
-                    }
-
-                    void set_omegaTTt(const Eigen::Matrix<Scalar, 3, 1>& _omegaTTt) {
-                        stateVec.template segment<3>(WX) = _omegaTTt;
-                    }
-
-                    Eigen::Matrix<Scalar, 3, 1>& get_omegaTTt_bias() {
-                        return stateVec.template segment<3>(BX);
-                    }
-
-                    void set_omegaTTt_bias(const Eigen::Matrix<Scalar, 3, 1>& _omegaTTt_bias) {
-                        stateVec.template segment<3>(BX) = _omegaTTt_bias;
-                    }
                 }
 
 
