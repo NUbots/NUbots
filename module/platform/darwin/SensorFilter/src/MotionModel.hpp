@@ -43,8 +43,7 @@ namespace module {
             template <typename Scalar>
             class MotionModel {
             public:
-                class StateVec {
-
+                struct StateVec {
                     enum Values {
                         // Our position in global space
                         // rTWw
@@ -79,17 +78,22 @@ namespace module {
                         BZ = 15,
                     };
 
-                    Eigen::Matrix<Scalar, 3, 1> rTTw(Eigen::Matrix<Scalar, 3, 1>::Zero());
-                    Eigen::Matrix<Scalar, 3, 1> vTw(Eigen::Matrix<Scalar, 3, 1>::Zero());
-                    // {1, 0, 0, 0} is the identity rotation
-                    Eigen::Quaternion<Scalar> Rwt({1, 0, 0, 0});
-                    Eigen::Matrix<Scalar, 3, 1> omegaTTt(Eigen::Matrix<Scalar, 3, 1>::Zero());
-                    Eigen::Matrix<Scalar, 3, 1> omegaTTt_bias(Eigen::Matrix<Scalar, 3, 1>::Zero());
+                    static constexpr size_t size = 16;
+
+                    constexpr static size_t getSize() {
+                        return size;
+                    }
+
+                    Eigen::Matrix<Scalar, 3, 1> rTWw;
+                    Eigen::Matrix<Scalar, 3, 1> vTw;
+                    Eigen::Quaternion<Scalar> Rwt;
+                    Eigen::Matrix<Scalar, 3, 1> omegaTTt;
+                    Eigen::Matrix<Scalar, 3, 1> omegaTTt_bias;
 
                     // TODO(KipHamiltons): Should this return a ref?
-                    Eigen::Matrix<Scalar, size, 1> getStateVec() {
+                    Eigen::Matrix<Scalar, size, 1> getStateVec() const {
                         Eigen::Matrix<Scalar, size, 1> state = Eigen::Matrix<Scalar, size, 1>::Zero();
-                        state.template segment<3>(PX)        = rTTw;
+                        state.template segment<3>(PX)        = rTWw;
                         state.template segment<3>(VX)        = vTw;
                         state.template segment<4>(QX)        = Rwt.coeffs();
                         state.template segment<3>(WX)        = omegaTTt;
@@ -97,17 +101,35 @@ namespace module {
                         return state;
                     }
 
-                    Eigen::Matrix<Scalar, size, size> asDiagonal() {
-                        return this.getStateVec().asDiagonal();
+                    // Default constructor initialises all vectors to zero, and the quaternion to the identity rotation
+                    StateVec()
+                        : rTWw(Eigen::Matrix<Scalar, 3, 1>::Zero())
+                        , vTw(Eigen::Matrix<Scalar, 3, 1>::Zero())
+                        , Rwt({1, 0, 0, 0})
+                        , omegaTTt(Eigen::Matrix<Scalar, 3, 1>::Zero())
+                        , omegaTTt_bias(Eigen::Matrix<Scalar, 3, 1>::Zero()) {}
+
+                    // Constructor from monolithic vector representation
+                    StateVec(const Eigen::Matrix<Scalar, size, 1>& state)
+                        : rTWw(state.template segment<3>(PX))
+                        , vTw(state.template segment<3>(VX))
+                        , Rwt(state.template segment<4>(QX))
+                        , omegaTTt(state.template segment<3>(WX))
+                        , omegaTTt_bias(state.template segment<3>(BX)) {}
+
+                    // Wrapper for asDiagonal for the long vector representation
+                    Eigen::Matrix<Scalar, size, size> asDiagonal() const {
+                        return this->getStateVec().asDiagonal();
                     }
 
-                }
+                    operator Eigen::Matrix<Scalar, size, 1>() const {
+                        return this->getStateVec();
+                    }
+                };
 
-                // The size of our state
-                static constexpr size_t size = 16;
+                static constexpr size_t size = StateVec::getSize();
 
-                // using StateVec = Eigen::Matrix<Scalar, size, 1>;
-                using StateMat = Eigen::Matrix<Scalar, size, size>;
+                using StateMat = Eigen::Matrix<Scalar, StateVec::size, StateVec::size>;
 
                 // Our static process noise diagonal vector
                 StateVec process_noise;
