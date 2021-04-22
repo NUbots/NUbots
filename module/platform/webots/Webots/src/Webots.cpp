@@ -276,7 +276,7 @@ namespace module::platform::webots {
             emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
 
             // Tick the clock forward
-            Clock.tick();
+            Clock::tick();
         });
 
         send_loop = on<Every<10, std::chrono::milliseconds>>().then([this, fd]() {
