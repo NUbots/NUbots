@@ -43,44 +43,103 @@ namespace module {
             template <typename Scalar>
             class MotionModel {
             public:
-                enum Values {
-                    // Our position in global space
-                    // rTWw
-                    PX = 0,
-                    PY = 1,
-                    PZ = 2,
+                struct StateVec {
 
-                    // Our velocity in global space
-                    // vTw
-                    VX = 3,
-                    VY = 4,
-                    VZ = 5,
+                    enum Values {
+                        // Our position in global space
+                        // rTWw
+                        PX = 0,
+                        PY = 1,
+                        PZ = 2,
 
-                    // Our orientation from robot to world
-                    // Rwt
-                    QX = 6,
-                    QY = 7,
-                    QZ = 8,
-                    QW = 9,
+                        // Our velocity in global space
+                        // vTw
+                        VX = 3,
+                        VY = 4,
+                        VZ = 5,
 
-                    // Our rotational velocity in torso space
-                    // Gyroscope measures the angular velocity of the torso in torso space
-                    // omegaTTt
-                    WX = 10,
-                    WY = 11,
-                    WZ = 12,
+                        // Our orientation from robot to world
+                        // Rwt
+                        QX = 6,
+                        QY = 7,
+                        QZ = 8,
+                        QW = 9,
 
-                    // Gyroscope Bias
-                    // omegaTTt
-                    BX = 13,
-                    BY = 14,
-                    BZ = 15,
-                };
+                        // Our rotational velocity in torso space
+                        // Gyroscope measures the angular velocity of the torso in torso space
+                        // omegaTTt
+                        WX = 10,
+                        WY = 11,
+                        WZ = 12,
+
+                        // Gyroscope Bias
+                        // omegaTTt
+                        BX = 13,
+                        BY = 14,
+                        BZ = 15,
+                    };
+
+                    // The actual vector under the hood
+                    Eigen::Matrix<Scalar, size, 1> stateVec = Eigen::Matrix<Scalar, size, 1>::Zero();
+
+                    // Copy constructor
+                    StateVec(StateVec state&) {
+                        stateVec = state.stateVec;
+                    };
+
+                    void updatePosition(Scalar deltaT) {
+                        // Add our velocity * deltaT to the current position
+                        this.set_rTWw(this.get_rTWw() + (this.get_vTw() * deltaT));
+                    }
+
+                    // Getters/Setters
+
+                    Eigen::Matrix<Scalar, 3, 1>& get_rTWw() {
+                        return stateVec.template segment<3>(PX);
+                    }
+
+                    void set_rTWw(const Eigen::Matrix<Scalar, 3, 1>& _rTWw) {
+                        stateVec.template segment<3>(PX) = _rTWw;
+                    }
+
+                    Eigen::Matrix<Scalar, 3, 1>& get_vTw() {
+                        return stateVec.template segment<3>(VX);
+                    }
+
+                    void set_vTw(const Eigen::Matrix<Scalar, 3, 1>& _vTw) {
+                        stateVec.template segment<3>(VX) = _vTw;
+                    }
+
+                    Eigen::Matrix<Scalar, 4, 1>& get_RwT() {
+                        return stateVec.template segment<4>(QX);
+                    }
+
+                    void set_RwT(const Eigen::Matrix<Scalar, 4, 1>& _RwT) {
+                        stateVec.template segment<4>(QX) = _RwT;
+                    }
+
+                    Eigen::Matrix<Scalar, 3, 1>& get_omegaTTt() {
+                        return stateVec.template segment<3>(WX);
+                    }
+
+                    void set_omegaTTt(const Eigen::Matrix<Scalar, 3, 1>& _omegaTTt) {
+                        stateVec.template segment<3>(WX) = _omegaTTt;
+                    }
+
+                    Eigen::Matrix<Scalar, 3, 1>& get_omegaTTt_bias() {
+                        return stateVec.template segment<3>(BX);
+                    }
+
+                    void set_omegaTTt_bias(const Eigen::Matrix<Scalar, 3, 1>& _omegaTTt_bias) {
+                        stateVec.template segment<3>(BX) = _omegaTTt_bias;
+                    }
+                }
+
 
                 // The size of our state
                 static constexpr size_t size = 16;
 
-                using StateVec = Eigen::Matrix<Scalar, size, 1>;
+                // using StateVec = Eigen::Matrix<Scalar, size, 1>;
                 using StateMat = Eigen::Matrix<Scalar, size, size>;
 
                 // Our static process noise diagonal vector
@@ -92,14 +151,14 @@ namespace module {
                 StateVec time(const StateVec& state, Scalar deltaT) {
 
                     // Prepare our new state
-                    StateVec newState = state;
+                    StateVec newState(state);
 
                     // ********************************
                     // UPDATE LINEAR POSITION/VELOCITY
                     // ********************************
 
                     // Add our velocity to our position
-                    newState.template segment<3>(PX) += state.template segment<3>(VX) * deltaT;
+                    newState.updatePosition(deltaT);
 
                     // add velocity decay
                     newState.template segment<3>(VX) =
