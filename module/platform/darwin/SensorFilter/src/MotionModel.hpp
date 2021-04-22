@@ -97,8 +97,11 @@ namespace module {
                         return state;
                     }
 
-                }
+                    Eigen::Matrix<Scalar, size, size> asDiagonal() {
+                        return this.getStateVec().asDiagonal();
+                    }
 
+                }
 
                 // The size of our state
                 static constexpr size_t size = 16;
@@ -201,8 +204,9 @@ namespace module {
                     StateVec newState = state;
 
                     // Make sure the quaternion remains normalised
-                    newState.template segment<4>(QX) =
-                        Eigen::Quaternion<Scalar>(newState.template segment<4>(QX)).normalized().coeffs();
+                    // TODO(KipHamiltons): Should we just normalise the quaternion in the copy constructor?
+                    // we always seem to want it as a unit quaternion, so why not just do it there too?
+                    newState.Rwt = newState.Rwt.normalized();
 
                     return newState;
                 }
