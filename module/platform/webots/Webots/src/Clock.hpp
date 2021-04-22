@@ -4,8 +4,10 @@
 #include <chrono>
 #include <ratio>
 
+
 // Satisfies the Clock type trait
 // See https://en.cppreference.com/w/cpp/named_req/Clock
+
 
 namespace module::platform::webots {
     class Clock {

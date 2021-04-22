@@ -33,6 +33,7 @@
 #include "message/platform/webots/messages.hpp"
 #include "message/support/GlobalConfig.hpp"
 
+#include "utility/input/ServoID.hpp"
 #include "utility/vision/fourcc.hpp"
 
 // Include headers needed for TCP connection
@@ -46,6 +47,7 @@ extern "C" {
 
 namespace module::platform::webots {
 
+
     using extension::Configuration;
     using message::motion::ServoTargets;
     using message::output::CompressedImage;
@@ -54,13 +56,55 @@ namespace module::platform::webots {
     using message::platform::webots::ActuatorRequests;
     using message::platform::webots::ConnectRequest;
     using message::platform::webots::Message;
+    using message::platform::webots::MotorPID;
     using message::platform::webots::MotorPosition;
     using message::platform::webots::MotorTorque;
     using message::platform::webots::MotorVelocity;
     using message::platform::webots::SensorMeasurements;
 
     using message::support::GlobalConfig;
+
+    using utility::input::ServoID;
     using utility::vision::fourcc;
+
+    // Converts the NUgus.proto servo name to the equivalent DarwinSensor.proto name
+    DarwinSensors::Servo& translate_servo_id(const std::string& name, DarwinSensors::Servos& servos) {
+        // clang-format off
+
+    // Left ankle
+    if (name == "left_ankle_roll_sensor") { return servos.lAnkleRoll; }
+    if (name == "left_ankle_pitch_sensor") { return servos.lAnklePitch; }
+    // Right ankle
+    if (name == "right_ankle_roll_sensor") { return servos.rAnkleRoll; }
+    if (name == "right_ankle_pitch_sensor") { return servos.rAnklePitch; }
+    // Knees
+    if (name == "right_knee_pitch_sensor") { return servos.rKnee; }
+    if (name == "left_knee_pitch_sensor") { return servos.lKnee; }
+    // Left hip
+    if (name == "left_hip_roll_sensor") { return servos.lHipRoll; }
+    if (name == "left_hip_pitch_sensor") { return servos.lHipPitch; }
+    if (name == "left_hip_yaw_sensor") { return servos.lHipYaw; }
+    // Right hip
+    if (name == "right_hip_roll_sensor") { return servos.rHipRoll; }
+    if (name == "right_hip_pitch_sensor") { return servos.rHipPitch; }
+    if (name == "right_hip_yaw_sensor") { return servos.rHipYaw; }
+    // Elbows
+    if (name == "left_elbow_pitch_sensor") { return servos.lElbow; }
+    if (name == "right_elbow_pitch_sensor") { return servos.rElbow; }
+    // Left shoulder
+    if (name == "left_shoulder_roll_sensor") { return servos.lShoulderRoll; }
+    if (name == "left_shoulder_pitch_sensor") { return servos.lShoulderPitch; }
+    // Right shoulder
+    if (name == "right_shoulder_roll_sensor") { return servos.rShoulderRoll; }
+    if (name == "right_shoulder_pitch_sensor") { return servos.rShoulderPitch; }
+    // Neck and head
+    if (name == "neck_yaw_sensor") { return servos.headPan; }
+    if (name == "head_pitch_sensor") { return servos.headTilt; }
+
+        // clang-format on
+
+        throw std::runtime_error("Unable to translate unknown NUgus.proto sensor name: " + name);
+    }
 
     int Webots::tcpip_connect(const std::string& server_name, const std::string& port) {
         // Hints for the connection type
@@ -110,13 +154,13 @@ namespace module::platform::webots {
                 // Use configuration here from file webots.yaml
 
                 // clang-format off
-        auto lvl = local_config["log_level"].as<std::string>();
-        if (lvl == "TRACE") { this->log_level = NUClear::TRACE; }
-        else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
-        else if (lvl == "INFO") { this->log_level = NUClear::INFO; }
-        else if (lvl == "WARN") { this->log_level = NUClear::WARN; }
-        else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
-        else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
+            auto lvl = local_config["log_level"].as<std::string>();
+            if (lvl == "TRACE") { this->log_level = NUClear::TRACE; }
+            else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
+            else if (lvl == "INFO") { this->log_level = NUClear::INFO; }
+            else if (lvl == "WARN") { this->log_level = NUClear::WARN; }
+            else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
+            else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
                 // clang-format on
 
                 on<Watchdog<Webots, 5, std::chrono::seconds>>().then([this] {
@@ -135,36 +179,43 @@ namespace module::platform::webots {
             to_send.motor_torques.clear();
 
             // Store each ServoTarget to send in the next lot
-            for (const auto& command : commands.targets) {
+            for (const auto& target : commands.targets) {
                 MotorPosition position_msg;
-                position_msg.name     = command.id;
-                position_msg.position = command.position;
+                position_msg.name     = target.id;
+                position_msg.position = target.position;
                 to_send.motor_positions.push_back(position_msg);
 
                 // TODO(cmurtagh) work out if gain is velocity or force
                 MotorVelocity velocity_msg;
-                velocity_msg.name     = command.id;
-                velocity_msg.velocity = command.gain;
+                velocity_msg.name     = target.id;
+                velocity_msg.velocity = target.gain;
                 to_send.motor_velocities.push_back(velocity_msg);
 
                 MotorTorque torque_msg;
-                torque_msg.name   = command.id;
-                torque_msg.torque = command.torque;
+                torque_msg.name   = target.id;
+                torque_msg.torque = target.torque;
                 to_send.motor_torques.push_back(torque_msg);
 
-                // MotorPID ? Do we need to send this?
+                // MotorPID, only sending P gain. Set I and D to zero
+                MotorPID motorpid_msg;
+                motorpid_msg.name  = target.id;
+                motorpid_msg.PID.X = static_cast<double>(target.gain);
+                motorpid_msg.PID.Y = 0.0;
+                motorpid_msg.PID.Z = 0.0;
+                to_send.motor_pids.push_back(motorpid_msg);
             }
         });
     }
 
     void Webots::setup_connection(const std::string& server_address, const std::string& port) {
-        // Unbind the
+        // Unbind any previous reaction handles
         read_io.unbind();
         send_loop.unbind();
         error_io.unbind();
         shutdown_handle.unbind();
 
         int fd = tcpip_connect(server_address, port);
+
 
         char inital_message[8];
         int n = recv(fd, inital_message, sizeof(inital_message), 0);
@@ -198,9 +249,8 @@ namespace module::platform::webots {
         // Tell webots who we are
         // send_player_details(fd, global_config); Not needed? Set by the port we connect to?
 
+        // Receiving
         read_io = on<IO>(fd, IO::READ).then([this, fd]() {
-            // Receiving
-
             // Get the size of the message
             uint32_t Nn;
             if (recv(fd, &Nn, sizeof(Nn), 0 != sizeof(Nn))) {
@@ -254,7 +304,7 @@ namespace module::platform::webots {
     }
 
     void Webots::send_player_details(const int& fd, const GlobalConfig& player_details) {
-        // TODO(cameron) resend if failes
+        // TODO(cameron) resend if fails
         std::vector<char> data = NUClear::util::serialise::Serialise<GlobalConfig>::serialise(player_details);
         uint32_t Nn            = htonl(data.size());
         send(fd, &Nn, sizeof(Nn), 0);
@@ -269,23 +319,24 @@ namespace module::platform::webots {
         sensor_data->timestamp = NUClear::clock::now();
         // connect_time + std::chrono::milliseconds(sensor_measurements.time);
 
-        // Vector3 is a neutron of 3 doubles
-
         for (const auto& position : sensor_measurements.position_sensors) {
-            // string name
-            // double value
+            translate_servo_id(position.name, sensor_data->servo).presentPosition = position.value;
         }
 
         for (const auto& accelerometer : sensor_measurements.accelerometers) {
-            // string name
-            // Vector3 value
+            sensor_data->accelerometer.x = static_cast<float>(accelerometer.value.X);
+            sensor_data->accelerometer.y = static_cast<float>(accelerometer.value.Y);
+            sensor_data->accelerometer.z = static_cast<float>(accelerometer.value.Z);
         }
 
         for (const auto& gyro : sensor_measurements.gyros) {
-            // string name
-            // Vector3 value
+            sensor_data->gyroscope.x = static_cast<float>(gyro.value.X);
+            sensor_data->gyroscope.y = static_cast<float>(gyro.value.Y);
+            sensor_data->gyroscope.z = static_cast<float>(gyro.value.Z);
         }
 
+        // Ignore as we don't have physical functionality for this
+        /*
         for (const auto& bumper : sensor_measurements.bumpers) {
             // string name
             // bool value
@@ -300,6 +351,7 @@ namespace module::platform::webots {
             // string name
             // Vector3 value
         }
+        */
 
         emit(sensor_data);
 
@@ -322,5 +374,4 @@ namespace module::platform::webots {
             }
         }
     }
-
 }  // namespace module::platform::webots
