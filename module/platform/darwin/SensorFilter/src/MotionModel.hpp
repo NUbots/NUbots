@@ -79,12 +79,22 @@ namespace module {
                         BZ = 15,
                     };
 
-                    Eigen::Matrix<Scalar, 3, 1> rTTw          = Eigen::Matrix<Scalar, 3, 1>::Zero();
-                    Eigen::Matrix<Scalar, 3, 1> vTw           = Eigen::Matrix<Scalar, 3, 1>::Zero();
-                    Eigen::Matrix<Scalar, 4, 1> Rwt           = Eigen::Matrix<Scalar, 4, 1>::Zero();
-                    Eigen::Matrix<Scalar, 3, 1> omegaTTt      = Eigen::Matrix<Scalar, 3, 1>::Zero();
-                    Eigen::Matrix<Scalar, 3, 1> omegaTTt_bias = Eigen::Matrix<Scalar, 3, 1>::Zero();
+                    Eigen::Matrix<Scalar, 3, 1> rTTw(Eigen::Matrix<Scalar, 3, 1>::Zero());
+                    Eigen::Matrix<Scalar, 3, 1> vTw(Eigen::Matrix<Scalar, 3, 1>::Zero());
+                    Eigen::Quaternion<Scalar> Rwt(Eigen::Matrix<Scalar, 4, 1>::Zero());
+                    Eigen::Matrix<Scalar, 3, 1> omegaTTt(Eigen::Matrix<Scalar, 3, 1>::Zero());
+                    Eigen::Matrix<Scalar, 3, 1> omegaTTt_bias(Eigen::Matrix<Scalar, 3, 1>::Zero());
 
+                    // TODO(KipHamiltons): Should this return a ref?
+                    Eigen::Matrix<Scalar, size, 1> getStateVec() {
+                        Eigen::Matrix<Scalar, size, 1> state = Eigen::Matrix<Scalar, size, 1>::Zero();
+                        state.template segment<3>(PX)        = rTTw;
+                        state.template segment<3>(VX)        = vTw;
+                        state.template segment<4>(QX)        = Rwt.coeffs();
+                        state.template segment<3>(WX)        = omegaTTt;
+                        state.template segment<3>(BX)        = omegaTTt_bias;
+                        return state;
+                    }
 
                 }
 
@@ -111,26 +121,28 @@ namespace module {
                     // ********************************
 
                     // Add our velocity to our position
-                    newState.updatePosition(deltaT);
+                    newState.rTTw += state.vTw * deltaT;
 
                     // add velocity decay
-                    newState.template segment<3>(VX) =
-                        newState.template segment<3>(VX).cwiseProduct(timeUpdateVelocityDecay);
+                    newState.vTw = newState.vTw.cwiseProduct(timeUpdateVelocityDecay);
 
                     // ********************************
                     // UPDATE ANGULAR POSITION/VELOCITY
                     // ********************************
 
                     // Extract our unit quaternion rotation
-                    Eigen::Quaternion<Scalar> Rwt(state.template segment<4>(QX));
+                    // TODO(KipHamiltons) verify whether this assumes a unit quaternion and whether it is one, because
+                    // eigen might not be guaranteed to be a unit quaternion...
+                    Eigen::Quaternion<Scalar> Rwt(state.Rwt);
 
                     // Apply our rotational velocity to our orientation
                     // https://fgiesen.wordpress.com/2012/08/24/quaternion-differentiation/
                     // Quaternions are stored internally as (x, y, z, w)
                     const Scalar t_2 = deltaT * Scalar(0.5);
-                    newState.template segment<4>(QX) =
+                    // TODO(KipHamiltons) this could probably be cleaner...
+                    newState.Rwt = Eigen::Quaternion<Scalar>(
                         Rwt.coeffs()
-                        + t_2 * (Eigen::Quaternion<Scalar>(0.0, state[WX], state[WY], state[WZ]) * Rwt).coeffs();
+                        + t_2 * (Eigen::Quaternion<Scalar>(0.0, state[WX], state[WY], state[WZ]) * Rwt).coeffs());
 
                     return newState;
                 }
