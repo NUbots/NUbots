@@ -149,11 +149,10 @@ namespace module {
 
                 Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::ACCELEROMETER&) {
                     // Extract our rotation quaternion
-                    Eigen::Matrix<Scalar, 3, 3> Rtw =
-                        Eigen::Quaternion<Scalar>(state.template segment<4>(QX)).toRotationMatrix().transpose();
+                    Eigen::Matrix<Scalar, 3, 3> Rtw = state.Rwt.inverse().toRotationMatrix();
 
                     // Make a world gravity vector and rotate it into torso space
-                    // Where is world gravity with respest to robot orientation?
+                    // Where is world gravity with respect to robot orientation?
                     // Multiplying a matrix with (0, 0, G) is equivalent to taking the
                     // third column of the matrix and multiplying it by G
                     return Rtw.template rightCols<1>() * G;
