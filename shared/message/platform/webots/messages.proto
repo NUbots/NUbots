@@ -84,8 +84,9 @@ message Message {
 }
 
 message SensorMeasurements {
-    uint32           time     = 1;  // time stamp at which the measurements were performed expressed in [ms] from the start of the connection.
-    repeated Message messages = 2;
+    uint32 time =
+        1;  // time stamp at which the measurements were performed expressed in [ms] from the start of the connection.
+    repeated Message                   messages         = 2;
     repeated AccelerometerMeasurement  accelerometers   = 3;
     repeated BumperMeasurement         bumpers          = 4;
     repeated CameraMeasurement         cameras          = 5;
