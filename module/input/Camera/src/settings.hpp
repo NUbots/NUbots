@@ -2,6 +2,7 @@
 #define MODULE_INPUT_CAMERA_SETTINGS_HPP
 
 #include <fmt/format.h>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 

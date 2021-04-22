@@ -1,6 +1,9 @@
 #ifndef MODULE_INPUT_CAMERA_ARAVIS_WRAP_HPP
 #define MODULE_INPUT_CAMERA_ARAVIS_WRAP_HPP
 
+#include <stdexcept>
+#include <string>
+
 extern "C" {
 #include <aravis-0.8/arv.h>
 }
