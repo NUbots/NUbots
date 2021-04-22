@@ -148,7 +148,7 @@ namespace module {
                     process_noise.Rwt                = this->config.motionFilter.noise.process.rotation;
                     process_noise.omegaTTt           = this->config.motionFilter.noise.process.rotationalVelocity;
                     process_noise.omegaTTt_bias      = this->config.motionFilter.noise.process.gyroscopeBias;
-                    motionFilter.model.process_noise = process_noise.getStateVec();
+                    motionFilter.model.process_noise = process_noise;
 
                     // Update our mean configs and if it changed, reset the filter
                     this->config.motionFilter.initial.mean.position =
@@ -187,7 +187,7 @@ namespace module {
                     covariance.Rwt           = this->config.motionFilter.initial.covariance.rotation;
                     covariance.omegaTTt      = this->config.motionFilter.initial.covariance.rotationalVelocity;
                     covariance.omegaTTt_bias = this->config.motionFilter.initial.covariance.gyroscopeBias;
-                    motionFilter.set_state(mean, covariance.asDiagonal());
+                    motionFilter.set_state(mean.getStateVec(), covariance.asDiagonal());
                 });
 
                 on<Configuration>("FootDownNetwork.yaml").then([this](const Configuration& config) {
@@ -472,9 +472,10 @@ namespace module {
                                                                                           : ServoID::R_ANKLE_ROLL]);
 
                                   if (foot_down && !prev_foot_down) {
+                                      const auto filterState = MotionModel<double>::StateVec(motionFilter.get());
                                       Eigen::Affine3d Hwt;
-                                      Hwt.linear()      = motionFilter.get().Rwt.toRotationMatrix();
-                                      Hwt.translation() = Eigen::Vector3d(motionFilter.get().rTWw);
+                                      Hwt.linear()      = filterState.Rwt.toRotationMatrix();
+                                      Hwt.translation() = filterState.rTWw;
 
                                       Eigen::Affine3d Htg(utility::motion::kinematics::calculateGroundSpace(Htf, Hwt));
 
@@ -516,7 +517,7 @@ namespace module {
                               motionFilter.time(deltaT);
 
                               // Gives us the quaternion representation
-                              const auto& o = motionFilter.get();
+                              const auto o = MotionModel<double>::StateVec(motionFilter.get());
 
                               // Map from world to torso coordinates (Rtw)
                               Eigen::Affine3d Hwt;
