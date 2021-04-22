@@ -136,7 +136,7 @@ namespace module {
 
                 static constexpr size_t size = StateVec::getSize();
 
-                using StateMat = Eigen::Matrix<Scalar, StateVec::size, StateVec::size>;
+                using StateMat = Eigen::Matrix<Scalar, size, size>;
 
                 // Our static process noise diagonal vector
                 StateVec process_noise;
