@@ -7,7 +7,7 @@
  * These are things that we must know at compile time
  */
 
-namespace module::platform::webots {
+namespace module::platform::Webots {
     using simulation_tick_speed = std::integral_constant<int, 1>; // In milliseconds
 }
 

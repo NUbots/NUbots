@@ -9,7 +9,7 @@
 // Satisfies the Clock type trait
 // See https://en.cppreference.com/w/cpp/named_req/Clock
 
-namespace module::platform::webots {
+namespace module::platform::Webots {
 class Clock {
 public:
     using rep = int;

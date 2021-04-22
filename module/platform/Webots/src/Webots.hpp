@@ -26,7 +26,7 @@
 #include "message/platform/webots/messages.hpp"
 #include "message/support/GlobalConfig.hpp"
 
-namespace module::platform::webots {
+namespace module::platform {
 
 class Webots : public NUClear::Reactor {
 private:

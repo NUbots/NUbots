@@ -19,6 +19,8 @@
 
 #include "Webots.hpp"
 
+#include "Clock.hpp"
+
 #include <chrono>
 #include <fmt/format.h>
 
@@ -42,7 +44,7 @@ extern "C" {
 #include <unistd.h> /* definition of close */
 }
 
-namespace module::platform::webots {
+namespace module::platform {
 
 using extension::Configuration;
 using message::motion::ServoTargets;
