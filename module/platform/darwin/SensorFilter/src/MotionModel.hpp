@@ -81,7 +81,8 @@ namespace module {
 
                     Eigen::Matrix<Scalar, 3, 1> rTTw(Eigen::Matrix<Scalar, 3, 1>::Zero());
                     Eigen::Matrix<Scalar, 3, 1> vTw(Eigen::Matrix<Scalar, 3, 1>::Zero());
-                    Eigen::Quaternion<Scalar> Rwt(Eigen::Matrix<Scalar, 4, 1>::Zero());
+                    // {1, 0, 0, 0} is the identity rotation
+                    Eigen::Quaternion<Scalar> Rwt({1, 0, 0, 0});
                     Eigen::Matrix<Scalar, 3, 1> omegaTTt(Eigen::Matrix<Scalar, 3, 1>::Zero());
                     Eigen::Matrix<Scalar, 3, 1> omegaTTt_bias(Eigen::Matrix<Scalar, 3, 1>::Zero());
 
