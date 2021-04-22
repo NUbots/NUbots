@@ -244,7 +244,7 @@ namespace module {
                     // we always seem to want it as a unit quaternion, so why not just do it there too?
                     newState.Rwt = newState.Rwt.normalized();
 
-                    return newState.getStateVec();
+                    return newState;
                 }
 
                 Eigen::Matrix<Scalar, size, size> noise(const Scalar& deltaT) {
