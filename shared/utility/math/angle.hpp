@@ -131,18 +131,8 @@ namespace utility {
                 }
             }
 
-        inline double vectorToBearing(const Eigen::Vector2d& dirVec) {
-            return std::atan2(dirVec.y(), dirVec.x());
-        }
-
-        /*! @brief Solves for x in $a \sin(x) + b \cos(x) = c ; x \in [0,\pi]$
-         */
-        inline float solveLinearTrigEquation(float a, float b, float c) {
-            float norm = std::sqrt(a * a + b * b);
-            if (norm == 0) {
-                throw std::domain_error(
-                    "utility::math::angle::solveLinearTrigEquation - std::sqrt(a*a+b*b) == 0 => Any value for x is a "
-                    "solution");
+            inline double vectorToBearing(const Eigen::Vector2d& dirVec) {
+                return std::atan2(dirVec.y(), dirVec.x());
             }
 
             /*! @brief Solves for x in $a \sin(x) + b \cos(x) = c ; x \in [0,\pi]$
@@ -156,23 +146,36 @@ namespace utility {
                         "solution");
                 }
 
-                // Normalise equation
-                float a_ = a / norm;
-                float b_ = b / norm;
-                float c_ = c / norm;
+                /*! @brief Solves for x in $a \sin(x) + b \cos(x) = c ; x \in [0,\pi]$
+                 */
+                inline float solveLinearTrigEquation(float a, float b, float c) {
+                    float norm = std::sqrt(a * a + b * b);
+                    if (norm == 0) {
+                        throw std::domain_error(
+                            "utility::math::angle::solveLinearTrigEquation - std::sqrt(a*a+b*b) == 0 => Any value for "
+                            "x is "
+                            "a "
+                            "solution");
+                    }
 
-                if (std::fabs(c_) > 1) {
-                    throw std::domain_error("utility::math::angle::solveLinearTrigEquation - no solution |c_|>1");
+                    // Normalise equation
+                    float a_ = a / norm;
+                    float b_ = b / norm;
+                    float c_ = c / norm;
+
+                    if (std::fabs(c_) > 1) {
+                        throw std::domain_error("utility::math::angle::solveLinearTrigEquation - no solution |c_|>1");
+                    }
+
+                    // Find alpha such that $\sin(\alpha) = a\_$ and $\cos(\alpha) = b\_$, which is possible because
+                    // $a\_^2
+                    // + b\_^2 = 1$
+                    float alpha = atan2(a_, b_);
+
+                    // Hence the equation becomes $\cos(\alpha)\cos(x)+\sin(\alpha)\sin(x) = cos(x-\alpha) = c\_$
+                    return alpha + acos_clamped(c_);
                 }
-
-                // Find alpha such that $\sin(\alpha) = a\_$ and $\cos(\alpha) = b\_$, which is possible because $a\_^2
-                // + b\_^2 = 1$
-                float alpha = atan2(a_, b_);
-
-                // Hence the equation becomes $\cos(\alpha)\cos(x)+\sin(\alpha)\sin(x) = cos(x-\alpha) = c\_$
-                return alpha + acos_clamped(c_);
-            }
-        }  // namespace angle
-    }      // namespace math
-}  // namespace utility
+            }  // namespace angle
+        }      // namespace math
+    }          // namespace utility
 #endif

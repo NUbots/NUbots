@@ -29,29 +29,23 @@ namespace utility {
             using LimbID  = utility::input::LimbID;
             using ServoID = utility::input::ServoID;
 
-        /*! @brief Calculates the leg joints for a given input ankle position.
-                The robot coordinate system has origin a distance DISTANCE_FROM_BODY_TO_HIP_JOINT above the midpoint of
-           the hips.
-                Robot coordinate system:
-                            x is out of the front of the robot
-                            y is left, from right shoulder to left
-                            z is upward, from feet to head
-                Input ankle coordinate system:
-                            x is forward, from heel to toe
-                            y is left,
-                            z is normal to the plane of the foot
-            @param target The target 4x4 basis matrix for the ankle
-            @param isLeft Request for left leg motors or right leg motors?
-            @param RobotKinematicsModel The class containing the leg model of the robot.
-        */
-        std::vector<std::pair<ServoID, double>> calculateLegJoints(const KinematicsModel& model,
-                                                                   const Eigen::Affine3d& target_,
-                                                                   const LimbID& limb) {
-            const double LENGTH_BETWEEN_LEGS             = model.leg.LENGTH_BETWEEN_LEGS;
-            const double DISTANCE_FROM_BODY_TO_HIP_JOINT = model.leg.HIP_OFFSET_Z;
-            const double HIP_OFFSET_X                    = model.leg.HIP_OFFSET_X;
-            const double UPPER_LEG_LENGTH                = model.leg.UPPER_LEG_LENGTH;
-            const double LOWER_LEG_LENGTH                = model.leg.LOWER_LEG_LENGTH;
+            /*! @brief Calculates the leg joints for a given input ankle position.
+                    The robot coordinate system has origin a distance DISTANCE_FROM_BODY_TO_HIP_JOINT above the midpoint
+               of the hips. Robot coordinate system: x is out of the front of the robot y is left, from right shoulder
+               to left z is upward, from feet to head Input ankle coordinate system: x is forward, from heel to toe y is
+               left, z is normal to the plane of the foot
+                @param target The target 4x4 basis matrix for the ankle
+                @param isLeft Request for left leg motors or right leg motors?
+                @param RobotKinematicsModel The class containing the leg model of the robot.
+            */
+            std::vector<std::pair<ServoID, double>> calculateLegJoints(const KinematicsModel& model,
+                                                                       const Eigen::Affine3d& target_,
+                                                                       const LimbID& limb) {
+                const double LENGTH_BETWEEN_LEGS             = model.leg.LENGTH_BETWEEN_LEGS;
+                const double DISTANCE_FROM_BODY_TO_HIP_JOINT = model.leg.HIP_OFFSET_Z;
+                const double HIP_OFFSET_X                    = model.leg.HIP_OFFSET_X;
+                const double UPPER_LEG_LENGTH                = model.leg.UPPER_LEG_LENGTH;
+                const double LOWER_LEG_LENGTH                = model.leg.LOWER_LEG_LENGTH;
 
                 double hipYaw     = 0;
                 double hipRoll    = 0;
@@ -362,37 +356,38 @@ namespace utility {
                 return joints;
             }
 
-        std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
-                                                                  const Eigen::Affine3f& leftTarget,
-                                                                  const Eigen::Affine3f& rightTarget) {
-            auto joints  = calculateLegJoints(model, leftTarget, LimbID::LEFT_LEG);
-            auto joints2 = calculateLegJoints(model, rightTarget, LimbID::RIGHT_LEG);
-            joints.insert(joints.end(), joints2.begin(), joints2.end());
-            return joints;
-        }
+            std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
+                                                                      const Eigen::Affine3f& leftTarget,
+                                                                      const Eigen::Affine3f& rightTarget) {
+                auto joints  = calculateLegJoints(model, leftTarget, LimbID::LEFT_LEG);
+                auto joints2 = calculateLegJoints(model, rightTarget, LimbID::RIGHT_LEG);
+                joints.insert(joints.end(), joints2.begin(), joints2.end());
+                return joints;
+            }
 
-        std::vector<std::pair<ServoID, double>> calculateCameraLookJoints(const KinematicsModel& model,
-                                                                          const Eigen::Vector3d& cameraUnitVector) {
-            std::vector<std::pair<ServoID, double>> positions;
-            positions.push_back(
-                std::make_pair(ServoID::HEAD_YAW, std::atan2(cameraUnitVector.y(), cameraUnitVector.x())));
-            positions.push_back(std::make_pair(ServoID::HEAD_PITCH,
-                                               std::atan2(-cameraUnitVector.z(),
-                                                          std::sqrt(cameraUnitVector.x() * cameraUnitVector.x()
-                                                                    + cameraUnitVector.y() * cameraUnitVector.y()))));
-            return positions;
-        }
+            std::vector<std::pair<ServoID, double>> calculateCameraLookJoints(const KinematicsModel& model,
+                                                                              const Eigen::Vector3d& cameraUnitVector) {
+                std::vector<std::pair<ServoID, double>> positions;
+                positions.push_back(
+                    std::make_pair(ServoID::HEAD_YAW, std::atan2(cameraUnitVector.y(), cameraUnitVector.x())));
+                positions.push_back(
+                    std::make_pair(ServoID::HEAD_PITCH,
+                                   std::atan2(-cameraUnitVector.z(),
+                                              std::sqrt(cameraUnitVector.x() * cameraUnitVector.x()
+                                                        + cameraUnitVector.y() * cameraUnitVector.y()))));
+                return positions;
+            }
 
-        std::vector<std::pair<ServoID, float>> calculateHeadJoints(Eigen::Vector3f cameraUnitVector) {
-            std::vector<std::pair<ServoID, float>> positions;
-            positions.push_back(std::make_pair(ServoID::HEAD_YAW, atan2(cameraUnitVector[1], cameraUnitVector[0])));
-            positions.push_back(std::make_pair(ServoID::HEAD_PITCH,
-                                               atan2(-cameraUnitVector[2],
-                                                     std::sqrt(cameraUnitVector[0] * cameraUnitVector[0]
-                                                               + cameraUnitVector[1] * cameraUnitVector[1]))));
-            return positions;
-        }
+            std::vector<std::pair<ServoID, float>> calculateHeadJoints(Eigen::Vector3f cameraUnitVector) {
+                std::vector<std::pair<ServoID, float>> positions;
+                positions.push_back(std::make_pair(ServoID::HEAD_YAW, atan2(cameraUnitVector[1], cameraUnitVector[0])));
+                positions.push_back(std::make_pair(ServoID::HEAD_PITCH,
+                                                   atan2(-cameraUnitVector[2],
+                                                         std::sqrt(cameraUnitVector[0] * cameraUnitVector[0]
+                                                                   + cameraUnitVector[1] * cameraUnitVector[1]))));
+                return positions;
+            }
 
-    }  // namespace kinematics
-}  // namespace motion
+        }  // namespace kinematics
+    }      // namespace motion
 }  // namespace utility

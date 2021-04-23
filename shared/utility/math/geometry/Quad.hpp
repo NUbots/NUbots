@@ -31,21 +31,6 @@ namespace utility {
             template <typename T>
             class Quad : std::false_type {};
 
-        template <typename Scalar, int R, int C>
-        class Quad<typename Eigen::Matrix<Scalar, R, C>> {
-        public:
-            using T = typename Eigen::Matrix<Scalar, R, C>;
-            Quad() : bl(T::Zero()), br(T::Zero()), tr(T::Zero()), tl(T::Zero()) {}
-            Quad(const Quad& other) : bl(other.bl), br(other.br), tr(other.tr), tl(other.tl) {}
-            Quad(const T& bottomLeft, const T& topLeft, const T& topRight, const T& bottomRight)
-                : bl(bottomLeft), br(bottomRight), tr(topRight), tl(topLeft) {}
-            Quad(const Scalar& left, const Scalar& top, const Scalar& right, const Scalar& bottom)
-                : bl(left, bottom), br(right, bottom), tr(right, top), tl(left, top) {}
-
-            // *****************
-            // * EIGEN VERSION *
-            // *****************
-
             template <typename Scalar, int R, int C>
             class Quad<typename Eigen::Matrix<Scalar, R, C>> {
             public:
@@ -57,208 +42,223 @@ namespace utility {
                 Quad(const Scalar& left, const Scalar& top, const Scalar& right, const Scalar& bottom)
                     : bl(left, bottom), br(right, bottom), tr(right, top), tl(left, top) {}
 
-                /**
-                 * Sets the Quad as a screen aligned rectangle given the specified positions.
-                 * @param left     The left x pixel value.
-                 * @param top      The top y pixel value.
-                 * @param right    The right x pixel value.
-                 * @param bottom   The bottom y pixel value.
-                 */
-                void set(const Scalar& left, const Scalar& top, const Scalar& right, const Scalar& bottom) {
-                    bl.x() = left;
-                    bl.y() = bottom;
-                    br.x() = right;
-                    br.y() = bottom;
-                    tl.x() = left;
-                    tl.y() = top;
-                    tr.x() = right;
-                    tr.y() = top;
-                }
+                // *****************
+                // * EIGEN VERSION *
+                // *****************
 
-                /**
-                 * Sets the Quad given the specified corners.
-                 * @param bottomLeft  The bottom left corner.
-                 * @param topLeft     The top left corner.
-                 * @param topRight    The top right corner.
-                 * @param bottomRight The bottom right corner.
-                 */
-                void set(const T& bottomLeft, const T& topLeft, const T& topRight, const T& bottomRight) {
-                    bl = bottomLeft;
-                    tl = topLeft;
-                    tr = topRight;
-                    br = bottomRight;
-                }
+                template <typename Scalar, int R, int C>
+                class Quad<typename Eigen::Matrix<Scalar, R, C>> {
+                public:
+                    using T = typename Eigen::Matrix<Scalar, R, C>;
+                    Quad() : bl(T::Zero()), br(T::Zero()), tr(T::Zero()), tl(T::Zero()) {}
+                    Quad(const Quad& other) : bl(other.bl), br(other.br), tr(other.tr), tl(other.tl) {}
+                    Quad(const T& bottomLeft, const T& topLeft, const T& topRight, const T& bottomRight)
+                        : bl(bottomLeft), br(bottomRight), tr(topRight), tl(topLeft) {}
+                    Quad(const Scalar& left, const Scalar& top, const Scalar& right, const Scalar& bottom)
+                        : bl(left, bottom), br(right, bottom), tr(right, top), tl(left, top) {}
 
-                //! Returns the bottom centre pixel location of the Quad.
-                T getTopCentre() const {
-                    return ((tl + tr) * 0.5);
-                }
-                //! Returns the bottom centre pixel location of the Quad.
-                T getBottomCentre() const {
-                    return ((bl + br) * 0.5);
-                }
-                T getRightCentre() const {
-                    return ((br + tr) * 0.5);
-                }
-                T getLeftCentre() const {
-                    return ((bl + tl) * 0.5);
-                }
-
-                //! Returns the centre pixel location  of the Quad.
-                T getCentre() const {
-                    return ((bl + tl + tr + br) * 0.25);
-                }
-
-                //! Returns the bottom left pixel location  of the Quad.
-                T getBottomLeft() const {
-                    return bl;
-                }
-                //! Returns the bottom right pixel location  of the Quad.
-                T getBottomRight() const {
-                    return br;
-                }
-                //! Returns the top left pixel location  of the Quad.
-                T getTopLeft() const {
-                    return tl;
-                }
-                //! Returns the top right pixel location  of the Quad.
-                T getTopRight() const {
-                    return tr;
-                }
-
-                // Returns the bounding box width and height
-                T getSize() const {
-                    Quad boundingBox = getBoundingBox(getVertices());
-                    return T(boundingBox.getAverageWidth(), boundingBox.getAverageHeight());
-                }
-
-                Scalar getLeft() const {
-                    return (0.5 * (bl.x() + tl.x()));
-                }
-                Scalar getRight() const {
-                    return (0.5 * (br.x() + tr.x()));
-                }
-                Scalar getTop() const {
-                    return (0.5 * (tl.y() + tr.y()));
-                }
-                Scalar getBottom() const {
-                    return (0.5 * (bl.y() + br.y()));
-                }
-
-                // //! Returns the base width of the Quad in pixels.
-                // int getBaseWidth() const;
-                // //! Returns the top width of the Quad in pixels.
-                // int getTopWidth() const;
-
-                // //! Returns the left height of the Quad in pixels.
-                // int getLeftHeight() const;
-                // //! Returns the right height of the Quad in pixels.
-                // int getRightHeight() const;
-
-                //! Returns the average width of the Quad in pixels.
-                Scalar getAverageWidth() const {
-                    return ((0.5 * ((br - bl).norm() + (tr - tl).norm())));
-                }
-
-                //! Returns the average height of the Quad in pixels.
-                Scalar getAverageHeight() const {
-                    return ((0.5 * ((br - tr).norm() + (bl - tl).norm())));
-                }
-
-                Scalar area() const {
-                    // Area of a quadrilateral: A = 0.5 * |diag1 X diag2|
-                    // In two dimensions, this equates to: A = 0.5 * |(diag1.x)(diag2.y) - (diag2.x)(diag2.y)|
-                    T diag1 = bl - tr;
-                    T diag2 = tl - br;
-                    return std::abs(0.5 * ((diag1.x() * diag2.y()) - (diag1.y() * diag2.x())));
-                }
-                Scalar aspectRatio() const {
-                    return (((br - tr).norm() + (bl - tl).norm() + 2) / ((br - bl).norm() + (tr - tl).norm() + 2));
-                }
-
-                std::vector<T> getVertices() const {
-                    std::vector<T> vert = {tr, br, bl, tl};
-                    return vert;
-                }
-
-                bool overlapsHorizontally(const Quad& other) const {
-                    // Rough for now.
-                    Scalar farRight   = std::max(tr.x(), br.x());
-                    Scalar farLeft    = std::min(tl.x(), bl.x());
-                    Scalar o_farRight = std::max(other.tr.x(), other.br.x());
-                    Scalar o_farLeft  = std::min(other.tl.x(), other.bl.x());
-
-                    return !((farRight < o_farLeft) || (o_farRight < farLeft));
-                }
-
-                bool checkCornersValid() const {
-                    return br.innerSize() == 2 && bl.innerSize() == 2 && tr.innerSize() == 2 && tl.innerSize() == 2;
-                }
-
-                static Quad getBoundingBox(const std::vector<T>& points) {
-                    // Check for
-                    if (points.size() <= 0) {
-                        throw std::domain_error("Request made for bounding box for empty list of points!");
+                    /**
+                     * Sets the Quad as a screen aligned rectangle given the specified positions.
+                     * @param left     The left x pixel value.
+                     * @param top      The top y pixel value.
+                     * @param right    The right x pixel value.
+                     * @param bottom   The bottom y pixel value.
+                     */
+                    void set(const Scalar& left, const Scalar& top, const Scalar& right, const Scalar& bottom) {
+                        bl.x() = left;
+                        bl.y() = bottom;
+                        br.x() = right;
+                        br.y() = bottom;
+                        tl.x() = left;
+                        tl.y() = top;
+                        tr.x() = right;
+                        tr.y() = top;
                     }
 
-                    Scalar min_x = points[0].x();
-                    Scalar max_x = points[0].x();
-                    Scalar min_y = points[0].y();
-                    Scalar max_y = points[0].y();
-                    for (uint i = 1; i < points.size(); i++) {
-                        auto& p = points[i];
-                        max_x   = std::max(max_x, p.x());
-                        min_x   = std::min(min_x, p.x());
-                        max_y   = std::max(max_y, p.y());
-                        min_y   = std::min(min_y, p.y());
+                    /**
+                     * Sets the Quad given the specified corners.
+                     * @param bottomLeft  The bottom left corner.
+                     * @param topLeft     The top left corner.
+                     * @param topRight    The top right corner.
+                     * @param bottomRight The bottom right corner.
+                     */
+                    void set(const T& bottomLeft, const T& topLeft, const T& topRight, const T& bottomRight) {
+                        bl = bottomLeft;
+                        tl = topLeft;
+                        tr = topRight;
+                        br = bottomRight;
                     }
-                    return Quad(T(min_x, min_y), T(min_x, max_y), T(max_x, max_y), T(max_x, min_y));
+
+                    //! Returns the bottom centre pixel location of the Quad.
+                    T getTopCentre() const {
+                        return ((tl + tr) * 0.5);
+                    }
+                    //! Returns the bottom centre pixel location of the Quad.
+                    T getBottomCentre() const {
+                        return ((bl + br) * 0.5);
+                    }
+                    T getRightCentre() const {
+                        return ((br + tr) * 0.5);
+                    }
+                    T getLeftCentre() const {
+                        return ((bl + tl) * 0.5);
+                    }
+
+                    //! Returns the centre pixel location  of the Quad.
+                    T getCentre() const {
+                        return ((bl + tl + tr + br) * 0.25);
+                    }
+
+                    //! Returns the bottom left pixel location  of the Quad.
+                    T getBottomLeft() const {
+                        return bl;
+                    }
+                    //! Returns the bottom right pixel location  of the Quad.
+                    T getBottomRight() const {
+                        return br;
+                    }
+                    //! Returns the top left pixel location  of the Quad.
+                    T getTopLeft() const {
+                        return tl;
+                    }
+                    //! Returns the top right pixel location  of the Quad.
+                    T getTopRight() const {
+                        return tr;
+                    }
+
+                    // Returns the bounding box width and height
+                    T getSize() const {
+                        Quad boundingBox = getBoundingBox(getVertices());
+                        return T(boundingBox.getAverageWidth(), boundingBox.getAverageHeight());
+                    }
+
+                    Scalar getLeft() const {
+                        return (0.5 * (bl.x() + tl.x()));
+                    }
+                    Scalar getRight() const {
+                        return (0.5 * (br.x() + tr.x()));
+                    }
+                    Scalar getTop() const {
+                        return (0.5 * (tl.y() + tr.y()));
+                    }
+                    Scalar getBottom() const {
+                        return (0.5 * (bl.y() + br.y()));
+                    }
+
+                    // //! Returns the base width of the Quad in pixels.
+                    // int getBaseWidth() const;
+                    // //! Returns the top width of the Quad in pixels.
+                    // int getTopWidth() const;
+
+                    // //! Returns the left height of the Quad in pixels.
+                    // int getLeftHeight() const;
+                    // //! Returns the right height of the Quad in pixels.
+                    // int getRightHeight() const;
+
+                    //! Returns the average width of the Quad in pixels.
+                    Scalar getAverageWidth() const {
+                        return ((0.5 * ((br - bl).norm() + (tr - tl).norm())));
+                    }
+
+                    //! Returns the average height of the Quad in pixels.
+                    Scalar getAverageHeight() const {
+                        return ((0.5 * ((br - tr).norm() + (bl - tl).norm())));
+                    }
+
+                    Scalar area() const {
+                        // Area of a quadrilateral: A = 0.5 * |diag1 X diag2|
+                        // In two dimensions, this equates to: A = 0.5 * |(diag1.x)(diag2.y) - (diag2.x)(diag2.y)|
+                        T diag1 = bl - tr;
+                        T diag2 = tl - br;
+                        return std::abs(0.5 * ((diag1.x() * diag2.y()) - (diag1.y() * diag2.x())));
+                    }
+                    Scalar aspectRatio() const {
+                        return (((br - tr).norm() + (bl - tl).norm() + 2) / ((br - bl).norm() + (tr - tl).norm() + 2));
+                    }
+
+                    std::vector<T> getVertices() const {
+                        std::vector<T> vert = {tr, br, bl, tl};
+                        return vert;
+                    }
+
+                    bool overlapsHorizontally(const Quad& other) const {
+                        // Rough for now.
+                        Scalar farRight   = std::max(tr.x(), br.x());
+                        Scalar farLeft    = std::min(tl.x(), bl.x());
+                        Scalar o_farRight = std::max(other.tr.x(), other.br.x());
+                        Scalar o_farLeft  = std::min(other.tl.x(), other.bl.x());
+
+                        return !((farRight < o_farLeft) || (o_farRight < farLeft));
+                    }
+
+                    bool checkCornersValid() const {
+                        return br.innerSize() == 2 && bl.innerSize() == 2 && tr.innerSize() == 2 && tl.innerSize() == 2;
+                    }
+
+                    static Quad getBoundingBox(const std::vector<T>& points) {
+                        // Check for
+                        if (points.size() <= 0) {
+                            throw std::domain_error("Request made for bounding box for empty list of points!");
+                        }
+
+                        Scalar min_x = points[0].x();
+                        Scalar max_x = points[0].x();
+                        Scalar min_y = points[0].y();
+                        Scalar max_y = points[0].y();
+                        for (uint i = 1; i < points.size(); i++) {
+                            auto& p = points[i];
+                            max_x   = std::max(max_x, p.x());
+                            min_x   = std::min(min_x, p.x());
+                            max_y   = std::max(max_y, p.y());
+                            min_y   = std::min(min_y, p.y());
+                        }
+                        return Quad(T(min_x, min_y), T(min_x, max_y), T(max_x, max_y), T(max_x, min_y));
+                    }
+
+                private:
+                    T bl;  //! @variable The bottom-left of the Quad.
+                    T br;  //! @variable The bottom-right of the Quad.
+                    T tr;  //! @variable The top-right of the Quad.
+                    T tl;  //! @variable The top-left of the Quad.
+
+                    //! @brief output stream operator.
+                    template <typename U>
+                    friend std::ostream& operator<<(std::ostream& output, const Quad<U>& quad);
+
+                    //! @brief output stream operator for a vector of goals.
+                    template <typename U>
+                    friend std::ostream& operator<<(std::ostream& output, const std::vector<Quad<U>>& quads);
+                };
+
+
+                /// @brief Stream insertion operator for a single Quad.
+                /// @relates Quad
+                template <typename T>
+                inline std::ostream& operator<<(std::ostream& output, const Quad<T>& quad) {
+                    output << "(" << quad.getBottomLeft().x() << ", " << quad.getBottomLeft().y() << ") ("
+                           << quad.getTopLeft().x() << ", " << quad.getTopLeft().y() << ") (" << quad.getTopRight().x()
+                           << ", " << quad.getTopRight().y() << ") (" << quad.getBottomRight().x() << ", "
+                           << quad.getBottomRight().y() << ")";
+
+                    return output;
                 }
 
-            private:
-                T bl;  //! @variable The bottom-left of the Quad.
-                T br;  //! @variable The bottom-right of the Quad.
-                T tr;  //! @variable The top-right of the Quad.
-                T tl;  //! @variable The top-left of the Quad.
+                /// @brief Stream insertion operator for a std::vector of Quads.
+                /// @relates Quad
+                template <typename T>
+                inline std::ostream& operator<<(std::ostream& output, const std::vector<Quad<T>>& quads) {
+                    output << "[";
 
-                //! @brief output stream operator.
-                template <typename U>
-                friend std::ostream& operator<<(std::ostream& output, const Quad<U>& quad);
+                    for (const auto& quad : quads)
+                        output << quad << ", ";
 
-                //! @brief output stream operator for a vector of goals.
-                template <typename U>
-                friend std::ostream& operator<<(std::ostream& output, const std::vector<Quad<U>>& quads);
-            };
+                    output << "]";
 
+                    return output;
+                }
 
-            /// @brief Stream insertion operator for a single Quad.
-            /// @relates Quad
-            template <typename T>
-            inline std::ostream& operator<<(std::ostream& output, const Quad<T>& quad) {
-                output << "(" << quad.getBottomLeft().x() << ", " << quad.getBottomLeft().y() << ") ("
-                       << quad.getTopLeft().x() << ", " << quad.getTopLeft().y() << ") (" << quad.getTopRight().x()
-                       << ", " << quad.getTopRight().y() << ") (" << quad.getBottomRight().x() << ", "
-                       << quad.getBottomRight().y() << ")";
-
-                return output;
-            }
-
-            /// @brief Stream insertion operator for a std::vector of Quads.
-            /// @relates Quad
-            template <typename T>
-            inline std::ostream& operator<<(std::ostream& output, const std::vector<Quad<T>>& quads) {
-                output << "[";
-
-                for (const auto& quad : quads)
-                    output << quad << ", ";
-
-                output << "]";
-
-                return output;
-            }
-
-        }  // namespace geometry
-    }      // namespace math
-}  // namespace utility
+            }  // namespace geometry
+        }      // namespace math
+    }          // namespace utility
 
 #endif

@@ -62,10 +62,10 @@ namespace module {
             using message::motion::KinematicsModel;
             using message::support::FieldDescription;
 
-        using LimbID = utility::input::LimbID;
-        using utility::localisation::fieldStateToTransform3D;
-        using utility::math::coordinates::sphericalToCartesian;
-        using utility::nusight::graph;
+            using LimbID = utility::input::LimbID;
+            using utility::localisation::fieldStateToTransform3D;
+            using utility::math::coordinates::sphericalToCartesian;
+            using utility::nusight::graph;
 
             KickPlanner::KickPlanner(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment))

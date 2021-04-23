@@ -26,23 +26,23 @@
 namespace utility {
     namespace math {
 
-    /**
-     * Functions to convert between coordinate representations.
-     *
-     * (r,phi,theta) represent radial distance, bearing (counter-clockwise from x-axis in xy-plane) and elevation
-     * (measured from the xy plane) (in radians)
-     * @author Alex Biddulph
-     */
-    namespace coordinates {
+        /**
+         * Functions to convert between coordinate representations.
+         *
+         * (r,phi,theta) represent radial distance, bearing (counter-clockwise from x-axis in xy-plane) and elevation
+         * (measured from the xy plane) (in radians)
+         * @author Alex Biddulph
+         */
+        namespace coordinates {
 
-        template <typename T, typename U = typename T::Scalar>
-        inline Eigen::Matrix<U, 3, 1> sphericalToCartesian(const Eigen::MatrixBase<T>& sphericalCoordinates) {
-            double distance  = sphericalCoordinates.x();
-            double cos_theta = std::cos(sphericalCoordinates.y());
-            double sin_theta = std::sin(sphericalCoordinates.y());
-            double cos_phi   = std::cos(sphericalCoordinates.z());
-            double sin_phi   = std::sin(sphericalCoordinates.z());
-            Eigen::Matrix<U, 3, 1> result;
+            template <typename T, typename U = typename T::Scalar>
+            inline Eigen::Matrix<U, 3, 1> sphericalToCartesian(const Eigen::MatrixBase<T>& sphericalCoordinates) {
+                double distance  = sphericalCoordinates.x();
+                double cos_theta = std::cos(sphericalCoordinates.y());
+                double sin_theta = std::sin(sphericalCoordinates.y());
+                double cos_phi   = std::cos(sphericalCoordinates.z());
+                double sin_phi   = std::sin(sphericalCoordinates.z());
+                Eigen::Matrix<U, 3, 1> result;
 
                 result.x() = distance * cos_theta * cos_phi;
                 result.y() = distance * sin_theta * cos_phi;
@@ -51,12 +51,12 @@ namespace utility {
                 return result;
             }
 
-        template <typename T, typename U = typename T::Scalar>
-        inline Eigen::Matrix<U, 3, 1> cartesianToSpherical(const Eigen::MatrixBase<T>& cartesianCoordinates) {
-            U x = cartesianCoordinates.x();
-            U y = cartesianCoordinates.y();
-            U z = cartesianCoordinates.z();
-            Eigen::Matrix<U, 3, 1> result;
+            template <typename T, typename U = typename T::Scalar>
+            inline Eigen::Matrix<U, 3, 1> cartesianToSpherical(const Eigen::MatrixBase<T>& cartesianCoordinates) {
+                U x = cartesianCoordinates.x();
+                U y = cartesianCoordinates.y();
+                U z = cartesianCoordinates.z();
+                Eigen::Matrix<U, 3, 1> result;
 
                 return result;
             }
@@ -71,8 +71,8 @@ namespace utility {
                 return arma::vec4({p[0], p[1], p[2], 1});
             }
 
-    }  // namespace coordinates
-}  // namespace math
+        }  // namespace coordinates
+    }      // namespace math
 }  // namespace utility
 
 

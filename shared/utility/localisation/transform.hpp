@@ -33,10 +33,10 @@ namespace utility {
             return Hfw;
         }
 
-    inline Eigen::Affine2d projectTo2D(const Eigen::Affine3d& m,
-                                       const Eigen::Vector3d& yawAxis,
-                                       const Eigen::Vector3d& forwardAxis) {
-        Eigen::Affine2d result;
+        inline Eigen::Affine2d projectTo2D(const Eigen::Affine3d& m,
+                                           const Eigen::Vector3d& yawAxis,
+                                           const Eigen::Vector3d& forwardAxis) {
+            Eigen::Affine2d result;
 
             // Translation
             const Eigen::Vector3d orthoForwardAxis = yawAxis.cross(forwardAxis.cross(yawAxis)).normalized();
@@ -65,7 +65,7 @@ namespace utility {
             return projectTo2D(m, Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitX());
         }
 
-}  // namespace localisation
+    }  // namespace localisation
 }  // namespace utility
 
 #endif

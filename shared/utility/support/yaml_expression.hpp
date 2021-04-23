@@ -281,10 +281,10 @@ namespace utility {
             //// ARMADILLO
             ////
 
-    private:
-        YAML::Node node;
-    };
-}  // namespace support
+        private:
+            YAML::Node node;
+        };
+    }  // namespace support
 }  // namespace utility
 
 namespace YAML {

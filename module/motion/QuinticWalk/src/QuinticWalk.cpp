@@ -32,8 +32,8 @@ namespace module {
         using message::motion::WalkCommand;
         using utility::support::Expression;
 
-    using utility::input::ServoID;
-    using utility::motion::kinematics::calculateLegJoints;
+        using utility::input::ServoID;
+        using utility::motion::kinematics::calculateLegJoints;
 
         QuinticWalk::QuinticWalk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -259,23 +259,24 @@ namespace module {
 
             auto waypoints = motionLegs(joints);
 
-        auto joints = calculateLegJoints(kinematicsModel,
-                                         Eigen::Affine3f(left_foot.cast<float>()),
-                                         Eigen::Affine3f(right_foot.cast<float>()));
+            auto joints = calculateLegJoints(kinematicsModel,
+                                             Eigen::Affine3f(left_foot.cast<float>()),
+                                             Eigen::Affine3f(right_foot.cast<float>()));
 
-        std::unique_ptr<std::vector<ServoCommand>> QuinticWalk::motionLegs(
-            const std::vector<std::pair<ServoID, float>>& joints) {
-            auto waypoints = std::make_unique<std::vector<ServoCommand>>();
-            waypoints->reserve(16);
+            std::unique_ptr<std::vector<ServoCommand>> QuinticWalk::motionLegs(
+                const std::vector<std::pair<ServoID, float>>& joints) {
+                auto waypoints = std::make_unique<std::vector<ServoCommand>>();
+                waypoints->reserve(16);
 
-            NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
+                NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
 
 
-            for (auto& joint : joints) {
-                waypoints->push_back({subsumptionId, time, joint.first, joint.second, jointGains[joint.first], 100});
+                for (auto& joint : joints) {
+                    waypoints->push_back(
+                        {subsumptionId, time, joint.first, joint.second, jointGains[joint.first], 100});
+                }
+
+                return waypoints;
             }
-
-            return waypoints;
-        }
-    }  // namespace motion
-}  // namespace module
+        }  // namespace motion
+    }      // namespace module

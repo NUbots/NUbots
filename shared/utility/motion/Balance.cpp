@@ -94,11 +94,11 @@ namespace utility {
             // TODO: LEARN HOW TO COMPUTE THE INTEGRAL TERM CORRECTLY
             // footGoalErrorSum = footGoalErrorSum.slerp(goalQuaternion * footGoalErrorSum, 1.0/90.0);
 
-        // Apply the PID gains
-        Eigen::AngleAxisf ankleRotation =
-            Eigen::AngleAxisf(Eigen::Quaternion<float>::Identity().slerp(rotationPGain, errorQuaternion)
-                              // * UnitQuaternion().slerp(footGoalErrorSum, rotationIGain)
-                              * Eigen::Quaternion<float>::Identity().slerp(rotationDGain, differential));
+            // Apply the PID gains
+            Eigen::AngleAxisf ankleRotation =
+                Eigen::AngleAxisf(Eigen::Quaternion<float>::Identity().slerp(rotationPGain, errorQuaternion)
+                                  // * UnitQuaternion().slerp(footGoalErrorSum, rotationIGain)
+                                  * Eigen::Quaternion<float>::Identity().slerp(rotationDGain, differential));
 
             // Apply our rotation by scaling the thetas by the rotationScale parameters
             auto hipRotation = ankleRotation;
@@ -171,8 +171,8 @@ namespace utility {
                     -translationPGainZ * total - translationDGainY * dTotal)
                     .cast<float>();
 
-        // Apply opposite translation to the foot position
-        footToTorso = footToTorso.translate(-torsoAdjustment_world);
-    }
-}  // namespace motion
+            // Apply opposite translation to the foot position
+            footToTorso = footToTorso.translate(-torsoAdjustment_world);
+        }
+    }  // namespace motion
 }  // namespace utility
