@@ -338,15 +338,6 @@ namespace utility {
                 return positions;
             }
 
-            std::vector<std::pair<ServoID, float>> calculateLegJoints(const KinematicsModel& model,
-                                                                      utility::math::matrix::Transform3D leftTarget,
-                                                                      utility::math::matrix::Transform3D rightTarget) {
-                auto joints  = calculateLegJoints(model, leftTarget, LimbID::LEFT_LEG);
-                auto joints2 = calculateLegJoints(model, rightTarget, LimbID::RIGHT_LEG);
-                joints.insert(joints.end(), joints2.begin(), joints2.end());
-                return joints;
-            }
-
             std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
                                                                       const Eigen::Affine3f& leftTarget,
                                                                       const Eigen::Affine3f& rightTarget) {
