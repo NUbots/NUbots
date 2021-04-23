@@ -487,7 +487,38 @@ namespace utility {
                 Eigen::Vector2d projXRobot = xRobotImu.head<2>().normalized();
                 Eigen::Vector2d projYRobot = Eigen::Vector2d(-projXRobot.y(), projXRobot.x());
 
+                Eigen::Matrix2d robotToImu;
+                robotToImu << projXRobot, projYRobot;
+
                 return robotToImu;
+            }
+
+            template <typename T,
+                      typename Scalar     = typename T::Scalar,
+                      typename MatrixType = typename T::LinearMatrixType>
+            T calculateGroundSpace(const T& Htf, const T& Hwt) {
+                // Retrieve rotations needed for creating the space
+                // support foot to torso rotation, and world to torso rotation
+                MatrixType Rtf(Htf.rotation());
+
+                // Fix the foot in world space
+                MatrixType Rwf(Hwt.rotation() * Rtf);
+
+                // Dot product of foot z (in world space) with world z
+                Scalar alpha = utility::math::angle::acos_clamped(Rwf(2, 2));
+
+                Eigen::Matrix<Scalar, 3, 1> axis(Rwf.col(2).cross(Eigen::Matrix<Scalar, 3, 1>::UnitZ()).normalized());
+
+                // Axis angle is foot to ground
+                MatrixType Rwg(Eigen::AngleAxis<Scalar>(alpha, axis).toRotationMatrix() * Rwf);
+                MatrixType Rtg(Hwt.rotation().transpose() * Rwg);
+
+                // Ground space assemble!
+                T Htg;
+                Htg.linear()      = Rtg;
+                Htg.translation() = Htf.translation();
+
+                return Htg;
             }
 
         }  // namespace kinematics

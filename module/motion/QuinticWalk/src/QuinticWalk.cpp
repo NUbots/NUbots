@@ -258,20 +258,24 @@ namespace module {
                                              Eigen::Affine3f(left_foot.cast<float>()),
                                              Eigen::Affine3f(right_foot.cast<float>()));
 
-            std::unique_ptr<std::vector<ServoCommand>> QuinticWalk::motionLegs(
-                const std::vector<std::pair<ServoID, float>>& joints) {
-                auto waypoints = std::make_unique<std::vector<ServoCommand>>();
-                waypoints->reserve(16);
+            auto waypoints = motionLegs(joints);
 
-                NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
+            emit(std::move(waypoints));
+        }
+
+        std::unique_ptr<std::vector<ServoCommand>> QuinticWalk::motionLegs(
+            const std::vector<std::pair<ServoID, float>>& joints) {
+            auto waypoints = std::make_unique<std::vector<ServoCommand>>();
+            waypoints->reserve(16);
+
+            NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
 
 
-                for (auto& joint : joints) {
-                    waypoints->push_back(
-                        {subsumptionId, time, joint.first, joint.second, jointGains[joint.first], 100});
-                }
-
-                return waypoints;
+            for (auto& joint : joints) {
+                waypoints->push_back({subsumptionId, time, joint.first, joint.second, jointGains[joint.first], 100});
             }
-        }  // namespace motion
-    }      // namespace module
+
+            return waypoints;
+        }
+    }  // namespace motion
+}  // namespace module
