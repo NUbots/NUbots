@@ -101,9 +101,9 @@ namespace module {
 
                 /*! @brief Gets a bounding box in screen angular space of a set of vision objects
                  */
-                utility::math::geometry::Quad<Eigen::Vector2d> getScreenAngularBoundingBox(
+                utility::math::geometry::Quad<double, 2, 1> getScreenAngularBoundingBox(
                     const message::vision::Balls& obs);
-                utility::math::geometry::Quad<Eigen::Vector2d> getScreenAngularBoundingBox(
+                utility::math::geometry::Quad<double, 2, 1> getScreenAngularBoundingBox(
                     const message::vision::Goals& obs);
 
                 bool orientationHasChanged(const message::input::Sensors& sensors);

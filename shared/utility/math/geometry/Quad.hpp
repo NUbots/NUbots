@@ -28,11 +28,8 @@ namespace utility {
     namespace math {
         namespace geometry {
 
-            template <typename T>
-            class Quad : std::false_type {};
-
             template <typename Scalar, int R, int C>
-            class Quad<typename Eigen::Matrix<Scalar, R, C>> {
+            class Quad {
             public:
                 using T = typename Eigen::Matrix<Scalar, R, C>;
                 Quad() : bl(T::Zero()), br(T::Zero()), tr(T::Zero()), tl(T::Zero()) {}
@@ -207,19 +204,19 @@ namespace utility {
                 T tl;  //! @variable The top-left of the Quad.
 
                 //! @brief output stream operator.
-                template <typename U>
-                friend std::ostream& operator<<(std::ostream& output, const Quad<U>& quad);
+                template <typename Scalar_, int R_, int C_>
+                friend std::ostream& operator<<(std::ostream& output, const Quad<Scalar_, R_, C_>& quad);
 
                 //! @brief output stream operator for a vector of goals.
-                template <typename U>
-                friend std::ostream& operator<<(std::ostream& output, const std::vector<Quad<U>>& quads);
+                template <typename Scalar_, int R_, int C_>
+                friend std::ostream& operator<<(std::ostream& output, const std::vector<Quad<Scalar_, R_, C_>>& quads);
             };
 
 
             /// @brief Stream insertion operator for a single Quad.
             /// @relates Quad
-            template <typename T>
-            inline std::ostream& operator<<(std::ostream& output, const Quad<T>& quad) {
+            template <typename Scalar, int R, int C>
+            inline std::ostream& operator<<(std::ostream& output, const Quad<Scalar, R, C>& quad) {
                 output << "(" << quad.getBottomLeft().x() << ", " << quad.getBottomLeft().y() << ") ("
                        << quad.getTopLeft().x() << ", " << quad.getTopLeft().y() << ") (" << quad.getTopRight().x()
                        << ", " << quad.getTopRight().y() << ") (" << quad.getBottomRight().x() << ", "
@@ -230,8 +227,8 @@ namespace utility {
 
             /// @brief Stream insertion operator for a std::vector of Quads.
             /// @relates Quad
-            template <typename T>
-            inline std::ostream& operator<<(std::ostream& output, const std::vector<Quad<T>>& quads) {
+            template <typename Scalar, int R, int C>
+            inline std::ostream& operator<<(std::ostream& output, const std::vector<Quad<Scalar, R, C>>& quads) {
                 output << "[";
 
                 for (const auto& quad : quads)
