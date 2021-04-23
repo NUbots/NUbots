@@ -163,22 +163,22 @@ namespace module {
                     // ********************************
 
                     // Extract our unit quaternion rotation
-                    Eigen::Quaternion<Scalar> Rwt(newState.Rwt);
+                    const Eigen::Quaternion<Scalar> Rwt(newState.Rwt.normalized());
 
                     // Apply our rotational velocity to our orientation
-                    // https://fgiesen.wordpress.com/2012/08/24/quaternion-differentiation/
-                    // Quaternions are stored internally as (x, y, z, w)
-                    const Scalar t_2 = deltaT * Scalar(0.5);
-                    // TODO(KipHamiltons) this could probably be cleaner...
-                    newState.Rwt = Eigen::Quaternion<Scalar>(Rwt.coeffs()
-                                                             + t_2
-                                                                   * (Eigen::Quaternion<Scalar>(0.0,
-                                                                                                newState.Rwt.x(),
-                                                                                                newState.Rwt.y(),
-                                                                                                newState.Rwt.z())
-                                                                      * Rwt)
-                                                                         .coeffs())
-                                       .normalized();
+                    // The change in the quaternion q is (1/2)*omega*q, as long as the time step is small enough
+                    // See here if you're still confused https://math.stackexchange.com/a/2099673 which also links
+                    // a derivation here https://fgiesen.wordpress.com/2012/08/24/quaternion-differentiation/
+                    const Scalar t_2                = deltaT * Scalar(0.5);
+                    Eigen::Quaternion<Scalar> dq_dt = Eigen::Quaternion<Scalar>(0.0,
+                                                                                newState.omegaTTt.x(),
+                                                                                newState.omegaTTt.y(),
+                                                                                newState.omegaTTt.z())
+                                                      * Rwt;
+                    dq_dt = Eigen::Quaternion<Scalar>(t_2 * dq_dt.coeffs());
+                    // TODO(KipHamiltons): This _should_ be multiplication rather than addition, right?????
+                    // Compose/multiply the change with our current rotation to get the updated rotation
+                    newState.Rwt = (dq_dt * Rwt).normalized();
 
                     return newState;
                 }
