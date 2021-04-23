@@ -217,14 +217,14 @@ namespace module::platform::webots {
         int fd = tcpip_connect(server_address, port);
 
 
-        char inital_message[8];
-        int n = recv(fd, inital_message, sizeof(inital_message), 0);
+        char initial_message[8];
+        int n = recv(fd, initial_message, sizeof(initial_message), 0);
 
         if (n > 0) {
-            if (strncmp(inital_message, "Welcome", sizeof(inital_message)) == 0) {
+            if (strncmp(initial_message, "Welcome", sizeof(initial_message)) == 0) {
                 // good
             }
-            else if (strncmp(inital_message, "Refused", sizeof(inital_message)) == 0) {
+            else if (strncmp(initial_message, "Refused", sizeof(initial_message)) == 0) {
                 log<NUClear::FATAL>(
                     fmt::format("Connection to {}:{} refused: your ip is not white listed.", server_address, port));
                 // Halt and don't retry as reconnection is pointless.

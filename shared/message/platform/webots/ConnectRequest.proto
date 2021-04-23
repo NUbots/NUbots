@@ -21,9 +21,9 @@ syntax = "proto3";
 
 package message.platform.webots;
 
-// The message to send when we connect or want to reconnect to the webots robocup
-// https://cdn.robocup.org/hl/wp/2021/03/v-hsc_simulator_api.pdf
-
+/** The message to send when we connect or want to reconnect to the webots robocup simulation
+ * https://cdn.robocup.org/hl/wp/2021/03/v-hsc_simulator_api.pdf
+ */
 message ConnectRequest {
     uint32 teamId   = 1;
     uint32 playerId = 2;

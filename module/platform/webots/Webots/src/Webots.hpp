@@ -45,6 +45,7 @@ namespace module::platform::webots {
         /// @brief Send the inital message that tells webots who we are. We should do this when we first connect or when
         /// we want to reconnect.
         /// @param fd The socket we want to send our details to.
+        /// @param player_details [...]
         void send_player_details(const int& fd, const message::support::GlobalConfig& player_details);
 
         /// @brief Establish a TCP connection to the specified server/port
@@ -67,4 +68,4 @@ namespace module::platform::webots {
 
 }  // namespace module::platform::webots
 
-#endif  // MODULE_PLATFORM_WEBOTS_HPP
+#endif  // MODULE_PLATFORM_WEBOTS_WEBOTS_HPP
