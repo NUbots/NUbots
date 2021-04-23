@@ -17,32 +17,32 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "NUsight.h"
+#include "NUsight.hpp"
 
-#include "message/localisation/Ball.h"
-#include "message/localisation/Field.h"
+#include "message/localisation/Ball.hpp"
+#include "message/localisation/Field.hpp"
 
-#include "utility/nusight/NUhelpers.h"
+#include "utility/nusight/NUhelpers.hpp"
 
 namespace module {
-namespace support {
+    namespace support {
 
-    using message::localisation::Ball;
-    using message::localisation::Field;
+        using message::localisation::Ball;
+        using message::localisation::Field;
 
-    using utility::nusight::graph;
+        using utility::nusight::graph;
 
-    void NUsight::provideLocalisation() {
+        void NUsight::provideLocalisation() {
 
-        handles["localisation"].push_back(
-            on<Trigger<Field>, Single, Priority::LOW>().then([this](std::shared_ptr<const Field> self) {
-                powerplant.emit_shared<Scope::NETWORK>(std::move(self), "nusight", false);
-            }));
+            handles["localisation"].push_back(
+                on<Trigger<Field>, Single, Priority::LOW>().then([this](std::shared_ptr<const Field> self) {
+                    powerplant.emit_shared<Scope::NETWORK>(std::move(self), "nusight", false);
+                }));
 
-        handles["localisation"].push_back(
-            on<Trigger<Ball>, Single, Priority::LOW>().then([this](std::shared_ptr<const Ball> ball) {
-                powerplant.emit_shared<Scope::NETWORK>(std::move(ball), "nusight", false);
-            }));
-    }
-}  // namespace support
+            handles["localisation"].push_back(
+                on<Trigger<Ball>, Single, Priority::LOW>().then([this](std::shared_ptr<const Ball> ball) {
+                    powerplant.emit_shared<Scope::NETWORK>(std::move(ball), "nusight", false);
+                }));
+        }
+    }  // namespace support
 }  // namespace module

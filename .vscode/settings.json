@@ -6,11 +6,25 @@
     "files.trimFinalNewlines": true,
     "files.trimTrailingWhitespace": true,
     "files.eol": "\n",
+    "cSpell.language": "en-GB",
     "editor.rulers": [
         120
     ],
-    "python.formatting.provider": "black",
+    "protoc": {
+        "options": [
+            "-I${workspaceFolder}/nuclear/message/proto"
+        ]
+    },
+    "python.formatting.provider": "black",    
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}/tools",
+        "${workspaceFolder}/nuclear"
+    ],
+    "yaml.format.printWidth": 120,
     "files.associations": {
         "*.role": "cmake"
+    },
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": true
     }
 }

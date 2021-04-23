@@ -7,13 +7,13 @@ nuclear_role(
   motion::KinematicsConfiguration
   # Support and Configuration
   support::configuration::GlobalConfig
-  support::configuration::NetworkConfiguration
+  network::NUClearNet
   support::NUsight
   # Hardware Interface
   platform::Gazebo
   platform::darwin::SensorFilter
   # Motion
-  motion::OldWalkEngine
+  motion::QuinticWalk
   motion::ScriptEngine
   # Behaviour
   behaviour::Controller

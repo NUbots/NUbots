@@ -1,32 +1,33 @@
 #!/usr/bin/env python3
 
-import os
+import subprocess
+
+from termcolor import cprint
 
 import b
-import docker
-import dockerise
+from utility.dockerise import defaults, platform
 
 
 def register(command):
     command.help = "Select the default platform to use for docker commands"
 
     command.add_argument(
-        "platform",
-        metavar="platform",
-        nargs="?",
-        choices=dockerise.platforms(),
-        help="the platform to select as the default platform",
+        "target", nargs="?", choices=platform.list(), help="the platform to select as the default platform"
     )
 
 
-def run(platform, **kwargs):
+def run(target, **kwargs):
 
-    if platform is None:
-        platform = dockerise.get_selected_platform()
-        print("Currently selected platform is {}".format(platform))
+    if target is None:
+        target = platform.selected(defaults.image)
+        print("Currently selected platform is {}".format(target))
     else:
-        tag = "{}:{}".format(dockerise.repository, platform)
-        dockerise.build_platform(platform)
-        img = dockerise.client.images.get(tag)
+        # Ensure the platform image is built
+        platform.build(defaults.image, target)
 
-        img.tag(dockerise.repository, "selected")
+        # Tag the built platform image is the selected image
+        tag = "{}:{}".format(defaults.image, target)
+        err = subprocess.run(["docker", "image", "tag", tag, "{}:selected".format(defaults.image)]).returncode
+        if err != 0:
+            cprint("docker image tag returned exit code {}".format(err), "red", attrs=["bold"])
+            exit(err)

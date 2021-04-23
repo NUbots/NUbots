@@ -3,16 +3,14 @@
 import os
 
 import b
-from dockerise import WrapPty, run_on_docker
-
-# import pty
-# import subprocess
+from utility.dockerise import run_on_docker
+from utility.shell import WrapPty
 
 
 @run_on_docker
 def register(command):
     # Install help
-    command.help = "Open an interactive shell in a docker container"
+    command.help = "Configure the project in a docker container"
 
     command.add_argument(
         "-i",
@@ -27,11 +25,10 @@ def register(command):
 
 @run_on_docker
 def run(interactive, args, **kwargs):
-    os.chdir(os.path.join(b.project_dir, "..", "build"))
-
     pty = WrapPty()
 
-    # If configure then run ccmake else just run cmake
+    # If interactive then run ccmake else just run cmake
+    os.chdir(os.path.join(b.project_dir, "..", "build"))
     if interactive:
         exit(
             pty.spawn(["ccmake", "-GNinja", "-DCMAKE_TOOLCHAIN_FILE=/usr/local/toolchain.cmake", *args, b.project_dir])

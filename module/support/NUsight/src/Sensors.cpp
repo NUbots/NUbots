@@ -17,24 +17,24 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "message/input/Sensors.h"
+#include "message/input/Sensors.hpp"
 
-#include "NUsight.h"
+#include "NUsight.hpp"
 
-#include "utility/support/eigen_armadillo.h"
+#include "utility/support/eigen_armadillo.hpp"
 
 namespace module {
-namespace support {
+    namespace support {
 
-    using message::input::Sensors;
+        using message::input::Sensors;
 
-    void NUsight::provideSensors() {
+        void NUsight::provideSensors() {
 
-        // This trigger gets the output from the sensors (unfiltered)
-        handles["sensor_data"].push_back(
-            on<Trigger<Sensors>, Single, Priority::LOW>().then([this](std::shared_ptr<const Sensors> sensors) {
-                powerplant.emit_shared<Scope::NETWORK>(std::move(sensors), "nusight", false);
-            }));
-    }
-}  // namespace support
+            // This trigger gets the output from the sensors (unfiltered)
+            handles["sensor_data"].push_back(
+                on<Trigger<Sensors>, Single, Priority::LOW>().then([this](std::shared_ptr<const Sensors> sensors) {
+                    powerplant.emit_shared<Scope::NETWORK>(std::move(sensors), "nusight", false);
+                }));
+        }
+    }  // namespace support
 }  // namespace module

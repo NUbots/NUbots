@@ -47,7 +47,7 @@ message Quad {
 }
 
 message Polygon {
-    vec2 point = 1;
+    repeated vec2 vertices = 1;
 }
 
 message Frustum {
@@ -58,7 +58,7 @@ message Frustum {
 }
 
 message Cone {
-    fvec3 axis     = 1;
-    float gradient = 2;
-    float radius   = 3;
+    fvec3 axis = 1;
+    // Cos(theta) of the cone angle
+    float radius = 3;
 }
