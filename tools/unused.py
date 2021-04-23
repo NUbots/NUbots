@@ -3,6 +3,8 @@
 import os
 import re
 
+from termcolor import cprint
+
 import b
 from utility.dockerise import run_on_docker
 
@@ -67,14 +69,14 @@ def run(**kwargs):
     # Find out which modules are missing
     missing_modules = existing_modules.difference(used_modules)
 
-    print("Existing")
+    cprint("Existing Modules", attrs=["bold"])
     print("\n".join(existing_modules))
     print("\n")
 
-    print("Used")
-    print("\n".join(used_modules))
+    cprint("Used Modules", "green", attrs=["bold"])
+    cprint("\n".join(used_modules), "green")
     print("\n")
 
-    print("Missing")
-    print("\n".join(missing_modules))
+    cprint("Missing Modules", "red", attrs=["bold"])
+    cprint("\n".join(missing_modules), "red", attrs=["bold"])
     print("\n")
