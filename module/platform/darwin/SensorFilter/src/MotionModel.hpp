@@ -79,10 +79,10 @@ namespace module {
                         VZ = 5,
 
                         // Rwt
-                        QX = 6,
-                        QY = 7,
-                        QZ = 8,
-                        QW = 9,
+                        QW = 6,
+                        QX = 7,
+                        QY = 8,
+                        QZ = 9,
 
                         // omegaTTt
                         WX = 10,
@@ -107,7 +107,7 @@ namespace module {
                     StateVec(const Eigen::Matrix<Scalar, size, 1>& state)
                         : rTWw(state.template segment<3>(PX))
                         , vTw(state.template segment<3>(VX))
-                        , Rwt(Eigen::Quaternion<Scalar>(state.template segment<4>(QX)).normalized())
+                        , Rwt(Eigen::Quaternion<Scalar>(state.template segment<4>(QW)).normalized())
                         , omegaTTt(state.template segment<3>(WX))
                         , omegaTTt_bias(state.template segment<3>(BX)) {}
 
@@ -116,7 +116,7 @@ namespace module {
                         Eigen::Matrix<Scalar, size, 1> state = Eigen::Matrix<Scalar, size, 1>::Zero();
                         state.template segment<3>(PX)        = rTWw;
                         state.template segment<3>(VX)        = vTw;
-                        state.template segment<4>(QX)        = Rwt.coeffs();
+                        state.template segment<4>(QW)        = Rwt.coeffs();
                         state.template segment<3>(WX)        = omegaTTt;
                         state.template segment<3>(BX)        = omegaTTt_bias;
                         return state;
