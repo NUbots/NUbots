@@ -7,20 +7,20 @@
 #include <vector>
 
 namespace module {
-namespace support {
-    namespace logging {
+    namespace support {
+        namespace logging {
 
-        struct Packet {
+            struct Packet {
 
-            uint64_t hash;
-            std::chrono::microseconds timecode;
-            std::vector<char> payload;
-        };
+                uint64_t hash;
+                std::chrono::microseconds timecode;
+                std::vector<char> payload;
+            };
 
-        Packet read_packet(std::ifstream& in);
+            Packet read_packet(std::ifstream& in);
 
-    }  // namespace logging
-}  // namespace support
+        }  // namespace logging
+    }      // namespace support
 }  // namespace module
 
 #endif  // READ_PACKET_HPP

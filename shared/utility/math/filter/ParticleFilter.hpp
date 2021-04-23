@@ -27,8 +27,8 @@
 #include <vector>
 
 namespace utility {
-namespace math {
-    namespace filter {
+    namespace math {
+        namespace filter {
 
         template <typename Scalar, template <typename> class FilterModel>
         class ParticleFilter {

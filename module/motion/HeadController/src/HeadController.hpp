@@ -24,35 +24,35 @@
 #include <nuclear>
 
 namespace module {
-namespace motion {
+    namespace motion {
 
-    /**
-     * Executes a HeadController action.
-     *
-     * @author Jake Fountain
-     */
-    class HeadController : public NUClear::Reactor {
-    private:
-        const size_t id;
-        double min_yaw, max_yaw, min_pitch, max_pitch, head_motor_gain, head_motor_torque, p_gain;
-        ReactionHandle updateHandle;
-        // Debug var:
-        NUClear::clock::time_point lastTime;
+        /**
+         * Executes a HeadController action.
+         *
+         * @author Jake Fountain
+         */
+        class HeadController : public NUClear::Reactor {
+        private:
+            const size_t id;
+            double min_yaw, max_yaw, min_pitch, max_pitch, head_motor_gain, head_motor_torque, p_gain;
+            ReactionHandle updateHandle;
+            // Debug var:
+            NUClear::clock::time_point lastTime;
 
-    public:
-        static constexpr const char* CONFIGURATION_PATH = "HeadController.yaml";
-        static constexpr const char* CONFIGURATION_MSSG = "Head Controller - Configure";
-        static constexpr const char* ONTRIGGER_HEAD_CMD = "Head Controller - Register Head Command";
-        static constexpr const char* ONTRIGGER_HEAD_POS = "Head Controller - Update Head Position";
+        public:
+            static constexpr const char* CONFIGURATION_PATH = "HeadController.yaml";
+            static constexpr const char* CONFIGURATION_MSSG = "Head Controller - Configure";
+            static constexpr const char* ONTRIGGER_HEAD_CMD = "Head Controller - Register Head Command";
+            static constexpr const char* ONTRIGGER_HEAD_POS = "Head Controller - Update Head Position";
 
-        explicit HeadController(std::unique_ptr<NUClear::Environment> environment);
+            explicit HeadController(std::unique_ptr<NUClear::Environment> environment);
 
-        Eigen::Vector2f currentAngles;
-        Eigen::Vector2f goalAngles;
-        bool goalRobotSpace = true;
-    };
+            Eigen::Vector2f currentAngles;
+            Eigen::Vector2f goalAngles;
+            bool goalRobotSpace = true;
+        };
 
-}  // namespace motion
+    }  // namespace motion
 }  // namespace module
 
 #endif  // MODULES_BEHAVIOURS_REFLEX_HEADCONTROLLER_HPP

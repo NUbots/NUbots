@@ -24,7 +24,7 @@
 #include <cmath>
 
 namespace utility {
-namespace math {
+    namespace math {
 
     /**
      * Functions to convert between coordinate representations.
@@ -44,12 +44,12 @@ namespace math {
             double sin_phi   = std::sin(sphericalCoordinates.z());
             Eigen::Matrix<U, 3, 1> result;
 
-            result.x() = distance * cos_theta * cos_phi;
-            result.y() = distance * sin_theta * cos_phi;
-            result.z() = distance * sin_phi;
+                result.x() = distance * cos_theta * cos_phi;
+                result.y() = distance * sin_theta * cos_phi;
+                result.z() = distance * sin_phi;
 
-            return result;
-        }
+                return result;
+            }
 
         template <typename T, typename U = typename T::Scalar>
         inline Eigen::Matrix<U, 3, 1> cartesianToSpherical(const Eigen::MatrixBase<T>& cartesianCoordinates) {
@@ -58,17 +58,18 @@ namespace math {
             U z = cartesianCoordinates.z();
             Eigen::Matrix<U, 3, 1> result;
 
-            result.x() = std::sqrt(x * x + y * y + z * z);  // r
-            result.y() = std::atan2(y, x);                  // theta
-            if (result.x() == static_cast<U>(0)) {
-                result.z() = static_cast<U>(0);
-            }
-            else {
-                result.z() = std::asin(z / (result.x()));  // phi
+                return result;
             }
 
-            return result;
-        }
+            inline arma::vec4 sphericalToCartesian4(const arma::vec3& sphericalCoordinates) {
+                arma::vec3 p = sphericalToCartesian(sphericalCoordinates);
+                return arma::vec4({p[0], p[1], p[2], 1});
+            }
+
+            inline arma::vec4 cartesianToSpherical4(const arma::vec3& cartesianCoordinates) {
+                arma::vec3 p = cartesianToSpherical(cartesianCoordinates);
+                return arma::vec4({p[0], p[1], p[2], 1});
+            }
 
     }  // namespace coordinates
 }  // namespace math

@@ -92,7 +92,7 @@ RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 
 # LLVM and Clang
 RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-11.0.1.tar.gz \
-    -DLLVM_ENABLE_PROJECTS="clang" \
+    -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" \
     -DLLVM_ENABLE_SPHINX=OFF \
     -DLLVM_BUILD_LLVM_DYLIB=ON \
     -DLLVM_LINK_LLVM_DYLIB=ON
@@ -236,7 +236,7 @@ RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.34.1.tar
     -DBUILD_TESTING=OFF
 
 # NUClear!
-RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.gz \
+RUN install-from-source https://github.com/Fastcode/NUClear/archive/153ccdb9a13dbc88f3c448e07a3048d67235116e.tar.gz \
     -DBUILD_TESTS=OFF
 
 # Backtrace

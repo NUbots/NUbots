@@ -39,35 +39,29 @@
 #include "utility/motion/ForwardKinematics.hpp"
 
 namespace utility {
-namespace motion {
-    namespace kinematics {
+    namespace motion {
+        namespace kinematics {
 
-        using utility::input::LimbID;
-        using utility::input::ServoID;
+            using utility::input::LimbID;
+            using utility::input::ServoID;
 
-        /*! @brief Calculates the leg joints for a given input ankle position.
-                The robot coordinate system has origin a distance DISTANCE_FROM_BODY_TO_HIP_JOINT above the midpoint of
-           the hips.
-                Robot coordinate system:
-                            x is out of the front of the robot
-                            y is left, from right shoulder to left
-                            z is upward, from feet to head
-                Input ankle coordinate system:
-                            x is forward, from heel to toe
-                            y is left,
-                            z is normal to the plane of the foot
-            @param target The target 4x4 basis matrix for the ankle
-            @param isLeft Request for left leg motors or right leg motors?
-            @param RobotKinematicsModel The class containing the leg model of the robot.
-        */
+            /*! @brief Calculates the leg joints for a given input ankle position.
+                    The robot coordinate system has origin a distance DISTANCE_FROM_BODY_TO_HIP_JOINT above the midpoint
+               of the hips. Robot coordinate system: x is out of the front of the robot y is left, from right shoulder
+               to left z is upward, from feet to head Input ankle coordinate system: x is forward, from heel to toe y is
+               left, z is normal to the plane of the foot
+                @param target The target 4x4 basis matrix for the ankle
+                @param isLeft Request for left leg motors or right leg motors?
+                @param RobotKinematicsModel The class containing the leg model of the robot.
+            */
 
         std::vector<std::pair<ServoID, double>> calculateLegJoints(const message::motion::KinematicsModel& model,
                                                                    const Eigen::Affine3d& target,
                                                                    const LimbID& limb);
 
-        std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
-                                                                  const Eigen::Affine3f& target,
-                                                                  const LimbID& limb);
+            std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
+                                                                      const Eigen::Affine3f& target,
+                                                                      const LimbID& limb);
 
         std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
                                                                   const Eigen::Affine3f& leftTarget,

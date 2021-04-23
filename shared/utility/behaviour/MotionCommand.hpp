@@ -25,15 +25,15 @@
 #include "message/behaviour/MotionCommand.hpp"
 
 namespace utility {
-namespace behaviour {
+    namespace behaviour {
 
     using message::behaviour::MotionCommand;
 
-    inline MotionCommand StandStill() {
-        MotionCommand cmd;
-        cmd.type = MotionCommand::Type::Value::StandStill;
-        return cmd;
-    }
+        inline MotionCommand StandStill() {
+            MotionCommand cmd;
+            cmd.type = MotionCommand::Type::Value::StandStill;
+            return cmd;
+        }
 
     inline MotionCommand WalkToState(const Eigen::Affine2d& goalState_) {
         MotionCommand cmd;
@@ -44,12 +44,12 @@ namespace behaviour {
         return cmd;
     }
 
-    inline MotionCommand BallApproach(const Eigen::Vector2d kickTarget_) {
-        MotionCommand cmd;
-        cmd.type       = MotionCommand::Type::Value::BallApproach;
-        cmd.kickTarget = kickTarget_;
-        return cmd;
-    }
+        inline MotionCommand BallApproach(const Eigen::Vector2d kickTarget_) {
+            MotionCommand cmd;
+            cmd.type       = MotionCommand::Type::Value::BallApproach;
+            cmd.kickTarget = kickTarget_;
+            return cmd;
+        }
 
     inline MotionCommand DirectCommand(const Eigen::Affine2d& walkCommand_) {
         MotionCommand cmd;
@@ -60,18 +60,18 @@ namespace behaviour {
         return cmd;
     }
 
-    // TODO: Create accessor methods that throw errors if the data
-    // accessed does not correspond to the command type?
+        // TODO: Create accessor methods that throw errors if the data
+        // accessed does not correspond to the command type?
 
-    // Note: We used to use more generic goal and kickTarget types, but
-    // these have been removed for simplicity.
-    // // What to face towards upon reaching the goal.
-    // // enum class TargetType {
-    // //     WayPoint,
-    // //     Ball
-    // // };
-    // // TargetType targetLookAt = WayPoint;
-}  // namespace behaviour
+        // Note: We used to use more generic goal and kickTarget types, but
+        // these have been removed for simplicity.
+        // // What to face towards upon reaching the goal.
+        // // enum class TargetType {
+        // //     WayPoint,
+        // //     Ball
+        // // };
+        // // TargetType targetLookAt = WayPoint;
+    }  // namespace behaviour
 }  // namespace utility
 
 #endif

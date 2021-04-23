@@ -23,22 +23,22 @@
 #include "message/input/Sensors.hpp"
 #include "message/motion/KickCommand.hpp"
 namespace module {
-namespace behaviour {
-    namespace planning {
+    namespace behaviour {
+        namespace planning {
 
-        class KickPlanner : public NUClear::Reactor {
-        public:
-            /// @brief Called by the powerplant to build and setup the KickPlanner reactor.
-            explicit KickPlanner(std::unique_ptr<NUClear::Environment> environment);
+            class KickPlanner : public NUClear::Reactor {
+            public:
+                /// @brief Called by the powerplant to build and setup the KickPlanner reactor.
+                explicit KickPlanner(std::unique_ptr<NUClear::Environment> environment);
 
-        private:
-            bool kickValid(const Eigen::Vector3d& ballPos);
-            message::motion::KickPlannerConfig cfg;
-            NUClear::clock::time_point ballLastSeen;
-            NUClear::clock::time_point lastTimeValid;
-        };
-    }  // namespace planning
-}  // namespace behaviour
+            private:
+                bool kickValid(const Eigen::Vector3d& ballPos);
+                message::motion::KickPlannerConfig cfg;
+                NUClear::clock::time_point ballLastSeen;
+                NUClear::clock::time_point lastTimeValid;
+            };
+        }  // namespace planning
+    }      // namespace behaviour
 }  // namespace module
 
 

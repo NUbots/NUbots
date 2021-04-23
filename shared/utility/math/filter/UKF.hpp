@@ -26,8 +26,8 @@
 #include "utility/support/LazyEvaluation.hpp"
 
 namespace utility {
-namespace math {
-    namespace filter {
+    namespace math {
+        namespace filter {
 
         template <typename Scalar, template <typename> class FilterModel>
         class UKF {
@@ -49,9 +49,9 @@ namespace math {
             using SigmaMat       = Eigen::Matrix<Scalar, Model::size, NUM_SIGMA_POINTS>;
             using SigmaSquareMat = Eigen::Matrix<Scalar, NUM_SIGMA_POINTS, NUM_SIGMA_POINTS>;
 
-            // Our estimate and covariance
-            StateVec mean;
-            StateMat covariance;
+                // Our estimate and covariance
+                StateVec mean;
+                StateMat covariance;
 
             // Our sigma points for UKF
             StateVec sigma_mean;
@@ -289,16 +289,16 @@ namespace math {
                     });
             }
 
-            const StateVec& get() const {
-                return mean;
-            }
+                const StateVec& get() const {
+                    return mean;
+                }
 
-            const StateMat& getCovariance() const {
-                return covariance;
-            }
-        };
-    }  // namespace filter
-}  // namespace math
+                const StateMat& getCovariance() const {
+                    return covariance;
+                }
+            };
+        }  // namespace filter
+    }      // namespace math
 }  // namespace utility
 
 
