@@ -111,7 +111,6 @@ namespace module {
                         , omegaTTt(state.template segment<3>(WX))
                         , omegaTTt_bias(state.template segment<3>(BX)) {}
 
-                    // TODO(KipHamiltons): Should this return a ref?
                     // Converts StateVec to monolithic vector representation
                     Eigen::Matrix<Scalar, size, 1> getStateVec() const {
                         Eigen::Matrix<Scalar, size, 1> state = Eigen::Matrix<Scalar, size, 1>::Zero();
@@ -199,7 +198,6 @@ namespace module {
                 Eigen::Matrix<Scalar, 3, 1> predict(const Eigen::Matrix<Scalar, size, 1>& state,
                                                     const MeasurementType::GYROSCOPE&) {
                     // Add predicted gyroscope bias to our predicted gyroscope
-                    // TODO(KipHamiltons) should we be subtracting bias?
                     return StateVec(state).omegaTTt + StateVec(state).omegaTTt_bias;
                 }
 
