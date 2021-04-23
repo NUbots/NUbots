@@ -29,7 +29,7 @@ def run(**kwargs):
     used_modules = set()
 
     # Modules that are not used by any role
-    missing_modules = set()
+    unused_modules = set()
 
     # Find all CMakeLists.txt in NUCLEAR_MODULE_DIR that contain a nuclear_module() call
     for folder, _, files in os.walk(modules_path):
@@ -66,8 +66,8 @@ def run(**kwargs):
                             if module != "" and module != "::":
                                 used_modules.add(module)
 
-    # Find out which modules are missing
-    missing_modules = existing_modules.difference(used_modules)
+    # Find out which modules are unused
+    unused_modules = existing_modules.difference(used_modules)
 
     cprint("Existing Modules", attrs=["bold"])
     print("\n".join(existing_modules))
@@ -77,6 +77,6 @@ def run(**kwargs):
     cprint("\n".join(used_modules), "green")
     print("\n")
 
-    cprint("Missing Modules", "red", attrs=["bold"])
-    cprint("\n".join(missing_modules), "red", attrs=["bold"])
+    cprint("Unused Modules", "red", attrs=["bold"])
+    cprint("\n".join(unused_modules), "red", attrs=["bold"])
     print("\n")
