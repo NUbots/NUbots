@@ -143,7 +143,7 @@ namespace module {
                 // The velocity decay for x/y/z velocities (1.0 = no decay)
                 Eigen::Matrix<Scalar, 3, 1> timeUpdateVelocityDecay = Eigen::Matrix<Scalar, 3, 1>::Ones();
 
-                Eigen::Matrix<Scalar, size, 1> time(const Eigen::Matrix<Scalar, size, 1>& state, Scalar deltaT) {
+                Eigen::Matrix<Scalar, size, 1> time(const Eigen::Matrix<Scalar, size, 1>& state, const Scalar deltaT) {
 
                     // Prepare our new state
                     StateVec newState(state);
