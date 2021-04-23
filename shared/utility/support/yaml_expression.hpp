@@ -277,10 +277,6 @@ namespace utility {
                 return matrix;
             }
 
-            ////
-            //// ARMADILLO
-            ////
-
         private:
             YAML::Node node;
         };

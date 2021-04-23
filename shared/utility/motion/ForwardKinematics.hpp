@@ -490,38 +490,8 @@ namespace utility {
                 return robotToImu;
             }
 
-            /*! @return matrix J such that \overdot{X} = J * \overdot{theta}
-             */
-            inline arma::mat33 calculateArmJacobian(const KinematicsModel& model, const arma::vec3& a, bool isLeft) {
-                int negativeIfRight = isLeft ? 1 : -1;
-
-                template <typename T,
-                          typename Scalar     = typename T::Scalar,
-                          typename MatrixType = typename T::LinearMatrixType>
-                T calculateGroundSpace(const T& Htf, const T& Hwt) {
-                    // Retrieve rotations needed for creating the space
-                    // support foot to torso rotation, and world to torso rotation
-                    MatrixType Rtf(Htf.rotation());
-
-                    // Dot product of foot z (in world space) with world z
-                    Scalar alpha = utility::math::angle::acos_clamped(Rwf(2, 2));
-
-                    Eigen::Matrix<Scalar, 3, 1> axis(
-                        Rwf.col(2).cross(Eigen::Matrix<Scalar, 3, 1>::UnitZ()).normalized());
-
-                    // Axis angle is foot to ground
-                    MatrixType Rwg(Eigen::AngleAxis<Scalar>(alpha, axis).toRotationMatrix() * Rwf);
-                    MatrixType Rtg(Hwt.rotation().transpose() * Rwg);
-
-                    // Ground space assemble!
-                    T Htg;
-                    Htg.linear()      = Rtg;
-                    Htg.translation() = Htf.translation();
-
-                    return Htg;
-                }
-            }  // namespace kinematics
-        }      // namespace motion
-    }          // namespace utility
+        }  // namespace kinematics
+    }      // namespace motion
+}  // namespace utility
 
 #endif  // UTILITY_MOTION_FORWARDKINEMATICS_HPP
