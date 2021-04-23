@@ -2,9 +2,9 @@
 
 import os
 import re
-import b
 
-from dockerise import run_on_docker
+import b
+from utility.dockerise import run_on_docker
 
 
 @run_on_docker
