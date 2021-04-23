@@ -17,7 +17,7 @@ def register(command):
 def run(**kwargs):
 
     source_dir = b.cmake_cache[b.cmake_cache["CMAKE_PROJECT_NAME"] + "_SOURCE_DIR"]
-    roles_path = os.path.join(source_dir, "roles")
+    roles_path = os.path.join(source_dir, b.cmake_cache["NUCLEAR_ROLES_DIR"])
     modules_path = os.path.join(source_dir, b.cmake_cache["NUCLEAR_MODULE_DIR"])
 
     # Modules that exist in the system
