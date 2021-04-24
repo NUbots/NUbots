@@ -18,7 +18,7 @@ namespace utility::io {
          *
          * @param baud the baud rate to set
          */
-        void set_baud(const int& baud);
+        void set_baud(const unsigned int& baud);
 
     public:
         /**

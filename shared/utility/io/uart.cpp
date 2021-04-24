@@ -51,7 +51,7 @@ namespace utility::io {
         return fd;
     }
 
-    void uart::set_baud(const int& baud) {
+    void uart::set_baud(const unsigned int& baud) {
 
         // Do our setup for the tio settings, you must set BS38400 in order to set custom baud using "baud rate
         // aliasing" http://stackoverflow.com/questions/4968529/how-to-set-baud-rate-to-307200-on-linux
