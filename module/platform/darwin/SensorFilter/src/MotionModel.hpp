@@ -171,14 +171,14 @@ namespace module {
                     const Scalar cos_theta_2 = std::cos(theta_2);
 
                     // Our rotation axis
-                    const auto normalised_omegaTTt = omegaTTt.normalized();
+                    const auto normalised_omegaTTt = newState.omegaTTt.normalized();
                     const Eigen::Quaternion<Scalar> update =
                         Eigen::Quaternion<Scalar>(cos_theta_2,
                                                   normalised_omegaTTt.x() * sin_theta_2,
                                                   normalised_omegaTTt.y() * sin_theta_2,
                                                   normalised_omegaTTt.z() * sin_theta_2);
                     // Add our rotation update by quaternion multiplication
-                    newState.Rtw = (update * newState.Rtw).normalized();
+                    newState.Rwt = (update * newState.Rwt).normalized();
 
                     return newState;
                 }
