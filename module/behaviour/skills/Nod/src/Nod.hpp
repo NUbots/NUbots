@@ -22,26 +22,22 @@
 
 #include <nuclear>
 
-namespace module {
-    namespace behaviour {
-        namespace skills {
+namespace module::behaviour::skills {
 
-            class Nod : public NUClear::Reactor {
-            public:
-                /// @brief Called by the powerplant to build and setup the KickScript reactor.
-                explicit Nod(std::unique_ptr<NUClear::Environment> environment);
+    class Nod : public NUClear::Reactor {
+    public:
+        /// @brief Called by the powerplant to build and setup the KickScript reactor.
+        explicit Nod(std::unique_ptr<NUClear::Environment> environment);
 
-            private:
-                const size_t id;
+    private:
+        const size_t id;
 
-                bool value;
-                float EXECUTION_PRIORITY;
+        bool value;
+        float EXECUTION_PRIORITY;
 
-                void updatePriority(const float& priority);
-            };
-        }  // namespace skills
-    }      // namespace behaviour
-}  // namespace module
+        void updatePriority(const float& priority);
+    };
+}  // namespace module::behaviour::skills
 
 
 #endif  // MODULE_BEHAVIOUR_SKILLS_NOD_HPP

@@ -2,14 +2,12 @@
 
 #include <chrono>
 
-namespace utility {
-    namespace clock {
+namespace utility::clock {
 
-        double custom_rtf                                 = 1.0;  // real time factor
-        std::chrono::steady_clock::time_point last_update = std::chrono::steady_clock::now();
+    double custom_rtf                                 = 1.0;  // real time factor
+    std::chrono::steady_clock::time_point last_update = std::chrono::steady_clock::now();
 
-    }  // namespace clock
-}  // namespace utility
+}  // namespace utility::clock
 
 namespace NUClear {
     clock::time_point clock::now() {

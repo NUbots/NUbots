@@ -25,66 +25,63 @@
 
 #include "message/support/nusight/DataPoint.hpp"
 
-namespace utility {
-    namespace nusight {
+namespace utility::nusight {
 
-        namespace {
+    namespace {
 
-            using message::support::nusight::DataPoint;
+        using message::support::nusight::DataPoint;
 
-            constexpr float TIMEOUT = 2.5;
+        constexpr float TIMEOUT = 2.5;
 
-            template <typename T>
-            struct is_iterable {
-            private:
-                typedef std::true_type yes;
-                typedef std::false_type no;
+        template <typename T>
+        struct is_iterable {
+        private:
+            typedef std::true_type yes;
+            typedef std::false_type no;
 
-                template <typename U>
-                static auto test_begin(int) -> decltype(std::declval<U>().begin(), yes());
-                template <typename>
-                static no test_begin(...);
+            template <typename U>
+            static auto test_begin(int) -> decltype(std::declval<U>().begin(), yes());
+            template <typename>
+            static no test_begin(...);
 
-                template <typename U>
-                static auto test_end(int) -> decltype(std::declval<U>().end(), yes());
-                template <typename>
-                static no test_end(...);
+            template <typename U>
+            static auto test_end(int) -> decltype(std::declval<U>().end(), yes());
+            template <typename>
+            static no test_end(...);
 
-            public:
-                static constexpr bool value = std::is_same<decltype(test_begin<T>(0)), yes>::value
-                                              && std::is_same<decltype(test_end<T>(0)), yes>::value;
-            };
+        public:
+            static constexpr bool value = std::is_same<decltype(test_begin<T>(0)), yes>::value
+                                          && std::is_same<decltype(test_end<T>(0)), yes>::value;
+        };
 
-            inline void buildGraph(DataPoint&) {}
+        inline void buildGraph(DataPoint&) {}
 
-            template <typename First, typename... Remainder>
-            typename std::enable_if<!is_iterable<First>::value>::type buildGraph(DataPoint& dataPoint,
-                                                                                 First first,
-                                                                                 Remainder... remainder) {
-                dataPoint.value.push_back(first);
-                buildGraph(dataPoint, remainder...);
-            }
-
-            template <typename First, typename... Remainder>
-            typename std::enable_if<is_iterable<First>::value>::type buildGraph(DataPoint& dataPoint,
-                                                                                First first,
-                                                                                Remainder... remainder) {
-                for (const auto& value : first) {
-                    dataPoint.value.push_back(value);
-                }
-                buildGraph(dataPoint, remainder...);
-            }
-        }  // namespace
-
-        template <typename... Values>
-        inline std::unique_ptr<message::support::nusight::DataPoint> graph(std::string label, Values... values) {
-            auto dataPoint   = std::make_unique<DataPoint>();
-            dataPoint->label = label;
-            buildGraph(*dataPoint, values...);
-            return dataPoint;
+        template <typename First, typename... Remainder>
+        typename std::enable_if<!is_iterable<First>::value>::type buildGraph(DataPoint& dataPoint,
+                                                                             First first,
+                                                                             Remainder... remainder) {
+            dataPoint.value.push_back(first);
+            buildGraph(dataPoint, remainder...);
         }
 
-    }  // namespace nusight
-}  // namespace utility
+        template <typename First, typename... Remainder>
+        typename std::enable_if<is_iterable<First>::value>::type buildGraph(DataPoint& dataPoint,
+                                                                            First first,
+                                                                            Remainder... remainder) {
+            for (const auto& value : first) {
+                dataPoint.value.push_back(value);
+            }
+            buildGraph(dataPoint, remainder...);
+        }
+    }  // namespace
 
+    template <typename... Values>
+    inline std::unique_ptr<message::support::nusight::DataPoint> graph(std::string label, Values... values) {
+        auto dataPoint   = std::make_unique<DataPoint>();
+        dataPoint->label = label;
+        buildGraph(*dataPoint, values...);
+        return dataPoint;
+    }
+
+}  // namespace utility::nusight
 #endif
