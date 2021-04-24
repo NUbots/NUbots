@@ -24,12 +24,10 @@
 
 namespace module::platform::darwin {
 
-    /**
-     * TODO document
-     *
-     * @author Trent Houliston
-     */
-    struct Convert {
+            /**
+             * @author Trent Houliston
+             */
+            struct Convert {
 
         /// The value from the Darwin is between 0 and 1023, representing a value between -4g and 4g.
         /// This means 512 = 0
