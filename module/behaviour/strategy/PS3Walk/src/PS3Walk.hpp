@@ -63,7 +63,7 @@ namespace module::behaviour::strategy {
         explicit PS3Walk(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        Joystick joystick;  // TODO: make configurable
+        Joystick joystick;
         Eigen::Vector2d strafe = Eigen::Vector2d::Zero();
         float rotationalSpeed  = 0.0f;
         bool moving            = false;
