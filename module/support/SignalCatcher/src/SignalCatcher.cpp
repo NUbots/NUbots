@@ -24,9 +24,11 @@
 namespace module::support {
 
     // Set our initial shutdown request state
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     volatile bool userRequestedShutdown = false;
 
     // Initialize our powerplant variable
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     NUClear::PowerPlant* POWER_PLANT = nullptr;
 
     void sigint(int) {

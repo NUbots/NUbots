@@ -40,8 +40,9 @@ namespace utility::support::evil {
         int lineno;
         std::string function;
     };
-
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     extern thread_local std::vector<StackFrame> stack;
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     extern thread_local std::string exception_name;
 }  // namespace utility::support::evil
 
