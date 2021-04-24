@@ -46,9 +46,7 @@ namespace module::behaviour::skills {
         void updatePriority(const float& priority);
         int getDirectionalQuadrant(float x, float y);
     };
-}  // namespace skills
-}  // namespace behaviour
-}  // namespace module
+}  // namespace module::behaviour::skills
 
 
 #endif
