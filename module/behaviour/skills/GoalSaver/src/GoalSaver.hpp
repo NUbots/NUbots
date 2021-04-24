@@ -36,12 +36,10 @@ namespace module::behaviour::skills {
         float DIVE_PRIORITY;
         float EXECUTION_PRIORITY;
 
-        /**
-         * TODO DiveCommand seems incompleted?
-         * @Mingze
-         * DiveCommand returns vec2 direction to dive
-         */
-        message::motion::DiveCommand diveCommand;
+                /**
+                 * DiveCommand returns vec2 direction to dive
+                 */
+                message::motion::DiveCommand diveCommand;
 
         void updatePriority(const float& priority);
         int getDirectionalQuadrant(float x, float y);
