@@ -166,19 +166,19 @@ namespace module {
                     const Eigen::Quaternion<Scalar> Rwt(newState.Rwt.normalized());
 
                     // Apply our rotational velocity to our orientation
-                    // The change in the quaternion q is (1/2)*omega*q, as long as the time step is small enough
-                    // See here if you're still confused https://math.stackexchange.com/a/2099673 which also links
+                    // The change in the quaternion q is (1/2)*omega*q, which we can add to q so long as our time step
+                    // is small enough, according to https://math.stackexchange.com/a/2099673 which also links
                     // a derivation here https://fgiesen.wordpress.com/2012/08/24/quaternion-differentiation/
-                    const Scalar t_2                = deltaT * Scalar(0.5);
-                    Eigen::Quaternion<Scalar> dq_dt = Eigen::Quaternion<Scalar>(0.0,
-                                                                                newState.omegaTTt.x(),
-                                                                                newState.omegaTTt.y(),
-                                                                                newState.omegaTTt.z())
-                                                      * Rwt;
-                    dq_dt = Eigen::Quaternion<Scalar>(t_2 * dq_dt.coeffs());
-                    // TODO(KipHamiltons): This _should_ be multiplication rather than addition, right?????
-                    // Compose/multiply the change with our current rotation to get the updated rotation
-                    newState.Rwt = (dq_dt * Rwt).normalized();
+                    // dq/dt = (1/2)*omega*Rwt
+                    const Eigen::Quaternion<Scalar> dq_dt = Eigen::Quaternion<Scalar>(0.0,
+                                                                                      newState.omegaTTt.x() * 0.5,
+                                                                                      newState.omegaTTt.y() * 0.5,
+                                                                                      newState.omegaTTt.z() * 0.5)
+                                                            * Rwt;
+                    // The change in the rotation is the derivative times the differential (which is the time-step)
+                    const Eigen::Quaternion<Scalar> change = Eigen::Quaternion<Scalar>(deltaT * dq_dt.coeffs());
+                    // We can add the change to the original, as long as our time step is small enough
+                    newState.Rwt = Eigen::Quaternion<Scalar>(Rwt.coeffs() + change.coeffs()).normalized();
 
                     return newState;
                 }
