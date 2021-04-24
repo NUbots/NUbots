@@ -38,9 +38,9 @@ namespace utility::math::matrix {
      * Michael M. Stark
      */
     inline arma::vec3 orthogonal(const arma::vec3& v) {
-        const unsigned int uyx = std::signbit(std::abs(v[0]) - std::abs(v[1]));
-        const unsigned int uzx = std::signbit(std::abs(v[0]) - std::abs(v[2]));
-        const unsigned int uzy = std::signbit(std::abs(v[1]) - std::abs(v[2]));
+        const unsigned int uyx = static_cast<const unsigned int>(std::signbit(std::abs(v[0]) - std::abs(v[1])));
+        const unsigned int uzx = static_cast<const unsigned int>(std::signbit(std::abs(v[0]) - std::abs(v[2])));
+        const unsigned int uzy = static_cast<const unsigned int>(std::signbit(std::abs(v[1]) - std::abs(v[2])));
         const unsigned int xm  = uyx & uzx;
         const unsigned int ym  = (1 ^ xm) & uzy;
         const unsigned int zm  = 1 ^ (xm & ym);

@@ -38,7 +38,7 @@ namespace module::extension {
         std::lock_guard<std::mutex> lock(reactor.paths_mutex);
 
         // Work out what path we are watching
-        std::array<char, 512> pathbuff;
+        std::array<char, 512> pathbuff{};
         pathbuff.fill('\0');
         size_t size = pathbuff.size();
         uv_fs_event_getpath(handle, pathbuff.data(), &size);

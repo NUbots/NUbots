@@ -19,6 +19,7 @@
 
 #include "Rotation3D.hpp"
 
+#include "math.h"
 #include "matrix.hpp"
 
 #include "utility/math/angle.hpp"
@@ -163,7 +164,7 @@ namespace utility::math::matrix {
         return {roll, pitch, yaw};
     }
 
-    float Rotation3D::norm(Rotation3D T) {
+    float Rotation3D::norm(const Rotation3D& T) {
         UnitQuaternion q = UnitQuaternion(T);
         // Get angle between -2Pi and 2pi
         float angle = q.getAngle();

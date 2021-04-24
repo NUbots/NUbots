@@ -36,7 +36,6 @@ namespace module::behaviour::strategy {
 
     using message::behaviour::MotionCommand;
     using message::motion::HeadCommand;
-    using message::motion::KickCommand;
     using NUClear::message::LogMessage;
     using LimbID = utility::input::LimbID;
 
@@ -50,7 +49,7 @@ namespace module::behaviour::strategy {
         initscr();
 
         // Initialise colours
-        if (has_colors() == TRUE) {
+        if (static_cast<int>(has_colors()) == TRUE) {
             colours_enabled = true;
             start_color();
             init_pair(short(LogColours::TRACE_COLOURS), COLOR_WHITE, COLOR_BLACK);
@@ -105,7 +104,7 @@ namespace module::behaviour::strategy {
             std::string source = "";
 
             // If we know where this log message came from, we display that
-            if (packet.task) {
+            if (packet.task != nullptr) {
                 // Get our reactor name
                 std::string reactor = packet.task->identifier[1];
 

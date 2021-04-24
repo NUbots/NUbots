@@ -22,6 +22,7 @@
 
 #include <armadillo>
 #include <nuclear>
+#include <utility>
 
 #include "message/support/nusight/DataPoint.hpp"
 
@@ -36,8 +37,8 @@ namespace utility::nusight {
         template <typename T>
         struct is_iterable {
         private:
-            typedef std::true_type yes;
-            typedef std::false_type no;
+            using yes = std::true_type;
+            using no  = std::false_type;
 
             template <typename U>
             static auto test_begin(int) -> decltype(std::declval<U>().begin(), yes());
@@ -54,7 +55,7 @@ namespace utility::nusight {
                                           && std::is_same<decltype(test_end<T>(0)), yes>::value;
         };
 
-        inline void buildGraph(DataPoint&) {}
+        inline void buildGraph(DataPoint& /*unused*/) {}
 
         template <typename First, typename... Remainder>
         typename std::enable_if<!is_iterable<First>::value>::type buildGraph(DataPoint& dataPoint,
@@ -78,7 +79,7 @@ namespace utility::nusight {
     template <typename... Values>
     inline std::unique_ptr<message::support::nusight::DataPoint> graph(std::string label, Values... values) {
         auto dataPoint   = std::make_unique<DataPoint>();
-        dataPoint->label = label;
+        dataPoint->label = std::move(label);
         buildGraph(*dataPoint, values...);
         return dataPoint;
     }

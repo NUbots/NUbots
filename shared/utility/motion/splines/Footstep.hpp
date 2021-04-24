@@ -20,7 +20,7 @@ namespace utility::motion::splines {
         /**
          * Initialization with lateral foot distance and support foot
          */
-        Footstep(float footDistance, bool isLeftSupportFoot = true);
+        Footstep(float foot_distance, bool is_left_support_foot = true);
 
         /**
          * Set the lateral foot distance parameters
@@ -28,51 +28,51 @@ namespace utility::motion::splines {
         void setFootDistance(float foot_distance) {
             this->foot_distance = foot_distance;
         }
-        float getFootDistance() const {
+        [[nodiscard]] float getFootDistance() const {
             return foot_distance;
         }
 
         /**
          * Reset to neutral position the current step (not the integrated odometry)
          */
-        void reset(bool isLeftSupportFoot);
+        void reset(bool is_left_support_foot);
 
         // Reset odometry
-        void resetInWorld(bool isLeftSupportFoot);
+        void resetInWorld(bool is_left_support_foot);
 
         /**
          * Current support foot
          */
-        bool isLeftSupport() const {
+        [[nodiscard]] bool isLeftSupport() const {
             return is_left_support_foot;
         }
 
         /**
          * Starting position of current flying foot in support foot frame
          */
-        const Eigen::Vector3f& getLast() const {
+        [[nodiscard]] const Eigen::Vector3f& getLast() const {
             return support_to_last;
         }
 
         /**
          * Target pose of current flying foot in support foot frame
          */
-        const Eigen::Vector3f& getNext() const {
+        [[nodiscard]] const Eigen::Vector3f& getNext() const {
             return support_to_next;
         }
 
         /**
          * Returns the odometry change of the current step.
          */
-        const Eigen::Vector3f& getOdom() const;
+        [[nodiscard]] const Eigen::Vector3f& getOdom() const;
 
         /**
          * Left and right, current or next pose of foot in world initial frame
          */
-        const Eigen::Vector3f& getLeft() const {
+        [[nodiscard]] const Eigen::Vector3f& getLeft() const {
             return left_in_world;
         }
-        const Eigen::Vector3f& getRight() const {
+        [[nodiscard]] const Eigen::Vector3f& getRight() const {
             return right_in_world;
         }
 
@@ -118,12 +118,12 @@ namespace utility::motion::splines {
         /**
          * Add to given pose the given diff expressed in pose frame and return the integrated added pose
          */
-        Eigen::Vector3f poseAdd(const Eigen::Vector3f& pose, const Eigen::Vector3f& diff) const;
+        static [[nodiscard]] Eigen::Vector3f poseAdd(const Eigen::Vector3f& pose, const Eigen::Vector3f& diff) const;
 
         /**
          * Compute and return the delta from (zero + diff) to (zero) in (zero + diff) frame.
          */
-        Eigen::Vector3f diffInv(const Eigen::Vector3f& diff) const;
+        static [[nodiscard]] Eigen::Vector3f diffInv(const Eigen::Vector3f& diff) const;
     };
 
 }  // namespace utility::motion::splines

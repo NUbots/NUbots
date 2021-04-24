@@ -46,13 +46,13 @@ namespace utility::file {
 
     bool exists(const std::string& path) {
         // Shamelessly stolen from: http://stackoverflow.com/a/12774387/1387006
-        struct stat buffer;
+        struct stat buffer {};
         return (stat(path.c_str(), &buffer) == 0);
     }
 
     std::chrono::system_clock::time_point getModificationTime(const std::string& path) {
-        int status;
-        struct stat st_buf;
+        int status = 0;
+        struct stat st_buf {};
 
         // Get the status of the file system object.
         status = stat(path.c_str(), &st_buf);
@@ -66,8 +66,8 @@ namespace utility::file {
     // Test if a passed path is a directory
     bool isDir(const std::string& path) {
 
-        int status;
-        struct stat st_buf;
+        int status = 0;
+        struct stat st_buf {};
 
         // Get the status of the file system object.
         status = stat(path.c_str(), &st_buf);
@@ -80,7 +80,7 @@ namespace utility::file {
     }
 
     void makeDir(const std::string& path) {
-        int status;
+        int status = 0;
         status = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
         if (status != 0) {
@@ -91,7 +91,7 @@ namespace utility::file {
     // List the contents of a directory
     std::vector<std::string> listDir(const std::string& path) {
 
-        auto dir = opendir(path.c_str());
+        auto* dir = opendir(path.c_str());
         std::vector<std::string> result;
 
         if (dir != nullptr) {
@@ -103,7 +103,7 @@ namespace utility::file {
                     continue;
                 }
 
-                if (ent->d_type & DT_DIR) {
+                if ((ent->d_type & DT_DIR) != 0) {
                     result.push_back(file + "/");
                 }
                 else {
@@ -135,9 +135,7 @@ namespace utility::file {
                 return {"/", "/"};
             }
             // Otherwise remove the slash and call recursivly
-            else {
-                return pathSplit(input.substr(0, input.size() - 1));
-            }
+            return pathSplit(input.substr(0, input.size() - 1));
         }
         else {
             return {input.substr(0, lastSlash), input.substr(lastSlash + 1, input.size())};
@@ -183,9 +181,9 @@ namespace utility::file {
         std::vector<std::string> elements;
 
         // Get elements of the path to create.
-        if (parent == true) {
+        if (parent) {
             elements         = utility::strutil::split(directory, '/');
-            elements.front() = elements.front() == "" ? "/" : elements.front();
+            elements.front() = elements.front().empty() ? "/" : elements.front();
         }
         else {
             elements.push_back(directory);
@@ -237,7 +235,7 @@ namespace utility::file {
         int rc = utimensat(AT_FDCWD, file.c_str(), nullptr, 0);
 
         // Failed to update timestamp.
-        if (rc) {
+        if (rc != 0) {
             throw std::runtime_error("Cannot update timestamp for '" + file + "'.");
             return;
         }

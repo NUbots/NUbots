@@ -62,7 +62,7 @@ namespace utility::io {
          *
          * @return the native file descriptor
          */
-        int native_handle() const;
+        [[nodiscard]] int native_handle() const;
 
         /**
          * @brief Return true if the connection is valid
