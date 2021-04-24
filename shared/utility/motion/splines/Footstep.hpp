@@ -118,12 +118,12 @@ namespace utility::motion::splines {
         /**
          * Add to given pose the given diff expressed in pose frame and return the integrated added pose
          */
-        static [[nodiscard]] Eigen::Vector3f poseAdd(const Eigen::Vector3f& pose, const Eigen::Vector3f& diff) const;
+        [[nodiscard]] static Eigen::Vector3f poseAdd(const Eigen::Vector3f& pose, const Eigen::Vector3f& diff);
 
         /**
          * Compute and return the delta from (zero + diff) to (zero) in (zero + diff) frame.
          */
-        static [[nodiscard]] Eigen::Vector3f diffInv(const Eigen::Vector3f& diff) const;
+        [[nodiscard]] static Eigen::Vector3f diffInv(const Eigen::Vector3f& diff);
     };
 
 }  // namespace utility::motion::splines
