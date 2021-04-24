@@ -28,43 +28,39 @@
  * @author Brendan Annable
  */
 
-namespace utility {
-    namespace math {
-        namespace matrix {
+namespace utility::math::matrix {
 
 
-            /**
-             * @brief Returns an orthogonal vec3 to a given vec3
-             * See: http://a.pomf.se/egicug.pdf
-             * Efficient Construction of Perpendicular Vectors without Branching
-             * Michael M. Stark
-             */
-            inline arma::vec3 orthogonal(const arma::vec3& v) {
-                const unsigned int uyx = std::signbit(std::abs(v[0]) - std::abs(v[1]));
-                const unsigned int uzx = std::signbit(std::abs(v[0]) - std::abs(v[2]));
-                const unsigned int uzy = std::signbit(std::abs(v[1]) - std::abs(v[2]));
-                const unsigned int xm  = uyx & uzx;
-                const unsigned int ym  = (1 ^ xm) & uzy;
-                const unsigned int zm  = 1 ^ (xm & ym);
-                return {zm * v[1] - ym * v[2], xm * v[2] - zm * v[0], ym * v[0] - xm * v[1]};
-            }
+    /**
+     * @brief Returns an orthogonal vec3 to a given vec3
+     * See: http://a.pomf.se/egicug.pdf
+     * Efficient Construction of Perpendicular Vectors without Branching
+     * Michael M. Stark
+     */
+    inline arma::vec3 orthogonal(const arma::vec3& v) {
+        const unsigned int uyx = std::signbit(std::abs(v[0]) - std::abs(v[1]));
+        const unsigned int uzx = std::signbit(std::abs(v[0]) - std::abs(v[2]));
+        const unsigned int uzy = std::signbit(std::abs(v[1]) - std::abs(v[2]));
+        const unsigned int xm  = uyx & uzx;
+        const unsigned int ym  = (1 ^ xm) & uzy;
+        const unsigned int zm  = 1 ^ (xm & ym);
+        return {zm * v[1] - ym * v[2], xm * v[2] - zm * v[0], ym * v[0] - xm * v[1]};
+    }
 
-            /**
-             * @brief An alternative method for returning a orthogonal vec3 to a given vec3
-             * See: http://lolengine.net/blog/2013/09/21/picking-orthogonal-vector-combing-coconuts
-             */
-            inline arma::vec3 orthogonal2(const arma::vec3& v) {
-                return std::abs(v[0]) > std::abs(v[2]) ? arma::vec3({-v[1], v[0], 0}) : arma::vec3({0, -v[2], v[1]});
-            }
+    /**
+     * @brief An alternative method for returning a orthogonal vec3 to a given vec3
+     * See: http://lolengine.net/blog/2013/09/21/picking-orthogonal-vector-combing-coconuts
+     */
+    inline arma::vec3 orthogonal2(const arma::vec3& v) {
+        return std::abs(v[0]) > std::abs(v[2]) ? arma::vec3({-v[1], v[0], 0}) : arma::vec3({0, -v[2], v[1]});
+    }
 
-            /**
-             * @brief Returns an arbitary orthonormal vec3 to the given vec3
-             */
-            inline arma::vec3 orthonormal(const arma::vec3& v) {
-                auto u = orthogonal(v);
-                return arma::normalise(u);
-            }
-        }  // namespace matrix
-    }      // namespace math
-}  // namespace utility
+    /**
+     * @brief Returns an arbitary orthonormal vec3 to the given vec3
+     */
+    inline arma::vec3 orthonormal(const arma::vec3& v) {
+        auto u = orthogonal(v);
+        return arma::normalise(u);
+    }
+}  // namespace utility::math::matrix
 #endif  // UTILITY_MATH_MATRIX_HPP
