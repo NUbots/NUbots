@@ -52,7 +52,7 @@ steps:
 
   # Build generic target and test
   - label: "Build generic and Test"
-    command: "./b configure -- -DBUILD_TESTS=ON && ./b build && ./b tests run"
+    command: "./b configure -- -DBUILD_TESTS=ON -DCI_BUILD=ON && ./b build && ./b tests run"
     plugins:
       - docker-compose#v3.0.3:
           config: .buildkite/docker-compose.yml
