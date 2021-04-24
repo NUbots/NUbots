@@ -81,7 +81,7 @@ namespace utility::file {
 
     void makeDir(const std::string& path) {
         int status = 0;
-        status = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+        status     = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
         if (status != 0) {
             throw std::system_error(errno, std::system_category(), "Error creating directory '" + path + "'.");
