@@ -210,7 +210,7 @@ namespace module::input {
                 std::string key = cfg.first.as<std::string>();
 
                 // Skip the region keys as we handle them above
-                if (key == "Width" || key == "Height" || key == "OffsetX" || key == "OffsetY") {
+                if (key == "width" || key == "height" || key == "offset_x" || key == "offset_y") {
                     continue;
                 }
 
