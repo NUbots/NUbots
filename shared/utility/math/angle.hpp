@@ -43,11 +43,13 @@ namespace utility::math::angle {
 
         T angle = std::fmod(value, static_cast<T>(2.0 * M_PI));
 
-        if (angle <= -M_PI)
+        if (angle <= -M_PI) {
             angle += M_PI * 2;
+        }
 
-        if (angle > M_PI)
+        if (angle > M_PI) {
             angle -= 2 * M_PI;
+        }
 
         return angle;
     }
@@ -165,7 +167,7 @@ namespace utility::math::angle {
 
         // Find alpha such that $\sin(\alpha) = a\_$ and $\cos(\alpha) = b\_$, which is possible because $a\_^2
         // + b\_^2 = 1$
-        float alpha = atan2(a_, b_);
+        float alpha = atan2f(a_, b_);
 
         // Hence the equation becomes $\cos(\alpha)\cos(x)+\sin(\alpha)\sin(x) = cos(x-\alpha) = c\_$
         return alpha + acos_clamped(c_);

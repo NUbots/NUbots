@@ -38,7 +38,7 @@ namespace utility::behaviour {
         return cmd;
     }
 
-    inline MotionCommand WalkToState(Transform2D goalState_) {
+    inline MotionCommand WalkToState(const Transform2D& goalState_) {
         MotionCommand cmd;
         cmd.type       = MotionCommand::Type::Value::WALK_TO_STATE;
         cmd.goal_state = convert(goalState_);
@@ -54,14 +54,14 @@ namespace utility::behaviour {
         return cmd;
     }
 
-    inline MotionCommand BallApproach(const Eigen::Vector2d kickTarget_) {
+    inline MotionCommand BallApproach(const Eigen::Vector2d& kickTarget_) {
         MotionCommand cmd;
         cmd.type        = MotionCommand::Type::Value::BALL_APPROACH;
         cmd.kick_target = kickTarget_;
         return cmd;
     }
 
-    inline MotionCommand DirectCommand(Transform2D walkCommand_) {
+    inline MotionCommand DirectCommand(const Transform2D& walkCommand_) {
         MotionCommand cmd;
         cmd.type         = MotionCommand::Type::Value::DIRECT_COMMAND;
         cmd.walk_command = convert(walkCommand_);
