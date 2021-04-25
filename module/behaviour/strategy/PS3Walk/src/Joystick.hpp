@@ -12,54 +12,54 @@
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 #ifndef __JOYSTICK_HH__
-#define __JOYSTICK_HH__
+    #define JOYSTICK_HH_
 
-#include <string>
+    #include <string>
 
-#define JS_EVENT_BUTTON 0x01  // button pressed/released
-#define JS_EVENT_AXIS   0x02  // joystick moved
-#define JS_EVENT_INIT   0x80  // initial state of device
+    #define JS_EVENT_BUTTON 0x01  // button pressed/released
+    #define JS_EVENT_AXIS   0x02  // joystick moved
+    #define JS_EVENT_INIT   0x80  // initial state of device
 
 /**
  * Encapsulates all data relevant to a sampled joystick event.
  */
 class JoystickEvent {
 public:
-    JoystickEvent() : time(0), value(0), type(0), number(0) {}
+    JoystickEvent() {}
 
     /**
      * The timestamp of the event, in milliseconds.
      */
-    unsigned int time;
+    unsigned int time{0};
 
     /**
      * The value associated with this joystick event.
      * For buttons this will be either 1 (down) or 0 (up).
      * For axes, this will range between -32768 and 32767.
      */
-    short value;
+    short value{0};
 
     /**
      * The event type.
      */
-    unsigned char type;
+    unsigned char type{0};
 
     /**
      * The axis/button number.
      */
-    unsigned char number;
+    unsigned char number{0};
 
     /**
      * Returns true if this event is the result of a button press.
      */
-    bool isButton() {
+    bool isButton() const {
         return (type & JS_EVENT_BUTTON) != 0;
     }
 
     /**
      * Returns true if this event is the result of an axis movement.
      */
-    bool isAxis() {
+    bool isAxis() const {
         return (type & JS_EVENT_AXIS) != 0;
     }
 
@@ -67,7 +67,7 @@ public:
      * Returns true if this event is part of the initial state obtained when
      * the joystick is first connected to.
      */
-    bool isInitialState() {
+    bool isInitialState() const {
         return (type & JS_EVENT_INIT) != 0;
     }
 };
@@ -77,9 +77,9 @@ public:
  */
 class Joystick {
 private:
-    void openPath(std::string devicePath);
+    void openPath(const std::string& devicePath);
 
-    int _fd;
+    int _fd{-1};
     std::string path;
 
 public:
@@ -99,17 +99,17 @@ public:
     /**
      * Initialises an instance for the joystick device specified.
      */
-    Joystick(std::string devicePath);
+    Joystick(const std::string& devicePath);
 
     /**
      * Returns true if the joystick was found and may be used, otherwise false.
      */
-    bool found();
+    bool found() const;
 
     /**
      * Returns true if the joystick file descriptor is valid, otherwise false
      */
-    bool valid();
+    bool valid() const;
 
     /**
      * Reconnect to the joystick
@@ -120,7 +120,7 @@ public:
      * Attempts to populate the provided JoystickEvent instance with data
      * from the joystick. Returns true if data is available, otherwise false.
      */
-    bool sample(JoystickEvent* event);
+    bool sample(JoystickEvent* event) const;
 };
 
 #endif

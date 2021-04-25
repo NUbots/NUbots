@@ -24,12 +24,14 @@
 namespace module::support {
 
     // Set our initial shutdown request state
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     volatile bool userRequestedShutdown = false;
 
     // Initialize our powerplant variable
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     NUClear::PowerPlant* POWER_PLANT = nullptr;
 
-    void sigint(int) {
+    void sigint(int /*unused*/) {
 
         // Output that a shutdown command was sent (so the user knows the ctrl-c worked)
         std::cout << std::endl << "Shutdown Command Sent" << std::endl;
@@ -48,12 +50,12 @@ namespace module::support {
     }
 
     // Our segmentation fault converter function
-    void sigsegv(int) {
+    void sigsegv(int /*unused*/) {
 
         throw std::runtime_error("Segmentation Fault");
     }
 
-    void sigabrt(int) {
+    void sigabrt(int /*unused*/) {
 
         throw std::runtime_error("Abort signal");
     }
@@ -62,7 +64,7 @@ namespace module::support {
 
         // Store our powerplant in the static variable
         POWER_PLANT = &powerplant;
-        struct sigaction action;
+        struct sigaction action {};
 
         // Setup our segmentation fault signal handler/converter
         std::memset(&action, 0, sizeof(action));
