@@ -81,26 +81,26 @@ namespace utility::math {
         return numToRound + multiple - remainder;
     }
 
-    // http://stackoverflow.com/a/3409892/4795763
-    template <typename T>
-    inline constexpr typename std::enable_if<std::is_floating_point<T>::value, T>::type roundUp(T number, T fixedBase) {
-        if ((fixedBase != 0.0) && (number != 0.0)) {
-            T sign = sgn(number);
-            number *= sign;
-            number /= fixedBase;
+// http://stackoverflow.com/a/3409892/4795763
+template <typename T>
+inline constexpr typename std::enable_if<std::is_floating_point<T>::value, T>::type roundUp(T number, T fixedBase) {
+    if ((fixedBase != 0.0) && (number != 0.0)) {
+        T sign = sgn(number);
+        number *= sign;
+        number /= fixedBase;
 
-            int fixedPoint = static_cast<int>(std::ceil(number));
-            number         = fixedPoint * fixedBase;
-            number *= sign;
-        }
-
-        return (number);
+        int fixedPoint = static_cast<int>(std::ceil(number));
+        number         = fixedPoint * fixedBase;
+        number *= sign;
     }
 
-    template <typename T>
-    inline constexpr typename std::enable_if<std::is_arithmetic<T>::value, T>::type clamp(T min, T val, T max) {
-        return (std::min(std::max(val, min), max));
-    }
+    return (number);
+}
+
+template <typename T>
+inline constexpr typename std::enable_if<std::is_arithmetic<T>::value, T>::type clamp(T min, T val, T max) {
+    return (std::min(std::max(val, min), max));
+}
 }  // namespace utility::math
 
 #endif  // UTILITY_MATH_COMPARISON_HPP

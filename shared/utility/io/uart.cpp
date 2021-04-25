@@ -11,9 +11,9 @@
 
 namespace utility::io {
 
-    uart::uart() : device("") {}
+    uart::uart() : device(""), fd(-1) {}
 
-    uart::uart(const std::string& device, const unsigned int& baud) : device(device) {
+    uart::uart(const std::string& device, const unsigned int& baud) : device(device), fd(-1) {
         open(device, baud);
     }
 
