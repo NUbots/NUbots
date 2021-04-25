@@ -25,44 +25,42 @@
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 
-namespace utility {
-    namespace behaviour {
+namespace utility::behaviour {
 
-        using LimbID  = utility::input::LimbID;
-        using ServoID = utility::input::ServoID;
+    using LimbID  = utility::input::LimbID;
+    using ServoID = utility::input::ServoID;
 
-        struct RegisterAction {
+    struct RegisterAction {
 
-            size_t id;
-            std::string name;
+        size_t id;
+        std::string name;
 
-            std::vector<std::pair<float, std::set<LimbID>>> limbSet;
+        std::vector<std::pair<float, std::set<LimbID>>> limbSet;
 
-            std::function<void(std::set<LimbID>)> start;
-            std::function<void(std::set<LimbID>)> kill;
-            std::function<void(std::set<ServoID>)> completed;
-        };
+        std::function<void(std::set<LimbID>)> start;
+        std::function<void(std::set<LimbID>)> kill;
+        std::function<void(std::set<ServoID>)> completed;
+    };
 
-        struct ActionPriorities {
-            size_t id;
+    struct ActionPriorities {
+        size_t id;
 
-            std::vector<float> priorities;
-        };
+        std::vector<float> priorities;
+    };
 
-        struct ActionStart {
-            size_t id;
-            std::string name;
+    struct ActionStart {
+        size_t id;
+        std::string name;
 
-            std::set<LimbID> limbs;
-        };
+        std::set<LimbID> limbs;
+    };
 
-        struct ActionKill {
-            size_t id;
-            std::string name;
+    struct ActionKill {
+        size_t id;
+        std::string name;
 
-            std::set<LimbID> limbs;
-        };
-    }  // namespace behaviour
-}  // namespace utility
+        std::set<LimbID> limbs;
+    };
+}  // namespace utility::behaviour
 
 #endif

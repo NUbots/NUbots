@@ -23,85 +23,82 @@
 #include <algorithm>
 #include <string>
 
-namespace utility {
 
-    /**
-     * TODO document
-     *
-     * @author Trent Houliston
-     * @author Alex Biddulph: added trimLeft, trimRight, trim, and removeAll functions 10-12-2012
-     * @author Monica Olejniczak added split functions
-     * @author Brendan Annable
-     */
-    namespace strutil {
+/**
+ * TODO document
+ *
+ * @author Trent Houliston
+ * @author Alex Biddulph: added trimLeft, trimRight, trim, and removeAll functions 10-12-2012
+ * @author Monica Olejniczak added split functions
+ * @author Brendan Annable
+ */
+namespace utility::strutil {
 
-        // http://stackoverflow.com/a/874160/1387006
-        inline bool endsWith(const std::string& str, const std::string& ending) {
+    // http://stackoverflow.com/a/874160/1387006
+    inline bool endsWith(const std::string& str, const std::string& ending) {
 
-            if (str.length() >= ending.length()) {
-                return (0 == str.compare(str.length() - ending.length(), ending.length(), ending));
-            }
-            else {
-                return false;
-            }
+        if (str.length() >= ending.length()) {
+            return (0 == str.compare(str.length() - ending.length(), ending.length(), ending));
         }
-
-        inline bool startsWith(const std::string& str, const std::string& start) {
-
-            if (str.length() >= start.length()) {
-                return (0 == str.compare(0, start.length(), start));
-            }
-            else {
-                return false;
-            }
+        else {
+            return false;
         }
+    }
 
-        inline void trimLeft(std::string& str, const std::string& tokens) {
-            str.erase(0, str.find_first_not_of(tokens));  // remove tokens from the beginning of the string.
+    inline bool startsWith(const std::string& str, const std::string& start) {
+
+        if (str.length() >= start.length()) {
+            return (0 == str.compare(0, start.length(), start));
         }
-
-        inline void trimRight(std::string& str, const std::string& tokens) {
-            str.erase(str.find_last_not_of(tokens),
-                      str.length() - 1);  // remove tokens from the beginning of the string.
+        else {
+            return false;
         }
+    }
 
-        inline void trim(std::string& str, const std::string& tokens) {
-            trimLeft(str, tokens);
-            trimRight(str, tokens);
+    inline void trimLeft(std::string& str, const std::string& tokens) {
+        str.erase(0, str.find_first_not_of(tokens));  // remove tokens from the beginning of the string.
+    }
+
+    inline void trimRight(std::string& str, const std::string& tokens) {
+        str.erase(str.find_last_not_of(tokens),
+                  str.length() - 1);  // remove tokens from the beginning of the string.
+    }
+
+    inline void trim(std::string& str, const std::string& tokens) {
+        trimLeft(str, tokens);
+        trimRight(str, tokens);
+    }
+
+    // http://stackoverflow.com/a/237280
+    inline std::vector<std::string>& split(const std::string& str, char delimeter, std::vector<std::string>& elements) {
+        std::stringstream ss(str);
+        std::string item;
+        while (std::getline(ss, item, delimeter)) {
+            elements.push_back(item);
         }
+        return elements;
+    }
 
-        // http://stackoverflow.com/a/237280
-        inline std::vector<std::string>& split(const std::string& str,
-                                               char delimeter,
-                                               std::vector<std::string>& elements) {
-            std::stringstream ss(str);
-            std::string item;
-            while (std::getline(ss, item, delimeter)) {
-                elements.push_back(item);
-            }
-            return elements;
-        }
+    inline std::vector<std::string> split(const std::string& string, char delimeter) {
+        std::vector<std::string> elements;
+        split(string, delimeter, elements);
+        return elements;
+    }
 
-        inline std::vector<std::string> split(const std::string& string, char delimeter) {
-            std::vector<std::string> elements;
-            split(string, delimeter, elements);
-            return elements;
-        }
+    inline void removeAll(std::string& str, const std::string& tokens) {
+        str.erase(std::remove_if(str.begin(),
+                                 str.end(),
+                                 [&tokens](const char& c) { return tokens.find(c) != std::string::npos; }),
+                  str.end());  // remove all tokens from the string.
+    }
 
-        inline void removeAll(std::string& str, const std::string& tokens) {
-            str.erase(std::remove_if(str.begin(),
-                                     str.end(),
-                                     [&tokens](const char& c) { return tokens.find(c) != std::string::npos; }),
-                      str.end());  // remove all tokens from the string.
-        }
+    inline std::string toUpper(const std::string& input) {
+        std::string output = input;
 
-        inline std::string toUpper(const std::string& input) {
-            std::string output = input;
+        std::transform(output.begin(), output.end(), output.begin(), ::toupper);
 
-            std::transform(output.begin(), output.end(), output.begin(), ::toupper);
+        return output;
+    }
+}  // namespace utility::strutil
 
-            return output;
-        }
-    }  // namespace strutil
-}  // namespace utility
 #endif

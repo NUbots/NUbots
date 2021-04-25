@@ -24,25 +24,22 @@
 
 #include "extension/Script.hpp"
 
-namespace module {
-    namespace motion {
+namespace module::motion {
 
-        /**
-         * Executes scripts as a series of waypoints.
-         * Can either find a script by name, or take a script as a set of waypoints
-         *
-         * @author Trent Houliston
-         */
-        class ScriptEngine : public NUClear::Reactor {
-        private:
-            std::map<std::string, ::extension::Script> scripts;
+    /**
+     * Executes scripts as a series of waypoints.
+     * Can either find a script by name, or take a script as a set of waypoints
+     *
+     * @author Trent Houliston
+     */
+    class ScriptEngine : public NUClear::Reactor {
+    private:
+        std::map<std::string, ::extension::Script> scripts;
 
-        public:
-            explicit ScriptEngine(std::unique_ptr<NUClear::Environment> environment);
-            static constexpr const char* CONFIGURATION_PATH = "";
-        };
-
-    }  // namespace motion
-}  // namespace module
+    public:
+        explicit ScriptEngine(std::unique_ptr<NUClear::Environment> environment);
+        static constexpr const char* CONFIGURATION_PATH = "";
+    };
+}  // namespace module::motion
 
 #endif  // MODULES_MOTION_SCRIPTENGINE_HPP
