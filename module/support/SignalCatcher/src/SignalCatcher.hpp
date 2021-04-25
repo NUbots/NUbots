@@ -23,26 +23,23 @@
 #include <exception>
 #include <nuclear>
 
-namespace module {
-    namespace support {
+namespace module::support {
 
-        /**
-         * @brief Handles OS interrupt signals.
-         *
-         * @details
-         *  This module catches SIGINT and SIGSEGV and changes how they are handled. Only one SignalCatcher should ever
-         * be installed in the program and this module will be incompatible with any code that uses signal(SIGINT, ...)
-         *  or signal(SIGSEGV, ...) anywhere else. Additionally if there are multiple NUClear::PowerPlant instances this
-         *  module may cause a race condition and incorrectly shut down the wrong power plant.
-         *
-         * @author Trent Houliston
-         */
-        class SignalCatcher : public NUClear::Reactor {
-        public:
-            explicit SignalCatcher(std::unique_ptr<NUClear::Environment> environment);
-        };
-
-    }  // namespace support
-}  // namespace module
+    /**
+     * @brief Handles OS interrupt signals.
+     *
+     * @details
+     *  This module catches SIGINT and SIGSEGV and changes how they are handled. Only one SignalCatcher should ever
+     * be installed in the program and this module will be incompatible with any code that uses signal(SIGINT, ...)
+     *  or signal(SIGSEGV, ...) anywhere else. Additionally if there are multiple NUClear::PowerPlant instances this
+     *  module may cause a race condition and incorrectly shut down the wrong power plant.
+     *
+     * @author Trent Houliston
+     */
+    class SignalCatcher : public NUClear::Reactor {
+    public:
+        explicit SignalCatcher(std::unique_ptr<NUClear::Environment> environment);
+    };
+}  // namespace module::support
 
 #endif  // MODULES_SUPPORT_SIGNALCATCHER_HPP

@@ -28,24 +28,22 @@
 /**
  * @author Monica Olejniczak
  */
-namespace module {
-    namespace support {
-        using utility::file::listFiles;
-        using utility::strutil::split;
+namespace module::support {
+    using utility::file::listFiles;
+    using utility::strutil::split;
 
-        /**
-         * @brief Saves the configuration file using the root YAML node.
-         * @details Writes to the YAML file specified at the path by using a YAML emitter. This emitter takes the output
-         * stream of the
-         * root YAML node and saves it to the file.
-         *
-         * @param path The path to the configuration file.
-         * @param root The root YAML node.
-         */
-        void NUsight::saveConfigurationFile(std::string path, const std::string& root) {
-            std::string tempName(fmt::format("{}.tmp", path));
-            utility::file::writeToFile(tempName, root);
-            rename(tempName.c_str(), path.c_str());
-        }
-    }  // namespace support
-}  // namespace module
+    /**
+     * @brief Saves the configuration file using the root YAML node.
+     * @details Writes to the YAML file specified at the path by using a YAML emitter. This emitter takes the output
+     * stream of the
+     * root YAML node and saves it to the file.
+     *
+     * @param path The path to the configuration file.
+     * @param root The root YAML node.
+     */
+    void NUsight::saveConfigurationFile(std::string path, const std::string& root) {
+        std::string tempName(fmt::format("{}.tmp", path));
+        utility::file::writeToFile(tempName, root);
+        rename(tempName.c_str(), path.c_str());
+    }
+}  // namespace module::support
