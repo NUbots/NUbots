@@ -22,21 +22,19 @@
 
 #include <functional>
 
-namespace utility {
-    namespace support {
+namespace utility::support {
 
-        template <typename T>
-        struct LazyEvaluation {
+    template <typename T>
+    struct LazyEvaluation {
 
-            std::function<T()> lazy;
+        std::function<T()> lazy;
 
-            LazyEvaluation(std::function<T()> lazy) : lazy(lazy) {}
+        LazyEvaluation(std::function<T()> lazy) : lazy(lazy) {}
 
-            operator T() {
-                return lazy();
-            }
-        };
-    }  // namespace support
-}  // namespace utility
+        operator T() {
+            return lazy();
+        }
+    };
+}  // namespace utility::support
 
 #endif  // UTILITY_SUPPORT_LAZYEVALUATION_HPP

@@ -20,83 +20,102 @@
 
 #include <stdexcept>
 
-namespace utility {
-    namespace input {
+namespace utility::input {
 
-        ServoID::ServoID(std::string const& str) : value(Value::R_SHOULDER_PITCH) {
-            if (str == "R_SHOULDER_PITCH")
-                value = Value::R_SHOULDER_PITCH;
-            else if (str == "L_SHOULDER_PITCH")
-                value = Value::L_SHOULDER_PITCH;
-            else if (str == "R_SHOULDER_ROLL")
-                value = Value::R_SHOULDER_ROLL;
-            else if (str == "L_SHOULDER_ROLL")
-                value = Value::L_SHOULDER_ROLL;
-            else if (str == "R_ELBOW")
-                value = Value::R_ELBOW;
-            else if (str == "L_ELBOW")
-                value = Value::L_ELBOW;
-            else if (str == "R_HIP_YAW")
-                value = Value::R_HIP_YAW;
-            else if (str == "L_HIP_YAW")
-                value = Value::L_HIP_YAW;
-            else if (str == "R_HIP_ROLL")
-                value = Value::R_HIP_ROLL;
-            else if (str == "L_HIP_ROLL")
-                value = Value::L_HIP_ROLL;
-            else if (str == "R_HIP_PITCH")
-                value = Value::R_HIP_PITCH;
-            else if (str == "L_HIP_PITCH")
-                value = Value::L_HIP_PITCH;
-            else if (str == "R_KNEE")
-                value = Value::R_KNEE;
-            else if (str == "L_KNEE")
-                value = Value::L_KNEE;
-            else if (str == "R_ANKLE_PITCH")
-                value = Value::R_ANKLE_PITCH;
-            else if (str == "L_ANKLE_PITCH")
-                value = Value::L_ANKLE_PITCH;
-            else if (str == "R_ANKLE_ROLL")
-                value = Value::R_ANKLE_ROLL;
-            else if (str == "L_ANKLE_ROLL")
-                value = Value::L_ANKLE_ROLL;
-            else if (str == "HEAD_YAW")
-                value = Value::HEAD_YAW;
-            else if (str == "HEAD_PITCH")
-                value = Value::HEAD_PITCH;
-            else
-                throw std::runtime_error("String " + str + " did not match any enum for ServoID");
+    ServoID::ServoID(std::string const& str) : value(Value::R_SHOULDER_PITCH) {
+        if (str == "R_SHOULDER_PITCH") {
+            value = Value::R_SHOULDER_PITCH;
         }
+        else if (str == "L_SHOULDER_PITCH") {
+            value = Value::L_SHOULDER_PITCH;
+        }
+        else if (str == "R_SHOULDER_ROLL") {
+            value = Value::R_SHOULDER_ROLL;
+        }
+        else if (str == "L_SHOULDER_ROLL") {
+            value = Value::L_SHOULDER_ROLL;
+        }
+        else if (str == "R_ELBOW") {
+            value = Value::R_ELBOW;
+        }
+        else if (str == "L_ELBOW") {
+            value = Value::L_ELBOW;
+        }
+        else if (str == "R_HIP_YAW") {
+            value = Value::R_HIP_YAW;
+        }
+        else if (str == "L_HIP_YAW") {
+            value = Value::L_HIP_YAW;
+        }
+        else if (str == "R_HIP_ROLL") {
+            value = Value::R_HIP_ROLL;
+        }
+        else if (str == "L_HIP_ROLL") {
+            value = Value::L_HIP_ROLL;
+        }
+        else if (str == "R_HIP_PITCH") {
+            value = Value::R_HIP_PITCH;
+        }
+        else if (str == "L_HIP_PITCH") {
+            value = Value::L_HIP_PITCH;
+        }
+        else if (str == "R_KNEE") {
+            value = Value::R_KNEE;
+        }
+        else if (str == "L_KNEE") {
+            value = Value::L_KNEE;
+        }
+        else if (str == "R_ANKLE_PITCH") {
+            value = Value::R_ANKLE_PITCH;
+        }
+        else if (str == "L_ANKLE_PITCH") {
+            value = Value::L_ANKLE_PITCH;
+        }
+        else if (str == "R_ANKLE_ROLL") {
+            value = Value::R_ANKLE_ROLL;
+        }
+        else if (str == "L_ANKLE_ROLL") {
+            value = Value::L_ANKLE_ROLL;
+        }
+        else if (str == "HEAD_YAW") {
+            value = Value::HEAD_YAW;
+        }
+        else if (str == "HEAD_PITCH") {
+            value = Value::HEAD_PITCH;
+        }
+        else {
+            throw std::runtime_error("String " + str + " did not match any enum for ServoID");
+        }
+    }
 
-        ServoID::operator std::string() const {
-            switch (value) {
-                case Value::R_SHOULDER_PITCH: return "R_SHOULDER_PITCH";
-                case Value::L_SHOULDER_PITCH: return "L_SHOULDER_PITCH";
-                case Value::R_SHOULDER_ROLL: return "R_SHOULDER_ROLL";
-                case Value::L_SHOULDER_ROLL: return "L_SHOULDER_ROLL";
-                case Value::R_ELBOW: return "R_ELBOW";
-                case Value::L_ELBOW: return "L_ELBOW";
-                case Value::R_HIP_YAW: return "R_HIP_YAW";
-                case Value::L_HIP_YAW: return "L_HIP_YAW";
-                case Value::R_HIP_ROLL: return "R_HIP_ROLL";
-                case Value::L_HIP_ROLL: return "L_HIP_ROLL";
-                case Value::R_HIP_PITCH: return "R_HIP_PITCH";
-                case Value::L_HIP_PITCH: return "L_HIP_PITCH";
-                case Value::R_KNEE: return "R_KNEE";
-                case Value::L_KNEE: return "L_KNEE";
-                case Value::R_ANKLE_PITCH: return "R_ANKLE_PITCH";
-                case Value::L_ANKLE_PITCH: return "L_ANKLE_PITCH";
-                case Value::R_ANKLE_ROLL: return "R_ANKLE_ROLL";
-                case Value::L_ANKLE_ROLL: return "L_ANKLE_ROLL";
-                case Value::HEAD_YAW: return "HEAD_YAW";
-                case Value::HEAD_PITCH: return "HEAD_PITCH";
-                case Value::NUMBER_OF_SERVOS:
-                default: throw std::runtime_error("enum ServoID's value is corrupt, unknown value stored");
-            }
+    ServoID::operator std::string() const {
+        switch (value) {
+            case Value::R_SHOULDER_PITCH: return "R_SHOULDER_PITCH";
+            case Value::L_SHOULDER_PITCH: return "L_SHOULDER_PITCH";
+            case Value::R_SHOULDER_ROLL: return "R_SHOULDER_ROLL";
+            case Value::L_SHOULDER_ROLL: return "L_SHOULDER_ROLL";
+            case Value::R_ELBOW: return "R_ELBOW";
+            case Value::L_ELBOW: return "L_ELBOW";
+            case Value::R_HIP_YAW: return "R_HIP_YAW";
+            case Value::L_HIP_YAW: return "L_HIP_YAW";
+            case Value::R_HIP_ROLL: return "R_HIP_ROLL";
+            case Value::L_HIP_ROLL: return "L_HIP_ROLL";
+            case Value::R_HIP_PITCH: return "R_HIP_PITCH";
+            case Value::L_HIP_PITCH: return "L_HIP_PITCH";
+            case Value::R_KNEE: return "R_KNEE";
+            case Value::L_KNEE: return "L_KNEE";
+            case Value::R_ANKLE_PITCH: return "R_ANKLE_PITCH";
+            case Value::L_ANKLE_PITCH: return "L_ANKLE_PITCH";
+            case Value::R_ANKLE_ROLL: return "R_ANKLE_ROLL";
+            case Value::L_ANKLE_ROLL: return "L_ANKLE_ROLL";
+            case Value::HEAD_YAW: return "HEAD_YAW";
+            case Value::HEAD_PITCH: return "HEAD_PITCH";
+            case Value::NUMBER_OF_SERVOS:
+            default: throw std::runtime_error("enum ServoID's value is corrupt, unknown value stored");
         }
+    }
 
-        std::ostream& operator<<(std::ostream& out, const ServoID& val) {
-            return out << static_cast<std::string>(val);
-        }
-    }  // namespace input
-}  // namespace utility
+    std::ostream& operator<<(std::ostream& out, const ServoID& val) {
+        return out << static_cast<std::string>(val);
+    }
+}  // namespace utility::input

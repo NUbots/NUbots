@@ -21,33 +21,31 @@
 #define UTILITY_SUPPORT_EVIL_PUREEVIL_HPP
 
 #include <string>
+#include <utility>
 #include <vector>
 
 // If we are not in debug mode, don't build it! Please don't build it!
 #ifndef NDEBUG
 
-namespace utility {
-    namespace support {
-        namespace evil {
+namespace utility::support::evil {
 
-            struct StackFrame {
+    struct StackFrame {
 
-                StackFrame() : pc(), file(), lineno(), function() {}
+        StackFrame() {}
 
-                StackFrame(uintptr_t pc, std::string file, int lineno, std::string function)
-                    : pc(pc), file(file), lineno(lineno), function(function) {}
+        StackFrame(uintptr_t pc, std::string file, int lineno, std::string function)
+            : pc(pc), file(std::move(std::move(file))), lineno(lineno), function(std::move(std::move(function))) {}
 
-                uintptr_t pc;
-                std::string file;
-                int lineno;
-                std::string function;
-            };
-
-            extern thread_local std::vector<StackFrame> stack;
-            extern thread_local std::string exception_name;
-        }  // namespace evil
-    }      // namespace support
-}  // namespace utility
+        uintptr_t pc{};
+        std::string file;
+        int lineno{};
+        std::string function;
+    };
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+    extern thread_local std::vector<StackFrame> stack;
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+    extern thread_local std::string exception_name;
+}  // namespace utility::support::evil
 
 #endif  // NDEBUG
 
