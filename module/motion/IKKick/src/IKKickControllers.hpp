@@ -57,9 +57,7 @@ namespace module::motion {
             duration                    = config["duration"].as<float>();
             Eigen::Vector3d pos         = config["pos"].as<Expression>();
             Eigen::Vector3d orientation = config["orientation"].as<Expression>();
-            // Convert to degrees
-            orientation = (180.0 / M_PI) * orientation;
-            pose        = Eigen::Affine3d::Identity();
+            pose                        = Eigen::Affine3d::Identity();
             pose.rotate(Eigen::AngleAxisd(orientation.x(), Eigen::Vector3d::UnitX()));
             pose.rotate(Eigen::AngleAxisd(orientation.y(), Eigen::Vector3d::UnitY()));
             pose.rotate(Eigen::AngleAxisd(orientation.z(), Eigen::Vector3d::UnitZ()));
