@@ -499,9 +499,9 @@ namespace module::input {
                     state->data.secondary_time = time;
 
                     stateChanges.push_back([this, time] {
-                        auto msg       = std::make_unique<GamePhase>();
-                        msg->phase     = GameState::Data::Phase::Value::READY;
-                        msg->readyTime = time;
+                        auto msg        = std::make_unique<GamePhase>();
+                        msg->phase      = GameState::Data::Phase::Value::READY;
+                        msg->ready_time = time;
                         emit(msg);
                     });
                     break;
@@ -526,10 +526,10 @@ namespace module::input {
                     state->data.phase          = GameState::Data::Phase::Value::PLAYING;
 
                     stateChanges.push_back([this, endHalf, ballFree] {
-                        auto msg      = std::make_unique<GamePhase>();
-                        msg->phase    = GameState::Data::Phase::Value::PLAYING;
-                        msg->endHalf  = endHalf;
-                        msg->ballFree = ballFree;
+                        auto msg       = std::make_unique<GamePhase>();
+                        msg->phase     = GameState::Data::Phase::Value::PLAYING;
+                        msg->end_half  = endHalf;
+                        msg->ball_free = ballFree;
                         emit(msg);
                     });
                     break;
@@ -542,9 +542,9 @@ namespace module::input {
                     state->data.phase        = GameState::Data::Phase::Value::FINISHED;
 
                     stateChanges.push_back([this, nextHalf] {
-                        auto msg      = std::make_unique<GamePhase>();
-                        msg->phase    = GameState::Data::Phase::Value::FINISHED;
-                        msg->nextHalf = nextHalf;
+                        auto msg       = std::make_unique<GamePhase>();
+                        msg->phase     = GameState::Data::Phase::Value::FINISHED;
+                        msg->next_half = nextHalf;
                         emit(msg);
                     });
                     break;
