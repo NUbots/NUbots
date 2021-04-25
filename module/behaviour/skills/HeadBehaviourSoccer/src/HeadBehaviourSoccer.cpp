@@ -153,7 +153,7 @@ namespace module::behaviour::skills {
                                                                             [this](const SoccerObjectPriority& p) {
                                                                                 ballPriority = p.ball;
                                                                                 goalPriority = p.goal;
-                                                                                searchType   = p.searchType;
+                                                                                search_type  = p.search_type;
                                                                             });
 
         auto initialPriority  = std::make_unique<SoccerObjectPriority>();
@@ -216,7 +216,7 @@ namespace module::behaviour::skills {
                       // log("updatePlan", updatePlan);
                       // log("lost", lost);
                       // log("isGettingUp", isGettingUp);
-                      // log("searchType", int(searchType));
+                      // log("search_type", int(search_type));
                       // log("headSearcher.size()", headSearcher.size());
 
                       // State execution
@@ -428,7 +428,7 @@ namespace module::behaviour::skills {
 
         // If there are objects to find
         if (search) {
-            fixationPoints = getSearchPoints(kinematicsModel, fixationObjects, searchType, sensors, lens);
+            fixationPoints = getSearchPoints(kinematicsModel, fixationObjects, search_type, sensors, lens);
         }
 
         if (fixationPoints.size() <= 0) {
@@ -469,7 +469,7 @@ namespace module::behaviour::skills {
 
         // If there are objects to find
         if (search) {
-            fixationPoints = getSearchPoints(kinematicsModel, fixationObjects, searchType, sensors, lens);
+            fixationPoints = getSearchPoints(kinematicsModel, fixationObjects, search_type, sensors, lens);
         }
 
         if (fixationPoints.size() <= 0) {

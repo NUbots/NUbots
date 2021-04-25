@@ -417,14 +417,14 @@ namespace module::behaviour::strategy {
         for (auto& fieldObject : fieldObjects) {
             switch (fieldObject.target.value) {
                 case FieldTarget::Target::SELF: {
-                    soccerObjectPriority->goal       = 1;
-                    soccerObjectPriority->searchType = SearchType::GOAL_SEARCH;
+                    soccerObjectPriority->goal        = 1;
+                    soccerObjectPriority->search_type = SearchType::GOAL_SEARCH;
 
                     break;
                 }
                 case FieldTarget::Target::BALL: {
-                    soccerObjectPriority->ball       = 1;
-                    soccerObjectPriority->searchType = SearchType::LOST;
+                    soccerObjectPriority->ball        = 1;
+                    soccerObjectPriority->search_type = SearchType::LOST;
                     break;
                 }
                 default: throw std::runtime_error("Soccer strategy attempted to find a bad object");
