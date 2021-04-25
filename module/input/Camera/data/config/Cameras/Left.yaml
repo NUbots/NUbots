@@ -1,11 +1,11 @@
 buffer_count: 4 # The number of software buffers to use.
 
 settings:
-  PixelFormat: BayerRG8
-  Width: 1280
-  Height: 1024
-  OffsetX: 0
-  OffsetY: 0
-  ExposureAuto: Continuous
-  GainAuto: Continuous
-  BalanceWhiteAuto: Continuous
+  pixel_format: BayerRG8
+  width: 1280
+  height: 1024
+  offset_x: 0
+  offset_y: 0
+  exposure_auto: Continuous
+  gain_auto: Continuous
+  balance_white_auto: Continuous

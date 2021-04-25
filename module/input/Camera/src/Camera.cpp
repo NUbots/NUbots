@@ -152,7 +152,7 @@ namespace module::input {
             context.time = sync_clocks(device);
 
             // Get the fourcc code from the pixel format
-            context.fourcc = description_to_fourcc(config["settings"]["PixelFormat"].as<std::string>());
+            context.fourcc = description_to_fourcc(config["settings"]["pixel_format"].as<std::string>());
 
             // Load Hpc from configuration
             context.Hpc = Eigen::Matrix4d(config["lens"]["Hpc"].as<Expression>());
@@ -161,10 +161,10 @@ namespace module::input {
             int full_width  = arv::device_get_integer_feature_value(device, "WidthMax");
             int full_height = arv::device_get_integer_feature_value(device, "HeightMax");
 
-            int offset_x = config["settings"]["OffsetX"].as<Expression>();
-            int offset_y = config["settings"]["OffsetY"].as<Expression>();
-            int width    = config["settings"]["Width"].as<Expression>();
-            int height   = config["settings"]["Height"].as<Expression>();
+            int offset_x = config["settings"]["offset_x"].as<Expression>();
+            int offset_y = config["settings"]["offset_y"].as<Expression>();
+            int width    = config["settings"]["width"].as<Expression>();
+            int height   = config["settings"]["height"].as<Expression>();
 
             // Renormalise the focal length
             float focal_length = config["lens"]["focal_length"].as<Expression>() * full_width / width;
