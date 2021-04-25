@@ -91,7 +91,7 @@ namespace module::behaviour::strategy {
         bool selfPenalised          = false;
         bool manualOrientationReset = false;
         double manualOrientation    = 0.0;
-        message::behaviour::KickPlan::KickType kickType;
+        message::behaviour::KickPlan::KickType kick_type;
         message::behaviour::Behaviour::State currentState = message::behaviour::Behaviour::State::INIT;
 
         NUClear::clock::time_point lastLocalised = NUClear::clock::now();

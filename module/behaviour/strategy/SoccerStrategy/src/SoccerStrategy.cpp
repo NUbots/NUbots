@@ -80,7 +80,7 @@ namespace module::behaviour::strategy {
         , cfg_()
         , walkTarget()
         , lookTarget()
-        , kickType()
+        , kick_type()
         , ballSearchStartTime()
         , goalLastMeasured() {
 
@@ -190,8 +190,8 @@ namespace module::behaviour::strategy {
                     // auto& phase = gameState.phase;
 
                     // TODO: fix ik kick
-                    kickType = KickType::SCRIPTED;
-                    // kickType = mode == GameMode::PENALTY_SHOOTOUT || cfg_.alwaysPowerKick ?
+                    kick_type = KickType::SCRIPTED;
+                    // kick_type = mode == GameMode::PENALTY_SHOOTOUT || cfg_.alwaysPowerKick ?
                     // KickType::SCRIPTED : KickType::IK_KICK;
 
                     if (cfg_.forcePlaying) {
@@ -258,7 +258,7 @@ namespace module::behaviour::strategy {
         on<Trigger<Field>, With<FieldDescription>>().then(
             [this](const Field& field, const FieldDescription& fieldDescription) {
                 Eigen::Vector2d kickTarget = getKickPlan(field, fieldDescription);
-                emit(std::make_unique<KickPlan>(KickPlan(kickTarget, kickType)));
+                emit(std::make_unique<KickPlan>(KickPlan(kickTarget, kick_type)));
             });
     }
 
