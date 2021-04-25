@@ -30,7 +30,7 @@ package message.motion;
 message HeadCommand {
     float yaw        = 1;
     float pitch      = 2;
-    bool  robotSpace = 3;  // if true, the yaw and pitch are interpreted in robot space, instead of IMU space
+    bool  robot_space = 3;  // if true, the yaw and pitch are interpreted in robot space, instead of IMU space
 }
 
 message HeadMotionUpdate {

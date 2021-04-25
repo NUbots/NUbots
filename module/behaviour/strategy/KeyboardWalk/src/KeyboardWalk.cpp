@@ -334,10 +334,10 @@ namespace module::behaviour::strategy {
             emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(affineParameter)));
         }
 
-        auto head_command        = std::make_unique<HeadCommand>();
-        head_command->yaw        = head_yaw;
-        head_command->pitch      = head_pitch;
-        head_command->robotSpace = true;
+        auto head_command         = std::make_unique<HeadCommand>();
+        head_command->yaw         = head_yaw;
+        head_command->pitch       = head_pitch;
+        head_command->robot_space = true;
         emit(head_command);
     }
 
