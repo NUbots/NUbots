@@ -73,7 +73,7 @@ namespace module::behaviour::strategy {
         void look_up();
         void look_down();
         void walk_toggle();
-        void quit();
+        static void quit();
 
         void update_command();
         void print_status();

@@ -20,7 +20,6 @@ syntax = "proto3";
 
 package message.localisation;
 
-import "Vector.proto";
 import "Matrix.proto";
 
 message Field {
