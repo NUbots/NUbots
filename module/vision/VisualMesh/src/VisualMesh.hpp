@@ -8,25 +8,22 @@
 #include "engine/opencl/opencl_engine.hpp"
 #include "visualmesh.hpp"
 
-namespace module {
-    namespace vision {
+namespace module::vision {
 
-        class VisualMesh : public NUClear::Reactor {
-        private:
-            template <typename Scalar>
-            using Engine     = visualmesh::engine::opencl::Engine<Scalar>;
-            using Classifier = visualmesh::engine::opencl::Classifier<float>;
-            using VM         = visualmesh::VisualMesh<float, Engine>;
+    class VisualMesh : public NUClear::Reactor {
+    private:
+        template <typename Scalar>
+        using Engine     = visualmesh::engine::opencl::Engine<Scalar>;
+        using Classifier = visualmesh::engine::opencl::Classifier<float>;
+        using VM         = visualmesh::VisualMesh<float, Engine>;
 
-            std::unique_ptr<VM> mesh;
-            std::unique_ptr<Classifier> classifier;
+        std::unique_ptr<VM> mesh;
+        std::unique_ptr<Classifier> classifier;
 
-        public:
-            /// @brief Called by the powerplant to build and setup the VisualMesh reactor.
-            explicit VisualMesh(std::unique_ptr<NUClear::Environment> environment);
-        };
+    public:
+        /// @brief Called by the powerplant to build and setup the VisualMesh reactor.
+        explicit VisualMesh(std::unique_ptr<NUClear::Environment> environment);
+    };
 
-    }  // namespace vision
-}  // namespace module
-
+}  // namespace module::vision
 #endif  // MODULE_VISION_VISUALMESH_HPP
