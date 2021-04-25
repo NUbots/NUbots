@@ -32,7 +32,7 @@ namespace extension {
         };
 
         std::string path;
-        int events;
+        int events{};
 
         inline operator bool() const {
             // Empty path is invalid
@@ -76,19 +76,17 @@ namespace NUClear::dsl {
             }
 
             template <typename DSL>
-            static inline ::extension::FileWatch get(threading::Reaction&) {
+            static inline ::extension::FileWatch get(threading::Reaction& /*unused*/) {
 
                 // Get our File Watch store value
-                auto ptr = ::extension::FileWatch::FileWatchStore::value;
+                auto* ptr = ::extension::FileWatch::FileWatchStore::value;
 
                 // If there was something in the store
                 if (ptr) {
                     return *ptr;
                 }
                 // Return an invalid file watch element
-                else {
-                    return ::extension::FileWatch{"", 0};
-                }
+                return ::extension::FileWatch{"", 0};
             }
         };
     }  // namespace operation

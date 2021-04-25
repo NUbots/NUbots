@@ -78,9 +78,7 @@ namespace utility::math {
             return -(abs(numToRound) - remainder);
         }
 
-        else {
-            return numToRound + multiple - remainder;
-        }
+        return numToRound + multiple - remainder;
     }
 
     // http://stackoverflow.com/a/3409892/4795763
