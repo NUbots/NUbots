@@ -71,7 +71,7 @@ namespace module::input {
                       send_port = config["send_port"].as<uint>();
 
                       // If we are changing ports (the port starts at 0 so this should start it the first time)
-                      if (config["recieve_port"].as<uint>() != recieve_port) {
+                      if (config["receive_port"].as<uint>() != recieve_port) {
 
                           // If we have an old binding, then unbind it
                           // The port starts at 0 so this should work
@@ -80,7 +80,7 @@ namespace module::input {
                           }
 
                           // Update our port
-                          recieve_port = config["recieve_port"].as<uint>();
+                          recieve_port = config["receive_port"].as<uint>();
 
                           // Bind our new handle
                           std::tie(listenHandle, std::ignore, std::ignore) =
