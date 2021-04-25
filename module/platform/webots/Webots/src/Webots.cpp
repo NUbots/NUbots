@@ -323,6 +323,8 @@ namespace module::platform::webots {
             translate_servo_id(position.name, sensor_data->servo).presentPosition = position.value;
         }
 
+        // TODO(KipHamiltons or ANYONE who can test!!) We need to work out what to do with these. At the moment, these
+        // loops just overwrite the same values each iteration. We should test and see what we need to do ASAP!!
         for (const auto& accelerometer : sensor_measurements.accelerometers) {
             sensor_data->accelerometer.x = static_cast<float>(accelerometer.value.X);
             sensor_data->accelerometer.y = static_cast<float>(accelerometer.value.Y);
