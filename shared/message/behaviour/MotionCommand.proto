@@ -39,11 +39,11 @@ message MotionCommand {
     Type type = 1;
 
     // Required data for WalkToState command:
-    vec3 goalState = 2;
+    vec3 goal_state = 2;
 
     // Required data for WalkToBall command:
-    vec2 kickTarget = 3;
+    vec2 kick_target = 3;
 
     // Required data for DirectCommand command:
-    vec3 walkCommand = 4;
+    vec3 walk_command = 4;
 }

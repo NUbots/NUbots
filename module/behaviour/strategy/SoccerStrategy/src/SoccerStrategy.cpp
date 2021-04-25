@@ -494,7 +494,7 @@ namespace module::behaviour::strategy {
             cmd.translation() = Eigen::Vector2d::Zero();
             motionCommand     = std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(cmd));
             if (std::fabs(fieldBearing) < cfg_.goalie_side_walk_angle_threshold) {
-                motionCommand->walkCommand.y() = translationSpeed;
+                motionCommand->walk_command.y() = translationSpeed;
             }
         }
         else {

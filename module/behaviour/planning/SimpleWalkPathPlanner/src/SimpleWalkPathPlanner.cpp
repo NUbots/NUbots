@@ -175,7 +175,7 @@ namespace module::behaviour::planning {
                 else if (latestCommand.type == message::behaviour::MotionCommand::Type::DIRECT_COMMAND) {
                     // TO DO, change to Bezier stuff
                     std::unique_ptr<WalkCommand> command =
-                        std::make_unique<WalkCommand>(subsumptionId, latestCommand.walkCommand);
+                        std::make_unique<WalkCommand>(subsumptionId, latestCommand.walk_command);
                     emit(std::move(command));
                     emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
                     return;

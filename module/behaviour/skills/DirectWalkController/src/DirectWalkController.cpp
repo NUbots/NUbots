@@ -75,7 +75,7 @@ namespace module::behaviour::skills {
         on<Trigger<MotionCommand>>().then([this](const MotionCommand& command) {
             if (command.type == MotionCommand::Type::DIRECT_COMMAND) {
                 emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {26, 11}}));
-                emit(std::move(std::make_unique<WalkCommand>(subsumptionId, command.walkCommand)));
+                emit(std::move(std::make_unique<WalkCommand>(subsumptionId, command.walk_command)));
             }
             else if (command.type == MotionCommand::Type::STAND_STILL) {
                 emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {26, 11}}));
