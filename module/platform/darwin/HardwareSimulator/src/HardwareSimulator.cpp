@@ -161,7 +161,7 @@ namespace module::platform::darwin {
                 noise.gyroscope.y = config["noise"]["gyroscope"]["y"].as<float>();
                 noise.gyroscope.z = config["noise"]["gyroscope"]["z"].as<float>();
 
-                bodyTilt = config["bodyTilt"].as<Expression>();
+                bodyTilt = config["body_tilt"].as<Expression>();
             });
 
         on<Trigger<DarwinSensors::Gyroscope>>().then("Receive Simulated Gyroscope",
