@@ -37,7 +37,7 @@ namespace utility::io {
         }
     }
 
-    void uart::close() {
+    void uart::close() const {
         if (fd >= 0) {
             ::close(fd);
         }
@@ -47,15 +47,15 @@ namespace utility::io {
         close();
     }
 
-    int uart::native_handle() {
+    int uart::native_handle() const {
         return fd;
     }
 
-    void uart::set_baud(const int& baud) {
+    void uart::set_baud(const unsigned int& baud) {
 
         // Do our setup for the tio settings, you must set BS38400 in order to set custom baud using "baud rate
         // aliasing" http://stackoverflow.com/questions/4968529/how-to-set-baud-rate-to-307200-on-linux
-        termios tio;
+        termios tio{};
         memset(&tio, 0, sizeof(tio));
         // B38400 for aliasing, CS8 (8bit,no parity,1 stopbit), CLOCAL (local connection, no modem control), CREAD
         // (enable receiving characters)
@@ -131,7 +131,7 @@ namespace utility::io {
         if (!known_baud) {
 
             // Here we do the baud rate aliasing in order to set the custom baud rate
-            serial_struct serinfo;
+            serial_struct serinfo{};
 
             // Get our serial_info from the system
             if (ioctl(fd, TIOCGSERIAL, &serinfo) < 0) {
@@ -163,11 +163,11 @@ namespace utility::io {
         return !(fcntl(fd, F_GETFL) < 0 && errno == EBADF);
     }
 
-    ssize_t uart::read(void* buf, size_t count) {
+    ssize_t uart::read(void* buf, size_t count) const {
         return ::read(fd, buf, count);
     }
 
-    ssize_t uart::write(const void* buf, size_t count) {
+    ssize_t uart::write(const void* buf, size_t count) const {
         return ::write(fd, buf, count);
     }
 }  // namespace utility::io
