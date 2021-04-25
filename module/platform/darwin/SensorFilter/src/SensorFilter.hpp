@@ -34,13 +34,13 @@
 
 namespace module::platform::darwin {
 
-            /**
-             * @author Jake Fountain
-             * @author Trent Houliston
-             */
-            class SensorFilter : public NUClear::Reactor {
-            public:
-                explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
+    /**
+     * @author Jake Fountain
+     * @author Trent Houliston
+     */
+    class SensorFilter : public NUClear::Reactor {
+    public:
+        explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
 
         utility::math::filter::UKF<double, MotionModel> motionFilter;
 

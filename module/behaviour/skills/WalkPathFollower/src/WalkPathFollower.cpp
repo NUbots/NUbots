@@ -125,11 +125,10 @@ namespace module::behaviour::skills {
             }
         });
 
-                updatePathReaction =
-                    on<Trigger<WalkPath>, With<ResetRobotHypotheses>, Sync<WalkPathFollower>, Single>()
-                        .then("Update current path plan",
-                              [this](const WalkPath& walkPath, const ResetRobotHypotheses& selfs) {
-                                  currentPath = walkPath;
+        updatePathReaction = on<Trigger<WalkPath>, With<ResetRobotHypotheses>, Sync<WalkPathFollower>, Single>()
+                                 .then("Update current path plan",
+                                       [this](const WalkPath& walkPath, const ResetRobotHypotheses& selfs) {
+                                           currentPath = walkPath;
 
                                            // Draw the robot's estimated path:
                                            if (cfg_.draw_estimated_path) {

@@ -26,13 +26,12 @@
 #include <string>
 #include <vector>
 
-namespace utility {
-    /**
-     * @author Jake Woods
-     * @author Trent Houliston
-     */
-    namespace file {
-        std::string loadFromFile(const std::string& path);
+/**
+ * @author Jake Woods
+ * @author Trent Houliston
+ */
+namespace utility::file {
+    std::string loadFromFile(const std::string& path);
 
     template <typename TData>
     void writeToFile(const std::string& path, const TData& data, bool append = false) {
