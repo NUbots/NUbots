@@ -52,7 +52,7 @@ message MotionCapture {
         fvec4           rotation      = 3;
         repeated Marker markers       = 4;
         float           error         = 5;
-        bool            trackingValid = 6;
+        bool            tracking_valid = 6;
 
         // Information added by the model
         string          name     = 7;
@@ -73,8 +73,8 @@ message MotionCapture {
     message LabeledMarker {
         Marker marker           = 1;
         bool   occluded         = 2;
-        bool   pointCloudSolved = 3;
-        bool   modelSolved      = 4;
+        bool   point_cloud_solved = 3;
+        bool   model_solved      = 4;
     }
 
     /// Each bone within a skeleton can be subject to position,
@@ -100,15 +100,15 @@ message MotionCapture {
     /// bytes, in binary coded decimal see
     /// https://en.wikipedia.org/wiki/SMPTE_timecode
     uint32 timecode    = 3;
-    uint32 timecodeSub = 4;
+    uint32 timecode_sub = 4;
     double timestamp   = 5;
     /// Whether or not this frame is to be recorded
     bool                   recording            = 6;
-    bool                   trackedModelsChanged = 7;
-    repeated MarkerSet     markerSets           = 8;
+    bool                   tracked_models_changed = 7;
+    repeated MarkerSet     marker_sets           = 8;
     repeated Marker        markers              = 9;
-    repeated RigidBody     rigidBodies          = 10;
+    repeated RigidBody     rigid_bodies          = 10;
     repeated Skeleton      skeletons            = 11;
-    repeated LabeledMarker labeledMarkers       = 12;
-    repeated ForcePlate    forcePlates          = 13;
+    repeated LabeledMarker labeled_markers       = 12;
+    repeated ForcePlate    force_plates          = 13;
 }
