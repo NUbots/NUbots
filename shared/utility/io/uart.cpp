@@ -9,8 +9,7 @@
 #include <termios.h>
 #include <unistd.h>
 
-namespace utility {
-namespace io {
+namespace utility::io {
 
     uart::uart() : device(""), fd(-1) {}
 
@@ -171,5 +170,4 @@ namespace io {
     ssize_t uart::write(const void* buf, size_t count) {
         return ::write(fd, buf, count);
     }
-}  // namespace io
-}  // namespace utility
+}  // namespace utility::io

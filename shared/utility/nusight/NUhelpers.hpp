@@ -24,10 +24,8 @@
 #include <nuclear>
 
 #include "message/support/nusight/DataPoint.hpp"
-#include "message/vision/Line.hpp"
 
-namespace utility {
-namespace nusight {
+namespace utility::nusight {
 
     namespace {
 
@@ -85,7 +83,5 @@ namespace nusight {
         return dataPoint;
     }
 
-}  // namespace nusight
-}  // namespace utility
-
+}  // namespace utility::nusight
 #endif

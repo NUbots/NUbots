@@ -24,8 +24,7 @@
 
 #include "utility/math/geometry/UnitQuaternion.hpp"
 
-namespace utility {
-namespace math {
+namespace utility::math {
     namespace geometry {
         class UnitQuaternion;
     }
@@ -104,8 +103,8 @@ namespace math {
             Rotation3D worldToLocal(const Rotation3D& reference) const;
 
             /**
-             * @brief Rotations current rotation from local coordinates relative to 'reference', to world coordinates
-             * (i.e. standard rotation)
+             * @brief Rotations current rotation from local coordinates relative to 'reference', to world
+             * coordinates (i.e. standard rotation)
              *
              * @param reference The rotation matrix that the current rotation is relative to
              * @return The transformed rotation matrix
@@ -219,7 +218,6 @@ namespace math {
         };
 
     }  // namespace matrix
-}  // namespace math
-}  // namespace utility
+}  // namespace utility::math
 
 #endif  // UTILITY_MATH_MATRIX_ROTATION3D_HPP

@@ -19,8 +19,7 @@
 
 #include "extension/Configuration.hpp"
 
-namespace module {
-namespace network {
+namespace module::network {
 
     using extension::Configuration;
 
@@ -76,6 +75,4 @@ namespace network {
             log<NUClear::INFO>("Disconnected from", event.name, "on", addr + ":" + std::to_string(port));
         });
     }
-
-}  // namespace network
-}  // namespace module
+}  // namespace module::network

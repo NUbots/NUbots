@@ -12,8 +12,7 @@
 #include "utility/math/geometry/ConvexHull.hpp"
 #include "utility/vision/visualmesh/VisualMesh.hpp"
 
-namespace module {
-namespace vision {
+namespace module::vision {
 
     using extension::Configuration;
 
@@ -125,7 +124,8 @@ namespace vision {
                         else {
                             if (config.debug) {
                                 log<NUClear::DEBUG>(
-                                    "The clusters are neither overlapping, nor are they not overlapping. What have you "
+                                    "The clusters are neither overlapping, nor are they not overlapping. What have "
+                                    "you "
                                     "done???");
                                 log<NUClear::DEBUG>(fmt::format("[{}, {}] -> [{}, {}], [{}, {}] -> [{}, {}]",
                                                                 *range_a.first,
@@ -188,6 +188,5 @@ namespace vision {
                 emit(std::move(msg));
             }
         });
-    }  // namespace vision
-}  // namespace vision
-}  // namespace module
+    }
+}  // namespace module::vision

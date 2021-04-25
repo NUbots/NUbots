@@ -23,8 +23,7 @@
 
 #include "utility/support/eigen_armadillo.hpp"
 
-namespace module {
-namespace support {
+namespace module::support {
 
     using message::input::Sensors;
 
@@ -36,5 +35,4 @@ namespace support {
                 powerplant.emit_shared<Scope::NETWORK>(std::move(sensors), "nusight", false);
             }));
     }
-}  // namespace support
-}  // namespace module
+}  // namespace module::support

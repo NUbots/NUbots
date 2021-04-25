@@ -26,28 +26,22 @@
 #include "utility/math/matrix/Transform2D.hpp"
 #include "utility/math/matrix/Transform3D.hpp"
 
-namespace utility {
-namespace localisation {
 
-    // Transforms the field state (x,y,theta) to the correct transform Hfw : World -> Field
-    inline utility::math::matrix::Transform3D fieldStateToTransform3D(const arma::vec3& state) {
-        utility::math::matrix::Transform3D Hfw;
-        Hfw.translation() = arma::vec3({state[0], state[1], 0});
-        Hfw               = Hfw.rotateZ(state[2]);
-        return Hfw;
-    }
-
-    // Transforms the transform
-    inline arma::vec3 transform3DToFieldState(const utility::math::matrix::Transform3D& m) {
-        utility::math::matrix::Transform2D ax = m.projectTo2D(arma::vec3({0, 0, 1}), arma::vec3({1, 0, 0}));
-        return arma::vec3({ax.x(), ax.y(), ax.angle()});
-    }
+namespace utility::localisation {
 
     // Transforms the field state (x,y,theta) to the correct transform Hfw : World -> Field
     inline Eigen::Affine3d fieldStateToTransform3D(const Eigen::Vector3d& state) {
         Eigen::Affine3d Hfw;
         Hfw.translation() = Eigen::Vector3d(state.x(), state.y(), 0.0);
         Hfw.linear()      = Eigen::AngleAxisd(state.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
+        return Hfw;
+    }
+
+    // Transforms the field state (x,y,theta) to the correct transform Hfw : World -> Field
+    inline utility::math::matrix::Transform3D fieldStateToTransform3D(const arma::vec3& state) {
+        utility::math::matrix::Transform3D Hfw;
+        Hfw.translation() = arma::vec3({state[0], state[1], 0});
+        Hfw               = Hfw.rotateZ(state[2]);
         return Hfw;
     }
 
@@ -83,7 +77,12 @@ namespace localisation {
         return projectTo2D(m, Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitX());
     }
 
-}  // namespace localisation
-}  // namespace utility
+    // Transforms the transform
+    inline arma::vec3 transform3DToFieldState(const utility::math::matrix::Transform3D& m) {
+        utility::math::matrix::Transform2D ax = m.projectTo2D(arma::vec3({0, 0, 1}), arma::vec3({1, 0, 0}));
+        return arma::vec3({ax.x(), ax.y(), ax.angle()});
+    }
+
+}  // namespace utility::localisation
 
 #endif

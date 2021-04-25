@@ -32,8 +32,7 @@ extern "C" {
 
 #include "utility/strutil/strutil.hpp"
 
-namespace utility {
-namespace file {
+namespace utility::file {
     std::string loadFromFile(const std::string& path) {
         std::ifstream data(path, std::ios::in);
 
@@ -244,5 +243,4 @@ namespace file {
         }
     }
 
-}  // namespace file
-}  // namespace utility
+}  // namespace utility::file

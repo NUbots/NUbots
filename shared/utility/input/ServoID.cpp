@@ -20,8 +20,7 @@
 
 #include <stdexcept>
 
-namespace utility {
-namespace input {
+namespace utility::input {
 
     ServoID::ServoID(std::string const& str) : value(Value::R_SHOULDER_PITCH) {
         if (str == "R_SHOULDER_PITCH")
@@ -98,5 +97,4 @@ namespace input {
     std::ostream& operator<<(std::ostream& out, const ServoID& val) {
         return out << static_cast<std::string>(val);
     }
-}  // namespace input
-}  // namespace utility
+}  // namespace utility::input

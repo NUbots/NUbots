@@ -26,8 +26,7 @@
 #include "message/platform/darwin/DarwinSensors.hpp"
 #include "message/support/GlobalConfig.hpp"
 
-namespace module {
-namespace input {
+namespace module::input {
 
     using extension::Configuration;
     using gamecontroller::GameControllerPacket;
@@ -603,6 +602,4 @@ namespace input {
 
         throw std::runtime_error("No opponent teams not found");  // should never happen!
     }
-
-}  // namespace input
-}  // namespace module
+}  // namespace module::input

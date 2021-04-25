@@ -33,8 +33,7 @@
 #include "utility/behaviour/Action.hpp"
 #include "utility/input/ServoID.hpp"
 
-namespace module {
-namespace behaviour {
+namespace module::behaviour {
 
     struct RequestItem;
 
@@ -129,7 +128,6 @@ namespace behaviour {
         explicit Controller(std::unique_ptr<NUClear::Environment> environment);
     };
 
-}  // namespace behaviour
-}  // namespace module
+}  // namespace module::behaviour
 
 #endif  // MODULES_BEHAVIOUR_CONTROLLER_HPP

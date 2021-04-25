@@ -13,8 +13,7 @@
 
 #include "utility/input/ServoID.hpp"
 
-namespace module {
-namespace motion {
+namespace module::motion {
 
     class QuinticWalk : public NUClear::Reactor {
 
@@ -65,8 +64,6 @@ namespace motion {
 
         std::map<utility::input::ServoID, float> jointGains;
     };
-
-}  // namespace motion
-}  // namespace module
+}  // namespace module::motion
 
 #endif

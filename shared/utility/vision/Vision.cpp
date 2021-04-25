@@ -24,8 +24,7 @@
 
 #include "message/input/Image.hpp"
 
-namespace utility {
-namespace vision {
+namespace utility::vision {
 
     void saveImage(const std::string& file, const message::input::Image& image) {
         std::ofstream ofs(file, std::ios::out | std::ios::binary);
@@ -328,5 +327,4 @@ namespace vision {
         }
     }
 
-}  // namespace vision
-}  // namespace utility
+}  // namespace utility::vision

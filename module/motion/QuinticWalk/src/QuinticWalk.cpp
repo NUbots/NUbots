@@ -11,14 +11,12 @@
 #include "message/support/SaveConfiguration.hpp"
 
 #include "utility/math/comparison.hpp"
-#include "utility/math/euler.h"
+#include "utility/math/euler.hpp"
 #include "utility/math/matrix/Transform3D.hpp"
 #include "utility/motion/InverseKinematics.hpp"
-#include "utility/support/eigen_armadillo.hpp"
 #include "utility/support/yaml_expression.hpp"
 
-namespace module {
-namespace motion {
+namespace module::motion {
 
     using extension::Configuration;
 
@@ -133,8 +131,8 @@ namespace motion {
         on<Trigger<StopCommand>>().then([this] { current_orders.setZero(); });
 
         on<Trigger<WalkCommand>>().then([this](const WalkCommand& walkCommand) {
-            // the engine expects orders in [m] not [m/s]. We have to compute by dividing by step frequency which is a
-            // double step factor 2 since the order distance is only for a single step, not double step
+            // the engine expects orders in [m] not [m/s]. We have to compute by dividing by step frequency which is
+            // a double step factor 2 since the order distance is only for a single step, not double step
             const float factor             = (1.0 / (params.freq)) / 2.0;
             const Eigen::Vector3f& command = walkCommand.command.cast<float>() * factor;
 
@@ -277,5 +275,4 @@ namespace motion {
 
         return waypoints;
     }
-}  // namespace motion
-}  // namespace module
+}  // namespace module::motion

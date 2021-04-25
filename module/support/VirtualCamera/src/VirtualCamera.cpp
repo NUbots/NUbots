@@ -26,8 +26,7 @@
 #include "utility/support/yaml_expression.hpp"
 #include "utility/vision/Vision.hpp"
 
-namespace module {
-namespace support {
+namespace module::support {
 
     using extension::Configuration;
 
@@ -89,5 +88,4 @@ namespace support {
             }
         });
     }
-}  // namespace support
-}  // namespace module
+}  // namespace module::support

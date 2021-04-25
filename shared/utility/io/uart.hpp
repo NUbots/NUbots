@@ -3,8 +3,7 @@
 
 #include <string>
 
-namespace utility {
-namespace io {
+namespace utility::io {
 
     /**
      * @brief Class for managing a connection to a serial device
@@ -99,7 +98,6 @@ namespace io {
         void close();
     };
 
-}  // namespace io
-}  // namespace utility
+}  // namespace utility::io
 
 #endif  // UTILITY_IO_UART_HPP

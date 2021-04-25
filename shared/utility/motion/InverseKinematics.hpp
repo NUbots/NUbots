@@ -40,75 +40,76 @@
 #include "utility/math/matrix/Transform3D.hpp"
 #include "utility/motion/ForwardKinematics.hpp"
 
-namespace utility {
-namespace motion {
-    namespace kinematics {
+namespace utility::motion::kinematics {
 
-        using LimbID  = utility::input::LimbID;
-        using ServoID = utility::input::ServoID;
+    using utility::input::LimbID;
+    using utility::input::ServoID;
 
-        /*! @brief Calculates the leg joints for a given input ankle position.
-                The robot coordinate system has origin a distance DISTANCE_FROM_BODY_TO_HIP_JOINT above the midpoint of
-           the hips.
-                Robot coordinate system:
-                            x is out of the front of the robot
-                            y is left, from right shoulder to left
-                            z is upward, from feet to head
-                Input ankle coordinate system:
-                            x is forward, from heel to toe
-                            y is left,
-                            z is normal to the plane of the foot
-            @param target The target 4x4 basis matrix for the ankle
-            @param isLeft Request for left leg motors or right leg motors?
-            @param RobotKinematicsModel The class containing the leg model of the robot.
-        */
+    /*! @brief Calculates the leg joints for a given input ankle position.
+            The robot coordinate system has origin a distance DISTANCE_FROM_BODY_TO_HIP_JOINT above the midpoint
+       of the hips. Robot coordinate system: x is out of the front of the robot y is left, from right shoulder
+       to left z is upward, from feet to head Input ankle coordinate system: x is forward, from heel to toe y is
+       left, z is normal to the plane of the foot
+        @param target The target 4x4 basis matrix for the ankle
+        @param isLeft Request for left leg motors or right leg motors?
+        @param RobotKinematicsModel The class containing the leg model of the robot.
+    */
 
-        bool legPoseValid(const message::motion::KinematicsModel& model,
-                          utility::math::matrix::Transform3D target,
-                          LimbID limb);
+    bool legPoseValid(const message::motion::KinematicsModel& model,
+                      utility::math::matrix::Transform3D target,
+                      LimbID limb);
 
-        std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
-                                                                  utility::math::matrix::Transform3D target,
-                                                                  LimbID limb);
-        std::vector<std::pair<ServoID, double>> calculateLegJoints(const message::motion::KinematicsModel& model,
-                                                                   const Eigen::Affine3d& target,
-                                                                   const LimbID& limb);
+    std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
+                                                              utility::math::matrix::Transform3D target,
+                                                              LimbID limb);
 
-        std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
-                                                                  utility::math::matrix::Transform3D leftTarget,
-                                                                  utility::math::matrix::Transform3D rightTarget);
+    std::vector<std::pair<ServoID, double>> calculateLegJoints(const message::motion::KinematicsModel& model,
+                                                               const Eigen::Affine3d& target,
+                                                               const LimbID& limb);
 
-        std::vector<std::pair<ServoID, float>> calculateCameraLookJoints(const message::motion::KinematicsModel& model,
-                                                                         arma::vec3 cameraUnitVector);
-        std::vector<std::pair<ServoID, double>> calculateCameraLookJoints(const message::motion::KinematicsModel& model,
-                                                                          const Eigen::Vector3d& cameraUnitVector);
+    std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
+                                                              const Eigen::Affine3f& target,
+                                                              const LimbID& limb);
 
-        std::vector<std::pair<ServoID, float>> calculateHeadJoints(arma::vec3 cameraUnitVector);
+    std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
+                                                              utility::math::matrix::Transform3D leftTarget,
+                                                              utility::math::matrix::Transform3D rightTarget);
 
-        arma::vec2 calculateHeadJointsToLookAt(arma::vec3 groundPoint,
-                                               const utility::math::matrix::Transform3D& camToGround,
-                                               const utility::math::matrix::Transform3D& bodyToGround);
+    std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
+                                                              const Eigen::Affine3f& leftTarget,
+                                                              const Eigen::Affine3f& rightTarget);
 
-        arma::vec2 headAnglesToSeeGroundPoint(const arma::vec2& gpos, const message::input::Sensors& sensors);
+    std::vector<std::pair<ServoID, float>> calculateCameraLookJoints(const message::motion::KinematicsModel& model,
+                                                                     arma::vec3 cameraUnitVector);
 
-        std::vector<std::pair<ServoID, float>> setHeadPoseFromFeet(
-            const message::motion::KinematicsModel& model,
-            const utility::math::matrix::Transform3D& cameraToFeet,
-            const float& footSeparation);
+    std::vector<std::pair<ServoID, double>> calculateCameraLookJoints(const KinematicsModel& model,
+                                                                      const Eigen::Vector3d& cameraUnitVector);
 
-        std::vector<std::pair<ServoID, float>> setArm(const message::motion::KinematicsModel& model,
-                                                      const arma::vec3& pos,
-                                                      bool left,
-                                                      int number_of_iterations = 300,
-                                                      arma::vec3 angleHint     = arma::zeros(3));
+    std::vector<std::pair<ServoID, float>> calculateHeadJoints(arma::vec3 cameraUnitVector);
 
-        std::vector<std::pair<ServoID, float>> setArmApprox(const message::motion::KinematicsModel& model,
-                                                            const arma::vec3& pos,
-                                                            bool left);
+    std::vector<std::pair<ServoID, float>> calculateHeadJoints(Eigen::Vector3f cameraUnitVector);
+
+    arma::vec2 calculateHeadJointsToLookAt(arma::vec3 groundPoint,
+                                           const utility::math::matrix::Transform3D& camToGround,
+                                           const utility::math::matrix::Transform3D& bodyToGround);
+
+    arma::vec2 headAnglesToSeeGroundPoint(const arma::vec2& gpos, const message::input::Sensors& sensors);
+
+    std::vector<std::pair<ServoID, float>> setHeadPoseFromFeet(const message::motion::KinematicsModel& model,
+                                                               const utility::math::matrix::Transform3D& cameraToFeet,
+                                                               const float& footSeparation);
+
+    std::vector<std::pair<ServoID, float>> setArm(const message::motion::KinematicsModel& model,
+                                                  const arma::vec3& pos,
+                                                  bool left,
+                                                  int number_of_iterations = 300,
+                                                  arma::vec3 angleHint     = arma::zeros(3));
+
+    std::vector<std::pair<ServoID, float>> setArmApprox(const message::motion::KinematicsModel& model,
+                                                        const arma::vec3& pos,
+                                                        bool left);
 
 
-    }  // namespace kinematics
-}  // namespace motion
-}  // namespace utility
+}  // namespace utility::motion::kinematics
 
 #endif  // UTILITY_MOTION_INVERSEKINEMATICS_HPP

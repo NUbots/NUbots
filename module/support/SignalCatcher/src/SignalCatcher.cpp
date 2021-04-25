@@ -21,8 +21,7 @@
 
 #include <csignal>
 
-namespace module {
-namespace support {
+namespace module::support {
 
     // Set our initial shutdown request state
     volatile bool userRequestedShutdown = false;
@@ -83,6 +82,4 @@ namespace support {
         action.sa_flags   = SA_NODEFER;
         sigaction(SIGINT, &action, nullptr);
     }
-
-}  // namespace support
-}  // namespace module
+}  // namespace module::support

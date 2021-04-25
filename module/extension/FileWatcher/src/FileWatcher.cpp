@@ -23,8 +23,7 @@
 
 #include "utility/file/fileutil.hpp"
 
-namespace module {
-namespace extension {
+namespace module::extension {
 
     using ::extension::FileWatch;
     using ::extension::FileWatchRequest;
@@ -276,5 +275,4 @@ namespace extension {
     FileWatcher::~FileWatcher() {
         uv_loop_close(loop.get());
     }
-}  // namespace extension
-}  // namespace module
+}  // namespace module::extension

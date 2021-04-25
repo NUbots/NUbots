@@ -16,8 +16,7 @@
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/Timer.hpp"
 
-namespace module {
-namespace vision {
+namespace module::vision {
 
     using extension::Configuration;
 
@@ -170,6 +169,5 @@ namespace vision {
 
             emit(msg);
         });
-    }  // namespace vision
-}  // namespace vision
-}  // namespace module
+    }
+}  // namespace module::vision

@@ -20,8 +20,7 @@
 
 #include <stdexcept>
 
-namespace utility {
-namespace input {
+namespace utility::input {
 
     using ServoID = utility::input::ServoID;
 
@@ -123,5 +122,4 @@ namespace input {
     std::ostream& operator<<(std::ostream& out, const LimbID& val) {
         return out << static_cast<std::string>(val);
     }
-}  // namespace input
-}  // namespace utility
+}  // namespace utility::input

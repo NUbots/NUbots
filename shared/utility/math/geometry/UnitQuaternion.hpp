@@ -24,8 +24,7 @@
 
 #include "utility/math/matrix/Rotation3D.hpp"
 
-namespace utility {
-namespace math {
+namespace utility::math {
     namespace matrix {
         template <int Dimensions>
         class Rotation;
@@ -145,7 +144,5 @@ namespace math {
             }
         };
     }  // namespace geometry
-}  // namespace math
-}  // namespace utility
-
+}  // namespace utility::math
 #endif

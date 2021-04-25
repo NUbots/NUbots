@@ -28,8 +28,7 @@
 
 #include "message/input/Image.hpp"
 
-namespace utility {
-namespace vision {
+namespace utility::vision {
 
     struct Colour {
         enum Value : char {
@@ -318,7 +317,6 @@ namespace vision {
     Pixel getPixel(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data, const FOURCC& fourcc);
 
 
-}  // namespace vision
-}  // namespace utility
+}  // namespace utility::vision
 
 #endif  // UTILITY_VISION_VISION_HPP
