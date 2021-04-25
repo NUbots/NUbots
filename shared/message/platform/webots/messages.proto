@@ -60,7 +60,7 @@ message Force3DMeasurement {
     Vector3 value = 2;  // [N], x-axis, y-axis, z-axis
 }
 
-message Force6DMeasurement {  // not yet implemented
+message Force6DMeasurement {  // not yet implemented by cyberbotics/tc, but we don't use it anyway
     string  name   = 1;
     Vector3 force  = 2;  // [N], x-axis, y-axis, z-axis
     Vector3 torque = 3;  // [N.m], x-axis, y-axis, z-axis
