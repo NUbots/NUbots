@@ -85,11 +85,5 @@ namespace module::behaviour::skills {
                 emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {0, 0}}));
             }
         });
-
-        on<Trigger<WalkStopped>>().then([this] {
-            // TODO : Right now, this causes the walk engine to become unaware of positions and negatively
-            // impact servo positions... emit(std::make_unique<ActionPriorities>(ActionPriorities {
-            // subsumptionId, { 0, 0 }}));
-        });
     }
 }  // namespace module::behaviour::skills
