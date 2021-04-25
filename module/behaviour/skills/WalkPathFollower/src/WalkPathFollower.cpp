@@ -191,7 +191,7 @@ namespace module::behaviour::skills {
                           //     // Transform the robot from ball space into the world space at
                           //     // the time of path planning (note that walk commands will be
                           //     // valid as they in robot space):
-                          //     currentState = localToWorld(currentPath.ballSpace, ballSpaceState);
+                          //     currentState = localToWorld(currentPath.ball_space, ballSpaceState);
                           // }
 
 
