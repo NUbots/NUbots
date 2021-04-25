@@ -31,17 +31,23 @@
 namespace module::platform::webots {
     class Clock {
     public:
-        using rep        = int;
-        using period     = std::ratio<1, 1000>;  // Should be the same as the webots world
-        using duration   = std::chrono::duration<rep, period>;
+        /// @brief An arithmetic type, which represents the duration
+        using rep = uint64_t;
+        /// @brief Tick period of the clock in seconds. Should be the same as the webots world
+        using period = std::ratio<1, 1000>;
+        /// @brief The duration type of the clock
+        using duration = std::chrono::duration<rep, period>;
+        /// @brief Specifies the type of time point, which uses this clock
         using time_point = std::chrono::time_point<Clock>;
-
+        /// @brief TODO(KipHamiltons): Why is this false?
         static constexpr bool is_steady = false;
 
+        /// @brief Gets current time
+        /// @return A time_point object representing the current point in time
         static time_point now();
-
+        /// @brief TODO(CMurtagh)
         static void tick();
-
+        /// @brief The discrete time point which represents the current time
         static duration current_tick;
     };
 
