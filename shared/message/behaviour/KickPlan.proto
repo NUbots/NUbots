@@ -28,7 +28,7 @@ message KickPlan {
         IK_KICK  = 1;
     }
 
-    vec2     target   = 1;
+    vec2     target    = 1;
     KickType kick_type = 2;
 }
 

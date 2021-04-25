@@ -35,5 +35,5 @@ message WalkPath {
     fvec3 goal  = 4;
 
     // The motion command for which this plan was generated:
-    MotionCommand command = 5;  // [default = MotionCommand.StandStill]
+    MotionCommand command = 5;  // [default = MotionCommand.STAND_STILL]
 }

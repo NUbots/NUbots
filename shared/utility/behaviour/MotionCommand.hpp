@@ -34,20 +34,20 @@ namespace utility::behaviour {
 
     inline MotionCommand StandStill() {
         MotionCommand cmd;
-        cmd.type = MotionCommand::Type::Value::StandStill;
+        cmd.type = MotionCommand::Type::Value::STAND_STILL;
         return cmd;
     }
 
     inline MotionCommand WalkToState(Transform2D goalState_) {
         MotionCommand cmd;
-        cmd.type      = MotionCommand::Type::Value::WalkToState;
+        cmd.type      = MotionCommand::Type::Value::WALK_TO_STATE;
         cmd.goalState = convert(goalState_);
         return cmd;
     }
 
     inline MotionCommand WalkToState(const Eigen::Affine2d& goalState_) {
         MotionCommand cmd;
-        cmd.type      = MotionCommand::Type::Value::WalkToState;
+        cmd.type      = MotionCommand::Type::Value::WALK_TO_STATE;
         cmd.goalState = Eigen::Vector3d(goalState_.translation().x(),
                                         goalState_.translation().y(),
                                         Eigen::Rotation2Dd(goalState_.linear()).angle());
@@ -56,21 +56,21 @@ namespace utility::behaviour {
 
     inline MotionCommand BallApproach(const Eigen::Vector2d kickTarget_) {
         MotionCommand cmd;
-        cmd.type       = MotionCommand::Type::Value::BallApproach;
+        cmd.type       = MotionCommand::Type::Value::BALL_APPROACH;
         cmd.kickTarget = kickTarget_;
         return cmd;
     }
 
     inline MotionCommand DirectCommand(Transform2D walkCommand_) {
         MotionCommand cmd;
-        cmd.type        = MotionCommand::Type::Value::DirectCommand;
+        cmd.type        = MotionCommand::Type::Value::DIRECT_COMMAND;
         cmd.walkCommand = convert(walkCommand_);
         return cmd;
     }
 
     inline MotionCommand DirectCommand(const Eigen::Affine2d& walkCommand_) {
         MotionCommand cmd;
-        cmd.type        = MotionCommand::Type::Value::DirectCommand;
+        cmd.type        = MotionCommand::Type::Value::DIRECT_COMMAND;
         cmd.walkCommand = Eigen::Vector3d(walkCommand_.translation().x(),
                                           walkCommand_.translation().y(),
                                           Eigen::Rotation2Dd(walkCommand_.linear()).angle());
