@@ -29,53 +29,50 @@
 #include "message/input/GameEvents.hpp"
 #include "message/input/GameState.hpp"
 
-namespace module {
-    namespace support {
+namespace module::support {
 
-        /**
-         * Intelligent debugging, logging and graphing for the NUbots system.
-         *
-         * @author Brendan Annable
-         * @author Trent Houliston
-         */
-        class NUsight : public NUClear::Reactor {
-        private:
-            NUClear::clock::duration max_image_duration;
-            std::map<uint32_t, NUClear::clock::time_point> last_image;
-            NUClear::clock::duration max_classified_image_duration;
-            NUClear::clock::time_point last_classified_image = NUClear::clock::now();
+    /**
+     * Intelligent debugging, logging and graphing for the NUbots system.
+     *
+     * @author Brendan Annable
+     * @author Trent Houliston
+     */
+    class NUsight : public NUClear::Reactor {
+    private:
+        NUClear::clock::duration max_image_duration;
+        std::map<uint32_t, NUClear::clock::time_point> last_image;
+        NUClear::clock::duration max_classified_image_duration;
+        NUClear::clock::time_point last_classified_image = NUClear::clock::now();
 
-            bool listening = true;
+        bool listening = true;
 
-            // Reaction Handles
-            std::map<std::string, std::vector<ReactionHandle>> handles;
+        // Reaction Handles
+        std::map<std::string, std::vector<ReactionHandle>> handles;
 
-            std::map<uint, message::behaviour::Subsumption::ActionRegister> actionRegisters;
+        std::map<uint, message::behaviour::Subsumption::ActionRegister> actionRegisters;
 
-            NUClear::clock::time_point last_camera_image = NUClear::clock::time_point(NUClear::clock::duration(0));
-            NUClear::clock::time_point last_seen_ball    = NUClear::clock::time_point(NUClear::clock::duration(0));
-            NUClear::clock::time_point last_seen_goal    = NUClear::clock::time_point(NUClear::clock::duration(0));
+        NUClear::clock::time_point last_camera_image = NUClear::clock::time_point(NUClear::clock::duration(0));
+        NUClear::clock::time_point last_seen_ball    = NUClear::clock::time_point(NUClear::clock::duration(0));
+        NUClear::clock::time_point last_seen_goal    = NUClear::clock::time_point(NUClear::clock::duration(0));
 
-            void provideOverview();
-            void provideDataPoints();
-            void provideDrawObjects();
-            void provideSubsumption();
-            void provideGameController();
-            void provideLocalisation();
-            void provideReactionStatistics();
-            void provideSensors();
-            void provideVision();
+        void provideOverview();
+        void provideDataPoints();
+        void provideDrawObjects();
+        void provideSubsumption();
+        void provideGameController();
+        void provideLocalisation();
+        void provideReactionStatistics();
+        void provideSensors();
+        void provideVision();
 
-            void sendGameState(std::string event, std::shared_ptr<const message::input::GameState> gameState);
-            void saveConfigurationFile(std::string path, const std::string& root);
-            void sendSubsumption();
+        void sendGameState(std::string event, std::shared_ptr<const message::input::GameState> gameState);
+        void saveConfigurationFile(std::string path, const std::string& root);
+        void sendSubsumption();
 
-        public:
-            static constexpr const char* IGNORE_TAG = "IGNORE";
-            explicit NUsight(std::unique_ptr<NUClear::Environment> environment);
-        };
-
-    }  // namespace support
-}  // namespace module
+    public:
+        static constexpr const char* IGNORE_TAG = "IGNORE";
+        explicit NUsight(std::unique_ptr<NUClear::Environment> environment);
+    };
+}  // namespace module::support
 
 #endif  // MODULES_SUPPORT_NUSIGHT_HPP

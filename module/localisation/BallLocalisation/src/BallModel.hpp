@@ -28,73 +28,71 @@
 
 #include "utility/math/coordinates.hpp"
 
-namespace module {
-    namespace localisation {
+namespace module::localisation {
 
-        using message::input::Sensors;
-        using message::support::FieldDescription;
-        using utility::math::coordinates::cartesianToSpherical;
+    using message::input::Sensors;
+    using message::support::FieldDescription;
+    using utility::math::coordinates::cartesianToSpherical;
 
-        template <typename Scalar>
-        class BallModel {
-        public:
-            // The indicies for our vector
-            static constexpr uint PX = 0;
-            static constexpr uint PY = 1;
+    template <typename Scalar>
+    class BallModel {
+    public:
+        // The indicies for our vector
+        static constexpr uint PX = 0;
+        static constexpr uint PY = 1;
 
-            static constexpr size_t size = 2;
+        static constexpr size_t size = 2;
 
-            using StateVec = Eigen::Matrix<Scalar, size, 1>;
-            using StateMat = Eigen::Matrix<Scalar, size, size>;
+        using StateVec = Eigen::Matrix<Scalar, size, 1>;
+        using StateMat = Eigen::Matrix<Scalar, size, size>;
 
-            struct MeasurementType {
-                struct BALL {};
-            };
-
-            // Local variables for this model. Set their values from config file
-            // Number of reset particles
-            int n_rogues;
-            // Range of reset particles
-            Eigen::Matrix<Scalar, 2, 1> resetRange;
-            // Diagonal noise matrix
-            Eigen::Matrix<Scalar, 2, 1> processNoiseDiagonal;
-
-            BallModel() : n_rogues(10), resetRange(10, 10), processNoiseDiagonal() {}
-
-            StateVec time(const StateVec& state, const Scalar& /*deltaT*/) const {
-                return state;
-            }
-
-            Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state,
-                                                const message::support::FieldDescription& field,
-                                                const Eigen::Matrix<Scalar, 4, 4>& Hcw) const {
-
-                const Eigen::Matrix<Scalar, 4, 1> rBWw(state[PX], state[PY], field.ball_radius, 1.0);
-                const Eigen::Matrix<Scalar, 3, 1> rBCc_cart((Hcw * rBWw).template head<3>());
-                return cartesianToSpherical(rBCc_cart);
-            }
-
-            StateVec limit(const StateVec& state) const {
-                return state;
-            }
-
-            StateMat noise(const Scalar& deltaT) {
-                return processNoiseDiagonal.asDiagonal() * deltaT;
-            }
-
-            template <typename T, typename U>
-            static auto difference(const T& a, const U& b) {
-                return a - b;
-            }
-
-            // Getters
-            inline int getRogueCount() const {
-                return n_rogues;
-            }
-            Eigen::Matrix<Scalar, 2, 1> getRogueRange() const {
-                return resetRange;
-            }
+        struct MeasurementType {
+            struct BALL {};
         };
-    }  // namespace localisation
-}  // namespace module
+
+        // Local variables for this model. Set their values from config file
+        // Number of reset particles
+        int n_rogues;
+        // Range of reset particles
+        Eigen::Matrix<Scalar, 2, 1> resetRange;
+        // Diagonal noise matrix
+        Eigen::Matrix<Scalar, 2, 1> processNoiseDiagonal;
+
+        BallModel() : n_rogues(10), resetRange(10, 10), processNoiseDiagonal() {}
+
+        StateVec time(const StateVec& state, const Scalar& /*deltaT*/) const {
+            return state;
+        }
+
+        Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state,
+                                            const message::support::FieldDescription& field,
+                                            const Eigen::Matrix<Scalar, 4, 4>& Hcw) const {
+
+            const Eigen::Matrix<Scalar, 4, 1> rBWw(state[PX], state[PY], field.ball_radius, 1.0);
+            const Eigen::Matrix<Scalar, 3, 1> rBCc_cart((Hcw * rBWw).template head<3>());
+            return cartesianToSpherical(rBCc_cart);
+        }
+
+        StateVec limit(const StateVec& state) const {
+            return state;
+        }
+
+        StateMat noise(const Scalar& deltaT) {
+            return processNoiseDiagonal.asDiagonal() * deltaT;
+        }
+
+        template <typename T, typename U>
+        static auto difference(const T& a, const U& b) {
+            return a - b;
+        }
+
+        // Getters
+        inline int getRogueCount() const {
+            return n_rogues;
+        }
+        Eigen::Matrix<Scalar, 2, 1> getRogueRange() const {
+            return resetRange;
+        }
+    };
+}  // namespace module::localisation
 #endif  // MODULE_LOCALISATION_BALLMODEL_HPP
