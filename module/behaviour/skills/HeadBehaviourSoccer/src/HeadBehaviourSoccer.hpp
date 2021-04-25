@@ -131,7 +131,7 @@ namespace module::behaviour::skills {
 
         int ballPriority = 0;
         int goalPriority = 0;
-        message::behaviour::SoccerObjectPriority::SearchType search_type =
+        message::behaviour::SoccerObjectPriority::SearchType searchType =
             message::behaviour::SoccerObjectPriority::SearchType::LOST;
 
         NUClear::clock::time_point lastPlanUpdate;

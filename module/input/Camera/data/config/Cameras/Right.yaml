@@ -1,7 +1,7 @@
 buffer_count: 4 # The number of software buffers to use.
 
 settings:
-  pixel-format: BayerRG8
+  pixel_format: BayerRG8
   width: 1280
   height: 1024
   offset_x: 0
