@@ -39,15 +39,15 @@ namespace module::platform::webots {
         using duration = std::chrono::duration<rep, period>;
         /// @brief Specifies the type of time point, which uses this clock
         using time_point = std::chrono::time_point<Clock>;
-        /// @brief TODO(KipHamiltons): Why is this false?
+        /// @brief False, because we cannot guarantee time between ticks is constant
         static constexpr bool is_steady = false;
 
         /// @brief Gets current time
         /// @return A time_point object representing the current point in time
         static time_point now();
-        /// @brief TODO(CMurtagh)
+        /// @brief Increments the tick count
         static void tick();
-        /// @brief The discrete time point which represents the current time
+        /// @brief The discrete time point which represents the current simulation time in Webots
         static duration current_tick;
     };
 
