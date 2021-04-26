@@ -32,10 +32,10 @@ namespace {
 
     struct StartTest {};
 
-    const char* test_file1_name = "directory-watcher-test-1.txt";
-    const char* test_file2_name = "directory-watcher-test-2.txt";
-    std::vector<extension::FileWatch> file_watch_events;
-    bool watchdog_triggered;
+    std::string testFile1Name = "directory-watcher-test-1.txt";
+    std::string testFile2Name = "directory-watcher-test-2.txt";
+    std::vector<extension::FileWatch> fileWatchEvents;
+    bool watchdogTriggered;
 
     class TestReactor : public NUClear::Reactor {
     public:
@@ -87,7 +87,7 @@ namespace {
                 powerplant.shutdown();
             });
         }
-
+      
         // We have a non default destructor so rule of 5 is needed
         TestReactor(const TestReactor&) = delete;
         TestReactor(TestReactor&&)      = delete;

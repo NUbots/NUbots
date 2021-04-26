@@ -24,34 +24,29 @@
 #include <utility>
 #include <vector>
 
-namespace utility {
-namespace math {
-    namespace ransac {
+namespace utility::math::ransac {
 
-        template <typename Iterator, typename Model>
-        struct RansacResult {
-        public:
-            RansacResult() : model(), first(), last() {}
+    template <typename Iterator, typename Model>
+    struct RansacResult {
+    public:
+        RansacResult() : model(), first(), last() {}
 
-            RansacResult(const Model& model, const Iterator& first, const Iterator& last)
-                : model(model), first(first), last(last) {}
+        RansacResult(const Model& model, const Iterator& first, const Iterator& last)
+            : model(model), first(first), last(last) {}
 
-            Model model;
+        Model model;
 
-            Iterator begin() const {
-                return first;
-            }
+        Iterator begin() const {
+            return first;
+        }
 
-            Iterator end() const {
-                return last;
-            }
+        Iterator end() const {
+            return last;
+        }
 
-        private:
-            Iterator first;
-            Iterator last;
-        };
-    }  // namespace ransac
-}  // namespace math
-}  // namespace utility
-
+    private:
+        Iterator first;
+        Iterator last;
+    };
+}  // namespace utility::math::ransac
 #endif

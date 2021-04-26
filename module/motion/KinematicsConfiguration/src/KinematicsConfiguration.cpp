@@ -23,11 +23,9 @@
 
 #include "message/motion/KinematicsModel.hpp"
 
-#include "utility/support/eigen_armadillo.hpp"
 #include "utility/support/yaml_expression.hpp"
 
-namespace module {
-namespace motion {
+namespace module::motion {
 
     using extension::Configuration;
     using message::motion::KinematicsModel;
@@ -54,10 +52,10 @@ namespace motion {
     }
 
     void KinematicsConfiguration::configureLeg(KinematicsModel& model, const YAML::Node& objLeg) {
-        arma::vec3 leg_hipOffset = objLeg["hip_offset"].as<Expression>();
-        model.leg.HIP_OFFSET_X   = leg_hipOffset[0];
-        model.leg.HIP_OFFSET_Y   = leg_hipOffset[1];
-        model.leg.HIP_OFFSET_Z   = leg_hipOffset[2];
+        Eigen::Vector3f leg_hipOffset = objLeg["hip_offset"].as<Expression>();
+        model.leg.HIP_OFFSET_X        = leg_hipOffset.x();
+        model.leg.HIP_OFFSET_Y        = leg_hipOffset.y();
+        model.leg.HIP_OFFSET_Z        = leg_hipOffset.z();
 
         model.leg.UPPER_LEG_LENGTH = objLeg["upper_leg_length"].as<float>();
         model.leg.LOWER_LEG_LENGTH = objLeg["lower_leg_length"].as<float>();
@@ -86,29 +84,29 @@ namespace motion {
     void KinematicsConfiguration::configureHead(KinematicsModel& model, const YAML::Node& objHead) {
         model.head.CAMERA_DECLINATION_ANGLE_OFFSET = objHead["camera_declination_angle_offset"].as<Expression>();
 
-        arma::vec3 head_neckToCamera       = objHead["neck_to_camera"].as<Expression>();
-        model.head.NECK_TO_CAMERA_X        = head_neckToCamera[0];
-        model.head.NECK_TO_CAMERA_Y        = head_neckToCamera[1];
-        model.head.NECK_TO_CAMERA_Z        = head_neckToCamera[2];
+        Eigen::Vector3f head_neckToCamera  = objHead["neck_to_camera"].as<Expression>();
+        model.head.NECK_TO_CAMERA_X        = head_neckToCamera.x();
+        model.head.NECK_TO_CAMERA_Y        = head_neckToCamera.y();
+        model.head.NECK_TO_CAMERA_Z        = head_neckToCamera.z();
         model.head.INTERPUPILLARY_DISTANCE = objHead["ipd"].as<float>();
 
         auto& objNeck = objHead["neck"];
 
         model.head.NECK_LENGTH = objNeck["length"].as<float>();
 
-        arma::vec3 neck_basePositionFromOrigin = objNeck["base_position_from_origin"].as<Expression>();
-        model.head.NECK_BASE_POS_FROM_ORIGIN_X = neck_basePositionFromOrigin[0];
-        model.head.NECK_BASE_POS_FROM_ORIGIN_Y = neck_basePositionFromOrigin[1];
-        model.head.NECK_BASE_POS_FROM_ORIGIN_Z = neck_basePositionFromOrigin[2];
+        Eigen::Vector3f neck_basePositionFromOrigin = objNeck["base_position_from_origin"].as<Expression>();
+        model.head.NECK_BASE_POS_FROM_ORIGIN_X      = neck_basePositionFromOrigin.x();
+        model.head.NECK_BASE_POS_FROM_ORIGIN_Y      = neck_basePositionFromOrigin.y();
+        model.head.NECK_BASE_POS_FROM_ORIGIN_Z      = neck_basePositionFromOrigin.z();
 
         auto& objHeadMovementLimits = objHead["limits"];
 
-        arma::vec2 headMovementLimits_yaw   = objHeadMovementLimits["yaw"].as<Expression>();
-        arma::vec2 headMovementLimits_pitch = objHeadMovementLimits["pitch"].as<Expression>();
-        model.head.MIN_YAW                  = headMovementLimits_yaw[0];
-        model.head.MAX_YAW                  = headMovementLimits_yaw[1];
-        model.head.MIN_PITCH                = headMovementLimits_pitch[0];
-        model.head.MAX_PITCH                = headMovementLimits_pitch[1];
+        Eigen::Vector2f headMovementLimits_yaw   = objHeadMovementLimits["yaw"].as<Expression>();
+        Eigen::Vector2f headMovementLimits_pitch = objHeadMovementLimits["pitch"].as<Expression>();
+        model.head.MIN_YAW                       = headMovementLimits_yaw.x();
+        model.head.MAX_YAW                       = headMovementLimits_yaw.y();
+        model.head.MIN_PITCH                     = headMovementLimits_pitch.x();
+        model.head.MAX_PITCH                     = headMovementLimits_pitch.y();
     }
 
     void KinematicsConfiguration::configureArm(KinematicsModel& model, const YAML::Node& objArm) {
@@ -117,45 +115,45 @@ namespace motion {
         auto& objLowerArm = objArm["lower_arm"];
 
         model.arm.DISTANCE_BETWEEN_SHOULDERS = objArm["distance_between_shoulders"].as<float>();
-        arma::vec2 shoulder                  = objShoulder["offset"].as<Expression>();
-        model.arm.SHOULDER_Z_OFFSET          = shoulder[1];
-        model.arm.SHOULDER_X_OFFSET          = shoulder[0];
+        Eigen::Vector2f shoulderOffset       = objShoulder["offset"].as<Expression>();
+        model.arm.SHOULDER_X_OFFSET          = shoulderOffset.x();
+        model.arm.SHOULDER_Z_OFFSET          = shoulderOffset.y();
         model.arm.SHOULDER_LENGTH            = objShoulder["length"].as<float>();
         model.arm.SHOULDER_WIDTH             = objShoulder["width"].as<float>();
         model.arm.SHOULDER_HEIGHT            = objShoulder["height"].as<float>();
-        arma::vec2 upper_arm                 = objUpperArm["offset"].as<Expression>();
-        model.arm.UPPER_ARM_LENGTH           = objUpperArm["length"].as<float>();
-        model.arm.UPPER_ARM_Y_OFFSET         = upper_arm[0];
-        model.arm.UPPER_ARM_X_OFFSET         = upper_arm[1];
-        arma::vec2 lower_arm                 = objLowerArm["offset"].as<Expression>();
-        model.arm.LOWER_ARM_LENGTH           = objLowerArm["length"].as<float>();
-        model.arm.LOWER_ARM_Y_OFFSET         = lower_arm[0];
-        model.arm.LOWER_ARM_Z_OFFSET         = lower_arm[1];
+
+        model.arm.UPPER_ARM_LENGTH     = objUpperArm["length"].as<float>();
+        Eigen::Vector2f upperArmOffset = objUpperArm["offset"].as<Expression>();
+        model.arm.UPPER_ARM_Y_OFFSET   = upperArmOffset.x();
+        model.arm.UPPER_ARM_X_OFFSET   = upperArmOffset.y();
+
+        model.arm.LOWER_ARM_LENGTH     = objLowerArm["length"].as<float>();
+        Eigen::Vector2f lowerArmOffset = objLowerArm["offset"].as<Expression>();
+        model.arm.LOWER_ARM_Y_OFFSET   = lowerArmOffset.x();
+        model.arm.LOWER_ARM_Z_OFFSET   = lowerArmOffset.y();
     }
 
     void KinematicsConfiguration::configureMassModel(KinematicsModel& model, const YAML::Node& objMassModel) {
-        model.massModel.head        = convert(arma::vec4(objMassModel["particles"]["head"].as<Expression>()));
-        model.massModel.arm_upper   = convert(arma::vec4(objMassModel["particles"]["arm_upper"].as<Expression>()));
-        model.massModel.arm_lower   = convert(arma::vec4(objMassModel["particles"]["arm_lower"].as<Expression>()));
-        model.massModel.torso       = convert(arma::vec4(objMassModel["particles"]["torso"].as<Expression>()));
-        model.massModel.hip_block   = convert(arma::vec4(objMassModel["particles"]["hip_block"].as<Expression>()));
-        model.massModel.leg_upper   = convert(arma::vec4(objMassModel["particles"]["leg_upper"].as<Expression>()));
-        model.massModel.leg_lower   = convert(arma::vec4(objMassModel["particles"]["leg_lower"].as<Expression>()));
-        model.massModel.ankle_block = convert(arma::vec4(objMassModel["particles"]["ankle_block"].as<Expression>()));
-        model.massModel.foot        = convert(arma::vec4(objMassModel["particles"]["foot"].as<Expression>()));
+        model.massModel.head        = objMassModel["particles"]["head"].as<Expression>();
+        model.massModel.arm_upper   = objMassModel["particles"]["arm_upper"].as<Expression>();
+        model.massModel.arm_lower   = objMassModel["particles"]["arm_lower"].as<Expression>();
+        model.massModel.torso       = objMassModel["particles"]["torso"].as<Expression>();
+        model.massModel.hip_block   = objMassModel["particles"]["hip_block"].as<Expression>();
+        model.massModel.leg_upper   = objMassModel["particles"]["leg_upper"].as<Expression>();
+        model.massModel.leg_lower   = objMassModel["particles"]["leg_lower"].as<Expression>();
+        model.massModel.ankle_block = objMassModel["particles"]["ankle_block"].as<Expression>();
+        model.massModel.foot        = objMassModel["particles"]["foot"].as<Expression>();
     }
 
     void KinematicsConfiguration::configureTensorModel(KinematicsModel& model, const YAML::Node& objTensorModel) {
-        model.tensorModel.head      = convert(arma::mat33(objTensorModel["particles"]["head"].as<Expression>()));
-        model.tensorModel.arm_upper = convert(arma::mat33(objTensorModel["particles"]["arm_upper"].as<Expression>()));
-        model.tensorModel.arm_lower = convert(arma::mat33(objTensorModel["particles"]["arm_lower"].as<Expression>()));
-        model.tensorModel.torso     = convert(arma::mat33(objTensorModel["particles"]["torso"].as<Expression>()));
-        model.tensorModel.hip_block = convert(arma::mat33(objTensorModel["particles"]["hip_block"].as<Expression>()));
-        model.tensorModel.leg_upper = convert(arma::mat33(objTensorModel["particles"]["leg_upper"].as<Expression>()));
-        model.tensorModel.leg_lower = convert(arma::mat33(objTensorModel["particles"]["leg_lower"].as<Expression>()));
-        model.tensorModel.ankle_block =
-            convert(arma::mat33(objTensorModel["particles"]["ankle_block"].as<Expression>()));
-        model.tensorModel.foot = convert(arma::mat33(objTensorModel["particles"]["foot"].as<Expression>()));
+        model.tensorModel.head        = objTensorModel["particles"]["head"].as<Expression>();
+        model.tensorModel.arm_upper   = objTensorModel["particles"]["arm_upper"].as<Expression>();
+        model.tensorModel.arm_lower   = objTensorModel["particles"]["arm_lower"].as<Expression>();
+        model.tensorModel.torso       = objTensorModel["particles"]["torso"].as<Expression>();
+        model.tensorModel.hip_block   = objTensorModel["particles"]["hip_block"].as<Expression>();
+        model.tensorModel.leg_upper   = objTensorModel["particles"]["leg_upper"].as<Expression>();
+        model.tensorModel.leg_lower   = objTensorModel["particles"]["leg_lower"].as<Expression>();
+        model.tensorModel.ankle_block = objTensorModel["particles"]["ankle_block"].as<Expression>();
+        model.tensorModel.foot        = objTensorModel["particles"]["foot"].as<Expression>();
     }
-}  // namespace motion
-}  // namespace module
+}  // namespace module::motion

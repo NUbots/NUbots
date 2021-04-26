@@ -82,7 +82,7 @@ namespace NUClear::dsl {
             static inline ::extension::FileWatch get(threading::Reaction& /*unused*/) {
 
                 // Get our File Watch store value
-                auto ptr = ::extension::FileWatch::FileWatchStore::value;
+                auto* ptr = ::extension::FileWatch::FileWatchStore::value;
 
                 // If there was something in the store
                 if (ptr) {
@@ -100,7 +100,6 @@ namespace NUClear::dsl {
         template <>
         struct is_transient<::extension::FileWatch> : public std::true_type {};
     }  // namespace trait
-
 }  // namespace NUClear::dsl
 
 #endif  // EXTENSION_FILEWATCH_HPP

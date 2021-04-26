@@ -21,8 +21,7 @@
 
 #include "utility/nusight/NUhelpers.hpp"
 
-namespace module {
-namespace support {
+namespace module::support {
 
     using std::chrono::milliseconds;
 
@@ -43,6 +42,4 @@ namespace support {
             emit(graph("Debug Waves", sine, cosine, dsine, dcosine));
         });
     }
-
-}  // namespace support
-}  // namespace module
+}  // namespace module::support

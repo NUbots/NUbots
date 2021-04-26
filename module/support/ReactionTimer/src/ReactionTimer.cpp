@@ -2,8 +2,7 @@
 
 #include "extension/Configuration.hpp"
 
-namespace module {
-namespace support {
+namespace module::support {
 
     using extension::Configuration;
     using NUClear::message::ReactionStatistics;
@@ -22,5 +21,4 @@ namespace support {
                 "ms");
         });
     }
-}  // namespace support
-}  // namespace module
+}  // namespace module::support

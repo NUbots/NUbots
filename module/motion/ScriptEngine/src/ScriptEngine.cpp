@@ -25,8 +25,7 @@
 
 #include "utility/file/fileutil.hpp"
 
-namespace module {
-namespace motion {
+namespace module::motion {
 
     using extension::ExecuteScript;
     using extension::ExecuteScriptByName;
@@ -92,6 +91,4 @@ namespace motion {
             emit(std::move(waypoints));
         });
     }
-
-}  // namespace motion
-}  // namespace module
+}  // namespace module::motion

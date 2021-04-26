@@ -23,8 +23,7 @@
 
 #include <type_traits>
 
-namespace mio {
-namespace detail {
+namespace mio::detail {
 
     template <typename String>
     struct is_c_str {
@@ -55,7 +54,6 @@ namespace detail {
         return !path || (*path == 0);
     }
 
-}  // namespace detail
-}  // namespace mio
+}  // namespace mio::detail
 
 #endif  // MIO_STRING_UTIL_HEADER

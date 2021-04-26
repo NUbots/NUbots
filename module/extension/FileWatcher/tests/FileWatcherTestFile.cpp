@@ -32,9 +32,9 @@ namespace {
 
     struct StartTest {};
 
-    const char* test_file_name = "file-watcher-test.txt";
-    std::vector<extension::FileWatch> file_watch_events;
-    bool watchdog_triggered;
+    std::string testFileName = "file-watcher-test.txt";
+    std::vector<extension::FileWatch> fileWatchEvents;
+    bool watchdogTriggered;
 
     class TestReactor : public NUClear::Reactor {
     public:
@@ -55,6 +55,7 @@ namespace {
                     file_watch_events.push_back(message);
 
                     if (file_watch_events.size() >= 2) {
+
                         powerplant.shutdown();
                     }
                 });
@@ -74,7 +75,7 @@ namespace {
                 powerplant.shutdown();
             });
         }
-
+      
         ~TestReactor() override {
             std::filesystem::remove_all(dir_path);  // Cleanup
         }

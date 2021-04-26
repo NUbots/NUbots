@@ -22,6 +22,7 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <fmt/format.h>
+#include <numeric>
 
 #include "extension/Configuration.hpp"
 
@@ -35,8 +36,7 @@
 #include "utility/vision/Vision.hpp"
 #include "utility/vision/visualmesh/VisualMesh.hpp"
 
-namespace module {
-namespace vision {
+namespace module::vision {
 
     using extension::Configuration;
 
@@ -326,5 +326,4 @@ namespace vision {
                 }
             });
     }
-}  // namespace vision
-}  // namespace module
+}  // namespace module::vision

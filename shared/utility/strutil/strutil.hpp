@@ -23,7 +23,6 @@
 #include <algorithm>
 #include <string>
 
-namespace utility {
 
 /**
  * TODO document
@@ -33,7 +32,7 @@ namespace utility {
  * @author Monica Olejniczak added split functions
  * @author Brendan Annable
  */
-namespace strutil {
+namespace utility::strutil {
 
     // http://stackoverflow.com/a/874160/1387006
     inline bool endsWith(const std::string& str, const std::string& ending) {
@@ -41,9 +40,7 @@ namespace strutil {
         if (str.length() >= ending.length()) {
             return (0 == str.compare(str.length() - ending.length(), ending.length(), ending));
         }
-        else {
-            return false;
-        }
+        return false;
     }
 
     inline bool startsWith(const std::string& str, const std::string& start) {
@@ -51,9 +48,7 @@ namespace strutil {
         if (str.length() >= start.length()) {
             return (0 == str.compare(0, start.length(), start));
         }
-        else {
-            return false;
-        }
+        return false;
     }
 
     inline void trimLeft(std::string& str, const std::string& tokens) {
@@ -61,7 +56,8 @@ namespace strutil {
     }
 
     inline void trimRight(std::string& str, const std::string& tokens) {
-        str.erase(str.find_last_not_of(tokens), str.length() - 1);  // remove tokens from the beginning of the string.
+        str.erase(str.find_last_not_of(tokens),
+                  str.length() - 1);  // remove tokens from the beginning of the string.
     }
 
     inline void trim(std::string& str, const std::string& tokens) {
@@ -99,6 +95,6 @@ namespace strutil {
 
         return output;
     }
-}  // namespace strutil
-}  // namespace utility
+}  // namespace utility::strutil
+
 #endif
