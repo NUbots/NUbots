@@ -84,7 +84,7 @@ namespace utility::math::angle {
 
         auto x = a - b;
 
-        auto m = x - std::floor(x / (M_2_PI)) * M_2_PI);
+        auto m = x - std::floor(x / (M_2_PI)) * M_2_PI;
 
         auto d = std::fmod(m + M_PI, M_2_PI) - M_PI;
 
