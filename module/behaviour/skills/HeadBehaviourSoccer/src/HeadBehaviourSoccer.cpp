@@ -547,7 +547,7 @@ namespace module::behaviour::skills {
             return scaledResults;
         }
 
-        Quad<Eigen::Vector2d> boundingBox = getScreenAngularBoundingBox(fixationObjects);
+        Quad<double, 2, 1> boundingBox = getScreenAngularBoundingBox(fixationObjects);
 
         std::vector<Eigen::Vector2d> viewPoints;
         if (lens.fov == 0) {
@@ -610,7 +610,7 @@ namespace module::behaviour::skills {
             return scaledResults;
         }
 
-        Quad<Eigen::Vector2d> boundingBox = getScreenAngularBoundingBox(fixationObjects);
+        Quad<double, 2, 1> boundingBox = getScreenAngularBoundingBox(fixationObjects);
 
         std::vector<Eigen::Vector2d> viewPoints;
         if (lens.fov == 0) {
@@ -650,14 +650,14 @@ namespace module::behaviour::skills {
                 "HeadBehaviourSoccer::combineVisionBalls - Attempted to combine zero vision objects into one.");
             return Ball();
         }
-        Quad<Eigen::Vector2d> q = getScreenAngularBoundingBox(ob);
-        Ball v                  = ob.balls.at(0);
-        v.screen_angular        = q.getCentre().cast<float>();
-        v.angular_size          = q.getSize().cast<float>();
+        Quad<double, 2, 1> q = getScreenAngularBoundingBox(ob);
+        Ball v               = ob.balls.at(0);
+        v.screen_angular     = q.getCentre().cast<float>();
+        v.angular_size       = q.getSize().cast<float>();
         return v;
     }
 
-    Quad<Eigen::Vector2d> HeadBehaviourSoccer::getScreenAngularBoundingBox(const Balls& ob) {
+    Quad<double, 2, 1> HeadBehaviourSoccer::getScreenAngularBoundingBox(const Balls& ob) {
         std::vector<Eigen::Vector2d> boundingPoints;
         for (uint i = 0; i < ob.balls.size(); i++) {
             boundingPoints.push_back(
@@ -665,7 +665,7 @@ namespace module::behaviour::skills {
             boundingPoints.push_back(
                 (ob.balls.at(i).screen_angular - ob.balls.at(i).angular_size * 0.5).cast<double>());
         }
-        return Quad<Eigen::Vector2d>::getBoundingBox(boundingPoints);
+        return Quad<double, 2, 1>::getBoundingBox(boundingPoints);
     }
 
 
@@ -679,7 +679,7 @@ namespace module::behaviour::skills {
         return ob.goals.at(0);
     }
 
-    Quad<Eigen::Vector2d> HeadBehaviourSoccer::getScreenAngularBoundingBox(const Goals& ob) {
+    Quad<double, 2, 1> HeadBehaviourSoccer::getScreenAngularBoundingBox(const Goals& ob) {
         std::vector<Eigen::Vector2d> boundingPoints;
         for (uint i = 0; i < ob.goals.size(); i++) {
             boundingPoints.push_back(
@@ -687,7 +687,7 @@ namespace module::behaviour::skills {
             boundingPoints.push_back(
                 (ob.goals.at(i).screen_angular - ob.goals.at(i).angular_size * 0.5).cast<double>());
         }
-        return Quad<Eigen::Vector2d>::getBoundingBox(boundingPoints);
+        return Quad<double, 2, 1>::getBoundingBox(boundingPoints);
     }
 
     bool HeadBehaviourSoccer::orientationHasChanged(const message::input::Sensors& sensors) {

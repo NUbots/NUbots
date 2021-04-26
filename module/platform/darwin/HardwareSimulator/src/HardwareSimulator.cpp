@@ -34,7 +34,6 @@
 #include "utility/math/angle.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/platform/darwin/DarwinSensors.hpp"
-#include "utility/support/eigen_armadillo.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::platform::darwin {
