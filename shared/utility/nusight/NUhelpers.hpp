@@ -55,7 +55,7 @@ namespace utility::nusight {
                                           && std::is_same<decltype(test_end<T>(0)), yes>::value;
         };
 
-        inline void buildGraph(DataPoint& /*unused*/) {}
+        inline void buildGraph(DataPoint& /*dataPoint*/) {}
 
         template <typename First, typename... Remainder>
         typename std::enable_if<!is_iterable<First>::value>::type buildGraph(DataPoint& dataPoint,

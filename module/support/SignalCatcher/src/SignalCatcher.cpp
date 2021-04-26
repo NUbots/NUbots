@@ -31,7 +31,7 @@ namespace module::support {
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     NUClear::PowerPlant* POWER_PLANT = nullptr;
 
-    void sigint(int /*unused*/) {
+    void sigint(int /*signal*/) {
 
         // Output that a shutdown command was sent (so the user knows the ctrl-c worked)
         std::cout << std::endl << "Shutdown Command Sent" << std::endl;
@@ -50,12 +50,12 @@ namespace module::support {
     }
 
     // Our segmentation fault converter function
-    void sigsegv(int /*unused*/) {
+    void sigsegv(int /*signal*/) {
 
         throw std::runtime_error("Segmentation Fault");
     }
 
-    void sigabrt(int /*unused*/) {
+    void sigabrt(int /*signal*/) {
 
         throw std::runtime_error("Abort signal");
     }
