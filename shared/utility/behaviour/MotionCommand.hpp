@@ -43,7 +43,7 @@ namespace utility::behaviour {
         return cmd;
     }
 
-    inline MotionCommand BallApproach(const Eigen::Vector2d kickTarget_) {
+    inline MotionCommand BallApproach(const Eigen::Vector2d& kickTarget_) {
         MotionCommand cmd;
         cmd.type       = MotionCommand::Type::Value::BallApproach;
         cmd.kickTarget = kickTarget_;
