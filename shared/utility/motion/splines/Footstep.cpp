@@ -85,7 +85,7 @@ namespace utility::motion::splines {
         stepFromSupport(tmpDiff);
     }
 
-    Eigen::Vector3f Footstep::poseAdd(const Eigen::Vector3f& pose, const Eigen::Vector3f& diff) {
+    Eigen::Vector3f poseAdd(const Eigen::Vector3f& pose, const Eigen::Vector3f& diff) {
         const float cos_z = std::cos(pose.z());
         const float sin_z = std::sin(pose.z());
         return Eigen::Vector3f(pose.x() + diff.x() * cos_z - diff.y() * sin_z,
@@ -93,7 +93,7 @@ namespace utility::motion::splines {
                                utility::math::angle::normalizeAngle(pose.z() + diff.z()));
     }
 
-    Eigen::Vector3f Footstep::diffInv(const Eigen::Vector3f& diff) {
+    Eigen::Vector3f diffInv(const Eigen::Vector3f& diff) {
         const float cos_z = std::cos(-diff.z());
         const float sin_z = std::sin(-diff.z());
         return Eigen::Vector3f(-diff.x() * cos_z + diff.y() * sin_z, -diff.x() * sin_z - diff.y() * cos_z, -diff.z());
