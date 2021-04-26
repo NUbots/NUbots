@@ -49,7 +49,7 @@ namespace module::behaviour::strategy {
         initscr();
 
         // Initialise colours
-        if (static_cast<int>(has_colors()) == TRUE) {
+        if (has_colors()) {
             colours_enabled = true;
             start_color();
             init_pair(short(LogColours::TRACE_COLOURS), COLOR_WHITE, COLOR_BLACK);
