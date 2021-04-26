@@ -41,14 +41,14 @@ namespace utility::math::angle {
     template <typename T>
     inline T normalizeAngle(const T value) {
 
-        T angle = std::fmod(value, static_cast<T>(M_2_PI));
+        T angle = std::fmod(value, static_cast<T>(2 * M_PI));
 
         if (angle <= -M_PI) {
-            angle += M_2_PI;
+            angle += 2 * M_PI;
         }
 
         if (angle > M_PI) {
-            angle -= M_2_PI;
+            angle -= 2 * M_PI;
         }
 
         return angle;
@@ -72,7 +72,7 @@ namespace utility::math::angle {
      */
     inline double difference(const double a, const double b) {
 
-        return M_PI - std::fabs(std::fmod(std::fabs(a - b), M_2_PI) - M_PI);
+        return M_PI - std::fabs(std::fmod(std::fabs(a - b), (2 * M_PI)) - M_PI);
     }
 
     /**
@@ -84,9 +84,9 @@ namespace utility::math::angle {
 
         auto x = a - b;
 
-        auto m = x - std::floor(x / (M_2_PI)) * M_2_PI;
+        auto m = x - std::floor(x / (2 * M_PI)) * 2 * M_PI;
 
-        auto d = std::fmod(m + M_PI, M_2_PI) - M_PI;
+        auto d = std::fmod(m + M_PI, (2 * M_PI)) - M_PI;
 
         return d;
     }
@@ -112,7 +112,7 @@ namespace utility::math::angle {
         }
 
         Scalar dist1 = max - min;
-        Scalar dist2 = M_2_PI - max + min;
+        Scalar dist2 = (2 * M_PI) - max + min;
 
         if (dist1 < dist2) {
             if (angleSrc > angleDst) {
