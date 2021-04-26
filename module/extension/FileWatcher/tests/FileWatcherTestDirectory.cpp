@@ -87,7 +87,7 @@ namespace {
                 powerplant.shutdown();
             });
         }
-      
+
         // We have a non default destructor so rule of 5 is needed
         TestReactor(const TestReactor&) = delete;
         TestReactor(TestReactor&&)      = delete;

@@ -75,7 +75,7 @@ namespace {
                 powerplant.shutdown();
             });
         }
-      
+
         ~TestReactor() override {
             std::filesystem::remove_all(dir_path);  // Cleanup
         }
