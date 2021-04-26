@@ -54,15 +54,20 @@ namespace module::platform::webots {
         /// @return If the connection was successful, a file descriptor. Else, -1 is returned
         int tcpip_connect(const std::string& server_name, const std::string& port);
 
+        /// @brief Establishes the connection with webots, then binds the reaction handles with the resulting fd
+        /// @param server_address The IP address to connect to, in "X.X.X.X" form
+        /// @param port The port number to connect to
         void setup_connection(const std::string& server_address, const std::string& port);
 
+        /// @brief Translate sensor measurement messages Webots sends us, emmitting readings as our message types
+        /// @param sensor_measurements Message from Webots with information from the sensors
         void translate_and_emit_sensor(const message::platform::webots::SensorMeasurements& sensor_measurements);
 
         /// @brief The time the connection was opened.
         NUClear::clock::time_point connect_time;
 
     public:
-        /// @brief Called by the powerplant to build and setup the webots reactor.
+        /// @brief Called by the powerplant to build and setup the webots reactor
         explicit Webots(std::unique_ptr<NUClear::Environment> environment);
     };
 
