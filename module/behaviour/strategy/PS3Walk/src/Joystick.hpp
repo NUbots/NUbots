@@ -11,8 +11,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-#ifndef __JOYSTICK_HPP__
-#define __JOYSTICK_HPP__
+#ifndef MODULE_BEHAVIOUR_STRATEGY_PS3WALK_JOYSTICK_HPP
+#define MODULE_BEHAVIOUR_STRATEGY_PS3WALK_JOYSTICK_HPP
 
 #include <string>
 
@@ -123,4 +123,4 @@ public:
     bool sample(JoystickEvent* event) const;
 };
 
-#endif  // __JOYSTICK_HPP__
+#endif  // MODULE_BEHAVIOUR_STRATEGY_PS3WALK_JOYSTICK_HPP
