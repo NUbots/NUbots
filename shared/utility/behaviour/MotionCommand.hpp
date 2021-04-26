@@ -24,24 +24,13 @@
 
 #include "message/behaviour/MotionCommand.hpp"
 
-#include "utility/math/matrix/Transform2D.hpp"
-#include "utility/support/eigen_armadillo.hpp"
-
 namespace utility::behaviour {
 
     using message::behaviour::MotionCommand;
-    using utility::math::matrix::Transform2D;
 
     inline MotionCommand StandStill() {
         MotionCommand cmd;
         cmd.type = MotionCommand::Type::Value::StandStill;
-        return cmd;
-    }
-
-    inline MotionCommand WalkToState(const Transform2D& goalState_) {
-        MotionCommand cmd;
-        cmd.type      = MotionCommand::Type::Value::WalkToState;
-        cmd.goalState = convert(goalState_);
         return cmd;
     }
 
@@ -58,13 +47,6 @@ namespace utility::behaviour {
         MotionCommand cmd;
         cmd.type       = MotionCommand::Type::Value::BallApproach;
         cmd.kickTarget = kickTarget_;
-        return cmd;
-    }
-
-    inline MotionCommand DirectCommand(const Transform2D& walkCommand_) {
-        MotionCommand cmd;
-        cmd.type        = MotionCommand::Type::Value::DirectCommand;
-        cmd.walkCommand = convert(walkCommand_);
         return cmd;
     }
 
