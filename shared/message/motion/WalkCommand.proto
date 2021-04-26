@@ -35,7 +35,7 @@ message StopCommand {
 }
 
 message NewWalkCommand {
-    vec3 velocityTarget = 1;
+    vec3 velocity_target = 1;
 }
 
 message EnableWalkEngineCommand {
