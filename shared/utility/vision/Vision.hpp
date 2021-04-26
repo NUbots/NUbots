@@ -28,8 +28,7 @@
 
 #include "message/input/Image.hpp"
 
-namespace utility {
-namespace vision {
+namespace utility::vision {
 
     struct Colour {
         enum Value : char {
@@ -55,24 +54,33 @@ namespace vision {
         Colour(char const& value) : value(static_cast<Value>(value)) {}
         Colour(Value const& value) : value(value) {}
         Colour(std::string const& str) : value(Value::UNCLASSIFIED) {
-            if (str == "UNCLASSIFIED")
+            if (str == "UNCLASSIFIED") {
                 value = Value::UNCLASSIFIED;
-            else if (str == "WHITE")
+            }
+            else if (str == "WHITE") {
                 value = Value::WHITE;
-            else if (str == "GREEN")
+            }
+            else if (str == "GREEN") {
                 value = Value::GREEN;
-            else if (str == "ORANGE")
+            }
+            else if (str == "ORANGE") {
                 value = Value::ORANGE;
-            else if (str == "YELLOW")
+            }
+            else if (str == "YELLOW") {
                 value = Value::YELLOW;
-            else if (str == "CYAN")
+            }
+            else if (str == "CYAN") {
                 value = Value::CYAN;
-            else if (str == "MAGENTA")
+            }
+            else if (str == "MAGENTA") {
                 value = Value::MAGENTA;
-            else if (str == "WHITE_GREEN")
+            }
+            else if (str == "WHITE_GREEN") {
                 value = Value::WHITE_GREEN;
-            else
+            }
+            else {
                 throw std::runtime_error("String " + str + " did not match any enum for Colour");
+            }
         }
 
 
@@ -259,9 +267,12 @@ namespace vision {
     template <typename T>
     inline void loadImage(const std::string& file, T& image) {
         std::ifstream ifs(file, std::ios::in | std::ios::binary);
-        std::string magic_number, width, height, max_val;
-        uint8_t bytes_per_pixel;
-        bool RGB;
+        std::string magic_number;
+        std::string width;
+        std::string height;
+        std::string max_val;
+        uint8_t bytes_per_pixel = 0;
+        bool RGB                = 0;
         ifs >> magic_number;
 
         if (magic_number.compare("P6") == 0) {
@@ -318,7 +329,6 @@ namespace vision {
     Pixel getPixel(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data, const FOURCC& fourcc);
 
 
-}  // namespace vision
-}  // namespace utility
+}  // namespace utility::vision
 
 #endif  // UTILITY_VISION_VISION_HPP

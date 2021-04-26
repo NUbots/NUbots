@@ -29,21 +29,19 @@
 #include "utility/input/LimbID.hpp"
 #include "utility/motion/Balance.hpp"
 
-namespace module {
-namespace motion {
+namespace module::motion {
 
     class IKKick : public NUClear::Reactor {
 
     private:
         // ID of support foot
         utility::input::LimbID supportFoot;
-        // NEED the vector from the point on the surface of the ball where we want to kick to the front of the kick foot
-        // which is rightFootFront
-        // KickPlanner has to add the radius of the all to get the location of the centre of the ball
-        // point position of ball
-        arma::vec3 ballPosition;
+        // NEED the vector from the point on the surface of the ball where we want to kick to the front of the kick
+        // foot which is rightFootFront KickPlanner has to add the radius of the all to get the location of the
+        // centre of the ball point position of ball
+        Eigen::Vector3d ballPosition;
         // direction we want to kick the ball
-        arma::vec3 goalPosition;
+        Eigen::Vector3d goalPosition;
 
         /// Subsumption ID key to access motors
         const size_t subsumptionId;
@@ -74,8 +72,7 @@ namespace motion {
         /// @brief Called by the powerplant to build and setup the IKKick reactor.
         explicit IKKick(std::unique_ptr<NUClear::Environment> environment);
     };
-}  // namespace motion
-}  // namespace module
+}  // namespace module::motion
 
 
 #endif

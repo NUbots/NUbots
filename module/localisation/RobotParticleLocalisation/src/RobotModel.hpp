@@ -34,8 +34,7 @@
 #include "utility/math/angle.hpp"
 #include "utility/math/coordinates.hpp"
 
-namespace module {
-namespace localisation {
+namespace module::localisation {
 
     using message::input::Sensors;
     using message::support::FieldDescription;
@@ -245,6 +244,5 @@ namespace localisation {
                                                                 : (widestTop.cross(widestBase)).normalized();
         }
     };
-}  // namespace localisation
-}  // namespace module
+}  // namespace module::localisation
 #endif

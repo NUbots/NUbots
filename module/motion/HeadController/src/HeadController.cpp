@@ -31,14 +31,11 @@
 #include "utility/input/ServoID.hpp"
 #include "utility/math/comparison.hpp"
 #include "utility/math/coordinates.hpp"
-#include "utility/math/matrix/Transform3D.hpp"
 #include "utility/motion/InverseKinematics.hpp"
 #include "utility/nusight/NUhelpers.hpp"
-#include "utility/support/eigen_armadillo.hpp"
+#include "utility/support/yaml_expression.hpp"
 
-
-namespace module {
-namespace motion {
+namespace module::motion {
     using utility::nusight::graph;
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
@@ -50,7 +47,6 @@ namespace motion {
     using utility::behaviour::RegisterAction;
     using utility::math::coordinates::cartesianToSpherical;
     using utility::math::coordinates::sphericalToCartesian;
-    using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::calculateCameraLookJoints;
     using utility::motion::kinematics::calculateHeadJoints;
 
@@ -69,8 +65,8 @@ namespace motion {
         , p_gain(0.0)
         , updateHandle()
         , lastTime()
-        , currentAngles(arma::fill::zeros)
-        , goalAngles(arma::fill::zeros) {
+        , currentAngles(Eigen::Vector2f::Zero())
+        , goalAngles(Eigen::Vector2f::Zero()) {
 
         // do a little configurating
         on<Configuration>("HeadController.yaml")
@@ -100,18 +96,19 @@ namespace motion {
         updateHandle = on<Trigger<Sensors>, With<KinematicsModel>, Single, Priority::HIGH>().then(
             "Head Controller - Update Head Position",
             [this](const Sensors& sensors, const KinematicsModel& kinematicsModel) {
-                emit(graph("HeadController Goal Angles", goalAngles[0], goalAngles[1]));
+                emit(graph("HeadController Goal Angles", goalAngles.x(), goalAngles.y()));
                 // P controller
                 currentAngles = p_gain * goalAngles + (1 - p_gain) * currentAngles;
 
                 // Get goal vector from angles
                 // Pitch is positive when the robot is looking down by Right hand rule, so negate the pitch
                 // The goal angles are for the neck directly, so we have to offset the camera declination again
-                arma::vec3 goalHeadUnitVector_world = sphericalToCartesian({1, currentAngles[0], currentAngles[1]});
+                Eigen::Vector3f goalHeadUnitVector_world =
+                    sphericalToCartesian(Eigen::Vector3f(1, currentAngles.x(), currentAngles.y()));
                 // Convert to robot space
-                arma::vec3 headUnitVector =
+                Eigen::Vector3f headUnitVector =
                     goalRobotSpace ? goalHeadUnitVector_world
-                                   : Transform3D(convert(sensors.Htw)).rotation() * goalHeadUnitVector_world;
+                                   : Eigen::Affine3d(sensors.Htw).rotation().cast<float>() * goalHeadUnitVector_world;
                 // Compute inverse kinematics for head
                 //!!!!!!!!!!!!!!
                 //!!!!!!!!!!!!!!
@@ -124,7 +121,7 @@ namespace motion {
                 //!!!!!!!!!!!!!!
                 //!!!!!!!!!!!!!!
                 std::vector<std::pair<ServoID, float>> goalAnglesList = calculateHeadJoints(headUnitVector);
-                // arma::vec2 goalAngles = cartesianToSpherical(headUnitVector).rows(1,2);
+                // Eigen::Vector2f goalAngles = cartesianToSpherical(headUnitVector).tail<2>();
 
                 // head limits
                 max_yaw   = kinematicsModel.head.MAX_YAW;
@@ -181,6 +178,4 @@ namespace motion {
             [this](const std::set<ServoID>&) {}  // Servos reached target
         }));
     }
-
-}  // namespace motion
-}  // namespace module
+}  // namespace module::motion

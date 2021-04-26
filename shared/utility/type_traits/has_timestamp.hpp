@@ -6,25 +6,25 @@
 
 namespace utility::type_traits {
 
-/**
- * @brief SFINAE struct to test if the passed class has a timestamp field
- *
- * @tparam T the class to check
- */
-template <typename T>
-struct has_timestamp {
-private:
-    using yes = std::true_type;
-    using no  = std::false_type;
+    /**
+     * @brief SFINAE struct to test if the passed class has a timestamp field
+     *
+     * @tparam T the class to check
+     */
+    template <typename T>
+    struct has_timestamp {
+    private:
+        using yes = std::true_type;
+        using no  = std::false_type;
 
-    template <typename U>
-    static auto test(int) -> decltype((std::declval<U>().timestamp, yes()));
-    template <typename>
-    static no test(...);
+        template <typename U>
+        static auto test(int) -> decltype((std::declval<U>().timestamp, yes()));
+        template <typename>
+        static no test(...);
 
-public:
-    static constexpr bool value = std::is_same<decltype(test<T>(0)), yes>::value;
-};
+    public:
+        static constexpr bool value = std::is_same<decltype(test<T>(0)), yes>::value;
+    };
 
 }  // namespace utility::type_traits
 

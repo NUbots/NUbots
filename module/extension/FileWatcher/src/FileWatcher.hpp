@@ -21,8 +21,7 @@
 #include <nuclear>
 #include <uv.h>
 
-namespace module {
-namespace extension {
+namespace module::extension {
 
     class FileWatcher : public NUClear::Reactor {
     private:
@@ -71,8 +70,6 @@ namespace extension {
         static void file_watch_callback(uv_fs_event_t* handle, const char* filename, int events, int status);
     };
 
-
-}  // namespace extension
-}  // namespace module
+}  // namespace module::extension
 
 #endif  // MODULES_EXTENSION_FILEWATCHER_HPP

@@ -20,11 +20,6 @@ syntax = "proto3";
 
 package message.output;
 
-/**
- * TODO document
- *
- * @author Trent Houliston
- */
 message Say {
     string message = 1;
 }
