@@ -73,7 +73,6 @@ namespace module::behaviour::strategy {
         void look_up();
         void look_down();
         void walk_toggle();
-        static void quit();
 
         void update_command();
         void print_status();
@@ -87,6 +86,10 @@ namespace module::behaviour::strategy {
         /// @brief Called by the powerplant to build and setup the KeyboardWalk reactor.
         explicit KeyboardWalk(std::unique_ptr<NUClear::Environment> environment);
     };
+
+    // quit does not need any of the state from the KeyboardWalk class
+    void quit();
+
 }  // namespace module::behaviour::strategy
 
 

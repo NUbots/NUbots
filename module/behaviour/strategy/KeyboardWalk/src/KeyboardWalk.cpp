@@ -360,7 +360,7 @@ namespace module::behaviour::strategy {
         update_window(command_window, LogColours::TRACE_COLOURS, "", message, false);
     }
 
-    void KeyboardWalk::quit() {
+    void quit() {
         endwin();
         std::raise(SIGTERM);  // Change back to SIGINT if required by NUbots messaging system//
     }
