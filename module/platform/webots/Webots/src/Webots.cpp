@@ -213,11 +213,10 @@ namespace module::platform::webots {
         error_io.unbind();
         shutdown_handle.unbind();
 
-        int fd = tcpip_connect(server_address, port);
-
+        const int fd = tcpip_connect(server_address, port);
 
         char initial_message[8];
-        int n = recv(fd, initial_message, sizeof(initial_message), 0);
+        const int n = recv(fd, initial_message, sizeof(initial_message), 0);
 
         if (n > 0) {
             if (strncmp(initial_message, "Welcome", sizeof(initial_message)) == 0) {
@@ -241,6 +240,7 @@ namespace module::platform::webots {
             log<NUClear::FATAL>("Connection was closed.");
         }
 
+        // TODO(KipHamiltons): Does this need to be replaced with our custom clock's now()?
         connect_time = NUClear::clock::now();
 
         log<NUClear::INFO>(fmt::format("Connected to {}:{}", server_address, port));
