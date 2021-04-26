@@ -21,7 +21,6 @@
 #define UTILITY_MATH_ANGLE_HPP
 
 #include <Eigen/Core>
-#include <armadillo>
 #include <cmath>
 
 /**
@@ -132,17 +131,8 @@ namespace utility::math::angle {
         }
     }
 
-
-    inline double vectorToBearing(arma::vec2 dirVec) {
-        return std::atan2(dirVec(1), dirVec(0));
-    }
-
     inline double vectorToBearing(const Eigen::Vector2d& dirVec) {
         return std::atan2(dirVec.y(), dirVec.x());
-    }
-
-    inline arma::vec2 bearingToUnitVector(double angle) {
-        return arma::vec2({std::cos(angle), std::sin(angle)});
     }
 
     /*! @brief Solves for x in $a \sin(x) + b \cos(x) = c ; x \in [0,\pi]$

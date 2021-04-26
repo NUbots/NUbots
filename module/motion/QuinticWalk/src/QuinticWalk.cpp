@@ -12,7 +12,6 @@
 
 #include "utility/math/comparison.hpp"
 #include "utility/math/euler.hpp"
-#include "utility/math/matrix/Transform3D.hpp"
 #include "utility/motion/InverseKinematics.hpp"
 #include "utility/support/yaml_expression.hpp"
 
@@ -33,7 +32,6 @@ namespace module::motion {
     using utility::support::Expression;
 
     using utility::input::ServoID;
-    using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::calculateLegJoints;
 
     QuinticWalk::QuinticWalk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -253,8 +251,9 @@ namespace module::motion {
         Eigen::Matrix4d right_foot =
             walk_engine.getFootstep().isLeftSupport() ? Hft.matrix().cast<double>() : Hst.matrix().cast<double>();
 
-        auto joints =
-            calculateLegJoints(kinematicsModel, Transform3D(convert(left_foot)), Transform3D(convert(right_foot)));
+        auto joints = calculateLegJoints(kinematicsModel,
+                                         Eigen::Affine3f(left_foot.cast<float>()),
+                                         Eigen::Affine3f(right_foot.cast<float>()));
 
         auto waypoints = motionLegs(joints);
 
