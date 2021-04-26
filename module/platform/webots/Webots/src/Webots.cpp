@@ -153,13 +153,13 @@ namespace module::platform::webots {
                 // Use configuration here from file webots.yaml
 
                 // clang-format off
-            auto lvl = local_config["log_level"].as<std::string>();
-            if (lvl == "TRACE") { this->log_level = NUClear::TRACE; }
-            else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
-            else if (lvl == "INFO") { this->log_level = NUClear::INFO; }
-            else if (lvl == "WARN") { this->log_level = NUClear::WARN; }
-            else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
-            else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
+                auto lvl = local_config["log_level"].as<std::string>();
+                if (lvl == "TRACE") { this->log_level = NUClear::TRACE; }
+                else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
+                else if (lvl == "INFO") { this->log_level = NUClear::INFO; }
+                else if (lvl == "WARN") { this->log_level = NUClear::WARN; }
+                else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
+                else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
                 // clang-format on
 
                 on<Watchdog<Webots, 5, std::chrono::seconds>>().then([this] {
