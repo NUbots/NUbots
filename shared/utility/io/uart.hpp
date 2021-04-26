@@ -46,10 +46,11 @@ namespace utility::io {
         uart& operator=(const uart& uart) = delete;
 
         /**
-         * @brief We can move these because it won't close the device twice
+         * @brief Moving these will call the destructors, closing the fd before trying to use it again
+         * TODO(KipHamiltons) implement an RAII fd utility, which would allow the uarts to be moved without that issue
          */
-        uart(uart&&)  = default;
-        uart& operator=(uart&& uart) = default;
+        uart(uart&&)  = delete;
+        uart& operator=(uart&& uart) = delete;
 
 
         /**
