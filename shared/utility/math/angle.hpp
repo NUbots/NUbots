@@ -21,7 +21,6 @@
 #define UTILITY_MATH_ANGLE_HPP
 
 #include <Eigen/Core>
-#include <armadillo>
 #include <cmath>
 
 /**
@@ -43,11 +42,13 @@ namespace utility::math::angle {
 
         T angle = std::fmod(value, static_cast<T>(2.0 * M_PI));
 
-        if (angle <= -M_PI)
+        if (angle <= -M_PI) {
             angle += M_PI * 2;
+        }
 
-        if (angle > M_PI)
+        if (angle > M_PI) {
             angle -= 2 * M_PI;
+        }
 
         return angle;
     }
@@ -130,17 +131,8 @@ namespace utility::math::angle {
         }
     }
 
-
-    inline double vectorToBearing(arma::vec2 dirVec) {
-        return std::atan2(dirVec(1), dirVec(0));
-    }
-
     inline double vectorToBearing(const Eigen::Vector2d& dirVec) {
         return std::atan2(dirVec.y(), dirVec.x());
-    }
-
-    inline arma::vec2 bearingToUnitVector(double angle) {
-        return arma::vec2({std::cos(angle), std::sin(angle)});
     }
 
     /*! @brief Solves for x in $a \sin(x) + b \cos(x) = c ; x \in [0,\pi]$
@@ -165,7 +157,7 @@ namespace utility::math::angle {
 
         // Find alpha such that $\sin(\alpha) = a\_$ and $\cos(\alpha) = b\_$, which is possible because $a\_^2
         // + b\_^2 = 1$
-        float alpha = atan2(a_, b_);
+        float alpha = atan2f(a_, b_);
 
         // Hence the equation becomes $\cos(\alpha)\cos(x)+\sin(\alpha)\sin(x) = cos(x-\alpha) = c\_$
         return alpha + acos_clamped(c_);
