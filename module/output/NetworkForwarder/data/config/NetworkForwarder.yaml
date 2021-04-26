@@ -1,5 +1,6 @@
 # The network device to send messages to
 target: nusight
+log_level: DEBUG
 
 # List the message types you want to send
 # Depending on what value you put it will influence how it is sent:
