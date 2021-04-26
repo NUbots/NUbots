@@ -29,7 +29,7 @@ namespace module::support::logging {
     using utility::strutil::Colour;
 
     ConsoleLogHandler::ConsoleLogHandler(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), mutex() {
+        : Reactor(std::move(environment)) {
         on<Trigger<ReactionStatistics>>().then([this](const ReactionStatistics& stats) {
             if (stats.exception) {
 
@@ -96,7 +96,7 @@ namespace module::support::logging {
             std::string source = "";
 
             // If we know where this log message came from, we display that
-            if (message.task) {
+            if (message.task != nullptr) {
                 // Get our reactor name
                 std::string reactor = message.task->identifier[1];
 

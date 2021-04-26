@@ -38,9 +38,7 @@ namespace utility::strutil {
         if (str.length() >= ending.length()) {
             return (0 == str.compare(str.length() - ending.length(), ending.length(), ending));
         }
-        else {
-            return false;
-        }
+        return false;
     }
 
     inline bool startsWith(const std::string& str, const std::string& start) {
@@ -48,9 +46,7 @@ namespace utility::strutil {
         if (str.length() >= start.length()) {
             return (0 == str.compare(0, start.length(), start));
         }
-        else {
-            return false;
-        }
+        return false;
     }
 
     inline void trimLeft(std::string& str, const std::string& tokens) {
