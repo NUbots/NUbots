@@ -70,8 +70,6 @@ namespace module::platform::webots {
     using utility::platform::darwin::getDarwinServo;
     using utility::vision::fourcc;
 
-    using module::platform::webots::Clock;
-
     // Converts the NUgus.proto servo name to the equivalent DarwinSensor.proto name
     DarwinSensors::Servo& translate_servo_id(const std::string& name, DarwinSensors::Servos& servos) {
 
@@ -260,8 +258,10 @@ namespace module::platform::webots {
             log<NUClear::FATAL>("Connection was closed.");
         }
 
-        // TODO(KipHamiltons): Does this need to be replaced with our custom clock's now()?
+        // Set the real time of the connection initiation
         connect_time = NUClear::clock::now();
+        // Reset the simulation connection time
+        Clock::current_tick = Clock::duration::zero();
 
         log<NUClear::INFO>(fmt::format("Connected to {}:{}", server_address, port));
 
