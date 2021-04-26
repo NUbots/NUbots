@@ -150,7 +150,7 @@ namespace module::motion {
                 Eigen::Vector3d directionSupportFoot = torsoPose.rotation() * directionTorso;
 
                 Eigen::Vector3d ballPosition = targetSupportFoot;
-                ballPosition.z()             = 0.05;
+                ballPosition.z()             = 0.05;  // TODO: get ball height from config
                 Eigen::Vector3d goalPosition = directionSupportFoot;
                 goalPosition.z()             = 0.0;
 
