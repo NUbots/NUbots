@@ -302,90 +302,88 @@ namespace extension {
 }  // namespace extension
 
 // NUClear configuration extension
-namespace NUClear {
-    namespace dsl {
-        namespace operation {
-            template <>
-            struct DSLProxy<::extension::Script> {
-                template <typename DSL>
-                static inline void bind(const std::shared_ptr<threading::Reaction>& reaction, const std::string& path) {
-                    auto flags = ::extension::FileWatch::RENAMED | ::extension::FileWatch::CHANGED;
+namespace NUClear::dsl {
+    namespace operation {
+        template <>
+        struct DSLProxy<::extension::Script> {
+            template <typename DSL>
+            static inline void bind(const std::shared_ptr<threading::Reaction>& reaction, const std::string& path) {
+                auto flags = ::extension::FileWatch::RENAMED | ::extension::FileWatch::CHANGED;
 
-                    std::string hostname(::extension::Script::getHostname()),
-                        platform(::extension::Script::getPlatform(hostname));
+                std::string hostname(::extension::Script::getHostname()),
+                    platform(::extension::Script::getPlatform(hostname));
 
-                    // Set paths to the script files.
-                    auto robotScript    = "scripts/" + hostname + "/" + path;
-                    auto platformScript = "scripts/" + platform + "/" + path;
+                // Set paths to the script files.
+                auto robotScript    = "scripts/" + hostname + "/" + path;
+                auto platformScript = "scripts/" + platform + "/" + path;
 
-                    // The platform script is the default script. This must exist!
-                    if (!utility::file::exists(platformScript)) {
-                        throw std::runtime_error("Script file '" + platformScript + "' does not exist.");
-                    }
-
-                    // Bind our default path
-                    DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, platformScript, flags);
-
-                    // Bind our robot specific path if it exists
-                    if (utility::file::exists(robotScript)) {
-                        DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, robotScript, flags);
-                    }
+                // The platform script is the default script. This must exist!
+                if (!utility::file::exists(platformScript)) {
+                    throw std::runtime_error("Script file '" + platformScript + "' does not exist.");
                 }
 
-                template <typename DSL>
-                static inline std::shared_ptr<::extension::Script> get(threading::Reaction& t) {
+                // Bind our default path
+                DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, platformScript, flags);
 
-                    // Get the file watch event
-                    ::extension::FileWatch watch = DSLProxy<::extension::FileWatch>::get<DSL>(t);
+                // Bind our robot specific path if it exists
+                if (utility::file::exists(robotScript)) {
+                    DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, robotScript, flags);
+                }
+            }
 
-                    // Check if the watch is valid
-                    if (watch && utility::strutil::endsWith(watch.path, ".yaml")) {
-                        // Return our yaml file
-                        try {
-                            std::string hostname(::extension::Script::getHostname()),
-                                platform(::extension::Script::getPlatform(hostname));
+            template <typename DSL>
+            static inline std::shared_ptr<::extension::Script> get(threading::Reaction& t) {
 
-                            // Get relative path to script file.
-                            auto components = utility::strutil::split(watch.path, '/');
-                            std::string relativePath("");
-                            bool flag = false;
+                // Get the file watch event
+                ::extension::FileWatch watch = DSLProxy<::extension::FileWatch>::get<DSL>(t);
 
-                            for (const auto& component : components) {
-                                // Ignore the hostname/platform name if they are present.
-                                if (flag && (component.compare(hostname) != 0) && (component.compare(platform) != 0)) {
-                                    relativePath.append(component + "/");
-                                }
+                // Check if the watch is valid
+                if (watch && utility::strutil::endsWith(watch.path, ".yaml")) {
+                    // Return our yaml file
+                    try {
+                        std::string hostname(::extension::Script::getHostname()),
+                            platform(::extension::Script::getPlatform(hostname));
 
-                                // We want out paths relative to the script folder.
-                                if (component.compare("scripts") == 0) {
-                                    flag = true;
-                                }
+                        // Get relative path to script file.
+                        auto components = utility::strutil::split(watch.path, '/');
+                        std::string relativePath("");
+                        bool flag = false;
+
+                        for (const auto& component : components) {
+                            // Ignore the hostname/platform name if they are present.
+                            if (flag && (component.compare(hostname) != 0) && (component.compare(platform) != 0)) {
+                                relativePath.append(component + "/");
                             }
 
-                            // There will be a trailing / character.
-                            relativePath.pop_back();
+                            // We want out paths relative to the script folder.
+                            if (component.compare("scripts") == 0) {
+                                flag = true;
+                            }
+                        }
 
-                            return std::make_shared<::extension::Script>(relativePath, hostname, platform);
-                        }
-                        catch (const YAML::ParserException& e) {
-                            throw std::runtime_error(watch.path + " " + std::string(e.what()));
-                        }
+                        // There will be a trailing / character.
+                        relativePath.pop_back();
+
+                        return std::make_shared<::extension::Script>(relativePath, hostname, platform);
                     }
-                    else {
-                        // Return an empty configuration (which will show up invalid)
-                        return std::shared_ptr<::extension::Script>(nullptr);
+                    catch (const YAML::ParserException& e) {
+                        throw std::runtime_error(watch.path + " " + std::string(e.what()));
                     }
                 }
-            };
-        }  // namespace operation
+                else {
+                    // Return an empty configuration (which will show up invalid)
+                    return std::shared_ptr<::extension::Script>(nullptr);
+                }
+            }
+        };
+    }  // namespace operation
 
-        // Script is transient
-        namespace trait {
-            template <>
-            struct is_transient<std::shared_ptr<::extension::Script>> : public std::true_type {};
-        }  // namespace trait
-    }      // namespace dsl
-}  // namespace NUClear
+    // Script is transient
+    namespace trait {
+        template <>
+        struct is_transient<std::shared_ptr<::extension::Script>> : public std::true_type {};
+    }  // namespace trait
+}  // namespace NUClear::dsl
 
 namespace YAML {
     template <>
