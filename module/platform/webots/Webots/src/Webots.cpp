@@ -172,7 +172,7 @@ namespace module::platform::webots {
 
         // Create the message that we are going to send.
         on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
-            // Maybe keep the `ServoTarget`s we have not sent yet, instead of just overriding them.
+            // TODO(KipHamiltons): Maybe keep the `ServoTarget`s we have not sent yet, instead of just overriding them.
             to_send.motor_positions.clear();
             to_send.motor_velocities.clear();
             to_send.motor_torques.clear();
