@@ -82,7 +82,7 @@ namespace NUClear::dsl {
                 auto* ptr = ::extension::FileWatch::FileWatchStore::value;
 
                 // If there was something in the store
-                if (ptr) {
+                if (ptr != nullptr) {
                     return *ptr;
                 }
                 // Return an invalid file watch element
