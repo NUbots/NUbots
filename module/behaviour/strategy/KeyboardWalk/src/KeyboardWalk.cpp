@@ -39,6 +39,11 @@ namespace module::behaviour::strategy {
     using NUClear::message::LogMessage;
     using LimbID = utility::input::LimbID;
 
+    void quit() {
+        endwin();
+        std::raise(SIGTERM);  // Change back to SIGINT if required by NUbots messaging system//
+    }
+
     KeyboardWalk::KeyboardWalk(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), velocity(Eigen::Vector2f::Zero()) {
 
@@ -360,8 +365,4 @@ namespace module::behaviour::strategy {
         update_window(command_window, LogColours::TRACE_COLOURS, "", message, false);
     }
 
-    void quit() {
-        endwin();
-        std::raise(SIGTERM);  // Change back to SIGINT if required by NUbots messaging system//
-    }
 }  // namespace module::behaviour::strategy

@@ -87,9 +87,6 @@ namespace module::behaviour::strategy {
         explicit KeyboardWalk(std::unique_ptr<NUClear::Environment> environment);
     };
 
-    // quit does not need any of the state from the KeyboardWalk class
-    void quit();
-
 }  // namespace module::behaviour::strategy
 
 

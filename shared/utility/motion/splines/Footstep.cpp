@@ -12,6 +12,28 @@ https://github.com/Rhoban/model/
 
 namespace utility::motion::splines {
 
+    /**
+     * Add to given pose the given diff expressed in pose frame and return the integrated added pose.
+     * Note that this is a free function which does not depend on the state of the Footstep class
+     */
+    Eigen::Vector3f poseAdd(const Eigen::Vector3f& pose, const Eigen::Vector3f& diff) {
+        const float cos_z = std::cos(pose.z());
+        const float sin_z = std::sin(pose.z());
+        return Eigen::Vector3f(pose.x() + diff.x() * cos_z - diff.y() * sin_z,
+                               pose.y() + diff.x() * sin_z + diff.y() * cos_z,
+                               utility::math::angle::normalizeAngle(pose.z() + diff.z()));
+    }
+
+    /**
+     * Compute and return the delta from (zero + diff) to (zero) in (zero + diff) frame.
+     * Note that this is a free function which does not depend on the state of the Footstep class
+     */
+    Eigen::Vector3f diffInv(const Eigen::Vector3f& diff) {
+        const float cos_z = std::cos(-diff.z());
+        const float sin_z = std::sin(-diff.z());
+        return Eigen::Vector3f(-diff.x() * cos_z + diff.y() * sin_z, -diff.x() * sin_z - diff.y() * cos_z, -diff.z());
+    }
+
     Footstep::Footstep(float foot_distance, bool is_left_support_foot) {
         if (foot_distance <= 0.0f) {
             throw std::logic_error("Footstep invalid distance");
@@ -83,20 +105,6 @@ namespace utility::motion::splines {
 
         // Make the step
         stepFromSupport(tmpDiff);
-    }
-
-    Eigen::Vector3f poseAdd(const Eigen::Vector3f& pose, const Eigen::Vector3f& diff) {
-        const float cos_z = std::cos(pose.z());
-        const float sin_z = std::sin(pose.z());
-        return Eigen::Vector3f(pose.x() + diff.x() * cos_z - diff.y() * sin_z,
-                               pose.y() + diff.x() * sin_z + diff.y() * cos_z,
-                               utility::math::angle::normalizeAngle(pose.z() + diff.z()));
-    }
-
-    Eigen::Vector3f diffInv(const Eigen::Vector3f& diff) {
-        const float cos_z = std::cos(-diff.z());
-        const float sin_z = std::sin(-diff.z());
-        return Eigen::Vector3f(-diff.x() * cos_z + diff.y() * sin_z, -diff.x() * sin_z - diff.y() * cos_z, -diff.z());
     }
 
 }  // namespace utility::motion::splines
