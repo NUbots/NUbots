@@ -21,9 +21,9 @@
  */
 class JoystickEvent {
 private:
-    static constexpr std::byte JS_EVENT_BUTTON{0x01};  // button pressed/released
-    static constexpr std::byte JS_EVENT_AXIS{0x02};    // joystick moved
-    static constexpr std::byte JS_EVENT_INIT{0x80};    // initial state of device
+    static constexpr unsigned char JS_EVENT_BUTTON{0x01};  // button pressed/released
+    static constexpr unsigned char  JS_EVENT_AXIS{0x02};    // joystick moved
+    static constexpr unsigned char  JS_EVENT_INIT{0x80};    // initial state of device
 
 public:
     JoystickEvent() {}
