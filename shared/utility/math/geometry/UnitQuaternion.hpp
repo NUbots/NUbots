@@ -25,127 +25,127 @@
 #include "utility/math/matrix/Rotation3D.hpp"
 
 namespace utility {
-namespace math {
-    namespace matrix {
-        template <int Dimensions>
-        class Rotation;
-        using Rotation3D = Rotation<3>;
-    }  // namespace matrix
-    namespace geometry {
+    namespace math {
+        namespace matrix {
+            template <int Dimensions>
+            class Rotation;
+            using Rotation3D = Rotation<3>;
+        }  // namespace matrix
+        namespace geometry {
 
-        class UnitQuaternion : public arma::vec4 {
-            using arma::vec4::vec4;  // inherit constructors
+            class UnitQuaternion : public arma::vec4 {
+                using arma::vec4::vec4;  // inherit constructors
 
-        private:
-            /* @brief Constructor for non-unit quaternion for purpose of point representation
-             */
-            UnitQuaternion(const arma::vec3& v);
+            private:
+                /* @brief Constructor for non-unit quaternion for purpose of point representation
+                 */
+                UnitQuaternion(const arma::vec3& v);
 
-        public:
-            UnitQuaternion();
+            public:
+                UnitQuaternion();
 
-            UnitQuaternion(const matrix::Rotation3D& rotation);
+                UnitQuaternion(const matrix::Rotation3D& rotation);
 
-            UnitQuaternion(double W, double X, double Y, double Z);
+                UnitQuaternion(double W, double X, double Y, double Z);
 
-            UnitQuaternion(const arma::vec3& vec1, const arma::vec3& vec2);
+                UnitQuaternion(const arma::vec3& vec1, const arma::vec3& vec2);
 
-            UnitQuaternion operator-(const UnitQuaternion& p) const;
+                UnitQuaternion operator-(const UnitQuaternion& p) const;
 
-            UnitQuaternion operator*(const UnitQuaternion& p) const;
+                UnitQuaternion operator*(const UnitQuaternion& p) const;
 
-            UnitQuaternion(double realPart, const arma::vec3& imaginaryPart);
+                UnitQuaternion(double realPart, const arma::vec3& imaginaryPart);
 
-            /*! @brief Creates quaternion which rotates about 3D axis by angle radians
-             */
-            UnitQuaternion(const arma::vec3& axis, double angle);
+                /*! @brief Creates quaternion which rotates about 3D axis by angle radians
+                 */
+                UnitQuaternion(const arma::vec3& axis, double angle);
 
-            /*! @brief Swaps quat to -quat if kW < 0
-             */
-            void rectify();
+                /*! @brief Swaps quat to -quat if kW < 0
+                 */
+                void rectify();
 
-            /*! @brief Gets the inverse of the quaternion
-             */
-            UnitQuaternion i() const;
+                /*! @brief Gets the inverse of the quaternion
+                 */
+                UnitQuaternion i() const;
 
-            arma::vec3 rotateVector(const arma::vec3& v) const;
+                arma::vec3 rotateVector(const arma::vec3& v) const;
 
-            arma::vec3 getAxis() const;
+                arma::vec3 getAxis() const;
 
-            double getAngle() const;
+                double getAngle() const;
 
-            void setAngle(double angle);
+                void setAngle(double angle);
 
-            void scaleAngle(double scale);
+                void scaleAngle(double scale);
 
-            void normalise();
+                void normalise();
 
-            /* @return Matrix Q(q) such that given another quaternion q', then
-             * Q(q) * q' = q * q'
-             */
-            arma::mat44 getLeftQuatMultMatrix() const;
+                /* @return Matrix Q(q) such that given another quaternion q', then
+                 * Q(q) * q' = q * q'
+                 */
+                arma::mat44 getLeftQuatMultMatrix() const;
 
-            /* @return Matrix W(q) such that given another quaternion q', then
-             * W(q) * q' = q' * q
-             */
-            arma::mat44 getRightQuatMultMatrix() const;
+                /* @return Matrix W(q) such that given another quaternion q', then
+                 * W(q) * q' = q' * q
+                 */
+                arma::mat44 getRightQuatMultMatrix() const;
 
-            static float random(float a, float b);
-            static UnitQuaternion getRandomU(float max_angle);
-            static UnitQuaternion getRandomN(float stddev);
+                static float random(float a, float b);
+                static UnitQuaternion getRandomU(float max_angle);
+                static UnitQuaternion getRandomN(float stddev);
 
-            double norm();
+                double norm();
 
-            // real part
-            inline double kW() const {
-                return at(0);
+                // real part
+                inline double kW() const {
+                    return at(0);
+                };
+                inline double& kW() {
+                    return at(0);
+                };
+
+                inline double kX() const {
+                    return at(1);
+                };
+                inline double& kX() {
+                    return at(1);
+                };
+
+                inline double kY() const {
+                    return at(2);
+                };
+                inline double& kY() {
+                    return at(2);
+                };
+
+                inline double kZ() const {
+                    return at(3);
+                };
+                inline double& kZ() {
+                    return at(3);
+                };
+
+                inline double real() const {
+                    return at(0);
+                };
+                inline double& real() {
+                    return at(0);
+                };
+
+                inline const arma::subview_col<double> imaginary() const {
+                    return rows(1, 3);
+                }
+                inline arma::subview_col<double> imaginary() {
+                    return rows(1, 3);
+                }
+
+                UnitQuaternion slerp(const UnitQuaternion& p, const double& t);
+                static inline UnitQuaternion Identity() {
+                    return (arma::vec4({1.0, 0.0, 0.0, 0.0}));
+                }
             };
-            inline double& kW() {
-                return at(0);
-            };
-
-            inline double kX() const {
-                return at(1);
-            };
-            inline double& kX() {
-                return at(1);
-            };
-
-            inline double kY() const {
-                return at(2);
-            };
-            inline double& kY() {
-                return at(2);
-            };
-
-            inline double kZ() const {
-                return at(3);
-            };
-            inline double& kZ() {
-                return at(3);
-            };
-
-            inline double real() const {
-                return at(0);
-            };
-            inline double& real() {
-                return at(0);
-            };
-
-            inline const arma::subview_col<double> imaginary() const {
-                return rows(1, 3);
-            }
-            inline arma::subview_col<double> imaginary() {
-                return rows(1, 3);
-            }
-
-            UnitQuaternion slerp(const UnitQuaternion& p, const double& t);
-            static inline UnitQuaternion Identity() {
-                return (arma::vec4({1.0, 0.0, 0.0, 0.0}));
-            }
-        };
-    }  // namespace geometry
-}  // namespace math
+        }  // namespace geometry
+    }      // namespace math
 }  // namespace utility
 
 #endif

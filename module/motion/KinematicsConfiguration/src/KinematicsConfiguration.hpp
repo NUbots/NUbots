@@ -29,23 +29,23 @@
 #include "message/motion/KinematicsModel.hpp"
 
 namespace module {
-namespace motion {
+    namespace motion {
 
-    class KinematicsConfiguration : public NUClear::Reactor {
+        class KinematicsConfiguration : public NUClear::Reactor {
 
-    public:
-        /// @brief Called by the powerplant to build and setup the KinematicsConfiguration reactor.
-        explicit KinematicsConfiguration(std::unique_ptr<NUClear::Environment> environment);
+        public:
+            /// @brief Called by the powerplant to build and setup the KinematicsConfiguration reactor.
+            explicit KinematicsConfiguration(std::unique_ptr<NUClear::Environment> environment);
 
-    private:
-        void configure(message::motion::KinematicsModel& model, const ::extension::Configuration& objDarwinModel);
-        void configureLeg(message::motion::KinematicsModel& model, const YAML::Node& objLeg);
-        void configureHead(message::motion::KinematicsModel& model, const YAML::Node& objHead);
-        void configureArm(message::motion::KinematicsModel& model, const YAML::Node& objArm);
-        void configureMassModel(message::motion::KinematicsModel& model, const YAML::Node& objMassModel);
-        void configureTensorModel(message::motion::KinematicsModel& model, const YAML::Node& objTensorModel);
-    };
-}  // namespace motion
+        private:
+            void configure(message::motion::KinematicsModel& model, const ::extension::Configuration& objDarwinModel);
+            void configureLeg(message::motion::KinematicsModel& model, const YAML::Node& objLeg);
+            void configureHead(message::motion::KinematicsModel& model, const YAML::Node& objHead);
+            void configureArm(message::motion::KinematicsModel& model, const YAML::Node& objArm);
+            void configureMassModel(message::motion::KinematicsModel& model, const YAML::Node& objMassModel);
+            void configureTensorModel(message::motion::KinematicsModel& model, const YAML::Node& objTensorModel);
+        };
+    }  // namespace motion
 }  // namespace module
 
 #endif  // MODULE_MOTION_KINEMATICSCONFIGURATION_HPP

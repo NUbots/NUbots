@@ -33,85 +33,85 @@
 #include "utility/input/ServoID.hpp"
 
 namespace module {
-namespace behaviour {
-    namespace skills {
+    namespace behaviour {
+        namespace skills {
 
-        struct ExecuteDive {};
-        struct FinishDive {};
+            struct ExecuteDive {};
+            struct FinishDive {};
 
-        using extension::Configuration;
-        using extension::ExecuteScriptByName;
+            using extension::Configuration;
+            using extension::ExecuteScriptByName;
 
-        using message::motion::DiveCommand;
-        using message::motion::DiveFinished;
-        using message::motion::StopCommand;
+            using message::motion::DiveCommand;
+            using message::motion::DiveFinished;
+            using message::motion::StopCommand;
 
-        using utility::behaviour::ActionPriorites;
-        using utility::behaviour::RegisterAction;
-        using utility::input::LimbID;
-        using utility::input::ServoID;
+            using utility::behaviour::ActionPriorites;
+            using utility::behaviour::RegisterAction;
+            using utility::input::LimbID;
+            using utility::input::ServoID;
 
-        GoalSaver::GoalSaver(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
+            GoalSaver::GoalSaver(std::unique_ptr<NUClear::Environment> environment)
+                : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
 
-            // do a little configuration
-            on<Configuration>("GoalSaver.yaml").then([this](const Configuration& config) {
-                DIVE_PRIORITY      = config["DIVE_PRIORITY"].as<float>();
-                EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
-            });
+                // do a little configuration
+                on<Configuration>("GoalSaver.yaml").then([this](const Configuration& config) {
+                    DIVE_PRIORITY      = config["DIVE_PRIORITY"].as<float>();
+                    EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
+                });
 
-            on<Trigger<DiveCommand>>().then([this](const DiveCommand& diveCommand) {
-                this->diveCommand = diveCommand;
-                updatePriority(DIVE_PRIORITY);
-            });
+                on<Trigger<DiveCommand>>().then([this](const DiveCommand& diveCommand) {
+                    this->diveCommand = diveCommand;
+                    updatePriority(DIVE_PRIORITY);
+                });
 
-            on<Trigger<ExecuteDive>>().then([this] {
-                Eigen::Vector2d direction = diveCommand.direction;
+                on<Trigger<ExecuteDive>>().then([this] {
+                    Eigen::Vector2d direction = diveCommand.direction;
 
-                int quadrant = getDirectionalQuadrant(direction.x(), direction.y());
-                // assume valid at this point as this is checked on the walkcommand trigger
-                if (quadrant == 1) {
-                    // side
-                    emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"DiveLeft.yaml"})));
-                }
-                else if (quadrant == 3) {
-                    // side
-                    emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"DiveRight.yaml"})));
-                }
+                    int quadrant = getDirectionalQuadrant(direction.x(), direction.y());
+                    // assume valid at this point as this is checked on the walkcommand trigger
+                    if (quadrant == 1) {
+                        // side
+                        emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"DiveLeft.yaml"})));
+                    }
+                    else if (quadrant == 3) {
+                        // side
+                        emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"DiveRight.yaml"})));
+                    }
 
-                updatePriority(EXECUTION_PRIORITY);
-            });
+                    updatePriority(EXECUTION_PRIORITY);
+                });
 
-            on<Trigger<FinishDive>>().then([this] {
-                emit(std::move(std::make_unique<DiveFinished>()));
-                updatePriority(0);
-            });
+                on<Trigger<FinishDive>>().then([this] {
+                    emit(std::move(std::make_unique<DiveFinished>()));
+                    updatePriority(0);
+                });
 
-            emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
-                RegisterAction{id,
-                               "Goal Saver",
-                               {std::pair<float, std::set<LimbID>>(
-                                   0,
-                                   {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
-                               [this](const std::set<LimbID>&) { emit(std::make_unique<ExecuteDive>()); },
-                               [this](const std::set<LimbID>&) { emit(std::make_unique<FinishDive>()); },
-                               [this](const std::set<ServoID>&) { emit(std::make_unique<FinishDive>()); }}));
-        }
+                emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
+                    RegisterAction{id,
+                                   "Goal Saver",
+                                   {std::pair<float, std::set<LimbID>>(
+                                       0,
+                                       {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
+                                   [this](const std::set<LimbID>&) { emit(std::make_unique<ExecuteDive>()); },
+                                   [this](const std::set<LimbID>&) { emit(std::make_unique<FinishDive>()); },
+                                   [this](const std::set<ServoID>&) { emit(std::make_unique<FinishDive>()); }}));
+            }
 
-        void GoalSaver::updatePriority(const float& priority) {
-            emit(std::make_unique<ActionPriorities>(ActionPriorities{id, {priority}}));
-        }
+            void GoalSaver::updatePriority(const float& priority) {
+                emit(std::make_unique<ActionPriorities>(ActionPriorities{id, {priority}}));
+            }
 
-        int GoalSaver::getDirectionalQuadrant(float x, float y) {
+            int GoalSaver::getDirectionalQuadrant(float x, float y) {
 
-            // These represent 4 directions of looking, see https://www.desmos.com/calculator/mm8cnsnpdt for a graph of
-            // the 4 quadrants
-            // Note that x is forward in relation to the robot so the forward quadrant is x >= |y|
-            return x >= std::abs(y)    ? 0   // forward
-                   : y >= std::abs(x)  ? 1   // left
-                   : x <= -std::abs(y) ? 2   // backward
-                                       : 3;  // right
-        }
-    }  // namespace skills
-}  // namespace behaviour
+                // These represent 4 directions of looking, see https://www.desmos.com/calculator/mm8cnsnpdt for a graph
+                // of the 4 quadrants Note that x is forward in relation to the robot so the forward quadrant is x >=
+                // |y|
+                return x >= std::abs(y)    ? 0   // forward
+                       : y >= std::abs(x)  ? 1   // left
+                       : x <= -std::abs(y) ? 2   // backward
+                                           : 3;  // right
+            }
+        }  // namespace skills
+    }      // namespace behaviour
 }  // namespace module

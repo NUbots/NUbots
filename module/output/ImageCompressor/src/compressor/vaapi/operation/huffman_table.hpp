@@ -5,7 +5,7 @@
 
 namespace module::output::compressor::vaapi::operation {
 
-VABufferID huffman_table(VADisplay dpy, VAContextID context, const bool& monochrome);
+    VABufferID huffman_table(VADisplay dpy, VAContextID context, const bool& monochrome);
 
 }  // namespace module::output::compressor::vaapi::operation
 

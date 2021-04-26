@@ -27,21 +27,21 @@
 #include "message/input/Image.hpp"
 
 namespace module {
-namespace support {
+    namespace support {
 
-    class VirtualCamera : public NUClear::Reactor {
-        ReactionHandle emitImageHandle;
-        std::string imagePath;
+        class VirtualCamera : public NUClear::Reactor {
+            ReactionHandle emitImageHandle;
+            std::string imagePath;
 
-    public:
-        /// @brief Called by the powerplant to build and setup the VirtualCamera reactor.
-        explicit VirtualCamera(std::unique_ptr<NUClear::Environment> environment);
+        public:
+            /// @brief Called by the powerplant to build and setup the VirtualCamera reactor.
+            explicit VirtualCamera(std::unique_ptr<NUClear::Environment> environment);
 
-    private:
-        Eigen::Matrix4d Hcw;
-        message::input::Image::Lens lens;
-    };
-}  // namespace support
+        private:
+            Eigen::Matrix4d Hcw;
+            message::input::Image::Lens lens;
+        };
+    }  // namespace support
 }  // namespace module
 
 #endif

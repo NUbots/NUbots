@@ -6,10 +6,10 @@
 
 namespace module::input::decompressor {
 
-class Decompressor {
-public:
-    virtual std::pair<std::vector<uint8_t>, int> decompress(const std::vector<uint8_t>& data) = 0;
-};
+    class Decompressor {
+    public:
+        virtual std::pair<std::vector<uint8_t>, int> decompress(const std::vector<uint8_t>& data) = 0;
+    };
 
 }  // namespace module::input::decompressor
 
