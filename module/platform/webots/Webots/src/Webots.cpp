@@ -34,6 +34,8 @@
 #include "message/support/GlobalConfig.hpp"
 
 #include "utility/input/ServoID.hpp"
+#include "utility/math/angle.hpp"
+#include "utility/platform/darwin/DarwinSensors.hpp"
 #include "utility/vision/fourcc.hpp"
 
 // Include headers needed for TCP connection
@@ -65,7 +67,10 @@ namespace module::platform::webots {
     using message::support::GlobalConfig;
 
     using utility::input::ServoID;
+    using utility::platform::darwin::getDarwinServo;
     using utility::vision::fourcc;
+
+    using module::platform::webots::Clock;
 
     // Converts the NUgus.proto servo name to the equivalent DarwinSensor.proto name
     DarwinSensors::Servo& translate_servo_id(const std::string& name, DarwinSensors::Servos& servos) {
@@ -171,39 +176,54 @@ namespace module::platform::webots {
             });
 
         // Create the message that we are going to send.
-        on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
-            // TODO(KipHamiltons): Maybe keep the `ServoTarget`s we have not sent yet, instead of just overriding them.
-            to_send.motor_positions.clear();
-            to_send.motor_velocities.clear();
-            to_send.motor_torques.clear();
+        on<Trigger<ServoTargets>, With<DarwinSensors>>().then(
+            [this](const ServoTargets& commands, const DarwinSensors& sensors) {
+                // TODO(CMurtagh): Maybe keep the `ServoTarget`s we have not sent yet, instead of just overriding
+                // them.
+                to_send.motor_positions.clear();
+                to_send.motor_velocities.clear();
+                to_send.motor_torques.clear();
 
-            // Store each ServoTarget to send in the next lot
-            for (const auto& target : commands.targets) {
-                MotorPosition position_msg;
-                position_msg.name     = target.id;
-                position_msg.position = target.position;
-                to_send.motor_positions.push_back(position_msg);
+                // Store each ServoTarget to send in the next lot
+                for (const auto& target : commands.targets) {
+                    MotorPosition position_msg;
+                    position_msg.name     = target.id;
+                    position_msg.position = target.position;
+                    to_send.motor_positions.push_back(position_msg);
 
-                // TODO(cmurtagh) work out if gain is velocity or force
-                MotorVelocity velocity_msg;
-                velocity_msg.name     = target.id;
-                velocity_msg.velocity = target.gain;
-                to_send.motor_velocities.push_back(velocity_msg);
+                    MotorVelocity velocity_msg;
+                    // We need to calculate the servo velocity to add to the velocity message
+                    // (method stolen from HardwareIO.cpp)
+                    // velocity = distance / time
+                    const float distance =
+                        utility::math::angle::difference(target.position,
+                                                         getDarwinServo(target.id, sensors).presentPosition);
+                    Clock::duration time = target.time - Clock::now();
+                    float velocity;
+                    if (time.count() > 0) {
+                        velocity = distance / static_cast<float>(time.count()) / static_cast<float>(Clock::period::den);
+                    }
+                    else {
+                        velocity = 0;
+                    }
+                    velocity_msg.name     = target.id;
+                    velocity_msg.velocity = velocity;
+                    to_send.motor_velocities.push_back(velocity_msg);
 
-                MotorTorque torque_msg;
-                torque_msg.name   = target.id;
-                torque_msg.torque = target.torque;
-                to_send.motor_torques.push_back(torque_msg);
+                    MotorTorque torque_msg;
+                    torque_msg.name   = target.id;
+                    torque_msg.torque = target.torque;
+                    to_send.motor_torques.push_back(torque_msg);
 
-                // MotorPID, only sending P gain. Set I and D to zero
-                MotorPID motorpid_msg;
-                motorpid_msg.name  = target.id;
-                motorpid_msg.PID.X = static_cast<double>(target.gain);
-                motorpid_msg.PID.Y = 0.0;
-                motorpid_msg.PID.Z = 0.0;
-                to_send.motor_pids.push_back(motorpid_msg);
-            }
-        });
+                    // MotorPID, only sending P gain. Set I and D to zero
+                    MotorPID motorpid_msg;
+                    motorpid_msg.name  = target.id;
+                    motorpid_msg.PID.X = static_cast<double>(target.gain);
+                    motorpid_msg.PID.Y = 0.0;
+                    motorpid_msg.PID.Z = 0.0;
+                    to_send.motor_pids.push_back(motorpid_msg);
+                }
+            });
     }
 
     void Webots::setup_connection(const std::string& server_address, const std::string& port) {
