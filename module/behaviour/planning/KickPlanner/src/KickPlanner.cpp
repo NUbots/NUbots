@@ -111,11 +111,11 @@ namespace module::behaviour::planning {
 
                 Eigen::Affine3d Htw(sensors.Htw);
                 Eigen::Vector3d ballPosition =
-                    (Htw * Eigen::Vector3d(ball.position.x(), ball.position.y(), fd.ball_radius));
+                    Htw * Eigen::Vector3d(ball.position.x(), ball.position.y(), fd.ball_radius);
 
                 // Transform target from field to torso space
                 Eigen::Affine3d Htf        = Htw * Hfw.inverse();
-                Eigen::Vector3d kickTarget = Htf * Eigen ::Vector3d(kickPlan.target.x(), kickPlan.target.y(), 0.0);
+                Eigen::Vector3d kickTarget = Htf * Eigen::Vector3d(kickPlan.target.x(), kickPlan.target.y(), 0.0);
                 float KickAngle            = std::fabs(std::atan2(kickTarget.y(), kickTarget.x()));
 
                 // log("KickPlan target global",kickPlan. target.transpose());
