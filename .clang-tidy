@@ -23,6 +23,7 @@ Checks: >
   readability-*,
   -readability-uppercase-literal-suffix,
   -readability-magic-numbers,
+  -readability-redundant-string-init,
   modernize-*,
   -modernize-use-trailing-return-type
 WarningsAsErrors: ""
