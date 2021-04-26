@@ -94,7 +94,7 @@ namespace utility::strutil {
     };
 
     template <enum ANSICode... Codes>
-    typename ANSISGR<Codes...>::Apply operator<<(std::ostream& out, const ANSISGR<Codes...> /*unused*/) {
+    typename ANSISGR<Codes...>::Apply operator<<(std::ostream& out, const ANSISGR<Codes...> /*codes*/) {
         return typename ANSISGR<Codes...>::Apply(out);
     }
 
