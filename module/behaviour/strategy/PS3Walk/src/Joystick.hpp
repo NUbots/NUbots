@@ -11,14 +11,14 @@
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-#ifndef __JOYSTICK_HH__
-    #define JOYSTICK_HH_
+#ifndef __JOYSTICK_HPP__
+#define __JOYSTICK_HPP__
 
-    #include <string>
+#include <string>
 
-    #define JS_EVENT_BUTTON 0x01  // button pressed/released
-    #define JS_EVENT_AXIS   0x02  // joystick moved
-    #define JS_EVENT_INIT   0x80  // initial state of device
+#define JS_EVENT_BUTTON 0x01  // button pressed/released
+#define JS_EVENT_AXIS   0x02  // joystick moved
+#define JS_EVENT_INIT   0x80  // initial state of device
 
 /**
  * Encapsulates all data relevant to a sampled joystick event.
@@ -123,4 +123,4 @@ public:
     bool sample(JoystickEvent* event) const;
 };
 
-#endif
+#endif  // __JOYSTICK_HPP__
