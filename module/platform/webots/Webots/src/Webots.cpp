@@ -248,6 +248,8 @@ namespace module::platform::webots {
         // Tell webots who we are
         // send_player_details(fd, global_config); Not needed? Set by the port we connect to?
 
+        // Now that we are connected, we can set up our reaction handles with this file descriptor
+
         // Receiving
         read_io = on<IO>(fd, IO::READ).then([this, fd]() {
             // Get the size of the message
@@ -257,7 +259,8 @@ namespace module::platform::webots {
                 return;
             }
 
-            uint32_t Nh = ntohl(Nn);  // Convert from network endian to host endian
+            // Convert from network endian to host endian
+            const uint32_t Nh = ntohl(Nn);
 
             // Get the message
             std::vector<char> data(Nh, 0);
@@ -281,13 +284,16 @@ namespace module::platform::webots {
         send_loop = on<Every<10, std::chrono::milliseconds>>().then([this, fd]() {
             // Sending
             std::vector<char> data = NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(to_send);
-            uint32_t Nn            = htonl(data.size());
+            // Size of the message, in network endian
+            const uint32_t Nn = htonl(data.size());
+            // Send the message size first
             if (send(fd, &Nn, sizeof(Nn), 0) == sizeof(Nn)) {
                 log<NUClear::ERROR>(
-                    fmt::format("Error in sending actuator requests message size, {}", strerror(errno)));
+                    fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
             }
+            // then send the data
             if (send(fd, data.data(), Nn, 0) == Nn) {
-                log<NUClear::ERROR>("Error in sending actuator requests message, {}", strerror(errno));
+                log<NUClear::ERROR>(fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
             }
         });
 
@@ -305,7 +311,8 @@ namespace module::platform::webots {
     void Webots::send_player_details(const int& fd, const GlobalConfig& player_details) {
         // TODO(cameron) resend if fails
         std::vector<char> data = NUClear::util::serialise::Serialise<GlobalConfig>::serialise(player_details);
-        uint32_t Nn            = htonl(data.size());
+        const uint32_t Nn      = htonl(data.size());
+        // Send the message size (network endian), then the message itself
         send(fd, &Nn, sizeof(Nn), 0);
         send(fd, data.data(), Nn, 0);
     }
@@ -367,7 +374,9 @@ namespace module::platform::webots {
             emit(compressed_image);
         }
 
-        // Parse the errors and warnings from Webots and log them. Maybe check for certain things.
+        // Parse the errors and warnings from Webots and log them.
+        // Note that this is where we should deal with specific messages passed in the sensor_measurements "messages"
+        // or check if those messages have specific information
         for (const auto& message : sensor_measurements.messages) {
             switch (int(message.message_type)) {
                 case Message::MessageType::ERROR_MESSAGE: log<NUClear::ERROR>(message.text); break;
