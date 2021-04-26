@@ -69,38 +69,37 @@ namespace module::platform::webots {
 
     // Converts the NUgus.proto servo name to the equivalent DarwinSensor.proto name
     DarwinSensors::Servo& translate_servo_id(const std::string& name, DarwinSensors::Servos& servos) {
+
         // clang-format off
-
-    // Left ankle
-    if (name == "left_ankle_roll_sensor") { return servos.lAnkleRoll; }
-    if (name == "left_ankle_pitch_sensor") { return servos.lAnklePitch; }
-    // Right ankle
-    if (name == "right_ankle_roll_sensor") { return servos.rAnkleRoll; }
-    if (name == "right_ankle_pitch_sensor") { return servos.rAnklePitch; }
-    // Knees
-    if (name == "right_knee_pitch_sensor") { return servos.rKnee; }
-    if (name == "left_knee_pitch_sensor") { return servos.lKnee; }
-    // Left hip
-    if (name == "left_hip_roll_sensor") { return servos.lHipRoll; }
-    if (name == "left_hip_pitch_sensor") { return servos.lHipPitch; }
-    if (name == "left_hip_yaw_sensor") { return servos.lHipYaw; }
-    // Right hip
-    if (name == "right_hip_roll_sensor") { return servos.rHipRoll; }
-    if (name == "right_hip_pitch_sensor") { return servos.rHipPitch; }
-    if (name == "right_hip_yaw_sensor") { return servos.rHipYaw; }
-    // Elbows
-    if (name == "left_elbow_pitch_sensor") { return servos.lElbow; }
-    if (name == "right_elbow_pitch_sensor") { return servos.rElbow; }
-    // Left shoulder
-    if (name == "left_shoulder_roll_sensor") { return servos.lShoulderRoll; }
-    if (name == "left_shoulder_pitch_sensor") { return servos.lShoulderPitch; }
-    // Right shoulder
-    if (name == "right_shoulder_roll_sensor") { return servos.rShoulderRoll; }
-    if (name == "right_shoulder_pitch_sensor") { return servos.rShoulderPitch; }
-    // Neck and head
-    if (name == "neck_yaw_sensor") { return servos.headPan; }
-    if (name == "head_pitch_sensor") { return servos.headTilt; }
-
+        // Left ankle
+        if (name == "left_ankle_roll_sensor") { return servos.lAnkleRoll; }
+        if (name == "left_ankle_pitch_sensor") { return servos.lAnklePitch; }
+        // Right ankle
+        if (name == "right_ankle_roll_sensor") { return servos.rAnkleRoll; }
+        if (name == "right_ankle_pitch_sensor") { return servos.rAnklePitch; }
+        // Knees
+        if (name == "right_knee_pitch_sensor") { return servos.rKnee; }
+        if (name == "left_knee_pitch_sensor") { return servos.lKnee; }
+        // Left hip
+        if (name == "left_hip_roll_sensor") { return servos.lHipRoll; }
+        if (name == "left_hip_pitch_sensor") { return servos.lHipPitch; }
+        if (name == "left_hip_yaw_sensor") { return servos.lHipYaw; }
+        // Right hip
+        if (name == "right_hip_roll_sensor") { return servos.rHipRoll; }
+        if (name == "right_hip_pitch_sensor") { return servos.rHipPitch; }
+        if (name == "right_hip_yaw_sensor") { return servos.rHipYaw; }
+        // Elbows
+        if (name == "left_elbow_pitch_sensor") { return servos.lElbow; }
+        if (name == "right_elbow_pitch_sensor") { return servos.rElbow; }
+        // Left shoulder
+        if (name == "left_shoulder_roll_sensor") { return servos.lShoulderRoll; }
+        if (name == "left_shoulder_pitch_sensor") { return servos.lShoulderPitch; }
+        // Right shoulder
+        if (name == "right_shoulder_roll_sensor") { return servos.rShoulderRoll; }
+        if (name == "right_shoulder_pitch_sensor") { return servos.rShoulderPitch; }
+        // Neck and head
+        if (name == "neck_yaw_sensor") { return servos.headPan; }
+        if (name == "head_pitch_sensor") { return servos.headTilt; }
         // clang-format on
 
         throw std::runtime_error("Unable to translate unknown NUgus.proto sensor name: " + name);
