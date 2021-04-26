@@ -22,7 +22,6 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <fmt/format.h>
-#include <numeric>
 
 #include "extension/Configuration.hpp"
 

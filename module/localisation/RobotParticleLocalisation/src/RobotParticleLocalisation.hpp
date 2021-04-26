@@ -10,7 +10,7 @@
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/Goal.hpp"
 
-#include "utility/math/filter/ParticleFilter.hpp"
+#include "utility/math/filter/eigen/ParticleFilter.hpp"
 
 namespace module::localisation {
 

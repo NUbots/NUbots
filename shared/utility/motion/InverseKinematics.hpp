@@ -22,6 +22,7 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
+#include <armadillo>
 #include <chrono>
 #include <cmath>
 #include <limits>
@@ -36,6 +37,7 @@
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 #include "utility/math/coordinates.hpp"
+#include "utility/math/matrix/Transform3D.hpp"
 #include "utility/motion/ForwardKinematics.hpp"
 
 namespace utility::motion::kinematics {
@@ -53,6 +55,14 @@ namespace utility::motion::kinematics {
         @param RobotKinematicsModel The class containing the leg model of the robot.
     */
 
+    bool legPoseValid(const message::motion::KinematicsModel& model,
+                      utility::math::matrix::Transform3D target,
+                      LimbID limb);
+
+    std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
+                                                              utility::math::matrix::Transform3D target,
+                                                              LimbID limb);
+
     std::vector<std::pair<ServoID, double>> calculateLegJoints(const message::motion::KinematicsModel& model,
                                                                const Eigen::Affine3d& target,
                                                                const LimbID& limb);
@@ -62,13 +72,43 @@ namespace utility::motion::kinematics {
                                                               const LimbID& limb);
 
     std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
+                                                              utility::math::matrix::Transform3D leftTarget,
+                                                              utility::math::matrix::Transform3D rightTarget);
+
+    std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
                                                               const Eigen::Affine3f& leftTarget,
                                                               const Eigen::Affine3f& rightTarget);
+
+    std::vector<std::pair<ServoID, float>> calculateCameraLookJoints(const message::motion::KinematicsModel& model,
+                                                                     arma::vec3 cameraUnitVector);
 
     std::vector<std::pair<ServoID, double>> calculateCameraLookJoints(const KinematicsModel& model,
                                                                       const Eigen::Vector3d& cameraUnitVector);
 
+    std::vector<std::pair<ServoID, float>> calculateHeadJoints(arma::vec3 cameraUnitVector);
+
     std::vector<std::pair<ServoID, float>> calculateHeadJoints(Eigen::Vector3f cameraUnitVector);
+
+    arma::vec2 calculateHeadJointsToLookAt(arma::vec3 groundPoint,
+                                           const utility::math::matrix::Transform3D& camToGround,
+                                           const utility::math::matrix::Transform3D& bodyToGround);
+
+    arma::vec2 headAnglesToSeeGroundPoint(const arma::vec2& gpos, const message::input::Sensors& sensors);
+
+    std::vector<std::pair<ServoID, float>> setHeadPoseFromFeet(const message::motion::KinematicsModel& model,
+                                                               const utility::math::matrix::Transform3D& cameraToFeet,
+                                                               const float& footSeparation);
+
+    std::vector<std::pair<ServoID, float>> setArm(const message::motion::KinematicsModel& model,
+                                                  const arma::vec3& pos,
+                                                  bool left,
+                                                  int number_of_iterations = 300,
+                                                  arma::vec3 angleHint     = arma::zeros(3));
+
+    std::vector<std::pair<ServoID, float>> setArmApprox(const message::motion::KinematicsModel& model,
+                                                        const arma::vec3& pos,
+                                                        bool left);
+
 
 }  // namespace utility::motion::kinematics
 

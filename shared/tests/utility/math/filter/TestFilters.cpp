@@ -24,8 +24,8 @@
 
 #include "VanDerPolModel.hpp"
 
-#include "utility/math/filter/ParticleFilter.hpp"
-#include "utility/math/filter/UKF.hpp"
+#include "utility/math/filter/eigen/ParticleFilter.hpp"
+#include "utility/math/filter/eigen/UKF.hpp"
 
 static const std::array<Eigen::Vector2d, 101> true_state   = {Eigen::Vector2d(2.0, 0.0),
                                                             Eigen::Vector2d(1.99762085441568, -0.0928337297585024),

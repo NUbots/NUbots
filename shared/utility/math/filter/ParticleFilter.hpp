@@ -16,164 +16,211 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2019 NUbots <nubots@nubots.net>
+ * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
 #ifndef UTILITY_MATH_FILTER_PARTICLEFILTER_HPP
 #define UTILITY_MATH_FILTER_PARTICLEFILTER_HPP
 
-#include <Eigen/Dense>
+#include <armadillo>
+#include <iostream>
+#include <nuclear>
 #include <random>
 #include <vector>
 
 namespace utility::math::filter {
 
-    template <typename Scalar, template <typename> class FilterModel>
+    template <typename Model>  // model is is a template parameter that Kalman also inherits
     class ParticleFilter {
     public:
-        using Model = FilterModel<Scalar>;
         // The model
         Model model;
 
-        using StateVec = Eigen::Matrix<Scalar, Model::size, 1>;
-        using StateMat = Eigen::Matrix<Scalar, Model::size, Model::size>;
+        using StateVec = arma::vec::fixed<Model::size>;
+        using StateMat = arma::mat::fixed<Model::size, Model::size>;
 
     private:
-        // Our random number generator
-        std::mt19937 rng;
-        std::normal_distribution<Scalar> norm;
-
         // Dimension types for vectors and square matricies
-        using ParticleList = Eigen::Matrix<Scalar, Model::size, Eigen::Dynamic>;
+        using ParticleList = arma::mat;
 
-        ParticleList sample_particles(const StateVec& mean, const StateMat& covariance, const int& n_particles) {
-            // Sample single gaussian (represented by a gaussian mixture model of size 1)
+        /* particles.n_cols = number of particles
+           particle.col(i) = particle i
+        */
+        ParticleList particles;
 
-            // Implementation based on the work presented in
-            // Conrad Sanderson and Ryan Curtin.
-            // An Open Source C++ Implementation of Multi-Threaded Gaussian Mixture Models, k-Means and
-            // Expectation Maximisation. International Conference on Signal Processing and Communication
-            // Systems, 2017.
-
-            ParticleList new_particles =
-                ParticleList::NullaryExpr(Model::size, n_particles, [&]() { return norm(rng); });
-
-            const StateMat sqrt_covariance = covariance.cwiseSqrt();
-
-            for (int i = 0; i < n_particles; ++i) {
-                new_particles.col(i) = new_particles.col(i).cwiseProduct(sqrt_covariance.col(0)) + mean;
-            }
-
-            return new_particles;
-        }
-
-        ParticleList sample_particles(const StateVec& mean, const StateVec& covariance, const int& n_particles) {
-            // Sample single gaussian (represented by a gaussian mixture model of size 1)
-
-            // Implementation based on the work presented in
-            // Conrad Sanderson and Ryan Curtin.
-            // An Open Source C++ Implementation of Multi-Threaded Gaussian Mixture Models, k-Means and
-            // Expectation Maximisation. International Conference on Signal Processing and Communication
-            // Systems, 2017.
-
-            ParticleList new_particles =
-                ParticleList::NullaryExpr(Model::size, n_particles, [&]() { return norm(rng); });
-
-            const StateVec sqrt_covariance = covariance.cwiseSqrt();
-
-            for (int i = 0; i < n_particles; ++i) {
-                new_particles.col(i) = new_particles.col(i).cwiseProduct(sqrt_covariance) + mean;
-            }
-
-            return new_particles;
-        }
+        StateVec sigma_sq;
 
     public:
-        ParticleFilter(const StateVec& initial_mean      = StateVec::Zero(),
-                       const StateMat& initialCovariance = StateMat::Identity() * 0.1,
-                       const int& number_of_particles    = 100)
-            : rng(), norm() {
-            set_state(initial_mean, initialCovariance, number_of_particles);
+        ParticleFilter(StateVec initialMean       = arma::zeros(Model::size),
+                       StateMat initialCovariance = arma::eye(Model::size, Model::size) * 0.1,
+                       int number_of_particles_   = 100,
+                       StateVec sigma_sq_         = 0.1 * arma::ones(Model::size)) {
+            sigma_sq = arma::abs(sigma_sq_);
+            reset(initialMean, initialCovariance, number_of_particles_);
         }
 
-        void set_state(const StateVec& initial_mean,
-                       const StateMat& initialCovariance,
-                       const int& number_of_particles = 100) {
-            particles = sample_particles(initial_mean, initialCovariance, number_of_particles);
+        void reset(StateVec initialMean, StateMat initialCovariance, int number_of_particles_ = 100) {
+            particles = getParticles(initialMean, initialCovariance, number_of_particles_);
+        }
 
-            // Limit the state of each particle to ensure they are still valid
-            for (unsigned int i = 0; i < particles.cols(); i++) {
-                particles.col(i) = model.limit(particles.col(i));
+        void resetAmbiguous(const std::vector<StateVec>& initialMeans,
+                            const std::vector<StateMat>& initialCovariances,
+                            const int& number_of_particles_ = 100) {
+            if (initialMeans.size() != initialCovariances.size()) {
+                throw std::runtime_error(std::string(__FILE__) + " : " + std::to_string(__LINE__)
+                                         + " different number of means vs covariances provided.");
+            }
+            particles = arma::zeros(Model::size, number_of_particles_);
+            // Sample the same number of particles for each possibility
+            const int particlesPerInit = number_of_particles_ / initialMeans.size();
+            const int remainder        = number_of_particles_ % initialMeans.size();
+            // Generate remainder using first hypotheses
+            // Cols are accessed cols(first,last_inclusive)
+            if (remainder > 0) {
+                particles.cols(0, remainder - 1) = getParticles(initialMeans[0], initialCovariances[0], remainder);
+            }
+            // Generate the rest equally
+            for (unsigned int i = 0, currentStart = remainder; currentStart < particles.n_cols;
+                 ++i, currentStart += particlesPerInit) {
+                particles.cols(currentStart, currentStart + particlesPerInit - 1) =
+                    getParticles(initialMeans[i], initialCovariances[i], particlesPerInit);
             }
         }
 
-        template <typename... Args>
-        void time(const Scalar& dt, const Args&... params) {
-            // Time update our particles
-            for (unsigned int i = 0; i < particles.cols(); ++i) {
-                particles.col(i) = model.time(particles.col(i), dt, params...);
-            }
+        ParticleList getParticles(const StateVec& initialMean,
+                                  const StateMat& initialCovariance,
+                                  const int& n_particles) const {
+            // Sample single gaussian (represented by a gaussian mixture model of size 1)
+            ParticleList new_particles = arma::zeros(n_particles, Model::size);
 
-            // Perturb them by noise
-            particles += sample_particles(StateVec::Zero(), StateVec(model.noise(dt).diagonal()), particles.cols());
+            arma::gmm_diag gaussian;
+            gaussian.set_params(arma::mat(initialMean), arma::mat(initialCovariance.diag()), arma::ones(1));
 
-            // Limit the state of each particle to ensure they are still valid
-            for (unsigned int i = 0; i < particles.cols(); i++) {
-                particles.col(i) = model.limit(particles.col(i));
-            }
+            return gaussian.generate(n_particles);
         }
 
-        template <typename MeasurementScalar, int S, int... VArgs, int... MArgs, typename... Args>
-        MeasurementScalar measure(const Eigen::Matrix<MeasurementScalar, S, 1, VArgs...>& measurement,
-                                  const Eigen::Matrix<MeasurementScalar, S, S, MArgs...>& measurement_variance,
-                                  const Args&... params) {
 
-            ParticleList candidate_particles =
-                ParticleList::Zero(Model::size, particles.cols() + model.getRogueCount());
-            candidate_particles.leftCols(particles.cols()) = particles;
+        template <typename... TAdditionalParameters>
+        void timeUpdate(const double& deltaT, const TAdditionalParameters&... additionalParameters) {
+            // Sample single zero mean gaussian with process noise (represented by a gaussian mixture model of
+            // size 1)
+            arma::gmm_diag gaussian;
+            gaussian.set_params(arma::mat(arma::zeros(Model::size)),
+                                arma::mat(model.processNoise().diag() * deltaT),
+                                arma::ones(1));
 
+            for (unsigned int i = 0; i < particles.n_cols; ++i) {
+                particles.col(i) = model.timeUpdate(particles.col(i), deltaT, additionalParameters...);
+            }
+            particles += gaussian.generate(particles.n_cols);
+        }
+
+        template <typename TMeasurement, typename... TMeasurementType>
+        double measurementUpdate(const TMeasurement& measurement,
+                                 const arma::mat& measurement_variance,
+                                 const TMeasurementType&... measurementArgs) {
+            ParticleList candidateParticles =
+                arma::join_rows(particles, arma::zeros(Model::size, model.getRogueCount()));
             // Resample some rogues
-            for (int i = 0; i < model.getRogueCount(); ++i) {
-                candidate_particles.col(i + particles.cols()) =
-                    particles.col(i) + model.getRogueRange().cwiseProduct(StateVec::Random() * 0.5);
+            for (int i = 0; i < model.getRogueCount(); i++) {
+                candidateParticles.col(i + particles.n_cols) =
+                    particles.col(i) + (model.getRogueRange() % (0.5 - arma::randu(Model::size)));
             }
 
-            Eigen::Matrix<MeasurementScalar, S, Eigen::Dynamic> differences(S, particles.cols());
-            for (int i = 0; i < candidate_particles.cols(); ++i) {
-                differences.col(i) = model.difference(model.predict(particles.col(i), params...), measurement);
+            arma::mat observationDifferences = arma::mat(measurement.n_elem, candidateParticles.n_cols);
+            for (unsigned int i = 0; i < candidateParticles.n_cols; ++i) {
+                arma::vec predictedObservation =
+                    model.predictedObservation(candidateParticles.col(i), measurementArgs...);
+                observationDifferences.col(i) = model.observationDifference(predictedObservation, measurement);
             }
 
             // Calculate log probabilities
-            Eigen::Matrix<MeasurementScalar, Eigen::Dynamic, 1> logits =
-                -differences.cwiseProduct(measurement_variance.inverse() * differences).colwise().sum();
+            arma::vec logits =
+                (-arma::sum(observationDifferences % (measurement_variance.i() * observationDifferences), 0)).t();
 
             // Subtract the max log prob for numerical stability and then exponentiate
-            logits = Eigen::exp(logits.array() - logits.maxCoeff());
+            logits = arma::exp(logits - logits.max());
 
             // Resample
-            std::discrete_distribution<> multinomial(logits.data(), logits.data() + logits.size());
-            for (unsigned int i = 0; i < particles.cols(); i++) {
-                particles.col(i) = model.limit(candidate_particles.col(multinomial(rng)));
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::discrete_distribution<> multinomial(logits.begin(),
+                                                     logits.end());  // class incorrectly named by cpp devs
+            for (unsigned int i = 0; i < particles.n_cols; i++) {
+                particles.col(i) = model.limitState(candidateParticles.col(multinomial(gen)));
             }
-            return logits.mean();
+            return arma::mean(logits);
         }
 
-        // Take the mean of all particles, pay no attention to the type of the data
+
+        template <typename TMeasurement, typename... TMeasurementType>
+        double ambiguousMeasurementUpdate(const TMeasurement& measurement,
+                                          const arma::mat& measurement_variance,
+                                          const std::vector<arma::vec>& possibilities,
+                                          const TMeasurementType&... measurementArgs) {
+            // Expand candidate particles with
+            ParticleList candidateParticles =
+                arma::join_rows(particles, arma::zeros(Model::size, model.getRogueCount()));
+            // Resample rogues
+            for (int i = 0; i < model.getRogueCount(); i++) {
+                candidateParticles.col(i + particles.n_cols) =
+                    particles.col(i) + (model.getRogueRange() % (0.5 - arma::randu(Model::size)));
+            }
+            // Repeat each particle for each possibility
+            ParticleList repCandidateParticles = arma::repmat(candidateParticles, 1, possibilities.size());
+
+            // Compute weights
+            arma::mat observationDifferences = arma::mat(measurement.n_elem, repCandidateParticles.n_cols);
+            for (unsigned int i = 0; i < repCandidateParticles.n_cols; ++i) {
+                arma::vec predictedObservation =
+                    model.predictedObservation(repCandidateParticles.col(i),
+                                               possibilities[i / candidateParticles.n_cols],
+                                               measurementArgs...);
+                observationDifferences.col(i) = model.observationDifference(predictedObservation, measurement);
+            }
+            arma::vec weights =
+                arma::exp(-arma::sum(observationDifferences % (measurement_variance.i() * observationDifferences), 0))
+                    .t();
+
+            // Resample
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::discrete_distribution<> multinomial(weights.begin(),
+                                                     weights.end());  // class incorrectly named by cpp devs
+            // Only sample N particles
+            arma::vec new_weights = arma::zeros(particles.n_cols);
+            for (unsigned int i = 0; i < particles.n_cols; i++) {
+                int index        = multinomial(gen);
+                particles.col(i) = repCandidateParticles.col(index);
+                new_weights(i)   = weights(index);
+            }
+            // Sort particles by descending weight
+
+            arma::uvec sorted_index  = sort_index(new_weights, "decend");
+            arma::mat particles_temp = particles;
+            for (unsigned int i = 0; i < sorted_index.n_rows; i++) {
+                particles.col(i) = model.limitState(particles_temp.col(sorted_index[i]));
+            }
+
+            // Return mean weight
+            return new_weights[sorted_index[0]];
+        }
+
         StateVec get() const {
-            return particles.rowwise().mean();
+            return arma::mean(particles, 1);
+        }
+
+        StateVec getBest() const {
+            return particles.col(0);
         }
 
         StateMat getCovariance() const {
-            auto mean_centered = particles.transpose().rowwise() - particles.transpose().colwise().mean();
-            return (mean_centered.transpose() * mean_centered) / (particles.transpose().rows() - 1);
+            return arma::cov(particles.t());
         }
 
-        const ParticleList& getParticles() const {
+        ParticleList getParticles() const {
             return particles;
         }
-
-    private:
-        ParticleList particles;
     };
 }  // namespace utility::math::filter
 
