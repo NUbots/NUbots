@@ -64,7 +64,7 @@ namespace module::support {
 
         // Store our powerplant in the static variable
         POWER_PLANT = &powerplant;
-        struct sigaction action {};
+        sigaction action{};
 
         // Setup our segmentation fault signal handler/converter
         std::memset(&action, 0, sizeof(action));
