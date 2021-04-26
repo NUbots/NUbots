@@ -100,9 +100,9 @@ namespace utility::io {
         void open(const std::string& device, const unsigned int& baud_rate = 57600);
 
         /**
-         * @brief Close the open file descriptor
+         * @brief Close the open file descriptor then reset fd = -1
          */
-        void close() const;
+        void close();
     };
 
 }  // namespace utility::io

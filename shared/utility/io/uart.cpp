@@ -37,10 +37,11 @@ namespace utility::io {
         }
     }
 
-    void uart::close() const {
+    void uart::close() {
         if (fd >= 0) {
             ::close(fd);
         }
+        fd = -1;
     }
 
     uart::~uart() {
