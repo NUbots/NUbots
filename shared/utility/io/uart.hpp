@@ -3,8 +3,7 @@
 
 #include <string>
 
-namespace utility {
-namespace io {
+namespace utility::io {
 
     /**
      * @brief Class for managing a connection to a serial device
@@ -12,14 +11,14 @@ namespace io {
     class uart {
     private:
         std::string device;
-        int fd;
+        int fd = -1;
 
         /**
          * @brief Set the baud rate of the device
          *
          * @param baud the baud rate to set
          */
-        void set_baud(const int& baud);
+        void set_baud(const unsigned int& baud);
 
     public:
         /**
@@ -44,7 +43,14 @@ namespace io {
          * @brief We can't copy these because otherwise we might close the device twice
          */
         uart(const uart& uart) = delete;
-        uart(uart&&)           = default;
+        uart& operator=(const uart& uart) = delete;
+
+        /**
+         * @brief We can move these because it won't close the device twice
+         */
+        uart(uart&&)  = default;
+        uart& operator=(uart&& uart) = default;
+
 
         /**
          * @brief Destructor, close the device on destruction
@@ -56,14 +62,14 @@ namespace io {
          *
          * @return the native file descriptor
          */
-        int native_handle();
+        [[nodiscard]] int native_handle() const;
 
         /**
          * @brief Return true if the connection is valid
          *
          * @return true if the uart is connected and working, false otherwise
          */
-        bool connected() const;
+        [[nodiscard]] bool connected() const;
 
         /**
          * @brief Read from the device into a buffer
@@ -73,7 +79,7 @@ namespace io {
          *
          * @return the number of bytes that were actually read, or -1 if fail. See ::read
          */
-        ssize_t read(void* buf, size_t count);
+        ssize_t read(void* buf, size_t count) const;
 
         /**
          * @brief Write bytes to the uart
@@ -83,7 +89,7 @@ namespace io {
          *
          * @return the number of bytes that were written
          */
-        ssize_t write(const void* buf, size_t count);
+        ssize_t write(const void* buf, size_t count) const;
 
         /**
          * @brief Open the uart for the given file descriptor. Closes any currently open file.
@@ -96,10 +102,9 @@ namespace io {
         /**
          * @brief Close the open file descriptor
          */
-        void close();
+        void close() const;
     };
 
-}  // namespace io
-}  // namespace utility
+}  // namespace utility::io
 
 #endif  // UTILITY_IO_UART_HPP

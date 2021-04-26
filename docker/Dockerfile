@@ -92,7 +92,7 @@ RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 
 # LLVM and Clang
 RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-11.0.1.tar.gz \
-    -DLLVM_ENABLE_PROJECTS="clang" \
+    -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" \
     -DLLVM_ENABLE_SPHINX=OFF \
     -DLLVM_BUILD_LLVM_DYLIB=ON \
     -DLLVM_LINK_LLVM_DYLIB=ON
@@ -167,14 +167,6 @@ RUN install-package gcc-fortran
 COPY usr/local/package/openblas/${platform}.sh /usr/local/package/openblas.sh
 RUN /usr/local/package/openblas.sh https://github.com/xianyi/OpenBLAS/archive/v0.3.13.tar.gz
 
-# Armadillo
-COPY usr/local/package/armadillo/armadillo.sh /usr/local/package/armadillo.sh
-COPY usr/local/package/armadillo/config.hpp /usr/local/package/armadillo_config.hpp
-RUN /usr/local/package/armadillo.sh https://downloads.sourceforge.net/project/arma/armadillo-9.800.3.tar.xz \
-    /usr/local/package/armadillo_config.hpp \
-    -DDETECT_HDF5=OFF \
-    -DBUILD_SHARED_LIBS=ON
-
 # Eigen3
 COPY usr/local/package/eigen3/deprecated-copy.patch /usr/local/package/deprecated-copy.patch
 COPY usr/local/package/eigen3/cxx17-overalign.patch /usr/local/package/cxx17-overalign.patch
@@ -244,7 +236,7 @@ RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.34.1.tar
     -DBUILD_TESTING=OFF
 
 # NUClear!
-RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.gz \
+RUN install-from-source https://github.com/Fastcode/NUClear/archive/153ccdb9a13dbc88f3c448e07a3048d67235116e.tar.gz \
     -DBUILD_TESTS=OFF
 
 # Backtrace

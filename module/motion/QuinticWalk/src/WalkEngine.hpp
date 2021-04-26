@@ -17,8 +17,7 @@ using utility::motion::splines::Footstep;
 using utility::motion::splines::Trajectories;
 using utility::motion::splines::TrajectoryTypes;
 
-namespace module {
-namespace motion {
+namespace module::motion {
 
     struct WalkingParameter {
         // Full walk cycle frequency
@@ -315,7 +314,5 @@ namespace motion {
          */
         void resetTrunkLastState();
     };
-
-}  // namespace motion
-}  // namespace module
+}  // namespace module::motion
 #endif

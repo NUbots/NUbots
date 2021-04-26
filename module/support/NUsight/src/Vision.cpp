@@ -24,19 +24,16 @@
 #include "message/vision/Ball.hpp"
 #include "message/vision/Goal.hpp"
 #include "message/vision/GreenHorizon.hpp"
-#include "message/vision/Line.hpp"
 #include "message/vision/Obstacle.hpp"
 #include "message/vision/VisualMesh.hpp"
 
-namespace module {
-namespace support {
+namespace module::support {
 
     using message::input::Image;
     using message::output::CompressedImage;
     using message::vision::Balls;
     using message::vision::Goals;
     using message::vision::GreenHorizon;
-    using message::vision::Lines;
     using message::vision::Obstacles;
     using message::vision::VisualMesh;
 
@@ -72,11 +69,6 @@ namespace support {
             }));
 
         handles["vision_object"].push_back(
-            on<Trigger<Lines>, Single, Priority::LOW>().then([this](std::shared_ptr<const Lines> lines) {
-                powerplant.emit_shared<Scope::NETWORK>(std::move(lines), "nusight", false);
-            }));
-
-        handles["vision_object"].push_back(
             on<Trigger<Obstacles>, Single, Priority::LOW>().then([this](std::shared_ptr<const Obstacles> obstacles) {
                 powerplant.emit_shared<Scope::NETWORK>(std::move(obstacles), "nusight", false);
             }));
@@ -91,5 +83,4 @@ namespace support {
                 powerplant.emit_shared<Scope::NETWORK>(std::move(gh), "nusight", false);
             }));
     }
-}  // namespace support
-}  // namespace module
+}  // namespace module::support

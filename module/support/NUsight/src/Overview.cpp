@@ -42,8 +42,7 @@
 /**
  * @author Monica Olejniczak
  */
-namespace module {
-namespace support {
+namespace module::support {
 
     using message::behaviour::Behaviour;
     using message::behaviour::KickPlan;
@@ -192,5 +191,4 @@ namespace support {
                 }
             }));
     }
-}  // namespace support
-}  // namespace module
+}  // namespace module::support

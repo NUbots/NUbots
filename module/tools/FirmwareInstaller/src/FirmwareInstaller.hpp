@@ -4,8 +4,7 @@
 #include <nuclear>
 #include <string>
 
-namespace module {
-namespace tools {
+namespace module::tools {
 
     class FirmwareInstaller : public NUClear::Reactor {
     public:
@@ -33,7 +32,6 @@ namespace tools {
         void showBatteryMenu() const;
     };
 
-}  // namespace tools
-}  // namespace module
+}  // namespace module::tools
 
 #endif  // MODULE_TOOLS_FIRMWAREINSTALLER_HPP

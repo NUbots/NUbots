@@ -5,8 +5,7 @@
 
 #include "utility/vision/fourcc.hpp"
 
-namespace module {
-namespace input {
+namespace module::input {
 
     inline uint32_t description_to_fourcc(const std::string& code) {
         using namespace utility::vision;
@@ -45,8 +44,6 @@ namespace input {
 
         throw std::runtime_error("Could not find a fourcc for the given description");
     }
-
-}  // namespace input
-}  // namespace module
+}  // namespace module::input
 
 #endif  // MODULE_INPUT_CAMERA_DESCRIPTION_TO_FOURCC_HPP

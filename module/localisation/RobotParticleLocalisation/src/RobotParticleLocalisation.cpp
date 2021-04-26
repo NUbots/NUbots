@@ -1,5 +1,7 @@
 #include "RobotParticleLocalisation.hpp"
 
+#include <Eigen/Geometry>
+
 #include "extension/Configuration.hpp"
 
 #include "message/input/Sensors.hpp"
@@ -11,8 +13,7 @@
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
-namespace module {
-namespace localisation {
+namespace module::localisation {
 
     using extension::Configuration;
 
@@ -192,5 +193,4 @@ namespace localisation {
         return position;
     }
 
-}  // namespace localisation
-}  // namespace module
+}  // namespace module::localisation

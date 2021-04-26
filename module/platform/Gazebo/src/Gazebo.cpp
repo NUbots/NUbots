@@ -13,8 +13,7 @@
 #include "message/platform/gazebo/Simulation.hpp"
 #include "message/platform/gazebo/Torso.hpp"
 
-namespace module {
-namespace platform {
+namespace module::platform {
 
     using extension::Configuration;
 
@@ -100,5 +99,4 @@ namespace platform {
             emit<Scope::NETWORK>(msg, config.simulator_name, false);
         });
     }
-}  // namespace platform
-}  // namespace module
+}  // namespace module::platform
