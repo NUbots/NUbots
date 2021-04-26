@@ -24,7 +24,6 @@
 #include <nuclear>
 
 #include "message/support/nusight/DataPoint.hpp"
-#include "message/vision/Line.hpp"
 
 namespace utility {
 namespace nusight {
