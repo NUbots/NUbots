@@ -37,8 +37,6 @@ namespace module::behaviour::skills {
         float EXECUTION_PRIORITY;
 
         /**
-         * TODO DiveCommand seems incompleted?
-         * @Mingze
          * DiveCommand returns vec2 direction to dive
          */
         message::motion::DiveCommand diveCommand;
