@@ -39,7 +39,6 @@ namespace module::extension {
 
         // Work out what path we are watching
         std::array<char, 512> pathbuff{};
-        pathbuff.fill('\0');
         size_t size = pathbuff.size();
         uv_fs_event_getpath(handle, pathbuff.data(), &size);
         std::string path(pathbuff.data());

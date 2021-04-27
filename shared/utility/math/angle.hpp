@@ -38,10 +38,10 @@ namespace utility::math::angle {
     template <typename T>
     inline T normalizeAngle(const T value) {
 
-        T angle = std::fmod(value, static_cast<T>(2.0 * M_PI));
+        T angle = std::fmod(value, static_cast<T>(2 * M_PI));
 
         if (angle <= -M_PI) {
-            angle += M_PI * 2;
+            angle += 2 * M_PI;
         }
 
         if (angle > M_PI) {
@@ -69,7 +69,7 @@ namespace utility::math::angle {
      */
     inline double difference(const double a, const double b) {
 
-        return M_PI - std::fabs(std::fmod(std::fabs(a - b), 2 * M_PI) - M_PI);
+        return M_PI - std::fabs(std::fmod(std::fabs(a - b), (2 * M_PI)) - M_PI);
     }
 
     /**
@@ -81,9 +81,9 @@ namespace utility::math::angle {
 
         auto x = a - b;
 
-        auto m = x - std::floor(x / (2 * M_PI)) * (2 * M_PI);
+        auto m = x - std::floor(x / (2 * M_PI)) * 2 * M_PI;
 
-        auto d = std::fmod(m + M_PI, 2 * M_PI) - M_PI;
+        auto d = std::fmod(m + M_PI, (2 * M_PI)) - M_PI;
 
         return d;
     }
@@ -109,7 +109,7 @@ namespace utility::math::angle {
         }
 
         Scalar dist1 = max - min;
-        Scalar dist2 = 2.0 * M_PI - max + min;
+        Scalar dist2 = (2 * M_PI) - max + min;
 
         if (dist1 < dist2) {
             if (angleSrc > angleDst) {
@@ -155,7 +155,7 @@ namespace utility::math::angle {
 
         // Find alpha such that $\sin(\alpha) = a\_$ and $\cos(\alpha) = b\_$, which is possible because $a\_^2
         // + b\_^2 = 1$
-        float alpha = atan2f(a_, b_);
+        float alpha = std::atan2(a_, b_);
 
         // Hence the equation becomes $\cos(\alpha)\cos(x)+\sin(\alpha)\sin(x) = cos(x-\alpha) = c\_$
         return alpha + acos_clamped(c_);
