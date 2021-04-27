@@ -233,14 +233,14 @@ namespace module::platform::webots {
 
         const int fd = tcpip_connect(server_address, port);
 
-        char initial_message[8];
-        const int n = recv(fd, initial_message, sizeof(initial_message), 0);
+        std::string initial_message;
+        const int n = recv(fd, initial_message.data(), sizeof(initial_message), 0);
 
         if (n > 0) {
-            if (strncmp(initial_message, "Welcome", sizeof(initial_message)) == 0) {
+            if (initial_message == "Welcome") {
                 // good
             }
-            else if (strncmp(initial_message, "Refused", sizeof(initial_message)) == 0) {
+            else if (initial_message == "Refused") {
                 log<NUClear::FATAL>(
                     fmt::format("Connection to {}:{} refused: your ip is not white listed.", server_address, port));
                 // Halt and don't retry as reconnection is pointless.
