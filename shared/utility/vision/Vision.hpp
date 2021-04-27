@@ -54,33 +54,19 @@ namespace utility::vision {
         Colour(char const& value) : value(static_cast<Value>(value)) {}
         Colour(Value const& value) : value(value) {}
         Colour(std::string const& str) : value(Value::UNCLASSIFIED) {
-            if (str == "UNCLASSIFIED") {
-                value = Value::UNCLASSIFIED;
-            }
-            else if (str == "WHITE") {
-                value = Value::WHITE;
-            }
-            else if (str == "GREEN") {
-                value = Value::GREEN;
-            }
-            else if (str == "ORANGE") {
-                value = Value::ORANGE;
-            }
-            else if (str == "YELLOW") {
-                value = Value::YELLOW;
-            }
-            else if (str == "CYAN") {
-                value = Value::CYAN;
-            }
-            else if (str == "MAGENTA") {
-                value = Value::MAGENTA;
-            }
-            else if (str == "WHITE_GREEN") {
-                value = Value::WHITE_GREEN;
-            }
+            // clang-format off
+            if      (str == "UNCLASSIFIED") { value = Value::UNCLASSIFIED; }
+            else if (str == "WHITE")        { value = Value::WHITE; }
+            else if (str == "GREEN")        { value = Value::GREEN; }
+            else if (str == "ORANGE")       { value = Value::ORANGE; }
+            else if (str == "YELLOW")       { value = Value::YELLOW; }
+            else if (str == "CYAN")         { value = Value::CYAN; }
+            else if (str == "MAGENTA")      { value = Value::MAGENTA; }
+            else if (str == "WHITE_GREEN")  { value = Value::WHITE_GREEN; }
             else {
                 throw std::runtime_error("String " + str + " did not match any enum for Colour");
             }
+            // clang-format on
         }
 
 
