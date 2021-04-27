@@ -1,40 +1,36 @@
-Darwin Hardware I/O
+NUgus Hardware I/O
 ===================
 
 ## Description
 
-This module is responsible for communicating with the Darwin robot's CM740
-controller.
+This module is responsible for communicating with the NUgus' CM740 controller.
 
 ## Usage
 
-Darwin Hardware I/O connects at startup to the Darwin controller located on
+NUgus Hardware I/O connects at startup to the NUgus controller located on
 `/dev/usbTTY0`. If this does not succeed an exception is thrown and startup is
 aborted.
 
-This module reads the current status of the Darwin 50 times per second and
-emits it as a `message::DarwinSensors` object. This includes the CM740 error
+This module reads the current status of the NUgus 50 times per second and
+emits it as a `message::platform::darwin::DarwinSensors` object. This includes the CM740 error
 code, LED panel, head and eye LED colour, buttons, voltage, accelerometer,
 gyroscope, left and right force-sensing resistors and each servo.
 
-To change the colour of the Darwin's head or eye LEDs, emit a
-`message::DarwinSensors::EyeLED` or `message::DarwinSensors::HeadLED`
+To change the colour of the NUgus' head or eye LEDs, emit a
+`message::platform::darwin::DarwinSensors::EyeLED` or `message::platform::darwin::DarwinSensors::HeadLED`
 containing the colour you wish to set them to.
 
-To control the Darwin's servos, use `message::DarwinServoCommand`. You may
-emit these commands individually or emit several at once in a `std::vector`.
+To control the NUgus' servos, use `message::behaviour::ServoCommand`.
 
 ## Consumes
 
-* `message::DarwinSensors::EyeLED` requesting a change to eye LED colour
-* `message::DarwinSensors::HeadLED` requesting a change to head LED colour
-* `message::DarwinServoCommand` requesting a single servo command be performed
-* `std::vector<message::DarwinServoCommand>` requesting a batch of servo
-  commands be performed
+* `message::platform::darwin::DarwinSensors::EyeLED` requesting a change to eye LED colour
+* `message::platform::darwin::DarwinSensors::HeadLED` requesting a change to head LED colour
+* `message::behaviour::ServoCommand` requesting a single servo command be performed
 
 ## Emits
 
-* `message::DarwinSensors` containing the current status of the Darwin
+* `message::platform::darwin::DarwinSensors` containing the current status of the NUgus
 
 ## Dependencies
 
