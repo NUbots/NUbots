@@ -291,6 +291,11 @@ RUN pip install --upgrade \
     isort==5.7.0 \
     black==20.8b1
 
+# TODO: Install python from source too
+# TODO: Eventually move these to the right spot in the dockerfile
+# Install Pybind for python modules
+RUN install-from-source https://github.com/pybind/pybind11/archive/refs/tags/v2.6.2.tar.gz
+
 ##############################
 ### SETUP THE USER ACCOUNT ###
 ##############################
