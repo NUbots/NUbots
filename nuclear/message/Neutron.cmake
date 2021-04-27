@@ -22,6 +22,17 @@ find_package(PythonInterp 3 REQUIRED)
 # We need Eigen for neutron messages
 find_package(Eigen3 REQUIRED)
 
+# We need pybind11 for python modules
+find_package(pybind11 REQIRED)
+
+# TODO(KipHamiltons): Not sure if I need these
+find_package(PythonInterp 3 REQUIRED)
+find_package(PythonLibsNew 3 REQUIRED)
+# TODO(KipHamiltons): Not sure about these either. Try `target_include_directories` eventually,
+# not including them at all
+include_directories(SYSTEM ${pybind11_INCLUDE_DIRS})
+include_directories(SYSTEM ${PYTHON_INCLUDE_DIRS})
+
 # Build the builtin protocol buffers as normal
 foreach(proto ${builtin_protobufs})
 
@@ -38,7 +49,13 @@ foreach(proto ${builtin_protobufs})
   list(APPEND protobuf_src "${pb_out}/${file_we}.pb.cc" "${pb_out}/${file_we}.pb.h")
   list(APPEND python_src "${py_out}/${file_we}_pb2.py")
 
+  # Pybind11 C++ files TODO(KipHamiltons): Not sure this is actually doing anything
+  list(APPEND neutron_src "${nt_out}/${file_we}.py.cpp")
+
 endforeach(proto ${builtin_protobufs})
+
+set(message_dependencies "")
+set(py_message_modules "")
 
 # Build the user protocol buffers
 foreach(proto ${message_protobufs})
@@ -85,6 +102,20 @@ foreach(proto ${message_protobufs})
     endif()
   endforeach()
 
+  # Extract the protocol buffer information so we can generate code off it
+  add_custom_command(
+    OUTPUT "${outputpath}/${file_we}.pb" "${outputpath}/${file_we}.dep"
+    COMMAND
+      ${PROTOBUF_PROTOC_EXECUTABLE} ARGS --descriptor_set_out="${outputpath}/${file_we}.pb"
+      --dependency_out="${outputpath}/${file_we}.dep" -I${message_source_include_dir}
+      -I${CMAKE_CURRENT_SOURCE_DIR}/proto ${proto}
+    DEPENDS ${source_depends}
+    COMMENT "Extracting protocol buffer information from ${proto}"
+  )
+
+  # Gather the dependencies for each message.
+  list(APPEND ${message_dependencies} "${outputpath}/${file_we}.dep")
+
   #
   # PROTOCOL BUFFERS
   #
@@ -129,10 +160,20 @@ foreach(proto ${message_protobufs})
 
   # Add to the respective outputs
   list(APPEND protobuf_src "${pb}.pb.cc" "${pb}.pb.h")
-  list(APPEND neutron_src "${nt}.cpp" "${nt}.hpp")
+  # TODO(KipHamiltons): Not sure if this is doing anything, adding ${nt}.py.cpp here
+  list(APPEND neutron_src "${nt}.cpp" "${nt}.hpp" "${nt}.py.cpp")
   list(APPEND python_src "${py}_pb2.py")
 
+  # TODO(KipHamiltons) verify this is required
+  # Add the message modules
+  LIST(APPEND py_message_modules "${outputpath}/${file_we}_pb2.py")
+
 endforeach(proto ${message_protobufs})
+
+# * TODO(KipHamiltons) investigate if this is required
+# *
+# Add Neutron_pb2.py here to prevent adding duplicate items to the list
+LIST(APPEND python_src "${message_binary_include_dir}/Neutron_pb2.py")
 
 # Build the reflection header
 add_custom_command(
@@ -153,12 +194,77 @@ target_include_directories(nuclear_message_protobuf PRIVATE ${pb_out})
 target_include_directories(nuclear_message_protobuf SYSTEM INTERFACE ${pb_out})
 target_link_libraries(nuclear_message_protobuf protobuf::libprotobuf)
 
-add_library(nuclear_message ${NUCLEAR_LINK_TYPE} ${neutron_src})
+add_library(nuclear_message ${NUCLEAR_LINK_TYPE} ${neutron_src} ${py_message_modules})
 target_compile_features(nuclear_message PUBLIC cxx_std_17)
 target_link_libraries(nuclear_message PUBLIC nuclear_message_protobuf)
 target_link_libraries(nuclear_message PUBLIC Eigen3::Eigen)
+target_link_libraries(nuclear_message PUBLIC pybind11::pybind11)
+# Don't know about this one
+target_link_libraries(nuclear_message ${PYTHON_LIBRARIES})
 target_include_directories(nuclear_message PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(nuclear_message PUBLIC ${nt_out})
+
+# Build our outer python binding wrapper class
+add_custom_command(
+  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/outer_python_binding.cpp"
+  COMMAND
+    ${PYTHON_EXECUTABLE} ARGS "${CMAKE_CURRENT_SOURCE_DIR}/build_outer_python_binding.py"
+    "${CMAKE_CURRENT_BINARY_DIR}/outer_python_binding.cpp" "${PROJECT_SOURCE_DIR}/${NUCLEAR_MESSAGE_DIR}"
+    ${dependencies}
+  WORKING_DIRECTORY ${message_binary_dir}
+  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/build_outer_python_binding.py" ${dependencies}
+  COMMENT "Building outer python message binding"
+)
+
+list(APPEND neutron_src "${CMAKE_CURRENT_BINARY_DIR}/outer_python_binding.cpp")
+
+# Macro to list all subdirectories of a given directory
+MACRO(SUBDIRLIST result curdir)
+    # Get list of directory entries in current directory
+    FILE(GLOB_RECURSE children LIST_DIRECTORIES TRUE RELATIVE ${curdir} ${curdir}/*)
+
+    # Append all subdirectories of current directory to our directory list
+    SET(dirlist "")
+    FOREACH(child ${children})
+        IF(IS_DIRECTORY "${curdir}/${child}")
+            LIST(APPEND dirlist "${child}")
+        ENDIF(IS_DIRECTORY "${curdir}/${child}")
+    ENDFOREACH(child)
+
+    # Return result
+    SET(${result} ${dirlist})
+ENDMACRO(SUBDIRLIST)
+
+# Generate a list of all of the python message files we will be generating
+# This allows us to tell cmake at configure time what we will be generating at build time
+# This should also allow us to set up proper dependencies and clean up generated files at clean time
+SET(py_messages "")
+LIST(REMOVE_DUPLICATES py_message_modules)
+
+SUBDIRLIST(py_messages ${message_source_dir})
+LIST(APPEND py_messages "")
+LIST(TRANSFORM py_messages PREPEND "${PROJECT_BINARY_DIR}/python/nuclear/message/")
+LIST(TRANSFORM py_messages APPEND "/__init__.py")
+
+# Generate module python file containing stub classes for all of our messages
+ADD_CUSTOM_COMMAND(
+    OUTPUT ${py_messages}
+    BYPRODUCTS "${PROJECT_BINARY_DIR}/python/nuclear/messages.txt"
+    COMMAND ${PYTHON_EXECUTABLE}
+    ARGS "${CMAKE_CURRENT_SOURCE_DIR}/generate_python_messages.py"
+          "${PROJECT_BINARY_DIR}/shared"
+          "${PROJECT_BINARY_DIR}/python/nuclear"
+          "${PROJECT_BINARY_DIR}/python/nuclear/messages.txt"
+    WORKING_DIRECTORY ${message_binary_dir}
+    DEPENDS ${src} ${py_message_modules}
+    COMMENT "Generating python sub messages")
+
+# Make sure all of the generated files are marked as generated
+SET_SOURCE_FILES_PROPERTIES(${py_messages} PROPERTIES GENERATED TRUE)
+
+# Create the python messages target and set the dependency chain up
+ADD_CUSTOM_TARGET(python_nuclear_message DEPENDS ${py_messages})
+ADD_DEPENDENCIES(nuclear_message python_nuclear_message)
 
 # Generate in the lib folder so it gets installed
 if(NUCLEAR_LINK_TYPE STREQUAL "SHARED")
