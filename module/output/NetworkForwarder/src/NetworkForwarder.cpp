@@ -36,13 +36,13 @@ namespace module::output {
                 // First we try reading this field as a double, if it is "true" or "false" it will throw an exception
                 try {
                     auto fps = setting.second.as<double>();
-                    period   = fps == 0.0 ? std::numeric_limits<double>::infinity() : 1.0 / fps;
                     enabled  = fps != 0.0;
+                    period   = enabled ? 1.0 / fps : std::numeric_limits<double>::infinity();
                 }
                 // If this happens we assume it's a boolean instead
                 catch (const YAML::TypedBadConversion<double>&) {
-                period  = std::numeric_limits<double>::infinity();
                     enabled = setting.second.as<bool>();
+                    period  = enabled ? 0.0 : std::numeric_limits<double>::infinity();
                 }
 
                 // Message if we have enabled/disabled a particular message type
