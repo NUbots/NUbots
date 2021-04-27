@@ -152,12 +152,8 @@ namespace module::motion {
                 waypoints->reserve(2);
                 auto t = NUClear::clock::now();
                 for (auto& angle : goalAnglesList) {
-                    waypoints->push_back({id,
-                                          t,
-                                          angle.first,
-                                          angle.second,
-                                          float(head_motor_gain),
-                                          float(head_motor_torque)});  // TODO: support separate gains for each leg
+                    waypoints->push_back(
+                        {id, t, angle.first, angle.second, float(head_motor_gain), float(head_motor_torque)});
                 }
                 // Send commands
                 emit(std::move(waypoints));

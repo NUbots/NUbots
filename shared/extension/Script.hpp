@@ -36,8 +36,6 @@ namespace extension {
     using ServoID = utility::input::ServoID;
 
     /**
-     * TODO document
-     *
      * @author Alex Biddulph
      */
     struct Script {
@@ -221,8 +219,6 @@ namespace extension {
     };
 
     /**
-     * TODO document
-     *
      * @author Trent Houliston
      */
     struct ExecuteScriptByName {
@@ -258,8 +254,6 @@ namespace extension {
     };
 
     /**
-     * TODO document
-     *
      * @author Trent Houliston
      */
     struct ExecuteScript {

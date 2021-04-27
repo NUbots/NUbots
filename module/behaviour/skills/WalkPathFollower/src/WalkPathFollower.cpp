@@ -125,11 +125,6 @@ namespace module::behaviour::skills {
             }
         });
 
-        // // TODO: Review the interaction of the kick with the WalkPathFollower.
-        // on<Trigger<KickFinished>>().then([this] (const KickFinished&) {
-        //     Re-issue walk command with target velocity...
-        // });
-
         updatePathReaction = on<Trigger<WalkPath>, With<ResetRobotHypotheses>, Sync<WalkPathFollower>, Single>()
                                  .then("Update current path plan",
                                        [this](const WalkPath& walkPath, const ResetRobotHypotheses& selfs) {
