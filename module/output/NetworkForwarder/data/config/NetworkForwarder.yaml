@@ -1,4 +1,4 @@
-# The network device to send messages to
+# The network device to send messages to, set to "" to send to all network devices
 target: nusight
 log_level: DEBUG
 
