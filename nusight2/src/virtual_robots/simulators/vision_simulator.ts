@@ -21,7 +21,6 @@ import image8 from './images/8.jpg'
 import image9 from './images/9.jpg'
 import { periodic } from './periodic'
 
-
 import CompressedImage = message.output.CompressedImage
 import Projection = message.output.CompressedImage.Lens.Projection
 import MeasurementType = message.vision.Ball.MeasurementType
