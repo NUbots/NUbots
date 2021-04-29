@@ -272,9 +272,6 @@ namespace module::platform::webots {
 
         log<NUClear::INFO>(fmt::format("Connected to {}:{}", server_address, port));
 
-        // Tell webots who we are
-        // send_player_details(fd, global_config); Not needed? Set by the port we connect to?
-
         // Now that we are connected, we can set up our reaction handles with this file descriptor
 
         // Receiving
@@ -335,15 +332,6 @@ namespace module::platform::webots {
             close(fd);
             fd = -1;
         });
-    }
-
-    void Webots::send_player_details(const int& fd, const GlobalConfig& player_details) {
-        // TODO(cameron) resend if fails
-        std::vector<char> data = NUClear::util::serialise::Serialise<GlobalConfig>::serialise(player_details);
-        const uint32_t Nn      = htonl(data.size());
-        // Send the message size (network endian), then the message itself
-        send(fd, &Nn, sizeof(Nn), 0);
-        send(fd, data.data(), Nn, 0);
     }
 
     void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurements) {

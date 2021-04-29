@@ -42,12 +42,6 @@ namespace module::platform::webots {
         /// @brief Store a handle to the shutdown reaction so we can unbind it
         ReactionHandle shutdown_handle;
 
-        /// @brief Send the inital message that tells webots who we are. We should do this when we first connect or when
-        /// we want to reconnect.
-        /// @param fd The socket we want to send our details to.
-        /// @param player_details [...]
-        void send_player_details(const int& fd, const message::support::GlobalConfig& player_details);
-
         /// @brief Establish a TCP connection to the specified server/port
         /// @param server_name The name or IP address to connect to. If it's an IP, it should be in "X.X.X.X" form
         /// @param port The port number to connect to
