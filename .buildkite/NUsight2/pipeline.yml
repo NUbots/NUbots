@@ -4,7 +4,7 @@ steps:
       - yarn
       - yarn build:ci
     plugins:
-      - ./.buildkite/plugins/cache: ~
+      - ./.buildkite/NUsight2/plugins/cache: ~
       - docker#v3.5.0:
           image: "node:12"
           always-pull: true
@@ -17,7 +17,7 @@ steps:
       - yarn
       - yarn storybook:build
     plugins:
-      - ./.buildkite/plugins/cache: ~
+      - ./.buildkite/NUsight2/plugins/cache: ~
       - docker#v3.5.0:
           image: "node:12"
           always-pull: true
@@ -30,7 +30,7 @@ steps:
       - yarn
       - yarn eslint
     plugins:
-      - ./.buildkite/plugins/cache: ~
+      - ./.buildkite/NUsight2/plugins/cache: ~
       - docker#v3.5.0:
           image: "node:12"
           always-pull: true
@@ -43,7 +43,7 @@ steps:
       - yarn
       - yarn test:ci
     plugins:
-      - ./.buildkite/plugins/cache: ~
+      - ./.buildkite/NUsight2/plugins/cache: ~
       - docker#v3.5.0:
           image: "node:12"
           always-pull: true
