@@ -23,8 +23,6 @@ package message.motion;
 import "Vector.proto";
 
 /**
- * TODO document
- *
  * @author Trent Houliston
  * @author Brendan Annable
  */
@@ -40,8 +38,6 @@ message KickCommand {
 }
 
 /**
- * TODO document
- *
  * @author Trent Houliston
  * @author Brendan Annable
  */

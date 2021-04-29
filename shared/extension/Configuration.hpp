@@ -30,8 +30,6 @@
 namespace extension {
 
     /**
-     * TODO document
-     *
      * @author Trent Houliston
      */
     struct Configuration {

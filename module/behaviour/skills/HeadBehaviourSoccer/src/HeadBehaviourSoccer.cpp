@@ -351,7 +351,6 @@ namespace module::behaviour::skills {
             log<NUClear::WARN>("HeadBehaviourSoccer - Multiple object searching currently not supported properly.");
         }
 
-        // TODO: make this a loop over a list of objects or something
         // Get balls
         if (ballPriority == maxPriority) {
             if (vballs && vballs->balls.size() > 0) {

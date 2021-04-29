@@ -25,8 +25,6 @@
 namespace module::platform::darwin {
 
     /**
-     * TODO document
-     *
      * @author Trent Houliston
      */
     struct Convert {

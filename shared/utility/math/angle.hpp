@@ -24,8 +24,6 @@
 #include <cmath>
 
 /**
- * TODO document
- *
  * @author Trent Houliston
  */
 namespace utility::math::angle {

@@ -100,8 +100,6 @@ namespace module::behaviour::planning {
 
                 // Compute target in robot coords
                 // Eigen::Vector3d kickTarget = Eigen::Vector3d::UnitX(); //Kick forwards
-                // TODO: The heading seems to judder here!!
-                // TODO: use sensors.Htw instead
                 Eigen::Affine2d position = Eigen::Affine2d(field.position);
                 Eigen::Affine3d Hfw;
                 Hfw.translation() = Eigen::Vector3d(position.translation().x(), position.translation().y(), 0);

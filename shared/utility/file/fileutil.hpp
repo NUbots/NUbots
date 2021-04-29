@@ -27,8 +27,6 @@
 #include <vector>
 
 /**
- * TODO document
- *
  * @author Jake Woods
  * @author Trent Houliston
  */

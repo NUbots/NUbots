@@ -25,8 +25,6 @@
 
 
 /**
- * TODO document
- *
  * @author Trent Houliston
  * @author Alex Biddulph: added trimLeft, trimRight, trim, and removeAll functions 10-12-2012
  * @author Monica Olejniczak added split functions
