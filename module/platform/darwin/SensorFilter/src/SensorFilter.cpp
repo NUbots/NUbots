@@ -138,13 +138,12 @@ namespace module::platform::darwin {
 
             // Set our process noise in our filter
             MotionModel<double>::StateVec process_noise;
-            process_noise.segment<3>(MotionModel<double>::PX) = this->config.motionFilter.noise.process.position;
-            process_noise.segment<3>(MotionModel<double>::VX) = this->config.motionFilter.noise.process.velocity;
-            process_noise.segment<4>(MotionModel<double>::QX) = this->config.motionFilter.noise.process.rotation;
-            process_noise.segment<3>(MotionModel<double>::WX) =
-                this->config.motionFilter.noise.process.rotationalVelocity;
-            process_noise.segment<3>(MotionModel<double>::BX) = this->config.motionFilter.noise.process.gyroscopeBias;
-            motionFilter.model.process_noise                  = process_noise;
+            process_noise.rTWw               = this->config.motionFilter.noise.process.position;
+            process_noise.vTw                = this->config.motionFilter.noise.process.velocity;
+            process_noise.Rwt                = this->config.motionFilter.noise.process.rotation;
+            process_noise.omegaTTt           = this->config.motionFilter.noise.process.rotationalVelocity;
+            process_noise.omegaTTt_bias      = this->config.motionFilter.noise.process.gyroscopeBias;
+            motionFilter.model.process_noise = process_noise;
 
             // Update our mean configs and if it changed, reset the filter
             this->config.motionFilter.initial.mean.position =
@@ -171,20 +170,19 @@ namespace module::platform::darwin {
 
             // Calculate our mean and covariance
             MotionModel<double>::StateVec mean;
-            mean.segment<3>(MotionModel<double>::PX) = this->config.motionFilter.initial.mean.position;
-            mean.segment<3>(MotionModel<double>::VX) = this->config.motionFilter.initial.mean.velocity;
-            mean.segment<4>(MotionModel<double>::QX) = this->config.motionFilter.initial.mean.rotation;
-            mean.segment<3>(MotionModel<double>::WX) = this->config.motionFilter.initial.mean.rotationalVelocity;
-            mean.segment<3>(MotionModel<double>::BX) = this->config.motionFilter.initial.mean.gyroscopeBias;
+            mean.rTWw          = this->config.motionFilter.initial.mean.position;
+            mean.vTw           = this->config.motionFilter.initial.mean.velocity;
+            mean.Rwt           = this->config.motionFilter.initial.mean.rotation;
+            mean.omegaTTt      = this->config.motionFilter.initial.mean.rotationalVelocity;
+            mean.omegaTTt_bias = this->config.motionFilter.initial.mean.gyroscopeBias;
 
             MotionModel<double>::StateVec covariance;
-            covariance.segment<3>(MotionModel<double>::PX) = this->config.motionFilter.initial.covariance.position;
-            covariance.segment<3>(MotionModel<double>::VX) = this->config.motionFilter.initial.covariance.velocity;
-            covariance.segment<4>(MotionModel<double>::QX) = this->config.motionFilter.initial.covariance.rotation;
-            covariance.segment<3>(MotionModel<double>::WX) =
-                this->config.motionFilter.initial.covariance.rotationalVelocity;
-            covariance.segment<3>(MotionModel<double>::BX) = this->config.motionFilter.initial.covariance.gyroscopeBias;
-            motionFilter.set_state(mean, covariance.asDiagonal());
+            covariance.rTWw          = this->config.motionFilter.initial.covariance.position;
+            covariance.vTw           = this->config.motionFilter.initial.covariance.velocity;
+            covariance.Rwt           = this->config.motionFilter.initial.covariance.rotation;
+            covariance.omegaTTt      = this->config.motionFilter.initial.covariance.rotationalVelocity;
+            covariance.omegaTTt_bias = this->config.motionFilter.initial.covariance.gyroscopeBias;
+            motionFilter.set_state(mean.getStateVec(), covariance.asDiagonal());
         });
 
         on<Configuration>("FootDownNetwork.yaml").then([this](const Configuration& config) {
@@ -466,10 +464,10 @@ namespace module::platform::darwin {
                         sensors->Htx[side == BodySide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL]);
 
                     if (foot_down && !prev_foot_down) {
+                        const auto filterState = MotionModel<double>::StateVec(motionFilter.get());
                         Eigen::Affine3d Hwt;
-                        Hwt.linear() = Eigen::Quaterniond(motionFilter.get().segment<4>(MotionModel<double>::QX))
-                                           .toRotationMatrix();
-                        Hwt.translation() = Eigen::Vector3d(motionFilter.get().segment<3>(MotionModel<double>::PX));
+                        Hwt.linear()      = filterState.Rwt.toRotationMatrix();
+                        Hwt.translation() = filterState.rTWw;
 
                         Eigen::Affine3d Htg(utility::motion::kinematics::calculateGroundSpace(Htf, Hwt));
 
@@ -510,16 +508,16 @@ namespace module::platform::darwin {
                 motionFilter.time(deltaT);
 
                 // Gives us the quaternion representation
-                const auto& o = motionFilter.get();
+                const auto o = MotionModel<double>::StateVec(motionFilter.get());
 
                 // Map from world to torso coordinates (Rtw)
                 Eigen::Affine3d Hwt;
-                Hwt.linear()      = Eigen::Quaterniond(o.segment<4>(MotionModel<double>::QX)).toRotationMatrix();
-                Hwt.translation() = Eigen::Vector3d(o.segment<3>(MotionModel<double>::PX));
+                Hwt.linear()      = o.Rwt.toRotationMatrix();
+                Hwt.translation() = o.rTWw;
                 sensors->Htw      = Hwt.inverse().matrix();
 
                 // Integrate gyro to get angular positions
-                sensors->angular_position = o.segment<3>(MotionModel<double>::WX) / 90.0;
+                sensors->angular_position = o.omegaTTt / 90.0;
 
                 if (this->config.debug) {
                     log("p_x:",
