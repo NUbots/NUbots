@@ -6,6 +6,7 @@ server_address: "127.0.0.1"
 port: "10020"
 
 # The mapping defined in the game.json inside the referee on the Webots
+# The mapping is team_id and the index is player_id
 # TODO(cameron) Work out how this will work in Robocup and put inside on<Configuration>
 player_port:
     "8" :
