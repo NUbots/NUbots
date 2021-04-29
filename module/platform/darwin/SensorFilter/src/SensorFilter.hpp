@@ -35,8 +35,6 @@
 namespace module::platform::darwin {
 
     /**
-     * TODO document
-     *
      * @author Jake Fountain
      * @author Trent Houliston
      */
