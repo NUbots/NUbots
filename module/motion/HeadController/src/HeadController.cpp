@@ -82,7 +82,7 @@ namespace module::motion {
             });
 
         on<Trigger<HeadCommand>>().then("Head Controller - Register Head Command", [this](const HeadCommand& command) {
-            goalRobotSpace = command.robotSpace;
+            goalRobotSpace = command.robot_space;
             if (goalRobotSpace) {
                 goalAngles = {utility::math::clamp(float(min_yaw), command.yaw, float(max_yaw)),
                               utility::math::clamp(float(min_pitch), command.pitch, float(max_pitch))};

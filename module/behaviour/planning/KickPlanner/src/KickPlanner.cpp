@@ -137,7 +137,7 @@ namespace module::behaviour::planning {
                 if (secondsSinceLastSeen < cfg.seconds_not_seen_limit && kickIsValid
                     && KickAngle < cfg.kick_forward_angle_limit) {
 
-                    switch (kickPlan.kickType.value) {
+                    switch (kickPlan.kick_type.value) {
                         case KickType::IK_KICK:
                             // NUClear::log("ik_kick");
                             if (ballPosition.y() > 0.0) {
