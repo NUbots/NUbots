@@ -275,7 +275,7 @@ namespace module::platform::webots {
         // Now that we are connected, we can set up our reaction handles with this file descriptor
 
         // Receiving
-        read_io = on<IO>(fd, IO::READ).then([this, fd]() {
+        read_io = on<IO>(fd, IO::READ).then([this]() {
             // Get the size of the message
             uint32_t Nn;
             if (recv(fd, &Nn, sizeof(Nn), 0 != sizeof(Nn))) {
@@ -305,7 +305,7 @@ namespace module::platform::webots {
             Clock::tick();
         });
 
-        send_loop = on<Every<10, std::chrono::milliseconds>>().then([this, fd]() {
+        send_loop = on<Every<10, std::chrono::milliseconds>>().then([this]() {
             // Sending
             std::vector<char> data = NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(to_send);
             // Size of the message, in network endian
@@ -321,12 +321,12 @@ namespace module::platform::webots {
             }
         });
 
-        error_io = on<IO>(fd, IO::CLOSE | IO::ERROR).then([this, fd](const IO::Event& event) {
+        error_io = on<IO>(fd, IO::CLOSE | IO::ERROR).then([this](const IO::Event& event) {
             // Something went wrong, reopen the connection
             setup_connection(server_address, port);
         });
 
-        shutdown_handle = on<Shutdown>().then([this, fd] {
+        shutdown_handle = on<Shutdown>().then([this] {
             // Disconnect the fd gracefully
             shutdown(fd, SHUT_RDWR);
             close(fd);
