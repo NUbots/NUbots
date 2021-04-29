@@ -9,12 +9,12 @@ port: "10020"
 # The mapping is team_id and the index is player_id
 # TODO(cameron) Work out how this will work in Robocup and put inside on<Configuration>
 player_port:
-    "8" :
+    "red" :
         - "10001"
         - "10002"
         - "10003"
         - "10004"
-    "25":
+    "blue":
         - "10021"
         - "10022"
         - "10023"
