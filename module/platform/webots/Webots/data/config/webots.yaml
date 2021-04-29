@@ -4,3 +4,18 @@ log_level: DEBUG
 # Connection details
 server_address: "127.0.0.1"
 port: "10020"
+
+# The mapping defined in the game.json inside the referee on the Webots
+# TODO(cameron) Work out how this will work in Robocup and put inside on<Configuration>
+player_port:
+    "8" :
+        - "10001"
+        - "10002"
+        - "10003"
+        - "10004"
+    "25":
+        - "10021"
+        - "10022"
+        - "10023"
+        - "10024"
+
