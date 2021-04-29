@@ -129,7 +129,6 @@ def generate_cpp(parts):
 
         #include "extension/Configuration.hpp"
 
-
         namespace {namespace} {{
 
         using extension::Configuration;
