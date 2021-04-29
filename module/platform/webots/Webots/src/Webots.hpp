@@ -63,6 +63,8 @@ namespace module::platform::webots {
         /// @param sensor_measurements Message from Webots with information from the sensors
         void translate_and_emit_sensor(const message::platform::webots::SensorMeasurements& sensor_measurements);
 
+        int fd;
+
         /// @brief The time the connection was opened.
         NUClear::clock::time_point connect_time;
 

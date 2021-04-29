@@ -167,6 +167,7 @@ namespace module::platform::webots {
 
                 on<Watchdog<Webots, 5, std::chrono::seconds>>().then([this] {
                     // We haven't received any messages lately
+                    setup_connection(local_config["server_address"].as<std::string>(), local_config["port"].as<std::string>());
                 });
 
                 setup_connection(local_config["server_address"].as<std::string>(),
@@ -231,7 +232,13 @@ namespace module::platform::webots {
         error_io.unbind();
         shutdown_handle.unbind();
 
-        const int fd = tcpip_connect(server_address, port);
+        if(fd != -1){
+            // Disconnect the fd gracefully
+            shutdown(fd, SHUT_RDWR);
+            close(fd);
+        }
+
+        fd = tcpip_connect(server_address, port);
 
         std::string initial_message;
         const int n = recv(fd, initial_message.data(), sizeof(initial_message), 0);
@@ -249,7 +256,7 @@ namespace module::platform::webots {
             }
             else {
                 log<NUClear::FATAL>(fmt::format("{}:{} sent unknown initial message", server_address, port));
-                // Halt and don't retry
+                // Halt and don't retry as the other end is clearly not Webots
                 close(fd);
                 powerplant.shutdown();
             }
@@ -318,13 +325,15 @@ namespace module::platform::webots {
         });
 
         error_io = on<IO>(fd, IO::CLOSE | IO::ERROR).then([this, fd](const IO::Event& event) {
-            // Something went wrong
+            // Something went wrong, reopen the connection
+            setup_connection(server_address, port);
         });
 
         shutdown_handle = on<Shutdown>().then([this, fd] {
             // Disconnect the fd gracefully
             shutdown(fd, SHUT_RDWR);
             close(fd);
+            fd = -1;
         });
     }
 
