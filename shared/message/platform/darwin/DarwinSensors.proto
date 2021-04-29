@@ -74,13 +74,13 @@ message DarwinSensors {
     }
 
     message FSR {
-        float  fsr1       = 1;
-        float  fsr2       = 2;
-        float  fsr3       = 3;
-        float  fsr4       = 4;
-        float  centreX    = 5;
-        float  centreY    = 6;
-        uint32 errorFlags = 7;
+        float  fsr1        = 1;
+        float  fsr2        = 2;
+        float  fsr3        = 3;
+        float  fsr4        = 4;
+        float  centre_x    = 5;
+        float  centre_y    = 6;
+        uint32 error_flags = 7;
     }
 
     message FSRs {
@@ -89,55 +89,55 @@ message DarwinSensors {
     }
 
     message Servo {
-        uint32 errorFlags      = 1;
-        bool   torqueEnabled   = 2;
-        float  pGain           = 3;
-        float  iGain           = 4;
-        float  dGain           = 5;
-        float  goalPosition    = 6;
-        float  movingSpeed     = 7;
-        float  torque          = 8;
-        float  presentPosition = 9;
-        float  presentSpeed    = 10;
-        float  load            = 11;
-        float  voltage         = 12;
-        float  temperature     = 13;
+        uint32 error_flags      = 1;
+        bool   torque_enabled   = 2;
+        float  p_gain           = 3;
+        float  i_gain           = 4;
+        float  d_gain           = 5;
+        float  goal_position    = 6;
+        float  moving_speed     = 7;
+        float  torque           = 8;
+        float  present_position = 9;
+        float  present_speed    = 10;
+        float  load             = 11;
+        float  voltage          = 12;
+        float  temperature      = 13;
     };
 
     message Servos {
-        Servo rShoulderPitch = 1;
-        Servo lShoulderPitch = 2;
-        Servo rShoulderRoll  = 3;
-        Servo lShoulderRoll  = 4;
-        Servo rElbow         = 5;
-        Servo lElbow         = 6;
-        Servo rHipYaw        = 7;
-        Servo lHipYaw        = 8;
-        Servo rHipRoll       = 9;
-        Servo lHipRoll       = 10;
-        Servo rHipPitch      = 11;
-        Servo lHipPitch      = 12;
-        Servo rKnee          = 13;
-        Servo lKnee          = 14;
-        Servo rAnklePitch    = 15;
-        Servo lAnklePitch    = 16;
-        Servo rAnkleRoll     = 17;
-        Servo lAnkleRoll     = 18;
-        Servo headPan        = 19;
-        Servo headTilt       = 20;
+        Servo r_shoulder_pitch = 1;
+        Servo l_shoulder_pitch = 2;
+        Servo r_shoulder_roll  = 3;
+        Servo l_shoulder_roll  = 4;
+        Servo r_elbow          = 5;
+        Servo l_elbow          = 6;
+        Servo r_hip_yaw        = 7;
+        Servo l_hip_yaw        = 8;
+        Servo r_hip_roll       = 9;
+        Servo l_hip_roll       = 10;
+        Servo r_hip_pitch      = 11;
+        Servo l_hip_pitch      = 12;
+        Servo r_knee           = 13;
+        Servo l_knee           = 14;
+        Servo r_ankle_pitch    = 15;
+        Servo l_ankle_pitch    = 16;
+        Servo r_ankle_roll     = 17;
+        Servo l_ankle_roll     = 18;
+        Servo head_pan         = 19;
+        Servo head_tilt        = 20;
     }
 
-    google.protobuf.Timestamp timestamp       = 1;
-    uint32                    cm740ErrorFlags = 2;
-    LEDPanel                  ledPanel        = 3;
-    HeadLED                   headLED         = 4;
-    EyeLED                    eyeLED          = 5;
-    Buttons                   buttons         = 6;
-    float                     voltage         = 7;
-    Accelerometer             accelerometer   = 8;
-    Gyroscope                 gyroscope       = 9;
-    FSRs                      fsr             = 10;
-    Servos                    servo           = 11;
+    google.protobuf.Timestamp timestamp         = 1;
+    uint32                    cm740_error_flags = 2;
+    LEDPanel                  led_panel         = 3;
+    HeadLED                   head_led          = 4;
+    EyeLED                    eye_led           = 5;
+    Buttons                   buttons           = 6;
+    float                     voltage           = 7;
+    Accelerometer             accelerometer     = 8;
+    Gyroscope                 gyroscope         = 9;
+    FSRs                      fsr               = 10;
+    Servos                    servo             = 11;
 }
 
 // Button press events

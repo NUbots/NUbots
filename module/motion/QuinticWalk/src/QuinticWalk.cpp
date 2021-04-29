@@ -163,7 +163,7 @@ namespace module::motion {
         });
 
         on<Trigger<EnableWalkEngineCommand>>().then([this](const EnableWalkEngineCommand& command) {
-            subsumptionId = command.subsumptionId;
+            subsumptionId = command.subsumption_id;
             walk_engine.reset();
             update_handle.enable();
         });

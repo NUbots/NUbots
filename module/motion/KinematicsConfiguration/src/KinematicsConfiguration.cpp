@@ -134,26 +134,26 @@ namespace module::motion {
     }
 
     void KinematicsConfiguration::configureMassModel(KinematicsModel& model, const YAML::Node& objMassModel) {
-        model.massModel.head        = objMassModel["particles"]["head"].as<Expression>();
-        model.massModel.arm_upper   = objMassModel["particles"]["arm_upper"].as<Expression>();
-        model.massModel.arm_lower   = objMassModel["particles"]["arm_lower"].as<Expression>();
-        model.massModel.torso       = objMassModel["particles"]["torso"].as<Expression>();
-        model.massModel.hip_block   = objMassModel["particles"]["hip_block"].as<Expression>();
-        model.massModel.leg_upper   = objMassModel["particles"]["leg_upper"].as<Expression>();
-        model.massModel.leg_lower   = objMassModel["particles"]["leg_lower"].as<Expression>();
-        model.massModel.ankle_block = objMassModel["particles"]["ankle_block"].as<Expression>();
-        model.massModel.foot        = objMassModel["particles"]["foot"].as<Expression>();
+        model.mass_model.head        = objMassModel["particles"]["head"].as<Expression>();
+        model.mass_model.arm_upper   = objMassModel["particles"]["arm_upper"].as<Expression>();
+        model.mass_model.arm_lower   = objMassModel["particles"]["arm_lower"].as<Expression>();
+        model.mass_model.torso       = objMassModel["particles"]["torso"].as<Expression>();
+        model.mass_model.hip_block   = objMassModel["particles"]["hip_block"].as<Expression>();
+        model.mass_model.leg_upper   = objMassModel["particles"]["leg_upper"].as<Expression>();
+        model.mass_model.leg_lower   = objMassModel["particles"]["leg_lower"].as<Expression>();
+        model.mass_model.ankle_block = objMassModel["particles"]["ankle_block"].as<Expression>();
+        model.mass_model.foot        = objMassModel["particles"]["foot"].as<Expression>();
     }
 
     void KinematicsConfiguration::configureTensorModel(KinematicsModel& model, const YAML::Node& objTensorModel) {
-        model.tensorModel.head        = objTensorModel["particles"]["head"].as<Expression>();
-        model.tensorModel.arm_upper   = objTensorModel["particles"]["arm_upper"].as<Expression>();
-        model.tensorModel.arm_lower   = objTensorModel["particles"]["arm_lower"].as<Expression>();
-        model.tensorModel.torso       = objTensorModel["particles"]["torso"].as<Expression>();
-        model.tensorModel.hip_block   = objTensorModel["particles"]["hip_block"].as<Expression>();
-        model.tensorModel.leg_upper   = objTensorModel["particles"]["leg_upper"].as<Expression>();
-        model.tensorModel.leg_lower   = objTensorModel["particles"]["leg_lower"].as<Expression>();
-        model.tensorModel.ankle_block = objTensorModel["particles"]["ankle_block"].as<Expression>();
-        model.tensorModel.foot        = objTensorModel["particles"]["foot"].as<Expression>();
+        model.tensor_model.head        = objTensorModel["particles"]["head"].as<Expression>();
+        model.tensor_model.arm_upper   = objTensorModel["particles"]["arm_upper"].as<Expression>();
+        model.tensor_model.arm_lower   = objTensorModel["particles"]["arm_lower"].as<Expression>();
+        model.tensor_model.torso       = objTensorModel["particles"]["torso"].as<Expression>();
+        model.tensor_model.hip_block   = objTensorModel["particles"]["hip_block"].as<Expression>();
+        model.tensor_model.leg_upper   = objTensorModel["particles"]["leg_upper"].as<Expression>();
+        model.tensor_model.leg_lower   = objTensorModel["particles"]["leg_lower"].as<Expression>();
+        model.tensor_model.ankle_block = objTensorModel["particles"]["ankle_block"].as<Expression>();
+        model.tensor_model.foot        = objTensorModel["particles"]["foot"].as<Expression>();
     }
 }  // namespace module::motion
