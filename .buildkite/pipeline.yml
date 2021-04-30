@@ -47,6 +47,47 @@ steps:
           push:
             - nuc8i7beh:nubots/nubots:nuc8i7beh
 
+  # Build NUsight2 and test it, which doesn't need to wait for the images to be uploaded
+  - label: "Build NUsight2"
+    command:
+      - yarn
+      - yarn build:ci
+    plugins:
+      - ./.buildkite/NUsight2/plugins/cache: ~
+      - docker#v3.5.0:
+          image: "node:12"
+          always-pull: true
+          propagate-uid-gid: true
+          environment:
+            - "HOME=/workdir"
+
+  - label: "Build NUsight2 Storybook"
+    command:
+      - yarn
+      - yarn storybook:build
+    plugins:
+      - ./.buildkite/NUsight2/plugins/cache: ~
+      - docker#v3.5.0:
+          image: "node:12"
+          always-pull: true
+          propagate-uid-gid: true
+          environment:
+            - "HOME=/workdir"
+
+  # Test NUsight
+  - label: "Test NUsight2"
+    command:
+      - yarn
+      - yarn test:ci
+    plugins:
+      - ./.buildkite/NUsight2/plugins/cache: ~
+      - docker#v3.5.0:
+          image: "node:12"
+          always-pull: true
+          propagate-uid-gid: true
+          environment:
+            - "HOME=/workdir"
+
   # Wait to finish uploading the image before doing the next steps
   - wait
 
@@ -103,3 +144,15 @@ steps:
           pull: generic_image
           run: generic
           workdir: /home/nubots/NUbots/
+  - label: "Check NUsight code with eslint"
+    command:
+      - yarn
+      - yarn eslint
+    plugins:
+      - ./.buildkite/NUsight2/plugins/cache: ~
+      - docker#v3.5.0:
+          image: "node:12"
+          always-pull: true
+          propagate-uid-gid: true
+          environment:
+            - "HOME=/workdir"
