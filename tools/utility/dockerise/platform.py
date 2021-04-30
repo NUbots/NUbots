@@ -58,7 +58,7 @@ def list():
     ]
 
 
-def build(repository, platform):
+def build(repository, platform, force_build=False):
     pty = WrapPty()
 
     # If we are building the selected platform we need to work out what that refers to
@@ -67,60 +67,82 @@ def build(repository, platform):
 
     remote_tag = "{0}/{0}:{1}".format(repository, platform)
     local_tag = "{0}:{1}".format(repository, platform)
+    selected_tag = "{}:selected".format(repository)
     dockerdir = os.path.join(b.project_dir, "docker")
 
-    # Go through all the files and try to ensure that their permissions are correct
-    # Otherwise caching will not work properly
-    for dir_name, subdirs, files in os.walk(dockerdir):
-        for f in files:
-            p = os.path.join(dir_name, f)
-            current = stat.S_IMODE(os.lstat(p).st_mode)
-            os.chmod(p, current & ~(stat.S_IWGRP | stat.S_IWOTH))
+    # We want to pull and tag the remote instead of rebuilding the image by default
+    if not force_build:
+        print("Pulling remote image", remote_tag)
+        err = subprocess.run(["docker", "pull", remote_tag], stderr=DEVNULL, stdout=DEVNULL).returncode
+        if err != 0:
+            raise RuntimeError("docker image pull returned a non-zero exit code")
 
-    # Create a buildx instance for building this image
-    builder_name = "{}_{}".format(defaults.image, platform)
-    if subprocess.run(["docker", "buildx", "inspect", builder_name], stderr=DEVNULL, stdout=DEVNULL).returncode != 0:
-        subprocess.run(["docker", "buildx", "create", "--name", builder_name], stderr=DEVNULL, stdout=DEVNULL)
-    subprocess.run(["docker", "buildx", "use", builder_name])
-
-    # Get docker host IP from bridge network
-    docker_gateway = (
-        subprocess.check_output(
-            ["docker", "network", "inspect", "bridge", "--format", "{{range .IPAM.Config}}{{.Gateway}}{{end}}"],
-        )
-        .strip()
-        .decode("ascii")
-    )
-
-    # Build the image!
-    err = pty.spawn(
-        [
-            "docker",
-            "buildx",
-            "build",
-            "-t",
-            local_tag,
-            "--pull",
-            "--cache-from=type=registry,ref={}/{}:{}".format(defaults.repository, defaults.image, platform),
-            "--cache-to=type=inline,mode=max",
-            "--build-arg",
-            "platform={}".format(platform),
-            "--build-arg",
-            "user_uid={}".format(os.getuid()),
-            "--output=type=docker",
-            "--add-host=host.docker.internal:{}".format(docker_gateway),
-            dockerdir,
-        ]
-    )
-    if err != 0:
-        cprint("Docker build returned exit code {}".format(err), "red", attrs=["bold"])
-        exit(err)
-
-    # If we were building the selected platform then update our selected tag
-    if _selected:
-        err = subprocess.run(
-            ["docker", "image", "tag", "{}:{}".format(repository, platform), "{}:selected".format(repository)],
-            stdout=subprocess.DEVNULL,
-        ).returncode
+        print("Tagging ", remote_tag, "as", local_tag)
+        err = subprocess.run(["docker", "tag", remote_tag, local_tag], stderr=DEVNULL, stdout=DEVNULL).returncode
         if err != 0:
             raise RuntimeError("docker image tag returned a non-zero exit code")
+
+        print("Tagging ", local_tag, "as", selected_tag)
+        err = subprocess.run(["docker", "tag", local_tag, selected_tag], stderr=DEVNULL, stdout=DEVNULL).returncode
+        if err != 0:
+            raise RuntimeError("docker image tag returned a non-zero exit code")
+
+    else:
+        # Go through all the files and try to ensure that their permissions are correct
+        # Otherwise caching will not work properly
+        for dir_name, subdirs, files in os.walk(dockerdir):
+            for f in files:
+                p = os.path.join(dir_name, f)
+                current = stat.S_IMODE(os.lstat(p).st_mode)
+                os.chmod(p, current & ~(stat.S_IWGRP | stat.S_IWOTH))
+
+        # Create a buildx instance for building this image
+        builder_name = "{}_{}".format(defaults.image, platform)
+        if (
+            subprocess.run(["docker", "buildx", "inspect", builder_name], stderr=DEVNULL, stdout=DEVNULL).returncode
+            != 0
+        ):
+            subprocess.run(["docker", "buildx", "create", "--name", builder_name], stderr=DEVNULL, stdout=DEVNULL)
+        subprocess.run(["docker", "buildx", "use", builder_name])
+
+        # Get docker host IP from bridge network
+        docker_gateway = (
+            subprocess.check_output(
+                ["docker", "network", "inspect", "bridge", "--format", "{{range .IPAM.Config}}{{.Gateway}}{{end}}"],
+            )
+            .strip()
+            .decode("ascii")
+        )
+
+        # Build the image!
+        err = pty.spawn(
+            [
+                "docker",
+                "buildx",
+                "build",
+                "-t",
+                local_tag,
+                "--pull",
+                "--cache-from=type=registry,ref={}/{}:{}".format(defaults.repository, defaults.image, platform),
+                "--cache-to=type=inline,mode=max",
+                "--build-arg",
+                "platform={}".format(platform),
+                "--build-arg",
+                "user_uid={}".format(os.getuid()),
+                "--output=type=docker",
+                "--add-host=host.docker.internal:{}".format(docker_gateway),
+                dockerdir,
+            ]
+        )
+        if err != 0:
+            cprint("Docker build returned exit code {}".format(err), "red", attrs=["bold"])
+            exit(err)
+
+        # If we were building the selected platform then update our selected tag
+        if _selected:
+            err = subprocess.run(
+                ["docker", "image", "tag", "{}:{}".format(repository, platform), selected_tag],
+                stdout=subprocess.DEVNULL,
+            ).returncode
+            if err != 0:
+                raise RuntimeError("docker image tag returned a non-zero exit code")
