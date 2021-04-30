@@ -11,6 +11,8 @@ It contains guides for [getting started with development](https://nubook.nubots.
 
 # Build Status
 
-All Checks [![NUbots Build Status](https://badge.buildkite.com/85cb206a2615c85981c4e0089b0abb0c6bcd775b3d946ede40.svg?branch=master)](https://buildkite.com/nubots/nubots)
-NUbots Main [![NUbots Master Build status](https://badge.buildkite.com/85cb206a2615c85981c4e0089b0abb0c6bcd775b3d946ede40.svg?branch=master&step=Build%20generic%20and%20Test)](https://buildkite.com/nubots/nubots)
-NUsight2 [![NUsight2 Master Build status](https://badge.buildkite.com/85cb206a2615c85981c4e0089b0abb0c6bcd775b3d946ede40.svg?branch=master&step=Build%20NUsight2)](https://buildkite.com/nubots/nubots)
+All Checks:  [![NUbots Build Status](https://badge.buildkite.com/85cb206a2615c85981c4e0089b0abb0c6bcd775b3d946ede40.svg?branch=master)](https://buildkite.com/nubots/nubots)
+
+NUbots Main:  [![NUbots Master Build status](https://badge.buildkite.com/85cb206a2615c85981c4e0089b0abb0c6bcd775b3d946ede40.svg?branch=master&step=Build%20generic%20and%20Test)](https://buildkite.com/nubots/nubots)
+
+NUsight2:  [![NUsight2 Master Build status](https://badge.buildkite.com/85cb206a2615c85981c4e0089b0abb0c6bcd775b3d946ede40.svg?branch=master&step=Build%20NUsight2)](https://buildkite.com/nubots/nubots)
