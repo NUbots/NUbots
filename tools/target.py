@@ -12,10 +12,7 @@ def register(command):
     command.help = "Select the default platform to use for docker commands"
 
     command.add_argument(
-        "target",
-        nargs="?",
-        choices=platform.list(),
-        help="the platform to select as the default platform",
+        "target", nargs="?", choices=platform.list(), help="the platform to select as the default platform"
     )
 
     command.add_argument(
