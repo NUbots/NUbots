@@ -12,18 +12,35 @@ def register(command):
     command.help = "Select the default platform to use for docker commands"
 
     command.add_argument(
-        "target", nargs="?", choices=platform.list(), help="the platform to select as the default platform"
+        "target",
+        nargs="?",
+        choices=platform.list(),
+        help="the platform to select as the default platform",
+    )
+
+    command.add_argument(
+        "-l",
+        "--local-build",
+        dest="build_local",
+        action="store_true",
+        default=False,
+        help="build the image locally, instead of pulling and tagging it",
     )
 
 
-def run(target, **kwargs):
+def run(target, build_local, **kwargs):
 
     if target is None:
         target = platform.selected(defaults.image)
         print("Currently selected platform is {}".format(target))
     else:
-        # Ensure the platform image is built
-        platform.build(defaults.image, target)
+
+        # If user wants to build it locally, do that
+        if build_local:
+            platform.build(defaults.image, target)
+        # Else, pull the image from dockerhub
+        else:
+            platform.pull_and_tag(defaults.image, target)
 
         # Tag the built platform image is the selected image
         tag = "{}:{}".format(defaults.image, target)

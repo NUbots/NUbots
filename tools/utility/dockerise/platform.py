@@ -128,6 +128,10 @@ def build(repository, platform):
 
 
 def pull_and_tag(repository, platform):
+    remote_tag = "{0}/{0}:{1}".format(repository, platform)
+    local_tag = "{0}:{1}".format(repository, platform)
+    selected_tag = "{}:selected".format(repository)
+
     print("Pulling remote image", remote_tag)
     err = subprocess.run(["docker", "pull", remote_tag], stderr=DEVNULL, stdout=DEVNULL).returncode
     if err != 0:
