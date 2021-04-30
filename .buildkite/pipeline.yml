@@ -50,6 +50,7 @@ steps:
   # Build NUsight2 and test it, which doesn't need to wait for the images to be uploaded
   - label: "Build NUsight2"
     command:
+      - cd ./nusight2
       - yarn
       - yarn build:ci
     plugins:
@@ -63,6 +64,7 @@ steps:
 
   - label: "Build NUsight2 Storybook"
     command:
+      - cd ./nusight2
       - yarn
       - yarn storybook:build
     plugins:
@@ -77,6 +79,7 @@ steps:
   # Test NUsight
   - label: "Test NUsight2"
     command:
+      - cd ./nusight2
       - yarn
       - yarn test:ci
     plugins:
