@@ -30,11 +30,12 @@ def register(command):
 
 def run(target, build_local, **kwargs):
 
+    # Print the current target if no target was selected
     if target is None:
         target = platform.selected(defaults.image)
         print("Currently selected platform is {}".format(target))
-    else:
 
+    else:
         # If user wants to build it locally, do that
         if build_local:
             platform.build(defaults.image, target)
@@ -42,7 +43,7 @@ def run(target, build_local, **kwargs):
         else:
             platform.pull(defaults.image, target)
 
-        # Tag the built platform image is the selected image
+        # Tag the result image as the selected image
         tag = "{}:{}".format(defaults.image, target)
         print("Tagging", tag, "as {}:selected".format(defaults.image))
 

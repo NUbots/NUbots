@@ -128,6 +128,7 @@ def build(repository, platform):
 
 
 def pull(repository, platform):
+    # Define our tag strings
     remote_tag = "{0}/{0}:{1}".format(repository, platform)
     local_tag = "{0}:{1}".format(repository, platform)
     selected_tag = "{}:selected".format(repository)
