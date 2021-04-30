@@ -149,6 +149,7 @@ steps:
           workdir: /home/nubots/NUbots/
   - label: "Check NUsight code with eslint"
     command:
+      - cd ./nusight2
       - yarn
       - yarn eslint
     plugins:
