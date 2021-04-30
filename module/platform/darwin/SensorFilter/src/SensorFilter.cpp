@@ -197,10 +197,10 @@ namespace module::platform::darwin {
 
                 // If we have any downs in the last 20 frames then we are button pushed
                 for (const auto& s : sensors) {
-                    if (s->buttons.left && !s->cm740ErrorFlags) {
+                    if (s->buttons.left && !s->cm740_error_flags) {
                         ++leftCount;
                     }
-                    if (s->buttons.middle && !s->cm740ErrorFlags) {
+                    if (s->buttons.middle && !s->cm740_error_flags) {
                         ++middleCount;
                     }
                 }
@@ -254,23 +254,23 @@ namespace module::platform::darwin {
 
 
                 // This checks for an error on the CM740 and reports it
-                if (input.cm740ErrorFlags != DarwinSensors::Error::OK) {
-                    NUClear::log<NUClear::WARN>(makeErrorString("CM740", input.cm740ErrorFlags));
+                if (input.cm740_error_flags != DarwinSensors::Error::OK) {
+                    NUClear::log<NUClear::WARN>(makeErrorString("CM740", input.cm740_error_flags));
                 }
 
                 // Output errors on the FSRs
-                if (input.fsr.left.errorFlags != DarwinSensors::Error::OK) {
-                    NUClear::log<NUClear::WARN>(makeErrorString("Left FSR", input.fsr.left.errorFlags));
+                if (input.fsr.left.error_flags != DarwinSensors::Error::OK) {
+                    NUClear::log<NUClear::WARN>(makeErrorString("Left FSR", input.fsr.left.error_flags));
                 }
 
-                if (input.fsr.right.errorFlags != DarwinSensors::Error::OK) {
-                    NUClear::log<NUClear::WARN>(makeErrorString("Right FSR", input.fsr.right.errorFlags));
+                if (input.fsr.right.error_flags != DarwinSensors::Error::OK) {
+                    NUClear::log<NUClear::WARN>(makeErrorString("Right FSR", input.fsr.right.error_flags));
                 }
 
                 // Read through all of our sensors
                 for (uint32_t i = 0; i < 20; ++i) {
                     auto& original = utility::platform::darwin::getDarwinServo(i, input);
-                    auto& error    = original.errorFlags;
+                    auto& error    = original.error_flags;
 
                     // Check for an error on the servo and report it
                     while (error != DarwinSensors::Error::OK) {
@@ -281,7 +281,7 @@ namespace module::platform::darwin {
                             s << " Input Voltage - " << original.voltage;
                         }
                         if (error & DarwinSensors::Error::ANGLE_LIMIT) {
-                            s << " Angle Limit - " << original.presentPosition;
+                            s << " Angle Limit - " << original.present_position;
                         }
                         if (error & DarwinSensors::Error::OVERHEATING) {
                             s << " Overheating - " << original.temperature;
@@ -308,12 +308,12 @@ namespace module::platform::darwin {
                     if (previousSensors && error != DarwinSensors::Error::OK) {
                         // Add the sensor values to the system properly
                         sensors->servo.push_back({error,
-                                                  original.torqueEnabled,
-                                                  original.pGain,
-                                                  original.iGain,
-                                                  original.dGain,
-                                                  original.goalPosition,
-                                                  original.movingSpeed,
+                                                  original.torque_enabled,
+                                                  original.p_gain,
+                                                  original.i_gain,
+                                                  original.d_gain,
+                                                  original.goal_position,
+                                                  original.moving_speed,
                                                   previousSensors->servo[i].present_position,
                                                   previousSensors->servo[i].present_velocity,
                                                   previousSensors->servo[i].load,
@@ -324,14 +324,14 @@ namespace module::platform::darwin {
                     else {
                         // Add the sensor values to the system properly
                         sensors->servo.push_back({error,
-                                                  original.torqueEnabled,
-                                                  original.pGain,
-                                                  original.iGain,
-                                                  original.dGain,
-                                                  original.goalPosition,
-                                                  original.movingSpeed,
-                                                  original.presentPosition,
-                                                  original.presentSpeed,
+                                                  original.torque_enabled,
+                                                  original.p_gain,
+                                                  original.i_gain,
+                                                  original.d_gain,
+                                                  original.goal_position,
+                                                  original.moving_speed,
+                                                  original.present_position,
+                                                  original.present_speed,
                                                   original.load,
                                                   original.voltage,
                                                   float(original.temperature)});
@@ -347,7 +347,7 @@ namespace module::platform::darwin {
                 // acc_z up
 
                 // If we have a previous sensors and our cm740 has errors then reuse our last sensor value
-                if (previousSensors && (input.cm740ErrorFlags)) {
+                if (previousSensors && (input.cm740_error_flags)) {
                     sensors->accelerometer = previousSensors->accelerometer;
                 }
                 else {
@@ -357,7 +357,7 @@ namespace module::platform::darwin {
 
                 // If we have a previous sensors and our cm740 has errors then reuse our last sensor value
                 if (previousSensors
-                    && (input.cm740ErrorFlags
+                    && (input.cm740_error_flags
                         || Eigen::Vector3d(input.gyroscope.x, input.gyroscope.y, input.gyroscope.z).norm()
                                > 4.0 * M_PI)) {
                     NUClear::log<NUClear::WARN>(
@@ -376,11 +376,11 @@ namespace module::platform::darwin {
                 sensors->button.push_back(Sensors::Button(0, input.buttons.left));
                 sensors->button.push_back(Sensors::Button(1, input.buttons.middle));
                 sensors->led.reserve(5);
-                sensors->led.push_back(Sensors::LED(0, input.ledPanel.led2 ? 0xFF0000 : 0));
-                sensors->led.push_back(Sensors::LED(1, input.ledPanel.led3 ? 0xFF0000 : 0));
-                sensors->led.push_back(Sensors::LED(2, input.ledPanel.led4 ? 0xFF0000 : 0));
-                sensors->led.push_back(Sensors::LED(3, input.headLED.RGB));  // Head
-                sensors->led.push_back(Sensors::LED(4, input.eyeLED.RGB));   // Eye
+                sensors->led.push_back(Sensors::LED(0, input.led_panel.led2 ? 0xFF0000 : 0));
+                sensors->led.push_back(Sensors::LED(1, input.led_panel.led3 ? 0xFF0000 : 0));
+                sensors->led.push_back(Sensors::LED(2, input.led_panel.led4 ? 0xFF0000 : 0));
+                sensors->led.push_back(Sensors::LED(3, input.head_led.RGB));  // Head
+                sensors->led.push_back(Sensors::LED(4, input.eye_led.RGB));   // Eye
 
                 /************************************************
                  *                  Kinematics                  *

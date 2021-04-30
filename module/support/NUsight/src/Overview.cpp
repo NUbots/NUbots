@@ -93,7 +93,7 @@ namespace module::support {
 
                     // Set properties
                     msg->timestamp       = NUClear::clock::now();
-                    msg->robot_id        = global ? global->playerId : 0;
+                    msg->robot_id        = global ? global->player_id : 0;
                     msg->role_name       = cli ? cli->at(0) : "";
                     msg->battery         = sensors ? sensors->battery : 0;
                     msg->voltage         = sensors ? sensors->voltage : 0;

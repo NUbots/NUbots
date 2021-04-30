@@ -153,7 +153,7 @@ namespace module::behaviour::skills {
                                                                             [this](const SoccerObjectPriority& p) {
                                                                                 ballPriority = p.ball;
                                                                                 goalPriority = p.goal;
-                                                                                searchType   = p.searchType;
+                                                                                searchType   = p.search_type;
                                                                             });
 
         auto initialPriority  = std::make_unique<SoccerObjectPriority>();
@@ -331,8 +331,8 @@ namespace module::behaviour::skills {
                           std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
                           command->yaw                         = direction[0];
                           command->pitch                       = direction[1];
-                          command->robotSpace                  = (state == SEARCH);
-                          // log("head angles robot space :", command->robotSpace);
+                          command->robot_space                 = (state == SEARCH);
+                          // log("head angles robot space :", command->robot_space);
                           emit(std::move(command));
                       }
 

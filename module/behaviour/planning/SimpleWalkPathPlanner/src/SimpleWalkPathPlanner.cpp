@@ -164,7 +164,7 @@ namespace module::behaviour::planning {
                     return;
                 }
 
-                if (latestCommand.type == message::behaviour::MotionCommand::Type::StandStill) {
+                if (latestCommand.type == message::behaviour::MotionCommand::Type::STAND_STILL) {
 
 
                     emit(std::make_unique<StopCommand>(subsumptionId));
@@ -172,10 +172,10 @@ namespace module::behaviour::planning {
 
                     return;
                 }
-                else if (latestCommand.type == message::behaviour::MotionCommand::Type::DirectCommand) {
+                else if (latestCommand.type == message::behaviour::MotionCommand::Type::DIRECT_COMMAND) {
                     // TO DO, change to Bezier stuff
                     std::unique_ptr<WalkCommand> command =
-                        std::make_unique<WalkCommand>(subsumptionId, latestCommand.walkCommand);
+                        std::make_unique<WalkCommand>(subsumptionId, latestCommand.walk_command);
                     emit(std::move(command));
                     emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
                     return;

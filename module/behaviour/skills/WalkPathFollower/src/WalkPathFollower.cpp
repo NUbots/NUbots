@@ -111,7 +111,8 @@ namespace module::behaviour::skills {
 
         // Enable/Disable path following based on the current motion command.
         on<Trigger<MotionCommand>>().then([this](const MotionCommand& command) {
-            if (command.type == MotionCommand::Type::WalkToState || command.type == MotionCommand::Type::BallApproach) {
+            if (command.type == MotionCommand::Type::WALK_TO_STATE
+                || command.type == MotionCommand::Type::BALL_APPROACH) {
                 followPathReaction.enable();
                 updatePathReaction.enable();
                 // Increase priority?
@@ -166,7 +167,7 @@ namespace module::behaviour::skills {
                           currentState.translation()   = self.position;
 
                           // if (cfg_.follow_path_in_ball_space
-                          //     && currentPath.command.type == MotionCommand::Type::BallApproach) {
+                          //     && currentPath.command.type == MotionCommand::Type::BALL_APPROACH) {
                           //     // Ball space is a space that has the ball position
                           //     // as its origin, and the x-axis in the direction of the kick
                           //     // target from the ball.
@@ -185,14 +186,14 @@ namespace module::behaviour::skills {
                           //     // Transform the robot from ball space into the world space at
                           //     // the time of path planning (note that walk commands will be
                           //     // valid as they in robot space):
-                          //     currentState = localToWorld(currentPath.ballSpace, ballSpaceState);
+                          //     currentState = localToWorld(currentPath.ball_space, ballSpaceState);
                           // }
 
 
                           // TODO: Remove.
                           // RoboCup HACK - Just aim for the goal state:
                           Eigen::Affine2d targetState;
-                          if (currentPath.command.type == MotionCommand::Type::BallApproach) {
+                          if (currentPath.command.type == MotionCommand::Type::BALL_APPROACH) {
                               Eigen::Affine2d ball_aff;
                               ball_aff.linear()                = Eigen::Rotation2Dd(0.0).toRotationMatrix();
                               ball_aff.translation()           = ball.position;

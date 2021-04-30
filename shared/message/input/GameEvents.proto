@@ -40,19 +40,19 @@ message GameEvents {
     };
 
     message Score {
-        uint32 ownScore      = 1;
-        uint32 opponentScore = 2;
+        uint32 own_score      = 1;
+        uint32 opponent_score = 2;
     }
 
     message GoalScored {
         /// The actor/team who scored the goal
-        Context context    = 1;
-        uint32  totalScore = 2;
+        Context context     = 1;
+        uint32  total_score = 2;
     }
 
     message Penalisation {
-        Context context = 1;
-        uint32  robotId = 2;
+        Context context  = 1;
+        uint32  robot_id = 2;
         /// The timestamp when the robot may resume playing
         google.protobuf.Timestamp    ends   = 3;
         GameState.Data.PenaltyReason reason = 4;
@@ -60,8 +60,8 @@ message GameEvents {
 
     /// The context and robot which were unpenalised
     message Unpenalisation {
-        Context context = 1;
-        uint32  robotId = 2;
+        Context context  = 1;
+        uint32  robot_id = 2;
     }
 
     message CoachMessage {
@@ -71,7 +71,7 @@ message GameEvents {
     }
 
     message HalfTime {
-        bool firstHalf = 1;
+        bool first_half = 1;
     }
 
     message BallKickedOut {
@@ -88,17 +88,17 @@ message GameEvents {
         GameState.Data.Phase phase = 1;
         /// Time when play begins.
         /// Set some time after game-states INITIAL or READY
-        google.protobuf.Timestamp readyTime = 2;
+        google.protobuf.Timestamp ready_time = 2;
         /// Time when the first half is due to end
         /// Set some time after game-states SET or PLAYING
-        google.protobuf.Timestamp endHalf  = 3;
-        google.protobuf.Timestamp ballFree = 4;
+        google.protobuf.Timestamp end_half  = 3;
+        google.protobuf.Timestamp ball_free = 4;
         /// Timestamp when the current phase will end
         /// Set some time after game-state TIMEOUT
         google.protobuf.Timestamp ends = 5;
         /// Time when the next half is to begin
         /// Set some time after game-state FINISHED
-        google.protobuf.Timestamp nextHalf = 6;
+        google.protobuf.Timestamp next_half = 6;
     }
 
     message GameMode {
