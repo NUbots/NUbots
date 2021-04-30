@@ -127,7 +127,7 @@ def build(repository, platform):
             raise RuntimeError("docker image tag returned a non-zero exit code")
 
 
-def pull_and_tag(repository, platform):
+def pull(repository, platform):
     remote_tag = "{0}/{0}:{1}".format(repository, platform)
     local_tag = "{0}:{1}".format(repository, platform)
     selected_tag = "{}:selected".format(repository)
@@ -139,10 +139,5 @@ def pull_and_tag(repository, platform):
 
     print("Tagging ", remote_tag, "as", local_tag)
     err = subprocess.run(["docker", "tag", remote_tag, local_tag], stderr=DEVNULL, stdout=DEVNULL).returncode
-    if err != 0:
-        raise RuntimeError("docker image tag returned a non-zero exit code")
-
-    print("Tagging ", local_tag, "as", selected_tag)
-    err = subprocess.run(["docker", "tag", local_tag, selected_tag], stderr=DEVNULL, stdout=DEVNULL).returncode
     if err != 0:
         raise RuntimeError("docker image tag returned a non-zero exit code")

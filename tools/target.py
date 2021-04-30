@@ -40,10 +40,12 @@ def run(target, build_local, **kwargs):
             platform.build(defaults.image, target)
         # Else, pull the image from dockerhub
         else:
-            platform.pull_and_tag(defaults.image, target)
+            platform.pull(defaults.image, target)
 
         # Tag the built platform image is the selected image
         tag = "{}:{}".format(defaults.image, target)
+        print("Tagging", tag, "as {}:selected".format(defaults.image))
+
         err = subprocess.run(["docker", "image", "tag", tag, "{}:selected".format(defaults.image)]).returncode
         if err != 0:
             cprint("docker image tag returned exit code {}".format(err), "red", attrs=["bold"])
