@@ -1,4 +1,4 @@
-# NUbots Codebase [![Build status](https://badge.buildkite.com/85cb206a2615c85981c4e0089b0abb0c6bcd775b3d946ede40.svg?branch=master)](https://buildkite.com/nubots/nubots)
+# NUbots Codebase [![NUbots Build Status](https://badge.buildkite.com/85cb206a2615c85981c4e0089b0abb0c6bcd775b3d946ede40.svg?branch=master)]] [![NUbots Master Build status](https://badge.buildkite.com/85cb206a2615c85981c4e0089b0abb0c6bcd775b3d946ede40.svg?branch=master&step=Build%20generic%20and%20Test)](https://buildkite.com/nubots/nubots) [![NUsight2 Master Build status](https://badge.buildkite.com/85cb206a2615c85981c4e0089b0abb0c6bcd775b3d946ede40.svg?branch=master&step=Build%20NUsight2)](https://buildkite.com/nubots/nubots)
 
 NUbots is a team in the University of Newcastle's robotics research group focused on developing humanoid soccer-playing robots for the international RoboCup competition.
 The team is made up of a multidisciplinary team of students and academics. The team develops both hardware and software for the robots.
