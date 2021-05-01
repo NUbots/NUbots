@@ -53,11 +53,11 @@ namespace module::platform::darwin {
         /// The angle is given as a value between 0 and 4095
         static constexpr double POSITION_CONVERSION_FACTOR = (2.0 * M_PI) / 4095.0;
 
-        /// The load is measured as a value between 0 and 2047 where the 10th bit specifies direction and 1024 =
-        /// 0 We convert it to a value between -1 and 1 (percentage)
+        /// The load is measured as a value between 0 and 2047 where the 10th bit specifies direction and 1024 = 0
+        /// We convert it to a value between -1 and 1 (percentage)
         static constexpr double LOAD_CONVERSION_FACTOR = 1.0 / 1023.0;
 
-        /// The torque limit is measured as a value between 0 and 1023
+        /// The torque limit is measured as a value between 0 and 1023. We use it between 0 and 100
         static constexpr double TORQUE_LIMIT_CONVERSION_FACTOR = 100.0 / 1023.0;
 
         /// The temperatures are given in degrees anyway
