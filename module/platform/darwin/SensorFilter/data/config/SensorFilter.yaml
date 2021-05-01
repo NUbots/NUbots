@@ -20,7 +20,9 @@ motion_filter:
       accelerometer: [3e-4, 3e-4, 3e-4] # x, y, z
       accelerometer_magnitude: [1e-4, 1e-4, 1e-4] # x, y, z
       gyroscope: [1e-8, 1e-8, 1e-8] # x, y, z
+      # covariance of a foot's translation
       flat_foot_odometry: [5e-8, 5e-8, 5e-8] # x, y, z
+      # covariance of each value of the quaternion which is the rotation of the foot, when both feet are down
       flat_foot_orientation: [5e-6, 5e-6, 5e-6, 5e-6] # QX, QY, QZ, QW
     process:
       position: [1e-10, 1e-10, 1e-10]
