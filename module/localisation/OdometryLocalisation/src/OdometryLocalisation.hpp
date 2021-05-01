@@ -4,8 +4,7 @@
 #include <Eigen/Geometry>
 #include <nuclear>
 
-namespace module {
-namespace localisation {
+namespace module::localisation {
 
     class OdometryLocalisation : public NUClear::Reactor {
     private:
@@ -15,7 +14,6 @@ namespace localisation {
         /// @brief Called by the powerplant to build and setup the OdometryLocalisation reactor.
         explicit OdometryLocalisation(std::unique_ptr<NUClear::Environment> environment);
     };
-}  // namespace localisation
-}  // namespace module
+}  // namespace module::localisation
 
 #endif  // MODULE_LOCALISATION_ODOMETRYLOCALISATION_HPP

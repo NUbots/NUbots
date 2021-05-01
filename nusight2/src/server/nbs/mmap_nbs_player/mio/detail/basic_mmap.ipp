@@ -35,8 +35,7 @@
     #include <unistd.h>
 #endif
 
-namespace mio {
-namespace detail {
+namespace mio::detail {
 
 #ifdef _WIN32
     inline DWORD int64_high(int64_t n) noexcept {
@@ -413,7 +412,6 @@ namespace detail {
         return !(a < b);
     }
 
-}  // namespace detail
-}  // namespace mio
+}  // namespace mio::detail
 
 #endif  // MIO_BASIC_MMAP_IMPL

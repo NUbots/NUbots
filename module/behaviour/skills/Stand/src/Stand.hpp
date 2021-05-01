@@ -22,25 +22,21 @@
 
 #include <nuclear>
 
-namespace module {
-namespace behaviour {
-    namespace skills {
+namespace module::behaviour::skills {
 
-        /**
-         * Executes a getup script if the robot falls over.
-         *
-         * @author Josiah Walker
-         */
-        class Stand : public NUClear::Reactor {
-        private:
-            const size_t id;
+    /**
+     * Executes a getup script if the robot falls over.
+     *
+     * @author Josiah Walker
+     */
+    class Stand : public NUClear::Reactor {
+    private:
+        const size_t id;
 
-        public:
-            explicit Stand(std::unique_ptr<NUClear::Environment> environment);
-        };
+    public:
+        explicit Stand(std::unique_ptr<NUClear::Environment> environment);
+    };
 
-    }  // namespace skills
-}  // namespace behaviour
-}  // namespace module
+}  // namespace module::behaviour::skills
 
 #endif  // MODULES_BEHAVIOUR_REFLEX_STAND_HPP

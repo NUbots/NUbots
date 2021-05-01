@@ -4,8 +4,7 @@
 #include <cstdint>
 #include <string>
 
-namespace utility {
-namespace vision {
+namespace utility::vision {
 
     inline constexpr uint32_t fourcc(const char (&c)[5]) {
         return c[3] << 24 | c[2] << 16 | c[1] << 8 | c[0];
@@ -20,7 +19,6 @@ namespace vision {
         return ch;
     }
 
-}  // namespace vision
-}  // namespace utility
+}  // namespace utility::vision
 
 #endif  // UTILITY_VISION_FOURCC

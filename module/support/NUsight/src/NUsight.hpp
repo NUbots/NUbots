@@ -29,8 +29,7 @@
 #include "message/input/GameEvents.hpp"
 #include "message/input/GameState.hpp"
 
-namespace module {
-namespace support {
+namespace module::support {
 
     /**
      * Intelligent debugging, logging and graphing for the NUbots system.
@@ -74,8 +73,6 @@ namespace support {
         static constexpr const char* IGNORE_TAG = "IGNORE";
         explicit NUsight(std::unique_ptr<NUClear::Environment> environment);
     };
-
-}  // namespace support
-}  // namespace module
+}  // namespace module::support
 
 #endif  // MODULES_SUPPORT_NUSIGHT_HPP

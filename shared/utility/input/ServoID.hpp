@@ -23,8 +23,7 @@
 #include <set>
 #include <string>
 
-namespace utility {
-namespace input {
+namespace utility::input {
 
     struct ServoID {
         enum Value {
@@ -122,7 +121,6 @@ namespace input {
     private:
         static const std::set<ServoID> values;
     };
-}  // namespace input
-}  // namespace utility
+}  // namespace utility::input
 
 #endif

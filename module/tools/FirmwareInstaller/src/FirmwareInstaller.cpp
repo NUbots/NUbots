@@ -11,8 +11,7 @@
 #include "utility/io/uart.hpp"
 #include "utility/strutil/strutil.hpp"
 
-namespace module {
-namespace tools {
+namespace module::tools {
 
     using extension::Configuration;
 
@@ -300,5 +299,4 @@ namespace tools {
         std::cout << "Choice: " << std::flush;
     }
 
-}  // namespace tools
-}  // namespace module
+}  // namespace module::tools

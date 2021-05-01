@@ -56,7 +56,7 @@ message Quad {
 }
 
 message Polygon {
-    vec2 point = 1;
+    repeated vec2 vertices = 1;
 }
 
 /**

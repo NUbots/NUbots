@@ -24,8 +24,7 @@
 
 #include "utility/input/ServoID.hpp"
 
-namespace utility {
-namespace input {
+namespace utility::input {
     // LimbID is a higher level of ServoID (see ServoID.h),
     // which contains all the constituent servos (e.g. An arm contains shoulder (pitch + roll)) and elbow.
     using ServoID = utility::input::ServoID;
@@ -104,7 +103,6 @@ namespace input {
 
         friend std::ostream& operator<<(std::ostream& out, const LimbID& val);
     };
-}  // namespace input
-}  // namespace utility
+}  // namespace utility::input
 
 #endif

@@ -28,8 +28,7 @@
 
 #include "utility/math/coordinates.hpp"
 
-namespace module {
-namespace localisation {
+namespace module::localisation {
 
     using message::input::Sensors;
     using message::support::FieldDescription;
@@ -69,8 +68,8 @@ namespace localisation {
                                             const message::support::FieldDescription& field,
                                             const Eigen::Matrix<Scalar, 4, 4>& Hcw) const {
 
-            const Eigen::Matrix<Scalar, 4, 1> rBWw(state[PX], state[PY], field.ball_radius, 1.0);
-            const Eigen::Matrix<Scalar, 3, 1> rBCc_cart((Hcw * rBWw).template head<3>());
+            const Eigen::Matrix<Scalar, 3, 1> rBWw(state[PX], state[PY], field.ball_radius);
+            const Eigen::Matrix<Scalar, 3, 1> rBCc_cart(Eigen::Affine3d(Hcw) * rBWw);
             return cartesianToSpherical(rBCc_cart);
         }
 
@@ -95,6 +94,5 @@ namespace localisation {
             return resetRange;
         }
     };
-}  // namespace localisation
-}  // namespace module
+}  // namespace module::localisation
 #endif  // MODULE_LOCALISATION_BALLMODEL_HPP
