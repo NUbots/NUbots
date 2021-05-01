@@ -20,16 +20,15 @@
 #include <fmt/format.h>
 #include <yaml-cpp/yaml.h>
 
-#include "NUsight.h"
+#include "NUsight.hpp"
 
-#include "utility/file/fileutil.h"
-#include "utility/strutil/strutil.h"
+#include "utility/file/fileutil.hpp"
+#include "utility/strutil/strutil.hpp"
 
 /**
  * @author Monica Olejniczak
  */
-namespace module {
-namespace support {
+namespace module::support {
     using utility::file::listFiles;
     using utility::strutil::split;
 
@@ -47,5 +46,4 @@ namespace support {
         utility::file::writeToFile(tempName, root);
         rename(tempName.c_str(), path.c_str());
     }
-}  // namespace support
-}  // namespace module
+}  // namespace module::support

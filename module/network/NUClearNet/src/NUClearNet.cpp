@@ -15,12 +15,11 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#include "NUClearNet.h"
+#include "NUClearNet.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-namespace module {
-namespace network {
+namespace module::network {
 
     using extension::Configuration;
 
@@ -76,6 +75,4 @@ namespace network {
             log<NUClear::INFO>("Disconnected from", event.name, "on", addr + ":" + std::to_string(port));
         });
     }
-
-}  // namespace network
-}  // namespace module
+}  // namespace module::network

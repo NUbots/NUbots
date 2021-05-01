@@ -17,23 +17,23 @@
  * Copyright 2013 NUBots <nubots@nubots.net>
  */
 
-#include "BallDetector.h"
+#include "BallDetector.hpp"
 
 #include <fmt/format.h>
 #include <fmt/ostream.h>
+#include <numeric>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/support/FieldDescription.h"
-#include "message/vision/Ball.h"
-#include "message/vision/GreenHorizon.h"
+#include "message/support/FieldDescription.hpp"
+#include "message/vision/Ball.hpp"
+#include "message/vision/GreenHorizon.hpp"
 
-#include "utility/math/coordinates.h"
-#include "utility/support/yaml_expression.h"
-#include "utility/vision/visualmesh/VisualMesh.h"
+#include "utility/math/coordinates.hpp"
+#include "utility/support/yaml_expression.hpp"
+#include "utility/vision/visualmesh/VisualMesh.hpp"
 
-namespace module {
-namespace vision {
+namespace module::vision {
 
     using extension::Configuration;
 
@@ -121,7 +121,7 @@ namespace vision {
                     auto balls = std::make_unique<Balls>();
                     balls->balls.reserve(clusters.size());
 
-                    balls->camera_id = horizon.camera_id;
+                    balls->id        = horizon.id;
                     balls->timestamp = horizon.timestamp;
                     balls->Hcw       = horizon.Hcw;
 
@@ -176,9 +176,9 @@ namespace vision {
                         b.colour.fill(1.0f);
 
                         // CALCULATE DEGREE OF FIT
-                        // Degree of fit defined as the standard deviation of angle between every rays on the cluster /
-                        // and the cone axis. If the standard deviation exceeds a given threshold then we have a bad
-                        // fit
+                        // Degree of fit defined as the standard deviation of angle between every rays on the
+                        // cluster / and the cone axis. If the standard deviation exceeds a given threshold then we
+                        // have a bad fit
                         std::vector<float> angles;
                         float mean             = 0.0f;
                         const float max_radius = std::acos(radius);
@@ -220,8 +220,8 @@ namespace vision {
                         }
 
                         // IF THE DISAGREEMENT BETWEEN THE ANGULAR AND PROJECTION BASED DISTANCES ARE TOO LARGE
-                        // Intersect cone axis vector with a plane midway through the ball with normal vector (0, 0, 1)
-                        // Do this in world space, not camera space!
+                        // Intersect cone axis vector with a plane midway through the ball with normal vector (0, 0,
+                        // 1) Do this in world space, not camera space!
                         // https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection#Algebraic_form
                         // Plane normal = (0, 0, 1)
                         // Point in plane = (0, 0, field.ball_radius)
@@ -261,7 +261,7 @@ namespace vision {
                         }
 
                         if (config.debug) {
-                            log<NUClear::DEBUG>(fmt::format("Camera {}", balls->camera_id));
+                            log<NUClear::DEBUG>(fmt::format("Camera {}", balls->id));
                             log<NUClear::DEBUG>(fmt::format("radius {}", b.cone.radius));
                             log<NUClear::DEBUG>(fmt::format("Axis {}", b.cone.axis.transpose()));
                             log<NUClear::DEBUG>(
@@ -287,9 +287,8 @@ namespace vision {
                     }
                 }
             });
-    }  // namespace vision
-}  // namespace vision
-}  // namespace module
+    }
+}  // namespace module::vision
 
 
 /*****************************************************************************

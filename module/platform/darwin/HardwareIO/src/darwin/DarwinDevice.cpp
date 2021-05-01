@@ -17,17 +17,17 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "DarwinDevice.h"
+#include "DarwinDevice.hpp"
 
 namespace Darwin {
-DarwinDevice::DarwinDevice(UART& coms, int id) : coms(coms), id(id) {}
+    DarwinDevice::DarwinDevice(UART& coms, int id) : coms(coms), id(id) {}
 
-bool DarwinDevice::ping() {
+    bool DarwinDevice::ping() {
 
-    // Ping and get the result
-    CommandResult result = coms.executeRead(PingCommand(id));
+        // Ping and get the result
+        CommandResult result = coms.executeRead(PingCommand(id));
 
-    // Check if there was an error code
-    return result.header.errorcode == ErrorCode::NONE;
-}
+        // Check if there was an error code
+        return result.header.errorcode == ErrorCode::NONE;
+    }
 }  // namespace Darwin

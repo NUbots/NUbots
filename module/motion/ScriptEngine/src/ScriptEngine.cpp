@@ -17,16 +17,15 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "ScriptEngine.h"
+#include "ScriptEngine.hpp"
 
-#include "extension/Script.h"
+#include "extension/Script.hpp"
 
-#include "message/behaviour/ServoCommand.h"
+#include "message/behaviour/ServoCommand.hpp"
 
-#include "utility/file/fileutil.h"
+#include "utility/file/fileutil.hpp"
 
-namespace module {
-namespace motion {
+namespace module::motion {
 
     using extension::ExecuteScript;
     using extension::ExecuteScriptByName;
@@ -92,6 +91,4 @@ namespace motion {
             emit(std::move(waypoints));
         });
     }
-
-}  // namespace motion
-}  // namespace module
+}  // namespace module::motion

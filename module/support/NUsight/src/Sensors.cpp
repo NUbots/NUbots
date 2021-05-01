@@ -17,14 +17,11 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "message/input/Sensors.h"
+#include "message/input/Sensors.hpp"
 
-#include "NUsight.h"
+#include "NUsight.hpp"
 
-#include "utility/support/eigen_armadillo.h"
-
-namespace module {
-namespace support {
+namespace module::support {
 
     using message::input::Sensors;
 
@@ -36,5 +33,4 @@ namespace support {
                 powerplant.emit_shared<Scope::NETWORK>(std::move(sensors), "nusight", false);
             }));
     }
-}  // namespace support
-}  // namespace module
+}  // namespace module::support

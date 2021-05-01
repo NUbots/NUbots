@@ -1,13 +1,12 @@
-#include "time_sync.h"
+#include "time_sync.hpp"
 
 extern "C" {
 #include <aravis-0.8/arv.h>
 }
 
-#include "aravis_wrap.h"
+#include "aravis_wrap.hpp"
 
-namespace module {
-namespace input {
+namespace module::input {
 
     CameraContext::TimeCorrection sync_clocks(ArvDevice* device) {
         using namespace std::chrono;
@@ -47,8 +46,9 @@ namespace input {
         }
 
         for (auto& s : samples) {
-            // Get the time before and after sending the command. We know neither are correct and it's likely somewhere
-            // in the middle that the actual latching took place. Therefore take the average of the two to get closer.
+            // Get the time before and after sending the command. We know neither are correct and it's likely
+            // somewhere in the middle that the actual latching took place. Therefore take the average of the two to
+            // get closer.
             try {
 
                 NUClear::clock::time_point t1 = NUClear::clock::now();
@@ -106,6 +106,4 @@ namespace input {
             return output;
         }
     }
-
-}  // namespace input
-}  // namespace module
+}  // namespace module::input

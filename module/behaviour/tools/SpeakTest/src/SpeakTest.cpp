@@ -17,21 +17,16 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "SpeakTest.h"
+#include "SpeakTest.hpp"
 
 #include <nuclear>
 
-#include "message/output/Say.h"
+#include "message/output/Say.hpp"
 
-namespace module {
-namespace behaviour {
-    namespace tools {
+namespace module::behaviour::tools {
 
-        SpeakTest::SpeakTest(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    SpeakTest::SpeakTest(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-            on<Every<30, std::chrono::seconds>>().then(
-                [this] { emit(std::make_unique<message::output::Say>("Bite Me")); });
-        }
-    }  // namespace tools
-}  // namespace behaviour
-}  // namespace module
+        on<Every<30, std::chrono::seconds>>().then([this] { emit(std::make_unique<message::output::Say>("Bite Me")); });
+    }
+}  // namespace module::behaviour::tools

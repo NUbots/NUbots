@@ -17,44 +17,40 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "Stand.h"
+#include "Stand.hpp"
 
-#include "extension/Script.h"
+#include "extension/Script.hpp"
 
-#include "message/behaviour/ServoCommand.h"
+#include "message/behaviour/ServoCommand.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
 
-namespace module {
-namespace behaviour {
-    namespace skills {
+namespace module::behaviour::skills {
 
-        using extension::ExecuteScriptByName;
+    using extension::ExecuteScriptByName;
 
-        using utility::behaviour::RegisterAction;
-        using LimbID  = utility::input::LimbID;
-        using ServoID = utility::input::ServoID;
+    using utility::behaviour::RegisterAction;
+    using LimbID  = utility::input::LimbID;
+    using ServoID = utility::input::ServoID;
 
-        // internal only callback messages to start and stop our action
-        struct ExecuteStand {};
+    // internal only callback messages to start and stop our action
+    struct ExecuteStand {};
 
-        Stand::Stand(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
+    Stand::Stand(std::unique_ptr<NUClear::Environment> environment)
+        : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
 
-            on<Trigger<ExecuteStand>>().then([this] { emit(std::make_unique<ExecuteScriptByName>(id, "Stand.yaml")); });
+        on<Trigger<ExecuteStand>>().then([this] { emit(std::make_unique<ExecuteScriptByName>(id, "Stand.yaml")); });
 
-            emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
-                RegisterAction{id,
-                               "Stand",
-                               {std::pair<float, std::set<LimbID>>(
-                                   std::numeric_limits<float>::epsilon(),
-                                   {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
-                               [this](const std::set<LimbID>&) { emit(std::make_unique<ExecuteStand>()); },
-                               [this](const std::set<LimbID>&) {},
-                               [this](const std::set<ServoID>&) {}}));
-        }
-    }  // namespace skills
-}  // namespace behaviour
-}  // namespace module
+        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
+            RegisterAction{id,
+                           "Stand",
+                           {std::pair<float, std::set<LimbID>>(
+                               std::numeric_limits<float>::epsilon(),
+                               {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
+                           [this](const std::set<LimbID>&) { emit(std::make_unique<ExecuteStand>()); },
+                           [this](const std::set<LimbID>&) {},
+                           [this](const std::set<ServoID>&) {}}));
+    }
+}  // namespace module::behaviour::skills

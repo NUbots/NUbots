@@ -1,19 +1,18 @@
-#include "GreenHorizonDetector.h"
+#include "GreenHorizonDetector.hpp"
 
 #include <fmt/format.h>
 #include <numeric>
 #include <set>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/vision/GreenHorizon.h"
-#include "message/vision/VisualMesh.h"
+#include "message/vision/GreenHorizon.hpp"
+#include "message/vision/VisualMesh.hpp"
 
-#include "utility/math/geometry/ConvexHull.h"
-#include "utility/vision/visualmesh/VisualMesh.h"
+#include "utility/math/geometry/ConvexHull.hpp"
+#include "utility/vision/visualmesh/VisualMesh.hpp"
 
-namespace module {
-namespace vision {
+namespace module::vision {
 
     using extension::Configuration;
 
@@ -125,7 +124,8 @@ namespace vision {
                         else {
                             if (config.debug) {
                                 log<NUClear::DEBUG>(
-                                    "The clusters are neither overlapping, nor are they not overlapping. What have you "
+                                    "The clusters are neither overlapping, nor are they not overlapping. What have "
+                                    "you "
                                     "done???");
                                 log<NUClear::DEBUG>(fmt::format("[{}, {}] -> [{}, {}], [{}, {}] -> [{}, {}]",
                                                                 *range_a.first,
@@ -164,7 +164,7 @@ namespace vision {
                 // Preserve mesh so that anyone using the GreenHorizon can access the original data
                 msg->mesh = const_cast<VisualMesh*>(&mesh)->shared_from_this();
 
-                msg->camera_id = mesh.camera_id;
+                msg->id        = mesh.id;
                 msg->Hcw       = mesh.Hcw;
                 msg->timestamp = mesh.timestamp;
 
@@ -188,6 +188,5 @@ namespace vision {
                 emit(std::move(msg));
             }
         });
-    }  // namespace vision
-}  // namespace vision
-}  // namespace module
+    }
+}  // namespace module::vision

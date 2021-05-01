@@ -1,4 +1,4 @@
-#include "Camera.h"
+#include "Camera.hpp"
 
 extern "C" {
 #include <aravis-0.8/arv.h>
@@ -7,21 +7,20 @@ extern "C" {
 #include <cmath>
 #include <fmt/format.h>
 
-#include "aravis_wrap.h"
-#include "description_to_fourcc.h"
-#include "settings.h"
-#include "time_sync.h"
+#include "aravis_wrap.hpp"
+#include "description_to_fourcc.hpp"
+#include "settings.hpp"
+#include "time_sync.hpp"
 
-#include "message/input/Image.h"
-#include "message/input/Sensors.h"
+#include "message/input/Image.hpp"
+#include "message/input/Sensors.hpp"
 
-#include "utility/input/ServoID.h"
-#include "utility/support/yaml_expression.h"
-#include "utility/vision/fourcc.h"
-#include "utility/vision/projection.h"
+#include "utility/input/ServoID.hpp"
+#include "utility/support/yaml_expression.hpp"
+#include "utility/vision/fourcc.hpp"
+#include "utility/vision/projection.hpp"
 
-namespace module {
-namespace input {
+namespace module::input {
 
     using extension::Configuration;
     using message::input::Image;
@@ -153,7 +152,7 @@ namespace input {
             context.time = sync_clocks(device);
 
             // Get the fourcc code from the pixel format
-            context.fourcc = description_to_fourcc(config["settings"]["PixelFormat"].as<std::string>());
+            context.fourcc = description_to_fourcc(config["settings"]["pixel_format"].as<std::string>());
 
             // Load Hpc from configuration
             context.Hpc = Eigen::Matrix4d(config["lens"]["Hpc"].as<Expression>());
@@ -162,10 +161,10 @@ namespace input {
             int full_width  = arv::device_get_integer_feature_value(device, "WidthMax");
             int full_height = arv::device_get_integer_feature_value(device, "HeightMax");
 
-            int offset_x = config["settings"]["OffsetX"].as<Expression>();
-            int offset_y = config["settings"]["OffsetY"].as<Expression>();
-            int width    = config["settings"]["Width"].as<Expression>();
-            int height   = config["settings"]["Height"].as<Expression>();
+            int offset_x = config["settings"]["offset_x"].as<Expression>();
+            int offset_y = config["settings"]["offset_y"].as<Expression>();
+            int width    = config["settings"]["width"].as<Expression>();
+            int height   = config["settings"]["height"].as<Expression>();
 
             // Renormalise the focal length
             float focal_length = config["lens"]["focal_length"].as<Expression>() * full_width / width;
@@ -211,7 +210,7 @@ namespace input {
                 std::string key = cfg.first.as<std::string>();
 
                 // Skip the region keys as we handle them above
-                if (key == "Width" || key == "Height" || key == "OffsetX" || key == "OffsetY") {
+                if (key == "width" || key == "height" || key == "offset_x" || key == "offset_y") {
                     continue;
                 }
 
@@ -275,8 +274,8 @@ namespace input {
             // Add buffers to the queue
             int payload_size = arv::camera_get_payload(cam.get());
             for (size_t i = 0; i < config["buffer_count"].as<size_t>(); i++) {
-                // TODO(trent) Eventually we should use preallocated page aligned data so that we can map directly to
-                // the GPU.
+                // TODO(trent) Eventually we should use preallocated page aligned data so that we can map directly
+                // to the GPU.
                 // TODO(trent) Make an std::vector and use it in the buffer to avoid copying to one later
                 arv_stream_push_buffer(stream.get(), arv_buffer_new(payload_size, nullptr));
             }
@@ -400,7 +399,7 @@ namespace input {
                 msg->dimensions = Eigen::Matrix<unsigned int, 2, 1>(width, height);
                 // TODO(trent) use an std::vector here to avoid the copy
                 msg->data.insert(msg->data.end(), buff, buff + buffSize);
-                msg->camera_id = context->camera_id;
+                msg->id        = context->id;
                 msg->name      = context->name;
                 msg->timestamp = NUClear::clock::time_point(nanoseconds(ts));
 
@@ -473,6 +472,4 @@ namespace input {
     void Camera::control_lost(ArvGvDevice*, CameraContext* context) {
         NUClear::log<NUClear::FATAL>(fmt::format("Control of a the {} camera has been lost", context->name));
     }
-
-}  // namespace input
-}  // namespace module
+}  // namespace module::input

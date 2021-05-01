@@ -8,13 +8,13 @@ import multiprocessing
 import os
 import pickle
 
-from tqdm import tqdm, trange
-
-import b
 import cv2
 import numpy as np
 import tensorflow as tf
 from ruamel.yaml import YAML
+from tqdm import tqdm, trange
+
+import b
 
 from .camera_calibration.callback import ExtrinsicProgress, IntrinsicProgress
 from .camera_calibration.grid_distance import grid_distance
@@ -53,14 +53,10 @@ def register(command):
         required=True,
         help="The directory containing the configuration files for the cameras",
     )
+    command.add_argument("--rows", default=4, type=int, help="the number of rows in the asymmetric circles grid")
+    command.add_argument("--cols", default=11, type=int, help="the number of columns in the asymmetric circles grid")
     command.add_argument(
-        "--rows", default=4, type=int, help="the number of rows in the asymmetric circles grid",
-    )
-    command.add_argument(
-        "--cols", default=11, type=int, help="the number of columns in the asymmetric circles grid",
-    )
-    command.add_argument(
-        "--grid_size", default=0.04, type=float, help="the distance between rows/cols in the grid in meters",
+        "--grid_size", default=0.04, type=float, help="the distance between rows/cols in the grid in meters"
     )
     command.add_argument(
         "--no-intrinsics",
@@ -259,8 +255,8 @@ def plane_quality(points, rows, cols, grid_size):
 
     # Allowed x/y percentage error
     allowed_error = 0.02
-    max_xy = tf.linalg.svd(tf.transpose((1 + allowed_error) * world_grid), compute_uv=False,)
-    min_xy = tf.linalg.svd(tf.transpose((1 - allowed_error) * world_grid), compute_uv=False,)
+    max_xy = tf.linalg.svd(tf.transpose((1 + allowed_error) * world_grid), compute_uv=False)
+    min_xy = tf.linalg.svd(tf.transpose((1 - allowed_error) * world_grid), compute_uv=False)
 
     # Mean centre
     centred = points - tf.reduce_mean(points, axis=[1, 2], keepdims=True)
