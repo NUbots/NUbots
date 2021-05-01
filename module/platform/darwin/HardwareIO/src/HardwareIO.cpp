@@ -51,17 +51,17 @@ namespace module::platform::darwin {
          */
 
         // Read our Error code
-        sensors.cm740ErrorFlags = data.cm740ErrorCode == 0xFF ? DarwinSensors::Error::TIMEOUT
-                                                              : DarwinSensors::Error(data.cm740ErrorCode).value;
+        sensors.cm740_error_flags = data.cm740ErrorCode == 0xFF ? DarwinSensors::Error::TIMEOUT
+                                                                : DarwinSensors::Error(data.cm740ErrorCode).value;
 
         // LED Panel
-        sensors.ledPanel = cm740State.ledPanel;
+        sensors.led_panel = cm740State.ledPanel;
 
         // Head LED
-        sensors.headLED = cm740State.headLED;
+        sensors.head_led = cm740State.headLED;
 
         // Eye LED
-        sensors.eyeLED = cm740State.eyeLED;
+        sensors.eye_led = cm740State.eyeLED;
 
         // Buttons
         sensors.buttons.left   = Convert::getBit<0>(data.cm740.buttons);
@@ -71,7 +71,7 @@ namespace module::platform::darwin {
         sensors.voltage = Convert::voltage(data.cm740.voltage);
 
         if (sensors.voltage <= chargedVoltage) {
-            sensors.cm740ErrorFlags &= ~DarwinSensors::Error::INPUT_VOLTAGE;
+            sensors.cm740_error_flags &= ~DarwinSensors::Error::INPUT_VOLTAGE;
         }
 
         // Accelerometer (in m/s^2)
@@ -90,9 +90,9 @@ namespace module::platform::darwin {
 
         // Right Sensor
         // Error
-        sensors.fsr.right.errorFlags = data.fsrErrorCodes[0] == 0xFF
-                                           ? DarwinSensors::Error::TIMEOUT
-                                           : DarwinSensors::Error(data.fsrErrorCodes[0]).value;
+        sensors.fsr.right.error_flags = data.fsrErrorCodes[0] == 0xFF
+                                            ? DarwinSensors::Error::TIMEOUT
+                                            : DarwinSensors::Error(data.fsrErrorCodes[0]).value;
 
         // Sensors
         sensors.fsr.right.fsr1 = Convert::fsrForce(data.fsr[0].fsr1);
@@ -103,13 +103,14 @@ namespace module::platform::darwin {
         // Centre, swaps X and Y coords to robot
         // see
         // http://support.robotis.com/en/product/darwin-op/references/reference/hardware_specifications/electronics/optional_components/fsr.htm
-        sensors.fsr.right.centreX = Convert::fsrCentre(false, data.fsr[0].centreY);
-        sensors.fsr.right.centreY = Convert::fsrCentre(false, data.fsr[0].centreX);
+        sensors.fsr.right.centre_x = Convert::fsrCentre(false, data.fsr[0].centreY);
+        sensors.fsr.right.centre_y = Convert::fsrCentre(false, data.fsr[0].centreX);
 
         // Left Sensor
         // Error
-        sensors.fsr.left.errorFlags = data.fsrErrorCodes[1] == 0xFF ? DarwinSensors::Error::TIMEOUT
-                                                                    : DarwinSensors::Error(data.fsrErrorCodes[1]).value;
+        sensors.fsr.left.error_flags = data.fsrErrorCodes[1] == 0xFF
+                                           ? DarwinSensors::Error::TIMEOUT
+                                           : DarwinSensors::Error(data.fsrErrorCodes[1]).value;
 
         // Sensors
         sensors.fsr.left.fsr1 = Convert::fsrForce(data.fsr[1].fsr1);
@@ -120,8 +121,8 @@ namespace module::platform::darwin {
         // Centre, swaps X and Y coords to robot
         // see
         // http://support.robotis.com/en/product/darwin-op/references/reference/hardware_specifications/electronics/optional_components/fsr.htm
-        sensors.fsr.left.centreX = Convert::fsrCentre(true, data.fsr[1].centreY);
-        sensors.fsr.left.centreY = Convert::fsrCentre(true, data.fsr[1].centreX);
+        sensors.fsr.left.centre_x = Convert::fsrCentre(true, data.fsr[1].centreY);
+        sensors.fsr.left.centre_y = Convert::fsrCentre(true, data.fsr[1].centreX);
 
         /*
          Servos
@@ -133,19 +134,19 @@ namespace module::platform::darwin {
 
 
             // Booleans
-            servo.torqueEnabled = servoState[i].torqueEnabled;
+            servo.torque_enabled = servoState[i].torqueEnabled;
 
             // Gain
-            servo.pGain = servoState[i].pGain;
-            servo.iGain = servoState[i].iGain;
-            servo.dGain = servoState[i].dGain;
+            servo.p_gain = servoState[i].pGain;
+            servo.i_gain = servoState[i].iGain;
+            servo.d_gain = servoState[i].dGain;
 
             // Torque
             servo.torque = servoState[i].torque;
 
             // Targets
-            servo.goalPosition = servoState[i].goalPosition;
-            servo.movingSpeed  = servoState[i].movingSpeed;
+            servo.goal_position = servoState[i].goalPosition;
+            servo.moving_speed  = servoState[i].movingSpeed;
 
             // If we are faking this hardware, simulate its motion
             if (servoState[i].simulated) {
@@ -173,24 +174,24 @@ namespace module::platform::darwin {
                 }
 
                 // Store our simulated values
-                servo.presentPosition = servoState[i].presentPosition;
-                servo.presentSpeed    = servoState[i].goalPosition;
-                servo.load            = servoState[i].load;
-                servo.voltage         = servoState[i].voltage;
-                servo.temperature     = servoState[i].temperature;
+                servo.present_position = servoState[i].presentPosition;
+                servo.present_speed    = servoState[i].goalPosition;
+                servo.load             = servoState[i].load;
+                servo.voltage          = servoState[i].voltage;
+                servo.temperature      = servoState[i].temperature;
             }
 
             // If we are using real data, get it from the packet
             else {
                 // Error code
-                servo.errorFlags = data.servoErrorCodes[i] == 0xFF
-                                       ? DarwinSensors::Error::TIMEOUT
-                                       : DarwinSensors::Error(data.servoErrorCodes[i]).value;
+                servo.error_flags = data.servoErrorCodes[i] == 0xFF
+                                        ? DarwinSensors::Error::TIMEOUT
+                                        : DarwinSensors::Error(data.servoErrorCodes[i]).value;
 
                 // Present Data
-                servo.presentPosition = Convert::servoPosition(i, data.servos[i].presentPosition);
-                servo.presentSpeed    = Convert::servoSpeed(i, data.servos[i].presentSpeed);
-                servo.load            = Convert::servoLoad(i, data.servos[i].load);
+                servo.present_position = Convert::servoPosition(i, data.servos[i].presentPosition);
+                servo.present_speed    = Convert::servoSpeed(i, data.servos[i].presentSpeed);
+                servo.load             = Convert::servoLoad(i, data.servos[i].load);
 
                 // Diagnostic Information
                 servo.voltage     = Convert::voltage(data.servos[i].voltage);
@@ -198,7 +199,7 @@ namespace module::platform::darwin {
 
                 // Clear Overvoltage flag if current voltage is greater than maximum expected voltage
                 if (servo.voltage <= chargedVoltage) {
-                    servo.errorFlags &= ~DarwinSensors::Error::INPUT_VOLTAGE;
+                    servo.error_flags &= ~DarwinSensors::Error::INPUT_VOLTAGE;
                 }
             }
         }
@@ -272,9 +273,9 @@ namespace module::platform::darwin {
                         }
 
                         // Get our goal position and speed
-                        uint16_t goalPosition = Convert::servoPositionInverse(i, servoState[i].goalPosition);
-                        uint16_t movingSpeed  = Convert::servoSpeedInverse(servoState[i].movingSpeed);
-                        uint16_t torque       = Convert::torqueLimitInverse(servoState[i].torque);
+                        uint16_t goal_position = Convert::servoPositionInverse(i, servoState[i].goalPosition);
+                        uint16_t movingSpeed   = Convert::servoSpeedInverse(servoState[i].movingSpeed);
+                        uint16_t torque        = Convert::torqueLimitInverse(servoState[i].torque);
 
                         // Add to our sync write command
                         command.insert(command.end(),
@@ -284,8 +285,8 @@ namespace module::platform::darwin {
                                            Convert::gainInverse(servoState[i].iGain),  // I Gain
                                            Convert::gainInverse(servoState[i].pGain),  // P Gain
                                            0,                                          // Reserved
-                                           uint8_t(0xFF & goalPosition),               // Goal Position L
-                                           uint8_t(0xFF & (goalPosition >> 8)),        // Goal Position H
+                                           uint8_t(0xFF & goal_position),              // Goal Position L
+                                           uint8_t(0xFF & (goal_position >> 8)),       // Goal Position H
                                            uint8_t(0xFF & movingSpeed),                // Goal Speed L
                                            uint8_t(0xFF & (movingSpeed >> 8)),         // Goal Speed H
                                            uint8_t(0xFF & torque),                     // Torque Limit L
@@ -372,7 +373,7 @@ namespace module::platform::darwin {
                 for (const auto& command : commands) {
                     float diff = utility::math::angle::difference(
                         command.position,
-                        utility::platform::darwin::getDarwinServo(command.id, sensors).presentPosition);
+                        utility::platform::darwin::getDarwinServo(command.id, sensors).present_position);
                     NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
                     float speed;
@@ -392,10 +393,9 @@ namespace module::platform::darwin {
 
                         servoState[command.id].dirty = true;
 
-                        servoState[command.id].pGain = command.gain;
-                        servoState[command.id].iGain = command.gain * 0;
-                        servoState[command.id].dGain = command.gain * 0;
-
+                        servoState[command.id].pGain        = command.gain;
+                        servoState[command.id].iGain        = command.gain * 0;
+                        servoState[command.id].dGain        = command.gain * 0;
                         servoState[command.id].movingSpeed  = speed;
                         servoState[command.id].goalPosition = command.position;
 

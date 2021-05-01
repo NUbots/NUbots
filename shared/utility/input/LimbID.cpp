@@ -25,27 +25,17 @@ namespace utility::input {
     using ServoID = utility::input::ServoID;
 
     LimbID::LimbID(std::string const& str) : value(Value::UNKNOWN) {
-        if (str == "UNKNOWN") {
-            value = Value::UNKNOWN;
-        }
-        else if (str == "LEFT_LEG") {
-            value = Value::LEFT_LEG;
-        }
-        else if (str == "RIGHT_LEG") {
-            value = Value::RIGHT_LEG;
-        }
-        else if (str == "LEFT_ARM") {
-            value = Value::LEFT_ARM;
-        }
-        else if (str == "RIGHT_ARM") {
-            value = Value::RIGHT_ARM;
-        }
-        else if (str == "HEAD") {
-            value = Value::HEAD;
-        }
+        // clang-format off
+        if      (str == "UNKNOWN")   { value = Value::UNKNOWN;   }
+        else if (str == "LEFT_LEG")  { value = Value::LEFT_LEG;  }
+        else if (str == "RIGHT_LEG") { value = Value::RIGHT_LEG; }
+        else if (str == "LEFT_ARM")  { value = Value::LEFT_ARM;  }
+        else if (str == "RIGHT_ARM") { value = Value::RIGHT_ARM; }
+        else if (str == "HEAD")      { value = Value::HEAD;      }
         else {
             throw std::runtime_error("String did not match any enum for LimbID");
         }
+        // clang-format on
     }
 
 
