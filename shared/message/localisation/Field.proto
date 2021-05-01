@@ -24,7 +24,7 @@ import "Matrix.proto";
 
 message Field {
     /// Affine2d position transform
-    mat3 position   = 1;
+    mat3 position = 1;
     /// Covariance of (x, y, theta)
     mat3 covariance = 2;
 }
