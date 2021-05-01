@@ -42,10 +42,10 @@ namespace module::platform::darwin {
         static constexpr double GYROSCOPE_CONVERSION_FACTOR = (1880.0 * (M_PI / 180.0)) / 512.0;
 
         /// The value that comes from the darwin is measured in decivolts (0.1 of a volt)
-        static constexpr double VOLTAGE_CONVERSION_FACTOR = 10;
+        static constexpr double VOLTAGE_CONVERSION_FACTOR = 0.1;
 
         /// The FSR values that are measured by the darwins feet are measured in millinewtons
-        static constexpr double FSR_FORCE_CONVERSION_FACTOR = 1000;
+        static constexpr double FSR_FORCE_CONVERSION_FACTOR = 0.001;
 
         /// The gain is a value between 0 and 254, we want a value between 0 and 100
         static constexpr double GAIN_CONVERSION_FACTOR = 100.0 / 254.0;
