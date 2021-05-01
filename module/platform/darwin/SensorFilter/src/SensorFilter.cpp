@@ -267,14 +267,14 @@ namespace module::platform::darwin {
                 }
 
                 // Loop through all the servos, emitting a message::input::Sensors for each one
-                for (uint32_t i = 0; i < 20; ++i) {
-                    auto& original = utility::platform::darwin::getDarwinServo(i, input);
+                for (uint32_t id = 0; id < 20; ++id) {
+                    auto& original = utility::platform::darwin::getDarwinServo(id, input);
                     auto& error    = original.error_flags;
 
                     // Check for an error on the servo and report it
                     while (error != DarwinSensors::Error::OK) {
                         std::stringstream s;
-                        s << "Error on Servo " << (i + 1) << " (" << static_cast<ServoID>(i) << "):";
+                        s << "Error on Servo " << (id + 1) << " (" << static_cast<ServoID>(id) << "):";
 
                         if (error & DarwinSensors::Error::INPUT_VOLTAGE) {
                             s << " Input Voltage - " << original.voltage;
@@ -313,11 +313,11 @@ namespace module::platform::darwin {
                                                   original.d_gain,
                                                   original.goal_position,
                                                   original.moving_speed,
-                                                  previousSensors->servo[i].present_position,
-                                                  previousSensors->servo[i].present_velocity,
-                                                  previousSensors->servo[i].load,
-                                                  previousSensors->servo[i].voltage,
-                                                  previousSensors->servo[i].temperature});
+                                                  previousSensors->servo[id].present_position,
+                                                  previousSensors->servo[id].present_velocity,
+                                                  previousSensors->servo[id].load,
+                                                  previousSensors->servo[id].voltage,
+                                                  previousSensors->servo[id].temperature});
                     }
                     // Otherwise we use the new values as is
                     else {
@@ -349,7 +349,7 @@ namespace module::platform::darwin {
                 // acc_z up
 
                 // If we have a previous Sensors message and our cm740 has errors, then reuse our last sensor value
-                if (previousSensors && (input.cm740_error_flags)) {
+                if (input.cm740_error_flags && previousSensors) {
                     sensors->accelerometer = previousSensors->accelerometer;
                 }
                 else {
@@ -542,20 +542,8 @@ namespace module::platform::darwin {
                 // We make Hwt first, because `o` is in world space
                 Eigen::Affine3d Hwt;
                 Hwt.linear()      = o.Rwt.toRotationMatrix();
-                Hwt.translation() = o.rTWw;
+                Hwt.translation() = -o.rTWw;
                 sensors->Htw      = Hwt.inverse().matrix();
-
-                // Integrate gyro to get angular positions
-                sensors->angular_position = o.omegaTTt / 90.0;
-
-                if (this->config.debug) {
-                    log("p_x:",
-                        sensors->angular_position.x(),
-                        "p_y:",
-                        sensors->angular_position.y(),
-                        "p_z:",
-                        sensors->angular_position.z());
-                }
 
                 /************************************************
                  *                  Mass Model                  *
@@ -567,26 +555,22 @@ namespace module::platform::darwin {
                  *                  Kinematics Horizon          *
                  ************************************************/
                 // Extract the inverse of the rotation component of Htw
-                // remove translation components from the transform
+                const Eigen::Matrix3d Rwt(sensors->Htw.topLeftCorner<3, 3>().transpose());
                 // We remove the yaw by making an angleaxis which has just the negative yaw,
                 // then multiplying it back in, taking the yaw away
-                    Eigen::AngleAxisd(-Rwt.rotation().eulerAngles(0, 1, 2).z(), Eigen::Vector3d::UnitZ()) * Rwt);
-                // sensors->Hgt : Mat size [4x4] (default identity)
-                // createRotationZ : Mat size [3x3]
-                // Rwt : Mat size [3x3]
-                sensors->Hgt = Rgt.matrix();
-                auto Htc     = sensors->Htx[ServoID::HEAD_PITCH];
+                const Eigen::AngleAxisd Rwt_negative_yaw(-Rwt.eulerAngles(0, 1, 2).z(), Eigen::Vector3d::UnitZ());
+                const Eigen::Affine3d Rgt(Rwt_negative_yaw * Rwt);
 
-                // Get torso to world transform
-                Eigen::Affine3d yawlessWorldInvR(
+                sensors->Hgt = Rgt.matrix();
+
+                // Get torso to ground transform (then do nothing with it????)
+                Eigen::AngleAxisd yawlessWorldInvR(
                     // Also removing the yaw in the same way
                     Eigen::AngleAxisd(-Hwt.rotation().eulerAngles(0, 1, 2).z(), Eigen::Vector3d::UnitZ())
                     * Hwt.rotation());
-                Eigen::Affine3d Hgt(Hwt);
+                Eigen::Affine3d Hgt;
                 Hgt.translation() = Eigen::Vector3d(0, 0, Hwt.translation().z());
-                Hgt.linear()      = yawlessWorldInvR.linear();
-                sensors->Hgc      = Hgt * Htc;  // Rwt * Rth
-
+                Hgt.linear()      = yawlessWorldInvR.toRotationMatrix();
                 emit(std::move(sensors));
             });
     }
