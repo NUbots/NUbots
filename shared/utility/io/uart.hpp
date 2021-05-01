@@ -46,10 +46,11 @@ namespace utility::io {
         uart& operator=(const uart& uart) = delete;
 
         /**
-         * @brief We can move these because it won't close the device twice
+         * @brief Moving these will call the destructors, closing the fd before trying to use it again
+         * TODO(KipHamiltons) implement an RAII fd utility, which would allow the uarts to be moved without that issue
          */
-        uart(uart&&)  = default;
-        uart& operator=(uart&& uart) = default;
+        uart(uart&&)  = delete;
+        uart& operator=(uart&& uart) = delete;
 
 
         /**
@@ -79,7 +80,7 @@ namespace utility::io {
          *
          * @return the number of bytes that were actually read, or -1 if fail. See ::read
          */
-        ssize_t read(void* buf, size_t count) const;
+        ssize_t read(void* buf, size_t count);
 
         /**
          * @brief Write bytes to the uart
@@ -89,7 +90,7 @@ namespace utility::io {
          *
          * @return the number of bytes that were written
          */
-        ssize_t write(const void* buf, size_t count) const;
+        ssize_t write(const void* buf, size_t count);
 
         /**
          * @brief Open the uart for the given file descriptor. Closes any currently open file.
@@ -100,9 +101,9 @@ namespace utility::io {
         void open(const std::string& device, const unsigned int& baud_rate = 57600);
 
         /**
-         * @brief Close the open file descriptor
+         * @brief Close the open file descriptor then reset fd = -1
          */
-        void close() const;
+        void close();
     };
 
 }  // namespace utility::io

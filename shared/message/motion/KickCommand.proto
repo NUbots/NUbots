@@ -22,6 +22,10 @@ package message.motion;
 
 import "Vector.proto";
 
+/**
+ * @author Trent Houliston
+ * @author Brendan Annable
+ */
 enum KickCommandType {
     NORMAL = 0;
     /// Disregard robot safety and smash it
@@ -29,12 +33,17 @@ enum KickCommandType {
 }
 
 message KickCommand {
+    /// The point to kick
     vec3 target = 1;
-    /// Force is the magnitude
-    vec3            direction       = 2;
-    KickCommandType kickCommandType = 3;
+    // Force is the magnitude
+    vec3            direction         = 2;
+    KickCommandType kick_command_type = 3;
 }
 
+/**
+ * @author Trent Houliston
+ * @author Brendan Annable
+ */
 message KickScriptCommand {
     /// Force is the magnitude
     vec3   direction = 1;

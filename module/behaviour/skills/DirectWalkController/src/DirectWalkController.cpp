@@ -73,23 +73,17 @@ namespace module::behaviour::skills {
             }}));
 
         on<Trigger<MotionCommand>>().then([this](const MotionCommand& command) {
-            if (command.type == MotionCommand::Type::DirectCommand) {
+            if (command.type == MotionCommand::Type::DIRECT_COMMAND) {
                 emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {26, 11}}));
-                emit(std::move(std::make_unique<WalkCommand>(subsumptionId, command.walkCommand)));
+                emit(std::move(std::make_unique<WalkCommand>(subsumptionId, command.walk_command)));
             }
-            else if (command.type == MotionCommand::Type::StandStill) {
+            else if (command.type == MotionCommand::Type::STAND_STILL) {
                 emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {26, 11}}));
                 emit(std::move(std::make_unique<StopCommand>(subsumptionId)));
             }
             else {
                 emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {0, 0}}));
             }
-        });
-
-        on<Trigger<WalkStopped>>().then([this] {
-            // TODO : Right now, this causes the walk engine to become unaware of positions and negatively
-            // impact servo positions... emit(std::make_unique<ActionPriorities>(ActionPriorities {
-            // subsumptionId, { 0, 0 }}));
         });
     }
 }  // namespace module::behaviour::skills

@@ -22,6 +22,9 @@ package message.motion;
 
 import "google/protobuf/timestamp.proto";
 
+/**
+ * @author Trent Houliston
+ */
 message ServoTarget {
     /// When the target was created
     google.protobuf.Timestamp time = 1;

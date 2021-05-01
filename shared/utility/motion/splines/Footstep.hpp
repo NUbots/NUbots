@@ -114,16 +114,6 @@ namespace utility::motion::splines {
          */
         Eigen::Vector3f left_in_world;
         Eigen::Vector3f right_in_world;
-
-        /**
-         * Add to given pose the given diff expressed in pose frame and return the integrated added pose
-         */
-        [[nodiscard]] static Eigen::Vector3f poseAdd(const Eigen::Vector3f& pose, const Eigen::Vector3f& diff);
-
-        /**
-         * Compute and return the delta from (zero + diff) to (zero) in (zero + diff) frame.
-         */
-        [[nodiscard]] static Eigen::Vector3f diffInv(const Eigen::Vector3f& diff);
     };
 
 }  // namespace utility::motion::splines

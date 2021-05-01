@@ -34,7 +34,7 @@ namespace utility::support::evil {
         StackFrame() {}
 
         StackFrame(uintptr_t pc, std::string file, int lineno, std::string function)
-            : pc(pc), file(std::move(std::move(file))), lineno(lineno), function(std::move(std::move(function))) {}
+            : pc(pc), file(std::move(std::move(file))), lineno(lineno), function(std::move(function)) {}
 
         uintptr_t pc{};
         std::string file;
