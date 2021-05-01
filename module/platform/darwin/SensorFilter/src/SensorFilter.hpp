@@ -111,8 +111,9 @@ namespace module::platform::darwin {
         // Our sensor for foot down
         VirtualLoadSensor<float> load_sensor;
 
-        // Foot to world in foot-flat rotation when the foot landed
         std::array<bool, 2> previous_foot_down = {false, false};
+
+        // Foot to world in foot-flat rotation when the foot landed
         std::array<Eigen::Affine3d, 2> footlanding_Hwf;
 
         // Storage for previous gyroscope values
