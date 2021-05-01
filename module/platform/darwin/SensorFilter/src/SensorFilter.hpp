@@ -111,9 +111,11 @@ namespace module::platform::darwin {
         // Our sensor for foot down
         VirtualLoadSensor<float> load_sensor;
 
+        // This keeps track of whether each sides foot was down in the previous time step
+        // e.g. if right foot down at time t, then at time t+1, previous_foot_down[RightSide] = true
         std::array<bool, 2> previous_foot_down = {false, false};
 
-        // Foot to world in foot-flat rotation when the foot landed
+        // Foot to world in foot-flat (both feet down) rotation at the timestep with the most recent foot landing
         std::array<Eigen::Affine3d, 2> footlanding_Hwf;
 
         // Storage for previous gyroscope values
