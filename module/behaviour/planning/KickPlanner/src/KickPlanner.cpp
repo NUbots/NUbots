@@ -100,8 +100,6 @@ namespace module::behaviour::planning {
 
                 // Compute target in robot coords
                 // Eigen::Vector3d kickTarget = Eigen::Vector3d::UnitX(); //Kick forwards
-                // TODO: The heading seems to judder here!!
-                // TODO: use sensors.Htw instead
                 Eigen::Affine2d position = Eigen::Affine2d(field.position);
                 Eigen::Affine3d Hfw;
                 Hfw.translation() = Eigen::Vector3d(position.translation().x(), position.translation().y(), 0);
@@ -111,13 +109,12 @@ namespace module::behaviour::planning {
 
                 Eigen::Affine3d Htw(sensors.Htw);
                 Eigen::Vector3d ballPosition =
-                    (Htw * Eigen::Vector4d(ball.position.x(), ball.position.y(), fd.ball_radius, 1.0)).head<3>();
+                    Htw * Eigen::Vector3d(ball.position.x(), ball.position.y(), fd.ball_radius);
 
                 // Transform target from field to torso space
-                Eigen::Affine3d Htf = Htw * Hfw.inverse();
-                Eigen::Vector3d kickTarget =
-                    (Htf * Eigen ::Vector4d(kickPlan.target.x(), kickPlan.target.y(), 0.0, 1.0)).head<3>();
-                float KickAngle = std::fabs(std::atan2(kickTarget.y(), kickTarget.x()));
+                Eigen::Affine3d Htf        = Htw * Hfw.inverse();
+                Eigen::Vector3d kickTarget = Htf * Eigen::Vector3d(kickPlan.target.x(), kickPlan.target.y(), 0.0);
+                float KickAngle            = std::fabs(std::atan2(kickTarget.y(), kickTarget.x()));
 
                 // log("KickPlan target global",kickPlan. target.transpose());
                 // log("Target of Kick", kickTarget.transpose());
@@ -140,7 +137,7 @@ namespace module::behaviour::planning {
                 if (secondsSinceLastSeen < cfg.seconds_not_seen_limit && kickIsValid
                     && KickAngle < cfg.kick_forward_angle_limit) {
 
-                    switch (kickPlan.kickType.value) {
+                    switch (kickPlan.kick_type.value) {
                         case KickType::IK_KICK:
                             // NUClear::log("ik_kick");
                             if (ballPosition.y() > 0.0) {

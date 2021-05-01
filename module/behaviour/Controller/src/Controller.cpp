@@ -115,7 +115,6 @@ namespace module::behaviour {
                     bool active = request->items[i].active;
 
                     // Short circuit if we can
-                    // TODO see if we can add more here
                     reselect |= (up != down) && ((active && down) || (!active && up));
 
                     // Update our priority

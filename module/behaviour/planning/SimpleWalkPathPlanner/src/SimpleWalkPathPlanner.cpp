@@ -164,7 +164,7 @@ namespace module::behaviour::planning {
                     return;
                 }
 
-                if (latestCommand.type == message::behaviour::MotionCommand::Type::StandStill) {
+                if (latestCommand.type == message::behaviour::MotionCommand::Type::STAND_STILL) {
 
 
                     emit(std::make_unique<StopCommand>(subsumptionId));
@@ -172,10 +172,10 @@ namespace module::behaviour::planning {
 
                     return;
                 }
-                else if (latestCommand.type == message::behaviour::MotionCommand::Type::DirectCommand) {
+                else if (latestCommand.type == message::behaviour::MotionCommand::Type::DIRECT_COMMAND) {
                     // TO DO, change to Bezier stuff
                     std::unique_ptr<WalkCommand> command =
-                        std::make_unique<WalkCommand>(subsumptionId, latestCommand.walkCommand);
+                        std::make_unique<WalkCommand>(subsumptionId, latestCommand.walk_command);
                     emit(std::move(command));
                     emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
                     return;
@@ -190,10 +190,9 @@ namespace module::behaviour::planning {
 
 
                 Eigen::Vector3d rBWw_temp(ball.position.x(), ball.position.y(), fieldDescription.ball_radius);
-                rBWw                = timeSinceBallSeen < search_timeout ? rBWw_temp :  // Place last seen
+                rBWw     = timeSinceBallSeen < search_timeout ? rBWw_temp :                         // Place last seen
                            Htw.inverse().linear().leftCols<1>() + Htw.inverse().translation();  // In front of the robot
-                Eigen::Vector3d pos = (Htw * Eigen::Vector4d(rBWw.x(), rBWw.y(), rBWw.z(), 1.0)).head<3>();
-                position            = pos.head<2>();
+                position = (Htw * rBWw).head<2>();
 
                 // Hack Planner:
                 float headingChange = 0;
@@ -210,9 +209,8 @@ namespace module::behaviour::planning {
                                                      Eigen::Vector3d::UnitZ())
                                        .toRotationMatrix();
 
-                    Eigen::Affine3d Htf = Htw * Hfw.inverse();
-                    Eigen::Vector3d kickTarget =
-                        (Htf * Eigen::Vector4d(kickPlan.target.x(), kickPlan.target.y(), 0.0, 1.0)).head<3>();
+                    Eigen::Affine3d Htf        = Htw * Hfw.inverse();
+                    Eigen::Vector3d kickTarget = Htf * Eigen::Vector3d(kickPlan.target.x(), kickPlan.target.y(), 0);
 
                     // //approach point:
                     Eigen::Vector2d ballToTarget = (kickTarget.head<2>() - position).normalized();

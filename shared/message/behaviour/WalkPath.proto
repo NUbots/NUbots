@@ -27,7 +27,7 @@ message WalkPath {
     /// Sequence of robot states that form a path
     repeated fvec3 states = 1;
     /// The ball position and target bearing at the time of planning
-    fvec3 ballSpace = 2;
+    fvec3 ball_space = 2;
     /// The start state used for planning
     fvec3 start = 3;
     /// The goal state used for planning

@@ -31,7 +31,7 @@ message KickPlan {
     /// Where the robot wants to kick to
     vec2 target = 1;
 
-    KickType kickType = 2;
+    KickType kick_type = 2;
 }
 
 message WantsToKick {
