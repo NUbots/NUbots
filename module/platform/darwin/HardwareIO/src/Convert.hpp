@@ -35,6 +35,10 @@ namespace module::platform::darwin {
 
         /// The Gyrosocope value from the Darwin is between 0 and 1023, representing a value between -500 and
         /// 500 degrees per second. This means 512 = 0
+        /// 1888.0 is an empirically measured value for this factor, which was calculated by spinning the robot on an
+        /// office chair and comparing how far the robot thought it spun to how much it actually spun.
+        /// Empirical estimates like this which don't match the data sheet are SUSPECT, and should be rechecked
+        /// periodically
         static constexpr double GYROSCOPE_CONVERSION_FACTOR = (1880.0 * (M_PI / 180.0)) / 512.0;
 
         /// The value that comes from the darwin is measured in decivolts (0.1 of a volt)
