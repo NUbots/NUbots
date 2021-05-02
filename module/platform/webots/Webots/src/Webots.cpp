@@ -322,7 +322,7 @@ namespace module::platform::webots {
             }
         });
 
-        error_io = on<IO>(fd, IO::CLOSE | IO::ERROR).then([this, server_address, port](const IO::Event& event) {
+        error_io = on<IO>(fd, IO::CLOSE | IO::ERROR).then([this, server_address, port](const IO::Event& /*event*/) {
             // Something went wrong, reopen the connection
             setup_connection(server_address, port);
         });
