@@ -108,7 +108,7 @@ namespace module::platform::webots {
         throw std::runtime_error("Unable to translate unknown NUgus.proto sensor name: " + name);
     }
 
-    ActuatorRequests make_acutator_request(const& ServoTargets& commands, const DarwinSensors& sensors) {
+    ActuatorRequests make_acutator_request(const ServoTargets& commands, const DarwinSensors& sensors) {
         message::platform::webots::ActuatorRequests to_send_next;
 
         // Convert the servo targets to the ActuatorRequests
