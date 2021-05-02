@@ -30,8 +30,8 @@ namespace module::platform::webots {
 
     class Webots : public NUClear::Reactor {
     private:
-        /// @brief A single message that stores all the data that webots needs from us.
-        message::platform::webots::ActuatorRequests to_send;
+        /// @brief A single message that stores all the data that webots needs from us
+        message::platform::webots::ActuatorRequests to_send_now;
 
         /// @brief Store a handle to the io reaction so we can unbind it
         ReactionHandle read_io;

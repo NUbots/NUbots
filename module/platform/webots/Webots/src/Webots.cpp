@@ -178,18 +178,14 @@ namespace module::platform::webots {
         // Create the message that we are going to send.
         on<Trigger<ServoTargets>, With<DarwinSensors>>().then([this](const ServoTargets& commands,
                                                                      const DarwinSensors& sensors) {
-            // TODO(CMurtagh): Maybe keep the `ServoTarget`s we have not sent yet, instead of just overwriting
-            // them.
-            to_send.motor_positions.clear();
-            to_send.motor_velocities.clear();
-            to_send.motor_torques.clear();
+            message::platform::webots::ActuatorRequests to_send_next;
 
             // Store each ServoTarget to send in the next lot
             for (const auto& target : commands.targets) {
                 MotorPosition position_msg;
                 position_msg.name     = target.id;
                 position_msg.position = target.position;
-                to_send.motor_positions.push_back(position_msg);
+                to_send_next.motor_positions.push_back(position_msg);
 
                 MotorVelocity velocity_msg;
                 // We need to calculate the servo velocity to add to the velocity message
@@ -210,12 +206,12 @@ namespace module::platform::webots {
                 }
                 velocity_msg.name     = target.id;
                 velocity_msg.velocity = velocity;
-                to_send.motor_velocities.push_back(velocity_msg);
+                to_send_next.motor_velocities.push_back(velocity_msg);
 
                 MotorTorque torque_msg;
                 torque_msg.name   = target.id;
                 torque_msg.torque = target.torque;
-                to_send.motor_torques.push_back(torque_msg);
+                to_send_next.motor_torques.push_back(torque_msg);
 
                 // MotorPID, only sending P gain. Set I and D to zero
                 MotorPID motorpid_msg;
@@ -223,8 +219,14 @@ namespace module::platform::webots {
                 motorpid_msg.PID.X = static_cast<double>(target.gain);
                 motorpid_msg.PID.Y = 0.0;
                 motorpid_msg.PID.Z = 0.0;
-                to_send.motor_pids.push_back(motorpid_msg);
+                to_send_next.motor_pids.push_back(motorpid_msg);
             }
+
+            // TODO(KipHamiltons) does this _still_ cause a race condition - as in, if it goes to send a message while
+            // this assignment is happening, what happens?
+            // Avoid a race condition by reassigning the whole message at once, so it won't be sent while the
+            // next message to send is being generated
+            to_send_now = std::move(to_send_next);
         });
     }
 
@@ -324,11 +326,9 @@ namespace module::platform::webots {
         });
 
         // TODO(KipHamiltons) why every 10 ms? That seems a little random?
-        // TODO(KipHamiltons) I think this is also a race condition, because there isn't a mutex on `to_send`,
-        // so it might try to send it after it's been cleared, but before it's been properly reassembled
         send_loop = on<Every<10, std::chrono::milliseconds>>().then([this]() {
             // Sending
-            std::vector<char> data = NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(to_send);
+            std::vector<char> data = NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(to_send_now);
             // Size of the message, in network endian
             const uint32_t Nn = htonl(data.size());
             // Send the message size first
