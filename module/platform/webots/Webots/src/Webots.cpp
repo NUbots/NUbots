@@ -108,6 +108,52 @@ namespace module::platform::webots {
         throw std::runtime_error("Unable to translate unknown NUgus.proto sensor name: " + name);
     }
 
+    ActuatorRequests make_acutator_request(const& ServoTargets& commands, const DarwinSensors& sensors) {
+        message::platform::webots::ActuatorRequests to_send_next;
+
+        // Convert the servo targets to the ActuatorRequests
+        for (const auto& target : commands.targets) {
+            MotorPosition position_msg;
+            position_msg.name     = target.id;
+            position_msg.position = target.position;
+            to_send_next.motor_positions.push_back(position_msg);
+
+            MotorVelocity velocity_msg;
+            // We need to calculate the servo velocity to add to the velocity message
+            // (method stolen from HardwareIO.cpp)
+            // velocity = distance / time
+            const float distance =
+                utility::math::angle::difference(target.position, getDarwinServo(target.id, sensors).present_position);
+
+            NUClear::clock::duration time = target.time - NUClear::clock::now();
+            float velocity;
+            if (time.count() > 0) {
+                velocity = distance / static_cast<float>(time.count()) * static_cast<float>(NUClear::clock::period::num)
+                           / static_cast<float>(NUClear::clock::period::den);
+            }
+            else {
+                velocity = 0;
+            }
+            velocity_msg.name     = target.id;
+            velocity_msg.velocity = velocity;
+            to_send_next.motor_velocities.push_back(velocity_msg);
+
+            MotorTorque torque_msg;
+            torque_msg.name   = target.id;
+            torque_msg.torque = target.torque;
+            to_send_next.motor_torques.push_back(torque_msg);
+
+            // MotorPID, only sending P gain. Set I and D to zero
+            MotorPID motorpid_msg;
+            motorpid_msg.name  = target.id;
+            motorpid_msg.PID.X = static_cast<double>(target.gain);
+            motorpid_msg.PID.Y = 0.0;
+            motorpid_msg.PID.Z = 0.0;
+            to_send_next.motor_pids.push_back(motorpid_msg);
+        }
+        return to_send_next;
+    }
+
     int Webots::tcpip_connect(const std::string& server_name, const std::string& port) {
         // Hints for the connection type
         addrinfo hints;
@@ -174,60 +220,6 @@ namespace module::platform::webots {
                 setup_connection(local_config["server_address"].as<std::string>(),
                                  local_config["port"].as<std::string>());
             });
-
-        // Create the message that we are going to send.
-        on<Trigger<ServoTargets>, With<DarwinSensors>>().then([this](const ServoTargets& commands,
-                                                                     const DarwinSensors& sensors) {
-            message::platform::webots::ActuatorRequests to_send_next;
-
-            // Store each ServoTarget to send in the next lot
-            for (const auto& target : commands.targets) {
-                MotorPosition position_msg;
-                position_msg.name     = target.id;
-                position_msg.position = target.position;
-                to_send_next.motor_positions.push_back(position_msg);
-
-                MotorVelocity velocity_msg;
-                // We need to calculate the servo velocity to add to the velocity message
-                // (method stolen from HardwareIO.cpp)
-                // velocity = distance / time
-                const float distance =
-                    utility::math::angle::difference(target.position,
-                                                     getDarwinServo(target.id, sensors).present_position);
-
-                NUClear::clock::duration time = target.time - NUClear::clock::now();
-                float velocity;
-                if (time.count() > 0) {
-                    velocity =
-                        distance / static_cast<float>(time.count()) / static_cast<float>(NUClear::clock::period::den);
-                }
-                else {
-                    velocity = 0;
-                }
-                velocity_msg.name     = target.id;
-                velocity_msg.velocity = velocity;
-                to_send_next.motor_velocities.push_back(velocity_msg);
-
-                MotorTorque torque_msg;
-                torque_msg.name   = target.id;
-                torque_msg.torque = target.torque;
-                to_send_next.motor_torques.push_back(torque_msg);
-
-                // MotorPID, only sending P gain. Set I and D to zero
-                MotorPID motorpid_msg;
-                motorpid_msg.name  = target.id;
-                motorpid_msg.PID.X = static_cast<double>(target.gain);
-                motorpid_msg.PID.Y = 0.0;
-                motorpid_msg.PID.Z = 0.0;
-                to_send_next.motor_pids.push_back(motorpid_msg);
-            }
-
-            // TODO(KipHamiltons) does this _still_ cause a race condition - as in, if it goes to send a message while
-            // this assignment is happening, what happens?
-            // Avoid a race condition by reassigning the whole message at once, so it won't be sent while the
-            // next message to send is being generated
-            to_send_now = std::move(to_send_next);
-        });
     }
 
     void Webots::setup_connection(const std::string& server_address, const std::string& port) {
@@ -280,67 +272,72 @@ namespace module::platform::webots {
         // Now that we are connected, we can set up our reaction handles with this file descriptor
 
         // Receiving
-        read_io = on<IO>(fd, IO::READ).then([this]() {
-            // Get the size of the message
-            uint32_t Nn;
-            if (recv(fd, &Nn, sizeof(Nn), 0 != sizeof(Nn))) {
-                log<NUClear::ERROR>("Failed to read message size from TCP connection");
-                return;
-            }
+        read_io =
+            on<IO, With<ServoTargets>, With<DarwinSensors>>(fd, IO::READ)
+                .then([this](const ServoTargets& commands, const DarwinSensors& sensors) {
+                    // ************************** Receiving ***************************************
+                    // Get the size of the message
+                    uint32_t Nn;
+                    if (recv(fd, &Nn, sizeof(Nn), 0 != sizeof(Nn))) {
+                        log<NUClear::ERROR>("Failed to read message size from TCP connection");
+                        return;
+                    }
 
-            // Convert from network endian to host endian
-            const uint32_t Nh = ntohl(Nn);
+                    // Convert from network endian to host endian
+                    const uint32_t Nh = ntohl(Nn);
 
-            // Get the message
-            std::vector<char> data(Nh, 0);
-            if (uint64_t(recv(fd, data.data(), Nh, 0)) != Nh) {
-                log<NUClear::ERROR>("Failed to read message from TCP connection");
-                return;
-            }
+                    // Get the message
+                    std::vector<char> data(Nh, 0);
+                    if (uint64_t(recv(fd, data.data(), Nh, 0)) != Nh) {
+                        log<NUClear::ERROR>("Failed to read message from TCP connection");
+                        return;
+                    }
 
-            // Deserialise the message into a neutron
-            SensorMeasurements msg = NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(data);
+                    // Deserialise the message into a neutron
+                    SensorMeasurements msg = NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(data);
 
-            translate_and_emit_sensor(msg);
+                    translate_and_emit_sensor(msg);
 
-            // Service the watchdog
-            emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
+                    // Service the watchdog
+                    emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
 
-            // Deal with time
+                    // ****************************** SENDING **************************************
 
-            // Save our previous deltas
-            const uint32_t prev_sim_delta  = this->sim_delta;
-            const uint32_t prev_real_delta = this->real_delta;
+                    // Deal with time
 
-            // Update our current deltas
-            this->sim_delta  = msg.time - this->current_sim_time;
-            this->real_delta = msg.real_time - this->current_real_time;
+                    // Save our previous deltas
+                    const uint32_t prev_sim_delta  = sim_delta;
+                    const uint32_t prev_real_delta = real_delta;
 
-            // Calculate our custom rtf - the ratio of the past two sim deltas and the past two real time deltas
-            utility::clock::custom_rtf = static_cast<double>(this->sim_delta + prev_sim_delta)
-                                         / static_cast<double>(this->real_delta + prev_real_delta);
+                    // Update our current deltas
+                    sim_delta  = msg.time - current_sim_time;
+                    real_delta = msg.real_time - current_real_time;
 
-            // Update our current times
-            this->current_sim_time  = msg.time;
-            this->current_real_time = msg.real_time;
-        });
+                    // Calculate our custom rtf - the ratio of the past two sim deltas and the past two real time deltas
+                    utility::clock::custom_rtf = static_cast<double>(sim_delta + prev_sim_delta)
+                                                 / static_cast<double>(real_delta + prev_real_delta);
 
-        // TODO(KipHamiltons) why every 10 ms? That seems a little random?
-        send_loop = on<Every<10, std::chrono::milliseconds>>().then([this]() {
-            // Sending
-            std::vector<char> data = NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(to_send_now);
-            // Size of the message, in network endian
-            const uint32_t Nn = htonl(data.size());
-            // Send the message size first
-            if (send(fd, &Nn, sizeof(Nn), 0) == sizeof(Nn)) {
-                log<NUClear::ERROR>(
-                    fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
-            }
-            // then send the data
-            if (send(fd, data.data(), Nn, 0) == Nn) {
-                log<NUClear::ERROR>(fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
-            }
-        });
+                    // Update our current times
+                    current_sim_time  = msg.time;
+                    current_real_time = msg.real_time;
+
+                    to_send_now = make_acutator_request(commands, sensors);
+
+                    // Sending
+                    std::vector<char> data =
+                        NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(to_send_now);
+                    // Size of the message, in network endian
+                    const uint32_t Nn = htonl(data.size());
+                    // Send the message size first
+                    if (send(fd, &Nn, sizeof(Nn), 0) == sizeof(Nn)) {
+                        log<NUClear::ERROR>(
+                            fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
+                    }
+                    // then send the data
+                    if (send(fd, data.data(), Nn, 0) == Nn) {
+                        log<NUClear::ERROR>(fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
+                    }
+                });
 
         error_io = on<IO>(fd, IO::CLOSE | IO::ERROR).then([this, server_address, port](const IO::Event& /*event*/) {
             // Something went wrong, reopen the connection
@@ -349,9 +346,11 @@ namespace module::platform::webots {
 
         shutdown_handle = on<Shutdown>().then([this] {
             // Disconnect the fd gracefully
-            shutdown(this->fd, SHUT_RDWR);
-            close(this->fd);
-            this->fd = -1;
+            if (fd != -1) {
+                shutdown(fd, SHUT_RDWR);
+                close(fd);
+                fd = -1;
+            }
         });
     }
 
