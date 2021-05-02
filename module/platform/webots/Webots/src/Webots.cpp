@@ -75,34 +75,34 @@ namespace module::platform::webots {
 
         // clang-format off
         // Left ankle
-        if (name == "left_ankle_roll_sensor") { return servos.lAnkleRoll; }
-        if (name == "left_ankle_pitch_sensor") { return servos.lAnklePitch; }
+        if (name == "left_ankle_roll_sensor") { return servos.l_ankle_roll; }
+        if (name == "left_ankle_pitch_sensor") { return servos.l_ankle_pitch; }
         // Right ankle
-        if (name == "right_ankle_roll_sensor") { return servos.rAnkleRoll; }
-        if (name == "right_ankle_pitch_sensor") { return servos.rAnklePitch; }
+        if (name == "right_ankle_roll_sensor") { return servos.r_ankle_roll; }
+        if (name == "right_ankle_pitch_sensor") { return servos.r_ankle_pitch; }
         // Knees
-        if (name == "right_knee_pitch_sensor") { return servos.rKnee; }
-        if (name == "left_knee_pitch_sensor") { return servos.lKnee; }
+        if (name == "right_knee_pitch_sensor") { return servos.r_knee; }
+        if (name == "left_knee_pitch_sensor") { return servos.l_knee; }
         // Left hip
-        if (name == "left_hip_roll_sensor") { return servos.lHipRoll; }
-        if (name == "left_hip_pitch_sensor") { return servos.lHipPitch; }
-        if (name == "left_hip_yaw_sensor") { return servos.lHipYaw; }
+        if (name == "left_hip_roll_sensor") { return servos.l_hip_roll; }
+        if (name == "left_hip_pitch_sensor") { return servos.l_hip_pitch; }
+        if (name == "left_hip_yaw_sensor") { return servos.l_hip_yaw; }
         // Right hip
-        if (name == "right_hip_roll_sensor") { return servos.rHipRoll; }
-        if (name == "right_hip_pitch_sensor") { return servos.rHipPitch; }
-        if (name == "right_hip_yaw_sensor") { return servos.rHipYaw; }
+        if (name == "right_hip_roll_sensor") { return servos.r_hip_roll; }
+        if (name == "right_hip_pitch_sensor") { return servos.r_hip_pitch; }
+        if (name == "right_hip_yaw_sensor") { return servos.r_hip_yaw; }
         // Elbows
-        if (name == "left_elbow_pitch_sensor") { return servos.lElbow; }
-        if (name == "right_elbow_pitch_sensor") { return servos.rElbow; }
+        if (name == "left_elbow_pitch_sensor") { return servos.l_elbow; }
+        if (name == "right_elbow_pitch_sensor") { return servos.r_elbow; }
         // Left shoulder
-        if (name == "left_shoulder_roll_sensor") { return servos.lShoulderRoll; }
-        if (name == "left_shoulder_pitch_sensor") { return servos.lShoulderPitch; }
+        if (name == "left_shoulder_roll_sensor") { return servos.l_shoulder_roll; }
+        if (name == "left_shoulder_pitch_sensor") { return servos.l_shoulder_pitch; }
         // Right shoulder
-        if (name == "right_shoulder_roll_sensor") { return servos.rShoulderRoll; }
-        if (name == "right_shoulder_pitch_sensor") { return servos.rShoulderPitch; }
+        if (name == "right_shoulder_roll_sensor") { return servos.r_shoulder_roll; }
+        if (name == "right_shoulder_pitch_sensor") { return servos.r_shoulder_pitch; }
         // Neck and head
-        if (name == "neck_yaw_sensor") { return servos.headPan; }
-        if (name == "head_pitch_sensor") { return servos.headTilt; }
+        if (name == "neck_yaw_sensor") { return servos.head_pan; }
+        if (name == "head_pitch_sensor") { return servos.head_tilt; }
         // clang-format on
 
         throw std::runtime_error("Unable to translate unknown NUgus.proto sensor name: " + name);
@@ -165,9 +165,10 @@ namespace module::platform::webots {
                 else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
                 // clang-format on
 
-                on<Watchdog<Webots, 5, std::chrono::seconds>>().then([this] {
+                on<Watchdog<Webots, 5, std::chrono::seconds>>().then([this, local_config] {
                     // We haven't received any messages lately
-                    setup_connection(local_config["server_address"].as<std::string>(), local_config["port"].as<std::string>());
+                    setup_connection(local_config["server_address"].as<std::string>(),
+                                     local_config["port"].as<std::string>());
                 });
 
                 setup_connection(local_config["server_address"].as<std::string>(),
@@ -196,7 +197,7 @@ namespace module::platform::webots {
                     // velocity = distance / time
                     const float distance =
                         utility::math::angle::difference(target.position,
-                                                         getDarwinServo(target.id, sensors).presentPosition);
+                                                         getDarwinServo(target.id, sensors).present_position);
                     Clock::duration time = target.time - Clock::now();
                     float velocity;
                     if (time.count() > 0) {
@@ -232,7 +233,7 @@ namespace module::platform::webots {
         error_io.unbind();
         shutdown_handle.unbind();
 
-        if(fd != -1){
+        if (fd != -1) {
             // Disconnect the fd gracefully
             shutdown(fd, SHUT_RDWR);
             close(fd);
@@ -321,16 +322,17 @@ namespace module::platform::webots {
             }
         });
 
-        error_io = on<IO>(fd, IO::CLOSE | IO::ERROR).then([this](const IO::Event& event) {
+        error_io = on<IO>(fd, IO::CLOSE | IO::ERROR).then([this, server_address, port](const IO::Event& event) {
             // Something went wrong, reopen the connection
             setup_connection(server_address, port);
         });
 
         shutdown_handle = on<Shutdown>().then([this] {
             // Disconnect the fd gracefully
-            shutdown(fd, SHUT_RDWR);
-            close(fd);
-            fd = -1;
+            // We need to access fd like this, because the class variable can't be captured by the lambda
+            shutdown(this->fd, SHUT_RDWR);
+            close(this->fd);
+            this->fd = -1;
         });
     }
 
@@ -343,7 +345,7 @@ namespace module::platform::webots {
         // connect_time + std::chrono::milliseconds(sensor_measurements.time);
 
         for (const auto& position : sensor_measurements.position_sensors) {
-            translate_servo_id(position.name, sensor_data->servo).presentPosition = position.value;
+            translate_servo_id(position.name, sensor_data->servo).present_position = position.value;
         }
 
         // TODO(KipHamiltons or ANYONE who can test!!) We need to work out what to do with these. At the moment, these
