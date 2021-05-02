@@ -132,10 +132,10 @@ namespace module::behaviour::strategy {
         // TODO: potential performance gain: ignore if value hasn't changed since last emit?
         on<Every<20, Per<std::chrono::seconds>>>().then([this] {
             if (!headLocked) {
-                auto headCommand        = std::make_unique<HeadCommand>();
-                headCommand->yaw        = headYaw / std::numeric_limits<short>::max() * 1.5f;
-                headCommand->pitch      = headPitch / std::numeric_limits<short>::max();
-                headCommand->robotSpace = true;
+                auto headCommand         = std::make_unique<HeadCommand>();
+                headCommand->yaw         = headYaw / std::numeric_limits<short>::max() * 1.5f;
+                headCommand->pitch       = headPitch / std::numeric_limits<short>::max();
+                headCommand->robot_space = true;
                 emit(std::move(headCommand));
             }
 

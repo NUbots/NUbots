@@ -29,9 +29,9 @@ namespace module::support::configuration {
     GlobalConfig::GlobalConfig(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("GlobalConfig.yaml").then([this](const Configuration& config) {
-            auto msg      = std::make_unique<message::support::GlobalConfig>();
-            msg->playerId = config["playerId"].as<uint32_t>();
-            msg->teamId   = config["teamId"].as<uint32_t>();
+            auto msg       = std::make_unique<message::support::GlobalConfig>();
+            msg->player_id = config["player_id"].as<uint32_t>();
+            msg->team_id   = config["team_id"].as<uint32_t>();
             emit(msg);
         });
     }
