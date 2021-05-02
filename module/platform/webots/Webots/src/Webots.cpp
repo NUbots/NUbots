@@ -321,13 +321,12 @@ namespace module::platform::webots {
                     current_sim_time  = msg.time;
                     current_real_time = msg.real_time;
 
-                    to_send_now = make_acutator_request(commands, sensors);
+                    ActuatorRequests to_send_now = make_acutator_request(commands, sensors);
 
                     // Sending
-                    std::vector<char> data =
-                        NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(to_send_now);
+                    data = NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(to_send_now);
                     // Size of the message, in network endian
-                    const uint32_t Nn = htonl(data.size());
+                    Nn = htonl(data.size());
                     // Send the message size first
                     if (send(fd, &Nn, sizeof(Nn), 0) == sizeof(Nn)) {
                         log<NUClear::ERROR>(
