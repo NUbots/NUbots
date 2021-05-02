@@ -271,7 +271,7 @@ namespace module::platform::webots {
         // Set the real time of the connection initiation
         connect_time = NUClear::clock::now();
         // Reset the simulation connection time
-        Clock::current_tick = Clock::duration::zero();
+        utility::clock::last_update = std::chrono::steady_clock::now();
 
         log<NUClear::INFO>(fmt::format("Connected to {}:{}", server_address, port));
 
@@ -323,6 +323,9 @@ namespace module::platform::webots {
             this->current_real_time = msg.real_time;
         });
 
+        // TODO(KipHamiltons) why every 10 ms? That seems a little random?
+        // TODO(KipHamiltons) I think this is also a race condition, because there isn't a mutex on `to_send`,
+        // so it might try to send it after it's been cleared, but before it's been properly reassembled
         send_loop = on<Every<10, std::chrono::milliseconds>>().then([this]() {
             // Sending
             std::vector<char> data = NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(to_send);
@@ -346,7 +349,6 @@ namespace module::platform::webots {
 
         shutdown_handle = on<Shutdown>().then([this] {
             // Disconnect the fd gracefully
-            // We need to access fd like this, because the class variable can't be captured by the lambda
             shutdown(this->fd, SHUT_RDWR);
             close(this->fd);
             this->fd = -1;
@@ -357,9 +359,7 @@ namespace module::platform::webots {
         // Read each field of msg, translate it to our protobuf and emit the data
         auto sensor_data = std::make_unique<DarwinSensors>();
 
-        // TODO(cameron) Work out if it makes sense to combine simulation time with real time.
         sensor_data->timestamp = NUClear::clock::now();
-        // connect_time + std::chrono::milliseconds(sensor_measurements.time);
 
         for (const auto& position : sensor_measurements.position_sensors) {
             translate_servo_id(position.name, sensor_data->servo).present_position = position.value;
