@@ -300,7 +300,7 @@ namespace module::platform::webots {
                     // Service the watchdog
                     emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
 
-                    // ****************************** SENDING **************************************
+                    // ****************************** TIME **************************************
 
                     // Deal with time
 
@@ -322,7 +322,7 @@ namespace module::platform::webots {
 
                     ActuatorRequests to_send_now = make_acutator_request(commands, sensors);
 
-                    // Sending
+                    // ***************** Sending ********************************
                     data = NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(to_send_now);
                     // Size of the message, in network endian
                     Nn = htonl(data.size());
