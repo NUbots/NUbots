@@ -225,7 +225,6 @@ namespace module::platform::webots {
     void Webots::setup_connection(const std::string& server_address, const std::string& port) {
         // Unbind any previous reaction handles
         read_io.unbind();
-        send_loop.unbind();
         error_io.unbind();
         shutdown_handle.unbind();
 
