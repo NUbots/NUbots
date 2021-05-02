@@ -85,7 +85,7 @@ message Message {
 
 message SensorMeasurements {
     // simulation time stamp at which the measurements were performed expressed in [ms] from the start of the connection
-    uint32                             time             = 1;
+    uint32 time = 1;
     // real unix time stamp at which the measurements were performed in [ms]
     uint64                             real_time        = 2;
     repeated Message                   messages         = 3;
