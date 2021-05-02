@@ -302,8 +302,23 @@ namespace module::platform::webots {
             // Service the watchdog
             emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
 
-            // Tick the clock forward
-            Clock::tick();
+            // Deal with time
+
+            // Save our previous deltas
+            const uint32_t prev_sim_delta  = this->sim_delta;
+            const uint32_t prev_real_delta = this->real_delta;
+
+            // Update our current deltas
+            this->sim_delta  = msg.time - this->current_sim_time;
+            this->real_delta = msg.real_time - this->current_real_time;
+
+            // Calculate our custom rtf - the ratio of the past two sim deltas and the past two real time deltas
+            utility::clock::custom_rtf = static_cast<double>(this->sim_delta + prev_sim_delta)
+                                         / static_cast<double>(this->real_delta + prev_real_delta);
+
+            // Update our current times
+            this->current_sim_time  = msg.time;
+            this->current_real_time = msg.real_time;
         });
 
         send_loop = on<Every<10, std::chrono::milliseconds>>().then([this]() {
