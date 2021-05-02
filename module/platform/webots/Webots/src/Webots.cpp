@@ -152,7 +152,7 @@ namespace module::platform::webots {
 
     Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
         on<Trigger<GlobalConfig>, Configuration>("webots.yaml")
-            .then([this](const GlobalConfig& global_config, const Configuration& local_config) {
+            .then([this](const GlobalConfig& /*global_config*/, const Configuration& local_config) {
                 // Use configuration here from file webots.yaml
 
                 // clang-format off
