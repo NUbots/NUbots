@@ -63,6 +63,8 @@ namespace module::platform::webots {
         uint32_t current_sim_time  = 0;
         uint64_t current_real_time = 0;
 
+        int time_step;
+
     public:
         /// @brief Called by the powerplant to build and setup the webots reactor
         explicit Webots(std::unique_ptr<NUClear::Environment> environment);

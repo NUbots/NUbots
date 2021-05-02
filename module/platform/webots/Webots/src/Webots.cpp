@@ -63,6 +63,7 @@ namespace module::platform::webots {
     using message::platform::webots::MotorTorque;
     using message::platform::webots::MotorVelocity;
     using message::platform::webots::SensorMeasurements;
+    using message::platform::webots::SensorTimeStep;
 
     using message::support::GlobalConfig;
 
@@ -110,6 +111,37 @@ namespace module::platform::webots {
 
     ActuatorRequests make_acutator_request(const ServoTargets& commands, const DarwinSensors& sensors) {
         message::platform::webots::ActuatorRequests to_send_next;
+
+        std::vector<std::string> sensors_list = {"left_ankle_roll_sensor",
+                                                 "left_ankle_pitch_sensor",
+                                                 "right_ankle_roll_sensor",
+                                                 "right_ankle_pitch_sensor",
+                                                 "right_knee_pitch_sensor",
+                                                 "left_knee_pitch_sensor",
+                                                 "left_hip_roll_sensor",
+                                                 "left_hip_pitch_sensor",
+                                                 "left_hip_yaw_sensor",
+                                                 "right_hip_roll_sensor",
+                                                 "right_hip_pitch_sensor ",
+                                                 "right_hip_yaw_sensor ",
+                                                 "left_elbow_pitch_sensor ",
+                                                 "right_elbow_pitch_sensor",
+                                                 "left_shoulder_roll_sensor",
+                                                 "left_shoulder_pitch_sensor",
+                                                 "right_shoulder_roll_sensor",
+                                                 "right_shoulder_pitch_sensor",
+                                                 "neck_yaw_sensor",
+                                                 "head_pitch_sensor accelerometer",
+                                                 "gyroscope",
+                                                 "right_camera",
+                                                 "left_camera"};
+
+        for (auto& sensor : sensors_list) {
+            SensorTimeStep time_step_msg;
+            time_step_msg.name     = sensor;
+            time_step_msg.timeStep = 32;
+            to_send_next.sensor_time_steps.push_back(time_step_msg);
+        }
 
         // Convert the servo targets to the ActuatorRequests
         for (const auto& target : commands.targets) {
@@ -200,6 +232,7 @@ namespace module::platform::webots {
         on<Trigger<GlobalConfig>, Configuration>("webots.yaml")
             .then([this](const GlobalConfig& /*global_config*/, const Configuration& local_config) {
                 // Use configuration here from file webots.yaml
+                time_step = local_config["time_step"].as<int>();
 
                 // clang-format off
                 auto lvl = local_config["log_level"].as<std::string>();
@@ -291,6 +324,8 @@ namespace module::platform::webots {
                         log<NUClear::ERROR>("Failed to read message from TCP connection");
                         return;
                     }
+
+                    std::cout << "Received sensor measurements" << std::endl;
 
                     // Deserialise the message into a neutron
                     SensorMeasurements msg = NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(data);
