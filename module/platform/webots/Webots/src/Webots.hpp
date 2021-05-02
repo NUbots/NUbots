@@ -30,13 +30,8 @@ namespace module::platform::webots {
 
     class Webots : public NUClear::Reactor {
     private:
-        /// @brief A single message that stores all the data that webots needs from us.
-        message::platform::webots::ActuatorRequests to_send;
-
         /// @brief Store a handle to the io reaction so we can unbind it
         ReactionHandle read_io;
-        /// @brief Store a handle to the every reaction so we can unbind it
-        ReactionHandle send_loop;
         /// @brief Store a handle to the io error reaction so we can unbind it
         ReactionHandle error_io;
         /// @brief Store a handle to the shutdown reaction so we can unbind it
@@ -57,10 +52,16 @@ namespace module::platform::webots {
         /// @param sensor_measurements Message from Webots with information from the sensors
         void translate_and_emit_sensor(const message::platform::webots::SensorMeasurements& sensor_measurements);
 
+        /// @brief The current file descriptor used for the connection. It should be kept -1 if no active connection
         int fd;
 
         /// @brief The time the connection was opened.
         NUClear::clock::time_point connect_time;
+
+        uint32_t sim_delta         = 0;
+        uint64_t real_delta        = 0;
+        uint32_t current_sim_time  = 0;
+        uint64_t current_real_time = 0;
 
     public:
         /// @brief Called by the powerplant to build and setup the webots reactor
