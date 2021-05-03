@@ -479,7 +479,7 @@ namespace module::platform::darwin {
                     Eigen::Affine3d Htf(
                         sensors->Htx[side == BodySide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL]);
 
-                    // If this sides foot is down, and it was down at the previous time step, then we calculate our
+                    // If this sides foot is down, and it was not down at the previous time step, then we calculate our
                     // new footlanding_Hwf value, because our foot has just landed
                     if (foot_down && !prev_foot_down) {
                         const auto filterState = MotionModel<double>::StateVec(motionFilter.get());
@@ -492,15 +492,15 @@ namespace module::platform::darwin {
                         footlanding_Hwf[side]                   = Hwt * Htg;
                         footlanding_Hwf[side].translation().z() = 0.0;
 
-                        // This foot was down at this time step, so next time step's previous time step should
-                        // have the foot down
+                        // Store the current foot down state for next time
                         previous_foot_down[side] = true;
                     }
                     // Else is down, and didn't hit the ground this time step
                     else if (foot_down && prev_foot_down) {
                         // Use stored Hwf and Htf to calculate Hwt
                         Eigen::Affine3d Hft = Htf.inverse();
-                        // I think that this (footlanding_Hwf) could have weird stuff stored / be uninitialised
+                        // Guaranteed to be initialised, because the prev_foot_down is initialised as false, so the
+                        // previous if() condition will be done before this one
                         Eigen::Affine3d footlanding_Hwt = footlanding_Hwf[side] * Hft;
 
                         // do a foot based position update
