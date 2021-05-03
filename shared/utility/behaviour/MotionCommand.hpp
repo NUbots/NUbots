@@ -40,8 +40,8 @@ namespace utility::behaviour {
 
     inline MotionCommand WalkToState(const Transform2D& goalState_) {
         MotionCommand cmd;
-        cmd.type      = MotionCommand::Type::Value::WalkToState;
-        cmd.goalState = convert(goalState_);
+        cmd.type       = MotionCommand::Type::Value::WALK_TO_STATE;
+        cmd.goal_state = convert(goalState_);
         return cmd;
     }
 
@@ -63,8 +63,8 @@ namespace utility::behaviour {
 
     inline MotionCommand DirectCommand(const Transform2D& walkCommand_) {
         MotionCommand cmd;
-        cmd.type        = MotionCommand::Type::Value::DirectCommand;
-        cmd.walkCommand = convert(walkCommand_);
+        cmd.type         = MotionCommand::Type::Value::DIRECT_COMMAND;
+        cmd.walk_command = convert(walkCommand_);
         return cmd;
     }
 
