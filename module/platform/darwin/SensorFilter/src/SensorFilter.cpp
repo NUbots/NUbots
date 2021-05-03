@@ -543,7 +543,7 @@ namespace module::platform::darwin {
                 // We make Hwt first, because `o` is in world space
                 Eigen::Affine3d Hwt;
                 Hwt.linear()      = o.Rwt.toRotationMatrix();
-                Hwt.translation() = -o.rTWw;
+                Hwt.translation() = o.rTWw;
                 sensors->Htw      = Hwt.inverse().matrix();
 
                 /************************************************
