@@ -358,11 +358,12 @@ namespace module::platform::darwin {
                         Eigen::Vector3d(-input.accelerometer.x, input.accelerometer.y, input.accelerometer.z);
                 }
 
-                // If we have a previous sensors and (our cm740 has errors or we are spinning too quickly), then
+                // If we have a previous Sensors message and (our cm740 has errors or we are spinning too quickly), then
                 // reuse our last sensor value
                 if (previousSensors
                     && (input.cm740_error_flags
-                        // if it's rotating this quick, something is probably wrong
+                        // One of the gyros would occasionally throw massive numbers without an error flag
+                        // If our hardware is working as intended, it should never read that we're spinning at 2 revs/s
                         || Eigen::Vector3d(input.gyroscope.x, input.gyroscope.y, input.gyroscope.z).norm()
                                > 4.0 * M_PI)) {
                     NUClear::log<NUClear::WARN>(
