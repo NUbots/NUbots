@@ -21,6 +21,7 @@
 
 #include <chrono>
 #include <fmt/format.h>
+#include <string>
 
 #include "clock/clock.hpp"
 
@@ -246,6 +247,7 @@ namespace module::platform::webots {
 
                 on<Watchdog<Webots, 5, std::chrono::seconds>>().then([this, local_config] {
                     // We haven't received any messages lately
+                    log<NUClear::ERROR>("Connection timed out.");
                     setup_connection(local_config["server_address"].as<std::string>(),
                                      local_config["port"].as<std::string>());
                 });
@@ -269,12 +271,20 @@ namespace module::platform::webots {
 
         fd = tcpip_connect(server_address, port);
 
-        std::string initial_message;
+        if (fd == -1){
+            // Connection failed
+            setup_connection(server_address, port);
+            return;
+        }
+
+        // Initaliase the string with ???????
+        std::string initial_message = std::string(7, '?');
         const int n = recv(fd, initial_message.data(), sizeof(initial_message), 0);
 
-        if (n > 0) {
+        if (n >= 0) {
             if (initial_message == "Welcome") {
                 // good
+                log<NUClear::INFO>(fmt::format("Connected to {}:{}", server_address, port));
             }
             else if (initial_message == "Refused") {
                 log<NUClear::FATAL>(
@@ -291,15 +301,16 @@ namespace module::platform::webots {
             }
         }
         else {
-            log<NUClear::FATAL>("Connection was closed.");
+            // There was nothing sent
+            log<NUClear::DEBUG>("Connection was closed.");
+            setup_connection(server_address, port);
+            return;
         }
 
         // Set the real time of the connection initiation
         connect_time = NUClear::clock::now();
         // Reset the simulation connection time
         utility::clock::last_update = std::chrono::steady_clock::now();
-
-        log<NUClear::INFO>(fmt::format("Connected to {}:{}", server_address, port));
 
         // Now that we are connected, we can set up our reaction handles with this file descriptor
 
