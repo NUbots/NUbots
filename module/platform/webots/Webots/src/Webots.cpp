@@ -214,6 +214,7 @@ namespace module::platform::webots {
 
                 on<Watchdog<Webots, 5, std::chrono::seconds>>().then([this, local_config] {
                     // We haven't received any messages lately
+                    log<NUClear::ERROR>("Connection timed out.");
                     setup_connection(local_config["server_address"].as<std::string>(),
                                      local_config["port"].as<std::string>());
                 });
