@@ -32,6 +32,8 @@ namespace module::platform::webots {
     private:
         /// @brief Store a handle to the io reaction so we can unbind it
         ReactionHandle read_io;
+        /// @brief Store a handle to the io reaction so we can unbind it
+        ReactionHandle send_io;
         /// @brief Store a handle to the io error reaction so we can unbind it
         ReactionHandle error_io;
         /// @brief Store a handle to the shutdown reaction so we can unbind it
