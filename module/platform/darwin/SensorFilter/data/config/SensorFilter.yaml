@@ -5,7 +5,9 @@ buttons:
 
 foot_down:
   from_load: true # If true uses the virtual load foot down, if false use the Z height method
-  certainty_threshold: 0.01 # Height difference of the Z for the Z height method
+  virtual_load: false # If true AND from_load is true uses the virtual load foot down, if false && from_load is true use fsr
+  certainty_threshold_virtual: 0.01 # Height difference of the Z for the Z height method
+  certainty_threshold_fsr: 60 # Height difference of the Z for the Z height method TODO This needs tuning
 
 foot_load_sensor:
   noise_factor: 1e-4
@@ -20,7 +22,9 @@ motion_filter:
       accelerometer: [3e-4, 3e-4, 3e-4] # x, y, z
       accelerometer_magnitude: [1e-4, 1e-4, 1e-4] # x, y, z
       gyroscope: [1e-8, 1e-8, 1e-8] # x, y, z
+      # covariance of a foot's translation
       flat_foot_odometry: [5e-8, 5e-8, 5e-8] # x, y, z
+      # covariance of each value of the quaternion which is the rotation of the foot, when both feet are down
       flat_foot_orientation: [5e-6, 5e-6, 5e-6, 5e-6] # QX, QY, QZ, QW
     process:
       position: [1e-10, 1e-10, 1e-10]
