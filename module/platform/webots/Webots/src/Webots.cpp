@@ -111,7 +111,7 @@ namespace module::platform::webots {
     }
 
 
-    ActuatorRequests make_inital_acutator_request(){
+    ActuatorRequests make_inital_acutator_request() {
         message::platform::webots::ActuatorRequests to_send_next;
 
         std::vector<std::string> sensors_list = {"left_ankle_roll_sensor",
@@ -291,7 +291,6 @@ namespace module::platform::webots {
                 });
 
 
-
                 // Prime these two reactions, so when only one is present, at least we have the other
                 emit(std::make_unique<ServoTargets>());
                 emit(std::make_unique<DarwinSensors>());
@@ -317,10 +316,10 @@ namespace module::platform::webots {
 
         fd = tcpip_connect(server_address, port);
 
-        if (fd == -1){
+        if (fd == -1) {
             // Connection failed
             // TODO(Cameron) Try to reconnect after a delay.
-            //setup_connection(server_address, port);
+            // setup_connection(server_address, port);
             log<NUClear::FATAL>("Quitting due to failed connection attempt");
             powerplant.shutdown();
             return;
@@ -328,7 +327,7 @@ namespace module::platform::webots {
 
         // Initaliase the string with ???????
         std::string initial_message = std::string(7, '?');
-        const int n = recv(fd, initial_message.data(), sizeof(initial_message), 0);
+        const int n                 = recv(fd, initial_message.data(), sizeof(initial_message), 0);
 
         if (n >= 0) {
             if (initial_message == "Welcome") {
@@ -364,63 +363,63 @@ namespace module::platform::webots {
         // Now that we are connected, we can set up our reaction handles with this file descriptor
 
         // Receiving
-        read_io =
-            on<IO>(fd, IO::READ).then([this]() {
-                    // ************************** Receiving ***************************************
-                    // Get the size of the message
-                    uint32_t Nn;
-                    if (recv(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
-                        log<NUClear::ERROR>("Failed to read message size from TCP connection");
-                        return;
-                    }
+        read_io = on<IO>(fd, IO::READ).then([this]() {
+            // ************************** Receiving ***************************************
+            // Get the size of the message
+            uint32_t Nn;
+            if (recv(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
+                log<NUClear::ERROR>("Failed to read message size from TCP connection");
+                return;
+            }
 
-                    // Convert from network endian to host endian
-                    const uint32_t Nh = ntohl(Nn);
+            // Convert from network endian to host endian
+            const uint32_t Nh = ntohl(Nn);
 
-                    // Get the message
-                    std::vector<char> data(Nh, 0);
-                    if (uint64_t(recv(fd, data.data(), Nh, 0)) != Nh) {
-                        log<NUClear::ERROR>("Failed to read message from TCP connection");
-                        return;
-                    }
+            // Get the message
+            std::vector<char> data(Nh, 0);
+            if (uint64_t(recv(fd, data.data(), Nh, 0)) != Nh) {
+                log<NUClear::ERROR>("Failed to read message from TCP connection");
+                return;
+            }
 
-                    log<NUClear::TRACE>("Received sensor measurements");
+            log<NUClear::TRACE>("Received sensor measurements");
 
-                    // Deserialise the message into a neutron
-                    SensorMeasurements msg = NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(data);
+            // Deserialise the message into a neutron
+            SensorMeasurements msg = NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(data);
 
-                    translate_and_emit_sensor(msg);
+            translate_and_emit_sensor(msg);
 
-                    // Service the watchdog
-                    emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
+            // Service the watchdog
+            emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
 
-                    // ****************************** TIME **************************************
+            // ****************************** TIME **************************************
 
-                    // Deal with time
+            // Deal with time
 
-                    // Save our previous deltas
-                    const uint32_t prev_sim_delta  = sim_delta;
-                    const uint32_t prev_real_delta = real_delta;
+            // Save our previous deltas
+            const uint32_t prev_sim_delta  = sim_delta;
+            const uint32_t prev_real_delta = real_delta;
 
-                    // Update our current deltas
-                    sim_delta  = msg.time - current_sim_time;
-                    real_delta = msg.real_time - current_real_time;
+            // Update our current deltas
+            sim_delta  = msg.time - current_sim_time;
+            real_delta = msg.real_time - current_real_time;
 
-                    // Calculate our custom rtf - the ratio of the past two sim deltas and the past two real time deltas
-                    utility::clock::custom_rtf = static_cast<double>(sim_delta + prev_sim_delta)
-                                                 / static_cast<double>(real_delta + prev_real_delta);
+            // Calculate our custom rtf - the ratio of the past two sim deltas and the past two real time deltas
+            utility::clock::custom_rtf =
+                static_cast<double>(sim_delta + prev_sim_delta) / static_cast<double>(real_delta + prev_real_delta);
 
-                    // Update our current times
-                    current_sim_time  = msg.time;
-                    current_real_time = msg.real_time;
-            });
+            // Update our current times
+            current_sim_time  = msg.time;
+            current_real_time = msg.real_time;
+        });
 
-            send_io =
-                on<IO, With<ServoTargets>, With<DarwinSensors>>(fd, IO::READ)
+        send_io =
+            on<IO, With<ServoTargets>, With<DarwinSensors>>(fd, IO::READ)
                 .then([this](const ServoTargets& commands, const DarwinSensors& sensors) {
                     ActuatorRequests to_send_now = make_acutator_request(commands, sensors);
 
-                    std::vector<char> data = NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(to_send_now);
+                    std::vector<char> data =
+                        NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(to_send_now);
                     // Size of the message, in network endian
                     uint32_t Nn = htonl(data.size());
                     // Send the message size first
@@ -429,7 +428,7 @@ namespace module::platform::webots {
                             fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
                     }
                     // then send the data
-                    if (send(fd, data.data(), data.size(), 0) != (signed)data.size()) {
+                    if (send(fd, data.data(), data.size(), 0) != (signed) data.size()) {
                         log<NUClear::ERROR>(fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
                     }
 
@@ -450,18 +449,18 @@ namespace module::platform::webots {
             }
         });
 
-        //Send initial message to activate the servos
-        std::vector<char> data = NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(make_inital_acutator_request());
+        // Send initial message to activate the servos
+        std::vector<char> data =
+            NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(make_inital_acutator_request());
 
         uint32_t Nn = htonl(data.size());
 
         // Send the message size first
         if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
-            log<NUClear::ERROR>(
-                fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
+            log<NUClear::ERROR>(fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
         }
         // then send the data
-        if (send(fd, data.data(), data.size(), 0) != (signed)data.size()) {
+        if (send(fd, data.data(), data.size(), 0) != (signed) data.size()) {
             log<NUClear::ERROR>(fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
         }
     }
