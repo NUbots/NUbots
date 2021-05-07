@@ -436,7 +436,7 @@ namespace module::platform::darwin {
                             feet_down[BodySide::LEFT]  = false;
                         }
                         // Right foot is above left foot in left foot space by more than the certainty threshold
-                        else if (input.left.fsr1 > config.footDown.certaintyFSRThreshold 
+                        else if (input.left.fsr1 > config.footDown.certaintyFSRThreshold
                                  && input.left.fsr2 > config.footDown.certaintyFSRThreshold
                                  && input.left.fsr3 > config.footDown.certaintyFSRThreshold
                                  && input.left.fsr4 > config.footDown.certaintyFSRThreshold
