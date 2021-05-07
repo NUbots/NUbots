@@ -64,6 +64,7 @@ namespace module::platform::webots {
     using message::platform::webots::MotorTorque;
     using message::platform::webots::MotorVelocity;
     using message::platform::webots::SensorMeasurements;
+    using message::platform::webots::SensorTimeStep;
 
     using message::support::GlobalConfig;
 
@@ -109,8 +110,77 @@ namespace module::platform::webots {
         throw std::runtime_error("Unable to translate unknown NUgus.proto sensor name: " + name);
     }
 
+
+    ActuatorRequests make_inital_acutator_request() {
+        message::platform::webots::ActuatorRequests to_send_next;
+
+        std::vector<std::string> sensors_list = {"left_ankle_roll_sensor",
+                                                 "left_ankle_pitch_sensor",
+                                                 "right_ankle_roll_sensor",
+                                                 "right_ankle_pitch_sensor",
+                                                 "right_knee_pitch_sensor",
+                                                 "left_knee_pitch_sensor",
+                                                 "left_hip_roll_sensor",
+                                                 "left_hip_pitch_sensor",
+                                                 "left_hip_yaw_sensor",
+                                                 "right_hip_roll_sensor",
+                                                 "right_hip_pitch_sensor ",
+                                                 "right_hip_yaw_sensor ",
+                                                 "left_elbow_pitch_sensor ",
+                                                 "right_elbow_pitch_sensor",
+                                                 "left_shoulder_roll_sensor",
+                                                 "left_shoulder_pitch_sensor",
+                                                 "right_shoulder_roll_sensor",
+                                                 "right_shoulder_pitch_sensor",
+                                                 "neck_yaw_sensor",
+                                                 "head_pitch_sensor accelerometer",
+                                                 "gyroscope",
+                                                 "right_camera",
+                                                 "left_camera"};
+
+        for (auto& sensor : sensors_list) {
+            SensorTimeStep time_step_msg;
+            time_step_msg.name     = sensor;
+            time_step_msg.timeStep = 32;
+            to_send_next.sensor_time_steps.push_back(time_step_msg);
+        }
+
+        return to_send_next;
+    }
+
     ActuatorRequests make_acutator_request(const ServoTargets& commands, const DarwinSensors& sensors) {
         message::platform::webots::ActuatorRequests to_send_next;
+
+        std::vector<std::string> sensors_list = {"left_ankle_roll_sensor",
+                                                 "left_ankle_pitch_sensor",
+                                                 "right_ankle_roll_sensor",
+                                                 "right_ankle_pitch_sensor",
+                                                 "right_knee_pitch_sensor",
+                                                 "left_knee_pitch_sensor",
+                                                 "left_hip_roll_sensor",
+                                                 "left_hip_pitch_sensor",
+                                                 "left_hip_yaw_sensor",
+                                                 "right_hip_roll_sensor",
+                                                 "right_hip_pitch_sensor ",
+                                                 "right_hip_yaw_sensor ",
+                                                 "left_elbow_pitch_sensor ",
+                                                 "right_elbow_pitch_sensor",
+                                                 "left_shoulder_roll_sensor",
+                                                 "left_shoulder_pitch_sensor",
+                                                 "right_shoulder_roll_sensor",
+                                                 "right_shoulder_pitch_sensor",
+                                                 "neck_yaw_sensor",
+                                                 "head_pitch_sensor accelerometer",
+                                                 "gyroscope",
+                                                 "right_camera",
+                                                 "left_camera"};
+
+        for (auto& sensor : sensors_list) {
+            SensorTimeStep time_step_msg;
+            time_step_msg.name     = sensor;
+            time_step_msg.timeStep = 32;
+            to_send_next.sensor_time_steps.push_back(time_step_msg);
+        }
 
         // Convert the servo targets to the ActuatorRequests
         for (const auto& target : commands.targets) {
@@ -201,6 +271,7 @@ namespace module::platform::webots {
         on<Trigger<GlobalConfig>, Configuration>("webots.yaml")
             .then([this](const GlobalConfig& /*global_config*/, const Configuration& local_config) {
                 // Use configuration here from file webots.yaml
+                time_step = local_config["time_step"].as<int>();
 
                 // clang-format off
                 auto lvl = local_config["log_level"].as<std::string>();
@@ -219,6 +290,12 @@ namespace module::platform::webots {
                                      local_config["port"].as<std::string>());
                 });
 
+
+                // Prime these two reactions, so when only one is present, at least we have the other
+                emit(std::make_unique<ServoTargets>());
+                emit(std::make_unique<DarwinSensors>());
+
+                // Connect to the server
                 setup_connection(local_config["server_address"].as<std::string>(),
                                  local_config["port"].as<std::string>());
             });
@@ -227,6 +304,7 @@ namespace module::platform::webots {
     void Webots::setup_connection(const std::string& server_address, const std::string& port) {
         // Unbind any previous reaction handles
         read_io.unbind();
+        send_io.unbind();
         error_io.unbind();
         shutdown_handle.unbind();
 
@@ -238,15 +316,18 @@ namespace module::platform::webots {
 
         fd = tcpip_connect(server_address, port);
 
-        if (fd == -1){
+        if (fd == -1) {
             // Connection failed
-            setup_connection(server_address, port);
+            // TODO(Cameron) Try to reconnect after a delay.
+            // setup_connection(server_address, port);
+            log<NUClear::FATAL>("Quitting due to failed connection attempt");
+            powerplant.shutdown();
             return;
         }
 
         // Initaliase the string with ???????
         std::string initial_message = std::string(7, '?');
-        const int n = recv(fd, initial_message.data(), sizeof(initial_message), 0);
+        const int n                 = recv(fd, initial_message.data(), sizeof(initial_message), 0);
 
         if (n >= 0) {
             if (initial_message == "Welcome") {
@@ -282,70 +363,76 @@ namespace module::platform::webots {
         // Now that we are connected, we can set up our reaction handles with this file descriptor
 
         // Receiving
-        read_io =
+        read_io = on<IO>(fd, IO::READ).then([this]() {
+            // ************************** Receiving ***************************************
+            // Get the size of the message
+            uint32_t Nn;
+            if (recv(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
+                log<NUClear::ERROR>("Failed to read message size from TCP connection");
+                return;
+            }
+
+            // Convert from network endian to host endian
+            const uint32_t Nh = ntohl(Nn);
+
+            // Get the message
+            std::vector<char> data(Nh, 0);
+            if (uint64_t(recv(fd, data.data(), Nh, 0)) != Nh) {
+                log<NUClear::ERROR>("Failed to read message from TCP connection");
+                return;
+            }
+
+            log<NUClear::TRACE>("Received sensor measurements");
+
+            // Deserialise the message into a neutron
+            SensorMeasurements msg = NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(data);
+
+            translate_and_emit_sensor(msg);
+
+            // Service the watchdog
+            emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
+
+            // ****************************** TIME **************************************
+
+            // Deal with time
+
+            // Save our previous deltas
+            const uint32_t prev_sim_delta  = sim_delta;
+            const uint32_t prev_real_delta = real_delta;
+
+            // Update our current deltas
+            sim_delta  = msg.time - current_sim_time;
+            real_delta = msg.real_time - current_real_time;
+
+            // Calculate our custom rtf - the ratio of the past two sim deltas and the past two real time deltas
+            utility::clock::custom_rtf =
+                static_cast<double>(sim_delta + prev_sim_delta) / static_cast<double>(real_delta + prev_real_delta);
+
+            // Update our current times
+            current_sim_time  = msg.time;
+            current_real_time = msg.real_time;
+        });
+
+        send_io =
             on<IO, With<ServoTargets>, With<DarwinSensors>>(fd, IO::READ)
                 .then([this](const ServoTargets& commands, const DarwinSensors& sensors) {
-                    // ************************** Receiving ***************************************
-                    // Get the size of the message
-                    uint32_t Nn;
-                    if (recv(fd, &Nn, sizeof(Nn), 0 != sizeof(Nn))) {
-                        log<NUClear::ERROR>("Failed to read message size from TCP connection");
-                        return;
-                    }
-
-                    // Convert from network endian to host endian
-                    const uint32_t Nh = ntohl(Nn);
-
-                    // Get the message
-                    std::vector<char> data(Nh, 0);
-                    if (uint64_t(recv(fd, data.data(), Nh, 0)) != Nh) {
-                        log<NUClear::ERROR>("Failed to read message from TCP connection");
-                        return;
-                    }
-
-                    // Deserialise the message into a neutron
-                    SensorMeasurements msg = NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(data);
-
-                    translate_and_emit_sensor(msg);
-
-                    // Service the watchdog
-                    emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
-
-                    // ****************************** TIME **************************************
-
-                    // Deal with time
-
-                    // Save our previous deltas
-                    const uint32_t prev_sim_delta  = sim_delta;
-                    const uint32_t prev_real_delta = real_delta;
-
-                    // Update our current deltas
-                    sim_delta  = msg.time - current_sim_time;
-                    real_delta = msg.real_time - current_real_time;
-
-                    // Calculate our custom rtf - the ratio of the past two sim deltas and the past two real time deltas
-                    utility::clock::custom_rtf = static_cast<double>(sim_delta + prev_sim_delta)
-                                                 / static_cast<double>(real_delta + prev_real_delta);
-
-                    // Update our current times
-                    current_sim_time  = msg.time;
-                    current_real_time = msg.real_time;
-
                     ActuatorRequests to_send_now = make_acutator_request(commands, sensors);
 
-                    // ***************** Sending ********************************
-                    data = NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(to_send_now);
+                    std::vector<char> data =
+                        NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(to_send_now);
                     // Size of the message, in network endian
-                    Nn = htonl(data.size());
+                    uint32_t Nn = htonl(data.size());
                     // Send the message size first
-                    if (send(fd, &Nn, sizeof(Nn), 0) == sizeof(Nn)) {
+                    if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
                         log<NUClear::ERROR>(
                             fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
                     }
                     // then send the data
-                    if (send(fd, data.data(), Nn, 0) == Nn) {
+                    if (send(fd, data.data(), data.size(), 0) != (signed) data.size()) {
                         log<NUClear::ERROR>(fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
                     }
+
+                    log<NUClear::TRACE>("Sending actuator request.");
                 });
 
         error_io = on<IO>(fd, IO::CLOSE | IO::ERROR).then([this, server_address, port](const IO::Event& /*event*/) {
@@ -361,6 +448,21 @@ namespace module::platform::webots {
                 fd = -1;
             }
         });
+
+        // Send initial message to activate the servos
+        std::vector<char> data =
+            NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(make_inital_acutator_request());
+
+        uint32_t Nn = htonl(data.size());
+
+        // Send the message size first
+        if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
+            log<NUClear::ERROR>(fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
+        }
+        // then send the data
+        if (send(fd, data.data(), data.size(), 0) != (signed) data.size()) {
+            log<NUClear::ERROR>(fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
+        }
     }
 
     void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurements) {

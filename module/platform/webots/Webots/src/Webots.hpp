@@ -32,6 +32,8 @@ namespace module::platform::webots {
     private:
         /// @brief Store a handle to the io reaction so we can unbind it
         ReactionHandle read_io;
+        /// @brief Store a handle to the io reaction so we can unbind it
+        ReactionHandle send_io;
         /// @brief Store a handle to the io error reaction so we can unbind it
         ReactionHandle error_io;
         /// @brief Store a handle to the shutdown reaction so we can unbind it
@@ -62,6 +64,8 @@ namespace module::platform::webots {
         uint64_t real_delta        = 0;
         uint32_t current_sim_time  = 0;
         uint64_t current_real_time = 0;
+
+        int time_step;
 
     public:
         /// @brief Called by the powerplant to build and setup the webots reactor
