@@ -99,7 +99,8 @@ namespace module::platform::darwin {
             this->config.footDown.fromLoad              = config["foot_down"]["from_load"].as<bool>();
             this->config.footDown.virtualLoad           = config["foot_down"]["vitrual_load"].as<bool>();
             this->config.footDown.certaintyFSRThreshold = config["foot_down"]["certainty_threshold_fsr"].as<float>();
-            this->config.footDown.certaintyVirtualThreshold = config["foot_down"]["certainty_threshold_virtual"].as<float>();
+            this->config.footDown.certaintyVirtualThreshold = 
+                config["foot_down"]["certainty_threshold_virtual"].as<float>();
 
             // Motion filter config
             this->config.motionFilter.velocityDecay =
@@ -412,7 +413,7 @@ namespace module::platform::darwin {
 
                 // If we're using the load value on the foot to work out if our foot is down, do that
                 if (config.footDown.fromLoad) {
-                    if (config.footDown.virtualLoad){
+                    if (config.footDown.virtualLoad) {
                         // Use our load sensor to work out which foot is down
                         feet_down = load_sensor.updateFeet(*sensors);
 
@@ -421,7 +422,7 @@ namespace module::platform::darwin {
                             emit(graph("Sensor/Foot Down/Load/Right", feet_down[BodySide::RIGHT]));
                         }
                     }
-                    else{
+                    else {
                         // TODO These metrics should probably be different
                         if (input.left.fsr1 < -config.footDown.certaintyFSRThreshold
                             && input.left.fsr2 < -config.footDown.certaintyFSRThreshold
@@ -436,13 +437,13 @@ namespace module::platform::darwin {
                         }
                         // Right foot is above left foot in left foot space by more than the certainty threshold
                         else if (input.left.fsr1 > config.footDown.certaintyFSRThreshold 
-                                && input.left.fsr2 > config.footDown.certaintyFSRThreshold 
-                                && input.left.fsr3 > config.footDown.certaintyFSRThreshold 
-                                && input.left.fsr4 > config.footDown.certaintyFSRThreshold 
-                                && input.right.fsr1 < -config.footDown.certaintyFSRThreshold 
-                                && input.right.fsr2 < -config.footDown.certaintyFSRThreshold 
-                                && input.right.fsr3 < -config.footDown.certaintyFSRThreshold 
-                                && input.right.fsr4 < -config.footDown.certaintyFSRThreshold) {
+                                 && input.left.fsr2 > config.footDown.certaintyFSRThreshold 
+                                 && input.left.fsr3 > config.footDown.certaintyFSRThreshold 
+                                 && input.left.fsr4 > config.footDown.certaintyFSRThreshold 
+                                 && input.right.fsr1 < -config.footDown.certaintyFSRThreshold 
+                                 && input.right.fsr2 < -config.footDown.certaintyFSRThreshold 
+                                 && input.right.fsr3 < -config.footDown.certaintyFSRThreshold 
+                                 && input.right.fsr4 < -config.footDown.certaintyFSRThreshold) {
                             feet_down[BodySide::RIGHT] = false;
                             feet_down[BodySide::LEFT]  = true;
                         }
