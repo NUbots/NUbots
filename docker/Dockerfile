@@ -35,7 +35,7 @@ RUN install-package \
     ninja \
     cmake \
     meson \
-    nodejs \
+    nodejs-lts-fermium \
     npm \
     yarn \
     git
