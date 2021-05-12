@@ -228,7 +228,7 @@ namespace utility::motion::kinematics {
             target.translation().x() = -target.translation().x();
         }
 
-        Eigen::Vector3f ankleX   = target.matrix().leftCols<1>(0).head<3>();
+        Eigen::Vector3f ankleX   = target.matrix().leftCols<1>().head<3>();
         Eigen::Vector3f ankleY   = target.matrix().middleCols<1>(1).head<3>();
         Eigen::Vector3f anklePos = target.translation();
 
