@@ -24,8 +24,7 @@
 #include "utility/behaviour/Action.hpp"
 #include "utility/input/LimbID.hpp"
 
-namespace module {
-namespace support {
+namespace module::support {
 
     using message::behaviour::Subsumption;
 
@@ -122,5 +121,4 @@ namespace support {
 
         emit<Scope::NETWORK>(subsumption, "nusight", true);
     }
-}  // namespace support
-}  // namespace module
+}  // namespace module::support

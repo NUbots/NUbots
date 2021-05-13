@@ -23,25 +23,21 @@
 #include <mutex>
 #include <nuclear>
 
-namespace module {
-namespace support {
-    namespace logging {
+namespace module::support::logging {
 
-        /**
-         * Handles the logging of log messages to the console in a thread safe manner.
-         *
-         * @author Jake Woods
-         */
-        class ConsoleLogHandler : public NUClear::Reactor {
-        private:
-            std::mutex mutex;
+    /**
+     * Handles the logging of log messages to the console in a thread safe manner.
+     *
+     * @author Jake Woods
+     */
+    class ConsoleLogHandler : public NUClear::Reactor {
+    private:
+        std::mutex mutex;
 
-        public:
-            explicit ConsoleLogHandler(std::unique_ptr<NUClear::Environment> environment);
-        };
+    public:
+        explicit ConsoleLogHandler(std::unique_ptr<NUClear::Environment> environment);
+    };
 
-    }  // namespace logging
-}  // namespace support
-}  // namespace module
+}  // namespace module::support::logging
 
 #endif  // MODULES_SUPPORT_LOGGING_CONSOLELOGHANDLER_HPP

@@ -22,6 +22,7 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <fmt/format.h>
+#include <numeric>
 
 #include "extension/Configuration.hpp"
 
@@ -35,8 +36,7 @@
 #include "utility/vision/Vision.hpp"
 #include "utility/vision/visualmesh/VisualMesh.hpp"
 
-namespace module {
-namespace vision {
+namespace module::vision {
 
     using extension::Configuration;
 
@@ -125,7 +125,7 @@ namespace vision {
                     auto goals = std::make_unique<Goals>();
                     goals->goals.reserve(clusters.size());
 
-                    goals->camera_id = horizon.camera_id;
+                    goals->id        = horizon.id;
                     goals->timestamp = horizon.timestamp;
                     goals->Hcw       = horizon.Hcw;
 
@@ -279,15 +279,13 @@ namespace vision {
                             // If they are close enough then assign left and right sides
                             if (config.debug) {
                                 log<NUClear::DEBUG>(fmt::format("Camera {}: Goal post 0 distance = {}",
-                                                                horizon.camera_id,
+                                                                horizon.id,
                                                                 it1->post.distance));
                                 log<NUClear::DEBUG>(fmt::format("Camera {}: Goal post 1 distance = {}",
-                                                                horizon.camera_id,
+                                                                horizon.id,
                                                                 it2->post.distance));
-                                log<NUClear::DEBUG>(fmt::format("Camera {}: Goal width = {} ({})",
-                                                                horizon.camera_id,
-                                                                width,
-                                                                disagreement));
+                                log<NUClear::DEBUG>(
+                                    fmt::format("Camera {}: Goal width = {} ({})", horizon.id, width, disagreement));
                             }
                             if (disagreement < config.disagreement_ratio) {
                                 auto it = pairs.find(it1);
@@ -328,5 +326,4 @@ namespace vision {
                 }
             });
     }
-}  // namespace vision
-}  // namespace module
+}  // namespace module::vision

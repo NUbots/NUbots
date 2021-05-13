@@ -11,8 +11,7 @@
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
-namespace module {
-namespace localisation {
+namespace module::localisation {
 
     using extension::Configuration;
     using message::behaviour::Nod;
@@ -60,5 +59,4 @@ namespace localisation {
             emit(field);
         });
     }
-}  // namespace localisation
-}  // namespace module
+}  // namespace module::localisation

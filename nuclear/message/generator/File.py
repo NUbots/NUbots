@@ -24,8 +24,8 @@ class File:
 
         define = "{}_HPP".format("_".join([s.upper() for s in self.name[:-6].strip().split("/")]))
         parts = self.package.split(".")
-        ns_open = "\n".join(["namespace {} {{".format(x) for x in parts])
-        ns_close = "\n".join("}" * len(parts))
+        ns_open = "namespace {} {{".format("::".join(parts))
+        ns_close = "}}  // namespace {}".format("::".join(parts))
 
         # Generate our enums c++
         enums = [e.generate_cpp() for e in self.enums]

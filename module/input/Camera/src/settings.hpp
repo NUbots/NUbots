@@ -9,8 +9,7 @@ extern "C" {
 #include <aravis-0.8/arv.h>
 }
 
-namespace module {
-namespace input {
+namespace module::input {
     template <typename T>
     struct SettingsFunctions;
 
@@ -191,8 +190,6 @@ namespace input {
         }
         return "";
     }
-
-}  // namespace input
-}  // namespace module
+}  // namespace module::input
 
 #endif  // MODULE_INPUT_CAMERA_SETTINGS_HPP

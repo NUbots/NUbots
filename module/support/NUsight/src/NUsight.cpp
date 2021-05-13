@@ -28,8 +28,7 @@
 #include "utility/math/coordinates.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 
-namespace module {
-namespace support {
+namespace module::support {
 
     using extension::Configuration;
 
@@ -102,6 +101,4 @@ namespace support {
             }
         });
     }
-
-}  // namespace support
-}  // namespace module
+}  // namespace module::support
