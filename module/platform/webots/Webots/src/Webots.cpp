@@ -110,6 +110,32 @@ namespace module::platform::webots {
         throw std::runtime_error("Unable to translate unknown NUgus.proto sensor name: " + name);
     }
 
+    std::string translate_id_servo(const uint32_t& id){
+        switch(id){
+            case 0 : return "right_shoulder_pitch [shoulder]";
+            case 2 : return "right_shoulder_roll";
+            case 4 : return "right_elbow_pitch";
+            case 1 : return "left_shoulder_pitch [shoulder]";
+            case 3 : return "left_shoulder_roll";
+            case 5 : return "left_elbow_pitch";
+            case 6 : return "right_hip_yaw";
+            case 8 : return "right_hip_roll [hip]";
+            case 10: return "right_hip_pitch";
+            case 12: return "right_knee_pitch";
+            case 14: return "right_ankle_pitch";
+            case 16: return "right_ankle_roll";
+            case 7 : return "left_hip_yaw";
+            case 9 : return "left_hip_roll [hip]";
+            case 11: return "left_hip_pitch";
+            case 13: return "left_knee_pitch";
+            case 15: return "left_ankle_pitch";
+            case 17: return "left_ankle_roll";
+            case 18: return "neck_yaw";
+            case 19: return "head_pitch";
+        }
+
+        throw std::runtime_error("Unable to translate unknown NUgus.proto servo id: " + id);
+    }
 
     ActuatorRequests make_inital_acutator_request() {
         message::platform::webots::ActuatorRequests to_send_next;
@@ -151,41 +177,10 @@ namespace module::platform::webots {
     ActuatorRequests make_acutator_request(const ServoTargets& commands, const DarwinSensors& sensors) {
         message::platform::webots::ActuatorRequests to_send_next;
 
-        std::vector<std::string> sensors_list = {"left_ankle_roll_sensor",
-                                                 "left_ankle_pitch_sensor",
-                                                 "right_ankle_roll_sensor",
-                                                 "right_ankle_pitch_sensor",
-                                                 "right_knee_pitch_sensor",
-                                                 "left_knee_pitch_sensor",
-                                                 "left_hip_roll_sensor",
-                                                 "left_hip_pitch_sensor",
-                                                 "left_hip_yaw_sensor",
-                                                 "right_hip_roll_sensor",
-                                                 "right_hip_pitch_sensor ",
-                                                 "right_hip_yaw_sensor ",
-                                                 "left_elbow_pitch_sensor ",
-                                                 "right_elbow_pitch_sensor",
-                                                 "left_shoulder_roll_sensor",
-                                                 "left_shoulder_pitch_sensor",
-                                                 "right_shoulder_roll_sensor",
-                                                 "right_shoulder_pitch_sensor",
-                                                 "neck_yaw_sensor",
-                                                 "head_pitch_sensor accelerometer",
-                                                 "gyroscope",
-                                                 "right_camera",
-                                                 "left_camera"};
-
-        for (auto& sensor : sensors_list) {
-            SensorTimeStep time_step_msg;
-            time_step_msg.name     = sensor;
-            time_step_msg.timeStep = 32;
-            to_send_next.sensor_time_steps.push_back(time_step_msg);
-        }
-
         // Convert the servo targets to the ActuatorRequests
         for (const auto& target : commands.targets) {
             MotorPosition position_msg;
-            position_msg.name     = target.id;
+            position_msg.name     = translate_id_servo(target.id);
             position_msg.position = target.position;
             to_send_next.motor_positions.push_back(position_msg);
 
@@ -205,18 +200,18 @@ namespace module::platform::webots {
             else {
                 velocity = 0;
             }
-            velocity_msg.name     = target.id;
+            velocity_msg.name     = translate_id_servo(target.id);
             velocity_msg.velocity = velocity;
             to_send_next.motor_velocities.push_back(velocity_msg);
 
             MotorTorque torque_msg;
-            torque_msg.name   = target.id;
+            torque_msg.name   = translate_id_servo(target.id);
             torque_msg.torque = target.torque;
             to_send_next.motor_torques.push_back(torque_msg);
 
             // MotorPID, only sending P gain. Set I and D to zero
             MotorPID motorpid_msg;
-            motorpid_msg.name  = target.id;
+            motorpid_msg.name  = translate_id_servo(target.id);
             motorpid_msg.PID.X = static_cast<double>(target.gain);
             motorpid_msg.PID.Y = 0.0;
             motorpid_msg.PID.Z = 0.0;
@@ -290,9 +285,7 @@ namespace module::platform::webots {
                                      local_config["port"].as<std::string>());
                 });
 
-
-                // Prime these two reactions, so when only one is present, at least we have the other
-                emit(std::make_unique<ServoTargets>());
+                // Prime these this reaction, so when only one ServoTargets is present, at least we have the other
                 emit(std::make_unique<DarwinSensors>());
 
                 // Connect to the server
@@ -463,6 +456,16 @@ namespace module::platform::webots {
         if (send(fd, data.data(), data.size(), 0) != (signed) data.size()) {
             log<NUClear::ERROR>(fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
         }
+
+        auto target = message::motion::ServoTarget();
+        target.time = NUClear::clock::now();
+        target.id = 10;
+        target.position = 2;
+        target.gain = 10;
+        target.torque = 10;
+        auto targets = std::make_unique<ServoTargets>();
+        targets->targets.push_back(target);
+        emit(targets);
     }
 
     void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurements) {
