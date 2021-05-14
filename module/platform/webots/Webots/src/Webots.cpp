@@ -110,25 +110,25 @@ namespace module::platform::webots {
         throw std::runtime_error("Unable to translate unknown NUgus.proto sensor name: " + name);
     }
 
-    std::string translate_id_servo(const uint32_t& id){
-        switch(id){
-            case 0 : return "right_shoulder_pitch [shoulder]";
-            case 2 : return "right_shoulder_roll";
-            case 4 : return "right_elbow_pitch";
-            case 1 : return "left_shoulder_pitch [shoulder]";
-            case 3 : return "left_shoulder_roll";
-            case 5 : return "left_elbow_pitch";
-            case 6 : return "right_hip_yaw";
-            case 8 : return "right_hip_roll [hip]";
+    std::string translate_id_servo(const uint32_t& id) {
+        switch (id) {
+            case 0: return "right_shoulder_pitch [shoulder]";
+            case 1: return "left_shoulder_pitch [shoulder]";
+            case 2: return "right_shoulder_roll";
+            case 3: return "left_shoulder_roll";
+            case 4: return "right_elbow_pitch";
+            case 5: return "left_elbow_pitch";
+            case 6: return "right_hip_yaw";
+            case 7: return "left_hip_yaw";
+            case 8: return "right_hip_roll [hip]";
+            case 9: return "left_hip_roll [hip]";
             case 10: return "right_hip_pitch";
-            case 12: return "right_knee_pitch";
-            case 14: return "right_ankle_pitch";
-            case 16: return "right_ankle_roll";
-            case 7 : return "left_hip_yaw";
-            case 9 : return "left_hip_roll [hip]";
             case 11: return "left_hip_pitch";
+            case 12: return "right_knee_pitch";
             case 13: return "left_knee_pitch";
+            case 14: return "right_ankle_pitch";
             case 15: return "left_ankle_pitch";
+            case 16: return "right_ankle_roll";
             case 17: return "left_ankle_roll";
             case 18: return "neck_yaw";
             case 19: return "head_pitch";
