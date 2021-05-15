@@ -29,6 +29,7 @@
 
 #include "message/motion/ServoTarget.hpp"
 #include "message/output/CompressedImage.hpp"
+#include "message/input/Image.hpp"
 #include "message/platform/darwin/DarwinSensors.hpp"
 #include "message/platform/webots/ConnectRequest.hpp"
 #include "message/platform/webots/messages.hpp"
@@ -54,6 +55,7 @@ namespace module::platform::webots {
     using extension::Configuration;
     using message::motion::ServoTargets;
     using message::output::CompressedImage;
+    using message::input::Image;
     using message::platform::darwin::DarwinSensors;
 
     using message::platform::webots::ActuatorRequests;
@@ -458,18 +460,129 @@ namespace module::platform::webots {
             log<NUClear::ERROR>(fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
         }
 
-        auto target     = message::motion::ServoTarget();
-        target.time     = NUClear::clock::now();
-        target.id       = 19;
-        target.position = 2;
-        target.gain     = 10;
-        target.torque   = 10;
-        auto targets    = std::make_unique<ServoTargets>();
-        targets->targets.push_back(target);
-        emit(targets);
+        // log("sending hardcoded servotargets to robot to test");
+        // auto target     = message::motion::ServoTarget();
+        // target.time     = NUClear::clock::now();
+        // target.id       = 2;
+        // target.position = 2;
+        // target.gain     = 10;
+        // target.torque   = 10;
+        // auto targets    = std::make_unique<ServoTargets>();
+        // targets->targets.push_back(target);
+        // emit(targets);
     }
 
     void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurements) {
+        if (false) { // Change to true to print the received sensor_measurements, will remove after this is done
+            std::cout << std::endl << std::endl << std::endl << "received SensorMeasurements: " << std::endl;
+            std::cout << "  sm.time: " << sensor_measurements.time << std::endl;
+            std::cout << "  sm.real_time: " << sensor_measurements.real_time << std::endl;
+
+            {
+                std::cout << "  sm.messages: " << std::endl;
+                int i = 0;
+                for (auto message : sensor_measurements.messages) {
+                    std::cout << "    sm.messages[" << i << "]" << std::endl;
+                    std::cout << "      message_type: " << message.message_type << std::endl;
+                    std::cout << "      text: " << message.text << std::endl;
+                    i++;
+                }
+            }
+
+
+            {
+                std::cout << "  sm.accelerometers: " << std::endl;
+                int i = 0;
+                for (auto acc : sensor_measurements.accelerometers) {
+                    std::cout << "    sm.accelerometers[" << i << "]" << std::endl;
+                    std::cout << "      name: " << acc.name << std::endl;
+                    std::cout << "      value: [" << acc.value.X << ", " << acc.value.Y << ", " << acc.value.Z << "]" << std::endl;
+                    i++;
+                }
+            }
+
+            {
+                std::cout << "  sm.bumpers: " << std::endl;
+                int i = 0;
+                for (auto bumper : sensor_measurements.bumpers) {
+                    std::cout << "    sm.bumpers[" << i << "]" << std::endl;
+                    std::cout << "      name: " << bumper.name << std::endl;
+                    std::cout << "      value: " << bumper.value << std::endl;
+                    i++;
+                }
+            }
+
+            {
+                std::cout << "  sm.cameras: " << std::endl;
+                int i = 0;
+                for (auto camera : sensor_measurements.cameras) {
+                    std::cout << "    sm.cameras[" << i << "]" << std::endl;
+                    std::cout << "      name: " << camera.name << std::endl;
+                    std::cout << "      width: " << camera.width << std::endl;
+                    std::cout << "      height: " << camera.height << std::endl;
+                    std::cout << "      quality: " << camera.quality << std::endl;
+                    std::cout << "      image (size): " << camera.image.size() << std::endl;
+                    i++;
+                }
+            }
+
+            {
+                std::cout << "  sm.forces: " << std::endl;
+                int i = 0;
+                for (auto force : sensor_measurements.forces) {
+                    std::cout << "    sm.forces[" << i << "]" << std::endl;
+                    std::cout << "      name: " << force.name << std::endl;
+                    std::cout << "      value: " << force.value << std::endl;
+                    i++;
+                }
+            }
+
+            {
+                std::cout << "  sm.force3ds: " << std::endl;
+                int i = 0;
+                for (auto force : sensor_measurements.force3ds) {
+                    std::cout << "    sm.force3ds[" << i << "]" << std::endl;
+                    std::cout << "      name: " << force.name << std::endl;
+                    std::cout << "      value: [" << force.value.X << ", " << force.value.Y << ", " << force.value.Z << "]" << std::endl;
+                    i++;
+                }
+            }
+
+            {
+                std::cout << "  sm.force6ds: " << std::endl;
+                int i = 0;
+                for (auto force : sensor_measurements.force6ds) {
+                    std::cout << "    sm.force6ds[" << i << "]" << std::endl;
+                    std::cout << "      name: " << force.name << std::endl;
+                    std::cout << "      force: [" << force.force.X << ", " << force.force.Y << ", " << force.force.Z << "]" << std::endl;
+                    std::cout << "      torque: [" << force.torque.X << ", " << force.force.Y << ", " << force.force.Z << "]" << std::endl;
+                    i++;
+                }
+            }
+
+            {
+                std::cout << "  sm.gyros: " << std::endl;
+                int i = 0;
+                for (auto gyro : sensor_measurements.gyros) {
+                    std::cout << "    sm.gyros[" << i << "]" << std::endl;
+                    std::cout << "      name: " << gyro.name << std::endl;
+                    std::cout << "      value: [" << gyro.value.X << ", " << gyro.value.Y << ", " << gyro.value.Z << "]" << std::endl;
+                    i++;
+                }
+            }
+
+            {
+                std::cout << "  sm.position_sensors: " << std::endl;
+                int i = 0;
+                for (auto sensor : sensor_measurements.position_sensors) {
+                    std::cout << "    sm.position_sensors[" << i << "]" << std::endl;
+                    std::cout << "      name: " << sensor.name << std::endl;
+                    std::cout << "      value: " << sensor.value << std::endl;
+                    i++;
+                }
+            }
+        }
+
         // Read each field of msg, translate it to our protobuf and emit the data
         auto sensor_data = std::make_unique<DarwinSensors>();
 
@@ -479,15 +592,17 @@ namespace module::platform::webots {
             translate_servo_id(position.name, sensor_data->servo).present_position = position.value;
         }
 
-        // TODO(KipHamiltons or ANYONE who can test!!) We need to work out what to do with these. At the moment, these
-        // loops just overwrite the same values each iteration. We should test and see what we need to do ASAP!!
-        for (const auto& accelerometer : sensor_measurements.accelerometers) {
+        if (sensor_measurements.accelerometers.size() > 0) {
+            // .accelerometers is a list of one, since our robots have only one accelerometer
+            const auto& accelerometer = sensor_measurements.accelerometers[0];
             sensor_data->accelerometer.x = static_cast<float>(accelerometer.value.X);
             sensor_data->accelerometer.y = static_cast<float>(accelerometer.value.Y);
             sensor_data->accelerometer.z = static_cast<float>(accelerometer.value.Z);
         }
 
-        for (const auto& gyro : sensor_measurements.gyros) {
+        if (sensor_measurements.gyros.size() > 0) {
+            // .gyros is a list of one, since our robots have only one gyroscope
+            const auto& gyro = sensor_measurements.gyros[0];
             sensor_data->gyroscope.x = static_cast<float>(gyro.value.X);
             sensor_data->gyroscope.y = static_cast<float>(gyro.value.Y);
             sensor_data->gyroscope.z = static_cast<float>(gyro.value.Z);
@@ -515,18 +630,18 @@ namespace module::platform::webots {
 
         for (const auto& camera : sensor_measurements.cameras) {
             // Convert the incoming image so we can emit it to the PowerPlant.
-            auto compressed_image            = std::make_unique<CompressedImage>();
-            compressed_image->name           = camera.name;
-            compressed_image->dimensions.x() = camera.width;
-            compressed_image->dimensions.y() = camera.height;
-            compressed_image->format         = fourcc("JPEG");
-            compressed_image->data           = camera.image;
-            emit(compressed_image);
+            auto image            = std::make_unique<Image>(); // Change to CompressedImage when compression is implemented in webots
+            image->name           = camera.name;
+            image->dimensions.x() = camera.width;
+            image->dimensions.y() = camera.height;
+            image->format         = fourcc("RGB3"); // Change to "JPEG" when webots compression is implemented
+            image->data           = camera.image;
+            emit(image);
         }
 
         // Parse the errors and warnings from Webots and log them.
-        // Note that this is where we should deal with specific messages passed in the sensor_measurements "messages"
-        // or check if those messages have specific information
+        // Note that this is where we should deal with specific messages passed in SensorMeasurements.messages.
+        // Or check if those messages have specific information
         for (const auto& message : sensor_measurements.messages) {
             switch (int(message.message_type)) {
                 case Message::MessageType::ERROR_MESSAGE: log<NUClear::ERROR>(message.text); break;
