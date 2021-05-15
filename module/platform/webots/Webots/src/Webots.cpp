@@ -266,35 +266,32 @@ namespace module::platform::webots {
     }
 
     Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-        on<Trigger<GlobalConfig>, Configuration>("webots.yaml")
-            .then([this](const GlobalConfig& /*global_config*/, const Configuration& local_config) {
-                // Use configuration here from file webots.yaml
-                time_step = local_config["time_step"].as<int>();
+        on<Trigger<GlobalConfig>, Configuration>("webots.yaml").then([this](const Configuration& config) {
+            // Use configuration here from file webots.yaml
+            time_step = config["time_step"].as<int>();
 
-                // clang-format off
-                auto lvl = local_config["log_level"].as<std::string>();
-                if (lvl == "TRACE") { this->log_level = NUClear::TRACE; }
-                else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
-                else if (lvl == "INFO") { this->log_level = NUClear::INFO; }
-                else if (lvl == "WARN") { this->log_level = NUClear::WARN; }
-                else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
-                else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
-                // clang-format on
+            // clang-format off
+            auto lvl = config["log_level"].as<std::string>();
+            if      (lvl == "TRACE") { this->log_level = NUClear::TRACE; }
+            else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
+            else if (lvl == "INFO")  { this->log_level = NUClear::INFO; }
+            else if (lvl == "WARN")  { this->log_level = NUClear::WARN; }
+            else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
+            else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
+            // clang-format on
 
-                on<Watchdog<Webots, 5, std::chrono::seconds>>().then([this, local_config] {
-                    // We haven't received any messages lately
-                    log<NUClear::ERROR>("Connection timed out.");
-                    setup_connection(local_config["server_address"].as<std::string>(),
-                                     local_config["port"].as<std::string>());
-                });
-
-                // Prime these this reaction, so when only one ServoTargets is present, at least we have the other
-                emit(std::make_unique<DarwinSensors>());
-
-                // Connect to the server
-                setup_connection(local_config["server_address"].as<std::string>(),
-                                 local_config["port"].as<std::string>());
+            on<Watchdog<Webots, 5, std::chrono::seconds>>().then([this, config] {
+                // We haven't received any messages lately
+                log<NUClear::ERROR>("Connection timed out.");
+                setup_connection(config["server_address"].as<std::string>(), config["port"].as<std::string>());
             });
+
+            // Prime these this reaction, so when only one ServoTargets is present, at least we have the other
+            emit(std::make_unique<DarwinSensors>());
+
+            // Connect to the server
+            setup_connection(config["server_address"].as<std::string>(), config["port"].as<std::string>());
+        });
     }
 
     void Webots::setup_connection(const std::string& server_address, const std::string& port) {
