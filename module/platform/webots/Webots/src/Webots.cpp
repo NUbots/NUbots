@@ -50,6 +50,9 @@ extern "C" {
 
 namespace module::platform::webots {
 
+    /// @brief The clock period factor, used to convert simulation time to real time
+    static constexpr float CLOCK_PERIOD_FACTOR =
+        static_cast<float>(NUClear::clock::period::num) / static_cast<float>(NUClear::clock::period::den);
 
     using extension::Configuration;
     using message::motion::ServoTargets;
@@ -188,15 +191,14 @@ namespace module::platform::webots {
             MotorVelocity velocity_msg;
             // We need to calculate the servo velocity to add to the velocity message
             // (method stolen from HardwareIO.cpp)
-            // velocity = distance / time
+            // velocity = (distance / time) * CLOCK_PERIOD_FACTOR
             const float distance =
                 utility::math::angle::difference(target.position, getDarwinServo(target.id, sensors).present_position);
 
             NUClear::clock::duration time = target.time - NUClear::clock::now();
             float velocity;
             if (time.count() > 0) {
-                velocity = distance / static_cast<float>(time.count()) * static_cast<float>(NUClear::clock::period::num)
-                           / static_cast<float>(NUClear::clock::period::den);
+                velocity = distance / static_cast<float>(time.count()) * CLOCK_PERIOD_FACTOR;
             }
             else {
                 velocity = 0;
