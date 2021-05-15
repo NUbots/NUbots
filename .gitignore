@@ -36,7 +36,6 @@ packer/build.pwi
 
 # LaTeX stuff
 *.aux
-
 *.out
 *.glo
 *.idx
@@ -65,6 +64,10 @@ packer/build.pwi
 *.vrb
 *.tdo
 *TSWLatexianTemp*
+
+# Webots container building stuff
+docker/webots/binaries
+docker/webots/toolchain
 
 # Tests
 tests_output/

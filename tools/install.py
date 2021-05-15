@@ -36,11 +36,12 @@ def run(target, user, config, toolchain, **kwargs):
 
     # Replace hostname with its IP address if the hostname is already known
     num_robots = 4
-    target = {
-        "{}{}".format(k, num): "10.1.1.{}".format(num)
-        for num in range(1, num_robots + 1)
-        for k, v in zip(("nugus", "n", "i", "igus"), [num] * num_robots)
-    }.get(target, target)
+    if target != "local":
+        target = {
+            "{}{}".format(k, num): "10.1.1.{}".format(num)
+            for num in range(1, num_robots + 1)
+            for k, v in zip(("nugus", "n", "i", "igus"), [num] * num_robots)
+        }.get(target, target)
 
     # If no user, use our user
     if user is None:
@@ -49,18 +50,25 @@ def run(target, user, config, toolchain, **kwargs):
         user = getpass.getuser()
 
     # Target location to install to
-    target_dir = "{0}@{1}:/home/{0}/".format(user, target)
+    if target != "local":
+        target_binary_dir = "{0}@{1}:/home/{0}/".format(user, target)
+        target_toolchain_dir = "{0}@{1}:/home/{0}/".format(user, target)
+    else:
+        target_binary_dir = b.project_dir + "/docker/webots/binaries"
+        target_toolchain_dir = b.project_dir + "/docker/webots/toolchain"
+
     build_dir = b.binary_dir
 
-    cprint("Installing binaries to " + target_dir, "blue", attrs=["bold"])
+    cprint("Installing binaries to " + target_binary_dir, "blue", attrs=["bold"])
     files = glob.glob(os.path.join(build_dir, "bin", "*"))
-    subprocess.run(["rsync", "-avPl", "--checksum", "-e ssh"] + files + [target_dir])
+    print(["rsync", "-avPl", "--checksum", "-e ssh"] + files + [target_binary_dir])
+    subprocess.run(["rsync", "-avPl", "--checksum", "-e ssh"] + files + [target_binary_dir])
 
     if toolchain:
         # Get all of our required shared libraries in our toolchain and send them
         # Only send toolchain files if ours are newer than the receivers.
         # Delete toolchain files on the receiver if they no longer exist in our toolchain
-        cprint("Installing toolchain library files", "blue", attrs=["bold"])
+        cprint("Installing toolchain library files to " + target_toolchain_dir, "blue", attrs=["bold"])
 
         subprocess.run(
             [
@@ -82,7 +90,7 @@ def run(target, user, config, toolchain, **kwargs):
                 "--prune-empty-dirs",
                 "-e ssh",
                 "/usr/local",
-                "{0}@{1}:/usr/".format(user, target),
+                target_toolchain_dir,
             ]
         )
 
@@ -102,15 +110,17 @@ def run(target, user, config, toolchain, **kwargs):
 
     if config in ["overwrite", "o"]:
         cprint("Overwriting configuration files on target", "blue", attrs=["bold"])
-        subprocess.run(["rsync", "-avPLR", "--checksum", "-e ssh"] + config_files + [target_dir])
+        subprocess.run(["rsync", "-avPLR", "--checksum", "-e ssh"] + config_files + [target_binary_dir])
 
     if config in ["update", "u"]:
         cprint("Updating configuration files that are older on target", "blue", attrs=["bold"])
-        subprocess.run(["rsync", "-avuPLR", "--checksum", "-e ssh"] + config_files + [target_dir])
+        subprocess.run(["rsync", "-avuPLR", "--checksum", "-e ssh"] + config_files + [target_binary_dir])
 
     if config in ["new", "n"]:
         cprint("Adding new configuration files to the target", "blue", attrs=["bold"])
-        subprocess.run(["rsync", "-avPLR", "--checksum", "--ignore-existing", "-e ssh"] + config_files + [target_dir])
+        subprocess.run(
+            ["rsync", "-avPLR", "--checksum", "--ignore-existing", "-e ssh"] + config_files + [target_binary_dir]
+        )
 
     if config in ["ignore", "i"]:
         cprint("Ignoring configuration changes", "blue", attrs=["bold"])
@@ -121,4 +131,4 @@ def run(target, user, config, toolchain, **kwargs):
         os.chdir(b.project_dir)
         subprocess.run(["git", "log", "-1"], stdout=f)
 
-    subprocess.run(["scp", version_file, target_dir])
+    subprocess.run(["scp", version_file, target_binary_dir])

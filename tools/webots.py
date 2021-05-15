@@ -67,22 +67,29 @@ def run(isBuild, isRun, isClean, isPush, **kwargs):
                     exit(err)
 
             # Set build config
-            err = subprocess.run(
-                ["./b", "configure", "--", "-DCMAKE_BUILD_TYPE=Release", "--", "-DROLE_robocup2021=ON"]
-            ).returncode
+            err = subprocess.run(["./b", "configure", "--", "-DCMAKE_BUILD_TYPE=Release"]).returncode
             if err != 0:
                 cprint("returned exit code {}".format(err), "red", attrs=["bold"])
                 exit(err)
 
             # Build code
-            err = subprocess.run(["./b", "build", "robocup2021"]).returncode
+            err = subprocess.run(["./b", "build"]).returncode
             if err != 0:
                 cprint("returned exit code {}".format(err), "red", attrs=["bold"])
                 exit(err)
 
-            # Copy code out of container?
+            # Copy compiled binaries and runtime dependancies out of build volume
+            err = subprocess.run(["./b", "install", "local"]).returncode
+            if err != 0:
+                cprint("returned exit code {}".format(err), "red", attrs=["bold"])
+                exit(err)
 
             # Build image!
+            os.chdir(b.project_dir + "/docker")
+            err = subprocess.run(["docker", "build", "-t", "webots:test", "-f", "./WebotsDockerfile", "."]).returncode
+            if err != 0:
+                cprint("returned exit code {}".format(err), "red", attrs=["bold"])
+                exit(err)
 
         # Run docker container
         if isRun:
