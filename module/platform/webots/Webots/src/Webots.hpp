@@ -60,11 +60,16 @@ namespace module::platform::webots {
         /// @brief The time the connection was opened.
         NUClear::clock::time_point connect_time;
 
-        uint32_t sim_delta         = 0;
-        uint64_t real_delta        = 0;
-        uint32_t current_sim_time  = 0;
+        /// @brief The number of time ticks which have passed since the last IO::READ trigger
+        uint32_t sim_delta = 0;
+        /// @brief The number of milliseconds which have passed since the last IO::READ trigger
+        uint64_t real_delta = 0;
+        /// @brief The current simulation time in ticks
+        uint32_t current_sim_time = 0;
+        /// @brief The current real time in milliseconds (unix time)
         uint64_t current_real_time = 0;
 
+        /// @brief The time between two measurements, expressed in milliseconds
         int time_step;
 
     public:
