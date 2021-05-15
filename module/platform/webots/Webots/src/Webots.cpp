@@ -137,7 +137,7 @@ namespace module::platform::webots {
         throw std::runtime_error("Unable to translate unknown NUgus.proto servo id: " + id);
     }
 
-    ActuatorRequests make_inital_acutator_request() {
+    ActuatorRequests make_inital_acutator_request(int time_step) {
         message::platform::webots::ActuatorRequests to_send_next;
 
         std::vector<std::string> sensors_list = {"left_ankle_roll_sensor",
@@ -165,10 +165,10 @@ namespace module::platform::webots {
                                                  "right_camera",
                                                  "left_camera"};
 
-        for (auto& sensor : sensors_list) {
+        for (const auto& sensor : sensors_list) {
             SensorTimeStep time_step_msg;
             time_step_msg.name     = sensor;
-            time_step_msg.timeStep = 32;
+            time_step_msg.timeStep = time_step;
             to_send_next.sensor_time_steps.push_back(time_step_msg);
         }
 
@@ -445,7 +445,7 @@ namespace module::platform::webots {
 
         // Send initial message to activate the servos
         std::vector<char> data =
-            NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(make_inital_acutator_request());
+            NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(make_inital_acutator_request(time_step));
 
         uint32_t Nn = htonl(data.size());
 
