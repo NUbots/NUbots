@@ -457,6 +457,8 @@ namespace module::platform::webots {
             log<NUClear::ERROR>(fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
         }
 
+        // Temporary measure to show that we can pass servo targets
+        log("sending test targets");
         auto target     = message::motion::ServoTarget();
         target.time     = NUClear::clock::now();
         target.id       = 19;
