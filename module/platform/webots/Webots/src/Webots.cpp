@@ -458,13 +458,13 @@ namespace module::platform::webots {
             log<NUClear::ERROR>(fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
         }
 
-        auto target = message::motion::ServoTarget();
-        target.time = NUClear::clock::now();
-        target.id = 10;
+        auto target     = message::motion::ServoTarget();
+        target.time     = NUClear::clock::now();
+        target.id       = 19;
         target.position = 2;
-        target.gain = 10;
-        target.torque = 10;
-        auto targets = std::make_unique<ServoTargets>();
+        target.gain     = 10;
+        target.torque   = 10;
+        auto targets    = std::make_unique<ServoTargets>();
         targets->targets.push_back(target);
         emit(targets);
     }
