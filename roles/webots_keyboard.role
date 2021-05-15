@@ -7,8 +7,6 @@ nuclear_role(
   # Support and Configuration
   support::configuration::GlobalConfig
   support::configuration::SoccerConfig
-  # Hardware Interface
-  platform::darwin::HardwareSimulator
   platform::darwin::SensorFilter
   # Motion
   motion::QuinticWalk
