@@ -27,9 +27,9 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/input/Image.hpp"
 #include "message/motion/ServoTarget.hpp"
 #include "message/output/CompressedImage.hpp"
-#include "message/input/Image.hpp"
 #include "message/platform/darwin/DarwinSensors.hpp"
 #include "message/platform/webots/ConnectRequest.hpp"
 #include "message/platform/webots/messages.hpp"
@@ -56,9 +56,9 @@ namespace module::platform::webots {
         static_cast<float>(NUClear::clock::period::num) / static_cast<float>(NUClear::clock::period::den);
 
     using extension::Configuration;
+    using message::input::Image;
     using message::motion::ServoTargets;
     using message::output::CompressedImage;
-    using message::input::Image;
     using message::platform::darwin::DarwinSensors;
 
     using message::platform::webots::ActuatorRequests;
@@ -473,7 +473,7 @@ namespace module::platform::webots {
     }
 
     void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurements) {
-        if (false) { // Change to true to print the received sensor_measurements, will remove after this is done
+        if (false) {  // Change to true to print the received sensor_measurements, will remove after this is done
             std::cout << std::endl << std::endl << std::endl << "received SensorMeasurements: " << std::endl;
             std::cout << "  sm.time: " << sensor_measurements.time << std::endl;
             std::cout << "  sm.real_time: " << sensor_measurements.real_time << std::endl;
@@ -496,7 +496,8 @@ namespace module::platform::webots {
                 for (auto acc : sensor_measurements.accelerometers) {
                     std::cout << "    sm.accelerometers[" << i << "]" << std::endl;
                     std::cout << "      name: " << acc.name << std::endl;
-                    std::cout << "      value: [" << acc.value.X << ", " << acc.value.Y << ", " << acc.value.Z << "]" << std::endl;
+                    std::cout << "      value: [" << acc.value.X << ", " << acc.value.Y << ", " << acc.value.Z << "]"
+                              << std::endl;
                     i++;
                 }
             }
@@ -543,7 +544,8 @@ namespace module::platform::webots {
                 for (auto force : sensor_measurements.force3ds) {
                     std::cout << "    sm.force3ds[" << i << "]" << std::endl;
                     std::cout << "      name: " << force.name << std::endl;
-                    std::cout << "      value: [" << force.value.X << ", " << force.value.Y << ", " << force.value.Z << "]" << std::endl;
+                    std::cout << "      value: [" << force.value.X << ", " << force.value.Y << ", " << force.value.Z
+                              << "]" << std::endl;
                     i++;
                 }
             }
@@ -554,8 +556,10 @@ namespace module::platform::webots {
                 for (auto force : sensor_measurements.force6ds) {
                     std::cout << "    sm.force6ds[" << i << "]" << std::endl;
                     std::cout << "      name: " << force.name << std::endl;
-                    std::cout << "      force: [" << force.force.X << ", " << force.force.Y << ", " << force.force.Z << "]" << std::endl;
-                    std::cout << "      torque: [" << force.torque.X << ", " << force.force.Y << ", " << force.force.Z << "]" << std::endl;
+                    std::cout << "      force: [" << force.force.X << ", " << force.force.Y << ", " << force.force.Z
+                              << "]" << std::endl;
+                    std::cout << "      torque: [" << force.torque.X << ", " << force.force.Y << ", " << force.force.Z
+                              << "]" << std::endl;
                     i++;
                 }
             }
@@ -566,7 +570,8 @@ namespace module::platform::webots {
                 for (auto gyro : sensor_measurements.gyros) {
                     std::cout << "    sm.gyros[" << i << "]" << std::endl;
                     std::cout << "      name: " << gyro.name << std::endl;
-                    std::cout << "      value: [" << gyro.value.X << ", " << gyro.value.Y << ", " << gyro.value.Z << "]" << std::endl;
+                    std::cout << "      value: [" << gyro.value.X << ", " << gyro.value.Y << ", " << gyro.value.Z << "]"
+                              << std::endl;
                     i++;
                 }
             }
@@ -594,7 +599,7 @@ namespace module::platform::webots {
 
         if (sensor_measurements.accelerometers.size() > 0) {
             // .accelerometers is a list of one, since our robots have only one accelerometer
-            const auto& accelerometer = sensor_measurements.accelerometers[0];
+            const auto& accelerometer    = sensor_measurements.accelerometers[0];
             sensor_data->accelerometer.x = static_cast<float>(accelerometer.value.X);
             sensor_data->accelerometer.y = static_cast<float>(accelerometer.value.Y);
             sensor_data->accelerometer.z = static_cast<float>(accelerometer.value.Z);
@@ -602,7 +607,7 @@ namespace module::platform::webots {
 
         if (sensor_measurements.gyros.size() > 0) {
             // .gyros is a list of one, since our robots have only one gyroscope
-            const auto& gyro = sensor_measurements.gyros[0];
+            const auto& gyro         = sensor_measurements.gyros[0];
             sensor_data->gyroscope.x = static_cast<float>(gyro.value.X);
             sensor_data->gyroscope.y = static_cast<float>(gyro.value.Y);
             sensor_data->gyroscope.z = static_cast<float>(gyro.value.Z);
@@ -630,11 +635,12 @@ namespace module::platform::webots {
 
         for (const auto& camera : sensor_measurements.cameras) {
             // Convert the incoming image so we can emit it to the PowerPlant.
-            auto image            = std::make_unique<Image>(); // Change to CompressedImage when compression is implemented in webots
+            auto image =
+                std::make_unique<Image>();  // Change to CompressedImage when compression is implemented in webots
             image->name           = camera.name;
             image->dimensions.x() = camera.width;
             image->dimensions.y() = camera.height;
-            image->format         = fourcc("RGB3"); // Change to "JPEG" when webots compression is implemented
+            image->format         = fourcc("RGB3");  // Change to "JPEG" when webots compression is implemented
             image->data           = camera.image;
             emit(image);
         }
