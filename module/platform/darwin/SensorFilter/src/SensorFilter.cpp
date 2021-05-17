@@ -521,15 +521,18 @@ namespace module::platform::darwin {
                     sensors->feet[side].Hwf = footlanding_Hwf[side].matrix();
                 }
 
-                // Calculate our time offset from the last read
-                // too hard to read
-                const double deltaT = std::max(
-                    (input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp)).count()
-                        / double(NUClear::clock::period::den),
-                    0.0);
+                // Calculate our time offset from the last read then update the filter's time
+                {
+                    using namespace std::chrono;
+                    constexpr double CLOCK_FACTOR = NUClear::clock::period::num / NUClear::clock::period::den;
 
-                // Time update
-                motionFilter.time(deltaT);
+                    const double deltaT = std::max(
+                        (input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp)).count()
+                            * CLOCK_FACTOR,
+                        0.0);
+
+                    motionFilter.time(deltaT);
+                }
 
                 // Convert the motion filter's state vector to a nicer representation, so we can access its elements
                 const auto o = MotionModel<double>::StateVec(motionFilter.get());
