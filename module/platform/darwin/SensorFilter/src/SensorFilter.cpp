@@ -205,8 +205,8 @@ namespace module::platform::darwin {
                     }
                 }
 
-                bool newLeftDown   = leftCount > config.buttons.debounceThreshold;
-                bool newMiddleDown = middleCount > config.buttons.debounceThreshold;
+                const bool newLeftDown   = leftCount > config.buttons.debounceThreshold;
+                const bool newMiddleDown = middleCount > config.buttons.debounceThreshold;
 
                 if (newLeftDown != leftDown) {
 
@@ -415,10 +415,10 @@ namespace module::platform::darwin {
                 // Otherwise, guess which foot is down by comparing the feet positions to the
                 // footDown certainty threshold
                 else {
-                    Eigen::Affine3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
-                    Eigen::Affine3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
-                    Eigen::Affine3d Hlr  = Htl.inverse() * Htr;
-                    Eigen::Vector3d rRLl = Hlr.translation();
+                    const Eigen::Affine3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
+                    const Eigen::Affine3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
+                    const Eigen::Affine3d Hlr  = Htl.inverse() * Htr;
+                    const Eigen::Vector3d rRLl = Hlr.translation();
 
                     // Right foot is below left foot in left foot space by more than the certainty threshold
                     if (rRLl.z() < -config.footDown.certaintyThreshold) {
@@ -455,7 +455,7 @@ namespace module::platform::darwin {
                                      MeasurementType::GYROSCOPE());
 
                 // Calculate accelerometer noise factor
-                Eigen::Matrix3d acc_noise =
+                const Eigen::Matrix3d acc_noise =
                     config.motionFilter.noise.measurement.accelerometer
                     // Add noise which is proportional to the square of how much we are moving, minus gravity
                     // This means that the faster we move, the noisier we think the measurements are
@@ -471,7 +471,7 @@ namespace module::platform::darwin {
                 for (auto&& side : {BodySide::LEFT, BodySide::RIGHT}) {
                     const bool foot_down      = sensors->feet[side].down;
                     const bool prev_foot_down = previous_foot_down[side];
-                    Eigen::Affine3d Htf(
+                    const Eigen::Affine3d Htf(
                         sensors->Htx[side == BodySide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL]);
 
                     // If this sides foot is down, and it was down at the previous time step, then we calculate our
@@ -482,7 +482,7 @@ namespace module::platform::darwin {
                         Hwt.linear()      = filterState.Rwt.toRotationMatrix();
                         Hwt.translation() = filterState.rTWw;
 
-                        Eigen::Affine3d Htg(utility::motion::kinematics::calculateGroundSpace(Htf, Hwt));
+                        const Eigen::Affine3d Htg(utility::motion::kinematics::calculateGroundSpace(Htf, Hwt));
 
                         footlanding_Hwf[side]                   = Hwt * Htg;
                         footlanding_Hwf[side].translation().z() = 0.0;
@@ -494,9 +494,9 @@ namespace module::platform::darwin {
                     // Else is down, and didn't hit the ground this time step
                     else if (foot_down && prev_foot_down) {
                         // Use stored Hwf and Htf to calculate Hwt
-                        Eigen::Affine3d Hft = Htf.inverse();
+                        const Eigen::Affine3d Hft = Htf.inverse();
                         // I think that this (footlanding_Hwf) could have weird stuff stored / be uninitialised
-                        Eigen::Affine3d footlanding_Hwt = footlanding_Hwf[side] * Hft;
+                        const Eigen::Affine3d footlanding_Hwt = footlanding_Hwf[side] * Hft;
 
                         // do a foot based position update
                         motionFilter.measure(Eigen::Vector3d(footlanding_Hwt.translation()),
