@@ -164,7 +164,7 @@ namespace module::vision {
                 // Preserve mesh so that anyone using the GreenHorizon can access the original data
                 msg->mesh = const_cast<VisualMesh*>(&mesh)->shared_from_this();
 
-                msg->id        = mesh.id;
+                msg->id        = mesh.camera_id;
                 msg->Hcw       = mesh.Hcw;
                 msg->timestamp = mesh.timestamp;
 

@@ -71,7 +71,7 @@ namespace module::vision {
                             // Move stuff into the emit message
                             auto msg             = std::make_unique<message::vision::VisualMesh>();
                             msg->timestamp       = image.timestamp;
-                            msg->camera_id       = image.camera_id;
+                            msg->camera_id       = image.id;
                             msg->name            = image.name;
                             msg->Hcw             = image.Hcw;
                             msg->rays            = std::move(result.rays);
