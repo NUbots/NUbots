@@ -547,25 +547,19 @@ namespace module::platform::darwin {
                 sensors->inertia_tensor = calculateInertialTensor(kinematicsModel, sensors->Htx);
 
                 /************************************************
-                 *                  Kinematics Horizon          *
+                 *                  Calculate Hgt               *
                  ************************************************/
                 // Extract the inverse of the rotation component of Htw
                 const Eigen::Matrix3d Rwt(sensors->Htw.topLeftCorner<3, 3>().transpose());
                 // We remove the yaw by making an angleaxis which has just the negative yaw,
                 // then multiplying it back in, taking the yaw away
                 const Eigen::AngleAxisd Rwt_negative_yaw(-Rwt.eulerAngles(0, 1, 2).z(), Eigen::Vector3d::UnitZ());
-                const Eigen::Affine3d Rgt(Rwt_negative_yaw * Rwt);
 
-                sensors->Hgt = Rgt.matrix();
-
-                // Get torso to ground transform (then do nothing with it????)
-                Eigen::AngleAxisd yawlessWorldInvR(
-                    // Also removing the yaw in the same way
-                    Eigen::AngleAxisd(-Hwt.rotation().eulerAngles(0, 1, 2).z(), Eigen::Vector3d::UnitZ())
-                    * Hwt.rotation());
                 Eigen::Affine3d Hgt;
+                Hgt.linear()      = Rwt_negative_yaw * Rwt;
                 Hgt.translation() = Eigen::Vector3d(0, 0, Hwt.translation().z());
-                Hgt.linear()      = yawlessWorldInvR.toRotationMatrix();
+                sensors->Hgt      = Hgt.matrix();
+
                 emit(std::move(sensors));
             });
     }
