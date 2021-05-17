@@ -11,7 +11,9 @@
 ### the date in the FROM command
 ### Date format is ISO year/month/day
 FROM archlinux:base-20210110.0.13332
-RUN echo "Server=https://archive.archlinux.org/repos/2021/01/10/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
+
+# ↓↓↓ UPDATE MIRRORS HERE ↓↓↓
+RUN echo -e "Server=http://host.docker.internal:7878/\$repo/os/\$arch\nServer=https://archive.archlinux.org/repos/2021/01/10/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
 
 # Arch recommends running this as the first command of the docker image
 # Use "yyuu" to allow for downgrades
@@ -90,7 +92,7 @@ RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 
 # LLVM and Clang
 RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-11.0.1.tar.gz \
-    -DLLVM_ENABLE_PROJECTS="clang" \
+    -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" \
     -DLLVM_ENABLE_SPHINX=OFF \
     -DLLVM_BUILD_LLVM_DYLIB=ON \
     -DLLVM_LINK_LLVM_DYLIB=ON
@@ -165,12 +167,6 @@ RUN install-package gcc-fortran
 COPY usr/local/package/openblas/${platform}.sh /usr/local/package/openblas.sh
 RUN /usr/local/package/openblas.sh https://github.com/xianyi/OpenBLAS/archive/v0.3.13.tar.gz
 
-# Armadillo
-RUN install-cmake-from-source https://downloads.sourceforge.net/project/arma/armadillo-9.800.3.tar.xz \
-    -DDETECT_HDF5=OFF \
-    -DBUILD_SHARED_LIBS=ON
-COPY usr/local/include/armadillo_bits/config.hpp /usr/local/include/armadillo_bits/config.hpp
-
 # Eigen3
 COPY usr/local/package/eigen3/deprecated-copy.patch /usr/local/package/deprecated-copy.patch
 COPY usr/local/package/eigen3/cxx17-overalign.patch /usr/local/package/cxx17-overalign.patch
@@ -240,7 +236,7 @@ RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.34.1.tar
     -DBUILD_TESTING=OFF
 
 # NUClear!
-RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.gz \
+RUN install-from-source https://github.com/Fastcode/NUClear/archive/153ccdb9a13dbc88f3c448e07a3048d67235116e.tar.gz \
     -DBUILD_TESTS=OFF
 
 # Backtrace
@@ -256,12 +252,19 @@ RUN install-from-source https://github.com/espeak-ng/pcaudiolib/archive/1.1.tar.
 COPY usr/local/package/espeak.sh /usr/local/package/espeak.sh
 RUN /usr/local/package/espeak.sh https://github.com/espeak-ng/espeak-ng/releases/download/1.50/espeak-ng-1.50.tgz
 
+# zstr header to have file streams that do zlib compression
+RUN mkdir -p /usr/local/include/zstr \
+    && wget https://raw.githubusercontent.com/mateidavid/zstr/v1.0.4/src/zstr.hpp -O /usr/local/include/zstr.hpp \
+    && wget https://raw.githubusercontent.com/mateidavid/zstr/v1.0.4/src/strict_fstream.hpp -O /usr/local/include/strict_fstream.hpp \
+    && wget https://raw.githubusercontent.com/mateidavid/zstr/v1.0.4/src/zstr_make_unique_polyfill.h -O /usr/local/include/zstr_make_unique_polyfill.h
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
 
 # Install python libraries
 RUN pip install \
+    xxhash \
     pylint \
     termcolor \
     stringcase \

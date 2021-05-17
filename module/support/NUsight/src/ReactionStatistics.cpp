@@ -21,8 +21,7 @@
 
 #include "NUsight.hpp"
 
-namespace module {
-namespace support {
+namespace module::support {
     using ReactionStatisticsProto = message::support::nuclear::ReactionStatistics;
     using NUClear::message::ReactionStatistics;
     using std::chrono::duration_cast;
@@ -47,5 +46,4 @@ namespace support {
         //     send(reactionStatistics);
         // }));
     }
-}  // namespace support
-}  // namespace module
+}  // namespace module::support

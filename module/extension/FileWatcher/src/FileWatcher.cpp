@@ -23,8 +23,7 @@
 
 #include "utility/file/fileutil.hpp"
 
-namespace module {
-namespace extension {
+namespace module::extension {
 
     using ::extension::FileWatch;
     using ::extension::FileWatchRequest;
@@ -39,8 +38,7 @@ namespace extension {
         std::lock_guard<std::mutex> lock(reactor.paths_mutex);
 
         // Work out what path we are watching
-        std::array<char, 512> pathbuff;
-        pathbuff.fill('\0');
+        std::array<char, 512> pathbuff{};
         size_t size = pathbuff.size();
         uv_fs_event_getpath(handle, pathbuff.data(), &size);
         std::string path(pathbuff.data());
@@ -276,5 +274,4 @@ namespace extension {
     FileWatcher::~FileWatcher() {
         uv_loop_close(loop.get());
     }
-}  // namespace extension
-}  // namespace module
+}  // namespace module::extension

@@ -6,12 +6,12 @@
 
 namespace module::output::compressor::vaapi::operation {
 
-std::pair<VABufferID, VABufferID> jpeg_header(VADisplay dpy,
-                                              VAContextID context,
-                                              uint32_t width,
-                                              uint32_t height,
-                                              const bool& monochrome,
-                                              int quality);
+    std::pair<VABufferID, VABufferID> jpeg_header(VADisplay dpy,
+                                                  VAContextID context,
+                                                  uint32_t width,
+                                                  uint32_t height,
+                                                  const bool& monochrome,
+                                                  int quality);
 
 }  // namespace module::output::compressor::vaapi::operation
 

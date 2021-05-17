@@ -22,18 +22,14 @@
 
 
 #include <nuclear>
-namespace module {
-namespace behaviour {
-    namespace tools {
+namespace module::behaviour::tools {
 
-        class SpeakTest : public NUClear::Reactor {
-        public:
-            /// @brief Called by the powerplant to build and setup the SpeakTest reactor.
-            explicit SpeakTest(std::unique_ptr<NUClear::Environment> environment);
-        };
-    }  // namespace tools
-}  // namespace behaviour
-}  // namespace module
+    class SpeakTest : public NUClear::Reactor {
+    public:
+        /// @brief Called by the powerplant to build and setup the SpeakTest reactor.
+        explicit SpeakTest(std::unique_ptr<NUClear::Environment> environment);
+    };
+}  // namespace module::behaviour::tools
 
 
 #endif

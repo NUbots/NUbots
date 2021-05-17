@@ -21,27 +21,8 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <armadillo>
 
-#include "utility/math/matrix/Transform2D.hpp"
-#include "utility/math/matrix/Transform3D.hpp"
-
-namespace utility {
-namespace localisation {
-
-    // Transforms the field state (x,y,theta) to the correct transform Hfw : World -> Field
-    inline utility::math::matrix::Transform3D fieldStateToTransform3D(const arma::vec3& state) {
-        utility::math::matrix::Transform3D Hfw;
-        Hfw.translation() = arma::vec3({state[0], state[1], 0});
-        Hfw               = Hfw.rotateZ(state[2]);
-        return Hfw;
-    }
-
-    // Transforms the transform
-    inline arma::vec3 transform3DToFieldState(const utility::math::matrix::Transform3D& m) {
-        utility::math::matrix::Transform2D ax = m.projectTo2D(arma::vec3({0, 0, 1}), arma::vec3({1, 0, 0}));
-        return arma::vec3({ax.x(), ax.y(), ax.angle()});
-    }
+namespace utility::localisation {
 
     // Transforms the field state (x,y,theta) to the correct transform Hfw : World -> Field
     inline Eigen::Affine3d fieldStateToTransform3D(const Eigen::Vector3d& state) {
@@ -57,23 +38,23 @@ namespace localisation {
         Eigen::Affine2d result;
 
         // Translation
-        Eigen::Vector3d orthoForwardAxis = yawAxis.cross(forwardAxis.cross(yawAxis)).normalized();
-        Eigen::Vector3d r                = m.translation();
-        Eigen::Affine3d newSpaceToWorld;
-        newSpaceToWorld.linear().block<3, 1>(0, 0) = orthoForwardAxis;
-        newSpaceToWorld.linear().block<3, 1>(0, 1) = yawAxis.cross(orthoForwardAxis);
-        newSpaceToWorld.linear().block<3, 1>(0, 2) = yawAxis;
-        Eigen::Affine3d worldToNewSpace            = newSpaceToWorld.inverse();
-        Eigen::Vector3d rNewSpace                  = worldToNewSpace * r;
-        result.translation()                       = rNewSpace.head<2>();
+        const Eigen::Vector3d orthoForwardAxis = yawAxis.cross(forwardAxis.cross(yawAxis)).normalized();
+        const Eigen::Vector3d r                = m.translation();
+        Eigen::Affine3d newSpaceToWorld(Eigen::Affine3d::Identity());
+        newSpaceToWorld.linear().leftCols<1>()    = orthoForwardAxis;
+        newSpaceToWorld.linear().middleCols<1>(1) = yawAxis.cross(orthoForwardAxis);
+        newSpaceToWorld.linear().rightCols<1>()   = yawAxis;
+        const Eigen::Affine3d worldToNewSpace(newSpaceToWorld.inverse());
+        Eigen::Vector3d rNewSpace = worldToNewSpace * r;
+        result.translation()      = rNewSpace.head<2>();
 
         // Rotation
         Eigen::Affine3d rot(m);
-        rot.translation()    = Eigen::Vector3d::Zero();
-        Eigen::Vector3d x    = rot.linear().block<3, 1>(0, 0);
-        Eigen::Vector3d xNew = worldToNewSpace * x;
-        float theta_x_from_f = std::atan2(xNew.y(), xNew.x());  // sin/cos
-        result.linear()      = Eigen::Rotation2Dd(theta_x_from_f).toRotationMatrix();
+        rot.translation() = Eigen::Vector3d::Zero();
+        const Eigen::Vector3d x(rot.linear().leftCols<1>());
+        const Eigen::Vector3d xNew(worldToNewSpace * x);
+        const float theta_x_from_f = std::atan2(xNew.y(), xNew.x());  // sin/cos
+        result.linear()            = Eigen::Rotation2Dd(theta_x_from_f).toRotationMatrix();
 
         return result;
     }
@@ -83,7 +64,6 @@ namespace localisation {
         return projectTo2D(m, Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitX());
     }
 
-}  // namespace localisation
-}  // namespace utility
+}  // namespace utility::localisation
 
 #endif

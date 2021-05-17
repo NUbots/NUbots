@@ -49,17 +49,13 @@ if __name__ == "__main__":
 
         {includes}
 
-        namespace module {{
-        namespace support {{
-            namespace logging {{
+        namespace module::support::logging {{
 
-                void DataPlayback::register_players() {{
+            void DataPlayback::register_players() {{
         {players}
-                }}
+            }}
 
-            }}  // namespace logging
-        }}  // namespace support
-        }}  // namespace module
+        }}  // namespace module::support::logging
 
         """
     )

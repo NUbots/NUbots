@@ -20,30 +20,23 @@
 #ifndef MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_HPP
 #define MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_HPP
 
-#include <armadillo>
-#include <nuclear>
-
 #include "message/input/Sensors.hpp"
 #include "message/motion/KickCommand.hpp"
-namespace module {
-namespace behaviour {
-    namespace planning {
+namespace module::behaviour::planning {
 
-        class KickPlanner : public NUClear::Reactor {
-        public:
-            /// @brief Called by the powerplant to build and setup the KickPlanner reactor.
-            explicit KickPlanner(std::unique_ptr<NUClear::Environment> environment);
+    class KickPlanner : public NUClear::Reactor {
+    public:
+        /// @brief Called by the powerplant to build and setup the KickPlanner reactor.
+        explicit KickPlanner(std::unique_ptr<NUClear::Environment> environment);
 
-        private:
-            bool kickValid(const arma::vec3& ballPos);
-            bool forcePlaying = false;
-            message::motion::KickPlannerConfig cfg;
-            NUClear::clock::time_point ballLastSeen;
-            NUClear::clock::time_point lastTimeValid;
-        };
-    }  // namespace planning
-}  // namespace behaviour
-}  // namespace module
+    private:
+        bool kickValid(const Eigen::Vector3d& ballPos);
+        bool forcePlaying = false;
+        message::motion::KickPlannerConfig cfg;
+        NUClear::clock::time_point ballLastSeen;
+        NUClear::clock::time_point lastTimeValid;
+    };
+}  // namespace module::behaviour::planning
 
 
 #endif
