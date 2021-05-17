@@ -99,7 +99,7 @@ namespace module::platform::darwin {
             this->config.footDown.fromLoad           = config["foot_down"]["from_load"].as<bool>();
             this->config.footDown.certaintyThreshold = config["foot_down"]["certainty_threshold"].as<float>();
 
-            // Motion filter config
+            // Set velocity decay
             this->config.motionFilter.velocityDecay =
                 config["motion_filter"]["update"]["velocity_decay"].as<Expression>();
             motionFilter.model.timeUpdateVelocityDecay = this->config.motionFilter.velocityDecay;
@@ -135,7 +135,7 @@ namespace module::platform::darwin {
             this->config.motionFilter.noise.process.gyroscopeBias =
                 config["motion_filter"]["noise"]["process"]["gyroscope_bias"].as<Expression>();
 
-            // Set our initial state vector
+            // Set our initial noise vector
             MotionModel<double>::StateVec process_noise;
             process_noise.rTWw               = this->config.motionFilter.noise.process.position;
             process_noise.vTw                = this->config.motionFilter.noise.process.velocity;
@@ -144,7 +144,7 @@ namespace module::platform::darwin {
             process_noise.omegaTTt_bias      = this->config.motionFilter.noise.process.gyroscopeBias;
             motionFilter.model.process_noise = process_noise;
 
-            // Set our mean configs
+            // Set our initial means
             this->config.motionFilter.initial.mean.position =
                 config["motion_filter"]["initial"]["mean"]["position"].as<Expression>();
             this->config.motionFilter.initial.mean.velocity =
@@ -156,6 +156,7 @@ namespace module::platform::darwin {
             this->config.motionFilter.initial.mean.gyroscopeBias =
                 config["motion_filter"]["initial"]["mean"]["gyroscope_bias"].as<Expression>();
 
+            // Set our initial covariances
             this->config.motionFilter.initial.covariance.position =
                 config["motion_filter"]["initial"]["covariance"]["position"].as<Expression>();
             this->config.motionFilter.initial.covariance.velocity =
@@ -167,7 +168,7 @@ namespace module::platform::darwin {
             this->config.motionFilter.initial.covariance.gyroscopeBias =
                 config["motion_filter"]["initial"]["covariance"]["gyroscope_bias"].as<Expression>();
 
-            // Set our initial state with the config state
+            // Set our initial state with the config means and covariances, resetting the filter in the process
             MotionModel<double>::StateVec mean;
             mean.rTWw          = this->config.motionFilter.initial.mean.position;
             mean.vTw           = this->config.motionFilter.initial.mean.velocity;
@@ -337,24 +338,16 @@ namespace module::platform::darwin {
                     }
                 }
 
-                // It's worth making absolutely sure that these are correct for a NUgus...
-                // gyro_x to the right
-                // gyro_y to the back
-                // gyro_z down
-
-                // This is a left-handed coordinate system?? that's not just a rotation of the CM740, if it's normally
-                // a right-handed coordinate system
-                // acc_x to the back
-                // acc_y to the left
-                // acc_z up
 
                 // If we have a previous Sensors message and our cm740 has errors, then reuse our last sensor value
                 if (input.cm740_error_flags && previousSensors) {
                     sensors->accelerometer = previousSensors->accelerometer;
                 }
                 else {
+                    // acc_x to the back
+                    // acc_y to the left
+                    // acc_z up
                     sensors->accelerometer =
-                        // accelerometer.x is backwards
                         Eigen::Vector3d(-input.accelerometer.x, input.accelerometer.y, input.accelerometer.z);
                 }
 
@@ -371,7 +364,9 @@ namespace module::platform::darwin {
                     sensors->gyroscope = previousSensors->gyroscope;
                 }
                 else {
-                    // This smells wrong. y x -z? at the very least this needs an explanatory comment
+                    // gyro_x to the right
+                    // gyro_y to the back
+                    // gyro_z down
                     sensors->gyroscope = Eigen::Vector3d(input.gyroscope.y, input.gyroscope.x, -input.gyroscope.z);
                 }
 
@@ -461,9 +456,10 @@ namespace module::platform::darwin {
                                      MeasurementType::GYROSCOPE());
 
                 // Calculate accelerometer noise factor
-                // Tom has never seen this. Updating the noise dynamically based on the acceleration seems very spicy
                 Eigen::Matrix3d acc_noise =
                     config.motionFilter.noise.measurement.accelerometer
+                    // Add noise which is proportional to the square of how much we are moving, minus gravity
+                    // This means that the faster we move, the noisier we think the measurements are
                     + ((sensors->accelerometer.norm() - std::abs(G)) * (sensors->accelerometer.norm() - std::abs(G)))
                           * config.motionFilter.noise.measurement.accelerometerMagnitude;
 
