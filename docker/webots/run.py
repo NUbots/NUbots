@@ -3,16 +3,23 @@
 import os
 import subprocess
 import sys
+from typing import Tuple
 
 BINARIES_DIR = "/home/nubots/NUbots/binaries"
 
+ENV_VARS = {
+    "ROBOCUP_ROBOT_ID": "ROBOCUP_ROBOT_ID",
+    "ROBOCUP_TEAM_COLOR": "ROBOCUP_TEAM_COLOR",
+    "ROBOCUP_SIMULATOR_ADDR": "ROBOCUP_SIMULATOR_ADDR",
+}
 
-def main():
+
+def read_args() -> Tuple[str, dict]:
     if len(sys.argv) != 2:
         print("Please specifiy a single role to run!")
         sys.exit(1)
 
-    run_role = sys.argv[1]
+    role = sys.argv[1]
 
     built_roles = []
 
@@ -21,49 +28,42 @@ def main():
         if os.path.isfile(os.path.join(BINARIES_DIR, filename)):
             built_roles.append(filename)
 
-    if run_role not in built_roles:
-        print("That role does not exist!")
-        sys.exit(0)
+    if role not in built_roles:
+        print("The role '" + role + "' does not exist!")
+        sys.exit(1)
 
-    env_vars = {
-        "ROBOCUP_ROBOT_ID": "ROBOCUP_ROBOT_ID",
-        "ROBOCUP_TEAM_COLOR": "ROBOCUP_TEAM_COLOR",
-        "ROBOCUP_SIMULATOR_ADDR": "ROBOCUP_SIMULATOR_ADDR",
-    }
+    # Read env vars
+    config = {k: os.environ.get(v) for k, v in ENV_VARS.items() if v in os.environ}
 
-    # Read environment variables
-    config = {k: os.environ.get(v) for k, v in env_vars.items() if v in os.environ}
-
-    unset_vars = {k: env_vars[k] for k in env_vars if k not in config}
+    # Dict of env vars that didn't get set :(
+    unset_vars = {k: ENV_VARS[k] for k in ENV_VARS if k not in config}
 
     # If not all needed environment variables were set
     if len(unset_vars) != 0:
         print("The following environment variables were not set!")
         for var in unset_vars:
             print(var)
+        sys.exit(1)
 
-    # Set environment variables
-    setEnvVars(config)
-
-    # Run Role!
+    return role, config
 
 
-def setEnvVars(config: dict):
+def set_env_vars(config: dict) -> None:
     # print(config)
     # Set args in appropriate config files
     pass
 
 
-def runRole(inRole: str):
+def run_role(inRole: str) -> None:
+    print(inRole)
     # Change into binaries directory
     os.chdir(BINARIES_DIR)
 
     # Run Binary
-    err = subprocess.run([inRole]).returncode
-    if err != 0:
-        print("returned exit code {}".format(err))
-        exit(err)
+    exit(subprocess.run("./" + inRole).returncode)
 
 
 if __name__ == "__main__":
-    main()
+    role, env_vars = read_args()
+    set_env_vars(env_vars)
+    run_role(role)

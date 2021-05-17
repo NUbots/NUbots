@@ -33,5 +33,4 @@ RUN ldconfig
 # Make a symlink from /usr/local/lib to /usr/local/lib64 so library install location is irrelevant
 RUN cd /usr/local && ln -sf lib lib64
 
-
 ENTRYPOINT [ "python3", "run.py" ]

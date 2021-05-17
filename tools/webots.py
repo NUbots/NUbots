@@ -9,101 +9,95 @@ import b
 
 
 def register(command):
+
     command.help = "Build and run images for use with Webots simulation environment"
+    subparsers = command.add_subparsers(help="sub-command help", dest="sub_command")
 
-    command.add_argument(
-        "-b",
-        "--build",
-        dest="isBuild",
-        action="store_true",
-        default=False,
-        help="Build a docker image for use with Webots simulation environment",
-    )
+    command_build = subparsers.add_parser("build")
+    command_run = subparsers.add_parser("run")
 
-    command.add_argument(
-        "-r",
-        "--run",
-        dest="isRun",
-        action="store_true",
-        default=False,
-        help="Run a container",
-    )
-
-    command.add_argument(
+    command_build.add_argument(
         "-c",
         "--clean",
-        dest="isClean",
+        dest="clean",
         action="store_true",
         default=False,
         help="Cleans config (./b configure --clean)",
     )
 
-    command.add_argument(
+    command_build.add_argument(
         "-p",
         "--push",
-        dest="isPush",
+        dest="push",
         action="store_true",
         default=False,
         help="Pushes image to Docker Hub",
     )
 
+    command_run.add_argument("role", nargs=1, help="Role to run")
 
-def run(isBuild, isRun, isClean, isPush, **kwargs):
-    if isBuild or isRun or isPush:
 
-        # Build docker image
-        if isBuild:
-            # Set target
-            err = subprocess.run(["./b", "target", "robocup2021"]).returncode
+def run(sub_command, role=None, **kwargs):
+    if sub_command == "build":
+
+        # # Set target
+        # err = subprocess.run(["./b", "target", "robocup2021"]).returncode
+        # if err != 0:
+        #     cprint("returned exit code {}".format(err), "red", attrs=["bold"])
+        #     exit(err)
+
+        # Remove build volume
+        if kwargs["clean"] == True:
+            # Clean config
+            err = subprocess.run(["./b", "configure", "--clean"]).returncode
             if err != 0:
                 cprint("returned exit code {}".format(err), "red", attrs=["bold"])
                 exit(err)
 
-            if isClean:
-                # Clean config
-                err = subprocess.run(["./b", "configure", "--clean"]).returncode
-                if err != 0:
-                    cprint("returned exit code {}".format(err), "red", attrs=["bold"])
-                    exit(err)
+        # Set build config
+        err = subprocess.run(
+            ["./b", "configure", "--", "-DCMAKE_BUILD_TYPE=Release", "--", "-DROLE_robocup2021=ON"]
+        ).returncode
+        if err != 0:
+            cprint("returned exit code {}".format(err), "red", attrs=["bold"])
+            exit(err)
 
-            # Set build config
-            err = subprocess.run(["./b", "configure", "--", "-DCMAKE_BUILD_TYPE=Release"]).returncode
-            if err != 0:
-                cprint("returned exit code {}".format(err), "red", attrs=["bold"])
-                exit(err)
+        # Build code
+        err = subprocess.run(["./b", "build"]).returncode
+        if err != 0:
+            cprint("returned exit code {}".format(err), "red", attrs=["bold"])
+            exit(err)
 
-            # Build code
-            err = subprocess.run(["./b", "build"]).returncode
-            if err != 0:
-                cprint("returned exit code {}".format(err), "red", attrs=["bold"])
-                exit(err)
+        # Copy compiled binaries and runtime dependancies out of build volume
+        err = subprocess.run(["./b", "install", "local"]).returncode
+        if err != 0:
+            cprint("returned exit code {}".format(err), "red", attrs=["bold"])
+            exit(err)
 
-            # Copy compiled binaries and runtime dependancies out of build volume
-            err = subprocess.run(["./b", "install", "local"]).returncode
-            if err != 0:
-                cprint("returned exit code {}".format(err), "red", attrs=["bold"])
-                exit(err)
+        # Build image!
+        os.chdir(b.project_dir + "/docker")
+        err = subprocess.run(["docker", "build", "-t", "webots:test", "-f", "./WebotsDockerfile", "."]).returncode
+        if err != 0:
+            cprint("returned exit code {}".format(err), "red", attrs=["bold"])
+            exit(err)
 
-            # Build image!
-            os.chdir(b.project_dir + "/docker")
-            err = subprocess.run(["docker", "build", "-t", "webots:test", "-f", "./WebotsDockerfile", "."]).returncode
-            if err != 0:
-                cprint("returned exit code {}".format(err), "red", attrs=["bold"])
-                exit(err)
-
-        # Run docker container
-        if isRun:
-            # Check image exists
-
-            # Run!
-            pass
-
-        # Push image to Docker Hub
-        if isPush:
-            # Check image exists
-
-            # Push
-            pass
+    # Just for testing atm
+    elif sub_command == "run":
+        docker_run_command = [
+            "docker",
+            "container",
+            "run",
+            "--rm",
+            "-e",
+            "ROBOCUP_ROBOT_ID=1",
+            "-e",
+            "ROBOCUP_TEAM_COLOR=1",
+            "-e",
+            "ROBOCUP_SIMULATOR_ADDR=1",
+            "webots:test",
+        ]
+        docker_run_command.append(role[0])
+        subprocess.run(docker_run_command)
 
     else:
         # Probably a better way to call help when no sub commands are given?
