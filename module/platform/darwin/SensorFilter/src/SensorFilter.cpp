@@ -483,6 +483,12 @@ namespace module::platform::darwin {
                         Hwt.linear()      = filterState.Rwt.toRotationMatrix();
                         Hwt.translation() = filterState.rTWw;
 
+                        // Htg is intended to be such that the "foot down" position is where the foot would be if it
+                        // were flat, even if it's not flat when first touches the ground.
+                        // As the foot flattens, it's meant to becomes true.
+                        // This means that even if the foot hits the ground at an angle, it doesn't store that angled
+                        // position as the footlanding_Hwf, but instead stores the position that foot would be if/when
+                        // it becomes flat on the ground
                         const Eigen::Affine3d Htg(utility::motion::kinematics::calculateGroundSpace(Htf, Hwt));
 
                         footlanding_Hwf[side]                   = Hwt * Htg;
