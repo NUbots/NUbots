@@ -350,11 +350,12 @@ namespace module::platform::darwin {
                         Eigen::Vector3d(-input.accelerometer.x, input.accelerometer.y, input.accelerometer.z);
                 }
 
-                // If we have a previous sensors and (our cm740 has errors or we are spinning too quickly), then
+                // If we have a previous Sensors message and (our cm740 has errors or we are spinning too quickly), then
                 // reuse our last sensor value
                 if (previousSensors
                     && (input.cm740_error_flags
-                        // if it's rotating this quick, something is probably wrong
+                        // One of the gyros would occasionally throw massive numbers without an error flag
+                        // If our hardware is working as intended, it should never read that we're spinning at 2 revs/s
                         || Eigen::Vector3d(input.gyroscope.x, input.gyroscope.y, input.gyroscope.z).norm()
                                > 4.0 * M_PI)) {
                     NUClear::log<NUClear::WARN>(
@@ -474,7 +475,7 @@ namespace module::platform::darwin {
                     const Eigen::Affine3d Htf(
                         sensors->Htx[side == BodySide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL]);
 
-                    // If this sides foot is down, and it was down at the previous time step, then we calculate our
+                    // If this sides foot is down, and it was not down at the previous time step, then we calculate our
                     // new footlanding_Hwf value, because our foot has just landed
                     if (foot_down && !prev_foot_down) {
                         const auto filterState = MotionModel<double>::StateVec(motionFilter.get());
@@ -487,15 +488,15 @@ namespace module::platform::darwin {
                         footlanding_Hwf[side]                   = Hwt * Htg;
                         footlanding_Hwf[side].translation().z() = 0.0;
 
-                        // This foot was down at this time step, so next time step's previous time step should
-                        // have the foot down
+                        // Store the current foot down state for next time
                         previous_foot_down[side] = true;
                     }
                     // Else is down, and didn't hit the ground this time step
                     else if (foot_down && prev_foot_down) {
                         // Use stored Hwf and Htf to calculate Hwt
                         const Eigen::Affine3d Hft = Htf.inverse();
-                        // I think that this (footlanding_Hwf) could have weird stuff stored / be uninitialised
+                        // Guaranteed to be initialised, because the prev_foot_down is initialised as false, so the
+                        // previous if() condition will be done before this one
                         const Eigen::Affine3d footlanding_Hwt = footlanding_Hwf[side] * Hft;
 
                         // do a foot based position update
@@ -540,7 +541,7 @@ namespace module::platform::darwin {
                 // We make Hwt first, because `o` is in world space
                 Eigen::Affine3d Hwt;
                 Hwt.linear()      = o.Rwt.toRotationMatrix();
-                Hwt.translation() = -o.rTWw;
+                Hwt.translation() = o.rTWw;
                 sensors->Htw      = Hwt.inverse().matrix();
 
                 /************************************************
