@@ -99,7 +99,7 @@ namespace module::platform::darwin {
             this->config.footDown.fromLoad           = config["foot_down"]["from_load"].as<bool>();
             this->config.footDown.certaintyThreshold = config["foot_down"]["certainty_threshold"].as<float>();
 
-            // Motion filter config
+            // Set velocity decay
             this->config.motionFilter.velocityDecay =
                 config["motion_filter"]["update"]["velocity_decay"].as<Expression>();
             motionFilter.model.timeUpdateVelocityDecay = this->config.motionFilter.velocityDecay;
@@ -135,7 +135,7 @@ namespace module::platform::darwin {
             this->config.motionFilter.noise.process.gyroscopeBias =
                 config["motion_filter"]["noise"]["process"]["gyroscope_bias"].as<Expression>();
 
-            // Set our initial state vector
+            // Set our initial noise vector
             MotionModel<double>::StateVec process_noise;
             process_noise.rTWw               = this->config.motionFilter.noise.process.position;
             process_noise.vTw                = this->config.motionFilter.noise.process.velocity;
@@ -144,7 +144,7 @@ namespace module::platform::darwin {
             process_noise.omegaTTt_bias      = this->config.motionFilter.noise.process.gyroscopeBias;
             motionFilter.model.process_noise = process_noise;
 
-            // Set our mean configs
+            // Set our initial means
             this->config.motionFilter.initial.mean.position =
                 config["motion_filter"]["initial"]["mean"]["position"].as<Expression>();
             this->config.motionFilter.initial.mean.velocity =
@@ -156,6 +156,7 @@ namespace module::platform::darwin {
             this->config.motionFilter.initial.mean.gyroscopeBias =
                 config["motion_filter"]["initial"]["mean"]["gyroscope_bias"].as<Expression>();
 
+            // Set our initial covariances
             this->config.motionFilter.initial.covariance.position =
                 config["motion_filter"]["initial"]["covariance"]["position"].as<Expression>();
             this->config.motionFilter.initial.covariance.velocity =
@@ -167,7 +168,7 @@ namespace module::platform::darwin {
             this->config.motionFilter.initial.covariance.gyroscopeBias =
                 config["motion_filter"]["initial"]["covariance"]["gyroscope_bias"].as<Expression>();
 
-            // Set our initial state with the config state
+            // Set our initial state with the config means and covariances, resetting the filter in the process
             MotionModel<double>::StateVec mean;
             mean.rTWw          = this->config.motionFilter.initial.mean.position;
             mean.vTw           = this->config.motionFilter.initial.mean.velocity;
@@ -204,8 +205,8 @@ namespace module::platform::darwin {
                     }
                 }
 
-                bool newLeftDown   = leftCount > config.buttons.debounceThreshold;
-                bool newMiddleDown = middleCount > config.buttons.debounceThreshold;
+                const bool newLeftDown   = leftCount > config.buttons.debounceThreshold;
+                const bool newMiddleDown = middleCount > config.buttons.debounceThreshold;
 
                 if (newLeftDown != leftDown) {
 
@@ -272,7 +273,7 @@ namespace module::platform::darwin {
                     auto& error    = original.error_flags;
 
                     // Check for an error on the servo and report it
-                    while (error != DarwinSensors::Error::OK) {
+                    if (error != DarwinSensors::Error::OK) {
                         std::stringstream s;
                         s << "Error on Servo " << (id + 1) << " (" << static_cast<ServoID>(id) << "):";
 
@@ -299,7 +300,6 @@ namespace module::platform::darwin {
                         }
 
                         NUClear::log<NUClear::WARN>(s.str());
-                        break;
                     }
 
                     // If we have a previous Sensors message and our current Sensors message for this servo has an
@@ -337,24 +337,16 @@ namespace module::platform::darwin {
                     }
                 }
 
-                // It's worth making absolutely sure that these are correct for a NUgus...
-                // gyro_x to the right
-                // gyro_y to the back
-                // gyro_z down
-
-                // This is a left-handed coordinate system?? that's not just a rotation of the CM740, if it's normally
-                // a right-handed coordinate system
-                // acc_x to the back
-                // acc_y to the left
-                // acc_z up
 
                 // If we have a previous Sensors message and our cm740 has errors, then reuse our last sensor value
                 if (input.cm740_error_flags && previousSensors) {
                     sensors->accelerometer = previousSensors->accelerometer;
                 }
                 else {
+                    // acc_x to the back
+                    // acc_y to the left
+                    // acc_z up
                     sensors->accelerometer =
-                        // accelerometer.x is backwards
                         Eigen::Vector3d(-input.accelerometer.x, input.accelerometer.y, input.accelerometer.z);
                 }
 
@@ -372,7 +364,9 @@ namespace module::platform::darwin {
                     sensors->gyroscope = previousSensors->gyroscope;
                 }
                 else {
-                    // This smells wrong. y x -z? at the very least this needs an explanatory comment
+                    // gyro_x to the right
+                    // gyro_y to the back
+                    // gyro_z down
                     sensors->gyroscope = Eigen::Vector3d(input.gyroscope.y, input.gyroscope.x, -input.gyroscope.z);
                 }
 
@@ -422,10 +416,10 @@ namespace module::platform::darwin {
                 // Otherwise, guess which foot is down by comparing the feet positions to the
                 // footDown certainty threshold
                 else {
-                    Eigen::Affine3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
-                    Eigen::Affine3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
-                    Eigen::Affine3d Hlr  = Htl.inverse() * Htr;
-                    Eigen::Vector3d rRLl = Hlr.translation();
+                    const Eigen::Affine3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
+                    const Eigen::Affine3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
+                    const Eigen::Affine3d Hlr  = Htl.inverse() * Htr;
+                    const Eigen::Vector3d rRLl = Hlr.translation();
 
                     // Right foot is below left foot in left foot space by more than the certainty threshold
                     if (rRLl.z() < -config.footDown.certaintyThreshold) {
@@ -462,9 +456,10 @@ namespace module::platform::darwin {
                                      MeasurementType::GYROSCOPE());
 
                 // Calculate accelerometer noise factor
-                // Tom has never seen this. Updating the noise dynamically based on the acceleration seems very spicy
-                Eigen::Matrix3d acc_noise =
+                const Eigen::Matrix3d acc_noise =
                     config.motionFilter.noise.measurement.accelerometer
+                    // Add noise which is proportional to the square of how much we are moving, minus gravity
+                    // This means that the faster we move, the noisier we think the measurements are
                     + ((sensors->accelerometer.norm() - std::abs(G)) * (sensors->accelerometer.norm() - std::abs(G)))
                           * config.motionFilter.noise.measurement.accelerometerMagnitude;
 
@@ -477,7 +472,7 @@ namespace module::platform::darwin {
                 for (auto&& side : {BodySide::LEFT, BodySide::RIGHT}) {
                     const bool foot_down      = sensors->feet[side].down;
                     const bool prev_foot_down = previous_foot_down[side];
-                    Eigen::Affine3d Htf(
+                    const Eigen::Affine3d Htf(
                         sensors->Htx[side == BodySide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL]);
 
                     // If this sides foot is down, and it was not down at the previous time step, then we calculate our
@@ -488,7 +483,7 @@ namespace module::platform::darwin {
                         Hwt.linear()      = filterState.Rwt.toRotationMatrix();
                         Hwt.translation() = filterState.rTWw;
 
-                        Eigen::Affine3d Htg(utility::motion::kinematics::calculateGroundSpace(Htf, Hwt));
+                        const Eigen::Affine3d Htg(utility::motion::kinematics::calculateGroundSpace(Htf, Hwt));
 
                         footlanding_Hwf[side]                   = Hwt * Htg;
                         footlanding_Hwf[side].translation().z() = 0.0;
@@ -499,10 +494,10 @@ namespace module::platform::darwin {
                     // Else is down, and didn't hit the ground this time step
                     else if (foot_down && prev_foot_down) {
                         // Use stored Hwf and Htf to calculate Hwt
-                        Eigen::Affine3d Hft = Htf.inverse();
+                        const Eigen::Affine3d Hft = Htf.inverse();
                         // Guaranteed to be initialised, because the prev_foot_down is initialised as false, so the
                         // previous if() condition will be done before this one
-                        Eigen::Affine3d footlanding_Hwt = footlanding_Hwf[side] * Hft;
+                        const Eigen::Affine3d footlanding_Hwt = footlanding_Hwf[side] * Hft;
 
                         // do a foot based position update
                         motionFilter.measure(Eigen::Vector3d(footlanding_Hwt.translation()),
@@ -527,15 +522,18 @@ namespace module::platform::darwin {
                     sensors->feet[side].Hwf = footlanding_Hwf[side].matrix();
                 }
 
-                // Calculate our time offset from the last read
-                // too hard to read
-                const double deltaT = std::max(
-                    (input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp)).count()
-                        / double(NUClear::clock::period::den),
-                    0.0);
+                // Calculate our time offset from the last read then update the filter's time
+                {
+                    using namespace std::chrono;
+                    constexpr double CLOCK_FACTOR = NUClear::clock::period::num / NUClear::clock::period::den;
 
-                // Time update
-                motionFilter.time(deltaT);
+                    const double deltaT = std::max(
+                        (input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp)).count()
+                            * CLOCK_FACTOR,
+                        0.0);
+
+                    motionFilter.time(deltaT);
+                }
 
                 // Convert the motion filter's state vector to a nicer representation, so we can access its elements
                 const auto o = MotionModel<double>::StateVec(motionFilter.get());
@@ -553,25 +551,19 @@ namespace module::platform::darwin {
                 sensors->inertia_tensor = calculateInertialTensor(kinematicsModel, sensors->Htx);
 
                 /************************************************
-                 *                  Kinematics Horizon          *
+                 *                  Calculate Hgt               *
                  ************************************************/
                 // Extract the inverse of the rotation component of Htw
                 const Eigen::Matrix3d Rwt(sensors->Htw.topLeftCorner<3, 3>().transpose());
                 // We remove the yaw by making an angleaxis which has just the negative yaw,
                 // then multiplying it back in, taking the yaw away
                 const Eigen::AngleAxisd Rwt_negative_yaw(-Rwt.eulerAngles(0, 1, 2).z(), Eigen::Vector3d::UnitZ());
-                const Eigen::Affine3d Rgt(Rwt_negative_yaw * Rwt);
 
-                sensors->Hgt = Rgt.matrix();
-
-                // Get torso to ground transform (then do nothing with it????)
-                Eigen::AngleAxisd yawlessWorldInvR(
-                    // Also removing the yaw in the same way
-                    Eigen::AngleAxisd(-Hwt.rotation().eulerAngles(0, 1, 2).z(), Eigen::Vector3d::UnitZ())
-                    * Hwt.rotation());
                 Eigen::Affine3d Hgt;
+                Hgt.linear()      = Rwt_negative_yaw * Rwt;
                 Hgt.translation() = Eigen::Vector3d(0, 0, Hwt.translation().z());
-                Hgt.linear()      = yawlessWorldInvR.toRotationMatrix();
+                sensors->Hgt      = Hgt.matrix();
+
                 emit(std::move(sensors));
             });
     }
