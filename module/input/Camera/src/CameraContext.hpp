@@ -13,8 +13,7 @@ extern "C" {
 #include <aravis-0.8/arv.h>
 }
 
-namespace module {
-namespace input {
+namespace module::input {
     // Forward declare camera
     class Camera;
 
@@ -23,10 +22,11 @@ namespace input {
         Camera& reactor;
         std::string name;
         uint32_t fourcc;
-        uint32_t camera_id;
+        uint32_t id;
         message::input::Image::Lens lens;
-        // Homogenous transform from platform (p) to camera where platform is the rigid body the camera is attached to
-        Eigen::Transform<double, 3, Eigen::Affine, Eigen::DontAlign> Hpc;
+        // Homogenous transform from platform (p) to camera where platform is the rigid body the camera is attached
+        // to
+        Eigen::Affine3d Hpc;
         std::shared_ptr<ArvCamera> camera;
         std::shared_ptr<ArvStream> stream;
 
@@ -58,8 +58,6 @@ namespace input {
             bool live;
         } time;
     };
-
-}  // namespace input
-}  // namespace module
+}  // namespace module::input
 
 #endif  // MODULE_INPUT_CAMERA_CONTEXT_HPP

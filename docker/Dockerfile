@@ -10,8 +10,10 @@
 ### The date in the Server command must either match, or be more recent than,
 ### the date in the FROM command
 ### Date format is ISO year/month/day
-FROM archlinux:20200505
-RUN echo "Server=https://archive.archlinux.org/repos/2020/05/05/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
+FROM archlinux:base-20210110.0.13332
+
+# ↓↓↓ UPDATE MIRRORS HERE ↓↓↓
+RUN echo -e "Server=http://host.docker.internal:7878/\$repo/os/\$arch\nServer=https://archive.archlinux.org/repos/2021/01/10/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
 
 # Arch recommends running this as the first command of the docker image
 # Use "yyuu" to allow for downgrades
@@ -22,14 +24,10 @@ RUN pacman -Syyuu --noconfirm --needed --overwrite \*
 # Add a script that installs packages
 COPY usr/local/bin/install-package /usr/local/bin/install-package
 
-# Install latest archlinux-keyring package so we have the most up-to-date keys
-RUN install-package wget
-RUN wget https://www.archlinux.org/packages/core/any/archlinux-keyring/download/ -O /var/tmp/archlinux-keyring.pkg.tar.zst
-RUN pacman -U /var/tmp/archlinux-keyring.pkg.tar.zst --noconfirm
-
 # Install base packages needed for building general toolchain
 # If you have a tool that's needed for a specific module install it before that module
 RUN install-package \
+    wget \
     sudo \
     python \
     python-pip \
@@ -93,50 +91,66 @@ RUN python /usr/local/generate_toolchain.py --prefix /usr/local
 RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 
 # LLVM and Clang
-RUN BUILD_FILE_DIR='llvm' install-cmake-from-source \
-    https://github.com/llvm/llvm-project/archive/llvmorg-9.0.1.tar.gz \
-    -DLLVM_ENABLE_PROJECTS="clang"
+RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-11.0.1.tar.gz \
+    -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" \
+    -DLLVM_ENABLE_SPHINX=OFF \
+    -DLLVM_BUILD_LLVM_DYLIB=ON \
+    -DLLVM_LINK_LLVM_DYLIB=ON
 
-# Libpci access and libdrm for communicating with graphics hardware
+# SPIRV LLVM Translator
+RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v11.0.0.tar.gz \
+    -DLLVM_INCLUDE_TESTS=OFF
+
+# opencl-clang
+COPY usr/local/package/opencl-clang.sh /usr/local/package/opencl-clang.sh
+RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/archive/v11.0.0.tar.gz
+
+# ncurses - dependency for IGC. Flags are from the arch PKGBUILD for ncurses
+RUN install-from-source https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.2.tar.gz \
+    --with-shared --with-normal --without-debug --without-ada \
+    --enable-widec --enable-pc-files --with-cxx-binding --with-cxx-shared
+
+# intel graphics compiler
+COPY usr/local/package/intel-graphics-compiler.sh /usr/local/package/intel-graphics-compiler.sh
+RUN /usr/local/package/intel-graphics-compiler.sh https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.5435.tar.gz \
+    -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
+    -DIGC_PREFERRED_LLVM_VERSION='11.0.0' \
+    -DVC_INTRINSICS_SRC="../../vc-intrinsics" \
+    -DINSTALL_SPIRVDLL=0
+
+# intel compute runtime dependencies
+# gmmlib
+RUN install-cmake-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-20.4.1.tar.gz \
+    -DRUN_TEST_SUITE=OFF
+# libpciaccess and libdrm help communicate with graphics hardware
 RUN install-from-source https://xorg.freedesktop.org/releases/individual/lib/libpciaccess-0.16.tar.bz2
-RUN install-meson-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.100.tar.bz2 \
+RUN install-meson-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.104.tar.xz \
     -Dudev=false \
     -Dvalgrind=false
+# libva
+RUN install-from-source https://github.com/intel/libva/releases/download/2.10.0/libva-2.10.0.tar.bz2 \
+    -DENABLE_VA_MESSAGING=ON
 
-# Intel graphics compiler
-RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v9.0.0-1.tar.gz
-COPY usr/local/package/opencl-clang.sh /usr/local/package/opencl-clang.sh
-RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/archive/v9.0.0.tar.gz
-RUN install-from-source https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.3041.tar.gz \
-    -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
-    -DIGC_PREFERRED_LLVM_VERSION='9.0.1'
-RUN install-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-19.4.1.tar.gz \
-    -DRUN_TEST_SUITE=OFF
-
-# Libva and the iHD driver for hardware compression
-RUN install-from-source https://github.com/intel/libva/releases/download/2.6.0/libva-2.6.0.tar.bz2
-RUN install-from-source https://github.com/intel/media-driver/archive/intel-media-19.4.0r.tar.gz \
+# intel media driver
+RUN install-cmake-from-source https://github.com/intel/media-driver/archive/intel-media-20.4.5.tar.gz \
     -DINSTALL_DRIVER_SYSCONF=OFF \
     -DLIBVA_DRIVERS_PATH="/usr/local/lib/dri" \
     -DMEDIA_RUN_TEST_SUITE=OFF \
     -DBUILD_TESTING=OFF \
     -DBUILD_KERNELS=ON \
     -DENABLE_KERNELS=ON \
-    -DENABLE_NONFREE_KERNELS=ON \
-    -DBUILD_TYPE=Release
+    -DENABLE_NONFREE_KERNELS=ON
 
 # Install intel compute runtime (OpenCL implementation)
 COPY --chown=root:root etc/OpenCL/vendors/intel.icd /etc/OpenCL/vendors/intel.icd
 COPY usr/local/package/intel-compute-runtime.sh /usr/local/package/intel-compute-runtime.sh
-RUN /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute-runtime/archive/20.01.15264.tar.gz \
-    -DNEO_DRIVER_VERSION=19.40.14409 \
-    -DSKIP_ALL_ULT=ON \
+RUN /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute-runtime/archive/20.48.18558.tar.gz \
     -DSKIP_UNIT_TESTS=ON \
-    -DIGDRCL__IGC_LIBRARY_PATH="/usr/local/lib"
+    -DIGC_DIR=/usr/local
 
 # Install OpenCL C and C++ headers
 COPY usr/local/package/opencl-headers.sh /usr/local/package/opencl-headers.sh
-RUN /usr/local/package/opencl-headers.sh https://github.com/KhronosGroup/OpenCL-Headers/archive/master.tar.gz
+RUN /usr/local/package/opencl-headers.sh https://github.com/KhronosGroup/OpenCL-Headers/archive/v2020.12.18.tar.gz
 RUN install-from-source https://github.com/KhronosGroup/OpenCL-CLHPP/archive/master.tar.gz \
     -DOPENCL_INCLUDE_DIR=/usr/local/include/CL \
     -DOPENCL_LIB_DIR=/usr/local/lib \
@@ -146,22 +160,16 @@ RUN install-from-source https://github.com/KhronosGroup/OpenCL-CLHPP/archive/mas
 
 # OpenCL loader library
 RUN install-package ruby
-RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/v2.2.12.tar.gz
+RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/v2.2.14.tar.gz
 
 # OpenBLAS
 RUN install-package gcc-fortran
-COPY usr/local/package/openblas/${platform}.sh usr/local/package/openblas.sh
-RUN /usr/local/package/openblas.sh https://github.com/xianyi/OpenBLAS/archive/v0.3.7.tar.gz
-
-# Armadillo
-RUN install-cmake-from-source https://downloads.sourceforge.net/project/arma/armadillo-9.800.3.tar.xz \
-    -DDETECT_HDF5=OFF \
-    -DBUILD_SHARED_LIBS=ON
-COPY usr/local/include/armadillo_bits/config.hpp /usr/local/include/armadillo_bits/config.hpp
+COPY usr/local/package/openblas/${platform}.sh /usr/local/package/openblas.sh
+RUN /usr/local/package/openblas.sh https://github.com/xianyi/OpenBLAS/archive/v0.3.13.tar.gz
 
 # Eigen3
-COPY usr/local/package/eigen3/deprecated-copy.patch usr/local/package/deprecated-copy.patch
-COPY usr/local/package/eigen3/cxx17-overalign.patch usr/local/package/cxx17-overalign.patch
+COPY usr/local/package/eigen3/deprecated-copy.patch /usr/local/package/deprecated-copy.patch
+COPY usr/local/package/eigen3/cxx17-overalign.patch /usr/local/package/cxx17-overalign.patch
 RUN install-from-source-with-patches https://gitlab.com/libeigen/eigen/-/archive/3.3.7/eigen-3.3.7.tar.bz2 \
     /usr/local/package/deprecated-copy.patch \
     /usr/local/package/cxx17-overalign.patch --
@@ -205,6 +213,8 @@ RUN  install-from-source https://github.com/fmtlib/fmt/archive/6.1.2.tar.gz \
 # Catch unit testing library
 RUN install-header-from-source https://github.com/catchorg/Catch2/releases/download/v2.11.1/catch.hpp
 
+# libusb - a dependency of aravis
+RUN install-from-source https://github.com/libusb/libusb/archive/v1.0.24.tar.gz
 # Aravis
 RUN install-from-source http://xmlsoft.org/sources/libxml2-2.9.10.tar.gz --with-zlib=/usr/local --without-python
 RUN install-from-source https://github.com/libffi/libffi/releases/download/v3.3/libffi-3.3.tar.gz
@@ -226,7 +236,7 @@ RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.34.1.tar
     -DBUILD_TESTING=OFF
 
 # NUClear!
-RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.gz \
+RUN install-from-source https://github.com/Fastcode/NUClear/archive/153ccdb9a13dbc88f3c448e07a3048d67235116e.tar.gz \
     -DBUILD_TESTS=OFF
 
 # Visual Mesh
@@ -247,12 +257,19 @@ RUN install-from-source https://github.com/espeak-ng/pcaudiolib/archive/1.1.tar.
 COPY usr/local/package/espeak.sh /usr/local/package/espeak.sh
 RUN /usr/local/package/espeak.sh https://github.com/espeak-ng/espeak-ng/releases/download/1.50/espeak-ng-1.50.tgz
 
+# zstr header to have file streams that do zlib compression
+RUN mkdir -p /usr/local/include/zstr \
+    && wget https://raw.githubusercontent.com/mateidavid/zstr/v1.0.4/src/zstr.hpp -O /usr/local/include/zstr.hpp \
+    && wget https://raw.githubusercontent.com/mateidavid/zstr/v1.0.4/src/strict_fstream.hpp -O /usr/local/include/strict_fstream.hpp \
+    && wget https://raw.githubusercontent.com/mateidavid/zstr/v1.0.4/src/zstr_make_unique_polyfill.h -O /usr/local/include/zstr_make_unique_polyfill.h
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
 
 # Install python libraries
 RUN pip install \
+    xxhash \
     pylint \
     termcolor \
     stringcase \
@@ -276,9 +293,9 @@ RUN install-package \
 
 # Install formatters as last step so if they change the image is easy to update
 RUN pip install --upgrade \
-    cmake-format==0.6.10 \
-    isort==4.3.21 \
-    black==19.10b0
+    cmake-format==0.6.13 \
+    isort==5.7.0 \
+    black==20.8b1
 
 # Enable all the driver capabilities so we can use OpenCL in the container
 ENV NVIDIA_DRIVER_CAPABILITIES=all

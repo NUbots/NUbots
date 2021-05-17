@@ -25,8 +25,7 @@
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 
-namespace utility {
-namespace behaviour {
+namespace utility::behaviour {
 
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
@@ -43,7 +42,7 @@ namespace behaviour {
         std::function<void(std::set<ServoID>)> completed;
     };
 
-    struct ActionPriorites {
+    struct ActionPriorities {
         size_t id;
 
         std::vector<float> priorities;
@@ -62,7 +61,6 @@ namespace behaviour {
 
         std::set<LimbID> limbs;
     };
-}  // namespace behaviour
-}  // namespace utility
+}  // namespace utility::behaviour
 
 #endif

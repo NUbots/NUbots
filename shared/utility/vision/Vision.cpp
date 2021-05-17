@@ -24,8 +24,7 @@
 
 #include "message/input/Image.hpp"
 
-namespace utility {
-namespace vision {
+namespace utility::vision {
 
     void saveImage(const std::string& file, const message::input::Image& image) {
         std::ofstream ofs(file, std::ios::out | std::ios::binary);
@@ -107,7 +106,7 @@ namespace vision {
     Pixel getGrey8Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // R0 G0 B0 R1 GR B1 R2 GB B2 ...
-        int origin = (y * width + x);
+        const int origin = (y * width + x);
 
         return {0, 0, data[origin]};
     }
@@ -121,13 +120,14 @@ namespace vision {
         // Green pixels are in every row, but in the even columns on even rows and the odd columns on odd rows.
         // Blue  pixels are in odd rows,  but even columns
 
-        Eigen::Matrix<uint8_t, 5, 5> patch = getSubImage(x, y, width, height, data);
+        const Eigen::Matrix<uint8_t, 5, 5> patch = getSubImage(x, y, width, height, data);
 
         // Work out what pixel type we are
-        const int row = y % 2;
-        const int col = x % 2;
-        BayerPixelType type =
-            row ? col ? BayerPixelType::GB : BayerPixelType::B : col ? BayerPixelType::R : BayerPixelType::GR;
+        const int row       = y % 2;
+        const int col       = x % 2;
+        BayerPixelType type = row   ? col ? BayerPixelType::GB : BayerPixelType::B
+                              : col ? BayerPixelType::R
+                                    : BayerPixelType::GR;
 
         return getBayerPixel(patch, type);
     }
@@ -144,10 +144,11 @@ namespace vision {
         Eigen::Matrix<uint8_t, 5, 5> patch = getSubImage(x, y, width, height, data);
 
         // Work out what pixel type we are
-        const int row = y % 2;
-        const int col = x % 2;
-        BayerPixelType type =
-            row ? col ? BayerPixelType::B : BayerPixelType::GB : col ? BayerPixelType::GR : BayerPixelType::R;
+        const int row       = y % 2;
+        const int col       = x % 2;
+        BayerPixelType type = row   ? col ? BayerPixelType::B : BayerPixelType::GB
+                              : col ? BayerPixelType::GR
+                                    : BayerPixelType::R;
 
         return getBayerPixel(patch, type);
     }
@@ -164,10 +165,11 @@ namespace vision {
         Eigen::Matrix<uint8_t, 5, 5> patch = getSubImage(x, y, width, height, data);
 
         // Work out what pixel type we are
-        const int row = y % 2;
-        const int col = x % 2;
-        BayerPixelType type =
-            row ? col ? BayerPixelType::GR : BayerPixelType::R : col ? BayerPixelType::B : BayerPixelType::GB;
+        const int row       = y % 2;
+        const int col       = x % 2;
+        BayerPixelType type = row   ? col ? BayerPixelType::GR : BayerPixelType::R
+                              : col ? BayerPixelType::B
+                                    : BayerPixelType::GB;
 
         return getBayerPixel(patch, type);
     }
@@ -184,16 +186,17 @@ namespace vision {
         Eigen::Matrix<uint8_t, 5, 5> patch = getSubImage(x, y, width, height, data);
 
         // Work out what pixel type we are
-        const int row = y % 2;
-        const int col = x % 2;
-        BayerPixelType type =
-            row ? col ? BayerPixelType::R : BayerPixelType::GR : col ? BayerPixelType::GB : BayerPixelType::B;
+        const int row       = y % 2;
+        const int col       = x % 2;
+        BayerPixelType type = row   ? col ? BayerPixelType::R : BayerPixelType::GR
+                              : col ? BayerPixelType::GB
+                                    : BayerPixelType::B;
 
         return getBayerPixel(patch, type);
     }
 
     Pixel getGrey16Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
-        int origin = (y * width + x) * 2;
+        const int origin = (y * width + x) * 2;
 
         return {0, data[origin + 1], data[origin]};
     }
@@ -201,7 +204,7 @@ namespace vision {
     Pixel getRGB3Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // R0 G0 B0 R1 GR B1 R2 GB B2 ...
-        int origin = (y * width + x) * 3;
+        const int origin = (y * width + x) * 3;
 
         return {data[origin + 0], data[origin + 1], data[origin + 2]};
     }
@@ -209,7 +212,7 @@ namespace vision {
     Pixel getYUV24Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // U0 Y0 V0 U1 Y1 V1 U2 Y2 V2
-        int origin = (y * width + x) * 3;
+        const int origin = (y * width + x) * 3;
 
         return {data[origin + 1], data[origin + 0], data[origin + 2]};
     }
@@ -217,8 +220,8 @@ namespace vision {
     Pixel getYUYVPixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // Y U Y V Y U Y V Y U Y V
-        int origin = (y * width + x) * 2;
-        int shift  = (x % 2) * 2;
+        const int origin = (y * width + x) * 2;
+        const int shift  = (x % 2) * 2;
 
         // origin = Y, always.
         return {data[origin + 0], data[origin + 1 - shift], data[origin + 3 - shift]};
@@ -227,8 +230,8 @@ namespace vision {
     Pixel getUYVYPixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // U Y V Y U Y V Y U Y V Y
-        int origin = (y * width + x) * 2;
-        int shift  = (x % 2) * 2;
+        const int origin = (y * width + x) * 2;
+        const int shift  = (x % 2) * 2;
 
         // Either    shift = 0 and origin = U
         // Or        shift = 2 and origin = V.
@@ -254,9 +257,9 @@ namespace vision {
         // U1Y5V1     {data[6], data[8], data[9]} (5, 0)
         const uint Y_OFFSET[6] = {1, 2, 4, 5, 7, 8};
 
-        int origin  = (y * width + (x - (x % 6))) * 6;
-        int shift   = ((x % 6) > 3) ? 6 : 0;
-        int y_shift = Y_OFFSET[x % 4];
+        const int origin  = (y * width + (x - (x % 6))) * 6;
+        const int shift   = ((x % 6) > 3) ? 6 : 0;
+        const int y_shift = Y_OFFSET[x % 4];
 
         return {data[origin + 0 + shift], data[origin + 0 + y_shift], data[origin + 3 + shift]};
     }
@@ -324,5 +327,4 @@ namespace vision {
         }
     }
 
-}  // namespace vision
-}  // namespace utility
+}  // namespace utility::vision

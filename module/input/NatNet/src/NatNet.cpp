@@ -25,8 +25,7 @@
 
 #include "extension/Configuration.hpp"
 
-namespace module {
-namespace input {
+namespace module::input {
 
     using extension::Configuration;
 
@@ -140,7 +139,7 @@ namespace input {
         mocap->markerSets = ReadData<std::vector<MotionCapture::MarkerSet>>::read(ptr, version);
 
         // Read the free floating markers
-        auto freeMarkers = ReadData<std::vector<Eigen::Matrix<float, 3, 1, Eigen::DontAlign>>>::read(ptr, version);
+        auto freeMarkers = ReadData<std::vector<Eigen::Vector3f>>::read(ptr, version);
         mocap->markers.reserve(freeMarkers.size());
         // Build markers
         for (auto position : freeMarkers) {
@@ -225,10 +224,10 @@ namespace input {
                                  [model](const MotionCapture::RigidBody& rb) { return rb.id == model->second.id; });
 
                 // Get a pointer to our parent if it exists and is not us
-                rigidBody.parent =
-                    parent->id == rigidBody.id
-                        ? 0
-                        : parent == mocap->rigidBodies.end() ? -1 : std::distance(mocap->rigidBodies.begin(), parent);
+                rigidBody.parent = parent->id == rigidBody.id ? 0
+                                   : parent == mocap->rigidBodies.end()
+                                       ? -1
+                                       : std::distance(mocap->rigidBodies.begin(), parent);
             }
             // We need to update our models
             else {
@@ -271,10 +270,9 @@ namespace input {
                             skeleton.bones.end(),
                             [boneModel](const MotionCapture::RigidBody& rb) { return rb.id == boneModel->second.id; });
 
-                        bone.parent =
-                            parent->id == bone.id
-                                ? 0
-                                : parent == skeleton.bones.end() ? -1 : std::distance(skeleton.bones.begin(), parent);
+                        bone.parent = parent->id == bone.id            ? 0
+                                      : parent == skeleton.bones.end() ? -1
+                                                                       : std::distance(skeleton.bones.begin(), parent);
                     }
                     // We need to update our models
                     else {
@@ -432,5 +430,4 @@ namespace input {
             default: log<NUClear::ERROR>("The NatNet server sent an unexpected packet type"); break;
         }
     }
-}  // namespace input
-}  // namespace module
+}  // namespace module::input

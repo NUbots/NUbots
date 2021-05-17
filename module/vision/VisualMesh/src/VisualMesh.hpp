@@ -8,8 +8,7 @@
 
 #include "visualmesh/VisualMeshRunner.hpp"
 
-namespace module {
-namespace vision {
+namespace module::vision {
 
     class VisualMesh : public NUClear::Reactor {
     private:
@@ -20,7 +19,5 @@ namespace vision {
         explicit VisualMesh(std::unique_ptr<NUClear::Environment> environment);
     };
 
-}  // namespace vision
-}  // namespace module
-
+}  // namespace module::vision
 #endif  // MODULE_VISION_VISUALMESH_HPP

@@ -26,14 +26,11 @@
 #include <string>
 #include <vector>
 
-namespace utility {
 /**
- * TODO document
- *
  * @author Jake Woods
  * @author Trent Houliston
  */
-namespace file {
+namespace utility::file {
     std::string loadFromFile(const std::string& path);
 
     template <typename TData>
@@ -77,6 +74,5 @@ namespace file {
 
     void touch(const std::string& file);
 
-}  // namespace file
-}  // namespace utility
+}  // namespace utility::file
 #endif

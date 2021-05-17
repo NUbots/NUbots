@@ -22,8 +22,7 @@
 
 #include <functional>
 
-namespace utility {
-namespace support {
+namespace utility::support {
 
     template <typename T>
     struct LazyEvaluation {
@@ -36,7 +35,6 @@ namespace support {
             return lazy();
         }
     };
-}  // namespace support
-}  // namespace utility
+}  // namespace utility::support
 
 #endif  // UTILITY_SUPPORT_LAZYEVALUATION_HPP
