@@ -273,7 +273,7 @@ namespace module::platform::darwin {
                     auto& error    = original.error_flags;
 
                     // Check for an error on the servo and report it
-                    while (error != DarwinSensors::Error::OK) {
+                    if (error != DarwinSensors::Error::OK) {
                         std::stringstream s;
                         s << "Error on Servo " << (id + 1) << " (" << static_cast<ServoID>(id) << "):";
 
@@ -300,7 +300,6 @@ namespace module::platform::darwin {
                         }
 
                         NUClear::log<NUClear::WARN>(s.str());
-                        break;
                     }
 
                     // If we have a previous Sensors message and our current Sensors message for this servo has an
