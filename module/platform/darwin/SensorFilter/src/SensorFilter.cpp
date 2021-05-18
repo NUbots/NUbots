@@ -27,6 +27,7 @@
 
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
+#include "utility/math/quaternion.hpp"
 #include "utility/motion/ForwardKinematics.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/platform/darwin/DarwinSensors.hpp"
@@ -87,6 +88,44 @@ namespace module::platform::darwin {
         return s.str();
     }
 
+    /// @brief Calculates the mean state, by averaging the vectors and calculating the mean quaternion
+    /// @param states The states being averaged
+    MotionModel<double>::StateVec calculateMeanState(std::vector<MotionModel<double>::StateVec> states) {
+
+        // We'll add the vectors to a zero-initialised state, then coefficient-wise divide them by the number of states
+        MotionModel<double>::StateVec mean_state{};
+        // We'll make a vector of the quaternions to take the mean of them
+        std::vector<Eigen::Quaterniond> rotations{};
+
+        for (const auto& state : states) {
+            // clang-format off
+            mean_state.rTWw          += state.rTWw;
+            mean_state.vTw           += state.vTw;
+            mean_state.omegaTTt      += state.omegaTTt;
+            mean_state.omegaTTt_bias += state.omegaTTt_bias;
+            // clang-format on
+            rotations.push_back(state.Rwt);
+        }
+
+        // clang-format off
+        mean_state.rTWw     /= states.size();
+        mean_state.vTw      /= states.size();
+        mean_state.omegaTTt /= states.size();
+        mean_state.omegaTTt /= states.size();
+        // clang-format on
+        mean_state.Rwt = utility::math::quaternion::mean(rotations.begin(), rotations.end());
+
+        return mean_state;
+    }
+
+    MotionModel<double>::StateVec sensorsToState(DarwinSensors sensors) {
+        MotionModel<double>::StateVec state;
+
+        // TODO: I have no idea how to construct a state from sensors
+        // maybe look at sims/kalman_filter for ideas
+        return state;
+    }
+
     SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), theta(Eigen::Vector3d::Zero()) {
 
@@ -144,45 +183,8 @@ namespace module::platform::darwin {
             process_noise.omegaTTt_bias      = this->config.motionFilter.noise.process.gyroscopeBias;
             motionFilter.model.process_noise = process_noise;
 
-            // Set our initial means
-            this->config.motionFilter.initial.mean.position =
-                config["motion_filter"]["initial"]["mean"]["position"].as<Expression>();
-            this->config.motionFilter.initial.mean.velocity =
-                config["motion_filter"]["initial"]["mean"]["velocity"].as<Expression>();
-            this->config.motionFilter.initial.mean.rotation =
-                config["motion_filter"]["initial"]["mean"]["rotation"].as<Expression>();
-            this->config.motionFilter.initial.mean.rotationalVelocity =
-                config["motion_filter"]["initial"]["mean"]["rotational_velocity"].as<Expression>();
-            this->config.motionFilter.initial.mean.gyroscopeBias =
-                config["motion_filter"]["initial"]["mean"]["gyroscope_bias"].as<Expression>();
-
-            // Set our initial covariances
-            this->config.motionFilter.initial.covariance.position =
-                config["motion_filter"]["initial"]["covariance"]["position"].as<Expression>();
-            this->config.motionFilter.initial.covariance.velocity =
-                config["motion_filter"]["initial"]["covariance"]["velocity"].as<Expression>();
-            this->config.motionFilter.initial.covariance.rotation =
-                config["motion_filter"]["initial"]["covariance"]["rotation"].as<Expression>();
-            this->config.motionFilter.initial.covariance.rotationalVelocity =
-                config["motion_filter"]["initial"]["covariance"]["rotational_velocity"].as<Expression>();
-            this->config.motionFilter.initial.covariance.gyroscopeBias =
-                config["motion_filter"]["initial"]["covariance"]["gyroscope_bias"].as<Expression>();
-
-            // Set our initial state with the config means and covariances, resetting the filter in the process
-            MotionModel<double>::StateVec mean;
-            mean.rTWw          = this->config.motionFilter.initial.mean.position;
-            mean.vTw           = this->config.motionFilter.initial.mean.velocity;
-            mean.Rwt           = this->config.motionFilter.initial.mean.rotation;
-            mean.omegaTTt      = this->config.motionFilter.initial.mean.rotationalVelocity;
-            mean.omegaTTt_bias = this->config.motionFilter.initial.mean.gyroscopeBias;
-
-            MotionModel<double>::StateVec covariance;
-            covariance.rTWw          = this->config.motionFilter.initial.covariance.position;
-            covariance.vTw           = this->config.motionFilter.initial.covariance.velocity;
-            covariance.Rwt           = this->config.motionFilter.initial.covariance.rotation;
-            covariance.omegaTTt      = this->config.motionFilter.initial.covariance.rotationalVelocity;
-            covariance.omegaTTt_bias = this->config.motionFilter.initial.covariance.gyroscopeBias;
-            motionFilter.set_state(mean.getStateVec(), covariance.asDiagonal());
+            // Configuration is a reset event
+            updates_since_reset_event = 0;
         });
 
         on<Configuration>("FootDownNetwork.yaml").then([this](const Configuration& config) {
@@ -241,6 +243,44 @@ namespace module::platform::darwin {
             [this](const DarwinSensors& input,
                    std::shared_ptr<const Sensors> previousSensors,
                    const KinematicsModel& kinematicsModel) {
+                // If we have reset the filter recently, then we average the next MIN_UPDATES to set an initial position
+                if (updates_since_reset_event < MIN_UPDATES) {
+                    first_updates.push_back(sensorsToState(input));
+                    updates_since_reset_event++;
+                    return;
+                }
+                // Once we have the minimum number of updates since the last reset event, we actually reset the filter
+                // Then, we can use the filter as normal
+                else if (updates_since_reset_event == MIN_UPDATES) {
+
+                    const auto& mean_state = calculateMeanState(first_updates);
+
+                    // We use our config covariance as the diagonal for an initial covariance matrix
+                    MotionModel<double>::StateVec covariance;
+                    covariance.rTWw          = this->config.motionFilter.initial.covariance.position;
+                    covariance.vTw           = this->config.motionFilter.initial.covariance.velocity;
+                    covariance.Rwt           = this->config.motionFilter.initial.covariance.rotation;
+                    covariance.omegaTTt      = this->config.motionFilter.initial.covariance.rotationalVelocity;
+                    covariance.omegaTTt_bias = this->config.motionFilter.initial.covariance.gyroscopeBias;
+
+                    // Reset the filter
+                    bool cholesky_success = motionFilter.reset(mean_state.getStateVec(),
+                                                               covariance.asDiagonal(),
+                                                               motionFilter.ALPHA_DEFAULT,
+                                                               motionFilter.KAPPA_DEFAULT,
+                                                               motionFilter.BETA_DEFAULT);
+
+                    // If a Cholesky decomposition failed, try wait another MIN_UPDATES and try again
+                    if (!cholesky_success) {
+                        NUClear::log<NUClear::WARN>("Cholesky decomposition failed after filter reset. Retry reset");
+                        updates_since_reset_event = 0;
+                    }
+
+                    // Reset the first updates vector, since we want it empty at the next reset event
+                    first_updates.clear();
+                }
+                updates_since_reset_event++;
+
                 auto sensors = std::make_unique<Sensors>();
 
                 /************************************************
@@ -537,7 +577,16 @@ namespace module::platform::darwin {
                                      input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp))
                                      .count(),
                                  0.0);
-                    motionFilter.time(deltaT);
+
+                    // Do a filter time update. If the cholesky decomposition(s) it did were not successful, we need to
+                    // reset the filter. The reset will be handled if we reset the updates since reset event count
+                    bool cholesky_success = motionFilter.time(deltaT);
+
+                    if (!cholesky_success) {
+                        NUClear::log<NUClear::WARN>(
+                            "Cholesky decomposition failed after time update. Filter reset triggered");
+                        updates_since_reset_event = 0;
+                    }
                 }
 
                 // Convert the motion filter's state vector to a nicer representation, so we can access its elements

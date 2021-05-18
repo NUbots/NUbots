@@ -120,6 +120,18 @@ namespace module::platform::darwin {
 
         // Storage for previous gyroscope values
         Eigen::Vector3d theta;
+
+        /// @brief The number of Sensor updates since last reset was required
+        /// Resets are required on startup, on configuration change, or on Cholesky decomposition failure
+        uint32_t updates_since_reset_event;
+
+        /// @brief The number of updates required to use the UKF
+        /// We use the first MIN_UPDATES after a reset to set our initial position properly,
+        /// storing each of those updates in `first_updates`
+        static constexpr uint32_t MIN_UPDATES = 10;
+
+        /// @brief The first updates after a reset. <b> Must be cleared on reset </b>
+        std::vector<MotionModel<double>::StateVec> first_updates;
     };
 }  // namespace module::platform::darwin
 #endif  // MODULES_PLATFORM_DARWIN_SENSORFILTER_HPP

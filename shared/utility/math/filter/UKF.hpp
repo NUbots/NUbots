@@ -39,6 +39,10 @@ namespace utility::math::filter {
         using StateVec = Eigen::Matrix<Scalar, Model::size, 1>;
         using StateMat = Eigen::Matrix<Scalar, Model::size, Model::size>;
 
+        static constexpr Scalar ALPHA_DEFAULT = 0.1;
+        static constexpr Scalar KAPPA_DEFAULT = 0.0;
+        static constexpr Scalar BETA_DEFAULT  = 2.0;
+
     private:
         // The number of sigma points
         static constexpr unsigned int NUM_SIGMA_POINTS = (Model::size * 2) + 1;
@@ -69,11 +73,13 @@ namespace utility::math::filter {
 
         /**
          * @brief Generate new sigma points given our mean and covariance.
+         * @return The matrix of sigma points, paired with cholesky_successful == true
          */
         template <typename T, int S>
-        static Eigen::Matrix<T, S, NUM_SIGMA_POINTS> generate_sigma_points(const Eigen::Matrix<T, S, 1>& mean,
-                                                                           const Eigen::Matrix<T, S, S>& covariance,
-                                                                           const T& sigma_weight) {
+        [[nodiscard]] static std::pair<Eigen::Matrix<T, S, NUM_SIGMA_POINTS>, bool> generate_sigma_points(
+            const Eigen::Matrix<T, S, 1>& mean,
+            const Eigen::Matrix<T, S, S>& covariance,
+            const T& sigma_weight) {
 
             Eigen::Matrix<T, S, NUM_SIGMA_POINTS> points;
 
@@ -109,7 +115,7 @@ namespace utility::math::filter {
                 }
             }
 
-            return points;
+            return {points, cholesky.info() == Eigen::Success};
         }
 
         /**
@@ -148,9 +154,9 @@ namespace utility::math::filter {
     public:
         UKF(StateVec initial_mean       = StateVec::Zero(),
             StateMat initial_covariance = StateMat::Identity() * 0.1,
-            Scalar alpha                = 0.1,
-            Scalar kappa                = 0.0,
-            Scalar beta                 = 2.0)
+            Scalar alpha                = ALPHA_DEFAULT,
+            Scalar kappa                = KAPPA_DEFAULT,
+            Scalar beta                 = BETA_DEFAULT)
             : model()
             , mean(initial_mean)
             , covariance(initial_covariance)
@@ -166,7 +172,11 @@ namespace utility::math::filter {
             reset(initial_mean, initial_covariance, alpha, kappa, beta);
         }
 
-        void reset(StateVec initial_mean, StateMat initial_covariance, Scalar alpha, Scalar kappa, Scalar beta) {
+        [[nodiscard]] bool reset(StateVec initial_mean,
+                                 StateMat initial_covariance,
+                                 Scalar alpha,
+                                 Scalar kappa,
+                                 Scalar beta) {
             Scalar lambda = alpha * alpha * (Model::size + kappa) - Model::size;
 
             covariance_sigma_weight = Model::size + lambda;
@@ -177,27 +187,33 @@ namespace utility::math::filter {
             covariance_weights.fill(1.0 / (2.0 * covariance_sigma_weight));
             covariance_weights[0] = lambda / covariance_sigma_weight + (1.0 - (alpha * alpha) + beta);
 
-            set_state(initial_mean, initial_covariance);
+            return set_state(initial_mean, initial_covariance);
         }
 
-        void set_state(StateVec initial_mean, StateMat initial_covariance) {
+        [[nodiscard]] bool set_state(StateVec initial_mean, StateMat initial_covariance) {
             mean       = initial_mean;
             covariance = initial_covariance;
 
             // Calculate our sigma points
-            sigma_mean   = mean;
-            sigma_points = generate_sigma_points(mean, covariance, covariance_sigma_weight);
+            sigma_mean                  = mean;
+            auto&& points_chole_success = generate_sigma_points(mean, covariance, covariance_sigma_weight);
+
+            sigma_points = points_chole_success.first;
 
             // Reset our state for more measurements
             covariance_update = covariance_weights.asDiagonal();
             d.setZero();
             centred_sigma_points = sigma_points.colwise() - sigma_mean;
+            return points_chole_success.second;
         }
 
         template <typename... Args>
-        void time(const Scalar& dt, const Args&... params) {
+        [[no_discard]] bool time(const Scalar& dt, const Args&... params) {
             // Generate our sigma points
-            sigma_points = generate_sigma_points(mean, covariance, covariance_sigma_weight);
+            auto&& points_chole_success = generate_sigma_points(mean, covariance, covariance_sigma_weight);
+            sigma_points                = points_chole_success.first;
+
+            bool chole_success = points_chole_success.second;
 
             // Write the propagated version of the sigma point
             for (unsigned int i = 0; i < NUM_SIGMA_POINTS; ++i) {
@@ -211,13 +227,16 @@ namespace utility::math::filter {
             covariance += model.noise(dt);
 
             // Re calculate our sigma points
-            sigma_mean   = mean;
-            sigma_points = generate_sigma_points(mean, covariance, covariance_sigma_weight);
+            sigma_mean           = mean;
+            points_chole_success = generate_sigma_points(mean, covariance, covariance_sigma_weight);
+            sigma_points         = points_chole_success.first;
+            chole_success &= points_chole_success.second;
 
             // Reset our state for more measurements
             covariance_update = covariance_weights.asDiagonal();
             d.setZero();
             centred_sigma_points = sigma_points.colwise() - sigma_mean;
+            return chole_success;
         }
 
 
