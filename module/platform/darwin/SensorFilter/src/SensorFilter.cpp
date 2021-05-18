@@ -243,7 +243,7 @@ namespace module::platform::darwin {
             [this](const DarwinSensors& input,
                    std::shared_ptr<const Sensors> previousSensors,
                    const KinematicsModel& kinematicsModel) {
-                // If we have reset the filter recently, then we average the next MIN_UPDATES to set an initial position
+                // If we have a reset event recently, then we average the next MIN_UPDATES to set an initial position
                 if (updates_since_reset_event < MIN_UPDATES) {
                     first_updates.push_back(sensorsToState(input));
                     updates_since_reset_event++;
@@ -270,7 +270,7 @@ namespace module::platform::darwin {
                                                                motionFilter.KAPPA_DEFAULT,
                                                                motionFilter.BETA_DEFAULT);
 
-                    // If a Cholesky decomposition failed, try wait another MIN_UPDATES and try again
+                    // If a Cholesky decomposition failed, wait another MIN_UPDATES and try again
                     if (!cholesky_success) {
                         NUClear::log<NUClear::WARN>("Cholesky decomposition failed after filter reset. Retry reset");
                         updates_since_reset_event = 0;
