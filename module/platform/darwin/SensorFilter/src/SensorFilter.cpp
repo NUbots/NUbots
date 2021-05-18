@@ -401,7 +401,7 @@ namespace module::platform::darwin {
                 sensors->feet[BodySide::RIGHT].down = true;
                 sensors->feet[BodySide::LEFT].down  = true;
 
-                std::array<bool, 2> feet_down = {true};
+                std::array<bool, 2> feet_down = {true, true};
 
                 // If we're using the load value on the foot to work out if our foot is down, do that
                 if (config.footDown.fromLoad) {
