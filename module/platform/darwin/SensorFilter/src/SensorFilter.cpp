@@ -531,13 +531,12 @@ namespace module::platform::darwin {
                 // Calculate our time offset from the last read then update the filter's time
                 {
                     using namespace std::chrono;
-                    constexpr double CLOCK_FACTOR = NUClear::clock::period::num / NUClear::clock::period::den;
 
-                    const double deltaT = std::max(
-                        (input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp)).count()
-                            * CLOCK_FACTOR,
-                        0.0);
-
+                    const double deltaT =
+                        std::max(duration_cast<duration<double>>(
+                                     input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp))
+                                     .count(),
+                                 0.0);
                     motionFilter.time(deltaT);
                 }
 
