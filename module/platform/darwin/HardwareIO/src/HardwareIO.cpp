@@ -37,6 +37,7 @@ namespace module::platform::darwin {
     using extension::Configuration;
     using message::motion::ServoTarget;
     using message::platform::darwin::DarwinSensors;
+    using utility::platform::darwin::Convert;
     using utility::support::Expression;
 
     DarwinSensors HardwareIO::parseSensors(const Darwin::BulkReadResults& data) {

@@ -17,12 +17,12 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_PLATFORM_DARWIN_CONVERT_HPP
-#define MODULES_PLATFORM_DARWIN_CONVERT_HPP
+#ifndef UTILITY_PLATFORM_DARWIN_CONVERT_HPP
+#define UTILITY_PLATFORM_DARWIN_CONVERT_HPP
 
 #include <nuclear>
 
-namespace module::platform::darwin {
+namespace utility::platform::darwin {
 
     /**
      * @author Trent Houliston
@@ -105,5 +105,5 @@ namespace module::platform::darwin {
 
         static float temperature(const uint8_t value);
     };
-}  // namespace module::platform::darwin
-#endif
+}  // namespace utility::platform::darwin
+#endif  // UTILITY_PLATFORM_DARWIN_CONVERT_HPP

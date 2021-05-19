@@ -21,7 +21,7 @@
 
 #include "utility/math/angle.hpp"
 
-namespace module::platform::darwin {
+namespace utility::platform::darwin {
 
     int8_t Convert::SERVO_DIRECTION[20] = {0};
     double Convert::SERVO_OFFSET[20]    = {0};
@@ -138,4 +138,4 @@ namespace module::platform::darwin {
     float Convert::temperature(const uint8_t value) {
         return value * TEMPERATURE_CONVERSION_FACTOR;
     }
-}  // namespace module::platform::darwin
+}  // namespace utility::platform::darwin
