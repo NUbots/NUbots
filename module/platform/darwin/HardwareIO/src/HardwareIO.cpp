@@ -75,14 +75,22 @@ namespace module::platform::darwin {
         }
 
         // Accelerometer (in m/s^2)
-        sensors.accelerometer.x = Convert::accelerometer(data.cm740.accelerometer.x);
+        // Swizzle axes to that
+        //      x is forward, y is to the left, and z is up
+        // The CM740 currently has
+        //      x is backward, y is to the left, and z is up
+        sensors.accelerometer.x = -Convert::accelerometer(data.cm740.accelerometer.x);
         sensors.accelerometer.y = Convert::accelerometer(data.cm740.accelerometer.y);
         sensors.accelerometer.z = Convert::accelerometer(data.cm740.accelerometer.z);
 
         // Gyroscope (in radians/second)
-        sensors.gyroscope.x = Convert::gyroscope(data.cm740.gyroscope.x);
-        sensors.gyroscope.y = Convert::gyroscope(data.cm740.gyroscope.y);
-        sensors.gyroscope.z = Convert::gyroscope(data.cm740.gyroscope.z);
+        // Swizzle axes to that
+        //      x is forward, y is to the left, and z is up
+        // The CM740 currently has
+        //      x is to the right, y is backward, and z is down
+        sensors.gyroscope.x = Convert::gyroscope(data.cm740.gyroscope.y);
+        sensors.gyroscope.y = Convert::gyroscope(data.cm740.gyroscope.x);
+        sensors.gyroscope.z = -Convert::gyroscope(data.cm740.gyroscope.z);
 
         /*
          Force Sensitive Resistor Data
