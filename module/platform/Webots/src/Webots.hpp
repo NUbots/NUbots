@@ -76,6 +76,6 @@ namespace module::platform {
         explicit Webots(std::unique_ptr<NUClear::Environment> environment);
     };
 
-}  // namespace module::platform::webots
+}  // namespace module::platform
 
 #endif  // MODULE_PLATFORM_WEBOTS_HPP

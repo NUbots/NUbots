@@ -653,4 +653,4 @@ namespace module::platform {
             }
         }
     }
-}  // namespace module::platform::webots
+}  // namespace module::platform
