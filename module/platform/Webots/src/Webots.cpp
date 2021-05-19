@@ -319,7 +319,7 @@ namespace module::platform {
 
         // Initaliase the string with ???????
         std::string initial_message = std::string(7, '?');
-        const int n                 = recv(fd, initial_message.data(), sizeof(initial_message), 0);
+        const int n                 = recv(fd, initial_message.data(), sizeof(initial_message), MSG_WAITALL);
 
         if (n >= 0) {
             if (initial_message == "Welcome") {
@@ -472,115 +472,109 @@ namespace module::platform {
 
     void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurements) {
         if (false) {  // Change to true to print the received sensor_measurements, will remove after this is done
-            std::cout << std::endl << std::endl << std::endl << "received SensorMeasurements: " << std::endl;
-            std::cout << "  sm.time: " << sensor_measurements.time << std::endl;
-            std::cout << "  sm.real_time: " << sensor_measurements.real_time << std::endl;
+            log<NUClear::TRACE>("received SensorMeasurements: ");
+            log<NUClear::TRACE>(fmt::format("  sm.time: {}", sensor_measurements.time));
+            log<NUClear::TRACE>(fmt::format("  sm.real_time: {}", sensor_measurements.real_time));
 
             {
-                std::cout << "  sm.messages: " << std::endl;
+                log<NUClear::TRACE>("  sm.messages: ");
                 int i = 0;
                 for (auto message : sensor_measurements.messages) {
-                    std::cout << "    sm.messages[" << i << "]" << std::endl;
-                    std::cout << "      message_type: " << message.message_type << std::endl;
-                    std::cout << "      text: " << message.text << std::endl;
+                    log<NUClear::TRACE>(fmt::format("    sm.messages[{}]", i));
+                    log<NUClear::TRACE>(fmt::format("      message_type: {}", message.message_type));
+                    log<NUClear::TRACE>(fmt::format("      text: {}", message.text));
                     i++;
                 }
             }
 
-
             {
-                std::cout << "  sm.accelerometers: " << std::endl;
+                log<NUClear::TRACE>("  sm.accelerometers: ");
                 int i = 0;
                 for (auto acc : sensor_measurements.accelerometers) {
-                    std::cout << "    sm.accelerometers[" << i << "]" << std::endl;
-                    std::cout << "      name: " << acc.name << std::endl;
-                    std::cout << "      value: [" << acc.value.X << ", " << acc.value.Y << ", " << acc.value.Z << "]"
-                              << std::endl;
+                    log<NUClear::TRACE>(fmt::format("    sm.accelerometers[{}]", i));
+                    log<NUClear::TRACE>(fmt::format("      name: ", acc.name));
+                    log<NUClear::TRACE>(fmt::format("      value: [{}, {}, {}]", acc.value.X, acc.value.Y, acc.value.Z));
                     i++;
                 }
             }
 
             {
-                std::cout << "  sm.bumpers: " << std::endl;
+                log<NUClear::TRACE>("  sm.bumpers: ");
                 int i = 0;
                 for (auto bumper : sensor_measurements.bumpers) {
-                    std::cout << "    sm.bumpers[" << i << "]" << std::endl;
-                    std::cout << "      name: " << bumper.name << std::endl;
-                    std::cout << "      value: " << bumper.value << std::endl;
+                    log<NUClear::TRACE>(fmt::format("    sm.bumpers[{}]", i));
+                    log<NUClear::TRACE>(fmt::format("      name: {}", bumper.name));
+                    log<NUClear::TRACE>(fmt::format("      value: {}", bumper.value));
                     i++;
                 }
             }
 
             {
-                std::cout << "  sm.cameras: " << std::endl;
+                log<NUClear::TRACE>("  sm.cameras: ");
                 int i = 0;
                 for (auto camera : sensor_measurements.cameras) {
-                    std::cout << "    sm.cameras[" << i << "]" << std::endl;
-                    std::cout << "      name: " << camera.name << std::endl;
-                    std::cout << "      width: " << camera.width << std::endl;
-                    std::cout << "      height: " << camera.height << std::endl;
-                    std::cout << "      quality: " << camera.quality << std::endl;
-                    std::cout << "      image (size): " << camera.image.size() << std::endl;
+                    log<NUClear::TRACE>(fmt::format("    sm.cameras[{}]", i));
+                    log<NUClear::TRACE>(fmt::format("      name: {}", camera.name));
+                    log<NUClear::TRACE>(fmt::format("      width: {}", camera.width));
+                    log<NUClear::TRACE>(fmt::format("      height: {}", camera.height));
+                    log<NUClear::TRACE>(fmt::format("      quality: {}", camera.quality));
+                    log<NUClear::TRACE>(fmt::format("      image (size): {}", camera.image.size()));
                     i++;
                 }
             }
 
             {
-                std::cout << "  sm.forces: " << std::endl;
+                log<NUClear::TRACE>("  sm.forces: ");
                 int i = 0;
                 for (auto force : sensor_measurements.forces) {
-                    std::cout << "    sm.forces[" << i << "]" << std::endl;
-                    std::cout << "      name: " << force.name << std::endl;
-                    std::cout << "      value: " << force.value << std::endl;
+                    log<NUClear::TRACE>(fmt::format("    sm.forces[{}]", i));
+                    log<NUClear::TRACE>(fmt::format("      name: {}", force.name));
+                    log<NUClear::TRACE>(fmt::format("      value: {}", force.value));
                     i++;
                 }
             }
 
             {
-                std::cout << "  sm.force3ds: " << std::endl;
+                log<NUClear::TRACE>("  sm.force3ds: ");
                 int i = 0;
                 for (auto force : sensor_measurements.force3ds) {
-                    std::cout << "    sm.force3ds[" << i << "]" << std::endl;
-                    std::cout << "      name: " << force.name << std::endl;
-                    std::cout << "      value: [" << force.value.X << ", " << force.value.Y << ", " << force.value.Z
-                              << "]" << std::endl;
+                    log<NUClear::TRACE>(fmt::format("    sm.force3ds[{}]", i));
+                    log<NUClear::TRACE>(fmt::format("      name: {}", force.name));
+                    log<NUClear::TRACE>(fmt::format("      value: [{}, {}, {}]", force.value.X, force.value.Y, force.value.Z));
                     i++;
                 }
             }
 
             {
-                std::cout << "  sm.force6ds: " << std::endl;
+                log<NUClear::TRACE>("  sm.force6ds: ");
                 int i = 0;
                 for (auto force : sensor_measurements.force6ds) {
-                    std::cout << "    sm.force6ds[" << i << "]" << std::endl;
-                    std::cout << "      name: " << force.name << std::endl;
-                    std::cout << "      force: [" << force.force.X << ", " << force.force.Y << ", " << force.force.Z
-                              << "]" << std::endl;
-                    std::cout << "      torque: [" << force.torque.X << ", " << force.force.Y << ", " << force.force.Z
-                              << "]" << std::endl;
+                    log<NUClear::TRACE>(fmt::format("    sm.force6ds[{}]", i));
+                    log<NUClear::TRACE>(fmt::format("      name: {}", force.name));
+                    log<NUClear::TRACE>(fmt::format("      force: [{}, {}, {}]", force.force.X, force.force.Y, force.force.Z));
+                    log<NUClear::TRACE>(fmt::format("      torque: [{}, {}, {}]", force.torque.X, force.force.Y, force.force.Z));
                     i++;
                 }
             }
 
             {
-                std::cout << "  sm.gyros: " << std::endl;
+                log<NUClear::TRACE>("  sm.gyros: ");
                 int i = 0;
                 for (auto gyro : sensor_measurements.gyros) {
-                    std::cout << "    sm.gyros[" << i << "]" << std::endl;
-                    std::cout << "      name: " << gyro.name << std::endl;
-                    std::cout << "      value: [" << gyro.value.X << ", " << gyro.value.Y << ", " << gyro.value.Z << "]"
-                              << std::endl;
+                    log<NUClear::TRACE>(fmt::format("    sm.gyros[{}]", i));
+                    log<NUClear::TRACE>(fmt::format("      name: {}", gyro.name));
+                    log<NUClear::TRACE>(fmt::format("      value: [{}, {}, {}]", gyro.value.X, gyro.value.Y, gyro.value.Z));
                     i++;
                 }
             }
 
             {
-                std::cout << "  sm.position_sensors: " << std::endl;
+                log<NUClear::TRACE>("  sm.position_sensors: ");
                 int i = 0;
                 for (auto sensor : sensor_measurements.position_sensors) {
-                    std::cout << "    sm.position_sensors[" << i << "]" << std::endl;
-                    std::cout << "      name: " << sensor.name << std::endl;
-                    std::cout << "      value: " << sensor.value << std::endl;
+                    log<NUClear::TRACE>(fmt::format("    sm.position_sensors[{}]", i));
+                    log<NUClear::TRACE>(fmt::format("      name: {}", sensor.name));
+                    log<NUClear::TRACE>(fmt::format("      value: {}", sensor.value));
                     i++;
                 }
             }
@@ -611,21 +605,11 @@ namespace module::platform {
             sensor_data->gyroscope.z = static_cast<float>(gyro.value.Z);
         }
 
-        // Ignore as we don't have physical functionality for this
+        // TODO Implement fsrs
         /*
         for (const auto& bumper : sensor_measurements.bumpers) {
             // string name
             // bool value
-        }
-
-        for (const auto& force_3d : sensor_measurements.force3ds) {
-            // string name
-            // Vector3 value
-        }
-
-        for (const auto& force_6d : sensor_measurements.force6ds) {
-            // string name
-            // Vector3 value
         }
         */
 
