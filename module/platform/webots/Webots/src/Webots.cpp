@@ -372,7 +372,8 @@ namespace module::platform::webots {
 
             // Get the message
             std::vector<char> data(Nh, 0);
-            if (uint64_t(recv(fd, data.data(), Nh, 0)) != Nh) {
+            uint64_t message = uint64_t(recv(fd, data.data(), Nh, MSG_WAITALL));
+            if (message != Nh) {
                 log<NUClear::ERROR>("Failed to read message from TCP connection");
                 return;
             }
