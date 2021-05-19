@@ -15,5 +15,5 @@ nuclear_role(
   behaviour::Controller
   behaviour::skills::DirectWalkController
   behaviour::strategy::KeyboardWalk
-  platform::webots::Webots
+  platform::Webots
 )

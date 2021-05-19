@@ -33,7 +33,6 @@
 #include "message/platform/darwin/DarwinSensors.hpp"
 #include "message/platform/webots/ConnectRequest.hpp"
 #include "message/platform/webots/messages.hpp"
-#include "message/support/GlobalConfig.hpp"
 
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
@@ -49,7 +48,7 @@ extern "C" {
 #include <unistd.h> /* definition of close */
 }
 
-namespace module::platform::webots {
+namespace module::platform {
 
     /// @brief The clock period factor, used to convert simulation time to real time
     static constexpr float CLOCK_PERIOD_FACTOR =
@@ -70,8 +69,6 @@ namespace module::platform::webots {
     using message::platform::webots::MotorVelocity;
     using message::platform::webots::SensorMeasurements;
     using message::platform::webots::SensorTimeStep;
-
-    using message::support::GlobalConfig;
 
     using utility::input::ServoID;
     using utility::platform::darwin::getDarwinServo;
@@ -268,7 +265,7 @@ namespace module::platform::webots {
     }
 
     Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-        on<Trigger<GlobalConfig>, Configuration>("webots.yaml").then([this](const Configuration& config) {
+        on<Configuration>("webots.yaml").then([this](const Configuration& config) {
             // Use configuration here from file webots.yaml
             time_step = config["time_step"].as<int>();
 
