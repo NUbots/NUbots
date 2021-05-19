@@ -21,14 +21,13 @@
 
 #include <iomanip>
 
-#include "Convert.hpp"
-
 #include "extension/Configuration.hpp"
 
 #include "message/motion/ServoTarget.hpp"
 #include "message/platform/darwin/DarwinSensors.hpp"
 
 #include "utility/math/angle.hpp"
+#include "utility/platform/darwin/Convert.hpp"
 #include "utility/platform/darwin/DarwinSensors.hpp"
 #include "utility/support/yaml_expression.hpp"
 
