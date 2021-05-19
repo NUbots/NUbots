@@ -19,11 +19,10 @@
 
 #include <catch.hpp>
 
-#include "Convert.hpp"
-
 #include "utility/math/angle.hpp"
+#include "utility/platform/darwin/Convert.hpp"
 
-using namespace module::platform::darwin;
+using namespace utility::platform::darwin;
 
 TEST_CASE("Testing the hardware accelerometer conversions to SI units", "[hardware][conversion][accelerometer]") {
 
