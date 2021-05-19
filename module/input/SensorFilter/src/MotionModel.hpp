@@ -17,8 +17,8 @@
  * Copyright 2016 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULE_PLATFORM_DARWIN_MOTIONMODEL_HPP
-#define MODULE_PLATFORM_DARWIN_MOTIONMODEL_HPP
+#ifndef MODULE_INPUT_MOTIONMODEL_HPP
+#define MODULE_INPUT_MOTIONMODEL_HPP
 
 /* Motion model Motion Unit*/
 #include <Eigen/Core>
@@ -26,7 +26,7 @@
 
 #include "utility/math/quaternion.hpp"
 
-namespace module::platform::darwin {
+namespace module::input {
 
     // Gravity
     static constexpr double G = -9.80665;
@@ -147,16 +147,6 @@ namespace module::platform::darwin {
             StateVec newState(state);
 
             // ********************************
-            // UPDATE LINEAR POSITION/VELOCITY
-            // ********************************
-
-            // Add our velocity to our position
-            newState.rTWw += newState.vTw * deltaT;
-
-            // add velocity decay
-            newState.vTw = newState.vTw.cwiseProduct(timeUpdateVelocityDecay);
-
-            // ********************************
             // UPDATE ANGULAR POSITION/VELOCITY
             // ********************************
 
@@ -177,6 +167,16 @@ namespace module::platform::darwin {
             const Eigen::Quaternion<Scalar> change = Eigen::Quaternion<Scalar>(deltaT * dq_dt.coeffs());
             // We can add the change to the original, as long as our time step is small enough
             newState.Rwt = Eigen::Quaternion<Scalar>(Rwt.coeffs() + change.coeffs()).normalized();
+
+            // ********************************
+            // UPDATE LINEAR POSITION/VELOCITY
+            // ********************************
+
+            // Add our velocity to our position
+            newState.rTWw += newState.vTw * deltaT;
+
+            // add velocity decay
+            newState.vTw = newState.vTw.cwiseProduct(timeUpdateVelocityDecay);
 
             return newState;
         }
@@ -245,5 +245,5 @@ namespace module::platform::darwin {
             return process_noise.asDiagonal() * deltaT;
         }
     };
-}  // namespace module::platform::darwin
-#endif  // MODULE_PLATFORM_DARWIN_MOTIONMODEL_HPP
+}  // namespace module::input
+#endif  // MODULE_INPUT_MOTIONMODEL_HPP

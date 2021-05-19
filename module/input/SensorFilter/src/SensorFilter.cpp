@@ -32,7 +32,7 @@
 #include "utility/platform/darwin/DarwinSensors.hpp"
 #include "utility/support/yaml_expression.hpp"
 
-namespace module::platform::darwin {
+namespace module::input {
 
     using extension::Configuration;
 
@@ -338,13 +338,11 @@ namespace module::platform::darwin {
                     }
                 }
 
-                // gyro_x to the right
-                // gyro_y to the back
-                // gyro_z down
+                /************************************************
+                 *          Accelerometer and Gyroscope         *
+                 ************************************************/
 
-                // acc_x to the back
-                // acc_y to the left
-                // acc_z up
+                // We assume that the accelerometer and gyroscope
 
                 // If we have a previous sensors and our cm740 has errors then reuse our last sensor value
                 if (previousSensors && (input.cm740_error_flags)) {
@@ -352,7 +350,7 @@ namespace module::platform::darwin {
                 }
                 else {
                     sensors->accelerometer =
-                        Eigen::Vector3d(-input.accelerometer.x, input.accelerometer.y, input.accelerometer.z);
+                        Eigen::Vector3d(input.accelerometer.x, input.accelerometer.y, input.accelerometer.z);
                 }
 
                 // If we have a previous sensors and our cm740 has errors then reuse our last sensor value
@@ -366,7 +364,7 @@ namespace module::platform::darwin {
                     sensors->gyroscope = previousSensors->gyroscope;
                 }
                 else {
-                    sensors->gyroscope = Eigen::Vector3d(input.gyroscope.y, input.gyroscope.x, -input.gyroscope.z);
+                    sensors->gyroscope = Eigen::Vector3d(input.gyroscope.x, input.gyroscope.y, input.gyroscope.z);
                 }
 
                 /************************************************
@@ -560,4 +558,4 @@ namespace module::platform::darwin {
                 emit(std::move(sensors));
             });
     }
-}  // namespace module::platform::darwin
+}  // namespace module::input
