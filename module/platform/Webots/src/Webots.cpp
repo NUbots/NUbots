@@ -493,7 +493,8 @@ namespace module::platform {
                 for (auto acc : sensor_measurements.accelerometers) {
                     log<NUClear::TRACE>(fmt::format("    sm.accelerometers[{}]", i));
                     log<NUClear::TRACE>(fmt::format("      name: ", acc.name));
-                    log<NUClear::TRACE>(fmt::format("      value: [{}, {}, {}]", acc.value.X, acc.value.Y, acc.value.Z));
+                    log<NUClear::TRACE>(
+                        fmt::format("      value: [{}, {}, {}]", acc.value.X, acc.value.Y, acc.value.Z));
                     i++;
                 }
             }
@@ -540,7 +541,8 @@ namespace module::platform {
                 for (auto force : sensor_measurements.force3ds) {
                     log<NUClear::TRACE>(fmt::format("    sm.force3ds[{}]", i));
                     log<NUClear::TRACE>(fmt::format("      name: {}", force.name));
-                    log<NUClear::TRACE>(fmt::format("      value: [{}, {}, {}]", force.value.X, force.value.Y, force.value.Z));
+                    log<NUClear::TRACE>(
+                        fmt::format("      value: [{}, {}, {}]", force.value.X, force.value.Y, force.value.Z));
                     i++;
                 }
             }
@@ -551,8 +553,10 @@ namespace module::platform {
                 for (auto force : sensor_measurements.force6ds) {
                     log<NUClear::TRACE>(fmt::format("    sm.force6ds[{}]", i));
                     log<NUClear::TRACE>(fmt::format("      name: {}", force.name));
-                    log<NUClear::TRACE>(fmt::format("      force: [{}, {}, {}]", force.force.X, force.force.Y, force.force.Z));
-                    log<NUClear::TRACE>(fmt::format("      torque: [{}, {}, {}]", force.torque.X, force.force.Y, force.force.Z));
+                    log<NUClear::TRACE>(
+                        fmt::format("      force: [{}, {}, {}]", force.force.X, force.force.Y, force.force.Z));
+                    log<NUClear::TRACE>(
+                        fmt::format("      torque: [{}, {}, {}]", force.torque.X, force.force.Y, force.force.Z));
                     i++;
                 }
             }
@@ -563,7 +567,8 @@ namespace module::platform {
                 for (auto gyro : sensor_measurements.gyros) {
                     log<NUClear::TRACE>(fmt::format("    sm.gyros[{}]", i));
                     log<NUClear::TRACE>(fmt::format("      name: {}", gyro.name));
-                    log<NUClear::TRACE>(fmt::format("      value: [{}, {}, {}]", gyro.value.X, gyro.value.Y, gyro.value.Z));
+                    log<NUClear::TRACE>(
+                        fmt::format("      value: [{}, {}, {}]", gyro.value.X, gyro.value.Y, gyro.value.Z));
                     i++;
                 }
             }
