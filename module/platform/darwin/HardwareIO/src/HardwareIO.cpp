@@ -26,10 +26,10 @@
 #include "extension/Configuration.hpp"
 
 #include "message/motion/ServoTarget.hpp"
-#include "message/platform/darwin/DarwinSensors.hpp"
+#include "message/platform/RawSensors.hpp"
 
 #include "utility/math/angle.hpp"
-#include "utility/platform/darwin/DarwinSensors.hpp"
+#include "utility/platform/RawSensors.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 
@@ -37,11 +37,11 @@ namespace module::platform::darwin {
 
     using extension::Configuration;
     using message::motion::ServoTarget;
-    using message::platform::darwin::DarwinSensors;
+    using message::platform::RawSensors;
     using utility::support::Expression;
 
-    DarwinSensors HardwareIO::parseSensors(const Darwin::BulkReadResults& data) {
-        DarwinSensors sensors;
+    RawSensors HardwareIO::parseSensors(const Darwin::BulkReadResults& data) {
+        RawSensors sensors;
 
         // Timestamp when our data was taken
         sensors.timestamp = NUClear::clock::now();
@@ -51,8 +51,8 @@ namespace module::platform::darwin {
          */
 
         // Read our Error code
-        sensors.cm740_error_flags = data.cm740ErrorCode == 0xFF ? DarwinSensors::Error::TIMEOUT
-                                                                : DarwinSensors::Error(data.cm740ErrorCode).value;
+        sensors.platform_error_flags =
+            data.cm740ErrorCode == 0xFF ? RawSensors::Error::TIMEOUT : RawSensors::Error(data.cm740ErrorCode).value;
 
         // LED Panel
         sensors.led_panel = cm740State.ledPanel;
@@ -71,7 +71,7 @@ namespace module::platform::darwin {
         sensors.voltage = Convert::voltage(data.cm740.voltage);
 
         if (sensors.voltage <= chargedVoltage) {
-            sensors.cm740_error_flags &= ~DarwinSensors::Error::INPUT_VOLTAGE;
+            sensors.platform_error_flags &= ~RawSensors::Error::INPUT_VOLTAGE;
         }
 
         // Accelerometer (in m/s^2)
@@ -98,9 +98,8 @@ namespace module::platform::darwin {
 
         // Right Sensor
         // Error
-        sensors.fsr.right.error_flags = data.fsrErrorCodes[0] == 0xFF
-                                            ? DarwinSensors::Error::TIMEOUT
-                                            : DarwinSensors::Error(data.fsrErrorCodes[0]).value;
+        sensors.fsr.right.error_flags =
+            data.fsrErrorCodes[0] == 0xFF ? RawSensors::Error::TIMEOUT : RawSensors::Error(data.fsrErrorCodes[0]).value;
 
         // Sensors
         sensors.fsr.right.fsr1 = Convert::fsrForce(data.fsr[0].fsr1);
@@ -116,9 +115,8 @@ namespace module::platform::darwin {
 
         // Left Sensor
         // Error
-        sensors.fsr.left.error_flags = data.fsrErrorCodes[1] == 0xFF
-                                           ? DarwinSensors::Error::TIMEOUT
-                                           : DarwinSensors::Error(data.fsrErrorCodes[1]).value;
+        sensors.fsr.left.error_flags =
+            data.fsrErrorCodes[1] == 0xFF ? RawSensors::Error::TIMEOUT : RawSensors::Error(data.fsrErrorCodes[1]).value;
 
         // Sensors
         sensors.fsr.left.fsr1 = Convert::fsrForce(data.fsr[1].fsr1);
@@ -138,7 +136,7 @@ namespace module::platform::darwin {
 
         for (int i = 0; i < 20; ++i) {
             // Get a reference to the servo we are populating
-            DarwinSensors::Servo& servo = utility::platform::darwin::getDarwinServo(i, sensors);
+            RawSensors::Servo& servo = utility::platform::getRawServo(i, sensors);
 
 
             // Booleans
@@ -192,9 +190,8 @@ namespace module::platform::darwin {
             // If we are using real data, get it from the packet
             else {
                 // Error code
-                servo.error_flags = data.servoErrorCodes[i] == 0xFF
-                                        ? DarwinSensors::Error::TIMEOUT
-                                        : DarwinSensors::Error(data.servoErrorCodes[i]).value;
+                servo.error_flags = data.servoErrorCodes[i] == 0xFF ? RawSensors::Error::TIMEOUT
+                                                                    : RawSensors::Error(data.servoErrorCodes[i]).value;
 
                 // Present Data
                 servo.present_position = Convert::servoPosition(i, data.servos[i].presentPosition);
@@ -207,7 +204,7 @@ namespace module::platform::darwin {
 
                 // Clear Overvoltage flag if current voltage is greater than maximum expected voltage
                 if (servo.voltage <= chargedVoltage) {
-                    servo.error_flags &= ~DarwinSensors::Error::INPUT_VOLTAGE;
+                    servo.error_flags &= ~RawSensors::Error::INPUT_VOLTAGE;
                 }
             }
         }
@@ -249,7 +246,7 @@ namespace module::platform::darwin {
         // This trigger gets the sensor data from the CM740
         on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then("Hardware Loop", [this] {
             // Our final sensor output
-            auto sensors = std::make_unique<DarwinSensors>();
+            auto sensors = std::make_unique<RawSensors>();
 
             std::vector<uint8_t> command = {0xFF,
                                             0xFF,
@@ -366,52 +363,51 @@ namespace module::platform::darwin {
                 ledl = (uint8_t(0x00) << 16) | (uint8_t(0x00) << 8) | uint8_t(0xFF);
                 ledr = (uint8_t(0x00) << 16) | (uint8_t(0x00) << 8) | uint8_t(0xFF);
             }
-            emit(std::make_unique<DarwinSensors::LEDPanel>(ledp[2], ledp[1], ledp[0]));
-            emit(std::make_unique<DarwinSensors::EyeLED>(ledl));
-            emit(std::make_unique<DarwinSensors::HeadLED>(ledr));
+            emit(std::make_unique<RawSensors::LEDPanel>(ledp[2], ledp[1], ledp[0]));
+            emit(std::make_unique<RawSensors::EyeLED>(ledl));
+            emit(std::make_unique<RawSensors::HeadLED>(ledr));
 
             // Send our nicely computed sensor data out to the world
             emit(std::move(sensors));
         });
 
         // This trigger writes the servo positions to the hardware
-        on<Trigger<std::vector<ServoTarget>>, With<DarwinSensors>>().then(
-            [this](const std::vector<ServoTarget>& commands, const DarwinSensors& sensors) {
-                // Loop through each of our commands
-                for (const auto& command : commands) {
-                    float diff = utility::math::angle::difference(
-                        command.position,
-                        utility::platform::darwin::getDarwinServo(command.id, sensors).present_position);
-                    NUClear::clock::duration duration = command.time - NUClear::clock::now();
+        on<Trigger<std::vector<ServoTarget>>, With<RawSensors>>().then([this](const std::vector<ServoTarget>& commands,
+                                                                              const RawSensors& sensors) {
+            // Loop through each of our commands
+            for (const auto& command : commands) {
+                float diff = utility::math::angle::difference(
+                    command.position,
+                    utility::platform::getRawServo(command.id, sensors).present_position);
+                NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
-                    float speed;
-                    if (duration.count() > 0) {
-                        speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
-                    }
-                    else {
-                        speed = 0;
-                    }
-
-                    // Update our internal state
-                    if (servoState[command.id].pGain != command.gain || servoState[command.id].iGain != command.gain * 0
-                        || servoState[command.id].dGain != command.gain * 0
-                        || servoState[command.id].movingSpeed != speed
-                        || servoState[command.id].goalPosition != command.position
-                        || servoState[command.id].torque != command.torque) {
-
-                        servoState[command.id].dirty = true;
-
-                        servoState[command.id].pGain        = command.gain;
-                        servoState[command.id].iGain        = command.gain * 0;
-                        servoState[command.id].dGain        = command.gain * 0;
-                        servoState[command.id].movingSpeed  = speed;
-                        servoState[command.id].goalPosition = command.position;
-
-                        servoState[command.id].torque       = command.torque;
-                        servoState[uint(command.id)].torque = command.torque;
-                    }
+                float speed;
+                if (duration.count() > 0) {
+                    speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
                 }
-            });
+                else {
+                    speed = 0;
+                }
+
+                // Update our internal state
+                if (servoState[command.id].pGain != command.gain || servoState[command.id].iGain != command.gain * 0
+                    || servoState[command.id].dGain != command.gain * 0 || servoState[command.id].movingSpeed != speed
+                    || servoState[command.id].goalPosition != command.position
+                    || servoState[command.id].torque != command.torque) {
+
+                    servoState[command.id].dirty = true;
+
+                    servoState[command.id].pGain        = command.gain;
+                    servoState[command.id].iGain        = command.gain * 0;
+                    servoState[command.id].dGain        = command.gain * 0;
+                    servoState[command.id].movingSpeed  = speed;
+                    servoState[command.id].goalPosition = command.position;
+
+                    servoState[command.id].torque       = command.torque;
+                    servoState[uint(command.id)].torque = command.torque;
+                }
+            }
+        });
 
         on<Trigger<ServoTarget>>().then([this](const ServoTarget command) {
             auto commandList = std::make_unique<std::vector<ServoTarget>>();
@@ -422,7 +418,7 @@ namespace module::platform::darwin {
         });
 
         // If we get a HeadLED command then write it
-        on<Trigger<DarwinSensors::HeadLED>>().then([this](const DarwinSensors::HeadLED& led) {
+        on<Trigger<RawSensors::HeadLED>>().then([this](const RawSensors::HeadLED& led) {
             // Update our internal state
             cm740State.headLED = led;
 
@@ -433,7 +429,7 @@ namespace module::platform::darwin {
         });
 
         // If we get a EyeLED command then write it
-        on<Trigger<DarwinSensors::EyeLED>>().then([this](const DarwinSensors::EyeLED& led) {
+        on<Trigger<RawSensors::EyeLED>>().then([this](const RawSensors::EyeLED& led) {
             // Update our internal state
             cm740State.eyeLED = led;
 
@@ -444,7 +440,7 @@ namespace module::platform::darwin {
         });
 
         // If we get a EyeLED command then write it
-        on<Trigger<DarwinSensors::LEDPanel>>().then([this](const DarwinSensors::LEDPanel& led) {
+        on<Trigger<RawSensors::LEDPanel>>().then([this](const RawSensors::LEDPanel& led) {
             // Update our internal state
             cm740State.ledPanel = led;
 

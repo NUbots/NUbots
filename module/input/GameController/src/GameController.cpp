@@ -23,7 +23,7 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/platform/darwin/DarwinSensors.hpp"
+#include "message/platform/RawSensors.hpp"
 #include "message/support/GlobalConfig.hpp"
 
 namespace module::input {
@@ -49,8 +49,8 @@ namespace module::input {
     using GameMode        = GameEvents::GameMode;
     using PenaltyReason   = GameState::Data::PenaltyReason;
     using TeamColourEvent = message::input::GameEvents::TeamColour;
-    using message::platform::darwin::ButtonLeftDown;
-    using message::platform::darwin::ButtonMiddleDown;
+    using message::platform::ButtonLeftDown;
+    using message::platform::ButtonMiddleDown;
 
     GameController::GameController(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))

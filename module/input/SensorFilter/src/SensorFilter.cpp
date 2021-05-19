@@ -23,13 +23,13 @@
 
 #include "message/input/Sensors.hpp"
 #include "message/motion/BodySide.hpp"
-#include "message/platform/darwin/DarwinSensors.hpp"
+#include "message/platform/RawSensors.hpp"
 
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/motion/ForwardKinematics.hpp"
 #include "utility/nusight/NUhelpers.hpp"
-#include "utility/platform/darwin/DarwinSensors.hpp"
+#include "utility/platform/RawSensors.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::input {
@@ -39,11 +39,11 @@ namespace module::input {
     using message::input::Sensors;
     using message::motion::BodySide;
     using message::motion::KinematicsModel;
-    using message::platform::darwin::ButtonLeftDown;
-    using message::platform::darwin::ButtonLeftUp;
-    using message::platform::darwin::ButtonMiddleDown;
-    using message::platform::darwin::ButtonMiddleUp;
-    using message::platform::darwin::DarwinSensors;
+    using message::platform::ButtonLeftDown;
+    using message::platform::ButtonLeftUp;
+    using message::platform::ButtonMiddleDown;
+    using message::platform::ButtonMiddleUp;
+    using message::platform::RawSensors;
 
     using utility::input::LimbID;
     using utility::input::ServoID;
@@ -62,25 +62,25 @@ namespace module::input {
         s << ":";
 
 
-        if (errorCode & DarwinSensors::Error::INPUT_VOLTAGE) {
+        if (errorCode & RawSensors::Error::INPUT_VOLTAGE) {
             s << " Input Voltage ";
         }
-        if (errorCode & DarwinSensors::Error::ANGLE_LIMIT) {
+        if (errorCode & RawSensors::Error::ANGLE_LIMIT) {
             s << " Angle Limit ";
         }
-        if (errorCode & DarwinSensors::Error::OVERHEATING) {
+        if (errorCode & RawSensors::Error::OVERHEATING) {
             s << " Overheating ";
         }
-        if (errorCode & DarwinSensors::Error::OVERLOAD) {
+        if (errorCode & RawSensors::Error::OVERLOAD) {
             s << " Overloaded ";
         }
-        if (errorCode & DarwinSensors::Error::INSTRUCTION) {
+        if (errorCode & RawSensors::Error::INSTRUCTION) {
             s << " Bad Instruction ";
         }
-        if (errorCode & DarwinSensors::Error::CORRUPT_DATA) {
+        if (errorCode & RawSensors::Error::CORRUPT_DATA) {
             s << " Corrupt Data ";
         }
-        if (errorCode & DarwinSensors::Error::TIMEOUT) {
+        if (errorCode & RawSensors::Error::TIMEOUT) {
             s << " Timeout ";
         }
 
@@ -190,17 +190,17 @@ namespace module::input {
             load_sensor = VirtualLoadSensor<float>(config);
         });
 
-        on<Last<20, Trigger<DarwinSensors>>, Single>().then(
-            [this](const std::list<std::shared_ptr<const DarwinSensors>>& sensors) {
+        on<Last<20, Trigger<RawSensors>>, Single>().then(
+            [this](const std::list<std::shared_ptr<const RawSensors>>& sensors) {
                 int leftCount   = 0;
                 int middleCount = 0;
 
                 // If we have any downs in the last 20 frames then we are button pushed
                 for (const auto& s : sensors) {
-                    if (s->buttons.left && !s->cm740_error_flags) {
+                    if (s->buttons.left && !s->platform_error_flags) {
                         ++leftCount;
                     }
-                    if (s->buttons.middle && !s->cm740_error_flags) {
+                    if (s->buttons.middle && !s->platform_error_flags) {
                         ++middleCount;
                     }
                 }
@@ -236,9 +236,9 @@ namespace module::input {
                 }
             });
 
-        on<Trigger<DarwinSensors>, Optional<With<Sensors>>, With<KinematicsModel>, Single, Priority::HIGH>().then(
+        on<Trigger<RawSensors>, Optional<With<Sensors>>, With<KinematicsModel>, Single, Priority::HIGH>().then(
             "Main Sensors Loop",
-            [this](const DarwinSensors& input,
+            [this](const RawSensors& input,
                    std::shared_ptr<const Sensors> previousSensors,
                    const KinematicsModel& kinematicsModel) {
                 auto sensors = std::make_unique<Sensors>();
@@ -253,49 +253,49 @@ namespace module::input {
                 sensors->voltage = input.voltage;
 
 
-                // This checks for an error on the CM740 and reports it
-                if (input.cm740_error_flags != DarwinSensors::Error::OK) {
-                    NUClear::log<NUClear::WARN>(makeErrorString("CM740", input.cm740_error_flags));
+                // This checks for an error on the platform and reports it
+                if (input.platform_error_flags != RawSensors::Error::OK) {
+                    NUClear::log<NUClear::WARN>(makeErrorString("Platform", input.platform_error_flags));
                 }
 
                 // Output errors on the FSRs
-                if (input.fsr.left.error_flags != DarwinSensors::Error::OK) {
+                if (input.fsr.left.error_flags != RawSensors::Error::OK) {
                     NUClear::log<NUClear::WARN>(makeErrorString("Left FSR", input.fsr.left.error_flags));
                 }
 
-                if (input.fsr.right.error_flags != DarwinSensors::Error::OK) {
+                if (input.fsr.right.error_flags != RawSensors::Error::OK) {
                     NUClear::log<NUClear::WARN>(makeErrorString("Right FSR", input.fsr.right.error_flags));
                 }
 
                 // Read through all of our sensors
                 for (uint32_t i = 0; i < 20; ++i) {
-                    auto& original = utility::platform::darwin::getDarwinServo(i, input);
+                    auto& original = utility::platform::getRawServo(i, input);
                     auto& error    = original.error_flags;
 
                     // Check for an error on the servo and report it
-                    while (error != DarwinSensors::Error::OK) {
+                    while (error != RawSensors::Error::OK) {
                         std::stringstream s;
                         s << "Error on Servo " << (i + 1) << " (" << static_cast<ServoID>(i) << "):";
 
-                        if (error & DarwinSensors::Error::INPUT_VOLTAGE) {
+                        if (error & RawSensors::Error::INPUT_VOLTAGE) {
                             s << " Input Voltage - " << original.voltage;
                         }
-                        if (error & DarwinSensors::Error::ANGLE_LIMIT) {
+                        if (error & RawSensors::Error::ANGLE_LIMIT) {
                             s << " Angle Limit - " << original.present_position;
                         }
-                        if (error & DarwinSensors::Error::OVERHEATING) {
+                        if (error & RawSensors::Error::OVERHEATING) {
                             s << " Overheating - " << original.temperature;
                         }
-                        if (error & DarwinSensors::Error::OVERLOAD) {
+                        if (error & RawSensors::Error::OVERLOAD) {
                             s << " Overloaded - " << original.load;
                         }
-                        if (error & DarwinSensors::Error::INSTRUCTION) {
+                        if (error & RawSensors::Error::INSTRUCTION) {
                             s << " Bad Instruction ";
                         }
-                        if (error & DarwinSensors::Error::CORRUPT_DATA) {
+                        if (error & RawSensors::Error::CORRUPT_DATA) {
                             s << " Corrupt Data ";
                         }
-                        if (error & DarwinSensors::Error::TIMEOUT) {
+                        if (error & RawSensors::Error::TIMEOUT) {
                             s << " Timeout ";
                         }
 
@@ -305,7 +305,7 @@ namespace module::input {
 
                     // If we have previous sensors and our current sensors have an error
                     // we then use our previous sensor values with some updates
-                    if (previousSensors && error != DarwinSensors::Error::OK) {
+                    if (previousSensors && error != RawSensors::Error::OK) {
                         // Add the sensor values to the system properly
                         sensors->servo.push_back({error,
                                                   i,
@@ -344,13 +344,14 @@ namespace module::input {
                  *          Accelerometer and Gyroscope         *
                  ************************************************/
 
-                // We assume that the accelerometer and gyroscope are oriented to conform with the standard coordinate system
+                // We assume that the accelerometer and gyroscope are oriented to conform with the standard coordinate
+                // system
                 // x-axis out the front of the robot
                 // y-axis to the left
                 // z-axis up
 
-                // If we have a previous sensors and our cm740 has errors then reuse our last sensor value
-                if (previousSensors && (input.cm740_error_flags)) {
+                // If we have a previous sensors and our platform has errors then reuse our last sensor value
+                if (previousSensors && (input.platform_error_flags)) {
                     sensors->accelerometer = previousSensors->accelerometer;
                 }
                 else {
@@ -358,9 +359,9 @@ namespace module::input {
                         Eigen::Vector3d(input.accelerometer.x, input.accelerometer.y, input.accelerometer.z);
                 }
 
-                // If we have a previous sensors and our cm740 has errors then reuse our last sensor value
+                // If we have a previous sensors and our platform has errors then reuse our last sensor value
                 if (previousSensors
-                    && (input.cm740_error_flags
+                    && (input.platform_error_flags
                         || Eigen::Vector3d(input.gyroscope.x, input.gyroscope.y, input.gyroscope.z).norm()
                                > 4.0 * M_PI)) {
                     NUClear::log<NUClear::WARN>(
