@@ -308,6 +308,7 @@ namespace module::input {
                     if (previousSensors && error != DarwinSensors::Error::OK) {
                         // Add the sensor values to the system properly
                         sensors->servo.push_back({error,
+                                                  i,
                                                   original.torque_enabled,
                                                   original.p_gain,
                                                   original.i_gain,
@@ -324,6 +325,7 @@ namespace module::input {
                     else {
                         // Add the sensor values to the system properly
                         sensors->servo.push_back({error,
+                                                  i,
                                                   original.torque_enabled,
                                                   original.p_gain,
                                                   original.i_gain,
