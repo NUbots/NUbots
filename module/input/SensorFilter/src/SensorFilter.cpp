@@ -344,7 +344,10 @@ namespace module::input {
                  *          Accelerometer and Gyroscope         *
                  ************************************************/
 
-                // We assume that the accelerometer and gyroscope
+                // We assume that the accelerometer and gyroscope are oriented to conform with the standard coordinate system
+                // x-axis out the front of the robot
+                // y-axis to the left
+                // z-axis up
 
                 // If we have a previous sensors and our cm740 has errors then reuse our last sensor value
                 if (previousSensors && (input.cm740_error_flags)) {
