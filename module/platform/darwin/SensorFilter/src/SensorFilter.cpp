@@ -264,15 +264,32 @@ namespace module::platform::darwin {
                     covariance.omegaTTt_bias = this->config.motionFilter.initial.covariance.gyroscopeBias;
 
                     // Reset the filter
-                    bool cholesky_success = motionFilter.reset(mean_state.getStateVec(),
-                                                               covariance.asDiagonal(),
-                                                               motionFilter.ALPHA_DEFAULT,
-                                                               motionFilter.KAPPA_DEFAULT,
-                                                               motionFilter.BETA_DEFAULT);
+                    Eigen::ComputationInfo cholesky_result = motionFilter.reset(mean_state.getStateVec(),
+                                                                                covariance.asDiagonal(),
+                                                                                motionFilter.ALPHA_DEFAULT,
+                                                                                motionFilter.KAPPA_DEFAULT,
+                                                                                motionFilter.BETA_DEFAULT);
 
-                    // If a Cholesky decomposition failed, wait another MIN_UPDATES and try again
-                    if (!cholesky_success) {
-                        NUClear::log<NUClear::WARN>("Cholesky decomposition failed after filter reset. Retry reset");
+                    // If a Cholesky decomposition failed, log the error, then wait another MIN_UPDATES and try again
+                    if (cholesky_result != Eigen::Success) {
+                        switch (cholesky_result) {
+                            case Eigen::NumericalIssue:
+                                NUClear::log<NUClear::WARN>(
+                                    "Cholesky decomposition failed. The provided data did not satisfy the "
+                                    "prerequisites.");
+                                break;
+                            case Eigen::NoConvergence:
+                                NUClear::log<NUClear::WARN>(
+                                    "Cholesky decomposition failed. Iterative procedure did not converge.");
+                                break;
+                            case Eigen::InvalidInput:
+                                NUClear::log<NUClear::WARN>(
+                                    "Cholesky decomposition failed. The inputs are invalid, or the algorithm has "
+                                    "been improperly called. When assertions are enabled, such errors trigger an "
+                                    "assert.");
+                                break;
+                            default: NUClear::log<NUClear::WARN>("Cholesky decomposition failed. Some other reason.");
+                        }
                         updates_since_reset_event = 0;
                     }
 

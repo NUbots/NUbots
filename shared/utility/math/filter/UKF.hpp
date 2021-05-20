@@ -76,15 +76,12 @@ namespace utility::math::filter {
          * @return The matrix of sigma points, paired with cholesky_successful == true
          */
         template <typename T, int S>
-        [[nodiscard]] static std::pair<Eigen::Matrix<T, S, NUM_SIGMA_POINTS>, bool> generate_sigma_points(
-            const Eigen::Matrix<T, S, 1>& mean,
-            const Eigen::Matrix<T, S, S>& covariance,
-            const T& sigma_weight) {
-
-            Eigen::Matrix<T, S, NUM_SIGMA_POINTS> points;
+        [[nodiscard]] Eigen::ComputationInfo generate_sigma_points(const Eigen::Matrix<T, S, 1>& mean,
+                                                                   const Eigen::Matrix<T, S, S>& covariance,
+                                                                   const T& sigma_weight) {
 
             // Our first row is always the mean
-            points.col(0) = mean;
+            sigma_points.col(0) = mean;
 
             // Get our Cholesky decomposition
             // Impose positive semi-definiteness on the covariance matrix
@@ -94,28 +91,11 @@ namespace utility::math::filter {
                 // Put our values in either end of the matrix
                 StateMat chol = cholesky.matrixL().toDenseMatrix();
                 for (unsigned int i = 1; i < Model::size + 1; ++i) {
-                    points.col(i)               = (mean + chol.col(i - 1));
-                    points.col(i + Model::size) = (mean - chol.col(i - 1));
+                    sigma_points.col(i)               = (mean + chol.col(i - 1));
+                    sigma_points.col(i + Model::size) = (mean - chol.col(i - 1));
                 }
             }
-            else {
-                switch (cholesky.info()) {
-                    case Eigen::NumericalIssue:
-                        throw std::runtime_error(
-                            "Cholesky decomposition failed. The provided data did not satisfy the "
-                            "prerequisites.");
-                    case Eigen::NoConvergence:
-                        throw std::runtime_error(
-                            "Cholesky decomposition failed. Iterative procedure did not converge.");
-                    case Eigen::InvalidInput:
-                        throw std::runtime_error(
-                            "Cholesky decomposition failed. The inputs are invalid, or the algorithm has been "
-                            "improperly called. When assertions are enabled, such errors trigger an assert.");
-                    default: throw std::runtime_error("Cholesky decomposition failed. Some other reason.");
-                }
-            }
-
-            return {points, cholesky.info() == Eigen::Success};
+            return cholesky.info();
         }
 
         /**
@@ -172,12 +152,12 @@ namespace utility::math::filter {
             reset(initial_mean, initial_covariance, alpha, kappa, beta);
         }
 
-        [[nodiscard]] bool reset(StateVec initial_mean,
-                                 StateMat initial_covariance,
-                                 Scalar alpha,
-                                 Scalar kappa,
-                                 Scalar beta) {
-            Scalar lambda = alpha * alpha * (Model::size + kappa) - Model::size;
+        [[nodiscard]] Eigen::ComputationInfo reset(StateVec initial_mean,
+                                                   StateMat initial_covariance,
+                                                   Scalar alpha,
+                                                   Scalar kappa,
+                                                   Scalar beta) {
+            const Scalar lambda = alpha * alpha * (Model::size + kappa) - Model::size;
 
             covariance_sigma_weight = Model::size + lambda;
 
@@ -190,30 +170,39 @@ namespace utility::math::filter {
             return set_state(initial_mean, initial_covariance);
         }
 
-        [[nodiscard]] bool set_state(StateVec initial_mean, StateMat initial_covariance) {
+        [[nodiscard]] Eigen::ComputationInfo set_state(StateVec initial_mean, StateMat initial_covariance) {
             mean       = initial_mean;
             covariance = initial_covariance;
 
             // Calculate our sigma points
-            sigma_mean                  = mean;
-            auto&& points_chole_success = generate_sigma_points(mean, covariance, covariance_sigma_weight);
+            sigma_mean = mean;
+            // Store the result of the cholesky decomposition
+            // If the cholesky was successful, set the sigma_points variable in the process
+            const Eigen::ComputationInfo cholesky_result =
+                generate_sigma_points(mean, covariance, covariance_sigma_weight);
 
-            sigma_points = points_chole_success.first;
+            // Terminate early if the decomposition wasn't successful. The filter will need to be reset
+            if (cholesky_result != Eigen::Success) {
+                return cholesky_result;
+            }
 
             // Reset our state for more measurements
             covariance_update = covariance_weights.asDiagonal();
             d.setZero();
             centred_sigma_points = sigma_points.colwise() - sigma_mean;
-            return points_chole_success.second;
+            return cholesky_result;
         }
 
         template <typename... Args>
-        [[no_discard]] bool time(const Scalar& dt, const Args&... params) {
-            // Generate our sigma points
-            auto&& points_chole_success = generate_sigma_points(mean, covariance, covariance_sigma_weight);
-            sigma_points                = points_chole_success.first;
+        [[no_discard]] Eigen::ComputationInfo time(const Scalar& dt, const Args&... params) {
+            // Store the result of the cholesky decomposition
+            // If the cholesky was successful, set the sigma_points variable in the process
+            Eigen::ComputationInfo cholesky_result = generate_sigma_points(mean, covariance, covariance_sigma_weight);
 
-            bool chole_success = points_chole_success.second;
+            // Terminate early if the decomposition wasn't successful. The filter will need to be reset
+            if (cholesky_result != Eigen::Success) {
+                return cholesky_result;
+            }
 
             // Write the propagated version of the sigma point
             for (unsigned int i = 0; i < NUM_SIGMA_POINTS; ++i) {
@@ -227,16 +216,21 @@ namespace utility::math::filter {
             covariance += model.noise(dt);
 
             // Re calculate our sigma points
-            sigma_mean           = mean;
-            points_chole_success = generate_sigma_points(mean, covariance, covariance_sigma_weight);
-            sigma_points         = points_chole_success.first;
-            chole_success &= points_chole_success.second;
+            sigma_mean = mean;
+            // Store the result of the cholesky decomposition
+            // If the cholesky was successful, set the sigma_points variable in the process
+            cholesky_result = generate_sigma_points(mean, covariance, covariance_sigma_weight);
+
+            // Terminate early if the decomposition wasn't successful. The filter will need to be reset
+            if (cholesky_result == Eigen::Success) {
+                return cholesky_result;
+            }
 
             // Reset our state for more measurements
             covariance_update = covariance_weights.asDiagonal();
             d.setZero();
             centred_sigma_points = sigma_points.colwise() - sigma_mean;
-            return chole_success;
+            return cholesky_result;
         }
 
 
