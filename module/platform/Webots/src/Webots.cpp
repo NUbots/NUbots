@@ -56,6 +56,7 @@ namespace module::platform {
 
     using extension::Configuration;
     using message::input::Image;
+    using message::motion::ServoTarget;
     using message::motion::ServoTargets;
     using message::output::CompressedImage;
     using message::platform::darwin::DarwinSensors;
@@ -285,6 +286,53 @@ namespace module::platform {
 
             // Connect to the server
             setup_connection(config["server_address"].as<std::string>(), config["port"].as<std::string>());
+        });
+
+        // This trigger updates our current servo state
+        on<Trigger<ServoTargets>, With<DarwinSensors>>().then([this](const ServoTargets& targets,
+                                                                     const DarwinSensors& sensors) {
+            // Loop through each of our commands
+            for (const auto& target : targets.targets) {
+                const float diff = utility::math::angle::difference(
+                    target.position,
+                    utility::platform::darwin::getDarwinServo(target.id, sensors).present_position);
+                NUClear::clock::duration duration = target.time - NUClear::clock::now();
+
+                float speed;
+                if (duration.count() > 0) {
+                    speed = float(diff / (double(duration.count()) / double(NUClear::clock::period::den)));
+                }
+                else {
+                    speed = 0.0f;
+                }
+
+                // Update our internal state
+                if (servo_state[target.id].p_gain != target.gain || servo_state[target.id].i_gain != target.gain * 0
+                    || servo_state[target.id].d_gain != target.gain * 0 || servo_state[target.id].moving_speed != speed
+                    || servo_state[target.id].goal_position != target.position
+                    || servo_state[target.id].torque != target.torque) {
+
+                    servo_state[target.id].dirty = true;
+                    servo_state[target.id].id    = target.id;
+                    servo_state[target.id].name  = translate_id_servo(target.id);
+
+                    servo_state[target.id].p_gain        = target.gain;
+                    servo_state[target.id].i_gain        = target.gain * 0;
+                    servo_state[target.id].d_gain        = target.gain * 0;
+                    servo_state[target.id].moving_speed  = speed;
+                    servo_state[target.id].goal_position = target.position;
+
+                    servo_state[target.id].torque = target.torque;
+                }
+            }
+        });
+
+        on<Trigger<ServoTarget>>().then([this](const ServoTarget& target) {
+            auto targets = std::make_unique<ServoTargets>();
+            targets->targets.emplace_back(target);
+
+            // Emit it so it's captured by the reaction above
+            emit<Scope::DIRECT>(targets);
         });
     }
 
