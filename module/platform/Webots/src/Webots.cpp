@@ -355,7 +355,25 @@ namespace module::platform {
         // Reset the simulation connection time
         utility::clock::last_update = std::chrono::steady_clock::now();
 
-        // Now that we are connected, we can set up our reaction handles with this file descriptor
+        // Now that we are connected, we can set up our reaction handles with this file descriptor and send the sensor
+        // timestamps message
+
+        // Create the sensor timestamps message
+        // This will activate all of the sensors in the simulator
+        const std::vector<char> data =
+            NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(create_sensor_time_steps(time_step));
+
+        const uint32_t Nn = htonl(data.size());
+
+        // Send the sensor timestamps message
+        if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
+            log<NUClear::ERROR>(fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
+            return;
+        }
+        if (send(fd, data.data(), data.size(), 0) != (signed) data.size()) {
+            log<NUClear::ERROR>(fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
+            return;
+        }
 
         // Receiving
         read_io = on<IO>(fd, IO::READ).then([this]() {
@@ -442,34 +460,6 @@ namespace module::platform {
             // Something went wrong, reopen the connection
             setup_connection(server_address, port);
         });
-    }
-
-        // Send initial message to activate the servos
-        std::vector<char> data =
-            NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(make_inital_actuator_request(time_step));
-
-        uint32_t Nn = htonl(data.size());
-
-        // Send the message size first
-        if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
-            log<NUClear::ERROR>(fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
-        }
-        // then send the data
-        if (send(fd, data.data(), data.size(), 0) != (signed) data.size()) {
-            log<NUClear::ERROR>(fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
-        }
-
-        // Temporary measure to show that we can pass servo targets
-        // log("sending hardcoded servotargets to robot to test");
-        // auto target     = message::motion::ServoTarget();
-        // target.time     = NUClear::clock::now();
-        // target.id       = 2;
-        // target.position = 2;
-        // target.gain     = 10;
-        // target.torque   = 10;
-        // auto targets    = std::make_unique<ServoTargets>();
-        // targets->targets.push_back(target);
-        // emit(targets);
     }
 
     void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurements) {
