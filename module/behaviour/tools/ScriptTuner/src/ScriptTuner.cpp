@@ -92,7 +92,7 @@ namespace module::behaviour::tools {
             Script::Frame::Target target;
 
             target.id       = id;
-            target.position = utility::platform::darwin::getDarwinServo(target.id, sensors).presentPosition;
+            target.position = utility::platform::darwin::getDarwinServo(target.id, sensors).present_position;
             target.gain     = defaultGain;
             target.torque   = 100;
 

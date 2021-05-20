@@ -31,6 +31,7 @@ namespace module::behaviour::planning {
 
     private:
         bool kickValid(const Eigen::Vector3d& ballPos);
+        bool forcePlaying = false;
         message::motion::KickPlannerConfig cfg;
         NUClear::clock::time_point ballLastSeen;
         NUClear::clock::time_point lastTimeValid;

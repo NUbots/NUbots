@@ -82,7 +82,7 @@ namespace module::motion {
             });
 
         on<Trigger<HeadCommand>>().then("Head Controller - Register Head Command", [this](const HeadCommand& command) {
-            goalRobotSpace = command.robotSpace;
+            goalRobotSpace = command.robot_space;
             if (goalRobotSpace) {
                 goalAngles = {utility::math::clamp(float(min_yaw), command.yaw, float(max_yaw)),
                               utility::math::clamp(float(min_pitch), command.pitch, float(max_pitch))};
@@ -152,12 +152,8 @@ namespace module::motion {
                 waypoints->reserve(2);
                 auto t = NUClear::clock::now();
                 for (auto& angle : goalAnglesList) {
-                    waypoints->push_back({id,
-                                          t,
-                                          angle.first,
-                                          angle.second,
-                                          float(head_motor_gain),
-                                          float(head_motor_torque)});  // TODO: support separate gains for each leg
+                    waypoints->push_back(
+                        {id, t, angle.first, angle.second, float(head_motor_gain), float(head_motor_torque)});
                 }
                 // Send commands
                 emit(std::move(waypoints));
