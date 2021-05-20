@@ -546,6 +546,18 @@ namespace module::platform {
             log<NUClear::TRACE>("      value:", sensor.value);
         }
 
+
+        // Parse the errors and warnings from Webots and log them.
+        // Note that this is where we should deal with specific messages passed in SensorMeasurements.messages.
+        // Or check if those messages have specific information
+        for (const auto& message : sensor_measurements.messages) {
+            switch (int(message.message_type)) {
+                case Message::MessageType::ERROR_MESSAGE: log<NUClear::ERROR>(message.text); break;
+                case Message::MessageType::WARNING_MESSAGE: log<NUClear::WARN>(message.text); break;
+            }
+        }
+
+
         // Read each field of msg, translate it to our protobuf and emit the data
         auto sensor_data = std::make_unique<DarwinSensors>();
 
@@ -591,16 +603,6 @@ namespace module::platform {
             image->format         = fourcc("RGB3");  // Change to "JPEG" when webots compression is implemented
             image->data           = camera.image;
             emit(image);
-        }
-
-        // Parse the errors and warnings from Webots and log them.
-        // Note that this is where we should deal with specific messages passed in SensorMeasurements.messages.
-        // Or check if those messages have specific information
-        for (const auto& message : sensor_measurements.messages) {
-            switch (int(message.message_type)) {
-                case Message::MessageType::ERROR_MESSAGE: log<NUClear::ERROR>(message.text); break;
-                case Message::MessageType::WARNING_MESSAGE: log<NUClear::WARN>(message.text); break;
-            }
         }
     }
 }  // namespace module::platform
