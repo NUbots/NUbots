@@ -140,42 +140,34 @@ namespace module::platform {
         throw std::runtime_error("Unable to translate unknown NUgus.proto servo id: " + id);
     }
 
-    ActuatorRequests make_inital_actuator_request(int time_step) {
-        message::platform::webots::ActuatorRequests to_send_next;
+    ActuatorRequests create_sensor_time_steps(const uint32_t& time_step) {
+        message::platform::webots::ActuatorRequests msg;
+        msg.sensor_time_steps = {{"left_ankle_roll_sensor", time_step},
+                                 {"left_ankle_pitch_sensor", time_step},
+                                 {"right_ankle_roll_sensor", time_step},
+                                 {"right_ankle_pitch_sensor", time_step},
+                                 {"right_knee_pitch_sensor", time_step},
+                                 {"left_knee_pitch_sensor", time_step},
+                                 {"left_hip_roll_sensor", time_step},
+                                 {"left_hip_pitch_sensor", time_step},
+                                 {"left_hip_yaw_sensor", time_step},
+                                 {"right_hip_roll_sensor", time_step},
+                                 {"right_hip_pitch_sensor", time_step},
+                                 {"right_hip_yaw_sensor", time_step},
+                                 {"left_elbow_pitch_sensor", time_step},
+                                 {"right_elbow_pitch_sensor", time_step},
+                                 {"left_shoulder_roll_sensor", time_step},
+                                 {"left_shoulder_pitch_sensor", time_step},
+                                 {"right_shoulder_roll_sensor", time_step},
+                                 {"right_shoulder_pitch_sensor", time_step},
+                                 {"neck_yaw_sensor", time_step},
+                                 {"head_pitch_sensor", time_step},
+                                 {"accelerometer", time_step},
+                                 {"gyroscope", time_step},
+                                 {"right_camera", time_step},
+                                 {"left_camera", time_step}};
 
-        std::vector<std::string> sensors_list = {"left_ankle_roll_sensor",
-                                                 "left_ankle_pitch_sensor",
-                                                 "right_ankle_roll_sensor",
-                                                 "right_ankle_pitch_sensor",
-                                                 "right_knee_pitch_sensor",
-                                                 "left_knee_pitch_sensor",
-                                                 "left_hip_roll_sensor",
-                                                 "left_hip_pitch_sensor",
-                                                 "left_hip_yaw_sensor",
-                                                 "right_hip_roll_sensor",
-                                                 "right_hip_pitch_sensor",
-                                                 "right_hip_yaw_sensor",
-                                                 "left_elbow_pitch_sensor",
-                                                 "right_elbow_pitch_sensor",
-                                                 "left_shoulder_roll_sensor",
-                                                 "left_shoulder_pitch_sensor",
-                                                 "right_shoulder_roll_sensor",
-                                                 "right_shoulder_pitch_sensor",
-                                                 "neck_yaw_sensor",
-                                                 "head_pitch_sensor",
-                                                 "accelerometer",
-                                                 "gyroscope",
-                                                 "right_camera",
-                                                 "left_camera"};
-
-        for (const auto& sensor : sensors_list) {
-            SensorTimeStep time_step_msg;
-            time_step_msg.name     = sensor;
-            time_step_msg.timeStep = time_step;
-            to_send_next.sensor_time_steps.push_back(time_step_msg);
-        }
-
-        return to_send_next;
+        return msg;
     }
 
     int Webots::tcpip_connect(const std::string& server_name, const std::string& port) {
