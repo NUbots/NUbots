@@ -139,7 +139,7 @@ namespace module::platform {
         throw std::runtime_error("Unable to translate unknown NUgus.proto servo id: " + id);
     }
 
-    ActuatorRequests make_inital_acutator_request(int time_step) {
+    ActuatorRequests make_inital_actuator_request(int time_step) {
         message::platform::webots::ActuatorRequests to_send_next;
 
         std::vector<std::string> sensors_list = {"left_ankle_roll_sensor",
@@ -439,7 +439,7 @@ namespace module::platform {
 
         // Send initial message to activate the servos
         std::vector<char> data =
-            NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(make_inital_acutator_request(time_step));
+            NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(make_inital_actuator_request(time_step));
 
         uint32_t Nn = htonl(data.size());
 
