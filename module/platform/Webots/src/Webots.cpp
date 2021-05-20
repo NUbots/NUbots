@@ -286,6 +286,15 @@ namespace module::platform {
             // Emit it so it's captured by the reaction above
             emit<Scope::DIRECT>(targets);
         });
+
+        on<Shutdown>().then([this] {
+            // Disconnect the fd gracefully
+            if (fd != -1) {
+                shutdown(fd, SHUT_RDWR);
+                close(fd);
+                fd = -1;
+            }
+        });
     }
 
     void Webots::setup_connection(const std::string& server_address, const std::string& port) {
@@ -433,15 +442,7 @@ namespace module::platform {
             // Something went wrong, reopen the connection
             setup_connection(server_address, port);
         });
-
-        on<Shutdown>().then([this] {
-            // Disconnect the fd gracefully
-            if (fd != -1) {
-                shutdown(fd, SHUT_RDWR);
-                close(fd);
-                fd = -1;
-            }
-        });
+    }
 
         // Send initial message to activate the servos
         std::vector<char> data =
