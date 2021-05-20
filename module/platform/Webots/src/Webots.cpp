@@ -30,13 +30,13 @@
 #include "message/input/Image.hpp"
 #include "message/motion/ServoTarget.hpp"
 #include "message/output/CompressedImage.hpp"
-#include "message/platform/darwin/DarwinSensors.hpp"
+#include "message/platform/RawSensors.hpp"
 #include "message/platform/webots/ConnectRequest.hpp"
 #include "message/platform/webots/messages.hpp"
 
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
-#include "utility/platform/darwin/DarwinSensors.hpp"
+#include "utility/platform/RawSensors.hpp"
 #include "utility/vision/fourcc.hpp"
 
 // Include headers needed for TCP connection
@@ -59,7 +59,7 @@ namespace module::platform {
     using message::motion::ServoTarget;
     using message::motion::ServoTargets;
     using message::output::CompressedImage;
-    using message::platform::darwin::DarwinSensors;
+    using message::platform::RawSensors;
 
     using message::platform::webots::ActuatorRequests;
     using message::platform::webots::ConnectRequest;
@@ -72,11 +72,11 @@ namespace module::platform {
     using message::platform::webots::SensorTimeStep;
 
     using utility::input::ServoID;
-    using utility::platform::darwin::getDarwinServo;
+    using utility::platform::getRawServo;
     using utility::vision::fourcc;
 
-    // Converts the NUgus.proto servo name to the equivalent DarwinSensor.proto name
-    DarwinSensors::Servo& translate_servo_id(const std::string& name, DarwinSensors::Servos& servos) {
+    // Converts the NUgus.proto servo name to the equivalent RawSensor.proto name
+    RawSensors::Servo& translate_servo_id(const std::string& name, RawSensors::Servos& servos) {
 
         // clang-format off
         // Left ankle
@@ -234,20 +234,20 @@ namespace module::platform {
             });
 
             // Prime these this reaction, so when only one ServoTargets is present, at least we have the other
-            emit(std::make_unique<DarwinSensors>());
+            emit(std::make_unique<RawSensors>());
 
             // Connect to the server
             setup_connection(config["server_address"].as<std::string>(), config["port"].as<std::string>());
         });
 
         // This trigger updates our current servo state
-        on<Trigger<ServoTargets>, With<DarwinSensors>>().then([this](const ServoTargets& targets,
-                                                                     const DarwinSensors& sensors) {
+        on<Trigger<ServoTargets>, With<RawSensors>>().then([this](const ServoTargets& targets,
+                                                                  const RawSensors& sensors) {
             // Loop through each of our commands
             for (const auto& target : targets.targets) {
                 const double diff = utility::math::angle::difference(
                     double(target.position),
-                    utility::platform::darwin::getDarwinServo(target.id, sensors).present_position);
+                    utility::platform::getRawServo(target.id, sensors).present_position);
                 NUClear::clock::duration duration = target.time - NUClear::clock::now();
 
                 double speed = 0.0;
@@ -552,7 +552,7 @@ namespace module::platform {
 
 
         // Read each field of msg, translate it to our protobuf and emit the data
-        auto sensor_data = std::make_unique<DarwinSensors>();
+        auto sensor_data = std::make_unique<RawSensors>();
 
         sensor_data->timestamp = NUClear::clock::now();
 
