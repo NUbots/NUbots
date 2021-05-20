@@ -420,10 +420,14 @@ namespace module::platform {
 
             log<NUClear::TRACE>("Received sensor measurements");
 
-            // Deserialise the message into a neutron
-            SensorMeasurements msg = NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(data);
-
-            translate_and_emit_sensor(msg);
+            // If we have data to deserialise then deserialise the message into a neutron
+            if (Nh > 0) {
+                translate_and_emit_sensor(NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(data));
+            }
+            // If we don't have any data then this should correspond to a message with all fields set to defaults
+            else {
+                translate_and_emit_sensor(SensorMeasurements(SensorMeasurements::protobuf_type()));
+            }
 
             // Service the watchdog
             emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
