@@ -8,7 +8,7 @@ namespace utility::clock {
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     double custom_rtf = 1.0;  // real time factor
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-    std::chrono::steady_clock::time_point last_update = std::chrono::steady_clock::now();
+    NUClear::base_clock::time_point last_update = NUClear::base_clock::now();
 
 }  // namespace utility::clock
 

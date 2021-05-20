@@ -351,7 +351,7 @@ namespace module::platform {
         // Set the real time of the connection initiation
         connect_time = NUClear::clock::now();
         // Reset the simulation connection time
-        utility::clock::last_update = std::chrono::steady_clock::now();
+        utility::clock::last_update = NUClear::base_clock::now();
 
         // Now that we are connected, we can set up our reaction handles with this file descriptor and send the sensor
         // timestamps message
