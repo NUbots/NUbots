@@ -222,7 +222,7 @@ namespace utility::math::filter {
             cholesky_result = generate_sigma_points(mean, covariance, covariance_sigma_weight);
 
             // Terminate early if the decomposition wasn't successful. The filter will need to be reset
-            if (cholesky_result == Eigen::Success) {
+            if (cholesky_result != Eigen::Success) {
                 return cholesky_result;
             }
 
