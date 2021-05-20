@@ -206,11 +206,6 @@ namespace module::platform {
             velocity_msg.velocity = velocity;
             to_send_next.motor_velocities.push_back(velocity_msg);
 
-            MotorTorque torque_msg;
-            torque_msg.name   = translate_id_servo(target.id);
-            torque_msg.torque = target.torque;
-            to_send_next.motor_torques.push_back(torque_msg);
-
             // MotorPID, only sending P gain. Set I and D to zero
             MotorPID motorpid_msg;
             motorpid_msg.name  = translate_id_servo(target.id);
