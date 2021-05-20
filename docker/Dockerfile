@@ -35,6 +35,9 @@ RUN install-package \
     ninja \
     cmake \
     meson \
+    nodejs-lts-fermium \
+    npm \
+    yarn \
     git
 
 # Get python to look in /usr/local for packages
