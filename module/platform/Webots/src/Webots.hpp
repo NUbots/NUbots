@@ -32,11 +32,11 @@ namespace module::platform {
         // How often we read the servos
         static constexpr int UPDATE_FREQUENCY = 90;
 
-        /// @brief Store a handle to the io reaction so we can unbind it
+        /// @brief Handle for incoming data reaction. This will be bound/unbound during (re)connection
         ReactionHandle read_io;
-        /// @brief Store a handle to the io reaction so we can unbind it
+        /// @brief Handle for outgoing data reaction. This will be bound/unbound during (re)connection
         ReactionHandle send_io;
-        /// @brief Store a handle to the io error reaction so we can unbind it
+        /// @brief Handle for error checking on the TCP connection. This will be bound/unbound during (re)connection
         ReactionHandle error_io;
 
         /// @brief Establish a TCP connection to the specified server/port
