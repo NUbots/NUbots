@@ -431,26 +431,6 @@ namespace module::platform {
 
             // Service the watchdog
             emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
-
-            // ****************************** TIME **************************************
-
-            // Deal with time
-
-            // Save our previous deltas
-            const uint32_t prev_sim_delta  = sim_delta;
-            const uint32_t prev_real_delta = real_delta;
-
-            // Update our current deltas
-            sim_delta  = msg.time - current_sim_time;
-            real_delta = msg.real_time - current_real_time;
-
-            // Calculate our custom rtf - the ratio of the past two sim deltas and the past two real time deltas
-            utility::clock::custom_rtf =
-                static_cast<double>(sim_delta + prev_sim_delta) / static_cast<double>(real_delta + prev_real_delta);
-
-            // Update our current times
-            current_sim_time  = msg.time;
-            current_real_time = msg.real_time;
         });
 
         send_io =
@@ -656,5 +636,25 @@ namespace module::platform {
             image->data           = camera.image;
             emit(image);
         }
+
+        // ****************************** TIME **************************************
+
+        // Deal with time
+
+        // Save our previous deltas
+        const uint32_t prev_sim_delta  = sim_delta;
+        const uint32_t prev_real_delta = real_delta;
+
+        // Update our current deltas
+        sim_delta  = sensor_measurements.time - current_sim_time;
+        real_delta = sensor_measurements.real_time - current_real_time;
+
+        // Calculate our custom rtf - the ratio of the past two sim deltas and the past two real time deltas
+        utility::clock::custom_rtf =
+            static_cast<double>(sim_delta + prev_sim_delta) / static_cast<double>(real_delta + prev_real_delta);
+
+        // Update our current times
+        current_sim_time  = sensor_measurements.time;
+        current_real_time = sensor_measurements.real_time;
     }
 }  // namespace module::platform
