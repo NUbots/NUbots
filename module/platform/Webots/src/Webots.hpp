@@ -29,6 +29,9 @@ namespace module::platform {
 
     class Webots : public NUClear::Reactor {
     private:
+        // How often we read the servos
+        static constexpr int UPDATE_FREQUENCY = 90;
+
         /// @brief Store a handle to the io reaction so we can unbind it
         ReactionHandle read_io;
         /// @brief Store a handle to the io reaction so we can unbind it

@@ -178,46 +178,6 @@ namespace module::platform {
         return to_send_next;
     }
 
-    ActuatorRequests make_acutator_request(const ServoTargets& commands, const DarwinSensors& sensors) {
-        message::platform::webots::ActuatorRequests to_send_next;
-
-        // Convert the servo targets to the ActuatorRequests
-        for (const auto& target : commands.targets) {
-            MotorPosition position_msg;
-            position_msg.name     = translate_id_servo(target.id);
-            position_msg.position = target.position;
-            to_send_next.motor_positions.push_back(position_msg);
-
-            MotorVelocity velocity_msg;
-            // We need to calculate the servo velocity to add to the velocity message
-            // (method stolen from HardwareIO.cpp)
-            // velocity = (distance / time) * CLOCK_PERIOD_FACTOR
-            const float distance =
-                utility::math::angle::difference(target.position, getDarwinServo(target.id, sensors).present_position);
-
-            NUClear::clock::duration time = target.time - NUClear::clock::now();
-            float velocity;
-            if (time.count() > 0) {
-                velocity = distance / static_cast<float>(time.count()) * CLOCK_PERIOD_FACTOR;
-            }
-            else {
-                velocity = 0;
-            }
-            velocity_msg.name     = translate_id_servo(target.id);
-            velocity_msg.velocity = velocity;
-            to_send_next.motor_velocities.push_back(velocity_msg);
-
-            // MotorPID, only sending P gain. Set I and D to zero
-            MotorPID motorpid_msg;
-            motorpid_msg.name  = translate_id_servo(target.id);
-            motorpid_msg.PID.X = static_cast<double>(target.gain);
-            motorpid_msg.PID.Y = 0.0;
-            motorpid_msg.PID.Z = 0.0;
-            to_send_next.motor_pids.push_back(motorpid_msg);
-        }
-        return to_send_next;
-    }
-
     int Webots::tcpip_connect(const std::string& server_name, const std::string& port) {
         // Hints for the connection type
         addrinfo hints;
@@ -433,27 +393,50 @@ namespace module::platform {
             emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
         });
 
-        send_io =
-            on<IO, With<ServoTargets>, With<DarwinSensors>>(fd, IO::READ)
-                .then([this](const ServoTargets& commands, const DarwinSensors& sensors) {
-                    ActuatorRequests to_send_now = make_acutator_request(commands, sensors);
+        send_io = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then(
+            "Simulator Update Loop",
+            [this] {
+                // Construct the ActuatorRequests message
+                ActuatorRequests actuator_requests;
+                for (auto& servo : servo_state) {
+                    if (servo.dirty) {
+                        // Servo is no longer dirty
+                        servo.dirty = false;
 
-                    std::vector<char> data =
-                        NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(to_send_now);
-                    // Size of the message, in network endian
-                    uint32_t Nn = htonl(data.size());
-                    // Send the message size first
-                    if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
-                        log<NUClear::ERROR>(
-                            fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
-                    }
-                    // then send the data
-                    if (send(fd, data.data(), data.size(), 0) != (signed) data.size()) {
-                        log<NUClear::ERROR>(fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
-                    }
+                        // Create servo position message
+                        actuator_requests.motor_positions.emplace_back(MotorPosition(servo.name, servo.goal_position));
 
-                    log<NUClear::TRACE>("Sending actuator request.");
-                });
+                        // Create servo velocity message
+                        actuator_requests.motor_velocities.emplace_back(MotorVelocity(servo.name, servo.moving_speed));
+
+                        // Create servo PID message
+                        actuator_requests.motor_pids.emplace_back(MotorPID(servo.name,
+                                                                           {static_cast<double>(servo.p_gain),
+                                                                            static_cast<double>(servo.i_gain),
+                                                                            static_cast<double>(servo.d_gain)}));
+                    }
+                }
+
+                // Serialise ActuatorRequests
+                std::vector<char> data =
+                    NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(actuator_requests);
+
+                // Size of the message, in network endian
+                uint32_t Nn = htonl(data.size());
+
+                // Send the message size first
+                if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
+                    log<NUClear::ERROR>(
+                        fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
+                }
+
+                // Now send the data
+                if (send(fd, data.data(), data.size(), 0) != int(data.size())) {
+                    log<NUClear::ERROR>(fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
+                }
+
+                log<NUClear::TRACE>("Sending actuator request.");
+            });
 
         error_io = on<IO>(fd, IO::CLOSE | IO::ERROR).then([this, server_address, port](const IO::Event& /*event*/) {
             // Something went wrong, reopen the connection
