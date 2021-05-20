@@ -74,6 +74,33 @@ namespace module::platform {
         /// @brief The time between two measurements, expressed in milliseconds
         int time_step;
 
+        /// @brief Current state of a servo
+        struct ServoState {
+            /// @brief True if we need to write new values to the simulator
+            bool dirty = false;
+
+            /// @brief ID of the servo
+            int id;
+
+            /// @brief Name of the servo
+            std::string name;
+
+            /// @brief Cached values that are never read from the simulator
+            float p_gain        = 32.0f / 255.0f;
+            float i_gain        = 0.0f;
+            float d_gain        = 0.0f;
+            float moving_speed  = 0.0f;
+            float goal_position = 0.0f;
+            float torque        = 0.0f;  // 0.0 to 1.0
+
+            /// Values that are read from the simulator
+            float present_position = 0.0f;
+            float present_speed    = 0.0f;
+        };
+
+        /// @brief Our current servo states
+        std::array<ServoState, 20> servo_state;
+
     public:
         /// @brief Called by the powerplant to build and setup the webots reactor
         explicit Webots(std::unique_ptr<NUClear::Environment> environment);
