@@ -84,16 +84,16 @@ namespace module::platform {
             std::string name;
 
             /// @brief Cached values that are never read from the simulator
-            float p_gain        = 32.0f / 255.0f;
-            float i_gain        = 0.0f;
-            float d_gain        = 0.0f;
-            float moving_speed  = 0.0f;
-            float goal_position = 0.0f;
-            float torque        = 0.0f;  // 0.0 to 1.0
+            double p_gain        = 32.0 / 255.0;
+            double i_gain        = 0.0;
+            double d_gain        = 0.0;
+            double moving_speed  = 0.0;
+            double goal_position = 0.0;
+            double torque        = 0.0;  // 0.0 to 1.0
 
             /// Values that are read from the simulator
-            float present_position = 0.0f;
-            float present_speed    = 0.0f;
+            double present_position = 0.0;
+            double present_speed    = 0.0;
         };
 
         /// @brief Our current servo states

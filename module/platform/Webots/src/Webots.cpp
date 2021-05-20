@@ -245,22 +245,20 @@ namespace module::platform {
                                                                      const DarwinSensors& sensors) {
             // Loop through each of our commands
             for (const auto& target : targets.targets) {
-                const float diff = utility::math::angle::difference(
-                    target.position,
+                const double diff = utility::math::angle::difference(
+                    double(target.position),
                     utility::platform::darwin::getDarwinServo(target.id, sensors).present_position);
                 NUClear::clock::duration duration = target.time - NUClear::clock::now();
 
-                float speed;
+                double speed = 0.0;
                 if (duration.count() > 0) {
-                    speed = float(diff / (double(duration.count()) / double(NUClear::clock::period::den)));
-                }
-                else {
-                    speed = 0.0f;
+                    speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
                 }
 
                 // Update our internal state
-                if (servo_state[target.id].p_gain != target.gain || servo_state[target.id].i_gain != target.gain * 0
-                    || servo_state[target.id].d_gain != target.gain * 0 || servo_state[target.id].moving_speed != speed
+                if (servo_state[target.id].p_gain != target.gain || servo_state[target.id].i_gain != target.gain * 0.0
+                    || servo_state[target.id].d_gain != target.gain * 0.0
+                    || servo_state[target.id].moving_speed != speed
                     || servo_state[target.id].goal_position != target.position
                     || servo_state[target.id].torque != target.torque) {
 
@@ -269,8 +267,8 @@ namespace module::platform {
                     servo_state[target.id].name  = translate_id_servo(target.id);
 
                     servo_state[target.id].p_gain        = target.gain;
-                    servo_state[target.id].i_gain        = target.gain * 0;
-                    servo_state[target.id].d_gain        = target.gain * 0;
+                    servo_state[target.id].i_gain        = target.gain * 0.0;
+                    servo_state[target.id].d_gain        = target.gain * 0.0;
                     servo_state[target.id].moving_speed  = speed;
                     servo_state[target.id].goal_position = target.position;
 
@@ -428,10 +426,8 @@ namespace module::platform {
                         actuator_requests.motor_velocities.emplace_back(MotorVelocity(servo.name, servo.moving_speed));
 
                         // Create servo PID message
-                        actuator_requests.motor_pids.emplace_back(MotorPID(servo.name,
-                                                                           {static_cast<double>(servo.p_gain),
-                                                                            static_cast<double>(servo.i_gain),
-                                                                            static_cast<double>(servo.d_gain)}));
+                        actuator_requests.motor_pids.emplace_back(
+                            MotorPID(servo.name, {servo.p_gain, servo.i_gain, servo.d_gain}));
                     }
                 }
 
