@@ -38,8 +38,6 @@ namespace module::platform {
         ReactionHandle send_io;
         /// @brief Store a handle to the io error reaction so we can unbind it
         ReactionHandle error_io;
-        /// @brief Store a handle to the shutdown reaction so we can unbind it
-        ReactionHandle shutdown_handle;
 
         /// @brief Establish a TCP connection to the specified server/port
         /// @param server_name The name or IP address to connect to. If it's an IP, it should be in "X.X.X.X" form

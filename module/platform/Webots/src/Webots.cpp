@@ -301,7 +301,6 @@ namespace module::platform {
         read_io.unbind();
         send_io.unbind();
         error_io.unbind();
-        shutdown_handle.unbind();
 
         if (fd != -1) {
             // Disconnect the fd gracefully
@@ -443,7 +442,7 @@ namespace module::platform {
             setup_connection(server_address, port);
         });
 
-        shutdown_handle = on<Shutdown>().then([this] {
+        on<Shutdown>().then([this] {
             // Disconnect the fd gracefully
             if (fd != -1) {
                 shutdown(fd, SHUT_RDWR);
