@@ -57,9 +57,9 @@ namespace Darwin {
 #pragma pack(push, 1)  // Make sure that this struct is not cache aligned
     struct Header {
         Header() {}
-        uint8_t id        = -1;
+        uint8_t id        = 0xFF;
         uint8_t length    = 0;
-        uint8_t errorcode = -1;
+        uint8_t errorcode = 0xFF;
     };
     // Check that this struct is not cache aligned
     static_assert(sizeof(Header) == 3, "The compiler is adding padding to this struct, Bad compiler!");
@@ -152,7 +152,7 @@ namespace Darwin {
             std::lock_guard<std::mutex> lock(mutex);
 
             // Write our command to the UART
-            int written = write(fd, &command, sizeof(TPacket));
+            ssize_t written = write(fd, &command, sizeof(TPacket));
 
             // Wait until we finish writing before continuing (no buffering)
             tcdrain(fd);
@@ -182,7 +182,7 @@ namespace Darwin {
             std::lock_guard<std::mutex> lock(mutex);
 
             // Write our command to the UART
-            int written = write(fd, &command, sizeof(TPacket));
+            ssize_t written = write(fd, &command, sizeof(TPacket));
 
             // Wait until we finish writing before continuing (no buffering)
             tcdrain(fd);

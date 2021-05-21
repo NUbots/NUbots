@@ -44,7 +44,7 @@ namespace module::behaviour::tools {
         size_t selection;
         /// If we are selecting the angle or gain for this item
         bool angleOrGain;
-        const size_t defaultGain     = 30;
+        const float defaultGain      = 30;
         const size_t defaultDuration = 1000;
 
         std::string userInput();
@@ -54,7 +54,7 @@ namespace module::behaviour::tools {
         void saveScript();
         void editDuration();
         void editSelection();
-        void activateFrame(int frame);
+        void activateFrame(size_t frame);
         void toggleLockMotor();
         void newFrame();
         void deleteFrame();

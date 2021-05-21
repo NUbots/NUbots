@@ -42,8 +42,8 @@ namespace extension {
         struct Frame {
             struct Target {
                 Target() : id(), position(0.0f), gain(0.0f), torque(0.0f) {}
-                Target(const ServoID& servo, float pos, float gain, float torque)
-                    : id(servo), position(pos), gain(gain), torque(torque) {}
+                Target(const ServoID& servo, float pos, float gain_, float torque_)
+                    : id(servo), position(pos), gain(gain_), torque(torque_) {}
                 Target(const Target& other)
                     : id(other.id), position(other.position), gain(other.gain), torque(other.torque) {}
                 Target(Target&& other)
@@ -73,40 +73,40 @@ namespace extension {
             };
 
             Frame() : duration(), targets() {}
-            Frame(const NUClear::clock::duration& dur, const std::vector<Target>& targets)
-                : duration(dur), targets(targets) {}
+            Frame(const NUClear::clock::duration& duration_, const std::vector<Target>& targets_)
+                : duration(duration_), targets(targets_) {}
 
             NUClear::clock::duration duration;
             std::vector<Target> targets;
         };
 
-        std::string fileName, hostname, platform;
+        std::string filename, hostname, platform;
         YAML::Node config;
         std::vector<Frame> frames;
 
         Script()
-            : fileName()
+            : filename()
             , hostname(Script::getHostname())
             , platform(Script::getPlatform(hostname))
             , config()
             , frames() {}
 
-        Script(const std::vector<Frame>& frames)
-            : fileName()
+        Script(const std::vector<Frame>& frames_)
+            : filename()
             , hostname(Script::getHostname())
             , platform(Script::getPlatform(hostname))
             , config()
-            , frames(frames) {}
+            , frames(frames_) {}
 
-        Script(const std::string& fileName,
-               const std::string& hostname,
-               const std::string& platform,
-               const YAML::Node& config,
-               const std::vector<Frame>& frames)
-            : fileName(fileName), hostname(hostname), platform(platform), config(config), frames(frames) {}
+        Script(const std::string& filename_,
+               const std::string& hostname_,
+               const std::string& platform_,
+               const YAML::Node& config_,
+               const std::vector<Frame>& frames_)
+            : filename(filename_), hostname(hostname_), platform(platform_), config(config_), frames(frames_) {}
 
-        Script(const std::string& fileName, const std::string& hostname, const std::string& platform)
-            : fileName(fileName), hostname(hostname), platform(platform), config(), frames() {
+        Script(const std::string& filename_, const std::string& hostname_, const std::string& platform_)
+            : filename(filename_), hostname(hostname_), platform(platform_), config(), frames() {
 
             // Per robot scripts:    Scripts that are specific to a certain robot (e.g. darwin1).
             //                       These are to account for minor hardware variations in a robot and, as such, take
@@ -115,14 +115,14 @@ namespace extension {
             //                       These are the default scripts, it is an error for this version of the script to not
             //                       exist.
 
-            if (utility::file::exists("scripts/" + hostname + "/" + fileName)) {
-                NUClear::log<NUClear::INFO>("Parsing robot specific script:", fileName);
-                config = YAML::LoadFile("scripts/" + hostname + "/" + fileName);
+            if (utility::file::exists("scripts/" + hostname + "/" + filename)) {
+                NUClear::log<NUClear::INFO>("Parsing robot specific script:", filename);
+                config = YAML::LoadFile("scripts/" + hostname + "/" + filename);
             }
 
-            else if (utility::file::exists("scripts/" + platform + "/" + fileName)) {
-                NUClear::log<NUClear::INFO>("Parsing default platform script:", fileName);
-                config = YAML::LoadFile("scripts/" + platform + "/" + fileName);
+            else if (utility::file::exists("scripts/" + platform + "/" + filename)) {
+                NUClear::log<NUClear::INFO>("Parsing default platform script:", filename);
+                config = YAML::LoadFile("scripts/" + platform + "/" + filename);
             }
 
             frames = config.as<std::vector<Frame>>();
@@ -158,35 +158,35 @@ namespace extension {
         }
 
         Script operator[](const std::string& key) {
-            return Script(fileName, hostname, platform, config[key], frames);
+            return Script(filename, hostname, platform, config[key], frames);
         }
 
         const Script operator[](const std::string& key) const {
-            return Script(fileName, hostname, platform, config[key], frames);
+            return Script(filename, hostname, platform, config[key], frames);
         }
 
         Script operator[](const char* key) {
-            return Script(fileName, hostname, platform, config[key], frames);
+            return Script(filename, hostname, platform, config[key], frames);
         }
 
         const Script operator[](const char* key) const {
-            return Script(fileName, hostname, platform, config[key], frames);
+            return Script(filename, hostname, platform, config[key], frames);
         }
 
         Script operator[](size_t index) {
-            return Script(fileName, hostname, platform, config[index], frames);
+            return Script(filename, hostname, platform, config[index], frames);
         }
 
         const Script operator[](size_t index) const {
-            return Script(fileName, hostname, platform, config[index], frames);
+            return Script(filename, hostname, platform, config[index], frames);
         }
 
         Script operator[](int index) {
-            return Script(fileName, hostname, platform, config[index], frames);
+            return Script(filename, hostname, platform, config[index], frames);
         }
 
         const Script operator[](int index) const {
-            return Script(fileName, hostname, platform, config[index], frames);
+            return Script(filename, hostname, platform, config[index], frames);
         }
 
         template <typename T>
@@ -224,22 +224,22 @@ namespace extension {
     struct ExecuteScriptByName {
         ExecuteScriptByName(const size_t& id,
                             const std::string& script,
-                            const NUClear::clock::time_point& start = NUClear::clock::now())
-            : sourceId(id), scripts(1, script), duration_modifier(1, 1.0), start(start){};
+                            const NUClear::clock::time_point& start_ = NUClear::clock::now())
+            : sourceId(id), scripts(1, script), duration_modifier(1, 1.0), start(start_){};
         ExecuteScriptByName(const size_t& id,
                             const std::string& script,
                             const double& duration_mod,
-                            const NUClear::clock::time_point& start = NUClear::clock::now())
-            : sourceId(id), scripts(1, script), duration_modifier(1, duration_mod), start(start){};
+                            const NUClear::clock::time_point& start_ = NUClear::clock::now())
+            : sourceId(id), scripts(1, script), duration_modifier(1, duration_mod), start(start_){};
         ExecuteScriptByName(const size_t& id,
-                            const std::vector<std::string>& scripts,
-                            const NUClear::clock::time_point& start = NUClear::clock::now())
-            : sourceId(id), scripts(scripts), duration_modifier(scripts.size(), 1.0), start(start){};
+                            const std::vector<std::string>& scripts_,
+                            const NUClear::clock::time_point& start_ = NUClear::clock::now())
+            : sourceId(id), scripts(scripts_), duration_modifier(scripts.size(), 1.0), start(start_){};
         ExecuteScriptByName(const size_t& id,
-                            const std::vector<std::string>& scripts,
+                            const std::vector<std::string>& scripts_,
                             const std::vector<double>& duration_mod,
-                            const NUClear::clock::time_point& start = NUClear::clock::now())
-            : sourceId(id), scripts(scripts), duration_modifier(duration_mod), start(start) {
+                            const NUClear::clock::time_point& start_ = NUClear::clock::now())
+            : sourceId(id), scripts(scripts_), duration_modifier(duration_mod), start(start_) {
             while (scripts.size() > duration_modifier.size()) {
                 duration_modifier.push_back(1.0);
             }
@@ -257,22 +257,22 @@ namespace extension {
      * @author Trent Houliston
      */
     struct ExecuteScript {
-        ExecuteScript(const size_t& id, const Script& script, NUClear::clock::time_point start = NUClear::clock::now())
-            : sourceId(id), scripts(1, script), duration_modifier(1, 1.0), start(start){};
+        ExecuteScript(const size_t& id, const Script& script, NUClear::clock::time_point start_ = NUClear::clock::now())
+            : sourceId(id), scripts(1, script), duration_modifier(1, 1.0), start(start_){};
         ExecuteScript(const size_t& id,
                       const Script& script,
-                      double duration_mod              = 1.0,
-                      NUClear::clock::time_point start = NUClear::clock::now())
-            : sourceId(id), scripts(1, script), duration_modifier(1, duration_mod), start(start){};
+                      double duration_mod               = 1.0,
+                      NUClear::clock::time_point start_ = NUClear::clock::now())
+            : sourceId(id), scripts(1, script), duration_modifier(1, duration_mod), start(start_){};
         ExecuteScript(const size_t& id,
-                      const std::vector<Script>& scripts,
-                      NUClear::clock::time_point start = NUClear::clock::now())
-            : sourceId(id), scripts(scripts), duration_modifier(scripts.size(), 1.0), start(start){};
+                      const std::vector<Script>& scripts_,
+                      NUClear::clock::time_point start_ = NUClear::clock::now())
+            : sourceId(id), scripts(scripts_), duration_modifier(scripts.size(), 1.0), start(start_){};
         ExecuteScript(const size_t& id,
-                      const std::vector<Script>& scripts,
+                      const std::vector<Script>& scripts_,
                       const std::vector<double>& duration_mod,
-                      NUClear::clock::time_point start = NUClear::clock::now())
-            : sourceId(id), scripts(scripts), duration_modifier(duration_mod), start(start) {
+                      NUClear::clock::time_point start_ = NUClear::clock::now())
+            : sourceId(id), scripts(scripts_), duration_modifier(duration_mod), start(start_) {
             while (scripts.size() > duration_modifier.size()) {
                 duration_modifier.push_back(1.0);
             }

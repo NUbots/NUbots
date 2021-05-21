@@ -78,7 +78,7 @@ namespace utility::vision {
          *
          * @return the dimensionality of the mosaic size (e.g. 1 for no mosaic, 2 for bayer, 4 for polarized bayer)
          */
-        static int size(const uint32_t& format);
+        static uint32_t size(const uint32_t& format);
 
         /**
          * @brief Returns true if this mosaic has been initialised with a type that requires demosaicking

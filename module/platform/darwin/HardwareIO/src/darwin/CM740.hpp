@@ -102,7 +102,7 @@ namespace Darwin {
             ADC15_H           = 80
         };
 
-        CM740(UART& coms, int id);
+        CM740(UART& coms, uint8_t id);
 
         /**
          * @brief turns on the Dynamixel power (servos and foot sensors)

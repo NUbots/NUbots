@@ -87,14 +87,14 @@ namespace module::behaviour::tools {
         });
 
         on<Trigger<LockServo>, With<RawSensors>>().then([this](const RawSensors& sensors) {
-            auto id = selection < 2 ? 18 + selection : selection - 2;
+            auto target_id = selection < 2 ? 18 + selection : selection - 2;
 
             Script::Frame::Target target;
 
-            target.id       = id;
+            target.id       = target_id;
             target.position = utility::platform::getRawServo(target.id, sensors).present_position;
             target.gain     = defaultGain;
-            target.torque   = 100;
+            target.torque   = 100.0;
 
             script.frames[frame].targets.push_back(target);
 
@@ -201,8 +201,8 @@ namespace module::behaviour::tools {
         on<Shutdown>().then(endwin);
     }
 
-    void ScriptTuner::activateFrame(int frame) {
-        this->frame = frame;
+    void ScriptTuner::activateFrame(size_t new_frame) {
+        frame = new_frame;
 
         auto waypoints = std::make_unique<std::vector<ServoTarget>>();
         for (auto& target : script.frames[frame].targets) {
@@ -277,7 +277,7 @@ namespace module::behaviour::tools {
                                   "Save"};
 
         // Prints commands and their meanings to the screen
-        for (size_t i = 0; i < 10; i = i + 2) {
+        for (int i = 0; i < 10; i = i + 2) {
             attron(A_BOLD);
             attron(A_STANDOUT);
             mvprintw(LINES - 5, 2 + ((2 + 14) * (i / 2)), COMMANDS[i]);
@@ -286,7 +286,7 @@ namespace module::behaviour::tools {
             mvprintw(LINES - 5, 4 + ((2 + 14) * (i / 2)), MEANINGS[i]);
         }
 
-        for (size_t i = 1; i < 10; i = i + 2) {
+        for (int i = 1; i < 10; i = i + 2) {
             attron(A_BOLD);
             attron(A_STANDOUT);
             mvprintw(LINES - 4, 2 + ((2 + 14) * ((i - 1) / 2)), COMMANDS[i]);
@@ -318,7 +318,7 @@ namespace module::behaviour::tools {
                                      "Left Ankle Roll"};
 
         // Loop through all our motors
-        for (size_t i = 0; i < 20; ++i) {
+        for (int i = 0; i < 20; ++i) {
             // Everything defaults to unlocked, we add locks as we find them
             mvprintw(i + 9, 2, "U");
 
@@ -333,18 +333,18 @@ namespace module::behaviour::tools {
 
         for (auto& target : script.frames[frame].targets) {
             // Output that this frame is locked (we shuffle the head to the top of the list)
-            mvprintw(((static_cast<uint32_t>(target.id) + 2) % 20) + 9, 2, "L");
+            mvprintw(((int(target.id) + 2) % 20) + 9, 2, "L");
 
             // Output this frames gain and angle
-            mvprintw(((static_cast<uint32_t>(target.id) + 2) % 20) + 9,
+            mvprintw(((int(target.id) + 2) % 20) + 9,
                      26,
                      "Angle: %+.3f Gain: %5.1f",
-                     target.position,
-                     target.gain);
+                     double(target.position),
+                     double(target.gain));
         }
 
         // Highlight our selected point
-        mvchgat(selection + 9, angleOrGain ? 26 : 40, angleOrGain ? 13 : 11, A_STANDOUT, 0, nullptr);
+        mvchgat(int(selection) + 9, angleOrGain ? 26 : 40, angleOrGain ? 13 : 11, A_STANDOUT, 0, nullptr);
 
         // We finished building
         refresh();
@@ -358,9 +358,7 @@ namespace module::behaviour::tools {
         };
 
         // See if we have this target in our frame
-        auto it = std::find_if(std::begin(script.frames[frame].targets),
-                               std::end(script.frames[frame].targets),
-                               targetFinder);
+        auto it = std::find_if(script.frames[frame].targets.begin(), script.frames[frame].targets.end(), targetFinder);
 
         // If we don't then save our current motor position as the position
         if (it == std::end(script.frames[frame].targets)) {
@@ -374,7 +372,7 @@ namespace module::behaviour::tools {
             // Emit a waypoint so that the motor will turn off gain (go limp)
             auto waypoint      = std::make_unique<ServoTarget>();
             waypoint->time     = NUClear::clock::now();
-            waypoint->id       = selection < 2 ? 18 + selection : selection - 2;
+            waypoint->id       = uint32_t(selection < 2 ? 18 + selection : selection - 2);
             waypoint->gain     = 0;
             waypoint->position = std::numeric_limits<float>::quiet_NaN();
             waypoint->torque   = 0;
@@ -385,18 +383,18 @@ namespace module::behaviour::tools {
     void ScriptTuner::newFrame() {
         // Make a new frame before our current with our current set of motor angles and unlocked/locked status
         auto newFrame = script.frames[frame];
-        script.frames.insert(script.frames.begin() + frame, newFrame);
+        script.frames.insert(std::next(script.frames.begin(), ssize_t(frame)), newFrame);
         script.frames[frame].duration = std::chrono::milliseconds(defaultDuration);
     }
 
     void ScriptTuner::deleteFrame() {
         // Delete our current frame and go to the one before this one, if this is the last frame then ignore
         if (script.frames.size() > 1) {
-            script.frames.erase(std::begin(script.frames) + frame);
+            script.frames.erase(std::next(script.frames.begin(), ssize_t(frame)));
             frame = frame < script.frames.size() ? frame : frame - 1;
         }
         else {
-            script.frames.erase(std::begin(script.frames));
+            script.frames.erase(script.frames.begin());
             script.frames.emplace_back();
             frame = 0;
         }
@@ -408,14 +406,14 @@ namespace module::behaviour::tools {
 
         // Keep reading until our termination case is reached
         while (true) {
-            auto ch = getch();
+            int ch = getch();
             switch (ch) {
                 case 27: return "";
                 case '\n':
                 case KEY_ENTER: return chars.str(); break;
                 default:
                     chars << static_cast<char>(ch);
-                    addch(ch);
+                    addch(uint(ch));
                     break;
             }
         }
@@ -458,10 +456,10 @@ namespace module::behaviour::tools {
     void ScriptTuner::editSelection() {
 
         // Erase our old text
-        mvprintw(selection + 9, angleOrGain ? 33 : 46, " ");
+        mvprintw(int(selection) + 9, angleOrGain ? 33 : 46, " ");
 
         // Move to our point
-        move(selection + 9, angleOrGain ? 33 : 46);
+        move(int(selection) + 9, angleOrGain ? 33 : 46);
 
         // Get the users input
         std::string result = userInput();
@@ -469,7 +467,7 @@ namespace module::behaviour::tools {
         // If we have a result
         if (!result.empty()) {
             try {
-                double num = stod(result);
+                float num = stof(result);
 
                 // This finds if we have this particular motor stored in the frame
                 auto targetFinder = [=](const Script::Frame::Target& target) {
@@ -477,15 +475,15 @@ namespace module::behaviour::tools {
                 };
 
                 // See if we have this target in our frame
-                auto it = std::find_if(std::begin(script.frames[frame].targets),
-                                       std::end(script.frames[frame].targets),
+                auto it = std::find_if(script.frames[frame].targets.begin(),
+                                       script.frames[frame].targets.end(),
                                        targetFinder);
 
                 // If we don't have this frame
                 if (it == std::end(script.frames[frame].targets)) {
                     it           = script.frames[frame].targets.emplace(std::end(script.frames[frame].targets));
-                    auto id      = selection < 2 ? 18 + selection : selection - 2;
-                    it->id       = id;
+                    auto new_id  = selection < 2 ? 18 + selection : selection - 2;
+                    it->id       = new_id;
                     it->position = 0;
                     it->gain     = defaultGain;
                 }
@@ -546,9 +544,9 @@ namespace module::behaviour::tools {
                                           "Exit (this works to exit help and editGain)",
                                           "Quit Scripttuner"};
 
-            size_t longestCommand = 0;
+            int longestCommand = 0;
             for (const auto& command : ALL_COMMANDS) {
-                longestCommand = std::max(longestCommand, std::strlen(command));
+                longestCommand = std::max(longestCommand, int(std::strlen(command)));
             }
 
             erase();
@@ -557,7 +555,7 @@ namespace module::behaviour::tools {
             mvprintw(0, (COLS - 14) / 2, " Script Tuner ");
             mvprintw(3, 2, "Help Commands:");
             attroff(A_BOLD);
-            for (size_t i = 0; i < 15; i++) {
+            for (int i = 0; i < 15; i++) {
                 mvprintw(5 + i, 2, ALL_COMMANDS[i]);
                 mvprintw(5 + i, longestCommand + 4, ALL_MEANINGS[i]);
             }
@@ -570,7 +568,7 @@ namespace module::behaviour::tools {
                 mvprintw(3, 2, "Help Commands:");
                 attroff(A_BOLD);
 
-                for (size_t i = 0; i < 15; i++) {
+                for (int i = 0; i < 15; i++) {
                     mvprintw(5 + i, 2, ALL_COMMANDS[i]);
                     mvprintw(5 + i, longestCommand + 4, ALL_MEANINGS[i]);
                 }
@@ -738,19 +736,19 @@ namespace module::behaviour::tools {
         mvprintw(10, 2, "Use X to exit Edit Gain");
         move(6, 7);
         curs_set(false);
-        size_t YPOSITION[3][3] = {{6, 6, 6}, {7, 0, 0}, {8, 8, 8}};
-        size_t XPOSITION[3][3] = {{7, 20, 33}, {12, 0, 0}, {7, 20, 33}};
-        size_t i               = 0;
-        size_t j               = 0;
-        float upperGainS       = -1;
-        float lowerGainS       = -1;
-        float upperGainF       = -1;
-        float lowerGainF       = -1;
-        bool editScript        = false;
-        bool editFrame         = false;
-        bool changedUpper      = false;
-        bool changedLower      = false;
-        bool editGainRun       = true;
+        int YPOSITION[3][3] = {{6, 6, 6}, {7, 0, 0}, {8, 8, 8}};
+        int XPOSITION[3][3] = {{7, 20, 33}, {12, 0, 0}, {7, 20, 33}};
+        size_t i            = 0;
+        size_t j            = 0;
+        float upperGainS    = -1.0f;
+        float lowerGainS    = -1.0f;
+        float upperGainF    = -1.0f;
+        float lowerGainF    = -1.0f;
+        bool editScript     = false;
+        bool editFrame      = false;
+        bool changedUpper   = false;
+        bool changedLower   = false;
+        bool editGainRun    = true;
         mvchgat(YPOSITION[i][j], XPOSITION[i][j], 5, A_STANDOUT, 0, nullptr);
 
         while (editGainRun) {
@@ -835,7 +833,7 @@ namespace module::behaviour::tools {
                     break;
                 case '\n':
                 case KEY_ENTER:
-                    float newGain = 0;
+                    float newGain = 0.0f;
                     // tracks editing
 
                     if (YPOSITION[i][j] == 6) {
@@ -858,14 +856,14 @@ namespace module::behaviour::tools {
                         newGain = userInputToGain();
                         if (std::isnan(newGain)) {
                             mvprintw(YPOSITION[i][j], XPOSITION[i][j], "---.-");
-                            upperGainS = -1;
-                            lowerGainS = -1;
-                            upperGainF = -1;
-                            lowerGainF = -1;
+                            upperGainS = -1.0f;
+                            lowerGainS = -1.0f;
+                            upperGainF = -1.0f;
+                            lowerGainF = -1.0f;
                         }
                         else {
 
-                            mvprintw(YPOSITION[i][j], XPOSITION[i][j], "%5.1f", newGain);
+                            mvprintw(YPOSITION[i][j], XPOSITION[i][j], "%5.1f", double(newGain));
 
                             // allows separate gains for upper and lower motors
                             if (XPOSITION[i][j] == 20) {
@@ -909,14 +907,14 @@ namespace module::behaviour::tools {
                                     if (YPOSITION[i][j] == 6) {
                                         upperGainS = newGain;
                                         lowerGainS = newGain;
-                                        mvprintw(6, 7, "%5.1f", upperGainS);
+                                        mvprintw(6, 7, "%5.1f", double(upperGainS));
                                         mvprintw(6, 20, "---.-");
                                         mvprintw(6, 33, "---.-");
                                     }
                                     else {
                                         upperGainF = newGain;
                                         lowerGainF = newGain;
-                                        mvprintw(8, 7, "%5.1f", upperGainF);
+                                        mvprintw(8, 7, "%5.1f", double(upperGainF));
                                         mvprintw(8, 20, "---.-");
                                         mvprintw(8, 33, "---.-");
                                     }
@@ -933,13 +931,13 @@ namespace module::behaviour::tools {
 
                             // if user has entered the same gain in upper and lower then automatically prints
                             // value in both and dashes upper and lower
-                            if ((upperGainS == lowerGainS) && (upperGainS >= 0)) {
-                                mvprintw(6, 7, "%5.1f", upperGainS);
+                            if ((upperGainS == lowerGainS) && (upperGainS >= 0.0f)) {
+                                mvprintw(6, 7, "%5.1f", double(upperGainS));
                                 mvprintw(6, 20, "---.-");
                                 mvprintw(6, 33, "---.-");
                             }
-                            if ((upperGainF == lowerGainF) && (upperGainF >= 0)) {
-                                mvprintw(8, 7, "%5.1f", upperGainF);
+                            if ((upperGainF == lowerGainF) && (upperGainF >= 0.0f)) {
+                                mvprintw(8, 7, "%5.1f", double(upperGainF));
                                 mvprintw(8, 20, "---.-");
                                 mvprintw(8, 33, "---.-");
                             }
@@ -966,7 +964,7 @@ namespace module::behaviour::tools {
                         case ServoID::L_SHOULDER_ROLL:
                         case ServoID::R_ELBOW:
                         case ServoID::L_ELBOW:
-                            if (changedUpper && (upperGainS >= 0)) {
+                            if (changedUpper && (upperGainS >= 0.0f)) {
                                 target.gain = upperGainS;
                             }
                             break;
@@ -982,7 +980,7 @@ namespace module::behaviour::tools {
                         case ServoID::L_ANKLE_PITCH:
                         case ServoID::R_ANKLE_ROLL:
                         case ServoID::L_ANKLE_ROLL:
-                            if (changedLower && (lowerGainS >= 0)) {
+                            if (changedLower && (lowerGainS >= 0.0f)) {
                                 target.gain = lowerGainS;
                             }
                             break;
@@ -1005,7 +1003,7 @@ namespace module::behaviour::tools {
                     case ServoID::L_SHOULDER_ROLL:
                     case ServoID::R_ELBOW:
                     case ServoID::L_ELBOW:
-                        if (changedUpper && (upperGainF >= 0)) {
+                        if (changedUpper && (upperGainF >= 0.0f)) {
                             target.gain = upperGainF;
                         }
                         break;
@@ -1021,7 +1019,7 @@ namespace module::behaviour::tools {
                     case ServoID::L_ANKLE_PITCH:
                     case ServoID::R_ANKLE_ROLL:
                     case ServoID::L_ANKLE_ROLL:
-                        if (changedLower && (lowerGainF >= 0)) {
+                        if (changedLower && (lowerGainF >= 0.0f)) {
                             target.gain = lowerGainF;
                         }
                         break;
@@ -1039,7 +1037,7 @@ namespace module::behaviour::tools {
         std::string tempframe = userInput();
         if (!tempframe.empty() && tempframe.size() <= 4) {
             try {
-                int tempframe2 = stoi(tempframe);
+                ssize_t tempframe2 = stol(tempframe);
 
                 // makes tempframe2 always positive
                 if (tempframe2 <= 0) {
@@ -1050,9 +1048,9 @@ namespace module::behaviour::tools {
                 }
 
                 // checks user input is within correct range
-                if ((size_t) tempframe2 <= script.frames.size()) {
+                if (size_t(tempframe2) <= script.frames.size()) {
 
-                    frame = tempframe2 - 1;
+                    frame = size_t(tempframe2 - 1);
                 }
                 else {
                     beep();

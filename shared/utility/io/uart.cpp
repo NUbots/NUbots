@@ -13,11 +13,12 @@ namespace utility::io {
 
     uart::uart() : device(""), fd(-1) {}
 
-    uart::uart(const std::string& device, const unsigned int& baud) : device(device), fd(-1) {
+    uart::uart(const std::string& device_, const unsigned int& baud) : device(device_), fd(-1) {
         open(device, baud);
     }
 
-    void uart::open(const std::string& device, const unsigned int& baud) {
+    void uart::open(const std::string& device_, const unsigned int& baud) {
+        device = device_;
 
         // Open our file descriptor for read/write with no controlling TTY and nonblock mode
         fd = ::open(device.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
@@ -123,7 +124,7 @@ namespace utility::io {
         // 0 means raw output
         tio.c_oflag = 0;
         // No ICANON so we read immediately rather then line by line
-        tio.c_lflag &= ~ICANON;
+        tio.c_lflag &= ~tcflag_t(ICANON);
         tio.c_cc[VTIME] = 0;
         tio.c_cc[VMIN]  = 0;
         // Set the settings
@@ -140,15 +141,15 @@ namespace utility::io {
             }
 
             // Set the speed flags to "Custom Speed" (clear the existing speed, and set the custom speed flags)
-            serinfo.flags &= ~ASYNC_SPD_MASK;
-            serinfo.flags |= ASYNC_SPD_CUST;
+            serinfo.flags &= ~int(ASYNC_SPD_MASK);
+            serinfo.flags |= int(ASYNC_SPD_CUST);
 
             // Set our serial port to use low latency mode (otherwise the USB driver buffers for 16ms before sending
             // data)
-            serinfo.flags |= ASYNC_LOW_LATENCY;
+            serinfo.flags |= int(ASYNC_LOW_LATENCY);
 
             // Set our custom divsor for our speed
-            serinfo.custom_divisor = serinfo.baud_base / baud;
+            serinfo.custom_divisor = serinfo.baud_base / int(baud);
 
             // Set our custom speed in the system
             if (ioctl(fd, TIOCSSERIAL, &serinfo) < 0) {

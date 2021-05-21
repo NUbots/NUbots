@@ -30,18 +30,21 @@
 namespace utility::support {
     /**
      * Represents a mathematical expression
-     * This could either be represented as a double or as a vector/matrix.
+     * This could either be represented as an arithmetic type (integer or floating point) or as a vector/matrix of
+     * arithmetic types.
      */
     struct Expression {
 
         Expression() {}
-        Expression(const YAML::Node& node) : node(node) {}
+        Expression(const YAML::Node& node_) : node(node_) {}
 
-        operator double() {
-            double value;
+        // Handle arithmetic types.
+        template <typename T, std::enable_if_t<std::is_arithmetic_v<T>>* = nullptr>
+        operator T() {
+            T value;
 
             try {
-                value = parse_math_string<double>(node.as<std::string>());
+                value = parse_math_string<T>(node.as<std::string>());
             }
 
             catch (const std::invalid_argument& ex) {

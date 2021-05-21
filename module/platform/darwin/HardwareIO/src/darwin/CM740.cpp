@@ -20,7 +20,7 @@
 #include "CM740.hpp"
 
 namespace Darwin {
-    CM740::CM740(UART& coms, int id) : DarwinDevice(coms, id) {}
+    CM740::CM740(UART& coms_, uint8_t id_) : DarwinDevice(coms_, id_) {}
 
     void CM740::turnOnDynamixel() {
         // Write true to the DXL_POWER byte

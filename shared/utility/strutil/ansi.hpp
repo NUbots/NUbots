@@ -66,7 +66,7 @@ namespace utility::strutil {
     struct ANSISGR {
 
         struct Apply {
-            Apply(std::ostream& out) : out(out) {}
+            Apply(std::ostream& out_) : out(out_) {}
 
             template <typename T>
             std::ostream& operator<<(const T& el) {

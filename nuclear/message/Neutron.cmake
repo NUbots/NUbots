@@ -35,6 +35,14 @@ foreach(proto ${builtin_protobufs})
     COMMENT "Compiling protocol buffer ${proto}"
   )
 
+  # * Disable warnings on generated protobuf files
+  # * If the protobuf generation starts to generate more warnings, add '-Wno-<warning_name>' to this list of -Wno's
+  set_source_files_properties(
+    "${pb_out}/${file_we}.pb.cc" "${pb_out}/${file_we}.pb.h"
+    PROPERTIES GENERATED TRUE COMPILE_FLAGS
+                              "-Wno-unused-parameter -Wno-conversion -Wno-sign-conversion -Wno-useless-cast"
+  )
+
   list(APPEND protobuf_src "${pb_out}/${file_we}.pb.cc" "${pb_out}/${file_we}.pb.h")
   list(APPEND python_src "${py_out}/${file_we}_pb2.py")
 
@@ -125,6 +133,22 @@ foreach(proto ${message_protobufs})
     WORKING_DIRECTORY "${nt_out}"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/build_message_class.py" ${message_class_generator_files} "${nt}.pb"
     COMMENT "Building classes for ${proto}"
+  )
+
+  # * Disable warnings on generated protobuf files
+  # * If the protobuf generation starts to generate more warnings, add '-Wno-<warning_name>' to this list of -Wno's
+  set_source_files_properties(
+    "${pb}.pb.cc" "${pb}.pb.h" "${nt}.cpp" "${nt}.hpp"
+    PROPERTIES GENERATED TRUE COMPILE_FLAGS
+                              "-Wno-unused-parameter -Wno-conversion -Wno-sign-conversion -Wno-useless-cast"
+  )
+
+  # * Disable warnings on generated neutron files
+  # * If the protobuf generation starts to generate more warnings, add '-Wno-<warning_name>' to this list of -Wno's
+  set_source_files_properties(
+    "${nt}.cpp" "${nt}.hpp"
+    PROPERTIES GENERATED TRUE COMPILE_FLAGS
+                              "-Wno-shadow -Wno-conversion -Wno-sign-conversion"
   )
 
   # Add to the respective outputs

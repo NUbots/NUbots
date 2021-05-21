@@ -60,7 +60,7 @@ namespace utility::nusight {
         typename std::enable_if<!is_iterable<First>::value>::type buildGraph(DataPoint& dataPoint,
                                                                              First first,
                                                                              Remainder... remainder) {
-            dataPoint.value.push_back(first);
+            dataPoint.value.push_back(float(first));
             buildGraph(dataPoint, remainder...);
         }
 
@@ -69,7 +69,7 @@ namespace utility::nusight {
                                                                             First first,
                                                                             Remainder... remainder) {
             for (const auto& value : first) {
-                dataPoint.value.push_back(value);
+                dataPoint.value.push_back(float(value));
             }
             buildGraph(dataPoint, remainder...);
         }

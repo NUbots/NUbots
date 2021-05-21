@@ -20,5 +20,5 @@
 #include "MX28.hpp"
 
 namespace Darwin {
-    MX28::MX28(UART& coms, int id) : DarwinDevice(coms, id) {}
+    MX28::MX28(UART& coms_, uint8_t id_) : DarwinDevice(coms_, id_) {}
 }  // namespace Darwin

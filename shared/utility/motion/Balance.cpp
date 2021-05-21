@@ -131,24 +131,25 @@ namespace utility::motion {
 
         // Get error signal
         //.eulerAngles(0, 1, 2) == {roll, pitch, yaw}
-        double pitch_gyro = errorQuaternion.toRotationMatrix().eulerAngles(0, 1, 2)[1];
-        double pitch      = pitch_gyro;  // anklePitchTorque;
-        double roll       = errorQuaternion.toRotationMatrix().eulerAngles(0, 1, 2)[0];
-        double total      = std::fabs(pitch_gyro) + std::fabs(roll);
+        float pitch_gyro = errorQuaternion.toRotationMatrix().eulerAngles(0, 1, 2)[1];
+        float pitch      = pitch_gyro;  // anklePitchTorque;
+        float roll       = errorQuaternion.toRotationMatrix().eulerAngles(0, 1, 2)[0];
+        float total      = std::abs(pitch_gyro) + std::abs(roll);
 
         // Differentiate error signal
-        auto now = NUClear::clock::now();
-        double timeSinceLastMeasurement =
-            std::chrono::duration_cast<std::chrono::nanoseconds>(now - lastBalanceTime).count() * 1e-9;
-        double newdPitch = timeSinceLastMeasurement != 0 ? (pitch - lastPitch) / timeSinceLastMeasurement
-                                                         : 0;  // note that this is not a great computation of the diff
-        double newdRoll  = timeSinceLastMeasurement != 0 ? (roll - lastRoll) / timeSinceLastMeasurement : 0;
+        auto now                                                             = NUClear::clock::now();
+        std::chrono::duration<float, std::nano> durationSinceLastMeasurement = now - lastBalanceTime;
+        float timeSinceLastMeasurement = durationSinceLastMeasurement.count() * 1e-9f;
+        float newdPitch                = timeSinceLastMeasurement != 0
+                                             ? (pitch - lastPitch) / timeSinceLastMeasurement
+                                             : 0.0f;  // note that this is not a great computation of the diff
+        float newdRoll = timeSinceLastMeasurement != 0 ? (roll - lastRoll) / timeSinceLastMeasurement : 0.0f;
 
         // Exponential filter for velocity
-        dPitch = newdPitch * 0.1 + dPitch * 0.9;
-        dRoll  = newdRoll * 0.1 + dRoll * 0.9;
+        dPitch = newdPitch * 0.1f + dPitch * 0.9f;
+        dRoll  = newdRoll * 0.1f + dRoll * 0.9f;
 
-        double dTotal = std::fabs(dPitch) + std::fabs(dRoll);
+        float dTotal = std::abs(dPitch) + std::abs(dRoll);
 
         lastPitch       = pitch;
         lastRoll        = roll;
@@ -160,12 +161,10 @@ namespace utility::motion {
         // sensors.bodyCentreHeight * dPitch));
 
         // Compute torso position adjustment
-        Eigen::Vector3f torsoAdjustment_world =
-            Eigen::Vector3f(
-                -translationPGainX * sensors.Htw(2, 3) * pitch - translationDGainX * sensors.Htw(2, 3) * dPitch,
-                translationPGainY * sensors.Htw(2, 3) * roll + translationDGainY * sensors.Htw(2, 3) * dRoll,
-                -translationPGainZ * total - translationDGainY * dTotal)
-                .cast<float>();
+        Eigen::Vector3f torsoAdjustment_world(
+            -translationPGainX * Htw(2, 3) * pitch - translationDGainX * Htw(2, 3) * dPitch,
+            translationPGainY * Htw(2, 3) * roll + translationDGainY * Htw(2, 3) * dRoll,
+            -translationPGainZ * total - translationDGainY * dTotal);
 
         // Apply opposite translation to the foot position
         footToTorso = footToTorso.translate(-torsoAdjustment_world);

@@ -38,14 +38,14 @@ namespace utility::math::angle {
     template <typename T>
     inline T normalizeAngle(const T value) {
 
-        T angle = std::fmod(value, static_cast<T>(2 * M_PI));
+        T angle = std::fmod(value, static_cast<T>(2.0 * M_PI));
 
-        if (angle <= -M_PI) {
-            angle += 2 * M_PI;
+        if (angle <= -T(M_PI)) {
+            angle += T(2.0 * M_PI);
         }
 
-        if (angle > M_PI) {
-            angle -= 2 * M_PI;
+        if (angle > T(M_PI)) {
+            angle -= T(2.0 * M_PI);
         }
 
         return angle;

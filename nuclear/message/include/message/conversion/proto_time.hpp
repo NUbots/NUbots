@@ -21,7 +21,7 @@ namespace message::conversion {
 
         // Set our seconds and nanoseconds
         proto.set_seconds(seconds.count());
-        proto.set_nanos(nanos.count());
+        proto.set_nanos(int(nanos.count()));
         return proto;
     }
 

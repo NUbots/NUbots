@@ -48,11 +48,11 @@ namespace module::extension {
         if (reactor.paths.find(path) != reactor.paths.end()) {
             auto& p = reactor.paths[path];
 
-            auto exec = [&](NUClear::threading::Reaction& r, const std::string& p, const int& events) {
+            auto exec = [&](NUClear::threading::Reaction& r, const std::string& watch_path, const int& watch_events) {
                 // Set our thread local event details
                 FileWatch watch;
-                watch.path   = p;
-                watch.events = events;
+                watch.path   = watch_path;
+                watch.events = watch_events;
 
                 // Store our watch value in the local cache
                 FileWatch::FileWatchStore::value = &watch;

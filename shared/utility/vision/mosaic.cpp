@@ -10,7 +10,7 @@ namespace utility::vision {
         table.reserve(width * height);
 
         // Loop through all the coordinates and calculate the new coordinates
-        int factor = Mosaic::size(format);
+        uint32_t factor = Mosaic::size(format);
         for (uint32_t y = 0; y < height; ++y) {
             for (uint32_t x = 0; x < width; ++x) {
                 // Local x and y are the same for all within the mosaic block
@@ -52,7 +52,7 @@ namespace utility::vision {
         return !table.empty();
     }
 
-    int Mosaic::size(const uint32_t& format) {
+    uint32_t Mosaic::size(const uint32_t& format) {
         switch (format) {
             case utility::vision::fourcc("BGGR"):  // Colour Bayer
             case utility::vision::fourcc("RGGB"):  // Colour Bayer

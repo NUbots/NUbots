@@ -54,13 +54,13 @@ namespace module::input {
              ************************************************************************/
             if (it == cameras.end()) {
                 // Strip the .yaml off the name of the file to get the name of the camera
-                std::string name = ::basename(config.fileName.substr(0, config.fileName.find_last_of('.')).c_str());
+                std::string name = ::basename(config.filename.substr(0, config.filename.find_last_of('.')).c_str());
 
                 // Find the camera with the correct serial number
-                auto find_camera = [](const std::string& serial_number) {
-                    int devices = arv_get_n_devices();
-                    for (int i = 0; i < devices; ++i) {
-                        if (serial_number.compare(arv_get_device_serial_nbr(i)) == 0) {
+                auto find_camera = [](const std::string& device_serial_number) {
+                    uint devices = arv_get_n_devices();
+                    for (int i = 0; i < int(devices); ++i) {
+                        if (device_serial_number.compare(arv_get_device_serial_nbr(i)) == 0) {
                             return i;
                         }
                     }
@@ -82,7 +82,7 @@ namespace module::input {
                 else {
 
                     // Open the camera: Store as shared pointer
-                    std::string device_description = arv_get_device_id(device_no);
+                    std::string device_description = arv_get_device_id(uint(device_no));
                     auto camera =
                         std::shared_ptr<ArvCamera>(arv_camera_new(device_description.c_str()), [](ArvCamera* ptr) {
                             if (ptr)
@@ -158,8 +158,8 @@ namespace module::input {
             context.Hpc = Eigen::Matrix4d(config["lens"]["Hpc"].as<Expression>());
 
             // Apply image offsets to lens_centre, optical axis:
-            int full_width  = arv::device_get_integer_feature_value(device, "WidthMax");
-            int full_height = arv::device_get_integer_feature_value(device, "HeightMax");
+            long full_width  = arv::device_get_integer_feature_value(device, "WidthMax");
+            long full_height = arv::device_get_integer_feature_value(device, "HeightMax");
 
             int offset_x = config["settings"]["offset_x"].as<Expression>();
             int offset_y = config["settings"]["offset_y"].as<Expression>();

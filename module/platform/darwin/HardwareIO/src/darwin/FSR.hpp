@@ -63,7 +63,7 @@ namespace Darwin {
             LOCK                   = 47
         };
 
-        FSR(UART& coms, int id);
+        FSR(UART& coms, uint8_t id);
     };
 }  // namespace Darwin
 
