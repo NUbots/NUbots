@@ -26,7 +26,15 @@ if(STATIC_LIBRARIES)
 endif()
 
 # We use additional modules that cmake needs to know about
-list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules/" "${PROJECT_SOURCE_DIR}/nuclear/cmake/Modules/")
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/" "${PROJECT_SOURCE_DIR}/cmake/Modules/"
+     "${PROJECT_SOURCE_DIR}/nuclear/cmake/Modules/"
+)
+
+# * We need to tell cmake where the function for the compiler warnings is (src/cmake)
+# * We use additional modules that cmake needs to know about (src/cmake/Modules)
+include(CompilerWarnings)
+option(WARNINGS_AS_ERRORS "Fail the build when we have compiler or clang-tidy warnings" ON)
+set_project_warnings()
 
 # If this option is set we are building using continous integration
 option(CI_BUILD "Enable build options for building in the CI server" OFF)
@@ -81,9 +89,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS
     ON
     CACHE STRING "Enable/Disable output of compile commands during generation." FORCE
 )
-
-# Enable all warnings that we can
-add_compile_options(-Wall -Wpedantic -Wextra)
 
 # This is needed everywhere so that we can catch segmentation faults
 add_compile_options(-fnon-call-exceptions)
