@@ -21,17 +21,17 @@
 
 #include "message/motion/ServoTarget.hpp"
 
-namespace module {
-namespace behaviour {
+namespace module::behaviour {
 
-    using LimbID  = utility::input::LimbID;
-    using ServoID = utility::input::ServoID;
     using message::behaviour::ServoCommand;
     using message::motion::ServoTarget;
+
     using utility::behaviour::ActionKill;
     using utility::behaviour::ActionPriorities;
     using utility::behaviour::ActionStart;
     using utility::behaviour::RegisterAction;
+    using utility::input::LimbID;
+    using utility::input::ServoID;
 
     // So we don't need a huge long type declaration everywhere...
     using iterators = std::pair<std::vector<std::reference_wrapper<RequestItem>>::iterator,
@@ -115,7 +115,6 @@ namespace behaviour {
                     bool active = request->items[i].active;
 
                     // Short circuit if we can
-                    // TODO see if we can add more here
                     reselect |= (up != down) && ((active && down) || (!active && up));
 
                     // Update our priority
@@ -445,5 +444,4 @@ namespace behaviour {
         currentActions = std::move(newActions);
     }
 
-}  // namespace behaviour
-}  // namespace module
+}  // namespace module::behaviour

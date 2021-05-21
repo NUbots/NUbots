@@ -42,8 +42,7 @@
 /**
  * @author Monica Olejniczak
  */
-namespace module {
-namespace support {
+namespace module::support {
 
     using message::behaviour::Behaviour;
     using message::behaviour::KickPlan;
@@ -94,7 +93,7 @@ namespace support {
 
                     // Set properties
                     msg->timestamp       = NUClear::clock::now();
-                    msg->robot_id        = global ? global->playerId : 0;
+                    msg->robot_id        = global ? global->player_id : 0;
                     msg->role_name       = cli ? cli->at(0) : "";
                     msg->battery         = sensors ? sensors->battery : 0;
                     msg->voltage         = sensors ? sensors->voltage : 0;
@@ -192,5 +191,4 @@ namespace support {
                 }
             }));
     }
-}  // namespace support
-}  // namespace module
+}  // namespace module::support

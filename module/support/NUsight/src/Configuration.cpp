@@ -28,8 +28,7 @@
 /**
  * @author Monica Olejniczak
  */
-namespace module {
-namespace support {
+namespace module::support {
     using utility::file::listFiles;
     using utility::strutil::split;
 
@@ -47,5 +46,4 @@ namespace support {
         utility::file::writeToFile(tempName, root);
         rename(tempName.c_str(), path.c_str());
     }
-}  // namespace support
-}  // namespace module
+}  // namespace module::support

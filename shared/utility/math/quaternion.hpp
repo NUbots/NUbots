@@ -27,51 +27,47 @@
 #include <type_traits>
 #include <vector>
 
-namespace utility {
-namespace math {
-    namespace quaternion {
-        // Take the mean of list of quaternions
-        //
-        // Implementation based on https://github.com/tolgabirdal/averaging_quaternions
-        template <typename Iterator,
-                  typename QType  = std::remove_cv_t<std::remove_reference_t<decltype(*std::declval<Iterator>())>>,
-                  typename Scalar = typename QType::Scalar>
-        inline QType mean(const Iterator& begin, const Iterator& end) {
-            // Initialise our accumulator matrix
-            Eigen::Matrix<Scalar, 4, 4> A = Eigen::Matrix<Scalar, 4, 4>::Zero();
+namespace utility::math::quaternion {
+    // Take the mean of list of quaternions
+    //
+    // Implementation based on https://github.com/tolgabirdal/averaging_quaternions
+    template <typename Iterator,
+              typename QType  = std::remove_cv_t<std::remove_reference_t<decltype(*std::declval<Iterator>())>>,
+              typename Scalar = typename QType::Scalar>
+    inline QType mean(const Iterator& begin, const Iterator& end) {
+        // Initialise our accumulator matrix
+        Eigen::Matrix<Scalar, 4, 4> A = Eigen::Matrix<Scalar, 4, 4>::Zero();
 
-            // Accumlate the quaternions across all particles
-            for (Iterator it = begin; it != end; ++it) {
-                // Convert quaternion to vec4
-                Eigen::Matrix<Scalar, 4, 1> q(it->coeffs());
+        // Accumlate the quaternions across all particles
+        for (Iterator it = begin; it != end; ++it) {
+            // Convert quaternion to vec4
+            Eigen::Matrix<Scalar, 4, 1> q(it->coeffs());
 
-                // Rank 1 update
-                A += q * q.transpose();
-            }
-
-            // Scale the accumulator matrix
-            A /= std::distance(begin, end);
-
-            // Solve for the eigenvectors of the accumulator matrix
-            Eigen::SelfAdjointEigenSolver<Eigen::Matrix<Scalar, 4, 4>> eigensolver(A);
-            if (eigensolver.info() != Eigen::Success) {
-                throw std::runtime_error("Eigen decomposition failed");
-            }
-
-            // We want the eigenvector corresponding to the largest eigenvector
-            return QType(eigensolver.eigenvectors().template rightCols<1>());
+            // Rank 1 update
+            A += q * q.transpose();
         }
 
-        template <typename QType>
-        inline QType difference(const QType& a, const QType& b) {
-            // Difference between two rotations
-            // Calculate the rotation from a to b
-            // https://www.gamedev.net/forums/topic/423462-rotation-difference-between-two-quaternions/?do=findComment&comment=3818213
-            return a.inverse() * b;
+        // Scale the accumulator matrix
+        A /= std::distance(begin, end);
+
+        // Solve for the eigenvectors of the accumulator matrix
+        Eigen::SelfAdjointEigenSolver<Eigen::Matrix<Scalar, 4, 4>> eigensolver(A);
+        if (eigensolver.info() != Eigen::Success) {
+            throw std::runtime_error("Eigen decomposition failed");
         }
-    }  // namespace quaternion
-}  // namespace math
-}  // namespace utility
+
+        // We want the eigenvector corresponding to the largest eigenvector
+        return QType(eigensolver.eigenvectors().template rightCols<1>());
+    }
+
+    template <typename QType>
+    inline QType difference(const QType& a, const QType& b) {
+        // Difference between two rotations
+        // Calculate the rotation from a to b
+        // https://www.gamedev.net/forums/topic/423462-rotation-difference-between-two-quaternions/?do=findComment&comment=3818213
+        return a.inverse() * b;
+    }
+}  // namespace utility::math::quaternion
 
 
 #endif  // UTILITY_MATH_QUATERNION_HPP

@@ -26,8 +26,7 @@
 
 #include "message/input/Image.hpp"
 
-namespace module {
-namespace support {
+namespace module::support {
 
     class VirtualCamera : public NUClear::Reactor {
         ReactionHandle emitImageHandle;
@@ -41,7 +40,6 @@ namespace support {
         Eigen::Matrix4d Hcw;
         message::input::Image::Lens lens;
     };
-}  // namespace support
-}  // namespace module
+}  // namespace module::support
 
 #endif

@@ -23,8 +23,7 @@
 #include <limits>
 #include <type_traits>
 
-namespace utility {
-namespace math {
+namespace utility::math {
 
     /**
      * Compare two floating-point numbers for 'almost' equality.
@@ -60,7 +59,8 @@ namespace math {
      * @param multiple The number that numToRound should be a multiple of.
      *
      * @return ret, such that ret % multiple == 0 and such that if ret2 and ret3 are also multiples of multiple
-     *  then ret2 < numToRound <= ret < ret3 (that is, there is no other multiple that is closer to the starting point).
+     *  then ret2 < numToRound <= ret < ret3 (that is, there is no other multiple that is closer to the starting
+     * point).
      */
     template <typename T>
     inline constexpr typename std::enable_if<std::is_integral<T>::value, T>::type roundUp(T numToRound, T multiple) {
@@ -78,9 +78,7 @@ namespace math {
             return -(abs(numToRound) - remainder);
         }
 
-        else {
-            return numToRound + multiple - remainder;
-        }
+        return numToRound + multiple - remainder;
     }
 
     // http://stackoverflow.com/a/3409892/4795763
@@ -103,7 +101,6 @@ namespace math {
     inline constexpr typename std::enable_if<std::is_arithmetic<T>::value, T>::type clamp(T min, T val, T max) {
         return (std::min(std::max(val, min), max));
     }
-}  // namespace math
-}  // namespace utility
+}  // namespace utility::math
 
 #endif  // UTILITY_MATH_COMPARISON_HPP
