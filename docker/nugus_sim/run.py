@@ -51,6 +51,17 @@ def read_args() -> Tuple[str, dict]:
 def set_env_vars(config: dict) -> None:
     # print(config)
     # Set args in appropriate config files
+
+    # ROBOCUP_ROBOT_ID
+    # module/input/gamecontroller/data/config/gamecontroller.yaml
+
+    # ROBOCUP_TEAM_COLOR
+    # ??
+
+    # ROBOCUP_SIMULATOR_ADDR
+    # module/platform/Webots/data/config/webots.yaml
+    addr, port = config["ROBOCUP_SIMULATOR_ADDR"].split(":", 2)
+
     pass
 
 

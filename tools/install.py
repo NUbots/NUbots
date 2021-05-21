@@ -54,8 +54,8 @@ def run(target, user, config, toolchain, **kwargs):
         target_binary_dir = "{0}@{1}:/home/{0}/".format(user, target)
         target_toolchain_dir = "{0}@{1}:/home/{0}/".format(user, target)
     else:
-        target_binary_dir = b.project_dir + "/docker/webots/binaries"
-        target_toolchain_dir = b.project_dir + "/docker/webots/toolchain"
+        target_binary_dir = b.project_dir + "/docker/nugus_sim/binaries"
+        target_toolchain_dir = b.project_dir + "/docker/nugus_sim/toolchain"
 
     build_dir = b.binary_dir
 

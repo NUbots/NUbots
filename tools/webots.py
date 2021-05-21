@@ -56,7 +56,7 @@ def run(sub_command, role=None, **kwargs):
 
         # Set build config
         err = subprocess.run(
-            ["./b", "configure", "--", "-DCMAKE_BUILD_TYPE=Release", "--", "-DROLE_robocup2021=ON"]
+            ["./b", "configure", "--", "-DCMAKE_BUILD_TYPE=Release", "--", "-DROLE_webots=ON"]
         ).returncode
         if err != 0:
             cprint("returned exit code {}".format(err), "red", attrs=["bold"])
@@ -69,14 +69,16 @@ def run(sub_command, role=None, **kwargs):
             exit(err)
 
         # Copy compiled binaries and runtime dependancies out of build volume
-        err = subprocess.run(["./b", "install", "local"]).returncode
+        err = subprocess.run(["./b", "install", "local", "-t"]).returncode
         if err != 0:
             cprint("returned exit code {}".format(err), "red", attrs=["bold"])
             exit(err)
 
         # Build image!
         os.chdir(b.project_dir + "/docker")
-        err = subprocess.run(["docker", "build", "-t", "webots:test", "-f", "./WebotsDockerfile", "."]).returncode
+        err = subprocess.run(
+            ["docker", "build", "-t", "nugus_sim:robocup", "-f", "./nugus_sim_Dockerfile", "."]
+        ).returncode
         if err != 0:
             cprint("returned exit code {}".format(err), "red", attrs=["bold"])
             exit(err)
@@ -93,8 +95,8 @@ def run(sub_command, role=None, **kwargs):
             "-e",
             "ROBOCUP_TEAM_COLOR=1",
             "-e",
-            "ROBOCUP_SIMULATOR_ADDR=1",
-            "webots:test",
+            "ROBOCUP_SIMULATOR_ADDR=127.0.0.1:10020",
+            "nugus_sim:robocup",
         ]
         docker_run_command.append(role[0])
         subprocess.run(docker_run_command)

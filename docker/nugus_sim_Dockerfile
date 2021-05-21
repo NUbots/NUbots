@@ -17,14 +17,18 @@ RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr
     > $(python -c "import site; print(site.getsitepackages()[0])")/local.pth
 COPY /etc/xdg/pip/pip.conf /etc/xdg/pip/pip.conf
 
+# Install python libraries
+RUN pip install \
+    pyyaml
+
 # Copy our code in yo
-COPY ./webots/binaries/ ./binaries
+COPY ./nugus_sim/binaries/ ./binaries
 
 # Copy toolchain
-COPY ./webots/toolchain/local /usr/local
+COPY ./nugus_sim/toolchain/local /usr/local
 
 # Copy run script
-COPY ./webots/run.py .
+COPY ./nugus_sim/run.py .
 
 # Make sure /usr/local is checked for libraries and binaries
 COPY /etc/ld.so.conf.d/usrlocal.conf /etc/ld.so.conf.d/usrlocal.conf

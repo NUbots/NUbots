@@ -66,8 +66,8 @@ packer/build.pwi
 *TSWLatexianTemp*
 
 # Webots container building stuff
-docker/webots/binaries
-docker/webots/toolchain
+docker/nugus_sim/binaries
+docker/nugus_sim/toolchain
 
 # Tests
 tests_output/
