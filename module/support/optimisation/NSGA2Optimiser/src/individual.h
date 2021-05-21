@@ -5,7 +5,7 @@
 #include <ostream>
 #include <vector>
 
-#include "random.h"
+#include "random.hpp"
 
 namespace nsga2 {
 struct IndividualConfigurator {

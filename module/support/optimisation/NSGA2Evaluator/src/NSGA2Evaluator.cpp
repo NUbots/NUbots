@@ -2,10 +2,10 @@
 
 #include "extension/Configuration.h"
 
-#include "message/behaviour/MotionCommand.h"
-#include "message/input/Sensors.h"
-#include "message/motion/ExecuteKick.h"
-#include "message/motion/KickCommand.h"
+#include "message/behaviour/MotionCommand.hpp"
+#include "message/input/Sensors.hpp"
+// #include "message/motion/ExecuteKick.hpp"
+#include "message/motion/KickCommand.hpp"
 #include "message/support/gazebo/GazeboBallLocation.h"
 #include "message/support/gazebo/GazeboRobotLocation.h"
 #include "message/support/gazebo/GazeboWorldCtrl.h"
@@ -192,6 +192,7 @@ namespace support {
                         BeginTermination();
                 }
             });
+
 
             on<Trigger<GazeboWorldStatus>, Single>().then([this](const GazeboWorldStatus& status) {
                 // Get the sim time
