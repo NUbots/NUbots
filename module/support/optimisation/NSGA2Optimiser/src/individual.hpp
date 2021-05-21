@@ -5,8 +5,6 @@
 #include <ostream>
 #include <vector>
 
-#include "random.hpp"
-
 namespace nsga2 {
     struct IndividualConfigurator {
         int realVars;

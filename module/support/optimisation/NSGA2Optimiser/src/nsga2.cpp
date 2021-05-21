@@ -1,4 +1,4 @@
-#include "nsga2.h"
+#include "nsga2.hpp"
 
 namespace nsga2 {
     NSGA2::NSGA2() {

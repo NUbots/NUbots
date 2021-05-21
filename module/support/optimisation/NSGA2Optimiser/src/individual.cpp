@@ -1,4 +1,4 @@
-#include "individual.h"
+#include "individual.hpp"
 
 namespace nsga2 {
     Individual::Individual(const IndividualConfigurator& _config) {

@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "population.hpp"
-#include "random.hpp"
 
 namespace nsga2 {
     class NSGA2 {
