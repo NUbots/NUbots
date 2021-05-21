@@ -54,7 +54,7 @@ namespace nsga2 {
         Population* parentPop;
         Population* childPop;
         Population* mixedPop;
-        RandomGenerator* randGen;
+        // RandomGenerator* randGen;
 
         bool crowdObj;
         int reportCount;

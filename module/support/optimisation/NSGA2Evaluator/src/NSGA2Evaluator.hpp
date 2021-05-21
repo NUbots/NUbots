@@ -1,6 +1,7 @@
 #ifndef MODULE_SUPPORT_OPTIMISATION_NSGA2EVALUATOR_H
 #define MODULE_SUPPORT_OPTIMISATION_NSGA2EVALUATOR_H
 
+#include <Eigen/Core>
 #include <nuclear>
 
 #include "extension/Script.hpp"
@@ -30,7 +31,7 @@ namespace module {
                 double simTime;
                 double simTimeDelta;
                 double timeSinceTermination;
-                arma::vec2 velocity;
+                Eigen::Vector2d velocity;
                 float rotation;
 
                 bool terminating;

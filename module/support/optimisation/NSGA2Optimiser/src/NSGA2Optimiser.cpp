@@ -9,6 +9,8 @@
 #include "utility/file/fileutil.hpp"
 #include "utility/input/ServoID.hpp"
 
+// TODO: fix random
+
 namespace module {
     namespace support {
         namespace optimisation {
@@ -28,7 +30,7 @@ namespace module {
                     // Use configuration here from file NSGA2Optimiser.yaml
 
                     int seed = 666;
-                    randGen.SetSeed(seed);
+                    // randGen.SetSeed(seed);
 
                     int popSize     = 40;
                     int generations = 300;
@@ -161,7 +163,7 @@ namespace module {
 
                     std::cout << "Starting..." << std::endl;
 
-                    nsga2Algorithm.randGen = &randGen;
+                    // nsga2Algorithm.randGen = &randGen;
                     nsga2Algorithm.SetRealVariableCount(realVars);
                     nsga2Algorithm.SetBinVariableCount(binVars);
                     nsga2Algorithm.SetObjectiveCount(objectives);

@@ -24,7 +24,7 @@ namespace nsga2 {
                    const double _etaM,
                    const double _epsC,
                    const bool _crowdObj,
-                   RandomGenerator* _randGen,
+                   // RandomGenerator* _randGen,
                    const std::vector<double> _initialRealVars);
         virtual ~Population();
         void Initialize(bool randomInitialize);

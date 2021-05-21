@@ -18,7 +18,7 @@ namespace nsga2 {
         int constraints;
         double etaM;
         double epsC;
-        RandomGenerator* randGen;
+        // RandomGenerator* randGen;
         std::vector<double> initialRealVars;
     };
 

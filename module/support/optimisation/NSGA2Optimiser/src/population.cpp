@@ -1,5 +1,7 @@
 #include "population.hpp"
 
+// TODO Fix randomness usage
+
 namespace nsga2 {
     Population::Population(const int _size,
                            const int _realVars,
@@ -14,24 +16,24 @@ namespace nsga2 {
                            const double _etaM,
                            const double _epsC,
                            const bool _crowdObj,
-                           RandomGenerator* _randGen,
+                           // RandomGenerator* _randGen,
                            const std::vector<double> _initialRealVars) {
         generation = 1;
         crowdObj   = _crowdObj;
         front      = std::vector<std::vector<int>>();
 
-        indConfig.realVars        = _realVars;
-        indConfig.realLimits      = _realLimits;
-        indConfig.realMutProb     = _realMutProb;
-        indConfig.binVars         = _binVars;
-        indConfig.binBits         = _binBits;
-        indConfig.binLimits       = _binLimits;
-        indConfig.binMutProb      = _binMutProb;
-        indConfig.objectives      = _objectives;
-        indConfig.constraints     = _constraints;
-        indConfig.etaM            = _etaM;
-        indConfig.epsC            = _epsC;
-        indConfig.randGen         = _randGen;
+        indConfig.realVars    = _realVars;
+        indConfig.realLimits  = _realLimits;
+        indConfig.realMutProb = _realMutProb;
+        indConfig.binVars     = _binVars;
+        indConfig.binBits     = _binBits;
+        indConfig.binLimits   = _binLimits;
+        indConfig.binMutProb  = _binMutProb;
+        indConfig.objectives  = _objectives;
+        indConfig.constraints = _constraints;
+        indConfig.etaM        = _etaM;
+        indConfig.epsC        = _epsC;
+        // indConfig.randGen         = _randGen;
         indConfig.initialRealVars = _initialRealVars;
 
         size = _size;

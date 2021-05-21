@@ -1,26 +1,24 @@
 #include "NSGA2Evaluator.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
 #include "message/behaviour/MotionCommand.hpp"
 #include "message/input/Sensors.hpp"
-// #include "message/motion/ExecuteKick.hpp"
 #include "message/motion/KickCommand.hpp"
-#include "message/support/gazebo/GazeboBallLocation.h"
-#include "message/support/gazebo/GazeboRobotLocation.h"
-#include "message/support/gazebo/GazeboWorldCtrl.h"
-#include "message/support/gazebo/GazeboWorldStatus.h"
-#include "message/support/optimisation/NSGA2EvaluationParameters.h"
-#include "message/support/optimisation/NSGA2EvaluationRequest.h"
-#include "message/support/optimisation/NSGA2FitnessScores.h"
-#include "message/support/optimisation/NSGA2Terminate.h"
+#include "message/support/gazebo/GazeboBallLocation.hpp"
+#include "message/support/gazebo/GazeboRobotLocation.hpp"
+#include "message/support/gazebo/GazeboWorldCtrl.hpp"
+#include "message/support/gazebo/GazeboWorldStatus.hpp"
+#include "message/support/optimisation/NSGA2EvaluationParameters.hpp"
+#include "message/support/optimisation/NSGA2EvaluationRequest.hpp"
+#include "message/support/optimisation/NSGA2FitnessScores.hpp"
+#include "message/support/optimisation/NSGA2Terminate.hpp"
 
-#include "utility/behaviour/Action.h"
-#include "utility/behaviour/MotionCommand.h"
-#include "utility/file/fileutil.h"
-#include "utility/input/LimbID.h"
-#include "utility/input/ServoID.h"
-#include "utility/math/matrix/Transform2D.h"
+#include "utility/behaviour/Action.hpp"
+#include "utility/behaviour/MotionCommand.hpp"
+#include "utility/file/fileutil.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
 
 namespace module {
     namespace support {
@@ -31,7 +29,6 @@ namespace module {
             using extension::Script;
             using message::behaviour::MotionCommand;
             using message::input::Sensors;
-            using message::motion::ExecuteKick;
             using message::motion::KickCommand;
             using message::support::gazebo::GazeboBallLocation;
             using message::support::gazebo::GazeboRobotLocation;
@@ -42,7 +39,6 @@ namespace module {
             using message::support::optimisation::NSGA2FitnessScores;
             using message::support::optimisation::NSGA2Terminate;
             using utility::behaviour::RegisterAction;
-            using utility::math::matrix::Transform2D;
             using LimbID  = utility::input::LimbID;
             using ServoID = utility::input::ServoID;
 
@@ -141,121 +137,125 @@ namespace module {
                     //{0, 0, 1}, message::motion::KickCommandType::NORMAL
                     //   }));//log("EMITTING");
                     // emit(std::make_unique<MotionCommand>(
-                    //    utility::behaviour::DirectCommand(Transform2D(velocity, rotation))));
+                    //    utility::behaviour::DirectCommand(Eigen::Affine2d(velocity, rotation))));
 
                     emit(params);
                     terminating = false;
                 });
 
-                on<Trigger<Sensors>, Single>().then([this](const Sensors& sensors) {
-                    // Get the sensory data
-                    // if fallen over, trigger end of evaluation
-                    // if (sensors.)
-                    accelerometer[0] = sensors.accelerometer[0];
-                    accelerometer[1] = sensors.accelerometer[1];
-                    accelerometer[2] = sensors.accelerometer[2];  // std::cout << accelerometer[2] << std::endl;
+                // TODO(KipH):
+                // This shouldn't be listening for sensors. that should be handled by something else
+                // on<Trigger<Sensors>, Single>().then([this](const Sensors& sensors) {
+                //     // Get the sensory data
+                //     // if fallen over, trigger end of evaluation
+                //     // if (sensors.)
+                //     accelerometer[0] = sensors.accelerometer[0];
+                //     accelerometer[1] = sensors.accelerometer[1];
+                //     accelerometer[2] = sensors.accelerometer[2];  // std::cout << accelerometer[2] << std::endl;
 
-                    gyroscope[0] = sensors.gyroscope[0];
-                    gyroscope[1] = sensors.gyroscope[1];
-                    gyroscope[2] = sensors.gyroscope[2];  // log(distanceTravelled);
+                //     gyroscope[0] = sensors.gyroscope[0];
+                //     gyroscope[1] = sensors.gyroscope[1];
+                //     gyroscope[2] = sensors.gyroscope[2];  // log(distanceTravelled);
 
-                    if (simTime > 0.25) {
-                        sway[0] += gyroscope[0] * simTimeDelta;
-                        sway[1] += gyroscope[1] * simTimeDelta;
-                        sway[2] += gyroscope[2] * simTimeDelta;
-                    }
+                //     if (simTime > 0.25) {
+                //         sway[0] += gyroscope[0] * simTimeDelta;
+                //         sway[1] += gyroscope[1] * simTimeDelta;
+                //         sway[2] += gyroscope[2] * simTimeDelta;
+                //     }
 
-                    if (!terminating && evaluating
-                        && ((std::abs(accelerometer[0]) > 9.2 || std::abs(accelerometer[1]) > 9.2)
-                            && std::abs(accelerometer[2]) < 0.5)
-                        && simTime > 3.0)
-                        fallenOver = true;
+                //     if (!terminating && evaluating
+                //         && ((std::abs(accelerometer[0]) > 9.2 || std::abs(accelerometer[1]) > 9.2)
+                //             && std::abs(accelerometer[2]) < 0.5)
+                //         && simTime > 3.0)
+                //         fallenOver = true;
 
-                    fieldPlaneSway = std::pow(std::pow(accelerometer[0], 2) + std::pow(accelerometer[1], 2), 0.5);
+                //     fieldPlaneSway = std::pow(std::pow(accelerometer[0], 2) + std::pow(accelerometer[1], 2), 0.5);
 
-                    if (!terminating && evaluating && !finished && fieldPlaneSway > maxFieldPlaneSway
-                        && simTime > 0.25) {
+                //     if (!terminating && evaluating && !finished && fieldPlaneSway > maxFieldPlaneSway
+                //         && simTime > 0.25) {
 
-                        maxFieldPlaneSway = fieldPlaneSway;
-                        // log(maxFieldPlaneSway);
-                    }
-                    // log("gyroscope.x = " + std::to_string(gyroscope[0]));
-                    // log("gyroscope.y = " + std::to_string(gyroscope[1]));
-                    // log("gyroscope.z = " + std::to_string(gyroscope[2]));
-                    // log("accelerme.x = " + std::to_string(accelerometer[0]));
-                    // log("accelerme.y = " + std::to_string(accelerometer[1]));
-                    // log("accelerme.z = " + std::to_string(accelerometer[2]));
+                //         maxFieldPlaneSway = fieldPlaneSway;
+                //         // log(maxFieldPlaneSway);
+                //     }
+                //     // log("gyroscope.x = " + std::to_string(gyroscope[0]));
+                //     // log("gyroscope.y = " + std::to_string(gyroscope[1]));
+                //     // log("gyroscope.z = " + std::to_string(gyroscope[2]));
+                //     // log("accelerme.x = " + std::to_string(accelerometer[0]));
+                //     // log("accelerme.y = " + std::to_string(accelerometer[1]));
+                //     // log("accelerme.z = " + std::to_string(accelerometer[2]));
 
-                    if (!terminating && evaluating && !finished && simTime > 4.0) {
-                        if (fallenOver)
-                            BeginTermination();
-                        else if (ballVelocity[0] == 0.0 && ballVelocity[1] == 0.0 && ballVelocity[2] == 0.0)
-                            BeginTermination();
-                    }
-                });
-
-
-                on<Trigger<GazeboWorldStatus>, Single>().then([this](const GazeboWorldStatus& status) {
-                    // Get the sim time
-                    simTimeDelta = status.simTime - simTime;
-                    simTime      = status.simTime;
-
-                    // if (simTime > 3.0 && !walking) {
-                    //    walking = true;
-                    //{std::cout << "running\n";
-                    // std::cout << "EMITTING\n";
-                    // emit(std::make_unique<ExecuteKick>());
+                //     if (!terminating && evaluating && !finished && simTime > 4.0) {
+                //         if (fallenOver)
+                //             BeginTermination();
+                //         else if (ballVelocity[0] == 0.0 && ballVelocity[1] == 0.0 && ballVelocity[2] == 0.0)
+                //             BeginTermination();
+                //     }
+                // });
 
 
-                    //}
-                    // if (simTime > 15.0)
-                    //    fallenOver = true;
+                // TODO: Kip thinks this is dealt with by the webots module
+                // on<Trigger<GazeboWorldStatus>, Single>().then([this](const GazeboWorldStatus& status) {
+                //     // Get the sim time
+                //     simTimeDelta = 0;  // status.simTime - simTime;
+                //     simTime      = 0;  // status.simTime;
 
-                    if (simTime > 1.0 && !evaluating & !terminating) {
-                        emit(std::make_unique<ExecuteScript>(subsumptionId, script, NUClear::clock::now()));
-                        ResetWorldTime();
-                        evaluating = true;
-                    }
+                //     // if (simTime > 3.0 && !walking) {
+                //     //    walking = true;
+                //     //{std::cout << "running\n";
+                //     // std::cout << "EMITTING\n";
+                //     // emit(std::make_unique<ExecuteKick>());
 
-                    if (terminating && !evaluating && !finished && (simTime - timeSinceTermination) > 2.0) {
-                        terminating = false;
-                        SendFitnessScores();
-                    }
-                });
+
+                //     //}
+                //     // if (simTime > 15.0)
+                //     //    fallenOver = true;
+
+                //     if (simTime > 1.0 && !evaluating & !terminating) {
+                //         emit(std::make_unique<ExecuteScript>(subsumptionId, script, NUClear::clock::now()));
+                //         ResetWorldTime();
+                //         evaluating = true;
+                //     }
+
+                //     if (terminating && !evaluating && !finished && (simTime - timeSinceTermination) > 2.0) {
+                //         terminating = false;
+                //         SendFitnessScores();
+                //     }
+                // });
 
                 on<Trigger<NSGA2Terminate>, Single>().then([this](const NSGA2Terminate& terminate) {
                     // Get the sim time
                     finished = true;
                 });
 
-                on<Trigger<GazeboBallLocation>, Single>().then([this](const GazeboBallLocation& location) {
-                    // Get the sensory data
-                    // if fallen over, trigger end of evaluation
-                    // if (sensors.)
+                // TODO: these updates should be handled by the webots module
+                // on<Trigger<GazeboBallLocation>, Single>().then([this](const GazeboBallLocation& location) {
+                //     // Get the sensory data
+                //     // if fallen over, trigger end of evaluation
+                //     // if (sensors.)
 
-                    ballLocation[0] = location.x;
-                    ballLocation[1] = location.y;
-                    ballLocation[2] = location.z;
+                //     ballLocation[0] = location.x;
+                //     ballLocation[1] = location.y;
+                //     ballLocation[2] = location.z;
 
-                    ballVelocity[0] = location.velx;
-                    ballVelocity[1] = location.vely;
-                    ballVelocity[2] = location.velz;
-                    // log(ballVelocity[0]);
-                    // log(ballVelocity[1]);
-                    // log(ballVelocity[2]);
-                });
+                //     ballVelocity[0] = location.velx;
+                //     ballVelocity[1] = location.vely;
+                //     ballVelocity[2] = location.velz;
+                //     // log(ballVelocity[0]);
+                //     // log(ballVelocity[1]);
+                //     // log(ballVelocity[2]);
+                // });
 
-                on<Trigger<GazeboRobotLocation>, Single>().then([this](const GazeboRobotLocation& location) {
-                    // distanceTravelled += location.x + 1;//std::pow(std::pow(location.x - robotLocation[0], 2) +
-                    // std::pow(location.y - robotLocation[1], 2), 0.5);
-                    robotLocationDelta[0] = location.x - robotLocationDelta[0];
-                    robotLocationDelta[1] = location.y - robotLocationDelta[1];
-                    robotLocationDelta[2] = location.z - robotLocationDelta[2];
+                // on<Trigger<GazeboRobotLocation>, Single>().then([this](const GazeboRobotLocation& location) {
+                //     // distanceTravelled += location.x + 1;//std::pow(std::pow(location.x - robotLocation[0], 2) +
+                //     // std::pow(location.y - robotLocation[1], 2), 0.5);
+                //     robotLocationDelta[0] = location.x - robotLocationDelta[0];
+                //     robotLocationDelta[1] = location.y - robotLocationDelta[1];
+                //     robotLocationDelta[2] = location.z - robotLocationDelta[2];
 
-                    robotLocation[0] = location.x;
-                    robotLocation[1] = location.y;
-                    robotLocation[2] = location.z;
-                });
+                //     robotLocation[0] = location.x;
+                //     robotLocation[1] = location.y;
+                //     robotLocation[2] = location.z;
+                // });
             }
 
             void NSGA2Evaluator::SendFitnessScores() {

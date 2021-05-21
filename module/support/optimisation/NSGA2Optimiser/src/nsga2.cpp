@@ -1,34 +1,38 @@
 #include "nsga2.hpp"
 
+#include <cmath>
+
+// TODO FIX random stuff
+
 namespace nsga2 {
     NSGA2::NSGA2() {
-        realVars         = -1;
-        binVars          = -1;
-        objectives       = -1;
-        constraints      = -1;
-        popSize          = -1;
-        generations      = -1;
-        reportCount      = 1;
-        realCrossProb    = -1;
-        binCrossProb     = -1;
-        realMutProb      = -1;
-        binMutProb       = -1;
-        etaC             = -1;
-        etaM             = -1;
-        epsC             = EPS;
-        binBits          = std::vector<int>();
-        realLimits       = std::vector<std::pair<double, double>>();
-        binLimits        = std::vector<std::pair<double, double>>();
-        binMutCount      = 0;
-        realMutCount     = 0;
-        binCrossCount    = 0;
-        realCrossCount   = 0;
-        bitLength        = 0;
-        parentPop        = NULL;
-        childPop         = NULL;
-        mixedPop         = NULL;
-        crowdObj         = true;
-        randGen          = NULL;
+        realVars       = -1;
+        binVars        = -1;
+        objectives     = -1;
+        constraints    = -1;
+        popSize        = -1;
+        generations    = -1;
+        reportCount    = 1;
+        realCrossProb  = -1;
+        binCrossProb   = -1;
+        realMutProb    = -1;
+        binMutProb     = -1;
+        etaC           = -1;
+        etaM           = -1;
+        epsC           = EPS;
+        binBits        = std::vector<int>();
+        realLimits     = std::vector<std::pair<double, double>>();
+        binLimits      = std::vector<std::pair<double, double>>();
+        binMutCount    = 0;
+        realMutCount   = 0;
+        binCrossCount  = 0;
+        realCrossCount = 0;
+        bitLength      = 0;
+        parentPop      = NULL;
+        childPop       = NULL;
+        mixedPop       = NULL;
+        crowdObj       = true;
+        // randGen          = NULL;
         randomInitialize = true;
     }
 
@@ -42,7 +46,7 @@ namespace nsga2 {
     }
 
     void NSGA2::SetSeed(int _seed) {
-        randGen->SetSeed(_seed);
+        // randGen->SetSeed(_seed);
     }
 
     void NSGA2::SetCrowdObj(bool _crowd) {
@@ -216,7 +220,7 @@ namespace nsga2 {
                                    etaM,
                                    epsC,
                                    crowdObj,
-                                   randGen,
+                                   // randGen,
                                    initialRealVars);
 
         childPop = new Population(popSize,
@@ -232,7 +236,7 @@ namespace nsga2 {
                                   etaM,
                                   epsC,
                                   crowdObj,
-                                  randGen,
+                                  // randGen,
                                   initialRealVars);
 
         mixedPop = new Population(popSize * 2,
@@ -248,7 +252,7 @@ namespace nsga2 {
                                   etaM,
                                   epsC,
                                   crowdObj,
-                                  randGen,
+                                  // randGen,
                                   initialRealVars);
 
         parentPop->Initialize(randomInitialize);
@@ -336,7 +340,8 @@ namespace nsga2 {
             _os << "Probability of crossover of binary variable = " << binCrossProb;
             _os << "Probability of mutation of binary variable = " << binMutProb;
         }
-        _os << "\nSeed for random number generator = " << randGen->GetSeed() << std::endl;
+        _os << "\nSeed for random number generator = ";
+        //<<  // randGen->GetSeed() << std::endl;
     }
 
     void NSGA2::ReportPop(const Population& _pop, std::ostream& _os) const {
@@ -355,9 +360,9 @@ namespace nsga2 {
         }
 
         for (int i = 0; i < oldPopSize; i++) {
-            int randInt = randGen->Integer(i, oldPopSize - 1);
+            int randInt = 0;  // randGen->Integer(i, oldPopSize - 1);
             std::swap(indList1[randInt], indList1[i]);
-            randInt = randGen->Integer(i, oldPopSize - 1);
+            randInt = 0;  // randGen->Integer(i, oldPopSize - 1);
             std::swap(indList2[randInt], indList2[i]);
         }
 
@@ -382,7 +387,8 @@ namespace nsga2 {
             return _ind1;
         else if (_ind2.crowdDist > _ind1.crowdDist)
             return _ind2;
-        else if (randGen->Realu() <= 0.5)
+        else if (true)
+            // randGen->Realu() <= 0.5)
             return _ind1;
         else
             return _ind2;
@@ -409,7 +415,7 @@ namespace nsga2 {
         double c1, c2;
         double alpha, beta, betaQ;
 
-        if (randGen->Realu() <= realCrossProb) {
+        if (true) {  // randGen->Realu() <= realCrossProb) {
             realCrossCount++;
             for (int i = 0; i < realVars; i++) {
                 if (std::fabs(_parent1.reals[i] - _parent2.reals[i]) > EPS) {
@@ -425,7 +431,7 @@ namespace nsga2 {
                     yLower = realLimits[i].first;
                     yUpper = realLimits[i].second;
 
-                    double randDouble = randGen->Realu();
+                    double randDouble = 0;  // randGen->Realu();
                     beta              = 1.0 + (2.0 * (y1 - yLower) / (y2 - y1));
                     alpha             = 2.0 - std::pow(beta, -(etaC + 1.0));
                     if (randDouble <= (1.0 / alpha))
@@ -446,7 +452,7 @@ namespace nsga2 {
                     c1 = std::min(std::max(c1, yLower), yUpper);
                     c2 = std::min(std::max(c2, yLower), yUpper);
 
-                    if (randGen->Realu() <= 0.5) {
+                    if (true) {  // randGen->Realu() <= 0.5) {
                         _child1.reals[i] = c2;
                         _child2.reals[i] = c1;
                     }
@@ -475,11 +481,11 @@ namespace nsga2 {
                          Individual& _child2) {
         int temp, site1, site2;
         for (int i = 0; i < binVars; i++) {
-            double randDouble = randGen->Realu();
+            double randDouble = 0.0;  // randGen->Realu();
             if (randDouble <= binCrossProb) {
                 binCrossCount++;
-                site1 = randGen->Integer(0, binBits[i] - 1);
-                site2 = randGen->Integer(0, binBits[i] - 1);
+                // site1 = randGen->Integer(0, binBits[i] - 1);
+                // site2 = randGen->Integer(0, binBits[i] - 1);
                 if (site1 > site2) {
                     temp  = site1;
                     site1 = site2;

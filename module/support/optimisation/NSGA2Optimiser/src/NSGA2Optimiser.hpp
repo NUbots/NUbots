@@ -8,6 +8,8 @@
 
 #include "extension/Script.hpp"
 
+// TODO: fix random usage
+
 namespace module {
     namespace support {
         namespace optimisation {
@@ -21,7 +23,7 @@ namespace module {
                 void requestIndEvaluation(int _id, int _generation, const std::vector<double>& _reals);
 
                 nsga2::NSGA2 nsga2Algorithm;
-                nsga2::RandomGenerator randGen;
+                // nsga2::RandomGenerator randGen;
             };
 
         }  // namespace optimisation
