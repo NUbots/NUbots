@@ -76,12 +76,14 @@ namespace module::platform::darwin {
 
         // Accelerometer (in m/s^2)
         // Swizzle axes to that
-        //      x is forward, y is to the left, and z is up
+        //      x axis reports a +1g acceleration when robot is laying on its back
+        //      y axis reports a +1g acceleration when robot is laying on its right side
+        //      z axis reports a +1g acceleration when robot is vertical
         // The CM740 currently has
         //      x is backward, y is to the left, and z is up
         sensors.accelerometer.x = -Convert::accelerometer(data.cm740.accelerometer.x);
         sensors.accelerometer.y = Convert::accelerometer(data.cm740.accelerometer.y);
-        sensors.accelerometer.z = Convert::accelerometer(data.cm740.accelerometer.z);
+        sensors.accelerometer.z = -Convert::accelerometer(data.cm740.accelerometer.z);
 
         // Gyroscope (in radians/second)
         // Swizzle axes to that
