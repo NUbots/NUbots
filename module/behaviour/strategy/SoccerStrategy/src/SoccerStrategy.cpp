@@ -65,7 +65,6 @@ namespace module::behaviour::strategy {
     using message::motion::BodySide;
     using message::motion::ExecuteGetup;
     using message::motion::KillGetup;
-    using message::platform::ButtonLeftDown;
     using message::platform::ButtonMiddleDown;
     using message::support::FieldDescription;
     using VisionBalls = message::vision::Balls;
@@ -76,13 +75,7 @@ namespace module::behaviour::strategy {
     using utility::support::Expression;
 
     SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment))
-        , cfg_()
-        , walkTarget()
-        , lookTarget()
-        , kickType()
-        , ballSearchStartTime()
-        , goalLastMeasured() {
+        : Reactor(std::move(environment)) {
 
         on<Configuration>("SoccerStrategy.yaml").then([this](const Configuration& config) {
             using namespace std::chrono;
@@ -395,17 +388,17 @@ namespace module::behaviour::strategy {
                                              Eigen::Vector2d(fieldDescription.dimensions.field_length * 0.5, 0.0)))));
     }
 
-    bool SoccerStrategy::pickedUp(const Sensors& sensors) {
+    bool SoccerStrategy::pickedUp(const Sensors& sensors) const {
         bool feetOffGround = !sensors.feet[BodySide::LEFT].down && !sensors.feet[BodySide::RIGHT].down;
         return false && feetOffGround && !isGettingUp && sensors.Htw(2, 2) < 0.92 && sensors.Htw(2, 2) > 0.88;
     }
 
-    bool SoccerStrategy::penalised() {
+    bool SoccerStrategy::penalised() const {
         return selfPenalised;
     }
 
     bool SoccerStrategy::ballDistance(const Ball& ball) {
-        return ball.position.norm();
+        return ball.position.norm() != 0.0;
     }
 
     void SoccerStrategy::find(const std::vector<FieldTarget>& fieldObjects) {
@@ -414,7 +407,7 @@ namespace module::behaviour::strategy {
         soccerObjectPriority->ball = 0;
         soccerObjectPriority->goal = 0;
         soccerObjectPriority->line = 0;
-        for (auto& fieldObject : fieldObjects) {
+        for (const auto& fieldObject : fieldObjects) {
             switch (fieldObject.target.value) {
                 case FieldTarget::Target::SELF: {
                     soccerObjectPriority->goal        = 1;
@@ -443,16 +436,16 @@ namespace module::behaviour::strategy {
         // Defines the box within in which the kick target is changed from the centre
         // of the oppposition goal to the perpendicular distance from the robot to the goal
 
-        float maxKickRange =
+        const float maxKickRange =
             0.6;  // TODO: make configurable, only want to change at the last kick to avoid smart goalies
-        float xTakeOverBox = maxKickRange;
-        size_t error       = 0.05;
-        size_t buffer      = error + 2 * fieldDescription.ball_radius;             // 15cm
-        float yTakeOverBox = fieldDescription.dimensions.goal_width / 2 - buffer;  // 90-15 = 75cm
+        const float xTakeOverBox = maxKickRange;
+        const float error        = 0.05;
+        const float buffer       = error + 2.0f * fieldDescription.ball_radius;          // 15cm
+        const float yTakeOverBox = fieldDescription.dimensions.goal_width / 2 - buffer;  // 90-15 = 75cm
         Eigen::Affine2d position(field.position);
-        float xRobot = position.translation().x();
-        float yRobot = position.translation().y();
-        Eigen::Vector2d newTarget;
+        const float xRobot = position.translation().x();
+        const float yRobot = position.translation().y();
+        Eigen::Vector2d newTarget{};
 
         if ((fieldDescription.dimensions.field_length * 0.5) - xTakeOverBox < xRobot && -yTakeOverBox < yRobot
             && yRobot < yTakeOverBox) {
@@ -478,18 +471,19 @@ namespace module::behaviour::strategy {
         if (timeSinceBallSeen < cfg_.goalie_command_timeout) {
 
             Eigen::Affine2d position(field.position);
-            float fieldBearing  = Eigen::Rotation2Dd(position.rotation()).angle();
-            int signBearing     = fieldBearing > 0 ? 1 : -1;
-            float rotationSpeed = -signBearing
-                                  * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * fieldBearing),
-                                              cfg_.goalie_max_rotation_speed);
+            const float fieldBearing  = Eigen::Rotation2Dd(position.rotation()).angle();
+            const int signBearing     = fieldBearing > 0 ? 1 : -1;
+            const float rotationSpeed = -signBearing
+                                        * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * fieldBearing),
+                                                    cfg_.goalie_max_rotation_speed);
 
-            int signTranslation    = ball.position.y() > 0 ? 1 : -1;
-            float translationSpeed = signTranslation
-                                     * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.position[1]),
-                                                 cfg_.goalie_max_translation_speed);
+            const int signTranslation = ball.position.y() > 0 ? 1 : -1;
+            const float translationSpeed =
+                signTranslation
+                * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.position[1]),
+                            cfg_.goalie_max_translation_speed);
 
-            Eigen::Affine2d cmd;
+            Eigen::Affine2d cmd{};
             cmd.linear()      = Eigen::Rotation2Dd(rotationSpeed).matrix();
             cmd.translation() = Eigen::Vector2d::Zero();
             motionCommand     = std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(cmd));
