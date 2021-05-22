@@ -41,7 +41,7 @@
 
 // Include headers needed for TCP connection
 extern "C" {
-#include <netdb.h>      /* definition of gethostbyname */
+#include <netdb.h> /* definition of gethostbyname */
 #include <netinet/in.h> /* definition of struct sockaddr_in */
 #include <sys/socket.h>
 #include <sys/time.h>
@@ -563,17 +563,17 @@ namespace module::platform {
         if (sensor_measurements.accelerometers.size() > 0) {
             // .accelerometers is a list of one, since our robots have only one accelerometer
             const auto& accelerometer    = sensor_measurements.accelerometers[0];
-            sensor_data->accelerometer.x = static_cast<float>(accelerometer.value.X);
-            sensor_data->accelerometer.y = static_cast<float>(accelerometer.value.Y);
-            sensor_data->accelerometer.z = static_cast<float>(accelerometer.value.Z);
+            sensor_data->accelerometer.x = Convert::accelerometer(static_cast<float>(accelerometer.value.X));
+            sensor_data->accelerometer.y = Convert::accelerometer(static_cast<float>(accelerometer.value.Y));
+            sensor_data->accelerometer.z = Convert::accelerometer(static_cast<float>(accelerometer.value.Z));
         }
 
         if (sensor_measurements.gyros.size() > 0) {
             // .gyros is a list of one, since our robots have only one gyroscope
             const auto& gyro         = sensor_measurements.gyros[0];
-            sensor_data->gyroscope.x = static_cast<float>(gyro.value.X);
-            sensor_data->gyroscope.y = static_cast<float>(gyro.value.Y);
-            sensor_data->gyroscope.z = static_cast<float>(gyro.value.Z);
+            sensor_data->gyroscope.x = Convert::gyroscope(static_cast<float>(gyro.value.X));
+            sensor_data->gyroscope.y = Convert::gyroscope(static_cast<float>(gyro.value.Y));
+            sensor_data->gyroscope.z = Convert::gyroscope(static_cast<float>(gyro.value.Z));
         }
 
         // TODO Implement fsrs
