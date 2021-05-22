@@ -1,5 +1,5 @@
-#ifndef MODULE_MOTION_QUINTICWALK_H
-#define MODULE_MOTION_QUINTICWALK_H
+#ifndef MODULE_MOTION_QUINTICWALK_HPP
+#define MODULE_MOTION_QUINTICWALK_HPP
 
 #include <map>
 #include <memory>
@@ -37,12 +37,12 @@ namespace module::motion {
             const std::vector<std::pair<utility::input::ServoID, float>>& joints);
 
         struct {
-            Eigen::Vector3f max_step;
-            float max_step_xy;
+            Eigen::Vector3f max_step = Eigen::Vector3f::Zero();
+            float max_step_xy        = 0.0f;
 
-            bool imu_active;
-            float imu_pitch_threshold;
-            float imu_roll_threshold;
+            bool imu_active           = false;
+            float imu_pitch_threshold = 0.0f;
+            float imu_roll_threshold  = 0.0f;
         } config;
 
         Eigen::Vector3f current_orders;
@@ -53,7 +53,7 @@ namespace module::motion {
         NUClear::clock::time_point last_update_time;
 
         QuinticWalkEngine walk_engine;
-        WalkingParameter params;
+        WalkingParameter params{};
 
         message::motion::KinematicsModel kinematicsModel;
 
@@ -66,4 +66,4 @@ namespace module::motion {
     };
 }  // namespace module::motion
 
-#endif
+#endif  // MODULE_MOTION_QUINTICWALK_HPP

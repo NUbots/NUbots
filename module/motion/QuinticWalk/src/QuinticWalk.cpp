@@ -26,7 +26,6 @@ namespace module::motion {
     using message::motion::ExecuteGetup;
     using message::motion::KillGetup;
     using message::motion::KinematicsModel;
-    using message::motion::ServoTarget;
     using message::motion::StopCommand;
     using message::motion::WalkCommand;
     using utility::support::Expression;
@@ -268,7 +267,7 @@ namespace module::motion {
         NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
 
 
-        for (auto& joint : joints) {
+        for (const auto& joint : joints) {
             waypoints->push_back({subsumptionId, time, joint.first, joint.second, jointGains[joint.first], 100});
         }
 
