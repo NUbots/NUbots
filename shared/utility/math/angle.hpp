@@ -98,7 +98,8 @@ namespace utility::math::angle {
         angleSrc = normalizeAngle(angleSrc);
         angleDst = normalizeAngle(angleDst);
 
-        Scalar max, min;
+        Scalar max;
+        Scalar min;
         if (angleSrc > angleDst) {
             max = angleSrc;
             min = angleDst;
@@ -108,25 +109,19 @@ namespace utility::math::angle {
             min = angleSrc;
         }
 
-        Scalar dist1 = max - min;
-        Scalar dist2 = (2 * M_PI) - max + min;
+        const Scalar dist1 = max - min;
+        const Scalar dist2 = (2.0 * M_PI) - max + min;
 
         if (dist1 < dist2) {
             if (angleSrc > angleDst) {
                 return -dist1;
             }
-            else {
-                return dist1;
-            }
+            return dist1;
         }
-        else {
-            if (angleSrc > angleDst) {
-                return dist2;
-            }
-            else {
-                return -dist2;
-            }
+        if (angleSrc > angleDst) {
+            return dist2;
         }
+        return -dist2;
     }
 
     inline double vectorToBearing(const Eigen::Vector2d& dirVec) {
