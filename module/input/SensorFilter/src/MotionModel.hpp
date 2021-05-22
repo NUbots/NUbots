@@ -131,7 +131,7 @@ namespace module::input {
             }
         };
 
-        static constexpr size_t size = StateVec::getSize();
+        static constexpr int size = StateVec::getSize();
 
         using StateMat = Eigen::Matrix<Scalar, size, size>;
 

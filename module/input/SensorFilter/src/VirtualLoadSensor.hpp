@@ -125,12 +125,12 @@ namespace module::input {
             current_noise *= 1.0f - k;
             current_noise += 1.0f;
 
-            for (ssize_t leg = 0; leg < 2; leg++) {
+            for (size_t leg = 0; leg < 2; leg++) {
                 // We have some certainty in our measurement
-                if (state[leg] > certainty_threshold) {
+                if (state[ssize_t(leg)] > certainty_threshold) {
                     output_state[leg] = true;
                 }
-                if (state[leg] < uncertainty_threshold) {
+                if (state[ssize_t(leg)] < uncertainty_threshold) {
                     output_state[leg] = false;
                 }
             }

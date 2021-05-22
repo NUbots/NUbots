@@ -46,7 +46,7 @@ namespace utility::math::filter {
         // Dimension types for vectors and square matricies
         using ParticleList = Eigen::Matrix<Scalar, Model::size, Eigen::Dynamic>;
 
-        ParticleList sample_particles(const StateVec& mean, const StateMat& covariance, const int& n_particles) {
+        ParticleList sample_particles(const StateVec& mean, const StateMat& covariance, const ssize_t& n_particles) {
             // Sample single gaussian (represented by a gaussian mixture model of size 1)
 
             // Implementation based on the work presented in
@@ -67,7 +67,7 @@ namespace utility::math::filter {
             return new_particles;
         }
 
-        ParticleList sample_particles(const StateVec& mean, const StateVec& covariance, const int& n_particles) {
+        ParticleList sample_particles(const StateVec& mean, const StateVec& covariance, const ssize_t& n_particles) {
             // Sample single gaussian (represented by a gaussian mixture model of size 1)
 
             // Implementation based on the work presented in
@@ -89,16 +89,16 @@ namespace utility::math::filter {
         }
 
     public:
-        ParticleFilter(const StateVec& initial_mean      = StateVec::Zero(),
-                       const StateMat& initialCovariance = StateMat::Identity() * 0.1,
-                       const int& number_of_particles    = 100)
+        ParticleFilter(const StateVec& initial_mean       = StateVec::Zero(),
+                       const StateMat& initialCovariance  = StateMat::Identity() * 0.1,
+                       const ssize_t& number_of_particles = 100)
             : rng(), norm() {
             set_state(initial_mean, initialCovariance, number_of_particles);
         }
 
         void set_state(const StateVec& initial_mean,
                        const StateMat& initialCovariance,
-                       const int& number_of_particles = 100) {
+                       const ssize_t& number_of_particles = 100) {
             particles = sample_particles(initial_mean, initialCovariance, number_of_particles);
 
             // Limit the state of each particle to ensure they are still valid

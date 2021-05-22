@@ -56,8 +56,8 @@ namespace utility::support {
         operator T() const {
 
             // value : [[a, b], [c, d]]
-            const size_t rows = node.size();
-            const size_t cols = node[0].size();
+            const ssize_t rows = ssize_t(node.size());
+            const ssize_t cols = ssize_t(node[0].size());
 
             // Count the columns on every row.
             for (const auto& row : node) {
@@ -81,8 +81,8 @@ namespace utility::support {
             T matrix;
 
             try {
-                for (ssize_t row = 0; row < ssize_t(rows); row++) {
-                    for (ssize_t col = 0; col < ssize_t(cols); col++) {
+                for (ssize_t row = 0; row < rows; row++) {
+                    for (ssize_t col = 0; col < cols; col++) {
                         matrix(row, col) = parse_math_string<typename T::Scalar>(node[row][col].as<std::string>());
                     }
                 }
@@ -130,8 +130,8 @@ namespace utility::support {
         operator T() const {
 
             // value : [a, b, c, d]
-            const size_t rows = node.size();
-            const size_t cols = node[0].size();
+            const ssize_t rows = ssize_t(node.size());
+            const ssize_t cols = ssize_t(node[0].size());
 
             // Validate row size.
             if (rows != T::ColsAtCompileTime) {
@@ -154,8 +154,8 @@ namespace utility::support {
             T matrix;
 
             try {
-                for (size_t row = 0; row < rows; row++) {
-                    for (size_t col = 0; col < cols; col++) {
+                for (ssize_t row = 0; row < rows; row++) {
+                    for (ssize_t col = 0; col < cols; col++) {
                         matrix(col, row) = parse_math_string<typename T::Scalar>(node[row][col].as<std::string>());
                     }
                 }
@@ -174,8 +174,8 @@ namespace utility::support {
         operator T() const {
 
             // value : [[a, b], [c, d]]
-            const size_t rows = node.size();
-            const size_t cols = node[0].size();
+            const ssize_t rows = ssize_t(node.size());
+            const ssize_t cols = ssize_t(node[0].size());
 
             // Check to see if the input is formatted as a matrix.
             // Count the columns on every row.
@@ -189,8 +189,8 @@ namespace utility::support {
             T matrix(rows, cols);
 
             try {
-                for (size_t row = 0; row < rows; row++) {
-                    for (size_t col = 0; col < cols; col++) {
+                for (ssize_t row = 0; row < rows; row++) {
+                    for (ssize_t col = 0; col < cols; col++) {
                         matrix(row, col) = parse_math_string<typename T::Scalar>(node[row][col].as<std::string>());
                     }
                 }
@@ -209,8 +209,8 @@ namespace utility::support {
         operator T() const {
 
             // value : [[a, b], [c, d]]
-            const size_t rows = node.size();
-            const size_t cols = node[0].size();
+            const ssize_t rows = ssize_t(node.size());
+            const ssize_t cols = ssize_t(node[0].size());
 
             // Check to see if the input is formatted as a matrix.
             // Count the columns on every row.
@@ -221,10 +221,10 @@ namespace utility::support {
                 }
             }
 
-            T matrix(rows, std::max(cols, size_t(1)));
+            T matrix(rows, std::max(cols, ssize_t(1)));
 
             try {
-                for (ssize_t i = 0; i < ssize_t(rows); i++) {
+                for (ssize_t i = 0; i < rows; i++) {
                     matrix(i) = parse_math_string<typename T::Scalar>(node[i].as<std::string>());
                 }
             }
@@ -242,8 +242,8 @@ namespace utility::support {
         operator T() const {
 
             // value : [[a, b], [c, d]]
-            const size_t rows = node.size();
-            const size_t cols = node[0].size();
+            const ssize_t rows = ssize_t(node.size());
+            const ssize_t cols = ssize_t(node[0].size());
 
             // Check to see if the input is formatted as a matrix.
             // Count the columns on every row.
@@ -257,7 +257,7 @@ namespace utility::support {
             T matrix(cols, rows);
 
             try {
-                for (size_t i = 0; i < rows; i++) {
+                for (ssize_t i = 0; i < rows; i++) {
                     matrix(i) = parse_math_string<typename T::Scalar>(node[i][0].as<std::string>());
                 }
             }

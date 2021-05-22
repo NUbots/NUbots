@@ -186,9 +186,9 @@ namespace module::input {
             motionFilter.set_state(mean.getStateVec(), covariance.asDiagonal());
         });
 
-        on<Configuration>("FootDownNetwork.yaml").then([this](const Configuration& config) {
+        on<Configuration>("FootDownNetwork.yaml").then([this](const Configuration& config_file) {
             // Foot load sensor config
-            load_sensor = VirtualLoadSensor<float>(config);
+            load_sensor = VirtualLoadSensor<float>(config_file);
         });
 
         on<Last<20, Trigger<RawSensors>>, Single>().then(
@@ -505,7 +505,7 @@ namespace module::input {
 
                 // Calculate our time offset from the last read
                 double deltaT = std::max(
-                    (input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp)).count()
+                    double((input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp)).count())
                         / double(NUClear::clock::period::den),
                     0.0);
 

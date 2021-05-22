@@ -38,7 +38,7 @@ namespace module::behaviour::skills {
 
     private:
         std::vector<T> points;
-        int current;
+        size_t current;
         T refPoint;
 
         bool new_goal;
@@ -104,7 +104,7 @@ namespace module::behaviour::skills {
             // TODO: recode this garbage
             auto now = NUClear::clock::now();
             if (!new_goal
-                && std::chrono::duration_cast<std::chrono::milliseconds>(now - lastSwitchTime).count()
+                && float(std::chrono::duration_cast<std::chrono::milliseconds>(now - lastSwitchTime).count())
                        > switch_period) {
                 new_goal = true;
                 if (forward) {
