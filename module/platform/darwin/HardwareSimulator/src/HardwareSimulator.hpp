@@ -43,9 +43,9 @@ namespace module::platform::darwin {
 
         float imu_drift_rate                     = 0;
         static constexpr size_t UPDATE_FREQUENCY = 90;
-        void addNoise(std::unique_ptr<message::platform::RawSensors>& sensors);
+        void addNoise(std::unique_ptr<message::platform::RawSensors>& sensors) const;
         struct NoiseConfig {
-            NoiseConfig() : accelerometer(), gyroscope() {}
+            NoiseConfig() = default;
             struct Vec3Noise {
                 float x = 0.001;
                 float y = 0.001;
