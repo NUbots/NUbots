@@ -48,19 +48,13 @@ namespace module::behaviour::skills {
     using utility::input::ServoID;
 
     FallingRelax::FallingRelax(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment))
-        , id(size_t(this) * size_t(this) - size_t(this))
-        , falling(false)
-        , FALLING_ANGLE(0.0f)
-        , FALLING_ACCELERATION(0.0f)
-        , RECOVERY_ACCELERATION()
-        , PRIORITY(0.0f) {
+        : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
 
         // do a little configurating
         on<Configuration>("FallingRelax.yaml").then([this](const Configuration& config) {
             // Store falling angle as a cosine so we can compare it directly to the z axis value
-            double fallingAngle = config["FALLING_ANGLE"].as<double>();
-            FALLING_ANGLE       = cos(fallingAngle);
+            const float fallingAngle = config["FALLING_ANGLE"].as<float>();
+            FALLING_ANGLE            = std::cos(fallingAngle);
 
             // When falling the acceleration should drop below this value
             FALLING_ACCELERATION = config["FALLING_ACCELERATION"].as<float>();
@@ -119,9 +113,9 @@ namespace module::behaviour::skills {
             {std::pair<float, std::set<LimbID>>(
                 0,
                 {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
-            [this](const std::set<LimbID>&) { emit(std::make_unique<Falling>()); },
-            [this](const std::set<LimbID>&) { emit(std::make_unique<KillFalling>()); },
-            [this](const std::set<ServoID>&) {
+            [this](const std::set<LimbID>& /*unused*/) { emit(std::make_unique<Falling>()); },
+            [this](const std::set<LimbID>& /*unused*/) { emit(std::make_unique<KillFalling>()); },
+            [](const std::set<ServoID>& /*unused*/) {
                 // Ignore
             }}));
     }

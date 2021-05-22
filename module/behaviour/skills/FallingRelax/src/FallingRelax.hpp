@@ -33,13 +33,13 @@ namespace module::behaviour::skills {
     private:
         const size_t id;
 
-        bool falling;
+        bool falling = false;
 
         /// config settings
-        float FALLING_ANGLE;
-        float FALLING_ACCELERATION;
-        std::vector<float> RECOVERY_ACCELERATION;
-        float PRIORITY;
+        float FALLING_ANGLE        = 0.0f;
+        float FALLING_ACCELERATION = 0.0f;
+        float PRIORITY             = 0.0f;
+        std::vector<float> RECOVERY_ACCELERATION{};
 
         void updatePriority(const float& priority);
 
