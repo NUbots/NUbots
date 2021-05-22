@@ -30,7 +30,7 @@ namespace module::behaviour::planning {
         explicit KickPlanner(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        bool kickValid(const Eigen::Vector3d& ballPos);
+        [[nodiscard]] bool kickValid(const Eigen::Vector3d& ballPos) const;
         bool forcePlaying = false;
         message::motion::KickPlannerConfig cfg;
         NUClear::clock::time_point ballLastSeen;
