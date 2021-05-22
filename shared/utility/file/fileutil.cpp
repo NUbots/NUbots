@@ -114,7 +114,7 @@ namespace utility::file {
             closedir(dir);
         }
         else {
-            // TODO Throw an error or something
+            throw std::runtime_error("Attempted to list directory which didn't exist.\n");
         }
 
         return result;
@@ -137,9 +137,8 @@ namespace utility::file {
             // Otherwise remove the slash and call recursivly
             return pathSplit(input.substr(0, input.size() - 1));
         }
-        else {
-            return {input.substr(0, lastSlash), input.substr(lastSlash + 1, input.size())};
-        }
+        // Else, the slash was not the last character
+        return {input.substr(0, lastSlash), input.substr(lastSlash + 1, input.size())};
     }
 
     std::vector<std::string> listFiles(const std::string& directory, bool recursive) {
@@ -158,7 +157,7 @@ namespace utility::file {
             // loop through every file within the directory
             for (auto&& file : listDir(directory)) {
                 // specify the correct path within the directory
-                auto path = directory + "/" + file;
+                auto path = directory.append("/").append(file);
                 // check if the given path is a directory
                 if (isDir(path)) {
                     // check if the function is recursive
