@@ -47,12 +47,19 @@ namespace module::behaviour::skills {
     using utility::behaviour::ActionPriorities;
     using utility::behaviour::RegisterAction;
 
+    int getDirectionalQuadrant(const float x, const float y) {
+
+        // These represent 4 directions of looking, see https://www.desmos.com/calculator/mm8cnsnpdt for a graph
+        // of the 4 quadrants Note that x is forward in relation to the robot so the forward quadrant is x >=
+        // |y|
+        return x >= std::abs(y)    ? 0   // forward
+               : y >= std::abs(x)  ? 1   // left
+               : x <= -std::abs(y) ? 2   // backward
+                                   : 3;  // right
+    }
+
     KickScript::KickScript(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment))
-        , id(size_t(this) * size_t(this) - size_t(this))
-        , KICK_PRIORITY(0.0f)
-        , EXECUTION_PRIORITY(0.0f)
-        , kickCommand() {
+        : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
 
         // do a little configurating
         on<Configuration>("KickScript.yaml").then([this](const Configuration& config) {
@@ -138,7 +145,7 @@ namespace module::behaviour::skills {
         });
 
         on<Trigger<FinishKick>>().then([this] {
-            emit(std::move(std::make_unique<KickFinished>()));
+            emit(std::make_unique<KickFinished>());
             updatePriority(0);
         });
 
@@ -148,23 +155,13 @@ namespace module::behaviour::skills {
                            {std::pair<float, std::set<LimbID>>(
                                0,
                                {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
-                           [this](const std::set<LimbID>&) { emit(std::make_unique<ExecuteKick>()); },
-                           [this](const std::set<LimbID>&) { emit(std::make_unique<FinishKick>()); },
-                           [this](const std::set<ServoID>&) { emit(std::make_unique<FinishKick>()); }}));
+                           [this](const std::set<LimbID>& /*unused*/) { emit(std::make_unique<ExecuteKick>()); },
+                           [this](const std::set<LimbID>& /*unused*/) { emit(std::make_unique<FinishKick>()); },
+                           [this](const std::set<ServoID>& /*unused*/) { emit(std::make_unique<FinishKick>()); }}));
     }
 
     void KickScript::updatePriority(const float& priority) {
         emit(std::make_unique<ActionPriorities>(ActionPriorities{id, {priority}}));
     }
 
-    int KickScript::getDirectionalQuadrant(float x, float y) {
-
-        // These represent 4 directions of looking, see https://www.desmos.com/calculator/mm8cnsnpdt for a graph
-        // of the 4 quadrants Note that x is forward in relation to the robot so the forward quadrant is x >=
-        // |y|
-        return x >= std::abs(y)    ? 0   // forward
-               : y >= std::abs(x)  ? 1   // left
-               : x <= -std::abs(y) ? 2   // backward
-                                   : 3;  // right
-    }
 }  // namespace module::behaviour::skills

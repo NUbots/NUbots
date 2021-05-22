@@ -34,13 +34,12 @@ namespace module::behaviour::skills {
     private:
         const size_t id;
 
-        float KICK_PRIORITY;
-        float EXECUTION_PRIORITY;
+        float KICK_PRIORITY      = 0.0f;
+        float EXECUTION_PRIORITY = 0.0f;
 
         message::motion::KickScriptCommand kickCommand;
 
         void updatePriority(const float& priority);
-        int getDirectionalQuadrant(float x, float y);
     };
 }  // namespace module::behaviour::skills
 
