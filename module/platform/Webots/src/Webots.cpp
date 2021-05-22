@@ -378,7 +378,7 @@ namespace module::platform {
             // ************************** Receiving ***************************************
             // Get the size of the message
             uint32_t Nn;
-            if (recv(fd, &Nn, sizeof(Nn), MSG_WAITALL) != sizeof(Nn)) {
+            if (recv(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
                 log<NUClear::ERROR>("Failed to read message size from TCP connection");
                 return;
             }
