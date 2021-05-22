@@ -25,6 +25,7 @@ namespace module::behaviour {
 
     using message::behaviour::ServoCommand;
     using message::motion::ServoTarget;
+    using message::motion::ServoTargets;
 
     using utility::behaviour::ActionKill;
     using utility::behaviour::ActionPriorities;
@@ -181,7 +182,7 @@ namespace module::behaviour {
             [this] {
                 auto now = NUClear::clock::now();
                 std::list<ServoID> emptiedQueues;
-                std::unique_ptr<std::vector<ServoTarget>> waypoints;
+                std::unique_ptr<ServoTargets> waypoints;
 
                 for (auto& queue : commandQueues) {
 
@@ -193,11 +194,11 @@ namespace module::behaviour {
 
                         // Lazy initialize
                         if (!waypoints) {
-                            waypoints = std::make_unique<std::vector<ServoTarget>>();
+                            waypoints = std::make_unique<ServoTargets>();
                         }
 
                         // Add to our waypoints
-                        waypoints->push_back(
+                        waypoints->targets.push_back(
                             {command.time, command.id, command.position, command.gain, command.torque});
 
                         // Dirty hack the waypoint
