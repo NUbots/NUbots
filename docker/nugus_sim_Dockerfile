@@ -19,7 +19,7 @@ COPY /etc/xdg/pip/pip.conf /etc/xdg/pip/pip.conf
 
 # Install python libraries
 RUN pip install \
-    pyyaml
+    ruamel.yaml
 
 # Copy our code in yo
 COPY ./nugus_sim/binaries/ ./binaries

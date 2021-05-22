@@ -5,7 +5,10 @@ import subprocess
 import sys
 from typing import Tuple
 
+import ruamel.yaml
+
 BINARIES_DIR = "/home/nubots/NUbots/binaries"
+CONFIG_DIR = BINARIES_DIR + "/config"
 
 ENV_VARS = {
     "ROBOCUP_ROBOT_ID": "ROBOCUP_ROBOT_ID",
@@ -49,20 +52,40 @@ def read_args() -> Tuple[str, dict]:
 
 
 def set_env_vars(config: dict) -> None:
-    # print(config)
-    # Set args in appropriate config files
+    yaml = ruamel.yaml.YAML()
+    os.chdir(CONFIG_DIR)
 
     # ROBOCUP_ROBOT_ID
-    # module/input/gamecontroller/data/config/gamecontroller.yaml
+    file_name = "GlobalConfig.yaml"
+    with open(file_name) as file:
+        data = yaml.load(file)
+    data["player_id"] = int(config["ROBOCUP_ROBOT_ID"])
+
+    with open(file_name, "w") as file:
+        yaml.dump(data, file)
+
+    file_name = "GameController.yaml"
+    with open(file_name) as file:
+        data = yaml.load(file)
+    data["player_id"] = int(config["ROBOCUP_ROBOT_ID"])
+
+    with open(file_name, "w") as file:
+        yaml.dump(data, file)
 
     # ROBOCUP_TEAM_COLOR
     # ??
 
     # ROBOCUP_SIMULATOR_ADDR
-    # module/platform/Webots/data/config/webots.yaml
-    addr, port = config["ROBOCUP_SIMULATOR_ADDR"].split(":", 2)
+    file_name = "webots.yaml"
+    webots_addr, webots_port = config["ROBOCUP_SIMULATOR_ADDR"].split(":", 2)
 
-    pass
+    with open(file_name) as file:
+        data = yaml.load(file)
+    data["server_address"] = str(webots_addr)
+    data["port"] = int(webots_port)
+
+    with open(file_name, "w") as file:
+        yaml.dump(data, file)
 
 
 def run_role(inRole: str) -> None:
