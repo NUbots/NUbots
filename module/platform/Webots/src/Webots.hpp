@@ -55,7 +55,7 @@ namespace module::platform {
         void translate_and_emit_sensor(const message::platform::webots::SensorMeasurements& sensor_measurements);
 
         /// @brief The current file descriptor used for the connection. It should be kept -1 if no active connection
-        int fd;
+        int fd = -1;
 
         /// @brief The time the connection was opened.
         NUClear::clock::time_point connect_time;
