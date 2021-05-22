@@ -49,7 +49,6 @@ namespace module::behaviour::skills {
         : Reactor(std::move(environment))
         , id(size_t(this) * size_t(this) - size_t(this))
         , gettingUp(false)
-        , fallenCheck()
         , FALLEN_ANGLE(0.0f)
         , GETUP_PRIORITY(0.0f)
         , EXECUTION_PRIORITY(0.0f) {
@@ -57,8 +56,8 @@ namespace module::behaviour::skills {
         // do a little configurating
         on<Configuration>("Getup.yaml").then([this](const Configuration& file) {
             // encode fallen angle as a cosine so we can compare it directly to the z axis value
-            double fallenAngleConfig = file["FALLEN_ANGLE"].as<double>();
-            FALLEN_ANGLE             = cos(fallenAngleConfig);
+            const float fallenAngleConfig = file["FALLEN_ANGLE"].as<float>();
+            FALLEN_ANGLE                  = std::cos(fallenAngleConfig);
 
             // load priorities for the getup
             GETUP_PRIORITY     = file["GETUP_PRIORITY"].as<float>();
@@ -102,11 +101,11 @@ namespace module::behaviour::skills {
             {std::pair<float, std::set<LimbID>>(
                 0,
                 {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
-            [this](const std::set<LimbID>&) { emit(std::make_unique<ExecuteGetup>()); },
-            [this](const std::set<LimbID>&) { emit(std::make_unique<KillGetup>()); },
+            [this](const std::set<LimbID>& /*unused*/) { emit(std::make_unique<ExecuteGetup>()); },
+            [this](const std::set<LimbID>& /*unused*/) { emit(std::make_unique<KillGetup>()); },
             [this](const std::set<ServoID>& servoSet) {
                 // HACK 2014 Jake Fountain, Trent Houliston
-                // TODO track set limbs and wait for all to finish
+                // TODO(unknown): track set limbs and wait for all to finish
                 log("Checking ankles: ",
                     servoSet.find(ServoID::L_ANKLE_PITCH) != servoSet.end(),
                     servoSet.find(ServoID::R_ANKLE_PITCH) != servoSet.end());
