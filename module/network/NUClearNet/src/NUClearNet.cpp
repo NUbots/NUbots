@@ -37,7 +37,7 @@ namespace module::network {
             char c[255];
             std::memset(c, 0, sizeof(c));
             std::string addr;
-            int port;
+            int port = 0;
 
             switch (event.address.sock.sa_family) {
                 case AF_INET:
@@ -58,7 +58,7 @@ namespace module::network {
             char c[255];
             std::memset(c, 0, sizeof(c));
             std::string addr;
-            int port;
+            int port = 0;
 
             switch (event.address.sock.sa_family) {
                 case AF_INET:
