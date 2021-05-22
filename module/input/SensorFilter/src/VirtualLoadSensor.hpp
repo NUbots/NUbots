@@ -92,14 +92,14 @@ namespace module::input {
                 }
             }
             if (accelerometer) {
-                logits[index++] = sensors.accelerometer.x();
-                logits[index++] = sensors.accelerometer.y();
-                logits[index++] = sensors.accelerometer.z();
+                logits[index++] = float(sensors.accelerometer.x());
+                logits[index++] = float(sensors.accelerometer.y());
+                logits[index++] = float(sensors.accelerometer.z());
             }
             if (gyroscope) {
-                logits[index++] = sensors.gyroscope.x();
-                logits[index++] = sensors.gyroscope.y();
-                logits[index++] = sensors.gyroscope.z();
+                logits[index++] = float(sensors.gyroscope.x());
+                logits[index++] = float(sensors.gyroscope.y());
+                logits[index++] = float(sensors.gyroscope.z());
             }
 
             // Run the neural network
@@ -114,8 +114,8 @@ namespace module::input {
                 }
                 // Sigmoid final layer
                 else {
-                    logits =
-                        logits.unaryExpr([](const Scalar& value) { return Scalar(1.0 / (1.0 + std::exp(-value))); });
+                    logits = logits.unaryExpr(
+                        [](const Scalar& value) { return Scalar(1.0 / (1.0 + std::exp(double(-value)))); });
                 }
             }
 
@@ -125,7 +125,7 @@ namespace module::input {
             current_noise *= 1.0f - k;
             current_noise += 1.0f;
 
-            for (size_t leg = 0; leg < 2; leg++) {
+            for (ssize_t leg = 0; leg < 2; leg++) {
                 // We have some certainty in our measurement
                 if (state[leg] > certainty_threshold) {
                     output_state[leg] = true;

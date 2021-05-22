@@ -90,98 +90,99 @@ namespace module::input {
     SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), theta(Eigen::Vector3d::Zero()) {
 
-        on<Configuration>("SensorFilter.yaml").then([this](const Configuration& config) {
-            this->config.debug = config["debug"].as<bool>();
+        on<Configuration>("SensorFilter.yaml").then([this](const Configuration& config_file) {
+            config.debug = config_file["debug"].as<bool>();
             // Button config
-            this->config.buttons.debounceThreshold = config["buttons"]["debounce_threshold"].as<int>();
+            config.buttons.debounceThreshold = config_file["buttons"]["debounce_threshold"].as<int>();
 
             // Foot down config
-            this->config.footDown.fromLoad           = config["foot_down"]["from_load"].as<bool>();
-            this->config.footDown.certaintyThreshold = config["foot_down"]["certainty_threshold"].as<float>();
+            config.footDown.fromLoad           = config_file["foot_down"]["from_load"].as<bool>();
+            config.footDown.certaintyThreshold = config_file["foot_down"]["certainty_threshold"].as<float>();
 
             // Motion filter config
             // Update our velocity timestep dekay
-            this->config.motionFilter.velocityDecay =
-                config["motion_filter"]["update"]["velocity_decay"].as<Expression>();
-            motionFilter.model.timeUpdateVelocityDecay = this->config.motionFilter.velocityDecay;
+            config.motionFilter.velocityDecay =
+                config_file["motion_filter"]["update"]["velocity_decay"].as<Expression>();
+            motionFilter.model.timeUpdateVelocityDecay = config.motionFilter.velocityDecay;
 
             // Update our measurement noises
-            this->config.motionFilter.noise.measurement.accelerometer =
-                Eigen::Vector3d(config["motion_filter"]["noise"]["measurement"]["accelerometer"].as<Expression>())
+            config.motionFilter.noise.measurement.accelerometer =
+                Eigen::Vector3d(config_file["motion_filter"]["noise"]["measurement"]["accelerometer"].as<Expression>())
                     .asDiagonal();
-            this->config.motionFilter.noise.measurement.accelerometerMagnitude =
+            config.motionFilter.noise.measurement.accelerometerMagnitude =
                 Eigen::Vector3d(
-                    config["motion_filter"]["noise"]["measurement"]["accelerometer_magnitude"].as<Expression>())
+                    config_file["motion_filter"]["noise"]["measurement"]["accelerometer_magnitude"].as<Expression>())
                     .asDiagonal();
-            this->config.motionFilter.noise.measurement.gyroscope =
-                Eigen::Vector3d(config["motion_filter"]["noise"]["measurement"]["gyroscope"].as<Expression>())
+            config.motionFilter.noise.measurement.gyroscope =
+                Eigen::Vector3d(config_file["motion_filter"]["noise"]["measurement"]["gyroscope"].as<Expression>())
                     .asDiagonal();
-            this->config.motionFilter.noise.measurement.flatFootOdometry =
-                Eigen::Vector3d(config["motion_filter"]["noise"]["measurement"]["flat_foot_odometry"].as<Expression>())
+            config.motionFilter.noise.measurement.flatFootOdometry =
+                Eigen::Vector3d(
+                    config_file["motion_filter"]["noise"]["measurement"]["flat_foot_odometry"].as<Expression>())
                     .asDiagonal();
-            this->config.motionFilter.noise.measurement.flatFootOrientation =
+            config.motionFilter.noise.measurement.flatFootOrientation =
                 Eigen::Vector4d(
-                    config["motion_filter"]["noise"]["measurement"]["flat_foot_orientation"].as<Expression>())
+                    config_file["motion_filter"]["noise"]["measurement"]["flat_foot_orientation"].as<Expression>())
                     .asDiagonal();
 
             // Update our process noises
-            this->config.motionFilter.noise.process.position =
-                config["motion_filter"]["noise"]["process"]["position"].as<Expression>();
-            this->config.motionFilter.noise.process.velocity =
-                config["motion_filter"]["noise"]["process"]["velocity"].as<Expression>();
-            this->config.motionFilter.noise.process.rotation =
-                config["motion_filter"]["noise"]["process"]["rotation"].as<Expression>();
-            this->config.motionFilter.noise.process.rotationalVelocity =
-                config["motion_filter"]["noise"]["process"]["rotational_velocity"].as<Expression>();
-            this->config.motionFilter.noise.process.gyroscopeBias =
-                config["motion_filter"]["noise"]["process"]["gyroscope_bias"].as<Expression>();
+            config.motionFilter.noise.process.position =
+                config_file["motion_filter"]["noise"]["process"]["position"].as<Expression>();
+            config.motionFilter.noise.process.velocity =
+                config_file["motion_filter"]["noise"]["process"]["velocity"].as<Expression>();
+            config.motionFilter.noise.process.rotation =
+                config_file["motion_filter"]["noise"]["process"]["rotation"].as<Expression>();
+            config.motionFilter.noise.process.rotationalVelocity =
+                config_file["motion_filter"]["noise"]["process"]["rotational_velocity"].as<Expression>();
+            config.motionFilter.noise.process.gyroscopeBias =
+                config_file["motion_filter"]["noise"]["process"]["gyroscope_bias"].as<Expression>();
 
             // Set our process noise in our filter
             MotionModel<double>::StateVec process_noise;
-            process_noise.rTWw               = this->config.motionFilter.noise.process.position;
-            process_noise.vTw                = this->config.motionFilter.noise.process.velocity;
-            process_noise.Rwt                = this->config.motionFilter.noise.process.rotation;
-            process_noise.omegaTTt           = this->config.motionFilter.noise.process.rotationalVelocity;
-            process_noise.omegaTTt_bias      = this->config.motionFilter.noise.process.gyroscopeBias;
+            process_noise.rTWw               = config.motionFilter.noise.process.position;
+            process_noise.vTw                = config.motionFilter.noise.process.velocity;
+            process_noise.Rwt                = config.motionFilter.noise.process.rotation;
+            process_noise.omegaTTt           = config.motionFilter.noise.process.rotationalVelocity;
+            process_noise.omegaTTt_bias      = config.motionFilter.noise.process.gyroscopeBias;
             motionFilter.model.process_noise = process_noise;
 
             // Update our mean configs and if it changed, reset the filter
-            this->config.motionFilter.initial.mean.position =
-                config["motion_filter"]["initial"]["mean"]["position"].as<Expression>();
-            this->config.motionFilter.initial.mean.velocity =
-                config["motion_filter"]["initial"]["mean"]["velocity"].as<Expression>();
-            this->config.motionFilter.initial.mean.rotation =
-                config["motion_filter"]["initial"]["mean"]["rotation"].as<Expression>();
-            this->config.motionFilter.initial.mean.rotationalVelocity =
-                config["motion_filter"]["initial"]["mean"]["rotational_velocity"].as<Expression>();
-            this->config.motionFilter.initial.mean.gyroscopeBias =
-                config["motion_filter"]["initial"]["mean"]["gyroscope_bias"].as<Expression>();
+            config.motionFilter.initial.mean.position =
+                config_file["motion_filter"]["initial"]["mean"]["position"].as<Expression>();
+            config.motionFilter.initial.mean.velocity =
+                config_file["motion_filter"]["initial"]["mean"]["velocity"].as<Expression>();
+            config.motionFilter.initial.mean.rotation =
+                config_file["motion_filter"]["initial"]["mean"]["rotation"].as<Expression>();
+            config.motionFilter.initial.mean.rotationalVelocity =
+                config_file["motion_filter"]["initial"]["mean"]["rotational_velocity"].as<Expression>();
+            config.motionFilter.initial.mean.gyroscopeBias =
+                config_file["motion_filter"]["initial"]["mean"]["gyroscope_bias"].as<Expression>();
 
-            this->config.motionFilter.initial.covariance.position =
-                config["motion_filter"]["initial"]["covariance"]["position"].as<Expression>();
-            this->config.motionFilter.initial.covariance.velocity =
-                config["motion_filter"]["initial"]["covariance"]["velocity"].as<Expression>();
-            this->config.motionFilter.initial.covariance.rotation =
-                config["motion_filter"]["initial"]["covariance"]["rotation"].as<Expression>();
-            this->config.motionFilter.initial.covariance.rotationalVelocity =
-                config["motion_filter"]["initial"]["covariance"]["rotational_velocity"].as<Expression>();
-            this->config.motionFilter.initial.covariance.gyroscopeBias =
-                config["motion_filter"]["initial"]["covariance"]["gyroscope_bias"].as<Expression>();
+            config.motionFilter.initial.covariance.position =
+                config_file["motion_filter"]["initial"]["covariance"]["position"].as<Expression>();
+            config.motionFilter.initial.covariance.velocity =
+                config_file["motion_filter"]["initial"]["covariance"]["velocity"].as<Expression>();
+            config.motionFilter.initial.covariance.rotation =
+                config_file["motion_filter"]["initial"]["covariance"]["rotation"].as<Expression>();
+            config.motionFilter.initial.covariance.rotationalVelocity =
+                config_file["motion_filter"]["initial"]["covariance"]["rotational_velocity"].as<Expression>();
+            config.motionFilter.initial.covariance.gyroscopeBias =
+                config_file["motion_filter"]["initial"]["covariance"]["gyroscope_bias"].as<Expression>();
 
             // Calculate our mean and covariance
             MotionModel<double>::StateVec mean;
-            mean.rTWw          = this->config.motionFilter.initial.mean.position;
-            mean.vTw           = this->config.motionFilter.initial.mean.velocity;
-            mean.Rwt           = this->config.motionFilter.initial.mean.rotation;
-            mean.omegaTTt      = this->config.motionFilter.initial.mean.rotationalVelocity;
-            mean.omegaTTt_bias = this->config.motionFilter.initial.mean.gyroscopeBias;
+            mean.rTWw          = config.motionFilter.initial.mean.position;
+            mean.vTw           = config.motionFilter.initial.mean.velocity;
+            mean.Rwt           = config.motionFilter.initial.mean.rotation;
+            mean.omegaTTt      = config.motionFilter.initial.mean.rotationalVelocity;
+            mean.omegaTTt_bias = config.motionFilter.initial.mean.gyroscopeBias;
 
             MotionModel<double>::StateVec covariance;
-            covariance.rTWw          = this->config.motionFilter.initial.covariance.position;
-            covariance.vTw           = this->config.motionFilter.initial.covariance.velocity;
-            covariance.Rwt           = this->config.motionFilter.initial.covariance.rotation;
-            covariance.omegaTTt      = this->config.motionFilter.initial.covariance.rotationalVelocity;
-            covariance.omegaTTt_bias = this->config.motionFilter.initial.covariance.gyroscopeBias;
+            covariance.rTWw          = config.motionFilter.initial.covariance.position;
+            covariance.vTw           = config.motionFilter.initial.covariance.velocity;
+            covariance.Rwt           = config.motionFilter.initial.covariance.rotation;
+            covariance.omegaTTt      = config.motionFilter.initial.covariance.rotationalVelocity;
+            covariance.omegaTTt_bias = config.motionFilter.initial.covariance.gyroscopeBias;
             motionFilter.set_state(mean.getStateVec(), covariance.asDiagonal());
         });
 
@@ -407,7 +408,7 @@ namespace module::input {
                     // Use our virtual load sensor class to work out which feet are down
                     feet_down = load_sensor.updateFeet(*sensors);
 
-                    if (this->config.debug) {
+                    if (config.debug) {
                         emit(graph("Sensor/Foot Down/Load/Left", feet_down[BodySide::LEFT]));
                         emit(graph("Sensor/Foot Down/Load/Right", feet_down[BodySide::RIGHT]));
                     }
@@ -434,7 +435,7 @@ namespace module::input {
                         feet_down[BodySide::LEFT]  = true;
                     }
 
-                    if (this->config.debug) {
+                    if (config.debug) {
                         emit(graph("Sensor/Foot Down/Z/Left", feet_down[BodySide::LEFT]));
                         emit(graph("Sensor/Foot Down/Z/Right", feet_down[BodySide::RIGHT]));
                     }
@@ -523,7 +524,7 @@ namespace module::input {
                 // Integrate gyro to get angular positions
                 sensors->angular_position = o.omegaTTt / 90.0;
 
-                if (this->config.debug) {
+                if (config.debug) {
                     log("p_x:",
                         sensors->angular_position.x(),
                         "p_y:",

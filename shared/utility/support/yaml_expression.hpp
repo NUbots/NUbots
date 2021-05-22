@@ -81,8 +81,8 @@ namespace utility::support {
             T matrix;
 
             try {
-                for (size_t row = 0; row < rows; row++) {
-                    for (size_t col = 0; col < cols; col++) {
+                for (ssize_t row = 0; row < ssize_t(rows); row++) {
+                    for (ssize_t col = 0; col < ssize_t(cols); col++) {
                         matrix(row, col) = parse_math_string<typename T::Scalar>(node[row][col].as<std::string>());
                     }
                 }
@@ -112,7 +112,7 @@ namespace utility::support {
             T matrix;
 
             try {
-                for (size_t i = 0; i < node.size(); i++) {
+                for (ssize_t i = 0; i < ssize_t(node.size()); i++) {
                     matrix(i) = parse_math_string<typename T::Scalar>(node[i].as<std::string>());
                 }
             }
@@ -224,7 +224,7 @@ namespace utility::support {
             T matrix(rows, std::max(cols, size_t(1)));
 
             try {
-                for (size_t i = 0; i < rows; i++) {
+                for (ssize_t i = 0; i < ssize_t(rows); i++) {
                     matrix(i) = parse_math_string<typename T::Scalar>(node[i].as<std::string>());
                 }
             }

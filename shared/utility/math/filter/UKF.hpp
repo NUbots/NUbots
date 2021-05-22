@@ -281,7 +281,7 @@ namespace utility::math::filter {
                     MeasurementScalar loglikelihood =
                         0.5
                         * (std::log(innovation_variance.determinant()) + std::abs(likelihood_exponent)
-                           + innovation.size() * std::log(2 * M_PI));
+                           + double(innovation.size()) * std::log(2 * M_PI));
 
                     return -loglikelihood;
                 });

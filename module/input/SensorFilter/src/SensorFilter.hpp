@@ -98,7 +98,7 @@ namespace module::input {
             struct FootDown {
                 FootDown() : fromLoad(true), certaintyThreshold(0.05) {}
                 bool fromLoad;
-                float certaintyThreshold;
+                double certaintyThreshold;
             } footDown;
         } config;
 
