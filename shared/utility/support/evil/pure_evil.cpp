@@ -8,8 +8,10 @@
     #include <nuclear>
 
 namespace utility::support::evil {
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     thread_local std::vector<utility::support::evil::StackFrame> stack =
         std::vector<utility::support::evil::StackFrame>();
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     thread_local std::string exception_name = std::string();
 }  // namespace utility::support::evil
 
@@ -19,10 +21,10 @@ extern "C" {
 void error_callback(void* /*data*/, const char* /*msg*/, int /*errnum*/) {}
 
 // Initialise our state for the backtrace (I think we can do this once per binary)
-// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-backtrace_state* state = backtrace_create_state(nullptr, true, error_callback, nullptr);
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables,cert-err58-cpp)
+backtrace_state* state = backtrace_create_state(nullptr, int(true), error_callback, nullptr);
 
-typedef void (*cxa_throw_func_type)(void*, void*, void (*)(void*));
+using cxa_throw_func_type = void (*)(void*, void*, void (*)(void*));
 
 /**
  * This function looks inside the libstdc++.so.6 library to manually load the __cxa_throw function
@@ -35,12 +37,14 @@ cxa_throw_func_type get_real_throw_func() {
     void* handle = dlopen("libstdc++.so.6", RTLD_LAZY);
 
     // Get the __cxa_throw function
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
     return (cxa_throw_func_type) dlsym(handle, "__cxa_throw");
 }
 
 // Find the real __cxa_throw and call it to actually throw the exception
-// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-static void (*const rethrow)(void*, void*, void (*)(void*)) __attribute__((noreturn)) = get_real_throw_func();
+// TODO(KipHamiltons) This should have "__attribute__((noreturn))", but it doesn't compile with clang without it
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables,cert-err58-cpp)
+static void (*const rethrow)(void*, void*, void (*)(void*)) = get_real_throw_func();
 
 /**
  * Add the stack frame to our list we pass in
@@ -56,10 +60,9 @@ static void (*const rethrow)(void*, void*, void (*)(void*)) __attribute__((noret
 int add_backtrace_info_to_vector(void* data, uintptr_t pc, const char* filename, int lineno, const char* function) {
 
     // Get our stack
-    std::vector<utility::support::evil::StackFrame>* stack =
-        static_cast<std::vector<utility::support::evil::StackFrame>*>(data);
+    auto* stack = static_cast<std::vector<utility::support::evil::StackFrame>*>(data);
 
-    if (filename && function) {
+    if (filename != nullptr && function != nullptr) {
         // Add a new one
         stack->emplace_back(pc, filename, lineno, NUClear::util::demangle(function));
     }
@@ -74,7 +77,7 @@ int add_backtrace_info_to_vector(void* data, uintptr_t pc, const char* filename,
  * @param ex the exception object
  * @param info the typeinfo of the exception
  * @param dest where we are going to execute when we are done here
- */
+ */ // NOLINTNEXTLINE(bugprone-reserved-identifier,cert-dcl37-c,cert-dcl51-cpp)
 void __cxa_throw(void* ex, void* info, void (*dest)(void*)) {
 
     // Demangle our exception name
@@ -87,6 +90,6 @@ void __cxa_throw(void* ex, void* info, void (*dest)(void*)) {
 
     rethrow(ex, info, dest);
 }
-}
+}  // extern "C"
 
 #endif  // NDEBUG
