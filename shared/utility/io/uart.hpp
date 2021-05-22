@@ -29,7 +29,7 @@ namespace utility::io {
         /**
          * @brief Construct a new unconnected uart class
          */
-        uart();
+        uart() = default;
 
         /**
          * @brief Create a new uart class that is connected to the device `device`
@@ -80,7 +80,7 @@ namespace utility::io {
          *
          * @return the number of bytes that were actually read, or -1 if fail. See ::read
          */
-        ssize_t read(void* buf, size_t count);
+        ssize_t read(void* buf, size_t count) const;
 
         /**
          * @brief Write bytes to the uart
