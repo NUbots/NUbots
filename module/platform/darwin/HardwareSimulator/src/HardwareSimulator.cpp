@@ -48,17 +48,6 @@ namespace module::platform::darwin {
     using utility::nusight::graph;
     using utility::support::Expression;
 
-    void addNoise(std::unique_ptr<RawSensors>& sensors) {
-        // TODO: Use a more standard c++ random generator.
-        sensors->accelerometer.x += noise.accelerometer.x * centered_noise();
-        sensors->accelerometer.y += noise.accelerometer.y * centered_noise();
-        sensors->accelerometer.z += noise.accelerometer.z * centered_noise();
-
-        sensors->gyroscope.x += noise.gyroscope.x * centered_noise();
-        sensors->gyroscope.y += noise.gyroscope.y * centered_noise();
-        sensors->gyroscope.z += noise.gyroscope.z * centered_noise();
-    }
-
     HardwareSimulator::HardwareSimulator(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), sensors(), gyroQueue(), gyroQueueMutex(), noise() {
 
@@ -240,7 +229,7 @@ namespace module::platform::darwin {
                     std::lock_guard<std::mutex> lock(gyroQueueMutex);
                     while (!gyroQueue.empty()) {
                         RawSensors::Gyroscope g = gyroQueue.front();
-                        sumGyro += Eigen::Vector3d(g.x, g.y, g.z);
+                        sumGyro += Eigen::Vector3f(g.x, g.y, g.z);
 
                         std::lock_guard<std::mutex> lock(gyroQueueMutex);
                         gyroQueue.pop();
@@ -297,6 +286,17 @@ namespace module::platform::darwin {
 
     float centered_noise() {
         return float(rand()) / float(RAND_MAX) - 0.5f;
+    }
+
+    void HardwareSimulator::addNoise(std::unique_ptr<RawSensors>& other_sensors) {
+        // TODO: Use a more standard c++ random generator.
+        other_sensors->accelerometer.x += noise.accelerometer.x * centered_noise();
+        other_sensors->accelerometer.y += noise.accelerometer.y * centered_noise();
+        other_sensors->accelerometer.z += noise.accelerometer.z * centered_noise();
+
+        other_sensors->gyroscope.x += noise.gyroscope.x * centered_noise();
+        other_sensors->gyroscope.y += noise.gyroscope.y * centered_noise();
+        other_sensors->gyroscope.z += noise.gyroscope.z * centered_noise();
     }
 
     void HardwareSimulator::setRightFootDown(bool down) {

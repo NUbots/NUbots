@@ -80,17 +80,17 @@ namespace module::behaviour::planning {
 
         // do a little configurating
         on<Configuration>("SimpleWalkPathPlanner.yaml").then([this](const Configuration& file) {
-            turnSpeed            = file.config["turnSpeed"].as<float>();
-            forwardSpeed         = file.config["forwardSpeed"].as<float>();
-            sideSpeed            = file.config["sideSpeed"].as<float>();
-            a                    = file.config["a"].as<float>();
-            b                    = file.config["b"].as<float>();
-            search_timeout       = file.config["search_timeout"].as<float>();
+            turnSpeed            = file.config["turnSpeed"].as<double>();
+            forwardSpeed         = file.config["forwardSpeed"].as<double>();
+            sideSpeed            = file.config["sideSpeed"].as<double>();
+            a                    = file.config["a"].as<double>();
+            b                    = file.config["b"].as<double>();
+            search_timeout       = file.config["search_timeout"].as<double>();
             robot_ground_space   = file.config["robot_ground_space"].as<bool>();
-            ball_approach_dist   = file.config["ball_approach_dist"].as<float>();
-            slowdown_distance    = file.config["slowdown_distance"].as<float>();
+            ball_approach_dist   = file.config["ball_approach_dist"].as<double>();
+            slowdown_distance    = file.config["slowdown_distance"].as<double>();
             useLocalisation      = file.config["useLocalisation"].as<bool>();
-            slow_approach_factor = file.config["slow_approach_factor"].as<float>();
+            slow_approach_factor = file.config["slow_approach_factor"].as<double>();
 
             emit(std::make_unique<WantsToKick>(false));
         });
@@ -184,9 +184,9 @@ namespace module::behaviour::planning {
                 Eigen::Affine3d Htw(sensors.Htw);
 
                 auto now = NUClear::clock::now();
-                float timeSinceBallSeen =
-                    std::chrono::duration_cast<std::chrono::nanoseconds>(now - timeBallLastSeen).count()
-                    * (1.0f / std::nano::den);
+                double timeSinceBallSeen =
+                    double(std::chrono::duration_cast<std::chrono::nanoseconds>(now - timeBallLastSeen).count())
+                    * (1.0 / double(std::nano::den));
 
 
                 Eigen::Vector3d rBWw_temp(ball.position.x(), ball.position.y(), fieldDescription.ball_radius);
@@ -195,22 +195,22 @@ namespace module::behaviour::planning {
                 position = (Htw * rBWw).head<2>();
 
                 // Hack Planner:
-                float headingChange = 0;
-                float sideStep      = 0;
-                float speedFactor   = 1;
+                double headingChange = 0.0;
+                double sideStep      = 0.0;
+                double speedFactor   = 1.0;
                 if (useLocalisation) {
 
                     // Transform kick target to torso space
                     Eigen::Affine2d fieldPosition = Eigen::Affine2d(field.position);
                     Eigen::Affine3d Hfw;
                     Hfw.translation() =
-                        Eigen::Vector3d(fieldPosition.translation().x(), fieldPosition.translation().y(), 0);
+                        Eigen::Vector3d(fieldPosition.translation().x(), fieldPosition.translation().y(), 0.0);
                     Hfw.linear() = Eigen::AngleAxisd(Eigen::Rotation2Dd(fieldPosition.rotation()).angle(),
                                                      Eigen::Vector3d::UnitZ())
                                        .toRotationMatrix();
 
                     Eigen::Affine3d Htf        = Htw * Hfw.inverse();
-                    Eigen::Vector3d kickTarget = Htf * Eigen::Vector3d(kickPlan.target.x(), kickPlan.target.y(), 0);
+                    Eigen::Vector3d kickTarget = Htf * Eigen::Vector3d(kickPlan.target.x(), kickPlan.target.y(), 0.0);
 
                     // //approach point:
                     Eigen::Vector2d ballToTarget = (kickTarget.head<2>() - position).normalized();
@@ -222,14 +222,14 @@ namespace module::behaviour::planning {
                     else {
                         speedFactor   = slow_approach_factor;
                         headingChange = std::atan2(ballToTarget.y(), ballToTarget.x());
-                        sideStep      = 1;
+                        sideStep      = 1.0;
                     }
                 }
                 // Eigen::Vector2d ball_world_position = WorldToRobotTransform(selfs.front().position,
                 // selfs.front().heading, position);
 
 
-                float angle = std::atan2(position.y(), position.x()) + headingChange;
+                double angle = std::atan2(position.y(), position.x()) + headingChange;
                 // log("ball bearing", angle);
                 angle = std::min(turnSpeed, std::max(angle, -turnSpeed));
                 // log("turnSpeed", turnSpeed);
@@ -239,14 +239,14 @@ namespace module::behaviour::planning {
                 // log("loc heading", selfs.front().heading);
 
                 // Euclidean distance to ball
-                float scaleF            = 2.0 / (1.0 + std::exp(-a * std::fabs(position.x()) + b)) - 1.0;
-                float scaleF2           = angle / M_PI;
-                float finalForwardSpeed = speedFactor * forwardSpeed * scaleF * (1.0 - scaleF2);
+                const double scaleF            = 2.0 / (1.0 + std::exp(-a * std::fabs(position.x()) + b)) - 1.0;
+                const double scaleF2           = angle / M_PI;
+                const double finalForwardSpeed = speedFactor * forwardSpeed * scaleF * (1.0 - scaleF2);
 
-                float scaleS         = 2.0 / (1.0 + std::exp(-a * std::fabs(position.y()) + b)) - 1.0;
-                float scaleS2        = angle / M_PI;
-                float finalSideSpeed = -speedFactor * ((0.0 < position.y()) - (position.y() < 0.0)) * sideStep
-                                       * sideSpeed * scaleS * (1.0 - scaleS2);
+                const double scaleS         = 2.0 / (1.0 + std::exp(-a * std::fabs(position.y()) + b)) - 1.0;
+                const double scaleS2        = angle / M_PI;
+                const double finalSideSpeed = -speedFactor * ((0.0 < position.y()) - (position.y() < 0.0)) * sideStep
+                                              * sideSpeed * scaleS * (1.0 - scaleS2);
                 // log("forwardSpeed1", forwardSpeed);
                 // log("scale", scale);
                 // log("distanceToBall", distanceToBall);

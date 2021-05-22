@@ -113,7 +113,7 @@ namespace module::behaviour::skills {
                         // Moves search forward and backward along path
                         if (new_index >= int(points.size())) {
                             forward = false;
-                            current = std::max(current - 1, 0);
+                            current = std::max(current - 1, size_t(0));
                         }
                         else {
                             current = new_index;

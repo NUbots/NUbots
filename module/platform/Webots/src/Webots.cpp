@@ -247,7 +247,7 @@ namespace module::platform {
             for (const auto& target : targets.targets) {
                 const double diff = utility::math::angle::difference(
                     double(target.position),
-                    utility::platform::getRawServo(target.id, sensors).present_position);
+                    double(utility::platform::getRawServo(target.id, sensors).present_position));
                 NUClear::clock::duration duration = target.time - NUClear::clock::now();
 
                 double speed = 0.0;
