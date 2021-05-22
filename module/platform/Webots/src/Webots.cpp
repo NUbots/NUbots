@@ -23,6 +23,7 @@
 #include <fmt/format.h>
 #include <string>
 
+#include "Convert.hpp"
 #include "clock/clock.hpp"
 
 #include "extension/Configuration.hpp"
