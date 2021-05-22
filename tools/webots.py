@@ -90,6 +90,7 @@ def run(sub_command, role=None, **kwargs):
             "container",
             "run",
             "--rm",
+            "--network=host",
             "-e",
             "ROBOCUP_ROBOT_ID=1",
             "-e",
