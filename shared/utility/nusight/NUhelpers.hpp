@@ -27,11 +27,9 @@
 
 namespace utility::nusight {
 
-    namespace {
+    using message::support::nusight::DataPoint;
 
-        using message::support::nusight::DataPoint;
-
-        constexpr float TIMEOUT = 2.5;
+    namespace helpers {
 
         template <typename T>
         struct is_iterable {
@@ -73,13 +71,13 @@ namespace utility::nusight {
             }
             buildGraph(dataPoint, remainder...);
         }
-    }  // namespace
+    }  // namespace helpers
 
     template <typename... Values>
     inline std::unique_ptr<message::support::nusight::DataPoint> graph(std::string label, Values... values) {
         auto dataPoint   = std::make_unique<DataPoint>();
         dataPoint->label = std::move(label);
-        buildGraph(*dataPoint, values...);
+        helpers::buildGraph(*dataPoint, values...);
         return dataPoint;
     }
 
