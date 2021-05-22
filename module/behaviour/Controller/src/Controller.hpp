@@ -46,7 +46,7 @@ namespace module::behaviour {
         Request(size_t id_,
                 std::string name_,
                 callback start_,
-                callback kill_),
+                callback kill_,
                 std::function<void(std::set<utility::input::ServoID>)> completed_)
             : id(id_)
             , name(std::move(std::move(name_)))
