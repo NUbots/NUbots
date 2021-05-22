@@ -32,7 +32,7 @@ namespace shared::tests {
             X2 = 1,
         };
 
-        static constexpr size_t size = 2;
+        static constexpr int size = 2;
 
         using StateVec = Eigen::Matrix<Scalar, size, 1>;
         using StateMat = Eigen::Matrix<Scalar, size, size>;

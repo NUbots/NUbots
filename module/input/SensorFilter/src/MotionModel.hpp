@@ -59,9 +59,9 @@ namespace module::input {
             // Gyroscope Bias
             Eigen::Matrix<Scalar, 3, 1> omegaTTt_bias;
 
-            static constexpr size_t size = 16;
+            static constexpr int size = 16;
 
-            constexpr static size_t getSize() {
+            constexpr static int getSize() {
                 return size;
             }
 

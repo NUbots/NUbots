@@ -47,7 +47,7 @@ namespace module::localisation {
     template <typename Scalar>
     class RobotModel {
     public:
-        static constexpr size_t size = 3;
+        static constexpr int size = 3;
 
         using StateVec = Eigen::Matrix<Scalar, size, 1>;
         using StateMat = Eigen::Matrix<Scalar, size, size>;
