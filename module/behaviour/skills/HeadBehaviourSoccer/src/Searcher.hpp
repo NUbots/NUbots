@@ -37,29 +37,23 @@ namespace module::behaviour::skills {
     class Searcher {
 
     private:
-        std::vector<T> points;
-        int current;
-        T refPoint;
+        std::vector<T> points{1, Eigen::Vector2d::Zero()};
+        int current = 0;
+        T refPoint{};
 
-        bool new_goal;
+        bool new_goal = false;
 
-        NUClear::clock::time_point lastSwitchTime;
-        float switch_period;
+        NUClear::clock::time_point lastSwitchTime{NUClear::clock::now()};
+        float switch_period = 1000.0f;
 
         bool forward = true;
 
     public:
-        Searcher()
-            : points(std::vector<T>(1, Eigen::Vector2d::Zero()))
-            , current(0)
-            , refPoint()
-            , new_goal(false)
-            , lastSwitchTime(NUClear::clock::now())
-            , switch_period(1000.0f) {
+        Searcher() {
             // Init points to something sane
         }
 
-        ~Searcher() {}
+        ~Searcher() = default;
 
         void sort() {
             // Just set to closest:
