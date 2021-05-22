@@ -44,10 +44,7 @@ namespace module::behaviour::skills {
     using utility::behaviour::RegisterAction;
 
     Nod::Nod(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment))
-        , id(size_t(this) * size_t(this) - size_t(this))
-        , value(false)
-        , EXECUTION_PRIORITY(0.0f) {
+        : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
 
         // do a little configurating
         on<Configuration>("Nod.yaml").then([this](const Configuration& config) {
@@ -63,7 +60,7 @@ namespace module::behaviour::skills {
             id,
             "Nod",
             {std::pair<float, std::set<LimbID>>(0, {LimbID::HEAD})},
-            [this](const std::set<LimbID>&) {
+            [this](const std::set<LimbID>& /*unused*/) {
                 if (value) {
                     emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"NodYes.yaml"})));
                 }
@@ -71,8 +68,8 @@ namespace module::behaviour::skills {
                     emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"NodNo.yaml"})));
                 }
             },
-            [this](const std::set<LimbID>&) { updatePriority(0); },
-            [this](const std::set<ServoID>&) { updatePriority(0); }}));
+            [this](const std::set<LimbID>& /*unused*/) { updatePriority(0); },
+            [this](const std::set<ServoID>& /*unused*/) { updatePriority(0); }}));
     }
 
     void Nod::updatePriority(const float& priority) {

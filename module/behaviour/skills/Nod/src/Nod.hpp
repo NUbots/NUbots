@@ -32,8 +32,8 @@ namespace module::behaviour::skills {
     private:
         const size_t id;
 
-        bool value;
-        float EXECUTION_PRIORITY;
+        bool value               = false;
+        float EXECUTION_PRIORITY = 0.0f;
 
         void updatePriority(const float& priority);
     };
