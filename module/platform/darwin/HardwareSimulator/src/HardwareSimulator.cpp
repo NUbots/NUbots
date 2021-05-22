@@ -45,11 +45,10 @@ namespace module::platform::darwin {
     using message::platform::RawSensors;
 
     using utility::input::ServoID;
-    using utility::nusight::graph;
     using utility::support::Expression;
 
     HardwareSimulator::HardwareSimulator(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), sensors(), gyroQueue(), gyroQueueMutex(), noise() {
+        : Reactor(std::move(environment)) {
 
         /*
          CM740 Data
@@ -166,13 +165,13 @@ namespace module::platform::darwin {
         on<Trigger<RawSensors::Gyroscope>>().then("Receive Simulated Gyroscope",
                                                   [this](const RawSensors::Gyroscope& gyro) {
                                                       std::lock_guard<std::mutex> lock(gyroQueueMutex);
-                                                      RawSensors::Gyroscope tmpGyro = gyro;
+                                                      const RawSensors::Gyroscope& tmpGyro = gyro;
                                                       gyroQueue.push(tmpGyro);
                                                   });
 
 
         on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Optional<With<Sensors>>, Single>().then(
-            [this](std::shared_ptr<const Sensors> previousSensors) {
+            [this](const std::shared_ptr<const Sensors>& previousSensors) {
                 if (previousSensors) {
                     Eigen::Affine3d Hf_rt(previousSensors->Htx[ServoID::R_ANKLE_ROLL]);
                     Eigen::Affine3d Hf_lt(previousSensors->Htx[ServoID::L_ANKLE_ROLL]);
@@ -255,7 +254,7 @@ namespace module::platform::darwin {
 
         // This trigger writes the servo positions to the hardware
         on<Trigger<std::vector<ServoTarget>>>().then([this](const std::vector<ServoTarget>& commands) {
-            for (auto& command : commands) {
+            for (const auto& command : commands) {
 
                 // Calculate our moving speed
                 float diff = utility::math::angle::difference(
@@ -263,12 +262,9 @@ namespace module::platform::darwin {
                     utility::platform::getRawServo(command.id, sensors).present_position);
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
-                float speed;
+                float speed = 0.0f;
                 if (duration.count() > 0) {
                     speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
-                }
-                else {
-                    speed = 0;
                 }
 
                 // Set our variables
@@ -278,7 +274,7 @@ namespace module::platform::darwin {
             }
         });
 
-        on<Trigger<ServoTarget>>().then([this](const ServoTarget command) {
+        on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
             auto commandList = std::make_unique<std::vector<ServoTarget>>();
             commandList->push_back(command);
 
@@ -291,7 +287,7 @@ namespace module::platform::darwin {
         return rand() / float(RAND_MAX) - 0.5f;
     }
 
-    void HardwareSimulator::addNoise(std::unique_ptr<RawSensors>& sensors) {
+    void HardwareSimulator::addNoise(std::unique_ptr<RawSensors>& sensors) const {
         // TODO: Use a more standard c++ random generator.
         sensors->accelerometer.x += noise.accelerometer.x * centered_noise();
         sensors->accelerometer.y += noise.accelerometer.y * centered_noise();
