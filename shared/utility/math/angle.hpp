@@ -67,7 +67,8 @@ namespace utility::math::angle {
      * http://math.stackexchange.com/questions/1158223/solve-for-x-where-a-sin-x-b-cos-x-c-where-a-b-and-c-are-kno
      * @param
      */
-    inline double difference(const double a, const double b) {
+    template <typename Scalar>
+    inline Scalar difference(const Scalar a, const Scalar b) {
 
         return M_PI - std::fabs(std::fmod(std::fabs(a - b), (2 * M_PI)) - M_PI);
     }

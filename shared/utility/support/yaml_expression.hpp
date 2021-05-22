@@ -61,7 +61,7 @@ namespace utility::support {
 
             // Count the columns on every row.
             for (const auto& row : node) {
-                if (row.size() != cols) {
+                if (row.size() != size_t(cols)) {
                     throw std::out_of_range(
                         fmt::format("Inconsistent number of cols in matrix (cols: {} vs {}).", row.size(), cols));
                 }
@@ -180,7 +180,7 @@ namespace utility::support {
             // Check to see if the input is formatted as a matrix.
             // Count the columns on every row.
             for (const auto& row : node) {
-                if (row.size() != cols) {
+                if (row.size() != size_t(cols)) {
                     throw std::out_of_range(
                         fmt::format("Inconsistent number of cols in matrix (cols: {} vs {}).", row.size(), cols));
                 }
@@ -215,7 +215,7 @@ namespace utility::support {
             // Check to see if the input is formatted as a matrix.
             // Count the columns on every row.
             for (const auto& row : node) {
-                if (row.size() != cols) {
+                if (row.size() != size_t(cols)) {
                     throw std::out_of_range(
                         fmt::format("Inconsistent number of cols in matrix (cols: {} vs {}).", row.size(), cols));
                 }
@@ -248,7 +248,7 @@ namespace utility::support {
             // Check to see if the input is formatted as a matrix.
             // Count the columns on every row.
             for (const auto& row : node) {
-                if (row.size() != cols) {
+                if (row.size() != size_t(cols)) {
                     throw std::out_of_range(
                         fmt::format("Inconsistent number of cols in matrix (cols: {} vs {}).", row.size(), cols));
                 }

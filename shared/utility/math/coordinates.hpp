@@ -35,11 +35,11 @@ namespace utility::math::coordinates {
 
     template <typename T, typename U = typename T::Scalar>
     inline Eigen::Matrix<U, 3, 1> sphericalToCartesian(const Eigen::MatrixBase<T>& sphericalCoordinates) {
-        double distance  = sphericalCoordinates.x();
-        double cos_theta = std::cos(sphericalCoordinates.y());
-        double sin_theta = std::sin(sphericalCoordinates.y());
-        double cos_phi   = std::cos(sphericalCoordinates.z());
-        double sin_phi   = std::sin(sphericalCoordinates.z());
+        U distance  = sphericalCoordinates.x();
+        U cos_theta = std::cos(sphericalCoordinates.y());
+        U sin_theta = std::sin(sphericalCoordinates.y());
+        U cos_phi   = std::cos(sphericalCoordinates.z());
+        U sin_phi   = std::sin(sphericalCoordinates.z());
         Eigen::Matrix<U, 3, 1> result;
 
         result.x() = distance * cos_theta * cos_phi;
