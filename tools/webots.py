@@ -94,7 +94,7 @@ def run(sub_command, role=None, **kwargs):
             "-e",
             "ROBOCUP_ROBOT_ID=1",
             "-e",
-            "ROBOCUP_TEAM_COLOR=1",
+            "ROBOCUP_TEAM_COLOR=Blue",
             "-e",
             "ROBOCUP_SIMULATOR_ADDR=127.0.0.1:10020",
             "nugus_sim:robocup",
