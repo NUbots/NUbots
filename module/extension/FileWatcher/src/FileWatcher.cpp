@@ -174,7 +174,7 @@ namespace module::extension {
                             // If erasing this file got rid of this path, unwatch this path
                             if (pIt->second.files.empty()) {
 
-                                // TODO unwatch the path
+                                // TODO(TrentHouliston) unwatch the path
                                 remove_queue.push_back(std::move(pIt->second.handle));
 
                                 paths.erase(pIt);
@@ -234,7 +234,7 @@ namespace module::extension {
                 for (const auto& element : utility::file::listDir(path)) {
                     // Set our thread local event details
                     FileWatch watch;
-                    watch.path   = path + "/" + element;
+                    watch.path   = path.append("/").append(element);
                     watch.events = 0;
 
                     // Store our watch value in the local cache
