@@ -29,7 +29,7 @@ namespace module::platform {
 
     class Webots : public NUClear::Reactor {
     private:
-        // How often we read the servos
+        /// @brief How often we read the servos
         static constexpr int UPDATE_FREQUENCY = 90;
 
         /// @brief Handle for incoming data reaction. This will be bound/unbound during (re)connection
