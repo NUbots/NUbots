@@ -68,8 +68,8 @@ namespace module::behaviour::skills {
         fallenCheck = on<Last<20, Trigger<RawSensors>>, Single>().then(
             "Getup Fallen Check",
             [this](const std::list<std::shared_ptr<const RawSensors>>& sensors) {
-                double acc_threshold = 8;
-                double acc_reading   = 0.0;
+                const double acc_threshold = 8.0;
+                double acc_reading         = 0.0;
 
                 for (const auto& s : sensors) {
                     acc_reading += s->accelerometer.z;
@@ -77,7 +77,7 @@ namespace module::behaviour::skills {
                 acc_reading = acc_reading / double(sensors.size());
 
                 // check that the accelerometer reading is less than some predetermined
-                // ammount
+                // amount
                 if (!gettingUp && acc_reading < acc_threshold) {
                     updatePriority(GETUP_PRIORITY);
                     fallenCheck.disable();
@@ -89,8 +89,8 @@ namespace module::behaviour::skills {
             [this](const std::list<std::shared_ptr<const RawSensors>>& sensors) {
                 gettingUp = true;
 
-                double acc_threshold = 8;
-                double acc_reading   = 0.0;
+                const double acc_threshold = 8.0;
+                double acc_reading         = 0.0;
 
                 for (const auto& s : sensors) {
                     acc_reading += s->accelerometer.y;
