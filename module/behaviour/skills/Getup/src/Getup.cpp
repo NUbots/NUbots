@@ -52,16 +52,27 @@ namespace module::behaviour::skills {
         , isFront(true)
         , gettingUp(false)
         , fallenCheck()
+        , getUp()
         , FALLEN_ANGLE(M_PI_2)
         , GETUP_PRIORITY(0.0f)
         , EXECUTION_PRIORITY(0.0f) {
         // do a little configurating
-        on<Configuration>("Getup.yaml").then([this](const Configuration& file) {
-            FALLEN_ANGLE = file["FALLEN_ANGLE"].as<float>();
+        on<Configuration>("Getup.yaml").then([this](const Configuration& config) {
+            // clang-format off
+            std::string lvl = config["log_level"].as<std::string>();
+            if (lvl == "TRACE")      { this->log_level = NUClear::TRACE; }
+            else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
+            else if (lvl == "INFO")  { this->log_level = NUClear::INFO;  }
+            else if (lvl == "WARN")  { this->log_level = NUClear::WARN;  }
+            else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
+            else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
+            // clang-format on
+
+            FALLEN_ANGLE = config["FALLEN_ANGLE"].as<float>();
 
             // load priorities for the getup
-            GETUP_PRIORITY     = file["GETUP_PRIORITY"].as<float>();
-            EXECUTION_PRIORITY = file["EXECUTION_PRIORITY"].as<float>();
+            GETUP_PRIORITY     = config["GETUP_PRIORITY"].as<float>();
+            EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
         });
 
         fallenCheck = on<Last<20, Trigger<RawSensors>>, Single>().then(
@@ -78,14 +89,15 @@ namespace module::behaviour::skills {
                 // amount
                 if (!gettingUp && std::acos(Eigen::Vector3d::UnitZ().dot(acc_reading)) > FALLEN_ANGLE) {
                     // If we are on our side, treat it as being on our front, hopefully the rollover will help matters
-                    isFront = (M_PI_2 - std::acos(Eigen::Vector3d::UnitX().dot(acc_reading)) >= 0.0);
+                    isFront = (M_PI_2 - std::acos(Eigen::Vector3d::UnitX().dot(acc_reading)) <= 0.0);
 
                     updatePriority(GETUP_PRIORITY);
                     fallenCheck.disable();
+                    getUp.enable();
                 }
             });
 
-        on<Trigger<ExecuteGetup>>().then("Execute Getup", [this]() {
+        getUp = on<Trigger<ExecuteGetup>, Single>().then("Execute Getup", [this]() {
             gettingUp = true;
 
             // Check with side we're getting up from
@@ -105,6 +117,7 @@ namespace module::behaviour::skills {
         on<Trigger<KillGetup>>().then([this] {
             gettingUp = false;
             updatePriority(0);
+            getUp.disable();
             fallenCheck.enable();
         });
 
@@ -116,17 +129,7 @@ namespace module::behaviour::skills {
                 {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
             [this](const std::set<LimbID>&) { emit(std::make_unique<ExecuteGetup>()); },
             [this](const std::set<LimbID>&) { emit(std::make_unique<KillGetup>()); },
-            [this](const std::set<ServoID>& servoSet) {
-                // HACK 2014 Jake Fountain, Trent Houliston
-                // TODO track set limbs and wait for all to finish
-                log("Checking ankles: ",
-                    servoSet.find(ServoID::L_ANKLE_PITCH) != servoSet.end(),
-                    servoSet.find(ServoID::R_ANKLE_PITCH) != servoSet.end());
-                if (servoSet.find(ServoID::L_ANKLE_PITCH) != servoSet.end()
-                    || servoSet.find(ServoID::R_ANKLE_PITCH) != servoSet.end()) {
-                    emit(std::make_unique<KillGetup>());
-                }
-            }}));
+            [this](const std::set<ServoID>&) { emit(std::make_unique<KillGetup>()); }}));
     }
 
     void Getup::updatePriority(const float& priority) {
