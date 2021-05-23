@@ -58,21 +58,21 @@ def set_env_vars(config: dict) -> None:
     # ROBOCUP_ROBOT_ID
     global_config_fname = "GlobalConfig.yaml"
     with open(global_config_fname) as file:
-        data = yaml.load(file)
+        global_config_data = yaml.load(file)
 
-    data["player_id"] = int(config["ROBOCUP_ROBOT_ID"])
+    global_config_data["player_id"] = int(config["ROBOCUP_ROBOT_ID"])
 
     with open(global_config_fname, "w") as file:
-        yaml.dump(data, file)
+        yaml.dump(global_config_data, file)
 
     game_controller_fname = "GameController.yaml"
     with open(game_controller_fname) as file:
-        data = yaml.load(file)
+        game_controller_data = yaml.load(file)
 
-    data["player_id"] = int(config["ROBOCUP_ROBOT_ID"])
+    game_controller_data["player_id"] = int(config["ROBOCUP_ROBOT_ID"])
 
     with open(game_controller_fname, "w") as file:
-        yaml.dump(data, file)
+        yaml.dump(game_controller_data, file)
 
     # ROBOCUP_TEAM_COLOR
     # ??
@@ -82,12 +82,12 @@ def set_env_vars(config: dict) -> None:
     webots_addr, webots_port = config["ROBOCUP_SIMULATOR_ADDR"].split(":", 2)
 
     with open(webots_config_fname) as file:
-        data = yaml.load(file)
-    data["server_address"] = str(webots_addr)
-    data["port"] = int(webots_port)
+        webots_config_data = yaml.load(file)
+    webots_config_data["server_address"] = str(webots_addr)
+    webots_config_data["port"] = int(webots_port)
 
     with open(webots_config_fname, "w") as file:
-        yaml.dump(data, file)
+        yaml.dump(webots_config_data, file)
 
 
 def run_role(inRole: str) -> None:
