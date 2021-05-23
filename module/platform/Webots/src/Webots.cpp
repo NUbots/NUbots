@@ -233,9 +233,6 @@ namespace module::platform {
                 setup_connection(config["server_address"].as<std::string>(), config["port"].as<std::string>());
             });
 
-            // Prime these this reaction, so when only one ServoTargets is present, at least we have the other
-            emit(std::make_unique<RawSensors>());
-
             // Connect to the server
             setup_connection(config["server_address"].as<std::string>(), config["port"].as<std::string>());
         });
