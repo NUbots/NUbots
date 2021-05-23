@@ -82,8 +82,8 @@ namespace module::platform::darwin {
         //      z axis reports a +1g acceleration when robot is vertical
         // The CM740 currently has
         //      x is backward, y is to the left, and z is up
-        sensors.accelerometer.x = -Convert::accelerometer(data.cm740.accelerometer.x);
-        sensors.accelerometer.y = Convert::accelerometer(data.cm740.accelerometer.y);
+        sensors.accelerometer.x = Convert::accelerometer(data.cm740.accelerometer.x);
+        sensors.accelerometer.y = -Convert::accelerometer(data.cm740.accelerometer.y);
         sensors.accelerometer.z = -Convert::accelerometer(data.cm740.accelerometer.z);
 
         // Gyroscope (in radians/second)
