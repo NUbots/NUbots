@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import subprocess
 
 from termcolor import cprint
@@ -16,16 +17,25 @@ def register(command):
     )
 
     command.add_argument(
-        "-l",
-        "--local-build",
-        dest="build_local",
+        "-b",
+        "--build",
+        dest="build",
         action="store_true",
         default=False,
         help="build the image locally, instead of pulling and tagging it",
     )
 
+    command.add_argument(
+        "-n",
+        "--no-pull",
+        dest="should_pull",
+        action="store_false",
+        default=True,
+        help="disable pulling the image from dockerhub",
+    )
 
-def run(target, build_local, **kwargs):
+
+def run(target, build, should_pull, **kwargs):
 
     # Print the current target if no target was selected
     if target is None:
@@ -33,12 +43,23 @@ def run(target, build_local, **kwargs):
         print("Currently selected platform is {}".format(target))
 
     else:
-        # If user wants to build it locally, do that
-        if build_local:
-            platform.build(defaults.image, target)
-        # Else, pull the image from dockerhub
-        else:
+        # We check if a build is necessary by diffing the docker folder with master
+        output = subprocess.run(
+            ["git", "diff", "origin/master", os.path.join(b.project_dir, "docker")], capture_output=True
+        ).stdout
+        # If there are changes in tracked files in the docker folder when comparing with master,
+        # we want to build the image and we don't want to pull the image
+        if output != b"":
+            build = True
+            should_pull = False
+
+        if should_pull:
+            # Pull the image from dockerhub
             platform.pull(defaults.image, target)
+
+        # If user wants or needs to build it locally, do that
+        if build:
+            platform.build(defaults.image, target)
 
         # Tag the result image as the selected image
         tag = "{}:{}".format(defaults.image, target)

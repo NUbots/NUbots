@@ -134,11 +134,11 @@ def pull(repository, platform):
     selected_tag = "{}:selected".format(repository)
 
     print("Pulling remote image", remote_tag)
-    err = subprocess.run(["docker", "pull", remote_tag], stderr=DEVNULL, stdout=DEVNULL).returncode
+    err = subprocess.run(["docker", "pull", remote_tag]).returncode
     if err != 0:
         raise RuntimeError("docker image pull returned a non-zero exit code")
 
     print("Tagging ", remote_tag, "as", local_tag)
-    err = subprocess.run(["docker", "tag", remote_tag, local_tag], stderr=DEVNULL, stdout=DEVNULL).returncode
+    err = subprocess.run(["docker", "tag", remote_tag, local_tag]).returncode
     if err != 0:
         raise RuntimeError("docker image tag returned a non-zero exit code")
