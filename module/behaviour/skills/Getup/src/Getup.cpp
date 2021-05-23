@@ -52,14 +52,12 @@ namespace module::behaviour::skills {
         , isFront(true)
         , gettingUp(false)
         , fallenCheck()
+        , FALLEN_ANGLE(M_PI_2)
         , GETUP_PRIORITY(0.0f)
         , EXECUTION_PRIORITY(0.0f) {
         // do a little configurating
         on<Configuration>("Getup.yaml").then([this](const Configuration& file) {
-            // encode fallen angle as a cosine so we can compare it directly to the z
-            // axis value
-            double fallenAngleConfig = file["FALLEN_ANGLE"].as<double>();
-            FALLEN_ANGLE             = cos(fallenAngleConfig);
+            FALLEN_ANGLE = file["FALLEN_ANGLE"].as<float>();
 
             // load priorities for the getup
             GETUP_PRIORITY     = file["GETUP_PRIORITY"].as<float>();
