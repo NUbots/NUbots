@@ -24,7 +24,7 @@
 #include <mutex>
 #include <nuclear>
 
-#include "message/platform/darwin/DarwinSensors.hpp"
+#include "message/platform/RawSensors.hpp"
 
 namespace module::platform::darwin {
 
@@ -36,14 +36,14 @@ namespace module::platform::darwin {
      */
     class HardwareSimulator : public NUClear::Reactor {
     private:
-        message::platform::darwin::DarwinSensors sensors;
+        message::platform::RawSensors sensors;
 
-        std::queue<message::platform::darwin::DarwinSensors::Gyroscope> gyroQueue;
+        std::queue<message::platform::RawSensors::Gyroscope> gyroQueue;
         std::mutex gyroQueueMutex;
 
         float imu_drift_rate                     = 0;
         static constexpr size_t UPDATE_FREQUENCY = 90;
-        void addNoise(std::unique_ptr<message::platform::darwin::DarwinSensors>& sensors);
+        void addNoise(std::unique_ptr<message::platform::RawSensors>& sensors);
         struct NoiseConfig {
             NoiseConfig() : accelerometer(), gyroscope() {}
             struct Vec3Noise {

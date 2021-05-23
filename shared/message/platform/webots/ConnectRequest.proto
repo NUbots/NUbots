@@ -14,23 +14,17 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2021 NUbots <nubots@nubots.net>
  */
+
 syntax = "proto3";
 
-package message.behaviour;
+package message.platform.webots;
 
-import "google/protobuf/timestamp.proto";
-
-message ServoCommand {
-    uint64                    source   = 1;
-    google.protobuf.Timestamp time     = 2;
-    uint32                    id       = 3;
-    float                     position = 4;
-    float                     gain     = 5;
-    float                     torque   = 6;
-}
-
-message ServoCommands {
-    repeated ServoCommand commands = 1;
+/** The message to send when we connect or want to reconnect to the webots robocup simulation
+ * https://cdn.robocup.org/hl/wp/2021/03/v-hsc_simulator_api.pdf
+ */
+message ConnectRequest {
+    uint32 teamId   = 1;
+    uint32 playerId = 2;
 }
