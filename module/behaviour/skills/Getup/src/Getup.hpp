@@ -32,9 +32,6 @@ namespace module::behaviour::skills {
      */
     class Getup : public NUClear::Reactor {
     private:
-        // If accelerometer z value faals below this threshold then we have fallen over
-        static constexpr double FALLEN_THRESHOLD = 8.0;
-
         const size_t id;
 
         bool isFront;
