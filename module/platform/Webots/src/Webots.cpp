@@ -245,17 +245,21 @@ namespace module::platform {
                                                                   const RawSensors& sensors) {
             // Loop through each of our commands
             for (const auto& target : targets.targets) {
+                // Get the difference between the current servo position and our servo target
                 const double diff = utility::math::angle::difference(
                     double(target.position),
                     utility::platform::getRawServo(target.id, sensors).present_position);
+                // Get the difference between the current time and the time the servo should reach its target
                 NUClear::clock::duration duration = target.time - NUClear::clock::now();
 
                 double speed = 0.0;
+                // If we have a positive duration, find the velocity
                 if (duration.count() > 0) {
                     speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
                 }
                 else {
-                    // We have a speed of 0, which means 'move as fast as you can'
+                    // The duraction is negative, so the servo should have reached its position before now
+                    // Because of this, we move the servo as fast as we can to reach the position.
                     // 5.236 == 50 rpm which is similar to the max speed of the servos
                     speed = 5.236;
                 }
