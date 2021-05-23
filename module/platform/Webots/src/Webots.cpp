@@ -31,10 +31,8 @@
 #include "message/motion/ServoTarget.hpp"
 #include "message/output/CompressedImage.hpp"
 #include "message/platform/RawSensors.hpp"
-#include "message/platform/webots/ConnectRequest.hpp"
 #include "message/platform/webots/messages.hpp"
 
-#include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 #include "utility/platform/RawSensors.hpp"
 #include "utility/vision/fourcc.hpp"
@@ -63,16 +61,13 @@ namespace module::platform {
     using message::platform::RawSensors;
 
     using message::platform::webots::ActuatorRequests;
-    using message::platform::webots::ConnectRequest;
     using message::platform::webots::Message;
     using message::platform::webots::MotorPID;
     using message::platform::webots::MotorPosition;
-    using message::platform::webots::MotorTorque;
     using message::platform::webots::MotorVelocity;
     using message::platform::webots::SensorMeasurements;
     using message::platform::webots::SensorTimeStep;
 
-    using utility::input::ServoID;
     using utility::platform::getRawServo;
     using utility::vision::fourcc;
 
@@ -253,7 +248,7 @@ namespace module::platform {
                 double speed = 0.0;
                 // If we have a positive duration, find the velocity
                 if (duration.count() > 0) {
-                    speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
+                    speed = diff / std::chrono::duration_cast<std::chrono::duration<double>>(duration).count();
                 }
                 else {
                     // The duration is negative, so the servo should have reached its position before now
@@ -273,9 +268,10 @@ namespace module::platform {
                     servo_state[target.id].id    = target.id;
                     servo_state[target.id].name  = translate_id_servo(target.id);
 
-                    servo_state[target.id].p_gain        = target.gain;
-                    servo_state[target.id].i_gain        = target.gain * 0.0;
-                    servo_state[target.id].d_gain        = target.gain * 0.0;
+                    servo_state[target.id].p_gain = target.gain;
+                    // `i` and `d` gains are always 0
+                    // servo_state[target.id].i_gain        = target.gain * 0.0;
+                    // servo_state[target.id].d_gain        = target.gain * 0.0;
                     servo_state[target.id].moving_speed  = speed;
                     servo_state[target.id].goal_position = target.position;
 
