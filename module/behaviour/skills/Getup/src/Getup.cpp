@@ -51,7 +51,6 @@ namespace module::behaviour::skills {
         , isFront(true)
         , gettingUp(false)
         , fallenCheck()
-        , FALLEN_ANGLE(0.0f)
         , GETUP_PRIORITY(0.0f)
         , EXECUTION_PRIORITY(0.0f) {
         // do a little configurating
@@ -89,24 +88,22 @@ namespace module::behaviour::skills {
                 }
             });
 
-        on<Trigger<ExecuteGetup>, With<RawSensors>>().then(
-            "Execute Getup",
-            [this](const std::list<std::shared_ptr<const RawSensors>>& sensors) {
-                gettingUp = true;
+        on<Trigger<ExecuteGetup>>().then("Execute Getup", [this]() {
+            gettingUp = true;
 
-                // Check with side we're getting up from
-                if (isFront) {
-                    emit(std::make_unique<ExecuteScriptByName>(
-                        id,
-                        std::vector<std::string>({"RollOverFront.yaml", "StandUpBack.yaml", "Stand.yaml"})));
-                }
-                else {
-                    emit(std::make_unique<ExecuteScriptByName>(
-                        id,
-                        std::vector<std::string>({"StandUpBack.yaml", "Stand.yaml"})));
-                }
-                updatePriority(EXECUTION_PRIORITY);
-            });
+            // Check with side we're getting up from
+            if (isFront) {
+                emit(std::make_unique<ExecuteScriptByName>(
+                    id,
+                    std::vector<std::string>({"RollOverFront.yaml", "StandUpBack.yaml", "Stand.yaml"})));
+            }
+            else {
+                emit(std::make_unique<ExecuteScriptByName>(
+                    id,
+                    std::vector<std::string>({"StandUpBack.yaml", "Stand.yaml"})));
+            }
+            updatePriority(EXECUTION_PRIORITY);
+        });
 
         on<Trigger<KillGetup>>().then([this] {
             gettingUp = false;
