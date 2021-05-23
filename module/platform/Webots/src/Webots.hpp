@@ -20,8 +20,10 @@
 #ifndef MODULE_PLATFORM_WEBOTS_HPP
 #define MODULE_PLATFORM_WEBOTS_HPP
 
+#include <array>
 #include <atomic>
 #include <nuclear>
+#include <string>
 #include <vector>
 
 #include "message/platform/webots/ConnectRequest.hpp"
