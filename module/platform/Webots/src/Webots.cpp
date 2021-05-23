@@ -191,19 +191,19 @@ namespace module::platform {
 
         // Loop through the linked list of potential options for connecting. In order of best to worst.
         for (addrinfo* addr_ptr = address; addr_ptr != NULL; addr_ptr = addr_ptr->ai_next) {
-            fd = socket(addr_ptr->ai_family, addr_ptr->ai_socktype, addr_ptr->ai_protocol);
+            int fd_temp = socket(addr_ptr->ai_family, addr_ptr->ai_socktype, addr_ptr->ai_protocol);
 
-            if (fd == -1) {
+            if (fd_temp == -1) {
                 // Bad fd
                 continue;
             }
-            else if (connect(fd, addr_ptr->ai_addr, addr_ptr->ai_addrlen) != -1) {
+            else if (connect(fd_temp, addr_ptr->ai_addr, addr_ptr->ai_addrlen) != -1) {
                 // Connection successful
                 freeaddrinfo(address);
-                return fd;
+                return fd_temp;
             }
             // Connection was not successful
-            close(fd);
+            close(fd_temp);
         }
 
         // No connection was successful
