@@ -266,9 +266,10 @@ namespace module::platform {
                     servo_state[target.id].id    = target.id;
                     servo_state[target.id].name  = translate_id_servo(target.id);
 
-                    servo_state[target.id].p_gain        = target.gain;
-                    servo_state[target.id].i_gain        = target.gain * 0.0;
-                    servo_state[target.id].d_gain        = target.gain * 0.0;
+                    servo_state[target.id].p_gain = target.gain;
+                    // `i` and `d` gains are always 0
+                    // servo_state[target.id].i_gain        = target.gain * 0.0;
+                    // servo_state[target.id].d_gain        = target.gain * 0.0;
                     servo_state[target.id].moving_speed  = speed;
                     servo_state[target.id].goal_position = target.position;
 
