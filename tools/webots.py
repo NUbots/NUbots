@@ -51,13 +51,15 @@ def run(sub_command, role=None, **kwargs):
             # Clean config
             err = subprocess.run(["./b", "configure", "--clean"]).returncode
             if err != 0:
-                cprint("returned exit code {} during NUbots docker volume clean and default configure.".format(err), "red", attrs=["bold"])
+                cprint(
+                    "returned exit code {} during NUbots docker volume clean and default configure.".format(err),
+                    "red",
+                    attrs=["bold"],
+                )
                 exit(err)
 
         # Set build config
-        err = subprocess.run(
-            ["./b", "configure", "--", "-DCMAKE_BUILD_TYPE=Release", "--", "-DROLE_webots=ON"]
-        ).returncode
+        err = subprocess.run(["./b", "configure", "--", "-DCMAKE_BUILD_TYPE=Release", "-DROLE_webots=ON"]).returncode
         if err != 0:
             cprint("returned exit code {} configuring NUbots.".format(err), "red", attrs=["bold"])
             exit(err)
@@ -71,7 +73,11 @@ def run(sub_command, role=None, **kwargs):
         # Copy compiled binaries and runtime dependancies out of build volume
         err = subprocess.run(["./b", "install", "local", "-t"]).returncode
         if err != 0:
-            cprint("returned exit code {} during copying of binaries to local directory.".format(err), "red", attrs=["bold"])
+            cprint(
+                "returned exit code {} during copying of binaries to local directory.".format(err),
+                "red",
+                attrs=["bold"],
+            )
             exit(err)
 
         # Build image!
@@ -80,7 +86,11 @@ def run(sub_command, role=None, **kwargs):
             ["docker", "build", "-t", "nugus_sim:robocup", "-f", "./nugus_sim_Dockerfile", "."]
         ).returncode
         if err != 0:
-            cprint("returned exit code {} during build stage of RoboCup2021 docker image.".format(err), "red", attrs=["bold"])
+            cprint(
+                "returned exit code {} during build stage of RoboCup2021 docker image.".format(err),
+                "red",
+                attrs=["bold"],
+            )
             exit(err)
 
     # Just for testing atm

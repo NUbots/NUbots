@@ -61,7 +61,6 @@ def run(target, user, config, toolchain, **kwargs):
 
     cprint("Installing binaries to " + target_binary_dir, "blue", attrs=["bold"])
     files = glob.glob(os.path.join(build_dir, "bin", "*"))
-    print(["rsync", "-avPl", "--checksum", "-e ssh"] + files + [target_binary_dir])
     subprocess.run(["rsync", "-avPl", "--checksum", "-e ssh"] + files + [target_binary_dir])
 
     if toolchain:

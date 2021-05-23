@@ -56,35 +56,37 @@ def set_env_vars(config: dict) -> None:
     os.chdir(CONFIG_DIR)
 
     # ROBOCUP_ROBOT_ID
-    file_name = "GlobalConfig.yaml"
-    with open(file_name) as file:
+    global_config_fname = "GlobalConfig.yaml"
+    with open(global_config_fname) as file:
         data = yaml.load(file)
+
     data["player_id"] = int(config["ROBOCUP_ROBOT_ID"])
 
-    with open(file_name, "w") as file:
+    with open(global_config_fname, "w") as file:
         yaml.dump(data, file)
 
-    file_name = "GameController.yaml"
-    with open(file_name) as file:
+    game_controller_fname = "GameController.yaml"
+    with open(game_controller_fname) as file:
         data = yaml.load(file)
+
     data["player_id"] = int(config["ROBOCUP_ROBOT_ID"])
 
-    with open(file_name, "w") as file:
+    with open(game_controller_fname, "w") as file:
         yaml.dump(data, file)
 
     # ROBOCUP_TEAM_COLOR
     # ??
 
     # ROBOCUP_SIMULATOR_ADDR
-    file_name = "webots.yaml"
+    webots_config_fname = "webots.yaml"
     webots_addr, webots_port = config["ROBOCUP_SIMULATOR_ADDR"].split(":", 2)
 
-    with open(file_name) as file:
+    with open(webots_config_fname) as file:
         data = yaml.load(file)
     data["server_address"] = str(webots_addr)
     data["port"] = int(webots_port)
 
-    with open(file_name, "w") as file:
+    with open(webots_config_fname, "w") as file:
         yaml.dump(data, file)
 
 
