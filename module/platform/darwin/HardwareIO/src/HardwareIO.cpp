@@ -415,7 +415,7 @@ namespace module::platform::darwin {
             commandList->targets.push_back(command);
 
             // Emit it so it's captured by the reaction above
-            emit<Scope::DIRECT>(std::move(commandList));
+            emit<Scope::DIRECT>(commandList);
         });
 
         // If we get a HeadLED command then write it
