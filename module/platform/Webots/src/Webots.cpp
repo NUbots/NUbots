@@ -243,11 +243,12 @@ namespace module::platform {
                 const double diff = utility::math::angle::difference(
                     double(target.position),
                     utility::platform::getRawServo(target.id, sensors).present_position);
-                NUClear::clock::duration duration = target.time - NUClear::clock::now();
 
-                double speed = 0.0;
+                NUClear::clock::duration duration = target.time - NUClear::clock::now();
+                double speed                      = 0.0;
+                // If the clock has moved forward since the last update, then we can have a non-zero speed
                 if (duration.count() > 0) {
-                    speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
+                    speed = diff / std::chrono::duration_cast<std::chrono::duration<double>>(duration).count();
                 }
 
                 // Update our internal state
