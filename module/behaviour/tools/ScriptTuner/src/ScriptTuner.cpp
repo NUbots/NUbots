@@ -207,11 +207,11 @@ namespace module::behaviour::tools {
 
         auto waypoints = std::make_unique<ServoTargets>();
         for (auto& target : script.frames[frame].targets) {
-            waypoints->targets.push_back(ServoTarget{NUClear::clock::now() + std::chrono::milliseconds(1000),
-                                                     target.id,
-                                                     target.position,
-                                                     target.gain,
-                                                     target.torque});
+            waypoints->targets.emplace_back(NUClear::clock::now() + std::chrono::milliseconds(1000),
+                                            target.id,
+                                            target.position,
+                                            target.gain,
+                                            target.torque);
         }
 
         emit(std::move(waypoints));
