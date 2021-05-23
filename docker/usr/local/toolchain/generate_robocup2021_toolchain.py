@@ -20,4 +20,4 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    generate_toolchains.generate(args.prefix, "generic", target)
+    generate_toolchains.generate(args.prefix, "robocup2021", target)
