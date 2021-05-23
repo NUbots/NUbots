@@ -74,7 +74,7 @@ namespace module::behaviour::skills {
                 for (const auto& s : sensors) {
                     acc_reading += s->accelerometer.z;
                 }
-                acc_reading = acc_reading / 20.0;
+                acc_reading = acc_reading / double(sensors.size());
 
                 // check that the accelerometer reading is less than some predetermined
                 // ammount
@@ -95,7 +95,7 @@ namespace module::behaviour::skills {
                 for (const auto& s : sensors) {
                     acc_reading += s->accelerometer.y;
                 }
-                acc_reading = acc_reading / 20.0;
+                acc_reading = acc_reading / double(sensors.size());
 
                 // Check with side we're getting up from
                 if (acc_reading > acc_threshold) {
