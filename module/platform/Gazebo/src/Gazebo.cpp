@@ -83,14 +83,6 @@ namespace module::platform {
             emit(msg);
         });
 
-        on<Trigger<std::vector<ServoTarget>>>().then([this](const std::vector<ServoTarget>& commands) {
-            auto msg = std::make_unique<ServoTargets>();
-            for (const auto& command : commands) {
-                msg->targets.push_back(command);
-            }
-            emit(msg);
-        });
-
         on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
             auto msg     = std::make_unique<GazeboTargets>();
             msg->model   = config.model_name;
