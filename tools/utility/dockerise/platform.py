@@ -117,15 +117,6 @@ def build(repository, platform):
         cprint("Docker build returned exit code {}".format(err), "red", attrs=["bold"])
         exit(err)
 
-    # If we were building the selected platform then update our selected tag
-    if _selected:
-        err = subprocess.run(
-            ["docker", "image", "tag", "{}:{}".format(repository, platform), selected_tag],
-            stdout=subprocess.DEVNULL,
-        ).returncode
-        if err != 0:
-            raise RuntimeError("docker image tag returned a non-zero exit code")
-
 
 def pull(repository, platform):
     # Define our tag strings
