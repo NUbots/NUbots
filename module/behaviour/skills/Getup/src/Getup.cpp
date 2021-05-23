@@ -72,7 +72,7 @@ namespace module::behaviour::skills {
                 for (const auto& s : sensors) {
                     acc_reading += Eigen::Vector3d(s->accelerometer.x, s->accelerometer.y, s->accelerometer.z);
                 }
-                acc_reading.normalize();
+                acc_reading = (acc_reading / double(sensors.size())).normalized();
 
                 // check that the accelerometer reading is less than some predetermined
                 // amount
