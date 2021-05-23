@@ -69,7 +69,6 @@ namespace module::behaviour::skills {
         fallenCheck = on<Last<20, Trigger<RawSensors>>, Single>().then(
             "Getup Fallen Check",
             [this](const std::list<std::shared_ptr<const RawSensors>>& sensors) {
-
                 Eigen::Vector3d acc_reading = Eigen::Vector3d::Zero();
 
                 for (const auto& s : sensors) {
@@ -81,7 +80,7 @@ namespace module::behaviour::skills {
                 // amount
                 if (!gettingUp && std::acos(EigenVector3d::UnitZ().dot(acc_reading)) > FALLEN_ANGLE) {
                     isFront = false;
-                    if(pi/2 - std::acos(EigenVector3d::UnitX().dot(acc_reading)) > 0.0){
+                    if (pi / 2 - std::acos(EigenVector3d::UnitX().dot(acc_reading)) > 0.0) {
                         isFront = true;
                     }
 
