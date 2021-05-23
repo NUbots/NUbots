@@ -42,6 +42,7 @@ namespace module::platform::darwin {
 
     using message::input::Sensors;
     using message::motion::ServoTarget;
+    using message::motion::ServoTargets;
     using message::platform::RawSensors;
 
     using utility::input::ServoID;
@@ -254,8 +255,8 @@ namespace module::platform::darwin {
             });
 
         // This trigger writes the servo positions to the hardware
-        on<Trigger<std::vector<ServoTarget>>>().then([this](const std::vector<ServoTarget>& commands) {
-            for (auto& command : commands) {
+        on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
+            for (auto& command : commands.targets) {
 
                 // Calculate our moving speed
                 float diff = utility::math::angle::difference(
@@ -279,11 +280,11 @@ namespace module::platform::darwin {
         });
 
         on<Trigger<ServoTarget>>().then([this](const ServoTarget command) {
-            auto commandList = std::make_unique<std::vector<ServoTarget>>();
-            commandList->push_back(command);
+            auto commandList = std::make_unique<ServoTargets>();
+            commandList->targets.push_back(command);
 
             // Emit it so it's captured by the reaction above
-            emit<Scope::DIRECT>(std::move(commandList));
+            emit<Scope::DIRECT>(commandList);
         });
     }
 
