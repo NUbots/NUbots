@@ -79,10 +79,8 @@ namespace module::behaviour::skills {
                 // check that the accelerometer reading is less than some predetermined
                 // amount
                 if (!gettingUp && std::acos(Eigen::Vector3d::UnitZ().dot(acc_reading)) > FALLEN_ANGLE) {
-                    isFront = false;
-                    if (M_PI / 2 - std::acos(EigenVector3d::UnitX().dot(acc_reading)) > 0.0) {
-                        isFront = true;
-                    }
+                    // If we are on our side, treat it as being on our front, hopefully the rollover will help matters
+                    isFront = (M_PI_2 - std::acos(Eigen::Vector3d::UnitX().dot(acc_reading)) >= 0.0);
 
                     updatePriority(GETUP_PRIORITY);
                     fallenCheck.disable();
