@@ -19,6 +19,7 @@
 
 #include "Getup.hpp"
 
+#include <Eigen/Core>
 #include <cmath>
 
 #include "extension/Configuration.hpp"
@@ -79,7 +80,7 @@ namespace module::behaviour::skills {
                 // amount
                 if (!gettingUp && std::acos(EigenVector3d::UnitZ().dot(acc_reading)) > FALLEN_ANGLE) {
                     isFront = false;
-                    if (pi / 2 - std::acos(EigenVector3d::UnitX().dot(acc_reading)) > 0.0) {
+                    if (M_PI / 2 - std::acos(EigenVector3d::UnitX().dot(acc_reading)) > 0.0) {
                         isFront = true;
                     }
 
