@@ -413,7 +413,7 @@ namespace module::platform {
             "Simulator Update Loop",
             [this] {
                 // Construct the ActuatorRequests message
-                ActuatorRequests actuator_requests;
+                ActuatorRequests actuator_requests = create_sensor_time_steps(time_step);
                 for (auto& servo : servo_state) {
                     if (servo.dirty) {
                         // Servo is no longer dirty
