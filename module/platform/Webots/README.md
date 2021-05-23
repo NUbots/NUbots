@@ -2,7 +2,7 @@ webots
 ======
 
 ## Description
-A module to connect to the Robocup controller in Webots and exchange protobuf messages with it.
+A module to connect to Webots controllers and exchange protobuf messages with them.
 
 ## Usage
 Add the ip for the computer running Webots, and the port the controller is listening on. For Robocup the port determines
