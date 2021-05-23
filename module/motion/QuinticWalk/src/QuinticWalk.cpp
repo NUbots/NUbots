@@ -6,7 +6,6 @@
 
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/KinematicsModel.hpp"
-#include "message/motion/ServoTarget.hpp"
 #include "message/motion/WalkCommand.hpp"
 #include "message/support/SaveConfiguration.hpp"
 
@@ -26,7 +25,6 @@ namespace module::motion {
     using message::motion::ExecuteGetup;
     using message::motion::KillGetup;
     using message::motion::KinematicsModel;
-    using message::motion::ServoTarget;
     using message::motion::StopCommand;
     using message::motion::WalkCommand;
     using utility::support::Expression;
