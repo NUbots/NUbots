@@ -258,7 +258,7 @@ namespace module::platform {
                     speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
                 }
                 else {
-                    // The duraction is negative, so the servo should have reached its position before now
+                    // The duration is negative, so the servo should have reached its position before now
                     // Because of this, we move the servo as fast as we can to reach the position.
                     // 5.236 == 50 rpm which is similar to the max speed of the servos
                     speed = 5.236;
