@@ -254,6 +254,11 @@ namespace module::platform {
                 if (duration.count() > 0) {
                     speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
                 }
+                else {
+                    // We have a speed of 0, which means 'move as fast as you can'
+                    // 5.236 == 50 rpm which is similar to the max speed of the servos
+                    speed = 5.236;
+                }
 
                 // Update our internal state
                 if (servo_state[target.id].p_gain != target.gain || servo_state[target.id].i_gain != target.gain * 0.0
