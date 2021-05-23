@@ -31,10 +31,8 @@
 #include "message/motion/ServoTarget.hpp"
 #include "message/output/CompressedImage.hpp"
 #include "message/platform/RawSensors.hpp"
-#include "message/platform/webots/ConnectRequest.hpp"
 #include "message/platform/webots/messages.hpp"
 
-#include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 #include "utility/platform/RawSensors.hpp"
 #include "utility/vision/fourcc.hpp"
@@ -62,16 +60,13 @@ namespace module::platform {
     using message::platform::RawSensors;
 
     using message::platform::webots::ActuatorRequests;
-    using message::platform::webots::ConnectRequest;
     using message::platform::webots::Message;
     using message::platform::webots::MotorPID;
     using message::platform::webots::MotorPosition;
-    using message::platform::webots::MotorTorque;
     using message::platform::webots::MotorVelocity;
     using message::platform::webots::SensorMeasurements;
     using message::platform::webots::SensorTimeStep;
 
-    using utility::input::ServoID;
     using utility::platform::getRawServo;
     using utility::vision::fourcc;
 
