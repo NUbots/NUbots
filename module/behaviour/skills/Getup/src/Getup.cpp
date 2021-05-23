@@ -48,6 +48,7 @@ namespace module::behaviour::skills {
     Getup::Getup(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
         , id(size_t(this) * size_t(this) - size_t(this))
+        , isFront(true)
         , gettingUp(false)
         , fallenCheck()
         , FALLEN_ANGLE(0.0f)
@@ -68,37 +69,34 @@ namespace module::behaviour::skills {
         fallenCheck = on<Last<20, Trigger<RawSensors>>, Single>().then(
             "Getup Fallen Check",
             [this](const std::list<std::shared_ptr<const RawSensors>>& sensors) {
-                const double acc_threshold = 8.0;
-                double acc_reading         = 0.0;
+
+                Eigen::Vector3d acc_reading = Eigen::Vector3d::Zero();
 
                 for (const auto& s : sensors) {
-                    acc_reading += s->accelerometer.z;
+                    acc_reading += Eigen::Vector3d(s->accelerometer.x, s->accelerometer.y, s->accelerometer.z);
                 }
-                acc_reading = acc_reading / double(sensors.size());
+                acc_reading.normalize();
 
                 // check that the accelerometer reading is less than some predetermined
                 // amount
-                if (!gettingUp && acc_reading < acc_threshold) {
+                if (!gettingUp && std::acos(EigenVector3d::UnitZ().dot(acc_reading)) > FALLEN_ANGLE) {
+                    isFront = false;
+                    if(pi/2 - std::acos(EigenVector3d::UnitX().dot(acc_reading)) > 0.0){
+                        isFront = true;
+                    }
+
                     updatePriority(GETUP_PRIORITY);
                     fallenCheck.disable();
                 }
             });
 
-        on<Trigger<ExecuteGetup>, Last<20, With<RawSensors>>>().then(
+        on<Trigger<ExecuteGetup>, With<RawSensors>>().then(
             "Execute Getup",
             [this](const std::list<std::shared_ptr<const RawSensors>>& sensors) {
                 gettingUp = true;
 
-                const double acc_threshold = 8.0;
-                double acc_reading         = 0.0;
-
-                for (const auto& s : sensors) {
-                    acc_reading += s->accelerometer.y;
-                }
-                acc_reading = acc_reading / double(sensors.size());
-
                 // Check with side we're getting up from
-                if (acc_reading > acc_threshold) {
+                if (isFront) {
                     emit(std::make_unique<ExecuteScriptByName>(
                         id,
                         std::vector<std::string>({"RollOverFront.yaml", "StandUpBack.yaml", "Stand.yaml"})));
