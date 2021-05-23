@@ -43,6 +43,7 @@ namespace module::behaviour::skills {
         ReactionHandle fallenCheck;
 
         /// config settings
+        float FALLEN_ANGLE;
         float GETUP_PRIORITY;
         float EXECUTION_PRIORITY;
 
