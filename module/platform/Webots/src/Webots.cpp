@@ -228,7 +228,7 @@ namespace module::platform {
                 setup_connection(config["server_address"].as<std::string>(), config["port"].as<std::string>());
             });
 
-            // Prime these this reaction, so when only one ServoTargets is present, at least we have the other
+            // Prime this reaction, so when only one ServoTargets is present, at least we have the other
             emit(std::make_unique<RawSensors>());
 
             // Connect to the server
@@ -314,7 +314,7 @@ namespace module::platform {
             return;
         }
 
-        // Initaliase the string with ???????
+        // Initialise the string with ???????
         std::string initial_message = std::string(7, '?');
         const int n                 = recv(fd, initial_message.data(), sizeof(initial_message), MSG_WAITALL);
 
@@ -350,16 +350,16 @@ namespace module::platform {
         utility::clock::last_update = NUClear::base_clock::now();
 
         // Now that we are connected, we can set up our reaction handles with this file descriptor and send the sensor
-        // timestamps message
+        // timesteps message
 
-        // Create the sensor timestamps message
+        // Create the sensor timesteps message
         // This will activate all of the sensors in the simulator
         const std::vector<char> data =
             NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(create_sensor_time_steps(time_step));
 
         const uint32_t Nn = htonl(data.size());
 
-        // Send the sensor timestamps message
+        // Send the sensor timesteps message
         if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
             log<NUClear::ERROR>(fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
             return;
