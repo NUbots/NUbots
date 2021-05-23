@@ -45,6 +45,7 @@ namespace module::behaviour::tools {
     using extension::Script;
 
     using message::motion::ServoTarget;
+    using message::motion::ServoTargets;
     using message::platform::RawSensors;
 
     using utility::behaviour::RegisterAction;
