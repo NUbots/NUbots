@@ -25,8 +25,8 @@
 #include "extension/Script.hpp"
 
 #include "message/behaviour/ServoCommand.hpp"
-#include "message/input/Sensors.hpp"
 #include "message/motion/GetupCommand.hpp"
+#include "message/platform/RawSensors.hpp"
 
 #include "utility/behaviour/Action.hpp"
 #include "utility/input/LimbID.hpp"
@@ -36,9 +36,9 @@ namespace module::behaviour::skills {
     using extension::Configuration;
     using extension::ExecuteScriptByName;
 
-    using message::input::Sensors;
     using message::motion::ExecuteGetup;
     using message::motion::KillGetup;
+    using message::platform::RawSensors;
 
     using utility::behaviour::ActionPriorities;
     using utility::behaviour::RegisterAction;
