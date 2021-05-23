@@ -45,6 +45,7 @@ namespace module::behaviour::tools {
     using extension::Script;
 
     using message::motion::ServoTarget;
+    using message::motion::ServoTargets;
     using message::platform::RawSensors;
 
     using utility::behaviour::RegisterAction;
@@ -204,13 +205,13 @@ namespace module::behaviour::tools {
     void ScriptTuner::activateFrame(int frame) {
         this->frame = frame;
 
-        auto waypoints = std::make_unique<std::vector<ServoTarget>>();
+        auto waypoints = std::make_unique<ServoTargets>();
         for (auto& target : script.frames[frame].targets) {
-            waypoints->push_back(ServoTarget{NUClear::clock::now() + std::chrono::milliseconds(1000),
-                                             target.id,
-                                             target.position,
-                                             target.gain,
-                                             target.torque});
+            waypoints->targets.emplace_back(NUClear::clock::now() + std::chrono::milliseconds(1000),
+                                            target.id,
+                                            target.position,
+                                            target.gain,
+                                            target.torque);
         }
 
         emit(std::move(waypoints));

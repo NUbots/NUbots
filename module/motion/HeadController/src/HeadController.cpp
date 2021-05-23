@@ -41,6 +41,7 @@ namespace module::motion {
     using ServoID = utility::input::ServoID;
     using extension::Configuration;
     using message::behaviour::ServoCommand;
+    using message::behaviour::ServoCommands;
     using message::input::Sensors;
     using message::motion::HeadCommand;
     using message::motion::KinematicsModel;
@@ -148,15 +149,19 @@ namespace module::motion {
 
 
                 // Create message
-                auto waypoints = std::make_unique<std::vector<ServoCommand>>();
-                waypoints->reserve(2);
+                auto waypoints = std::make_unique<ServoCommands>();
+                waypoints->commands.reserve(2);
                 auto t = NUClear::clock::now();
                 for (auto& angle : goalAnglesList) {
-                    waypoints->push_back(
-                        {id, t, angle.first, angle.second, float(head_motor_gain), float(head_motor_torque)});
+                    waypoints->commands.emplace_back(id,
+                                                     t,
+                                                     angle.first,
+                                                     angle.second,
+                                                     float(head_motor_gain),
+                                                     float(head_motor_torque));
                 }
                 // Send commands
-                emit(std::move(waypoints));
+                emit(waypoints);
             });
 
         updateHandle.disable();

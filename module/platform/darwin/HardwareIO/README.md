@@ -21,15 +21,14 @@ To change the colour of the Darwin's head or eye LEDs, emit a
 containing the colour you wish to set them to.
 
 To control the Darwin's servos, use `message::motion::ServoTarget`. You may
-emit these commands individually or emit several at once in a `std::vector`.
+emit these commands individually or emit several at once in a `message::motion::ServoTargets`.
 
 ## Consumes
 
 - `message::platform::RawSensors::EyeLED` requesting a change to eye LED colour
 - `message::platform::RawSensors::HeadLED` requesting a change to head LED colour
 - `message::motion::ServoTarget` requesting a single servo command be performed
-- `std::vector<message::motion::ServoTarget>` requesting a batch of servo
-  commands be performed
+- `message::motion::ServoTargets` requesting a batch of servo commands be performed
 
 ## Emits
 
