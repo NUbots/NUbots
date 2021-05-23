@@ -43,6 +43,7 @@
 extern "C" {
 #include <netdb.h>      /* definition of gethostbyname */
 #include <netinet/in.h> /* definition of struct sockaddr_in */
+#include <sys/ioctl.h>  /* definition of ioctl and FIONREAD */
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <unistd.h> /* definition of close */
@@ -302,166 +303,197 @@ namespace module::platform {
     }
 
     void Webots::setup_connection(const std::string& server_address, const std::string& port) {
-        // Unbind any previous reaction handles
-        read_io.unbind();
-        send_io.unbind();
-        error_io.unbind();
+        // This will return false if a reconnection is not currently in progress
+        if (!active_reconnect.exchange(true)) {
+            // Unbind any previous reaction handles
+            read_io.unbind();
+            send_io.unbind();
+            error_io.unbind();
 
-        if (fd != -1) {
-            // Disconnect the fd gracefully
-            shutdown(fd, SHUT_RDWR);
-            close(fd);
-        }
-
-        fd = tcpip_connect(server_address, port);
-
-        if (fd == -1) {
-            // Connection failed
-            // TODO(Cameron) Try to reconnect after a delay.
-            // setup_connection(server_address, port);
-            log<NUClear::FATAL>("Quitting due to failed connection attempt");
-            powerplant.shutdown();
-            return;
-        }
-
-        // Initaliase the string with ???????
-        std::string initial_message = std::string(7, '?');
-        const int n                 = recv(fd, initial_message.data(), sizeof(initial_message), MSG_WAITALL);
-
-        if (n >= 0) {
-            if (initial_message == "Welcome") {
-                // good
-                log<NUClear::INFO>(fmt::format("Connected to {}:{}", server_address, port));
-            }
-            else if (initial_message == "Refused") {
-                log<NUClear::FATAL>(
-                    fmt::format("Connection to {}:{} refused: your ip is not white listed.", server_address, port));
-                // Halt and don't retry as reconnection is pointless.
+            if (fd != -1) {
+                // Disconnect the fd gracefully
+                shutdown(fd, SHUT_RDWR);
                 close(fd);
-                powerplant.shutdown();
             }
-            else {
-                log<NUClear::FATAL>(fmt::format("{}:{} sent unknown initial message", server_address, port));
-                // Halt and don't retry as the other end is clearly not Webots
-                close(fd);
-                powerplant.shutdown();
-            }
-        }
-        else {
-            // There was nothing sent
-            log<NUClear::DEBUG>("Connection was closed.");
-            setup_connection(server_address, port);
-            return;
-        }
 
-        // Set the real time of the connection initiation
-        connect_time = NUClear::clock::now();
-        // Reset the simulation connection time
-        utility::clock::last_update = NUClear::base_clock::now();
+            fd = tcpip_connect(server_address, port);
 
-        // Now that we are connected, we can set up our reaction handles with this file descriptor and send the sensor
-        // timestamps message
-
-        // Create the sensor timestamps message
-        // This will activate all of the sensors in the simulator
-        const std::vector<char> data =
-            NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(create_sensor_time_steps(time_step));
-
-        const uint32_t Nn = htonl(data.size());
-
-        // Send the sensor timestamps message
-        if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
-            log<NUClear::ERROR>(fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
-            return;
-        }
-        if (send(fd, data.data(), data.size(), 0) != (signed) data.size()) {
-            log<NUClear::ERROR>(fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
-            return;
-        }
-
-        // Receiving
-        read_io = on<IO>(fd, IO::READ).then([this]() {
-            // ************************** Receiving ***************************************
-            // Get the size of the message
-            uint32_t Nn;
-            if (recv(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
-                log<NUClear::ERROR>("Failed to read message size from TCP connection");
+            if (fd == -1) {
+                // Connection failed
+                log<NUClear::ERROR>("Failed to connect to server.");
+                active_reconnect.store(false);
                 return;
             }
 
-            // Convert from network endian to host endian
-            const uint32_t Nh = ntohl(Nn);
+            // Initaliase the string with ???????
+            std::string initial_message = std::string(7, '?');
+            const int n                 = recv(fd, initial_message.data(), sizeof(initial_message), MSG_WAITALL);
 
-            // Get the message
-            std::vector<char> data(Nh, 0);
-            uint64_t message = uint64_t(recv(fd, data.data(), Nh, MSG_WAITALL));
-            if (message != Nh) {
-                log<NUClear::ERROR>("Failed to read message from TCP connection");
+            if (n >= 0) {
+                if (initial_message == "Welcome") {
+                    // good
+                    log<NUClear::INFO>(fmt::format("Connected to {}:{}", server_address, port));
+                }
+                else if (initial_message == "Refused") {
+                    log<NUClear::FATAL>(
+                        fmt::format("Connection to {}:{} refused: your IP is not white listed.", server_address, port));
+                    // Halt and don't retry as reconnection is pointless.
+                    close(fd);
+                    powerplant.shutdown();
+                }
+                else {
+                    log<NUClear::FATAL>(fmt::format("{}:{} sent unknown initial message", server_address, port));
+                    // Halt and don't retry as the other end is clearly not Webots
+                    close(fd);
+                    powerplant.shutdown();
+                }
+            }
+            else {
+                // There was nothing sent
+                log<NUClear::DEBUG>("Connection was closed.");
+                active_reconnect.store(false);
                 return;
             }
 
-            log<NUClear::TRACE>("Received sensor measurements");
+            // Set the real time of the connection initiation
+            connect_time = NUClear::clock::now();
+            // Reset the simulation connection time
+            utility::clock::last_update = NUClear::base_clock::now();
 
-            // If we have data to deserialise then deserialise the message into a neutron
-            if (Nh > 0) {
-                translate_and_emit_sensor(NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(data));
+            // Now that we are connected, we can set up our reaction handles with this file descriptor and send the
+            // sensor timestamps message
+
+            // Create the sensor timestamps message
+            // This will activate all of the sensors in the simulator
+            const std::vector<char> data =
+                NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(create_sensor_time_steps(time_step));
+
+            const uint32_t Nn = htonl(data.size());
+
+            // Send the sensor timestamps message
+            if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
+                log<NUClear::ERROR>(
+                    fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
+                active_reconnect.store(false);
+                return;
             }
-            // If we don't have any data then this should correspond to a message with all fields set to defaults
-            else {
-                translate_and_emit_sensor(SensorMeasurements(SensorMeasurements::protobuf_type()));
+            if (send(fd, data.data(), data.size(), 0) != signed(data.size())) {
+                log<NUClear::ERROR>(fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
+                active_reconnect.store(false);
+                return;
             }
 
-            // Service the watchdog
-            emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
-        });
+            // Receiving
+            read_io = on<IO>(fd, IO::READ | IO::CLOSE | IO::ERROR).then("Read Stream", [this](const IO::Event& event) {
+                if ((event.events & IO::READ) != 0) {
+                    // Service the watchdog
+                    emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
 
-        send_io = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then(
-            "Simulator Update Loop",
-            [this] {
-                // Construct the ActuatorRequests message
-                ActuatorRequests actuator_requests = create_sensor_time_steps(time_step);
-                for (auto& servo : servo_state) {
-                    if (servo.dirty) {
-                        // Servo is no longer dirty
-                        servo.dirty = false;
+                    // Work out how many bytes are available to read in the buffer and ensure we have enough space to
+                    // read them in our data buffer
+                    unsigned long available = 0;
+                    if (::ioctl(fd, FIONREAD, &available) < 0) {
+                        log<NUClear::ERROR>(fmt::format("Error querying for available data, {}", strerror(errno)));
+                        return;
+                    }
+                    buffer.reserve(buffer.size() + available);
 
-                        // Create servo position message
-                        actuator_requests.motor_positions.emplace_back(MotorPosition(servo.name, servo.goal_position));
+                    // Read data into our buffer and resize it to the new data we read
+                    auto bytes_read = ::read(fd, buffer.data() + buffer.size(), buffer.capacity() - buffer.size());
+                    buffer.resize(buffer.size() + bytes_read);
 
-                        // Create servo velocity message
-                        actuator_requests.motor_velocities.emplace_back(MotorVelocity(servo.name, servo.moving_speed));
+                    // Function to read the payload length from the buffer
+                    auto read_length = [](const std::vector<uint8_t>& buffer) {
+                        return buffer.size() >= sizeof(uint32_t)
+                                   ? ntohl(*reinterpret_cast<const uint32_t*>(buffer.data()))
+                                   : 0;
+                    };
 
-                        // Create servo PID message
-                        actuator_requests.motor_pids.emplace_back(
-                            MotorPID(servo.name, {servo.p_gain, servo.i_gain, servo.d_gain}));
+                    // So long as we have enough bytes to process an entire packet, process the packets
+                    for (uint32_t length = read_length(buffer); buffer.size() >= length + sizeof(length);
+                         length          = read_length(buffer)) {
+                        // Decode the protocol buffer and emit it as a message
+                        char* payload = reinterpret_cast<char*>(buffer.data()) + sizeof(length);
+
+                        // TODO do something here with this payload and length to extract the protocol buffer and emit
+                        // it
+                        log<NUClear::TRACE>("Received sensor measurements");
+                        translate_and_emit_sensor(
+                            NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(payload, length));
+
+                        // Delete the packet we just read ready to read the next one
+                        buffer.erase(buffer.begin(), std::next(buffer.begin(), sizeof(length) + length));
                     }
                 }
 
-                // Serialise ActuatorRequests
-                std::vector<char> data =
-                    NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(actuator_requests);
-
-                // Size of the message, in network endian
-                uint32_t Nn = htonl(data.size());
-
-                // Send the message size first
-                if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
-                    log<NUClear::ERROR>(
-                        fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
+                // For IO::ERROR and IO::CLOSE conditions the watchdog will handle reconnections so just report the
+                // error
+                else if ((event.events & IO::ERROR) != 0) {
+                    if (!active_reconnect.exchange(true)) {
+                        log<NUClear::WARN>(
+                            fmt::format("An invalid request or some other error occurred. Closing our connection"));
+                    }
                 }
-
-                // Now send the data
-                if (send(fd, data.data(), data.size(), 0) != int(data.size())) {
-                    log<NUClear::ERROR>(fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
+                else if ((event.events & IO::CLOSE) != 0) {
+                    if (!active_reconnect.exchange(true)) {
+                        log<NUClear::WARN>(fmt::format("The Remote hung up. Closing our connection"));
+                    }
                 }
-
-                log<NUClear::TRACE>("Sending actuator request.");
             });
 
-        error_io = on<IO>(fd, IO::CLOSE | IO::ERROR).then([this, server_address, port](const IO::Event& /*event*/) {
-            // Something went wrong, reopen the connection
-            setup_connection(server_address, port);
-        });
+            send_io = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then(
+                "Simulator Update Loop",
+                [this] {
+                    // Construct the ActuatorRequests message
+                    ActuatorRequests actuator_requests = create_sensor_time_steps(time_step);
+                    for (auto& servo : servo_state) {
+                        if (servo.dirty) {
+                            // Servo is no longer dirty
+                            servo.dirty = false;
+
+                            // Create servo position message
+                            actuator_requests.motor_positions.emplace_back(
+                                MotorPosition(servo.name, servo.goal_position));
+
+                            // Create servo velocity message
+                            actuator_requests.motor_velocities.emplace_back(
+                                MotorVelocity(servo.name, servo.moving_speed));
+
+                            // Create servo PID message
+                            actuator_requests.motor_pids.emplace_back(
+                                MotorPID(servo.name, {servo.p_gain, servo.i_gain, servo.d_gain}));
+                        }
+                    }
+
+                    // Serialise ActuatorRequests
+                    std::vector<char> data =
+                        NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(actuator_requests);
+
+                    // Size of the message, in network endian
+                    uint32_t Nn = htonl(data.size());
+
+                    // Send the message size first
+                    if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
+                        log<NUClear::ERROR>(
+                            fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
+                    }
+
+                    // Now send the data
+                    if (send(fd, data.data(), data.size(), 0) != int(data.size())) {
+                        log<NUClear::ERROR>(fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
+                    }
+
+                    log<NUClear::TRACE>("Sending actuator request.");
+                });
+
+            error_io = on<IO>(fd, IO::CLOSE | IO::ERROR).then([this, server_address, port](const IO::Event& /*event*/) {
+                // Something went wrong, reopen the connection
+                setup_connection(server_address, port);
+            });
+
+            // Reconnection has now completed
+            active_reconnect.store(false);
+        }
     }
 
     void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurements) {

@@ -20,7 +20,9 @@
 #ifndef MODULE_PLATFORM_WEBOTS_HPP
 #define MODULE_PLATFORM_WEBOTS_HPP
 
+#include <atomic>
 #include <nuclear>
+#include <vector>
 
 #include "message/platform/webots/ConnectRequest.hpp"
 #include "message/platform/webots/messages.hpp"
@@ -98,6 +100,12 @@ namespace module::platform {
 
         /// @brief Our current servo states
         std::array<ServoState, 20> servo_state;
+
+        /// @brief Buffer for storing received messages
+        std::vector<uint8_t> buffer;
+
+        /// @brief Atomic variable indicating that a reconnect is currently in progress
+        std::atomic_bool active_reconnect;
 
     public:
         /// @brief Called by the powerplant to build and setup the webots reactor
