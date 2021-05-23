@@ -72,7 +72,7 @@ namespace module::behaviour::skills {
                 double acc_reading   = 0.0;
 
                 for (const auto& s : sensors) {
-                    acc_reading += s->accelerometer[2];
+                    acc_reading += s->accelerometer.z;
                 }
                 acc_reading = acc_reading / 20.0;
 
@@ -93,7 +93,7 @@ namespace module::behaviour::skills {
                 double acc_reading   = 0.0;
 
                 for (const auto& s : sensors) {
-                    acc_reading += s->accelerometer[1];
+                    acc_reading += s->accelerometer.y;
                 }
                 acc_reading = acc_reading / 20.0;
 
