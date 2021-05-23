@@ -422,6 +422,8 @@ namespace module::platform {
                         // Create servo velocity message
                         actuator_requests.motor_velocities.emplace_back(MotorVelocity(servo.name, servo.moving_speed));
 
+                        // TODO: Add FSRs message
+
                         // Create servo PID message
                         actuator_requests.motor_pids.emplace_back(
                             MotorPID(servo.name, {servo.p_gain, servo.i_gain, servo.d_gain}));
