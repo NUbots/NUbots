@@ -21,4 +21,4 @@ player_port:
         - "10023"
         - "10024"
 
-time_step: 32
+time_step: 8
