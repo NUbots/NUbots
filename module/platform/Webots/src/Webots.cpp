@@ -329,9 +329,6 @@ namespace module::platform {
             // Receiving
             read_io = on<IO>(fd, IO::READ | IO::CLOSE | IO::ERROR).then("Read Stream", [this](const IO::Event& event) {
                 if ((event.events & IO::READ) != 0) {
-                    // Service the watchdog
-                    emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
-
                     // If we have not seen the welcome message yet, look for it
                     if (!connection_active) {
                         // Initaliase the string with ???????
@@ -408,6 +405,9 @@ namespace module::platform {
                             buffer.erase(buffer.begin(), std::next(buffer.begin(), sizeof(length) + length));
                         }
                     }
+
+                    // Service the watchdog
+                    emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
                 }
 
                 // For IO::ERROR and IO::CLOSE conditions the watchdog will handle reconnections so just report
