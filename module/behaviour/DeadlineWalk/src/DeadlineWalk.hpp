@@ -21,7 +21,6 @@
 #define MODULES_BEHAVIOUR_STRATEGY_CONTROLLABLEDARWIN_HPP
 
 #include <Eigen/Core>
-// #include <mutex>
 #include <nuclear>
 
 #include "utility/input/LimbID.hpp"
@@ -37,26 +36,11 @@ namespace module::behaviour::strategy {
         Eigen::Vector2f velocity;
         float rotation = 0.0f;
 
-        // std::mutex mutex;
-
         void create_windows();
         void forward();
-        void left();
-        void back();
-        void right();
-        void turn_left();
-        void turn_right();
-        void get_up();
-        void reset();
-        void kick(utility::input::LimbID::Value l);
-        void look_left();
-        void look_right();
-        void look_up();
-        void look_down();
-        void walk_toggle();
+        // void get_up();
 
         void update_command();
-        void print_status();
 
     public:
         /// @brief Called by the powerplant to build and setup the KeyboardWalk reactor.

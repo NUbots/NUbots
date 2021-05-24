@@ -17,13 +17,13 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
+#include "DeadlineWalk.hpp"
+
 #include <clocale>
 #include <csignal>
 #include <cstdio>
 #include <fmt/format.h>
 #include <fmt/ostream.h>
-
-#include "KeyboardWalk.hpp"
 
 #include "message/behaviour/MotionCommand.hpp"
 
@@ -42,7 +42,13 @@ namespace module::behaviour::strategy {
     KeyboardWalk::KeyboardWalk(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), velocity(Eigen::Vector2f::Zero()) {
 
-        // update_command();
+        on<Configuration>("Deadline.yaml").then("Empty deadline config", [this](const Configuration& config) {
+            forward();
+            forward();
+            forward();
+            moving = true;
+            update_command();
+        });
     }
 
     void KeyboardWalk::forward() {
@@ -52,54 +58,11 @@ namespace module::behaviour::strategy {
         log<NUClear::INFO>("forward");
     }
 
-    void KeyboardWalk::left() {
-        velocity.y() += DIFF;
-        update_command();
-        print_status();
-        log<NUClear::INFO>("left");
-    }
-
-    void KeyboardWalk::back() {
-        velocity.x() -= DIFF;
-        update_command();
-        print_status();
-        log<NUClear::INFO>("back");
-    }
-
-    void KeyboardWalk::right() {
-        velocity.y() -= DIFF;
-        update_command();
-        print_status();
-        log<NUClear::INFO>("right");
-    }
-
-    void KeyboardWalk::get_up() {
-        update_command();
-        print_status();
-        log<NUClear::INFO>("getup");
-    }
-
-    // void KeyboardWalk::walk_toggle() {
-    //     if (moving) {
-    //         emit(std::make_unique<MotionCommand>(utility::behaviour::StandStill()));
-    //         moving = false;
-    //     }
-    //     else {
-    //         moving = true;
-    //         update_command();
-    //     }
+    // void KeyboardWalk::get_up() {
+    //     update_command();
     //     print_status();
+    //     log<NUClear::INFO>("getup");
     // }
-
-    void KeyboardWalk::reset() {
-        velocity   = Eigen::Vector2f::Zero();
-        rotation   = 0.0f;
-        head_yaw   = 0.0f;
-        head_pitch = 0.0f;
-        update_command();
-        print_status();
-        log<NUClear::INFO>("reset");
-    }
 
     void KeyboardWalk::update_command() {
         if (moving) {
