@@ -14,6 +14,6 @@ nuclear_role(
   # Behaviour
   behaviour::Controller
   behaviour::skills::DirectWalkController
-  behaviour::strategy::DeadlineWalk
+  behaviour::DeadlineWalk
   platform::Webots
 )
