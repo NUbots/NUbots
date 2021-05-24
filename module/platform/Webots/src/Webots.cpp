@@ -166,7 +166,7 @@ namespace module::platform {
         return msg;
     }
 
-    int Webots::tcpip_connect(const std::string& server_name, const std::string& port) {
+    int Webots::tcpip_connect() {
         // Hints for the connection type
         addrinfo hints;
         memset(&hints, 0, sizeof(addrinfo));  // Defaults on what we do not explicitly set
@@ -177,9 +177,9 @@ namespace module::platform {
         addrinfo* address;
 
         int error;
-        if ((error = getaddrinfo(server_name.c_str(), port.c_str(), &hints, &address)) != 0) {
+        if ((error = getaddrinfo(server_address.c_str(), server_port.c_str(), &hints, &address)) != 0) {
             log<NUClear::ERROR>(fmt::format("Cannot resolve server name: {}. Error {}. Error code {}",
-                                            server_name,
+                                            server_address,
                                             gai_strerror(error),
                                             error));
             return -1;
@@ -204,7 +204,7 @@ namespace module::platform {
 
         // No connection was successful
         freeaddrinfo(address);
-        log<NUClear::ERROR>(fmt::format("Cannot connect to server: {}:{}", server_name, port));
+        log<NUClear::ERROR>(fmt::format("Cannot connect to server: {}:{}", server_address, server_port));
         return -1;
     }
 
@@ -223,14 +223,19 @@ namespace module::platform {
             else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
             // clang-format on
 
+            clock_smoothing = config["clock_smoothing"].as<double>();
+
+            server_address = config["server_address"].as<std::string>();
+            server_port    = config["port"].as<std::string>();
+
             on<Watchdog<Webots, 5, std::chrono::seconds>>().then([this, config] {
                 // We haven't received any messages lately
-                log<NUClear::ERROR>("Connection timed out.");
-                setup_connection(config["server_address"].as<std::string>(), config["port"].as<std::string>());
+                log<NUClear::WARN>("Connection timed out. Attempting reconnect");
+                setup_connection();
             });
 
             // Connect to the server
-            setup_connection(config["server_address"].as<std::string>(), config["port"].as<std::string>());
+            setup_connection();
         });
 
         // This trigger updates our current servo state
@@ -245,16 +250,14 @@ namespace module::platform {
                 // Get the difference between the current time and the time the servo should reach its target
                 NUClear::clock::duration duration = target.time - NUClear::clock::now();
 
-                double speed = 0.0;
+                // The duration is negative, so the servo should have reached its position before now
+                // Because of this, we move the servo as fast as we can to reach the position.
+                // 5.236 == 50 rpm which is similar to the max speed of the servos
+                double speed = 5.236;
+
                 // If we have a positive duration, find the velocity
                 if (duration.count() > 0) {
                     speed = diff / std::chrono::duration_cast<std::chrono::duration<double>>(duration).count();
-                }
-                else {
-                    // The duration is negative, so the servo should have reached its position before now
-                    // Because of this, we move the servo as fast as we can to reach the position.
-                    // 5.236 == 50 rpm which is similar to the max speed of the servos
-                    speed = 5.236;
                 }
 
                 // Update our internal state
@@ -298,9 +301,11 @@ namespace module::platform {
         });
     }
 
-    void Webots::setup_connection(const std::string& server_address, const std::string& port) {
+    void Webots::setup_connection() {
         // This will return false if a reconnection is not currently in progress
         if (!active_reconnect.exchange(true)) {
+            connection_active = false;
+
             // Unbind any previous reaction handles
             read_io.unbind();
             send_io.unbind();
@@ -312,69 +317,11 @@ namespace module::platform {
                 close(fd);
             }
 
-            fd = tcpip_connect(server_address, port);
+            fd = tcpip_connect();
 
             if (fd == -1) {
                 // Connection failed
                 log<NUClear::ERROR>("Failed to connect to server.");
-                active_reconnect.store(false);
-                return;
-            }
-
-            // Initaliase the string with ???????
-            std::string initial_message = std::string(7, '?');
-            const int n                 = recv(fd, initial_message.data(), sizeof(initial_message), MSG_WAITALL);
-
-            if (n >= 0) {
-                if (initial_message == "Welcome") {
-                    // good
-                    log<NUClear::INFO>(fmt::format("Connected to {}:{}", server_address, port));
-                }
-                else if (initial_message == "Refused") {
-                    log<NUClear::FATAL>(
-                        fmt::format("Connection to {}:{} refused: your IP is not white listed.", server_address, port));
-                    // Halt and don't retry as reconnection is pointless.
-                    close(fd);
-                    powerplant.shutdown();
-                }
-                else {
-                    log<NUClear::FATAL>(fmt::format("{}:{} sent unknown initial message", server_address, port));
-                    // Halt and don't retry as the other end is clearly not Webots
-                    close(fd);
-                    powerplant.shutdown();
-                }
-            }
-            else {
-                // There was nothing sent
-                log<NUClear::DEBUG>("Connection was closed.");
-                active_reconnect.store(false);
-                return;
-            }
-
-            // Set the real time of the connection initiation
-            connect_time = NUClear::clock::now();
-            // Reset the simulation connection time
-            utility::clock::last_update = NUClear::base_clock::now();
-
-            // Now that we are connected, we can set up our reaction handles with this file descriptor and send the
-            // sensor timestamps message
-
-            // Create the sensor timestamps message
-            // This will activate all of the sensors in the simulator
-            const std::vector<char> data =
-                NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(create_sensor_time_steps(time_step));
-
-            const uint32_t Nn = htonl(data.size());
-
-            // Send the sensor timestamps message
-            if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
-                log<NUClear::ERROR>(
-                    fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
-                active_reconnect.store(false);
-                return;
-            }
-            if (send(fd, data.data(), data.size(), 0) != signed(data.size())) {
-                log<NUClear::ERROR>(fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
                 active_reconnect.store(false);
                 return;
             }
@@ -385,45 +332,86 @@ namespace module::platform {
                     // Service the watchdog
                     emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
 
-                    // Work out how many bytes are available to read in the buffer and ensure we have enough space to
-                    // read them in our data buffer
-                    unsigned long available = 0;
-                    if (::ioctl(fd, FIONREAD, &available) < 0) {
-                        log<NUClear::ERROR>(fmt::format("Error querying for available data, {}", strerror(errno)));
-                        return;
+                    // If we have not seen the welcome message yet, look for it
+                    if (!connection_active) {
+                        // Initaliase the string with ???????
+                        std::string initial_message = std::string(7, '?');
+                        const int n                 = ::read(fd, initial_message.data(), sizeof(initial_message));
+
+                        if (n >= 0) {
+                            if (initial_message == "Welcome") {
+                                // good
+                                log<NUClear::INFO>(fmt::format("Connected to {}:{}", server_address, server_port));
+                            }
+                            else if (initial_message == "Refused") {
+                                log<NUClear::FATAL>(
+                                    fmt::format("Connection to {}:{} refused: your IP is not white listed.",
+                                                server_address,
+                                                server_port));
+                                // Halt and don't retry as reconnection is pointless.
+                                close(fd);
+                                powerplant.shutdown();
+                            }
+                            else {
+                                log<NUClear::FATAL>(
+                                    fmt::format("{}:{} sent unknown initial message", server_address, server_port));
+                                // Halt and don't retry as the other end is clearly not Webots
+                                close(fd);
+                                powerplant.shutdown();
+                            }
+                        }
+                        else {
+                            // There was nothing sent
+                            log<NUClear::DEBUG>("Connection was closed.");
+                            active_reconnect.store(false);
+                            return;
+                        }
+
+                        // Set the real time of the connection initiation
+                        connect_time = NUClear::clock::now();
+                        // Reset the simulation connection time
+                        utility::clock::last_update = NUClear::base_clock::now();
+
+                        connection_active = true;
                     }
-                    buffer.reserve(buffer.size() + available);
+                    else {
+                        // Work out how many bytes are available to read in the buffer and ensure we have enough
+                        // space to read them in our data buffer
+                        unsigned long available = 0;
+                        if (::ioctl(fd, FIONREAD, &available) < 0) {
+                            log<NUClear::ERROR>(fmt::format("Error querying for available data, {}", strerror(errno)));
+                            return;
+                        }
+                        const size_t old_size = buffer.size();
+                        buffer.resize(old_size + available);
 
-                    // Read data into our buffer and resize it to the new data we read
-                    auto bytes_read = ::read(fd, buffer.data() + buffer.size(), buffer.capacity() - buffer.size());
-                    buffer.resize(buffer.size() + bytes_read);
+                        // Read data into our buffer and resize it to the new data we read
+                        auto bytes_read = ::read(fd, buffer.data() + old_size, available);
 
-                    // Function to read the payload length from the buffer
-                    auto read_length = [](const std::vector<uint8_t>& buffer) {
-                        return buffer.size() >= sizeof(uint32_t)
-                                   ? ntohl(*reinterpret_cast<const uint32_t*>(buffer.data()))
-                                   : 0;
-                    };
+                        // Function to read the payload length from the buffer
+                        auto read_length = [this](const std::vector<uint8_t>& buffer) {
+                            return buffer.size() >= sizeof(uint32_t)
+                                       ? ntohl(*reinterpret_cast<const uint32_t*>(buffer.data()))
+                                       : 0u;
+                        };
 
-                    // So long as we have enough bytes to process an entire packet, process the packets
-                    for (uint32_t length = read_length(buffer); buffer.size() >= length + sizeof(length);
-                         length          = read_length(buffer)) {
-                        // Decode the protocol buffer and emit it as a message
-                        char* payload = reinterpret_cast<char*>(buffer.data()) + sizeof(length);
+                        // So long as we have enough bytes to process an entire packet, process the packets
+                        for (uint32_t length = read_length(buffer); buffer.size() >= length + sizeof(length);
+                             length          = read_length(buffer)) {
+                            // Decode the protocol buffer and emit it as a message
+                            char* payload = reinterpret_cast<char*>(buffer.data()) + sizeof(length);
 
-                        // TODO do something here with this payload and length to extract the protocol buffer and emit
-                        // it
-                        log<NUClear::TRACE>("Received sensor measurements");
-                        translate_and_emit_sensor(
-                            NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(payload, length));
+                            translate_and_emit_sensor(
+                                NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(payload, length));
 
-                        // Delete the packet we just read ready to read the next one
-                        buffer.erase(buffer.begin(), std::next(buffer.begin(), sizeof(length) + length));
+                            // Delete the packet we just read ready to read the next one
+                            buffer.erase(buffer.begin(), std::next(buffer.begin(), sizeof(length) + length));
+                        }
                     }
                 }
 
-                // For IO::ERROR and IO::CLOSE conditions the watchdog will handle reconnections so just report the
-                // error
+                // For IO::ERROR and IO::CLOSE conditions the watchdog will handle reconnections so just report
+                // the error
                 else if ((event.events & IO::ERROR) != 0) {
                     if (!active_reconnect.exchange(true)) {
                         log<NUClear::WARN>(
@@ -478,14 +466,8 @@ namespace module::platform {
                     if (send(fd, data.data(), data.size(), 0) != int(data.size())) {
                         log<NUClear::ERROR>(fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
                     }
-
                     log<NUClear::TRACE>("Sending actuator request.");
                 });
-
-            error_io = on<IO>(fd, IO::CLOSE | IO::ERROR).then([this, server_address, port](const IO::Event& /*event*/) {
-                // Something went wrong, reopen the connection
-                setup_connection(server_address, port);
-            });
 
             // Reconnection has now completed
             active_reconnect.store(false);
@@ -493,6 +475,27 @@ namespace module::platform {
     }
 
     void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurements) {
+        // ****************************** TIME **************************************
+        // Deal with time first
+
+        // Save our previous deltas
+        const uint32_t prev_sim_delta  = sim_delta;
+        const uint64_t prev_real_delta = real_delta;
+
+        // Update our current deltas
+        real_delta = sensor_measurements.real_time - current_real_time;
+        sim_delta  = sensor_measurements.time - current_sim_time;
+
+        // Calculate our custom rtf - the ratio of the past two sim deltas and the past two real time deltas, smoothed
+        const double ratio =
+            static_cast<double>(sim_delta + prev_sim_delta) / static_cast<double>(real_delta + prev_real_delta);
+        utility::clock::custom_rtf = utility::clock::custom_rtf * clock_smoothing + (1.0 - clock_smoothing) * ratio;
+
+        // ************************* DEBUGGING LOGS *********************************
+
+        // Update our current times
+        current_sim_time  = sensor_measurements.time;
+        current_real_time = sensor_measurements.real_time;
         log<NUClear::TRACE>("received SensorMeasurements:");
         log<NUClear::TRACE>("  sm.time:", sensor_measurements.time);
         log<NUClear::TRACE>("  sm.real_time:", sensor_measurements.real_time);
@@ -635,25 +638,5 @@ namespace module::platform {
             image->data           = camera.image;
             emit(image);
         }
-
-        // ****************************** TIME **************************************
-
-        // Deal with time
-
-        // Save our previous deltas
-        const uint32_t prev_sim_delta  = sim_delta;
-        const uint32_t prev_real_delta = real_delta;
-
-        // Update our current deltas
-        sim_delta  = sensor_measurements.time - current_sim_time;
-        real_delta = sensor_measurements.real_time - current_real_time;
-
-        // Calculate our custom rtf - the ratio of the past two sim deltas and the past two real time deltas
-        utility::clock::custom_rtf =
-            static_cast<double>(sim_delta + prev_sim_delta) / static_cast<double>(real_delta + prev_real_delta);
-
-        // Update our current times
-        current_sim_time  = sensor_measurements.time;
-        current_real_time = sensor_measurements.real_time;
     }
 }  // namespace module::platform

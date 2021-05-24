@@ -124,9 +124,14 @@ namespace module::motion {
 
         on<Trigger<KillGetup>>().then([this]() { falling = false; });
 
-        on<Trigger<StopCommand>>().then([this] { current_orders.setZero(); });
+        on<Trigger<StopCommand>>().then([this](const StopCommand& walkCommand) {
+            subsumptionId = walkCommand.subsumption_id;
+            current_orders.setZero();
+        });
 
         on<Trigger<WalkCommand>>().then([this](const WalkCommand& walkCommand) {
+            subsumptionId = walkCommand.subsumption_id;
+
             // the engine expects orders in [m] not [m/s]. We have to compute by dividing by step frequency which is
             // a double step factor 2 since the order distance is only for a single step, not double step
             const float factor             = (1.0 / (params.freq)) / 2.0;
@@ -166,7 +171,10 @@ namespace module::motion {
             update_handle.enable();
         });
 
-        on<Trigger<DisableWalkEngineCommand>>().then([this] { update_handle.disable(); });
+        on<Trigger<DisableWalkEngineCommand>>().then([this](const DisableWalkEngineCommand& command) {
+            subsumptionId = command.subsumption_id;
+            update_handle.disable();
+        });
 
         update_handle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single>().then([this]() {
             const float dt = getTimeDelta();
@@ -263,7 +271,6 @@ namespace module::motion {
         waypoints->commands.reserve(joints.size());
 
         NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
-
 
         for (auto& joint : joints) {
             waypoints->commands
