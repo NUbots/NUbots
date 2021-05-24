@@ -25,13 +25,16 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 
+#include "extension/Configuration.hpp"
+
 #include "message/behaviour/MotionCommand.hpp"
 
 #include "utility/behaviour/MotionCommand.hpp"
 #include "utility/input/LimbID.hpp"
 
-namespace module::behaviour::strategy {
+namespace module::behaviour {
 
+    using extension::Configuration;
     using message::behaviour::MotionCommand;
     using LimbID = utility::input::LimbID;
 
@@ -39,44 +42,24 @@ namespace module::behaviour::strategy {
     //     std::raise(SIGTERM);  // Change back to SIGINT if required by NUbots messaging system//
     // }
 
-    KeyboardWalk::KeyboardWalk(std::unique_ptr<NUClear::Environment> environment)
+    DeadlineWalk::DeadlineWalk(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), velocity(Eigen::Vector2f::Zero()) {
 
-        on<Configuration>("Deadline.yaml").then("Empty deadline config", [this](const Configuration& config) {
-            forward();
-            forward();
-            forward();
-            moving = true;
+        on<Configuration>("DeadlineWalk.yaml").then("Empty deadline config", [this](const Configuration& /*config*/) {
+            velocity.x() += 4 * DIFF;
             update_command();
         });
     }
 
-    void KeyboardWalk::forward() {
-        velocity.x() += DIFF;
-        update_command();
-        print_status();
-        log<NUClear::INFO>("forward");
-    }
-
-    // void KeyboardWalk::get_up() {
+    // void DeadlineWalk::get_up() {
     //     update_command();
-    //     print_status();
     //     log<NUClear::INFO>("getup");
     // }
 
-    void KeyboardWalk::update_command() {
-        if (moving) {
-            Eigen::Affine2d affineParameter;
-            affineParameter.linear()      = Eigen::Rotation2Dd(rotation).toRotationMatrix();
-            affineParameter.translation() = Eigen::Vector2d(velocity.x(), velocity.y());
-            emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(affineParameter)));
-        }
-
-        auto head_command         = std::make_unique<HeadCommand>();
-        head_command->yaw         = head_yaw;
-        head_command->pitch       = head_pitch;
-        head_command->robot_space = true;
-        emit(head_command);
+    void DeadlineWalk::update_command() {
+        Eigen::Affine2d affineParameter = Eigen::Affine2d::Identity();
+        affineParameter.translation()   = Eigen::Vector2d(velocity.x(), 0.0);
+        emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(affineParameter)));
     }
 
-}  // namespace module::behaviour::strategy
+}  // namespace module::behaviour

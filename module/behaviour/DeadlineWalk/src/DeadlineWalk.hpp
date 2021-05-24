@@ -17,37 +17,33 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_STRATEGY_CONTROLLABLEDARWIN_HPP
-#define MODULES_BEHAVIOUR_STRATEGY_CONTROLLABLEDARWIN_HPP
+#ifndef MODULES_BEHAVIOUR_DEADLINEWALK_HPP
+#define MODULES_BEHAVIOUR_DEADLINEWALK_HPP
 
 #include <Eigen/Core>
 #include <nuclear>
 
 #include "utility/input/LimbID.hpp"
 
-namespace module::behaviour::strategy {
+namespace module::behaviour {
 
-    class KeyboardWalk : public NUClear::Reactor {
+    class DeadlineWalk : public NUClear::Reactor {
     private:
-        static constexpr const float DIFF     = 0.01f;
-        static constexpr const float ROT_DIFF = 0.1f;
+        static constexpr const float DIFF = 0.01f;
 
-        bool moving = false;
         Eigen::Vector2f velocity;
-        float rotation = 0.0f;
 
-        void create_windows();
         void forward();
         // void get_up();
 
         void update_command();
 
     public:
-        /// @brief Called by the powerplant to build and setup the KeyboardWalk reactor.
-        explicit KeyboardWalk(std::unique_ptr<NUClear::Environment> environment);
+        /// @brief Called by the powerplant to build and setup the DeadlineWalk reactor.
+        explicit DeadlineWalk(std::unique_ptr<NUClear::Environment> environment);
     };
 
-}  // namespace module::behaviour::strategy
+}  // namespace module::behaviour
 
 
-#endif
+#endif  // MODULES_BEHAVIOUR_DEADLINEWALK_HPP
