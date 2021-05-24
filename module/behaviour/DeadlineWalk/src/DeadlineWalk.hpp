@@ -21,42 +21,23 @@
 #define MODULES_BEHAVIOUR_STRATEGY_CONTROLLABLEDARWIN_HPP
 
 #include <Eigen/Core>
-#include <mutex>
-#include <ncurses.h>
+// #include <mutex>
 #include <nuclear>
 
 #include "utility/input/LimbID.hpp"
 
 namespace module::behaviour::strategy {
 
-    enum class LogColours : short {
-        TRACE_COLOURS = 1,
-        DEBUG_COLOURS = 2,
-        INFO_COLOURS  = 3,
-        WARN_COLOURS  = 4,
-        ERROR_COLOURS = 5,
-        FATAL_COLOURS = 6
-    };
-
     class KeyboardWalk : public NUClear::Reactor {
     private:
         static constexpr const float DIFF     = 0.01f;
         static constexpr const float ROT_DIFF = 0.1f;
 
-        static constexpr const float HEAD_DIFF = 1.0f * float(M_PI) / 180.0f;
-
         bool moving = false;
         Eigen::Vector2f velocity;
         float rotation = 0.0f;
 
-        float head_yaw   = 0.0f;
-        float head_pitch = 0.0f;
-
-        std::shared_ptr<WINDOW> command_window;
-        std::shared_ptr<WINDOW> log_window;
-        bool colours_enabled;
-
-        std::mutex mutex;
+        // std::mutex mutex;
 
         void create_windows();
         void forward();
@@ -76,11 +57,6 @@ namespace module::behaviour::strategy {
 
         void update_command();
         void print_status();
-        void update_window(const std::shared_ptr<WINDOW>& window,
-                           const LogColours& colours,
-                           const std::string& source,
-                           const std::string& message,
-                           const bool& print_level);
 
     public:
         /// @brief Called by the powerplant to build and setup the KeyboardWalk reactor.
