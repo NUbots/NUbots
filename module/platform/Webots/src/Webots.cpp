@@ -166,7 +166,7 @@ namespace module::platform {
         return msg;
     }
 
-    int Webots::tcpip_connect(const std::string& server_name, const std::string& port) {
+    int Webots::tcpip_connect() {
         // Hints for the connection type
         addrinfo hints;
         memset(&hints, 0, sizeof(addrinfo));  // Defaults on what we do not explicitly set
@@ -177,9 +177,9 @@ namespace module::platform {
         addrinfo* address;
 
         int error;
-        if ((error = getaddrinfo(server_name.c_str(), port.c_str(), &hints, &address)) != 0) {
+        if ((error = getaddrinfo(server_address.c_str(), server_port.c_str(), &hints, &address)) != 0) {
             log<NUClear::ERROR>(fmt::format("Cannot resolve server name: {}. Error {}. Error code {}",
-                                            server_name,
+                                            server_address,
                                             gai_strerror(error),
                                             error));
             return -1;
@@ -204,7 +204,7 @@ namespace module::platform {
 
         // No connection was successful
         freeaddrinfo(address);
-        log<NUClear::ERROR>(fmt::format("Cannot connect to server: {}:{}", server_name, port));
+        log<NUClear::ERROR>(fmt::format("Cannot connect to server: {}:{}", server_address, server_port));
         return -1;
     }
 
@@ -223,14 +223,17 @@ namespace module::platform {
             else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
             // clang-format on
 
+            server_address = config["server_address"].as<std::string>();
+            server_port    = config["port"].as<std::string>();
+
             on<Watchdog<Webots, 5, std::chrono::seconds>>().then([this, config] {
                 // We haven't received any messages lately
-                log<NUClear::ERROR>("Connection timed out.");
-                setup_connection(config["server_address"].as<std::string>(), config["port"].as<std::string>());
+                log<NUClear::WARN>("Connection timed out. Attempting reconnect");
+                setup_connection();
             });
 
             // Connect to the server
-            setup_connection(config["server_address"].as<std::string>(), config["port"].as<std::string>());
+            setup_connection();
         });
 
         // This trigger updates our current servo state
@@ -298,7 +301,7 @@ namespace module::platform {
         });
     }
 
-    void Webots::setup_connection(const std::string& server_address, const std::string& port) {
+    void Webots::setup_connection() {
         // This will return false if a reconnection is not currently in progress
         if (!active_reconnect.exchange(true)) {
             // Unbind any previous reaction handles
@@ -312,7 +315,7 @@ namespace module::platform {
                 close(fd);
             }
 
-            fd = tcpip_connect(server_address, port);
+            fd = tcpip_connect();
 
             if (fd == -1) {
                 // Connection failed
