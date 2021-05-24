@@ -109,6 +109,7 @@ namespace module::platform {
 
         /// @brief Atomic variable indicating that a reconnect is currently in progress
         std::atomic_bool active_reconnect;
+        bool connection_active = false;
 
     public:
         /// @brief Called by the powerplant to build and setup the webots reactor
