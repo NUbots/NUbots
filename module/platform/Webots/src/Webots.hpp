@@ -20,7 +20,11 @@
 #ifndef MODULE_PLATFORM_WEBOTS_HPP
 #define MODULE_PLATFORM_WEBOTS_HPP
 
+#include <array>
+#include <atomic>
 #include <nuclear>
+#include <string>
+#include <vector>
 
 #include "message/platform/webots/ConnectRequest.hpp"
 #include "message/platform/webots/messages.hpp"
@@ -55,7 +59,7 @@ namespace module::platform {
         void translate_and_emit_sensor(const message::platform::webots::SensorMeasurements& sensor_measurements);
 
         /// @brief The current file descriptor used for the connection. It should be kept -1 if no active connection
-        int fd;
+        int fd = -1;
 
         /// @brief The time the connection was opened.
         NUClear::clock::time_point connect_time;
@@ -99,6 +103,12 @@ namespace module::platform {
 
         /// @brief Our current servo states
         std::array<ServoState, 20> servo_state;
+
+        /// @brief Buffer for storing received messages
+        std::vector<uint8_t> buffer;
+
+        /// @brief Atomic variable indicating that a reconnect is currently in progress
+        std::atomic_bool active_reconnect;
 
     public:
         /// @brief Called by the powerplant to build and setup the webots reactor
