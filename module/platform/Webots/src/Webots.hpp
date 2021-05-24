@@ -43,16 +43,17 @@ namespace module::platform {
         /// @brief Handle for error checking on the TCP connection. This will be bound/unbound during (re)connection
         ReactionHandle error_io;
 
+        /// @brief server_name The name or IP address to connect to. If it's an IP, it should be in "X.X.X.X" form
+        std::string server_address;
+        /// @param server_port The port number to connect to on the server
+        std::string server_port;
+
         /// @brief Establish a TCP connection to the specified server/port
-        /// @param server_name The name or IP address to connect to. If it's an IP, it should be in "X.X.X.X" form
-        /// @param port The port number to connect to
         /// @return If the connection was successful, a file descriptor. Else, -1 is returned
-        int tcpip_connect(const std::string& server_name, const std::string& port);
+        int tcpip_connect();
 
         /// @brief Establishes the connection with webots, then binds the reaction handles with the resulting fd
-        /// @param server_address The IP address to connect to, in "X.X.X.X" form
-        /// @param port The port number to connect to
-        void setup_connection(const std::string& server_address, const std::string& port);
+        void setup_connection();
 
         /// @brief Translate sensor measurement messages Webots sends us, emmitting readings as our message types
         /// @param sensor_measurements Message from Webots with information from the sensors
