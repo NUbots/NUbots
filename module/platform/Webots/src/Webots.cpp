@@ -248,16 +248,14 @@ namespace module::platform {
                 // Get the difference between the current time and the time the servo should reach its target
                 NUClear::clock::duration duration = target.time - NUClear::clock::now();
 
-                double speed = 0.0;
+                // The duration is negative, so the servo should have reached its position before now
+                // Because of this, we move the servo as fast as we can to reach the position.
+                // 5.236 == 50 rpm which is similar to the max speed of the servos
+                double speed = 5.236;
+
                 // If we have a positive duration, find the velocity
                 if (duration.count() > 0) {
                     speed = diff / std::chrono::duration_cast<std::chrono::duration<double>>(duration).count();
-                }
-                else {
-                    // The duration is negative, so the servo should have reached its position before now
-                    // Because of this, we move the servo as fast as we can to reach the position.
-                    // 5.236 == 50 rpm which is similar to the max speed of the servos
-                    speed = 5.236;
                 }
 
                 // Update our internal state
