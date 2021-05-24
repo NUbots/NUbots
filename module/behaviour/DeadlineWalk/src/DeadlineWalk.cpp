@@ -28,6 +28,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/MotionCommand.hpp"
+#include "message/motion/KinematicsModel.hpp"
 
 #include "utility/behaviour/MotionCommand.hpp"
 #include "utility/input/LimbID.hpp"
@@ -36,6 +37,7 @@ namespace module::behaviour {
 
     using extension::Configuration;
     using message::behaviour::MotionCommand;
+    using message::motion::KinematicsModel;
     using LimbID = utility::input::LimbID;
 
     // void quit() {
@@ -44,17 +46,12 @@ namespace module::behaviour {
 
     DeadlineWalk::DeadlineWalk(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), velocity(Eigen::Vector2f::Zero()) {
-
-        on<Configuration>("DeadlineWalk.yaml").then("Empty deadline config", [this](const Configuration& /*config*/) {
-            velocity.x() += 4 * DIFF;
+        on<Trigger<KinematicsModel>>().then([this] {
+            velocity.x() = 4 * DIFF;
             update_command();
         });
     }
 
-    // void DeadlineWalk::get_up() {
-    //     update_command();
-    //     log<NUClear::INFO>("getup");
-    // }
 
     void DeadlineWalk::update_command() {
         Eigen::Affine2d affineParameter = Eigen::Affine2d::Identity();
