@@ -73,6 +73,9 @@ namespace module::platform {
         uint32_t current_sim_time = 0;
         /// @brief The current real time in milliseconds (unix time)
         uint64_t current_real_time = 0;
+        /// @brief Interpolation factor to smooth clock. 0.0 is no smoothing (raw updates from webots), 1.0 takes no
+        /// updates from webots
+        double clock_smoothing = 0.0;
 
         /// @brief The time between two measurements, expressed in milliseconds
         int time_step;

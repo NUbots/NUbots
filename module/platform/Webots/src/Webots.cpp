@@ -223,6 +223,8 @@ namespace module::platform {
             else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
             // clang-format on
 
+            clock_smoothing = config["clock_smoothing"].as<double>();
+
             server_address = config["server_address"].as<std::string>();
             server_port    = config["port"].as<std::string>();
 
@@ -473,6 +475,27 @@ namespace module::platform {
     }
 
     void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurements) {
+        // ****************************** TIME **************************************
+        // Deal with time first
+
+        // Save our previous deltas
+        const uint32_t prev_sim_delta  = sim_delta;
+        const uint64_t prev_real_delta = real_delta;
+
+        // Update our current deltas
+        real_delta = sensor_measurements.real_time - current_real_time;
+        sim_delta  = sensor_measurements.time - current_sim_time;
+
+        // Calculate our custom rtf - the ratio of the past two sim deltas and the past two real time deltas, smoothed
+        const double ratio =
+            static_cast<double>(sim_delta + prev_sim_delta) / static_cast<double>(real_delta + prev_real_delta);
+        utility::clock::custom_rtf = utility::clock::custom_rtf * clock_smoothing + (1.0 - clock_smoothing) * ratio;
+
+        // ************************* DEBUGGING LOGS *********************************
+
+        // Update our current times
+        current_sim_time  = sensor_measurements.time;
+        current_real_time = sensor_measurements.real_time;
         log<NUClear::TRACE>("received SensorMeasurements:");
         log<NUClear::TRACE>("  sm.time:", sensor_measurements.time);
         log<NUClear::TRACE>("  sm.real_time:", sensor_measurements.real_time);
@@ -615,25 +638,5 @@ namespace module::platform {
             image->data           = camera.image;
             emit(image);
         }
-
-        // ****************************** TIME **************************************
-
-        // Deal with time
-
-        // Save our previous deltas
-        const uint32_t prev_sim_delta  = sim_delta;
-        const uint32_t prev_real_delta = real_delta;
-
-        // Update our current deltas
-        sim_delta  = sensor_measurements.time - current_sim_time;
-        real_delta = sensor_measurements.real_time - current_real_time;
-
-        // Calculate our custom rtf - the ratio of the past two sim deltas and the past two real time deltas
-        utility::clock::custom_rtf =
-            static_cast<double>(sim_delta + prev_sim_delta) / static_cast<double>(real_delta + prev_real_delta);
-
-        // Update our current times
-        current_sim_time  = sensor_measurements.time;
-        current_real_time = sensor_measurements.real_time;
     }
 }  // namespace module::platform
