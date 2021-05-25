@@ -33,7 +33,7 @@ namespace module::motion {
     class HeadController : public NUClear::Reactor {
     private:
         const size_t id;
-        double min_yaw, max_yaw, min_pitch, max_pitch, head_motor_gain, head_motor_torque, p_gain;
+        float min_yaw, max_yaw, min_pitch, max_pitch, head_motor_gain, head_motor_torque, p_gain;
         ReactionHandle updateHandle;
         // Debug var:
         NUClear::clock::time_point lastTime;

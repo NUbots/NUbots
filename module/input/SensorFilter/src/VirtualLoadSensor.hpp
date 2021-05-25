@@ -92,14 +92,14 @@ namespace module::input {
                 }
             }
             if (accelerometer) {
-                logits[index++] = sensors.accelerometer.x();
-                logits[index++] = sensors.accelerometer.y();
-                logits[index++] = sensors.accelerometer.z();
+                logits[index++] = Scalar(sensors.accelerometer.x());
+                logits[index++] = Scalar(sensors.accelerometer.y());
+                logits[index++] = Scalar(sensors.accelerometer.z());
             }
             if (gyroscope) {
-                logits[index++] = sensors.gyroscope.x();
-                logits[index++] = sensors.gyroscope.y();
-                logits[index++] = sensors.gyroscope.z();
+                logits[index++] = Scalar(sensors.gyroscope.x());
+                logits[index++] = Scalar(sensors.gyroscope.y());
+                logits[index++] = Scalar(sensors.gyroscope.z());
             }
 
             // Run the neural network
@@ -114,8 +114,8 @@ namespace module::input {
                 }
                 // Sigmoid final layer
                 else {
-                    logits =
-                        logits.unaryExpr([](const Scalar& value) { return Scalar(1.0 / (1.0 + std::exp(-value))); });
+                    logits = logits.unaryExpr(
+                        [](const Scalar& value) { return Scalar(1) / (Scalar(1) + std::exp(-value)); });
                 }
             }
 
@@ -127,10 +127,10 @@ namespace module::input {
 
             for (size_t leg = 0; leg < 2; leg++) {
                 // We have some certainty in our measurement
-                if (state[leg] > certainty_threshold) {
+                if (state[Eigen::Index(leg)] > certainty_threshold) {
                     output_state[leg] = true;
                 }
-                if (state[leg] < uncertainty_threshold) {
+                if (state[Eigen::Index(leg)] < uncertainty_threshold) {
                     output_state[leg] = false;
                 }
             }

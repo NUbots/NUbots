@@ -9,7 +9,7 @@ namespace module::output::compressor::turbojpeg {
 
     class Compressor : public compressor::Compressor {
     public:
-        Compressor(const int& quality, const uint32_t& width, const uint32_t& height, const uint32_t& format);
+        Compressor(const uint32_t& quality, const uint32_t& width, const uint32_t& height, const uint32_t& format);
         Compressor(const Compressor&) = default;
         Compressor(Compressor&&)      = default;
         Compressor& operator=(const Compressor&) = default;
@@ -19,7 +19,7 @@ namespace module::output::compressor::turbojpeg {
 
     private:
         /// The JPEG quality to compress with
-        int quality;
+        uint32_t quality;
         /// The image width
         uint32_t width;
         /// The image height

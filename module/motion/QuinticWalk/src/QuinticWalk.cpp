@@ -76,7 +76,7 @@ namespace module::motion {
             params.foot_overshoot_ratio          = cfg["walk"]["foot"]["overshoot"]["ratio"].as<float>();
             params.foot_overshoot_phase          = cfg["walk"]["foot"]["overshoot"]["phase"].as<float>();
             params.trunk_height                  = cfg["walk"]["trunk"]["height"].as<float>();
-            params.trunk_pitch                   = 1.0f + cfg["walk"]["trunk"]["pitch"].as<Expression>();
+            params.trunk_pitch                   = 1.0f + float(cfg["walk"]["trunk"]["pitch"].as<Expression>());
             params.trunk_phase                   = cfg["walk"]["trunk"]["phase"].as<float>();
             params.trunk_x_offset                = cfg["walk"]["trunk"]["x_offset"].as<float>();
             params.trunk_y_offset                = cfg["walk"]["trunk"]["y_offset"].as<float>();
@@ -84,12 +84,14 @@ namespace module::motion {
             params.trunk_pause                   = cfg["walk"]["trunk"]["pause"].as<float>();
             params.trunk_x_offset_p_coef_forward = cfg["walk"]["trunk"]["x_offset_p_coef"]["forward"].as<float>();
             params.trunk_x_offset_p_coef_turn    = cfg["walk"]["trunk"]["x_offset_p_coef"]["turn"].as<float>();
-            params.trunk_pitch_p_coef_forward = 1.0f + cfg["walk"]["trunk"]["pitch_p_coef"]["forward"].as<Expression>();
-            params.trunk_pitch_p_coef_turn    = 1.0f + cfg["walk"]["trunk"]["pitch_p_coef"]["turn"].as<Expression>();
-            params.kick_length                = cfg["walk"]["kick"]["length"].as<float>();
-            params.kick_phase                 = cfg["walk"]["kick"]["phase"].as<float>();
-            params.kick_vel                   = cfg["walk"]["kick"]["vel"].as<float>();
-            params.pause_duration             = cfg["walk"]["pause"]["duration"].as<float>();
+            params.trunk_pitch_p_coef_forward =
+                1.0f + float(cfg["walk"]["trunk"]["pitch_p_coef"]["forward"].as<Expression>());
+            params.trunk_pitch_p_coef_turn =
+                1.0f + float(cfg["walk"]["trunk"]["pitch_p_coef"]["turn"].as<Expression>());
+            params.kick_length    = cfg["walk"]["kick"]["length"].as<float>();
+            params.kick_phase     = cfg["walk"]["kick"]["phase"].as<float>();
+            params.kick_vel       = cfg["walk"]["kick"]["vel"].as<float>();
+            params.pause_duration = cfg["walk"]["pause"]["duration"].as<float>();
 
             // Send these parameters to the walk engine
             walk_engine.setParameters(params);
@@ -131,7 +133,7 @@ namespace module::motion {
         on<Trigger<WalkCommand>>().then([this](const WalkCommand& walkCommand) {
             // the engine expects orders in [m] not [m/s]. We have to compute by dividing by step frequency which is
             // a double step factor 2 since the order distance is only for a single step, not double step
-            const float factor             = (1.0 / (params.freq)) / 2.0;
+            const float factor             = (1.0f / (params.freq)) / 2.0f;
             const Eigen::Vector3f& command = walkCommand.command.cast<float>() * factor;
 
             // Clamp velocity command
@@ -190,8 +192,7 @@ namespace module::motion {
     float QuinticWalk::getTimeDelta() {
         // compute time delta depended if we are currently in simulation or reality
         auto current_time = NUClear::clock::now();
-        float dt =
-            std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_update_time).count() / 1000.0f;
+        float dt          = std::chrono::duration<float, std::milli>(current_time - last_update_time).count() / 1000.0f;
 
         if (dt == 0.0f) {
             // log<NUClear::WARN>(fmt::format("dt was 0 ({})", time_diff_ms.count()));

@@ -40,7 +40,7 @@ namespace module::behaviour::skills {
         message::motion::KickScriptCommand kickCommand;
 
         void updatePriority(const float& priority);
-        int getDirectionalQuadrant(float x, float y);
+        int getDirectionalQuadrant(const double& x, const double& y);
     };
 }  // namespace module::behaviour::skills
 

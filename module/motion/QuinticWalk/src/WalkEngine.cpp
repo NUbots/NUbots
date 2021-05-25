@@ -411,11 +411,11 @@ namespace module::motion {
         // Trunk support foot and next support foot external oscillating position
         Eigen::Vector2f trunkPointSupport(params.trunk_x_offset
                                               + params.trunk_x_offset_p_coef_forward * foot_step.getNext().x()
-                                              + params.trunk_x_offset_p_coef_turn * fabs(foot_step.getNext().z()),
+                                              + params.trunk_x_offset_p_coef_turn * std::abs(foot_step.getNext().z()),
                                           params.trunk_y_offset);
         Eigen::Vector2f trunkPointNext(foot_step.getNext().x() + params.trunk_x_offset
                                            + params.trunk_x_offset_p_coef_forward * foot_step.getNext().x()
-                                           + params.trunk_x_offset_p_coef_turn * fabs(foot_step.getNext().z()),
+                                           + params.trunk_x_offset_p_coef_turn * std::abs(foot_step.getNext().z()),
                                        foot_step.getNext().y() + params.trunk_y_offset);
 
         // Trunk middle neutral (no swing) position
@@ -483,11 +483,11 @@ namespace module::motion {
         // vector
         Eigen::Vector3f eulerAtSupport(0.0f,
                                        params.trunk_pitch + params.trunk_pitch_p_coef_forward * foot_step.getNext().x()
-                                           + params.trunk_pitch_p_coef_turn * fabs(foot_step.getNext().z()),
+                                           + params.trunk_pitch_p_coef_turn * std::abs(foot_step.getNext().z()),
                                        0.5f * foot_step.getLast().z() + 0.5f * foot_step.getNext().z());
         Eigen::Vector3f eulerAtNext(0.0f,
                                     params.trunk_pitch + params.trunk_pitch_p_coef_forward * foot_step.getNext().x()
-                                        + params.trunk_pitch_p_coef_turn * fabs(foot_step.getNext().z()),
+                                        + params.trunk_pitch_p_coef_turn * std::abs(foot_step.getNext().z()),
                                     foot_step.getNext().z());
         Eigen::Matrix3f matAtSupport  = utility::math::euler::EulerIntrinsicToMatrix(eulerAtSupport);
         Eigen::Matrix3f matAtNext     = utility::math::euler::EulerIntrinsicToMatrix(eulerAtNext);

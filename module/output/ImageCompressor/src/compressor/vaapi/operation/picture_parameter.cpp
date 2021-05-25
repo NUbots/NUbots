@@ -15,9 +15,9 @@ namespace module::output::compressor::vaapi::operation {
         // Initialize the picture parameter buffer
         VAEncPictureParameterBufferJPEG params;
         params.coded_buf                   = encoded;
-        params.picture_width               = width;
-        params.picture_height              = height;
-        params.quality                     = quality;
+        params.picture_width               = uint16_t(width);
+        params.picture_height              = uint16_t(height);
+        params.quality                     = uint8_t(quality);
         params.pic_flags.bits.profile      = 0;  // Baseline jpeg profile
         params.pic_flags.bits.progressive  = 0;  // Sequential encoding
         params.pic_flags.bits.huffman      = 1;  // Uses Huffman coding

@@ -14,7 +14,7 @@ namespace module::output::compressor::vaapi::cl {
         cl_uint platform_count = 0;
         ::clGetPlatformIDs(0, nullptr, &platform_count);
         std::vector<cl_platform_id> platform_ids(platform_count);
-        ::clGetPlatformIDs(platform_ids.size(), platform_ids.data(), nullptr);
+        ::clGetPlatformIDs(cl_uint(platform_ids.size()), platform_ids.data(), nullptr);
 
         for (const auto& platform_id : platform_ids) {
             // Get the extensions supported by this platform
@@ -76,7 +76,7 @@ namespace module::output::compressor::vaapi::cl {
                         }
 
                         // create context for the first device only
-                        cl::context context =
+                        cl::context ctx =
                             cl::context(clCreateContext(props.data(), 1, device_ids.data(), nullptr, nullptr, &err),
                                         ::clReleaseContext);
                         if (err != CL_SUCCESS) {
@@ -87,7 +87,7 @@ namespace module::output::compressor::vaapi::cl {
 
                         return CompressionContext::OpenCLContext{
                             device_ids.front(),
-                            context,
+                            ctx,
                             mem_from_surface,
                             acquire_surface,
                             release_surface,

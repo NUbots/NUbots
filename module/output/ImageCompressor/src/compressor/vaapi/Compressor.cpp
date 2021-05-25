@@ -25,12 +25,12 @@
 
 namespace module::output::compressor::vaapi {
 
-    Compressor::Compressor(const CompressionContext& cctx,
-                           const uint32_t& width,
-                           const uint32_t& height,
-                           const uint32_t& format,
-                           const int& quality)
-        : cctx(cctx), surface{}, context{}, encoded{}, buffers{}, width(width), height(height), format(format) {
+    Compressor::Compressor(const CompressionContext& cctx_,
+                           const uint32_t& width_,
+                           const uint32_t& height_,
+                           const uint32_t& format_,
+                           const uint32_t& quality)
+        : cctx(cctx_), surface{}, context{}, encoded{}, buffers{}, width(width_), height(height_), format(format_) {
 
         VAStatus va_status = 0;
 
@@ -75,7 +75,14 @@ namespace module::output::compressor::vaapi {
         }
 
         // Create Context for the encode pipe
-        va_status = vaCreateContext(cctx.va.dpy, cctx.va.config, width, height, VA_PROGRESSIVE, &surface, 1, &context);
+        va_status = vaCreateContext(cctx.va.dpy,
+                                    cctx.va.config,
+                                    int(width),
+                                    int(height),
+                                    VA_PROGRESSIVE,
+                                    &surface,
+                                    1,
+                                    &context);
         if (va_status != VA_STATUS_SUCCESS) {
             throw std::system_error(va_status, vaapi_error_category(), "Error while creating a context");
         }
@@ -129,7 +136,7 @@ namespace module::output::compressor::vaapi {
         if (va_status != VA_STATUS_SUCCESS) {
             throw std::system_error(va_status, vaapi_error_category(), "Error beginning picture rendering");
         }
-        va_status = vaRenderPicture(cctx.va.dpy, context, buffers.data(), buffers.size());
+        va_status = vaRenderPicture(cctx.va.dpy, context, buffers.data(), int(buffers.size()));
         if (va_status != VA_STATUS_SUCCESS) {
             throw std::system_error(va_status, vaapi_error_category(), "Error pushing buffers to the render context");
         }

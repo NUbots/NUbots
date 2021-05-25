@@ -49,7 +49,7 @@ namespace module::support {
         // Reaction Handles
         std::map<std::string, std::vector<ReactionHandle>> handles;
 
-        std::map<uint, message::behaviour::Subsumption::ActionRegister> actionRegisters;
+        std::map<size_t, message::behaviour::Subsumption::ActionRegister> actionRegisters;
 
         NUClear::clock::time_point last_camera_image = NUClear::clock::time_point(NUClear::clock::duration(0));
         NUClear::clock::time_point last_seen_ball    = NUClear::clock::time_point(NUClear::clock::duration(0));

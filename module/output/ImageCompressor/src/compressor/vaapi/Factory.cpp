@@ -18,8 +18,8 @@
 
 namespace module::output::compressor::vaapi {
 
-    Factory::Factory(const std::string& device, const std::string& driver, const int& quality)
-        : fd(-1), quality(quality) {
+    Factory::Factory(const std::string& device, const std::string& driver, const uint32_t& quality_)
+        : fd(-1), quality(quality_) {
         VAStatus va_status = 0;
 
         // Open the render device
@@ -64,13 +64,13 @@ namespace module::output::compressor::vaapi {
         }
 
         // Query for the entrypoints for the JPEGBaseline profile
-        std::vector<VAEntrypoint> entrypoints(vaMaxNumEntrypoints(cctx.va.dpy));
+        std::vector<VAEntrypoint> entrypoints(size_t(vaMaxNumEntrypoints(cctx.va.dpy)));
         int num_entrypoints = 0;
         va_status = vaQueryConfigEntrypoints(cctx.va.dpy, VAProfileJPEGBaseline, entrypoints.data(), &num_entrypoints);
         if (va_status != VA_STATUS_SUCCESS) {
             throw std::system_error(va_status, vaapi_error_category(), "Error while querying entrypoints");
         }
-        entrypoints.resize(num_entrypoints);
+        entrypoints.resize(size_t(num_entrypoints));
         if (std::count(entrypoints.begin(), entrypoints.end(), VAEntrypointEncPicture) == 0) {
             throw std::runtime_error("There are no JPEG encoding endpoints");
         }

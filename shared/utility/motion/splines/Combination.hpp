@@ -8,6 +8,7 @@ https://github.com/Rhoban/model/
 
 #include <limits>
 #include <map>
+#include <numeric>
 #include <stdexcept>
 #include <vector>
 
@@ -22,27 +23,27 @@ namespace utility::motion::splines {
     class Combination {
     public:
         /**
-         * Compute the number of possible combinations for (n choose k) (using dynamic progamming)
+         * Compute the number of possible combinations for (n choose k) (using dynamic programming)
          */
-        unsigned long binomialCoefficient(size_t k, size_t n) {
-            if (n == 0 || k == 0) {
+        unsigned long binomialCoefficient(const size_t& k_, const size_t& n_) {
+            if (n_ == 0 || k_ == 0) {
                 return 1;
             }
-            if (k > n) {
+            if (k_ > n_) {
                 throw std::logic_error("Combination not valid k>n");
             }
 
-            if (n - k < k) {
-                return binomialCoefficient(n - k, n);
+            if (n_ - k_ < k_) {
+                return binomialCoefficient(n_ - k_, n_);
             }
-            if (k == 1 || k == n) {
-                return n;
+            if (k_ == 1 || k_ == n_) {
+                return n_;
             }
 
-            Pair pair(k, n);
+            Pair pair(k_, n_);
             if (pascal_triangle.count(pair) == 0) {
-                unsigned long val1 = binomialCoefficient(k - 1, n - 1);
-                unsigned long val2 = binomialCoefficient(k, n - 1);
+                unsigned long val1 = binomialCoefficient(k_ - 1, n_ - 1);
+                unsigned long val2 = binomialCoefficient(k_, n_ - 1);
                 unsigned long test = std::numeric_limits<unsigned long>::max() - val1;
                 if (val2 < test) {
                     pascal_triangle[pair] = val1 + val2;
@@ -58,20 +59,19 @@ namespace utility::motion::splines {
         /**
          * Start combination iteration for given (n choose k)
          */
-        void startCombination(size_t k, size_t n) {
-            if (n == 0 || k == 0) {
+        void startCombination(const size_t& k_, const size_t& n_) {
+            if (n_ == 0 || k_ == 0) {
                 throw std::logic_error("Combination zero");
             }
-            if (k > n) {
+            if (k_ > n_) {
                 throw std::logic_error("Combination not valid k>n");
             }
 
-            indexes = std::vector<size_t>();
-            k       = k;
-            n       = n;
-            for (size_t i = 0; i < k; i++) {
-                indexes.push_back(i);
-            }
+            indexes.clear();
+            indexes.resize(k);
+            k = k_;
+            n = n_;
+            std::iota(indexes.begin(), indexes.end(), 0);
         }
 
         /**
@@ -114,7 +114,7 @@ namespace utility::motion::splines {
          * Increment by one the indexes container at digit i (recursively).
          * Return true on iteration end.
          */
-        bool incrIndexes(size_t i) {
+        bool incrIndexes(const size_t& i) {
             if (indexes[i] == n - (k - i)) {
                 if (i == 0) {
                     return true;

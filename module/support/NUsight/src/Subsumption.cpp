@@ -70,7 +70,7 @@ namespace module::support {
             auto subsumption = std::make_unique<Subsumption>();
 
             Subsumption::ActionRegister actionRegister;
-            actionRegister.id   = action.id;
+            actionRegister.id   = uint32_t(action.id);
             actionRegister.name = action.name;
 
             for (const auto& set : action.limbSet) {
@@ -94,7 +94,7 @@ namespace module::support {
             auto subsumption = std::make_unique<Subsumption>();
 
             Subsumption::ActionPriorities actionPriorityChange;
-            actionPriorityChange.id = action.id;
+            actionPriorityChange.id = uint32_t(action.id);
 
             Subsumption::ActionRegister actionRegister = actionRegisters.find(action.id)->second;
 

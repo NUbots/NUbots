@@ -60,23 +60,23 @@ namespace module::behaviour::skills {
             EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
         });
 
-        on<Trigger<KickScriptCommand>>().then([this](const KickScriptCommand& kickCommand) {
-            auto direction = kickCommand.direction;
-            LimbID leg     = kickCommand.leg;
+        on<Trigger<KickScriptCommand>>().then([this](const KickScriptCommand& kick_command) {
+            auto direction = kick_command.direction;
+            LimbID leg     = kick_command.leg;
 
-            int quadrant = getDirectionalQuadrant(direction[0], direction[1]);
+            int quadrant = getDirectionalQuadrant(direction.x(), direction.y());
 
             // check if the command was valid
             bool valid = true;
             if (leg == LimbID::RIGHT_LEG) {
                 if (quadrant == 2 || quadrant == 3) {
-                    NUClear::log<NUClear::WARN>("Right leg cannot kick towards: ", direction);
+                    NUClear::log<NUClear::WARN>("Right leg cannot kick towards: ", direction.transpose());
                     valid = false;
                 }
             }
             else if (leg == LimbID::LEFT_LEG) {
                 if (quadrant == 2 || quadrant == 1) {
-                    NUClear::log<NUClear::WARN>("Left leg cannot kick towards: ", direction);
+                    NUClear::log<NUClear::WARN>("Left leg cannot kick towards: ", direction.transpose());
                     valid = false;
                 }
             }
@@ -87,7 +87,7 @@ namespace module::behaviour::skills {
             }
 
             if (valid) {
-                this->kickCommand = kickCommand;
+                kickCommand = kick_command;
                 updatePriority(KICK_PRIORITY);
             }
         });
@@ -157,7 +157,7 @@ namespace module::behaviour::skills {
         emit(std::make_unique<ActionPriorities>(ActionPriorities{id, {priority}}));
     }
 
-    int KickScript::getDirectionalQuadrant(float x, float y) {
+    int KickScript::getDirectionalQuadrant(const double& x, const double& y) {
 
         // These represent 4 directions of looking, see https://www.desmos.com/calculator/mm8cnsnpdt for a graph
         // of the 4 quadrants Note that x is forward in relation to the robot so the forward quadrant is x >=

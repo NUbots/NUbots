@@ -9,7 +9,7 @@ namespace module::output::compressor::vaapi {
 
     class Factory : public CompressorFactory {
     public:
-        Factory(const std::string& device, const std::string& driver, const int& quality);
+        Factory(const std::string& device, const std::string& driver, const uint32_t& quality);
         Factory(const Factory&) = default;
         Factory(Factory&&)      = default;
         Factory& operator=(const Factory&) = default;
@@ -26,7 +26,7 @@ namespace module::output::compressor::vaapi {
         /// The compression context that we are using, contains information about the compressor and OpenCL contexts
         CompressionContext cctx;
         /// The quality that this compressor is configured for
-        int quality;
+        uint32_t quality;
     };
 
 }  // namespace module::output::compressor::vaapi

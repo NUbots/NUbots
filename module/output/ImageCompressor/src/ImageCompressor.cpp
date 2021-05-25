@@ -117,15 +117,15 @@ namespace module::output {
             }
 
             // Look through our compressors and try to find the first free one
-            for (auto& ctx : ctx->compressors) {
+            for (auto& compressor : ctx->compressors) {
                 // We swap in true to the atomic and if we got false back then it wasn't active previously
-                if (!ctx.active->exchange(true)) {
+                if (!compressor.active->exchange(true)) {
                     std::exception_ptr eptr;
                     try {
                         auto msg = std::make_unique<CompressedImage>();
 
                         // Compress the data
-                        msg->data = ctx.compressor->compress(image.data);
+                        msg->data = compressor.compressor->compress(image.data);
 
                         // The format depends on what kind of data we took in
                         msg->format = compressed_fourcc(image.format);
@@ -150,7 +150,7 @@ namespace module::output {
                     }
 
                     // This sets the atomic integer back to false so another thread can use this compressor
-                    ctx.active->store(false);
+                    compressor.active->store(false);
 
                     if (eptr) {
                         // Exception :(

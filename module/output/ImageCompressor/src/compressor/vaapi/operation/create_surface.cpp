@@ -9,7 +9,7 @@
 
 namespace module::output::compressor::vaapi::operation {
 
-    int va_render_target_type_from_format(uint32_t format) {
+    unsigned int va_render_target_type_from_format(uint32_t format) {
         // Work out what surface type we will need to hold the image
         switch (format) {
             case utility::vision::fourcc("BGGR"):

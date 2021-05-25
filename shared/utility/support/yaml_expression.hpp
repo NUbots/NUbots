@@ -59,12 +59,12 @@ namespace utility::support {
         operator T() const {
 
             // value : [[a, b], [c, d]]
-            const size_t rows = node.size();
-            const size_t cols = node[0].size();
+            const Eigen::Index rows = Eigen::Index(node.size());
+            const Eigen::Index cols = Eigen::Index(node[0].size());
 
             // Count the columns on every row.
             for (const auto& row : node) {
-                if (row.size() != cols) {
+                if (Eigen::Index(row.size()) != cols) {
                     throw std::out_of_range(
                         fmt::format("Inconsistent number of cols in matrix (cols: {} vs {}).", row.size(), cols));
                 }
@@ -84,8 +84,8 @@ namespace utility::support {
             T matrix;
 
             try {
-                for (size_t row = 0; row < rows; row++) {
-                    for (size_t col = 0; col < cols; col++) {
+                for (Eigen::Index row = 0; row < rows; row++) {
+                    for (Eigen::Index col = 0; col < cols; col++) {
                         matrix(row, col) = parse_math_string<typename T::Scalar>(node[row][col].as<std::string>());
                     }
                 }
@@ -115,7 +115,7 @@ namespace utility::support {
             T matrix;
 
             try {
-                for (size_t i = 0; i < node.size(); i++) {
+                for (Eigen::Index i = 0; i < Eigen::Index(node.size()); i++) {
                     matrix(i) = parse_math_string<typename T::Scalar>(node[i].as<std::string>());
                 }
             }
@@ -133,8 +133,8 @@ namespace utility::support {
         operator T() const {
 
             // value : [a, b, c, d]
-            const size_t rows = node.size();
-            const size_t cols = node[0].size();
+            const Eigen::Index rows = Eigen::Index(node.size());
+            const Eigen::Index cols = Eigen::Index(node[0].size());
 
             // Validate row size.
             if (rows != T::ColsAtCompileTime) {
@@ -147,7 +147,7 @@ namespace utility::support {
 
             // Count the columns on every row.
             for (const auto& col : node) {
-                if (col.size() != cols) {
+                if (Eigen::Index(col.size()) != cols) {
                     throw std::out_of_range(
                         fmt::format("Inconsistent number of cols in matrix (cols: {} vs {}).", col.size(), cols));
                 }
@@ -157,8 +157,8 @@ namespace utility::support {
             T matrix;
 
             try {
-                for (size_t row = 0; row < rows; row++) {
-                    for (size_t col = 0; col < cols; col++) {
+                for (Eigen::Index row = 0; row < rows; row++) {
+                    for (Eigen::Index col = 0; col < cols; col++) {
                         matrix(col, row) = parse_math_string<typename T::Scalar>(node[row][col].as<std::string>());
                     }
                 }
@@ -177,13 +177,13 @@ namespace utility::support {
         operator T() const {
 
             // value : [[a, b], [c, d]]
-            const size_t rows = node.size();
-            const size_t cols = node[0].size();
+            const Eigen::Index rows = Eigen::Index(node.size());
+            const Eigen::Index cols = Eigen::Index(node[0].size());
 
             // Check to see if the input is formatted as a matrix.
             // Count the columns on every row.
             for (const auto& row : node) {
-                if (row.size() != cols) {
+                if (Eigen::Index(row.size()) != cols) {
                     throw std::out_of_range(
                         fmt::format("Inconsistent number of cols in matrix (cols: {} vs {}).", row.size(), cols));
                 }
@@ -192,8 +192,8 @@ namespace utility::support {
             T matrix(rows, cols);
 
             try {
-                for (size_t row = 0; row < rows; row++) {
-                    for (size_t col = 0; col < cols; col++) {
+                for (Eigen::Index row = 0; row < rows; row++) {
+                    for (Eigen::Index col = 0; col < cols; col++) {
                         matrix(row, col) = parse_math_string<typename T::Scalar>(node[row][col].as<std::string>());
                     }
                 }
@@ -212,22 +212,22 @@ namespace utility::support {
         operator T() const {
 
             // value : [[a, b], [c, d]]
-            const size_t rows = node.size();
-            const size_t cols = node[0].size();
+            const Eigen::Index rows = Eigen::Index(node.size());
+            const Eigen::Index cols = Eigen::Index(node[0].size());
 
             // Check to see if the input is formatted as a matrix.
             // Count the columns on every row.
             for (const auto& row : node) {
-                if (row.size() != cols) {
+                if (Eigen::Index(row.size()) != cols) {
                     throw std::out_of_range(
                         fmt::format("Inconsistent number of cols in matrix (cols: {} vs {}).", row.size(), cols));
                 }
             }
 
-            T matrix(rows, std::max(cols, size_t(1)));
+            T matrix(rows, std::max(cols, Eigen::Index(1)));
 
             try {
-                for (size_t i = 0; i < rows; i++) {
+                for (Eigen::Index i = 0; i < rows; i++) {
                     matrix(i) = parse_math_string<typename T::Scalar>(node[i].as<std::string>());
                 }
             }
@@ -245,13 +245,13 @@ namespace utility::support {
         operator T() const {
 
             // value : [[a, b], [c, d]]
-            const size_t rows = node.size();
-            const size_t cols = node[0].size();
+            const Eigen::Index rows(node.size());
+            const Eigen::Index cols(node[0].size());
 
             // Check to see if the input is formatted as a matrix.
             // Count the columns on every row.
             for (const auto& row : node) {
-                if (row.size() != cols) {
+                if (Eigen::Index(row.size()) != cols) {
                     throw std::out_of_range(
                         fmt::format("Inconsistent number of cols in matrix (cols: {} vs {}).", row.size(), cols));
                 }
@@ -260,7 +260,7 @@ namespace utility::support {
             T matrix(cols, rows);
 
             try {
-                for (size_t i = 0; i < rows; i++) {
+                for (Eigen::Index i = 0; i < rows; i++) {
                     matrix(i) = parse_math_string<typename T::Scalar>(node[i][0].as<std::string>());
                 }
             }
