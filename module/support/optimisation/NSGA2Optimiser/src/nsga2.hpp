@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "population.hpp"
+#include "random.hpp"
 
 namespace nsga2 {
     class NSGA2 {
@@ -54,7 +55,7 @@ namespace nsga2 {
         Population* parentPop;
         Population* childPop;
         Population* mixedPop;
-        // RandomGenerator* randGen;
+        RandomGenerator<>* randGen;
 
         bool crowdObj;
         int reportCount;

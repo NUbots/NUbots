@@ -4,6 +4,7 @@
 #include <algorithm>
 
 #include "individual.hpp"
+#include "random.hpp"
 
 #define EPS 1e-14
 #define INF 1e+14
@@ -24,7 +25,7 @@ namespace nsga2 {
                    const double _etaM,
                    const double _epsC,
                    const bool _crowdObj,
-                   // RandomGenerator* _randGen,
+                   RandomGenerator<>* _randGen,
                    const std::vector<double> _initialRealVars);
         virtual ~Population();
         void Initialize(bool randomInitialize);

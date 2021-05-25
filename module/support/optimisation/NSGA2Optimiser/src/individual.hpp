@@ -5,6 +5,8 @@
 #include <ostream>
 #include <vector>
 
+#include "random.hpp"
+
 namespace nsga2 {
     struct IndividualConfigurator {
         int realVars;
@@ -18,7 +20,7 @@ namespace nsga2 {
         int constraints;
         double etaM;
         double epsC;
-        // RandomGenerator* randGen;
+        RandomGenerator<>* randGen;
         std::vector<double> initialRealVars;
     };
 

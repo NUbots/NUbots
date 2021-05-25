@@ -39,12 +39,12 @@ namespace nsga2 {
         generation = 1;
         if (randomInitialize) {
             for (int i = 0; i < config->realVars; i++) {
-                // reals[i] = config->randGen->Real(config->realLimits[i].first, config->realLimits[i].second);
+                reals[i] = config->randGen->Real(config->realLimits[i].first, config->realLimits[i].second);
             }
 
             for (int i = 0; i < config->binVars; i++) {
                 for (int j = 0; j < config->binBits[i]; j++) {
-                    // gene[i][j] = config->randGen->Realu() <= 0.5 ? 0 : 1;
+                    gene[i][j] = config->randGen->Realu() <= 0.5 ? 0 : 1;
                 }
             }
         }
@@ -166,13 +166,13 @@ namespace nsga2 {
     int Individual::realMutate() {
         int mutationCount = 0;
         for (int i = 0; i < config->realVars; i++) {
-            if (true) {  // config->randGen->Realu() <= config->realMutProb) {
+            if (config->randGen->Realu() <= config->realMutProb) {
                 double realI      = reals[i];
                 double realILower = config->realLimits[i].first;
                 double realIUpper = config->realLimits[i].second;
                 double delta1     = (realI - realILower) / (realIUpper - realILower);
                 double delta2     = (realIUpper - realI) / (realIUpper - realILower);
-                double randReal   = 1.0;  // config->randGen->Realu();
+                double randReal   = config->randGen->Realu();
                 double mutPower   = 1.0 / (config->etaM + 1.0);
 
                 double deltaInverse, value, deltaq;
@@ -206,7 +206,7 @@ namespace nsga2 {
         int mutationCount = 0;
         for (int i = 0; i < config->binVars; i++) {
             for (int j = 0; j < config->binBits[i]; j++) {
-                double probability = 0.5;  // config->randGen->Realu();
+                double probability = config->randGen->Realu();
                 if (probability <= config->binMutProb) {
                     if (gene[i][j] == 0)
                         gene[i][j] = 1;
