@@ -6,7 +6,6 @@
 
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/KinematicsModel.hpp"
-#include "message/motion/ServoTarget.hpp"
 #include "message/motion/WalkCommand.hpp"
 #include "message/support/SaveConfiguration.hpp"
 
@@ -19,14 +18,13 @@ namespace module::motion {
 
     using extension::Configuration;
 
-    using message::behaviour::ServoCommand;
+    using message::behaviour::ServoCommands;
     using message::input::Sensors;
     using message::motion::DisableWalkEngineCommand;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::ExecuteGetup;
     using message::motion::KillGetup;
     using message::motion::KinematicsModel;
-    using message::motion::ServoTarget;
     using message::motion::StopCommand;
     using message::motion::WalkCommand;
     using utility::support::Expression;
@@ -261,16 +259,16 @@ namespace module::motion {
         emit(std::move(waypoints));
     }
 
-    std::unique_ptr<std::vector<ServoCommand>> QuinticWalk::motionLegs(
-        const std::vector<std::pair<ServoID, float>>& joints) {
-        auto waypoints = std::make_unique<std::vector<ServoCommand>>();
-        waypoints->reserve(16);
+    std::unique_ptr<ServoCommands> QuinticWalk::motionLegs(const std::vector<std::pair<ServoID, float>>& joints) {
+        auto waypoints = std::make_unique<ServoCommands>();
+        waypoints->commands.reserve(joints.size());
 
         NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
 
 
         for (auto& joint : joints) {
-            waypoints->push_back({subsumptionId, time, joint.first, joint.second, jointGains[joint.first], 100});
+            waypoints->commands
+                .emplace_back(subsumptionId, time, joint.first, joint.second, jointGains[joint.first], 100);
         }
 
         return waypoints;

@@ -29,7 +29,7 @@
 namespace module::input {
 
     // Gravity
-    static constexpr double G = -9.80665;
+    static constexpr double G = 9.80665;
 
     namespace MeasurementType {
         struct GYROSCOPE {};

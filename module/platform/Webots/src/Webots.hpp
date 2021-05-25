@@ -29,7 +29,7 @@ namespace module::platform {
 
     class Webots : public NUClear::Reactor {
     private:
-        // How often we read the servos
+        /// @brief How often we read the servos
         static constexpr int UPDATE_FREQUENCY = 90;
 
         /// @brief Handle for incoming data reaction. This will be bound/unbound during (re)connection
@@ -83,10 +83,11 @@ namespace module::platform {
             /// @brief Name of the servo
             std::string name;
 
-            /// @brief Cached values that are never read from the simulator
-            double p_gain        = 32.0 / 255.0;
-            double i_gain        = 0.0;
-            double d_gain        = 0.0;
+            double p_gain = 32.0 / 255.0;
+            // `i` and `d` gains are always 0
+            static constexpr double i_gain = 0.0;
+            static constexpr double d_gain = 0.0;
+
             double moving_speed  = 0.0;
             double goal_position = 0.0;
             double torque        = 0.0;  // 0.0 to 1.0
