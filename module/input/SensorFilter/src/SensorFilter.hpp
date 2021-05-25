@@ -17,8 +17,8 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_PLATFORM_DARWIN_SENSORFILTER_HPP
-#define MODULES_PLATFORM_DARWIN_SENSORFILTER_HPP
+#ifndef MODULES_INPUT_SENSORFILTER_HPP
+#define MODULES_INPUT_SENSORFILTER_HPP
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
@@ -32,7 +32,7 @@
 #include "utility/math/filter/UKF.hpp"
 
 
-namespace module::platform::darwin {
+namespace module::input {
 
     /**
      * @author Jake Fountain
@@ -133,5 +133,5 @@ namespace module::platform::darwin {
         /// @brief The first updates after a reset. <b> Must be cleared on reset </b>
         std::vector<MotionModel<double>::StateVec> first_updates;
     };
-}  // namespace module::platform::darwin
-#endif  // MODULES_PLATFORM_DARWIN_SENSORFILTER_HPP
+}  // namespace module::input
+#endif  // MODULES_INPUT_SENSORFILTER_HPP

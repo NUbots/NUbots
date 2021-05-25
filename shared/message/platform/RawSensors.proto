@@ -18,14 +18,14 @@
  */
 syntax = "proto3";
 
-package message.platform.darwin;
+package message.platform;
 
 import "google/protobuf/timestamp.proto";
 
 /**
  * @author Trent Houliston
  */
-message DarwinSensors {
+message RawSensors {
     // bitmask values
     enum Error {
         OK            = 0;  // not really a flag but the lack of any other flag
@@ -127,17 +127,17 @@ message DarwinSensors {
         Servo head_tilt        = 20;
     }
 
-    google.protobuf.Timestamp timestamp         = 1;
-    uint32                    cm740_error_flags = 2;
-    LEDPanel                  led_panel         = 3;
-    HeadLED                   head_led          = 4;
-    EyeLED                    eye_led           = 5;
-    Buttons                   buttons           = 6;
-    float                     voltage           = 7;
-    Accelerometer             accelerometer     = 8;
-    Gyroscope                 gyroscope         = 9;
-    FSRs                      fsr               = 10;
-    Servos                    servo             = 11;
+    google.protobuf.Timestamp timestamp            = 1;
+    uint32                    platform_error_flags = 2;
+    LEDPanel                  led_panel            = 3;
+    HeadLED                   head_led             = 4;
+    EyeLED                    eye_led              = 5;
+    Buttons                   buttons              = 6;
+    float                     voltage              = 7;
+    Accelerometer             accelerometer        = 8;
+    Gyroscope                 gyroscope            = 9;
+    FSRs                      fsr                  = 10;
+    Servos                    servo                = 11;
 }
 
 // Button press events

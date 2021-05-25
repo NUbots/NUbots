@@ -8,7 +8,7 @@ nuclear_role(
   motion::KinematicsConfiguration
   # Hardware for button testing
   platform::darwin::HardwareIO
-  platform::darwin::SensorFilter
+  input::SensorFilter
   # Support and Configuration
   support::configuration::GlobalConfig
   support::configuration::SoccerConfig
