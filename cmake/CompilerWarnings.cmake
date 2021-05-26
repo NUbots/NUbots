@@ -3,7 +3,7 @@
 # * https://github.com/lefticus/cppbestpractices/blob/master/02-Use_the_Tools_Available.md
 # * https://github.com/lefticus/cpp_starter_project/blob/master/cmake/CompilerWarnings.cmake
 
-function(set_project_warnings)
+function(set_project_warnings target_name)
 
   set(CLANG_WARNINGS
       -Wall
@@ -44,6 +44,6 @@ function(set_project_warnings)
     message(AUTHOR_WARNING "No compiler warnings set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
   endif()
 
-  add_compile_options(${PROJECT_WARNINGS})
+  target_compile_options(${target_name} INTERFACE ${PROJECT_WARNINGS})
 
 endfunction()

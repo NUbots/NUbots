@@ -30,12 +30,6 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/" "${PROJECT_SOURCE_D
      "${PROJECT_SOURCE_DIR}/nuclear/cmake/Modules/"
 )
 
-# * We need to tell cmake where the function for the compiler warnings is (src/cmake)
-# * We use additional modules that cmake needs to know about (src/cmake/Modules)
-include(CompilerWarnings)
-option(WARNINGS_AS_ERRORS "Fail the build when we have compiler or clang-tidy warnings" ON)
-set_project_warnings()
-
 # If this option is set we are building using continous integration
 option(CI_BUILD "Enable build options for building in the CI server" OFF)
 
@@ -108,6 +102,9 @@ set(NUCLEAR_ROLE_BANNER_FILE
     "${PROJECT_SOURCE_DIR}/cmake/banner.png"
     CACHE PATH "The path the banner to print at the start of each role execution" FORCE
 )
+
+# Treat all normal compiler warnings as errors
+option(WARNINGS_AS_ERRORS "Fail the build when we have compiler or clang-tidy warnings" ON)
 
 # Include the NUClear roles system
 add_subdirectory(nuclear)
