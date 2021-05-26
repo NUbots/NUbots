@@ -192,6 +192,16 @@ function(NUCLEAR_MODULE)
   set_target_properties(${module_target_name} PROPERTIES FOLDER ${module_path})
 
   # ####################################################################################################################
+  # Warnings #
+  # ####################################################################################################################
+
+  # * We need to tell cmake where the function for the compiler warnings is (src/cmake)
+  list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/")
+  include(CompilerWarnings)
+  # * Then we set the warnings with it for the module
+  set_project_warnings(${module_target_name})
+
+  # ####################################################################################################################
   # Testing #
   # ####################################################################################################################
 

@@ -3,9 +3,9 @@
 # * https://github.com/lefticus/cppbestpractices/blob/master/02-Use_the_Tools_Available.md
 # * https://github.com/lefticus/cpp_starter_project/blob/master/cmake/CompilerWarnings.cmake
 
-function(set_project_warnings)
+function(set_project_warnings target_name)
 
-  set(CLANG_WARNINGS
+  set(TARGET_WARNINGS
       -Wall
       -Wextra # reasonable and standard
       -Wshadow # warn the user if a variable declaration shadows one from a parent context
@@ -20,30 +20,25 @@ function(set_project_warnings)
       -Wsign-conversion # warn on sign conversions
       -Wdouble-promotion # warn if float is implicit promoted to double
       # -Wformat=2 # warn on security issues around functions that format output (ie printf)
+      -Wnull-dereference # warn if a null dereference is detected
+      -Wmisleading-indentation # warn if indentation implies blocks where blocks do not exist
+      # * We want the warnings below if clang adds support for them
+      # * Until then, these make clang-tidy mad, and we would have to have an extra CI pipeline step to cover them
+      # * -Wlogical-op # warn about logical operations being used where bitwise were probably wanted
+      # * -Wuseless-cast # warn if you perform a cast to the same type
   )
 
   if(WARNINGS_AS_ERRORS)
-    set(CLANG_WARNINGS ${CLANG_WARNINGS} -Werror)
+    list(APPEND TARGET_WARNINGS -Werror)
   endif()
 
-  set(GCC_WARNINGS
-      ${CLANG_WARNINGS}
-      -Wnull-dereference # warn if a null dereference is detected
-      -Wmisleading-indentation # warn if indentation implies blocks where blocks do not exist
-      -Wduplicated-cond # warn if if / else chain has duplicated conditions
-      -Wduplicated-branches # warn if if / else branches have duplicated code
-      -Wlogical-op # warn about logical operations being used where bitwise were probably wanted
-      -Wuseless-cast # warn if you perform a cast to the same type
-  )
-
-  if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang" OR ENABLE_CLANG_TIDY)
-    set(PROJECT_WARNINGS ${CLANG_WARNINGS})
-  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(PROJECT_WARNINGS ${GCC_WARNINGS})
+  if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(PROJECT_WARNINGS ${TARGET_WARNINGS})
   else()
+    # User is using some other unsupported compiler, such as MSVC
     message(AUTHOR_WARNING "No compiler warnings set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
   endif()
 
-  add_compile_options(${PROJECT_WARNINGS})
+  target_compile_options(${target_name} INTERFACE ${PROJECT_WARNINGS})
 
 endfunction()
