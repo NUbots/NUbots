@@ -42,7 +42,7 @@ namespace module::extension {
 
         // A list of tasks that we will execute after we release the mutex to prevent deadlocks
         std::vector<FileExecTask> exec_queue;
-
+      
         auto exec = [&reactor](NUClear::threading::Reaction& r, const std::string& p, const int& events) {
             // Set our thread local event details
             FileWatch watch;

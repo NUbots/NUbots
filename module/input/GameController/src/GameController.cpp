@@ -23,7 +23,7 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/platform/darwin/DarwinSensors.hpp"
+#include "message/platform/RawSensors.hpp"
 #include "message/support/GlobalConfig.hpp"
 
 namespace module::input {
@@ -49,8 +49,8 @@ namespace module::input {
     using GameMode        = GameEvents::GameMode;
     using PenaltyReason   = GameState::Data::PenaltyReason;
     using TeamColourEvent = message::input::GameEvents::TeamColour;
-    using message::platform::darwin::ButtonLeftDown;
-    using message::platform::darwin::ButtonMiddleDown;
+    using message::platform::ButtonLeftDown;
+    using message::platform::ButtonMiddleDown;
 
     GameController::GameController(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
@@ -66,12 +66,12 @@ namespace module::input {
         on<Configuration, Trigger<GlobalConfig>>("GameController.yaml")
             .then("GameController Configuration",
                   [this](const Configuration& config, const GlobalConfig& globalConfig) {
-                      PLAYER_ID = globalConfig.playerId;
-                      TEAM_ID   = globalConfig.teamId;
+                      PLAYER_ID = globalConfig.player_id;
+                      TEAM_ID   = globalConfig.team_id;
                       send_port = config["send_port"].as<uint>();
 
                       // If we are changing ports (the port starts at 0 so this should start it the first time)
-                      if (config["recieve_port"].as<uint>() != recieve_port) {
+                      if (config["receive_port"].as<uint>() != recieve_port) {
 
                           // If we have an old binding, then unbind it
                           // The port starts at 0 so this should work
@@ -80,7 +80,7 @@ namespace module::input {
                           }
 
                           // Update our port
-                          recieve_port = config["recieve_port"].as<uint>();
+                          recieve_port = config["receive_port"].as<uint>();
 
                           // Bind our new handle
                           std::tie(listenHandle, std::ignore, std::ignore) =
@@ -499,9 +499,9 @@ namespace module::input {
                     state->data.secondary_time = time;
 
                     stateChanges.push_back([this, time] {
-                        auto msg       = std::make_unique<GamePhase>();
-                        msg->phase     = GameState::Data::Phase::Value::READY;
-                        msg->readyTime = time;
+                        auto msg        = std::make_unique<GamePhase>();
+                        msg->phase      = GameState::Data::Phase::Value::READY;
+                        msg->ready_time = time;
                         emit(msg);
                     });
                     break;
@@ -526,10 +526,10 @@ namespace module::input {
                     state->data.phase          = GameState::Data::Phase::Value::PLAYING;
 
                     stateChanges.push_back([this, endHalf, ballFree] {
-                        auto msg      = std::make_unique<GamePhase>();
-                        msg->phase    = GameState::Data::Phase::Value::PLAYING;
-                        msg->endHalf  = endHalf;
-                        msg->ballFree = ballFree;
+                        auto msg       = std::make_unique<GamePhase>();
+                        msg->phase     = GameState::Data::Phase::Value::PLAYING;
+                        msg->end_half  = endHalf;
+                        msg->ball_free = ballFree;
                         emit(msg);
                     });
                     break;
@@ -542,9 +542,9 @@ namespace module::input {
                     state->data.phase        = GameState::Data::Phase::Value::FINISHED;
 
                     stateChanges.push_back([this, nextHalf] {
-                        auto msg      = std::make_unique<GamePhase>();
-                        msg->phase    = GameState::Data::Phase::Value::FINISHED;
-                        msg->nextHalf = nextHalf;
+                        auto msg       = std::make_unique<GamePhase>();
+                        msg->phase     = GameState::Data::Phase::Value::FINISHED;
+                        msg->next_half = nextHalf;
                         emit(msg);
                     });
                     break;

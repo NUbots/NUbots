@@ -43,7 +43,7 @@ namespace module::motion {
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
     using message::behaviour::KickPlan;
-    using message::behaviour::ServoCommand;
+    using message::behaviour::ServoCommands;
     using message::motion::IKKickParams;
     using message::motion::KickCommand;
     using message::motion::KickFinished;
@@ -134,11 +134,8 @@ namespace module::motion {
 
                 Eigen::Affine3d Htg = Eigen::Affine3d(sensors.Hgt).inverse();
 
-                // Create the command target point object so we can transform it
-                Eigen::Vector4d commandTargetPoint(command.target.x(), command.target.y(), command.target.z(), 1);
-
                 // Put the ball position from vision into torso coordinates by transforming the command target point
-                Eigen::Vector3d targetTorso = (Htg * commandTargetPoint).head<3>();
+                Eigen::Vector3d targetTorso = Htg * commandTargetPoint;
 
                 // Put the ball position into support foot coordinates
                 Eigen::Vector3d targetSupportFoot = torsoPose * targetTorso;
@@ -146,13 +143,14 @@ namespace module::motion {
                 // Put the goal from vision into torso coordinates
                 Eigen::Vector3d directionTorso(Htg * command.direction);
 
-                // Put the goal into support foot coordinates
+                // Put the goal into support foot coordinates. Note that this transforms directionTorso as a vector,
+                // as opposed to transforming it as a point
                 Eigen::Vector3d directionSupportFoot = torsoPose.rotation() * directionTorso;
 
                 Eigen::Vector3d ballPosition = targetSupportFoot;
-                ballPosition.z()             = 0.05;  // TODO: figure out why ball height is unreliable
+                ballPosition.z()             = 0.05;  // TODO: get ball height from config
                 Eigen::Vector3d goalPosition = directionSupportFoot;
-                goalPosition.z()             = 0.0;  // TODO: figure out why ball height is unreliable
+                goalPosition.z()             = 0.0;
 
                 balancer.setKickParameters(supportFoot, ballPosition, goalPosition);
                 kicker.setKickParameters(supportFoot, ballPosition, goalPosition);
@@ -224,20 +222,19 @@ namespace module::motion {
                 joints.insert(joints.end(), supportJoints.begin(), supportJoints.end());
 
                 // Create message to send to servos
-                auto waypoints = std::make_unique<std::vector<ServoCommand>>();
-                waypoints->reserve(16);
+                auto waypoints = std::make_unique<ServoCommands>();
+                waypoints->commands.reserve(16);
 
                 // Goal time is by next frame
                 NUClear::clock::time_point time = NUClear::clock::now();
 
                 // Push back each servo command
                 for (auto& joint : joints) {
-                    waypoints->push_back(
-                        ServoCommand(subsumptionId, time, joint.first, joint.second, gain_legs, torque));
+                    waypoints->commands.emplace_back(subsumptionId, time, joint.first, joint.second, gain_legs, torque);
                 }
 
                 // Send message
-                emit(std::move(waypoints));
+                emit(waypoints);
             });
 
         updater.disable();

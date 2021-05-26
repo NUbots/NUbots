@@ -26,10 +26,12 @@
 
 #include "message/behaviour/KickPlan.hpp"
 #include "message/behaviour/ServoCommand.hpp"
+#include "message/input/GameState.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/motion/KinematicsModel.hpp"
 #include "message/motion/WalkCommand.hpp"
+#include "message/platform/RawSensors.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/Ball.hpp"
 
@@ -46,21 +48,27 @@ namespace module::behaviour::planning {
     using extension::Configuration;
 
     using message::behaviour::KickPlan;
-    using KickType = message::behaviour::KickPlan::KickType;
     using message::behaviour::WantsToKick;
+    using message::input::GameState;
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
-    using VisionBalls = message::vision::Balls;
     using message::motion::IKKickParams;
     using message::motion::KickCommand;
-    using KickCommandType = message::motion::KickCommandType;
+    using message::motion::KickCommandType;
     using message::motion::KickPlannerConfig;
     using message::motion::KickScriptCommand;
     using message::motion::KinematicsModel;
+    using message::platform::ButtonMiddleDown;
     using message::support::FieldDescription;
 
-    using LimbID = utility::input::LimbID;
+    using KickType      = message::behaviour::KickPlan::KickType;
+    using PenaltyReason = message::input::GameState::Data::PenaltyReason;
+    using Phase         = message::input::GameState::Data::Phase;
+    using VisionBall    = message::vision::Ball;
+    using VisionBalls   = message::vision::Balls;
+
+    using utility::input::LimbID;
     using utility::localisation::fieldStateToTransform3D;
     using utility::math::coordinates::sphericalToCartesian;
     using utility::nusight::graph;
@@ -87,12 +95,20 @@ namespace module::behaviour::planning {
             }
         });
 
-        on<Trigger<Ball>, With<Field>, With<FieldDescription>, With<KickPlan>, With<Sensors>>().then(
-            [this](const Ball& ball,
-                   const Field& field,
-                   const FieldDescription& fd,
-                   const KickPlan& kickPlan,
-                   const Sensors& sensors) {
+        on<Trigger<ButtonMiddleDown>, Single>().then([this] { forcePlaying = true; });
+
+        on<Trigger<Ball>,
+           With<Field>,
+           With<FieldDescription>,
+           With<KickPlan>,
+           With<Sensors>,
+           Optional<With<GameState>>>()
+            .then([this](const Ball& ball,
+                         const Field& field,
+                         const FieldDescription& fd,
+                         const KickPlan& kickPlan,
+                         const Sensors& sensors,
+                         std::shared_ptr<const GameState> gameState) {
                 // Get time since last seen ball
                 auto now = NUClear::clock::now();
                 double secondsSinceLastSeen =
@@ -100,8 +116,6 @@ namespace module::behaviour::planning {
 
                 // Compute target in robot coords
                 // Eigen::Vector3d kickTarget = Eigen::Vector3d::UnitX(); //Kick forwards
-                // TODO: The heading seems to judder here!!
-                // TODO: use sensors.Htw instead
                 Eigen::Affine2d position = Eigen::Affine2d(field.position);
                 Eigen::Affine3d Hfw;
                 Hfw.translation() = Eigen::Vector3d(position.translation().x(), position.translation().y(), 0);
@@ -111,36 +125,43 @@ namespace module::behaviour::planning {
 
                 Eigen::Affine3d Htw(sensors.Htw);
                 Eigen::Vector3d ballPosition =
-                    (Htw * Eigen::Vector4d(ball.position.x(), ball.position.y(), fd.ball_radius, 1.0)).head<3>();
+                    Htw * Eigen::Vector3d(ball.position.x(), ball.position.y(), fd.ball_radius);
 
                 // Transform target from field to torso space
-                Eigen::Affine3d Htf = Htw * Hfw.inverse();
-                Eigen::Vector3d kickTarget =
-                    (Htf * Eigen ::Vector4d(kickPlan.target.x(), kickPlan.target.y(), 0.0, 1.0)).head<3>();
-                float KickAngle = std::fabs(std::atan2(kickTarget.y(), kickTarget.x()));
+                Eigen::Affine3d Htf        = Htw * Hfw.inverse();
+                Eigen::Vector3d kickTarget = Htf * Eigen::Vector3d(kickPlan.target.x(), kickPlan.target.y(), 0.0);
+                float KickAngle            = std::fabs(std::atan2(kickTarget.y(), kickTarget.x()));
 
                 // log("KickPlan target global",kickPlan. target.transpose());
                 // log("Target of Kick", kickTarget.transpose());
                 // log("KickAngle", KickAngle);
 
                 // Check whether to kick
-                // log("kickTarget", kickTarget.transpose());
-                // log("KickAngle", KickAngle);
-                // log("ballPosition", ballPosition);
-                // log("secondsSinceLastSeen", secondsSinceLastSeen);
+                // log("kickTarget",kickTarget.t());
+                // log("KickAngle",KickAngle);
+                // log("ballPosition",ballPosition);
+                // log("secondsSinceLastSeen",secondsSinceLastSeen);
+                bool correctState = true;
+                if (gameState) {
+                    // If we are playing with GameController, only kick if we are in the playing state, are not
+                    // penalised and are not in ready state
+                    correctState = gameState->data.phase == Phase::PLAYING
+                                   && gameState->data.self.penalty_reason == PenaltyReason::UNPENALISED
+                                   && gameState->data.phase != Phase::READY;
+                }
                 bool kickIsValid = kickValid(ballPosition);
                 if (kickIsValid) {
                     lastTimeValid = now;
                 }
-                float timeSinceValid = (now - lastTimeValid).count() * (1.0 / double(NUClear::clock::period::den));
+                float timeSinceValid = (now - lastTimeValid).count() * (1 / double(NUClear::clock::period::den));
 
                 // log("kick checks",secondsSinceLastSeen < cfg.seconds_not_seen_limit
                 //     , kickIsValid
                 //     , KickAngle < cfg.kick_forward_angle_limit);
-                if (secondsSinceLastSeen < cfg.seconds_not_seen_limit && kickIsValid
+                if (secondsSinceLastSeen < cfg.seconds_not_seen_limit && kickIsValid && (correctState || forcePlaying)
                     && KickAngle < cfg.kick_forward_angle_limit) {
 
-                    switch (kickPlan.kickType.value) {
+                    switch (kickPlan.kick_type.value) {
                         case KickType::IK_KICK:
                             // NUClear::log("ik_kick");
                             if (ballPosition.y() > 0.0) {

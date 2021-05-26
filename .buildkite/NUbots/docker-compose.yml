@@ -4,13 +4,13 @@ services:
     image: nubots/nubots:generic
   generic:
     build:
-      context: ./../docker
+      context: ./../../docker
       args:
         platform: generic
         BUILDKIT_INLINE_CACHE: 1
     volumes:
       - type: bind
-        source: ./..
+        source: ./../..
         target: /home/nubots/NUbots
         read_only: true
         consistency: cached
@@ -19,13 +19,13 @@ services:
     image: nubots/nubots:nuc7i7bnh
   nuc7i7bnh:
     build:
-      context: ./../docker
+      context: ./../../docker
       args:
         platform: nuc7i7bnh
         BUILDKIT_INLINE_CACHE: 1
     volumes:
       - type: bind
-        source: ./..
+        source: ./../..
         target: /home/nubots/NUbots
         read_only: true
         consistency: cached
@@ -34,13 +34,13 @@ services:
     image: nubots/nubots:nuc8i7beh
   nuc8i7beh:
     build:
-      context: ./../docker
+      context: ./../../docker
       args:
         platform: nuc8i7beh
         BUILDKIT_INLINE_CACHE: 1
     volumes:
       - type: bind
-        source: ./..
+        source: ./../..
         target: /home/nubots/NUbots
         read_only: true
         consistency: cached

@@ -15,7 +15,7 @@ nuclear_role(
   input::Camera
   platform::darwin::HardwareIO
   # platform::darwin::HardwareSimulator
-  platform::darwin::SensorFilter
+  input::SensorFilter
   # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector

@@ -51,14 +51,14 @@ namespace module::behaviour::strategy {
                         case AXIS_LEFT_JOYSTICK_HORIZONTAL:
                             // y is left relative to robot
                             // strafe[1] = -event.value;
-                            rotationalSpeed = float(-event.value);
+                            rotationalSpeed = static_cast<float>(-event.value);
                             break;
                         case AXIS_LEFT_JOYSTICK_VERTICAL:
                             // x is forward relative to robot
                             strafe[0] = -event.value;
                             break;
-                        case AXIS_RIGHT_JOYSTICK_VERTICAL: headPitch = float(-event.value); break;
-                        case AXIS_RIGHT_JOYSTICK_HORIZONTAL: headYaw = float(-event.value); break;
+                        case AXIS_RIGHT_JOYSTICK_VERTICAL: headPitch = static_cast<float>(-event.value); break;
+                        case AXIS_RIGHT_JOYSTICK_HORIZONTAL: headYaw = static_cast<float>(-event.value); break;
                     }
                 }
                 else if (event.isButton()) {
@@ -132,10 +132,10 @@ namespace module::behaviour::strategy {
         // TODO: potential performance gain: ignore if value hasn't changed since last emit?
         on<Every<20, Per<std::chrono::seconds>>>().then([this] {
             if (!headLocked) {
-                auto headCommand        = std::make_unique<HeadCommand>();
-                headCommand->yaw        = headYaw / std::numeric_limits<short>::max() * 1.5f;
-                headCommand->pitch      = headPitch / std::numeric_limits<short>::max();
-                headCommand->robotSpace = true;
+                auto headCommand         = std::make_unique<HeadCommand>();
+                headCommand->yaw         = headYaw / std::numeric_limits<short>::max() * 1.5f;
+                headCommand->pitch       = headPitch / std::numeric_limits<short>::max();
+                headCommand->robot_space = true;
                 emit(std::move(headCommand));
             }
 

@@ -79,13 +79,13 @@ namespace NUClear::dsl {
             }
 
             template <typename DSL>
-            static inline ::extension::FileWatch get(threading::Reaction& /*unused*/) {
+            static inline ::extension::FileWatch get(threading::Reaction& /*reaction*/) {
 
                 // Get our File Watch store value
                 auto* ptr = ::extension::FileWatch::FileWatchStore::value;
 
                 // If there was something in the store
-                if (ptr) {
+                if (ptr != nullptr) {
                     return *ptr;
                 }
 
