@@ -1390,11 +1390,11 @@ namespace message::conversion {
     inline Proto& convert(Proto& proto, const DynamicMatProto<Proto> matrix) {
 
         // Set our rows and columns
-        proto.set_rows(matrix.rows());
-        proto.set_cols(matrix.cols());
+        proto.set_rows(uint32_t(matrix.rows()));
+        proto.set_cols(uint32_t(matrix.cols()));
 
         // Allocate the memory
-        proto.mutable_v()->Resize(matrix.size(), 0);
+        proto.mutable_v()->Resize(int(matrix.size()), 0);
 
         // Copy over
         Eigen::Map<DynamicMatProto<Proto>>(

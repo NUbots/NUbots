@@ -138,17 +138,9 @@ foreach(proto ${message_protobufs})
   # * Disable warnings on generated protobuf files
   # * If the protobuf generation starts to generate more warnings, add '-Wno-<warning_name>' to this list of -Wno's
   set_source_files_properties(
-    "${pb}.pb.cc" "${pb}.pb.h" "${nt}.cpp" "${nt}.hpp"
+    "${pb}.pb.cc" "${pb}.pb.h"
     PROPERTIES GENERATED TRUE COMPILE_FLAGS
                               "-Wno-unused-parameter -Wno-conversion -Wno-sign-conversion -Wno-useless-cast"
-  )
-
-  # * Disable warnings on generated neutron files
-  # * If the protobuf generation starts to generate more warnings, add '-Wno-<warning_name>' to this list of -Wno's
-  set_source_files_properties(
-    "${nt}.cpp" "${nt}.hpp"
-    PROPERTIES GENERATED TRUE COMPILE_FLAGS
-                              "-Wno-shadow -Wno-conversion -Wno-sign-conversion"
   )
 
   # Add to the respective outputs
