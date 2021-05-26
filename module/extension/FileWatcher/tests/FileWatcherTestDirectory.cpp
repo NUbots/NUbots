@@ -32,10 +32,10 @@ namespace {
 
     struct StartTest {};
 
-    std::string testFile1Name = "directory-watcher-test-1.txt";
-    std::string testFile2Name = "directory-watcher-test-2.txt";
-    std::vector<extension::FileWatch> fileWatchEvents;
-    bool watchdogTriggered;
+    const char* const test_file1_name = "directory-watcher-test-1.txt";
+    const char* const test_file2_name = "directory-watcher-test-2.txt";
+    std::vector<extension::FileWatch> file_watch_events;  // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+    bool watchdog_triggered;                              // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 
     class TestReactor : public NUClear::Reactor {
     public:

@@ -32,9 +32,9 @@ namespace {
 
     struct StartTest {};
 
-    std::string testFileName = "file-watcher-test.txt";
-    std::vector<extension::FileWatch> fileWatchEvents;
-    bool watchdogTriggered;
+    const char* const test_file_name = "file-watcher-test.txt";
+    std::vector<extension::FileWatch> file_watch_events;  // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+    bool watchdog_triggered;                              // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 
     class TestReactor : public NUClear::Reactor {
     public:
@@ -55,7 +55,6 @@ namespace {
                     file_watch_events.push_back(message);
 
                     if (file_watch_events.size() >= 2) {
-
                         powerplant.shutdown();
                     }
                 });
