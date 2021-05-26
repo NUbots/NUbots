@@ -17,11 +17,11 @@
 
 #include "FileWatcher.hpp"
 
+#include <filesystem>
 #include <fmt/format.h>
+#include <vector>
 
 #include "extension/FileWatch.hpp"
-
-#include "utility/file/fileutil.hpp"
 
 namespace module::extension {
 
@@ -29,65 +29,81 @@ namespace module::extension {
     using ::extension::FileWatchRequest;
     using Unbind = NUClear::dsl::operation::Unbind<FileWatch>;
 
-    void FileWatcher::file_watch_callback(uv_fs_event_t* handle, const char* filename, int events, int /*status*/) {
+    void FileWatcher::file_watch_callback(uv_fs_event_t* handle, const char* filename, int events, int /* status */) {
+
+        struct FileExecTask {
+            std::shared_ptr<NUClear::threading::Reaction> reaction;
+            std::string path;
+            int events;
+        };
 
         // Regain our reactor
         FileWatcher& reactor = *reinterpret_cast<FileWatcher*>(handle->data);
 
-        // Lock our mutex as we are editing our datastructure
-        std::lock_guard<std::mutex> lock(reactor.paths_mutex);
+        // A list of tasks that we will execute after we release the mutex to prevent deadlocks
+        std::vector<FileExecTask> exec_queue;
 
-        // Work out what path we are watching
-        std::array<char, 512> pathbuff{};
-        size_t size = pathbuff.size();
-        uv_fs_event_getpath(handle, pathbuff.data(), &size);
-        std::string path(pathbuff.data());
+        auto exec = [&reactor](NUClear::threading::Reaction& r, const std::string& p, const int& events) {
+            // Set our thread local event details
+            FileWatch watch;
+            watch.path   = p;
+            watch.events = events;
 
-        std::string fullpath = fmt::format("{}/{}", path, filename);
+            // Store our watch value in the local cache
+            FileWatch::FileWatchStore::value = &watch;
 
-        if (reactor.paths.find(path) != reactor.paths.end()) {
-            auto& p = reactor.paths[path];
+            // Directly execute our reaction here
+            auto task = r.get_task();
 
-            auto exec = [&](NUClear::threading::Reaction& r, const std::string& p, const int& events) {
-                // Set our thread local event details
-                FileWatch watch;
-                watch.path   = p;
-                watch.events = events;
+            // Clear our local cache
+            FileWatch::FileWatchStore::value = nullptr;
 
-                // Store our watch value in the local cache
-                FileWatch::FileWatchStore::value = &watch;
+            if (task) {
+                reactor.powerplant.submit(std::move(task));
+            }
+        };
 
-                // Directly execute our reaction here
-                auto task = r.get_task();
-                if (task) {
-                    reactor.powerplant.submit(std::move(task));
+        /* mutex scope */ {
+            // Lock our mutex as we are editing our datastructure
+            std::lock_guard<std::mutex> lock(reactor.paths_mutex);
+
+            // Work out what path we are watching
+            std::array<char, 512> pathbuff{};
+            size_t size = pathbuff.size();
+            uv_fs_event_getpath(handle, pathbuff.data(), &size);
+            std::string path(pathbuff.data());
+
+            std::string fullpath = fmt::format("{}/{}", path, filename);
+
+            if (reactor.paths.find(path) != reactor.paths.end()) {
+                auto& p = reactor.paths[path];
+
+                // If someone is watching this directory
+                if (p.files.find("") != p.files.end()) {
+                    for (auto& r : p.files[""].reactions) {
+
+                        // If there are events we are interested in
+                        if ((r.events & events) != 0) {
+                            exec_queue.push_back(FileExecTask{r.reaction, fullpath, events});
+                        }
+                    }
                 }
 
-                // Clear our local cache
-                FileWatch::FileWatchStore::value = nullptr;
-            };
+                // If someone is watching for this file
+                if (p.files.find(filename) != p.files.end()) {
+                    for (auto& r : p.files[filename].reactions) {
 
-            // If someone is watching this directory
-            if (p.files.find("") != p.files.end()) {
-                for (auto& r : p.files[""].reactions) {
-
-                    // If there are events we are interested in
-                    if ((r.events & events) != 0) {
-                        exec(*r.reaction, fullpath, events);
+                        // If there are events we are interested in
+                        if ((r.events & events) != 0) {
+                            exec_queue.push_back(FileExecTask{r.reaction, fullpath, events});
+                        }
                     }
                 }
             }
+        }
 
-            // If someone is watching for this file
-            if (p.files.find(filename) != p.files.end()) {
-                for (auto& r : p.files[filename].reactions) {
-
-                    // If there are events we are interested in
-                    if ((r.events & events) != 0) {
-                        exec(*r.reaction, fullpath, events);
-                    }
-                }
-            }
+        for (auto& task : exec_queue) {
+            exec(*task.reaction, task.path, task.events);
         }
     }
 
@@ -143,8 +159,16 @@ namespace module::extension {
         remove_watch->data = this;
 
         on<Always>().then("FileWatcher", [this] {
-            // Run our event loop
-            uv_run(loop.get(), UV_RUN_DEFAULT);
+            if (first_loop) {
+                // The first time run with no wait so if there are no events we won't get stuck
+                uv_run(loop.get(), UV_RUN_NOWAIT);
+                first_loop = false;
+                emit(std::make_unique<::extension::FileWatcherReady>());
+            }
+            else {
+                // Run our event loop
+                uv_run(loop.get(), UV_RUN_DEFAULT);
+            }
         });
 
         // Shutdown with the system
@@ -174,7 +198,7 @@ namespace module::extension {
                             // If erasing this file got rid of this path, unwatch this path
                             if (pIt->second.files.empty()) {
 
-                                // TODO unwatch the path
+                                // TODO(thouliston) unwatch the path
                                 remove_queue.push_back(std::move(pIt->second.handle));
 
                                 paths.erase(pIt);
@@ -191,50 +215,42 @@ namespace module::extension {
         });
 
         on<Trigger<FileWatchRequest>>().then("Add FileWatch", [this](const FileWatchRequest& req) {
-            // Lock our mutex as we are editing our datastructure
-            std::lock_guard<std::mutex> lock(paths_mutex);
+            // Get the real path
+            std::filesystem::path path = std::filesystem::absolute(req.path);
 
-            // Get the real path with a unique ptr to ensure it is freed properly
-            std::unique_ptr<char, void (*)(void*)> realPath{::realpath(req.path.c_str(), nullptr), std::free};
+            std::string filename = path.filename();
+            std::string dir      = path.parent_path();
 
-            // If this happens then the config file does not exist
-            if (!realPath) {
-                throw std::system_error(errno,
-                                        std::system_category(),
-                                        fmt::format("Cannot get real path to {}", req.path));
-            }
-
-            std::string path = realPath.get();
-            std::string dir;
-            std::string filename;
-
-            if (utility::file::isDir(path)) {
+            // If it's a directory then there is no filename to watch
+            if (std::filesystem::is_directory(path)) {
                 dir      = path;
                 filename = "";
             }
-            else {
-                std::tie(dir, filename) = utility::file::pathSplit(path);
+
+            /* mutex scope */ {
+                // Lock our mutex as we are editing our datastructure
+                std::lock_guard<std::mutex> lock(paths_mutex);
+
+                // If this is a new path to watch
+                if (paths.find(dir) == paths.end()) {
+                    auto& p        = paths[path];
+                    p.handle       = std::make_unique<uv_fs_event_t>();
+                    p.handle->data = this;
+                    p.path         = dir;
+                    add_queue.push_back(&p);
+                    uv_async_send(add_watch.get());
+                }
+
+                // Add our reaction here into the correct spot
+                paths[dir].files[filename].reactions.push_back(ReactionMap{req.reaction, req.events});
             }
 
-            // If this is a new path to watch
-            if (paths.find(dir) == paths.end()) {
-                auto& p        = paths[path];
-                p.handle       = std::make_unique<uv_fs_event_t>();
-                p.handle->data = this;
-                p.path         = dir;
-                add_queue.push_back(&p);
-                uv_async_send(add_watch.get());
-            }
-
-            // Add our reaction here into the correct spot
-            paths[dir].files[filename].reactions.push_back(ReactionMap{req.reaction, req.events});
-
-            if (utility::file::isDir(path)) {
+            if (std::filesystem::is_directory(path)) {
                 // Initial emit for each of our files in this folder
-                for (const auto& element : utility::file::listDir(path)) {
+                for (const auto& p : std::filesystem::directory_iterator(path)) {
                     // Set our thread local event details
                     FileWatch watch;
-                    watch.path   = path + "/" + element;
+                    watch.path   = p.path();
                     watch.events = 0;
 
                     // Store our watch value in the local cache
@@ -242,12 +258,13 @@ namespace module::extension {
 
                     // Directly execute our reaction here
                     auto task = req.reaction->get_task();
-                    if (task) {
-                        task->run(std::move(task));
-                    }
 
                     // Clear our local cache
                     FileWatch::FileWatchStore::value = nullptr;
+
+                    if (task) {
+                        task->run(std::move(task));
+                    }
                 }
             }
             else {
@@ -261,12 +278,13 @@ namespace module::extension {
 
                 // Directly execute our reaction here
                 auto task = req.reaction->get_task();
-                if (task) {
-                    task->run(std::move(task));
-                }
 
                 // Clear our local cache
                 FileWatch::FileWatchStore::value = nullptr;
+
+                if (task) {
+                    task->run(std::move(task));
+                }
             }
         });
     }
@@ -274,4 +292,5 @@ namespace module::extension {
     FileWatcher::~FileWatcher() {
         uv_loop_close(loop.get());
     }
+
 }  // namespace module::extension
