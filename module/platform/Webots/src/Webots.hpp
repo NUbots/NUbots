@@ -112,7 +112,7 @@ namespace module::platform {
         std::vector<uint8_t> buffer;
 
         /// @brief Atomic variable indicating that a reconnect is currently in progress
-        std::atomic_bool active_reconnect;
+        std::atomic_bool active_reconnect{false};
         bool connection_active = false;
 
     public:
