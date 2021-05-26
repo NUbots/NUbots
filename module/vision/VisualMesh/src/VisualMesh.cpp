@@ -57,13 +57,9 @@ namespace module::vision {
                             weight.push_back(v.as<float>());
                         }
                         if (first_loop && i % 3 == 2) {
-                            int size = net_layer.first.back().size();
-
                             net_layer.first.emplace_back();
-                            auto& weight = net_layer.first.back();
-                            for (int j = 0; j < size; ++j) {
-                                weight.push_back(0.0f);
-                            }
+                            net_layer.first.back().resize(net_layer.first.back().size());
+                            std::fill(net_layer.first.back().begin(), net_layer.first.back().end(), 0.0f);
                         }
                     }
 
@@ -87,7 +83,7 @@ namespace module::vision {
             }
             else if (config["geometry"]["shape"].as<std::string>() == "CIRCLE") {
                 auto shape = visualmesh::geometry::Circle<float>(config["geometry"]["radius"].as<float>(),
-                                                                 config["geometry"]["intersections"].as<float>(),
+                                                                 config["geometry"]["intersections"].as<uint>(),
                                                                  config["geometry"]["max_distance"].as<float>());
                 mesh       = std::make_unique<VM>(shape,
                                             config["height"]["minimum"].as<float>(),
@@ -97,7 +93,7 @@ namespace module::vision {
             else if (config["geometry"]["shape"].as<std::string>() == "CYLINDER") {
                 auto shape = visualmesh::geometry::Cylinder<float>(config["geometry"]["height"].as<float>(),
                                                                    config["geometry"]["radius"].as<float>(),
-                                                                   config["geometry"]["intersections"].as<float>(),
+                                                                   config["geometry"]["intersections"].as<uint>(),
                                                                    config["geometry"]["max_distance"].as<float>());
                 mesh       = std::make_unique<VM>(shape,
                                             config["height"]["minimum"].as<float>(),
@@ -119,9 +115,10 @@ namespace module::vision {
             // Build our lens object
             visualmesh::Lens<float> lens;
             lens.dimensions   = {int(img.dimensions[0]), int(img.dimensions[1])};
-            lens.focal_length = img.lens.focal_length * img.dimensions[0];
+            lens.focal_length = img.lens.focal_length * float(img.dimensions[0]);
             lens.fov          = img.lens.fov;
-            lens.centre       = {img.lens.centre[0] * img.dimensions[0], img.lens.centre[1] * img.dimensions[0]};
+            lens.centre       = {img.lens.centre[0] * float(img.dimensions[0]),
+                           img.lens.centre[1] * float(img.dimensions[0])};
             switch (img.lens.projection.value) {
                 case Image::Lens::Projection::EQUIDISTANT: lens.projection = visualmesh::EQUIDISTANT; break;
                 case Image::Lens::Projection::EQUISOLID: lens.projection = visualmesh::EQUISOLID; break;
@@ -140,10 +137,11 @@ namespace module::vision {
             msg->id  = img.id;
 
             // Get all the rays
-            msg->rays.resize(3, results.global_indices.size());
+            msg->rays.resize(3, Eigen::Index(results.global_indices.size()));
             int col = 0;
             for (const auto& i : results.global_indices) {
-                msg->rays.col(col++) = Eigen::Vector3f(m.nodes[i].ray[0], m.nodes[i].ray[1], m.nodes[i].ray[2]);
+                msg->rays.col(col++) =
+                    Eigen::Vector3f(m.nodes[size_t(i)].ray[0], m.nodes[size_t(i)].ray[1], m.nodes[size_t(i)].ray[2]);
             }
 
             for (const auto& r : m.rows) {
@@ -153,16 +151,16 @@ namespace module::vision {
             msg->coordinates = Eigen::Map<const Eigen::Matrix<float, 2, Eigen::Dynamic>>(
                 reinterpret_cast<float*>(results.pixel_coordinates.data()),
                 2,
-                results.pixel_coordinates.size());
+                Eigen::Index(results.pixel_coordinates.size()));
             msg->indices       = std::move(results.global_indices);
             msg->neighbourhood = Eigen::Map<const Eigen::Matrix<int, 6, Eigen::Dynamic>>(
                 reinterpret_cast<int*>(results.neighbourhood.data()),
                 6,
-                results.neighbourhood.size());
+                Eigen::Index(results.neighbourhood.size()));
             msg->classifications = Eigen::Map<const Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>>(
                 results.classifications.data(),
-                results.classifications.size() / results.neighbourhood.size(),
-                results.neighbourhood.size());
+                Eigen::Index(results.classifications.size() / results.neighbourhood.size()),
+                Eigen::Index(results.neighbourhood.size()));
 
             msg->Hcw       = img.Hcw;
             msg->timestamp = img.timestamp;

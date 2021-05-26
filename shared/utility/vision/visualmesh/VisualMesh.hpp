@@ -46,7 +46,7 @@ namespace utility::vision::visualmesh {
     void cluster_points(Iterator first,
                         Iterator last,
                         const Eigen::MatrixXi& neighbours,
-                        int min_cluster_size,
+                        size_t min_cluster_size,
                         std::vector<std::vector<int>>& clusters) {
 
         // TODOs
@@ -56,7 +56,7 @@ namespace utility::vision::visualmesh {
         using value_type = typename std::iterator_traits<Iterator>::value_type;
 
         // Do a DFS over all valid points and their neighbours to make connected clusters
-        std::vector<bool> visited(std::distance(first, last), false);
+        std::vector<bool> visited(size_t(std::distance(first, last)), false);
         for (Iterator it = first; it != last; it = std::next(it)) {
             std::vector<Iterator> q;
             std::vector<value_type> cluster;
@@ -70,23 +70,23 @@ namespace utility::vision::visualmesh {
                 q.pop_back();
 
                 // Make sure we haven't seen this point before
-                if (!visited[std::distance(first, current)]) {
+                if (!visited[size_t(std::distance(first, current))]) {
                     // Add new point to cluster and mark it as seen
                     cluster.push_back(*current);
-                    visited[std::distance(first, current)] = true;
+                    visited[size_t(std::distance(first, current))] = true;
 
                     // Find the current points neighbours
                     for (int n = 0; n < 6; ++n) {
                         const value_type neighbour_idx = neighbours(n, *current);
                         Iterator neighbour             = std::find(first, last, neighbour_idx);
-                        if ((neighbour != last) && (!visited[std::distance(first, neighbour)])) {
+                        if ((neighbour != last) && (!visited[size_t(std::distance(first, neighbour))])) {
                             q.push_back(neighbour);
                         }
                     }
                 }
             }
             // Only add cluster to list if it meets minimum size requirment
-            if (int(cluster.size()) >= min_cluster_size) {
+            if (cluster.size() >= min_cluster_size) {
                 clusters.emplace_back(std::move(cluster));
             }
         }

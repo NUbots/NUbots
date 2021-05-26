@@ -31,7 +31,7 @@ namespace module::vision {
     private:
         struct {
             float confidence_threshold;
-            int cluster_points;
+            size_t cluster_points;
             float minimum_ball_distance;
             float distance_disagreement;
             float maximum_deviation;

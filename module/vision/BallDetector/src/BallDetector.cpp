@@ -51,7 +51,7 @@ namespace module::vision {
 
         on<Configuration>("BallDetector.yaml").then([this](const Configuration& cfg) {
             config.confidence_threshold  = cfg["confidence_threshold"].as<float>();
-            config.cluster_points        = cfg["cluster_points"].as<int>();
+            config.cluster_points        = cfg["cluster_points"].as<size_t>();
             config.minimum_ball_distance = cfg["minimum_ball_distance"].as<float>();
             config.distance_disagreement = cfg["distance_disagreement"].as<float>();
             config.maximum_deviation     = cfg["maximum_deviation"].as<float>();
@@ -81,7 +81,7 @@ namespace module::vision {
                     });
 
                 // Discard indices that are not on the boundary and are not below the green horizon
-                indices.resize(std::distance(indices.begin(), boundary));
+                indices.resize(size_t(std::distance(indices.begin(), boundary)));
 
                 // Cluster all points into ball candidates
                 // Points are clustered based on their connectivity to other ball points
@@ -111,7 +111,7 @@ namespace module::vision {
                                                                                             rays,
                                                                                             false,
                                                                                             true);
-                clusters.resize(std::distance(clusters.begin(), green_boundary));
+                clusters.resize(size_t(std::distance(clusters.begin(), green_boundary)));
 
                 if (config.debug) {
                     log<NUClear::DEBUG>(fmt::format("Found {} clusters below green horizon", clusters.size()));
@@ -133,8 +133,7 @@ namespace module::vision {
                         for (const auto& idx : cluster) {
                             axis += rays.col(idx);
                         }
-                        axis /= cluster.size();
-                        axis.normalize();
+                        axis = (axis / float(cluster.size())).normalized();
 
                         // Find the ray with the greatest distance from the axis
                         // Should we use the average distance instead?
@@ -151,7 +150,7 @@ namespace module::vision {
                         b.cone.radius = radius;
 
                         // https://en.wikipedia.org/wiki/Angular_diameter
-                        float distance = field.ball_radius / std::sqrt(1.0f - radius * radius);
+                        float distance = float(field.ball_radius) / std::sqrt(1.0f - radius * radius);
 
                         // Attach the measurement to the object (distance from camera to ball)
                         b.measurements.push_back(Ball::Measurement());
@@ -187,12 +186,12 @@ namespace module::vision {
                             angles.emplace_back(angle);
                             mean += angle;
                         }
-                        mean /= angles.size();
+                        mean /= float(angles.size());
                         float deviation = 0.0f;
                         for (const auto& angle : angles) {
                             deviation += (mean - angle) * (mean - angle);
                         }
-                        deviation = std::sqrt(deviation / (angles.size() - 1));
+                        deviation = std::sqrt(deviation / (float(angles.size()) - 1.0f));
 
                         if (deviation > config.maximum_deviation) {
                             if (config.debug) {
@@ -227,7 +226,7 @@ namespace module::vision {
                         // Point in plane = (0, 0, field.ball_radius)
                         // Line direction = axis
                         // Point on line = camera = Hcw.topRightCorner<3, 1>()
-                        const float d = (field.ball_radius - horizon.Hcw(2, 3)) / axis.z();
+                        const float d = float(field.ball_radius - horizon.Hcw(2, 3)) / axis.z();
                         const Eigen::Vector3f ball_projection =
                             axis * d + horizon.Hcw.topRightCorner<3, 1>().cast<float>();
                         const float projection_distance = ball_projection.norm();
@@ -247,7 +246,7 @@ namespace module::vision {
                         }
 
                         // IF THE BALL IS FURTHER THAN THE LENGTH OF THE FIELD
-                        if (distance > field.dimensions.field_length) {
+                        if (distance > float(field.dimensions.field_length)) {
                             if (config.debug) {
                                 log<NUClear::DEBUG>(fmt::format(
                                     "Ball discarded: Distance to ball greater than field length: distance = "

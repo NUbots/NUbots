@@ -115,7 +115,8 @@ namespace utility::math::filter {
             }
 
             // Perturb them by noise
-            particles += sample_particles(StateVec::Zero(), StateVec(model.noise(dt).diagonal()), particles.cols());
+            particles +=
+                sample_particles(StateVec::Zero(), StateVec(model.noise(dt).diagonal()), int(particles.cols()));
 
             // Limit the state of each particle to ensure they are still valid
             for (unsigned int i = 0; i < particles.cols(); i++) {

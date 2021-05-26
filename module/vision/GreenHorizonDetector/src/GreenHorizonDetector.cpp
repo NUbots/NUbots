@@ -28,7 +28,7 @@ namespace module::vision {
         on<Configuration>("GreenHorizonDetector.yaml").then([this](const Configuration& cfg) {
             // Use configuration here from file GreenHorizonDetector.yaml
             config.confidence_threshold = cfg["confidence_threshold"].as<float>();
-            config.cluster_points       = cfg["cluster_points"].as<uint>();
+            config.cluster_points       = cfg["cluster_points"].as<size_t>();
             config.distance_offset      = cfg["distance_offset"].as<float>();
             config.debug                = cfg["debug"].as<bool>();
         });
@@ -38,7 +38,7 @@ namespace module::vision {
             const auto& cls                                     = mesh.classifications;
             const auto& neighbours                              = mesh.neighbourhood;
             const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = mesh.rays;
-            const float world_offset                            = std::atan2(mesh.Hcw(0, 1), mesh.Hcw(0, 0));
+            const float world_offset = std::atan2(float(mesh.Hcw(0, 1)), float(mesh.Hcw(0, 0)));
 
             // Get some indices to partition
             std::vector<int> indices(mesh.indices.size());
@@ -57,7 +57,7 @@ namespace module::vision {
 
 
             // Discard indices that are not on the boundary
-            indices.resize(std::distance(indices.begin(), boundary));
+            indices.resize(size_t(std::distance(indices.begin(), boundary)));
 
             if (config.debug) {
                 log<NUClear::DEBUG>(fmt::format("Partitioned {} points", indices.size()));
@@ -172,7 +172,7 @@ namespace module::vision {
                 msg->horizon.reserve(hull_indices.size());
                 for (const auto& idx : hull_indices) {
                     const Eigen::Vector3f ray      = rays.col(idx);
-                    const float d                  = mesh.Hcw(2, 3) / ray.z();
+                    const float d                  = float(mesh.Hcw(2, 3)) / ray.z();
                     Eigen::Vector3f ray_projection = ray * d;
                     const float norm               = ray_projection.head<2>().norm();
                     ray_projection.head<2>() *= 1.0f + config.distance_offset / norm;

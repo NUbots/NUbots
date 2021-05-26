@@ -127,8 +127,8 @@ namespace module::behaviour::skills {
 
                 replan_angle_threshold = config["replan_angle_threshold"].as<float>();
 
-                pitch_plan_threshold = config["pitch_plan_threshold"].as<float>() * M_PI / 180.0f;
-                pitch_plan_value     = config["pitch_plan_value"].as<float>() * M_PI / 180.0f;
+                pitch_plan_threshold = config["pitch_plan_threshold"].as<float>() * float(M_PI) / 180.0f;
+                pitch_plan_value     = config["pitch_plan_value"].as<float>() * float(M_PI) / 180.0f;
 
                 // Load searches:
                 for (auto& search : config["searches"].config) {
@@ -205,9 +205,8 @@ namespace module::behaviour::skills {
                       bool updatePlan =
                           !isGettingUp && ((lastBallPriority != ballPriority) || (lastGoalPriority != goalPriority));
                       // Has it been a long time since we have seen anything of interest?
-                      bool searchTimedOut =
-                          std::chrono::duration_cast<std::chrono::milliseconds>(now - timeLastObjectSeen).count()
-                          > search_timeout_ms;
+                      bool searchTimedOut = std::chrono::duration<float, std::milli>(now - timeLastObjectSeen).count()
+                                            > search_timeout_ms;
                       // Did the object move in IMUspace?
                       bool objectMoved = false;
 
@@ -261,8 +260,8 @@ namespace module::behaviour::skills {
                           Eigen::Vector2d currentCentroid_world =
                               getIMUSpaceDirection(kinematicsModel, currentCentroid, headToIMUSpace);
                           // If our objects have moved, we need to replan
-                          if ((currentCentroid_world - lastCentroid).norm()
-                              >= fractional_angular_update_threshold * image.lens.fov / 2.0) {
+                          if (float((currentCentroid_world - lastCentroid).norm())
+                              >= fractional_angular_update_threshold * image.lens.fov / 2.0f) {
                               objectMoved  = true;
                               lastCentroid = currentCentroid_world;
                           }
@@ -327,7 +326,7 @@ namespace module::behaviour::skills {
                       // Emit new result if possible
                       if (headSearcher.newGoal()) {
                           // Emit result
-                          Eigen::Vector2d direction            = headSearcher.getState();
+                          Eigen::Vector2f direction            = headSearcher.getState().cast<float>();
                           std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
                           command->yaw                         = direction[0];
                           command->pitch                       = direction[1];
@@ -553,7 +552,7 @@ namespace module::behaviour::skills {
             log<NUClear::WARN>("NO CAMERA PARAMETERS LOADED!!");
         }
         // Get points which keep everything on screen with padding
-        float view_padding_radians = fractional_view_padding * lens.fov;
+        double view_padding_radians = fractional_view_padding * double(lens.fov);
         // 1
         Eigen::Vector2d padding = {view_padding_radians, view_padding_radians};
         Eigen::Vector2d tr      = boundingBox.getBottomLeft() - padding + Eigen::Vector2d(lens.fov, lens.fov) * 0.5;
@@ -570,8 +569,8 @@ namespace module::behaviour::skills {
         // Interpolate between max and min allowed angles with -1 = min and 1 = max
         std::vector<Eigen::Vector2d> searchPoints;
         for (auto& p : searches[SearchType::FIND_ADDITIONAL_OBJECTS]) {
-            float x = p[0];
-            float y = p[1];
+            double x = p[0];
+            double y = p[1];
             searchPoints.push_back(
                 ((1 - x) * (1 - y) * bl + (1 - x) * (1 + y) * tl + (1 + x) * (1 + y) * tr + (1 + x) * (1 - y) * br)
                 / 4);
@@ -616,7 +615,7 @@ namespace module::behaviour::skills {
             log<NUClear::WARN>("NO CAMERA PARAMETERS LOADED!!");
         }
         // Get points which keep everything on screen with padding
-        double view_padding_radians = fractional_view_padding * lens.fov;
+        double view_padding_radians = fractional_view_padding * double(lens.fov);
         // 1
         Eigen::Vector2d padding = {view_padding_radians, view_padding_radians};
         Eigen::Vector2d tr      = boundingBox.getBottomLeft() - padding + Eigen::Vector2d(lens.fov, lens.fov) * 0.5;
@@ -633,8 +632,8 @@ namespace module::behaviour::skills {
         // Interpolate between max and min allowed angles with -1 = min and 1 = max
         std::vector<Eigen::Vector2d> searchPoints;
         for (auto& p : searches[SearchType::FIND_ADDITIONAL_OBJECTS]) {
-            float x = p[0];
-            float y = p[1];
+            double x = p[0];
+            double y = p[1];
             searchPoints.push_back(
                 ((1 - x) * (1 - y) * bl + (1 - x) * (1 + y) * tl + (1 + x) * (1 + y) * tr + (1 + x) * (1 - y) * br)
                 / 4);
@@ -696,7 +695,7 @@ namespace module::behaviour::skills {
         // Max and min prevent nand error, presumably due to computational limitations
         double angle = 2.0 * utility::math::angle::acos_clamped(std::min(1.0, std::max(quat.w(), -1.0)));
 
-        return std::abs(angle) > replan_angle_threshold;
+        return std::abs(angle) > double(replan_angle_threshold);
     }
 
 }  // namespace module::behaviour::skills

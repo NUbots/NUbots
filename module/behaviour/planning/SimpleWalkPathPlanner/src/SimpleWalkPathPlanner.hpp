@@ -41,13 +41,13 @@ namespace module::behaviour::planning {
     private:
         message::behaviour::MotionCommand latestCommand;
         const size_t subsumptionId;
-        float turnSpeed            = 0.8;
-        float forwardSpeed         = 1;
-        float sideSpeed            = 1;
-        float slow_approach_factor = 0.5;
-        float a                    = 7;
-        float b                    = 0;
-        float search_timeout       = 3;
+        double turnSpeed            = 0.8;
+        double forwardSpeed         = 1.0;
+        double sideSpeed            = 1.0;
+        double slow_approach_factor = 0.5;
+        double a                    = 7.0;
+        double b                    = 0.0;
+        double search_timeout       = 3.0;
 
         //-----------non-config variables (not defined in WalkPathPlanner.yaml)-----------
 
@@ -58,12 +58,12 @@ namespace module::behaviour::planning {
         Eigen::Vector2d targetPosition = Eigen::Vector2d::Zero();
 
         NUClear::clock::time_point timeBallLastSeen;
-        Eigen::Vector3d rBWw     = Eigen::Vector3d(10.0, 0.0, 0.0);
-        bool robot_ground_space  = true;
-        Eigen::Vector2d position = Eigen::Vector2d::UnitX();  // ball pos rel to robot
-        float ball_approach_dist = 0.2;
-        float slowdown_distance  = 0.2;
-        bool useLocalisation     = true;
+        Eigen::Vector3d rBWw      = Eigen::Vector3d(10.0, 0.0, 0.0);
+        bool robot_ground_space   = true;
+        Eigen::Vector2d position  = Eigen::Vector2d::UnitX();  // ball pos rel to robot
+        double ball_approach_dist = 0.2;
+        double slowdown_distance  = 0.2;
+        bool useLocalisation      = true;
 
     public:
         explicit SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);

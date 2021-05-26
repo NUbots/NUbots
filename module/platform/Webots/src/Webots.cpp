@@ -186,19 +186,19 @@ namespace module::platform {
 
         // Loop through the linked list of potential options for connecting. In order of best to worst.
         for (addrinfo* addr_ptr = address; addr_ptr != NULL; addr_ptr = addr_ptr->ai_next) {
-            int fd = socket(addr_ptr->ai_family, addr_ptr->ai_socktype, addr_ptr->ai_protocol);
+            int temp_fd = socket(addr_ptr->ai_family, addr_ptr->ai_socktype, addr_ptr->ai_protocol);
 
-            if (fd == -1) {
+            if (temp_fd == -1) {
                 // Bad fd
                 continue;
             }
             else if (connect(fd, addr_ptr->ai_addr, addr_ptr->ai_addrlen) != -1) {
                 // Connection successful
                 freeaddrinfo(address);
-                return fd;
+                return temp_fd;
             }
             // Connection was not successful
-            close(fd);
+            close(temp_fd);
         }
 
         // No connection was successful
@@ -210,7 +210,7 @@ namespace module::platform {
     Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
         on<Configuration>("webots.yaml").then([this](const Configuration& config) {
             // Use configuration here from file webots.yaml
-            time_step = config["time_step"].as<int>();
+            time_step = config["time_step"].as<uint32_t>();
 
             // clang-format off
             auto lvl = config["log_level"].as<std::string>();
@@ -236,43 +236,44 @@ namespace module::platform {
         });
 
         // This trigger updates our current servo state
-        on<Trigger<ServoTargets>, With<RawSensors>>().then([this](const ServoTargets& targets,
-                                                                  const RawSensors& sensors) {
-            // Loop through each of our commands
-            for (const auto& target : targets.targets) {
-                const double diff = utility::math::angle::difference(
-                    double(target.position),
-                    utility::platform::getRawServo(target.id, sensors).present_position);
+        on<Trigger<ServoTargets>, With<RawSensors>>().then(
+            [this](const ServoTargets& targets, const RawSensors& sensors) {
+                // Loop through each of our commands
+                for (const auto& target : targets.targets) {
+                    const double diff = utility::math::angle::difference(
+                        double(target.position),
+                        double(utility::platform::getRawServo(target.id, sensors).present_position));
 
-                NUClear::clock::duration duration = target.time - NUClear::clock::now();
-                double speed                      = 0.0;
-                // If the clock has moved forward since the last update, then we can have a non-zero speed
-                if (duration.count() > 0) {
-                    speed = diff / std::chrono::duration_cast<std::chrono::duration<double>>(duration).count();
+                    NUClear::clock::duration duration = target.time - NUClear::clock::now();
+                    double speed                      = 0.0;
+                    // If the clock has moved forward since the last update, then we can have a non-zero speed
+                    if (duration.count() > 0) {
+                        speed = diff / std::chrono::duration<double>(duration).count();
+                    }
+
+                    // Update our internal state
+                    if (servo_state[target.id].p_gain != double(target.gain)
+                        || servo_state[target.id].i_gain != double(target.gain) * 0.0
+                        || servo_state[target.id].d_gain != double(target.gain) * 0.0
+                        || servo_state[target.id].moving_speed != speed
+                        || servo_state[target.id].goal_position != double(target.position)
+                        || servo_state[target.id].torque != double(target.torque)) {
+
+                        servo_state[target.id].dirty = true;
+                        servo_state[target.id].id    = int(target.id);
+                        servo_state[target.id].name  = translate_id_servo(target.id);
+
+                        servo_state[target.id].p_gain = double(target.gain);
+                        // `i` and `d` gains are always 0
+                        // servo_state[target.id].i_gain        = target.gain * 0.0;
+                        // servo_state[target.id].d_gain        = target.gain * 0.0;
+                        servo_state[target.id].moving_speed  = speed;
+                        servo_state[target.id].goal_position = double(target.position);
+
+                        servo_state[target.id].torque = double(target.torque);
+                    }
                 }
-
-                // Update our internal state
-                if (servo_state[target.id].p_gain != target.gain || servo_state[target.id].i_gain != target.gain * 0.0
-                    || servo_state[target.id].d_gain != target.gain * 0.0
-                    || servo_state[target.id].moving_speed != speed
-                    || servo_state[target.id].goal_position != target.position
-                    || servo_state[target.id].torque != target.torque) {
-
-                    servo_state[target.id].dirty = true;
-                    servo_state[target.id].id    = target.id;
-                    servo_state[target.id].name  = translate_id_servo(target.id);
-
-                    servo_state[target.id].p_gain = target.gain;
-                    // `i` and `d` gains are always 0
-                    // servo_state[target.id].i_gain        = target.gain * 0.0;
-                    // servo_state[target.id].d_gain        = target.gain * 0.0;
-                    servo_state[target.id].moving_speed  = speed;
-                    servo_state[target.id].goal_position = target.position;
-
-                    servo_state[target.id].torque = target.torque;
-                }
-            }
-        });
+            });
 
         on<Trigger<ServoTarget>>().then([this](const ServoTarget& target) {
             auto targets = std::make_unique<ServoTargets>();
@@ -317,7 +318,7 @@ namespace module::platform {
 
         // Initialise the string with ???????
         std::string initial_message = std::string(7, '?');
-        const int n                 = recv(fd, initial_message.data(), sizeof(initial_message), MSG_WAITALL);
+        const ssize_t n             = recv(fd, initial_message.data(), sizeof(initial_message), MSG_WAITALL);
 
         if (n >= 0) {
             if (initial_message == "Welcome") {
@@ -358,14 +359,14 @@ namespace module::platform {
         const std::vector<char> data =
             NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(create_sensor_time_steps(time_step));
 
-        const uint32_t Nn = htonl(data.size());
+        uint32_t Nn = htonl(uint32_t(data.size()));
 
         // Send the sensor timesteps message
-        if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
+        if (::send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
             log<NUClear::ERROR>(fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
             return;
         }
-        if (send(fd, data.data(), data.size(), 0) != (signed) data.size()) {
+        if (::send(fd, data.data(), data.size(), 0) != ssize_t(data.size())) {
             log<NUClear::ERROR>(fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
             return;
         }
@@ -374,19 +375,19 @@ namespace module::platform {
         read_io = on<IO>(fd, IO::READ).then([this]() {
             // ************************** Receiving ***************************************
             // Get the size of the message
-            uint32_t Nn;
-            if (recv(fd, &Nn, sizeof(Nn), MSG_WAITALL) != sizeof(Nn)) {
+            uint32_t message_size = 0;
+            if (::recv(fd, &message_size, sizeof(message_size), MSG_WAITALL) != sizeof(Nn)) {
                 log<NUClear::ERROR>("Failed to read message size from TCP connection");
                 return;
             }
 
             // Convert from network endian to host endian
-            const uint32_t Nh = ntohl(Nn);
+            message_size = ntohl(message_size);
 
             // Get the message
-            std::vector<char> data(Nh, 0);
-            uint64_t message = uint64_t(recv(fd, data.data(), Nh, MSG_WAITALL));
-            if (message != Nh) {
+            std::vector<char> message(message_size, 0);
+            ssize_t read_bytes = ::recv(fd, message.data(), message_size, MSG_WAITALL);
+            if (read_bytes != ssize_t(message_size)) {
                 log<NUClear::ERROR>("Failed to read message from TCP connection");
                 return;
             }
@@ -394,8 +395,9 @@ namespace module::platform {
             log<NUClear::TRACE>("Received sensor measurements");
 
             // If we have data to deserialise then deserialise the message into a neutron
-            if (Nh > 0) {
-                translate_and_emit_sensor(NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(data));
+            if (message_size > 0) {
+                translate_and_emit_sensor(
+                    NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(message));
             }
             // If we don't have any data then this should correspond to a message with all fields set to defaults
             else {
@@ -431,20 +433,20 @@ namespace module::platform {
                 }
 
                 // Serialise ActuatorRequests
-                std::vector<char> data =
+                std::vector<char> message =
                     NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(actuator_requests);
 
                 // Size of the message, in network endian
-                const uint32_t Nn = htonl(data.size());
+                const uint32_t message_size = htonl(uint32_t(message.size()));
 
                 // Send the message size first
-                if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
+                if (::send(fd, &message_size, sizeof(message_size), 0) != sizeof(message_size)) {
                     log<NUClear::ERROR>(
                         fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
                 }
 
                 // Now send the data
-                if (send(fd, data.data(), data.size(), 0) != int(data.size())) {
+                if (::send(fd, message.data(), message.size(), 0) != ssize_t(message.size())) {
                     log<NUClear::ERROR>(fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
                 }
 
@@ -463,7 +465,7 @@ namespace module::platform {
         log<NUClear::TRACE>("  sm.real_time:", sensor_measurements.real_time);
 
         log<NUClear::TRACE>("  sm.messages:");
-        for (int i = 0; i < int(sensor_measurements.messages.size()); ++i) {
+        for (size_t i = 0; i < sensor_measurements.messages.size(); ++i) {
             const auto& message = sensor_measurements.messages[i];
             log<NUClear::TRACE>("    sm.messages #", i);
             log<NUClear::TRACE>("      message_type:", message.message_type);
@@ -471,7 +473,7 @@ namespace module::platform {
         }
 
         log<NUClear::TRACE>("  sm.accelerometers:");
-        for (int i = 0; i < int(sensor_measurements.accelerometers.size()); ++i) {
+        for (size_t i = 0; i < sensor_measurements.accelerometers.size(); ++i) {
             const auto& acc = sensor_measurements.accelerometers[i];
             log<NUClear::TRACE>("    sm.accelerometers #", i);
             log<NUClear::TRACE>("      name:", acc.name);
@@ -479,7 +481,7 @@ namespace module::platform {
         }
 
         log<NUClear::TRACE>("  sm.bumpers:");
-        for (int i = 0; i < int(sensor_measurements.bumpers.size()); ++i) {
+        for (size_t i = 0; i < sensor_measurements.bumpers.size(); ++i) {
             const auto& bumper = sensor_measurements.bumpers[i];
             log<NUClear::TRACE>("    sm.bumpers #", i);
             log<NUClear::TRACE>("      name:", bumper.name);
@@ -487,7 +489,7 @@ namespace module::platform {
         }
 
         log<NUClear::TRACE>("  sm.cameras:");
-        for (int i = 0; i < int(sensor_measurements.cameras.size()); ++i) {
+        for (size_t i = 0; i < sensor_measurements.cameras.size(); ++i) {
             const auto& camera = sensor_measurements.cameras[i];
             log<NUClear::TRACE>("    sm.cameras #", i);
             log<NUClear::TRACE>("      name:", camera.name);
@@ -498,7 +500,7 @@ namespace module::platform {
         }
 
         log<NUClear::TRACE>("  sm.forces:");
-        for (int i = 0; i < int(sensor_measurements.forces.size()); ++i) {
+        for (size_t i = 0; i < sensor_measurements.forces.size(); ++i) {
             const auto& force = sensor_measurements.forces[i];
             log<NUClear::TRACE>("    sm.forces #", i);
             log<NUClear::TRACE>("      name:", force.name);
@@ -506,7 +508,7 @@ namespace module::platform {
         }
 
         log<NUClear::TRACE>("  sm.force3ds:");
-        for (int i = 0; i < int(sensor_measurements.force3ds.size()); ++i) {
+        for (size_t i = 0; i < sensor_measurements.force3ds.size(); ++i) {
             const auto& force = sensor_measurements.force3ds[i];
             log<NUClear::TRACE>("    sm.force3ds #", i);
             log<NUClear::TRACE>("      name:", force.name);
@@ -514,7 +516,7 @@ namespace module::platform {
         }
 
         log<NUClear::TRACE>("  sm.force6ds:");
-        for (int i = 0; i < int(sensor_measurements.force6ds.size()); ++i) {
+        for (size_t i = 0; i < sensor_measurements.force6ds.size(); ++i) {
             const auto& force = sensor_measurements.force6ds[i];
             log<NUClear::TRACE>("    sm.force6ds #", i);
             log<NUClear::TRACE>("      name:", force.name);
@@ -523,7 +525,7 @@ namespace module::platform {
         }
 
         log<NUClear::TRACE>("  sm.gyros:");
-        for (int i = 0; i < int(sensor_measurements.gyros.size()); ++i) {
+        for (size_t i = 0; i < sensor_measurements.gyros.size(); ++i) {
             const auto& gyro = sensor_measurements.gyros[i];
             log<NUClear::TRACE>("    sm.gyros #", i);
             log<NUClear::TRACE>("      name:", gyro.name);
@@ -531,7 +533,7 @@ namespace module::platform {
         }
 
         log<NUClear::TRACE>("  sm.position_sensors:");
-        for (int i = 0; i < int(sensor_measurements.position_sensors.size()); ++i) {
+        for (size_t i = 0; i < sensor_measurements.position_sensors.size(); ++i) {
             const auto& sensor = sensor_measurements.position_sensors[i];
             log<NUClear::TRACE>("    sm.position_sensors #", i);
             log<NUClear::TRACE>("      name:", sensor.name);
@@ -556,7 +558,7 @@ namespace module::platform {
         sensor_data->timestamp = NUClear::clock::now();
 
         for (const auto& position : sensor_measurements.position_sensors) {
-            translate_servo_id(position.name, sensor_data->servo).present_position = position.value;
+            translate_servo_id(position.name, sensor_data->servo).present_position = float(position.value);
         }
 
         if (sensor_measurements.accelerometers.size() > 0) {
@@ -607,7 +609,7 @@ namespace module::platform {
 
         // Save our previous deltas
         const uint32_t prev_sim_delta  = sim_delta;
-        const uint32_t prev_real_delta = real_delta;
+        const uint64_t prev_real_delta = real_delta;
 
         // Update our current deltas
         sim_delta  = sensor_measurements.time - current_sim_time;

@@ -13,6 +13,7 @@ namespace module::input::decompressor {
         virtual std::shared_ptr<Decompressor> make_decompressor(const uint32_t& width,
                                                                 const uint32_t& height,
                                                                 const uint32_t& format) = 0;
+        virtual ~DecompressorFactory()                                                  = default;
     };
 
 }  // namespace module::input::decompressor

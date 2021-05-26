@@ -352,7 +352,7 @@ namespace module::input {
 
                     // Measurement update
                     double k        = timesync.kf.p / (timesync.kf.p + timesync.kf.r);
-                    timesync.offset = std::llround(timesync.offset + k * (o_ns - timesync.offset));
+                    timesync.offset = std::llround(double(timesync.offset) + k * double(o_ns - timesync.offset));
                     timesync.kf.p   = (1.0 - k) * timesync.kf.p;
                 }
                 else {
@@ -381,8 +381,8 @@ namespace module::input {
                             reactor.log<NUClear::INFO>(fmt::format(
                                 "Clock drift for {} camera exceeded threshold ({:.1f}ms > {:.1f}ms), recalibrating",
                                 context->name,
-                                std::abs(total_cam - total_local) / 1e6,
-                                timesync.drift.max_clock_drift / 1e6));
+                                double(std::abs(total_cam - total_local)) / 1e6,
+                                double(timesync.drift.max_clock_drift) / 1e6));
 
                             arv::camera_stop_acquisition(context->camera.get());
                             arv_stream_set_emit_signals(context->stream.get(), false);
@@ -439,7 +439,7 @@ namespace module::input {
                         }
                     }
 
-                    Hcw = Eigen::Affine3d(Hwp * Hpc).inverse();
+                    Hcw = (Hwp * Hpc).inverse();
                 }
 
                 msg->lens = context->lens;
