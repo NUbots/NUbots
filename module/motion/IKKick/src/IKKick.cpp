@@ -43,7 +43,7 @@ namespace module::motion {
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
     using message::behaviour::KickPlan;
-    using message::behaviour::ServoCommand;
+    using message::behaviour::ServoCommands;
     using message::motion::IKKickParams;
     using message::motion::KickCommand;
     using message::motion::KickFinished;
@@ -148,9 +148,9 @@ namespace module::motion {
                 Eigen::Vector3d directionSupportFoot = torsoPose.rotation() * directionTorso;
 
                 Eigen::Vector3d ballPosition = targetSupportFoot;
-                ballPosition.z()             = 0.05;  // TODO: figure out why ball height is unreliable
+                ballPosition.z()             = 0.05;  // TODO: get ball height from config
                 Eigen::Vector3d goalPosition = directionSupportFoot;
-                goalPosition.z()             = 0.0;  // TODO: figure out why ball height is unreliable
+                goalPosition.z()             = 0.0;
 
                 balancer.setKickParameters(supportFoot, ballPosition, goalPosition);
                 kicker.setKickParameters(supportFoot, ballPosition, goalPosition);
@@ -222,20 +222,19 @@ namespace module::motion {
                 joints.insert(joints.end(), supportJoints.begin(), supportJoints.end());
 
                 // Create message to send to servos
-                auto waypoints = std::make_unique<std::vector<ServoCommand>>();
-                waypoints->reserve(16);
+                auto waypoints = std::make_unique<ServoCommands>();
+                waypoints->commands.reserve(16);
 
                 // Goal time is by next frame
                 NUClear::clock::time_point time = NUClear::clock::now();
 
                 // Push back each servo command
                 for (auto& joint : joints) {
-                    waypoints->push_back(
-                        ServoCommand(subsumptionId, time, joint.first, joint.second, gain_legs, torque));
+                    waypoints->commands.emplace_back(subsumptionId, time, joint.first, joint.second, gain_legs, torque);
                 }
 
                 // Send message
-                emit(std::move(waypoints));
+                emit(waypoints);
             });
 
         updater.disable();

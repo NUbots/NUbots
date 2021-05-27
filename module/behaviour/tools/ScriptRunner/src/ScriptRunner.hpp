@@ -41,10 +41,6 @@ namespace module::behaviour::tools {
         // Script delay
         uint script_delay;
 
-        // Default scripts
-
-        // TODO
-
         /// Execute the next script in the list
         void executeNextScript();
 

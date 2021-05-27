@@ -107,7 +107,7 @@ namespace module::behaviour::skills {
                     std::vector<std::string>({"Stand.yaml", "KickLeft.yaml", "Stand.yaml"})));
             }
 
-            // if (kickCommand.kickCommandType == KickType::SCRIPTED) {
+            // if (kickCommand.kick_command_type == KickType::SCRIPTED) {
             // } else {
             // int quadrant = getDirectionalQuadrant(direction[0], direction[1]);
             // // assume valid at this point as this is checked on the walkcommand trigger

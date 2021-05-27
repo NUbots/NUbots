@@ -7,4 +7,4 @@ output:
 messages:
   message.output.CompressedImage: false
   message.input.Sensors: false
-  message.platform.darwin.DarwinSensors: false
+  message.platform.RawSensors: false

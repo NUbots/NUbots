@@ -22,7 +22,7 @@
 #include "extension/Configuration.hpp"
 #include "extension/Script.hpp"
 
-#include "message/platform/darwin/DarwinSensors.hpp"
+#include "message/platform/RawSensors.hpp"
 
 #include "utility/behaviour/Action.hpp"
 #include "utility/input/LimbID.hpp"
@@ -35,10 +35,10 @@ namespace module::behaviour::tools {
 
     using extension::ExecuteScriptByName;
 
-    using message::platform::darwin::DarwinSensors;
+    using message::platform::RawSensors;
     using NUClear::message::CommandLineArguments;
 
-    using message::platform::darwin::ButtonMiddleDown;
+    using message::platform::ButtonMiddleDown;
 
     using utility::behaviour::RegisterAction;
     using LimbID  = utility::input::LimbID;

@@ -28,14 +28,14 @@ extern "C" {
 #include <sstream>
 
 #include "message/motion/ServoTarget.hpp"
-#include "message/platform/darwin/DarwinSensors.hpp"
+#include "message/platform/RawSensors.hpp"
 
 #include "utility/behaviour/Action.hpp"
 #include "utility/file/fileutil.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
-#include "utility/platform/darwin/DarwinSensors.hpp"
+#include "utility/platform/RawSensors.hpp"
 
 namespace module::behaviour::tools {
 
@@ -45,7 +45,8 @@ namespace module::behaviour::tools {
     using extension::Script;
 
     using message::motion::ServoTarget;
-    using message::platform::darwin::DarwinSensors;
+    using message::motion::ServoTargets;
+    using message::platform::RawSensors;
 
     using utility::behaviour::RegisterAction;
     using LimbID  = utility::input::LimbID;
@@ -86,13 +87,13 @@ namespace module::behaviour::tools {
             }
         });
 
-        on<Trigger<LockServo>, With<DarwinSensors>>().then([this](const DarwinSensors& sensors) {
+        on<Trigger<LockServo>, With<RawSensors>>().then([this](const RawSensors& sensors) {
             auto id = selection < 2 ? 18 + selection : selection - 2;
 
             Script::Frame::Target target;
 
             target.id       = id;
-            target.position = utility::platform::darwin::getDarwinServo(target.id, sensors).presentPosition;
+            target.position = utility::platform::getRawServo(target.id, sensors).present_position;
             target.gain     = defaultGain;
             target.torque   = 100;
 
@@ -204,13 +205,13 @@ namespace module::behaviour::tools {
     void ScriptTuner::activateFrame(int frame) {
         this->frame = frame;
 
-        auto waypoints = std::make_unique<std::vector<ServoTarget>>();
+        auto waypoints = std::make_unique<ServoTargets>();
         for (auto& target : script.frames[frame].targets) {
-            waypoints->push_back(ServoTarget{NUClear::clock::now() + std::chrono::milliseconds(1000),
-                                             target.id,
-                                             target.position,
-                                             target.gain,
-                                             target.torque});
+            waypoints->targets.emplace_back(NUClear::clock::now() + std::chrono::milliseconds(1000),
+                                            target.id,
+                                            target.position,
+                                            target.gain,
+                                            target.torque);
         }
 
         emit(std::move(waypoints));

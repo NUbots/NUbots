@@ -17,8 +17,8 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_PLATFORM_DARWIN_VIRTUALLOADSENSOR_HPP
-#define MODULES_PLATFORM_DARWIN_VIRTUALLOADSENSOR_HPP
+#ifndef MODULES_INPUT_VIRTUALLOADSENSOR_HPP
+#define MODULES_INPUT_VIRTUALLOADSENSOR_HPP
 
 #include <Eigen/Core>
 
@@ -29,7 +29,7 @@
 #include "utility/input/ServoID.hpp"
 #include "utility/support/yaml_expression.hpp"
 
-namespace module::platform::darwin {
+namespace module::input {
 
     template <typename Scalar>
     class VirtualLoadSensor {
@@ -159,6 +159,6 @@ namespace module::platform::darwin {
 
         std::array<bool, 2> output_state;
     };
-}  // namespace module::platform::darwin
+}  // namespace module::input
 
-#endif
+#endif  // MODULES_INPUT_VIRTUALLOADSENSOR_HPP

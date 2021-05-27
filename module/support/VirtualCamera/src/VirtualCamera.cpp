@@ -65,15 +65,15 @@ namespace module::support {
                 // Pinhole specific
                 lens.projection   = Image::Lens::Projection::RECTILINEAR;
                 lens.fov          = config["FOV_X"].as<float>();
-                lens.focal_length = (config["imageWidth"].as<float>() * 0.5f) / std::tan(lens.fov * 0.5f);
+                lens.focal_length = (config["image_width"].as<float>() * 0.5f) / std::tan(lens.fov * 0.5f);
                 lens.centre << 0.0f, 0.0f;
             }
             else if (config["lens_type"].as<std::string>().compare("radial") == 0) {
                 // Radial specific
                 lens.projection   = Image::Lens::Projection::EQUIDISTANT;
                 lens.fov          = config["FOV_X"].as<float>();
-                lens.focal_length = 1.0f / config["lens"]["radiansPerPixel"].as<float>();
-                lens.centre       = config["lens"]["centreOffset"].as<Expression>();
+                lens.focal_length = 1.0f / config["lens"]["radians_per_pixel"].as<float>();
+                lens.centre       = config["lens"]["centre_offset"].as<Expression>();
             }
             else {
                 log<NUClear::ERROR>("LENS TYPE UNDEFINED: choose from 'pinhole' or 'radial'");

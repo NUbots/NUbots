@@ -17,8 +17,8 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_PLATFORM_DARWIN_SENSORFILTER_HPP
-#define MODULES_PLATFORM_DARWIN_SENSORFILTER_HPP
+#ifndef MODULES_INPUT_SENSORFILTER_HPP
+#define MODULES_INPUT_SENSORFILTER_HPP
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
@@ -32,11 +32,9 @@
 #include "utility/math/filter/UKF.hpp"
 
 
-namespace module::platform::darwin {
+namespace module::input {
 
     /**
-     * TODO document
-     *
      * @author Jake Fountain
      * @author Trent Houliston
      */
@@ -120,5 +118,5 @@ namespace module::platform::darwin {
         // Storage for previous gyroscope values
         Eigen::Vector3d theta;
     };
-}  // namespace module::platform::darwin
-#endif  // MODULES_PLATFORM_DARWIN_SENSORFILTER_HPP
+}  // namespace module::input
+#endif  // MODULES_INPUT_SENSORFILTER_HPP

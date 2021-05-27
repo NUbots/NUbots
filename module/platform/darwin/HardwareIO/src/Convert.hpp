@@ -25,8 +25,6 @@
 namespace module::platform::darwin {
 
     /**
-     * TODO document
-     *
      * @author Trent Houliston
      */
     struct Convert {
@@ -37,6 +35,10 @@ namespace module::platform::darwin {
 
         /// The Gyrosocope value from the Darwin is between 0 and 1023, representing a value between -500 and
         /// 500 degrees per second. This means 512 = 0
+        /// 1880.0 is an empirically measured value for this factor, which was calculated by spinning the robot on an
+        /// office chair and comparing how far the robot thought it spun to how much it actually spun.
+        /// Empirical estimates like this which don't match the data sheet are SUSPECT, and should be rechecked
+        /// periodically
         static constexpr double GYROSCOPE_CONVERSION_FACTOR = (1880.0 * (M_PI / 180.0)) / 512.0;
 
         /// The value that comes from the darwin is measured in decivolts (0.1 of a volt)
@@ -51,18 +53,19 @@ namespace module::platform::darwin {
         /// The angle is given as a value between 0 and 4095
         static constexpr double POSITION_CONVERSION_FACTOR = (2.0 * M_PI) / 4095.0;
 
-        /// The load is measured as a value between 0 and 2047 where the 10th bit specifies direction and 1024 =
-        /// 0 We convert it to a value between -1 and 1 (percentage)
+        /// The load is measured as a value between 0 and 2047 where the 10th bit specifies direction and 1024 = 0
+        /// We convert it to a value between -1 and 1 (percentage)
         static constexpr double LOAD_CONVERSION_FACTOR = 1.0 / 1023.0;
 
-        /// The torque limit is measured as a value between 0 and 1023
+        /// The torque limit is measured as a value between 0 and 1023. We use it between 0 and 100
         static constexpr double TORQUE_LIMIT_CONVERSION_FACTOR = 100.0 / 1023.0;
 
         /// The temperatures are given in degrees anyway
         static constexpr double TEMPERATURE_CONVERSION_FACTOR = 1.0;
 
-        /// The MX28 measures its speed between 0 and 1023 where 1023 means a speed of 117.07rpm
-        static constexpr double SPEED_CONVERSION_FACTOR = (117.07 * 2.0 * M_PI) / (1023.0 * 60);
+        /// The MX64 and MX106 both measure speed between 0 and 1023, with unit of about 0.114rpm
+        /// If the speed is 1023, then the speed is about 116.62 == 0.114 * 1023, per the datasheet
+        static constexpr double SPEED_CONVERSION_FACTOR = (0.114 * 2.0 * M_PI) / 60.0;
 
         /// Picks which direction a motor should be measured in (forward or reverse) -- configurable based on
         /// the specific humanoid being used.
