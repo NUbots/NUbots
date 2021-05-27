@@ -157,16 +157,20 @@ namespace module::input {
             // The change in the quaternion q is (1/2)*omega*q
             // Here is an explanation https://gamedev.stackexchange.com/a/157018
             // Here is another derivation https://fgiesen.wordpress.com/2012/08/24/quaternion-differentiation/
-            // dq/dt = (1/2)*omega*Rwt
-            const Eigen::Quaternion<Scalar> dq_dt = Eigen::Quaternion<Scalar>(0.0,
-                                                                              newState.omegaTTt.x() * 0.5,
-                                                                              newState.omegaTTt.y() * 0.5,
-                                                                              newState.omegaTTt.z() * 0.5)
-                                                    * Rwt;
+            // dq = (dt / 2) * Rwt * omega
+            // Rwt = dq + Rwt
+            //     = (dt / 2) * Rwt * omega + Rwt
+
             // The change in the rotation is the derivative times the differential (which is the time-step)
-            const Eigen::Quaternion<Scalar> change = Eigen::Quaternion<Scalar>(deltaT * dq_dt.coeffs());
+            const Scalar t_2                   = deltaT * Scalar(0.5);
+            const Eigen::Quaternion<Scalar> dq = Rwt
+                                                 * Eigen::Quaternion<Scalar>(0.0,
+                                                                             newState.omegaTTt.x() * t_2,
+                                                                             newState.omegaTTt.y() * t_2,
+                                                                             newState.omegaTTt.z() * t_2);
+
             // We can add the change to the original, as long as our time step is small enough
-            newState.Rwt = Eigen::Quaternion<Scalar>(Rwt.coeffs() + change.coeffs()).normalized();
+            newState.Rwt = Eigen::Quaternion<Scalar>((Rwt.coeffs() + dq.coeffs()).normalized());
 
             // ********************************
             // UPDATE LINEAR POSITION/VELOCITY
