@@ -195,11 +195,9 @@ function(NUCLEAR_MODULE)
   # Warnings #
   # ####################################################################################################################
 
-  # * We need to tell cmake where the function for the compiler warnings is (src/cmake)
-  list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/nuclear/cmake")
   include(CompilerWarnings)
-  # * Then we set the warnings with it for the module
-  set_project_warnings(${module_target_name})
+  # * Set the warnings with this function for the module
+  set_target_warnings(${module_target_name})
 
   # ####################################################################################################################
   # Testing #

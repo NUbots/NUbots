@@ -3,7 +3,7 @@
 # * https://github.com/lefticus/cppbestpractices/blob/master/02-Use_the_Tools_Available.md
 # * https://github.com/lefticus/cpp_starter_project/blob/master/cmake/CompilerWarnings.cmake
 
-function(set_project_warnings target_name)
+function(set_target_warnings target_name)
 
   set(TARGET_WARNINGS
       -Wall
@@ -32,13 +32,6 @@ function(set_project_warnings target_name)
     list(APPEND TARGET_WARNINGS -Werror)
   endif()
 
-  if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(PROJECT_WARNINGS ${TARGET_WARNINGS})
-  else()
-    # User is using some other unsupported compiler, such as MSVC
-    message(AUTHOR_WARNING "No compiler warnings set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
-  endif()
-
-  target_compile_options(${target_name} INTERFACE ${PROJECT_WARNINGS})
+  target_compile_options(${target_name} PRIVATE ${TARGET_WARNINGS})
 
 endfunction()
