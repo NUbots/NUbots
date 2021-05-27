@@ -40,6 +40,7 @@ struct convert<::NUClear::LogLevel> {
             case NUClear::WARN: node = "WARN"; break;
             case NUClear::ERROR: node = "ERROR"; break;
             case NUClear::FATAL: node = "FATAL"; break;
+            default: node = "DEBUG"; break;
         }
 
         return node;
@@ -55,6 +56,7 @@ struct convert<::NUClear::LogLevel> {
             else if (lvl == "WARN") { rhs = NUClear::WARN; }
             else if (lvl == "ERROR") { rhs = NUClear::ERROR; }
             else if (lvl == "FATAL") { rhs = NUClear::FATAL; }
+            else { rhs = NUClear::DEBUG; }
             // clang-format on
         }
         catch (const std::invalid_argument& ex) {
