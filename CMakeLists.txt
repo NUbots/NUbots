@@ -104,7 +104,7 @@ set(NUCLEAR_ROLE_BANNER_FILE
 )
 
 # Treat all normal compiler warnings as errors
-option(WARNINGS_AS_ERRORS "Fail the build when we have compiler or clang-tidy warnings" ON)
+option(WARNINGS_AS_ERRORS "Fail the build when we have compiler warnings" OFF)
 
 # Include the NUClear roles system
 add_subdirectory(nuclear)
