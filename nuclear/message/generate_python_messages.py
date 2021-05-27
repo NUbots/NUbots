@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-import sys
 import os
 import pkgutil
 import shutil
+import sys
+
 import google.protobuf.message
 
 

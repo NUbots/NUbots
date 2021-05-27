@@ -28,8 +28,8 @@ find_package(pybind11 REQIRED)
 # TODO(KipHamiltons): Not sure if I need these
 find_package(PythonInterp 3 REQUIRED)
 find_package(PythonLibsNew 3 REQUIRED)
-# TODO(KipHamiltons): Not sure about these either. Try `target_include_directories` eventually,
-# not including them at all
+# TODO(KipHamiltons): Not sure about these either. Try `target_include_directories` eventually, not including them at
+# all
 include_directories(SYSTEM ${pybind11_INCLUDE_DIRS})
 include_directories(SYSTEM ${PYTHON_INCLUDE_DIRS})
 
@@ -164,16 +164,14 @@ foreach(proto ${message_protobufs})
   list(APPEND neutron_src "${nt}.cpp" "${nt}.hpp" "${nt}.py.cpp")
   list(APPEND python_src "${py}_pb2.py")
 
-  # TODO(KipHamiltons) verify this is required
-  # Add the message modules
-  LIST(APPEND py_message_modules "${outputpath}/${file_we}_pb2.py")
+  # TODO(KipHamiltons) verify this is required Add the message modules
+  list(APPEND py_message_modules "${outputpath}/${file_we}_pb2.py")
 
 endforeach(proto ${message_protobufs})
 
-# * TODO(KipHamiltons) investigate if this is required
-# *
-# Add Neutron_pb2.py here to prevent adding duplicate items to the list
-LIST(APPEND python_src "${message_binary_include_dir}/Neutron_pb2.py")
+# * TODO(KipHamiltons) investigate if this is required * Add Neutron_pb2.py here to prevent adding duplicate items to
+#   the list
+list(APPEND python_src "${message_binary_include_dir}/Neutron_pb2.py")
 
 # Build the reflection header
 add_custom_command(
@@ -219,52 +217,56 @@ add_custom_command(
 list(APPEND neutron_src "${CMAKE_CURRENT_BINARY_DIR}/outer_python_binding.cpp")
 
 # Macro to list all subdirectories of a given directory
-MACRO(SUBDIRLIST result curdir)
-    # Get list of directory entries in current directory
-    FILE(GLOB_RECURSE children LIST_DIRECTORIES TRUE RELATIVE ${curdir} ${curdir}/*)
+macro(SUBDIRLIST result curdir)
+  # Get list of directory entries in current directory
+  file(
+    GLOB_RECURSE children
+    LIST_DIRECTORIES TRUE
+    RELATIVE ${curdir}
+    ${curdir}/*
+  )
 
-    # Append all subdirectories of current directory to our directory list
-    SET(dirlist "")
-    FOREACH(child ${children})
-        IF(IS_DIRECTORY "${curdir}/${child}")
-            LIST(APPEND dirlist "${child}")
-        ENDIF(IS_DIRECTORY "${curdir}/${child}")
-    ENDFOREACH(child)
+  # Append all subdirectories of current directory to our directory list
+  set(dirlist "")
+  foreach(child ${children})
+    if(IS_DIRECTORY "${curdir}/${child}")
+      list(APPEND dirlist "${child}")
+    endif(IS_DIRECTORY "${curdir}/${child}")
+  endforeach(child)
 
-    # Return result
-    SET(${result} ${dirlist})
-ENDMACRO(SUBDIRLIST)
+  # Return result
+  set(${result} ${dirlist})
+endmacro(SUBDIRLIST)
 
-# Generate a list of all of the python message files we will be generating
-# This allows us to tell cmake at configure time what we will be generating at build time
-# This should also allow us to set up proper dependencies and clean up generated files at clean time
-SET(py_messages "")
-LIST(REMOVE_DUPLICATES py_message_modules)
+# Generate a list of all of the python message files we will be generating This allows us to tell cmake at configure
+# time what we will be generating at build time This should also allow us to set up proper dependencies and clean up
+# generated files at clean time
+set(py_messages "")
+list(REMOVE_DUPLICATES py_message_modules)
 
-SUBDIRLIST(py_messages ${message_source_dir})
-LIST(APPEND py_messages "")
-LIST(TRANSFORM py_messages PREPEND "${PROJECT_BINARY_DIR}/python/nuclear/message/")
-LIST(TRANSFORM py_messages APPEND "/__init__.py")
+subdirlist(py_messages ${message_source_dir})
+list(APPEND py_messages "")
+list(TRANSFORM py_messages PREPEND "${PROJECT_BINARY_DIR}/python/nuclear/message/")
+list(TRANSFORM py_messages APPEND "/__init__.py")
 
 # Generate module python file containing stub classes for all of our messages
-ADD_CUSTOM_COMMAND(
-    OUTPUT ${py_messages}
-    BYPRODUCTS "${PROJECT_BINARY_DIR}/python/nuclear/messages.txt"
-    COMMAND ${PYTHON_EXECUTABLE}
-    ARGS "${CMAKE_CURRENT_SOURCE_DIR}/generate_python_messages.py"
-          "${PROJECT_BINARY_DIR}/shared"
-          "${PROJECT_BINARY_DIR}/python/nuclear"
-          "${PROJECT_BINARY_DIR}/python/nuclear/messages.txt"
-    WORKING_DIRECTORY ${message_binary_dir}
-    DEPENDS ${src} ${py_message_modules}
-    COMMENT "Generating python sub messages")
+add_custom_command(
+  OUTPUT ${py_messages}
+  BYPRODUCTS "${PROJECT_BINARY_DIR}/python/nuclear/messages.txt"
+  COMMAND
+    ${PYTHON_EXECUTABLE} ARGS "${CMAKE_CURRENT_SOURCE_DIR}/generate_python_messages.py" "${PROJECT_BINARY_DIR}/shared"
+    "${PROJECT_BINARY_DIR}/python/nuclear" "${PROJECT_BINARY_DIR}/python/nuclear/messages.txt"
+  WORKING_DIRECTORY ${message_binary_dir}
+  DEPENDS ${src} ${py_message_modules}
+  COMMENT "Generating python sub messages"
+)
 
 # Make sure all of the generated files are marked as generated
-SET_SOURCE_FILES_PROPERTIES(${py_messages} PROPERTIES GENERATED TRUE)
+set_source_files_properties(${py_messages} PROPERTIES GENERATED TRUE)
 
 # Create the python messages target and set the dependency chain up
-ADD_CUSTOM_TARGET(python_nuclear_message DEPENDS ${py_messages})
-ADD_DEPENDENCIES(nuclear_message python_nuclear_message)
+add_custom_target(python_nuclear_message DEPENDS ${py_messages})
+add_dependencies(nuclear_message python_nuclear_message)
 
 # Generate in the lib folder so it gets installed
 if(NUCLEAR_LINK_TYPE STREQUAL "SHARED")
