@@ -82,8 +82,9 @@ namespace utility::math::filter {
 
             // Get our Cholesky decomposition
             // Impose positive semi-definiteness on the covariance matrix
-            Eigen::LLT<StateMat> cholesky(sigma_weight
-                                          * covariance.unaryExpr([](const Scalar& c) { return std::abs(c); }));
+            const Eigen::Matrix<T, S, S> weights =
+                sigma_weight * covariance.unaryExpr([](const Scalar& c) { return std::abs(c); });
+            Eigen::LLT<StateMat> cholesky(weights);
             if (cholesky.info() == Eigen::Success) {
                 // Put our values in either end of the matrix
                 StateMat chol = cholesky.matrixU().toDenseMatrix();
@@ -93,6 +94,7 @@ namespace utility::math::filter {
                 }
             }
             else {
+                NUClear::log<NUClear::ERROR>("UKF state:\n", weights);
                 switch (cholesky.info()) {
                     case Eigen::NumericalIssue:
                         throw std::runtime_error(
