@@ -212,7 +212,7 @@ set(py_messages "")
 list(REMOVE_DUPLICATES py_message_modules)
 
 subdirlist(py_messages ${message_source_dir})
-list(APPEND py_messages "")
+list(APPEND py_messages "") # Empty message file to make __init__.py for the top level dir
 list(TRANSFORM py_messages PREPEND "${PROJECT_BINARY_DIR}/python/nuclear/message/")
 list(TRANSFORM py_messages APPEND "/__init__.py")
 
