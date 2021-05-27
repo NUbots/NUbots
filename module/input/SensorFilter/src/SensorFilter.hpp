@@ -117,6 +117,9 @@ namespace module::input {
 
         // Storage for previous gyroscope values
         Eigen::Vector3d theta;
+
+        ReactionHandle update_loop;
+        std::atomic_bool reset_filter{true};
     };
 }  // namespace module::input
 #endif  // MODULES_INPUT_SENSORFILTER_HPP
