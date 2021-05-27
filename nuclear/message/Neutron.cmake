@@ -54,7 +54,6 @@ foreach(proto ${builtin_protobufs})
 
 endforeach(proto ${builtin_protobufs})
 
-set(message_dependencies "")
 set(py_message_modules "")
 
 # Build the user protocol buffers
@@ -101,20 +100,6 @@ foreach(proto ${message_protobufs})
       list(APPEND binary_depends "${pb_out}/${depend_rel}")
     endif()
   endforeach()
-
-  # Extract the protocol buffer information so we can generate code off it
-  add_custom_command(
-    OUTPUT "${outputpath}/${file_we}.pb" "${outputpath}/${file_we}.dep"
-    COMMAND
-      ${PROTOBUF_PROTOC_EXECUTABLE} ARGS --descriptor_set_out="${outputpath}/${file_we}.pb"
-      --dependency_out="${outputpath}/${file_we}.dep" -I${message_source_include_dir}
-      -I${CMAKE_CURRENT_SOURCE_DIR}/proto ${proto}
-    DEPENDS ${source_depends}
-    COMMENT "Extracting protocol buffer information from ${proto}"
-  )
-
-  # Gather the dependencies for each message.
-  list(APPEND ${message_dependencies} "${outputpath}/${file_we}.dep")
 
   #
   # PROTOCOL BUFFERS
@@ -184,24 +169,6 @@ add_custom_command(
 )
 list(APPEND neutron_src "${nt_out}/message/reflection.hpp")
 
-# * Make this library be a system include when it's linked into other libraries
-# * This will prevent clang-tidy from looking at the headers
-add_library(nuclear_message_protobuf OBJECT ${protobuf_src})
-set_target_properties(nuclear_message_protobuf PROPERTIES CXX_CLANG_TIDY "")
-target_include_directories(nuclear_message_protobuf PRIVATE ${pb_out})
-target_include_directories(nuclear_message_protobuf SYSTEM INTERFACE ${pb_out})
-target_link_libraries(nuclear_message_protobuf protobuf::libprotobuf)
-
-add_library(nuclear_message ${NUCLEAR_LINK_TYPE} ${neutron_src} ${py_message_modules})
-target_compile_features(nuclear_message PUBLIC cxx_std_17)
-target_link_libraries(nuclear_message PUBLIC nuclear_message_protobuf)
-target_link_libraries(nuclear_message PUBLIC Eigen3::Eigen)
-target_link_libraries(nuclear_message PUBLIC pybind11::pybind11)
-# Don't know about this one
-target_link_libraries(nuclear_message ${PYTHON_LIBRARIES})
-target_include_directories(nuclear_message PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
-target_include_directories(nuclear_message PUBLIC ${nt_out})
-
 # Build our outer python binding wrapper class
 add_custom_command(
   OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/outer_python_binding.cpp"
@@ -267,6 +234,24 @@ set_source_files_properties(${py_messages} PROPERTIES GENERATED TRUE)
 # Create the python messages target and set the dependency chain up
 add_custom_target(python_nuclear_message DEPENDS ${py_messages})
 add_dependencies(nuclear_message python_nuclear_message)
+
+# * Make this library be a system include when it's linked into other libraries
+# * This will prevent clang-tidy from looking at the headers
+add_library(nuclear_message_protobuf OBJECT ${protobuf_src})
+set_target_properties(nuclear_message_protobuf PROPERTIES CXX_CLANG_TIDY "")
+target_include_directories(nuclear_message_protobuf PRIVATE ${pb_out})
+target_include_directories(nuclear_message_protobuf SYSTEM INTERFACE ${pb_out})
+target_link_libraries(nuclear_message_protobuf protobuf::libprotobuf)
+
+add_library(nuclear_message ${NUCLEAR_LINK_TYPE} ${neutron_src} ${py_message_modules})
+target_compile_features(nuclear_message PUBLIC cxx_std_17)
+target_link_libraries(nuclear_message PUBLIC nuclear_message_protobuf)
+target_link_libraries(nuclear_message PUBLIC Eigen3::Eigen)
+target_link_libraries(nuclear_message PUBLIC pybind11::pybind11)
+# Don't know about this one
+target_link_libraries(nuclear_message ${PYTHON_LIBRARIES})
+target_include_directories(nuclear_message PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_include_directories(nuclear_message PUBLIC ${nt_out})
 
 # Generate in the lib folder so it gets installed
 if(NUCLEAR_LINK_TYPE STREQUAL "SHARED")
