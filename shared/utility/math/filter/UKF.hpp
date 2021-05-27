@@ -86,7 +86,7 @@ namespace utility::math::filter {
                                           * covariance.unaryExpr([](const Scalar& c) { return std::abs(c); }));
             if (cholesky.info() == Eigen::Success) {
                 // Put our values in either end of the matrix
-                StateMat chol = cholesky.matrixL().toDenseMatrix();
+                StateMat chol = cholesky.matrixU().toDenseMatrix();
                 for (unsigned int i = 1; i < Model::size + 1; ++i) {
                     points.col(i)               = (mean + chol.col(i - 1));
                     points.col(i + Model::size) = (mean - chol.col(i - 1));
