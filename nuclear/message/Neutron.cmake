@@ -176,6 +176,10 @@ target_link_libraries(nuclear_message PUBLIC Eigen3::Eigen)
 target_include_directories(nuclear_message PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(nuclear_message PUBLIC ${nt_out})
 
+# Add warnings for the C++ message files
+include(CompilerWarnings)
+set_target_warnings(nuclear_message)
+
 # Generate in the lib folder so it gets installed
 if(NUCLEAR_LINK_TYPE STREQUAL "SHARED")
   set_property(TARGET nuclear_message PROPERTY LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/lib")

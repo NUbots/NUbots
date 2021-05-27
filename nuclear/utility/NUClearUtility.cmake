@@ -31,5 +31,9 @@ if(NUCLEAR_LINK_TYPE STREQUAL "SHARED")
   set_target_properties(nuclear_utility PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/lib")
 endif()
 
+# Set warnings
+include(CompilerWarnings)
+set_target_warnings(nuclear_utility)
+
 # Alias to the namespaced version
 add_library(nuclear::utility ALIAS nuclear_utility)
