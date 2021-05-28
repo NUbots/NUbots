@@ -94,34 +94,17 @@ namespace utility::math::angle {
      * (Better than doing angleDst-angleSrc)
      */
     template <typename Scalar>
-    inline double angleDistance(Scalar angleSrc, Scalar angleDst) {
-        angleSrc = normalizeAngle(angleSrc);
-        angleDst = normalizeAngle(angleDst);
+    inline double angleDistance(const Scalar& angleSrc, const Scalar& angleDst) {
+        const Scalar source = normalizeAngle(angleSrc);
+        const Scalar dest   = normalizeAngle(angleDst);
 
-        Scalar max;
-        Scalar min;
-        if (angleSrc > angleDst) {
-            max = angleSrc;
-            min = angleDst;
-        }
-        else {
-            max = angleDst;
-            min = angleSrc;
-        }
+        const Scalar max = source > dest ? source : dest;
+        const Scalar min = source > dest ? dest : source;
 
         const Scalar dist1 = max - min;
         const Scalar dist2 = (2.0 * M_PI) - max + min;
 
-        if (dist1 < dist2) {
-            if (angleSrc > angleDst) {
-                return -dist1;
-            }
-            return dist1;
-        }
-        if (angleSrc > angleDst) {
-            return dist2;
-        }
-        return -dist2;
+        return dist1 < dist2 ? (source > dest ? -dist1 : dist1) : (source > dest ? dist2 : -dist2);
     }
 
     inline double vectorToBearing(const Eigen::Vector2d& dirVec) {
