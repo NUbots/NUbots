@@ -27,3 +27,7 @@ add_custom_command(
 target_sources(nuclear_utility PRIVATE "${CMAKE_BINARY_DIR}/recordings")
 
 target_compile_features(nuclear_utility PUBLIC cxx_std_17)
+
+# Set warnings
+include(CompilerWarnings)
+set_target_warnings(nuclear_utility)
