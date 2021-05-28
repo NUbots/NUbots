@@ -25,8 +25,7 @@
 
 #include "message/conversion/math_types.hpp"
 
-namespace module {
-namespace vision {
+namespace module::vision {
 
     class BallDetector : public NUClear::Reactor {
     private:
@@ -44,8 +43,7 @@ namespace vision {
         /// @brief Called by the powerplant to build and setup the BallDetector reactor.
         explicit BallDetector(std::unique_ptr<NUClear::Environment> environment);
     };
-}  // namespace vision
-}  // namespace module
+}  // namespace module::vision
 
 
 #endif

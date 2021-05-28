@@ -3,30 +3,33 @@
 
 #include "../Compressor.hpp"
 
-namespace module {
-namespace output {
-    namespace compressor {
-        namespace turbojpeg {
+#include "utility/vision/mosaic.hpp"
 
-            class Compressor : public compressor::Compressor {
-            public:
-                Compressor(const int& quality, const uint32_t& width, const uint32_t& height, const uint32_t& format);
-                virtual ~Compressor();
-                virtual std::vector<uint8_t> compress(const std::vector<uint8_t>& data,
-                                                      const uint32_t& width,
-                                                      const uint32_t& height,
-                                                      const uint32_t& format) override;
+namespace module::output::compressor::turbojpeg {
 
-            private:
-                /// The JPEG quality to compress with
-                int quality;
-                /// Either a mosaic permutation table if this is a mosaic pattern, or an empty list
-                std::vector<uint32_t> mosaic_table;
-            };
+    class Compressor : public compressor::Compressor {
+    public:
+        Compressor(const int& quality, const uint32_t& width, const uint32_t& height, const uint32_t& format);
+        Compressor(const Compressor&) = default;
+        Compressor(Compressor&&)      = default;
+        Compressor& operator=(const Compressor&) = default;
+        Compressor& operator=(Compressor&&) = default;
+        virtual ~Compressor();
+        std::vector<uint8_t> compress(const std::vector<uint8_t>& data) override;
 
-        }  // namespace turbojpeg
-    }      // namespace compressor
-}  // namespace output
-}  // namespace module
+    private:
+        /// The JPEG quality to compress with
+        int quality;
+        /// The image width
+        uint32_t width;
+        /// The image height
+        uint32_t height;
+        /// The image format
+        uint32_t format;
+        /// The mosaic permutation table if this is a mosaic pattern
+        utility::vision::Mosaic mosaic;
+    };
+
+}  // namespace module::output::compressor::turbojpeg
 
 #endif  // MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_TURBOJPEG_COMPRESSOR_HPP

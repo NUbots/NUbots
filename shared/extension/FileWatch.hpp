@@ -22,35 +22,37 @@
 
 namespace extension {
 
-struct FileWatch {
-    using FileWatchStore = NUClear::dsl::store::ThreadStore<FileWatch>;
+    struct FileWatch {
+        using FileWatchStore = NUClear::dsl::store::ThreadStore<FileWatch>;
 
-    enum Event {
-        NO_OP   = 0,  // No event
-        RENAMED = 1,  // File created or renamed
-        CHANGED = 2   // File modified
+        enum Event {
+            NO_OP   = 0,  // No event
+            RENAMED = 1,  // File created or renamed
+            CHANGED = 2   // File modified
+        };
+
+        std::string path;
+        int events{};
+
+        inline operator bool() const {
+            // Empty path is invalid
+            return !path.empty();
+        }
     };
 
-    std::string path;
-    int events;
+    struct FileWatchRequest {
+        std::string path;
+        int events{};
+        std::shared_ptr<NUClear::threading::Reaction> reaction;
+    };
 
-    inline operator bool() const {
-        // Empty path is invalid
-        return !path.empty();
-    }
-};
-
-struct FileWatchRequest {
-    std::string path;
-    int events;
-    std::shared_ptr<NUClear::threading::Reaction> reaction;
-};
+    /// Emitted once the FileWatcher has started up and is watching files
+    struct FileWatcherReady {};
 
 }  // namespace extension
 
 // NUClear configuration extension
-namespace NUClear {
-namespace dsl {
+namespace NUClear::dsl {
     namespace operation {
         template <>
         struct DSLProxy<::extension::FileWatch> {
@@ -77,19 +79,18 @@ namespace dsl {
             }
 
             template <typename DSL>
-            static inline ::extension::FileWatch get(threading::Reaction&) {
+            static inline ::extension::FileWatch get(threading::Reaction& /*reaction*/) {
 
                 // Get our File Watch store value
-                auto ptr = ::extension::FileWatch::FileWatchStore::value;
+                auto* ptr = ::extension::FileWatch::FileWatchStore::value;
 
                 // If there was something in the store
-                if (ptr) {
+                if (ptr != nullptr) {
                     return *ptr;
                 }
+
                 // Return an invalid file watch element
-                else {
-                    return ::extension::FileWatch{"", 0};
-                }
+                return ::extension::FileWatch{"", 0};
             }
         };
     }  // namespace operation
@@ -99,7 +100,6 @@ namespace dsl {
         template <>
         struct is_transient<::extension::FileWatch> : public std::true_type {};
     }  // namespace trait
-}  // namespace dsl
-}  // namespace NUClear
+}  // namespace NUClear::dsl
 
 #endif  // EXTENSION_FILEWATCH_HPP

@@ -7,15 +7,11 @@
     #include <iostream>
     #include <nuclear>
 
-namespace utility {
-namespace support {
-    namespace evil {
-        thread_local std::vector<utility::support::evil::StackFrame> stack =
-            std::vector<utility::support::evil::StackFrame>();
-        thread_local std::string exception_name = std::string();
-    }  // namespace evil
-}  // namespace support
-}  // namespace utility
+namespace utility::support::evil {
+    thread_local std::vector<utility::support::evil::StackFrame> stack =
+        std::vector<utility::support::evil::StackFrame>();
+    thread_local std::string exception_name = std::string();
+}  // namespace utility::support::evil
 
 extern "C" {
 
@@ -23,6 +19,7 @@ extern "C" {
 void error_callback(void* /*data*/, const char* /*msg*/, int /*errnum*/) {}
 
 // Initialise our state for the backtrace (I think we can do this once per binary)
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 backtrace_state* state = backtrace_create_state(nullptr, true, error_callback, nullptr);
 
 typedef void (*cxa_throw_func_type)(void*, void*, void (*)(void*));
@@ -42,6 +39,7 @@ cxa_throw_func_type get_real_throw_func() {
 }
 
 // Find the real __cxa_throw and call it to actually throw the exception
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 static void (*const rethrow)(void*, void*, void (*)(void*)) __attribute__((noreturn)) = get_real_throw_func();
 
 /**

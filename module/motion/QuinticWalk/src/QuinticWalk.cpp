@@ -6,36 +6,30 @@
 
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/KinematicsModel.hpp"
-#include "message/motion/ServoTarget.hpp"
 #include "message/motion/WalkCommand.hpp"
 #include "message/support/SaveConfiguration.hpp"
 
 #include "utility/math/comparison.hpp"
-#include "utility/math/euler.h"
-#include "utility/math/matrix/Transform3D.hpp"
+#include "utility/math/euler.hpp"
 #include "utility/motion/InverseKinematics.hpp"
-#include "utility/support/eigen_armadillo.hpp"
 #include "utility/support/yaml_expression.hpp"
 
-namespace module {
-namespace motion {
+namespace module::motion {
 
     using extension::Configuration;
 
-    using message::behaviour::ServoCommand;
+    using message::behaviour::ServoCommands;
     using message::input::Sensors;
     using message::motion::DisableWalkEngineCommand;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::ExecuteGetup;
     using message::motion::KillGetup;
     using message::motion::KinematicsModel;
-    using message::motion::ServoTarget;
     using message::motion::StopCommand;
     using message::motion::WalkCommand;
     using utility::support::Expression;
 
     using utility::input::ServoID;
-    using utility::math::matrix::Transform3D;
     using utility::motion::kinematics::calculateLegJoints;
 
     QuinticWalk::QuinticWalk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -133,8 +127,8 @@ namespace motion {
         on<Trigger<StopCommand>>().then([this] { current_orders.setZero(); });
 
         on<Trigger<WalkCommand>>().then([this](const WalkCommand& walkCommand) {
-            // the engine expects orders in [m] not [m/s]. We have to compute by dividing by step frequency which is a
-            // double step factor 2 since the order distance is only for a single step, not double step
+            // the engine expects orders in [m] not [m/s]. We have to compute by dividing by step frequency which is
+            // a double step factor 2 since the order distance is only for a single step, not double step
             const float factor             = (1.0 / (params.freq)) / 2.0;
             const Eigen::Vector3f& command = walkCommand.command.cast<float>() * factor;
 
@@ -167,7 +161,7 @@ namespace motion {
         });
 
         on<Trigger<EnableWalkEngineCommand>>().then([this](const EnableWalkEngineCommand& command) {
-            subsumptionId = command.subsumptionId;
+            subsumptionId = command.subsumption_id;
             walk_engine.reset();
             update_handle.enable();
         });
@@ -255,27 +249,27 @@ namespace motion {
         Eigen::Matrix4d right_foot =
             walk_engine.getFootstep().isLeftSupport() ? Hft.matrix().cast<double>() : Hst.matrix().cast<double>();
 
-        auto joints =
-            calculateLegJoints(kinematicsModel, Transform3D(convert(left_foot)), Transform3D(convert(right_foot)));
+        auto joints = calculateLegJoints(kinematicsModel,
+                                         Eigen::Affine3f(left_foot.cast<float>()),
+                                         Eigen::Affine3f(right_foot.cast<float>()));
 
         auto waypoints = motionLegs(joints);
 
         emit(std::move(waypoints));
     }
 
-    std::unique_ptr<std::vector<ServoCommand>> QuinticWalk::motionLegs(
-        const std::vector<std::pair<ServoID, float>>& joints) {
-        auto waypoints = std::make_unique<std::vector<ServoCommand>>();
-        waypoints->reserve(16);
+    std::unique_ptr<ServoCommands> QuinticWalk::motionLegs(const std::vector<std::pair<ServoID, float>>& joints) {
+        auto waypoints = std::make_unique<ServoCommands>();
+        waypoints->commands.reserve(joints.size());
 
         NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
 
 
         for (auto& joint : joints) {
-            waypoints->push_back({subsumptionId, time, joint.first, joint.second, jointGains[joint.first], 100});
+            waypoints->commands
+                .emplace_back(subsumptionId, time, joint.first, joint.second, jointGains[joint.first], 100);
         }
 
         return waypoints;
     }
-}  // namespace motion
-}  // namespace module
+}  // namespace module::motion

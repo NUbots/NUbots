@@ -1,5 +1,4 @@
-NUsight
-========
+# NUsight
 
 ## Description
 
@@ -20,14 +19,12 @@ copy of an image from the robot's camera.
 
 ## Consumes
 
-* `message::DarwinSensors` containing sensor data
-* `message::Image` containing a frame from the camera
+- `message::Image` containing a frame from the camera
 
 ## Dependencies
 
-* libzmq is used for network communication
-* libprotobuf is used for data serialization
-* The Darwin HardwareIO module must be installed to report sensor data
-* The LinuxCameraStreamer module must be installed to transmit images
-* libjpeg is used to compress camera images
-
+- libzmq is used for network communication
+- libprotobuf is used for data serialization
+- The Darwin HardwareIO module must be installed to report sensor data
+- The LinuxCameraStreamer module must be installed to transmit images
+- libjpeg is used to compress camera images

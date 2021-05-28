@@ -9,10 +9,9 @@ https://github.com/Rhoban/model/
 #include <nuclear>
 
 #include "utility/math/angle.hpp"
-#include "utility/math/euler.h"
+#include "utility/math/euler.hpp"
 
-namespace module {
-namespace motion {
+namespace module::motion {
 
     QuinticWalkEngine::QuinticWalkEngine()
         : foot_step(0.14f, true)
@@ -703,5 +702,4 @@ namespace motion {
         TrajectoriesTrunkFootPos(time, trajs, trunkPos, trunkAxis, footPos, footAxis);
         TrajectoriesSupportFootState(time, trajs, isDoubleSupport, isLeftsupportFoot);
     }
-}  // namespace motion
-}  // namespace module
+}  // namespace module::motion

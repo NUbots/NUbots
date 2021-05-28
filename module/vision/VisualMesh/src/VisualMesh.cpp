@@ -16,8 +16,7 @@
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/Timer.hpp"
 
-namespace module {
-namespace vision {
+namespace module::vision {
 
     using extension::Configuration;
 
@@ -137,8 +136,8 @@ namespace vision {
             auto results = (*classifier)(m, img.data.data(), img.format, Hoc, lens);
 
             // Copy the data into the message
-            auto msg       = std::make_unique<VisualMeshMsg>();
-            msg->camera_id = img.camera_id;
+            auto msg = std::make_unique<VisualMeshMsg>();
+            msg->id  = img.id;
 
             // Get all the rays
             msg->rays.resize(3, results.global_indices.size());
@@ -170,6 +169,5 @@ namespace vision {
 
             emit(msg);
         });
-    }  // namespace vision
-}  // namespace vision
-}  // namespace module
+    }
+}  // namespace module::vision

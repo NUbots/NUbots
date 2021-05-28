@@ -27,8 +27,7 @@
 #include "message/input/GameEvents.hpp"
 #include "message/input/GameState.hpp"
 
-namespace module {
-namespace input {
+namespace module::input {
 
     /**
      * Monitors the match Game Controller
@@ -70,8 +69,6 @@ namespace input {
     public:
         explicit GameController(std::unique_ptr<NUClear::Environment> environment);
     };
-
-}  // namespace input
-}  // namespace module
+}  // namespace module::input
 
 #endif  // MODULES_INPUT_GAMECONTROLLER_HPP

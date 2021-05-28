@@ -1,0 +1,147 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUbots <nubots@nubots.net>
+ */
+syntax = "proto3";
+
+package message.platform;
+
+import "google/protobuf/timestamp.proto";
+
+/**
+ * @author Trent Houliston
+ */
+message RawSensors {
+    // bitmask values
+    enum Error {
+        OK            = 0;  // not really a flag but the lack of any other flag
+        INPUT_VOLTAGE = 1;
+        ANGLE_LIMIT   = 2;
+        OVERHEATING   = 4;
+        RANGE         = 8;
+        CHECKSUM      = 16;
+        OVERLOAD      = 32;
+        INSTRUCTION   = 64;
+        CORRUPT_DATA  = 128;
+        TIMEOUT       = 256;
+    }
+
+    message LEDPanel {
+        bool led2 = 1;
+        bool led3 = 2;
+        bool led4 = 3;
+    }
+
+    message HeadLED {
+        // Encode as 0x00 0xRR 0xGG 0xBB
+        uint32 RGB = 1;
+    }
+
+    message EyeLED {
+        // Encode as 0x00 0xRR 0xGG 0xBB
+        uint32 RGB = 1;
+    }
+
+    message Buttons {
+        bool left   = 1;
+        bool middle = 2;
+    }
+
+    message Accelerometer {
+        float x = 1;
+        float y = 2;
+        float z = 3;
+    }
+
+    message Gyroscope {
+        float x = 1;
+        float y = 2;
+        float z = 3;
+    }
+
+    message FSR {
+        float  fsr1        = 1;
+        float  fsr2        = 2;
+        float  fsr3        = 3;
+        float  fsr4        = 4;
+        float  centre_x    = 5;
+        float  centre_y    = 6;
+        uint32 error_flags = 7;
+    }
+
+    message FSRs {
+        FSR left  = 1;
+        FSR right = 2;
+    }
+
+    message Servo {
+        uint32 error_flags      = 1;
+        bool   torque_enabled   = 2;
+        float  p_gain           = 3;
+        float  i_gain           = 4;
+        float  d_gain           = 5;
+        float  goal_position    = 6;
+        float  moving_speed     = 7;
+        float  torque           = 8;
+        float  present_position = 9;
+        float  present_speed    = 10;
+        float  load             = 11;
+        float  voltage          = 12;
+        float  temperature      = 13;
+    };
+
+    message Servos {
+        Servo r_shoulder_pitch = 1;
+        Servo l_shoulder_pitch = 2;
+        Servo r_shoulder_roll  = 3;
+        Servo l_shoulder_roll  = 4;
+        Servo r_elbow          = 5;
+        Servo l_elbow          = 6;
+        Servo r_hip_yaw        = 7;
+        Servo l_hip_yaw        = 8;
+        Servo r_hip_roll       = 9;
+        Servo l_hip_roll       = 10;
+        Servo r_hip_pitch      = 11;
+        Servo l_hip_pitch      = 12;
+        Servo r_knee           = 13;
+        Servo l_knee           = 14;
+        Servo r_ankle_pitch    = 15;
+        Servo l_ankle_pitch    = 16;
+        Servo r_ankle_roll     = 17;
+        Servo l_ankle_roll     = 18;
+        Servo head_pan         = 19;
+        Servo head_tilt        = 20;
+    }
+
+    google.protobuf.Timestamp timestamp            = 1;
+    uint32                    platform_error_flags = 2;
+    LEDPanel                  led_panel            = 3;
+    HeadLED                   head_led             = 4;
+    EyeLED                    eye_led              = 5;
+    Buttons                   buttons              = 6;
+    float                     voltage              = 7;
+    Accelerometer             accelerometer        = 8;
+    Gyroscope                 gyroscope            = 9;
+    FSRs                      fsr                  = 10;
+    Servos                    servo                = 11;
+}
+
+// Button press events
+message ButtonLeftDown {}
+message ButtonLeftUp {}
+message ButtonMiddleDown {}
+message ButtonMiddleUp {}

@@ -13,8 +13,7 @@
 
 #include "utility/input/ServoID.hpp"
 
-namespace module {
-namespace motion {
+namespace module::motion {
 
     class QuinticWalk : public NUClear::Reactor {
 
@@ -34,7 +33,7 @@ namespace motion {
 
         void calculateJointGoals();
         float getTimeDelta();
-        std::unique_ptr<std::vector<message::behaviour::ServoCommand>> motionLegs(
+        std::unique_ptr<message::behaviour::ServoCommands> motionLegs(
             const std::vector<std::pair<utility::input::ServoID, float>>& joints);
 
         struct {
@@ -65,8 +64,6 @@ namespace motion {
 
         std::map<utility::input::ServoID, float> jointGains;
     };
-
-}  // namespace motion
-}  // namespace module
+}  // namespace module::motion
 
 #endif

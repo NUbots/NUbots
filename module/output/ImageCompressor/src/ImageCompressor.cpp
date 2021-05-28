@@ -12,8 +12,7 @@
 
 #include "utility/vision/fourcc.hpp"
 
-namespace module {
-namespace output {
+namespace module::output {
 
     using extension::Configuration;
     using message::input::Image;
@@ -86,22 +85,22 @@ namespace output {
 
             /* Mutex Scope */ {
                 std::lock_guard<std::mutex> lock(compressor_mutex);
-                auto it = compressors.find(image.camera_id);
+                auto it = compressors.find(image.id);
                 if (it == compressors.end() || it->second->width != image.dimensions[0]
                     || it->second->height != image.dimensions[1] || it->second->format != image.format) {
                     log<NUClear::INFO>("Rebuilding compressors for", image.name, "camera");
 
                     // Replace the existing one with a new one
-                    it = compressors.insert(std::make_pair(image.camera_id, std::make_shared<CompressorContext>()))
-                             .first;
+                    it = compressors.insert(std::make_pair(image.id, std::make_shared<CompressorContext>())).first;
                     it->second->width  = image.dimensions[0];
                     it->second->height = image.dimensions[1];
                     it->second->format = image.format;
 
                     for (auto& f : config.factories) {
                         for (int i = 0; i < f.second; ++i) {
+                            auto a = std::make_unique<std::atomic<bool>>();
                             it->second->compressors.emplace_back(CompressorContext::Compressor{
-                                std::make_unique<std::atomic<bool>>(),
+                                std::move(a),
                                 f.first->make_compressor(image.dimensions[0], image.dimensions[1], image.format),
                             });
                         }
@@ -119,17 +118,14 @@ namespace output {
                         auto msg = std::make_unique<CompressedImage>();
 
                         // Compress the data
-                        msg->data = ctx.compressor->compress(image.data,
-                                                             image.dimensions[0],
-                                                             image.dimensions[1],
-                                                             image.format);
+                        msg->data = ctx.compressor->compress(image.data);
 
                         // The format depends on what kind of data we took in
                         msg->format = compressed_fourcc(image.format);
 
                         // Copy across the other attributes
                         msg->dimensions        = image.dimensions;
-                        msg->camera_id         = image.camera_id;
+                        msg->id                = image.id;
                         msg->name              = image.name;
                         msg->timestamp         = image.timestamp;
                         msg->Hcw               = image.Hcw;
@@ -175,5 +171,4 @@ namespace output {
         });
     }
 
-}  // namespace output
-}  // namespace module
+}  // namespace module::output
