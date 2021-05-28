@@ -80,7 +80,7 @@ namespace utility::io {
          *
          * @return the number of bytes that were actually read, or -1 if fail. See ::read
          */
-        ssize_t read(void* buf, size_t count) const;
+        ssize_t read(void* buf, size_t count);
 
         /**
          * @brief Write bytes to the uart
