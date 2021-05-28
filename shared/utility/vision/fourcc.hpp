@@ -12,13 +12,11 @@ namespace utility::vision {
     }
 
     inline std::string fourcc(const uint32_t& v) {
-        // NOLINTNEXTLINE(cppcoreguidelines-avoid-c-arrays,modernize-avoid-c-arrays)
-        const char ch[5] = {static_cast<char>((v >> 0) & 0xFF),
-                            static_cast<char>((v >> 8) & 0xFF),
-                            static_cast<char>((v >> 16) & 0xFF),
-                            static_cast<char>((v >> 24) & 0xFF),
-                            0};
-        return ch;
+        return {static_cast<char>((v >> 0) & 0xFF),
+                static_cast<char>((v >> 8) & 0xFF),
+                static_cast<char>((v >> 16) & 0xFF),
+                static_cast<char>((v >> 24) & 0xFF),
+                0};
     }
 
 }  // namespace utility::vision
