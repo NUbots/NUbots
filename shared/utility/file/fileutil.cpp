@@ -157,7 +157,7 @@ namespace utility::file {
             // loop through every file within the directory
             for (auto&& file : listDir(directory)) {
                 // specify the correct path within the directory
-                auto path = directory.append("/").append(file);
+                auto path = directory + "/" + file;
                 // check if the given path is a directory
                 if (isDir(path)) {
                     // check if the function is recursive
