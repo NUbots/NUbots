@@ -31,10 +31,8 @@
 #include "message/motion/ServoTarget.hpp"
 #include "message/output/CompressedImage.hpp"
 #include "message/platform/RawSensors.hpp"
-#include "message/platform/webots/ConnectRequest.hpp"
 #include "message/platform/webots/messages.hpp"
 
-#include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 #include "utility/platform/RawSensors.hpp"
 #include "utility/vision/fourcc.hpp"
@@ -62,16 +60,13 @@ namespace module::platform {
     using message::platform::RawSensors;
 
     using message::platform::webots::ActuatorRequests;
-    using message::platform::webots::ConnectRequest;
     using message::platform::webots::Message;
     using message::platform::webots::MotorPID;
     using message::platform::webots::MotorPosition;
-    using message::platform::webots::MotorTorque;
     using message::platform::webots::MotorVelocity;
     using message::platform::webots::SensorMeasurements;
     using message::platform::webots::SensorTimeStep;
 
-    using utility::input::ServoID;
     using utility::platform::getRawServo;
     using utility::vision::fourcc;
 
@@ -233,7 +228,7 @@ namespace module::platform {
                 setup_connection(config["server_address"].as<std::string>(), config["port"].as<std::string>());
             });
 
-            // Prime these this reaction, so when only one ServoTargets is present, at least we have the other
+            // Prime this reaction, so when only one ServoTargets is present, at least we have the other
             emit(std::make_unique<RawSensors>());
 
             // Connect to the server
@@ -248,11 +243,12 @@ namespace module::platform {
                 const double diff = utility::math::angle::difference(
                     double(target.position),
                     utility::platform::getRawServo(target.id, sensors).present_position);
-                NUClear::clock::duration duration = target.time - NUClear::clock::now();
 
-                double speed = 0.0;
+                NUClear::clock::duration duration = target.time - NUClear::clock::now();
+                double speed                      = 0.0;
+                // If the clock has moved forward since the last update, then we can have a non-zero speed
                 if (duration.count() > 0) {
-                    speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
+                    speed = diff / std::chrono::duration_cast<std::chrono::duration<double>>(duration).count();
                 }
 
                 // Update our internal state
@@ -266,9 +262,10 @@ namespace module::platform {
                     servo_state[target.id].id    = target.id;
                     servo_state[target.id].name  = translate_id_servo(target.id);
 
-                    servo_state[target.id].p_gain        = target.gain;
-                    servo_state[target.id].i_gain        = target.gain * 0.0;
-                    servo_state[target.id].d_gain        = target.gain * 0.0;
+                    servo_state[target.id].p_gain = target.gain;
+                    // `i` and `d` gains are always 0
+                    // servo_state[target.id].i_gain        = target.gain * 0.0;
+                    // servo_state[target.id].d_gain        = target.gain * 0.0;
                     servo_state[target.id].moving_speed  = speed;
                     servo_state[target.id].goal_position = target.position;
 
@@ -318,7 +315,7 @@ namespace module::platform {
             return;
         }
 
-        // Initaliase the string with ???????
+        // Initialise the string with ???????
         std::string initial_message = std::string(7, '?');
         const int n                 = recv(fd, initial_message.data(), sizeof(initial_message), MSG_WAITALL);
 
@@ -354,16 +351,16 @@ namespace module::platform {
         utility::clock::last_update = NUClear::base_clock::now();
 
         // Now that we are connected, we can set up our reaction handles with this file descriptor and send the sensor
-        // timestamps message
+        // timesteps message
 
-        // Create the sensor timestamps message
+        // Create the sensor timesteps message
         // This will activate all of the sensors in the simulator
         const std::vector<char> data =
             NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(create_sensor_time_steps(time_step));
 
         const uint32_t Nn = htonl(data.size());
 
-        // Send the sensor timestamps message
+        // Send the sensor timesteps message
         if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
             log<NUClear::ERROR>(fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
             return;
@@ -425,6 +422,8 @@ namespace module::platform {
                         // Create servo velocity message
                         actuator_requests.motor_velocities.emplace_back(MotorVelocity(servo.name, servo.moving_speed));
 
+                        // TODO: Add FSRs message
+
                         // Create servo PID message
                         actuator_requests.motor_pids.emplace_back(
                             MotorPID(servo.name, {servo.p_gain, servo.i_gain, servo.d_gain}));
@@ -436,7 +435,7 @@ namespace module::platform {
                     NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(actuator_requests);
 
                 // Size of the message, in network endian
-                uint32_t Nn = htonl(data.size());
+                const uint32_t Nn = htonl(data.size());
 
                 // Send the message size first
                 if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
@@ -562,18 +561,22 @@ namespace module::platform {
 
         if (sensor_measurements.accelerometers.size() > 0) {
             // .accelerometers is a list of one, since our robots have only one accelerometer
-            const auto& accelerometer    = sensor_measurements.accelerometers[0];
-            sensor_data->accelerometer.x = static_cast<float>(accelerometer.value.X);
-            sensor_data->accelerometer.y = static_cast<float>(accelerometer.value.Y);
-            sensor_data->accelerometer.z = static_cast<float>(accelerometer.value.Z);
+            const auto& accelerometer = sensor_measurements.accelerometers[0];
+            // Webots has a strictly positive output for the accelerometers. We minus 100 to center the output over 0
+            // The value 100.0 is based on the Look-up Table from NUgus.proto and should be kept consistent with that
+            sensor_data->accelerometer.x = static_cast<float>(accelerometer.value.X) - 100.0f;
+            sensor_data->accelerometer.y = static_cast<float>(accelerometer.value.Y) - 100.0f;
+            sensor_data->accelerometer.z = static_cast<float>(accelerometer.value.Z) - 100.0f;
         }
 
         if (sensor_measurements.gyros.size() > 0) {
             // .gyros is a list of one, since our robots have only one gyroscope
-            const auto& gyro         = sensor_measurements.gyros[0];
-            sensor_data->gyroscope.x = static_cast<float>(gyro.value.X);
-            sensor_data->gyroscope.y = static_cast<float>(gyro.value.Y);
-            sensor_data->gyroscope.z = static_cast<float>(gyro.value.Z);
+            const auto& gyro = sensor_measurements.gyros[0];
+            // Webots has a strictly positive output for the gyros. We minus 100 to center the output over 0
+            // The value 100.0 is based on the Look-up Table from NUgus.proto and should be kept consistent with that
+            sensor_data->gyroscope.x = static_cast<float>(gyro.value.X) - 100.0f;
+            sensor_data->gyroscope.y = static_cast<float>(gyro.value.Y) - 100.0f;
+            sensor_data->gyroscope.z = static_cast<float>(gyro.value.Z) - 100.0f;
         }
 
         // TODO Implement fsrs
