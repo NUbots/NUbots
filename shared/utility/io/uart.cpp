@@ -137,7 +137,6 @@ namespace utility::io {
             }
 
             // Set the speed flags to "Custom Speed" (clear the existing speed, and set the custom speed flags)
-            // TODO(KipHamiltons) Pretty sure this is undefined behaviour
             serinfo.flags &= ~ASYNC_SPD_MASK;
             serinfo.flags |= ASYNC_SPD_CUST;
 
