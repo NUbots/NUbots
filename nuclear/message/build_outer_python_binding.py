@@ -14,15 +14,18 @@ message_dir = sys.argv[2]
 functions = []
 duplicates = []
 for dep_file in sys.argv[3:]:
-    with open(dep_file) as deps:
+    dep_file = dep_file.strip()
+    with open(dep_file) as dep:
+        exclude = ["google/protobuf", "Matrix.proto", "Neutron.proto", "Vector.proto"]
+        dependencies = []
         # Extract all dependencies for every message and place them in the list.
         # Make all paths relative to the root mesage directory and remove any unwanted characters.
         # Also remove Matrix.proto, Neutron.proto, and Vector.proto from the list and anything to do with google.
-        dependencies = [
-            os.path.relpath(s.strip("\\ \n\t"), message_dir).replace("/", "_").replace(".proto", "_proto")
-            for s in deps.readlines()
-            if not any(exclude in s for exclude in ["google/protobuf", "Matrix.proto", "Neutron.proto", "Vector.proto"])
-        ]
+        for line in dep.readlines():
+            if "import" in line and not any(e in line for e in exclude):
+                dependencies.append(
+                    os.path.relpath(line.strip("\\ \n\t"), message_dir).replace("/", "_").replace(".proto", "_proto")
+                )
 
         # Finally, remove duplicates. We must keep the first instance of every message in the list.
         for function in dependencies:
