@@ -113,6 +113,7 @@ namespace module::input {
 
         // Foot to world in foot-flat rotation when the foot landed
         std::array<bool, 2> previous_foot_down = {false, false};
+        // Foot to world in foot-flat (both feet down) rotation at the timestep with the most recent foot landing
         std::array<Eigen::Affine3d, 2> footlanding_Hwf;
 
         // Storage for previous gyroscope values
