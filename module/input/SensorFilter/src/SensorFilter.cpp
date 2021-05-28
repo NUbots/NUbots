@@ -370,10 +370,9 @@ namespace module::input {
                             NUClear::log<NUClear::WARN>(makeErrorString("Right FSR", input.fsr.right.error_flags));
                         }
 
-                        // Loop through all the servos, emitting a message::input::Sensors for each one
                         for (uint32_t id = 0; id < 20; ++id) {
-                            auto& original = utility::platform::getRawServo(id, input);
-                            auto& error    = original.error_flags;
+                            const auto& original = utility::platform::getRawServo(id, input);
+                            const auto& error    = original.error_flags;
 
                             // Check for an error on the servo and report it
                             if (error != RawSensors::Error::OK) {
