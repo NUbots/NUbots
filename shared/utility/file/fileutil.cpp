@@ -114,7 +114,7 @@ namespace utility::file {
             closedir(dir);
         }
         else {
-            throw std::runtime_error("Attempted to list directory which didn't exist.\n");
+            throw std::runtime_error("Attempted to list directory which didn't exist.");
         }
 
         return result;
