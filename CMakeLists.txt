@@ -26,7 +26,7 @@ if(STATIC_LIBRARIES)
 endif()
 
 # We use additional modules that cmake needs to know about
-list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/" "${PROJECT_SOURCE_DIR}/cmake/Modules/"
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules/"
      "${PROJECT_SOURCE_DIR}/nuclear/cmake/Modules/"
 )
 
