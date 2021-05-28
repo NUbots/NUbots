@@ -640,7 +640,7 @@ namespace module::input {
                         // Calculate our time offset from the last read then update the filter's time
                         {
                             using namespace std::chrono;
-                            const double delta = std::max(
+                            const double deltaT = std::max(
                                 duration_cast<duration<double>>(
                                     input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp))
                                     .count(),
@@ -682,10 +682,8 @@ namespace module::input {
                         // Filter is not reliable, just use previous sensors
                         if (reset_filter.load()) {
                             if (previousSensors) {
-                                sensors->Htw              = previousSensors->Htw;
-                                sensors->Hgt              = previousSensors->Hgt;
-                                sensors->Hgc              = previousSensors->Hgc;
-                                sensors->angular_position = previousSensors->angular_position;
+                                sensors->Htw = previousSensors->Htw;
+                                sensors->Hgt = previousSensors->Hgt;
                             }
                         }
                         else {
