@@ -75,13 +75,6 @@ namespace module::extension {
         FileWatcher& operator=(FileWatcher&&) = delete;
         ~FileWatcher() override;
         static void file_watch_callback(uv_fs_event_t* handle, const char* filename, int events, int status);
-
-        // Delete the move and copy constructors and operators, because we only want one filewatcher per powerplant
-        // and it shouldn't change
-        FileWatcher(FileWatcher& other)  = delete;
-        FileWatcher(FileWatcher&& other) = delete;
-        FileWatcher& operator=(FileWatcher& other) = delete;
-        FileWatcher&& operator=(FileWatcher&& other) = delete;
     };
 
 }  // namespace module::extension
