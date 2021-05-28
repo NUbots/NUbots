@@ -11,7 +11,7 @@ from utility.dockerise import run_on_docker
 from utility.yarn import find_eslint, find_package_json
 
 
-def _do_format(path, eslint_path, package_path):
+def _do_format(path, eslint_path, package_path, skip_nusight):
     text = ""
     try:
         # Use the absolute path to file
@@ -27,7 +27,7 @@ def _do_format(path, eslint_path, package_path):
             text = "Formatting {} with isort and black\n".format(path)
             text = text + check_output(["isort", abs_path], stderr=STDOUT).decode("utf-8")
             text = text + check_output(["black", abs_path], stderr=STDOUT).decode("utf-8")
-        elif eslint_path is not None and (path.endswith((".ts")) or path.endswith((".tsx"))):
+        elif eslint_path is not None and not skip_nusight and (path.endswith((".ts")) or path.endswith((".tsx"))):
             text = "Formatting {} with eslint and prettier\n".format(path)
             text = text + check_output(
                 [eslint_path, "--color", "--fix", abs_path], cwd=package_path, stderr=STDOUT
@@ -42,9 +42,19 @@ def _do_format(path, eslint_path, package_path):
 def register(command):
     command.help = "Format all the code in the codebase using clang-format"
 
+    command.add_argument(
+        "-s",
+        "--skip-nusight",
+        dest="skip_nusight",
+        action="store_true",
+        default=False,
+        help="Skip formatting the NUsight2 code",
+    )
+
 
 @run_on_docker
-def run(**kwargs):
+def run(skip_nusight, **kwargs):
+
     # Check for eslint in node_modules folder
     eslint_path = find_eslint(os.path.join(b.project_dir, "nusight2", "node_modules"))
 
@@ -60,6 +70,7 @@ def run(**kwargs):
 
     with multiprocessing.Pool(multiprocessing.cpu_count()) as pool:
         for r in pool.imap_unordered(
-            partial(_do_format, eslint_path=eslint_path, package_path=package_path), files.splitlines()
+            partial(_do_format, eslint_path=eslint_path, package_path=package_path, skip_nusight=skip_nusight),
+            files.splitlines(),
         ):
             sys.stdout.write(r)
