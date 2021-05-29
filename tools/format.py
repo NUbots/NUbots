@@ -65,7 +65,7 @@ def register(command):
         help="Skip formatting the C++",
     )
     command.add_argument(
-        "-g",  # g for google. p is for python
+        "-g",  # g for google protobuf. p is already taken for python
         "--skip-protobuf",
         dest="skip_protobuf",
         action="store_true",
@@ -92,7 +92,6 @@ def register(command):
 
 @run_on_docker
 def run(skip_typescript, skip_cpp, skip_protobuf, skip_python, skip_cmake, **kwargs):
-
     # Check for eslint in node_modules folder
     eslint_path = find_eslint(os.path.join(b.project_dir, "nusight2", "node_modules"))
 
