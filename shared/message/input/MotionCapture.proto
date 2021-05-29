@@ -22,7 +22,6 @@ syntax = "proto3";
 package message.input;
 
 import "Vector.proto";
-import "google/protobuf/timestamp.proto";
 
 /**
  * Contains Marker, Rigidbody, and message metadata information.
@@ -100,9 +99,9 @@ message MotionCapture {
     /// Encoded timestamp - 0 := the first timecode. hour:minute:second:frame
     /// bytes, in binary coded decimal see
     /// https://en.wikipedia.org/wiki/SMPTE_timecode
-    uint32                    timecode     = 3;
-    uint32                    timecode_sub = 4;
-    google.protobuf.Timestamp timestamp    = 5;
+    uint32 timecode     = 3;
+    uint32 timecode_sub = 4;
+    double time         = 5;
     /// Whether or not this frame is to be recorded
     bool                   recording              = 6;
     bool                   tracked_models_changed = 7;
