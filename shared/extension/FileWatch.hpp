@@ -42,9 +42,12 @@ namespace extension {
 
     struct FileWatchRequest {
         std::string path;
-        int events;
+        int events{};
         std::shared_ptr<NUClear::threading::Reaction> reaction;
     };
+
+    /// Emitted once the FileWatcher has started up and is watching files
+    struct FileWatcherReady {};
 
 }  // namespace extension
 
@@ -85,6 +88,7 @@ namespace NUClear::dsl {
                 if (ptr != nullptr) {
                     return *ptr;
                 }
+
                 // Return an invalid file watch element
                 return ::extension::FileWatch{"", 0};
             }

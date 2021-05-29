@@ -25,7 +25,7 @@
 
 #include "darwin/Darwin.hpp"
 
-#include "message/platform/darwin/DarwinSensors.hpp"
+#include "message/platform/RawSensors.hpp"
 
 namespace module::platform::darwin {
 
@@ -42,17 +42,17 @@ namespace module::platform::darwin {
 
         /// @brief Our internal darwin class that is used for interacting with the hardware
         Darwin::Darwin darwin;
-        message::platform::darwin::DarwinSensors parseSensors(const Darwin::BulkReadResults& data);
+        message::platform::RawSensors parseSensors(const Darwin::BulkReadResults& data);
         float dGain = 0;
         float iGain = 0;
         float pGain = 0;
 
 
         struct CM740State {
-            message::platform::darwin::DarwinSensors::LEDPanel ledPanel = {false, false, false};
+            message::platform::RawSensors::LEDPanel ledPanel = {false, false, false};
             //  0x00, 0xRR, 0xGG, 0xBB
-            message::platform::darwin::DarwinSensors::HeadLED headLED = {0x0000FF00};
-            message::platform::darwin::DarwinSensors::EyeLED eyeLED   = {0x000000FF};
+            message::platform::RawSensors::HeadLED headLED = {0x0000FF00};
+            message::platform::RawSensors::EyeLED eyeLED   = {0x000000FF};
         };
 
         struct Config {
