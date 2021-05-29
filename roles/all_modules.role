@@ -1,0 +1,88 @@
+nuclear_role(
+    # We don't care about order because this is just for compiling purposes
+
+    # Behaviour
+    behaviour::Controller
+
+    behaviour::planning::KickPlanner
+    behaviour::planning::SimpleWalkPathPlanner
+
+    behaviour::skills::DirectWalkController
+    behaviour::skills::FallingRelax
+    behaviour::skills::Getup
+    behaviour::skills::GoalSaver
+    behaviour::skills::HeadBehaviourSoccer
+    behaviour::skills::KickScript
+    behaviour::skills::Nod
+    behaviour::skills::Stand
+    behaviour::skills::WalkEngineStand
+    behaviour::skills::WalkPathFollower
+
+    behaviour::strategy::KeyboardWalk
+    behaviour::strategy::PS3Walk
+    behaviour::strategy::SoccerStrategy
+
+    behaviour::tools::ScriptRunner
+    behaviour::tools::ScriptTuner
+    behaviour::tools::SpeakTest
+
+    # Extension
+    extension::FileWatcher
+
+    # Input
+    input::Camera
+    input::GameController
+    input::ImageDecompressor
+    input::NatNet
+    input::SensorFilter
+
+    # Localisation
+    localisation::BallLocalisation
+    localisation::OdometryLocalisation
+    localisation::RobotParticleLocalisation
+
+    # Motion
+    motion::HeadController
+    motion::IKKick
+    motion::KinematicsConfiguration
+    motion::QuinticWalk
+    motion::ScriptEngine
+
+    # Network
+    network::NUClearNet
+
+    # Output
+    output::eSpeak
+    output::ImageCompressor
+
+    # Platform
+    platform::darwin::HardwareIO
+    platform::darwin::HardwareSimulator
+    platform::Gazebo
+    platform::Webots
+
+    # Support
+    support::configuration::GlobalConfig
+    support::configuration::SoccerConfig
+    support::LocalisationSimulator
+    support::logging::ConsoleLogHandler
+    support::logging::DataLogging
+    support::logging::DataPlayback
+    support::logging::FileLogHandler
+    support::NUsight
+    support::NUsightHarness
+    support::ReactionTimer
+    support::SignalCatcher
+    support::VirtualCamera
+
+    # Tools
+    tools::FirmwareInstaller
+
+    # Vision
+    vision::BallDetector
+    vision::GoalDetector
+    vision::GreenHorizonDetector
+    vision::VisualMesh
+
+
+)
