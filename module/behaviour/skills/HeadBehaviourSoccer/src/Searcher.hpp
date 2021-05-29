@@ -103,9 +103,7 @@ namespace module::behaviour::skills {
         void update(bool oscillate) {
             // TODO: recode this garbage
             auto now = NUClear::clock::now();
-            if (!new_goal
-                && std::chrono::duration_cast<std::chrono::milliseconds>(now - lastSwitchTime).count()
-                       > switch_period) {
+            if (!new_goal && std::chrono::duration<float, std::milli>(now - lastSwitchTime).count() > switch_period) {
                 new_goal = true;
                 if (forward) {
                     int new_index = current + 1;
@@ -151,7 +149,7 @@ namespace module::behaviour::skills {
 
         T getState() {
             new_goal = false;
-            return points[current % points.size()];
+            return points[size_t(current) % points.size()];
         }
 
         void replaceSearchPoints(const std::vector<T>& ps, const T& refPoint_) {

@@ -23,20 +23,20 @@
 #include "unistd.h"
 
 Joystick::Joystick() : path("/dev/input/js0") {
-    openPath(path);
+    open_device(path);
 }
 
-Joystick::Joystick(const std::string& path) : _fd(-1), path(path) {
-    openPath(path);
+Joystick::Joystick(const std::string& device_path) : _fd(-1), path(device_path) {
+    open_device(path);
 }
 
-void Joystick::openPath(const std::string& devicePath) {
-    std::cout << "Connecting to " << devicePath << std::endl;
-    _fd = open(devicePath.c_str(), O_RDONLY | O_NONBLOCK);
+void Joystick::open_device(const std::string& device_path) {
+    std::cout << "Connecting to " << device_path << std::endl;
+    _fd = open(device_path.c_str(), O_RDONLY | O_NONBLOCK);
 }
 
 bool Joystick::sample(JoystickEvent* event) const {
-    int bytes = read(_fd, event, sizeof(*event));
+    ssize_t bytes = read(_fd, event, sizeof(*event));
 
     if (bytes == -1) {
         return false;
@@ -58,7 +58,7 @@ bool Joystick::valid() const {
 
 void Joystick::reconnect() {
     close(_fd);
-    openPath(path);
+    open_device(path);
 }
 
 Joystick::~Joystick() {

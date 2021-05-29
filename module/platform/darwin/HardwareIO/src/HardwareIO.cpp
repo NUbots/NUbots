@@ -72,7 +72,7 @@ namespace module::platform::darwin {
         sensors.voltage = Convert::voltage(data.cm740.voltage);
 
         if (sensors.voltage <= chargedVoltage) {
-            sensors.platform_error_flags &= ~RawSensors::Error::INPUT_VOLTAGE;
+            sensors.platform_error_flags &= ~uint32_t(RawSensors::Error::INPUT_VOLTAGE);
         }
 
         // Accelerometer (in m/s^2)
@@ -137,7 +137,7 @@ namespace module::platform::darwin {
          Servos
          */
 
-        for (int i = 0; i < 20; ++i) {
+        for (uint8_t i = 0; i < 20; ++i) {
             // Get a reference to the servo we are populating
             RawSensors::Servo& servo = utility::platform::getRawServo(i, sensors);
 
@@ -162,7 +162,7 @@ namespace module::platform::darwin {
                 // Work out how fast we should be moving
                 // 5.236 == 50 rpm which is similar to the max speed of the servos
                 float movingSpeed =
-                    (servoState[i].movingSpeed == 0 ? 5.236 : servoState[i].movingSpeed) / UPDATE_FREQUENCY;
+                    (servoState[i].movingSpeed == 0 ? 5.236f : servoState[i].movingSpeed) / float(UPDATE_FREQUENCY);
 
                 // Get our offset for this servo and apply it
                 // The values are now between -pi and pi around the servos axis
@@ -173,12 +173,12 @@ namespace module::platform::darwin {
                 // We have reached our destination
                 if (std::abs(present - goal) < movingSpeed) {
                     servoState[i].presentPosition = servoState[i].goalPosition;
-                    servoState[i].presentSpeed    = 0;
+                    servoState[i].presentSpeed    = 0.0f;
                 }
                 // We have to move towards our destination at moving speed
                 else {
                     servoState[i].presentPosition = utility::math::angle::normalizeAngle(
-                        (present + movingSpeed * (goal > present ? 1 : -1)) + offset);
+                        (present + movingSpeed * (goal > present ? 1.0f : -1.0f)) + offset);
                     servoState[i].presentSpeed = servoState[i].movingSpeed;
                 }
 
@@ -207,7 +207,7 @@ namespace module::platform::darwin {
 
                 // Clear Overvoltage flag if current voltage is greater than maximum expected voltage
                 if (servo.voltage <= chargedVoltage) {
-                    servo.error_flags &= ~RawSensors::Error::INPUT_VOLTAGE;
+                    servo.error_flags &= ~uint32_t(RawSensors::Error::INPUT_VOLTAGE);
                 }
             }
         }
@@ -232,18 +232,18 @@ namespace module::platform::darwin {
             log<NUClear::INFO>("CM740 Firmware Version:", version.str());
         });
 
-        on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
+        on<Configuration>("HardwareIO.yaml").then([this](const Configuration& cfg) {
             // Set config for the packet waiting
-            darwin.setConfig(config);
+            darwin.setConfig(cfg);
 
-            for (size_t i = 0; i < config["servos"].config.size(); ++i) {
-                Convert::SERVO_OFFSET[i]    = config["servos"][i]["offset"].as<Expression>();
-                Convert::SERVO_DIRECTION[i] = config["servos"][i]["direction"].as<Expression>();
-                servoState[i].simulated     = config["servos"][i]["simulated"].as<bool>();
+            for (size_t i = 0; i < cfg["servos"].config.size(); ++i) {
+                Convert::SERVO_OFFSET[i]    = cfg["servos"][i]["offset"].as<Expression>();
+                Convert::SERVO_DIRECTION[i] = cfg["servos"][i]["direction"].as<Expression>();
+                servoState[i].simulated     = cfg["servos"][i]["simulated"].as<bool>();
             }
 
-            chargedVoltage = config["battery"]["charged_voltage"].as<float>();
-            flatVoltage    = config["battery"]["flat_voltage"].as<float>();
+            chargedVoltage = cfg["battery"]["charged_voltage"].as<float>();
+            flatVoltage    = cfg["battery"]["flat_voltage"].as<float>();
         });
 
         // This trigger gets the sensor data from the CM740
@@ -259,7 +259,7 @@ namespace module::platform::darwin {
                                             Darwin::MX28::Address::D_GAIN,
                                             0x0A};
 
-            for (uint i = 0; i < servoState.size(); ++i) {
+            for (uint8_t i = 0; i < servoState.size(); ++i) {
 
                 if (servoState[i].dirty) {
 
@@ -270,7 +270,7 @@ namespace module::platform::darwin {
                     if (servoState[i].torqueEnabled
                         && (std::isnan(servoState[i].goalPosition) || servoState[i].torque == 0)) {
                         servoState[i].torqueEnabled = false;
-                        darwin[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, false);
+                        darwin[i + 1u].write(Darwin::MX28::Address::TORQUE_ENABLE, false);
                     }
                     else {
                         // If our torque was disabled but is now enabled
@@ -307,7 +307,7 @@ namespace module::platform::darwin {
             // Write our data (if we need to)
             if (command.size() > 7) {
                 // Calculate our length
-                command[Darwin::Packet::LENGTH] = command.size() - 3;
+                command[Darwin::Packet::LENGTH] = uint8_t(command.size() - 3);
 
                 // Do a checksum
                 command.push_back(0);
@@ -330,32 +330,32 @@ namespace module::platform::darwin {
             uint32_t ledr            = 0;
             std::array<bool, 3> ledp = {false, false, false};
 
-            if (sensors->voltage > 0.9) {
+            if (sensors->voltage > 0.9f) {
                 ledp = {true, true, true};
                 ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
                 ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
             }
-            else if (sensors->voltage > 0.7) {
+            else if (sensors->voltage > 0.7f) {
                 ledp = {false, true, true};
                 ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
                 ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
             }
-            else if (sensors->voltage > 0.5) {
+            else if (sensors->voltage > 0.5f) {
                 ledp = {false, false, true};
                 ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
                 ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
             }
-            else if (sensors->voltage > 0.3) {
+            else if (sensors->voltage > 0.3f) {
                 ledp = {false, false, false};
                 ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
                 ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
             }
-            else if (sensors->voltage > 0.2) {
+            else if (sensors->voltage > 0.2f) {
                 ledp = {false, false, false};
                 ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
                 ledr = (uint8_t(0xFF) << 16) | (uint8_t(0x00) << 8) | uint8_t(0x00);
             }
-            else if (sensors->voltage > 0) {
+            else if (sensors->voltage > 0.0f) {
                 ledp = {false, false, false};
                 ledl = (uint8_t(0xFF) << 16) | (uint8_t(0x00) << 8) | uint8_t(0x00);
                 ledr = (uint8_t(0xFF) << 16) | (uint8_t(0x00) << 8) | uint8_t(0x00);
@@ -384,12 +384,9 @@ namespace module::platform::darwin {
                     utility::platform::getRawServo(command.id, sensors).present_position);
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
-                float speed;
+                float speed = 0.0f;
                 if (duration.count() > 0) {
-                    speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
-                }
-                else {
-                    speed = 0;
+                    speed = diff / (float(duration.count()) / float(NUClear::clock::period::den));
                 }
 
                 // Update our internal state

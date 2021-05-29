@@ -30,7 +30,7 @@ namespace module::vision {
     private:
         struct {
             float confidence_threshold;
-            int cluster_points;
+            size_t cluster_points;
             float disagreement_ratio;
             message::conversion::math::fmat3 goal_angular_cov;
             bool use_median;

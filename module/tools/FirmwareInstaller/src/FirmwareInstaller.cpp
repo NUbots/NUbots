@@ -180,7 +180,7 @@ namespace module::tools {
                 // Wait for connection to the CM740 Bootloader
                 char send      = '#';
                 char recv[256] = {'\0'};
-                int read       = 1;
+                ssize_t read   = 1;
                 do {
                     std::cout << "\rWaiting for " << name.first << " to reset .....";
                     uart.write(&send, sizeof(send));
@@ -189,12 +189,12 @@ namespace module::tools {
                     poll(&pfd, 1, 20);
                     read       = uart.read(&recv, sizeof(recv));
                     recv[read] = '\0';
-                } while ((std::string(recv, read).compare("#") != 0) && powerplant.running());
+                } while ((std::string(recv, size_t(read)).compare("#") != 0) && powerplant.running());
 
                 std::cout << "\rWaiting for " << name.first << " to reset ....." << std::endl;
 
                 // Check we are good to go
-                if (std::string(recv, read).compare("#") == 0) {
+                if (std::string(recv, size_t(read)).compare("#") == 0) {
 
                     log<NUClear::INFO>(name.first, "reset complete...");
 
@@ -217,15 +217,15 @@ namespace module::tools {
                     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
                     // TODO write in such a way that you get progress
-                    ssize_t count;
-                    for (count = 0; static_cast<size_t>(count) < cm740.firmware.size();) {
-                        ssize_t writeSize = 64;
+                    size_t count;
+                    for (count = 0; count < cm740.firmware.size();) {
+                        size_t writeSize = 64;
 
-                        if ((static_cast<size_t>(count) + 64) > cm740.firmware.size()) {
+                        if (count + 64 > cm740.firmware.size()) {
                             writeSize = cm740.firmware.size() - count;
                         }
 
-                        if (uart.write(cm740.firmware.data() + count, writeSize) == writeSize) {
+                        if (uart.write(cm740.firmware.data() + count, writeSize) == ssize_t(writeSize)) {
                             count += writeSize;
                             std::cout << "\rFlashing CM740 firmware " << count << "/" << cm740.firmware.size()
                                       << " completed...";
@@ -248,7 +248,7 @@ namespace module::tools {
                         poll(&pfd, 1, 10);
                         read = uart.read(recv, sizeof(recv));
 
-                        std::string text(recv, read);
+                        std::string text(recv, size_t(read));
                         log<NUClear::INFO>(text);
                     }
 
@@ -260,7 +260,7 @@ namespace module::tools {
                     uart.write("\rgo\r", 4);
                     poll(&pfd, 1, 50);
                     if ((read = uart.read(recv, sizeof(recv))) > 0) {
-                        std::string text(recv, read);
+                        std::string text(recv, size_t(read));
                         log<NUClear::INFO>(text);
                     }
 

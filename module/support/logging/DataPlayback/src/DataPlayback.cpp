@@ -60,11 +60,11 @@ namespace module::support::logging {
 
                         // Don't print this on the first loop
                         if (file_index >= 0) {
-                            log<NUClear::INFO>("Playback of file", files[file_index], "finished");
+                            log<NUClear::INFO>("Playback of file", files[size_t(file_index)], "finished");
                         }
 
                         // If we have more files to go in our list
-                        if (file_index + 1 < int(files.size())) {
+                        if (file_index + 1 < ssize_t(files.size())) {
                             // Go to the next file in the list
                             file_index += 1;
                             // This resets the timer offset for the new file
@@ -73,12 +73,12 @@ namespace module::support::logging {
                             start_time = last_emit_time;
 
                             // Open the first file again
-                            if (std::filesystem::exists(files[file_index])) {
-                                input_file = std::make_unique<std::ifstream>(files[file_index]);
-                                log<NUClear::INFO>("Starting playback of file", files[file_index]);
+                            if (std::filesystem::exists(files[size_t(file_index)])) {
+                                input_file = std::make_unique<std::ifstream>(files[size_t(file_index)]);
+                                log<NUClear::INFO>("Starting playback of file", files[size_t(file_index)]);
                             }
                             else {
-                                log<NUClear::ERROR>("The file", files[file_index], "does not exist!");
+                                log<NUClear::ERROR>("The file", files[size_t(file_index)], "does not exist!");
                             }
                         }
                         // We are done and should shutdown the system now
@@ -95,13 +95,13 @@ namespace module::support::logging {
                             start_time = last_emit_time;
 
                             // Open the first file again
-                            if (std::filesystem::exists(files[file_index])) {
-                                input_file = std::make_unique<std::ifstream>(files[file_index]);
-                                log<NUClear::INFO>("Restarting playback with file", files[file_index]);
+                            if (std::filesystem::exists(files[size_t(file_index)])) {
+                                input_file = std::make_unique<std::ifstream>(files[size_t(file_index)]);
+                                log<NUClear::INFO>("Restarting playback with file", files[size_t(file_index)]);
                             }
                             else {
                                 log<NUClear::ERROR>("Cannot restart with file",
-                                                    files[file_index],
+                                                    files[size_t(file_index)],
                                                     "as it does not exist!");
                             }
                         }

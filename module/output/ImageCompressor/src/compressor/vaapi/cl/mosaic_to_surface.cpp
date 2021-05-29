@@ -7,8 +7,8 @@
 
 namespace module::output::compressor::vaapi::cl {
 
-    void mosaic_to_surface(const CompressionContext::OpenCLContext& context,
-                           const cl::command_queue& command_queue,
+    void mosaic_to_surface(const CompressionContext::OpenCLContext& ctx,
+                           const cl::command_queue& command_queue_,
                            const cl::kernel& mosaic,
                            const cl::mem& image,
                            const std::vector<uint8_t>& data,
@@ -24,7 +24,7 @@ namespace module::output::compressor::vaapi::cl {
         std::array<size_t, 3> region = {{size_t(width), size_t(height), 1}};
 
         // Upload our image to device memory
-        error = clEnqueueWriteImage(command_queue,
+        error = clEnqueueWriteImage(command_queue_,
                                     image,
                                     0,
                                     origin.data(),
@@ -41,7 +41,7 @@ namespace module::output::compressor::vaapi::cl {
         }
 
         // Acquire the surface from VAAPI
-        error = context.acquire_surface(command_queue, 1, &surface, 0, nullptr, &ev);
+        error = ctx.acquire_surface(command_queue_, 1, &surface, 0, nullptr, &ev);
         cl::event acquired_ev(ev, ::clReleaseEvent);
         if (error != CL_SUCCESS) {
             throw std::system_error(error, cl::opencl_error_category(), "Error acquiring the VAAPI surface");
@@ -63,7 +63,7 @@ namespace module::output::compressor::vaapi::cl {
         std::array<size_t, 2> offset         = {0, 0};
         std::array<size_t, 2> global_size    = {width, height};
         std::array<cl_event, 2> process_wait = {copied_ev, acquired_ev};
-        error                                = ::clEnqueueNDRangeKernel(command_queue,
+        error                                = ::clEnqueueNDRangeKernel(command_queue_,
                                          mosaic,
                                          offset.size(),
                                          offset.data(),
@@ -79,7 +79,7 @@ namespace module::output::compressor::vaapi::cl {
 
         // Release the surface back to vaapi
         cl_event release_wait = filled_ev;
-        context.release_surface(command_queue, 1, &surface, 1, &release_wait, &ev);
+        ctx.release_surface(command_queue_, 1, &surface, 1, &release_wait, &ev);
         cl::event finished_ev(ev, ::clReleaseEvent);
         if (error != CL_SUCCESS) {
             throw std::system_error(error, cl::opencl_error_category(), "Error acquiring the VAAPI surface");

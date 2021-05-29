@@ -57,7 +57,7 @@ namespace module::input::decompressor::turbojpeg {
         TJPF code = mosaic || subsamp == TJSAMP::TJSAMP_GRAY ? TJPF::TJPF_GRAY : TJPF::TJPF_RGB;
 
         // Decode the image
-        std::vector<uint8_t> output(width * height * (code == TJPF::TJPF_GRAY ? 1 : 3));
+        std::vector<uint8_t> output(size_t(width * height * (code == TJPF::TJPF_GRAY ? 1 : 3)));
         tjDecompress2(decompressor,
                       data.data(),
                       data.size(),

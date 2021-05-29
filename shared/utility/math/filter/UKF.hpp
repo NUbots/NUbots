@@ -41,7 +41,7 @@ namespace utility::math::filter {
 
     private:
         // The number of sigma points
-        static constexpr unsigned int NUM_SIGMA_POINTS = (Model::size * 2) + 1;
+        static constexpr int NUM_SIGMA_POINTS = (Model::size * 2) + 1;
 
         using SigmaVec       = Eigen::Matrix<Scalar, NUM_SIGMA_POINTS, 1>;
         using SigmaMat       = Eigen::Matrix<Scalar, Model::size, NUM_SIGMA_POINTS>;
@@ -281,7 +281,7 @@ namespace utility::math::filter {
                     MeasurementScalar loglikelihood =
                         0.5
                         * (std::log(innovation_variance.determinant()) + std::abs(likelihood_exponent)
-                           + innovation.size() * std::log(2 * M_PI));
+                           + double(innovation.size()) * std::log(2.0 * M_PI));
 
                     return -loglikelihood;
                 });

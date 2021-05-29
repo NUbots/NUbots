@@ -55,7 +55,7 @@ namespace module::vision {
         // Trigger the same function when either update
         on<Configuration>("GoalDetector.yaml").then([this](const Configuration& cfg) {
             config.confidence_threshold = cfg["confidence_threshold"].as<float>();
-            config.cluster_points       = cfg["cluster_points"].as<int>();
+            config.cluster_points       = cfg["cluster_points"].as<size_t>();
             config.disagreement_ratio   = cfg["disagreement_ratio"].as<float>();
             config.goal_angular_cov     = Eigen::Vector3f(cfg["goal_angular_cov"].as<Expression>()).asDiagonal();
             config.use_median           = cfg["use_median"].as<bool>();
@@ -69,7 +69,7 @@ namespace module::vision {
                 const auto& cls                                     = horizon.mesh->classifications;
                 const auto& neighbours                              = horizon.mesh->neighbourhood;
                 const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = horizon.mesh->rays;
-                const float world_offset                            = std::atan2(horizon.Hcw(0, 1), horizon.Hcw(0, 0));
+                const float world_offset = std::atan2(float(horizon.Hcw(0, 1)), float(horizon.Hcw(0, 0)));
 
                 // Get some indices to partition
                 std::vector<int> indices(horizon.mesh->indices.size());
@@ -85,7 +85,7 @@ namespace module::vision {
                     });
 
                 // Discard indices that are not on the boundary and are not below the green horizon
-                indices.resize(std::distance(indices.begin(), boundary));
+                indices.resize(size_t(std::distance(indices.begin(), boundary)));
 
                 // Cluster all points into ball candidates
                 // Points are clustered based on their connectivity to other ball points
@@ -115,7 +115,7 @@ namespace module::vision {
                                                                                             rays,
                                                                                             true,
                                                                                             true);
-                clusters.resize(std::distance(clusters.begin(), green_boundary));
+                clusters.resize(size_t(std::distance(clusters.begin(), green_boundary)));
 
                 if (config.debug) {
                     log<NUClear::DEBUG>(fmt::format("Found {} clusters below green horizon", clusters.size()));
@@ -203,8 +203,8 @@ namespace module::vision {
                                         bottom_point = p0;
                                     }
                                 }
-                                left_side /= std::distance(cluster.begin(), right);
-                                right_side /= std::distance(right, other);
+                                left_side /= float(std::distance(cluster.begin(), right));
+                                right_side /= float(std::distance(right, other));
                             }
 
                             // Calculate bottom middle of goal post, z is calculated above
@@ -214,11 +214,11 @@ namespace module::vision {
                             // https://en.wikipedia.org/wiki/Angular_diameter
                             Eigen::Vector3f middle = ((left_side + right_side) * 0.5f).normalized();
                             float radius           = middle.dot(left_side.normalized());
-                            float distance =
-                                field.dimensions.goalpost_width * radius * 0.5f / std::sqrt(1.0f - radius * radius);
+                            float distance         = float(field.dimensions.goalpost_width) * radius * 0.5f
+                                             / std::sqrt(1.0f - radius * radius);
 
                             Eigen::Vector3f top_point(bottom_point * distance);
-                            top_point.z() += field.dimensions.goal_crossbar_height;
+                            top_point.z() += float(field.dimensions.goal_crossbar_height);
                             g.post.top    = horizon.Hcw.topLeftCorner<3, 3>().cast<float>() * top_point.normalized();
                             g.post.bottom = horizon.Hcw.topLeftCorner<3, 3>().cast<float>() * bottom_point.normalized();
                             g.post.distance = distance;
@@ -265,7 +265,7 @@ namespace module::vision {
                     };
 
                     std::map<std::vector<Goal>::iterator, std::pair<std::vector<Goal>::iterator, float>> pairs;
-                    const float actual_width = field.dimensions.goal_width;
+                    const float actual_width = float(field.dimensions.goal_width);
                     for (auto it1 = goals->goals.begin(); it1 != goals->goals.end(); it1 = std::next(it1)) {
                         for (auto it2 = std::next(it1); it2 != goals->goals.end(); it2 = std::next(it2)) {
                             const Eigen::Vector3f& rGCc0 = it1->post.bottom;

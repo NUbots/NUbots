@@ -123,7 +123,8 @@ namespace module::support {
 
                             // Store our position from field to torso
                             msg->robot_position =
-                                Eigen::Vector3f(rTFf[0], rTFf[1], Hft.rotation().matrix().eulerAngles(0, 1, 2).z());
+                                Eigen::Vector3d(rTFf.x(), rTFf.y(), Hft.rotation().matrix().eulerAngles(0, 1, 2).z())
+                                    .cast<float>();
                             msg->robot_position_covariance = field->covariance.cast<float>();
 
                             if (loc_ball) {

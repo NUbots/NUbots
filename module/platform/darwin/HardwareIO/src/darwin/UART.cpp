@@ -89,7 +89,7 @@ namespace Darwin {
         // 0 means raw output
         tio.c_oflag = 0;
         // No ICANON so we read immediantly rather then line by line
-        tio.c_lflag &= ~ICANON;
+        tio.c_lflag &= ~tcflag_t(ICANON);
         tio.c_cc[VTIME] = 0;
         tio.c_cc[VMIN]  = 0;
         // Set the settings
@@ -104,14 +104,14 @@ namespace Darwin {
         }
 
         // Set the speed flags to "Custom Speed" (clear the existing speed, and set the custom speed flags)
-        serinfo.flags &= ~ASYNC_SPD_MASK;
-        serinfo.flags |= ASYNC_SPD_CUST;
+        serinfo.flags &= ~int(ASYNC_SPD_MASK);
+        serinfo.flags |= int(ASYNC_SPD_CUST);
 
         // Set our serial port to use low latency mode (otherwise the USB driver buffers for 16ms before sending data)
-        serinfo.flags |= ASYNC_LOW_LATENCY;
+        serinfo.flags |= int(ASYNC_LOW_LATENCY);
 
         // Set our custom divsor for our speed
-        serinfo.custom_divisor = serinfo.baud_base / baud;
+        serinfo.custom_divisor = int(serinfo.baud_base / baud);
 
         // Set our custom speed in the system
         if (ioctl(fd, TIOCSSERIAL, &serinfo) < 0) {
@@ -127,40 +127,40 @@ namespace Darwin {
     }
 
     size_t UART::writeBytes(const void* buf, size_t count) {
-        uint8_t reconnects = 0;
-        int bytesWritten   = 0;
+        uint8_t reconnects   = 0;
+        ssize_t bytesWritten = 0;
 
         // We flush our buffer, just in case there was anything random in it
         tcflush(fd, TCIFLUSH);
 
-        while ((bytesWritten != (int) count) && (reconnects < 3)) {
+        while ((bytesWritten != ssize_t(count)) && (reconnects < 3)) {
             bytesWritten = write(fd, buf, count);
 
-            if (bytesWritten < (int) count) {
+            if (bytesWritten < ssize_t(count)) {
                 reconnect();
                 reconnects++;
             }
         }
 
         if (reconnects > 0) {
-            std::cout << "Bytes Written: " << (int) bytesWritten << " Reconnects: " << (int) reconnects << "\r"
+            std::cout << "Bytes Written: " << int(bytesWritten) << " Reconnects: " << int(reconnects) << "\r"
                       << std::endl;
         }
 
         assert(reconnects < 3);
         (void) reconnects;  // Make the compiler happy when NDEBUG is set
 
-        return (bytesWritten);
+        return size_t(bytesWritten);
     }
 
     size_t UART::readBytes(void* buf, size_t count) {
         uint8_t reconnects = 0;
-        int bytesRead      = 0;
+        ssize_t bytesRead  = 0;
 
-        while ((bytesRead != (int) count) && (reconnects < 3)) {
+        while ((bytesRead != ssize_t(count)) && (reconnects < 3)) {
             bytesRead = read(fd, buf, count);
 
-            if ((errno == EAGAIN) || ((bytesRead < (int) count) && (bytesRead > 0))) {
+            if ((errno == EAGAIN) || ((bytesRead < ssize_t(count)) && (bytesRead > 0))) {
                 break;
             }
 
@@ -171,9 +171,9 @@ namespace Darwin {
         }
 
         if (reconnects > 0) {
-            std::cout << "Bytes Read: " << (int) bytesRead << " Reconnects: " << (int) reconnects << " Data: ";
+            std::cout << "Bytes Read: " << int(bytesRead) << " Reconnects: " << int(reconnects) << " Data: ";
             for (int i = 0; i < bytesRead; i++) {
-                std::cout << (int) (*((uint8_t*) buf + i)) << " ";
+                std::cout << int(*reinterpret_cast<uint8_t*>(buf)) + i << " ";
             }
             std::cout << "\r" << std::endl;
         }
@@ -181,7 +181,7 @@ namespace Darwin {
         assert(reconnects < 3);
         (void) reconnects;  // Make the compiler happy when NDEBUG is set
 
-        return (bytesRead);
+        return size_t(bytesRead);
     }
 
     void UART::reconnect() {
@@ -227,7 +227,7 @@ namespace Darwin {
         }
 
         // We now are now waiting for 4 bytes
-        timeout.tv_usec      = BYTE_WAIT * sizeof(Header);
+        timeout.tv_usec      = size_t(BYTE_WAIT) * sizeof(Header);
         uint8_t* headerBytes = reinterpret_cast<uint8_t*>(&result.header);
         for (size_t done = 0; done < sizeof(Header);) {
             if (select(fd + 1, &connectionset, nullptr, nullptr, &timeout) == 1) {
@@ -243,7 +243,7 @@ namespace Darwin {
         // length
         int length = 0;
         if (result.header.length < 2) {
-            std::cout << "Length: " << (int) result.header.length << ", " << (int) (result.header.length - 2) << "\r"
+            std::cout << "Length: " << int(result.header.length) << ", " << result.header.length - 2 << "\r"
                       << std::endl;
         }
 
@@ -253,10 +253,10 @@ namespace Darwin {
 
         // We now are now waiting for our data
         timeout.tv_usec = BYTE_WAIT * length;
-        result.data.resize(length);
+        result.data.resize(size_t(length));
         for (int done = 0; done < length;) {
             if (select(fd + 1, &connectionset, nullptr, nullptr, &timeout) == 1) {
-                done += readBytes(&result.data[done], length - done);
+                done += int(readBytes(&result.data[size_t(done)], size_t(length - done)));
             }
             else {
                 // Set our packet header to timeout and return it
@@ -282,20 +282,20 @@ namespace Darwin {
 
         // Validate our checksum
         if (result.checksum != calculateChecksum(result)) {
-            CommandResult result;
-            result.checksum = 0;  // GCC doesn't like that this isn't initalized
-            result.header.errorcode |= ErrorCode::CORRUPT_DATA;
-            return result;
+            CommandResult command_result;
+            command_result.checksum = 0;  // GCC doesn't like that this isn't initalized
+            command_result.header.errorcode |= ErrorCode::CORRUPT_DATA;
+            return command_result;
         }
 
-        // Return the packet we recieved
+        // Return the packet we received
         return result;
     }
 
     std::vector<CommandResult> UART::executeBulk(const std::vector<uint8_t>& command) {
 
         // We can work out how many responses to expect based on our packets length
-        int responses = (command[Packet::LENGTH] - 3) / 3;
+        size_t responses = size_t(command[Packet::LENGTH] - 3) / 3;
         std::vector<CommandResult> results(responses);
 
         // Lock our mutex
@@ -304,7 +304,7 @@ namespace Darwin {
         writeBytes(command.data(), command.size());
 
         // Read our responses for each of the packets
-        for (int i = 0; i < responses; ++i) {
+        for (size_t i = 0; i < responses; ++i) {
             results[i] = readPacket();
             // If we get a timeout don't wait for other packets (other errors are fine)
             if (results[i].header.errorcode == ErrorCode::NO_RESPONSE) {

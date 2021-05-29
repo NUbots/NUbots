@@ -54,14 +54,14 @@ namespace module::input {
              ************************************************************************/
             if (it == cameras.end()) {
                 // Strip the .yaml off the name of the file to get the name of the camera
-                std::string name = ::basename(config.fileName.substr(0, config.fileName.find_last_of('.')).c_str());
+                std::string name = ::basename(config.filename.substr(0, config.filename.find_last_of('.')).c_str());
 
                 // Find the camera with the correct serial number
-                auto find_camera = [](const std::string& serial_number) {
-                    int devices = arv_get_n_devices();
-                    for (int i = 0; i < devices; ++i) {
-                        if (serial_number.compare(arv_get_device_serial_nbr(i)) == 0) {
-                            return i;
+                auto find_camera = [](const std::string& device_serial_number) {
+                    uint devices = arv_get_n_devices();
+                    for (uint i = 0; i < devices; ++i) {
+                        if (device_serial_number.compare(arv_get_device_serial_nbr(i)) == 0) {
+                            return int(i);
                         }
                     }
                     return -1;
@@ -82,7 +82,7 @@ namespace module::input {
                 else {
 
                     // Open the camera: Store as shared pointer
-                    std::string device_description = arv_get_device_id(device_no);
+                    std::string device_description = arv_get_device_id(uint(device_no));
                     auto camera =
                         std::shared_ptr<ArvCamera>(arv_camera_new(device_description.c_str()), [](ArvCamera* ptr) {
                             if (ptr)
@@ -158,8 +158,8 @@ namespace module::input {
             context.Hpc = Eigen::Matrix4d(config["lens"]["Hpc"].as<Expression>());
 
             // Apply image offsets to lens_centre, optical axis:
-            int full_width  = arv::device_get_integer_feature_value(device, "WidthMax");
-            int full_height = arv::device_get_integer_feature_value(device, "HeightMax");
+            long full_width  = arv::device_get_integer_feature_value(device, "WidthMax");
+            long full_height = arv::device_get_integer_feature_value(device, "HeightMax");
 
             int offset_x = config["settings"]["OffsetX"].as<Expression>();
             int offset_y = config["settings"]["OffsetY"].as<Expression>();
@@ -167,20 +167,21 @@ namespace module::input {
             int height   = config["settings"]["Height"].as<Expression>();
 
             // Renormalise the focal length
-            float focal_length = config["lens"]["focal_length"].as<Expression>() * full_width / width;
-            float fov          = config["lens"]["fov"].as<Expression>();
+            float focal_length =
+                float(config["lens"]["focal_length"].as<Expression>()) * float(full_width) / float(width);
+            float fov = config["lens"]["fov"].as<Expression>();
 
             // Recentre/renormalise the centre
             Eigen::Vector2f centre = Eigen::Vector2f(config["lens"]["centre"].as<Expression>()) * full_width;
             centre += Eigen::Vector2f(offset_x - (full_width - width - offset_x),
                                       offset_y - (full_height - height - offset_y))
                       * 0.5;
-            centre /= width;
+            centre /= float(width);
 
             // Adjust the distortion parameters for the new width units
             Eigen::Vector2f k = config["lens"]["k"].as<Expression>();
-            k[0]              = k[0] * std::pow(width / full_height, 2);
-            k[1]              = k[1] * std::pow(width / full_height, 4);
+            k[0]              = k[0] * std::pow(float(width / full_height), 2.0f);
+            k[1]              = k[1] * std::pow(float(width / full_height), 4.0f);
 
             // Set the lens parameters from configuration
             context.lens = Image::Lens{
@@ -193,13 +194,13 @@ namespace module::input {
 
             // If the lens fov was auto we need to correct it
             if (!std::isfinite(context.lens.fov)) {
-                double a = height / width;
-                std::array<double, 4> options{
-                    utility::vision::unproject(Eigen::Vector2f(0, 0), context.lens, Eigen::Vector2f(1, a)).x(),
-                    utility::vision::unproject(Eigen::Vector2f(1, 0), context.lens, Eigen::Vector2f(1, a)).x(),
-                    utility::vision::unproject(Eigen::Vector2f(0, a), context.lens, Eigen::Vector2f(1, a)).x(),
-                    utility::vision::unproject(Eigen::Vector2f(1, a), context.lens, Eigen::Vector2f(1, a)).x()};
-                context.lens.fov = std::acos(*std::min_element(options.begin(), options.end())) * 2.0;
+                float a = float(height / width);
+                std::array<float, 4> options{
+                    utility::vision::unproject(Eigen::Vector2f(0.0f, 0.0f), context.lens, Eigen::Vector2f(1.0f, a)).x(),
+                    utility::vision::unproject(Eigen::Vector2f(1.0f, 0.0f), context.lens, Eigen::Vector2f(1.0f, a)).x(),
+                    utility::vision::unproject(Eigen::Vector2f(0.0f, a), context.lens, Eigen::Vector2f(1.0f, a)).x(),
+                    utility::vision::unproject(Eigen::Vector2f(1.0f, a), context.lens, Eigen::Vector2f(1.0f, a)).x()};
+                context.lens.fov = std::acos(*std::min_element(options.begin(), options.end())) * 2.0f;
             }
 
             // Apply the region to the camera
@@ -272,7 +273,7 @@ namespace module::input {
             }
 
             // Add buffers to the queue
-            int payload_size = arv::camera_get_payload(cam.get());
+            size_t payload_size = arv::camera_get_payload(cam.get());
             for (size_t i = 0; i < config["buffer_count"].as<size_t>(); i++) {
                 // TODO(trent) Eventually we should use preallocated page aligned data so that we can map directly
                 // to the GPU.
@@ -294,9 +295,10 @@ namespace module::input {
         on<Trigger<Sensors>>().then("Buffer Sensors", [this](const Sensors& sensors) {
             std::lock_guard<std::mutex> lock(sensors_mutex);
             auto now = NUClear::clock::now();
-            Hwps.resize(std::distance(Hwps.begin(), std::remove_if(Hwps.begin(), Hwps.end(), [now](const auto& v) {
-                                          return v.first < (now - std::chrono::milliseconds(500));
-                                      })));
+            Hwps.resize(
+                size_t(std::distance(Hwps.begin(), std::remove_if(Hwps.begin(), Hwps.end(), [now](const auto& v) {
+                                         return v.first < (now - std::chrono::milliseconds(500));
+                                     }))));
 
             // Get torso to head, and torso to world
             Eigen::Affine3d Htp(sensors.Htx[ServoID::HEAD_PITCH]);
@@ -334,7 +336,7 @@ namespace module::input {
                 auto& timesync = context->time;
 
                 // Get the timestamp from the buffer
-                int64_t ts = arv_buffer_get_timestamp(buffer);
+                int64_t ts = int64_t(arv_buffer_get_timestamp(buffer));
 
                 // If we couldn't calculate the timestamp offset using the cameras API, we have to do it on the fly
                 // and hope that our answer isn't too far off the truth
@@ -350,7 +352,7 @@ namespace module::input {
 
                     // Measurement update
                     double k        = timesync.kf.p / (timesync.kf.p + timesync.kf.r);
-                    timesync.offset = std::llround(timesync.offset + k * (o_ns - timesync.offset));
+                    timesync.offset = std::llround(double(timesync.offset) + k * double(o_ns - timesync.offset));
                     timesync.kf.p   = (1.0 - k) * timesync.kf.p;
                 }
                 else {
@@ -379,8 +381,8 @@ namespace module::input {
                             reactor.log<NUClear::INFO>(fmt::format(
                                 "Clock drift for {} camera exceeded threshold ({:.1f}ms > {:.1f}ms), recalibrating",
                                 context->name,
-                                std::abs(total_cam - total_local) / 1e6,
-                                timesync.drift.max_clock_drift / 1e6));
+                                double(std::abs(total_cam - total_local)) / 1e6,
+                                double(timesync.drift.max_clock_drift) / 1e6));
 
                             arv::camera_stop_acquisition(context->camera.get());
                             arv_stream_set_emit_signals(context->stream.get(), false);
@@ -437,7 +439,7 @@ namespace module::input {
                         }
                     }
 
-                    Hcw = Eigen::Affine3d(Hwp * Hpc).inverse();
+                    Hcw = (Hwp * Hpc).inverse();
                 }
 
                 msg->lens = context->lens;

@@ -156,10 +156,10 @@ namespace module::motion {
         /**
          * Assign given parameters vector
          */
-        void setParameters(const WalkingParameter& params) {
-            this->params      = params;
-            this->half_period = 1.0f / (2.0f * this->params.freq);
-            foot_step.setFootDistance(this->params.foot_distance);
+        void setParameters(const WalkingParameter& params_) {
+            params      = params_;
+            half_period = 1.0f / (2.0f * params.freq);
+            foot_step.setFootDistance(params.foot_distance);
         }
 
         /**

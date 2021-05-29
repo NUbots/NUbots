@@ -78,7 +78,7 @@ public:
  */
 class Joystick {
 private:
-    void openPath(const std::string& devicePath);
+    void open_device(const std::string& device_path);
 
     int _fd{-1};
     std::string path;
@@ -95,12 +95,12 @@ public:
      * Initialises an instance for the joystick with the specified,
      * zero-indexed number.
      */
-    Joystick(int joystickNumber);
+    Joystick(int joystick_number);
 
     /**
      * Initialises an instance for the joystick device specified.
      */
-    Joystick(const std::string& devicePath);
+    Joystick(const std::string& device_path);
 
     /**
      * Returns true if the joystick was found and may be used, otherwise false.

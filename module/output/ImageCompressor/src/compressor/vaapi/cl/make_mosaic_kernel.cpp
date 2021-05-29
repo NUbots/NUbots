@@ -7,13 +7,13 @@
 #include "utility/vision/mosaic.hpp"
 
 namespace module::output::compressor::vaapi::cl {
-    std::pair<cl::program, cl::kernel> make_mosaic_kernel(const CompressionContext::OpenCLContext& context,
+    std::pair<cl::program, cl::kernel> make_mosaic_kernel(const CompressionContext::OpenCLContext& ctx,
                                                           const uint32_t& width,
                                                           const uint32_t& height,
                                                           const uint32_t& format) {
         // Make the OpenCL source
-        int mosaic_size    = utility::vision::Mosaic::size(format);
-        std::string source = fmt::format(R"(
+        uint32_t mosaic_size = utility::vision::Mosaic::size(format);
+        std::string source   = fmt::format(R"(
                     const sampler_t s  = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST;
                     kernel void
                         mosaic_to_surface(read_only image2d_t input, write_only image2d_t surface) {{
@@ -29,33 +29,33 @@ namespace module::output::compressor::vaapi::cl {
         cl_int error     = 0;
         const char* cstr = source.c_str();
         size_t csize     = source.size();
-        cl::program program(::clCreateProgramWithSource(context.context, 1, &cstr, &csize, &error), ::clReleaseProgram);
+        cl::program prog(::clCreateProgramWithSource(ctx.context, 1, &cstr, &csize, &error), ::clReleaseProgram);
         if (error != CL_SUCCESS) {
             throw std::system_error(error, cl::opencl_error_category(), "Error adding sources to projection program");
         }
 
         // Compile the program
-        error = ::clBuildProgram(program, 0, nullptr, nullptr, nullptr, nullptr);
+        error = ::clBuildProgram(prog, 0, nullptr, nullptr, nullptr, nullptr);
         if (error != CL_SUCCESS) {
             // Get program build log
             size_t used = 0;
-            ::clGetProgramBuildInfo(program, context.device, CL_PROGRAM_BUILD_LOG, 0, nullptr, &used);
+            ::clGetProgramBuildInfo(prog, ctx.device, CL_PROGRAM_BUILD_LOG, 0, nullptr, &used);
             std::vector<char> log(used);
-            ::clGetProgramBuildInfo(program, context.device, CL_PROGRAM_BUILD_LOG, log.size(), log.data(), &used);
+            ::clGetProgramBuildInfo(prog, ctx.device, CL_PROGRAM_BUILD_LOG, log.size(), log.data(), &used);
 
             // Throw an error with the build log
-            throw std::system_error(
-                error,
-                cl::opencl_error_category(),
-                "Error building projection program\n" + std::string(log.begin(), log.begin() + used));
+            throw std::system_error(error,
+                                    cl::opencl_error_category(),
+                                    "Error building projection program\n"
+                                        + std::string(log.begin(), std::next(log.begin(), ssize_t(used))));
         }
 
-        cl::kernel kernel(::clCreateKernel(program, "mosaic_to_surface", &error), ::clReleaseKernel);
+        cl::kernel kern(::clCreateKernel(prog, "mosaic_to_surface", &error), ::clReleaseKernel);
         if (error != CL_SUCCESS) {
             throw std::system_error(error, cl::opencl_error_category(), "Error getting the mosaic_to_surface kernel");
         }
 
-        return std::make_pair(program, kernel);
+        return std::make_pair(prog, kern);
     }
 
 }  // namespace module::output::compressor::vaapi::cl

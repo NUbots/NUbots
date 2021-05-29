@@ -20,7 +20,7 @@
 #include "DarwinDevice.hpp"
 
 namespace Darwin {
-    DarwinDevice::DarwinDevice(UART& coms, int id) : coms(coms), id(id) {}
+    DarwinDevice::DarwinDevice(UART& coms_, uint8_t id_) : coms(coms_), id(id_) {}
 
     bool DarwinDevice::ping() {
 

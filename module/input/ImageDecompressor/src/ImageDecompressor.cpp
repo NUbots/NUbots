@@ -73,17 +73,17 @@ namespace module::input {
             }
 
             // Look through our compressors and try to find the first free one
-            for (auto& ctx : ctx->decompressors) {
+            for (auto& decompressor : ctx->decompressors) {
                 // We swap in true to the atomic and if we got false back then it wasn't active previously
-                if (!ctx.active->exchange(true)) {
+                if (!decompressor.active->exchange(true)) {
                     std::exception_ptr eptr;
                     try {
                         auto msg = std::make_unique<Image>();
 
                         // Compress the data
-                        auto result = ctx.decompressor->decompress(image.data);
+                        auto result = decompressor.decompressor->decompress(image.data);
                         msg->data   = result.first;
-                        msg->format = result.second;
+                        msg->format = uint32_t(result.second);
 
                         // Copy across the other attributes
                         msg->dimensions        = image.dimensions;
@@ -105,7 +105,7 @@ namespace module::input {
                     }
 
                     // This sets the atomic integer back to false so another thread can use this compressor
-                    ctx.active->store(false);
+                    decompressor.active->store(false);
 
                     if (eptr) {
                         // Exception :(

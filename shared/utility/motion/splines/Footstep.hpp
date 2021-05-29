@@ -25,8 +25,8 @@ namespace utility::motion::splines {
         /**
          * Set the lateral foot distance parameters
          */
-        void setFootDistance(float foot_distance) {
-            this->foot_distance = foot_distance;
+        void setFootDistance(float foot_distance_) {
+            foot_distance = foot_distance_;
         }
         [[nodiscard]] float getFootDistance() const {
             return foot_distance;

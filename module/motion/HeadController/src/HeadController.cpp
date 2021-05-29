@@ -40,7 +40,6 @@ namespace module::motion {
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
     using extension::Configuration;
-    using message::behaviour::ServoCommand;
     using message::behaviour::ServoCommands;
     using message::input::Sensors;
     using message::motion::HeadCommand;
@@ -57,13 +56,13 @@ namespace module::motion {
     HeadController::HeadController(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
         , id(size_t(this) * size_t(this) - size_t(this))
-        , min_yaw(0.0)
-        , max_yaw(0.0)
-        , min_pitch(0.0)
-        , max_pitch(0.0)
-        , head_motor_gain(0.0)
-        , head_motor_torque(0.0)
-        , p_gain(0.0)
+        , min_yaw(0.0f)
+        , max_yaw(0.0f)
+        , min_pitch(0.0f)
+        , max_pitch(0.0f)
+        , head_motor_gain(0.0f)
+        , head_motor_torque(0.0f)
+        , p_gain(0.0f)
         , updateHandle()
         , lastTime()
         , currentAngles(Eigen::Vector2f::Zero())
@@ -73,8 +72,8 @@ namespace module::motion {
         on<Configuration>("HeadController.yaml")
             .then("Head Controller - Configure", [this](const Configuration& config) {
                 // Gains
-                head_motor_gain   = config["head_motors"]["gain"].as<double>();
-                head_motor_torque = config["head_motors"]["torque"].as<double>();
+                head_motor_gain   = config["head_motors"]["gain"].as<float>();
+                head_motor_torque = config["head_motors"]["torque"].as<float>();
 
                 emit(std::make_unique<HeadCommand>(
                     HeadCommand{config["initial"]["yaw"].as<float>(), config["initial"]["pitch"].as<float>(), false}));
@@ -85,12 +84,12 @@ namespace module::motion {
         on<Trigger<HeadCommand>>().then("Head Controller - Register Head Command", [this](const HeadCommand& command) {
             goalRobotSpace = command.robot_space;
             if (goalRobotSpace) {
-                goalAngles = {utility::math::clamp(float(min_yaw), command.yaw, float(max_yaw)),
-                              utility::math::clamp(float(min_pitch), command.pitch, float(max_pitch))};
+                goalAngles = {utility::math::clamp(min_yaw, command.yaw, max_yaw),
+                              utility::math::clamp(min_pitch, command.pitch, max_pitch)};
             }
             else {
-                goalAngles = {utility::math::clamp(float(min_yaw), command.yaw, float(max_yaw)),
-                              -utility::math::clamp(float(min_pitch), command.pitch, float(max_pitch))};
+                goalAngles = {utility::math::clamp(min_yaw, command.yaw, max_yaw),
+                              -utility::math::clamp(min_pitch, command.pitch, max_pitch)};
             }
         });
 
@@ -99,7 +98,7 @@ namespace module::motion {
             [this](const Sensors& sensors, const KinematicsModel& kinematicsModel) {
                 emit(graph("HeadController Goal Angles", goalAngles.x(), goalAngles.y()));
                 // P controller
-                currentAngles = p_gain * goalAngles + (1 - p_gain) * currentAngles;
+                currentAngles = p_gain * goalAngles + (1.0f - p_gain) * currentAngles;
 
                 // Get goal vector from angles
                 // Pitch is positive when the robot is looking down by Right hand rule, so negate the pitch
@@ -135,11 +134,11 @@ namespace module::motion {
                 float yaw   = 0;
                 for (auto& angle : goalAnglesList) {
                     if (angle.first == ServoID::HEAD_PITCH) {
-                        angle.second = std::fmin(std::fmax(angle.second, min_pitch), max_pitch);
+                        angle.second = std::min(std::max(angle.second, min_pitch), max_pitch);
                         pitch        = angle.second;
                     }
                     else if (angle.first == ServoID::HEAD_YAW) {
-                        angle.second = std::fmin(std::fmax(angle.second, min_yaw), max_yaw);
+                        angle.second = std::min(std::max(angle.second, min_yaw), max_yaw);
                         yaw          = angle.second;
                     }
                 }
@@ -153,12 +152,8 @@ namespace module::motion {
                 waypoints->commands.reserve(2);
                 auto t = NUClear::clock::now();
                 for (auto& angle : goalAnglesList) {
-                    waypoints->commands.emplace_back(id,
-                                                     t,
-                                                     angle.first,
-                                                     angle.second,
-                                                     float(head_motor_gain),
-                                                     float(head_motor_torque));
+                    waypoints->commands
+                        .emplace_back(id, t, angle.first, angle.second, head_motor_gain, head_motor_torque);
                 }
                 // Send commands
                 emit(waypoints);

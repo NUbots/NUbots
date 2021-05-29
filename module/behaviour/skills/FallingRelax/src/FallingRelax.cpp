@@ -59,8 +59,8 @@ namespace module::behaviour::skills {
         // do a little configurating
         on<Configuration>("FallingRelax.yaml").then([this](const Configuration& config) {
             // Store falling angle as a cosine so we can compare it directly to the z axis value
-            double fallingAngle = config["FALLING_ANGLE"].as<double>();
-            FALLING_ANGLE       = cos(fallingAngle);
+            float fallingAngle = config["FALLING_ANGLE"].as<float>();
+            FALLING_ANGLE      = std::cos(fallingAngle);
 
             // When falling the acceleration should drop below this value
             FALLING_ACCELERATION = config["FALLING_ACCELERATION"].as<float>();
@@ -72,16 +72,16 @@ namespace module::behaviour::skills {
         });
 
         on<Last<5, Trigger<Sensors>>, Single>([this](const std::list<std::shared_ptr<const Sensors>>& sensors) {
-            if (!falling && !sensors.empty() && fabs(sensors.back()->Htw(2, 2)) < FALLING_ANGLE) {
+            if (!falling && !sensors.empty() && std::abs(float(sensors.back()->Htw(2, 2))) < FALLING_ANGLE) {
 
                 // We might be falling, check the accelerometer
-                double magnitude = 0;
+                float magnitude = 0.0f;
 
                 for (const auto& sensor : sensors) {
-                    magnitude += sensor->accelerometer.norm();
+                    magnitude += float(sensor->accelerometer.norm());
                 }
 
-                magnitude /= sensors.size();
+                magnitude /= float(sensors.size());
 
                 if (magnitude < FALLING_ACCELERATION) {
                     falling = true;
@@ -90,13 +90,13 @@ namespace module::behaviour::skills {
             }
             else if (falling) {
                 // We might be recovered, check the accelerometer
-                double magnitude = 0;
+                float magnitude = 0.0f;
 
                 for (const auto& sensor : sensors) {
-                    magnitude += sensor->accelerometer.norm();
+                    magnitude += float(sensor->accelerometer.norm());
                 }
 
-                magnitude /= sensors.size();
+                magnitude /= float(sensors.size());
 
                 // See if we recover
                 if (magnitude > RECOVERY_ACCELERATION[0] && magnitude < RECOVERY_ACCELERATION[1]) {

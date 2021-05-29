@@ -112,7 +112,7 @@ namespace module::behaviour::planning {
                 // Get time since last seen ball
                 auto now = NUClear::clock::now();
                 double secondsSinceLastSeen =
-                    std::chrono::duration_cast<std::chrono::microseconds>(now - ballLastSeen).count() * 1e-6;
+                    std::chrono::duration<double, std::micro>(now - ballLastSeen).count() * 1e-6;
 
                 // Compute target in robot coords
                 // Eigen::Vector3d kickTarget = Eigen::Vector3d::UnitX(); //Kick forwards
@@ -130,7 +130,7 @@ namespace module::behaviour::planning {
                 // Transform target from field to torso space
                 Eigen::Affine3d Htf        = Htw * Hfw.inverse();
                 Eigen::Vector3d kickTarget = Htf * Eigen::Vector3d(kickPlan.target.x(), kickPlan.target.y(), 0.0);
-                float KickAngle            = std::fabs(std::atan2(kickTarget.y(), kickTarget.x()));
+                double KickAngle           = std::abs(std::atan2(kickTarget.y(), kickTarget.x()));
 
                 // log("KickPlan target global",kickPlan. target.transpose());
                 // log("Target of Kick", kickTarget.transpose());
@@ -153,13 +153,15 @@ namespace module::behaviour::planning {
                 if (kickIsValid) {
                     lastTimeValid = now;
                 }
-                float timeSinceValid = (now - lastTimeValid).count() * (1 / double(NUClear::clock::period::den));
+                double timeSinceValid =
+                    std::chrono::duration<double, NUClear::clock::period>(now - lastTimeValid).count()
+                    * (1.0 / double(NUClear::clock::period::den));
 
                 // log("kick checks",secondsSinceLastSeen < cfg.seconds_not_seen_limit
                 //     , kickIsValid
                 //     , KickAngle < cfg.kick_forward_angle_limit);
-                if (secondsSinceLastSeen < cfg.seconds_not_seen_limit && kickIsValid && (correctState || forcePlaying)
-                    && KickAngle < cfg.kick_forward_angle_limit) {
+                if (secondsSinceLastSeen < double(cfg.seconds_not_seen_limit) && kickIsValid
+                    && (correctState || forcePlaying) && KickAngle < double(cfg.kick_forward_angle_limit)) {
 
                     switch (kickPlan.kick_type.value) {
                         case KickType::IK_KICK:
@@ -195,16 +197,15 @@ namespace module::behaviour::planning {
                         default: throw new std::runtime_error("KickPlanner: Invalid KickType");
                     }
                 }
-                else if (secondsSinceLastSeen > cfg.seconds_not_seen_limit
-                         || timeSinceValid > cfg.seconds_not_seen_limit) {
+                else if (secondsSinceLastSeen > double(cfg.seconds_not_seen_limit)
+                         || timeSinceValid > double(cfg.seconds_not_seen_limit)) {
                     emit(std::make_unique<WantsToKick>(WantsToKick(false)));
                 }
             });
     }
 
-
     bool KickPlanner::kickValid(const Eigen::Vector3d& ballPos) {
-        return (ballPos.x() > 0.0) && (ballPos.x() < cfg.max_ball_distance)
-               && (std::fabs(ballPos.y()) < cfg.kick_corridor_width * 0.5);
+        return (ballPos.x() > 0.0) && (ballPos.x() < double(cfg.max_ball_distance))
+               && (std::fabs(ballPos.y()) < double(cfg.kick_corridor_width) * 0.5);
     }
 }  // namespace module::behaviour::planning

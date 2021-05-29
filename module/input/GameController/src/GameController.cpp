@@ -66,8 +66,8 @@ namespace module::input {
         on<Configuration, Trigger<GlobalConfig>>("GameController.yaml")
             .then("GameController Configuration",
                   [this](const Configuration& config, const GlobalConfig& globalConfig) {
-                      PLAYER_ID = globalConfig.player_id;
-                      TEAM_ID   = globalConfig.team_id;
+                      PLAYER_ID = uint8_t(globalConfig.player_id);
+                      TEAM_ID   = uint8_t(globalConfig.team_id);
                       send_port = config["send_port"].as<uint>();
 
                       // If we are changing ports (the port starts at 0 so this should start it the first time)
@@ -115,22 +115,20 @@ namespace module::input {
     }
 
     void GameController::sendReplyMessage(const ReplyMessage& message) {
-        auto packet     = std::make_unique<GameControllerReplyPacket>();
-        packet->header  = {gamecontroller::RETURN_HEADER[0],
-                          gamecontroller::RETURN_HEADER[1],
-                          gamecontroller::RETURN_HEADER[2],
-                          gamecontroller::RETURN_HEADER[3]};
-        packet->version = gamecontroller::RETURN_VERSION;
-        packet->team    = TEAM_ID;
-        packet->player  = PLAYER_ID;
-        packet->message = message;
+        auto reply_packet     = std::make_unique<GameControllerReplyPacket>();
+        reply_packet->header  = {gamecontroller::RETURN_HEADER[0],
+                                gamecontroller::RETURN_HEADER[1],
+                                gamecontroller::RETURN_HEADER[2],
+                                gamecontroller::RETURN_HEADER[3]};
+        reply_packet->version = gamecontroller::RETURN_VERSION;
+        reply_packet->team    = TEAM_ID;
+        reply_packet->player  = PLAYER_ID;
+        reply_packet->message = message;
 
-        emit<Scope::UDP>(packet, BROADCAST_IP, send_port);
+        emit<Scope::UDP>(reply_packet, BROADCAST_IP, send_port);
     }
 
     void GameController::resetState() {
-
-        mode = static_cast<gamecontroller::Mode>(-1);
 
         std::copy(std::begin(gamecontroller::RECEIVE_HEADER),
                   std::end(gamecontroller::RECEIVE_HEADER),
@@ -138,18 +136,18 @@ namespace module::input {
         packet.version        = SUPPORTED_VERSION;
         packet.packetNumber   = 0;
         packet.playersPerTeam = PLAYERS_PER_TEAM;
-        packet.state          = static_cast<gamecontroller::State>(-1);
+        packet.state          = static_cast<gamecontroller::State>(0xFF);
         packet.firstHalf      = true;
-        packet.kickOffTeam    = static_cast<gamecontroller::TeamColour>(-1);
-        packet.mode           = static_cast<gamecontroller::Mode>(-1);
-        packet.dropInTeam     = static_cast<gamecontroller::TeamColour>(-1);
+        packet.kickOffTeam    = static_cast<gamecontroller::TeamColour>(0xFF);
+        packet.mode           = static_cast<gamecontroller::Mode>(0xFF);
+        packet.dropInTeam     = static_cast<gamecontroller::TeamColour>(0xFF);
         packet.dropInTime     = -1;
         packet.secsRemaining  = 0;
         packet.secondaryTime  = 0;
         for (uint i = 0; i < NUM_TEAMS; i++) {
             auto& ownTeam       = packet.teams[i];
             ownTeam.teamId      = (i == 0 ? TEAM_ID : 0);
-            ownTeam.teamColour  = static_cast<gamecontroller::TeamColour>(-1);
+            ownTeam.teamColour  = static_cast<gamecontroller::TeamColour>(0xFF);
             ownTeam.score       = 0;
             ownTeam.penaltyShot = 0;
             ownTeam.singleShots = 0;
@@ -157,9 +155,9 @@ namespace module::input {
             auto& coach             = ownTeam.coach;
             coach.penaltyState      = gamecontroller::PenaltyState::UNPENALISED;
             coach.penalisedTimeLeft = 0;
-            for (uint i = 0; i < gamecontroller::MAX_NUM_PLAYERS; i++) {
-                auto& player = ownTeam.players[i];
-                if (i <= ACTIVE_PLAYERS_PER_TEAM) {
+            for (uint j = 0; j < gamecontroller::MAX_NUM_PLAYERS; j++) {
+                auto& player = ownTeam.players[j];
+                if (j <= ACTIVE_PLAYERS_PER_TEAM) {
                     player.penaltyState      = gamecontroller::PenaltyState::UNPENALISED;
                     player.penalisedTimeLeft = 0;
                 }

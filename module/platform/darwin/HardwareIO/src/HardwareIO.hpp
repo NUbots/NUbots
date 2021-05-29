@@ -77,19 +77,19 @@ namespace module::platform::darwin {
             bool torqueEnabled = true;
 
             // Cached values that are never read
-            float pGain        = 32.0 / 255.0;
-            float iGain        = 0;
-            float dGain        = 0;
-            float movingSpeed  = 0;
-            float goalPosition = 0;
-            float torque       = 0;  // 0.0 to 1.0
+            float pGain        = 32.0f / 255.0f;
+            float iGain        = 0.0f;
+            float dGain        = 0.0f;
+            float movingSpeed  = 0.0f;
+            float goalPosition = 0.0f;
+            float torque       = 0.0f;  // 0.0 to 1.0
 
             // Values that are either simulated or read
-            float presentPosition = 0;
-            float presentSpeed    = 0;
-            float load            = 0;
-            float voltage         = 10;
-            float temperature     = 40;
+            float presentPosition = 0.0f;
+            float presentSpeed    = 0.0f;
+            float load            = 0.0f;
+            float voltage         = 10.0f;
+            float temperature     = 40.0f;
         };
 
         /// @brief Our state for our CM740 for variables we send to it

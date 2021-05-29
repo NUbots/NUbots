@@ -26,8 +26,8 @@ namespace utility::motion::splines {
          * Default and inital degree initialization
          */
         Polynom() {}
-        Polynom(size_t degree) : coefs(degree + 1, static_cast<Scalar>(0)) {}
-        Polynom(std::vector<Scalar> coefs) : coefs(coefs) {}
+        Polynom(const size_t& degree) : coefs(degree + 1, static_cast<Scalar>(0)) {}
+        Polynom(const std::vector<Scalar>& coefs_) : coefs(coefs_) {}
 
         /**
          * Access to coefficient indexed from constant to higher degree
@@ -73,7 +73,7 @@ namespace utility::motion::splines {
             Scalar xx  = static_cast<Scalar>(1);
             Scalar val = static_cast<Scalar>(0);
             for (size_t i = 1; i < coefs.size(); i++) {
-                val += i * xx * coefs[i];
+                val += float(i) * xx * coefs[i];
                 xx *= x;
             }
             return val;
@@ -83,7 +83,7 @@ namespace utility::motion::splines {
             Scalar xx  = static_cast<Scalar>(1);
             Scalar val = static_cast<Scalar>(0);
             for (size_t i = 2; i < coefs.size(); i++) {
-                val += (i - 1) * i * xx * coefs[i];
+                val += float((i - 1) * i) * xx * coefs[i];
                 xx *= x;
             }
             return val;
@@ -93,7 +93,7 @@ namespace utility::motion::splines {
             Scalar xx  = static_cast<Scalar>(1);
             Scalar val = static_cast<Scalar>(0);
             for (size_t i = 3; i < coefs.size(); i++) {
-                val += (i - 2) * (i - 1) * i * xx * coefs[i];
+                val += float((i - 2) * (i - 1) * i) * xx * coefs[i];
                 xx *= x;
             }
             return val;

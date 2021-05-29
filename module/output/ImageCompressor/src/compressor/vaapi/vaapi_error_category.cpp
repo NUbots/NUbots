@@ -45,7 +45,7 @@ namespace module::output::compressor::vaapi {
     }
 
     bool vaapi_error_category_t::equivalent(const std::error_code& code, int condition) const noexcept {
-        return *this == code.category() && static_cast<int>(default_error_condition(code.value()).value()) == condition;
+        return *this == code.category() && default_error_condition(code.value()).value() == condition;
     }
 
     std::string vaapi_error_category_t::message(int code) const noexcept {

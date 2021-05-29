@@ -11,7 +11,7 @@ namespace module::output::compressor::vaapi::operation {
                                                   uint32_t width,
                                                   uint32_t height,
                                                   const bool& monochrome,
-                                                  int quality);
+                                                  uint32_t quality);
 
 }  // namespace module::output::compressor::vaapi::operation
 

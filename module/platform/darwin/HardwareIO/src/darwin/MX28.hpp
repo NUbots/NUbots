@@ -108,7 +108,7 @@ namespace Darwin {
             D_ERROR_OUT_H          = 67
         };
 
-        MX28(UART& coms, int id);
+        MX28(UART& coms, uint8_t id);
     };
 }  // namespace Darwin
 

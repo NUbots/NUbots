@@ -30,8 +30,8 @@ namespace utility::vision {
         std::ofstream ofs(file, std::ios::out | std::ios::binary);
         ofs << fmt::format("P6\n{} {}\n255\n", image.dimensions[0], image.dimensions[1]);
 
-        for (size_t row = 0; row < image.dimensions[1]; row++) {
-            for (size_t col = 0; col < image.dimensions[0]; col++) {
+        for (uint row = 0; row < image.dimensions[1]; row++) {
+            for (uint col = 0; col < image.dimensions[0]; col++) {
                 Pixel p =
                     getPixel(col, row, image.dimensions[0], image.dimensions[1], image.data, FOURCC(image.format));
                 ofs.write(reinterpret_cast<char*>(&p.components.r), sizeof(p.components.r));
@@ -103,15 +103,15 @@ namespace utility::vision {
         }
     }
 
-    Pixel getGrey8Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
+    Pixel getGrey8Pixel(uint x, uint y, uint width, uint /*height*/, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // R0 G0 B0 R1 GR B1 R2 GB B2 ...
-        const int origin = (y * width + x);
+        const uint origin = (y * width + x);
 
         return {0, 0, data[origin]};
     }
 
-    Pixel getGRBGPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data) {
+    Pixel getGRBGPixel(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // Col    0 1 2 3 4 5
         // Row 0: G R G R G R ....
@@ -123,8 +123,8 @@ namespace utility::vision {
         const Eigen::Matrix<uint8_t, 5, 5> patch = getSubImage(x, y, width, height, data);
 
         // Work out what pixel type we are
-        const int row       = y % 2;
-        const int col       = x % 2;
+        const uint row      = y % 2;
+        const uint col      = x % 2;
         BayerPixelType type = row   ? col ? BayerPixelType::GB : BayerPixelType::B
                               : col ? BayerPixelType::R
                                     : BayerPixelType::GR;
@@ -132,7 +132,7 @@ namespace utility::vision {
         return getBayerPixel(patch, type);
     }
 
-    Pixel getRGGBPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data) {
+    Pixel getRGGBPixel(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // Col    0 1 2 3 4 5
         // Row 0: R G R G R G ....
@@ -144,8 +144,8 @@ namespace utility::vision {
         Eigen::Matrix<uint8_t, 5, 5> patch = getSubImage(x, y, width, height, data);
 
         // Work out what pixel type we are
-        const int row       = y % 2;
-        const int col       = x % 2;
+        const uint row      = y % 2;
+        const uint col      = x % 2;
         BayerPixelType type = row   ? col ? BayerPixelType::B : BayerPixelType::GB
                               : col ? BayerPixelType::GR
                                     : BayerPixelType::R;
@@ -153,7 +153,7 @@ namespace utility::vision {
         return getBayerPixel(patch, type);
     }
 
-    Pixel getGBRGPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data) {
+    Pixel getGBRGPixel(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // Col    0 1 2 3 4 5
         // Row 0: G B G B G B ....
@@ -165,8 +165,8 @@ namespace utility::vision {
         Eigen::Matrix<uint8_t, 5, 5> patch = getSubImage(x, y, width, height, data);
 
         // Work out what pixel type we are
-        const int row       = y % 2;
-        const int col       = x % 2;
+        const uint row      = y % 2;
+        const uint col      = x % 2;
         BayerPixelType type = row   ? col ? BayerPixelType::GR : BayerPixelType::R
                               : col ? BayerPixelType::B
                                     : BayerPixelType::GB;
@@ -174,7 +174,7 @@ namespace utility::vision {
         return getBayerPixel(patch, type);
     }
 
-    Pixel getBGGRPixel(uint x, uint y, int width, int height, const std::vector<uint8_t>& data) {
+    Pixel getBGGRPixel(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // Col    0 1 2 3 4 5
         // Row 0: B G B G B G ....
@@ -186,8 +186,8 @@ namespace utility::vision {
         Eigen::Matrix<uint8_t, 5, 5> patch = getSubImage(x, y, width, height, data);
 
         // Work out what pixel type we are
-        const int row       = y % 2;
-        const int col       = x % 2;
+        const uint row      = y % 2;
+        const uint col      = x % 2;
         BayerPixelType type = row   ? col ? BayerPixelType::R : BayerPixelType::GR
                               : col ? BayerPixelType::GB
                                     : BayerPixelType::B;
@@ -195,50 +195,50 @@ namespace utility::vision {
         return getBayerPixel(patch, type);
     }
 
-    Pixel getGrey16Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
-        const int origin = (y * width + x) * 2;
+    Pixel getGrey16Pixel(uint x, uint y, uint width, uint /*height*/, const std::vector<uint8_t>& data) {
+        const uint origin = (y * width + x) * 2;
 
         return {0, data[origin + 1], data[origin]};
     }
 
-    Pixel getRGB3Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
+    Pixel getRGB3Pixel(uint x, uint y, uint width, uint /*height*/, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // R0 G0 B0 R1 GR B1 R2 GB B2 ...
-        const int origin = (y * width + x) * 3;
+        const uint origin = (y * width + x) * 3;
 
         return {data[origin + 0], data[origin + 1], data[origin + 2]};
     }
 
-    Pixel getYUV24Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
+    Pixel getYUV24Pixel(uint x, uint y, uint width, uint /*height*/, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // U0 Y0 V0 U1 Y1 V1 U2 Y2 V2
-        const int origin = (y * width + x) * 3;
+        const uint origin = (y * width + x) * 3;
 
         return {data[origin + 1], data[origin + 0], data[origin + 2]};
     }
 
-    Pixel getYUYVPixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
+    Pixel getYUYVPixel(uint x, uint y, uint width, uint /*height*/, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // Y U Y V Y U Y V Y U Y V
-        const int origin = (y * width + x) * 2;
-        const int shift  = (x % 2) * 2;
+        const uint origin = (y * width + x) * 2;
+        const uint shift  = (x % 2) * 2;
 
         // origin = Y, always.
         return {data[origin + 0], data[origin + 1 - shift], data[origin + 3 - shift]};
     }
 
-    Pixel getUYVYPixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
+    Pixel getUYVYPixel(uint x, uint y, uint width, uint /*height*/, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // U Y V Y U Y V Y U Y V Y
-        const int origin = (y * width + x) * 2;
-        const int shift  = (x % 2) * 2;
+        const uint origin = (y * width + x) * 2;
+        const uint shift  = (x % 2) * 2;
 
         // Either    shift = 0 and origin = U
         // Or        shift = 2 and origin = V.
         return {data[origin + 1], data[origin + 0 - shift], data[origin + 2 - shift]};
     }
 
-    Pixel getYUV12Pixel(uint x, uint y, int width, int /*height*/, const std::vector<uint8_t>& data) {
+    Pixel getYUV12Pixel(uint x, uint y, uint width, uint /*height*/, const std::vector<uint8_t>& data) {
         // Asumming pixels are stored as
         // U0 Y0 Y1 V0 Y2 Y3 U1 Y4 Y5 V1 Y6 Y7 U2 Y8 Y9 V1 Y10 Y11
         // U0Y0V0 U0Y1V0 U0Y2V0 U0Y3V0 U1Y4V1
@@ -257,9 +257,9 @@ namespace utility::vision {
         // U1Y5V1     {data[6], data[8], data[9]} (5, 0)
         const uint Y_OFFSET[6] = {1, 2, 4, 5, 7, 8};
 
-        const int origin  = (y * width + (x - (x % 6))) * 6;
-        const int shift   = ((x % 6) > 3) ? 6 : 0;
-        const int y_shift = Y_OFFSET[x % 4];
+        const uint origin  = (y * width + (x - (x % 6))) * 6;
+        const uint shift   = ((x % 6) > 3) ? 6 : 0;
+        const uint y_shift = Y_OFFSET[x % 4];
 
         return {data[origin + 0 + shift], data[origin + 0 + y_shift], data[origin + 3 + shift]};
     }

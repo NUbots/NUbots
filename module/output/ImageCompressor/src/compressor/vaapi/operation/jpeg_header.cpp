@@ -52,13 +52,13 @@ namespace module::output::compressor::vaapi::operation {
                 quality = (quality < 50) ? (5000 / quality) : (200 - (quality * 2));
                 for (size_t i = 0; i < table.size(); ++i) {
                     int v    = (table[jpeg_zigzag[i]] * quality) / 100;
-                    quant[i] = std::max(1, std::min(255, v));
+                    quant[i] = uint8_t(std::max(1, std::min(255, v)));
                 }
             }
         };
 
         // Define huffman table
-        template <int Entries>
+        template <size_t Entries>
         struct DHT {
             uint8_t marker  = 0xFF;
             uint8_t type    = 0xC4;
@@ -69,7 +69,7 @@ namespace module::output::compressor::vaapi::operation {
             // Following this there are those entries that were described in those 16 bytes
             std::array<uint8_t, 1 + 16 + Entries> table;
 
-            DHT(const std::array<uint8_t, 1 + 16 + Entries>& table) : table(table) {}
+            DHT(const std::array<uint8_t, 1 + 16 + Entries>& table_) : table(table_) {}
         };
 
         struct SOS_Monochrome {
@@ -114,7 +114,7 @@ namespace module::output::compressor::vaapi::operation {
             uint8_t y_samp           = 0x11;
             uint8_t y_quant_table_no = 0;
 
-            SOF0_Monochrome(uint16_t width, uint16_t height) : height(htons(height)), width(htons(width)) {}
+            SOF0_Monochrome(uint16_t width_, uint16_t height_) : height(htons(height_)), width(htons(width_)) {}
         };
 
         struct SOF0_Colour {
@@ -138,7 +138,7 @@ namespace module::output::compressor::vaapi::operation {
             uint8_t v_samp           = 0x11;
             uint8_t v_quant_table_no = 1;
 
-            SOF0_Colour(uint16_t width, uint16_t height) : height(height), width(width) {}
+            SOF0_Colour(uint16_t width_, uint16_t height_) : height(height_), width(width_) {}
         };
 
     }  // namespace markers
@@ -156,7 +156,7 @@ namespace module::output::compressor::vaapi::operation {
                                                   uint32_t width,
                                                   uint32_t height,
                                                   const bool& monochrome,
-                                                  int quality) {
+                                                  uint32_t quality) {
 
         /// This jpeg header builder works using a c++ technique called placement new
         /// https://en.cppreference.com/w/cpp/language/new#Placement_new
@@ -175,11 +175,11 @@ namespace module::output::compressor::vaapi::operation {
         emplace_bytes<markers::AppData>(header);
 
         // Add the luma quantization table
-        emplace_bytes<markers::DQT>(header, jpeg_luma_quant, quality);
+        emplace_bytes<markers::DQT>(header, jpeg_luma_quant, int(quality));
 
         // If colour add the chroma quantisation table
         if (!monochrome) {
-            emplace_bytes<markers::DQT>(header, jpeg_chroma_quant, quality);
+            emplace_bytes<markers::DQT>(header, jpeg_chroma_quant, int(quality));
         }
 
         // Depending on if we have a monochrome image, add the correct start of frame header
@@ -210,7 +210,7 @@ namespace module::output::compressor::vaapi::operation {
 
         VAEncPackedHeaderParameterBuffer params;
         params.type                = VAEncPackedHeaderRawData;
-        params.bit_length          = header.size() * 8;
+        params.bit_length          = uint32_t(header.size() * 8);
         params.has_emulation_bytes = 0;
 
         VABufferID paramid = 0;
@@ -228,8 +228,13 @@ namespace module::output::compressor::vaapi::operation {
         }
 
         VABufferID rawid = 0;
-        va_status =
-            vaCreateBuffer(dpy, context, VAEncPackedHeaderDataBufferType, header.size(), 1, header.data(), &rawid);
+        va_status        = vaCreateBuffer(dpy,
+                                   context,
+                                   VAEncPackedHeaderDataBufferType,
+                                   uint(header.size()),
+                                   2,
+                                   header.data(),
+                                   &rawid);
         if (va_status != VA_STATUS_SUCCESS) {
             throw std::system_error(va_status, vaapi_error_category(), "Error creating the raw header buffer");
         }

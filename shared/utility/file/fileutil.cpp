@@ -152,13 +152,13 @@ namespace utility::file {
         // loop through all the directories using a depth-first search
         while (!directories.empty()) {
             // retrieve the last directory in the vector, beginning with the initial directory
-            auto directory = directories.top();
+            auto current_directory = directories.top();
             // immediately remove the directory that was found
             directories.pop();
             // loop through every file within the directory
-            for (auto&& file : listDir(directory)) {
+            for (auto&& file : listDir(current_directory)) {
                 // specify the correct path within the directory
-                auto path = directory + "/" + file;
+                auto path = current_directory + "/" + file;
                 // check if the given path is a directory
                 if (isDir(path)) {
                     // check if the function is recursive

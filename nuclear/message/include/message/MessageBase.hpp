@@ -20,7 +20,7 @@ namespace NUClear::util::serialise {
             protobuf_type proto = in;
 
             std::vector<char> output(proto.ByteSizeLong());
-            proto.SerializeToArray(output.data(), output.size());
+            proto.SerializeToArray(output.data(), int(output.size()));
 
             return output;
         }
@@ -31,7 +31,7 @@ namespace NUClear::util::serialise {
             protobuf_type out;
 
             // Deserialize it
-            if (!out.ParseFromArray(in.data(), in.size())) {
+            if (!out.ParseFromArray(in.data(), int(in.size()))) {
                 throw std::runtime_error("Message failed to deserialise.");
             }
 

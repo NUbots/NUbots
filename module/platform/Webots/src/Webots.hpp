@@ -70,7 +70,7 @@ namespace module::platform {
         uint64_t current_real_time = 0;
 
         /// @brief The time between two measurements, expressed in milliseconds
-        int time_step;
+        uint32_t time_step;
 
         /// @brief Current state of a servo
         struct ServoState {

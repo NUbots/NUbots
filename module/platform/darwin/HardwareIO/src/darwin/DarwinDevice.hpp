@@ -70,7 +70,7 @@ namespace Darwin {
         template <typename TType>
         struct ReadCommand {
 
-            ReadCommand(uint8_t id, uint8_t address) : id(id), address(address), size(sizeof(TType)) {}
+            ReadCommand(uint8_t id_, uint8_t address_) : id(id_), address(address_), size(sizeof(TType)) {}
 
             /// Magic number that heads up every packet
             const uint16_t magic = 0xFFFF;
@@ -107,8 +107,8 @@ namespace Darwin {
         template <typename TType>
         struct WriteCommand {
 
-            WriteCommand(uint8_t id, uint8_t address, TType data)
-                : id(id), length(3 + sizeof(TType)), address(address), data(data) {}
+            WriteCommand(uint8_t id_, uint8_t address_, TType data_)
+                : id(id_), length(3 + sizeof(TType)), address(address_), data(data_) {}
 
             /// Magic number that heads up every packet
             const uint16_t magic = 0xFFFF;
@@ -138,7 +138,7 @@ namespace Darwin {
  */
 #pragma pack(push, 1)  // Make it so that the compiler reads this struct "as is" (no padding bytes)
         struct PingCommand {
-            explicit PingCommand(uint8_t id) : id(id) {}
+            explicit PingCommand(uint8_t id_) : id(id_) {}
 
             /// Magic number that heads up every packet
             const uint16_t magic = 0xFFFF;
@@ -157,10 +157,10 @@ namespace Darwin {
 
     protected:
         UART& coms;
-        int id;
+        uint8_t id;
 
     public:
-        DarwinDevice(UART& coms, int id);
+        DarwinDevice(UART& coms, uint8_t id);
 
         /**
          * @brief Reads from this device at the given memory address.

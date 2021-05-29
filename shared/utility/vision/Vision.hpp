@@ -48,11 +48,11 @@ namespace utility::vision {
 
         // Constructors
         Colour() : value(Value::UNCLASSIFIED) {}
-        Colour(int const& value) : value(static_cast<Value>(value)) {}
-        Colour(uint8_t const& value) : value(static_cast<Value>(value)) {}
-        Colour(uint32_t const& value) : value(static_cast<Value>(value)) {}
-        Colour(char const& value) : value(static_cast<Value>(value)) {}
-        Colour(Value const& value) : value(value) {}
+        Colour(int const& v) : value(static_cast<Value>(v)) {}
+        Colour(uint8_t const& v) : value(static_cast<Value>(v)) {}
+        Colour(uint32_t const& v) : value(static_cast<Value>(v)) {}
+        Colour(char const& v) : value(static_cast<Value>(v)) {}
+        Colour(Value const& v) : value(v) {}
         Colour(std::string const& str) : value(Value::UNCLASSIFIED) {
             // clang-format off
             if      (str == "UNCLASSIFIED") { value = Value::UNCLASSIFIED; }
@@ -145,7 +145,7 @@ namespace utility::vision {
 
     struct Pixel {
         Pixel() : rgba(0) {}
-        Pixel(uint32_t rgba) : rgba(rgba) {}
+        Pixel(uint32_t rgba_) : rgba(rgba_) {}
         Pixel(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : components({r, g, b, a}) {}
         Pixel(uint8_t r, uint8_t g, uint8_t b) : components({r, g, b, 0}) {}
         Pixel(const Pixel& pixel) : rgba(pixel.rgba) {}

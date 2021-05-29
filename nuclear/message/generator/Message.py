@@ -51,11 +51,11 @@ class Message:
             for v in self.fields:
                 # Work out if we should be copying a trivial type from a const reference or moving a more complicated type
                 if v.trivially_copyable:
-                    field_list.append("{} const& {}".format(v.cpp_type, v.name))
-                    field_set.append("{0}({0})".format(v.name))
+                    field_list.append("{} const& {}_".format(v.cpp_type, v.name))
+                    field_set.append("{0}({0}_)".format(v.name))
                 else:
-                    field_list.append("{} {}".format(v.cpp_type, v.name))
-                    field_set.append("{0}(std::move({0}))".format(v.name))
+                    field_list.append("{} {}_".format(v.cpp_type, v.name))
+                    field_set.append("{0}(std::move({0}_))".format(v.name))
                 default_field_list.append(
                     "{} = {}".format(field_list[-1], v.default_value if v.default_value else "{}()".format(v.cpp_type))
                 )
@@ -160,7 +160,7 @@ class Message:
 
                 elif v.repeated:
                     if v.bytes_type:
-                        lines.append(indent("{0}.resize(proto.{0}_size());".format(v.name.lower())))
+                        lines.append(indent("{0}.resize(size_t(proto.{0}_size()));".format(v.name.lower())))
                         lines.append(indent("for (size_t i = 0; i < {0}.size(); ++i) {{".format(v.name)))
                         lines.append(
                             indent(
@@ -183,7 +183,7 @@ class Message:
                             )
                             lines.append(
                                 indent(
-                                    "message::conversion::convert({0}[i], proto.{1}(i));".format(
+                                    "message::conversion::convert({0}[i], proto.{1}(int(i)));".format(
                                         v.name, v.name.lower()
                                     ),
                                     8,
@@ -192,11 +192,11 @@ class Message:
                             lines.append(indent("}"))
                         else:
                             # Add the top of our for loop for the repeated field
-                            lines.append(indent("{0}.resize(proto.{1}_size());".format(v.name, v.name.lower())))
+                            lines.append(indent("{0}.resize(size_t(proto.{1}_size()));".format(v.name, v.name.lower())))
                             lines.append(indent("for (size_t i = 0; i < {0}.size(); ++i) {{".format(v.name)))
                             lines.append(
                                 indent(
-                                    "message::conversion::convert({0}[i], proto.{1}(i));".format(
+                                    "message::conversion::convert({0}[i], proto.{1}(int(i)));".format(
                                         v.name, v.name.lower()
                                     ),
                                     8,

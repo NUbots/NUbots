@@ -97,7 +97,7 @@ namespace module::behaviour {
                 auto maxEl = std::max_element(std::begin(update.priorities), std::end(update.priorities));
 
                 // Find its index
-                uint mainElement = std::distance(std::begin(update.priorities), maxEl);
+                size_t mainElement = size_t(std::distance(std::begin(update.priorities), maxEl));
 
                 // Unless we need to, try not to run the expensive subsumption algorithm
                 bool reselect;

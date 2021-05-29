@@ -159,8 +159,9 @@ namespace module::localisation {
             // The vector direction across the field perpendicular to the camera view vector
             const Eigen::Matrix<Scalar, 3, 1> rLRf = rZCc.cross(Eigen::Matrix<Scalar, 3, 1>::UnitX()).normalized();
 
-            const float dir                           = (type == Goal::MeasurementType::LEFT_NORMAL) ? 1.0f : -1.0f;
-            const Eigen::Matrix<Scalar, 3, 1> rG_blCc = post_centre + 0.5 * dir * fd.dimensions.goalpost_width * rLRf;
+            const Scalar dir = (type == Goal::MeasurementType::LEFT_NORMAL) ? Scalar(1) : Scalar(-1);
+            const Eigen::Matrix<Scalar, 3, 1> rG_blCc =
+                post_centre + Scalar(0.5) * dir * fd.dimensions.goalpost_width * rLRf;
             const Eigen::Matrix<Scalar, 3, 1> rG_tlCc = rG_blCc + fd.dimensions.goal_crossbar_height * rZCc;
 
             // creating the normal vector (following convention stipulated in VisionObjects)
@@ -207,13 +208,13 @@ namespace module::localisation {
             // Get widest lines
             Eigen::Matrix<Scalar, 3, 1> widestBase(goalBaseCornersCam.col(0).template head<3>());
             Eigen::Matrix<Scalar, 3, 1> widestTop(goalTopCornersCam.col(0).template head<3>());
-            float largest_angle = 0;
+            Scalar largest_angle = Scalar(0);
 
             for (int i = 1; i < goalBaseCornersCam.cols(); ++i) {
                 const Eigen::Matrix<Scalar, 4, 1> baseCorner(goalBaseCornersCam.col(i));
                 const Eigen::Matrix<Scalar, 3, 1> baseCorner3(baseCorner.template head<3>());
                 const Eigen::Matrix<Scalar, 4, 1> topCorner(goalTopCornersCam.col(i));
-                const float angle(std::acos(baseCorner.dot(goalBaseCornersCam.col(0))));
+                const Scalar angle(std::acos(baseCorner.dot(goalBaseCornersCam.col(0))));
 
                 // Left side will have cross product point in neg field z direction
                 const Eigen::Matrix<Scalar, 3, 1> goalBaseCorner0(goalBaseCornersCam.col(0).template head<3>());

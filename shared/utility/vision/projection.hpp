@@ -100,7 +100,7 @@ namespace utility::vision {
     inline T __attribute__((optimize("-ffast-math"))) undistort(const T& r, const message::input::Image::Lens& lens) {
         const auto& k = lens.k;
         // These parenthesis are important as they allow the compiler to optimise further
-        return r * (1.0 + k[0] * (r * r) + k[1] * (r * r) * (r * r) + k[2] * (r * r) * (r * r) * (r * r));
+        return r * (T(1) + k[0] * (r * r) + k[1] * (r * r) * (r * r) + k[2] * (r * r) * (r * r) * (r * r));
     }
 
     template <typename T, int options, int max_rows_at_compile_time, int max_cols_at_compile_time>

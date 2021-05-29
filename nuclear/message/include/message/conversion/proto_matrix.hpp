@@ -1390,11 +1390,11 @@ namespace message::conversion {
     inline Proto& convert(Proto& proto, const DynamicMatProto<Proto> matrix) {
 
         // Set our rows and columns
-        proto.set_rows(matrix.rows());
-        proto.set_cols(matrix.cols());
+        proto.set_rows(uint32_t(matrix.rows()));
+        proto.set_cols(uint32_t(matrix.cols()));
 
         // Allocate the memory
-        proto.mutable_v()->Resize(matrix.size(), 0);
+        proto.mutable_v()->Resize(int(matrix.size()), 0);
 
         // Copy over
         Eigen::Map<DynamicMatProto<Proto>>(
@@ -1417,18 +1417,18 @@ namespace message::conversion {
     inline ::message::conversion::math::cvec& convert(::message::conversion::math::cvec& vector, const ::cvec& proto) {
 
         vector = Eigen::Map<const ::message::conversion::math::cvec>(reinterpret_cast<const uint8_t*>(proto.v().data()),
-                                                                     proto.v().size());
+                                                                     Eigen::Index(proto.v().size()));
 
         return vector;
     }
 
     inline ::cvec& convert(::cvec& proto, const ::message::conversion::math::cvec& vector) {
 
-        proto.mutable_v()->resize(vector.size());
+        proto.mutable_v()->resize(size_t(vector.size()));
 
         // Copy the data across
         Eigen::Map<::message::conversion::math::cvec>(reinterpret_cast<uint8_t*>(proto.mutable_v()->data()),
-                                                      proto.v().size()) = vector;
+                                                      Eigen::Index(proto.v().size())) = vector;
 
         return proto;
     }
@@ -1437,8 +1437,8 @@ namespace message::conversion {
 
         // Map the data and copy it across
         matrix = Eigen::Map<const ::message::conversion::math::cmat>(reinterpret_cast<const uint8_t*>(proto.v().data()),
-                                                                     proto.rows(),
-                                                                     proto.cols());
+                                                                     size_t(proto.rows()),
+                                                                     size_t(proto.cols()));
 
         return matrix;
     }
@@ -1446,11 +1446,11 @@ namespace message::conversion {
     inline ::cmat& convert(::cmat& proto, const ::message::conversion::math::cmat& matrix) {
 
         // Set our size
-        proto.set_rows(matrix.rows());
-        proto.set_cols(matrix.cols());
+        proto.set_rows(uint32_t(matrix.rows()));
+        proto.set_cols(uint32_t(matrix.cols()));
 
         // Allocate space
-        proto.mutable_v()->resize(matrix.size());
+        proto.mutable_v()->resize(size_t(matrix.size()));
 
         // Copy it across
         Eigen::Map<::message::conversion::math::cmat>(reinterpret_cast<uint8_t*>(proto.mutable_v()->data()),

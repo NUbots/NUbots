@@ -29,7 +29,7 @@ namespace utility::support {
 
         std::function<T()> lazy;
 
-        LazyEvaluation(std::function<T()> lazy) : lazy(lazy) {}
+        LazyEvaluation(std::function<T()> lazy_) : lazy(lazy_) {}
 
         operator T() {
             return lazy();

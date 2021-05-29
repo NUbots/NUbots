@@ -7,8 +7,11 @@
 
 namespace module::output::compressor::turbojpeg {
 
-    Compressor::Compressor(const int& quality, const uint32_t& width, const uint32_t& height, const uint32_t& format)
-        : quality(quality), width(width), height(height), format(format) {
+    Compressor::Compressor(const uint32_t& quality_,
+                           const uint32_t& width_,
+                           const uint32_t& height_,
+                           const uint32_t& format_)
+        : quality(quality_), width(width_), height(height_), format(format_) {
 
         // If this is a mosaic format, build a mosaic table
         if (utility::vision::Mosaic::size(format) > 1) {
@@ -82,14 +85,14 @@ namespace module::output::compressor::turbojpeg {
 
             tjCompress2(compressor.get(),
                         cast.data(),
-                        width,
+                        int(width),
                         0,
-                        height,
+                        int(height),
                         tj_format,
                         &compressed,
                         &jpeg_size,
                         tj_sampling,  // Output chrominance sampling
-                        quality,
+                        int(quality),
                         TJFLAG_FASTDCT);
         }
         // Mosaic table to rearrange with
@@ -99,27 +102,27 @@ namespace module::output::compressor::turbojpeg {
 
             tjCompress2(compressor.get(),
                         permuted.data(),
-                        width,
+                        int(width),
                         0,
-                        height,
+                        int(height),
                         tj_format,
                         &compressed,
                         &jpeg_size,
                         tj_sampling,  // Output chrominance sampling
-                        quality,
+                        int(quality),
                         TJFLAG_FASTDCT);
         }
         else {
             tjCompress2(compressor.get(),
                         data.data(),
-                        width,
+                        int(width),
                         0,
-                        height,
+                        int(height),
                         tj_format,
                         &compressed,
                         &jpeg_size,
                         tj_sampling,  // Output chrominance sampling
-                        quality,
+                        int(quality),
                         TJFLAG_FASTDCT);
         }
 

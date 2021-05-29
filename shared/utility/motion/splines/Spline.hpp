@@ -17,11 +17,13 @@ namespace utility::motion::splines {
     /**
      * Spline
      *
-     * Generic one dimentional polynomial spline generator
+     * Generic one dimensional polynomial spline generator
      */
     template <typename Scalar>
     class Spline {
     public:
+        virtual ~Spline() {}
+
         /**
          * Internal spline part structure with a polynom valid on an interval
          */
@@ -228,7 +230,7 @@ namespace utility::motion::splines {
                 x = static_cast<Scalar>(1) + (x - (static_cast<int>(x) / static_cast<Scalar>(1)));
             }
             else if (x > static_cast<Scalar>(1)) {
-                x = (x - ((int) x / 1));
+                x = (x - (int(x) / 1));
             }
             return interpolation(x, func);
         }

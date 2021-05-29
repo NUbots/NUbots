@@ -46,46 +46,46 @@ namespace extension {
         // We have to merge the YAML trees to account for situations where a sub-node is not defined in a higher
         // priotity tree.
 
-        std::string fileName, hostname, binary;
+        std::string filename, hostname, binary;
         YAML::Node config;
 
-        Configuration() : fileName(), hostname(), binary(), config(){};
-        Configuration(const std::string& fileName,
-                      const std::string& hostname,
-                      const std::string& binary,
-                      const YAML::Node& config)
-            : fileName(fileName), hostname(hostname), binary(binary), config(config) {}
+        Configuration() : filename(), hostname(), binary(), config(){};
+        Configuration(const std::string& filename_,
+                      const std::string& hostname_,
+                      const std::string& binary_,
+                      const YAML::Node& config_)
+            : filename(filename_), hostname(hostname_), binary(binary_), config(config_) {}
 
-        Configuration(const std::string& fileName, const std::string& hostname, const std::string& binary)
-            : fileName(fileName), hostname(hostname), binary(binary), config() {
+        Configuration(const std::string& filename_, const std::string& hostname_, const std::string& binary_)
+            : filename(filename_), hostname(hostname_), binary(binary_), config() {
             bool loaded = false;
 
             // Load the default config file.
-            if (utility::file::exists("config/" + fileName)) {
-                config = YAML::LoadFile("config/" + fileName);
+            if (utility::file::exists("config/" + filename)) {
+                config = YAML::LoadFile("config/" + filename);
                 loaded = true;
             }
 
             // If the same file exists in this robots per-robot config directory then load and merge.
-            if (utility::file::exists("config/" + hostname + "/" + fileName)) {
+            if (utility::file::exists("config/" + hostname + "/" + filename)) {
                 if (loaded) {
-                    config = mergeYAML(config, YAML::LoadFile("config/" + hostname + "/" + fileName));
+                    config = mergeYAML(config, YAML::LoadFile("config/" + hostname + "/" + filename));
                 }
 
                 else {
-                    config = YAML::LoadFile("config/" + hostname + "/" + fileName);
+                    config = YAML::LoadFile("config/" + hostname + "/" + filename);
                     loaded = true;
                 }
             }
 
             // If the same file exists in this binary's per-binary config directory then load and merge.
-            if (utility::file::exists("config/" + binary + "/" + fileName)) {
+            if (utility::file::exists("config/" + binary + "/" + filename)) {
                 if (loaded) {
-                    config = mergeYAML(config, YAML::LoadFile("config/" + binary + "/" + fileName));
+                    config = mergeYAML(config, YAML::LoadFile("config/" + binary + "/" + filename));
                 }
 
                 else {
-                    config = YAML::LoadFile("config/" + binary + "/" + fileName);
+                    config = YAML::LoadFile("config/" + binary + "/" + filename);
                 }
             }
         }
@@ -142,35 +142,35 @@ namespace extension {
         }
 
         Configuration operator[](const std::string& key) {
-            return Configuration(fileName, hostname, binary, config[key]);
+            return Configuration(filename, hostname, binary, config[key]);
         }
 
         const Configuration operator[](const std::string& key) const {
-            return Configuration(fileName, hostname, binary, config[key]);
+            return Configuration(filename, hostname, binary, config[key]);
         }
 
         Configuration operator[](const char* key) {
-            return Configuration(fileName, hostname, binary, config[key]);
+            return Configuration(filename, hostname, binary, config[key]);
         }
 
         const Configuration operator[](const char* key) const {
-            return Configuration(fileName, hostname, binary, config[key]);
+            return Configuration(filename, hostname, binary, config[key]);
         }
 
         Configuration operator[](size_t index) {
-            return Configuration(fileName, hostname, binary, config[index]);
+            return Configuration(filename, hostname, binary, config[index]);
         }
 
         const Configuration operator[](size_t index) const {
-            return Configuration(fileName, hostname, binary, config[index]);
+            return Configuration(filename, hostname, binary, config[index]);
         }
 
         Configuration operator[](int index) {
-            return Configuration(fileName, hostname, binary, config[index]);
+            return Configuration(filename, hostname, binary, config[index]);
         }
 
         const Configuration operator[](int index) const {
-            return Configuration(fileName, hostname, binary, config[index]);
+            return Configuration(filename, hostname, binary, config[index]);
         }
 
         template <typename T>

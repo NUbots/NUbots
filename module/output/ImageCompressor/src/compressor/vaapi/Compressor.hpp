@@ -16,7 +16,7 @@ namespace module::output::compressor::vaapi {
                    const uint32_t& width,
                    const uint32_t& height,
                    const uint32_t& format,
-                   const int& quality);
+                   const uint32_t& quality);
         Compressor(const Compressor&) = default;
         Compressor(Compressor&&)      = default;
         Compressor& operator=(const Compressor&) = default;

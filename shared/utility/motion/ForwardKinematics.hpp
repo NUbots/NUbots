@@ -104,7 +104,7 @@ namespace utility::motion::kinematics {
         Eigen::Affine3d runningTransform = Eigen::Affine3d::Identity();
         // Variables to mask left and right leg differences:
         ServoID HIP_YAW, HIP_ROLL, HIP_PITCH, KNEE, ANKLE_PITCH, ANKLE_ROLL;
-        int negativeIfRight = 1;
+        double negativeIfRight = 1.0;
 
         if (isLeft == BodySide::LEFT) {
             HIP_YAW     = ServoID::L_HIP_YAW;
@@ -121,12 +121,13 @@ namespace utility::motion::kinematics {
             KNEE            = ServoID::R_KNEE;
             ANKLE_PITCH     = ServoID::R_ANKLE_PITCH;
             ANKLE_ROLL      = ServoID::R_ANKLE_ROLL;
-            negativeIfRight = -1;
+            negativeIfRight = -1.0;
         }
 
         // Hip pitch
-        runningTransform = runningTransform.translate(
-            Eigen::Vector3d(model.leg.HIP_OFFSET_X, negativeIfRight * model.leg.HIP_OFFSET_Y, -model.leg.HIP_OFFSET_Z));
+        runningTransform = runningTransform.translate(Eigen::Vector3d(model.leg.HIP_OFFSET_X,
+                                                                      negativeIfRight * double(model.leg.HIP_OFFSET_Y),
+                                                                      -model.leg.HIP_OFFSET_Z));
         // Rotate to face down the leg (see above for definitions of terms, including 'facing')
         runningTransform = runningTransform.rotate(Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitY()));
         // Using right hand rule along global z gives positive direction of yaw:
@@ -209,7 +210,7 @@ namespace utility::motion::kinematics {
         Eigen::Affine3d runningTransform = Eigen::Affine3d::Identity();
         // Variables to mask left and right differences:
         ServoID SHOULDER_PITCH, SHOULDER_ROLL, ELBOW;
-        int negativeIfRight = 1;
+        double negativeIfRight = 1.0;
 
         if (isLeft == BodySide::LEFT) {
             SHOULDER_PITCH = ServoID::L_SHOULDER_PITCH;
@@ -220,25 +221,26 @@ namespace utility::motion::kinematics {
             SHOULDER_PITCH  = ServoID::R_SHOULDER_PITCH;
             SHOULDER_ROLL   = ServoID::R_SHOULDER_ROLL;
             ELBOW           = ServoID::R_ELBOW;
-            negativeIfRight = -1;
+            negativeIfRight = -1.0;
         }
 
-        const float& shoulder_pitch = sensors.servo[SHOULDER_PITCH].present_position;
-        const float& shoulder_roll  = sensors.servo[SHOULDER_ROLL].present_position;
-        const float& elbow          = sensors.servo[ELBOW].present_position;
+        const double shoulder_pitch = double(sensors.servo[SHOULDER_PITCH].present_position);
+        const double shoulder_roll  = double(sensors.servo[SHOULDER_ROLL].present_position);
+        const double elbow          = double(sensors.servo[ELBOW].present_position);
 
         // Translate to shoulder
-        runningTransform =
-            runningTransform.translate(Eigen::Vector3d(model.arm.SHOULDER_X_OFFSET,
-                                                       negativeIfRight * model.arm.DISTANCE_BETWEEN_SHOULDERS * 0.5,
-                                                       model.arm.SHOULDER_Z_OFFSET));
+        runningTransform = runningTransform.translate(
+            Eigen::Vector3d(model.arm.SHOULDER_X_OFFSET,
+                            negativeIfRight * double(model.arm.DISTANCE_BETWEEN_SHOULDERS) * 0.5,
+                            model.arm.SHOULDER_Z_OFFSET));
         // Rotate about shoulder pitch with zero position Zombie arms
         runningTransform =
             runningTransform.rotate(Eigen::AngleAxisd(shoulder_pitch - M_PI_2, Eigen::Vector3d::UnitY()));
         // Translate to end of shoulder part
-        runningTransform = runningTransform.translate(Eigen::Vector3d(model.arm.SHOULDER_LENGTH,
-                                                                      negativeIfRight * model.arm.SHOULDER_WIDTH,
-                                                                      -model.arm.SHOULDER_HEIGHT));
+        runningTransform =
+            runningTransform.translate(Eigen::Vector3d(model.arm.SHOULDER_LENGTH,
+                                                       negativeIfRight * double(model.arm.SHOULDER_WIDTH),
+                                                       -model.arm.SHOULDER_HEIGHT));
         // Return matrix pointing forward out of shoulder, y same as global y. Pos = at centre of shoulder roll
         // joint
         positions[SHOULDER_PITCH] = runningTransform;
@@ -249,9 +251,10 @@ namespace utility::motion::kinematics {
         // Rotate by the shoulder roll
         runningTransform = runningTransform.rotate(Eigen::AngleAxisd(shoulder_roll, Eigen::Vector3d::UnitX()));
         // Translate to centre of next joint
-        runningTransform = runningTransform.translate(Eigen::Vector3d(model.arm.UPPER_ARM_X_OFFSET,
-                                                                      negativeIfRight * model.arm.UPPER_ARM_Y_OFFSET,
-                                                                      -model.arm.UPPER_ARM_LENGTH));
+        runningTransform =
+            runningTransform.translate(Eigen::Vector3d(model.arm.UPPER_ARM_X_OFFSET,
+                                                       negativeIfRight * double(model.arm.UPPER_ARM_Y_OFFSET),
+                                                       -model.arm.UPPER_ARM_LENGTH));
         // Rotate to face down arm
         runningTransform = runningTransform.rotate(Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitY()));
 
@@ -263,9 +266,10 @@ namespace utility::motion::kinematics {
         // Rotate by the elbow angle
         runningTransform = runningTransform.rotate(Eigen::AngleAxisd(elbow, Eigen::Vector3d::UnitY()));
         // Translate to centre of end of arm, in line with joint
-        runningTransform = runningTransform.translate(Eigen::Vector3d(model.arm.LOWER_ARM_LENGTH,
-                                                                      negativeIfRight * model.arm.LOWER_ARM_Y_OFFSET,
-                                                                      -model.arm.LOWER_ARM_Z_OFFSET));
+        runningTransform =
+            runningTransform.translate(Eigen::Vector3d(model.arm.LOWER_ARM_LENGTH,
+                                                       negativeIfRight * double(model.arm.LOWER_ARM_Y_OFFSET),
+                                                       -model.arm.LOWER_ARM_Z_OFFSET));
         positions[ELBOW] = runningTransform;
         return positions;
     }
@@ -329,17 +333,18 @@ namespace utility::motion::kinematics {
                                                  const Eigen::Matrix4d& Hwt) {
 
         // Convenience function to transform particle-space CoM to torso-space CoM
-        // Htx - transform from particle space to torso space
+        // Htp - transform from particle space to torso space
         // particle - CoM coordinates in particle space
-        auto com = [&Hwt](const Eigen::Matrix4d& Htx, const Eigen::Vector4d& particle) {
+        auto com = [&Hwt](const Eigen::Matrix4d& Htp, const Eigen::Vector4d& particle) {
             // Split out CoM and mass
-            Eigen::Vector4d com(particle.x(), particle.y(), particle.z(), 1.0);
+            // CoM = rCPp (from particle origin to CoM in particle space)
+            Eigen::Vector4d rCPp(particle.x(), particle.y(), particle.z(), 1.0);
             double mass = particle.w();
 
             // Calculate CoM in torso space
-            com = Htx * com;
+            rCPp = Htp * rCPp;
 
-            return std::pair<Eigen::Vector3d, double>{Eigen::Vector3d(com.x(), com.y(), com.z()), mass};
+            return std::pair<Eigen::Vector3d, double>{Eigen::Vector3d(rCPp.x(), rCPp.y(), rCPp.z()), mass};
         };
 
         // Get the centre of mass for each particle in torso space
@@ -386,16 +391,17 @@ namespace utility::motion::kinematics {
                                                    const std::array<Eigen::Matrix4d, 20>& Htx) {
 
         // Convenience function to transform particle-space inertial tensors to torso-space inertial tensor
-        // Htx - transform from particle space to torso space
+        // Htp - transform from particle space to torso space
         // particle - CoM coordinates in particle space
-        auto translateTensor = [](const Eigen::Matrix4d& Htx,
+        auto translateTensor = [](const Eigen::Matrix4d& Htp,
                                   const Eigen::Matrix3d& tensor,
                                   const Eigen::Vector4d& com_mass) {
-            Eigen::Vector4d com(com_mass.x(), com_mass.y(), com_mass.z(), 1.0);
-            com = Htx * com;
+            // rCPp - vector from particle origin to CoM in particle space
+            Eigen::Vector4d rCPp(com_mass.x(), com_mass.y(), com_mass.z(), 1.0);
+            rCPp = Htp * rCPp;
 
             // Calculate distance to particle CoM from particle origin, using skew-symmetric matrix
-            double x = com.x(), y = com.y(), z = com.z();
+            double x = rCPp.x(), y = rCPp.y(), z = rCPp.z();
             Eigen::Matrix3d d;
             // clang-format off
                     d <<  y * y + z * z, -x * y,         -x * z,
@@ -405,7 +411,7 @@ namespace utility::motion::kinematics {
 
             // We need to rotate the tensor into our torso reference frame
             // https://en.wikipedia.org/wiki/Moment_of_inertia#Body_frame
-            Eigen::Matrix3d torso_tensor = Htx.topLeftCorner<3, 3>() * tensor * Htx.topLeftCorner<3, 3>().transpose();
+            Eigen::Matrix3d torso_tensor = Htp.topLeftCorner<3, 3>() * tensor * Htp.topLeftCorner<3, 3>().transpose();
 
             // Translate tensor using the parallel axis theorem
             Eigen::Matrix3d tensor_com = com_mass.w() * (torso_tensor - d);

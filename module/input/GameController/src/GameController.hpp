@@ -45,8 +45,8 @@ namespace module::input {
 
         uint recieve_port;
         uint send_port;
-        uint TEAM_ID;
-        uint PLAYER_ID;
+        uint8_t TEAM_ID;
+        uint8_t PLAYER_ID;
         uint BROADCAST_IP = 0xFFFFFFFF;
 
         bool penaltyOverride = false;

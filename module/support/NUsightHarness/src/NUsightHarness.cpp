@@ -31,9 +31,9 @@ namespace module::support {
         : Reactor(std::move(environment)) {
 
         on<Every<50, milliseconds>>().then([this] {
-            double period  = 10;
-            double freq    = 1.0 / period;
-            double t       = NUClear::clock::now().time_since_epoch().count() / double(NUClear::clock::period::den);
+            double period = 10;
+            double freq   = 1.0 / period;
+            double t = double(NUClear::clock::now().time_since_epoch().count()) / double(NUClear::clock::period::den);
             double sine    = std::sin(2.0 * M_PI * freq * t);
             double cosine  = std::cos(2.0 * M_PI * freq * t);
             double dsine   = 2.0 * sine;

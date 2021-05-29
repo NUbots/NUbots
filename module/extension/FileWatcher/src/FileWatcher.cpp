@@ -43,25 +43,26 @@ namespace module::extension {
         // A list of tasks that we will execute after we release the mutex to prevent deadlocks
         std::vector<FileExecTask> exec_queue;
 
-        auto exec = [&reactor](NUClear::threading::Reaction& r, const std::string& p, const int& events) {
-            // Set our thread local event details
-            FileWatch watch;
-            watch.path   = p;
-            watch.events = events;
+        auto exec =
+            [&reactor](NUClear::threading::Reaction& r, const std::string& watch_path, const int& watch_events) {
+                // Set our thread local event details
+                FileWatch watch;
+                watch.path   = watch_path;
+                watch.events = watch_events;
 
-            // Store our watch value in the local cache
-            FileWatch::FileWatchStore::value = &watch;
+                // Store our watch value in the local cache
+                FileWatch::FileWatchStore::value = &watch;
 
-            // Directly execute our reaction here
-            auto task = r.get_task();
+                // Directly execute our reaction here
+                auto task = r.get_task();
 
-            // Clear our local cache
-            FileWatch::FileWatchStore::value = nullptr;
+                // Clear our local cache
+                FileWatch::FileWatchStore::value = nullptr;
 
-            if (task) {
-                reactor.powerplant.submit(std::move(task));
-            }
-        };
+                if (task) {
+                    reactor.powerplant.submit(std::move(task));
+                }
+            };
 
         /* mutex scope */ {
             // Lock our mutex as we are editing our datastructure

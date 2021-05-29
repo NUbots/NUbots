@@ -44,7 +44,7 @@ class Enum:
 
                 {name}(int const& v);
 
-                {name}(Value const& value);
+                {name}(Value const& v);
 
                 {name}(std::string const& str);
 
@@ -96,7 +96,7 @@ class Enum:
 
             {fqn}::{name}(int const& v) : value(static_cast<Value>(v)) {{}}
 
-            {fqn}::{name}(Value const& value) : value(value) {{}}
+            {fqn}::{name}(Value const& v) : value(v) {{}}
 
             {fqn}::{name}(std::string const& str) {{
             {if_chain}

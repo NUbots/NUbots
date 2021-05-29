@@ -443,15 +443,15 @@ namespace module::behaviour::strategy {
         // Defines the box within in which the kick target is changed from the centre
         // of the oppposition goal to the perpendicular distance from the robot to the goal
 
-        float maxKickRange =
-            0.6;  // TODO: make configurable, only want to change at the last kick to avoid smart goalies
-        float xTakeOverBox = maxKickRange;
-        size_t error       = 0.05;
-        size_t buffer      = error + 2 * fieldDescription.ball_radius;             // 15cm
-        float yTakeOverBox = fieldDescription.dimensions.goal_width / 2 - buffer;  // 90-15 = 75cm
+        // TODO: make configurable, only want to change at the last kick to avoid smart goalies
+        double maxKickRange = 0.6;
+        double xTakeOverBox = maxKickRange;
+        double error        = 0.05;
+        double buffer       = error + 2.0 * fieldDescription.ball_radius;             // 15cm
+        double yTakeOverBox = fieldDescription.dimensions.goal_width / 2.0 - buffer;  // 90-15 = 75cm
         Eigen::Affine2d position(field.position);
-        float xRobot = position.translation().x();
-        float yRobot = position.translation().y();
+        double xRobot = position.translation().x();
+        double yRobot = position.translation().y();
         Eigen::Vector2d newTarget;
 
         if ((fieldDescription.dimensions.field_length * 0.5) - xTakeOverBox < xRobot && -yTakeOverBox < yRobot
@@ -473,27 +473,27 @@ namespace module::behaviour::strategy {
         std::unique_ptr<MotionCommand> motionCommand;
 
         float timeSinceBallSeen =
-            std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now() - ballLastMeasured).count()
-            * 1e-6;
+            std::chrono::duration<float, std::micro>(NUClear::clock::now() - ballLastMeasured).count() * 1e-6f;
         if (timeSinceBallSeen < cfg_.goalie_command_timeout) {
 
             Eigen::Affine2d position(field.position);
-            float fieldBearing  = Eigen::Rotation2Dd(position.rotation()).angle();
-            int signBearing     = fieldBearing > 0 ? 1 : -1;
-            float rotationSpeed = -signBearing
-                                  * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * fieldBearing),
-                                              cfg_.goalie_max_rotation_speed);
+            double fieldBearing  = Eigen::Rotation2Dd(position.rotation()).angle();
+            int signBearing      = fieldBearing > 0.0 ? 1 : -1;
+            double rotationSpeed = -signBearing
+                                   * std::min(std::abs(double(cfg_.goalie_rotation_speed_factor) * fieldBearing),
+                                              double(cfg_.goalie_max_rotation_speed));
 
-            int signTranslation    = ball.position.y() > 0 ? 1 : -1;
-            float translationSpeed = signTranslation
-                                     * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.position[1]),
-                                                 cfg_.goalie_max_translation_speed);
+            int signTranslation = ball.position.y() > 0.0 ? 1 : -1;
+            double translationSpeed =
+                signTranslation
+                * std::min(std::abs(double(cfg_.goalie_translation_speed_factor) * ball.position[1]),
+                           double(cfg_.goalie_max_translation_speed));
 
             Eigen::Affine2d cmd;
             cmd.linear()      = Eigen::Rotation2Dd(rotationSpeed).matrix();
             cmd.translation() = Eigen::Vector2d::Zero();
             motionCommand     = std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(cmd));
-            if (std::fabs(fieldBearing) < cfg_.goalie_side_walk_angle_threshold) {
+            if (std::abs(fieldBearing) < double(cfg_.goalie_side_walk_angle_threshold)) {
                 motionCommand->walk_command.y() = translationSpeed;
             }
         }

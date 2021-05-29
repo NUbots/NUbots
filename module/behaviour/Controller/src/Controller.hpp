@@ -51,20 +51,20 @@ namespace module::behaviour {
             , kill()
             , completed() {}
 
-        Request(size_t id,
-                std::string name,
-                callback start,
-                callback kill,
-                std::function<void(std::set<utility::input::ServoID>)> completed)
-            : id(id)
-            , name(name)
+        Request(size_t id_,
+                std::string name_,
+                callback start_,
+                callback kill_,
+                std::function<void(std::set<utility::input::ServoID>)> completed_)
+            : id(id_)
+            , name(name_)
             , active(false)
             , maxPriority(std::numeric_limits<float>::min())
             , mainElement(0)
             , items()
-            , start(start)
-            , kill(kill)
-            , completed(completed) {}
+            , start(start_)
+            , kill(kill_)
+            , completed(completed_) {}
 
         /// The ID of this request that will be sent with any motion commands
         size_t id;
@@ -94,8 +94,8 @@ namespace module::behaviour {
 
         // RequestItem() : group(Request()), index(0), active(false), priority(std::numeric_limits<float>::min()),
         // limbSet() {}
-        RequestItem(Request& group, size_t index, float priority, const std::set<utility::input::LimbID>& limbSet)
-            : group(group), index(index), active(false), priority(priority), limbSet(limbSet) {}
+        RequestItem(Request& group_, size_t index_, float priority_, const std::set<utility::input::LimbID>& limbSet_)
+            : group(group_), index(index_), active(false), priority(priority_), limbSet(limbSet_) {}
 
         Request& group;
 

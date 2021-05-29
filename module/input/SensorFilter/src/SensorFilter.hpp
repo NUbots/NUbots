@@ -96,7 +96,7 @@ namespace module::input {
             } buttons;
 
             struct FootDown {
-                FootDown() : fromLoad(true), certaintyThreshold(0.05) {}
+                FootDown() : fromLoad(true), certaintyThreshold(0.05f) {}
                 bool fromLoad;
                 float certaintyThreshold;
             } footDown;

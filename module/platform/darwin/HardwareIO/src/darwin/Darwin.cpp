@@ -191,7 +191,7 @@ namespace Darwin {
         command[Packet::MAGIC]       = 0xFF;
         command[Packet::MAGIC + 1]   = 0xFF;
         command[Packet::ID]          = ID::BROADCAST;
-        command[Packet::LENGTH]      = 3 + (request.size() * 3);
+        command[Packet::LENGTH]      = uint8_t(3 + (request.size() * 3));
         command[Packet::INSTRUCTION] = DarwinDevice::Instruction::BULK_READ;
         command[Packet::PARAMETER]   = 0x00;
 
@@ -249,11 +249,12 @@ namespace Darwin {
                     memcpy(bytes, &bulkReadCommand[Packet::PARAMETER + 1 + (i * 3)], 3);
 
                     // Erase our 3 bytes for this packet
-                    bulkReadCommand.erase(std::begin(bulkReadCommand) + Packet::PARAMETER + 1 + (i * 3),
-                                          std::begin(bulkReadCommand) + Packet::PARAMETER + 1 + (i * 3) + 3);
+                    bulkReadCommand.erase(
+                        std::next(bulkReadCommand.begin(), ssize_t(Packet::PARAMETER + 1 + (i * 3))),
+                        std::next(bulkReadCommand.begin(), ssize_t(Packet::PARAMETER + 1 + (i * 3) + 3)));
 
                     // Insert our 3 bytes at the end
-                    bulkReadCommand.insert(std::end(bulkReadCommand) - 1, bytes, bytes + 3);
+                    bulkReadCommand.insert(std::prev(bulkReadCommand.end(), 1), bytes, bytes + 3);
 
                     firstError = false;
                 }

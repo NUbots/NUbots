@@ -63,7 +63,7 @@ namespace module::support::logging {
         std::vector<std::string> files;
 
         // Which file number we are up to
-        int file_index = 0;
+        ssize_t file_index = 0;
 
         // The first time that appears in the file
         std::chrono::microseconds first_timecode;

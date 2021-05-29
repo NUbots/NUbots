@@ -183,11 +183,9 @@ namespace module::behaviour::planning {
 
                 Eigen::Affine3d Htw(sensors.Htw);
 
-                auto now = NUClear::clock::now();
-                float timeSinceBallSeen =
-                    std::chrono::duration_cast<std::chrono::nanoseconds>(now - timeBallLastSeen).count()
-                    * (1.0f / std::nano::den);
-
+                auto now                 = NUClear::clock::now();
+                double timeSinceBallSeen = std::chrono::duration<double, std::nano>(now - timeBallLastSeen).count()
+                                           * (1.0 / double(std::nano::den));
 
                 Eigen::Vector3d rBWw_temp(ball.position.x(), ball.position.y(), fieldDescription.ball_radius);
                 rBWw     = timeSinceBallSeen < search_timeout ? rBWw_temp :                         // Place last seen
@@ -195,9 +193,9 @@ namespace module::behaviour::planning {
                 position = (Htw * rBWw).head<2>();
 
                 // Hack Planner:
-                float headingChange = 0;
-                float sideStep      = 0;
-                float speedFactor   = 1;
+                double headingChange = 0.0;
+                double sideStep      = 0.0;
+                double speedFactor   = 1.0;
                 if (useLocalisation) {
 
                     // Transform kick target to torso space
@@ -228,8 +226,7 @@ namespace module::behaviour::planning {
                 // Eigen::Vector2d ball_world_position = WorldToRobotTransform(selfs.front().position,
                 // selfs.front().heading, position);
 
-
-                float angle = std::atan2(position.y(), position.x()) + headingChange;
+                double angle = std::atan2(position.y(), position.x()) + headingChange;
                 // log("ball bearing", angle);
                 angle = std::min(turnSpeed, std::max(angle, -turnSpeed));
                 // log("turnSpeed", turnSpeed);
@@ -239,19 +236,18 @@ namespace module::behaviour::planning {
                 // log("loc heading", selfs.front().heading);
 
                 // Euclidean distance to ball
-                float scaleF            = 2.0 / (1.0 + std::exp(-a * std::fabs(position.x()) + b)) - 1.0;
-                float scaleF2           = angle / M_PI;
-                float finalForwardSpeed = speedFactor * forwardSpeed * scaleF * (1.0 - scaleF2);
+                double scaleF            = 2.0 / (1.0 + std::exp(-a * std::fabs(position.x()) + b)) - 1.0;
+                double scaleF2           = angle / M_PI;
+                double finalForwardSpeed = speedFactor * forwardSpeed * scaleF * (1.0 - scaleF2);
 
-                float scaleS         = 2.0 / (1.0 + std::exp(-a * std::fabs(position.y()) + b)) - 1.0;
-                float scaleS2        = angle / M_PI;
-                float finalSideSpeed = -speedFactor * ((0.0 < position.y()) - (position.y() < 0.0)) * sideStep
-                                       * sideSpeed * scaleS * (1.0 - scaleS2);
+                double scaleS         = 2.0 / (1.0 + std::exp(-a * std::fabs(position.y()) + b)) - 1.0;
+                double scaleS2        = angle / M_PI;
+                double finalSideSpeed = -speedFactor * ((0.0 < position.y()) - (position.y() < 0.0)) * sideStep
+                                        * sideSpeed * scaleS * (1.0 - scaleS2);
                 // log("forwardSpeed1", forwardSpeed);
                 // log("scale", scale);
                 // log("distanceToBall", distanceToBall);
                 // log("forwardSpeed2", finalForwardSpeed);
-
 
                 std::unique_ptr<WalkCommand> command =
                     std::make_unique<WalkCommand>(subsumptionId,

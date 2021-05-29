@@ -39,7 +39,7 @@ namespace utility::input {
         LimbID(uint32_t const& v) : value(static_cast<Value>(v)) {}
         LimbID(uint64_t const& v) : value(static_cast<Value>(v)) {}
         LimbID(int const& v) : value(static_cast<Value>(v)) {}
-        LimbID(Value const& value) : value(value) {}
+        LimbID(Value const& v) : value(v) {}
         LimbID(std::string const& str);
 
         // Operators

@@ -38,7 +38,7 @@ namespace module::output::compressor::vaapi::operation {
                          const uint32_t& width,
                          const uint32_t& height,
                          const uint32_t& format) {
-        int channels = 1;
+        uint32_t channels = 1;
         switch (format) {
             case utility::vision::fourcc("BGRA"):
             case utility::vision::fourcc("RGBA"): channels = 4; [[fallthrough]];

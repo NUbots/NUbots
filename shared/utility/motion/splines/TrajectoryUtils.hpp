@@ -36,8 +36,8 @@ namespace utility::motion::splines {
 
         // Constructors
         TrajectoryTypes() : value(Value::UNKNOWN) {}
-        TrajectoryTypes(uint8_t const& value) : value(static_cast<Value>(value)) {}
-        TrajectoryTypes(Value const& value) : value(value) {}
+        TrajectoryTypes(uint8_t const& v) : value(static_cast<Value>(v)) {}
+        TrajectoryTypes(Value const& v) : value(v) {}
         TrajectoryTypes(std::string const& str) : value(Value::UNKNOWN) {
             if (str == "IS_DOUBLE_SUPPORT") {
                 value = Value::IS_DOUBLE_SUPPORT;
@@ -265,32 +265,30 @@ namespace utility::motion::splines {
      * Default Cartesian state check function.
      * Return positive cost value if given time and Cartesian state are outside standard valid range
      */
-    inline float DefaultCheckState(const Eigen::VectorXf& params,
-                                   float t,
+    inline float DefaultCheckState(const Eigen::VectorXf& /* params */,
+                                   const float& /* t */,
                                    const Eigen::Vector3f& trunkPos,
                                    const Eigen::Vector3f& trunkAxis,
                                    const Eigen::Vector3f& footPos,
                                    const Eigen::Vector3f& footAxis) {
-        (void) params;
-        (void) t;
         float cost = 0.0f;
         if (trunkPos.z() < 0.0f) {
             cost += 1000.0f - 1000.0f * trunkPos.z();
         }
-        if (trunkAxis.norm() >= M_PI_2) {
-            cost += 1000.0f + 1000.0f * (trunkAxis.norm() - M_PI_2);
+        if (trunkAxis.norm() >= float(M_PI_2)) {
+            cost += 1000.0f + 1000.0f * (trunkAxis.norm() - float(M_PI_2));
         }
         if (std::abs(footPos.y()) < 2.0f * 0.037f) {
             cost += 1000.0f + 1000.0f * (2.0f * 0.037f - std::abs(footPos.y()));
         }
-        if (footPos.z() < -1e6) {
+        if (footPos.z() < -1e6f) {
             cost += 1000.0f - 1000.0f * footPos.z();
         }
         if (trunkPos.z() - footPos.z() < 0.20f) {
             cost += 1000.0f - 1000.0f * (trunkPos.z() - footPos.z() - 0.20f);
         }
-        if (footAxis.norm() >= M_PI_2) {
-            cost += 1000.0f + 1000.0f * (footAxis.norm() - M_PI_2);
+        if (footAxis.norm() >= float(M_PI_2)) {
+            cost += 1000.0f + 1000.0f * (footAxis.norm() - float(M_PI_2));
         }
 
         return cost;

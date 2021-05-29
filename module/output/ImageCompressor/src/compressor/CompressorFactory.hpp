@@ -13,6 +13,7 @@ namespace module::output::compressor {
         virtual std::shared_ptr<Compressor> make_compressor(const uint32_t& width,
                                                             const uint32_t& height,
                                                             const uint32_t& format) = 0;
+        virtual ~CompressorFactory()                                                = default;
     };
 
 }  // namespace module::output::compressor

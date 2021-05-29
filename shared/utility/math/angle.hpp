@@ -36,16 +36,16 @@ namespace utility::math::angle {
      * @return the angle between -pi and pi
      */
     template <typename T>
-    inline T normalizeAngle(const T value) {
+    inline T normalizeAngle(const T& value) {
 
-        T angle = std::fmod(value, static_cast<T>(2 * M_PI));
+        T angle = std::fmod(value, static_cast<T>(2.0 * M_PI));
 
-        if (angle <= -M_PI) {
-            angle += 2 * M_PI;
+        if (angle <= -T(M_PI)) {
+            angle += T(2.0 * M_PI);
         }
 
-        if (angle > M_PI) {
-            angle -= 2 * M_PI;
+        if (angle > T(M_PI)) {
+            angle -= T(2.0 * M_PI);
         }
 
         return angle;
@@ -67,9 +67,9 @@ namespace utility::math::angle {
      * http://math.stackexchange.com/questions/1158223/solve-for-x-where-a-sin-x-b-cos-x-c-where-a-b-and-c-are-kno
      * @param
      */
-    inline double difference(const double a, const double b) {
-
-        return M_PI - std::fabs(std::fmod(std::fabs(a - b), (2 * M_PI)) - M_PI);
+    template <typename T>
+    inline T difference(const T& a, const T& b) {
+        return T(M_PI) - std::abs(std::fmod(std::abs(a - b), T(2.0 * M_PI)) - T(M_PI));
     }
 
     /**
@@ -94,7 +94,7 @@ namespace utility::math::angle {
      * (Better than doing angleDst-angleSrc)
      */
     template <typename Scalar>
-    inline double angleDistance(Scalar angleSrc, Scalar angleDst) {
+    inline Scalar angleDistance(Scalar angleSrc, Scalar angleDst) {
         angleSrc = normalizeAngle(angleSrc);
         angleDst = normalizeAngle(angleDst);
 
@@ -109,7 +109,7 @@ namespace utility::math::angle {
         }
 
         Scalar dist1 = max - min;
-        Scalar dist2 = (2 * M_PI) - max + min;
+        Scalar dist2 = Scalar(2 * M_PI) - max + min;
 
         if (dist1 < dist2) {
             if (angleSrc > angleDst) {

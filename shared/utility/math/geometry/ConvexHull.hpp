@@ -42,8 +42,10 @@ namespace utility::math::geometry {
             const Eigen::Vector3f& p0(rays.col(a));
             const Eigen::Vector3f& p1(rays.col(b));
 
-            float theta0 = std::fmod(std::atan2(p0.y(), p0.x()) + M_PI - world_offset, static_cast<float>(2.0 * M_PI));
-            float theta1 = std::fmod(std::atan2(p1.y(), p1.x()) + M_PI - world_offset, static_cast<float>(2.0 * M_PI));
+            float theta0 = std::fmod(std::atan2(p0.y(), p0.x()) + static_cast<float>(M_PI) - world_offset,
+                                     static_cast<float>(2.0 * M_PI));
+            float theta1 = std::fmod(std::atan2(p1.y(), p1.x()) + static_cast<float>(M_PI) - world_offset,
+                                     static_cast<float>(2.0 * M_PI));
             return theta0 < theta1;
         });
     }
@@ -299,7 +301,7 @@ namespace utility::math::geometry {
         std::sort(std::next(local_indices.begin()),
                   local_indices.end(),
                   [&bottom_left, &coords](const int& a, const int& b) {
-                      const Eigen::Vector2f p0(coords.col(bottom_left));
+                      const Eigen::Vector2f p0(coords.col(Eigen::Index(bottom_left)));
                       const Eigen::Vector2f p1(coords.col(a));
                       const Eigen::Vector2f p2(coords.col(b));
 
@@ -316,16 +318,14 @@ namespace utility::math::geometry {
                   });
 
         // Remove all colinear points
-        for (auto it = std::next(local_indices.begin(), 2); it != local_indices.end();) {
+        for (auto it = std::next(local_indices.begin(), 2); it != local_indices.end(); it = std::next(it)) {
             const Eigen::Vector2f p0(coords.col(*std::prev(it, 2)));
             const Eigen::Vector2f p1(coords.col(*std::prev(it, 1)));
             Eigen::Vector2f p2(coords.col(*it));
 
             while (turn_direction(p0, p1, p2) == 0) {
-                it = local_indices.erase(it);
-                Eigen::Vector2f p2(coords.col(*it));
+                p2 = coords.col(*local_indices.erase(it));
             }
-            it = std::next(it);
         }
 
         // We need a minimum of 3 non-colinear points to calculate the convex hull
