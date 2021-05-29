@@ -130,15 +130,17 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
         const double previous_angle = M_PI_2 * std::sin(M_PI * double(i - 1) / 180.0);
 
         // We are rotating around the x-axis, so the other 2 axes are zero
-        // const Eigen::Vector3d gyroscope((d(gen) + (current_angle - previous_angle)) / deltaT, 0.0, 0.0);
-        const Eigen::Vector3d gyroscope((current_angle - previous_angle) / deltaT, 0.0, 0.0);
+        const Eigen::Vector3d gyroscope((d(gen) + (current_angle - previous_angle)) / deltaT, 0.0, 0.0);
 
         // Perform the measurement update
         filter.measure(gyroscope, gyroscope_noise, module::input::MeasurementType::GYROSCOPE());
-        // filter.measure(Eigen::Vector3d(0.0, 0.0, 0.0), gyroscope_noise, module::input::MeasurementType::GYROSCOPE());
 
         // Time update
         INFO("Running time update for step " << i);
+        INFO("Gyroscope Measurement: " << gyroscope.transpose());
+        INFO("Current Angle........: " << current_angle);
+        INFO("Previous Angle.......: " << previous_angle);
+        INFO("Rwt..................: " << Rwt.coeffs().transpose());
         switch (filter.time(deltaT)) {
             case Eigen::Success:
                 // Calculate difference between expected and predicted orientations
