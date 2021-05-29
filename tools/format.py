@@ -11,23 +11,29 @@ from utility.dockerise import run_on_docker
 from utility.yarn import find_eslint, find_package_json
 
 
-def _do_format(path, eslint_path, package_path, skip_nusight):
+def _do_format(path, eslint_path, package_path, skip_typescript, skip_cpp, skip_protobuf, skip_python, skip_cmake):
     text = ""
     try:
         # Use the absolute path to file
         abs_path = os.path.abspath(path)
 
-        if path.endswith((".h", ".c", ".cc", ".cxx", ".cpp", ".hpp", ".ipp", ".proto", ".frag", ".glsl", ".vert")):
+        # .frag, .glsl, and .vert files are lumped in with C++
+        if not skip_cpp and path.endswith(
+            (".h", ".c", ".cc", ".cxx", ".cpp", ".hpp", ".ipp", ".frag", ".glsl", ".vert")
+        ):
             text = "Formatting {} with clang-format\n".format(path)
             text = text + check_output(["clang-format", "-i", "-style=file", abs_path], stderr=STDOUT).decode("utf-8")
-        elif path.endswith(("CMakeLists.txt", ".cmake", ".role")):
+        elif not skip_protobuf and path.endswith((".proto")):
+            text = "Formatting {} with clang-format\n".format(path)
+            text = text + check_output(["clang-format", "-i", "-style=file", abs_path], stderr=STDOUT).decode("utf-8")
+        elif not skip_cmake and path.endswith(("CMakeLists.txt", ".cmake", ".role")):
             text = "Formatting {} with cmake-format\n".format(path)
             text = text + check_output(["cmake-format", "-i", abs_path], stderr=STDOUT).decode("utf-8")
-        elif path.endswith((".py")):
+        elif not skip_python and path.endswith((".py")):
             text = "Formatting {} with isort and black\n".format(path)
             text = text + check_output(["isort", abs_path], stderr=STDOUT).decode("utf-8")
             text = text + check_output(["black", abs_path], stderr=STDOUT).decode("utf-8")
-        elif eslint_path is not None and not skip_nusight and (path.endswith((".ts")) or path.endswith((".tsx"))):
+        elif eslint_path is not None and not skip_typescript and (path.endswith((".ts")) or path.endswith((".tsx"))):
             text = "Formatting {} with eslint and prettier\n".format(path)
             text = text + check_output(
                 [eslint_path, "--color", "--fix", abs_path], cwd=package_path, stderr=STDOUT
@@ -43,17 +49,49 @@ def register(command):
     command.help = "Format all the code in the codebase using clang-format"
 
     command.add_argument(
-        "-s",
-        "--skip-nusight",
-        dest="skip_nusight",
+        "-t",
+        "--skip-typescript",
+        dest="skip_typescript",
         action="store_true",
         default=False,
-        help="Skip formatting the NUsight2 code",
+        help="Skip formatting the typescript",
+    )
+    command.add_argument(
+        "-c",
+        "--skip-cpp",
+        dest="skip_cpp",
+        action="store_true",
+        default=False,
+        help="Skip formatting the C++",
+    )
+    command.add_argument(
+        "-g",  # g for google. p is for python
+        "--skip-protobuf",
+        dest="skip_protobuf",
+        action="store_true",
+        default=False,
+        help="Skip formatting the protobuf",
+    )
+    command.add_argument(
+        "-p",
+        "--skip-python",
+        dest="skip_python",
+        action="store_true",
+        default=False,
+        help="Skip formatting the python",
+    )
+    command.add_argument(
+        "-m",
+        "--skip-cmake",
+        dest="skip_cmake",
+        action="store_true",
+        default=False,
+        help="Skip formatting the cmake",
     )
 
 
 @run_on_docker
-def run(skip_nusight, **kwargs):
+def run(skip_typescript, skip_cpp, skip_protobuf, skip_python, skip_cmake, **kwargs):
 
     # Check for eslint in node_modules folder
     eslint_path = find_eslint(os.path.join(b.project_dir, "nusight2", "node_modules"))
@@ -70,7 +108,16 @@ def run(skip_nusight, **kwargs):
 
     with multiprocessing.Pool(multiprocessing.cpu_count()) as pool:
         for r in pool.imap_unordered(
-            partial(_do_format, eslint_path=eslint_path, package_path=package_path, skip_nusight=skip_nusight),
+            partial(
+                _do_format,
+                eslint_path=eslint_path,
+                package_path=package_path,
+                skip_typescript=skip_typescript,
+                skip_cpp=skip_cpp,
+                skip_protobuf=skip_protobuf,
+                skip_python=skip_python,
+                skip_cmake=skip_cmake,
+            ),
             files.splitlines(),
         ):
             sys.stdout.write(r)
