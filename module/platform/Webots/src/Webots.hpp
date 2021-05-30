@@ -79,6 +79,10 @@ namespace module::platform {
 
         /// @brief The time between two measurements, expressed in milliseconds
         int time_step;
+        /// @brief The minimum allowed time between two camera measurements
+        int min_camera_time_step;
+        /// @brief The minimum allowed time between two sensor measurements, not including the camera
+        int min_sensor_time_step;
 
         /// @brief Current state of a servo
         struct ServoState {

@@ -136,32 +136,33 @@ namespace module::platform {
         throw std::runtime_error("Unable to translate unknown NUgus.proto servo id: " + id);
     }
 
-    ActuatorRequests create_sensor_time_steps(const uint32_t& time_step) {
+    ActuatorRequests create_sensor_time_steps(const uint32_t& sensor_timestep, const uint32_t& camera_timestep) {
         message::platform::webots::ActuatorRequests msg;
-        msg.sensor_time_steps = {{"left_ankle_roll_sensor", time_step},
-                                 {"left_ankle_pitch_sensor", time_step},
-                                 {"right_ankle_roll_sensor", time_step},
-                                 {"right_ankle_pitch_sensor", time_step},
-                                 {"right_knee_pitch_sensor", time_step},
-                                 {"left_knee_pitch_sensor", time_step},
-                                 {"left_hip_roll_sensor", time_step},
-                                 {"left_hip_pitch_sensor", time_step},
-                                 {"left_hip_yaw_sensor", time_step},
-                                 {"right_hip_roll_sensor", time_step},
-                                 {"right_hip_pitch_sensor", time_step},
-                                 {"right_hip_yaw_sensor", time_step},
-                                 {"left_elbow_pitch_sensor", time_step},
-                                 {"right_elbow_pitch_sensor", time_step},
-                                 {"left_shoulder_roll_sensor", time_step},
-                                 {"left_shoulder_pitch_sensor", time_step},
-                                 {"right_shoulder_roll_sensor", time_step},
-                                 {"right_shoulder_pitch_sensor", time_step},
-                                 {"neck_yaw_sensor", time_step},
-                                 {"head_pitch_sensor", time_step},
-                                 {"accelerometer", time_step},
-                                 {"gyroscope", time_step},
-                                 {"right_camera", time_step},
-                                 {"left_camera", time_step}};
+
+        msg.sensor_time_steps = {{"left_ankle_roll_sensor", sensor_timestep},
+                                 {"left_ankle_pitch_sensor", sensor_timestep},
+                                 {"right_ankle_roll_sensor", sensor_timestep},
+                                 {"right_ankle_pitch_sensor", sensor_timestep},
+                                 {"right_knee_pitch_sensor", sensor_timestep},
+                                 {"left_knee_pitch_sensor", sensor_timestep},
+                                 {"left_hip_roll_sensor", sensor_timestep},
+                                 {"left_hip_pitch_sensor", sensor_timestep},
+                                 {"left_hip_yaw_sensor", sensor_timestep},
+                                 {"right_hip_roll_sensor", sensor_timestep},
+                                 {"right_hip_pitch_sensor", sensor_timestep},
+                                 {"right_hip_yaw_sensor", sensor_timestep},
+                                 {"left_elbow_pitch_sensor", sensor_timestep},
+                                 {"right_elbow_pitch_sensor", sensor_timestep},
+                                 {"left_shoulder_roll_sensor", sensor_timestep},
+                                 {"left_shoulder_pitch_sensor", sensor_timestep},
+                                 {"right_shoulder_roll_sensor", sensor_timestep},
+                                 {"right_shoulder_pitch_sensor", sensor_timestep},
+                                 {"neck_yaw_sensor", sensor_timestep},
+                                 {"head_pitch_sensor", sensor_timestep},
+                                 {"accelerometer", sensor_timestep},
+                                 {"gyroscope", sensor_timestep},
+                                 {"right_camera", camera_timestep},
+                                 {"left_camera", camera_timestep}};
 
         return msg;
     }
@@ -211,7 +212,9 @@ namespace module::platform {
     Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
         on<Configuration>("webots.yaml").then([this](const Configuration& config) {
             // Use configuration here from file webots.yaml
-            time_step = config["time_step"].as<int>();
+            time_step            = config["time_step"].as<int>();
+            min_camera_time_step = config["min_camera_time_step"].as<int>();
+            min_sensor_time_step = config["min_sensor_time_step"].as<int>();
 
             // clang-format off
             auto lvl = config["log_level"].as<std::string>();
@@ -428,8 +431,13 @@ namespace module::platform {
             send_io = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then(
                 "Simulator Update Loop",
                 [this] {
+                    // Bound the time_step for the cameras and other sensors by the minimum allowed time_step for the
+                    // competition
+                    uint32_t sensor_timestep = std::max(min_sensor_time_step, time_step);
+                    uint32_t camera_timestep = std::max(min_camera_time_step, time_step);
+
                     // Construct the ActuatorRequests message
-                    ActuatorRequests actuator_requests = create_sensor_time_steps(time_step);
+                    ActuatorRequests actuator_requests = create_sensor_time_steps(sensor_timestep, camera_timestep);
                     for (auto& servo : servo_state) {
                         if (servo.dirty) {
                             // Servo is no longer dirty
