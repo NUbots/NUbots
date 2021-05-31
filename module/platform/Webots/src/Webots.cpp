@@ -212,15 +212,7 @@ namespace module::platform {
             // Use configuration here from file webots.yaml
             time_step = config["time_step"].as<int>();
 
-            // clang-format off
-            auto lvl = config["log_level"].as<std::string>();
-            if      (lvl == "TRACE") { this->log_level = NUClear::TRACE; }
-            else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
-            else if (lvl == "INFO")  { this->log_level = NUClear::INFO; }
-            else if (lvl == "WARN")  { this->log_level = NUClear::WARN; }
-            else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
-            else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
-            // clang-format on
+            this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
 
             on<Watchdog<Webots, 5, std::chrono::seconds>>().then([this, config] {
                 // We haven't received any messages lately
