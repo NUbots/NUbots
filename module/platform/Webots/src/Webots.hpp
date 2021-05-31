@@ -45,7 +45,7 @@ namespace module::platform {
 
         /// @brief server_name The name or IP address to connect to. If it's an IP, it should be in "X.X.X.X" form
         std::string server_address;
-        /// @param server_port The port number to connect to on the server
+        /// @brief server_port The port number to connect to on the server
         std::string server_port;
 
         /// @brief Establish a TCP connection to the specified server/port
