@@ -28,27 +28,31 @@
 
 namespace YAML {
 
-template <>
-struct convert<::NUClear::LogLevel> {
-    static Node encode(const ::NUClear::LogLevel& rhs) {
-        Node node;
+    /// @brief Converts between YAML::Node and NUClear::LogLevel
+    /// @example this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
+    template <>
+    struct convert<::NUClear::LogLevel> {
+        /// @brief Converts a NUClear::LogLevel to a YAML::Node that stores the name of the log level
+        static Node encode(const ::NUClear::LogLevel& rhs) {
+            Node node;
 
-        switch (rhs) {
-            case NUClear::TRACE: node = "TRACE"; break;
-            case NUClear::DEBUG: node = "DEBUG"; break;
-            case NUClear::INFO: node = "INFO"; break;
-            case NUClear::WARN: node = "WARN"; break;
-            case NUClear::ERROR: node = "ERROR"; break;
-            case NUClear::FATAL: node = "FATAL"; break;
-            default: node = "DEBUG"; break;
+            switch (rhs) {
+                case NUClear::TRACE: node = "TRACE"; break;
+                case NUClear::DEBUG: node = "DEBUG"; break;
+                case NUClear::INFO: node = "INFO"; break;
+                case NUClear::WARN: node = "WARN"; break;
+                case NUClear::ERROR: node = "ERROR"; break;
+                case NUClear::FATAL: node = "FATAL"; break;
+                default: node = "DEBUG"; break;
+            }
+
+            return node;
         }
 
-        return node;
-    }
-
-    static bool decode(const Node& node, ::NUClear::LogLevel& rhs) {
-        try {
-            // clang-format off
+        /// @brief Converts a YAML::Node that stores the name of a log level to the corresponding NUClear::LogLevel
+        static bool decode(const Node& node, ::NUClear::LogLevel& rhs) {
+            try {
+                // clang-format off
             auto lvl = node.as<std::string>();
             if (lvl == "TRACE") { rhs = NUClear::TRACE; }
             else if (lvl == "DEBUG") { rhs = NUClear::DEBUG; }
@@ -57,15 +61,15 @@ struct convert<::NUClear::LogLevel> {
             else if (lvl == "ERROR") { rhs = NUClear::ERROR; }
             else if (lvl == "FATAL") { rhs = NUClear::FATAL; }
             else { rhs = NUClear::DEBUG; }
-            // clang-format on
-        }
-        catch (const std::invalid_argument& ex) {
-            return false;
-        }
+                // clang-format on
+            }
+            catch (const std::invalid_argument& ex) {
+                return false;
+            }
 
-        return true;
-    }
-};
+            return true;
+        }
+    };
 }  // namespace YAML
 
 #endif  // UTILITY_SUPPORT_YAML_LOG_LEVEL_HPP
