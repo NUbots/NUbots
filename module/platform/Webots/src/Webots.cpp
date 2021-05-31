@@ -212,7 +212,7 @@ namespace module::platform {
             // Use configuration here from file webots.yaml
             time_step = config["time_step"].as<int>();
 
-            this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
+            this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
             on<Watchdog<Webots, 5, std::chrono::seconds>>().then([this, config] {
                 // We haven't received any messages lately
