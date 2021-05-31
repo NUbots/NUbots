@@ -67,6 +67,7 @@ def build(repository, platform):
 
     remote_tag = "{0}/{0}:{1}".format(repository, platform)
     local_tag = "{0}:{1}".format(repository, platform)
+    selected_tag = "{}:selected".format(repository)
     dockerdir = os.path.join(b.project_dir, "docker")
 
     # Go through all the files and try to ensure that their permissions are correct
@@ -116,11 +117,19 @@ def build(repository, platform):
         cprint("Docker build returned exit code {}".format(err), "red", attrs=["bold"])
         exit(err)
 
-    # If we were building the selected platform then update our selected tag
-    if _selected:
-        err = subprocess.run(
-            ["docker", "image", "tag", "{}:{}".format(repository, platform), "{}:selected".format(repository)],
-            stdout=subprocess.DEVNULL,
-        ).returncode
-        if err != 0:
-            raise RuntimeError("docker image tag returned a non-zero exit code")
+
+def pull(repository, platform):
+    # Define our tag strings
+    remote_tag = "{0}/{0}:{1}".format(repository, platform)
+    local_tag = "{0}:{1}".format(repository, platform)
+    selected_tag = "{}:selected".format(repository)
+
+    print("Pulling remote image", remote_tag)
+    err = subprocess.run(["docker", "pull", remote_tag]).returncode
+    if err != 0:
+        raise RuntimeError("docker image pull returned a non-zero exit code")
+
+    print("Tagging ", remote_tag, "as", local_tag)
+    err = subprocess.run(["docker", "tag", remote_tag, local_tag]).returncode
+    if err != 0:
+        raise RuntimeError("docker image tag returned a non-zero exit code")
