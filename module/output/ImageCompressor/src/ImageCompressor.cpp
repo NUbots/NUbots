@@ -55,7 +55,7 @@ namespace module::output {
         : Reactor(std::move(environment)) {
 
         on<Configuration>("ImageCompressor.yaml").then("Configure Compressors", [this](const Configuration& cfg) {
-            this->log_level = cfg["log_level"];
+            this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
 
 
             // Clear the compressors and factories
