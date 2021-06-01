@@ -31,14 +31,14 @@ namespace module::vision {
 
             for (const auto& camera : config["cameras"].config) {
                 std::string name        = camera.first.as<std::string>();
-                std::string engine_type = camera["engine"].as<std::string>();
-                int concurrent          = camera["concurrent"].as<int>();
-                std::string network     = camera["network"].as<std::string>();
+                std::string engine_type = camera.second["engine"].as<std::string>();
+                int concurrent          = camera.second["concurrent"].as<int>();
+                std::string network     = camera.second["network"].as<std::string>();
 
-                double min_height   = camera["classifier"]["height"][0].as<double>();
-                double max_height   = camera["classifier"]["height"][1].as<double>();
-                double max_distance = camera["classifier"]["max_distance"].as<double>();
-                double tolerance    = camera["classifier"]["intersection_tolerance"].as<double>();
+                double min_height   = camera.second["classifier"]["height"][0].as<double>();
+                double max_height   = camera.second["classifier"]["height"][1].as<double>();
+                double max_distance = camera.second["classifier"]["max_distance"].as<double>();
+                double tolerance    = camera.second["classifier"]["intersection_tolerance"].as<double>();
 
                 // Create a network runner for each concurrent system
                 auto& runners = engines[name];
