@@ -99,7 +99,7 @@ export class CameraViewModel {
 
   private meshGeometry = createTransformer(
     (mesh: VisualMesh): BufferGeometry => {
-      const { indices, neighbours, coordinates, classifications } = mesh
+      const { neighbours, coordinates, classifications } = mesh
 
       const nElem = coordinates.length / 2
 
