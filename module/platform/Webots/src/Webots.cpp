@@ -460,7 +460,7 @@ namespace module::platform {
                         NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(actuator_requests);
 
                     // Size of the message, in network endian
-                    uint32_t Nn = htonl(data.size());
+                    const uint32_t Nn = htonl(data.size());
 
                     // Send the message size first
                     if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
