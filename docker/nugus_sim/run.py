@@ -10,11 +10,7 @@ import ruamel.yaml
 BINARIES_DIR = "/home/nubots/NUbots/binaries"
 CONFIG_DIR = BINARIES_DIR + "/config"
 
-ENV_VARS = {
-    "ROBOCUP_ROBOT_ID": "ROBOCUP_ROBOT_ID",
-    "ROBOCUP_TEAM_COLOR": "ROBOCUP_TEAM_COLOR",
-    "ROBOCUP_SIMULATOR_ADDR": "ROBOCUP_SIMULATOR_ADDR",
-}
+ENV_VARS = ["ROBOCUP_ROBOT_ID", "ROBOCUP_TEAM_COLOR", "ROBOCUP_SIMULATOR_ADDR"]
 
 
 def read_args() -> Tuple[str, dict]:
@@ -36,10 +32,10 @@ def read_args() -> Tuple[str, dict]:
         sys.exit(1)
 
     # Read env vars
-    config = {k: os.environ.get(v) for k, v in ENV_VARS.items() if v in os.environ}
+    config = {var: os.environ.get(var) for var in ENV_VARS if var in os.environ}
 
-    # Dict of env vars that didn't get set :(
-    unset_vars = {k: ENV_VARS[k] for k in ENV_VARS if k not in config}
+    # List of env vars that didn't get set :(
+    unset_vars = [var for var in ENV_VARS if var not in config]
 
     # If not all needed environment variables were set
     if len(unset_vars) != 0:
