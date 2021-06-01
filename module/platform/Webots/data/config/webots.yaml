@@ -3,6 +3,6 @@ log_level: DEBUG
 
 # Connection details
 server_address: "127.0.0.1"
-port: "10020"
+port: 10020
 
 time_step: 32
