@@ -469,6 +469,7 @@ namespace module::platform {
                     // Size of the message, in network endian
                     const uint32_t Nn = htonl(data.size());
 
+                    // Only send actuator requests if we are connected to the controller
                     if (connection_active) {
                         // Send the message size first
                         if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
