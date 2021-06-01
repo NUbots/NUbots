@@ -9,7 +9,7 @@ import ruamel.yaml
 BINARIES_DIR = "/home/nubots/NUbots/binaries"
 CONFIG_DIR = BINARIES_DIR + "/config"
 
-ENV_VARS = ["ROBOCUP_ROBOT_ID", "ROBOCUP_TEAM_COLOR", "ROBOCUP_SIMULATOR_ADDR"]
+ENV_VARS = ("ROBOCUP_ROBOT_ID", "ROBOCUP_TEAM_COLOR", "ROBOCUP_SIMULATOR_ADDR")
 
 
 def read_args() -> dict:
