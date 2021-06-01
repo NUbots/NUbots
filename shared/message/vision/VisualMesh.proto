@@ -26,7 +26,7 @@
 
  message VisualMesh {
      google.protobuf.Timestamp timestamp       = 1;
-     uint32                    camera_id       = 2;
+    uint32                    id              = 2;
      string                    name            = 3;
      mat4                      Hcw             = 4;
      fmat                      coordinates     = 5;
