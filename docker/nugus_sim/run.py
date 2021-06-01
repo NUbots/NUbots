@@ -19,23 +19,16 @@ def read_args() -> dict:
         sys.exit(1)
 
     role = sys.argv[1]
+
+    if not os.path.exists(os.path.join(BINARIES_DIR, role)):
+        print("The role '" + role + "' does not exist!")
+        sys.exit(1)
+
     is_goalie = False
 
     # Check for the goalie flag
     if len(sys.argv) > 2:
         is_goalie = sys.argv[2] == "--goalie"
-
-    built_roles = []
-
-    # Create a list of the built roles
-    for filename in os.listdir(BINARIES_DIR):
-        if os.path.isfile(os.path.join(BINARIES_DIR, filename)):
-            built_roles.append(filename)
-
-    # Ensure that the role requested is in the built roles
-    if role not in built_roles:
-        print("The role '" + role + "' does not exist!")
-        sys.exit(1)
 
     # Read the env vars
     config = {var: os.environ.get(var) for var in ENV_VARS if var in os.environ}
