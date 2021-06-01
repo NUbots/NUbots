@@ -9,20 +9,28 @@ log_level: DEBUG
 #     radius: the search radius to do at that distance (NOT THE RADIUS OF THE OBJECT)
 
 cameras:
-  Left:
+  FakeCamera:
     concurrent: 2
     network: config/networks/RobocupNetwork.yaml
-    engine: opencl
+    engine: cpu
     classifier:
       height: [0.5, 1.0]
       max_distance: 15
       intersection_tolerance: 0.25
-
-  Right:
-    concurrent: 2
-    network: config/networks/RobocupNetwork.yaml
-    engine: opencl
-    classifier:
-      height: [0.5, 1.0]
-      max_distance: 15
-      intersection_tolerance: 0.25
+#  Left:
+#    concurrent: 2
+#    network: config/networks/RobocupNetwork.yaml
+#    engine: opencl
+#    classifier:
+#      height: [0.5, 1.0]
+#      max_distance: 15
+#      intersection_tolerance: 0.25
+#
+#  Right:
+#    concurrent: 2
+#    network: config/networks/RobocupNetwork.yaml
+#    engine: opencl
+#    classifier:
+#      height: [0.5, 1.0]
+#      max_distance: 15
+#      intersection_tolerance: 0.25
