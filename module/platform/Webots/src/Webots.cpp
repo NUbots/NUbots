@@ -162,7 +162,15 @@ namespace module::platform {
                                  {"accelerometer", sensor_timestep},
                                  {"gyroscope", sensor_timestep},
                                  {"right_camera", camera_timestep},
-                                 {"left_camera", camera_timestep}};
+                                 {"left_camera", camera_timestep},
+                                 {"right_touch_sensor_br", sensor_timestep},
+                                 {"right_touch_sensor_bl", sensor_timestep},
+                                 {"right_touch_sensor_fl", sensor_timestep},
+                                 {"right_touch_sensor_fr", sensor_timestep},
+                                 {"left_touch_sensor_br", sensor_timestep},
+                                 {"left_touch_sensor_bl", sensor_timestep},
+                                 {"left_touch_sensor_fl", sensor_timestep},
+                                 {"left_touch_sensor_fr", sensor_timestep}};
 
         return msg;
     }
@@ -629,13 +637,36 @@ namespace module::platform {
                 sensor_data->gyroscope.z = static_cast<float>(gyro.value.Z) - 100.0f;
             }
 
-            // TODO Implement fsrs
-            /*
             for (const auto& bumper : sensor_measurements.bumpers) {
-                // string name
-                // bool value
+                // We should have eight bumper sensors
+                // Right foot
+                std::string bumper_name = bumper.name;
+                if (bumper_name == "right_touch_sensor_br") {
+                    sensor_data->fsr.right.fsr1 = bumper.value;
+                }
+                else if (bumper_name == "right_touch_sensor_bl") {
+                    sensor_data->fsr.right.fsr2 = bumper.value;
+                }
+                else if (bumper_name == "right_touch_sensor_fl") {
+                    sensor_data->fsr.right.fsr3 = bumper.value;
+                }
+                else if (bumper_name == "right_touch_sensor_fr") {
+                    sensor_data->fsr.right.fsr4 = bumper.value;
+                }
+                // Left foot
+                else if (bumper_name == "left_touch_sensor_br") {
+                    sensor_data->fsr.left.fsr1 = bumper.value;
+                }
+                else if (bumper_name == "left_touch_sensor_bl") {
+                    sensor_data->fsr.left.fsr2 = bumper.value;
+                }
+                else if (bumper_name == "left_touch_sensor_fl") {
+                    sensor_data->fsr.left.fsr3 = bumper.value;
+                }
+                else if (bumper_name == "left_touch_sensor_fr") {
+                    sensor_data->fsr.left.fsr4 = bumper.value;
+                }
             }
-            */
 
             emit(sensor_data);
         }
