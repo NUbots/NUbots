@@ -53,7 +53,7 @@ def read_args() -> dict:
     return {"role": role, "env_vars": config, "is_goalie": is_goalie}
 
 
-def set_env_vars(args: dict) -> None:
+def update_config(args: dict) -> None:
     # Get the data
     env_vars = args["env_vars"]
     is_goalie = args["is_goalie"]
@@ -106,5 +106,5 @@ def run_role(role: str) -> None:
 
 if __name__ == "__main__":
     args = read_args()
-    set_env_vars(args)
+    update_config(args)
     run_role(args["role"])
