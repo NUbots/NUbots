@@ -87,14 +87,11 @@ def update_config(args: dict) -> None:
 
 
 def run_role(role: str) -> None:
-    # Print the role we're running
-    print(role)
-
     # Change into the directory with the binaries
     os.chdir(BINARIES_DIR)
 
     # Run the role binary
-    exit(subprocess.run("./" + role).returncode)
+    exit(subprocess.run(f"./{role}").returncode)
 
 
 if __name__ == "__main__":
