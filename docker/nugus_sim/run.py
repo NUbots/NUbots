@@ -51,7 +51,7 @@ def update_config(args: dict) -> None:
     env_vars = args["env_vars"]
     is_goalie = args["is_goalie"]
 
-    yaml = ruamel.yaml.YAML()
+    yaml = ruamel.yaml.YAML(typ="safe")
 
     # Change into the config directory
     os.chdir(CONFIG_DIR)
