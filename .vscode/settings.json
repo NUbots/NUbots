@@ -22,7 +22,10 @@
     ],
     "yaml.format.printWidth": 120,
     "files.associations": {
-        "*.role": "cmake"
+        "*.m": "matlab",
+        "*.rasi": "css",
+        "*.role": "cmake",
+        "iosfwd": "cpp"
     },
     "editor.codeActionsOnSave": {
         "source.organizeImports": true
