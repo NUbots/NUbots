@@ -266,7 +266,7 @@ namespace module::platform {
                 // Because of this, we move the servo as fast as we can to reach the position.
                 // 5.236 == 50 rpm which is similar to the max speed of the servos
                 double speed = duration.count() > 0
-                                   ? diff / std::chrono::duration_cast<std::chrono::duration<double>>(duration).count()
+                                   ? diff / std::chrono::duration<double>(duration).count()
                                    : 5.236;
 
                 // Update our internal state
@@ -472,10 +472,12 @@ namespace module::platform {
                     // Size of the message, in network endian
                     const uint32_t Nn = htonl(data.size());
 
-                    // Send the message size first
-                    if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
-                        log<NUClear::ERROR>(
-                            fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
+                    if (!connection_active) {
+                        // Send the message size first
+                        if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
+                            log<NUClear::ERROR>(
+                                fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
+                        }
                     }
 
                     // Now send the data
