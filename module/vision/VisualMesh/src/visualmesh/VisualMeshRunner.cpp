@@ -67,7 +67,7 @@ namespace generate_runner {
                                                     cfg.mesh.classifier.max_distance));
         auto engine = std::make_shared<Engine<float>>(cfg.model);
 
-        return [shape, mesh, engine](const Image& img, const Eigen::Affine3f& Htc) {
+            return [shape, mesh, engine](const Image& img, const Eigen::Affine3f& Hcw) {
             // Create the lens
             ::visualmesh::Lens<float> lens;
             lens.dimensions   = {int(img.dimensions[0]), int(img.dimensions[1])};
@@ -87,7 +87,7 @@ namespace generate_runner {
 
             // Convert our orientation matrix
             std::array<std::array<float, 4>, 4> Hoc;
-            Eigen::Map<Eigen::Matrix<float, 4, 4, Eigen::RowMajor>>(Hoc[0].data()) = Htc.matrix();
+                Eigen::Map<Eigen::Matrix<float, 4, 4, Eigen::RowMajor>>(Hoc[0].data()) = Hcw.inverse().matrix();
 
             // Run the network
             const auto& m = mesh->height(Hoc[2][3]);
