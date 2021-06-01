@@ -640,30 +640,29 @@ namespace module::platform {
             for (const auto& bumper : sensor_measurements.bumpers) {
                 // We should have eight bumper sensors
                 // Right foot
-                std::string bumper_name = bumper.name;
-                if (bumper_name == "right_touch_sensor_br") {
+                if (bumper.name == "right_touch_sensor_br") {
                     sensor_data->fsr.right.fsr1 = bumper.value;
                 }
-                else if (bumper_name == "right_touch_sensor_bl") {
+                else if (bumper.name == "right_touch_sensor_bl") {
                     sensor_data->fsr.right.fsr2 = bumper.value;
                 }
-                else if (bumper_name == "right_touch_sensor_fl") {
+                else if (bumper.name == "right_touch_sensor_fl") {
                     sensor_data->fsr.right.fsr3 = bumper.value;
                 }
-                else if (bumper_name == "right_touch_sensor_fr") {
+                else if (bumper.name == "right_touch_sensor_fr") {
                     sensor_data->fsr.right.fsr4 = bumper.value;
                 }
                 // Left foot
-                else if (bumper_name == "left_touch_sensor_br") {
+                else if (bumper.name == "left_touch_sensor_br") {
                     sensor_data->fsr.left.fsr1 = bumper.value;
                 }
-                else if (bumper_name == "left_touch_sensor_bl") {
+                else if (bumper.name == "left_touch_sensor_bl") {
                     sensor_data->fsr.left.fsr2 = bumper.value;
                 }
-                else if (bumper_name == "left_touch_sensor_fl") {
+                else if (bumper.name == "left_touch_sensor_fl") {
                     sensor_data->fsr.left.fsr3 = bumper.value;
                 }
-                else if (bumper_name == "left_touch_sensor_fr") {
+                else if (bumper.name == "left_touch_sensor_fr") {
                     sensor_data->fsr.left.fsr4 = bumper.value;
                 }
             }
