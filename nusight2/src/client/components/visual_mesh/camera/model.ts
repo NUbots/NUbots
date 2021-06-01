@@ -2,7 +2,6 @@ import { observable } from 'mobx'
 import { Image } from '../../../image_decoder/image_decoder'
 import { VisualMeshRobotModel } from '../model'
 
-
 export interface VisualMesh {
   // readonly rows: number[]
   readonly indices: number[]

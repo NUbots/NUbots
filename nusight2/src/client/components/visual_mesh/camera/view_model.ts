@@ -1,12 +1,23 @@
 import { autorun, computed, observable } from 'mobx'
 import { createTransformer } from 'mobx-utils'
-import { BufferGeometry, Camera, Float32BufferAttribute, InterleavedBuffer, InterleavedBufferAttribute, Mesh, Object3D, OrthographicCamera, RawShaderMaterial, Scene, Vector2, WebGLRenderer } from 'three'
+import {
+  BufferGeometry,
+  Camera,
+  Float32BufferAttribute,
+  InterleavedBuffer,
+  InterleavedBufferAttribute,
+  Mesh,
+  Object3D,
+  OrthographicCamera,
+  RawShaderMaterial,
+  Scene,
+  Vector2,
+  WebGLRenderer,
+} from 'three'
 import { ImageDecoder } from '../../../image_decoder/image_decoder'
 import { CameraModel, VisualMesh } from './model'
 import meshFragmentShader from './shaders/mesh.frag'
 import meshVertexShader from './shaders/mesh.vert'
-
-
 
 export class CameraViewModel {
   @observable.ref canvas: HTMLCanvasElement | null = null

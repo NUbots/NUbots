@@ -23,18 +23,18 @@
 
 namespace module::vision::visualmesh {
 
-struct LoadedModel {
-    ::visualmesh::NetworkStructure<float> model;
-    std::string mesh_model;
-    int num_classes;
-    struct {
-        std::string shape;
-        double radius;
-        double intersections;
-    } geometry;
-};
+    struct LoadedModel {
+        ::visualmesh::NetworkStructure<float> model;
+        std::string mesh_model;
+        int num_classes;
+        struct {
+            std::string shape;
+            double radius;
+            double intersections;
+        } geometry;
+    };
 
-LoadedModel load_model(const std::string& path);
+    LoadedModel load_model(const std::string& path);
 
 }  // namespace module::vision::visualmesh
 

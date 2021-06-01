@@ -44,7 +44,9 @@ namespace utility::strutil {
     inline bool endsWith(const std::string& str, const std::vector<std::string>& endings) {
 
         for (const auto& ending : endings) {
-            if (endsWith(str, ending)) { return true; }
+            if (endsWith(str, ending)) {
+                return true;
+            }
         }
         return false;
     }
@@ -59,7 +61,9 @@ namespace utility::strutil {
     inline bool startsWith(const std::string& str, const std::vector<std::string>& starts) {
 
         for (const auto& start : starts) {
-            if (startsWith(str, start)) { return true; }
+            if (startsWith(str, start)) {
+                return true;
+            }
         }
         return false;
     }
