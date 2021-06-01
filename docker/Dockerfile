@@ -303,6 +303,9 @@ RUN pip install --upgrade \
 # Enable all the driver capabilities so we can use OpenCL in the container
 ENV NVIDIA_DRIVER_CAPABILITIES=all
 
+# Copy the nvidia OpenCL vendorfile into the container so we can also use OpenCL on nvidia GPUs
+COPY --chown=root:root etc/OpenCL/vendors/nvidia.icd /etc/OpenCL/vendors/nvidia.icd
+
 ##############################
 ### SETUP THE USER ACCOUNT ###
 ##############################
