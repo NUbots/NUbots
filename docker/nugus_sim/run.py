@@ -15,7 +15,7 @@ ENV_VARS = ["ROBOCUP_ROBOT_ID", "ROBOCUP_TEAM_COLOR", "ROBOCUP_SIMULATOR_ADDR"]
 
 def read_args() -> Tuple[str, dict]:
     if len(sys.argv) != 2:
-        print("Please specifiy a single role to run!")
+        print("Please specify a single role to run!")
         sys.exit(1)
 
     role = sys.argv[1]
