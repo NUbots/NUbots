@@ -52,7 +52,7 @@ def run(target, user, config, toolchain, **kwargs):
     # Target location to install to
     if target != "local":
         target_binary_dir = "{0}@{1}:/home/{0}/".format(user, target)
-        target_toolchain_dir = "{0}@{1}:/home/{0}/".format(user, target)
+        target_toolchain_dir = "{0}@{1}:/usr/".format(user, target)
     else:
         target_binary_dir = b.project_dir + "/docker/nugus_sim/binaries"
         target_toolchain_dir = b.project_dir + "/docker/nugus_sim/toolchain"
