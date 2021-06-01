@@ -13,11 +13,11 @@ namespace utility::support {
 
         if (hostname == nullptr) {
             char buffer[255];
-            ::gethostname(buffer, 255);    
+            ::gethostname(buffer, 255);
             hostname = buffer;
         }
 
-        return std::string(hostname);            
+        return std::string(hostname);
     }
 
 }  // namespace utility::support
