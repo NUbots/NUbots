@@ -593,45 +593,52 @@ namespace module::platform {
             }
         }
 
+        // Only emit RawSensors if there is any data!
+        if (!(sensor_measurements.position_sensors.size() == 0 && sensor_measurements.accelerometers.size() == 0
+              && sensor_measurements.bumpers.size() == 0 && sensor_measurements.gyros.size() == 0)) {
 
-        // Read each field of msg, translate it to our protobuf and emit the data
-        auto sensor_data = std::make_unique<RawSensors>();
 
-        sensor_data->timestamp = NUClear::clock::now();
+            // Read each field of msg, translate it to our protobuf and emit the data
+            auto sensor_data = std::make_unique<RawSensors>();
 
-        for (const auto& position : sensor_measurements.position_sensors) {
-            translate_servo_id(position.name, sensor_data->servo).present_position = position.value;
+            sensor_data->timestamp = NUClear::clock::now();
+
+            for (const auto& position : sensor_measurements.position_sensors) {
+                translate_servo_id(position.name, sensor_data->servo).present_position = position.value;
+            }
+
+            if (sensor_measurements.accelerometers.size() > 0) {
+                // .accelerometers is a list of one, since our robots have only one accelerometer
+                const auto& accelerometer = sensor_measurements.accelerometers[0];
+                // Webots has a strictly positive output for the accelerometers. We minus 100 to center the output over
+                // 0 The value 100.0 is based on the Look-up Table from NUgus.proto and should be kept consistent with
+                // that
+                sensor_data->accelerometer.x = static_cast<float>(accelerometer.value.X) - 100.0f;
+                sensor_data->accelerometer.y = static_cast<float>(accelerometer.value.Y) - 100.0f;
+                sensor_data->accelerometer.z = static_cast<float>(accelerometer.value.Z) - 100.0f;
+            }
+
+            if (sensor_measurements.gyros.size() > 0) {
+                // .gyros is a list of one, since our robots have only one gyroscope
+                const auto& gyro = sensor_measurements.gyros[0];
+                // Webots has a strictly positive output for the gyros. We minus 100 to center the output over 0
+                // The value 100.0 is based on the Look-up Table from NUgus.proto and should be kept consistent with
+                // that
+                sensor_data->gyroscope.x = static_cast<float>(gyro.value.X) - 100.0f;
+                sensor_data->gyroscope.y = static_cast<float>(gyro.value.Y) - 100.0f;
+                sensor_data->gyroscope.z = static_cast<float>(gyro.value.Z) - 100.0f;
+            }
+
+            // TODO Implement fsrs
+            /*
+            for (const auto& bumper : sensor_measurements.bumpers) {
+                // string name
+                // bool value
+            }
+            */
+
+            emit(sensor_data);
         }
-
-        if (sensor_measurements.accelerometers.size() > 0) {
-            // .accelerometers is a list of one, since our robots have only one accelerometer
-            const auto& accelerometer = sensor_measurements.accelerometers[0];
-            // Webots has a strictly positive output for the accelerometers. We minus 100 to center the output over 0
-            // The value 100.0 is based on the Look-up Table from NUgus.proto and should be kept consistent with that
-            sensor_data->accelerometer.x = static_cast<float>(accelerometer.value.X) - 100.0f;
-            sensor_data->accelerometer.y = static_cast<float>(accelerometer.value.Y) - 100.0f;
-            sensor_data->accelerometer.z = static_cast<float>(accelerometer.value.Z) - 100.0f;
-        }
-
-        if (sensor_measurements.gyros.size() > 0) {
-            // .gyros is a list of one, since our robots have only one gyroscope
-            const auto& gyro = sensor_measurements.gyros[0];
-            // Webots has a strictly positive output for the gyros. We minus 100 to center the output over 0
-            // The value 100.0 is based on the Look-up Table from NUgus.proto and should be kept consistent with that
-            sensor_data->gyroscope.x = static_cast<float>(gyro.value.X) - 100.0f;
-            sensor_data->gyroscope.y = static_cast<float>(gyro.value.Y) - 100.0f;
-            sensor_data->gyroscope.z = static_cast<float>(gyro.value.Z) - 100.0f;
-        }
-
-        // TODO Implement fsrs
-        /*
-        for (const auto& bumper : sensor_measurements.bumpers) {
-            // string name
-            // bool value
-        }
-        */
-
-        emit(sensor_data);
 
         for (const auto& camera : sensor_measurements.cameras) {
             // Convert the incoming image so we can emit it to the PowerPlant.
