@@ -265,9 +265,7 @@ namespace module::platform {
                 // Otherwise, if the duration is negative or 0, the servo should have reached its position before now
                 // Because of this, we move the servo as fast as we can to reach the position.
                 // 5.236 == 50 rpm which is similar to the max speed of the servos
-                double speed = duration.count() > 0
-                                   ? diff / std::chrono::duration<double>(duration).count()
-                                   : 5.236;
+                double speed = duration.count() > 0 ? diff / std::chrono::duration<double>(duration).count() : 5.236;
 
                 // Update our internal state
                 if (servo_state[target.id].p_gain != target.gain || servo_state[target.id].i_gain != target.gain * 0.0
@@ -338,6 +336,8 @@ namespace module::platform {
             // Receiving
             read_io = on<IO>(fd, IO::READ | IO::CLOSE | IO::ERROR).then("Read Stream", [this](const IO::Event& event) {
                 if ((event.events & IO::READ) != 0) {
+                    // Service the watchdog
+                    emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
                     // If we have not seen the welcome message yet, look for it
                     if (!connection_active) {
                         // Initaliase the string with ???????
@@ -416,9 +416,6 @@ namespace module::platform {
                             buffer.erase(buffer.begin(), std::next(buffer.begin(), sizeof(length) + length));
                         }
                     }
-
-                    // Service the watchdog
-                    emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
                 }
 
                 // For IO::ERROR and IO::CLOSE conditions the watchdog will handle reconnections so just report
@@ -472,19 +469,21 @@ namespace module::platform {
                     // Size of the message, in network endian
                     const uint32_t Nn = htonl(data.size());
 
-                    if (!connection_active) {
+                    if (connection_active) {
                         // Send the message size first
                         if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
                             log<NUClear::ERROR>(
                                 fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
                         }
-                    }
 
-                    // Now send the data
-                    if (send(fd, data.data(), data.size(), 0) != int(data.size())) {
-                        log<NUClear::ERROR>(fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
+
+                        // Now send the data
+                        if (send(fd, data.data(), data.size(), 0) != int(data.size())) {
+                            log<NUClear::ERROR>(
+                                fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
+                        }
+                        log<NUClear::TRACE>("Sending actuator request.");
                     }
-                    log<NUClear::TRACE>("Sending actuator request.");
                 });
 
             // Reconnection has now completed
