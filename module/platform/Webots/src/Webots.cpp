@@ -393,6 +393,8 @@ namespace module::platform {
 
                         // Read data into our buffer and resize it to the new data we read
                         auto bytes_read = ::read(fd, buffer.data() + old_size, available);
+                        // Shrink the buffer to the size that was actually read.
+                        buffer.resize(old_size + bytes_read);
 
                         // Function to read the payload length from the buffer
                         auto read_length = [this](const std::vector<uint8_t>& buffer) {
