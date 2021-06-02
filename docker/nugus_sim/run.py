@@ -101,22 +101,24 @@ def update_config_files(args: dict) -> None:
     webots_config["port"] = int(port)
     write_config("webots.yaml", webots_config)
 
-    # Compute the log directory for this robot, based on ROBOCUP_ROBOT_ID
-    hostname = f"webots{env_vars['ROBOCUP_ROBOT_ID']}"
-    robot_log_dir = f"/robocup-logs/{hostname}"
+    # Configure logging to /robocup-logs if it exists
+    if os.path.exists("/robocup-logs"):
+        # Compute the log directory for this robot, based on ROBOCUP_ROBOT_ID
+        hostname = f"webots{env_vars['ROBOCUP_ROBOT_ID']}"
+        robot_log_dir = f"/robocup-logs/{hostname}"
 
-    # Ensure the log directory exists
-    Path(robot_log_dir).mkdir(parents=True, exist_ok=True)
+        # Ensure the log directory exists
+        Path(robot_log_dir).mkdir(parents=True, exist_ok=True)
 
-    # Configure FileLogHandler to write to the RoboCup log directory
-    file_log_handler_config = read_config("FileLogHandler.yaml")
-    file_log_handler_config["log_file"] = f"{robot_log_dir}/log"
-    write_config("FileLogHandler.yaml", file_log_handler_config)
+        # Configure FileLogHandler to write to the RoboCup log directory
+        file_log_handler_config = read_config("FileLogHandler.yaml")
+        file_log_handler_config["log_file"] = f"{robot_log_dir}/log"
+        write_config("FileLogHandler.yaml", file_log_handler_config)
 
-    # Configure DataLogging to write to the RoboCup log directory
-    data_logging_config = read_config("DataLogging.yaml")
-    data_logging_config["output"]["directory"] = robot_log_dir
-    write_config("DataLogging.yaml", data_logging_config)
+        # Configure DataLogging to write to the RoboCup log directory
+        data_logging_config = read_config("DataLogging.yaml")
+        data_logging_config["output"]["directory"] = robot_log_dir
+        write_config("DataLogging.yaml", data_logging_config)
 
 
 def run_role(role: str, binaries_dir: str, env_vars: dict) -> None:
