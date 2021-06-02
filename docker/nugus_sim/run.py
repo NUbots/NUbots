@@ -45,43 +45,47 @@ def read_args() -> dict:
 
 
 def update_config(args: dict) -> None:
-    # Get the data
     env_vars = args["env_vars"]
     is_goalie = args["is_goalie"]
 
-    yaml = ruamel.yaml.YAML(typ="safe")
+    yaml = ruamel.yaml.YAML()  # Can't use `typ="safe"` since we want round-tripping to preserve comments
 
     # Change into the config directory
     os.chdir(CONFIG_DIR)
 
     # Set `player_id` in GlobalConfig.yaml from ROBOCUP_ROBOT_ID
-    with open("GlobalConfig.yaml", "rw") as file:
+    with open("GlobalConfig.yaml", "r+") as file:
         global_config = yaml.load(file)
         global_config["player_id"] = int(env_vars["ROBOCUP_ROBOT_ID"])
+        file.seek(0)
         yaml.dump(global_config, file)
 
     # Set `player_id` in GameController.yaml from ROBOCUP_ROBOT_ID
-    with open("GameController.yaml", "rw") as file:
+    with open("GameController.yaml", "r+") as file:
         game_controller_config = yaml.load(file)
         game_controller_config["player_id"] = int(env_vars["ROBOCUP_ROBOT_ID"])
+        file.seek(0)
         yaml.dump(game_controller_config, file)
 
     # ROBOCUP_TEAM_COLOR
     # ??
 
     # Set `server_address` and `port` in webots.yaml from ROBOCUP_SIMULATOR_ADDR
-    with open("webots.yaml", "rw") as file:
+    with open("webots.yaml", "r+") as file:
         webots_config = yaml.load(file)
         address, port = env_vars["ROBOCUP_SIMULATOR_ADDR"].split(":", 2)
         webots_config["server_address"] = address
         webots_config["port"] = int(port)
+        file.seek(0)
         yaml.dump(webots_config, file)
 
     # Set `goalie` in SoccerSimulator.yaml from the --goalie argument
-    with open("SoccerStrategy.yaml", "rw") as file:
-        soccer_simulator_config = yaml.load(file)
-        soccer_simulator_config["goalie"] = is_goalie
-        yaml.dump(soccer_simulator_config, file)
+    if is_goalie:
+        with open("SoccerStrategy.yaml", "r+") as file:
+            soccer_simulator_config = yaml.load(file)
+            soccer_simulator_config["goalie"] = is_goalie
+            file.seek(0)
+            yaml.dump(soccer_simulator_config, file)
 
 
 def run_role(role: str, env_vars: dict) -> None:
@@ -91,14 +95,14 @@ def run_role(role: str, env_vars: dict) -> None:
     modified_env = os.environ.copy()
 
     # Set up env variables to pass through
-    for key, value in env_vars:
+    for key, value in env_vars.items():
         modified_env[key] = value
 
     # Set the robot hostname
     modified_env["ROBOT_HOSTNAME"] = f"webots{env_vars['ROBOCUP_ROBOT_ID']}"
 
     # Run the role binary
-    exit(subprocess.run(f"./{role}", env=modified_env).returncode)
+    sys.exit(subprocess.run(f"./{role}", env=modified_env).returncode)
 
 
 if __name__ == "__main__":
