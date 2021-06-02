@@ -10,7 +10,13 @@ import ruamel.yaml
 BINARIES_DIR = "/home/nubots/NUbots/binaries"
 CONFIG_DIR = BINARIES_DIR + "/config"
 
-ENV_VARS = ("ROBOCUP_ROBOT_ID", "ROBOCUP_TEAM_COLOR", "ROBOCUP_SIMULATOR_ADDR")
+REQUIRED_ENV_VARS = ("ROBOCUP_ROBOT_ID", "ROBOCUP_TEAM_COLOR", "ROBOCUP_SIMULATOR_ADDR")
+OPTIONAL_ENV_VARS = (
+    "ROBOCUP_TEAM_PLAYER1_IP",
+    "ROBOCUP_TEAM_PLAYER2_IP",
+    "ROBOCUP_TEAM_PLAYER3_IP",
+    "ROBOCUP_TEAM_PLAYER4_IP",
+)
 
 
 def read_args() -> dict:
@@ -28,11 +34,11 @@ def read_args() -> dict:
         print("The role '" + args.role + "' does not exist!")
         sys.exit(1)
 
-    # Read the env vars
-    config = {var: os.environ.get(var) for var in ENV_VARS if var in os.environ}
+    # Read the required environment variables
+    env_vars = {var: os.environ.get(var) for var in REQUIRED_ENV_VARS if var in os.environ}
 
-    # Get the list of vars required that weren't set :(
-    unset_vars = [var for var in ENV_VARS if var not in config]
+    # Get the list of required environment variables that weren't set :(
+    unset_vars = [var for var in REQUIRED_ENV_VARS if var not in env_vars]
 
     # Ensure that all required environment variables were set
     if len(unset_vars) != 0:
@@ -41,7 +47,12 @@ def read_args() -> dict:
             print(var)
         sys.exit(1)
 
-    return {"role": args.role, "env_vars": config, "is_goalie": args.goalie}
+    # Read the optional environment variables
+    for var in OPTIONAL_ENV_VARS:
+        if var in os.environ:
+            env_vars[var] = os.environ.get(var)
+
+    return {"role": args.role, "env_vars": env_vars, "is_goalie": args.goalie}
 
 
 def update_config(args: dict) -> None:
@@ -68,7 +79,7 @@ def update_config(args: dict) -> None:
         yaml.dump(game_controller_config, file)
 
     # ROBOCUP_TEAM_COLOR
-    # ??
+    # (not set as it's not used by our code)
 
     # Set `server_address` and `port` in webots.yaml from ROBOCUP_SIMULATOR_ADDR
     with open("webots.yaml", "r+") as file:
@@ -94,7 +105,7 @@ def run_role(role: str, env_vars: dict) -> None:
 
     modified_env = os.environ.copy()
 
-    # Set up env variables to pass through
+    # Set up environment variables to pass through to the binary
     for key, value in env_vars.items():
         modified_env[key] = value
 
