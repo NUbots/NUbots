@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
+import glob
 import os
 import subprocess
+from pathlib import Path
 
 from termcolor import cprint
 
@@ -9,111 +11,106 @@ import b
 
 
 def register(command):
-
-    command.help = "Build and run images for use with Webots simulation environment"
+    command.help = "Build and run images for use with Webots"
     subparsers = command.add_subparsers(help="sub-command help", dest="sub_command")
 
-    command_build = subparsers.add_parser("build")
-    command_run = subparsers.add_parser("run")
+    build_subcommand = subparsers.add_parser("build", "Build the docker image for use with Webots")
+    run_subcommand.add_argument("roles", nargs="+", help="The roles to build for the image")
 
-    command_build.add_argument(
-        "-c",
-        "--clean",
-        dest="clean",
-        action="store_true",
-        default=False,
-        help="Cleans config (./b configure --clean)",
-    )
-
-    command_build.add_argument(
-        "-p",
-        "--push",
-        dest="push",
-        action="store_true",
-        default=False,
-        help="Pushes image to Docker Hub",
-    )
-
-    command_run.add_argument("role", nargs=1, help="Role to run")
+    run_subcommand = subparsers.add_parser("run", "Run the simulation docker image for use with Webots")
+    run_subcommand.add_argument("role", help="The role to run")
 
 
-def run(sub_command, role=None, **kwargs):
+def get_cmake_flags(roles_to_build):
+    roles_dir = os.path.join(b.project_dir, "roles")
+    roles_glob = os.path.join(roles_dir, "*.role")
+
+    available_roles = [Path(role_path).stem for role_path in glob.glob(roles_glob)]
+
+    # Ensure that all the roles requested are available
+    for role in roles_to_build:
+        if role not in available_roles:
+            print(f"role '{role}' not found")
+            sys.exit(1)
+
+    role_flags = [f"-DROLE_{role}=ON" for role in available_roles if role in roles_to_build] + [
+        f"-DROLE_{role}=OFF" for role in available_roles if role not in roles_to_build
+    ]
+
+    return ["-DCMAKE_BUILD_TYPE=Release"] + role_flags
+
+
+def exec_build(roles):
+    # Set target and build the base docker image
+    exit_code = subprocess.run(["./b", "target", "generic"]).returncode
+    if exit_code != 0:
+        cprint("unable to set target, exit code {}".format(exit_code), "red", attrs=["bold"])
+        sys.exit(exit_code)
+
+    # Configure the build
+    exit_code = subprocess.run(["./b", "configure", "--"] + get_cmake_flags(roles)).returncode
+    if exit_code != 0:
+        cprint("unable to configure build, exit code {}".format(exit_code), "red", attrs=["bold"])
+        sys.exit(exit_code)
+
+    # Build the code
+    exit_code = subprocess.run(["./b", "build"]).returncode
+    if exit_code != 0:
+        cprint("unable to build code, exit code {}".format(exit_code), "red", attrs=["bold"])
+        sys.exit(exit_code)
+
+    # Copy compiled binaries and toolchain files out of the build volume by `./b install`ing to a local folder
+    exit_code = subprocess.run(["./b", "install", "local", "-co", "-t"]).returncode
+    if exit_code != 0:
+        cprint(
+            "unable to install to local directory, exit code {}".format(exit_code),
+            "red",
+            attrs=["bold"],
+        )
+        sys.exit(exit_code)
+
+    # Change into the docker folder
+    os.chdir(os.path.join(b.project_dir, "docker"))
+
+    # Build the image!
+    exit_code = subprocess.run(
+        ["docker", "build", "-t", "nugus_sim:robocup", "-f", "./nugus_sim.Dockerfile", "."]
+    ).returncode
+    if exit_code != 0:
+        cprint(
+            "unable to build nugus_sim docker image, exit code {}".format(exit_code),
+            "red",
+            attrs=["bold"],
+        )
+        sys.exit(exit_code)
+
+    print("built and tagged docker image nugus_sim:robocup")
+
+
+def exec_run(role):
+    docker_run_command = [
+        "docker",
+        "container",
+        "run",
+        "--rm",
+        "--network=host",
+        "-e",
+        "ROBOCUP_ROBOT_ID=1",
+        "-e",
+        "ROBOCUP_TEAM_COLOR=blue",
+        "-e",
+        "ROBOCUP_SIMULATOR_ADDR=127.0.0.1:10020",
+        "nugus_sim:robocup",
+        role,
+    ]
+
+    subprocess.run(docker_run_command)
+
+
+def run(sub_command, roles=None, role=None, **kwargs):
     if sub_command == "build":
-
-        # # Set target
-        # err = subprocess.run(["./b", "target", "robocup2021"]).returncode
-        # if err != 0:
-        #     cprint("returned exit code {}".format(err), "red", attrs=["bold"])
-        #     exit(err)
-
-        # Remove build volume
-        if kwargs["clean"] == True:
-            # Clean config
-            err = subprocess.run(["./b", "configure", "--clean"]).returncode
-            if err != 0:
-                cprint(
-                    "returned exit code {} during NUbots docker volume clean and default configure.".format(err),
-                    "red",
-                    attrs=["bold"],
-                )
-                exit(err)
-
-        # Set build config
-        err = subprocess.run(["./b", "configure", "--", "-DCMAKE_BUILD_TYPE=Release", "-DROLE_webots=ON"]).returncode
-        if err != 0:
-            cprint("returned exit code {} configuring NUbots.".format(err), "red", attrs=["bold"])
-            exit(err)
-
-        # Build code
-        err = subprocess.run(["./b", "build"]).returncode
-        if err != 0:
-            cprint("returned exit code {} building NUbots.".format(err), "red", attrs=["bold"])
-            exit(err)
-
-        # Copy compiled binaries and runtime dependancies out of build volume
-        err = subprocess.run(["./b", "install", "local", "-t"]).returncode
-        if err != 0:
-            cprint(
-                "returned exit code {} during copying of binaries to local directory.".format(err),
-                "red",
-                attrs=["bold"],
-            )
-            exit(err)
-
-        # Build image!
-        os.chdir(b.project_dir + "/docker")
-        err = subprocess.run(
-            ["docker", "build", "-t", "nugus_sim:robocup", "-f", "./nugus_sim_Dockerfile", "."]
-        ).returncode
-        if err != 0:
-            cprint(
-                "returned exit code {} during build stage of RoboCup2021 docker image.".format(err),
-                "red",
-                attrs=["bold"],
-            )
-            exit(err)
-
-    # Just for testing atm
-    elif sub_command == "run":
-        docker_run_command = [
-            "docker",
-            "container",
-            "run",
-            "--rm",
-            "--network=host",
-            "-e",
-            "ROBOCUP_ROBOT_ID=1",
-            "-e",
-            "ROBOCUP_TEAM_COLOR=Blue",
-            "-e",
-            "ROBOCUP_SIMULATOR_ADDR=127.0.0.1:10020",
-            "nugus_sim:robocup",
-        ]
-        docker_run_command.append(role[0])
-        subprocess.run(docker_run_command)
-
+        exec_build(roles)
+    elif sub_command == "run":  # For testing
+        exec_run(role)
     else:
-        # Probably a better way to call help when no sub commands are given?
-        os.chdir(b.project_dir)
-        tool_name = os.path.basename(__file__)[:-3]
-        exit(subprocess.run(["./b", tool_name, "--help"]).returncode)
+        print(f"invalid sub command: '{sub_command}'")
