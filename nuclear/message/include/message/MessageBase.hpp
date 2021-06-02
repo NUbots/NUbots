@@ -25,17 +25,21 @@ namespace NUClear::util::serialise {
             return output;
         }
 
-        static inline T deserialise(const std::vector<char>& in) {
+        [[nodiscard]] static inline T deserialise(const char* in, const size_t& length) {
 
             // Make a buffer
             protobuf_type out;
 
             // Deserialize it
-            if (!out.ParseFromArray(in.data(), in.size())) {
+            if (!out.ParseFromArray(in, length)) {
                 throw std::runtime_error("Message failed to deserialise.");
             }
 
             return out;
+        }
+
+        [[nodiscard]] static inline T deserialise(const std::vector<char>& in) {
+            return deserialise(in.data(), in.size());
         }
 
         static inline uint64_t hash() {

@@ -1,8 +1,17 @@
 # Controls the minimum log level that NUClear log will display
 log_level: DEBUG
 
+# Requested time step between sensors
+time_step: 8
+# Minimum time step allowed between camera sensors
+min_camera_time_step: 16
+# Minimum time step allowed between other sensors
+min_sensor_time_step: 8
+
+clock_smoothing: 0.6
+
 # Connection details
 server_address: "127.0.0.1"
-port: "10020"
+port: 10020
 
 time_step: 32

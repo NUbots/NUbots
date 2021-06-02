@@ -1,101 +1,124 @@
 #!/usr/bin/env python3
 
+import argparse
 import os
 import subprocess
 import sys
-from typing import Tuple
 
 import ruamel.yaml
 
-BINARIES_DIR = "/home/nubots/NUbots/binaries"
-CONFIG_DIR = BINARIES_DIR + "/config"
+DEFAULT_BINARIES_DIR = os.path.abspath(os.path.join(os.sep, "home", "nubots", "NUbots", "binaries"))
+DEFAULT_CONFIG_DIR = os.path.join(DEFAULT_BINARIES_DIR, "config")
 
-ENV_VARS = ["ROBOCUP_ROBOT_ID", "ROBOCUP_TEAM_COLOR", "ROBOCUP_SIMULATOR_ADDR"]
+REQUIRED_ENV_VARS = ("ROBOCUP_ROBOT_ID", "ROBOCUP_TEAM_COLOR", "ROBOCUP_SIMULATOR_ADDR")
+OPTIONAL_ENV_VARS = (
+    "ROBOCUP_TEAM_PLAYER1_IP",
+    "ROBOCUP_TEAM_PLAYER2_IP",
+    "ROBOCUP_TEAM_PLAYER3_IP",
+    "ROBOCUP_TEAM_PLAYER4_IP",
+)
 
 
-def read_args() -> Tuple[str, dict]:
-    if len(sys.argv) != 2:
-        print("Please specifiy a single role to run!")
+yaml = ruamel.yaml.YAML()  # Can't use `typ="safe"` since we want round-tripping to preserve comments
+
+
+def read_config(file_path):
+    with open(file_path, "r") as file:
+        return yaml.load(file)
+
+
+def write_config(file_path, config):
+    with open(file_path, "w") as file:
+        yaml.dump(config, file)
+
+
+def read_args() -> dict:
+    parser = argparse.ArgumentParser(description="Run a role for webots RoboCup")
+
+    parser.add_argument("role", help="The role to run")
+    parser.add_argument(
+        "--binaries-dir", dest="binaries_dir", default=DEFAULT_BINARIES_DIR, help="The path to built role binaries"
+    )
+    parser.add_argument("--config-dir", dest="config_dir", default=DEFAULT_CONFIG_DIR, help="The path to config files")
+
+    args = parser.parse_args()
+
+    # Ensure that the role requested exists
+    if not os.path.exists(os.path.join(args.binaries_dir, args.role)):
+        print("The role '" + args.role + "' does not exist!")
         sys.exit(1)
 
-    role = sys.argv[1]
+    # Read the required environment variables
+    env_vars = {var: os.environ.get(var) for var in REQUIRED_ENV_VARS if var in os.environ}
 
-    built_roles = []
+    # Get the list of required environment variables that weren't set :(
+    unset_vars = [var for var in REQUIRED_ENV_VARS if var not in env_vars]
 
-    # Built roles
-    for filename in os.listdir(BINARIES_DIR):
-        if os.path.isfile(os.path.join(BINARIES_DIR, filename)):
-            built_roles.append(filename)
-
-    if role not in built_roles:
-        print("The role '" + role + "' does not exist!")
-        sys.exit(1)
-
-    # Read env vars
-    config = {var: os.environ.get(var) for var in ENV_VARS if var in os.environ}
-
-    # List of env vars that didn't get set :(
-    unset_vars = [var for var in ENV_VARS if var not in config]
-
-    # If not all needed environment variables were set
+    # Ensure that all required environment variables were set
     if len(unset_vars) != 0:
         print("The following environment variables were not set!")
         for var in unset_vars:
             print(var)
         sys.exit(1)
 
-    return role, config
+    # Read the optional environment variables
+    for var in OPTIONAL_ENV_VARS:
+        if var in os.environ:
+            env_vars[var] = os.environ.get(var)
+
+    return {
+        "role": args.role,
+        "binaries_dir": args.binaries_dir,
+        "config_dir": args.config_dir,
+        "env_vars": env_vars,
+    }
 
 
-def set_env_vars(config: dict) -> None:
-    yaml = ruamel.yaml.YAML()
-    os.chdir(CONFIG_DIR)
+def update_config_files(args: dict) -> None:
+    env_vars = args["env_vars"]
 
-    # ROBOCUP_ROBOT_ID
-    global_config_fname = "GlobalConfig.yaml"
-    with open(global_config_fname) as file:
-        global_config_data = yaml.load(file)
+    # Change into the config directory
+    os.chdir(args["config_dir"])
 
-    global_config_data["player_id"] = int(config["ROBOCUP_ROBOT_ID"])
+    # Set `player_id` in GlobalConfig.yaml from ROBOCUP_ROBOT_ID
+    global_config = read_config("GlobalConfig.yaml")
+    global_config["player_id"] = int(env_vars["ROBOCUP_ROBOT_ID"])
+    write_config("GlobalConfig.yaml", global_config)
 
-    with open(global_config_fname, "w") as file:
-        yaml.dump(global_config_data, file)
-
-    game_controller_fname = "GameController.yaml"
-    with open(game_controller_fname) as file:
-        game_controller_data = yaml.load(file)
-
-    game_controller_data["player_id"] = int(config["ROBOCUP_ROBOT_ID"])
-
-    with open(game_controller_fname, "w") as file:
-        yaml.dump(game_controller_data, file)
+    # Set `player_id` in GameController.yaml from ROBOCUP_ROBOT_ID
+    game_controller_config = read_config("GameController.yaml")
+    game_controller_config["player_id"] = int(env_vars["ROBOCUP_ROBOT_ID"])
+    write_config("GameController.yaml", game_controller_config)
 
     # ROBOCUP_TEAM_COLOR
-    # ??
+    # (not set as it's not used by our code)
 
-    # ROBOCUP_SIMULATOR_ADDR
-    webots_config_fname = "webots.yaml"
-    webots_addr, webots_port = config["ROBOCUP_SIMULATOR_ADDR"].split(":", 2)
-
-    with open(webots_config_fname) as file:
-        webots_config_data = yaml.load(file)
-    webots_config_data["server_address"] = str(webots_addr)
-    webots_config_data["port"] = int(webots_port)
-
-    with open(webots_config_fname, "w") as file:
-        yaml.dump(webots_config_data, file)
+    # Set `server_address` and `port` in webots.yaml from ROBOCUP_SIMULATOR_ADDR
+    webots_config = read_config("webots.yaml")
+    address, port = env_vars["ROBOCUP_SIMULATOR_ADDR"].split(":", 2)
+    webots_config["server_address"] = address
+    webots_config["port"] = int(port)
+    write_config("webots.yaml", webots_config)
 
 
-def run_role(inRole: str) -> None:
-    print(inRole)
-    # Change into binaries directory
-    os.chdir(BINARIES_DIR)
+def run_role(role: str, binaries_dir: str, env_vars: dict) -> None:
+    # Change into the directory with the binaries
+    os.chdir(binaries_dir)
 
-    # Run Binary
-    exit(subprocess.run("./" + inRole).returncode)
+    modified_env = os.environ.copy()
+
+    # Set up environment variables to pass through to the binary
+    for key, value in env_vars.items():
+        modified_env[key] = value
+
+    # Set the robot hostname
+    modified_env["ROBOT_HOSTNAME"] = f"webots{env_vars['ROBOCUP_ROBOT_ID']}"
+
+    # Run the role binary
+    sys.exit(subprocess.run(f"./{role}", env=modified_env).returncode)
 
 
 if __name__ == "__main__":
-    role, env_vars = read_args()
-    set_env_vars(env_vars)
-    run_role(role)
+    args = read_args()
+    update_config_files(args)
+    run_role(args["role"], args["binaries_dir"], args["env_vars"])

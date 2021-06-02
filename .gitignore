@@ -73,6 +73,9 @@ docker/nugus_sim/toolchain
 # Tests
 tests_output/
 
+# Logs
+/home/nubots/NUbots/log/*
+
 # Misc
 tags
 *.swp
