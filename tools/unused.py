@@ -1,9 +1,8 @@
-#!/usr/bin/env python3
+#! /usr/bin/env python3
 
 import os
-import re
-
-from termcolor import cprint
+import textwrap
+from glob import glob
 
 import b
 from utility.dockerise import run_on_docker
@@ -12,71 +11,70 @@ from utility.dockerise import run_on_docker
 @run_on_docker
 def register(command):
     # Install help
-    command.help = "Creates a list of unused or commented out modules"
+    command.help = "Find all unused modules"
+
+    command.add_argument(
+        "--export-role",
+        dest="export",
+        action="store_true",
+        default=False,
+        help="Create a role containing all unused modules",
+    )
 
 
 @run_on_docker
-def run(**kwargs):
+def run(export, **kwargs):
+    base = b.project_dir
+    module_base = os.path.join(base, b.cmake_cache["NUCLEAR_MODULE_DIR"])
+    role_base = os.path.join(base, b.cmake_cache["NUCLEAR_ROLES_DIR"])
 
-    source_dir = b.cmake_cache[b.cmake_cache["CMAKE_PROJECT_NAME"] + "_SOURCE_DIR"]
-    roles_path = os.path.join(source_dir, b.cmake_cache["NUCLEAR_ROLES_DIR"])
-    modules_path = os.path.join(source_dir, b.cmake_cache["NUCLEAR_MODULE_DIR"])
+    # Find all module folders that contain a CMakeLists.txt file
+    potential_modules = glob(os.path.join(module_base, "**", "CMakeLists.txt"), recursive=True)
 
-    # Modules that exist in the system
-    existing_modules = set()
+    # Filter potential modules down to only those whose CMakeLists.txt contains 'nuclear_module'
+    modules = []
+    for module in potential_modules:
+        with open(module, "r") as f:
+            contents = f.read()
+        if "nuclear_module" in contents.lower():
+            modules.append(os.path.relpath(os.path.dirname(module), module_base).replace(os.sep, "::"))
 
-    # Modules that are used in role files
-    used_modules = set()
+    # Find all of the role files
+    role_files = glob(os.path.join(role_base, "*.role"), recursive=True)
 
-    # Modules that are not used by any role
-    unused_modules = set()
+    # Extract from the role files all of the used modules
+    used_modules = []
+    for role in role_files:
+        with open(role, "r") as f:
+            for module in f:
+                # Exclude lines containing 'nuclear_role', '(' and ')'
+                if "nuclear_role" not in module and "(" not in module and ")" not in module:
+                    # Exclude commented lines
+                    if len(module[: module.find("#")].strip()) > 0:
+                        used_modules.append(module[: module.find("#")].strip())
 
-    # Find all CMakeLists.txt in NUCLEAR_MODULE_DIR that contain a nuclear_module() call
-    for folder, _, files in os.walk(modules_path):
-        for module in files:
-            if module == "CMakeLists.txt":
-                module_path = os.path.join(folder, module)
-                with open(module_path, "r") as f:
-                    for line in f:
-                        if "nuclear_module" in line.lower():
-                            # Find nuclear_module call and make sure it is not commented out
-                            if "#" not in line or line.find("#") > line.lower().find("nuclear_module"):
-                                # Remove modules_path from the start of the path and
-                                # CMakeLists.txt from the end of the path
-                                # So module/motion/HeadController/CMakeLists.txt becomes motion/HeadController
-                                path = module_path.replace(modules_path, "")
-                                path = os.path.join(*(path.split(os.path.sep)[:-1]))
+    # Remove used modules from the list of modules
+    modules = set(modules) - set(used_modules)
 
-                                # Replace path separators with ::
-                                path = path.replace(os.path.sep, "::")
-                                existing_modules.add(path)
-                                break
-
-    # Find all of the used modules
-    for role in os.listdir(roles_path):
-        if role.endswith(".role"):
-            with open(os.path.join(roles_path, role), "r") as f:
-                for line in f:
-                    if "#" in line:
-                        line = line[: line.find("#")]
-                    line = line.strip()
-                    reg = re.findall(r"(\w+::(?:\w+(::)?)*)", line)
-                    for modules in reg:
-                        for module in modules:
-                            if module != "" and module != "::":
-                                used_modules.add(module)
-
-    # Find out which modules are unused
-    unused_modules = existing_modules.difference(used_modules)
-
-    cprint("Existing Modules", attrs=["bold"])
-    print("\n".join(existing_modules))
-    print("\n")
-
-    cprint("Used Modules", "green", attrs=["bold"])
-    cprint("\n".join(used_modules), "green")
-    print("\n")
-
-    cprint("Unused Modules", "red", attrs=["bold"])
-    cprint("\n".join(unused_modules), "red", attrs=["bold"])
-    print("\n")
+    # Show the results
+    if len(modules) > 0:
+        if export:
+            role_template = textwrap.dedent(
+                """\
+                nuclear_role(
+                  {modules}
+                )
+                """
+            )
+            with open(os.path.join(role_base, "unused.role"), "w") as f:
+                f.write(role_template.format(modules="\n  ".join(modules)))
+        else:
+            role_template = textwrap.dedent(
+                """\
+                Unused modules:
+                  {modules}
+                """
+            )
+            print(role_template.format(modules="\n  ".join(modules)))
+    else:
+        print("No unused modules")
