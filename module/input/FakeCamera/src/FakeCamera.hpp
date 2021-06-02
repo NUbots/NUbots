@@ -19,8 +19,11 @@ namespace module::input {
             std::string lens_prefix;
         } config;
 
+        /// @brief List of images and their corresponding lens files that we are cycling through
         std::vector<std::pair<std::string, std::string>> images;
-        size_t image_counter = 0;
+        /// @brief Index into the images vector representing the current image/lens pair we are loading
+        size_t image_index = 0;
+        /// @brief mutex controlling access to the images vector and the image_index variable
         std::mutex images_mutex;
 
         /// @brief JPEG decompressor. Constructed as a shared_ptr so that it will be automatically deleted on class

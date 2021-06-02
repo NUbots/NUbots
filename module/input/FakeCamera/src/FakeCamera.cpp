@@ -113,7 +113,7 @@ namespace module::input {
                     msg->Hcw = Hoc.inverse().matrix();
 
                     // Load image file into vector
-                    msg->data = utility::file::readFile(images[image_counter].first);
+                    msg->data = utility::file::readFile(images[image_index].first);
 
                     // Extract file dimensions from file data
                     std::array<int, 2> dimensions;
@@ -140,8 +140,8 @@ namespace module::input {
                                                         images[image_index].first));
                     }
                 }
-                if (++image_counter >= images.size()) {
-                    image_counter = 0;
+                if (++image_index >= images.size()) {
+                    image_index = 0;
                 }
             }
         });
