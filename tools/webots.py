@@ -59,8 +59,11 @@ def exec_build(roles):
         cprint("unable to build code, exit code {}".format(exit_code), "red", attrs=["bold"])
         sys.exit(exit_code)
 
-    # Copy compiled binaries and toolchain files out of the build volume by `./b install`ing to a local folder
-    exit_code = subprocess.run(["./b", "install", "local", "-co", "-t"]).returncode
+    # Location of the built binaries and toolchain files on the local filesystem
+    local_install_dir = os.path.join(b.project_dir, "docker", "nugus_sim")
+
+    # Install the compiled binaries and toolchain files to the local install directory, to be added to the docker image
+    exit_code = subprocess.run(["./b", "install", local_install_dir, "--local", "-co", "-t"]).returncode
     if exit_code != 0:
         cprint(
             "unable to install to local directory, exit code {}".format(exit_code),
