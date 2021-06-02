@@ -26,6 +26,7 @@
 
 #include "utility/file/fileutil.hpp"
 #include "utility/strutil/strutil.hpp"
+#include "utility/support/hostname.hpp"
 
 namespace extension {
 
@@ -44,7 +45,7 @@ namespace extension {
         // Per-robot and per-binary files can add new nodes to the file, but this is probably unwise.
         //
         // We have to merge the YAML trees to account for situations where a sub-node is not defined in a higher
-        // priotity tree.
+        // priority tree.
 
         std::string fileName, hostname, binary;
         YAML::Node config;
@@ -208,8 +209,7 @@ namespace NUClear::dsl {
                 auto flags = ::extension::FileWatch::RENAMED | ::extension::FileWatch::CHANGED;
 
                 // Get hostname so we can find the correct per-robot config directory.
-                char hostname[255];
-                gethostname(hostname, 255);
+                std::string hostname = utility::support::getHostname();
 
                 // Get the command line arguments so we can find the current binary's name.
                 std::shared_ptr<const message::CommandLineArguments> args =
@@ -221,7 +221,7 @@ namespace NUClear::dsl {
 
                 // Set paths to the config files.
                 auto defaultConfig = "config/" + path;
-                auto robotConfig   = "config/" + std::string(hostname) + "/" + path;
+                auto robotConfig   = "config/" + hostname + "/" + path;
                 auto binaryConfig  = "config/" + std::string(binary) + "/" + path;
 
                 if (!utility::file::exists(defaultConfig)) {
@@ -268,8 +268,7 @@ namespace NUClear::dsl {
                     // Return our yaml file
                     try {
                         // Get hostname so we can find the correct per-robot config directory.
-                        char hostname[255];
-                        gethostname(hostname, 255);
+                        std::string hostname = utility::support::getHostname();
 
                         // Get the command line arguments so we can find the current binary's name.
                         std::shared_ptr<const message::CommandLineArguments> args =
