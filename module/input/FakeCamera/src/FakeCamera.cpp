@@ -85,32 +85,27 @@ namespace module::input {
             {  // mutex scope
                 std::lock_guard<std::mutex> lock(images_mutex);
 
-                if (image_counter < images.size()) {
-                    auto msg                     = std::make_unique<message::output::CompressedImage>();
-                    YAML::Node lens              = YAML::LoadFile(images[image_counter].second);
-                    const std::string projection = lens["projection"].as<std::string>();
-                    if (projection == "RECTILINEAR") {
-                        msg->lens.projection = CompressedImage::Lens::Projection::RECTILINEAR;
-                    }
-                    else if (projection == "EQUIDISTANT") {
-                        msg->lens.projection = CompressedImage::Lens::Projection::EQUIDISTANT;
-                    }
-                    else if (projection == "EQUISOLID") {
-                        msg->lens.projection = CompressedImage::Lens::Projection::EQUISOLID;
-                    }
-                    else {
-                        msg->lens.projection = CompressedImage::Lens::Projection::UNKNOWN;
-                    }
+                if (image_index < images.size()) {
+                    auto msg = std::make_unique<CompressedImage>();
+
+                    // Extract lens parameters from the lens file
+                    YAML::Node lens        = YAML::LoadFile(images[image_index].second);
+                    msg->lens.projection   = lens["projection"].as<std::string>();
                     msg->lens.focal_length = lens["focal_length"].as<float>();
                     msg->lens.fov          = lens["fov"].as<float>();
                     msg->lens.centre       = lens["centre"].as<Expression>();
                     msg->lens.k            = lens["k"].as<Expression>();
-                    msg->format            = utility::vision::fourcc("JPEG");
-                    msg->id                = 0;
-                    msg->name              = "FakeCamera";
-                    msg->timestamp         = NUClear::clock::now();
+
+                    // Convert Hoc from lens file to Hcw. We are assuming that the observation plane corresponds to the
+                    // world
                     const Eigen::Affine3d Hoc(Eigen::Matrix4d(lens["Hoc"].as<Expression>()));
                     msg->Hcw = Hoc.inverse().matrix();
+
+                    // Set image properties
+                    msg->format    = utility::vision::fourcc("JPEG");
+                    msg->id        = 0;
+                    msg->name      = "FakeCamera";
+                    msg->timestamp = NUClear::clock::now();
 
                     // Load image file into vector
                     msg->data = utility::file::readFile(images[image_index].first);
