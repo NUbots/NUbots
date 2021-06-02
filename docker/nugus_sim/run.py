@@ -7,8 +7,8 @@ import sys
 
 import ruamel.yaml
 
-BINARIES_DIR = "/home/nubots/NUbots/binaries"
-CONFIG_DIR = BINARIES_DIR + "/config"
+DEFAULT_BINARIES_DIR = "/home/nubots/NUbots/binaries"
+DEFAULT_CONFIG_DIR = DEFAULT_BINARIES_DIR + "/config"
 
 REQUIRED_ENV_VARS = ("ROBOCUP_ROBOT_ID", "ROBOCUP_TEAM_COLOR", "ROBOCUP_SIMULATOR_ADDR")
 OPTIONAL_ENV_VARS = (
@@ -23,14 +23,16 @@ def read_args() -> dict:
     parser = argparse.ArgumentParser(description="Run a role for webots RoboCup")
 
     parser.add_argument("role", help="The role to run")
+    parser.add_argument("--goalie", action="store_true", default=False, help="Run the role with goalie behaviour")
     parser.add_argument(
-        "--goalie", action=argparse.BooleanOptionalAction, default=False, help="Run the role with goalie behaviour"
+        "--binaries-dir", dest="binaries_dir", default=DEFAULT_BINARIES_DIR, help="The path to built role binaries"
     )
+    parser.add_argument("--config-dir", dest="config_dir", default=DEFAULT_CONFIG_DIR, help="The path to config files")
 
     args = parser.parse_args()
 
     # Ensure that the role requested exists
-    if not os.path.exists(os.path.join(BINARIES_DIR, args.role)):
+    if not os.path.exists(os.path.join(args.binaries_dir, args.role)):
         print("The role '" + args.role + "' does not exist!")
         sys.exit(1)
 
@@ -52,7 +54,13 @@ def read_args() -> dict:
         if var in os.environ:
             env_vars[var] = os.environ.get(var)
 
-    return {"role": args.role, "env_vars": env_vars, "is_goalie": args.goalie}
+    return {
+        "role": args.role,
+        "binaries_dir": args.binaries_dir,
+        "config_dir": args.config_dir,
+        "env_vars": env_vars,
+        "is_goalie": args.goalie,
+    }
 
 
 def update_config(args: dict) -> None:
@@ -62,7 +70,7 @@ def update_config(args: dict) -> None:
     yaml = ruamel.yaml.YAML()  # Can't use `typ="safe"` since we want round-tripping to preserve comments
 
     # Change into the config directory
-    os.chdir(CONFIG_DIR)
+    os.chdir(args["config_dir"])
 
     # Set `player_id` in GlobalConfig.yaml from ROBOCUP_ROBOT_ID
     with open("GlobalConfig.yaml", "r+") as file:
@@ -99,9 +107,9 @@ def update_config(args: dict) -> None:
             yaml.dump(soccer_simulator_config, file)
 
 
-def run_role(role: str, env_vars: dict) -> None:
+def run_role(role: str, binaries_dir: str, env_vars: dict) -> None:
     # Change into the directory with the binaries
-    os.chdir(BINARIES_DIR)
+    os.chdir(binaries_dir)
 
     modified_env = os.environ.copy()
 
@@ -119,4 +127,4 @@ def run_role(role: str, env_vars: dict) -> None:
 if __name__ == "__main__":
     args = read_args()
     update_config(args)
-    run_role(args["role"], args["env_vars"])
+    run_role(args["role"], args["binaries_dir"], args["env_vars"])
