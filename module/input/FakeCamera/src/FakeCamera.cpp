@@ -3,6 +3,7 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <array>
+#include <filesystem>
 #include <fmt/format.h>
 #include <yaml-cpp/yaml.h>
 
@@ -10,7 +11,6 @@
 
 #include "message/output/CompressedImage.hpp"
 
-#include "utility/file/fileutil.hpp"
 #include "utility/strutil/strutil.hpp"
 #include "utility/support/yaml_expression.hpp"
 #include "utility/vision/fourcc.hpp"
@@ -41,7 +41,7 @@ namespace module::input {
             const std::string image_prefix = cfg["image_prefix"].as<std::string>();
             const std::string lens_prefix  = cfg["lens_prefix"].as<std::string>();
 
-            if ((utility::file::isDir(image_folder) && image_folder != config.image_folder)
+            if ((std::filesystem::is_directory(image_folder) && image_folder != config.image_folder)
                 || image_prefix != config.image_prefix || lens_prefix != config.lens_prefix) {
                 config.image_folder = image_folder;
                 config.image_prefix = image_prefix;
@@ -50,23 +50,30 @@ namespace module::input {
                 {  // mutex scope
                     std::lock_guard<std::mutex> lock(images_mutex);
 
+                    // Clear out old images and reset the index
                     images.clear();
-                    image_counter = 0;
-                    for (const auto& file : utility::file::listFiles(config.image_folder, true)) {
-                        if (utility::strutil::endsWith(file, std::vector<std::string>{".jpg", ".jpeg"})) {
-                            std::string image_file = file;
-                            std::string lens_file  = file;
-                            lens_file.replace(config.image_folder.length() + 1,
-                                              config.image_prefix.length(),
-                                              config.lens_prefix);
-                            lens_file.replace(lens_file.begin() + lens_file.find_last_of("."),
-                                              lens_file.end(),
-                                              ".yaml");
-                            log<NUClear::TRACE>(
-                                fmt::format("Looking for lens file '{}' for image '{}'", lens_file, image_file));
-                            if (utility::file::exists(lens_file)) {
-                                log<NUClear::TRACE>(fmt::format("Found lens file '{}'", lens_file));
-                                images.emplace_back(image_file, lens_file);
+                    image_index = 0;
+
+                    // Traverse specified directory and locate all image/lens pairs
+                    for (auto& p : std::filesystem::recursive_directory_iterator(config.image_folder)) {
+                        if (utility::strutil::endsWith(p.path(), std::vector<std::string>{".jpg", ".jpeg"})) {
+                            std::filesystem::path image_file = p.path();
+                            std::filesystem::path lens_file  = p.path();
+
+                            // Replace the filename component and change the extension
+                            // This will take image000001.jpg and return lens000001.yaml
+                            // Assuming image_prefix = "image" and lens_prefix = "lens"
+                            lens_file
+                                .replace_filename(lens_file.filename().string().replace(0,
+                                                                                        config.image_prefix.length(),
+                                                                                        config.lens_prefix))
+                                .replace_extension("yaml");
+                            log<NUClear::TRACE>(fmt::format("Looking for lens file '{}' for image '{}'",
+                                                            lens_file.string(),
+                                                            image_file.string()));
+                            if (std::filesystem::exists(lens_file)) {
+                                log<NUClear::TRACE>(fmt::format("Found lens file '{}'", lens_file.string()));
+                                images.emplace_back(image_file.string(), lens_file.string());
                             }
                         }
                     }
