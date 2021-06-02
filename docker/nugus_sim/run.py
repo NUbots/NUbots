@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import argparse
 import os
 import subprocess
 import sys
@@ -13,22 +14,19 @@ ENV_VARS = ("ROBOCUP_ROBOT_ID", "ROBOCUP_TEAM_COLOR", "ROBOCUP_SIMULATOR_ADDR")
 
 
 def read_args() -> dict:
-    # Check that we have at least a role argument
-    if len(sys.argv) < 2:
-        print("Please specify a role to run!")
+    parser = argparse.ArgumentParser(description="Run a role for webots RoboCup")
+
+    parser.add_argument("role", help="The role to run")
+    parser.add_argument(
+        "--goalie", action=argparse.BooleanOptionalAction, default=False, help="Run the role with goalie behaviour"
+    )
+
+    args = parser.parse_args()
+
+    # Ensure that the role requested exists
+    if not os.path.exists(os.path.join(BINARIES_DIR, args.role)):
+        print("The role '" + args.role + "' does not exist!")
         sys.exit(1)
-
-    role = sys.argv[1]
-
-    if not os.path.exists(os.path.join(BINARIES_DIR, role)):
-        print("The role '" + role + "' does not exist!")
-        sys.exit(1)
-
-    is_goalie = False
-
-    # Check for the goalie flag
-    if len(sys.argv) > 2:
-        is_goalie = sys.argv[2] == "--goalie"
 
     # Read the env vars
     config = {var: os.environ.get(var) for var in ENV_VARS if var in os.environ}
@@ -43,7 +41,7 @@ def read_args() -> dict:
             print(var)
         sys.exit(1)
 
-    return {"role": role, "env_vars": config, "is_goalie": is_goalie}
+    return {"role": args.role, "env_vars": config, "is_goalie": args.goalie}
 
 
 def update_config(args: dict) -> None:
