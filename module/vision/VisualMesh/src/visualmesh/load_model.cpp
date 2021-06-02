@@ -4,11 +4,11 @@ namespace module::vision::visualmesh {
 
     inline ::visualmesh::ActivationFunction activation_function(const std::string& name) {
         // clang-format off
-    if      (name == "selu")    { return ::visualmesh::ActivationFunction::SELU;    }
-    else if (name == "softmax") { return ::visualmesh::ActivationFunction::SOFTMAX; }
-    else if (name == "relu")    { return ::visualmesh::ActivationFunction::RELU;    }
-    else if (name == "tanh")    { return ::visualmesh::ActivationFunction::TANH;    }
-    else { throw std::runtime_error("Unknown activation function " + name); }
+        if      (name == "selu")    { return ::visualmesh::ActivationFunction::SELU;    }
+        else if (name == "softmax") { return ::visualmesh::ActivationFunction::SOFTMAX; }
+        else if (name == "relu")    { return ::visualmesh::ActivationFunction::RELU;    }
+        else if (name == "tanh")    { return ::visualmesh::ActivationFunction::TANH;    }
+        else { throw std::runtime_error("Unknown activation function " + name); }
         // clang-format on
     }
 
