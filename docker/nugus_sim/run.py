@@ -84,15 +84,24 @@ def update_config(args: dict) -> None:
         yaml.dump(soccer_simulator_config, file)
 
 
-def run_role(role: str) -> None:
+def run_role(role: str, env_vars: dict) -> None:
     # Change into the directory with the binaries
     os.chdir(BINARIES_DIR)
 
+    modified_env = os.environ.copy()
+
+    # Set up env variables to pass through
+    for key, value in env_vars:
+        modified_env[key] = value
+
+    # Set the robot hostname
+    modified_env["ROBOT_HOSTNAME"] = f"webots{env_vars['ROBOCUP_ROBOT_ID']}"
+
     # Run the role binary
-    exit(subprocess.run(f"./{role}").returncode)
+    exit(subprocess.run(f"./{role}", env=modified_env).returncode)
 
 
 if __name__ == "__main__":
     args = read_args()
     update_config(args)
-    run_role(args["role"])
+    run_role(args["role"], args["env_vars"])
