@@ -94,8 +94,8 @@ message MotionCapture {
         /// change over time
         repeated Channel channels = 2;
     }
-    uint32 frameNumber = 1;
-    float  latency     = 2;
+    uint32 frame_number = 1;
+    float  latency      = 2;
     /// Encoded timestamp - 0 := the first timecode. hour:minute:second:frame
     /// bytes, in binary coded decimal see
     /// https://en.wikipedia.org/wiki/SMPTE_timecode
