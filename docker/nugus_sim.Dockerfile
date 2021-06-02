@@ -1,4 +1,3 @@
-
 FROM archlinux:base-20210110.0.13332
 
 WORKDIR /home/nubots/NUbots
@@ -18,8 +17,7 @@ RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr
 COPY /etc/xdg/pip/pip.conf /etc/xdg/pip/pip.conf
 
 # Install python libraries
-RUN pip install \
-    ruamel.yaml
+RUN pip install ruamel.yaml
 
 # Copy our code in yo
 COPY ./nugus_sim/binaries/ ./binaries
@@ -40,4 +38,6 @@ RUN cd /usr/local && ln -sf lib lib64
 # Allow terminal to work
 ENV TERM xterm
 
+# Set the run.py script as the entrypoint.
+# `dockerCmd` in the Robocup team config will be passed to run.py as arguments.
 ENTRYPOINT [ "python3", "run.py" ]
