@@ -224,15 +224,7 @@ namespace module::platform {
             min_camera_time_step = config["min_camera_time_step"].as<int>();
             min_sensor_time_step = config["min_sensor_time_step"].as<int>();
 
-            // clang-format off
-            auto lvl = config["log_level"].as<std::string>();
-            if      (lvl == "TRACE") { this->log_level = NUClear::TRACE; }
-            else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
-            else if (lvl == "INFO")  { this->log_level = NUClear::INFO; }
-            else if (lvl == "WARN")  { this->log_level = NUClear::WARN; }
-            else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
-            else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
-            // clang-format on
+            this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
             clock_smoothing = config["clock_smoothing"].as<double>();
 
