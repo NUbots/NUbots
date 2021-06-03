@@ -4,7 +4,6 @@ import argparse
 import os
 import subprocess
 import sys
-from pathlib import Path
 
 import ruamel.yaml
 
@@ -108,7 +107,7 @@ def update_config_files(args: dict) -> None:
         robot_log_dir = f"/robocup-logs/{hostname}"
 
         # Ensure the log directory exists
-        Path(robot_log_dir).mkdir(parents=True, exist_ok=True)
+        os.makedirs(robot_log_dir, exist_ok=True)
 
         # Configure FileLogHandler to write to the RoboCup log directory
         file_log_handler_config = read_config("FileLogHandler.yaml")
