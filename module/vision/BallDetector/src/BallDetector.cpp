@@ -45,8 +45,6 @@ namespace module::vision {
     using utility::math::coordinates::cartesianToSpherical;
     using utility::support::Expression;
 
-    static constexpr int BALL_INDEX = 0;
-
     BallDetector::BallDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("BallDetector.yaml").then([this](const Configuration& cfg) {
@@ -66,6 +64,7 @@ namespace module::vision {
                 const auto& cls                                     = horizon.mesh->classifications;
                 const auto& neighbours                              = horizon.mesh->neighbourhood;
                 const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = horizon.mesh->rays;
+                const int BALL_INDEX                                = horizon.class_map.at("ball");
 
                 // Get some indices to partition
                 std::vector<int> indices(horizon.mesh->indices.size());
