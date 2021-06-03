@@ -365,7 +365,7 @@
       gain: 30
       torque: 100
     - id: R_KNEE
-      position: 1.006441
+      position: 1.20000005
       gain: 30
       torque: 100
     - id: R_HIP_ROLL
