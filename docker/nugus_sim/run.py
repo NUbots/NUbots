@@ -115,9 +115,9 @@ def update_config_files(args: dict) -> None:
         write_config("FileLogHandler.yaml", file_log_handler_config)
 
         # Configure DataLogging to write to the RoboCup log directory
-        data_logging_config = read_config("DataLogging.yaml")
+        data_logging_config = read_config("webotsrobocup/DataLogging.yaml")
         data_logging_config["output"]["directory"] = robot_log_dir
-        write_config("DataLogging.yaml", data_logging_config)
+        write_config("webotsrobocup/DataLogging.yaml", data_logging_config)
 
 
 def run_role(role: str, binaries_dir: str, env_vars: dict) -> None:
