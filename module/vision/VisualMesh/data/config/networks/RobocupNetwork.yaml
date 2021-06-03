@@ -1,4 +1,4 @@
-
+class_map: {ball: 0, environment: 4, goal: 1, line: 2, field: 3}
 geometry: {intersections: 6, radius: 0.0949996, shape: SPHERE}
 mesh: RING6
 num_classes: 5
