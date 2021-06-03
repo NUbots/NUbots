@@ -4,7 +4,6 @@ import glob
 import os
 import re
 import subprocess
-from pathlib import Path
 
 from termcolor import cprint
 
@@ -56,8 +55,8 @@ def run(target, local, user, config, toolchain, **kwargs):
         target_toolchain_dir = os.path.abspath(os.path.join(target, "toolchain"))
 
         # Ensure the directories exist
-        Path(target_binaries_dir).mkdir(parents=True, exist_ok=True)
-        Path(target_toolchain_dir).mkdir(parents=True, exist_ok=True)
+        os.makedirs(target_binaries_dir, exist_ok=True)
+        os.makedirs(target_toolchain_dir, exist_ok=True)
     else:
         target_binaries_dir = "{0}@{1}:/home/{0}/".format(user, target)
         target_toolchain_dir = "{0}@{1}:/usr/".format(user, target)
