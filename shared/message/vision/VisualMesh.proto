@@ -25,25 +25,25 @@ import "google/protobuf/timestamp.proto";
 import "Matrix.proto";
 
 message VisualMesh {
-    /// @brief Time this message was created
+    /// Time this message was created
     google.protobuf.Timestamp timestamp = 1;
-    /// @brief ID of the camera that this mesh was constructed from
+    /// ID of the camera that this mesh was constructed from
     uint32 id = 2;
-    /// @brief name of the camera that this mesh was constructed from
+    /// name of the camera that this mesh was constructed from
     string name = 3;
-    /// @brief World to camera transform that this mesh was constructed with
+    /// World to camera transform that this mesh was constructed with
     mat4 Hcw = 4;
-    /// @brief Pixel coordinates projected from the rays
+    /// Pixel coordinates projected from the rays
     fmat coordinates = 5;
-    /// @brief Neighbours of each node in the mesh. Each row corresponds to a node and the columns are the neighbours
+    /// Neighbours of each node in the mesh. Each row corresponds to a node and the columns are the neighbours
     imat neighbourhood = 6;
-    /// @brief The corresponding global indices for each on-screen node
+    /// The corresponding global indices for each on-screen node
     repeated int32 indices = 7 [packed = true];
-    /// @brief The classification for each pixel/ray. Each row corresponds to a pixel. Each column corresponds to a
+    /// The classification for each pixel/ray. Each row corresponds to a pixel. Each column corresponds to a
     /// class. The mapping from columns to classes is dependant on how the classes were presented during training
     fmat classifications = 8;
-    /// @brief Unit vectors pointing from the camera to each node in the mesh
+    /// Unit vectors pointing from the camera to each node in the mesh
     fmat rays = 9;
-    /// @brief A mapping from class names to column indices (for accessing the corresponding classification column)
+    /// A mapping from class names to column indices (for accessing the corresponding classification column)
     map<string, uint32> class_map = 10;
 }
