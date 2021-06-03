@@ -44,4 +44,6 @@ message VisualMesh {
     fmat classifications = 8;
     /// @brief Unit vectors pointing from the camera to each node in the mesh
     fmat rays = 9;
+    /// @brief A mapping from class names to column indices (for accessing the corresponding classification column)
+    map<string, uint32> class_map = 10;
 }
