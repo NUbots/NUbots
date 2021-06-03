@@ -2,9 +2,8 @@
 #define MODULE_SUPPORT_OPTIMISATION_NSGA2EVALUATOR_H
 
 #include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <nuclear>
-
-#include "extension/Script.hpp"
 
 namespace module {
     namespace support {
@@ -15,54 +14,50 @@ namespace module {
             public:
                 /// @brief Called by the powerplant to build and setup the NSGA2Evaluator reactor.
                 explicit NSGA2Evaluator(std::unique_ptr<NUClear::Environment> environment);
+
+            private:
                 void SendFitnessScores();
                 void ResetWorld();
                 void ResetWorldTime();
-                bool BeginTermination();
+                void BeginTermination();
                 void CalculateFitness();
 
                 size_t subsumptionId;
-                int generation;
-                int id;
-                std::vector<double> scores;
-                std::vector<double> contstraints;
-                std::vector<double> parameters;
+                int generation                   = 0;
+                int id                           = 0;
+                std::vector<double> scores       = {2.0, 0.0};
+                std::vector<double> contstraints = {0.0, 0.0};
 
-                double simTime;
-                double simTimeDelta;
+                double simTime      = 0.0;
+                double simTimeDelta = 0.0;
                 double timeSinceTermination;
-                Eigen::Vector2d velocity;
-                float rotation;
+                Eigen::Vector2d velocity = Eigen::Vector2d(0.5, 0.0);
+                double rotation          = 0.0;
 
-                bool terminating;
-                bool walking;
-                bool standing;
-                bool evaluating;
-                bool finished;
-                bool fallenOver;
+                bool terminating = false;
+                bool walking     = false;
+                bool standing    = false;
+                bool evaluating  = false;
+                bool finished    = false;
+                bool fallenOver  = false;
 
                 std::vector<double> constraints;
 
-                double gyroscope[3];      // [X, Y, Z]
-                double accelerometer[3];  // [X, Y, Z]
+                Eigen::Vector3d gyroscope     = Eigen::Vector3d::Zero();
+                Eigen::Vector3d accelerometer = Eigen::Vector3d::Zero();
 
-                double ballLocation[3];  // [X, Y, Z]
-                double ballVelocity[3];
-                double robotLocation[3];
-                double robotLocationDelta[3];
+                Eigen::Vector3d ballLocation       = Eigen::Vector3d::Zero();
+                Eigen::Vector3d ballVelocity       = Eigen::Vector3d::Zero();
+                Eigen::Vector3d robotLocation      = Eigen::Vector3d::Zero();
+                Eigen::Vector3d robotLocationDelta = Eigen::Vector3d::Zero();
 
-                double distanceTravelled;
+                double distanceTravelled = 0.0;
 
-                double sway[3];
+                Eigen::Vector3d sway = Eigen::Vector3d::Zero();
 
-                double fieldPlaneSway;
-
+                double fieldPlaneSway = 0.0;
 
                 double maxFieldPlaneSway;
-
-                // the script being modified
-                ::extension::Script script;
-                bool optimizeScript;
             };
 
         }  // namespace optimisation

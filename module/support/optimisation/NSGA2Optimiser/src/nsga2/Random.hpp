@@ -1,6 +1,5 @@
-
-#ifndef RANDOM_GEN_H
-#define RANDOM_GEN_H
+#ifndef MODULE_SUPPORT_OPTIMISATION_NSGA2OPTIMISER_RANDOM_HPP
+#define MODULE_SUPPORT_OPTIMISATION_NSGA2OPTIMISER_RANDOM_HPP
 
 #include <random>
 
@@ -38,4 +37,4 @@ namespace nsga2 {
     };
 }  // namespace nsga2
 
-#endif
+#endif  // MODULE_SUPPORT_OPTIMISATION_NSGA2OPTIMISER_RANDOM_HPP

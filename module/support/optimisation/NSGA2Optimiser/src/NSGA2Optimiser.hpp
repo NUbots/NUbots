@@ -4,26 +4,23 @@
 #include <nuclear>
 #include <vector>
 
-#include "nsga2.hpp"
-
-#include "extension/Script.hpp"
-
-// TODO: fix random usage
+#include "nsga2/NSGA2.hpp"
 
 namespace module {
     namespace support {
         namespace optimisation {
 
             class NSGA2Optimiser : public NUClear::Reactor {
+            private:
+                void requestIndEvaluation(int _id, int _generation, const std::vector<double>& _reals);
+
+                nsga2::NSGA2 nsga2Algorithm;
+
+                double default_gain;
 
             public:
                 /// @brief Called by the powerplant to build and setup the NSGA2Optimiser reactor.
                 explicit NSGA2Optimiser(std::unique_ptr<NUClear::Environment> environment);
-
-                void requestIndEvaluation(int _id, int _generation, const std::vector<double>& _reals);
-
-                nsga2::NSGA2 nsga2Algorithm;
-                // nsga2::RandomGenerator randGen;
             };
 
         }  // namespace optimisation

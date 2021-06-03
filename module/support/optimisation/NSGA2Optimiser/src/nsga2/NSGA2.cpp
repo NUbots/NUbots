@@ -1,199 +1,78 @@
-#include "nsga2.hpp"
+#include "NSGA2.hpp"
 
 #include <cmath>
-
-// TODO FIX random stuff
+#include <nuclear>
 
 namespace nsga2 {
-    NSGA2::NSGA2() {
-        realVars         = -1;
-        binVars          = -1;
-        objectives       = -1;
-        constraints      = -1;
-        popSize          = -1;
-        generations      = -1;
-        reportCount      = 1;
-        realCrossProb    = -1;
-        binCrossProb     = -1;
-        realMutProb      = -1;
-        binMutProb       = -1;
-        etaC             = -1;
-        etaM             = -1;
-        epsC             = EPS;
-        binBits          = std::vector<int>();
-        realLimits       = std::vector<std::pair<double, double>>();
-        binLimits        = std::vector<std::pair<double, double>>();
-        binMutCount      = 0;
-        realMutCount     = 0;
-        binCrossCount    = 0;
-        realCrossCount   = 0;
-        bitLength        = 0;
-        parentPop        = nullptr;
-        childPop         = nullptr;
-        mixedPop         = nullptr;
-        crowdObj         = true;
-        randGen          = nullptr;
-        randomInitialize = true;
-    }
-
-    NSGA2::~NSGA2() {
-        if (parentPop != NULL)
-            delete parentPop;
-        if (childPop != NULL)
-            delete childPop;
-        if (mixedPop != NULL)
-            delete mixedPop;
-    }
-
-    void NSGA2::SetSeed(int _seed) {
-        randGen->SetSeed(_seed);
-    }
-
-    void NSGA2::SetCrowdObj(bool _crowd) {
-        crowdObj = _crowd;
-    }
-
-    void NSGA2::SetRealVariableCount(int _realVars) {
-        realVars = _realVars;
-    }
-
-    void NSGA2::SetBinVariableCount(int _binVars) {
-        binVars = _binVars;
-    }
-
-    void NSGA2::SetObjectiveCount(int _objectives) {
-        objectives = _objectives;
-    }
-
-    void NSGA2::SetContraintCount(int _constraints) {
-        constraints = _constraints;
-    }
-
-    void NSGA2::SetPopulationSize(int _popSize) {
-        popSize = _popSize;
-    }
-
-    void NSGA2::SetTargetGenerations(int _generations) {
-        generations = _generations;
-    }
-
-    void NSGA2::SetRealCrossoverProbability(double _realCrossProb) {
-        realCrossProb = _realCrossProb;
-    }
-
-    void NSGA2::SetBinCrossoverProbability(double _binCrossProb) {
-        binCrossProb = _binCrossProb;
-    }
-
-    void NSGA2::SetRealMutationProbability(double _realMutProb) {
-        realMutProb = _realMutProb;
-    }
-
-    void NSGA2::SetBinMutationProbability(double _binMutProb) {
-        binMutProb = _binMutProb;
-    }
-
-    void NSGA2::SetEtaC(double _etaC) {
-        etaC = _etaC;
-    }
-
-    void NSGA2::SetEtaM(double _etaM) {
-        etaM = _etaM;
-    }
-
-    void NSGA2::SetEpsC(double _epsC) {
-        epsC = _epsC;
-    }
-
-    void NSGA2::SetBitCount(const std::vector<int> _binBits) {
-        binBits = _binBits;
-    }
-
-    void NSGA2::SetRealVarLimits(const std::vector<std::pair<double, double>> _realLimits) {
-        realLimits = _realLimits;
-    }
-
-    void NSGA2::SetBinVarLimits(const std::vector<std::pair<double, double>> _binLimits) {
-        binLimits = _binLimits;
-    }
-
-    void NSGA2::SetInitialRealVars(std::vector<double> _initRealVars) {
-        initialRealVars = _initRealVars;
-    }
-
-    void NSGA2::SetRandomInitialize(bool _randomInitialize) {
-        randomInitialize = _randomInitialize;
-    }
-
     int NSGA2::PreEvaluationInitialize() {
-        std::cout << "Initializing NSGA-II\nChecking configuration..." << std::endl;
+        NUClear::log<NUClear::INFO>("Initializing NSGA-II\nChecking configuration...");
 
         if (realVars < 0) {
-            std::cout << "Invalid number of real variables" << std::endl;
+            NUClear::log<NUClear::INFO>("Invalid number of real variables");
             return -1;
         }
         if (binVars < 0) {
-            std::cout << "Invalid number of binary variables" << std::endl;
+            NUClear::log<NUClear::INFO>("Invalid number of binary variables");
             return -1;
         }
         if (realVars == 0 && binVars == 0) {
-            std::cout << "Zero real and binary variables" << std::endl;
+            NUClear::log<NUClear::INFO>("Zero real and binary variables");
             return -1;
         }
         if (objectives < 1) {
-            std::cout << "Invalid number of objective functions" << std::endl;
+            NUClear::log<NUClear::INFO>("Invalid number of objective functions");
             return -1;
         }
         if (constraints < 0) {
-            std::cout << "Invalid number of constraints" << std::endl;
+            NUClear::log<NUClear::INFO>("Invalid number of constraints");
             return -1;
         }
         if (popSize < 4 || (popSize % 4) != 0) {
-            std::cout << "Invalid size of population" << std::endl;
+            NUClear::log<NUClear::INFO>("Invalid size of population");
             return -1;
         }
         if (realCrossProb < 0.0 || realCrossProb > 1.0) {
-            std::cout << "Invalid probability of real crossover" << std::endl;
+            NUClear::log<NUClear::INFO>("Invalid probability of real crossover");
             return -1;
         }
         if (realMutProb < 0.0 || realMutProb > 1.0) {
-            std::cout << "Invalid probability of real mutation" << std::endl;
+            NUClear::log<NUClear::INFO>("Invalid probability of real mutation");
             return -1;
         }
         if (binCrossProb < 0.0 || binCrossProb > 1.0) {
-            std::cout << "Invalid probability of binary crossover" << std::endl;
+            NUClear::log<NUClear::INFO>("Invalid probability of binary crossover");
             return -1;
         }
         if (binMutProb < 0.0 || binMutProb > 1.0) {
-            std::cout << "Invalid probability of binary mutation" << std::endl;
+            NUClear::log<NUClear::INFO>("Invalid probability of binary mutation");
             return -1;
         }
         if (etaC <= 0) {
-            std::cout << "Invalid distribution index for crossover" << std::endl;
+            NUClear::log<NUClear::INFO>("Invalid distribution index for crossover");
             return -1;
         }
         if (etaM <= 0) {
-            std::cout << "Invalid distribution index for mutation" << std::endl;
+            NUClear::log<NUClear::INFO>("Invalid distribution index for mutation");
             return -1;
         }
         if (generations < 1) {
-            std::cout << "Invalid number of generations" << std::endl;
+            NUClear::log<NUClear::INFO>("Invalid number of generations");
             return -1;
         }
         if (binVars != 0 && binBits.size() == 0) {
-            std::cout << "Invalid number of bits for binary variables" << std::endl;
+            NUClear::log<NUClear::INFO>("Invalid number of bits for binary variables");
             return -1;
         }
-        if (realLimits.size() != realVars) {
-            std::cout << "Invalid number of real variable limits" << std::endl;
+        if (int(realLimits.size()) != realVars) {
+            NUClear::log<NUClear::INFO>("Invalid number of real variable limits");
             return -1;
         }
-        if (binLimits.size() != binVars) {
-            std::cout << "Invalid number of binary variable limits" << std::endl;
+        if (int(binLimits.size()) != binVars) {
+            NUClear::log<NUClear::INFO>("Invalid number of binary variable limits");
             return -1;
         }
-        if (!randomInitialize && (initialRealVars.size() != realVars)) {
-            std::cout << "Invalid number of initial real variables" << std::endl;
+        if (!randomInitialize && (int(initialRealVars.size()) != realVars)) {
+            NUClear::log<NUClear::INFO>("Invalid number of initial real variables");
             return -1;
         }
 
@@ -207,56 +86,56 @@ namespace nsga2 {
 
         bitLength = std::accumulate(binBits.begin(), binBits.end(), 0);
 
-        parentPop = new Population(popSize,
-                                   realVars,
-                                   binVars,
-                                   constraints,
-                                   binBits,
-                                   realLimits,
-                                   binLimits,
-                                   objectives,
-                                   realMutProb,
-                                   binMutProb,
-                                   etaM,
-                                   epsC,
-                                   crowdObj,
-                                   randGen,
-                                   initialRealVars);
+        parentPop = std::make_shared<Population>(popSize,
+                                                 realVars,
+                                                 binVars,
+                                                 constraints,
+                                                 binBits,
+                                                 realLimits,
+                                                 binLimits,
+                                                 objectives,
+                                                 realMutProb,
+                                                 binMutProb,
+                                                 etaM,
+                                                 epsC,
+                                                 crowdObj,
+                                                 randGen,
+                                                 initialRealVars);
 
-        childPop = new Population(popSize,
-                                  realVars,
-                                  binVars,
-                                  constraints,
-                                  binBits,
-                                  realLimits,
-                                  binLimits,
-                                  objectives,
-                                  realMutProb,
-                                  binMutProb,
-                                  etaM,
-                                  epsC,
-                                  crowdObj,
-                                  randGen,
-                                  initialRealVars);
+        childPop = std::make_shared<Population>(popSize,
+                                                realVars,
+                                                binVars,
+                                                constraints,
+                                                binBits,
+                                                realLimits,
+                                                binLimits,
+                                                objectives,
+                                                realMutProb,
+                                                binMutProb,
+                                                etaM,
+                                                epsC,
+                                                crowdObj,
+                                                randGen,
+                                                initialRealVars);
 
-        mixedPop = new Population(popSize * 2,
-                                  realVars,
-                                  binVars,
-                                  constraints,
-                                  binBits,
-                                  realLimits,
-                                  binLimits,
-                                  objectives,
-                                  realMutProb,
-                                  binMutProb,
-                                  etaM,
-                                  epsC,
-                                  crowdObj,
-                                  randGen,
-                                  initialRealVars);
+        mixedPop = std::make_shared<Population>(popSize * 2,
+                                                realVars,
+                                                binVars,
+                                                constraints,
+                                                binBits,
+                                                realLimits,
+                                                binLimits,
+                                                objectives,
+                                                realMutProb,
+                                                binMutProb,
+                                                etaM,
+                                                epsC,
+                                                crowdObj,
+                                                randGen,
+                                                initialRealVars);
 
         parentPop->Initialize(randomInitialize);
-        std::cout << "Initialization done!" << std::endl;
+        NUClear::log<NUClear::INFO>("Initialization done!");
 
         parentPop->Decode();
         // parentPop->EvaluateInd(); // split here
@@ -269,11 +148,11 @@ namespace nsga2 {
 
         currentGen = 1;
 
-        // std::cout << "Generation 1 complete!" << std::endl;
+        // NUClear::log<NUClear::INFO>("Generation 1 complete!");
 
-        ReportPop(*parentPop, fpt1);
+        ReportPop(parentPop, fpt1);
         fpt4 << "# gen = " << currentGen << "\n";
-        ReportPop(*parentPop, fpt4);
+        ReportPop(parentPop, fpt4);
 
         fpt1.flush();
         fpt4.flush();
@@ -343,14 +222,15 @@ namespace nsga2 {
         _os << "\nSeed for random number generator = " << randGen->GetSeed() << std::endl;
     }
 
-    void NSGA2::ReportPop(const Population& _pop, std::ostream& _os) const {
-        _pop.Report(_os);
+    void NSGA2::ReportPop(const std::shared_ptr<Population>& _pop, std::ostream& _os) const {
+        _pop->Report(_os);
     }
 
-    void NSGA2::Selection(Population& _oldPop, Population& _newPop) {
-        const int oldPopSize = _oldPop.GetSize();
-        if (_newPop.GetSize() != oldPopSize)
-            std::cout << "ERROR: Selection error: new and old pops don't have the same size";
+    void NSGA2::Selection(const std::shared_ptr<Population>& _oldPop, std::shared_ptr<Population>& _newPop) {
+        const int oldPopSize = _oldPop->GetSize();
+        if (_newPop->GetSize() != oldPopSize) {
+            NUClear::log<NUClear::ERROR>("Selection error: new and old pops don't have the same size");
+        }
 
         std::vector<int> indList1(oldPopSize), indList2(oldPopSize);
         for (int i = 0; i < oldPopSize; i++) {
@@ -366,40 +246,48 @@ namespace nsga2 {
         }
 
         for (int i = 0; i < oldPopSize; i += 4) {
-            Individual& p11 = Tournament(_oldPop.inds[indList1[i]], _oldPop.inds[indList1[i + 1]]);
-            Individual& p12 = Tournament(_oldPop.inds[indList1[i + 2]], _oldPop.inds[indList1[i + 3]]);
-            Crossover(p11, p12, _newPop.inds[i], _newPop.inds[i + 1]);
+            const Individual& p11 = Tournament(_oldPop->inds[indList1[i]], _oldPop->inds[indList1[i + 1]]);
+            const Individual& p12 = Tournament(_oldPop->inds[indList1[i + 2]], _oldPop->inds[indList1[i + 3]]);
+            Crossover(p11, p12, _newPop->inds[i], _newPop->inds[i + 1]);
 
-            Individual& p21 = Tournament(_oldPop.inds[indList2[i]], _oldPop.inds[indList2[i + 1]]);
-            Individual& p22 = Tournament(_oldPop.inds[indList2[i + 2]], _oldPop.inds[indList2[i + 3]]);
-            Crossover(p21, p22, _newPop.inds[i + 2], _newPop.inds[i + 3]);
+            const Individual& p21 = Tournament(_oldPop->inds[indList2[i]], _oldPop->inds[indList2[i + 1]]);
+            const Individual& p22 = Tournament(_oldPop->inds[indList2[i + 2]], _oldPop->inds[indList2[i + 3]]);
+            Crossover(p21, p22, _newPop->inds[i + 2], _newPop->inds[i + 3]);
         }
     }
 
-    Individual& NSGA2::Tournament(Individual& _ind1, Individual& _ind2) const {
-        int flag = _ind1.CheckDominance(_ind2);
-        if (flag == 1)  // ind1 dominates ind2
+    const Individual& NSGA2::Tournament(const Individual& _ind1, const Individual& _ind2) const {
+        const int flag = _ind1.CheckDominance(_ind2);
+        if (flag == 1) {  // ind1 dominates ind2
             return _ind1;
-        else if (flag == -1)  // ind2 dominates ind1
+        }
+        else if (flag == -1) {  // ind2 dominates ind1
             return _ind2;
-        else if (_ind1.crowdDist > _ind2.crowdDist)
+        }
+        else if (_ind1.crowdDist > _ind2.crowdDist) {
             return _ind1;
-        else if (_ind2.crowdDist > _ind1.crowdDist)
+        }
+        else if (_ind2.crowdDist > _ind1.crowdDist) {
             return _ind2;
-        else if (randGen->Realu() <= 0.5)
+        }
+        else if (randGen->Realu() <= 0.5) {
             return _ind1;
-        else
+        }
+        else {
             return _ind2;
+        }
     }
 
     void NSGA2::Crossover(const Individual& _parent1,
                           const Individual& _parent2,
                           Individual& _child1,
                           Individual& _child2) {
-        if (realVars)
+        if (realVars) {
             Realcross(_parent1, _parent2, _child1, _child2);
-        if (binVars)
+        }
+        if (binVars) {
             Bincross(_parent1, _parent2, _child1, _child2);
+        }
 
         _child1.evaluated = false;
         _child2.evaluated = false;
@@ -416,7 +304,7 @@ namespace nsga2 {
         if (randGen->Realu() <= realCrossProb) {
             realCrossCount++;
             for (int i = 0; i < realVars; i++) {
-                if (std::fabs(_parent1.reals[i] - _parent2.reals[i]) > EPS) {
+                if (std::fabs(_parent1.reals[i] - _parent2.reals[i]) > std::numeric_limits<double>::epsilon()) {
                     if (_parent1.reals[i] < _parent2.reals[i]) {
                         y1 = _parent1.reals[i];
                         y2 = _parent2.reals[i];
@@ -527,10 +415,10 @@ namespace nsga2 {
     };
 
     void NSGA2::PreEvaluationAdvance() {
-        std::cout << "Advancing to generation " << currentGen + 1 << std::endl;
+        NUClear::log<NUClear::INFO>("Advancing to generation", currentGen + 1);
 
         // create next population Qt
-        Selection(*parentPop, *childPop);
+        Selection(parentPop, childPop);
         std::pair<int, int> mutationsCount = childPop->Mutate();
         // mutation book-keeping
         realMutCount += mutationsCount.first;
@@ -552,10 +440,10 @@ namespace nsga2 {
 
         int i = 0;
         // until |Pt+1| + |Fi| <= N, i.e. until parent population is filled
-        while (parentPop->GetSize() + mixedPop->front[i].size() < popSize) {
+        while (parentPop->GetSize() + int(mixedPop->front[i].size()) < popSize) {
             std::vector<int>& Fi = mixedPop->front[i];
-            mixedPop->CrowdingDistance(i);       // calculate crowding in Fi
-            for (int j = 0; j < Fi.size(); j++)  // Pt+1 = Pt+1 U Fi
+            mixedPop->CrowdingDistance(i);            // calculate crowding in Fi
+            for (int j = 0; j < int(Fi.size()); j++)  // Pt+1 = Pt+1 U Fi
             {
                 parentPop->inds.push_back(mixedPop->inds[Fi[j]]);
             }
@@ -580,21 +468,12 @@ namespace nsga2 {
 
         if (currentGen % reportCount == 0) {
             fpt4 << "# gen = " << currentGen << "\n";
-            ReportPop(*parentPop, fpt4);
+            ReportPop(parentPop, fpt4);
             fpt4.flush();
         }
     }
 
-    /*void NSGA2::Evolve()
-    {
-        while (currentGen < generations)
-        {
-            Advance();
-        }
-
-    }*/
-
     void NSGA2::ReportFinalGenerationPop() {
-        ReportPop(*parentPop, fpt2);
+        ReportPop(parentPop, fpt2);
     }
 }  // namespace nsga2

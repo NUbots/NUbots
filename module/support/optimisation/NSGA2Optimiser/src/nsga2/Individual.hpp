@@ -1,11 +1,11 @@
-#ifndef INDIVIDUAL_H
-#define INDIVIDUAL_H
+#ifndef MODULE_SUPPORT_OPTIMISATION_NSGA2OPTIMISER_INDIVIDUAL_HPP
+#define MODULE_SUPPORT_OPTIMISATION_NSGA2OPTIMISER_INDIVIDUAL_HPP
 
-#include <iostream>
+#include <memory>
 #include <ostream>
 #include <vector>
 
-#include "random.hpp"
+#include "Random.hpp"
 
 namespace nsga2 {
     struct IndividualConfigurator {
@@ -20,42 +20,43 @@ namespace nsga2 {
         int constraints;
         double etaM;
         double epsC;
-        RandomGenerator<>* randGen;
+        std::shared_ptr<RandomGenerator<>> randGen;
         std::vector<double> initialRealVars;
     };
 
     class Individual {
     public:
         Individual(const IndividualConfigurator& _config);
-        virtual ~Individual();
-        void Initialize(int _id, bool randomInitialize);
+        virtual ~Individual() = default;
+        void Initialize(const int& _id, const bool& randomInitialize);
         void Decode();
-        void Evaluate(int _generation);
         std::pair<int, int> Mutate();
         int CheckDominance(const Individual& _b) const;
         void CheckConstraints();
 
-        int id;
-        int generation;
         int rank;
         double constrViolation;
-        std::vector<double> reals;
         std::vector<std::vector<int>> gene;
-        std::vector<double> bins;
+        std::vector<double> reals;
         std::vector<double> objScore;
         std::vector<double> constr;
-        double crowdDist;
-
-        int dominations;
         std::vector<int> dominated;
+        int dominations;
+        double crowdDist;
         bool evaluated;
 
     private:
+        int id;
+        int generation;
+        std::vector<double> bins;
+
+
         int realMutate();
         int binMutate();
-        const IndividualConfigurator* config;
+        IndividualConfigurator config;
+
+        friend std::ostream& operator<<(std::ostream& _os, const Individual& _ind);
     };
-    std::ostream& operator<<(std::ostream& _os, const Individual& _ind);
 }  // namespace nsga2
 
-#endif
+#endif  // MODULE_SUPPORT_OPTIMISATION_NSGA2OPTIMISER_INDIVIDUAL_HPP

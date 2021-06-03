@@ -1,97 +1,71 @@
-#include "population.hpp"
+#include "Population.hpp"
 
-// TODO Fix randomness usage
+#include <nuclear>
 
 namespace nsga2 {
-    Population::Population(const int _size,
-                           const int _realVars,
-                           const int _binVars,
-                           const int _constraints,
-                           const std::vector<int> _binBits,
-                           const std::vector<std::pair<double, double>> _realLimits,
-                           const std::vector<std::pair<double, double>> _binLimits,
-                           const int _objectives,
-                           const double _realMutProb,
-                           const double _binMutProb,
-                           const double _etaM,
-                           const double _epsC,
-                           const bool _crowdObj,
-                           RandomGenerator<>* _randGen,
-                           const std::vector<double> _initialRealVars) {
-        generation = 1;
-        crowdObj   = _crowdObj;
-        front      = std::vector<std::vector<int>>();
-
-        indConfig.realVars        = _realVars;
-        indConfig.realLimits      = _realLimits;
-        indConfig.realMutProb     = _realMutProb;
-        indConfig.binVars         = _binVars;
-        indConfig.binBits         = _binBits;
-        indConfig.binLimits       = _binLimits;
-        indConfig.binMutProb      = _binMutProb;
-        indConfig.objectives      = _objectives;
-        indConfig.constraints     = _constraints;
-        indConfig.etaM            = _etaM;
-        indConfig.epsC            = _epsC;
-        indConfig.randGen         = _randGen;
-        indConfig.initialRealVars = _initialRealVars;
-
-        size = _size;
+    Population::Population(const int& _size,
+                           const int& _realVars,
+                           const int& _binVars,
+                           const int& _constraints,
+                           const std::vector<int>& _binBits,
+                           const std::vector<std::pair<double, double>>& _realLimits,
+                           const std::vector<std::pair<double, double>>& _binLimits,
+                           const int& _objectives,
+                           const double& _realMutProb,
+                           const double& _binMutProb,
+                           const double& _etaM,
+                           const double& _epsC,
+                           const bool& _crowdObj,
+                           std::shared_ptr<RandomGenerator<>> _randGen,
+                           const std::vector<double>& _initialRealVars)
+        : generation(1)
+        , indConfig({_realVars,
+                     _realLimits,
+                     _realMutProb,
+                     _binVars,
+                     _binBits,
+                     _binLimits,
+                     _binMutProb,
+                     _objectives,
+                     _constraints,
+                     _etaM,
+                     _epsC,
+                     _randGen,
+                     _initialRealVars})
+        , size(_size)
+        , crowdObj(_crowdObj) {
 
         for (int i = 0; i < _size; i++) {
-            inds.push_back(Individual(indConfig));
+            inds.emplace_back(indConfig);
         }
     }
 
-    Population::~Population() {}
-
-    int Population::GetSize() const {
-        return inds.size();
-    }
-
-    void Population::Initialize(bool randomInitialize) {
+    void Population::Initialize(const bool& randomInitialize) {
         for (int i = 0; i < size; i++) {
             inds[i].Initialize(i, randomInitialize);
         }
     }
-
     void Population::Decode() {
-        std::vector<Individual>::iterator it;
-        for (it = inds.begin(); it != inds.end(); it++) {
-            it->Decode();
+        for (auto& ind : inds) {
+            ind.Decode();
         }
     }
 
-    /*void Population::Evaluate()
-    {
-        std::vector<Individual>::iterator it;
-        for (it = inds.begin();
-            it != inds.end(); it++)
-        {
-            it->Evaluate();
-        }
-    }*/
-
-    /*void Population::EvaluateInd(int _id)
-    {
-        inds[_id].Evaluate(generation);
-    }*/
-    std::vector<double> Population::GetIndReals(int _id) {
+    std::vector<double> Population::GetIndReals(const int& _id) {
         return inds[_id].reals;
     }
 
-    void Population::SetIndObjectiveScore(int _id, std::vector<double> _objScore) {
+    void Population::SetIndObjectiveScore(const int& _id, const std::vector<double>& _objScore) {
         inds[_id].objScore = _objScore;
     }
 
-    void Population::SetIndConstraints(int _id, std::vector<double> _constraints) {
+    void Population::SetIndConstraints(const int& _id, const std::vector<double>& _constraints) {
         inds[_id].constr = _constraints;
     }
 
     void Population::CheckConstraints() {
-        std::vector<Individual>::iterator it;
-        for (it = inds.begin(); it != inds.end(); it++) {
-            it->CheckConstraints();
+        for (auto& ind : inds) {
+            ind.CheckConstraints();
         }
     }
 
@@ -99,19 +73,21 @@ namespace nsga2 {
         front.resize(1);
         front[0].clear();
 
-        for (int i = 0; i < inds.size(); i++) {
+        for (int i = 0; i < int(inds.size()); i++) {
             std::vector<int> dominationList;
             int dominationCount = 0;
             Individual& indP    = inds[i];
 
-            for (int j = 0; j < inds.size(); j++) {
-                Individual& indQ = inds[j];
+            for (int j = 0; j < int(inds.size()); j++) {
+                const Individual& indQ = inds[j];
 
                 int comparison = indP.CheckDominance(indQ);
-                if (comparison == 1)
+                if (comparison == 1) {
                     dominationList.push_back(j);
-                else if (comparison == -1)
+                }
+                else if (comparison == -1) {
                     dominationCount++;
+                }
             }
 
             indP.dominations = dominationCount;
@@ -130,10 +106,10 @@ namespace nsga2 {
         while (front[fi - 1].size() > 0) {
             std::vector<int>& fronti = front[fi - 1];
             std::vector<int> Q;
-            for (int i = 0; i < fronti.size(); i++) {
+            for (int i = 0; i < int(fronti.size()); i++) {
                 Individual& indP = inds[fronti[i]];
 
-                for (int j = 0; j < indP.dominated.size(); j++) {
+                for (int j = 0; j < int(indP.dominated.size()); j++) {
                     Individual& indQ = inds[indP.dominated[j]];
                     indQ.dominations--;
 
@@ -149,17 +125,17 @@ namespace nsga2 {
         }
     }
 
-
     void Population::CrowdingDistanceAll() {
-        for (int i = 0; i < front.size(); i++) {
+        for (int i = 0; i < int(front.size()); i++) {
             CrowdingDistance(i);
         }
     }
 
-    void Population::CrowdingDistance(int _frontI) {
-        std::vector<int> F = front[_frontI];
-        if (F.size() == 0)
+    void Population::CrowdingDistance(const int& _frontI) {
+        std::vector<int>& F = front[_frontI];
+        if (F.size() == 0) {
             return;
+        }
 
         const int l = F.size();
         for (int i = 0; i < l; i++) {
@@ -167,14 +143,16 @@ namespace nsga2 {
         }
         const int limit = crowdObj ? indConfig.objectives : indConfig.realVars;
         for (int i = 0; i < limit; i++) {
-            std::sort(F.begin(), F.end(), comparator_obj(*this, i));
+            std::sort(F.begin(), F.end(), [&](const int& a, const int& b) {
+                return crowdObj ? inds[a].objScore[i] < inds[b].objScore[i] : inds[a].reals[i] < inds[b].reals[i];
+            });
 
-            inds[F[0]].crowdDist = INF;
+            inds[F[0]].crowdDist = std::numeric_limits<double>::infinity();
             if (l > 1)
-                inds[F[l - 1]].crowdDist = INF;
+                inds[F[l - 1]].crowdDist = std::numeric_limits<double>::infinity();
 
             for (int j = 1; j < l - 1; j++) {
-                if (inds[F[j]].crowdDist != INF) {
+                if (inds[F[j]].crowdDist != std::numeric_limits<double>::infinity()) {
                     if (crowdObj && inds[F[l - 1]].objScore[i] != inds[F[0]].objScore[i]) {
                         inds[F[j]].crowdDist += (inds[F[j + 1]].objScore[i] - inds[F[j - 1]].objScore[i])
                                                 / (inds[F[l - 1]].objScore[i] - inds[F[0]].objScore[i]);
@@ -189,8 +167,10 @@ namespace nsga2 {
     }
 
     void Population::Merge(const Population& _pop1, const Population& _pop2) {
-        if (GetSize() < _pop1.GetSize() + _pop2.GetSize())
-            std::cout << "Merge: target population not big enough" << std::endl;
+        if (GetSize() < _pop1.GetSize() + _pop2.GetSize()) {
+            NUClear::log<NUClear::WARN>("Merge: target population not big enough");
+            inds.reserve(_pop1.GetSize() + _pop2.GetSize());
+        }
 
         std::copy(_pop1.inds.begin(), _pop1.inds.end(), inds.begin());
         std::copy(_pop2.inds.begin(), _pop2.inds.end(), inds.begin() + _pop1.GetSize());

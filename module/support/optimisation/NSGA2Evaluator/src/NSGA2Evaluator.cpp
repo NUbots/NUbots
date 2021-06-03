@@ -1,146 +1,124 @@
 #include "NSGA2Evaluator.hpp"
 
+#include <yaml-cpp/yaml.h>
+
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/MotionCommand.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/motion/KickCommand.hpp"
-#include "message/support/gazebo/GazeboBallLocation.hpp"
-#include "message/support/gazebo/GazeboRobotLocation.hpp"
-#include "message/support/gazebo/GazeboWorldCtrl.hpp"
-#include "message/support/gazebo/GazeboWorldStatus.hpp"
-#include "message/support/optimisation/NSGA2EvaluationParameters.hpp"
 #include "message/support/optimisation/NSGA2EvaluationRequest.hpp"
 #include "message/support/optimisation/NSGA2FitnessScores.hpp"
 #include "message/support/optimisation/NSGA2Terminate.hpp"
 
-#include "utility/behaviour/Action.hpp"
 #include "utility/behaviour/MotionCommand.hpp"
-#include "utility/file/fileutil.hpp"
-#include "utility/input/LimbID.hpp"
-#include "utility/input/ServoID.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module {
     namespace support {
         namespace optimisation {
 
             using extension::Configuration;
-            using extension::ExecuteScript;
-            using extension::Script;
+
             using message::behaviour::MotionCommand;
             using message::input::Sensors;
-            using message::motion::KickCommand;
-            using message::support::gazebo::GazeboBallLocation;
-            using message::support::gazebo::GazeboRobotLocation;
-            using message::support::gazebo::GazeboWorldCtrl;
-            using message::support::gazebo::GazeboWorldStatus;
-            using message::support::optimisation::NSGA2EvaluationParameters;
             using message::support::optimisation::NSGA2EvaluationRequest;
             using message::support::optimisation::NSGA2FitnessScores;
             using message::support::optimisation::NSGA2Terminate;
-            using utility::behaviour::RegisterAction;
-            using LimbID  = utility::input::LimbID;
-            using ServoID = utility::input::ServoID;
+
+            using utility::support::Expression;
 
             NSGA2Evaluator::NSGA2Evaluator(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
                 on<Configuration>("NSGA2Evaluator.yaml").then([this](const Configuration& config) {
-                    // Use configuration here from file NSGA2Evaluator.yaml
-
-                    evaluating  = false;
-                    finished    = false;
-                    walking     = false;
-                    standing    = false;
-                    terminating = false;
-                    generation  = 0;
-                    id          = 0;
-                    scores      = std::vector<double>(2, 0.0);
-                    constraints = std::vector<double>(2, 0.0);
-                    parameters  = std::vector<double>();
-
-                    gyroscope[0] = 0.0;
-                    gyroscope[1] = 0.0;
-                    gyroscope[2] = 0.0;
-
-                    simTime = 0.0;
-
-                    accelerometer[0] = 0.0;
-                    accelerometer[1] = 0.0;
-                    accelerometer[2] = 0.0;
-
-                    ballLocation[0] = 0.0;
-                    ballLocation[1] = 0.0;
-                    ballLocation[2] = 0.0;
-
-                    robotLocation[0] = 0.0;
-                    robotLocation[1] = 0.0;
-                    robotLocation[2] = 0.0;
-
-                    robotLocationDelta[0] = 0.0;
-                    robotLocationDelta[1] = 0.0;
-                    robotLocationDelta[2] = 0.0;
-
-                    sway[0]    = 0.0;
-                    sway[1]    = 0.0;
-                    sway[2]    = 0.0;
-                    fallenOver = false;
-
-                    simTimeDelta = 0.0;
-
-                    velocity = {0.5, 0.0};
-                    rotation = 0.0;
-
-                    distanceTravelled = 0.0;
-                    optimizeScript    = true;
-                    if (optimizeScript)
-                        script = YAML::LoadFile("scripts/nubotsvm/KickRightArmsExtended.yaml").as<Script>();
-
-                    // ResetWorld();
+                    velocity = config["walk_command"]["velocity"].as<Expression>();
+                    rotation = config["walk_command"]["rotation"].as<Expression>();
+                    ResetWorld();
                 });
 
-                emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
-                    subsumptionId,
-                    "NSGA2 Evaluator",
-                    {std::pair<float, std::set<LimbID>>(
-                        0,
-                        {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
-                    [this](const std::set<LimbID>&) {},
-                    [this](const std::set<LimbID>&) {},
-                    [this](const std::set<ServoID>&) {}}));
+                on<Startup>().then([this]() { ResetWorld(); });
 
                 on<Trigger<NSGA2EvaluationRequest>, Single>().then([this](const NSGA2EvaluationRequest& request) {
                     // set config file with request parameters
                     // run kick
                     generation = request.generation;
                     id         = request.id;
-                    parameters = request.reals;
-                    // if (generation == 1 && id == 0)
-                    //    ResetWorld();
                     ResetWorldTime();
 
-                    std::unique_ptr<NSGA2EvaluationParameters> params = std::make_unique<NSGA2EvaluationParameters>();
-                    params->bodyTilt                                  = parameters[0];
-                    params->qLArmStartPitch                           = parameters[1];
+                    // Write walk config from parameters
+                    YAML::Node walk_config = YAML::LoadFile("config/QuinticWalk.yaml");
 
-                    if (optimizeScript) {
-                        int var = 0;
-                        for (int i = 1; i < script.frames.size() - 1; i++) {
-                            for (auto& target : script.frames[i].targets) {
-                                target.position = (float) parameters[var];
-                                var++;
-                            }
-                        }
-                    }
-                    // emit(std::make_unique<KickCommand>(KickCommand{
-                    //       {0, -1, 0}, //Ball is right of centre for right kick
-                    //{0, 0, 1}, message::motion::KickCommandType::NORMAL
-                    //   }));//log("EMITTING");
-                    // emit(std::make_unique<MotionCommand>(
-                    //    utility::behaviour::DirectCommand(Eigen::Affine2d(velocity, rotation))));
+                    auto walk                       = walk_config["walk"];
+                    walk["freq"]                    = request.parameters.freq;
+                    walk["double_support_ratio"]    = request.parameters.double_support_ratio;
+                    walk["first_step_swing_factor"] = request.parameters.first_step_swing_factor;
 
-                    emit(params);
+                    auto foot          = walk["foot"];
+                    foot["distance"]   = request.parameters.foot.distance;
+                    foot["rise"]       = request.parameters.foot.rise;
+                    foot["z_pause"]    = request.parameters.foot.z_pause;
+                    foot["apex_phase"] = request.parameters.foot.apex_phase;
+
+                    auto put_down           = foot["put_down"];
+                    put_down["z_offset"]    = request.parameters.foot.put_down.z_offset;
+                    put_down["phase"]       = request.parameters.foot.put_down.phase;
+                    put_down["roll_offset"] = request.parameters.foot.put_down.roll_offset;
+
+                    auto overshoot     = foot["overshoot"];
+                    overshoot["ratio"] = request.parameters.foot.overshoot.ratio;
+                    overshoot["phase"] = request.parameters.foot.overshoot.phase;
+
+                    auto trunk        = walk["trunk"];
+                    trunk["height"]   = request.parameters.trunk.height;
+                    trunk["pitch"]    = request.parameters.trunk.pitch;
+                    trunk["phase"]    = request.parameters.trunk.phase;
+                    trunk["x_offset"] = request.parameters.trunk.x_offset;
+                    trunk["y_offset"] = request.parameters.trunk.y_offset;
+                    trunk["swing"]    = request.parameters.trunk.swing;
+                    trunk["pause"]    = request.parameters.trunk.pause;
+
+                    auto x_offset       = trunk["x_offset"];
+                    x_offset["forward"] = request.parameters.trunk.x_offset_p_coef.forward;
+                    x_offset["turn"]    = request.parameters.trunk.x_offset_p_coef.turn;
+
+                    auto pitch       = trunk["pitch_p_coef"];
+                    pitch["forward"] = request.parameters.trunk.pitch_p_coef.forward;
+                    pitch["turn"]    = request.parameters.trunk.pitch_p_coef.turn;
+
+                    auto kick        = walk["kick"];
+                    kick["length"]   = request.parameters.kick.length;
+                    kick["phase"]    = request.parameters.kick.phase;
+                    kick["velocity"] = request.parameters.kick.vel;
+
+                    auto pause        = walk["pause"];
+                    pause["duration"] = request.parameters.pause.duration;
+
+                    auto max_step  = walk["max_step"];
+                    max_step["x"]  = request.parameters.max_step.x;
+                    max_step["y"]  = request.parameters.max_step.y;
+                    max_step["z"]  = request.parameters.max_step.z;
+                    max_step["xy"] = request.parameters.max_step.xy;
+
+                    auto imu                  = walk["imu"];
+                    imu["active"]             = request.parameters.imu.active;
+                    imu["pitch"]["threshold"] = request.parameters.imu.pitch.threshold;
+                    imu["roll"]["threshold"]  = request.parameters.imu.roll.threshold;
+
+                    auto gains    = walk["gains"];
+                    gains["legs"] = request.parameters.gains.legs;
+
+                    // Write updated config to disk
+                    std::ofstream ofs("config/QuinticWalk.yaml");
+                    ofs << YAML::Dump(walk_config);
+                    ofs.close();
+
                     terminating = false;
+
+                    // Send walk command
+                    Eigen::Affine2d walk_command;
+                    walk_command.linear()      = Eigen::Rotation2Dd(rotation).toRotationMatrix();
+                    walk_command.translation() = velocity;
+                    emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(walk_command)));
                 });
 
                 // TODO(KipH):
@@ -222,7 +200,7 @@ namespace module {
                 //     }
                 // });
 
-                on<Trigger<NSGA2Terminate>, Single>().then([this](const NSGA2Terminate& terminate) {
+                on<Trigger<NSGA2Terminate>, Single>().then([this]() {
                     // Get the sim time
                     finished = true;
                 });
@@ -268,41 +246,40 @@ namespace module {
             }
 
             void NSGA2Evaluator::ResetWorld() {
-                std::unique_ptr<GazeboWorldCtrl> command = std::make_unique<GazeboWorldCtrl>();
-                command->command                         = "RESET";
-                emit(command);
+                // std::unique_ptr<GazeboWorldCtrl> command = std::make_unique<GazeboWorldCtrl>();
+                // command->command                         = "RESET";
+                // emit(command);
 
                 distanceTravelled    = 0.0;
                 timeSinceTermination = 0.0;
-                sway[0]              = 0.0;
-                sway[1]              = 0.0;
-                sway[2]              = 0.0;
+                sway                 = Eigen::Vector3d::Zero();
                 fieldPlaneSway       = 0.0;
                 maxFieldPlaneSway    = 0.0;
                 simTimeDelta         = 0.0;
-                constraints[0]       = 0.0;
-                constraints[1]       = 0.0;
+                constraints          = {0.0, 0.0};
                 fallenOver           = false;
             }
 
             void NSGA2Evaluator::ResetWorldTime() {
-                std::unique_ptr<GazeboWorldCtrl> command = std::make_unique<GazeboWorldCtrl>();
-                command->command                         = "RESETTIME";
-                emit(command);
+                // std::unique_ptr<GazeboWorldCtrl> command = std::make_unique<GazeboWorldCtrl>();
+                // command->command                         = "RESETTIME";
+                // emit(command);
             }
 
-            bool NSGA2Evaluator::BeginTermination() {
+            void NSGA2Evaluator::BeginTermination() {
                 terminating = true;
                 evaluating  = false;
-                if (fallenOver)
-                    log("fallen over...");
-                else
-                    log("terminating...");
+                if (fallenOver) {
+                    log<NUClear::DEBUG>("fallen over...");
+                }
+                else {
+                    log<NUClear::DEBUG>("terminating...");
+                }
 
                 timeSinceTermination = simTime;
                 CalculateFitness();
                 ResetWorld();
-                // emit(std::make_unique<MotionCommand>(utility::behaviour::StandStill()));
+                emit(std::make_unique<MotionCommand>(utility::behaviour::StandStill()));
             }
 
             void NSGA2Evaluator::CalculateFitness() {
