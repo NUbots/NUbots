@@ -14,8 +14,8 @@ nuclear_role(
   # input
   input::GameController
   # Simulator connection
-  platform::Webots
   input::SensorFilter
+  platform::Webots
   # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector
