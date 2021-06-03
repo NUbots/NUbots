@@ -49,10 +49,9 @@ namespace module::vision {
                 indices.end(),
                 neighbours,
                 [&](const int& idx) {
-                    return idx == int(indices.size())
-                           || (cls(FIELD_INDEX, idx) + cls(LINE_INDEX, idx) >= config.confidence_threshold);
-                },
-                {4, 5});
+                    return idx == int(indices.size()) || cls(FIELD_INDEX, idx) >= config.confidence_threshold
+                           || cls(LINE_INDEX, idx) >= config.confidence_threshold;
+                });
 
 
             // Discard indices that are not on the boundary
