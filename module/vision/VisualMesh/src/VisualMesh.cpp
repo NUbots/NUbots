@@ -79,6 +79,7 @@ namespace module::vision {
                             msg->neighbourhood   = std::move(result.neighbourhood);
                             msg->indices         = std::move(result.indices);
                             msg->classifications = std::move(result.classifications);
+                            msg->class_map       = runner.class_map;
 
                             // Emit the inference
                             emit(msg);

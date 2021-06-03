@@ -1,9 +1,11 @@
 #ifndef MODULE_INPUT_FAKECAMERA_HPP
 #define MODULE_INPUT_FAKECAMERA_HPP
 
+#include <memory>
 #include <mutex>
 #include <nuclear>
 #include <string>
+#include <turbojpeg.h>
 #include <vector>
 
 namespace module::input {
@@ -17,9 +19,20 @@ namespace module::input {
             std::string lens_prefix;
         } config;
 
+        /// @brief List of images and their corresponding lens files that we are cycling through
         std::vector<std::pair<std::string, std::string>> images;
-        size_t image_counter = 0;
+        /// @brief Index into the images vector representing the current image/lens pair we are loading
+        size_t image_index = 0;
+        /// @brief mutex controlling access to the images vector and the image_index variable
         std::mutex images_mutex;
+
+        /// @brief JPEG decompressor. Constructed as a shared_ptr so that it will be automatically deleted on class
+        /// destruction
+        std::shared_ptr<void> decompressor = std::shared_ptr<void>(tjInitDecompress(), [](auto handle) {
+            if (handle != nullptr) {
+                tjDestroy(handle);
+            }
+        });
 
     public:
         /// @brief Called by the powerplant to build and setup the FakeCamera reactor.

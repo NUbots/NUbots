@@ -5,7 +5,9 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <functional>
+#include <map>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "message/input/Image.hpp"
@@ -35,6 +37,7 @@ namespace module::vision::visualmesh {
         VisualMeshResults operator()(const message::input::Image& image, const Eigen::Affine3f& Htc);
 
         std::unique_ptr<std::atomic<bool>> active;
+        std::map<std::string, uint32_t> class_map;
     };
 
 }  // namespace module::vision::visualmesh

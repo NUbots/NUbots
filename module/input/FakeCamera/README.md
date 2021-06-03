@@ -43,3 +43,4 @@ Hoc:                    # Camera to observation plane (world) homogeneous transf
 ## Dependencies
 
 Eigen
+libjpeg-turbo

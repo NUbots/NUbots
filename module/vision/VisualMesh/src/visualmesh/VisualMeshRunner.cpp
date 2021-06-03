@@ -194,6 +194,7 @@ namespace module::vision::visualmesh {
 
         // Load the properties from the model
         auto loaded                     = load_model(path);
+        class_map                       = loaded.class_map;
         cfg.model                       = loaded.model;
         cfg.mesh_model                  = loaded.mesh_model;
         cfg.num_classes                 = loaded.num_classes;

@@ -18,6 +18,8 @@
 #ifndef MODULE_VISION_VISUALMESH_LOAD_MODEL_HPP
 #define MODULE_VISION_VISUALMESH_LOAD_MODEL_HPP
 
+#include <map>
+#include <string>
 #include <visualmesh/network_structure.hpp>
 #include <yaml-cpp/yaml.h>
 
@@ -27,6 +29,7 @@ namespace module::vision::visualmesh {
         ::visualmesh::NetworkStructure<float> model;
         std::string mesh_model;
         int num_classes;
+        std::map<std::string, uint32_t> class_map;
         struct {
             std::string shape;
             double radius;
