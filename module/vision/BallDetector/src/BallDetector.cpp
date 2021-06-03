@@ -82,6 +82,10 @@ namespace module::vision {
                 // Discard indices that are not on the boundary and are not below the green horizon
                 indices.resize(std::distance(indices.begin(), boundary));
 
+                if (config.debug) {
+                    log<NUClear::DEBUG>(fmt::format("Partitioned {} points", indices.size()));
+                }
+
                 // Cluster all points into ball candidates
                 // Points are clustered based on their connectivity to other ball points
                 // Clustering is down in two steps
