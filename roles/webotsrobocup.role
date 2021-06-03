@@ -34,7 +34,6 @@ nuclear_role(
   behaviour::planning::KickPlanner
   behaviour::planning::SimpleWalkPathPlanner # Creates WalkPaths.
   behaviour::strategy::SoccerStrategy
-  behaviour::skills::Nod
   # Motion
   motion::ScriptEngine
   motion::QuinticWalk
