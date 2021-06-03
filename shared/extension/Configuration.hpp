@@ -26,8 +26,8 @@
 
 #include "utility/file/fileutil.hpp"
 #include "utility/strutil/strutil.hpp"
-#include "utility/support/yaml_log_level.hpp"
 #include "utility/support/hostname.hpp"
+#include "utility/support/yaml_log_level.hpp"
 
 namespace extension {
 
