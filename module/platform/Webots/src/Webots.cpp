@@ -161,7 +161,7 @@ namespace module::platform {
                                  {"head_pitch_sensor", sensor_timestep},
                                  {"accelerometer", sensor_timestep},
                                  {"gyroscope", sensor_timestep},
-                                 {"right_camera", camera_timestep},
+                                 //  {"right_camera", camera_timestep},
                                  {"left_camera", camera_timestep},
                                  {"right_touch_sensor_br", sensor_timestep},
                                  {"right_touch_sensor_bl", sensor_timestep},
