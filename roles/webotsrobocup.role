@@ -3,6 +3,7 @@ nuclear_role(
   # without it many roles do not run
   extension::FileWatcher
   support::SignalCatcher
+  support::logging::ConsoleLogHandler
   support::logging::FileLogHandler
   # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
   motion::KinematicsConfiguration
