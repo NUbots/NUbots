@@ -99,9 +99,9 @@ message MotionCapture {
     /// Encoded timestamp - 0 := the first timecode. hour:minute:second:frame
     /// bytes, in binary coded decimal see
     /// https://en.wikipedia.org/wiki/SMPTE_timecode
-    uint32 timecode     = 3;
-    uint32 timecode_sub = 4;
-    double timestamp    = 5;
+    uint32 timecode         = 3;
+    uint32 timecode_sub     = 4;
+    double natnet_timestamp = 5;
     /// Whether or not this frame is to be recorded
     bool                   recording              = 6;
     bool                   tracked_models_changed = 7;

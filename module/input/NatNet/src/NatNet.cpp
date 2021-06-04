@@ -173,12 +173,12 @@ namespace module::input {
         mocap->timecode     = ReadData<uint32_t>::read(ptr, version);
         mocap->timecode_sub = ReadData<uint32_t>::read(ptr, version);
 
-        // In version 2.9 timestamp went from a float to a double
+        // In version 2.9 natnet_timestamp went from a float to a double
         if (version >= 0x02090000) {
-            mocap->timestamp = ReadData<double>::read(ptr, version);
+            mocap->natnet_timestamp = ReadData<double>::read(ptr, version);
         }
         else {
-            mocap->timestamp = ReadData<float>::read(ptr, version);
+            mocap->natnet_timestamp = ReadData<float>::read(ptr, version);
         }
 
         short params                  = ReadData<short>::read(ptr, version);
