@@ -104,7 +104,7 @@ namespace module::behaviour::skills {
             if (isFront) {
                 emit(std::make_unique<ExecuteScriptByName>(
                     id,
-                    std::vector<std::string>({"RollOverFront.yaml", "StandUpBack.yaml", "Stand.yaml"})));
+                    std::vector<std::string>({"StandUpFront.yaml", "Stand.yaml"})));
             }
             else {
                 emit(std::make_unique<ExecuteScriptByName>(
