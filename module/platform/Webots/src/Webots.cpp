@@ -224,6 +224,8 @@ namespace module::platform {
             min_camera_time_step = config["min_camera_time_step"].as<int>();
             min_sensor_time_step = config["min_sensor_time_step"].as<int>();
 
+            max_velocity = config["max_velocity"].as<double>();
+
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
             clock_smoothing = config["clock_smoothing"].as<double>();
@@ -257,8 +259,9 @@ namespace module::platform {
                 // Otherwise, if the duration is negative or 0, the servo should have reached its position before now
                 // Because of this, we move the servo as fast as we can to reach the position.
                 // 5.236 == 50 rpm which is similar to the max speed of the servos
-                double speed = duration.count() > 0 ? diff / std::chrono::duration<double>(duration).count() : 5.236;
-
+                double speed =
+                    duration.count() > 0 ? diff / std::chrono::duration<double>(duration).count() : max_velocity;
+                speed = std::min(max_velocity, speed);
                 // Update our internal state
                 if (servo_state[target.id].p_gain != target.gain || servo_state[target.id].i_gain != target.gain * 0.0
                     || servo_state[target.id].d_gain != target.gain * 0.0
