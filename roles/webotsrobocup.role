@@ -16,12 +16,7 @@ nuclear_role(
   # Simulator connection
   input::SensorFilter
   platform::Webots
-  # Vision
-  vision::VisualMesh
-  vision::GreenHorizonDetector
-  vision::GoalDetector
-  vision::BallDetector
-  # Localisation
+  # Vision vision::VisualMesh vision::GreenHorizonDetector vision::GoalDetector vision::BallDetector Localisation
   localisation::BallLocalisation
   localisation::RobotParticleLocalisation
   # Behaviour
