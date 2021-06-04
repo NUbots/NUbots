@@ -7,9 +7,6 @@
 #include <visualmesh/model/nmgrid4.hpp>
 #include <visualmesh/model/nmgrid6.hpp>
 #include <visualmesh/model/nmgrid8.hpp>
-#include <visualmesh/model/radial4.hpp>
-#include <visualmesh/model/radial6.hpp>
-#include <visualmesh/model/radial8.hpp>
 #include <visualmesh/model/ring4.hpp>
 #include <visualmesh/model/ring6.hpp>
 #include <visualmesh/model/ring8.hpp>
@@ -146,9 +143,6 @@ namespace module::vision::visualmesh {
         if (cfg.mesh_model      == "RING4")   { return engine<::visualmesh::model::Ring4>(cfg, shape);   }
         else if (cfg.mesh_model == "RING6")   { return engine<::visualmesh::model::Ring6>(cfg, shape);   }
         else if (cfg.mesh_model == "RING8")   { return engine<::visualmesh::model::Ring8>(cfg, shape);   }
-        else if (cfg.mesh_model == "RADIAL4") { return engine<::visualmesh::model::Radial4>(cfg, shape); }
-        else if (cfg.mesh_model == "RADIAL6") { return engine<::visualmesh::model::Radial6>(cfg, shape); }
-        else if (cfg.mesh_model == "RADIAL8") { return engine<::visualmesh::model::Radial8>(cfg, shape); }
         else if (cfg.mesh_model == "XYGRID4") { return engine<::visualmesh::model::XYGrid4>(cfg, shape); }
         else if (cfg.mesh_model == "XYGRID6") { return engine<::visualmesh::model::XYGrid6>(cfg, shape); }
         else if (cfg.mesh_model == "XYGRID8") { return engine<::visualmesh::model::XYGrid8>(cfg, shape); }
