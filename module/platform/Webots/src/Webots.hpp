@@ -83,7 +83,6 @@ namespace module::platform {
         int min_camera_time_step;
         /// @brief The minimum allowed time between two sensor measurements, not including the camera
         int min_sensor_time_step;
-
         /// @brief The maximum velocity allowed by the NUgus motors in webots
         double max_velocity;
 

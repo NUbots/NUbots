@@ -223,8 +223,7 @@ namespace module::platform {
             time_step            = config["time_step"].as<int>();
             min_camera_time_step = config["min_camera_time_step"].as<int>();
             min_sensor_time_step = config["min_sensor_time_step"].as<int>();
-
-            max_velocity = config["max_velocity"].as<double>();
+            max_velocity         = config["max_velocity"].as<double>();
 
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
@@ -258,7 +257,8 @@ namespace module::platform {
                 // If we have a positive duration, find the velocity.
                 // Otherwise, if the duration is negative or 0, the servo should have reached its position before now
                 // Because of this, we move the servo as fast as we can to reach the position.
-                // 5.236 == 50 rpm which is similar to the max speed of the servos
+                // The fastest speed is determined by the config, which comes from the max servo velocity from
+                // NUgus.proto in Webots
                 double speed =
                     duration.count() > 0 ? diff / std::chrono::duration<double>(duration).count() : max_velocity;
                 speed = std::min(max_velocity, speed);
