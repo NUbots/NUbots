@@ -245,7 +245,8 @@ RUN install-from-source https://github.com/Fastcode/NUClear/archive/153ccdb9a13d
 # Visual Mesh
 RUN install-from-source https://github.com/Fastcode/VisualMesh/archive/refs/tags/v2.1.0.tar.gz \
     -DBUILD_TENSORFLOW_OP=OFF \
-    -DBUILD_EXAMPLES=OFF
+    -DBUILD_EXAMPLES=OFF \
+    -DBUILD_OPENCL_ENGINE=ON
 
 # Backtrace
 RUN install-from-source https://github.com/ianlancetaylor/libbacktrace/archive/master.tar.gz \
