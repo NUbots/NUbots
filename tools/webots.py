@@ -5,6 +5,7 @@ import os
 import shutil
 import subprocess
 import sys
+import textwrap
 from pathlib import Path
 
 from termcolor import cprint
@@ -18,6 +19,19 @@ def register(command):
 
     build_subcommand = subparsers.add_parser("build", help="Build the docker image for use with Webots")
     build_subcommand.add_argument("roles", nargs="+", help="The roles to build for the image")
+
+    push_subcommand = subparsers.add_parser(
+        "push",
+        help=textwrap.dedent(
+            """
+            Push the simulation docker image to the TC registry.
+
+            You should install the aws CLI and login with the TC credentials before running this command.
+
+            See "Uploading Docker Images" in the Robocup "API Specifications for Virtual Soccer Competition" document for details.
+        """
+        ),
+    )
 
     run_subcommand = subparsers.add_parser("run", help="Run the simulation docker image for use with Webots")
     run_subcommand.add_argument("role", help="The role to run")
@@ -136,9 +150,42 @@ def exec_run(role):
     subprocess.run(docker_run_command)
 
 
+def exec_push():
+    image_name = "robocup-vhsc-nubots"
+    image_tag = "robocup2021"
+    registry_host = "079967072104.dkr.ecr.us-east-2.amazonaws.com/robocup-vhsc-nubots"
+
+    exit_code = subprocess.run(
+        [
+            "docker",
+            "tag",
+            f"{image_name}:{image_tag}",
+            f"{registry_host}:{image_tag}",
+        ]
+    ).returncode
+
+    if exit_code != 0:
+        print(f"unable to tag image, exit code {exit_code}")
+        sys.exit(1)
+
+    exit_code = subprocess.run(
+        [
+            "docker",
+            "push",
+            f"{registry_host}:{image_tag}",
+        ]
+    ).returncode
+
+    if exit_code != 0:
+        print(f"unable to push image, exit code {exit_code}")
+        sys.exit(1)
+
+
 def run(sub_command, roles=None, role=None, **kwargs):
     if sub_command == "build":
         exec_build(roles)
+    elif sub_command == "push":
+        exec_push()
     elif sub_command == "run":  # For testing
         exec_run(role)
     else:
