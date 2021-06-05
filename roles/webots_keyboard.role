@@ -9,12 +9,15 @@ nuclear_role(
   support::configuration::GlobalConfig
   support::configuration::SoccerConfig
   input::SensorFilter
+  platform::Webots
   # Motion
   motion::QuinticWalk
   motion::HeadController
+  motion::ScriptEngine
   # Behaviour
   behaviour::Controller
+  behaviour::skills::Getup
+  behaviour::skills::KickScript
   behaviour::skills::DirectWalkController
   behaviour::strategy::KeyboardWalk
-  platform::Webots
 )
