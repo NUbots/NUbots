@@ -44,6 +44,7 @@ namespace module::vision {
             std::iota(indices.begin(), indices.end(), 0);
 
             // Partition the indices such that we only have the field points that dont have field surrounding them
+            // Only check the top two neighbours of each point
             auto boundary = utility::vision::visualmesh::partition_points(
                 indices.begin(),
                 indices.end(),
@@ -51,7 +52,8 @@ namespace module::vision {
                 [&](const int& idx) {
                     return idx == int(indices.size()) || cls(FIELD_INDEX, idx) >= config.confidence_threshold
                            || cls(LINE_INDEX, idx) >= config.confidence_threshold;
-                });
+                },
+                {1, 2});
 
 
             // Discard indices that are not on the boundary
