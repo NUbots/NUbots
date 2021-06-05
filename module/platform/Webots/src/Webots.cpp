@@ -312,6 +312,7 @@ namespace module::platform {
             read_io.unbind();
             send_io.unbind();
             error_io.unbind();
+            buffer.clear();
 
             if (fd != -1) {
                 // Disconnect the fd gracefully
@@ -335,16 +336,16 @@ namespace module::platform {
                     emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
                     // If we have not seen the welcome message yet, look for it
                     if (!connection_active) {
-                        // Initaliase the string with ???????
-                        std::string initial_message = std::string(7, '?');
-                        const int n                 = ::read(fd, initial_message.data(), sizeof(initial_message));
+                        // Initaliase the string with 0s
+                        std::array<char, 8> initial_message = {'\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'};
+                        const int n = ::read(fd, initial_message.data(), initial_message.size());
 
                         if (n >= 0) {
-                            if (initial_message == "Welcome") {
+                            if (std::strncmp(initial_message.data(), "Welcome", initial_message.size()) == 0) {
                                 // good
                                 log<NUClear::INFO>(fmt::format("Connected to {}:{}", server_address, server_port));
                             }
-                            else if (initial_message == "Refused") {
+                            else if (std::strncmp(initial_message.data(), "Refused", initial_message.size()) == 0) {
                                 log<NUClear::FATAL>(
                                     fmt::format("Connection to {}:{} refused: your IP is not white listed.",
                                                 server_address,
@@ -404,11 +405,16 @@ namespace module::platform {
                             // Decode the protocol buffer and emit it as a message
                             char* payload = reinterpret_cast<char*>(buffer.data()) + sizeof(length);
 
-                            translate_and_emit_sensor(
-                                NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(payload, length));
-
-                            // Delete the packet we just read ready to read the next one
-                            buffer.erase(buffer.begin(), std::next(buffer.begin(), sizeof(length) + length));
+                            try {
+                                translate_and_emit_sensor(
+                                    NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(payload,
+                                                                                                         length));
+                                // Delete the packet we just read ready to read the next one
+                                buffer.erase(buffer.begin(), std::next(buffer.begin(), sizeof(length) + length));
+                            }
+                            catch (std::exception e) {
+                                log<NUClear::WARN>(e.what());
+                            }
                         }
                     }
                 }
