@@ -403,10 +403,12 @@ namespace module::platform {
                             // Decode the protocol buffer and emit it as a message
                             char* payload = reinterpret_cast<char*>(buffer.data()) + sizeof(length);
 
-                            // Service the watchdog
-                            emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
                             translate_and_emit_sensor(
                                 NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(payload, length));
+
+                            // Service the watchdog
+                            emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
+
                             // Delete the packet we just read ready to read the next one
                             buffer.erase(buffer.begin(), std::next(buffer.begin(), sizeof(length) + length));
                         }
