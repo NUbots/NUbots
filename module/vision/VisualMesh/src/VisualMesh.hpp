@@ -1,24 +1,18 @@
 #ifndef MODULE_VISION_VISUALMESH_HPP
 #define MODULE_VISION_VISUALMESH_HPP
 
+#include <map>
 #include <nuclear>
+#include <string>
+#include <vector>
 
-#define CL_TARGET_OPENCL_VERSION 120
-
-#include "engine/cpu/cpu_engine.hpp"
-#include "visualmesh.hpp"
+#include "visualmesh/VisualMeshRunner.hpp"
 
 namespace module::vision {
 
     class VisualMesh : public NUClear::Reactor {
     private:
-        template <typename Scalar>
-        using Engine     = visualmesh::engine::cpu::Engine<Scalar>;
-        using Classifier = visualmesh::engine::cpu::Classifier<float>;
-        using VM         = visualmesh::VisualMesh<float, Engine>;
-
-        std::unique_ptr<VM> mesh;
-        std::unique_ptr<Classifier> classifier;
+        std::map<std::string, std::vector<visualmesh::VisualMeshRunner>> engines;
 
     public:
         /// @brief Called by the powerplant to build and setup the VisualMesh reactor.
