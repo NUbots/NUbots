@@ -32,8 +32,8 @@ namespace module::vision::visualmesh {
         LoadedModel loaded;
         loaded.model                  = model;
         loaded.mesh_model             = config["mesh"].as<std::string>();
-        loaded.num_classes            = config["num_classes"].as<int>();
         loaded.class_map              = config["class_map"].as<std::map<std::string, uint32_t>>();
+        loaded.num_classes            = loaded.class_map.size();
         loaded.geometry.shape         = config["geometry"]["shape"].as<std::string>();
         loaded.geometry.radius        = config["geometry"]["radius"].as<double>();
         loaded.geometry.intersections = config["geometry"]["intersections"].as<double>();
