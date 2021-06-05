@@ -11,7 +11,7 @@ log_level: DEBUG
 cameras:
   FakeCamera:
     concurrent: 2
-    network: config/networks/RobocupNetwork.yaml
+    network: config/networks/WebotsNetwork.yaml
     engine: cpu
     classifier:
       height: [0.5, 1.0]
