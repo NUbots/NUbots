@@ -337,7 +337,7 @@ namespace module::platform {
                     // If we have not seen the welcome message yet, look for it
                     if (!connection_active) {
                         // Initaliase the string with 0s
-                        std::array<char, 8> initial_message = {'\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'};
+                        std::array<char, 8> initial_message{};
                         const int n = ::read(fd, initial_message.data(), initial_message.size());
 
                         if (n >= 0) {
