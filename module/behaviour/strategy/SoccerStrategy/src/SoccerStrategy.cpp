@@ -212,6 +212,7 @@ namespace module::behaviour::strategy {
                                 currentState = Behaviour::State::INITIAL;
                             }
                             else if (phase == Phase::READY) {
+                                standStill();
                                 if (gameState.data.our_kick_off) {
                                     walkTo(fieldDescription, cfg_.start_position_offensive);
                                 }

@@ -23,6 +23,7 @@
 #include <cmath>
 
 #include "extension/Configuration.hpp"
+#include "extension/Script.hpp"
 
 #include "message/behaviour/KickPlan.hpp"
 #include "message/behaviour/MotionCommand.hpp"
@@ -46,6 +47,7 @@
 namespace module::behaviour::planning {
 
     using extension::Configuration;
+    using extension::ExecuteScriptByName;
 
     using message::behaviour::KickPlan;
     using message::behaviour::MotionCommand;
@@ -167,7 +169,7 @@ namespace module::behaviour::planning {
                 if (latestCommand.type == message::behaviour::MotionCommand::Type::STAND_STILL) {
 
 
-                    emit(std::make_unique<StopCommand>(subsumptionId));
+                    emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "Stand.yaml"));
                     // emit(std::make_unique<ActionPriorities>(ActionPriorities { subsumptionId, { 40, 11 }}));
 
                     return;
