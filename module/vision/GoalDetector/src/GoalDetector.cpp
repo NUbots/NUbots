@@ -117,7 +117,8 @@ namespace module::vision {
                 clusters.resize(std::distance(clusters.begin(), green_boundary));
 
                 if (config.debug) {
-                    log<NUClear::DEBUG>(fmt::format("Found {} clusters below green horizon", clusters.size()));
+                    log<NUClear::DEBUG>(
+                        fmt::format("Found {} clusters that intersect the green horizon", clusters.size()));
                 }
 
                 if (clusters.size() > 0) {
@@ -140,7 +141,7 @@ namespace module::vision {
                                 return idx == int(indices.size())
                                        || (cls(GOAL_INDEX, idx) >= config.confidence_threshold);
                             },
-                            {2});
+                            {0});
                         // Return true if the right neighbour is NOT a goal point
                         auto other = utility::vision::visualmesh::partition_points(
                             right,
