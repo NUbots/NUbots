@@ -312,6 +312,7 @@ namespace module::platform {
             read_io.unbind();
             send_io.unbind();
             error_io.unbind();
+            buffer.clear();
 
             if (fd != -1) {
                 // Disconnect the fd gracefully
@@ -331,20 +332,20 @@ namespace module::platform {
             // Receiving
             read_io = on<IO>(fd, IO::READ | IO::CLOSE | IO::ERROR).then("Read Stream", [this](const IO::Event& event) {
                 if ((event.events & IO::READ) != 0) {
-                    // Service the watchdog
-                    emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
                     // If we have not seen the welcome message yet, look for it
                     if (!connection_active) {
-                        // Initaliase the string with ???????
-                        std::string initial_message = std::string(7, '?');
-                        const int n                 = ::read(fd, initial_message.data(), sizeof(initial_message));
+                        // Initaliase the string with 0s
+                        // make sure we have an extra character just in case we read something that isn't a null
+                        // terminator
+                        std::array<char, 9> initial_message{};
+                        const int n = ::read(fd, initial_message.data(), initial_message.size() - 1);
 
                         if (n >= 0) {
-                            if (initial_message == "Welcome") {
+                            if (initial_message.data() == std::string("Welcome")) {
                                 // good
                                 log<NUClear::INFO>(fmt::format("Connected to {}:{}", server_address, server_port));
                             }
-                            else if (initial_message == "Refused") {
+                            else if (initial_message.data() == std::string("Refused")) {
                                 log<NUClear::FATAL>(
                                     fmt::format("Connection to {}:{} refused: your IP is not white listed.",
                                                 server_address,
@@ -406,6 +407,9 @@ namespace module::platform {
 
                             translate_and_emit_sensor(
                                 NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(payload, length));
+
+                            // Service the watchdog
+                            emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
 
                             // Delete the packet we just read ready to read the next one
                             buffer.erase(buffer.begin(), std::next(buffer.begin(), sizeof(length) + length));
