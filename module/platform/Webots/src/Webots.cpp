@@ -332,8 +332,6 @@ namespace module::platform {
             // Receiving
             read_io = on<IO>(fd, IO::READ | IO::CLOSE | IO::ERROR).then("Read Stream", [this](const IO::Event& event) {
                 if ((event.events & IO::READ) != 0) {
-                    // Service the watchdog
-                    emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
                     // If we have not seen the welcome message yet, look for it
                     if (!connection_active) {
                         // Initaliase the string with 0s
@@ -405,6 +403,8 @@ namespace module::platform {
                             // Decode the protocol buffer and emit it as a message
                             char* payload = reinterpret_cast<char*>(buffer.data()) + sizeof(length);
 
+                            // Service the watchdog
+                            emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
                             translate_and_emit_sensor(
                                 NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(payload, length));
                             // Delete the packet we just read ready to read the next one
