@@ -341,11 +341,11 @@ namespace module::platform {
                         const int n = ::read(fd, initial_message.data(), initial_message.size());
 
                         if (n >= 0) {
-                            if (std::strncmp(initial_message.data(), "Welcome", initial_message.size()) == 0) {
+                            if (std::string("Welcome") == initial_message.data()) {
                                 // good
                                 log<NUClear::INFO>(fmt::format("Connected to {}:{}", server_address, server_port));
                             }
-                            else if (std::strncmp(initial_message.data(), "Refused", initial_message.size()) == 0) {
+                            else if (std::string("Refused") == initial_message.data()) {
                                 log<NUClear::FATAL>(
                                     fmt::format("Connection to {}:{} refused: your IP is not white listed.",
                                                 server_address,
@@ -405,16 +405,10 @@ namespace module::platform {
                             // Decode the protocol buffer and emit it as a message
                             char* payload = reinterpret_cast<char*>(buffer.data()) + sizeof(length);
 
-                            try {
-                                translate_and_emit_sensor(
-                                    NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(payload,
-                                                                                                         length));
-                                // Delete the packet we just read ready to read the next one
-                                buffer.erase(buffer.begin(), std::next(buffer.begin(), sizeof(length) + length));
-                            }
-                            catch (std::exception e) {
-                                log<NUClear::WARN>(e.what());
-                            }
+                            translate_and_emit_sensor(
+                                NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(payload, length));
+                            // Delete the packet we just read ready to read the next one
+                            buffer.erase(buffer.begin(), std::next(buffer.begin(), sizeof(length) + length));
                         }
                     }
                 }
