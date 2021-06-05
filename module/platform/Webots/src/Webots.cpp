@@ -161,7 +161,7 @@ namespace module::platform {
                                  {"head_pitch_sensor", sensor_timestep},
                                  {"accelerometer", sensor_timestep},
                                  {"gyroscope", sensor_timestep},
-                                 {"right_camera", camera_timestep},
+                                 //  {"right_camera", camera_timestep},
                                  {"left_camera", camera_timestep},
                                  {"right_touch_sensor_br", sensor_timestep},
                                  {"right_touch_sensor_bl", sensor_timestep},
@@ -223,16 +223,9 @@ namespace module::platform {
             time_step            = config["time_step"].as<int>();
             min_camera_time_step = config["min_camera_time_step"].as<int>();
             min_sensor_time_step = config["min_sensor_time_step"].as<int>();
+            max_velocity         = config["max_velocity"].as<double>();
 
-            // clang-format off
-            auto lvl = config["log_level"].as<std::string>();
-            if      (lvl == "TRACE") { this->log_level = NUClear::TRACE; }
-            else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
-            else if (lvl == "INFO")  { this->log_level = NUClear::INFO; }
-            else if (lvl == "WARN")  { this->log_level = NUClear::WARN; }
-            else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
-            else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
-            // clang-format on
+            this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
             clock_smoothing = config["clock_smoothing"].as<double>();
 
@@ -264,9 +257,11 @@ namespace module::platform {
                 // If we have a positive duration, find the velocity.
                 // Otherwise, if the duration is negative or 0, the servo should have reached its position before now
                 // Because of this, we move the servo as fast as we can to reach the position.
-                // 5.236 == 50 rpm which is similar to the max speed of the servos
-                double speed = duration.count() > 0 ? diff / std::chrono::duration<double>(duration).count() : 5.236;
-
+                // The fastest speed is determined by the config, which comes from the max servo velocity from
+                // NUgus.proto in Webots
+                double speed =
+                    duration.count() > 0 ? diff / std::chrono::duration<double>(duration).count() : max_velocity;
+                speed = std::min(max_velocity, speed);
                 // Update our internal state
                 if (servo_state[target.id].p_gain != target.gain || servo_state[target.id].i_gain != target.gain * 0.0
                     || servo_state[target.id].d_gain != target.gain * 0.0
