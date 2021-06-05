@@ -19,9 +19,6 @@ namespace module::vision {
     using message::vision::VisualMesh;
     using GreenHorizonMsg = message::vision::GreenHorizon;
 
-    static constexpr int LINE_INDEX  = 2;
-    static constexpr int FIELD_INDEX = 3;
-
     GreenHorizonDetector::GreenHorizonDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
@@ -39,21 +36,24 @@ namespace module::vision {
             const auto& neighbours                              = mesh.neighbourhood;
             const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = mesh.rays;
             const float world_offset                            = std::atan2(mesh.Hcw(0, 1), mesh.Hcw(0, 0));
+            const uint32_t LINE_INDEX                           = mesh.class_map.at("line");
+            const uint32_t FIELD_INDEX                          = mesh.class_map.at("field");
 
             // Get some indices to partition
             std::vector<int> indices(mesh.indices.size());
             std::iota(indices.begin(), indices.end(), 0);
 
             // Partition the indices such that we only have the field points that dont have field surrounding them
+            // Only check the top two neighbours of each point
             auto boundary = utility::vision::visualmesh::partition_points(
                 indices.begin(),
                 indices.end(),
                 neighbours,
                 [&](const int& idx) {
-                    return idx == int(indices.size())
-                           || (cls(FIELD_INDEX, idx) + cls(LINE_INDEX, idx) >= config.confidence_threshold);
+                    return idx == int(indices.size()) || cls(FIELD_INDEX, idx) >= config.confidence_threshold
+                           || cls(LINE_INDEX, idx) >= config.confidence_threshold;
                 },
-                {4, 5});
+                {1, 2});
 
 
             // Discard indices that are not on the boundary
@@ -167,6 +167,7 @@ namespace module::vision {
                 msg->id        = mesh.id;
                 msg->Hcw       = mesh.Hcw;
                 msg->timestamp = mesh.timestamp;
+                msg->class_map = mesh.class_map;
 
                 // Find the convex hull of the cluster
                 msg->horizon.reserve(hull_indices.size());
