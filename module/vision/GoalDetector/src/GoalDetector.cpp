@@ -117,7 +117,8 @@ namespace module::vision {
                 clusters.resize(std::distance(clusters.begin(), green_boundary));
 
                 if (config.debug) {
-                    log<NUClear::DEBUG>(fmt::format("Found {} clusters below green horizon", clusters.size()));
+                    log<NUClear::DEBUG>(
+                        fmt::format("Found {} clusters that intersect the green horizon", clusters.size()));
                 }
 
                 if (clusters.size() > 0) {
