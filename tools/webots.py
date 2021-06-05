@@ -24,10 +24,7 @@ def register(command):
         "push",
         help=textwrap.dedent(
             """
-            Push the simulation docker image to the TC registry.
-
-            You should install the aws CLI and login with the TC credentials before running this command.
-
+            Push the simulation docker image to the TC registry. Run the aws CLI and login with the TC credentials before running this command.
             See "Uploading Docker Images" in the Robocup "API Specifications for Virtual Soccer Competition" document for details.
         """
         ),
