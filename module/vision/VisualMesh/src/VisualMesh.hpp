@@ -5,7 +5,7 @@
 
 #define CL_TARGET_OPENCL_VERSION 120
 
-#include "engine/opencl/opencl_engine.hpp"
+#include "engine/cpu/cpu_engine.hpp"
 #include "visualmesh.hpp"
 
 namespace module::vision {
@@ -13,8 +13,8 @@ namespace module::vision {
     class VisualMesh : public NUClear::Reactor {
     private:
         template <typename Scalar>
-        using Engine     = visualmesh::engine::opencl::Engine<Scalar>;
-        using Classifier = visualmesh::engine::opencl::Classifier<float>;
+        using Engine     = visualmesh::engine::cpu::Engine<Scalar>;
+        using Classifier = visualmesh::engine::cpu::Classifier<float>;
         using VM         = visualmesh::VisualMesh<float, Engine>;
 
         std::unique_ptr<VM> mesh;
