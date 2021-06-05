@@ -32,6 +32,7 @@
  */
 namespace utility::file {
     std::string loadFromFile(const std::string& path);
+    std::vector<uint8_t> readFile(const std::string& path);
 
     template <typename TData>
     void writeToFile(const std::string& path, const TData& data, bool append = false) {

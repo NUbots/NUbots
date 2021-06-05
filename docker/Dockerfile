@@ -242,6 +242,12 @@ RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.34.1.tar
 RUN install-from-source https://github.com/Fastcode/NUClear/archive/153ccdb9a13dbc88f3c448e07a3048d67235116e.tar.gz \
     -DBUILD_TESTS=OFF
 
+# Visual Mesh
+RUN install-from-source https://github.com/Fastcode/VisualMesh/archive/9df04eab3b08d2dca1d955a5bfbdbeea75f11d6b.tar.gz \
+    -DBUILD_TENSORFLOW_OP=OFF \
+    -DBUILD_EXAMPLES=OFF \
+    -DBUILD_OPENCL_ENGINE=ON
+
 # Backtrace
 RUN install-from-source https://github.com/ianlancetaylor/libbacktrace/archive/master.tar.gz \
     --without-system-libunwind \

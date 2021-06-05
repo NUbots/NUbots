@@ -26,6 +26,7 @@ extern "C" {
 }
 
 #include <iostream>
+#include <iterator>
 #include <sstream>
 #include <stack>
 #include <system_error>
@@ -42,6 +43,28 @@ namespace utility::file {
         stream << data.rdbuf();
 
         return stream.str();
+    }
+
+    std::vector<uint8_t> readFile(const std::string& path) {
+        std::ifstream data(path, std::ios::binary);
+
+        // Stop eating new lines in binary mode
+        data.unsetf(std::ios::skipws);
+
+        // Get number of bytes in the file
+        std::streampos num_bytes;
+        data.seekg(0, std::ios::end);
+        num_bytes = data.tellg();
+        data.seekg(0, std::ios::beg);
+
+        // Reserve capacity
+        std::vector<uint8_t> vec;
+        vec.reserve(num_bytes);
+
+        // Read the data
+        vec.insert(vec.begin(), std::istream_iterator<uint8_t>(data), std::istream_iterator<uint8_t>());
+
+        return vec;
     }
 
     bool exists(const std::string& path) {
