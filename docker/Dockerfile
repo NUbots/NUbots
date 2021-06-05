@@ -243,7 +243,7 @@ RUN install-from-source https://github.com/Fastcode/NUClear/archive/153ccdb9a13d
     -DBUILD_TESTS=OFF
 
 # Visual Mesh
-RUN install-from-source https://github.com/Fastcode/VisualMesh/archive/refs/tags/v2.1.0.tar.gz \
+RUN install-from-source https://github.com/Fastcode/VisualMesh/archive/9df04eab3b08d2dca1d955a5bfbdbeea75f11d6b.tar.gz \
     -DBUILD_TENSORFLOW_OP=OFF \
     -DBUILD_EXAMPLES=OFF \
     -DBUILD_OPENCL_ENGINE=ON
@@ -292,20 +292,13 @@ RUN install-package \
     colordiff \
     parallel \
     vim \
-    nano \
-    clinfo
+    nano
 
 # Install formatters as last step so if they change the image is easy to update
 RUN pip install --upgrade \
     cmake-format==0.6.13 \
     isort==5.7.0 \
     black==20.8b1
-
-# Enable all the driver capabilities so we can use OpenCL in the container
-ENV NVIDIA_DRIVER_CAPABILITIES=all
-
-# Copy the nvidia OpenCL vendorfile into the container so we can also use OpenCL on nvidia GPUs
-COPY --chown=root:root etc/OpenCL/vendors/nvidia.icd /etc/OpenCL/vendors/nvidia.icd
 
 ##############################
 ### SETUP THE USER ACCOUNT ###
