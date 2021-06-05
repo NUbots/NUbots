@@ -292,13 +292,20 @@ RUN install-package \
     colordiff \
     parallel \
     vim \
-    nano
+    nano \
+    clinfo
 
 # Install formatters as last step so if they change the image is easy to update
 RUN pip install --upgrade \
     cmake-format==0.6.13 \
     isort==5.7.0 \
     black==20.8b1
+
+# Enable all the driver capabilities so we can use OpenCL in the container
+ENV NVIDIA_DRIVER_CAPABILITIES=all
+
+# Copy the nvidia OpenCL vendorfile into the container so we can also use OpenCL on nvidia GPUs
+COPY --chown=root:root etc/OpenCL/vendors/nvidia.icd /etc/OpenCL/vendors/nvidia.icd
 
 ##############################
 ### SETUP THE USER ACCOUNT ###
