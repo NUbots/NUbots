@@ -339,11 +339,11 @@ namespace module::platform {
                         const int n = ::read(fd, initial_message.data(), initial_message.size());
 
                         if (n >= 0) {
-                            if (std::string("Welcome") == initial_message.data()) {
+                            if (initial_message.data() == std::string("Welcome")) {
                                 // good
                                 log<NUClear::INFO>(fmt::format("Connected to {}:{}", server_address, server_port));
                             }
-                            else if (std::string("Refused") == initial_message.data()) {
+                            else if (initial_message.data() == std::string("Refused")) {
                                 log<NUClear::FATAL>(
                                     fmt::format("Connection to {}:{} refused: your IP is not white listed.",
                                                 server_address,
