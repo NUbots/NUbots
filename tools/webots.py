@@ -144,9 +144,9 @@ def exec_run(role):
         "-e",
         "ROBOCUP_ROBOT_ID=1",
         "-e",
-        "ROBOCUP_TEAM_COLOR=blue",
+        "ROBOCUP_TEAM_COLOR=red",
         "-e",
-        "ROBOCUP_SIMULATOR_ADDR=127.0.0.1:10020",
+        "ROBOCUP_SIMULATOR_ADDR=127.0.0.1:10001",
         "robocup-vhsc-nubots:robocup2021",
         role,
     ]
