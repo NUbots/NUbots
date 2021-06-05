@@ -14,10 +14,10 @@ GoalAreaWidth: 3
 # Height to the bottom of the crossbar.
 GoalCrossbarHeight: 1.25 # from top of wood to ground
 # What shape the goal is (RECTANGLE,CIRCLE)
-GoalpostType: RECTANGLE
+GoalpostType: CIRCLE
 # The crossbar diameter and the goalpost diameter are (supposed to be) equal.
-GoalpostWidth: 0.05
-GoalpostDepth: 0.05
+GoalpostWidth: 0.10
+GoalpostDepth: 0.10
 GoalCrossbarWidth: 0.10
 GoalCrossbarDepth: 0.10
 GoalNetHeight: 1.0
