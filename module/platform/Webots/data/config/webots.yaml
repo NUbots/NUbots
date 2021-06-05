@@ -1,6 +1,8 @@
 # Controls the minimum log level that NUClear log will display
 log_level: DEBUG
 
+# Maximum velocity from NUgus.proto motors
+max_velocity: 5.76
 # Requested time step between sensors
 time_step: 8
 # Minimum time step allowed between camera sensors
@@ -13,5 +15,3 @@ clock_smoothing: 0.6
 # Connection details
 server_address: "127.0.0.1"
 port: 10020
-
-time_step: 32
