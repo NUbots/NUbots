@@ -128,12 +128,19 @@ def exec_build(roles):
 
 
 def exec_run(role):
+    robocup_logs_dir = os.path.join(b.project_dir, "robocup-logs")
+
+    # Ensure the logs directory exists for binding into the container
+    os.makedirs(robocup_logs_dir, exist_ok=True)
+
     docker_run_command = [
         "docker",
         "container",
         "run",
         "--rm",
         "--network=host",
+        "--mount",
+        f"type=bind,source={robocup_logs_dir},target=/robocup-logs",
         "-e",
         "ROBOCUP_ROBOT_ID=1",
         "-e",
