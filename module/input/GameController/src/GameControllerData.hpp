@@ -130,7 +130,7 @@ namespace module::input::gamecontroller {
            << "\t\tNumber of warnings: " << uint(robot.numberOfWarnings) << std::endl
            << "\t\tYellow Card Count..: " << uint(robot.yellowCardCount) << std::endl
            << "\t\tRed Card Count.....: " << uint(robot.redCardCount) << std::endl
-           << "\t\tGoalkeeper: " << uint(robot.goalKeeper) << std::endl;
+           << "\t\tGoalkeeper: " << std::boolalpha << robot.goalKeeper << std::endl;
         return os;
     }
 
