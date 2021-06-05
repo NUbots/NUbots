@@ -19,9 +19,6 @@ namespace module::vision {
     using message::vision::VisualMesh;
     using GreenHorizonMsg = message::vision::GreenHorizon;
 
-    static constexpr int LINE_INDEX  = 2;
-    static constexpr int FIELD_INDEX = 3;
-
     GreenHorizonDetector::GreenHorizonDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
@@ -39,6 +36,8 @@ namespace module::vision {
             const auto& neighbours                              = mesh.neighbourhood;
             const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = mesh.rays;
             const float world_offset                            = std::atan2(mesh.Hcw(0, 1), mesh.Hcw(0, 0));
+            const uint32_t LINE_INDEX                           = mesh.class_map.at("line");
+            const uint32_t FIELD_INDEX                          = mesh.class_map.at("field");
 
             // Get some indices to partition
             std::vector<int> indices(mesh.indices.size());
@@ -167,6 +166,7 @@ namespace module::vision {
                 msg->id        = mesh.id;
                 msg->Hcw       = mesh.Hcw;
                 msg->timestamp = mesh.timestamp;
+                msg->class_map = mesh.class_map;
 
                 // Find the convex hull of the cluster
                 msg->horizon.reserve(hull_indices.size());

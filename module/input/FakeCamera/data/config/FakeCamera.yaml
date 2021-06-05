@@ -1,0 +1,6 @@
+# Controls the minimum log level that NUClear log will display
+log_level: DEBUG
+
+image_folder: "images"
+image_prefix: "image"
+lens_prefix: "lens"

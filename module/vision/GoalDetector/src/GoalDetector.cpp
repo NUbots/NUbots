@@ -48,8 +48,6 @@ namespace module::vision {
     using utility::math::coordinates::cartesianToSpherical;
     using utility::support::Expression;
 
-    static constexpr int GOAL_INDEX = 1;
-
     GoalDetector::GoalDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         // Trigger the same function when either update
@@ -70,6 +68,7 @@ namespace module::vision {
                 const auto& neighbours                              = horizon.mesh->neighbourhood;
                 const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = horizon.mesh->rays;
                 const float world_offset                            = std::atan2(horizon.Hcw(0, 1), horizon.Hcw(0, 0));
+                const int GOAL_INDEX                                = horizon.class_map.at("goal");
 
                 // Get some indices to partition
                 std::vector<int> indices(horizon.mesh->indices.size());
