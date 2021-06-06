@@ -76,6 +76,7 @@ tests_output/
 
 # Logs
 /home/nubots/NUbots/log/*
+log
 
 # Misc
 tags

@@ -654,7 +654,7 @@
       position: -2
       gain: 30
       torque: 100
-- duration: 300
+- duration: 500
   targets:
     - id: R_HIP_PITCH
       position: -2
@@ -736,7 +736,7 @@
       position: 0.300000012
       gain: 30
       torque: 100
-- duration: 300
+- duration: 500
   targets:
     - id: R_HIP_PITCH
       position: -2
@@ -818,7 +818,7 @@
       position: 0.300000012
       gain: 30
       torque: 100
-- duration: 300
+- duration: 500
   targets:
     - id: R_HIP_PITCH
       position: -2
