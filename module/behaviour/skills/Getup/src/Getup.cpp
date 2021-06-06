@@ -92,7 +92,6 @@ namespace module::behaviour::skills {
                     isFront = (M_PI_2 - std::acos(Eigen::Vector3d::UnitX().dot(acc_reading)) <= 0.0);
 
                     updatePriority(GETUP_PRIORITY);
-                    fallenCheck.disable();
                     getUp.enable();
                 }
             });
@@ -104,7 +103,7 @@ namespace module::behaviour::skills {
             if (isFront) {
                 emit(std::make_unique<ExecuteScriptByName>(
                     id,
-                    std::vector<std::string>({"RollOverFront.yaml", "StandUpBack.yaml", "Stand.yaml"})));
+                    std::vector<std::string>({"StandUpFront.yaml", "Stand.yaml"})));
             }
             else {
                 emit(std::make_unique<ExecuteScriptByName>(
@@ -118,7 +117,6 @@ namespace module::behaviour::skills {
             gettingUp = false;
             updatePriority(0);
             getUp.disable();
-            fallenCheck.enable();
         });
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
