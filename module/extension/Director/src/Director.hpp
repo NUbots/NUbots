@@ -1,11 +1,10 @@
-#ifndef MODULE_EXTENSION_DIRECTOR_H
-#define MODULE_EXTENSION_DIRECTOR_H
+#ifndef MODULE_EXTENSION_DIRECTOR_HPP
+#define MODULE_EXTENSION_DIRECTOR_HPP
 
 #include <nuclear>
 #include <typeindex>
 
-namespace module {
-namespace extension {
+namespace module::extension {
 
     class Director : public NUClear::Reactor {
 
@@ -42,7 +41,6 @@ namespace extension {
         std::map<uint64_t, std::multimap<std::type_index, Provider>::iterator> reactions;
     };
 
-}  // namespace extension
-}  // namespace module
+}  // namespace module::extension
 
-#endif  // MODULE_EXTENSION_DIRECTOR_H
+#endif  // MODULE_EXTENSION_DIRECTOR_HPP
