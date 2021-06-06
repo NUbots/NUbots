@@ -11,9 +11,9 @@ nuclear_role(
   support::NUsight
   # Hardware Interface
   platform::darwin::HardwareSimulator
-  platform::darwin::SensorFilter
+  input::SensorFilter
   # Motion
-  motion::OldWalkEngine
+  motion::QuinticWalk
   motion::HeadController
   # Behaviour
   behaviour::Controller

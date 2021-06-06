@@ -19,8 +19,10 @@
 
 #include "BallDetector.hpp"
 
+#include <Eigen/Geometry>
 #include <fmt/format.h>
 #include <fmt/ostream.h>
+#include <numeric>
 
 #include "extension/Configuration.hpp"
 
@@ -32,8 +34,7 @@
 #include "utility/support/yaml_expression.hpp"
 #include "utility/vision/visualmesh/VisualMesh.hpp"
 
-namespace module {
-namespace vision {
+namespace module::vision {
 
     using extension::Configuration;
 
@@ -44,8 +45,6 @@ namespace vision {
 
     using utility::math::coordinates::cartesianToSpherical;
     using utility::support::Expression;
-
-    static constexpr int BALL_INDEX = 0;
 
     BallDetector::BallDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -66,6 +65,7 @@ namespace vision {
                 const auto& cls                                     = horizon.mesh->classifications;
                 const auto& neighbours                              = horizon.mesh->neighbourhood;
                 const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = horizon.mesh->rays;
+                const int BALL_INDEX                                = horizon.class_map.at("ball");
 
                 // Get some indices to partition
                 std::vector<int> indices(horizon.mesh->indices.size());
@@ -82,6 +82,10 @@ namespace vision {
 
                 // Discard indices that are not on the boundary and are not below the green horizon
                 indices.resize(std::distance(indices.begin(), boundary));
+
+                if (config.debug) {
+                    log<NUClear::DEBUG>(fmt::format("Partitioned {} points", indices.size()));
+                }
 
                 // Cluster all points into ball candidates
                 // Points are clustered based on their connectivity to other ball points
@@ -121,7 +125,7 @@ namespace vision {
                     auto balls = std::make_unique<Balls>();
                     balls->balls.reserve(clusters.size());
 
-                    balls->camera_id = horizon.camera_id;
+                    balls->id        = horizon.id;
                     balls->timestamp = horizon.timestamp;
                     balls->Hcw       = horizon.Hcw;
 
@@ -176,9 +180,9 @@ namespace vision {
                         b.colour.fill(1.0f);
 
                         // CALCULATE DEGREE OF FIT
-                        // Degree of fit defined as the standard deviation of angle between every rays on the cluster /
-                        // and the cone axis. If the standard deviation exceeds a given threshold then we have a bad
-                        // fit
+                        // Degree of fit defined as the standard deviation of angle between every rays on the
+                        // cluster / and the cone axis. If the standard deviation exceeds a given threshold then we
+                        // have a bad fit
                         std::vector<float> angles;
                         float mean             = 0.0f;
                         const float max_radius = std::acos(radius);
@@ -220,17 +224,17 @@ namespace vision {
                         }
 
                         // IF THE DISAGREEMENT BETWEEN THE ANGULAR AND PROJECTION BASED DISTANCES ARE TOO LARGE
-                        // Intersect cone axis vector with a plane midway through the ball with normal vector (0, 0, 1)
-                        // Do this in world space, not camera space!
+                        // Intersect cone axis vector with a plane midway through the ball with normal vector (0, 0,
+                        // 1) Do this in world space, not camera space!
                         // https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection#Algebraic_form
                         // Plane normal = (0, 0, 1)
                         // Point in plane = (0, 0, field.ball_radius)
                         // Line direction = axis
                         // Point on line = camera = Hcw.topRightCorner<3, 1>()
-                        const float d = (field.ball_radius - horizon.Hcw(2, 3)) / axis.z();
-                        const Eigen::Vector3f ball_projection =
-                            axis * d + horizon.Hcw.topRightCorner<3, 1>().cast<float>();
-                        const float projection_distance = ball_projection.norm();
+                        Eigen::Affine3f Hcw(horizon.Hcw.cast<float>());
+                        const float d = (Hcw.inverse().translation().z() - field.ball_radius) / std::abs(axis.z());
+                        const Eigen::Vector3f rBCc      = axis * d;
+                        const float projection_distance = rBCc.norm();
                         const float max_distance        = std::max(projection_distance, distance);
 
                         if ((std::abs(projection_distance - distance) / max_distance) > config.distance_disagreement) {
@@ -261,7 +265,7 @@ namespace vision {
                         }
 
                         if (config.debug) {
-                            log<NUClear::DEBUG>(fmt::format("Camera {}", balls->camera_id));
+                            log<NUClear::DEBUG>(fmt::format("Camera {}", balls->id));
                             log<NUClear::DEBUG>(fmt::format("radius {}", b.cone.radius));
                             log<NUClear::DEBUG>(fmt::format("Axis {}", b.cone.axis.transpose()));
                             log<NUClear::DEBUG>(
@@ -287,9 +291,8 @@ namespace vision {
                     }
                 }
             });
-    }  // namespace vision
-}  // namespace vision
-}  // namespace module
+    }
+}  // namespace module::vision
 
 
 /*****************************************************************************

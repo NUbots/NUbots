@@ -16,7 +16,7 @@ nuclear_role(
   # Sensors
   input::Camera
   platform::darwin::HardwareIO
-  platform::darwin::SensorFilter
+  input::SensorFilter
   # Vision
   vision::VisualMesh
   vision::GreenHorizonDetector
@@ -39,6 +39,6 @@ nuclear_role(
   behaviour::skills::Nod
   # Motion
   motion::ScriptEngine
-  motion::OldWalkEngine
+  motion::QuinticWalk
   motion::HeadController
 )

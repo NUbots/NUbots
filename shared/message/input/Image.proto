@@ -26,6 +26,7 @@ import "Matrix.proto";
 import "Vector.proto";
 
 message Image {
+
     message Lens {
         enum Projection {
             UNKNOWN     = 0;
@@ -33,20 +34,25 @@ message Image {
             EQUIDISTANT = 2;
             EQUISOLID   = 3;
         }
-
-        Projection projection   = 1;
-        float      focal_length = 2;
-        float      fov          = 3;
-        fvec2      centre       = 4;
-        fvec2      k            = 5;
+        Projection projection = 1;
+        /// Normalised focal length: focal length in pixels / image width
+        float focal_length = 2;
+        /// The angular diameter that the lens covers (the area that light hits on the sensor). In radians
+        float fov = 3;
+        /// Normalised image centre offset: pixels from centre to optical axis / image width
+        fvec2 centre = 4;
+        fvec2 k      = 5;
     }
-
-    uint32                    format     = 1;
+    /// Encoding of colour channels, e.g. BGGR, PRG8, RGBA, etc.
+    /// see module::output::compressor::turbojpeg::Compressor::compress for currently supported formats
+    uint32 format = 1;
+    /// Number of pixels of {x, y} of the image
     uvec2                     dimensions = 2;
     bytes                     data       = 3;
-    uint32                    camera_id  = 4;
+    uint32                    id         = 4;
     string                    name       = 5;
     google.protobuf.Timestamp timestamp  = 6;
-    mat4                      Hcw        = 7;
-    Lens                      lens       = 8;
+    /// World to camera Affine3D transform
+    mat4 Hcw  = 7;
+    Lens lens = 8;
 }

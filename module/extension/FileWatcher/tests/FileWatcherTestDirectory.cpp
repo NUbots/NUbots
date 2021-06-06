@@ -30,84 +30,88 @@
 
 namespace {
 
-struct StartTest {};
+    struct StartTest {};
 
-std::string testFile1Name = "directory-watcher-test-1.txt";
-std::string testFile2Name = "directory-watcher-test-2.txt";
-std::vector<extension::FileWatch> fileWatchEvents;
-bool watchdogTriggered;
+    const char* const test_file1_name = "directory-watcher-test-1.txt";
+    const char* const test_file2_name = "directory-watcher-test-2.txt";
+    std::vector<extension::FileWatch> file_watch_events;  // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+    bool watchdog_triggered;                              // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 
-class TestReactor : public NUClear::Reactor {
-public:
-    TestReactor(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-        // GIVEN a directory containing two files.
-        std::filesystem::path dirPath = std::filesystem::temp_directory_path() / "directory-watcher-test-XXXXXX";
-        std::string dirPathString     = dirPath.string();
+    class TestReactor : public NUClear::Reactor {
+    public:
+        TestReactor(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+            // GIVEN a directory containing two files.
+            std::filesystem::path dir_path = std::filesystem::temp_directory_path() / "directory-watcher-test-XXXXXX";
+            std::string dir_path_string    = dir_path.string();
 
-        std::vector<char> dirPathChars(dirPathString.c_str(), dirPathString.c_str() + dirPathString.size() + 1);
-        dirPath = mkdtemp(dirPathChars.data());
+            std::vector<char> dir_path_chars(dir_path_string.c_str(),
+                                             dir_path_string.c_str() + dir_path_string.size() + 1);
+            dir_path = mkdtemp(dir_path_chars.data());
 
-        std::filesystem::path file1Path = dirPath / testFile1Name;
-        std::filesystem::path file2Path = dirPath / testFile2Name;
+            std::filesystem::path file1_path = dir_path / test_file1_name;
+            std::filesystem::path file2_path = dir_path / test_file2_name;
 
-        // Create files and close streams at end of scope
-        {
-            std::ofstream(file1Path.string());
-            std::ofstream(file2Path.string());
-        }
+            // Create files and close streams at end of scope
+            {
+                std::ofstream(file1_path.string());
+                std::ofstream(file2_path.string());
+            }
 
-        on<extension::FileWatch>(dirPath.string(), extension::FileWatch::CHANGED)
-            .then([this, file1Path, file2Path](const extension::FileWatch& message) {
-                UNSCOPED_INFO("Directory change event: " << message.path);
-                fileWatchEvents.push_back(message);
+            on<extension::FileWatch>(dir_path.string(), extension::FileWatch::CHANGED)
+                .then([this, file1_path, file2_path](const extension::FileWatch& message) {
+                    UNSCOPED_INFO("Directory change event: " << message.path);
+                    file_watch_events.push_back(message);
 
-                if (fileWatchEvents.size() >= 4) {
-                    powerplant.shutdown();
-                }
+                    if (file_watch_events.size() >= 4) {
+                        powerplant.shutdown();
+                    }
+                });
+
+            on<Trigger<extension::FileWatcherReady>>().then([this] { emit(std::make_unique<StartTest>()); });
+            on<Trigger<StartTest>, MainThread>().then([file1_path, file2_path] {
+                // WHEN the file contents are modified.
+                std::ofstream ofs1 = std::ofstream(file1_path, std::ofstream::app);
+                ofs1 << "Test\n";
+                ofs1.close();
+                UNSCOPED_INFO("File modified: " << file1_path);
+
+                std::ofstream ofs2 = std::ofstream(file2_path, std::ofstream::app);
+                ofs2 << "Test\n";
+                ofs2.close();
+                UNSCOPED_INFO("File modified: " << file2_path);
             });
 
-        on<Startup>().then([this] { emit(std::make_unique<StartTest>()); });
-        on<Trigger<StartTest>, MainThread>().then([this, file1Path, file2Path] {
-            // Delay for a little bit to ensure the system is entirely started
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            on<Watchdog<TestReactor, 1000, std::chrono::milliseconds>>().then([this] {
+                UNSCOPED_INFO("Watchdog timeout.");
+                watchdog_triggered = true;
+                powerplant.shutdown();
+            });
+        }
 
-            // WHEN the file contents are modified.
-            std::ofstream ofs1 = std::ofstream(file1Path, std::ofstream::app);
-            ofs1 << "Test\n";
-            ofs1.close();
-            UNSCOPED_INFO("File modified: " << file1Path);
+        // We have a non default destructor so rule of 5 is needed
+        TestReactor(const TestReactor&) = delete;
+        TestReactor(TestReactor&&)      = delete;
+        TestReactor& operator=(const TestReactor&) = delete;
+        TestReactor& operator=(TestReactor&&) = delete;
 
-            std::ofstream ofs2 = std::ofstream(file2Path, std::ofstream::app);
-            ofs2 << "Test\n";
-            ofs2.close();
-            UNSCOPED_INFO("File modified: " << file2Path);
-        });
+        ~TestReactor() override {
+            std::filesystem::remove_all(dir_path);  // Cleanup
+        }
 
-        on<Watchdog<TestReactor, 1000, std::chrono::milliseconds>>().then([this] {
-            UNSCOPED_INFO("Watchdog timeout.");
-            watchdogTriggered = true;
-            powerplant.shutdown();
-        });
+    private:
+        std::filesystem::path dir_path;
+    };
+
+    bool event_triggered(const std::string& file_name, extension::FileWatch::Event event) {
+        auto iterator = std::find_if(file_watch_events.begin(),
+                                     file_watch_events.end(),
+                                     [file_name, event](extension::FileWatch const& file_watch) {
+                                         std::filesystem::path file_path = file_watch.path;
+                                         return file_path.filename() == file_name && file_watch.events == event;
+                                     });
+
+        return iterator != file_watch_events.end();
     }
-
-    virtual ~TestReactor() {
-        std::filesystem::remove_all(dirPath);  // Cleanup
-    }
-
-private:
-    std::filesystem::path dirPath;
-};
-
-bool eventTriggered(std::string fileName, extension::FileWatch::Event event) {
-    auto iterator = std::find_if(fileWatchEvents.begin(),
-                                 fileWatchEvents.end(),
-                                 [fileName, event](extension::FileWatch const& fileWatch) {
-                                     std::filesystem::path filePath = fileWatch.path;
-                                     return filePath.filename() == fileName && fileWatch.events == event;
-                                 });
-
-    return iterator != fileWatchEvents.end();
-}
 
 }  // namespace
 
@@ -127,10 +131,10 @@ TEST_CASE(
     plant.start();
 
     // THEN change events are triggered for each file
-    REQUIRE_FALSE(watchdogTriggered);
-    REQUIRE(fileWatchEvents.size() == 4);
-    REQUIRE(eventTriggered(testFile1Name, extension::FileWatch::NO_OP));    // Initial event
-    REQUIRE(eventTriggered(testFile1Name, extension::FileWatch::CHANGED));  // Change event
-    REQUIRE(eventTriggered(testFile2Name, extension::FileWatch::NO_OP));
-    REQUIRE(eventTriggered(testFile2Name, extension::FileWatch::CHANGED));
+    REQUIRE_FALSE(watchdog_triggered);
+    REQUIRE(file_watch_events.size() == 4);
+    REQUIRE(event_triggered(test_file1_name, extension::FileWatch::NO_OP));    // Initial event
+    REQUIRE(event_triggered(test_file1_name, extension::FileWatch::CHANGED));  // Change event
+    REQUIRE(event_triggered(test_file2_name, extension::FileWatch::NO_OP));
+    REQUIRE(event_triggered(test_file2_name, extension::FileWatch::CHANGED));
 }

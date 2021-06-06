@@ -23,8 +23,7 @@
 
 #include <map>
 
-namespace utility {
-namespace support {
+namespace utility::support {
 
     template <typename Index, typename T>
     class Limiter {
@@ -83,7 +82,6 @@ namespace support {
             return result;
         }
     };
-}  // namespace support
-}  // namespace utility
+}  // namespace utility::support
 
 #endif

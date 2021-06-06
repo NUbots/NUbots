@@ -42,8 +42,7 @@
 /**
  * @author Monica Olejniczak
  */
-namespace module {
-namespace support {
+namespace module::support {
 
     using message::behaviour::Behaviour;
     using message::behaviour::KickPlan;
@@ -94,7 +93,7 @@ namespace support {
 
                     // Set properties
                     msg->timestamp       = NUClear::clock::now();
-                    msg->robot_id        = global ? global->playerId : 0;
+                    msg->robot_id        = global ? global->player_id : 0;
                     msg->role_name       = cli ? cli->at(0) : "";
                     msg->battery         = sensors ? sensors->battery : 0;
                     msg->voltage         = sensors ? sensors->voltage : 0;
@@ -106,7 +105,17 @@ namespace support {
 
                         // If we have field information
                         if (field) {
-                            Eigen::Affine3d Hfw = utility::localisation::fieldStateToTransform3D(field->position);
+                            // Transform the field state into Hfw
+                            Eigen::Affine3d Hfw;
+
+                            Eigen::Affine2d position(field->position);
+                            Hfw.translation() =
+                                Eigen::Vector3d(position.translation().x(), position.translation().y(), 0);
+
+                            // Rotate field-position.rotation().angle() radians about the Z-axis
+                            Hfw.linear() = Eigen::AngleAxisd(Eigen::Rotation2Dd(position.rotation()).angle(),
+                                                             Eigen::Vector3d::UnitZ())
+                                               .toRotationMatrix();
 
                             // Get our torso in field space
                             Eigen::Affine3d Hft  = Hfw * Htw.inverse();
@@ -182,5 +191,4 @@ namespace support {
                 }
             }));
     }
-}  // namespace support
-}  // namespace module
+}  // namespace module::support

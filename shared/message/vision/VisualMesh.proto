@@ -25,17 +25,25 @@ import "google/protobuf/timestamp.proto";
 import "Matrix.proto";
 
 message VisualMesh {
-    message Row {
-        float phi      = 1;
-        int32 segments = 2;
-    }
-    uint32                    camera_id       = 1;
-    fmat                      rays            = 2;
-    imat                      neighbourhood   = 3;
-    fmat                      classifications = 4;
-    fmat                      coordinates     = 5;
-    repeated int32            indices         = 6 [packed = true];
-    mat4                      Hcw             = 7;
-    repeated Row              mesh            = 8;
-    google.protobuf.Timestamp timestamp       = 9;
+    /// Time this message was created
+    google.protobuf.Timestamp timestamp = 1;
+    /// ID of the camera that this mesh was constructed from
+    uint32 id = 2;
+    /// name of the camera that this mesh was constructed from
+    string name = 3;
+    /// World to camera transform that this mesh was constructed with
+    mat4 Hcw = 4;
+    /// Pixel coordinates projected from the rays
+    fmat coordinates = 5;
+    /// Neighbours of each node in the mesh. Each row corresponds to a node and the columns are the neighbours
+    imat neighbourhood = 6;
+    /// The corresponding global indices for each on-screen node
+    repeated int32 indices = 7 [packed = true];
+    /// The classification for each pixel/ray. Each row corresponds to a pixel. Each column corresponds to a
+    /// class. The mapping from columns to classes is dependant on how the classes were presented during training
+    fmat classifications = 8;
+    /// Unit vectors pointing from the camera to each node in the mesh
+    fmat rays = 9;
+    /// A mapping from class names to column indices (for accessing the corresponding classification column)
+    map<string, uint32> class_map = 10;
 }

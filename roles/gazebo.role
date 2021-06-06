@@ -11,9 +11,9 @@ nuclear_role(
   support::NUsight
   # Hardware Interface
   platform::Gazebo
-  platform::darwin::SensorFilter
+  input::SensorFilter
   # Motion
-  motion::OldWalkEngine
+  motion::QuinticWalk
   motion::ScriptEngine
   # Behaviour
   behaviour::Controller

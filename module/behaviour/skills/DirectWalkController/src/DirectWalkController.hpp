@@ -22,22 +22,18 @@
 
 #include <nuclear>
 
-namespace module {
-namespace behaviour {
-    namespace skills {
+namespace module::behaviour::skills {
 
-        class DirectWalkController : public NUClear::Reactor {
+    class DirectWalkController : public NUClear::Reactor {
 
-        public:
-            /// @brief Called by the powerplant to build and setup the DirectWalkController reactor.
-            explicit DirectWalkController(std::unique_ptr<NUClear::Environment> environment);
+    public:
+        /// @brief Called by the powerplant to build and setup the DirectWalkController reactor.
+        explicit DirectWalkController(std::unique_ptr<NUClear::Environment> environment);
 
-        private:
-            /// @brief Subsumption ID key to access motors
-            const size_t subsumptionId;
-        };
-    }  // namespace skills
-}  // namespace behaviour
-}  // namespace module
+    private:
+        /// @brief Subsumption ID key to access motors
+        const size_t subsumptionId;
+    };
+}  // namespace module::behaviour::skills
 
 #endif  // MODULES_BEHAVIOUR_SKILLS_DIRECTWALKCONTROLLER_HPP

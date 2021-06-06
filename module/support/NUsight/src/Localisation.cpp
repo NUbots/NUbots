@@ -24,8 +24,7 @@
 
 #include "utility/nusight/NUhelpers.hpp"
 
-namespace module {
-namespace support {
+namespace module::support {
 
     using message::localisation::Ball;
     using message::localisation::Field;
@@ -44,5 +43,4 @@ namespace support {
                 powerplant.emit_shared<Scope::NETWORK>(std::move(ball), "nusight", false);
             }));
     }
-}  // namespace support
-}  // namespace module
+}  // namespace module::support

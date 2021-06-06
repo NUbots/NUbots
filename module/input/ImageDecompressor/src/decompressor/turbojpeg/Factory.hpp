@@ -6,15 +6,19 @@
 
 namespace module::input::decompressor::turbojpeg {
 
-class Factory : public DecompressorFactory {
-public:
-    Factory();
-    virtual ~Factory();
+    class Factory : public DecompressorFactory {
+    public:
+        Factory();
+        Factory(const Factory&) = default;
+        Factory(Factory&&)      = default;
+        Factory& operator=(const Factory&) = default;
+        Factory& operator=(Factory&&) = default;
+        virtual ~Factory();
 
-    virtual std::shared_ptr<decompressor::Decompressor> make_decompressor(const uint32_t& width,
-                                                                          const uint32_t& height,
-                                                                          const uint32_t& format) override;
-};
+        std::shared_ptr<decompressor::Decompressor> make_decompressor(const uint32_t& width,
+                                                                      const uint32_t& height,
+                                                                      const uint32_t& format) override;
+    };
 
 }  // namespace module::input::decompressor::turbojpeg
 

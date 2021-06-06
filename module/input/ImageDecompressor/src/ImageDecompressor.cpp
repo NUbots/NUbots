@@ -9,8 +9,7 @@
 #include "message/input/Image.hpp"
 #include "message/output/CompressedImage.hpp"
 
-namespace module {
-namespace input {
+namespace module::input {
 
     using extension::Configuration;
     using message::input::Image;
@@ -20,15 +19,7 @@ namespace input {
         : Reactor(std::move(environment)) {
 
         on<Configuration>("ImageDecompressor.yaml").then("Configure Decompressors", [this](const Configuration& cfg) {
-            // clang-format off
-            std::string lvl = cfg["log_level"].as<std::string>();
-            if (lvl == "TRACE") { this->log_level = NUClear::TRACE; }
-            else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
-            else if (lvl == "INFO") { this->log_level = NUClear::INFO; }
-            else if (lvl == "WARN") { this->log_level = NUClear::WARN; }
-            else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
-            else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
-            // clang-format on
+            this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
 
             // Clear the compressors and factories
             std::lock_guard<std::mutex> lock(decompressor_mutex);
@@ -49,22 +40,22 @@ namespace input {
 
             /* Mutex Scope */ {
                 std::lock_guard<std::mutex> lock(decompressor_mutex);
-                auto it = decompressors.find(image.camera_id);
+                auto it = decompressors.find(image.id);
                 if (it == decompressors.end() || it->second->width != image.dimensions[0]
                     || it->second->height != image.dimensions[1] || it->second->format != image.format) {
                     log<NUClear::INFO>("Rebuilding decompressors for", image.name, "camera");
 
                     // Replace the existing one with a new one
-                    it = decompressors.insert(std::make_pair(image.camera_id, std::make_shared<DecompressorContext>()))
-                             .first;
+                    it = decompressors.insert(std::make_pair(image.id, std::make_shared<DecompressorContext>())).first;
                     it->second->width  = image.dimensions[0];
                     it->second->height = image.dimensions[1];
                     it->second->format = image.format;
 
                     for (auto& f : config.factories) {
                         for (int i = 0; i < f.second; ++i) {
+                            auto a = std::make_unique<std::atomic<bool>>();
                             it->second->decompressors.emplace_back(DecompressorContext::Decompressor{
-                                std::make_unique<std::atomic<bool>>(),
+                                std::move(a),
                                 f.first->make_decompressor(image.dimensions[0], image.dimensions[1], image.format),
                             });
                         }
@@ -88,7 +79,7 @@ namespace input {
 
                         // Copy across the other attributes
                         msg->dimensions        = image.dimensions;
-                        msg->camera_id         = image.camera_id;
+                        msg->id                = image.id;
                         msg->name              = image.name;
                         msg->timestamp         = image.timestamp;
                         msg->Hcw               = image.Hcw;
@@ -119,7 +110,7 @@ namespace input {
                     }
                 }
             }
-            // We failed to find an available decompressor for this image
+            // We failed to decompress this image
             ++dropped;
         });
 
@@ -134,5 +125,4 @@ namespace input {
         });
     }
 
-}  // namespace input
-}  // namespace module
+}  // namespace module::input

@@ -26,183 +26,182 @@
 
 #include "utility/file/fileutil.hpp"
 #include "utility/strutil/strutil.hpp"
+#include "utility/support/hostname.hpp"
+#include "utility/support/yaml_log_level.hpp"
 
 namespace extension {
 
-/**
- * TODO document
- *
- * @author Trent Houliston
- */
-struct Configuration {
-    // Rules:
-    // 1) Default config file should define a value for every node.
-    // 2) Per-robot config overrides default config values. This file need only override the values that nee to be
-    // overriden.
-    // 3) Per-binary config overrides per-robot and default config values. This file need only override the values that
-    // nee to be overriden.
-    //
-    // Per-robot and per-binary files need not exist.
-    // Per-robot and per-binary files can add new nodes to the file, but this is probably unwise.
-    //
-    // We have to merge the YAML trees to account for situations where a sub-node is not defined in a higher priotity
-    // tree.
+    /**
+     * @author Trent Houliston
+     */
+    struct Configuration {
+        // Rules:
+        // 1) Default config file should define a value for every node.
+        // 2) Per-robot config overrides default config values. This file need only override the values that nee to be
+        // overriden.
+        // 3) Per-binary config overrides per-robot and default config values. This file need only override the values
+        // that nee to be overriden.
+        //
+        // Per-robot and per-binary files need not exist.
+        // Per-robot and per-binary files can add new nodes to the file, but this is probably unwise.
+        //
+        // We have to merge the YAML trees to account for situations where a sub-node is not defined in a higher
+        // priority tree.
 
-    std::string fileName, hostname, binary;
-    YAML::Node config;
+        std::string fileName, hostname, binary;
+        YAML::Node config;
 
-    Configuration() : fileName(), hostname(), binary(), config(){};
-    Configuration(const std::string& fileName,
-                  const std::string& hostname,
-                  const std::string& binary,
-                  const YAML::Node& config)
-        : fileName(fileName), hostname(hostname), binary(binary), config(config) {}
+        Configuration() : fileName(), hostname(), binary(), config(){};
+        Configuration(const std::string& fileName,
+                      const std::string& hostname,
+                      const std::string& binary,
+                      const YAML::Node& config)
+            : fileName(fileName), hostname(hostname), binary(binary), config(config) {}
 
-    Configuration(const std::string& fileName, const std::string& hostname, const std::string& binary)
-        : fileName(fileName), hostname(hostname), binary(binary), config() {
-        bool loaded = false;
+        Configuration(const std::string& fileName, const std::string& hostname, const std::string& binary)
+            : fileName(fileName), hostname(hostname), binary(binary), config() {
+            bool loaded = false;
 
-        // Load the default config file.
-        if (utility::file::exists("config/" + fileName)) {
-            config = YAML::LoadFile("config/" + fileName);
-            loaded = true;
-        }
-
-        // If the same file exists in this robots per-robot config directory then load and merge.
-        if (utility::file::exists("config/" + hostname + "/" + fileName)) {
-            if (loaded) {
-                config = mergeYAML(config, YAML::LoadFile("config/" + hostname + "/" + fileName));
-            }
-
-            else {
-                config = YAML::LoadFile("config/" + hostname + "/" + fileName);
+            // Load the default config file.
+            if (utility::file::exists("config/" + fileName)) {
+                config = YAML::LoadFile("config/" + fileName);
                 loaded = true;
             }
-        }
 
-        // If the same file exists in this binary's per-binary config directory then load and merge.
-        if (utility::file::exists("config/" + binary + "/" + fileName)) {
-            if (loaded) {
-                config = mergeYAML(config, YAML::LoadFile("config/" + binary + "/" + fileName));
+            // If the same file exists in this robots per-robot config directory then load and merge.
+            if (utility::file::exists("config/" + hostname + "/" + fileName)) {
+                if (loaded) {
+                    config = mergeYAML(config, YAML::LoadFile("config/" + hostname + "/" + fileName));
+                }
+
+                else {
+                    config = YAML::LoadFile("config/" + hostname + "/" + fileName);
+                    loaded = true;
+                }
             }
 
-            else {
-                config = YAML::LoadFile("config/" + binary + "/" + fileName);
-            }
-        }
-    }
+            // If the same file exists in this binary's per-binary config directory then load and merge.
+            if (utility::file::exists("config/" + binary + "/" + fileName)) {
+                if (loaded) {
+                    config = mergeYAML(config, YAML::LoadFile("config/" + binary + "/" + fileName));
+                }
 
-    YAML::Node mergeYAML(const YAML::Node& base, const YAML::Node& override) {
-        YAML::Node ret(base);
-
-        for (auto it = override.begin(); it != override.end(); it++) {
-            const std::string& key = it->first.as<std::string>();
-
-            // If the key doesn't exist in the base set then add it and move on.
-            if (!base[key]) {
-                ret[key] = it->second;
-            }
-
-            // If the key does exist then we must go deeper.
-            else {
-                // The type dictates whether we need a recursive call or not.
-                switch (it->second.Type()) {
-                    // Just a raw value (int, double, etc)
-                    case YAML::NodeType::Scalar: {
-                        ret[key] = it->second;
-                        break;
-                    }
-
-                    // Essentially a vector.
-                    case YAML::NodeType::Sequence: {
-                        ret[key] = it->second;
-                        break;
-                    }
-
-                    // Recurse.
-                    case YAML::NodeType::Map: {
-                        ret[key] = mergeYAML(base[key], override[key]);
-                        break;
-                    }
-
-                    // Its nothing, so overwrite (unset) the value.
-                    // Is this really the intended behaviour?
-                    case YAML::NodeType::Null:
-                    case YAML::NodeType::Undefined:
-                    default: {
-                        NUClear::log<NUClear::WARN>("Unsetting key",
-                                                    "'" + key + "'",
-                                                    "in YAML file. Is this what you intended?");
-                        ret[key] = it->second;
-                        break;
-                    }
+                else {
+                    config = YAML::LoadFile("config/" + binary + "/" + fileName);
                 }
             }
         }
 
-        return ret;
-    }
+        YAML::Node mergeYAML(const YAML::Node& base, const YAML::Node& override) {
+            YAML::Node ret(base);
 
-    Configuration operator[](const std::string& key) {
-        return Configuration(fileName, hostname, binary, config[key]);
-    }
+            for (auto it = override.begin(); it != override.end(); it++) {
+                const std::string& key = it->first.as<std::string>();
 
-    const Configuration operator[](const std::string& key) const {
-        return Configuration(fileName, hostname, binary, config[key]);
-    }
+                // If the key doesn't exist in the base set then add it and move on.
+                if (!base[key]) {
+                    ret[key] = it->second;
+                }
 
-    Configuration operator[](const char* key) {
-        return Configuration(fileName, hostname, binary, config[key]);
-    }
+                // If the key does exist then we must go deeper.
+                else {
+                    // The type dictates whether we need a recursive call or not.
+                    switch (it->second.Type()) {
+                        // Just a raw value (int, double, etc)
+                        case YAML::NodeType::Scalar: {
+                            ret[key] = it->second;
+                            break;
+                        }
 
-    const Configuration operator[](const char* key) const {
-        return Configuration(fileName, hostname, binary, config[key]);
-    }
+                        // Essentially a vector.
+                        case YAML::NodeType::Sequence: {
+                            ret[key] = it->second;
+                            break;
+                        }
 
-    Configuration operator[](size_t index) {
-        return Configuration(fileName, hostname, binary, config[index]);
-    }
+                        // Recurse.
+                        case YAML::NodeType::Map: {
+                            ret[key] = mergeYAML(base[key], override[key]);
+                            break;
+                        }
 
-    const Configuration operator[](size_t index) const {
-        return Configuration(fileName, hostname, binary, config[index]);
-    }
+                        // Its nothing, so overwrite (unset) the value.
+                        // Is this really the intended behaviour?
+                        case YAML::NodeType::Null:
+                        case YAML::NodeType::Undefined:
+                        default: {
+                            NUClear::log<NUClear::WARN>("Unsetting key",
+                                                        "'" + key + "'",
+                                                        "in YAML file. Is this what you intended?");
+                            ret[key] = it->second;
+                            break;
+                        }
+                    }
+                }
+            }
 
-    Configuration operator[](int index) {
-        return Configuration(fileName, hostname, binary, config[index]);
-    }
+            return ret;
+        }
 
-    const Configuration operator[](int index) const {
-        return Configuration(fileName, hostname, binary, config[index]);
-    }
+        Configuration operator[](const std::string& key) {
+            return Configuration(fileName, hostname, binary, config[key]);
+        }
 
-    template <typename T>
-    T as() const {
-        return config.as<T>();
-    }
+        const Configuration operator[](const std::string& key) const {
+            return Configuration(fileName, hostname, binary, config[key]);
+        }
 
-    // All of these disables for this template are because the std::string constructor is magic and screwy
-    template <
-        typename T,
-        typename Decayed = typename std::decay<T>::type,
-        typename         = typename std::enable_if<
-            !std::is_same<const char*, Decayed>::value && !std::is_same<std::allocator<char>, Decayed>::value
-            && !std::is_same<std::initializer_list<char>, Decayed>::value && !std::is_same<char, Decayed>::value>::type>
-    operator T() const {
-        return config.as<T>();
-    }
+        Configuration operator[](const char* key) {
+            return Configuration(fileName, hostname, binary, config[key]);
+        }
 
-    // The conversion for string is fully specialised because strings get screwy
-    // because of their auto conversion to const char* etc
-    operator std::string() const {
-        return config.as<std::string>();
-    }
-};
+        const Configuration operator[](const char* key) const {
+            return Configuration(fileName, hostname, binary, config[key]);
+        }
+
+        Configuration operator[](size_t index) {
+            return Configuration(fileName, hostname, binary, config[index]);
+        }
+
+        const Configuration operator[](size_t index) const {
+            return Configuration(fileName, hostname, binary, config[index]);
+        }
+
+        Configuration operator[](int index) {
+            return Configuration(fileName, hostname, binary, config[index]);
+        }
+
+        const Configuration operator[](int index) const {
+            return Configuration(fileName, hostname, binary, config[index]);
+        }
+
+        template <typename T>
+        T as() const {
+            return config.as<T>();
+        }
+
+        // All of these disables for this template are because the std::string constructor is magic and screwy
+        template <typename T,
+                  typename Decayed = typename std::decay<T>::type,
+                  typename         = typename std::enable_if<!std::is_same<const char*, Decayed>::value
+                                                     && !std::is_same<std::allocator<char>, Decayed>::value
+                                                     && !std::is_same<std::initializer_list<char>, Decayed>::value
+                                                     && !std::is_same<char, Decayed>::value>::type>
+        operator T() const {
+            return config.as<T>();
+        }
+
+        // The conversion for string is fully specialised because strings get screwy
+        // because of their auto conversion to const char* etc
+        operator std::string() const {
+            return config.as<std::string>();
+        }
+    };
 
 }  // namespace extension
 
 // NUClear configuration extension
-namespace NUClear {
-namespace dsl {
+namespace NUClear::dsl {
     namespace operation {
         template <>
         struct DSLProxy<::extension::Configuration> {
@@ -211,8 +210,7 @@ namespace dsl {
                 auto flags = ::extension::FileWatch::RENAMED | ::extension::FileWatch::CHANGED;
 
                 // Get hostname so we can find the correct per-robot config directory.
-                char hostname[255];
-                gethostname(hostname, 255);
+                std::string hostname = utility::support::getHostname();
 
                 // Get the command line arguments so we can find the current binary's name.
                 std::shared_ptr<const message::CommandLineArguments> args =
@@ -224,7 +222,7 @@ namespace dsl {
 
                 // Set paths to the config files.
                 auto defaultConfig = "config/" + path;
-                auto robotConfig   = "config/" + std::string(hostname) + "/" + path;
+                auto robotConfig   = "config/" + hostname + "/" + path;
                 auto binaryConfig  = "config/" + std::string(binary) + "/" + path;
 
                 if (!utility::file::exists(defaultConfig)) {
@@ -271,8 +269,7 @@ namespace dsl {
                     // Return our yaml file
                     try {
                         // Get hostname so we can find the correct per-robot config directory.
-                        char hostname[255];
-                        gethostname(hostname, 255);
+                        std::string hostname = utility::support::getHostname();
 
                         // Get the command line arguments so we can find the current binary's name.
                         std::shared_ptr<const message::CommandLineArguments> args =
@@ -320,7 +317,6 @@ namespace dsl {
         template <>
         struct is_transient<std::shared_ptr<::extension::Configuration>> : public std::true_type {};
     }  // namespace trait
-}  // namespace dsl
-}  // namespace NUClear
+}  // namespace NUClear::dsl
 
 #endif  // EXTENSION_CONFIGURATION_HPP

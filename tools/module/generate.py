@@ -61,9 +61,9 @@ def run(path, **kwargs):
         output.write(generate_readme(parts))
         print("\t", os.path.join(src_path, "README.md"))
 
-    with open(os.path.join(src_path, "{}.h".format(module_name)), "w") as output:
+    with open(os.path.join(src_path, "{}.hpp".format(module_name)), "w") as output:
         output.write(generate_header(parts))
-        print("\t", os.path.join(src_path, "{}.h".format(module_name)))
+        print("\t", os.path.join(src_path, "{}.hpp".format(module_name)))
 
     with open(os.path.join(src_path, "{}.cpp".format(module_name)), "w") as output:
         output.write(generate_cpp(parts))
@@ -73,7 +73,9 @@ def run(path, **kwargs):
         output.write(generate_test(parts))
         print("\t", os.path.join(tests_path, "{}.cpp".format(module_name)))
 
-    with open(os.path.join(config_path, "{}.yaml".format(module_name)), "a"):
+    with open(os.path.join(config_path, "{}.yaml".format(module_name)), "a") as output:
+        output.write("# Controls the minimum log level that NUClear log will display\n")
+        output.write("log_level: DEBUG\n")
         print("\t", os.path.join(config_path, "{}.yaml".format(module_name)))
 
 
@@ -81,7 +83,7 @@ def generate_cmake(parts):
     return textwrap.dedent(
         """\
         # Build our NUClear module
-        NUCLEAR_MODULE()
+        nuclear_module()
         """
     )
 
@@ -94,56 +96,56 @@ def generate_header(parts):
 
         #include <nuclear>
 
-        {openNamespace}
+        namespace {namespace} {{
 
-            class {className} : public NUClear::Reactor {{
+        class {className} : public NUClear::Reactor {{
+        private:
+            /// The configuration variables for this reactor
+            struct {{
+            }} config;
 
-            public:
-                /// @brief Called by the powerplant to build and setup the {className} reactor.
-                explicit {className}(std::unique_ptr<NUClear::Environment> environment);
-            }};
+        public:
+            /// @brief Called by the powerplant to build and setup the {className} reactor.
+            explicit {className}(std::unique_ptr<NUClear::Environment> environment);
+        }};
 
-        {closeNamespace}
+        }}  // namespace {namespace}
 
         #endif  // {define}
         """
     )
 
     return template.format(
-        define="{}_H".format("_".join([p.upper() for p in parts])),
+        define="{}_HPP".format("_".join([p.upper() for p in parts])),
         className=parts[-1],
-        openNamespace="\n".join(["namespace {} {{".format(x) for x in parts[:-1]]),
-        closeNamespace="\n".join("}" * (len(parts) - 1)),
+        namespace="::".join([x for x in parts[:-1]]),
     )
 
 
 def generate_cpp(parts):
     template = textwrap.dedent(
         """\
-        #include "{className}.h"
+        #include "{className}.hpp"
 
-        #include "extension/Configuration.h"
+        #include "extension/Configuration.hpp"
 
-        {openNamespace}
+        namespace {namespace} {{
 
-            using extension::Configuration;
+        using extension::Configuration;
 
-            {className}::{className}(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment)) {{
+        {className}::{className}(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), config{{}} {{
 
-                on<Configuration>("{className}.yaml").then([this] (const Configuration& config) {{
-                    // Use configuration here from file {className}.yaml
-                }});
-            }}
-        {closeNamespace}
+            on<Configuration>("{className}.yaml").then([this](const Configuration& cfg) {{
+                // Use configuration here from file {className}.yaml
+                this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
+            }});
+        }}
+
+        }}  // namespace {namespace}
         """
     )
 
-    return template.format(
-        className=parts[-1],
-        openNamespace="\n".join(["namespace {} {{".format(x) for x in parts[:-1]]),
-        closeNamespace="\n".join(["}" for x in parts[:-1]]),
-    )
+    return template.format(className=parts[-1], namespace="::".join([x for x in parts[:-1]]))
 
 
 def generate_readme(parts):
