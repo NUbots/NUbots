@@ -273,7 +273,7 @@ namespace module::behaviour::skills {
                           switch (state) {
                               case FIXATION:
                                   if (lost) {
-                                      state = WAIT;
+                                      state = SEARCH;
                                   }
                                   else if (objectMoved) {
                                       updatePlan = true;

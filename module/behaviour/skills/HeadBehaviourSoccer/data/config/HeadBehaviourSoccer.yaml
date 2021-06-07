@@ -22,12 +22,12 @@ initial:
     ball: 1
     goal: 0
 
-oscillate_search: false
+oscillate_search: true
 
 searches:
   - #enum type for search
     search_type: "LOST"
-    #Points in absolute angle (degrees) relative to the horizon and x-xis of robot
+    #Points in absolute angle (degrees) relative to the horizon and x-axis of robot
     points:
       - [0, -45]
       - [0, 0]
@@ -43,20 +43,20 @@ searches:
       - [20, -30]
       - [0, 0]
       - [0, 30]
-      - [30,  30]
-      - [50,  -15]
-      - [120,  -30]
-      - [45,  -15]
+      - [30, 30]
+      - [50, -15]
+      - [120, -30]
+      - [45, -15]
       - [45, -30]
   - search_type: "FIND_ADDITIONAL_OBJECTS"
     #Points for this search are relative to the padded bounding box containing the already visible objects
     points:
-      - [-1,-1]
-      - [0,-1]
-      - [1,-1]
-      - [1,0]
-      - [0,0]
-      - [-1,0]
+      - [-1, -1]
+      - [0, -1]
+      - [1, -1]
+      - [1, 0]
+      - [0, 0]
+      - [-1, 0]
   - search_type: "GOAL_SEARCH"
     points:
       - [-0.4, 1]
@@ -65,17 +65,16 @@ searches:
   - search_type: "GOAL_LEFT"
     #Points for this search are relative to the padded bounding box containing the already visible objects
     points:
-      - [0.5,0]
+      - [0.5, 0]
   - search_type: "GOAL_RIGHT"
     #Points for this search are relative to the padded bounding box containing the already visible objects
     points:
-      - [-0.5,0]
+      - [-0.5, 0]
   - search_type: "GROUND_LEFT"
     #Points for this search are relative to the padded bounding box containing the already visible objects
     points:
-      - [0.5,-1]
+      - [0.5, -1]
   - search_type: "GROUND_RIGHT"
     #Points for this search are relative to the padded bounding box containing the already visible objects
     points:
-      - [-0.5,-1]
-
+      - [-0.5, -1]
