@@ -232,7 +232,7 @@ namespace module::platform {
             server_address = config["server_address"].as<std::string>();
             server_port    = config["port"].as<std::string>();
 
-            on<Watchdog<Webots, 5, std::chrono::seconds>>().then([this, config] {
+            on<Watchdog<Webots, 10, std::chrono::seconds>>().then([this, config] {
                 // We haven't received any messages lately
                 log<NUClear::WARN>("Connection timed out. Attempting reconnect");
                 setup_connection();
@@ -375,6 +375,16 @@ namespace module::platform {
                         utility::clock::last_update = NUClear::base_clock::now();
 
                         connection_active = true;
+
+                        // Clear socket && buffer
+                        unsigned long available = 0;
+                        if (::ioctl(fd, FIONREAD, &available) < 0) {
+                            log<NUClear::ERROR>(fmt::format("Error querying for available data, {}", strerror(errno)));
+                            return;
+                        }
+                        const size_t old_size = buffer.size();
+                        ::read(fd, buffer.data() + old_size, available);
+                        buffer.clear();
                     }
                     else {
                         // Work out how many bytes are available to read in the buffer and ensure we have enough
