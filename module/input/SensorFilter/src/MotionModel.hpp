@@ -108,6 +108,13 @@ namespace module::input {
                 , Rwt(Eigen::Quaternion<Scalar>(state.template segment<4>(QW)).normalized())
                 , omegaTTt(state.template segment<3>(WX))
                 , omegaTTt_bias(state.template segment<3>(BX)) {}
+            template <typename OtherDerived>
+            StateVec(const Eigen::MatrixBase<OtherDerived>& state)
+                : rTWw(state.template segment<3>(PX))
+                , vTw(state.template segment<3>(VX))
+                , Rwt(Eigen::Quaternion<Scalar>(state.template segment<4>(QW)).normalized())
+                , omegaTTt(state.template segment<3>(WX))
+                , omegaTTt_bias(state.template segment<3>(BX)) {}
 
             // Converts StateVec to monolithic vector representation
             Eigen::Matrix<Scalar, size, 1> getStateVec() const {
@@ -141,7 +148,7 @@ namespace module::input {
         // The velocity decay for x/y/z velocities (1.0 = no decay)
         Eigen::Matrix<Scalar, 3, 1> timeUpdateVelocityDecay = Eigen::Matrix<Scalar, 3, 1>::Ones();
 
-        Eigen::Matrix<Scalar, size, 1> time(const Eigen::Matrix<Scalar, size, 1>& state, const Scalar deltaT) {
+        Eigen::Matrix<Scalar, size, 1> time(const StateVec& state, const Scalar deltaT) {
 
             // Prepare our new state
             StateVec newState(state);
@@ -149,9 +156,6 @@ namespace module::input {
             // ********************************
             // UPDATE ANGULAR POSITION/VELOCITY
             // ********************************
-
-            // Extract our unit quaternion rotation
-            const Eigen::Quaternion<Scalar> Rwt(newState.Rwt.normalized());
 
             // Apply our rotational velocity to our orientation
             // If the norm of the gyroscope update is 0 then there is not update needed
@@ -162,7 +166,7 @@ namespace module::input {
                 Eigen::AngleAxis dq(norm * deltaT, newState.omegaTTt / norm);
 
                 // Update our orientation
-                newState.Rwt = dq * Rwt;
+                newState.Rwt = newState.Rwt * dq;
             }
 
             // ********************************
@@ -178,35 +182,31 @@ namespace module::input {
             return newState;
         }
 
-        Eigen::Matrix<Scalar, 3, 1> predict(const Eigen::Matrix<Scalar, size, 1>& state,
-                                            const MeasurementType::ACCELEROMETER&) {
+        Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::ACCELEROMETER&) {
+
             // Rotate world gravity vector into torso space using quaternion conjugation
-            // p' = q * p * q.inverse()
-            // G' = Rtw * G * Rtw.inverse()
-            //    = Rwt.inverse() * G * Rwt.inverse().inverse()
-            //    = Rwt.inverse() * G * Rwt
+            // p' = q * p * q.conjugate()
+            // G' = Rtw * G * Rtw.conjugate()
+            //    = Rwt.conjugate() * G * Rwt.conjugate().conjugate()
+            //    = Rwt.conjugate() * G * Rwt
             // G is a quaternion with real part zero and vector part (0, 0, G)
             // The vector part of G' is the result of rotating G by Rtw
-            return (StateVec(state).Rwt.inverse()
-                    * Eigen::Quaternion<Scalar>(Scalar(0), Scalar(0), Scalar(0), Scalar(G)) * StateVec(state).Rwt)
-                .coeffs()
-                .template head<3>();
+            return (state.Rwt.conjugate() * Eigen::Quaternion<Scalar>(Scalar(0), Scalar(0), Scalar(0), Scalar(G))
+                    * state.Rwt)
+                .vec();
         }
 
-        Eigen::Matrix<Scalar, 3, 1> predict(const Eigen::Matrix<Scalar, size, 1>& state,
-                                            const MeasurementType::GYROSCOPE&) {
+        Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::GYROSCOPE&) {
             // Add predicted gyroscope bias to our predicted gyroscope
-            return StateVec(state).omegaTTt + StateVec(state).omegaTTt_bias;
+            return state.omegaTTt + state.omegaTTt_bias;
         }
 
-        Eigen::Matrix<Scalar, 3, 1> predict(const Eigen::Matrix<Scalar, size, 1>& state,
-                                            const MeasurementType::FLAT_FOOT_ODOMETRY&) {
-            return StateVec(state).rTWw;
+        Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::FLAT_FOOT_ODOMETRY&) {
+            return state.rTWw;
         }
 
-        Eigen::Matrix<Scalar, 4, 1> predict(const Eigen::Matrix<Scalar, size, 1>& state,
-                                            const MeasurementType::FLAT_FOOT_ORIENTATION&) {
-            return StateVec(state).Rwt.coeffs();
+        Eigen::Matrix<Scalar, 4, 1> predict(const StateVec& state, const MeasurementType::FLAT_FOOT_ORIENTATION&) {
+            return {state.Rwt.w(), state.Rwt.x(), state.Rwt.y(), state.Rwt.z()};
         }
 
         // This function is called to determine the difference between position, velocity, and acceleration
@@ -220,18 +220,14 @@ namespace module::input {
         Eigen::Matrix<Scalar, 4, 1> difference(const Eigen::Matrix<Scalar, 4, 1>& a,
                                                const Eigen::Matrix<Scalar, 4, 1>& b) {
             // Find the rotation needed to get from orientation a to orientation b
-            Eigen::Quaternion<Scalar> diff =
-                utility::math::quaternion::difference(Eigen::Quaternion<Scalar>(a), Eigen::Quaternion<Scalar>(b));
+            const Eigen::Quaternion<Scalar> q0(a);
+            const Eigen::Quaternion<Scalar> q1(b);
+            const Eigen::Quaternion<Scalar> diff = utility::math::quaternion::difference(q0, q1);
 
-            // Take the difference with the identity rotation (1, 0, 0, 0)
-            // If a and b represent very similar orientations, then the real part will be very close to one and
-            // the imaginary part will be very close to (0, 0, 0)
-            diff.w() -= Scalar(1);
-
-            return diff.coeffs();
+            return {diff.w(), diff.x(), diff.y(), diff.z()};
         }
 
-        Eigen::Matrix<Scalar, size, 1> limit(const Eigen::Matrix<Scalar, size, 1>& state) {
+        StateVec limit(const StateVec& state) {
             StateVec newState(state);
 
             // Make sure the quaternion remains normalised
