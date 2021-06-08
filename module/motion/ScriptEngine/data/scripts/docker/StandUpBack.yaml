@@ -818,7 +818,7 @@
       position: 0.0813208371
       gain: 30
       torque: 100
-- duration: 300
+- duration: 500
   targets:
     - id: L_ELBOW
       position: -1.35000002
@@ -900,7 +900,7 @@
       position: -0.0966643915
       gain: 30
       torque: 100
-- duration: 300
+- duration: 500
   targets:
     - id: L_ELBOW
       position: -1.35000002
@@ -982,7 +982,7 @@
       position: -0.0966643915
       gain: 30
       torque: 100
-- duration: 300
+- duration: 500
   targets:
     - id: L_ELBOW
       position: -1.35000002
