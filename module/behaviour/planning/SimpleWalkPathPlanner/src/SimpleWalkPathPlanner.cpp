@@ -252,6 +252,11 @@ namespace module::behaviour::planning {
                 // log("distanceToBall", distanceToBall);
                 // log("forwardSpeed2", finalForwardSpeed);
 
+                // Hack for walking without odometry, so that the walk isn't infected with NaNs from odometry and
+                // actually does something
+                finalForwardSpeed = 0.02;
+                finalSideSpeed    = 0.0;
+                angle             = 0.0;
 
                 std::unique_ptr<WalkCommand> command =
                     std::make_unique<WalkCommand>(subsumptionId,
