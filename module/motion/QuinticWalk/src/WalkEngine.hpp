@@ -169,26 +169,16 @@ namespace module::motion {
          */
         bool updateState(const float dt, const Eigen::Vector3f& orders);
 
+        // Return type for the following two functions
+        using PositionSupportTuple =
+            std::tuple<Eigen::Vector3f, Eigen::Vector3f, Eigen::Vector3f, Eigen::Vector3f, bool>;
         /**
-         * Compute current cartesian
-         * target from trajectories and assign
-         * it to given model through inverse
-         * kinematics.
-         * Return false is the target is
-         * unreachable.
+         * @brief Compute current cartesian target from trajectories
+         * @return PositionSupportTuple The computed vectors with the bool indicating the support foot:
+         *         {trunkPositionTarget, trunkAxisTarget, footPositionTarget, footAxisTarget, isLeftsupportFoot}
          */
-        void computeCartesianPosition(Eigen::Vector3f& trunkPos,
-                                      Eigen::Vector3f& trunkAxis,
-                                      Eigen::Vector3f& footPos,
-                                      Eigen::Vector3f& footAxis,
-                                      bool& isLeftsupportFoot);
-
-        void computeCartesianPositionAtTime(Eigen::Vector3f& trunkPos,
-                                            Eigen::Vector3f& trunkAxis,
-                                            Eigen::Vector3f& footPos,
-                                            Eigen::Vector3f& footAxis,
-                                            bool& isLeftsupportFoot,
-                                            float time);
+        [[nodiscard]] PositionSupportTuple computeCartesianPosition() const;  // Gets current time and calls below func
+        [[nodiscard]] PositionSupportTuple computeCartesianPositionAtTime(const float time) const;
 
         void requestKick(const bool left) {
             if (left) {

@@ -679,29 +679,21 @@ namespace module::motion {
         trunk_axis_acc_at_last.setZero();
     }
 
-    void QuinticWalkEngine::computeCartesianPosition(Eigen::Vector3f& trunkPos,
-                                                     Eigen::Vector3f& trunkAxis,
-                                                     Eigen::Vector3f& footPos,
-                                                     Eigen::Vector3f& footAxis,
-                                                     bool& isLeftsupportFoot) {
+    using PositionSupportTuple = std::tuple<Eigen::Vector3f, Eigen::Vector3f, Eigen::Vector3f, Eigen::Vector3f, bool>;
+
+    PositionSupportTuple QuinticWalkEngine::computeCartesianPosition() const {
         // Compute trajectories time
-        float time = getTrajsTime();
-
-        computeCartesianPositionAtTime(trunkPos, trunkAxis, footPos, footAxis, isLeftsupportFoot, time);
+        const float time = getTrajsTime();
+        return computeCartesianPositionAtTime(time);
     }
 
-
-    void QuinticWalkEngine::computeCartesianPositionAtTime(Eigen::Vector3f& trunkPos,
-                                                           Eigen::Vector3f& trunkAxis,
-                                                           Eigen::Vector3f& footPos,
-                                                           Eigen::Vector3f& footAxis,
-                                                           bool& isLeftsupportFoot,
-                                                           float time) {
-        // We don't use the double support capability of the trajectory utils
-        // We need to initialise this (l-value) to pass in as a reference to the function though
-        bool isDoubleSupport = false;
+    PositionSupportTuple QuinticWalkEngine::computeCartesianPositionAtTime(const float time) const {
         // Evaluate target cartesian state from trajectories
-        TrajectoriesTrunkFootPos(time, trajs, trunkPos, trunkAxis, footPos, footAxis);
-        TrajectoriesSupportFootState(time, trajs, isDoubleSupport, isLeftsupportFoot);
+        const auto [trunkPos, trunkAxis, footPos, footAxis] = TrajectoriesTrunkFootPos(time, trajs);
+        // Discard isDoubleSupport because we don't use it
+        const auto [_, isLeftSupportFoot] = TrajectoriesSupportFootState(time, trajs);
+        return {trunkPos, trunkAxis, footPos, footAxis, isLeftSupportFoot};
     }
+
+
 }  // namespace module::motion
