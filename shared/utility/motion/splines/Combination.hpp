@@ -24,7 +24,7 @@ namespace utility::motion::splines {
         /**
          * Compute the number of possible combinations for (n choose k) (using dynamic progamming)
          */
-        unsigned long binomialCoefficient(size_t k, size_t n) {
+        constexpr unsigned long binomialCoefficient(size_t k, size_t n) {
             if (n == 0 || k == 0) {
                 return 1;
             }
@@ -41,9 +41,9 @@ namespace utility::motion::splines {
 
             Pair pair(k, n);
             if (pascal_triangle.count(pair) == 0) {
-                unsigned long val1 = binomialCoefficient(k - 1, n - 1);
-                unsigned long val2 = binomialCoefficient(k, n - 1);
-                unsigned long test = std::numeric_limits<unsigned long>::max() - val1;
+                const unsigned long val1 = binomialCoefficient(k - 1, n - 1);
+                const unsigned long val2 = binomialCoefficient(k, n - 1);
+                const unsigned long test = std::numeric_limits<unsigned long>::max() - val1;
                 if (val2 < test) {
                     pascal_triangle[pair] = val1 + val2;
                 }
@@ -66,9 +66,9 @@ namespace utility::motion::splines {
                 throw std::logic_error("Combination not valid k>n");
             }
 
-            indexes = std::vector<size_t>();
-            k       = k;
-            n       = n;
+            indexes.clear();
+            k = k;
+            n = n;
             for (size_t i = 0; i < k; i++) {
                 indexes.push_back(i);
             }
@@ -76,7 +76,7 @@ namespace utility::motion::splines {
 
         /**
          * Return the next combination.
-         * Return empty sdt::vector when iteration is finished
+         * Return empty std::vector when iteration is finished
          */
         std::vector<size_t> nextCombination() {
             std::vector<size_t> result = indexes;
@@ -101,12 +101,12 @@ namespace utility::motion::splines {
         /**
          * Hold (n choose k) number of possible combinations for dynamic programming
          */
-        std::map<Pair, unsigned long> pascal_triangle;
+        std::map<Pair, unsigned long> pascal_triangle{};
 
         /**
          * Current indexes container and iteration n and k parameter
          */
-        std::vector<size_t> indexes;
+        std::vector<size_t> indexes{};
         size_t n;
         size_t k;
 
@@ -120,7 +120,7 @@ namespace utility::motion::splines {
                     return true;
                 }
                 else {
-                    bool isEnd = incrIndexes(i - 1);
+                    const bool isEnd = incrIndexes(i - 1);
                     if (isEnd) {
                         return true;
                     }
