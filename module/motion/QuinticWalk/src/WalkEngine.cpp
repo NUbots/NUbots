@@ -34,8 +34,8 @@ namespace module::motion {
         TrajectoriesInit(trajs);
     }
 
-    bool QuinticWalkEngine::updateState(const float dt, const Eigen::Vector3f& orders) {
-        bool ordersZero = orders.isZero();
+    bool QuinticWalkEngine::updateState(const float& dt, const Eigen::Vector3f& orders) {
+        const bool ordersZero = orders.isZero();
         // First check if we are currently in pause state or idle, since we don't want to update the phase in this
         // case
         if (engine_state == WalkEngineState::PAUSED) {
@@ -70,7 +70,7 @@ namespace module::motion {
         updatePhase(dt);
 
         // check if we will finish a half step with this update
-        bool halfStepFinished = (last_phase < 0.5f && phase >= 0.5f) || (last_phase > 0.5f && phase < 0.5f);
+        const bool halfStepFinished = (last_phase < 0.5f && phase >= 0.5f) || (last_phase > 0.5f && phase < 0.5f);
 
         // small state machine
         switch (engine_state) {
@@ -179,7 +179,7 @@ namespace module::motion {
         return true;
     }
 
-    void QuinticWalkEngine::updatePhase(const float dt) {
+    void QuinticWalkEngine::updatePhase(const float& dt) {
         float local_dt = dt;
         // Check for negative time step
         if (local_dt <= 0.0f) {
@@ -286,9 +286,9 @@ namespace module::motion {
     }
 
     void QuinticWalkEngine::buildTrajectories(const Eigen::Vector3f& orders,
-                                              const bool startMovement,
-                                              const bool startStep,
-                                              const bool kickStep) {
+                                              const bool& startMovement,
+                                              const bool& startStep,
+                                              const bool& kickStep) {
         // Save the current trunk state to use it later and compute next step position
         if (!startMovement) {
             saveCurrentTrunkState();
@@ -531,7 +531,8 @@ namespace module::motion {
         point(TrajectoryTypes::TRUNK_AXIS_Z, period + timeShift, axisAtNext.z(), axisVel.z());
     }
 
-    void QuinticWalkEngine::buildWalkDisableTrajectories(const Eigen::Vector3f& orders, const bool footInIdlePosition) {
+    void QuinticWalkEngine::buildWalkDisableTrajectories(const Eigen::Vector3f& orders,
+                                                         const bool& footInIdlePosition) {
         // Save the current trunk state to use it later
         saveCurrentTrunkState();
         // Update support foot and compute odometry
@@ -696,7 +697,7 @@ namespace module::motion {
                                                            Eigen::Vector3f& footPos,
                                                            Eigen::Vector3f& footAxis,
                                                            bool& isLeftsupportFoot,
-                                                           float time) {
+                                                           const float& time) {
         // We don't use the double support capability of the trajectory utils
         // We need to initialise this (l-value) to pass in as a reference to the function though
         bool isDoubleSupport = false;
