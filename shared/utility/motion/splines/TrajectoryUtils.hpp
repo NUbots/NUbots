@@ -32,13 +32,14 @@ namespace utility::motion::splines {
             FOOT_AXIS_Y,
             FOOT_AXIS_Z
         };
-        Value value;
+        Value value = Value::UNKNOWN;
+
 
         // Constructors
-        TrajectoryTypes() : value(Value::UNKNOWN) {}
-        TrajectoryTypes(uint8_t const& value) : value(static_cast<Value>(value)) {}
-        TrajectoryTypes(Value const& value) : value(value) {}
-        TrajectoryTypes(std::string const& str) : value(Value::UNKNOWN) {
+        constexpr TrajectoryTypes() = default;
+        constexpr TrajectoryTypes(uint8_t const& value_) : value(static_cast<Value>(value_)) {}
+        constexpr TrajectoryTypes(Value const& value_) : value(value_) {}
+        constexpr TrajectoryTypes(std::string const& str) {
             if (str == "IS_DOUBLE_SUPPORT") {
                 value = Value::IS_DOUBLE_SUPPORT;
             }
@@ -87,48 +88,48 @@ namespace utility::motion::splines {
         }
 
         // Operators
-        bool operator<(TrajectoryTypes const& other) const {
+        constexpr bool operator<(TrajectoryTypes const& other) const {
             return value < other.value;
         }
-        bool operator>(TrajectoryTypes const& other) const {
+        constexpr bool operator>(TrajectoryTypes const& other) const {
             return value > other.value;
         }
-        bool operator<=(TrajectoryTypes const& other) const {
+        constexpr bool operator<=(TrajectoryTypes const& other) const {
             return value <= other.value;
         }
-        bool operator>=(TrajectoryTypes const& other) const {
+        constexpr bool operator>=(TrajectoryTypes const& other) const {
             return value >= other.value;
         }
-        bool operator==(TrajectoryTypes const& other) const {
+        constexpr bool operator==(TrajectoryTypes const& other) const {
             return value == other.value;
         }
-        bool operator!=(TrajectoryTypes const& other) const {
+        constexpr bool operator!=(TrajectoryTypes const& other) const {
             return value != other.value;
         }
-        bool operator<(TrajectoryTypes::Value const& other) const {
+        constexpr bool operator<(TrajectoryTypes::Value const& other) const {
             return value < other;
         }
-        bool operator>(TrajectoryTypes::Value const& other) const {
+        constexpr bool operator>(TrajectoryTypes::Value const& other) const {
             return value > other;
         }
-        bool operator<=(TrajectoryTypes::Value const& other) const {
+        constexpr bool operator<=(TrajectoryTypes::Value const& other) const {
             return value <= other;
         }
-        bool operator>=(TrajectoryTypes::Value const& other) const {
+        constexpr bool operator>=(TrajectoryTypes::Value const& other) const {
             return value >= other;
         }
-        bool operator==(TrajectoryTypes::Value const& other) const {
+        constexpr bool operator==(TrajectoryTypes::Value const& other) const {
             return value == other;
         }
-        bool operator!=(TrajectoryTypes::Value const& other) const {
+        constexpr bool operator!=(TrajectoryTypes::Value const& other) const {
             return value != other;
         }
 
         // Conversions
-        operator Value() const {
+        constexpr operator Value() const {
             return value;
         }
-        operator uint8_t() const {
+        constexpr operator uint8_t() const {
             return value;
         }
 
@@ -252,48 +253,13 @@ namespace utility::motion::splines {
                                       traj.get(TrajectoryTypes::FOOT_AXIS_Z).acc(t));
     }
 
-    inline void TrajectoriesSupportFootState(float t,
-                                             const Trajectories& traj,
-                                             bool& isDoubleSupport,
-                                             bool& isLeftSupportFoot) {
+    constexpr void TrajectoriesSupportFootState(float t,
+                                                const Trajectories& traj,
+                                                bool& isDoubleSupport,
+                                                bool& isLeftSupportFoot) {
         // Compute support foot state
         isDoubleSupport   = (traj.get(TrajectoryTypes::IS_DOUBLE_SUPPORT).pos(t) >= 0.5f);
         isLeftSupportFoot = (traj.get(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT).pos(t) >= 0.5f);
-    }
-
-    /**
-     * Default Cartesian state check function.
-     * Return positive cost value if given time and Cartesian state are outside standard valid range
-     */
-    inline float DefaultCheckState(const Eigen::VectorXf& params,
-                                   float t,
-                                   const Eigen::Vector3f& trunkPos,
-                                   const Eigen::Vector3f& trunkAxis,
-                                   const Eigen::Vector3f& footPos,
-                                   const Eigen::Vector3f& footAxis) {
-        (void) params;
-        (void) t;
-        float cost = 0.0f;
-        if (trunkPos.z() < 0.0f) {
-            cost += 1000.0f - 1000.0f * trunkPos.z();
-        }
-        if (trunkAxis.norm() >= M_PI_2) {
-            cost += 1000.0f + 1000.0f * (trunkAxis.norm() - M_PI_2);
-        }
-        if (std::abs(footPos.y()) < 2.0f * 0.037f) {
-            cost += 1000.0f + 1000.0f * (2.0f * 0.037f - std::abs(footPos.y()));
-        }
-        if (footPos.z() < -1e6) {
-            cost += 1000.0f - 1000.0f * footPos.z();
-        }
-        if (trunkPos.z() - footPos.z() < 0.20f) {
-            cost += 1000.0f - 1000.0f * (trunkPos.z() - footPos.z() - 0.20f);
-        }
-        if (footAxis.norm() >= M_PI_2) {
-            cost += 1000.0f + 1000.0f * (footAxis.norm() - M_PI_2);
-        }
-
-        return cost;
     }
 
 }  // namespace utility::motion::splines

@@ -33,7 +33,7 @@ namespace utility::motion::splines {
         /**
          * Return the number of contained splines
          */
-        inline size_t size() const {
+        constexpr size_t size() const {
             return container.size();
         }
 
@@ -64,21 +64,21 @@ namespace utility::motion::splines {
         /**
          * Return true if given spline name is contained
          */
-        inline bool exist(const U& name) const {
+        constexpr bool exist(const U& name) const {
             return container.count(name) > 0;
         }
 
         /**
          * Access to given named spline
          */
-        inline const T& get(const U& name) const {
+        constexpr const T& get(const U& name) const {
             if (container.count(name) == 0) {
                 throw std::logic_error(fmt::format("SplineContainer invalid name: {}", std::string(name)));
             }
             return container.at(name);
         }
 
-        inline T& get(const U& name) {
+        constexpr T& get(const U& name) {
             if (container.count(name) == 0) {
                 throw std::logic_error(fmt::format("SplineContainer invalid name: {}", std::string(name)));
             }
@@ -88,7 +88,7 @@ namespace utility::motion::splines {
         /**
          * Access to internal map container
          */
-        const Map& get() const {
+        constexpr const Map& get() const {
             return container;
         }
 
@@ -118,7 +118,7 @@ namespace utility::motion::splines {
         /**
          * Return minimum and maximum abscisse values of all registered splines parts
          */
-        Scalar min() const {
+        constexpr Scalar min() const {
             if (container.size() == 0) {
                 return 0.0;
             }
@@ -133,7 +133,7 @@ namespace utility::motion::splines {
             return m;
         }
 
-        Scalar max() const {
+        constexpr Scalar max() const {
             if (container.size() == 0) {
                 return 0.0;
             }
@@ -151,7 +151,7 @@ namespace utility::motion::splines {
         /**
          * Export to and Import from given file name in "spline" CSV format prefixed with spline name
          */
-        void exportData(const std::string& file_name) const {
+        constexpr void exportData(const std::string& file_name) const {
             if (container.size() == 0) {
                 throw std::logic_error("SplineContainer empty");
             }
@@ -169,7 +169,7 @@ namespace utility::motion::splines {
             file.close();
         }
 
-        void importData(const std::string& file_name) {
+        constexpr void importData(const std::string& file_name) {
             std::ifstream file(file_name);
             if (!file.is_open()) {
                 throw std::runtime_error(fmt::format("SplineContainer unable to read file: ", file_name));
@@ -211,7 +211,7 @@ namespace utility::motion::splines {
         /**
          * Spline container indexed by their name
          */
-        Map container;
+        Map container{};
     };
 
 }  // namespace utility::motion::splines
