@@ -181,13 +181,13 @@ namespace module::motion {
                                       Eigen::Vector3f& trunkAxis,
                                       Eigen::Vector3f& footPos,
                                       Eigen::Vector3f& footAxis,
-                                      bool isLeftsupportFoot);
+                                      bool& isLeftsupportFoot);
 
         void computeCartesianPositionAtTime(Eigen::Vector3f& trunkPos,
                                             Eigen::Vector3f& trunkAxis,
                                             Eigen::Vector3f& footPos,
                                             Eigen::Vector3f& footAxis,
-                                            bool isLeftsupportFoot,
+                                            bool& isLeftsupportFoot,
                                             float time);
 
         void requestKick(const bool left) {

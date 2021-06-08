@@ -683,7 +683,7 @@ namespace module::motion {
                                                      Eigen::Vector3f& trunkAxis,
                                                      Eigen::Vector3f& footPos,
                                                      Eigen::Vector3f& footAxis,
-                                                     bool isLeftsupportFoot) {
+                                                     bool& isLeftsupportFoot) {
         // Compute trajectories time
         float time = getTrajsTime();
 
@@ -695,10 +695,12 @@ namespace module::motion {
                                                            Eigen::Vector3f& trunkAxis,
                                                            Eigen::Vector3f& footPos,
                                                            Eigen::Vector3f& footAxis,
-                                                           bool isLeftsupportFoot,
+                                                           bool& isLeftsupportFoot,
                                                            float time) {
+        // We don't use the double support capability of the trajectory utils
+        // We need to initialise this (l-value) to pass in as a reference to the function though
+        bool isDoubleSupport = false;
         // Evaluate target cartesian state from trajectories
-        bool isDoubleSupport;
         TrajectoriesTrunkFootPos(time, trajs, trunkPos, trunkAxis, footPos, footAxis);
         TrajectoriesSupportFootState(time, trajs, isDoubleSupport, isLeftsupportFoot);
     }
