@@ -190,7 +190,7 @@ namespace utility::motion::splines {
      * Compute from given spline container trajectory Cartesian trunk and foot position/velocity/acceleration
      * and assign it to given vector
      */
-    inline void TrajectoriesTrunkFootPos(float t,
+    inline void TrajectoriesTrunkFootPos(const float& t,
                                          const Trajectories& traj,
                                          Eigen::Vector3f& trunkPos,
                                          Eigen::Vector3f& trunkAxis,
@@ -211,7 +211,7 @@ namespace utility::motion::splines {
                                    traj.get(TrajectoryTypes::FOOT_AXIS_Z).pos(t));
     }
 
-    inline void TrajectoriesTrunkFootVel(float t,
+    inline void TrajectoriesTrunkFootVel(const float& t,
                                          const Trajectories& traj,
                                          Eigen::Vector3f& trunkPosVel,
                                          Eigen::Vector3f& trunkAxisVel,
@@ -232,7 +232,7 @@ namespace utility::motion::splines {
                                       traj.get(TrajectoryTypes::FOOT_AXIS_Z).vel(t));
     }
 
-    inline void TrajectoriesTrunkFootAcc(float t,
+    inline void TrajectoriesTrunkFootAcc(const float& t,
                                          const Trajectories& traj,
                                          Eigen::Vector3f& trunkPosAcc,
                                          Eigen::Vector3f& trunkAxisAcc,
@@ -253,7 +253,7 @@ namespace utility::motion::splines {
                                       traj.get(TrajectoryTypes::FOOT_AXIS_Z).acc(t));
     }
 
-    constexpr void TrajectoriesSupportFootState(float t,
+    constexpr void TrajectoriesSupportFootState(const float& t,
                                                 const Trajectories& traj,
                                                 bool& isDoubleSupport,
                                                 bool& isLeftSupportFoot) {
