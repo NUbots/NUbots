@@ -34,6 +34,12 @@ namespace utility::behaviour {
         return cmd;
     }
 
+    inline MotionCommand Stand() {
+        MotionCommand cmd;
+        cmd.type = MotionCommand::Type::Value::STAND;
+        return cmd;
+    }
+
     inline MotionCommand WalkToState(const Eigen::Affine2d& goalState_) {
         MotionCommand cmd;
         cmd.type       = MotionCommand::Type::Value::WALK_TO_STATE;

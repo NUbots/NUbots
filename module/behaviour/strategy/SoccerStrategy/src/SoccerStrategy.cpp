@@ -206,13 +206,12 @@ namespace module::behaviour::strategy {
                         if (mode == GameMode::NORMAL || mode == GameMode::OVERTIME
                             || mode == GameMode::PENALTY_SHOOTOUT) {
                             if (phase == Phase::INITIAL) {
-                                standStill();
+                                stand();
                                 find({FieldTarget(FieldTarget::Target::SELF)});
                                 initialLocalisationReset(fieldDescription);
                                 currentState = Behaviour::State::INITIAL;
                             }
                             else if (phase == Phase::READY) {
-                                standStill();
                                 if (gameState.data.our_kick_off) {
                                     walkTo(fieldDescription, cfg_.start_position_offensive);
                                 }
@@ -375,6 +374,10 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::searchWalk() {}
+
+    void SoccerStrategy::stand() {
+        emit(std::make_unique<MotionCommand>(utility::behaviour::Stand()));
+    }
 
     void SoccerStrategy::standStill() {
         emit(std::make_unique<MotionCommand>(utility::behaviour::StandStill()));

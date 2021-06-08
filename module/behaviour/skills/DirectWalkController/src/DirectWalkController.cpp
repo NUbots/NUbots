@@ -20,6 +20,7 @@
 #include "DirectWalkController.hpp"
 
 #include "extension/Configuration.hpp"
+#include "extension/Script.hpp"
 
 #include "message/behaviour/MotionCommand.hpp"
 #include "message/motion/WalkCommand.hpp"
@@ -31,6 +32,7 @@
 namespace module::behaviour::skills {
 
     using extension::Configuration;
+    using extension::ExecuteScriptByName;
 
     using message::behaviour::MotionCommand;
     using message::motion::DisableWalkEngineCommand;
@@ -80,6 +82,10 @@ namespace module::behaviour::skills {
             else if (command.type == MotionCommand::Type::STAND_STILL) {
                 emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {26, 11}}));
                 emit(std::move(std::make_unique<StopCommand>(subsumptionId)));
+            }
+            else if (command.type == MotionCommand::Type::STAND) {
+                emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "Stand.yaml"));
+                emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {50, 50}}));
             }
             else {
                 emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {0, 0}}));
