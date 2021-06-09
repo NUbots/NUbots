@@ -229,7 +229,7 @@ namespace module::platform {
             server_address = config["server_address"].as<std::string>();
             server_port    = config["port"].as<std::string>();
 
-            on<Watchdog<Webots, 5, std::chrono::seconds>>().then([this, config] {
+            on<Watchdog<Webots, 30, std::chrono::seconds>, Sync<Webots>>().then([this, config] {
                 // We haven't received any messages lately
                 log<NUClear::WARN>("Connection timed out. Attempting reconnect");
                 setup_connection();
@@ -327,107 +327,122 @@ namespace module::platform {
             }
 
             // Receiving
-            read_io = on<IO>(fd, IO::READ | IO::CLOSE | IO::ERROR).then("Read Stream", [this](const IO::Event& event) {
-                if ((event.events & IO::READ) != 0) {
-                    // If we have not seen the welcome message yet, look for it
-                    if (!connection_active) {
-                        // Initialise the string with 0s
-                        // make sure we have an extra character just in case we read something that isn't a null
-                        // terminator
-                        std::array<char, 9> initial_message{};
-                        const int n = ::read(fd, initial_message.data(), initial_message.size() - 1);
+            read_io =
+                on<IO, Sync<Webots>>(fd, IO::READ | IO::CLOSE | IO::ERROR)
+                    .then("Read Stream", [this](const IO::Event& event) {
+                        if ((event.events & IO::READ) != 0) {
+                            // If we have not seen the welcome message yet, look for it
+                            if (!connection_active) {
+                                // Initaliase the string with 0s
+                                // make sure we have an extra character just in case we read something that isn't a null
+                                // terminator
+                                std::array<char, 9> initial_message{};
+                                const int n = ::read(fd, initial_message.data(), initial_message.size() - 1);
 
-                        if (n >= 0) {
-                            if (initial_message.data() == std::string("Welcome")) {
-                                // good
-                                log<NUClear::INFO>(fmt::format("Connected to {}:{}", server_address, server_port));
-                            }
-                            else if (initial_message.data() == std::string("Refused")) {
-                                log<NUClear::FATAL>(
-                                    fmt::format("Connection to {}:{} refused: your IP is not white listed.",
-                                                server_address,
-                                                server_port));
-                                // Halt and don't retry as reconnection is pointless.
-                                close(fd);
-                                powerplant.shutdown();
+                                if (n >= 0) {
+                                    if (initial_message.data() == std::string("Welcome")) {
+                                        // good
+                                        log<NUClear::INFO>(
+                                            fmt::format("Connected to {}:{}", server_address, server_port));
+                                    }
+                                    else if (initial_message.data() == std::string("Refused")) {
+                                        log<NUClear::FATAL>(
+                                            fmt::format("Connection to {}:{} refused: your IP is not white listed.",
+                                                        server_address,
+                                                        server_port));
+                                        // Halt and don't retry as reconnection is pointless.
+                                        close(fd);
+                                        powerplant.shutdown();
+                                    }
+                                    else {
+                                        log<NUClear::FATAL>(fmt::format("{}:{} sent unknown initial message",
+                                                                        server_address,
+                                                                        server_port));
+                                        // Halt and don't retry as the other end is clearly not Webots
+                                        close(fd);
+                                        powerplant.shutdown();
+                                    }
+                                }
+                                else {
+                                    // There was nothing sent
+                                    log<NUClear::DEBUG>("Connection was closed.");
+                                    active_reconnect.store(false);
+                                    return;
+                                }
+
+                                // Set the real time of the connection initiation
+                                connect_time = NUClear::clock::now();
+                                // Reset the simulation connection time
+                                utility::clock::last_update = NUClear::base_clock::now();
+
+                                connection_active = true;
+
+                                // Clear socket && buffer
+                                unsigned long available = 0;
+                                if (::ioctl(fd, FIONREAD, &available) < 0) {
+                                    log<NUClear::ERROR>(
+                                        fmt::format("Error querying for available data, {}", strerror(errno)));
+                                    return;
+                                }
+                                const size_t old_size = buffer.size();
+                                ::read(fd, buffer.data() + old_size, available);
+                                buffer.clear();
                             }
                             else {
-                                log<NUClear::FATAL>(
-                                    fmt::format("{}:{} sent unknown initial message", server_address, server_port));
-                                // Halt and don't retry as the other end is clearly not Webots
-                                close(fd);
-                                powerplant.shutdown();
+                                // Work out how many bytes are available to read in the buffer and ensure we have enough
+                                // space to read them in our data buffer
+                                unsigned long available = 0;
+                                if (::ioctl(fd, FIONREAD, &available) < 0) {
+                                    log<NUClear::ERROR>(
+                                        fmt::format("Error querying for available data, {}", strerror(errno)));
+                                    return;
+                                }
+                                const size_t old_size = buffer.size();
+                                buffer.resize(old_size + available);
+
+                                // Read data into our buffer and resize it to the new data we read
+                                auto bytes_read = ::read(fd, buffer.data() + old_size, available);
+                                // Shrink the buffer to the size that was actually read.
+                                buffer.resize(old_size + bytes_read);
+
+                                // Function to read the payload length from the buffer
+                                auto read_length = [this](const std::vector<uint8_t>& buffer) {
+                                    return buffer.size() >= sizeof(uint32_t)
+                                               ? ntohl(*reinterpret_cast<const uint32_t*>(buffer.data()))
+                                               : 0u;
+                                };
+
+                                // So long as we have enough bytes to process an entire packet, process the packets
+                                for (uint32_t length = read_length(buffer); buffer.size() >= length + sizeof(length);
+                                     length          = read_length(buffer)) {
+                                    // Decode the protocol buffer and emit it as a message
+                                    char* payload = reinterpret_cast<char*>(buffer.data()) + sizeof(length);
+                                    translate_and_emit_sensor(
+                                        NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(payload,
+                                                                                                             length));
+                                    // Service the watchdog
+                                    emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
+
+                                    // Delete the packet we just read ready to read the next one
+                                    buffer.erase(buffer.begin(), std::next(buffer.begin(), sizeof(length) + length));
+                                }
                             }
                         }
-                        else {
-                            // There was nothing sent
-                            log<NUClear::DEBUG>("Connection was closed.");
-                            active_reconnect.store(false);
-                            return;
+
+                        // For IO::ERROR and IO::CLOSE conditions the watchdog will handle reconnections so just report
+                        // the error
+                        else if ((event.events & IO::ERROR) != 0) {
+                            if (!active_reconnect.exchange(true)) {
+                                log<NUClear::WARN>(fmt::format(
+                                    "An invalid request or some other error occurred. Closing our connection"));
+                            }
                         }
-
-                        // Set the real time of the connection initiation
-                        connect_time = NUClear::clock::now();
-                        // Reset the simulation connection time
-                        utility::clock::last_update = NUClear::base_clock::now();
-
-                        connection_active = true;
-                    }
-                    else {
-                        // Work out how many bytes are available to read in the buffer and ensure we have enough
-                        // space to read them in our data buffer
-                        unsigned long available = 0;
-                        if (::ioctl(fd, FIONREAD, &available) < 0) {
-                            log<NUClear::ERROR>(fmt::format("Error querying for available data, {}", strerror(errno)));
-                            return;
+                        else if ((event.events & IO::CLOSE) != 0) {
+                            if (!active_reconnect.exchange(true)) {
+                                log<NUClear::WARN>(fmt::format("The Remote hung up. Closing our connection"));
+                            }
                         }
-                        const size_t old_size = buffer.size();
-                        buffer.resize(old_size + available);
-
-                        // Read data into our buffer and resize it to the new data we read
-                        const auto bytes_read = ::read(fd, buffer.data() + old_size, available);
-                        // Shrink the buffer to the size that was actually read.
-                        buffer.resize(old_size + bytes_read);
-
-                        // Function to read the payload length from the buffer
-                        auto read_length = [this](const std::vector<uint8_t>& buffer) {
-                            return buffer.size() >= sizeof(uint32_t)
-                                       ? ntohl(*reinterpret_cast<const uint32_t*>(buffer.data()))
-                                       : 0u;
-                        };
-
-                        // So long as we have enough bytes to process an entire packet, process the packets
-                        for (uint32_t length = read_length(buffer); buffer.size() >= length + sizeof(length);
-                             length          = read_length(buffer)) {
-                            // Decode the protocol buffer and emit it as a message
-                            char* payload = reinterpret_cast<char*>(buffer.data()) + sizeof(length);
-
-                            translate_and_emit_sensor(
-                                NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(payload, length));
-
-                            // Service the watchdog
-                            emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
-
-                            // Delete the packet we just read ready to read the next one
-                            buffer.erase(buffer.begin(), std::next(buffer.begin(), sizeof(length) + length));
-                        }
-                    }
-                }
-
-                // For IO::ERROR and IO::CLOSE conditions the watchdog will handle reconnections so just report
-                // the error
-                else if ((event.events & IO::ERROR) != 0) {
-                    if (!active_reconnect.exchange(true)) {
-                        log<NUClear::WARN>(
-                            fmt::format("An invalid request or some other error occurred. Closing our connection"));
-                    }
-                }
-                else if ((event.events & IO::CLOSE) != 0) {
-                    if (!active_reconnect.exchange(true)) {
-                        log<NUClear::WARN>(fmt::format("The Remote hung up. Closing our connection"));
-                    }
-                }
-            });
+                    });
 
             send_io = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then(
                 "Simulator Update Loop",
