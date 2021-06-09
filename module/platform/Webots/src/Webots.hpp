@@ -50,7 +50,7 @@ namespace module::platform {
 
         /// @brief Establish a TCP connection to the specified server/port
         /// @return If the connection was successful, a file descriptor. Else, -1 is returned
-        int tcpip_connect();
+        [[nodiscard]] int tcpip_connect();
 
         /// @brief Establishes the connection with webots, then binds the reaction handles with the resulting fd
         void setup_connection();
@@ -63,7 +63,7 @@ namespace module::platform {
         int fd = -1;
 
         /// @brief The time the connection was opened.
-        NUClear::clock::time_point connect_time;
+        NUClear::clock::time_point connect_time{};
 
         /// @brief The number of time ticks which have passed since the last IO::READ trigger
         uint32_t sim_delta = 0;
@@ -112,10 +112,10 @@ namespace module::platform {
         };
 
         /// @brief Our current servo states
-        std::array<ServoState, 20> servo_state;
+        std::array<ServoState, 20> servo_state{};
 
         /// @brief Buffer for storing received messages
-        std::vector<uint8_t> buffer;
+        std::vector<uint8_t> buffer{};
 
         /// @brief Atomic variable indicating that a reconnect is currently in progress
         std::atomic_bool active_reconnect{false};
