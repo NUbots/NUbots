@@ -441,8 +441,12 @@ namespace module::platform {
                     const uint32_t sensor_timestep = std::max(min_sensor_time_step, time_step);
                     const uint32_t camera_timestep = std::max(min_camera_time_step, time_step);
 
-                        // Create servo position message
-                        actuator_requests.motor_positions.emplace_back(MotorPosition(servo.name, servo.goal_position));
+                    // Construct the ActuatorRequests message
+                    ActuatorRequests actuator_requests = create_sensor_time_steps(sensor_timestep, camera_timestep);
+                    for (auto& servo : servo_state) {
+                        if (servo.dirty) {
+                            // Servo is no longer dirty
+                            servo.dirty = false;
 
                             // Create servo position message
                             actuator_requests.motor_positions.emplace_back(
