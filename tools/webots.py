@@ -12,6 +12,11 @@ from termcolor import cprint
 
 import b
 
+# The docker image details for Robocup
+ROBOCUP_IMAGE_NAME = "robocup-vhsc-nubots"  # Provided by the TC and shouldn't be changed
+ROBOCUP_IMAGE_TAG = "robocup2021"  # Submitted in our team_config.json, shouldn't be changed here unless changed there
+ROBOCUP_IMAGE_REGISTRY = "079967072104.dkr.ecr.us-east-2.amazonaws.com/robocup-vhsc-nubots"  # Provided by the TC
+
 
 def register(command):
     command.help = "Build and run images for use with Webots"
@@ -24,7 +29,7 @@ def register(command):
         "push",
         help=textwrap.dedent(
             """
-            Push the simulation docker image to the TC registry. Run the aws CLI and login with the TC credentials before running this command.
+            Push the simulation docker image to the TC registry. Configure the aws CLI and login with the TC credentials before running this command.
             See "Uploading Docker Images" in the Robocup "API Specifications for Virtual Soccer Competition" document for details.
         """
         ),
@@ -62,8 +67,6 @@ def exec_build(roles):
 
     print("Configuring build...")
     configure_command = ["./b", "configure", "--"] + get_cmake_flags(roles)
-    print(" ".join(configure_command))
-
     exit_code = subprocess.run(configure_command).returncode
     if exit_code != 0:
         cprint("unable to configure build, exit code {}".format(exit_code), "red", attrs=["bold"])
@@ -102,17 +105,11 @@ def exec_build(roles):
     # Change into the docker folder
     os.chdir(os.path.join(b.project_dir, "docker"))
 
-    # The docker image details
-    # The image name is given by the TC and shouldn't be changed
-    # The image tag is submitted in our team_config.json and shouldn't be changed
-    image_name = "robocup-vhsc-nubots"
-    image_tag = "robocup2021"
-
-    print(f"Building the docker image {image_name}:{image_tag}...")
+    print(f"Building the docker image {ROBOCUP_IMAGE_NAME}:{ROBOCUP_IMAGE_TAG}...")
 
     # Build the image!
     exit_code = subprocess.run(
-        ["docker", "build", "-t", f"{image_name}:{image_tag}", "-f", "./nugus_sim.Dockerfile", "."]
+        ["docker", "build", "-t", f"{ROBOCUP_IMAGE_NAME}:{ROBOCUP_IMAGE_TAG}", "-f", "./nugus_sim.Dockerfile", "."]
     ).returncode
     if exit_code != 0:
         cprint(
@@ -147,7 +144,7 @@ def exec_run(role):
         "ROBOCUP_TEAM_COLOR=red",
         "-e",
         "ROBOCUP_SIMULATOR_ADDR=127.0.0.1:10001",
-        "robocup-vhsc-nubots:robocup2021",
+        f"{ROBOCUP_IMAGE_NAME}:{ROBOCUP_IMAGE_TAG}",
         role,
     ]
 
@@ -155,16 +152,12 @@ def exec_run(role):
 
 
 def exec_push():
-    image_name = "robocup-vhsc-nubots"
-    image_tag = "robocup2021"
-    registry_host = "079967072104.dkr.ecr.us-east-2.amazonaws.com/robocup-vhsc-nubots"
-
     exit_code = subprocess.run(
         [
             "docker",
             "tag",
-            f"{image_name}:{image_tag}",
-            f"{registry_host}:{image_tag}",
+            f"{ROBOCUP_IMAGE_NAME}:{ROBOCUP_IMAGE_TAG}",
+            f"{ROBOCUP_IMAGE_REGISTRY}:{ROBOCUP_IMAGE_TAG}",
         ]
     ).returncode
 
@@ -176,7 +169,7 @@ def exec_push():
         [
             "docker",
             "push",
-            f"{registry_host}:{image_tag}",
+            f"{ROBOCUP_IMAGE_REGISTRY}:{ROBOCUP_IMAGE_TAG}",
         ]
     ).returncode
 
