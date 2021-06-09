@@ -333,7 +333,7 @@ namespace module::platform {
                         if ((event.events & IO::READ) != 0) {
                             // If we have not seen the welcome message yet, look for it
                             if (!connection_active) {
-                                // Initaliase the string with 0s
+                                // Initialise the string with 0s
                                 // make sure we have an extra character just in case we read something that isn't a null
                                 // terminator
                                 std::array<char, 9> initial_message{};
@@ -401,7 +401,7 @@ namespace module::platform {
                                 buffer.resize(old_size + available);
 
                                 // Read data into our buffer and resize it to the new data we read
-                                auto bytes_read = ::read(fd, buffer.data() + old_size, available);
+                                const auto bytes_read = ::read(fd, buffer.data() + old_size, available);
                                 // Shrink the buffer to the size that was actually read.
                                 buffer.resize(old_size + bytes_read);
 
