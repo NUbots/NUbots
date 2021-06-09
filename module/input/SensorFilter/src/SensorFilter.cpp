@@ -583,7 +583,7 @@ namespace module::input {
                         motionFilter.measure(sensors->accelerometer, acc_noise, MeasurementType::ACCELEROMETER());
                         // This loop calculates the Hwf transform for feet if they have just hit the ground. If they
                         // have not just hit the ground, it uses the previous Hwf value. This assumes that once the foot
-                        // hits the ground, it doesn't move at all
+                        // hits the ground, it doesn't move at all i.e. we're ASSUMING the foot cannot slip/slide
                         for (auto&& side : {BodySide::LEFT, BodySide::RIGHT}) {
                             const bool foot_down      = sensors->feet[side].down;
                             const bool prev_foot_down = previous_foot_down[side];
