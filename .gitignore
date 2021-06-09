@@ -69,10 +69,6 @@ packer/build.pwi
 # Tests
 tests_output/
 
-# Logs
-/home/nubots/NUbots/log/*
-log
-
 # Misc
 tags
 *.swp

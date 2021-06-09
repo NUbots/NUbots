@@ -1,5 +1,5 @@
-find_package(OpenCL REQUIRED)
-find_package(VisualMesh REQUIRED)
+# Add the VisualMesh project to be built
+add_subdirectory(VisualMesh)
 
 # Build our NUClear module
-nuclear_module(LIBRARIES visualmesh::visualmesh)
+nuclear_module(INCLUDES} LIBRARIES libvisualmesh)

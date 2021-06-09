@@ -29,20 +29,20 @@ export class VisualMeshNetwork {
   @action
   private onVisualMesh = (robotModel: RobotModel, packet: VisualMesh) => {
     const robot = VisualMeshRobotModel.of(robotModel)
-    const { id, name, indices, neighbourhood, coordinates, classifications } = packet
+    const { id, mesh, indices, neighbourhood, coordinates, classifications } = packet
 
     let camera = robot.cameras.get(id)
     if (!camera) {
       camera = CameraModel.of(robot, {
         id: id,
-        name: name,
+        name,
       })
       robot.cameras.set(id, camera)
     }
 
     // We don't need to know phi, just how many items are in each ring
     camera.mesh = {
-      // rows: mesh.map(v => v.segments!),
+      rows: mesh.map(v => v.segments!),
       indices,
       neighbours: neighbourhood!.v!,
       coordinates: coordinates!.v!,

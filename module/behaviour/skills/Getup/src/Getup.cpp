@@ -19,15 +19,14 @@
 
 #include "Getup.hpp"
 
-#include <Eigen/Core>
 #include <cmath>
 
 #include "extension/Configuration.hpp"
 #include "extension/Script.hpp"
 
 #include "message/behaviour/ServoCommand.hpp"
+#include "message/input/Sensors.hpp"
 #include "message/motion/GetupCommand.hpp"
-#include "message/platform/RawSensors.hpp"
 
 #include "utility/behaviour/Action.hpp"
 #include "utility/input/LimbID.hpp"
@@ -37,9 +36,9 @@ namespace module::behaviour::skills {
     using extension::Configuration;
     using extension::ExecuteScriptByName;
 
+    using message::input::Sensors;
     using message::motion::ExecuteGetup;
     using message::motion::KillGetup;
-    using message::platform::RawSensors;
 
     using utility::behaviour::ActionPriorities;
     using utility::behaviour::RegisterAction;
@@ -49,61 +48,39 @@ namespace module::behaviour::skills {
     Getup::Getup(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
         , id(size_t(this) * size_t(this) - size_t(this))
-        , isFront(true)
         , gettingUp(false)
         , fallenCheck()
-        , getUp()
-        , FALLEN_ANGLE(M_PI_2)
+        , FALLEN_ANGLE(0.0f)
         , GETUP_PRIORITY(0.0f)
         , EXECUTION_PRIORITY(0.0f) {
-        // do a little configurating
-        on<Configuration>("Getup.yaml").then([this](const Configuration& config) {
-            // clang-format off
-            std::string lvl = config["log_level"].as<std::string>();
-            if (lvl == "TRACE")      { this->log_level = NUClear::TRACE; }
-            else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
-            else if (lvl == "INFO")  { this->log_level = NUClear::INFO;  }
-            else if (lvl == "WARN")  { this->log_level = NUClear::WARN;  }
-            else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
-            else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
-            // clang-format on
 
-            FALLEN_ANGLE = config["FALLEN_ANGLE"].as<float>();
+        // do a little configurating
+        on<Configuration>("Getup.yaml").then([this](const Configuration& file) {
+            // encode fallen angle as a cosine so we can compare it directly to the z axis value
+            double fallenAngleConfig = file["FALLEN_ANGLE"].as<double>();
+            FALLEN_ANGLE             = cos(fallenAngleConfig);
 
             // load priorities for the getup
-            GETUP_PRIORITY     = config["GETUP_PRIORITY"].as<float>();
-            EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
+            GETUP_PRIORITY     = file["GETUP_PRIORITY"].as<float>();
+            EXECUTION_PRIORITY = file["EXECUTION_PRIORITY"].as<float>();
         });
 
-        fallenCheck = on<Last<20, Trigger<RawSensors>>, Single>().then(
-            "Getup Fallen Check",
-            [this](const std::list<std::shared_ptr<const RawSensors>>& sensors) {
-                Eigen::Vector3d acc_reading = Eigen::Vector3d::Zero();
+        fallenCheck = on<Trigger<Sensors>, Single>().then("Getup Fallen Check", [this](const Sensors& sensors) {
+            // check if the orientation is smaller than the cosine of our fallen angle
+            if (!gettingUp && fabs(sensors.Htw(2, 2)) < FALLEN_ANGLE) {
+                updatePriority(GETUP_PRIORITY);
+                fallenCheck.disable();
+            }
+        });
 
-                for (const auto& s : sensors) {
-                    acc_reading += Eigen::Vector3d(s->accelerometer.x, s->accelerometer.y, s->accelerometer.z);
-                }
-                acc_reading = (acc_reading / double(sensors.size())).normalized();
-
-                // check that the accelerometer reading is less than some predetermined
-                // amount
-                if (!gettingUp && std::acos(Eigen::Vector3d::UnitZ().dot(acc_reading)) > FALLEN_ANGLE) {
-                    // If we are on our side, treat it as being on our front, hopefully the rollover will help matters
-                    isFront = (M_PI_2 - std::acos(Eigen::Vector3d::UnitX().dot(acc_reading)) <= 0.0);
-
-                    updatePriority(GETUP_PRIORITY);
-                    getUp.enable();
-                }
-            });
-
-        getUp = on<Trigger<ExecuteGetup>, Single>().then("Execute Getup", [this]() {
+        on<Trigger<ExecuteGetup>, With<Sensors>>().then("Execute Getup", [this](const Sensors& sensors) {
             gettingUp = true;
 
             // Check with side we're getting up from
-            if (isFront) {
+            if (sensors.Htw(0, 2) < 0.0) {
                 emit(std::make_unique<ExecuteScriptByName>(
                     id,
-                    std::vector<std::string>({"StandUpFront.yaml", "Stand.yaml"})));
+                    std::vector<std::string>({"RollOverFront.yaml", "StandUpBack.yaml", "Stand.yaml"})));
             }
             else {
                 emit(std::make_unique<ExecuteScriptByName>(
@@ -116,7 +93,7 @@ namespace module::behaviour::skills {
         on<Trigger<KillGetup>>().then([this] {
             gettingUp = false;
             updatePriority(0);
-            getUp.disable();
+            fallenCheck.enable();
         });
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
@@ -127,7 +104,17 @@ namespace module::behaviour::skills {
                 {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
             [this](const std::set<LimbID>&) { emit(std::make_unique<ExecuteGetup>()); },
             [this](const std::set<LimbID>&) { emit(std::make_unique<KillGetup>()); },
-            [this](const std::set<ServoID>&) { emit(std::make_unique<KillGetup>()); }}));
+            [this](const std::set<ServoID>& servoSet) {
+                // HACK 2014 Jake Fountain, Trent Houliston
+                // TODO track set limbs and wait for all to finish
+                log("Checking ankles: ",
+                    servoSet.find(ServoID::L_ANKLE_PITCH) != servoSet.end(),
+                    servoSet.find(ServoID::R_ANKLE_PITCH) != servoSet.end());
+                if (servoSet.find(ServoID::L_ANKLE_PITCH) != servoSet.end()
+                    || servoSet.find(ServoID::R_ANKLE_PITCH) != servoSet.end()) {
+                    emit(std::make_unique<KillGetup>());
+                }
+            }}));
     }
 
     void Getup::updatePriority(const float& priority) {

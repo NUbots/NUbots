@@ -1,0 +1,4 @@
+[submodule "module/vision/VisualMesh/VisualMesh"]
+	path = module/vision/VisualMesh/VisualMesh
+	url = https://github.com/Fastcode/VisualMesh.git
+	branch = master

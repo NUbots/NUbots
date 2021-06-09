@@ -97,7 +97,6 @@ def run(func, image):
             "--interactive",
             "--env",
             "EDITOR={}".format(os.environ.get("EDITOR", "nano")),
-            "--privileged",
         ]
 
         # Work out if we are using an internal image

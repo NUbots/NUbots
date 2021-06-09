@@ -19,7 +19,6 @@
 
 #include "BallDetector.hpp"
 
-#include <Eigen/Geometry>
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 #include <numeric>
@@ -46,6 +45,8 @@ namespace module::vision {
     using utility::math::coordinates::cartesianToSpherical;
     using utility::support::Expression;
 
+    static constexpr int BALL_INDEX = 0;
+
     BallDetector::BallDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("BallDetector.yaml").then([this](const Configuration& cfg) {
@@ -65,7 +66,6 @@ namespace module::vision {
                 const auto& cls                                     = horizon.mesh->classifications;
                 const auto& neighbours                              = horizon.mesh->neighbourhood;
                 const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = horizon.mesh->rays;
-                const int BALL_INDEX                                = horizon.class_map.at("ball");
 
                 // Get some indices to partition
                 std::vector<int> indices(horizon.mesh->indices.size());
@@ -82,10 +82,6 @@ namespace module::vision {
 
                 // Discard indices that are not on the boundary and are not below the green horizon
                 indices.resize(std::distance(indices.begin(), boundary));
-
-                if (config.debug) {
-                    log<NUClear::DEBUG>(fmt::format("Partitioned {} points", indices.size()));
-                }
 
                 // Cluster all points into ball candidates
                 // Points are clustered based on their connectivity to other ball points
@@ -231,10 +227,10 @@ namespace module::vision {
                         // Point in plane = (0, 0, field.ball_radius)
                         // Line direction = axis
                         // Point on line = camera = Hcw.topRightCorner<3, 1>()
-                        Eigen::Affine3f Hcw(horizon.Hcw.cast<float>());
-                        const float d = (Hcw.inverse().translation().z() - field.ball_radius) / std::abs(axis.z());
-                        const Eigen::Vector3f rBCc      = axis * d;
-                        const float projection_distance = rBCc.norm();
+                        const float d = (field.ball_radius - horizon.Hcw(2, 3)) / axis.z();
+                        const Eigen::Vector3f ball_projection =
+                            axis * d + horizon.Hcw.topRightCorner<3, 1>().cast<float>();
+                        const float projection_distance = ball_projection.norm();
                         const float max_distance        = std::max(projection_distance, distance);
 
                         if ((std::abs(projection_distance - distance) / max_distance) > config.distance_disagreement) {

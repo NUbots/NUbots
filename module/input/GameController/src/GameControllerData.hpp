@@ -79,10 +79,8 @@ namespace module::input::gamecontroller {
     struct Robot {
         PenaltyState penaltyState;  // penalty state of the player
         uint8_t penalisedTimeLeft;  // estimate of time till unpenalised (seconds)
-        uint8_t numberOfWarnings;   // number of warnings
         uint8_t yellowCardCount;    // number of yellow cards
         uint8_t redCardCount;       // number of red cards
-        bool goalKeeper;            // flags if robot is goal keeper
     };
 
     struct Team {
@@ -127,10 +125,8 @@ namespace module::input::gamecontroller {
     inline std::ostream& operator<<(std::ostream& os, const Robot& robot) {
         os << "\t\tPenalty state......: " << uint(robot.penaltyState) << std::endl
            << "\t\tPenalised time left: " << uint(robot.penalisedTimeLeft) << std::endl
-           << "\t\tNumber of warnings: " << uint(robot.numberOfWarnings) << std::endl
            << "\t\tYellow Card Count..: " << uint(robot.yellowCardCount) << std::endl
-           << "\t\tRed Card Count.....: " << uint(robot.redCardCount) << std::endl
-           << "\t\tGoalkeeper: " << std::boolalpha << robot.goalKeeper << std::endl;
+           << "\t\tRed Card Count.....: " << uint(robot.redCardCount) << std::endl;
         return os;
     }
 

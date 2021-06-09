@@ -55,8 +55,15 @@ namespace module::output {
         : Reactor(std::move(environment)) {
 
         on<Configuration>("ImageCompressor.yaml").then("Configure Compressors", [this](const Configuration& cfg) {
-            this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
-
+            // clang-format off
+            auto lvl = cfg["log_level"].as<std::string>();
+            if (lvl == "TRACE") { this->log_level = NUClear::TRACE; }
+            else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
+            else if (lvl == "INFO") { this->log_level = NUClear::INFO; }
+            else if (lvl == "WARN") { this->log_level = NUClear::WARN; }
+            else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
+            else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
+            // clang-format on
 
             // Clear the compressors and factories
             std::lock_guard<std::mutex> lock(compressor_mutex);

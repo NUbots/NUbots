@@ -133,10 +133,10 @@ namespace module::input {
         const char* ptr = &packet.data;
 
         // Read frame number
-        mocap->frame_number = ReadData<uint32_t>::read(ptr, version);
+        mocap->frameNumber = ReadData<uint32_t>::read(ptr, version);
 
         // Read the markersets
-        mocap->marker_sets = ReadData<std::vector<MotionCapture::MarkerSet>>::read(ptr, version);
+        mocap->markerSets = ReadData<std::vector<MotionCapture::MarkerSet>>::read(ptr, version);
 
         // Read the free floating markers
         auto freeMarkers = ReadData<std::vector<Eigen::Vector3f>>::read(ptr, version);
@@ -151,7 +151,7 @@ namespace module::input {
         }
 
         // Read the Rigid Bodies
-        mocap->rigid_bodies = ReadData<std::vector<MotionCapture::RigidBody>>::read(ptr, version);
+        mocap->rigidBodies = ReadData<std::vector<MotionCapture::RigidBody>>::read(ptr, version);
 
         // Read the skeletons
         if (version >= 0x02010000) {
@@ -160,35 +160,35 @@ namespace module::input {
 
         // Read the labeled markers
         if (version >= 0x02030000) {
-            mocap->labeled_markers = ReadData<std::vector<MotionCapture::LabeledMarker>>::read(ptr, version);
+            mocap->labeledMarkers = ReadData<std::vector<MotionCapture::LabeledMarker>>::read(ptr, version);
         }
 
         // Read the force plates
         if (version >= 0x02090000) {
-            mocap->force_plates = ReadData<std::vector<MotionCapture::ForcePlate>>::read(ptr, version);
+            mocap->forcePlates = ReadData<std::vector<MotionCapture::ForcePlate>>::read(ptr, version);
         }
 
         // Read our metadata
-        mocap->latency      = ReadData<float>::read(ptr, version);
-        mocap->timecode     = ReadData<uint32_t>::read(ptr, version);
-        mocap->timecode_sub = ReadData<uint32_t>::read(ptr, version);
+        mocap->latency     = ReadData<float>::read(ptr, version);
+        mocap->timecode    = ReadData<uint32_t>::read(ptr, version);
+        mocap->timecodeSub = ReadData<uint32_t>::read(ptr, version);
 
-        // In version 2.9 natnet_timestamp went from a float to a double
+        // In version 2.9 timestamp went from a float to a double
         if (version >= 0x02090000) {
-            mocap->natnet_timestamp = ReadData<double>::read(ptr, version);
+            mocap->timestamp = ReadData<double>::read(ptr, version);
         }
         else {
-            mocap->natnet_timestamp = ReadData<float>::read(ptr, version);
+            mocap->timestamp = ReadData<float>::read(ptr, version);
         }
 
-        short params                  = ReadData<short>::read(ptr, version);
-        mocap->recording              = (params & 0x01) == 0x01;
-        mocap->tracked_models_changed = (params & 0x01) == 0x02;
+        short params                = ReadData<short>::read(ptr, version);
+        mocap->recording            = (params & 0x01) == 0x01;
+        mocap->trackedModelsChanged = (params & 0x01) == 0x02;
 
         // TODO there is an eod thing here
 
         // Apply the model information we have to the objects
-        for (auto& markerSet : mocap->marker_sets) {
+        for (auto& markerSet : mocap->markerSets) {
 
             auto model = markerSetModels.find(markerSet.name);
 
@@ -208,7 +208,7 @@ namespace module::input {
             }
         }
 
-        for (auto& rigidBody : mocap->rigid_bodies) {
+        for (auto& rigidBody : mocap->rigidBodies) {
 
             auto model = rigidBodyModels.find(rigidBody.id);
 
@@ -219,15 +219,15 @@ namespace module::input {
                 rigidBody.offset = model->second.offset;
 
                 auto parent =
-                    std::find_if(mocap->rigid_bodies.begin(),
-                                 mocap->rigid_bodies.end(),
+                    std::find_if(mocap->rigidBodies.begin(),
+                                 mocap->rigidBodies.end(),
                                  [model](const MotionCapture::RigidBody& rb) { return rb.id == model->second.id; });
 
                 // Get a pointer to our parent if it exists and is not us
                 rigidBody.parent = parent->id == rigidBody.id ? 0
-                                   : parent == mocap->rigid_bodies.end()
+                                   : parent == mocap->rigidBodies.end()
                                        ? -1
-                                       : std::distance(mocap->rigid_bodies.begin(), parent);
+                                       : std::distance(mocap->rigidBodies.begin(), parent);
             }
             // We need to update our models
             else {
@@ -243,10 +243,10 @@ namespace module::input {
         }
 
         // Now we reverse link all our rigid bodies
-        for (auto rigidBody = mocap->rigid_bodies.begin(); rigidBody != mocap->rigid_bodies.end(); rigidBody++) {
+        for (auto rigidBody = mocap->rigidBodies.begin(); rigidBody != mocap->rigidBodies.end(); rigidBody++) {
             if (rigidBody->parent > 0) {
-                mocap->rigid_bodies.at(rigidBody->parent)
-                    .children.push_back(std::distance(mocap->rigid_bodies.begin(), rigidBody));
+                mocap->rigidBodies.at(rigidBody->parent)
+                    .children.push_back(std::distance(mocap->rigidBodies.begin(), rigidBody));
             }
         }
 
