@@ -41,16 +41,13 @@
 extern "C" {
 #include <netdb.h>      /* definition of gethostbyname */
 #include <netinet/in.h> /* definition of struct sockaddr_in */
+#include <sys/ioctl.h>  /* definition of ioctl and FIONREAD */
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <unistd.h> /* definition of close */
 }
 
 namespace module::platform {
-
-    /// @brief The clock period factor, used to convert simulation time to real time
-    static constexpr float CLOCK_PERIOD_FACTOR =
-        static_cast<float>(NUClear::clock::period::num) / static_cast<float>(NUClear::clock::period::den);
 
     using extension::Configuration;
     using message::input::Image;
@@ -71,7 +68,7 @@ namespace module::platform {
     using utility::vision::fourcc;
 
     // Converts the NUgus.proto servo name to the equivalent RawSensor.proto name
-    RawSensors::Servo& translate_servo_id(const std::string& name, RawSensors::Servos& servos) {
+    [[nodiscard]] RawSensors::Servo& translate_servo_id(const std::string& name, RawSensors::Servos& servos) {
 
         // clang-format off
         // Left ankle
@@ -108,7 +105,7 @@ namespace module::platform {
         throw std::runtime_error("Unable to translate unknown NUgus.proto sensor name: " + name);
     }
 
-    std::string translate_id_servo(const uint32_t& id) {
+    [[nodiscard]] std::string translate_id_servo(const uint32_t& id) {
         switch (id) {
             case 0: return "right_shoulder_pitch [shoulder]";
             case 1: return "left_shoulder_pitch [shoulder]";
@@ -135,37 +132,47 @@ namespace module::platform {
         throw std::runtime_error("Unable to translate unknown NUgus.proto servo id: " + id);
     }
 
-    ActuatorRequests create_sensor_time_steps(const uint32_t& time_step) {
+    [[nodiscard]] ActuatorRequests create_sensor_time_steps(const uint32_t& sensor_timestep,
+                                                            const uint32_t& camera_timestep) {
         message::platform::webots::ActuatorRequests msg;
-        msg.sensor_time_steps = {{"left_ankle_roll_sensor", time_step},
-                                 {"left_ankle_pitch_sensor", time_step},
-                                 {"right_ankle_roll_sensor", time_step},
-                                 {"right_ankle_pitch_sensor", time_step},
-                                 {"right_knee_pitch_sensor", time_step},
-                                 {"left_knee_pitch_sensor", time_step},
-                                 {"left_hip_roll_sensor", time_step},
-                                 {"left_hip_pitch_sensor", time_step},
-                                 {"left_hip_yaw_sensor", time_step},
-                                 {"right_hip_roll_sensor", time_step},
-                                 {"right_hip_pitch_sensor", time_step},
-                                 {"right_hip_yaw_sensor", time_step},
-                                 {"left_elbow_pitch_sensor", time_step},
-                                 {"right_elbow_pitch_sensor", time_step},
-                                 {"left_shoulder_roll_sensor", time_step},
-                                 {"left_shoulder_pitch_sensor", time_step},
-                                 {"right_shoulder_roll_sensor", time_step},
-                                 {"right_shoulder_pitch_sensor", time_step},
-                                 {"neck_yaw_sensor", time_step},
-                                 {"head_pitch_sensor", time_step},
-                                 {"accelerometer", time_step},
-                                 {"gyroscope", time_step},
-                                 {"right_camera", time_step},
-                                 {"left_camera", time_step}};
+
+        msg.sensor_time_steps = {{"left_ankle_roll_sensor", sensor_timestep},
+                                 {"left_ankle_pitch_sensor", sensor_timestep},
+                                 {"right_ankle_roll_sensor", sensor_timestep},
+                                 {"right_ankle_pitch_sensor", sensor_timestep},
+                                 {"right_knee_pitch_sensor", sensor_timestep},
+                                 {"left_knee_pitch_sensor", sensor_timestep},
+                                 {"left_hip_roll_sensor", sensor_timestep},
+                                 {"left_hip_pitch_sensor", sensor_timestep},
+                                 {"left_hip_yaw_sensor", sensor_timestep},
+                                 {"right_hip_roll_sensor", sensor_timestep},
+                                 {"right_hip_pitch_sensor", sensor_timestep},
+                                 {"right_hip_yaw_sensor", sensor_timestep},
+                                 {"left_elbow_pitch_sensor", sensor_timestep},
+                                 {"right_elbow_pitch_sensor", sensor_timestep},
+                                 {"left_shoulder_roll_sensor", sensor_timestep},
+                                 {"left_shoulder_pitch_sensor", sensor_timestep},
+                                 {"right_shoulder_roll_sensor", sensor_timestep},
+                                 {"right_shoulder_pitch_sensor", sensor_timestep},
+                                 {"neck_yaw_sensor", sensor_timestep},
+                                 {"head_pitch_sensor", sensor_timestep},
+                                 {"accelerometer", sensor_timestep},
+                                 {"gyroscope", sensor_timestep},
+                                 //  {"right_camera", camera_timestep},
+                                 {"left_camera", camera_timestep},
+                                 {"right_touch_sensor_br", sensor_timestep},
+                                 {"right_touch_sensor_bl", sensor_timestep},
+                                 {"right_touch_sensor_fl", sensor_timestep},
+                                 {"right_touch_sensor_fr", sensor_timestep},
+                                 {"left_touch_sensor_br", sensor_timestep},
+                                 {"left_touch_sensor_bl", sensor_timestep},
+                                 {"left_touch_sensor_fl", sensor_timestep},
+                                 {"left_touch_sensor_fr", sensor_timestep}};
 
         return msg;
     }
 
-    int Webots::tcpip_connect(const std::string& server_name, const std::string& port) {
+    int Webots::tcpip_connect() {
         // Hints for the connection type
         addrinfo hints;
         memset(&hints, 0, sizeof(addrinfo));  // Defaults on what we do not explicitly set
@@ -175,10 +182,10 @@ namespace module::platform {
         // Store the ip address information that we will connect to
         addrinfo* address;
 
-        int error;
-        if ((error = getaddrinfo(server_name.c_str(), port.c_str(), &hints, &address)) != 0) {
+        const int error = getaddrinfo(server_address.c_str(), server_port.c_str(), &hints, &address);
+        if (error != 0) {
             log<NUClear::ERROR>(fmt::format("Cannot resolve server name: {}. Error {}. Error code {}",
-                                            server_name,
+                                            server_address,
                                             gai_strerror(error),
                                             error));
             return -1;
@@ -186,41 +193,36 @@ namespace module::platform {
 
         // Loop through the linked list of potential options for connecting. In order of best to worst.
         for (addrinfo* addr_ptr = address; addr_ptr != NULL; addr_ptr = addr_ptr->ai_next) {
-            int fd = socket(addr_ptr->ai_family, addr_ptr->ai_socktype, addr_ptr->ai_protocol);
+            const int fd_temp = socket(addr_ptr->ai_family, addr_ptr->ai_socktype, addr_ptr->ai_protocol);
 
-            if (fd == -1) {
+            if (fd_temp == -1) {
                 // Bad fd
                 continue;
             }
-            else if (connect(fd, addr_ptr->ai_addr, addr_ptr->ai_addrlen) != -1) {
+            else if (connect(fd_temp, addr_ptr->ai_addr, addr_ptr->ai_addrlen) != -1) {
                 // Connection successful
                 freeaddrinfo(address);
-                return fd;
+                return fd_temp;
             }
             // Connection was not successful
-            close(fd);
+            close(fd_temp);
         }
 
         // No connection was successful
         freeaddrinfo(address);
-        log<NUClear::ERROR>(fmt::format("Cannot connect to server: {}:{}", server_name, port));
+        log<NUClear::ERROR>(fmt::format("Cannot connect to server: {}:{}", server_address, server_port));
         return -1;
     }
 
     Webots::Webots(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
         on<Configuration>("webots.yaml").then([this](const Configuration& config) {
             // Use configuration here from file webots.yaml
-            time_step = config["time_step"].as<int>();
+            time_step            = config["time_step"].as<int>();
+            min_camera_time_step = config["min_camera_time_step"].as<int>();
+            min_sensor_time_step = config["min_sensor_time_step"].as<int>();
+            max_velocity         = config["max_velocity"].as<double>();
 
-            // clang-format off
-            auto lvl = config["log_level"].as<std::string>();
-            if      (lvl == "TRACE") { this->log_level = NUClear::TRACE; }
-            else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
-            else if (lvl == "INFO")  { this->log_level = NUClear::INFO; }
-            else if (lvl == "WARN")  { this->log_level = NUClear::WARN; }
-            else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
-            else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
-            // clang-format on
+            this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
             clock_smoothing = config["clock_smoothing"].as<double>();
 
@@ -229,15 +231,12 @@ namespace module::platform {
 
             on<Watchdog<Webots, 30, std::chrono::seconds>, Sync<Webots>>().then([this, config] {
                 // We haven't received any messages lately
-                log<NUClear::ERROR>("Connection timed out.");
-                setup_connection(config["server_address"].as<std::string>(), config["port"].as<std::string>());
+                log<NUClear::WARN>("Connection timed out. Attempting reconnect");
+                setup_connection();
             });
 
-            // Prime this reaction, so when only one ServoTargets is present, at least we have the other
-            emit(std::make_unique<RawSensors>());
-
             // Connect to the server
-            setup_connection(config["server_address"].as<std::string>(), config["port"].as<std::string>());
+            setup_connection();
         });
 
         // This trigger updates our current servo state
@@ -245,18 +244,22 @@ namespace module::platform {
                                                                   const RawSensors& sensors) {
             // Loop through each of our commands
             for (const auto& target : targets.targets) {
+                // Get the difference between the current servo position and our servo target
                 const double diff = utility::math::angle::difference(
                     double(target.position),
                     utility::platform::getRawServo(target.id, sensors).present_position);
-
+                // Get the difference between the current time and the time the servo should reach its target
                 NUClear::clock::duration duration = target.time - NUClear::clock::now();
-                double speed                      = 0.0;
-                // If the clock has moved forward since the last update, then we can have a non-zero speed
-                if (duration.count() > 0) {
-                    speed = diff / std::chrono::duration_cast<std::chrono::duration<double>>(duration).count();
-                }
 
-                // Update our internal state
+                // If we have a positive duration, find the velocity.
+                // Otherwise, if the duration is negative or 0, the servo should have reached its position before now
+                // Because of this, we move the servo as fast as we can to reach the position.
+                // The fastest speed is determined by the config, which comes from the max servo velocity from
+                // NUgus.proto in Webots
+                double speed =
+                    duration.count() > 0 ? diff / std::chrono::duration<double>(duration).count() : max_velocity;
+                speed = std::min(max_velocity, speed);
+                // Update our internal state if anything has changed for this servo
                 if (servo_state[target.id].p_gain != target.gain || servo_state[target.id].i_gain != target.gain * 0.0
                     || servo_state[target.id].d_gain != target.gain * 0.0
                     || servo_state[target.id].moving_speed != speed
@@ -297,58 +300,31 @@ namespace module::platform {
         });
     }
 
-    void Webots::setup_connection(const std::string& server_address, const std::string& port) {
-        // Unbind any previous reaction handles
-        read_io.unbind();
-        send_io.unbind();
-        error_io.unbind();
+    void Webots::setup_connection() {
+        // This will return false if a reconnection is not currently in progress
+        if (!active_reconnect.exchange(true)) {
+            connection_active = false;
 
-        if (fd != -1) {
-            // Disconnect the fd gracefully
-            shutdown(fd, SHUT_RDWR);
-            close(fd);
-        }
+            // Unbind any previous reaction handles
+            read_io.unbind();
+            send_io.unbind();
+            error_io.unbind();
+            buffer.clear();
 
-        fd = tcpip_connect(server_address, port);
-
-        if (fd == -1) {
-            // Connection failed
-            // TODO(Cameron) Try to reconnect after a delay.
-            // setup_connection(server_address, port);
-            log<NUClear::FATAL>("Quitting due to failed connection attempt");
-            powerplant.shutdown();
-            return;
-        }
-
-        // Initialise the string with ???????
-        std::string initial_message = std::string(7, '?');
-        const int n                 = recv(fd, initial_message.data(), sizeof(initial_message), MSG_WAITALL);
-
-        if (n >= 0) {
-            if (initial_message == "Welcome") {
-                // good
-                log<NUClear::INFO>(fmt::format("Connected to {}:{}", server_address, port));
-            }
-            else if (initial_message == "Refused") {
-                log<NUClear::FATAL>(
-                    fmt::format("Connection to {}:{} refused: your ip is not white listed.", server_address, port));
-                // Halt and don't retry as reconnection is pointless.
+            if (fd != -1) {
+                // Disconnect the fd gracefully
+                shutdown(fd, SHUT_RDWR);
                 close(fd);
-                powerplant.shutdown();
             }
-            else {
-                log<NUClear::FATAL>(fmt::format("{}:{} sent unknown initial message", server_address, port));
-                // Halt and don't retry as the other end is clearly not Webots
-                close(fd);
-                powerplant.shutdown();
+
+            fd = tcpip_connect();
+
+            if (fd == -1) {
+                // Connection failed
+                log<NUClear::ERROR>("Failed to connect to server.");
+                active_reconnect.store(false);
+                return;
             }
-        }
-        else {
-            // There was nothing sent
-            log<NUClear::DEBUG>("Connection was closed.");
-            setup_connection(server_address, port);
-            return;
-        }
 
             // Receiving
             read_io =
@@ -468,45 +444,73 @@ namespace module::platform {
                         // Create servo position message
                         actuator_requests.motor_positions.emplace_back(MotorPosition(servo.name, servo.goal_position));
 
-                        // Create servo velocity message
-                        actuator_requests.motor_velocities.emplace_back(MotorVelocity(servo.name, servo.moving_speed));
+                            // Create servo position message
+                            actuator_requests.motor_positions.emplace_back(
+                                MotorPosition(servo.name, servo.goal_position));
 
-                        // TODO: Add FSRs message
+                            // Create servo velocity message
+                            actuator_requests.motor_velocities.emplace_back(
+                                MotorVelocity(servo.name, servo.moving_speed));
 
-                        // Create servo PID message
-                        actuator_requests.motor_pids.emplace_back(
-                            MotorPID(servo.name, {servo.p_gain, servo.i_gain, servo.d_gain}));
+                            // Create servo PID message
+                            actuator_requests.motor_pids.emplace_back(
+                                MotorPID(servo.name, {servo.p_gain, servo.i_gain, servo.d_gain}));
+                        }
                     }
-                }
 
-                // Serialise ActuatorRequests
-                std::vector<char> data =
-                    NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(actuator_requests);
+                    // Serialise ActuatorRequests
+                    std::vector<char> data =
+                        NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(actuator_requests);
 
-                // Size of the message, in network endian
-                const uint32_t Nn = htonl(data.size());
+                    // Size of the message, in network endian
+                    const uint32_t Nn = htonl(data.size());
 
-                // Send the message size first
-                if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
-                    log<NUClear::ERROR>(
-                        fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
-                }
+                    // Only send actuator requests if we are connected to the controller
+                    if (connection_active) {
+                        // Send the message size first
+                        if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
+                            log<NUClear::ERROR>(
+                                fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
+                        }
 
-                // Now send the data
-                if (send(fd, data.data(), data.size(), 0) != int(data.size())) {
-                    log<NUClear::ERROR>(fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
-                }
 
-                log<NUClear::TRACE>("Sending actuator request.");
-            });
+                        // Now send the data
+                        if (send(fd, data.data(), data.size(), 0) != int(data.size())) {
+                            log<NUClear::ERROR>(
+                                fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
+                        }
+                        log<NUClear::TRACE>("Sending actuator request.");
+                    }
+                });
 
-        error_io = on<IO>(fd, IO::CLOSE | IO::ERROR).then([this, server_address, port](const IO::Event& /*event*/) {
-            // Something went wrong, reopen the connection
-            setup_connection(server_address, port);
-        });
+            // Reconnection has now completed
+            active_reconnect.store(false);
+        }
     }
 
     void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurements) {
+        // ****************************** TIME **************************************
+        // Deal with time first
+
+        // Save our previous deltas
+        const uint32_t prev_sim_delta  = sim_delta;
+        const uint64_t prev_real_delta = real_delta;
+
+        // Update our current deltas
+        real_delta = sensor_measurements.real_time - current_real_time;
+        sim_delta  = sensor_measurements.time - current_sim_time;
+
+        // Calculate our custom rtf - the ratio of the past two sim deltas and the past two real time deltas, smoothed
+        const double ratio =
+            static_cast<double>(sim_delta + prev_sim_delta) / static_cast<double>(real_delta + prev_real_delta);
+        // Exponential filter to do the smoothing
+        utility::clock::custom_rtf = utility::clock::custom_rtf * clock_smoothing + (1.0 - clock_smoothing) * ratio;
+
+        // Update our current times
+        current_sim_time  = sensor_measurements.time;
+        current_real_time = sensor_measurements.real_time;
+
+        // ************************* DEBUGGING LOGS *********************************
         log<NUClear::TRACE>("received SensorMeasurements:");
         log<NUClear::TRACE>("  sm.time:", sensor_measurements.time);
         log<NUClear::TRACE>("  sm.real_time:", sensor_measurements.real_time);
@@ -598,45 +602,74 @@ namespace module::platform {
             }
         }
 
+        // Only emit RawSensors if there is any data!
+        if (!(sensor_measurements.position_sensors.size() == 0 && sensor_measurements.accelerometers.size() == 0
+              && sensor_measurements.bumpers.size() == 0 && sensor_measurements.gyros.size() == 0)) {
 
-        // Read each field of msg, translate it to our protobuf and emit the data
-        auto sensor_data = std::make_unique<RawSensors>();
 
-        sensor_data->timestamp = NUClear::clock::now();
+            // Read each field of msg, translate it to our protobuf and emit the data
+            auto sensor_data = std::make_unique<RawSensors>();
 
-        for (const auto& position : sensor_measurements.position_sensors) {
-            translate_servo_id(position.name, sensor_data->servo).present_position = position.value;
+            sensor_data->timestamp = NUClear::clock::now();
+
+            for (const auto& position : sensor_measurements.position_sensors) {
+                translate_servo_id(position.name, sensor_data->servo).present_position = position.value;
+            }
+
+            if (sensor_measurements.accelerometers.size() > 0) {
+                // .accelerometers is a list of one, since our robots have only one accelerometer
+                const auto& accelerometer = sensor_measurements.accelerometers[0];
+                // Webots has a strictly positive output for the accelerometers. We minus 100 to center the output over
+                // 0 The value 100.0 is based on the Look-up Table from NUgus.proto and should be kept consistent with
+                // that
+                sensor_data->accelerometer.x = static_cast<float>(accelerometer.value.X) - 100.0f;
+                sensor_data->accelerometer.y = static_cast<float>(accelerometer.value.Y) - 100.0f;
+                sensor_data->accelerometer.z = static_cast<float>(accelerometer.value.Z) - 100.0f;
+            }
+
+            if (sensor_measurements.gyros.size() > 0) {
+                // .gyros is a list of one, since our robots have only one gyroscope
+                const auto& gyro = sensor_measurements.gyros[0];
+                // Webots has a strictly positive output for the gyros. We minus 100 to center the output over 0
+                // The value 100.0 is based on the Look-up Table from NUgus.proto and should be kept consistent with
+                // that
+                sensor_data->gyroscope.x = static_cast<float>(gyro.value.X) - 100.0f;
+                sensor_data->gyroscope.y = static_cast<float>(gyro.value.Y) - 100.0f;
+                sensor_data->gyroscope.z = static_cast<float>(gyro.value.Z) - 100.0f;
+            }
+
+            for (const auto& bumper : sensor_measurements.bumpers) {
+                // We should have eight bumper sensors
+                // Right foot
+                if (bumper.name == "right_touch_sensor_br") {
+                    sensor_data->fsr.right.fsr1 = bumper.value;
+                }
+                else if (bumper.name == "right_touch_sensor_bl") {
+                    sensor_data->fsr.right.fsr2 = bumper.value;
+                }
+                else if (bumper.name == "right_touch_sensor_fl") {
+                    sensor_data->fsr.right.fsr3 = bumper.value;
+                }
+                else if (bumper.name == "right_touch_sensor_fr") {
+                    sensor_data->fsr.right.fsr4 = bumper.value;
+                }
+                // Left foot
+                else if (bumper.name == "left_touch_sensor_br") {
+                    sensor_data->fsr.left.fsr1 = bumper.value;
+                }
+                else if (bumper.name == "left_touch_sensor_bl") {
+                    sensor_data->fsr.left.fsr2 = bumper.value;
+                }
+                else if (bumper.name == "left_touch_sensor_fl") {
+                    sensor_data->fsr.left.fsr3 = bumper.value;
+                }
+                else if (bumper.name == "left_touch_sensor_fr") {
+                    sensor_data->fsr.left.fsr4 = bumper.value;
+                }
+            }
+
+            emit(sensor_data);
         }
-
-        if (sensor_measurements.accelerometers.size() > 0) {
-            // .accelerometers is a list of one, since our robots have only one accelerometer
-            const auto& accelerometer = sensor_measurements.accelerometers[0];
-            // Webots has a strictly positive output for the accelerometers. We minus 100 to center the output over 0
-            // The value 100.0 is based on the Look-up Table from NUgus.proto and should be kept consistent with that
-            sensor_data->accelerometer.x = static_cast<float>(accelerometer.value.X) - 100.0f;
-            sensor_data->accelerometer.y = static_cast<float>(accelerometer.value.Y) - 100.0f;
-            sensor_data->accelerometer.z = static_cast<float>(accelerometer.value.Z) - 100.0f;
-        }
-
-        if (sensor_measurements.gyros.size() > 0) {
-            // .gyros is a list of one, since our robots have only one gyroscope
-            const auto& gyro = sensor_measurements.gyros[0];
-            // Webots has a strictly positive output for the gyros. We minus 100 to center the output over 0
-            // The value 100.0 is based on the Look-up Table from NUgus.proto and should be kept consistent with that
-            sensor_data->gyroscope.x = static_cast<float>(gyro.value.X) - 100.0f;
-            sensor_data->gyroscope.y = static_cast<float>(gyro.value.Y) - 100.0f;
-            sensor_data->gyroscope.z = static_cast<float>(gyro.value.Z) - 100.0f;
-        }
-
-        // TODO Implement fsrs
-        /*
-        for (const auto& bumper : sensor_measurements.bumpers) {
-            // string name
-            // bool value
-        }
-        */
-
-        emit(sensor_data);
 
         for (const auto& camera : sensor_measurements.cameras) {
             // Convert the incoming image so we can emit it to the PowerPlant.
@@ -649,25 +682,5 @@ namespace module::platform {
             image->data           = camera.image;
             emit(image);
         }
-
-        // ****************************** TIME **************************************
-
-        // Deal with time
-
-        // Save our previous deltas
-        const uint32_t prev_sim_delta  = sim_delta;
-        const uint32_t prev_real_delta = real_delta;
-
-        // Update our current deltas
-        sim_delta  = sensor_measurements.time - current_sim_time;
-        real_delta = sensor_measurements.real_time - current_real_time;
-
-        // Calculate our custom rtf - the ratio of the past two sim deltas and the past two real time deltas
-        utility::clock::custom_rtf =
-            static_cast<double>(sim_delta + prev_sim_delta) / static_cast<double>(real_delta + prev_real_delta);
-
-        // Update our current times
-        current_sim_time  = sensor_measurements.time;
-        current_real_time = sensor_measurements.real_time;
     }
 }  // namespace module::platform

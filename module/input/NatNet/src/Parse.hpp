@@ -158,7 +158,7 @@ namespace module::input {
 
             // Version specific information
             rigidBody.error = version >= 0x02000000 ? ReadData<float>::read(ptr, version) : -1;
-            rigidBody.trackingValid =
+            rigidBody.tracking_valid =
                 version >= 0x02060000 ? (ReadData<short>::read(ptr, version) & 0x01) == 0x01 : true;
 
             return rigidBody;
@@ -191,15 +191,15 @@ namespace module::input {
             marker.marker.size     = ReadData<float>::read(ptr, version);
 
             if (version >= 0x02060000) {
-                short params            = ReadData<short>::read(ptr, version);
-                marker.occluded         = (params & 0x01) == 0x01;
-                marker.pointCloudSolved = (params & 0x02) == 0x02;
-                marker.modelSolved      = (params & 0x04) == 0x04;
+                short params              = ReadData<short>::read(ptr, version);
+                marker.occluded           = (params & 0x01) == 0x01;
+                marker.point_cloud_solved = (params & 0x02) == 0x02;
+                marker.model_solved       = (params & 0x04) == 0x04;
             }
             else {
-                marker.occluded         = false;
-                marker.pointCloudSolved = false;
-                marker.modelSolved      = false;
+                marker.occluded           = false;
+                marker.point_cloud_solved = false;
+                marker.model_solved       = false;
             }
 
             return marker;

@@ -48,8 +48,6 @@ namespace module::vision {
     using utility::math::coordinates::cartesianToSpherical;
     using utility::support::Expression;
 
-    static constexpr int GOAL_INDEX = 1;
-
     GoalDetector::GoalDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         // Trigger the same function when either update
@@ -70,6 +68,7 @@ namespace module::vision {
                 const auto& neighbours                              = horizon.mesh->neighbourhood;
                 const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = horizon.mesh->rays;
                 const float world_offset                            = std::atan2(horizon.Hcw(0, 1), horizon.Hcw(0, 0));
+                const int GOAL_INDEX                                = horizon.class_map.at("goal");
 
                 // Get some indices to partition
                 std::vector<int> indices(horizon.mesh->indices.size());
@@ -118,7 +117,8 @@ namespace module::vision {
                 clusters.resize(std::distance(clusters.begin(), green_boundary));
 
                 if (config.debug) {
-                    log<NUClear::DEBUG>(fmt::format("Found {} clusters below green horizon", clusters.size()));
+                    log<NUClear::DEBUG>(
+                        fmt::format("Found {} clusters that intersect the green horizon", clusters.size()));
                 }
 
                 if (clusters.size() > 0) {
@@ -141,7 +141,7 @@ namespace module::vision {
                                 return idx == int(indices.size())
                                        || (cls(GOAL_INDEX, idx) >= config.confidence_threshold);
                             },
-                            {2});
+                            {0});
                         // Return true if the right neighbour is NOT a goal point
                         auto other = utility::vision::visualmesh::partition_points(
                             right,
