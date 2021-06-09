@@ -30,10 +30,10 @@ COPY ./nugus_sim/run.py .
 
 # Make sure /usr/local is checked for libraries and binaries
 COPY /etc/ld.so.conf.d/usrlocal.conf /etc/ld.so.conf.d/usrlocal.conf
-RUN ldconfig
 
 # Make a symlink from /usr/local/lib to /usr/local/lib64 so library install location is irrelevant
 RUN cd /usr/local && ln -sf lib lib64
+RUN ldconfig
 
 # Allow terminal to work
 ENV TERM xterm
