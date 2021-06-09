@@ -27,9 +27,20 @@ namespace module::extension {
                 : type(type), reaction(reaction) {}
         };
 
+        /**
+         * @brief Adds a provider for a type if it does not already exist
+         * @param data_type The type_index of the data type to provide for
+         * @param r The reaction that will be run to provide
+         * @throws std::runtime_error when there is more than one Provides in an on statement
+         */
         void add_provider(const std::type_index& data_type,
                           const std::shared_ptr<NUClear::threading::Reaction>& r,
                           const Provider::Type& provider_type);
+        /**
+         * @brief Removes a provider for a type if it exists
+         * @param The id of the reaction we want to remove providers for
+         * @throws std::runtime_error when the reaction does not provide anything
+         */
         void remove_provider(const uint64_t& id);
 
     public:
@@ -38,6 +49,7 @@ namespace module::extension {
 
     private:
         std::multimap<std::type_index, Provider> providers;
+        /// @brief Maps a Reaction::id to what it provides
         std::map<uint64_t, std::multimap<std::type_index, Provider>::iterator> reactions;
     };
 

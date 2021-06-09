@@ -20,7 +20,7 @@ namespace module {
                                     const std::shared_ptr<Reaction>& r,
                                     const Provider::Type& provider_type) {
 
-            // Find our specific item
+            // Look for our specific item
             auto range = providers.equal_range(data_type);
             auto it    = std::find_if(range.first, range.second, [&](auto item) { return item.second.reaction == r; });
 
@@ -49,7 +49,7 @@ namespace module {
 
         Director::Director(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-            // Remove a provider
+            // Removes all the providers for a reaction when it is unbound
             on<Trigger<Unbind>>().then([this](const Unbind& unbind) {  //
                 remove_provider(unbind.id);
             });
