@@ -376,17 +376,6 @@ namespace module::platform {
                                 utility::clock::last_update = NUClear::base_clock::now();
 
                                 connection_active = true;
-
-                                // Clear socket && buffer
-                                unsigned long available = 0;
-                                if (::ioctl(fd, FIONREAD, &available) < 0) {
-                                    log<NUClear::ERROR>(
-                                        fmt::format("Error querying for available data, {}", strerror(errno)));
-                                    return;
-                                }
-                                const size_t old_size = buffer.size();
-                                ::read(fd, buffer.data() + old_size, available);
-                                buffer.clear();
                             }
                             else {
                                 // Work out how many bytes are available to read in the buffer and ensure we have enough
