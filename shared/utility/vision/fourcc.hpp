@@ -15,8 +15,7 @@ namespace utility::vision {
         return {static_cast<char>((v >> 0) & 0xFF),
                 static_cast<char>((v >> 8) & 0xFF),
                 static_cast<char>((v >> 16) & 0xFF),
-                static_cast<char>((v >> 24) & 0xFF),
-                0};
+                static_cast<char>((v >> 24) & 0xFF)};
     }
 
 }  // namespace utility::vision
