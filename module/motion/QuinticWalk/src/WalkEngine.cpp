@@ -31,7 +31,7 @@ namespace module::motion {
         , trunk_axis_acc_at_last()
         , trajs() {
         // Make sure to call the reset method after having the parameters
-        TrajectoriesInit(trajs);
+        trajectoriesInit(trajs);
     }
 
     bool QuinticWalkEngine::updateState(const float dt, const Eigen::Vector3f& orders) {
@@ -300,7 +300,7 @@ namespace module::motion {
         }
 
         // Reset the trajectories
-        TrajectoriesInit(trajs);
+        trajectoriesInit(trajs);
 
         // full period (float step) is needed for trunk splines
         float period = 2.0f * half_period;
@@ -538,7 +538,7 @@ namespace module::motion {
         foot_step.stepFromOrders(orders);
 
         // Reset the trajectories
-        TrajectoriesInit(trajs);
+        trajectoriesInit(trajs);
 
         // Time length of float and single support phase during the half cycle
         float doubleSupportLength = params.double_support_ratio * half_period;
@@ -687,9 +687,9 @@ namespace module::motion {
 
     QuinticWalkEngine::PositionSupportTuple QuinticWalkEngine::computeCartesianPositionAtTime(const float time) const {
         // Evaluate target cartesian state from trajectories
-        const auto [trunkPos, trunkAxis, footPos, footAxis] = TrajectoriesTrunkFootPos(time, trajs);
+        const auto [trunkPos, trunkAxis, footPos, footAxis] = trajectoriesTrunkFootPos(time, trajs);
         // Discard isDoubleSupport because we don't use it
-        const auto [_, isLeftSupportFoot] = TrajectoriesSupportFootState(time, trajs);
+        const auto [_, isLeftSupportFoot] = trajectoriesSupportFootState(time, trajs);
         return {trunkPos, trunkAxis, footPos, footAxis, isLeftSupportFoot};
     }
 
