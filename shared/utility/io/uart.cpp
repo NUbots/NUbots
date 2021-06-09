@@ -137,7 +137,7 @@ namespace utility::io {
             }
 
             // Set the speed flags to "Custom Speed" (clear the existing speed, and set the custom speed flags)
-            serinfo.flags &= ~ASYNC_SPD_MASK;
+            serinfo.flags &= int(~ASYNC_SPD_MASK);
             serinfo.flags |= ASYNC_SPD_CUST;
 
             // Set our serial port to use low latency mode (otherwise the USB driver buffers for 16ms before sending
