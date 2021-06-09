@@ -50,22 +50,38 @@ namespace extension::behaviour {
             int resulting_state;
         };
 
+        struct ProviderDone {
+            ProviderDone(uint64_t requester_id, uint64_t requester_task_id)
+                : requester_id(requester_id), requester_task_id(requester_task_id) {}
+
+            uint64_t reaction_id;
+            uint64_t requester_task_id;
+        };
+
         struct DirectorTask {
             DirectorTask(std::type_index type,
                          uint64_t requester_id,
+                         uint64_t requester_task_id,
                          std::shared_ptr<void> command,
                          int priority,
                          const std::string& name)
-                : type(type), requester_id(requester_id), command(command), priority(priority), name(name) {}
+                : type(type)
+                , requester_id(requester_id)
+                , requester_task_id(requester_task_id)
+                , command(command)
+                , priority(priority)
+                , name(name) {}
+
             std::type_index type;
             uint64_t requester_id;
+            uint64_t requester_task_id;
             std::shared_ptr<void> command;
             int priority;
             std::string name;
         };
 
         template <typename T>
-        struct DirectorGet {
+        struct ProviderBase {
 
             template <typename DSL>
             static inline std::shared_ptr<T> get(NUClear::threading::Reaction& t) {
@@ -78,6 +94,13 @@ namespace extension::behaviour {
 
                 // TODO get the instance of the task command data from the director
                 return nullptr;
+            }
+
+            template <typename DSL>
+            static inline void postcondition(NUClear::threading::ReactionTask& task) {
+
+                // Take the task id and send it to the director to let it know that this provider is done
+                emit(std::make_unique<ProviderDone>(task.parent.id, task.id));
             }
         };
     }  // namespace commands
@@ -174,6 +197,9 @@ namespace extension::behaviour {
         template <typename DSL>
         static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
 
+            // TODO add a reaction for this type so that the director is able to react to this state changing
+            // on<Trigger<State>>().then([](const State& state){ let_the_director_know(); })
+
             // Tell the director about this when condition
             reaction->reactor.powerplant.emit(std::make_unique<commands::WhenExpression>(
                 reaction,
@@ -225,8 +251,8 @@ namespace extension::behaviour {
     struct Task {
 
         /**
-         * This is a special task that should be emitted when a module finishes the task that it was given. When
-         * this is emitted the director will re-execute the provider which caused this task to run.
+         * This is a special task that should be emitted when a provider finishes the task it was given.
+         * When this is emitted the director will re-execute the provider which caused this task to run.
          *
          * ```
          * emit<Task>(std::make_unique<Task::Done>());
@@ -240,12 +266,13 @@ namespace extension::behaviour {
                          const std::string& name = "") {
 
             // Work out who is sending the task so we can determine if it's a subtask
-            auto* task  = NUClear::threading::ReactionTask::get_current_task();
-            uint64_t id = task ? task->parent.id : -1;
+            auto* task           = NUClear::threading::ReactionTask::get_current_task();
+            uint64_t reaction_id = task ? task->parent.id : -1;
+            uint64_t task_id     = task ? task->id : -1;
 
             NUClear::dsl::word::emit::Direct<T>::emit(
                 powerplant,
-                std::make_shared<commands::DirectorTask>(typeid(T), id, data, priority, name));
+                std::make_shared<commands::DirectorTask>(typeid(T), reaction_id, task_id, data, priority, name));
         }
     };
 

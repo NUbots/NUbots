@@ -30,7 +30,8 @@ namespace module {
                 reactions.insert(std::make_pair(r->id, it));
             }
             else {
-                throw std::runtime_error("There cannot be multiple provider statements in a single on statement.");
+                throw std::runtime_error(
+                    "You cannot have multiple provider DSL words (Provides, Entering, Leaving) in a single statement.");
             }
         }
 
@@ -94,6 +95,30 @@ namespace module {
             });
 
             on<Trigger<DirectorTask>>().then([this](const DirectorTask& task) {
+                // Check if this is a root level task
+                if (reactions.count(task.requester_id) == 0) {
+                    // TODO root level task, make the TaskPack immediately and send it off to be executed as a root task
+                }
+                // Check if this provider is active and allowed to make subtasks
+                else if (task_is_from_an_active_provider) {
+                    // TODO add this task to a list and wait for the ProviderDone event to be emitted for this provider
+                }
+                else {
+                    // Throw an error so the user can see what a fool they are being
+                    throw std::runtime_error(
+                        "The task {} cannot be executed as the provider {} is not active and cannot make subtasks",
+                        task.name,
+                        active_provider_name);
+                }
+            });
+
+            on<Trigger<ProviderDone>>().then([this](const ProviderDone& done) {
+                // TODO this reaction task id has been completed, any tasks that it emitted are ready to be bundled into
+                // a pack and emitted for the main loop
+            });
+
+            // We do things when we receive tasks to run
+            on<Trigger<TaskPack>>().then([this](const DirectorTask& task) {
                 // We should have a current state tree (which initially may be empty), a transitional state tree and a
                 // new state tree. The current state tree represents what was last executed.
                 //
