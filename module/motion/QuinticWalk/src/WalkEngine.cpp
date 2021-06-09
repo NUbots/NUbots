@@ -679,15 +679,13 @@ namespace module::motion {
         trunk_axis_acc_at_last.setZero();
     }
 
-    using PositionSupportTuple = std::tuple<Eigen::Vector3f, Eigen::Vector3f, Eigen::Vector3f, Eigen::Vector3f, bool>;
-
-    PositionSupportTuple QuinticWalkEngine::computeCartesianPosition() const {
+    QuinticWalkEngine::PositionSupportTuple QuinticWalkEngine::computeCartesianPosition() const {
         // Compute trajectories time
         const float time = getTrajsTime();
         return computeCartesianPositionAtTime(time);
     }
 
-    PositionSupportTuple QuinticWalkEngine::computeCartesianPositionAtTime(const float time) const {
+    QuinticWalkEngine::PositionSupportTuple QuinticWalkEngine::computeCartesianPositionAtTime(const float time) const {
         // Evaluate target cartesian state from trajectories
         const auto [trunkPos, trunkAxis, footPos, footAxis] = TrajectoriesTrunkFootPos(time, trajs);
         // Discard isDoubleSupport because we don't use it
