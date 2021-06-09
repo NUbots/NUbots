@@ -107,16 +107,15 @@ namespace module::motion {
      */
     class QuinticWalkEngine {
     public:
-        /**
-         * Initialization
-         */
-        QuinticWalkEngine();
+        QuinticWalkEngine() {
+            trajectoriesInit(trajs);
+        };
 
         /**
          * Return current walk phase
          * between 0 and 1
          */
-        constexpr float getPhase() const {
+        [[nodiscard]] constexpr float getPhase() const {
             return phase;
         }
 
@@ -125,28 +124,28 @@ namespace module::motion {
          * 0 and half period for
          * trajectories evaluation
          */
-        constexpr float getTrajsTime() const {
+        [[nodiscard]] constexpr float getTrajsTime() const {
             return phase < 0.5f ? phase / params.freq : (phase - 0.5f) / params.freq;
         }
 
         /**
          * Get the footstep object.
          */
-        Footstep getFootstep() {
+        [[nodiscard]] Footstep getFootstep() {
             return foot_step;
         }
 
         /**
          * Return if true if left is current support foot
          */
-        constexpr bool isLeftSupport() {
+        [[nodiscard]] constexpr bool isLeftSupport() {
             return foot_step.isLeftSupport();
         }
 
         /**
          * Return true if both feet are currently on the ground
          */
-        constexpr bool isDoubleSupport() {
+        [[nodiscard]] constexpr bool isDoubleSupport() {
             // returns true if the value of the "is_float_support" spline is currently higher than 0.5
             // the spline should only have values of 0 or 1
             return trajs.get(TrajectoryTypes::IS_DOUBLE_SUPPORT).pos(getTrajsTime()) >= 0.5f;
@@ -208,54 +207,54 @@ namespace module::motion {
          */
         void reset();
 
-        constexpr WalkEngineState getState() {
+        [[nodiscard]] constexpr WalkEngineState getState() {
             return engine_state;
         }
 
     private:
-        WalkEngineState engine_state;
+        WalkEngineState engine_state{};
 
         /**
          * Current footstep support
          * and flying last and next pose
          */
-        Footstep foot_step;
+        Footstep foot_step = Footstep(0.14f, true);
 
         /**
          * Movement phase between 0 and 1
          */
-        float phase;
-        float last_phase;
+        float phase      = 0.0f;
+        float last_phase = 0.0f;
 
-        float time_paused;
+        float time_paused = 0.0f;
 
         /**
          * Currently used parameters
          */
-        WalkingParameter params;
-        float half_period;
+        WalkingParameter params{};
+        float half_period = 0.0f;
 
-        bool left_kick_requested;
-        bool right_kick_requested;
-        bool pause_requested;
+        bool left_kick_requested  = false;
+        bool right_kick_requested = false;
+        bool pause_requested      = false;
 
         /**
          * Trunk pose and orientation
          * position, velocity and acceleration
          * at half cycle start
          */
-        Eigen::Vector3f trunk_pos_at_last;
-        Eigen::Vector3f trunk_vel_at_last;
-        Eigen::Vector3f trunk_acc_at_last;
-        Eigen::Vector3f trunk_axis_pos_at_last;
-        Eigen::Vector3f trunk_axis_vel_at_last;
-        Eigen::Vector3f trunk_axis_acc_at_last;
+        Eigen::Vector3f trunk_pos_at_last      = Eigen::Vector3f::Zero();
+        Eigen::Vector3f trunk_vel_at_last      = Eigen::Vector3f::Zero();
+        Eigen::Vector3f trunk_acc_at_last      = Eigen::Vector3f::Zero();
+        Eigen::Vector3f trunk_axis_pos_at_last = Eigen::Vector3f::Zero();
+        Eigen::Vector3f trunk_axis_vel_at_last = Eigen::Vector3f::Zero();
+        Eigen::Vector3f trunk_axis_acc_at_last = Eigen::Vector3f::Zero();
 
         /**
          * Generated half walk
          * cycle trajectory
          */
-        Trajectories trajs;
+        Trajectories trajs{};
 
         void updatePhase(const float& dt);
 

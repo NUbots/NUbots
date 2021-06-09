@@ -106,15 +106,15 @@ namespace utility::motion::splines {
         /**
          * Pose diff [dx, dy, dtheta] from support foot to flying foot last and next position
          */
-        Eigen::Vector3f support_to_last;
-        Eigen::Vector3f support_to_next;
+        Eigen::Vector3f support_to_last = Eigen::Vector3f::Zero();
+        Eigen::Vector3f support_to_next = Eigen::Vector3f::Zero();
 
         /**
          * Pose integration of left and right foot in initial frame.
          * Set at "future" state taking into account next expected fot pose.
          */
-        Eigen::Vector3f left_in_world;
-        Eigen::Vector3f right_in_world;
+        Eigen::Vector3f left_in_world  = Eigen::Vector3f::Zero();
+        Eigen::Vector3f right_in_world = Eigen::Vector3f::Zero();
     };
 
 }  // namespace utility::motion::splines

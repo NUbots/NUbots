@@ -33,7 +33,7 @@ namespace utility::motion::splines {
         /**
          * Return the number of contained splines
          */
-        constexpr size_t size() const {
+        [[nodiscard]] constexpr size_t size() const {
             return container.size();
         }
 
@@ -64,21 +64,21 @@ namespace utility::motion::splines {
         /**
          * Return true if given spline name is contained
          */
-        constexpr bool exist(const U& name) const {
+        [[nodiscard]] constexpr bool exist(const U& name) const {
             return container.count(name) > 0;
         }
 
         /**
          * Access to given named spline
          */
-        constexpr const T& get(const U& name) const {
+        [[nodiscard]] constexpr const T& get(const U& name) const {
             if (container.count(name) == 0) {
                 throw std::logic_error(fmt::format("SplineContainer invalid name: {}", std::string(name)));
             }
             return container.at(name);
         }
 
-        constexpr T& get(const U& name) {
+        [[nodiscard]] constexpr T& get(const U& name) {
             if (container.count(name) == 0) {
                 throw std::logic_error(fmt::format("SplineContainer invalid name: {}", std::string(name)));
             }
@@ -88,18 +88,18 @@ namespace utility::motion::splines {
         /**
          * Access to internal map container
          */
-        constexpr const Map& get() const {
+        [[nodiscard]] constexpr const Map& get() const {
             return container;
         }
 
-        Map& get() {
+        [[nodiscard]] Map& get() {
             return container;
         }
 
         /**
          * Returns all time points where a point in any spline exists.
          */
-        std::vector<Scalar> getTimes() {
+        [[nodiscard]] std::vector<Scalar> getTimes() {
             std::set<Scalar> times;
             std::vector<Scalar> times_sorted;
             // go through all splines
@@ -118,7 +118,7 @@ namespace utility::motion::splines {
         /**
          * Return minimum and maximum abscisse values of all registered splines parts
          */
-        constexpr Scalar min() const {
+        [[nodiscard]] constexpr Scalar min() const {
             if (container.size() == 0) {
                 return 0.0;
             }
@@ -133,7 +133,7 @@ namespace utility::motion::splines {
             return m;
         }
 
-        constexpr Scalar max() const {
+        [[nodiscard]] constexpr Scalar max() const {
             if (container.size() == 0) {
                 return 0.0;
             }

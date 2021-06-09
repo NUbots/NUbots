@@ -26,24 +26,24 @@ namespace utility::motion::splines {
          * Internal spline part structure with a polynom valid on an interval
          */
         struct Spline_t {
-            Polynom<Scalar> polynom;
-            Scalar min;
-            Scalar max;
+            Polynom<Scalar> polynom{};
+            Scalar min = 0;
+            Scalar max = 0;
         };
 
         /**
          * Return spline interpolation at given t. Compute spline value, its first, second and third derivative
          */
-        constexpr Scalar pos(Scalar t) const {
+        [[nodiscard]] constexpr Scalar pos(const Scalar& t) const {
             return interpolation(t, &Polynom<Scalar>::pos);
         }
-        constexpr Scalar vel(Scalar t) const {
+        [[nodiscard]] constexpr Scalar vel(const Scalar& t) const {
             return interpolation(t, &Polynom<Scalar>::vel);
         }
-        constexpr Scalar acc(Scalar t) const {
+        [[nodiscard]] constexpr Scalar acc(const Scalar& t) const {
             return interpolation(t, &Polynom<Scalar>::acc);
         }
-        constexpr Scalar jerk(Scalar t) const {
+        [[nodiscard]] constexpr Scalar jerk(const Scalar& t) const {
             return interpolation(t, &Polynom<Scalar>::jerk);
         }
 
@@ -51,23 +51,23 @@ namespace utility::motion::splines {
          * Return spline interpolation value, first, second and third derivative with given t bound between 0
          * and 1
          */
-        constexpr Scalar posMod(Scalar t) const {
+        [[nodiscard]] constexpr Scalar posMod(const Scalar& t) const {
             return interpolationMod(t, &Polynom<Scalar>::pos);
         }
-        constexpr Scalar velMod(Scalar t) const {
+        [[nodiscard]] constexpr Scalar velMod(const Scalar& t) const {
             return interpolationMod(t, &Polynom<Scalar>::vel);
         }
-        constexpr Scalar accMod(Scalar t) const {
+        [[nodiscard]] constexpr Scalar accMod(const Scalar& t) const {
             return interpolationMod(t, &Polynom<Scalar>::acc);
         }
-        constexpr Scalar jerkMod(Scalar t) const {
+        [[nodiscard]] constexpr Scalar jerkMod(const Scalar& t) const {
             return interpolationMod(t, &Polynom<Scalar>::jerk);
         }
 
         /**
          * Return minimum and maximum abscisse value for which spline is defined
          */
-        constexpr Scalar min() const {
+        [[nodiscard]] constexpr Scalar min() const {
             if (splines.size() == 0) {
                 return static_cast<Scalar>(0);
             }
@@ -75,7 +75,7 @@ namespace utility::motion::splines {
                 return splines.front().min;
             }
         }
-        constexpr Scalar max() const {
+        [[nodiscard]] constexpr Scalar max() const {
             if (splines.size() == 0) {
                 return static_cast<Scalar>(0);
             }
@@ -145,14 +145,14 @@ namespace utility::motion::splines {
         /**
          * Return the number of internal polynom
          */
-        constexpr size_t size() const {
+        [[nodiscard]] constexpr size_t size() const {
             return splines.size();
         }
 
         /**
          * Access to given by its index
          */
-        constexpr const Spline_t& part(size_t index) const {
+        [[nodiscard]] constexpr const Spline_t& part(size_t index) const {
             return splines.at(index);
         }
 
@@ -188,7 +188,8 @@ namespace utility::motion::splines {
          * Return spline interpolation of given value and used given polynom evaluation function (member
          * function pointer)
          */
-        constexpr Scalar interpolation(Scalar x, Scalar (Polynom<Scalar>::*func)(const Scalar&) const) const {
+        [[nodiscard]] constexpr Scalar interpolation(Scalar x,
+                                                     Scalar (Polynom<Scalar>::*func)(const Scalar&) const) const {
             // Empty case
             if (splines.size() == 0) {
                 return static_cast<Scalar>(0);
@@ -223,7 +224,8 @@ namespace utility::motion::splines {
         /**
          * Return interpolation with x bound between 0 and 1
          */
-        constexpr Scalar interpolationMod(Scalar x, Scalar (Polynom<Scalar>::*func)(const Scalar&) const) const {
+        [[nodiscard]] constexpr Scalar interpolationMod(Scalar x,
+                                                        Scalar (Polynom<Scalar>::*func)(const Scalar&) const) const {
             if (x < static_cast<Scalar>(0)) {
                 x = static_cast<Scalar>(1) + (x - (static_cast<int>(x) / static_cast<Scalar>(1)));
             }

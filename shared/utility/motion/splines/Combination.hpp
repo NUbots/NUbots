@@ -24,7 +24,7 @@ namespace utility::motion::splines {
         /**
          * Compute the number of possible combinations for (n choose k) (using dynamic progamming)
          */
-        constexpr unsigned long binomialCoefficient(size_t k, size_t n) {
+        [[nodiscard]] constexpr unsigned long binomialCoefficient(size_t k, size_t n) {
             if (n == 0 || k == 0) {
                 return 1;
             }
@@ -78,7 +78,7 @@ namespace utility::motion::splines {
          * Return the next combination.
          * Return empty std::vector when iteration is finished
          */
-        std::vector<size_t> nextCombination() {
+        [[nodiscard]] std::vector<size_t> nextCombination() {
             std::vector<size_t> result = indexes;
 
             if (indexes.size() > 0) {
@@ -107,14 +107,14 @@ namespace utility::motion::splines {
          * Current indexes container and iteration n and k parameter
          */
         std::vector<size_t> indexes{};
-        size_t n;
-        size_t k;
+        size_t n = 0;
+        size_t k = 0;
 
         /**
          * Increment by one the indexes container at digit i (recursively).
          * Return true on iteration end.
          */
-        bool incrIndexes(size_t i) {
+        bool incrIndexes(const size_t& i) {
             if (indexes[i] == n - (k - i)) {
                 if (i == 0) {
                     return true;

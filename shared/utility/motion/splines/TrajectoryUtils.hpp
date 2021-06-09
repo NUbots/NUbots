@@ -88,52 +88,52 @@ namespace utility::motion::splines {
         }
 
         // Operators
-        constexpr bool operator<(TrajectoryTypes const& other) const {
+        [[nodiscard]] constexpr bool operator<(TrajectoryTypes const& other) const {
             return value < other.value;
         }
-        constexpr bool operator>(TrajectoryTypes const& other) const {
+        [[nodiscard]] constexpr bool operator>(TrajectoryTypes const& other) const {
             return value > other.value;
         }
-        constexpr bool operator<=(TrajectoryTypes const& other) const {
+        [[nodiscard]] constexpr bool operator<=(TrajectoryTypes const& other) const {
             return value <= other.value;
         }
-        constexpr bool operator>=(TrajectoryTypes const& other) const {
+        [[nodiscard]] constexpr bool operator>=(TrajectoryTypes const& other) const {
             return value >= other.value;
         }
-        constexpr bool operator==(TrajectoryTypes const& other) const {
+        [[nodiscard]] constexpr bool operator==(TrajectoryTypes const& other) const {
             return value == other.value;
         }
-        constexpr bool operator!=(TrajectoryTypes const& other) const {
+        [[nodiscard]] constexpr bool operator!=(TrajectoryTypes const& other) const {
             return value != other.value;
         }
-        constexpr bool operator<(TrajectoryTypes::Value const& other) const {
+        [[nodiscard]] constexpr bool operator<(TrajectoryTypes::Value const& other) const {
             return value < other;
         }
-        constexpr bool operator>(TrajectoryTypes::Value const& other) const {
+        [[nodiscard]] constexpr bool operator>(TrajectoryTypes::Value const& other) const {
             return value > other;
         }
-        constexpr bool operator<=(TrajectoryTypes::Value const& other) const {
+        [[nodiscard]] constexpr bool operator<=(TrajectoryTypes::Value const& other) const {
             return value <= other;
         }
-        constexpr bool operator>=(TrajectoryTypes::Value const& other) const {
+        [[nodiscard]] constexpr bool operator>=(TrajectoryTypes::Value const& other) const {
             return value >= other;
         }
-        constexpr bool operator==(TrajectoryTypes::Value const& other) const {
+        [[nodiscard]] constexpr bool operator==(TrajectoryTypes::Value const& other) const {
             return value == other;
         }
-        constexpr bool operator!=(TrajectoryTypes::Value const& other) const {
+        [[nodiscard]] constexpr bool operator!=(TrajectoryTypes::Value const& other) const {
             return value != other;
         }
 
         // Conversions
-        constexpr operator Value() const {
+        [[nodiscard]] constexpr operator Value() const {
             return value;
         }
-        constexpr operator uint8_t() const {
+        [[nodiscard]] constexpr operator uint8_t() const {
             return value;
         }
 
-        operator std::string() const {
+        [[nodiscard]] operator std::string() const {
             switch (value) {
                 case Value::IS_DOUBLE_SUPPORT: return "IS_DOUBLE_SUPPORT";
                 case Value::IS_LEFT_SUPPORT_FOOT: return "IS_LEFT_SUPPORT_FOOT";
@@ -195,7 +195,7 @@ namespace utility::motion::splines {
      * Compute from given spline container trajectory Cartesian trunk and foot position/velocity/acceleration
      * and assign it to given vector
      */
-    [[nodiscard]] inline Vector3fQuadruple trajectoriesTrunkFootPos(const float t, const Trajectories& traj) {
+    [[nodiscard]] inline Vector3fQuadruple trajectoriesTrunkFootPos(const float& t, const Trajectories& traj) {
         // Compute Cartesian positions
         const auto trunkPos  = Eigen::Vector3f(traj.get(TrajectoryTypes::TRUNK_POS_X).pos(t),
                                               traj.get(TrajectoryTypes::TRUNK_POS_Y).pos(t),
@@ -212,7 +212,7 @@ namespace utility::motion::splines {
         return {trunkPos, trunkAxis, footPos, footAxis};
     }
 
-    [[nodiscard]] inline Vector3fQuadruple trajectoriesTrunkFootVel(const float t, const Trajectories& traj) {
+    [[nodiscard]] inline Vector3fQuadruple trajectoriesTrunkFootVel(const float& t, const Trajectories& traj) {
         // Compute Cartesian velocities
         const auto trunkPosVel  = Eigen::Vector3f(traj.get(TrajectoryTypes::TRUNK_POS_X).vel(t),
                                                  traj.get(TrajectoryTypes::TRUNK_POS_Y).vel(t),
@@ -229,7 +229,7 @@ namespace utility::motion::splines {
         return {trunkPosVel, trunkAxisVel, footPosVel, footAxisVel};
     }
 
-    [[nodiscard]] inline Vector3fQuadruple trajectoriesTrunkFootAcc(const float t, const Trajectories& traj) {
+    [[nodiscard]] inline Vector3fQuadruple trajectoriesTrunkFootAcc(const float& t, const Trajectories& traj) {
         // Compute Cartesian accelerations
         const auto trunkPosAcc  = Eigen::Vector3f(traj.get(TrajectoryTypes::TRUNK_POS_X).acc(t),
                                                  traj.get(TrajectoryTypes::TRUNK_POS_Y).acc(t),
@@ -253,7 +253,7 @@ namespace utility::motion::splines {
      * @param traj The set of trajectories which are being evaluated
      * @return std::pair<bool, bool> {isDoubleSupportFoot, isLeftSupportFoot}, as evaluated at time t
      */
-    [[nodiscard]] constexpr inline std::pair<bool, bool> trajectoriesSupportFootState(float t,
+    [[nodiscard]] constexpr inline std::pair<bool, bool> trajectoriesSupportFootState(const float& t,
                                                                                       const Trajectories& traj) {
         // Compute support foot state
         return {traj.get(TrajectoryTypes::IS_DOUBLE_SUPPORT).pos(t) >= 0.5f,

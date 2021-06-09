@@ -25,41 +25,41 @@ namespace utility::motion::splines {
         /**
          * Default and inital degree initialization
          */
-        Polynom() = default;
-        Polynom(const size_t& degree) : coefs(degree + 1, static_cast<Scalar>(0)) {}
-        Polynom(const std::vector<Scalar>& coefs) : coefs(coefs) {}
+        constexpr Polynom() = default;
+        constexpr Polynom(const size_t& degree) : coefs(degree + 1, static_cast<Scalar>(0)) {}
+        constexpr Polynom(const std::vector<Scalar>& coefs) : coefs(coefs) {}
 
         /**
          * Access to coefficient indexed from constant to higher degree
          */
-        constexpr const std::vector<Scalar>& getCoefs() const {
+        [[nodiscard]] constexpr const std::vector<Scalar>& getCoefs() const {
             return coefs;
         }
-        std::vector<Scalar>& getCoefs() {
+        [[nodiscard]] std::vector<Scalar>& getCoefs() {
             return coefs;
         }
 
         /**
          * Access to coefficient
          */
-        constexpr const Scalar& operator()(const size_t& index) const {
+        [[nodiscard]] constexpr const Scalar& operator()(const size_t& index) const {
             return coefs.at(index);
         }
-        Scalar& operator()(const size_t& index) {
+        [[nodiscard]] Scalar& operator()(const size_t& index) {
             return coefs.at(index);
         }
 
         /**
          * Return polynom degree -1 means empty polynom
          */
-        constexpr size_t degree() const {
+        [[nodiscard]] constexpr size_t degree() const {
             return coefs.size() - 1;
         }
 
         /**
          * Polynom evaluation, its first, second and third derivative at given x
          */
-        constexpr Scalar pos(const Scalar& x) const {
+        [[nodiscard]] constexpr Scalar pos(const Scalar& x) const {
             Scalar xx  = static_cast<Scalar>(1);
             Scalar val = static_cast<Scalar>(0);
             for (size_t i = 0; i < coefs.size(); i++) {
@@ -69,7 +69,7 @@ namespace utility::motion::splines {
             return val;
         }
 
-        constexpr Scalar vel(const Scalar& x) const {
+        [[nodiscard]] constexpr Scalar vel(const Scalar& x) const {
             Scalar xx  = static_cast<Scalar>(1);
             Scalar val = static_cast<Scalar>(0);
             for (size_t i = 1; i < coefs.size(); i++) {
@@ -79,7 +79,7 @@ namespace utility::motion::splines {
             return val;
         }
 
-        constexpr Scalar acc(const Scalar& x) const {
+        [[nodiscard]] constexpr Scalar acc(const Scalar& x) const {
             Scalar xx  = static_cast<Scalar>(1);
             Scalar val = static_cast<Scalar>(0);
             for (size_t i = 2; i < coefs.size(); i++) {
@@ -89,7 +89,7 @@ namespace utility::motion::splines {
             return val;
         }
 
-        constexpr Scalar jerk(const Scalar& x) const {
+        [[nodiscard]] constexpr Scalar jerk(const Scalar& x) const {
             Scalar xx  = static_cast<Scalar>(1);
             Scalar val = static_cast<Scalar>(0);
             for (size_t i = 3; i < coefs.size(); i++) {
@@ -139,9 +139,9 @@ namespace utility::motion::splines {
          * Expand the given formula (x + y)^degree and return the polynom in x whose coefficient are computed
          * using binomial coefficient
          */
-        constexpr static Polynom<Scalar> expandBinomial(const Scalar& y, const size_t& degree) {
-            Combination combination;
-            Polynom polynom;
+        [[nodiscard]] constexpr static Polynom<Scalar> expandBinomial(const Scalar& y, const size_t& degree) {
+            Combination combination{};
+            Polynom polynom{};
 
             polynom.getCoefs().resize(degree + 1);
 
