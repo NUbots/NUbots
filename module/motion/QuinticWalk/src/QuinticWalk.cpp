@@ -236,9 +236,8 @@ namespace module::motion {
                 .normalized()
                 .toRotationMatrix();
         };
-
         // Read the cartesian positions and orientations for trunk and fly foot
-        walk_engine.computeCartesianPosition(trunk_pos, trunk_axis, foot_pos, foot_axis, is_left_support);
+        std::tie(trunk_pos, trunk_axis, foot_pos, foot_axis, is_left_support) = walk_engine.computeCartesianPosition();
 
         // Change goals from support foot based coordinate system to trunk based coordinate system
         Eigen::Affine3f Hst;  // trunk_to_support_foot_goal
