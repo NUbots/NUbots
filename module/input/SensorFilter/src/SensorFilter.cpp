@@ -496,7 +496,7 @@ namespace module::input {
                          *                  Kinematics                  *
                          ************************************************/
 
-                        // Htx is a Map from ServoID to (a homogeneous transform from that joint to the torso)
+                        // Htx is a map from ServoID to homogeneous transforms from each ServoID to the torso
                         auto Htx = calculateAllPositions(kinematicsModel, *sensors);
                         // copying the map to the sensors->Htx Map
                         for (const auto& entry : Htx) {
@@ -574,7 +574,7 @@ namespace module::input {
                         const Eigen::Matrix3d acc_noise =
                             config.motionFilter.noise.measurement.accelerometer
                             // Add noise which is proportional to the square of how much we are moving, minus gravity
-                            // This means that the faster we move, the noisier we think the measurements are
+                            // This means that the more we're accelerating, the noisier we think the measurements are
                             + ((sensors->accelerometer.norm() - std::abs(G))
                                * (sensors->accelerometer.norm() - std::abs(G)))
                                   * config.motionFilter.noise.measurement.accelerometerMagnitude;
@@ -589,7 +589,7 @@ namespace module::input {
                             const bool prev_foot_down = previous_foot_down[side];
                             const Eigen::Affine3d Htf(
                                 sensors->Htx[side == BodySide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL]);
-                            // If this sides foot is down, and it was not down at the previous time step, then we
+                            // If this side's foot is down, and it was not down at the previous time step, then we
                             // calculate our new footlanding_Hwf value, because our foot has just landed
                             if (foot_down && !prev_foot_down) {
                                 const auto filterState = MotionModel<double>::StateVec(motionFilter.get());
@@ -609,7 +609,7 @@ namespace module::input {
                                 // Store the current foot down state for next time
                                 previous_foot_down[side] = true;
                             }
-                            // Else is down, and didn't hit the ground this time step
+                            // This sides foot is down, but it didn't hit the ground in
                             else if (foot_down && prev_foot_down) {
                                 // Use stored Hwf and Htf to calculate Hwt
                                 const Eigen::Affine3d footlanding_Hwt = footlanding_Hwf[side] * Htf.inverse();
@@ -625,8 +625,8 @@ namespace module::input {
                                                      config.motionFilter.noise.measurement.flatFootOrientation,
                                                      MeasurementType::FLAT_FOOT_ORIENTATION());
                             }
-                            // Else the foot is off the ground, so we make sure that for the next time step, we know
-                            // that this time step, the foot was off the ground
+                            // Otherwise this side's foot is off the ground, so we make sure that for the next time
+                            // step, we know that this time step, the foot was off the ground
                             else if (!foot_down) {
                                 previous_foot_down[side] = false;
                             }
@@ -705,9 +705,6 @@ namespace module::input {
                             Eigen::Affine3d Rgt(
                                 Eigen::AngleAxisd(-Rwt.rotation().eulerAngles(0, 1, 2).z(), Eigen::Vector3d::UnitZ())
                                 * Rwt);
-                            // sensors->Hgt : Mat size [4x4] (default identity)
-                            // createRotationZ : Mat size [3x3]
-                            // Rwt : Mat size [3x3]
                             sensors->Hgt = Rgt.matrix();
                         }
 
