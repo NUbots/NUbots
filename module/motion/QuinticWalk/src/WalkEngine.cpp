@@ -13,6 +13,10 @@ https://github.com/Rhoban/model/
 
 namespace module::motion {
 
+    QuinticWalkEngine::QuinticWalkEngine() {
+        trajectoriesInit(trajs);
+    }
+
     bool QuinticWalkEngine::updateState(const float& dt, const Eigen::Vector3f& orders) {
         const bool ordersZero = orders.isZero();
         // First check if we are currently in pause state or idle, since we don't want to update the phase in this

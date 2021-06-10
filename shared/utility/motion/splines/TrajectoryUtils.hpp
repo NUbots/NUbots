@@ -133,7 +133,7 @@ namespace utility::motion::splines {
             return value;
         }
 
-        [[nodiscard]] operator std::string() const {
+        [[nodiscard]] inline operator std::string() const {
             switch (value) {
                 case Value::IS_DOUBLE_SUPPORT: return "IS_DOUBLE_SUPPORT";
                 case Value::IS_LEFT_SUPPORT_FOOT: return "IS_LEFT_SUPPORT_FOOT";

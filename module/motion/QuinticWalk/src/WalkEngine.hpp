@@ -107,9 +107,7 @@ namespace module::motion {
      */
     class QuinticWalkEngine {
     public:
-        QuinticWalkEngine() {
-            trajectoriesInit(trajs);
-        };
+        QuinticWalkEngine();
 
         /**
          * Return current walk phase
@@ -131,7 +129,7 @@ namespace module::motion {
         /**
          * Get the footstep object.
          */
-        [[nodiscard]] Footstep getFootstep() {
+        [[nodiscard]] inline Footstep getFootstep() {
             return foot_step;
         }
 
