@@ -1,6 +1,7 @@
 import { computed } from 'mobx'
 import { observable } from 'mobx'
 import { memoize } from '../../base/memoize'
+import { Matrix4 } from '../../math/matrix4'
 import { Vector3 } from '../../math/vector3'
 import { AppModel } from '../app/model'
 import { RobotModel } from '../robot/model'
@@ -29,6 +30,18 @@ export class OdometryRobotModel {
       robotModel,
       OdometryVisualizerModel.of({
         accelerometer: new Vector3(0, 0, -9.8),
+        // TODO
+        leftFoot: {
+          down: true,
+          Hwf: Matrix4.of(),
+          Htf: Matrix4.of(),
+        },
+        // TODO
+        rightFoot: {
+          down: true,
+          Hwf: Matrix4.of(),
+          Htf: Matrix4.of(),
+        },
       }),
     )
   })

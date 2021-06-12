@@ -6,6 +6,7 @@ import React from 'react'
 import * as THREE from 'three'
 import { Matrix4 } from '../../../../math/matrix4'
 import { Vector3 } from '../../../../math/vector3'
+import { Vector4 } from '../../../../math/vector4'
 import { fullscreen } from '../../../storybook/fullscreen'
 import { OdometryVisualizerModel } from '../model'
 import { OdometryVisualizer } from '../view'
@@ -18,7 +19,37 @@ storiesOf('components.odometry.odometry_visualizer', module)
 class OdometryVisualizerHarness extends React.Component<{ animate?: boolean }> {
   private model = OdometryVisualizerModel.of({
     Hwt: Matrix4.fromThree(new THREE.Matrix4().makeTranslation(0, 0, 1)),
-    accelerometer: new Vector3(0, 0, -9.8),
+    accelerometer: new Vector3(0, 0, 9.8),
+    leftFoot: {
+      down: true,
+      Htf: new Matrix4(
+        new Vector4(1, 0, 0, 0),
+        new Vector4(0, 1, 0, 0),
+        new Vector4(0, 0, 1, 0),
+        new Vector4(0, 0.3, -1, 1),
+      ),
+      Hwf: new Matrix4(
+        new Vector4(1, 0, 0, 0),
+        new Vector4(0, 1, 0, 0),
+        new Vector4(0, 0, 1, 0),
+        new Vector4(0, 0.3, 0, 1),
+      ),
+    },
+    rightFoot: {
+      down: true,
+      Htf: new Matrix4(
+        new Vector4(1, 0, 0, 0),
+        new Vector4(0, 1, 0, 0),
+        new Vector4(0, 0, 1, 0),
+        new Vector4(0, -0.3, -1, 1),
+      ),
+      Hwf: new Matrix4(
+        new Vector4(1, 0, 0, 0),
+        new Vector4(0, 1, 0, 0),
+        new Vector4(0, 0, 1, 0),
+        new Vector4(0, -0.3, 0, 1),
+      ),
+    },
   })
 
   componentDidMount() {
@@ -32,6 +63,11 @@ class OdometryVisualizerHarness extends React.Component<{ animate?: boolean }> {
               new THREE.Matrix4()
                 .makeRotationFromEuler(new THREE.Euler(Math.cos(t) / 5, 0, t))
                 .setPosition(0, 0, 1),
+            )
+            this.model.accelerometer = Vector3.fromThree(
+              new Vector3(0, 0, 9.8)
+                .toThree()
+                .applyMatrix4(new THREE.Matrix4().getInverse(this.model.Hwt.toThree())),
             )
           },
         ),
