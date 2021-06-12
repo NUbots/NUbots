@@ -93,7 +93,7 @@ namespace module::behaviour::skills {
                     isFront = (M_PI_2 - std::acos(Eigen::Vector3d::UnitX().dot(acc_reading)) <= 0.0);
 
                     updatePriority(GETUP_PRIORITY);
-                    std::cout << "\n\n\n\n\n\ndetected a fall, enabling getup" << std::endl;
+                    // std::cout << "\n\n\n\n\n\ndetected a fall, enabling getup" << std::endl;
                     getUp.enable();
                 }
             });

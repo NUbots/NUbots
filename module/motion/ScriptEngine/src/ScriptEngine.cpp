@@ -48,7 +48,7 @@ namespace module::motion {
         });
 
         on<Trigger<ExecuteScriptByName>>().then([this](const ExecuteScriptByName& command) {
-            std::cout << "\n\n\n\n\n\nexecuting script: " << command.scripts[0] << std::endl;
+            // std::cout << "\n\n\n\n\n\nexecuting script: " << command.scripts[0] << std::endl;
 
             std::vector<Script> scriptList;
 
@@ -60,8 +60,8 @@ namespace module::motion {
                     throw std::runtime_error("The script " + scriptName + " is not loaded in the system");
                 }
                 else {
-                    std::cout << "found script to execute: " << script->second.fileName << ", "
-                              << script->second.hostname << ", " << script->second.platform << std::endl;
+                    // std::cout << "found script to execute: " << script->second.fileName << ", "
+                    //   << script->second.hostname << ", " << script->second.platform << std::endl;
                     scriptList.push_back(script->second);
                 }
             }
