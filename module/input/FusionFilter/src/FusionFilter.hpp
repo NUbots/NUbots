@@ -3,10 +3,13 @@
 
 #include <nuclear>
 
+#include "filter/tasks.hpp"
+
 namespace module::input {
 
     class FusionFilter : public NUClear::Reactor {
     private:
+        filter::tasks::SV_6DOF_GY_KALMAN filter{};
         /// The configuration variables for this reactor
         // TODO(KipHamiltons): Add config vars
         struct {
