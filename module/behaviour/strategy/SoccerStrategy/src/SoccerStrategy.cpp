@@ -240,7 +240,7 @@ namespace module::behaviour::strategy {
                                 currentState = Behaviour::State::FINISHED;
                             }
                             else if (phase == Phase::PLAYING) {
-                                play(field, ball, fieldDescription, mode);
+                                walkTo(fieldDescription, cfg_.start_position_offensive);
                             }
                         }
                     }
