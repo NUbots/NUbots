@@ -5,16 +5,17 @@
 
 namespace module::input {
 
-class FusionFilter : public NUClear::Reactor {
-private:
-    /// The configuration variables for this reactor
-    struct {
-    } config;
+    class FusionFilter : public NUClear::Reactor {
+    private:
+        /// The configuration variables for this reactor
+        // TODO(KipHamiltons): Add config vars
+        struct {
+        } config;
 
-public:
-    /// @brief Called by the powerplant to build and setup the FusionFilter reactor.
-    explicit FusionFilter(std::unique_ptr<NUClear::Environment> environment);
-};
+    public:
+        /// @brief Called by the powerplant to build and setup the FusionFilter reactor.
+        explicit FusionFilter(std::unique_ptr<NUClear::Environment> environment);
+    };
 
 }  // namespace module::input
 
