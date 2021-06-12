@@ -25,12 +25,12 @@ import "Matrix.proto";
 import "Vector.proto";
 
 message OrientationReading {
-    vec3 acceleration = 0;
-    vec3 gyro         = 1;
+    vec3 acceleration = 1;
+    vec3 gyro         = 2;
 }
 
 message ResetFusionFilter {}
 
 message RotationPrediction {
-    mat3 prediction = 0;
+    mat3 prediction = 1;
 }
