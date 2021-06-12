@@ -20,6 +20,7 @@
 #include "Getup.hpp"
 
 #include <Eigen/Core>
+#include <chrono>
 #include <cmath>
 
 #include "extension/Configuration.hpp"
@@ -92,6 +93,7 @@ namespace module::behaviour::skills {
                     isFront = (M_PI_2 - std::acos(Eigen::Vector3d::UnitX().dot(acc_reading)) <= 0.0);
 
                     updatePriority(GETUP_PRIORITY);
+                    std::cout << "\n\n\n\n\n\ndetected a fall, enabling getup" << std::endl;
                     getUp.enable();
                 }
             });
@@ -101,9 +103,10 @@ namespace module::behaviour::skills {
 
             // Check with side we're getting up from
             if (isFront) {
-                emit(std::make_unique<ExecuteScriptByName>(
-                    id,
-                    std::vector<std::string>({"StandUpFront.yaml", "Stand.yaml"})));
+                emit<Scope::DELAY>(std::make_unique<ExecuteScriptByName>(
+                                       id,
+                                       std::vector<std::string>({"StandUpFront.yaml", "Stand.yaml"})),
+                                   std::chrono::seconds(5));
             }
             else {
                 emit(std::make_unique<ExecuteScriptByName>(

@@ -48,6 +48,8 @@ namespace module::motion {
         });
 
         on<Trigger<ExecuteScriptByName>>().then([this](const ExecuteScriptByName& command) {
+            std::cout << "\n\n\n\n\n\nexecuting script: " << command.scripts[0] << std::endl;
+
             std::vector<Script> scriptList;
 
             for (size_t i = 0; i < command.scripts.size(); i++) {
@@ -58,6 +60,8 @@ namespace module::motion {
                     throw std::runtime_error("The script " + scriptName + " is not loaded in the system");
                 }
                 else {
+                    std::cout << "found script to execute: " << script->second.fileName << ", "
+                              << script->second.hostname << ", " << script->second.platform << std::endl;
                     scriptList.push_back(script->second);
                 }
             }
@@ -78,6 +82,7 @@ namespace module::motion {
                     // Move along our duration in time
                     time += std::chrono::duration_cast<NUClear::clock::time_point::duration>(
                         frame.duration * command.duration_modifier[i]);
+                    // frame.duration * 2.0); // command.duration_modifier[i]);
 
                     // Loop through all the motors and make a servo waypoint for it
                     for (const auto& target : frame.targets) {

@@ -8,3 +8,4 @@ messages:
   message.output.CompressedImage: false
   message.input.Sensors: false
   message.platform.RawSensors: false
+  message.support.nusight.DataPoint: true

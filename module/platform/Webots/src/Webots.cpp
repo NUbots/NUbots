@@ -34,6 +34,7 @@
 #include "message/platform/webots/messages.hpp"
 
 #include "utility/math/angle.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 #include "utility/platform/RawSensors.hpp"
 #include "utility/vision/fourcc.hpp"
 
@@ -64,6 +65,7 @@ namespace module::platform {
     using message::platform::webots::SensorMeasurements;
     using message::platform::webots::SensorTimeStep;
 
+    using utility::nusight::graph;
     using utility::platform::getRawServo;
     using utility::vision::fourcc;
 
@@ -459,6 +461,8 @@ namespace module::platform {
                             // Create servo PID message
                             actuator_requests.motor_pids.emplace_back(
                                 MotorPID(servo.name, {servo.p_gain, servo.i_gain, servo.d_gain}));
+
+                            // emit(graph(servo.name, servo.moving_speed));
                         }
                     }
 
@@ -507,6 +511,9 @@ namespace module::platform {
         // Calculate our custom rtf - the ratio of the past two sim deltas and the past two real time deltas, smoothed
         const double ratio =
             static_cast<double>(sim_delta + prev_sim_delta) / static_cast<double>(real_delta + prev_real_delta);
+
+        // emit(graph("custom rtf ratio", ratio));
+
         // Exponential filter to do the smoothing
         utility::clock::custom_rtf = utility::clock::custom_rtf * clock_smoothing + (1.0 - clock_smoothing) * ratio;
 
