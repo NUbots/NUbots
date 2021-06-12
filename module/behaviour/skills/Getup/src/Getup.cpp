@@ -23,6 +23,8 @@
 #include <chrono>
 #include <cmath>
 
+#include "clock/clock.hpp"
+
 #include "extension/Configuration.hpp"
 #include "extension/Script.hpp"
 
@@ -103,10 +105,19 @@ namespace module::behaviour::skills {
 
             // Check with side we're getting up from
             if (isFront) {
-                emit<Scope::DELAY>(std::make_unique<ExecuteScriptByName>(
-                                       id,
-                                       std::vector<std::string>({"StandUpFront.yaml", "Stand.yaml"})),
-                                   std::chrono::seconds(5));
+                // Use the slow getup if the simulator RTF is less than 0.3
+                if (utility::clock::custom_rtf < 0.3) {
+                    emit<Scope::DELAY>(std::make_unique<ExecuteScriptByName>(
+                                           id,
+                                           std::vector<std::string>({"StandUpFrontSlow.yaml", "Stand.yaml"})),
+                                       std::chrono::seconds(5));
+                }
+                // Otherwise use the normal getup
+                else {
+                    emit(std::make_unique<ExecuteScriptByName>(
+                        id,
+                        std::vector<std::string>({"StandUpFront.yaml", "Stand.yaml"})));
+                }
             }
             else {
                 emit(std::make_unique<ExecuteScriptByName>(
