@@ -7,6 +7,9 @@ if(test_src)
 
   set_target_properties(TestShared PROPERTIES FOLDER "shared/tests")
 
+  # Add warnings for the tests
+  set_target_warnings(TestShared)
+
   # Add the test
   add_test(
     NAME TestShared

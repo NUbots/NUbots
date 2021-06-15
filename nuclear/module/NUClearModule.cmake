@@ -225,6 +225,9 @@ function(NUCLEAR_MODULE)
 
       set_target_properties(${test_module_target_name} PROPERTIES FOLDER "modules/tests")
 
+      # Add warnings for the tests
+      set_target_warnings(${test_module_target_name})
+
       # Add the test
       add_test(
         NAME ${test_module_target_name}
