@@ -39,9 +39,9 @@
 
 // Include headers needed for TCP connection
 extern "C" {
-#include <netdb.h>      /* definition of gethostbyname */
+#include <netdb.h> /* definition of gethostbyname */
 #include <netinet/in.h> /* definition of struct sockaddr_in */
-#include <sys/ioctl.h>  /* definition of ioctl and FIONREAD */
+#include <sys/ioctl.h> /* definition of ioctl and FIONREAD */
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <unistd.h> /* definition of close */
@@ -259,13 +259,6 @@ namespace module::platform {
                 double speed = duration.count() > 0
                                    ? diff / (double(duration.count()) / double(NUClear::clock::period::den))
                                    : max_velocity;
-
-                log<NUClear::DEBUG>(
-                    fmt::format("Servo velocities {} -> {}, {}",
-                                target.id,
-                                speed,
-                                diff / (double(duration.count()) / double(NUClear::clock::period::den))));
-
 
                 speed = std::min(max_velocity, speed);
                 // Update our internal state if anything has changed for this servo
