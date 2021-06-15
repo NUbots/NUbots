@@ -24,10 +24,6 @@ namespace NUClear {
         utility::clock::state       = clock::time_point(utility::clock::state + delta);
         utility::clock::last_update = now;
         return utility::clock::state;
-
-        // return clock::time_point(utility::clock::start
-        //                          + std::chrono::duration_cast<std::chrono::steady_clock::duration>(
-        //                              (now - utility::clock::start) * utility::clock::custom_rtf));
     }
 
 }  // namespace NUClear

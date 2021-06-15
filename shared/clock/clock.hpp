@@ -5,7 +5,6 @@
 
 namespace utility::clock {
     extern double custom_rtf;  // real time factor
-    extern std::chrono::steady_clock::time_point start;
 }  // namespace utility::clock
 
 #endif  // UTILITY_CLOCK_HPP
