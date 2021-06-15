@@ -259,7 +259,10 @@ namespace module::platform {
                 double speed = duration.count() > 0
                                    ? diff / (double(duration.count()) / double(NUClear::clock::period::den))
                                    : max_velocity;
-                speed        = std::min(max_velocity, speed);
+
+                log<NUClear::DEBUG>(fmt::format("Servo velocities {}:{}", target.id, speed));
+
+                speed = std::min(max_velocity, speed);
                 // Update our internal state if anything has changed for this servo
                 if (servo_state[target.id].p_gain != target.gain || servo_state[target.id].i_gain != target.gain * 0.0
                     || servo_state[target.id].d_gain != target.gain * 0.0
@@ -508,6 +511,8 @@ namespace module::platform {
         // Calculate our custom rtf - the ratio of the past two sim deltas and the past two real time deltas, smoothed
         const double ratio =
             static_cast<double>(sim_delta + prev_sim_delta) / static_cast<double>(real_delta + prev_real_delta);
+
+        log<NUClear::DEBUG>(fmt::format("Simulation time ratio {}", ratio));
         // Exponential filter to do the smoothing
         utility::clock::custom_rtf = utility::clock::custom_rtf * clock_smoothing + (1.0 - clock_smoothing) * ratio;
 
