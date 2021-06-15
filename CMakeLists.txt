@@ -26,7 +26,9 @@ if(STATIC_LIBRARIES)
 endif()
 
 # We use additional modules that cmake needs to know about
-list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules/" "${PROJECT_SOURCE_DIR}/nuclear/cmake/Modules/" "${PROJECT_SOURCE_DIR}/nuclear/cmake")
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules/" "${PROJECT_SOURCE_DIR}/nuclear/cmake/Modules/"
+     "${PROJECT_SOURCE_DIR}/nuclear/cmake"
+)
 
 # If this option is set we are building using continous integration
 option(CI_BUILD "Enable build options for building in the CI server" OFF)
