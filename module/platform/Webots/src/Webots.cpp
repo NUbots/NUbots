@@ -257,9 +257,7 @@ namespace module::platform {
                 // The fastest speed is determined by the config, which comes from the max servo velocity from
                 // NUgus.proto in Webots
                 double speed = duration.count() > 0
-                                   ? diff
-                                         / (std::chrono::duration<double, NUClear::clock::period>(duration).count()
-                                            / double(NUClear::clock::period::den))
+                                   ? diff / (double(duration.count()) / double(NUClear::clock::period::den))
                                    : max_velocity;
                 speed        = std::min(max_velocity, speed);
                 // Update our internal state if anything has changed for this servo
