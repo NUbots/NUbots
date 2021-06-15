@@ -39,9 +39,9 @@
 
 // Include headers needed for TCP connection
 extern "C" {
-#include <netdb.h> /* definition of gethostbyname */
+#include <netdb.h>      /* definition of gethostbyname */
 #include <netinet/in.h> /* definition of struct sockaddr_in */
-#include <sys/ioctl.h> /* definition of ioctl and FIONREAD */
+#include <sys/ioctl.h>  /* definition of ioctl and FIONREAD */
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <unistd.h> /* definition of close */
@@ -260,7 +260,12 @@ namespace module::platform {
                                    ? diff / (double(duration.count()) / double(NUClear::clock::period::den))
                                    : max_velocity;
 
-                log<NUClear::DEBUG>(fmt::format("Servo velocities {}:{}", target.id, speed));
+                log<NUClear::DEBUG>(
+                    fmt::format("Servo velocities {} -> {}, {}",
+                                target.id,
+                                speed,
+                                diff / (double(duration.count()) / double(NUClear::clock::period::den))));
+
 
                 speed = std::min(max_velocity, speed);
                 // Update our internal state if anything has changed for this servo
@@ -376,8 +381,6 @@ namespace module::platform {
 
                                 // Set the real time of the connection initiation
                                 connect_time = NUClear::clock::now();
-                                // Reset the simulation connection time
-                                utility::clock::last_update = NUClear::base_clock::now();
 
                                 connection_active = true;
                             }
@@ -512,7 +515,6 @@ namespace module::platform {
         const double ratio =
             static_cast<double>(sim_delta + prev_sim_delta) / static_cast<double>(real_delta + prev_real_delta);
 
-        log<NUClear::DEBUG>(fmt::format("Simulation time ratio {}", ratio));
         // Exponential filter to do the smoothing
         utility::clock::custom_rtf = utility::clock::custom_rtf * clock_smoothing + (1.0 - clock_smoothing) * ratio;
 

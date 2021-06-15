@@ -110,6 +110,7 @@ add_subdirectory(nuclear)
 # Setting to use the custom clock with an adaptable rate
 option(USE_CUSTOM_CLOCK "Replace NUClear's clock with a custom implementation." ON)
 if(USE_CUSTOM_CLOCK)
+  add_compile_definitions(NUCLEAR_CUSTOM_CLOCK)
   add_subdirectory(shared/clock)
 endif()
 
