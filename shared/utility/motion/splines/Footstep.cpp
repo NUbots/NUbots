@@ -35,7 +35,7 @@ namespace utility::motion::splines {
     }
 
     Footstep::Footstep(const float& foot_distance_, const bool& is_left_support_foot_) {
-        if (foot_distance <= 0.0f) {
+        if (foot_distance_ <= 0.0f) {
             throw std::logic_error("Footstep invalid distance");
         }
 
