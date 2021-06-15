@@ -19,6 +19,7 @@
 
 #include <Eigen/Geometry>
 #include <catch.hpp>
+#include <cmath>
 #include <fmt/format.h>
 
 #include "utility/motion/splines/Combination.hpp"
@@ -26,103 +27,103 @@
 #include "utility/motion/splines/SmoothSpline.hpp"
 
 // Stores values of n, k and n choose k.
-std::vector<std::vector<long int>> C = {{3, 0, 1},
-                                        {13, 5, 1287},
-                                        {39, 38, 39},
-                                        {36, 7, 8347680},
-                                        {46, 21, 6943526580276},
-                                        {36, 22, 3796297200},
-                                        {37, 32, 435897},
-                                        {1, 1, 1},
-                                        {36, 8, 30260340},
-                                        {20, 6, 38760},
-                                        {23, 15, 490314},
-                                        {42, 11, 4280561376},
-                                        {21, 3, 1330},
-                                        {40, 16, 62852101650},
-                                        {15, 0, 1},
-                                        {50, 10, 10272278170},
-                                        {42, 41, 42},
-                                        {13, 11, 78},
-                                        {28, 16, 30421755},
-                                        {19, 15, 3876},
-                                        {42, 28, 52860229080},
-                                        {47, 17, 2741188875414},
-                                        {20, 13, 77520},
-                                        {3, 1, 3},
-                                        {8, 2, 28},
-                                        {12, 9, 220},
-                                        {46, 36, 4076350421},
-                                        {13, 11, 78},
-                                        {24, 14, 1961256},
-                                        {41, 26, 63432274896},
-                                        {48, 9, 1677106640},
-                                        {27, 0, 1},
-                                        {26, 12, 9657700},
-                                        {27, 7, 888030},
-                                        {48, 11, 22595200368},
-                                        {13, 5, 1287},
-                                        {0, 0, 1},
-                                        {40, 15, 40225345056},
-                                        {44, 24, 1761039350070},
-                                        {42, 12, 11058116888},
-                                        {41, 33, 95548245},
-                                        {3, 3, 1},
-                                        {2, 2, 1},
-                                        {36, 7, 8347680},
-                                        {42, 30, 11058116888},
-                                        {31, 21, 44352165},
-                                        {12, 10, 66},
-                                        {1, 0, 1},
-                                        {11, 4, 330},
-                                        {1, 1, 1},
-                                        {33, 2, 528},
-                                        {22, 5, 26334},
-                                        {43, 21, 1052049481860},
-                                        {13, 6, 1716},
-                                        {9, 6, 84},
-                                        {41, 21, 269128937220},
-                                        {6, 1, 6},
-                                        {7, 3, 35},
-                                        {4, 3, 4},
-                                        {24, 24, 1},
-                                        {11, 2, 55},
-                                        {23, 23, 1},
-                                        {35, 18, 4537567650},
-                                        {6, 4, 15},
-                                        {27, 1, 27},
-                                        {6, 2, 15},
-                                        {21, 16, 20349},
-                                        {24, 12, 2704156},
-                                        {38, 32, 2760681},
-                                        {46, 16, 991493848554},
-                                        {13, 1, 13},
-                                        {11, 0, 1},
-                                        {28, 26, 378},
-                                        {44, 5, 1086008},
-                                        {21, 20, 21},
-                                        {39, 23, 37711260990},
-                                        {27, 6, 296010},
-                                        {12, 8, 495},
-                                        {22, 18, 7315},
-                                        {27, 2, 351},
-                                        {9, 9, 1},
-                                        {9, 6, 84},
-                                        {10, 7, 120},
-                                        {25, 18, 480700},
-                                        {22, 3, 1540},
-                                        {48, 2, 1128},
-                                        {50, 20, 47129212243960},
-                                        {37, 21, 12875774670},
-                                        {24, 6, 134596},
-                                        {15, 1, 15},
-                                        {39, 21, 62359143990},
-                                        {44, 20, 1761039350070},
-                                        {21, 21, 1},
-                                        {14, 11, 364},
-                                        {43, 0, 1},
-                                        {1, 0, 1},
-                                        {39, 21, 62359143990}};
+std::vector<std::vector<size_t>> C = {{3, 0, 1},
+                                      {13, 5, 1287},
+                                      {39, 38, 39},
+                                      {36, 7, 8347680},
+                                      {46, 21, 6943526580276},
+                                      {36, 22, 3796297200},
+                                      {37, 32, 435897},
+                                      {1, 1, 1},
+                                      {36, 8, 30260340},
+                                      {20, 6, 38760},
+                                      {23, 15, 490314},
+                                      {42, 11, 4280561376},
+                                      {21, 3, 1330},
+                                      {40, 16, 62852101650},
+                                      {15, 0, 1},
+                                      {50, 10, 10272278170},
+                                      {42, 41, 42},
+                                      {13, 11, 78},
+                                      {28, 16, 30421755},
+                                      {19, 15, 3876},
+                                      {42, 28, 52860229080},
+                                      {47, 17, 2741188875414},
+                                      {20, 13, 77520},
+                                      {3, 1, 3},
+                                      {8, 2, 28},
+                                      {12, 9, 220},
+                                      {46, 36, 4076350421},
+                                      {13, 11, 78},
+                                      {24, 14, 1961256},
+                                      {41, 26, 63432274896},
+                                      {48, 9, 1677106640},
+                                      {27, 0, 1},
+                                      {26, 12, 9657700},
+                                      {27, 7, 888030},
+                                      {48, 11, 22595200368},
+                                      {13, 5, 1287},
+                                      {0, 0, 1},
+                                      {40, 15, 40225345056},
+                                      {44, 24, 1761039350070},
+                                      {42, 12, 11058116888},
+                                      {41, 33, 95548245},
+                                      {3, 3, 1},
+                                      {2, 2, 1},
+                                      {36, 7, 8347680},
+                                      {42, 30, 11058116888},
+                                      {31, 21, 44352165},
+                                      {12, 10, 66},
+                                      {1, 0, 1},
+                                      {11, 4, 330},
+                                      {1, 1, 1},
+                                      {33, 2, 528},
+                                      {22, 5, 26334},
+                                      {43, 21, 1052049481860},
+                                      {13, 6, 1716},
+                                      {9, 6, 84},
+                                      {41, 21, 269128937220},
+                                      {6, 1, 6},
+                                      {7, 3, 35},
+                                      {4, 3, 4},
+                                      {24, 24, 1},
+                                      {11, 2, 55},
+                                      {23, 23, 1},
+                                      {35, 18, 4537567650},
+                                      {6, 4, 15},
+                                      {27, 1, 27},
+                                      {6, 2, 15},
+                                      {21, 16, 20349},
+                                      {24, 12, 2704156},
+                                      {38, 32, 2760681},
+                                      {46, 16, 991493848554},
+                                      {13, 1, 13},
+                                      {11, 0, 1},
+                                      {28, 26, 378},
+                                      {44, 5, 1086008},
+                                      {21, 20, 21},
+                                      {39, 23, 37711260990},
+                                      {27, 6, 296010},
+                                      {12, 8, 495},
+                                      {22, 18, 7315},
+                                      {27, 2, 351},
+                                      {9, 9, 1},
+                                      {9, 6, 84},
+                                      {10, 7, 120},
+                                      {25, 18, 480700},
+                                      {22, 3, 1540},
+                                      {48, 2, 1128},
+                                      {50, 20, 47129212243960},
+                                      {37, 21, 12875774670},
+                                      {24, 6, 134596},
+                                      {15, 1, 15},
+                                      {39, 21, 62359143990},
+                                      {44, 20, 1761039350070},
+                                      {21, 21, 1},
+                                      {14, 11, 364},
+                                      {43, 0, 1},
+                                      {1, 0, 1},
+                                      {39, 21, 62359143990}};
 
 // Test that the combination class works
 // https://en.wikipedia.org/wiki/Combination
@@ -131,10 +132,10 @@ TEST_CASE("Test Combination", "[utility][motion][splines][Combination]") {
 
     // Loop over all our test values and see if Combination gives the correct result for n choose k
     for (size_t i = 0; i < C.size(); i++) {
-        const int& n   = C[i][0];
-        const int& k   = C[i][1];
-        const int& nCk = C[i][2];
-        int combResult = comb.binomialCoefficient(k, n);
+        const size_t& n         = C[i][0];
+        const size_t& k         = C[i][1];
+        const size_t& nCk       = C[i][2];
+        const size_t combResult = comb.binomialCoefficient(k, n);
         INFO(n << " choose " << k << " = " << nCk << ", got " << combResult);
         REQUIRE(combResult == nCk);
     }
@@ -198,12 +199,12 @@ TEST_CASE("Test Polynom", "[utility][motion][splines][Polynom]") {
     for (size_t i = 0; i < P.size(); i++) {
         // Get the coefficients for the test polynomial and the true differential values for the given x
         std::vector<long int> coefs = {P[i][5], P[i][4], P[i][3], P[i][2], P[i][1], P[i][0]};
-        Eigen::Vector4i result_true(P[i][7], P[i][8], P[i][9], P[i][10]);
-        int x = P[i][6];
+        Eigen::Matrix<long int, 4, 1> result_true(P[i][7], P[i][8], P[i][9], P[i][10]);
+        long int x = P[i][6];
 
         // Create the polynomial from test coefficients and get the computed differential values for the given x
         utility::motion::splines::Polynom poly(coefs);
-        Eigen::Matrix<int long, 4, 1> result_calc(poly.pos(x), poly.vel(x), poly.acc(x), poly.jerk(x));
+        Eigen::Matrix<long int, 4, 1> result_calc(poly.pos(x), poly.vel(x), poly.acc(x), poly.jerk(x));
 
         // Log the polynomial, expected and computed values
         INFO("p(x) = " << coefs[0] << "x^5 + " << coefs[1] << "x^4 + " << coefs[2] << "x^3 + " << coefs[3] << "x^2 + "
@@ -234,7 +235,7 @@ TEST_CASE("Test Smooth Spline", "[utility][motion][splines][SmoothSpline]") {
         spline.reset();
 
         // Get a random number of points for this spline
-        size_t noPoints = rand() % 6;
+        size_t noPoints = static_cast<size_t>(rand() % 6);
         std::vector<Eigen::Vector4d> points;
 
         // This value will keep track of the last t value - we want them to be consecutive, so we will check against
@@ -280,7 +281,7 @@ TEST_CASE("Test Smooth Spline", "[utility][motion][splines][SmoothSpline]") {
             std::vector<double> splineResult = spline.part(i).polynom.getCoefs();
 
             // Check contraints for first endpoint and then the second endpoint in the polynomial
-            for (int k = 0; k < 2; k++) {
+            for (size_t k = 0; k < 2; k++) {
 
                 // We need to check what this spline actually gives for x, and the first and second derivatives
                 // of x, given an input of t. We will then check they match the expected values.
@@ -293,14 +294,14 @@ TEST_CASE("Test Smooth Spline", "[utility][motion][splines][SmoothSpline]") {
                 double t = ((k == 0) ? 0.0 : points[i + 1][0] - points[i][0]);
 
                 // Loop over the coefficients, add to the calculations for each coefficient.
-                // Position: x += a_j t^j
-                // Velocity: xd = j * a_j * t^(j-1)
-                // Acceleration: xdd = j * (j-1) * a_j * t^(j-2)
-                // If j is less than 0, don't add anything since our derivative has become 0 for that term.
-                for (int j = 0; j < int(splineResult.size()); j++) {
-                    x += splineResult[j] * pow(t, j);
-                    xd += (((j - 1) >= 0) ? j * splineResult[j] * pow(t, j - 1) : 0.0);
-                    xdd += (((j - 2) >= 0) ? j * (j - 1) * splineResult[j] * pow(t, j - 2) : 0.0);
+                // Position: x += a_l t^l
+                // Velocity: xd = l * a_l * t^(l-1)
+                // Acceleration: xdd = l * (l-1) * a_l * t^(l-2)
+                // If l is less than 0, don't add anything since our derivative has become 0 for that term.
+                for (int l = 0; l < int(splineResult.size()); l++) {
+                    x += splineResult[size_t(l)] * pow(t, l);
+                    xd += (((l - 1) >= 0) ? l * splineResult[size_t(l)] * pow(t, l - 1) : 0.0);
+                    xdd += (((l - 2) >= 0) ? l * (l - 1) * splineResult[size_t(l)] * pow(t, l - 2) : 0.0);
                 }
 
                 // Log calculated and expected values of each contraint, and the spline coefficients a_0 to a_5
@@ -318,9 +319,9 @@ TEST_CASE("Test Smooth Spline", "[utility][motion][splines][SmoothSpline]") {
 
                 // Check that the contraints hold - do the computed values from the spline match the given random values
                 // Check the difference is within a small error since we are using floating point values
-                REQUIRE(abs(x - points[i + k][1]) < ERROR);
-                REQUIRE(abs(xd - points[i + k][2]) < ERROR);
-                REQUIRE(abs(xdd - points[i + k][3]) < ERROR);
+                REQUIRE(std::abs(x - points[i + k][1]) < ERROR);
+                REQUIRE(std::abs(xd - points[i + k][2]) < ERROR);
+                REQUIRE(std::abs(xdd - points[i + k][3]) < ERROR);
             }
         }
     }

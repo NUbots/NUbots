@@ -41,8 +41,8 @@ namespace {
     public:
         TestReactor(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
             // GIVEN a directory containing two files.
-            std::filesystem::path dir_path = std::filesystem::temp_directory_path() / "directory-watcher-test-XXXXXX";
-            std::string dir_path_string    = dir_path.string();
+            dir_path                    = std::filesystem::temp_directory_path() / "directory-watcher-test-XXXXXX";
+            std::string dir_path_string = dir_path.string();
 
             std::vector<char> dir_path_chars(dir_path_string.c_str(),
                                              dir_path_string.c_str() + dir_path_string.size() + 1);

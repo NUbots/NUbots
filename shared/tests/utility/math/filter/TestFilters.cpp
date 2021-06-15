@@ -165,12 +165,12 @@ static const std::array<MeasurementType, 101> measurements = {
     MeasurementType(-1.08344978673423),   MeasurementType(-1.69966623692842),  MeasurementType(-0.777801698154316),
     MeasurementType(-1.57714784288996),   MeasurementType(-0.971672418368469)};
 
-static constexpr int number_of_particles = 1000;
-static constexpr double deltaT           = 0.05;
+static constexpr int num_particles = 1000;
+static constexpr double deltaT     = 0.05;
 static const MeasurementType measurement_noise(0.2);
 static const Eigen::Vector2d process_noise(0.02, 0.1);
 static const Eigen::Vector2d initial_state(2.0, 0.0);
-static const Eigen::Matrix2d initial_covariance = Eigen::Matrix2d::Identity() * 0.01;
+static const Eigen::Matrix2d initial_cov = Eigen::Matrix2d::Identity() * 0.01;
 
 
 TEST_CASE("Test the UKF", "[utility][math][filter][UKF]") {
@@ -181,9 +181,9 @@ TEST_CASE("Test the UKF", "[utility][math][filter][UKF]") {
     INFO("    Time step.........: " << deltaT);
     INFO("    Process Noise.....: " << process_noise.transpose());
     INFO("    Initial State.....: " << initial_state.transpose());
-    INFO("    Initial Covariance: \n" << initial_covariance);
+    INFO("    Initial Covariance: \n" << initial_cov);
     model_filter.model.process_noise = process_noise;
-    model_filter.set_state(initial_state, initial_covariance);
+    model_filter.set_state(initial_state, initial_cov);
 
     INFO("Feeding noisy measurements into the filter")
     std::array<double, 100> innovations;
@@ -220,13 +220,13 @@ TEST_CASE("Test the UKF", "[utility][math][filter][UKF]") {
         mean_state_error += state_error;
     }
 
-    mean_innovations /= innovations.size();
-    mean_state_error /= actual_state.size();
-    mean_x1_boundary /= actual_state.size();
-    mean_x2_boundary /= actual_state.size();
+    mean_innovations /= static_cast<double>(innovations.size());
+    mean_state_error /= static_cast<double>(actual_state.size());
+    mean_x1_boundary /= static_cast<double>(actual_state.size());
+    mean_x2_boundary /= static_cast<double>(actual_state.size());
 
-    double percentage_x1 = 100.0 * count_x1 / actual_state.size();
-    double percentage_x2 = 100.0 * count_x2 / actual_state.size();
+    const double percentage_x1 = 100.0 * count_x1 / static_cast<double>(actual_state.size());
+    const double percentage_x2 = 100.0 * count_x2 / static_cast<double>(actual_state.size());
 
     INFO("The mean of the innovations is: " << mean_innovations << ". This should be small.");
     INFO("The mean of the state errors is: " << mean_state_error.transpose() << ". This should be small.");
@@ -245,12 +245,12 @@ TEST_CASE("Test the ParticleFilter", "[utility][math][filter][ParticleFilter]") 
 
     INFO("Configuring the ParticleFilter with")
     INFO("    Time step..........: " << deltaT);
-    INFO("    Number of Particles: " << number_of_particles)
+    INFO("    Number of Particles: " << num_particles)
     INFO("    Process Noise......: " << process_noise.transpose());
     INFO("    Initial State......: " << initial_state.transpose());
-    INFO("    Initial Covariance.: \n" << initial_covariance);
+    INFO("    Initial Covariance.: \n" << initial_cov);
     model_filter.model.process_noise = process_noise;
-    model_filter.set_state(initial_state, initial_covariance, number_of_particles);
+    model_filter.set_state(initial_state, initial_cov, num_particles);
 
     INFO("Feeding noisy measurements into the filter")
     std::array<double, 100> innovations;
@@ -287,13 +287,13 @@ TEST_CASE("Test the ParticleFilter", "[utility][math][filter][ParticleFilter]") 
         mean_state_error += state_error;
     }
 
-    mean_innovations /= innovations.size();
-    mean_state_error /= actual_state.size();
-    mean_x1_boundary /= actual_state.size();
-    mean_x2_boundary /= actual_state.size();
+    mean_innovations /= static_cast<double>(innovations.size());
+    mean_state_error /= static_cast<double>(actual_state.size());
+    mean_x1_boundary /= static_cast<double>(actual_state.size());
+    mean_x2_boundary /= static_cast<double>(actual_state.size());
 
-    double percentage_x1 = 100.0 * count_x1 / actual_state.size();
-    double percentage_x2 = 100.0 * count_x2 / actual_state.size();
+    double percentage_x1 = 100.0 * count_x1 / static_cast<double>(actual_state.size());
+    double percentage_x2 = 100.0 * count_x2 / static_cast<double>(actual_state.size());
 
     INFO("The mean of the innovations is: " << mean_innovations << ". This should be small.");
     INFO("The mean of the state errors is: " << mean_state_error.transpose() << ". This should be small.");

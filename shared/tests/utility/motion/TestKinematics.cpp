@@ -39,10 +39,21 @@ using utility::input::ServoID;
 
 static const KinematicsModel kinematics_model = {
     // Leg
-    {0.0, 0.055, 0.045, 0.2, 0.2, 0.04, 0.215, 0.13, 0.085, 0.13, 0.02, 2.0 * 0.055, -1, -1, 1, 1, 1, -1},
+    {0.0f, 0.055f, 0.045f, 0.2f, 0.2f, 0.04f, 0.215f, 0.13f, 0.085f, 0.13f, 0.02f, 2.0f * 0.055f, -1, -1, 1, 1, 1, -1},
     // Head
-    {-0.007, 0.0, 0.21, 0.048, 0.069, 0, 0.065, M_PI / 90.0, 0.068, -M_PI_4, M_PI_4, -M_PI / 6.0, M_PI / 6.0},
-};
+    {-0.007f,
+     0.0f,
+     0.21f,
+     0.048f,
+     0.069f,
+     0.0f,
+     0.065f,
+     float(M_PI) / 90.0f,
+     0.068f,
+     -float(M_PI_4),
+     float(M_PI_4),
+     -float(M_PI) / 6.0f,
+     float(M_PI) / 6.0f}};
 
 static constexpr double ITERATIONS      = 10000;
 static constexpr double ERROR_THRESHOLD = 2e-5;
@@ -65,12 +76,8 @@ TEST_CASE("Test the Head kinematics", "[utility][motion][kinematics][head]") {
 
         // Insert our known sensors (from the calculated angles) into our sensors
         for (const auto& angle : angles) {
-            ServoID servoID;
-            double position;
-
-            std::tie(servoID, position) = angle;
-
-            sensors.servo[static_cast<int>(servoID)].present_position = position;
+            const auto [servoID, position]                               = angle;
+            sensors.servo[static_cast<size_t>(servoID)].present_position = static_cast<float>(position);
         }
 
         // Do our forward kinematics
@@ -105,23 +112,15 @@ TEST_CASE("Test the Leg kinematics", "[utility][motion][kinematics][leg]") {
         std::vector<std::pair<ServoID, double>> left_leg_joints =
             utility::motion::kinematics::calculateLegJoints(kinematics_model, ik_request, LimbID::LEFT_LEG);
         for (const auto& leg_joint : left_leg_joints) {
-            ServoID servoID;
-            double position;
-
-            std::tie(servoID, position) = leg_joint;
-
-            sensors.servo[servoID].present_position = position;
+            const auto [servoID, position]          = leg_joint;
+            sensors.servo[servoID].present_position = static_cast<float>(position);
         }
 
         std::vector<std::pair<ServoID, double>> right_leg_joints =
             utility::motion::kinematics::calculateLegJoints(kinematics_model, ik_request, LimbID::RIGHT_LEG);
         for (const auto& leg_joint : right_leg_joints) {
-            ServoID servoID;
-            double position;
-
-            std::tie(servoID, position) = leg_joint;
-
-            sensors.servo[servoID].present_position = position;
+            const auto [servoID, position]          = leg_joint;
+            sensors.servo[servoID].present_position = static_cast<float>(position);
         }
 
         INFO("Calculating forward kinematics");
@@ -140,8 +139,8 @@ TEST_CASE("Test the Leg kinematics", "[utility][motion][kinematics][leg]") {
             INFO(ServoID(servo_id) << ": " << sensors.servo[servo_id].present_position);
         }
 
-        double lerror = (left_foot_position.matrix().array() - ik_request.matrix().array()).abs().maxCoeff();
-        double rerror = (right_foot_position.matrix().array() - ik_request.matrix().array()).abs().maxCoeff();
+        const double lerror = (left_foot_position.matrix().array() - ik_request.matrix().array()).abs().maxCoeff();
+        const double rerror = (right_foot_position.matrix().array() - ik_request.matrix().array()).abs().maxCoeff();
 
         REQUIRE(lerror == Approx(0.0).margin(ERROR_THRESHOLD));
         REQUIRE(rerror == Approx(0.0).margin(ERROR_THRESHOLD));
