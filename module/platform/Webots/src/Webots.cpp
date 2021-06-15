@@ -39,9 +39,9 @@
 
 // Include headers needed for TCP connection
 extern "C" {
-#include <netdb.h>      /* definition of gethostbyname */
+#include <netdb.h> /* definition of gethostbyname */
 #include <netinet/in.h> /* definition of struct sockaddr_in */
-#include <sys/ioctl.h>  /* definition of ioctl and FIONREAD */
+#include <sys/ioctl.h> /* definition of ioctl and FIONREAD */
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <unistd.h> /* definition of close */
@@ -256,9 +256,12 @@ namespace module::platform {
                 // Because of this, we move the servo as fast as we can to reach the position.
                 // The fastest speed is determined by the config, which comes from the max servo velocity from
                 // NUgus.proto in Webots
-                double speed =
-                    duration.count() > 0 ? diff / std::chrono::duration<double>(duration).count() : max_velocity;
-                speed = std::min(max_velocity, speed);
+                double speed = duration.count() > 0
+                                   ? diff
+                                         / (std::chrono::duration<double, NUClear::clock::period>(duration).count()
+                                            / double(NUClear::clock::period::den))
+                                   : max_velocity;
+                speed        = std::min(max_velocity, speed);
                 // Update our internal state if anything has changed for this servo
                 if (servo_state[target.id].p_gain != target.gain || servo_state[target.id].i_gain != target.gain * 0.0
                     || servo_state[target.id].d_gain != target.gain * 0.0
