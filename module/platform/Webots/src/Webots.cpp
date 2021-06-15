@@ -33,6 +33,7 @@
 #include "message/platform/RawSensors.hpp"
 #include "message/platform/webots/messages.hpp"
 
+#include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 #include "utility/platform/RawSensors.hpp"
 #include "utility/vision/fourcc.hpp"
@@ -64,6 +65,7 @@ namespace module::platform {
     using message::platform::webots::SensorMeasurements;
     using message::platform::webots::SensorTimeStep;
 
+    using utility::input::ServoID;
     using utility::platform::getRawServo;
     using utility::vision::fourcc;
 
@@ -220,7 +222,8 @@ namespace module::platform {
             time_step            = config["time_step"].as<int>();
             min_camera_time_step = config["min_camera_time_step"].as<int>();
             min_sensor_time_step = config["min_sensor_time_step"].as<int>();
-            max_velocity         = config["max_velocity"].as<double>();
+            max_velocity_mx64    = config["max_velocity_mx64"].as<double>();
+            max_velocity_mx106   = config["max_velocity_mx106"].as<double>();
 
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
@@ -256,6 +259,13 @@ namespace module::platform {
                 // Because of this, we move the servo as fast as we can to reach the position.
                 // The fastest speed is determined by the config, which comes from the max servo velocity from
                 // NUgus.proto in Webots
+                double max_velocity = 0.0;
+                if (target.id >= ServoID::R_HIP_YAW && target.id <= ServoID::L_ANKLE_ROLL) {
+                    max_velocity == max_velocity_mx106;
+                }
+                else {
+                    max_velocity == max_velocity_mx64;
+                }
                 double speed = duration.count() > 0
                                    ? diff / (double(duration.count()) / double(NUClear::clock::period::den))
                                    : max_velocity;
