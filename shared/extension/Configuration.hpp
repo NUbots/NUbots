@@ -176,7 +176,7 @@ namespace extension {
         }
 
         template <typename T, typename... Args>
-        T as(Args&& args...) const {
+        T as(Args&&... args) const {
             return config.as<T>(std::forward<Args>(args)...);
         }
 
