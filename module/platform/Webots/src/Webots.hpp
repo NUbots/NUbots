@@ -84,7 +84,8 @@ namespace module::platform {
         /// @brief The minimum allowed time between two sensor measurements, not including the camera
         int min_sensor_time_step;
         /// @brief The maximum velocity allowed by the NUgus motors in webots
-        double max_velocity;
+        double max_velocity_mx64;
+        double max_velocity_mx106;
 
         /// @brief Current state of a servo
         struct ServoState {
