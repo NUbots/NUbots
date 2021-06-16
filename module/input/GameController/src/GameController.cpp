@@ -70,6 +70,8 @@ namespace module::input {
                       TEAM_ID   = globalConfig.team_id;
                       send_port = config["send_port"].as<uint>();
 
+                      udp_filter_address = config["udp_filter_address"].as<std::string>("");
+
                       // If we are changing ports (the port starts at 0 so this should start it the first time)
                       if (config["receive_port"].as<uint>() != recieve_port) {
 
@@ -86,6 +88,16 @@ namespace module::input {
                           std::tie(listenHandle, std::ignore, std::ignore) =
                               on<UDP::Broadcast, With<GameState>>(recieve_port)
                                   .then([this](const UDP::Packet& p, const GameState& gameState) {
+                                      std::string remoteAddr = ipAddressIntToString(p.remote.address);
+
+                                      if (!udp_filter_address.empty() && remoteAddr != udp_filter_address) {
+                                          log<NUClear::INFO>("Ignoring UDP packet from",
+                                                             remoteAddr,
+                                                             "as it doesn't match configured filter address",
+                                                             udp_filter_address);
+                                          return;
+                                      }
+
                                       // Get our packet contents
                                       const GameControllerPacket& newPacket =
                                           *reinterpret_cast<const GameControllerPacket*>(p.payload.data());
@@ -601,5 +613,16 @@ namespace module::input {
         }
 
         throw std::runtime_error("No opponent teams not found");  // should never happen!
+    }
+
+    std::string GameController::ipAddressIntToString(const uint32_t ipAddr) {
+        uint32_t ipAddrN = htonl(ipAddr);
+
+        char c[255];
+        std::memset(c, 0, sizeof(c));
+
+        std::string addr = inet_ntop(AF_INET, &ipAddrN, c, sizeof(c));
+
+        return addr;
     }
 }  // namespace module::input

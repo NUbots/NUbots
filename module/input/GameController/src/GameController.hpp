@@ -48,6 +48,7 @@ namespace module::input {
         uint TEAM_ID;
         uint PLAYER_ID;
         uint BROADCAST_IP = 0xFFFFFFFF;
+        std::string udp_filter_address;
 
         bool penaltyOverride = false;
         bool selfPenalised   = true;
@@ -65,6 +66,8 @@ namespace module::input {
         const gamecontroller::Team& getOpponentTeam(const gamecontroller::GameControllerPacket& packet) const;
         message::input::GameState::Data::PenaltyReason getPenaltyReason(
             const gamecontroller::PenaltyState& penaltyState) const;
+
+        std::string ipAddressIntToString(const uint32_t ipAddr);
 
     public:
         explicit GameController(std::unique_ptr<NUClear::Environment> environment);
