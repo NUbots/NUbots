@@ -17,27 +17,22 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "GlobalConfig.h"
+#include "GlobalConfig.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/support/GlobalConfig.h"
+#include "message/support/GlobalConfig.hpp"
 
-namespace module {
-namespace support {
-    namespace configuration {
-        using extension::Configuration;
+namespace module::support::configuration {
+    using extension::Configuration;
 
-        GlobalConfig::GlobalConfig(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment)) {
+    GlobalConfig::GlobalConfig(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-            on<Configuration>("GlobalConfig.yaml").then([this](const Configuration& config) {
-                auto msg      = std::make_unique<message::support::GlobalConfig>();
-                msg->playerId = config["playerId"].as<uint32_t>();
-                msg->teamId   = config["teamId"].as<uint32_t>();
-                emit(msg);
-            });
-        }
-    }  // namespace configuration
-}  // namespace support
-}  // namespace module
+        on<Configuration>("GlobalConfig.yaml").then([this](const Configuration& config) {
+            auto msg       = std::make_unique<message::support::GlobalConfig>();
+            msg->player_id = config["player_id"].as<uint32_t>();
+            msg->team_id   = config["team_id"].as<uint32_t>();
+            emit(msg);
+        });
+    }
+}  // namespace module::support::configuration

@@ -17,12 +17,11 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "NUsight.h"
+#include "NUsight.hpp"
 
-#include "message/support/nusight/DataPoint.h"
+#include "message/support/nusight/DataPoint.hpp"
 
-namespace module {
-namespace support {
+namespace module::support {
     using message::support::nusight::DataPoint;
 
     void NUsight::provideDataPoints() {
@@ -32,5 +31,4 @@ namespace support {
                 powerplant.emit_shared<Scope::NETWORK>(std::move(dataPoint), "nusight", false);
             }));
     }
-}  // namespace support
-}  // namespace module
+}  // namespace module::support

@@ -17,33 +17,32 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#include "message/support/nusight/Overview.h"
+#include "message/support/nusight/Overview.hpp"
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
-#include "NUsight.h"
+#include "NUsight.hpp"
 
-#include "message/behaviour/Behaviour.h"
-#include "message/behaviour/KickPlan.h"
-#include "message/behaviour/WalkPath.h"
-#include "message/input/GameState.h"
-#include "message/input/Image.h"
-#include "message/input/Sensors.h"
-#include "message/localisation/Ball.h"
-#include "message/localisation/Field.h"
-#include "message/motion/WalkCommand.h"
-#include "message/support/GlobalConfig.h"
-#include "message/vision/Ball.h"
-#include "message/vision/Goal.h"
+#include "message/behaviour/Behaviour.hpp"
+#include "message/behaviour/KickPlan.hpp"
+#include "message/behaviour/WalkPath.hpp"
+#include "message/input/GameState.hpp"
+#include "message/input/Image.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/localisation/Ball.hpp"
+#include "message/localisation/Field.hpp"
+#include "message/motion/WalkCommand.hpp"
+#include "message/support/GlobalConfig.hpp"
+#include "message/vision/Ball.hpp"
+#include "message/vision/Goal.hpp"
 
-#include "utility/localisation/transform.h"
+#include "utility/localisation/transform.hpp"
 
 /**
  * @author Monica Olejniczak
  */
-namespace module {
-namespace support {
+namespace module::support {
 
     using message::behaviour::Behaviour;
     using message::behaviour::KickPlan;
@@ -94,7 +93,7 @@ namespace support {
 
                     // Set properties
                     msg->timestamp       = NUClear::clock::now();
-                    msg->robot_id        = global ? global->playerId : 0;
+                    msg->robot_id        = global ? global->player_id : 0;
                     msg->role_name       = cli ? cli->at(0) : "";
                     msg->battery         = sensors ? sensors->battery : 0;
                     msg->voltage         = sensors ? sensors->voltage : 0;
@@ -106,7 +105,17 @@ namespace support {
 
                         // If we have field information
                         if (field) {
-                            Eigen::Affine3d Hfw = utility::localisation::fieldStateToTransform3D(field->position);
+                            // Transform the field state into Hfw
+                            Eigen::Affine3d Hfw;
+
+                            Eigen::Affine2d position(field->position);
+                            Hfw.translation() =
+                                Eigen::Vector3d(position.translation().x(), position.translation().y(), 0);
+
+                            // Rotate field-position.rotation().angle() radians about the Z-axis
+                            Hfw.linear() = Eigen::AngleAxisd(Eigen::Rotation2Dd(position.rotation()).angle(),
+                                                             Eigen::Vector3d::UnitZ())
+                                               .toRotationMatrix();
 
                             // Get our torso in field space
                             Eigen::Affine3d Hft  = Hfw * Htw.inverse();
@@ -182,5 +191,4 @@ namespace support {
                 }
             }));
     }
-}  // namespace support
-}  // namespace module
+}  // namespace module::support

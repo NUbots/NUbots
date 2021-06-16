@@ -1,27 +1,23 @@
-#include "GreenHorizonDetector.h"
+#include "GreenHorizonDetector.hpp"
 
 #include <fmt/format.h>
 #include <numeric>
 #include <set>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/vision/GreenHorizon.h"
-#include "message/vision/VisualMesh.h"
+#include "message/vision/GreenHorizon.hpp"
+#include "message/vision/VisualMesh.hpp"
 
-#include "utility/math/geometry/ConvexHull.h"
-#include "utility/vision/visualmesh/VisualMesh.h"
+#include "utility/math/geometry/ConvexHull.hpp"
+#include "utility/vision/visualmesh/VisualMesh.hpp"
 
-namespace module {
-namespace vision {
+namespace module::vision {
 
     using extension::Configuration;
 
     using message::vision::VisualMesh;
     using GreenHorizonMsg = message::vision::GreenHorizon;
-
-    static constexpr int LINE_INDEX  = 2;
-    static constexpr int FIELD_INDEX = 3;
 
     GreenHorizonDetector::GreenHorizonDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -40,21 +36,24 @@ namespace vision {
             const auto& neighbours                              = mesh.neighbourhood;
             const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = mesh.rays;
             const float world_offset                            = std::atan2(mesh.Hcw(0, 1), mesh.Hcw(0, 0));
+            const uint32_t LINE_INDEX                           = mesh.class_map.at("line");
+            const uint32_t FIELD_INDEX                          = mesh.class_map.at("field");
 
             // Get some indices to partition
             std::vector<int> indices(mesh.indices.size());
             std::iota(indices.begin(), indices.end(), 0);
 
             // Partition the indices such that we only have the field points that dont have field surrounding them
+            // Only check the top two neighbours of each point
             auto boundary = utility::vision::visualmesh::partition_points(
                 indices.begin(),
                 indices.end(),
                 neighbours,
                 [&](const int& idx) {
-                    return idx == int(indices.size())
-                           || (cls(FIELD_INDEX, idx) + cls(LINE_INDEX, idx) >= config.confidence_threshold);
+                    return idx == int(indices.size()) || cls(FIELD_INDEX, idx) >= config.confidence_threshold
+                           || cls(LINE_INDEX, idx) >= config.confidence_threshold;
                 },
-                {4, 5});
+                {1, 2});
 
 
             // Discard indices that are not on the boundary
@@ -125,7 +124,8 @@ namespace vision {
                         else {
                             if (config.debug) {
                                 log<NUClear::DEBUG>(
-                                    "The clusters are neither overlapping, nor are they not overlapping. What have you "
+                                    "The clusters are neither overlapping, nor are they not overlapping. What have "
+                                    "you "
                                     "done???");
                                 log<NUClear::DEBUG>(fmt::format("[{}, {}] -> [{}, {}], [{}, {}] -> [{}, {}]",
                                                                 *range_a.first,
@@ -164,9 +164,10 @@ namespace vision {
                 // Preserve mesh so that anyone using the GreenHorizon can access the original data
                 msg->mesh = const_cast<VisualMesh*>(&mesh)->shared_from_this();
 
-                msg->camera_id = mesh.camera_id;
+                msg->id        = mesh.id;
                 msg->Hcw       = mesh.Hcw;
                 msg->timestamp = mesh.timestamp;
+                msg->class_map = mesh.class_map;
 
                 // Find the convex hull of the cluster
                 msg->horizon.reserve(hull_indices.size());
@@ -188,6 +189,5 @@ namespace vision {
                 emit(std::move(msg));
             }
         });
-    }  // namespace vision
-}  // namespace vision
-}  // namespace module
+    }
+}  // namespace module::vision

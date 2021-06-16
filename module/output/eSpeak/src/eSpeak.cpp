@@ -17,14 +17,13 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "eSpeak.h"
+#include "eSpeak.hpp"
 
 #include <espeak/speak_lib.h>
 
-#include "message/output/Say.h"
+#include "message/output/Say.hpp"
 
-namespace module {
-namespace output {
+namespace module::output {
 
     using message::output::Say;
 
@@ -56,6 +55,4 @@ namespace output {
 
         on<Shutdown>().then(espeak_Terminate);
     }
-
-}  // namespace output
-}  // namespace module
+}  // namespace module::output

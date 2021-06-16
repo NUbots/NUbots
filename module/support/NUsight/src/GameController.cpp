@@ -17,10 +17,9 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "NUsight.h"
+#include "NUsight.hpp"
 
-namespace module {
-namespace support {
+namespace module::support {
     using TeamColour     = message::input::GameEvents::TeamColour;
     using Score          = message::input::GameEvents::Score;
     using GoalScored     = message::input::GameEvents::GoalScored;
@@ -233,5 +232,4 @@ namespace support {
 
         powerplant.emit_shared<Scope::NETWORK>(std::move(gameState), "nusight", true);
     }
-}  // namespace support
-}  // namespace module
+}  // namespace module::support

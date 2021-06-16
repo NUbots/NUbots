@@ -66,6 +66,13 @@ packer/build.pwi
 *.tdo
 *TSWLatexianTemp*
 
+# Tests
+tests_output/
+
+# Logs
+/home/nubots/NUbots/log/*
+log
+
 # Misc
 tags
 *.swp
@@ -75,5 +82,3 @@ tags
 .idea
 *.sublime-workspace
 \.vscode/ipch
-
-*.nbs*

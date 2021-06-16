@@ -1,5 +1,4 @@
-Darwin Hardware I/O
-===================
+# Darwin Hardware Simulator
 
 ## Description
 
@@ -13,29 +12,24 @@ Darwin Hardware I/O connects at startup to the Darwin controller located on
 aborted.
 
 This module reads the current status of the Darwin 50 times per second and
-emits it as a `message::DarwinSensors` object. This includes the CM740 error
+emits it as a `message::platform::RawSensors` object. This includes the CM740 error
 code, LED panel, head and eye LED colour, buttons, voltage, accelerometer,
 gyroscope, left and right force-sensing resistors and each servo.
 
 To change the colour of the Darwin's head or eye LEDs, emit a
-`message::DarwinSensors::EyeLED` or `message::DarwinSensors::HeadLED`
+`message::platform::RawSensors::EyeLED` or `message::platform::RawSensors::HeadLED`
 containing the colour you wish to set them to.
 
-To control the Darwin's servos, use `message::DarwinServoCommand`. You may
-emit these commands individually or emit several at once in a `std::vector`.
+To control the Darwin's servos, use `message::motion::ServoTarget`. You may
+emit these commands individually or emit several at once in a `message::motion::ServoTargets`.
 
 ## Consumes
 
-* `message::DarwinSensors::EyeLED` requesting a change to eye LED colour
-* `message::DarwinSensors::HeadLED` requesting a change to head LED colour
-* `message::DarwinServoCommand` requesting a single servo command be performed
-* `std::vector<message::DarwinServoCommand>` requesting a batch of servo
-  commands be performed
+- `message::platform::RawSensors::EyeLED` requesting a change to eye LED colour
+- `message::platform::RawSensors::HeadLED` requesting a change to head LED colour
+- `message::motion::ServoTarget` requesting a single servo command be performed
+- `message::motion::ServoTargets` requesting a batch of servo commands be performed
 
 ## Emits
 
-* `message::DarwinSensors` containing the current status of the Darwin
-
-## Dependencies
-
-* The USB TTY communication relies on Linux-specific system calls
+- `message::platform::RawSensors` containing the current status of the Darwin

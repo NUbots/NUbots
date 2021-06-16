@@ -1,0 +1,5 @@
+{
+  "execMap": {
+    "ts": "cross-env TS_NODE_FILES=true ts-node"
+  }
+}

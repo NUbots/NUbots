@@ -7,9 +7,8 @@ nuclear_role(
   # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
   motion::KinematicsConfiguration
   support::configuration::GlobalConfig
-  support::configuration::NetworkConfiguration
-  # platform::darwin::HardwareIO
-  support::logging::DataPlayback
-  platform::darwin::SensorFilter
+  network::NUClearNet
+  platform::darwin::HardwareIO
+  input::SensorFilter
   support::NUsight
 )

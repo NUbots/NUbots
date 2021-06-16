@@ -17,26 +17,26 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "GoalDetector.h"
+#include "GoalDetector.hpp"
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <fmt/format.h>
+#include <numeric>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/support/FieldDescription.h"
-#include "message/vision/Goal.h"
-#include "message/vision/GreenHorizon.h"
+#include "message/support/FieldDescription.hpp"
+#include "message/vision/Goal.hpp"
+#include "message/vision/GreenHorizon.hpp"
 
-#include "utility/math/coordinates.h"
-#include "utility/math/geometry/ConvexHull.h"
-#include "utility/support/yaml_expression.h"
-#include "utility/vision/Vision.h"
-#include "utility/vision/visualmesh/VisualMesh.h"
+#include "utility/math/coordinates.hpp"
+#include "utility/math/geometry/ConvexHull.hpp"
+#include "utility/support/yaml_expression.hpp"
+#include "utility/vision/Vision.hpp"
+#include "utility/vision/visualmesh/VisualMesh.hpp"
 
-namespace module {
-namespace vision {
+namespace module::vision {
 
     using extension::Configuration;
 
@@ -47,8 +47,6 @@ namespace vision {
 
     using utility::math::coordinates::cartesianToSpherical;
     using utility::support::Expression;
-
-    static constexpr int GOAL_INDEX = 1;
 
     GoalDetector::GoalDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
@@ -70,6 +68,7 @@ namespace vision {
                 const auto& neighbours                              = horizon.mesh->neighbourhood;
                 const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = horizon.mesh->rays;
                 const float world_offset                            = std::atan2(horizon.Hcw(0, 1), horizon.Hcw(0, 0));
+                const int GOAL_INDEX                                = horizon.class_map.at("goal");
 
                 // Get some indices to partition
                 std::vector<int> indices(horizon.mesh->indices.size());
@@ -118,14 +117,15 @@ namespace vision {
                 clusters.resize(std::distance(clusters.begin(), green_boundary));
 
                 if (config.debug) {
-                    log<NUClear::DEBUG>(fmt::format("Found {} clusters below green horizon", clusters.size()));
+                    log<NUClear::DEBUG>(
+                        fmt::format("Found {} clusters that intersect the green horizon", clusters.size()));
                 }
 
                 if (clusters.size() > 0) {
                     auto goals = std::make_unique<Goals>();
                     goals->goals.reserve(clusters.size());
 
-                    goals->camera_id = horizon.camera_id;
+                    goals->id        = horizon.id;
                     goals->timestamp = horizon.timestamp;
                     goals->Hcw       = horizon.Hcw;
 
@@ -141,7 +141,7 @@ namespace vision {
                                 return idx == int(indices.size())
                                        || (cls(GOAL_INDEX, idx) >= config.confidence_threshold);
                             },
-                            {2});
+                            {0});
                         // Return true if the right neighbour is NOT a goal point
                         auto other = utility::vision::visualmesh::partition_points(
                             right,
@@ -279,15 +279,13 @@ namespace vision {
                             // If they are close enough then assign left and right sides
                             if (config.debug) {
                                 log<NUClear::DEBUG>(fmt::format("Camera {}: Goal post 0 distance = {}",
-                                                                horizon.camera_id,
+                                                                horizon.id,
                                                                 it1->post.distance));
                                 log<NUClear::DEBUG>(fmt::format("Camera {}: Goal post 1 distance = {}",
-                                                                horizon.camera_id,
+                                                                horizon.id,
                                                                 it2->post.distance));
-                                log<NUClear::DEBUG>(fmt::format("Camera {}: Goal width = {} ({})",
-                                                                horizon.camera_id,
-                                                                width,
-                                                                disagreement));
+                                log<NUClear::DEBUG>(
+                                    fmt::format("Camera {}: Goal width = {} ({})", horizon.id, width, disagreement));
                             }
                             if (disagreement < config.disagreement_ratio) {
                                 auto it = pairs.find(it1);
@@ -328,5 +326,4 @@ namespace vision {
                 }
             });
     }
-}  // namespace vision
-}  // namespace module
+}  // namespace module::vision

@@ -1,4 +1,4 @@
-#include "Camera.h"
+#include "Camera.hpp"
 
 extern "C" {
 #include <aravis-0.8/arv.h>
@@ -7,21 +7,20 @@ extern "C" {
 #include <cmath>
 #include <fmt/format.h>
 
-#include "aravis_wrap.h"
-#include "description_to_fourcc.h"
-#include "settings.h"
-#include "time_sync.h"
+#include "aravis_wrap.hpp"
+#include "description_to_fourcc.hpp"
+#include "settings.hpp"
+#include "time_sync.hpp"
 
-#include "message/input/Image.h"
-#include "message/input/Sensors.h"
+#include "message/input/Image.hpp"
+#include "message/input/Sensors.hpp"
 
-#include "utility/input/ServoID.h"
-#include "utility/support/yaml_expression.h"
-#include "utility/vision/fourcc.h"
-#include "utility/vision/projection.h"
+#include "utility/input/ServoID.hpp"
+#include "utility/support/yaml_expression.hpp"
+#include "utility/vision/fourcc.hpp"
+#include "utility/vision/projection.hpp"
 
-namespace module {
-namespace input {
+namespace module::input {
 
     using extension::Configuration;
     using message::input::Image;
@@ -275,8 +274,8 @@ namespace input {
             // Add buffers to the queue
             int payload_size = arv::camera_get_payload(cam.get());
             for (size_t i = 0; i < config["buffer_count"].as<size_t>(); i++) {
-                // TODO(trent) Eventually we should use preallocated page aligned data so that we can map directly to
-                // the GPU.
+                // TODO(trent) Eventually we should use preallocated page aligned data so that we can map directly
+                // to the GPU.
                 // TODO(trent) Make an std::vector and use it in the buffer to avoid copying to one later
                 arv_stream_push_buffer(stream.get(), arv_buffer_new(payload_size, nullptr));
             }
@@ -400,7 +399,7 @@ namespace input {
                 msg->dimensions = Eigen::Matrix<unsigned int, 2, 1>(width, height);
                 // TODO(trent) use an std::vector here to avoid the copy
                 msg->data.insert(msg->data.end(), buff, buff + buffSize);
-                msg->camera_id = context->camera_id;
+                msg->id        = context->id;
                 msg->name      = context->name;
                 msg->timestamp = NUClear::clock::time_point(nanoseconds(ts));
 
@@ -473,6 +472,4 @@ namespace input {
     void Camera::control_lost(ArvGvDevice*, CameraContext* context) {
         NUClear::log<NUClear::FATAL>(fmt::format("Control of a the {} camera has been lost", context->name));
     }
-
-}  // namespace input
-}  // namespace module
+}  // namespace module::input

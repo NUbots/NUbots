@@ -1,13 +1,10 @@
-#ifndef UTILITY_CLOCK_H
-#define UTILITY_CLOCK_H
+#ifndef UTILITY_CLOCK_HPP
+#define UTILITY_CLOCK_HPP
 
 #include <nuclear>
 
-namespace utility {
-namespace clock {
+namespace utility::clock {
     extern double custom_rtf;  // real time factor
-    extern std::chrono::steady_clock::time_point last_Update;
-}  // namespace clock
-}  // namespace utility
+}  // namespace utility::clock
 
-#endif  // UTILITY_CLOCK_H
+#endif  // UTILITY_CLOCK_HPP
