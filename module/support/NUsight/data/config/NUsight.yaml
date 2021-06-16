@@ -16,7 +16,7 @@ reaction_handles:
   # Raw image
   image: true
   # compressed image
-  compressed_image: false
+  compressed_image: true
   # Classified image
   classified_image: true
   # Vision objects including goals, balls and debugging lines
@@ -34,9 +34,9 @@ reaction_handles:
   # Subsumption data
   subsumption: false
   # GameController information
-  game_state: false
+  game_state: true
   # Behaviour information
-  behaviour: false
+  behaviour: true
   # Statistics about reactions, modules and runtimes
   reaction_statistics: false
 

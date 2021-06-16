@@ -22,6 +22,7 @@ nuclear_role(
   vision::GreenHorizonDetector
   vision::GoalDetector
   vision::BallDetector
+  output::ImageCompressor
   # Localisation
   localisation::BallLocalisation
   localisation::RobotParticleLocalisation
