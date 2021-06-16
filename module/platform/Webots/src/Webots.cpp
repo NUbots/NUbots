@@ -261,10 +261,10 @@ namespace module::platform {
                 // NUgus.proto in Webots
                 double max_velocity = 0.0;
                 if (target.id >= ServoID::R_HIP_YAW && target.id <= ServoID::L_ANKLE_ROLL) {
-                    max_velocity == max_velocity_mx106;
+                    max_velocity = max_velocity_mx106;
                 }
                 else {
-                    max_velocity == max_velocity_mx64;
+                    max_velocity = max_velocity_mx64;
                 }
                 double speed = duration.count() > 0
                                    ? diff / (double(duration.count()) / double(NUClear::clock::period::den))
