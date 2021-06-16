@@ -322,10 +322,7 @@ namespace module::platform {
             // Get torso to head, and torso to world
             Eigen::Affine3d Htp(sensors.Htx[ServoID::HEAD_PITCH]);
             Eigen::Affine3d Htw(sensors.Htw);
-            Eigen::Affine3d Hwp = Htp;
-            if (!isnan(Htw.matrix().maxCoeff())) {
-                Hwp = Htw.inverse() * Htp;
-            }
+            Eigen::Affine3d Hwp = Htw.inverse() * Htp;
 
             Hwps.push_back(std::make_pair(sensors.timestamp, Hwp));
         });
