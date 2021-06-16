@@ -490,9 +490,10 @@ namespace module::input {
                     if (foot_down && !prev_foot_down) {
                         const auto filterState = MotionModel<double>::StateVec(motionFilter.get());
                         Eigen::Affine3d Hwt;
-                        Hwt.linear() = quat.toRotationMatrix();
+                        Hwt.linear()      = quat.toRotationMatrix();
+                        Hwt.translation() = Eigen::Vector3d(0.0, 0.0, 0.51);
                         // Hwt.linear()      = filterState.Rwt.toRotationMatrix();
-                        Hwt.translation() = filterState.rTWw;
+                        // Hwt.translation() = filterState.rTWw;
 
                         Eigen::Affine3d Htg(utility::motion::kinematics::calculateGroundSpace(Htf, Hwt));
 
