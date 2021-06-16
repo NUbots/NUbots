@@ -68,13 +68,130 @@ if(CI_BUILD)
   set(CMAKE_C_CLANG_TIDY ${CMAKE_C_CLANG_TIDY} -warnings-as-errors=*)
 endif()
 
-# Enable address sanitizer
+# Options common to all sanitizers. See https://github.com/google/sanitizers/wiki/SanitizerCommonFlags
+# TODO(KipHamiltons): add python code to run.py to print an advisory and set the env vars that way
+set(SANITIZER_OPTIONS
+    "fast_unwind_on_check=true fast_unwind_on_fatal=true external_symbolizer_path=/usr/local/bin/llvm-symbolizer"
+)
+# Verbosity of sanitizers gets its own variable, so we can set it manually
+set(VERBOSE_SANITIZERS
+    "0"
+    CACHE STRING "Verbosity of Sanitizers. # 0 (default) => silent, 1 => a bit of output, 2 => more output."
+)
+if(VERBOSE_SANITIZERS STREQUAL "2")
+  string(APPEND SANITIZER_OPTIONS " verbosity=2")
+elseif(VERBOSE_SANITIZERS STREQUAL "1")
+  string(APPEND SANITIZER_OPTIONS " verbosity=1")
+endif()
+
+# Enable address sanitizer (implicitly enables leak sanitizer too)
 option(USE_ASAN "Enable address sanitization" OFF)
 if(USE_ASAN)
-  add_compile_options(-fsanitize=address -fno-omit-frame-pointer -U_FORTIFY_SOURCE -fno-common)
+  # These sanitizers are mutually exclusive
+  if(USE_MSAN)
+    message(FATAL_ERROR "You have ADDRESS sanitizer and MEMORY sanitizer on. These are incompatible together"
+                        "Turn one of them off to get rid of this error."
+    )
+  elseif(USE_TSAN)
+    message(FATAL_ERROR "You have ADDRESS sanitizer and THREAD sanitizer on. These are incompatible together"
+                        "Turn one of them off to get rid of this error."
+    )
+  endif()
+  # Set the variables/flags for running ASAN
+  add_compile_options(-fsanitize=address -g -fno-omit-frame-pointer -U_FORTIFY_SOURCE -fno-common)
   add_link_options(-fsanitize=address)
   link_libraries(asan)
+  set(ENV{ASAN_OPTIONS} SANITIZER_OPTIONS)
 endif()
+
+# Enable thread sanitizer
+option(USE_TSAN "Enable thread sanitization. Note that there is an enormous expected overhead" OFF)
+if(USE_TSAN)
+  # These sanitizers are mutually exclusive
+  if(USE_MSAN)
+    message(FATAL_ERROR "You have THREAD sanitizer and MEMORY sanitizer on. These are incompatible together"
+                        "Turn one of them off to get rid of this error."
+    )
+  endif()
+  # We need to use clang to use TSAN
+  message(STATUS "Memory sanitizer enabled. Forcing clang as project compiler")
+  set(PROJECT_COMPILER
+      "clang"
+      CACHE STRING "Compiler to use for C and C++ source."
+  )
+  # Set the variables/flags for running TSAN
+  add_compile_options(-fsanitize=thread -g -fno-omit-frame-pointer -U_FORTIFY_SOURCE -fno-common)
+  add_link_options(-fsanitize=thread)
+  link_libraries(tsan)
+  set(ENV{TSAN_OPTIONS} SANITIZER_OPTIONS)
+endif()
+
+# Enable memory sanitizer
+option(USE_MSAN "Enable memory sanitization" OFF)
+if(USE_MSAN)
+  # Memory sanitizer does not work with static libraries. We exit if both are enabled
+  if(STATIC_LIBRARIES)
+    message(FATAL_ERROR "You have memory sanitizer and static libraries on. These are incompatible together."
+                        "Turn one of them off to get rid of this error."
+    )
+  endif()
+  # We need to use clang to use MSAN
+  message(STATUS "Memory sanitizer enabled. Forcing clang as project compiler")
+  set(PROJECT_COMPILER
+      "clang"
+      CACHE STRING "Compiler to use for C and C++ source."
+  )
+  # Set the variables/flags for running MSAN
+  add_compile_options(
+    -fsanitize=memory -g -fno-omit-frame-pointer -U_FORTIFY_SOURCE -fno-common -fsanitize-memory-use-after-dtor
+  )
+  add_link_options(-fsanitize=memory)
+  set(ENV{MSAN_OPTIONS} SANITIZER_OPTIONS)
+endif()
+
+# Enable undefined behaviour sanitizer
+option(USE_UBSAN "Enable undefined behaviour sanitization" OFF)
+if(USE_UBSAN)
+  # -fsanitize has several extra options for undefined or bug-prone behaviour we can enable as well, so we add them too
+  add_compile_options(
+    -fsanitize=undefined,float-divide-by-zero,unsigned-integer-overflow,implicit-conversion,local-bounds,nullability -g
+    -fno-omit-frame-pointer -U_FORTIFY_SOURCE -fno-common -fno-sanitize-recover=1
+  )
+  add_link_options(-fsanitize=undefined)
+  link_libraries(ubsan)
+  # Set the variables/flags for running UBSAN
+  set(UBSAN_OPTIONS SANITIZER_OPTIONS)
+  string(APPEND UBSAN_OPTIONS " UBSAN_OPTIONS=print_stacktrace=1")
+  set(ENV{UBSAN_OPTIONS} UBSAN_OPTIONS)
+endif()
+
+# Set the compiler for the project
+if(PROJECT_COMPILER STREQUAL "clang")
+  set(CMAKE_C_COMPILER "clang")
+  set(CMAKE_CXX_COMPILER "clang")
+elseif(PROJECT_COMPILER STREQUAL "gcc")
+  set(CMAKE_C_COMPILER "gcc")
+  set(CMAKE_CXX_COMPILER "gcc")
+elseif(PROJECT_COMPILER)
+  message(WARNING "Unsupported compiler selected. Defaulting to gcc")
+  set(PROJECT_COMPILER
+      "gcc"
+      CACHE STRING "Compiler to use for C and C++ source."
+  )
+  set(CMAKE_C_COMPILER "gcc")
+  set(CMAKE_CXX_COMPILER "gcc")
+else()
+  # Don't bother warning if no compiler was selected. We default to using gcc
+  set(PROJECT_COMPILER
+      "gcc"
+      CACHE STRING "Compiler to use for C and C++ source."
+  )
+  set(CMAKE_C_COMPILER "gcc")
+  set(CMAKE_CXX_COMPILER "gcc")
+endif()
+
+# Set the possible compilers we use for cmake-gui
+set_property(CACHE PROJECT_COMPILER PROPERTY STRINGS "clang" "gcc")
 
 # Output the compilation database
 set(CMAKE_EXPORT_COMPILE_COMMANDS
