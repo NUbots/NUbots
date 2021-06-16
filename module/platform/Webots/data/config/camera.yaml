@@ -1,0 +1,39 @@
+# serial_number: 0
+
+lens:
+  # Lens:
+  # Camera:
+
+  # Theoretical normalised focal length
+  # Lens Focal Length =
+  # Camera Pixel Size =
+  # focal_length / (camera_pixel_size * width)
+
+  # NOTE: all lens parameters are based on a full size image (without width/height/offset values)
+
+  # Lens projection type
+  projection: RECTILINEAR
+  # Normalised focal length: focal length in pixels / image width
+  focal_length: 0.34767878619271286
+  # Normalised image centre offset: pixels from centre to optical axis / image width
+  centre: [0, 0]
+  # The polynomial distortion coefficients for the lens
+  k: [0.46673390301927425, 0.15017118169604132]
+  # The angular diameter that the lens covers (the area that light hits on the sensor) or auto for the entire sensor
+  fov: 90 * pi / 180
+  # The homogenous transform from the rigid platform this camera is attached to to its optical location
+  Hpc:
+  - [0.9997403694613228, -0.016551656784825577, -0.01566002262642871, 0.08893612063588988]
+  - [0.01728764296000275, 0.9986932814319833, 0.04809227613146373, 0.03529909622045881]
+  - [0.014843552535558163, -0.04835051478781678, 0.9987201292902445, 0.0713674563254241]
+  - [0.0, 0.0, 0.0, 1.0]
+
+settings:
+  # PixelFormat: BayerRG8
+  Width: 1280
+  Height: 1024
+  OffsetX: 0
+  OffsetY: 0
+  # ExposureAuto: Continuous
+  # GainAuto: Continuous
+  # BalanceWhiteAuto: Contsinuous

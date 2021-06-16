@@ -20,12 +20,16 @@
 #ifndef MODULE_PLATFORM_WEBOTS_HPP
 #define MODULE_PLATFORM_WEBOTS_HPP
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <array>
 #include <atomic>
+#include <mutex>
 #include <nuclear>
 #include <string>
 #include <vector>
 
+#include "message/input/Image.hpp"
 #include "message/platform/webots/ConnectRequest.hpp"
 #include "message/platform/webots/messages.hpp"
 
@@ -121,6 +125,23 @@ namespace module::platform {
         /// @brief Atomic variable indicating that a reconnect is currently in progress
         std::atomic_bool active_reconnect{false};
         bool connection_active = false;
+
+        std::mutex sensors_mutex;
+        std::vector<std::pair<NUClear::clock::time_point, Eigen::Affine3d>> Hwps;
+
+        struct CameraContext {
+            Webots& reactor;
+            std::string name;
+            uint32_t id;
+            message::input::Image::Lens lens;
+            // Homogenous transform from platform (p) to camera where platform is the rigid body the camera is attached
+            // to
+            Eigen::Affine3d Hpc;
+        };
+
+        std::unique_ptr<CameraContext> context;
+
+        uint32_t num_cameras = 0;
 
     public:
         /// @brief Called by the powerplant to build and setup the webots reactor
