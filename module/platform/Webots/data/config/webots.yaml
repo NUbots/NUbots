@@ -2,7 +2,8 @@
 log_level: DEBUG
 
 # Maximum velocity from NUgus.proto motors
-max_velocity: 5.76
+max_velocity_mx64: 8.17
+max_velocity_mx106: 5.76
 # Requested time step between sensors
 time_step: 8
 # Minimum time step allowed between camera sensors
