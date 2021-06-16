@@ -28,6 +28,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/Image.hpp"
+#include "message/input/Sensors.hpp"
 #include "message/motion/ServoTarget.hpp"
 #include "message/output/CompressedImage.hpp"
 #include "message/platform/RawSensors.hpp"
@@ -54,6 +55,7 @@ namespace module::platform {
 
     using extension::Configuration;
     using message::input::Image;
+    using message::input::Sensors;
     using message::motion::ServoTarget;
     using message::motion::ServoTargets;
     using message::output::CompressedImage;
@@ -308,6 +310,24 @@ namespace module::platform {
                     utility::vision::unproject(Eigen::Vector2f(1, a), context->lens, Eigen::Vector2f(1, a)).x()};
                 context->lens.fov = std::acos(*std::min_element(options.begin(), options.end())) * 2.0;
             }
+        });
+
+        on<Trigger<Sensors>>().then("Buffer Sensors", [this](const Sensors& sensors) {
+            std::lock_guard<std::mutex> lock(sensors_mutex);
+            auto now = NUClear::clock::now();
+            Hwps.resize(std::distance(Hwps.begin(), std::remove_if(Hwps.begin(), Hwps.end(), [now](const auto& v) {
+                                          return v.first < (now - std::chrono::milliseconds(500));
+                                      })));
+
+            // Get torso to head, and torso to world
+            Eigen::Affine3d Htp(sensors.Htx[ServoID::HEAD_PITCH]);
+            Eigen::Affine3d Htw(sensors.Htw);
+            Eigen::Affine3d Hwp = Htp;
+            if (!isnan(Htw.matrix().maxCoeff())) {
+                Hwp = Htw.inverse() * Htp;
+            }
+
+            Hwps.push_back(std::make_pair(sensors.timestamp, Hwp));
         });
 
         // This trigger updates our current servo state
