@@ -99,6 +99,13 @@ namespace module::input {
             this->config.footDown.fromLoad           = config["foot_down"]["from_load"].as<bool>();
             this->config.footDown.certaintyThreshold = config["foot_down"]["certainty_threshold"].as<float>();
 
+            // Mahony config
+            this->Kp           = config["mahony"]["Kp"].as<double>();
+            this->Ki           = config["mahony"]["Ki"].as<double>();
+            this->ts           = config["mahony"]["ts"].as<double>();
+            this->initial_quat = config["mahony"]["initial_quat"].as<Expression>();
+            this->bias         = config["mahony"]["bias"].as<Expression>();
+
             // Motion filter config
             // Update our velocity timestep dekay
             this->config.motionFilter.velocityDecay =
@@ -452,6 +459,13 @@ namespace module::input {
                  *             Motion (IMU+Odometry)            *
                  ************************************************/
 
+                // Mahony calculation for Rtw
+                Eigen::Quaterniond quat =
+                    previousSensors == NULL
+                        ? Eigen::Quaterniond(initial_quat[0], initial_quat[1], initial_quat[2], initial_quat[3])
+                        : Eigen::Quaterniond(Eigen::Affine3d(previousSensors->Htw).rotation().transpose());
+                utility::math::filter::MahonyUpdate(sensors->accelerometer, sensors->gyroscope, ts, Ki, Kp, quat, bias);
+
                 // Gyroscope measurement update
                 motionFilter.measure(sensors->gyroscope,
                                      config.motionFilter.noise.measurement.gyroscope,
@@ -475,7 +489,8 @@ namespace module::input {
                     if (foot_down && !prev_foot_down) {
                         const auto filterState = MotionModel<double>::StateVec(motionFilter.get());
                         Eigen::Affine3d Hwt;
-                        Hwt.linear()      = filterState.Rwt.toRotationMatrix();
+                        Hwt.linear() = quat.toRotationMatrix();
+                        // Hwt.linear()      = filterState.Rwt.toRotationMatrix();
                         Hwt.translation() = filterState.rTWw;
 
                         Eigen::Affine3d Htg(utility::motion::kinematics::calculateGroundSpace(Htf, Hwt));
