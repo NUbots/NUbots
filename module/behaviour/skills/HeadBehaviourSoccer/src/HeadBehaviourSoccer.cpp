@@ -181,11 +181,11 @@ namespace module::behaviour::skills {
                       max_pitch = kinematicsModel.head.MAX_PITCH;
                       min_pitch = kinematicsModel.head.MIN_PITCH;
 
-                      std::cout << "Seen: Balls: "
-                                << ((vballs != nullptr) ? std::to_string(int(vballs->size())) : std::string("null"))
-                                << "Goals: "
-                                << ((vgoals != nullptr) ? std::to_string(int(vgoals->size())) : std::string("null"))
-                                << std::endl;
+                      // std::cout << "Seen: Balls: " <<
+                      // ((vballs != nullptr) ? std::to_string(int(vballs->size())) : std::string("null")) <<
+                      // "Goals: " <<
+                      // ((vgoals != nullptr) ? std::to_string(int(vgoals->size())) : std::string("null")) <<
+                      // std::endl;
 
                       if (locBall) {
                           locBallReceived = true;
@@ -213,11 +213,11 @@ namespace module::behaviour::skills {
 
                       bool ballMaxPriority = (ballPriority == std::max(ballPriority, goalPriority));
 
-                      log("updatePlan", updatePlan);
-                      log("lost", lost);
-                      log("isGettingUp", isGettingUp);
-                      log("searchType", int(searchType));
-                      log("headSearcher.size()", headSearcher.size());
+                      // log("updatePlan", updatePlan);
+                      // log("lost", lost);
+                      // log("isGettingUp", isGettingUp);
+                      // log("searchType", int(searchType));
+                      // log("headSearcher.size()", headSearcher.size());
 
                       // State execution
 
