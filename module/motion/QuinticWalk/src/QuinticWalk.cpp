@@ -3,6 +3,7 @@
 #include <fmt/format.h>
 
 #include "extension/Configuration.hpp"
+#include "extension/Script.hpp"
 
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/KinematicsModel.hpp"
@@ -17,6 +18,7 @@
 namespace module::motion {
 
     using extension::Configuration;
+    using extension::ExecuteScriptByName;
 
     using message::behaviour::ServoCommands;
     using message::input::Sensors;
@@ -259,6 +261,9 @@ namespace module::motion {
         auto joints = calculateLegJoints(kinematicsModel,
                                          Eigen::Affine3f(left_foot.cast<float>()),
                                          Eigen::Affine3f(right_foot.cast<float>()));
+
+        // Make sure we are in stand as well
+        emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "Stand.yaml"));
 
         auto waypoints = motionLegs(joints);
 
