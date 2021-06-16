@@ -262,9 +262,6 @@ namespace module::motion {
                                          Eigen::Affine3f(left_foot.cast<float>()),
                                          Eigen::Affine3f(right_foot.cast<float>()));
 
-        // Make sure we are in stand as well
-        emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "Stand.yaml"));
-
         auto waypoints = motionLegs(joints);
 
         emit(std::move(waypoints));
