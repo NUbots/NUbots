@@ -23,7 +23,6 @@
 #include <cmath>
 
 #include "extension/Configuration.hpp"
-#include "extension/Script.hpp"
 
 #include "message/behaviour/KickPlan.hpp"
 #include "message/behaviour/MotionCommand.hpp"
@@ -47,7 +46,6 @@
 namespace module::behaviour::planning {
 
     using extension::Configuration;
-    using extension::ExecuteScriptByName;
 
     using message::behaviour::KickPlan;
     using message::behaviour::MotionCommand;

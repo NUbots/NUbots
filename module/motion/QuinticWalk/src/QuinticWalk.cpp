@@ -3,7 +3,6 @@
 #include <fmt/format.h>
 
 #include "extension/Configuration.hpp"
-#include "extension/Script.hpp"
 
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/KinematicsModel.hpp"
@@ -18,7 +17,6 @@
 namespace module::motion {
 
     using extension::Configuration;
-    using extension::ExecuteScriptByName;
 
     using message::behaviour::ServoCommands;
     using message::input::Sensors;

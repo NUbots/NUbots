@@ -20,7 +20,6 @@
 #include "DirectWalkController.hpp"
 
 #include "extension/Configuration.hpp"
-#include "extension/Script.hpp"
 
 #include "message/behaviour/MotionCommand.hpp"
 #include "message/motion/WalkCommand.hpp"
@@ -32,7 +31,6 @@
 namespace module::behaviour::skills {
 
     using extension::Configuration;
-    using extension::ExecuteScriptByName;
 
     using message::behaviour::MotionCommand;
     using message::motion::DisableWalkEngineCommand;
