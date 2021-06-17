@@ -219,22 +219,20 @@ namespace module::motion {
         This method computes the next motor goals and publishes them.
         */
         auto setRPY = [&](const float& roll, const float& pitch, const float& yaw) {
-            const float halfYaw   = yaw * 0.5f;
-            const float halfPitch = pitch * 0.5f;
-            const float halfRoll  = roll * 0.5f;
-            const float cosYaw    = std::cos(halfYaw);
-            const float sinYaw    = std::sin(halfYaw);
-            const float cosPitch  = std::cos(halfPitch);
-            const float sinPitch  = std::sin(halfPitch);
-            const float cosRoll   = std::cos(halfRoll);
-            const float sinRoll   = std::sin(halfRoll);
-            return Eigen::Quaternionf(cosRoll * cosPitch * cosYaw + sinRoll * sinPitch * sinYaw,  // formerly yzx
-                                      sinRoll * cosPitch * cosYaw - cosRoll * sinPitch * sinYaw,  // x
-                                      cosRoll * sinPitch * cosYaw + sinRoll * cosPitch * sinYaw,  // y
-                                      cosRoll * cosPitch * sinYaw - sinRoll * sinPitch * cosYaw   // z
-                                      )
-                .normalized()
-                .toRotationMatrix();
+            const float halfYaw    = yaw * 0.5f;
+            const float halfPitch  = pitch * 0.5f;
+            const float halfRoll   = roll * 0.5f;
+            const float cosYaw     = std::cos(halfYaw);
+            const float sinYaw     = std::sin(halfYaw);
+            const float cosPitch   = std::cos(halfPitch);
+            const float sinPitch   = std::sin(halfPitch);
+            const float cosRoll    = std::cos(halfRoll);
+            const float sinRoll    = std::sin(halfRoll);
+            const auto quat_coeffs = Eigen::Vector4f(sinRoll * cosPitch * cosYaw - cosRoll * sinPitch * sinYaw,   // x
+                                                     cosRoll * sinPitch * cosYaw + sinRoll * cosPitch * sinYaw,   // y
+                                                     cosRoll * cosPitch * sinYaw - sinRoll * sinPitch * cosYaw,   // z
+                                                     cosRoll * cosPitch * cosYaw + sinRoll * sinPitch * sinYaw);  // w
+            return Eigen::Quaternionf(quat_coeffs).normalized().toRotationMatrix();
         };
         // Read the cartesian positions and orientations for trunk and fly foot
         std::tie(trunk_pos, trunk_axis, foot_pos, foot_axis, is_left_support) = walk_engine.computeCartesianPosition();

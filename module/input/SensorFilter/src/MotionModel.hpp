@@ -77,10 +77,10 @@ namespace module::input {
                 VZ = 5,
 
                 // Rwt
-                QW = 6,
-                QX = 7,
-                QY = 8,
-                QZ = 9,
+                QX = 6,
+                QY = 7,
+                QZ = 8,
+                QW = 9,
 
                 // omegaTTt
                 WX = 10,
@@ -97,7 +97,7 @@ namespace module::input {
             StateVec()
                 : rTWw(Eigen::Matrix<Scalar, 3, 1>::Zero())
                 , vTw(Eigen::Matrix<Scalar, 3, 1>::Zero())
-                , Rwt({1, 0, 0, 0})
+                , Rwt(Eigen::Quaternion<Scalar>::Identity())
                 , omegaTTt(Eigen::Matrix<Scalar, 3, 1>::Zero())
                 , omegaTTt_bias(Eigen::Matrix<Scalar, 3, 1>::Zero()) {}
 
@@ -105,7 +105,7 @@ namespace module::input {
             StateVec(const Eigen::Matrix<Scalar, size, 1>& state)
                 : rTWw(state.template segment<3>(PX))
                 , vTw(state.template segment<3>(VX))
-                , Rwt(Eigen::Quaternion<Scalar>(state.template segment<4>(QW)).normalized())
+                , Rwt(Eigen::Quaternion<Scalar>(state.template segment<4>(QX)).normalized())
                 , omegaTTt(state.template segment<3>(WX))
                 , omegaTTt_bias(state.template segment<3>(BX)) {}
 
@@ -114,7 +114,7 @@ namespace module::input {
                 Eigen::Matrix<Scalar, size, 1> state = Eigen::Matrix<Scalar, size, 1>::Zero();
                 state.template segment<3>(PX)        = rTWw;
                 state.template segment<3>(VX)        = vTw;
-                state.template segment<4>(QW)        = Eigen::Matrix<Scalar, 4, 1>(Rwt.w(), Rwt.x(), Rwt.y(), Rwt.z());
+                state.template segment<4>(QX)        = Rwt.coeffs();
                 state.template segment<3>(WX)        = omegaTTt;
                 state.template segment<3>(BX)        = omegaTTt_bias;
                 return state;
@@ -158,22 +158,15 @@ namespace module::input {
             // Here is an explanation https://gamedev.stackexchange.com/a/157018
             // Here is another derivation https://fgiesen.wordpress.com/2012/08/24/quaternion-differentiation/
             // dq/dt = (1/2)*omega*Rwt
-            const Eigen::Quaternion<Scalar> dq_dt = Eigen::Quaternion<Scalar>(0.0,
-                                                                              newState.omegaTTt.x() * 0.5,
-                                                                              newState.omegaTTt.y() * 0.5,
-                                                                              newState.omegaTTt.z() * 0.5)
-                                                    * Rwt;
+            const Eigen::Matrix<Scalar, 4, 1> half_omegaTTt_coeffs(newState.omegaTTt.x() * 0.5,
+                                                                   newState.omegaTTt.y() * 0.5,
+                                                                   newState.omegaTTt.z() * 0.5,
+                                                                   0.0);
+            const Eigen::Quaternion<Scalar> dq_dt = Eigen::Quaternion<Scalar>(half_omegaTTt_coeffs) * Rwt;
             // The change in the rotation is the derivative times the differential (which is the time-step)
-            const Eigen::Quaternion<Scalar> change = Eigen::Quaternion<Scalar>(deltaT * dq_dt.w(),
-                                                                               deltaT * dq_dt.x(),
-                                                                               deltaT * dq_dt.y(),
-                                                                               deltaT * dq_dt.z());
-            // We can add the change to the original, as long as our time step is small enough
-            newState.Rwt = Eigen::Quaternion<Scalar>(Rwt.w() + change.w(),
-                                                     Rwt.x() + change.x(),
-                                                     Rwt.y() + change.y(),
-                                                     Rwt.z() + change.z())
-                               .normalized();
+            const auto change = deltaT * Eigen::Matrix<Scalar, 4, 1>(dq_dt.x(), dq_dt.y(), dq_dt.z(), dq_dt.w());
+            // We can add the change to the original as vectors, as long as our time step is small enough
+            newState.Rwt = Eigen::Quaternion<Scalar>(Rwt.coeffs() + change).normalized();
 
             // ********************************
             // UPDATE LINEAR POSITION/VELOCITY
@@ -213,7 +206,7 @@ namespace module::input {
 
         Eigen::Matrix<Scalar, 4, 1> predict(const Eigen::Matrix<Scalar, size, 1>& state,
                                             const MeasurementType::FLAT_FOOT_ORIENTATION&) {
-            return Eigen::Matrix<Scalar, 4, 1>(state.template segment<4>(StateVec::QW));
+            return Eigen::Matrix<Scalar, 4, 1>(state.template segment<4>(StateVec::QX));
         }
 
         // This function is called to determine the difference between position, velocity, and acceleration
@@ -234,8 +227,7 @@ namespace module::input {
             // If a and b represent very similar orientations, then the real part will be very close to one and
             // the imaginary part will be very close to (0, 0, 0)
             diff.w() -= Scalar(1);
-            const Eigen::Matrix<Scalar, 4, 1> tmp(diff.w(), diff.x(), diff.y(), diff.z());
-            return tmp;
+            return diff.coeffs();
         }
 
         Eigen::Matrix<Scalar, size, 1> limit(const Eigen::Matrix<Scalar, size, 1>& state) {
