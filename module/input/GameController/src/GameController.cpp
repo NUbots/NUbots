@@ -90,15 +90,18 @@ namespace module::input {
                                   .then([this](const UDP::Packet& p, const GameState& gameState) {
                                       std::string remoteAddr = ipAddressIntToString(p.remote.address);
 
-                                      if (!udp_filter_address.empty() && remoteAddr != udp_filter_address
-                                          && !(std::find(deniedAddr.begin(), deniedAddr.end(), remoteAddr)
-                                               != deniedAddr.end())) {
-                                          deniedAddr.emplace_back(remoteAddr);
-                                          log<NUClear::INFO>("Ignoring UDP packet from",
-                                                             remoteAddr,
-                                                             "as it doesn't match configured filter address",
-                                                             udp_filter_address);
-                                          return;
+                                      // Apply filtering of packets if udp_filter_address is set in config
+                                      if (!udp_filter_address.empty() && remoteAddr != udp_filter_address) {
+                                          if (std::find(ignored_ip_addresses.begin(),
+                                                        ignored_ip_addresses.end(),
+                                                        remoteAddr)
+                                              == ignored_ip_addresses.end()) {
+                                              ignored_ip_addresses.insert(remoteAddr);
+                                              log<NUClear::INFO>("Ignoring UDP packet from",
+                                                                 remoteAddr,
+                                                                 "as it doesn't match configured filter address",
+                                                                 udp_filter_address);
+                                          }
                                       }
 
                                       // Get our packet contents
