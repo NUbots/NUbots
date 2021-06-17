@@ -496,7 +496,8 @@ namespace module::input {
 
                         // do a foot based orientation update
                         Eigen::Quaterniond Rwt(footlanding_Hwt.linear());
-                        motionFilter.measure(Rwt.coeffs(),
+                        const Eigen::Vector4d quat_coeffs(Rwt.w(), Rwt.x(), Rwt.y(), Rwt.z());
+                        motionFilter.measure(quat_coeffs,
                                              config.motionFilter.noise.measurement.flatFootOrientation,
                                              MeasurementType::FLAT_FOOT_ORIENTATION());
                     }
