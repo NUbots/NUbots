@@ -102,6 +102,8 @@ namespace module::input {
                                                                  "as it doesn't match configured filter address",
                                                                  udp_filter_address);
                                           }
+
+                                          return;
                                       }
 
                                       // Get our packet contents
