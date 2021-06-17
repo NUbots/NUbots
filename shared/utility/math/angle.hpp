@@ -103,7 +103,8 @@ namespace utility::math::angle {
 
         const Scalar dist1 = max - min;
         const Scalar dist2 = (2.0 * M_PI) - max + min;
-
+        // Whichever distance is smaller is used, and we make sure that the rotation is in the correct direction
+        // by negating the distance if it's clockwise
         return dist1 < dist2 ? (source > dest ? -dist1 : dist1) : (source > dest ? dist2 : -dist2);
     }
 
