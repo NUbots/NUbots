@@ -171,11 +171,6 @@ namespace module::behaviour::planning {
                     emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {26, 11}}));
                     return;
                 }
-                else if (latestCommand.type == message::behaviour::MotionCommand::Type::STAND) {
-                    emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "Stand.yaml"));
-                    emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {50, 50}}));
-                    return;
-                }
                 else if (latestCommand.type == message::behaviour::MotionCommand::Type::DIRECT_COMMAND) {
                     // TO DO, change to Bezier stuff
                     std::unique_ptr<WalkCommand> command =

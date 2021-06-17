@@ -27,14 +27,12 @@ message MotionCommand {
     enum Type {
         // Stop moving and just stand still, (equivalent to a VelocityCommand of {0} m/s).
         STAND_STILL = 0;
-        // Run the stand script
-        STAND = 1;
         // Walk to a given position and heading on the field, avoiding obstacles.
-        WALK_TO_STATE = 2;
+        WALK_TO_STATE = 1;
         // Approach the ball, ready to perform a forward kick toward the given kickTarget. Avoids obstacles.
-        BALL_APPROACH = 3;
+        BALL_APPROACH = 2;
         // Stop all current motion and directly send the given WalkCommand to the WalkEngine.
-        DIRECT_COMMAND = 4;
+        DIRECT_COMMAND = 3;
     }
 
     // The type of this motion command:

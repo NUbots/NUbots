@@ -83,10 +83,6 @@ namespace module::behaviour::skills {
                 emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {26, 11}}));
                 emit(std::move(std::make_unique<StopCommand>(subsumptionId)));
             }
-            else if (command.type == MotionCommand::Type::STAND) {
-                emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "Stand.yaml"));
-                emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {50, 50}}));
-            }
             else {
                 emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {0, 0}}));
             }
