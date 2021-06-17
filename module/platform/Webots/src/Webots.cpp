@@ -780,7 +780,7 @@ namespace module::platform {
 
                 Eigen::Affine3d Hpc = context->Hpc;
                 Eigen::Affine3d Hwp;
-                if (reactor.Hwps.empty()) {
+                if (true) {
                     Hwp = Eigen::Affine3d::Identity();
                 }
                 else {

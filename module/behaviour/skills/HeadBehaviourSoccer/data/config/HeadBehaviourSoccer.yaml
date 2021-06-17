@@ -27,7 +27,7 @@ oscillate_search: false
 searches:
   - #enum type for search
     search_type: "LOST"
-    #Points in absolute angle (degrees) relative to the horizon and x-xis of robot
+    #Points in absolute angle (degrees) relative to the horizon and x-axis of robot
     points:
       - [0, -45]
       - [0, 0]
@@ -78,4 +78,3 @@ searches:
     #Points for this search are relative to the padded bounding box containing the already visible objects
     points:
       - [-0.5,-1]
-
