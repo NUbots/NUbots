@@ -249,21 +249,8 @@ namespace module::platform {
 
 
         on<Configuration>("camera.yaml").then([this](const Configuration& config) {
-            // std::string serial_number = config["serial_number"].as<std::string>();
             // Strip the .yaml off the name of the file to get the name of the camera
             std::string name = ::basename(config.fileName.substr(0, config.fileName.find_last_of('.')).c_str());
-
-            // // Add camera to list.
-            // auto it = cameras
-            //               .insert(std::make_pair(serial_number,
-            //                                      CameraContext{
-            //                                          *this,
-            //                                          name,
-            //                                          num_cameras++,
-            //                                          Image::Lens(),      // Lens is constructed in settings
-            //                                          Eigen::Affine3d(),  // Hpc is set in settings
-            //                                      }))
-            //               .first;
 
             log<NUClear::INFO>(fmt::format("Connected to the webots {} camera", name));
 
