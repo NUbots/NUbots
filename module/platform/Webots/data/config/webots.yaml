@@ -15,4 +15,4 @@ clock_smoothing: 0.6
 
 # Connection details
 server_address: "127.0.1.1"
-port: 10001
+port: 10020

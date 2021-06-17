@@ -373,7 +373,11 @@
       gain: 30
       torque: 100
     - id: L_ANKLE_PITCH
+<<<<<<< Updated upstream
       position: -0.392794997
+=======
+      position: 0.200000003
+>>>>>>> Stashed changes
       gain: 30
       torque: 100
     - id: L_SHOULDER_ROLL
@@ -381,10 +385,17 @@
       gain: 30
       torque: 100
     - id: R_HIP_ROLL
+<<<<<<< Updated upstream
       position: 0.0291527491
       gain: 30
       torque: 100
 - duration: 500
+=======
+      position: 0.0900000036
+      gain: 30
+      torque: 0
+- duration: 200
+>>>>>>> Stashed changes
   targets:
     - id: L_HIP_YAW
       position: 0.0292397309
@@ -443,7 +454,11 @@
       gain: 30
       torque: 100
     - id: R_HIP_ROLL
+<<<<<<< Updated upstream
       position: 0.0859239027
+=======
+      position: -0.129999995
+>>>>>>> Stashed changes
       gain: 30
       torque: 100
     - id: R_SHOULDER_ROLL
