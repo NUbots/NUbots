@@ -165,8 +165,11 @@ namespace module::behaviour::planning {
                 }
 
                 if (latestCommand.type == message::behaviour::MotionCommand::Type::STAND_STILL) {
-                    emit(std::move(std::make_unique<StopCommand>(subsumptionId)));
-                    emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {26, 11}}));
+
+
+                    emit(std::make_unique<StopCommand>(subsumptionId));
+                    // emit(std::make_unique<ActionPriorities>(ActionPriorities { subsumptionId, { 40, 11 }}));
+
                     return;
                 }
                 else if (latestCommand.type == message::behaviour::MotionCommand::Type::DIRECT_COMMAND) {
