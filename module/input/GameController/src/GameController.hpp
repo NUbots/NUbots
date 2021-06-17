@@ -49,6 +49,7 @@ namespace module::input {
         uint PLAYER_ID;
         uint BROADCAST_IP = 0xFFFFFFFF;
         std::string udp_filter_address;
+        std::vector<std::string> deniedAddr;
 
         bool penaltyOverride = false;
         bool selfPenalised   = true;

@@ -90,7 +90,10 @@ namespace module::input {
                                   .then([this](const UDP::Packet& p, const GameState& gameState) {
                                       std::string remoteAddr = ipAddressIntToString(p.remote.address);
 
-                                      if (!udp_filter_address.empty() && remoteAddr != udp_filter_address) {
+                                      if (!udp_filter_address.empty() && remoteAddr != udp_filter_address
+                                          && !(std::find(deniedAddr.begin(), deniedAddr.end(), remoteAddr)
+                                               != deniedAddr.end())) {
+                                          deniedAddr.emplace_back(remoteAddr);
                                           log<NUClear::INFO>("Ignoring UDP packet from",
                                                              remoteAddr,
                                                              "as it doesn't match configured filter address",
