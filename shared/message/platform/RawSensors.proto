@@ -145,3 +145,6 @@ message ButtonLeftDown {}
 message ButtonLeftUp {}
 message ButtonMiddleDown {}
 message ButtonMiddleUp {}
+
+// Reset sensors in Webots
+message ResetRawSensors {}
