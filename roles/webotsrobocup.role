@@ -9,8 +9,8 @@ nuclear_role(
   motion::KinematicsConfiguration
   # Support
   support::configuration::GlobalConfig
-  network::NUClearNet
-  support::NUsight
+  #network::NUClearNet
+  #support::NUsight
   support::configuration::SoccerConfig
   # input
   input::GameController
@@ -18,7 +18,7 @@ nuclear_role(
   input::SensorFilter
   platform::Webots
   # Vision
-  vision::VisualMesh
+  #vision::VisualMesh
   vision::GreenHorizonDetector
   vision::GoalDetector
   vision::BallDetector
@@ -40,5 +40,5 @@ nuclear_role(
   motion::QuinticWalk
   motion::HeadController
   # Data logger
-  support::logging::DataLogging
+  #support::logging::DataLogging
 )
