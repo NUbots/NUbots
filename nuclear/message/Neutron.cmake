@@ -154,7 +154,7 @@ target_include_directories(nuclear_message_protobuf SYSTEM INTERFACE ${pb_out})
 target_link_libraries(nuclear_message_protobuf protobuf::libprotobuf)
 
 add_library(nuclear_message ${NUCLEAR_LINK_TYPE} ${neutron_src})
-target_compile_features(nuclear_message PUBLIC cxx_std_17)
+target_compile_features(nuclear_message PUBLIC cxx_std_20)
 target_link_libraries(nuclear_message PUBLIC nuclear_message_protobuf)
 target_link_libraries(nuclear_message PUBLIC Eigen3::Eigen)
 target_include_directories(nuclear_message PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)

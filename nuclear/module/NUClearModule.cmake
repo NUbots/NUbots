@@ -191,6 +191,9 @@ function(NUCLEAR_MODULE)
   # Put it in an IDE group for the module's directory
   set_target_properties(${module_target_name} PROPERTIES FOLDER ${module_path})
 
+  # Set the C++ standard
+  target_compile_features(${module_target_name} PUBLIC cxx_std_20)
+
   # ####################################################################################################################
   # Testing #
   # ####################################################################################################################
@@ -216,6 +219,7 @@ function(NUCLEAR_MODULE)
       target_link_libraries(${test_module_target_name} ${module_target_name})
 
       set_target_properties(${test_module_target_name} PROPERTIES FOLDER "modules/tests")
+      target_compile_features(${test_module_target_name} PUBLIC cxx_std_20)
 
       # Add the test
       add_test(

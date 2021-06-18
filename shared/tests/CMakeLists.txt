@@ -7,6 +7,9 @@ if(test_src)
 
   set_target_properties(TestShared PROPERTIES FOLDER "shared/tests")
 
+  # Set the C++ standard
+  target_compile_features(TestShared PUBLIC cxx_std_20)
+
   # Add the test
   add_test(
     NAME TestShared
