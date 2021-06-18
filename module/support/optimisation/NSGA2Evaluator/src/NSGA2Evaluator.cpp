@@ -30,22 +30,28 @@ namespace module {
             NSGA2Evaluator::NSGA2Evaluator(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
+                // Read the NSGA2Evaluator.yaml config file and set the walk command parameters
                 on<Configuration>("NSGA2Evaluator.yaml").then([this](const Configuration& config) {
                     velocity = config["walk_command"]["velocity"].as<Expression>();
                     rotation = config["walk_command"]["rotation"].as<Expression>();
+
+                    // Reset our state and the simulation since the config has changed
                     ResetWorld();
                 });
 
+                // Reset our state and the simulation on system startup
                 on<Startup>().then([this]() { ResetWorld(); });
 
                 on<Trigger<NSGA2EvaluationRequest>, Single>().then([this](const NSGA2EvaluationRequest& request) {
-                    // set config file with request parameters
-                    // run kick
+                    // Set our genration and individual identifiers from the request
                     generation = request.generation;
                     id         = request.id;
+
+                    // Reset the simulation time for the new evaluation
                     ResetWorldTime();
 
-                    // Write walk config from parameters
+                    // Read the QuinticWalk config and overwrite the config parameters with the current individual's
+                    // parameters
                     YAML::Node walk_config = YAML::LoadFile("config/QuinticWalk.yaml");
 
                     auto walk                       = walk_config["walk"];
@@ -107,14 +113,15 @@ namespace module {
                     auto gains    = walk["gains"];
                     gains["legs"] = request.parameters.gains.legs;
 
-                    // Write updated config to disk
-                    std::ofstream ofs("config/QuinticWalk.yaml");
-                    ofs << YAML::Dump(walk_config);
-                    ofs.close();
+                    // Write the updated config to disk
+                    std::ofstream output_file_stream("config/QuinticWalk.yaml");
+                    output_file_stream << YAML::Dump(walk_config);
+                    output_file_stream.close();
 
+                    // Ensure we are not in the terminating state
                     terminating = false;
 
-                    // Send walk command
+                    // Create and send the walk command, which will be evaluated when we get simulation data
                     Eigen::Affine2d walk_command;
                     walk_command.linear()      = Eigen::Rotation2Dd(rotation).toRotationMatrix();
                     walk_command.translation() = velocity;
@@ -122,39 +129,20 @@ namespace module {
                 });
 
                 // TODO(KipH):
-                // This shouldn't be listening for sensors. that should be handled by something else
+                // ~This shouldn't be listening for sensors. that should be handled by something else~
+                // Some of this needs to be handled here (e.g. getting sensor data to set this module's state), but we
+                // can probably add a proxy that emits something like OptimisationSensors with just the data we need.
                 // on<Trigger<Sensors>, Single>().then([this](const Sensors& sensors) {
-                //     // Get the sensory data
-                //     // if fallen over, trigger end of evaluation
-                //     // if (sensors.)
+                //     // Get the accelerometer sensor data
                 //     accelerometer[0] = sensors.accelerometer[0];
                 //     accelerometer[1] = sensors.accelerometer[1];
-                //     accelerometer[2] = sensors.accelerometer[2];  // std::cout << accelerometer[2] << std::endl;
+                //     accelerometer[2] = sensors.accelerometer[2];
 
+                //     // Get the gyroscope sensor data
                 //     gyroscope[0] = sensors.gyroscope[0];
                 //     gyroscope[1] = sensors.gyroscope[1];
-                //     gyroscope[2] = sensors.gyroscope[2];  // log(distanceTravelled);
+                //     gyroscope[2] = sensors.gyroscope[2];
 
-                //     if (simTime > 0.25) {
-                //         sway[0] += gyroscope[0] * simTimeDelta;
-                //         sway[1] += gyroscope[1] * simTimeDelta;
-                //         sway[2] += gyroscope[2] * simTimeDelta;
-                //     }
-
-                //     if (!terminating && evaluating
-                //         && ((std::abs(accelerometer[0]) > 9.2 || std::abs(accelerometer[1]) > 9.2)
-                //             && std::abs(accelerometer[2]) < 0.5)
-                //         && simTime > 3.0)
-                //         fallenOver = true;
-
-                //     fieldPlaneSway = std::pow(std::pow(accelerometer[0], 2) + std::pow(accelerometer[1], 2), 0.5);
-
-                //     if (!terminating && evaluating && !finished && fieldPlaneSway > maxFieldPlaneSway
-                //         && simTime > 0.25) {
-
-                //         maxFieldPlaneSway = fieldPlaneSway;
-                //         // log(maxFieldPlaneSway);
-                //     }
                 //     // log("gyroscope.x = " + std::to_string(gyroscope[0]));
                 //     // log("gyroscope.y = " + std::to_string(gyroscope[1]));
                 //     // log("gyroscope.z = " + std::to_string(gyroscope[2]));
@@ -162,17 +150,49 @@ namespace module {
                 //     // log("accelerme.y = " + std::to_string(accelerometer[1]));
                 //     // log("accelerme.z = " + std::to_string(accelerometer[2]));
 
+                //     // Calculate the sway based on our gyroscope values over time, after the simulation has
+                //     progressed
+                //     // past some initial time since the beginning. This is likely used to stabliise the gyro before
+                //     we
+                //     // start reading its values.
+                //     if (simTime > 0.25) {
+                //         sway[0] += gyroscope[0] * simTimeDelta;
+                //         sway[1] += gyroscope[1] * simTimeDelta;
+                //         sway[2] += gyroscope[2] * simTimeDelta;
+                //     }
+
+                //     // Determine whether we've fallen over by looking at gravity (accelerometer[2])
+                //     if (!terminating && evaluating
+                //         && ((std::abs(accelerometer[0]) > 9.2 || std::abs(accelerometer[1]) > 9.2)
+                //             && std::abs(accelerometer[2]) < 0.5)
+                //         && simTime > 3.0) {
+                //         fallenOver = true;
+                //     }
+
+                //     // Calculate the robot sway along the field plane (left/right, forward/backward)
+                //     fieldPlaneSway = std::pow(std::pow(accelerometer[0], 2) + std::pow(accelerometer[1], 2), 0.5);
+
+                //     // Update max plane sway if the new plane sway is bigger
+                //     if (!terminating && evaluating && !finished && fieldPlaneSway > maxFieldPlaneSway
+                //         && simTime > 0.25) {
+                //         maxFieldPlaneSway = fieldPlaneSway;
+                //     }
+
+                //     // Determine when we can terminate early: if we've fallen over, or if the ball is not moving
                 //     if (!terminating && evaluating && !finished && simTime > 4.0) {
-                //         if (fallenOver)
+                //         if (fallenOver) {
                 //             BeginTermination();
-                //         else if (ballVelocity[0] == 0.0 && ballVelocity[1] == 0.0 && ballVelocity[2] == 0.0)
+                //         } else if (ballVelocity[0] == 0.0 && ballVelocity[1] == 0.0 && ballVelocity[2] == 0.0) {
                 //             BeginTermination();
+                //         }
                 //     }
                 // });
 
 
-                // TODO: Kip thinks this is dealt with by the webots module
-                // on<Trigger<GazeboWorldStatus>, Single>().then([this](const GazeboWorldStatus& status) {
+                // TODO: ~Kip thinks this is dealt with by the webots module~ We need to keep this, to set the
+                // simulation time, but we can probably rename GazeboWorldStatus to something more general, like
+                // OptimisationTimeUpdate. on<Trigger<GazeboWorldStatus>, Single>().then([this](const GazeboWorldStatus&
+                // status) {
                 //     // Get the sim time
                 //     simTimeDelta = 0;  // status.simTime - simTime;
                 //     simTime      = 0;  // status.simTime;
@@ -188,12 +208,16 @@ namespace module {
                 //     // if (simTime > 15.0)
                 //     //    fallenOver = true;
 
+                //     // If there's been at least 1 second in the simulation but we're not evaluating or terminating,
+                //     // then execute the script (probably stand), reset the time, and start evaluating.
                 //     if (simTime > 1.0 && !evaluating & !terminating) {
                 //         emit(std::make_unique<ExecuteScript>(subsumptionId, script, NUClear::clock::now()));
                 //         ResetWorldTime();
                 //         evaluating = true;
                 //     }
 
+                //     // If we've been terminating for at least 2 seconds, but are not finished, clear our terminating
+                //     // status and send the fitness scores back to the Optimiser
                 //     if (terminating && !evaluating && !finished && (simTime - timeSinceTermination) > 2.0) {
                 //         terminating = false;
                 //         SendFitnessScores();
@@ -201,11 +225,13 @@ namespace module {
                 // });
 
                 on<Trigger<NSGA2Terminate>, Single>().then([this]() {
-                    // Get the sim time
+                    // Set the finished state when we get the termination message
                     finished = true;
                 });
 
-                // TODO: these updates should be handled by the webots module
+                // TODO: ~these updates should be handled by the webots module~ Actually it makes sense to keep them
+                // here since they're setting state here. We just need to rename the message to something generic like
+                // OptimisationBallLocation.
                 // on<Trigger<GazeboBallLocation>, Single>().then([this](const GazeboBallLocation& location) {
                 //     // Get the sensory data
                 //     // if fallen over, trigger end of evaluation
@@ -237,6 +263,8 @@ namespace module {
             }
 
             void NSGA2Evaluator::SendFitnessScores() {
+                // Create the fitness scores message based on the results we calculated in CalculateFitness
+                // and emit it back to the Optimiser
                 std::unique_ptr<NSGA2FitnessScores> fitnessScores = std::make_unique<NSGA2FitnessScores>();
                 fitnessScores->id                                 = id;
                 fitnessScores->generation                         = generation;
@@ -246,10 +274,12 @@ namespace module {
             }
 
             void NSGA2Evaluator::ResetWorld() {
+                // TODO: change this to a webots message that resets the world
                 // std::unique_ptr<GazeboWorldCtrl> command = std::make_unique<GazeboWorldCtrl>();
                 // command->command                         = "RESET";
                 // emit(command);
 
+                // Reset our local state
                 distanceTravelled    = 0.0;
                 timeSinceTermination = 0.0;
                 sway                 = Eigen::Vector3d::Zero();
@@ -261,14 +291,17 @@ namespace module {
             }
 
             void NSGA2Evaluator::ResetWorldTime() {
+                // TODO: change this to a webots message that resets the simulation time
                 // std::unique_ptr<GazeboWorldCtrl> command = std::make_unique<GazeboWorldCtrl>();
                 // command->command                         = "RESETTIME";
                 // emit(command);
             }
 
             void NSGA2Evaluator::BeginTermination() {
+                // Set state to indicate we're starting to terminate
                 terminating = true;
                 evaluating  = false;
+
                 if (fallenOver) {
                     log<NUClear::DEBUG>("fallen over...");
                 }
@@ -276,40 +309,62 @@ namespace module {
                     log<NUClear::DEBUG>("terminating...");
                 }
 
+                // Keep track of when we started terminating
                 timeSinceTermination = simTime;
+
                 CalculateFitness();
+
+                // Reset the world and make the robot stand still for the next evaluation
                 ResetWorld();
                 emit(std::make_unique<MotionCommand>(utility::behaviour::StandStill()));
             }
 
             void NSGA2Evaluator::CalculateFitness() {
+                // Calculate the distance the ball travelled
                 distanceTravelled = std::abs(ballLocation[0]);
 
-                if (fallenOver || distanceTravelled < 0.001)
+                // If the robot fell over, or the ball didn't move much, set distance travelled to a fixed bad number
+                if (fallenOver || distanceTravelled < 0.001) {
                     distanceTravelled = 0.001;
-                else if (distanceTravelled > 10.0)
+                }
+                // Limit the distance travelled to 10m
+                else if (distanceTravelled > 10.0) {
                     distanceTravelled = 10.0;
+                }
 
+                // Ensure maxFieldPlaneSway is positive, since we only care about the magnitude
                 maxFieldPlaneSway = std::abs(maxFieldPlaneSway);
 
-                if (fallenOver || maxFieldPlaneSway == 0 || maxFieldPlaneSway > 1000.0)
+                // If the robot didn't sway, or it swayed too much, set max sway to a fixed bad number
+                if (maxFieldPlaneSway == 0 || maxFieldPlaneSway > 1000.0) {
                     maxFieldPlaneSway = 1000.0;
+                }
 
+                // If the robot fell over, set the first constraint (fallen/not-fallen) to a fixed bad number,
+                // and set max sway to a fixed bad number
                 if (fallenOver) {
                     constraints[0]    = -10.0;
                     maxFieldPlaneSway = 1000.0;
                 }
 
+                // Ensure the sway along the second axis is positive, for use in calculating the second constraint
+                // (whether or not we've swayed too far)
                 sway[2] = std::abs(sway[2]);
-                // log(sway[2]);
 
-                if (sway[2] > 6.66)
-                    constraints[1] = -1.0 * (sway[2] - 6.66);
-                else
+                // If the robot swayed more than 6.6 (a magic number), then it violated the second constraint
+                if (sway[2] > 6.66) {
+                    constraints[1] = -1.0 * (sway[2] - 6.66);  // Set the constraint based on how much it's over 6.6
+                }
+                // Otherwise the second constraint wasn't violated
+                else {
                     constraints[1] = 0.0;
+                }
 
+                // Set the calculated fitness scores
                 scores[0] = maxFieldPlaneSway;
                 scores[1] = 1.0 / (distanceTravelled);
+
+                // Log the scores
                 log(scores[0]);
                 log(scores[1]);
             }

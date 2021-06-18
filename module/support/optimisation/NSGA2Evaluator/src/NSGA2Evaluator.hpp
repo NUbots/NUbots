@@ -16,24 +16,52 @@ namespace module {
                 explicit NSGA2Evaluator(std::unique_ptr<NUClear::Environment> environment);
 
             private:
-                void SendFitnessScores();
-                void ResetWorld();
-                void ResetWorldTime();
-                void BeginTermination();
+                /// @brief Evaluate the fitness of the current individual
                 void CalculateFitness();
 
+                ///  @brief Emits the evaluation results back to the Optimiser for advancement
+                void SendFitnessScores();
+
+                /// @brief Resets our state and the simulator world for the next evaluation
+                void ResetWorld();
+
+                /// @brief Reset the simulation time
+                void ResetWorldTime();
+
+                /// @brief Start ending the current evaluation
+                void BeginTermination();
+
+                /// @brief Subsumption priority ID for this module
                 size_t subsumptionId;
-                int generation                   = 0;
-                int id                           = 0;
-                std::vector<double> scores       = {2.0, 0.0};
-                std::vector<double> contstraints = {0.0, 0.0};
 
-                double simTime      = 0.0;
+                /// @brief The number of the current generation
+                int generation = 0;
+
+                /// @brief The number of the current individual in the current generation
+                int id = 0;
+
+                /// @brief The evaluated fitness scores for the current individual (sway, ball distance)
+                std::vector<double> scores = {2.0, 0.0};
+
+                /// @brief The current simulation time
+                double simTime = 0.0;
+
+                /// @brief Delta between this update and the last update
                 double simTimeDelta = 0.0;
-                double timeSinceTermination;
-                Eigen::Vector2d velocity = Eigen::Vector2d(0.5, 0.0);
-                double rotation          = 0.0;
 
+                /// @brief The amount of simulation time that has elapsed since we started terminating the current
+                /// evaluation
+                double timeSinceTermination;
+
+                /// @brief The walk command velocity
+                /// TODO: rename to walk_command_velocity
+                Eigen::Vector2d velocity = Eigen::Vector2d(0.5, 0.0);
+
+                /// @brief The walk command rotation
+                /// TODO: rename to walk_command_rotation
+                double rotation = 0.0;
+
+                /// @brief Booleans indicating what state we're in with the current evaluation
                 bool terminating = false;
                 bool walking     = false;
                 bool standing    = false;
@@ -41,22 +69,32 @@ namespace module {
                 bool finished    = false;
                 bool fallenOver  = false;
 
-                std::vector<double> constraints;
+                /// @brief A list of constraints for domination calculation. These can be used to encode one or more
+                /// failure conditions. Here, we set the first constraint if the robot has fallen over, and the second
+                /// one if it's swayed too too much. The more negative the constraint value is, the more it has violated
+                /// the constriant, which means it will be dominated by other individuals that have violated less.
+                std::vector<double> constraints = {0.0, 0.0};
 
+                /// @brief Sensor readings from the simulator, used during fitness and constraint calculation
                 Eigen::Vector3d gyroscope     = Eigen::Vector3d::Zero();
                 Eigen::Vector3d accelerometer = Eigen::Vector3d::Zero();
 
-                Eigen::Vector3d ballLocation       = Eigen::Vector3d::Zero();
-                Eigen::Vector3d ballVelocity       = Eigen::Vector3d::Zero();
+                /// @brief Ball state for this evaluation, used during fitness and constraint calculation
+                Eigen::Vector3d ballLocation = Eigen::Vector3d::Zero();
+                Eigen::Vector3d ballVelocity = Eigen::Vector3d::Zero();
+                double distanceTravelled     = 0.0;
+
+                /// @brief Robot state for this evaluation, used during fitness and constraint calculation
                 Eigen::Vector3d robotLocation      = Eigen::Vector3d::Zero();
                 Eigen::Vector3d robotLocationDelta = Eigen::Vector3d::Zero();
 
-                double distanceTravelled = 0.0;
-
+                /// @brief How much the robot swayed for this evaluation
                 Eigen::Vector3d sway = Eigen::Vector3d::Zero();
 
+                /// @brief How much the robot swayed in the field plane (forward/backward, left/right, but not up/down)
                 double fieldPlaneSway = 0.0;
 
+                /// @brief The max field plane sway observed during the evaluation
                 double maxFieldPlaneSway;
             };
 
