@@ -60,6 +60,7 @@ namespace module::platform {
     using message::motion::ServoTargets;
     using message::output::CompressedImage;
     using message::platform::RawSensors;
+    using message::platform::ResetRawSensors;
 
     using message::platform::webots::ActuatorRequests;
     using message::platform::webots::Message;
@@ -380,6 +381,20 @@ namespace module::platform {
                 shutdown(fd, SHUT_RDWR);
                 close(fd);
                 fd = -1;
+            }
+        });
+
+        on<Trigger<ResetRawSensors>>().then([this]() {
+            log("Resetting sensors");
+            // Reset the servo state
+            for (auto& servo : servo_state) {
+                servo.dirty            = false;
+                servo.p_gain           = 32.0 / 255.0;
+                servo.moving_speed     = 0.0;
+                servo.goal_position    = 0.0;
+                servo.torque           = 0.0;
+                servo.present_position = 0.0;
+                servo.present_speed    = 0.0;
             }
         });
     }

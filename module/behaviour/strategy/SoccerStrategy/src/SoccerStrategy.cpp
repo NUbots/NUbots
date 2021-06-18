@@ -67,6 +67,7 @@ namespace module::behaviour::strategy {
     using message::motion::KillGetup;
     using message::platform::ButtonLeftDown;
     using message::platform::ButtonMiddleDown;
+    using message::platform::ResetRawSensors;
     using message::support::FieldDescription;
     using VisionBalls = message::vision::Balls;
     using VisionGoals = message::vision::Goals;
@@ -139,6 +140,7 @@ namespace module::behaviour::strategy {
         on<Trigger<KillGetup>>().then([this] { isGettingUp = false; });
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& selfPenalisation) {
+            emit(std::make_unique<ResetRawSensors>());
             if (selfPenalisation.context == GameEvents::Context::SELF) {
                 selfPenalised = true;
             }
@@ -226,6 +228,7 @@ namespace module::behaviour::strategy {
                                 find({FieldTarget(FieldTarget::Target::BALL)});
                                 if (mode == GameMode::PENALTY_SHOOTOUT) {
                                     penaltyShootoutLocalisationReset(fieldDescription);
+                                    emit(std::make_unique<ResetRawSensors>());
                                 }
                                 currentState = Behaviour::State::SET;
                             }
