@@ -158,11 +158,12 @@ namespace module::input {
             // Here is an explanation https://gamedev.stackexchange.com/a/157018
             // Here is another derivation https://fgiesen.wordpress.com/2012/08/24/quaternion-differentiation/
             // dq/dt = (1/2)*omega*Rwt
-            const Eigen::Matrix<Scalar, 4, 1> half_omegaTTt_coeffs(newState.omegaTTt.x() * 0.5,
-                                                                   newState.omegaTTt.y() * 0.5,
-                                                                   newState.omegaTTt.z() * 0.5,
-                                                                   0.0);
-            const Eigen::Quaternion<Scalar> dq_dt = Eigen::Quaternion<Scalar>(half_omegaTTt_coeffs) * Rwt;
+            const Eigen::Quaternion<Scalar> dq_dt =
+                Eigen::Quaternion<Scalar>(Eigen::Matrix<Scalar, 4, 1>(newState.omegaTTt.x() * 0.5,
+                                                                      newState.omegaTTt.y() * 0.5,
+                                                                      newState.omegaTTt.z() * 0.5,
+                                                                      0.0))
+                * Rwt;
             // The change in the rotation is the derivative times the differential (which is the time-step)
             const auto change = deltaT * Eigen::Matrix<Scalar, 4, 1>(dq_dt.x(), dq_dt.y(), dq_dt.z(), dq_dt.w());
             // We can add the change to the original as vectors, as long as our time step is small enough
