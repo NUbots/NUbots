@@ -165,7 +165,7 @@ namespace module::input {
                                                                       0.0))
                 * Rwt;
             // The change in the rotation is the derivative times the differential (which is the time-step)
-            const auto change = deltaT * Eigen::Matrix<Scalar, 4, 1>(dq_dt.x(), dq_dt.y(), dq_dt.z(), dq_dt.w());
+            const auto change = deltaT * dq_dt.coeffs();
             // We can add the change to the original as vectors, as long as our time step is small enough
             newState.Rwt = Eigen::Quaternion<Scalar>(Rwt.coeffs() + change).normalized();
 
