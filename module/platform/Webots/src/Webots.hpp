@@ -24,6 +24,7 @@
 #include <Eigen/Geometry>
 #include <array>
 #include <atomic>
+#include <map>
 #include <mutex>
 #include <nuclear>
 #include <string>
@@ -130,7 +131,6 @@ namespace module::platform {
         std::vector<std::pair<NUClear::clock::time_point, Eigen::Affine3d>> Hwps;
 
         struct CameraContext {
-            Webots& reactor;
             std::string name;
             uint32_t id;
             message::input::Image::Lens lens;
@@ -138,9 +138,7 @@ namespace module::platform {
             // to
             Eigen::Affine3d Hpc;
         };
-
-        std::unique_ptr<CameraContext> context;
-
+        std::map<std::string, CameraContext> camera_context;
         uint32_t num_cameras = 0;
 
     public:
