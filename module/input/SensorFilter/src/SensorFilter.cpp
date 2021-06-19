@@ -437,6 +437,24 @@ namespace module::input {
                         feet_down[BodySide::RIGHT] = true;
                         feet_down[BodySide::LEFT]  = true;
                     }
+                }
+                else if (config.footDown.method() == "FSR") {
+                    // For a foot to be on the ground we want a minimum of 2 diagonally opposite studs
+                    // in contact with the ground
+                    // So fsr1 and fsr3, or fsr2 and fsr4
+                    //
+                    // A FSR is in contact with the ground if its value is greater than the certainty threshold
+
+                    feet_down[BodySide::LEFT] = (((input.fsr.left.fsr1 > config.footDown.threshold())
+                                                  && (input.fsr.left.fsr3 > config.footDown.threshold()))
+                                                 || ((input.fsr.left.fsr2 > config.footDown.threshold())
+                                                     && (input.fsr.left.fsr4 > config.footDown.threshold())));
+
+                    feet_down[BodySide::RIGHT] = (((input.fsr.right.fsr1 > config.footDown.threshold())
+                                                   && (input.fsr.right.fsr3 > config.footDown.threshold()))
+                                                  || ((input.fsr.right.fsr2 > config.footDown.threshold())
+                                                      && (input.fsr.right.fsr4 > config.footDown.threshold())));
+                }
 
                 if (this->config.debug) {
                     emit(graph(fmt::format("Sensor/Foot Down/{}/Left", config.footDown.method()),
