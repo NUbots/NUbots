@@ -385,7 +385,6 @@ namespace module::platform {
         });
 
         on<Trigger<ResetRawSensors>>().then([this]() {
-            log("Resetting sensors");
             // Reset the servo state
             for (auto& servo : servo_state) {
                 servo.dirty            = false;
