@@ -12,7 +12,7 @@ namespace utility::nbs {
         /// The hash type of the message
         uint64_t type;
         /// The id field of the message if it exists, else 0 (used for things like camera's id)
-        uint32_t subtype;
+        uint32_t id;
         /// The timestamp from the protcol buffer if it exists, else the timestamp from the NBS file
         uint64_t timestamp;
         /// The offset of the message from the start of the file

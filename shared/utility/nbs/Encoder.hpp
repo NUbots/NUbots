@@ -30,7 +30,7 @@ namespace utility::nbs {
             return write(timestamp,
                          get_timestamp(value, timestamp),
                          NUClear::util::serialise::Serialise<T>::hash(),
-                         get_subtype(value),
+                         get_id(value),
                          NUClear::util::serialise::Serialise<T>::serialise(value));
         }
 
@@ -40,13 +40,13 @@ namespace utility::nbs {
          * @param timestamp the timestamp the message was originally emited at
          * @param message_timestamp the timestamp inside the message
          * @param hash The type hash of the message
-         * @param subtype The subtype of the message
+         * @param id The id of the message
          * @param data The raw message data to be written
          */
         int write(const NUClear::clock::time_point& timestamp,
                   const uint64_t& message_timestamp,
                   const uint64_t& hash,
-                  const uint32_t& subtype,
+                  const uint32_t& id,
                   const std::vector<char>& data);
 
         /// @brief Gets the number of bytes written

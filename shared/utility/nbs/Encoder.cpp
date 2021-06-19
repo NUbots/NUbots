@@ -10,7 +10,7 @@ namespace utility::nbs {
     int Encoder::write(const NUClear::clock::time_point& timestamp,
                        const uint64_t& message_timestamp,
                        const uint64_t& hash,
-                       const uint32_t& subtype,
+                       const uint32_t& id,
                        const std::vector<char>& data) {
         // NBS File Format
         // Name      | Type               |  Description
@@ -51,7 +51,7 @@ namespace utility::nbs {
         // Name      | Type               |  Description
         // ------------------------------------------------------------
         // hash      | uint64_t           | the 64bit hash for the payload type
-        // subtype   | uint32_t           | the id field of the payload
+        // id        | uint32_t           | the id field of the payload
         // timestamp | uint64_t           | Timestamp of the message or the emit timestamp in nanoseconds
         // offset    | uint64_t           | offset to start of radiation symbol ☢
         // size      | uint32_t           | Size of the whole packet from the radiation symbol
@@ -60,7 +60,7 @@ namespace utility::nbs {
         uint32_t full_size = HEADER_SIZE + sizeof(size) + size;
 
         index_file.write(reinterpret_cast<const char*>(&hash), sizeof(hash));
-        index_file.write(reinterpret_cast<const char*>(&subtype), sizeof(subtype));
+        index_file.write(reinterpret_cast<const char*>(&id), sizeof(id));
         index_file.write(reinterpret_cast<const char*>(&message_timestamp), sizeof(message_timestamp));
         index_file.write(reinterpret_cast<const char*>(&bytes_written), sizeof(bytes_written));
         index_file.write(reinterpret_cast<const char*>(&full_size), sizeof(full_size));

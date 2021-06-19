@@ -12,31 +12,31 @@ namespace utility::nbs {
 
     namespace {
         template <typename T>
-        struct SubtypeReflector;
+        struct IdReflector;
 
         template <>
-        struct SubtypeReflector<void> {  // NOLINT(cppcoreguidelines-special-member-functions)
-            virtual uint32_t subtype(const uint8_t* payload, uint32_t length) = 0;
-            virtual ~SubtypeReflector()                                       = default;
+        struct IdReflector<void> {  // NOLINT(cppcoreguidelines-special-member-functions)
+            virtual uint32_t id(const uint8_t* payload, uint32_t length) = 0;
+            virtual ~IdReflector()                                       = default;
         };
 
         template <typename T>
-        struct SubtypeReflector : public SubtypeReflector<void> {
+        struct IdReflector : public IdReflector<void> {
             template <typename U = T>
-            uint32_t get_subtype(...) {  // NOLINT(cert-dcl50-cpp) gimme my SFINAE!
+            uint32_t get_id(...) {  // NOLINT(cert-dcl50-cpp) gimme my SFINAE!
                 return 0;
             }
 
             template <typename U = T>
-            auto get_subtype(const uint8_t* payload, uint32_t length) -> decltype(std::declval<U>().id) {
+            auto get_id(const uint8_t* payload, uint32_t length) -> decltype(std::declval<U>().id) {
                 typename U::protobuf_type pb;
                 pb.ParseFromArray(payload, length);
                 U msg = pb;
                 return msg.id;
             }
 
-            uint32_t subtype(const uint8_t* payload, uint32_t length) override {
-                return get_subtype(payload, length);
+            uint32_t id(const uint8_t* payload, uint32_t length) override {
+                return get_id(payload, length);
             }
         };
 
@@ -59,9 +59,10 @@ namespace utility::nbs {
             }
 
             template <typename U = T>
-            auto get_timestamp(uint64_t /*original*/, const uint8_t* payload, uint32_t length) -> decltype(
-                std::chrono::duration_cast<std::chrono::nanoseconds>(std::declval<U>().timestamp.time_since_epoch())
-                    .count()) {
+            auto get_timestamp(uint64_t /*original*/, const uint8_t* payload, uint32_t length)
+                -> decltype(std::chrono::duration_cast<std::chrono::nanoseconds>(
+                                std::declval<U>().timestamp.time_since_epoch())
+                                .count()) {
                 typename U::protobuf_type pb;
                 pb.ParseFromArray(payload, length);
                 U msg = pb;
@@ -119,9 +120,9 @@ namespace utility::nbs {
                     uint32_t payload_length = size - sizeof(timestamp) - sizeof(hash);
                     p += payload_length;
 
-                    // Use reflection to extract the subtype from messages that have them
-                    auto sr          = message::reflection::from_hash<SubtypeReflector>(hash);
-                    uint32_t subtype = sr->subtype(payload, payload_length);
+                    // Use reflection to extract the id from messages that have them
+                    auto sr     = message::reflection::from_hash<IdReflector>(hash);
+                    uint32_t id = sr->id(payload, payload_length);
 
                     // Use reflection to extract the timestamp from messages that have them or just return the timestamp
                     // from the nbs file if the message type doesn't have one
@@ -130,7 +131,7 @@ namespace utility::nbs {
 
                     // Write the data to the index file
                     idx.write(reinterpret_cast<char*>(&hash), sizeof(hash));
-                    idx.write(reinterpret_cast<char*>(&subtype), sizeof(subtype));
+                    idx.write(reinterpret_cast<char*>(&id), sizeof(id));
                     idx.write(reinterpret_cast<char*>(&timestamp), sizeof(timestamp));
                     idx.write(reinterpret_cast<char*>(&offset), sizeof(offset));
 
