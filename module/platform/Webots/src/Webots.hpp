@@ -20,8 +20,16 @@
 #ifndef MODULE_PLATFORM_WEBOTS_HPP
 #define MODULE_PLATFORM_WEBOTS_HPP
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+#include <array>
+#include <atomic>
+#include <mutex>
 #include <nuclear>
+#include <string>
+#include <vector>
 
+#include "message/input/Image.hpp"
 #include "message/platform/webots/ConnectRequest.hpp"
 #include "message/platform/webots/messages.hpp"
 
@@ -29,7 +37,7 @@ namespace module::platform {
 
     class Webots : public NUClear::Reactor {
     private:
-        // How often we read the servos
+        /// @brief How often we read the servos
         static constexpr int UPDATE_FREQUENCY = 90;
 
         /// @brief Handle for incoming data reaction. This will be bound/unbound during (re)connection
@@ -39,26 +47,27 @@ namespace module::platform {
         /// @brief Handle for error checking on the TCP connection. This will be bound/unbound during (re)connection
         ReactionHandle error_io;
 
+        /// @brief server_name The name or IP address to connect to. If it's an IP, it should be in "X.X.X.X" form
+        std::string server_address;
+        /// @brief server_port The port number to connect to on the server
+        std::string server_port;
+
         /// @brief Establish a TCP connection to the specified server/port
-        /// @param server_name The name or IP address to connect to. If it's an IP, it should be in "X.X.X.X" form
-        /// @param port The port number to connect to
         /// @return If the connection was successful, a file descriptor. Else, -1 is returned
-        int tcpip_connect(const std::string& server_name, const std::string& port);
+        [[nodiscard]] int tcpip_connect();
 
         /// @brief Establishes the connection with webots, then binds the reaction handles with the resulting fd
-        /// @param server_address The IP address to connect to, in "X.X.X.X" form
-        /// @param port The port number to connect to
-        void setup_connection(const std::string& server_address, const std::string& port);
+        void setup_connection();
 
         /// @brief Translate sensor measurement messages Webots sends us, emmitting readings as our message types
         /// @param sensor_measurements Message from Webots with information from the sensors
         void translate_and_emit_sensor(const message::platform::webots::SensorMeasurements& sensor_measurements);
 
         /// @brief The current file descriptor used for the connection. It should be kept -1 if no active connection
-        int fd;
+        int fd = -1;
 
         /// @brief The time the connection was opened.
-        NUClear::clock::time_point connect_time;
+        NUClear::clock::time_point connect_time{};
 
         /// @brief The number of time ticks which have passed since the last IO::READ trigger
         uint32_t sim_delta = 0;
@@ -68,9 +77,19 @@ namespace module::platform {
         uint32_t current_sim_time = 0;
         /// @brief The current real time in milliseconds (unix time)
         uint64_t current_real_time = 0;
+        /// @brief Interpolation factor to smooth clock. 0.0 is no smoothing (raw updates from webots), 1.0 takes no
+        /// updates from webots
+        double clock_smoothing = 0.0;
 
         /// @brief The time between two measurements, expressed in milliseconds
         int time_step;
+        /// @brief The minimum allowed time between two camera measurements
+        int min_camera_time_step;
+        /// @brief The minimum allowed time between two sensor measurements, not including the camera
+        int min_sensor_time_step;
+        /// @brief The maximum velocity allowed by the NUgus motors in webots
+        double max_velocity_mx64;
+        double max_velocity_mx106;
 
         /// @brief Current state of a servo
         struct ServoState {
@@ -83,10 +102,11 @@ namespace module::platform {
             /// @brief Name of the servo
             std::string name;
 
-            /// @brief Cached values that are never read from the simulator
-            double p_gain        = 32.0 / 255.0;
-            double i_gain        = 0.0;
-            double d_gain        = 0.0;
+            double p_gain = 32.0 / 255.0;
+            // `i` and `d` gains are always 0
+            static constexpr double i_gain = 0.0;
+            static constexpr double d_gain = 0.0;
+
             double moving_speed  = 0.0;
             double goal_position = 0.0;
             double torque        = 0.0;  // 0.0 to 1.0
@@ -97,7 +117,31 @@ namespace module::platform {
         };
 
         /// @brief Our current servo states
-        std::array<ServoState, 20> servo_state;
+        std::array<ServoState, 20> servo_state{};
+
+        /// @brief Buffer for storing received messages
+        std::vector<uint8_t> buffer{};
+
+        /// @brief Atomic variable indicating that a reconnect is currently in progress
+        std::atomic_bool active_reconnect{false};
+        bool connection_active = false;
+
+        std::mutex sensors_mutex;
+        std::vector<std::pair<NUClear::clock::time_point, Eigen::Affine3d>> Hwps;
+
+        struct CameraContext {
+            Webots& reactor;
+            std::string name;
+            uint32_t id;
+            message::input::Image::Lens lens;
+            // Homogenous transform from platform (p) to camera where platform is the rigid body the camera is attached
+            // to
+            Eigen::Affine3d Hpc;
+        };
+
+        std::unique_ptr<CameraContext> context;
+
+        uint32_t num_cameras = 0;
 
     public:
         /// @brief Called by the powerplant to build and setup the webots reactor

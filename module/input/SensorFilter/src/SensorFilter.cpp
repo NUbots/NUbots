@@ -349,6 +349,11 @@ namespace module::input {
                 // x-axis out the front of the robot
                 // y-axis to the left
                 // z-axis up
+                //
+                // For the accelerometer the orientation should be as follows
+                // x axis reports a +1g acceleration when robot is laying on its back
+                // y axis reports a +1g acceleration when robot is laying on its right side
+                // z axis reports a +1g acceleration when robot is vertical
 
                 // If we have a previous sensors and our platform has errors then reuse our last sensor value
                 if (previousSensors && (input.platform_error_flags)) {

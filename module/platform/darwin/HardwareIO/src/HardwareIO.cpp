@@ -37,6 +37,7 @@ namespace module::platform::darwin {
 
     using extension::Configuration;
     using message::motion::ServoTarget;
+    using message::motion::ServoTargets;
     using message::platform::RawSensors;
     using utility::support::Expression;
 
@@ -76,12 +77,14 @@ namespace module::platform::darwin {
 
         // Accelerometer (in m/s^2)
         // Swizzle axes to that
-        //      x is forward, y is to the left, and z is up
+        //      x axis reports a +1g acceleration when robot is laying on its back
+        //      y axis reports a +1g acceleration when robot is laying on its right side
+        //      z axis reports a +1g acceleration when robot is vertical
         // The CM740 currently has
         //      x is backward, y is to the left, and z is up
-        sensors.accelerometer.x = -Convert::accelerometer(data.cm740.accelerometer.x);
-        sensors.accelerometer.y = Convert::accelerometer(data.cm740.accelerometer.y);
-        sensors.accelerometer.z = Convert::accelerometer(data.cm740.accelerometer.z);
+        sensors.accelerometer.x = Convert::accelerometer(data.cm740.accelerometer.x);
+        sensors.accelerometer.y = -Convert::accelerometer(data.cm740.accelerometer.y);
+        sensors.accelerometer.z = -Convert::accelerometer(data.cm740.accelerometer.z);
 
         // Gyroscope (in radians/second)
         // Swizzle axes to that
@@ -372,10 +375,10 @@ namespace module::platform::darwin {
         });
 
         // This trigger writes the servo positions to the hardware
-        on<Trigger<std::vector<ServoTarget>>, With<RawSensors>>().then([this](const std::vector<ServoTarget>& commands,
-                                                                              const RawSensors& sensors) {
+        on<Trigger<ServoTargets>, With<RawSensors>>().then([this](const ServoTargets& commands,
+                                                                  const RawSensors& sensors) {
             // Loop through each of our commands
-            for (const auto& command : commands) {
+            for (const auto& command : commands.targets) {
                 float diff = utility::math::angle::difference(
                     command.position,
                     utility::platform::getRawServo(command.id, sensors).present_position);
@@ -410,11 +413,11 @@ namespace module::platform::darwin {
         });
 
         on<Trigger<ServoTarget>>().then([this](const ServoTarget command) {
-            auto commandList = std::make_unique<std::vector<ServoTarget>>();
-            commandList->push_back(command);
+            auto commandList = std::make_unique<ServoTargets>();
+            commandList->targets.push_back(command);
 
             // Emit it so it's captured by the reaction above
-            emit<Scope::DIRECT>(std::move(commandList));
+            emit<Scope::DIRECT>(commandList);
         });
 
         // If we get a HeadLED command then write it

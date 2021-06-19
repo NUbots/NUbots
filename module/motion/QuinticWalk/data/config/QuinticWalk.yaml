@@ -118,3 +118,12 @@ imu:
 
 gains:
   legs: 13
+  arms: 13
+
+arms:
+  right_shoulder_pitch: 1.98
+  left_shoulder_pitch: 2.05
+  right_shoulder_roll: -0.176
+  left_shoulder_roll: 0.135
+  right_elbow: -1.57
+  left_elbow: -1.57
