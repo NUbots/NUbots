@@ -57,7 +57,12 @@ namespace utility::math::quaternion {
         }
 
         // We want the eigenvector corresponding to the largest eigenvector
-        return QType(eigensolver.eigenvectors().template rightCols<1>());
+        auto tmp = QType(eigensolver.eigenvectors().template rightCols<1>());
+        if (tmp.w() < 0) {
+            tmp.w()   = -tmp.w();
+            tmp.vec() = -tmp.vec();
+        }
+        return tmp;
     }
 
     template <typename QType>
