@@ -96,8 +96,12 @@ namespace module::input {
             this->config.buttons.debounceThreshold = config["buttons"]["debounce_threshold"].as<int>();
 
             // Foot down config
-            this->config.footDown.fromLoad           = config["foot_down"]["from_load"].as<bool>();
-            this->config.footDown.certaintyThreshold = config["foot_down"]["certainty_threshold"].as<float>();
+            const std::string method = config["foot_down"]["method"].as<std::string>();
+            std::map<std::string, float> thresholds;
+            for (const auto& threshold : config["foot_down"]["known_methods"]) {
+                thresholds[threshold["name"].as<std::string>()] = threshold["certainty_threshold"].as<float>();
+            }
+            this->config.footDown.set_method(method, thresholds);
 
             // Motion filter config
             // Update our velocity timestep dekay
@@ -408,28 +412,23 @@ namespace module::input {
                 sensors->feet[BodySide::LEFT].down  = true;
 
                 std::array<bool, 2> feet_down = {true};
-                if (config.footDown.fromLoad) {
+                if (config.footDown.method() == "LOAD") {
                     // Use our virtual load sensor class to work out which feet are down
                     feet_down = load_sensor.updateFeet(*sensors);
-
-                    if (this->config.debug) {
-                        emit(graph("Sensor/Foot Down/Load/Left", feet_down[BodySide::LEFT]));
-                        emit(graph("Sensor/Foot Down/Load/Right", feet_down[BodySide::RIGHT]));
-                    }
                 }
-                else {
+                else if (config.footDown.method() == "Z_HEIGHT") {
                     Eigen::Affine3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
                     Eigen::Affine3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
                     Eigen::Affine3d Hlr  = Htl.inverse() * Htr;
                     Eigen::Vector3d rRLl = Hlr.translation();
 
                     // Right foot is below left foot in left foot space
-                    if (rRLl.z() < -config.footDown.certaintyThreshold) {
+                    if (rRLl.z() < -config.footDown.threshold()) {
                         feet_down[BodySide::RIGHT] = true;
                         feet_down[BodySide::LEFT]  = false;
                     }
                     // Right foot is above left foot in left foot space
-                    else if (rRLl.z() > config.footDown.certaintyThreshold) {
+                    else if (rRLl.z() > config.footDown.threshold()) {
                         feet_down[BodySide::RIGHT] = false;
                         feet_down[BodySide::LEFT]  = true;
                     }
@@ -439,10 +438,11 @@ namespace module::input {
                         feet_down[BodySide::LEFT]  = true;
                     }
 
-                    if (this->config.debug) {
-                        emit(graph("Sensor/Foot Down/Z/Left", feet_down[BodySide::LEFT]));
-                        emit(graph("Sensor/Foot Down/Z/Right", feet_down[BodySide::RIGHT]));
-                    }
+                if (this->config.debug) {
+                    emit(graph(fmt::format("Sensor/Foot Down/{}/Left", config.footDown.method()),
+                               feet_down[BodySide::LEFT]));
+                    emit(graph(fmt::format("Sensor/Foot Down/{}/Right", config.footDown.method()),
+                               feet_down[BodySide::RIGHT]));
                 }
 
                 sensors->feet[BodySide::RIGHT].down = feet_down[BodySide::RIGHT];

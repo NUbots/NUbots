@@ -96,9 +96,31 @@ namespace module::input {
             } buttons;
 
             struct FootDown {
-                FootDown() : fromLoad(true), certaintyThreshold(0.05) {}
-                bool fromLoad;
-                float certaintyThreshold;
+                FootDown()
+                    : current_method("Z_HEIGHT")
+                    , certainty_thresholds({
+                          {"Z_HEIGHT", 0.01f},
+                          {"VIRTUAL", 0.05f},
+                          {"FSR", 60.0f},
+                      }) {}
+                FootDown(const std::string& method, const std::map<std::string, float>& thresholds) {
+                    set_method(method, thresholds);
+                }
+                void set_method(const std::string& method, const std::map<std::string, float>& thresholds) {
+                    if (thresholds.count(method) == 0) {
+                        throw std::runtime_error(fmt::format("Invalid foot down method '{}'", method));
+                    }
+                    current_method       = method;
+                    certainty_thresholds = thresholds;
+                }
+                float threshold() const {
+                    return certainty_thresholds.at(current_method);
+                }
+                std::string method() const {
+                    return current_method;
+                }
+                std::string current_method;
+                std::map<std::string, float> certainty_thresholds;
             } footDown;
         } config;
 
