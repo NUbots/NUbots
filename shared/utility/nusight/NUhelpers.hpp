@@ -25,34 +25,17 @@
 
 #include "message/support/nusight/DataPoint.hpp"
 
+#include "utility/type_traits/is_iterable.hpp"
+
 namespace utility::nusight {
 
     namespace {
 
         using message::support::nusight::DataPoint;
+        using utility::type_traits::is_iterable;
 
         constexpr float TIMEOUT = 2.5;
 
-        template <typename T>
-        struct is_iterable {
-        private:
-            using yes = std::true_type;
-            using no  = std::false_type;
-
-            template <typename U>
-            static auto test_begin(int) -> decltype(std::declval<U>().begin(), yes());
-            template <typename>
-            static no test_begin(...);
-
-            template <typename U>
-            static auto test_end(int) -> decltype(std::declval<U>().end(), yes());
-            template <typename>
-            static no test_end(...);
-
-        public:
-            static constexpr bool value = std::is_same<decltype(test_begin<T>(0)), yes>::value
-                                          && std::is_same<decltype(test_end<T>(0)), yes>::value;
-        };
 
         inline void buildGraph(DataPoint& /*dataPoint*/) {}
 
