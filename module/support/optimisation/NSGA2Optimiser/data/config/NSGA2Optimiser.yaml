@@ -18,24 +18,24 @@ eta:
 walk:
   # Full walk cycle frequency (how long it takes in seconds for a left + right steps)
   # (in Hz, > 0)
-  freq: [0.7, 0.5, 1.75]
+  freq: [0.2, 0.2, 1.75]
   # Length of double support phase in half cycle (how long both legs should be on the ground, as a ratio of how long it takes for a single step)
   # (ratio, [0:1])
-  double_support_ratio: [0.55, 0.1, 0.55]
+  double_support_ratio: [0.3, 0.1, 0.55]
   foot:
     # Lateral distance between the feet center (how spread apart the feet should be)
     # (in m, >= 0)
-    distance: [0.28, 0.16, 0.3]
+    distance: [0.15, 0.14, 0.3]
     # Maximum flying foot height (how high we lift a foot from the ground)
     # (in m, >= 0)
-    rise: [0.15, 0.05, 0.16]
+    rise: [0.15, 0.05, 0.17]
   trunk:
     # Height of the trunk from ground (how much we bend the knee, for the entire walk, fully standing is 0.51-ish)
     # (in m, > 0)
-    height: [0.45, 0.4, 0.5]
+    height: [0.45, 0.35, 0.5]
     # Trunk pitch orientation (how much we lean the torso forward or backward, does not change)
     # (in rad)
-    pitch: [24 * pi / 180, -15 * pi / 180, 30 * pi / 180]
+    pitch: [15 * pi / 180, -15 * pi / 180, 30 * pi / 180]
     # Trunk forward offset (how much we offset the trunk forward or backward lean when walking)
     # (in m)
     x_offset: [0.03, -0.05, 0.05]
@@ -54,4 +54,5 @@ walk:
     duration: [0.5, 0.0, 2.0]
 
 gains:
-  legs: [13, 10, 25]
+  legs: 13
+  arms: 13
