@@ -1,9 +1,14 @@
 #include "FilterTester.hpp"
 
+#include <filesystem>
+
 #include "extension/Configuration.hpp"
 
 #include "message/input/Sensors.hpp"
 #include "message/platform/RawSensors.hpp"
+
+#include "utility/nbs/Decoder.hpp"
+#include "utility/support/ProgressBar.hpp"
 
 namespace module::tools {
 
