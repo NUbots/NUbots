@@ -134,8 +134,8 @@ namespace module::platform {
             std::string name;
             uint32_t id;
             message::input::Image::Lens lens;
-            // Homogenous transform from camera (c) to platform (p) where platform is the rigid body the camera is attached
-            // to
+            // Homogenous transform from camera (c) to platform (p) where platform is the rigid body the camera is
+            // attached to
             Eigen::Affine3d Hpc;
         };
         std::map<std::string, CameraContext> camera_context;
