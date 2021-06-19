@@ -105,7 +105,21 @@ namespace module::motion {
                 if ((i >= 6) && (i < 18)) {
                     jointGains[i] = cfg["gains"]["legs"].as<float>();
                 }
+                if (i < 6) {
+                    jointGains[i] = cfg["gains"]["arms"].as<float>();
+                }
             }
+
+            arm_positions.push_back(
+                std::make_pair(ServoID::R_SHOULDER_PITCH, cfg["arms"]["right_shoulder_pitch"].as<float>()));
+            arm_positions.push_back(
+                std::make_pair(ServoID::L_SHOULDER_PITCH, cfg["arms"]["left_shoulder_pitch"].as<float>()));
+            arm_positions.push_back(
+                std::make_pair(ServoID::R_SHOULDER_ROLL, cfg["arms"]["right_shoulder_roll"].as<float>()));
+            arm_positions.push_back(
+                std::make_pair(ServoID::L_SHOULDER_ROLL, cfg["arms"]["left_shoulder_roll"].as<float>()));
+            arm_positions.push_back(std::make_pair(ServoID::R_ELBOW, cfg["arms"]["right_elbow"].as<float>()));
+            arm_positions.push_back(std::make_pair(ServoID::L_ELBOW, cfg["arms"]["left_elbow"].as<float>()));
 
             imu_reaction.enable(config.imu_active);
         });
@@ -259,18 +273,22 @@ namespace module::motion {
                                                Eigen::Affine3f(left_foot.cast<float>()),
                                                Eigen::Affine3f(right_foot.cast<float>()));
 
-        auto waypoints = motionLegs(joints);
-
+        auto waypoints = motion(joints);
         emit(std::move(waypoints));
     }
 
-    std::unique_ptr<ServoCommands> QuinticWalk::motionLegs(const std::vector<std::pair<ServoID, float>>& joints) {
+    std::unique_ptr<ServoCommands> QuinticWalk::motion(const std::vector<std::pair<ServoID, float>>& joints) {
         auto waypoints = std::make_unique<ServoCommands>();
-        waypoints->commands.reserve(joints.size());
+        waypoints->commands.reserve(joints.size() + arm_positions.size());
 
         const NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
 
         for (const auto& joint : joints) {
+            waypoints->commands
+                .emplace_back(subsumptionId, time, joint.first, joint.second, jointGains[joint.first], 100);
+        }
+
+        for (const auto& joint : arm_positions) {
             waypoints->commands
                 .emplace_back(subsumptionId, time, joint.first, joint.second, jointGains[joint.first], 100);
         }
