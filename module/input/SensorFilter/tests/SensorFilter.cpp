@@ -617,55 +617,55 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
                 break;
         }
 
-        if (!failed) {
-            // Calculate difference between expected and predicted orientations
-            const Eigen::Quaterniond& tmp = MotionModel<double>::StateVec(filter.get()).Rwt;
-            Eigen::Quaterniond Rwt;
-            if (Rwt.w() < 0) {
-                Rwt.w()   = -tmp.w();
-                Rwt.vec() = -tmp.vec();
-            }
-            else {
-                Rwt.w()   = tmp.w();
-                Rwt.vec() = tmp.vec();
-            }
-            const double dot = quaternions[i].dot(Rwt);
-
-            INFO("Predicted Orientation....: " << Rwt.coeffs().transpose());
-
-            angular_errors.emplace_back(std::acos(2.0 * dot * dot - 1.0));
-            errors.emplace_back(utility::math::quaternion::difference(Rwt, quaternions[i]));
-            Rwt_quat.emplace_back(Rwt);
+        // if (!failed) {
+        // Calculate difference between expected and predicted orientations
+        const Eigen::Quaterniond& tmp = MotionModel<double>::StateVec(filter.get()).Rwt;
+        Eigen::Quaterniond Rwt;
+        if (Rwt.w() < 0) {
+            Rwt.w()   = -tmp.w();
+            Rwt.vec() = -tmp.vec();
         }
         else {
-            // UKF state unrecoverable. Print current average error and bail
-            const Eigen::Quaterniond& Rwt = MotionModel<double>::StateVec(filter.get()).Rwt;
-            const double dot              = quaternions[i].dot(Rwt);
-
-            const double current_angular_error = std::acos(2.0 * dot * dot - 1.0);
-
-            angular_errors.emplace_back(current_angular_error);
-            errors.emplace_back(utility::math::quaternion::difference(Rwt, quaternions[i]));
-            Rwt_quat.emplace_back(Rwt);
-
-            const Eigen::Quaterniond mean_error =
-                utility::math::quaternion::mean(errors.begin(), errors.end()).normalized();
-            const double mean_angular_error =
-                std::accumulate(angular_errors.begin(), angular_errors.end(), 0.0) / double(angular_errors.size());
-
-            INFO("Predicted Orientation....: " << Rwt.coeffs().transpose());
-            INFO("Current Angular Error....: " << current_angular_error);
-            INFO("Mean Error........: " << mean_error.coeffs().transpose());
-            INFO("Mean Angular Error: " << mean_angular_error);
-
-            const double covariance_sigma_weight = 0.1 * 0.1 * 16;
-            const Eigen::Matrix<double, 16, 16> state(
-                covariance_sigma_weight
-                * filter.getCovariance().unaryExpr([](const double& c) { return std::abs(c); }));
-            INFO(state.diagonal());
-
-            FAIL("UKF State unrecoverable. Aborting");
+            Rwt.w()   = tmp.w();
+            Rwt.vec() = tmp.vec();
         }
+        const double dot = quaternions[i].dot(Rwt);
+
+        INFO("Predicted Orientation....: " << Rwt.coeffs().transpose());
+
+        angular_errors.emplace_back(std::acos(2.0 * dot * dot - 1.0));
+        errors.emplace_back(utility::math::quaternion::difference(Rwt, quaternions[i]));
+        Rwt_quat.emplace_back(Rwt);
+        // }
+        // else {
+        //     // UKF state unrecoverable. Print current average error and bail
+        //     const Eigen::Quaterniond& Rwt = MotionModel<double>::StateVec(filter.get()).Rwt;
+        //     const double dot              = quaternions[i].dot(Rwt);
+
+        //     const double current_angular_error = std::acos(2.0 * dot * dot - 1.0);
+
+        //     angular_errors.emplace_back(current_angular_error);
+        //     errors.emplace_back(utility::math::quaternion::difference(Rwt, quaternions[i]));
+        //     Rwt_quat.emplace_back(Rwt);
+
+        //     const Eigen::Quaterniond mean_error =
+        //         utility::math::quaternion::mean(errors.begin(), errors.end()).normalized();
+        //     const double mean_angular_error =
+        //         std::accumulate(angular_errors.begin(), angular_errors.end(), 0.0) / double(angular_errors.size());
+
+        //     INFO("Predicted Orientation....: " << Rwt.coeffs().transpose());
+        //     INFO("Current Angular Error....: " << current_angular_error);
+        //     INFO("Mean Error........: " << mean_error.coeffs().transpose());
+        //     INFO("Mean Angular Error: " << mean_angular_error);
+
+        //     const double covariance_sigma_weight = 0.1 * 0.1 * 16;
+        //     const Eigen::Matrix<double, 16, 16> state(
+        //         covariance_sigma_weight
+        //         * filter.getCovariance().unaryExpr([](const double& c) { return std::abs(c); }));
+        //     INFO(state.diagonal());
+
+        //     FAIL("UKF State unrecoverable. Aborting");
+        // }
     }
 
     const Eigen::Quaterniond mean_error = utility::math::quaternion::mean(errors.begin(), errors.end()).normalized();
@@ -680,8 +680,8 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
     // }
     std::cout << Rwt_quat.size() << std::endl;
     for (auto& it : Rwt_quat) {
-        INFO("Rwt_quat :" << i << " " << it.w() << "," << it.x() << "," << it.y() << "," << it.z());
-        std::cout << "Rwt_quat :" << i << "," << it.w() << "," << it.x() << "," << it.y() << "," << it.z() << std::endl;
+        // INFO("Rwt_quat :" << i << " " << it.w() << "," << it.x() << "," << it.y() << "," << it.z());
+        std::cout << it.w() << "," << it.x() << "," << it.y() << "," << it.z() << std::endl;
         i++;
     }
     REQUIRE(mean_error.w() == Approx(1.0));

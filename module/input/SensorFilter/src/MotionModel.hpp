@@ -198,7 +198,7 @@ namespace module::input {
 
         Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::GYROSCOPE&) {
             // Add predicted gyroscope bias to our predicted gyroscope
-            return state.omegaTTt + state.omegaTTt_bias;
+            return state.omegaTTt;  // + state.omegaTTt_bias;
         }
 
         Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::FLAT_FOOT_ODOMETRY&) {
