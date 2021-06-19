@@ -24,6 +24,7 @@
 #include <utility>
 
 #include "message/support/nusight/DataPoint.hpp"
+
 #include "utility/type_traits/is_iterable.hpp"
 
 namespace utility::nusight {
