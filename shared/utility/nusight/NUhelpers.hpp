@@ -32,6 +32,7 @@ namespace utility::nusight {
     namespace {
 
         using message::support::nusight::DataPoint;
+        using utility::type_traits::is_iterable;
 
         constexpr float TIMEOUT = 2.5;
 
