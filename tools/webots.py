@@ -48,7 +48,7 @@ def get_cmake_flags(roles_to_build):
     # Ensure that all the roles requested are available
     for role in roles_to_build:
         if role not in available_roles:
-            print(f"role '{role}' not found")
+            cprint(f"role '{role}' not found", color="red", attrs=["bold"])
             sys.exit(1)
 
     role_flags = [f"-DROLE_{role}=ON" for role in available_roles if role in roles_to_build] + [
@@ -69,13 +69,13 @@ def exec_build(roles):
     configure_command = ["./b", "configure", "--"] + get_cmake_flags(roles)
     exit_code = subprocess.run(configure_command).returncode
     if exit_code != 0:
-        cprint("unable to configure build, exit code {}".format(exit_code), "red", attrs=["bold"])
+        cprint(f"unable to configure build, exit code {exit_code}", "red", attrs=["bold"])
         sys.exit(exit_code)
 
     print("Building code...")
     exit_code = subprocess.run(["./b", "build"]).returncode
     if exit_code != 0:
-        cprint("unable to build code, exit code {}".format(exit_code), "red", attrs=["bold"])
+        cprint(f"unable to build code, exit code {exit_code}", "red", attrs=["bold"])
         sys.exit(exit_code)
 
     # The paths to the built binaries and toolchain on the local filesystem
@@ -96,8 +96,8 @@ def exec_build(roles):
     exit_code = subprocess.run(["./b", "install", docker_install_dir, "--local", "-co", "-t"]).returncode
     if exit_code != 0:
         cprint(
-            "unable to install to local directory, exit code {}".format(exit_code),
-            "red",
+            f"unable to install to local directory, exit code {exit_code}",
+            color="red",
             attrs=["bold"],
         )
         sys.exit(exit_code)
@@ -113,8 +113,8 @@ def exec_build(roles):
     ).returncode
     if exit_code != 0:
         cprint(
-            "unable to build docker image, exit code {}".format(exit_code),
-            "red",
+            f"unable to build docker image, exit code {exit_code}",
+            color="red",
             attrs=["bold"],
         )
         sys.exit(exit_code)
@@ -163,7 +163,7 @@ def exec_push():
 
     if exit_code != 0:
         print(f"unable to tag image, exit code {exit_code}")
-        sys.exit(1)
+        sys.exit(exit_code)
 
     exit_code = subprocess.run(
         [
@@ -175,7 +175,7 @@ def exec_push():
 
     if exit_code != 0:
         print(f"unable to push image, exit code {exit_code}")
-        sys.exit(1)
+        sys.exit(exit_code)
 
 
 def run(sub_command, roles=None, role=None, **kwargs):
@@ -187,3 +187,4 @@ def run(sub_command, roles=None, role=None, **kwargs):
         exec_run(role)
     else:
         print(f"invalid sub command: '{sub_command}'")
+        sys.exit(1)
