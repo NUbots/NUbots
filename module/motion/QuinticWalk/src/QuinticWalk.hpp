@@ -33,7 +33,7 @@ namespace module::motion {
 
         void calculateJointGoals();
         [[nodiscard]] float getTimeDelta();
-        [[nodiscard]] std::unique_ptr<message::behaviour::ServoCommands> motionLegs(
+        [[nodiscard]] std::unique_ptr<message::behaviour::ServoCommands> motion(
             const std::vector<std::pair<utility::input::ServoID, float>>& joints);
 
         struct {
@@ -63,6 +63,8 @@ namespace module::motion {
         Eigen::Vector3f foot_axis  = Eigen::Vector3f::Zero();
 
         std::map<utility::input::ServoID, float> jointGains{};
+
+        std::vector<std::pair<utility::input::ServoID, float>> arm_positions{};
     };
 }  // namespace module::motion
 
