@@ -143,6 +143,9 @@ namespace module::platform {
 
         uint32_t num_cameras = 0;
 
+        /// @brief Max FSR sensor value
+        float max_fsr_value;
+
     public:
         /// @brief Called by the powerplant to build and setup the webots reactor
         explicit Webots(std::unique_ptr<NUClear::Environment> environment);
