@@ -213,10 +213,10 @@ namespace module::behaviour::strategy {
                             }
                             else if (phase == Phase::READY) {
                                 if (gameState.data.our_kick_off) {
-                                    walkTo(fieldDescription, cfg_.start_position_offensive);
+                                    // walkTo(fieldDescription, cfg_.start_position_offensive);
                                 }
                                 else {
-                                    walkTo(fieldDescription, cfg_.start_position_defensive);
+                                    // walkTo(fieldDescription, cfg_.start_position_defensive);
                                 }
                                 find({FieldTarget(FieldTarget::Target::SELF)});
                                 currentState = Behaviour::State::READY;
@@ -289,7 +289,7 @@ namespace module::behaviour::strategy {
             if (NUClear::clock::now() - ballLastMeasured
                 < cfg_.ball_last_seen_max_time) {  // ball has been seen recently
                 find({FieldTarget(FieldTarget::Target::BALL)});
-                walkTo(fieldDescription, FieldTarget::Target::BALL);
+                // walkTo(fieldDescription, FieldTarget::Target::BALL);
                 currentState = Behaviour::State::WALK_TO_BALL;
             }
             else {  // ball has not been seen recently
@@ -298,12 +298,12 @@ namespace module::behaviour::strategy {
                     && (position.translation().norm() > 1)) {  // a long way away from centre
                     // walk to centre of field
                     find({FieldTarget(FieldTarget::Target::BALL)});
-                    walkTo(fieldDescription, Eigen::Vector2d::Zero());
+                    // walkTo(fieldDescription, Eigen::Vector2d::Zero());
                     currentState = Behaviour::State::MOVE_TO_CENTRE;
                 }
                 else {
                     find({FieldTarget(FieldTarget::Target::BALL)});
-                    walkTo(fieldDescription, FieldTarget::Target::BALL);
+                    // walkTo(fieldDescription, FieldTarget::Target::BALL);
                     // spinWalk();
 
                     currentState = Behaviour::State::SEARCH_FOR_BALL;

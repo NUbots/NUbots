@@ -446,30 +446,43 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
     std::vector<Eigen::Quaterniond> quaternions;
 
     char comma;
-    std::ifstream ifs("tests/gyroscope.csv");
+    // std::ifstream ifs("tests/gyroscope.csv");
+    // while (ifs.good()) {
+    //     Eigen::Vector3d gyro;
+    //     ifs >> gyro.x() >> comma >> gyro.y() >> comma >> gyro.z();
+    //     if (ifs.good()) {
+    //         gyro_readings.emplace_back(gyro);
+    //     }
+    // }
+    // ifs.close();
+    // ifs.open("tests/accelerometer.csv");
+    // while (ifs.good()) {
+    //     Eigen::Vector3d acc;
+    //     ifs >> acc.x() >> comma >> acc.y() >> comma >> acc.z();
+    //     if (ifs.good()) {
+    //         acc_readings.emplace_back(acc);
+    //     }
+    // }
+    // ifs.close();
+    // ifs.open("tests/quaternion.csv");
+    // while (ifs.good()) {
+    //     Eigen::Quaterniond quat;
+    //     ifs >> quat.w() >> comma >> quat.x() >> comma >> quat.y() >> comma >> quat.z();
+    //     if (ifs.good()) {
+    //         quaternions.emplace_back(quat);
+    //     }
+    // }
+    std::ifstream ifs("/home/nubots/NUbots/module/input/SensorFilter/tests/data/webots.csv");
     while (ifs.good()) {
         Eigen::Vector3d gyro;
-        ifs >> gyro.x() >> comma >> gyro.y() >> comma >> gyro.z();
+        Eigen::Vector3d acc;
+        Eigen::Quaterniond quat;
+        ifs >> gyro.x() >> comma >> gyro.y() >> comma >> gyro.z() >> comma >> acc.x() >> comma >> acc.y() >> comma
+            >> acc.z();
         if (ifs.good()) {
             gyro_readings.emplace_back(gyro);
-        }
-    }
-    ifs.close();
-    ifs.open("tests/accelerometer.csv");
-    while (ifs.good()) {
-        Eigen::Vector3d acc;
-        ifs >> acc.x() >> comma >> acc.y() >> comma >> acc.z();
-        if (ifs.good()) {
             acc_readings.emplace_back(acc);
-        }
-    }
-    ifs.close();
-    ifs.open("tests/quaternion.csv");
-    while (ifs.good()) {
-        Eigen::Quaterniond quat;
-        ifs >> quat.w() >> comma >> quat.x() >> comma >> quat.y() >> comma >> quat.z();
-        if (ifs.good()) {
-            quaternions.emplace_back(quat);
+            quaternions.emplace_back(Eigen::Quaterniond(1.0, 0.0, 0.0, 0.0));
         }
     }
     ifs.close();
@@ -605,8 +618,17 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
 
         if (!failed) {
             // Calculate difference between expected and predicted orientations
-            const Eigen::Quaterniond& Rwt = MotionModel<double>::StateVec(filter.get()).Rwt;
-            const double dot              = quaternions[i].dot(Rwt);
+            const Eigen::Quaterniond& tmp = MotionModel<double>::StateVec(filter.get()).Rwt;
+            Eigen::Quaterniond Rwt;
+            if (Rwt.w() < 0) {
+                Rwt.w()   = -tmp.w();
+                Rwt.vec() = -tmp.vec();
+            }
+            else {
+                Rwt.w()   = tmp.w();
+                Rwt.vec() = tmp.vec();
+            }
+            const double dot = quaternions[i].dot(Rwt);
 
             INFO("Predicted Orientation....: " << Rwt.coeffs().transpose());
 
@@ -648,6 +670,11 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
         std::accumulate(angular_errors.begin(), angular_errors.end(), 0.0) / double(angular_errors.size());
     INFO("Mean Error........: " << mean_error.coeffs().transpose());
     INFO("Mean Angular Error: " << mean_angular_error);
+    auto i = 0;
+    for (auto& it : angular_errors) {
+        std::cout << "Angular Error :" << i << " " << it << std::endl;
+        i++;
+    }
     REQUIRE(mean_error.w() == Approx(1.0));
     REQUIRE(mean_error.x() == Approx(0.0));
     REQUIRE(mean_error.y() == Approx(0.0));

@@ -706,6 +706,11 @@ namespace module::input {
                             sensors->Hgc      = Hgt * Htc;  // Rwt * Rth
                         }
 
+                        std::cout << "Data" << sensors->gyroscope.x() << "," << sensors->gyroscope.y() << ","
+                                  << sensors->gyroscope.z() << "," << sensors->accelerometer.x() << ","
+                                  << sensors->accelerometer.y() << "," << sensors->accelerometer.z() << ","
+                                  << std::endl;
+
                         emit(std::move(sensors));
                     })
                 .disable();
