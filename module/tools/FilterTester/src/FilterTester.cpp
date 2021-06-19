@@ -10,6 +10,7 @@ namespace module::tools {
     using extension::Configuration;
     using message::input::Sensors;
     using message::platform::RawSensors;
+    using NUClear::message::CommandLineArguments;
 
     FilterTester::FilterTester(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), config{} {
