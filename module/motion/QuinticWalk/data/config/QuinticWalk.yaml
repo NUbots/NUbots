@@ -93,16 +93,16 @@ walk:
 max_step:
   # Maximal step length in X
   # (in m, [0:1])
-  x: 0.04
+  x: 1
   # Maximal step length in Y
   # (in m, [0:1])
-  y: 0.04
+  y: 1
   # Maximal step turn in yaw
   # (in rad, [0:1.5])
-  z: 0.50
+  z: 1.5
   # Maximal step length in X and Y combined
   # (in m, [0:1])
-  xy: 0.05
+  xy: 1
 
 imu:
   # Activates the IMU to stop the walking when the robot gets unstable
