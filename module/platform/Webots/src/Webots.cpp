@@ -28,14 +28,18 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/Image.hpp"
+#include "message/input/Sensors.hpp"
 #include "message/motion/ServoTarget.hpp"
 #include "message/output/CompressedImage.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/platform/webots/messages.hpp"
 
+#include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 #include "utility/platform/RawSensors.hpp"
+#include "utility/support/yaml_expression.hpp"
 #include "utility/vision/fourcc.hpp"
+#include "utility/vision/projection.hpp"
 
 // Include headers needed for TCP connection
 extern "C" {
@@ -51,6 +55,7 @@ namespace module::platform {
 
     using extension::Configuration;
     using message::input::Image;
+    using message::input::Sensors;
     using message::motion::ServoTarget;
     using message::motion::ServoTargets;
     using message::output::CompressedImage;
@@ -64,7 +69,9 @@ namespace module::platform {
     using message::platform::webots::SensorMeasurements;
     using message::platform::webots::SensorTimeStep;
 
+    using utility::input::ServoID;
     using utility::platform::getRawServo;
+    using utility::support::Expression;
     using utility::vision::fourcc;
 
     // Converts the NUgus.proto servo name to the equivalent RawSensor.proto name
@@ -220,7 +227,8 @@ namespace module::platform {
             time_step            = config["time_step"].as<int>();
             min_camera_time_step = config["min_camera_time_step"].as<int>();
             min_sensor_time_step = config["min_sensor_time_step"].as<int>();
-            max_velocity         = config["max_velocity"].as<double>();
+            max_velocity_mx64    = config["max_velocity_mx64"].as<double>();
+            max_velocity_mx106   = config["max_velocity_mx106"].as<double>();
 
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
@@ -229,7 +237,7 @@ namespace module::platform {
             server_address = config["server_address"].as<std::string>();
             server_port    = config["port"].as<std::string>();
 
-            on<Watchdog<Webots, 5, std::chrono::seconds>>().then([this, config] {
+            on<Watchdog<Webots, 30, std::chrono::seconds>, Sync<Webots>>().then([this, config] {
                 // We haven't received any messages lately
                 log<NUClear::WARN>("Connection timed out. Attempting reconnect");
                 setup_connection();
@@ -237,6 +245,73 @@ namespace module::platform {
 
             // Connect to the server
             setup_connection();
+        });
+
+
+        on<Configuration>("camera.yaml").then([this](const Configuration& config) {
+            // Strip the .yaml off the name of the file to get the name of the camera
+            std::string name = ::basename(config.fileName.substr(0, config.fileName.find_last_of('.')).c_str());
+
+            log<NUClear::INFO>(fmt::format("Connected to the webots {} camera", name));
+
+            context = std::make_unique<CameraContext>(CameraContext{
+                *this,
+                name,
+                num_cameras++,
+                Image::Lens(),     // Lens is constructed in settings
+                Eigen::Affine3d()  // Hpc is set in settings
+            });
+
+            // Load Hpc from configuration
+            context->Hpc = Eigen::Matrix4d(config["lens"]["Hpc"].as<Expression>());
+
+            int width  = config["settings"]["Width"].as<Expression>();
+            int height = config["settings"]["Height"].as<Expression>();
+
+            // Renormalise the focal length
+            float focal_length = config["lens"]["focal_length"].as<Expression>();
+            float fov          = config["lens"]["fov"].as<Expression>();
+
+            // Recentre/renormalise the centre
+            Eigen::Vector2f centre = Eigen::Vector2f(config["lens"]["centre"].as<Expression>());
+
+            // Adjust the distortion parameters for the new width units
+            Eigen::Vector2f k = config["lens"]["k"].as<Expression>();
+
+            // Set the lens parameters from configuration
+            context->lens = Image::Lens{
+                config["lens"]["projection"].as<std::string>(),
+                focal_length,
+                fov,
+                centre,
+                k,
+            };
+
+            // If the lens fov was auto we need to correct it
+            if (!std::isfinite(context->lens.fov)) {
+                double a = height / width;
+                std::array<double, 4> options{
+                    utility::vision::unproject(Eigen::Vector2f(0, 0), context->lens, Eigen::Vector2f(1, a)).x(),
+                    utility::vision::unproject(Eigen::Vector2f(1, 0), context->lens, Eigen::Vector2f(1, a)).x(),
+                    utility::vision::unproject(Eigen::Vector2f(0, a), context->lens, Eigen::Vector2f(1, a)).x(),
+                    utility::vision::unproject(Eigen::Vector2f(1, a), context->lens, Eigen::Vector2f(1, a)).x()};
+                context->lens.fov = std::acos(*std::min_element(options.begin(), options.end())) * 2.0;
+            }
+        });
+
+        on<Trigger<Sensors>>().then("Buffer Sensors", [this](const Sensors& sensors) {
+            std::lock_guard<std::mutex> lock(sensors_mutex);
+            auto now = NUClear::clock::now();
+            Hwps.resize(std::distance(Hwps.begin(), std::remove_if(Hwps.begin(), Hwps.end(), [now](const auto& v) {
+                                          return v.first < (now - std::chrono::milliseconds(500));
+                                      })));
+
+            // Get torso to head, and torso to world
+            Eigen::Affine3d Htp(sensors.Htx[ServoID::HEAD_PITCH]);
+            Eigen::Affine3d Htw(sensors.Htw);
+            Eigen::Affine3d Hwp = Htw.inverse() * Htp;
+
+            Hwps.push_back(std::make_pair(sensors.timestamp, Hwp));
         });
 
         // This trigger updates our current servo state
@@ -252,12 +327,21 @@ namespace module::platform {
                 NUClear::clock::duration duration = target.time - NUClear::clock::now();
 
                 // If we have a positive duration, find the velocity.
-                // Otherwise, if the duration is negative or 0, the servo should have reached its position before now
-                // Because of this, we move the servo as fast as we can to reach the position.
-                // The fastest speed is determined by the config, which comes from the max servo velocity from
+                // Otherwise, if the duration is negative or 0, the servo should have reached its position
+                // before now Because of this, we move the servo as fast as we can to reach the position. The
+                // fastest speed is determined by the config, which comes from the max servo velocity from
                 // NUgus.proto in Webots
-                double speed =
-                    duration.count() > 0 ? diff / std::chrono::duration<double>(duration).count() : max_velocity;
+                double max_velocity = 0.0;
+                if (target.id >= ServoID::R_HIP_YAW && target.id <= ServoID::L_ANKLE_ROLL) {
+                    max_velocity = max_velocity_mx106;
+                }
+                else {
+                    max_velocity = max_velocity_mx64;
+                }
+                double speed = duration.count() > 0
+                                   ? diff / (double(duration.count()) / double(NUClear::clock::period::den))
+                                   : max_velocity;
+
                 speed = std::min(max_velocity, speed);
                 // Update our internal state if anything has changed for this servo
                 if (servo_state[target.id].p_gain != target.gain || servo_state[target.id].i_gain != target.gain * 0.0
@@ -327,113 +411,115 @@ namespace module::platform {
             }
 
             // Receiving
-            read_io = on<IO>(fd, IO::READ | IO::CLOSE | IO::ERROR).then("Read Stream", [this](const IO::Event& event) {
-                if ((event.events & IO::READ) != 0) {
-                    // If we have not seen the welcome message yet, look for it
-                    if (!connection_active) {
-                        // Initialise the string with 0s
-                        // make sure we have an extra character just in case we read something that isn't a null
-                        // terminator
-                        std::array<char, 9> initial_message{};
-                        const int n = ::read(fd, initial_message.data(), initial_message.size() - 1);
+            read_io =
+                on<IO, Sync<Webots>>(fd, IO::READ | IO::CLOSE | IO::ERROR)
+                    .then("Read Stream", [this](const IO::Event& event) {
+                        if ((event.events & IO::READ) != 0) {
+                            // If we have not seen the welcome message yet, look for it
+                            if (!connection_active) {
+                                // Initialise the string with 0s
+                                // make sure we have an extra character just in case we read something that isn't a
+                                // null terminator
+                                std::array<char, 9> initial_message{};
+                                const int n = ::read(fd, initial_message.data(), initial_message.size() - 1);
 
-                        if (n >= 0) {
-                            if (initial_message.data() == std::string("Welcome")) {
-                                // good
-                                log<NUClear::INFO>(fmt::format("Connected to {}:{}", server_address, server_port));
-                            }
-                            else if (initial_message.data() == std::string("Refused")) {
-                                log<NUClear::FATAL>(
-                                    fmt::format("Connection to {}:{} refused: your IP is not white listed.",
-                                                server_address,
-                                                server_port));
-                                // Halt and don't retry as reconnection is pointless.
-                                close(fd);
-                                powerplant.shutdown();
+                                if (n >= 0) {
+                                    if (initial_message.data() == std::string("Welcome")) {
+                                        // good
+                                        log<NUClear::INFO>(
+                                            fmt::format("Connected to {}:{}", server_address, server_port));
+                                    }
+                                    else if (initial_message.data() == std::string("Refused")) {
+                                        log<NUClear::FATAL>(
+                                            fmt::format("Connection to {}:{} refused: your IP is not white listed.",
+                                                        server_address,
+                                                        server_port));
+                                        // Halt and don't retry as reconnection is pointless.
+                                        close(fd);
+                                        powerplant.shutdown();
+                                    }
+                                    else {
+                                        log<NUClear::FATAL>(fmt::format("{}:{} sent unknown initial message",
+                                                                        server_address,
+                                                                        server_port));
+                                        // Halt and don't retry as the other end is clearly not Webots
+                                        close(fd);
+                                        powerplant.shutdown();
+                                    }
+                                }
+                                else {
+                                    // There was nothing sent
+                                    log<NUClear::DEBUG>("Connection was closed.");
+                                    active_reconnect.store(false);
+                                    return;
+                                }
+
+                                // Set the real time of the connection initiation
+                                connect_time = NUClear::clock::now();
+
+                                connection_active = true;
                             }
                             else {
-                                log<NUClear::FATAL>(
-                                    fmt::format("{}:{} sent unknown initial message", server_address, server_port));
-                                // Halt and don't retry as the other end is clearly not Webots
-                                close(fd);
-                                powerplant.shutdown();
+                                // Work out how many bytes are available to read in the buffer and ensure we have
+                                // enough space to read them in our data buffer
+                                unsigned long available = 0;
+                                if (::ioctl(fd, FIONREAD, &available) < 0) {
+                                    log<NUClear::ERROR>(
+                                        fmt::format("Error querying for available data, {}", strerror(errno)));
+                                    return;
+                                }
+                                const size_t old_size = buffer.size();
+                                buffer.resize(old_size + available);
+
+                                // Read data into our buffer and resize it to the new data we read
+                                const auto bytes_read = ::read(fd, buffer.data() + old_size, available);
+                                // Shrink the buffer to the size that was actually read.
+                                buffer.resize(old_size + bytes_read);
+
+                                // Function to read the payload length from the buffer
+                                auto read_length = [this](const std::vector<uint8_t>& buffer) {
+                                    return buffer.size() >= sizeof(uint32_t)
+                                               ? ntohl(*reinterpret_cast<const uint32_t*>(buffer.data()))
+                                               : 0u;
+                                };
+
+                                // So long as we have enough bytes to process an entire packet, process the packets
+                                for (uint32_t length = read_length(buffer); buffer.size() >= length + sizeof(length);
+                                     length          = read_length(buffer)) {
+                                    // Decode the protocol buffer and emit it as a message
+                                    char* payload = reinterpret_cast<char*>(buffer.data()) + sizeof(length);
+                                    translate_and_emit_sensor(
+                                        NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(payload,
+                                                                                                             length));
+                                    // Service the watchdog
+                                    emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
+
+                                    // Delete the packet we just read ready to read the next one
+                                    buffer.erase(buffer.begin(), std::next(buffer.begin(), sizeof(length) + length));
+                                }
                             }
                         }
-                        else {
-                            // There was nothing sent
-                            log<NUClear::DEBUG>("Connection was closed.");
-                            active_reconnect.store(false);
-                            return;
+
+                        // For IO::ERROR and IO::CLOSE conditions the watchdog will handle reconnections so just
+                        // report the error
+                        else if ((event.events & IO::ERROR) != 0) {
+                            if (!active_reconnect.exchange(true)) {
+                                log<NUClear::WARN>(fmt::format(
+                                    "An invalid request or some other error occurred. Closing our connection"));
+                            }
                         }
-
-                        // Set the real time of the connection initiation
-                        connect_time = NUClear::clock::now();
-                        // Reset the simulation connection time
-                        utility::clock::last_update = NUClear::base_clock::now();
-
-                        connection_active = true;
-                    }
-                    else {
-                        // Work out how many bytes are available to read in the buffer and ensure we have enough
-                        // space to read them in our data buffer
-                        unsigned long available = 0;
-                        if (::ioctl(fd, FIONREAD, &available) < 0) {
-                            log<NUClear::ERROR>(fmt::format("Error querying for available data, {}", strerror(errno)));
-                            return;
+                        else if ((event.events & IO::CLOSE) != 0) {
+                            if (!active_reconnect.exchange(true)) {
+                                log<NUClear::WARN>(fmt::format("The Remote hung up. Closing our connection"));
+                            }
                         }
-                        const size_t old_size = buffer.size();
-                        buffer.resize(old_size + available);
-
-                        // Read data into our buffer and resize it to the new data we read
-                        const auto bytes_read = ::read(fd, buffer.data() + old_size, available);
-                        // Shrink the buffer to the size that was actually read.
-                        buffer.resize(old_size + bytes_read);
-
-                        // Function to read the payload length from the buffer
-                        auto read_length = [this](const std::vector<uint8_t>& buffer) {
-                            return buffer.size() >= sizeof(uint32_t)
-                                       ? ntohl(*reinterpret_cast<const uint32_t*>(buffer.data()))
-                                       : 0u;
-                        };
-
-                        // So long as we have enough bytes to process an entire packet, process the packets
-                        for (uint32_t length = read_length(buffer); buffer.size() >= length + sizeof(length);
-                             length          = read_length(buffer)) {
-                            // Decode the protocol buffer and emit it as a message
-                            char* payload = reinterpret_cast<char*>(buffer.data()) + sizeof(length);
-
-                            translate_and_emit_sensor(
-                                NUClear::util::serialise::Serialise<SensorMeasurements>::deserialise(payload, length));
-
-                            // Service the watchdog
-                            emit<Scope::WATCHDOG>(ServiceWatchdog<Webots>());
-
-                            // Delete the packet we just read ready to read the next one
-                            buffer.erase(buffer.begin(), std::next(buffer.begin(), sizeof(length) + length));
-                        }
-                    }
-                }
-
-                // For IO::ERROR and IO::CLOSE conditions the watchdog will handle reconnections so just report
-                // the error
-                else if ((event.events & IO::ERROR) != 0) {
-                    if (!active_reconnect.exchange(true)) {
-                        log<NUClear::WARN>(
-                            fmt::format("An invalid request or some other error occurred. Closing our connection"));
-                    }
-                }
-                else if ((event.events & IO::CLOSE) != 0) {
-                    if (!active_reconnect.exchange(true)) {
-                        log<NUClear::WARN>(fmt::format("The Remote hung up. Closing our connection"));
-                    }
-                }
-            });
+                    });
 
             send_io = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then(
                 "Simulator Update Loop",
                 [this] {
-                    // Bound the time_step for the cameras and other sensors by the minimum allowed time_step for the
-                    // competition
+                    // Bound the time_step for the cameras and other sensors by the minimum allowed time_step for
+                    // the competition
                     const uint32_t sensor_timestep = std::max(min_sensor_time_step, time_step);
                     const uint32_t camera_timestep = std::max(min_camera_time_step, time_step);
 
@@ -500,9 +586,11 @@ namespace module::platform {
         real_delta = sensor_measurements.real_time - current_real_time;
         sim_delta  = sensor_measurements.time - current_sim_time;
 
-        // Calculate our custom rtf - the ratio of the past two sim deltas and the past two real time deltas, smoothed
+        // Calculate our custom rtf - the ratio of the past two sim deltas and the past two real time deltas,
+        // smoothed
         const double ratio =
             static_cast<double>(sim_delta + prev_sim_delta) / static_cast<double>(real_delta + prev_real_delta);
+
         // Exponential filter to do the smoothing
         utility::clock::custom_rtf = utility::clock::custom_rtf * clock_smoothing + (1.0 - clock_smoothing) * ratio;
 
@@ -619,9 +707,9 @@ namespace module::platform {
             if (sensor_measurements.accelerometers.size() > 0) {
                 // .accelerometers is a list of one, since our robots have only one accelerometer
                 const auto& accelerometer = sensor_measurements.accelerometers[0];
-                // Webots has a strictly positive output for the accelerometers. We minus 100 to center the output over
-                // 0 The value 100.0 is based on the Look-up Table from NUgus.proto and should be kept consistent with
-                // that
+                // Webots has a strictly positive output for the accelerometers. We minus 100 to center the output
+                // over 0 The value 100.0 is based on the Look-up Table from NUgus.proto and should be kept
+                // consistent with that
                 sensor_data->accelerometer.x = static_cast<float>(accelerometer.value.X) - 100.0f;
                 sensor_data->accelerometer.y = static_cast<float>(accelerometer.value.Y) - 100.0f;
                 sensor_data->accelerometer.z = static_cast<float>(accelerometer.value.Z) - 100.0f;
@@ -678,8 +766,53 @@ namespace module::platform {
             image->name           = camera.name;
             image->dimensions.x() = camera.width;
             image->dimensions.y() = camera.height;
-            image->format         = fourcc("RGB3");  // Change to "JPEG" when webots compression is implemented
+            image->format         = fourcc("BGR3");  // Change to "JPEG" when webots compression is implemented
             image->data           = camera.image;
+
+            image->id        = context->id;
+            image->timestamp = NUClear::clock::time_point(std::chrono::nanoseconds(sensor_measurements.time));
+
+            Eigen::Affine3d Hcw;
+
+            Webots& reactor = context->reactor;
+            /* Mutex Scope */ {
+                std::lock_guard<std::mutex> lock(reactor.sensors_mutex);
+
+                Eigen::Affine3d Hpc = context->Hpc;
+                Eigen::Affine3d Hwp;
+                if (reactor.Hwps.empty()) {
+                    Hwp = Eigen::Affine3d::Identity();
+                }
+                else {
+                    // Find the first time that is not less than the target time
+                    auto Hwp_it = std::lower_bound(reactor.Hwps.begin(),
+                                                   reactor.Hwps.end(),
+                                                   std::make_pair(image->timestamp, Eigen::Affine3d::Identity()),
+                                                   [](const auto& a, const auto& b) { return a.first < b.first; });
+
+                    if (Hwp_it == reactor.Hwps.end()) {
+                        // Image is newer than most recent sensors
+                        Hwp = std::prev(Hwp_it)->second;
+                    }
+                    else if (Hwp_it == reactor.Hwps.begin()) {
+                        // Image is older than oldest sensors
+                        Hwp = Hwp_it->second;
+                    }
+                    else {
+                        // Check Hwp_it and std::prev(Hwp) for closest match
+                        Hwp = std::abs((Hwp_it->first - image->timestamp).count())
+                                      < std::abs((std::prev(Hwp_it)->first - image->timestamp).count())
+                                  ? Hwp_it->second
+                                  : std::prev(Hwp_it)->second;
+                    }
+                }
+
+                Hcw = Eigen::Affine3d(Hwp * Hpc).inverse();
+            }
+
+            image->lens = context->lens;
+            image->Hcw  = Hcw.matrix();
+
             emit(image);
         }
     }
