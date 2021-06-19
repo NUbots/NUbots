@@ -275,10 +275,13 @@ namespace module::motion {
                                                Eigen::Affine3f(right_foot.cast<float>()));
 
         auto waypoints_legs = motion(joints);
-        emit(std::move(waypoints_legs));
-
         auto waypoints_arms = motion(arm_positions);
-        emit(std::move(waypoints_arms));
+
+        for (auto& servo_command : waypoints_arms->commands) {
+            waypoints_legs->commands.push_back(servo_command);
+        }
+
+        emit(std::move(waypoints_legs));
     }
 
     std::unique_ptr<ServoCommands> QuinticWalk::motion(const std::vector<std::pair<ServoID, float>>& joints) {
