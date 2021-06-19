@@ -187,6 +187,9 @@ namespace module::input {
             covariance.omegaTTt      = this->config.motionFilter.initial.covariance.rotationalVelocity;
             covariance.omegaTTt_bias = this->config.motionFilter.initial.covariance.gyroscopeBias;
             motionFilter.set_state(mean.getStateVec(), covariance.asDiagonal());
+
+            // Set our initial position
+            rTWw = config["motion_filter"]["initial"]["mean"]["position"].as<Expression>();
         });
 
         on<Configuration>("FootDownNetwork.yaml").then([this](const Configuration& config) {
@@ -484,47 +487,6 @@ namespace module::input {
                 // Accelerometer measurement update
                 motionFilter.measure(sensors->accelerometer, acc_noise, MeasurementType::ACCELEROMETER());
 
-                for (auto& side : {BodySide::LEFT, BodySide::RIGHT}) {
-                    bool foot_down      = sensors->feet[side].down;
-                    bool prev_foot_down = previous_foot_down[side];
-                    Eigen::Affine3d Htf(
-                        sensors->Htx[side == BodySide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL]);
-
-                    if (foot_down && !prev_foot_down) {
-                        const auto filterState = MotionModel<double>::StateVec(motionFilter.get());
-                        Eigen::Affine3d Hwt;
-                        Hwt.linear()      = filterState.Rwt.toRotationMatrix();
-                        Hwt.translation() = filterState.rTWw;
-
-                        Eigen::Affine3d Htg(utility::motion::kinematics::calculateGroundSpace(Htf, Hwt));
-
-                        footlanding_Hwf[side]                   = Hwt * Htg;
-                        footlanding_Hwf[side].translation().z() = 0.0;
-
-                        previous_foot_down[side] = true;
-                    }
-                    else if (foot_down && prev_foot_down) {
-                        // Use stored Hwf and Htf to calculate Hwt
-                        Eigen::Affine3d footlanding_Hwt = footlanding_Hwf[side] * Htf.inverse();
-
-                        // do a foot based position update
-                        motionFilter.measure(Eigen::Vector3d(footlanding_Hwt.translation()),
-                                             config.motionFilter.noise.measurement.flatFootOdometry,
-                                             MeasurementType::FLAT_FOOT_ODOMETRY());
-
-                        // do a foot based orientation update
-                        Eigen::Quaterniond Rwt(footlanding_Hwt.linear());
-                        motionFilter.measure(Rwt.coeffs(),
-                                             config.motionFilter.noise.measurement.flatFootOrientation,
-                                             MeasurementType::FLAT_FOOT_ORIENTATION());
-                    }
-                    else if (!foot_down) {
-                        previous_foot_down[side] = false;
-                    }
-
-                    sensors->feet[side].Hwf = footlanding_Hwf[side].matrix();
-                }
-
                 // Calculate our time offset from the last read
                 double deltaT = std::max(
                     (input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp)).count()
@@ -534,13 +496,67 @@ namespace module::input {
                 // Time update
                 motionFilter.time(deltaT);
 
+                /************************************************
+                 *                  Mass Model                  *
+                 ************************************************/
+                sensors->rMTt           = calculateCentreOfMass(kinematicsModel, sensors->Htx);
+                sensors->inertia_tensor = calculateInertialTensor(kinematicsModel, sensors->Htx);
+
+                /************************************************
+                 *       Torso CoM Position in World (rMWw)     *
+                 ************************************************/
+                bool update_done = false;
+
+                for (auto& side : {BodySide::LEFT, BodySide::RIGHT}) {
+                    const bool& foot_down      = sensors->feet[side].down;
+                    const bool& prev_foot_down = previous_foot_down[side];
+
+                    // Get the Foot to Torso transform for this foot
+                    const Eigen::Affine3d Htf(
+                        sensors->Htx[side == BodySide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL]);
+
+                    // Calculate our current Foot to CoM vector for this foot
+                    const Eigen::Vector3d current_rMFt = Htf.translation().head<3>() + sensors->rMTt.head<3>();
+
+                    // We just put this foot on the ground (i.e. it wasn't on the ground in the last time step)
+                    if (foot_down && !prev_foot_down) {
+                        // Update our Foot to CoM vector for this foot
+                        rMFt[side]               = current_rMFt;
+                        previous_foot_down[side] = true;
+                    }
+                    // Our foot is on the ground and was also on the ground in the last time step
+                    else if (foot_down && prev_foot_down) {
+                        // If both feet are on the ground then we don't need to do another update
+                        if (!update_done) {
+                            // The difference between our current and previous Foot to torso CoM vectors is how much our
+                            // torso has moved in the last time step in torso space
+                            // We need to rotate this into world space to update our current Torso CoM position
+                            const Eigen::Quaterniond& Rwt     = MotionModel<double>::StateVec(motionFilter.get()).Rwt;
+                            const Eigen::Vector3d rMFt_update = current_rMFt - rMFt[side];
+                            const Eigen::Quaterniond q(0.0, rMFt_update.x(), rMFt_update.y(), rMFt_update.z());
+                            rTWw += (Rwt * q * Rwt.conjugate()).vec();
+
+                            // Make sure we don't do another update
+                            update_done = true;
+                        }
+                        previous_foot_down[side] = true;
+                        rMFt[side]               = current_rMFt;
+                    }
+                    else {
+                        previous_foot_down[side] = false;
+                    }
+                }
+
+                /************************************************
+                 *       Construct Odometry Output (Htw)        *
+                 ************************************************/
                 // Gives us the quaternion representation
                 const auto o = MotionModel<double>::StateVec(motionFilter.get());
 
                 // Map from world to torso coordinates (Rtw)
                 Eigen::Affine3d Hwt;
                 Hwt.linear()      = o.Rwt.toRotationMatrix();
-                Hwt.translation() = o.rTWw;
+                Hwt.translation() = rTWw;
                 sensors->Htw      = Hwt.inverse().matrix();
 
                 // Integrate gyro to get angular positions
@@ -554,12 +570,6 @@ namespace module::input {
                         "p_z:",
                         sensors->angular_position.z());
                 }
-
-                /************************************************
-                 *                  Mass Model                  *
-                 ************************************************/
-                sensors->rMTt           = calculateCentreOfMass(kinematicsModel, sensors->Htx, sensors->Htw.inverse());
-                sensors->inertia_tensor = calculateInertialTensor(kinematicsModel, sensors->Htx);
 
                 /************************************************
                  *                  Kinematics Horizon          *
