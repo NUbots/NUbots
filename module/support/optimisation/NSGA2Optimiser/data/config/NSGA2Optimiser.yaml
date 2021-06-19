@@ -1,7 +1,7 @@
 population_size: 40
 num_generations: 300
 num_objectives: 2
-num_contraints: 2
+num_constraints: 2
 num_real_vars: 2
 seed: 666
 probabilities:

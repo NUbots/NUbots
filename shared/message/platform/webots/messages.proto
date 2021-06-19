@@ -83,6 +83,11 @@ message Message {
     string      text         = 2;
 }
 
+// NUbots-specific, used for the walk optimisation
+message OptimisationRobotPosition {
+    Vector3 value = 1;
+}
+
 message SensorMeasurements {
     // simulation time stamp at which the measurements were performed expressed in [ms] from the start of the connection
     uint32 time = 1;
@@ -97,6 +102,9 @@ message SensorMeasurements {
     repeated Force6DMeasurement        force6ds         = 9;
     repeated GyroMeasurement           gyros            = 10;
     repeated PositionSensorMeasurement position_sensors = 11;
+
+    // NUbots-specific, used for the walk optimisation
+    OptimisationRobotPosition robot_position = 20;
 }
 
 message MotorPosition {
@@ -139,6 +147,16 @@ message CameraExposure {
     double exposure = 2;  // photometric exposure of the scene in joule per square meter [J/m^2]
 }
 
+// NUbots-specific, used for the walk optimisation
+message OptimisationCommand {
+    enum CommandType {
+        RESET_WORLD = 0;
+        RESET_TIME  = 1;
+        TERMINATE   = 2;
+    }
+    CommandType command = 1;
+}
+
 message ActuatorRequests {
     repeated MotorPosition  motor_positions   = 1;
     repeated MotorVelocity  motor_velocities  = 2;
@@ -148,4 +166,7 @@ message ActuatorRequests {
     repeated SensorTimeStep sensor_time_steps = 6;
     repeated CameraQuality  camera_qualities  = 7;
     repeated CameraExposure camera_exposures  = 8;
+
+    // NUbots-specific, used for the walk optimisation
+    OptimisationCommand optimisation_command = 20;
 }

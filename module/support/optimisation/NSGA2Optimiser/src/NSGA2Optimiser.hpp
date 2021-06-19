@@ -18,13 +18,12 @@ namespace module {
                 /// the individual's parameters to optimise,
                 void requestIndEvaluation(int _id, int _generation, const std::vector<double>& _reals);
 
-                /// @brief implementation of the NSGA II algorithm, holds the state of the entire optimisation,
+                /// @brief Implementation of the NSGA II algorithm, holds the state of the entire optimisation,
                 /// including the populations, scores, etc
                 nsga2::NSGA2 nsga2Algorithm;
 
-                /// @brief default leg gains for the walk, read from the config file
-                // TODO: rename this to `default_leg_gains`
-                double default_gain;
+                /// @brief Default leg gains for the walk, read from the config file
+                double default_leg_gains;
 
             public:
                 /// @brief Called by the powerplant to build and setup the NSGA2Optimiser reactor.

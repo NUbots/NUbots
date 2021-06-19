@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package message.platform.webots;
+
+message WebotsTimeUpdate {
+    double sim_time    = 1;
+    double real_time   = 2;
+    double sim_delta   = 3;
+    double real_delta  = 4;
+    double rtf         = 5;
+}

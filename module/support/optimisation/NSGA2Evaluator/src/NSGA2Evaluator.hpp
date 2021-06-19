@@ -41,7 +41,7 @@ namespace module {
                 int id = 0;
 
                 /// @brief The evaluated fitness scores for the current individual (sway, ball distance)
-                std::vector<double> scores = {2.0, 0.0};
+                std::vector<double> scores = {0.0, 0.0};
 
                 /// @brief The current simulation time
                 double simTime = 0.0;
@@ -54,12 +54,10 @@ namespace module {
                 double timeSinceTermination;
 
                 /// @brief The walk command velocity
-                /// TODO: rename to walk_command_velocity
-                Eigen::Vector2d velocity = Eigen::Vector2d(0.5, 0.0);
+                Eigen::Vector2d walk_command_velocity = Eigen::Vector2d(0.5, 0.0);
 
                 /// @brief The walk command rotation
-                /// TODO: rename to walk_command_rotation
-                double rotation = 0.0;
+                double walk_command_rotation = 0.0;
 
                 /// @brief Booleans indicating what state we're in with the current evaluation
                 bool terminating = false;
@@ -79,14 +77,10 @@ namespace module {
                 Eigen::Vector3d gyroscope     = Eigen::Vector3d::Zero();
                 Eigen::Vector3d accelerometer = Eigen::Vector3d::Zero();
 
-                /// @brief Ball state for this evaluation, used during fitness and constraint calculation
-                Eigen::Vector3d ballLocation = Eigen::Vector3d::Zero();
-                Eigen::Vector3d ballVelocity = Eigen::Vector3d::Zero();
-                double distanceTravelled     = 0.0;
-
                 /// @brief Robot state for this evaluation, used during fitness and constraint calculation
-                Eigen::Vector3d robotLocation      = Eigen::Vector3d::Zero();
-                Eigen::Vector3d robotLocationDelta = Eigen::Vector3d::Zero();
+                Eigen::Vector3d robotPosition      = Eigen::Vector3d::Zero();
+                Eigen::Vector3d robotPositionDelta = Eigen::Vector3d::Zero();
+                double robotDistanceTravelled      = 0.0;
 
                 /// @brief How much the robot swayed for this evaluation
                 Eigen::Vector3d sway = Eigen::Vector3d::Zero();
