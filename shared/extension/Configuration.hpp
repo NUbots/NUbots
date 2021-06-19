@@ -179,7 +179,21 @@ namespace extension {
         T as(Args&&... args) const {
             return config.as<T>(std::forward<Args>(args)...);
         }
-
+        
+        // Allow interating through configuration
+        YAML::iterator begin() {
+            return config.begin();
+        }
+        YAML::const_iterator begin() const {
+            return config.end();
+        }
+        YAML::iterator end() {
+            return config.begin();
+        }
+        YAML::const_iterator end() const {
+            return config.end();
+        }
+        
         // All of these disables for this template are because the std::string constructor is magic and screwy
         template <typename T,
                   typename Decayed = typename std::decay<T>::type,
