@@ -566,6 +566,7 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
 
     // Vector of quaternion errors from each timestep
     std::vector<Eigen::Quaterniond> errors;
+    std::vector<Eigen::Quaterniond> Rwt_quat;
     std::vector<double> angular_errors;
 
     // Step through test data and get orientation predictions
@@ -634,6 +635,7 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
 
             angular_errors.emplace_back(std::acos(2.0 * dot * dot - 1.0));
             errors.emplace_back(utility::math::quaternion::difference(Rwt, quaternions[i]));
+            Rwt_quat.emplace_back(Rwt);
         }
         else {
             // UKF state unrecoverable. Print current average error and bail
@@ -644,6 +646,7 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
 
             angular_errors.emplace_back(current_angular_error);
             errors.emplace_back(utility::math::quaternion::difference(Rwt, quaternions[i]));
+            Rwt_quat.emplace_back(Rwt);
 
             const Eigen::Quaterniond mean_error =
                 utility::math::quaternion::mean(errors.begin(), errors.end()).normalized();
@@ -671,8 +674,14 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
     INFO("Mean Error........: " << mean_error.coeffs().transpose());
     INFO("Mean Angular Error: " << mean_angular_error);
     auto i = 0;
-    for (auto& it : angular_errors) {
-        std::cout << "Angular Error :" << i << " " << it << std::endl;
+    // for (auto& it : angular_errors) {
+    //     std::cout << "Angular Error :" << i << " " << it << std::endl;
+    //     i++;
+    // }
+    std::cout << Rwt_quat.size() << std::endl;
+    for (auto& it : Rwt_quat) {
+        INFO("Rwt_quat :" << i << " " << it.w() << "," << it.x() << "," << it.y() << "," << it.z());
+        std::cout << "Rwt_quat :" << i << "," << it.w() << "," << it.x() << "," << it.y() << "," << it.z() << std::endl;
         i++;
     }
     REQUIRE(mean_error.w() == Approx(1.0));
