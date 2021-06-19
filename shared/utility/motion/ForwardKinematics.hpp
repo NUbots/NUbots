@@ -325,8 +325,7 @@ namespace utility::motion::kinematics {
         @return [x_com, y_com, z_com, total_mass] relative to the torso basis
     */
     [[nodiscard]] inline Eigen::Vector4d calculateCentreOfMass(const message::motion::KinematicsModel& model,
-                                                               const std::array<Eigen::Matrix4d, 20>& Htx,
-                                                               const Eigen::Matrix4d& Hwt) {
+                                                               const std::array<Eigen::Matrix4d, 20>& Htx) {
 
         // Convenience function to transform particle-space CoM to torso-space CoM
         // Htx - transform from particle space to torso space

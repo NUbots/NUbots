@@ -589,83 +589,79 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
         INFO("Accelerometer Measurement: " << acc_readings[i].transpose() << " (" << acc_readings[i].norm() << ")");
         INFO("Expected Orientation.....: " << quaternions[i].coeffs().transpose());
         bool failed = false;
+        std::string error_msg;
         switch (filter.time(deltaT)) {
             case Eigen::Success: break;
             case Eigen::NumericalIssue:
-                print_error(__LINE__,
-                            "Cholesky decomposition failed. The provided data did not satisfy the "
-                            "prerequisites.",
-                            filter.getCovariance());
-                failed = true;
+                error_msg = "Cholesky decomposition failed. The provided data did not satisfy the prerequisites.";
+                failed    = true;
                 break;
             case Eigen::NoConvergence:
-                print_error(__LINE__,
-                            "Cholesky decomposition failed. Iterative procedure did not converge.",
-                            filter.getCovariance());
-                failed = true;
+                error_msg = "Cholesky decomposition failed. Iterative procedure did not converge.";
+                failed    = true;
                 break;
             case Eigen::InvalidInput:
-                print_error(__LINE__,
-                            "Cholesky decomposition failed. The inputs are invalid, or the algorithm has been "
-                            "improperly called. When assertions are enabled, such errors trigger an assert.",
-                            filter.getCovariance());
+                error_msg =
+                    "Cholesky decomposition failed. The inputs are invalid, or the algorithm has been "
+                    "improperly called. When assertions are enabled, such errors trigger an assert.";
                 failed = true;
                 break;
             default:
-                print_error(__LINE__, "Cholesky decomposition failed. Some other reason.", filter.getCovariance());
-                failed = true;
+                error_msg = "Cholesky decomposition failed. Some other reason.";
+                failed    = true;
                 break;
         }
 
-        // if (!failed) {
-        // Calculate difference between expected and predicted orientations
-        const Eigen::Quaterniond& tmp = MotionModel<double>::StateVec(filter.get()).Rwt;
-        Eigen::Quaterniond Rwt;
-        if (Rwt.w() < 0) {
-            Rwt.w()   = -tmp.w();
-            Rwt.vec() = -tmp.vec();
+        if (!failed) {
+            // Calculate difference between expected and predicted orientations
+            const Eigen::Quaterniond& tmp = MotionModel<double>::StateVec(filter.get()).Rwt;
+            Eigen::Quaterniond Rwt;
+            if (Rwt.w() < 0) {
+                Rwt.w()   = -tmp.w();
+                Rwt.vec() = -tmp.vec();
+            }
+            else {
+                Rwt.w()   = tmp.w();
+                Rwt.vec() = tmp.vec();
+            }
+            const double dot = quaternions[i].dot(Rwt);
+
+            INFO("Predicted Orientation....: " << Rwt.coeffs().transpose());
+
+            angular_errors.emplace_back(std::acos(2.0 * dot * dot - 1.0));
+            errors.emplace_back(utility::math::quaternion::difference(Rwt, quaternions[i]));
+            Rwt_quat.emplace_back(Rwt);
         }
         else {
-            Rwt.w()   = tmp.w();
-            Rwt.vec() = tmp.vec();
+            // UKF state unrecoverable. Print current average error and bail
+            const Eigen::Quaterniond& Rwt = MotionModel<double>::StateVec(filter.get()).Rwt;
+            const double dot              = quaternions[i].dot(Rwt);
+
+            const double current_angular_error = std::acos(2.0 * dot * dot - 1.0);
+
+            angular_errors.emplace_back(current_angular_error);
+            errors.emplace_back(utility::math::quaternion::difference(Rwt, quaternions[i]));
+            Rwt_quat.emplace_back(Rwt);
+
+            const Eigen::Quaterniond mean_error =
+                utility::math::quaternion::mean(errors.begin(), errors.end()).normalized();
+            const double mean_angular_error =
+                std::accumulate(angular_errors.begin(), angular_errors.end(), 0.0) / double(angular_errors.size());
+
+            INFO("Predicted Orientation....: " << Rwt.coeffs().transpose());
+            INFO("Current Angular Error....: " << current_angular_error);
+            INFO("Mean Error........: " << mean_error.coeffs().transpose());
+            INFO("Mean Angular Error: " << mean_angular_error);
+
+            const double covariance_sigma_weight = 0.1 * 0.1 * 16;
+            const Eigen::Matrix<double, 16, 16> state(
+                covariance_sigma_weight
+                * filter.getCovariance().unaryExpr([](const double& c) { return std::abs(c); }));
+            INFO(state.diagonal());
+
+            INFO(error_msg);
+            FAIL("UKF State unrecoverable. Aborting");
         }
-        const double dot = quaternions[i].dot(Rwt);
-
-        INFO("Predicted Orientation....: " << Rwt.coeffs().transpose());
-
-        angular_errors.emplace_back(std::acos(2.0 * dot * dot - 1.0));
-        errors.emplace_back(utility::math::quaternion::difference(Rwt, quaternions[i]));
-        Rwt_quat.emplace_back(Rwt);
-        // }
-        // else {
-        //     // UKF state unrecoverable. Print current average error and bail
-        //     const Eigen::Quaterniond& Rwt = MotionModel<double>::StateVec(filter.get()).Rwt;
-        //     const double dot              = quaternions[i].dot(Rwt);
-
-        //     const double current_angular_error = std::acos(2.0 * dot * dot - 1.0);
-
-        //     angular_errors.emplace_back(current_angular_error);
-        //     errors.emplace_back(utility::math::quaternion::difference(Rwt, quaternions[i]));
-        //     Rwt_quat.emplace_back(Rwt);
-
-        //     const Eigen::Quaterniond mean_error =
-        //         utility::math::quaternion::mean(errors.begin(), errors.end()).normalized();
-        //     const double mean_angular_error =
-        //         std::accumulate(angular_errors.begin(), angular_errors.end(), 0.0) / double(angular_errors.size());
-
-        //     INFO("Predicted Orientation....: " << Rwt.coeffs().transpose());
-        //     INFO("Current Angular Error....: " << current_angular_error);
-        //     INFO("Mean Error........: " << mean_error.coeffs().transpose());
-        //     INFO("Mean Angular Error: " << mean_angular_error);
-
-        //     const double covariance_sigma_weight = 0.1 * 0.1 * 16;
-        //     const Eigen::Matrix<double, 16, 16> state(
-        //         covariance_sigma_weight
-        //         * filter.getCovariance().unaryExpr([](const double& c) { return std::abs(c); }));
-        //     INFO(state.diagonal());
-
-        //     FAIL("UKF State unrecoverable. Aborting");
-        // }
     }
 
     const Eigen::Quaterniond mean_error = utility::math::quaternion::mean(errors.begin(), errors.end()).normalized();
