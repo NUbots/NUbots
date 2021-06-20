@@ -78,4 +78,3 @@ searches:
     #Points for this search are relative to the padded bounding box containing the already visible objects
     points:
       - [-0.5,-1]
-
