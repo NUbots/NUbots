@@ -207,7 +207,7 @@ namespace module::input {
 
         Eigen::Matrix<Scalar, 4, 1> predict(const Eigen::Matrix<Scalar, size, 1>& state,
                                             const MeasurementType::FLAT_FOOT_ORIENTATION&) {
-            return Eigen::Matrix<Scalar, 4, 1>(state.template segment<4>(StateVec::QX));
+            return state.template segment<4>(StateVec::QX);
         }
 
         // This function is called to determine the difference between position, velocity, and acceleration
