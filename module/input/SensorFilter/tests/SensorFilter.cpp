@@ -44,14 +44,6 @@ using module::input::MotionModel;
 using utility::math::filter::UKF;
 using utility::support::Expression;
 
-void print_error(const int& line, const std::string& msg, const Eigen::Matrix<double, 16, 16>& covariance) {
-    const double covariance_sigma_weight = 0.1 * 0.1 * 16;
-    const Eigen::Matrix<double, 16, 16> state(covariance_sigma_weight
-                                              * covariance.unaryExpr([](const double& c) { return std::abs(c); }));
-    INFO(state.diagonal());
-    INFO("Line " << line << ": " << msg << "\n");
-}
-
 // message::motion::KinematicsModel construct_kinematics_model() {
 //     YAML::Node config = YAML::LoadFile("config/KinematicsConfiguration.yaml");
 
@@ -446,33 +438,50 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
     std::vector<Eigen::Quaterniond> quaternions;
 
     char comma;
-    std::ifstream ifs("tests/gyroscope.csv");
+    // std::ifstream ifs("tests/gyroscope.csv");
+    // while (ifs.good()) {
+    //     Eigen::Vector3d gyro;
+    //     ifs >> gyro.x() >> comma >> gyro.y() >> comma >> gyro.z();
+    //     if (ifs.good()) {
+    //         gyro_readings.emplace_back(gyro);
+    //     }
+    // }
+    // ifs.close();
+    // ifs.open("tests/accelerometer.csv");
+    // while (ifs.good()) {
+    //     Eigen::Vector3d acc;
+    //     ifs >> acc.x() >> comma >> acc.y() >> comma >> acc.z();
+    //     if (ifs.good()) {
+    //         acc_readings.emplace_back(acc);
+    //     }
+    // }
+    // ifs.close();
+    // ifs.open("tests/quaternion.csv");
+    // while (ifs.good()) {
+    //     Eigen::Quaterniond quat;
+    //     ifs >> quat.w() >> comma >> quat.x() >> comma >> quat.y() >> comma >> quat.z();
+    //     if (ifs.good()) {
+    //         quaternions.emplace_back(quat);
+    //     }
+    // }
+    std::ifstream ifs("tests/webots.csv");
     while (ifs.good()) {
         Eigen::Vector3d gyro;
-        ifs >> gyro.x() >> comma >> gyro.y() >> comma >> gyro.z();
+        Eigen::Vector3d acc;
+        Eigen::Quaterniond quat;
+        ifs >> gyro.x() >> comma >> gyro.y() >> comma >> gyro.z() >> comma >> acc.x() >> comma >> acc.y() >> comma
+            >> acc.z();
         if (ifs.good()) {
             gyro_readings.emplace_back(gyro);
-        }
-    }
-    ifs.close();
-    ifs.open("tests/accelerometer.csv");
-    while (ifs.good()) {
-        Eigen::Vector3d acc;
-        ifs >> acc.x() >> comma >> acc.y() >> comma >> acc.z();
-        if (ifs.good()) {
             acc_readings.emplace_back(acc);
+            quaternions.emplace_back(Eigen::Quaterniond(1.0, 0.0, 0.0, 0.0));
         }
     }
     ifs.close();
-    ifs.open("tests/quaternion.csv");
-    while (ifs.good()) {
-        Eigen::Quaterniond quat;
-        ifs >> quat.w() >> comma >> quat.x() >> comma >> quat.y() >> comma >> quat.z();
-        if (ifs.good()) {
-            quaternions.emplace_back(quat);
-        }
+
+    if (gyro_readings.size() == 0 || acc_readings.size() == 0 || quaternions.size() == 0) {
+        FAIL("No data to test on");
     }
-    ifs.close();
 
     // Configure the motion model
     YAML::Node config = YAML::LoadFile("config/SensorFilter.yaml");
@@ -482,51 +491,59 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
 
     // Set our process noise in our filter
     MotionModel<double>::StateVec process_noise;
-    const auto& process         = config["motion_filter"]["noise"]["process"];
-    process_noise.rTWw          = process["position"].as<Expression>();
-    process_noise.vTw           = process["velocity"].as<Expression>();
-    process_noise.Rwt           = Eigen::Vector4d(process["rotation"].as<Expression>());
-    process_noise.omegaTTt      = process["rotational_velocity"].as<Expression>();
-    process_noise.omegaTTt_bias = process["gyroscope_bias"].as<Expression>();
-    filter.model.process_noise  = process_noise;
+    const auto& process        = config["motion_filter"]["noise"]["process"];
+    process_noise.rTWw         = process["position"].as<Expression>();
+    process_noise.vTw          = process["velocity"].as<Expression>();
+    process_noise.Rwt          = Eigen::Vector4d(process["rotation"].as<Expression>());
+    process_noise.omegaTTt     = process["rotational_velocity"].as<Expression>();
+    filter.model.process_noise = process_noise;
 
     // Set our initial mean and covariance
     MotionModel<double>::StateVec mean;
     MotionModel<double>::StateVec covariance;
-    const auto& initial      = config["motion_filter"]["initial"];
-    mean.rTWw                = initial["mean"]["position"].as<Expression>();
-    mean.vTw                 = initial["mean"]["velocity"].as<Expression>();
-    mean.Rwt                 = Eigen::Vector4d(initial["mean"]["rotation"].as<Expression>());
-    mean.omegaTTt            = initial["mean"]["rotational_velocity"].as<Expression>();
-    mean.omegaTTt_bias       = initial["mean"]["gyroscope_bias"].as<Expression>();
-    covariance.rTWw          = initial["covariance"]["position"].as<Expression>();
-    covariance.vTw           = initial["covariance"]["velocity"].as<Expression>();
-    covariance.Rwt           = Eigen::Vector4d(initial["covariance"]["rotation"].as<Expression>());
-    covariance.omegaTTt      = initial["covariance"]["rotational_velocity"].as<Expression>();
-    covariance.omegaTTt_bias = initial["covariance"]["gyroscope_bias"].as<Expression>();
+    const auto& initial = config["motion_filter"]["initial"];
+    mean.rTWw           = initial["mean"]["position"].as<Expression>();
+    mean.vTw            = initial["mean"]["velocity"].as<Expression>();
+    mean.Rwt            = Eigen::Vector4d(initial["mean"]["rotation"].as<Expression>());
+    mean.omegaTTt       = initial["mean"]["rotational_velocity"].as<Expression>();
+    covariance.rTWw     = initial["covariance"]["position"].as<Expression>();
+    covariance.vTw      = initial["covariance"]["velocity"].as<Expression>();
+    covariance.Rwt      = Eigen::Vector4d(initial["covariance"]["rotation"].as<Expression>());
+    covariance.omegaTTt = initial["covariance"]["rotational_velocity"].as<Expression>();
 
+    bool failed = false;
+    std::string error_msg;
     switch (filter.set_state(mean.getStateVec(), covariance.asDiagonal())) {
         case Eigen::Success: break;
         case Eigen::NumericalIssue:
-            print_error(__LINE__,
-                        "Cholesky decomposition failed. The provided data did not satisfy the "
-                        "prerequisites.",
-                        filter.getCovariance());
+            error_msg = "Cholesky decomposition failed. The provided data did not satisfy the prerequisites.";
+            failed    = true;
             break;
         case Eigen::NoConvergence:
-            print_error(__LINE__,
-                        "Cholesky decomposition failed. Iterative procedure did not converge.",
-                        filter.getCovariance());
+            error_msg = "Cholesky decomposition failed. Iterative procedure did not converge.";
+            failed    = true;
             break;
         case Eigen::InvalidInput:
-            print_error(__LINE__,
-                        "Cholesky decomposition failed. The inputs are invalid, or the algorithm has been "
-                        "improperly called. When assertions are enabled, such errors trigger an assert.",
-                        filter.getCovariance());
+            error_msg =
+                "Cholesky decomposition failed. The inputs are invalid, or the algorithm has been improperly called. "
+                "When assertions are enabled, such errors trigger an assert.";
+            failed = true;
             break;
         default:
-            print_error(__LINE__, "Cholesky decomposition failed. Some other reason.", filter.getCovariance());
+            error_msg = "Cholesky decomposition failed. Some other reason.";
+            failed    = true;
             break;
+    }
+
+    if (failed) {
+        // Failed to initialise UKF
+        const double covariance_sigma_weight = 0.1 * 0.1 * 13;
+        const Eigen::Matrix<double, 13, 13> state(
+            covariance_sigma_weight * filter.getCovariance().unaryExpr([](const double& c) { return std::abs(c); }));
+        INFO(state.diagonal());
+
+        INFO(error_msg);
+        FAIL("Failed to initialise UKF. Aborting");
     }
 
     // Noise to be applied to gyroscope measurements
@@ -575,56 +592,48 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
         INFO("Accelerometer Measurement: " << acc_readings[i].transpose() << " (" << acc_readings[i].norm() << ")");
         INFO("Expected Orientation.....: " << quaternions[i].coeffs().transpose());
         bool failed = false;
+        std::string error_msg;
         switch (filter.time(deltaT)) {
             case Eigen::Success: break;
             case Eigen::NumericalIssue:
-                print_error(__LINE__,
-                            "Cholesky decomposition failed. The provided data did not satisfy the "
-                            "prerequisites.",
-                            filter.getCovariance());
-                failed = true;
+                error_msg = "Cholesky decomposition failed. The provided data did not satisfy the prerequisites.";
+                failed    = true;
                 break;
             case Eigen::NoConvergence:
-                print_error(__LINE__,
-                            "Cholesky decomposition failed. Iterative procedure did not converge.",
-                            filter.getCovariance());
-                failed = true;
+                error_msg = "Cholesky decomposition failed. Iterative procedure did not converge.";
+                failed    = true;
                 break;
             case Eigen::InvalidInput:
-                print_error(__LINE__,
-                            "Cholesky decomposition failed. The inputs are invalid, or the algorithm has been "
-                            "improperly called. When assertions are enabled, such errors trigger an assert.",
-                            filter.getCovariance());
+                error_msg =
+                    "Cholesky decomposition failed. The inputs are invalid, or the algorithm has been "
+                    "improperly called. When assertions are enabled, such errors trigger an assert.";
                 failed = true;
                 break;
             default:
-                print_error(__LINE__, "Cholesky decomposition failed. Some other reason.", filter.getCovariance());
-                failed = true;
+                error_msg = "Cholesky decomposition failed. Some other reason.";
+                failed    = true;
                 break;
         }
 
         if (!failed) {
             // Calculate difference between expected and predicted orientations
-            const Eigen::Quaterniond& Rwt = MotionModel<double>::StateVec(filter.get()).Rwt;
-            const double dot              = quaternions[i].dot(Rwt);
-
+            Eigen::Quaterniond Rwt = MotionModel<double>::StateVec(filter.get()).Rwt;
             INFO("Predicted Orientation....: " << Rwt.coeffs().transpose());
 
-            angular_errors.emplace_back(std::acos(2.0 * dot * dot - 1.0));
+            angular_errors.emplace_back(Rwt.angularDistance(quaternions[i]));
             errors.emplace_back(utility::math::quaternion::difference(Rwt, quaternions[i]));
         }
         else {
             // UKF state unrecoverable. Print current average error and bail
-            const Eigen::Quaterniond& Rwt = MotionModel<double>::StateVec(filter.get()).Rwt;
-            const double dot              = quaternions[i].dot(Rwt);
-
-            const double current_angular_error = std::acos(2.0 * dot * dot - 1.0);
+            Eigen::Quaterniond Rwt             = MotionModel<double>::StateVec(filter.get()).Rwt;
+            const double current_angular_error = Rwt.angularDistance(quaternions[i]);
 
             angular_errors.emplace_back(current_angular_error);
             errors.emplace_back(utility::math::quaternion::difference(Rwt, quaternions[i]));
 
             const Eigen::Quaterniond mean_error =
                 utility::math::quaternion::mean(errors.begin(), errors.end()).normalized();
+
             const double mean_angular_error =
                 std::accumulate(angular_errors.begin(), angular_errors.end(), 0.0) / double(angular_errors.size());
 
@@ -633,17 +642,19 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
             INFO("Mean Error........: " << mean_error.coeffs().transpose());
             INFO("Mean Angular Error: " << mean_angular_error);
 
-            const double covariance_sigma_weight = 0.1 * 0.1 * 16;
-            const Eigen::Matrix<double, 16, 16> state(
+            const double covariance_sigma_weight = 0.1 * 0.1 * 13;
+            const Eigen::Matrix<double, 13, 13> state(
                 covariance_sigma_weight
                 * filter.getCovariance().unaryExpr([](const double& c) { return std::abs(c); }));
             INFO(state.diagonal());
 
+            INFO(error_msg);
             FAIL("UKF State unrecoverable. Aborting");
         }
     }
 
-    const Eigen::Quaterniond mean_error = utility::math::quaternion::mean(errors.begin(), errors.end()).normalized();
+    const Eigen::Quaterniond mean_error = utility::math::quaternion::mean(errors.begin(), errors.end());
+
     const double mean_angular_error =
         std::accumulate(angular_errors.begin(), angular_errors.end(), 0.0) / double(angular_errors.size());
     INFO("Mean Error........: " << mean_error.coeffs().transpose());
