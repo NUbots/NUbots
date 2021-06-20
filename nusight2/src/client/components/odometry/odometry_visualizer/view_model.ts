@@ -44,7 +44,7 @@ export class OdometryVisualizerViewModel {
   }
 
   private readonly scene = scene(() => ({
-    children: [this.torso(), this.floor(), this.origin()],
+    children: [this.torso(), this.floor(), this.worldFrame()],
   }))
 
   private readonly torso = group(() => ({
@@ -61,7 +61,7 @@ export class OdometryVisualizerViewModel {
     ],
   }))
 
-  private readonly origin = group(() => ({
+  private readonly worldFrame = group(() => ({
     position: this.rTWw,
     children: [
       new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), undefined, 0.2, 0xff0000),
