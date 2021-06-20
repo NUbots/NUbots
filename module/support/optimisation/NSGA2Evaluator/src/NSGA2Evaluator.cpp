@@ -134,8 +134,10 @@ namespace module {
                     // log("accl.y = " + std::to_string(accelerometer[1]));
                     // log("accl.z = " + std::to_string(accelerometer[2]));
 
-                    // // Calculate the sway based on our gyroscope values over time, after the simulation has progressed
-                    // // past some initial time since the beginning. This is likely used to stabalise the gyro before we
+                    // // Calculate the sway based on our gyroscope values over time, after the simulation has
+                    // progressed
+                    // // past some initial time since the beginning. This is likely used to stabalise the gyro
+                    // before we
                     // // start reading its values.
                     // if (simTime > 0.25) {
                     //     sway[0] += gyroscope[0] * simTimeDelta; // multiplying by time integrates the gyro
@@ -152,7 +154,8 @@ namespace module {
                     }
 
                     // // Calculate the robot sway along the field plane (left/right, forward/backward)
-                    // fieldPlaneSway = std::pow(std::pow(accelerometer[0], 2) + std::pow(accelerometer[1], 2), 0.5);
+                    // fieldPlaneSway = std::pow(std::pow(accelerometer[0], 2) + std::pow(accelerometer[1], 2),
+                    // 0.5);
 
                     // // Update max plane sway if the new plane sway is bigger
                     // if (!terminating && evaluating && !finished && fieldPlaneSway > maxFieldPlaneSway
@@ -205,17 +208,16 @@ namespace module {
                     finished = true;
                 });
 
-                on<Trigger<OptimisationRobotPosition>, Single>().then([this](const OptimisationRobotPosition& position) {
-                    robotDistanceTravelled += std::pow(
-                        std::pow(position.value.X - robotPosition[0], 2) +
-                        std::pow(position.value.Y - robotPosition[1], 2),
-                        0.5
-                    );
+                on<Trigger<OptimisationRobotPosition>, Single>().then(
+                    [this](const OptimisationRobotPosition& position) {
+                        robotDistanceTravelled += std::pow(std::pow(position.value.X - robotPosition[0], 2)
+                                                               + std::pow(position.value.Y - robotPosition[1], 2),
+                                                           0.5);
 
-                    robotPosition[0] = position.value.X;
-                    robotPosition[1] = position.value.Y;
-                    robotPosition[2] = position.value.Z;
-                });
+                        robotPosition[0] = position.value.X;
+                        robotPosition[1] = position.value.Y;
+                        robotPosition[2] = position.value.Z;
+                    });
             }
 
             void NSGA2Evaluator::SendFitnessScores() {
@@ -239,11 +241,11 @@ namespace module {
                 robotDistanceTravelled = 0.0;
                 timeSinceTermination   = 0.0;
                 // sway                   = Eigen::Vector3d::Zero();
-                fieldPlaneSway         = 0.0;
-                maxFieldPlaneSway      = 0.0;
-                simTimeDelta           = 0.0;
-                constraints            = {0.0, 0.0};
-                fallenOver             = false;
+                fieldPlaneSway    = 0.0;
+                maxFieldPlaneSway = 0.0;
+                simTimeDelta      = 0.0;
+                constraints       = {0.0, 0.0};
+                fallenOver        = false;
             }
 
             void NSGA2Evaluator::ResetWorldTime() {
@@ -287,19 +289,21 @@ namespace module {
                 // If the robot fell over, set the first constraint (fallen/not-fallen) to a fixed bad number,
                 // and set max sway to a fixed bad number
                 if (fallenOver) {
-                    constraints[0]    = -10.0;
+                    constraints[0] = -10.0;
                     // maxFieldPlaneSway = 1000.0;
                 }
 
                 constraints[1] = 0;
 
-                // // Ensure the sway along the second axis is positive, for use in calculating the second constraint
+                // // Ensure the sway along the second axis is positive, for use in calculating the second
+                // constraint
                 // // (whether or not we've swayed too far)
                 // sway[2] = std::abs(sway[2]);
 
                 // // If the robot swayed more than 6.6 (a magic number), then it violated the second constraint
                 // if (sway[2] > 6.66) {
-                //     constraints[1] = -1.0 * (sway[2] - 6.66);  // Set the constraint based on how much it's over 6.6
+                //     constraints[1] = -1.0 * (sway[2] - 6.66);  // Set the constraint based on how much it's
+                //     over 6.6
                 // }
                 // // Otherwise the second constraint wasn't violated
                 // else {
@@ -307,7 +311,7 @@ namespace module {
                 // }
 
                 // Set the calculated fitness scores
-                scores[0] = 1; // fix the first score as we're trying to optimise only the distance travelled
+                scores[0] = 1;  // fix the first score as we're trying to optimise only the distance travelled
                 scores[1] = 1.0 / robotDistanceTravelled;
 
                 // Log the scores
