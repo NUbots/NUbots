@@ -252,6 +252,7 @@ namespace module::behaviour::planning {
                 // log("distanceToBall", distanceToBall);
                 // log("forwardSpeed2", finalForwardSpeed);
 
+
                 std::unique_ptr<WalkCommand> command =
                     std::make_unique<WalkCommand>(subsumptionId,
                                                   Eigen::Vector3d(finalForwardSpeed, finalSideSpeed, angle));
