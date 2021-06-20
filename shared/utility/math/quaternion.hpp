@@ -59,7 +59,16 @@ namespace utility::math::quaternion {
         // Solve for the eigenvectors of the accumulator matrix
         Eigen::SelfAdjointEigenSolver<Eigen::Matrix<Scalar, 4, 4>> eigensolver(A);
         if (eigensolver.info() != Eigen::Success) {
-            throw std::runtime_error("Eigen decomposition failed");
+            // Failed to get the mean using Merkley's method, try just averaging naively
+            Eigen::Vector4d mean = Eigen::Vector4d::Zero();
+            for (Iterator it = begin; it != end; ++it) {
+                mean += it->coeffs();
+            }
+            mean /= std::distance(begin, end);
+            if (mean.w() < Scalar(0)) {
+                mean *= Scalar(-1);
+            }
+            return QType(mean).normalized();
         }
 
         // We want the eigenvector corresponding to the largest eigenvector
