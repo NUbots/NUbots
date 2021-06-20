@@ -5,20 +5,19 @@
 #include "message/behaviour/Nod.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
-#include "message/platform/darwin/DarwinSensors.hpp"
+#include "message/platform/RawSensors.hpp"
 
 #include "utility/localisation/transform.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
-namespace module {
-namespace localisation {
+namespace module::localisation {
 
     using extension::Configuration;
     using message::behaviour::Nod;
     using message::input::Sensors;
     using message::localisation::Field;
-    using message::platform::darwin::ButtonLeftDown;
+    using message::platform::ButtonLeftDown;
     using utility::localisation::projectTo2D;
     using utility::nusight::graph;
     using utility::support::Expression;
@@ -60,5 +59,4 @@ namespace localisation {
             emit(field);
         });
     }
-}  // namespace localisation
-}  // namespace module
+}  // namespace module::localisation

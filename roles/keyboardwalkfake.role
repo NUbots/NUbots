@@ -12,7 +12,7 @@ nuclear_role(
   output::Overview
   # Hardware Interface
   platform::darwin::HardwareSimulator
-  platform::darwin::SensorFilter
+  input::SensorFilter
   # Motion
   motion::QuinticWalk
   motion::HeadController

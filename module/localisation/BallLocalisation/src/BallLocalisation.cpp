@@ -14,8 +14,7 @@
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
-namespace module {
-namespace localisation {
+namespace module::localisation {
 
     using extension::Configuration;
     using message::input::Sensors;
@@ -101,5 +100,4 @@ namespace localisation {
                 }
             });
     }
-}  // namespace localisation
-}  // namespace module
+}  // namespace module::localisation

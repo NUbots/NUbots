@@ -9,7 +9,7 @@ nuclear_role(
   support::configuration::GlobalConfig
   network::NUClearNet
   support::logging::DataPlayback
-  platform::darwin::SensorFilter
+  input::SensorFilter
   output::NetworkForwarder
   output::Overview
 )

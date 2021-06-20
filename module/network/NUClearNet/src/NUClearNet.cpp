@@ -19,8 +19,9 @@
 
 #include "extension/Configuration.hpp"
 
-namespace module {
-namespace network {
+#include "utility/support/hostname.hpp"
+
+namespace module::network {
 
     using extension::Configuration;
 
@@ -28,7 +29,8 @@ namespace network {
 
         on<Configuration>("NUClearNet.yaml").then([this](const Configuration& config) {
             auto netConfig              = std::make_unique<NUClear::message::NetworkConfiguration>();
-            netConfig->name             = config["name"].as<std::string>();
+            std::string name            = config["name"].as<std::string>();
+            netConfig->name             = name.empty() ? utility::support::getHostname() : name;
             netConfig->announce_address = config["address"].as<std::string>();
             netConfig->announce_port    = config["port"].as<uint16_t>();
             emit<Scope::DIRECT>(netConfig);
@@ -76,6 +78,4 @@ namespace network {
             log<NUClear::INFO>("Disconnected from", event.name, "on", addr + ":" + std::to_string(port));
         });
     }
-
-}  // namespace network
-}  // namespace module
+}  // namespace module::network

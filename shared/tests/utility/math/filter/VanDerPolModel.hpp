@@ -22,8 +22,7 @@
 
 #include <Eigen/Core>
 
-namespace shared {
-namespace tests {
+namespace shared::tests {
 
     template <typename Scalar>
     class VanDerPolModel {
@@ -75,6 +74,5 @@ namespace tests {
             return reset_range;
         }
     };
-}  // namespace tests
-}  // namespace shared
+}  // namespace shared::tests
 #endif  // SHARED_TESTS_VANDERPOLMODEL_HPP

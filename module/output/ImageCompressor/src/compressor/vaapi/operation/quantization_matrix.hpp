@@ -5,7 +5,7 @@
 
 namespace module::output::compressor::vaapi::operation {
 
-VABufferID quantization_matrix(VADisplay dpy, VAContextID context, const bool& monochrome);
+    VABufferID quantization_matrix(VADisplay dpy, VAContextID context, const bool& monochrome);
 
 }  // namespace module::output::compressor::vaapi::operation
 

@@ -9,7 +9,7 @@ nuclear_role(
   network::NUClearNet
   support::configuration::GlobalConfig
   platform::darwin::HardwareIO
-  platform::darwin::SensorFilter
+  input::SensorFilter
   input::Camera
   output::NetworkForwarder
   output::Overview

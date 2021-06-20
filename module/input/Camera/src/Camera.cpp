@@ -20,8 +20,7 @@ extern "C" {
 #include "utility/vision/fourcc.hpp"
 #include "utility/vision/projection.hpp"
 
-namespace module {
-namespace input {
+namespace module::input {
 
     using extension::Configuration;
     using message::input::Image;
@@ -275,8 +274,8 @@ namespace input {
             // Add buffers to the queue
             int payload_size = arv::camera_get_payload(cam.get());
             for (size_t i = 0; i < config["buffer_count"].as<size_t>(); i++) {
-                // TODO(trent) Eventually we should use preallocated page aligned data so that we can map directly to
-                // the GPU.
+                // TODO(trent) Eventually we should use preallocated page aligned data so that we can map directly
+                // to the GPU.
                 // TODO(trent) Make an std::vector and use it in the buffer to avoid copying to one later
                 arv_stream_push_buffer(stream.get(), arv_buffer_new(payload_size, nullptr));
             }
@@ -473,6 +472,4 @@ namespace input {
     void Camera::control_lost(ArvGvDevice*, CameraContext* context) {
         NUClear::log<NUClear::FATAL>(fmt::format("Control of a the {} camera has been lost", context->name));
     }
-
-}  // namespace input
-}  // namespace module
+}  // namespace module::input

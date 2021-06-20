@@ -10,10 +10,9 @@
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/Goal.hpp"
 
-#include "utility/math/filter/eigen/ParticleFilter.hpp"
+#include "utility/math/filter/ParticleFilter.hpp"
 
-namespace module {
-namespace localisation {
+namespace module::localisation {
 
     class RobotParticleLocalisation : public NUClear::Reactor {
     private:
@@ -35,7 +34,6 @@ namespace localisation {
         /// @brief Called by the powerplant to build and setup the RobotParticleLocalisation reactor.
         explicit RobotParticleLocalisation(std::unique_ptr<NUClear::Environment> environment);
     };
-}  // namespace localisation
-}  // namespace module
+}  // namespace module::localisation
 
 #endif  // MODULE_LOCALISATION_ROBOTPARTICLELOCALISATION_HPP

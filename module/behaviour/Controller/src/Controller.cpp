@@ -21,17 +21,18 @@
 
 #include "message/motion/ServoTarget.hpp"
 
-namespace module {
-namespace behaviour {
+namespace module::behaviour {
 
-    using LimbID  = utility::input::LimbID;
-    using ServoID = utility::input::ServoID;
     using message::behaviour::ServoCommand;
-    using message::motion::ServoTarget;
+    using message::behaviour::ServoCommands;
+    using message::motion::ServoTargets;
+
     using utility::behaviour::ActionKill;
     using utility::behaviour::ActionPriorities;
     using utility::behaviour::ActionStart;
     using utility::behaviour::RegisterAction;
+    using utility::input::LimbID;
+    using utility::input::ServoID;
 
     // So we don't need a huge long type declaration everywhere...
     using iterators = std::pair<std::vector<std::reference_wrapper<RequestItem>>::iterator,
@@ -115,7 +116,6 @@ namespace behaviour {
                     bool active = request->items[i].active;
 
                     // Short circuit if we can
-                    // TODO see if we can add more here
                     reselect |= (up != down) && ((active && down) || (!active && up));
 
                     // Update our priority
@@ -131,58 +131,52 @@ namespace behaviour {
         // For single waypoints
         on<Trigger<ServoCommand>>().then([this](const ServoCommand& point) {
             // Make a vector of the command
-            auto points = std::make_unique<std::vector<ServoCommand>>();
-            points->push_back(point);
-            emit<Scope::DIRECT>(std::move(points));
+            auto points = std::make_unique<ServoCommands>();
+            points->commands.push_back(point);
+            emit<Scope::DIRECT>(points);
         });
 
-        on<Trigger<std::vector<ServoCommand>>, Sync<Controller>>().then(
-            "Command Filter",
-            [this](const std::vector<ServoCommand>& commands) {
-                for (auto& command : commands) {
+        on<Trigger<ServoCommands>, Sync<Controller>>().then("Command Filter", [this](const ServoCommands& commands) {
+            for (auto& command : commands.commands) {
 
-                    // Check if we have access
-                    if (this->limbAccess[uint(utility::input::LimbID::limbForServo(command.id)) - 1]
-                        == command.source) {
+                // Check if we have access
+                if (this->limbAccess[uint(utility::input::LimbID::limbForServo(command.id)) - 1] == command.source) {
 
-                        // Get our queue
-                        auto& queue = commandQueues[uint(command.id)];
+                    // Get our queue
+                    auto& queue = commandQueues[uint(command.id)];
 
-                        // Clear commands until we get back one that we are after
-                        while (!queue.empty() && queue.back().time > command.time) {
-                            queue.pop_back();
-                        }
+                    // Clear commands until we get back one that we are after
+                    while (!queue.empty() && queue.back().time > command.time) {
+                        queue.pop_back();
+                    }
 
-                        // Push our command onto the queue
-                        queue.push_back(command);
+                    // Push our command onto the queue
+                    queue.push_back(command);
+                }
+                else {
+                    auto source = requests.find(command.source);
+
+                    // If we don't have a source
+                    if (source == requests.end()) {
+                        log<NUClear::WARN>("Motor command from unregistered source",
+                                           command.source,
+                                           "denied access: SERVO",
+                                           int(command.id));
                     }
                     else {
-                        auto source = requests.find(command.source);
-
-                        // If we don't have a source
-                        if (source == requests.end()) {
-                            log<NUClear::WARN>("Motor command from unregistered source",
-                                               command.source,
-                                               "denied access: SERVO",
-                                               int(command.id));
-                        }
-                        else {
-                            auto& name = requests.find(command.source)->second->name;
-                            log<NUClear::WARN>("Motor command (from ",
-                                               name,
-                                               ") denied access: SERVO ",
-                                               int(command.id));
-                        }
+                        auto& name = requests.find(command.source)->second->name;
+                        log<NUClear::WARN>("Motor command (from ", name, ") denied access: SERVO ", int(command.id));
                     }
                 }
-            });
+            }
+        });
 
         on<Every<90, Per<std::chrono::seconds>>, Single, Sync<Controller>, Priority::HIGH>().then(
             "Controller Update Waypoints",
             [this] {
                 auto now = NUClear::clock::now();
                 std::list<ServoID> emptiedQueues;
-                std::unique_ptr<std::vector<ServoTarget>> waypoints;
+                std::unique_ptr<ServoTargets> waypoints;
 
                 for (auto& queue : commandQueues) {
 
@@ -194,12 +188,15 @@ namespace behaviour {
 
                         // Lazy initialize
                         if (!waypoints) {
-                            waypoints = std::make_unique<std::vector<ServoTarget>>();
+                            waypoints = std::make_unique<ServoTargets>();
                         }
 
                         // Add to our waypoints
-                        waypoints->push_back(
-                            {command.time, command.id, command.position, command.gain, command.torque});
+                        waypoints->targets.emplace_back(command.time,
+                                                        command.id,
+                                                        command.position,
+                                                        command.gain,
+                                                        command.torque);
 
                         // Dirty hack the waypoint
                         command.source = 0;
@@ -445,5 +442,4 @@ namespace behaviour {
         currentActions = std::move(newActions);
     }
 
-}  // namespace behaviour
-}  // namespace module
+}  // namespace module::behaviour

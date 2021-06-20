@@ -16,6 +16,6 @@ nuclear_role(
   localisation::RobotParticleLocalisation
   support::LocalisationSimulator
   # Sensors
-  platform::darwin::SensorFilter
+  input::SensorFilter
   # platform::darwin::HardwareSimulator
 )

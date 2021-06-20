@@ -34,8 +34,7 @@
 #include "utility/math/angle.hpp"
 #include "utility/math/coordinates.hpp"
 
-namespace module {
-namespace localisation {
+namespace module::localisation {
 
     using message::input::Sensors;
     using message::support::FieldDescription;
@@ -79,12 +78,11 @@ namespace localisation {
             return state;
         }
 
-        Eigen::Matrix<Scalar, Eigen::Dynamic, 1> predict(
-            const StateVec& state,
-            const Eigen::Matrix<Scalar, Eigen::Dynamic, 1>& actual_position,
-            const Eigen::Matrix<Scalar, 4, 4>& Hcw,
-            const message::vision::Goal::MeasurementType& type,
-            const message::support::FieldDescription& fd) {
+        Eigen::Matrix<Scalar, Eigen::Dynamic, 1> predict(const StateVec& state,
+                                                         const Eigen::Matrix<Scalar, 3, 1>& actual_position,
+                                                         const Eigen::Matrix<Scalar, 4, 4>& Hcw,
+                                                         const message::vision::Goal::MeasurementType& type,
+                                                         const message::support::FieldDescription& fd) {
 
             // Create a transform from the field state
             Eigen::Transform<Scalar, 3, Eigen::Affine> Hfw;
@@ -94,12 +92,7 @@ namespace localisation {
             const Eigen::Transform<Scalar, 3, Eigen::Affine> Hcf(Hcw * Hfw.inverse().matrix());
 
             if (type == Goal::MeasurementType::CENTRE) {
-                // rGCc = vector from camera to goal post expected position
-                const Eigen::Matrix<Scalar, 4, 1> rGCc_4(actual_position.x(),
-                                                         actual_position.y(),
-                                                         actual_position.z(),
-                                                         1);
-                const Eigen::Matrix<Scalar, 3, 1> rGCc((Hcf * rGCc_4).template head<3>());
+                const Eigen::Matrix<Scalar, 3, 1> rGCc(Hcf * actual_position);
                 return cartesianToSpherical(rGCc);
             }
 
@@ -245,6 +238,5 @@ namespace localisation {
                                                                 : (widestTop.cross(widestBase)).normalized();
         }
     };
-}  // namespace localisation
-}  // namespace module
+}  // namespace module::localisation
 #endif

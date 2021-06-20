@@ -27,8 +27,7 @@
 #include "message/input/GameEvents.hpp"
 #include "message/input/GameState.hpp"
 
-namespace module {
-namespace input {
+namespace module::input {
 
     /**
      * Monitors the match Game Controller
@@ -49,6 +48,8 @@ namespace input {
         uint TEAM_ID;
         uint PLAYER_ID;
         uint BROADCAST_IP = 0xFFFFFFFF;
+        std::string udp_filter_address;
+        std::set<std::string> ignored_ip_addresses;
 
         bool penaltyOverride = false;
         bool selfPenalised   = true;
@@ -67,11 +68,11 @@ namespace input {
         message::input::GameState::Data::PenaltyReason getPenaltyReason(
             const gamecontroller::PenaltyState& penaltyState) const;
 
+        std::string ipAddressIntToString(const uint32_t ipAddr);
+
     public:
         explicit GameController(std::unique_ptr<NUClear::Environment> environment);
     };
-
-}  // namespace input
-}  // namespace module
+}  // namespace module::input
 
 #endif  // MODULES_INPUT_GAMECONTROLLER_HPP

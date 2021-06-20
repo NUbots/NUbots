@@ -13,8 +13,7 @@
 
 #include "utility/input/ServoID.hpp"
 
-namespace module {
-namespace motion {
+namespace module::motion {
 
     class QuinticWalk : public NUClear::Reactor {
 
@@ -29,12 +28,12 @@ namespace motion {
         size_t subsumptionId = 1;
 
         // Reaction handle for the main update loop, disabling when not moving will save unnecessary CPU
-        ReactionHandle update_handle;
-        ReactionHandle imu_reaction;
+        ReactionHandle update_handle{};
+        ReactionHandle imu_reaction{};
 
         void calculateJointGoals();
-        float getTimeDelta();
-        std::unique_ptr<std::vector<message::behaviour::ServoCommand>> motionLegs(
+        [[nodiscard]] float getTimeDelta();
+        [[nodiscard]] std::unique_ptr<message::behaviour::ServoCommands> motion(
             const std::vector<std::pair<utility::input::ServoID, float>>& joints);
 
         struct {
@@ -46,27 +45,27 @@ namespace motion {
             float imu_roll_threshold;
         } config;
 
-        Eigen::Vector3f current_orders;
-        bool is_left_support;
-        bool falling;
-        bool first_run;
+        Eigen::Vector3f current_orders = Eigen::Vector3f::Zero();
+        bool is_left_support           = true;
+        bool falling                   = false;
+        bool first_run                 = true;
 
-        NUClear::clock::time_point last_update_time;
+        NUClear::clock::time_point last_update_time{};
 
-        QuinticWalkEngine walk_engine;
-        WalkingParameter params;
+        QuinticWalkEngine walk_engine{};
+        WalkingParameter params{};
 
-        message::motion::KinematicsModel kinematicsModel;
+        message::motion::KinematicsModel kinematicsModel{};
 
-        Eigen::Vector3f trunk_pos;
-        Eigen::Vector3f trunk_axis;
-        Eigen::Vector3f foot_pos;
-        Eigen::Vector3f foot_axis;
+        Eigen::Vector3f trunk_pos  = Eigen::Vector3f::Zero();
+        Eigen::Vector3f trunk_axis = Eigen::Vector3f::Zero();
+        Eigen::Vector3f foot_pos   = Eigen::Vector3f::Zero();
+        Eigen::Vector3f foot_axis  = Eigen::Vector3f::Zero();
 
-        std::map<utility::input::ServoID, float> jointGains;
+        std::map<utility::input::ServoID, float> jointGains{};
+
+        std::vector<std::pair<utility::input::ServoID, float>> arm_positions{};
     };
-
-}  // namespace motion
-}  // namespace module
+}  // namespace module::motion
 
 #endif

@@ -23,11 +23,10 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/platform/darwin/DarwinSensors.hpp"
+#include "message/platform/RawSensors.hpp"
 #include "message/support/GlobalConfig.hpp"
 
-namespace module {
-namespace input {
+namespace module::input {
 
     using extension::Configuration;
     using gamecontroller::GameControllerPacket;
@@ -50,8 +49,8 @@ namespace input {
     using GameMode        = GameEvents::GameMode;
     using PenaltyReason   = GameState::Data::PenaltyReason;
     using TeamColourEvent = message::input::GameEvents::TeamColour;
-    using message::platform::darwin::ButtonLeftDown;
-    using message::platform::darwin::ButtonMiddleDown;
+    using message::platform::ButtonLeftDown;
+    using message::platform::ButtonMiddleDown;
 
     GameController::GameController(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
@@ -67,12 +66,14 @@ namespace input {
         on<Configuration, Trigger<GlobalConfig>>("GameController.yaml")
             .then("GameController Configuration",
                   [this](const Configuration& config, const GlobalConfig& globalConfig) {
-                      PLAYER_ID = globalConfig.playerId;
-                      TEAM_ID   = globalConfig.teamId;
+                      PLAYER_ID = globalConfig.player_id;
+                      TEAM_ID   = globalConfig.team_id;
                       send_port = config["send_port"].as<uint>();
 
+                      udp_filter_address = config["udp_filter_address"].as<std::string>("");
+
                       // If we are changing ports (the port starts at 0 so this should start it the first time)
-                      if (config["recieve_port"].as<uint>() != recieve_port) {
+                      if (config["receive_port"].as<uint>() != recieve_port) {
 
                           // If we have an old binding, then unbind it
                           // The port starts at 0 so this should work
@@ -81,12 +82,30 @@ namespace input {
                           }
 
                           // Update our port
-                          recieve_port = config["recieve_port"].as<uint>();
+                          recieve_port = config["receive_port"].as<uint>();
 
                           // Bind our new handle
                           std::tie(listenHandle, std::ignore, std::ignore) =
                               on<UDP::Broadcast, With<GameState>>(recieve_port)
                                   .then([this](const UDP::Packet& p, const GameState& gameState) {
+                                      std::string remoteAddr = ipAddressIntToString(p.remote.address);
+
+                                      // Apply filtering of packets if udp_filter_address is set in config
+                                      if (!udp_filter_address.empty() && remoteAddr != udp_filter_address) {
+                                          if (std::find(ignored_ip_addresses.begin(),
+                                                        ignored_ip_addresses.end(),
+                                                        remoteAddr)
+                                              == ignored_ip_addresses.end()) {
+                                              ignored_ip_addresses.insert(remoteAddr);
+                                              log<NUClear::INFO>("Ignoring UDP packet from",
+                                                                 remoteAddr,
+                                                                 "as it doesn't match configured filter address",
+                                                                 udp_filter_address);
+                                          }
+
+                                          return;
+                                      }
+
                                       // Get our packet contents
                                       const GameControllerPacket& newPacket =
                                           *reinterpret_cast<const GameControllerPacket*>(p.payload.data());
@@ -500,9 +519,9 @@ namespace input {
                     state->data.secondary_time = time;
 
                     stateChanges.push_back([this, time] {
-                        auto msg       = std::make_unique<GamePhase>();
-                        msg->phase     = GameState::Data::Phase::Value::READY;
-                        msg->readyTime = time;
+                        auto msg        = std::make_unique<GamePhase>();
+                        msg->phase      = GameState::Data::Phase::Value::READY;
+                        msg->ready_time = time;
                         emit(msg);
                     });
                     break;
@@ -527,10 +546,10 @@ namespace input {
                     state->data.phase          = GameState::Data::Phase::Value::PLAYING;
 
                     stateChanges.push_back([this, endHalf, ballFree] {
-                        auto msg      = std::make_unique<GamePhase>();
-                        msg->phase    = GameState::Data::Phase::Value::PLAYING;
-                        msg->endHalf  = endHalf;
-                        msg->ballFree = ballFree;
+                        auto msg       = std::make_unique<GamePhase>();
+                        msg->phase     = GameState::Data::Phase::Value::PLAYING;
+                        msg->end_half  = endHalf;
+                        msg->ball_free = ballFree;
                         emit(msg);
                     });
                     break;
@@ -543,9 +562,9 @@ namespace input {
                     state->data.phase        = GameState::Data::Phase::Value::FINISHED;
 
                     stateChanges.push_back([this, nextHalf] {
-                        auto msg      = std::make_unique<GamePhase>();
-                        msg->phase    = GameState::Data::Phase::Value::FINISHED;
-                        msg->nextHalf = nextHalf;
+                        auto msg       = std::make_unique<GamePhase>();
+                        msg->phase     = GameState::Data::Phase::Value::FINISHED;
+                        msg->next_half = nextHalf;
                         emit(msg);
                     });
                     break;
@@ -604,5 +623,14 @@ namespace input {
         throw std::runtime_error("No opponent teams not found");  // should never happen!
     }
 
-}  // namespace input
-}  // namespace module
+    std::string GameController::ipAddressIntToString(const uint32_t ipAddr) {
+        uint32_t ipAddrN = htonl(ipAddr);
+
+        char c[255];
+        std::memset(c, 0, sizeof(c));
+
+        std::string addr = inet_ntop(AF_INET, &ipAddrN, c, sizeof(c));
+
+        return addr;
+    }
+}  // namespace module::input

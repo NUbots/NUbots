@@ -20,7 +20,7 @@
 #ifndef MODULES_BEHAVIOUR_PLANNERS_SIMPLEWALKPATHPLANNER_HPP
 #define MODULES_BEHAVIOUR_PLANNERS_SIMPLEWALKPATHPLANNER_HPP
 
-#include <armadillo>
+#include <Eigen/Core>
 #include <cmath>
 #include <nuclear>
 
@@ -29,50 +29,45 @@
 #include "message/behaviour/KickPlan.hpp"
 #include "message/behaviour/MotionCommand.hpp"
 
-namespace module {
-namespace behaviour {
-    namespace planning {
+namespace module::behaviour::planning {
 
-        // using namespace message;
-        /**
-         * Executes a getup script if the robot falls over.
-         *
-         * @author Josiah Walker
-         */
-        class SimpleWalkPathPlanner : public NUClear::Reactor {
-        private:
-            message::behaviour::MotionCommand latestCommand;
-            const size_t subsumptionId;
-            float turnSpeed            = 0.8;
-            float forwardSpeed         = 1;
-            float sideSpeed            = 1;
-            float slow_approach_factor = 0.5;
-            float a                    = 7;
-            float b                    = 0;
-            float search_timeout       = 3;
+    // using namespace message;
+    /**
+     * Executes a getup script if the robot falls over.
+     *
+     * @author Josiah Walker
+     */
+    class SimpleWalkPathPlanner : public NUClear::Reactor {
+    private:
+        message::behaviour::MotionCommand latestCommand;
+        const size_t subsumptionId;
+        float turnSpeed            = 0.8;
+        float forwardSpeed         = 1;
+        float sideSpeed            = 1;
+        float slow_approach_factor = 0.5;
+        float a                    = 7;
+        float b                    = 0;
+        float search_timeout       = 3;
 
-            //-----------non-config variables (not defined in WalkPathPlanner.yaml)-----------
+        //-----------non-config variables (not defined in WalkPathPlanner.yaml)-----------
 
-            // info for the current walk
-            arma::vec2 currentTargetPosition;
-            arma::vec2 currentTargetHeading;
-            message::behaviour::KickPlan targetHeading;
-            arma::vec2 targetPosition = {0, 0};
+        // info for the current walk
+        Eigen::Vector2d currentTargetPosition;
+        Eigen::Vector2d currentTargetHeading;
+        message::behaviour::KickPlan targetHeading;
+        Eigen::Vector2d targetPosition = Eigen::Vector2d::Zero();
 
-            NUClear::clock::time_point timeBallLastSeen;
-            arma::vec3 rBWw          = {10, 0, 0};
-            bool robot_ground_space  = true;
-            arma::vec2 position      = {1, 0};  // ball pos rel to robot
-            float ball_approach_dist = 0.2;
-            float slowdown_distance  = 0.2;
-            bool useLocalisation     = true;
+        NUClear::clock::time_point timeBallLastSeen;
+        Eigen::Vector3d rBWw     = Eigen::Vector3d(10.0, 0.0, 0.0);
+        bool robot_ground_space  = true;
+        Eigen::Vector2d position = Eigen::Vector2d::UnitX();  // ball pos rel to robot
+        float ball_approach_dist = 0.2;
+        float slowdown_distance  = 0.2;
+        bool useLocalisation     = true;
 
-        public:
-            explicit SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);
-        };
-
-    }  // namespace planning
-}  // namespace behaviour
-}  // namespace module
+    public:
+        explicit SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);
+    };
+}  // namespace module::behaviour::planning
 
 #endif  // MODULES_BEHAVIOUR_PLANNERS_SIMPLEWALKPATHPLANNER_HPP

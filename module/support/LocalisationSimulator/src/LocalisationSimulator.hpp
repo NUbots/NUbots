@@ -5,16 +5,16 @@
 
 namespace module::support {
 
-class LocalisationSimulator : public NUClear::Reactor {
-private:
-    /// The configuration variables for this reactor
-    struct {
-    } config;
+    class LocalisationSimulator : public NUClear::Reactor {
+    private:
+        /// The configuration variables for this reactor
+        struct {
+        } config;
 
-public:
-    /// @brief Called by the powerplant to build and setup the LocalisationSimulator reactor.
-    explicit LocalisationSimulator(std::unique_ptr<NUClear::Environment> environment);
-};
+    public:
+        /// @brief Called by the powerplant to build and setup the LocalisationSimulator reactor.
+        explicit LocalisationSimulator(std::unique_ptr<NUClear::Environment> environment);
+    };
 
 }  // namespace module::support
 
