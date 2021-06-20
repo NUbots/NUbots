@@ -420,7 +420,7 @@ using utility::support::Expression;
 //         }
 //     }
 
-//     const Eigen::Quaterniond mean_error = utility::math::quaternion::mean(errors.begin(), errors.end());
+//     const Eigen::Quaterniond mean_error = utility::math::quaternion::meanRotation(errors.begin(), errors.end());
 //     INFO("mean error: " << mean_error.coeffs().transpose());
 //     REQUIRE(mean_error.w() == Approx(1.0));
 //     REQUIRE(mean_error.x() == Approx(0.0));
@@ -632,7 +632,7 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
             errors.emplace_back(utility::math::quaternion::difference(Rwt, quaternions[i]));
 
             const Eigen::Quaterniond mean_error =
-                utility::math::quaternion::mean(errors.begin(), errors.end()).normalized();
+                utility::math::quaternion::meanRotation(errors.begin(), errors.end()).normalized();
 
             const double mean_angular_error =
                 std::accumulate(angular_errors.begin(), angular_errors.end(), 0.0) / double(angular_errors.size());
@@ -653,15 +653,15 @@ TEST_CASE("Test MotionModel Orientation", "[module][input][SensorFilter][MotionM
         }
     }
 
-    const Eigen::Quaterniond mean_error = utility::math::quaternion::mean(errors.begin(), errors.end());
+    const Eigen::Quaterniond mean_error = utility::math::quaternion::meanRotation(errors.begin(), errors.end());
 
     const double mean_angular_error =
         std::accumulate(angular_errors.begin(), angular_errors.end(), 0.0) / double(angular_errors.size());
     INFO("Mean Error........: " << mean_error.coeffs().transpose());
     INFO("Mean Angular Error: " << mean_angular_error);
-    REQUIRE(mean_error.w() == Approx(1.0));
-    REQUIRE(mean_error.x() == Approx(0.0));
-    REQUIRE(mean_error.y() == Approx(0.0));
-    REQUIRE(mean_error.z() == Approx(0.0));
-    REQUIRE(mean_angular_error == Approx(0.0));
+    REQUIRE(mean_error.w() == Approx(1.0).margin(0.01));
+    REQUIRE(mean_error.x() == Approx(0.0).margin(0.01));
+    REQUIRE(mean_error.y() == Approx(0.0).margin(0.01));
+    REQUIRE(mean_error.z() == Approx(0.0).margin(0.01));
+    REQUIRE(mean_angular_error == Approx(0.0).margin(0.02));
 }
