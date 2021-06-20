@@ -45,6 +45,9 @@ namespace utility::math::quaternion {
         for (Iterator it = begin; it != end; ++it) {
             // Convert quaternion to vec4
             Eigen::Matrix<Scalar, 4, 1> q(it->coeffs());
+            if (q.w() < Scalar(0)) {
+                q *= Scalar(-1);
+            }
 
             // Rank 1 update
             A += q * q.transpose();
@@ -60,7 +63,12 @@ namespace utility::math::quaternion {
         }
 
         // We want the eigenvector corresponding to the largest eigenvector
-        return QType(eigensolver.eigenvectors().template rightCols<1>());
+        QType mean = QType(eigensolver.eigenvectors().template rightCols<1>());
+        if (mean.w() < Scalar(0)) {
+            mean.w() *= Scalar(-1);
+            mean.vec() *= Scalar(-1);
+        }
+        return mean.normalized();
     }
 
     template <typename QType>
