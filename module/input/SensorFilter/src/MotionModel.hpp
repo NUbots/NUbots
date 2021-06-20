@@ -220,6 +220,12 @@ namespace module::input {
             // Make sure the quaternion remains normalised
             newState.Rwt = newState.Rwt.normalized();
 
+            // Make sure the real part of the quaternion remains non-negative
+            if (newState.Rwt.w() < Scalar(0)) {
+                newState.Rwt.w() *= Scalar(-1);
+                newState.Rwt.vec() *= Scalar(-1);
+            }
+
             return newState;
         }
 
