@@ -84,6 +84,10 @@ namespace module {
                     nsga2Algorithm.SetRandomInitialize(false);
                     nsga2Algorithm.SetInitialRealVars(paramInitialValues);
 
+                    // Zero out binary things
+                    nsga2Algorithm.SetBinCrossoverProbability(0.0);
+                    nsga2Algorithm.SetBinMutationProbability(0.0);
+
                     // This seg faults, SetSeed in the library dereferences a null pointer
                     nsga2Algorithm.SetSeed(config["seed"].as<int>());
 
