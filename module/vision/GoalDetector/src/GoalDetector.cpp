@@ -245,7 +245,7 @@ namespace module::vision {
                                 log<NUClear::DEBUG>("*                    THROWOUTS                   *");
                                 log<NUClear::DEBUG>("**************************************************");
                             }
-                            bool keep = true;
+                            bool keep = true;  // if false then we will not consider this as a valid goal post
 
                             // If the goal is too far away, get rid of it!
                             if (distance > config.max_goal_distance) {
@@ -258,6 +258,7 @@ namespace module::vision {
                             }
 
                             if (keep == true) {
+                                // Passed the tests, this post can go onto the next round as a valid goal post!
                                 goals->goals.push_back(std::move(g));
                             }
                         }
