@@ -29,13 +29,13 @@ namespace module::output {
         explicit NetworkForwarder(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        struct {
-            std::string target;
-        } config;
-
         struct Handle {
-            double period = std::numeric_limits<double>::max();
-            std::map<int, NUClear::clock::time_point> last_message;
+            struct TargetHandle {
+                double period = std::numeric_limits<double>::max();
+                std::map<int, NUClear::clock::time_point> last_message;
+            };
+
+            std::map<std::string, TargetHandle> targets;
             ReactionHandle reaction;
         };
 
@@ -56,12 +56,18 @@ namespace module::output {
                             int id = id::get(*msg);
 
                             auto now = NUClear::clock::now();
-                            if (handle->last_message.count(id) == 0
-                                || duration_cast<duration<double>>(now - handle->last_message[id]).count()
-                                       > handle->period) {
-                                powerplant.emit_shared<Scope::NETWORK>(std::move(msg), config.target, false);
-                                handle->last_message[id] = now;
-                                log<NUClear::TRACE>("Forwarding", type, "to", config.target);
+
+                            // Loop through all the targets that are interested in this type
+                            for (const auto& target_handle : handle->target_handles) {
+                                target = handle.first();
+
+                                if (target_handle->last_message.count(id) == 0
+                                    || duration_cast<duration<double>>(now - target_handle->last_message[id]).count()
+                                           > target_handle->period) {
+                                    powerplant.emit_shared<Scope::NETWORK>(std::move(msg), target, false);
+                                    target_handle->last_message[id] = now;
+                                    log<NUClear::TRACE>("Forwarding", type, "to", target);
+                                }
                             }
                         })
                     .disable();

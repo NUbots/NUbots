@@ -23,45 +23,54 @@ namespace module::output {
             else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
             // clang-format on
 
-            config.target = cfg["target"].as<std::string>();
-
             // Update which types we will be forwarding
-            for (const auto& setting : cfg["messages"].config) {
-                // Get the name of the type
-                auto name = setting.first.as<std::string>();
+            for (const auto& target_config : cfg["targets"].config) {
 
-                double period = std::numeric_limits<double>::infinity();
-                bool enabled  = false;
+                // Extract the target we are sending to
+                std::string target = target_config.first.as<std::string>();
 
-                // First we try reading this field as a double, if it is "true" or "false" it will throw an exception
-                try {
-                    auto fps = setting.second.as<double>();
-                    enabled  = fps != 0.0;
-                    period   = enabled ? 1.0 / fps : std::numeric_limits<double>::infinity();
-                }
-                // If this happens we assume it's a boolean instead
-                catch (const YAML::TypedBadConversion<double>&) {
-                    enabled = setting.second.as<bool>();
-                    period  = enabled ? 0.0 : std::numeric_limits<double>::infinity();
-                }
+                for (const auto& setting : target_config.second) {
+                    // Get the name of the type
+                    auto name = setting.first.as<std::string>();
 
-                // Message if we have enabled/disabled a particular message type
-                if (handles.find(name) != handles.end()) {
-                    auto& handle = handles[name];
+                    double period = std::numeric_limits<double>::infinity();
+                    bool enabled  = false;
 
-                    handle->period = period;
-
-                    if (enabled && !handle->reaction.enabled()) {
-                        handle->reaction.enable();
-                        log<NUClear::INFO>("Forwarding", name, "to", config.target);
+                    // First we try reading this field as a double, if it is "true" or "false" it will throw an
+                    // exception
+                    try {
+                        auto fps = setting.second.as<double>();
+                        enabled  = fps != 0.0;
+                        period   = enabled ? 1.0 / fps : std::numeric_limits<double>::infinity();
                     }
-                    else if (!enabled && handle->reaction.enabled()) {
-                        handle->reaction.disable();
-                        log<NUClear::INFO>("Stopped forwarding", name, "to", config.target);
+                    // If this happens we assume it's a boolean instead
+                    catch (const YAML::TypedBadConversion<double>&) {
+                        enabled = setting.second.as<bool>();
+                        period  = enabled ? 0.0 : std::numeric_limits<double>::infinity();
                     }
-                }
-                else {
-                    log<NUClear::WARN>("Network Forwarder does not know about the message type", name);
+
+                    // Message if we have enabled/disabled a particular message type
+                    if (handles.find(name) != handles.end()) {
+                        auto& handle = handles[name];
+                        bool active  = handle->targets.count(target) != 0;
+
+                        if (enabled && !active) {
+                            log<NUClear::INFO>("Forwarding", name, "to", target);
+                            auto& target_handle   = handle->targets[target];
+                            target_handle.period  = period;
+                            target_handle.enabled = enabled;
+                        }
+                        else if (!enabled && active) {
+                            handle->targets.erase(target);
+                            log<NUClear::INFO>("Stopped forwarding", name, "to", target);
+                        }
+
+                        // Enable if somebody wants this type
+                        handle->reaction.enable(!handle->targets.empty());
+                    }
+                    else {
+                        log<NUClear::WARN>("Network Forwarder does not know about the message type", name);
+                    }
                 }
             }
         });
