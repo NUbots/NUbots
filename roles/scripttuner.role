@@ -10,5 +10,6 @@ nuclear_role(
   behaviour::Controller
   network::NUClearNet
   output::NetworkForwarder
+  output::Overview
   motion::ScriptEngine
 )

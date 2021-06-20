@@ -57,6 +57,7 @@ namespace module::vision {
             config.disagreement_ratio   = cfg["disagreement_ratio"].as<float>();
             config.goal_angular_cov     = Eigen::Vector3f(cfg["goal_angular_cov"].as<Expression>()).asDiagonal();
             config.use_median           = cfg["use_median"].as<bool>();
+            config.max_goal_distance    = cfg["max_goal_distance"].as<float>();
             config.debug                = cfg["debug"].as<bool>();
         });
 
@@ -235,7 +236,31 @@ namespace module::vision {
                             g.screen_angular = cartesianToSpherical(g.post.bottom).tail<2>();
                             g.angular_size   = Eigen::Vector2f::Constant(std::acos(radius));
 
-                            goals->goals.push_back(std::move(g));
+                            /***********************************************
+                             *                  THROWOUTS                  *
+                             ***********************************************/
+
+                            if (config.debug) {
+                                log<NUClear::DEBUG>("**************************************************");
+                                log<NUClear::DEBUG>("*                    THROWOUTS                   *");
+                                log<NUClear::DEBUG>("**************************************************");
+                            }
+                            bool keep = true;  // if false then we will not consider this as a valid goal post
+
+                            // If the goal is too far away, get rid of it!
+                            if (distance > config.max_goal_distance) {
+                                keep = false;
+                                log<NUClear::DEBUG>(
+                                    fmt::format("Goal discarded: goal distance ({}) > maximum_goal_distance ({})",
+                                                distance,
+                                                config.max_goal_distance));
+                                log<NUClear::DEBUG>("--------------------------------------------------");
+                            }
+
+                            if (keep) {
+                                // Passed the tests, this post can go onto the next round as a valid goal post!
+                                goals->goals.push_back(std::move(g));
+                            }
                         }
                     }
 
