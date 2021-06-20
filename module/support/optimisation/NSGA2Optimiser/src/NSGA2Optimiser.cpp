@@ -39,15 +39,15 @@ namespace module {
 
                     // Extract the initial values and limits and from config file, for all of the parameters
                     auto& walk = config["walk"];
-                    for (const auto& element : std::vector<std::string>({std::string("freq"),
-                                                                         std::string("double_support_ratio")})) {
+                    for (const auto& element :
+                         std::vector<std::string>({std::string("freq"), std::string("double_support_ratio")})) {
                         paramInitialValues.emplace_back(walk[element][0].as<Expression>());
                         paramLimits.emplace_back(walk[element][1].as<Expression>(), walk[element][2].as<Expression>());
                     }
 
                     auto& foot = walk["foot"];
-                    for (const auto& element : std::vector<std::string>({std::string("distance"),
-                                                                         std::string("rise")})) {
+                    for (const auto& element :
+                         std::vector<std::string>({std::string("distance"), std::string("rise")})) {
                         paramInitialValues.emplace_back(foot[element][0].as<Expression>());
                         paramLimits.emplace_back(foot[element][1].as<Expression>(), foot[element][2].as<Expression>());
                     }
@@ -60,13 +60,15 @@ namespace module {
                                                                          std::string("swing"),
                                                                          std::string("pause")})) {
                         paramInitialValues.emplace_back(trunk[element][0].as<Expression>());
-                        paramLimits.emplace_back(trunk[element][1].as<Expression>(), trunk[element][2].as<Expression>());
+                        paramLimits.emplace_back(trunk[element][1].as<Expression>(),
+                                                 trunk[element][2].as<Expression>());
                     }
 
-                    auto& pause = walk["pause"]; // config['walk']['pause']
+                    auto& pause = walk["pause"];  // config['walk']['pause']
                     for (const auto& element : std::vector<std::string>({std::string("duration")})) {
                         paramInitialValues.emplace_back(pause[element][0].as<Expression>());
-                        paramLimits.emplace_back(pause[element][1].as<Expression>(), pause[element][2].as<Expression>());
+                        paramLimits.emplace_back(pause[element][1].as<Expression>(),
+                                                 pause[element][2].as<Expression>());
                     }
 
                     // Set up the NSGA2 algorithm based on our config values
@@ -197,7 +199,7 @@ namespace module {
                             log<NUClear::INFO>("error: individual number out of bounds");
                         }
                     }
-            });
+                });
             }
 
             void NSGA2Optimiser::requestIndEvaluation(int _id, int _generation, const std::vector<double>& _reals) {
@@ -209,17 +211,17 @@ namespace module {
                 request->generation                             = _generation;
 
                 // Add the individual's parameters to the message
-                request->parameters.freq                          = _reals[0];
-                request->parameters.double_support_ratio          = _reals[1];
-                request->parameters.foot.distance                 = _reals[2];
-                request->parameters.foot.rise                     = _reals[3];
-                request->parameters.trunk.height                  = _reals[4];
-                request->parameters.trunk.pitch                   = _reals[5];
-                request->parameters.trunk.x_offset                = _reals[6];
-                request->parameters.trunk.y_offset                = _reals[7];
-                request->parameters.trunk.swing                   = _reals[8];
-                request->parameters.trunk.pause                   = _reals[9];
-                request->parameters.pause.duration                = _reals[10];
+                request->parameters.freq                 = _reals[0];
+                request->parameters.double_support_ratio = _reals[1];
+                request->parameters.foot.distance        = _reals[2];
+                request->parameters.foot.rise            = _reals[3];
+                request->parameters.trunk.height         = _reals[4];
+                request->parameters.trunk.pitch          = _reals[5];
+                request->parameters.trunk.x_offset       = _reals[6];
+                request->parameters.trunk.y_offset       = _reals[7];
+                request->parameters.trunk.swing          = _reals[8];
+                request->parameters.trunk.pause          = _reals[9];
+                request->parameters.pause.duration       = _reals[10];
 
                 // Set default leg gains
                 request->parameters.gains.legs = default_leg_gains;
