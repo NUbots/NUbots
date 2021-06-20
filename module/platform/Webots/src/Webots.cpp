@@ -60,6 +60,7 @@ namespace module::platform {
     using message::motion::ServoTargets;
     using message::output::CompressedImage;
     using message::platform::RawSensors;
+    using message::platform::ResetRawSensors;
 
     using message::platform::webots::ActuatorRequests;
     using message::platform::webots::Message;
@@ -248,22 +249,16 @@ namespace module::platform {
         });
 
 
-        on<Configuration>("camera.yaml").then([this](const Configuration& config) {
+        on<Configuration>("WebotsCameras").then([this](const Configuration& config) {
             // Strip the .yaml off the name of the file to get the name of the camera
-            std::string name = ::basename(config.fileName.substr(0, config.fileName.find_last_of('.')).c_str());
+            const std::string name = ::basename(config.fileName.substr(0, config.fileName.find_last_of('.')).c_str());
 
             log<NUClear::INFO>(fmt::format("Connected to the webots {} camera", name));
 
-            context = std::make_unique<CameraContext>(CameraContext{
-                *this,
-                name,
-                num_cameras++,
-                Image::Lens(),     // Lens is constructed in settings
-                Eigen::Affine3d()  // Hpc is set in settings
-            });
-
-            // Load Hpc from configuration
-            context->Hpc = Eigen::Matrix4d(config["lens"]["Hpc"].as<Expression>());
+            CameraContext context;
+            context.name = name;
+            context.id   = num_cameras++;
+            context.Hpc  = Eigen::Matrix4d(config["lens"]["Hpc"].as<Expression>());  // Load Hpc from configuration
 
             int width  = config["settings"]["Width"].as<Expression>();
             int height = config["settings"]["Height"].as<Expression>();
@@ -279,7 +274,7 @@ namespace module::platform {
             Eigen::Vector2f k = config["lens"]["k"].as<Expression>();
 
             // Set the lens parameters from configuration
-            context->lens = Image::Lens{
+            context.lens = Image::Lens{
                 config["lens"]["projection"].as<std::string>(),
                 focal_length,
                 fov,
@@ -288,15 +283,17 @@ namespace module::platform {
             };
 
             // If the lens fov was auto we need to correct it
-            if (!std::isfinite(context->lens.fov)) {
+            if (!std::isfinite(context.lens.fov)) {
                 double a = height / width;
                 std::array<double, 4> options{
-                    utility::vision::unproject(Eigen::Vector2f(0, 0), context->lens, Eigen::Vector2f(1, a)).x(),
-                    utility::vision::unproject(Eigen::Vector2f(1, 0), context->lens, Eigen::Vector2f(1, a)).x(),
-                    utility::vision::unproject(Eigen::Vector2f(0, a), context->lens, Eigen::Vector2f(1, a)).x(),
-                    utility::vision::unproject(Eigen::Vector2f(1, a), context->lens, Eigen::Vector2f(1, a)).x()};
-                context->lens.fov = std::acos(*std::min_element(options.begin(), options.end())) * 2.0;
+                    utility::vision::unproject(Eigen::Vector2f(0, 0), context.lens, Eigen::Vector2f(1, a)).x(),
+                    utility::vision::unproject(Eigen::Vector2f(1, 0), context.lens, Eigen::Vector2f(1, a)).x(),
+                    utility::vision::unproject(Eigen::Vector2f(0, a), context.lens, Eigen::Vector2f(1, a)).x(),
+                    utility::vision::unproject(Eigen::Vector2f(1, a), context.lens, Eigen::Vector2f(1, a)).x()};
+                context.lens.fov = std::acos(*std::min_element(options.begin(), options.end())) * 2.0;
             }
+
+            camera_context[name] = std::move(context);
         });
 
         on<Trigger<Sensors>>().then("Buffer Sensors", [this](const Sensors& sensors) {
@@ -380,6 +377,19 @@ namespace module::platform {
                 shutdown(fd, SHUT_RDWR);
                 close(fd);
                 fd = -1;
+            }
+        });
+
+        on<Trigger<ResetRawSensors>>().then([this]() {
+            // Reset the servo state
+            for (auto& servo : servo_state) {
+                servo.dirty            = false;
+                servo.p_gain           = 32.0 / 255.0;
+                servo.moving_speed     = 0.0;
+                servo.goal_position    = 0.0;
+                servo.torque           = 0.0;
+                servo.present_position = 0.0;
+                servo.present_speed    = 0.0;
             }
         });
     }
@@ -769,32 +779,28 @@ namespace module::platform {
             image->format         = fourcc("BGR3");  // Change to "JPEG" when webots compression is implemented
             image->data           = camera.image;
 
-            image->id        = context->id;
+            image->id        = camera_context[camera.name].id;
             image->timestamp = NUClear::clock::time_point(std::chrono::nanoseconds(sensor_measurements.time));
 
             Eigen::Affine3d Hcw;
 
-            Webots& reactor = context->reactor;
             /* Mutex Scope */ {
-                std::lock_guard<std::mutex> lock(reactor.sensors_mutex);
+                std::lock_guard<std::mutex> lock(sensors_mutex);
 
-                Eigen::Affine3d Hpc = context->Hpc;
-                Eigen::Affine3d Hwp;
-                if (true) {
-                    Hwp = Eigen::Affine3d::Identity();
-                }
-                else {
+                const Eigen::Affine3d& Hpc = camera_context[camera.name].Hpc;
+                Eigen::Affine3d Hwp        = Eigen::Affine3d::Identity();
+                if (!Hwps.empty()) {
                     // Find the first time that is not less than the target time
-                    auto Hwp_it = std::lower_bound(reactor.Hwps.begin(),
-                                                   reactor.Hwps.end(),
+                    auto Hwp_it = std::lower_bound(Hwps.begin(),
+                                                   Hwps.end(),
                                                    std::make_pair(image->timestamp, Eigen::Affine3d::Identity()),
                                                    [](const auto& a, const auto& b) { return a.first < b.first; });
 
-                    if (Hwp_it == reactor.Hwps.end()) {
+                    if (Hwp_it == Hwps.end()) {
                         // Image is newer than most recent sensors
                         Hwp = std::prev(Hwp_it)->second;
                     }
-                    else if (Hwp_it == reactor.Hwps.begin()) {
+                    else if (Hwp_it == Hwps.begin()) {
                         // Image is older than oldest sensors
                         Hwp = Hwp_it->second;
                     }
@@ -810,7 +816,7 @@ namespace module::platform {
                 Hcw = Eigen::Affine3d(Hwp * Hpc).inverse();
             }
 
-            image->lens = context->lens;
+            image->lens = camera_context[camera.name].lens;
             image->Hcw  = Hcw.matrix();
 
             emit(image);

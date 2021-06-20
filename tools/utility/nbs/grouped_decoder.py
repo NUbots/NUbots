@@ -42,9 +42,9 @@ class GroupDecoder:
     def __init__(self, *paths, types=None, show_progress=False):
         indices, self._maps = load_nbs(*paths, types=types, show_progress=show_progress)
 
-        types = np.unique(indices[["type_hash", "subtype"]])
+        types = np.unique(indices[["type_hash", "id"]])
 
-        self._index = {(k[0], k[1]): indices[np.where(k == indices[["type_hash", "subtype"]])] for k in types}
+        self._index = {(k[0], k[1]): indices[np.where(k == indices[["type_hash", "id"]])] for k in types}
 
     def type_reader(self, type):
         if isinstance(type, tuple):
