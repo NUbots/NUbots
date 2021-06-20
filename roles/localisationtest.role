@@ -11,6 +11,7 @@ nuclear_role(
   support::configuration::GlobalConfig
   network::NUClearNet
   output::NetworkForwarder
+  output::Overview
   # Localisation
   localisation::RobotParticleLocalisation
   support::LocalisationSimulator

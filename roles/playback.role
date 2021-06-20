@@ -8,4 +8,5 @@ nuclear_role(
   network::NUClearNet
   support::logging::DataPlayback
   output::NetworkForwarder
+  output::Overview
 )
