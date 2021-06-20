@@ -150,9 +150,10 @@ message CameraExposure {
 // NUbots-specific, used for the walk optimisation
 message OptimisationCommand {
     enum CommandType {
-        RESET_WORLD = 0;
-        RESET_TIME  = 1;
-        TERMINATE   = 2;
+        NO_COMMAND  = 0;
+        RESET_WORLD = 1;
+        RESET_TIME  = 2;
+        TERMINATE   = 3;
     }
     CommandType command = 1;
 }
