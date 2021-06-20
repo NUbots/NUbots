@@ -83,15 +83,15 @@ namespace module {
 
                     // Read the QuinticWalk config and overwrite the config parameters with the current individual's
                     // parameters
-                    YAML::Node walk_config = YAML::LoadFile("config/QuinticWalk.yaml");
+                    YAML::Node walk_config = YAML::LoadFile("config/webots/QuinticWalk.yaml");
 
-                    auto walk                       = walk_config["walk"];
-                    walk["freq"]                    = request.parameters.freq;
-                    walk["double_support_ratio"]    = request.parameters.double_support_ratio;
+                    auto walk                    = walk_config["walk"];
+                    walk["freq"]                 = request.parameters.freq;
+                    walk["double_support_ratio"] = request.parameters.double_support_ratio;
 
-                    auto foot          = walk["foot"];
-                    foot["distance"]   = request.parameters.foot.distance;
-                    foot["rise"]       = request.parameters.foot.rise;
+                    auto foot        = walk["foot"];
+                    foot["distance"] = request.parameters.foot.distance;
+                    foot["rise"]     = request.parameters.foot.rise;
 
                     auto trunk        = walk["trunk"];
                     trunk["height"]   = request.parameters.trunk.height;
@@ -108,7 +108,7 @@ namespace module {
                     gains["legs"] = request.parameters.gains.legs;
 
                     // Write the updated config to disk
-                    std::ofstream output_file_stream("config/QuinticWalk.yaml");
+                    std::ofstream output_file_stream("config/webots/QuinticWalk.yaml");
                     output_file_stream << YAML::Dump(walk_config);
                     output_file_stream.close();
 
