@@ -238,24 +238,30 @@ namespace module::input {
                     gyro /= double(sensors.size());
                     rMFt /= double(sensors.size());
 
+                    // Average time per sensor reading
+                    double deltaT = std::chrono::duration_cast<std::chrono::duration<double>>(
+                                        sensors.back()->timestamp - sensors.front()->timestamp)
+                                        .count()
+                                    / double(sensors.size());
+
                     // Find the rotation from the average accelerometer reading to world UnitZ
                     // Rotating from torso acceleration vector to world z vector ===> torso to world rotation
                     Eigen::Quaterniond Rwt = Eigen::Quaterniond::FromTwoVectors(acc, Eigen::Vector3d::UnitZ());
                     Rwt.normalize();
 
                     MotionModel<double>::StateVec mean;
-                    // Rotate rMFt into world space. We are assuming that CoM (M) and torso are close enough to each
-                    // other
-                    mean.rTWw          = Rwt.toRotationMatrix() * rMFt;
-                    mean.vTw           = Eigen::Vector3d::Zero();
-                    mean.Rwt           = Rwt;
-                    mean.omegaTTt      = Eigen::Vector3d::Zero();
+                    // Rotate rMFt (Foot to Torso CoM) into world space
+                    mean.rTWw = Rwt.toRotationMatrix() * rMFt;
+                    // Remove gravity from accelerometer average and integrate to get velocity
+                    mean.vTw = (acc - (Rwt.conjugate() * Eigen::Quaterniond(0.0, 0.0, 0.0, G) * Rwt).vec()) * deltaT;
+                    mean.Rwt = Rwt;
+                    mean.omegaTTt = gyro;
 
                     MotionModel<double>::StateVec covariance;
-                    covariance.rTWw          = this->config.motionFilter.initial.covariance.position;
-                    covariance.vTw           = this->config.motionFilter.initial.covariance.velocity;
-                    covariance.Rwt           = this->config.motionFilter.initial.covariance.rotation;
-                    covariance.omegaTTt      = this->config.motionFilter.initial.covariance.rotationalVelocity;
+                    covariance.rTWw     = this->config.motionFilter.initial.covariance.position;
+                    covariance.vTw      = this->config.motionFilter.initial.covariance.velocity;
+                    covariance.Rwt      = this->config.motionFilter.initial.covariance.rotation;
+                    covariance.omegaTTt = this->config.motionFilter.initial.covariance.rotationalVelocity;
 
                     // We have finished resetting the filter now
                     switch (motionFilter.reset(mean.getStateVec(), covariance.asDiagonal())) {
