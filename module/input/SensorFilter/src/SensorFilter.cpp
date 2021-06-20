@@ -622,12 +622,14 @@ namespace module::input {
                                 log<NUClear::ERROR>(
                                     "Cholesky decomposition failed. The provided data did not satisfy the "
                                     "prerequisites.");
+                                // Disable the sensor update loop to reset the filter post cholesky
                                 update_loop.disable();
                                 reset_filter.store(true);
                                 break;
                             case Eigen::NoConvergence:
                                 log<NUClear::ERROR>(
                                     "Cholesky decomposition failed. Iterative procedure did not converge.");
+                                // Disable the sensor update loop to reset the filter post cholesky
                                 update_loop.disable();
                                 reset_filter.store(true);
                                 break;
@@ -635,11 +637,13 @@ namespace module::input {
                                 log<NUClear::ERROR>(
                                     "Cholesky decomposition failed. The inputs are invalid, or the algorithm has been "
                                     "improperly called. When assertions are enabled, such errors trigger an assert.");
+                                // Disable the sensor update loop to reset the filter post cholesky
                                 update_loop.disable();
                                 reset_filter.store(true);
                                 break;
                             default:
                                 log<NUClear::ERROR>("Cholesky decomposition failed. Some other reason.");
+                                // Disable the sensor update loop to reset the filter post cholesky
                                 update_loop.disable();
                                 reset_filter.store(true);
                                 break;

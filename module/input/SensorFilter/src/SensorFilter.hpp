@@ -118,6 +118,7 @@ namespace module::input {
         // Storage for previous gyroscope values
         Eigen::Vector3d theta;
 
+        // Handle for the sensor filter update loop, allows disabling new sensor updates when a reset event occurs
         ReactionHandle update_loop;
         std::atomic_bool reset_filter{true};
     };
