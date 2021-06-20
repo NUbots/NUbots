@@ -609,7 +609,7 @@ namespace module::input {
                                 // Store the current foot down state for next time
                                 previous_foot_down[side] = true;
                             }
-                            // This sides foot is down, but it didn't hit the ground in
+                            // This sides foot is down, but it didn't hit the ground this time step
                             else if (foot_down && prev_foot_down) {
                                 // Use stored Hwf and Htf to calculate Hwt
                                 const Eigen::Affine3d footlanding_Hwt = footlanding_Hwf[side] * Htf.inverse();
