@@ -10,7 +10,8 @@ nuclear_role(
   support::configuration::GlobalConfig
   support::configuration::SoccerConfig
   network::NUClearNet
-  support::NUsight
+  output::NetworkForwarder
+  output::Overview
   # Sensors
   input::Camera
   platform::darwin::HardwareIO
