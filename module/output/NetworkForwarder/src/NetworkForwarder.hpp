@@ -44,8 +44,11 @@ namespace module::output {
 
             auto handle = std::make_shared<Handle>();
 
+            // We put a buffer here so that under normal operation this reaction isn't impeded.
+            // However if because of the low priority other modules are taking all the thread time this module won't
+            // queue indefinitely killing all the ram in the system.
             handle->reaction =
-                on<Trigger<T>, Buffer<4>, Priority::LOW>()
+                on<Trigger<T>, Buffer<10>, Priority::LOW>()
                     .then(
                         type,
                         [this, type, handle](std::shared_ptr<const T> msg) {
