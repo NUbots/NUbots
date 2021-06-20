@@ -108,12 +108,6 @@ namespace module::input {
         bool leftDown   = false;
         bool middleDown = false;
 
-        Eigen::Vector3d bias;
-        Eigen::Vector4d initial_quat;
-        double Ki;
-        double Kp;
-        double ts;
-
         // Our sensor for foot down
         VirtualLoadSensor<float> load_sensor;
 

@@ -190,7 +190,7 @@ namespace module::behaviour::strategy {
                     auto mode = cfg_.forcePenaltyShootout ? GameMode::PENALTY_SHOOTOUT : gameState.data.mode.value;
 
                     // auto& phase = gameState.phase;
-                    // phase = Phase::INITIAL;
+
                     // TODO: fix ik kick
                     kickType = KickType::SCRIPTED;
                     // kickType = mode == GameMode::PENALTY_SHOOTOUT || cfg_.alwaysPowerKick ?

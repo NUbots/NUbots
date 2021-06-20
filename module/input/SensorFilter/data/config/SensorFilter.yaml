@@ -42,10 +42,3 @@ motion_filter:
       rotation: [0.1, 0.1, 0.1, 0.1] # Not very sure of rotation (QX, QY, QZ, QW)
       rotational_velocity: [0.1, 0.1, 0.1] # Fairly unsure about our rotational velocity
       gyroscope_bias: [1, 1, 1] # Very unsure about our gyroscope bias
-
-mahony:
-  Kp: 10.8279
-  Ki: 17.8421
-  ts: 0.0085
-  initial_quat: [1, 0, 0, 0]
-  bias: [0, 0, 0]
