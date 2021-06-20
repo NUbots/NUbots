@@ -38,7 +38,7 @@ namespace module::output {
     using VisionGoals      = message::vision::Goals;
     using OverviewMsg      = message::support::nusight::Overview;
 
-    Overview::Overview(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), config{} {
+    Overview::Overview(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("Overview.yaml").then([this](const Configuration& cfg) {
             // Use configuration here from file Overview.yaml
