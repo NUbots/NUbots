@@ -142,13 +142,13 @@ namespace module::platform {
         uint32_t num_cameras = 0;
 
         /// @brief When set, the next ActuatorRequests to webots will set the reset world command to end the simulation.
-        bool resetSimulationWorld = false;
+        bool reset_simulation_world = false;
 
         /// @brief When set, the next ActuatorRequests to webots will set the reset time command to end the simulation.
-        bool resetSimulationTime = false;
+        bool reset_simulation_time = false;
 
         /// @brief When set, the next ActuatorRequests to webots will set the terminate command to end the simulation.
-        bool terminateSimulation = false;
+        bool terminate_simulation = false;
 
     public:
         /// @brief Called by the powerplant to build and setup the webots reactor

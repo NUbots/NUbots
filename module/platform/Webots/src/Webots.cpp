@@ -400,13 +400,15 @@ namespace module::platform {
         on<Trigger<OptimisationCommand>>().then([this](const OptimisationCommand& msg) {
             if (msg.command == OptimisationCommand::CommandType::RESET_WORLD) {
                 // Set the reset world flag to send the reset command to webots with the next ActuatorRequests
-                resetSimulationWorld = true;
-            } else if (msg.command == OptimisationCommand::CommandType::RESET_TIME) {
+                reset_simulation_world = true;
+            }
+            else if (msg.command == OptimisationCommand::CommandType::RESET_TIME) {
                 // Set the reset flag to send the reset command to webots with the next ActuatorRequests
-                resetSimulationTime = true;
-            } else if (msg.command == OptimisationCommand::CommandType::TERMINATE) {
+                reset_simulation_time = true;
+            }
+            else if (msg.command == OptimisationCommand::CommandType::TERMINATE) {
                 // Set the termination flag to send the terminate command to webots with the next ActuatorRequests
-                terminateSimulation = true;
+                terminate_simulation = true;
             }
         });
     }
@@ -571,19 +573,21 @@ namespace module::platform {
                         }
                     }
 
-                    // Set the terminate command if the flag is set to terminate the simulator, used by the walk simulator
-                    if (terminateSimulation) {
+                    // Set the terminate command if the flag is set to terminate the simulator, used by the walk
+                    // simulator
+                    if (terminate_simulation) {
                         actuator_requests.optimisation_command.command = OptimisationCommand::CommandType::TERMINATE;
-                        terminateSimulation = false;
+                        terminate_simulation                           = false;
                     }
 
                     // Set the reset command if the flag is set to reset the simulator, used by the walk simulator
-                    if (resetSimulationWorld) {
+                    if (reset_simulation_world) {
                         actuator_requests.optimisation_command.command = OptimisationCommand::CommandType::RESET_WORLD;
-                        resetSimulationWorld = false;
-                    } else if (resetSimulationTime) {
+                        reset_simulation_world                         = false;
+                    }
+                    else if (reset_simulation_time) {
                         actuator_requests.optimisation_command.command = OptimisationCommand::CommandType::RESET_TIME;
-                        resetSimulationTime = false;
+                        reset_simulation_time                          = false;
                     }
 
                     // Serialise ActuatorRequests
