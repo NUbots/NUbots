@@ -5,21 +5,17 @@
 
 namespace module::output {
 
-class Overview : public NUClear::Reactor {
-private:
-    /// The configuration variables for this reactor
-    struct {
-    } config;
+    class Overview : public NUClear::Reactor {
 
-public:
-    /// @brief Called by the powerplant to build and setup the Overview reactor.
-    explicit Overview(std::unique_ptr<NUClear::Environment> environment);
+    public:
+        /// @brief Called by the powerplant to build and setup the Overview reactor.
+        explicit Overview(std::unique_ptr<NUClear::Environment> environment);
 
-private:
-    NUClear::clock::time_point last_camera_image;
-    NUClear::clock::time_point last_seen_ball;
-    NUClear::clock::time_point last_seen_goal;
-};
+    private:
+        NUClear::clock::time_point last_camera_image;
+        NUClear::clock::time_point last_seen_ball;
+        NUClear::clock::time_point last_seen_goal;
+    };
 
 }  // namespace module::output
 
