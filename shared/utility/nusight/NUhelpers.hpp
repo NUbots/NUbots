@@ -35,7 +35,7 @@ namespace utility::nusight {
         using message::support::nusight::DataPoint;
         using utility::type_traits::is_iterable;
 
-        inline void(DataPoint& /*dataPoint*/) {}
+        inline void buildGraph(DataPoint& /*dataPoint*/) {}
 
         template <typename First, typename... Remainder>
         typename std::enable_if<!is_iterable<First>::value>::type buildGraph(DataPoint& dataPoint,
