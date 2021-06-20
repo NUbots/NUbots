@@ -35,6 +35,9 @@ namespace utility::math::quaternion {
               typename QType  = std::remove_cv_t<std::remove_reference_t<decltype(*std::declval<Iterator>())>>,
               typename Scalar = typename QType::Scalar>
     inline QType mean(const Iterator& begin, const Iterator& end) {
+        if (std::distance(begin, end) == 0) {
+            return QType::Identity();
+        }
         // Initialise our accumulator matrix
         Eigen::Matrix<Scalar, 4, 4> A = Eigen::Matrix<Scalar, 4, 4>::Zero();
 
