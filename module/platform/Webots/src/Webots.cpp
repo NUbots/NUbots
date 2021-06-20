@@ -867,18 +867,11 @@ namespace module::platform {
         }
 
         // Create and emit the OptimisationRobotPosition message used by the walk optimiser
-        if (!(sensor_measurements.robot_position == OptimisationRobotPosition())) {
-            std::cout << "\n\n\ngot new robot position, emitting to the optimiser" << std::endl;
+        auto robotPosition     = std::make_unique<OptimisationRobotPosition>();
+        robotPosition->value.X = sensor_measurements.robot_position.value.X;
+        robotPosition->value.Y = sensor_measurements.robot_position.value.Y;
+        robotPosition->value.Z = sensor_measurements.robot_position.value.Z;
 
-            auto robotPosition = std::make_unique<OptimisationRobotPosition>();
-
-            robotPosition->value.X = sensor_measurements.robot_position.value.X;
-            robotPosition->value.Y = sensor_measurements.robot_position.value.Y;
-            robotPosition->value.Z = sensor_measurements.robot_position.value.Z;
-
-            emit(robotPosition);
-        } else {
-            std::cout << "\n\n\nrobot position is the default" << std::endl;
-        }
+        emit(robotPosition);
     }
 }  // namespace module::platform
