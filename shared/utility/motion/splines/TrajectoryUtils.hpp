@@ -32,13 +32,14 @@ namespace utility::motion::splines {
             FOOT_AXIS_Y,
             FOOT_AXIS_Z
         };
-        Value value;
+        Value value = Value::UNKNOWN;
+
 
         // Constructors
-        TrajectoryTypes() : value(Value::UNKNOWN) {}
-        TrajectoryTypes(uint8_t const& value) : value(static_cast<Value>(value)) {}
-        TrajectoryTypes(Value const& value) : value(value) {}
-        TrajectoryTypes(std::string const& str) : value(Value::UNKNOWN) {
+        constexpr TrajectoryTypes() = default;
+        constexpr TrajectoryTypes(uint8_t const& value_) : value(static_cast<Value>(value_)) {}
+        constexpr TrajectoryTypes(Value const& value_) : value(value_) {}
+        constexpr TrajectoryTypes(std::string const& str) {
             if (str == "IS_DOUBLE_SUPPORT") {
                 value = Value::IS_DOUBLE_SUPPORT;
             }
@@ -87,52 +88,52 @@ namespace utility::motion::splines {
         }
 
         // Operators
-        bool operator<(TrajectoryTypes const& other) const {
+        [[nodiscard]] constexpr bool operator<(TrajectoryTypes const& other) const {
             return value < other.value;
         }
-        bool operator>(TrajectoryTypes const& other) const {
+        [[nodiscard]] constexpr bool operator>(TrajectoryTypes const& other) const {
             return value > other.value;
         }
-        bool operator<=(TrajectoryTypes const& other) const {
+        [[nodiscard]] constexpr bool operator<=(TrajectoryTypes const& other) const {
             return value <= other.value;
         }
-        bool operator>=(TrajectoryTypes const& other) const {
+        [[nodiscard]] constexpr bool operator>=(TrajectoryTypes const& other) const {
             return value >= other.value;
         }
-        bool operator==(TrajectoryTypes const& other) const {
+        [[nodiscard]] constexpr bool operator==(TrajectoryTypes const& other) const {
             return value == other.value;
         }
-        bool operator!=(TrajectoryTypes const& other) const {
+        [[nodiscard]] constexpr bool operator!=(TrajectoryTypes const& other) const {
             return value != other.value;
         }
-        bool operator<(TrajectoryTypes::Value const& other) const {
+        [[nodiscard]] constexpr bool operator<(TrajectoryTypes::Value const& other) const {
             return value < other;
         }
-        bool operator>(TrajectoryTypes::Value const& other) const {
+        [[nodiscard]] constexpr bool operator>(TrajectoryTypes::Value const& other) const {
             return value > other;
         }
-        bool operator<=(TrajectoryTypes::Value const& other) const {
+        [[nodiscard]] constexpr bool operator<=(TrajectoryTypes::Value const& other) const {
             return value <= other;
         }
-        bool operator>=(TrajectoryTypes::Value const& other) const {
+        [[nodiscard]] constexpr bool operator>=(TrajectoryTypes::Value const& other) const {
             return value >= other;
         }
-        bool operator==(TrajectoryTypes::Value const& other) const {
+        [[nodiscard]] constexpr bool operator==(TrajectoryTypes::Value const& other) const {
             return value == other;
         }
-        bool operator!=(TrajectoryTypes::Value const& other) const {
+        [[nodiscard]] constexpr bool operator!=(TrajectoryTypes::Value const& other) const {
             return value != other;
         }
 
         // Conversions
-        operator Value() const {
+        [[nodiscard]] constexpr operator Value() const {
             return value;
         }
-        operator uint8_t() const {
+        [[nodiscard]] constexpr operator uint8_t() const {
             return value;
         }
 
-        operator std::string() const {
+        [[nodiscard]] inline operator std::string() const {
             switch (value) {
                 case Value::IS_DOUBLE_SUPPORT: return "IS_DOUBLE_SUPPORT";
                 case Value::IS_LEFT_SUPPORT_FOOT: return "IS_LEFT_SUPPORT_FOOT";
@@ -194,7 +195,7 @@ namespace utility::motion::splines {
      * Compute from given spline container trajectory Cartesian trunk and foot position/velocity/acceleration
      * and assign it to given vector
      */
-    [[nodiscard]] inline Vector3fQuadruple trajectoriesTrunkFootPos(const float t, const Trajectories& traj) {
+    [[nodiscard]] inline Vector3fQuadruple trajectoriesTrunkFootPos(const float& t, const Trajectories& traj) {
         // Compute Cartesian positions
         const auto trunkPos  = Eigen::Vector3f(traj.get(TrajectoryTypes::TRUNK_POS_X).pos(t),
                                               traj.get(TrajectoryTypes::TRUNK_POS_Y).pos(t),
@@ -211,7 +212,7 @@ namespace utility::motion::splines {
         return {trunkPos, trunkAxis, footPos, footAxis};
     }
 
-    [[nodiscard]] inline Vector3fQuadruple trajectoriesTrunkFootVel(const float t, const Trajectories& traj) {
+    [[nodiscard]] inline Vector3fQuadruple trajectoriesTrunkFootVel(const float& t, const Trajectories& traj) {
         // Compute Cartesian velocities
         const auto trunkPosVel  = Eigen::Vector3f(traj.get(TrajectoryTypes::TRUNK_POS_X).vel(t),
                                                  traj.get(TrajectoryTypes::TRUNK_POS_Y).vel(t),
@@ -228,7 +229,7 @@ namespace utility::motion::splines {
         return {trunkPosVel, trunkAxisVel, footPosVel, footAxisVel};
     }
 
-    [[nodiscard]] inline Vector3fQuadruple trajectoriesTrunkFootAcc(const float t, const Trajectories& traj) {
+    [[nodiscard]] inline Vector3fQuadruple trajectoriesTrunkFootAcc(const float& t, const Trajectories& traj) {
         // Compute Cartesian accelerations
         const auto trunkPosAcc  = Eigen::Vector3f(traj.get(TrajectoryTypes::TRUNK_POS_X).acc(t),
                                                  traj.get(TrajectoryTypes::TRUNK_POS_Y).acc(t),
@@ -252,7 +253,8 @@ namespace utility::motion::splines {
      * @param traj The set of trajectories which are being evaluated
      * @return std::pair<bool, bool> {isDoubleSupportFoot, isLeftSupportFoot}, as evaluated at time t
      */
-    [[nodiscard]] inline std::pair<bool, bool> trajectoriesSupportFootState(float t, const Trajectories& traj) {
+    [[nodiscard]] constexpr inline std::pair<bool, bool> trajectoriesSupportFootState(const float& t,
+                                                                                      const Trajectories& traj) {
         // Compute support foot state
         return {traj.get(TrajectoryTypes::IS_DOUBLE_SUPPORT).pos(t) >= 0.5f,
                 traj.get(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT).pos(t) >= 0.5f};
