@@ -1,19 +1,23 @@
 #include "NSGA2Evaluator.hpp"
 
+#include <fmt/format.h>
+#include <fmt/ostream.h>
 #include <yaml-cpp/yaml.h>
 
 #include "extension/Configuration.hpp"
 #include "extension/Script.hpp"
 
-#include "message/behaviour/MotionCommand.hpp"
+#include "message/motion/WalkCommand.hpp"
 #include "message/platform/RawSensors.hpp"
-#include "message/platform/webots/messages.hpp"
 #include "message/platform/webots/WebotsTimeUpdate.hpp"
+#include "message/platform/webots/messages.hpp"
 #include "message/support/optimisation/NSGA2EvaluationRequest.hpp"
 #include "message/support/optimisation/NSGA2FitnessScores.hpp"
 #include "message/support/optimisation/NSGA2Terminate.hpp"
 
-#include "utility/behaviour/MotionCommand.hpp"
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module {
@@ -23,7 +27,10 @@ namespace module {
             using extension::Configuration;
             using extension::ExecuteScriptByName;
 
-            using message::behaviour::MotionCommand;
+            using message::motion::DisableWalkEngineCommand;
+            using message::motion::EnableWalkEngineCommand;
+            using message::motion::StopCommand;
+            using message::motion::WalkCommand;
             using message::platform::RawSensors;
             using message::platform::webots::OptimisationCommand;
             using message::platform::webots::OptimisationRobotPosition;
@@ -32,10 +39,33 @@ namespace module {
             using message::support::optimisation::NSGA2FitnessScores;
             using message::support::optimisation::NSGA2Terminate;
 
+            using utility::behaviour::RegisterAction;
+            using utility::input::LimbID;
+            using utility::input::ServoID;
             using utility::support::Expression;
 
             NSGA2Evaluator::NSGA2Evaluator(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
+
+                emit<Scope::DIRECT>(std::make_unique<RegisterAction>(RegisterAction{
+                    subsumptionId,
+                    "NSGA2 Evaluator",
+                    {std::pair<float, std::set<LimbID>>(
+                        1,
+                        {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
+                    [this](const std::set<LimbID>& given_limbs) {
+                        if (given_limbs.find(LimbID::LEFT_LEG) != given_limbs.end()) {
+                            // Enable the walk engine.},
+                            emit<Scope::DIRECT>(std::make_unique<EnableWalkEngineCommand>(subsumptionId));
+                        }
+                    },
+                    [this](const std::set<LimbID>& taken_limbs) {
+                        if (taken_limbs.find(LimbID::LEFT_LEG) != taken_limbs.end()) {
+                            // Shut down the walk engine, since we don't need it right now.
+                            emit<Scope::DIRECT>(std::make_unique<DisableWalkEngineCommand>(subsumptionId));
+                        }
+                    },
+                    [this](const std::set<ServoID>&) {}}));
 
                 // Read the NSGA2Evaluator.yaml config file and set the walk command parameters
                 on<Configuration>("NSGA2Evaluator.yaml").then([this](const Configuration& config) {
@@ -90,12 +120,6 @@ namespace module {
 
                     // Ensure we are not in the terminating state
                     terminating = false;
-
-                    // Create and send the walk command, which will be evaluated when we get simulation data
-                    Eigen::Affine2d walk_command;
-                    walk_command.linear()      = Eigen::Rotation2Dd(walk_command_rotation).toRotationMatrix();
-                    walk_command.translation() = walk_command_velocity;
-                    emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(walk_command)));
                 });
 
                 on<Trigger<RawSensors>, Single>().then([this](const RawSensors& sensors) {
@@ -161,6 +185,18 @@ namespace module {
                         emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "Stand.yaml"));
                         ResetWorldTime();
                         evaluating = true;
+
+                        // Create and send the walk command, which will be evaluated when we get simulation data
+                        // Eigen::Affine2d walk_command;
+                        // walk_command.linear()      = Eigen::Rotation2Dd(walk_command_rotation).toRotationMatrix();
+                        // walk_command.translation() = walk_command_velocity;
+                        log<NUClear::INFO>(fmt::format("Trialling with walk command: ({}) {}",
+                                                       walk_command_velocity.transpose(),
+                                                       walk_command_rotation));
+                        emit(std::make_unique<WalkCommand>(subsumptionId,
+                                                           Eigen::Vector3d(walk_command_velocity.x(),
+                                                                           walk_command_velocity.y(),
+                                                                           walk_command_rotation)));
                     }
 
                     // If we've been terminating for at least 2 seconds, but are not finished, clear our terminating
@@ -243,7 +279,7 @@ namespace module {
 
                 // Reset the world and make the robot stand still for the next evaluation
                 ResetWorld();
-                emit(std::make_unique<MotionCommand>(utility::behaviour::StandStill()));
+                emit(std::make_unique<StopCommand>(subsumptionId));
             }
 
             void NSGA2Evaluator::CalculateFitness() {

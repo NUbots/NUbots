@@ -12,10 +12,6 @@ nuclear_role(
   input::SensorFilter
   platform::Webots
   behaviour::Controller
-  behaviour::skills::DirectWalkController
-  behaviour::planning::SimpleWalkPathPlanner
-  # behaviour::skills::KickScript
-  # behaviour::planning::KickPlanner
   behaviour::skills::Stand
   motion::ScriptEngine
   motion::QuinticWalk
