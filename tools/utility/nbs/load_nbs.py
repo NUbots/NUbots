@@ -12,7 +12,7 @@ from .protobuf_types import MessageTypes
 
 
 def _build_index(mem, show_progress=False):
-    # Returns a list of tuples in the form (type_hash, subtype, timestamp, offset)
+    # Returns a list of tuples in the form (type_hash, id, timestamp, offset)
     index = []
 
     progress = (
@@ -41,8 +41,8 @@ def _build_index(mem, show_progress=False):
             # Skip to the payload
             offset += 20
 
-            # If this hash matches to a type with an id, load that as the subtype
-            subtype = 0
+            # If this hash matches to a type with an id, load that as the id
+            id = 0
             if type_hash in MessageTypes:
                 t = MessageTypes[type_hash]
 
@@ -54,13 +54,13 @@ def _build_index(mem, show_progress=False):
                 else:
                     timestamp *= 1000
 
-                # If we have a id field, we can use them as the subtype
+                # If we have a id field, we can use them as the id
                 if hasattr(t.type, "id"):
                     m_id = t.type.FromString(mem[offset : offset + size - 16]).id
                     if isinstance(m_id, int):
-                        subtype = m_id
+                        id = m_id
 
-            index.append((type_hash, subtype, timestamp, offset - 23, size + 7))
+            index.append((type_hash, id, timestamp, offset - 23, size + 7))
 
             # Skip ahead over the rest of the packet
             offset += size - 16
@@ -111,7 +111,7 @@ def load_nbs(*paths, types=None, show_progress=False):
 
             with gzip.open(index_path, "wb") as idx:
                 for v in index:
-                    # Write the type_hash, subtype, timestamp and offset
+                    # Write the type_hash, id, timestamp and offset
                     idx.write(struct.pack("<QIQQI", v[0], v[1], v[2], v[3], v[4]))
 
         # Load in the index file
@@ -121,7 +121,7 @@ def load_nbs(*paths, types=None, show_progress=False):
                     idx.read(),
                     dtype=[
                         ("type_hash", "u8"),
-                        ("subtype", "u4"),
+                        ("id", "u4"),
                         ("timestamp", "u8"),
                         ("offset", "u8"),
                         ("size", "u4"),
@@ -132,7 +132,7 @@ def load_nbs(*paths, types=None, show_progress=False):
                     read_index.size,
                     dtype=[
                         ("type_hash", "u8"),
-                        ("subtype", "u4"),
+                        ("id", "u4"),
                         ("timestamp", "u8"),
                         ("fileno", "u4"),
                         ("offset", "u8"),
@@ -140,7 +140,7 @@ def load_nbs(*paths, types=None, show_progress=False):
                     ],
                 )
 
-                index[["type_hash", "subtype", "timestamp", "offset", "size"]] = read_index
+                index[["type_hash", "id", "timestamp", "offset", "size"]] = read_index
                 index["timestamp"] = index["timestamp"] * 1e-3  # Convert from nano to micro seconds
                 index["fileno"] = fileno
                 index["size"] += np.full(index["size"].size, -23, dtype=("u4"))
@@ -160,7 +160,7 @@ def load_nbs(*paths, types=None, show_progress=False):
         elements = []
         for t in types:
             if isinstance(t, tuple):
-                elements.append(indexes[["type_hash", "subtype"]] == [MessageTypes[t[0]].type_hash, t[1]])
+                elements.append(indexes[["type_hash", "id"]] == [MessageTypes[t[0]].type_hash, t[1]])
             else:
                 elements.append(indexes["type_hash"] == MessageTypes[t].type_hash)
         indexes = indexes[np.any(np.stack(elements, axis=-1), axis=-1)]
