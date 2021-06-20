@@ -63,7 +63,9 @@ namespace module::localisation {
 
         // Local variables for this model. Set their values from config file
         // Number of reset particles
-        int n_rogues;
+        int n_rogues = 0;
+        // Number of particles
+        int n_particles = 100;
         // Range of reset particles
         Eigen::Matrix<Scalar, 3, 1> resetRange;
         // Diagonal for 3x3 noise matrix (which is diagonal)
@@ -142,6 +144,10 @@ namespace module::localisation {
         }
         Eigen::Matrix<Scalar, Eigen::Dynamic, 1> getRogueRange() const {
             return resetRange;
+        }
+
+        int getParticleCount() {
+            return n_particles;
         }
 
         Eigen::Matrix<Scalar, 3, 1> getCylindricalPostCamSpaceNormal(

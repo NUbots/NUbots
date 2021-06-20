@@ -52,7 +52,10 @@ namespace module::localisation {
 
         // Local variables for this model. Set their values from config file
         // Number of reset particles
-        int n_rogues;
+        int n_rogues = 0;
+
+        // Number of particles
+        int n_particles = 100;
         // Range of reset particles
         Eigen::Matrix<Scalar, 2, 1> resetRange;
         // Diagonal noise matrix
@@ -92,6 +95,10 @@ namespace module::localisation {
         }
         Eigen::Matrix<Scalar, 2, 1> getRogueRange() const {
             return resetRange;
+        }
+
+        int getParticleCount() {
+            return n_particles;
         }
     };
 }  // namespace module::localisation

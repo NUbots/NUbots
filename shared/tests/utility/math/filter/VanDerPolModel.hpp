@@ -43,6 +43,8 @@ namespace shared::tests {
         int n_rogues         = 0;
         StateVec reset_range = StateVec::Zero();
 
+        int n_particles = 100;
+
         StateVec time(const StateVec& state, const Scalar& deltaT) {
             StateVec new_state(state[X2], (Scalar(1) - state[X1] * state[X1]) * state[X2] - state[X1]);
             return state + new_state * deltaT;
@@ -72,6 +74,10 @@ namespace shared::tests {
         }
         StateVec getRogueRange() const {
             return reset_range;
+        }
+
+        int getParticleCount() {
+            return n_particles;
         }
     };
 }  // namespace shared::tests
