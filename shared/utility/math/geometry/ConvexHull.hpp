@@ -246,7 +246,7 @@ namespace utility::math::geometry {
             Eigen::Vector2f p1       = project_vector(rays.col(*std::prev(hull_indices.end(), 1)));
             const Eigen::Vector2f p2 = project_vector(rays.col(*it));
             // Triple does not make an clockwise turn, replace the last element in the list
-            while ((hull_indices.size() > 2) && (turn_direction(p0, p1, p2) <= 0)) {
+            while ((hull_indices.size() > 1) && (turn_direction(p0, p1, p2) <= 0)) {
                 // Remove the offending point from the convex hull
                 hull_indices.pop_back();
                 p0 = project_vector(rays.col(*std::prev(hull_indices.end(), 2)));
