@@ -30,7 +30,7 @@
 #include "message/localisation/ResetRobotHypotheses.hpp"
 #include "message/motion/BodySide.hpp"
 #include "message/motion/GetupCommand.hpp"
-#include "message/platform/darwin/DarwinSensors.hpp"
+#include "message/platform/RawSensors.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/Ball.hpp"
 #include "message/vision/Goal.hpp"
@@ -65,8 +65,9 @@ namespace module::behaviour::strategy {
     using message::motion::BodySide;
     using message::motion::ExecuteGetup;
     using message::motion::KillGetup;
-    using message::platform::darwin::ButtonLeftDown;
-    using message::platform::darwin::ButtonMiddleDown;
+    using message::platform::ButtonLeftDown;
+    using message::platform::ButtonMiddleDown;
+    using message::platform::ResetRawSensors;
     using message::support::FieldDescription;
     using VisionBalls = message::vision::Balls;
     using VisionGoals = message::vision::Goals;
@@ -139,6 +140,7 @@ namespace module::behaviour::strategy {
         on<Trigger<KillGetup>>().then([this] { isGettingUp = false; });
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& selfPenalisation) {
+            emit(std::make_unique<ResetRawSensors>());
             if (selfPenalisation.context == GameEvents::Context::SELF) {
                 selfPenalised = true;
             }
@@ -226,6 +228,7 @@ namespace module::behaviour::strategy {
                                 find({FieldTarget(FieldTarget::Target::BALL)});
                                 if (mode == GameMode::PENALTY_SHOOTOUT) {
                                     penaltyShootoutLocalisationReset(fieldDescription);
+                                    emit(std::make_unique<ResetRawSensors>());
                                 }
                                 currentState = Behaviour::State::SET;
                             }
@@ -417,14 +420,14 @@ namespace module::behaviour::strategy {
         for (auto& fieldObject : fieldObjects) {
             switch (fieldObject.target.value) {
                 case FieldTarget::Target::SELF: {
-                    soccerObjectPriority->goal       = 1;
-                    soccerObjectPriority->searchType = SearchType::GOAL_SEARCH;
+                    soccerObjectPriority->goal        = 1;
+                    soccerObjectPriority->search_type = SearchType::GOAL_SEARCH;
 
                     break;
                 }
                 case FieldTarget::Target::BALL: {
-                    soccerObjectPriority->ball       = 1;
-                    soccerObjectPriority->searchType = SearchType::LOST;
+                    soccerObjectPriority->ball        = 1;
+                    soccerObjectPriority->search_type = SearchType::LOST;
                     break;
                 }
                 default: throw std::runtime_error("Soccer strategy attempted to find a bad object");
@@ -494,7 +497,7 @@ namespace module::behaviour::strategy {
             cmd.translation() = Eigen::Vector2d::Zero();
             motionCommand     = std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(cmd));
             if (std::fabs(fieldBearing) < cfg_.goalie_side_walk_angle_threshold) {
-                motionCommand->walkCommand.y() = translationSpeed;
+                motionCommand->walk_command.y() = translationSpeed;
             }
         }
         else {

@@ -28,12 +28,12 @@
 
 #include "message/input/Sensors.hpp"
 #include "message/motion/ServoTarget.hpp"
-#include "message/platform/darwin/DarwinSensors.hpp"
+#include "message/platform/RawSensors.hpp"
 
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 #include "utility/nusight/NUhelpers.hpp"
-#include "utility/platform/darwin/DarwinSensors.hpp"
+#include "utility/platform/RawSensors.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::platform::darwin {
@@ -42,7 +42,8 @@ namespace module::platform::darwin {
 
     using message::input::Sensors;
     using message::motion::ServoTarget;
-    using message::platform::darwin::DarwinSensors;
+    using message::motion::ServoTargets;
+    using message::platform::RawSensors;
 
     using utility::input::ServoID;
     using utility::nusight::graph;
@@ -55,18 +56,18 @@ namespace module::platform::darwin {
          CM740 Data
          */
         // Read our Error code
-        sensors.cm740ErrorFlags = 0;
+        sensors.platform_error_flags = 0;
 
         // LED Panel
-        sensors.ledPanel.led2 = 0;
-        sensors.ledPanel.led3 = 0;
-        sensors.ledPanel.led4 = 0;
+        sensors.led_panel.led2 = 0;
+        sensors.led_panel.led3 = 0;
+        sensors.led_panel.led4 = 0;
 
         // Head LED
-        sensors.headLED.RGB = 0;
+        sensors.head_led.RGB = 0;
 
         // Head LED
-        sensors.eyeLED.RGB = 0;
+        sensors.eye_led.RGB = 0;
 
         // Buttons
         sensors.buttons.left   = 0;
@@ -86,7 +87,7 @@ namespace module::platform::darwin {
 
         // Right Sensor
         // Error
-        sensors.fsr.right.errorFlags = 0;
+        sensors.fsr.right.error_flags = 0;
 
         // Sensors
         sensors.fsr.right.fsr1 = 1;
@@ -95,12 +96,12 @@ namespace module::platform::darwin {
         sensors.fsr.right.fsr4 = 1;
 
         // Centre
-        sensors.fsr.right.centreX = 0;
-        sensors.fsr.right.centreY = 0;
+        sensors.fsr.right.centre_x = 0;
+        sensors.fsr.right.centre_y = 0;
 
         // Left Sensor
         // Error
-        sensors.fsr.left.errorFlags = 0;
+        sensors.fsr.left.error_flags = 0;
 
         // Sensors
         sensors.fsr.left.fsr1 = 1;
@@ -109,8 +110,8 @@ namespace module::platform::darwin {
         sensors.fsr.left.fsr4 = 1;
 
         // Centre
-        sensors.fsr.left.centreX = 0;
-        sensors.fsr.left.centreY = 0;
+        sensors.fsr.left.centre_x = 0;
+        sensors.fsr.left.centre_y = 0;
 
         /*
          Servos
@@ -118,30 +119,30 @@ namespace module::platform::darwin {
 
         for (int i = 0; i < 20; ++i) {
             // Get a reference to the servo we are populating
-            DarwinSensors::Servo& servo = utility::platform::darwin::getDarwinServo(i, sensors);
+            RawSensors::Servo& servo = utility::platform::getRawServo(i, sensors);
 
             // Error code
-            servo.errorFlags = 0;
+            servo.error_flags = 0;
 
             // Booleans
-            servo.torqueEnabled = true;
+            servo.torque_enabled = true;
 
             // Gain
-            servo.dGain = 0;
-            servo.iGain = 0;
-            servo.pGain = 0;
+            servo.d_gain = 0;
+            servo.i_gain = 0;
+            servo.p_gain = 0;
 
             // Torque
             servo.torque = 0;
 
             // Targets
-            servo.goalPosition = 0;
-            servo.movingSpeed  = M_PI_4;
+            servo.goal_position = 0;
+            servo.moving_speed  = M_PI_4;
 
             // Present Data
-            servo.presentPosition = 0;
-            servo.presentSpeed    = 0;
-            servo.load            = 0;
+            servo.present_position = 0;
+            servo.present_speed    = 0;
+            servo.load             = 0;
 
             // Diagnostic Information
             servo.voltage     = 0;
@@ -160,15 +161,15 @@ namespace module::platform::darwin {
                 noise.gyroscope.y = config["noise"]["gyroscope"]["y"].as<float>();
                 noise.gyroscope.z = config["noise"]["gyroscope"]["z"].as<float>();
 
-                bodyTilt = config["bodyTilt"].as<Expression>();
+                bodyTilt = config["body_tilt"].as<Expression>();
             });
 
-        on<Trigger<DarwinSensors::Gyroscope>>().then("Receive Simulated Gyroscope",
-                                                     [this](const DarwinSensors::Gyroscope& gyro) {
-                                                         std::lock_guard<std::mutex> lock(gyroQueueMutex);
-                                                         DarwinSensors::Gyroscope tmpGyro = gyro;
-                                                         gyroQueue.push(tmpGyro);
-                                                     });
+        on<Trigger<RawSensors::Gyroscope>>().then("Receive Simulated Gyroscope",
+                                                  [this](const RawSensors::Gyroscope& gyro) {
+                                                      std::lock_guard<std::mutex> lock(gyroQueueMutex);
+                                                      RawSensors::Gyroscope tmpGyro = gyro;
+                                                      gyroQueue.push(tmpGyro);
+                                                  });
 
 
         on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Optional<With<Sensors>>, Single>().then(
@@ -194,26 +195,28 @@ namespace module::platform::darwin {
                 }
 
                 for (int i = 0; i < 20; ++i) {
-                    auto& servo       = utility::platform::darwin::getDarwinServo(i, sensors);
-                    float movingSpeed = servo.movingSpeed == 0 ? 0.1 : servo.movingSpeed / UPDATE_FREQUENCY;
+                    auto& servo       = utility::platform::getRawServo(i, sensors);
+                    float movingSpeed = servo.moving_speed == 0 ? 0.1 : servo.moving_speed / UPDATE_FREQUENCY;
                     movingSpeed       = movingSpeed > 0.1 ? 0.1 : movingSpeed;
 
 
-                    if (std::abs(servo.presentPosition - servo.goalPosition) < movingSpeed) {
-                        servo.presentPosition = servo.goalPosition;
+                    if (std::abs(servo.present_position - servo.goal_position) < movingSpeed) {
+                        servo.present_position = servo.goal_position;
                     }
                     else {
-                        Eigen::Vector3d present(std::cos(servo.presentPosition), std::sin(servo.presentPosition), 0.0);
-                        Eigen::Vector3d goal(std::cos(servo.goalPosition), std::sin(servo.goalPosition), 0.0);
+                        Eigen::Vector3d present(std::cos(servo.present_position),
+                                                std::sin(servo.present_position),
+                                                0.0);
+                        Eigen::Vector3d goal(std::cos(servo.goal_position), std::sin(servo.goal_position), 0.0);
 
                         Eigen::Vector3d cross = present.cross(goal);
                         if (cross.z() > 0) {
-                            servo.presentPosition =
-                                utility::math::angle::normalizeAngle(servo.presentPosition + movingSpeed);
+                            servo.present_position =
+                                utility::math::angle::normalizeAngle(servo.present_position + movingSpeed);
                         }
                         else {
-                            servo.presentPosition =
-                                utility::math::angle::normalizeAngle(servo.presentPosition - movingSpeed);
+                            servo.present_position =
+                                utility::math::angle::normalizeAngle(servo.present_position - movingSpeed);
                         }
                     }
                 }
@@ -226,7 +229,7 @@ namespace module::platform::darwin {
                 /* mutext scope */ {
                     std::lock_guard<std::mutex> lock(gyroQueueMutex);
                     while (!gyroQueue.empty()) {
-                        DarwinSensors::Gyroscope g = gyroQueue.front();
+                        RawSensors::Gyroscope g = gyroQueue.front();
                         sumGyro += Eigen::Vector3d(g.x, g.y, g.z);
 
                         std::lock_guard<std::mutex> lock(gyroQueueMutex);
@@ -244,7 +247,7 @@ namespace module::platform::darwin {
                 sensors.timestamp       = NUClear::clock::now();
 
                 // Add some noise so that sensor fusion doesnt converge to a singularity
-                auto sensors_message = std::make_unique<DarwinSensors>(sensors);
+                auto sensors_message = std::make_unique<RawSensors>(sensors);
                 addNoise(sensors_message);
 
                 // Send our nicely computed sensor data out to the world
@@ -252,13 +255,13 @@ namespace module::platform::darwin {
             });
 
         // This trigger writes the servo positions to the hardware
-        on<Trigger<std::vector<ServoTarget>>>().then([this](const std::vector<ServoTarget>& commands) {
-            for (auto& command : commands) {
+        on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
+            for (auto& command : commands.targets) {
 
                 // Calculate our moving speed
                 float diff = utility::math::angle::difference(
                     command.position,
-                    utility::platform::darwin::getDarwinServo(command.id, sensors).presentPosition);
+                    utility::platform::getRawServo(command.id, sensors).present_position);
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
                 float speed;
@@ -270,18 +273,18 @@ namespace module::platform::darwin {
                 }
 
                 // Set our variables
-                auto& servo        = utility::platform::darwin::getDarwinServo(command.id, sensors);
-                servo.movingSpeed  = speed;
-                servo.goalPosition = utility::math::angle::normalizeAngle(command.position);
+                auto& servo         = utility::platform::getRawServo(command.id, sensors);
+                servo.moving_speed  = speed;
+                servo.goal_position = utility::math::angle::normalizeAngle(command.position);
             }
         });
 
         on<Trigger<ServoTarget>>().then([this](const ServoTarget command) {
-            auto commandList = std::make_unique<std::vector<ServoTarget>>();
-            commandList->push_back(command);
+            auto commandList = std::make_unique<ServoTargets>();
+            commandList->targets.push_back(command);
 
             // Emit it so it's captured by the reaction above
-            emit<Scope::DIRECT>(std::move(commandList));
+            emit<Scope::DIRECT>(commandList);
         });
     }
 
@@ -289,7 +292,7 @@ namespace module::platform::darwin {
         return rand() / float(RAND_MAX) - 0.5f;
     }
 
-    void HardwareSimulator::addNoise(std::unique_ptr<DarwinSensors>& sensors) {
+    void HardwareSimulator::addNoise(std::unique_ptr<RawSensors>& sensors) {
         // TODO: Use a more standard c++ random generator.
         sensors->accelerometer.x += noise.accelerometer.x * centered_noise();
         sensors->accelerometer.y += noise.accelerometer.y * centered_noise();
@@ -308,11 +311,11 @@ namespace module::platform::darwin {
         sensors.fsr.right.fsr4 = down ? 1 : 0;
 
         // Set the knee loads to something huge to be foot down
-        utility::platform::darwin::getDarwinServo(ServoID::R_KNEE, sensors).load = down ? 1.0 : -1.0;
+        utility::platform::getRawServo(ServoID::R_KNEE, sensors).load = down ? 1.0 : -1.0;
 
         // Centre
-        sensors.fsr.right.centreX = down ? 1 : std::numeric_limits<double>::quiet_NaN();
-        sensors.fsr.right.centreY = down ? 1 : std::numeric_limits<double>::quiet_NaN();
+        sensors.fsr.right.centre_x = down ? 1 : std::numeric_limits<double>::quiet_NaN();
+        sensors.fsr.right.centre_y = down ? 1 : std::numeric_limits<double>::quiet_NaN();
     }
 
     void HardwareSimulator::setLeftFootDown(bool down) {
@@ -323,10 +326,10 @@ namespace module::platform::darwin {
         sensors.fsr.left.fsr4 = down ? 1 : 0;
 
         // Set the knee loads to something huge to be foot down
-        utility::platform::darwin::getDarwinServo(ServoID::L_KNEE, sensors).load = down ? 1.0 : -1.0;
+        utility::platform::getRawServo(ServoID::L_KNEE, sensors).load = down ? 1.0 : -1.0;
 
         // Centre
-        sensors.fsr.left.centreX = down ? 1 : std::numeric_limits<double>::quiet_NaN();
-        sensors.fsr.left.centreY = down ? 1 : std::numeric_limits<double>::quiet_NaN();
+        sensors.fsr.left.centre_x = down ? 1 : std::numeric_limits<double>::quiet_NaN();
+        sensors.fsr.left.centre_y = down ? 1 : std::numeric_limits<double>::quiet_NaN();
     }
 }  // namespace module::platform::darwin

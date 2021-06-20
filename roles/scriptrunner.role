@@ -11,6 +11,6 @@ nuclear_role(
   behaviour::Controller
   motion::ScriptEngine
   behaviour::tools::ScriptRunner
-  platform::darwin::SensorFilter
+  input::SensorFilter
   output::NetworkForwarder
 )
