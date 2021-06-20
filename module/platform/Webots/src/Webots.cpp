@@ -645,10 +645,10 @@ namespace module::platform {
         current_real_time = sensor_measurements.real_time;
 
         // Emit the webots time update
-        auto time_update_msg = std::make_unique<WebotsTimeUpdate>();
-        time_update_msg->sim_time = current_sim_time;
-        time_update_msg->real_time = current_real_time;
-        time_update_msg->sim_delta = sim_delta;
+        auto time_update_msg        = std::make_unique<WebotsTimeUpdate>();
+        time_update_msg->sim_time   = current_sim_time;
+        time_update_msg->real_time  = current_real_time;
+        time_update_msg->sim_delta  = sim_delta;
         time_update_msg->real_delta = real_delta;
         emit(time_update_msg);
 
