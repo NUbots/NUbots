@@ -58,14 +58,14 @@ namespace module::output {
                             auto now = NUClear::clock::now();
 
                             // Loop through all the targets that are interested in this type
-                            for (const auto& target_handle : handle->target_handles) {
-                                target = handle.first();
+                            for (auto& target_handle : handle->targets) {
+                                const auto& target = target_handle.first;
+                                auto& h            = target_handle.second;
 
-                                if (target_handle->last_message.count(id) == 0
-                                    || duration_cast<duration<double>>(now - target_handle->last_message[id]).count()
-                                           > target_handle->period) {
+                                if (h.last_message.count(id) == 0
+                                    || duration_cast<duration<double>>(now - h.last_message[id]).count() > h.period) {
                                     powerplant.emit_shared<Scope::NETWORK>(std::move(msg), target, false);
-                                    target_handle->last_message[id] = now;
+                                    h.last_message[id] = now;
                                     log<NUClear::TRACE>("Forwarding", type, "to", target);
                                 }
                             }

@@ -56,9 +56,7 @@ namespace module::output {
 
                         if (enabled && !active) {
                             log<NUClear::INFO>("Forwarding", name, "to", target);
-                            auto& target_handle   = handle->targets[target];
-                            target_handle.period  = period;
-                            target_handle.enabled = enabled;
+                            handle->targets[target].period = period;
                         }
                         else if (!enabled && active) {
                             handle->targets.erase(target);
