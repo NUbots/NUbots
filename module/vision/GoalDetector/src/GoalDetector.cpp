@@ -257,7 +257,7 @@ namespace module::vision {
                                 log<NUClear::DEBUG>("--------------------------------------------------");
                             }
 
-                            if (keep == true) {
+                            if (keep) {
                                 // Passed the tests, this post can go onto the next round as a valid goal post!
                                 goals->goals.push_back(std::move(g));
                             }
