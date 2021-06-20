@@ -71,21 +71,15 @@ namespace module {
                 on<Configuration>("NSGA2Evaluator.yaml").then([this](const Configuration& config) {
                     walk_command_velocity = config["walk_command"]["velocity"].as<Expression>();
                     walk_command_rotation = config["walk_command"]["rotation"].as<Expression>();
-
-                    // Reset our state and the simulation since the config has changed
-                    ResetWorld();
                 });
 
-                // Reset our state and the simulation on system startup
-                on<Startup>().then([this]() { ResetWorld(); });
-
                 on<Trigger<NSGA2EvaluationRequest>, Single>().then([this](const NSGA2EvaluationRequest& request) {
+                    // Make sure the simulator is in a known state
+                    ResetWorld();
+
                     // Set our genration and individual identifiers from the request
                     generation = request.generation;
                     id         = request.id;
-
-                    // Reset the simulation time for the new evaluation
-                    ResetWorldTime();
 
                     // Read the QuinticWalk config and overwrite the config parameters with the current individual's
                     // parameters
@@ -183,7 +177,6 @@ namespace module {
                     // then execute the script (probably stand), reset the time, and start evaluating.
                     if (simTime > 1.0 && !evaluating & !terminating) {
                         emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "Stand.yaml"));
-                        ResetWorldTime();
                         evaluating = true;
 
                         // Create and send the walk command, which will be evaluated when we get simulation data
