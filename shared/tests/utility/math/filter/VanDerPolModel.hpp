@@ -76,7 +76,7 @@ namespace shared::tests {
             return reset_range;
         }
 
-        int getParticleCount() {
+        [[nodiscard]] int getParticleCount() const {
             return n_particles;
         }
     };

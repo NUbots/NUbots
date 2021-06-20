@@ -146,7 +146,7 @@ namespace module::localisation {
             return resetRange;
         }
 
-        int getParticleCount() {
+        [[nodiscard]] int getParticleCount() const {
             return n_particles;
         }
 
