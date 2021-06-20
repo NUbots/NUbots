@@ -8,7 +8,7 @@ nuclear_role(
   # Support and Configuration
   support::configuration::GlobalConfig
   network::NUClearNet
-  support::NUsight
+  output::NetworkForwarder
   # Hardware Interface
   platform::Gazebo
   input::SensorFilter
