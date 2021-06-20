@@ -35,6 +35,9 @@ namespace utility::math::quaternion {
               typename QType  = std::remove_cv_t<std::remove_reference_t<decltype(*std::declval<Iterator>())>>,
               typename Scalar = typename QType::Scalar>
     inline QType mean(const Iterator& begin, const Iterator& end) {
+        if (std::distance(begin, end) == 0) {
+            return QType::Identity();
+        }
         // Initialise our accumulator matrix
         Eigen::Matrix<Scalar, 4, 4> A = Eigen::Matrix<Scalar, 4, 4>::Zero();
 
@@ -42,6 +45,9 @@ namespace utility::math::quaternion {
         for (Iterator it = begin; it != end; ++it) {
             // Convert quaternion to vec4
             Eigen::Matrix<Scalar, 4, 1> q(it->coeffs());
+            if (q.w() < Scalar(0)) {
+                q *= Scalar(-1);
+            }
 
             // Rank 1 update
             A += q * q.transpose();
@@ -53,11 +59,71 @@ namespace utility::math::quaternion {
         // Solve for the eigenvectors of the accumulator matrix
         Eigen::SelfAdjointEigenSolver<Eigen::Matrix<Scalar, 4, 4>> eigensolver(A);
         if (eigensolver.info() != Eigen::Success) {
-            throw std::runtime_error("Eigen decomposition failed");
+            // Failed to get the mean using Merkley's method, try just averaging naively
+            Eigen::Vector4d mean = Eigen::Vector4d::Zero();
+            for (Iterator it = begin; it != end; ++it) {
+                mean += it->coeffs();
+            }
+            mean /= std::distance(begin, end);
+            if (mean.w() < Scalar(0)) {
+                mean *= Scalar(-1);
+            }
+            return QType(mean).normalized();
         }
 
         // We want the eigenvector corresponding to the largest eigenvector
-        return QType(eigensolver.eigenvectors().template rightCols<1>());
+        QType mean = QType(eigensolver.eigenvectors().template rightCols<1>());
+        return mean.normalized();
+    }
+
+    // Normalises to ensure scalare component is positive
+    template <typename Iterator,
+              typename QType  = std::remove_cv_t<std::remove_reference_t<decltype(*std::declval<Iterator>())>>,
+              typename Scalar = typename QType::Scalar>
+    inline QType meanRotation(const Iterator& begin, const Iterator& end) {
+        if (std::distance(begin, end) == 0) {
+            return QType::Identity();
+        }
+        // Initialise our accumulator matrix
+        Eigen::Matrix<Scalar, 4, 4> A = Eigen::Matrix<Scalar, 4, 4>::Zero();
+
+        // Accumlate the quaternions across all particles
+        for (Iterator it = begin; it != end; ++it) {
+            // Convert quaternion to vec4
+            Eigen::Matrix<Scalar, 4, 1> q(it->coeffs());
+            if (q.w() < Scalar(0)) {
+                q *= Scalar(-1);
+            }
+
+            // Rank 1 update
+            A += q * q.transpose();
+        }
+
+        // Scale the accumulator matrix
+        A /= std::distance(begin, end);
+
+        // Solve for the eigenvectors of the accumulator matrix
+        Eigen::SelfAdjointEigenSolver<Eigen::Matrix<Scalar, 4, 4>> eigensolver(A);
+        if (eigensolver.info() != Eigen::Success) {
+            // Failed to get the mean using Merkley's method, try just averaging naively
+            Eigen::Vector4d mean = Eigen::Vector4d::Zero();
+            for (Iterator it = begin; it != end; ++it) {
+                mean += it->coeffs();
+            }
+            mean /= std::distance(begin, end);
+            if (mean.w() < Scalar(0)) {
+                mean *= Scalar(-1);
+            }
+            return QType(mean).normalized();
+        }
+
+        // We want the eigenvector corresponding to the largest eigenvector
+        QType mean = QType(eigensolver.eigenvectors().template rightCols<1>());
+        if (mean.w() < Scalar(0)) {
+            mean.w() *= Scalar(-1);
+            mean.vec() *= Scalar(-1);
+        }
+        return mean.normalized();
     }
 
     template <typename QType>

@@ -56,10 +56,7 @@ namespace module::input {
             // Gyroscope measures the angular velocity of the torso in torso space
             Eigen::Matrix<Scalar, 3, 1> omegaTTt;
 
-            // Gyroscope Bias
-            Eigen::Matrix<Scalar, 3, 1> omegaTTt_bias;
-
-            static constexpr size_t size = 16;
+            static constexpr size_t size = 13;
 
             constexpr static size_t getSize() {
                 return size;
@@ -86,11 +83,6 @@ namespace module::input {
                 WX = 10,
                 WY = 11,
                 WZ = 12,
-
-                // omegaTTt_bias
-                BX = 13,
-                BY = 14,
-                BZ = 15,
             };
 
             // Default constructor initialises all vectors to zero, and the quaternion to the identity rotation
@@ -98,23 +90,20 @@ namespace module::input {
                 : rTWw(Eigen::Matrix<Scalar, 3, 1>::Zero())
                 , vTw(Eigen::Matrix<Scalar, 3, 1>::Zero())
                 , Rwt({1, 0, 0, 0})
-                , omegaTTt(Eigen::Matrix<Scalar, 3, 1>::Zero())
-                , omegaTTt_bias(Eigen::Matrix<Scalar, 3, 1>::Zero()) {}
+                , omegaTTt(Eigen::Matrix<Scalar, 3, 1>::Zero()) {}
 
             // Constructor from monolithic vector representation, normalising the quaternion in the process
             StateVec(const Eigen::Matrix<Scalar, size, 1>& state)
                 : rTWw(state.template segment<3>(PX))
                 , vTw(state.template segment<3>(VX))
                 , Rwt(Eigen::Quaternion<Scalar>(state.template segment<4>(QW)).normalized())
-                , omegaTTt(state.template segment<3>(WX))
-                , omegaTTt_bias(state.template segment<3>(BX)) {}
+                , omegaTTt(state.template segment<3>(WX)) {}
             template <typename OtherDerived>
             StateVec(const Eigen::MatrixBase<OtherDerived>& state)
                 : rTWw(state.template segment<3>(PX))
                 , vTw(state.template segment<3>(VX))
                 , Rwt(Eigen::Quaternion<Scalar>(state.template segment<4>(QW)).normalized())
-                , omegaTTt(state.template segment<3>(WX))
-                , omegaTTt_bias(state.template segment<3>(BX)) {}
+                , omegaTTt(state.template segment<3>(WX)) {}
 
             // Converts StateVec to monolithic vector representation
             Eigen::Matrix<Scalar, size, 1> getStateVec() const {
@@ -123,7 +112,6 @@ namespace module::input {
                 state.template segment<3>(VX)        = vTw;
                 state.template segment<4>(QW)        = Rwt.coeffs();
                 state.template segment<3>(WX)        = omegaTTt;
-                state.template segment<3>(BX)        = omegaTTt_bias;
                 return state;
             }
 
@@ -197,8 +185,7 @@ namespace module::input {
         }
 
         Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::GYROSCOPE&) {
-            // Add predicted gyroscope bias to our predicted gyroscope
-            return state.omegaTTt + state.omegaTTt_bias;
+            return state.omegaTTt;
         }
 
         Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::FLAT_FOOT_ODOMETRY&) {
@@ -232,6 +219,12 @@ namespace module::input {
 
             // Make sure the quaternion remains normalised
             newState.Rwt = newState.Rwt.normalized();
+
+            // Make sure the real part of the quaternion remains non-negative
+            if (newState.Rwt.w() < Scalar(0)) {
+                newState.Rwt.w() *= Scalar(-1);
+                newState.Rwt.vec() *= Scalar(-1);
+            }
 
             return newState;
         }

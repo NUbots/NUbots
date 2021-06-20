@@ -68,21 +68,26 @@ namespace module::vision {
                             // Run the inference
                             auto result = runner(image, Hcw.cast<float>());
 
-                            // Move stuff into the emit message
-                            auto msg             = std::make_unique<message::vision::VisualMesh>();
-                            msg->timestamp       = image.timestamp;
-                            msg->id              = image.id;
-                            msg->name            = image.name;
-                            msg->Hcw             = image.Hcw;
-                            msg->rays            = std::move(result.rays);
-                            msg->coordinates     = std::move(result.coordinates);
-                            msg->neighbourhood   = std::move(result.neighbourhood);
-                            msg->indices         = std::move(result.indices);
-                            msg->classifications = std::move(result.classifications);
-                            msg->class_map       = runner.class_map;
+                            if (result.indices.empty()) {
+                                log<NUClear::WARN>("Hcw resulted in no mesh points being on-screen.");
+                            }
+                            else {
+                                // Move stuff into the emit message
+                                auto msg             = std::make_unique<message::vision::VisualMesh>();
+                                msg->timestamp       = image.timestamp;
+                                msg->id              = image.id;
+                                msg->name            = image.name;
+                                msg->Hcw             = image.Hcw;
+                                msg->rays            = std::move(result.rays);
+                                msg->coordinates     = std::move(result.coordinates);
+                                msg->neighbourhood   = std::move(result.neighbourhood);
+                                msg->indices         = std::move(result.indices);
+                                msg->classifications = std::move(result.classifications);
+                                msg->class_map       = runner.class_map;
 
-                            // Emit the inference
-                            emit(msg);
+                                // Emit the inference
+                                emit(msg);
+                            }
                         }
                         catch (...) {
                             eptr = std::current_exception();

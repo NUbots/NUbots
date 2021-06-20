@@ -105,7 +105,21 @@ namespace module::motion {
                 if ((i >= 6) && (i < 18)) {
                     jointGains[i] = cfg["gains"]["legs"].as<float>();
                 }
+                if (i < 6) {
+                    jointGains[i] = cfg["gains"]["arms"].as<float>();
+                }
             }
+
+            arm_positions.push_back(
+                std::make_pair(ServoID::R_SHOULDER_PITCH, cfg["arms"]["right_shoulder_pitch"].as<float>()));
+            arm_positions.push_back(
+                std::make_pair(ServoID::L_SHOULDER_PITCH, cfg["arms"]["left_shoulder_pitch"].as<float>()));
+            arm_positions.push_back(
+                std::make_pair(ServoID::R_SHOULDER_ROLL, cfg["arms"]["right_shoulder_roll"].as<float>()));
+            arm_positions.push_back(
+                std::make_pair(ServoID::L_SHOULDER_ROLL, cfg["arms"]["left_shoulder_roll"].as<float>()));
+            arm_positions.push_back(std::make_pair(ServoID::R_ELBOW, cfg["arms"]["right_elbow"].as<float>()));
+            arm_positions.push_back(std::make_pair(ServoID::L_ELBOW, cfg["arms"]["left_elbow"].as<float>()));
 
             imu_reaction.enable(config.imu_active);
         });
@@ -195,7 +209,7 @@ namespace module::motion {
 
     float QuinticWalk::getTimeDelta() {
         // compute time delta depended if we are currently in simulation or reality
-        auto current_time = NUClear::clock::now();
+        const auto current_time = NUClear::clock::now();
         float dt =
             std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_update_time).count() / 1000.0f;
 
@@ -236,43 +250,46 @@ namespace module::motion {
                 .normalized()
                 .toRotationMatrix();
         };
-
         // Read the cartesian positions and orientations for trunk and fly foot
-        walk_engine.computeCartesianPosition(trunk_pos, trunk_axis, foot_pos, foot_axis, is_left_support);
+        std::tie(trunk_pos, trunk_axis, foot_pos, foot_axis, is_left_support) = walk_engine.computeCartesianPosition();
 
         // Change goals from support foot based coordinate system to trunk based coordinate system
         Eigen::Affine3f Hst;  // trunk_to_support_foot_goal
-        Hst.linear()      = setRPY(trunk_axis[0], trunk_axis[1], trunk_axis[2]).transpose();
+        Hst.linear()      = setRPY(trunk_axis.x(), trunk_axis.y(), trunk_axis.z()).transpose();
         Hst.translation() = -Hst.rotation() * trunk_pos;
 
         Eigen::Affine3f Hfs;  // support_to_flying_foot
-        Hfs.linear()      = setRPY(foot_axis[0], foot_axis[1], foot_axis[2]);
+        Hfs.linear()      = setRPY(foot_axis.x(), foot_axis.y(), foot_axis.z());
         Hfs.translation() = foot_pos;
 
-        Eigen::Affine3f Hft = Hfs * Hst;  // trunk_to_flying_foot_goal
+        const Eigen::Affine3f Hft = Hfs * Hst;  // trunk_to_flying_foot_goal
 
         // Calculate leg joints
-        Eigen::Matrix4d left_foot =
+        const Eigen::Matrix4d left_foot =
             walk_engine.getFootstep().isLeftSupport() ? Hst.matrix().cast<double>() : Hft.matrix().cast<double>();
-        Eigen::Matrix4d right_foot =
+        const Eigen::Matrix4d right_foot =
             walk_engine.getFootstep().isLeftSupport() ? Hft.matrix().cast<double>() : Hst.matrix().cast<double>();
 
-        auto joints = calculateLegJoints(kinematicsModel,
-                                         Eigen::Affine3f(left_foot.cast<float>()),
-                                         Eigen::Affine3f(right_foot.cast<float>()));
+        const auto joints = calculateLegJoints(kinematicsModel,
+                                               Eigen::Affine3f(left_foot.cast<float>()),
+                                               Eigen::Affine3f(right_foot.cast<float>()));
 
-        auto waypoints = motionLegs(joints);
-
+        auto waypoints = motion(joints);
         emit(std::move(waypoints));
     }
 
-    std::unique_ptr<ServoCommands> QuinticWalk::motionLegs(const std::vector<std::pair<ServoID, float>>& joints) {
+    std::unique_ptr<ServoCommands> QuinticWalk::motion(const std::vector<std::pair<ServoID, float>>& joints) {
         auto waypoints = std::make_unique<ServoCommands>();
-        waypoints->commands.reserve(joints.size());
+        waypoints->commands.reserve(joints.size() + arm_positions.size());
 
-        NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
+        const NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
 
-        for (auto& joint : joints) {
+        for (const auto& joint : joints) {
+            waypoints->commands
+                .emplace_back(subsumptionId, time, joint.first, joint.second, jointGains[joint.first], 100);
+        }
+
+        for (const auto& joint : arm_positions) {
             waypoints->commands
                 .emplace_back(subsumptionId, time, joint.first, joint.second, jointGains[joint.first], 100);
         }

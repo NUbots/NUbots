@@ -93,6 +93,10 @@ namespace module::vision::visualmesh {
                 // Assemble the results
                 VisualMeshResults results;
 
+                if (output.global_indices.empty()) {
+                    return results;
+                }
+
                 // Get all the rays
                 results.rays.resize(3, output.global_indices.size());
                 int col = 0;

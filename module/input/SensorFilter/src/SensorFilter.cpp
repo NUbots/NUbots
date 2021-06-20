@@ -132,8 +132,6 @@ namespace module::input {
                 config["motion_filter"]["noise"]["process"]["rotation"].as<Expression>();
             this->config.motionFilter.noise.process.rotationalVelocity =
                 config["motion_filter"]["noise"]["process"]["rotational_velocity"].as<Expression>();
-            this->config.motionFilter.noise.process.gyroscopeBias =
-                config["motion_filter"]["noise"]["process"]["gyroscope_bias"].as<Expression>();
 
             // Set our initial process noise in our filter
             MotionModel<double>::StateVec process_noise;
@@ -141,7 +139,6 @@ namespace module::input {
             process_noise.vTw                = this->config.motionFilter.noise.process.velocity;
             process_noise.Rwt                = this->config.motionFilter.noise.process.rotation;
             process_noise.omegaTTt           = this->config.motionFilter.noise.process.rotationalVelocity;
-            process_noise.omegaTTt_bias      = this->config.motionFilter.noise.process.gyroscopeBias;
             motionFilter.model.process_noise = process_noise;
 
             // Set our initial means
@@ -153,8 +150,6 @@ namespace module::input {
                 config["motion_filter"]["initial"]["mean"]["rotation"].as<Expression>();
             this->config.motionFilter.initial.mean.rotationalVelocity =
                 config["motion_filter"]["initial"]["mean"]["rotational_velocity"].as<Expression>();
-            this->config.motionFilter.initial.mean.gyroscopeBias =
-                config["motion_filter"]["initial"]["mean"]["gyroscope_bias"].as<Expression>();
 
             this->config.motionFilter.initial.covariance.position =
                 config["motion_filter"]["initial"]["covariance"]["position"].as<Expression>();
@@ -164,24 +159,20 @@ namespace module::input {
                 config["motion_filter"]["initial"]["covariance"]["rotation"].as<Expression>();
             this->config.motionFilter.initial.covariance.rotationalVelocity =
                 config["motion_filter"]["initial"]["covariance"]["rotational_velocity"].as<Expression>();
-            this->config.motionFilter.initial.covariance.gyroscopeBias =
-                config["motion_filter"]["initial"]["covariance"]["gyroscope_bias"].as<Expression>();
 
             // Set our initial mean
             MotionModel<double>::StateVec mean;
-            mean.rTWw          = this->config.motionFilter.initial.mean.position;
-            mean.vTw           = this->config.motionFilter.initial.mean.velocity;
-            mean.Rwt           = this->config.motionFilter.initial.mean.rotation;
-            mean.omegaTTt      = this->config.motionFilter.initial.mean.rotationalVelocity;
-            mean.omegaTTt_bias = this->config.motionFilter.initial.mean.gyroscopeBias;
+            mean.rTWw     = this->config.motionFilter.initial.mean.position;
+            mean.vTw      = this->config.motionFilter.initial.mean.velocity;
+            mean.Rwt      = this->config.motionFilter.initial.mean.rotation;
+            mean.omegaTTt = this->config.motionFilter.initial.mean.rotationalVelocity;
 
             // Set our initial covariance matrix, as a diagonal matrix
             MotionModel<double>::StateVec covariance;
-            covariance.rTWw          = this->config.motionFilter.initial.covariance.position;
-            covariance.vTw           = this->config.motionFilter.initial.covariance.velocity;
-            covariance.Rwt           = this->config.motionFilter.initial.covariance.rotation;
-            covariance.omegaTTt      = this->config.motionFilter.initial.covariance.rotationalVelocity;
-            covariance.omegaTTt_bias = this->config.motionFilter.initial.covariance.gyroscopeBias;
+            covariance.rTWw     = this->config.motionFilter.initial.covariance.position;
+            covariance.vTw      = this->config.motionFilter.initial.covariance.velocity;
+            covariance.Rwt      = this->config.motionFilter.initial.covariance.rotation;
+            covariance.omegaTTt = this->config.motionFilter.initial.covariance.rotationalVelocity;
             // Set the filter's state with those initial state parameters
             motionFilter.set_state(mean.getStateVec(), covariance.asDiagonal());
 
@@ -248,26 +239,30 @@ namespace module::input {
                     gyro /= double(sensors.size());
                     rMFt /= double(sensors.size());
 
+                    // Average time per sensor reading
+                    double deltaT = std::chrono::duration_cast<std::chrono::duration<double>>(
+                                        sensors.back()->timestamp - sensors.front()->timestamp)
+                                        .count()
+                                    / double(sensors.size());
+
                     // Find the rotation from the average accelerometer reading to world UnitZ
                     // Rotating from torso acceleration vector to world z vector ===> torso to world rotation
                     Eigen::Quaterniond Rwt = Eigen::Quaterniond::FromTwoVectors(acc, Eigen::Vector3d::UnitZ());
                     Rwt.normalize();
 
                     MotionModel<double>::StateVec mean;
-                    // Rotate rMFt into world space. We are assuming that CoM (M) and torso are close enough to each
-                    // other
-                    mean.rTWw          = Rwt.toRotationMatrix() * rMFt;
-                    mean.vTw           = Eigen::Vector3d::Zero();
-                    mean.Rwt           = Rwt;
-                    mean.omegaTTt      = Eigen::Vector3d::Zero();
-                    mean.omegaTTt_bias = Eigen::Vector3d::Zero();
+                    // Rotate rMFt (Foot to Torso CoM) into world space
+                    mean.rTWw = Rwt.toRotationMatrix() * rMFt;
+                    // Remove gravity from accelerometer average and integrate to get velocity
+                    mean.vTw = (acc - (Rwt.conjugate() * Eigen::Quaterniond(0.0, 0.0, 0.0, G) * Rwt).vec()) * deltaT;
+                    mean.Rwt = Rwt;
+                    mean.omegaTTt = gyro;
 
                     MotionModel<double>::StateVec covariance;
-                    covariance.rTWw          = this->config.motionFilter.initial.covariance.position;
-                    covariance.vTw           = this->config.motionFilter.initial.covariance.velocity;
-                    covariance.Rwt           = this->config.motionFilter.initial.covariance.rotation;
-                    covariance.omegaTTt      = this->config.motionFilter.initial.covariance.rotationalVelocity;
-                    covariance.omegaTTt_bias = this->config.motionFilter.initial.covariance.gyroscopeBias;
+                    covariance.rTWw     = this->config.motionFilter.initial.covariance.position;
+                    covariance.vTw      = this->config.motionFilter.initial.covariance.velocity;
+                    covariance.Rwt      = this->config.motionFilter.initial.covariance.rotation;
+                    covariance.omegaTTt = this->config.motionFilter.initial.covariance.rotationalVelocity;
 
                     // We have finished resetting the filter now
                     switch (motionFilter.reset(mean.getStateVec(), covariance.asDiagonal())) {
@@ -645,37 +640,38 @@ namespace module::input {
                                     .count(),
                                 0.0);
 
-                            // Time update
-                            switch (motionFilter.time(deltaT)) {
-                                case Eigen::Success: break;
-                                case Eigen::NumericalIssue:
-                                    log<NUClear::ERROR>(
-                                        "Cholesky decomposition failed. The provided data did not satisfy the "
-                                        "prerequisites.");
-                                    update_loop.disable();
-                                    reset_filter.store(true);
-                                    break;
-                                case Eigen::NoConvergence:
-                                    log<NUClear::ERROR>(
-                                        "Cholesky decomposition failed. Iterative procedure did not converge.");
-                                    update_loop.disable();
-                                    reset_filter.store(true);
-                                    break;
-                                case Eigen::InvalidInput:
-                                    log<NUClear::ERROR>(
-                                        "Cholesky decomposition failed. The inputs are invalid, or the algorithm has "
-                                        "been "
-                                        "improperly called. When assertions are enabled, such errors trigger an "
-                                        "assert.");
-                                    update_loop.disable();
-                                    reset_filter.store(true);
-                                    break;
-                                default:
-                                    log<NUClear::ERROR>("Cholesky decomposition failed. Some other reason.");
-                                    update_loop.disable();
-                                    reset_filter.store(true);
-                                    break;
-                            }
+                        // Time update
+                        switch (motionFilter.time(deltaT)) {
+                            case Eigen::Success: break;
+                            case Eigen::NumericalIssue:
+                                log<NUClear::ERROR>(
+                                    "Cholesky decomposition failed. The provided data did not satisfy the "
+                                    "prerequisites.");
+                                // Disable the sensor update loop to reset the filter post cholesky
+                                update_loop.disable();
+                                reset_filter.store(true);
+                                break;
+                            case Eigen::NoConvergence:
+                                log<NUClear::ERROR>(
+                                    "Cholesky decomposition failed. Iterative procedure did not converge.");
+                                // Disable the sensor update loop to reset the filter post cholesky
+                                update_loop.disable();
+                                reset_filter.store(true);
+                                break;
+                            case Eigen::InvalidInput:
+                                log<NUClear::ERROR>(
+                                    "Cholesky decomposition failed. The inputs are invalid, or the algorithm has been "
+                                    "improperly called. When assertions are enabled, such errors trigger an assert.");
+                                // Disable the sensor update loop to reset the filter post cholesky
+                                update_loop.disable();
+                                reset_filter.store(true);
+                                break;
+                            default:
+                                log<NUClear::ERROR>("Cholesky decomposition failed. Some other reason.");
+                                // Disable the sensor update loop to reset the filter post cholesky
+                                update_loop.disable();
+                                reset_filter.store(true);
+                                break;
                         }
 
                         // Filter is not reliable, just use previous sensors
