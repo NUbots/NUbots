@@ -133,8 +133,6 @@ namespace module::input {
                 config["motion_filter"]["noise"]["process"]["rotation"].as<Expression>();
             this->config.motionFilter.noise.process.rotationalVelocity =
                 config["motion_filter"]["noise"]["process"]["rotational_velocity"].as<Expression>();
-            this->config.motionFilter.noise.process.gyroscopeBias =
-                config["motion_filter"]["noise"]["process"]["gyroscope_bias"].as<Expression>();
 
             // Set our process noise in our filter
             MotionModel<double>::StateVec process_noise;
@@ -142,7 +140,6 @@ namespace module::input {
             process_noise.vTw                = this->config.motionFilter.noise.process.velocity;
             process_noise.Rwt                = this->config.motionFilter.noise.process.rotation;
             process_noise.omegaTTt           = this->config.motionFilter.noise.process.rotationalVelocity;
-            process_noise.omegaTTt_bias      = this->config.motionFilter.noise.process.gyroscopeBias;
             motionFilter.model.process_noise = process_noise;
 
             // Update our mean configs and if it changed, reset the filter
@@ -154,8 +151,6 @@ namespace module::input {
                 config["motion_filter"]["initial"]["mean"]["rotation"].as<Expression>();
             this->config.motionFilter.initial.mean.rotationalVelocity =
                 config["motion_filter"]["initial"]["mean"]["rotational_velocity"].as<Expression>();
-            this->config.motionFilter.initial.mean.gyroscopeBias =
-                config["motion_filter"]["initial"]["mean"]["gyroscope_bias"].as<Expression>();
 
             this->config.motionFilter.initial.covariance.position =
                 config["motion_filter"]["initial"]["covariance"]["position"].as<Expression>();
@@ -165,23 +160,19 @@ namespace module::input {
                 config["motion_filter"]["initial"]["covariance"]["rotation"].as<Expression>();
             this->config.motionFilter.initial.covariance.rotationalVelocity =
                 config["motion_filter"]["initial"]["covariance"]["rotational_velocity"].as<Expression>();
-            this->config.motionFilter.initial.covariance.gyroscopeBias =
-                config["motion_filter"]["initial"]["covariance"]["gyroscope_bias"].as<Expression>();
 
             // Calculate our mean and covariance
             MotionModel<double>::StateVec mean;
-            mean.rTWw          = this->config.motionFilter.initial.mean.position;
-            mean.vTw           = this->config.motionFilter.initial.mean.velocity;
-            mean.Rwt           = this->config.motionFilter.initial.mean.rotation;
-            mean.omegaTTt      = this->config.motionFilter.initial.mean.rotationalVelocity;
-            mean.omegaTTt_bias = this->config.motionFilter.initial.mean.gyroscopeBias;
+            mean.rTWw     = this->config.motionFilter.initial.mean.position;
+            mean.vTw      = this->config.motionFilter.initial.mean.velocity;
+            mean.Rwt      = this->config.motionFilter.initial.mean.rotation;
+            mean.omegaTTt = this->config.motionFilter.initial.mean.rotationalVelocity;
 
             MotionModel<double>::StateVec covariance;
-            covariance.rTWw          = this->config.motionFilter.initial.covariance.position;
-            covariance.vTw           = this->config.motionFilter.initial.covariance.velocity;
-            covariance.Rwt           = this->config.motionFilter.initial.covariance.rotation;
-            covariance.omegaTTt      = this->config.motionFilter.initial.covariance.rotationalVelocity;
-            covariance.omegaTTt_bias = this->config.motionFilter.initial.covariance.gyroscopeBias;
+            covariance.rTWw     = this->config.motionFilter.initial.covariance.position;
+            covariance.vTw      = this->config.motionFilter.initial.covariance.velocity;
+            covariance.Rwt      = this->config.motionFilter.initial.covariance.rotation;
+            covariance.omegaTTt = this->config.motionFilter.initial.covariance.rotationalVelocity;
             motionFilter.set_state(mean.getStateVec(), covariance.asDiagonal());
 
             // Don't filter any sensors until we have initialised the filter
@@ -259,14 +250,12 @@ namespace module::input {
                     mean.vTw           = Eigen::Vector3d::Zero();
                     mean.Rwt           = Rwt;
                     mean.omegaTTt      = Eigen::Vector3d::Zero();
-                    mean.omegaTTt_bias = Eigen::Vector3d::Zero();
 
                     MotionModel<double>::StateVec covariance;
                     covariance.rTWw          = this->config.motionFilter.initial.covariance.position;
                     covariance.vTw           = this->config.motionFilter.initial.covariance.velocity;
                     covariance.Rwt           = this->config.motionFilter.initial.covariance.rotation;
                     covariance.omegaTTt      = this->config.motionFilter.initial.covariance.rotationalVelocity;
-                    covariance.omegaTTt_bias = this->config.motionFilter.initial.covariance.gyroscopeBias;
 
                     // We have finished resetting the filter now
                     switch (motionFilter.reset(mean.getStateVec(), covariance.asDiagonal())) {
