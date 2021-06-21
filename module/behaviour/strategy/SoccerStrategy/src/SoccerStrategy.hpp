@@ -38,16 +38,24 @@ namespace module::behaviour::strategy {
     class SoccerStrategy : public NUClear::Reactor {
     private:
         enum State {
+            // NORMAL STATES
             NORMAL_INITIAL,
             NORMAL_SET,
             NORMAL_READY,
             NORMAL_PLAYING,
+            NORMAL_PLAYING_GOALIE,
+
+            // SHOOTOUT STATES
             SHOOTOUT_INITIAL,
             SHOOTOUT_SET_KICK,
             SHOOTOUT_SET_GOALIE,
             SHOOTOUT_PLAYING_KICK,
             SHOOTOUT_PLAYING_GOALIE,
+
+            // GENERAL STATES
             PENALTY,
+            FINISHED,
+            TIMEOUT,
             UNKNOWN
         };
         State state    = State::UNKNOWN;

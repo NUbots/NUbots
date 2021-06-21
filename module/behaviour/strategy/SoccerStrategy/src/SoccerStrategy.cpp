@@ -141,7 +141,8 @@ namespace module::behaviour::strategy {
         on<Trigger<KillGetup>>().then([this] { isGettingUp = false; });
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& selfPenalisation) {
-            if (selfPenalisation.context == GameEvents::Context::SELF) {
+            // Only penalise if it's us and we are not forcing playing
+            if (selfPenalisation.context == GameEvents::Context::SELF && !cfg_.forcePlaying) {
                 selfPenalised = true;
                 oldState      = state;
                 state         = State::PENALISED;
@@ -189,12 +190,24 @@ namespace module::behaviour::strategy {
                          const Ball& ball) {
                 try {
                     // Set our game mode
-                    auto mode = cfg_.forcePenaltyShootout ? GameMode::PENALTY_SHOOTOUT : gameState.data.mode.value;
-                    const currentStateCheck = state;  // store the current state to test later if it is changed
+                    auto mode = gameState.data.mode.value;
+
+                    // Force mode to penalty shootout if config says to
+                    if (cfg_.forcePenaltyShootout) {
+                        mode = GameMode::PENALTY_SHOOTOUT;
+                    }
+
+                    // Force phase to playing if config says to
+                    if (cfg_.forcePlaying) {
+                        phase == Phase::PLAYING;
+                    }
+
+                    // Store the current state to test later if it is changed
+                    const currentStateCheck = state;
 
                     // Call a function based on the game mode
                     switch (mode) {
-                        case GameMode::PENALTY_SHOOTOUT: penaltyShootout(phase); break;
+                        case GameMode::PENALTY_SHOOTOUT: penaltyShootout(phase, fieldDescription); break;
                         case GameMode::NORMAL: normal(); break;
                         case GameMode::OVERTIME: overtime(); break;
                         default: log<NUClear::WARN>("Game mode unknown.");
@@ -232,11 +245,13 @@ namespace module::behaviour::strategy {
                     // If we are in the set phase, figure out whether we are goalie or kicker
                     case Phase::SET: state = penaltySideCheck(); break;
 
+                    // Basic states
+                    case Phase::FINISHED: state = State::FINISHED; break;
+                    case Phase::TIMEOUT: state = State::TIMEOUT; break;
+
                     // If we were in this phase, and now are in any of these phases, then something has gone wrong
                     case Phase::READY:
-                    case Phase::PLAYING:
-                    case Phase::TIMEOUT:
-                    case Phase::FINISHED: log<NUClear::WARN>("Unexpected phase."); break;
+                    case Phase::PLAYING: log<NUClear::WARN>("Unexpected phase."); break;
                     default: log<NUClear::WARN>("Unknown phase.");
                 }
                 break;
@@ -258,11 +273,13 @@ namespace module::behaviour::strategy {
                         state = State::SHOOTOUT_PLAYING_KICK;
                         break;
 
+                    // Basic states
+                    case Phase::FINISHED: state = State::FINISHED; break;
+                    case Phase::TIMEOUT: state = State::TIMEOUT; break;
+
                     // If we were in this phase, and now are in any of these phases, then something has gone wrong
                     case Phase::INITIAL:
-                    case Phase::READY:
-                    case Phase::TIMEOUT:
-                    case Phase::FINISHED: log<NUClear::WARN>("Unexpected phase."); break;
+                    case Phase::READY: log<NUClear::WARN>("Unexpected phase."); break;
                     default: log<NUClear::WARN>("Unknown phase.");
                 }
                 break;
@@ -285,11 +302,13 @@ namespace module::behaviour::strategy {
                         state = State::SHOOTOUT_PLAYING_GOALIE;
                         break;
 
+                    // Basic states
+                    case Phase::FINISHED: state = State::FINISHED; break;
+                    case Phase::TIMEOUT: state = State::TIMEOUT; break;
+
                     // If we were in this phase, and now are in any of these phases, then something has gone wrong
                     case Phase::INITIAL:
-                    case Phase::READY:
-                    case Phase::TIMEOUT:
-                    case Phase::FINISHED: log<NUClear::WARN>("Unexpected phase."); break;
+                    case Phase::READY: log<NUClear::WARN>("Unexpected phase."); break;
                     default: log<NUClear::WARN>("Unknown phase.");
                 }
                 break;
@@ -303,13 +322,17 @@ namespace module::behaviour::strategy {
                     case Phase::SET: state = penaltySideCheck(fieldDescription); break;
 
                     // We have already kicked and are still playing - just stand still
-                    case Phase::PLAYING: standStill(); break;
+                    case Phase::PLAYING:
+                        standStill();
+                        break;
+
+                        // Basic states
+                    case Phase::FINISHED: state = State::FINISHED; break;
+                    case Phase::TIMEOUT: state = State::TIMEOUT; break;
 
                     // If we were in this phase, and now are in any of these phases, then something has gone wrong
                     case Phase::INITIAL:
-                    case Phase::READY:
-                    case Phase::TIMEOUT:
-                    case Phase::FINISHED: log<NUClear::WARN>("Unexpected phase."); break;
+                    case Phase::READY: log<NUClear::WARN>("Unexpected phase."); break;
                     default: log<NUClear::WARN>("Unknown phase.");
                 }
                 break;
@@ -326,11 +349,138 @@ namespace module::behaviour::strategy {
                     case Phase::PLAYING:
                         find({FieldTarget(FieldTarget::Target::BALL)});  // Look for the ball
                         goalieWalk(field, ball);                         // Walk to it
-                        state = State::SHOOTOUT_PLAYING_GOALIE;
                         break;
+
+                    // Basic states
+                    case Phase::FINISHED: state = State::FINISHED; break;
+                    case Phase::TIMEOUT: state = State::TIMEOUT; break;
 
                     // If we were in the initial phase, and now are in any of these phases, then something has gone
                     // wrong
+                    case Phase::INITIAL:
+                    case Phase::READY: log<NUClear::WARN>("Unexpected phase."); break;
+                    default: log<NUClear::WARN>("Unknown phase.");
+                }
+                break;
+            // ****************************************************
+
+            // *************** PENALISED **************************
+            // We are penalised, we should do nothing
+            case State::PENALISED: standStill(); break;
+
+            // ************* FINISHED ****************************
+            // The game has finished, just stop
+            case State::FINISHED: standStill(); break;
+
+            // ************** UNKNOWN ****************************
+            // We should reset to the initial state if we don't know what's happening
+            case State::UNKNOWN: state = SHOOTOUT_INITIAL; break;
+
+            // ******* OTHER STATES NOT IN THIS GAME MODE - SHOULD NOT HAPPEN *********
+            case State::NORMAL_INITIAL:
+            case State::NORMAL_SET:
+            case State::NORMAL_READY:
+            case State::NORMAL_PLAYING: log<NUClear::WARN>("Unexpected state for game mode penalty shootout."); break;
+
+            // ********* SOME UNKNOWN STATE - SHOULD NOT HAPPEN ***********
+            default: log<NUClear::WARN>("Unknown state.");
+        }
+    }
+
+    // ********** NORMAL GAME MODE ********************************
+    void normal(const Phase& phase, const FieldDescription& fieldDescription) {
+        switch (state) {
+            // ********** STATE INITIAL *****************
+            case State::NORMAL_INITIAL:
+                switch (phase) {
+                    // We are still in the initial state
+                    // Stand still, reset localisation, and look for where we are (ball isn't spawned yet)
+                    case Phase::INITIAL:
+                        standStill();
+                        find({FieldTarget(FieldTarget::Target::SELF)});
+                        initialLocalisationReset(fieldDescription);
+                        break;
+
+                    // We are moving from initial to ready
+                    // Lets walk to our defensive or offensive position and look for where we are (ball isn't spawned
+                    // yet)
+                    case Phase::READY:
+                        if (gameState.data.our_kick_off) {
+                            walkTo(fieldDescription, cfg_.start_position_offensive);
+                        }
+                        else {
+                            walkTo(fieldDescription, cfg_.start_position_defensive);
+                        }
+                        find({FieldTarget(FieldTarget::Target::SELF)});
+                        state = State::NORMAL_READY;
+                        break;
+
+                    // If we were in this phase, and now are in any of these phases, then something has gone wrong
+                    case Phase::SET:
+                    case Phase::PLAYING:
+                    case Phase::TIMEOUT:
+                    case Phase::FINISHED: log<NUClear::WARN>("Unexpected phase."); break;
+                    default: log<NUClear::WARN>("Unknown phase.");
+                }
+                break;
+
+            // ******************************************
+
+            // ********** STATE READY *****************
+            case State::NORMAL_READY:
+                switch (phase) {
+                    // We are still in the ready state
+                    // Keep walking to our intended position and look for where we are
+                    case Phase::READY:
+                        if (gameState.data.our_kick_off) {
+                            walkTo(fieldDescription, cfg_.start_position_offensive);
+                        }
+                        else {
+                            walkTo(fieldDescription, cfg_.start_position_defensive);
+                        }
+                        find({FieldTarget(FieldTarget::Target::SELF)});
+                        break;
+
+                    // We are moving from the ready state to the set state
+                    // Stand still and look for the ball, which should be spawning now
+                    case Phase::SET:
+                        standStill();
+                        find({FieldTarget(FieldTarget::Target::BALL)});
+                        state = State::NORMAL_SET;
+                        break;
+
+                    // If we were in this phase, and now are in any of these phases, then something has gone wrong
+                    case Phase::INITIAL:
+                    case Phase::PLAYING:
+                    case Phase::TIMEOUT:
+                    case Phase::FINISHED: log<NUClear::WARN>("Unexpected phase."); break;
+                    default: log<NUClear::WARN>("Unknown phase.");
+                }
+                break;
+            // ******************************************
+
+            // ********** STATE SET *****************
+            case State::NORMAL_SET:
+                switch (phase) {
+                    // We are still in the set state
+                    // Stand still and look for the ball
+                    case Phase::SET:
+                        standStill();
+                        find({FieldTarget(FieldTarget::Target::BALL)});
+                        break;
+
+                    // Now we are moving to the play state!
+                    case Phase::PLAYING:
+                        if (cfg_.is_goalie) {
+                            state = State::NORMAL_PLAYING_GOALIE;
+                        }
+                        else {
+                            state = State::NORMAL_PLAYING;
+                        }
+
+                        break;
+
+                    // If we were in this phase, and now are in any of these phases, then something has gone wrong
                     case Phase::INITIAL:
                     case Phase::READY:
                     case Phase::TIMEOUT:
@@ -338,20 +488,107 @@ namespace module::behaviour::strategy {
                     default: log<NUClear::WARN>("Unknown phase.");
                 }
                 break;
-            // ****************************************************
+            // ******************************************
 
-            // ************ PENALISED *****************************
+            // ********** STATE PLAYING AS NON-GOALIE *****************
+            case State::NORMAL_PLAYING:
+                switch (phase) {
+                    // We are still playing
+                    // Lets check if we should update our playing state, otherwise play!
+                    case Phase::PLAYING:
+                        // Check if we should update to be a goalie
+                        if (cfg_.is_goalie) {
+                            state = State::NORMAL_PLAYING_GOALIE;
+                        }
+                        // Keep being a non-goalie
+                        else {
+                            // We have seen the ball recently, so we should walk to it
+                            if (NUClear::clock::now() - ballLastMeasured < cfg_.ball_last_seen_max_time) {
+                                find({FieldTarget(FieldTarget::Target::BALL)});
+                                walkTo(fieldDescription, FieldTarget::Target::BALL);
+                            }
+                            // We have not seen the ball recently, so we should look for it
+                            else {
+                                Eigen::Affine2d position(field.position);
+                                // We are far from the centre, so lets walk to the centre of the field
+                                if (mode != GameMode::PENALTY_SHOOTOUT && (position.translation().norm() > 1)) {
+                                    find({FieldTarget(FieldTarget::Target::BALL)});
+                                    walkTo(fieldDescription, Eigen::Vector2d::Zero());
+                                }
+                                // Otherwise we are not far from the center of the field, should look for the ball
+                                else {
+                                    find({FieldTarget(FieldTarget::Target::BALL)});
+                                    walkTo(fieldDescription, FieldTarget::Target::BALL);
+                                }
+                            }
+                        }
+
+                        break;
+
+                    // If we were in this phase, and now are in any of these phases, then something has gone wrong
+                    case Phase::INITIAL:
+                    case Phase::SET:
+                    case Phase::READY:
+                    case Phase::TIMEOUT:
+                    case Phase::FINISHED: log<NUClear::WARN>("Unexpected phase."); break;
+                    default: log<NUClear::WARN>("Unknown phase.");
+                }
+
+                break;
+            // ******************************************
+
+            // ********** STATE PLAYING AS GOALIE *****************
+            case State::NORMAL_PLAYING_GOALIE:
+                switch (phase) {
+                    // We are still playing
+                    // Lets check if we should update our playing state, otherwise do goalie things
+                    case Phase::PLAYING:
+                        // Check if we should update the state
+                        if (!cfg_.is_goalie) {
+                            state = State::NORMAL_PLAYING;
+                        }
+                        // Keep being a goalie
+                        else {
+                            find({FieldTarget(FieldTarget::Target::BALL)});
+                            goalieWalk(field, ball);
+                        }
+
+                        break;
+
+                    // If we were in this phase, and now are in any of these phases, then something has gone wrong
+                    case Phase::INITIAL:
+                    case Phase::SET:
+                    case Phase::READY:
+                    case Phase::TIMEOUT:
+                    case Phase::FINISHED: log<NUClear::WARN>("Unexpected phase."); break;
+                    default: log<NUClear::WARN>("Unknown phase.");
+                }
+
+                break;
+            // ******************************************
+
+
+            // *************** PENALISED **************************
             case State::PENALISED:
                 standStill();  // We are penalised, we should do nothing
                 break;
-            // ****************************************************
+
+            // ************** UNKNOWN ****************************
+            // We should reset to the initial state if we don't know what's happening
+            case State::UNKNOWN: state = SHOOTOUT_INITIAL; break;
 
             // ******* OTHER STATES NOT IN THIS GAME MODE - SHOULD NOT HAPPEN *********
-            case State::NORMAL_INITIAL: log<NUClear::WARN>("Unexpected state for game mode penalty shootout."); break;
+            case State::SHOOTOUT_INITIAL:
+            case State::SHOOTOUT_SET_KICK:
+            case State::SHOOTOUT_SET_GOALIE:
+            case State::SHOOTOUT_PLAYING_KICK:
+            case State::SHOOTOUT_PLAYING_GOALIE: log<NUClear::WARN>("Unexpected state for game mode NORMAL."); break;
+
             // ********* SOME UNKNOWN STATE - SHOULD NOT HAPPEN ***********
             default: log<NUClear::WARN>("Unknown state.");
         }
     }
+
 
     // If we have just entered SET in the PENALTY_SHOOTOUT mode, we need to check if we are kicker or goalie
     State penaltySideCheck(const FieldDescription& fieldDescription) {
@@ -372,56 +609,6 @@ namespace module::behaviour::strategy {
             state = State::SHOOTOUT_SET_GOALIE;
         }
         return state;
-    }
-
-    void SoccerStrategy::play(const Field& field,
-                              const Ball& ball,
-                              const FieldDescription& fieldDescription,
-                              const GameMode& mode) {
-        if (penalised() && !cfg_.forcePlaying) {  // penalised
-            standStill();
-            find({FieldTarget(FieldTarget::Target::SELF)});
-            currentState = Behaviour::State::PENALISED;
-        }
-        else if (cfg_.is_goalie) {  // goalie
-            find({FieldTarget(FieldTarget::Target::BALL)});
-            goalieWalk(field, ball);
-            currentState = Behaviour::State::GOALIE_WALK;
-        }
-        else {
-            /*if (NUClear::clock::now() - lastLocalised > cfg_.localisation_interval) {
-            standStill();
-            find({FieldTarget(FieldTarget::Target::BALL)});
-            if (NUClear::clock::now() - lastLocalised > cfg_.localisation_interval + cfg_.localisation_duration)
-        { lastLocalised = NUClear::clock::now();
-            }
-            currentState = Behaviour::State::LOCALISING;
-        }
-        else*/
-            if (NUClear::clock::now() - ballLastMeasured
-                < cfg_.ball_last_seen_max_time) {  // ball has been seen recently
-                find({FieldTarget(FieldTarget::Target::BALL)});
-                walkTo(fieldDescription, FieldTarget::Target::BALL);
-                currentState = Behaviour::State::WALK_TO_BALL;
-            }
-            else {  // ball has not been seen recently
-                Eigen::Affine2d position(field.position);
-                if (mode != GameMode::PENALTY_SHOOTOUT
-                    && (position.translation().norm() > 1)) {  // a long way away from centre
-                    // walk to centre of field
-                    find({FieldTarget(FieldTarget::Target::BALL)});
-                    walkTo(fieldDescription, Eigen::Vector2d::Zero());
-                    currentState = Behaviour::State::MOVE_TO_CENTRE;
-                }
-                else {
-                    find({FieldTarget(FieldTarget::Target::BALL)});
-                    walkTo(fieldDescription, FieldTarget::Target::BALL);
-                    // spinWalk();
-
-                    currentState = Behaviour::State::SEARCH_FOR_BALL;
-                }
-            }
-        }
     }
 
     void SoccerStrategy::initialLocalisationReset(const FieldDescription& fieldDescription) {
