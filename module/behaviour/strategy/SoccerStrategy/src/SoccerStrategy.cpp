@@ -203,13 +203,15 @@ namespace module::behaviour::strategy {
                     }
 
                     // Store the current state to test later if it is changed
-                    const currentStateCheck = state;
+                    const auto currentStateCheck = state;
 
                     // Call a function based on the game mode
                     switch (mode) {
-                        case GameMode::PENALTY_SHOOTOUT: penaltyShootout(phase, fieldDescription); break;
-                        case GameMode::NORMAL: normal(); break;
-                        case GameMode::OVERTIME: overtime(); break;
+                        case GameMode::PENALTY_SHOOTOUT:
+                            penaltyShootout(gameState, phase, fieldDescription, field, ball);
+                            break;
+                        case GameMode::NORMAL: normal(gameState, phase, fieldDescription, field, ball); break;
+                        case GameMode::OVERTIME: normal(gameState, phase, fieldDescription, field, ball); break;
                         default: log<NUClear::WARN>("Game mode unknown.");
                     }
 
@@ -232,18 +234,22 @@ namespace module::behaviour::strategy {
     }
 
     // *********** PENALTY SHOOTOUT GAME MODE *********************
-    void penaltyShootout(const Phase& phase, const FieldDescription& fieldDescription) {
+    void SoccerStrategy::penaltyShootout(const GameState& gameState,
+                                         Phase phase,
+                                         const FieldDescription& fieldDescription,
+                                         const Field& field,
+                                         const Ball& ball) {
         // Act based on our current state
         switch (state) {
             // ******************* STATE INITIAL *****************
             case State::SHOOTOUT_INITIAL:
                 // Check our current phase
-                switch (phase) {
+                switch (phase.value) {
                     // If we are still in initial, just stand and don't do anything
                     case Phase::INITIAL: standStill(); break;
 
                     // If we are in the set phase, figure out whether we are goalie or kicker
-                    case Phase::SET: state = penaltySideCheck(); break;
+                    case Phase::SET: state = penaltySideCheck(fieldDescription); break;
 
                     // Basic states
                     case Phase::FINISHED: state = State::FINISHED; break;
@@ -260,7 +266,7 @@ namespace module::behaviour::strategy {
             // ****************** STATE SET KICK *****************
             // Set state with our turn to kick
             case State::SHOOTOUT_SET_KICK:
-                switch (phase) {
+                switch (phase.value) {
                     // If we are still in set phase, keep looking for the ball
                     case Phase::SET:
                         standStill();                                    // We are still in set, just be still
@@ -288,7 +294,7 @@ namespace module::behaviour::strategy {
             // ****************** STATE SET GOALIE *****************
             // Set state with our turn to be goalie
             case State::SHOOTOUT_SET_GOALIE:
-                switch (phase) {
+                switch (phase.value) {
                     // If we are still in set phase, keep looking for the ball
                     case Phase::SET:
                         standStill();                                    // We are still in set, just be still
@@ -317,7 +323,7 @@ namespace module::behaviour::strategy {
             // ****************** STATE PLAYING KICK *****************
             // Play state where we are kicking
             case State::SHOOTOUT_PLAYING_KICK:
-                switch (phase) {
+                switch (phase.value) {
                     // If we are back in set, then we need to recheck who is kicking
                     case Phase::SET: state = penaltySideCheck(fieldDescription); break;
 
@@ -341,7 +347,7 @@ namespace module::behaviour::strategy {
             // ****************** STATE PLAYING GOALIE *****************
             // Play state where we are goalie
             case State::SHOOTOUT_PLAYING_GOALIE:
-                switch (phase) {
+                switch (phase.value) {
                     // If we are back in set, then we need to recheck who is kicking
                     case Phase::SET: penaltySideCheck(fieldDescription); break;
 
@@ -363,6 +369,10 @@ namespace module::behaviour::strategy {
                 }
                 break;
             // ****************************************************
+
+            // ************** TIMEOUT *****************************
+            // There is a timeout happening, take a break!
+            case State::TIMEOUT: standStill(); break;
 
             // *************** PENALISED **************************
             // We are penalised, we should do nothing
@@ -388,11 +398,15 @@ namespace module::behaviour::strategy {
     }
 
     // ********** NORMAL GAME MODE ********************************
-    void normal(const Phase& phase, const FieldDescription& fieldDescription) {
+    void SoccerStrategy::normal(const GameState& gameState,
+                                Phase phase,
+                                const FieldDescription& fieldDescription,
+                                const Field& field,
+                                const Ball& ball) {
         switch (state) {
             // ********** STATE INITIAL *****************
             case State::NORMAL_INITIAL:
-                switch (phase) {
+                switch (phase.value) {
                     // We are still in the initial state
                     // Stand still, reset localisation, and look for where we are (ball isn't spawned yet)
                     case Phase::INITIAL:
@@ -428,7 +442,7 @@ namespace module::behaviour::strategy {
 
             // ********** STATE READY *****************
             case State::NORMAL_READY:
-                switch (phase) {
+                switch (phase.value) {
                     // We are still in the ready state
                     // Keep walking to our intended position and look for where we are
                     case Phase::READY:
@@ -461,7 +475,7 @@ namespace module::behaviour::strategy {
 
             // ********** STATE SET *****************
             case State::NORMAL_SET:
-                switch (phase) {
+                switch (phase.value) {
                     // We are still in the set state
                     // Stand still and look for the ball
                     case Phase::SET:
@@ -492,7 +506,7 @@ namespace module::behaviour::strategy {
 
             // ********** STATE PLAYING AS NON-GOALIE *****************
             case State::NORMAL_PLAYING:
-                switch (phase) {
+                switch (phase.value) {
                     // We are still playing
                     // Lets check if we should update our playing state, otherwise play!
                     case Phase::PLAYING:
@@ -511,7 +525,7 @@ namespace module::behaviour::strategy {
                             else {
                                 Eigen::Affine2d position(field.position);
                                 // We are far from the centre, so lets walk to the centre of the field
-                                if (mode != GameMode::PENALTY_SHOOTOUT && (position.translation().norm() > 1)) {
+                                if (position.translation().norm() > 1) {
                                     find({FieldTarget(FieldTarget::Target::BALL)});
                                     walkTo(fieldDescription, Eigen::Vector2d::Zero());
                                 }
@@ -539,7 +553,7 @@ namespace module::behaviour::strategy {
 
             // ********** STATE PLAYING AS GOALIE *****************
             case State::NORMAL_PLAYING_GOALIE:
-                switch (phase) {
+                switch (phase.value) {
                     // We are still playing
                     // Lets check if we should update our playing state, otherwise do goalie things
                     case Phase::PLAYING:
@@ -567,11 +581,17 @@ namespace module::behaviour::strategy {
                 break;
             // ******************************************
 
+            // ************** TIMEOUT *****************************
+            // There is a timeout happening, take a break!
+            case State::TIMEOUT: standStill(); break;
 
             // *************** PENALISED **************************
-            case State::PENALISED:
-                standStill();  // We are penalised, we should do nothing
-                break;
+            // We are penalised, we should do nothing
+            case State::PENALISED: standStill(); break;
+
+            // ************* FINISHED ****************************
+            // The game has finished, just stop
+            case State::FINISHED: standStill(); break;
 
             // ************** UNKNOWN ****************************
             // We should reset to the initial state if we don't know what's happening
@@ -589,9 +609,8 @@ namespace module::behaviour::strategy {
         }
     }
 
-
     // If we have just entered SET in the PENALTY_SHOOTOUT mode, we need to check if we are kicker or goalie
-    State penaltySideCheck(const FieldDescription& fieldDescription) {
+    SoccerStrategy::State SoccerStrategy::penaltySideCheck(const FieldDescription& fieldDescription) {
         State state = State::UNKNOWN;
         if (team_kicking_off == GameEvents::Context::TEAM) {
             penaltyShootoutLocalisationReset(fieldDescription);  // Reset localisation

@@ -53,7 +53,7 @@ namespace module::behaviour::strategy {
             SHOOTOUT_PLAYING_GOALIE,
 
             // GENERAL STATES
-            PENALTY,
+            PENALISED,
             FINISHED,
             TIMEOUT,
             UNKNOWN
@@ -127,10 +127,21 @@ namespace module::behaviour::strategy {
         NUClear::clock::time_point ballSearchStartTime;
         NUClear::clock::time_point goalLastMeasured;
 
-        void penaltyShootout(const Phase& phase, const FieldDescription& fieldDescription);
-        void normal() {}
-        void overtime() {}
-        State penaltySideCheck(const FieldDescription& fieldDescription);
+        void penaltyShootout(const message::input::GameState& gameState,
+                             message::input::GameState::Data::Phase phase,
+                             const message::support::FieldDescription& fieldDescription,
+                             const message::localisation::Field& field,
+                             const message::localisation::Ball& ball);
+
+        void normal(const message::input::GameState& gameState,
+                    message::input::GameState::Data::Phase phase,
+                    const message::support::FieldDescription& fieldDescription,
+                    const message::localisation::Field& field,
+                    const message::localisation::Ball& ball);
+
+        // void overtime() {}
+
+        State penaltySideCheck(const message::support::FieldDescription& fieldDescription);
 
         void initialLocalisationReset(const message::support::FieldDescription& fieldDescription);
         void penaltyShootoutLocalisationReset(const message::support::FieldDescription& fieldDescription);

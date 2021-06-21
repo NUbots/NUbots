@@ -397,10 +397,10 @@ namespace module::input {
             auto time = NUClear::clock::now() - std::chrono::seconds(newPacket.dropInTime);
 
             // Update the ball kicked out time and player in the state
-            state->data.kicked_out_by_us = newPacket.dropInTeam == newOwnTeam.teamId;
+            state->data.kicked_out_by_us = newPacket.dropInTeam == newOwnTeam.teamColour;
             state->data.kicked_out_time  = time;
 
-            if (newPacket.dropInTeam == newOwnTeam.teamId) {
+            if (newPacket.dropInTeam == newOwnTeam.teamColour) {
                 // we kicked the ball out :S
                 stateChanges.push_back([this, time] {
                     emit(std::make_unique<BallKickedOut>(BallKickedOut{GameEvents::Context::Value::TEAM, time}));
@@ -421,10 +421,10 @@ namespace module::input {
         if (oldPacket.kickOffTeam != newPacket.kickOffTeam) {
 
             // Update the kickoff team (us or them)
-            state->data.our_kick_off = newPacket.kickOffTeam == newOwnTeam.teamColour;
+            state->data.our_kick_off = newPacket.kickOffTeam == newOwnTeam.teamId;
 
             // new kick off team? :/
-            GameEvents::Context team = newPacket.kickOffTeam == newOwnTeam.teamColour
+            GameEvents::Context team = newPacket.kickOffTeam == newOwnTeam.teamId
                                            ? GameEvents::Context::Value::TEAM
                                            : GameEvents::Context::Value::OPPONENT;
             stateChanges.push_back([this, team] { emit(std::make_unique<KickOffTeam>(KickOffTeam{team})); });
