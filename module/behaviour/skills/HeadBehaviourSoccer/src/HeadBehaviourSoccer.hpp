@@ -41,7 +41,7 @@ namespace module::behaviour::skills {
     /**
      * Executes a HeadBehaviourSoccer action.
      *
-     * @author Jake Fountain
+     * @author Jade Fountain
      */
     class HeadBehaviourSoccer : public NUClear::Reactor {
     public:

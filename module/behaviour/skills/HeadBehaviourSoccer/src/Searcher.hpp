@@ -29,7 +29,7 @@ namespace module::behaviour::skills {
     /**
      * Executes a HeadBehaviourSoccer action.
      *
-     * @author Jake Fountain
+     * @author Jade Fountain
 
      Template argument T must be a normed linear space using Eigen::norm();
      */
