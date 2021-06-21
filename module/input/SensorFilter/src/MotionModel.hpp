@@ -56,10 +56,7 @@ namespace module::input {
             // Gyroscope measures the angular velocity of the torso in torso space
             Eigen::Matrix<Scalar, 3, 1> omegaTTt;
 
-            // Gyroscope Bias
-            Eigen::Matrix<Scalar, 3, 1> omegaTTt_bias;
-
-            static constexpr size_t size = 16;
+            static constexpr size_t size = 13;
 
             constexpr static size_t getSize() {
                 return size;
@@ -77,46 +74,39 @@ namespace module::input {
                 VZ = 5,
 
                 // Rwt
-                QW = 6,
-                QX = 7,
-                QY = 8,
-                QZ = 9,
+                QX = 6,
+                QY = 7,
+                QZ = 8,
+                QW = 9,
 
                 // omegaTTt
                 WX = 10,
                 WY = 11,
                 WZ = 12,
-
-                // omegaTTt_bias
-                BX = 13,
-                BY = 14,
-                BZ = 15,
             };
 
             // Default constructor initialises all vectors to zero, and the quaternion to the identity rotation
             StateVec()
                 : rTWw(Eigen::Matrix<Scalar, 3, 1>::Zero())
                 , vTw(Eigen::Matrix<Scalar, 3, 1>::Zero())
-                , Rwt({1, 0, 0, 0})
-                , omegaTTt(Eigen::Matrix<Scalar, 3, 1>::Zero())
-                , omegaTTt_bias(Eigen::Matrix<Scalar, 3, 1>::Zero()) {}
+                , Rwt(Eigen::Quaternion<Scalar>::Identity())
+                , omegaTTt(Eigen::Matrix<Scalar, 3, 1>::Zero()) {}
 
             // Constructor from monolithic vector representation, normalising the quaternion in the process
-            StateVec(const Eigen::Matrix<Scalar, size, 1>& state)
+            template <typename OtherDerived>
+            StateVec(const Eigen::MatrixBase<OtherDerived>& state)
                 : rTWw(state.template segment<3>(PX))
                 , vTw(state.template segment<3>(VX))
-                , Rwt(Eigen::Quaternion<Scalar>(state.template segment<4>(QW)).normalized())
-                , omegaTTt(state.template segment<3>(WX))
-                , omegaTTt_bias(state.template segment<3>(BX)) {}
+                , Rwt(Eigen::Quaternion<Scalar>(state.template segment<4>(QX)).normalized())
+                , omegaTTt(state.template segment<3>(WX)) {}
 
             // Converts StateVec to monolithic vector representation
             Eigen::Matrix<Scalar, size, 1> getStateVec() const {
                 Eigen::Matrix<Scalar, size, 1> state = Eigen::Matrix<Scalar, size, 1>::Zero();
                 state.template segment<3>(PX)        = rTWw;
                 state.template segment<3>(VX)        = vTw;
-                state.template segment<4>(QW)        = Rwt.coeffs();
+                state.template segment<4>(QX)        = Rwt.coeffs();
                 state.template segment<3>(WX)        = omegaTTt;
-                state.template segment<3>(BX)        = omegaTTt_bias;
                 return state;
             }
 
@@ -141,7 +131,7 @@ namespace module::input {
         // The velocity decay for x/y/z velocities (1.0 = no decay)
         Eigen::Matrix<Scalar, 3, 1> timeUpdateVelocityDecay = Eigen::Matrix<Scalar, 3, 1>::Ones();
 
-        Eigen::Matrix<Scalar, size, 1> time(const Eigen::Matrix<Scalar, size, 1>& state, const Scalar deltaT) {
+        Eigen::Matrix<Scalar, size, 1> time(const StateVec& state, const Scalar deltaT) {
 
             // Prepare our new state
             StateVec newState(state);
@@ -150,23 +140,17 @@ namespace module::input {
             // UPDATE ANGULAR POSITION/VELOCITY
             // ********************************
 
-            // Extract our unit quaternion rotation
-            const Eigen::Quaternion<Scalar> Rwt(newState.Rwt.normalized());
-
             // Apply our rotational velocity to our orientation
-            // The change in the quaternion q is (1/2)*omega*q
-            // Here is an explanation https://gamedev.stackexchange.com/a/157018
-            // Here is another derivation https://fgiesen.wordpress.com/2012/08/24/quaternion-differentiation/
-            // dq/dt = (1/2)*omega*Rwt
-            const Eigen::Quaternion<Scalar> dq_dt = Eigen::Quaternion<Scalar>(0.0,
-                                                                              newState.omegaTTt.x() * 0.5,
-                                                                              newState.omegaTTt.y() * 0.5,
-                                                                              newState.omegaTTt.z() * 0.5)
-                                                    * Rwt;
-            // The change in the rotation is the derivative times the differential (which is the time-step)
-            const Eigen::Quaternion<Scalar> change = Eigen::Quaternion<Scalar>(deltaT * dq_dt.coeffs());
-            // We can add the change to the original, as long as our time step is small enough
-            newState.Rwt = Eigen::Quaternion<Scalar>(Rwt.coeffs() + change.coeffs()).normalized();
+            // If the norm of the gyroscope update is 0 then there is not update needed
+            const Scalar norm = newState.omegaTTt.norm();
+            if (norm != Scalar(0)) {
+                // The gyroscope has measured a rotation of norm * deltaT around the axis
+                // omegaTTt / norm
+                Eigen::AngleAxis dq(norm * deltaT, newState.omegaTTt / norm);
+
+                // Update our orientation
+                newState.Rwt = newState.Rwt * dq;
+            }
 
             // ********************************
             // UPDATE LINEAR POSITION/VELOCITY
@@ -181,32 +165,36 @@ namespace module::input {
             return newState;
         }
 
-        Eigen::Matrix<Scalar, 3, 1> predict(const Eigen::Matrix<Scalar, size, 1>& state,
-                                            const MeasurementType::ACCELEROMETER&) {
-            // Extract our rotation quaternion
-            const Eigen::Matrix<Scalar, 3, 3> Rtw = StateVec(state).Rwt.inverse().toRotationMatrix();
+        Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::ACCELEROMETER&) {
 
-            // Make a world gravity vector and rotate it into torso space
-            // Where is world gravity with respect to robot orientation?
-            // Multiplying a matrix with (0, 0, G) is equivalent to taking the
-            // third column of the matrix and multiplying it by G
-            return Rtw.template rightCols<1>() * G;
+            // Rotate world gravity vector into torso space using quaternion conjugation
+            //
+            // p' = q * p * q.conjugate()
+            //
+            // Substitute q with Rtw and p with G
+            // Where G is a quaternion with real part zero and vector part (0, 0, G)
+            //
+            // G' = Rtw * G * Rtw.conjugate()
+            //    = Rwt.conjugate() * G * Rwt.conjugate().conjugate()
+            //    = Rwt.conjugate() * G * Rwt
+            //
+            // The vector part of G' is the result of rotating G by Rtw
+            return (state.Rwt.conjugate()
+                    * Eigen::Quaternion<Scalar>(Eigen::Matrix<Scalar, 4, 1>(Scalar(0), Scalar(0), Scalar(G), Scalar(0)))
+                    * state.Rwt)
+                .vec();
         }
 
-        Eigen::Matrix<Scalar, 3, 1> predict(const Eigen::Matrix<Scalar, size, 1>& state,
-                                            const MeasurementType::GYROSCOPE&) {
-            // Add predicted gyroscope bias to our predicted gyroscope
-            return StateVec(state).omegaTTt + StateVec(state).omegaTTt_bias;
+        Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::GYROSCOPE&) {
+            return state.omegaTTt;
         }
 
-        Eigen::Matrix<Scalar, 3, 1> predict(const Eigen::Matrix<Scalar, size, 1>& state,
-                                            const MeasurementType::FLAT_FOOT_ODOMETRY&) {
-            return StateVec(state).rTWw;
+        Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::FLAT_FOOT_ODOMETRY&) {
+            return state.rTWw;
         }
 
-        Eigen::Matrix<Scalar, 4, 1> predict(const Eigen::Matrix<Scalar, size, 1>& state,
-                                            const MeasurementType::FLAT_FOOT_ORIENTATION&) {
-            return StateVec(state).Rwt.coeffs();
+        Eigen::Matrix<Scalar, 4, 1> predict(const StateVec& state, const MeasurementType::FLAT_FOOT_ORIENTATION&) {
+            return state.Rwt.coeffs();
         }
 
         // This function is called to determine the difference between position, velocity, and acceleration
@@ -220,22 +208,23 @@ namespace module::input {
         Eigen::Matrix<Scalar, 4, 1> difference(const Eigen::Matrix<Scalar, 4, 1>& a,
                                                const Eigen::Matrix<Scalar, 4, 1>& b) {
             // Find the rotation needed to get from orientation a to orientation b
-            Eigen::Quaternion<Scalar> diff =
-                utility::math::quaternion::difference(Eigen::Quaternion<Scalar>(a), Eigen::Quaternion<Scalar>(b));
+            const Eigen::Quaternion<Scalar> q0(a);
+            const Eigen::Quaternion<Scalar> q1(b);
 
-            // Take the difference with the identity rotation (1, 0, 0, 0)
-            // If a and b represent very similar orientations, then the real part will be very close to one and
-            // the imaginary part will be very close to (0, 0, 0)
-            diff.w() -= Scalar(1);
-
-            return diff.coeffs();
+            return utility::math::quaternion::difference(q0, q1).coeffs();
         }
 
-        Eigen::Matrix<Scalar, size, 1> limit(const Eigen::Matrix<Scalar, size, 1>& state) {
+        StateVec limit(const StateVec& state) {
             StateVec newState(state);
 
             // Make sure the quaternion remains normalised
             newState.Rwt = newState.Rwt.normalized();
+
+            // Make sure the real part of the quaternion remains non-negative
+            if (newState.Rwt.w() < Scalar(0)) {
+                newState.Rwt.w() *= Scalar(-1);
+                newState.Rwt.vec() *= Scalar(-1);
+            }
 
             return newState;
         }
