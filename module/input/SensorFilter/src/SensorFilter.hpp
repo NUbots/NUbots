@@ -138,8 +138,8 @@ namespace module::input {
         std::array<Eigen::Affine3d, 2> footlanding_Hwf;
 
         // Foot to CoM in torso space
-        std::array<Eigen::Vector3d, 2> rMFt;
-        Eigen::Vector3d rTWw;
+        std::array<Eigen::Vector3d, 2> rMFt{};
+        Eigen::Vector3d rTWw{};
 
         // Storage for previous gyroscope values
         Eigen::Vector3d theta;
