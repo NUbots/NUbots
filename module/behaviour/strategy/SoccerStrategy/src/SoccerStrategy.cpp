@@ -519,33 +519,49 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::goalieWalk(const Field& field, const Ball& ball) {
+
+        // make a motionCommand to emit
         std::unique_ptr<MotionCommand> motionCommand;
 
+        // time since the ball has been seen, in microseconds, current clock - time the ball was last measured
         float timeSinceBallSeen =
             std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now() - ballLastMeasured).count()
-            * 1e-6;
+            * 1e6;  // SUSS
+
+        // timeSinceBallSeen < 1 (as stated in the cfg file SoccerStrategy.yaml)
         if (timeSinceBallSeen < cfg_.goalie_command_timeout) {
 
+            // position == Hfw
             Eigen::Affine2d position(field.position);
+
             float fieldBearing  = Eigen::Rotation2Dd(position.rotation()).angle();
             int signBearing     = fieldBearing > 0 ? 1 : -1;
             float rotationSpeed = -signBearing
                                   * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * fieldBearing),
                                               cfg_.goalie_max_rotation_speed);
 
-            int signTranslation    = ball.position.y() > 0 ? 1 : -1;
-            float translationSpeed = signTranslation
-                                     * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.position[1]),
-                                                 cfg_.goalie_max_translation_speed);
+            int signTranslation = ball.position.y() > 0 ? 1 : -1;
+            float tmp           = signTranslation
+                        * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.position[1]),
+                                    cfg_.goalie_max_translation_speed);
+
+            float translationSpeed = std::fabs(fieldBearing) < cfg_.goalie_side_walk_angle_threshold ? tmp : 0;
 
             Eigen::Affine2d cmd;
-            cmd.linear()      = Eigen::Rotation2Dd(rotationSpeed).matrix();
-            cmd.translation() = Eigen::Vector2d::Zero();
-            motionCommand     = std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(cmd));
-            if (std::fabs(fieldBearing) < cfg_.goalie_side_walk_angle_threshold) {
-                motionCommand->walk_command.y() = translationSpeed;
-            }
+            cmd.linear() = Eigen::Rotation2Dd(rotationSpeed).matrix();
+
+            // initalise the x and y movements to zero
+            cmd.translation() = Eigen::Vector2d(0, translationSpeed);
+
+            // motion command set to a direct command
+            motionCommand = std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(cmd));
+
+            // //2D rotation of the robot is less than the angle threshold of the goalie side walk
+            // if (std::fabs(fieldBearing) < cfg_.goalie_side_walk_angle_threshold) {
+            //     motionCommand->walk_command.y() = translationSpeed;
+            // }
         }
+        // looking for the ball?? Do nothing??
         else {
             motionCommand =
                 std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(Eigen::Affine2d::Identity()));
