@@ -26,6 +26,7 @@
 #include "message/behaviour/MotionCommand.hpp"
 #include "message/behaviour/Nod.hpp"
 #include "message/behaviour/SoccerObjectPriority.hpp"
+#include "message/input/GameEvents.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/ResetRobotHypotheses.hpp"
 #include "message/motion/BodySide.hpp"
@@ -103,7 +104,7 @@ namespace module::behaviour::strategy {
 
             cfg_.is_goalie = config["goalie"].as<bool>();
 
-            // Use configuration here from file GoalieWalkPlanner.yaml
+            // Use configuration here from file SoccerStrategy.yaml
             cfg_.goalie_command_timeout           = config["goalie_command_timeout"].as<float>();
             cfg_.goalie_rotation_speed_factor     = config["goalie_rotation_speed_factor"].as<float>();
             cfg_.goalie_max_rotation_speed        = config["goalie_max_rotation_speed"].as<float>();
@@ -230,11 +231,17 @@ namespace module::behaviour::strategy {
                             else if (phase == Phase::SET) {
                                 standStill();
                                 find({FieldTarget(FieldTarget::Target::BALL)});
-                                if (mode == GameMode::PENALTY_SHOOTOUT) {
-                                    penaltyShootoutLocalisationReset(fieldDescription);
-                                    emit(std::make_unique<ResetRawSensors>());
-                                }
                                 currentState = Behaviour::State::SET;
+                                if (mode == GameMode::PENALTY_SHOOTOUT) {
+                                    if (currentState != previousState) {
+                                        emit(std::make_unique<ResetRawSensors>());
+                                        standStill();
+                                    }
+                                    else {
+                                    }
+                                    // log("set penalty shoot-out");
+                                    penaltyShootoutLocalisationReset(fieldDescription);
+                                }
                             }
                             else if (phase == Phase::TIMEOUT) {
                                 standStill();
@@ -415,6 +422,10 @@ namespace module::behaviour::strategy {
 
     void SoccerStrategy::standStill() {
         emit(std::make_unique<MotionCommand>(utility::behaviour::StandStill()));
+    }
+
+    void SoccerStrategy::standScript() {
+        emit(std::make_unique<MotionCommand>(utility::behaviour::StandScript()));
     }
 
     void SoccerStrategy::walkTo(const FieldDescription& fieldDescription, const FieldTarget::Target& target) {
