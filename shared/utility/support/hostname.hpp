@@ -11,13 +11,13 @@ namespace utility::support {
     inline std::string getHostname() {
         char* hostname = std::getenv("ROBOT_HOSTNAME");
 
-        if (hostname == nullptr) {
-            char buffer[255];
-            ::gethostname(buffer, 255);
-            hostname = buffer;
+        if (hostname != nullptr) {
+            return std::string(hostname);
         }
 
-        return std::string(hostname);
+        char buffer[255];
+        ::gethostname(buffer, 255);
+        return std::string(buffer);
     }
 
 }  // namespace utility::support

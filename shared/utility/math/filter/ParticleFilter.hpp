@@ -90,16 +90,14 @@ namespace utility::math::filter {
 
     public:
         ParticleFilter(const StateVec& initial_mean      = StateVec::Zero(),
-                       const StateMat& initialCovariance = StateMat::Identity() * 0.1,
-                       const int& number_of_particles    = 100)
+                       const StateMat& initialCovariance = StateMat::Identity() * 0.1)
             : rng(), norm() {
-            set_state(initial_mean, initialCovariance, number_of_particles);
+            set_state(initial_mean, initialCovariance);
         }
 
-        void set_state(const StateVec& initial_mean,
-                       const StateMat& initialCovariance,
-                       const int& number_of_particles = 100) {
-            particles = sample_particles(initial_mean, initialCovariance, number_of_particles);
+        void set_state(const StateVec& initial_mean, const StateMat& initialCovariance) {
+            particles =
+                sample_particles(initial_mean, initialCovariance, model.getParticleCount() + model.getRogueCount());
 
             // Limit the state of each particle to ensure they are still valid
             for (unsigned int i = 0; i < particles.cols(); i++) {
@@ -128,13 +126,12 @@ namespace utility::math::filter {
                                   const Eigen::Matrix<MeasurementScalar, S, S, MArgs...>& measurement_variance,
                                   const Args&... params) {
 
-            ParticleList candidate_particles =
-                ParticleList::Zero(Model::size, particles.cols() + model.getRogueCount());
+            ParticleList candidate_particles               = ParticleList::Zero(Model::size, particles.cols());
             candidate_particles.leftCols(particles.cols()) = particles;
 
             // Resample some rogues
             for (int i = 0; i < model.getRogueCount(); ++i) {
-                candidate_particles.col(i + particles.cols()) =
+                candidate_particles.col(i + model.getParticleCount()) =
                     particles.col(i) + model.getRogueRange().cwiseProduct(StateVec::Random() * 0.5);
             }
 

@@ -10,5 +10,6 @@ nuclear_role(
   network::NUClearNet
   platform::darwin::HardwareIO
   input::SensorFilter
-  support::NUsight
+  output::NetworkForwarder
+  output::Overview
 )
