@@ -41,20 +41,17 @@ namespace utility::math::quaternion {
         // Initialise our accumulator matrix
         Eigen::Matrix<Scalar, 4, 4> A = Eigen::Matrix<Scalar, 4, 4>::Zero();
 
-        // Accumlate the quaternions across all particles
+        // Accumulate the quaternions across all particles
         for (Iterator it = begin; it != end; ++it) {
             // Convert quaternion to vec4
             Eigen::Matrix<Scalar, 4, 1> q(it->coeffs());
-            if (q.w() < Scalar(0)) {
-                q *= Scalar(-1);
-            }
 
             // Rank 1 update
             A += q * q.transpose();
         }
 
         // Scale the accumulator matrix
-        A /= std::distance(begin, end);
+        A /= static_cast<Scalar>(std::distance(begin, end));
 
         // Solve for the eigenvectors of the accumulator matrix
         Eigen::SelfAdjointEigenSolver<Eigen::Matrix<Scalar, 4, 4>> eigensolver(A);
@@ -64,10 +61,7 @@ namespace utility::math::quaternion {
             for (Iterator it = begin; it != end; ++it) {
                 mean += it->coeffs();
             }
-            mean /= std::distance(begin, end);
-            if (mean.w() < Scalar(0)) {
-                mean *= Scalar(-1);
-            }
+            mean /= static_cast<Scalar>(std::distance(begin, end));
             return QType(mean).normalized();
         }
 
@@ -76,7 +70,7 @@ namespace utility::math::quaternion {
         return mean.normalized();
     }
 
-    // Normalises to ensure scalare component is positive
+    // Normalises to ensure scalar component is non-negative
     template <typename Iterator,
               typename QType  = std::remove_cv_t<std::remove_reference_t<decltype(*std::declval<Iterator>())>>,
               typename Scalar = typename QType::Scalar>
@@ -87,7 +81,7 @@ namespace utility::math::quaternion {
         // Initialise our accumulator matrix
         Eigen::Matrix<Scalar, 4, 4> A = Eigen::Matrix<Scalar, 4, 4>::Zero();
 
-        // Accumlate the quaternions across all particles
+        // Accumulate the quaternions across all particles
         for (Iterator it = begin; it != end; ++it) {
             // Convert quaternion to vec4
             Eigen::Matrix<Scalar, 4, 1> q(it->coeffs());
@@ -100,7 +94,7 @@ namespace utility::math::quaternion {
         }
 
         // Scale the accumulator matrix
-        A /= std::distance(begin, end);
+        A /= static_cast<Scalar>(std::distance(begin, end));
 
         // Solve for the eigenvectors of the accumulator matrix
         Eigen::SelfAdjointEigenSolver<Eigen::Matrix<Scalar, 4, 4>> eigensolver(A);
@@ -110,7 +104,7 @@ namespace utility::math::quaternion {
             for (Iterator it = begin; it != end; ++it) {
                 mean += it->coeffs();
             }
-            mean /= std::distance(begin, end);
+            mean /= static_cast<Scalar>(std::distance(begin, end));
             if (mean.w() < Scalar(0)) {
                 mean *= Scalar(-1);
             }
