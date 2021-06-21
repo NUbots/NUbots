@@ -273,9 +273,27 @@ namespace module::behaviour::strategy {
                         find({FieldTarget(FieldTarget::Target::BALL)});  // Look for the ball
                         break;
 
-                    // We are now playing, so lets kick
+                    // We are now playing, so lets find the ball
                     case Phase::PLAYING:
-                        emit(std::make_unique<MotionCommand>(utility::behaviour::PenaltyKick()));
+                        // We have seen the ball recently, so we should walk to it
+                        if (NUClear::clock::now() - ballLastMeasured < cfg_.ball_last_seen_max_time) {
+                            find({FieldTarget(FieldTarget::Target::BALL)});
+                            walkTo(fieldDescription, FieldTarget::Target::BALL);
+                        }
+                        // We have not seen the ball recently, so we should look for it
+                        else {
+                            Eigen::Affine2d position(field.position);
+                            // We are far from the centre, so lets walk to the centre of the field
+                            if (position.translation().norm() > 1) {
+                                find({FieldTarget(FieldTarget::Target::BALL)});
+                                walkTo(fieldDescription, Eigen::Vector2d::Zero());
+                            }
+                            // Otherwise we are not far from the center of the field, should look for the ball
+                            else {
+                                find({FieldTarget(FieldTarget::Target::BALL)});
+                                walkTo(fieldDescription, FieldTarget::Target::BALL);
+                            }
+                        }
                         state = State::SHOOTOUT_PLAYING_KICK;
                         break;
 
@@ -329,7 +347,25 @@ namespace module::behaviour::strategy {
 
                     // We have already kicked and are still playing - just stand still
                     case Phase::PLAYING:
-                        standStill();
+                        // We have seen the ball recently, so we should walk to it
+                        if (NUClear::clock::now() - ballLastMeasured < cfg_.ball_last_seen_max_time) {
+                            find({FieldTarget(FieldTarget::Target::BALL)});
+                            walkTo(fieldDescription, FieldTarget::Target::BALL);
+                        }
+                        // We have not seen the ball recently, so we should look for it
+                        else {
+                            Eigen::Affine2d position(field.position);
+                            // We are far from the centre, so lets walk to the centre of the field
+                            if (position.translation().norm() > 1) {
+                                find({FieldTarget(FieldTarget::Target::BALL)});
+                                walkTo(fieldDescription, Eigen::Vector2d::Zero());
+                            }
+                            // Otherwise we are not far from the center of the field, should look for the ball
+                            else {
+                                find({FieldTarget(FieldTarget::Target::BALL)});
+                                walkTo(fieldDescription, FieldTarget::Target::BALL);
+                            }
+                        }
                         break;
 
                         // Basic states
