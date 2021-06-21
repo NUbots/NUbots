@@ -142,7 +142,7 @@ namespace module::platform {
         uint32_t num_cameras = 0;
 
         /// @brief Max FSR sensor value
-        float max_fsr_value;
+        float max_fsr_value = 0;
 
     public:
         /// @brief Called by the powerplant to build and setup the webots reactor
