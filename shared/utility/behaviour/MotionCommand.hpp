@@ -34,6 +34,12 @@ namespace utility::behaviour {
         return cmd;
     }
 
+    inline MotionCommand StandScript() {
+        MotionCommand cmd;
+        cmd.type = MotionCommand::Type::Value::STAND_SCRIPT;
+        return cmd;
+    }
+
     inline MotionCommand PenaltyKick() {
         MotionCommand cmd;
         cmd.type = MotionCommand::Type::Value::PENALTY_KICK;

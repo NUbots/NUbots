@@ -34,7 +34,9 @@ message MotionCommand {
         // Execute the kick for penalty shoot-out
         PENALTY_KICK = 3;
         // Stop all current motion and directly send the given WalkCommand to the WalkEngine.
-        DIRECT_COMMAND = 3;
+        DIRECT_COMMAND = 4;
+        // Run the stand script
+        STAND_SCRIPT = 5;
     }
 
     // The type of this motion command:

@@ -172,6 +172,16 @@ namespace module::behaviour::planning {
 
                     return;
                 }
+
+                if (latestCommand.type == message::behaviour::MotionCommand::Type::STAND_SCRIPT) {
+
+                    // log("STAND SCRIPT");
+                    emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "Stand.yaml"));
+                    emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {45, 15}}));
+
+                    return;
+                }
+
                 else if (latestCommand.type == message::behaviour::MotionCommand::Type::PENALTY_KICK) {
                     // log("KICK PENALTY");
                     emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "KickPenalty.yaml"));
