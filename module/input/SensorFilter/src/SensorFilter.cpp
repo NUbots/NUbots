@@ -722,10 +722,8 @@ namespace module::input {
                                         const Eigen::Quaterniond& Rwt =
                                             MotionModel<double>::StateVec(motionFilter.get()).Rwt;
                                         const Eigen::Vector3d rMFt_update = current_rMFt - rMFt[side];
-                                        const Eigen::Quaterniond q(0.0,
-                                                                   rMFt_update.x(),
-                                                                   rMFt_update.y(),
-                                                                   rMFt_update.z());
+                                        const Eigen::Quaterniond q(
+                                            Eigen::Vector4d(rMFt_update.x(), rMFt_update.y(), rMFt_update.z(), 0.0));
                                         rTWw += (Rwt * q * Rwt.conjugate()).vec();
 
                                         // Make sure we don't do another update
