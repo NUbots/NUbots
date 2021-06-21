@@ -123,15 +123,15 @@ namespace module::input {
         } config;
 
 
-        struct LegLoad {
-            enum Value { FSR = 0, Z_HEIGHT = 1, LOAD = 2 };
-            Value value;
+        // struct LegLoad {
+        //     enum Value { FSR = 0, Z_HEIGHT = 1, LOAD = 2 };
+        //     Value value;
 
-            // Constructors
-            LegLoad() : value(Value::FSR) {}
+        //     // Constructors
+        //     LegLoad() : value(Value::FSR) {}
 
-            operator std::string() const;
-        };
+        //     operator std::string() const;
+        // };
 
     private:
         // Current state of the button pushes

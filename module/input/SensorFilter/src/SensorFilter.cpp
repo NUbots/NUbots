@@ -87,14 +87,14 @@ namespace module::input {
         return s.str();
     }
 
-    LegLoad::operator std::string() const {
-        switch (value) {
-            case Value::FSR: return "FSR";
-            case Value::Z_HEIGHT: return "Z_HEIGHT";
-            case Value::LOAD: return "LOAD";
-            default: throw std::runtime_error("enum LegLoad value is corrupt, unknown value stored");
-        }
-    }
+    // LegLoad::operator std::string() const {
+    //     switch (value) {
+    //         case Value::FSR: return "FSR";
+    //         case Value::Z_HEIGHT: return "Z_HEIGHT";
+    //         case Value::LOAD: return "LOAD";
+    //         default: throw std::runtime_error("enum LegLoad value is corrupt, unknown value stored");
+    //     }
+    // }
 
     SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), theta(Eigen::Vector3d::Zero()) {

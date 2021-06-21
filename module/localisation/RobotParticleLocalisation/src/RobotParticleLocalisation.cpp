@@ -82,22 +82,22 @@ namespace module::localisation {
                     for (auto goal : goals.goals) {
 
                         // Check side and team
-                        const std::map<Eigen::Vector3d, auto>{poss, m.type} = getFieldPosition(goal, fd);
+                        const Eigen::Vector3d poss = getFieldPosition(goal, fd);
 
                         for (auto& m : goal.measurements) {
-                            // if (m.type == VisionGoal::MeasurementType::CENTRE) {
-                            if (m.position.allFinite() && m.covariance.allFinite()) {
-                                filter.measure(Eigen::Vector3d(m.position.cast<double>()),
-                                               Eigen::Matrix3d(m.covariance.cast<double>()),
-                                               poss,
-                                               goals.Hcw,
-                                               m.type,
-                                               fd);
+                            if (m.type == VisionGoal::MeasurementType::CENTRE) {
+                                if (m.position.allFinite() && m.covariance.allFinite()) {
+                                    filter.measure(Eigen::Vector3d(m.position.cast<double>()),
+                                                   Eigen::Matrix3d(m.covariance.cast<double>()),
+                                                   poss,
+                                                   goals.Hcw,
+                                                   m.type,
+                                                   fd);
+                                }
+                                else {
+                                    log("Received non-finite measurements from vision. Discarding ...");
+                                }
                             }
-                            else {
-                                log("Received non-finite measurements from vision. Discarding ...");
-                            }
-                            // }
                         }
                     }
                 }
@@ -165,42 +165,33 @@ namespace module::localisation {
             leftSide.heading_var  = 0.005;
 
             reset->hypotheses.push_back(leftSide);
-            ResetRobotHypotheses::Self rightSide;
-            // Start on goal line
-            rightSide.position     = Eigen::Vector2d(start_state.x(), -start_state.y());
-            rightSide.position_cov = Eigen::Vector2d::Constant(0.5).asDiagonal();
-            rightSide.heading      = -start_state.z();
-            rightSide.heading_var  = 0.005;
+            // ResetRobotHypotheses::Self rightSide;
+            // // Start on goal line
+            // rightSide.position     = Eigen::Vector2d(start_state.x(), -start_state.y());
+            // rightSide.position_cov = Eigen::Vector2d::Constant(0.5).asDiagonal();
+            // rightSide.heading      = -start_state.z();
+            // rightSide.heading_var  = 0.005;
 
             // reset->hypotheses.push_back(rightSide);
             emit<Scope::DELAY>(reset, std::chrono::seconds(1));
         });
     }
 
-    std::map<Eigen::Vector3d, auto> RobotParticleLocalisation::getFieldPosition(
-        const VisionGoal& goal,
-        const message::support::FieldDescription& fd) const {
+    Eigen::Vector3d RobotParticleLocalisation::getFieldPosition(const VisionGoal& goal,
+                                                                const message::support::FieldDescription& fd) const {
         Eigen::Vector3d position;
 
-        const bool left    = (goal.side != VisionGoal::Side::RIGHT);
-        const bool right   = (goal.side != VisionGoal::Side::LEFT);
-        const bool unknown = (goal.side != VisionGoal::Side::UNKNOWN);
+        const bool left  = (goal.side != VisionGoal::Side::RIGHT);
+        const bool right = (goal.side != VisionGoal::Side::LEFT);
 
         if (left) {
             position = Eigen::Vector3d(goal.measurements[0].position);
-            return std::map(position, Goal::MeasurementType::LEFT_NORMAL);
         }
         if (right) {
             position = Eigen::Vector3d(goal.measurements[0].position);
-            return std::map(position, Goal::MeasurementType::RIGHT_NORMAL);
-        }
-        if (unknown) {
-            // return std::map(position, Goal::MeasurementType::LEFT_NORMAL);
-            log("Unknown posts not handled yet, soz");
         }
 
-        // TODO Handle Unknown side
-        return std::map(position, Goal::MeasurementType::LEFT_NORMAL);
+        return position;
     }
 
 }  // namespace module::localisation
