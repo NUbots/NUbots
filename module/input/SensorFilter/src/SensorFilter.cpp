@@ -683,10 +683,8 @@ namespace module::input {
                         // Filter is not reliable, just use previous sensors
                         if (reset_filter.load()) {
                             if (previousSensors) {
-                                sensors->Htw              = previousSensors->Htw;
-                                sensors->Hgt              = previousSensors->Hgt;
-                                sensors->Hgc              = previousSensors->Hgc;
-                                sensors->angular_position = previousSensors->angular_position;
+                                sensors->Htw = previousSensors->Htw;
+                                sensors->Hgt = previousSensors->Hgt;
                             }
                         }
                         else {
@@ -698,18 +696,6 @@ namespace module::input {
                             Hwt.linear()      = o.Rwt.toRotationMatrix();
                             Hwt.translation() = o.rTWw;
                             sensors->Htw      = Hwt.inverse().matrix();
-
-                            // Integrate gyro to get angular positions
-                            sensors->angular_position = o.omegaTTt / 90.0;
-
-                            if (config.debug) {
-                                log("p_x:",
-                                    sensors->angular_position.x(),
-                                    "p_y:",
-                                    sensors->angular_position.y(),
-                                    "p_z:",
-                                    sensors->angular_position.z());
-                            }
 
                             /************************************************
                              *                  Kinematics Horizon          *
@@ -724,16 +710,6 @@ namespace module::input {
                             // createRotationZ : Mat size [3x3]
                             // Rwt : Mat size [3x3]
                             sensors->Hgt = Rgt.matrix();
-                            Eigen::Affine3d Htc(sensors->Htx[ServoID::HEAD_PITCH]);
-
-                            // Get torso to world transform
-                            const Eigen::Affine3d yawlessWorldInvR(
-                                Eigen::AngleAxisd(-Hwt.rotation().eulerAngles(0, 1, 2).z(), Eigen::Vector3d::UnitZ())
-                                * Hwt.rotation());
-                            Eigen::Affine3d Hgt(Hwt);
-                            Hgt.translation() = Eigen::Vector3d(0, 0, Hwt.translation().z());
-                            Hgt.linear()      = yawlessWorldInvR.linear();
-                            sensors->Hgc      = Hgt * Htc;  // Rwt * Rth
                         }
 
                         emit(std::move(sensors));
