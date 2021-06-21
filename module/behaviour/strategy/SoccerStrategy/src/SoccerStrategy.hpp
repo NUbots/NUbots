@@ -87,10 +87,11 @@ namespace module::behaviour::strategy {
         std::vector<message::behaviour::FieldTarget> lookTarget;
 
         // TODO: remove horrible
-        bool isGettingUp            = false;
-        bool selfPenalised          = false;
-        bool manualOrientationReset = false;
-        double manualOrientation    = 0.0;
+        bool isGettingUp                                     = false;
+        bool selfPenalised                                   = false;
+        bool manualOrientationReset                          = false;
+        double manualOrientation                             = 0.0;
+        message::input::GameEvents::Context team_kicking_off = message::input::GameEvents::Context::UNKNOWN;
         message::behaviour::KickPlan::KickType kickType;
         message::behaviour::Behaviour::State currentState = message::behaviour::Behaviour::State::INIT;
 

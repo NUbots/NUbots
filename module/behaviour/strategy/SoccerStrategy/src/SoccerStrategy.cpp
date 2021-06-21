@@ -55,6 +55,7 @@ namespace module::behaviour::strategy {
     using message::input::GameEvents;
     using message::input::GameState;
     using Phase          = message::input::GameState::Data::Phase;
+    using KickOffTeam    = message::input::GameEvents::KickOffTeam;
     using Penalisation   = message::input::GameEvents::Penalisation;
     using Unpenalisation = message::input::GameEvents::Unpenalisation;
     using GameMode       = message::input::GameState::Data::Mode;
@@ -167,6 +168,9 @@ namespace module::behaviour::strategy {
             }
         });
 
+        on<Trigger<KickOffTeam>>().then(
+            [this](const KickOffTeam& kickOffTeam) { team_kicking_off = kickOffTeam.context; });
+
         // Main Loop
         // TODO: ensure a reasonable state is emitted even if gamecontroller is not running
         on<Every<30, Per<std::chrono::seconds>>,
@@ -243,7 +247,38 @@ namespace module::behaviour::strategy {
                                 currentState = Behaviour::State::FINISHED;
                             }
                             else if (phase == Phase::PLAYING) {
-                                play(field, ball, fieldDescription, mode);
+                                // We are in the playing state and it is a penalty shoot-out game!
+                                if (mode == GameMode::PENALTY_SHOOTOUT) {
+                                    // Our opponent is kicking!
+                                    if (team_kicking_off == GameEvents::Context::OPPONENT) {
+                                        // log("Opponent is kicking");
+                                        // Do goalie behaviour
+                                        find({FieldTarget(FieldTarget::Target::BALL)});
+                                        goalieWalk(field, ball);
+                                        currentState = Behaviour::State::GOALIE_WALK;
+                                    }
+                                    // We are kicking!
+                                    else if (team_kicking_off == GameEvents::Context::TEAM) {
+                                        // log("We are kicking");
+                                        currentState = Behaviour::State::SHOOTOUT;
+                                        // If our state has changed, kick!
+                                        if (currentState != previousState) {
+                                            emit(std::make_unique<MotionCommand>(utility::behaviour::PenaltyKick()));
+                                        }
+                                        // Otherwise we want to finish our kick
+                                        else {
+                                            standStill();
+                                        }
+                                    }
+                                    // Neither team is set as the kick off team, so something is probably wrong.
+                                    else {
+                                        log<NUClear::WARN>("Neither team is kicking in penalty shoot-out.");
+                                    }
+                                }
+                                // It is not a penalty shoot-out game, so just execute the normal play
+                                else {
+                                    play(field, ball, fieldDescription, mode);
+                                }
                             }
                         }
                     }
