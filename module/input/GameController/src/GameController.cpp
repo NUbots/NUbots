@@ -160,7 +160,7 @@ namespace module::input {
         packet.playersPerTeam = PLAYERS_PER_TEAM;
         packet.state          = static_cast<gamecontroller::State>(-1);
         packet.firstHalf      = true;
-        packet.kickOffTeam    = static_cast<gamecontroller::TeamColour>(-1);
+        packet.kickOffTeam    = -1;
         packet.mode           = static_cast<gamecontroller::Mode>(-1);
         packet.dropInTeam     = static_cast<gamecontroller::TeamColour>(-1);
         packet.dropInTime     = -1;
@@ -397,10 +397,10 @@ namespace module::input {
             auto time = NUClear::clock::now() - std::chrono::seconds(newPacket.dropInTime);
 
             // Update the ball kicked out time and player in the state
-            state->data.kicked_out_by_us = newPacket.dropInTeam == newOwnTeam.teamColour;
+            state->data.kicked_out_by_us = newPacket.dropInTeam == newOwnTeam.teamId;
             state->data.kicked_out_time  = time;
 
-            if (newPacket.dropInTeam == newOwnTeam.teamColour) {
+            if (newPacket.dropInTeam == newOwnTeam.teamId) {
                 // we kicked the ball out :S
                 stateChanges.push_back([this, time] {
                     emit(std::make_unique<BallKickedOut>(BallKickedOut{GameEvents::Context::Value::TEAM, time}));
