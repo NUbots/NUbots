@@ -75,7 +75,45 @@ namespace module {
                     walk_command_rotation = config["walk_command"]["rotation"].as<Expression>();
                 });
 
+                // Handle a state transition event
+                on<Trigger<Event>, Single>().then([this](const Event event) {
+                    State oldState = currentState;
+                    State newState = HandleTransition(currentState, event);
+
+                    log<NUClear::INFO>("transitioning on", event, ", from state", oldState, "to state", newState);
+
+                    switch (newState) {
+                        case State::WAITING_FOR_REQUEST:
+                            WaitingForRequest(oldState, event, oldState == newState);
+                            break;
+                        case State::RESETTING_SIMULATION:
+                            ResettingSimulation(oldState, event, oldState == newState);
+                            break;
+                        case State::STANDING:
+                            Standing(oldState, event, oldState == newState);
+                            break;
+                        case State::WALKING:
+                            Walking(oldState, event, oldState == newState);
+                            break;
+                        case State::TERMINATING_EARLY:
+                            TerminatingEarly(oldState, event, oldState == newState);
+                            break;
+                        case State::TERMINATING_GRACEFULLY:
+                            TerminatingGracefully(oldState, event, oldState == newState);
+                            break;
+                        case State::SENDING_FITNESS_SCORES:
+                            SendingFitnessScores(oldState, event, oldState == newState);
+                            break;
+                        default:
+                            log<NUClear::WARN>("unable to transition to unknown", currentState);
+                    }
+                });
+
                 on<Trigger<NSGA2EvaluationRequest>, Single>().then([this](const NSGA2EvaluationRequest& request) {
+                    lastEvalRequest = request;
+                    emit(Event::EvaluateRequest);
+
+                    /*
                     log("NSGA2EvaluationRequest");
 
                     // Make sure the simulator is in a known state
@@ -118,6 +156,7 @@ namespace module {
 
                     // Ensure we are not in the terminating state
                     terminating = false;
+                    */
                 });
 
                 on<Trigger<RawSensors>, Single>().then([this](const RawSensors& sensors) {
@@ -346,6 +385,99 @@ namespace module {
                 // Log the scores
                 log("individual score (fixed, 1/distanceTravelled):", scores[0], scores[1]);
             }
+
+            NSGA2Evaluator::State NSGA2Evaluator::HandleTransition(NSGA2Evaluator::State currentState, NSGA2Evaluator::Event event) {
+                switch (currentState) {
+                    case State::WAITING_FOR_REQUEST:
+                        switch (event) {
+                            case Event::TimeUpdate:
+                                return State::WAITING_FOR_REQUEST;
+                            case Event::EvaluateRequest:
+                                return State::RESETTING_SIMULATION;
+                            default:
+                                return State::UNKNOWN;
+                        }
+                    case State::RESETTING_SIMULATION:
+                        switch (event) {
+                            case Event::ResetDone:
+                                return State::STANDING;
+                            default:
+                                return State::UNKNOWN;
+                        }
+                    case State::STANDING:
+                        switch (event) {
+                            case Event::TimeUpdate:
+                                return State::STANDING;
+                            case Event::RawSensors:
+                                return State::STANDING;
+                            case Event::Fallen:
+                                return State::TERMINATING_EARLY;
+                            case Event::StandDone:
+                                return State::WALKING;
+                            default:
+                                return State::UNKNOWN;
+                        }
+                    case State::WALKING:
+                        switch (event) {
+                            case Event::TimeUpdate:
+                                return State::WALKING;
+                            case Event::RawSensors:
+                                return State::WALKING;
+                            case Event::RobotLocation:
+                                return State::WALKING;
+                            case Event::Fallen:
+                                return State::TERMINATING_EARLY;
+                            case Event::TrialTimeExpired:
+                                return State::TERMINATING_GRACEFULLY;
+                            default:
+                                return State::UNKNOWN;
+                        }
+                    case State::TERMINATING_EARLY:
+                        switch (event) {
+                            case Event::CalculatedFitness:
+                                return State::SENDING_FITNESS_SCORES;
+                            default:
+                                return State::UNKNOWN;
+                        }
+                    case State::TERMINATING_GRACEFULLY:
+                        switch (event) {
+                            case Event::CalculatedFitness:
+                                return State::SENDING_FITNESS_SCORES;
+                            default:
+                                return State::UNKNOWN;
+                        }
+                    case State::SENDING_FITNESS_SCORES:
+                        switch (event) {
+                            case Event::FitnessScoresSent:
+                                return State::WAITING_FOR_REQUEST;
+                            default:
+                                return State::UNKNOWN;
+                        }
+                    default:
+                        return State::UNKNOWN;
+                }
+            }
+
+            /// @brief Handle the WAITING_FOR_REQUEST state
+            void NSGA2Evaluator::WaitingForRequest(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event, bool isReEntry);
+
+            /// @brief Handle the RESETTING_SIMULATION state
+            void NSGA2Evaluator::ResettingSimulation(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event, bool isReEntry);
+
+            /// @brief Handle the STANDING state
+            void NSGA2Evaluator::Standing(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event, bool isReEntry);
+
+            /// @brief Handle the WALKING state
+            void NSGA2Evaluator::Walking(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event, bool isReEntry);
+
+            /// @brief Handle the TERMINATING_EARLY state
+            void NSGA2Evaluator::TerminatingEarly(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event, bool isReEntry);
+
+            /// @brief Handle the TERMINATING_GRACEFULLY state
+            void NSGA2Evaluator::StateTerminatingGracefully(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event, bool isReEntry);
+
+            /// @brief Handle the SENDING_FITNESS_SCORES state
+            void NSGA2Evaluator::SendingFitnessScores(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event, bool isReEntry);
         }  // namespace optimisation
     }      // namespace support
 }  // namespace module

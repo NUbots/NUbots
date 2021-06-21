@@ -15,6 +15,29 @@ namespace module {
                 /// @brief Called by the powerplant to build and setup the NSGA2Evaluator reactor.
                 explicit NSGA2Evaluator(std::unique_ptr<NUClear::Environment> environment);
 
+                enum State {
+                    UNKNOWN,
+                    WAITING_FOR_REQUEST,
+                    RESETTING_SIMULATION,
+                    STANDING,
+                    WALKING,
+                    TERMINATING_EARLY,
+                    TERMINATING_GRACEFULLY,
+                    SENDING_FITNESS_SCORES
+                };
+
+                enum Event {
+                    TimeUpdate,
+                    EvaluateRequest,
+                    ResetDone,
+                    RawSensors,
+                    Fallen,
+                    RobotLocation,
+                    TrialTimeExpired,
+                    CalculatedFitness,
+                    FitnessScoresSent
+                };
+
             private:
                 /// @brief Evaluate the fitness of the current individual
                 void CalculateFitness();
@@ -59,14 +82,6 @@ namespace module {
                 /// @brief The walk command rotation
                 double walk_command_rotation = 0.0;
 
-                /// @brief Booleans indicating what state we're in with the current evaluation
-                bool terminating = false;
-                bool walking     = false;
-                bool standing    = false;
-                bool evaluating  = false;
-                bool finished    = false;
-                bool fallenOver  = false;
-
                 /// @brief A list of constraints for domination calculation. These can be used to encode one or more
                 /// failure conditions. Here, we set the first constraint if the robot has fallen over, and the second
                 /// one if it's swayed too too much. The more negative the constraint value is, the more it has violated
@@ -91,8 +106,33 @@ namespace module {
                 /// @brief The max field plane sway observed during the evaluation
                 double maxFieldPlaneSway;
 
-                /// @brief Set when the simulation is loaded and ready to run trials
-                bool webotsReady = false;
+                NSGA2EvaluationRequest lastEvalRequest;
+
+                State currentState = State::WAITING_FOR_REQUEST;
+
+                /// @brief Get the next state to transition to given the current state and an event
+                State HandleTransition(State currentState, Event event);
+
+                /// @brief Handle the WAITING_FOR_REQUEST state
+                void WaitingForRequest(State previousState, Event event, bool isReEntry);
+
+                /// @brief Handle the RESETTING_SIMULATION state
+                void ResettingSimulation(State previousState, Event event, bool isReEntry);
+
+                /// @brief Handle the STANDING state
+                void Standing(State previousState, Event event, bool isReEntry);
+
+                /// @brief Handle the WALKING state
+                void Walking(State previousState, Event event, bool isReEntry);
+
+                /// @brief Handle the TERMINATING_EARLY state
+                void TerminatingEarly(State previousState, Event event, bool isReEntry);
+
+                /// @brief Handle the TERMINATING_GRACEFULLY state
+                void TerminatingGracefully(State previousState, Event event, bool isReEntry);
+
+                /// @brief Handle the SENDING_FITNESS_SCORES state
+                void SendingFitnessScores(State previousState, Event event, bool isReEntry);
             };
 
         }  // namespace optimisation
