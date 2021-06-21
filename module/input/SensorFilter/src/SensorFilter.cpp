@@ -597,7 +597,7 @@ namespace module::input {
                         // Accelerometer measurement update
                         motionFilter.measure(sensors->accelerometer, acc_noise, MeasurementType::ACCELEROMETER());
 
-                        for (auto& side : {BodySide::LEFT, BodySide::RIGHT}) {
+                        for (const auto& side : {BodySide::LEFT, BodySide::RIGHT}) {
                             bool foot_down      = sensors->feet[side].down;
                             bool prev_foot_down = previous_foot_down[side];
                             Eigen::Affine3d Htf(
