@@ -487,6 +487,47 @@ namespace module::input {
                 // Accelerometer measurement update
                 motionFilter.measure(sensors->accelerometer, acc_noise, MeasurementType::ACCELEROMETER());
 
+                for (auto& side : {BodySide::LEFT, BodySide::RIGHT}) {
+                    bool foot_down      = sensors->feet[side].down;
+                    bool prev_foot_down = previous_foot_down[side];
+                    Eigen::Affine3d Htf(
+                        sensors->Htx[side == BodySide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL]);
+
+                    if (foot_down && !prev_foot_down) {
+                        const auto filterState = MotionModel<double>::StateVec(motionFilter.get());
+                        Eigen::Affine3d Hwt;
+                        Hwt.linear()      = filterState.Rwt.toRotationMatrix();
+                        Hwt.translation() = filterState.rTWw;
+
+                        Eigen::Affine3d Htg(utility::motion::kinematics::calculateGroundSpace(Htf, Hwt));
+
+                        footlanding_Hwf[side]                   = Hwt * Htg;
+                        footlanding_Hwf[side].translation().z() = 0.0;
+
+                        previous_foot_down[side] = true;
+                    }
+                    else if (foot_down && prev_foot_down) {
+                        // Use stored Hwf and Htf to calculate Hwt
+                        Eigen::Affine3d footlanding_Hwt = footlanding_Hwf[side] * Htf.inverse();
+
+                        // do a foot based position update
+                        motionFilter.measure(Eigen::Vector3d(footlanding_Hwt.translation()),
+                                             config.motionFilter.noise.measurement.flatFootOdometry,
+                                             MeasurementType::FLAT_FOOT_ODOMETRY());
+
+                        // do a foot based orientation update
+                        Eigen::Quaterniond Rwt(footlanding_Hwt.linear());
+                        motionFilter.measure(Rwt.coeffs(),
+                                             config.motionFilter.noise.measurement.flatFootOrientation,
+                                             MeasurementType::FLAT_FOOT_ORIENTATION());
+                    }
+                    else if (!foot_down) {
+                        previous_foot_down[side] = false;
+                    }
+
+                    sensors->feet[side].Hwf = footlanding_Hwf[side].matrix();
+                }
+
                 // Calculate our time offset from the last read
                 double deltaT = std::max(
                     (input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp)).count()
@@ -556,7 +597,7 @@ namespace module::input {
                 // Map from world to torso coordinates (Rtw)
                 Eigen::Affine3d Hwt;
                 Hwt.linear()      = o.Rwt.toRotationMatrix();
-                Hwt.translation() = rTWw;
+                Hwt.translation() = o.rTWw;
                 sensors->Htw      = Hwt.inverse().matrix();
 
                 // Integrate gyro to get angular positions
