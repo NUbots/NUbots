@@ -684,7 +684,7 @@ namespace module::input {
                              ************************************************/
                             bool update_done = false;
 
-                            for (auto& side : {BodySide::LEFT, BodySide::RIGHT}) {
+                            for (const auto& side : {BodySide::LEFT, BodySide::RIGHT}) {
                                 const bool& foot_down      = sensors->feet[side].down;
                                 const bool& prev_foot_down = previous_foot_down[side];
 

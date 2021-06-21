@@ -96,13 +96,7 @@ namespace module::input {
             } buttons;
 
             struct FootDown {
-                FootDown()
-                    : current_method("Z_HEIGHT")
-                    , certainty_thresholds({
-                          {"Z_HEIGHT", 0.01f},
-                          {"VIRTUAL", 0.05f},
-                          {"FSR", 60.0f},
-                      }) {}
+                FootDown() = default;
                 FootDown(const std::string& method, const std::map<std::string, float>& thresholds) {
                     set_method(method, thresholds);
                 }
@@ -113,14 +107,18 @@ namespace module::input {
                     current_method       = method;
                     certainty_thresholds = thresholds;
                 }
-                float threshold() const {
+                [[nodiscard]] float threshold() const {
                     return certainty_thresholds.at(current_method);
                 }
-                std::string method() const {
+                [[nodiscard]] std::string method() const {
                     return current_method;
                 }
-                std::string current_method;
-                std::map<std::string, float> certainty_thresholds;
+                std::string current_method                        = "Z_HEIGHT";
+                std::map<std::string, float> certainty_thresholds = {
+                    {"Z_HEIGHT", 0.01f},
+                    {"VIRTUAL", 0.05f},
+                    {"FSR", 60.0f},
+                };
             } footDown;
         } config;
 
