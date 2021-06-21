@@ -58,6 +58,7 @@ namespace module::behaviour::strategy {
     using Penalisation   = message::input::GameEvents::Penalisation;
     using Unpenalisation = message::input::GameEvents::Unpenalisation;
     using GameMode       = message::input::GameState::Data::Mode;
+    using KickOffTeam    = message::input::GameEvents::KickOffTeam;
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
@@ -140,9 +141,10 @@ namespace module::behaviour::strategy {
         on<Trigger<KillGetup>>().then([this] { isGettingUp = false; });
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& selfPenalisation) {
-            emit(std::make_unique<ResetRawSensors>());
             if (selfPenalisation.context == GameEvents::Context::SELF) {
                 selfPenalised = true;
+                oldState      = state;
+                state         = State::PENALISED;
             }
         });
 
@@ -150,10 +152,9 @@ namespace module::behaviour::strategy {
             [this](const Unpenalisation& selfPenalisation, const FieldDescription& fieldDescription) {
                 if (selfPenalisation.context == GameEvents::Context::SELF) {
                     selfPenalised = false;
-
-                    // TODO: isSideChecking = true;
-                    // TODO: only do this once put down
-                    unpenalisedLocalisationReset(fieldDescription);
+                    unpenalisedLocalisationReset(fieldDescription);  // Reset localisation
+                    state = oldState;  // We have been unpenalised, so lets set our state to be the old state
+                    emit(std::make_unique<ResetRawSensors>());  // We have been teleported, so reset the sensors
                 }
             });
 
@@ -166,6 +167,9 @@ namespace module::behaviour::strategy {
                 cfg_.forcePlaying = true;
             }
         });
+
+        on<Trigger<KickOffTeam>>().then(
+            [this](const KickOffTeam& kickOffTeam) { team_kicking_off = kickOffTeam.context; });
 
         // Main Loop
         // TODO: ensure a reasonable state is emitted even if gamecontroller is not running
@@ -184,72 +188,21 @@ namespace module::behaviour::strategy {
                          const Field& field,
                          const Ball& ball) {
                 try {
-
-                    Behaviour::State previousState = currentState;
-
+                    // Set our game mode
                     auto mode = cfg_.forcePenaltyShootout ? GameMode::PENALTY_SHOOTOUT : gameState.data.mode.value;
+                    const currentStateCheck = state;  // store the current state to test later if it is changed
 
-                    // auto& phase = gameState.phase;
-
-                    // TODO: fix ik kick
-                    kickType = KickType::SCRIPTED;
-                    // kickType = mode == GameMode::PENALTY_SHOOTOUT || cfg_.alwaysPowerKick ?
-                    // KickType::SCRIPTED : KickType::IK_KICK;
-
-                    if (cfg_.forcePlaying) {
-                        play(field, ball, fieldDescription, mode);
-                    }
-                    else if (pickedUp(sensors)) {
-                        // TODO: stand, no moving
-                        standStill();
-                        currentState = Behaviour::State::PICKED_UP;
-                    }
-                    else {
-                        if (mode == GameMode::NORMAL || mode == GameMode::OVERTIME
-                            || mode == GameMode::PENALTY_SHOOTOUT) {
-                            if (phase == Phase::INITIAL) {
-                                standStill();
-                                find({FieldTarget(FieldTarget::Target::SELF)});
-                                initialLocalisationReset(fieldDescription);
-                                currentState = Behaviour::State::INITIAL;
-                            }
-                            else if (phase == Phase::READY) {
-                                if (gameState.data.our_kick_off) {
-                                    walkTo(fieldDescription, cfg_.start_position_offensive);
-                                }
-                                else {
-                                    walkTo(fieldDescription, cfg_.start_position_defensive);
-                                }
-                                find({FieldTarget(FieldTarget::Target::SELF)});
-                                currentState = Behaviour::State::READY;
-                            }
-                            else if (phase == Phase::SET) {
-                                standStill();
-                                find({FieldTarget(FieldTarget::Target::BALL)});
-                                if (mode == GameMode::PENALTY_SHOOTOUT) {
-                                    penaltyShootoutLocalisationReset(fieldDescription);
-                                    emit(std::make_unique<ResetRawSensors>());
-                                }
-                                currentState = Behaviour::State::SET;
-                            }
-                            else if (phase == Phase::TIMEOUT) {
-                                standStill();
-                                find({FieldTarget(FieldTarget::Target::SELF)});
-                                currentState = Behaviour::State::TIMEOUT;
-                            }
-                            else if (phase == Phase::FINISHED) {
-                                standStill();
-                                find({FieldTarget(FieldTarget::Target::SELF)});
-                                currentState = Behaviour::State::FINISHED;
-                            }
-                            else if (phase == Phase::PLAYING) {
-                                play(field, ball, fieldDescription, mode);
-                            }
-                        }
+                    // Call a function based on the game mode
+                    switch (mode) {
+                        case GameMode::PENALTY_SHOOTOUT: penaltyShootout(phase); break;
+                        case GameMode::NORMAL: normal(); break;
+                        case GameMode::OVERTIME: overtime(); break;
+                        default: log<NUClear::WARN>("Game mode unknown.");
                     }
 
-                    if (currentState != previousState) {
-                        emit(std::make_unique<Behaviour::State>(currentState));
+                    // The state has changed, update the old state
+                    if (currentStateCheck != state) {
+                        oldState = currentStateCheck;
                     }
                 }
                 catch (std::runtime_error& err) {
@@ -263,6 +216,162 @@ namespace module::behaviour::strategy {
                 Eigen::Vector2d kickTarget = getKickPlan(field, fieldDescription);
                 emit(std::make_unique<KickPlan>(KickPlan(kickTarget, kickType)));
             });
+    }
+
+    // *********** PENALTY SHOOTOUT GAME MODE *********************
+    void penaltyShootout(const Phase& phase, const FieldDescription& fieldDescription) {
+        // Act based on our current state
+        switch (state) {
+            // ******************* STATE INITIAL *****************
+            case State::SHOOTOUT_INITIAL:
+                // Check our current phase
+                switch (phase) {
+                    // If we are still in initial, just stand and don't do anything
+                    case Phase::INITIAL: standStill(); break;
+
+                    // If we are in the set phase, figure out whether we are goalie or kicker
+                    case Phase::SET: state = penaltySideCheck(); break;
+
+                    // If we were in this phase, and now are in any of these phases, then something has gone wrong
+                    case Phase::READY:
+                    case Phase::PLAYING:
+                    case Phase::TIMEOUT:
+                    case Phase::FINISHED: log<NUClear::WARN>("Unexpected phase."); break;
+                    default: log<NUClear::WARN>("Unknown phase.");
+                }
+                break;
+            // ***************************************************
+
+            // ****************** STATE SET KICK *****************
+            // Set state with our turn to kick
+            case State::SHOOTOUT_SET_KICK:
+                switch (phase) {
+                    // If we are still in set phase, keep looking for the ball
+                    case Phase::SET:
+                        standStill();                                    // We are still in set, just be still
+                        find({FieldTarget(FieldTarget::Target::BALL)});  // Look for the ball
+                        break;
+
+                    // We are now playing, so lets kick
+                    case Phase::PLAYING:
+                        emit(std::make_unique<MotionCommand>(utility::behaviour::PenaltyKick()));
+                        state = State::SHOOTOUT_PLAYING_KICK;
+                        break;
+
+                    // If we were in this phase, and now are in any of these phases, then something has gone wrong
+                    case Phase::INITIAL:
+                    case Phase::READY:
+                    case Phase::TIMEOUT:
+                    case Phase::FINISHED: log<NUClear::WARN>("Unexpected phase."); break;
+                    default: log<NUClear::WARN>("Unknown phase.");
+                }
+                break;
+            // ****************************************************
+
+            // ****************** STATE SET GOALIE *****************
+            // Set state with our turn to be goalie
+            case State::SHOOTOUT_SET_GOALIE:
+                switch (phase) {
+                    // If we are still in set phase, keep looking for the ball
+                    case Phase::SET:
+                        standStill();                                    // We are still in set, just be still
+                        find({FieldTarget(FieldTarget::Target::BALL)});  // Look for the ball
+                        break;
+
+                    // We are now playing, lets look for the ball and keep in line with it
+                    case Phase::PLAYING:
+                        find({FieldTarget(FieldTarget::Target::BALL)});  // Look for the ball
+                        goalieWalk(field, ball);                         // Walk to it
+                        state = State::SHOOTOUT_PLAYING_GOALIE;
+                        break;
+
+                    // If we were in this phase, and now are in any of these phases, then something has gone wrong
+                    case Phase::INITIAL:
+                    case Phase::READY:
+                    case Phase::TIMEOUT:
+                    case Phase::FINISHED: log<NUClear::WARN>("Unexpected phase."); break;
+                    default: log<NUClear::WARN>("Unknown phase.");
+                }
+                break;
+            // ****************************************************
+
+            // ****************** STATE PLAYING KICK *****************
+            // Play state where we are kicking
+            case State::SHOOTOUT_PLAYING_KICK:
+                switch (phase) {
+                    // If we are back in set, then we need to recheck who is kicking
+                    case Phase::SET: state = penaltySideCheck(fieldDescription); break;
+
+                    // We have already kicked and are still playing - just stand still
+                    case Phase::PLAYING: standStill(); break;
+
+                    // If we were in this phase, and now are in any of these phases, then something has gone wrong
+                    case Phase::INITIAL:
+                    case Phase::READY:
+                    case Phase::TIMEOUT:
+                    case Phase::FINISHED: log<NUClear::WARN>("Unexpected phase."); break;
+                    default: log<NUClear::WARN>("Unknown phase.");
+                }
+                break;
+            // ****************************************************
+
+            // ****************** STATE PLAYING GOALIE *****************
+            // Play state where we are goalie
+            case State::SHOOTOUT_PLAYING_GOALIE:
+                switch (phase) {
+                    // If we are back in set, then we need to recheck who is kicking
+                    case Phase::SET: penaltySideCheck(fieldDescription); break;
+
+                    // We are still playing, lets look for the ball and keep in line with it
+                    case Phase::PLAYING:
+                        find({FieldTarget(FieldTarget::Target::BALL)});  // Look for the ball
+                        goalieWalk(field, ball);                         // Walk to it
+                        state = State::SHOOTOUT_PLAYING_GOALIE;
+                        break;
+
+                    // If we were in the initial phase, and now are in any of these phases, then something has gone
+                    // wrong
+                    case Phase::INITIAL:
+                    case Phase::READY:
+                    case Phase::TIMEOUT:
+                    case Phase::FINISHED: log<NUClear::WARN>("Unexpected phase."); break;
+                    default: log<NUClear::WARN>("Unknown phase.");
+                }
+                break;
+            // ****************************************************
+
+            // ************ PENALISED *****************************
+            case State::PENALISED:
+                standStill();  // We are penalised, we should do nothing
+                break;
+            // ****************************************************
+
+            // ******* OTHER STATES NOT IN THIS GAME MODE - SHOULD NOT HAPPEN *********
+            case State::NORMAL_INITIAL: log<NUClear::WARN>("Unexpected state for game mode penalty shootout."); break;
+            // ********* SOME UNKNOWN STATE - SHOULD NOT HAPPEN ***********
+            default: log<NUClear::WARN>("Unknown state.");
+        }
+    }
+
+    // If we have just entered SET in the PENALTY_SHOOTOUT mode, we need to check if we are kicker or goalie
+    State penaltySideCheck(const FieldDescription& fieldDescription) {
+        State state = State::UNKNOWN;
+        if (team_kicking_off == GameEvents::Context::TEAM) {
+            penaltyShootoutLocalisationReset(fieldDescription);  // Reset localisation
+            emit(std::make_unique<ResetRawSensors>());           // We just teleported, so reset our sensors
+            standStill();                                        // We don't want to move yet
+            find({FieldTarget(FieldTarget::Target::BALL)});      // Look for the ball
+            state = State::SHOOTOUT_SET_KICK;                    // Set our state to set kick
+        }
+        // If the team kicking off is the opponent, get ready to be a goalie
+        else if (team_kicking_off == GameEvents::Context::OPPONENT) {
+            penaltyShootoutLocalisationReset(fieldDescription);  // Reset localisation
+            emit(std::make_unique<ResetRawSensors>());           // We just teleported, so reset our sensors
+            standStill();                                        // We don't want to move yet
+            find({FieldTarget(FieldTarget::Target::BALL)});      // Look for the ball
+            state = State::SHOOTOUT_SET_GOALIE;
+        }
+        return state;
     }
 
     void SoccerStrategy::play(const Field& field,

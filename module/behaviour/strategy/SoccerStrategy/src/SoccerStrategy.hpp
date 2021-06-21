@@ -37,6 +37,24 @@ namespace module::behaviour::strategy {
 
     class SoccerStrategy : public NUClear::Reactor {
     private:
+        enum State {
+            NORMAL_INITIAL,
+            NORMAL_SET,
+            NORMAL_READY,
+            NORMAL_PLAYING,
+            SHOOTOUT_INITIAL,
+            SHOOTOUT_SET_KICK,
+            SHOOTOUT_SET_GOALIE,
+            SHOOTOUT_PLAYING_KICK,
+            SHOOTOUT_PLAYING_GOALIE,
+            PENALTY,
+            UNKNOWN
+        };
+        State state    = State::UNKNOWN;
+        State oldState = State::UNKNOWN;
+
+        message::input::GameEvents::Context team_kicking_off = message::input::GameEvents::Context::UNKNOWN;
+
         struct Config {
             Config()
                 : ball_last_seen_max_time()
@@ -100,6 +118,12 @@ namespace module::behaviour::strategy {
             NUClear::clock::now() - std::chrono::seconds(600);  // TODO: unhack
         NUClear::clock::time_point ballSearchStartTime;
         NUClear::clock::time_point goalLastMeasured;
+
+        void penaltyShootout(const Phase& phase, const FieldDescription& fieldDescription);
+        void normal() {}
+        void overtime() {}
+        State penaltySideCheck(const FieldDescription& fieldDescription);
+
         void initialLocalisationReset(const message::support::FieldDescription& fieldDescription);
         void penaltyShootoutLocalisationReset(const message::support::FieldDescription& fieldDescription);
         void unpenalisedLocalisationReset(const message::support::FieldDescription& fieldDescription);
