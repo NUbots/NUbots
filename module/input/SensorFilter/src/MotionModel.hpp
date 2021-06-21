@@ -156,7 +156,7 @@ namespace module::input {
             // UPDATE LINEAR POSITION/VELOCITY
             // ********************************
 
-            // Add our velocity to our positionWebots
+            // Add our velocity to our position
             newState.rTWw += newState.vTw * deltaT;
 
             // add velocity decay
