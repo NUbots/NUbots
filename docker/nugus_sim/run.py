@@ -23,13 +23,21 @@ yaml = ruamel.yaml.YAML()  # Can't use `typ="safe"` since we want round-tripping
 
 
 def read_config(file_path):
-    with open(file_path, "r") as file:
-        return yaml.load(file)
+    try:
+        with open(file_path, "r") as file:
+            return yaml.load(file)
+    except FileNotFoundError:
+        print(f"config file not found: {file_path}")
+        sys.exit(1)
 
 
 def write_config(file_path, config):
-    with open(file_path, "w") as file:
-        yaml.dump(config, file)
+    try:
+        with open(file_path, "w") as file:
+            yaml.dump(config, file)
+    except FileNotFoundError:
+        print(f"config file not found: {file_path}")
+        sys.exit(1)
 
 
 def read_args() -> dict:
