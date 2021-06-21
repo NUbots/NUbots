@@ -77,10 +77,10 @@ namespace module::input {
                 VZ = 5,
 
                 // Rwt
-                QW = 6,
-                QX = 7,
-                QY = 8,
-                QZ = 9,
+                QX = 6,
+                QY = 7,
+                QZ = 8,
+                QW = 9,
 
                 // omegaTTt
                 WX = 10,
@@ -97,7 +97,7 @@ namespace module::input {
             StateVec()
                 : rTWw(Eigen::Matrix<Scalar, 3, 1>::Zero())
                 , vTw(Eigen::Matrix<Scalar, 3, 1>::Zero())
-                , Rwt({1, 0, 0, 0})
+                , Rwt(Eigen::Quaternion<Scalar>::Identity())
                 , omegaTTt(Eigen::Matrix<Scalar, 3, 1>::Zero())
                 , omegaTTt_bias(Eigen::Matrix<Scalar, 3, 1>::Zero()) {}
 
@@ -105,7 +105,7 @@ namespace module::input {
             StateVec(const Eigen::Matrix<Scalar, size, 1>& state)
                 : rTWw(state.template segment<3>(PX))
                 , vTw(state.template segment<3>(VX))
-                , Rwt(Eigen::Quaternion<Scalar>(state.template segment<4>(QW)).normalized())
+                , Rwt(Eigen::Quaternion<Scalar>(state.template segment<4>(QX)).normalized())
                 , omegaTTt(state.template segment<3>(WX))
                 , omegaTTt_bias(state.template segment<3>(BX)) {}
 
@@ -114,7 +114,7 @@ namespace module::input {
                 Eigen::Matrix<Scalar, size, 1> state = Eigen::Matrix<Scalar, size, 1>::Zero();
                 state.template segment<3>(PX)        = rTWw;
                 state.template segment<3>(VX)        = vTw;
-                state.template segment<4>(QW)        = Rwt.coeffs();
+                state.template segment<4>(QX)        = Rwt.coeffs();
                 state.template segment<3>(WX)        = omegaTTt;
                 state.template segment<3>(BX)        = omegaTTt_bias;
                 return state;
@@ -158,15 +158,16 @@ namespace module::input {
             // Here is an explanation https://gamedev.stackexchange.com/a/157018
             // Here is another derivation https://fgiesen.wordpress.com/2012/08/24/quaternion-differentiation/
             // dq/dt = (1/2)*omega*Rwt
-            const Eigen::Quaternion<Scalar> dq_dt = Eigen::Quaternion<Scalar>(0.0,
-                                                                              newState.omegaTTt.x() * 0.5,
-                                                                              newState.omegaTTt.y() * 0.5,
-                                                                              newState.omegaTTt.z() * 0.5)
-                                                    * Rwt;
+            const Eigen::Quaternion<Scalar> dq_dt =
+                Eigen::Quaternion<Scalar>(Eigen::Matrix<Scalar, 4, 1>(newState.omegaTTt.x() * 0.5,
+                                                                      newState.omegaTTt.y() * 0.5,
+                                                                      newState.omegaTTt.z() * 0.5,
+                                                                      0.0))
+                * Rwt;
             // The change in the rotation is the derivative times the differential (which is the time-step)
-            const Eigen::Quaternion<Scalar> change = Eigen::Quaternion<Scalar>(deltaT * dq_dt.coeffs());
-            // We can add the change to the original, as long as our time step is small enough
-            newState.Rwt = Eigen::Quaternion<Scalar>(Rwt.coeffs() + change.coeffs()).normalized();
+            const Eigen::Matrix<Scalar, 4, 1> change(deltaT * dq_dt.coeffs());
+            // We can add the change to the original as vectors, as long as our time step is small enough
+            newState.Rwt = Eigen::Quaternion<Scalar>(Rwt.coeffs() + change).normalized();
 
             // ********************************
             // UPDATE LINEAR POSITION/VELOCITY
@@ -206,7 +207,7 @@ namespace module::input {
 
         Eigen::Matrix<Scalar, 4, 1> predict(const Eigen::Matrix<Scalar, size, 1>& state,
                                             const MeasurementType::FLAT_FOOT_ORIENTATION&) {
-            return StateVec(state).Rwt.coeffs();
+            return state.template segment<4>(StateVec::QX);
         }
 
         // This function is called to determine the difference between position, velocity, and acceleration
@@ -227,7 +228,6 @@ namespace module::input {
             // If a and b represent very similar orientations, then the real part will be very close to one and
             // the imaginary part will be very close to (0, 0, 0)
             diff.w() -= Scalar(1);
-
             return diff.coeffs();
         }
 

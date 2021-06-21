@@ -242,12 +242,11 @@ namespace module::motion {
             const float sinPitch  = std::sin(halfPitch);
             const float cosRoll   = std::cos(halfRoll);
             const float sinRoll   = std::sin(halfRoll);
-            return Eigen::Quaternionf(cosRoll * cosPitch * cosYaw + sinRoll * sinPitch * sinYaw,  // formerly yzx
-                                      sinRoll * cosPitch * cosYaw - cosRoll * sinPitch * sinYaw,  // x
-                                      cosRoll * sinPitch * cosYaw + sinRoll * cosPitch * sinYaw,  // y
-                                      cosRoll * cosPitch * sinYaw - sinRoll * sinPitch * cosYaw   // z
-                                      )
-                .normalized()
+            return Eigen::Quaternionf(Eigen::Vector4f(sinRoll * cosPitch * cosYaw - cosRoll * sinPitch * sinYaw,   // x
+                                                      cosRoll * sinPitch * cosYaw + sinRoll * cosPitch * sinYaw,   // y
+                                                      cosRoll * cosPitch * sinYaw - sinRoll * sinPitch * cosYaw,   // z
+                                                      cosRoll * cosPitch * cosYaw + sinRoll * sinPitch * sinYaw))  // w
+                .normalized()  // Rotation quaternions should have unit norm
                 .toRotationMatrix();
         };
         // Read the cartesian positions and orientations for trunk and fly foot
