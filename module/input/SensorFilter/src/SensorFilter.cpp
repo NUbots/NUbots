@@ -245,7 +245,7 @@ namespace module::input {
                                     / double(sensors.size());
 
                     // Find the rotation from the average accelerometer reading to world UnitZ
-                    // Rotating from torso acceleration vector to world z vector ===> torso to world rotation
+                    // Rotating from torso acceleration vector to world z vector ===> this makes it Rwt and not Rtw
                     Eigen::Quaterniond Rwt = Eigen::Quaterniond::FromTwoVectors(acc, Eigen::Vector3d::UnitZ());
                     Rwt.normalize();
 

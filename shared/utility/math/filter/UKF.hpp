@@ -75,10 +75,10 @@ namespace utility::math::filter {
          * @brief Generate new sigma points given our mean and covariance.
          */
         template <typename T, int S>
-        static Eigen::ComputationInfo generate_sigma_points(const Eigen::Matrix<T, S, 1>& mean,
-                                                            const Eigen::Matrix<T, S, S>& covariance,
-                                                            const T& sigma_weight,
-                                                            SigmaMat& points) {
+        [[nodiscard]] static Eigen::ComputationInfo generate_sigma_points(const Eigen::Matrix<T, S, 1>& mean,
+                                                                          const Eigen::Matrix<T, S, S>& covariance,
+                                                                          const T& sigma_weight,
+                                                                          SigmaMat& points) {
 
             // Our first row is always the mean
             points.col(0) = mean;
