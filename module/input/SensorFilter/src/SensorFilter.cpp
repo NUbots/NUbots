@@ -87,15 +87,6 @@ namespace module::input {
         return s.str();
     }
 
-    LegLoad::operator std::string() const {
-        switch (value) {
-            case Value::FSR: return "FSR";
-            case Value::Z_HEIGHT: return "Z_HEIGHT";
-            case Value::LOAD: return "LOAD";
-            default: throw std::runtime_error("enum LegLoad value is corrupt, unknown value stored");
-        }
-    }
-
     SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), theta(Eigen::Vector3d::Zero()) {
 
@@ -105,8 +96,8 @@ namespace module::input {
             this->config.buttons.debounceThreshold = config["buttons"]["debounce_threshold"].as<int>();
 
             // Foot down config
-            const std::string method = config["foot_down"]["method"].as<std::string>();
-            std::map<std::string, float> thresholds;
+            const FootDownMethod method = config["foot_down"]["method"].as<std::string>();
+            std::map<FootDownMethod, float> thresholds;
             for (const auto& threshold : config["foot_down"]["known_methods"].config) {
                 thresholds[threshold["name"].as<std::string>()] = threshold["certainty_threshold"].as<float>();
             }
@@ -524,54 +515,62 @@ namespace module::input {
                         sensors->feet[BodySide::LEFT].down  = true;
 
                         std::array<bool, 2> feet_down = {true, true};
-                        if (config.footDown.method() == "LOAD") {
-                            // Use our virtual load sensor class to work out which feet are down
-                            feet_down = load_sensor.updateFeet(*sensors);
-                        }
-                        else if (config.footDown.method() == "Z_HEIGHT") {
-                            Eigen::Affine3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
-                            Eigen::Affine3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
-                            Eigen::Affine3d Hlr  = Htl.inverse() * Htr;
-                            Eigen::Vector3d rRLl = Hlr.translation();
 
-                            // Right foot is below left foot in left foot space
-                            if (rRLl.z() < -config.footDown.threshold()) {
-                                feet_down[BodySide::RIGHT] = true;
-                                feet_down[BodySide::LEFT]  = false;
-                            }
-                            // Right foot is above left foot in left foot space
-                            else if (rRLl.z() > config.footDown.threshold()) {
-                                feet_down[BodySide::RIGHT] = false;
-                                feet_down[BodySide::LEFT]  = true;
-                            }
-                            // Right foot and left foot are roughly the same height in left foot space
-                            else {
-                                feet_down[BodySide::RIGHT] = true;
-                                feet_down[BodySide::LEFT]  = true;
-                            }
-                        }
-                        else if (config.footDown.method() == "FSR") {
-                            // For a foot to be on the ground we want a minimum of 2 diagonally opposite studs
-                            // in contact with the ground
-                            // So fsr1 and fsr3, or fsr2 and fsr4
-                            //
-                            // A FSR is in contact with the ground if its value is greater than the certainty threshold
+                        // Calculate values needed for Z_HEIGHT method
+                        const Eigen::Affine3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
+                        const Eigen::Affine3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
+                        const Eigen::Affine3d Hlr  = Htl.inverse() * Htr;
+                        const Eigen::Vector3d rRLl = Hlr.translation();
 
-                            feet_down[BodySide::LEFT] = (((input.fsr.left.fsr1 > config.footDown.threshold())
-                                                          && (input.fsr.left.fsr3 > config.footDown.threshold()))
-                                                         || ((input.fsr.left.fsr2 > config.footDown.threshold())
-                                                             && (input.fsr.left.fsr4 > config.footDown.threshold())));
+                        switch (config.footDown.method()) {
+                            case FootDownMethod::LOAD:
+                                // Use our virtual load sensor class to work out which feet are down
+                                feet_down = load_sensor.updateFeet(*sensors);
+                                break;
+                            case FootDownMethod::Z_HEIGHT:
+                                // Right foot is below left foot in left foot space
+                                if (rRLl.z() < -config.footDown.threshold()) {
+                                    feet_down[BodySide::RIGHT] = true;
+                                    feet_down[BodySide::LEFT]  = false;
+                                }
+                                // Right foot is above left foot in left foot space
+                                else if (rRLl.z() > config.footDown.threshold()) {
+                                    feet_down[BodySide::RIGHT] = false;
+                                    feet_down[BodySide::LEFT]  = true;
+                                }
+                                // Right foot and left foot are roughly the same height in left foot space
+                                else {
+                                    feet_down[BodySide::RIGHT] = true;
+                                    feet_down[BodySide::LEFT]  = true;
+                                }
+                                break;
+                            case FootDownMethod::FSR:
+                                // For a foot to be on the ground we want a minimum of 2 diagonally opposite studs
+                                // in contact with the ground
+                                // So fsr1 and fsr3, or fsr2 and fsr4
+                                //
+                                // A FSR is in contact with the ground if its value is greater than the certainty
+                                // threshold
 
-                            feet_down[BodySide::RIGHT] = (((input.fsr.right.fsr1 > config.footDown.threshold())
-                                                           && (input.fsr.right.fsr3 > config.footDown.threshold()))
-                                                          || ((input.fsr.right.fsr2 > config.footDown.threshold())
-                                                              && (input.fsr.right.fsr4 > config.footDown.threshold())));
+                                feet_down[BodySide::LEFT] =
+                                    (((input.fsr.left.fsr1 > config.footDown.threshold())
+                                      && (input.fsr.left.fsr3 > config.footDown.threshold()))
+                                     || ((input.fsr.left.fsr2 > config.footDown.threshold())
+                                         && (input.fsr.left.fsr4 > config.footDown.threshold())));
+
+                                feet_down[BodySide::RIGHT] =
+                                    (((input.fsr.right.fsr1 > config.footDown.threshold())
+                                      && (input.fsr.right.fsr3 > config.footDown.threshold()))
+                                     || ((input.fsr.right.fsr2 > config.footDown.threshold())
+                                         && (input.fsr.right.fsr4 > config.footDown.threshold())));
+                                break;
+                            default: log<NUClear::WARN>("Unknown foot down method"); break;
                         }
 
                         if (this->config.debug) {
-                            emit(graph(fmt::format("Sensor/Foot Down/{}/Left", config.footDown.method()),
+                            emit(graph(fmt::format("Sensor/Foot Down/{}/Left", std::string(config.footDown.method())),
                                        feet_down[BodySide::LEFT]));
-                            emit(graph(fmt::format("Sensor/Foot Down/{}/Right", config.footDown.method()),
+                            emit(graph(fmt::format("Sensor/Foot Down/{}/Right", std::string(config.footDown.method())),
                                        feet_down[BodySide::RIGHT]));
                         }
 

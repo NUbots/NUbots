@@ -44,6 +44,39 @@ namespace module::input {
 
         utility::math::filter::UKF<double, MotionModel> motionFilter;
 
+        struct FootDownMethod {
+            enum Value { UNKNOWN = 0, Z_HEIGHT = 1, LOAD = 2, FSR = 3 };
+            Value value;
+
+            // Constructors
+            FootDownMethod() : value(Value::UNKNOWN) {}
+            FootDownMethod(int const& v) : value(static_cast<Value>(v)) {}
+            FootDownMethod(Value const& v) : value(v) {}
+            FootDownMethod(std::string const& str) {
+                // clang-format off
+                        if      (str == "Z_HEIGHT") { value = Value::Z_HEIGHT; }
+                        else if (str == "LOAD") { value = Value::LOAD; }
+                        else if (str == "FSR")  { value = Value::FSR; }
+                        else {
+                            value = Value::UNKNOWN;
+                            throw std::runtime_error("String " + str + " did not match any enum for ServoID");
+                        }
+                // clang-format on
+            }
+
+            // Conversions
+            operator Value() const {
+                return value;
+            }
+            operator std::string() const {
+                switch (value) {
+                    case Value::Z_HEIGHT: return "Z_HEIGHT";
+                    case Value::LOAD: return "VIRTUAL";
+                    case Value::FSR: return "FSR";
+                    default: throw std::runtime_error("enum Method's value is corrupt, unknown value stored");
+                }
+            }
+        };
         struct Config {
             Config() : motionFilter(), buttons(), footDown() {}
 
@@ -97,12 +130,12 @@ namespace module::input {
 
             struct FootDown {
                 FootDown() = default;
-                FootDown(const std::string& method, const std::map<std::string, float>& thresholds) {
+                FootDown(const FootDownMethod& method, const std::map<FootDownMethod, float>& thresholds) {
                     set_method(method, thresholds);
                 }
-                void set_method(const std::string& method, const std::map<std::string, float>& thresholds) {
+                void set_method(const FootDownMethod& method, const std::map<FootDownMethod, float>& thresholds) {
                     if (thresholds.count(method) == 0) {
-                        throw std::runtime_error(fmt::format("Invalid foot down method '{}'", method));
+                        throw std::runtime_error(fmt::format("Invalid foot down method '{}'", std::string(method)));
                     }
                     current_method       = method;
                     certainty_thresholds = thresholds;
@@ -110,28 +143,17 @@ namespace module::input {
                 [[nodiscard]] float threshold() const {
                     return certainty_thresholds.at(current_method);
                 }
-                [[nodiscard]] std::string method() const {
+                [[nodiscard]] FootDownMethod method() const {
                     return current_method;
                 }
-                std::string current_method                        = "Z_HEIGHT";
-                std::map<std::string, float> certainty_thresholds = {
-                    {"Z_HEIGHT", 0.01f},
-                    {"VIRTUAL", 0.05f},
-                    {"FSR", 60.0f},
+                FootDownMethod current_method                        = FootDownMethod::Z_HEIGHT;
+                std::map<FootDownMethod, float> certainty_thresholds = {
+                    {FootDownMethod::Z_HEIGHT, 0.01f},
+                    {FootDownMethod::LOAD, 0.05f},
+                    {FootDownMethod::FSR, 60.0f},
                 };
             } footDown;
         } config;
-
-
-        struct LegLoad {
-            enum Value { FSR = 0, Z_HEIGHT = 1, LOAD = 2 };
-            Value value;
-
-            // Constructors
-            LegLoad() : value(Value::FSR) {}
-
-            operator std::string() const;
-        };
 
     private:
         // Current state of the button pushes
