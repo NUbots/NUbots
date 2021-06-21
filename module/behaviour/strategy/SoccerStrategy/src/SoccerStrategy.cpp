@@ -631,7 +631,7 @@ namespace module::behaviour::strategy {
 
             // ************** UNKNOWN ****************************
             // We should reset to the initial state if we don't know what's happening
-            case State::UNKNOWN: state = SHOOTOUT_INITIAL; break;
+            case State::UNKNOWN: state = NORMAL_INITIAL; break;
 
             // ******* OTHER STATES NOT IN THIS GAME MODE - SHOULD NOT HAPPEN *********
             case State::SHOOTOUT_INITIAL:
