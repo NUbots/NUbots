@@ -415,9 +415,23 @@ namespace module::behaviour::strategy {
             case State::PENALISED: standStill(); break;
 
             // ************* FINISHED ****************************
-            // The game has finished, just stop
-            case State::FINISHED: standStill(); break;
+            // The game has finished or we are in the second half (I don't think this can happen here?)
+            case State::FINISHED:
+                switch (phase.value) {
+                    // We could have just finished the first half, so check for initial again
+                    case Phase::INITIAL:
 
+                    // Basic states
+                    case Phase::FINISHED: standStill(); break;
+                    case Phase::TIMEOUT: state = State::TIMEOUT; break;
+
+                    // If we were in this phase, and now are in any of these phases, then something has gone wrong
+                    case Phase::SET:
+                    case Phase::PLAYING:
+                    case Phase::READY: log<NUClear::WARN>("Unexpected phase."); break;
+                    default: log<NUClear::WARN>("Unknown phase.");
+                }
+                break;
             // ************** UNKNOWN ****************************
             // We should reset to the initial state if we don't know what's happening
             case State::UNKNOWN: state = SHOOTOUT_INITIAL; break;
@@ -465,11 +479,13 @@ namespace module::behaviour::strategy {
                         state = State::NORMAL_READY;
                         break;
 
+                        // Basic states
+                    case Phase::FINISHED: state = State::FINISHED; break;
+                    case Phase::TIMEOUT: state = State::TIMEOUT; break;
+
                     // If we were in this phase, and now are in any of these phases, then something has gone wrong
                     case Phase::SET:
-                    case Phase::PLAYING:
-                    case Phase::TIMEOUT:
-                    case Phase::FINISHED: log<NUClear::WARN>("Unexpected phase."); break;
+                    case Phase::PLAYING: log<NUClear::WARN>("Unexpected phase."); break;
                     default: log<NUClear::WARN>("Unknown phase.");
                 }
                 break;
@@ -499,11 +515,13 @@ namespace module::behaviour::strategy {
                         state = State::NORMAL_SET;
                         break;
 
+                    // Basic states
+                    case Phase::FINISHED: state = State::FINISHED; break;
+                    case Phase::TIMEOUT: state = State::TIMEOUT; break;
+
                     // If we were in this phase, and now are in any of these phases, then something has gone wrong
                     case Phase::INITIAL:
-                    case Phase::PLAYING:
-                    case Phase::TIMEOUT:
-                    case Phase::FINISHED: log<NUClear::WARN>("Unexpected phase."); break;
+                    case Phase::PLAYING: log<NUClear::WARN>("Unexpected phase."); break;
                     default: log<NUClear::WARN>("Unknown phase.");
                 }
                 break;
@@ -530,11 +548,13 @@ namespace module::behaviour::strategy {
 
                         break;
 
+                    // Basic states
+                    case Phase::FINISHED: state = State::FINISHED; break;
+                    case Phase::TIMEOUT: state = State::TIMEOUT; break;
+
                     // If we were in this phase, and now are in any of these phases, then something has gone wrong
                     case Phase::INITIAL:
-                    case Phase::READY:
-                    case Phase::TIMEOUT:
-                    case Phase::FINISHED: log<NUClear::WARN>("Unexpected phase."); break;
+                    case Phase::READY: log<NUClear::WARN>("Unexpected phase."); break;
                     default: log<NUClear::WARN>("Unknown phase.");
                 }
                 break;
@@ -575,12 +595,14 @@ namespace module::behaviour::strategy {
 
                         break;
 
+                    // Basic states
+                    case Phase::FINISHED: state = State::FINISHED; break;
+                    case Phase::TIMEOUT: state = State::TIMEOUT; break;
+
                     // If we were in this phase, and now are in any of these phases, then something has gone wrong
                     case Phase::INITIAL:
                     case Phase::SET:
-                    case Phase::READY:
-                    case Phase::TIMEOUT:
-                    case Phase::FINISHED: log<NUClear::WARN>("Unexpected phase."); break;
+                    case Phase::READY: log<NUClear::WARN>("Unexpected phase."); break;
                     default: log<NUClear::WARN>("Unknown phase.");
                 }
 
@@ -605,12 +627,14 @@ namespace module::behaviour::strategy {
 
                         break;
 
+                    // Basic states
+                    case Phase::FINISHED: state = State::FINISHED; break;
+                    case Phase::TIMEOUT: state = State::TIMEOUT; break;
+
                     // If we were in this phase, and now are in any of these phases, then something has gone wrong
                     case Phase::INITIAL:
                     case Phase::SET:
-                    case Phase::READY:
-                    case Phase::TIMEOUT:
-                    case Phase::FINISHED: log<NUClear::WARN>("Unexpected phase."); break;
+                    case Phase::READY: log<NUClear::WARN>("Unexpected phase."); break;
                     default: log<NUClear::WARN>("Unknown phase.");
                 }
 
@@ -626,8 +650,23 @@ namespace module::behaviour::strategy {
             case State::PENALISED: standStill(); break;
 
             // ************* FINISHED ****************************
-            // The game has finished, just stop
-            case State::FINISHED: standStill(); break;
+            // The game has finished or we are moving to the next half
+            case State::FINISHED:
+                switch (phase.value) {
+                    // We could have just finished the first half, so check for initial again
+                    case Phase::INITIAL:
+
+                    // Basic states
+                    case Phase::FINISHED: standStill(); break;
+                    case Phase::TIMEOUT: state = State::TIMEOUT; break;
+
+                    // If we were in this phase, and now are in any of these phases, then something has gone wrong
+                    case Phase::SET:
+                    case Phase::PLAYING:
+                    case Phase::READY: log<NUClear::WARN>("Unexpected phase."); break;
+                    default: log<NUClear::WARN>("Unknown phase.");
+                }
+                break;
 
             // ************** UNKNOWN ****************************
             // We should reset to the initial state if we don't know what's happening
@@ -638,7 +677,9 @@ namespace module::behaviour::strategy {
             case State::SHOOTOUT_SET_KICK:
             case State::SHOOTOUT_SET_GOALIE:
             case State::SHOOTOUT_PLAYING_KICK:
-            case State::SHOOTOUT_PLAYING_GOALIE: log<NUClear::WARN>("Unexpected state for game mode NORMAL."); break;
+            case State::SHOOTOUT_PLAYING_GOALIE:
+                log<NUClear::WARN>("Unexpected state for game mode NORMAL.", state);
+                break;
 
             // ********* SOME UNKNOWN STATE - SHOULD NOT HAPPEN ***********
             default: log<NUClear::WARN>("Unknown state.");
