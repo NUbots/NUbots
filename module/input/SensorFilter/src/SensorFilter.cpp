@@ -98,7 +98,7 @@ namespace module::input {
             // Foot down config
             const std::string method = config["foot_down"]["method"].as<std::string>();
             std::map<std::string, float> thresholds;
-            for (const auto& threshold : config["foot_down"]["known_methods"]) {
+            for (const auto& threshold : config["foot_down"]["known_methods"].config) {
                 thresholds[threshold["name"].as<std::string>()] = threshold["certainty_threshold"].as<float>();
             }
             this->config.footDown.set_method(method, thresholds);
