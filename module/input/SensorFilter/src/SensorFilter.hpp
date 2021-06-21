@@ -122,6 +122,17 @@ namespace module::input {
             } footDown;
         } config;
 
+
+        struct LegLoad {
+            enum Value { FSR = 0, Z_HEIGHT = 1, LOAD = 2 };
+            Value value;
+
+            // Constructors
+            LegLoad() : value(Value::FSR) {}
+
+            operator std::string() const;
+        };
+
     private:
         // Current state of the button pushes
         // used to debounce button presses
