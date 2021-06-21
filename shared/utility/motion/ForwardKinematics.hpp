@@ -373,7 +373,7 @@ namespace utility::motion::kinematics {
         }
 
         return Eigen::Vector4d{robot_com.first.x(), robot_com.first.y(), robot_com.first.z(), robot_com.second};
-    }  // namespace kinematics
+    }
 
     /*! @brief Transforms inertial tensors for each robot particle into torso space and sums to find the total
        inertial tensor
