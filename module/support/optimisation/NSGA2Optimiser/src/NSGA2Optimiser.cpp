@@ -3,6 +3,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/platform/webots/messages.hpp"
+#include "message/platform/webots/WebotsReady.hpp"
 #include "message/support/optimisation/NSGA2EvaluationRequest.hpp"
 #include "message/support/optimisation/NSGA2FitnessScores.hpp"
 #include "message/support/optimisation/NSGA2Terminate.hpp"
@@ -16,6 +17,7 @@ namespace module {
             using extension::Configuration;
 
             using message::platform::webots::OptimisationCommand;
+            using message::platform::webots::WebotsReady;
             using message::support::optimisation::NSGA2EvaluationRequest;
             using message::support::optimisation::NSGA2FitnessScores;
             using message::support::optimisation::NSGA2Terminate;
@@ -98,6 +100,17 @@ namespace module {
                 });
 
                 on<Startup>().then([this]() {
+                    // Create a message to request an evaluation of an individual
+                    std::unique_ptr<WebotsReady> message = std::make_unique<WebotsReady>();
+                    message->sim_time = 0;
+
+                    log<NUClear::INFO>("starting up in 4 seconds");
+                    emit<Scope::DELAY>(message, std::chrono::seconds(4));
+                });
+
+                on<Trigger<WebotsReady>, Single>().then([this](const WebotsReady& message) {
+                    log<NUClear::INFO>("webots ready, starting first evaluation");
+
                     // On system startup, initialize the algorithm
                     bool initSucceeded = nsga2Algorithm.PreEvaluationInitialize() == 0;
 
@@ -106,12 +119,14 @@ namespace module {
                     // (from the NSGA2FitnessScores trigger)
                     if (initSucceeded) {
                         requestIndEvaluation(0,
-                                             nsga2Algorithm.parentPop->generation,
-                                             nsga2Algorithm.parentPop->GetIndReals(0));
+                                                nsga2Algorithm.parentPop->generation,
+                                                nsga2Algorithm.parentPop->GetIndReals(0));
                     }
                 });
 
                 on<Trigger<NSGA2FitnessScores>, Single>().then([this](const NSGA2FitnessScores& scores) {
+                    log<NUClear::INFO>("got evaluation fitness scores");
+
                     // An individual has been evaluation and we've got the scores. This updates the
                     // algorithm with the score, and evaluates the next individual.
 

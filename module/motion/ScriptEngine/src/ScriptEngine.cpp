@@ -50,9 +50,13 @@ namespace module::motion {
         on<Trigger<ExecuteScriptByName>>().then([this](const ExecuteScriptByName& command) {
             std::vector<Script> scriptList;
 
+            std::cout << "executing scripts by name: ";
+
             for (size_t i = 0; i < command.scripts.size(); i++) {
                 const auto& scriptName = command.scripts[i];
                 auto script            = scripts.find(scriptName);
+
+                std::cout << scriptName;
 
                 if (script == std::end(scripts)) {
                     throw std::runtime_error("The script " + scriptName + " is not loaded in the system");
@@ -61,6 +65,9 @@ namespace module::motion {
                     scriptList.push_back(script->second);
                 }
             }
+
+            std::cout << std::endl;
+
             emit<Scope::DIRECT>(std::make_unique<ExecuteScript>(command.sourceId,
                                                                 scriptList,
                                                                 command.duration_modifier,

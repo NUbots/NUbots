@@ -9,6 +9,7 @@
 
 #include "message/motion/WalkCommand.hpp"
 #include "message/platform/RawSensors.hpp"
+#include "message/platform/webots/WebotsReady.hpp"
 #include "message/platform/webots/WebotsTimeUpdate.hpp"
 #include "message/platform/webots/messages.hpp"
 #include "message/support/optimisation/NSGA2EvaluationRequest.hpp"
@@ -34,6 +35,7 @@ namespace module {
             using message::platform::RawSensors;
             using message::platform::webots::OptimisationCommand;
             using message::platform::webots::OptimisationRobotPosition;
+            using message::platform::webots::WebotsReady;
             using message::platform::webots::WebotsTimeUpdate;
             using message::support::optimisation::NSGA2EvaluationRequest;
             using message::support::optimisation::NSGA2FitnessScores;
@@ -74,6 +76,8 @@ namespace module {
                 });
 
                 on<Trigger<NSGA2EvaluationRequest>, Single>().then([this](const NSGA2EvaluationRequest& request) {
+                    log("NSGA2EvaluationRequest");
+
                     // Make sure the simulator is in a known state
                     ResetWorld();
 
@@ -166,9 +170,15 @@ namespace module {
                     // Determine when we can terminate early: if we've fallen over
                     if (!terminating && evaluating && !finished && simTime > 4.0) {
                         if (fallenOver) {
+                            log("simTime > 4.0 and fallen over, beginning termination");
                             BeginTermination();
                         }
                     }
+                });
+
+                on<Trigger<WebotsReady>, Single>().then([this](const WebotsReady& message) {
+                    webotsReady = true;
+                    // readyTime = sim_time;
                 });
 
                 on<Trigger<WebotsTimeUpdate>, Single>().then([this](const WebotsTimeUpdate& update) {
@@ -178,7 +188,9 @@ namespace module {
 
                     // If there's been at least 1 second in the simulation but we're not evaluating or terminating,
                     // then execute the script (probably stand), reset the time, and start evaluating.
-                    if (simTime > 1.0 && !evaluating & !terminating) {
+                    if (webotsReady && !evaluating & !terminating) { // && simTime > 1.0
+                        log("Got WebotsTimeUpdate, starting initial evaluation after 1 seconds");
+
                         emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "Stand.yaml"));
                         evaluating = true;
 
@@ -186,24 +198,29 @@ namespace module {
                         // Eigen::Affine2d walk_command;
                         // walk_command.linear()      = Eigen::Rotation2Dd(walk_command_rotation).toRotationMatrix();
                         // walk_command.translation() = walk_command_velocity;
-                        log<NUClear::INFO>(fmt::format("Trialling with walk command: ({}) {}",
+                        log<NUClear::INFO>(fmt::format("Trialling with walk command: ({}) {}   NOT!",
                                                        walk_command_velocity.transpose(),
                                                        walk_command_rotation));
-                        emit(std::make_unique<WalkCommand>(subsumptionId,
+
+                        emit<Scope::DELAY>(std::make_unique<WalkCommand>(subsumptionId,
                                                            Eigen::Vector3d(walk_command_velocity.x(),
                                                                            walk_command_velocity.y(),
-                                                                           walk_command_rotation)));
+                                                                           walk_command_rotation)), std::chrono::seconds(3));
                     }
 
                     // If we've been terminating for at least 2 seconds, but are not finished, clear our terminating
                     // status and send the fitness scores back to the Optimiser
-                    if (terminating && !evaluating && !finished && (simTime - timeSinceTermination) > 2.0) {
+                    if (webotsReady && terminating && !evaluating && !finished && (simTime - timeSinceTermination) > 2.0) {
+                        log("Got WebotsTimeUpdate, termination ended, sending back fitness scores");
+
                         terminating = false;
                         SendFitnessScores();
                     }
                 });
 
                 on<Trigger<NSGA2Terminate>, Single>().then([this]() {
+                    log("got NSGA2Terminate, setting finish");
+
                     // Set the finished state when we get the termination message
                     finished = true;
                 });
@@ -221,6 +238,8 @@ namespace module {
             }
 
             void NSGA2Evaluator::SendFitnessScores() {
+                log<NUClear::DEBUG>("SendFitnessScores");
+
                 // Create the fitness scores message based on the results we calculated in CalculateFitness
                 // and emit it back to the Optimiser
                 std::unique_ptr<NSGA2FitnessScores> fitnessScores = std::make_unique<NSGA2FitnessScores>();
@@ -232,6 +251,8 @@ namespace module {
             }
 
             void NSGA2Evaluator::ResetWorld() {
+                log<NUClear::DEBUG>("ResetWorld");
+
                 // Tell Webots to reset the world
                 std::unique_ptr<OptimisationCommand> resetMsg = std::make_unique<OptimisationCommand>();
                 resetMsg->command                             = OptimisationCommand::CommandType::RESET_WORLD;
@@ -249,6 +270,8 @@ namespace module {
             }
 
             void NSGA2Evaluator::ResetWorldTime() {
+                log<NUClear::DEBUG>("ResetWorldTime");
+
                 // Tell Webots to reset the time
                 std::unique_ptr<OptimisationCommand> resetMsg = std::make_unique<OptimisationCommand>();
                 resetMsg->command                             = OptimisationCommand::CommandType::RESET_TIME;
@@ -256,6 +279,8 @@ namespace module {
             }
 
             void NSGA2Evaluator::BeginTermination() {
+                log<NUClear::DEBUG>("BeginTermination");
+
                 // Set state to indicate we're starting to terminate
                 terminating = true;
                 evaluating  = false;
@@ -274,10 +299,14 @@ namespace module {
 
                 // Reset the world and make the robot stand still for the next evaluation
                 ResetWorld();
+
+                log<NUClear::DEBUG>("Emitting StopCommand to end current walk");
                 emit(std::make_unique<StopCommand>(subsumptionId));
             }
 
             void NSGA2Evaluator::CalculateFitness() {
+                log<NUClear::DEBUG>("CalculateFitness");
+
                 // // Ensure maxFieldPlaneSway is positive, since we only care about the magnitude
                 // maxFieldPlaneSway = std::abs(maxFieldPlaneSway);
 
@@ -315,8 +344,7 @@ namespace module {
                 scores[1] = 1.0 / robotDistanceTravelled;
 
                 // Log the scores
-                log(scores[0]);
-                log(scores[1]);
+                log("individual score (fixed, 1/distanceTravelled):", scores[0], scores[1]);
             }
         }  // namespace optimisation
     }      // namespace support

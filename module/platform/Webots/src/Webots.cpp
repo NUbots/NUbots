@@ -576,6 +576,7 @@ namespace module::platform {
                         // Set the terminate command if the flag is set to terminate the simulator, used by the walk
                         // simulator
                         if (terminate_simulation) {
+                            std::cout << "setting terminate on ActuatorRequests to send" << std::endl;
                             actuator_requests.optimisation_command.command =
                                 OptimisationCommand::CommandType::TERMINATE;
                             terminate_simulation = false;
@@ -583,11 +584,13 @@ namespace module::platform {
 
                         // Set the reset command if the flag is set to reset the simulator, used by the walk simulator
                         if (reset_simulation_world) {
+                            std::cout << "setting RESET_WORLD on ActuatorRequests to send" << std::endl;
                             actuator_requests.optimisation_command.command =
                                 OptimisationCommand::CommandType::RESET_WORLD;
                             reset_simulation_world = false;
                         }
                         else if (reset_simulation_time) {
+                            std::cout << "setting RESET_TIME on ActuatorRequests to send" << std::endl;
                             actuator_requests.optimisation_command.command =
                                 OptimisationCommand::CommandType::RESET_TIME;
                             reset_simulation_time = false;
@@ -626,6 +629,16 @@ namespace module::platform {
     void Webots::translate_and_emit_sensor(const SensorMeasurements& sensor_measurements) {
         // ****************************** TIME **************************************
         // Deal with time first
+
+        // If our local sim time is non zero and we just got one that is zero, that means the simulation was reset
+        // (which is something we do for the walk optimisation), so reset our local times
+        if (sim_delta > 0 && sensor_measurements.time == 0) {
+            std::cout << "webots sim time reset to zero, resetting local sim_time. time before reset: " << current_sim_time << std::endl;
+            sim_delta = 0;
+            real_delta = 0;
+            current_sim_time = 0;
+            current_real_time = 0;
+        }
 
         // Save our previous deltas
         const uint32_t prev_sim_delta  = sim_delta;

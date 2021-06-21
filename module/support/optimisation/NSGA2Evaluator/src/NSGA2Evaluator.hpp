@@ -90,6 +90,9 @@ namespace module {
 
                 /// @brief The max field plane sway observed during the evaluation
                 double maxFieldPlaneSway;
+
+                /// @brief Set when the simulation is loaded and ready to run trials
+                bool webotsReady = false;
             };
 
         }  // namespace optimisation
