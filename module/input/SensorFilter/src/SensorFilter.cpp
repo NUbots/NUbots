@@ -201,11 +201,11 @@ namespace module::input {
                         gyro += Eigen::Vector3d(s->gyroscope.x, s->gyroscope.y, s->gyroscope.z);
 
                         // Make sure we have servo positions
-                        for (uint32_t i = 0; i < 20; ++i) {
-                            auto& original = utility::platform::getRawServo(i, *s);
+                        for (uint32_t id = 0; id < 20; ++id) {
+                            auto& original = utility::platform::getRawServo(id, *s);
                             // Add the sensor values to the system properly
                             filtered_sensors->servo.push_back({0,
-                                                               i,
+                                                               id,
                                                                original.torque_enabled,
                                                                original.p_gain,
                                                                original.i_gain,
@@ -259,10 +259,10 @@ namespace module::input {
                     mean.omegaTTt = gyro;
 
                     MotionModel<double>::StateVec covariance;
-                    covariance.rTWw     = this->config.motionFilter.initial.covariance.position;
-                    covariance.vTw      = this->config.motionFilter.initial.covariance.velocity;
-                    covariance.Rwt      = this->config.motionFilter.initial.covariance.rotation;
-                    covariance.omegaTTt = this->config.motionFilter.initial.covariance.rotationalVelocity;
+                    covariance.rTWw     = config.motionFilter.initial.covariance.position;
+                    covariance.vTw      = config.motionFilter.initial.covariance.velocity;
+                    covariance.Rwt      = config.motionFilter.initial.covariance.rotation;
+                    covariance.omegaTTt = config.motionFilter.initial.covariance.rotationalVelocity;
 
                     // We have finished resetting the filter now
                     switch (motionFilter.reset(mean.getStateVec(), covariance.asDiagonal())) {
@@ -701,6 +701,6 @@ namespace module::input {
 
                 emit(std::move(sensors));
             })
-                .disable();
+            .disable();
     }
     }  // namespace module::input

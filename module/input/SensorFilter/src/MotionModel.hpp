@@ -93,11 +93,6 @@ namespace module::input {
                 , omegaTTt(Eigen::Matrix<Scalar, 3, 1>::Zero()) {}
 
             // Constructor from monolithic vector representation, normalising the quaternion in the process
-            StateVec(const Eigen::Matrix<Scalar, size, 1>& state)
-                : rTWw(state.template segment<3>(PX))
-                , vTw(state.template segment<3>(VX))
-                , Rwt(Eigen::Quaternion<Scalar>(state.template segment<4>(QW)).normalized())
-                , omegaTTt(state.template segment<3>(WX)) {}
             template <typename OtherDerived>
             StateVec(const Eigen::MatrixBase<OtherDerived>& state)
                 : rTWw(state.template segment<3>(PX))
@@ -161,7 +156,7 @@ namespace module::input {
             // UPDATE LINEAR POSITION/VELOCITY
             // ********************************
 
-            // Add our velocity to our position
+            // Add our velocity to our positionWebots
             newState.rTWw += newState.vTw * deltaT;
 
             // add velocity decay
@@ -173,13 +168,19 @@ namespace module::input {
         Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::ACCELEROMETER&) {
 
             // Rotate world gravity vector into torso space using quaternion conjugation
+            //
             // p' = q * p * q.conjugate()
+            //
+            // Substitute q with Rtw and p with G
+            // Where G is a quaternion with real part zero and vector part (0, 0, G)
+            //
             // G' = Rtw * G * Rtw.conjugate()
             //    = Rwt.conjugate() * G * Rwt.conjugate().conjugate()
             //    = Rwt.conjugate() * G * Rwt
-            // G is a quaternion with real part zero and vector part (0, 0, G)
+            //
             // The vector part of G' is the result of rotating G by Rtw
-            return (state.Rwt.conjugate() * Eigen::Quaternion<Scalar>(Scalar(0), Scalar(0), Scalar(0), Scalar(G))
+            return (state.Rwt.conjugate()
+                    * Eigen::Quaternion<Scalar>(Eigen::Matrix<Scalar, 4, 1>(Scalar(0), Scalar(0), Scalar(G), Scalar(0)))
                     * state.Rwt)
                 .vec();
         }
@@ -193,7 +194,7 @@ namespace module::input {
         }
 
         Eigen::Matrix<Scalar, 4, 1> predict(const StateVec& state, const MeasurementType::FLAT_FOOT_ORIENTATION&) {
-            return {state.Rwt.w(), state.Rwt.x(), state.Rwt.y(), state.Rwt.z()};
+            return state.Rwt.coeffs();
         }
 
         // This function is called to determine the difference between position, velocity, and acceleration
@@ -209,9 +210,8 @@ namespace module::input {
             // Find the rotation needed to get from orientation a to orientation b
             const Eigen::Quaternion<Scalar> q0(a);
             const Eigen::Quaternion<Scalar> q1(b);
-            const Eigen::Quaternion<Scalar> diff = utility::math::quaternion::difference(q0, q1);
 
-            return {diff.w(), diff.x(), diff.y(), diff.z()};
+            return utility::math::quaternion::difference(q0, q1).coeffs();
         }
 
         StateVec limit(const StateVec& state) {
