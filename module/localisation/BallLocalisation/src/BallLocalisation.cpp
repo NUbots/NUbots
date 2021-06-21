@@ -41,15 +41,15 @@ namespace module::localisation {
 
             ball_pos_log = config["ball_pos_log"].as<bool>();
             // Use configuration here from file RobotParticleLocalisation.yaml
-            filter.model.n_rogues   = config["n_rogues"].as<int>();
-            filter.model.resetRange = config["reset_range"].as<Expression>();
-            int n_particles         = config["n_particles"].as<int>();
+            filter.model.n_rogues    = config["n_rogues"].as<int>();
+            filter.model.resetRange  = config["reset_range"].as<Expression>();
+            filter.model.n_particles = config["n_particles"].as<int>();
 
             const Eigen::Vector2d start_state    = config["start_state"].as<Expression>();
             const Eigen::Vector2d start_variance = config["start_variance"].as<Expression>();
 
             // start_variance.asDiagonal() == the starting covariance matrix
-            filter.set_state(start_state, start_variance.asDiagonal(), n_particles);
+            filter.set_state(start_state, start_variance.asDiagonal());
 
             // Use configuration here from file BallLocalisation.yaml
         });

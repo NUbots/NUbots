@@ -20,12 +20,17 @@
 #ifndef MODULE_PLATFORM_WEBOTS_HPP
 #define MODULE_PLATFORM_WEBOTS_HPP
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <array>
 #include <atomic>
+#include <map>
+#include <mutex>
 #include <nuclear>
 #include <string>
 #include <vector>
 
+#include "message/input/Image.hpp"
 #include "message/platform/webots/ConnectRequest.hpp"
 #include "message/platform/webots/messages.hpp"
 
@@ -84,7 +89,8 @@ namespace module::platform {
         /// @brief The minimum allowed time between two sensor measurements, not including the camera
         int min_sensor_time_step;
         /// @brief The maximum velocity allowed by the NUgus motors in webots
-        double max_velocity;
+        double max_velocity_mx64;
+        double max_velocity_mx106;
 
         /// @brief Current state of a servo
         struct ServoState {
@@ -120,6 +126,20 @@ namespace module::platform {
         /// @brief Atomic variable indicating that a reconnect is currently in progress
         std::atomic_bool active_reconnect{false};
         bool connection_active = false;
+
+        std::mutex sensors_mutex;
+        std::vector<std::pair<NUClear::clock::time_point, Eigen::Affine3d>> Hwps;
+
+        struct CameraContext {
+            std::string name;
+            uint32_t id;
+            message::input::Image::Lens lens;
+            // Homogenous transform from camera (c) to platform (p) where platform is the rigid body the camera is
+            // attached to
+            Eigen::Affine3d Hpc;
+        };
+        std::map<std::string, CameraContext> camera_context;
+        uint32_t num_cameras = 0;
 
     public:
         /// @brief Called by the powerplant to build and setup the webots reactor

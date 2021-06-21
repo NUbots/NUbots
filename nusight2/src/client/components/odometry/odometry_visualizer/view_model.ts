@@ -2,19 +2,12 @@ import { computed } from 'mobx'
 import * as THREE from 'three'
 import { Matrix4 } from '../../../math/matrix4'
 import { Vector3 } from '../../../math/vector3'
-import { planeGeometry } from '../../three/builders'
-import { boxGeometry } from '../../three/builders'
-import { meshBasicMaterial } from '../../three/builders'
-import { mesh } from '../../three/builders'
-import { group } from '../../three/builders'
-import { scene } from '../../three/builders'
-import { perspectiveCamera } from '../../three/builders'
-import { stage } from '../../three/builders'
+import { boxGeometry, group, mesh, meshBasicMaterial, perspectiveCamera, planeGeometry, scene, stage } from '../../three/builders'
 import { Canvas } from '../../three/three'
 import { OdometryVisualizerModel } from './model'
 
 export class OdometryVisualizerViewModel {
-  constructor(private readonly canvas: Canvas, private readonly model: OdometryVisualizerModel) {}
+  constructor(private readonly canvas: Canvas, private readonly model: OdometryVisualizerModel) { }
 
   static of(canvas: Canvas, model: OdometryVisualizerModel) {
     return new OdometryVisualizerViewModel(canvas, model)
@@ -52,6 +45,7 @@ export class OdometryVisualizerViewModel {
     children: [
       this.torso(),
       this.floor(),
+      this.worldFrame(),
       this.leftFootPrint(),
       this.rightFootPrint(),
       this.model.leftFoot?.down && this.leftFootTorso(),
@@ -63,6 +57,23 @@ export class OdometryVisualizerViewModel {
     position: this.rTWw,
     rotation: Vector3.fromThree(new THREE.Euler().setFromRotationMatrix(this.model.Hwt.toThree())),
     children: [this.basis('torso'), this.accelerometer(), this.leftFoot(), this.rightFoot()],
+  }))
+
+  private readonly basis = group(() => ({
+    children: [
+      new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), undefined, 1, 0xff0000),
+      new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), undefined, 1, 0x00ff00),
+      new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), undefined, 1, 0x0000ff),
+    ],
+  }))
+
+  private readonly worldFrame = group(() => ({
+    position: this.rTWw,
+    children: [
+      new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), undefined, 0.2, 0xff0000),
+      new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), undefined, 0.2, 0x00ff00),
+      new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), undefined, 0.2, 0x0000ff),
+    ],
   }))
 
   private readonly accelerometer = group(() => ({
