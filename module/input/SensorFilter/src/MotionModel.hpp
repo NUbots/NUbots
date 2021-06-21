@@ -74,10 +74,10 @@ namespace module::input {
                 VZ = 5,
 
                 // Rwt
-                QW = 6,
-                QX = 7,
-                QY = 8,
-                QZ = 9,
+                QX = 6,
+                QY = 7,
+                QZ = 8,
+                QW = 9,
 
                 // omegaTTt
                 WX = 10,
@@ -89,7 +89,7 @@ namespace module::input {
             StateVec()
                 : rTWw(Eigen::Matrix<Scalar, 3, 1>::Zero())
                 , vTw(Eigen::Matrix<Scalar, 3, 1>::Zero())
-                , Rwt({1, 0, 0, 0})
+                , Rwt(Eigen::Quaternion<Scalar>::Identity())
                 , omegaTTt(Eigen::Matrix<Scalar, 3, 1>::Zero()) {}
 
             // Constructor from monolithic vector representation, normalising the quaternion in the process
@@ -97,7 +97,7 @@ namespace module::input {
             StateVec(const Eigen::MatrixBase<OtherDerived>& state)
                 : rTWw(state.template segment<3>(PX))
                 , vTw(state.template segment<3>(VX))
-                , Rwt(Eigen::Quaternion<Scalar>(state.template segment<4>(QW)).normalized())
+                , Rwt(Eigen::Quaternion<Scalar>(state.template segment<4>(QX)).normalized())
                 , omegaTTt(state.template segment<3>(WX)) {}
 
             // Converts StateVec to monolithic vector representation
@@ -105,7 +105,7 @@ namespace module::input {
                 Eigen::Matrix<Scalar, size, 1> state = Eigen::Matrix<Scalar, size, 1>::Zero();
                 state.template segment<3>(PX)        = rTWw;
                 state.template segment<3>(VX)        = vTw;
-                state.template segment<4>(QW)        = Rwt.coeffs();
+                state.template segment<4>(QX)        = Rwt.coeffs();
                 state.template segment<3>(WX)        = omegaTTt;
                 return state;
             }
