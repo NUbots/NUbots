@@ -312,8 +312,8 @@ namespace module::platform {
         });
 
         // This trigger updates our current servo state
-        on<Trigger<ServoTargets>, With<RawSensors>>().then([this](const ServoTargets& targets,
-                                                                  const RawSensors& sensors) {
+        on<Trigger<ServoTargets>, With<RawSensors>, Sync<ServoTargets>>().then([this](const ServoTargets& targets,
+                                                                                      const RawSensors& sensors) {
             // Loop through each of our commands
             for (const auto& target : targets.targets) {
                 // Get the difference between the current servo position and our servo target
@@ -525,59 +525,59 @@ namespace module::platform {
                         }
                     });
 
-            send_io = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then(
-                "Simulator Update Loop",
-                [this] {
-                    // Bound the time_step for the cameras and other sensors by the minimum allowed time_step for
-                    // the competition
-                    const uint32_t sensor_timestep = std::max(min_sensor_time_step, time_step);
-                    const uint32_t camera_timestep = std::max(min_camera_time_step, time_step);
+            send_io =
+                on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH, Sync<ServoTargets>>()
+                    .then("Simulator Update Loop", [this] {
+                        // Bound the time_step for the cameras and other sensors by the minimum allowed time_step for
+                        // the competition
+                        const uint32_t sensor_timestep = std::max(min_sensor_time_step, time_step);
+                        const uint32_t camera_timestep = std::max(min_camera_time_step, time_step);
 
-                    // Construct the ActuatorRequests message
-                    ActuatorRequests actuator_requests = create_sensor_time_steps(sensor_timestep, camera_timestep);
-                    for (auto& servo : servo_state) {
-                        if (servo.dirty) {
-                            // Servo is no longer dirty
-                            servo.dirty = false;
+                        // Construct the ActuatorRequests message
+                        ActuatorRequests actuator_requests = create_sensor_time_steps(sensor_timestep, camera_timestep);
+                        for (auto& servo : servo_state) {
+                            if (servo.dirty) {
+                                // Servo is no longer dirty
+                                servo.dirty = false;
 
-                            // Create servo position message
-                            actuator_requests.motor_positions.emplace_back(
-                                MotorPosition(servo.name, servo.goal_position));
+                                // Create servo position message
+                                actuator_requests.motor_positions.emplace_back(
+                                    MotorPosition(servo.name, servo.goal_position));
 
-                            // Create servo velocity message
-                            actuator_requests.motor_velocities.emplace_back(
-                                MotorVelocity(servo.name, servo.moving_speed));
+                                // Create servo velocity message
+                                actuator_requests.motor_velocities.emplace_back(
+                                    MotorVelocity(servo.name, servo.moving_speed));
 
-                            // Create servo PID message
-                            actuator_requests.motor_pids.emplace_back(
-                                MotorPID(servo.name, {servo.p_gain, servo.i_gain, servo.d_gain}));
-                        }
-                    }
-
-                    // Serialise ActuatorRequests
-                    std::vector<char> data =
-                        NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(actuator_requests);
-
-                    // Size of the message, in network endian
-                    const uint32_t Nn = htonl(data.size());
-
-                    // Only send actuator requests if we are connected to the controller
-                    if (connection_active) {
-                        // Send the message size first
-                        if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
-                            log<NUClear::ERROR>(
-                                fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
+                                // Create servo PID message
+                                actuator_requests.motor_pids.emplace_back(
+                                    MotorPID(servo.name, {servo.p_gain, servo.i_gain, servo.d_gain}));
+                            }
                         }
 
+                        // Serialise ActuatorRequests
+                        std::vector<char> data =
+                            NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(actuator_requests);
 
-                        // Now send the data
-                        if (send(fd, data.data(), data.size(), 0) != int(data.size())) {
-                            log<NUClear::ERROR>(
-                                fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
+                        // Size of the message, in network endian
+                        const uint32_t Nn = htonl(data.size());
+
+                        // Only send actuator requests if we are connected to the controller
+                        if (connection_active) {
+                            // Send the message size first
+                            if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
+                                log<NUClear::ERROR>(fmt::format("Error in sending ActuatorRequests' message size,  {}",
+                                                                strerror(errno)));
+                            }
+
+
+                            // Now send the data
+                            if (send(fd, data.data(), data.size(), 0) != int(data.size())) {
+                                log<NUClear::ERROR>(
+                                    fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
+                            }
+                            log<NUClear::TRACE>("Sending actuator request.");
                         }
-                        log<NUClear::TRACE>("Sending actuator request.");
-                    }
-                });
+                    });
 
             // Reconnection has now completed
             active_reconnect.store(false);
