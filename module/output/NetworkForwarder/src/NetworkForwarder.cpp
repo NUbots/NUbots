@@ -24,7 +24,7 @@ namespace module::output {
             // clang-format on
 
             // Update which types we will be forwarding
-            for (const auto& target_config : cfg["targets"].config) {
+            for (const auto& target_config : cfg["targets"]) {
 
                 // Extract the target we are sending to
                 std::string target = target_config.first.as<std::string>();
