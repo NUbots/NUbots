@@ -34,6 +34,7 @@ namespace module::vision {
             float disagreement_ratio;
             message::conversion::math::fmat3 goal_angular_cov;
             bool use_median;
+            float max_goal_distance;
             bool debug;
         } config;
 
