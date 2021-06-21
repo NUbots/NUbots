@@ -105,6 +105,7 @@ namespace module::behaviour::strategy {
         void unpenalisedLocalisationReset(const message::support::FieldDescription& fieldDescription);
 
         void standStill();
+        void standScript();
         void searchWalk();
         void walkTo(const message::support::FieldDescription& fieldDescription,
                     const message::behaviour::FieldTarget::Target& object);
