@@ -514,7 +514,7 @@ namespace module::input {
                         sensors->feet[BodySide::RIGHT].down = true;
                         sensors->feet[BodySide::LEFT].down  = true;
 
-                        std::array<bool, 2> feet_down = {true};
+                        std::array<bool, 2> feet_down = {true, true};
                         if (config.footDown.method() == "LOAD") {
                             // Use our virtual load sensor class to work out which feet are down
                             feet_down = load_sensor.updateFeet(*sensors);
