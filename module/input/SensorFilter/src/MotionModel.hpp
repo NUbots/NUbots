@@ -93,11 +93,6 @@ namespace module::input {
                 , omegaTTt(Eigen::Matrix<Scalar, 3, 1>::Zero()) {}
 
             // Constructor from monolithic vector representation, normalising the quaternion in the process
-            StateVec(const Eigen::Matrix<Scalar, size, 1>& state)
-                : rTWw(state.template segment<3>(PX))
-                , vTw(state.template segment<3>(VX))
-                , Rwt(Eigen::Quaternion<Scalar>(state.template segment<4>(QW)).normalized())
-                , omegaTTt(state.template segment<3>(WX)) {}
             template <typename OtherDerived>
             StateVec(const Eigen::MatrixBase<OtherDerived>& state)
                 : rTWw(state.template segment<3>(PX))
@@ -161,7 +156,7 @@ namespace module::input {
             // UPDATE LINEAR POSITION/VELOCITY
             // ********************************
 
-            // Add our velocity to our position
+            // Add our velocity to our positionWebots
             newState.rTWw += newState.vTw * deltaT;
 
             // add velocity decay
