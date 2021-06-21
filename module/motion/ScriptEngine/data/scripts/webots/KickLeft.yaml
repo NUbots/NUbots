@@ -337,7 +337,7 @@
       gain: 30
       torque: 100
     - id: L_HIP_PITCH
-      position: 0.0500000007
+      position: 0.200000003
       gain: 30
       torque: 100
     - id: L_ANKLE_PITCH
@@ -439,7 +439,7 @@
       gain: 30
       torque: 100
     - id: L_KNEE
-      position: 0.699999988
+      position: 0.800000012
       gain: 30
       torque: 100
     - id: L_HIP_ROLL
