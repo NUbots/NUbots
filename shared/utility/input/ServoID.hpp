@@ -49,15 +49,15 @@ namespace utility::input {
             HEAD_PITCH       = 19,
             NUMBER_OF_SERVOS = 20
         };
-        Value value;
+        Value value = Value::R_SHOULDER_PITCH;
 
         // Constructors
-        ServoID() : value(Value::R_SHOULDER_PITCH) {}
+        ServoID() = default;
         ServoID(uint8_t const& v) : value(static_cast<Value>(v)) {}
         ServoID(uint32_t const& v) : value(static_cast<Value>(v)) {}
         ServoID(uint64_t const& v) : value(static_cast<Value>(v)) {}
         ServoID(int const& v) : value(static_cast<Value>(v)) {}
-        ServoID(Value const& value) : value(value) {}
+        ServoID(Value const& v) : value(v) {}
         ServoID(std::string const& str);
 
         // Operators
@@ -123,4 +123,4 @@ namespace utility::input {
     };
 }  // namespace utility::input
 
-#endif
+#endif  // UTILITY_INPUT_SERVOID_HPP
