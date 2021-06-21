@@ -172,6 +172,13 @@ namespace module::behaviour::planning {
 
                     return;
                 }
+                else if (latestCommand.type == message::behaviour::MotionCommand::Type::PENALTY_KICK) {
+                    // log("KICK PENALTY");
+                    emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "KickPenalty.yaml"));
+                    emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {1000, 1000}}));
+                    return;
+                }
+
                 else if (latestCommand.type == message::behaviour::MotionCommand::Type::DIRECT_COMMAND) {
                     // TO DO, change to Bezier stuff
                     std::unique_ptr<WalkCommand> command =

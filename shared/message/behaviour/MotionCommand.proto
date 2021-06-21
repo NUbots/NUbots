@@ -31,6 +31,8 @@ message MotionCommand {
         WALK_TO_STATE = 1;
         // Approach the ball, ready to perform a forward kick toward the given kickTarget. Avoids obstacles.
         BALL_APPROACH = 2;
+        // Execute the kick for penalty shoot-out
+        PENALTY_KICK = 3;
         // Stop all current motion and directly send the given WalkCommand to the WalkEngine.
         DIRECT_COMMAND = 3;
     }
