@@ -20,14 +20,12 @@ namespace module::localisation {
         NUClear::clock::time_point last_time_update_time;
         NUClear::clock::time_point last_measurement_update_time;
 
-        static constexpr int TIME_UPDATE_FREQUENCY     = 10;
-        static constexpr int PARTICLE_UPDATE_FREQUENCY = 1;
-
-        // Member variables, to be set by config
-        int draw_particles;
+        static constexpr int TIME_UPDATE_FREQUENCY = 10;
 
         struct {
             bool debug;
+            std::vector<Eigen::Vector3d> start_state{};
+            Eigen::Vector3d start_variance{};
         } config;
 
         Eigen::Vector3d getFieldPosition(const message::vision::Goal& goal,

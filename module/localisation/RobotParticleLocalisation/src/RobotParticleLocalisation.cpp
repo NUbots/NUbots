@@ -2,6 +2,7 @@
 
 #include <Eigen/Geometry>
 #include <fmt/format.h>
+#include <fmt/ostream.h>
 
 #include "extension/Configuration.hpp"
 
@@ -138,19 +139,14 @@ namespace module::localisation {
                                     log(fmt::format("Testing post {}",
                                                     goal_post.side == Goal::Side::LEFT ? "left" : "Right"));
                                     log(fmt::format("Candidate own {}", candidate_own));
-                                    log(fmt::format("Actual own post at {}\n{}\n{}",
-                                                    cartesianToSpherical(rGCc_own)[0],
-                                                    cartesianToSpherical(rGCc_own)[1],
-                                                    cartesianToSpherical(rGCc_own)[2]));
+                                    log(fmt::format("State {}", state.transpose()));
+                                    log(fmt::format("Hcw {}\n", goals.Hcw));
+                                    log(fmt::format("Actual own post at {}",
+                                                    cartesianToSpherical(rGCc_own).transpose()));
                                     log(fmt::format("Candidate opp {}", candidate_opp));
-                                    log(fmt::format("Actual opp post at {}\n{}\n{}",
-                                                    cartesianToSpherical(rGCc_opp)[0],
-                                                    cartesianToSpherical(rGCc_opp)[1],
-                                                    cartesianToSpherical(rGCc_opp)[2]));
-                                    log(fmt::format("Measured post at {}\n{}\n{}",
-                                                    Eigen::Vector3d(m.position.cast<double>()).x(),
-                                                    Eigen::Vector3d(m.position.cast<double>()).y(),
-                                                    Eigen::Vector3d(m.position.cast<double>()).z()));
+                                    log(fmt::format("Actual opp post at {}",
+                                                    cartesianToSpherical(rGCc_opp).transpose()));
+                                    log(fmt::format("Measured post at {}", m.position.transpose()));
                                 }
 
                                 filter = candidate_own > candidate_opp ? filter_new_own : filter_new_opp;
@@ -197,13 +193,20 @@ namespace module::localisation {
         on<Trigger<ResetRobotHypotheses>, With<Sensors>, Sync<RobotParticleLocalisation>>().then(
             "Reset Robot Hypotheses",
             [this](const ResetRobotHypotheses& locReset, const Sensors& sensors) {
+                if (locReset.hypotheses.empty()) {
+                    filter.set_state(config.start_state,
+                                     std::vector<Eigen::Vector3d>(config.start_state.size(), config.start_variance));
+                    return;
+                }
+
                 std::vector<Eigen::Vector3d> states;
                 std::vector<Eigen::Matrix3d> cov;
 
-                Eigen::Affine3d Htw;
-                Htw.matrix() = (sensors.Htw);
-
+                Eigen::Affine3d Htw(sensors.Htw);
+                log("Reset Robot Hypotheses");
                 for (auto& s : locReset.hypotheses) {
+
+                    // Calculate the reset state
                     Eigen::Affine3d Hft;
                     Hft.translation() = Eigen::Vector3d(s.position.x(), s.position.y(), 0);
                     // Linear part of transform is `s.heading` radians rotation about Z axis
@@ -219,6 +222,7 @@ namespace module::localisation {
 
                     states.push_back(hfw_state_vec);
 
+                    // Calculate the reset covariance
                     const Eigen::Rotation2D<double> Hfw_xy(
                         utility::localisation::projectTo2D(Hfw, Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitX())
                             .rotation());
@@ -229,8 +233,8 @@ namespace module::localisation {
                     state_cov.topLeftCorner(2, 2) = pos_cov.matrix();
                     state_cov(2, 2)               = s.heading_var;
                     cov.push_back(state_cov);
-                    filter.set_state(hfw_state_vec, state_cov);
                 }
+                filter.set_state(states, cov);
             });
 
         on<Configuration>("RobotParticleLocalisation.yaml").then([this](const Configuration& cfg) {
@@ -239,34 +243,46 @@ namespace module::localisation {
             filter.model.n_rogues             = cfg["n_rogues"].as<int>();
             filter.model.resetRange           = cfg["reset_range"].as<Expression>();
             filter.model.n_particles          = cfg["n_particles"].as<int>();
-            draw_particles                    = cfg["draw_particles"].as<int>();
-
-            Eigen::Vector3d start_state = cfg["start_state"].as<Expression>();
-            // TODO: This variable is not used. Probably remove it
-            /* Eigen::Vector3d start_variance = cfg["start_variance"].as<Expression>(); */
 
             config.debug = cfg["debug"].as<bool>();
 
-            auto reset = std::make_unique<ResetRobotHypotheses>();
-            ResetRobotHypotheses::Self leftSide;
-            // Start on goal line
-            leftSide.position     = Eigen::Vector2d(start_state.x(), start_state.y());
-            leftSide.position_cov = Eigen::Vector2d::Constant(0.5).asDiagonal();
-            leftSide.heading      = start_state.z();
-            leftSide.heading_var  = 0.005;
+            config.start_variance = cfg["start_variance"].as<Expression>();
+        });
 
-            reset->hypotheses.push_back(leftSide);
-            ResetRobotHypotheses::Self rightSide;
-            // Start on goal line
-            rightSide.position     = Eigen::Vector2d(start_state.x(), -start_state.y());
-            rightSide.position_cov = Eigen::Vector2d::Constant(0.5).asDiagonal();
-            rightSide.heading      = -start_state.z();
-            rightSide.heading_var  = 0.005;
+        on<Startup, With<FieldDescription>>().then([this](const FieldDescription& fd) {
+            // Left side penalty mark
+            config.start_state.emplace_back((-fd.dimensions.field_length / 2.0) + fd.dimensions.penalty_mark_distance,
+                                            (-fd.dimensions.field_width / 2.0),
+                                            -M_PI_2);
 
-            reset->hypotheses.push_back(rightSide);
-            emit<Scope::DELAY>(reset, std::chrono::seconds(1));
+            // Right side penalty mark
+            config.start_state.emplace_back((-fd.dimensions.field_length / 2.0) + fd.dimensions.penalty_mark_distance,
+                                            (fd.dimensions.field_width / 2.0),
+                                            M_PI_2);
+
+            // // Left side goal line
+            // config.start_state.emplace_back(
+            //     (-fd.dimensions.field_length / 2.0),
+            //     (-fd.dimensions.field_width / 2.0) + ((fd.dimensions.field_width - fd.dimensions.goal_width) / 4.0),
+            //     0.0);
+
+            // // Right side goal line
+            // config.start_state.emplace_back(
+            //     (-fd.dimensions.field_length / 2.0),
+            //     (fd.dimensions.field_width / 2.0) - ((fd.dimensions.field_width - fd.dimensions.goal_width) / 4.0),
+            //     0.0);
+
+            // Penalty shootout position
+            // config.start_state.emplace_back((-fd.dimensions.field_length / 2.0) +
+            // fd.dimensions.penalty_mark_distance,
+            //                                 0.0,
+            //                                 -M_PI);
+
+            filter.set_state(config.start_state,
+                             std::vector<Eigen::Vector3d>(config.start_state.size(), config.start_variance));
         });
     }
+
 
     // True goal posiiton
     Eigen::Vector3d RobotParticleLocalisation::getFieldPosition(const VisionGoal& goal,
@@ -274,8 +290,8 @@ namespace module::localisation {
                                                                 const bool isOwn) const {
         Eigen::Vector3d position;
 
-        const bool left  = (goal.side != VisionGoal::Side::RIGHT);
-        const bool right = (goal.side != VisionGoal::Side::LEFT);
+        const bool left  = (goal.side == VisionGoal::Side::LEFT);
+        const bool right = (goal.side == VisionGoal::Side::RIGHT);
 
         // TODO This should be removed from the message
         // const bool own   = (goal.team != VisionGoal::Team::OPPONENT);
@@ -297,3 +313,28 @@ namespace module::localisation {
         return position;
     }
 }  // namespace module::localisation
+
+
+// csv recording
+// {
+//     // clang-format off
+//     Eigen::Vector3d position(m.position.cast<double>());
+//     std::cout << position(0) << "," << position(1) << "," << position(2);
+
+//     Eigen::Matrix3d cov(m.covariance.cast<double>());
+//     std::cout
+//         << cov(0, 0) << "," << cov(0, 1) << "," << cov(0, 2) << ","
+//         << cov(1, 0) << "," << cov(1, 1) << "," << cov(1, 2) << ","
+//         << cov(2, 0) << "," << cov(2, 1) << "," << cov(2, 2) << ",";
+
+//     Eigen::Matrix4d Hcw(goals.Hcw);
+
+//     std::cout
+//         << Hcw(0, 0) << "," << Hcw(0, 1) << "," << Hcw(0, 2) << "," << Hcw(0, 3) << ","
+//         << Hcw(1, 0) << "," << Hcw(1, 1) << "," << Hcw(1, 2) << "," << Hcw(1, 3) << ","
+//         << Hcw(2, 0) << "," << Hcw(2, 1) << "," << Hcw(2, 2) << "," << Hcw(2, 3) << ","
+//         << Hcw(3, 0) << "," << Hcw(3, 1) << "," << Hcw(3, 2) << "," << Hcw(3, 3) << ",";
+
+//     std::cout << goal_post.side << std::endl;
+//     // clang-format on
+// }
