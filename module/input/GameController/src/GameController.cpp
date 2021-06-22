@@ -86,7 +86,7 @@ namespace module::input {
 
                           // Bind our new handle
                           std::tie(listenHandle, std::ignore, std::ignore) =
-                              on<UDP::Broadcast, With<GameState>>(recieve_port)
+                              on<UDP::Broadcast, With<GameState>, Single>(recieve_port)
                                   .then([this](const UDP::Packet& p, const GameState& gameState) {
                                       std::string remoteAddr = ipAddressIntToString(p.remote.address);
 
