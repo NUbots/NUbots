@@ -8,6 +8,8 @@
 
 #include "WalkEngine.hpp"
 
+#include "extension/Configuration.hpp"
+
 #include "message/behaviour/ServoCommand.hpp"
 #include "message/motion/KinematicsModel.hpp"
 
@@ -36,14 +38,24 @@ namespace module::motion {
         [[nodiscard]] std::unique_ptr<message::behaviour::ServoCommands> motion(
             const std::vector<std::pair<utility::input::ServoID, float>>& joints);
 
-        struct {
+        struct Config {
             Eigen::Vector3f max_step;
             float max_step_xy;
 
             bool imu_active;
             float imu_pitch_threshold;
             float imu_roll_threshold;
-        } config;
+
+            WalkingParameter params{};
+
+            std::map<utility::input::ServoID, float> jointGains{};
+            std::vector<std::pair<utility::input::ServoID, float>> arm_positions{};
+        } normal_config, goalie_config;
+
+        void load_quintic_walk(const ::extension::Configuration& cfg, Config& config) const;
+
+        Config& current_config = normal_config;
+        bool first_config      = true;
 
         Eigen::Vector3f current_orders = Eigen::Vector3f::Zero();
         bool is_left_support           = true;
@@ -53,7 +65,6 @@ namespace module::motion {
         NUClear::clock::time_point last_update_time{};
 
         QuinticWalkEngine walk_engine{};
-        WalkingParameter params{};
 
         message::motion::KinematicsModel kinematicsModel{};
 
@@ -61,10 +72,6 @@ namespace module::motion {
         Eigen::Vector3f trunk_axis = Eigen::Vector3f::Zero();
         Eigen::Vector3f foot_pos   = Eigen::Vector3f::Zero();
         Eigen::Vector3f foot_axis  = Eigen::Vector3f::Zero();
-
-        std::map<utility::input::ServoID, float> jointGains{};
-
-        std::vector<std::pair<utility::input::ServoID, float>> arm_positions{};
     };
 }  // namespace module::motion
 
