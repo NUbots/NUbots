@@ -1,6 +1,7 @@
 #include "RobotParticleLocalisation.hpp"
 
 #include <Eigen/Geometry>
+#include <fmt/format.h>
 
 #include "extension/Configuration.hpp"
 
@@ -71,7 +72,7 @@ namespace module::localisation {
             "Measurement Update",
             [this](const VisionGoals& goals, const FieldDescription& fd) {
                 if (!goals.goals.empty()) {
-                    /* Perform time update */
+                    // Perform time update
                     using namespace std::chrono;
                     const auto curr_time  = NUClear::clock::now();
                     const double seconds  = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
@@ -116,11 +117,42 @@ namespace module::localisation {
                                                            Eigen::Matrix3d(m.covariance.cast<double>()),
                                                            getFieldPosition(goal_post, fd, 0),  // Opp post
                                                            goals.Hcw);                          //,
-                                                                                                //    m.type,
-                                                                                                //    fd);
+                                //    m.type,
+                                //    fd);
+                                if (config.debug) {
 
-                                // Check which one was more confident
-                                // TODO Should this be > or <
+                                    Eigen::Vector3d state(filter.get());
+                                    Eigen::Transform<double, 3, Eigen::Affine> Hfw;
+                                    Hfw.translation() = Eigen::Matrix<double, 3, 1>(state.x(), state.y(), 0);
+                                    Hfw.linear() =
+                                        Eigen::AngleAxis<double>(state.z(), Eigen::Matrix<double, 3, 1>::UnitZ())
+                                            .toRotationMatrix();
+
+                                    const Eigen::Transform<double, 3, Eigen::Affine> Hcf(goals.Hcw
+                                                                                         * Hfw.inverse().matrix());
+
+                                    const Eigen::Matrix<double, 3, 1> rGCc_own(Hcf
+                                                                               * getFieldPosition(goal_post, fd, 1));
+                                    const Eigen::Matrix<double, 3, 1> rGCc_opp(Hcf
+                                                                               * getFieldPosition(goal_post, fd, 0));
+                                    log(fmt::format("Testing post {}",
+                                                    goal_post.side == Goal::Side::LEFT ? "left" : "Right"));
+                                    log(fmt::format("Candidate own {}", candidate_own));
+                                    log(fmt::format("Actual own post at {}\n{}\n{}",
+                                                    cartesianToSpherical(rGCc_own)[0],
+                                                    cartesianToSpherical(rGCc_own)[1],
+                                                    cartesianToSpherical(rGCc_own)[2]));
+                                    log(fmt::format("Candidate opp {}", candidate_opp));
+                                    log(fmt::format("Actual opp post at {}\n{}\n{}",
+                                                    cartesianToSpherical(rGCc_opp)[0],
+                                                    cartesianToSpherical(rGCc_opp)[1],
+                                                    cartesianToSpherical(rGCc_opp)[2]));
+                                    log(fmt::format("Measured post at {}\n{}\n{}",
+                                                    Eigen::Vector3d(m.position.cast<double>()).x(),
+                                                    Eigen::Vector3d(m.position.cast<double>()).y(),
+                                                    Eigen::Vector3d(m.position.cast<double>()).z()));
+                                }
+
                                 filter = candidate_own > candidate_opp ? filter_new_own : filter_new_opp;
                             }
                             else {
@@ -224,14 +256,14 @@ namespace module::localisation {
             leftSide.heading_var  = 0.005;
 
             reset->hypotheses.push_back(leftSide);
-            // ResetRobotHypotheses::Self rightSide;
-            // // Start on goal line
-            // rightSide.position     = Eigen::Vector2d(start_state.x(), -start_state.y());
-            // rightSide.position_cov = Eigen::Vector2d::Constant(0.5).asDiagonal();
-            // rightSide.heading      = -start_state.z();
-            // rightSide.heading_var  = 0.005;
+            ResetRobotHypotheses::Self rightSide;
+            // Start on goal line
+            rightSide.position     = Eigen::Vector2d(start_state.x(), -start_state.y());
+            rightSide.position_cov = Eigen::Vector2d::Constant(0.5).asDiagonal();
+            rightSide.heading      = -start_state.z();
+            rightSide.heading_var  = 0.005;
 
-            // reset->hypotheses.push_back(rightSide);
+            reset->hypotheses.push_back(rightSide);
             emit<Scope::DELAY>(reset, std::chrono::seconds(1));
         });
     }
