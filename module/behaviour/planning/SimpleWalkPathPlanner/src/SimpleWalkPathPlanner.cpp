@@ -193,6 +193,10 @@ namespace module::behaviour::planning {
                 rBWw     = timeSinceBallSeen < search_timeout ? rBWw_temp :                         // Place last seen
                            Htw.inverse().linear().leftCols<1>() + Htw.inverse().translation();  // In front of the robot
                 position = (Htw * rBWw).head<2>();
+                log("-------------------------------------");
+                log("position x SWPP \n", position.x());
+                log("position y SWPP \n", position.y());
+
 
                 // Hack Planner:
                 float headingChange = 0;
@@ -215,11 +219,16 @@ namespace module::behaviour::planning {
                     // //approach point:
                     Eigen::Vector2d ballToTarget = (kickTarget.head<2>() - position).normalized();
                     Eigen::Vector2d kick_point   = position - ballToTarget * ball_approach_dist;
+                    log("kickpoint: position ", position);
+                    log("kickpoint: balltotarget ", ballToTarget);
+                    log("kickpoint: ball_approach_dist: ", ball_approach_dist);
 
                     if (position.norm() > slowdown_distance) {
+                        log("POSITION NOW KICK POINT");
                         position = kick_point;
                     }
                     else {
+                        log("POSITION NOT");
                         speedFactor   = slow_approach_factor;
                         headingChange = std::atan2(ballToTarget.y(), ballToTarget.x());
                         sideStep      = 1;
@@ -239,9 +248,17 @@ namespace module::behaviour::planning {
                 // log("loc heading", selfs.front().heading);
 
                 // Euclidean distance to ball
-                float scaleF            = 2.0 / (1.0 + std::exp(-a * std::fabs(position.x()) + b)) - 1.0;
+                float scaleF = 2.0 / (1.0 + std::exp(-a * std::fabs(position.x()) + b)) - 1.0;
+                NUClear::log<NUClear::DEBUG>("scaleF", scaleF);
+                NUClear::log<NUClear::DEBUG>("SF: a", a);
+                NUClear::log<NUClear::DEBUG>("SF: posx", position.x());
+                NUClear::log<NUClear::DEBUG>("SF: b", b);
+                NUClear::log<NUClear::DEBUG>("\n");
+
                 float scaleF2           = angle / M_PI;
                 float finalForwardSpeed = speedFactor * forwardSpeed * scaleF * (1.0 - scaleF2);
+
+                NUClear::log<NUClear::DEBUG>("FFS", finalForwardSpeed);
 
                 float scaleS         = 2.0 / (1.0 + std::exp(-a * std::fabs(position.y()) + b)) - 1.0;
                 float scaleS2        = angle / M_PI;
@@ -256,7 +273,6 @@ namespace module::behaviour::planning {
                 std::unique_ptr<WalkCommand> command =
                     std::make_unique<WalkCommand>(subsumptionId,
                                                   Eigen::Vector3d(finalForwardSpeed, finalSideSpeed, angle));
-
                 emit(std::move(command));
                 emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
             });

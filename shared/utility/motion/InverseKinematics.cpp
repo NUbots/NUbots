@@ -118,7 +118,7 @@ namespace utility::motion::kinematics {
         }
         else {
             NUClear::log<NUClear::DEBUG>(
-                "InverseKinematics::calculateLegJoints : targetLeg and ankleY parallel. This is unhandled at "
+                "3D InverseKinematics::calculateLegJoints : targetLeg and ankleY parallel. This is unhandled at "
                 "the "
                 "moment. requested pose = \n",
                 target.matrix());
@@ -265,7 +265,7 @@ namespace utility::motion::kinematics {
         }
         else {
             NUClear::log<NUClear::DEBUG>(
-                "InverseKinematics::calculateLegJoints : targetLeg and ankleY parallel. This is unhandled at "
+                "3F InverseKinematics::calculateLegJoints : targetLeg and ankleY parallel. This is unhandled at "
                 "the "
                 "moment. requested pose = \n",
                 target.matrix());
