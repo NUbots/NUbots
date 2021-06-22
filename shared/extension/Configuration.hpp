@@ -181,16 +181,16 @@ namespace extension {
         }
 
         // Allow iterating through configuration
-        YAML::iterator begin() {
+        [[nodiscard]] YAML::iterator begin() {
             return config.begin();
         }
-        YAML::const_iterator begin() const {
+        [[nodiscard]] YAML::const_iterator begin() const {
             return config.begin();
         }
-        YAML::iterator end() {
+        [[nodiscard]] YAML::iterator end() {
             return config.end();
         }
-        YAML::const_iterator end() const {
+        [[nodiscard]] YAML::const_iterator end() const {
             return config.end();
         }
 
