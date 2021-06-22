@@ -46,10 +46,10 @@ namespace module::input {
 
         struct FootDownMethod {
             enum Value { UNKNOWN = 0, Z_HEIGHT = 1, LOAD = 2, FSR = 3 };
-            Value value;
+            Value value = Value::UNKNOWN;
 
             // Constructors
-            FootDownMethod() : value(Value::UNKNOWN) {}
+            FootDownMethod() = default;
             FootDownMethod(int const& v) : value(static_cast<Value>(v)) {}
             FootDownMethod(Value const& v) : value(v) {}
             FootDownMethod(std::string const& str) {
