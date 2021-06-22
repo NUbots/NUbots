@@ -230,7 +230,7 @@ namespace module::behaviour::strategy {
                             }
                             else if (phase == Phase::SET) {
                                 standStill();
-                                find({FieldTarget(FieldTarget::Target::BALL)});
+                                // find({FieldTarget(FieldTarget::Target::BALL)});
                                 currentState = Behaviour::State::SET;
                                 if (mode == GameMode::PENALTY_SHOOTOUT) {
                                     if (currentState != previousState) {
@@ -261,7 +261,7 @@ namespace module::behaviour::strategy {
                                         // log("Opponent is kicking");
                                         // Do goalie behaviour
                                         find({FieldTarget(FieldTarget::Target::BALL)});
-                                        goalieWalk(field, ball);
+                                        // goalieWalk(field, ball);
                                         currentState = Behaviour::State::GOALIE_WALK;
                                     }
                                     // We are kicking!
