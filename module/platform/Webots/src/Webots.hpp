@@ -149,6 +149,8 @@ namespace module::platform {
 
         /// @brief When set, the next ActuatorRequests to webots will set the terminate command to end the simulation.
         bool terminate_simulation = false;
+        /// @brief Max FSR sensor value
+        float max_fsr_value = 0;
 
     public:
         /// @brief Called by the powerplant to build and setup the webots reactor

@@ -1,17 +1,17 @@
 walk:
   # Full walk cycle frequency (how long it takes in seconds for a left + right steps)
   # (in Hz, > 0)
-  freq: 0.2
+  freq: 0.7
   # Length of double support phase in half cycle (how long both legs should be on the ground, as a ratio of how long it takes for a single step)
   # (ratio, [0:1])
-  double_support_ratio: 0.3
+  double_support_ratio: 0.55
   # Give extra swing to first step for better start
   # (in ?, [0:10])
   first_step_swing_factor: 0.8 #1.0
   foot:
     # Lateral distance between the feet center (how spread apart the feet should be)
     # (in m, >= 0)
-    distance: 0.15 #0.28
+    distance: 0.28 #0.28
     # Maximum flying foot height (how high we lift a foot from the ground)
     # (in m, >= 0)
     rise: 0.15 #0.1
