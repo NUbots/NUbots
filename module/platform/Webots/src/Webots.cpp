@@ -230,6 +230,7 @@ namespace module::platform {
             min_sensor_time_step = config["min_sensor_time_step"].as<int>();
             max_velocity_mx64    = config["max_velocity_mx64"].as<double>();
             max_velocity_mx106   = config["max_velocity_mx106"].as<double>();
+            max_fsr_value        = config["max_fsr_value"].as<float>();
 
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
@@ -312,8 +313,8 @@ namespace module::platform {
         });
 
         // This trigger updates our current servo state
-        on<Trigger<ServoTargets>, With<RawSensors>>().then([this](const ServoTargets& targets,
-                                                                  const RawSensors& sensors) {
+        on<Trigger<ServoTargets>, With<RawSensors>, Sync<ServoState>>().then([this](const ServoTargets& targets,
+                                                                                    const RawSensors& sensors) {
             // Loop through each of our commands
             for (const auto& target : targets.targets) {
                 // Get the difference between the current servo position and our servo target
@@ -525,7 +526,7 @@ namespace module::platform {
                         }
                     });
 
-            send_io = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then(
+            send_io = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Sync<ServoState>, Priority::HIGH>().then(
                 "Simulator Update Loop",
                 [this] {
                     // Bound the time_step for the cameras and other sensors by the minimum allowed time_step for
@@ -740,29 +741,29 @@ namespace module::platform {
                 // We should have eight bumper sensors
                 // Right foot
                 if (bumper.name == "right_touch_sensor_br") {
-                    sensor_data->fsr.right.fsr1 = bumper.value;
+                    sensor_data->fsr.right.fsr1 = bumper.value ? max_fsr_value : 0.0f;
                 }
                 else if (bumper.name == "right_touch_sensor_bl") {
-                    sensor_data->fsr.right.fsr2 = bumper.value;
+                    sensor_data->fsr.right.fsr2 = bumper.value ? max_fsr_value : 0.0f;
                 }
                 else if (bumper.name == "right_touch_sensor_fl") {
-                    sensor_data->fsr.right.fsr3 = bumper.value;
+                    sensor_data->fsr.right.fsr3 = bumper.value ? max_fsr_value : 0.0f;
                 }
                 else if (bumper.name == "right_touch_sensor_fr") {
-                    sensor_data->fsr.right.fsr4 = bumper.value;
+                    sensor_data->fsr.right.fsr4 = bumper.value ? max_fsr_value : 0.0f;
                 }
                 // Left foot
                 else if (bumper.name == "left_touch_sensor_br") {
-                    sensor_data->fsr.left.fsr1 = bumper.value;
+                    sensor_data->fsr.left.fsr1 = bumper.value ? max_fsr_value : 0.0f;
                 }
                 else if (bumper.name == "left_touch_sensor_bl") {
-                    sensor_data->fsr.left.fsr2 = bumper.value;
+                    sensor_data->fsr.left.fsr2 = bumper.value ? max_fsr_value : 0.0f;
                 }
                 else if (bumper.name == "left_touch_sensor_fl") {
-                    sensor_data->fsr.left.fsr3 = bumper.value;
+                    sensor_data->fsr.left.fsr3 = bumper.value ? max_fsr_value : 0.0f;
                 }
                 else if (bumper.name == "left_touch_sensor_fr") {
-                    sensor_data->fsr.left.fsr4 = bumper.value;
+                    sensor_data->fsr.left.fsr4 = bumper.value ? max_fsr_value : 0.0f;
                 }
             }
 
