@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package message.platform.webots;
+
+message WebotsResetDone {
+    bool unused = 1; // Just here so we don't have an empty messasge
+}

@@ -7,9 +7,7 @@ nuclear_role(
   # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
   motion::KinematicsConfiguration
   support::configuration::GlobalConfig
-  # network::NUClearNet
-  # platform::darwin::HardwareSimulator
-  # input::SensorFilter
+  # network::NUClearNet platform::darwin::HardwareSimulator input::SensorFilter
   platform::Webots
   behaviour::Controller
   behaviour::skills::Stand

@@ -2,8 +2,8 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/platform/webots/messages.hpp"
 #include "message/platform/webots/WebotsReady.hpp"
+#include "message/platform/webots/messages.hpp"
 #include "message/support/optimisation/NSGA2EvaluationRequest.hpp"
 #include "message/support/optimisation/NSGA2FitnessScores.hpp"
 #include "message/support/optimisation/NSGA2Terminate.hpp"
@@ -102,7 +102,7 @@ namespace module {
                 on<Startup>().then([this]() {
                     // Create a message to request an evaluation of an individual
                     std::unique_ptr<WebotsReady> message = std::make_unique<WebotsReady>();
-                    message->sim_time = 0;
+                    message->sim_time                    = 0;
 
                     log<NUClear::INFO>("starting up in 4 seconds");
                     emit<Scope::DELAY>(message, std::chrono::seconds(4));
@@ -119,8 +119,8 @@ namespace module {
                     // (from the NSGA2FitnessScores trigger)
                     if (initSucceeded) {
                         requestIndEvaluation(0,
-                                                nsga2Algorithm.parentPop->generation,
-                                                nsga2Algorithm.parentPop->GetIndReals(0));
+                                             nsga2Algorithm.parentPop->generation,
+                                             nsga2Algorithm.parentPop->GetIndReals(0));
                     }
                 });
 
@@ -149,6 +149,8 @@ namespace module {
 
                             // Start the next generation (creates the new children for evaluation)
                             nsga2Algorithm.PreEvaluationAdvance();
+
+                            log("advanced to generation", nsga2Algorithm.childPop->generation);
 
                             // Evaluate the first individual in the new generation
                             requestIndEvaluation(0,
@@ -201,6 +203,8 @@ namespace module {
 
                                 // Start the next generation (creates the new children for evaluation)
                                 nsga2Algorithm.PreEvaluationAdvance();
+
+                                log("advanced to generation", nsga2Algorithm.childPop->generation);
 
                                 // Evaluate the first individual in the new generation
                                 requestIndEvaluation(0,

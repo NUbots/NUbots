@@ -32,6 +32,7 @@
 #include "message/motion/ServoTarget.hpp"
 #include "message/output/CompressedImage.hpp"
 #include "message/platform/RawSensors.hpp"
+#include "message/platform/webots/WebotsResetDone.hpp"
 #include "message/platform/webots/WebotsTimeUpdate.hpp"
 #include "message/platform/webots/messages.hpp"
 
@@ -72,6 +73,7 @@ namespace module::platform {
     using message::platform::webots::OptimisationRobotPosition;
     using message::platform::webots::SensorMeasurements;
     using message::platform::webots::SensorTimeStep;
+    using message::platform::webots::WebotsResetDone;
     using message::platform::webots::WebotsTimeUpdate;
 
     using utility::input::ServoID;
@@ -633,10 +635,11 @@ namespace module::platform {
         // If our local sim time is non zero and we just got one that is zero, that means the simulation was reset
         // (which is something we do for the walk optimisation), so reset our local times
         if (sim_delta > 0 && sensor_measurements.time == 0) {
-            std::cout << "webots sim time reset to zero, resetting local sim_time. time before reset: " << current_sim_time << std::endl;
-            sim_delta = 0;
-            real_delta = 0;
-            current_sim_time = 0;
+            std::cout << "webots sim time reset to zero, resetting local sim_time. time before reset: "
+                      << current_sim_time << std::endl;
+            sim_delta         = 0;
+            real_delta        = 0;
+            current_sim_time  = 0;
             current_real_time = 0;
         }
 
@@ -741,12 +744,16 @@ namespace module::platform {
             log<NUClear::TRACE>("      value:", gyro.value.X, ",", gyro.value.Y, ",", gyro.value.Z);
         }
 
-        log<NUClear::TRACE>("  sm.position_sensors:");
+        // log<NUClear::INFO>("  sm.position_sensors:");
         for (int i = 0; i < int(sensor_measurements.position_sensors.size()); ++i) {
             const auto& sensor = sensor_measurements.position_sensors[i];
-            log<NUClear::TRACE>("    sm.position_sensors #", i);
-            log<NUClear::TRACE>("      name:", sensor.name);
-            log<NUClear::TRACE>("      value:", sensor.value);
+
+            if (sensor.name == "right_shoulder_pitch_sensor" || sensor.name == "left_shoulder_pitch_sensor"
+                || sensor.name == "left_elbow_pitch_sensor" || sensor.name == "right_elbow_pitch_sensor") {
+                // log<NUClear::INFO>("    sm.position_sensors #", i);
+                // log<NUClear::INFO>("      name:", sensor.name);
+                // log<NUClear::INFO>("      value:", sensor.value);
+            }
         }
 
 
@@ -887,7 +894,11 @@ namespace module::platform {
         robotPosition->value.X = sensor_measurements.robot_position.value.X;
         robotPosition->value.Y = sensor_measurements.robot_position.value.Y;
         robotPosition->value.Z = sensor_measurements.robot_position.value.Z;
-
         emit(robotPosition);
+
+        // Create and emit the WebotsResetDone message used by the walk optimiser
+        if (sensor_measurements.reset_done) {
+            emit(std::make_unique<WebotsResetDone>());
+        }
     }
 }  // namespace module::platform
