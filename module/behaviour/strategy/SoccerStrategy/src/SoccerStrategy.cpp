@@ -230,7 +230,7 @@ namespace module::behaviour::strategy {
                             }
                             else if (phase == Phase::SET) {
                                 standStill();
-                                // find({FieldTarget(FieldTarget::Target::BALL)});
+                                find({FieldTarget(FieldTarget::Target::BALL)});
                                 currentState = Behaviour::State::SET;
                                 if (mode == GameMode::PENALTY_SHOOTOUT) {
                                     if (currentState != previousState) {
@@ -239,7 +239,6 @@ namespace module::behaviour::strategy {
                                     }
                                     else {
                                     }
-                                    // log("set penalty shoot-out");
                                     penaltyShootoutLocalisationReset(fieldDescription);
                                 }
                             }
@@ -258,15 +257,14 @@ namespace module::behaviour::strategy {
                                 if (mode == GameMode::PENALTY_SHOOTOUT) {
                                     // Our opponent is kicking!
                                     if (team_kicking_off == GameEvents::Context::OPPONENT) {
-                                        // log("Opponent is kicking");
                                         // Do goalie behaviour
                                         find({FieldTarget(FieldTarget::Target::BALL)});
+                                        // This is commented out until goalie behaviour is fixed
                                         // goalieWalk(field, ball);
                                         currentState = Behaviour::State::GOALIE_WALK;
                                     }
                                     // We are kicking!
                                     else if (team_kicking_off == GameEvents::Context::TEAM) {
-                                        // log("We are kicking");
                                         currentState = Behaviour::State::SHOOTOUT;
                                         // If our state has changed, kick!
                                         if (currentState != previousState) {

@@ -9,15 +9,14 @@ nuclear_role(
   motion::KinematicsConfiguration
   # Support
   support::configuration::GlobalConfig
-  # network::NUClearNet
-  # output::NetworkForwarder
   support::configuration::SoccerConfig
   # input
   input::GameController
   # Simulator connection
   input::SensorFilter
   platform::Webots
-  # Vision vision::VisualMesh
+  # Vision
+  vision::VisualMesh
   vision::GreenHorizonDetector
   vision::GoalDetector
   vision::BallDetector
@@ -30,7 +29,7 @@ nuclear_role(
   behaviour::skills::Stand
   behaviour::skills::Getup
   behaviour::skills::KickScript
-  # behaviour::skills::HeadBehaviourSoccer
+  behaviour::skills::HeadBehaviourSoccer
   behaviour::planning::KickPlanner
   behaviour::planning::SimpleWalkPathPlanner # Creates WalkPaths.
   behaviour::strategy::SoccerStrategy
