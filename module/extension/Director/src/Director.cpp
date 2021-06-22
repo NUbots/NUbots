@@ -1,6 +1,5 @@
 #include "Director.hpp"
 
-#include "extension/Behaviour.h"
 #include "extension/Configuration.h"
 
 namespace module {
@@ -9,16 +8,42 @@ namespace module {
         using ::extension::Configuration;
         using ::extension::behaviour::commands::CausingExpression;
         using ::extension::behaviour::commands::DirectorTask;
-        using ::extension::behaviour::commands::EnteringReaction;
-        using ::extension::behaviour::commands::LeavingReaction;
+        using ::extension::behaviour::commands::ProviderAction;
         using ::extension::behaviour::commands::ProvidesReaction;
         using ::extension::behaviour::commands::WhenExpression;
         using ::NUClear::threading::Reaction;
         using Unbind = NUClear::dsl::operation::Unbind<ProvidesReaction>;
 
+        /**
+         * This object bunches up tasks that are coming from a single provider (or a single root level task) so they can
+         * be emitted all at once. This lets the director see if a provider is changing what tasks it's requesting
+         * between runs.
+         * This is especially important if it emits no tasks since there would be no other way to see this.
+         */
+        struct TaskPack {
+            /// The ID of the requester (the providers reaction id)
+            uint64_t requester_id;
+            /// The list of task objects that are requested
+            std::vector<std::shared_ptr<const DirectorTask>> tasks;
+        };
+
+        /**
+         * This message gets emitted when a state we are monitoring is updated.
+         * When a `When` condition is being waited on a reaction will start monitoring that state, when it updates we
+         * emit one of these so we can decide if we want to take action based on that.
+         */
+        struct StateUpdate {
+            /// The provider_id which was waiting on this type
+            uint64_t provider_id;
+            /// The enum type that this enum was listening for
+            std::type_index type;
+            /// The new value for the enum
+            int new_state;
+        };
+
         void Director::add_provider(const std::type_index& data_type,
                                     const std::shared_ptr<Reaction>& r,
-                                    const Provider::Type& provider_type) {
+                                    const ProviderAction& action) {
 
             // Look for our specific item
             auto range = providers.equal_range(data_type);
@@ -26,7 +51,7 @@ namespace module {
 
             // No item means add a new one
             if (it == range.second) {
-                it = providers.insert(std::make_pair(data_type, Provider(provider_type, r)));
+                it = providers.insert(std::make_pair(data_type, Provider(action, r)));
                 reactions.insert(std::make_pair(r->id, it));
             }
             else {
@@ -40,6 +65,13 @@ namespace module {
             // If we can find it, erase it
             auto it = reactions.find(id);
             if (it != reactions.end()) {
+
+                // Unbind any when state monitors
+                for (auto& when : it->second.when) {
+                    when.handle.unbind();
+                }
+
+                // Erase from the list
                 providers.erase(it->second);
                 reactions.erase(it);
             }
@@ -51,30 +83,30 @@ namespace module {
         Director::Director(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
             // Removes all the providers for a reaction when it is unbound
-            on<Trigger<Unbind>>().then([this](const Unbind& unbind) {  //
+            on<Trigger<Unbind>, Sync<Director>>().then([this](const Unbind& unbind) {  //
                 remove_provider(unbind.id);
             });
 
-            // Add a normal provider
-            on<Trigger<ProvidesReaction>>().then([this](const ProvidesReaction& r) {  //
-                add_provider(r.type, r.reaction, Provider::NORMAL);
-            });
-
-            // Add an entering provider
-            on<Trigger<EnteringReaction>>().then([this](const EnteringReaction& r) {  //
-                add_provider(r.type, r.reaction, Provider::ENTERING);
-            });
-
-            // Add a leaving provider
-            on<Trigger<LeavingReaction>>().then([this](const LeavingReaction& r) {  //
-                add_provider(r.type, r.reaction, Provider::LEAVING);
+            // Add a provider provider
+            on<Trigger<ProvidesReaction>, Sync<Director>>().then([this](const ProvidesReaction& r) {  //
+                add_provider(r.type, r.reaction, r.action);
             });
 
             // Add a when expression to this provider
-            on<Trigger<WhenExpression>>().then([this](const WhenExpression& r) {
+            on<Trigger<WhenExpression>, Sync<Director>>().then([this](const WhenExpression& r) {
                 auto it = reactions.find(r.reaction->id);
                 if (it != reactions.end()) {
-                    it->second->second.when.emplace_back(r.type, r.expr, r.current);
+
+                    // Add a reaction that will listen for changes to this state and notify the director
+                    auto id               = r.reaction->id;
+                    auto type             = r.type;
+                    ReactionHandle handle = r.binder(*this, [id, type](const int& state) {  //
+                        emit(std::make_unique<StateUpdate>(id, type, state));
+                    });
+                    handle.disable();
+
+                    // Add it to the list of when conditions
+                    it->second->second.when.emplace_back(r.type, r.validator, r.current, handle);
                 }
                 else {
                     throw std::runtime_error(
@@ -83,7 +115,7 @@ namespace module {
             });
 
             // Add a causing condition to this provider
-            on<Trigger<CausingExpression>>().then([this](const CausingExpression& r) {
+            on<Trigger<CausingExpression>, Sync<Director>>().then([this](const CausingExpression& r) {
                 auto it = reactions.find(r.reaction->id);
                 if (it != reactions.end()) {
                     it->second->second.causing.insert(std::make_pair(r.type, r.resulting_state));
@@ -94,14 +126,15 @@ namespace module {
                 }
             });
 
-            on<Trigger<DirectorTask>>().then([this](const DirectorTask& task) {
-                // Check if this is a root level task
-                if (reactions.count(task.requester_id) == 0) {
-                    // TODO root level task, make the TaskPack immediately and send it off to be executed as a root task
+            // A task has arrived, either it's a root task and send it off, or build up our pack for when it's done
+            on<Trigger<DirectorTask>, Sync<DirectorTask>>().then([this](std::shared_ptr<const DirectorTask> task) {
+                // Root level task, make the TaskPack immediately and send it off to be executed as a root task
+                if (reactions.count(task->requester_id) == 0) {
+                    emit(std::make_unique<TaskPack>(task->requester_task_id, {task}));
                 }
                 // Check if this provider is active and allowed to make subtasks
-                else if (task_is_from_an_active_provider) {
-                    // TODO add this task to a list and wait for the ProviderDone event to be emitted for this provider
+                else if (reactions[task->requester_id]->active) {
+                    pack_builder.emplace(task->requester_task_id, task);
                 }
                 else {
                     // Throw an error so the user can see what a fool they are being
@@ -112,13 +145,23 @@ namespace module {
                 }
             });
 
-            on<Trigger<ProviderDone>>().then([this](const ProviderDone& done) {
-                // TODO this reaction task id has been completed, any tasks that it emitted are ready to be bundled into
-                // a pack and emitted for the main loop
+            // This reaction runs when a provider finishes to send off the task pack to the main director
+            on<Trigger<ProviderDone>, Sync<DirectorTask>>().then([this](const ProviderDone& done) {
+                // Get all the tasks that were emitted by this provider and send it as a task pack
+                auto e = pack_builder.equal_range(done.id);
+                emit(std::make_unique<TaskPack>(std::vector<std::shared_ptr<const DirectorTask>>(e.first, e.second)));
+
+                // Erase the task pack builder for this id
+                pack_builder.erase(done.id)
+            });
+
+            // A state that we were monitoring is updated, we might be able to run the reaction now
+            on<Trigger<StateUpdate>, Sync<Director>>().then([this](const StateUpdate& state) {
+                // TODO one of the causing states we are monitoring has updated
             });
 
             // We do things when we receive tasks to run
-            on<Trigger<TaskPack>>().then([this](const DirectorTask& task) {
+            on<Trigger<TaskPack>, Sync<Director>>().then([this](const DirectorTask& task) {
                 // We should have a current state tree (which initially may be empty), a transitional state tree and a
                 // new state tree. The current state tree represents what was last executed.
                 //
