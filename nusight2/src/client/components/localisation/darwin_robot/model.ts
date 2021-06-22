@@ -1,7 +1,9 @@
 import { observable } from 'mobx'
 import { computed } from 'mobx'
+import * as THREE from 'three'
 
 import { memoize } from '../../../base/memoize'
+import { Matrix4 } from '../../../math/matrix4'
 import { Quaternion } from '../../../math/quaternion'
 import { Vector3 } from '../../../math/vector3'
 import { RobotModel } from '../../robot/model'
@@ -114,30 +116,30 @@ export class LocalisationRobotModel {
   @observable private model: RobotModel
   @observable name: string
   @observable color?: string
-  @observable rWTt: Vector3 // Torso to world translation in torso space.
-  @observable Rwt: Quaternion // Torso to world rotation.
+  @observable Htw: Matrix4 // World to torso
+  @observable Hfw: Matrix4 // World to field
   @observable motors: DarwinMotorSet
 
   constructor({
     model,
     name,
     color,
-    rWTt,
-    Rwt,
+    Htw,
+    Hfw,
     motors,
   }: {
     model: RobotModel
     name: string
     color?: string
-    rWTt: Vector3
-    Rwt: Quaternion
+    Htw: Matrix4
+    Hfw: Matrix4
     motors: DarwinMotorSet
   }) {
     this.model = model
     this.name = name
     this.color = color
-    this.rWTt = rWTt
-    this.Rwt = Rwt
+    this.Htw = Htw
+    this.Hfw = Hfw
     this.motors = motors
   }
 
@@ -146,8 +148,8 @@ export class LocalisationRobotModel {
       return new LocalisationRobotModel({
         model,
         name: model.name,
-        rWTt: Vector3.of(),
-        Rwt: Quaternion.of(),
+        Htw: Matrix4.of(),
+        Hfw: Matrix4.of(),
         motors: DarwinMotorSet.of(),
       })
     },
@@ -156,4 +158,33 @@ export class LocalisationRobotModel {
   @computed get visible() {
     return this.model.enabled
   }
+
+  /** Field to torso */
+  @computed get Htf(): Matrix4 {
+    const Hwf = new THREE.Matrix4().getInverse(this.Hfw.toThree())
+    return Matrix4.fromThree(this.Htw.toThree().multiply(Hwf))
+  }
+
+  /** Field to torso translation in field space. */
+  @computed get rTFf(): Vector3 {
+    const Hft = new THREE.Matrix4().getInverse(this.Htf.toThree())
+    const { translation: rTFf } = decompose(Hft)
+    return new Vector3(rTFf.x, rTFf.y, rTFf.z)
+  }
+
+  /* Field to torso rotation in field space. */
+  @computed get Rtf(): Quaternion {
+    const { rotation: Rtf } = decompose(this.Htf.toThree())
+    return new Quaternion(Rtf.x, Rtf.y, Rtf.z, Rtf.w)
+  }
+}
+
+function decompose(
+  m: THREE.Matrix4,
+): { translation: THREE.Vector3; rotation: THREE.Quaternion; scale: THREE.Vector3 } {
+  const translation = new THREE.Vector3()
+  const rotation = new THREE.Quaternion()
+  const scale = new THREE.Vector3()
+  m.decompose(translation, rotation, scale)
+  return { translation, rotation, scale }
 }
