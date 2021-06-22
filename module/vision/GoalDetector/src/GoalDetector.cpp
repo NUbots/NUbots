@@ -230,7 +230,7 @@ namespace module::vision {
                             g.measurements.back().position =
                                 cartesianToSpherical(Eigen::Vector3f(g.post.bottom * distance));
                             g.measurements.back().covariance =
-                                config.goal_angular_cov * Eigen::Vector3f(distance, 1, 1).asDiagonal();
+                                config.goal_angular_cov * Eigen::Vector3f(distance, 0.1, 0.1).asDiagonal();
 
                             // Angular positions from the camera
                             g.screen_angular = cartesianToSpherical(g.post.bottom).tail<2>();
@@ -240,16 +240,17 @@ namespace module::vision {
                              *                  THROWOUTS                  *
                              ***********************************************/
 
-                            if (config.debug) {
-                                log<NUClear::DEBUG>("**************************************************");
-                                log<NUClear::DEBUG>("*                    THROWOUTS                   *");
-                                log<NUClear::DEBUG>("**************************************************");
-                            }
+
                             bool keep = true;  // if false then we will not consider this as a valid goal post
 
                             // If the goal is too far away, get rid of it!
                             if (distance > config.max_goal_distance) {
                                 keep = false;
+                                if (config.debug) {
+                                    log<NUClear::DEBUG>("**************************************************");
+                                    log<NUClear::DEBUG>("*                    THROWOUTS                   *");
+                                    log<NUClear::DEBUG>("**************************************************");
+                                }
                                 log<NUClear::DEBUG>(
                                     fmt::format("Goal discarded: goal distance ({}) > maximum_goal_distance ({})",
                                                 distance,
