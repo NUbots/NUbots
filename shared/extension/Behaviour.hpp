@@ -45,9 +45,9 @@ namespace extension::behaviour {
         struct WhenExpression {
             WhenExpression(const std::shared_ptr<NUClear::threading::Reaction>& reaction,
                            const std::type_index& type,
-                           bool (*expr)(const int&),
+                           bool (*validator)(const int&),
                            int (*current)())
-                : reaction(reaction), type(type), expr(expr), current(current) {}
+                : reaction(reaction), type(type), validator(validator), current(current) {}
 
             /// The provider reaction that is contingent on this when condition
             std::shared_ptr<NUClear::threading::Reaction> reaction;
@@ -58,7 +58,7 @@ namespace extension::behaviour {
             /// Function to get the current state from the global cache
             int (*current)();
             /// Function to bind a reaction to monitor when this state changes
-            NUClear::threading::ReactionHandle (*binder)(Reactor&, std::function<void(const int&)>);
+            NUClear::threading::ReactionHandle (*binder)(NUClear::Reactor&, std::function<void(const int&)>);
         };
 
         /**
@@ -134,7 +134,7 @@ namespace extension::behaviour {
             static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
 
                 // Tell the director
-                reaction->reactor.powerplant.emit(std::make_unique<ProviderMethod>(reaction, typeid(T), action));
+                reaction->reactor.powerplant.emit(std::make_unique<ProvidesReaction>(reaction, typeid(T), action));
 
                 // Add our unbinder
                 reaction->unbinders.emplace_back([](const NUClear::threading::Reaction& r) {
@@ -158,7 +158,7 @@ namespace extension::behaviour {
             template <typename DSL>
             static inline void postcondition(NUClear::threading::ReactionTask& task) {
                 // Take the task id and send it to the director to let it know that this provider is done
-                emit(std::make_unique<ProviderDone>(task.parent.id, task.id));
+                task.parent.reactor.emit(std::make_unique<ProviderDone>(task.parent.id, task.id));
             }
         };
     }  // namespace commands
@@ -219,7 +219,8 @@ namespace extension::behaviour {
                 typeid(State),
                 [](const int& v) { return expr<int>()(v, value); },
                 []() { return NUClear::dsl::operation::CacheGet<State>::get(); },
-                [](Reactor& reactor, std::function<void(const int&)> fn) -> NUClear::threading::ReactionHandle {
+                [](NUClear::Reactor& reactor,
+                   std::function<void(const int&)> fn) -> NUClear::threading::ReactionHandle {
                     return reactor.on<NUClear::dsl::word::Trigger<State>>().then(
                         [fn](const State& s) { fn(static_cast<int>(s)); });
                 }));

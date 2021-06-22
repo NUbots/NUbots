@@ -21,8 +21,11 @@ namespace module::extension {
              * compare it to causing statements to determine if those causing statements would satisfy this provider
              */
             struct WhenCondition {
-                WhenCondition(const std::type_index& type, bool (*validator)(const int&), int (*current)())
-                    : type(type), validator(validator), current(current) {}
+                WhenCondition(const std::type_index& type,
+                              bool (*validator)(const int&),
+                              int (*current)(),
+                              ReactionHandle handle)
+                    : type(type), validator(validator), current(current), handle(std::move(handle)) {}
 
                 /// The type of state that this condition is checking
                 std::type_index type;
@@ -80,7 +83,7 @@ namespace module::extension {
 
         /// A list of reaction_task_ids to director_task objects, once the provider has finished running it will emit
         /// all these as a pack so that the director can work out when providers change which subtasks they emit
-        std::multimap<uint64_t, ::extension::behaviour::commands::DirectorTask> pack_builder;
+        std::multimap<uint64_t, std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>> pack_builder;
     };
 
 }  // namespace module::extension
