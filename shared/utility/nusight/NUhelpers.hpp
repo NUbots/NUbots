@@ -29,13 +29,11 @@
 
 namespace utility::nusight {
 
-    namespace {
+    using message::support::nusight::DataPoint;
 
+    namespace helpers {
         using message::support::nusight::DataPoint;
         using utility::type_traits::is_iterable;
-
-        constexpr float TIMEOUT = 2.5;
-
 
         inline void buildGraph(DataPoint& /*dataPoint*/) {}
 
@@ -56,13 +54,13 @@ namespace utility::nusight {
             }
             buildGraph(dataPoint, remainder...);
         }
-    }  // namespace
+    }  // namespace helpers
 
     template <typename... Values>
     inline std::unique_ptr<message::support::nusight::DataPoint> graph(std::string label, Values... values) {
         auto dataPoint   = std::make_unique<DataPoint>();
         dataPoint->label = std::move(label);
-        buildGraph(*dataPoint, values...);
+        helpers::buildGraph(*dataPoint, values...);
         return dataPoint;
     }
 

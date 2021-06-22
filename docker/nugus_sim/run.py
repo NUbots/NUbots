@@ -142,7 +142,8 @@ def run_role(role: str, binaries_dir: str, env_vars: dict) -> None:
     modified_env["ROBOT_HOSTNAME"] = f"webots{env_vars['ROBOCUP_ROBOT_ID']}"
 
     # Run the role binary
-    sys.exit(subprocess.run(f"./{role}", env=modified_env).returncode)
+    while True:
+        subprocess.run(f"./{role}", env=modified_env)
 
 
 if __name__ == "__main__":

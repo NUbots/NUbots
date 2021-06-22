@@ -29,7 +29,7 @@ namespace utility::io {
         /**
          * @brief Construct a new unconnected uart class
          */
-        uart();
+        uart() = default;
 
         /**
          * @brief Create a new uart class that is connected to the device `device`
