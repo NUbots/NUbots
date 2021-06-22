@@ -312,8 +312,8 @@ namespace module::platform {
         });
 
         // This trigger updates our current servo state
-        on<Trigger<ServoTargets>, With<RawSensors>>().then([this](const ServoTargets& targets,
-                                                                  const RawSensors& sensors) {
+        on<Trigger<ServoTargets>, With<RawSensors>, Sync<ServoState>>().then([this](const ServoTargets& targets,
+                                                                                    const RawSensors& sensors) {
             // Loop through each of our commands
             for (const auto& target : targets.targets) {
                 // Get the difference between the current servo position and our servo target
@@ -525,7 +525,7 @@ namespace module::platform {
                         }
                     });
 
-            send_io = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then(
+            send_io = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Sync<ServoState>, Priority::HIGH>().then(
                 "Simulator Update Loop",
                 [this] {
                     // Bound the time_step for the cameras and other sensors by the minimum allowed time_step for

@@ -10,10 +10,7 @@
 #include <unistd.h>
 
 namespace utility::io {
-
-    uart::uart() : device(""), fd(-1) {}
-
-    uart::uart(const std::string& device, const unsigned int& baud) : device(device), fd(-1) {
+    uart::uart(const std::string& device, const unsigned int& baud) : device(device) {
         open(device, baud);
     }
 
@@ -140,7 +137,7 @@ namespace utility::io {
             }
 
             // Set the speed flags to "Custom Speed" (clear the existing speed, and set the custom speed flags)
-            serinfo.flags &= ~ASYNC_SPD_MASK;
+            serinfo.flags &= int(~ASYNC_SPD_MASK);
             serinfo.flags |= ASYNC_SPD_CUST;
 
             // Set our serial port to use low latency mode (otherwise the USB driver buffers for 16ms before sending
@@ -148,7 +145,7 @@ namespace utility::io {
             serinfo.flags |= ASYNC_LOW_LATENCY;
 
             // Set our custom divsor for our speed
-            serinfo.custom_divisor = serinfo.baud_base / baud;
+            serinfo.custom_divisor = int(serinfo.baud_base / baud);
 
             // Set our custom speed in the system
             if (ioctl(fd, TIOCSSERIAL, &serinfo) < 0) {
@@ -164,10 +161,13 @@ namespace utility::io {
         return !(fcntl(fd, F_GETFL) < 0 && errno == EBADF);
     }
 
+    // `read` and `write` can technically be `const`, but that's deceptive because they change the state of the buffer
+    // associated with the fd, so it can be thought of as "changing" the fd
+    // NOLINTNEXTLINE(readability-make-member-function-const)
     ssize_t uart::read(void* buf, size_t count) {
         return ::read(fd, buf, count);
     }
-
+    // NOLINTNEXTLINE(readability-make-member-function-const)
     ssize_t uart::write(const void* buf, size_t count) {
         return ::write(fd, buf, count);
     }

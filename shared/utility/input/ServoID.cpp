@@ -22,7 +22,7 @@
 
 namespace utility::input {
 
-    ServoID::ServoID(std::string const& str) : value(Value::R_SHOULDER_PITCH) {
+    ServoID::ServoID(std::string const& str) {
         // clang-format off
         if      (str == "R_SHOULDER_PITCH") { value = Value::R_SHOULDER_PITCH; }
         else if (str == "L_SHOULDER_PITCH") { value = Value::L_SHOULDER_PITCH; }

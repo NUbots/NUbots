@@ -26,17 +26,17 @@ Joystick::Joystick() : path("/dev/input/js0") {
     openPath(path);
 }
 
-Joystick::Joystick(const std::string& path) : _fd(-1), path(path) {
-    openPath(path);
+Joystick::Joystick(const std::string& devicePath) : path(devicePath) {
+    openPath(devicePath);
 }
 
 void Joystick::openPath(const std::string& devicePath) {
     std::cout << "Connecting to " << devicePath << std::endl;
-    _fd = open(devicePath.c_str(), O_RDONLY | O_NONBLOCK);
+    fd = open(devicePath.c_str(), O_RDONLY | O_NONBLOCK);
 }
 
 bool Joystick::sample(JoystickEvent* event) const {
-    int bytes = read(_fd, event, sizeof(*event));
+    const int bytes = read(fd, event, sizeof(*event));
 
     if (bytes == -1) {
         return false;
@@ -48,19 +48,19 @@ bool Joystick::sample(JoystickEvent* event) const {
 }
 
 bool Joystick::found() const {
-    return _fd >= 0;
+    return fd >= 0;
 }
 
 bool Joystick::valid() const {
     // Check if we can get the stats
-    return !(fcntl(_fd, F_GETFL) < 0 && errno == EBADF);
+    return !(fcntl(fd, F_GETFL) < 0 && errno == EBADF);
 }
 
 void Joystick::reconnect() {
-    close(_fd);
+    close(fd);
     openPath(path);
 }
 
 Joystick::~Joystick() {
-    close(_fd);
+    close(fd);
 }
