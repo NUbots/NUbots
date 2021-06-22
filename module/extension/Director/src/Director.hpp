@@ -21,13 +21,13 @@ namespace module::extension {
              * compare it to causing statements to determine if those causing statements would satisfy this provider
              */
             struct WhenCondition {
-                WhenCondition(const std::type_index& type, bool (*expr)(const int&), int (*current)())
-                    : type(type), expr(expr), current(current) {}
+                WhenCondition(const std::type_index& type, bool (*validator)(const int&), int (*current)())
+                    : type(type), validator(validator), current(current) {}
 
                 /// The type of state that this condition is checking
                 std::type_index type;
                 /// Expression to determine if the passed state is valid
-                bool (*expr)(const int&);
+                bool (*validator)(const int&);
                 /// Function to get the current state
                 int (*current)();
                 /// The reaction handle which is monitoring this state for this condition
