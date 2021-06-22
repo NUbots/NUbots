@@ -68,7 +68,7 @@ namespace module::input {
             operator Value() const {
                 return value;
             }
-            operator std::string() const {
+            [[nodiscard]] operator std::string() const {
                 switch (value) {
                     case Value::Z_HEIGHT: return "Z_HEIGHT";
                     case Value::LOAD: return "VIRTUAL";
