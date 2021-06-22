@@ -29,6 +29,8 @@ namespace module::support::logging {
             }
 
             logFile.open(logFileName, std::ios_base::out | std::ios_base::app | std::ios_base::ate);
+
+            logFile << "\n*********************************************************************\n" << std::endl;
         });
 
         on<Shutdown>().then([this] {
