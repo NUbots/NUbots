@@ -221,17 +221,18 @@ namespace module {
                     }
                 }
 
-                // This task is not active and is not allowed to run subtasks
-                else if (!reactions[pack.requester_id]->second.active) {
-                    // Throw an error so the user can see what a fool they are being
-                    throw std::runtime_error(fmt::format(
-                        "The task {} cannot be executed as the provider {} is not active and cannot make subtasks",
-                        pack.name,
-                        reactions[pack.requester_id]->second.reaction->identifier[0]));
-                }
-
                 // Loop through each task
                 for (const auto& task : pack.tasks) {
+
+                    // This task is not active and is not allowed to run subtasks
+                    if (!reactions[task->requester_id]->second.active) {
+                        // Throw an error so the user can see what a fool they are being
+                        throw std::runtime_error(fmt::format(
+                            "The task {} cannot be executed as the provider {} is not active and cannot make subtasks",
+                            task->name,
+                            reactions[task->requester_id]->second.reaction->identifier[0]));
+                    }
+
                     // All task executions happen after we have evaluated the actions for all tasks in this pack
 
                     // Possibilities
