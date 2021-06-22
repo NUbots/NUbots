@@ -82,17 +82,12 @@ namespace module {
 
                 // Handle a state transition event
                 on<Trigger<Event>, Sync<NSGA2Evaluator>>().then([this](const Event& event) {
-                    // log("event", event);
+                    // log<NUClear::DEBUG>("event", event);
 
                     State oldState = currentState;
                     State newState = HandleTransition(currentState, event);
 
-                    // Some transitions are ignored
-                    if (newState == State::IGNORE) {
-                        return;
-                    }
-
-                    log<NUClear::INFO>("transitioning on", event, ", from state", oldState, "to state", newState);
+                    log<NUClear::DEBUG>("transitioning on", event, ", from state", oldState, "to state", newState);
 
                     switch (newState) {
                         case State::WAITING_FOR_REQUEST:
@@ -150,8 +145,8 @@ namespace module {
                 });
 
                 on<Trigger<NSGA2Terminate>, Single>().then([this]() {
-                    log("Got NSGA2Terminate, figure how to use this event");
-                    emit(std::make_unique<Event>(Event::TerminateEvaluation));  // TODO: handle this in WAITING, other
+                    // NSGA2Terminate is emitted when we've finished all generations and all individuals
+                    emit(std::make_unique<Event>(Event::TerminateEvaluation));
                 });
 
                 on<Trigger<OptimisationRobotPosition>, Single>().then(
@@ -172,7 +167,8 @@ namespace module {
 
                     if ((std::abs(accelerometer.x) > 9.2 || std::abs(accelerometer.y) > 9.2)
                         && std::abs(accelerometer.z) < 0.5) {
-                        log("fallen, sending StandStill, then Fallen!");
+                        log<NUClear::DEBUG>("fallen, stopping WalkCommand, then emitting Fallen");
+
                         // emit(std::make_unique<MotionCommand>(utility::behaviour::StandStill()));
 
                         // Send a zero walk command to stop walking
@@ -201,15 +197,9 @@ namespace module {
                     std::fabs(sensors.servo.r_shoulder_pitch.present_position - r_shoulder_pitch_target) < epsilon;
 
                 if (l_elbow_ok && r_elbow_ok && l_shoulder_pitch_ok && r_shoulder_pitch_ok) {
-                    log("stand done!");
+                    log<NUClear::DEBUG>("stand done!");
                     emit(std::make_unique<Event>(Event::StandDone));
                 }
-
-                // log("checking for stand");
-                // log("  l_elbow: ", sensors.servo.l_elbow.present_position);
-                // log("  r_elbow: ", sensors.servo.r_elbow.present_position);
-                // log("  l_shoulder_pitch: ", sensors.servo.l_shoulder_pitch.present_position);
-                // log("  r_shoulder_pitch: ", sensors.servo.r_shoulder_pitch.present_position);
             }
 
             NSGA2Evaluator::State NSGA2Evaluator::HandleTransition(NSGA2Evaluator::State currentState,
@@ -218,40 +208,49 @@ namespace module {
                     case State::WAITING_FOR_REQUEST:
                         switch (event) {
                             case Event::EvaluateRequest: return State::SETTING_UP_TRIAL;
+                            // When we get TerminateEvaluation it's the end of all the trials, so we can probably
+                            // go to a "FINISHED" state and end there
                             // case Event::TerminateEvaluation: return State::WAITING_FOR_REQUEST;
+                            case Event::TerminateEvaluation: return State::FINISHED;
                             default: return State::UNKNOWN;
                         }
                     case State::SETTING_UP_TRIAL:
                         switch (event) {
                             case Event::TrialSetupDone: return State::RESETTING_SIMULATION;
+                            case Event::TerminateEvaluation: return State::FINISHED;
                             default: return State::UNKNOWN;
                         }
                     case State::RESETTING_SIMULATION:
                         switch (event) {
                             case Event::ResetDone: return State::STANDING;
+                            case Event::TerminateEvaluation: return State::FINISHED;
                             default: return State::UNKNOWN;
                         }
                     case State::STANDING:
                         switch (event) {
                             case Event::Fallen: return State::TERMINATING_EARLY;
                             case Event::StandDone: return State::WALKING;
+                            case Event::TerminateEvaluation: return State::FINISHED;
                             default: return State::UNKNOWN;
                         }
                     case State::WALKING:
                         switch (event) {
                             case Event::Fallen: return State::TERMINATING_EARLY;
                             case Event::TrialTimeExpired: return State::TERMINATING_GRACEFULLY;
+                            case Event::TerminateEvaluation: return State::FINISHED;
                             default: return State::UNKNOWN;
                         }
                     case State::TERMINATING_EARLY:
                         switch (event) {
                             case Event::FitnessScoresSent: return State::WAITING_FOR_REQUEST;
+                            case Event::TerminateEvaluation: return State::FINISHED;
                             default: return State::UNKNOWN;
                         }
                     case State::TERMINATING_GRACEFULLY:
                         switch (event) {
                             case Event::ExpiredTrialInvalid: return State::WALKING;
                             case Event::FitnessScoresSent: return State::WAITING_FOR_REQUEST;
+                            case Event::TerminateEvaluation: return State::FINISHED;
                             default: return State::UNKNOWN;
                         }
                     default: return State::UNKNOWN;
@@ -323,16 +322,13 @@ namespace module {
             void NSGA2Evaluator::Standing(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
                 log<NUClear::DEBUG>("Standing: emitting Stand script");
 
+                // This skips standing and emits StandDone to start walking, to use the walk's stand instead
+                // Remove and uncomment the block that follows to actually do the stand here.
                 emit(std::make_unique<Event>(Event::StandDone));
 
                 // // Start the stand script if we just finished resetting the world
                 // if (event == Event::ResetDone) {
                 //     emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "Stand.yaml"));
-                // }
-
-                // // Check that we haven't fallen if we just got updated RawSensors
-                // if (event == Event::RawSensors) {
-
                 // }
             }
 
@@ -361,38 +357,28 @@ namespace module {
                     // Schedule the end of the walk trial after 30 seconds
                     emit<Scope::DELAY>(message, std::chrono::seconds(30));
                 }
-
-                // // Check that we haven't fallen if we just got updated RawSensors
-                // if (event == Event::RawSensors) {
-                //     CheckForFall();
-                // }
             }
 
             /// @brief Handle the TERMINATING_EARLY state
             void NSGA2Evaluator::TerminatingEarly(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
                 log<NUClear::DEBUG>("TerminatingEarly");
 
-                // Calculate and send the fitness scores for a fall if just fell over
-                if (event == Event::Fallen) {
-                    std::vector<double> scores = {
-                        1.0,  // Fix the first score as we're trying to optimise only the distance travelled
-                        1.0 / robotDistanceTravelled  // 1/x since the NSGA2 optimiser is a minimiser
-                    };
+                // Calculate and send the fitness scores for a fall since we just fell over
+                std::vector<double> scores = {
+                    1.0,  // Fix the first score as we're trying to optimise only the distance travelled
+                    1.0 / robotDistanceTravelled  // 1/x since the NSGA2 optimiser is a minimiser
+                };
 
-                    std::vector<double> constraints = {
-                        -10.0,  // Punish for falling over: TODO: set based on total time walking
-                        0.0,    // Second constraint unused, fixed to 0
-                    };
+                std::vector<double> constraints = {
+                    -10.0,  // Punish for falling over: TODO: set based on total time walking
+                    0.0,    // Second constraint unused, fixed to 0
+                };
 
-                    // Send the fitness scores back to the optimiser
-                    SendFitnessScores(scores, constraints);
+                // Send the fitness scores back to the optimiser
+                SendFitnessScores(scores, constraints);
 
-                    // Go back to waiting for the next request
-                    emit(std::make_unique<Event>(Event::FitnessScoresSent));
-                }
-                else {
-                    log("Transitioned to TerminateEarly from an event that wasn't fallen: this shouldn't happen!!");
-                }
+                // Go back to waiting for the next request
+                emit(std::make_unique<Event>(Event::FitnessScoresSent));
             }
 
             /// @brief Handle the TERMINATING_GRACEFULLY state

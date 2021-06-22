@@ -25,34 +25,31 @@ namespace module {
 
                 enum State {
                     UNKNOWN                = 0,
-                    IGNORE                 = 1,
-                    WAITING_FOR_REQUEST    = 2,
-                    SETTING_UP_TRIAL       = 3,
-                    RESETTING_SIMULATION   = 4,
-                    STANDING               = 5,
-                    WALKING                = 6,
-                    TERMINATING_EARLY      = 7,
-                    TERMINATING_GRACEFULLY = 8
+                    WAITING_FOR_REQUEST    = 1,
+                    SETTING_UP_TRIAL       = 2,
+                    RESETTING_SIMULATION   = 3,
+                    STANDING               = 4,
+                    WALKING                = 5,
+                    TERMINATING_EARLY      = 6,
+                    TERMINATING_GRACEFULLY = 7,
+                    FINISHED               = 8
                 };
 
                 enum Event {
                     // From webots
-                    TimeUpdate    = 0,
-                    RawSensors    = 1,
-                    ResetDone     = 2,
-                    StandDone     = 3,
-                    RobotLocation = 4,
+                    ResetDone = 0,
 
                     // From optimiser
-                    EvaluateRequest     = 5,
-                    TrialSetupDone      = 6,
-                    TerminateEvaluation = 7,
+                    EvaluateRequest     = 1,
+                    TerminateEvaluation = 2,
 
                     // Internal
-                    Fallen              = 8,
-                    TrialTimeExpired    = 9,
-                    ExpiredTrialInvalid = 10,
-                    FitnessScoresSent   = 11
+                    TrialSetupDone      = 3,
+                    Fallen              = 4,
+                    StandDone           = 5,
+                    TrialTimeExpired    = 6,
+                    ExpiredTrialInvalid = 7,
+                    FitnessScoresSent   = 8
                 };
 
             private:
