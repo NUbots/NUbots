@@ -25,6 +25,7 @@ namespace module::behaviour {
 
     using message::behaviour::ServoCommand;
     using message::behaviour::ServoCommands;
+    using message::behaviour::ClearCommands;
     using message::motion::ServoTargets;
 
     using utility::behaviour::ActionKill;
@@ -134,6 +135,12 @@ namespace module::behaviour {
             auto points = std::make_unique<ServoCommands>();
             points->commands.push_back(point);
             emit<Scope::DIRECT>(points);
+        });
+
+        on<Trigger<ClearCommands>>().then([this](const ClearCommands& /*unused*/){
+            for(auto& queue : commandQueues){
+                queue.clear();
+            }
         });
 
         on<Trigger<ServoCommands>, Sync<Controller>>().then("Command Filter", [this](const ServoCommands& commands) {

@@ -34,3 +34,6 @@ message ServoCommand {
 message ServoCommands {
     repeated ServoCommand commands = 1;
 }
+
+/* This will clear all the commands that have been previously emitted, kind of a hack tbh */
+message ClearCommands {}
