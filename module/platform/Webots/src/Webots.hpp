@@ -31,7 +31,6 @@
 #include <vector>
 
 #include "message/input/Image.hpp"
-#include "message/platform/webots/ConnectRequest.hpp"
 #include "message/platform/webots/messages.hpp"
 
 namespace module::platform {
