@@ -22,7 +22,7 @@ syntax = "proto3";
 package message.support.optimisation;
 
 message NSGA2TrialExpired {
-    int32 generation = 1;
-    int32 individual = 2;
+    int32 generation   = 1;
+    int32 individual   = 2;
     int32 time_started = 3;
 }
