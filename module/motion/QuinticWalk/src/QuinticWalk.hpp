@@ -39,18 +39,18 @@ namespace module::motion {
             const std::vector<std::pair<utility::input::ServoID, float>>& joints);
 
         struct Config {
-            Eigen::Vector3f max_step;
-            float max_step_xy;
+            Eigen::Vector3f max_step = Eigen::Vector3f::Zero();
+            float max_step_xy = 0.0f;
 
-            bool imu_active;
-            float imu_pitch_threshold;
-            float imu_roll_threshold;
+            bool imu_active = true;
+            float imu_pitch_threshold = 0.0f;
+            float imu_roll_threshold = 0.0f;
 
             WalkingParameter params{};
 
             std::map<utility::input::ServoID, float> jointGains{};
             std::vector<std::pair<utility::input::ServoID, float>> arm_positions{};
-        } normal_config, goalie_config;
+        } normal_config{}, goalie_config{};
 
         void load_quintic_walk(const ::extension::Configuration& cfg, Config& config) const;
 

@@ -35,9 +35,9 @@ namespace module::motion {
     using utility::motion::kinematics::calculateLegJoints;
 
     /**
-     * @breif loads the configuration from cfg into config
+     * @brief loads the configuration from cfg into config
      */
-    void QuinticWalk::load_quintic_walk(const Configuration& cfg, Config& config) const {
+    static void QuinticWalk::load_quintic_walk(const Configuration& cfg, Config& config) {
         config.params.freq                          = cfg["walk"]["freq"].as<float>();
         config.params.double_support_ratio          = cfg["walk"]["double_support_ratio"].as<float>();
         config.params.first_step_swing_factor       = cfg["walk"]["first_step_swing_factor"].as<float>();
@@ -68,9 +68,9 @@ namespace module::motion {
         config.params.pause_duration          = cfg["walk"]["pause"]["duration"].as<float>();
 
 
-        config.max_step[0] = cfg["max_step"]["x"].as<float>();
-        config.max_step[1] = cfg["max_step"]["y"].as<float>();
-        config.max_step[2] = cfg["max_step"]["z"].as<float>();
+        config.max_step.x() = cfg["max_step"]["x"].as<float>();
+        config.max_step.y() = cfg["max_step"]["y"].as<float>();
+        config.max_step.z() = cfg["max_step"]["z"].as<float>();
         config.max_step_xy = cfg["max_step"]["xy"].as<float>();
 
         config.imu_active          = cfg["imu"]["active"].as<bool>();
@@ -184,7 +184,7 @@ namespace module::motion {
 
             // the engine expects orders in [m] not [m/s]. We have to compute by dividing by step frequency which is
             // a double step factor 2 since the order distance is only for a single step, not double step
-            const float factor             = (1.0 / (current_config.params.freq)) / 2.0;
+            const float factor             = (1.0f / (current_config.params.freq)) * 0.5f;
             const Eigen::Vector3f& command = walkCommand.command.cast<float>() * factor;
 
             // Clamp velocity command
@@ -205,9 +205,9 @@ namespace module::motion {
                                 command.y(),
                                 command.z(),
                                 command.x() + command.y(),
-                                current_config.max_step[0] / factor,
-                                current_config.max_step[1] / factor,
-                                current_config.max_step[2] / factor,
+                                current_config.max_step.x() / factor,
+                                current_config.max_step.y() / factor,
+                                current_config.max_step.z() / factor,
                                 current_config.max_step_xy / factor));
             }
 
