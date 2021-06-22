@@ -36,6 +36,8 @@ namespace module::motion {
 
     /**
      * @brief loads the configuration from cfg into config
+     * @param cfg A Configuration provided by the Configuration extension
+     * @param config The destination configuration that we will write to.
      */
     static void QuinticWalk::load_quintic_walk(const Configuration& cfg, Config& config) {
         config.params.freq                          = cfg["walk"]["freq"].as<float>();
