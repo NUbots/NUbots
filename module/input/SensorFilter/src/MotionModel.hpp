@@ -44,21 +44,21 @@ namespace module::input {
         struct StateVec {
 
             // Our position in global space
-            Eigen::Matrix<Scalar, 3, 1> rTWw;
+            Eigen::Matrix<Scalar, 3, 1> rTWw = Eigen::Matrix<Scalar, 3, 1>::Zero();
 
             // Our velocity in global space
-            Eigen::Matrix<Scalar, 3, 1> vTw;
+            Eigen::Matrix<Scalar, 3, 1> vTw = Eigen::Matrix<Scalar, 3, 1>::Zero();
 
             // Our orientation from robot to world
-            Eigen::Quaternion<Scalar> Rwt;
+            Eigen::Quaternion<Scalar> Rwt = Eigen::Quaternion<Scalar>::Identity();
 
             // Our rotational velocity in torso space
             // Gyroscope measures the angular velocity of the torso in torso space
-            Eigen::Matrix<Scalar, 3, 1> omegaTTt;
+            Eigen::Matrix<Scalar, 3, 1> omegaTTt = Eigen::Matrix<Scalar, 3, 1>::Zero();
 
             static constexpr size_t size = 13;
 
-            constexpr static size_t getSize() {
+            [[nodiscard]] constexpr static size_t getSize() {
                 return size;
             }
 
@@ -86,11 +86,7 @@ namespace module::input {
             };
 
             // Default constructor initialises all vectors to zero, and the quaternion to the identity rotation
-            StateVec()
-                : rTWw(Eigen::Matrix<Scalar, 3, 1>::Zero())
-                , vTw(Eigen::Matrix<Scalar, 3, 1>::Zero())
-                , Rwt(Eigen::Quaternion<Scalar>::Identity())
-                , omegaTTt(Eigen::Matrix<Scalar, 3, 1>::Zero()) {}
+            StateVec() = default;
 
             // Constructor from monolithic vector representation, normalising the quaternion in the process
             template <typename OtherDerived>
@@ -101,7 +97,7 @@ namespace module::input {
                 , omegaTTt(state.template segment<3>(WX)) {}
 
             // Converts StateVec to monolithic vector representation
-            Eigen::Matrix<Scalar, size, 1> getStateVec() const {
+            [[nodiscard]] Eigen::Matrix<Scalar, size, 1> getStateVec() const {
                 Eigen::Matrix<Scalar, size, 1> state = Eigen::Matrix<Scalar, size, 1>::Zero();
                 state.template segment<3>(PX)        = rTWw;
                 state.template segment<3>(VX)        = vTw;
@@ -111,13 +107,13 @@ namespace module::input {
             }
 
             // Wrapper for asDiagonal for monolithic vector representation
-            Eigen::Matrix<Scalar, size, size> asDiagonal() const {
-                return this->getStateVec().asDiagonal();
+            [[nodiscard]] Eigen::Matrix<Scalar, size, size> asDiagonal() const {
+                return getStateVec().asDiagonal();
             }
 
             // Operator for implicit conversion to monolithic vector representation
-            operator Eigen::Matrix<Scalar, size, 1>() const {
-                return this->getStateVec();
+            [[nodiscard]] operator Eigen::Matrix<Scalar, size, 1>() const {
+                return getStateVec();
             }
         };
 
@@ -126,12 +122,12 @@ namespace module::input {
         using StateMat = Eigen::Matrix<Scalar, size, size>;
 
         // Our static process noise diagonal vector
-        StateVec process_noise;
+        StateVec process_noise{};
 
         // The velocity decay for x/y/z velocities (1.0 = no decay)
         Eigen::Matrix<Scalar, 3, 1> timeUpdateVelocityDecay = Eigen::Matrix<Scalar, 3, 1>::Ones();
 
-        Eigen::Matrix<Scalar, size, 1> time(const StateVec& state, const Scalar deltaT) {
+        [[nodiscard]] Eigen::Matrix<Scalar, size, 1> time(const StateVec& state, const Scalar deltaT) const {
 
             // Prepare our new state
             StateVec newState(state);
@@ -165,7 +161,8 @@ namespace module::input {
             return newState;
         }
 
-        Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::ACCELEROMETER&) {
+        [[nodiscard]] static Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state,
+                                                                 const MeasurementType::ACCELEROMETER&) {
 
             // Rotate world gravity vector into torso space using quaternion conjugation
             //
@@ -185,28 +182,31 @@ namespace module::input {
                 .vec();
         }
 
-        Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::GYROSCOPE&) {
+        [[nodiscard]] static Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state,
+                                                                 const MeasurementType::GYROSCOPE&) {
             return state.omegaTTt;
         }
 
-        Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state, const MeasurementType::FLAT_FOOT_ODOMETRY&) {
+        [[nodiscard]] static Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state,
+                                                                 const MeasurementType::FLAT_FOOT_ODOMETRY&) {
             return state.rTWw;
         }
 
-        Eigen::Matrix<Scalar, 4, 1> predict(const StateVec& state, const MeasurementType::FLAT_FOOT_ORIENTATION&) {
+        [[nodiscard]] static Eigen::Matrix<Scalar, 4, 1> predict(const StateVec& state,
+                                                                 const MeasurementType::FLAT_FOOT_ORIENTATION&) {
             return state.Rwt.coeffs();
         }
 
         // This function is called to determine the difference between position, velocity, and acceleration
         // measurements/predictions
-        Eigen::Matrix<Scalar, 3, 1> difference(const Eigen::Matrix<Scalar, 3, 1>& a,
-                                               const Eigen::Matrix<Scalar, 3, 1>& b) {
+        [[nodiscard]] static Eigen::Matrix<Scalar, 3, 1> difference(const Eigen::Matrix<Scalar, 3, 1>& a,
+                                                                    const Eigen::Matrix<Scalar, 3, 1>& b) {
             return a - b;
         }
 
         // This function is called to determine the difference between quaternion measurements/predictions
-        Eigen::Matrix<Scalar, 4, 1> difference(const Eigen::Matrix<Scalar, 4, 1>& a,
-                                               const Eigen::Matrix<Scalar, 4, 1>& b) {
+        [[nodiscard]] static Eigen::Matrix<Scalar, 4, 1> difference(const Eigen::Matrix<Scalar, 4, 1>& a,
+                                                                    const Eigen::Matrix<Scalar, 4, 1>& b) {
             // Find the rotation needed to get from orientation a to orientation b
             const Eigen::Quaternion<Scalar> q0(a);
             const Eigen::Quaternion<Scalar> q1(b);
@@ -214,7 +214,7 @@ namespace module::input {
             return utility::math::quaternion::difference(q0, q1).coeffs();
         }
 
-        StateVec limit(const StateVec& state) {
+        [[nodiscard]] static StateVec limit(const StateVec& state) {
             StateVec newState(state);
 
             // Make sure the quaternion remains normalised
@@ -225,11 +225,10 @@ namespace module::input {
                 newState.Rwt.w() *= Scalar(-1);
                 newState.Rwt.vec() *= Scalar(-1);
             }
-
             return newState;
         }
 
-        Eigen::Matrix<Scalar, size, size> noise(const Scalar& deltaT) {
+        [[nodiscard]] Eigen::Matrix<Scalar, size, size> noise(const Scalar& deltaT) {
             // Return our process noise matrix
             return process_noise.asDiagonal() * deltaT;
         }
