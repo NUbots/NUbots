@@ -82,6 +82,8 @@ namespace module::behaviour::strategy {
             bool forcePenaltyShootout = false;
         } cfg_;
 
+        class enum FieldTarget { BALL, GOAL };
+
         message::behaviour::FieldTarget walkTarget;
 
         std::vector<message::behaviour::FieldTarget> lookTarget;
