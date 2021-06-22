@@ -65,7 +65,7 @@ namespace module::input {
             }
 
             // Conversions
-            operator Value() const {
+            [[nodiscard]] operator Value() const {
                 return value;
             }
             [[nodiscard]] operator std::string() const {
