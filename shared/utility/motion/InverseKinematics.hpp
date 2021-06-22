@@ -53,22 +53,25 @@ namespace utility::motion::kinematics {
         @param RobotKinematicsModel The class containing the leg model of the robot.
     */
 
-    std::vector<std::pair<ServoID, double>> calculateLegJoints(const message::motion::KinematicsModel& model,
-                                                               const Eigen::Affine3d& target,
-                                                               const LimbID& limb);
+    [[nodiscard]] std::vector<std::pair<ServoID, double>> calculateLegJoints(
+        const message::motion::KinematicsModel& model,
+        const Eigen::Affine3d& target,
+        const LimbID& limb);
 
-    std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
-                                                              const Eigen::Affine3f& target,
-                                                              const LimbID& limb);
+    [[nodiscard]] std::vector<std::pair<ServoID, float>> calculateLegJoints(
+        const message::motion::KinematicsModel& model,
+        const Eigen::Affine3f& target,
+        const LimbID& limb);
 
-    std::vector<std::pair<ServoID, float>> calculateLegJoints(const message::motion::KinematicsModel& model,
-                                                              const Eigen::Affine3f& leftTarget,
-                                                              const Eigen::Affine3f& rightTarget);
+    [[nodiscard]] std::vector<std::pair<ServoID, float>> calculateLegJoints(
+        const message::motion::KinematicsModel& model,
+        const Eigen::Affine3f& leftTarget,
+        const Eigen::Affine3f& rightTarget);
 
-    std::vector<std::pair<ServoID, double>> calculateCameraLookJoints(const KinematicsModel& model,
-                                                                      const Eigen::Vector3d& cameraUnitVector);
+    [[nodiscard]] std::vector<std::pair<ServoID, double>> calculateCameraLookJoints(
+        const Eigen::Vector3d& cameraUnitVector);
 
-    std::vector<std::pair<ServoID, float>> calculateHeadJoints(Eigen::Vector3f cameraUnitVector);
+    [[nodiscard]] std::vector<std::pair<ServoID, float>> calculateHeadJoints(Eigen::Vector3f cameraUnitVector);
 
 }  // namespace utility::motion::kinematics
 

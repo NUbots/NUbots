@@ -42,11 +42,11 @@ namespace utility::motion::kinematics {
     using utility::input::ServoID;
 
 
-    inline std::map<ServoID, Eigen::Affine3d> calculateHeadJointPosition(const KinematicsModel& model,
-                                                                         const float& HEAD_PITCH,
-                                                                         const float& HEAD_YAW,
-                                                                         const ServoID& servoID) {
-        std::map<ServoID, Eigen::Affine3d> positions;
+    [[nodiscard]] inline std::map<ServoID, Eigen::Affine3d> calculateHeadJointPosition(const KinematicsModel& model,
+                                                                                       const float& HEAD_PITCH,
+                                                                                       const float& HEAD_YAW,
+                                                                                       const ServoID& servoID) {
+        std::map<ServoID, Eigen::Affine3d> positions{};
 
         Eigen::Affine3d runningTransform = Eigen::Affine3d::Identity();
         const Eigen::Vector3d NECK_POS(model.head.NECK_BASE_POS_FROM_ORIGIN_X,
@@ -81,9 +81,9 @@ namespace utility::motion::kinematics {
         return positions;
     }
 
-    inline std::map<ServoID, Eigen::Affine3d> calculateHeadJointPosition(const KinematicsModel& model,
-                                                                         const Sensors& sensors,
-                                                                         const ServoID& servoID) {
+    [[nodiscard]] inline std::map<ServoID, Eigen::Affine3d> calculateHeadJointPosition(const KinematicsModel& model,
+                                                                                       const Sensors& sensors,
+                                                                                       const ServoID& servoID) {
         return calculateHeadJointPosition(model,
                                           sensors.servo[static_cast<int>(ServoID::HEAD_PITCH)].present_position,
                                           sensors.servo[static_cast<int>(ServoID::HEAD_YAW)].present_position,
@@ -96,11 +96,11 @@ namespace utility::motion::kinematics {
 
         The basis 'faces' down its x axis.
     */
-    inline std::map<ServoID, Eigen::Affine3d> calculateLegJointPosition(const KinematicsModel& model,
-                                                                        const Sensors& sensors,
-                                                                        const ServoID& servoID,
-                                                                        const BodySide& isLeft) {
-        std::map<ServoID, Eigen::Affine3d> positions;
+    [[nodiscard]] inline std::map<ServoID, Eigen::Affine3d> calculateLegJointPosition(const KinematicsModel& model,
+                                                                                      const Sensors& sensors,
+                                                                                      const ServoID& servoID,
+                                                                                      const BodySide& isLeft) {
+        std::map<ServoID, Eigen::Affine3d> positions{};
         Eigen::Affine3d runningTransform = Eigen::Affine3d::Identity();
         // Variables to mask left and right leg differences:
         ServoID HIP_YAW, HIP_ROLL, HIP_PITCH, KNEE, ANKLE_PITCH, ANKLE_ROLL;
@@ -201,11 +201,11 @@ namespace utility::motion::kinematics {
 
         The basis 'faces' down its x axis.
     */
-    inline std::map<ServoID, Eigen::Affine3d> calculateArmJointPosition(const KinematicsModel& model,
-                                                                        const Sensors& sensors,
-                                                                        const ServoID& servoID,
-                                                                        const BodySide& isLeft) {
-        std::map<ServoID, Eigen::Affine3d> positions;
+    [[nodiscard]] inline std::map<ServoID, Eigen::Affine3d> calculateArmJointPosition(const KinematicsModel& model,
+                                                                                      const Sensors& sensors,
+                                                                                      const ServoID& servoID,
+                                                                                      const BodySide& isLeft) {
+        std::map<ServoID, Eigen::Affine3d> positions{};
         Eigen::Affine3d runningTransform = Eigen::Affine3d::Identity();
         // Variables to mask left and right differences:
         ServoID SHOULDER_PITCH, SHOULDER_ROLL, ELBOW;
@@ -272,9 +272,9 @@ namespace utility::motion::kinematics {
 
     /*! @brief
      */
-    inline std::map<ServoID, Eigen::Affine3d> calculatePosition(const KinematicsModel& model,
-                                                                const Sensors& sensors,
-                                                                const ServoID& servoID) {
+    [[nodiscard]] inline std::map<ServoID, Eigen::Affine3d> calculatePosition(const KinematicsModel& model,
+                                                                              const Sensors& sensors,
+                                                                              const ServoID& servoID) {
         switch (servoID.value) {
             case ServoID::HEAD_YAW:
             case ServoID::HEAD_PITCH: return calculateHeadJointPosition(model, sensors, servoID);
@@ -300,9 +300,9 @@ namespace utility::motion::kinematics {
         }
     }
 
-    inline std::map<ServoID, Eigen::Affine3d> calculateAllPositions(const KinematicsModel& model,
-                                                                    const Sensors& sensors) {
-        std::map<ServoID, Eigen::Affine3d> result;
+    [[nodiscard]] inline std::map<ServoID, Eigen::Affine3d> calculateAllPositions(const KinematicsModel& model,
+                                                                                  const Sensors& sensors) {
+        std::map<ServoID, Eigen::Affine3d> result{};
         for (const auto& r : calculatePosition(model, sensors, ServoID::L_ANKLE_ROLL)) {
             result[r.first] = r.second;
         }
@@ -324,17 +324,16 @@ namespace utility::motion::kinematics {
     /*! @brief Adds up the mass vectors stored in the robot model and normalises the resulting position
         @return [x_com, y_com, z_com, total_mass] relative to the torso basis
     */
-    inline Eigen::Vector4d calculateCentreOfMass(const message::motion::KinematicsModel& model,
-                                                 const std::array<Eigen::Matrix4d, 20>& Htx,
-                                                 const Eigen::Matrix4d& Hwt) {
+    [[nodiscard]] inline Eigen::Vector4d calculateCentreOfMass(const message::motion::KinematicsModel& model,
+                                                               const std::array<Eigen::Matrix4d, 20>& Htx) {
 
         // Convenience function to transform particle-space CoM to torso-space CoM
         // Htx - transform from particle space to torso space
         // particle - CoM coordinates in particle space
-        auto com = [&Hwt](const Eigen::Matrix4d& Htx, const Eigen::Vector4d& particle) {
+        auto com = [](const Eigen::Matrix4d& Htx, const Eigen::Vector4d& particle) {
             // Split out CoM and mass
             Eigen::Vector4d com(particle.x(), particle.y(), particle.z(), 1.0);
-            double mass = particle.w();
+            const double mass = particle.w();
 
             // Calculate CoM in torso space
             com = Htx * com;
@@ -374,7 +373,7 @@ namespace utility::motion::kinematics {
         }
 
         return Eigen::Vector4d{robot_com.first.x(), robot_com.first.y(), robot_com.first.z(), robot_com.second};
-    }  // namespace kinematics
+    }
 
     /*! @brief Transforms inertial tensors for each robot particle into torso space and sums to find the total
        inertial tensor
@@ -382,8 +381,8 @@ namespace utility::motion::kinematics {
                  [xy, yy, yz],
                  [xz, yz, zz]]
     */
-    inline Eigen::Matrix3d calculateInertialTensor(const message::motion::KinematicsModel& model,
-                                                   const std::array<Eigen::Matrix4d, 20>& Htx) {
+    [[nodiscard]] inline Eigen::Matrix3d calculateInertialTensor(const message::motion::KinematicsModel& model,
+                                                                 const std::array<Eigen::Matrix4d, 20>& Htx) {
 
         // Convenience function to transform particle-space inertial tensors to torso-space inertial tensor
         // Htx - transform from particle space to torso space
@@ -395,7 +394,7 @@ namespace utility::motion::kinematics {
             com = Htx * com;
 
             // Calculate distance to particle CoM from particle origin, using skew-symmetric matrix
-            double x = com.x(), y = com.y(), z = com.z();
+            const double x = com.x(), y = com.y(), z = com.z();
             Eigen::Matrix3d d;
             // clang-format off
                     d <<  y * y + z * z, -x * y,         -x * z,
@@ -466,10 +465,10 @@ namespace utility::motion::kinematics {
         return inertia_tensor;
     }  // namespace kinematics
 
-    inline Eigen::Matrix2d calculateRobotToIMU(const Eigen::Affine3d& orientation) {
-        Eigen::Vector3d xRobotImu  = orientation.rotation().topRows<1>();
-        Eigen::Vector2d projXRobot = xRobotImu.head<2>().normalized();
-        Eigen::Vector2d projYRobot = Eigen::Vector2d(-projXRobot.y(), projXRobot.x());
+    [[nodiscard]] inline Eigen::Matrix2d calculateRobotToIMU(const Eigen::Affine3d& orientation) {
+        const Eigen::Vector3d xRobotImu  = orientation.rotation().topRows<1>();
+        const Eigen::Vector2d projXRobot = xRobotImu.head<2>().normalized();
+        const Eigen::Vector2d projYRobot = Eigen::Vector2d(-projXRobot.y(), projXRobot.x());
 
         Eigen::Matrix2d robotToImu;
         robotToImu << projXRobot, projYRobot;
@@ -478,22 +477,22 @@ namespace utility::motion::kinematics {
     }
 
     template <typename T, typename Scalar = typename T::Scalar, typename MatrixType = typename T::LinearMatrixType>
-    T calculateGroundSpace(const T& Htf, const T& Hwt) {
+    [[nodiscard]] T calculateGroundSpace(const T& Htf, const T& Hwt) {
         // Retrieve rotations needed for creating the space
         // support foot to torso rotation, and world to torso rotation
-        MatrixType Rtf(Htf.rotation());
+        const MatrixType Rtf(Htf.rotation());
 
         // Fix the foot in world space
-        MatrixType Rwf(Hwt.rotation() * Rtf);
+        const MatrixType Rwf(Hwt.rotation() * Rtf);
 
         // Dot product of foot z (in world space) with world z
-        Scalar alpha = utility::math::angle::acos_clamped(Rwf(2, 2));
+        const Scalar alpha = utility::math::angle::acos_clamped(Rwf(2, 2));
 
         Eigen::Matrix<Scalar, 3, 1> axis(Rwf.col(2).cross(Eigen::Matrix<Scalar, 3, 1>::UnitZ()).normalized());
 
         // Axis angle is foot to ground
-        MatrixType Rwg(Eigen::AngleAxis<Scalar>(alpha, axis).toRotationMatrix() * Rwf);
-        MatrixType Rtg(Hwt.rotation().transpose() * Rwg);
+        const MatrixType Rwg(Eigen::AngleAxis<Scalar>(alpha, axis).toRotationMatrix() * Rwf);
+        const MatrixType Rtg(Hwt.rotation().transpose() * Rwg);
 
         // Ground space assemble!
         T Htg;

@@ -131,7 +131,7 @@ namespace module::localisation {
                     state_cov.topLeftCorner(2, 2) = pos_cov.matrix();
                     state_cov(2, 2)               = s.heading_var;
                     cov.push_back(state_cov);
-                    filter.set_state(hfw_state_vec, state_cov, n_particles);
+                    filter.set_state(hfw_state_vec, state_cov);
                 }
             });
 
@@ -140,7 +140,7 @@ namespace module::localisation {
             filter.model.processNoiseDiagonal = config["process_noise_diagonal"].as<Expression>();
             filter.model.n_rogues             = config["n_rogues"].as<int>();
             filter.model.resetRange           = config["reset_range"].as<Expression>();
-            n_particles                       = config["n_particles"].as<int>();
+            filter.model.n_particles          = config["n_particles"].as<int>();
             draw_particles                    = config["draw_particles"].as<int>();
 
             Eigen::Vector3d start_state = config["start_state"].as<Expression>();

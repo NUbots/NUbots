@@ -10,7 +10,8 @@ nuclear_role(
   # Support
   support::configuration::GlobalConfig
   network::NUClearNet
-  support::NUsight
+  output::NetworkForwarder
+  output::Overview
   # Localisation
   localisation::RobotParticleLocalisation
   support::LocalisationSimulator
