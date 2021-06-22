@@ -4,39 +4,10 @@
 #include <filesystem>
 #include <fstream>
 #include <nuclear>
-#include <zstr.hpp>
 
-#include "utility/type_traits/has_id.hpp"
-#include "utility/type_traits/has_timestamp.hpp"
+#include "utility/nbs/Encoder.hpp"
 
 namespace module::support::logging {
-
-    /// @brief Returns the timestamp field of data or, if timestamp does not exist, it returns original, both converted
-    /// to uint64_t
-    template <typename T>
-    std::enable_if_t<!utility::type_traits::has_timestamp<T>::value, uint64_t> get_timestamp(
-        const NUClear::clock::time_point& original,
-        const T& /*data*/) {
-        return std::chrono::duration_cast<std::chrono::nanoseconds>(original.time_since_epoch()).count();
-    }
-
-    template <typename T>
-    std::enable_if_t<utility::type_traits::has_timestamp<T>::value, uint64_t> get_timestamp(
-        const NUClear::clock::time_point& /*original*/,
-        const T& data) {
-        return std::chrono::duration_cast<std::chrono::nanoseconds>(data.timestamp.time_since_epoch()).count();
-    }
-
-    /// @brief Returns the id field of data or, if id does not exist, 0
-    template <typename T>
-    std::enable_if_t<!utility::type_traits::has_id<T>::value, uint32_t> get_id(const T& /*data*/) {
-        return 0;
-    }
-
-    template <typename T>
-    std::enable_if_t<utility::type_traits::has_id<T>::value, uint32_t> get_id(const T& data) {
-        return data.id;
-    }
 
     class DataLogging : public NUClear::Reactor {
     public:
@@ -73,15 +44,14 @@ namespace module::support::logging {
             } output;
         } config;
 
-        /// The number of bytes written to the file so far
-        uint64_t bytes_written;
         /// The file we are outputting to currently
-        std::ofstream output_file;
         std::filesystem::path output_file_path{};
         /// The file we are outputting our index to currently
-        /// Using a unique pointer as zstr::ofstream does not have a default constructor
-        std::unique_ptr<zstr::ofstream> index_file;
         std::filesystem::path index_file_path{};
+        /// The encoder that writes the files
+        /// Using a unique pointer as Encoder does not have a default constructor
+        std::unique_ptr<utility::nbs::Encoder> encoder;
+
         /// The reaction handles for types we have currently bound that we are recording
         std::map<std::string, ReactionHandle> handles;
     };
