@@ -147,7 +147,7 @@ namespace module::behaviour::planning {
             }
         });
 
-        on<Every<30, Per<std::chrono::seconds>>,
+        on<Every<40, Per<std::chrono::seconds>>,
            With<Ball>,
            With<Field>,
            With<Sensors>,
