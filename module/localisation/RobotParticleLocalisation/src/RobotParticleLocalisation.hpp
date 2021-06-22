@@ -31,7 +31,8 @@ namespace module::localisation {
         } config;
 
         Eigen::Vector3d getFieldPosition(const message::vision::Goal& goal,
-                                         const message::support::FieldDescription& fd) const;
+                                         const message::support::FieldDescription& fd,
+                                         const bool isOwn) const;
 
     public:
         /// @brief Called by the powerplant to build and setup the RobotParticleLocalisation reactor.

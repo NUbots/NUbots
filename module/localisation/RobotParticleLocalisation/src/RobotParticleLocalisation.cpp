@@ -79,26 +79,85 @@ namespace module::localisation {
 
                     filter.time(seconds);
 
-                    for (auto goal : goals.goals) {
+                    // Currently this has no idea about pairs of posts, only that it has been labelled left, right and
+                    // unknown
 
-                        // Check side and team
-                        const Eigen::Vector3d poss = getFieldPosition(goal, fd);
+                    // Save the filter state
+                    auto saved_filter = filter;
 
-                        for (auto& m : goal.measurements) {
-                            if (m.type == VisionGoal::MeasurementType::CENTRE) {
-                                if (m.position.allFinite() && m.covariance.allFinite()) {
-                                    filter.measure(Eigen::Vector3d(m.position.cast<double>()),
-                                                   Eigen::Matrix3d(m.covariance.cast<double>()),
-                                                   poss,
-                                                   goals.Hcw,
-                                                   m.type,
-                                                   fd);
-                                }
-                                else {
-                                    log("Received non-finite measurements from vision. Discarding ...");
-                                }
+                    // Go through all of the known sided posts
+                    for (auto goal_post : goals.goals) {
+                        if (goal_post.side != Goal::Side::UNKNOWN_SIDE) {
+                            // These are either left or right goal posts
+
+                            // Compare each of these to the possible goal posts on the field (own and opp)
+
+                            // TODO remove the repeated measurements
+                            auto m = goal_post.measurements[0];
+
+                            // Check that the measurement is sane
+                            if (m.position.allFinite() && m.covariance.allFinite()) {
+                                auto filter_new_own = saved_filter;
+
+                                // Make a new candidate for the post
+                                auto candidate_own =
+                                    filter_new_own.measure(Eigen::Vector3d(m.position.cast<double>()),
+                                                           Eigen::Matrix3d(m.covariance.cast<double>()),
+                                                           getFieldPosition(goal_post, fd, 1),  // Own post
+                                                           goals.Hcw);                          //,
+                                                                                                //    m.type,
+                                                                                                //    fd);
+
+                                auto filter_new_opp = saved_filter;
+
+                                // Make a new candidate for the post
+                                auto candidate_opp =
+                                    filter_new_opp.measure(Eigen::Vector3d(m.position.cast<double>()),
+                                                           Eigen::Matrix3d(m.covariance.cast<double>()),
+                                                           getFieldPosition(goal_post, fd, 0),  // Opp post
+                                                           goals.Hcw);                          //,
+                                                                                                //    m.type,
+                                                                                                //    fd);
+
+                                // Check which one was more confident
+                                // TODO Should this be > or <
+                                filter = candidate_own > candidate_opp ? filter_new_own : filter_new_opp;
+                            }
+                            else {
+                                log("Received non-finite measurements from vision. Discarding ...");
                             }
                         }
+                    }
+
+                    for (auto goal_post : goals.goals) {
+                        if (goal_post.side == Goal::Side::UNKNOWN_SIDE) {
+                            log("This isn't handled yet :D");
+                        }
+
+                        // If the goal measurement is a pair of goals. Then get the pairs of true goals, for each pair
+                        // of true goals, calculate the likelyhood of it being the goal detected. Update the state with
+                        // the minimum error state pair
+
+                        // Else if the goal measurement is not a pair of goals. Then get each true goals, calculate the
+                        // likelyhood of it being the goal detected. Update the state with the minimum error state
+
+                        // // Check side and team
+                        // const Eigen::Vector3d rGFf = getFieldPosition(goal, fd);
+
+                        // for (auto& m : goal.measurements) {
+
+                        //     if (m.type == VisionGoal::MeasurementType::CENTRE) {
+                        //         if (m.position.allFinite() && m.covariance.allFinite()) {
+                        //             filter.measure(Eigen::Vector3d(m.position.cast<double>()),
+                        //                            Eigen::Matrix3d(m.covariance.cast<double>()),
+                        //                            rGFf,
+                        //                            goals.Hcw);
+                        //         }
+                        //         else {
+                        //             log("Received non-finite measurements from vision. Discarding ...");
+                        //         }
+                        //     }
+                        // }
                     }
                 }
             });
@@ -177,21 +236,32 @@ namespace module::localisation {
         });
     }
 
+    // True goal posiiton
     Eigen::Vector3d RobotParticleLocalisation::getFieldPosition(const VisionGoal& goal,
-                                                                const message::support::FieldDescription& fd) const {
+                                                                const message::support::FieldDescription& fd,
+                                                                const bool isOwn) const {
         Eigen::Vector3d position;
 
         const bool left  = (goal.side != VisionGoal::Side::RIGHT);
         const bool right = (goal.side != VisionGoal::Side::LEFT);
 
-        if (left) {
-            position = Eigen::Vector3d(goal.measurements[0].position);
+        // TODO This should be removed from the message
+        // const bool own   = (goal.team != VisionGoal::Team::OPPONENT);
+        // const bool opp   = (goal.team != VisionGoal::Team::OWN);
+
+        if (isOwn && left) {
+            position = Eigen::Vector3d(fd.goalpost_own_l.x(), fd.goalpost_own_l.y(), 0);
         }
-        if (right) {
-            position = Eigen::Vector3d(goal.measurements[0].position);
+        if (isOwn && right) {
+            position = Eigen::Vector3d(fd.goalpost_own_r.x(), fd.goalpost_own_r.y(), 0);
+        }
+        if (!isOwn && left) {
+            position = Eigen::Vector3d(fd.goalpost_opp_l.x(), fd.goalpost_opp_l.y(), 0);
+        }
+        if (!isOwn && right) {
+            position = Eigen::Vector3d(fd.goalpost_opp_r.x(), fd.goalpost_opp_r.y(), 0);
         }
 
         return position;
     }
-
 }  // namespace module::localisation
