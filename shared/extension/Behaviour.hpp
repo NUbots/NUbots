@@ -80,8 +80,21 @@ namespace extension::behaviour {
             std::string name;
         };
 
-        template <typename T>
+        template <typename T, typename ProviderMethod>
         struct ProviderBase {
+
+            template <typename DSL>
+            static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
+
+                // Tell the director
+                reaction->reactor.powerplant.emit(std::make_unique<ProviderMethod>(reaction, typeid(T)));
+
+                // Add our unbinder
+                reaction->unbinders.emplace_back([](const NUClear::threading::Reaction& r) {
+                    r.reactor.emit<NUClear::dsl::word::emit::Direct>(
+                        std::make_unique<NUClear::dsl::operation::Unbind<commands::ProvidesReaction>>(r.id));
+                });
+            }
 
             template <typename DSL>
             static inline std::shared_ptr<T> get(NUClear::threading::Reaction& t) {
@@ -116,21 +129,7 @@ namespace extension::behaviour {
      * @tparam T the provider type that this transition function provides for
      */
     template <typename T>
-    struct Entering : public commands::DirectorGet<T> {
-
-        template <typename DSL>
-        static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
-
-            // Tell the director
-            reaction->reactor.powerplant.emit(std::make_unique<commands::EnteringReaction>(reaction, typeid(T)));
-
-            // Add our unbinder
-            reaction->unbinders.emplace_back([](const NUClear::threading::Reaction& r) {
-                r.reactor.emit<NUClear::dsl::word::emit::Direct>(
-                    std::make_unique<NUClear::dsl::operation::Unbind<commands::ProvidesReaction>>(r.id));
-            });
-        }
-    };
+    struct Entering : public commands::ProviderBase<T, commands::EnteringReaction> {};
 
     /**
      * This DSL word is used to define a leaving transition from a provider.
@@ -142,21 +141,7 @@ namespace extension::behaviour {
      * @tparam T the provider type that this transition function provides for
      */
     template <typename T>
-    struct Leaving : public commands::DirectorGet<T> {
-
-        template <typename DSL>
-        static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
-
-            // Tell the director
-            reaction->reactor.powerplant.emit(std::make_unique<commands::LeavingReaction>(reaction, typeid(T)));
-
-            // Add our unbinder
-            reaction->unbinders.emplace_back([](const NUClear::threading::Reaction& r) {
-                r.reactor.emit<NUClear::dsl::word::emit::Direct>(
-                    std::make_unique<NUClear::dsl::operation::Unbind<commands::ProvidesReaction>>(r.id));
-            });
-        }
-    };
+    struct Leaving : public commands::ProviderBase<T, commands::LeavingReaction> {};
 
     /**
      * This DSL word is used to define a provider for a type.
@@ -167,21 +152,7 @@ namespace extension::behaviour {
      * @tparam T the provider type that this transition function provides for
      */
     template <typename T>
-    struct Provides : public commands::DirectorGet<T> {
-
-        template <typename DSL>
-        static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
-
-            // Tell the director
-            reaction->reactor.powerplant.emit(std::make_unique<commands::ProvidesReaction>(reaction, typeid(T)));
-
-            // Add our unbinder
-            reaction->unbinders.emplace_back([](const NUClear::threading::Reaction& r) {
-                r.reactor.emit<NUClear::dsl::word::emit::Direct>(
-                    std::make_unique<NUClear::dsl::operation::Unbind<commands::ProvidesReaction>>(r.id));
-            });
-        }
-    };
+    struct Provides : public commands::ProviderBase<T, commands::ProvidesReaction> {};
 
     /**
      * The When DSL word is used to limit access to a provider unless a condition is true.
