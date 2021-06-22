@@ -137,7 +137,7 @@ namespace utility::file {
             closedir(dir);
         }
         else {
-            // TODO Throw an error or something
+            throw std::runtime_error("Attempted to list directory which didn't exist.");
         }
 
         return result;
@@ -160,9 +160,8 @@ namespace utility::file {
             // Otherwise remove the slash and call recursivly
             return pathSplit(input.substr(0, input.size() - 1));
         }
-        else {
-            return {input.substr(0, lastSlash), input.substr(lastSlash + 1, input.size())};
-        }
+        // Else, the slash was not the last character
+        return {input.substr(0, lastSlash), input.substr(lastSlash + 1, input.size())};
     }
 
     std::vector<std::string> listFiles(const std::string& directory, bool recursive) {
