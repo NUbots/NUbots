@@ -318,8 +318,8 @@ namespace module::platform {
         });
 
         // This trigger updates our current servo state
-        on<Trigger<ServoTargets>, With<RawSensors>, Sync<ServoTargets>>().then([this](const ServoTargets& targets,
-                                                                                      const RawSensors& sensors) {
+        on<Trigger<ServoTargets>, With<RawSensors>, Sync<ServoState>>().then([this](const ServoTargets& targets,
+                                                                                    const RawSensors& sensors) {
             // Loop through each of our commands
             for (const auto& target : targets.targets) {
                 // Get the difference between the current servo position and our servo target
@@ -546,33 +546,32 @@ namespace module::platform {
                         }
                     });
 
-            send_io =
-                on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH, Sync<ServoTarget>>()
-                    .then("Simulator Update Loop", [this] {
-                        // Bound the time_step for the cameras and other sensors by the minimum allowed time_step for
-                        // the competition
-                        const uint32_t sensor_timestep = std::max(min_sensor_time_step, time_step);
-                        const uint32_t camera_timestep = std::max(min_camera_time_step, time_step);
+            send_io = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Sync<ServoState>, Priority::HIGH>().then(
+                "Simulator Update Loop",
+                [this] {
+                    // Bound the time_step for the cameras and other sensors by the minimum allowed time_step for
+                    // the competition
+                    const uint32_t sensor_timestep = std::max(min_sensor_time_step, time_step);
+                    const uint32_t camera_timestep = std::max(min_camera_time_step, time_step);
 
-                        // Construct the ActuatorRequests message
-                        ActuatorRequests actuator_requests = create_sensor_time_steps(sensor_timestep, camera_timestep);
-                        for (auto& servo : servo_state) {
-                            if (servo.dirty) {
-                                // Servo is no longer dirty
-                                servo.dirty = false;
+                    // Construct the ActuatorRequests message
+                    ActuatorRequests actuator_requests = create_sensor_time_steps(sensor_timestep, camera_timestep);
+                    for (auto& servo : servo_state) {
+                        if (servo.dirty) {
+                            // Servo is no longer dirty
+                            servo.dirty = false;
 
-                                // Create servo position message
-                                actuator_requests.motor_positions.emplace_back(
-                                    MotorPosition(servo.name, servo.goal_position));
+                            // Create servo position message
+                            actuator_requests.motor_positions.emplace_back(
+                                MotorPosition(servo.name, servo.goal_position));
 
-                                // Create servo velocity message
-                                actuator_requests.motor_velocities.emplace_back(
-                                    MotorVelocity(servo.name, servo.moving_speed));
+                            // Create servo velocity message
+                            actuator_requests.motor_velocities.emplace_back(
+                                MotorVelocity(servo.name, servo.moving_speed));
 
-                                // Create servo PID message
-                                actuator_requests.motor_pids.emplace_back(
-                                    MotorPID(servo.name, {servo.p_gain, servo.i_gain, servo.d_gain}));
-                            }
+                            // Create servo PID message
+                            actuator_requests.motor_pids.emplace_back(
+                                MotorPID(servo.name, {servo.p_gain, servo.i_gain, servo.d_gain}));
                         }
 
                         // Set the terminate command if the flag is set to terminate the simulator, used by the walk
@@ -597,31 +596,32 @@ namespace module::platform {
                                 OptimisationCommand::CommandType::RESET_TIME;
                             reset_simulation_time = false;
                         }
+                    }
 
-                        // Serialise ActuatorRequests
-                        std::vector<char> data =
-                            NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(actuator_requests);
+                    // Serialise ActuatorRequests
+                    std::vector<char> data =
+                        NUClear::util::serialise::Serialise<ActuatorRequests>::serialise(actuator_requests);
 
-                        // Size of the message, in network endian
-                        const uint32_t Nn = htonl(data.size());
+                    // Size of the message, in network endian
+                    const uint32_t Nn = htonl(data.size());
 
-                        // Only send actuator requests if we are connected to the controller
-                        if (connection_active) {
-                            // Send the message size first
-                            if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
-                                log<NUClear::ERROR>(fmt::format("Error in sending ActuatorRequests' message size,  {}",
-                                                                strerror(errno)));
-                            }
-
-
-                            // Now send the data
-                            if (send(fd, data.data(), data.size(), 0) != int(data.size())) {
-                                log<NUClear::ERROR>(
-                                    fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
-                            }
-                            log<NUClear::TRACE>("Sending actuator request.");
+                    // Only send actuator requests if we are connected to the controller
+                    if (connection_active) {
+                        // Send the message size first
+                        if (send(fd, &Nn, sizeof(Nn), 0) != sizeof(Nn)) {
+                            log<NUClear::ERROR>(
+                                fmt::format("Error in sending ActuatorRequests' message size,  {}", strerror(errno)));
                         }
-                    });
+
+
+                        // Now send the data
+                        if (send(fd, data.data(), data.size(), 0) != int(data.size())) {
+                            log<NUClear::ERROR>(
+                                fmt::format("Error sending ActuatorRequests message, {}", strerror(errno)));
+                        }
+                        log<NUClear::TRACE>("Sending actuator request.");
+                    }
+                });
 
             // Reconnection has now completed
             active_reconnect.store(false);
@@ -744,16 +744,12 @@ namespace module::platform {
             log<NUClear::TRACE>("      value:", gyro.value.X, ",", gyro.value.Y, ",", gyro.value.Z);
         }
 
-        // log<NUClear::INFO>("  sm.position_sensors:");
+        log<NUClear::TRACE>("  sm.position_sensors:");
         for (int i = 0; i < int(sensor_measurements.position_sensors.size()); ++i) {
             const auto& sensor = sensor_measurements.position_sensors[i];
-
-            if (sensor.name == "right_shoulder_pitch_sensor" || sensor.name == "left_shoulder_pitch_sensor"
-                || sensor.name == "left_elbow_pitch_sensor" || sensor.name == "right_elbow_pitch_sensor") {
-                // log<NUClear::INFO>("    sm.position_sensors #", i);
-                // log<NUClear::INFO>("      name:", sensor.name);
-                // log<NUClear::INFO>("      value:", sensor.value);
-            }
+            log<NUClear::TRACE>("    sm.position_sensors #", i);
+            log<NUClear::TRACE>("      name:", sensor.name);
+            log<NUClear::TRACE>("      value:", sensor.value);
         }
 
 
