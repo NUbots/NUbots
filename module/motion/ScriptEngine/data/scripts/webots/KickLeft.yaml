@@ -376,7 +376,7 @@
       position: 0.100000001
       gain: 30
       torque: 100
-- duration: 180
+- duration: 120
   targets:
     - id: L_HIP_YAW
       position: 0.0292397309
@@ -439,7 +439,7 @@
       gain: 30
       torque: 100
     - id: L_KNEE
-      position: 0.800000012
+      position: 0.850000024
       gain: 30
       torque: 100
     - id: L_HIP_ROLL
