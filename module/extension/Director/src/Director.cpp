@@ -187,6 +187,12 @@ namespace module {
                 for (auto it = e.first; it != e.second; ++it) {
                     tasks.emplace_back(it->second);
                 }
+
+                // Sort the task pack so highest priority tasks come first
+                std::sort(tasks.begin(), tasks.end(), [](const auto& a, const auto& b) {
+                    return a->priority < b->priority;
+                });
+
                 emit(std::make_unique<TaskPack>(done.requester_id, std::move(tasks)));
 
                 // Erase the task pack builder for this id
@@ -194,64 +200,87 @@ namespace module {
             });
 
             // A state that we were monitoring is updated, we might be able to run the reaction now
-            on<Trigger<StateUpdate>, Sync<Director>>().then("State Updated", [this](const StateUpdate& state) {
-                // TODO one of the causing states we are monitoring has updated
+            on<Trigger<StateUpdate>, Sync<Director>>().then("State Updated", [this](const StateUpdate& update) {
+                // Find the reaction that is mentioned in the update
+                // If this new state makes things valid then run the task
             });
 
             // We do things when we receive tasks to run
             on<Trigger<TaskPack>, Sync<Director>>().then("Run Task Pack", [this](const TaskPack& pack) {
-                // We should have a current state tree (which initially may be empty), a transitional state tree and a
-                // new state tree. The current state tree represents what was last executed.
-                //
-                // The transitional state tree is used when we are trying to change states, but there are some leaving
-                // reactions in the current state tree that are preventing us from changing. Often this tree will be
-                // empty after each iteration as completed transitions are moved into the current state tree.
-                //
-                // The new state tree is the one we are generating and it represents our desired state change.
-                // If at some point while generating the new state tree we reach an impasse where we are unable to
-                // change states due to a condition our progress so far is stored within the transitional state tree. In
-                // these times we will instead run a modified version of the current state tree.
-                //
-                // The algorithm for generating is recursively done for each level using the global tasks first, and
-                // then local tasks from each provider.
-                //
-                // We take the set of tasks and the current state tree and use them to work out which reactions need to
-                // be updated. As we generate a new state tree we compare it to the current state tree. While doing this
-                // there are a few situations that can occur
-                //      1st: the node we generated is identical to the transitional, or if it does not exist current
-                //      state tree and with identical data.
-                //          Do nothing (do not execute this reaction) and continue down the tree
-                //      2nd: the node we generated is identical to the transitional, or if it does not exist current
-                //      state tree, but with different data
-                //          Execute this node of the graph, and then continue to generate the state tree
-                //      3rd: the node we generated is different to the current state tree
-                //          From the bottom of the now dead branch of the current/transitional state tree up, gather any
-                //          leaving reactions but do not execute them yet as we may not actually be leaving depending on
-                //          what is lower in our own tree
-                //      4th: We want to generate a different state tree, but we are blocked by a when condition
-                //          The branches of the new state tree that we have generated thus far becomes a part of the
-                //          transitional tree. Then from the bottom of the now dead branch up of the current state tree
-                //          up, in addition to any we gathered in a 3rd step from above check to see if any of them have
-                //          a leaving reaction that will fulfill our when condition and if so, execute that branch of
-                //          the tree. Otherwise, try to find an entering reaction for our current branch that fulfills
-                //          the condition and execute that instead.
-                //      5th: We want to generate a different state tree, but we are blocked by another task with a
-                //      higher global priority, or by another task from our current provider with a higher local
-                //      priority.
-                //          We can't continue here, we perform the transition technique like when there is a when
-                //          condition that we cannot execute. This branch ends here.
-                //          TODO what happens when our local provider has another task to execute as well that isn't
-                //          blocked? Do we allow that second task to execute or perform a block one block all. Both
-                //          cases seem to exist (walk engine doesn't need arms) so maybe there needs to be a way to emit
-                //          groups of tasks where it is accept all, or accept none.
-                //      6th: We have reached a leaf node of our existing tree without changing anything in our subgraph
-                //          In this case, we want to run the parent of this component again so that it will generate a
-                //          new task for the leaf node. This scheme can be used to allow things to continuously execute
-                //          and draw more data as needed. For example, if the task was to move the leg through an IK
-                //          pose, once it reached the target position the Provider who asked to move the leg to that
-                //          position would execute again, potentially providing a new pose. Or if that provider had
-                //          finished its task, it may emit an empty task in which case it's parent would run (perhaps a
-                //          walk engine step phase).
+                // This is a root task
+                if (reactions.count(pack.requester_id) == 0) {
+                    // Root tasks only ever have one task in the pack
+                    const auto& task = pack.tasks[0];
+
+                    // TODO add this task to the root task list
+
+                    // If we submit a root task with 0 priority we remove it from the root tasks
+                    if (task->priority == 0) {
+                        // TODO remove this task from the root task list
+                        return;
+                    }
+                }
+
+                // This task is not active and is not allowed to run subtasks
+                else if (!reactions[pack.requester_id]->second.active) {
+                    // Throw an error so the user can see what a fool they are being
+                    throw std::runtime_error(fmt::format(
+                        "The task {} cannot be executed as the provider {} is not active and cannot make subtasks",
+                        pack.name,
+                        reactions[pack.requester_id]->second.reaction->identifier[0]));
+                }
+
+                // Loop through each task
+                for (const auto& task : pack.tasks) {
+                    // All task executions happen after we have evaluated the actions for all tasks in this pack
+
+                    // Possibilities
+
+                    // case Task is a Task::Done task
+                    //      Rerun the provider which is a parent to this task with the same data (but with a done flag)
+                    //      If we are a root task then delete the task from the list
+
+                    // case Provider is available (no When condition that limits it) and not in use
+                    //      Execute any entering with no causing first
+                    //      Otherwise execute main provider
+
+                    // case Provider is in use by us
+                    //      Check if running an entering for a causing and it's not met yet run the entering again
+                    //      else run normal provider
+
+                    // case Provider is in use by a root task with higher priority than us
+                    //      Put our task in this providers queue
+                    //          we can start this task:
+                    //              if the other task priority drops
+                    //              if the other task stops running
+
+                    // case we have a Provider but it is limited by a When condition and not in use
+                    //      Enable the ReactionHandle which monitors the when condition for this provider
+                    //      Add this task to the queue of tasks to be executed when the provider's conditions are met
+                    //
+                    //      See if there is a leaving that provides a casing for our type we can use
+                    //          The algorithm has major a bug here.
+                    //          If the kick engine wants to be "Statically Stable" and the walk engine has a `Leaving`
+                    //          provider that causes this, how does the algorithm know that later down the line the kick
+                    //          engine would take over the walk engines IK controls making it have to stop running
+                    //          running its leaving reaction first. The algorithm might need to have more information
+                    //          provided to it
+                    //      See if there is an entering for this provider that provides the causing and run that
+                    //
+
+                    // case Provider is in use by a root task with lower priority than us
+                    //      We take control of this provider and put the old task in the queue of tasks to be executed
+                    //      by this provider
+                    //
+                    //      We traverse up the tree and find the first optional path that we took (first negative
+                    //      priority) or the root, and we move all the tasks into the queue of tasks to execute
+                    //      If any of these tasks that we are kicking off have a leaving reaction we  we are done with
+                    //      this task pack if any of these tasks have an empty leaving reaction we run that to ensure
+                    //      that we have a clean exit
+                }
+
+                // If this provider was previously active and has tasks that are no longer running
+                //      check if there is another task that was queued at a lower priority than us and run it
             });
         }
     }  // namespace extension
