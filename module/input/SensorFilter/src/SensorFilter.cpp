@@ -731,7 +731,7 @@ namespace module::input {
 
                                 // Calculate our current Foot to CoM vector for this foot
                                 const Eigen::Vector3d current_rMFt =
-                                    Htf.translation().head<3>() + sensors->rMTt.head<3>();
+                                    Htf.translation() + sensors->rMTt.head<3>();
 
                                 // We just put this foot on the ground (i.e. it wasn't on the ground in the last time
                                 // step)
