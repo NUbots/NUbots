@@ -110,7 +110,7 @@ namespace module::behaviour::strategy {
         void walkTo(const message::support::FieldDescription& fieldDescription,
                     const message::behaviour::FieldTarget::Target& object);
         void walkTo(const message::support::FieldDescription& fieldDescription, const Eigen::Vector2d& position);
-        void find(const std::vector<message::behaviour::FieldTarget>& objects);
+        void find(const FieldTarget& objects);
         void spinWalk();
         bool pickedUp(const message::input::Sensors& sensors);
         bool penalised();

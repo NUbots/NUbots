@@ -281,7 +281,7 @@ namespace module::behaviour::strategy {
         else {
             /*if (NUClear::clock::now() - lastLocalised > cfg_.localisation_interval) {
             standStill();
-            find(FieldTarget::BALL));
+            find(FieldTarget::BALL);
             if (NUClear::clock::now() - lastLocalised > cfg_.localisation_interval + cfg_.localisation_duration)
         { lastLocalised = NUClear::clock::now();
             }
@@ -299,12 +299,12 @@ namespace module::behaviour::strategy {
                 if (mode != GameMode::PENALTY_SHOOTOUT
                     && (position.translation().norm() > 1)) {  // a long way away from centre
                     // walk to centre of field
-                    find(FieldTarget::BALL));
+                    find(FieldTarget::BALL);
                     walkTo(fieldDescription, Eigen::Vector2d::Zero());
                     currentState = Behaviour::State::MOVE_TO_CENTRE;
                 }
                 else {
-                    find(FieldTarget::BALL));
+                    find(FieldTarget::BALL);
                     walkTo(fieldDescription, FieldTarget::BALL);
                     // spinWalk();
 
@@ -410,26 +410,22 @@ namespace module::behaviour::strategy {
         return ball.position.norm();
     }
 
-    void SoccerStrategy::find(const std::vector<FieldTarget>& fieldObjects) {
+    void SoccerStrategy::find(const FieldTarget& fieldObject) {
         // Create the soccer object priority pointer and initialise each value to 0.
         auto soccerObjectPriority  = std::make_unique<SoccerObjectPriority>();
         soccerObjectPriority->ball = 0;
         soccerObjectPriority->goal = 0;
         soccerObjectPriority->line = 0;
-        for (auto& fieldObject : fieldObjects) {
-            switch (fieldObject.target.value) {
-                case FieldTarget::GOAL: {
-                    soccerObjectPriority->goal        = 1;
-                    soccerObjectPriority->search_type = SearchType::GOAL_SEARCH;
-
-                    break;
-                }
-                case FieldTarget::BALL: {
-                    soccerObjectPriority->ball        = 1;
-                    soccerObjectPriority->search_type = SearchType::LOST;
-                    break;
-                }
-                default: throw std::runtime_error("Soccer strategy attempted to find a bad object");
+        switch (fieldObject) {
+            case FieldTarget::GOAL: {
+                soccerObjectPriority->goal        = 1;
+                soccerObjectPriority->search_type = SearchType::GOAL_SEARCH;
+                break;
+            }
+            case FieldTarget::BALL: {
+                soccerObjectPriority->ball        = 1;
+                soccerObjectPriority->search_type = SearchType::LOST;
+                break;
             }
         }
         emit(std::move(soccerObjectPriority));
