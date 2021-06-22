@@ -254,8 +254,7 @@ namespace module::behaviour::planning {
 
 
                 std::unique_ptr<WalkCommand> command =
-                    std::make_unique<WalkCommand>(subsumptionId,
-                                                  Eigen::Vector3d(finalForwardSpeed, finalSideSpeed, angle));
+                    std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(forwardSpeed, sideSpeed, turnSpeed));
 
                 emit(std::move(command));
                 emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));

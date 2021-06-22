@@ -1,7 +1,7 @@
 walk:
   # Full walk cycle frequency
   # (in Hz, > 0)
-  freq: 0.2
+  freq: 0.3
   # Length of double support phase in half cycle
   # (ratio, [0:1])
   double_support_ratio: 0.7
@@ -28,7 +28,7 @@ walk:
       phase: 0.5 # 0.5
       # Roll offset on flying foot at put down
       # (in rad, [-1,1])
-      roll_offset: -0.4
+      roll_offset: -0.6
     # Phase of flying foot apex
     # (single support cycle phase, [0:1])
     apex_phase: 0.2
@@ -118,3 +118,12 @@ imu:
 
 gains:
   legs: 13
+  arms: 13
+
+arms:
+  right_shoulder_pitch: 1.98
+  left_shoulder_pitch: 1.98
+  right_shoulder_roll: -0.8
+  left_shoulder_roll: 0.8
+  right_elbow: -1.57
+  left_elbow: -1.57
