@@ -45,7 +45,6 @@ namespace module::behaviour::strategy {
     using extension::Configuration;
 
     using message::behaviour::Behaviour;
-    using message::behaviour::FieldTarget;
     using message::behaviour::KickPlan;
     using KickType = message::behaviour::KickPlan::KickType;
     using message::behaviour::MotionCommand;
@@ -209,7 +208,7 @@ namespace module::behaviour::strategy {
                             || mode == GameMode::PENALTY_SHOOTOUT) {
                             if (phase == Phase::INITIAL) {
                                 standStill();
-                                find({FieldTarget(FieldTarget::Target::SELF)});
+                                find(FieldTarget::GOAL);
                                 initialLocalisationReset(fieldDescription);
                                 currentState = Behaviour::State::INITIAL;
                             }
@@ -220,12 +219,12 @@ namespace module::behaviour::strategy {
                                 else {
                                     walkTo(fieldDescription, cfg_.start_position_defensive);
                                 }
-                                find({FieldTarget(FieldTarget::Target::SELF)});
+                                find(FieldTarget::GOAL);
                                 currentState = Behaviour::State::READY;
                             }
                             else if (phase == Phase::SET) {
                                 standStill();
-                                find({FieldTarget(FieldTarget::Target::BALL)});
+                                find(FieldTarget::BALL);
                                 if (mode == GameMode::PENALTY_SHOOTOUT) {
                                     penaltyShootoutLocalisationReset(fieldDescription);
                                     emit(std::make_unique<ResetRawSensors>());
@@ -234,12 +233,12 @@ namespace module::behaviour::strategy {
                             }
                             else if (phase == Phase::TIMEOUT) {
                                 standStill();
-                                find({FieldTarget(FieldTarget::Target::SELF)});
+                                find(FieldTarget::GOAL);
                                 currentState = Behaviour::State::TIMEOUT;
                             }
                             else if (phase == Phase::FINISHED) {
                                 standStill();
-                                find({FieldTarget(FieldTarget::Target::SELF)});
+                                find(FieldTarget::GOAL);
                                 currentState = Behaviour::State::FINISHED;
                             }
                             else if (phase == Phase::PLAYING) {
@@ -271,18 +270,18 @@ namespace module::behaviour::strategy {
                               const GameMode& mode) {
         if (penalised() && !cfg_.forcePlaying) {  // penalised
             standStill();
-            find({FieldTarget(FieldTarget::Target::SELF)});
+            find(FieldTarget::GOAL);
             currentState = Behaviour::State::PENALISED;
         }
         else if (cfg_.is_goalie) {  // goalie
-            find({FieldTarget(FieldTarget::Target::BALL)});
+            find(FieldTarget::BALL);
             goalieWalk(field, ball);
             currentState = Behaviour::State::GOALIE_WALK;
         }
         else {
             /*if (NUClear::clock::now() - lastLocalised > cfg_.localisation_interval) {
             standStill();
-            find({FieldTarget(FieldTarget::Target::BALL)});
+            find(FieldTarget::BALL));
             if (NUClear::clock::now() - lastLocalised > cfg_.localisation_interval + cfg_.localisation_duration)
         { lastLocalised = NUClear::clock::now();
             }
@@ -291,8 +290,8 @@ namespace module::behaviour::strategy {
         else*/
             if (NUClear::clock::now() - ballLastMeasured
                 < cfg_.ball_last_seen_max_time) {  // ball has been seen recently
-                find({FieldTarget(FieldTarget::Target::BALL)});
-                walkTo(fieldDescription, FieldTarget::Target::BALL);
+                find(FieldTarget::BALL);
+                walkTo(fieldDescription, FieldTarget::BALL);
                 currentState = Behaviour::State::WALK_TO_BALL;
             }
             else {  // ball has not been seen recently
@@ -300,13 +299,13 @@ namespace module::behaviour::strategy {
                 if (mode != GameMode::PENALTY_SHOOTOUT
                     && (position.translation().norm() > 1)) {  // a long way away from centre
                     // walk to centre of field
-                    find({FieldTarget(FieldTarget::Target::BALL)});
+                    find(FieldTarget::BALL));
                     walkTo(fieldDescription, Eigen::Vector2d::Zero());
                     currentState = Behaviour::State::MOVE_TO_CENTRE;
                 }
                 else {
-                    find({FieldTarget(FieldTarget::Target::BALL)});
-                    walkTo(fieldDescription, FieldTarget::Target::BALL);
+                    find(FieldTarget::BALL));
+                    walkTo(fieldDescription, FieldTarget::BALL);
                     // spinWalk();
 
                     currentState = Behaviour::State::SEARCH_FOR_BALL;
@@ -383,8 +382,8 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::walkTo(const FieldDescription& fieldDescription, const FieldTarget::Target& target) {
-        if (target != FieldTarget::Target::BALL) {
-            throw std::runtime_error("SoccerStrategy::walkTo: Only FieldTarget::Target::BALL is supported.");
+        if (target != FieldTarget::BALL) {
+            throw std::runtime_error("SoccerStrategy::walkTo: Only FieldTarget::BALL is supported.");
         }
 
         Eigen::Vector2d enemyGoal(fieldDescription.dimensions.field_length * 0.5, 0.0);
@@ -419,13 +418,13 @@ namespace module::behaviour::strategy {
         soccerObjectPriority->line = 0;
         for (auto& fieldObject : fieldObjects) {
             switch (fieldObject.target.value) {
-                case FieldTarget::Target::SELF: {
+                case FieldTarget::GOAL: {
                     soccerObjectPriority->goal        = 1;
                     soccerObjectPriority->search_type = SearchType::GOAL_SEARCH;
 
                     break;
                 }
-                case FieldTarget::Target::BALL: {
+                case FieldTarget::BALL: {
                     soccerObjectPriority->ball        = 1;
                     soccerObjectPriority->search_type = SearchType::LOST;
                     break;

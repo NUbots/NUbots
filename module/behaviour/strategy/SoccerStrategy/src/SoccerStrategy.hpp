@@ -24,7 +24,6 @@
 #include <nuclear>
 
 #include "message/behaviour/Behaviour.hpp"
-#include "message/behaviour/FieldTarget.hpp"
 #include "message/behaviour/KickPlan.hpp"
 #include "message/input/GameEvents.hpp"
 #include "message/input/GameState.hpp"
