@@ -28,7 +28,7 @@ enum Stability {
     FALLING = 1;
     // The robot is dynamically stable, provided continued control input it should not fall
     DYNAMIC = 2;
-    // The robot is statically stable, if control input ceased immediatly it would not fall
+    // The robot is statically stable, if control input ceased immediately it would not fall
     STATIC = 3;
     // The robot is standing upright on both feet
     STANDING = 4;
