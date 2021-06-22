@@ -8,7 +8,7 @@ search_timeout_ms: 3000
 fractional_angular_update_threshold: 0.1
 
 #Time between saccades
-fixation_time_ms: 500
+fixation_time_ms: 1500
 
 #Time before replanning of search when already searching
 replan_angle_threshold: 0.5
@@ -29,25 +29,32 @@ searches:
     search_type: "LOST"
     #Points in absolute angle (degrees) relative to the horizon and x-xis of robot
     points:
-      - [0, -45]
+      - [0, 5]
+      - [5, 45]
+      - [10, 5]
+      - [0, 45]
+      - [-10, 5]
+      - [-5, 45]
       - [0, 0]
-      - [0, 30]
-      - [-45, -15]
-      - [-45, -30]
-      - [-120, -30]
-      - [-50, -15]
-      - [-30, 30]
-      - [0, 30]
-      - [-20, -30]
-      - [0, -60]
-      - [20, -30]
-      - [0, 0]
-      - [0, 30]
-      - [30,  30]
-      - [50,  -15]
-      - [120,  -30]
-      - [45,  -15]
-      - [45, -30]
+      #- [0, -45]
+      #- [0, 0]
+      #- [0, 30]
+      #- [-45, -15]
+      #- [-45, -30]
+      #- [-120, -30]
+      #- [-50, -15]
+      #- [-30, 30]
+      #- [0, 30]
+      #- [-20, -30]
+      #- [0, -60]
+      #- [20, -30]
+      #- [0, 0]
+      #- [0, 30]
+      #- [30,  30]
+      #- [50,  -15]
+      #- [120,  -30]
+      #- [45,  -15]
+      #- [45, -30]
   - search_type: "FIND_ADDITIONAL_OBJECTS"
     #Points for this search are relative to the padded bounding box containing the already visible objects
     points:
@@ -59,7 +66,7 @@ searches:
       - [-1,0]
   - search_type: "GOAL_SEARCH"
     points:
-      - [-0.4, 1]
+      - [-0.4,0]
       - [0, 1]
       - [0.4, 1]
   - search_type: "GOAL_LEFT"
