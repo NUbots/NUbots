@@ -20,9 +20,8 @@
 #ifndef MODULES_VISION_GOALDETECTOR_HPP
 #define MODULES_VISION_GOALDETECTOR_HPP
 
+#include <Eigen/Core>
 #include <nuclear>
-
-#include "message/conversion/math_types.hpp"
 
 namespace module::vision {
 
@@ -32,7 +31,7 @@ namespace module::vision {
             float confidence_threshold;
             int cluster_points;
             float disagreement_ratio;
-            message::conversion::math::fmat3 goal_angular_cov;
+            Eigen::Vector3f goal_angular_cov;
             bool use_median;
             float max_goal_distance;
             bool debug;

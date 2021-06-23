@@ -55,7 +55,7 @@ namespace module::vision {
             config.confidence_threshold = cfg["confidence_threshold"].as<float>();
             config.cluster_points       = cfg["cluster_points"].as<int>();
             config.disagreement_ratio   = cfg["disagreement_ratio"].as<float>();
-            config.goal_angular_cov     = Eigen::Vector3f(cfg["goal_angular_cov"].as<Expression>()).asDiagonal();
+            config.goal_angular_cov     = Eigen::Vector3f(cfg["goal_angular_cov"].as<Expression>());
             config.use_median           = cfg["use_median"].as<bool>();
             config.max_goal_distance    = cfg["max_goal_distance"].as<float>();
             config.debug                = cfg["debug"].as<bool>();
@@ -227,10 +227,13 @@ namespace module::vision {
                             // Attach the measurement to the object (distance from camera to bottom center of post)
                             g.measurements.push_back(Goal::Measurement());
                             g.measurements.back().type = Goal::MeasurementType::CENTRE;
-                            g.measurements.back().position =
-                                cartesianToSpherical(Eigen::Vector3f(g.post.bottom * distance));
-                            g.measurements.back().covariance =
-                                config.goal_angular_cov * Eigen::Vector3f(distance, 0.1, 0.1).asDiagonal();
+
+                            // Spherical Coordinates (1/distance, phi, theta)
+                            auto measurement = cartesianToSpherical(Eigen::Vector3f(g.post.bottom * distance));
+                            g.measurements.back().measurement =
+                                Eigen::Vector3f(1.0f / measurement.x(), measurement.y(), measurement.z());
+
+                            g.measurements.back().covariance = config.goal_angular_cov.asDiagonal();
 
                             // Angular positions from the camera
                             g.screen_angular = cartesianToSpherical(g.post.bottom).tail<2>();

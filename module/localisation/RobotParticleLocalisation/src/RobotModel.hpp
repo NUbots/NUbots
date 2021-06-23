@@ -95,7 +95,10 @@ namespace module::localisation {
 
             if (type == Goal::MeasurementType::CENTRE) {
                 const Eigen::Matrix<Scalar, 3, 1> rGCc(Hcf * actual_position);
-                return cartesianToSpherical(rGCc);
+
+                // Spherical Coordinates (1/distance, phi, theta)
+                auto measurement = cartesianToSpherical(rGCc);
+                return Eigen::Matrix<Scalar, 3, 1>(Scalar(1) / measurement.x(), measurement.y(), measurement.z());
             }
 
             switch (FieldDescription::GoalpostType::Value(fd.dimensions.goalpost_type)) {

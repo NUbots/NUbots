@@ -47,7 +47,7 @@ message Goal {
     message Measurement {
         MeasurementType type = 1;
         // Normal vectors point inwards towards the centre of the object
-        fvec3 position   = 2;
+        fvec3 measurement   = 2; // Spherical Coordinates (1/distance, phi, theta)
         fmat3 covariance = 3;
     }
     message Post {
