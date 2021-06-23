@@ -230,7 +230,7 @@ namespace module::vision {
                             g.measurements.back().type = Goal::MeasurementType::CENTRE;
 
                             // Spherical Coordinates (1/distance, phi, theta)
-                            g.measurements.back().measurement =
+                            g.measurements.back().rGCc =
                                 inverseDistanceCartesianToSpherical(Eigen::Vector3f(g.post.bottom * distance));
 
                             g.measurements.back().covariance = config.goal_projection_covariance.asDiagonal();
