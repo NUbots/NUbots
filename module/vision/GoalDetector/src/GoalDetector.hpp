@@ -28,13 +28,13 @@ namespace module::vision {
     class GoalDetector : public NUClear::Reactor {
     private:
         struct {
-            float confidence_threshold;
-            int cluster_points;
-            float disagreement_ratio;
-            Eigen::Vector3f goal_angular_cov;
-            bool use_median;
-            float max_goal_distance;
-            bool debug;
+            float confidence_threshold = 0;
+            int cluster_points         = 0;
+            float disagreement_ratio   = 0;
+            Eigen::Vector3f goal_angular_cov{};
+            bool use_median         = 0;
+            float max_goal_distance = 0;
+            bool debug              = false;
         } config;
 
     public:
