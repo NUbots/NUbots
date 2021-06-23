@@ -9,6 +9,8 @@ nuclear_role(
   motion::KinematicsConfiguration
   # Support
   support::configuration::GlobalConfig
+  network::NUClearNet
+  output::NetworkForwarder
   support::configuration::SoccerConfig
   # input
   input::GameController
