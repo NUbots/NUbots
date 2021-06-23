@@ -26,6 +26,10 @@ namespace module::localisation {
         // Member variables, to be set by config
         int draw_particles;
 
+        struct {
+            int num_field_line_points = 1000;
+        } config;
+
         Eigen::Vector3d getFieldPosition(const message::vision::Goal& goal,
                                          const message::support::FieldDescription& fd) const;
 

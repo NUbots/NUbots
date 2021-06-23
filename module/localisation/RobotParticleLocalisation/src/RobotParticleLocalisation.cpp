@@ -7,8 +7,8 @@
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/localisation/ResetRobotHypotheses.hpp"
+#include "message/vision/FieldLine.hpp"
 #include "message/vision/Goal.hpp"
-#include "message/vision/ieldLine.hpp"
 
 #include "utility/localisation/transform.hpp"
 #include "utility/nusight/NUhelpers.hpp"
@@ -116,7 +116,8 @@ namespace module::localisation {
                             filter.measure(Eigen::Vector3d(line.rLCc.cast<double>()),
                                            Eigen::Matrix3d(line.covariance.cast<double>()),
                                            lines.Hcw,
-                                           fd);
+                                           fd,
+                                           config.num_field_line_points);
                         }
                         else {
                             log("Received non-finite field line measurements from vision. Discarding ...");
@@ -164,15 +165,17 @@ namespace module::localisation {
                 }
             });
 
-        on<Configuration>("RobotParticleLocalisation.yaml").then([this](const Configuration& config) {
+        on<Configuration>("RobotParticleLocalisation.yaml").then([this](const Configuration& cfg) {
             // Use configuration here from file RobotParticleLocalisation.yaml
-            filter.model.processNoiseDiagonal = config["process_noise_diagonal"].as<Expression>();
-            filter.model.n_rogues             = config["n_rogues"].as<int>();
-            filter.model.resetRange           = config["reset_range"].as<Expression>();
-            filter.model.n_particles          = config["n_particles"].as<int>();
-            draw_particles                    = config["draw_particles"].as<int>();
+            filter.model.processNoiseDiagonal = cfg["process_noise_diagonal"].as<Expression>();
+            filter.model.n_rogues             = cfg["n_rogues"].as<int>();
+            filter.model.resetRange           = cfg["reset_range"].as<Expression>();
+            filter.model.n_particles          = cfg["n_particles"].as<int>();
+            draw_particles                    = cfg["draw_particles"].as<int>();
 
-            Eigen::Vector3d start_state = config["start_state"].as<Expression>();
+            Eigen::Vector3d start_state = cfg["start_state"].as<Expression>();
+
+            config.num_field_line_points = cfg["field_line_points"].as<int>();
             // TODO: This variable is not used. Probably remove it
             /* Eigen::Vector3d start_variance = config["start_variance"].as<Expression>(); */
 
