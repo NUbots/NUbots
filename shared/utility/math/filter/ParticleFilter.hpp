@@ -88,14 +88,15 @@ namespace utility::math::filter {
             return new_particles;
         }
 
-        ParticleList sample_particles(const std::vector<StateVec>& mean,
-                                      const std::vector<StateMat>& covariance,
-                                      const int& n_particles) {
-            if (mean.size() != covariance.size() || mean.size() == 0) {
+        [[nodiscard]] ParticleList sample_particles(const std::vector<StateVec>& mean,
+                                                    const std::vector<StateMat>& covariance,
+                                                    const int& n_particles) {
+            const size_t mean_size = mean.size();
+            if (mean_size != covariance.size() || mean_size == 0) {
                 throw std::runtime_error("ParticleFilter::set_state called with invalid data");
             }
 
-            if (mean.size() == 1) {
+            if (mean_size == 1) {
                 return sample_particles(mean[0], covariance[0], n_particles);
             }
 
@@ -112,9 +113,9 @@ namespace utility::math::filter {
 
             // We want to evenly distribute the particles across all hypotheses
             // If this is not an even division, the last N particles will just be randomly initialised
-            const int particles_per_state = n_particles / mean.size();
+            const int particles_per_state = n_particles / mean_size;
 
-            for (int state = 0; state < int(mean.size()); ++state) {
+            for (size_t state = 0; state < mean.size(); ++state) {
                 const StateMat sqrt_covariance = covariance[state].cwiseSqrt();
 
                 const int start_col = state * particles_per_state;
@@ -126,14 +127,15 @@ namespace utility::math::filter {
             return new_particles;
         }
 
-        ParticleList sample_particles(const std::vector<StateVec>& mean,
-                                      const std::vector<StateVec>& covariance,
-                                      const int& n_particles) {
-            if (mean.size() != covariance.size() || mean.size() == 0) {
+        [[nodiscard]] ParticleList sample_particles(const std::vector<StateVec>& mean,
+                                                    const std::vector<StateVec>& covariance,
+                                                    const int& n_particles) {
+            const size_t mean_size = mean.size();
+            if (mean_size != covariance.size() || mean_size == 0) {
                 throw std::runtime_error("ParticleFilter::set_state called with invalid data");
             }
 
-            if (mean.size() == 1) {
+            if (mean_size == 1) {
                 return sample_particles(mean[0], covariance[0], n_particles);
             }
 
@@ -150,9 +152,9 @@ namespace utility::math::filter {
 
             // We want to evenly distribute the particles across all hypotheses
             // If this is not an even division, the last N particles will just be randomly initialised
-            const int particles_per_state = n_particles / mean.size();
+            const int particles_per_state = n_particles / mean_size;
 
-            for (int state = 0; state < int(mean.size()); ++state) {
+            for (int state = 0; state < int(mean_size); ++state) {
                 const StateVec sqrt_covariance = covariance[state].cwiseSqrt();
 
                 const int start_col = state * particles_per_state;
