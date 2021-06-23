@@ -991,9 +991,9 @@ TEST_CASE("Test coordinate conversion - Spherical to cartesian.", "[utility][mat
     INFO(fmt::format("{:*^50}", "Calculating cartesian coordinates for the origin"));
 
     for (size_t i = 0; i < spher_coords.size(); i++) {
-        Eigen::Matrix<double, 3, 1> spher_input   = spher_coords[i];
-        Eigen::Matrix<double, 3, 1> spher_compare = spherToCart_results[i];
-        Eigen::Matrix<double, 3, 1> cart_result   = Eigen::Matrix<double, 3, 1>(0, 0, 0);
+        Eigen::Vector3d spher_input   = spher_coords[i];
+        Eigen::Vector3d spher_compare = spherToCart_results[i];
+        Eigen::Vector3d cart_result   = Eigen::Vector3d::Zero();
         // Throws a domain error if radial dist is negative
         if (spher_input.x() < 0) {
             REQUIRE_THROWS_AS(utility::math::coordinates::sphericalToCartesian(spher_input), std::domain_error);
