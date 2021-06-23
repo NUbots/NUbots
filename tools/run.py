@@ -48,6 +48,9 @@ def run(args, use_gdb, use_valgrind, **kwargs):
     # Get current environment
     env = os.environ
 
+    # Make sure the log directory exists
+    os.makedirs("/home/nubots/NUbots/log/", exist_ok=True)
+
     # Add necessary ASAN environment variables
     if use_asan:
         cprint("WARN: ASan is enabled. Set USE_ASAN to OFF and rebuild to disable.", "red", attrs=["bold"])
@@ -56,9 +59,9 @@ def run(args, use_gdb, use_valgrind, **kwargs):
         if "ASAN_OPTIONS" in env:
             # Only append log_path if it hasn't already been set
             if "log_path" not in env["ASAN_OPTIONS"]:
-                env["ASAN_OPTIONS"] = "{}:log_path=/home/nubots/NUbots/asan.log".format(env["ASAN_OPTIONS"])
+                env["ASAN_OPTIONS"] = "{}:log_path=/home/nubots/NUbots/log/asan.log".format(env["ASAN_OPTIONS"])
         else:
-            env.update({"ASAN_OPTIONS": "log_path=/home/nubots/NUbots/asan.log"})
+            env.update({"ASAN_OPTIONS": "log_path=/home/nubots/NUbots/log/asan.log"})
 
     # Start role with GDB
     if use_gdb:
@@ -77,7 +80,7 @@ def run(args, use_gdb, use_valgrind, **kwargs):
     elif use_valgrind:
         cmd = [
             "valgrind",
-            "--log-file=/home/nubots/NUbots/valgrind.log",
+            "--log-file=/home/nubots/NUbots/log/valgrind.log",
             "--show-error-list=yes",
             "--leak-check=full",
             "--show-leak-kinds=all",
