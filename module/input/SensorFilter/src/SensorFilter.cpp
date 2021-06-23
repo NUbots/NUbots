@@ -96,9 +96,14 @@ namespace module::input {
             config.buttons.debounceThreshold = cfg["buttons"]["debounce_threshold"].as<int>();
 
             // Foot down config
-            config.footDown.fromLoad           = cfg["foot_down"]["from_load"].as<bool>();
-            config.footDown.certaintyThreshold = cfg["foot_down"]["certainty_threshold"].as<float>();
+            const FootDownMethod method = cfg["foot_down"]["method"].as<std::string>();
+            std::map<FootDownMethod, float> thresholds;
+            for (const auto& threshold : cfg["foot_down"]["known_methods"].config) {
+                thresholds[threshold["name"].as<std::string>()] = threshold["certainty_threshold"].as<float>();
+            }
+            config.footDown.set_method(method, thresholds);
 
+            // Motion filter config
             // Set velocity decay
             config.motionFilter.velocityDecay = cfg["motion_filter"]["update"]["velocity_decay"].as<Expression>();
             motionFilter.model.timeUpdateVelocityDecay = config.motionFilter.velocityDecay;
@@ -172,6 +177,9 @@ namespace module::input {
             covariance.Rwt      = config.motionFilter.initial.covariance.rotation;
             covariance.omegaTTt = config.motionFilter.initial.covariance.rotationalVelocity;
             motionFilter.set_state(mean.getStateVec(), covariance.asDiagonal());
+
+            // Set our initial position
+            rTWw = cfg["motion_filter"]["initial"]["mean"]["position"].as<Expression>();
 
             // Don't filter any sensors until we have initialised the filter
             update_loop.disable();
@@ -509,45 +517,64 @@ namespace module::input {
                         sensors->feet[BodySide::RIGHT].down = true;
                         sensors->feet[BodySide::LEFT].down  = true;
 
-                        std::array<bool, 2> feet_down = {true};
-                        // If we're using the load value on the foot to work out if our foot is down, do that
-                        if (config.footDown.fromLoad) {
-                            // Use our load sensor to work out which foot is down
-                            feet_down = load_sensor.updateFeet(*sensors);
+                        std::array<bool, 2> feet_down = {true, true};
 
-                            if (config.debug) {
-                                emit(graph("Sensor/Foot Down/Load/Left", feet_down[BodySide::LEFT]));
-                                emit(graph("Sensor/Foot Down/Load/Right", feet_down[BodySide::RIGHT]));
-                            }
+                        // Calculate values needed for Z_HEIGHT method
+                        const Eigen::Affine3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
+                        const Eigen::Affine3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
+                        const Eigen::Affine3d Hlr  = Htl.inverse() * Htr;
+                        const Eigen::Vector3d rRLl = Hlr.translation();
+
+                        switch (config.footDown.method()) {
+                            case FootDownMethod::LOAD:
+                                // Use our virtual load sensor class to work out which feet are down
+                                feet_down = load_sensor.updateFeet(*sensors);
+                                break;
+                            case FootDownMethod::Z_HEIGHT:
+                                // Right foot is below left foot in left foot space
+                                if (rRLl.z() < -config.footDown.threshold()) {
+                                    feet_down[BodySide::RIGHT] = true;
+                                    feet_down[BodySide::LEFT]  = false;
+                                }
+                                // Right foot is above left foot in left foot space
+                                else if (rRLl.z() > config.footDown.threshold()) {
+                                    feet_down[BodySide::RIGHT] = false;
+                                    feet_down[BodySide::LEFT]  = true;
+                                }
+                                // Right foot and left foot are roughly the same height in left foot space
+                                else {
+                                    feet_down[BodySide::RIGHT] = true;
+                                    feet_down[BodySide::LEFT]  = true;
+                                }
+                                break;
+                            case FootDownMethod::FSR:
+                                // For a foot to be on the ground we want a minimum of 2 diagonally opposite studs
+                                // in contact with the ground
+                                // So fsr1 and fsr3, or fsr2 and fsr4
+                                //
+                                // A FSR is in contact with the ground if its value is greater than the certainty
+                                // threshold
+
+                                feet_down[BodySide::LEFT] =
+                                    (((input.fsr.left.fsr1 > config.footDown.threshold())
+                                      && (input.fsr.left.fsr3 > config.footDown.threshold()))
+                                     || ((input.fsr.left.fsr2 > config.footDown.threshold())
+                                         && (input.fsr.left.fsr4 > config.footDown.threshold())));
+
+                                feet_down[BodySide::RIGHT] =
+                                    (((input.fsr.right.fsr1 > config.footDown.threshold())
+                                      && (input.fsr.right.fsr3 > config.footDown.threshold()))
+                                     || ((input.fsr.right.fsr2 > config.footDown.threshold())
+                                         && (input.fsr.right.fsr4 > config.footDown.threshold())));
+                                break;
+                            default: log<NUClear::WARN>("Unknown foot down method"); break;
                         }
-                        // Otherwise, guess which foot is down by comparing the feet positions to the
-                        // footDown certainty threshold
-                        else {
-                            const Eigen::Affine3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
-                            const Eigen::Affine3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
-                            const Eigen::Affine3d Hlr  = Htl.inverse() * Htr;
-                            const Eigen::Vector3d rRLl = Hlr.translation();
 
-                            // Right foot is below left foot in left foot space by more than the certainty threshold
-                            if (rRLl.z() < -config.footDown.certaintyThreshold) {
-                                feet_down[BodySide::RIGHT] = true;
-                                feet_down[BodySide::LEFT]  = false;
-                            }
-                            // Right foot is above left foot in left foot space by more than the certainty threshold
-                            else if (rRLl.z() > config.footDown.certaintyThreshold) {
-                                feet_down[BodySide::RIGHT] = false;
-                                feet_down[BodySide::LEFT]  = true;
-                            }
-                            // Right foot and left foot are roughly the same height in left foot space
-                            else {
-                                feet_down[BodySide::RIGHT] = true;
-                                feet_down[BodySide::LEFT]  = true;
-                            }
-
-                            if (config.debug) {
-                                emit(graph("Sensor/Foot Down/Z/Left", feet_down[BodySide::LEFT]));
-                                emit(graph("Sensor/Foot Down/Z/Right", feet_down[BodySide::RIGHT]));
-                            }
+                        if (this->config.debug) {
+                            emit(graph(fmt::format("Sensor/Foot Down/{}/Left", std::string(config.footDown.method())),
+                                       feet_down[BodySide::LEFT]));
+                            emit(graph(fmt::format("Sensor/Foot Down/{}/Right", std::string(config.footDown.method())),
+                                       feet_down[BodySide::RIGHT]));
                         }
 
                         sensors->feet[BodySide::RIGHT].down = feet_down[BodySide::RIGHT];
@@ -573,10 +600,11 @@ namespace module::input {
 
                         // Accelerometer measurement update
                         motionFilter.measure(sensors->accelerometer, acc_noise, MeasurementType::ACCELEROMETER());
+
                         // This loop calculates the Hwf transform for feet if they have just hit the ground. If they
                         // have not just hit the ground, it uses the previous Hwf value. This assumes that once the foot
                         // hits the ground, it doesn't move at all i.e. we're ASSUMING the foot cannot slip/slide
-                        for (auto& side : {BodySide::LEFT, BodySide::RIGHT}) {
+                        for (const auto& side : {BodySide::LEFT, BodySide::RIGHT}) {
                             bool foot_down      = sensors->feet[side].down;
                             bool prev_foot_down = previous_foot_down[side];
                             Eigen::Affine3d Htf(
@@ -688,6 +716,57 @@ namespace module::input {
                             }
                         }
                         else {
+                            /************************************************
+                             *       Torso CoM Position in World (rMWw)     *
+                             ************************************************/
+                            bool update_done = false;
+
+                            for (const auto& side : {BodySide::LEFT, BodySide::RIGHT}) {
+                                const bool& foot_down      = sensors->feet[side].down;
+                                const bool& prev_foot_down = previous_foot_down[side];
+
+                                // Get the Foot to Torso transform for this foot
+                                const Eigen::Affine3d Htf(sensors->Htx[side == BodySide::LEFT ? ServoID::L_ANKLE_ROLL
+                                                                                              : ServoID::R_ANKLE_ROLL]);
+
+                                // Calculate our current Foot to CoM vector for this foot
+                                const Eigen::Vector3d current_rMFt = Htf.translation() + sensors->rMTt.head<3>();
+
+                                // We just put this foot on the ground (i.e. it wasn't on the ground in the last time
+                                // step)
+                                if (foot_down && !prev_foot_down) {
+                                    // Update our Foot to CoM vector for this foot
+                                    rMFt[side]               = current_rMFt;
+                                    previous_foot_down[side] = true;
+                                }
+                                // Our foot is on the ground and was also on the ground in the last time step
+                                else if (foot_down && prev_foot_down) {
+                                    // If both feet are on the ground then we don't need to do another update
+                                    if (!update_done) {
+                                        // The difference between our current and previous Foot to torso CoM vectors is
+                                        // how much our torso has moved in the last time step in torso space We need to
+                                        // rotate this into world space to update our current Torso CoM position
+                                        const Eigen::Quaterniond& Rwt =
+                                            MotionModel<double>::StateVec(motionFilter.get()).Rwt;
+                                        const Eigen::Vector3d rMFt_update = current_rMFt - rMFt[side];
+                                        const Eigen::Quaterniond q(
+                                            Eigen::Vector4d(rMFt_update.x(), rMFt_update.y(), rMFt_update.z(), 0.0));
+                                        rTWw += (Rwt * q * Rwt.conjugate()).vec();
+
+                                        // Make sure we don't do another update
+                                        update_done = true;
+                                    }
+                                    previous_foot_down[side] = true;
+                                    rMFt[side]               = current_rMFt;
+                                }
+                                else {
+                                    previous_foot_down[side] = false;
+                                }
+                            }
+
+                            /************************************************
+                             *       Construct Odometry Output (Htw)        *
+                             ************************************************/
                             // Gives us the quaternion representation
                             const auto o = MotionModel<double>::StateVec(motionFilter.get());
 
