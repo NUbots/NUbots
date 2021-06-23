@@ -69,7 +69,6 @@ namespace module::motion {
         config.params.kick_vel                = cfg["walk"]["kick"]["vel"].as<float>();
         config.params.pause_duration          = cfg["walk"]["pause"]["duration"].as<float>();
 
-
         config.max_step.x() = cfg["max_step"]["x"].as<float>();
         config.max_step.y() = cfg["max_step"]["y"].as<float>();
         config.max_step.z() = cfg["max_step"]["z"].as<float>();
