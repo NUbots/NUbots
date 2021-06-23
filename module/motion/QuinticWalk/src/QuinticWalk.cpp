@@ -78,12 +78,12 @@ namespace module::motion {
         config.imu_pitch_threshold = 1.0f + cfg["imu"]["pitch"]["threshold"].as<float>();
         config.imu_roll_threshold  = cfg["imu"]["roll"]["threshold"].as<float>();
 
-        for (int i = 0; i < ServoID::NUMBER_OF_SERVOS; ++i) {
-            if ((i >= 6) && (i < 18)) {
-                config.jointGains[i] = cfg["gains"]["legs"].as<float>();
+        for (int servo_index_number = 0; servo_index_number < ServoID::NUMBER_OF_SERVOS; ++servo_index_number) {
+            if ((servo_index_number >= ServoID::R_HIP_YAW) && (servo_index_number < ServoID::HEAD_YAW)) {
+                config.jointGains[servo_index_number] = cfg["gains"]["legs"].as<float>();
             }
-            if (i < 6) {
-                config.jointGains[i] = cfg["gains"]["arms"].as<float>();
+            if (servo_index_number < ServoID::R_HIP_YAW) {
+                config.jointGains[servo_index_number] = cfg["gains"]["arms"].as<float>();
             }
         }
 
