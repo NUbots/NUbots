@@ -163,20 +163,24 @@ namespace module::localisation {
             const Scalar points_per_meter = field_line_length / Scalar(num_field_points);
             const Scalar meters_per_point = Scalar(num_field_points) / field_line_length;
 
-            std::vector<Eigen::Matrix<Scalar, 2, 1>> points;
+            std::vector<Eigen::Matrix<Scalar, 3, 1>> rLFf_truths;
 
-            // Sample all of field the points on the field
+            // Sample all of field points on the field lines
             // Top line
             // Bottom line
             // Mid-field line
             int num_points = field_width * points_per_meter;
             for (int point = 0; point < num_points; ++point) {
                 // Top line
-                points.emplace_back(dis(gen) + half_field_length, -half_field_width + point * meters_per_point);
+                rLFf_truths.emplace_back(dis(gen) + half_field_length,
+                                         -half_field_width + point * meters_per_point,
+                                         Scalar(0));
                 // Mid-field line
-                points.emplace_back(dis(gen), -half_field_width + point * meters_per_point);
+                rLFf_truths.emplace_back(dis(gen), -half_field_width + point * meters_per_point, Scalar(0));
                 // Bottom line
-                points.emplace_back(dis(gen) - half_field_length, -half_field_width + point * meters_per_point);
+                rLFf_truths.emplace_back(dis(gen) - half_field_length,
+                                         -half_field_width + point * meters_per_point,
+                                         Scalar(0));
             }
 
             // Left line
@@ -184,9 +188,13 @@ namespace module::localisation {
             num_points = field_length * points_per_meter;
             for (int point = 0; point < num_points; ++point) {
                 // Left line
-                points.emplace_back(-half_field_length + point * meters_per_point, dis(gen) + half_field_width);
+                rLFf_truths.emplace_back(-half_field_length + point * meters_per_point,
+                                         dis(gen) + half_field_width,
+                                         Scalar(0));
                 // Right line
-                points.emplace_back(-half_field_length + point * meters_per_point, dis(gen) - half_field_width);
+                rLFf_truths.emplace_back(-half_field_length + point * meters_per_point,
+                                         dis(gen) - half_field_width,
+                                         Scalar(0));
             }
 
             // Center circle
@@ -198,7 +206,7 @@ namespace module::localisation {
                 const Scalar theta  = 2.0 * M_PI * point / num_points;
 
                 // Convert to cartesian coordinates
-                points.emplace_back(radius * std::cos(theta), radius * std::sin(theta));
+                rLFf_truths.emplace_back(radius * std::cos(theta), radius * std::sin(theta), Scalar(0));
             }
 
             // Top penalty mark side to side
@@ -206,10 +214,13 @@ namespace module::localisation {
             num_points = line_width * 3 * points_per_meter;
             for (int point = 0; point < num_points; ++point) {
                 // Top mark
-                points.emplace_back(half_field_length - penalty_mark + dis(gen), line_width - point * meters_per_point);
+                rLFf_truths.emplace_back(half_field_length - penalty_mark + dis(gen),
+                                         line_width - point * meters_per_point,
+                                         Scalar(0));
                 // Bottom mark
-                points.emplace_back(-half_field_length + penalty_mark + dis(gen),
-                                    line_width - point * meters_per_point);
+                rLFf_truths.emplace_back(-half_field_length + penalty_mark + dis(gen),
+                                         line_width - point * meters_per_point,
+                                         Scalar(0));
             }
 
             // Top penalty mark end to end
@@ -218,12 +229,15 @@ namespace module::localisation {
             num_points = line_width * 3 * points_per_meter;
             for (int point = 0; point < num_points; ++point) {
                 // Top mark
-                points.emplace_back(half_field_length - penalty_mark - line_width + point * meters_per_point, dis(gen));
+                rLFf_truths.emplace_back(half_field_length - penalty_mark - line_width + point * meters_per_point,
+                                         dis(gen),
+                                         Scalar(0));
                 // Center mark
-                points.emplace_back(-line_width + point * meters_per_point, dis(gen));
+                rLFf_truths.emplace_back(-line_width + point * meters_per_point, dis(gen), Scalar(0));
                 // Bottom mark
-                points.emplace_back(-half_field_length + penalty_mark - line_width + point * meters_per_point,
-                                    dis(gen));
+                rLFf_truths.emplace_back(-half_field_length + penalty_mark - line_width + point * meters_per_point,
+                                         dis(gen),
+                                         Scalar(0));
             }
 
             // Top goal box left and right lines
@@ -231,18 +245,22 @@ namespace module::localisation {
             num_points = goal_length * points_per_meter;
             for (int point = 0; point < num_points; ++point) {
                 // Top Left line
-                points.emplace_back(half_field_length - goal_length * point * meters_per_point,
-                                    goal_width * Scalar(0.5) + dis(gen));
+                rLFf_truths.emplace_back(half_field_length - goal_length * point * meters_per_point,
+                                         goal_width * Scalar(0.5) + dis(gen),
+                                         Scalar(0));
                 // Top Right line
-                points.emplace_back(half_field_length - goal_length * point * meters_per_point,
-                                    -goal_width * Scalar(0.5) + dis(gen));
+                rLFf_truths.emplace_back(half_field_length - goal_length * point * meters_per_point,
+                                         -goal_width * Scalar(0.5) + dis(gen),
+                                         Scalar(0));
 
                 // Bottom Left line
-                points.emplace_back(-half_field_length + goal_length * point * meters_per_point,
-                                    goal_width * Scalar(0.5) + dis(gen));
+                rLFf_truths.emplace_back(-half_field_length + goal_length * point * meters_per_point,
+                                         goal_width * Scalar(0.5) + dis(gen),
+                                         Scalar(0));
                 // Bottom Right line
-                points.emplace_back(-half_field_length + goal_length * point * meters_per_point,
-                                    -goal_width * Scalar(0.5) + dis(gen));
+                rLFf_truths.emplace_back(-half_field_length + goal_length * point * meters_per_point,
+                                         -goal_width * Scalar(0.5) + dis(gen),
+                                         Scalar(0));
             }
 
             // Top goal box top/bottom lines
@@ -250,11 +268,13 @@ namespace module::localisation {
             num_points = goal_width * points_per_meter;
             for (int point = 0; point < num_points; ++point) {
                 // Top line
-                points.emplace_back(half_field_length - goal_length + dis(gen),
-                                    -goal_width * Scalar(0.5) + point * meters_per_point);
+                rLFf_truths.emplace_back(half_field_length - goal_length + dis(gen),
+                                         -goal_width * Scalar(0.5) + point * meters_per_point,
+                                         Scalar(0));
                 // Bottom line
-                points.emplace_back(-half_field_length + goal_length + dis(gen),
-                                    -goal_width * Scalar(0.5) + point * meters_per_point);
+                rLFf_truths.emplace_back(-half_field_length + goal_length + dis(gen),
+                                         -goal_width * Scalar(0.5) + point * meters_per_point,
+                                         Scalar(0));
             }
 
             // Top penalty box left and right lines
@@ -262,18 +282,22 @@ namespace module::localisation {
             num_points = penalty_length * points_per_meter;
             for (int point = 0; point < num_points; ++point) {
                 // Top Left line
-                points.emplace_back(half_field_length - penalty_length + point * meters_per_point,
-                                    penalty_width * Scalar(0.5) + dis(gen));
+                rLFf_truths.emplace_back(half_field_length - penalty_length + point * meters_per_point,
+                                         penalty_width * Scalar(0.5) + dis(gen),
+                                         Scalar(0));
                 // Top Right line
-                points.emplace_back(half_field_length - penalty_length + point * meters_per_point,
-                                    -penalty_width * Scalar(0.5) + dis(gen));
+                rLFf_truths.emplace_back(half_field_length - penalty_length + point * meters_per_point,
+                                         -penalty_width * Scalar(0.5) + dis(gen),
+                                         Scalar(0));
 
                 // Bottom Left line
-                points.emplace_back(-half_field_length + point * meters_per_point,
-                                    penalty_width * Scalar(0.5) + dis(gen));
+                rLFf_truths.emplace_back(-half_field_length + point * meters_per_point,
+                                         penalty_width * Scalar(0.5) + dis(gen),
+                                         Scalar(0));
                 // Bottom Right line
-                points.emplace_back(-half_field_length + point * meters_per_point,
-                                    -penalty_width * Scalar(0.5) + dis(gen));
+                rLFf_truths.emplace_back(-half_field_length + point * meters_per_point,
+                                         -penalty_width * Scalar(0.5) + dis(gen),
+                                         Scalar(0));
             }
 
             // Top penalty box top/bottom lines
@@ -281,15 +305,29 @@ namespace module::localisation {
             num_points = penalty_width * points_per_meter;
             for (int point = 0; point < num_points; ++point) {
                 // Top line
-                points.emplace_back(half_field_length - penalty_length + dis(gen),
-                                    -penalty_width * Scalar(0.5) + point * meters_per_point);
+                rLFf_truths.emplace_back(half_field_length - penalty_length + dis(gen),
+                                         -penalty_width * Scalar(0.5) + point * meters_per_point,
+                                         Scalar(0));
                 // Bottom line
-                points.emplace_back(-half_field_length + penalty_length + dis(gen),
-                                    -penalty_width * Scalar(0.5) + point * meters_per_point);
+                rLFf_truths.emplace_back(-half_field_length + penalty_length + dis(gen),
+                                         -penalty_width * Scalar(0.5) + point * meters_per_point,
+                                         Scalar(0));
+            }
+
+            // Create a transform from the field state
+            Eigen::Transform<Scalar, 3, Eigen::Affine> Hfw;
+            Hfw.translation() = Eigen::Matrix<Scalar, 3, 1>(state.x(), state.y(), 0);
+            Hfw.linear() = Eigen::AngleAxis<Scalar>(state.z(), Eigen::Matrix<Scalar, 3, 1>::UnitZ()).toRotationMatrix();
+
+            const Eigen::Transform<Scalar, 3, Eigen::Affine> Hcf(Hcw * Hfw.inverse().matrix());
+
+            // Transform all field coordinates into camera coordinates
+            for (auto& rLFf : rLFf_truths) {
+                rLFf = cartesianToSpherical(Hcf * rLFf);
             }
 
             // TODO Cull points based on FOV
-            return points;
+            return rLFf_truths;
         }
 
         StateVec limit(const StateVec& state) {
