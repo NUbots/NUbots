@@ -32,7 +32,7 @@ namespace module::vision {
             int cluster_points         = 0;
             float disagreement_ratio   = 0;
             Eigen::Vector3f goal_angular_cov{};
-            bool use_median         = 0;
+            bool use_median         = false;
             float max_goal_distance = 0;
             bool debug              = false;
         } config;
