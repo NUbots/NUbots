@@ -204,8 +204,8 @@ namespace module::behaviour::strategy {
                         case GameMode::PENALTY_SHOOTOUT:
                             penaltyShootout(gameState, phase, fieldDescription, field, ball);
                             break;
-                        case GameMode::NORMAL: normal(gameState, phase, fieldDescription, field, ball); break;
-                        case GameMode::OVERTIME: normal(gameState, phase, fieldDescription, field, ball); break;
+                        case GameMode::NORMAL: normal(gameState, phase, fieldDescription, field, ball, mode); break;
+                        case GameMode::OVERTIME: normal(gameState, phase, fieldDescription, field, ball, mode); break;
                         default: log<NUClear::WARN>("Game mode unknown.");
                     }
                 }
@@ -447,12 +447,13 @@ namespace module::behaviour::strategy {
                                 message::input::GameState::Data::Phase phase,
                                 const message::support::FieldDescription& fieldDescription,
                                 const message::localisation::Field& field,
-                                const message::localisation::Ball& ball) {
+                                const message::localisation::Ball& ball,
+                                const message::input::GameState::Data::Mode& mode) {
         switch (phase.value) {
             case Phase::INITIAL: normalInitial(fieldDescription); break;
-            case Phase::READY: normalReady(gameState); break;
+            case Phase::READY: normalReady(gameState, fieldDescription); break;
             case Phase::SET: normalSet(); break;
-            case Phase::PLAYING: normalPlaying(gameState, state, fieldDescription, field, ball); break;
+            case Phase::PLAYING: normalPlaying(field, ball, fieldDescription, mode); break;
             case Phase::FINISHED: normalFinished(); break;
             case Phase::TIMEOUT: normalTimeout(); break;
             default: log<NUClear::WARN>("penalty Unknown phase.");
@@ -474,14 +475,15 @@ namespace module::behaviour::strategy {
     }
 
     // INITIAL state in NORMAL mode
-    void normalInitial(const message::support::FieldDescription& fieldDescription) {
-        standStill();
-        find({FieldTarget(FieldTarget::Target::SELF)});
-        initialLocalisationReset(fieldDescription);
+    void SoccerStrategy::normalInitial(const message::support::FieldDescription& fieldDescription) {
+        // standStill();
+        // find({FieldTarget(FieldTarget::Target::SELF)});
+        // initialLocalisationReset(fieldDescription);
     }
 
     // READY state in NORMAL mode
-    void normalReady(const message::input::GameState& gameState) {
+    void SoccerStrategy::normalReady(const message::input::GameState& gameState,
+                                     const message::support::FieldDescription& fieldDescription) {
         if (gameState.data.our_kick_off) {
             walkTo(fieldDescription, cfg_.start_position_offensive);
         }
@@ -492,15 +494,15 @@ namespace module::behaviour::strategy {
     }
 
     // SET state in NORMAL mode
-    void normalSet() {
+    void SoccerStrategy::normalSet() {
         standStill();
         find({FieldTarget(FieldTarget::Target::BALL)});
     }
 
-    void normalPlaying(const Field& field,
-                       const Ball& ball,
-                       const FieldDescription& fieldDescription,
-                       const GameMode& mode) {
+    void SoccerStrategy::normalPlaying(const Field& field,
+                                       const Ball& ball,
+                                       const FieldDescription& fieldDescription,
+                                       const GameMode& mode) {
 
         if (penalised() && !cfg_.forcePlaying) {  // penalised
             standStill();
@@ -533,13 +535,13 @@ namespace module::behaviour::strategy {
     }
 
     // FINISHED phase in NORMAL mode
-    void normalFinished() {
+    void SoccerStrategy::normalFinished() {
         standStill();
         find({FieldTarget(FieldTarget::Target::SELF)});
     }
 
     // TIMEOUT phase in NORMAL mode
-    void normalTimeout() {
+    void SoccerStrategy::normalTimeout() {
         standStill();
         find({FieldTarget(FieldTarget::Target::SELF)});
     }

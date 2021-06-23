@@ -136,7 +136,8 @@ namespace module::behaviour::strategy {
                     message::input::GameState::Data::Phase phase,
                     const message::support::FieldDescription& fieldDescription,
                     const message::localisation::Field& field,
-                    const message::localisation::Ball& ball);
+                    const message::localisation::Ball& ball,
+                    const message::input::GameState::Data::Mode& mode);
 
         // PENALTY mode functions
         void penaltyShootoutSet();
@@ -144,12 +145,13 @@ namespace module::behaviour::strategy {
 
         // NORMAL mode functions
         void normalInitial(const message::support::FieldDescription& fieldDescription);
-        void normalReady(const message::input::GameState& gameState);
+        void normalReady(const message::input::GameState& gameState,
+                         const message::support::FieldDescription& fieldDescription);
         void normalSet();
-        void normalPlaying(const Field& field,
-                           const Ball& ball,
-                           const FieldDescription& fieldDescription,
-                           const GameMode& mode);
+        void normalPlaying(const message::localisation::Field& field,
+                           const message::localisation::Ball& ball,
+                           const message::support::FieldDescription& fieldDescription,
+                           const message::input::GameState::Data::Mode& mode);
         void normalFinished();
         void normalTimeout();
 
