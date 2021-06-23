@@ -642,6 +642,9 @@ namespace module::platform {
             real_delta        = 0;
             current_sim_time  = 0;
             current_real_time = 0;
+
+            // Reset the local raw sensors buffer
+            emit(std::make_unique<ResetRawSensors>());
         }
 
         // Save our previous deltas
