@@ -168,36 +168,17 @@ namespace module::behaviour::planning {
                 }
 
                 if (latestCommand.type == message::behaviour::MotionCommand::Type::STAND_STILL) {
-                    log("STAND STILL");
+                    // log("STAND STILL");
                     emit(std::make_unique<StopCommand>(subsumptionId));
-                    // emit(std::make_unique<ActionPriorities>(ActionPriorities { subsumptionId, { 40, 11 }}));
                     return;
                 }
 
                 if (latestCommand.type == message::behaviour::MotionCommand::Type::STAND_SCRIPT) {
-
-                    log("STAND SCRIPT");
+                    // log("STAND SCRIPT");
                     emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "Stand.yaml"));
                     emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {45, 15}}));
-
                     return;
                 }
-
-                // else if (latestCommand.type == message::behaviour::MotionCommand::Type::PENALTY_KICK) {
-                //     log("KICK PENALTY");
-                //     emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "KickPenalty.yaml"));
-                //     emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {1000, 1000}}));
-                //     return;
-                // }
-
-                // else if (latestCommand.type == message::behaviour::MotionCommand::Type::DIRECT_COMMAND) {
-                //     // TO DO, change to Bezier stuff
-                //     std::unique_ptr<WalkCommand> command =
-                //         std::make_unique<WalkCommand>(subsumptionId, latestCommand.walk_command);
-                //     emit(std::move(command));
-                //     emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
-                //     return;
-                // }
 
                 Eigen::Affine3d Htw(sensors.Htw);
 
@@ -281,7 +262,6 @@ namespace module::behaviour::planning {
 
         on<Trigger<MotionCommand>, Sync<SimpleWalkPathPlanner>>().then([this](const MotionCommand& cmd) {
             // save the plan
-            log("motion cmd", cmd.type);
             latestCommand = cmd;
         });
     }
