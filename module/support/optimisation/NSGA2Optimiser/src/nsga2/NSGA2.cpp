@@ -160,11 +160,11 @@ namespace nsga2 {
     }
 
     void NSGA2::InitStreams() {
-        fpt1.open("../module/support/Gazebo/data/nsga2_initial_pop.out", std::ios::out | std::ios::trunc);
-        fpt2.open("../module/support/Gazebo/data/nsga2_final_pop.out", std::ios::out | std::ios::trunc);
-        fpt3.open("../module/support/Gazebo/data/nsga2_best_pop.out", std::ios::out | std::ios::trunc);
-        fpt4.open("../module/support/Gazebo/data/nsga2_all_pop.out", std::ios::out | std::ios::trunc);
-        fpt5.open("../module/support/Gazebo/data/nsga2_params.out", std::ios::out | std::ios::trunc);
+        fpt1.open("nsga2_initial_pop.out", std::ios::out | std::ios::trunc);
+        fpt2.open("nsga2_final_pop.out", std::ios::out | std::ios::trunc);
+        fpt3.open("nsga2_best_pop.out", std::ios::out | std::ios::trunc);
+        fpt4.open("nsga2_all_pop.out", std::ios::out | std::ios::trunc);
+        fpt5.open("nsga2_params.out", std::ios::out | std::ios::trunc);
 
         fpt1.setf(std::ios::scientific);
         fpt2.setf(std::ios::scientific);
@@ -466,11 +466,9 @@ namespace nsga2 {
 
         parentPop->generation = currentGen;
 
-        if (currentGen % reportCount == 0) {
-            fpt4 << "# gen = " << currentGen << "\n";
-            ReportPop(parentPop, fpt4);
-            fpt4.flush();
-        }
+        fpt4 << "# gen = " << currentGen << "\n";
+        ReportPop(parentPop, fpt4);
+        fpt4.flush();
     }
 
     void NSGA2::ReportFinalGenerationPop() {
