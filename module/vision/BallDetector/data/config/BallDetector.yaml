@@ -5,5 +5,5 @@ distance_disagreement: 0.30          # Percentage difference between width and p
                                      # the distance measurements must match perfectly
 maximum_deviation: 0.17              # A threshold on how large the standard deviation of the angle between ray and
                                      # cone axis can be
-ball_angular_cov: [0.1, 0.01, 0.01]  # Measurement certainties
+ball_angular_cov: [0.01, 0.01, 0.01]  # Measurement certainties
 debug: false                         # Turn on debug outputs

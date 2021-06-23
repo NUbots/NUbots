@@ -54,7 +54,7 @@ namespace module::vision {
             config.minimum_ball_distance = cfg["minimum_ball_distance"].as<float>();
             config.distance_disagreement = cfg["distance_disagreement"].as<float>();
             config.maximum_deviation     = cfg["maximum_deviation"].as<float>();
-            config.ball_angular_cov      = Eigen::Vector3f(cfg["ball_angular_cov"].as<Expression>()).asDiagonal();
+            config.ball_angular_cov      = Eigen::Vector3f(cfg["ball_angular_cov"].as<Expression>());
             config.debug                 = cfg["debug"].as<bool>();
         });
 
@@ -159,13 +159,16 @@ namespace module::vision {
 
                         // Attach the measurement to the object (distance from camera to ball)
                         b.measurements.push_back(Ball::Measurement());
-                        b.measurements.back().rBCc       = cartesianToSpherical(b.cone.axis * distance);
-                        b.measurements.back().covariance = config.ball_angular_cov;
+
+                        // Spherical Coordinates (1/distance, phi, theta)
+                        auto measurement = cartesianToSpherical(b.cone.axis * distance);
+                        b.measurements.back().rBCc =
+                            Eigen::Vector3f(1.0f / measurement.x(), measurement.y(), measurement.z());
+                        b.measurements.back().covariance = config.ball_angular_cov.asDiagonal();
 
                         // Angular positions from the camera
                         b.screen_angular = cartesianToSpherical(axis).tail<2>();
                         b.angular_size   = Eigen::Vector2f::Constant(std::acos(radius));
-
 
                         /***********************************************
                          *                  THROWOUTS                  *

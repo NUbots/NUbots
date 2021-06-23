@@ -87,9 +87,8 @@ namespace module::localisation {
                     last_time_update_time = curr_time;
                     filter.time(seconds);
 
-                    /* Now call Measurement Update. Supports multiple measurement methods
-                     * and will treat them as
-                     * separate measurements */
+                    // Now call Measurement Update. Supports multiple measurement methods and will treat them as
+                    // separate measurements
                     for (auto& measurement : balls.balls[0].measurements) {
                         filter.measure(Eigen::Vector3d(measurement.rBCc.cast<double>()),
                                        Eigen::Matrix3d(measurement.covariance.cast<double>()),

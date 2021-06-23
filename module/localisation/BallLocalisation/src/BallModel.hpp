@@ -73,7 +73,9 @@ namespace module::localisation {
 
             const Eigen::Matrix<Scalar, 3, 1> rBWw(state[PX], state[PY], field.ball_radius);
             const Eigen::Matrix<Scalar, 3, 1> rBCc_cart(Eigen::Affine3d(Hcw) * rBWw);
-            return cartesianToSpherical(rBCc_cart);
+
+            auto measurement = cartesianToSpherical(rBCc_cart);
+            return Eigen::Matrix<Scalar, 3, 1>(Scalar(1) / measurement.x(), measurement.y(), measurement.z());
         }
 
         StateVec limit(const StateVec& state) const {
