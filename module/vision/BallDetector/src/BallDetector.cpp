@@ -44,6 +44,7 @@ namespace module::vision {
     using message::vision::GreenHorizon;
 
     using utility::math::coordinates::cartesianToSpherical;
+    using utility::math::coordinates::inverseDistanceCartesianToSpherical;
     using utility::support::Expression;
 
     BallDetector::BallDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -161,9 +162,7 @@ namespace module::vision {
                         b.measurements.push_back(Ball::Measurement());
 
                         // Spherical Coordinates (1/distance, phi, theta)
-                        auto measurement = cartesianToSpherical(b.cone.axis * distance);
-                        b.measurements.back().rBCc =
-                            Eigen::Vector3f(1.0f / measurement.x(), measurement.y(), measurement.z());
+                        b.measurements.back().rBCc       = inverseDistanceCartesianToSpherical(b.cone.axis * distance);
                         b.measurements.back().covariance = config.ball_angular_cov.asDiagonal();
 
                         // Angular positions from the camera
