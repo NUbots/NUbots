@@ -394,8 +394,8 @@ namespace module::platform {
             }
 
             auto targets = std::make_unique<ServoTargets>();
-
-            for (int i = 0; i < 20; i++) {
+            // Clear all servo targets on reset
+            for (int i = 0; i < ServoID::NUMBER_OF_SERVOS; i++) {
                 targets->targets.emplace_back(NUClear::clock::now(), i, 0.0, 1, 0);
             }
 
