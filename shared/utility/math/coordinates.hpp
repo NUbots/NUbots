@@ -66,14 +66,8 @@ namespace utility::math::coordinates {
     template <typename T, typename U = typename T::Scalar>
     inline Eigen::Matrix<U, 3, 1> inverseDistanceCartesianToSpherical(
         const Eigen::MatrixBase<T>& cartesianCoordinates) {
-        const U x = cartesianCoordinates.x();
-        const U y = cartesianCoordinates.y();
-        const U z = cartesianCoordinates.z();
-        Eigen::Matrix<U, 3, 1> result;
-
-        result.x() = U(1.0 / std::sqrt(x * x + y * y + z * z));                                          // r
-        result.y() = std::atan2(y, x);                                                                   // theta
-        result.x() == static_cast<U>(0) ? result.z() = static_cast<U>(0) : std::asin(z / (result.x()));  // phi
+        Eigen::Matrix<U, 3, 1> result = cartesianToSpherical(cartesianCoordinates);
+        return {U(1) / result.x(), result.y(), result.z()};
 
         return result;
     }
