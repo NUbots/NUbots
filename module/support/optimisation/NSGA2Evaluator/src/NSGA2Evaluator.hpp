@@ -55,6 +55,9 @@ namespace module {
                 /// @brief Subsumption priority ID for this module
                 size_t subsumptionId;
 
+                /// @brief The amount of time to run a single trial, in seconds. Read from config.
+                int trial_duration_limit = 0.0;
+
                 /// @brief The walk command velocity, read from config
                 Eigen::Vector2d walk_command_velocity = Eigen::Vector2d(0.0, 0.0);
 

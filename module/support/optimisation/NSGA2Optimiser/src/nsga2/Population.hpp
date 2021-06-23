@@ -38,7 +38,7 @@ namespace nsga2 {
         void CrowdingDistance(const int& _frontI);
         std::pair<int, int> Mutate();
         void Merge(const Population& _pop1, const Population& _pop2);
-        void Report(std::ostream& _os) const;
+        void Report(std::ostream& _os, int generation) const;
         int GetSize() const {
             return int(inds.size());
         }

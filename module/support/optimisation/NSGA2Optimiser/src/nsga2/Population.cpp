@@ -176,20 +176,31 @@ namespace nsga2 {
         std::copy(_pop2.inds.begin(), _pop2.inds.end(), inds.begin() + _pop1.GetSize());
     }
 
-    void Population::Report(std::ostream& os) const {
+    void Population::Report(std::ostream& os, int generation) const {
         std::vector<Individual>::const_iterator it;
-        for (it = inds.begin(); it != inds.end(); it++) {
-            for (int i = 0; i < indConfig.objectives; i++)
-                os << it->objScore[i] << "\t";
-            for (int i = 0; i < indConfig.constraints; i++)
-                os << it->constr[i] << "\t";
-            for (int i = 0; i < indConfig.realVars; i++)
-                os << it->reals[i] << "\t";
-            for (int i = 0; i < indConfig.binVars; i++)
-                for (int j = 0; j < indConfig.binBits[i]; j++)
-                    os << it->gene[i][j] << "\t";
 
-            os << it->constrViolation << "\t" << it->rank << "\t" << it->crowdDist << "\n";
+        for (it = inds.begin(); it != inds.end(); it++) {
+            os << generation << "," << it->id << ",";
+
+            for (int i = 0; i < indConfig.objectives; i++) {
+                os << it->objScore[i] << ",";
+            }
+
+            for (int i = 0; i < indConfig.constraints; i++) {
+                os << it->constr[i] << ",";
+            }
+
+            for (int i = 0; i < indConfig.realVars; i++) {
+                os << it->reals[i] << ",";
+            }
+
+            for (int i = 0; i < indConfig.binVars; i++) {
+                for (int j = 0; j < indConfig.binBits[i]; j++) {
+                    os << it->gene[i][j] << ",";
+                }
+            }
+
+            os << it->constrViolation << "," << it->rank << "," << it->crowdDist << std::endl;
         }
     }
 

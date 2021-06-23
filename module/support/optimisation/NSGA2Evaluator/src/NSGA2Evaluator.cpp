@@ -78,6 +78,7 @@ namespace module {
                 on<Configuration>("NSGA2Evaluator.yaml").then([this](const Configuration& config) {
                     walk_command_velocity = config["walk_command"]["velocity"].as<Expression>();
                     walk_command_rotation = config["walk_command"]["rotation"].as<Expression>();
+                    trial_duration_limit  = config["trial_duration_limit"].as<Expression>();
                 });
 
                 // Read the QuinticWalk.yaml config file and set the arm targets
@@ -379,8 +380,8 @@ namespace module {
                     message->generation                        = generation;
                     message->individual                        = individual;
 
-                    // Schedule the end of the walk trial after 40 seconds
-                    emit<Scope::DELAY>(message, std::chrono::seconds(40));
+                    // Schedule the end of the walk trial after the duration limit
+                    emit<Scope::DELAY>(message, std::chrono::seconds(trial_duration_limit));
                 }
             }
 
@@ -388,8 +389,10 @@ namespace module {
             void NSGA2Evaluator::TerminatingEarly(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
                 log<NUClear::DEBUG>("TerminatingEarly");
 
-                bool MAX_TRIAL_DURATION = (30 + 1) * 1000;  // 30 seconds + 1 for overhead
-                double trialDuration    = simTime - trialStartTime;
+                // Convert trial duration limit to ms, add 1 for overhead
+                bool max_trial_duration = (trial_duration_limit + 1) * 1000;
+
+                double trialDuration = simTime - trialStartTime;
 
                 log<NUClear::INFO>("Trial ran for", trialDuration);
 
@@ -403,7 +406,7 @@ namespace module {
                 };
 
                 std::vector<double> constraints = {
-                    trialDuration - MAX_TRIAL_DURATION,  // Punish for falling over, based on how long the trial took
+                    trialDuration - max_trial_duration,  // Punish for falling over, based on how long the trial took
                                                          // (more negative is worse)
                                                          // TODO: should we be punishing the distance walked instead
                                                          // (since that's what we reward?)

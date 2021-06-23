@@ -45,9 +45,11 @@ namespace nsga2 {
         double crowdDist;
         bool evaluated;
 
-    private:
+        // Public for report access
         int id;
         int generation;
+
+    private:
         std::vector<double> bins;
 
 

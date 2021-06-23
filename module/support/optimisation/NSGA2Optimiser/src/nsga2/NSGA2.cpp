@@ -77,7 +77,7 @@ namespace nsga2 {
         }
 
         InitStreams();
-        ReportParams(fpt5);
+        ReportParams(nsga2_params_file);
 
         binMutCount    = 0;
         realMutCount   = 0;
@@ -150,80 +150,108 @@ namespace nsga2 {
 
         // NUClear::log<NUClear::INFO>("Generation 1 complete!");
 
-        ReportPop(parentPop, fpt1);
-        fpt4 << "# gen = " << currentGen << "\n";
-        ReportPop(parentPop, fpt4);
+        ReportPop(parentPop, initial_pop_file);
 
-        fpt1.flush();
-        fpt4.flush();
-        fpt5.flush();
+        // all_pop_file << "# gen = " << currentGen << "\n";
+        ReportPop(parentPop, all_pop_file);
+
+        initial_pop_file.flush();
+        all_pop_file.flush();
+        nsga2_params_file.flush();
     }
 
     void NSGA2::InitStreams() {
-        fpt1.open("nsga2_initial_pop.out", std::ios::out | std::ios::trunc);
-        fpt2.open("nsga2_final_pop.out", std::ios::out | std::ios::trunc);
-        fpt3.open("nsga2_best_pop.out", std::ios::out | std::ios::trunc);
-        fpt4.open("nsga2_all_pop.out", std::ios::out | std::ios::trunc);
-        fpt5.open("nsga2_params.out", std::ios::out | std::ios::trunc);
+        InitPopStream(initial_pop_file, "nsga2_initial_pop.csv", "This file contains the data of all generations");
+        InitPopStream(final_pop_file, "nsga2_final_pop.csv", "This file contains the data of final population");
+        InitPopStream(best_pop_file,
+                      "nsga2_best_pop.csv",
+                      "This file contains the data of final feasible population (if any)");
+        InitPopStream(all_pop_file, "nsga2_all_pop.csv", "This file contains the data of all generations");
 
-        fpt1.setf(std::ios::scientific);
-        fpt2.setf(std::ios::scientific);
-        fpt3.setf(std::ios::scientific);
-        fpt4.setf(std::ios::scientific);
-        fpt4.precision(16);
-        fpt5.setf(std::ios::scientific);
+        nsga2_params_file.open("nsga2_params.csv", std::ios::out | std::ios::trunc);
+        // nsga2_params_file.setf(std::ios::scientific);
+        nsga2_params_file.precision(16);
+    }
 
-        fpt1 << "# This file contains the data of initial population\n";
-        fpt2 << "# This file contains the data of final population\n";
-        fpt3 << "# This file contains the data of final feasible population (if found)\n";
-        fpt4 << "# This file contains the data of all generations\n";
-        fpt5 << "# This file contains information about inputs as read by the program\n";
+    void NSGA2::InitPopStream(std::ofstream& file_stream, std::string file_name, std::string description) {
+        file_stream.open(file_name, std::ios::out | std::ios::trunc);
+        // file_stream.setf(std::ios::scientific);
+        file_stream.precision(16);
 
-        fpt1 << "# of objectives = " << objectives << ", # of constraints = " << constraints
-             << ", # of real variables = " << realVars << ", # of bits of binary variables = " << bitLength
-             << ", constraint violation, rank, crowding_distance\n";
-        fpt2 << "# of objectives = " << objectives << ", # of constraints = " << constraints
-             << ", # of real variables = " << realVars << ", # of bits of binary variables = " << bitLength
-             << ", constraint violation, rank, crowding_distance\n";
-        fpt3 << "# of objectives = " << objectives << ", # of constraints = " << constraints
-             << ", # of real variables = " << realVars << ", # of bits of binary variables = " << bitLength
-             << ", constrViolation, rank, crowding_distance\n";
-        fpt4 << "# of objectives = " << objectives << ", # of constraints = " << constraints
-             << ", # of real variables = " << realVars << ", # of bits of binary variables = " << bitLength
-             << ", constrViolation, rank, crowding_distance\n";
+        file_stream << "# " << description << "\n";
+        file_stream << "# num_objectives: " << objectives << ", num_constraints: " << constraints
+                    << ", num_real_variables: " << realVars << ", num_binary_variables: " << bitLength << std::endl;
     }
 
     void NSGA2::ReportParams(std::ostream& _os) const {
-        _os << "Population size = " << popSize << "\nNumber of generations = " << generations
-            << "\nNumber of objective functions = " << objectives << "\nNumber of constraints = " << constraints
-            << "\nNumber of real variables = " << realVars;
+        _os << "# General Parameters\n";
+        _os << "population_size,num_generations,num_objective_functions,num_constraints,rand_seed"
+            << ",num_real_vars,real_var_crossover_prob,real_var_mutation_prob"
+            << ",crossover_dist_index,mutation_dist_index"
+            << ",num_binary_vars,binary_var_crossover_prob,binary_var_mutation_prob" << std::endl;
 
-        if (realVars != 0) {
+        _os << popSize << "," << generations << "," << objectives << "," << constraints << "," << randGen->GetSeed()
+            << "," << realVars << "," << realCrossProb << "," << realMutProb << "," << etaC << "," << etaM << ","
+            << "," << binVars << "," << binCrossProb << "," << binMutProb << std::endl;
+
+
+        if (realVars > 0) {
+            _os << "\n";
+
+            _os << "# Real Variable Parameters\n";
+            _os << "index,initial_value,lower_limit,upper_limit" << std::endl;
+
             for (int i = 0; i < realVars; i++) {
-                _os << "\nLower limit of real variable " << (i + 1) << " = " << realLimits[i].first;
-                _os << "\nUpper limit of real variable " << (i + 1) << " = " << realLimits[i].second;
+                _os << i << "," << initialRealVars[i] << "," << realLimits[i].first << "," << realLimits[i].second
+                    << std::endl;
             }
-            _os << "\nProbability of crossover of real variable = " << realCrossProb;
-            _os << "\nProbability of mutation of real variable = " << realMutProb;
-            _os << "\nDistribution index for crossover = " << etaC;
-            _os << "\nDistribution index for mutation = " << etaM;
         }
 
-        _os << "\nNumber of binary variables = " << binVars;
-        if (binVars != 0) {
+        if (binVars > 0) {
+            _os << "\n";
+
+            _os << "# Binary Variable Parameters\n";
+            _os << "index,lower_limit,upper_limit,num_bits" << std::endl;
+
             for (int i = 0; i < binVars; i++) {
-                _os << "\nNumber of bits for binary variable " << (i + 1) << " = " << binBits[i];
-                _os << "\nLower limit of real variable " << (i + 1) << " = " << binLimits[i].first;
-                _os << "\nUpper limit of real variable " << (i + 1) << " = " << binLimits[i].second;
+                _os << i << "," << binLimits[i].first << "," << binLimits[i].second << "," << binBits[i] << std::endl;
             }
-            _os << "Probability of crossover of binary variable = " << binCrossProb;
-            _os << "Probability of mutation of binary variable = " << binMutProb;
         }
-        _os << "\nSeed for random number generator = " << randGen->GetSeed() << std::endl;
     }
 
     void NSGA2::ReportPop(const std::shared_ptr<Population>& _pop, std::ostream& _os) const {
-        _pop->Report(_os);
+        _os << "\n# Generation " << _pop->generation << "\n";
+
+        _os << "generation"
+            << ","
+            << "individual"
+            << ",";
+
+        for (int i = 0; i < objectives; i++) {
+            _os << "objective_" << i << ",";
+        }
+
+        for (int i = 0; i < constraints; i++) {
+            _os << "constraints_" << i << ",";
+        }
+
+        for (int i = 0; i < realVars; i++) {
+            _os << "real_param_" << i << ",";
+        }
+
+        for (int i = 0; i < binVars; i++) {
+            for (int j = 0; j < binBits[i]; j++) {
+                _os << "binary_param_" << i << "_" << j << ",";
+            }
+        }
+
+        _os << "constraint_violation"
+            << ","
+            << "rank"
+            << ","
+            << "crowding_dist" << std::endl;
+
+        _pop->Report(_os, _pop->generation);
     }
 
     void NSGA2::Selection(const std::shared_ptr<Population>& _oldPop, std::shared_ptr<Population>& _newPop) {
@@ -466,12 +494,12 @@ namespace nsga2 {
 
         parentPop->generation = currentGen;
 
-        fpt4 << "# gen = " << currentGen << "\n";
-        ReportPop(parentPop, fpt4);
-        fpt4.flush();
+        // all_pop_file << "# gen = " << currentGen << "\n";
+        ReportPop(parentPop, all_pop_file);
+        // all_pop_file.flush();
     }
 
     void NSGA2::ReportFinalGenerationPop() {
-        ReportPop(parentPop, fpt2);
+        ReportPop(parentPop, final_pop_file);
     }
 }  // namespace nsga2
