@@ -138,9 +138,20 @@ namespace module::behaviour::strategy {
                     const message::localisation::Field& field,
                     const message::localisation::Ball& ball);
 
+        // PENALTY mode functions
         void penaltyShootoutSet();
         void penaltyShootoutPlaying();
 
+        // NORMAL mode functions
+        void normalInitial(const message::support::FieldDescription& fieldDescription);
+        void normalReady(const message::input::GameState& gameState);
+        void normalSet();
+        void normalPlaying(const Field& field,
+                           const Ball& ball,
+                           const FieldDescription& fieldDescription,
+                           const GameMode& mode);
+        void normalFinished();
+        void normalTimeout();
 
     public:
         explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);
