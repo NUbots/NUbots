@@ -259,7 +259,7 @@ namespace module::localisation {
     Eigen::Vector3d RobotParticleLocalisation::getFieldPosition(const VisionGoal& goal,
                                                                 const message::support::FieldDescription& fd,
                                                                 const bool isOwn) const {
-        Eigen::Vector3d position = Eigen::Vector3d::Zeros();
+        Eigen::Vector3d position = Eigen::Vector3d::Zero();
 
         const bool left  = (goal.side == VisionGoal::Side::LEFT);
         const bool right = (goal.side == VisionGoal::Side::RIGHT);
