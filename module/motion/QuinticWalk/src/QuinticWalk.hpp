@@ -40,11 +40,11 @@ namespace module::motion {
 
         struct Config {
             Eigen::Vector3f max_step = Eigen::Vector3f::Zero();
-            float max_step_xy = 0.0f;
+            float max_step_xy        = 0.0f;
 
-            bool imu_active = true;
+            bool imu_active           = true;
             float imu_pitch_threshold = 0.0f;
-            float imu_roll_threshold = 0.0f;
+            float imu_roll_threshold  = 0.0f;
 
             WalkingParameter params{};
 

@@ -72,7 +72,7 @@ namespace module::motion {
         config.max_step.x() = cfg["max_step"]["x"].as<float>();
         config.max_step.y() = cfg["max_step"]["y"].as<float>();
         config.max_step.z() = cfg["max_step"]["z"].as<float>();
-        config.max_step_xy = cfg["max_step"]["xy"].as<float>();
+        config.max_step_xy  = cfg["max_step"]["xy"].as<float>();
 
         config.imu_active          = cfg["imu"]["active"].as<bool>();
         config.imu_pitch_threshold = 1.0f + cfg["imu"]["pitch"]["threshold"].as<float>();

@@ -124,7 +124,6 @@ namespace module::behaviour::planning {
         });
 
 
-
         on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
             if (balls.balls.size() > 0) {
                 timeBallLastSeen = NUClear::clock::now();
@@ -213,7 +212,6 @@ namespace module::behaviour::planning {
                 }
 
 
-
                 float angle = std::atan2(position.y(), position.x()) + headingChange;
 
                 angle = std::min(turnSpeed, std::max(angle, -turnSpeed));
@@ -231,7 +229,8 @@ namespace module::behaviour::planning {
 
 
                 std::unique_ptr<WalkCommand> command =
-                    std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(finalForwardSpeed, finalSideSpeed, angle));
+                    std::make_unique<WalkCommand>(subsumptionId,
+                                                  Eigen::Vector3d(finalForwardSpeed, finalSideSpeed, angle));
 
                 emit(std::move(command));
                 emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
@@ -242,4 +241,4 @@ namespace module::behaviour::planning {
             latestCommand = cmd;
         });
     }
-}  
+}  // namespace module::behaviour::planning
