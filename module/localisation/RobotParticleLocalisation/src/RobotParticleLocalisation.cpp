@@ -79,8 +79,8 @@ namespace module::localisation {
 
                         for (auto& m : goal.measurements) {
                             if (m.type == VisionGoal::MeasurementType::CENTRE) {
-                                if (m.measurement.allFinite() && m.covariance.allFinite()) {
-                                    filter.measure(Eigen::Vector3d(m.measurement.cast<double>()),
+                                if (m.rGCc.allFinite() && m.covariance.allFinite()) {
+                                    filter.measure(Eigen::Vector3d(m.rGCc.cast<double>()),
                                                    Eigen::Matrix3d(m.covariance.cast<double>()),
                                                    poss,
                                                    goals.Hcw,
