@@ -76,20 +76,17 @@ namespace module::localisation {
 
                         // Check side and team
                         const Eigen::Vector3d poss = getFieldPosition(goal, fd);
-
-                        for (auto& m : goal.measurements) {
-                            if (m.type == VisionGoal::MeasurementType::CENTRE) {
-                                if (m.position.allFinite() && m.covariance.allFinite()) {
-                                    filter.measure(Eigen::Vector3d(m.position.cast<double>()),
-                                                   Eigen::Matrix3d(m.covariance.cast<double>()),
-                                                   poss,
-                                                   goals.Hcw,
-                                                   m.type,
-                                                   fd);
-                                }
-                                else {
-                                    log("Received non-finite measurements from vision. Discarding ...");
-                                }
+                        if (goal.measurement.type == VisionGoal::MeasurementType::CENTRE) {
+                            if (goal.measurement.position.allFinite() && goal.measurement.covariance.allFinite()) {
+                                filter.measure(Eigen::Vector3d(goal.measurement.position.cast<double>()),
+                                               Eigen::Matrix3d(goal.measurement.covariance.cast<double>()),
+                                               poss,
+                                               goals.Hcw,
+                                               goal.measurement.type,
+                                               fd);
+                            }
+                            else {
+                                log("Received non-finite measurements from vision. Discarding ...");
                             }
                         }
                     }

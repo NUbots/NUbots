@@ -55,12 +55,12 @@ message Goal {
         fvec3 bottom   = 2;
         float distance = 3;
     }
-    Side                 side           = 1;
-    Post                 post           = 3;
-    repeated Measurement measurements   = 4;
-    fvec2                screen_angular = 5;
-    fvec2                angular_size   = 6;
-    Team                 team           = 7;
+    Side        side           = 1;
+    Post        post           = 3;
+    Measurement measurement    = 4;
+    fvec2       screen_angular = 5;
+    fvec2       angular_size   = 6;
+    Team        team           = 7;
 }
 
 message Goals {

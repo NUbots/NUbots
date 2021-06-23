@@ -225,11 +225,10 @@ namespace module::vision {
                             g.post.distance = distance;
 
                             // Attach the measurement to the object (distance from camera to bottom center of post)
-                            g.measurements.push_back(Goal::Measurement());
-                            g.measurements.back().type = Goal::MeasurementType::CENTRE;
-                            g.measurements.back().position =
-                                cartesianToSpherical(Eigen::Vector3f(g.post.bottom * distance));
-                            g.measurements.back().covariance =
+                            g.measurement          = Goal::Measurement();
+                            g.measurement.type     = Goal::MeasurementType::CENTRE;
+                            g.measurement.position = cartesianToSpherical(Eigen::Vector3f(g.post.bottom * distance));
+                            g.measurement.covariance =
                                 config.goal_angular_cov * Eigen::Vector3f(distance, 1, 1).asDiagonal();
 
                             // Angular positions from the camera
