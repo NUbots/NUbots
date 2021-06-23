@@ -8,6 +8,7 @@
 #include "message/localisation/Field.hpp"
 #include "message/localisation/ResetRobotHypotheses.hpp"
 #include "message/vision/Goal.hpp"
+#include "message/vision/ieldLine.hpp"
 
 #include "utility/localisation/transform.hpp"
 #include "utility/nusight/NUhelpers.hpp"
@@ -23,6 +24,8 @@ namespace module::localisation {
     using message::support::FieldDescription;
     using VisionGoal  = message::vision::Goal;
     using VisionGoals = message::vision::Goals;
+    using VisionLine  = message::vision::FieldLine;
+    using VisionLines = message::vision::FieldLines;
 
     using utility::nusight::graph;
     using utility::support::Expression;
@@ -61,7 +64,7 @@ namespace module::localisation {
             });
 
         on<Trigger<VisionGoals>, With<FieldDescription>, Sync<RobotParticleLocalisation>>().then(
-            "Measurement Update",
+            "Goal Measurement Update",
             [this](const VisionGoals& goals, const FieldDescription& fd) {
                 if (!goals.goals.empty()) {
                     /* Perform time update */
@@ -88,9 +91,35 @@ namespace module::localisation {
                                                    fd);
                                 }
                                 else {
-                                    log("Received non-finite measurements from vision. Discarding ...");
+                                    log("Received non-finite goal measurements from vision. Discarding ...");
                                 }
                             }
+                        }
+                    }
+                }
+            });
+
+        on<Trigger<VisionLines>, With<FieldDescription>, Sync<RobotParticleLocalisation>>().then(
+            "Field Line Measurement Update",
+            [this](const VisionLines& lines, const FieldDescription& fd) {
+                if (!lines.lines.empty()) {
+                    // Perform time update
+                    using namespace std::chrono;
+                    const auto curr_time  = NUClear::clock::now();
+                    const double seconds  = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
+                    last_time_update_time = curr_time;
+
+                    filter.time(seconds);
+
+                    for (auto line : lines.lines) {
+                        if (line.rLCc.allFinite() && line.covariance.allFinite()) {
+                            filter.measure(Eigen::Vector3d(line.rLCc.cast<double>()),
+                                           Eigen::Matrix3d(line.covariance.cast<double>()),
+                                           lines.Hcw,
+                                           fd);
+                        }
+                        else {
+                            log("Received non-finite field line measurements from vision. Discarding ...");
                         }
                     }
                 }
