@@ -26,6 +26,8 @@
 #include <random>
 #include <vector>
 
+#include "utility/math/stats/multivariate.hpp"
+
 namespace utility::math::filter {
 
     template <typename Scalar, template <typename> class FilterModel>
@@ -55,13 +57,12 @@ namespace utility::math::filter {
             // Expectation Maximisation. International Conference on Signal Processing and Communication
             // Systems, 2017.
 
-            ParticleList new_particles =
-                ParticleList::NullaryExpr(Model::size, n_particles, [&]() { return norm(rng); });
 
-            const StateMat sqrt_covariance = covariance.cwiseSqrt();
+            ParticleList new_particles;
+            utility::math::stats::MultivariateNormal dist(mean, covariance);
 
             for (int i = 0; i < n_particles; ++i) {
-                new_particles.col(i) = sqrt_covariance * new_particles.col(i) + mean;
+                new_particles.col(i) = dist();
             }
 
             return new_particles;
@@ -108,19 +109,18 @@ namespace utility::math::filter {
             // Expectation Maximisation. International Conference on Signal Processing and Communication
             // Systems, 2017.
 
-            ParticleList new_particles =
-                ParticleList::NullaryExpr(Model::size, n_particles, [&]() { return norm(rng); });
+            ParticleList new_particles;
 
             // We want to evenly distribute the particles across all hypotheses
             // If this is not an even division, the last N particles will just be randomly initialised
             const int particles_per_state = n_particles / mean_size;
 
             for (int state = 0; state < int(mean_size); ++state) {
-                const StateMat sqrt_covariance = covariance[state].cwiseSqrt();
+                utility::math::stats::MultivariateNormal dist(mean[state], covariance[state]);
 
                 const int start_col = state * particles_per_state;
                 for (int i = 0; i < particles_per_state; ++i) {
-                    new_particles.col(start_col + i) = sqrt_covariance * new_particles.col(start_col + i) + mean[state];
+                    new_particles.col(start_col + i) = dist();
                 }
             }
 
