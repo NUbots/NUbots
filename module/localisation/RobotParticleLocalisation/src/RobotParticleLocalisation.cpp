@@ -59,7 +59,7 @@ namespace module::localisation {
                 field->covariance      = filter.getCovariance();
 
                 if (config.debug) {
-                    log<NUClear::DEBUG>(fmt::format("Robot Location {} : {} : {}",
+                    log<NUClear::DEBUG>(fmt::format("Robot Location x {} : y {} : theta {}",
                                                     state[RobotModel<double>::kX],
                                                     state[RobotModel<double>::kY],
                                                     state[RobotModel<double>::kAngle]));
@@ -106,9 +106,7 @@ namespace module::localisation {
                                     filter_new_own.measure(Eigen::Vector3d(m.position.cast<double>()),
                                                            Eigen::Matrix3d(m.covariance.cast<double>()),
                                                            getFieldPosition(goal_post, fd, 1),  // Own post
-                                                           goals.Hcw);                          //,
-                                                                                                //    m.type,
-                                                                                                //    fd);
+                                                           goals.Hcw);
 
                                 auto filter_new_opp = saved_filter;
 
@@ -117,9 +115,7 @@ namespace module::localisation {
                                     filter_new_opp.measure(Eigen::Vector3d(m.position.cast<double>()),
                                                            Eigen::Matrix3d(m.covariance.cast<double>()),
                                                            getFieldPosition(goal_post, fd, 0),  // Opp post
-                                                           goals.Hcw);                          //,
-                                //    m.type,
-                                //    fd);
+                                                           goals.Hcw);
                                 if (config.debug) {
 
                                     Eigen::Vector3d state(filter.get());
@@ -159,33 +155,8 @@ namespace module::localisation {
 
                     for (auto goal_post : goals.goals) {
                         if (goal_post.side == Goal::Side::UNKNOWN_SIDE) {
-                            log("This isn't handled yet :D");
+                            log<NUClear::INFO>("UNKNOWN_SIDE Goal posts aren't handled yet");
                         }
-
-                        // If the goal measurement is a pair of goals. Then get the pairs of true goals, for each pair
-                        // of true goals, calculate the likelyhood of it being the goal detected. Update the state with
-                        // the minimum error state pair
-
-                        // Else if the goal measurement is not a pair of goals. Then get each true goals, calculate the
-                        // likelyhood of it being the goal detected. Update the state with the minimum error state
-
-                        // // Check side and team
-                        // const Eigen::Vector3d rGFf = getFieldPosition(goal, fd);
-
-                        // for (auto& m : goal.measurements) {
-
-                        //     if (m.type == VisionGoal::MeasurementType::CENTRE) {
-                        //         if (m.position.allFinite() && m.covariance.allFinite()) {
-                        //             filter.measure(Eigen::Vector3d(m.position.cast<double>()),
-                        //                            Eigen::Matrix3d(m.covariance.cast<double>()),
-                        //                            rGFf,
-                        //                            goals.Hcw);
-                        //         }
-                        //         else {
-                        //             log("Received non-finite measurements from vision. Discarding ...");
-                        //         }
-                        //     }
-                        // }
                     }
                 }
             });
@@ -288,14 +259,10 @@ namespace module::localisation {
     Eigen::Vector3d RobotParticleLocalisation::getFieldPosition(const VisionGoal& goal,
                                                                 const message::support::FieldDescription& fd,
                                                                 const bool isOwn) const {
-        Eigen::Vector3d position;
+        Eigen::Vector3d position = Eigen::Vector3d::Zeros();
 
         const bool left  = (goal.side == VisionGoal::Side::LEFT);
         const bool right = (goal.side == VisionGoal::Side::RIGHT);
-
-        // TODO This should be removed from the message
-        // const bool own   = (goal.team != VisionGoal::Team::OPPONENT);
-        // const bool opp   = (goal.team != VisionGoal::Team::OWN);
 
         if (isOwn && left) {
             position = Eigen::Vector3d(fd.goalpost_own_l.x(), fd.goalpost_own_l.y(), 0);
@@ -313,28 +280,3 @@ namespace module::localisation {
         return position;
     }
 }  // namespace module::localisation
-
-
-// csv recording
-// {
-//     // clang-format off
-//     Eigen::Vector3d position(m.position.cast<double>());
-//     std::cout << position(0) << "," << position(1) << "," << position(2);
-
-//     Eigen::Matrix3d cov(m.covariance.cast<double>());
-//     std::cout
-//         << cov(0, 0) << "," << cov(0, 1) << "," << cov(0, 2) << ","
-//         << cov(1, 0) << "," << cov(1, 1) << "," << cov(1, 2) << ","
-//         << cov(2, 0) << "," << cov(2, 1) << "," << cov(2, 2) << ",";
-
-//     Eigen::Matrix4d Hcw(goals.Hcw);
-
-//     std::cout
-//         << Hcw(0, 0) << "," << Hcw(0, 1) << "," << Hcw(0, 2) << "," << Hcw(0, 3) << ","
-//         << Hcw(1, 0) << "," << Hcw(1, 1) << "," << Hcw(1, 2) << "," << Hcw(1, 3) << ","
-//         << Hcw(2, 0) << "," << Hcw(2, 1) << "," << Hcw(2, 2) << "," << Hcw(2, 3) << ","
-//         << Hcw(3, 0) << "," << Hcw(3, 1) << "," << Hcw(3, 2) << "," << Hcw(3, 3) << ",";
-
-//     std::cout << goal_post.side << std::endl;
-//     // clang-format on
-// }

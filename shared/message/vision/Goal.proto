@@ -60,7 +60,6 @@ message Goal {
     repeated Measurement measurements   = 4;
     fvec2                screen_angular = 5;
     fvec2                angular_size   = 6;
-    Team                 team           = 7;
 }
 
 message Goals {
