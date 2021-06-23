@@ -58,7 +58,7 @@ namespace utility::math::filter {
             // Systems, 2017.
 
 
-            ParticleList new_particles;
+            ParticleList new_particles(Model::size, n_particles);
             utility::math::stats::MultivariateNormal dist(mean, covariance);
 
             for (int i = 0; i < n_particles; ++i) {
@@ -109,7 +109,7 @@ namespace utility::math::filter {
             // Expectation Maximisation. International Conference on Signal Processing and Communication
             // Systems, 2017.
 
-            ParticleList new_particles;
+            ParticleList new_particles(Model::size, n_particles);
 
             // We want to evenly distribute the particles across all hypotheses
             // If this is not an even division, the last N particles will just be randomly initialised
