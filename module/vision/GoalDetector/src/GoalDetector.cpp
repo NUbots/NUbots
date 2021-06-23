@@ -53,13 +53,13 @@ namespace module::vision {
 
         // Trigger the same function when either update
         on<Configuration>("GoalDetector.yaml").then([this](const Configuration& cfg) {
-            config.confidence_threshold = cfg["confidence_threshold"].as<float>();
-            config.cluster_points       = cfg["cluster_points"].as<int>();
-            config.disagreement_ratio   = cfg["disagreement_ratio"].as<float>();
-            config.goal_angular_cov     = Eigen::Vector3f(cfg["goal_angular_cov"].as<Expression>());
-            config.use_median           = cfg["use_median"].as<bool>();
-            config.max_goal_distance    = cfg["max_goal_distance"].as<float>();
-            config.debug                = cfg["debug"].as<bool>();
+            config.confidence_threshold       = cfg["confidence_threshold"].as<float>();
+            config.cluster_points             = cfg["cluster_points"].as<int>();
+            config.disagreement_ratio         = cfg["disagreement_ratio"].as<float>();
+            config.goal_projection_covariance = Eigen::Vector3f(cfg["goal_projection_covariance"].as<Expression>());
+            config.use_median                 = cfg["use_median"].as<bool>();
+            config.max_goal_distance          = cfg["max_goal_distance"].as<float>();
+            config.debug                      = cfg["debug"].as<bool>();
         });
 
         on<Trigger<GreenHorizon>, With<FieldDescription>, Buffer<2>>().then(
@@ -233,7 +233,7 @@ namespace module::vision {
                             g.measurements.back().measurement =
                                 inverseDistanceCartesianToSpherical(Eigen::Vector3f(g.post.bottom * distance));
 
-                            g.measurements.back().covariance = config.goal_angular_cov.asDiagonal();
+                            g.measurements.back().covariance = config.goal_projection_covariance.asDiagonal();
 
                             // Angular positions from the camera
                             g.screen_angular = cartesianToSpherical(g.post.bottom).tail<2>();
