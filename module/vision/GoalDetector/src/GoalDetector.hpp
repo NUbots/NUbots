@@ -28,7 +28,7 @@ namespace module::vision {
     class GoalDetector : public NUClear::Reactor {
     private:
         struct {
-            float confidence_threshold = 0;
+            float confidence_threshold = 0.0f;
             int cluster_points         = 0;
             float disagreement_ratio   = 0;
             Eigen::Vector3f goal_angular_cov{};
