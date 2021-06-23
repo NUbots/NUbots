@@ -129,7 +129,7 @@ namespace module::behaviour::planning {
                 timeBallLastSeen = NUClear::clock::now();
             }
         });
-
+        // Freq must be equal to or greater than soccer strategy
         on<Every<40, Per<std::chrono::seconds>>,
            With<Ball>,
            With<Field>,
