@@ -124,26 +124,29 @@ namespace module::behaviour::strategy {
         void play(const message::localisation::Field& field,
                   const message::localisation::Ball& ball,
                   const message::support::FieldDescription& fieldDescription,
-                  const message::input::GameState::Data::Mode& mode);
+                  const message::input::GameState::Data::Mode& mode,
+                  const Sensors& sensors);
 
         void penaltyShootout(const message::input::GameState& gameState,
                              message::input::GameState::Data::Phase phase,
                              const message::support::FieldDescription& fieldDescription,
                              const message::localisation::Field& field,
-                             const message::localisation::Ball& ball);
+                             const message::localisation::Ball& ball,
+                             const Sensors& sensors);
 
         void normal(const message::input::GameState& gameState,
                     message::input::GameState::Data::Phase phase,
                     const message::support::FieldDescription& fieldDescription,
                     const message::localisation::Field& field,
                     const message::localisation::Ball& ball,
-                    const message::input::GameState::Data::Mode& mode);
+                    const message::input::GameState::Data::Mode& mode,
+                    const Sensors& sensors);
 
         // PENALTY mode functions
         void penaltyShootoutInitial(){};
         void penaltyShootoutSet();
         void penaltyShootoutReady(){};
-        void penaltyShootoutPlaying();
+        void penaltyShootoutPlaying(const Sensors& sensors);
         void penaltyShootoutFinished(){};
         void penaltyShootoutTimeout(){};
 
@@ -155,7 +158,8 @@ namespace module::behaviour::strategy {
         void normalPlaying(const message::localisation::Field& field,
                            const message::localisation::Ball& ball,
                            const message::support::FieldDescription& fieldDescription,
-                           const message::input::GameState::Data::Mode& mode);
+                           const message::input::GameState::Data::Mode& mode,
+                           const Sensors& sensors);
         void normalFinished();
         void normalTimeout();
 
