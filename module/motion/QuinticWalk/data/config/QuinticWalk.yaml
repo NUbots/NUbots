@@ -1,23 +1,23 @@
 walk:
   # Full walk cycle frequency (how long it takes in seconds for a left + right steps)
   # (in Hz, > 0)
-  freq: 0.7
+  freq: 2
   # Length of double support phase in half cycle (how long both legs should be on the ground, as a ratio of how long it takes for a single step)
   # (ratio, [0:1])
-  double_support_ratio: 0.55
+  double_support_ratio: 0.1
   # Give extra swing to first step for better start
   # (in ?, [0:10])
   first_step_swing_factor: 0.8 #1.0
   foot:
     # Lateral distance between the feet center (how spread apart the feet should be)
     # (in m, >= 0)
-    distance: 0.28 #0.28
+    distance: 0.18 #0.28
     # Maximum flying foot height (how high we lift a foot from the ground)
     # (in m, >= 0)
-    rise: 0.15 #0.1
+    rise: 0.075 #0.1
     # Pause of Z movement on highest point (how long we hold a foot at the top, as a ratio of how long we're standing on one foot)
     # (single support cycle ratio, [0,1])
-    z_pause: 0.08 #0.04
+    z_pause: 0.0 #0.04
     put_down:
       # Let the foot's downward trajectory end above the ground
       # this is helpful if the support leg bends
@@ -93,7 +93,7 @@ walk:
 max_step:
   # Maximal step length in X
   # (in m, [0:1])
-  x: 0.04
+  x: 0.1
   # Maximal step length in Y
   # (in m, [0:1])
   y: 0.04
@@ -122,8 +122,8 @@ gains:
 
 arms:
   right_shoulder_pitch: 1.98
-  left_shoulder_pitch: 2.05
+  left_shoulder_pitch: 1.98
   right_shoulder_roll: -0.176
-  left_shoulder_roll: 0.135
-  right_elbow: -1.57
-  left_elbow: -1.57
+  left_shoulder_roll: 0.176
+  right_elbow: -1
+  left_elbow: -1
