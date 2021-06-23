@@ -102,9 +102,7 @@ namespace module {
                 on<Startup>().then([this]() {
                     // Create a message to request an evaluation of an individual
                     std::unique_ptr<WebotsReady> message = std::make_unique<WebotsReady>();
-                    message->sim_time                    = 0;
-
-                    log<NUClear::INFO>("starting up in 4 seconds");
+                    log<NUClear::INFO>("Starting up in 4 seconds");
                     emit<Scope::DELAY>(message, std::chrono::seconds(4));
                 });
 
@@ -125,7 +123,7 @@ namespace module {
                 });
 
                 on<Trigger<NSGA2FitnessScores>, Single>().then([this](const NSGA2FitnessScores& scores) {
-                    log<NUClear::INFO>("got evaluation fitness scores");
+                    log<NUClear::DEBUG>("Got evaluation fitness scores");
 
                     // An individual has been evaluation and we've got the scores. This updates the
                     // algorithm with the score, and evaluates the next individual.
@@ -150,7 +148,7 @@ namespace module {
                             // Start the next generation (creates the new children for evaluation)
                             nsga2Algorithm.PreEvaluationAdvance();
 
-                            log("advanced to generation", nsga2Algorithm.childPop->generation);
+                            log<NUClear::INFO>("Advanced to new generation", nsga2Algorithm.childPop->generation);
 
                             // Evaluate the first individual in the new generation
                             requestIndEvaluation(0,
@@ -204,7 +202,7 @@ namespace module {
                                 // Start the next generation (creates the new children for evaluation)
                                 nsga2Algorithm.PreEvaluationAdvance();
 
-                                log("advanced to generation", nsga2Algorithm.childPop->generation);
+                                log<NUClear::INFO>("Advanced to new generation", nsga2Algorithm.childPop->generation);
 
                                 // Evaluate the first individual in the new generation
                                 requestIndEvaluation(0,
@@ -215,14 +213,14 @@ namespace module {
                         // Otherwise we have an individual that's out of bounds
                         // TODO: perhaps make the above `else if` an `else`
                         else {
-                            log<NUClear::INFO>("error: individual number out of bounds");
+                            log<NUClear::ERROR>("Individual number out of bounds");
                         }
                     }
                 });
             }
 
             void NSGA2Optimiser::requestIndEvaluation(int _id, int _generation, const std::vector<double>& _reals) {
-                log<NUClear::INFO>("Evaluating generation", _generation, "individual", _id);
+                log<NUClear::INFO>("\n\n\nEvaluating generation", _generation, "individual", _id);
 
                 // Create a message to request an evaluation of an individual
                 std::unique_ptr<NSGA2EvaluationRequest> request = std::make_unique<NSGA2EvaluationRequest>();
