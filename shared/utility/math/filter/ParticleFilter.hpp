@@ -115,7 +115,7 @@ namespace utility::math::filter {
             // If this is not an even division, the last N particles will just be randomly initialised
             const int particles_per_state = n_particles / mean_size;
 
-            for (size_t state = 0; state < mean.size(); ++state) {
+            for (int state = 0; state < int(mean_size); ++state) {
                 const StateMat sqrt_covariance = covariance[state].cwiseSqrt();
 
                 const int start_col = state * particles_per_state;
