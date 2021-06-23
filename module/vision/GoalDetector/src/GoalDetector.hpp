@@ -31,7 +31,7 @@ namespace module::vision {
             float confidence_threshold = 0.0f;
             int cluster_points         = 0;
             float disagreement_ratio   = 0.0f;
-            Eigen::Vector3f goal_angular_cov{};
+            Eigen::Vector3f goal_angular_cov = Eigen::Vector3d::Zero();
             bool use_median         = false;
             float max_goal_distance = 0;
             bool debug              = false;
