@@ -28,13 +28,13 @@ namespace module::vision {
     class BallDetector : public NUClear::Reactor {
     private:
         struct {
-            float confidence_threshold  = 0;
-            int cluster_points          = 0;
-            float minimum_ball_distance = 0;
-            float distance_disagreement = 0;
-            float maximum_deviation     = 0;
+            float confidence_threshold       = 0;
+            int cluster_points               = 0;
+            float minimum_ball_distance      = 0;
+            float distance_disagreement      = 0;
+            float maximum_deviation          = 0;
             Eigen::Vector3f ball_angular_cov = Eigen::Vector3f::Zero();
-            bool debug = false;
+            bool debug                       = false;
         } config;
 
     public:
