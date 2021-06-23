@@ -71,6 +71,7 @@ namespace module::behaviour::skills {
             LimbID leg = kickCommand.leg;
 
             // Execute the penalty kick if the type is PENALTY
+            // Temporary implementation for WeBots penalty kicks
             if (kickCommand.type == KickCommandType::PENALTY) {
                 emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"KickPenalty.yaml"})));
             }
