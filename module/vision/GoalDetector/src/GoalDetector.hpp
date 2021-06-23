@@ -35,7 +35,7 @@ namespace module::vision {
             bool use_median         = false;
             float max_goal_distance = 0;
             bool debug              = false;
-        } config;
+        } config{};
 
     public:
         /// @brief Called by the powerplant to build and setup the GoalDetector reactor.
