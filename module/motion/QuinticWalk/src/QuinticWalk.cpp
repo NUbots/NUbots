@@ -39,7 +39,7 @@ namespace module::motion {
      * @param cfg A Configuration provided by the Configuration extension
      * @param config The destination configuration that we will write to.
      */
-    static void QuinticWalk::load_quintic_walk(const Configuration& cfg, Config& config) {
+    void QuinticWalk::load_quintic_walk(const Configuration& cfg, Config& config) {
         config.params.freq                          = cfg["walk"]["freq"].as<float>();
         config.params.double_support_ratio          = cfg["walk"]["double_support_ratio"].as<float>();
         config.params.first_step_swing_factor       = cfg["walk"]["first_step_swing_factor"].as<float>();
