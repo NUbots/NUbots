@@ -106,20 +106,24 @@ RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 
 # LLVM and Clang
 COPY usr/local/package/llvm.sh /usr/local/package/llvm.sh
-RUN BUILD_FILE_DIR='llvm' PLATFORM=${platform} /usr/local/package/llvm.sh https://github.com/llvm/llvm-project/archive/llvmorg-11.0.1.tar.gz
+RUN PLATFORM=${platform} /usr/local/package/llvm.sh https://github.com/llvm/llvm-project/archive/llvmorg-11.0.1.tar.gz
 
 # SPIRV LLVM Translator
 RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v11.0.0.tar.gz \
     -DLLVM_INCLUDE_TESTS=OFF
 
 # opencl-clang
+COPY usr/local/bin/llvm-tblgen /usr/local/bin/llvm-tblgen
+COPY usr/local/package/opencl-clang.patch usr/local/package/opencl-clang.patch
 COPY usr/local/package/opencl-clang.sh /usr/local/package/opencl-clang.sh
 RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/archive/v11.0.0.tar.gz
 
-# ncurses - dependency for IGC. Flags are from the arch PKGBUILD for ncurses
-RUN install-from-source https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.2.tar.gz \
-    --with-shared --with-normal --without-debug --without-ada \
-    --enable-widec --enable-pc-files --with-cxx-binding --with-cxx-shared
+# # ncurses - dependency for IGC. Flags are from the arch PKGBUILD for ncurses
+# RUN install-from-source https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.2.tar.gz \
+#     --with-shared --with-normal --without-debug --without-ada \
+#     --enable-widec --enable-pc-files --with-cxx-binding --with-cxx-shared
+
+RUN install-package ncurses
 
 # intel graphics compiler
 COPY usr/local/package/intel-graphics-compiler.sh /usr/local/package/intel-graphics-compiler.sh
