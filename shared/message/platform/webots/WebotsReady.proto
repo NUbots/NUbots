@@ -2,6 +2,4 @@ syntax = "proto3";
 
 package message.platform.webots;
 
-message WebotsReady {
-    double sim_time = 1;
-}
+message WebotsReady {}
