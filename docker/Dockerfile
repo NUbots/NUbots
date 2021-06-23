@@ -106,7 +106,7 @@ RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 
 # LLVM and Clang
 COPY usr/local/package/llvm.sh /usr/local/package/llvm.sh
-RUN PLATFORM=${platform} /usr/local/package/llvm.sh https://github.com/llvm/llvm-project/archive/llvmorg-11.0.1.tar.gz
+RUN BUILD_FILE_DIR='llvm' PLATFORM=${platform} /usr/local/package/llvm.sh https://github.com/llvm/llvm-project/archive/llvmorg-11.0.1.tar.gz
 
 # SPIRV LLVM Translator
 RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v11.0.0.tar.gz \
