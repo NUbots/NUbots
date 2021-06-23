@@ -44,12 +44,11 @@ namespace module {
                     TerminateEvaluation = 2,
 
                     // Internal
-                    TrialSetupDone      = 3,
-                    Fallen              = 4,
-                    StandDone           = 5,
-                    TrialTimeExpired    = 6,
-                    ExpiredTrialInvalid = 7,
-                    FitnessScoresSent   = 8
+                    TrialSetupDone    = 3,
+                    Fallen            = 4,
+                    StandDone         = 5,
+                    TrialTimeExpired  = 6,
+                    FitnessScoresSent = 7
                 };
 
             private:
@@ -62,11 +61,20 @@ namespace module {
                 /// @brief The walk command rotation, read from config
                 double walk_command_rotation = 0.0;
 
+                /// @brief The arm targets during the walk (read from config, used for Stand done detection)
+                double arms_l_shoulder_pitch = 0.0;
+                double arms_r_shoulder_pitch = 0.0;
+                double arms_l_elbow          = 0.0;
+                double arms_r_elbow          = 0.0;
+
                 /// @brief The current simulation time
                 double simTime = 0.0;
 
                 /// @brief Delta between this update and the last update
                 double simTimeDelta = 0.0;
+
+                /// @brief Keep track of when the trial started
+                double trialStartTime = 0.0;
 
                 /// @brief The number of the current generation
                 int generation = 0;
@@ -80,8 +88,6 @@ namespace module {
 
                 /// @brief Keeps track of the last messages we received
                 NSGA2EvaluationRequest lastEvalRequestMsg;
-                NSGA2TrialExpired lastTrialExpiredMsg;
-
 
                 /// @brief Send the evaluated fitness scores
                 /// @param scores The evaluated fitness scores for the current individual (sway, distance travelled)

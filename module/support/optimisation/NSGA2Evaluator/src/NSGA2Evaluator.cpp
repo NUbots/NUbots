@@ -80,10 +80,16 @@ namespace module {
                     walk_command_rotation = config["walk_command"]["rotation"].as<Expression>();
                 });
 
+                // Read the QuinticWalk.yaml config file and set the arm targets
+                on<Configuration>("QuinticWalk.yaml").then([this](const Configuration& walkConfig) {
+                    arms_r_shoulder_pitch = walkConfig["arms"]["right_shoulder_pitch"].as<Expression>();
+                    arms_l_shoulder_pitch = walkConfig["arms"]["left_shoulder_pitch"].as<Expression>();
+                    arms_l_elbow          = walkConfig["arms"]["left_elbow"].as<Expression>();
+                    arms_r_elbow          = walkConfig["arms"]["right_elbow"].as<Expression>();
+                });
+
                 // Handle a state transition event
                 on<Trigger<Event>, Sync<NSGA2Evaluator>>().then([this](const Event& event) {
-                    // log<NUClear::DEBUG>("event", event);
-
                     State oldState = currentState;
                     State newState = HandleTransition(currentState, event);
 
@@ -123,13 +129,21 @@ namespace module {
                             Finished(oldState, event);
                             break;
                         default:
-                            log<NUClear::WARN>("unable to transition to unknown state from", currentState, "on", event);
+                            log<NUClear::WARN>("Unable to transition to unknown state from", currentState, "on", event);
                     }
                 });
 
                 on<Trigger<NSGA2EvaluationRequest>, Single>().then([this](const NSGA2EvaluationRequest& request) {
                     lastEvalRequestMsg = request;
                     emit(std::make_unique<Event>(Event::EvaluateRequest));
+                });
+
+                on<Trigger<NSGA2TrialExpired>, Single>().then([this](const NSGA2TrialExpired& message) {
+                    // Only start terminating gracefully if the trial that just expired is the current one
+                    // (and not previous ones that have terminated early)
+                    if (message.generation == generation && message.individual == individual) {
+                        emit(std::make_unique<Event>(Event::TrialTimeExpired));
+                    }
                 });
 
                 on<Trigger<RawSensorsMsg>, Single>().then([this](const RawSensorsMsg& sensors) {
@@ -140,8 +154,10 @@ namespace module {
                     }
                 });
 
-                on<Trigger<WebotsResetDone>, Single>().then(
-                    [this](const WebotsResetDone&) { emit(std::make_unique<Event>(Event::ResetDone)); });
+                on<Trigger<WebotsResetDone>, Single>().then([this](const WebotsResetDone&) {
+                    log<NUClear::INFO>("Reset done");
+                    emit(std::make_unique<Event>(Event::ResetDone));
+                });
 
                 on<Trigger<WebotsTimeUpdate>, Single>().then([this](const WebotsTimeUpdate& update) {
                     simTimeDelta = update.sim_time - simTime;
@@ -169,39 +185,31 @@ namespace module {
                 if (currentState == State::STANDING || currentState == State::WALKING) {
                     auto accelerometer = sensors.accelerometer;
 
-                    if ((std::abs(accelerometer.x) > 9.2 || std::abs(accelerometer.y) > 9.2)
-                        && std::abs(accelerometer.z) < 0.5) {
-                        log<NUClear::DEBUG>("fallen, stopping WalkCommand, then emitting Fallen");
-
-                        // emit(std::make_unique<MotionCommand>(utility::behaviour::StandStill()));
-
-                        // Send a zero walk command to stop walking
-                        emit(std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(0.0, 0.0, 0.0)));
-
+                    if ((std::fabs(accelerometer.x) > 9.2 || std::fabs(accelerometer.y) > 9.2)
+                        && std::fabs(accelerometer.z) < 0.5) {
+                        log<NUClear::INFO>("Fallen!");
+                        log<NUClear::DEBUG>("acc at fall (x y z):",
+                                            std::fabs(accelerometer.x),
+                                            std::fabs(accelerometer.y),
+                                            std::fabs(accelerometer.z));
                         emit(std::make_unique<Event>(Event::Fallen));
                     }
                 }
             }
 
             void NSGA2Evaluator::CheckForStandDone(const RawSensorsMsg& sensors) {
-                // Where we expect these servos to be when the stand is complete
-                float l_elbow_target          = -1.569;
-                float r_elbow_target          = -1.569;
-                float l_shoulder_pitch_target = 2.0505;
-                float r_shoulder_pitch_target = 1.98;
-
                 // The acceptable error margin for the target positions
                 float epsilon = 0.015;
 
-                bool l_elbow_ok = std::fabs(sensors.servo.l_elbow.present_position - l_elbow_target) < epsilon;
-                bool r_elbow_ok = std::fabs(sensors.servo.r_elbow.present_position - r_elbow_target) < epsilon;
+                bool l_elbow_ok = std::fabs(sensors.servo.l_elbow.present_position - arms_l_elbow) < epsilon;
+                bool r_elbow_ok = std::fabs(sensors.servo.r_elbow.present_position - arms_r_elbow) < epsilon;
                 bool l_shoulder_pitch_ok =
-                    std::fabs(sensors.servo.l_shoulder_pitch.present_position - l_shoulder_pitch_target) < epsilon;
+                    std::fabs(sensors.servo.l_shoulder_pitch.present_position - arms_l_shoulder_pitch) < epsilon;
                 bool r_shoulder_pitch_ok =
-                    std::fabs(sensors.servo.r_shoulder_pitch.present_position - r_shoulder_pitch_target) < epsilon;
+                    std::fabs(sensors.servo.r_shoulder_pitch.present_position - arms_r_shoulder_pitch) < epsilon;
 
                 if (l_elbow_ok && r_elbow_ok && l_shoulder_pitch_ok && r_shoulder_pitch_ok) {
-                    log<NUClear::DEBUG>("stand done!");
+                    log<NUClear::INFO>("Stand done");
                     emit(std::make_unique<Event>(Event::StandDone));
                 }
             }
@@ -252,7 +260,6 @@ namespace module {
                         }
                     case State::TERMINATING_GRACEFULLY:
                         switch (event) {
-                            case Event::ExpiredTrialInvalid: return State::WALKING;
                             case Event::FitnessScoresSent: return State::WAITING_FOR_REQUEST;
                             case Event::TerminateEvaluation: return State::FINISHED;
                             default: return State::UNKNOWN;
@@ -310,11 +317,15 @@ namespace module {
 
             /// @brief Handle the RESETTING_SIMULATION state
             void NSGA2Evaluator::ResettingSimulation(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
-                log<NUClear::DEBUG>("ResettingSimulation: sending message to reset world, resetting local");
+                log<NUClear::DEBUG>("ResettingSimulation");
 
                 // Reset our local state
                 simTimeDelta           = 0.0;
+                trialStartTime         = 0.0;
                 robotDistanceTravelled = 0.0;
+                robotPosition[0]       = 0.0;
+                robotPosition[1]       = 0.0;
+                robotPosition[2]       = 0.0;
 
                 // Tell Webots to reset the world
                 std::unique_ptr<OptimisationCommand> reset = std::make_unique<OptimisationCommand>();
@@ -324,14 +335,24 @@ namespace module {
 
             /// @brief Handle the STANDING state
             void NSGA2Evaluator::Standing(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
-                log<NUClear::DEBUG>("Standing: emitting Stand script");
+                log<NUClear::DEBUG>("Standing");
+
+                // Keep track of when we started the trial
+                trialStartTime = simTime;
 
                 // This skips standing and emits StandDone to start walking, to use the walk's stand instead
                 // Remove and uncomment the block that follows to actually do the stand here.
                 emit(std::make_unique<Event>(Event::StandDone));
 
-                // // Start the stand script if we just finished resetting the world
+                // Start the stand script if we just finished resetting the world
                 // if (event == Event::ResetDone) {
+                //     // Reset our local state now that the webots reset is done
+                //     simTimeDelta           = 0.0;
+                //     trialStartTime         = 0.0;
+                //     robotDistanceTravelled = 0.0;
+                //     robotPosition[0]      = 0.0;
+                //     robotPosition[1]      = 0.0;
+                //     robotPosition[2]      = 0.0;
                 //     emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "Stand.yaml"));
                 // }
             }
@@ -358,14 +379,22 @@ namespace module {
                     message->generation                        = generation;
                     message->individual                        = individual;
 
-                    // Schedule the end of the walk trial after 30 seconds
-                    emit<Scope::DELAY>(message, std::chrono::seconds(30));
+                    // Schedule the end of the walk trial after 40 seconds
+                    emit<Scope::DELAY>(message, std::chrono::seconds(40));
                 }
             }
 
             /// @brief Handle the TERMINATING_EARLY state
             void NSGA2Evaluator::TerminatingEarly(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
                 log<NUClear::DEBUG>("TerminatingEarly");
+
+                bool MAX_TRIAL_DURATION = (30 + 1) * 1000;  // 30 seconds + 1 for overhead
+                double trialDuration    = simTime - trialStartTime;
+
+                log<NUClear::INFO>("Trial ran for", trialDuration);
+
+                // Send a zero walk command to stop walking
+                emit(std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(0.0, 0.0, 0.0)));
 
                 // Calculate and send the fitness scores for a fall since we just fell over
                 std::vector<double> scores = {
@@ -374,8 +403,11 @@ namespace module {
                 };
 
                 std::vector<double> constraints = {
-                    -10.0,  // Punish for falling over: TODO: set based on total time walking
-                    0.0,    // Second constraint unused, fixed to 0
+                    trialDuration - MAX_TRIAL_DURATION,  // Punish for falling over, based on how long the trial took
+                                                         // (more negative is worse)
+                                                         // TODO: should we be punishing the distance walked instead
+                                                         // (since that's what we reward?)
+                    0.0,                                 // Second constraint unused, fixed to 0
                 };
 
                 // Send the fitness scores back to the optimiser
@@ -390,33 +422,32 @@ namespace module {
                                                        NSGA2Evaluator::Event event) {
                 log<NUClear::DEBUG>("TerminatingGracefully");
 
-                // Calculate and emit the fitness scores if the TrialExpired message applies to the current evaluation
-                if (lastTrialExpiredMsg.generation == generation && lastTrialExpiredMsg.individual == individual) {
-                    std::vector<double> scores = {
-                        1,  // Fix the first score as we're trying to optimise only the distance travelled
-                        1.0 / robotDistanceTravelled  // 1/x since the NSGA2 optimiser is a minimiser
-                    };
+                log<NUClear::INFO>("Trial ran for", simTime - trialStartTime);
 
-                    std::vector<double> constraints = {
-                        0,  // Robot didn't fall
-                        0,  // Second constraint unused, fixed to 0
-                    };
+                // Send a zero walk command to stop walking
+                emit(std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(0.0, 0.0, 0.0)));
 
-                    // Send the fitness scores back to the optimiser
-                    SendFitnessScores(scores, constraints);
+                std::vector<double> scores = {
+                    1,  // Fix the first score as we're trying to optimise only the distance travelled
+                    1.0 / robotDistanceTravelled  // 1/x since the NSGA2 optimiser is a minimiser
+                };
 
-                    // Go back to waiting for the next request
-                    emit(std::make_unique<Event>(Event::FitnessScoresSent));
-                }
-                // Otherwise we got a trial expired for a previous evaluation that's no longer relevant. This happens
-                // if a previous trial ended early without the trial timeout completing.
-                else {
-                    emit(std::make_unique<Event>(Event::ExpiredTrialInvalid));
-                }
+                std::vector<double> constraints = {
+                    0,  // Robot didn't fall
+                    0,  // Second constraint unused, fixed to 0
+                };
+
+                // Send the fitness scores back to the optimiser
+                SendFitnessScores(scores, constraints);
+
+                // Go back to waiting for the next request
+                emit(std::make_unique<Event>(Event::FitnessScoresSent));
             }
 
             void NSGA2Evaluator::SendFitnessScores(std::vector<double> scores, std::vector<double> constraints) {
-                log<NUClear::DEBUG>("SendFitnessScores");
+                log<NUClear::INFO>("SendFitnessScores for generation", generation, "individual", individual);
+                log<NUClear::INFO>("    scores:", scores[0], scores[1]);
+                log<NUClear::INFO>("    constraints:", constraints[0], constraints[1]);
 
                 // Create the fitness scores message based on the given results and emit it back to the Optimiser
                 std::unique_ptr<NSGA2FitnessScores> fitnessScores = std::make_unique<NSGA2FitnessScores>();
@@ -428,7 +459,7 @@ namespace module {
             }
 
             void NSGA2Evaluator::Finished(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
-                log<NUClear::DEBUG>("Finished");
+                log<NUClear::INFO>("Finished");
             }
         }  // namespace optimisation
     }      // namespace support
