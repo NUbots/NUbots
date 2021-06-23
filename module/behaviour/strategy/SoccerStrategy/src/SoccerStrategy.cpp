@@ -32,12 +32,14 @@
 #include "message/localisation/ResetRobotHypotheses.hpp"
 #include "message/motion/BodySide.hpp"
 #include "message/motion/GetupCommand.hpp"
+#include "message/motion/KickCommand.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/Ball.hpp"
 #include "message/vision/Goal.hpp"
 
 #include "utility/behaviour/MotionCommand.hpp"
+#include "utility/input/LimbID.hpp"
 #include "utility/math/matrix/transform.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
@@ -68,6 +70,8 @@ namespace module::behaviour::strategy {
     using message::localisation::ResetRobotHypotheses;
     using message::motion::BodySide;
     using message::motion::ExecuteGetup;
+    using message::motion::KickCommandType;
+    using message::motion::KickScriptCommand;
     using message::motion::KillGetup;
     using message::platform::ButtonLeftDown;
     using message::platform::ButtonMiddleDown;
@@ -76,6 +80,7 @@ namespace module::behaviour::strategy {
     using VisionBalls = message::vision::Balls;
     using VisionGoals = message::vision::Goals;
 
+    using utility::input::LimbID;
     using utility::support::Expression;
 
     using utility::support::Expression;
@@ -121,7 +126,7 @@ namespace module::behaviour::strategy {
         });
 
         // TODO: unhack
-        // emit(std::make_unique<KickPlan>(KickPlan(Eigen::Vector2d(4.5, 0.0), KickType::SCRIPTED)));
+        emit(std::make_unique<KickPlan>(KickPlan(Eigen::Vector2d(4.5, 0.0), KickType::SCRIPTED)));
 
 
         // For checking last seen times
@@ -461,15 +466,14 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::penaltyShootoutSet() {
+        emit(std::make_unique<ResetRawSensors>());
         hasKicked = false;
     }
 
     void SoccerStrategy::penaltyShootoutPlaying() {
         if (!hasKicked && team_kicking_off == GameEvents::Context::TEAM) {
             log("kick da ball dood");
-            emit(std::make_unique<MotionCommand>(utility::behaviour::PenaltyKick()));
-            // emit(std::make_unique<MotionCommand>(utility::behaviour::PenaltyKick()));
-            // emit(std::make_unique<ExecuteScriptByName>(0, "KickPenalty.yaml"));
+            emit(std::make_unique<KickScriptCommand>(LimbID::LEFT_LEG, KickCommandType::PENALTY));
             hasKicked = true;
         }
     }
@@ -517,18 +521,20 @@ namespace module::behaviour::strategy {
                 < cfg_.ball_last_seen_max_time) {  // ball has been seen recently
                 find({FieldTarget(FieldTarget::Target::BALL)});
                 walkTo(fieldDescription, FieldTarget::Target::BALL);
+                log("normal playing ball");
             }
             else {  // ball has not been seen recently
                 Eigen::Affine2d position(field.position);
-                if (mode != GameMode::PENALTY_SHOOTOUT
-                    && (position.translation().norm() > 1)) {  // a long way away from centre
+                if (position.translation().norm() > 1) {  // a long way away from centre
                     // walk to centre of field
                     find({FieldTarget(FieldTarget::Target::BALL)});
                     walkTo(fieldDescription, Eigen::Vector2d::Zero());
+                    log("normal playing ball has been seen");
                 }
                 else {
                     find({FieldTarget(FieldTarget::Target::BALL)});
                     walkTo(fieldDescription, FieldTarget::Target::BALL);
+                    log("normal playing else");
                 }
             }
         }
@@ -536,12 +542,14 @@ namespace module::behaviour::strategy {
 
     // FINISHED phase in NORMAL mode
     void SoccerStrategy::normalFinished() {
+        log("normal finished");
         standStill();
         find({FieldTarget(FieldTarget::Target::SELF)});
     }
 
     // TIMEOUT phase in NORMAL mode
     void SoccerStrategy::normalTimeout() {
+        log("normal timeout");
         standStill();
         find({FieldTarget(FieldTarget::Target::SELF)});
     }

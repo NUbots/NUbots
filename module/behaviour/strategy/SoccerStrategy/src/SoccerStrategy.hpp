@@ -140,8 +140,17 @@ namespace module::behaviour::strategy {
                     const message::input::GameState::Data::Mode& mode);
 
         // PENALTY mode functions
+        void penaltyShootoutInitial() {
+            log("shootout initial");
+        };
         void penaltyShootoutSet();
         void penaltyShootoutPlaying();
+        void penaltyShootoutFinished() {
+            log("shootout finished");
+        };
+        void penaltyShootoutTimeout() {
+            log("shootout timeout");
+        };
 
         // NORMAL mode functions
         void normalInitial(const message::support::FieldDescription& fieldDescription);

@@ -161,26 +161,16 @@ namespace module::behaviour::planning {
                          const WantsToKick& wantsTo,
                          const KickPlan& kickPlan,
                          const FieldDescription& fieldDescription) {
-                // if (wantsTo.kick) {
-                //     emit(std::make_unique<StopCommand>(subsumptionId));
-                //     emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "KickPenalty.yaml"));
-                //     emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {1000, 1000}}));
-                //     return;
-                // }
-                log("STAND STILL");
-                // if (latestCommand.type == message::behaviour::MotionCommand::Type::STAND_STILL) {
-                //     log("STAND STILL");
-
-                //     emit(std::make_unique<StopCommand>(subsumptionId));
-                //     // emit(std::make_unique<ActionPriorities>(ActionPriorities { subsumptionId, { 40, 11 }}));
-
-                //     return;
-                // }
-
-                if (latestCommand.type == message::behaviour::MotionCommand::Type::PENALTY_KICK) {
-                    log("KICK PENALTY");
-                    emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "KickPenalty.yaml"));
+                if (wantsTo.kick) {
+                    emit(std::make_unique<StopCommand>(subsumptionId));
                     emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {1000, 1000}}));
+                    return;
+                }
+
+                if (latestCommand.type == message::behaviour::MotionCommand::Type::STAND_STILL) {
+                    log("STAND STILL");
+                    emit(std::make_unique<StopCommand>(subsumptionId));
+                    // emit(std::make_unique<ActionPriorities>(ActionPriorities { subsumptionId, { 40, 11 }}));
                     return;
                 }
 
@@ -293,9 +283,6 @@ namespace module::behaviour::planning {
             // save the plan
             log("motion cmd", cmd.type);
             latestCommand = cmd;
-            if (latestCommand.type == message::behaviour::MotionCommand::Type::PENALTY_KICK) {
-                emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "KickPenalty.yaml"));
-            }
         });
     }
 }  // namespace module::behaviour::planning
