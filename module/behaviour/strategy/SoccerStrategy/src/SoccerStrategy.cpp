@@ -281,10 +281,6 @@ namespace module::behaviour::strategy {
         emit(std::make_unique<MotionCommand>(utility::behaviour::StandStill()));
     }
 
-    void SoccerStrategy::standScript() {
-        emit(std::make_unique<MotionCommand>(utility::behaviour::StandScript()));
-    }
-
     void SoccerStrategy::walkTo(const FieldDescription& fieldDescription, const FieldTarget::Target& target) {
         if (target != FieldTarget::Target::BALL) {
             throw std::runtime_error("SoccerStrategy::walkTo: Only FieldTarget::Target::BALL is supported.");
