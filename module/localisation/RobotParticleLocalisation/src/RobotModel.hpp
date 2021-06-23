@@ -43,6 +43,7 @@ namespace module::localisation {
     using utility::localisation::fieldStateToTransform3D;
     using utility::math::angle::normalizeAngle;
     using utility::math::coordinates::cartesianToSpherical;
+    using utility::math::coordinates::inverseDistanceCartesianToSpherical;
 
     template <typename Scalar>
     class RobotModel {
@@ -97,8 +98,7 @@ namespace module::localisation {
                 const Eigen::Matrix<Scalar, 3, 1> rGCc(Hcf * actual_position);
 
                 // Spherical Coordinates (1/distance, phi, theta)
-                auto measurement = cartesianToSpherical(rGCc);
-                return Eigen::Matrix<Scalar, 3, 1>(Scalar(1) / measurement.x(), measurement.y(), measurement.z());
+                return Eigen::Matrix<Scalar, 3, 1>(inverseDistanceCartesianToSpherical(rGCc));
             }
 
             switch (FieldDescription::GoalpostType::Value(fd.dimensions.goalpost_type)) {

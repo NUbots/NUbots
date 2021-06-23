@@ -46,6 +46,7 @@ namespace module::vision {
     using message::vision::GreenHorizon;
 
     using utility::math::coordinates::cartesianToSpherical;
+    using utility::math::coordinates::inverseDistanceCartesianToSpherical;
     using utility::support::Expression;
 
     GoalDetector::GoalDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -229,9 +230,8 @@ namespace module::vision {
                             g.measurements.back().type = Goal::MeasurementType::CENTRE;
 
                             // Spherical Coordinates (1/distance, phi, theta)
-                            auto measurement = cartesianToSpherical(Eigen::Vector3f(g.post.bottom * distance));
                             g.measurements.back().measurement =
-                                Eigen::Vector3f(1.0f / measurement.x(), measurement.y(), measurement.z());
+                                inverseDistanceCartesianToSpherical(Eigen::Vector3f(g.post.bottom * distance));
 
                             g.measurements.back().covariance = config.goal_angular_cov.asDiagonal();
 
