@@ -56,8 +56,8 @@ namespace utility::math::coordinates {
         const U z = cartesianCoordinates.z();
         Eigen::Matrix<U, 3, 1> result;
 
-        result.x() = std::sqrt(x * x + y * y + z * z);                                                   // r
-        result.y() = std::atan2(y, x);                                                                   // theta
+        result.x() = std::sqrt(x * x + y * y + z * z);                                                     // r
+        result.y() = std::atan2(y, x);                                                                     // theta
         result.z() = (result.x() == static_cast<U>(0)) ? static_cast<U>(0) : std::asin(z / (result.x()));  // phi
 
         return result;
