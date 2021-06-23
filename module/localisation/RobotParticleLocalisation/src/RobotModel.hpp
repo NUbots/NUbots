@@ -81,10 +81,8 @@ namespace module::localisation {
         }
 
         Eigen::Matrix<Scalar, Eigen::Dynamic, 1> predict(const StateVec& state,
-                                                         const Eigen::Matrix<Scalar, 3, 1>& actual_position,
-                                                         const Eigen::Matrix<Scalar, 4, 4>& Hcw,
-                                                         const message::vision::Goal::MeasurementType& type,
-                                                         const message::support::FieldDescription& fd) {
+                                                         const Eigen::Matrix<Scalar, 3, 1>& rGFf,  // true goal position
+                                                         const Eigen::Matrix<Scalar, 4, 4>& Hcw) {
 
             // Create a transform from the field state
             Eigen::Transform<Scalar, 3, Eigen::Affine> Hfw;
@@ -93,36 +91,34 @@ namespace module::localisation {
 
             const Eigen::Transform<Scalar, 3, Eigen::Affine> Hcf(Hcw * Hfw.inverse().matrix());
 
-            if (type == Goal::MeasurementType::CENTRE) {
-                const Eigen::Matrix<Scalar, 3, 1> rGCc(Hcf * actual_position);
-                return cartesianToSpherical(rGCc);
-            }
+            // if (type == Goal::MeasurementType::CENTRE) {
+            const Eigen::Matrix<Scalar, 3, 1> rGCc(Hcf * rGFf);
+            return cartesianToSpherical(rGCc);
+            // }
 
-            switch (FieldDescription::GoalpostType::Value(fd.dimensions.goalpost_type)) {
-                case FieldDescription::GoalpostType::CIRCLE: {
-                    if (type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL) {
-                        const Eigen::Matrix<Scalar, 3, 1> rNCc(
-                            getCylindricalPostCamSpaceNormal(type, actual_position, Hcf, fd));
-                        const Eigen::Matrix<Scalar, 2, 1> angles(
-                            std::atan2(rNCc.y(), rNCc.x()),
-                            std::atan2(rNCc.z(), std::sqrt(rNCc.x() * rNCc.x() + rNCc.y() * rNCc.y())));
-                        return angles;
-                    }
-                    break;
-                }
-                case FieldDescription::GoalpostType::RECTANGLE: {
-                    if (type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL) {
-                        const Eigen::Matrix<Scalar, 3, 1> rNCc(
-                            getSquarePostCamSpaceNormal(type, actual_position, Hcf, fd));
-                        const Eigen::Matrix<Scalar, 2, 1> angles(
-                            std::atan2(rNCc.y(), rNCc.x()),
-                            std::atan2(rNCc.z(), std::sqrt(rNCc.x() * rNCc.x() + rNCc.y() * rNCc.y())));
-                        return angles;
-                    }
-                    break;
-                }
-            }
-            return Eigen::Matrix<Scalar, 2, 1>::Zero();
+            // switch (FieldDescription::GoalpostType::Value(fd.dimensions.goalpost_type)) {
+            //     case FieldDescription::GoalpostType::CIRCLE: {
+            //         if (type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL) {
+            //             const Eigen::Matrix<Scalar, 3, 1> rNCc(getCylindricalPostCamSpaceNormal(type, rGFf, Hcf,
+            //             fd)); const Eigen::Matrix<Scalar, 2, 1> angles(
+            //                 std::atan2(rNCc.y(), rNCc.x()),
+            //                 std::atan2(rNCc.z(), std::sqrt(rNCc.x() * rNCc.x() + rNCc.y() * rNCc.y())));
+            //             return angles;
+            //         }
+            //         break;
+            //     }
+            //     case FieldDescription::GoalpostType::RECTANGLE: {
+            //         if (type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL) {
+            //             const Eigen::Matrix<Scalar, 3, 1> rNCc(getSquarePostCamSpaceNormal(type, rGFf, Hcf, fd));
+            //             const Eigen::Matrix<Scalar, 2, 1> angles(
+            //                 std::atan2(rNCc.y(), rNCc.x()),
+            //                 std::atan2(rNCc.z(), std::sqrt(rNCc.x() * rNCc.x() + rNCc.y() * rNCc.y())));
+            //             return angles;
+            //         }
+            //         break;
+            //     }
+            // }
+            // return Eigen::Matrix<Scalar, 2, 1>::Zero();
         }
 
         StateVec limit(const StateVec& state) {

@@ -210,7 +210,9 @@ namespace module::behaviour::strategy {
                             if (phase == Phase::INITIAL) {
                                 standStill();
                                 find({FieldTarget(FieldTarget::Target::SELF)});
-                                initialLocalisationReset(fieldDescription);
+                                if (currentState != previousState) {
+                                    initialLocalisationReset(fieldDescription);
+                                }
                                 currentState = Behaviour::State::INITIAL;
                             }
                             else if (phase == Phase::READY) {
@@ -227,7 +229,9 @@ namespace module::behaviour::strategy {
                                 standStill();
                                 find({FieldTarget(FieldTarget::Target::BALL)});
                                 if (mode == GameMode::PENALTY_SHOOTOUT) {
-                                    penaltyShootoutLocalisationReset(fieldDescription);
+                                    if (currentState != previousState) {
+                                        penaltyShootoutLocalisationReset(fieldDescription);
+                                    }
                                     emit(std::make_unique<ResetRawSensors>());
                                 }
                                 currentState = Behaviour::State::SET;
@@ -315,65 +319,27 @@ namespace module::behaviour::strategy {
         }
     }
 
-    void SoccerStrategy::initialLocalisationReset(const FieldDescription& fieldDescription) {
-
-        auto reset = std::make_unique<ResetRobotHypotheses>();
-
-        ResetRobotHypotheses::Self leftSide;
-        // Start on goal line
-        leftSide.position =
-            Eigen::Vector2d(-fieldDescription.dimensions.field_length, fieldDescription.dimensions.field_width) * 0.5;
-        leftSide.position_cov = Eigen::Vector2d::Constant(0.01).asDiagonal();
-        leftSide.heading      = 0;
-        leftSide.heading_var  = 0.005;
-
-        reset->hypotheses.push_back(leftSide);
-        ResetRobotHypotheses::Self rightSide;
-        // Start on goal line
-        rightSide.position =
-            Eigen::Vector2d(-fieldDescription.dimensions.field_length, -fieldDescription.dimensions.field_width) * 0.5;
-        rightSide.position_cov = Eigen::Vector2d::Constant(0.01).asDiagonal();
-        rightSide.heading      = 0;
-        rightSide.heading_var  = 0.005;
-
-        reset->hypotheses.push_back(rightSide);
-        emit(std::move(reset));
+    void SoccerStrategy::initialLocalisationReset(const FieldDescription& /*fd*/) {
+        emit(std::make_unique<ResetRobotHypotheses>());
     }
 
-    void SoccerStrategy::penaltyShootoutLocalisationReset(const FieldDescription& /*fieldDescription*/) {
-
+    void SoccerStrategy::penaltyShootoutLocalisationReset(const FieldDescription& fd) {
         auto reset = std::make_unique<ResetRobotHypotheses>();
 
         ResetRobotHypotheses::Self selfSideBaseLine;
-        selfSideBaseLine.position     = Eigen::Vector2d(2.0, 0.0);
+        selfSideBaseLine.position =
+            Eigen::Vector2d((-fd.dimensions.field_length / 2.0) + fd.dimensions.penalty_mark_distance, 0.0);
         selfSideBaseLine.position_cov = Eigen::Vector2d::Constant(0.01).asDiagonal();
-        selfSideBaseLine.heading      = 0;
+        selfSideBaseLine.heading      = -M_PI;
         selfSideBaseLine.heading_var  = 0.005;
+
         reset->hypotheses.push_back(selfSideBaseLine);
 
         emit(std::move(reset));
     }
 
-    void SoccerStrategy::unpenalisedLocalisationReset(const FieldDescription& fieldDescription) {
-
-        auto reset = std::make_unique<ResetRobotHypotheses>();
-        ResetRobotHypotheses::Self left;
-        left.position =
-            Eigen::Vector2d(-fieldDescription.penalty_robot_start, fieldDescription.dimensions.field_width * 0.5);
-        left.position_cov = Eigen::Vector2d(1.0, 0.01).asDiagonal();
-        left.heading      = -M_PI_2;
-        left.heading_var  = 0.005;
-        reset->hypotheses.push_back(left);
-
-        ResetRobotHypotheses::Self right;
-        right.position =
-            Eigen::Vector2d(-fieldDescription.penalty_robot_start, -fieldDescription.dimensions.field_width * 0.5);
-        right.position_cov = Eigen::Vector2d(1.0, 0.01).asDiagonal();
-        right.heading      = M_PI_2;
-        right.heading_var  = 0.005;
-        reset->hypotheses.push_back(right);
-
-        emit(std::move(reset));
+    void SoccerStrategy::unpenalisedLocalisationReset(const FieldDescription& /*fd*/) {
+        emit(std::make_unique<ResetRobotHypotheses>());
     }
 
     void SoccerStrategy::searchWalk() {}
