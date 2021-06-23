@@ -477,7 +477,7 @@ namespace utility::motion::kinematics {
     }
 
     template <typename T, typename Scalar = typename T::Scalar, typename MatrixType = typename T::LinearMatrixType>
-    [[nodiscard]] T calculateGroundSpace(const T& Htf, const T& Hwt) {
+    [[nodiscard]] inline T calculateGroundSpace(const T& Htf, const T& Hwt) {
         // Retrieve rotations needed for creating the space
         // support foot to torso rotation, and world to torso rotation
         const MatrixType Rtf(Htf.rotation());

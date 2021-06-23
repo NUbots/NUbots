@@ -9,7 +9,6 @@
         "ms-python.python",
         "ms-vscode-remote.remote-containers",
         "zxh404.vscode-proto3",
-        "redhat.vscode-yaml",
-        "fleshywaffles.vs-code-clippy"
+        "redhat.vscode-yaml"
     ]
 }

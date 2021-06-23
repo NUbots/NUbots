@@ -44,6 +44,39 @@ namespace module::input {
 
         utility::math::filter::UKF<double, MotionModel> motionFilter{};
 
+        struct FootDownMethod {
+            enum Value { UNKNOWN = 0, Z_HEIGHT = 1, LOAD = 2, FSR = 3 };
+            Value value = Value::UNKNOWN;
+
+            // Constructors
+            FootDownMethod() = default;
+            FootDownMethod(int const& v) : value(static_cast<Value>(v)) {}
+            FootDownMethod(Value const& v) : value(v) {}
+            FootDownMethod(std::string const& str) {
+                // clang-format off
+                        if      (str == "Z_HEIGHT") { value = Value::Z_HEIGHT; }
+                        else if (str == "LOAD") { value = Value::LOAD; }
+                        else if (str == "FSR")  { value = Value::FSR; }
+                        else {
+                            value = Value::UNKNOWN;
+                            throw std::runtime_error("String " + str + " did not match any enum for ServoID");
+                        }
+                // clang-format on
+            }
+
+            // Conversions
+            [[nodiscard]] operator Value() const {
+                return value;
+            }
+            [[nodiscard]] operator std::string() const {
+                switch (value) {
+                    case Value::Z_HEIGHT: return "Z_HEIGHT";
+                    case Value::LOAD: return "VIRTUAL";
+                    case Value::FSR: return "FSR";
+                    default: throw std::runtime_error("enum Method's value is corrupt, unknown value stored");
+                }
+            }
+        };
         struct Config {
             Config() = default;
 
@@ -96,11 +129,31 @@ namespace module::input {
             } buttons{};
 
             struct FootDown {
-                FootDown()               = default;
-                bool fromLoad            = true;
-                float certaintyThreshold = 0.05;
-            } footDown{};
-        } config{};
+                FootDown() = default;
+                FootDown(const FootDownMethod& method, const std::map<FootDownMethod, float>& thresholds) {
+                    set_method(method, thresholds);
+                }
+                void set_method(const FootDownMethod& method, const std::map<FootDownMethod, float>& thresholds) {
+                    if (thresholds.count(method) == 0) {
+                        throw std::runtime_error(fmt::format("Invalid foot down method '{}'", std::string(method)));
+                    }
+                    current_method       = method;
+                    certainty_thresholds = thresholds;
+                }
+                [[nodiscard]] float threshold() const {
+                    return certainty_thresholds.at(current_method);
+                }
+                [[nodiscard]] FootDownMethod method() const {
+                    return current_method;
+                }
+                FootDownMethod current_method                        = FootDownMethod::Z_HEIGHT;
+                std::map<FootDownMethod, float> certainty_thresholds = {
+                    {FootDownMethod::Z_HEIGHT, 0.01f},
+                    {FootDownMethod::LOAD, 0.05f},
+                    {FootDownMethod::FSR, 60.0f},
+                };
+            } footDown;
+        } config;
 
     private:
         // Current state of the button pushes
@@ -116,6 +169,10 @@ namespace module::input {
         std::array<bool, 2> previous_foot_down = {false, false};
         // Foot to world in foot-flat (both feet down) rotation at the timestep with the most recent foot landing
         std::array<Eigen::Affine3d, 2> footlanding_Hwf{};
+
+        // Foot to CoM in torso space
+        std::array<Eigen::Vector3d, 2> rMFt{};
+        Eigen::Vector3d rTWw{};
 
         // Storage for previous gyroscope values
         Eigen::Vector3d theta = Eigen::Vector3d::Zero();

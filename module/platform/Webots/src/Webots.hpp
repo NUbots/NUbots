@@ -141,6 +141,9 @@ namespace module::platform {
         std::map<std::string, CameraContext> camera_context;
         uint32_t num_cameras = 0;
 
+        /// @brief Max FSR sensor value
+        float max_fsr_value = 0;
+
     public:
         /// @brief Called by the powerplant to build and setup the webots reactor
         explicit Webots(std::unique_ptr<NUClear::Environment> environment);
