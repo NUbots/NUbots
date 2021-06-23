@@ -58,7 +58,7 @@ namespace utility::math::coordinates {
 
         result.x() = std::sqrt(x * x + y * y + z * z);                                                   // r
         result.y() = std::atan2(y, x);                                                                   // theta
-        result.x() == static_cast<U>(0) ? result.z() = static_cast<U>(0) : std::asin(z / (result.x()));  // phi
+        result.z() = (result.x() == static_cast<U>(0)) ? static_cast<U>(0) : std::asin(z / (result.x()));  // phi
 
         return result;
     }
