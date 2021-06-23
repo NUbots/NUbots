@@ -964,7 +964,7 @@ TEST_CASE("Test coordinate conversion - Cartesian to spherical.", "[utility][mat
         //***Output table***
         INFO(fmt::format("{:*^50}", "Calculating Spherical coordinates for the origin"));
         INFO(fmt::format("{:-^50}", ""));
-        INFO(fmt::format("Input:\n x = {}\n y = {}\n z = {}", cart_input.x(), cart_input.y(), cart_input.z()));
+        INFO(fmt::format("Input: {}", cart_input.tranpose()));
         INFO(fmt::format("Ext result:\n x = {}\n y = {}\n z = {}",
                          cart_compare.x(),
                          cart_compare.y(),
