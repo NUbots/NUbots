@@ -110,19 +110,19 @@ namespace module::localisation {
                     last_time_update_time = curr_time;
 
                     filter.time(seconds);
-
+                    std::vector<Eigen::Vector3d> points_rLCc{};
+                    std::vector<Eigen::Matrix3d> points_covariance{};
                     for (auto line : lines.lines) {
                         if (line.rLCc.allFinite() && line.covariance.allFinite()) {
-                            filter.measure(Eigen::Vector3d(line.rLCc.cast<double>()),
-                                           Eigen::Matrix3d(line.covariance.cast<double>()),
-                                           lines.Hcw,
-                                           fd,
-                                           config.num_field_line_points);
+                            points_rLCc.emplace_back(line.rLCc);
+                            points_covariance.emplace_back(line.covariance);
                         }
                         else {
                             log("Received non-finite field line measurements from vision. Discarding ...");
                         }
                     }
+
+                    filter.measure(points_rLCc, points_covariance, lines.Hcw, fd, config.num_field_line_points);
                 }
             });
 
