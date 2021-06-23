@@ -61,7 +61,7 @@ namespace utility::math::filter {
             const StateMat sqrt_covariance = covariance.cwiseSqrt();
 
             for (int i = 0; i < n_particles; ++i) {
-                new_particles.col(i) = new_particles.col(i).cwiseProduct(sqrt_covariance.col(0)) + mean;
+                new_particles.col(i) = sqrt_covariance * new_particles.col(i) + mean;
             }
 
             return new_particles;
@@ -88,14 +88,115 @@ namespace utility::math::filter {
             return new_particles;
         }
 
+        ParticleList sample_particles(const std::vector<StateVec>& mean,
+                                      const std::vector<StateMat>& covariance,
+                                      const int& n_particles) {
+            if (mean.size() != covariance.size() || mean.size() == 0) {
+                throw std::runtime_error("ParticleFilter::set_state called with invalid data");
+            }
+
+            if (mean.size() == 1) {
+                return sample_particles(mean[0], covariance[0], n_particles);
+            }
+
+            // Sample single gaussian (represented by a gaussian mixture model of size 1)
+
+            // Implementation based on the work presented in
+            // Conrad Sanderson and Ryan Curtin.
+            // An Open Source C++ Implementation of Multi-Threaded Gaussian Mixture Models, k-Means and
+            // Expectation Maximisation. International Conference on Signal Processing and Communication
+            // Systems, 2017.
+
+            ParticleList new_particles =
+                ParticleList::NullaryExpr(Model::size, n_particles, [&]() { return norm(rng); });
+
+            // We want to evenly distribute the particles across all hypotheses
+            // If this is not an even division, the last N particles will just be randomly initialised
+            const int particles_per_state = n_particles / mean.size();
+
+            for (int state = 0; state < int(mean.size()); ++state) {
+                const StateMat sqrt_covariance = covariance[state].cwiseSqrt();
+
+                const int start_col = state * particles_per_state;
+                for (int i = 0; i < particles_per_state; ++i) {
+                    new_particles.col(start_col + i) = sqrt_covariance * new_particles.col(start_col + i) + mean[state];
+                }
+            }
+
+            return new_particles;
+        }
+
+        ParticleList sample_particles(const std::vector<StateVec>& mean,
+                                      const std::vector<StateVec>& covariance,
+                                      const int& n_particles) {
+            if (mean.size() != covariance.size() || mean.size() == 0) {
+                throw std::runtime_error("ParticleFilter::set_state called with invalid data");
+            }
+
+            if (mean.size() == 1) {
+                return sample_particles(mean[0], covariance[0], n_particles);
+            }
+
+            // Sample single gaussian (represented by a gaussian mixture model of size 1)
+
+            // Implementation based on the work presented in
+            // Conrad Sanderson and Ryan Curtin.
+            // An Open Source C++ Implementation of Multi-Threaded Gaussian Mixture Models, k-Means and
+            // Expectation Maximisation. International Conference on Signal Processing and Communication
+            // Systems, 2017.
+
+            ParticleList new_particles =
+                ParticleList::NullaryExpr(Model::size, n_particles, [&]() { return norm(rng); });
+
+            // We want to evenly distribute the particles across all hypotheses
+            // If this is not an even division, the last N particles will just be randomly initialised
+            const int particles_per_state = n_particles / mean.size();
+
+            for (int state = 0; state < int(mean.size()); ++state) {
+                const StateVec sqrt_covariance = covariance[state].cwiseSqrt();
+
+                const int start_col = state * particles_per_state;
+                for (int i = 0; i < particles_per_state; ++i) {
+                    new_particles.col(start_col + i) =
+                        new_particles.col(start_col + i).cwiseProduct(sqrt_covariance) + mean[state];
+                }
+            }
+
+            return new_particles;
+        }
+
     public:
         ParticleFilter(const StateVec& initial_mean      = StateVec::Zero(),
                        const StateMat& initialCovariance = StateMat::Identity() * 0.1)
             : rng(), norm() {
             set_state(initial_mean, initialCovariance);
         }
+        ParticleFilter(const std::vector<StateVec>& initial_mean, const std::vector<StateMat>& initialCovariance)
+            : rng(), norm() {
+            set_state(initial_mean, initialCovariance);
+        }
 
         void set_state(const StateVec& initial_mean, const StateMat& initialCovariance) {
+            particles =
+                sample_particles(initial_mean, initialCovariance, model.getParticleCount() + model.getRogueCount());
+
+            // Limit the state of each particle to ensure they are still valid
+            for (unsigned int i = 0; i < particles.cols(); i++) {
+                particles.col(i) = model.limit(particles.col(i));
+            }
+        }
+
+        void set_state(const std::vector<StateVec>& initial_mean, const std::vector<StateMat>& initialCovariance) {
+            particles =
+                sample_particles(initial_mean, initialCovariance, model.getParticleCount() + model.getRogueCount());
+
+            // Limit the state of each particle to ensure they are still valid
+            for (unsigned int i = 0; i < particles.cols(); i++) {
+                particles.col(i) = model.limit(particles.col(i));
+            }
+        }
+
+        void set_state(const std::vector<StateVec>& initial_mean, const std::vector<StateVec>& initialCovariance) {
             particles =
                 sample_particles(initial_mean, initialCovariance, model.getParticleCount() + model.getRogueCount());
 
