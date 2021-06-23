@@ -47,7 +47,6 @@
 namespace module::behaviour::planning {
 
     using extension::Configuration;
-    using extension::ExecuteScriptByName;
 
     using message::behaviour::KickPlan;
     using message::behaviour::MotionCommand;
@@ -125,22 +124,6 @@ namespace module::behaviour::planning {
             emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {0, 0}}));
         });
 
-        // on<Trigger<std::vector<Ball>>>().then([this]{
-        //     log("std::vector<Ball>");
-        // });
-        // on<Trigger<std::vector<Self>>>().then([this]{
-        //     log("std::vector<Self>");
-        // });
-        // on<Trigger<KickPlan>>().then([this]{
-        //     log("KickPlan");
-        // });
-        // on<Trigger<WantsToKick>>().then([this]{
-        //     log("WantsToKick");
-        // });
-        // on<Trigger<Sensors>>().then([this]{
-        //     log("Sensors");
-        // });
-
         on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
             if (balls.balls.size() > 0) {
                 timeBallLastSeen = NUClear::clock::now();
@@ -163,20 +146,11 @@ namespace module::behaviour::planning {
                          const FieldDescription& fieldDescription) {
                 if (wantsTo.kick) {
                     emit(std::make_unique<StopCommand>(subsumptionId));
-                    emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {1000, 1000}}));
                     return;
                 }
 
                 if (latestCommand.type == message::behaviour::MotionCommand::Type::STAND_STILL) {
-                    // log("STAND STILL");
                     emit(std::make_unique<StopCommand>(subsumptionId));
-                    return;
-                }
-
-                if (latestCommand.type == message::behaviour::MotionCommand::Type::STAND_SCRIPT) {
-                    // log("STAND SCRIPT");
-                    emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "Stand.yaml"));
-                    emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {45, 15}}));
                     return;
                 }
 
