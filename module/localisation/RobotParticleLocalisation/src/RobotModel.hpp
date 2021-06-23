@@ -136,20 +136,32 @@ namespace module::localisation {
             std::uniform_real_distribution<Scalar> dis(-fd.dimensions.line_width * Scalar(0.5),
                                                        fd.dimensions.line_width * Scalar(0.5));
 
+            // Cache needed field dimension to improve readability
+            const Scalar field_length           = fd.dimensions.field_length;
+            const Scalar field_width            = fd.dimensions.field_width;
+            const Scalar half_field_length      = fd.dimensions.field_length * Scalar(0.5);
+            const Scalar half_field_width       = fd.dimensions.field_width * Scalar(0.5);
+            const Scalar line_width             = fd.dimensions.line_width;
+            const Scalar goal_length            = fd.dimensions.goal_area_length;
+            const Scalar goal_width             = fd.dimensions.goal_area_width;
+            const Scalar penalty_length         = fd.dimensions.penalty_area_length;
+            const Scalar penalty_width          = fd.dimensions.penalty_area_width;
+            const Scalar penalty_mark           = fd.dimensions.penalty_mark_distance;
+            const Scalar center_circle_diameter = fd.dimensions.center_circle_diameter;
+
             // Total length of all field lines on the field in metres
-            const Scalar field_line_length =
-                fd.dimensions.field_length * 2        // Left and right lines
-                + fd.dimensions.field_width * 3       // Top, mid-field, and bottom lines
-                + fd.dimensions.line_width * 10       // Top and bottom penalty marks
-                + fd.dimensions.line_width * 2        // Center mark
-                + fd.dimensions.goal_area_length * 4  // Top and bottom goal areas
-                + fd.dimensions.goal_area_width * 2
-                + fd.dimensions.penalty_area_length * 4  // Top and bottom penalty areas
-                + fd.dimensions.penalty_area_width * 2
-                + fd.dimensions.center_circle_diameter * M_PI;  // Center circle circumference
+            const Scalar field_line_length = field_length * 2                       // Left and right lines
+                                             + field_width * 3                      // Top, mid-field, and bottom lines
+                                             + line_width * 10                      // Top and bottom penalty marks
+                                             + line_width * 2                       // Center mark
+                                             + goal_length * 4                      // Top and bottom goal areas
+                                             + goal_width * 2 + penalty_length * 4  // Top and bottom penalty areas
+                                             + penalty_width * 2
+                                             + center_circle_diameter * M_PI;  // Center circle circumference
 
             // Number of points to sample per meter
             const Scalar points_per_meter = field_line_length / Scalar(num_field_points);
+            const Scalar meters_per_point = Scalar(num_field_points) / field_line_length;
 
             std::vector<Eigen::Matrix<Scalar, 2, 1>> points;
 
@@ -157,148 +169,123 @@ namespace module::localisation {
             // Top line
             // Bottom line
             // Mid-field line
-            int num_points = fd.dimensions.field_width * points_per_meter;
+            int num_points = field_width * points_per_meter;
             for (int point = 0; point < num_points; ++point) {
                 // Top line
-                points.emplace_back(dis(gen) + fd.dimensions.field_length * Scalar(0.5),
-                                    -fd.dimensions.field_width * Scalar(0.5) + point / points_per_meter);
+                points.emplace_back(dis(gen) + half_field_length, -half_field_width + point * meters_per_point);
                 // Mid-field line
-                points.emplace_back(dis(gen), -fd.dimensions.field_width * Scalar(0.5) + point / points_per_meter);
+                points.emplace_back(dis(gen), -half_field_width + point * meters_per_point);
                 // Bottom line
-                points.emplace_back(dis(gen) - fd.dimensions.field_length * Scalar(0.5),
-                                    -fd.dimensions.field_width * Scalar(0.5) + point / points_per_meter);
+                points.emplace_back(dis(gen) - half_field_length, -half_field_width + point * meters_per_point);
             }
 
             // Left line
             // Right line
-            num_points = fd.dimensions.field_length * points_per_meter;
+            num_points = field_length * points_per_meter;
             for (int point = 0; point < num_points; ++point) {
                 // Left line
-                points.emplace_back(-fd.dimensions.field_length * Scalar(0.5) + point / points_per_meter,
-                                    dis(gen) + fd.dimensions.field_width * Scalar(0.5));
+                points.emplace_back(-half_field_length + point * meters_per_point, dis(gen) + half_field_width);
                 // Right line
-                points.emplace_back(fd.dimensions.field_length * Scalar(0.5) + point / points_per_meter,
-                                    dis(gen) - fd.dimensions.field_width * Scalar(0.5));
+                points.emplace_back(-half_field_length + point * meters_per_point, dis(gen) - half_field_width);
             }
 
             // Center circle
-            num_points = M_PI * fd.dimensions.center_circle_diameter * points_per_meter;
+            num_points = M_PI * center_circle_diameter * points_per_meter;
             for (int point = 0; point < num_points; ++point) {
                 // Calculate point in polar coordinates
                 // Evenly divide the circle into num_points wedges
-                const Scalar radius = dis(gen) + fd.dimensions.center_circle_diameter * Scalar(0.5);
-                const Scalar theta  = 2.0 * M_PI * points / num_points;
+                const Scalar radius = dis(gen) + center_circle_diameter * Scalar(0.5);
+                const Scalar theta  = 2.0 * M_PI * point / num_points;
 
                 // Convert to cartesian coordinates
-                const auto x = radius * std::cos(theta);
-                const auto y = radius * std::sin(theta);
-
-                points.emplace_back(x, y);
+                points.emplace_back(radius * std::cos(theta), radius * std::sin(theta));
             }
 
             // Top penalty mark side to side
             // Bottom penalty mark side to side
-            num_points = fd.dimensions.line_width * 3 * points_per_meter;
+            num_points = line_width * 3 * points_per_meter;
             for (int point = 0; point < num_points; ++point) {
                 // Top mark
-                points.emplace_back(
-                    fd.dimensions.field_length * Scalar(0.5) - fd.dimensions.penalty_mark_distance + dis(gen),
-                    fd.dimensions.line_width * Scalar(0.5) - point / points_per_meter);
+                points.emplace_back(half_field_length - penalty_mark + dis(gen), line_width - point * meters_per_point);
                 // Bottom mark
-                points.emplace_back(
-                    -fd.dimensions.field_length * Scalar(0.5) + fd.dimensions.penalty_mark_distance + dis(gen),
-                    fd.dimensions.line_width * Scalar(0.5) - point / points_per_meter);
+                points.emplace_back(-half_field_length + penalty_mark + dis(gen),
+                                    line_width - point * meters_per_point);
             }
 
             // Top penalty mark end to end
             // Center mark end to end
             // Bottom penalty mark end to end
-            num_points = fd.dimensions.line_width * 3 * points_per_meter;
+            num_points = line_width * 3 * points_per_meter;
             for (int point = 0; point < num_points; ++point) {
                 // Top mark
-                points.emplace_back(fd.dimensions.field_length * Scalar(0.5) - fd.dimensions.penalty_mark_distance
-                                        - fd.dimensions.line_width + point / points_per_meter,
-                                    dis(gen));
+                points.emplace_back(half_field_length - penalty_mark - line_width + point * meters_per_point, dis(gen));
                 // Center mark
-                points.emplace_back(-fd.dimensions.line_width + point / points_per_meter, dis(gen));
+                points.emplace_back(-line_width + point * meters_per_point, dis(gen));
                 // Bottom mark
-                points.emplace_back(-fd.dimensions.field_length * Scalar(0.5) + fd.dimensions.penalty_mark_distance
-                                        - fd.dimensions.line_width + point / points_per_meter,
+                points.emplace_back(-half_field_length + penalty_mark - line_width + point * meters_per_point,
                                     dis(gen));
             }
 
             // Top goal box left and right lines
             // Bottom goal box left and right lines
-            num_points = fd.dimensions.goal_area_length * points_per_meter;
+            num_points = goal_length * points_per_meter;
             for (int point = 0; point < num_points; ++point) {
                 // Top Left line
-                points.emplace_back(fd.dimensions.field_length * Scalar(0.5)
-                                        - fd.dimensions.goal_area_length * point / points_per_meter,
-                                    fd.dimensions.goal_area_width * Scalar(0.5) + dis(gen));
+                points.emplace_back(half_field_length - goal_length * point * meters_per_point,
+                                    goal_width * Scalar(0.5) + dis(gen));
                 // Top Right line
-                points.emplace_back(fd.dimensions.field_length * Scalar(0.5)
-                                        - fd.dimensions.goal_area_length * point / points_per_meter,
-                                    -fd.dimensions.goal_area_width * Scalar(0.5) + dis(gen));
+                points.emplace_back(half_field_length - goal_length * point * meters_per_point,
+                                    -goal_width * Scalar(0.5) + dis(gen));
 
                 // Bottom Left line
-                points.emplace_back(-fd.dimensions.field_length * Scalar(0.5)
-                                        + fd.dimensions.goal_area_length * point / points_per_meter,
-                                    fd.dimensions.goal_area_width * Scalar(0.5) + dis(gen));
+                points.emplace_back(-half_field_length + goal_length * point * meters_per_point,
+                                    goal_width * Scalar(0.5) + dis(gen));
                 // Bottom Right line
-                points.emplace_back(-fd.dimensions.field_length * Scalar(0.5)
-                                        + fd.dimensions.goal_area_length * point / points_per_meter,
-                                    -fd.dimensions.goal_area_width * Scalar(0.5) + dis(gen));
+                points.emplace_back(-half_field_length + goal_length * point * meters_per_point,
+                                    -goal_width * Scalar(0.5) + dis(gen));
             }
 
             // Top goal box top/bottom lines
             // Bottom goal box top/bottom lines
-            num_points = fd.dimensions.goal_area_width * points_per_meter;
+            num_points = goal_width * points_per_meter;
             for (int point = 0; point < num_points; ++point) {
                 // Top line
-                points.emplace_back(
-                    fd.dimensions.field_length * Scalar(0.5) - fd.dimensions.goal_area_length + dis(gen),
-                    -fd.dimensions.goal_area_width * Scalar(0.5) * point / points_per_meter);
+                points.emplace_back(half_field_length - goal_length + dis(gen),
+                                    -goal_width * Scalar(0.5) + point * meters_per_point);
                 // Bottom line
-                points.emplace_back(
-                    -fd.dimensions.field_length * Scalar(0.5) + fd.dimensions.goal_area_length + dis(gen),
-                    -fd.dimensions.goal_area_width * Scalar(0.5) * point / points_per_meter);
+                points.emplace_back(-half_field_length + goal_length + dis(gen),
+                                    -goal_width * Scalar(0.5) + point * meters_per_point);
             }
 
             // Top penalty box left and right lines
             // Bottom penalty box left and right lines
-            num_points = fd.dimensions.penalty_area_length * points_per_meter;
+            num_points = penalty_length * points_per_meter;
             for (int point = 0; point < num_points; ++point) {
                 // Top Left line
-                points.emplace_back(fd.dimensions.field_length * Scalar(0.5)
-                                        - fd.dimensions.penalty_area_length * point / points_per_meter,
-                                    fd.dimensions.penalty_area_width * Scalar(0.5) + dis(gen));
+                points.emplace_back(half_field_length - penalty_length + point * meters_per_point,
+                                    penalty_width * Scalar(0.5) + dis(gen));
                 // Top Right line
-                points.emplace_back(fd.dimensions.field_length * Scalar(0.5)
-                                        - fd.dimensions.penalty_area_length * point / points_per_meter,
-                                    -fd.dimensions.penalty_area_width * Scalar(0.5) + dis(gen));
+                points.emplace_back(half_field_length - penalty_length + point * meters_per_point,
+                                    -penalty_width * Scalar(0.5) + dis(gen));
 
                 // Bottom Left line
-                points.emplace_back(-fd.dimensions.field_length * Scalar(0.5)
-                                        + fd.dimensions.penalty_area_length * point / points_per_meter,
-                                    fd.dimensions.penalty_area_width * Scalar(0.5) + dis(gen));
+                points.emplace_back(-half_field_length + point * meters_per_point,
+                                    penalty_width * Scalar(0.5) + dis(gen));
                 // Bottom Right line
-                points.emplace_back(-fd.dimensions.field_length * Scalar(0.5)
-                                        + fd.dimensions.penalty_area_length * point / points_per_meter,
-                                    -fd.dimensions.penalty_area_width * Scalar(0.5) + dis(gen));
+                points.emplace_back(-half_field_length + point * meters_per_point,
+                                    -penalty_width * Scalar(0.5) + dis(gen));
             }
 
             // Top penalty box top/bottom lines
             // Bottom penalty box top/bottom lines
-            num_points = fd.dimensions.penalty_area_width * points_per_meter;
+            num_points = penalty_width * points_per_meter;
             for (int point = 0; point < num_points; ++point) {
                 // Top line
-                points.emplace_back(
-                    fd.dimensions.field_length * Scalar(0.5) - fd.dimensions.penalty_area_length + dis(gen),
-                    -fd.dimensions.penalty_area_width * Scalar(0.5) * point / points_per_meter);
+                points.emplace_back(half_field_length - penalty_length + dis(gen),
+                                    -penalty_width * Scalar(0.5) + point * meters_per_point);
                 // Bottom line
-                points.emplace_back(
-                    -fd.dimensions.field_length * Scalar(0.5) + fd.dimensions.penalty_area_length + dis(gen),
-                    -fd.dimensions.penalty_area_width * Scalar(0.5) * point / points_per_meter);
+                points.emplace_back(-half_field_length + penalty_length + dis(gen),
+                                    -penalty_width * Scalar(0.5) + point * meters_per_point);
             }
 
             // TODO Cull points based on FOV
