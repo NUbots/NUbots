@@ -42,67 +42,100 @@ namespace module::input {
     public:
         explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
 
-        utility::math::filter::UKF<double, MotionModel> motionFilter;
+        utility::math::filter::UKF<double, MotionModel> motionFilter{};
 
+        struct FootDownMethod {
+            enum Value { UNKNOWN = 0, Z_HEIGHT = 1, LOAD = 2, FSR = 3 };
+            Value value = Value::UNKNOWN;
+
+            // Constructors
+            FootDownMethod() = default;
+            FootDownMethod(int const& v) : value(static_cast<Value>(v)) {}
+            FootDownMethod(Value const& v) : value(v) {}
+            FootDownMethod(std::string const& str) {
+                // clang-format off
+                        if      (str == "Z_HEIGHT") { value = Value::Z_HEIGHT; }
+                        else if (str == "LOAD") { value = Value::LOAD; }
+                        else if (str == "FSR")  { value = Value::FSR; }
+                        else {
+                            value = Value::UNKNOWN;
+                            throw std::runtime_error("String " + str + " did not match any enum for ServoID");
+                        }
+                // clang-format on
+            }
+
+            // Conversions
+            [[nodiscard]] operator Value() const {
+                return value;
+            }
+            [[nodiscard]] operator std::string() const {
+                switch (value) {
+                    case Value::Z_HEIGHT: return "Z_HEIGHT";
+                    case Value::LOAD: return "VIRTUAL";
+                    case Value::FSR: return "FSR";
+                    default: throw std::runtime_error("enum Method's value is corrupt, unknown value stored");
+                }
+            }
+        };
         struct Config {
-            Config() : motionFilter(), buttons(), footDown() {}
+            Config() = default;
 
-            bool debug;
+            bool debug = false;
 
             struct MotionFilter {
-                MotionFilter() : velocityDecay(Eigen::Vector3d::Zero()), noise(), initial() {}
+                MotionFilter() = default;
 
-                Eigen::Vector3d velocityDecay;
+                Eigen::Vector3d velocityDecay = Eigen::Vector3d::Zero();
 
                 struct Noise {
-                    Noise() : measurement(), process() {}
+                    Noise() = default;
                     struct Measurement {
-                        Eigen::Matrix3d accelerometer;
-                        Eigen::Matrix3d accelerometerMagnitude;
-                        Eigen::Matrix3d gyroscope;
-                        Eigen::Matrix3d flatFootOdometry;
-                        Eigen::Matrix4d flatFootOrientation;
-                    } measurement;
+                        Eigen::Matrix3d accelerometer          = Eigen::Matrix3d::Zero();
+                        Eigen::Matrix3d accelerometerMagnitude = Eigen::Matrix3d::Zero();
+                        Eigen::Matrix3d gyroscope              = Eigen::Matrix3d::Zero();
+                        Eigen::Matrix3d flatFootOdometry       = Eigen::Matrix3d::Zero();
+                        Eigen::Matrix4d flatFootOrientation    = Eigen::Matrix4d::Zero();
+                    } measurement{};
                     struct Process {
-                        Eigen::Vector3d position;
-                        Eigen::Vector3d velocity;
-                        Eigen::Vector4d rotation;
-                        Eigen::Vector3d rotationalVelocity;
-                        Eigen::Vector3d gyroscopeBias;
-                    } process;
-                } noise;
+                        Eigen::Vector3d position           = Eigen::Vector3d::Zero();
+                        Eigen::Vector3d velocity           = Eigen::Vector3d::Zero();
+                        Eigen::Vector4d rotation           = Eigen::Vector4d::Zero();
+                        Eigen::Vector3d rotationalVelocity = Eigen::Vector3d::Zero();
+                        Eigen::Vector3d gyroscopeBias      = Eigen::Vector3d::Zero();
+                    } process{};
+                } noise{};
                 struct Initial {
-                    Initial() : mean(), covariance() {}
+                    Initial() = default;
                     struct Mean {
-                        Eigen::Vector3d position;
-                        Eigen::Vector3d velocity;
-                        Eigen::Vector4d rotation;
-                        Eigen::Vector3d rotationalVelocity;
-                        Eigen::Vector3d gyroscopeBias;
-                    } mean;
+                        Eigen::Vector3d position           = Eigen::Vector3d::Zero();
+                        Eigen::Vector3d velocity           = Eigen::Vector3d::Zero();
+                        Eigen::Vector4d rotation           = Eigen::Vector4d::Zero();
+                        Eigen::Vector3d rotationalVelocity = Eigen::Vector3d::Zero();
+                        Eigen::Vector3d gyroscopeBias      = Eigen::Vector3d::Zero();
+                    } mean{};
                     struct Covariance {
-                        Eigen::Vector3d position;
-                        Eigen::Vector3d velocity;
-                        Eigen::Vector4d rotation;
-                        Eigen::Vector3d rotationalVelocity;
-                        Eigen::Vector3d gyroscopeBias;
-                    } covariance;
-                } initial;
-            } motionFilter;
+                        Eigen::Vector3d position           = Eigen::Vector3d::Zero();
+                        Eigen::Vector3d velocity           = Eigen::Vector3d::Zero();
+                        Eigen::Vector4d rotation           = Eigen::Vector4d::Zero();
+                        Eigen::Vector3d rotationalVelocity = Eigen::Vector3d::Zero();
+                        Eigen::Vector3d gyroscopeBias      = Eigen::Vector3d::Zero();
+                    } covariance{};
+                } initial{};
+            } motionFilter{};
 
             struct Button {
-                Button() : debounceThreshold(0) {}
-                int debounceThreshold;
-            } buttons;
+                Button()              = default;
+                int debounceThreshold = 0;
+            } buttons{};
 
             struct FootDown {
                 FootDown() = default;
-                FootDown(const std::string& method, const std::map<std::string, float>& thresholds) {
+                FootDown(const FootDownMethod& method, const std::map<FootDownMethod, float>& thresholds) {
                     set_method(method, thresholds);
                 }
-                void set_method(const std::string& method, const std::map<std::string, float>& thresholds) {
+                void set_method(const FootDownMethod& method, const std::map<FootDownMethod, float>& thresholds) {
                     if (thresholds.count(method) == 0) {
-                        throw std::runtime_error(fmt::format("Invalid foot down method '{}'", method));
+                        throw std::runtime_error(fmt::format("Invalid foot down method '{}'", std::string(method)));
                     }
                     current_method       = method;
                     certainty_thresholds = thresholds;
@@ -110,14 +143,14 @@ namespace module::input {
                 [[nodiscard]] float threshold() const {
                     return certainty_thresholds.at(current_method);
                 }
-                [[nodiscard]] std::string method() const {
+                [[nodiscard]] FootDownMethod method() const {
                     return current_method;
                 }
-                std::string current_method                        = "Z_HEIGHT";
-                std::map<std::string, float> certainty_thresholds = {
-                    {"Z_HEIGHT", 0.01f},
-                    {"VIRTUAL", 0.05f},
-                    {"FSR", 60.0f},
+                FootDownMethod current_method                        = FootDownMethod::Z_HEIGHT;
+                std::map<FootDownMethod, float> certainty_thresholds = {
+                    {FootDownMethod::Z_HEIGHT, 0.01f},
+                    {FootDownMethod::LOAD, 0.05f},
+                    {FootDownMethod::FSR, 60.0f},
                 };
             } footDown;
         } config;
@@ -140,21 +173,23 @@ namespace module::input {
         bool middleDown = false;
 
         // Our sensor for foot down
-        VirtualLoadSensor<float> load_sensor;
+        VirtualLoadSensor<float> load_sensor{};
 
-        // Foot to world in foot-flat rotation when the foot landed
+        // This keeps track of whether each sides foot was down in the previous time step
+        // e.g. if right foot down at time t, then at time t+1, previous_foot_down[RightSide] = true
         std::array<bool, 2> previous_foot_down = {false, false};
-        std::array<Eigen::Affine3d, 2> footlanding_Hwf;
+        // Foot to world in foot-flat (both feet down) rotation at the timestep with the most recent foot landing
+        std::array<Eigen::Affine3d, 2> footlanding_Hwf{};
 
         // Foot to CoM in torso space
         std::array<Eigen::Vector3d, 2> rMFt{};
         Eigen::Vector3d rTWw{};
 
         // Storage for previous gyroscope values
-        Eigen::Vector3d theta;
+        Eigen::Vector3d theta = Eigen::Vector3d::Zero();
 
         // Handle for the sensor filter update loop, allows disabling new sensor updates when a reset event occurs
-        ReactionHandle update_loop;
+        ReactionHandle update_loop{};
         std::atomic_bool reset_filter{true};
     };
 }  // namespace module::input
