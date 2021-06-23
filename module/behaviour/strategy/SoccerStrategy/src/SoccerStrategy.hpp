@@ -85,9 +85,11 @@ namespace module::behaviour::strategy {
         message::behaviour::FieldTarget walkTarget;
 
         std::vector<message::behaviour::FieldTarget> lookTarget;
+        const size_t id;
 
         // TODO: remove horrible
         bool isGettingUp                                     = false;
+        bool hasKicked                                       = false;
         bool selfPenalised                                   = false;
         bool manualOrientationReset                          = false;
         double manualOrientation                             = 0.0;
@@ -123,6 +125,22 @@ namespace module::behaviour::strategy {
                   const message::localisation::Ball& ball,
                   const message::support::FieldDescription& fieldDescription,
                   const message::input::GameState::Data::Mode& mode);
+
+        void penaltyShootout(const message::input::GameState& gameState,
+                             message::input::GameState::Data::Phase phase,
+                             const message::support::FieldDescription& fieldDescription,
+                             const message::localisation::Field& field,
+                             const message::localisation::Ball& ball);
+
+        void normal(const message::input::GameState& gameState,
+                    message::input::GameState::Data::Phase phase,
+                    const message::support::FieldDescription& fieldDescription,
+                    const message::localisation::Field& field,
+                    const message::localisation::Ball& ball);
+
+        void penaltyShootoutSet();
+        void penaltyShootoutPlaying();
+
 
     public:
         explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);

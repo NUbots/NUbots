@@ -22,6 +22,7 @@
 #include <Eigen/Geometry>
 
 #include "extension/Configuration.hpp"
+#include "extension/Script.hpp"
 
 #include "message/behaviour/MotionCommand.hpp"
 #include "message/behaviour/Nod.hpp"
@@ -44,6 +45,7 @@
 namespace module::behaviour::strategy {
 
     using extension::Configuration;
+    using extension::ExecuteScriptByName;
 
     using message::behaviour::Behaviour;
     using message::behaviour::FieldTarget;
@@ -81,6 +83,7 @@ namespace module::behaviour::strategy {
     SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
         , cfg_()
+        , id(size_t(this) * size_t(this) - size_t(this))
         , walkTarget()
         , lookTarget()
         , kickType()
@@ -118,56 +121,56 @@ namespace module::behaviour::strategy {
         });
 
         // TODO: unhack
-        emit(std::make_unique<KickPlan>(KickPlan(Eigen::Vector2d(4.5, 0.0), KickType::SCRIPTED)));
+        // emit(std::make_unique<KickPlan>(KickPlan(Eigen::Vector2d(4.5, 0.0), KickType::SCRIPTED)));
 
 
         // For checking last seen times
-        on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
-            if (!balls.balls.empty()) {
-                ballLastMeasured = NUClear::clock::now();
-            }
-        });
+        // on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
+        //     if (!balls.balls.empty()) {
+        //         ballLastMeasured = NUClear::clock::now();
+        //     }
+        // });
 
-        on<Trigger<VisionGoals>>().then([this](const VisionGoals& goals) {
-            if (!goals.goals.empty()) {
-                goalLastMeasured = NUClear::clock::now();
-            }
-        });
+        // on<Trigger<VisionGoals>>().then([this](const VisionGoals& goals) {
+        //     if (!goals.goals.empty()) {
+        //         goalLastMeasured = NUClear::clock::now();
+        //     }
+        // });
 
-        // TODO: remove this horrible code
-        // Check to see if we are currently in the process of getting up.
-        on<Trigger<ExecuteGetup>>().then([this] { isGettingUp = true; });
+        // // TODO: remove this horrible code
+        // // Check to see if we are currently in the process of getting up.
+        // on<Trigger<ExecuteGetup>>().then([this] { isGettingUp = true; });
 
-        // Check to see if we have finished getting up.
-        on<Trigger<KillGetup>>().then([this] { isGettingUp = false; });
+        // // Check to see if we have finished getting up.
+        // on<Trigger<KillGetup>>().then([this] { isGettingUp = false; });
 
-        on<Trigger<Penalisation>>().then([this](const Penalisation& selfPenalisation) {
-            emit(std::make_unique<ResetRawSensors>());
-            if (selfPenalisation.context == GameEvents::Context::SELF) {
-                selfPenalised = true;
-            }
-        });
+        // on<Trigger<Penalisation>>().then([this](const Penalisation& selfPenalisation) {
+        //     emit(std::make_unique<ResetRawSensors>());
+        //     if (selfPenalisation.context == GameEvents::Context::SELF) {
+        //         selfPenalised = true;
+        //     }
+        // });
 
-        on<Trigger<Unpenalisation>, With<FieldDescription>>().then(
-            [this](const Unpenalisation& selfPenalisation, const FieldDescription& fieldDescription) {
-                if (selfPenalisation.context == GameEvents::Context::SELF) {
-                    selfPenalised = false;
+        // on<Trigger<Unpenalisation>, With<FieldDescription>>().then(
+        //     [this](const Unpenalisation& selfPenalisation, const FieldDescription& fieldDescription) {
+        //         if (selfPenalisation.context == GameEvents::Context::SELF) {
+        //             selfPenalised = false;
 
-                    // TODO: isSideChecking = true;
-                    // TODO: only do this once put down
-                    unpenalisedLocalisationReset(fieldDescription);
-                }
-            });
+        //             // TODO: isSideChecking = true;
+        //             // TODO: only do this once put down
+        //             unpenalisedLocalisationReset(fieldDescription);
+        //         }
+        //     });
 
 
-        on<Trigger<ButtonMiddleDown>, Single>().then([this] {
-            log("Middle button pressed!");
-            if (!cfg_.forcePlaying) {
-                log("Force playing started.");
-                emit(std::make_unique<Nod>(true));
-                cfg_.forcePlaying = true;
-            }
-        });
+        // on<Trigger<ButtonMiddleDown>, Single>().then([this] {
+        //     log("Middle button pressed!");
+        //     if (!cfg_.forcePlaying) {
+        //         log("Force playing started.");
+        //         emit(std::make_unique<Nod>(true));
+        //         cfg_.forcePlaying = true;
+        //     }
+        // });
 
         on<Trigger<KickOffTeam>>().then(
             [this](const KickOffTeam& kickOffTeam) { team_kicking_off = kickOffTeam.context; });
@@ -201,96 +204,107 @@ namespace module::behaviour::strategy {
                     // kickType = mode == GameMode::PENALTY_SHOOTOUT || cfg_.alwaysPowerKick ?
                     // KickType::SCRIPTED : KickType::IK_KICK;
 
-                    if (cfg_.forcePlaying) {
-                        play(field, ball, fieldDescription, mode);
-                    }
-                    else if (pickedUp(sensors)) {
-                        // TODO: stand, no moving
-                        standStill();
-                        currentState = Behaviour::State::PICKED_UP;
-                    }
-                    else {
-                        if (mode == GameMode::NORMAL || mode == GameMode::OVERTIME
-                            || mode == GameMode::PENALTY_SHOOTOUT) {
-                            if (phase == Phase::INITIAL) {
-                                standStill();
-                                find({FieldTarget(FieldTarget::Target::SELF)});
-                                initialLocalisationReset(fieldDescription);
-                                currentState = Behaviour::State::INITIAL;
-                            }
-                            else if (phase == Phase::READY) {
-                                if (gameState.data.our_kick_off) {
-                                    walkTo(fieldDescription, cfg_.start_position_offensive);
-                                }
-                                else {
-                                    walkTo(fieldDescription, cfg_.start_position_defensive);
-                                }
-                                find({FieldTarget(FieldTarget::Target::SELF)});
-                                currentState = Behaviour::State::READY;
-                            }
-                            else if (phase == Phase::SET) {
-                                standStill();
-                                find({FieldTarget(FieldTarget::Target::BALL)});
-                                currentState = Behaviour::State::SET;
-                                if (mode == GameMode::PENALTY_SHOOTOUT) {
-                                    if (currentState != previousState) {
-                                        emit(std::make_unique<ResetRawSensors>());
-                                        standStill();
-                                    }
-                                    else {
-                                    }
-                                    penaltyShootoutLocalisationReset(fieldDescription);
-                                }
-                            }
-                            else if (phase == Phase::TIMEOUT) {
-                                standStill();
-                                find({FieldTarget(FieldTarget::Target::SELF)});
-                                currentState = Behaviour::State::TIMEOUT;
-                            }
-                            else if (phase == Phase::FINISHED) {
-                                standStill();
-                                find({FieldTarget(FieldTarget::Target::SELF)});
-                                currentState = Behaviour::State::FINISHED;
-                            }
-                            else if (phase == Phase::PLAYING) {
-                                // We are in the playing state and it is a penalty shoot-out game!
-                                if (mode == GameMode::PENALTY_SHOOTOUT) {
-                                    // Our opponent is kicking!
-                                    if (team_kicking_off == GameEvents::Context::OPPONENT) {
-                                        // Do goalie behaviour
-                                        find({FieldTarget(FieldTarget::Target::BALL)});
-                                        // This is commented out until goalie behaviour is fixed
-                                        // goalieWalk(field, ball);
-                                        currentState = Behaviour::State::GOALIE_WALK;
-                                    }
-                                    // We are kicking!
-                                    else if (team_kicking_off == GameEvents::Context::TEAM) {
-                                        currentState = Behaviour::State::SHOOTOUT;
-                                        // If our state has changed, kick!
-                                        if (currentState != previousState) {
-                                            emit(std::make_unique<MotionCommand>(utility::behaviour::PenaltyKick()));
-                                        }
-                                        // Otherwise we want to finish our kick
-                                        else {
-                                            standStill();
-                                        }
-                                    }
-                                    // Neither team is set as the kick off team, so something is probably wrong.
-                                    else {
-                                        log<NUClear::WARN>("Neither team is kicking in penalty shoot-out.");
-                                    }
-                                }
-                                // It is not a penalty shoot-out game, so just execute the normal play
-                                else {
-                                    play(field, ball, fieldDescription, mode);
-                                }
-                            }
-                        }
+                    switch (mode) {
+                        case GameMode::PENALTY_SHOOTOUT:
+                            penaltyShootout(gameState, phase, fieldDescription, field, ball);
+                            break;
+                        case GameMode::NORMAL: normal(gameState, phase, fieldDescription, field, ball); break;
+                        case GameMode::OVERTIME: normal(gameState, phase, fieldDescription, field, ball); break;
+                        default: log<NUClear::WARN>("Game mode unknown.");
                     }
 
-                    if (currentState != previousState) {
-                        emit(std::make_unique<Behaviour::State>(currentState));
-                    }
+                    // if (cfg_.forcePlaying) {
+                    //     play(field, ball, fieldDescription, mode);
+                    // }
+                    // else if (pickedUp(sensors)) {
+                    //     // TODO: stand, no moving
+                    //     standStill();
+                    //     currentState = Behaviour::State::PICKED_UP;
+                    // }
+                    // else {
+                    //     if (mode == GameMode::NORMAL || mode == GameMode::OVERTIME
+                    //         || mode == GameMode::PENALTY_SHOOTOUT) {
+                    //         if (phase == Phase::INITIAL) {
+                    //             standStill();
+                    //             find({FieldTarget(FieldTarget::Target::SELF)});
+                    //             initialLocalisationReset(fieldDescription);
+                    //             currentState = Behaviour::State::INITIAL;
+                    //         }
+                    //         else if (phase == Phase::READY) {
+                    //             if (gameState.data.our_kick_off) {
+                    //                 walkTo(fieldDescription, cfg_.start_position_offensive);
+                    //             }
+                    //             else {
+                    //                 walkTo(fieldDescription, cfg_.start_position_defensive);
+                    //             }
+                    //             find({FieldTarget(FieldTarget::Target::SELF)});
+                    //             currentState = Behaviour::State::READY;
+                    //         }
+                    //         else if (phase == Phase::SET) {
+                    //             standStill();
+                    //             find({FieldTarget(FieldTarget::Target::BALL)});
+                    //             hasKicked    = false;
+                    //             currentState = Behaviour::State::SET;
+                    //             if (mode == GameMode::PENALTY_SHOOTOUT) {
+                    //                 if (currentState != previousState) {
+                    //                     emit(std::make_unique<ResetRawSensors>());
+                    //                     standStill();
+                    //                 }
+                    //                 else {
+                    //                 }
+                    //                 penaltyShootoutLocalisationReset(fieldDescription);
+                    //             }
+                    //         }
+                    //         else if (phase == Phase::TIMEOUT) {
+                    //             standStill();
+                    //             find({FieldTarget(FieldTarget::Target::SELF)});
+                    //             currentState = Behaviour::State::TIMEOUT;
+                    //         }
+                    //         else if (phase == Phase::FINISHED) {
+                    //             standStill();
+                    //             find({FieldTarget(FieldTarget::Target::SELF)});
+                    //             currentState = Behaviour::State::FINISHED;
+                    //         }
+                    //         else if (phase == Phase::PLAYING) {
+                    //             // We are in the playing state and it is a penalty shoot-out game!
+                    //             if (mode == GameMode::PENALTY_SHOOTOUT) {
+                    //                 // Our opponent is kicking!
+                    //                 if (team_kicking_off == GameEvents::Context::OPPONENT) {
+                    //                     // Do goalie behaviour
+                    //                     find({FieldTarget(FieldTarget::Target::BALL)});
+                    //                     // This is commented out until goalie behaviour is fixed
+                    //                     // goalieWalk(field, ball);
+                    //                     currentState = Behaviour::State::GOALIE_WALK;
+                    //                 }
+                    //                 // We are kicking!
+                    //                 else if (team_kicking_off == GameEvents::Context::TEAM) {
+                    //                     currentState = Behaviour::State::SHOOTOUT;
+                    //                     // If our state has changed, kick!
+                    //                     if (currentState != previousState) {
+                    //                         emit(std::make_unique<MotionCommand>(utility::behaviour::PenaltyKick()));
+                    //                         hasKicked = true;
+                    //                     }
+                    //                     // Otherwise we want to finish our kick
+                    //                     else {
+                    //                         standStill();
+                    //                     }
+                    //                 }
+                    //                 // Neither team is set as the kick off team, so something is probably wrong.
+                    //                 else {
+                    //                     log<NUClear::WARN>("Neither team is kicking in penalty shoot-out.");
+                    //                 }
+                    //             }
+                    //             // It is not a penalty shoot-out game, so just execute the normal play
+                    //             else {
+                    //                 play(field, ball, fieldDescription, mode);
+                    //             }
+                    //         }
+                    //     }
+                    // }
+
+                    // if (currentState != previousState) {
+                    //     emit(std::make_unique<Behaviour::State>(currentState));
+                    // }
                 }
                 catch (std::runtime_error& err) {
                     log(err.what());
@@ -298,11 +312,11 @@ namespace module::behaviour::strategy {
                 }
             });
 
-        on<Trigger<Field>, With<FieldDescription>>().then(
-            [this](const Field& field, const FieldDescription& fieldDescription) {
-                Eigen::Vector2d kickTarget = getKickPlan(field, fieldDescription);
-                emit(std::make_unique<KickPlan>(KickPlan(kickTarget, kickType)));
-            });
+        // on<Trigger<Field>, With<FieldDescription>>().then(
+        //     [this](const Field& field, const FieldDescription& fieldDescription) {
+        //         Eigen::Vector2d kickTarget = getKickPlan(field, fieldDescription);
+        //         emit(std::make_unique<KickPlan>(KickPlan(kickTarget, kickType)));
+        //     });
     }
 
     void SoccerStrategy::play(const Field& field,
@@ -566,4 +580,54 @@ namespace module::behaviour::strategy {
         }
         emit(std::move(motionCommand));
     }
+
+    void SoccerStrategy::penaltyShootout(const message::input::GameState& gameState,
+                                         message::input::GameState::Data::Phase phase,
+                                         const message::support::FieldDescription& fieldDescription,
+                                         const message::localisation::Field& field,
+                                         const message::localisation::Ball& ball) {
+        switch (phase.value) {
+            case Phase::INITIAL: log("penatly,init"); break;
+            case Phase::SET: penaltyShootoutSet(); break;
+            case Phase::FINISHED: log("penatly, finished"); break;
+            case Phase::TIMEOUT: log("penatly, timeout"); break;
+            case Phase::READY: log("penatly, ready"); break;
+            case Phase::PLAYING: penaltyShootoutPlaying(); break;
+            default: log<NUClear::WARN>("penalty Unknown phase.");
+        }
+    }
+
+    void SoccerStrategy::normal(const message::input::GameState& gameState,
+                                message::input::GameState::Data::Phase phase,
+                                const message::support::FieldDescription& fieldDescription,
+                                const message::localisation::Field& field,
+                                const message::localisation::Ball& ball) {
+        switch (phase.value) {
+            case Phase::INITIAL: log("normal,init"); break;
+            case Phase::SET: log("normal, set"); break;
+            case Phase::READY: log("normal, ready"); break;
+            case Phase::PLAYING: log("normal, playing"); break;
+            case Phase::FINISHED: log("normal, finished"); break;
+            case Phase::TIMEOUT: log("normal, timeout"); break;
+            default: log<NUClear::WARN>("penalty Unknown phase.");
+        }
+    }
+
+    void SoccerStrategy::penaltyShootoutSet() {
+        hasKicked = false;
+    }
+
+    void SoccerStrategy::penaltyShootoutPlaying() {
+        if (!hasKicked && team_kicking_off == GameEvents::Context::TEAM) {
+            log("kick da ball dood");
+            emit(std::make_unique<MotionCommand>(utility::behaviour::PenaltyKick()));
+            // emit(std::make_unique<MotionCommand>(utility::behaviour::PenaltyKick()));
+            // emit(std::make_unique<ExecuteScriptByName>(0, "KickPenalty.yaml"));
+            hasKicked = true;
+        }
+        // else {
+        //     standStill();
+        // }
+    }
+
 }  // namespace module::behaviour::strategy
