@@ -118,6 +118,10 @@ namespace module {
                             currentState = newState;
                             TerminatingGracefully(oldState, event);
                             break;
+                        case State::FINISHED:
+                            currentState = newState;
+                            Finished(oldState, event);
+                            break;
                         default:
                             log<NUClear::WARN>("unable to transition to unknown state from", currentState, "on", event);
                     }
@@ -421,6 +425,10 @@ namespace module {
                 fitnessScores->objScore                           = scores;
                 fitnessScores->constraints                        = constraints;
                 emit(fitnessScores);
+            }
+
+            void NSGA2Evaluator::Finished(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
+                log<NUClear::DEBUG>("Finished");
             }
         }  // namespace optimisation
     }      // namespace support

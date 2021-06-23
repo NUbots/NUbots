@@ -124,6 +124,9 @@ namespace module {
 
                 /// @brief Handle the TERMINATING_GRACEFULLY state
                 void TerminatingGracefully(State previousState, Event event);
+
+                /// @brief Handle the FINISHED state
+                void Finished(State previousState, Event event);
             };
 
         }  // namespace optimisation
