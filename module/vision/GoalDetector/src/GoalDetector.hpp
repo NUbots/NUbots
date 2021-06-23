@@ -30,7 +30,7 @@ namespace module::vision {
         struct {
             float confidence_threshold = 0.0f;
             int cluster_points         = 0;
-            float disagreement_ratio   = 0;
+            float disagreement_ratio   = 0.0f;
             Eigen::Vector3f goal_angular_cov{};
             bool use_median         = false;
             float max_goal_distance = 0;
