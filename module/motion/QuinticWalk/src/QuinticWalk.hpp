@@ -52,7 +52,7 @@ namespace module::motion {
             std::vector<std::pair<utility::input::ServoID, float>> arm_positions{};
         } normal_config{}, goalie_config{};
 
-        void load_quintic_walk(const ::extension::Configuration& cfg, Config& config) const;
+        static void load_quintic_walk(const ::extension::Configuration& cfg, Config& config);
 
         Config& current_config = normal_config;
         bool first_config      = true;
