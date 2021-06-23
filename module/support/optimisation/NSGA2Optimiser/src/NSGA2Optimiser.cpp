@@ -222,7 +222,7 @@ namespace module {
             }
 
             void NSGA2Optimiser::requestIndEvaluation(int _id, int _generation, const std::vector<double>& _reals) {
-                log<NUClear::INFO>("Evaluating generation", nsga2Algorithm.parentPop->generation, "individual", _id);
+                log<NUClear::INFO>("Evaluating generation", _generation, "individual", _id);
 
                 // Create a message to request an evaluation of an individual
                 std::unique_ptr<NSGA2EvaluationRequest> request = std::make_unique<NSGA2EvaluationRequest>();
