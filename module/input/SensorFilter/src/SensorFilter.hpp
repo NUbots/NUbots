@@ -65,10 +65,17 @@ namespace module::input {
             }
 
             // Conversions
+<<<<<<< HEAD
             operator Value() const {
                 return value;
             }
             operator std::string() const {
+=======
+            [[nodiscard]] operator Value() const {
+                return value;
+            }
+            [[nodiscard]] operator std::string() const {
+>>>>>>> origin/master
                 switch (value) {
                     case Value::Z_HEIGHT: return "Z_HEIGHT";
                     case Value::LOAD: return "VIRTUAL";

@@ -730,8 +730,12 @@ namespace module::input {
                                                                                               : ServoID::R_ANKLE_ROLL]);
 
                                 // Calculate our current Foot to CoM vector for this foot
+<<<<<<< HEAD
                                 const Eigen::Vector3d current_rMFt =
                                     Htf.translation().head<3>() + sensors->rMTt.head<3>();
+=======
+                                const Eigen::Vector3d current_rMFt = Htf.translation() + sensors->rMTt.head<3>();
+>>>>>>> origin/master
 
                                 // We just put this foot on the ground (i.e. it wasn't on the ground in the last time
                                 // step)
