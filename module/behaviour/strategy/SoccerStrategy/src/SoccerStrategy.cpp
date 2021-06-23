@@ -181,7 +181,6 @@ namespace module::behaviour::strategy {
             [this](const KickOffTeam& kickOffTeam) { team_kicking_off = kickOffTeam.context; });
 
         // Main Loop
-        // TODO: ensure a reasonable state is emitted even if gamecontroller is not running
         on<Every<30, Per<std::chrono::seconds>>,
            With<Sensors>,
            With<GameState>,
@@ -197,14 +196,9 @@ namespace module::behaviour::strategy {
                          const Field& field,
                          const Ball& ball) {
                 try {
-
-                    Behaviour::State previousState = currentState;
-
+                    // Force penalty shootout mode if set in config
                     auto mode = cfg_.forcePenaltyShootout ? GameMode::PENALTY_SHOOTOUT : gameState.data.mode.value;
-
-                    // TODO: fix ik kick
-                    kickType = KickType::SCRIPTED;
-
+                    // Switch gamemode statemachine based on GameController state
                     switch (mode) {
                         case GameMode::PENALTY_SHOOTOUT:
                             penaltyShootout(gameState, phase, fieldDescription, field, ball);
@@ -219,12 +213,6 @@ namespace module::behaviour::strategy {
                     log("Runtime exception.");
                 }
             });
-
-        // on<Trigger<Field>, With<FieldDescription>>().then(
-        //     [this](const Field& field, const FieldDescription& fieldDescription) {
-        //         Eigen::Vector2d kickTarget = getKickPlan(field, fieldDescription);
-        //         emit(std::make_unique<KickPlan>(KickPlan(kickTarget, kickType)));
-        //     });
     }
 
 
@@ -432,22 +420,24 @@ namespace module::behaviour::strategy {
         emit(std::move(motionCommand));
     }
 
+    // ********************PENALTY GAMEMODE STATE MACHINE********************************
     void SoccerStrategy::penaltyShootout(const message::input::GameState& gameState,
                                          message::input::GameState::Data::Phase phase,
                                          const message::support::FieldDescription& fieldDescription,
                                          const message::localisation::Field& field,
                                          const message::localisation::Ball& ball) {
         switch (phase.value) {
-            case Phase::INITIAL: log("penalty,init"); break;        // Happens at beginning
-            case Phase::SET: penaltyShootoutSet(); break;           // Happens on beginning of each kick try
-            case Phase::FINISHED: log("penalty, finished"); break;  // Happens when penalty shootout all ends
-            case Phase::TIMEOUT: log("penalty, timeout"); break;
-            case Phase::READY: log("penalty, ready"); break;       // Should not happen
+            case Phase::INITIAL: penaltyShootoutInitial(); break;    // Happens at beginning
+            case Phase::SET: penaltyShootoutSet(); break;            // Happens on beginning of each kick try
+            case Phase::FINISHED: penaltyShootoutFinished(); break;  // Happens when penalty shootout all ends
+            case Phase::TIMEOUT: penaltyShootoutTimeout(); break;
+            case Phase::READY: penaltyShootoutReady(); break;      // Should not happen
             case Phase::PLAYING: penaltyShootoutPlaying(); break;  // Either kicking or goalie
-            default: log<NUClear::WARN>("penalty Unknown phase.");
+            default: log<NUClear::WARN>("Unknown penalty shootout gamemode phase.");
         }
     }
 
+    // ********************NORMAL GAMEMODE STATE MACHINE********************************
     void SoccerStrategy::normal(const message::input::GameState& gameState,
                                 message::input::GameState::Data::Phase phase,
                                 const message::support::FieldDescription& fieldDescription,
@@ -461,31 +451,26 @@ namespace module::behaviour::strategy {
             case Phase::PLAYING: normalPlaying(field, ball, fieldDescription, mode); break;
             case Phase::FINISHED: normalFinished(); break;
             case Phase::TIMEOUT: normalTimeout(); break;
-            default: log<NUClear::WARN>("penalty Unknown phase.");
+            default: log<NUClear::WARN>("Unknown normal gamemode phase.");
         }
     }
 
+    // ********************PENALTY GAMEMODE STATES********************************
     void SoccerStrategy::penaltyShootoutSet() {
         emit(std::make_unique<ResetRawSensors>());
+        // Reset the has kicked flag between kicks
         hasKicked = false;
     }
 
     void SoccerStrategy::penaltyShootoutPlaying() {
+        // Execute penalty kick script once if we haven't yet and are not goalie
         if (!hasKicked && team_kicking_off == GameEvents::Context::TEAM) {
-            log("kick da ball dood");
             emit(std::make_unique<KickScriptCommand>(LimbID::LEFT_LEG, KickCommandType::PENALTY));
             hasKicked = true;
         }
     }
 
-    // INITIAL state in NORMAL mode
-    void SoccerStrategy::normalInitial(const message::support::FieldDescription& fieldDescription) {
-        // standStill();
-        // find({FieldTarget(FieldTarget::Target::SELF)});
-        // initialLocalisationReset(fieldDescription);
-    }
-
-    // READY state in NORMAL mode
+    // ********************NORMAL GAMEMODE STATES********************************
     void SoccerStrategy::normalReady(const message::input::GameState& gameState,
                                      const message::support::FieldDescription& fieldDescription) {
         if (gameState.data.our_kick_off) {
@@ -497,7 +482,6 @@ namespace module::behaviour::strategy {
         find({FieldTarget(FieldTarget::Target::SELF)});
     }
 
-    // SET state in NORMAL mode
     void SoccerStrategy::normalSet() {
         standStill();
         find({FieldTarget(FieldTarget::Target::BALL)});
@@ -507,7 +491,6 @@ namespace module::behaviour::strategy {
                                        const Ball& ball,
                                        const FieldDescription& fieldDescription,
                                        const GameMode& mode) {
-
         if (penalised() && !cfg_.forcePlaying) {  // penalised
             standStill();
             find({FieldTarget(FieldTarget::Target::SELF)});
@@ -521,7 +504,6 @@ namespace module::behaviour::strategy {
                 < cfg_.ball_last_seen_max_time) {  // ball has been seen recently
                 find({FieldTarget(FieldTarget::Target::BALL)});
                 walkTo(fieldDescription, FieldTarget::Target::BALL);
-                log("normal playing ball");
             }
             else {  // ball has not been seen recently
                 Eigen::Affine2d position(field.position);
@@ -529,27 +511,21 @@ namespace module::behaviour::strategy {
                     // walk to centre of field
                     find({FieldTarget(FieldTarget::Target::BALL)});
                     walkTo(fieldDescription, Eigen::Vector2d::Zero());
-                    log("normal playing ball has been seen");
                 }
                 else {
                     find({FieldTarget(FieldTarget::Target::BALL)});
                     walkTo(fieldDescription, FieldTarget::Target::BALL);
-                    log("normal playing else");
                 }
             }
         }
     }
 
-    // FINISHED phase in NORMAL mode
     void SoccerStrategy::normalFinished() {
-        log("normal finished");
         standStill();
         find({FieldTarget(FieldTarget::Target::SELF)});
     }
 
-    // TIMEOUT phase in NORMAL mode
     void SoccerStrategy::normalTimeout() {
-        log("normal timeout");
         standStill();
         find({FieldTarget(FieldTarget::Target::SELF)});
     }
