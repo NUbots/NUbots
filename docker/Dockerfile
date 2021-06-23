@@ -69,6 +69,10 @@ RUN ln -s /usr/local/bin/install-from-source /usr/local/bin/install-header-from-
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-python-from-source \
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-from-source-with-patches
 
+# Copy a generic llvm-tblgen and clang-tblgen that is used when cross compiling llvm
+COPY usr/local/bin/llvm-tblgen /usr/local/bin/llvm-tblgen
+COPY usr/local/bin/clang-tblgen /usr/local/bin/clang-tblgen
+
 # Generate toolchain files for generic
 COPY usr/local/toolchain/generate_generic_toolchain.py /usr/local/generate_toolchain.py
 RUN python /usr/local/generate_toolchain.py --prefix /usr
@@ -93,12 +97,16 @@ RUN python /usr/local/generate_toolchain.py --prefix /usr/local
 # zlib
 RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 
+# # LLVM and Clang
+# RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-11.0.1.tar.gz \
+#     -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" \
+#     -DLLVM_ENABLE_SPHINX=OFF \
+#     -DLLVM_BUILD_LLVM_DYLIB=ON \
+#     -DLLVM_LINK_LLVM_DYLIB=ON
+
 # LLVM and Clang
-RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-11.0.1.tar.gz \
-    -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" \
-    -DLLVM_ENABLE_SPHINX=OFF \
-    -DLLVM_BUILD_LLVM_DYLIB=ON \
-    -DLLVM_LINK_LLVM_DYLIB=ON
+COPY usr/local/package/llvm.sh /usr/local/package/llvm.sh
+RUN PLATFORM=${platform} /usr/local/package/llvm.sh https://github.com/llvm/llvm-project/archive/llvmorg-11.0.1.tar.gz
 
 # SPIRV LLVM Translator
 RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v11.0.0.tar.gz \
