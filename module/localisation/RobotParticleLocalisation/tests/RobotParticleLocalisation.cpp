@@ -41,6 +41,6 @@ int main() {
     //         truth_readings.emplace_back(truth);
     //     }
     // }
-    ifs.close();
+    // ifs.close();
     return 0;
 }
