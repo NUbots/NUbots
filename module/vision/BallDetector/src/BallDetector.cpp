@@ -158,7 +158,7 @@ namespace module::vision {
 
                         // Spherical Reciprocal Coordinates (1/distance, phi, theta)
                         b.measurements.back().srBCc =
-                            cartesianToReciprocalSpherical(cartesianToSpherical(b.cone.axis * distance));
+                            cartesianToReciprocalSpherical(b.cone.axis * distance);
                         b.measurements.back().covariance = config.ball_angular_cov.asDiagonal();
 
                         // Angular positions from the camera
