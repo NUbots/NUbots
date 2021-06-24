@@ -157,7 +157,7 @@ namespace module::vision {
                         b.measurements.push_back(Ball::Measurement());
 
                         // Spherical Coordinates (1/distance, phi, theta)
-                        b.measurements.back().rBCc =
+                        b.measurements.back().srBCc =
                             cartesianToReciprocalSpherical(cartesianToSpherical(b.cone.axis * distance));
                         b.measurements.back().covariance = config.ball_angular_cov.asDiagonal();
 
@@ -226,8 +226,8 @@ namespace module::vision {
                         // Point on line = camera = Hcw.topRightCorner<3, 1>()
                         Eigen::Affine3f Hcw(horizon.Hcw.cast<float>());
                         const float d = (Hcw.inverse().translation().z() - field.ball_radius) / std::abs(axis.z());
-                        const Eigen::Vector3f rBCc      = axis * d;
-                        const float projection_distance = rBCc.norm();
+                        const Eigen::Vector3f srBCc     = axis * d;
+                        const float projection_distance = srBCc.norm();
                         const float max_distance        = std::max(projection_distance, distance);
 
                         if ((std::abs(projection_distance - distance) / max_distance) > config.distance_disagreement) {
@@ -260,7 +260,7 @@ namespace module::vision {
                         log<NUClear::DEBUG>(fmt::format("radius {}", b.cone.radius));
                         log<NUClear::DEBUG>(fmt::format("Axis {}", b.cone.axis.transpose()));
                         log<NUClear::DEBUG>(
-                            fmt::format("Distance {} - rBCc {}", distance, b.measurements.back().rBCc.transpose()));
+                            fmt::format("Distance {} - srBCc {}", distance, b.measurements.back().srBCc.transpose()));
                         log<NUClear::DEBUG>(fmt::format("screen_angular {} - angular_size {}",
                                                         b.screen_angular.transpose(),
                                                         b.angular_size.transpose()));
