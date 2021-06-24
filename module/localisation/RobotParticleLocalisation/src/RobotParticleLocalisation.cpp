@@ -128,34 +128,26 @@ namespace module::localisation {
                                     const Eigen::Vector3d rGCc_own(Hcf * getFieldPosition(goal_post, fd, 1));
                                     const Eigen::Vector3d rGCc_opp(Hcf * getFieldPosition(goal_post, fd, 0));
 
-
-
-
-
-                                    log(fmt::format("Testing post {}",
-                                                    goal_post.side == Goal::Side::LEFT ? "left" : "Right"));
-                                    log(fmt::format("Candidate own {}", candidate_own));
-                                    log(fmt::format("State {}", state.transpose()));
-                                    log(fmt::format("Hcw {}\n", goals.Hcw));
-                                    log(fmt::format("Actual own post at {}",
-                                                    cartesianToSpherical(rGCc_own).transpose()));
-                                    log(fmt::format("Candidate opp {}", candidate_opp));
-                                    log(fmt::format("Actual opp post at {}",
-                                                    cartesianToSpherical(rGCc_opp).transpose()));
-                                    log(fmt::format("Measured post at {}", m.position.transpose()));
+                                    log<NUClear::DEBUG>(fmt::format("Testing post {}", std::string(goal_post.side)));
+                                    log<NUClear::DEBUG>(fmt::format("Candidate own {}", own_logits));
+                                    log<NUClear::DEBUG>(fmt::format("State {}", state.transpose()));
+                                    log<NUClear::DEBUG>(fmt::format("Hcw {}\n", goals.Hcw));
+                                    log<NUClear::DEBUG>(fmt::format("Actual own post at {}",
+                                                                    cartesianToSpherical(rGCc_own).transpose()));
+                                    log<NUClear::DEBUG>(fmt::format("Candidate opp {}", opp_logits));
+                                    log<NUClear::DEBUG>(fmt::format("Actual opp post at {}",
+                                                                    cartesianToSpherical(rGCc_opp).transpose()));
+                                    log<NUClear::DEBUG>(fmt::format("Measured post at {}", m.position.transpose()));
                                 }
 
                                 filter = candidate_own > candidate_opp ? filter_new_own : filter_new_opp;
                             }
                             else {
-                                log("Received non-finite measurements from vision. Discarding ...");
+                                log<NUClear::WARN>("Received non-finite measurements from vision. Discarding ...");
                             }
                         }
-                    }
-
-                    for (auto goal_post : goals.goals) {
-                        if (goal_post.side == Goal::Side::UNKNOWN_SIDE) {
-                            log<NUClear::INFO>("UNKNOWN_SIDE Goal posts aren't handled yet");
+                        else {
+                            log<NUClear::DEBUG>("UNKNOWN_SIDE Goal posts aren't handled yet. Ignoring ...");
                         }
                     }
                 }
@@ -174,7 +166,6 @@ namespace module::localisation {
                 std::vector<Eigen::Matrix3d> cov;
 
                 const Eigen::Affine3d Htw(sensors.Htw);
-                log("Reset Robot Hypotheses");
                 for (auto& s : locReset.hypotheses) {
 
                     // Calculate the reset state
