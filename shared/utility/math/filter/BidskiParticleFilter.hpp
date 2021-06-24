@@ -27,6 +27,11 @@
 #include <vector>
 
 #include "utility/math/stats/multivariate.hpp"
+#include "utility/math/stats/resample/multinomial.hpp"
+#include "utility/math/stats/resample/resample.hpp"
+#include "utility/math/stats/resample/residual.hpp"
+#include "utility/math/stats/resample/stratified.hpp"
+#include "utility/math/stats/resample/systematic.hpp"
 
 namespace utility::math::filter {
 
@@ -85,62 +90,17 @@ namespace utility::math::filter {
             std::fill(weights.begin(), weights.end(), Scalar(1));
         }
 
-        // Resampling techniques!!!
-        // http://users.isy.liu.se/rt/schon/Publications/HolSG2006.pdf
+        void resample(const Scalar& dt) {
 
-        // void resample(const Scalar& dt) {
-        //     // Create a multivariate normal distribution with zero mean and the model's process noise as the
-        //     covariance MultivariateNormal<Scalar, Model::size> multivariate(model.noise(dt));
-
-        //     // Create a weighted sampler
-        //     std::random_device rd;
-        //     std::mt19937 gen(rd());
-        //     std::discrete_distribution<int> weighted_sample(weights.begin(), weights.end());
-
-        //     // Create a new particle list
-        //     ParticleList resampled_particles(Model::size, particles.cols());
-
-        //     for (int i = 0; i < model.n_particles; ++i) {
-        //         // Randomly select a particle from all particles weighted by the particle weights
-        //         const int sample_idx = weighted_sample(gen);
-
-        //         // Create a new particle by using the selected particle as the mean + value from process noise
-        //         resampled_particles.col(i) = particles.col(sample_idx) + multivariate.sample();
-        //     }
-
-        //     // Get the model to give us some rogue particles
-        //     for (int i = 0; i < model.n_rogues; ++i) {
-        //         resampled_particles.col(model.n_particles + i) = model.get_rogue();
-        //     }
-
-        //     // Update our particles with our resampled particles
-        //     // Limit the state of each particle to ensure they are still valid
-        //     for (int i = 0; i < particles.cols(); i++) {
-        //         particles.col(i) = model.limit(resampled_particles.col(i));
-        //     }
-
-        //     // Reset all weights to 1
-        //     std::fill(weights.begin(), weights.end(), Scalar(1));
-        // }
-
-        void multinomial_resample(const Scalar& dt) {
-            // Create a multivariate normal distribution with zero mean and the model's process noise as the covariance
+            // Make a multivariate normal distribution with zero mean and the model's process noise as the covariance
             MultivariateNormal<Scalar, Model::size> multivariate(model.noise(dt));
 
-            // Create a weighted sampler
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::discrete_distribution<int> weighted_sample(weights.begin(), weights.end());
-
-            // Create a new particle list
+            // Resample the particles
             ParticleList resampled_particles(Model::size, particles.cols());
-
-            for (int i = 0; i < model.n_particles; ++i) {
-                // Randomly select a particle from all particles weighted by the particle weights
-                const int sample_idx = weighted_sample(gen);
-
+            std::vector<int> idx = stats::resample::residual(model.n_particles, weights.begin(), weights.end());
+            for (int i = 0; i < int(idx.size()); ++i) {
                 // Create a new particle by using the selected particle as the mean + value from process noise
-                resampled_particles.col(i) = particles.col(sample_idx) + multivariate.sample();
+                resampled_particles.col(i) = particles.col(idx[i]) + multivariate.sample();
             }
 
             // Get the model to give us some rogue particles
@@ -158,130 +118,12 @@ namespace utility::math::filter {
             std::fill(weights.begin(), weights.end(), Scalar(1));
         }
 
-        void stratified_resample(const Scalar& dt) {
-            // Create a multivariate normal distribution with zero mean and the model's process noise as the covariance
-            MultivariateNormal<Scalar, Model::size> multivariate(model.noise(dt));
-
-            // Normalise the weights
-            ParticleWeights normalised(weights.size(), Scalar(0));
-            const Scalar sum = std::accumulate(weights.begin(), weights.end(), Scalar(0));
-            std::transform(weights.begin(), weights.end(), normalised.begin(), [&](const Scalar& w) {
-                return w / sum;
-            });
-
-            // Make a cumulative sum of the weights
-            ParticleWeights cumsum(weights.size(), Scalar(0));
-            std::partial_sum(normalised.begin(), normalised.end(), cumsum.begin());
-
-            // Create a new particle list
-            ParticleList resampled_particles(Model::size, particles.cols());
-
-            std::random_device rd;   // Will be used to obtain a seed for the random number engine
-            std::mt19937 gen(rd());  // Standard mersenne_twister_engine seeded with rd()
-            std::uniform_real_distribution<Scalar> dis(Scalar(0), Scalar(1));
-
-            for (int i = 0; i < model.n_particles; ++i) {
-                // Pick a random number, uniformly, from [0, 1)
-                // Use this to sample a particle
-                const Scalar sample_weight = dis(gen);
-                const Scalar sample_idx =
-                    std::distance(cumsum.begin(), std::lower_bound(cumsum.begin(), cumsum.end(), sample_weight));
-
-                // Create a new particle by using the selected particle as the mean + value from process noise
-                resampled_particles.col(i) = particles.col(sample_idx) + multivariate.sample();
-            }
-
-            // Get the model to give us some rogue particles
-            for (int i = 0; i < model.n_rogues; ++i) {
-                resampled_particles.col(model.n_particles + i) = model.get_rogue();
-            }
-
-            // Reset all weights to 1
-            std::fill(weights.begin(), weights.end(), Scalar(1));
-        }
-
-        void systematic_resample(const Scalar& dt) {
-            // Create a multivariate normal distribution with zero mean and the model's process noise as the covariance
-            MultivariateNormal<Scalar, Model::size> multivariate(model.noise(dt));
-
-            // Normalise the weights
-            ParticleWeights normalised(weights.size(), Scalar(0));
-            const Scalar sum = std::accumulate(weights.begin(), weights.end(), Scalar(0));
-            std::transform(weights.begin(), weights.end(), normalised.begin(), [&](const Scalar& w) {
-                return w / sum;
-            });
-
-            // Make a cumulative sum of the weights
-            ParticleWeights cumsum(weights.size(), Scalar(0));
-            std::partial_sum(normalised.begin(), normalised.end(), cumsum.begin());
-
-            // Create a new particle list
-            ParticleList resampled_particles(Model::size, particles.cols());
-
-            std::random_device rd;   // Will be used to obtain a seed for the random number engine
-            std::mt19937 gen(rd());  // Standard mersenne_twister_engine seeded with rd()
-            std::uniform_real_distribution<Scalar> dis(Scalar(0), Scalar(1));
-
-            // Guaranteed random. I rolled a dice once
-            const Scalar random_sample = dis(gen);
-
-            for (int i = 0; i < model.n_particles; ++i) {
-                // Pick a random number, uniformly, from [0, 1)
-                // Use this to sample a particle
-                const Scalar sample_weight = (i + random_sample) / particles.cols();
-                const Scalar sample_idx =
-                    std::distance(cumsum.begin(), std::lower_bound(cumsum.begin(), cumsum.end(), sample_weight));
-
-                // Create a new particle by using the selected particle as the mean + value from process noise
-                resampled_particles.col(i) = particles.col(sample_idx) + multivariate.sample();
-            }
-
-            // Get the model to give us some rogue particles
-            for (int i = 0; i < model.n_rogues; ++i) {
-                resampled_particles.col(model.n_particles + i) = model.get_rogue();
-            }
-
-            // Reset all weights to 1
-            std::fill(weights.begin(), weights.end(), Scalar(1));
-        }
-
-        void residual_resample(const Scalar& dt) {
-            // Create a multivariate normal distribution with zero mean and the model's process noise as the covariance
-            MultivariateNormal<Scalar, Model::size> multivariate(model.noise(dt));
-
-            // Normalise the weights
-            ParticleWeights normalised(weights.size(), Scalar(0));
-            const Scalar sum = std::accumulate(weights.begin(), weights.end(), Scalar(0));
-            std::transform(weights.begin(), weights.end(), normalised.begin(), [&](const Scalar& w) {
-                return std::floor(particles.cols() * w / sum);
-            });
-
-            // Create a new particle list
-            ParticleList resampled_particles(Model::size, particles.cols());
-
-            int particle_count = 0;
-            for (int i = 0; i < model.n_particles; ++i) {
-                // Replicate each particle n time
-                for (int n = 0; n < normalised[i]; ++n) {
-                    resampled_particles.col(particle_count + n) = particles.col(i) + multivariate.sample();
-                }
-                particle_count += normalised[i];
-            }
-
-            // Now sample the residual particles
-            int num_residuals = model.n_particles - particle_count;
-
-            // Adjust the weights
-            std::transform(weights.begin(), weights.end(), normalised.begin(), [&](const Scalar& w) {
-                return (particles.cols() * w / sum) - std::floor(particles.cols() * w / sum);
-            });
-        }
-
     public:
         template <typename... Args>
         void time(const Scalar& dt, const Args&... params) {
+
             // Resample our particles
-            systematic_resample(dt);
+            resample(dt);
 
             // For each particle update its state using the time update
             for (int i = 0; i < particles.cols(); ++i) {
