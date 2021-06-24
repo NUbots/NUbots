@@ -129,7 +129,7 @@ namespace module::support::logging {
             }
             if (size >= max_size) {
                 logging_reaction.disable();
-                log(<NUClear::WARN>("Datalogging disabled - Maximum logging amount exceeded.");
+                log<NUClear::WARN>("Datalogging disabled - Maximum logging amount exceeded.");
                 if (log_file.is_open()) {
                     log_file.close();
                 }
