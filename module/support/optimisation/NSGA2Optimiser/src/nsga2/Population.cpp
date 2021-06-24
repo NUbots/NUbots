@@ -179,8 +179,9 @@ namespace nsga2 {
     void Population::Report(std::ostream& os, int generation) const {
         std::vector<Individual>::const_iterator it;
 
+        int counter = 0;
         for (it = inds.begin(); it != inds.end(); it++) {
-            os << generation << "," << it->id << ",";
+            os << generation << "," << counter << ",";
 
             for (int i = 0; i < indConfig.objectives; i++) {
                 os << it->objScore[i] << ",";
@@ -201,6 +202,7 @@ namespace nsga2 {
             }
 
             os << it->constrViolation << "," << it->rank << "," << it->crowdDist << std::endl;
+            counter++; //TODO: propagate ID correctly to reportings
         }
     }
 
