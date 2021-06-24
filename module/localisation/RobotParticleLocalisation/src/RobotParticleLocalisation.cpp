@@ -97,24 +97,25 @@ namespace module::localisation {
                             // TODO remove the repeated measurements
                             const auto& m = goal_post.measurements[0];
 
-                            // Check that the measurement is sane
+                            // Check that the measurement is finite
                             if (m.position.allFinite() && m.covariance.allFinite()) {
+                                // Run a measurement for our own goal post and store how likely the filter thinks this
+                                // is a real measurement
                                 auto filter_new_own = saved_filter;
-
-                                // Make a new candidate for the post
-                                auto candidate_own =
+                                const auto own_logits =
                                     filter_new_own.measure(Eigen::Vector3d(m.position.cast<double>()),
                                                            Eigen::Matrix3d(m.covariance.cast<double>()),
-                                                           getFieldPosition(goal_post, fd, 1),  // Own post
+                                                           getFieldPosition(goal_post, fd, 1),
                                                            goals.Hcw);
 
-                                auto filter_new_opp = saved_filter;
 
-                                // Make a new candidate for the post
-                                auto candidate_opp =
+                                // Run a measurement for the opposition goal post and store how likely the filter thinks
+                                // this is a real measurement
+                                auto filter_new_opp = saved_filter;
+                                const auto opp_logits =
                                     filter_new_opp.measure(Eigen::Vector3d(m.position.cast<double>()),
                                                            Eigen::Matrix3d(m.covariance.cast<double>()),
-                                                           getFieldPosition(goal_post, fd, 0),  // Opp post
+                                                           getFieldPosition(goal_post, fd, 0),
                                                            goals.Hcw);
                                 if (log_level <= NUClear::DEBUG) {
 
@@ -140,7 +141,7 @@ namespace module::localisation {
                                     log<NUClear::DEBUG>(fmt::format("Measured post at {}", m.position.transpose()));
                                 }
 
-                                filter = candidate_own > candidate_opp ? filter_new_own : filter_new_opp;
+                                filter = own_logits > opp_logits ? filter_new_own : filter_new_opp;
                             }
                             else {
                                 log<NUClear::WARN>("Received non-finite measurements from vision. Discarding ...");
