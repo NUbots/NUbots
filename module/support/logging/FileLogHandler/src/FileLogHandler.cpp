@@ -18,7 +18,6 @@ namespace module::support::logging {
 
     FileLogHandler::FileLogHandler(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
-        , mutex()
         , logFileName("/home/nubots/log")
         , logFile(logFileName, std::ios_base::out | std::ios_base::app | std::ios_base::ate) {
 
@@ -43,10 +42,8 @@ namespace module::support::logging {
             }
         });
 
-        on<Trigger<ReactionStatistics>>().then([this](const ReactionStatistics& stats) {
+        on<Trigger<ReactionStatistics>, Sync<FileLogHandler>>().then([this](const ReactionStatistics& stats) {
             if (stats.exception) {
-
-                std::lock_guard<std::mutex> lock(mutex);
 
                 // Get our reactor name
                 std::string reactor = stats.identifier[1];
@@ -89,13 +86,7 @@ namespace module::support::logging {
             }
         });
 
-        on<Trigger<LogMessage>>().then([this](const LogMessage& message) {
-            // We're full TODO(cameron) unbind the reaction
-            if(killed){
-            return;
-            }
-
-            std::lock_guard<std::mutex> lock(mutex);
+        logging_reaction = on<Trigger<LogMessage>, Sync<FileLogHandler>>().then([this](const LogMessage& message) {
 
             // Where this message came from
             std::string source = "";
@@ -129,8 +120,7 @@ namespace module::support::logging {
         });
 
 
-        on<Every<10, Per<std::chrono::seconds>>>().then([this](){
-            std::lock_guard<std::mutex> lock(mutex); //TODO(cameron) SYNC!!!
+        on<Every<10, Per<std::chrono::seconds>>, Sync<FileLogHandler>>().then([this](){
             int size = 0;
             for(auto& f: std::filesystem::recursive_directory_iterator(logFileName.remove_filename())){
                 if(f.is_regular_file()){
@@ -138,9 +128,11 @@ namespace module::support::logging {
                 }
             }
             if(size >= max_size){
-                killed = true;
+                logging_reaction.disable();
                 log("killed datalogging");
-                logFile.close();
+                if(logFile.is_open()){
+                    logFile.close();
+                }
             }
         });
     }

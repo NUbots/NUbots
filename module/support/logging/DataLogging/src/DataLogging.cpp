@@ -26,12 +26,7 @@ namespace module::support::logging {
     DataLogging::DataLogging(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         /// This receives every DataLog message as a Sync operation (one at a time) and writes it to the file
-        on<Trigger<DataLog>, Sync<DataLog>>().then([this](const DataLog& data) {
-        // we're full
-        // TODO unbind reaction instead
-        if(killed){
-            return;
-        }
+        logging_reaction = on<Trigger<DataLog>, Sync<DataLog>>().then([this](const DataLog& data) {
             // NBS File Format
             // Name      | Type               |  Description
             // ------------------------------------------------------------
@@ -173,7 +168,7 @@ namespace module::support::logging {
                 }
             }
             if(size >= config.output.max_size){
-                killed = true;
+                logging_reaction.disabled();
                 log("killed datalogging");
                 encoder->close();
             }

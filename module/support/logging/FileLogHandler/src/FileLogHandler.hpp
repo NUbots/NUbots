@@ -16,13 +16,12 @@ namespace module::support::logging {
         explicit FileLogHandler(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        std::mutex mutex; // TODO(cameron) use proper NUClear stuff
-
         std::filesystem::path logFileName;
         std::ofstream logFile;
         int max_size;
 
-        bool killed = false;
+        /// Holds the reaction so we can disable it when we fill the log folder
+        ReactionHandle logging_reaction;
     };
 }  // namespace module::support::logging
 
