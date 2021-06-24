@@ -158,7 +158,6 @@ namespace module::behaviour::planning {
                     return;
                 }
                 else if (latestCommand.type == message::behaviour::MotionCommand::Type::DIRECT_COMMAND) {
-                    // TO DO, change to Bezier stuff
                     std::unique_ptr<WalkCommand> command =
                         std::make_unique<WalkCommand>(subsumptionId, latestCommand.walk_command);
                     emit(std::move(command));
@@ -168,70 +167,25 @@ namespace module::behaviour::planning {
 
                 Eigen::Affine3d Htw(sensors.Htw);
 
-                auto now = NUClear::clock::now();
-                float timeSinceBallSeen =
-                    std::chrono::duration_cast<std::chrono::nanoseconds>(now - timeBallLastSeen).count()
-                    * (1.0f / std::nano::den);
+                // Get ball position
+                log("ball position x [m]:", ball.position.x());
+                log("ball position y [m]::", ball.position.y());
+                Eigen::Vector3d rBWw(ball.position.x(), ball.position.y(), fieldDescription.ball_radius);
+                // Transform ball position to torso space
+                Eigen::Vector3d rBTt = Htw * rBWw;
+                // Get unit vector to ball in torso space
+                Eigen::Vector3d unit_vector_to_ball = rBTt / rBTt.norm();
+                // Calculate velocity vector to ball by scalling unit vector by forward velocity
+                Eigen::Vector3d velocity_vector = forwardSpeed * unit_vector_to_ball;
+                // Calculate heading angle
+                float heading_angle = std::atan2(position.y(), position.x());
 
-
-                Eigen::Vector3d rBWw_temp(ball.position.x(), ball.position.y(), fieldDescription.ball_radius);
-                rBWw     = timeSinceBallSeen < search_timeout ? rBWw_temp :                         // Place last seen
-                           Htw.inverse().linear().leftCols<1>() + Htw.inverse().translation();  // In front of the robot
-                position = (Htw * rBWw).head<2>();
-
-                // Hack Planner:
-                float headingChange = 0;
-                float sideStep      = 0;
-                float speedFactor   = 1;
-                if (useLocalisation) {
-
-                    // Transform kick target to torso space
-                    Eigen::Affine2d fieldPosition = Eigen::Affine2d(field.position);
-                    Eigen::Affine3d Hfw;
-                    Hfw.translation() =
-                        Eigen::Vector3d(fieldPosition.translation().x(), fieldPosition.translation().y(), 0);
-                    Hfw.linear() = Eigen::AngleAxisd(Eigen::Rotation2Dd(fieldPosition.rotation()).angle(),
-                                                     Eigen::Vector3d::UnitZ())
-                                       .toRotationMatrix();
-
-                    Eigen::Affine3d Htf        = Htw * Hfw.inverse();
-                    Eigen::Vector3d kickTarget = Htf * Eigen::Vector3d(kickPlan.target.x(), kickPlan.target.y(), 0);
-
-                    // //approach point:
-                    Eigen::Vector2d ballToTarget = (kickTarget.head<2>() - position).normalized();
-                    Eigen::Vector2d kick_point   = position - ballToTarget * ball_approach_dist;
-
-                    if (position.norm() > slowdown_distance) {
-                        position = kick_point;
-                    }
-                    else {
-                        speedFactor   = slow_approach_factor;
-                        headingChange = std::atan2(ballToTarget.y(), ballToTarget.x());
-                        sideStep      = 1;
-                    }
-                }
-
-
-                float angle = std::atan2(position.y(), position.x()) + headingChange;
-
-                angle = std::min(turnSpeed, std::max(angle, -turnSpeed));
-
-
-                // Euclidean distance to ball
-                float scaleF            = 2.0 / (1.0 + std::exp(-a * std::fabs(position.x()) + b)) - 1.0;
-                float scaleF2           = angle / M_PI;
-                float finalForwardSpeed = speedFactor * forwardSpeed * scaleF * (1.0 - scaleF2);
-
-                float scaleS         = 2.0 / (1.0 + std::exp(-a * std::fabs(position.y()) + b)) - 1.0;
-                float scaleS2        = angle / M_PI;
-                float finalSideSpeed = -speedFactor * ((0.0 < position.y()) - (position.y() < 0.0)) * sideStep
-                                       * sideSpeed * scaleS * (1.0 - scaleS2);
-
-
-                std::unique_ptr<WalkCommand> command =
-                    std::make_unique<WalkCommand>(subsumptionId,
-                                                  Eigen::Vector3d(finalForwardSpeed, finalSideSpeed, angle));
-
+                std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(
+                    subsumptionId,
+                    Eigen::Vector3d(velocity_vector.x(), velocity_vector.y(), heading_angle));
+                log("x velocity command [m/s]:", velocity_vector.x());
+                log("y velocity command [m/s]:", velocity_vector.y());
+                log("heading angle [rad]:", velocity_vector.y());
                 emit(std::move(command));
                 emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
             });
