@@ -29,7 +29,7 @@ def register(command):
         "--target",
         nargs="?",
         choices=platform.list(),
-        default="generic",
+        default="g4dnxlarge",
         help="The platform to compile for",
     )
 
@@ -203,7 +203,7 @@ def exec_push():
         sys.exit(exit_code)
 
 
-def run(sub_command, roles=None, role=None, target="generic", **kwargs):
+def run(sub_command, roles=None, role=None, target="g4dnxlarge", **kwargs):
     if sub_command == "build":
         exec_build(target, roles)
     elif sub_command == "push":
