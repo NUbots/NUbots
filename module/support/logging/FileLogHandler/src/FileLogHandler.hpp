@@ -5,6 +5,7 @@
 #include <fstream>
 #include <nuclear>
 #include <string>
+#include <limits>
 
 namespace module::support::logging {
 
@@ -15,8 +16,8 @@ namespace module::support::logging {
         explicit FileLogHandler(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        std::filesystem::path logFileName;
-        std::ofstream logFile;
+        std::filesystem::path log_file_name;
+        std::ofstream log_file;
         int max_size;
 
         /// Holds the reaction so we can disable it when we fill the log folder

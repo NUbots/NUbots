@@ -4,6 +4,7 @@
 #include <filesystem>
 #include <fstream>
 #include <nuclear>
+#include <limits>
 
 #include "utility/nbs/Encoder.hpp"
 
@@ -42,12 +43,12 @@ namespace module::support::logging {
                 /// The threshold of bytes where after this we split the file
                 uint64_t split_size{};
 
-                uint64_t max_size{};
+                uint64_t max_size = = std::numeric_limits<int>::max();
             } output;
         } config;
 
         /// Holds the reaction so we can disable it when we fill the log folder
-        ReactionHandle logging_reaction;
+        ReactionHandle logging_reaction{};
 
         /// The file we are outputting to currently
         std::filesystem::path output_file_path{};
