@@ -29,6 +29,7 @@ namespace module::localisation {
     using VisionGoal  = message::vision::Goal;
     using VisionGoals = message::vision::Goals;
 
+    using utility::math::coordinates::cartesianToSpherical;
     using utility::nusight::graph;
     using utility::support::Expression;
 
@@ -92,7 +93,7 @@ namespace module::localisation {
                         for (const auto& m : goal_post.measurements) {
 
                             // Check that the measurement is finite
-                            if (m.position.allFinite() && m.covariance.allFinite()) {
+                            if (m.srGCc.allFinite() && m.covariance.allFinite()) {
                                 if (goal_post.side != VisionGoal::Side::UNKNOWN_SIDE) {
                                     // These are either left or right goal posts
 
@@ -102,7 +103,7 @@ namespace module::localisation {
                                     // this is a real measurement
                                     auto own_filter = filter;
                                     const auto own_logits =
-                                        own_filter.measure(Eigen::Vector3d(m.position.cast<double>()),
+                                        own_filter.measure(Eigen::Vector3d(m.srGCc.cast<double>()),
                                                            Eigen::Matrix3d(m.covariance.cast<double>()),
                                                            getFieldPosition(goal_post.side, fd, true),
                                                            goals.Hcw);
@@ -111,7 +112,7 @@ namespace module::localisation {
                                     // thinks this is a real measurement
                                     auto opp_filter = filter;
                                     const auto opp_logits =
-                                        opp_filter.measure(Eigen::Vector3d(m.position.cast<double>()),
+                                        opp_filter.measure(Eigen::Vector3d(m.srGCc.cast<double>()),
                                                            Eigen::Matrix3d(m.covariance.cast<double>()),
                                                            getFieldPosition(goal_post.side, fd, false),
                                                            goals.Hcw);
@@ -139,7 +140,7 @@ namespace module::localisation {
                                         log<NUClear::DEBUG>(fmt::format("Candidate opp {}", opp_logits));
                                         log<NUClear::DEBUG>(fmt::format("Actual opp post at {}",
                                                                         cartesianToSpherical(rGCc_opp).transpose()));
-                                        log<NUClear::DEBUG>(fmt::format("Measured post at {}", m.position.transpose()));
+                                        log<NUClear::DEBUG>(fmt::format("Measured post at {}", m.srGCc.transpose()));
                                     }
 
                                     filter = own_logits > opp_logits ? own_filter : opp_filter;
@@ -158,7 +159,7 @@ namespace module::localisation {
                                         auto current_filter = filter;
 
                                         const double current_logits =
-                                            current_filter.measure(Eigen::Vector3d(m.position.cast<double>()),
+                                            current_filter.measure(Eigen::Vector3d(m.srGCc.cast<double>()),
                                                                    Eigen::Matrix3d(m.covariance.cast<double>()),
                                                                    getFieldPosition(post.first, fd, post.second),
                                                                    goals.Hcw);

@@ -42,7 +42,7 @@ namespace module::localisation {
     using utility::input::ServoID;
     using utility::localisation::fieldStateToTransform3D;
     using utility::math::angle::normalizeAngle;
-    using utility::math::coordinates::cartesianToSpherical;
+    using utility::math::coordinates::cartesianToReciprocalSpherical;
 
     template <typename Scalar>
     class RobotModel {
@@ -92,7 +92,7 @@ namespace module::localisation {
             const Eigen::Transform<Scalar, 3, Eigen::Affine> Hcf(Hcw * Hfw.inverse().matrix());
 
             const Eigen::Matrix<Scalar, 3, 1> rGCc(Hcf * rGFf);
-            return cartesianToSpherical(rGCc);
+            return cartesianToReciprocalSpherical(rGCc);
         }
 
         StateVec limit(const StateVec& state) {
