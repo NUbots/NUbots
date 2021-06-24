@@ -3,9 +3,9 @@
 
 #include <filesystem>
 #include <fstream>
+#include <limits>
 #include <nuclear>
 #include <string>
-#include <limits>
 
 namespace module::support::logging {
 

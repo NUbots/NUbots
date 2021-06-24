@@ -56,13 +56,13 @@ namespace module::support::logging {
 
                 // Print our exception detals
                 log_file << reactor << " " << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
-                        << Colour::brightred << "Exception:"
-                        << " " << Colour::brightred << utility::support::evil::exception_name << std::endl;
+                         << Colour::brightred << "Exception:"
+                         << " " << Colour::brightred << utility::support::evil::exception_name << std::endl;
 
                 // Print our stack trace
                 for (auto& s : utility::support::evil::stack) {
                     log_file << "\t" << Colour::brightmagenta << s.file << ":" << Colour::brightmagenta << s.lineno
-                            << " " << s.function << std::endl;
+                             << " " << s.function << std::endl;
                 }
 #else
                 try {
@@ -73,14 +73,14 @@ namespace module::support::logging {
                     std::string exceptionName = NUClear::util::demangle(typeid(ex).name());
 
                     log_file << reactor << " " << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
-                            << Colour::brightred << "Exception:"
-                            << " " << Colour::brightred << exceptionName << " " << ex.what() << std::endl;
+                             << Colour::brightred << "Exception:"
+                             << " " << Colour::brightred << exceptionName << " " << ex.what() << std::endl;
                 }
                 // We don't actually want to crash
                 catch (...) {
 
                     log_file << reactor << " " << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
-                            << Colour::brightred << "Exception of unkown type" << std::endl;
+                             << Colour::brightred << "Exception of unkown type" << std::endl;
                 }
 #endif
             }
