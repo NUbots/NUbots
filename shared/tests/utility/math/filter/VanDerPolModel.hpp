@@ -76,6 +76,10 @@ namespace shared::tests {
             return reset_range;
         }
 
+        StateVec get_rogue() const {
+            return reset_range;
+        }
+
         [[nodiscard]] int getParticleCount() const {
             return n_particles;
         }
