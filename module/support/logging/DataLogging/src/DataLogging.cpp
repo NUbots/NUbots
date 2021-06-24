@@ -168,7 +168,7 @@ namespace module::support::logging {
                 }
             }
             if(size >= config.output.max_size){
-                logging_reaction.disabled();
+                logging_reaction.disable();
                 log("killed datalogging");
                 encoder->close();
             }
