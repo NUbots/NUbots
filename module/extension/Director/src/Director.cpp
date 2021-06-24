@@ -201,12 +201,16 @@ namespace module {
 
             // A state that we were monitoring is updated, we might be able to run the reaction now
             on<Trigger<StateUpdate>, Sync<Director>>().then("State Updated", [this](const StateUpdate& update) {
+                // TODO algorithm section
+
                 // Find the reaction that is mentioned in the update
                 // If this new state makes things valid then run the task
             });
 
             // We do things when we receive tasks to run
             on<Trigger<TaskPack>, Sync<Director>>().then("Run Task Pack", [this](const TaskPack& pack) {
+                // TODO algorithm section
+
                 // This is a root task
                 if (reactions.count(pack.requester_id) == 0) {
                     // Root tasks only ever have one task in the pack
@@ -259,15 +263,19 @@ namespace module {
                     //      Enable the ReactionHandle which monitors the when condition for this provider
                     //      Add this task to the queue of tasks to be executed when the provider's conditions are met
                     //
-                    //      See if there is a leaving that provides a casing for our type we can use
-                    //          The algorithm has major a bug here.
-                    //          If the kick engine wants to be "Statically Stable" and the walk engine has a `Leaving`
-                    //          provider that causes this, how does the algorithm know that later down the line the kick
-                    //          engine would take over the walk engines IK controls making it have to stop running
-                    //          running its leaving reaction first. The algorithm might need to have more information
-                    //          provided to it
-                    //      See if there is an entering for this provider that provides the causing and run that
-                    //
+                    //      If: there is an entering for this provider that provides the causing and run that until
+                    //      the causing condition has been met. If at some point while running a decendent of this
+                    //      entering provider we kick off the required child of another provider which has a leaving
+                    //      condition which would also solve our causing problem, then we swap to running that leaving
+                    //      condition instead
+
+                    //      Else: See if there is a leaving for a currently running provider that has a casing for our
+                    //      desired state.
+                    //          We will either run this leaving as our action, or we will will queue for it based on the
+                    //          following state properties:
+                    //              Is it: A sibling of our same root task, A child of a different root task
+                    //              Is it: Optional/Optional Parent in other root task, Optional/Optional Parent current
+                    //              task Is it: Higher priority, Lower priority
 
                     // case Provider is in use by a root task with lower priority than us
                     //      We take control of this provider and put the old task in the queue of tasks to be executed
@@ -275,7 +283,7 @@ namespace module {
                     //
                     //      We traverse up the tree and find the first optional path that we took (first negative
                     //      priority) or the root, and we move all the tasks into the queue of tasks to execute
-                    //      If any of these tasks that we are kicking off have a leaving reaction we  we are done with
+                    //      If any of these tasks that we are kicking off have a leaving reaction we are done with
                     //      this task pack if any of these tasks have an empty leaving reaction we run that to ensure
                     //      that we have a clean exit
                 }
