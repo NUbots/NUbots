@@ -1,11 +1,11 @@
 #include "FileLogHandler.hpp"
 
+#include <filesystem>
+
 #include "extension/Configuration.hpp"
 
 #include "utility/strutil/ansi.hpp"
 #include "utility/support/evil/pure_evil.hpp"
-
-#include <filesystem>
 
 namespace module::support::logging {
 
@@ -87,7 +87,6 @@ namespace module::support::logging {
         });
 
         logging_reaction = on<Trigger<LogMessage>, Sync<FileLogHandler>>().then([this](const LogMessage& message) {
-
             // Where this message came from
             std::string source = "";
 
@@ -120,17 +119,17 @@ namespace module::support::logging {
         });
 
 
-        on<Every<10, Per<std::chrono::seconds>>, Sync<FileLogHandler>>().then([this](){
+        on<Every<10, Per<std::chrono::seconds>>, Sync<FileLogHandler>>().then([this]() {
             int size = 0;
-            for(auto& f: std::filesystem::recursive_directory_iterator(logFileName.remove_filename())){
-                if(f.is_regular_file()){
+            for (auto& f : std::filesystem::recursive_directory_iterator(logFileName.remove_filename())) {
+                if (f.is_regular_file()) {
                     size += f.file_size();
                 }
             }
-            if(size >= max_size){
+            if (size >= max_size) {
                 logging_reaction.disable();
                 log("killed datalogging");
-                if(logFile.is_open()){
+                if (logFile.is_open()) {
                     logFile.close();
                 }
             }

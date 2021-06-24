@@ -1,8 +1,8 @@
 #ifndef MODULE_SUPPORT_LOGGING_FILELOGHANDLER_HPP
 #define MODULE_SUPPORT_LOGGING_FILELOGHANDLER_HPP
 
-#include <fstream>
 #include <filesystem>
+#include <fstream>
 #include <nuclear>
 #include <string>
 

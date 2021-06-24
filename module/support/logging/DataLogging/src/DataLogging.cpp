@@ -116,7 +116,7 @@ namespace module::support::logging {
                     // Get the details we need to generate a log file name
                     config.output.directory  = cfg["output"]["directory"].as<std::string>();
                     config.output.split_size = cfg["output"]["split_size"].as<Expression>();
-                    config.output.max_size = cfg["output"]["max_size"].as<int>();   
+                    config.output.max_size   = cfg["output"]["max_size"].as<int>();
 
                     // Get the name of the currently running binary
                     std::vector<char> data(argv[0].cbegin(), argv[0].cend());
@@ -159,15 +159,15 @@ namespace module::support::logging {
                     handles = std::move(new_handles);
                 }
             });
-    
-        on<Every<10, Per<std::chrono::seconds>>, Sync<DataLog>>().then([this](){
+
+        on<Every<10, Per<std::chrono::seconds>>, Sync<DataLog>>().then([this]() {
             unsigned int size = 0;
-            for(auto& f: std::filesystem::recursive_directory_iterator(config.output.directory)){
-                if(f.is_regular_file()){
+            for (auto& f : std::filesystem::recursive_directory_iterator(config.output.directory)) {
+                if (f.is_regular_file()) {
                     size += f.file_size();
                 }
             }
-            if(size >= config.output.max_size){
+            if (size >= config.output.max_size) {
                 logging_reaction.disable();
                 log("killed datalogging");
                 encoder->close();

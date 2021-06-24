@@ -45,7 +45,7 @@ namespace module::support::logging {
                 uint64_t max_size{};
             } output;
         } config;
-         
+
         /// Holds the reaction so we can disable it when we fill the log folder
         ReactionHandle logging_reaction;
 
