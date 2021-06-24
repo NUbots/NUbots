@@ -390,7 +390,7 @@ namespace module {
                 log<NUClear::DEBUG>("TerminatingEarly");
 
                 // Convert trial duration limit to ms, add 1 for overhead
-                bool max_trial_duration = (trial_duration_limit + 1) * 1000;
+                double max_trial_duration = (trial_duration_limit + 1) * 1000;
 
                 double trialDuration = simTime - trialStartTime;
 
