@@ -35,24 +35,25 @@ namespace nsga2 {
 
     void Individual::Initialize(const int& _id, const bool& randomInitialize) {
         id         = _id;
-        generation = 1;
-        if (randomInitialize) {
+        generation = 1; //TODO: This is correct, as Initialize is called only on first generation, but should it be here?
+        if (!randomInitialize && id == 0 && generation == 1) {
+            // First individual get vars from config if not randomInitialize
+            //initialise real vars
+            for (int i = 0; i < config.realVars; i++) {
+                reals[i] = config.initialRealVars[i];
+            }
+            //TODO: initialise bin vars not implemented
+        } else {
+            //initialise real vars
             for (int i = 0; i < config.realVars; i++) {
                 reals[i] = config.randGen->Real(config.realLimits[i].first, config.realLimits[i].second);
             }
-
+            //initialise bin vars
             for (int i = 0; i < config.binVars; i++) {
                 for (int j = 0; j < config.binBits[i]; j++) {
                     gene[i][j] = config.randGen->Realu() <= 0.5 ? 0 : 1;
                 }
             }
-        }
-        else {
-            for (int i = 0; i < config.realVars; i++) {
-                reals[i] = config.initialRealVars[i];
-            }
-            if (_id != 0)
-                realMutate();
         }
     }
 
@@ -142,10 +143,12 @@ namespace nsga2 {
 
     std::pair<int, int> Individual::Mutate() {
         std::pair<int, int> mutationCount = std::make_pair(0, 0);
-        if (config.realVars)
+        if (config.realVars) {
             mutationCount.first += realMutate();
-        if (config.binVars)
+        }
+        if (config.binVars) {
             mutationCount.second += binMutate();
+        }
         return mutationCount;
     }
 
