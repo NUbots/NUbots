@@ -255,18 +255,18 @@ namespace module::localisation {
         const bool right = (goal.side == VisionGoal::Side::RIGHT);
 
         if (isOwn && left) {
-            position = Eigen::Vector3d(fd.goalpost_own_l.x(), fd.goalpost_own_l.y(), 0);
+            return Eigen::Vector3d(fd.goalpost_own_l.x(), fd.goalpost_own_l.y(), 0);
         }
         if (isOwn && right) {
-            position = Eigen::Vector3d(fd.goalpost_own_r.x(), fd.goalpost_own_r.y(), 0);
+            return Eigen::Vector3d(fd.goalpost_own_r.x(), fd.goalpost_own_r.y(), 0);
         }
         if (!isOwn && left) {
-            position = Eigen::Vector3d(fd.goalpost_opp_l.x(), fd.goalpost_opp_l.y(), 0);
+            return Eigen::Vector3d(fd.goalpost_opp_l.x(), fd.goalpost_opp_l.y(), 0);
         }
         if (!isOwn && right) {
-            position = Eigen::Vector3d(fd.goalpost_opp_r.x(), fd.goalpost_opp_r.y(), 0);
+            return Eigen::Vector3d(fd.goalpost_opp_r.x(), fd.goalpost_opp_r.y(), 0);
         }
 
-        return position;
+        return Eigen::Vector3d::Zero();
     }
 }  // namespace module::localisation
