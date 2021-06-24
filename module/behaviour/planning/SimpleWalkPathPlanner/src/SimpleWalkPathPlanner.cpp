@@ -23,7 +23,6 @@
 #include <cmath>
 
 #include "extension/Configuration.hpp"
-#include "extension/Script.hpp"
 
 #include "message/behaviour/KickPlan.hpp"
 #include "message/behaviour/MotionCommand.hpp"
@@ -129,7 +128,8 @@ namespace module::behaviour::planning {
                 timeBallLastSeen = NUClear::clock::now();
             }
         });
-        // Freq must be equal to or greater than soccer strategy
+
+        // Freq must be equal to or greater than the frequency of the main loop in soccer strategy
         on<Every<40, Per<std::chrono::seconds>>,
            With<Ball>,
            With<Field>,

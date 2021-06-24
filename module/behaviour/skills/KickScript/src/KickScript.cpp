@@ -88,34 +88,6 @@ namespace module::behaviour::skills {
                 }
             }
 
-
-            // if (kickCommand.kick_command_type == KickType::SCRIPTED) {
-            // } else {
-            // int quadrant = getDirectionalQuadrant(direction[0], direction[1]);
-            // // assume valid at this point as this is checked on the walkcommand trigger
-            // if (leg == LimbID::RIGHT_LEG) {
-            //     if (quadrant == 0) {
-            //         // front
-            //         emit(std::make_unique<ExecuteScriptByName>(id,
-            //         std::vector<std::string>({"RightFootKickForward3.yaml", "Stand.yaml"})));
-            //     } else if (quadrant == 1) {
-            //         // side
-            //         emit(std::make_unique<ExecuteScriptByName>(id,
-            //         std::vector<std::string>({"RightFootKickLeft.yaml", "Stand.yaml"})));
-            //     }
-            // } else if (leg == LimbID::LEFT_LEG) {
-            //     if (quadrant == 0) {
-            //         // front
-            //         emit(std::make_unique<ExecuteScriptByName>(id,
-            //         std::vector<std::string>({"LeftFootKickForward3.yaml", "Stand.yaml"})));
-            //     } else if (quadrant == 3) {
-            //         // side
-            //         emit(std::make_unique<ExecuteScriptByName>(id,
-            //         std::vector<std::string>({"LeftFootKickRight.yaml", "Stand.yaml"})));
-            //     }
-            // }
-            // }
-
             updatePriority(EXECUTION_PRIORITY);
         });
 

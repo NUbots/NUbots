@@ -22,7 +22,6 @@
 #include <Eigen/Geometry>
 
 #include "extension/Configuration.hpp"
-#include "extension/Script.hpp"
 
 #include "message/behaviour/MotionCommand.hpp"
 #include "message/behaviour/Nod.hpp"
@@ -47,7 +46,6 @@
 namespace module::behaviour::strategy {
 
     using extension::Configuration;
-    using extension::ExecuteScriptByName;
 
     using message::behaviour::Behaviour;
     using message::behaviour::FieldTarget;
@@ -75,7 +73,7 @@ namespace module::behaviour::strategy {
     using message::motion::KillGetup;
     using message::platform::ButtonLeftDown;
     using message::platform::ButtonMiddleDown;
-    using message::platform::ResetRawSensors;
+    using message::platform::ResetWebotsServos;
     using message::support::FieldDescription;
     using VisionBalls = message::vision::Balls;
     using VisionGoals = message::vision::Goals;
@@ -88,7 +86,6 @@ namespace module::behaviour::strategy {
     SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
         , cfg_()
-        , id(size_t(this) * size_t(this) - size_t(this))
         , walkTarget()
         , lookTarget()
         , kickType()
@@ -142,16 +139,16 @@ namespace module::behaviour::strategy {
             }
         });
 
-        // // TODO: remove this horrible code
-        // // Check to see if we are currently in the process of getting up.
+        // TODO: remove this horrible code
+        // Check to see if we are currently in the process of getting up.
         on<Trigger<ExecuteGetup>>().then([this] { isGettingUp = true; });
 
-        // // Check to see if we have finished getting up.
+        // Check to see if we have finished getting up.
         on<Trigger<KillGetup>>().then([this] { isGettingUp = false; });
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& selfPenalisation) {
-            emit(std::make_unique<ResetRawSensors>());
             if (selfPenalisation.context == GameEvents::Context::SELF) {
+                emit(std::make_unique<ResetWebotsServos>());
                 selfPenalised = true;
             }
         });
@@ -203,6 +200,7 @@ namespace module::behaviour::strategy {
                         case GameMode::PENALTY_SHOOTOUT:
                             penaltyShootout(gameState, phase, fieldDescription, field, ball);
                             break;
+                        // We handle NORMAL and OVERTIME the same at the moment because we don't have any special behavior for overtime.
                         case GameMode::NORMAL: normal(gameState, phase, fieldDescription, field, ball, mode); break;
                         case GameMode::OVERTIME: normal(gameState, phase, fieldDescription, field, ball, mode); break;
                         default: log<NUClear::WARN>("Game mode unknown.");
@@ -366,7 +364,6 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::goalieWalk(const Field& field, const Ball& ball) {
-
         // make a motionCommand to emit
         std::unique_ptr<MotionCommand> motionCommand;
 
@@ -375,13 +372,10 @@ namespace module::behaviour::strategy {
             std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now() - ballLastMeasured).count()
             * 1e6;  // SUSS
 
-        // timeSinceBallSeen < 1 (as stated in the cfg file SoccerStrategy.yaml)
         if (timeSinceBallSeen < cfg_.goalie_command_timeout) {
+            Eigen::Affine2d Hfw(field.position);
 
-            // position == Hfw
-            Eigen::Affine2d position(field.position);
-
-            float fieldBearing  = Eigen::Rotation2Dd(position.rotation()).angle();
+            float fieldBearing  = Eigen::Rotation2Dd(Hfw.rotation()).angle();
             int signBearing     = fieldBearing > 0 ? 1 : -1;
             float rotationSpeed = -signBearing
                                   * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * fieldBearing),
@@ -453,13 +447,13 @@ namespace module::behaviour::strategy {
 
     // ********************PENALTY GAMEMODE STATES********************************
     void SoccerStrategy::penaltyShootoutSet() {
-        emit(std::make_unique<ResetRawSensors>());
-        // Reset the has kicked flag between kicks
+        emit(std::make_unique<ResetWebotsServos>());
+        // Reset the hasKicked flag between kicks
         hasKicked = false;
     }
 
     void SoccerStrategy::penaltyShootoutPlaying() {
-        // Execute penalty kick script once if we haven't yet and are not goalie
+        // Execute penalty kick script once if we haven't yet, and if we are not goalie
         if (!hasKicked && team_kicking_off == GameEvents::Context::TEAM) {
             emit(std::make_unique<KickScriptCommand>(LimbID::LEFT_LEG, KickCommandType::PENALTY));
             hasKicked = true;
@@ -478,9 +472,23 @@ namespace module::behaviour::strategy {
         find({FieldTarget(FieldTarget::Target::SELF)});
     }
 
+    void SoccerStrategy::normalInitial(const message::support::FieldDescription& fieldDescription) {
+        standStill();
+        find({FieldTarget(FieldTarget::Target::SELF)});
+
+        if (resetInInitial) {
+            initialLocalisationReset(fieldDescription);
+            emit(std::make_unique<ResetWebotsServos>());
+            resetInInitial = false;
+        }
+
+        currentState = Behaviour::State::INITIAL;
+    }
+
     void SoccerStrategy::normalSet() {
         standStill();
         find({FieldTarget(FieldTarget::Target::BALL)});
+        resetInInitial = true;
     }
 
     void SoccerStrategy::normalPlaying(const Field& field,

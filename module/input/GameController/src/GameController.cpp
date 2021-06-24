@@ -423,10 +423,11 @@ namespace module::input {
             // Update the kickoff team (us or them)
             state->data.our_kick_off = newPacket.kickOffTeam == newOwnTeam.teamId;
 
-            // new kick off team? :/
+            // Get the new kick off team to emit the team change
             GameEvents::Context team = newPacket.kickOffTeam == newOwnTeam.teamId
                                            ? GameEvents::Context::Value::TEAM
                                            : GameEvents::Context::Value::OPPONENT;
+
             stateChanges.push_back([this, team] { emit(std::make_unique<KickOffTeam>(KickOffTeam{team})); });
         }
 

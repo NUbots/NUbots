@@ -85,13 +85,13 @@ namespace module::behaviour::strategy {
         message::behaviour::FieldTarget walkTarget;
 
         std::vector<message::behaviour::FieldTarget> lookTarget;
-        const size_t id;
 
         // TODO: remove horrible
         bool isGettingUp                                     = false;
         bool hasKicked                                       = false;
         bool selfPenalised                                   = false;
         bool manualOrientationReset                          = false;
+        bool resetInInitial                                  = true;
         double manualOrientation                             = 0.0;
         message::input::GameEvents::Context team_kicking_off = message::input::GameEvents::Context::UNKNOWN;
         message::behaviour::KickPlan::KickType kickType;
@@ -108,8 +108,6 @@ namespace module::behaviour::strategy {
         void unpenalisedLocalisationReset(const message::support::FieldDescription& fieldDescription);
 
         void standStill();
-        void standScript();
-        void searchWalk();
         void walkTo(const message::support::FieldDescription& fieldDescription,
                     const message::behaviour::FieldTarget::Target& object);
         void walkTo(const message::support::FieldDescription& fieldDescription, const Eigen::Vector2d& position);
@@ -148,7 +146,7 @@ namespace module::behaviour::strategy {
         void penaltyShootoutTimeout(){};
 
         // NORMAL mode functions
-        void normalInitial(const message::support::FieldDescription& fieldDescription){};
+        void normalInitial(const message::support::FieldDescription& fieldDescription);
         void normalReady(const message::input::GameState& gameState,
                          const message::support::FieldDescription& fieldDescription);
         void normalSet();
