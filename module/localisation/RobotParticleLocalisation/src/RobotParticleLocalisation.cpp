@@ -88,14 +88,14 @@ namespace module::localisation {
                     auto saved_filter = filter;
 
                     // Go through all of the known sided posts
-                    for (auto goal_post : goals.goals) {
+                    for (const auto& goal_post : goals.goals) {
                         if (goal_post.side != Goal::Side::UNKNOWN_SIDE) {
                             // These are either left or right goal posts
 
                             // Compare each of these to the possible goal posts on the field (own and opp)
 
                             // TODO remove the repeated measurements
-                            auto m = goal_post.measurements[0];
+                            const auto& m = goal_post.measurements[0];
 
                             // Check that the measurement is sane
                             if (m.position.allFinite() && m.covariance.allFinite()) {
@@ -118,7 +118,7 @@ namespace module::localisation {
                                                            goals.Hcw);
                                 if (log_level <= NUClear::DEBUG) {
 
-                                    Eigen::Vector3d state(filter.get());
+                                    const Eigen::Vector3d state(filter.get());
                                     Eigen::Transform<double, 3, Eigen::Affine> Hfw;
                                     Hfw.translation() = Eigen::Matrix<double, 3, 1>(state.x(), state.y(), 0);
                                     Hfw.linear() =
@@ -173,7 +173,7 @@ namespace module::localisation {
                 std::vector<Eigen::Vector3d> states;
                 std::vector<Eigen::Matrix3d> cov;
 
-                Eigen::Affine3d Htw(sensors.Htw);
+                const Eigen::Affine3d Htw(sensors.Htw);
                 log("Reset Robot Hypotheses");
                 for (auto& s : locReset.hypotheses) {
 
