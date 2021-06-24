@@ -17,6 +17,11 @@ namespace module::localisation {
         NUClear::clock::time_point last_measurement_update_time;
         bool ball_pos_log;
 
+        struct {
+            std::vector<Eigen::Vector2d> start_state{};
+            Eigen::Vector2d start_variance{};
+        } config{};
+
     public:
         /// @brief Called by the powerplant to build and setup the BallLocalisation reactor.
         explicit BallLocalisation(std::unique_ptr<NUClear::Environment> environment);
