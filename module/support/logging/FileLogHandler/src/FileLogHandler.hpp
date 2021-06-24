@@ -2,6 +2,7 @@
 #define MODULE_SUPPORT_LOGGING_FILELOGHANDLER_HPP
 
 #include <fstream>
+#include <filesystem>
 #include <mutex>
 #include <nuclear>
 #include <string>
@@ -15,10 +16,13 @@ namespace module::support::logging {
         explicit FileLogHandler(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        std::mutex mutex;
+        std::mutex mutex; // TODO(cameron) use proper NUClear stuff
 
-        std::string logFileName;
+        std::filesystem::path logFileName;
         std::ofstream logFile;
+        int max_size;
+
+        bool killed = false;
     };
 }  // namespace module::support::logging
 

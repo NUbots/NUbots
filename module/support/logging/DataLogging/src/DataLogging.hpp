@@ -41,8 +41,12 @@ namespace module::support::logging {
                 std::string binary;
                 /// The threshold of bytes where after this we split the file
                 uint64_t split_size{};
+
+                uint64_t max_size{};
             } output;
         } config;
+        
+        bool killed = false;
 
         /// The file we are outputting to currently
         std::filesystem::path output_file_path{};

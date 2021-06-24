@@ -5,6 +5,8 @@
 #include "utility/strutil/ansi.hpp"
 #include "utility/support/evil/pure_evil.hpp"
 
+#include <filesystem>
+
 namespace module::support::logging {
 
     using NUClear::message::LogMessage;
@@ -22,7 +24,9 @@ namespace module::support::logging {
 
         on<Configuration>("FileLogHandler.yaml").then([this](const Configuration& config) {
             // Use configuration here from file FileLogHandler.yaml
-            logFileName = config["log_file"].as<std::string>();
+            logFileName = std::filesystem::path(config["log_file"].as<std::string>());
+
+            max_size = config["max_size"].as<int>();
 
             if (logFile.is_open()) {
                 logFile.close();
@@ -86,6 +90,11 @@ namespace module::support::logging {
         });
 
         on<Trigger<LogMessage>>().then([this](const LogMessage& message) {
+            // We're full TODO(cameron) unbind the reaction
+            if(killed){
+            return;
+            }
+
             std::lock_guard<std::mutex> lock(mutex);
 
             // Where this message came from
@@ -117,6 +126,22 @@ namespace module::support::logging {
 
             // Output the message
             logFile << message.message << std::endl;
+        });
+
+
+        on<Every<10, Per<std::chrono::seconds>>>().then([this](){
+            std::lock_guard<std::mutex> lock(mutex); //TODO(cameron) SYNC!!!
+            int size = 0;
+            for(auto& f: std::filesystem::recursive_directory_iterator(logFileName.remove_filename())){
+                if(f.is_regular_file()){
+                    size += f.file_size();
+                }
+            }
+            if(size >= max_size){
+                killed = true;
+                log("killed datalogging");
+                logFile.close();
+            }
         });
     }
 }  // namespace module::support::logging

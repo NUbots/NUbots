@@ -27,6 +27,11 @@ namespace module::support::logging {
 
         /// This receives every DataLog message as a Sync operation (one at a time) and writes it to the file
         on<Trigger<DataLog>, Sync<DataLog>>().then([this](const DataLog& data) {
+        // we're full
+        // TODO unbind reaction instead
+        if(killed){
+            return;
+        }
             // NBS File Format
             // Name      | Type               |  Description
             // ------------------------------------------------------------
@@ -116,6 +121,7 @@ namespace module::support::logging {
                     // Get the details we need to generate a log file name
                     config.output.directory  = cfg["output"]["directory"].as<std::string>();
                     config.output.split_size = cfg["output"]["split_size"].as<Expression>();
+                    config.output.max_size = cfg["output"]["max_size"].as<int>();   
 
                     // Get the name of the currently running binary
                     std::vector<char> data(argv[0].cbegin(), argv[0].cend());
@@ -158,6 +164,20 @@ namespace module::support::logging {
                     handles = std::move(new_handles);
                 }
             });
+    
+        on<Every<10, Per<std::chrono::seconds>>, Sync<DataLog>>().then([this](){
+            unsigned int size = 0;
+            for(auto& f: std::filesystem::recursive_directory_iterator(config.output.directory)){
+                if(f.is_regular_file()){
+                    size += f.file_size();
+                }
+            }
+            if(size >= config.output.max_size){
+                killed = true;
+                log("killed datalogging");
+                encoder->close();
+            }
+        });
     }
 
 }  // namespace module::support::logging
