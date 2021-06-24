@@ -178,14 +178,14 @@ namespace module::behaviour::planning {
                 // Calculate velocity vector to ball by scalling unit vector by forward velocity
                 Eigen::Vector3d velocity_vector = forwardSpeed * unit_vector_to_ball;
                 // Calculate heading angle
-                float heading_angle = std::atan2(position.y(), position.x());
+                float heading_angle = std::atan2(rBTt.y(), rBTt.x());
 
                 std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(
                     subsumptionId,
                     Eigen::Vector3d(velocity_vector.x(), velocity_vector.y(), heading_angle));
                 log("x velocity command [m/s]:", velocity_vector.x());
                 log("y velocity command [m/s]:", velocity_vector.y());
-                log("heading angle [rad]:", velocity_vector.y());
+                log("heading angle [rad]:", heading_angle);
                 emit(std::move(command));
                 emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
             });
