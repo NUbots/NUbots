@@ -22,6 +22,10 @@ namespace module::support::logging {
 
         /// Holds the reaction so we can disable it when we fill the log folder
         ReactionHandle logging_reaction{};
+        ReactionHandle stats_reaction{};
+
+        /// Holds the reaction so we can disable it so we don't recheck the file size
+        ReactionHandle log_check_handler{};
     };
 }  // namespace module::support::logging
 

@@ -42,7 +42,7 @@ namespace module::support::logging {
             }
         });
 
-        on<Trigger<ReactionStatistics>, Sync<FileLogHandler>>().then([this](const ReactionStatistics& stats) {
+        stats_reaction = on<Trigger<ReactionStatistics>, Sync<FileLogHandler>>().then([this](const ReactionStatistics& stats) {
             if (stats.exception) {
 
                 // Get our reactor name
@@ -91,8 +91,9 @@ namespace module::support::logging {
             std::string source = "";
 
             // If we know where this log message came from, we display that
-            if (message.task) {
+            if (message.task && message.task->identifier.size() >= 2) {
                 // Get our reactor name
+                std::cout << message.task->identifier[1] << std::endl;
                 std::string reactor = message.task->identifier[1];
 
                 // Strip to the last semicolon if we have one
@@ -120,7 +121,7 @@ namespace module::support::logging {
 
 
         // This checks that we haven't reached the max_size
-        on<Every<5, std::chrono::seconds>, Sync<FileLogHandler>>().then([this]() {
+        log_check_handler = on<Every<5, std::chrono::seconds>, Sync<FileLogHandler>, Single>().then([this]() {
             int size = 0;
             for (auto& f : std::filesystem::recursive_directory_iterator(log_file_name.remove_filename())) {
                 if (f.is_regular_file()) {
@@ -128,8 +129,10 @@ namespace module::support::logging {
                 }
             }
             if (size >= max_size) {
-                logging_reaction.disable();
-                log<NUClear::WARN>("Datalogging disabled - Maximum logging amount exceeded.");
+                logging_reaction.unbind();
+                stats_reaction.unbind();
+                log_check_handler.unbind();
+                log<NUClear::WARN>("FileLogHandler disabled - Maximum logging amount exceeded.");
                 if (log_file.is_open()) {
                     log_file.close();
                 }

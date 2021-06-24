@@ -49,6 +49,8 @@ namespace module::support::logging {
 
         /// Holds the reaction so we can disable it when we fill the log folder
         ReactionHandle logging_reaction{};
+        /// Holds the reaction so we can disable it so we don't recheck the file size
+        ReactionHandle log_check_handler{};
 
         /// The file we are outputting to currently
         std::filesystem::path output_file_path{};
