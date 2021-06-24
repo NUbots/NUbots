@@ -58,7 +58,7 @@ namespace module::localisation {
                 field->position        = position.matrix();
                 field->covariance      = filter.getCovariance();
 
-                if (config.debug) {
+                if (log_level <= NUClear::DEBUG) {
                     log<NUClear::DEBUG>(fmt::format("Robot Location x {} : y {} : theta {}",
                                                     state[RobotModel<double>::kX],
                                                     state[RobotModel<double>::kY],
@@ -116,7 +116,7 @@ namespace module::localisation {
                                                            Eigen::Matrix3d(m.covariance.cast<double>()),
                                                            getFieldPosition(goal_post, fd, 0),  // Opp post
                                                            goals.Hcw);
-                                if (config.debug) {
+                                if (log_level <= NUClear::DEBUG) {
 
                                     Eigen::Vector3d state(filter.get());
                                     Eigen::Transform<double, 3, Eigen::Affine> Hfw;
@@ -210,12 +210,12 @@ namespace module::localisation {
 
         on<Configuration>("RobotParticleLocalisation.yaml").then([this](const Configuration& cfg) {
             // Use configuration here from file RobotParticleLocalisation.yaml
+            log_level = cfg["log_level"].as<NUClear::LogLevel>();
+
             filter.model.processNoiseDiagonal = cfg["process_noise_diagonal"].as<Expression>();
             filter.model.n_rogues             = cfg["n_rogues"].as<int>();
             filter.model.resetRange           = cfg["reset_range"].as<Expression>();
             filter.model.n_particles          = cfg["n_particles"].as<int>();
-
-            config.debug = cfg["debug"].as<bool>();
 
             config.start_variance = cfg["start_variance"].as<Expression>();
         });
