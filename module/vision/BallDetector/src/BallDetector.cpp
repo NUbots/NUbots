@@ -156,7 +156,7 @@ namespace module::vision {
                         // Attach the measurement to the object (distance from camera to ball)
                         b.measurements.push_back(Ball::Measurement());
 
-                        // Spherical Coordinates (1/distance, phi, theta)
+                        // Spherical Reciprocal Coordinates (1/distance, phi, theta)
                         b.measurements.back().srBCc =
                             cartesianToReciprocalSpherical(cartesianToSpherical(b.cone.axis * distance));
                         b.measurements.back().covariance = config.ball_angular_cov.asDiagonal();
