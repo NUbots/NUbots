@@ -97,7 +97,7 @@ def exec_build(target, roles):
         sys.exit(exit_code)
 
     # Set selected image back to 'generic'
-    print("Setting target 'generic'...")
+    print("Setting back to target 'generic'...")
     exit_code = subprocess.run(["./b", "target", "generic"]).returncode
     if exit_code != 0:
         cprint("unable to set target to 'generic', exit code {}".format(exit_code), "red", attrs=["bold"])
