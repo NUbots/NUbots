@@ -3,6 +3,9 @@
 #include <Eigen/Geometry>
 #include <fmt/format.h>
 #include <fmt/ostream.h>
+#include <initializer_list>
+#include <limits>
+#include <utility>
 
 #include "extension/Configuration.hpp"
 
@@ -84,41 +87,36 @@ namespace module::localisation {
                     // Currently this has no idea about pairs of posts, only that it has been labelled left, right and
                     // unknown
 
-                    // Save the filter state
-                    auto saved_filter = filter;
-
                     // Go through all of the known sided posts
                     for (const auto& goal_post : goals.goals) {
-                        if (goal_post.side != VisionGoal::Side::UNKNOWN_SIDE) {
-                            // These are either left or right goal posts
+                        // TODO remove the repeated measurements
+                        const auto& m = goal_post.measurements[0];
 
-                            // Compare each of these to the possible goal posts on the field (own and opp)
+                        // Check that the measurement is finite
+                        if (m.position.allFinite() && m.covariance.allFinite()) {
+                            if (goal_post.side != VisionGoal::Side::UNKNOWN_SIDE) {
+                                // These are either left or right goal posts
 
-                            // TODO remove the repeated measurements
-                            const auto& m = goal_post.measurements[0];
+                                // Compare each of these to the possible goal posts on the field (own and opp)
 
-                            // Check that the measurement is finite
-                            if (m.position.allFinite() && m.covariance.allFinite()) {
                                 // Run a measurement for our own goal post and store how likely the filter thinks this
                                 // is a real measurement
-                                auto filter_new_own = saved_filter;
-                                const auto own_logits =
-                                    filter_new_own.measure(Eigen::Vector3d(m.position.cast<double>()),
-                                                           Eigen::Matrix3d(m.covariance.cast<double>()),
-                                                           getFieldPosition(goal_post, fd, 1),
-                                                           goals.Hcw);
+                                auto own_filter       = filter;
+                                const auto own_logits = own_filter.measure(Eigen::Vector3d(m.position.cast<double>()),
+                                                                           Eigen::Matrix3d(m.covariance.cast<double>()),
+                                                                           getFieldPosition(goal_post.side, fd, true),
+                                                                           goals.Hcw);
 
 
                                 // Run a measurement for the opposition goal post and store how likely the filter thinks
                                 // this is a real measurement
-                                auto filter_new_opp = saved_filter;
-                                const auto opp_logits =
-                                    filter_new_opp.measure(Eigen::Vector3d(m.position.cast<double>()),
-                                                           Eigen::Matrix3d(m.covariance.cast<double>()),
-                                                           getFieldPosition(goal_post, fd, 0),
-                                                           goals.Hcw);
-                                if (log_level <= NUClear::DEBUG) {
+                                auto opp_filter       = filter;
+                                const auto opp_logits = opp_filter.measure(Eigen::Vector3d(m.position.cast<double>()),
+                                                                           Eigen::Matrix3d(m.covariance.cast<double>()),
+                                                                           getFieldPosition(goal_post.side, fd, false),
+                                                                           goals.Hcw);
 
+                                if (log_level <= NUClear::DEBUG) {
                                     const Eigen::Vector3d state(filter.get());
                                     Eigen::Affine3d Hfw;
                                     Hfw.translation() = Eigen::Vector3d(state.x(), state.y(), 0);
@@ -126,8 +124,8 @@ namespace module::localisation {
                                         Eigen::AngleAxisd(state.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
 
                                     const Eigen::Affine3d Hcf(goals.Hcw * Hfw.inverse().matrix());
-                                    const Eigen::Vector3d rGCc_own(Hcf * getFieldPosition(goal_post, fd, 1));
-                                    const Eigen::Vector3d rGCc_opp(Hcf * getFieldPosition(goal_post, fd, 0));
+                                    const Eigen::Vector3d rGCc_own(Hcf * getFieldPosition(goal_post.side, fd, true));
+                                    const Eigen::Vector3d rGCc_opp(Hcf * getFieldPosition(goal_post.side, fd, false));
 
                                     log<NUClear::DEBUG>(fmt::format("Testing post {}", std::string(goal_post.side)));
                                     log<NUClear::DEBUG>(fmt::format("Candidate own {}", own_logits));
@@ -141,14 +139,38 @@ namespace module::localisation {
                                     log<NUClear::DEBUG>(fmt::format("Measured post at {}", m.position.transpose()));
                                 }
 
-                                filter = own_logits > opp_logits ? filter_new_own : filter_new_opp;
+                                filter = own_logits > opp_logits ? own_filter : opp_filter;
                             }
                             else {
-                                log<NUClear::WARN>("Received non-finite measurements from vision. Discarding ...");
+                                // Keep track of our best option
+                                double best_logits = std::numeric_limits<double>::lowest();
+                                auto best_filter   = filter;
+
+                                // Check the measurement against each possible goal post and find the best match
+                                for (const auto& post : std::initializer_list<std::pair<VisionGoal::Side, bool>>{
+                                         {VisionGoal::Side::LEFT, true},
+                                         {VisionGoal::Side::RIGHT, true},
+                                         {VisionGoal::Side::LEFT, false},
+                                         {VisionGoal::Side::RIGHT, false}}) {
+                                    auto current_filter = filter;
+
+                                    const double current_logits =
+                                        current_filter.measure(Eigen::Vector3d(m.position.cast<double>()),
+                                                               Eigen::Matrix3d(m.covariance.cast<double>()),
+                                                               getFieldPosition(post.first, fd, post.second),
+                                                               goals.Hcw);
+
+                                    if (current_logits > best_logits) {
+                                        best_filter = current_filter;
+                                        best_logits = current_logits;
+                                    }
+                                }
+
+                                filter = best_filter;
                             }
                         }
                         else {
-                            log<NUClear::DEBUG>("UNKNOWN_SIDE Goal posts aren't handled yet. Ignoring ...");
+                            log<NUClear::WARN>("Received non-finite measurements from vision. Discarding ...");
                         }
                     }
                 }
@@ -226,14 +248,14 @@ namespace module::localisation {
             // // Left side goal line
             // config.start_state.emplace_back(
             //     (-fd.dimensions.field_length / 2.0),
-            //     (-fd.dimensions.field_width / 2.0) + ((fd.dimensions.field_width - fd.dimensions.goal_width) / 4.0),
-            //     0.0);
+            //     (-fd.dimensions.field_width / 2.0) + ((fd.dimensions.field_width - fd.dimensions.goal_width)
+            //     / 4.0), 0.0);
 
             // // Right side goal line
             // config.start_state.emplace_back(
             //     (-fd.dimensions.field_length / 2.0),
-            //     (fd.dimensions.field_width / 2.0) - ((fd.dimensions.field_width - fd.dimensions.goal_width) / 4.0),
-            //     0.0);
+            //     (fd.dimensions.field_width / 2.0) - ((fd.dimensions.field_width - fd.dimensions.goal_width)
+            //     / 4.0), 0.0);
 
             // Penalty shootout position
             // config.start_state.emplace_back((-fd.dimensions.field_length / 2.0) +
@@ -248,12 +270,11 @@ namespace module::localisation {
 
     // True goal position
     [[nodiscard]] Eigen::Vector3d RobotParticleLocalisation::getFieldPosition(
-        const VisionGoal& goal,
+        const VisionGoal::Side& side,
         const message::support::FieldDescription& fd,
         const bool& isOwn) const {
-
-        const bool left  = (goal.side == VisionGoal::Side::LEFT);
-        const bool right = (goal.side == VisionGoal::Side::RIGHT);
+        const bool left  = (side == VisionGoal::Side::LEFT);
+        const bool right = (side == VisionGoal::Side::RIGHT);
 
         if (isOwn && left) {
             return Eigen::Vector3d(fd.goalpost_own_l.x(), fd.goalpost_own_l.y(), 0);

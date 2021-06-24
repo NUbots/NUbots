@@ -27,7 +27,7 @@ namespace module::localisation {
             Eigen::Vector3d start_variance{};
         } config{};
 
-        [[nodiscard]] Eigen::Vector3d getFieldPosition(const message::vision::Goal& goal,
+        [[nodiscard]] Eigen::Vector3d getFieldPosition(const message::vision::Goal::Side& side,
                                                        const message::support::FieldDescription& fd,
                                                        const bool& isOwn) const;
 
