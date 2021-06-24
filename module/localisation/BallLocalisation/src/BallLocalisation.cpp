@@ -93,23 +93,25 @@ namespace module::localisation {
         /* To run whenever a ball has been detected */
         on<Trigger<message::vision::Balls>, With<FieldDescription>>().then(
             [this](const message::vision::Balls& balls, const FieldDescription& field) {
-                if (balls.balls.size() > 0) {
-                    /* Call Time Update first */
-                    using namespace std::chrono;
-                    const auto curr_time  = NUClear::clock::now();
-                    const double seconds  = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
-                    last_time_update_time = curr_time;
-                    filter.time(seconds);
+                // Call Time Update first
+                using namespace std::chrono;
+                const auto curr_time  = NUClear::clock::now();
+                const double seconds  = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
+                last_time_update_time = curr_time;
+                filter.time(seconds);
+                for (const auto& ball : balls.balls) {
+                    if (!balls.debug_ball) {
 
-                    // Now call Measurement Update. Supports multiple measurement methods and will treat them as
-                    // separate measurements
-                    for (auto& measurement : balls.balls[0].measurements) {
-                        filter.measure(Eigen::Vector3d(measurement.srBCc.cast<double>()),
-                                       Eigen::Matrix3d(measurement.covariance.cast<double>()),
-                                       field,
-                                       balls.Hcw);
+                        // Now call Measurement Update. Supports multiple measurement methods and will treat them as
+                        // separate measurements
+                        for (auto& measurement : ball.measurements) {
+                            filter.measure(Eigen::Vector3d(measurement.srBCc.cast<double>()),
+                                           Eigen::Matrix3d(measurement.covariance.cast<double>()),
+                                           field,
+                                           balls.Hcw);
+                        }
+                        last_measurement_update_time = curr_time;
                     }
-                    last_measurement_update_time = curr_time;
                 }
             });
 
