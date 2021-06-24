@@ -150,8 +150,8 @@ namespace module::behaviour::strategy {
         on<Trigger<KillGetup>>().then([this] { isGettingUp = false; });
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& selfPenalisation) {
-            emit(std::make_unique<ResetRawSensors>());
             if (selfPenalisation.context == GameEvents::Context::SELF) {
+                emit(std::make_unique<ResetRawSensors>());
                 selfPenalised = true;
             }
         });
