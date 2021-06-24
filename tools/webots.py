@@ -67,18 +67,21 @@ def get_cmake_flags(roles_to_build):
 
 
 def exec_build(target, roles):
+    # Tags correct image as 'selected' for given target
     print("Setting target '{}'...".format(target))
     exit_code = subprocess.run(["./b", "target", target]).returncode
     if exit_code != 0:
         cprint("unable to set target to '{}', exit code {}".format(target, exit_code), "red", attrs=["bold"])
         sys.exit(exit_code)
 
+    # Cleans build volume to ensure everything gets build for given target
     print("Cleaning build volume...")
     exit_code = subprocess.run(["./b", "configure", "--clean"]).returncode
     if exit_code != 0:
         cprint("unable to clean build volume, exit code {}".format(exit_code), "red", attrs=["bold"])
         sys.exit(exit_code)
 
+    # Sets cmake flags and roles
     print("Configuring build...")
     configure_command = ["./b", "configure", "--"] + get_cmake_flags(roles)
     exit_code = subprocess.run(configure_command).returncode
@@ -86,12 +89,14 @@ def exec_build(target, roles):
         cprint(f"unable to configure build, exit code {exit_code}", "red", attrs=["bold"])
         sys.exit(exit_code)
 
+    # Compiles code for correct target
     print("Building code...")
     exit_code = subprocess.run(["./b", "build"]).returncode
     if exit_code != 0:
         cprint(f"unable to build code, exit code {exit_code}", "red", attrs=["bold"])
         sys.exit(exit_code)
 
+    # Set selected image back to 'generic'
     print("Setting target 'generic'...")
     exit_code = subprocess.run(["./b", "target", "generic"]).returncode
     if exit_code != 0:
