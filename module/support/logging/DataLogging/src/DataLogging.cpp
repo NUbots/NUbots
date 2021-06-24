@@ -168,9 +168,10 @@ namespace module::support::logging {
                     size += f.file_size();
                 }
             }
+            // If we have past the amount of logging we want to do, disable the logging reaction
             if (size >= config.output.max_size) {
                 logging_reaction.disable();
-                log("killed datalogging");
+                log<NUClear::WARN>("Datalogging disabled - Maximum logging amount exceeded.");
                 encoder->close();
             }
         });
