@@ -62,7 +62,7 @@ namespace utility::math::filter {
             utility::math::stats::MultivariateNormal dist(mean, covariance);
 
             for (int i = 0; i < n_particles; ++i) {
-                new_particles.col(i) = dist();
+                new_particles.col(i) = sqrt_covariance * new_particles.col(i) + mean;
             }
 
             return new_particles;
@@ -109,18 +109,19 @@ namespace utility::math::filter {
             // Expectation Maximisation. International Conference on Signal Processing and Communication
             // Systems, 2017.
 
-            ParticleList new_particles(Model::size, n_particles);
+            ParticleList new_particles =
+                ParticleList::NullaryExpr(Model::size, n_particles, [&]() { return norm(rng); });
 
             // We want to evenly distribute the particles across all hypotheses
             // If this is not an even division, the last N particles will just be randomly initialised
             const int particles_per_state = n_particles / mean_size;
 
             for (int state = 0; state < int(mean_size); ++state) {
-                utility::math::stats::MultivariateNormal dist(mean[state], covariance[state]);
+                const StateMat sqrt_covariance = covariance[state].cwiseSqrt();
 
                 const int start_col = state * particles_per_state;
                 for (int i = 0; i < particles_per_state; ++i) {
-                    new_particles.col(start_col + i) = dist();
+                    new_particles.col(start_col + i) = sqrt_covariance * new_particles.col(start_col + i) + mean[state];
                 }
             }
 

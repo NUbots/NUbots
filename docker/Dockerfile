@@ -38,7 +38,8 @@ RUN install-package \
     nodejs-lts-fermium \
     npm \
     yarn \
-    git
+    git \
+    ncurses
 
 # Get python to look in /usr/local for packages
 RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
@@ -107,11 +108,6 @@ RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Transla
 # opencl-clang
 COPY usr/local/package/opencl-clang.sh /usr/local/package/opencl-clang.sh
 RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/archive/v11.0.0.tar.gz
-
-# ncurses - dependency for IGC. Flags are from the arch PKGBUILD for ncurses
-RUN install-from-source https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.2.tar.gz \
-    --with-shared --with-normal --without-debug --without-ada \
-    --enable-widec --enable-pc-files --with-cxx-binding --with-cxx-shared
 
 # intel graphics compiler
 COPY usr/local/package/intel-graphics-compiler.sh /usr/local/package/intel-graphics-compiler.sh

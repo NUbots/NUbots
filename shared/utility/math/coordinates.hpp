@@ -34,7 +34,7 @@
 namespace utility::math::coordinates {
 
     template <typename T, typename U = typename T::Scalar>
-    inline Eigen::Matrix<U, 3, 1> sphericalToCartesian(const Eigen::MatrixBase<T>& sphericalCoordinates) {
+    [[nodiscard]] inline Eigen::Matrix<U, 3, 1> sphericalToCartesian(const Eigen::MatrixBase<T>& sphericalCoordinates) {
         double distance  = sphericalCoordinates.x();
         double cos_theta = std::cos(sphericalCoordinates.y());
         double sin_theta = std::sin(sphericalCoordinates.y());
@@ -50,7 +50,7 @@ namespace utility::math::coordinates {
     }
 
     template <typename T, typename U = typename T::Scalar>
-    inline Eigen::Matrix<U, 3, 1> cartesianToSpherical(const Eigen::MatrixBase<T>& cartesianCoordinates) {
+    [[nodiscard]] inline Eigen::Matrix<U, 3, 1> cartesianToSpherical(const Eigen::MatrixBase<T>& cartesianCoordinates) {
         const U x = cartesianCoordinates.x();
         const U y = cartesianCoordinates.y();
         const U z = cartesianCoordinates.z();
@@ -64,12 +64,10 @@ namespace utility::math::coordinates {
     }
 
     template <typename T, typename U = typename T::Scalar>
-    inline Eigen::Matrix<U, 3, 1> inverseDistanceCartesianToSpherical(
+    [[nodiscard]] inline Eigen::Matrix<U, 3, 1> cartesianToReciprocalSpherical(
         const Eigen::MatrixBase<T>& cartesianCoordinates) {
-        Eigen::Matrix<U, 3, 1> result = cartesianToSpherical(cartesianCoordinates);
-        return {U(1) / result.x(), result.y(), result.z()};
-
-        return result;
+        const Eigen::Matrix<U, 3, 1> sphericalCoordinates = cartesianToSpherical(cartesianCoordinates);
+        return {U(1) / sphericalCoordinates.x(), sphericalCoordinates.y(), sphericalCoordinates.z()};
     }
 
 }  // namespace utility::math::coordinates

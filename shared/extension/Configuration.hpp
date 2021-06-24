@@ -180,17 +180,17 @@ namespace extension {
             return config.as<T>(std::forward<Args>(args)...);
         }
 
-        // Allow interating through configuration
-        YAML::iterator begin() {
+        // Allow iterating through configuration
+        [[nodiscard]] YAML::iterator begin() {
             return config.begin();
         }
-        YAML::const_iterator begin() const {
+        [[nodiscard]] YAML::const_iterator begin() const {
+            return config.begin();
+        }
+        [[nodiscard]] YAML::iterator end() {
             return config.end();
         }
-        YAML::iterator end() {
-            return config.begin();
-        }
-        YAML::const_iterator end() const {
+        [[nodiscard]] YAML::const_iterator end() const {
             return config.end();
         }
 
