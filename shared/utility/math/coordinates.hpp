@@ -64,8 +64,10 @@ namespace utility::math::coordinates {
     }
 
     template <typename T, typename U = typename T::Scalar>
-    [[nodiscard]] inline Eigen::Matrix<U, 3, 1> invertSphericalDistance(const Eigen::MatrixBase<T>& spherical) {
-        return {U(1) / spherical.x(), spherical.y(), spherical.z()};
+    [[nodiscard]] inline Eigen::Matrix<U, 3, 1> cartesianToReciprocalSpherical(
+        const Eigen::MatrixBase<T>& cartesianCoordinates) {
+        const Eigen::Matrix<U, 3, 1> sphericalCoordinates = cartesianToSpherical(cartesianCoordinates);
+        return {U(1) / sphericalCoordinates.x(), sphericalCoordinates.y(), sphericalCoordinates.z()};
     }
 
 }  // namespace utility::math::coordinates
