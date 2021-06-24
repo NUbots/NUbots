@@ -23,6 +23,7 @@
 #include <cmath>
 
 #include "extension/Configuration.hpp"
+#include "extension/Script.hpp"
 
 #include "message/behaviour/KickPlan.hpp"
 #include "message/behaviour/MotionCommand.hpp"
@@ -123,14 +124,13 @@ namespace module::behaviour::planning {
             emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {0, 0}}));
         });
 
-
         on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
             if (balls.balls.size() > 0) {
                 timeBallLastSeen = NUClear::clock::now();
             }
         });
-
-        on<Every<20, Per<std::chrono::seconds>>,
+        // Freq must be equal to or greater than soccer strategy
+        on<Every<40, Per<std::chrono::seconds>>,
            With<Ball>,
            With<Field>,
            With<Sensors>,
@@ -150,19 +150,7 @@ namespace module::behaviour::planning {
                 }
 
                 if (latestCommand.type == message::behaviour::MotionCommand::Type::STAND_STILL) {
-
-
                     emit(std::make_unique<StopCommand>(subsumptionId));
-
-
-                    return;
-                }
-                else if (latestCommand.type == message::behaviour::MotionCommand::Type::DIRECT_COMMAND) {
-                    // TO DO, change to Bezier stuff
-                    std::unique_ptr<WalkCommand> command =
-                        std::make_unique<WalkCommand>(subsumptionId, latestCommand.walk_command);
-                    emit(std::move(command));
-                    emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
                     return;
                 }
 

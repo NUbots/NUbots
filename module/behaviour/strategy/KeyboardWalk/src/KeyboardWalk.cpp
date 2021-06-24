@@ -273,9 +273,9 @@ namespace module::behaviour::strategy {
 
     void KeyboardWalk::kick(LimbID::Value l) {
         message::motion::KickScriptCommand ks;
-        ks.direction    = Eigen::Vector3d(0.05, 0.0, 0.0);
         ks.leg          = l;
         std::string leg = (l == 1) ? "left" : "right";
+        ks.type         = message::motion::KickCommandType::NORMAL;
         emit(std::make_unique<message::motion::KickScriptCommand>(ks));
         log<NUClear::INFO>(fmt::format("kick {}", leg));
     }

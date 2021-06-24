@@ -26,6 +26,7 @@ message KickPlan {
     enum KickType {
         SCRIPTED = 0;
         IK_KICK  = 1;
+        PENALTY = 2;
     }
 
     vec2     target    = 1;

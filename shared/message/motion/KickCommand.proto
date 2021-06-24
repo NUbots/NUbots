@@ -28,7 +28,7 @@ import "Vector.proto";
  */
 enum KickCommandType {
     NORMAL = 0;
-    POWER  = 1;
+    PENALTY  = 1;
 }
 
 message KickCommand {
@@ -42,8 +42,8 @@ message KickCommand {
  * @author Brendan Annable
  */
 message KickScriptCommand {
-    vec3   direction = 1;  // Direction to kick with magnitude determining force
-    uint32 leg       = 2;  // Leg to kick with
+    uint32 leg       = 1;  // Leg to kick with
+    KickCommandType type = 2;
 }
 
 message KickPlannerConfig {

@@ -41,6 +41,7 @@ namespace module::behaviour::skills {
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
 
+    using message::motion::KickCommandType;
     using message::motion::KickFinished;
     using message::motion::KickScriptCommand;
 
@@ -61,51 +62,32 @@ namespace module::behaviour::skills {
         });
 
         on<Trigger<KickScriptCommand>>().then([this](const KickScriptCommand& kickCommand) {
-            auto direction = kickCommand.direction;
-            LimbID leg     = kickCommand.leg;
-
-            int quadrant = getDirectionalQuadrant(direction[0], direction[1]);
-
-            // check if the command was valid
-            bool valid = true;
-            if (leg == LimbID::RIGHT_LEG) {
-                if (quadrant == 2 || quadrant == 3) {
-                    NUClear::log<NUClear::WARN>("Right leg cannot kick towards: ", direction);
-                    valid = false;
-                }
-            }
-            else if (leg == LimbID::LEFT_LEG) {
-                if (quadrant == 2 || quadrant == 1) {
-                    NUClear::log<NUClear::WARN>("Left leg cannot kick towards: ", direction);
-                    valid = false;
-                }
-            }
-            else {
-                NUClear::log<NUClear::WARN>("Cannot kick with limb: ", leg);
-                updatePriority(0);
-                valid = false;
-            }
-
-            if (valid) {
-                this->kickCommand = kickCommand;
-                updatePriority(KICK_PRIORITY);
-            }
+            this->kickCommand = kickCommand;
+            updatePriority(KICK_PRIORITY);
         });
 
         on<Trigger<ExecuteKick>>().then([this] {
             // auto direction = kickCommand.direction;
             LimbID leg = kickCommand.leg;
 
-            if (leg == LimbID::RIGHT_LEG) {
-                emit(std::make_unique<ExecuteScriptByName>(
-                    id,
-                    std::vector<std::string>({"Stand.yaml", "KickRight.yaml", "Stand.yaml"})));
+            // Execute the penalty kick if the type is PENALTY
+            // Temporary implementation for WeBots penalty kicks
+            if (kickCommand.type == KickCommandType::PENALTY) {
+                emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"KickPenalty.yaml"})));
             }
-            else {  // if (leg == LimbID::LEFT_LEG) {
-                emit(std::make_unique<ExecuteScriptByName>(
-                    id,
-                    std::vector<std::string>({"Stand.yaml", "KickLeft.yaml", "Stand.yaml"})));
+            else {
+                if (leg == LimbID::RIGHT_LEG) {
+                    emit(std::make_unique<ExecuteScriptByName>(
+                        id,
+                        std::vector<std::string>({"Stand.yaml", "KickRight.yaml", "Stand.yaml"})));
+                }
+                else {  // if (leg == LimbID::LEFT_LEG) {
+                    emit(std::make_unique<ExecuteScriptByName>(
+                        id,
+                        std::vector<std::string>({"Stand.yaml", "KickLeft.yaml", "Stand.yaml"})));
+                }
             }
+
 
             // if (kickCommand.kick_command_type == KickType::SCRIPTED) {
             // } else {

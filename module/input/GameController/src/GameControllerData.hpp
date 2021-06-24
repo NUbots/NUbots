@@ -105,7 +105,7 @@ namespace module::input::gamecontroller {
         GameType gameType;                       // type of the game (GAME_ROUNDROBIN, GAME_PLAYOFF, GAME_DROPIN)
         State state;                             // state of the game (STATE_READY, STATE_PLAYING, etc)
         bool firstHalf;                          // 1 = game in first half, 0 otherwise
-        TeamColour kickOffTeam;                  // the team number of the next team to kick off or DROPBALL
+        uint8_t kickOffTeam;                     // the team number of the next team to kick off or DROPBALL
         Mode mode;                               // extra state information - (STATE2_NORMAL, STATE2_PENALTYSHOOT, etc)
         std::array<char, 4> secondaryStateInfo;  // Extra info on the secondary state
         TeamColour dropInTeam;                   // number of team that caused last drop in

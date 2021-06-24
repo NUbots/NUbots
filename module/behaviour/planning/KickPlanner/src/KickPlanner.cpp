@@ -181,13 +181,13 @@ namespace module::behaviour::planning {
                             // NUClear::log("scripted");
                             if (ballPosition.y() > 0.0) {
                                 emit(std::make_unique<KickScriptCommand>(
-                                    KickScriptCommand(Eigen::Vector3d::UnitX(), LimbID::LEFT_LEG)));
+                                    KickScriptCommand(LimbID::LEFT_LEG, KickCommandType::NORMAL)));
                                 emit(std::make_unique<WantsToKick>(true));
                                 ;
                             }
                             else {
                                 emit(std::make_unique<KickScriptCommand>(
-                                    KickScriptCommand(Eigen::Vector3d::UnitX(), LimbID::RIGHT_LEG)));
+                                    KickScriptCommand(LimbID::RIGHT_LEG, KickCommandType::NORMAL)));
                                 emit(std::make_unique<WantsToKick>(true));
                                 ;
                             }

@@ -392,6 +392,15 @@ namespace module::platform {
                 servo.present_position = 0.0;
                 servo.present_speed    = 0.0;
             }
+
+            auto targets = std::make_unique<ServoTargets>();
+            // Clear all servo targets on reset
+            for (int i = 0; i < ServoID::NUMBER_OF_SERVOS; i++) {
+                targets->targets.emplace_back(NUClear::clock::now(), i, 0.0, 1, 0);
+            }
+
+            // Emit it so it's captured by the reaction above
+            emit<Scope::DIRECT>(targets);
         });
     }
 

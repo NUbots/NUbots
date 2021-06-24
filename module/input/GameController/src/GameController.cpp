@@ -86,7 +86,7 @@ namespace module::input {
 
                           // Bind our new handle
                           std::tie(listenHandle, std::ignore, std::ignore) =
-                              on<UDP::Broadcast, With<GameState>>(recieve_port)
+                              on<UDP::Broadcast, With<GameState>, Single>(recieve_port)
                                   .then([this](const UDP::Packet& p, const GameState& gameState) {
                                       std::string remoteAddr = ipAddressIntToString(p.remote.address);
 
@@ -160,7 +160,7 @@ namespace module::input {
         packet.playersPerTeam = PLAYERS_PER_TEAM;
         packet.state          = static_cast<gamecontroller::State>(-1);
         packet.firstHalf      = true;
-        packet.kickOffTeam    = static_cast<gamecontroller::TeamColour>(-1);
+        packet.kickOffTeam    = -1;
         packet.mode           = static_cast<gamecontroller::Mode>(-1);
         packet.dropInTeam     = static_cast<gamecontroller::TeamColour>(-1);
         packet.dropInTime     = -1;
@@ -421,10 +421,10 @@ namespace module::input {
         if (oldPacket.kickOffTeam != newPacket.kickOffTeam) {
 
             // Update the kickoff team (us or them)
-            state->data.our_kick_off = newPacket.kickOffTeam == newOwnTeam.teamColour;
+            state->data.our_kick_off = newPacket.kickOffTeam == newOwnTeam.teamId;
 
             // new kick off team? :/
-            GameEvents::Context team = newPacket.kickOffTeam == newOwnTeam.teamColour
+            GameEvents::Context team = newPacket.kickOffTeam == newOwnTeam.teamId
                                            ? GameEvents::Context::Value::TEAM
                                            : GameEvents::Context::Value::OPPONENT;
             stateChanges.push_back([this, team] { emit(std::make_unique<KickOffTeam>(KickOffTeam{team})); });
