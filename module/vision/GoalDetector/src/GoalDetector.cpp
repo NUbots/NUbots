@@ -222,7 +222,7 @@ namespace module::vision {
                             g.measurements.push_back(Goal::Measurement());
                             g.measurements.back().type = Goal::MeasurementType::CENTRE;
 
-                            // Spherical Coordinates (1/distance, phi, theta)
+                            // Spherical Reciprocal Coordinates (1/distance, phi, theta)
                             g.measurements.back().srGCc =
                                 cartesianToReciprocalSpherical(Eigen::Vector3f(g.post.bottom * distance));
 
