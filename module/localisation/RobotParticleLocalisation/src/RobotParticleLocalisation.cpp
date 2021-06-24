@@ -61,12 +61,10 @@ namespace module::localisation {
                 field->position        = position.matrix();
                 field->covariance      = filter.getCovariance();
 
-                if (log_level <= NUClear::DEBUG) {
-                    log<NUClear::DEBUG>(fmt::format("Robot Location x {} : y {} : theta {}",
-                                                    state[RobotModel<double>::kX],
-                                                    state[RobotModel<double>::kY],
-                                                    state[RobotModel<double>::kAngle]));
-                }
+                log<NUClear::DEBUG>(fmt::format("Robot Location x {} : y {} : theta {}",
+                                                state[RobotModel<double>::kX],
+                                                state[RobotModel<double>::kY],
+                                                state[RobotModel<double>::kAngle]));
 
                 emit(std::make_unique<std::vector<Field>>(1, *field));
                 emit(field);
