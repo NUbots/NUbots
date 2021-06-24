@@ -34,7 +34,6 @@ namespace module::vision {
             float distance_disagreement      = 0;
             float maximum_deviation          = 0;
             Eigen::Vector3f ball_angular_cov = Eigen::Vector3f::Zero();
-            bool debug                       = false;
         } config;
 
     public:
