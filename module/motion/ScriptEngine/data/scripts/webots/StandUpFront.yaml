@@ -541,11 +541,11 @@
       gain: 30
       torque: 100
     - id: R_ANKLE_PITCH
-      position: -0.527818322
+      position: -0.50999999
       gain: 30
       torque: 100
     - id: L_ANKLE_PITCH
-      position: -0.58919251
+      position: -0.50999999
       gain: 30
       torque: 100
     - id: R_SHOULDER_PITCH
@@ -615,11 +615,11 @@
       gain: 30
       torque: 100
     - id: R_ANKLE_PITCH
-      position: -0.532421291
+      position: -0.419999987
       gain: 30
       torque: 100
     - id: L_ANKLE_PITCH
-      position: -0.556971014
+      position: -0.419999987
       gain: 30
       torque: 100
     - id: R_ANKLE_ROLL

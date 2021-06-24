@@ -337,8 +337,7 @@ namespace utility::motion::kinematics {
         joints.insert(joints.end(), joints2.begin(), joints2.end());
         return joints;
     }
-    std::vector<std::pair<ServoID, double>> calculateCameraLookJoints(const KinematicsModel& model,
-                                                                      const Eigen::Vector3d& cameraUnitVector) {
+    std::vector<std::pair<ServoID, double>> calculateCameraLookJoints(const Eigen::Vector3d& cameraUnitVector) {
         std::vector<std::pair<ServoID, double>> positions;
         positions.push_back(std::make_pair(ServoID::HEAD_YAW, std::atan2(cameraUnitVector.y(), cameraUnitVector.x())));
         positions.push_back(std::make_pair(ServoID::HEAD_PITCH,

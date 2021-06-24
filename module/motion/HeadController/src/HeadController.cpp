@@ -48,7 +48,6 @@ namespace module::motion {
     using utility::behaviour::RegisterAction;
     using utility::math::coordinates::cartesianToSpherical;
     using utility::math::coordinates::sphericalToCartesian;
-    using utility::motion::kinematics::calculateCameraLookJoints;
     using utility::motion::kinematics::calculateHeadJoints;
 
     // internal only callback messages to start and stop our action

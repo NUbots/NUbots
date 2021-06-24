@@ -23,8 +23,7 @@ namespace module::support::logging {
         return time.str();
     }
 
-    DataLogging::DataLogging(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), bytes_written(0) {
+    DataLogging::DataLogging(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         /// This receives every DataLog message as a Sync operation (one at a time) and writes it to the file
         on<Trigger<DataLog>, Sync<DataLog>>().then([this](const DataLog& data) {
@@ -46,9 +45,12 @@ namespace module::support::logging {
             uint32_t size = data.data.size() + sizeof(data.hash) + sizeof(timestamp_us);
 
             // If the file isn't open, or writing this message will exceed our max size, make a new file
-            if (!output_file.is_open()
-                || (bytes_written + size + 3 + sizeof(timestamp_us) + sizeof(data.hash)) >= config.output.split_size) {
-                output_file.close();
+            if (!encoder || !encoder->is_open()
+                || (encoder->get_bytes_written() + size + 3 + sizeof(timestamp_us) + sizeof(data.hash))
+                       >= config.output.split_size) {
+                if (encoder) {
+                    encoder->close();
+                }
 
                 std::filesystem::path temp;
 
@@ -72,61 +74,22 @@ namespace module::support::logging {
                 // Creates directory for output
                 std::filesystem::create_directories(config.output.directory / config.output.binary);
 
-                // Creates the output ".nbs" file.
+                // Creates the output ".nbs" file path.
                 output_file_path = std::filesystem::path();
                 output_file_path += config.output.directory / config.output.binary / ("_" + formatted_time() + ".nbs");
-                output_file = std::ofstream(output_file_path);
 
-                // Creates the output ".idx" file.
+                // Creates the output ".idx" file path.
                 index_file_path = output_file_path;
                 index_file_path += ".idx";
-                index_file = std::make_unique<zstr::ofstream>(index_file_path);
 
-                bytes_written = 0;
+                encoder = std::make_unique<utility::nbs::Encoder>(output_file_path, index_file_path);
             }
 
-            // Write radiation symbol
-            output_file.put(char(0xE2));
-            output_file.put(char(0x98));
-            output_file.put(char(0xA2));
-
-            // Write the size of the packet
-            output_file.write(reinterpret_cast<const char*>(&size), sizeof(size));
-
-            // Write the timestamp
-            output_file.write(reinterpret_cast<const char*>(&timestamp_us), sizeof(timestamp_us));
-
-            // Write the hash
-            output_file.write(reinterpret_cast<const char*>(&data.hash), sizeof(data.hash));
-
-            // Write the actual packet data
-            output_file.write(data.data.data(), data.data.size());
-            output_file.flush();
-
-            // NBS Index File Format
-            // Name      | Type               |  Description
-            // ------------------------------------------------------------
-            // hash      | uint64_t           | the 64bit hash for the payload type
-            // id        | uint32_t           | the id field of the payload (or 0 if it does not have one)
-            // timestamp | uint64_t           | Timestamp of the message or the emit timestamp in nanoseconds
-            // offset    | uint64_t           | offset to start of radiation symbol ☢
-            // size      | uint32_t           | Size of the whole packet from the radiation symbol
-
-            uint32_t full_size = size + 7;
-
-            index_file->write(reinterpret_cast<const char*>(&data.hash), sizeof(data.hash));
-            index_file->write(reinterpret_cast<const char*>(&data.id), sizeof(data.id));
-            index_file->write(reinterpret_cast<const char*>(&data.message_timestamp), sizeof(data.message_timestamp));
-            index_file->write(reinterpret_cast<const char*>(&bytes_written), sizeof(bytes_written));
-            index_file->write(reinterpret_cast<const char*>(&full_size), sizeof(full_size));
-            index_file->flush();
-
-            // Update the number of bytes we have written to the nbs file
-            bytes_written += size + 3 + sizeof(timestamp_us) + sizeof(data.hash);
+            encoder->write(data.timestamp, data.message_timestamp, data.hash, data.id, data.data);
         });
 
         on<Shutdown>().then([this] {
-            output_file.close();
+            encoder->close();
 
             std::filesystem::path temp;
 
