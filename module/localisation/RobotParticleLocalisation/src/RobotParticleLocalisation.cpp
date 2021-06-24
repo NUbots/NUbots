@@ -245,12 +245,11 @@ namespace module::localisation {
         });
     }
 
-
-    // True goal posiiton
-    Eigen::Vector3d RobotParticleLocalisation::getFieldPosition(const VisionGoal& goal,
-                                                                const message::support::FieldDescription& fd,
-                                                                const bool isOwn) const {
-        Eigen::Vector3d position = Eigen::Vector3d::Zero();
+    // True goal position
+    [[nodiscard]] Eigen::Vector3d RobotParticleLocalisation::getFieldPosition(
+        const VisionGoal& goal,
+        const message::support::FieldDescription& fd,
+        const bool& isOwn) const {
 
         const bool left  = (goal.side == VisionGoal::Side::LEFT);
         const bool right = (goal.side == VisionGoal::Side::RIGHT);
