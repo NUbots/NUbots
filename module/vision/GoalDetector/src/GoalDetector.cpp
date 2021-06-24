@@ -66,6 +66,8 @@ namespace module::vision {
         on<Trigger<GreenHorizon>, With<FieldDescription>, Buffer<2>>().then(
             "Goal Detector",
             [this](const GreenHorizon& horizon, const FieldDescription& field) {
+                log("Goal Detector");
+
                 // Convenience variables
                 const auto& cls                                     = horizon.mesh->classifications;
                 const auto& neighbours                              = horizon.mesh->neighbourhood;
@@ -258,6 +260,100 @@ namespace module::vision {
                                 goals->goals.push_back(std::move(g));
                             }
                         }
+                    }
+
+                    log<NUClear::DEBUG>("Culling colinear goals");
+
+                    for (auto it1 = goals->goals.begin(); it1 != goals->goals.end(); it1 = std::next(it1)) {
+                        log<NUClear::DEBUG>(fmt::format("Post Disances {}", it1->post.distance));
+                    }
+                    // If a sided goal is "behind" another sided goal it cannot be a goal
+                    // loop through all goals (sided), if any other goal is behind it (ie ~same phi theta && goal1_dist
+                    // < goal2_dist) throw it away! (or for now, make it an unknow goal or something)
+                    const Eigen::Affine3f Hcw(horizon.Hcw.cast<float>());
+                    for (auto goal_post_a = goals->goals.begin(); goal_post_a != goals->goals.end();) {
+                        bool increment_a = false;
+                        // Vector from camera to the bottom center of the post, projected to the observation
+                        Eigen::Matrix<float, 2, 1> rGOo_a =
+                            (goal_post_a->post.bottom.head<2>() * goal_post_a->post.distance);
+
+                        // Length of that vector
+                        const float distance_a = rGOo_a.norm();
+
+                        rGOo_a /= distance_a;
+
+                        for (auto goal_post_b = goals->goals.begin(); goal_post_b != goals->goals.end();) {
+
+                            // No point checking a post against itself
+                            if (goal_post_a != goal_post_b) {
+                                log<NUClear::DEBUG>(fmt::format("Goal post a at distance {}", distance_a));
+                                // Vector from camera to the bottom center of the post, projected to the observation
+                                Eigen::Matrix<float, 2, 1> rGOo_b =
+                                    (goal_post_b->post.bottom.head<2>() * goal_post_b->post.distance);
+
+                                // Length of that vector
+                                const float distance_b = rGOo_b.norm();
+
+                                rGOo_b /= distance_b;
+
+                                log<NUClear::DEBUG>(fmt::format("Goal post b at distance {}", distance_b));
+
+                                // Calculate the angular distance between the two posts
+                                const float post_to_post_theta = rGOo_a.dot(rGOo_b);
+
+                                const float d = distance_a < distance_b ? distance_a : distance_b;
+                                const float radius =
+                                    (2.0 * d)
+                                    / std::sqrt(4 * d * d
+                                                + field.dimensions.goalpost_width * field.dimensions.goalpost_width);
+
+                                log<NUClear::DEBUG>(fmt::format("Post vector a:{} {}, b:{} {}",
+                                                                rGOo_a.x(),
+                                                                rGOo_a.y(),
+                                                                rGOo_b.x(),
+                                                                rGOo_b.y()));
+
+                                if (post_to_post_theta > radius) {
+                                    if (distance_a < distance_b) {
+                                        // Remove the goal post
+                                        goal_post_a = goals->goals.erase(goal_post_a);
+                                        log<NUClear::DEBUG>(fmt::format(
+                                            "Throwout post at distance {}, post in front diatance {} because {} > {}",
+                                            distance_a,
+                                            distance_b,
+                                            post_to_post_theta,
+                                            radius));
+                                        // If we delete the outer loop iterator, no need to continue the inner loop for
+                                        // this outer loop
+                                        increment_a = true;
+                                        break;
+                                    }
+                                    else {
+                                        // Remove the goal post
+                                        goal_post_b = goals->goals.erase(goal_post_b);
+                                        log<NUClear::DEBUG>(fmt::format(
+                                            "Throwout post at distance {}, post in front diatance {} because {} < {}",
+                                            distance_b,
+                                            distance_a,
+                                            post_to_post_theta,
+                                            radius));
+                                    }
+                                }
+                                else {
+                                    goal_post_b = std::next(goal_post_b);
+                                }
+                            }
+                            else {
+                                goal_post_b = std::next(goal_post_b);
+                            }
+                        }
+                        if (!increment_a) {
+                            goal_post_a = std::next(goal_post_a);
+                        }
+                    }
+
+                    if (goals->goals.empty()) {
+                        log<NUClear::DEBUG>(fmt::format("Found no goals!"));
                     }
 
                     // Returns true if rGCc0 is to the left of rGCc1, with respect to camera z
