@@ -27,8 +27,8 @@ import "Vector.proto";
  * @author Brendan Annable
  */
 enum KickCommandType {
-    NORMAL = 0;
-    PENALTY  = 1;
+    NORMAL  = 0;
+    PENALTY = 1;
 }
 
 message KickCommand {
@@ -42,7 +42,7 @@ message KickCommand {
  * @author Brendan Annable
  */
 message KickScriptCommand {
-    uint32 leg       = 1;  // Leg to kick with
+    uint32          leg  = 1;  // Leg to kick with
     KickCommandType type = 2;
 }
 
