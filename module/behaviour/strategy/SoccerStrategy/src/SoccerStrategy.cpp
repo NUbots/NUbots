@@ -153,7 +153,7 @@ namespace module::behaviour::strategy {
 
                     // TODO: isSideChecking = true;
                     // TODO: only do this once put down
-                    unpenalisedLocalisationReset(fieldDescription);
+                    unpenalisedLocalisationReset();
                 }
             });
 
@@ -211,7 +211,7 @@ namespace module::behaviour::strategy {
                                 standStill();
                                 find({FieldTarget(FieldTarget::Target::SELF)});
                                 if (currentState != previousState) {
-                                    initialLocalisationReset(fieldDescription);
+                                    initialLocalisationReset();
                                 }
                                 currentState = Behaviour::State::INITIAL;
                             }
@@ -319,8 +319,10 @@ namespace module::behaviour::strategy {
         }
     }
 
-    void SoccerStrategy::initialLocalisationReset(const FieldDescription& /*fd*/) {
-        emit(std::make_unique<ResetRobotHypotheses>());
+    void SoccerStrategy::initialLocalisationReset() {
+        // Reset the robot and ball hypotheses to the default positions
+        emit(std::make_unique<ResetRobotHypotheses::Self>());
+        emit(std::make_unique<ResetRobotHypotheses::Ball>());
     }
 
     void SoccerStrategy::penaltyShootoutLocalisationReset(const FieldDescription& fd) {
@@ -333,13 +335,21 @@ namespace module::behaviour::strategy {
         selfSideBaseLine.heading      = -M_PI;
         selfSideBaseLine.heading_var  = 0.005;
 
-        reset->hypotheses.push_back(selfSideBaseLine);
+        reset->self_hypotheses.push_back(selfSideBaseLine);
+
+        ResetRobotHypotheses::Ball atFeet;
+        atFeet.position     = Eigen::Vector2d(0.2, 0);
+        atFeet.position_cov = Eigen::Vector2d::Constant(0.01).asDiagonal();
+
+        reset->ball_hypotheses.push_back(atFeet);
 
         emit(std::move(reset));
     }
 
-    void SoccerStrategy::unpenalisedLocalisationReset(const FieldDescription& /*fd*/) {
+    void SoccerStrategy::unpenalisedLocalisationReset() {
         emit(std::make_unique<ResetRobotHypotheses>());
+        // TODO This should do some random distribution or something as we don't know where the ball is
+        // emit(std::make_unique<ResetBallHypotheses>());
     }
 
     void SoccerStrategy::searchWalk() {}

@@ -100,9 +100,9 @@ namespace module::behaviour::strategy {
             NUClear::clock::now() - std::chrono::seconds(600);  // TODO: unhack
         NUClear::clock::time_point ballSearchStartTime;
         NUClear::clock::time_point goalLastMeasured;
-        void initialLocalisationReset(const message::support::FieldDescription& fieldDescription);
+        void initialLocalisationReset();
         void penaltyShootoutLocalisationReset(const message::support::FieldDescription& fieldDescription);
-        void unpenalisedLocalisationReset(const message::support::FieldDescription& fieldDescription);
+        void unpenalisedLocalisationReset();
 
         void standStill();
         void searchWalk();

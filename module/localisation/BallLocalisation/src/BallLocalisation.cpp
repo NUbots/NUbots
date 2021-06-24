@@ -54,15 +54,15 @@ namespace module::localisation {
 
         on<Startup, With<FieldDescription>>().then([this](const FieldDescription& fd) {
             // Left side penalty mark
-            config.start_state.emplace_back((fd.dimensions.field_length / 2.0) + fd.dimensions.penalty_mark_distance,
-                                            (-fd.dimensions.field_width / 2.0));
+            config.start_state.emplace_back((fd.dimensions.field_width / 2.0),
+                                            (fd.dimensions.field_length / 2.0) + fd.dimensions.penalty_mark_distance);
 
             // Right side penalty mark
-            config.start_state.emplace_back((fd.dimensions.field_length / 2.0) + fd.dimensions.penalty_mark_distance,
-                                            (fd.dimensions.field_width / 2.0));
+            config.start_state.emplace_back((fd.dimensions.field_width / 2.0),
+                                            -(fd.dimensions.field_length / 2.0) + fd.dimensions.penalty_mark_distance);
 
             // Infront of our feet (Penalty shootout)
-            config.start_state.emplace_back(0.5, 0);
+            config.start_state.emplace_back(0.2, 0);
 
             filter.set_state(config.start_state,
                              std::vector<Eigen::Vector2d>(config.start_state.size(), config.start_variance));
@@ -100,7 +100,7 @@ namespace module::localisation {
                 last_time_update_time = curr_time;
                 filter.time(seconds);
                 for (const auto& ball : balls.balls) {
-                    if (!balls.debug_ball) {
+                    if (!ball.debug_ball) {
 
                         // Now call Measurement Update. Supports multiple measurement methods and will treat them as
                         // separate measurements
@@ -115,10 +115,9 @@ namespace module::localisation {
                 }
             });
 
-        // TODO This should probably be a new message
-        on<Trigger<ResetRobotHypotheses>, With<Sensors>, Sync<BallLocalisation>>().then(
+        on<Trigger<ResetRobotHypotheses::Ball>, With<Sensors>, Sync<BallLocalisation>>().then(
             "Reset Ball Hypotheses",
-            [this](const ResetRobotHypotheses& locReset, const Sensors& sensors) {
+            [this](const ResetRobotHypotheses::Ball& locReset, const Sensors& sensors) {
                 filter.set_state(config.start_state,
                                  std::vector<Eigen::Vector2d>(config.start_state.size(), config.start_variance));
             });

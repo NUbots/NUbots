@@ -34,5 +34,12 @@ message ResetRobotHypotheses {
         bool   absolute_yaw = 5;
     }
 
-    repeated Self hypotheses = 1;
+    message Ball {
+        /// Estimate of the balls position in world space
+        vec2   position     = 1;
+        mat2   position_cov = 2;
+    }
+
+    repeated Self self_hypotheses = 1;
+    repeated Ball ball_hypotheses = 2;
 }

@@ -184,7 +184,7 @@ namespace module::localisation {
         on<Trigger<ResetRobotHypotheses>, With<Sensors>, Sync<RobotParticleLocalisation>>().then(
             "Reset Robot Hypotheses",
             [this](const ResetRobotHypotheses& locReset, const Sensors& sensors) {
-                if (locReset.hypotheses.empty()) {
+                if (locReset.self_hypotheses.empty()) {
                     filter.set_state(config.start_state,
                                      std::vector<Eigen::Vector3d>(config.start_state.size(), config.start_variance));
                     return;
@@ -194,7 +194,7 @@ namespace module::localisation {
                 std::vector<Eigen::Matrix3d> cov;
 
                 const Eigen::Affine3d Htw(sensors.Htw);
-                for (auto& s : locReset.hypotheses) {
+                for (auto& s : locReset.self_hypotheses) {
 
                     // Calculate the reset state
                     Eigen::Affine3d Hft;
