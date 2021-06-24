@@ -269,7 +269,7 @@ namespace module::vision {
                                                         std::abs(projection_distance - distance) / max_distance));
                         log<NUClear::DEBUG>("**************************************************");
 
-                        if (log_level <= NUClear::DEBUG keep) {
+                        if (log_level <= NUClear::DEBUG || keep) {
                             balls->balls.push_back(std::move(b));
                         }
                     }
