@@ -16,7 +16,7 @@ namespace module::support::logging {
         explicit FileLogHandler(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        std::filesystem::path log_file_name;
+        std::filesystem::path log_file_name = std::filesystem::path("log") / std::filesystem::path("log");
         std::ofstream log_file;
         int max_size = std::numeric_limits<int>::max();
 
