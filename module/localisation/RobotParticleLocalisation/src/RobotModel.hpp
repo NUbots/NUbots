@@ -42,7 +42,7 @@ namespace module::localisation {
     using utility::input::ServoID;
     using utility::localisation::fieldStateToTransform3D;
     using utility::math::angle::normalizeAngle;
-    using utility::math::coordinates::cartesianToSpherical;
+    using utility::math::coordinates::cartesianToReciprocalSpherical;
 
     template <typename Scalar>
     class RobotModel {
@@ -95,7 +95,9 @@ namespace module::localisation {
 
             if (type == Goal::MeasurementType::CENTRE) {
                 const Eigen::Matrix<Scalar, 3, 1> rGCc(Hcf * actual_position);
-                return cartesianToSpherical(rGCc);
+
+                // Spherical Coordinates (1/distance, phi, theta)
+                return Eigen::Matrix<Scalar, 3, 1>(cartesianToReciprocalSpherical(rGCc));
             }
 
             switch (FieldDescription::GoalpostType::Value(fd.dimensions.goalpost_type)) {
