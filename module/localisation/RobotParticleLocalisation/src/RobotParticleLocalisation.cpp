@@ -89,7 +89,7 @@ namespace module::localisation {
 
                     // Go through all of the known sided posts
                     for (const auto& goal_post : goals.goals) {
-                        if (goal_post.side != Goal::Side::UNKNOWN_SIDE) {
+                        if (goal_post.side != VisionGoal::Side::UNKNOWN_SIDE) {
                             // These are either left or right goal posts
 
                             // Compare each of these to the possible goal posts on the field (own and opp)
@@ -119,19 +119,19 @@ namespace module::localisation {
                                 if (log_level <= NUClear::DEBUG) {
 
                                     const Eigen::Vector3d state(filter.get());
-                                    Eigen::Transform<double, 3, Eigen::Affine> Hfw;
-                                    Hfw.translation() = Eigen::Matrix<double, 3, 1>(state.x(), state.y(), 0);
+                                    Eigen::Affine3d Hfw;
+                                    Hfw.translation() = Eigen::Vector3d(state.x(), state.y(), 0);
                                     Hfw.linear() =
-                                        Eigen::AngleAxis<double>(state.z(), Eigen::Matrix<double, 3, 1>::UnitZ())
-                                            .toRotationMatrix();
+                                        Eigen::AngleAxisd(state.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();
 
-                                    const Eigen::Transform<double, 3, Eigen::Affine> Hcf(goals.Hcw
-                                                                                         * Hfw.inverse().matrix());
+                                    const Eigen::Affine3d Hcf(goals.Hcw * Hfw.inverse().matrix());
+                                    const Eigen::Vector3d rGCc_own(Hcf * getFieldPosition(goal_post, fd, 1));
+                                    const Eigen::Vector3d rGCc_opp(Hcf * getFieldPosition(goal_post, fd, 0));
 
-                                    const Eigen::Matrix<double, 3, 1> rGCc_own(Hcf
-                                                                               * getFieldPosition(goal_post, fd, 1));
-                                    const Eigen::Matrix<double, 3, 1> rGCc_opp(Hcf
-                                                                               * getFieldPosition(goal_post, fd, 0));
+
+
+
+
                                     log(fmt::format("Testing post {}",
                                                     goal_post.side == Goal::Side::LEFT ? "left" : "Right"));
                                     log(fmt::format("Candidate own {}", candidate_own));
@@ -194,13 +194,13 @@ namespace module::localisation {
                     states.push_back(hfw_state_vec);
 
                     // Calculate the reset covariance
-                    const Eigen::Rotation2D<double> Hfw_xy(
+                    const Eigen::Rotation2Dd Hfw_xy(
                         utility::localisation::projectTo2D(Hfw, Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitX())
                             .rotation());
 
-                    const Eigen::Rotation2D<double> pos_cov(Hfw_xy * s.position_cov * Hfw_xy.matrix().transpose());
+                    const Eigen::Rotation2Dd pos_cov(Hfw_xy * s.position_cov * Hfw_xy.matrix().transpose());
 
-                    Eigen::Matrix<double, 3, 3> state_cov(Eigen::Matrix<double, 3, 3>::Identity());
+                    Eigen::Matrix3d state_cov(Eigen::Matrix3d::Identity());
                     state_cov.topLeftCorner(2, 2) = pos_cov.matrix();
                     state_cov(2, 2)               = s.heading_var;
                     cov.push_back(state_cov);
