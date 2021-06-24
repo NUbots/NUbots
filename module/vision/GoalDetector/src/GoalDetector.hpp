@@ -34,7 +34,6 @@ namespace module::vision {
             Eigen::Vector3f goal_projection_covariance = Eigen::Vector3f::Zero();
             bool use_median                            = false;
             float max_goal_distance                    = 0;
-            bool debug                                 = false;
         } config{};
 
     public:
