@@ -208,7 +208,7 @@ def run(sub_command, roles=None, role=None, target="g4dnxlarge", **kwargs):
         exec_build(target, roles)
     elif sub_command == "push":
         exec_push()
-    elif sub_command == "run":  # For testing
+    elif sub_command == "run":  # For testing docker image
         exec_run(role)
     else:
         print(f"invalid sub command: '{sub_command}'")
