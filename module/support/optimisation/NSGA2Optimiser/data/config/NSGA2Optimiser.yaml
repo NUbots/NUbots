@@ -2,7 +2,7 @@ population_size: 4
 num_generations: 5
 num_objectives: 2
 num_constraints: 2
-num_real_vars: 2
+num_real_vars: 11
 seed: 7777777
 probabilities:
   real:

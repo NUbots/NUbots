@@ -1,3 +1,4 @@
 walk_command:
   velocity: [0.1, 0.0]
   rotation: 0.0
+trial_duration_limit: 40 # number of seconds to run a single trial for
