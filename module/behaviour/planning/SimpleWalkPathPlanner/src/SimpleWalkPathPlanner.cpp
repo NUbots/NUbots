@@ -170,6 +170,7 @@ namespace module::behaviour::planning {
                     emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
                     return;
                 }
+                emit(std::make_unique<EnableWalkEngineCommand>(subsumptionId));
 
                 Eigen::Affine3d Htw(sensors.Htw);
 
