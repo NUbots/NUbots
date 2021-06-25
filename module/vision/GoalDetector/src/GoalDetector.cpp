@@ -146,6 +146,9 @@ namespace module::vision {
                             // Delete the second cluster
                             it2 = clusters.erase(it2);
                         }
+                        else {
+                            it2 = std::next(it2);
+                        }
                     }
                 }
 
