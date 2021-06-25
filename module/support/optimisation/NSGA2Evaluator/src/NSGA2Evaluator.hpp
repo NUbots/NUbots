@@ -6,8 +6,8 @@
 #include <nuclear>
 
 #include "message/platform/RawSensors.hpp"
-#include "message/support/optimisation/NSGA2EvaluationRequest.hpp"
-#include "message/support/optimisation/NSGA2TrialExpired.hpp"
+#include "message/support/optimisation/NSGA2EvaluatorMessages.hpp"
+#include "message/support/optimisation/NSGA2OptimiserMessages.hpp"
 
 namespace module {
     namespace support {

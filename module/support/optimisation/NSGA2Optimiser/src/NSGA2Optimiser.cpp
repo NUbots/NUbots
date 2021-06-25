@@ -4,9 +4,8 @@
 
 #include "message/platform/webots/WebotsReady.hpp"
 #include "message/platform/webots/messages.hpp"
-#include "message/support/optimisation/NSGA2EvaluationRequest.hpp"
-#include "message/support/optimisation/NSGA2FitnessScores.hpp"
-#include "message/support/optimisation/NSGA2Terminate.hpp"
+#include "message/support/optimisation/NSGA2EvaluatorMessages.hpp"
+#include "message/support/optimisation/NSGA2OptimiserMessages.hpp"
 
 #include "utility/support/yaml_expression.hpp"
 
@@ -206,7 +205,6 @@ namespace module {
 
                     // Tell the evaluator to finish up
                     std::unique_ptr<NSGA2Terminate> terminate = std::make_unique<NSGA2Terminate>();
-                    terminate->terminateMe                    = 1;
                     emit(terminate);
 
                     // Tell Webots to terminate

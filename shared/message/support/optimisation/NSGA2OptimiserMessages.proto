@@ -20,10 +20,14 @@
 syntax = "proto3";
 
 package message.support.optimisation;
+import "message/support/optimisation/NSGA2EvaluationParameters.proto";
 
-message NSGA2FitnessScores {
-    int32           id          = 1;
-    int32           generation  = 2;
-    repeated double objScore    = 3;
-    repeated double constraints = 4;
+// Request an individual be created with the following parameters
+message NSGA2EvaluationRequest {
+    int32                     id         = 1;
+    int32                     generation = 2;
+    NSGA2EvaluationParameters parameters = 3;
 }
+
+// Announce the NSGA2 algorithm is finished
+message NSGA2Terminate {}

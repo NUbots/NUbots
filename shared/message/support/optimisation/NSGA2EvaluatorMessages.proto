@@ -21,10 +21,17 @@ syntax = "proto3";
 
 package message.support.optimisation;
 
-import "message/support/optimisation/NSGA2EvaluationParameters.proto";
-
-message NSGA2EvaluationRequest {
-    int32                     id         = 1;
-    int32                     generation = 2;
-    NSGA2EvaluationParameters parameters = 3;
+message NSGA2TrialExpired {
+    int32 generation   = 1;
+    int32 individual   = 2;
+    int32 time_started = 3;
 }
+
+message NSGA2FitnessScores {
+    int32           id          = 1;
+    int32           generation  = 2;
+    repeated double objScore    = 3;
+    repeated double constraints = 4;
+}
+
+message NSGA2EvaluatorReady {}
