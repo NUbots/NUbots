@@ -436,7 +436,7 @@ namespace utility::math::filter {
         /**
          * @brief Calculates and returns the mean of all particles.
          */
-        [[nodiscard]] StateVec get() const {
+        [[nodiscard]] StateVec getMean() const {
             return particles.rowwise().mean();
         }
 

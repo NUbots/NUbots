@@ -51,7 +51,7 @@ namespace module::localisation {
                 filter.time(seconds);
 
                 // Get filter state and transform
-                Eigen::Vector3d state(filter.get());
+                Eigen::Vector3d state(filter.getMean());
                 emit(graph("robot filter state = ", state.x(), state.y(), state.z()));
 
                 // Emit state
@@ -118,7 +118,7 @@ namespace module::localisation {
                                                            goals.Hcw);
 
                                     if (log_level <= NUClear::DEBUG) {
-                                        const Eigen::Vector3d state(filter.get());
+                                        const Eigen::Vector3d state(filter.getMean());
                                         Eigen::Affine3d Hfw;
                                         Hfw.translation() = Eigen::Vector3d(state.x(), state.y(), 0);
                                         Hfw.linear() =
