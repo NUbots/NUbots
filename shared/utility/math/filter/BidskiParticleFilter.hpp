@@ -338,6 +338,13 @@ namespace utility::math::filter {
         [[nodiscard]] const ParticleList& getParticles() const {
             return particles;
         }
+
+        /**
+         * @brief Returns the underlying particle weights.
+         */
+        [[nodiscard]] const ParticleWeights& getParticleWeights() const {
+            return weights;
+        }
     };
 }  // namespace utility::math::filter
 
