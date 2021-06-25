@@ -158,11 +158,16 @@ namespace module::behaviour::planning {
                     return;
                 }
                 else if (latestCommand.type == message::behaviour::MotionCommand::Type::ABSOLUTE_STOP) {
+                    log("absolute stop");
                     emit<Scope::DIRECT>(std::make_unique<DisableWalkEngineCommand>(subsumptionId));
                     return;
                 }
+                else if (latestCommand.type == message::behaviour::MotionCommand::Type::STOP_ABSOLUTE_STOP) {
+                    emit<Scope::DIRECT>(std::make_unique<EnableWalkEngineCommand>(subsumptionId));
+                    return;
+                }
                 else if (latestCommand.type == message::behaviour::MotionCommand::Type::DIRECT_COMMAND) {
-                    emit(std::make_unique<EnableWalkEngineCommand>(subsumptionId));
+                    // emit(std::make_unique<EnableWalkEngineCommand>(subsumptionId));
                     // TO DO, change to Bezier stuff
                     std::unique_ptr<WalkCommand> command =
                         std::make_unique<WalkCommand>(subsumptionId, latestCommand.walk_command);
@@ -170,7 +175,7 @@ namespace module::behaviour::planning {
                     emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
                     return;
                 }
-                emit(std::make_unique<EnableWalkEngineCommand>(subsumptionId));
+                // emit(std::make_unique<EnableWalkEngineCommand>(subsumptionId));
 
                 Eigen::Affine3d Htw(sensors.Htw);
 

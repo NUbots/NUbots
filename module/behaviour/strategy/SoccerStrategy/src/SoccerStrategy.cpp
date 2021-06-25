@@ -337,6 +337,7 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::penaltyShootoutPlaying(const Field& field, const Ball& ball) {
+        emit<Scope::DIRECT>(std::make_unique<MotionCommand>(utility::behaviour::StopAbsoluteStop()));
         // Execute penalty kick script once if we haven't yet, and if we are not goalie
         if (!hasKicked && team_kicking_off == GameEvents::Context::TEAM) {
             emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::PENALTY));
