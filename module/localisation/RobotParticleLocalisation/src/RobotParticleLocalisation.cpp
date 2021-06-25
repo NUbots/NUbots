@@ -67,7 +67,6 @@ namespace module::localisation {
                                                 state[RobotModel<double>::kY],
                                                 state[RobotModel<double>::kAngle]));
 
-                emit(std::make_unique<std::vector<Field>>(1, *field));
                 emit(field);
             });
 
