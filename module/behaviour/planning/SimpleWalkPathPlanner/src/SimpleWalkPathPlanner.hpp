@@ -43,6 +43,7 @@ namespace module::behaviour::planning {
         const size_t subsumptionId;
         float turnSpeed            = 0.8;
         float forwardSpeed         = 1;
+        float walkToReadySpeed     = 0.1;
         float sideSpeed            = 1;
         float slow_approach_factor = 0.5;
         float a                    = 7;

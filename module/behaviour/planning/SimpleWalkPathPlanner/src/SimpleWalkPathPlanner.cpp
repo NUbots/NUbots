@@ -82,6 +82,7 @@ namespace module::behaviour::planning {
         on<Configuration>("SimpleWalkPathPlanner.yaml").then([this](const Configuration& file) {
             turnSpeed            = file.config["turnSpeed"].as<float>();
             forwardSpeed         = file.config["forwardSpeed"].as<float>();
+            walkToReadySpeed     = file.config["walkToReadySpeed"].as<float>();
             sideSpeed            = file.config["sideSpeed"].as<float>();
             a                    = file.config["a"].as<float>();
             b                    = file.config["b"].as<float>();
@@ -151,6 +152,7 @@ namespace module::behaviour::planning {
                 }
 
                 if (latestCommand.type == message::behaviour::MotionCommand::Type::STAND_STILL) {
+                    log("stop command emitted");
                     emit(std::make_unique<StopCommand>(subsumptionId));
                     return;
                 }
@@ -158,6 +160,14 @@ namespace module::behaviour::planning {
                     // TO DO, change to Bezier stuff
                     std::unique_ptr<WalkCommand> command =
                         std::make_unique<WalkCommand>(subsumptionId, latestCommand.walk_command);
+                    emit(std::move(command));
+                    emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
+                    return;
+                }   else if (latestCommand.type == message::behaviour::MotionCommand::Type::WALK_TO_READY_POSITION) {
+                    log("Walk to ready");
+                    std::unique_ptr<WalkCommand> command =
+                        std::make_unique<WalkCommand>(subsumptionId,
+                                                  Eigen::Vector3d(walkToReadySpeed, 0, 0));
                     emit(std::move(command));
                     emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
                     return;

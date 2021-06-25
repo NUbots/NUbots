@@ -1,7 +1,7 @@
 walk:
   # Full walk cycle frequency (how long it takes in seconds for a left + right steps)
   # (in Hz, > 0)
-  freq: 2.75
+  freq: 3
   # Length of double support phase in half cycle (how long both legs should be on the ground, as a ratio of how long it takes for a single step)
   # (ratio, [0:1])
   double_support_ratio: 0.1
