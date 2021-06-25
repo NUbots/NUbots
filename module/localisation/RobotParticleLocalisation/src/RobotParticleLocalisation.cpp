@@ -197,7 +197,7 @@ namespace module::localisation {
 
                     // Calculate the reset state
                     Eigen::Affine3d Hft;
-                    Hft.translation() = Eigen::Vector3d(s.position.x(), s.position.y(), 0);
+                    Hft.translation() = Eigen::Vector3d(s.rTFf.x(), s.rTFf.y(), 0);
                     // Linear part of transform is `s.heading` radians rotation about Z axis
                     Hft.linear() = Eigen::AngleAxisd(s.heading, Eigen::Vector3d::UnitZ()).toRotationMatrix();
                     const Eigen::Affine3d Hfw(Hft * Htw);
@@ -216,7 +216,7 @@ namespace module::localisation {
                         utility::localisation::projectTo2D(Hfw, Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitX())
                             .rotation());
 
-                    const Eigen::Rotation2Dd pos_cov(Hfw_xy * s.position_cov * Hfw_xy.matrix().transpose());
+                    const Eigen::Rotation2Dd pos_cov(Hfw_xy * s.covariance * Hfw_xy.matrix().transpose());
 
                     Eigen::Matrix3d state_cov(Eigen::Matrix3d::Identity());
                     state_cov.topLeftCorner(2, 2) = pos_cov.matrix();

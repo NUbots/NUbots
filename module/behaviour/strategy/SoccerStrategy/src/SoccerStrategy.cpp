@@ -333,11 +333,11 @@ namespace module::behaviour::strategy {
         auto robot_reset = std::make_unique<ResetRobotHypotheses>();
 
         ResetRobotHypotheses::Self selfSideBaseLine;
-        selfSideBaseLine.position =
+        selfSideBaseLine.rTFf =
             Eigen::Vector2d((-fd.dimensions.field_length / 2.0) + fd.dimensions.penalty_mark_distance, 0.0);
-        selfSideBaseLine.position_cov = Eigen::Vector2d::Constant(0.01).asDiagonal();
-        selfSideBaseLine.heading      = -M_PI;
-        selfSideBaseLine.heading_var  = 0.005;
+        selfSideBaseLine.covariance  = Eigen::Vector2d::Constant(0.01).asDiagonal();
+        selfSideBaseLine.heading     = -M_PI;
+        selfSideBaseLine.heading_var = 0.005;
 
         robot_reset->hypotheses.push_back(selfSideBaseLine);
 
@@ -346,8 +346,8 @@ namespace module::behaviour::strategy {
         auto ball_reset = std::make_unique<ResetBallHypotheses>();
 
         ResetBallHypotheses::Ball atFeet;
-        atFeet.position     = Eigen::Vector2d(0.2, 0);
-        atFeet.position_cov = Eigen::Vector2d::Constant(0.01).asDiagonal();
+        atFeet.rBWw       = Eigen::Vector2d(0.2, 0);
+        atFeet.covariance = Eigen::Vector2d::Constant(0.01).asDiagonal();
 
         ball_reset->hypotheses.push_back(atFeet);
         ball_reset->self_reset = true;
