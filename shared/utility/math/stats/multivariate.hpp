@@ -59,7 +59,7 @@ namespace utility::math::stats {
          * @param covariance_ The covariance matrix for this multivariate normal distribution
          */
         MultivariateNormal(const Eigen::Matrix<Scalar, N, 1>& mean_, const Eigen::Matrix<Scalar, N, N>& covariance_)
-            : mean(mean_), covariance(covariance_), gen(rd()) {
+            : mean(mean_), covariance(covariance_), gen(std::random_device()()) {
 
             // Calculate the spectral decomposition of the covariance matrix
             // This is needed MultivariateNormal::sample
@@ -109,7 +109,6 @@ namespace utility::math::stats {
         Eigen::Matrix<Scalar, N, N> transform = Eigen::Matrix<Scalar, N, N>::Zero();
 
         /// @brief Standard normal distribution. Used in MultivariateNormal::sample
-        std::random_device rd{};
         std::mt19937 gen;
         std::normal_distribution<Scalar> dist;
     };
