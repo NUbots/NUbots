@@ -259,7 +259,8 @@ namespace module::vision {
                         log<NUClear::DEBUG>(fmt::format("radius {}", b.cone.radius));
                         log<NUClear::DEBUG>(fmt::format("Axis {}", b.cone.axis.transpose()));
                         log<NUClear::DEBUG>(
-                            fmt::format("Distance {} ; srBCc {}", distance, b.measurements.back().srBCc.transpose()));
+                            fmt::format("Distance {}", distance));
+                    log<NUClear::DEBUG>(fmt::format("srBCc {}", b.measurements.back().srBCc.transpose()));
                         log<NUClear::DEBUG>(fmt::format("screen_angular {} - angular_size {}",
                                                         b.screen_angular.transpose(),
                                                         b.angular_size.transpose()));
