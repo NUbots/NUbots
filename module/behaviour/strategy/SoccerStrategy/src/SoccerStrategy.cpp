@@ -518,7 +518,7 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::goalieWalk(const Field& field, const Ball& ball) {
-        std::unique_ptr<MotionCommand> motionCommand;
+        auto motionCommand = std::make_unique<MotionCommand>();
 
         float timeSinceBallSeen =
             std::chrono::duration_cast<std::chrono::duration<float>>(NUClear::clock::now() - ballLastMeasured).count();
