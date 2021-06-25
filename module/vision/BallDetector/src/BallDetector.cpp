@@ -201,7 +201,6 @@ namespace module::vision {
                             log<NUClear::DEBUG>("--------------------------------------------------");
                             b.colour = keep ? message::conversion::math::fvec4(0.0f, 1.0f, 0.0f, 1.0f) : b.colour;
                             keep     = false;
-                            b.measurements.clear();
                         }
 
                         // DISTANCE IS TOO CLOSE
@@ -214,7 +213,6 @@ namespace module::vision {
                             log<NUClear::DEBUG>("--------------------------------------------------");
                             b.colour = keep ? message::conversion::math::fvec4(1.0f, 0.0f, 0.0f, 1.0f) : b.colour;
                             keep     = false;
-                            b.measurements.clear();
                         }
 
                         // IF THE DISAGREEMENT BETWEEN THE ANGULAR AND PROJECTION BASED DISTANCES ARE TOO LARGE
@@ -227,8 +225,8 @@ namespace module::vision {
                         // Point on line = camera = Hcw.topRightCorner<3, 1>()
                         Eigen::Affine3f Hcw(horizon.Hcw.cast<float>());
                         const float d = (Hcw.inverse().translation().z() - field.ball_radius) / std::abs(axis.z());
-                        const Eigen::Vector3f srBCc     = axis * d;
-                        const float projection_distance = srBCc.norm();
+                        const Eigen::Vector3f rBCc      = axis * d;
+                        const float projection_distance = rBCc.norm();
                         const float max_distance        = std::max(projection_distance, distance);
 
                         if ((std::abs(projection_distance - distance) / max_distance) > config.distance_disagreement) {
@@ -241,7 +239,6 @@ namespace module::vision {
                             log<NUClear::DEBUG>("--------------------------------------------------");
                             b.colour = keep ? message::conversion::math::fvec4(0.0f, 0.0f, 1.0f, 1.0f) : b.colour;
                             keep     = false;
-                            b.measurements.clear();
                         }
 
                         // IF THE BALL IS FURTHER THAN THE LENGTH OF THE FIELD
@@ -256,7 +253,6 @@ namespace module::vision {
 
                             b.colour = keep ? message::conversion::math::fvec4(1.0f, 0.0f, 1.0f, 1.0f) : b.colour;
                             keep     = false;
-                            b.measurements.clear();
                         }
 
                         log<NUClear::DEBUG>(fmt::format("Camera {}", balls->id));
@@ -272,6 +268,9 @@ namespace module::vision {
                                                         std::abs(projection_distance - distance) / max_distance));
                         log<NUClear::DEBUG>("**************************************************");
 
+                        if (!keep) {
+                            b.measurements.clear();
+                        }
                         if (log_level <= NUClear::DEBUG || keep) {
                             balls->balls.push_back(std::move(b));
                         }
