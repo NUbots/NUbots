@@ -18,7 +18,7 @@ namespace module::support::logging {
     private:
         std::filesystem::path log_file_name = std::filesystem::path("log") / std::filesystem::path("log");
         std::ofstream log_file;
-        int max_size = std::numeric_limits<int>::max();
+        long max_size = std::numeric_limits<long>::max();
 
         /// Holds the reaction so we can disable it when we fill the log folder
         ReactionHandle logging_reaction{};

@@ -42,7 +42,7 @@ namespace module::support::logging {
                                         .count();
 
             // The size of our output timestamp hash and data
-            uint32_t size = data.data.size() + sizeof(data.hash) + sizeof(timestamp_us);
+            uint64_t size = data.data.size() + sizeof(data.hash) + sizeof(timestamp_us);
 
             // If the file isn't open, or writing this message will exceed our max size, make a new file
             if (!encoder || !encoder->is_open()
@@ -162,7 +162,7 @@ namespace module::support::logging {
 
         // This checks that we haven't reached the max_size
         log_check_handler = on<Every<5, std::chrono::seconds>, Sync<DataLog>, Single>().then([this]() {
-            unsigned long size = 0;
+            long size = 0;
             for (auto& f : std::filesystem::recursive_directory_iterator(config.output.directory)) {
                 if (f.is_regular_file()) {
                     size += f.file_size();

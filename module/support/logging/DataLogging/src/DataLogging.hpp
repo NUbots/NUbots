@@ -43,7 +43,7 @@ namespace module::support::logging {
                 /// The threshold of bytes where after this we split the file
                 uint64_t split_size{};
 
-                uint64_t max_size = std::numeric_limits<int>::max();
+                long max_size = std::numeric_limits<long>::max();
             } output;
         } config;
 
