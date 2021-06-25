@@ -169,7 +169,7 @@ namespace module::behaviour::planning {
                     emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
                     return;
                 }   else if (latestCommand.type == message::behaviour::MotionCommand::Type::WALK_TO_READY_POSITION) {
-                    log("Walk to ready");
+                    // log("Walk to ready");
                     std::unique_ptr<WalkCommand> command =
                         std::make_unique<WalkCommand>(subsumptionId,
                                                   Eigen::Vector3d(walkToReadySpeedX, walkToReadySpeedY, walkToReadyRotation));
@@ -188,8 +188,8 @@ namespace module::behaviour::planning {
 
                 Eigen::Affine3d Htw(sensors.Htw);
                 // Get ball position
-                log("ball position x [m]:", ball.position.x());
-                log("ball position y [m]::", ball.position.y());
+                // log("ball position x [m]:", ball.position.x());
+                // log("ball position y [m]::", ball.position.y());
                 Eigen::Vector3d rBWw(ball.position.x(), ball.position.y(), fieldDescription.ball_radius);
                 // Transform ball position to torso space
                 Eigen::Vector3d rBTt = Htw * rBWw;
@@ -212,9 +212,9 @@ namespace module::behaviour::planning {
                 std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(
                     subsumptionId,
                     Eigen::Vector3d(velocity_vector.x(), velocity_vector.y(), 0));
-                log("x velocity command [m/s]:", velocity_vector.x());
-                log("y velocity command [m/s]:", velocity_vector.y());
-                log("heading angle [rad]:", heading_angle);
+                // log("x velocity command [m/s]:", velocity_vector.x());
+                // log("y velocity command [m/s]:", velocity_vector.y());
+                // log("heading angle [rad]:", heading_angle);
 
                 emit(std::move(command));
                 emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
