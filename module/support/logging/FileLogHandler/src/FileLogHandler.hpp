@@ -4,9 +4,9 @@
 #include <filesystem>
 #include <fstream>
 #include <limits>
+#include <mutex>
 #include <nuclear>
 #include <string>
-#include <mutex>
 
 namespace module::support::logging {
 

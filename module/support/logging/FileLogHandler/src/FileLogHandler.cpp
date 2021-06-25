@@ -35,7 +35,13 @@ namespace module::support::logging {
 
             log_file.open(log_file_name, std::ios_base::out | std::ios_base::app | std::ios_base::ate);
 
-            log_file << "\n*********************************************************************\n" << std::endl;
+            if (log_file.is_open()) {
+                log_file << "\n*********************************************************************\n" << std::endl;
+            }
+
+            else {
+                log<NUClear::ERROR>("Failed to open log file");
+            }
         });
 
         on<Shutdown>().then([this] {
@@ -47,6 +53,10 @@ namespace module::support::logging {
         stats_reaction = on<Trigger<ReactionStatistics>>().then([this](const ReactionStatistics& stats) {
             if (stats.exception) {
                 std::lock_guard<std::mutex> lock(mutex);
+                if (!log_file.is_open()) {
+                    log<NUClear::ERROR>("Log file was closed");  // TODO: Cameron maybe reopen this
+                    return;
+                }
                 // Get our reactor name
                 std::string reactor = stats.identifier[1];
 
@@ -55,7 +65,6 @@ namespace module::support::logging {
                 reactor      = lastC == std::string::npos ? reactor : reactor.substr(lastC + 1);
 
 #ifndef NDEBUG  // We have a cold hearted monstrosity that got built!
-
                 // Print our exception detals
                 log_file << reactor << " " << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
                          << Colour::brightred << "Exception:"
