@@ -103,7 +103,7 @@ namespace utility::math::filter {
                        const ResampleMethod& resample_method_ = ResampleMethod::RESIDUAL,
                        const ResampleMethod& residual_method_ = ResampleMethod::SYSTEMATIC) {
             set_state(mean, covariance);
-            resample_method = residual_method_;
+            resample_method = resample_method_;
 
             // The residual resampling method requires a secondary method to resample the residual particles. This
             // secondary method cannot be the residual method.
@@ -112,7 +112,7 @@ namespace utility::math::filter {
                     "Invalid setting for residual method. Can't use the residual resampling method to sample "
                     "residuals.");
             }
-            residual_method = resample_method_;
+            residual_method = residual_method_;
         }
 
         /**
@@ -137,7 +137,7 @@ namespace utility::math::filter {
                        const ResampleMethod& resample_method_ = ResampleMethod::RESIDUAL,
                        const ResampleMethod& residual_method_ = ResampleMethod::SYSTEMATIC) {
             set_state(hypotheses);
-            resample_method = residual_method_;
+            resample_method = resample_method_;
 
             // The residual resampling method requires a secondary method to resample the residual particles. This
             // secondary method cannot be the residual method.
@@ -146,7 +146,7 @@ namespace utility::math::filter {
                     "Invalid setting for residual method. Can't use the residual resampling method to sample "
                     "residuals.");
             }
-            residual_method = resample_method_;
+            residual_method = residual_method_;
         }
 
         /**
