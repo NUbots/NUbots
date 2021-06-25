@@ -130,7 +130,8 @@ namespace module::behaviour::planning {
             }
         });
 
-        on<Every<20, Per<std::chrono::seconds>>,
+        // Freq should be equal to the main loop in soccer strategy
+        on<Every<30, Per<std::chrono::seconds>>,
            With<Ball>,
            With<Field>,
            With<Sensors>,
@@ -150,11 +151,7 @@ namespace module::behaviour::planning {
                 }
 
                 if (latestCommand.type == message::behaviour::MotionCommand::Type::STAND_STILL) {
-
-
                     emit(std::make_unique<StopCommand>(subsumptionId));
-
-
                     return;
                 }
                 else if (latestCommand.type == message::behaviour::MotionCommand::Type::DIRECT_COMMAND) {
