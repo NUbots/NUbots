@@ -320,12 +320,7 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::penaltyShootoutSet(const FieldDescription& fieldDescription) {
-        log("set");
         // TODO unhack
-        // emit(std::make_unique<ExecuteScriptByName>(id,
-        //                                            std::vector<std::string>({"Zombie.yaml"}),
-        //                                            NUClear::clock::time_point())); // Emit at start of time to clear
-        //                                            queue
         emit(std::make_unique<ExecuteScriptByName>(subsumptionId, std::vector<std::string>({"Zombie.yaml"})));
         emit<Scope::DIRECT>(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {10000000000000.0}}));
         emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {0.0}}));

@@ -145,7 +145,6 @@ namespace module::behaviour::planning {
                          const WantsToKick& wantsTo,
                          const KickPlan& kickPlan,
                          const FieldDescription& fieldDescription) {
-                // log("simple walk path planner");
                 if (wantsTo.kick) {
                     emit(std::make_unique<StopCommand>(subsumptionId));
                     return;
@@ -156,7 +155,6 @@ namespace module::behaviour::planning {
                     return;
                 }
                 else if (latestCommand.type == message::behaviour::MotionCommand::Type::ABSOLUTE_STOP) {
-                    // log("absolute stop");
                     emit<Scope::DIRECT>(std::make_unique<DisableWalkEngineCommand>(subsumptionId));
                     return;
                 }
