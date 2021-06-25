@@ -143,10 +143,13 @@ def run_role(role: str, binaries_dir: str, env_vars: dict) -> None:
 
     # Run the role binary
     while True:
+        print(f"Binary '{role}' starting...")  # For debugging
         subprocess.run(f"./{role}", env=modified_env)
+        print(f"Binary '{role}' crashed!")  # For debugging
 
 
 if __name__ == "__main__":
     args = read_args()
+    print(args)  # For debugging
     update_config_files(args)
     run_role(args["role"], args["binaries_dir"], args["env_vars"])
