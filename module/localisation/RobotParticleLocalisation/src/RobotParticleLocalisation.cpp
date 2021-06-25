@@ -185,8 +185,9 @@ namespace module::localisation {
             "Reset Robot Hypotheses",
             [this](const ResetRobotHypotheses& locReset, const Sensors& sensors) {
                 if (locReset.hypotheses.empty()) {
-                    filter.set_state(config.start_state,
-                                     std::vector<Eigen::Vector3d>(config.start_state.size(), config.start_variance));
+                    filter.set_state(
+                        config.start_state,
+                        std::vector<Eigen::Matrix3d>(config.start_state.size(), config.start_variance.asDiagonal()));
                     return;
                 }
 
@@ -268,8 +269,9 @@ namespace module::localisation {
             //                                 0.0,
             //                                 -M_PI);
 
-            filter.set_state(config.start_state,
-                             std::vector<Eigen::Vector3d>(config.start_state.size(), config.start_variance));
+            filter.set_state(
+                config.start_state,
+                std::vector<Eigen::Matrix3d>(config.start_state.size(), config.start_variance.asDiagonal()));
         });
     }
 
