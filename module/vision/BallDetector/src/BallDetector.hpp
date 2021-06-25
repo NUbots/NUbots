@@ -34,7 +34,7 @@ namespace module::vision {
             float distance_disagreement      = 0.0f;
             float maximum_deviation          = 0.0f;
             Eigen::Vector3f ball_angular_cov = Eigen::Vector3f::Zero();
-        } config;
+        } config{};
 
     public:
         /// @brief Called by the powerplant to build and setup the BallDetector reactor.
