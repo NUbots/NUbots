@@ -20,7 +20,6 @@
 #ifndef UTILITY_MATH_STATS_MULTIVARIATE_HPP
 #define UTILITY_MATH_STATS_MULTIVARIATE_HPP
 
-#include <Eigen/Cholesky>
 #include <Eigen/Core>
 #include <Eigen/Eigenvalues>
 #include <cmath>
@@ -39,7 +38,6 @@ namespace utility::math::stats {
             : MultivariateNormal(Eigen::Matrix<Scalar, N, 1>::Zero(), covariance_) {}
         MultivariateNormal(const Eigen::Matrix<Scalar, N, 1>& mean_, const Eigen::Matrix<Scalar, N, N>& covariance_)
             : mean(mean_), covariance(covariance_), gen(rd()) {
-            // transform = Eigen::LLT<Eigen::Matrix<Scalar, N, N>>(covariance_).matrixL();
             Eigen::SelfAdjointEigenSolver<Eigen::Matrix<Scalar, N, N>> solver(covariance_);
             transform = solver.eigenvectors() * solver.eigenvalues().cwiseSqrt().asDiagonal();
         }
