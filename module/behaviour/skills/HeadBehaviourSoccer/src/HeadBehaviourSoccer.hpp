@@ -124,6 +124,8 @@ namespace module::behaviour::skills {
 
         NUClear::clock::time_point lastBallTime{};
         NUClear::clock::time_point lastGoalTime{};
+        // This should be read from a config file after Robocup2021 :)
+        std::chrono::duration<int64_t, std::nano> searcherTime = std::chrono::duration<int64_t, std::nano>(1500000000);
 
         std::map<message::behaviour::SoccerObjectPriority::SearchType, std::vector<Eigen::Vector2d>> searches;
 
