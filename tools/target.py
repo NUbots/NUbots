@@ -44,14 +44,15 @@ def run(target, build, should_pull, **kwargs):
 
     else:
         # We check if a build is necessary by diffing the docker folder with master
-        changed = (
-            subprocess.run(
-                ["git", "diff", "--exit-code", "origin/master", os.path.join(b.project_dir, "docker")],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            ).returncode
-            != 0
-        )
+        changed = False
+        # = (
+        #     subprocess.run(
+        #         ["git", "diff", "--exit-code", "origin/master", os.path.join(b.project_dir, "docker")],
+        #         stdout=subprocess.DEVNULL,
+        #         stderr=subprocess.DEVNULL,
+        #     ).returncode
+        #     != 0
+        # )
 
         # If there are changes in tracked files in the docker folder when comparing with master,
         # we want to build the image and we don't want to pull the image
