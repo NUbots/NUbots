@@ -6,6 +6,7 @@
 
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
+#include "message/localisation/Field.hpp"
 #include "message/localisation/ResetBallHypotheses.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/Ball.hpp"
@@ -20,6 +21,7 @@ namespace module::localisation {
     using extension::Configuration;
     using message::input::Sensors;
     using message::localisation::Ball;
+    using message::localisation::Field;
     using message::localisation::ResetBallHypotheses;
     using message::support::FieldDescription;
 
@@ -100,7 +102,7 @@ namespace module::localisation {
                 last_time_update_time = curr_time;
                 filter.time(seconds);
                 for (const auto& ball : balls.balls) {
-                    if (!ball.debug_ball) {
+                    if (!ball.measurements.empty()) {
 
                         // Now call Measurement Update. Supports multiple measurement methods and will treat them as
                         // separate measurements
@@ -115,11 +117,23 @@ namespace module::localisation {
                 }
             });
 
-        on<Trigger<ResetBallHypotheses>, With<Sensors>, Sync<BallLocalisation>>().then(
-            "Reset Ball Hypotheses",
-            [this](const ResetBallHypotheses& locReset, const Sensors& sensors) {
-                filter.set_state(config.start_state,
-                                 std::vector<Eigen::Vector2d>(config.start_state.size(), config.start_variance));
-            });
+        on<Trigger<ResetBallHypotheses>, With<Sensors>, With<Field>, With<FieldDescription>, Sync<BallLocalisation>>()
+            .then("Reset Ball Hypotheses",
+                  [this](const ResetBallHypotheses& locReset,
+                         const Sensors& sensors,
+                         const Field& field,
+                         const FieldDescription& fd) {
+                      if (locReset.self_reset) {
+                          filter.set_state(
+                              config.start_state,
+                              std::vector<Eigen::Vector2d>(config.start_state.size(), config.start_variance));
+                      }
+                      else {
+
+                          // Set the filter state to the field origin relative to us
+                          filter.set_state(Eigen::Affine2d(field.position).translation(),
+                                           config.start_variance.asDiagonal());
+                      }
+                  });
     }
 }  // namespace module::localisation

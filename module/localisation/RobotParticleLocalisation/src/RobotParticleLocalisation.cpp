@@ -67,7 +67,6 @@ namespace module::localisation {
                                                 state[RobotModel<double>::kY],
                                                 state[RobotModel<double>::kAngle]));
 
-                emit(std::make_unique<std::vector<Field>>(1, *field));
                 emit(field);
             });
 
@@ -184,7 +183,7 @@ namespace module::localisation {
         on<Trigger<ResetRobotHypotheses>, With<Sensors>, Sync<RobotParticleLocalisation>>().then(
             "Reset Robot Hypotheses",
             [this](const ResetRobotHypotheses& locReset, const Sensors& sensors) {
-                if (locReset.self_hypotheses.empty()) {
+                if (locReset.hypotheses.empty()) {
                     filter.set_state(config.start_state,
                                      std::vector<Eigen::Vector3d>(config.start_state.size(), config.start_variance));
                     return;
@@ -194,7 +193,7 @@ namespace module::localisation {
                 std::vector<Eigen::Matrix3d> cov;
 
                 const Eigen::Affine3d Htw(sensors.Htw);
-                for (auto& s : locReset.self_hypotheses) {
+                for (auto& s : locReset.hypotheses) {
 
                     // Calculate the reset state
                     Eigen::Affine3d Hft;

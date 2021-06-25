@@ -32,4 +32,5 @@ message ResetBallHypotheses {
     }
 
     repeated Ball hypotheses = 1;
+    bool          self_reset = 2;
 }

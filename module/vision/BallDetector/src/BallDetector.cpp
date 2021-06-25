@@ -199,9 +199,9 @@ namespace module::vision {
                                                             deviation,
                                                             config.maximum_deviation));
                             log<NUClear::DEBUG>("--------------------------------------------------");
-                            b.colour     = keep ? message::conversion::math::fvec4(0.0f, 1.0f, 0.0f, 1.0f) : b.colour;
-                            keep         = false;
-                            b.debug_ball = true;
+                            b.colour = keep ? message::conversion::math::fvec4(0.0f, 1.0f, 0.0f, 1.0f) : b.colour;
+                            keep     = false;
+                            b.measurements.clear();
                         }
 
                         // DISTANCE IS TOO CLOSE
@@ -212,9 +212,9 @@ namespace module::vision {
                                             distance,
                                             config.minimum_ball_distance));
                             log<NUClear::DEBUG>("--------------------------------------------------");
-                            b.colour     = keep ? message::conversion::math::fvec4(1.0f, 0.0f, 0.0f, 1.0f) : b.colour;
-                            keep         = false;
-                            b.debug_ball = true;
+                            b.colour = keep ? message::conversion::math::fvec4(1.0f, 0.0f, 0.0f, 1.0f) : b.colour;
+                            keep     = false;
+                            b.measurements.clear();
                         }
 
                         // IF THE DISAGREEMENT BETWEEN THE ANGULAR AND PROJECTION BASED DISTANCES ARE TOO LARGE
@@ -239,9 +239,9 @@ namespace module::vision {
                                             distance,
                                             projection_distance));
                             log<NUClear::DEBUG>("--------------------------------------------------");
-                            b.colour     = keep ? message::conversion::math::fvec4(0.0f, 0.0f, 1.0f, 1.0f) : b.colour;
-                            keep         = false;
-                            b.debug_ball = true;
+                            b.colour = keep ? message::conversion::math::fvec4(0.0f, 0.0f, 1.0f, 1.0f) : b.colour;
+                            keep     = false;
+                            b.measurements.clear();
                         }
 
                         // IF THE BALL IS FURTHER THAN THE LENGTH OF THE FIELD
@@ -254,9 +254,9 @@ namespace module::vision {
                                             field.dimensions.field_length));
                             log<NUClear::DEBUG>("--------------------------------------------------");
 
-                            b.colour     = keep ? message::conversion::math::fvec4(1.0f, 0.0f, 1.0f, 1.0f) : b.colour;
-                            keep         = false;
-                            b.debug_ball = true;
+                            b.colour = keep ? message::conversion::math::fvec4(1.0f, 0.0f, 1.0f, 1.0f) : b.colour;
+                            keep     = false;
+                            b.measurements.clear();
                         }
 
                         log<NUClear::DEBUG>(fmt::format("Camera {}", balls->id));
