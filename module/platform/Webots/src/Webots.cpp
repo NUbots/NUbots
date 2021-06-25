@@ -60,7 +60,7 @@ namespace module::platform {
     using message::motion::ServoTargets;
     using message::output::CompressedImage;
     using message::platform::RawSensors;
-    using message::platform::ResetRawSensors;
+    using message::platform::ResetWebotsServos;
 
     using message::platform::webots::ActuatorRequests;
     using message::platform::webots::Message;
@@ -381,7 +381,9 @@ namespace module::platform {
             }
         });
 
-        on<Trigger<ResetRawSensors>>().then([this]() {
+        // Used to reset our local servo state when the robot is teleported by the referee in the simulation.
+        // Needed to cancel old servo targets and reset the pose to account for the teleportation.
+        on<Trigger<ResetWebotsServos>>().then([this]() {
             // Reset the servo state
             for (auto& servo : servo_state) {
                 servo.dirty            = false;
@@ -392,6 +394,16 @@ namespace module::platform {
                 servo.present_position = 0.0;
                 servo.present_speed    = 0.0;
             }
+
+            auto targets = std::make_unique<ServoTargets>();
+
+            // Clear all servo targets on reset
+            for (int i = 0; i < ServoID::NUMBER_OF_SERVOS; i++) {
+                targets->targets.emplace_back(NUClear::clock::now(), i, 0.0, 1, 0);
+            }
+
+            // Emit it so it's captured by the reaction above
+            emit<Scope::DIRECT>(targets);
         });
     }
 
