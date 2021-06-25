@@ -61,8 +61,8 @@ namespace module::behaviour::skills {
             EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
         });
 
-        on<Trigger<KickScriptCommand>>().then([this](const KickScriptCommand& kickCommand) {
-            this->kickCommand = kickCommand;
+        on<Trigger<KickScriptCommand>>().then([this](const KickScriptCommand& cmd) {
+            kickCommand = cmd;
             updatePriority(KICK_PRIORITY);
         });
 
