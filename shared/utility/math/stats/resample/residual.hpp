@@ -26,14 +26,12 @@
 #include <utility>
 #include <vector>
 
-#include "systematic.hpp"
-
 // Resampling techniques!!!
 // http://users.isy.liu.se/rt/schon/Publications/HolSG2006.pdf
 namespace utility::math::stats::resample {
 
-    template <typename Iterator>
-    std::vector<int> residual(const int& count, Iterator&& begin, Iterator&& end) {
+    template <typename Iterator, typename ResidualSampler>
+    std::vector<int> residual(const int& count, Iterator&& begin, Iterator&& end, ResidualSampler&& residual_sampler) {
         using Scalar = std::remove_reference_t<decltype(*begin)>;
 
         // Get number of weights
@@ -60,8 +58,10 @@ namespace utility::math::stats::resample {
             return w - std::floor(w);
         });
 
-        auto residual_elements = systematic(residual_count, normalised.begin(), normalised.end());
+        // Sample the residual particles
+        const auto residual_elements = residual_sampler(residual_count, normalised.begin(), normalised.end());
 
+        // Append residual particles
         idx.insert(idx.end(), residual_elements.begin(), residual_elements.end());
 
         return idx;
