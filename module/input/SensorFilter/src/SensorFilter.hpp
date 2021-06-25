@@ -80,8 +80,6 @@ namespace module::input {
         struct Config {
             Config() = default;
 
-            bool debug = false;
-
             struct MotionFilter {
                 MotionFilter() = default;
 
