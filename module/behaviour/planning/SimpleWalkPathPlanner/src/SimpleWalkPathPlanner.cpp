@@ -154,6 +154,15 @@ namespace module::behaviour::planning {
                     emit(std::make_unique<StopCommand>(subsumptionId));
                     return;
                 }
+                else if (latestCommand.type == message::behaviour::MotionCommand::Type::DIRECT_COMMAND) {
+                    // TO DO, change to Bezier stuff
+                    std::unique_ptr<WalkCommand> command =
+                        std::make_unique<WalkCommand>(subsumptionId, latestCommand.walk_command);
+                    emit(std::move(command));
+                    emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
+                    return;
+                }
+
 
                 Eigen::Affine3d Htw(sensors.Htw);
 
