@@ -325,18 +325,10 @@ namespace utility::math::filter {
         }
 
         /**
-         * @brief Do a weighted resampling of all of the particles in the filter. Resampled particles are then perturbed
-         * (using model::noise) and the model is asked to provide new rogue particles (if the model is using
-         * them). Resampled particles are then limited (using model::limit) to ensure validity and all particle weights
-         * are reset to 1.
-         *
-         * @param dt The amount of time that has elapsed since the previous time update step.
+         * @brief Do a weighted resampling of all of the particles in the filter. The model is also asked to provide new
+         * rogues. All particle weights are reset to 1.
          */
-        void resample(const Scalar& dt) {
-
-            // Make a multivariate normal distribution with zero mean and the model's process noise as the covariance
-            // This will be used to perturb the resampled particles
-            MultivariateNormal<Scalar, Model::size> multivariate(model.noise(dt));
+        void resample() {
 
             // Get indexes to the particles that are being resampled
             // Some particles may be resampled multiple times
@@ -347,7 +339,7 @@ namespace utility::math::filter {
             ParticleList resampled_particles(Model::size, particles.cols());
             for (int i = 0; i < int(idx.size()); ++i) {
                 // Create a new particle by using the selected particle as the mean + value from process noise
-                resampled_particles.col(i) = particles.col(idx[i]) + multivariate.sample();
+                resampled_particles.col(i) = particles.col(idx[i]);
             }
 
             // Get the model to give us some rogue particles
@@ -355,9 +347,9 @@ namespace utility::math::filter {
                 resampled_particles.col(model.n_particles + i) = model.get_rogue();
             }
 
-            // Update our particles with our resampled particles and limit each one to ensure it remains valid
+            // Update our particles with our resampled particles
             for (int i = 0; i < particles.cols(); i++) {
-                particles.col(i) = model.limit(resampled_particles.col(i));
+                particles.col(i) = resampled_particles.col(i);
             }
 
             // Reset all weights to 1
@@ -378,11 +370,16 @@ namespace utility::math::filter {
         void time(const Scalar& dt, Args&&... params) {
 
             // Resample our particles
-            resample(dt);
+            resample();
 
-            // Get the model to apply a time update to each particle
+            // Make a multivariate normal distribution with zero mean and the model's process noise as the covariance
+            // This will be used to perturb the resampled particles
+            MultivariateNormal<Scalar, Model::size> multivariate(model.noise(dt));
+
+            // Perturb each particle and get the model to apply a time update. Then limit particle to ensure it is valid
             for (int i = 0; i < particles.cols(); ++i) {
-                particles.col(i) = model.time(particles.col(i), dt, std::forward<Args>(params)...);
+                particles.col(i) = model.limit(
+                    model.time(particles.col(i) + multivariate.sample(), dt, std::forward<Args>(params)...));
             }
         }
 
