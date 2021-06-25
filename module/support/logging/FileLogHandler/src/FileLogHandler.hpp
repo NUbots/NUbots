@@ -6,6 +6,7 @@
 #include <limits>
 #include <nuclear>
 #include <string>
+#include <mutex>
 
 namespace module::support::logging {
 
@@ -16,6 +17,7 @@ namespace module::support::logging {
         explicit FileLogHandler(std::unique_ptr<NUClear::Environment> environment);
 
     private:
+        std::mutex mutex;
         std::filesystem::path log_file_name = std::filesystem::path("log") / std::filesystem::path("log");
         std::ofstream log_file;
         long max_size = std::numeric_limits<long>::max();

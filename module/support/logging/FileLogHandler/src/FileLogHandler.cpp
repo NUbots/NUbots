@@ -18,6 +18,7 @@ namespace module::support::logging {
 
     FileLogHandler::FileLogHandler(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
+        , mutex()
         , log_file_name("/home/nubots/log")
         , log_file(log_file_name, std::ios_base::out | std::ios_base::app | std::ios_base::ate) {
 
@@ -42,9 +43,10 @@ namespace module::support::logging {
             }
         });
 
-        stats_reaction = on<Trigger<ReactionStatistics>, Sync<FileLogHandler>>().then([this](const ReactionStatistics& stats) {
+        stats_reaction = on<Trigger<ReactionStatistics>>().then([this](const ReactionStatistics& stats) {
+            
             if (stats.exception) {
-
+                std::lock_guard<std::mutex> lock(mutex);
                 // Get our reactor name
                 std::string reactor = stats.identifier[1];
 
@@ -86,14 +88,14 @@ namespace module::support::logging {
             }
         });
 
-        logging_reaction = on<Trigger<LogMessage>, Sync<FileLogHandler>>().then([this](const LogMessage& message) {
+        logging_reaction = on<Trigger<LogMessage>>().then([this](const LogMessage& message) {
+            std::lock_guard<std::mutex> lock(mutex);
             // Where this message came from
             std::string source = "";
 
             // If we know where this log message came from, we display that
-            if (message.task && message.task->identifier.size() >= 2) {
+            if (message.task != nullptr) {
                 // Get our reactor name
-                std::cout << message.task->identifier[1] << std::endl;
                 std::string reactor = message.task->identifier[1];
 
                 // Strip to the last semicolon if we have one
@@ -121,7 +123,8 @@ namespace module::support::logging {
 
 
         // This checks that we haven't reached the max_size
-        log_check_handler = on<Every<5, std::chrono::seconds>, Sync<FileLogHandler>, Single>().then([this]() {
+        log_check_handler = on<Every<5, std::chrono::seconds>, Single>().then([this]() {
+            std::lock_guard<std::mutex> lock(mutex);
             long size = 0;
             for (auto& f : std::filesystem::recursive_directory_iterator(log_file_name.remove_filename())) {
                 if (f.is_regular_file()) {
