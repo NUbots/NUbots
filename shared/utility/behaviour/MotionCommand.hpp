@@ -49,6 +49,12 @@ namespace utility::behaviour {
         return cmd;
     }
 
+    inline MotionCommand RotateOnSpot() {
+        MotionCommand cmd;
+        cmd.type       = MotionCommand::Type::Value::ROTATE_ON_SPOT;
+        return cmd;
+    }
+
     inline MotionCommand BallApproach(const Eigen::Vector2d& kickTarget_) {
         MotionCommand cmd;
         cmd.type        = MotionCommand::Type::Value::BALL_APPROACH;

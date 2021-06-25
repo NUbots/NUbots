@@ -1,11 +1,15 @@
 forwardSpeed: 0.1
-sideSpeed: 0.01
+sideSpeed: 0.1
 turnSpeed : 0.08
 walkToReadySpeed: 0.05
 slow_approach_factor: 0.01
 a: 7
 b: 0
 search_timeout: 3
+
+rotateSpeed: 0.2
+rotateSpeedX: -0.04
+rotateSpeedY: 0
 
 robot_ground_space: false
 

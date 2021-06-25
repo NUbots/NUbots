@@ -144,6 +144,7 @@ namespace module::behaviour::strategy {
         // For checking last seen times
         on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
             if (!balls.balls.empty()) {
+                log("BALL HAS BEEN SEEN");
                 ballLastMeasured = NUClear::clock::now();
             }
         });
@@ -324,7 +325,7 @@ namespace module::behaviour::strategy {
         }
         // If we are not kicking off then be a goalie
         else if (team_kicking_off == GameEvents::Context::OPPONENT) {
-            find({FieldTarget(FieldTarget::Target::BALL)});
+            // find({FieldTarget(FieldTarget::Target::BALL)});
             goalieWalk(field, ball);
             currentState = Behaviour::State::GOALIE_WALK;
         }
@@ -353,7 +354,7 @@ namespace module::behaviour::strategy {
     void SoccerStrategy::normalInitial() {
         log<NUClear::DEBUG>("normalInitial()");
         standStill();
-        find({FieldTarget(FieldTarget::Target::SELF)});
+        // find({FieldTarget(FieldTarget::Target::SELF)});
 
         if (resetInInitial) {
             initialLocalisationReset();
@@ -383,7 +384,7 @@ namespace module::behaviour::strategy {
         }
 
         // Self localise while we're walking on in READY
-        find({FieldTarget(FieldTarget::Target::SELF)});
+        // find({FieldTarget(FieldTarget::Target::SELF)});
 
         currentState = Behaviour::State::READY;
     }
@@ -391,7 +392,7 @@ namespace module::behaviour::strategy {
     void SoccerStrategy::normalSet() {
         log<NUClear::DEBUG>("normalSet()");
         standStill();
-        find({FieldTarget(FieldTarget::Target::BALL)});
+        // find({FieldTarget(FieldTarget::Target::BALL)});
         resetInInitial = true;
         currentState   = Behaviour::State::SET;
     }
@@ -400,49 +401,42 @@ namespace module::behaviour::strategy {
         log<NUClear::DEBUG>("normalPlaying()");
         if (penalised() && !cfg_.forcePlaying) {  // penalised
             standStill();
-            find({FieldTarget(FieldTarget::Target::SELF)});
+            // find({FieldTarget(FieldTarget::Target::SELF)});
             currentState = Behaviour::State::PENALISED;
+            return;
         }
-        else if (cfg_.is_goalie) {  // goalie
-            find({FieldTarget(FieldTarget::Target::BALL)});
-            goalieWalk(field, ball);
-            currentState = Behaviour::State::GOALIE_WALK;
+        // else if (cfg_.is_goalie) {  // goalie
+        //     find({FieldTarget(FieldTarget::Target::BALL)});
+        //     goalieWalk(field, ball);
+        //     currentState = Behaviour::State::GOALIE_WALK;
+        // }
+
+        if (NUClear::clock::now() - ballLastMeasured < cfg_.ball_last_seen_max_time) {
+            // ball has been seen recently
+            log("Walk to ball");
+            walkTo(fieldDescription, FieldTarget::Target::BALL);
+            currentState = Behaviour::State::WALK_TO_BALL;
         }
         else {
-            if (NUClear::clock::now() - ballLastMeasured
-                < cfg_.ball_last_seen_max_time) {  // ball has been seen recently
-                find({FieldTarget(FieldTarget::Target::BALL)});
-                walkTo(fieldDescription, FieldTarget::Target::BALL);
-                currentState = Behaviour::State::WALK_TO_BALL;
-            }
-            else {  // ball has not been seen recently
-                Eigen::Affine2d position(field.position);
-                if (position.translation().norm() > 1) {  // a long way away from centre
-                    // walk to centre of field
-                    find({FieldTarget(FieldTarget::Target::BALL)});
-                    walkTo(fieldDescription, Eigen::Vector2d::Zero());
-                    currentState = Behaviour::State::MOVE_TO_CENTRE;
-                }
-                else {
-                    find({FieldTarget(FieldTarget::Target::BALL)});
-                    walkTo(fieldDescription, FieldTarget::Target::BALL);
-                    currentState = Behaviour::State::SEARCH_FOR_BALL;
-                }
-            }
+            // ball has not been seen recently
+            // Rotate on the spot to find ball
+            log("Ball has not been seen recently");
+            emit(std::make_unique<MotionCommand>(utility::behaviour::RotateOnSpot()));
+            // find({FieldTarget(FieldTarget::Target::BALL)});
         }
     }
 
     void SoccerStrategy::normalFinished() {
         log<NUClear::DEBUG>("normalFinished()");
         standStill();
-        find({FieldTarget(FieldTarget::Target::SELF)});
+        // find({FieldTarget(FieldTarget::Target::SELF)});
         currentState = Behaviour::State::FINISHED;
     }
 
     void SoccerStrategy::normalTimeout() {
         log<NUClear::DEBUG>("normalTimeout()");
         standStill();
-        find({FieldTarget(FieldTarget::Target::SELF)});
+        // find({FieldTarget(FieldTarget::Target::SELF)});
         currentState = Behaviour::State::TIMEOUT;
     }
 
@@ -490,12 +484,12 @@ namespace module::behaviour::strategy {
         emit(std::make_unique<MotionCommand>(utility::behaviour::BallApproach(enemyGoal)));
     }
 
-    void SoccerStrategy::walkTo(const FieldDescription& fieldDescription, const Eigen::Vector2d& position) {
-        log<NUClear::DEBUG>("walkTo() position");
-        emit(std::make_unique<MotionCommand>(utility::behaviour::WalkToState(
-        utility::math::transform::lookAt(position,
-                                            Eigen::Vector2d(fieldDescription.dimensions.field_length * 0.5, 0.0)))));
-    }
+    // void SoccerStrategy::walkTo(const FieldDescription& fieldDescription, const Eigen::Vector2d& position) {
+    //     log<NUClear::DEBUG>("walkTo() position");
+    //     emit(std::make_unique<MotionCommand>(utility::behaviour::WalkToState(
+    //     utility::math::transform::lookAt(position,
+    //                                         Eigen::Vector2d(fieldDescription.dimensions.field_length * 0.5, 0.0)))));
+    // }
 
     bool SoccerStrategy::pickedUp(const Sensors& sensors) {
         bool feetOffGround = !sensors.feet[BodySide::LEFT].down && !sensors.feet[BodySide::RIGHT].down;

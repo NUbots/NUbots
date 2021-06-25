@@ -35,6 +35,8 @@ message MotionCommand {
         DIRECT_COMMAND = 3;
         // Walk to a the ready position.
         WALK_TO_READY_POSITION = 4;
+        // Rotate on spot
+        ROTATE_ON_SPOT = 5;
 
     }
 
