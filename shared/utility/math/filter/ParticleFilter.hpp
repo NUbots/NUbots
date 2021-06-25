@@ -56,7 +56,8 @@ namespace utility::math::filter {
      *
      * Measurement Update: Asks the model to predict what the next measurement will be (based on current state/particle)
      * and the finds the difference between the model's prediction and the actual measurement. The likelihood of this
-     * measurement occuring is then determined using a multivariate normal distribution probability density function.
+     * prediction occuring, given the measurement, is then determined using a multivariate normal distribution
+     * probability density function.
      *
      * @tparam Scalar The scalar type to use for all calculations. This puts an upper bound on the numerical precision
      * that is achievable by the filter
