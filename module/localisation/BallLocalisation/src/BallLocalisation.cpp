@@ -124,11 +124,14 @@ namespace module::localisation {
                          const Sensors& sensors,
                          const Field& field,
                          const FieldDescription& fd) {
+                      // If we've just reset our self localisation we can't trust Htf. So reset balls to the known
+                      // starting position
                       if (locReset.self_reset) {
                           filter.set_state(
                               config.start_state,
                               std::vector<Eigen::Vector2d>(config.start_state.size(), config.start_variance));
                       }
+                      // Otherwise reset balls to the [0, 0] field position
                       else {
 
                           // Set the filter state to the field origin relative to us
