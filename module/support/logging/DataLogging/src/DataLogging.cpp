@@ -162,7 +162,7 @@ namespace module::support::logging {
 
         // This checks that we haven't reached the max_size
         log_check_handler = on<Every<5, std::chrono::seconds>, Sync<DataLog>, Single>().then([this]() {
-            unsigned int size = 0;
+            unsigned long size = 0;
             for (auto& f : std::filesystem::recursive_directory_iterator(config.output.directory)) {
                 if (f.is_regular_file()) {
                     size += f.file_size();
