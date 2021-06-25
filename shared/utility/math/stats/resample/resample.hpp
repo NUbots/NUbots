@@ -35,7 +35,7 @@ namespace utility::math::stats::resample {
         using Scalar = std::remove_reference_t<decltype(*begin)>;
 
         // Get number of weights
-        auto n_weights = std::distance(begin, end);
+        const auto n_weights = std::distance(begin, end);
 
         // Create our distribution generator
         Generator<Scalar> fn(count);

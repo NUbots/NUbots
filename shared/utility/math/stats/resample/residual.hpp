@@ -35,7 +35,7 @@ namespace utility::math::stats::resample {
         using Scalar = std::remove_reference_t<decltype(*begin)>;
 
         // Get number of weights
-        auto n_weights = std::distance(begin, end);
+        const auto n_weights = std::distance(begin, end);
 
         // Normalise the weights and multiply out by our count
         std::vector<Scalar> normalised(n_weights, Scalar(0));
@@ -51,7 +51,7 @@ namespace utility::math::stats::resample {
         }
 
         // Now sample the residual particles
-        int residual_count = count - idx.size();
+        const int residual_count = count - idx.size();
 
         // Adjust the weights
         std::transform(normalised.begin(), normalised.end(), normalised.begin(), [&](const Scalar& w) {
