@@ -24,6 +24,7 @@
 
 #include <Eigen/Dense>
 #include <random>
+#include <utility>
 #include <vector>
 
 #include "utility/math/stats/multivariate.hpp"
@@ -131,11 +132,10 @@ namespace utility::math::filter {
          * @param residual_method_ When using ResampleMethod::RESIDUAL for the resample method, this method will be used
          * when the residual method needs to resample residual particles.
          */
-        ParticleFilter(const std::vector<StateVec>& mean,
-                       const std::vector<StateMat>& covariance,
+        ParticleFilter(const std::vector<std::pair<StateVec, StateMat>>& hypotheses,
                        const ResampleMethod& resample_method_ = ResampleMethod::RESIDUAL,
                        const ResampleMethod& residual_method_ = ResampleMethod::SYSTEMATIC) {
-            set_state(mean, covariance);
+            set_state(hypotheses);
             resample_method = residual_method_;
 
             // The residual resampling method requires a secondary method to resample the residual particles. This
@@ -180,18 +180,18 @@ namespace utility::math::filter {
          * @param covariance The covariance of the multivariate normal distribution. There is one covariance for each
          * initial hypothesis.
          */
-        void set_state(const std::vector<StateVec>& mean, const std::vector<StateMat>& covariance) {
+        void set_state(const std::vector<std::pair<StateVec, StateMat>>& hypotheses) {
             // Make sure we have sane inputs
             if (mean.size() != covariance.size() || mean.size() == 0) {
                 throw std::runtime_error("ParticleFilter::set_state called with invalid data");
             }
 
             // Initialise all of the particles
-            if (mean.size() == 1) {
-                init(mean[0], covariance[0]);
+            if (hypotheses.size() == 1) {
+                init(hypotheses[0].first, hypotheses[0].second);
             }
             else {
-                init(mean, covariance);
+                init(hypotheses);
             }
 
             // Limit the state of each particle to ensure they are still valid
@@ -251,7 +251,7 @@ namespace utility::math::filter {
          * @param mean The mean of the multivariate normal distribution.
          * @param covariance The covariance of the multivariate normal distribution.
          */
-        void init(const std::vector<StateVec>& mean, const std::vector<StateMat>& covariance) {
+        void init(const std::vector<std::pair<StateVec, StateMat>>& hypotheses) {
             // Make sure our particle list has the right shape
             if (particles.cols() != model.n_particles + model.n_rogues || particles.rows() != Model::size) {
                 particles.resize(Model::size, model.n_particles + model.n_rogues);
@@ -260,12 +260,13 @@ namespace utility::math::filter {
 
             // We want to evenly distribute the particles across all hypotheses
             // If the distribution is not even then the remaining particles will be treated as extra rogues
-            const int particles_per_state = model.n_particles / mean.size();
+            const int particles_per_state = model.n_particles / hypotheses.size();
 
             // For each hypothesis sample a random vector from the multivariate distribution for each particle
-            for (int hypothesis = 0; hypothesis < int(mean.size()); ++hypothesis) {
+            for (int hypothesis = 0; hypothesis < int(hypotheses.size()); ++hypothesis) {
                 // Setup our multivariate normal distribution for this hypothesis so we can initialise the particles
-                MultivariateNormal<Scalar, Model::size> multivariate(mean[hypothesis], covariance[hypothesis]);
+                MultivariateNormal<Scalar, Model::size> multivariate(hypotheses[hypothesis].first,
+                                                                     hypotheses[hypothesis].second);
 
                 const int start_col = hypothesis * particles_per_state;
                 for (int i = 0; i < particles_per_state; ++i) {
