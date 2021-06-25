@@ -1,5 +1,7 @@
 forwardSpeed: 0.1
 sideSpeed: 0.1
+log_level: WARN
+
 turnSpeed : 0.08
 walkToReadySpeedX: 0.05
 walkToReadySpeedY: 0.025

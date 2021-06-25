@@ -130,6 +130,8 @@ namespace module::motion {
         });
 
         on<Configuration>("QuinticWalk.yaml").then([this](const Configuration& cfg) {
+            log_level = cfg["log_level"].as<NUClear::LogLevel>();
+
             load_quintic_walk(cfg, normal_config);
 
             // Make sure the walk engine has the parameters at least once

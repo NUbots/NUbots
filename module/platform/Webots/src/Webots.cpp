@@ -232,7 +232,7 @@ namespace module::platform {
             max_velocity_mx106   = config["max_velocity_mx106"].as<double>();
             max_fsr_value        = config["max_fsr_value"].as<float>();
 
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            log_level = config["log_level"].as<NUClear::LogLevel>();
 
             clock_smoothing = config["clock_smoothing"].as<double>();
 
@@ -792,8 +792,13 @@ namespace module::platform {
             image->format         = fourcc("BGR3");  // Change to "JPEG" when webots compression is implemented
             image->data           = camera.image;
 
-            image->id        = camera_context[camera.name].id;
-            image->timestamp = NUClear::clock::time_point(std::chrono::nanoseconds(sensor_measurements.time));
+            image->id = camera_context[camera.name].id;
+            // TODO unhack
+            // Webots clock and custom clock get out of sync very quickly. HeadBehaviour requires accurate timestamps
+            // on images to ensure it doesn't get stuck fixated on the ball. Safer at this point to save the timestamp
+            // using NUClear clock, however the unsync issue should be investigated
+            image->timestamp = NUClear::clock::now();
+            // connect_time + std::chrono::milliseconds(sensor_measurements.time);
 
             Eigen::Affine3d Hcw;
 

@@ -1,5 +1,5 @@
 # Log level of DEBUG will print out compression rates
-log_level: INFO
+log_level: WARN
 
 confidence_threshold: 0.6             # How confident do we need to be that this is a goal point
 cluster_points: 5                     # How many points do we need to claim this cluster is a viable goal
@@ -10,4 +10,3 @@ use_median: false                     # Use median rather than mean when determi
                                       # post edges
 max_goal_distance: 12                 # maximum distance that a goal may be from the robot to be a real goal,
                                       # measured as diagonal of the field (furthest two points)
-debug: false                          # Turn on debug outputs

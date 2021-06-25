@@ -66,6 +66,8 @@ namespace module::input {
         on<Configuration, Trigger<GlobalConfig>>("GameController.yaml")
             .then("GameController Configuration",
                   [this](const Configuration& config, const GlobalConfig& globalConfig) {
+                      log_level = config["log_level"].as<NUClear::LogLevel>();
+
                       PLAYER_ID = globalConfig.player_id;
                       TEAM_ID   = globalConfig.team_id;
                       send_port = config["send_port"].as<uint>();

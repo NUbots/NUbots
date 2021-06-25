@@ -97,15 +97,7 @@ namespace module::behaviour::strategy {
         , goalLastMeasured() {
 
         on<Configuration>("SoccerStrategy.yaml").then([this](const Configuration& config) {
-            // clang-format off
-            std::string lvl = config["log_level"].as<std::string>();
-            if (lvl == "TRACE")      { this->log_level = NUClear::TRACE; }
-            else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; log("set log level to debug"); }
-            else if (lvl == "INFO")  { this->log_level = NUClear::INFO;  }
-            else if (lvl == "WARN")  { this->log_level = NUClear::WARN;  }
-            else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
-            else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
-            // clang-format on
+            log_level = config["log_level"].as<NUClear::LogLevel>();
 
             using namespace std::chrono;
             cfg_.ball_last_seen_max_time = duration_cast<NUClear::clock::duration>(

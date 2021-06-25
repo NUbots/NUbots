@@ -1,4 +1,4 @@
-log_level: DEBUG
+log_level: WARN
 
 ball_last_seen_max_time: 10
 goal_last_seen_max_time: 10

@@ -82,6 +82,9 @@ namespace module::behaviour::planning {
 
         // do a little configurating
         on<Configuration>("SimpleWalkPathPlanner.yaml").then([this](const Configuration& file) {
+            // TODO(KipHamiltons): Make these all consistent with the other files. We don't use .config anywhere else
+            log_level = file.config["log_level"].as<NUClear::LogLevel>();
+
             turnSpeed            = file.config["turnSpeed"].as<float>();
             forwardSpeed         = file.config["forwardSpeed"].as<float>();
             walkToReadySpeedX     = file.config["walkToReadySpeedX"].as<float>();

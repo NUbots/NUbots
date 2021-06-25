@@ -20,6 +20,7 @@
 #include "HeadBehaviourSoccer.hpp"
 
 #include <string>
+#include <type_traits>
 
 #include "extension/Configuration.hpp"
 
@@ -107,6 +108,8 @@ namespace module::behaviour::skills {
 
         on<Configuration>("HeadBehaviourSoccer.yaml")
             .then("Head Behaviour Soccer Config", [this](const Configuration& config) {
+                log_level = config["log_level"].as<NUClear::LogLevel>();
+
                 lastPlanUpdate     = NUClear::clock::now();
                 timeLastObjectSeen = NUClear::clock::now();
 
@@ -266,7 +269,6 @@ namespace module::behaviour::skills {
                               lastCentroid = currentCentroid_world;
                           }
                       }
-
                       // State Transitions
                       if (!isGettingUp) {
                           switch (state) {
@@ -352,7 +354,10 @@ namespace module::behaviour::skills {
 
         // Get balls
         if (ballPriority == maxPriority) {
-            if (vballs && vballs->balls.size() > 0) {
+            // If there is a ball and we've got a new ball or it's been less than searcherTime since the last ball
+            if (vballs && vballs->balls.size() > 0
+                && (lastBallTime != vballs->timestamp || NUClear::clock::now() - vballs->timestamp < searcherTime)) {
+                lastBallTime = vballs->timestamp;
                 // Fixate on ball
                 timeLastObjectSeen = now;
                 auto& ball         = vballs->balls.at(0);
@@ -379,7 +384,9 @@ namespace module::behaviour::skills {
         // TODO: make this a loop over a list of objects or something
         // Get goals
         if (goalPriority == maxPriority) {
-            if (vgoals && vgoals->goals.size() > 0) {
+            if (vgoals && vgoals->goals.size() > 0
+                && (lastGoalTime != vgoals->timestamp || NUClear::clock::now() - vgoals->timestamp < searcherTime)) {
+                lastGoalTime = vgoals->timestamp;
                 // Fixate on goals and lines and other landmarks
                 timeLastObjectSeen = now;
                 std::set<Goal::Side> visiblePosts;

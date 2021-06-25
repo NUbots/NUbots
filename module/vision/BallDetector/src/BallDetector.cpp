@@ -50,7 +50,7 @@ namespace module::vision {
     BallDetector::BallDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("BallDetector.yaml").then([this](const Configuration& cfg) {
-            this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
+            log_level = cfg["log_level"].as<NUClear::LogLevel>();
 
             config.confidence_threshold  = cfg["confidence_threshold"].as<float>();
             config.cluster_points        = cfg["cluster_points"].as<int>();

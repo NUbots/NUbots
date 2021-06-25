@@ -33,6 +33,14 @@ def register(command):
         help="The platform to compile for",
     )
 
+    build_subcommand.add_argument(
+        "--no-clean",
+        dest="clean",
+        action="store_false",
+        default=True,
+        help="Disables cleaning the build volume before compiling",
+    )
+
     push_subcommand = subparsers.add_parser(
         "push",
         help=textwrap.dedent(
@@ -66,7 +74,7 @@ def get_cmake_flags(roles_to_build):
     return ["-DCMAKE_BUILD_TYPE=Release"] + role_flags
 
 
-def exec_build(target, roles):
+def exec_build(target, roles, clean):
     # Tags correct image as 'selected' for given target
     print("Setting target '{}'...".format(target))
     exit_code = subprocess.run(["./b", "target", target]).returncode
@@ -75,11 +83,12 @@ def exec_build(target, roles):
         sys.exit(exit_code)
 
     # Cleans build volume to ensure everything gets build for given target
-    print("Cleaning build volume...")
-    exit_code = subprocess.run(["./b", "configure", "--clean"]).returncode
-    if exit_code != 0:
-        cprint("unable to clean build volume, exit code {}".format(exit_code), "red", attrs=["bold"])
-        sys.exit(exit_code)
+    if clean:
+        print("Cleaning build volume...")
+        exit_code = subprocess.run(["./b", "configure", "--clean"]).returncode
+        if exit_code != 0:
+            cprint("unable to clean build volume, exit code {}".format(exit_code), "red", attrs=["bold"])
+            sys.exit(exit_code)
 
     # Sets cmake flags and roles
     print("Configuring build...")
@@ -94,13 +103,6 @@ def exec_build(target, roles):
     exit_code = subprocess.run(["./b", "build"]).returncode
     if exit_code != 0:
         cprint(f"unable to build code, exit code {exit_code}", "red", attrs=["bold"])
-        sys.exit(exit_code)
-
-    # Set selected image back to 'generic'
-    print("Setting back to target 'generic'...")
-    exit_code = subprocess.run(["./b", "target", "generic"]).returncode
-    if exit_code != 0:
-        cprint("unable to set target to 'generic', exit code {}".format(exit_code), "red", attrs=["bold"])
         sys.exit(exit_code)
 
     # The paths to the built binaries and toolchain on the local filesystem
@@ -142,6 +144,16 @@ def exec_build(target, roles):
             color="red",
             attrs=["bold"],
         )
+        sys.exit(exit_code)
+
+    # Change back into project dir
+    os.chdir(b.project_dir)
+
+    # Set selected image back to 'generic'
+    print("Setting back to target 'generic'...")
+    exit_code = subprocess.run(["./b", "target", "generic"]).returncode
+    if exit_code != 0:
+        cprint("unable to set target to 'generic', exit code {}".format(exit_code), "red", attrs=["bold"])
         sys.exit(exit_code)
 
     # Clean up
@@ -203,9 +215,9 @@ def exec_push():
         sys.exit(exit_code)
 
 
-def run(sub_command, roles=None, role=None, target="g4dnxlarge", **kwargs):
+def run(sub_command, clean=False, roles=None, role=None, target="g4dnxlarge", **kwargs):
     if sub_command == "build":
-        exec_build(target, roles)
+        exec_build(target, roles, clean)
     elif sub_command == "push":
         exec_push()
     elif sub_command == "run":  # For testing docker image
