@@ -81,6 +81,8 @@ namespace module::behaviour::planning {
 
 
         on<Configuration>("KickPlanner.yaml").then([this](const Configuration& config) {
+            log_level = config["log_level"].as<NUClear::LogLevel>();
+
             cfg.max_ball_distance        = config["max_ball_distance"].as<float>();
             cfg.kick_corridor_width      = config["kick_corridor_width"].as<float>();
             cfg.seconds_not_seen_limit   = config["seconds_not_seen_limit"].as<float>();
