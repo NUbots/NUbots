@@ -86,7 +86,6 @@ namespace module::behaviour::strategy {
 
         std::vector<message::behaviour::FieldTarget> lookTarget;
 
-        // TODO: remove horrible
         bool isGettingUp                                     = false;
         bool hasKicked                                       = false;
         bool selfPenalised                                   = false;
