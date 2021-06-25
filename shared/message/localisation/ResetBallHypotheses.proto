@@ -23,16 +23,13 @@ package message.localisation;
 import "Matrix.proto";
 import "Vector.proto";
 
-message ResetRobotHypotheses {
+message ResetBallHypotheses {
 
-    message Self {
-        /// Estimate of the robot's {x, y} position in field space
-        vec2   position     = 1;
-        mat2   position_cov = 2;
-        double heading      = 3;
-        double heading_var  = 4;
-        bool   absolute_yaw = 5;
+    message Ball {
+        /// Estimate of the balls position in world space
+        vec2 position     = 1;
+        mat2 position_cov = 2;
     }
 
-    repeated Self hypotheses = 1;
+    repeated Ball hypotheses = 1;
 }

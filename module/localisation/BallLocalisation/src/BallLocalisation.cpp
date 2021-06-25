@@ -6,7 +6,7 @@
 
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
-#include "message/localisation/ResetRobotHypotheses.hpp"
+#include "message/localisation/ResetBallHypotheses.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/Ball.hpp"
 
@@ -20,7 +20,7 @@ namespace module::localisation {
     using extension::Configuration;
     using message::input::Sensors;
     using message::localisation::Ball;
-    using message::localisation::ResetRobotHypotheses;
+    using message::localisation::ResetBallHypotheses;
     using message::support::FieldDescription;
 
     using utility::math::coordinates::cartesianToSpherical;
@@ -115,9 +115,9 @@ namespace module::localisation {
                 }
             });
 
-        on<Trigger<ResetRobotHypotheses::Ball>, With<Sensors>, Sync<BallLocalisation>>().then(
+        on<Trigger<ResetBallHypotheses>, With<Sensors>, Sync<BallLocalisation>>().then(
             "Reset Ball Hypotheses",
-            [this](const ResetRobotHypotheses::Ball& locReset, const Sensors& sensors) {
+            [this](const ResetBallHypotheses& locReset, const Sensors& sensors) {
                 filter.set_state(config.start_state,
                                  std::vector<Eigen::Vector2d>(config.start_state.size(), config.start_variance));
             });

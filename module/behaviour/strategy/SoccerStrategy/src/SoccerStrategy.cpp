@@ -321,8 +321,8 @@ namespace module::behaviour::strategy {
 
     void SoccerStrategy::initialLocalisationReset() {
         // Reset the robot and ball hypotheses to the default positions
-        emit(std::make_unique<ResetRobotHypotheses::Self>());
-        emit(std::make_unique<ResetRobotHypotheses::Ball>());
+        emit(std::make_unique<ResetRobotHypotheses>());
+        emit(std::make_unique<ResetBallHypotheses>());
     }
 
     void SoccerStrategy::penaltyShootoutLocalisationReset(const FieldDescription& fd) {
@@ -337,7 +337,9 @@ namespace module::behaviour::strategy {
 
         reset->self_hypotheses.push_back(selfSideBaseLine);
 
-        ResetRobotHypotheses::Ball atFeet;
+        auto reset = std::make_unique<ResetBallHypotheses>();
+
+        ResetBallHypotheses::Ball atFeet;
         atFeet.position     = Eigen::Vector2d(0.2, 0);
         atFeet.position_cov = Eigen::Vector2d::Constant(0.01).asDiagonal();
 
@@ -348,8 +350,9 @@ namespace module::behaviour::strategy {
 
     void SoccerStrategy::unpenalisedLocalisationReset() {
         emit(std::make_unique<ResetRobotHypotheses>());
+
         // TODO This should do some random distribution or something as we don't know where the ball is
-        // emit(std::make_unique<ResetBallHypotheses>());
+        emit(std::make_unique<ResetBallHypotheses>());
     }
 
     void SoccerStrategy::searchWalk() {}
