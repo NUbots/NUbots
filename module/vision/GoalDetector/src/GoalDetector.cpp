@@ -120,7 +120,7 @@ namespace module::vision {
                 log<NUClear::DEBUG>(fmt::format("Found {} clusters that intersect the green horizon", clusters.size()));
 
                 // Find overlapping clusters and merge them
-                for (auto it = clusters.begin(); it != std::prev(clusters.end()); it = std::next(it)) {
+                for (auto it = clusters.begin(); it != clusters.end(); it = std::next(it)) {
                     // Get the largest and smallest theta values
                     auto range_a = std::minmax_element(it->begin(), it->end(), [&rays](const int& a, const int& b) {
                         return std::atan2(rays(1, a), rays(0, a)) < std::atan2(rays(1, b), rays(0, b));
