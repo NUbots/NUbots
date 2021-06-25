@@ -23,7 +23,7 @@ namespace module::motion {
         /// @brief Called by the powerplant to build and setup the QuinticWalk reactor.
         explicit QuinticWalk(std::unique_ptr<NUClear::Environment> environment);
 
-        static constexpr int UPDATE_FREQUENCY = 200;
+        static constexpr int UPDATE_FREQUENCY = 100;
 
     private:
         /// Current subsumption ID key to access motors.

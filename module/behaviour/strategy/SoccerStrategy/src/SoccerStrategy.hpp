@@ -95,6 +95,7 @@ namespace module::behaviour::strategy {
         message::input::GameEvents::Context team_kicking_off = message::input::GameEvents::Context::UNKNOWN;
         message::behaviour::KickPlan::KickType kickType;
         message::behaviour::Behaviour::State currentState = message::behaviour::Behaviour::State::INIT;
+        const size_t subsumptionId;
 
         NUClear::clock::time_point lastLocalised = NUClear::clock::now();
 

@@ -311,7 +311,7 @@ namespace module::motion {
         const auto joints = calculateLegJoints(kinematicsModel,
                                                Eigen::Affine3f(left_foot.cast<float>()),
                                                Eigen::Affine3f(right_foot.cast<float>()));
-
+        // log("emitting walk stuff");
         auto waypoints = motion(joints);
         emit(std::move(waypoints));
     }

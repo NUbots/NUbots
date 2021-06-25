@@ -22,6 +22,7 @@
 #include <Eigen/Geometry>
 
 #include "extension/Configuration.hpp"
+#include "extension/Script.hpp"
 
 #include "message/behaviour/MotionCommand.hpp"
 #include "message/behaviour/Nod.hpp"
@@ -38,6 +39,7 @@
 #include "message/vision/Ball.hpp"
 #include "message/vision/Goal.hpp"
 
+#include "utility/behaviour/Action.hpp"
 #include "utility/behaviour/MotionCommand.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/math/matrix/transform.hpp"
@@ -47,6 +49,7 @@
 namespace module::behaviour::strategy {
 
     using extension::Configuration;
+    using extension::ExecuteScriptByName;
 
     using message::behaviour::Behaviour;
     using message::behaviour::FieldTarget;
@@ -79,11 +82,14 @@ namespace module::behaviour::strategy {
     using message::support::FieldDescription;
     using VisionBalls = message::vision::Balls;
     using VisionGoals = message::vision::Goals;
+    using utility::behaviour::ActionPriorities;
+    using utility::behaviour::RegisterAction;
+
+    using ServoID = utility::input::ServoID;
 
     using utility::input::LimbID;
     using utility::support::Expression;
 
-    using utility::support::Expression;
 
     SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
@@ -92,7 +98,8 @@ namespace module::behaviour::strategy {
         , lookTarget()
         , kickType()
         , ballSearchStartTime()
-        , goalLastMeasured() {
+        , goalLastMeasured()
+        , subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
         on<Configuration>("SoccerStrategy.yaml").then([this](const Configuration& config) {
             using namespace std::chrono;
@@ -123,6 +130,25 @@ namespace module::behaviour::strategy {
             cfg_.forcePlaying         = config["force_playing"].as<bool>();
             cfg_.forcePenaltyShootout = config["force_penalty_shootout"].as<bool>();
         });
+
+        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
+            subsumptionId,
+            "Soccer Strats",
+            {
+                // Limb sets required by the walk engine:
+                std::pair<double, std::set<LimbID>>(
+                    0,
+                    {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD}),
+            },
+            [this](const std::set<LimbID>&) {
+
+            },
+            [this](const std::set<LimbID>&) {
+
+            },
+            [this](const std::set<ServoID>&) {
+                // nothing
+            }}));
 
         // TODO: unhack
         emit(std::make_unique<KickPlan>(KickPlan(Eigen::Vector2d(4.5, 0.0), KickType::SCRIPTED)));
@@ -155,7 +181,7 @@ namespace module::behaviour::strategy {
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& selfPenalisation) {
             if (selfPenalisation.context == GameEvents::Context::SELF) {
-                emit(std::make_unique<ResetWebotsServos>());
+                emit<Scope::DIRECT>(std::make_unique<ResetWebotsServos>());
                 selfPenalised = true;
             }
         });
@@ -184,7 +210,7 @@ namespace module::behaviour::strategy {
             [this](const KickOffTeam& kickOffTeam) { team_kicking_off = kickOffTeam.context; });
 
         // ********************* Main Loop ********************
-        on<Every<200, Per<std::chrono::seconds>>,
+        on<Every<100, Per<std::chrono::seconds>>,
            With<Sensors>,
            With<GameState>,
            With<Phase>,
@@ -294,10 +320,21 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::penaltyShootoutSet(const FieldDescription& fieldDescription) {
-        emit(std::make_unique<MotionCommand>(utility::behaviour::AbsoluteStop()));
-        emit(std::make_unique<ResetWebotsServos>());         // we were teleported, so reset
-        hasKicked = false;                                   // reset the hasKicked flag between kicks
-        penaltyShootoutLocalisationReset(fieldDescription);  // Reset localisation
+        log("set");
+        // TODO unhack
+        // emit(std::make_unique<ExecuteScriptByName>(id,
+        //                                            std::vector<std::string>({"Zombie.yaml"}),
+        //                                            NUClear::clock::time_point())); // Emit at start of time to clear
+        //                                            queue
+        emit(std::make_unique<ExecuteScriptByName>(subsumptionId, std::vector<std::string>({"Zombie.yaml"})));
+        emit<Scope::DIRECT>(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {10000000000000.0}}));
+        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {0.0}}));
+
+
+        emit<Scope::DIRECT>(std::make_unique<MotionCommand>(utility::behaviour::AbsoluteStop()));
+        emit<Scope::DIRECT>(std::make_unique<ResetWebotsServos>());  // we were teleported, so reset
+        hasKicked = false;                                           // reset the hasKicked flag between kicks
+        penaltyShootoutLocalisationReset(fieldDescription);          // Reset localisation
         standStill();
         currentState = Behaviour::State::SET;
     }
@@ -341,7 +378,7 @@ namespace module::behaviour::strategy {
 
         if (resetInInitial) {
             initialLocalisationReset();
-            emit(std::make_unique<ResetWebotsServos>());
+            emit<Scope::DIRECT>(std::make_unique<ResetWebotsServos>());
             resetInInitial = false;
         }
 

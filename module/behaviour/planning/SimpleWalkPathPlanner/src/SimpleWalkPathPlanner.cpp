@@ -131,7 +131,7 @@ namespace module::behaviour::planning {
         });
 
         // Freq should be equal to the main loop in soccer strategy
-        on<Every<200, Per<std::chrono::seconds>>,
+        on<Every<100, Per<std::chrono::seconds>>,
            With<Ball>,
            With<Field>,
            With<Sensors>,
@@ -145,6 +145,7 @@ namespace module::behaviour::planning {
                          const WantsToKick& wantsTo,
                          const KickPlan& kickPlan,
                          const FieldDescription& fieldDescription) {
+                // log("simple walk path planner");
                 if (wantsTo.kick) {
                     emit(std::make_unique<StopCommand>(subsumptionId));
                     return;
@@ -155,7 +156,8 @@ namespace module::behaviour::planning {
                     return;
                 }
                 else if (latestCommand.type == message::behaviour::MotionCommand::Type::ABSOLUTE_STOP) {
-                    emit(std::make_unique<DisableWalkEngineCommand>(subsumptionId));
+                    // log("absolute stop");
+                    emit<Scope::DIRECT>(std::make_unique<DisableWalkEngineCommand>(subsumptionId));
                     return;
                 }
                 else if (latestCommand.type == message::behaviour::MotionCommand::Type::DIRECT_COMMAND) {
@@ -241,6 +243,13 @@ namespace module::behaviour::planning {
         on<Trigger<MotionCommand>, Sync<SimpleWalkPathPlanner>>().then([this](const MotionCommand& cmd) {
             // save the plan
             latestCommand = cmd;
+        });
+
+        on<Trigger<MotionCommand>>().then([this](const MotionCommand& cmd) {
+            // TODO(cameron) unhack
+            if (cmd.type == message::behaviour::MotionCommand::Type::ABSOLUTE_STOP) {
+                emit<Scope::DIRECT>(std::make_unique<DisableWalkEngineCommand>(subsumptionId));
+            }
         });
     }
 }  // namespace module::behaviour::planning
