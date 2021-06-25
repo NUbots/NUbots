@@ -45,7 +45,7 @@ namespace module::behaviour::planning {
         float forwardSpeed         = 1;
         float walkToReadySpeedX    = 0.1;
         float walkToReadySpeedY    = 0.025;
-        float walkToReadyRotation    = 0.2;
+        float walkToReadyRotation    = 0;
         float rotateSpeed = 0.3;
         float rotateSpeedX = -0.04;
         float rotateSpeedY = 0;

@@ -379,7 +379,7 @@ namespace module::behaviour::strategy {
             startedWalkingToReady = true;
         }
 
-        if (NUClear::clock::now() - startedWalkingToReadyAt < std::chrono::milliseconds(20*1000)) {
+        if (NUClear::clock::now() - startedWalkingToReadyAt < std::chrono::milliseconds(17*1000)) {
             emit(std::make_unique<MotionCommand>(utility::behaviour::WalkToReady()));
         } else {
             log("10 seconds up, stopping walk");
