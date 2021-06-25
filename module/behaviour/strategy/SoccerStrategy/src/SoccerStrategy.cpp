@@ -28,6 +28,7 @@
 #include "message/behaviour/SoccerObjectPriority.hpp"
 #include "message/input/GameEvents.hpp"
 #include "message/input/Sensors.hpp"
+#include "message/localisation/ResetBallHypotheses.hpp"
 #include "message/localisation/ResetRobotHypotheses.hpp"
 #include "message/motion/BodySide.hpp"
 #include "message/motion/GetupCommand.hpp"
@@ -65,6 +66,7 @@ namespace module::behaviour::strategy {
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
+    using message::localisation::ResetBallHypotheses;
     using message::localisation::ResetRobotHypotheses;
     using message::motion::BodySide;
     using message::motion::ExecuteGetup;
@@ -239,7 +241,7 @@ namespace module::behaviour::strategy {
                         case GameMode::PENALTY_SHOOTOUT: penaltyShootout(phase, fieldDescription, field, ball); break;
                         // We handle NORMAL and OVERTIME the same at the moment because we don't have any special
                         // behaviour for overtime.
-                        case GameMode::NORMAL: normal(gameState, phase, fieldDescription, field, ball); break;
+                        case GameMode::NORMAL:
                         case GameMode::OVERTIME: normal(gameState, phase, fieldDescription, field, ball); break;
                         default: log<NUClear::WARN>("Game mode unknown.");
                     }
@@ -444,28 +446,46 @@ namespace module::behaviour::strategy {
     void SoccerStrategy::initialLocalisationReset() {
         log<NUClear::DEBUG>("initialLocalisationReset()");
         emit(std::make_unique<ResetRobotHypotheses>());
+        auto ball_reset        = std::make_unique<ResetBallHypotheses>();
+        ball_reset->self_reset = true;
+        emit(ball_reset);
     }
 
     // **************************** LOCALISATION RESETS ****************************
     void SoccerStrategy::penaltyShootoutLocalisationReset(const FieldDescription& fd) {
-        log<NUClear::DEBUG>("penaltyShootoutLocalisationReset()");
-        auto reset = std::make_unique<ResetRobotHypotheses>();
+        auto robot_reset = std::make_unique<ResetRobotHypotheses>();
 
         ResetRobotHypotheses::Self selfSideBaseLine;
-        selfSideBaseLine.position =
+        selfSideBaseLine.rTFf =
             Eigen::Vector2d((-fd.dimensions.field_length / 2.0) + fd.dimensions.penalty_mark_distance, 0.0);
-        selfSideBaseLine.position_cov = Eigen::Vector2d::Constant(0.01).asDiagonal();
-        selfSideBaseLine.heading      = -M_PI;
-        selfSideBaseLine.heading_var  = 0.005;
+        selfSideBaseLine.covariance  = Eigen::Vector2d::Constant(0.01).asDiagonal();
+        selfSideBaseLine.heading     = -M_PI;
+        selfSideBaseLine.heading_var = 0.005;
 
-        reset->hypotheses.push_back(selfSideBaseLine);
+        robot_reset->hypotheses.push_back(selfSideBaseLine);
 
-        emit(std::move(reset));
+        emit(robot_reset);
+
+        auto ball_reset = std::make_unique<ResetBallHypotheses>();
+
+        ResetBallHypotheses::Ball atFeet;
+        atFeet.rBWw       = Eigen::Vector2d(0.2, 0);
+        atFeet.covariance = Eigen::Vector2d::Constant(0.01).asDiagonal();
+
+        ball_reset->hypotheses.push_back(atFeet);
+        ball_reset->self_reset = true;
+
+        emit(ball_reset);
     }
 
     void SoccerStrategy::unpenalisedLocalisationReset() {
         log<NUClear::DEBUG>("unpenalisedLocalisationReset()");
         emit(std::make_unique<ResetRobotHypotheses>());
+
+        // TODO This should do some random distribution or something as we don't know where the ball is
+        auto ball_reset        = std::make_unique<ResetBallHypotheses>();
+        ball_reset->self_reset = true;
+        emit(ball_reset);
     }
 
     // ******************* MOTIONS *************************************************

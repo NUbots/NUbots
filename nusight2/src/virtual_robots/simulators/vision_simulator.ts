@@ -113,7 +113,7 @@ export class VisionSimulator extends Simulator {
             measurements: [
               {
                 type: MeasurementType.WIDTH_BASED,
-                rBCc: new Vector3(1, 0, 0),
+                srBCc: new Vector3(1, 0, 0),
               },
             ],
           },
