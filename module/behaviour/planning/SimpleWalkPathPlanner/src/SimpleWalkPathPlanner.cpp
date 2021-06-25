@@ -130,8 +130,8 @@ namespace module::behaviour::planning {
             }
         });
 
-        // Freq must be equal to or greater than the frequency of the main loop in soccer strategy
-        on<Every<40, Per<std::chrono::seconds>>,
+        // Freq should be equal to the main loop in soccer strategy
+        on<Every<30, Per<std::chrono::seconds>>,
            With<Ball>,
            With<Field>,
            With<Sensors>,
