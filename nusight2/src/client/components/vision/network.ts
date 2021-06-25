@@ -100,7 +100,7 @@ export class VisionNetwork {
         axis: Vector3.from(ball.cone?.axis),
         radius: ball.cone?.radius!,
       },
-      distance: Math.abs(ball.measurements?.[0].rBCc?.x!),
+      distance: Math.abs(ball.measurements?.[0].srBCc?.x!),
       colour: Vector4.from(ball.colour),
     }))
   }
