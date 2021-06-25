@@ -18,43 +18,20 @@
  */
 syntax = "proto3";
 
-package message.motion;
+package message.localisation;
 
+import "Matrix.proto";
 import "Vector.proto";
 
-/**
- * @author Trent Houliston
- * @author Brendan Annable
- */
-enum KickCommandType {
-    NORMAL  = 0;
-    PENALTY = 1;
-}
+message ResetBallHypotheses {
 
-message KickCommand {
-    vec3            target            = 1;  // The point to kick
-    vec3            direction         = 2;  // force is the magnitude
-    KickCommandType kick_command_type = 3;
-}
+    message Ball {
+        /// Estimate of the balls position in world space
+        vec2 rBWw       = 1;
+        mat2 covariance = 2;
+    }
 
-/**
- * @author Trent Houliston
- * @author Brendan Annable
- */
-message KickScriptCommand {
-    uint32          leg  = 1;  // Leg to kick with
-    KickCommandType type = 2;
-}
-
-message KickPlannerConfig {
-    float max_ball_distance        = 1;
-    float kick_corridor_width      = 2;
-    float seconds_not_seen_limit   = 3;
-    float kick_forward_angle_limit = 4;
-}
-
-message KickFinished {}
-
-message IKKickParams {
-    float stand_height = 1;
+    repeated Ball hypotheses = 1;
+    // Robot localisation has been reset. Flag to not use Htf on ball reset
+    bool self_reset = 2;
 }

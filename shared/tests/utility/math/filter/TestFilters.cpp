@@ -262,8 +262,8 @@ TEST_CASE("Test the ParticleFilter", "[utility][math][filter][ParticleFilter]") 
     for (size_t time_count = 0; time_count < 100; ++time_count) {
         model_filter.measure(measurements[time_count], measurement_noise);
         model_filter.time(deltaT);
-        innovations[time_count]  = measurements[time_count].x() - model_filter.get().x();
-        actual_state[time_count] = std::make_pair(model_filter.get(), model_filter.getCovariance());
+        innovations[time_count]  = measurements[time_count].x() - model_filter.getMean().x();
+        actual_state[time_count] = std::make_pair(model_filter.getMean(), model_filter.getCovariance());
     }
 
     INFO("Calculating statistics")

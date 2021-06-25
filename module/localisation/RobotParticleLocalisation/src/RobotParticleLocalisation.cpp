@@ -51,7 +51,7 @@ namespace module::localisation {
                 filter.time(seconds);
 
                 // Get filter state and transform
-                Eigen::Vector3d state(filter.get());
+                Eigen::Vector3d state(filter.getMean());
                 emit(graph("robot filter state = ", state.x(), state.y(), state.z()));
 
                 // Emit state
@@ -67,7 +67,6 @@ namespace module::localisation {
                                                 state[RobotModel<double>::kY],
                                                 state[RobotModel<double>::kAngle]));
 
-                emit(std::make_unique<std::vector<Field>>(1, *field));
                 emit(field);
             });
 
@@ -118,7 +117,7 @@ namespace module::localisation {
                                                            goals.Hcw);
 
                                     if (log_level <= NUClear::DEBUG) {
-                                        const Eigen::Vector3d state(filter.get());
+                                        const Eigen::Vector3d state(filter.getMean());
                                         Eigen::Affine3d Hfw;
                                         Hfw.translation() = Eigen::Vector3d(state.x(), state.y(), 0);
                                         Hfw.linear() =
@@ -184,21 +183,21 @@ namespace module::localisation {
         on<Trigger<ResetRobotHypotheses>, With<Sensors>, Sync<RobotParticleLocalisation>>().then(
             "Reset Robot Hypotheses",
             [this](const ResetRobotHypotheses& locReset, const Sensors& sensors) {
+                std::vector<std::pair<Eigen::Vector3d, Eigen::Matrix3d>> hypotheses;
                 if (locReset.hypotheses.empty()) {
-                    filter.set_state(config.start_state,
-                                     std::vector<Eigen::Vector3d>(config.start_state.size(), config.start_variance));
+                    for (const auto& state : config.start_state) {
+                        hypotheses.emplace_back(std::make_pair(state, config.start_variance.asDiagonal()));
+                    }
+                    filter.set_state(hypotheses);
                     return;
                 }
-
-                std::vector<Eigen::Vector3d> states;
-                std::vector<Eigen::Matrix3d> cov;
 
                 const Eigen::Affine3d Htw(sensors.Htw);
                 for (auto& s : locReset.hypotheses) {
 
                     // Calculate the reset state
                     Eigen::Affine3d Hft;
-                    Hft.translation() = Eigen::Vector3d(s.position.x(), s.position.y(), 0);
+                    Hft.translation() = Eigen::Vector3d(s.rTFf.x(), s.rTFf.y(), 0);
                     // Linear part of transform is `s.heading` radians rotation about Z axis
                     Hft.linear() = Eigen::AngleAxisd(s.heading, Eigen::Vector3d::UnitZ()).toRotationMatrix();
                     const Eigen::Affine3d Hfw(Hft * Htw);
@@ -210,21 +209,19 @@ namespace module::localisation {
                                                         hfw_2d_projection.translation().y(),
                                                         Eigen::Rotation2Dd(hfw_2d_projection.rotation()).angle());
 
-                    states.push_back(hfw_state_vec);
-
                     // Calculate the reset covariance
                     const Eigen::Rotation2Dd Hfw_xy(
                         utility::localisation::projectTo2D(Hfw, Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitX())
                             .rotation());
 
-                    const Eigen::Rotation2Dd pos_cov(Hfw_xy * s.position_cov * Hfw_xy.matrix().transpose());
+                    const Eigen::Rotation2Dd pos_cov(Hfw_xy * s.covariance * Hfw_xy.matrix().transpose());
 
                     Eigen::Matrix3d state_cov(Eigen::Matrix3d::Identity());
                     state_cov.topLeftCorner(2, 2) = pos_cov.matrix();
                     state_cov(2, 2)               = s.heading_var;
-                    cov.push_back(state_cov);
+                    hypotheses.emplace_back(std::make_pair(hfw_state_vec, state_cov));
                 }
-                filter.set_state(states, cov);
+                filter.set_state(hypotheses);
             });
 
         on<Configuration>("RobotParticleLocalisation.yaml").then([this](const Configuration& cfg) {
@@ -268,8 +265,11 @@ namespace module::localisation {
             //                                 0.0,
             //                                 -M_PI);
 
-            filter.set_state(config.start_state,
-                             std::vector<Eigen::Vector3d>(config.start_state.size(), config.start_variance));
+            std::vector<std::pair<Eigen::Vector3d, Eigen::Matrix3d>> hypotheses;
+            for (const auto& state : config.start_state) {
+                hypotheses.emplace_back(std::make_pair(state, config.start_variance.asDiagonal()));
+            }
+            filter.set_state(hypotheses);
         });
     }
 

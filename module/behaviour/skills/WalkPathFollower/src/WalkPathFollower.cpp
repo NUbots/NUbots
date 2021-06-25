@@ -141,7 +141,7 @@ namespace module::behaviour::skills {
                                                Eigen::Affine2d currentState;
                                                currentState.linear() =
                                                    Eigen::Rotation2Dd(self.heading).toRotationMatrix();
-                                               currentState.translation() = self.position;
+                                               currentState.translation() = self.rTFf;
                                                auto estPath = estimatedPath(currentState, currentPath, 0.01, 2000, 40);
                                            }
                                        })
@@ -164,7 +164,7 @@ namespace module::behaviour::skills {
                           // Get the robot's current state as a Eigen::Affine2d:
                           Eigen::Affine2d currentState = Eigen::Affine2d::Identity();
                           currentState.linear()        = Eigen::Rotation2Dd(self.heading).toRotationMatrix();
-                          currentState.translation()   = self.position;
+                          currentState.translation()   = self.rTFf;
 
                           // if (cfg_.follow_path_in_ball_space
                           //     && currentPath.command.type == MotionCommand::Type::BALL_APPROACH) {
