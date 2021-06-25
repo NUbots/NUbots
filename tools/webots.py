@@ -96,12 +96,12 @@ def exec_build(target, roles):
         cprint(f"unable to build code, exit code {exit_code}", "red", attrs=["bold"])
         sys.exit(exit_code)
 
-    # Set selected image back to 'generic'
-    print("Setting back to target 'generic'...")
-    exit_code = subprocess.run(["./b", "target", "generic"]).returncode
-    if exit_code != 0:
-        cprint("unable to set target to 'generic', exit code {}".format(exit_code), "red", attrs=["bold"])
-        sys.exit(exit_code)
+    # # Set selected image back to 'generic'
+    # print("Setting back to target 'generic'...")
+    # exit_code = subprocess.run(["./b", "target", "generic"]).returncode
+    # if exit_code != 0:
+    #     cprint("unable to set target to 'generic', exit code {}".format(exit_code), "red", attrs=["bold"])
+    #     sys.exit(exit_code)
 
     # The paths to the built binaries and toolchain on the local filesystem
     local_binaries_dir = os.path.join(b.project_dir, "docker", "nugus_sim", "binaries")

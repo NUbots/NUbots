@@ -91,6 +91,10 @@ namespace module::behaviour::strategy {
         bool selfPenalised                                   = false;
         bool manualOrientationReset                          = false;
         bool resetInInitial                                  = true;
+
+        bool startedWalkingToReady                           = false;
+        NUClear::clock::time_point startedWalkingToReadyAt;
+
         double manualOrientation                             = 0.0;
         message::input::GameEvents::Context team_kicking_off = message::input::GameEvents::Context::UNKNOWN;
         message::behaviour::KickPlan::KickType kickType;
