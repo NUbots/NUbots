@@ -67,8 +67,11 @@ namespace module::localisation {
             // Infront of our feet (Penalty shootout)
             config.start_state.emplace_back(0.2, 0);
 
-            filter.set_state(config.start_state,
-                             std::vector<Eigen::Vector2d>(config.start_state.size(), config.start_variance));
+            std::vector<std::pair<Eigen::Vector2d, Eigen::Matrix2d>> hypotheses;
+            for (const auto& state : config.start_state) {
+                hypotheses.emplace_back(std::make_pair(state, config.start_variance.asDiagonal()));
+            }
+            filter.set_state(hypotheses);
         });
 
         /* Run Time Update */
@@ -127,13 +130,14 @@ namespace module::localisation {
                       // If we've just reset our self localisation we can't trust Htf. So reset balls to the known
                       // starting position
                       if (locReset.self_reset) {
-                          filter.set_state(
-                              config.start_state,
-                              std::vector<Eigen::Vector2d>(config.start_state.size(), config.start_variance));
+                          std::vector<std::pair<Eigen::Vector2d, Eigen::Matrix2d>> hypotheses;
+                          for (const auto& state : config.start_state) {
+                              hypotheses.emplace_back(std::make_pair(state, config.start_variance.asDiagonal()));
+                          }
+                          filter.set_state(hypotheses);
                       }
                       // Otherwise reset balls to the [0, 0] field position
                       else {
-
                           // Set the filter state to the field origin relative to us
                           filter.set_state(Eigen::Affine2d(field.position).translation(),
                                            config.start_variance.asDiagonal());
