@@ -22,8 +22,7 @@
     ],
     "yaml.format.printWidth": 120,
     "files.associations": {
-        "*.role": "cmake",
-        "chrono": "cpp"
+        "*.role": "cmake"
     },
     "editor.codeActionsOnSave": {
         "source.organizeImports": true
