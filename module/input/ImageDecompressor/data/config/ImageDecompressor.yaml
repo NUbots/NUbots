@@ -1,5 +1,5 @@
 # Log level of DEBUG will print out decompression rates
-log_level: INFO
+log_level: WARN
 
 # The settings for each decompressor
 # These decompressors will be tried in order per camera id until a free decompressor is found
