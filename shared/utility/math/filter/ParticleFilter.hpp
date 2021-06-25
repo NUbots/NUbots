@@ -51,8 +51,7 @@ namespace utility::math::filter {
      * update.
      *
      * Time Update: Resamples all particles, perturbing the resampled particles with the model's process noise, and asks
-     * the model to predict what should happen to each particle after an elapsed amount of time. Also known as the
-     * predict step.
+     * the model to predict what should happen to each particle after an elapsed amount of time.
      *
      * Measurement Update: Asks the model to predict what the next measurement will be (based on current state/particle)
      * and the finds the difference between the model's prediction and the actual measurement. The likelihood of this
