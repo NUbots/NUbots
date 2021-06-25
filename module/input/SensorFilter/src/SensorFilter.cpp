@@ -91,7 +91,8 @@ namespace module::input {
         : Reactor(std::move(environment)), theta(Eigen::Vector3d::Zero()) {
 
         on<Configuration>("SensorFilter.yaml").then([this](const Configuration& cfg) {
-            config.debug = cfg["debug"].as<bool>();
+            log_level = cfg["log_level"].as<NUClear::LogLevel>();
+
             // Button config
             config.buttons.debounceThreshold = cfg["buttons"]["debounce_threshold"].as<int>();
 
@@ -277,19 +278,19 @@ namespace module::input {
                             update_loop.enable();
                             break;
                         case Eigen::NumericalIssue:
-                            log<NUClear::ERROR>(
+                            log<NUClear::WARN>(
                                 "Cholesky decomposition failed. The provided data did not satisfy the "
                                 "prerequisites.");
                             break;
                         case Eigen::NoConvergence:
-                            log<NUClear::ERROR>("Cholesky decomposition failed. Iterative procedure did not converge.");
+                            log<NUClear::WARN>("Cholesky decomposition failed. Iterative procedure did not converge.");
                             break;
                         case Eigen::InvalidInput:
-                            log<NUClear::ERROR>(
+                            log<NUClear::WARN>(
                                 "Cholesky decomposition failed. The inputs are invalid, or the algorithm has been "
                                 "improperly called. When assertions are enabled, such errors trigger an assert.");
                             break;
-                        default: log<NUClear::ERROR>("Cholesky decomposition failed. Some other reason."); break;
+                        default: log<NUClear::WARN>("Cholesky decomposition failed. Some other reason."); break;
                     }
                 }
 
@@ -570,7 +571,7 @@ namespace module::input {
                             default: log<NUClear::WARN>("Unknown foot down method"); break;
                         }
 
-                        if (this->config.debug) {
+                        if (log_level <= NUClear::DEBUG) {
                             emit(graph(fmt::format("Sensor/Foot Down/{}/Left", std::string(config.footDown.method())),
                                        feet_down[BodySide::LEFT]));
                             emit(graph(fmt::format("Sensor/Foot Down/{}/Right", std::string(config.footDown.method())),
@@ -675,7 +676,7 @@ namespace module::input {
                                 case Eigen::Success: break;
                                 // Otherwise, we log the error and set the flag to reset the filter
                                 case Eigen::NumericalIssue:
-                                    log<NUClear::ERROR>(
+                                    log<NUClear::WARN>(
                                         "Cholesky decomposition failed. The provided data did not satisfy the "
                                         "prerequisites.");
                                     // Disable the sensor update loop to reset the filter post cholesky
@@ -683,14 +684,14 @@ namespace module::input {
                                     reset_filter.store(true);
                                     break;
                                 case Eigen::NoConvergence:
-                                    log<NUClear::ERROR>(
+                                    log<NUClear::WARN>(
                                         "Cholesky decomposition failed. Iterative procedure did not converge.");
                                     // Disable the sensor update loop to reset the filter post cholesky
                                     update_loop.disable();
                                     reset_filter.store(true);
                                     break;
                                 case Eigen::InvalidInput:
-                                    log<NUClear::ERROR>(
+                                    log<NUClear::WARN>(
                                         "Cholesky decomposition failed. The inputs are invalid, or the algorithm has "
                                         "been "
                                         "improperly called. When assertions are enabled, such errors trigger an "
@@ -700,7 +701,7 @@ namespace module::input {
                                     reset_filter.store(true);
                                     break;
                                 default:
-                                    log<NUClear::ERROR>("Cholesky decomposition failed. Some other reason.");
+                                    log<NUClear::WARN>("Cholesky decomposition failed. Some other reason.");
                                     // Disable the sensor update loop to reset the filter post cholesky
                                     update_loop.disable();
                                     reset_filter.store(true);
