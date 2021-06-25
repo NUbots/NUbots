@@ -91,15 +91,7 @@ namespace module::input {
         : Reactor(std::move(environment)), theta(Eigen::Vector3d::Zero()) {
 
         on<Configuration>("SensorFilter.yaml").then([this](const Configuration& cfg) {
-            // clang-format off
-            std::string lvl = cfg["log_level"].as<std::string>();
-            if (lvl == "TRACE")      { this->log_level = NUClear::TRACE; }
-            else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
-            else if (lvl == "INFO")  { this->log_level = NUClear::INFO;  }
-            else if (lvl == "WARN")  { this->log_level = NUClear::WARN;  }
-            else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
-            else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
-            // clang-format on
+            log_level = cfg["log_level"].as<NUClear::LogLevel>();
 
             // Button config
             config.buttons.debounceThreshold = cfg["buttons"]["debounce_threshold"].as<int>();
