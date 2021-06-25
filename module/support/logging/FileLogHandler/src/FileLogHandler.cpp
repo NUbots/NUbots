@@ -141,9 +141,9 @@ namespace module::support::logging {
                 }
             }
             if (size >= max_size) {
-                logging_reaction.unbind();
-                stats_reaction.unbind();
-                log_check_handler.unbind();
+                logging_reaction.disable();
+                stats_reaction.disable();
+                log_check_handler.disable();
                 log<NUClear::WARN>("FileLogHandler disabled - Maximum logging amount exceeded.");
                 if (log_file.is_open()) {
                     log_file.close();

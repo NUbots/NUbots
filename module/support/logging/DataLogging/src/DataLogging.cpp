@@ -170,8 +170,8 @@ namespace module::support::logging {
             }
             // If we have past the amount of logging we want to do, disable the logging reaction
             if (size >= config.output.max_size) {
-                logging_reaction.unbind();
-                log_check_handler.unbind();
+                logging_reaction.disable();
+                log_check_handler.disable();
                 log<NUClear::WARN>("Datalogging disabled - Maximum logging amount exceeded.");
                 encoder->close();
             }
