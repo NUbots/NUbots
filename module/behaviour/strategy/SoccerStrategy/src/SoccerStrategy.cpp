@@ -333,11 +333,15 @@ namespace module::behaviour::strategy {
         hasKicked = false;                                           // reset the hasKicked flag between kicks
         penaltyShootoutLocalisationReset(fieldDescription);          // Reset localisation
         standStill();
-        currentState = Behaviour::State::SET;
+        currentState    = Behaviour::State::SET;
+        absoluteStopped = true;
     }
 
     void SoccerStrategy::penaltyShootoutPlaying(const Field& field, const Ball& ball) {
-        emit<Scope::DIRECT>(std::make_unique<MotionCommand>(utility::behaviour::StopAbsoluteStop()));
+        if (absoluteStopped) {
+            emit<Scope::DIRECT>(std::make_unique<MotionCommand>(utility::behaviour::StopAbsoluteStop()));
+            absoluteStopped = false;
+        }
         // Execute penalty kick script once if we haven't yet, and if we are not goalie
         if (!hasKicked && team_kicking_off == GameEvents::Context::TEAM) {
             emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::PENALTY));

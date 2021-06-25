@@ -257,6 +257,9 @@ namespace module::behaviour::planning {
             if (cmd.type == message::behaviour::MotionCommand::Type::ABSOLUTE_STOP) {
                 emit<Scope::DIRECT>(std::make_unique<DisableWalkEngineCommand>(subsumptionId));
             }
+            else if (latestCommand.type == message::behaviour::MotionCommand::Type::STOP_ABSOLUTE_STOP) {
+                emit<Scope::DIRECT>(std::make_unique<EnableWalkEngineCommand>(subsumptionId));
+            }
         });
     }
 }  // namespace module::behaviour::planning
