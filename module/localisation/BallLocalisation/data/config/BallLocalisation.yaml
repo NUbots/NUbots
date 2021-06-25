@@ -1,3 +1,5 @@
+log_level: WARN
+
 process_noise_diagonal: [0.01, 0.01]
 n_rogues: 1
 

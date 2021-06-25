@@ -35,6 +35,8 @@ namespace module::localisation {
         });
 
         on<Configuration, Sync<BallLocalisation>>("BallLocalisation.yaml").then([this](const Configuration& config) {
+            log_level = config["log_level"].as<NUClear::LogLevel>();
+
             auto message = std::make_unique<std::vector<Ball>>();
             emit(message);
             emit(std::make_unique<Ball>());
