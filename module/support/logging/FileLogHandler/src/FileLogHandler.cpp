@@ -6,6 +6,7 @@
 
 #include "utility/strutil/ansi.hpp"
 #include "utility/support/evil/pure_evil.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module::support::logging {
 
@@ -26,7 +27,7 @@ namespace module::support::logging {
             // Use configuration here from file FileLogHandler.yaml
             log_file_name = std::filesystem::path(config["log_file"].as<std::string>());
 
-            max_size = config["max_size"].as<long>();
+            max_size = config["max_size"].as<utility::support::Expression>();
 
             if (log_file.is_open()) {
                 log_file.close();
@@ -44,7 +45,6 @@ namespace module::support::logging {
         });
 
         stats_reaction = on<Trigger<ReactionStatistics>>().then([this](const ReactionStatistics& stats) {
-            
             if (stats.exception) {
                 std::lock_guard<std::mutex> lock(mutex);
                 // Get our reactor name
@@ -125,7 +125,7 @@ namespace module::support::logging {
         // This checks that we haven't reached the max_size
         log_check_handler = on<Every<5, std::chrono::seconds>, Single>().then([this]() {
             std::lock_guard<std::mutex> lock(mutex);
-            long size = 0;
+            uint64_t size = 0;
             for (auto& f : std::filesystem::recursive_directory_iterator(log_file_name.remove_filename())) {
                 if (f.is_regular_file()) {
                     size += f.file_size();
