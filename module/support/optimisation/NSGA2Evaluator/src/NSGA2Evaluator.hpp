@@ -101,6 +101,15 @@ namespace module {
                 /// less.
                 void SendFitnessScores(std::vector<double> scores, std::vector<double> constraints);
 
+                /// @brief Implementation of the fitness function (i.e. how well the individual did)
+                std::vector<double> CalculateScores();
+
+                /// @brief Implementation of the constraints function (i.e. how much to penalise for violations)
+                std::vector<double> CalculateConstraints();
+
+                /// @brief Returns the appropriate values for the case where no constraints are violated
+                std::vector<double> ConstraintsNotViolated();
+
                 /// @brief Check sensors to see if the robot has fallen
                 void CheckForFall(const RawSensorsMsg& sensors);
 

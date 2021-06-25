@@ -396,35 +396,13 @@ namespace module {
             void NSGA2Evaluator::TerminatingEarly(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
                 log<NUClear::DEBUG>("TerminatingEarly");
 
-                // Convert trial duration limit to ms, add 1 for overhead
-                double max_trial_duration = (trial_duration_limit + 1) * 1000;
-
-                double trialDuration = simTime - trialStartTime;
-
-                log<NUClear::INFO>("Trial ran for", trialDuration);
+                emit(std::make_unique<Event>(Event::FitnessScoresSent)); // Go back to waiting for the next request
 
                 // Send a zero walk command to stop walking
                 emit(std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(0.0, 0.0, 0.0)));
 
-                // Calculate and send the fitness scores for a fall since we just fell over
-                std::vector<double> scores = {
-                    1.0,  // Fix the first score as we're trying to optimise only the distance travelled
-                    1.0 / robotDistanceTravelled  // 1/x since the NSGA2 optimiser is a minimiser
-                };
-
-                std::vector<double> constraints = {
-                    trialDuration - max_trial_duration,  // Punish for falling over, based on how long the trial took
-                                                         // (more negative is worse)
-                                                         // TODO: should we be punishing the distance walked instead
-                                                         // (since that's what we reward?)
-                    0.0,                                 // Second constraint unused, fixed to 0
-                };
-
-                // Send the fitness scores back to the optimiser
-                SendFitnessScores(scores, constraints);
-
-                // Go back to waiting for the next request
-                emit(std::make_unique<Event>(Event::FitnessScoresSent));
+                // Calculate and send the fitness scores *with* constraint violations
+                SendFitnessScores(CalculateScores(), CalculateConstraints());
             }
 
             /// @brief Handle the TERMINATING_GRACEFULLY state
@@ -432,29 +410,45 @@ namespace module {
                                                        NSGA2Evaluator::Event event) {
                 log<NUClear::DEBUG>("TerminatingGracefully");
 
-                log<NUClear::INFO>("Trial ran for", simTime - trialStartTime);
+                emit(std::make_unique<Event>(Event::FitnessScoresSent)); // Go back to waiting for the next request
 
                 // Send a zero walk command to stop walking
                 emit(std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(0.0, 0.0, 0.0)));
 
-                std::vector<double> scores = {
-                    1,  // Fix the first score as we're trying to optimise only the distance travelled
+                // Calculate and send the fitness scores *without* constraint violations
+                SendFitnessScores(CalculateScores(), ConstraintsNotViolated());
+            }
+
+            std::vector<double> NSGA2Evaluator::CalculateScores() {
+                return {
+                    1.0,  // Fix the first score as we're trying to optimise only the distance travelled
                     1.0 / robotDistanceTravelled  // 1/x since the NSGA2 optimiser is a minimiser
                 };
+            }
 
-                std::vector<double> constraints = {
-                    0,  // Robot didn't fall
-                    0,  // Second constraint unused, fixed to 0
+            std::vector<double> NSGA2Evaluator::CalculateConstraints() {
+                // Convert trial duration limit to ms, add 1 for overhead
+                double max_trial_duration = (trial_duration_limit + 1) * 1000;
+                double trialDuration = simTime - trialStartTime;
+                return {
+                    trialDuration - max_trial_duration,  // Punish for falling over, based on how long the trial took
+                                                         // (more negative is worse)
+                                                         // TODO: should we be punishing the distance walked instead
+                                                         // (since that's what we reward?)
+                    0.0                                  // Second constraint unused, fixed to 0
                 };
+            }
 
-                // Send the fitness scores back to the optimiser
-                SendFitnessScores(scores, constraints);
-
-                // Go back to waiting for the next request
-                emit(std::make_unique<Event>(Event::FitnessScoresSent));
+            std::vector<double> NSGA2Evaluator::ConstraintsNotViolated() {
+                return {
+                    0,  // Robot didn't fall
+                    0   // Second constraint unused, fixed to 0
+                };
             }
 
             void NSGA2Evaluator::SendFitnessScores(std::vector<double> scores, std::vector<double> constraints) {
+                double trialDuration = simTime - trialStartTime;
+                log<NUClear::INFO>("Trial ran for", trialDuration);
                 log<NUClear::INFO>("SendFitnessScores for generation", generation, "individual", individual);
                 log<NUClear::INFO>("    scores:", scores[0], scores[1]);
                 log<NUClear::INFO>("    constraints:", constraints[0], constraints[1]);
