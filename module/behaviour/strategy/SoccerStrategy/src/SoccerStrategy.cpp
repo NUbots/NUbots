@@ -551,5 +551,4 @@ namespace module::behaviour::strategy {
         }
         emit(std::move(motionCommand));
     }
-
 }  // namespace module::behaviour::strategy
