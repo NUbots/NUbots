@@ -258,8 +258,8 @@ namespace module::vision {
                         log<NUClear::DEBUG>(fmt::format("Camera {}", balls->id));
                         log<NUClear::DEBUG>(fmt::format("radius {}", b.cone.radius));
                         log<NUClear::DEBUG>(fmt::format("Axis {}", b.cone.axis.transpose()));
-                        log<NUClear::DEBUG>(fmt::format("Distance {}", distance));
-                        log<NUClear::DEBUG>(fmt::format("srBCc {}", b.measurements.back().srBCc.transpose()));
+                        log<NUClear::DEBUG>(
+                            fmt::format("Distance {} - srBCc {}", distance, b.measurements.back().srBCc.transpose()));
                         log<NUClear::DEBUG>(fmt::format("screen_angular {} - angular_size {}",
                                                         b.screen_angular.transpose(),
                                                         b.angular_size.transpose()));
@@ -268,6 +268,9 @@ namespace module::vision {
                                                         std::abs(projection_distance - distance) / max_distance));
                         log<NUClear::DEBUG>("**************************************************");
 
+                        if (!keep) {
+                            b.measurements.clear();
+                        }
                         if (log_level <= NUClear::DEBUG || keep) {
                             balls->balls.push_back(std::move(b));
                         }
