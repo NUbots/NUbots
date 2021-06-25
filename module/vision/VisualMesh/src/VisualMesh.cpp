@@ -16,15 +16,7 @@ namespace module::vision {
     VisualMesh::VisualMesh(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("VisualMesh.yaml").then([this](const Configuration& config) {
-            // clang-format off
-            std::string lvl = config["log_level"].as<std::string>();
-            if (lvl == "TRACE")      { this->log_level = NUClear::TRACE; }
-            else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
-            else if (lvl == "INFO")  { this->log_level = NUClear::INFO;  }
-            else if (lvl == "WARN")  { this->log_level = NUClear::WARN;  }
-            else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
-            else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
-            // clang-format on
+            log_level = config["log_level"].as<NUClear::LogLevel>();
 
             // Delete all the old engines
             engines.clear();
