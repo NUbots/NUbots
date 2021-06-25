@@ -13,5 +13,5 @@ messages:
   message.localisation.Field: true
   message.localisation.ResetRobotHypotheses: true
   # These two are fairly large, we can turn them off if we're running out of log space
-  message.vision.VisualMesh: true
-  message.vision.GreenHorizon: true
+  message.vision.VisualMesh: false
+  message.vision.GreenHorizon: false
