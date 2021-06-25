@@ -13,10 +13,14 @@ namespace module {
             class NSGA2Optimiser : public NUClear::Reactor {
             private:
                 /// @brief Send a message to the Evaluator module to evaluate the given individual in the given
-                /// generation. _id is the individual's id (a number, starts at 0 for first individual in the
-                /// generation) _generation is the generation number, starts at 1 for the first generation _reals are
-                /// the individual's parameters to optimise,
-                void requestIndEvaluation(int _id, int _generation, const std::vector<double>& _reals);
+                /// generation. id is the individual's id (a number, starts at 0 for first individual in the
+                /// generation) generation is the generation number, starts at 1 for the first generation parameters
+                /// are the individual's parameters to optimise,
+                void requestIndEvaluation(int id, int generation, const std::vector<double>& parameters);
+
+                void processFirstGenerationIndividual(int id, int generation, const std::vector<double>& objScore, const std::vector<double>& constraints);
+                void processOrdinaryGenerationIndividual(int id, int generation, const std::vector<double>& objScore, const std::vector<double>& constraints);
+                void processFinalGenerationIndividual(int id, int generation, const std::vector<double>& objScore, const std::vector<double>& constraints);
 
                 /// @brief Implementation of the NSGA II algorithm, holds the state of the entire optimisation,
                 /// including the populations, scores, etc

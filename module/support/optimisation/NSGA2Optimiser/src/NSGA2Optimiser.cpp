@@ -24,12 +24,10 @@ namespace module {
 
             using utility::support::Expression;
 
-
             NSGA2Optimiser::NSGA2Optimiser(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment)) {
 
-                // Read the NSGA2Optimiser.yaml config file and initialize the values we're going to use for the
-                // optimisation
+                // Read NSGA2Optimiser.yaml file and initialize the values we're going to use for the optimisation
                 on<Configuration>("NSGA2Optimiser.yaml").then([this](const Configuration& config) {
                     default_leg_gains = config["gains"]["legs"].as<Expression>();
 
@@ -127,121 +125,121 @@ namespace module {
                     // An individual has been evaluation and we've got the scores. This updates the
                     // algorithm with the score, and evaluates the next individual.
 
-                    if (scores.generation == 1)  // INITIAL GENERATION
-                    {
-                        // Tell the algorithm the evaluation scores for this individual
-                        nsga2Algorithm.parentPop->SetIndObjectiveScore(scores.id, scores.objScore);
-                        nsga2Algorithm.parentPop->SetIndConstraints(scores.id, scores.constraints);
-
-                        // If we have more individuals then evaluate next individual
-                        if (scores.id < nsga2Algorithm.popSize - 1) {
-                            requestIndEvaluation(scores.id + 1,
-                                                 nsga2Algorithm.parentPop->generation,
-                                                 nsga2Algorithm.parentPop->GetIndReals(scores.id + 1));
-                        }
-                        // If this was the last individual, end the current generation and start the next generation
-                        else if (scores.id == nsga2Algorithm.popSize - 1) {
-                            // End the first generation
-                            nsga2Algorithm.CompleteFirstGeneration();
-
-                            // Start the next generation (creates the new children for evaluation)
-                            nsga2Algorithm.InitializeNextGeneration();
-
-                            log<NUClear::INFO>("Advanced to new generation", nsga2Algorithm.childPop->generation);
-
-                            // Evaluate the first individual in the new generation
-                            requestIndEvaluation(0,
-                                                 nsga2Algorithm.childPop->generation,
-                                                 nsga2Algorithm.childPop->GetIndReals(0));
-                        }
-                        // Otherwise we have an individual that's out of bounds
-                        // TODO: perhaps make the above `else if` an `else`
-                        else {
-                            log<NUClear::INFO>("error: individual number out of bounds");
-                        }
-                    }
-                    else  // FOLLOWING GENERATIONS
-                    {
-                        // Tell the algorithm the evaluation scores for this individual
-                        nsga2Algorithm.childPop->SetIndObjectiveScore(scores.id, scores.objScore);
-                        nsga2Algorithm.childPop->SetIndConstraints(scores.id, scores.constraints);
-
-                        // If we have more individuals then evaluate next individual
-                        if (scores.id < nsga2Algorithm.popSize - 1) {
-                            requestIndEvaluation(scores.id + 1,
-                                                 nsga2Algorithm.childPop->generation,
-                                                 nsga2Algorithm.childPop->GetIndReals(scores.id + 1));
-                        }
-                        // If this was the last individual, end the current generation and start the next generation
-                        else if (scores.id == nsga2Algorithm.popSize - 1) {
-                            // If this was the final generation, finish up
-                            if (scores.generation == nsga2Algorithm.generations) {
-                                // End the generation and save its data
-                                nsga2Algorithm.CompleteOrdinaryGeneration();
-
-                                // Report the population of our final generation
-                                nsga2Algorithm.ReportFinalGenerationPop();
-
-                                log<NUClear::INFO>("NSGA2 evaluation finished!");
-
-                                // Tell the evaluator to finish up
-                                std::unique_ptr<NSGA2Terminate> terminate = std::make_unique<NSGA2Terminate>();
-                                terminate->terminateMe                    = 1;
-                                emit(terminate);
-
-                                // Tell Webots to terminate
-                                std::unique_ptr<OptimisationCommand> msg = std::make_unique<OptimisationCommand>();
-                                msg->command                             = OptimisationCommand::CommandType::TERMINATE;
-                                emit(msg);
-
-                                // Tell ourselves to terminate
-                                log<NUClear::INFO>("Powerplant shutdown");
-                                powerplant.shutdown();
-                            }
-                            else if (scores.generation < nsga2Algorithm.generations) {
-                                // End the generation and save its data
-                                nsga2Algorithm.CompleteOrdinaryGeneration();
-
-                                // Start the next generation (creates the new children for evaluation)
-                                nsga2Algorithm.InitializeNextGeneration();
-
-                                log<NUClear::INFO>("Advanced to new generation", nsga2Algorithm.childPop->generation);
-
-                                // Evaluate the first individual in the new generation
-                                requestIndEvaluation(0,
-                                                     nsga2Algorithm.childPop->generation,
-                                                     nsga2Algorithm.childPop->GetIndReals(0));
-                            }
-                        }
-                        // Otherwise we have an individual that's out of bounds
-                        // TODO: perhaps make the above `else if` an `else`
-                        else {
-                            log<NUClear::ERROR>("Individual number out of bounds");
-                        }
+                    if (scores.generation == 1) {
+                        processFirstGenerationIndividual(scores.id, scores.generation, scores.objScore, scores.constraints);
+                    } else if (scores.generation < nsga2Algorithm.generations) {
+                        processOrdinaryGenerationIndividual(scores.id, scores.generation, scores.objScore, scores.constraints);
+                    } else {
+                        processFinalGenerationIndividual(scores.id, scores.generation, scores.objScore, scores.constraints);
                     }
                 });
             }
 
-            void NSGA2Optimiser::requestIndEvaluation(int _id, int _generation, const std::vector<double>& _reals) {
-                log<NUClear::INFO>("\n\n\nEvaluating generation", _generation, "individual", _id);
+            void NSGA2Optimiser::processFirstGenerationIndividual(int id, int generation, const std::vector<double>& objScore, const std::vector<double>& constraints) {
+                // Tell the algorithm the evaluation scores for this individual
+                nsga2Algorithm.parentPop->SetIndObjectiveScore(id, objScore);
+                nsga2Algorithm.parentPop->SetIndConstraints(id, constraints);
+
+                // If we have more individuals then evaluate next individual
+                if (id < nsga2Algorithm.popSize - 1) {
+                    requestIndEvaluation(id + 1,
+                                            nsga2Algorithm.parentPop->generation,
+                                            nsga2Algorithm.parentPop->GetIndReals(id + 1));
+                } else {
+                    // End the first generation
+                    nsga2Algorithm.CompleteFirstGeneration();
+
+                    // Start the next generation (creates the new children for evaluation)
+                    nsga2Algorithm.InitializeNextGeneration();
+                    log<NUClear::INFO>("Advanced to new generation", nsga2Algorithm.childPop->generation);
+
+                    // Evaluate the first individual in the new generation
+                    requestIndEvaluation(0,
+                                            nsga2Algorithm.childPop->generation,
+                                            nsga2Algorithm.childPop->GetIndReals(0));
+                }
+            }
+
+            void NSGA2Optimiser::processOrdinaryGenerationIndividual(int id, int generation, const std::vector<double>& objScore, const std::vector<double>& constraints) {
+                // Tell the algorithm the evaluation scores for this individual
+                nsga2Algorithm.childPop->SetIndObjectiveScore(id, objScore);
+                nsga2Algorithm.childPop->SetIndConstraints(id, constraints);
+
+                // If we have more individuals then evaluate next individual
+                if (id < nsga2Algorithm.popSize - 1) {
+                    requestIndEvaluation(id + 1,
+                                            nsga2Algorithm.childPop->generation,
+                                            nsga2Algorithm.childPop->GetIndReals(id + 1));
+                } else {
+                // End the generation and save its data
+                nsga2Algorithm.CompleteOrdinaryGeneration();
+
+                // Start the next generation (creates the new children for evaluation)
+                nsga2Algorithm.InitializeNextGeneration();
+                log<NUClear::INFO>("Advanced to new generation", nsga2Algorithm.childPop->generation);
+
+                // Evaluate the first individual in the new generation
+                requestIndEvaluation(0,
+                                        nsga2Algorithm.childPop->generation,
+                                        nsga2Algorithm.childPop->GetIndReals(0));
+                }
+            }
+
+            void NSGA2Optimiser::processFinalGenerationIndividual(int id, int generation, const std::vector<double>& objScore, const std::vector<double>& constraints) {
+                // Tell the algorithm the evaluation scores for this individual
+                nsga2Algorithm.childPop->SetIndObjectiveScore(id, objScore);
+                nsga2Algorithm.childPop->SetIndConstraints(id, constraints);
+
+                // If we have more individuals then evaluate next individual
+                if (id < nsga2Algorithm.popSize - 1) {
+                    requestIndEvaluation(id + 1,
+                                            nsga2Algorithm.childPop->generation,
+                                            nsga2Algorithm.childPop->GetIndReals(id + 1));
+                } else {
+                    // End the generation and save its data
+                    nsga2Algorithm.CompleteOrdinaryGeneration();
+
+                    // Report the population of our final generation
+                    nsga2Algorithm.ReportFinalGenerationPop();
+
+                    log<NUClear::INFO>("NSGA2 evaluation finished!");
+
+                    // Tell the evaluator to finish up
+                    std::unique_ptr<NSGA2Terminate> terminate = std::make_unique<NSGA2Terminate>();
+                    terminate->terminateMe                    = 1;
+                    emit(terminate);
+
+                    // Tell Webots to terminate
+                    std::unique_ptr<OptimisationCommand> msg = std::make_unique<OptimisationCommand>();
+                    msg->command                             = OptimisationCommand::CommandType::TERMINATE;
+                    emit(msg);
+
+                    // Tell ourselves to terminate
+                    log<NUClear::INFO>("Powerplant shutdown");
+                    powerplant.shutdown();
+                }
+            }
+
+            void NSGA2Optimiser::requestIndEvaluation(int id, int generation, const std::vector<double>& parameters) {
+                log<NUClear::INFO>("\n\n\nEvaluating generation", generation, "individual", id);
 
                 // Create a message to request an evaluation of an individual
                 std::unique_ptr<NSGA2EvaluationRequest> request = std::make_unique<NSGA2EvaluationRequest>();
-                request->id                                     = _id;
-                request->generation                             = _generation;
+                request->id                                     = id;
+                request->generation                             = generation;
 
                 // Add the individual's parameters to the message
-                request->parameters.freq                 = _reals[0];
-                request->parameters.double_support_ratio = _reals[1];
-                request->parameters.foot.distance        = _reals[2];
-                request->parameters.foot.rise            = _reals[3];
-                request->parameters.trunk.height         = _reals[4];
-                request->parameters.trunk.pitch          = _reals[5];
-                request->parameters.trunk.x_offset       = _reals[6];
-                request->parameters.trunk.y_offset       = _reals[7];
-                request->parameters.trunk.swing          = _reals[8];
-                request->parameters.trunk.pause          = _reals[9];
-                request->parameters.pause.duration       = _reals[10];
+                request->parameters.freq                 = parameters[0];
+                request->parameters.double_support_ratio = parameters[1];
+                request->parameters.foot.distance        = parameters[2];
+                request->parameters.foot.rise            = parameters[3];
+                request->parameters.trunk.height         = parameters[4];
+                request->parameters.trunk.pitch          = parameters[5];
+                request->parameters.trunk.x_offset       = parameters[6];
+                request->parameters.trunk.y_offset       = parameters[7];
+                request->parameters.trunk.swing          = parameters[8];
+                request->parameters.trunk.pause          = parameters[9];
+                request->parameters.pause.duration       = parameters[10];
 
                 // Set default leg gains
                 request->parameters.gains.legs = default_leg_gains;

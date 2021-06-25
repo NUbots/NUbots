@@ -232,8 +232,8 @@ namespace nsga2 {
     }
 
     void NSGA2::InitializeReportingStreams() {
-        InitializePopulationStream(initial_pop_file, "nsga2_initial_pop.csv", "This file contains the data of all generations");
-        InitializePopulationStream(final_pop_file, "nsga2_final_pop.csv", "This file contains the data of final population");
+        InitializePopulationStream(initial_pop_file, "nsga2_initial_pop.csv", "This file contains the data of the initial generation");
+        InitializePopulationStream(final_pop_file, "nsga2_final_pop.csv", "This file contains the data of the final population");
         InitializePopulationStream(best_pop_file,
                                     "nsga2_best_pop.csv",
                                     "This file contains the data of final feasible population (if any)");
