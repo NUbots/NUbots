@@ -55,6 +55,7 @@ namespace module::localisation {
         });
 
         on<Startup, With<FieldDescription>>().then([this](const FieldDescription& fd) {
+            // On Startup World to Torso is 0, such that config.start_state is rBWw
             // Left side penalty mark
             config.start_state.emplace_back((fd.dimensions.field_width / 2.0),
                                             (fd.dimensions.field_length / 2.0) + fd.dimensions.penalty_mark_distance);
