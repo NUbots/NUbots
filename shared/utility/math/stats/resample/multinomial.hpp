@@ -35,7 +35,8 @@ namespace utility::math::stats::resample {
     template <typename Scalar>
     struct Multinomial {
         Multinomial(const int& /*count*/) : gen((std::random_device()())), dist(Scalar(0.0), Scalar(1.0)) {}
-        Scalar operator()(const int& /*i*/) {
+
+        [[nodiscard]] Scalar operator()(const int& /*i*/) {
             return dist(gen);
         }
 
@@ -46,7 +47,7 @@ namespace utility::math::stats::resample {
     };
 
     template <typename Iterator>
-    std::vector<int> multinomial(const int& count, Iterator&& begin, Iterator&& end) {
+    [[nodiscard]] std::vector<int> multinomial(const int& count, Iterator&& begin, Iterator&& end) {
         return resample<Multinomial>(count, std::forward<Iterator>(begin), std::forward<Iterator>(end));
     }
 

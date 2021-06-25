@@ -31,7 +31,10 @@
 namespace utility::math::stats::resample {
 
     template <typename Iterator, typename ResidualSampler>
-    std::vector<int> residual(const int& count, Iterator&& begin, Iterator&& end, ResidualSampler&& residual_sampler) {
+    [[nodiscard]] std::vector<int> residual(const int& count,
+                                            Iterator&& begin,
+                                            Iterator&& end,
+                                            ResidualSampler&& residual_sampler) {
         using Scalar = std::remove_reference_t<decltype(*begin)>;
 
         // Get number of weights

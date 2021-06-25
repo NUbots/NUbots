@@ -35,7 +35,8 @@ namespace utility::math::stats::resample {
     template <typename Scalar>
     struct Stratified {
         Stratified(const int& count) : gen((std::random_device()())), dist(Scalar(0.0), Scalar(1.0)), count(count) {}
-        Scalar operator()(const int& i) {
+
+        [[nodiscard]] Scalar operator()(const int& i) {
             return (Scalar(i) + dist(gen)) / count;
         }
 
@@ -48,7 +49,7 @@ namespace utility::math::stats::resample {
     };
 
     template <typename Iterator>
-    std::vector<int> stratified(const int& count, Iterator&& begin, Iterator&& end) {
+    [[nodiscard]] std::vector<int> stratified(const int& count, Iterator&& begin, Iterator&& end) {
         return resample<Stratified>(count, std::forward<Iterator>(begin), std::forward<Iterator>(end));
     }
 

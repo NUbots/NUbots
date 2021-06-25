@@ -31,7 +31,7 @@
 namespace utility::math::stats::resample {
 
     template <template <typename> class Generator, typename Iterator>
-    std::vector<int> resample(const int& count, Iterator begin, Iterator end) {
+    [[nodiscard]] std::vector<int> resample(const int& count, Iterator begin, Iterator end) {
         using Scalar = std::remove_reference_t<decltype(*begin)>;
 
         // Get number of weights

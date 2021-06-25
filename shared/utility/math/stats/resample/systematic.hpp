@@ -34,11 +34,10 @@ namespace utility::math::stats::resample {
 
     template <typename Scalar>
     struct Systematic {
-
         Systematic(const int& count)
             : gen((std::random_device()())), dist(Scalar(0.0), Scalar(1.0)), count(count), rng(dist(gen)) {}
 
-        Scalar operator()(const int& i) {
+        [[nodiscard]] Scalar operator()(const int& i) {
             return (Scalar(i) + rng) / count;
         }
 
@@ -51,7 +50,7 @@ namespace utility::math::stats::resample {
     };
 
     template <typename Iterator>
-    std::vector<int> systematic(const int& count, Iterator&& begin, Iterator&& end) {
+    [[nodiscard]] std::vector<int> systematic(const int& count, Iterator&& begin, Iterator&& end) {
         return resample<Systematic>(count, std::forward<Iterator>(begin), std::forward<Iterator>(end));
     }
 
