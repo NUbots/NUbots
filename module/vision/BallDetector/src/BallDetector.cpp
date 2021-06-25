@@ -157,12 +157,21 @@ namespace module::vision {
                         b.measurements.push_back(Ball::Measurement());
 
                         // Spherical Reciprocal Coordinates (1/distance, phi, theta)
+                        Eigen::Vector3f rBCc = b.cone.axis * distance;
                         b.measurements.back().srBCc      = cartesianToReciprocalSpherical(b.cone.axis * distance);
                         b.measurements.back().covariance = config.ball_angular_cov.asDiagonal();
 
                         // Angular positions from the camera
                         b.screen_angular = cartesianToSpherical(axis).tail<2>();
                         b.angular_size   = Eigen::Vector2f::Constant(std::acos(radius));
+
+                        //Convert to rBCc
+                        // float r = 1/distance;
+                        // const Eigen::Vector3d srBCc =  b.measurements.back().srBCc;
+                        // rBCc.x() = r*std::cos(srBCc.z())*std::sin(srBCc.y());
+                        // rBCc.y() = r*std::sin(srBCc.z())*std::sin(srBCc.y());
+                        // rBCc.z() = r*std::cos(srBCc.y());
+                        // log(rBCc.x(),rBCc.y(),rBCc.z());
 
                         /***********************************************
                          *                  THROWOUTS                  *
@@ -267,6 +276,9 @@ namespace module::vision {
                         log<NUClear::DEBUG>(fmt::format("Distance Throwout {}",
                                                         std::abs(projection_distance - distance) / max_distance));
                         log<NUClear::DEBUG>("**************************************************");
+                        log(rBCc.x(),rBCc.y(),rBCc.z());
+
+
 
                         if (!keep) {
                             b.measurements.clear();

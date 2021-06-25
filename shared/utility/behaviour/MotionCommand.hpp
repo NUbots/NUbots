@@ -55,6 +55,12 @@ namespace utility::behaviour {
         return cmd;
     }
 
+    inline MotionCommand WalkToBall() {
+        MotionCommand cmd;
+        cmd.type       = MotionCommand::Type::Value::WALK_TO_BALL;
+        return cmd;
+    }
+
     inline MotionCommand BallApproach(const Eigen::Vector2d& kickTarget_) {
         MotionCommand cmd;
         cmd.type        = MotionCommand::Type::Value::BALL_APPROACH;

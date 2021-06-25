@@ -70,6 +70,7 @@ namespace module::behaviour::planning {
         float ball_approach_dist = 0.2;
         float slowdown_distance  = 0.2;
         bool useLocalisation     = true;
+        Eigen::Vector3f rBTt     = Eigen::Vector3f(1.0, 0.0, 0.0);
 
     public:
         explicit SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);

@@ -121,8 +121,8 @@ gains:
   arms: 13
 
 arms:
-  right_shoulder_pitch: 2.25
-  left_shoulder_pitch: 2.25
+  right_shoulder_pitch: 2.5
+  left_shoulder_pitch: 2.5
   right_shoulder_roll: -0.176
   left_shoulder_roll: 0.176
   right_elbow: -1

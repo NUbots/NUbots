@@ -92,6 +92,8 @@ namespace module::behaviour::strategy {
         bool manualOrientationReset                          = false;
         bool resetInInitial                                  = true;
 
+        Eigen::Vector3f rBTt     = Eigen::Vector3f(1.0, 0.0, 0.0);
+
         bool startedWalkingToReady                           = false;
         NUClear::clock::time_point startedWalkingToReadyAt;
 

@@ -43,6 +43,7 @@
 #include "utility/math/matrix/transform.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
+#include "utility/math/coordinates.hpp"
 
 namespace module::behaviour::strategy {
 
@@ -79,6 +80,7 @@ namespace module::behaviour::strategy {
     using message::support::FieldDescription;
     using VisionBalls = message::vision::Balls;
     using VisionGoals = message::vision::Goals;
+    using utility::math::coordinates::sphericalToCartesian;
 
     using utility::input::LimbID;
     using utility::support::Expression;
@@ -157,6 +159,16 @@ namespace module::behaviour::strategy {
             }
         });
 
+        on<Trigger<VisionBalls>, With<Sensors>>().then([this](const VisionBalls& balls, const Sensors& sensors) {
+            if (balls.balls.size() > 0) {
+                Eigen::Vector3f srBCc = balls.balls[0].measurements[0].srBCc;
+                srBCc.x() = 1.0/srBCc.x();
+                Eigen::Affine3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
+                rBTt = Htc * Eigen::Vector3f(sphericalToCartesian(srBCc));
+                log("rBTt: ", rBTt.x(),rBTt.y(),rBTt.z());
+            }
+        });
+
         // TODO: remove this horrible code
         // Check to see if we are currently in the process of getting up.
         on<Trigger<ExecuteGetup>>().then([this] { isGettingUp = true; });
@@ -165,10 +177,14 @@ namespace module::behaviour::strategy {
         on<Trigger<KillGetup>>().then([this] { isGettingUp = false; });
 
         on<Trigger<Penalisation>>().then([this](const Penalisation& selfPenalisation) {
-            log(selfPenalisation.context);
-            if (selfPenalisation.context == GameEvents::Context::SELF) {
+            log<NUClear::DEBUG>("This is the selfPenalisation message value", selfPenalisation.context.value);
+
+            log<NUClear::DEBUG>("This is the selfPenalisation message", selfPenalisation.context);
+            if (selfPenalisation.context.value == GameEvents::Context::SELF) {
+                log(selfPenalisation.context);
                 emit(std::make_unique<ResetWebotsServos>());
                 selfPenalised = true;
+                log<NUClear::DEBUG>("robot has been penalised");
             }
         });
 
@@ -403,21 +419,23 @@ namespace module::behaviour::strategy {
     void SoccerStrategy::normalPlaying(const Field& field, const Ball& ball, const FieldDescription& fieldDescription) {
         log<NUClear::DEBUG>("normalPlaying()");
         if (penalised() && !cfg_.forcePlaying) {  // penalised
-            standStill();
+            // standStill();
+            log("we think we are penalised");
             // find({FieldTarget(FieldTarget::Target::SELF)});
             currentState = Behaviour::State::PENALISED;
             return;
         }
-        // else if (cfg_.is_goalie) {  // goalie
-        //     find({FieldTarget(FieldTarget::Target::BALL)});
-        //     goalieWalk(field, ball);
-        //     currentState = Behaviour::State::GOALIE_WALK;
-        // }
+        else if (cfg_.is_goalie) {  // goalie
+            find({FieldTarget(FieldTarget::Target::BALL)});
+            goalieWalk(field, ball);
+            currentState = Behaviour::State::GOALIE_WALK;
+        }
 
-        if (NUClear::clock::now() - ballLastMeasured < cfg_.ball_last_seen_max_time) {
+        if (NUClear::clock::now() - ballLastMeasured < cfg_.ball_last_seen_max_time && std::abs(rBTt.x()) < 10 && std::abs(rBTt.y()) < 10 && std::abs(rBTt.z()) < 10) {
             // ball has been seen recently
             log("Walk to ball");
-            walkTo(fieldDescription, FieldTarget::Target::BALL);
+            emit(std::make_unique<MotionCommand>(utility::behaviour::WalkToBall()));
+            // walkTo(fieldDescription, FieldTarget::Target::BALL);
             currentState = Behaviour::State::WALK_TO_BALL;
         }
         else {
@@ -518,10 +536,6 @@ namespace module::behaviour::strategy {
     }
 
     bool SoccerStrategy::penalised() {
-        if (selfPenalised) {
-            log<NUClear::DEBUG>("robot has been penalised");
-        }
-
         return selfPenalised;
     }
 

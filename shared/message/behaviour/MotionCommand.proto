@@ -37,7 +37,8 @@ message MotionCommand {
         WALK_TO_READY_POSITION = 4;
         // Rotate on spot
         ROTATE_ON_SPOT = 5;
-
+        // Rotate on spot
+        WALK_TO_BALL = 6;
     }
 
     // The type of this motion command:

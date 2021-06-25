@@ -288,6 +288,7 @@ namespace module::input {
                 auto unpenalisedTime = NUClear::clock::now() + std::chrono::seconds(newOwnPlayer.penalisedTimeLeft);
                 auto reason          = getPenaltyReason(newOwnPlayer.penaltyState);
                 stateChanges.push_back([this, playerId, unpenalisedTime, reason] {
+                    log<NUClear::DEBUG>("This is the playerId", playerId);
                     if (playerId == PLAYER_ID) {
                         // self penalised :@
                         emit(std::make_unique<Penalisation>(
