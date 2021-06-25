@@ -98,6 +98,19 @@ namespace utility::math::filter {
             }
 
             return cholesky.info();
+            // Eigen::SelfAdjointEigenSolver<Eigen::Matrix<T, S, S>> solver(
+            //     sigma_weight * covariance.unaryExpr([](const Scalar& c) { return std::abs(c); }));
+
+            // if (solver.info() == Eigen::Success) {
+            //     Eigen::Matrix<T, S, S> transform =
+            //         solver.eigenvectors() * solver.eigenvalues().cwiseSqrt().asDiagonal();
+            //     for (unsigned int i = 1; i < Model::size + 1; ++i) {
+            //         points.col(i)               = (mean + transform.col(i - 1));
+            //         points.col(i + Model::size) = (mean - transform.col(i - 1));
+            //     }
+            // }
+
+            // return solver.info();
         }
 
         /**
