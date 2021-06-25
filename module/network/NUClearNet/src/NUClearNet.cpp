@@ -28,6 +28,7 @@ namespace module::network {
     NUClearNet::NUClearNet(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("NUClearNet.yaml").then([this](const Configuration& config) {
+            log_level                   = config["log_level"].as<NUClear::LogLevel>();
             auto netConfig              = std::make_unique<NUClear::message::NetworkConfiguration>();
             std::string name            = config["name"].as<std::string>();
             netConfig->name             = name.empty() ? utility::support::getHostname() : name;

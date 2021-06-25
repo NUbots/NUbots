@@ -95,6 +95,8 @@ namespace module::behaviour::strategy {
         , goalLastMeasured() {
 
         on<Configuration>("SoccerStrategy.yaml").then([this](const Configuration& config) {
+            log_level = config["log_level"].as<NUClear::LogLevel>();
+
             using namespace std::chrono;
             cfg_.ball_last_seen_max_time = duration_cast<NUClear::clock::duration>(
                 duration<double>(config["ball_last_seen_max_time"].as<double>()));
