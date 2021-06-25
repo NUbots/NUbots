@@ -220,7 +220,7 @@ namespace module::behaviour::strategy {
                     switch (mode) {
                         case GameMode::PENALTY_SHOOTOUT: penaltyShootout(phase, fieldDescription, field, ball); break;
                         // We handle NORMAL and OVERTIME the same at the moment because we don't have any special
-                        // behavior for overtime.
+                        // behaviour for overtime.
                         case GameMode::NORMAL: normal(gameState, phase, fieldDescription, field, ball); break;
                         case GameMode::OVERTIME: normal(gameState, phase, fieldDescription, field, ball); break;
                         default: log<NUClear::WARN>("Game mode unknown.");
