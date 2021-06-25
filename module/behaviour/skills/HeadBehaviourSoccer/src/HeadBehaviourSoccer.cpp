@@ -139,9 +139,6 @@ namespace module::behaviour::skills {
                         searches[s].push_back(p.as<Expression>());
                     }
                 }
-
-                // lastBallTime = NUClear::clock::now();
-                // lastGoalTime = NUClear::clock::now();
             });
 
 
@@ -355,7 +352,7 @@ namespace module::behaviour::skills {
 
         // Get balls
         if (ballPriority == maxPriority) {
-            // If there is a ball and we've got a new ball or its been less than searcherTime since the last ball
+            // If there is a ball and we've got a new ball or it's been less than searcherTime since the last ball
             if (vballs && vballs->balls.size() > 0
                 && (lastBallTime != vballs->timestamp || NUClear::clock::now() - vballs->timestamp < searcherTime)) {
                 lastBallTime = vballs->timestamp;
