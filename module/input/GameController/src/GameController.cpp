@@ -228,7 +228,7 @@ namespace module::input {
             emit(std::make_unique<GameEvents::Score>(GameEvents::Score{newOwnTeam.score, newOpponentTeam.score}));
 
 
-            if (oldOwnTeam.score > newOwnTeam.score) {
+            if (oldOwnTeam.score < newOwnTeam.score) {
                 // we scored! :D
 
                 // Set the team scores in the state packet
@@ -238,7 +238,7 @@ namespace module::input {
                 });
             }
 
-            if (oldOpponentTeam.score > newOpponentTeam.score) {
+            if (oldOpponentTeam.score < newOpponentTeam.score) {
                 // they scored :( boo
 
                 // Set the team scores in the state packet
@@ -293,8 +293,7 @@ namespace module::input {
                         emit(std::make_unique<Penalisation>(
                             Penalisation{GameEvents::Context::Value::SELF, playerId, unpenalisedTime, reason}));
                         sendReplyMessage(ReplyMessage::PENALISED);
-                        selfPenalised   = true;
-                        penaltyOverride = false;
+                        selfPenalised = true;
                     }
                     else {
                         // team mate penalised :'(
@@ -311,8 +310,7 @@ namespace module::input {
                         emit(std::make_unique<Unpenalisation>(
                             Unpenalisation{GameEvents::Context::Value::SELF, playerId}));
                         sendReplyMessage(ReplyMessage::UNPENALISED);
-                        selfPenalised   = false;
-                        penaltyOverride = false;
+                        selfPenalised = false;
                     }
                     else {
                         // team mate unpenalised :)

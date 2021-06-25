@@ -95,7 +95,7 @@ namespace module::localisation {
         inline int getRogueCount() const {
             return n_rogues;
         }
-        Eigen::Matrix<Scalar, 2, 1> getRogueRange() const {
+        [[nodiscard]] StateVec get_rogue() const {
             return resetRange;
         }
 
