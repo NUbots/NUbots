@@ -42,8 +42,6 @@ namespace utility::math::filter {
     enum class ResampleMethod { MULTINOMIAL, RESIDUAL, STRATIFIED, SYSTEMATIC };
 
     /**
-     * Particle Filter
-     *
      * @author Alex Biddulph, Trent Houliston
      *
      * @details Uses a set of particles (or samples) to represent possible states in a system. Each particle is randomly
