@@ -265,6 +265,13 @@ namespace module {
                             case Event::TerminateEvaluation: return State::FINISHED;
                             default: return State::UNKNOWN;
                         }
+                    case State::FINISHED:
+                        switch (event) {
+                            // Arguably this should return FINISHED regardless of event
+                            case Event::FitnessScoresSent: return State::FINISHED;
+                            case Event::TerminateEvaluation: return State::FINISHED;
+                            default: return State::UNKNOWN;
+                        }
                     default: return State::UNKNOWN;
                 }
             }
