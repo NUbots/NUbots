@@ -258,8 +258,7 @@ namespace module::behaviour::skills {
                                       ob.screen_angular.cast<double>() / double(goalFixationObjects.goals.size());
                               }
                           }
-                          Eigen::Vector2d currentCentroid_world =
-                              getIMUSpaceDirection(currentCentroid, headToIMUSpace);
+                          Eigen::Vector2d currentCentroid_world = getIMUSpaceDirection(currentCentroid, headToIMUSpace);
                           // If our objects have moved, we need to replan
                           if ((currentCentroid_world - lastCentroid).norm()
                               >= fractional_angular_update_threshold * image.lens.fov / 2.0) {
