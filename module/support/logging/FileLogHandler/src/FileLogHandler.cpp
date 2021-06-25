@@ -116,7 +116,9 @@ namespace module::support::logging {
             }
 
             // Output the message
-            logFile << message.message << std::endl;
+            // logFile << message.message << std::endl;
+            // TEMPORARY: Send to std::cout for RoboCup as we currently are not getting our logs back
+            std::cout << message.message << std::endl;
         });
     }
 }  // namespace module::support::logging
