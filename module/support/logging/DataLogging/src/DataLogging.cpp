@@ -116,7 +116,7 @@ namespace module::support::logging {
                     // Get the details we need to generate a log file name
                     config.output.directory  = cfg["output"]["directory"].as<std::string>();
                     config.output.split_size = cfg["output"]["split_size"].as<Expression>();
-                    config.output.max_size   = cfg["output"]["max_size"].as<long>();
+                    config.output.max_size   = cfg["output"]["max_size"].as<Expression>();
 
                     // Get the name of the currently running binary
                     std::vector<char> data(argv[0].cbegin(), argv[0].cend());

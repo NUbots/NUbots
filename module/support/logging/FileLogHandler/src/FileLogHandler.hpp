@@ -20,7 +20,7 @@ namespace module::support::logging {
         std::mutex mutex;
         std::filesystem::path log_file_name = std::filesystem::path("log") / std::filesystem::path("log");
         std::ofstream log_file;
-        long max_size = std::numeric_limits<long>::max();
+        uint64_t max_size = std::numeric_limits<uint64_t>::max();
 
         /// Holds the reaction so we can disable it when we fill the log folder
         ReactionHandle logging_reaction{};
