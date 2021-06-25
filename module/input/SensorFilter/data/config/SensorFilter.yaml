@@ -1,4 +1,4 @@
-debug: False
+log_level: ERROR
 
 buttons:
   debounce_threshold: 7

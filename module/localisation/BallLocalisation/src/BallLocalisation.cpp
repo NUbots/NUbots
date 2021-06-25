@@ -6,6 +6,8 @@
 
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
+#include "message/localisation/Field.hpp"
+#include "message/localisation/ResetBallHypotheses.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/Ball.hpp"
 
@@ -19,6 +21,8 @@ namespace module::localisation {
     using extension::Configuration;
     using message::input::Sensors;
     using message::localisation::Ball;
+    using message::localisation::Field;
+    using message::localisation::ResetBallHypotheses;
     using message::support::FieldDescription;
 
     using utility::math::coordinates::cartesianToSpherical;
@@ -34,24 +38,40 @@ namespace module::localisation {
             last_time_update_time        = NUClear::clock::now();
         });
 
-        on<Configuration, Sync<BallLocalisation>>("BallLocalisation.yaml").then([this](const Configuration& config) {
+        on<Configuration, Sync<BallLocalisation>>("BallLocalisation.yaml").then([this](const Configuration& cfg) {
             auto message = std::make_unique<std::vector<Ball>>();
             emit(message);
             emit(std::make_unique<Ball>());
 
-            ball_pos_log = config["ball_pos_log"].as<bool>();
+            log_level = cfg["log_level"].as<NUClear::LogLevel>();
+
+            ball_pos_log = cfg["ball_pos_log"].as<bool>();
             // Use configuration here from file RobotParticleLocalisation.yaml
-            filter.model.n_rogues    = config["n_rogues"].as<int>();
-            filter.model.resetRange  = config["reset_range"].as<Expression>();
-            filter.model.n_particles = config["n_particles"].as<int>();
+            filter.model.n_rogues    = cfg["n_rogues"].as<int>();
+            filter.model.resetRange  = cfg["reset_range"].as<Expression>();
+            filter.model.n_particles = cfg["n_particles"].as<int>();
 
-            const Eigen::Vector2d start_state    = config["start_state"].as<Expression>();
-            const Eigen::Vector2d start_variance = config["start_variance"].as<Expression>();
+            config.start_variance = cfg["start_variance"].as<Expression>();
+        });
 
-            // start_variance.asDiagonal() == the starting covariance matrix
-            filter.set_state(start_state, start_variance.asDiagonal());
+        on<Startup, With<FieldDescription>>().then([this](const FieldDescription& fd) {
+            // On Startup World to Torso is 0, such that config.start_state is rBWw
+            // Left side penalty mark
+            config.start_state.emplace_back((fd.dimensions.field_width / 2.0),
+                                            (fd.dimensions.field_length / 2.0) + fd.dimensions.penalty_mark_distance);
 
-            // Use configuration here from file BallLocalisation.yaml
+            // Right side penalty mark
+            config.start_state.emplace_back((fd.dimensions.field_width / 2.0),
+                                            -(fd.dimensions.field_length / 2.0) + fd.dimensions.penalty_mark_distance);
+
+            // Infront of our feet (Penalty shootout)
+            config.start_state.emplace_back(0.2, 0);
+
+            std::vector<std::pair<Eigen::Vector2d, Eigen::Matrix2d>> hypotheses;
+            for (const auto& state : config.start_state) {
+                hypotheses.emplace_back(std::make_pair(state, config.start_variance.asDiagonal()));
+            }
+            filter.set_state(hypotheses);
         });
 
         /* Run Time Update */
@@ -79,24 +99,49 @@ namespace module::localisation {
         /* To run whenever a ball has been detected */
         on<Trigger<message::vision::Balls>, With<FieldDescription>>().then(
             [this](const message::vision::Balls& balls, const FieldDescription& field) {
-                if (balls.balls.size() > 0) {
-                    /* Call Time Update first */
-                    using namespace std::chrono;
-                    const auto curr_time  = NUClear::clock::now();
-                    const double seconds  = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
-                    last_time_update_time = curr_time;
-                    filter.time(seconds);
+                // Call Time Update first
+                using namespace std::chrono;
+                const auto curr_time  = NUClear::clock::now();
+                const double seconds  = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
+                last_time_update_time = curr_time;
+                filter.time(seconds);
+                for (const auto& ball : balls.balls) {
+                    if (!ball.measurements.empty()) {
 
-                    // Now call Measurement Update. Supports multiple measurement methods and will treat them as
-                    // separate measurements
-                    for (auto& measurement : balls.balls[0].measurements) {
-                        filter.measure(Eigen::Vector3d(measurement.srBCc.cast<double>()),
-                                       Eigen::Matrix3d(measurement.covariance.cast<double>()),
-                                       field,
-                                       balls.Hcw);
+                        // Now call Measurement Update. Supports multiple measurement methods and will treat them as
+                        // separate measurements
+                        for (auto& measurement : ball.measurements) {
+                            filter.measure(Eigen::Vector3d(measurement.srBCc.cast<double>()),
+                                           Eigen::Matrix3d(measurement.covariance.cast<double>()),
+                                           field,
+                                           balls.Hcw);
+                        }
+                        last_measurement_update_time = curr_time;
                     }
-                    last_measurement_update_time = curr_time;
                 }
             });
+
+        on<Trigger<ResetBallHypotheses>, With<Sensors>, With<Field>, With<FieldDescription>, Sync<BallLocalisation>>()
+            .then("Reset Ball Hypotheses",
+                  [this](const ResetBallHypotheses& locReset,
+                         const Sensors& sensors,
+                         const Field& field,
+                         const FieldDescription& fd) {
+                      // If we've just reset our self localisation we can't trust Htf. So reset balls to the known
+                      // starting position
+                      if (locReset.self_reset) {
+                          std::vector<std::pair<Eigen::Vector2d, Eigen::Matrix2d>> hypotheses;
+                          for (const auto& state : config.start_state) {
+                              hypotheses.emplace_back(std::make_pair(state, config.start_variance.asDiagonal()));
+                          }
+                          filter.set_state(hypotheses);
+                      }
+                      // Otherwise reset balls to the [0, 0] field position
+                      else {
+                          // Set the filter state to the field origin relative to us
+                          filter.set_state(Eigen::Affine2d(field.position).translation(),
+                                           config.start_variance.asDiagonal());
+                      }
+                  });
     }
 }  // namespace module::localisation
