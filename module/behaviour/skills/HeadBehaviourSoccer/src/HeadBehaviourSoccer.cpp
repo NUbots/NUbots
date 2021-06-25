@@ -107,6 +107,8 @@ namespace module::behaviour::skills {
 
         on<Configuration>("HeadBehaviourSoccer.yaml")
             .then("Head Behaviour Soccer Config", [this](const Configuration& config) {
+                log_level = config["log_level"].as<NUClear::LogLevel>();
+
                 lastPlanUpdate     = NUClear::clock::now();
                 timeLastObjectSeen = NUClear::clock::now();
 

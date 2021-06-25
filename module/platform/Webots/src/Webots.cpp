@@ -232,7 +232,7 @@ namespace module::platform {
             max_velocity_mx106   = config["max_velocity_mx106"].as<double>();
             max_fsr_value        = config["max_fsr_value"].as<float>();
 
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            log_level = config["log_level"].as<NUClear::LogLevel>();
 
             clock_smoothing = config["clock_smoothing"].as<double>();
 

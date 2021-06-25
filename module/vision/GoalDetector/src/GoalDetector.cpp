@@ -53,7 +53,7 @@ namespace module::vision {
 
         // Trigger the same function when either update
         on<Configuration>("GoalDetector.yaml").then([this](const Configuration& cfg) {
-            this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
+            log_level = cfg["log_level"].as<NUClear::LogLevel>();
 
             config.confidence_threshold       = cfg["confidence_threshold"].as<float>();
             config.cluster_points             = cfg["cluster_points"].as<int>();
