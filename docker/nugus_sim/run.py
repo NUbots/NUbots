@@ -144,12 +144,13 @@ def run_role(role: str, binaries_dir: str, env_vars: dict) -> None:
     # Run the role binary
     while True:
         print(f"Binary '{role}' starting...")  # For debugging
-        subprocess.run(f"./{role}", env=modified_env)
-        print(f"Binary '{role}' crashed!")  # For debugging
+        exit_code = subprocess.run(f"./{role}", env=modified_env).returncode
+        print(f"Binary '{role}' crashed! Exit code: {exit_code}")  # For debugging
 
 
 if __name__ == "__main__":
+    print("starting nugus run.py")
     args = read_args()
-    print(args)  # For debugging
+    print("main args", args)  # For debugging
     update_config_files(args)
     run_role(args["role"], args["binaries_dir"], args["env_vars"])
