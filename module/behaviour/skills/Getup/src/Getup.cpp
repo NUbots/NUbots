@@ -58,15 +58,15 @@ namespace module::behaviour::skills {
         , EXECUTION_PRIORITY(0.0f) {
 
         // do a little configurating
-        on<Configuration>("Getup.yaml").then([this](const Configuration& file) {
+        on<Configuration>("Getup.yaml").then([this](const Configuration& config) {
             // encode fallen angle as a cosine so we can compare it directly to the z axis value
-            double fallenAngleConfig = file["FALLEN_ANGLE"].as<double>();
+            double fallenAngleConfig = config["FALLEN_ANGLE"].as<double>();
             FALLEN_ANGLE             = cos(fallenAngleConfig);
-            log_level = config["log_level"].as<NUClear::LogLevel>();
+            log_level                = config["log_level"].as<NUClear::LogLevel>();
 
             // load priorities for the getup
-            GETUP_PRIORITY     = file["GETUP_PRIORITY"].as<float>();
-            EXECUTION_PRIORITY = file["EXECUTION_PRIORITY"].as<float>();
+            GETUP_PRIORITY     = config["GETUP_PRIORITY"].as<float>();
+            EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
         });
 
         fallenCheck = on<Trigger<Sensors>, Single>().then("Getup Fallen Check", [this](const Sensors& sensors) {
