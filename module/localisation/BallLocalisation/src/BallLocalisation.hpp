@@ -19,7 +19,7 @@ namespace module::localisation {
 
         struct {
             std::vector<Eigen::Vector2d> start_state{};
-            Eigen::Vector2d start_variance{};
+            Eigen::Vector2d start_variance = Eigen::Vector2d::Zero();
         } config{};
 
     public:
