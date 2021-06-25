@@ -33,6 +33,11 @@ namespace utility::behaviour {
         cmd.type = MotionCommand::Type::Value::STAND_STILL;
         return cmd;
     }
+    inline MotionCommand AbsoluteStop() {
+        MotionCommand cmd;
+        cmd.type = MotionCommand::Type::Value::ABSOLUTE_STOP;
+        return cmd;
+    }
 
     inline MotionCommand WalkToState(const Eigen::Affine2d& goalState_) {
         MotionCommand cmd;

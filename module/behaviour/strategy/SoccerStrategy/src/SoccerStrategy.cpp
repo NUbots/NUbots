@@ -184,7 +184,7 @@ namespace module::behaviour::strategy {
             [this](const KickOffTeam& kickOffTeam) { team_kicking_off = kickOffTeam.context; });
 
         // ********************* Main Loop ********************
-        on<Every<30, Per<std::chrono::seconds>>,
+        on<Every<200, Per<std::chrono::seconds>>,
            With<Sensors>,
            With<GameState>,
            With<Phase>,
@@ -294,6 +294,7 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::penaltyShootoutSet(const FieldDescription& fieldDescription) {
+        emit(std::make_unique<MotionCommand>(utility::behaviour::AbsoluteStop()));
         emit(std::make_unique<ResetWebotsServos>());         // we were teleported, so reset
         hasKicked = false;                                   // reset the hasKicked flag between kicks
         penaltyShootoutLocalisationReset(fieldDescription);  // Reset localisation

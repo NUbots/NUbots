@@ -21,12 +21,15 @@
 
 #include "message/motion/ServoTarget.hpp"
 
+#include "utility/platform/RawSensors.hpp"
+
 namespace module::behaviour {
 
     using message::behaviour::ServoCommand;
     using message::behaviour::ServoCommands;
     using message::motion::ServoTargets;
 
+    using message::platform::ResetWebotsServos;
     using utility::behaviour::ActionKill;
     using utility::behaviour::ActionPriorities;
     using utility::behaviour::ActionStart;

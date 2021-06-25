@@ -131,7 +131,7 @@ namespace module::behaviour::planning {
         });
 
         // Freq should be equal to the main loop in soccer strategy
-        on<Every<30, Per<std::chrono::seconds>>,
+        on<Every<200, Per<std::chrono::seconds>>,
            With<Ball>,
            With<Field>,
            With<Sensors>,
@@ -154,7 +154,12 @@ namespace module::behaviour::planning {
                     emit(std::make_unique<StopCommand>(subsumptionId));
                     return;
                 }
+                else if (latestCommand.type == message::behaviour::MotionCommand::Type::ABSOLUTE_STOP) {
+                    emit(std::make_unique<DisableWalkEngineCommand>(subsumptionId));
+                    return;
+                }
                 else if (latestCommand.type == message::behaviour::MotionCommand::Type::DIRECT_COMMAND) {
+                    emit(std::make_unique<EnableWalkEngineCommand>(subsumptionId));
                     // TO DO, change to Bezier stuff
                     std::unique_ptr<WalkCommand> command =
                         std::make_unique<WalkCommand>(subsumptionId, latestCommand.walk_command);

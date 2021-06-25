@@ -1,4 +1,4 @@
-- duration: 500
+- duration: 1500
   targets:
     - id: L_HIP_YAW
       position: -7.38E-24

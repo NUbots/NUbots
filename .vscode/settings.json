@@ -22,7 +22,10 @@
     ],
     "yaml.format.printWidth": 120,
     "files.associations": {
-        "*.role": "cmake"
+        "*.role": "cmake",
+        "random": "cpp",
+        "initializer_list": "cpp",
+        "*.ipp": "cpp"
     },
     "editor.codeActionsOnSave": {
         "source.organizeImports": true
