@@ -122,7 +122,7 @@ namespace module::support::logging {
 
         // This checks that we haven't reached the max_size
         log_check_handler = on<Every<5, std::chrono::seconds>, Sync<FileLogHandler>, Single>().then([this]() {
-            int size = 0;
+            long size = 0;
             for (auto& f : std::filesystem::recursive_directory_iterator(log_file_name.remove_filename())) {
                 if (f.is_regular_file()) {
                     size += f.file_size();
