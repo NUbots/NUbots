@@ -21,21 +21,19 @@ def register(command):
         "--build",
         dest="build",
         action="store_true",
-        default=False,
         help="build the image locally, instead of pulling and tagging it",
     )
 
     command.add_argument(
         "-n",
         "--no-pull",
-        dest="should_pull",
+        dest="pull",
         action="store_false",
-        default=True,
         help="disable pulling the image from dockerhub",
     )
 
 
-def run(target, build, should_pull, **kwargs):
+def run(target, build, pull, **kwargs):
 
     # Print the current target if no target was selected
     if target is None:
@@ -53,19 +51,31 @@ def run(target, build, should_pull, **kwargs):
             != 0
         )
 
-        # If there are changes in tracked files in the docker folder when comparing with master,
-        # we want to build the image and we don't want to pull the image
-        if changed:
-            build = True
-            should_pull = False
-
-        if should_pull:
+        if pull:
             # Pull the image from dockerhub
             platform.pull(defaults.image, target)
 
-        # If user wants or needs to build it locally, do that
+        # If user wants or needs to build it locally, do that unless the build context is the same as origin/master
         if build:
-            platform.build(defaults.image, target)
+            if not changed:
+                cprint(
+                    "There aren't any changes to be made to the docker image. "
+                    "Skipping build, and using tagged image instead",
+                    "red",
+                    attrs=["bold"],
+                )
+            else:
+                platform.build(defaults.image, target)
+        # If the user hasn't selected build but they have changed the docker directory, then we warn them that the image
+        # isn't going to be built, even though the dirty diff implies they might want it to be built
+        else:
+            if changed:
+                cprint(
+                    "Docker build context differs from origin/master, and build not selected. "
+                    "This is likely an error.",
+                    "red",
+                    attrs=["bold"],
+                )
 
         # Tag the result image as the selected image
         tag = "{}:{}".format(defaults.image, target)
