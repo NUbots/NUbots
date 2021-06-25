@@ -37,7 +37,7 @@ def register(command):
         "--no-clean",
         dest="clean",
         action="store_false",
-        default="True",
+        default=True,
         help="Disables cleaning the build volume before compiling",
     )
 
@@ -215,7 +215,7 @@ def exec_push():
         sys.exit(exit_code)
 
 
-def run(sub_command, clean, roles=None, role=None, target="g4dnxlarge", **kwargs):
+def run(sub_command, clean=False, roles=None, role=None, target="g4dnxlarge", **kwargs):
     if sub_command == "build":
         exec_build(target, roles, clean)
     elif sub_command == "push":
