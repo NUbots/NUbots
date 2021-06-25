@@ -350,6 +350,7 @@ namespace module::behaviour::strategy {
         atFeet.position_cov = Eigen::Vector2d::Constant(0.01).asDiagonal();
 
         ball_reset->hypotheses.push_back(atFeet);
+        ball_reset->self_reset = true;
 
         emit(ball_reset);
     }
