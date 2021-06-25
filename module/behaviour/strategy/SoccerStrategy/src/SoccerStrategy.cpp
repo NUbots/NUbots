@@ -313,6 +313,10 @@ namespace module::behaviour::strategy {
             currentState = Behaviour::State::GOALIE_WALK;
         }
         // Else we are not a goalie but we've already kicked. Current behaviour is to do nothing.
+        else {
+            standStill();
+            currentState = Behaviour::State::SHOOTOUT;
+        }
     }
 
     void SoccerStrategy::penaltyShootoutTimeout() {
@@ -397,11 +401,13 @@ namespace module::behaviour::strategy {
     void SoccerStrategy::normalFinished() {
         standStill();
         find({FieldTarget(FieldTarget::Target::SELF)});
+        currentState = Behaviour::State::FINISHED;
     }
 
     void SoccerStrategy::normalTimeout() {
         standStill();
         find({FieldTarget(FieldTarget::Target::SELF)});
+        currentState = Behaviour::State::TIMEOUT;
     }
 
     void SoccerStrategy::initialLocalisationReset() {
