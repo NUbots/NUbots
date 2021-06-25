@@ -17,10 +17,10 @@ namespace nsga2 {
     public:
         NSGA2() : randGen(std::make_shared<RandomGenerator<>>()) {}
         virtual ~NSGA2() = default;
-        int PreEvaluationInitialize();
-        void PostEvaluationInitialize();
-        void PreEvaluationAdvance();
-        void PostEvaluationAdvance();
+        bool InitializeFirstGeneration();
+        void CompleteFirstGeneration();
+        void InitializeNextGeneration();
+        void CompleteOrdinaryGeneration();
 
         // clang-format off
         void SetSeed(const int& _seed) { randGen->SetSeed(_seed); }
@@ -45,8 +45,6 @@ namespace nsga2 {
         void SetRandomInitialize(const bool& _randomInitialize) { randomInitialize = _randomInitialize; }
         // clang-format on
 
-        void InitStreams();
-        void InitPopStream(std::ofstream& file_stream, std::string file_name, std::string description);
         void ReportParams(std::ostream& os) const;
         void ReportPop(const std::shared_ptr<Population>& pop, std::ostream& os) const;
         void ReportFinalGenerationPop();
@@ -98,6 +96,10 @@ namespace nsga2 {
         bool randomInitialize                             = {};
         std::vector<std::pair<double, double>> realLimits = {};
         std::vector<std::pair<double, double>> binLimits  = {};
+        bool ConfigurationIsValid();
+        void CreateStartingPopulations();
+        void InitializeReportingStreams();
+        void InitializePopulationStream(std::ofstream& file_stream, std::string file_name, std::string description);
     };
 }  // namespace nsga2
 

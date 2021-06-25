@@ -109,16 +109,15 @@ namespace module {
                 on<Trigger<WebotsReady>, Single>().then([this](const WebotsReady& message) {
                     log<NUClear::INFO>("webots ready, starting first evaluation");
 
-                    // On system startup, initialize the algorithm
-                    bool initSucceeded = nsga2Algorithm.PreEvaluationInitialize() == 0;
-
                     // If initialisation succeeded, evaluate the first individual of the first generation
                     // Subsequent individuals will be evaluated after we get the evaluation scores for this individual
                     // (from the NSGA2FitnessScores trigger)
-                    if (initSucceeded) {
+                    if (nsga2Algorithm.InitializeFirstGeneration()) {
                         requestIndEvaluation(0,
                                              nsga2Algorithm.parentPop->generation,
                                              nsga2Algorithm.parentPop->GetIndReals(0));
+                    } else {
+                        log<NUClear::ERROR>("Failed to initialise NSGA2");
                     }
                 });
 
@@ -143,10 +142,10 @@ namespace module {
                         // If this was the last individual, end the current generation and start the next generation
                         else if (scores.id == nsga2Algorithm.popSize - 1) {
                             // End the first generation
-                            nsga2Algorithm.PostEvaluationInitialize();
+                            nsga2Algorithm.CompleteFirstGeneration();
 
                             // Start the next generation (creates the new children for evaluation)
-                            nsga2Algorithm.PreEvaluationAdvance();
+                            nsga2Algorithm.InitializeNextGeneration();
 
                             log<NUClear::INFO>("Advanced to new generation", nsga2Algorithm.childPop->generation);
 
@@ -178,7 +177,7 @@ namespace module {
                             // If this was the final generation, finish up
                             if (scores.generation == nsga2Algorithm.generations) {
                                 // End the generation and save its data
-                                nsga2Algorithm.PostEvaluationAdvance();
+                                nsga2Algorithm.CompleteOrdinaryGeneration();
 
                                 // Report the population of our final generation
                                 nsga2Algorithm.ReportFinalGenerationPop();
@@ -194,13 +193,17 @@ namespace module {
                                 std::unique_ptr<OptimisationCommand> msg = std::make_unique<OptimisationCommand>();
                                 msg->command                             = OptimisationCommand::CommandType::TERMINATE;
                                 emit(msg);
+
+                                // Tell ourselves to terminate
+                                log<NUClear::INFO>("Powerplant shutdown");
+                                powerplant.shutdown();
                             }
                             else if (scores.generation < nsga2Algorithm.generations) {
                                 // End the generation and save its data
-                                nsga2Algorithm.PostEvaluationAdvance();
+                                nsga2Algorithm.CompleteOrdinaryGeneration();
 
                                 // Start the next generation (creates the new children for evaluation)
-                                nsga2Algorithm.PreEvaluationAdvance();
+                                nsga2Algorithm.InitializeNextGeneration();
 
                                 log<NUClear::INFO>("Advanced to new generation", nsga2Algorithm.childPop->generation);
 

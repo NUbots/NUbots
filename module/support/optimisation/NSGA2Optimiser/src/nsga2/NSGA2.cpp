@@ -4,79 +4,87 @@
 #include <nuclear>
 
 namespace nsga2 {
-    int NSGA2::PreEvaluationInitialize() {
-        NUClear::log<NUClear::INFO>("Initializing NSGA-II\nChecking configuration...");
+    struct sort_n {
+        const Population& pop;
+        sort_n(const Population& population) : pop(population) {}
+        bool operator()(int i, int j) {
+            const Individual& ind1 = pop.inds[i];
+            const Individual& ind2 = pop.inds[j];
+            if (ind1.rank < ind2.rank)
+                return true;
+            else if (ind1.rank == ind2.rank && ind1.crowdDist > ind2.crowdDist)
+                return true;
+            return false;
+        }
+    };
 
+    bool NSGA2::ConfigurationIsValid() {
+        NUClear::log<NUClear::INFO>("Checking NSGA-II configuration...");
         if (realVars < 0) {
             NUClear::log<NUClear::INFO>("Invalid number of real variables");
-            return -1;
-        }
-        if (binVars < 0) {
+            return false;
+        } else if (binVars < 0) {
             NUClear::log<NUClear::INFO>("Invalid number of binary variables");
-            return -1;
-        }
-        if (realVars == 0 && binVars == 0) {
+            return false;
+        } else if (realVars == 0 && binVars == 0) {
             NUClear::log<NUClear::INFO>("Zero real and binary variables");
-            return -1;
-        }
-        if (objectives < 1) {
+            return false;
+        } else if (objectives < 1) {
             NUClear::log<NUClear::INFO>("Invalid number of objective functions");
-            return -1;
-        }
-        if (constraints < 0) {
+            return false;
+        } else if (constraints < 0) {
             NUClear::log<NUClear::INFO>("Invalid number of constraints");
-            return -1;
-        }
-        if (popSize < 4 || (popSize % 4) != 0) {
+            return false;
+        } else if (popSize < 4 || (popSize % 4) != 0) {
             NUClear::log<NUClear::INFO>("Invalid size of population");
-            return -1;
-        }
-        if (realCrossProb < 0.0 || realCrossProb > 1.0) {
+            return false;
+        } else if (realCrossProb < 0.0 || realCrossProb > 1.0) {
             NUClear::log<NUClear::INFO>("Invalid probability of real crossover");
-            return -1;
-        }
-        if (realMutProb < 0.0 || realMutProb > 1.0) {
+            return false;
+        } else if (realMutProb < 0.0 || realMutProb > 1.0) {
             NUClear::log<NUClear::INFO>("Invalid probability of real mutation");
-            return -1;
-        }
-        if (binCrossProb < 0.0 || binCrossProb > 1.0) {
+            return false;
+        } else if (binCrossProb < 0.0 || binCrossProb > 1.0) {
             NUClear::log<NUClear::INFO>("Invalid probability of binary crossover");
-            return -1;
-        }
-        if (binMutProb < 0.0 || binMutProb > 1.0) {
+            return false;
+        } else if (binMutProb < 0.0 || binMutProb > 1.0) {
             NUClear::log<NUClear::INFO>("Invalid probability of binary mutation");
-            return -1;
-        }
-        if (etaC <= 0) {
+            return false;
+        } else if (etaC <= 0) {
             NUClear::log<NUClear::INFO>("Invalid distribution index for crossover");
-            return -1;
-        }
-        if (etaM <= 0) {
+            return false;
+        } else if (etaM <= 0) {
             NUClear::log<NUClear::INFO>("Invalid distribution index for mutation");
-            return -1;
-        }
-        if (generations < 1) {
+            return false;
+        } else if (generations < 1) {
             NUClear::log<NUClear::INFO>("Invalid number of generations");
-            return -1;
-        }
-        if (binVars != 0 && binBits.size() == 0) {
+            return false;
+        } else if (binVars != 0 && binBits.size() == 0) {
             NUClear::log<NUClear::INFO>("Invalid number of bits for binary variables");
-            return -1;
-        }
-        if (int(realLimits.size()) != realVars) {
+            return false;
+        } else if (int(realLimits.size()) != realVars) {
             NUClear::log<NUClear::INFO>("Invalid number of real variable limits");
-            return -1;
-        }
-        if (int(binLimits.size()) != binVars) {
+            return false;
+        } else if (int(binLimits.size()) != binVars) {
             NUClear::log<NUClear::INFO>("Invalid number of binary variable limits");
-            return -1;
-        }
-        if (!randomInitialize && (int(initialRealVars.size()) != realVars)) {
+            return false;
+        } else if (!randomInitialize && (int(initialRealVars.size()) != realVars)) {
             NUClear::log<NUClear::INFO>("Invalid number of initial real variables");
-            return -1;
+            return false;
+        } else {
+            NUClear::log<NUClear::INFO>("NSGA-II configuration is valid");
+            return true;
+        }
+    }
+
+    bool NSGA2::InitializeFirstGeneration() {
+        NUClear::log<NUClear::INFO>("Initializing NSGA-II");
+
+        if(!ConfigurationIsValid()) {
+            return false;
         }
 
-        InitStreams();
+        InitializeReportingStreams();
         ReportParams(nsga2_params_file);
 
         binMutCount    = 0;
@@ -86,6 +94,94 @@ namespace nsga2 {
 
         bitLength = std::accumulate(binBits.begin(), binBits.end(), 0);
 
+        CreateStartingPopulations();
+        parentPop->Initialize(randomInitialize);
+        NUClear::log<NUClear::INFO>("Initialization done!");
+
+        parentPop->Decode();
+        return true;
+    }
+
+    void NSGA2::CompleteFirstGeneration() {
+        parentPop->FastNDS();
+        parentPop->CrowdingDistanceAll();
+
+        currentGen = 1;
+
+        // NUClear::log<NUClear::INFO>("Generation 1 complete!");
+
+        ReportPop(parentPop, initial_pop_file);
+
+        // all_pop_file << "# gen = " << currentGen << "\n";
+        ReportPop(parentPop, all_pop_file);
+
+        initial_pop_file.flush();
+        all_pop_file.flush();
+        nsga2_params_file.flush();
+    }
+
+    void NSGA2::InitializeNextGeneration() {
+        NUClear::log<NUClear::INFO>("Advancing to generation", currentGen + 1);
+
+        // create next population Qt
+        Selection(parentPop, childPop);
+        std::pair<int, int> mutationsCount = childPop->Mutate();
+        // mutation book-keeping
+        realMutCount += mutationsCount.first;
+        binMutCount += mutationsCount.second;
+
+        childPop->generation = currentGen + 1;
+        childPop->Decode();
+        // childPop->Evaluate();
+    }
+
+    void NSGA2::CompleteOrdinaryGeneration() {
+        // create population Rt = Pt U Qt
+        mixedPop->Merge(*parentPop, *childPop);
+        mixedPop->generation = currentGen + 1;
+        mixedPop->FastNDS();
+
+        // Pt + 1 = empty
+        parentPop->inds.clear();
+
+        int i = 0;
+        // until |Pt+1| + |Fi| <= N, i.e. until parent population is filled
+        while (parentPop->GetSize() + int(mixedPop->front[i].size()) < popSize) {
+            std::vector<int>& Fi = mixedPop->front[i];
+            mixedPop->CrowdingDistance(i);            // calculate crowding in Fi
+            for (int j = 0; j < int(Fi.size()); j++)  // Pt+1 = Pt+1 U Fi
+            {
+                parentPop->inds.push_back(mixedPop->inds[Fi[j]]);
+            }
+            i++;
+        }
+
+        mixedPop->CrowdingDistance(i);  // calculate crowding in Fi
+
+        std::sort(mixedPop->front[i].begin(),
+                  mixedPop->front[i].end(),
+                  sort_n(*mixedPop));  // sort remaining front using <n
+
+        const int extra = popSize - parentPop->GetSize();
+        for (int j = 0; j < extra; j++)  // Pt+1 = Pt+1 U Fi[1:N-|Pt+1|]
+        {
+            parentPop->inds.push_back(mixedPop->inds[mixedPop->front[i][j]]);
+        }
+
+        currentGen++;
+
+        parentPop->generation = currentGen;
+
+        // all_pop_file << "# gen = " << currentGen << "\n";
+        ReportPop(parentPop, all_pop_file);
+        // all_pop_file.flush();
+    }
+
+    void NSGA2::ReportFinalGenerationPop() {
+        ReportPop(parentPop, final_pop_file);
+    }
+
+    void NSGA2::CreateStartingPopulations() {
         parentPop = std::make_shared<Population>(popSize,
                                                  realVars,
                                                  binVars,
@@ -133,47 +229,22 @@ namespace nsga2 {
                                                 crowdObj,
                                                 randGen,
                                                 initialRealVars);
-
-        parentPop->Initialize(randomInitialize);
-        NUClear::log<NUClear::INFO>("Initialization done!");
-
-        parentPop->Decode();
-        // parentPop->EvaluateInd(); // split here
-        return 0;
     }
 
-    void NSGA2::PostEvaluationInitialize() {
-        parentPop->FastNDS();
-        parentPop->CrowdingDistanceAll();
-
-        currentGen = 1;
-
-        // NUClear::log<NUClear::INFO>("Generation 1 complete!");
-
-        ReportPop(parentPop, initial_pop_file);
-
-        // all_pop_file << "# gen = " << currentGen << "\n";
-        ReportPop(parentPop, all_pop_file);
-
-        initial_pop_file.flush();
-        all_pop_file.flush();
-        nsga2_params_file.flush();
-    }
-
-    void NSGA2::InitStreams() {
-        InitPopStream(initial_pop_file, "nsga2_initial_pop.csv", "This file contains the data of all generations");
-        InitPopStream(final_pop_file, "nsga2_final_pop.csv", "This file contains the data of final population");
-        InitPopStream(best_pop_file,
-                      "nsga2_best_pop.csv",
-                      "This file contains the data of final feasible population (if any)");
-        InitPopStream(all_pop_file, "nsga2_all_pop.csv", "This file contains the data of all generations");
+    void NSGA2::InitializeReportingStreams() {
+        InitializePopulationStream(initial_pop_file, "nsga2_initial_pop.csv", "This file contains the data of all generations");
+        InitializePopulationStream(final_pop_file, "nsga2_final_pop.csv", "This file contains the data of final population");
+        InitializePopulationStream(best_pop_file,
+                                    "nsga2_best_pop.csv",
+                                    "This file contains the data of final feasible population (if any)");
+        InitializePopulationStream(all_pop_file, "nsga2_all_pop.csv", "This file contains the data of all generations");
 
         nsga2_params_file.open("nsga2_params.csv", std::ios::out | std::ios::trunc);
         // nsga2_params_file.setf(std::ios::scientific);
         nsga2_params_file.precision(16);
     }
 
-    void NSGA2::InitPopStream(std::ofstream& file_stream, std::string file_name, std::string description) {
+    void NSGA2::InitializePopulationStream(std::ofstream& file_stream, std::string file_name, std::string description) {
         file_stream.open(file_name, std::ios::out | std::ios::trunc);
         // file_stream.setf(std::ios::scientific);
         file_stream.precision(16);
@@ -426,80 +497,5 @@ namespace nsga2 {
                 }
             }
         }
-    }
-
-    struct sort_n {
-        const Population& pop;
-        sort_n(const Population& population) : pop(population) {}
-        bool operator()(int i, int j) {
-            const Individual& ind1 = pop.inds[i];
-            const Individual& ind2 = pop.inds[j];
-            if (ind1.rank < ind2.rank)
-                return true;
-            else if (ind1.rank == ind2.rank && ind1.crowdDist > ind2.crowdDist)
-                return true;
-            return false;
-        }
-    };
-
-    void NSGA2::PreEvaluationAdvance() {
-        NUClear::log<NUClear::INFO>("Advancing to generation", currentGen + 1);
-
-        // create next population Qt
-        Selection(parentPop, childPop);
-        std::pair<int, int> mutationsCount = childPop->Mutate();
-        // mutation book-keeping
-        realMutCount += mutationsCount.first;
-        binMutCount += mutationsCount.second;
-
-        childPop->generation = currentGen + 1;
-        childPop->Decode();
-        // childPop->Evaluate();
-    }
-
-    void NSGA2::PostEvaluationAdvance() {
-        // create population Rt = Pt U Qt
-        mixedPop->Merge(*parentPop, *childPop);
-        mixedPop->generation = currentGen + 1;
-        mixedPop->FastNDS();
-
-        // Pt + 1 = empty
-        parentPop->inds.clear();
-
-        int i = 0;
-        // until |Pt+1| + |Fi| <= N, i.e. until parent population is filled
-        while (parentPop->GetSize() + int(mixedPop->front[i].size()) < popSize) {
-            std::vector<int>& Fi = mixedPop->front[i];
-            mixedPop->CrowdingDistance(i);            // calculate crowding in Fi
-            for (int j = 0; j < int(Fi.size()); j++)  // Pt+1 = Pt+1 U Fi
-            {
-                parentPop->inds.push_back(mixedPop->inds[Fi[j]]);
-            }
-            i++;
-        }
-
-        mixedPop->CrowdingDistance(i);  // calculate crowding in Fi
-
-        std::sort(mixedPop->front[i].begin(),
-                  mixedPop->front[i].end(),
-                  sort_n(*mixedPop));  // sort remaining front using <n
-
-        const int extra = popSize - parentPop->GetSize();
-        for (int j = 0; j < extra; j++)  // Pt+1 = Pt+1 U Fi[1:N-|Pt+1|]
-        {
-            parentPop->inds.push_back(mixedPop->inds[mixedPop->front[i][j]]);
-        }
-
-        currentGen++;
-
-        parentPop->generation = currentGen;
-
-        // all_pop_file << "# gen = " << currentGen << "\n";
-        ReportPop(parentPop, all_pop_file);
-        // all_pop_file.flush();
-    }
-
-    void NSGA2::ReportFinalGenerationPop() {
-        ReportPop(parentPop, final_pop_file);
     }
 }  // namespace nsga2
