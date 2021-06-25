@@ -40,15 +40,16 @@ namespace module {
                     ResetDone = 0,
 
                     // From optimiser
-                    EvaluateRequest     = 1,
-                    TerminateEvaluation = 2,
+                    CheckReady = 1,
+                    EvaluateRequest = 2,
+                    TerminateEvaluation = 3,
 
                     // Internal
-                    TrialSetupDone    = 3,
-                    Fallen            = 4,
-                    StandDone         = 5,
-                    TrialTimeExpired  = 6,
-                    FitnessScoresSent = 7
+                    TrialSetupDone    = 4,
+                    Fallen            = 5,
+                    StandDone         = 6,
+                    TrialTimeExpired  = 7,
+                    FitnessScoresSent = 8
                 };
 
             private:

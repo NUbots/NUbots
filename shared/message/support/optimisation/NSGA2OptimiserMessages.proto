@@ -29,5 +29,8 @@ message NSGA2EvaluationRequest {
     NSGA2EvaluationParameters parameters = 3;
 }
 
+// Check if Optimiser is ready to go (not busy evaluating)
+message NSGA2EvaluatorReadinessQuery {}
+
 // Announce the NSGA2 algorithm is finished
 message NSGA2Terminate {}

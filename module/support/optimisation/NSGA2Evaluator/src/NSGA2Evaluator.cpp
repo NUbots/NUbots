@@ -40,6 +40,8 @@ namespace module {
             using message::platform::webots::WebotsResetDone;
             using message::platform::webots::WebotsTimeUpdate;
             using message::support::optimisation::NSGA2EvaluationRequest;
+            using message::support::optimisation::NSGA2EvaluatorReadinessQuery;
+            using message::support::optimisation::NSGA2EvaluatorReady;
             using message::support::optimisation::NSGA2FitnessScores;
             using message::support::optimisation::NSGA2Terminate;
             using message::support::optimisation::NSGA2TrialExpired;
@@ -168,6 +170,11 @@ namespace module {
                     emit(std::make_unique<Event>(Event::TerminateEvaluation));
                 });
 
+                on<Trigger<NSGA2EvaluatorReadinessQuery>, Single>().then([this]() {
+                    // NSGA2EvaluatorReadinessQuery is the optimiser checking if we're ready
+                    emit(std::make_unique<Event>(Event::CheckReady));
+                });
+
                 on<Trigger<OptimisationRobotPosition>, Single>().then(
                     [this](const OptimisationRobotPosition& position) {
                         robotDistanceTravelled += std::pow(std::pow(position.value.X - robotPosition[0], 2)
@@ -219,9 +226,7 @@ namespace module {
                     case State::WAITING_FOR_REQUEST:
                         switch (event) {
                             case Event::EvaluateRequest: return State::SETTING_UP_TRIAL;
-                            // When we get TerminateEvaluation it's the end of all the trials, so we can probably
-                            // go to a "FINISHED" state and end there
-                            // case Event::TerminateEvaluation: return State::WAITING_FOR_REQUEST;
+                            case Event::CheckReady: return State::WAITING_FOR_REQUEST;
                             case Event::TerminateEvaluation: return State::FINISHED;
                             default: return State::UNKNOWN;
                         }
@@ -265,7 +270,7 @@ namespace module {
                         }
                     case State::FINISHED:
                         switch (event) {
-                            // Arguably this should return FINISHED regardless of event
+                            // Arguably this should return FINISHED regardless of event, unless we want to be able to reset
                             case Event::FitnessScoresSent: return State::FINISHED;
                             case Event::TerminateEvaluation: return State::FINISHED;
                             default: return State::UNKNOWN;
@@ -277,6 +282,7 @@ namespace module {
             /// @brief Handle the WAITING_FOR_REQUEST state
             void NSGA2Evaluator::WaitingForRequest(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
                 log<NUClear::DEBUG>("WaitingForRequest");
+                emit(std::make_unique<NSGA2EvaluatorReady>()); // Let the optimiser know we're ready
             }
 
             /// @brief Handle the SETTING_UP_TRIAL state
