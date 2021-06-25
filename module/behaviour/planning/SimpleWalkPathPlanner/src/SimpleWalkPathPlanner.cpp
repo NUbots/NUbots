@@ -82,7 +82,9 @@ namespace module::behaviour::planning {
         on<Configuration>("SimpleWalkPathPlanner.yaml").then([this](const Configuration& file) {
             turnSpeed            = file.config["turnSpeed"].as<float>();
             forwardSpeed         = file.config["forwardSpeed"].as<float>();
-            walkToReadySpeed     = file.config["walkToReadySpeed"].as<float>();
+            walkToReadySpeedX     = file.config["walkToReadySpeedX"].as<float>();
+            walkToReadySpeedY     = file.config["walkToReadySpeedY"].as<float>();
+            walkToReadyRotation    = file.config["walkToReadyRotation"].as<float>();
             rotateSpeed     = file.config["rotateSpeed"].as<float>();
             rotateSpeedX     = file.config["rotateSpeedX"].as<float>();
             rotateSpeedY     = file.config["rotateSpeedY"].as<float>();
@@ -170,7 +172,7 @@ namespace module::behaviour::planning {
                     log("Walk to ready");
                     std::unique_ptr<WalkCommand> command =
                         std::make_unique<WalkCommand>(subsumptionId,
-                                                  Eigen::Vector3d(walkToReadySpeed, 0, 0));
+                                                  Eigen::Vector3d(walkToReadySpeedX, walkToReadySpeedY, walkToReadyRotation));
                     emit(std::move(command));
                     emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
                     return;
@@ -209,7 +211,7 @@ namespace module::behaviour::planning {
 
                 std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(
                     subsumptionId,
-                    Eigen::Vector3d(velocity_vector.x(), velocity_vector.y(), scale_rotation*heading_angle));
+                    Eigen::Vector3d(velocity_vector.x(), velocity_vector.y(), 0));
                 log("x velocity command [m/s]:", velocity_vector.x());
                 log("y velocity command [m/s]:", velocity_vector.y());
                 log("heading angle [rad]:", heading_angle);

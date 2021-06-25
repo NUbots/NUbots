@@ -5,9 +5,9 @@ walkToReadySpeed: 0.05
 slow_approach_factor: 0.01
 a: 7
 b: 0
-search_timeout: 3
+search_timeout: 1.5
 
-rotateSpeed: 0.2
+rotateSpeed: 0.3
 rotateSpeedX: -0.04
 rotateSpeedY: 0
 
