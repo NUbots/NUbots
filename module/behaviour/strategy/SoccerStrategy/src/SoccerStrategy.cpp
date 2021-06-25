@@ -413,7 +413,7 @@ namespace module::behaviour::strategy {
         if (penalised() && !cfg_.forcePlaying) {  // penalised
             // standStill();
             log("we think we are penalised");
-            // find({FieldTarget(FieldTarget::Target::SELF)});
+            find({FieldTarget(FieldTarget::Target::BALL)});
             currentState = Behaviour::State::PENALISED;
             return;
         }
@@ -429,13 +429,14 @@ namespace module::behaviour::strategy {
             emit(std::make_unique<MotionCommand>(utility::behaviour::WalkToBall()));
             // walkTo(fieldDescription, FieldTarget::Target::BALL);
             currentState = Behaviour::State::WALK_TO_BALL;
+            find({FieldTarget(FieldTarget::Target::BALL)});
         }
         else {
             // ball has not been seen recently
             // Rotate on the spot to find ball
             log("Ball has not been seen recently");
             emit(std::make_unique<MotionCommand>(utility::behaviour::RotateOnSpot()));
-            // find({FieldTarget(FieldTarget::Target::BALL)});
+            find({FieldTarget(FieldTarget::Target::BALL)});
         }
     }
 
