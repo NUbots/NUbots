@@ -293,7 +293,7 @@ namespace module::input {
                         emit(std::make_unique<Penalisation>(
                             Penalisation{GameEvents::Context::Value::SELF, playerId, unpenalisedTime, reason}));
                         sendReplyMessage(ReplyMessage::PENALISED);
-                        selfPenalised = true;
+                        selfPenalised   = true;
                     }
                     else {
                         // team mate penalised :'(
@@ -310,7 +310,7 @@ namespace module::input {
                         emit(std::make_unique<Unpenalisation>(
                             Unpenalisation{GameEvents::Context::Value::SELF, playerId}));
                         sendReplyMessage(ReplyMessage::UNPENALISED);
-                        selfPenalised = false;
+                        selfPenalised   = false;
                     }
                     else {
                         // team mate unpenalised :)

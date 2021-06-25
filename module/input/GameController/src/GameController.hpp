@@ -51,7 +51,7 @@ namespace module::input {
         std::string udp_filter_address;
         std::set<std::string> ignored_ip_addresses;
 
-        bool selfPenalised = true;
+        bool selfPenalised   = true;
         ReactionHandle listenHandle;
 
         gamecontroller::GameControllerPacket packet;
