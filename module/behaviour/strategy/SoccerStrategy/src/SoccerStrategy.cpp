@@ -516,8 +516,8 @@ namespace module::behaviour::strategy {
         std::unique_ptr<MotionCommand> motionCommand;
 
         float timeSinceBallSeen =
-            std::chrono::duration_cast<std::chrono::microseconds>(NUClear::clock::now() - ballLastMeasured).count()
-            * 1e-6;
+            std::chrono::duration_cast<std::chrono::duration<float>>(NUClear::clock::now() - ballLastMeasured).count();
+
         if (timeSinceBallSeen < cfg_.goalie_command_timeout) {
 
             Eigen::Affine2d position(field.position);
