@@ -112,7 +112,9 @@ namespace module::support::logging {
 
         on<Configuration, Trigger<CommandLineArguments>, Sync<DataLog>>("DataLogging.yaml")
             .then([this](const Configuration& cfg, const CommandLineArguments& argv) {
-                {
+                {  // TODO(KipHamiltons): Clarify if this scope even does anything...
+                    log_level = cfg["log_level"].as<NUClear::LogLevel>();
+
                     // Get the details we need to generate a log file name
                     config.output.directory  = cfg["output"]["directory"].as<std::string>();
                     config.output.split_size = cfg["output"]["split_size"].as<Expression>();
