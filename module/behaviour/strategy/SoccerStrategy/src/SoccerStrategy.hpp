@@ -133,8 +133,7 @@ namespace module::behaviour::strategy {
                     const message::input::GameState::Data::Phase& phase,
                     const message::support::FieldDescription& fieldDescription,
                     const message::localisation::Field& field,
-                    const message::localisation::Ball& ball,
-                    const message::input::GameState::Data::Mode& mode);
+                    const message::localisation::Ball& ball);
 
         // PENALTY mode functions
         void penaltyShootoutInitial();

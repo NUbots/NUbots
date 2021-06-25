@@ -192,16 +192,42 @@ namespace module::behaviour::strategy {
                          const Field& field,
                          const Ball& ball) {
                 try {
+
                     // Force penalty shootout mode if set in config
                     auto mode = cfg_.forcePenaltyShootout ? GameMode::PENALTY_SHOOTOUT : gameState.data.mode.value;
+
+                    kickType = KickType::SCRIPTED;  // Use the scripted kick
+
+                    Behaviour::State previousState = currentState;  // Update previous state
+
+                    // If force playing, just run the play functions based on mode
+                    if (cfg_.forcePlaying) {
+                        if (mode == GameMode::PENALTY_SHOOTOUT) {
+                            penaltyShootoutPlaying(field, ball);
+                        }
+                        else {
+                            normalPlaying(field, ball, fieldDescription);
+                        }
+                    }
+                    // If we're picked up, stand still
+                    else if (pickedUp(sensors)) {
+                        // TODO: stand, no moving
+                        standStill();
+                        currentState = Behaviour::State::PICKED_UP;
+                    }
+
                     // Switch gamemode statemachine based on GameController state
                     switch (mode) {
                         case GameMode::PENALTY_SHOOTOUT: penaltyShootout(phase, fieldDescription, field, ball); break;
                         // We handle NORMAL and OVERTIME the same at the moment because we don't have any special
                         // behavior for overtime.
-                        case GameMode::NORMAL: normal(gameState, phase, fieldDescription, field, ball, mode); break;
-                        case GameMode::OVERTIME: normal(gameState, phase, fieldDescription, field, ball, mode); break;
+                        case GameMode::NORMAL: normal(gameState, phase, fieldDescription, field, ball); break;
+                        case GameMode::OVERTIME: normal(gameState, phase, fieldDescription, field, ball); break;
                         default: log<NUClear::WARN>("Game mode unknown.");
+                    }
+
+                    if (currentState != previousState) {
+                        emit(std::make_unique<Behaviour::State>(currentState));
                     }
                 }
                 catch (std::runtime_error& err) {
@@ -232,8 +258,7 @@ namespace module::behaviour::strategy {
                                 const Phase& phase,
                                 const FieldDescription& fieldDescription,
                                 const Field& field,
-                                const Ball& ball,
-                                const GameMode& mode) {
+                                const Ball& ball) {
         switch (phase.value) {
             // Beginning of game and half time
             case Phase::INITIAL: normalInitial(); break;
