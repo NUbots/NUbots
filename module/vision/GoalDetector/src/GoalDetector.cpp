@@ -299,9 +299,13 @@ namespace module::vision {
                                 log<NUClear::DEBUG>(fmt::format("Goal post b at distance {}", distance_b));
 
                                 // Calculate the angular distance between the two posts
-                                const float post_to_post_theta = rGOo_a.dot(rGOo_b);
+                                const float angular_distance = rGOo_a.dot(rGOo_b);
 
+                                // Get the distance to the closest post
                                 const float d = distance_a < distance_b ? distance_a : distance_b;
+
+                                // Calculate the angular radius
+                                // https://en.wikipedia.org/wiki/Angular_diameter
                                 const float radius =
                                     (2.0 * d)
                                     / std::sqrt(4 * d * d
@@ -312,16 +316,17 @@ namespace module::vision {
                                                                 rGOo_a.y(),
                                                                 rGOo_b.x(),
                                                                 rGOo_b.y()));
-
-                                if (post_to_post_theta > radius) {
-                                    if (distance_a < distance_b) {
+                                // Check to see if the two posts overlap. Because these are cos(theta) and not theta the
+                                // inequality is opposite
+                                if (angular_distance > radius) {
+                                    if (distance_a > distance_b) {
                                         // Remove the goal post
                                         goal_post_a = goals->goals.erase(goal_post_a);
                                         log<NUClear::DEBUG>(fmt::format(
                                             "Throwout post at distance {}, post in front diatance {} because {} > {}",
                                             distance_a,
                                             distance_b,
-                                            post_to_post_theta,
+                                            angular_distance,
                                             radius));
                                         // If we delete the outer loop iterator, no need to continue the inner loop for
                                         // this outer loop
@@ -335,7 +340,7 @@ namespace module::vision {
                                             "Throwout post at distance {}, post in front diatance {} because {} < {}",
                                             distance_b,
                                             distance_a,
-                                            post_to_post_theta,
+                                            angular_distance,
                                             radius));
                                     }
                                 }
