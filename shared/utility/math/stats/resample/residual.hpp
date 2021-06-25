@@ -30,6 +30,33 @@
 // http://users.isy.liu.se/rt/schon/Publications/HolSG2006.pdf
 namespace utility::math::stats::resample {
 
+    /**
+     * @brief Residual resampling. See [1] for details on the algorithm (a copy is in
+     * doc/Localisation/On_Resampling_Algorithms_for_Particle_Filters.pdf)
+     *
+     * [1]J. Hol, T. Schon and F. Dustafsson, "On Resampling Algorithms for Particle Filters", in 2006 IEEE Nonlinear
+     * Statistical Signal Processing Workshop, Cambridge. UK, 2006.
+     *
+     * @details The algorithm takes the following steps
+     *  1. Normalise the weights so they sum to 1
+     *  2. Scale the normalised weights by the number of particles being resampled and floor them (take integer
+     *      component)
+     *   - These scaled weights are counts of the number of times each particle should be resmapled (i.e. particles are
+     *      duplicated)
+     *  3. Resample the particles according to the counts obtained in the previous step
+     *  4. Determine how many particles are left to resample (these particles are the residuals)
+     *  5. Calculate the residual weights
+     *  6. Use one of the other resampling methods (e.g. multinomial, stratified, systematic) to resample the residual
+     *      particles
+     *
+     * @tparam Scalar The scalar type to used for the particle weights
+     * @tparam ResidualSampler The type of the sampler to use for sampling the residual particles
+     *
+     * @param count Number of particles being resampled
+     * @param begin Iterator to the first weight to use for resampling
+     * @param end Iterator to the last weight to use for resampling
+     * @param residual_sample The sampler to use when resampling the residual particles
+     */
     template <typename Iterator, typename ResidualSampler>
     [[nodiscard]] std::vector<int> residual(const int& count,
                                             Iterator&& begin,

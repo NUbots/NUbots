@@ -30,6 +30,25 @@
 // http://users.isy.liu.se/rt/schon/Publications/HolSG2006.pdf
 namespace utility::math::stats::resample {
 
+    /**
+     * @brief The core resampling algorithm for multinomial, stratified, and systematic resampling schemes.
+     *
+     * @details The algorithm takes the following steps
+     *  1. Normalise weights so they sum to 1
+     *  2. Calculate cumulative sum of the normalised weights
+     *  3. For each of the count particles
+     *   a. Get a new resampling weight from the generator
+     *   b. Find the first index in the cumulative sum where the generated resampling weight is >= cumulative sum
+     *
+     * The index in step 3b is the index of the particle that should be sampled
+     *
+     * @tparam Generator Type of the generator to use for resampling weights
+     * @tparam Iterator The iterator type for the weights array
+     *
+     * @param count The number of particles being resampled
+     * @param begin Iterator to the first weight to use for resampling
+     * @param end Iterator to the last weight to use for resampling
+     */
     template <template <typename> class Generator, typename Iterator>
     [[nodiscard]] std::vector<int> resample(const int& count, Iterator begin, Iterator end) {
         using Scalar = std::remove_reference_t<decltype(*begin)>;
