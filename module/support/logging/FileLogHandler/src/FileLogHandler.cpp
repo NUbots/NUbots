@@ -25,7 +25,7 @@ namespace module::support::logging {
             // Use configuration here from file FileLogHandler.yaml
             log_file_name = std::filesystem::path(config["log_file"].as<std::string>());
 
-            max_size = config["max_size"].as<int>();
+            max_size = config["max_size"].as<long>();
 
             if (log_file.is_open()) {
                 log_file.close();
