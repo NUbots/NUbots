@@ -37,6 +37,10 @@ namespace utility::math::filter {
 
     using utility::math::stats::MultivariateNormal;
 
+    // The possible resampling methods
+    // See http://users.isy.liu.se/rt/schon/Publications/HolSG2006.pdf for an explanation on each one
+    enum class ResampleMethod { MULTINOMIAL, RESIDUAL, STRATIFIED, SYSTEMATIC };
+
     /**
      * Particle Filter
      *
@@ -77,8 +81,10 @@ namespace utility::math::filter {
          */
         BidskiParticleFilter() {
             set_state(StateVec::Zero(), StateMat::Identity() * 0.1);
+            resample_method = ResampleMethod::RESIDUAL;
+            residual_method = ResampleMethod::SYSTEMATIC;
         }
-        BidskiParticleFilter(const StateVec& mean, const StateMat& covariance) {
+
         /**
          * @brief Constructs the particle filter with the provided values. The resampling method with default to the
          * residual method with the systematic method for resampling the residual particles. It is an error to use the
@@ -92,7 +98,21 @@ namespace utility::math::filter {
          * @param residual_method_ When using ResampleMethod::RESIDUAL for the resample method, this method will be used
          * when the residual method needs to resample residual particles.
          */
+        BidskiParticleFilter(const StateVec& mean,
+                             const StateMat& covariance,
+                             const ResampleMethod& resample_method_ = ResampleMethod::RESIDUAL,
+                             const ResampleMethod& residual_method_ = ResampleMethod::SYSTEMATIC) {
             set_state(mean, covariance);
+            resample_method = residual_method_;
+
+            // The residual resampling method requires a secondary method to resample the residual particles. This
+            // secondary method cannot be the residual method.
+            if (residual_method == ResampleMethod::RESIDUAL) {
+                throw std::runtime_error(
+                    "Invalid setting for residual method. Can't use the residual resampling method to sample "
+                    "residuals.");
+            }
+            residual_method = resample_method_;
         }
 
         /**
@@ -119,6 +139,8 @@ namespace utility::math::filter {
 
         ParticleList particles;
         ParticleWeights weights;
+        ResampleMethod resample_method;
+        ResampleMethod residual_method;
 
         /**
          * @brief Clears all particles in the filter and samples new particles from the multivariate normal
@@ -147,6 +169,44 @@ namespace utility::math::filter {
         }
 
         /**
+         * @brief Use the chosen resample and residual method to resample the particles in the filter based on their
+         * weights.
+         */
+        std::vector<int> resample_particles() {
+
+            // Select the resampling method to use
+            switch (resample_method) {
+                case ResampleMethod::MULTINOMIAL:
+                    return stats::resample::multinomial(model.n_particles, weights.begin(), weights.end());
+                case ResampleMethod::RESIDUAL:
+                    // The residual method uses a secondary method when it resamples the residual particles
+                    switch (residual_method) {
+                        case ResampleMethod::MULTINOMIAL:
+                            return stats::resample::residual(model.n_particles,
+                                                             weights.begin(),
+                                                             weights.end(),
+                                                             stats::resample::multinomial<decltype(weights.begin())>);
+                        case ResampleMethod::STRATIFIED:
+                            return stats::resample::residual(model.n_particles,
+                                                             weights.begin(),
+                                                             weights.end(),
+                                                             stats::resample::stratified<decltype(weights.begin())>);
+                        case ResampleMethod::SYSTEMATIC:
+                            return stats::resample::residual(model.n_particles,
+                                                             weights.begin(),
+                                                             weights.end(),
+                                                             stats::resample::systematic<decltype(weights.begin())>);
+                        default: throw std::runtime_error("Invalid setting for residual method."); break;
+                    }
+                    break;
+                case ResampleMethod::STRATIFIED:
+                    return stats::resample::stratified(model.n_particles, weights.begin(), weights.end());
+                case ResampleMethod::SYSTEMATIC:
+                    return stats::resample::systematic(model.n_particles, weights.begin(), weights.end());
+                default: throw std::runtime_error("Invalid setting for resample method."); break;
+            }
+        }
+
         /**
          * @brief Do a weighted resampling of all of the particles in the filter. Resampled particles are then perturbed
          * (using model::noise) and the model is asked to provide new rogue particles (if the model is using
@@ -161,10 +221,13 @@ namespace utility::math::filter {
             // This will be used to perturb the resampled particles
             MultivariateNormal<Scalar, Model::size> multivariate(model.noise(dt));
 
+            // Get indexes to the particles that are being resampled
+            // Some particles may be resampled multiple times
+            std::vector<int> idx = resample_particles();
+
             // Resample the particles
             // For each index get the corresponding particle and perturb it with the model's process noise
             ParticleList resampled_particles(Model::size, particles.cols());
-            std::vector<int> idx = stats::resample::residual(model.n_particles, weights.begin(), weights.end());
             for (int i = 0; i < int(idx.size()); ++i) {
                 // Create a new particle by using the selected particle as the mean + value from process noise
                 resampled_particles.col(i) = particles.col(idx[i]) + multivariate.sample();
