@@ -183,7 +183,7 @@ namespace utility::math::filter {
          */
         void set_state(const std::vector<std::pair<StateVec, StateMat>>& hypotheses) {
             // Make sure we have sane inputs
-            if (mean.size() != covariance.size() || mean.size() == 0) {
+            if (hypotheses.size() == 0) {
                 throw std::runtime_error("ParticleFilter::set_state called with invalid data");
             }
 
@@ -276,7 +276,7 @@ namespace utility::math::filter {
             }
 
             // Get the model to give us some rogues
-            const int num_particles = particles_per_state * mean.size();
+            const int num_particles = particles_per_state * hypotheses.size();
             const int num_rogues    = model.n_particles - num_particles + model.n_rogues;
             for (int i = 0; i < num_rogues; ++i) {
                 particles.col(num_particles + i) = model.get_rogue();
