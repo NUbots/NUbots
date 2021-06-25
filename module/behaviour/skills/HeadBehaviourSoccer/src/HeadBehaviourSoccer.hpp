@@ -122,6 +122,9 @@ namespace module::behaviour::skills {
         bool locBallReceived = false;
         message::localisation::Ball lastLocBall;
 
+        NUClear::clock::time_point lastBallTime{};
+        NUClear::clock::time_point lastGoalTime{};
+
         std::map<message::behaviour::SoccerObjectPriority::SearchType, std::vector<Eigen::Vector2d>> searches;
 
         // State variables

@@ -138,6 +138,9 @@ namespace module::behaviour::skills {
                         searches[s].push_back(p.as<Expression>());
                     }
                 }
+
+                lastBallTime = NUClear::clock::now();
+                lastGoalTime = NUClear::clock::now();
             });
 
 
@@ -198,6 +201,11 @@ namespace module::behaviour::skills {
                       // Get the list of objects which are currently visible
                       Balls ballFixationObjects = getFixationObjects(vballs, objectsMissing);
                       Goals goalFixationObjects = getFixationObjects(vgoals, objectsMissing);
+
+                      log("Balls length: ",
+                          ballFixationObjects.balls.size(),
+                          " Goals length: ",
+                          goalFixationObjects.goals.size());
 
                       // Determine state transition variables
                       bool lost = ((ballFixationObjects.balls.size() <= 0) && (goalFixationObjects.goals.size() <= 0));
@@ -266,7 +274,7 @@ namespace module::behaviour::skills {
                               lastCentroid = currentCentroid_world;
                           }
                       }
-
+                      log("state is ", state);
                       // State Transitions
                       if (!isGettingUp) {
                           switch (state) {
@@ -349,10 +357,17 @@ namespace module::behaviour::skills {
         if (ballPriority == goalPriority) {
             log<NUClear::WARN>("HeadBehaviourSoccer - Multiple object searching currently not supported properly.");
         }
+        if (vballs) {
+            log("ball old timestamp: ",
+                lastBallTime.time_since_epoch().count(),
+                ", new is ",
+                vballs->timestamp.time_since_epoch().count());
+        }
 
         // Get balls
         if (ballPriority == maxPriority) {
-            if (vballs && vballs->balls.size() > 0) {
+            if (vballs && vballs->balls.size() > 0 && vballs->timestamp != lastBallTime) {
+                lastBallTime = vballs->timestamp;
                 // Fixate on ball
                 timeLastObjectSeen = now;
                 auto& ball         = vballs->balls.at(0);
@@ -379,7 +394,8 @@ namespace module::behaviour::skills {
         // TODO: make this a loop over a list of objects or something
         // Get goals
         if (goalPriority == maxPriority) {
-            if (vgoals && vgoals->goals.size() > 0) {
+            if (vgoals && vgoals->goals.size() > 0 && vgoals->timestamp != lastGoalTime) {
+                lastGoalTime = vgoals->timestamp;
                 // Fixate on goals and lines and other landmarks
                 timeLastObjectSeen = now;
                 std::set<Goal::Side> visiblePosts;
