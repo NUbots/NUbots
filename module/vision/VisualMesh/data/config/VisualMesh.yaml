@@ -1,4 +1,4 @@
-log_level: DEBUG
+log_level: WARN
 
 # The settings for each camera
 # CameraName:
