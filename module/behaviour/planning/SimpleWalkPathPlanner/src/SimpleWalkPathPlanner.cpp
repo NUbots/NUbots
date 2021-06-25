@@ -147,7 +147,7 @@ namespace module::behaviour::planning {
         });
 
         // Freq should be equal to the main loop in soccer strategy
-        on<Every<100, Per<std::chrono::seconds>>,
+        on<Every<200, Per<std::chrono::seconds>>,
            With<Ball>,
            With<Field>,
            With<Sensors>,

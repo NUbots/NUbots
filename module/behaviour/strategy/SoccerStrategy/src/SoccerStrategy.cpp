@@ -229,7 +229,7 @@ namespace module::behaviour::strategy {
             [this](const KickOffTeam& kickOffTeam) { team_kicking_off = kickOffTeam.context; });
 
         // ********************* Main Loop ********************
-        on<Every<100, Per<std::chrono::seconds>>,
+        on<Every<200, Per<std::chrono::seconds>>,
            With<Sensors>,
            With<GameState>,
            With<Phase>,
