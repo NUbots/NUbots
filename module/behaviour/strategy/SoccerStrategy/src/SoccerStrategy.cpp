@@ -125,6 +125,11 @@ namespace module::behaviour::strategy {
         // TODO: unhack
         emit(std::make_unique<KickPlan>(KickPlan(Eigen::Vector2d(4.5, 0.0), KickType::SCRIPTED)));
 
+        on<Trigger<Field>, With<FieldDescription>>().then(
+            [this](const Field& field, const FieldDescription& fieldDescription) {
+                Eigen::Vector2d kickTarget = getKickPlan(field, fieldDescription);
+                emit(std::make_unique<KickPlan>(KickPlan(kickTarget, kickType)));
+            });
 
         // For checking last seen times
         on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
