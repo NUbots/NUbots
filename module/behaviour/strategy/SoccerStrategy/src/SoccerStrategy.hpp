@@ -92,6 +92,11 @@ namespace module::behaviour::strategy {
         bool manualOrientationReset                          = false;
         bool resetInInitial                                  = true;
         bool absoluteStopped                                 = false;
+        Eigen::Vector3f rBTt     = Eigen::Vector3f(1.0, 0.0, 0.0);
+
+        bool startedWalkingToReady                           = false;
+        NUClear::clock::time_point startedWalkingToReadyAt;
+
         double manualOrientation                             = 0.0;
         message::input::GameEvents::Context team_kicking_off = message::input::GameEvents::Context::UNKNOWN;
         message::behaviour::KickPlan::KickType kickType;

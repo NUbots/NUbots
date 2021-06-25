@@ -54,6 +54,24 @@ namespace utility::behaviour {
         return cmd;
     }
 
+    inline MotionCommand WalkToReady() {
+        MotionCommand cmd;
+        cmd.type       = MotionCommand::Type::Value::WALK_TO_READY_POSITION;
+        return cmd;
+    }
+
+    inline MotionCommand RotateOnSpot() {
+        MotionCommand cmd;
+        cmd.type       = MotionCommand::Type::Value::ROTATE_ON_SPOT;
+        return cmd;
+    }
+
+    inline MotionCommand WalkToBall() {
+        MotionCommand cmd;
+        cmd.type       = MotionCommand::Type::Value::WALK_TO_BALL;
+        return cmd;
+    }
+
     inline MotionCommand BallApproach(const Eigen::Vector2d& kickTarget_) {
         MotionCommand cmd;
         cmd.type        = MotionCommand::Type::Value::BALL_APPROACH;

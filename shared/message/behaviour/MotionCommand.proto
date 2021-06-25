@@ -33,9 +33,14 @@ message MotionCommand {
         BALL_APPROACH = 2;
         // Stop all current motion and directly send the given WalkCommand to the WalkEngine.
         DIRECT_COMMAND = 3;
-        ABSOLUTE_STOP = 4;
-        STOP_ABSOLUTE_STOP = 5;
-
+        // Walk to a the ready position.
+        WALK_TO_READY_POSITION = 4;
+        // Rotate on spot
+        ROTATE_ON_SPOT = 5;
+        // Rotate on spot
+        WALK_TO_BALL = 6;
+        ABSOLUTE_STOP = 7;
+        STOP_ABSOLUTE_STOP = 8;
     }
 
     // The type of this motion command:
