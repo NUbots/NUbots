@@ -103,9 +103,9 @@ namespace module::behaviour::strategy {
             NUClear::clock::now() - std::chrono::seconds(600);  // TODO: unhack
         NUClear::clock::time_point ballSearchStartTime;
         NUClear::clock::time_point goalLastMeasured;
-        void initialLocalisationReset(const message::support::FieldDescription& fieldDescription);
+        void initialLocalisationReset();
         void penaltyShootoutLocalisationReset(const message::support::FieldDescription& fieldDescription);
-        void unpenalisedLocalisationReset(const message::support::FieldDescription& fieldDescription);
+        void unpenalisedLocalisationReset();
 
         void standStill();
         void walkTo(const message::support::FieldDescription& fieldDescription,
@@ -124,36 +124,34 @@ namespace module::behaviour::strategy {
                   const message::support::FieldDescription& fieldDescription,
                   const message::input::GameState::Data::Mode& mode);
 
-        void penaltyShootout(const message::input::GameState& gameState,
-                             message::input::GameState::Data::Phase phase,
+        void penaltyShootout(const message::input::GameState::Data::Phase& phase,
                              const message::support::FieldDescription& fieldDescription,
                              const message::localisation::Field& field,
                              const message::localisation::Ball& ball);
 
         void normal(const message::input::GameState& gameState,
-                    message::input::GameState::Data::Phase phase,
+                    const message::input::GameState::Data::Phase& phase,
                     const message::support::FieldDescription& fieldDescription,
                     const message::localisation::Field& field,
                     const message::localisation::Ball& ball,
                     const message::input::GameState::Data::Mode& mode);
 
         // PENALTY mode functions
-        void penaltyShootoutInitial(){};
-        void penaltyShootoutSet();
-        void penaltyShootoutReady(){};
-        void penaltyShootoutPlaying();
-        void penaltyShootoutFinished(){};
-        void penaltyShootoutTimeout(){};
+        void penaltyShootoutInitial();
+        void penaltyShootoutReady();
+        void penaltyShootoutSet(const message::support::FieldDescription& fieldDescription);
+        void penaltyShootoutPlaying(const message::localisation::Field& field, const message::localisation::Ball& ball);
+        void penaltyShootoutTimeout();
+        void penaltyShootoutFinished();
 
         // NORMAL mode functions
-        void normalInitial(const message::support::FieldDescription& fieldDescription);
+        void normalInitial();
         void normalReady(const message::input::GameState& gameState,
                          const message::support::FieldDescription& fieldDescription);
         void normalSet();
         void normalPlaying(const message::localisation::Field& field,
                            const message::localisation::Ball& ball,
-                           const message::support::FieldDescription& fieldDescription,
-                           const message::input::GameState::Data::Mode& mode);
+                           const message::support::FieldDescription& fieldDescription);
         void normalFinished();
         void normalTimeout();
 
