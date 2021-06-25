@@ -33,5 +33,5 @@ message ResetBallHypotheses {
 
     repeated Ball hypotheses = 1;
     // Robot localisation has been reset. Flag to not use Htf on ball reset
-    bool          self_reset = 2;
+    bool self_reset = 2;
 }
