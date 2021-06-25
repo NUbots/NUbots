@@ -383,7 +383,7 @@ namespace module::behaviour::strategy {
                     // walk to centre of field
                     find({FieldTarget(FieldTarget::Target::BALL)});
                     walkTo(fieldDescription, Eigen::Vector2d::Zero());
-                    currentState = Behaviour::State::WALK_TO_BALL;
+                    currentState = Behaviour::State::MOVE_TO_CENTRE;
                 }
                 else {
                     find({FieldTarget(FieldTarget::Target::BALL)});

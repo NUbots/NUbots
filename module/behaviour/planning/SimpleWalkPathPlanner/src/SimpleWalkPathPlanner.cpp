@@ -163,7 +163,6 @@ namespace module::behaviour::planning {
                     return;
                 }
 
-
                 Eigen::Affine3d Htw(sensors.Htw);
 
                 auto now = NUClear::clock::now();
