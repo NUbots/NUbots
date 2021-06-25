@@ -265,7 +265,7 @@ namespace utility::math::filter {
 
             // Get the model to apply a time update to each particle
             for (int i = 0; i < particles.cols(); ++i) {
-                particles.col(i) = model.time(particles.col(i), dt, params...);
+                particles.col(i) = model.time(particles.col(i), dt, std::forward<Args...>(params)...);
             }
         }
 
@@ -295,7 +295,8 @@ namespace utility::math::filter {
             // Also get the model to tell us how much a prediction deviates from the observed measurement
             Eigen::Matrix<MeasurementScalar, S, Eigen::Dynamic> differences(S, particles.cols());
             for (int i = 0; i < particles.cols(); ++i) {
-                differences.col(i) = model.difference(model.predict(particles.col(i), params...), measurement);
+                differences.col(i) =
+                    model.difference(model.predict(particles.col(i), std::forward<Args...>(params)...), measurement);
             }
 
             // Recalculate the weights of each particle
