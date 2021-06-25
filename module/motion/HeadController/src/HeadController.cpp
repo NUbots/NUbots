@@ -71,6 +71,8 @@ namespace module::motion {
         // do a little configurating
         on<Configuration>("HeadController.yaml")
             .then("Head Controller - Configure", [this](const Configuration& config) {
+                log_level = config["log_level"].as<NUClear::LogLevel>();
+
                 // Gains
                 head_motor_gain   = config["head_motors"]["gain"].as<double>();
                 head_motor_torque = config["head_motors"]["torque"].as<double>();

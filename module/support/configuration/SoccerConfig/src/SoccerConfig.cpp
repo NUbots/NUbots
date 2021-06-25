@@ -85,7 +85,8 @@ namespace module::support::configuration {
 
         on<Configuration>("FieldDescription.yaml")
             .then("FieldDescriptionConfig Update", [this](const Configuration& config) {
-                auto fd = std::make_unique<message::support::FieldDescription>(LoadFieldDescription(config));
+                log_level = config["log_level"].as<NUClear::LogLevel>();
+                auto fd   = std::make_unique<message::support::FieldDescription>(LoadFieldDescription(config));
                 emit(std::move(fd));
             });
     }

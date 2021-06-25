@@ -62,6 +62,7 @@ namespace module::behaviour::skills {
             // encode fallen angle as a cosine so we can compare it directly to the z axis value
             double fallenAngleConfig = file["FALLEN_ANGLE"].as<double>();
             FALLEN_ANGLE             = cos(fallenAngleConfig);
+            log_level = config["log_level"].as<NUClear::LogLevel>();
 
             // load priorities for the getup
             GETUP_PRIORITY     = file["GETUP_PRIORITY"].as<float>();

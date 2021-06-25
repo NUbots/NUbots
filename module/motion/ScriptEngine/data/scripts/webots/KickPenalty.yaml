@@ -1,820 +1,820 @@
-- duration: 1500
+- duration: 1000
   targets:
     - id: L_HIP_YAW
-      position: -7.38E-24
+      position: -7.37999966e-24
       gain: 200
       torque: 300
     - id: L_HIP_ROLL
-      position: -0.080270784
+      position: -0.0802707821
       gain: 200
       torque: 300
     - id: L_HIP_PITCH
-      position: 2.93E-23
+      position: 2.93000011e-23
       gain: 200
       torque: 300
     - id: L_KNEE
-      position: 0.058150131
+      position: 0.0581501313
       gain: 200
       torque: 300
     - id: L_ANKLE_PITCH
-      position: -0.037501524
+      position: -0.0375015251
       gain: 200
       torque: 300
     - id: L_ANKLE_ROLL
-      position: 0.061661752
+      position: 0.0616617538
       gain: 200
       torque: 300
     - id: L_SHOULDER_PITCH
-      position: 1.963495
+      position: 1.96349502
       gain: 200
       torque: 300
     - id: L_SHOULDER_ROLL
-      position: 0.1239184
+      position: 0.123918399
       gain: 200
       torque: 300
     - id: L_ELBOW
-      position: -2.443461
+      position: -2.44346094
       gain: 200
       torque: 300
     - id: HEAD_YAW
-      position: -0.002165994
+      position: -0.00216599391
       gain: 200
       torque: 300
     - id: HEAD_PITCH
-      position: 2.20E-40
+      position: 2.19999655e-40
       gain: 200
       torque: 300
     - id: R_HIP_YAW
-      position: 0.001688342
+      position: 0.00168834196
       gain: 200
       torque: 300
     - id: R_HIP_ROLL
-      position: -0.11813267
+      position: -0.118132673
       gain: 200
       torque: 300
     - id: R_HIP_PITCH
-      position: -0.040870822
+      position: -0.040870823
       gain: 200
       torque: 300
     - id: R_KNEE
-      position: 0.141208
+      position: 0.141207993
       gain: 200
       torque: 300
     - id: R_ANKLE_PITCH
-      position: -0.075248191
+      position: -0.0752481893
       gain: 200
       torque: 300
     - id: R_ANKLE_ROLL
-      position: 0.070229464
+      position: 0.0702294633
       gain: 200
       torque: 300
     - id: R_SHOULDER_PITCH
-      position: 1.963495
+      position: 1.96349502
       gain: 200
       torque: 300
     - id: R_SHOULDER_ROLL
-      position: -0.1239184
+      position: -0.123918399
       gain: 200
       torque: 300
     - id: R_ELBOW
-      position: -2.443461
+      position: -2.44346094
+      gain: 200
+      torque: 300
+- duration: 1000
+  targets:
+    - id: L_HIP_YAW
+      position: -2.47000001e-24
+      gain: 200
+      torque: 300
+    - id: L_HIP_ROLL
+      position: -0.108527899
+      gain: 200
+      torque: 300
+    - id: L_HIP_PITCH
+      position: -2.22999997e-23
+      gain: 200
+      torque: 300
+    - id: L_KNEE
+      position: 0.0610768385
+      gain: 200
+      torque: 300
+    - id: L_ANKLE_PITCH
+      position: -0.0348371454
+      gain: 200
+      torque: 300
+    - id: L_ANKLE_ROLL
+      position: 0.131130725
+      gain: 200
+      torque: 300
+    - id: L_SHOULDER_PITCH
+      position: 1.96349502
+      gain: 200
+      torque: 300
+    - id: L_SHOULDER_ROLL
+      position: 0.123918399
+      gain: 200
+      torque: 300
+    - id: L_ELBOW
+      position: -2.44346094
+      gain: 200
+      torque: 300
+    - id: HEAD_YAW
+      position: -0.00233770907
+      gain: 200
+      torque: 300
+    - id: HEAD_PITCH
+      position: 2.37000208e-40
+      gain: 200
+      torque: 300
+    - id: R_HIP_YAW
+      position: 0.00649842108
+      gain: 200
+      torque: 300
+    - id: R_HIP_ROLL
+      position: -0.149128526
+      gain: 200
+      torque: 300
+    - id: R_HIP_PITCH
+      position: -0.110482559
+      gain: 200
+      torque: 300
+    - id: R_KNEE
+      position: 0.365137935
+      gain: 200
+      torque: 300
+    - id: R_ANKLE_PITCH
+      position: -0.213955045
+      gain: 200
+      torque: 300
+    - id: R_ANKLE_ROLL
+      position: 0.146723881
+      gain: 200
+      torque: 300
+    - id: R_SHOULDER_PITCH
+      position: 1.96349502
+      gain: 200
+      torque: 300
+    - id: R_SHOULDER_ROLL
+      position: -0.123918399
+      gain: 200
+      torque: 300
+    - id: R_ELBOW
+      position: -2.44346094
+      gain: 200
+      torque: 300
+- duration: 200
+  targets:
+    - id: L_HIP_YAW
+      position: -1.22e-17
+      gain: 200
+      torque: 300
+    - id: L_HIP_ROLL
+      position: -0.0457609259
+      gain: 200
+      torque: 300
+    - id: L_HIP_PITCH
+      position: -5.90000005e-17
+      gain: 200
+      torque: 300
+    - id: L_KNEE
+      position: 0.0608823672
+      gain: 200
+      torque: 300
+    - id: L_ANKLE_PITCH
+      position: -0.0522639081
+      gain: 200
+      torque: 300
+    - id: L_ANKLE_ROLL
+      position: 0.142211571
+      gain: 200
+      torque: 300
+    - id: L_SHOULDER_PITCH
+      position: 1.96349502
+      gain: 200
+      torque: 300
+    - id: L_SHOULDER_ROLL
+      position: 0.123918399
+      gain: 200
+      torque: 300
+    - id: L_ELBOW
+      position: -2.44346094
+      gain: 200
+      torque: 300
+    - id: HEAD_YAW
+      position: -0.000363005995
+      gain: 200
+      torque: 300
+    - id: HEAD_PITCH
+      position: -5.79000014e-21
+      gain: 200
+      torque: 300
+    - id: R_HIP_YAW
+      position: 0.00685612112
+      gain: 200
+      torque: 300
+    - id: R_HIP_ROLL
+      position: -0.0957342759
+      gain: 200
+      torque: 300
+    - id: R_HIP_PITCH
+      position: -0.150427327
+      gain: 200
+      torque: 300
+    - id: R_KNEE
+      position: 0.629658163
+      gain: 200
+      torque: 300
+    - id: R_ANKLE_PITCH
+      position: -0.443038672
+      gain: 200
+      torque: 300
+    - id: R_ANKLE_ROLL
+      position: 0.182252273
+      gain: 200
+      torque: 300
+    - id: R_SHOULDER_PITCH
+      position: 1.96349502
+      gain: 200
+      torque: 300
+    - id: R_SHOULDER_ROLL
+      position: -0.123918399
+      gain: 200
+      torque: 300
+    - id: R_ELBOW
+      position: -2.44346094
+      gain: 200
+      torque: 300
+- duration: 100
+  targets:
+    - id: L_HIP_YAW
+      position: -4.48000014e-16
+      gain: 200
+      torque: 300
+    - id: L_HIP_ROLL
+      position: -0.0203500222
+      gain: 200
+      torque: 300
+    - id: L_HIP_PITCH
+      position: 1.37999997e-14
+      gain: 200
+      torque: 300
+    - id: L_KNEE
+      position: 0.0609520003
+      gain: 200
+      torque: 300
+    - id: L_ANKLE_PITCH
+      position: -0.0713831633
+      gain: 200
+      torque: 300
+    - id: L_ANKLE_ROLL
+      position: 0.139394581
+      gain: 200
+      torque: 300
+    - id: L_SHOULDER_PITCH
+      position: 1.96349502
+      gain: 200
+      torque: 300
+    - id: L_SHOULDER_ROLL
+      position: 0.123918399
+      gain: 200
+      torque: 300
+    - id: L_ELBOW
+      position: -2.44346094
+      gain: 200
+      torque: 300
+    - id: HEAD_YAW
+      position: -0.000865896989
+      gain: 200
+      torque: 300
+    - id: HEAD_PITCH
+      position: -2.70000008e-20
+      gain: 200
+      torque: 300
+    - id: R_HIP_YAW
+      position: 0.0107564302
+      gain: 200
+      torque: 300
+    - id: R_HIP_ROLL
+      position: -0.0813525021
+      gain: 200
+      torque: 300
+    - id: R_HIP_PITCH
+      position: -0.14191179
+      gain: 200
+      torque: 300
+    - id: R_KNEE
+      position: 0.821070254
+      gain: 200
+      torque: 300
+    - id: R_ANKLE_PITCH
+      position: -0.449999988
+      gain: 200
+      torque: 300
+    - id: R_ANKLE_ROLL
+      position: 0.195902824
+      gain: 200
+      torque: 300
+    - id: R_SHOULDER_PITCH
+      position: 1.96349502
+      gain: 200
+      torque: 300
+    - id: R_SHOULDER_ROLL
+      position: -0.123918399
+      gain: 200
+      torque: 300
+    - id: R_ELBOW
+      position: -2.44346094
+      gain: 200
+      torque: 300
+- duration: 100
+  targets:
+    - id: L_HIP_YAW
+      position: -2.24000007e-16
+      gain: 200
+      torque: 300
+    - id: L_HIP_ROLL
+      position: -0.0152467806
+      gain: 200
+      torque: 300
+    - id: L_HIP_PITCH
+      position: -6.6600001e-26
+      gain: 200
+      torque: 300
+    - id: L_KNEE
+      position: 0.0610126108
+      gain: 200
+      torque: 300
+    - id: L_ANKLE_PITCH
+      position: -0.078713201
+      gain: 200
+      torque: 300
+    - id: L_ANKLE_ROLL
+      position: 0.137776092
+      gain: 200
+      torque: 300
+    - id: L_SHOULDER_PITCH
+      position: 1.96349502
+      gain: 200
+      torque: 300
+    - id: L_SHOULDER_ROLL
+      position: 0.123918399
+      gain: 200
+      torque: 300
+    - id: L_ELBOW
+      position: -2.44346094
+      gain: 200
+      torque: 300
+    - id: HEAD_YAW
+      position: -0.00106254604
+      gain: 200
+      torque: 300
+    - id: HEAD_PITCH
+      position: -2.70000008e-20
+      gain: 200
+      torque: 300
+    - id: R_HIP_YAW
+      position: 0.0113925925
+      gain: 200
+      torque: 300
+    - id: R_HIP_ROLL
+      position: -0.0818101093
+      gain: 200
+      torque: 300
+    - id: R_HIP_PITCH
+      position: -0.122295342
+      gain: 200
+      torque: 300
+    - id: R_KNEE
+      position: 0.883200705
+      gain: 200
+      torque: 300
+    - id: R_ANKLE_PITCH
+      position: -0.449999988
+      gain: 200
+      torque: 300
+    - id: R_ANKLE_ROLL
+      position: 0.201758727
+      gain: 200
+      torque: 300
+    - id: R_SHOULDER_PITCH
+      position: 1.96349502
+      gain: 200
+      torque: 300
+    - id: R_SHOULDER_ROLL
+      position: -0.123918399
+      gain: 200
+      torque: 300
+    - id: R_ELBOW
+      position: -2.44346094
+      gain: 200
+      torque: 300
+- duration: 100
+  targets:
+    - id: L_HIP_YAW
+      position: -2.24000007e-16
+      gain: 200
+      torque: 300
+    - id: L_HIP_ROLL
+      position: -0.0152467806
+      gain: 200
+      torque: 300
+    - id: L_HIP_PITCH
+      position: -6.6600001e-26
+      gain: 200
+      torque: 300
+    - id: L_KNEE
+      position: 0.0610126108
+      gain: 200
+      torque: 300
+    - id: L_ANKLE_PITCH
+      position: -0.078713201
+      gain: 200
+      torque: 300
+    - id: L_ANKLE_ROLL
+      position: 0.137776092
+      gain: 200
+      torque: 300
+    - id: L_SHOULDER_PITCH
+      position: 1.96349502
+      gain: 200
+      torque: 300
+    - id: L_SHOULDER_ROLL
+      position: 0.123918399
+      gain: 200
+      torque: 300
+    - id: L_ELBOW
+      position: -2.44346094
+      gain: 200
+      torque: 300
+    - id: HEAD_YAW
+      position: -0.00106254604
+      gain: 200
+      torque: 300
+    - id: HEAD_PITCH
+      position: -2.70000008e-20
+      gain: 200
+      torque: 300
+    - id: R_HIP_YAW
+      position: 0.0113925925
+      gain: 200
+      torque: 300
+    - id: R_HIP_ROLL
+      position: -0.0818101093
+      gain: 200
+      torque: 300
+    - id: R_HIP_PITCH
+      position: -0.122295342
+      gain: 200
+      torque: 300
+    - id: R_KNEE
+      position: 0.883200705
+      gain: 200
+      torque: 300
+    - id: R_ANKLE_PITCH
+      position: -0.850000024
+      gain: 200
+      torque: 300
+    - id: R_ANKLE_ROLL
+      position: 0.201758727
+      gain: 200
+      torque: 300
+    - id: R_SHOULDER_PITCH
+      position: 1.96349502
+      gain: 200
+      torque: 300
+    - id: R_SHOULDER_ROLL
+      position: -0.123918399
+      gain: 200
+      torque: 300
+    - id: R_ELBOW
+      position: -2.44346094
       gain: 200
       torque: 300
 - duration: 50
   targets:
     - id: L_HIP_YAW
-      position: -2.47E-24
+      position: -1.12000003e-16
       gain: 200
       torque: 300
     - id: L_HIP_ROLL
-      position: -0.1085279
+      position: -0.00438451394
       gain: 200
       torque: 300
     - id: L_HIP_PITCH
-      position: -2.23E-23
+      position: -7.4699998e-19
       gain: 200
       torque: 300
     - id: L_KNEE
-      position: 0.061076838
+      position: 0.0621051677
       gain: 200
       torque: 300
     - id: L_ANKLE_PITCH
-      position: -0.034837145
+      position: -0.0512268506
       gain: 200
       torque: 300
     - id: L_ANKLE_ROLL
-      position: 0.13113073
+      position: 0.137744218
       gain: 200
       torque: 300
     - id: L_SHOULDER_PITCH
-      position: 1.963495
+      position: 1.96349502
       gain: 200
       torque: 300
     - id: L_SHOULDER_ROLL
-      position: 0.1239184
+      position: 0.123918399
       gain: 200
       torque: 300
     - id: L_ELBOW
-      position: -2.443461
+      position: -2.44346094
       gain: 200
       torque: 300
     - id: HEAD_YAW
-      position: -0.002337709
+      position: -0.00155355001
       gain: 200
       torque: 300
     - id: HEAD_PITCH
-      position: 2.37E-40
+      position: -2.70000008e-20
       gain: 200
       torque: 300
     - id: R_HIP_YAW
-      position: 0.006498421
+      position: 0.00586471381
       gain: 200
       torque: 300
     - id: R_HIP_ROLL
-      position: -0.149128528
+      position: -0.0744833872
       gain: 200
       torque: 300
     - id: R_HIP_PITCH
-      position: -0.110482557
+      position: -0.486096025
       gain: 200
       torque: 300
     - id: R_KNEE
-      position: 0.365137921
+      position: 1.07823074
       gain: 200
       torque: 300
     - id: R_ANKLE_PITCH
-      position: -0.213955043
+      position: -0.649999976
       gain: 200
       torque: 300
     - id: R_ANKLE_ROLL
-      position: 0.146723877
+      position: 0.206514984
       gain: 200
       torque: 300
     - id: R_SHOULDER_PITCH
-      position: 1.963495
+      position: 1.96349502
       gain: 200
       torque: 300
     - id: R_SHOULDER_ROLL
-      position: -0.1239184
+      position: -0.123918399
       gain: 200
       torque: 300
     - id: R_ELBOW
-      position: -2.443461
+      position: -2.44346094
       gain: 200
       torque: 300
 - duration: 50
   targets:
     - id: L_HIP_YAW
-      position: -1.22E-17
+      position: -5.60000017e-17
       gain: 200
       torque: 300
     - id: L_HIP_ROLL
-      position: -0.045760926
+      position: -0.084127523
       gain: 200
       torque: 300
     - id: L_HIP_PITCH
-      position: -5.90E-17
+      position: 4.03000009e-26
       gain: 200
       torque: 300
     - id: L_KNEE
-      position: 0.060882367
+      position: 0.0633577481
       gain: 200
       torque: 300
     - id: L_ANKLE_PITCH
-      position: -0.052263907
+      position: -0.0746184289
       gain: 200
       torque: 300
     - id: L_ANKLE_ROLL
-      position: 0.142211574
+      position: 0.12957114
       gain: 200
       torque: 300
     - id: L_SHOULDER_PITCH
-      position: 1.963495
+      position: 1.96349502
       gain: 200
       torque: 300
     - id: L_SHOULDER_ROLL
-      position: 0.1239184
+      position: 0.123918399
       gain: 200
       torque: 300
     - id: L_ELBOW
-      position: -2.443461
+      position: -2.44346094
       gain: 200
       torque: 300
     - id: HEAD_YAW
-      position: -0.000363006
+      position: 0.00846509263
       gain: 200
       torque: 300
     - id: HEAD_PITCH
-      position: -5.79E-21
+      position: -2.70000008e-20
       gain: 200
       torque: 300
     - id: R_HIP_YAW
-      position: 0.006856121
+      position: -0.0332896896
       gain: 200
       torque: 300
     - id: R_HIP_ROLL
-      position: -0.095734278
+      position: -0.138156086
       gain: 200
       torque: 300
     - id: R_HIP_PITCH
-      position: -0.150427331
+      position: -0.837851763
       gain: 200
       torque: 300
     - id: R_KNEE
-      position: 0.629658134
+      position: 0.638313353
       gain: 200
       torque: 300
     - id: R_ANKLE_PITCH
-      position: -0.44303868
+      position: 0.151117682
       gain: 200
       torque: 300
     - id: R_ANKLE_ROLL
-      position: 0.182252277
+      position: 0.186925009
       gain: 200
       torque: 300
     - id: R_SHOULDER_PITCH
-      position: 1.963495
+      position: 1.96349502
       gain: 200
       torque: 300
     - id: R_SHOULDER_ROLL
-      position: -0.1239184
+      position: -0.123918399
       gain: 200
       torque: 300
     - id: R_ELBOW
-      position: -2.443461
+      position: -2.44346094
       gain: 200
       torque: 300
 - duration: 50
   targets:
     - id: L_HIP_YAW
-      position: -4.48E-16
+      position: 7.51999984e-14
       gain: 200
       torque: 300
     - id: L_HIP_ROLL
-      position: -0.020350023
+      position: -0.264135182
       gain: 200
       torque: 300
     - id: L_HIP_PITCH
-      position: 1.38E-14
+      position: -1.47000007e-13
       gain: 200
       torque: 300
     - id: L_KNEE
-      position: 0.060952001
+      position: 0.125325143
       gain: 200
       torque: 300
     - id: L_ANKLE_PITCH
-      position: -0.071383165
+      position: -0.232378662
       gain: 200
       torque: 300
     - id: L_ANKLE_ROLL
-      position: 0.139394587
+      position: 0.0670355484
       gain: 200
       torque: 300
     - id: L_SHOULDER_PITCH
-      position: 1.963495
+      position: 1.96349502
       gain: 200
       torque: 300
     - id: L_SHOULDER_ROLL
-      position: 0.1239184
+      position: 0.123918399
       gain: 200
       torque: 300
     - id: L_ELBOW
-      position: -2.443461
+      position: -2.44346094
       gain: 200
       torque: 300
     - id: HEAD_YAW
-      position: -0.000865897
+      position: 0.0084648449
       gain: 200
       torque: 300
     - id: HEAD_PITCH
-      position: -2.70E-20
+      position: -8.32000031e-17
       gain: 200
       torque: 300
     - id: R_HIP_YAW
-      position: 0.01075643
+      position: -0.10544508
       gain: 200
       torque: 300
     - id: R_HIP_ROLL
-      position: -0.081352501
+      position: -0.188155383
       gain: 200
       torque: 300
     - id: R_HIP_PITCH
-      position: -0.141911791
+      position: -1.0153923
       gain: 200
       torque: 300
     - id: R_KNEE
-      position: 0.821070229
+      position: 0.07213936
       gain: 200
       torque: 300
     - id: R_ANKLE_PITCH
-      position: -0.647601296
+      position: 0.83791703
       gain: 200
       torque: 300
     - id: R_ANKLE_ROLL
-      position: 0.195902831
+      position: 0.0198160782
       gain: 200
       torque: 300
     - id: R_SHOULDER_PITCH
-      position: 1.963495
+      position: 1.96349502
       gain: 200
       torque: 300
     - id: R_SHOULDER_ROLL
-      position: -0.1239184
+      position: -0.123918399
       gain: 200
       torque: 300
     - id: R_ELBOW
-      position: -2.443461
+      position: -2.44346094
       gain: 200
       torque: 300
 - duration: 50
   targets:
     - id: L_HIP_YAW
-      position: -2.24E-16
+      position: 6.24999998e-14
       gain: 200
       torque: 300
     - id: L_HIP_ROLL
-      position: -0.015246781
+      position: -0.270622671
       gain: 200
       torque: 300
     - id: L_HIP_PITCH
-      position: -6.66E-26
+      position: -1.21999999e-13
       gain: 200
       torque: 300
     - id: L_KNEE
-      position: 0.061012611
+      position: 0.125327706
       gain: 200
       torque: 300
     - id: L_ANKLE_PITCH
-      position: -0.078713204
+      position: -0.226487607
       gain: 200
       torque: 300
     - id: L_ANKLE_ROLL
-      position: 0.137776089
+      position: 0.066715464
       gain: 200
       torque: 300
     - id: L_SHOULDER_PITCH
-      position: 1.963495
+      position: 1.96349502
       gain: 200
       torque: 300
     - id: L_SHOULDER_ROLL
-      position: 0.1239184
+      position: 0.123918399
       gain: 200
       torque: 300
     - id: L_ELBOW
-      position: -2.443461
+      position: -2.44346094
       gain: 200
       torque: 300
     - id: HEAD_YAW
-      position: -0.001062546
+      position: 0.00846486259
       gain: 200
       torque: 300
     - id: HEAD_PITCH
-      position: -2.70E-20
+      position: 1.24000001e-15
       gain: 200
       torque: 300
     - id: R_HIP_YAW
-      position: 0.011392592
+      position: -0.0932975486
       gain: 200
       torque: 300
     - id: R_HIP_ROLL
-      position: -0.081810113
+      position: -0.160733059
       gain: 200
       torque: 300
     - id: R_HIP_PITCH
-      position: -0.122295339
+      position: -1.09420788
       gain: 200
       torque: 300
     - id: R_KNEE
-      position: 0.883200709
+      position: 0.0278709102
       gain: 200
       torque: 300
     - id: R_ANKLE_PITCH
-      position: -0.730707714
+      position: 0.964522779
       gain: 200
       torque: 300
     - id: R_ANKLE_ROLL
-      position: 0.201758731
+      position: -0.0130452355
       gain: 200
       torque: 300
     - id: R_SHOULDER_PITCH
-      position: 1.963495
+      position: 1.96349502
       gain: 200
       torque: 300
     - id: R_SHOULDER_ROLL
-      position: -0.1239184
+      position: -0.123918399
       gain: 200
       torque: 300
     - id: R_ELBOW
-      position: -2.443461
-      gain: 200
-      torque: 300
-- duration: 50
-  targets:
-    - id: L_HIP_YAW
-      position: -2.24E-16
-      gain: 200
-      torque: 300
-    - id: L_HIP_ROLL
-      position: -0.015246781
-      gain: 200
-      torque: 300
-    - id: L_HIP_PITCH
-      position: -6.66E-26
-      gain: 200
-      torque: 300
-    - id: L_KNEE
-      position: 0.061012611
-      gain: 200
-      torque: 300
-    - id: L_ANKLE_PITCH
-      position: -0.078713204
-      gain: 200
-      torque: 300
-    - id: L_ANKLE_ROLL
-      position: 0.137776089
-      gain: 200
-      torque: 300
-    - id: L_SHOULDER_PITCH
-      position: 1.963495
-      gain: 200
-      torque: 300
-    - id: L_SHOULDER_ROLL
-      position: 0.1239184
-      gain: 200
-      torque: 300
-    - id: L_ELBOW
-      position: -2.443461
-      gain: 200
-      torque: 300
-    - id: HEAD_YAW
-      position: -0.001062546
-      gain: 200
-      torque: 300
-    - id: HEAD_PITCH
-      position: -2.70E-20
-      gain: 200
-      torque: 300
-    - id: R_HIP_YAW
-      position: 0.011392592
-      gain: 200
-      torque: 300
-    - id: R_HIP_ROLL
-      position: -0.081810113
-      gain: 200
-      torque: 300
-    - id: R_HIP_PITCH
-      position: -0.122295339
-      gain: 200
-      torque: 300
-    - id: R_KNEE
-      position: 0.883200709
-      gain: 200
-      torque: 300
-    - id: R_ANKLE_PITCH
-      position: -0.730707714
-      gain: 200
-      torque: 300
-    - id: R_ANKLE_ROLL
-      position: 0.201758731
-      gain: 200
-      torque: 300
-    - id: R_SHOULDER_PITCH
-      position: 1.963495
-      gain: 200
-      torque: 300
-    - id: R_SHOULDER_ROLL
-      position: -0.1239184
-      gain: 200
-      torque: 300
-    - id: R_ELBOW
-      position: -2.443461
-      gain: 200
-      torque: 300
-- duration: 50
-  targets:
-    - id: L_HIP_YAW
-      position: -1.12E-16
-      gain: 200
-      torque: 300
-    - id: L_HIP_ROLL
-      position: -0.004384514
-      gain: 200
-      torque: 300
-    - id: L_HIP_PITCH
-      position: -7.47E-19
-      gain: 200
-      torque: 300
-    - id: L_KNEE
-      position: 0.062105168
-      gain: 200
-      torque: 300
-    - id: L_ANKLE_PITCH
-      position: -0.05122685
-      gain: 200
-      torque: 300
-    - id: L_ANKLE_ROLL
-      position: 0.137744225
-      gain: 200
-      torque: 300
-    - id: L_SHOULDER_PITCH
-      position: 1.963495
-      gain: 200
-      torque: 300
-    - id: L_SHOULDER_ROLL
-      position: 0.1239184
-      gain: 200
-      torque: 300
-    - id: L_ELBOW
-      position: -2.443461
-      gain: 200
-      torque: 300
-    - id: HEAD_YAW
-      position: -0.00155355
-      gain: 200
-      torque: 300
-    - id: HEAD_PITCH
-      position: -2.70E-20
-      gain: 200
-      torque: 300
-    - id: R_HIP_YAW
-      position: 0.005864714
-      gain: 200
-      torque: 300
-    - id: R_HIP_ROLL
-      position: -0.07448339
-      gain: 200
-      torque: 300
-    - id: R_HIP_PITCH
-      position: -0.48609603
-      gain: 200
-      torque: 300
-    - id: R_KNEE
-      position: 1.078230719
-      gain: 200
-      torque: 300
-    - id: R_ANKLE_PITCH
-      position: -0.601508349
-      gain: 200
-      torque: 300
-    - id: R_ANKLE_ROLL
-      position: 0.206514978
-      gain: 200
-      torque: 300
-    - id: R_SHOULDER_PITCH
-      position: 1.963495
-      gain: 200
-      torque: 300
-    - id: R_SHOULDER_ROLL
-      position: -0.1239184
-      gain: 200
-      torque: 300
-    - id: R_ELBOW
-      position: -2.443461
-      gain: 200
-      torque: 300
-- duration: 50
-  targets:
-    - id: L_HIP_YAW
-      position: -5.60E-17
-      gain: 200
-      torque: 300
-    - id: L_HIP_ROLL
-      position: -0.084127521
-      gain: 200
-      torque: 300
-    - id: L_HIP_PITCH
-      position: 4.03E-26
-      gain: 200
-      torque: 300
-    - id: L_KNEE
-      position: 0.06335775
-      gain: 200
-      torque: 300
-    - id: L_ANKLE_PITCH
-      position: -0.074618429
-      gain: 200
-      torque: 300
-    - id: L_ANKLE_ROLL
-      position: 0.129571143
-      gain: 200
-      torque: 300
-    - id: L_SHOULDER_PITCH
-      position: 1.963495
-      gain: 200
-      torque: 300
-    - id: L_SHOULDER_ROLL
-      position: 0.1239184
-      gain: 200
-      torque: 300
-    - id: L_ELBOW
-      position: -2.443461
-      gain: 200
-      torque: 300
-    - id: HEAD_YAW
-      position: 0.008465093
-      gain: 200
-      torque: 300
-    - id: HEAD_PITCH
-      position: -2.70E-20
-      gain: 200
-      torque: 300
-    - id: R_HIP_YAW
-      position: -0.033289691
-      gain: 200
-      torque: 300
-    - id: R_HIP_ROLL
-      position: -0.138156093
-      gain: 200
-      torque: 300
-    - id: R_HIP_PITCH
-      position: -0.837851752
-      gain: 200
-      torque: 300
-    - id: R_KNEE
-      position: 0.638313382
-      gain: 200
-      torque: 300
-    - id: R_ANKLE_PITCH
-      position: 0.15111768
-      gain: 200
-      torque: 300
-    - id: R_ANKLE_ROLL
-      position: 0.186925003
-      gain: 200
-      torque: 300
-    - id: R_SHOULDER_PITCH
-      position: 1.963495
-      gain: 200
-      torque: 300
-    - id: R_SHOULDER_ROLL
-      position: -0.1239184
-      gain: 200
-      torque: 300
-    - id: R_ELBOW
-      position: -2.443461
-      gain: 200
-      torque: 300
-- duration: 50
-  targets:
-    - id: L_HIP_YAW
-      position: 7.52E-14
-      gain: 200
-      torque: 300
-    - id: L_HIP_ROLL
-      position: -0.264135191
-      gain: 200
-      torque: 300
-    - id: L_HIP_PITCH
-      position: -1.47E-13
-      gain: 200
-      torque: 300
-    - id: L_KNEE
-      position: 0.125325148
-      gain: 200
-      torque: 300
-    - id: L_ANKLE_PITCH
-      position: -0.232378656
-      gain: 200
-      torque: 300
-    - id: L_ANKLE_ROLL
-      position: 0.067035551
-      gain: 200
-      torque: 300
-    - id: L_SHOULDER_PITCH
-      position: 1.963495
-      gain: 200
-      torque: 300
-    - id: L_SHOULDER_ROLL
-      position: 0.1239184
-      gain: 200
-      torque: 300
-    - id: L_ELBOW
-      position: -2.443461
-      gain: 200
-      torque: 300
-    - id: HEAD_YAW
-      position: 0.008464845
-      gain: 200
-      torque: 300
-    - id: HEAD_PITCH
-      position: -8.32E-17
-      gain: 200
-      torque: 300
-    - id: R_HIP_YAW
-      position: -0.105445079
-      gain: 200
-      torque: 300
-    - id: R_HIP_ROLL
-      position: -0.188155378
-      gain: 200
-      torque: 300
-    - id: R_HIP_PITCH
-      position: -1.015392271
-      gain: 200
-      torque: 300
-    - id: R_KNEE
-      position: 0.072139359
-      gain: 200
-      torque: 300
-    - id: R_ANKLE_PITCH
-      position: 0.837917019
-      gain: 200
-      torque: 300
-    - id: R_ANKLE_ROLL
-      position: 0.019816079
-      gain: 200
-      torque: 300
-    - id: R_SHOULDER_PITCH
-      position: 1.963495
-      gain: 200
-      torque: 300
-    - id: R_SHOULDER_ROLL
-      position: -0.1239184
-      gain: 200
-      torque: 300
-    - id: R_ELBOW
-      position: -2.443461
-      gain: 200
-      torque: 300
-- duration: 50
-  targets:
-    - id: L_HIP_YAW
-      position: 6.25E-14
-      gain: 200
-      torque: 300
-    - id: L_HIP_ROLL
-      position: -0.27062267
-      gain: 200
-      torque: 300
-    - id: L_HIP_PITCH
-      position: -1.22E-13
-      gain: 200
-      torque: 300
-    - id: L_KNEE
-      position: 0.125327707
-      gain: 200
-      torque: 300
-    - id: L_ANKLE_PITCH
-      position: -0.226487609
-      gain: 200
-      torque: 300
-    - id: L_ANKLE_ROLL
-      position: 0.066715461
-      gain: 200
-      torque: 300
-    - id: L_SHOULDER_PITCH
-      position: 1.963495
-      gain: 200
-      torque: 300
-    - id: L_SHOULDER_ROLL
-      position: 0.1239184
-      gain: 200
-      torque: 300
-    - id: L_ELBOW
-      position: -2.443461
-      gain: 200
-      torque: 300
-    - id: HEAD_YAW
-      position: 0.008464863
-      gain: 200
-      torque: 300
-    - id: HEAD_PITCH
-      position: 1.24E-15
-      gain: 200
-      torque: 300
-    - id: R_HIP_YAW
-      position: -0.093297551
-      gain: 200
-      torque: 300
-    - id: R_HIP_ROLL
-      position: -0.160733065
-      gain: 200
-      torque: 300
-    - id: R_HIP_PITCH
-      position: -1.094207833
-      gain: 200
-      torque: 300
-    - id: R_KNEE
-      position: 0.027870911
-      gain: 200
-      torque: 300
-    - id: R_ANKLE_PITCH
-      position: 0.964522775
-      gain: 200
-      torque: 300
-    - id: R_ANKLE_ROLL
-      position: -0.013045236
-      gain: 200
-      torque: 300
-    - id: R_SHOULDER_PITCH
-      position: 1.963495
-      gain: 200
-      torque: 300
-    - id: R_SHOULDER_ROLL
-      position: -0.1239184
-      gain: 200
-      torque: 300
-    - id: R_ELBOW
-      position: -2.443461
+      position: -2.44346094
       gain: 200
       torque: 300
