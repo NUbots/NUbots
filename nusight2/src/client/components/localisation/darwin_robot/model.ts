@@ -159,23 +159,25 @@ export class LocalisationRobotModel {
     return this.model.enabled
   }
 
-  /** Field to torso */
-  @computed get Htf(): Matrix4 {
-    const Hwf = new THREE.Matrix4().getInverse(this.Hfw.toThree())
-    return Matrix4.fromThree(this.Htw.toThree().multiply(Hwf))
-  }
-
   /** Field to torso translation in field space. */
   @computed get rTFf(): Vector3 {
-    const Hft = new THREE.Matrix4().getInverse(this.Htf.toThree())
-    const { translation: rTFf } = decompose(Hft)
-    return new Vector3(rTFf.x, rTFf.y, rTFf.z)
+    return this.position.rTFf
   }
 
   /* Field to torso rotation in field space. */
   @computed get Rtf(): Quaternion {
-    const { rotation: Rtf } = decompose(this.Htf.toThree())
-    return new Quaternion(Rtf.x, Rtf.y, Rtf.z, Rtf.w)
+    return this.position.Rtf
+  }
+
+  @computed private get position() {
+    const Hwf = new THREE.Matrix4().getInverse(this.Hfw.toThree())
+    const Htf = Matrix4.fromThree(this.Htw.toThree().multiply(Hwf))
+    const { translation: rTFf, rotation: Rtf } = decompose(Htf.toThree())
+    return {
+      Htf,
+      rTFf: Vector3.from(rTFf),
+      Rtf: Quaternion.from(Rtf),
+    }
   }
 }
 
