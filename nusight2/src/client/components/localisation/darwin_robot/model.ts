@@ -171,8 +171,10 @@ export class LocalisationRobotModel {
 
   @computed private get position() {
     const Hwf = new THREE.Matrix4().getInverse(this.Hfw.toThree())
-    const Htf = Matrix4.fromThree(this.Htw.toThree().multiply(Hwf))
-    const { translation: rTFf, rotation: Rtf } = decompose(Htf.toThree())
+    const Htf = this.Htw.toThree().multiply(Hwf)
+    const { rotation: Rtf } = decompose(Htf)
+    const Hft = new THREE.Matrix4().getInverse(Htf)
+    const { translation: rTFf } = decompose(Hft)
     return { Htf, rTFf, Rtf }
   }
 }
