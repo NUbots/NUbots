@@ -29,11 +29,10 @@
 #include <vector>
 
 #include "message/support/FieldDescription.hpp"
+
 namespace module::localisation {
 
     using message::support::FieldDescription;
-    using utility::math::coordinates::cartesianToReciprocalSpherical;
-    using utility::math::coordinates::cartesianToSpherical;
 
     template <typename Scalar>
     [[nodiscard]] inline std::map<std::string, Eigen::Matrix<Scalar, Eigen::Dynamic, 3>> sample_field_points(
@@ -55,7 +54,7 @@ namespace module::localisation {
         const Scalar center_circle_diameter = fd.dimensions.center_circle_diameter;
 
         // We want to uniformly sample points inside the field line width
-        std::mt19937 gen(std::random_device()());
+        std::mt19937 gen(std::random_device{}());
         std::uniform_real_distribution<Scalar> dis(-half_line_width, half_line_width);
 
         // Total length of all field lines on the field in metres
@@ -139,7 +138,7 @@ namespace module::localisation {
             rLFf["opp_penalty_mark"].row(old_num_points + point)
                 << half_field_length - penalty_mark - line_width + point * meters_per_point,
                 dis(gen), Scalar(0);
-            rLFf["center_mark"].row(point) << -line_width + point * meters_per_point, dis(gen), Scalar(0));
+            rLFf["center_mark"].row(point) << -line_width + point * meters_per_point, dis(gen), Scalar(0);
             rLFf["own_penalty_mark"].row(old_num_points + point)
                 << -half_field_length + penalty_mark - line_width + point * meters_per_point,
                 dis(gen), Scalar(0);
@@ -164,8 +163,8 @@ namespace module::localisation {
 
         // Top goal box top/bottom lines
         // Bottom goal box top/bottom lines
-        int old_num_points = num_points;
-        num_points         = goal_width * points_per_meter;
+        old_num_points = num_points;
+        num_points     = goal_width * points_per_meter;
         rLFf["opp_goal_box"].conservativeResize(old_num_points + num_points, 3);
         rLFf["own_goal_box"].conservativeResize(old_num_points + num_points, 3);
         for (int point = 0; point < num_points; ++point) {
@@ -194,8 +193,8 @@ namespace module::localisation {
 
         // Top penalty box top/bottom lines
         // Bottom penalty box top/bottom lines
-        int old_num_points = num_points;
-        num_points         = penalty_width * points_per_meter;
+        old_num_points = num_points;
+        num_points     = penalty_width * points_per_meter;
         rLFf["opp_penalty_box"].conservativeResize(old_num_points + num_points, 3);
         rLFf["own_penalty_box"].conservativeResize(old_num_points + num_points, 3);
         for (int point = 0; point < num_points; ++point) {

@@ -70,6 +70,13 @@ namespace utility::math::coordinates {
         return {U(1) / sphericalCoordinates.x(), sphericalCoordinates.y(), sphericalCoordinates.z()};
     }
 
+    template <typename T, typename U = typename T::Scalar>
+    [[nodiscard]] inline Eigen::Matrix<U, 3, 1> reciprocalSphericalToCartesian(
+        const Eigen::MatrixBase<T>& reciprocalCoordinates) {
+        return sphericalToCartesian(
+            {U(1) / reciprocalCoordinates.x(), reciprocalCoordinates.y(), reciprocalCoordinates.z()});
+    }
+
     // Calculates ||a - b|| where both a and b are expressed in spherical coordinates
     // https://math.stackexchange.com/a/833110/44447
     //
