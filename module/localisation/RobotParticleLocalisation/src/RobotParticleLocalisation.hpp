@@ -20,18 +20,16 @@ namespace module::localisation {
         NUClear::clock::time_point last_time_update_time;
         NUClear::clock::time_point last_measurement_update_time;
 
-        static constexpr int TIME_UPDATE_FREQUENCY     = 10;
-        static constexpr int PARTICLE_UPDATE_FREQUENCY = 1;
-
-        // Member variables, to be set by config
-        int draw_particles;
+        static constexpr int TIME_UPDATE_FREQUENCY = 10;
 
         struct {
-            int num_field_line_points = 1000;
-        } config;
+            std::vector<Eigen::Vector3d> start_state{};
+            Eigen::Vector3d start_variance{};
+        } config{};
 
-        Eigen::Vector3d getFieldPosition(const message::vision::Goal& goal,
-                                         const message::support::FieldDescription& fd) const;
+        [[nodiscard]] Eigen::Vector3d getFieldPosition(const message::vision::Goal::Side& side,
+                                                       const message::support::FieldDescription& fd,
+                                                       const bool& isOwn) const;
 
     public:
         /// @brief Called by the powerplant to build and setup the RobotParticleLocalisation reactor.

@@ -72,7 +72,7 @@ namespace shared::tests {
         int getRogueCount() const {
             return n_rogues;
         }
-        StateVec getRogueRange() const {
+        [[nodiscard]] StateVec get_rogue() const {
             return reset_range;
         }
 
