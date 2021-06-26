@@ -26,6 +26,8 @@
 #include <random>
 #include <vector>
 
+#include "FieldLineSampling.hpp"
+
 #include "message/input/Sensors.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/Goal.hpp"
@@ -34,7 +36,6 @@
 #include "utility/localisation/transform.hpp"
 #include "utility/math/angle.hpp"
 #include "utility/math/coordinates.hpp"
-
 namespace module::localisation {
 
     using message::input::Sensors;
@@ -96,208 +97,47 @@ namespace module::localisation {
             return cartesianToReciprocalSpherical(rGCc);
         }
 
-        std::vector<Eigen::Matrix<Scalar, Eigen::Dynamic, 1>> predict(const StateVec& state,
-                                                                      const Eigen::Matrix<Scalar, 4, 4>& Hcw,
-                                                                      const message::support::FieldDescription& fd,
-                                                                      const int& num_field_points) {
-            // We want to uniformly sample points inside the field line width
-            std::random_device rd;
-            std::mt19937 gen(rd());
-            std::uniform_real_distribution<Scalar> dis(-fd.dimensions.line_width * Scalar(0.5),
-                                                       fd.dimensions.line_width * Scalar(0.5));
+        Eigen::Matrix<Scalar, Eigen::Dynamic, 3> predict(const StateVec& state,
+                                                         const Eigen::Transform<Scalar, 3, Eigen::Affine>& Hcw,
+                                                         const std::string& field_element,
+                                                         const Scalar& fov) {
 
-            // Cache needed field dimension to improve readability
-            const Scalar field_length           = fd.dimensions.field_length;
-            const Scalar field_width            = fd.dimensions.field_width;
-            const Scalar half_field_length      = fd.dimensions.field_length * Scalar(0.5);
-            const Scalar half_field_width       = fd.dimensions.field_width * Scalar(0.5);
-            const Scalar line_width             = fd.dimensions.line_width;
-            const Scalar goal_length            = fd.dimensions.goal_area_length;
-            const Scalar goal_width             = fd.dimensions.goal_area_width;
-            const Scalar penalty_length         = fd.dimensions.penalty_area_length;
-            const Scalar penalty_width          = fd.dimensions.penalty_area_width;
-            const Scalar penalty_mark           = fd.dimensions.penalty_mark_distance;
-            const Scalar center_circle_diameter = fd.dimensions.center_circle_diameter;
-
-            // Total length of all field lines on the field in metres
-            const Scalar field_line_length = field_length * 2                       // Left and right lines
-                                             + field_width * 3                      // Top, mid-field, and bottom lines
-                                             + line_width * 10                      // Top and bottom penalty marks
-                                             + line_width * 2                       // Center mark
-                                             + goal_length * 4                      // Top and bottom goal areas
-                                             + goal_width * 2 + penalty_length * 4  // Top and bottom penalty areas
-                                             + penalty_width * 2
-                                             + center_circle_diameter * M_PI;  // Center circle circumference
-
-            // Number of points to sample per meter
-            const Scalar points_per_meter = field_line_length / Scalar(num_field_points);
-            const Scalar meters_per_point = Scalar(num_field_points) / field_line_length;
-
-            std::vector<Eigen::Matrix<Scalar, 3, 1>> rLFf_truths;
-
-            // Sample all of field points on the field lines
-            // Top line
-            // Bottom line
-            // Mid-field line
-            int num_points = field_width * points_per_meter;
-            for (int point = 0; point < num_points; ++point) {
-                // Top line
-                rLFf_truths.emplace_back(dis(gen) + half_field_length,
-                                         -half_field_width + point * meters_per_point,
-                                         Scalar(0));
-                // Mid-field line
-                rLFf_truths.emplace_back(dis(gen), -half_field_width + point * meters_per_point, Scalar(0));
-                // Bottom line
-                rLFf_truths.emplace_back(dis(gen) - half_field_length,
-                                         -half_field_width + point * meters_per_point,
-                                         Scalar(0));
-            }
-
-            // Left line
-            // Right line
-            num_points = field_length * points_per_meter;
-            for (int point = 0; point < num_points; ++point) {
-                // Left line
-                rLFf_truths.emplace_back(-half_field_length + point * meters_per_point,
-                                         dis(gen) + half_field_width,
-                                         Scalar(0));
-                // Right line
-                rLFf_truths.emplace_back(-half_field_length + point * meters_per_point,
-                                         dis(gen) - half_field_width,
-                                         Scalar(0));
-            }
-
-            // Center circle
-            num_points = M_PI * center_circle_diameter * points_per_meter;
-            for (int point = 0; point < num_points; ++point) {
-                // Calculate point in polar coordinates
-                // Evenly divide the circle into num_points wedges
-                const Scalar radius = dis(gen) + center_circle_diameter * Scalar(0.5);
-                const Scalar theta  = 2.0 * M_PI * point / num_points;
-
-                // Convert to cartesian coordinates
-                rLFf_truths.emplace_back(radius * std::cos(theta), radius * std::sin(theta), Scalar(0));
-            }
-
-            // Top penalty mark side to side
-            // Bottom penalty mark side to side
-            num_points = line_width * 3 * points_per_meter;
-            for (int point = 0; point < num_points; ++point) {
-                // Top mark
-                rLFf_truths.emplace_back(half_field_length - penalty_mark + dis(gen),
-                                         line_width - point * meters_per_point,
-                                         Scalar(0));
-                // Bottom mark
-                rLFf_truths.emplace_back(-half_field_length + penalty_mark + dis(gen),
-                                         line_width - point * meters_per_point,
-                                         Scalar(0));
-            }
-
-            // Top penalty mark end to end
-            // Center mark end to end
-            // Bottom penalty mark end to end
-            num_points = line_width * 3 * points_per_meter;
-            for (int point = 0; point < num_points; ++point) {
-                // Top mark
-                rLFf_truths.emplace_back(half_field_length - penalty_mark - line_width + point * meters_per_point,
-                                         dis(gen),
-                                         Scalar(0));
-                // Center mark
-                rLFf_truths.emplace_back(-line_width + point * meters_per_point, dis(gen), Scalar(0));
-                // Bottom mark
-                rLFf_truths.emplace_back(-half_field_length + penalty_mark - line_width + point * meters_per_point,
-                                         dis(gen),
-                                         Scalar(0));
-            }
-
-            // Top goal box left and right lines
-            // Bottom goal box left and right lines
-            num_points = goal_length * points_per_meter;
-            for (int point = 0; point < num_points; ++point) {
-                // Top Left line
-                rLFf_truths.emplace_back(half_field_length - goal_length * point * meters_per_point,
-                                         goal_width * Scalar(0.5) + dis(gen),
-                                         Scalar(0));
-                // Top Right line
-                rLFf_truths.emplace_back(half_field_length - goal_length * point * meters_per_point,
-                                         -goal_width * Scalar(0.5) + dis(gen),
-                                         Scalar(0));
-
-                // Bottom Left line
-                rLFf_truths.emplace_back(-half_field_length + goal_length * point * meters_per_point,
-                                         goal_width * Scalar(0.5) + dis(gen),
-                                         Scalar(0));
-                // Bottom Right line
-                rLFf_truths.emplace_back(-half_field_length + goal_length * point * meters_per_point,
-                                         -goal_width * Scalar(0.5) + dis(gen),
-                                         Scalar(0));
-            }
-
-            // Top goal box top/bottom lines
-            // Bottom goal box top/bottom lines
-            num_points = goal_width * points_per_meter;
-            for (int point = 0; point < num_points; ++point) {
-                // Top line
-                rLFf_truths.emplace_back(half_field_length - goal_length + dis(gen),
-                                         -goal_width * Scalar(0.5) + point * meters_per_point,
-                                         Scalar(0));
-                // Bottom line
-                rLFf_truths.emplace_back(-half_field_length + goal_length + dis(gen),
-                                         -goal_width * Scalar(0.5) + point * meters_per_point,
-                                         Scalar(0));
-            }
-
-            // Top penalty box left and right lines
-            // Bottom penalty box left and right lines
-            num_points = penalty_length * points_per_meter;
-            for (int point = 0; point < num_points; ++point) {
-                // Top Left line
-                rLFf_truths.emplace_back(half_field_length - penalty_length + point * meters_per_point,
-                                         penalty_width * Scalar(0.5) + dis(gen),
-                                         Scalar(0));
-                // Top Right line
-                rLFf_truths.emplace_back(half_field_length - penalty_length + point * meters_per_point,
-                                         -penalty_width * Scalar(0.5) + dis(gen),
-                                         Scalar(0));
-
-                // Bottom Left line
-                rLFf_truths.emplace_back(-half_field_length + point * meters_per_point,
-                                         penalty_width * Scalar(0.5) + dis(gen),
-                                         Scalar(0));
-                // Bottom Right line
-                rLFf_truths.emplace_back(-half_field_length + point * meters_per_point,
-                                         -penalty_width * Scalar(0.5) + dis(gen),
-                                         Scalar(0));
-            }
-
-            // Top penalty box top/bottom lines
-            // Bottom penalty box top/bottom lines
-            num_points = penalty_width * points_per_meter;
-            for (int point = 0; point < num_points; ++point) {
-                // Top line
-                rLFf_truths.emplace_back(half_field_length - penalty_length + dis(gen),
-                                         -penalty_width * Scalar(0.5) + point * meters_per_point,
-                                         Scalar(0));
-                // Bottom line
-                rLFf_truths.emplace_back(-half_field_length + penalty_length + dis(gen),
-                                         -penalty_width * Scalar(0.5) + point * meters_per_point,
-                                         Scalar(0));
-            }
+            // Calculate all of the ground truth points
+            auto rLFf = sample_field_points(fd, num_field_points);
 
             // Create a transform from the field state
             Eigen::Transform<Scalar, 3, Eigen::Affine> Hfw;
             Hfw.translation() = Eigen::Matrix<Scalar, 3, 1>(state.x(), state.y(), 0);
             Hfw.linear() = Eigen::AngleAxis<Scalar>(state.z(), Eigen::Matrix<Scalar, 3, 1>::UnitZ()).toRotationMatrix();
 
-            const Eigen::Transform<Scalar, 3, Eigen::Affine> Hcf(Hcw * Hfw.inverse().matrix());
+            const Eigen::Transform<Scalar, 3, Eigen::Affine> Hfc = Hcw * Hfw.inverse();
+            const Eigen::Matrix<Scalar, 3, 1> camera_x           = Hfc.rotation().leftCols<1>();
 
-            // Transform all field coordinates into camera coordinates
-            for (auto& rLFf : rLFf_truths) {
-                rLFf = cartesianToSpherical(Hcf * rLFf);
-            }
+            // Swap all potentially in-view points
+            std::vector<int> indexes(rLFf[field_element].rows(), 0);
+            std::iota(indexes.begin(), indexes.end(), 0);
+            std::sort(indexes.begin(), indexes.end(), [&](const int& a, const int& b) {
+                return (Hfc.rotation().leftCols<1>().dot(rLFf[field_element].row(a))
+                        > Hfc.rotation().leftCols<1>().dot(rLFf[field_element].row(b)));
+            });
+            const cos_theta = std::cos(fov * Scalar(0.5));
 
-            // TODO Cull points based on FOV
-            return rLFf_truths;
+            // for (auto it = rLFf.begin(); it != rLFf.end();) {
+            //     if (Hfc.rotation().leftCols<1>().dot(*it) < cos_theta) {
+            //         it = rLFf.erase(it);
+            //     }
+            //     else {
+            //         it = std::next(it);
+            //     }
+            // }
+
+            // // Transform all field coordinates into camera coordinates and store in a matrix
+            // Eigen::Matrix<Scalar, Eigen::Dynamic, 3> rLCc(rlFf_truths.size(), 3);
+            // for (int i = 0; i < int(rLFf_truths.size(); ++i) {
+            //     rLCc.row(i) = cartesianToSpherical(Hcf * rLFf).transpose();
+            // }
+
+            // return rLCc;
         }
 
         StateVec limit(const StateVec& state) {

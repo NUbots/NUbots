@@ -70,6 +70,47 @@ namespace utility::math::coordinates {
         return {U(1) / sphericalCoordinates.x(), sphericalCoordinates.y(), sphericalCoordinates.z()};
     }
 
+    // Calculates ||a - b|| where both a and b are expressed in spherical coordinates
+    // https://math.stackexchange.com/a/833110/44447
+    //
+    // We use phi for the polar angle and theta for the azimuthal angle
+    template <typename T, typename U = typename T::Scalar>
+    [[nodiscard]] inline Eigen::Matrix<U, 3, 1> sphericalDistance(const Eigen::MatrixBase<T>& a,
+                                                                  const Eigen::MatrixBase<T>& b) {
+        const U r_a     = a.x();  // radial distance
+        const U phi_a   = a.x();  // polar angle
+        const U theta_a = a.z();  // azimuth angle
+        const U r_b     = b.x();  // radial distance
+        const U phi_b   = b.x();  // polar angle
+        const U theta_b = b.z();  // azimuth angle
+        const U result  = r_a * r_a + r_b * r_b
+                         - U(2) * r_a * r_b
+                               * (std::sin(phi_a) * std::sin(phi_b) * std::cos(theta_a - theta_b)
+                                  + std::cos(phi_a) * std::cos(phi_b));
+        return result;
+    }
+
+    // Calculates ||a - b|| where both a and b are expressed in reciprocal spherical coordinates
+    // https://math.stackexchange.com/a/833110/44447
+    //
+    // We use phi for the polar angle and theta for the azimuthal angle
+    template <typename T, typename U = typename T::Scalar>
+    [[nodiscard]] inline Eigen::Matrix<U, 3, 1> reciprocalSphericalDistance(const Eigen::MatrixBase<T>& a,
+                                                                            const Eigen::MatrixBase<T>& b) {
+        const U r_a     = a.x();  // radial distance
+        const U phi_a   = a.x();  // polar angle
+        const U theta_a = a.z();  // azimuth angle
+        const U r_b     = b.x();  // radial distance
+        const U phi_b   = b.x();  // polar angle
+        const U theta_b = b.z();  // azimuth angle
+        const U result  = U(1) / (r_a * r_a) + U(1) / (r_b * r_b)
+                         - (U(2) / (r_a * r_b))
+                               * (std::sin(phi_a) * std::sin(phi_b) * std::cos(theta_a - theta_b)
+                                  + std::cos(phi_a) * std::cos(phi_b));
+
+        return result;
+    }
+
 }  // namespace utility::math::coordinates
 
 
