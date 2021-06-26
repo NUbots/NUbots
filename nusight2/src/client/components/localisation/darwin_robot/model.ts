@@ -173,20 +173,20 @@ export class LocalisationRobotModel {
     const Hwf = new THREE.Matrix4().getInverse(this.Hfw.toThree())
     const Htf = Matrix4.fromThree(this.Htw.toThree().multiply(Hwf))
     const { translation: rTFf, rotation: Rtf } = decompose(Htf.toThree())
-    return {
-      Htf,
-      rTFf: Vector3.from(rTFf),
-      Rtf: Quaternion.from(Rtf),
-    }
+    return { Htf, rTFf, Rtf }
   }
 }
 
 function decompose(
   m: THREE.Matrix4,
-): { translation: THREE.Vector3; rotation: THREE.Quaternion; scale: THREE.Vector3 } {
+): { translation: Vector3; rotation: Quaternion; scale: Vector3 } {
   const translation = new THREE.Vector3()
   const rotation = new THREE.Quaternion()
   const scale = new THREE.Vector3()
   m.decompose(translation, rotation, scale)
-  return { translation, rotation, scale }
+  return {
+    translation: Vector3.from(translation),
+    rotation: Quaternion.from(rotation),
+    scale: Vector3.from(scale),
+  }
 }
