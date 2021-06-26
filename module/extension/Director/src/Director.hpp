@@ -4,55 +4,14 @@
 #include <nuclear>
 #include <typeindex>
 
+#include "director/ProviderGroup.hpp"
+
 #include "extension/Behaviour.hpp"
 
 namespace module::extension {
 
     class Director : public NUClear::Reactor {
-
     private:
-        /**
-         * A provider instance which is able to execute a specific task type
-         */
-        struct Provider {
-
-            /**
-             * The data held by a when condition in order to monitor when the condition will be met, as well as to
-             * compare it to causing statements to determine if those causing statements would satisfy this provider
-             */
-            struct WhenCondition {
-                WhenCondition(const std::type_index& type,
-                              bool (*validator)(const int&),
-                              int (*current)(),
-                              ReactionHandle handle)
-                    : type(type), validator(validator), current(current), handle(std::move(handle)) {}
-
-                /// The type of state that this condition is checking
-                std::type_index type;
-                /// Expression to determine if the passed state is valid
-                bool (*validator)(const int&);
-                /// Function to get the current state
-                int (*current)();
-                /// The reaction handle which is monitoring this state for this condition
-                ReactionHandle handle;
-            };
-
-            Provider(const ::extension::behaviour::commands::ProviderAction& action,
-                     const std::shared_ptr<NUClear::threading::Reaction>& reaction)
-                : action(action), reaction(reaction), active(false) {}
-
-            /// The action type that this provider is to be used for
-            ::extension::behaviour::commands::ProviderAction action;
-            /// The reaction object to run in order to run this provider
-            std::shared_ptr<NUClear::threading::Reaction> reaction;
-            /// Any when conditions that are required by this provider
-            std::vector<WhenCondition> when;
-            /// A list of types and states that are caused by running this provider
-            std::map<std::type_index, int> causing;
-            /// A boolean that is true if this provider is currently active and running (can make subtasks)
-            bool active;
-        };
-
         /**
          * Adds a provider for a type if it does not already exist
          *
@@ -66,7 +25,7 @@ namespace module::extension {
 
         /**
          * Removes a provider for a type if it exists
-         * @param The id of the reaction we want to remove providers for
+         * @param id the id of the reaction we want to remove providers for
          * @throws std::runtime_error when the reaction does not provide anything
          */
         void remove_provider(const uint64_t& id);
@@ -76,10 +35,10 @@ namespace module::extension {
         explicit Director(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        /// A list of providers grouped by type
-        std::multimap<std::type_index, Provider> providers;
-        /// Maps a Reaction::id to what it provides
-        std::map<uint64_t, std::multimap<std::type_index, Provider>::iterator> reactions;
+        /// A list of provider groups
+        std::map<std::type_index, ProviderGroup> groups;
+        /// Maps reaction_id to the provider which implements it
+        std::map<uint64_t, std::shared_ptr<Provider>> providers;
 
         /// A list of reaction_task_ids to director_task objects, once the provider has finished running it will emit
         /// all these as a pack so that the director can work out when providers change which subtasks they emit

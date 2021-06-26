@@ -6,6 +6,7 @@ namespace module {
     namespace extension {
 
         using ::extension::Configuration;
+        using ::extension::behaviour::Task;
         using ::extension::behaviour::commands::CausingExpression;
         using ::extension::behaviour::commands::DirectorTask;
         using ::extension::behaviour::commands::ProviderAction;
@@ -15,26 +16,12 @@ namespace module {
         using ::NUClear::threading::Reaction;
         using Unbind = NUClear::dsl::operation::Unbind<ProvidesReaction>;
 
-        /**
-         * This object bunches up tasks that are coming from a single provider (or a single root level task) so they can
-         * be emitted all at once. This lets the director see if a provider is changing what tasks it's requesting
-         * between runs.
-         * This is especially important if it emits no tasks since there would be no other way to see this.
-         */
-        struct TaskPack {
-            TaskPack(const uint64_t& requester_id, std::vector<std::shared_ptr<const DirectorTask>> tasks)
-                : requester_id(requester_id), tasks(std::move(tasks)) {}
-
-            /// The ID of the requester (the providers reaction id)
-            uint64_t requester_id;
-            /// The list of task objects that are requested
-            std::vector<std::shared_ptr<const DirectorTask>> tasks;
-        };
+        using TaskPack = std::vector<std::shared_ptr<const DirectorTask>>;
 
         /**
          * This message gets emitted when a state we are monitoring is updated.
-         * When a `When` condition is being waited on a reaction will start monitoring that state, when it updates we
-         * emit one of these so we can decide if we want to take action based on that.
+         * When a `When` condition is being waited on a reaction will start monitoring that state.
+         * When it updates we check to see if this would now satisfy the conditions and if it does we emit
          */
         struct StateUpdate {
             StateUpdate(const uint64_t& provider_id, const std::type_index& type, const int& state)
@@ -59,19 +46,16 @@ namespace module {
                                     const std::shared_ptr<Reaction>& r,
                                     const ProviderAction& action) {
 
-            // Look for our specific item
-            auto range = providers.equal_range(data_type);
-            auto it    = std::find_if(range.first, range.second, [&](auto item) { return item.second.reaction == r; });
+            auto& group = groups[data_type];
 
-            // No item means add a new one
-            if (it == range.second) {
-                it = providers.insert(std::make_pair(data_type, Provider(action, r)));
-                reactions.insert(std::make_pair(r->id, it));
+            // Check if we already inserted this element as a provider
+            if (providers.count(r->id) != 0) {
+                throw std::runtime_error("You cannot have multiple provider DSL words in a single on statement.");
             }
-            else {
-                throw std::runtime_error(
-                    "You cannot have multiple provider DSL words (Provides, Entering, Leaving) in a single statement.");
-            }
+
+            auto provider = std::make_shared<Provider>(action, data_type, r);
+            group.providers.emplace_back(provider);
+            providers.emplace(r->id, provider);
         }
 
         /**
@@ -82,17 +66,43 @@ namespace module {
         void Director::remove_provider(const uint64_t& id) {
 
             // If we can find it, erase it
-            auto it = reactions.find(id);
-            if (it != reactions.end()) {
+            auto it = providers.find(id);
+            if (it != providers.end()) {
+
+                // Get the relevant elements
+                auto provider = it->second;
+                auto& group   = groups[provider->type];
 
                 // Unbind any when state monitors
-                for (auto& when : it->second->second.when) {
+                for (auto& when : provider->when) {
                     when.handle.unbind();
                 }
 
-                // Erase from the list
-                providers.erase(it->second);
-                reactions.erase(it);
+                // Erase the provider from this group
+                auto g_it = std::find(group.providers.begin(), group.providers.end(), provider);
+                if (g_it != group.providers.end()) {
+                    group.providers.erase(g_it);
+                }
+
+                // Now we need to deal with the cases where this provider was in use when it was unbound
+                if (provider->active) {
+                    if (group.providers.empty()) {
+                        // This is now an error, there are no providers to service the task
+                        log<NUClear::ERROR>(
+                            "The last provider for a type was removed while there were still tasks for it");
+                    }
+                    else {
+                        // TODO run the current task in the group to refresh which provider is chosen
+                        // run_task(group.active_task);
+                    }
+                }
+
+                // If there are no providers left in this group erase it too
+                if (group.providers.empty()) {
+                    groups.erase(provider->type);
+                }
+                // Erase from our list of providers
+                providers.erase(id);
             }
             else {
                 throw std::runtime_error("Attempted to remove a Provider that was not loaded");
@@ -119,25 +129,29 @@ namespace module {
             });
 
             // Add a provider provider
-            on<Trigger<ProvidesReaction>, Sync<Director>>().then("Add Provider", [this](const ProvidesReaction& r) {  //
+            on<Trigger<ProvidesReaction>, Sync<Director>>().then("Add Provider", [this](const ProvidesReaction& r) {
                 add_provider(r.type, r.reaction, r.action);
             });
 
             // Add a when expression to this provider
             on<Trigger<WhenExpression>, Sync<Director>>().then("Add When", [this](const WhenExpression& r) {
-                auto it = reactions.find(r.reaction->id);
-                if (it != reactions.end()) {
+                auto it = providers.find(r.reaction->id);
+                if (it != providers.end()) {
+                    auto provider = it->second;
 
                     // Add a reaction that will listen for changes to this state and notify the director
                     auto id               = r.reaction->id;
                     auto type             = r.type;
-                    ReactionHandle handle = r.binder(*this, [this, id, type](const int& state) {  //
-                        emit(std::make_unique<StateUpdate>(id, type, state));
+                    auto validator        = r.validator;
+                    ReactionHandle handle = r.binder(*this, [this, id, type, validator](const int& state) {  //
+                        if (validator(state)) {
+                            emit(std::make_unique<StateUpdate>(id, type, state));
+                        }
                     });
                     handle.disable();
 
                     // Add it to the list of when conditions
-                    it->second->second.when.emplace_back(r.type, r.validator, r.current, handle);
+                    provider->when.emplace_back(r.type, r.validator, r.current, handle);
                 }
                 else {
                     throw std::runtime_error(
@@ -147,9 +161,10 @@ namespace module {
 
             // Add a causing condition to this provider
             on<Trigger<CausingExpression>, Sync<Director>>().then("Add Causing", [this](const CausingExpression& r) {
-                auto it = reactions.find(r.reaction->id);
-                if (it != reactions.end()) {
-                    it->second->second.causing.insert(std::make_pair(r.type, r.resulting_state));
+                auto it = providers.find(r.reaction->id);
+                if (it != providers.end()) {
+                    auto provider = it->second;
+                    provider->causing.emplace(r.type, r.resulting_state);
                 }
                 else {
                     throw std::runtime_error(
@@ -162,20 +177,20 @@ namespace module {
                 "Director Task",
                 [this](std::shared_ptr<const DirectorTask> task) {
                     // Root level task, make the TaskPack immediately and send it off to be executed as a root task
-                    if (reactions.count(task->requester_id) == 0) {
-                        emit(std::make_unique<TaskPack>(task->requester_task_id,
-                                                        std::vector<std::shared_ptr<const DirectorTask>>({task})));
+                    if (providers.count(task->requester_id) == 0) {
+                        emit(std::make_unique<TaskPack>(TaskPack({task})));
                     }
                     // Check if this provider is active and allowed to make subtasks
-                    else if (reactions[task->requester_id]->second.active) {
+                    else if (providers[task->requester_id]->active) {
                         pack_builder.emplace(task->requester_task_id, task);
                     }
                     else {
                         // Throw an error so the user can see what a fool they are being
-                        throw std::runtime_error(fmt::format(
-                            "The task {} cannot be executed as the provider {} is not active and cannot make subtasks",
-                            task->name,
-                            reactions[task->requester_id]->second.reaction->identifier[0]));
+                        log<NUClear::WARN>("The task",
+                                           task->name,
+                                           "cannot be executed as the provider",
+                                           providers[task->requester_id]->reaction->identifier[0],
+                                           "is not active and cannot make subtasks");
                     }
                 });
 
@@ -183,7 +198,7 @@ namespace module {
             on<Trigger<ProviderDone>, Sync<DirectorTask>>().then("Package Tasks", [this](const ProviderDone& done) {
                 // Get all the tasks that were emitted by this provider and send it as a task pack
                 auto e = pack_builder.equal_range(done.requester_task_id);
-                std::vector<std::shared_ptr<const DirectorTask>> tasks;
+                TaskPack tasks;
                 for (auto it = e.first; it != e.second; ++it) {
                     tasks.emplace_back(it->second);
                 }
@@ -193,7 +208,8 @@ namespace module {
                     return a->priority < b->priority;
                 });
 
-                emit(std::make_unique<TaskPack>(done.requester_id, std::move(tasks)));
+                // Emit the task pack
+                emit(std::make_unique<TaskPack>(TaskPack(std::move(tasks))));
 
                 // Erase the task pack builder for this id
                 pack_builder.erase(done.requester_task_id);
@@ -201,95 +217,21 @@ namespace module {
 
             // A state that we were monitoring is updated, we might be able to run the reaction now
             on<Trigger<StateUpdate>, Sync<Director>>().then("State Updated", [this](const StateUpdate& update) {
-                // TODO algorithm section
-
-                // Find the reaction that is mentioned in the update
-                // If this new state makes things valid then run the task
+                // TODO ALGORITHM SECTION HERE
+                // This state update event means the conditions for the provider specified in the update are now met
             });
 
             // We do things when we receive tasks to run
             on<Trigger<TaskPack>, Sync<Director>>().then("Run Task Pack", [this](const TaskPack& pack) {
-                // TODO algorithm section
+                // TODO ALGORITHM SECTION HERE
+                // We have just been given a new task pack
 
-                // This is a root task
-                if (reactions.count(pack.requester_id) == 0) {
-                    // Root tasks only ever have one task in the pack
-                    const auto& task = pack.tasks[0];
+                // TODO check if there are tasks that were previously in the pack from this provider and now are gone
+                // For those we need to end execution of those tasks
 
-                    // TODO add this task to the root task list
-
-                    // If we submit a root task with 0 priority we remove it from the root tasks
-                    if (task->priority == 0) {
-                        // TODO remove this task from the root task list
-                        return;
-                    }
+                for (const auto& task : pack) {
+                    // TODO run this task through the director's algorithm to work out what to do with it
                 }
-
-                // Loop through each task
-                for (const auto& task : pack.tasks) {
-
-                    // This task is not active and is not allowed to run subtasks
-                    if (!reactions[task->requester_id]->second.active) {
-                        // Throw an error so the user can see what a fool they are being
-                        throw std::runtime_error(fmt::format(
-                            "The task {} cannot be executed as the provider {} is not active and cannot make subtasks",
-                            task->name,
-                            reactions[task->requester_id]->second.reaction->identifier[0]));
-                    }
-
-                    // All task executions happen after we have evaluated the actions for all tasks in this pack
-
-                    // Possibilities
-
-                    // case Task is a Task::Done task
-                    //      Rerun the provider which is a parent to this task with the same data (but with a done flag)
-                    //      If we are a root task then delete the task from the list
-
-                    // case Provider is available (no When condition that limits it) and not in use
-                    //      Execute any entering with no causing first
-                    //      Otherwise execute main provider
-
-                    // case Provider is in use by us
-                    //      Check if running an entering for a causing and it's not met yet run the entering again
-                    //      else run normal provider
-
-                    // case Provider is in use by a root task with higher priority than us
-                    //      Put our task in this providers queue
-                    //          we can start this task:
-                    //              if the other task priority drops
-                    //              if the other task stops running
-
-                    // case we have a Provider but it is limited by a When condition and not in use
-                    //      Enable the ReactionHandle which monitors the when condition for this provider
-                    //      Add this task to the queue of tasks to be executed when the provider's conditions are met
-                    //
-                    //      If: there is an entering for this provider that provides the causing and run that until
-                    //      the causing condition has been met. If at some point while running a decendent of this
-                    //      entering provider we kick off the required child of another provider which has a leaving
-                    //      condition which would also solve our causing problem, then we swap to running that leaving
-                    //      condition instead
-
-                    //      Else: See if there is a leaving for a currently running provider that has a casing for our
-                    //      desired state.
-                    //          We will either run this leaving as our action, or we will will queue for it based on the
-                    //          following state properties:
-                    //              Is it: A sibling of our same root task, A child of a different root task
-                    //              Is it: Optional/Optional Parent in other root task, Optional/Optional Parent current
-                    //              task Is it: Higher priority, Lower priority
-
-                    // case Provider is in use by a root task with lower priority than us
-                    //      We take control of this provider and put the old task in the queue of tasks to be executed
-                    //      by this provider
-                    //
-                    //      We traverse up the tree and find the first optional path that we took (first negative
-                    //      priority) or the root, and we move all the tasks into the queue of tasks to execute
-                    //      If any of these tasks that we are kicking off have a leaving reaction we are done with
-                    //      this task pack if any of these tasks have an empty leaving reaction we run that to ensure
-                    //      that we have a clean exit
-                }
-
-                // If this provider was previously active and has tasks that are no longer running
-                //      check if there is another task that was queued at a lower priority than us and run it
             });
         }
     }  // namespace extension

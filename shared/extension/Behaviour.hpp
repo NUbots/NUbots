@@ -146,6 +146,9 @@ namespace extension::behaviour {
             template <typename DSL>
             static inline std::shared_ptr<T> get(NUClear::threading::Reaction& r) {
 
+                // TODO make this return a special type that can be dereferenced into a T object
+                // TODO then you can add in extra information that can be passed to the provider (like when it is
+                // triggered due to a `Done` event)
                 // TODO here we need to get task information from the director
                 // TODO using r.id we can query the director if this provider is supposed to be running right now and
                 // also get the data for this provider
@@ -272,16 +275,6 @@ namespace extension::behaviour {
     template <typename T>
     struct Task {
 
-        /**
-         * This is a special task that should be emitted when a provider finishes the task it was given.
-         * When this is emitted the director will re-execute the provider which caused this task to run.
-         *
-         * ```
-         * emit<Task>(std::make_unique<Task::Done>());
-         * ```
-         */
-        struct Done {};
-
         static void emit(NUClear::PowerPlant& powerplant,
                          std::shared_ptr<T> data,
                          int priority            = 1,
@@ -297,6 +290,16 @@ namespace extension::behaviour {
                 std::make_shared<commands::DirectorTask>(typeid(T), reaction_id, task_id, data, priority, name));
         }
     };
+
+    /**
+     * This is a special task that should be emitted when a provider finishes the task it was given.
+     * When this is emitted the director will re-execute the provider which caused this task to run.
+     *
+     * ```
+     * emit<Task>(std::make_unique<Done>());
+     * ```
+     */
+    struct Done {};
 
 }  // namespace extension::behaviour
 
