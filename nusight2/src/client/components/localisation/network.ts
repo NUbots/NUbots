@@ -57,6 +57,5 @@ export class LocalisationNetwork {
   private onField = (robotModel: RobotModel, field: message.localisation.Field) => {
     const robot = LocalisationRobotModel.of(robotModel)
     robot.Hfw = Matrix4.fromMatrix3(Matrix3.from(field.position))
-    console.log(field.position)
   }
 }
