@@ -23,7 +23,6 @@ package message.behaviour;
 import "Vector.proto";
 
 message KickPlan {
-
     enum KickType {
         SCRIPTED = 0;
         IK_KICK  = 1;
