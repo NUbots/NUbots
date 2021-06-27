@@ -10,7 +10,7 @@
 namespace module::extension {
 
     struct ProviderGroup {
-        enum class State {
+        enum State {
             /// This provider currently isn't doing anything
             IDLE,
             /// This provider is currently in an "Entering" state

@@ -13,22 +13,33 @@ namespace module::extension {
     class Director : public NUClear::Reactor {
     private:
         /**
-         * Adds a provider for a type if it does not already exist
+         * Adds a provider for a type
          *
          * @param data_type The type_index of the data type to provide for
          * @param r The reaction that will be run to provide
          * @throws std::runtime_error when there is more than one Provides in an on statement
          */
-        void add_provider(const std::type_index& data_type,
-                          const std::shared_ptr<NUClear::threading::Reaction>& r,
-                          const ::extension::behaviour::commands::ProviderAction& action);
+        void add_provider(const ::extension::behaviour::commands::ProvidesReaction& p);
 
         /**
-         * Removes a provider for a type if it exists
+         * Removes a provider for a type
+         *
          * @param id the id of the reaction we want to remove providers for
          * @throws std::runtime_error when the reaction does not provide anything
          */
         void remove_provider(const uint64_t& id);
+
+        /**
+         * Add a when condition to an existing provider
+         *
+         */
+        void add_when(const ::extension::behaviour::commands::WhenExpression& when);
+
+        /**
+         * Add a causing condition to an existing provider
+         *
+         */
+        void add_causing(const ::extension::behaviour::commands::CausingExpression& causing);
 
     public:
         /// Called by the powerplant to build and setup the Director reactor.
