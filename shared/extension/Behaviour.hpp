@@ -96,15 +96,17 @@ namespace extension::behaviour {
             DirectorTask(std::type_index type,
                          uint64_t requester_id,
                          uint64_t requester_task_id,
-                         std::shared_ptr<void> command,
-                         int priority,
-                         const std::string& name)
+                         std::shared_ptr<void> data,
+                         const std::string& name,
+                         const int& priority,
+                         const bool& optional)
                 : type(type)
                 , requester_id(requester_id)
                 , requester_task_id(requester_task_id)
-                , command(command)
+                , data(data)
+                , name(name)
                 , priority(priority)
-                , name(name) {}
+                , optional(optional) {}
 
             /// The provider type this director task is for
             std::type_index type;
@@ -113,11 +115,13 @@ namespace extension::behaviour {
             /// The reaction task id of the requester (if it is a provider later a ProviderDone will be emitted)
             uint64_t requester_task_id;
             /// The data for the command, (the data that will be given to the provider)
-            std::shared_ptr<void> command;
-            /// The priority with which this task is to be executed
-            int priority;
+            std::shared_ptr<void> data;
             /// A name for this task to be shown in debugging systems
             std::string name;
+            /// The priority with which this task is to be executed
+            int priority;
+            /// If this task is optional
+            bool optional;
         };
 
         /**
@@ -266,9 +270,10 @@ namespace extension::behaviour {
      * root task. In these cases the subtask that requested the provider with the highest priority will have its
      * task executed. The other subtask will be blocked until that task is no longer in the call queue.
      *
-     * If a subtask is emitted with a negative priority then it will be considered an "optional" task for this tree.
-     * In this case any positive priority from another root task will be preferred over this task and can kick it and
-     * its descendents off the behaviour tree.
+     * If a subtask is emitted with optional then it is compared differently to other tasks when it comes to priority.
+     * This task and all its decendents will be considered optional. If it is compared to a task that does not have
+     * optional in it's parantage, the non optional task will win. However decendents of this task that are not optional
+     * will compare to eachother as normal.
      *
      * @tparam T the provider type that this task is for
      */
@@ -277,17 +282,23 @@ namespace extension::behaviour {
 
         static void emit(NUClear::PowerPlant& powerplant,
                          std::shared_ptr<T> data,
+                         const std::string& name = "",
                          int priority            = 1,
-                         const std::string& name = "") {
+                         bool optional           = false) {
 
             // Work out who is sending the task so we can determine if it's a subtask
             auto* task           = NUClear::threading::ReactionTask::get_current_task();
             uint64_t reaction_id = task ? task->parent.id : -1;
             uint64_t task_id     = task ? task->id : -1;
 
-            NUClear::dsl::word::emit::Direct<T>::emit(
-                powerplant,
-                std::make_shared<commands::DirectorTask>(typeid(T), reaction_id, task_id, data, priority, name));
+            NUClear::dsl::word::emit::Direct<T>::emit(powerplant,
+                                                      std::make_shared<commands::DirectorTask>(typeid(T),
+                                                                                               reaction_id,
+                                                                                               task_id,
+                                                                                               data,
+                                                                                               name,
+                                                                                               priority,
+                                                                                               optional));
         }
     };
 
