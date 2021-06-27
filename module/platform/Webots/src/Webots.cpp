@@ -60,7 +60,7 @@ namespace module::platform {
     using message::motion::ServoTargets;
     using message::output::CompressedImage;
     using message::platform::RawSensors;
-    using message::platform::ResetRawSensors;
+    using message::platform::ResetWebotsServos;
 
     using message::platform::webots::ActuatorRequests;
     using message::platform::webots::Message;
@@ -230,8 +230,9 @@ namespace module::platform {
             min_sensor_time_step = config["min_sensor_time_step"].as<int>();
             max_velocity_mx64    = config["max_velocity_mx64"].as<double>();
             max_velocity_mx106   = config["max_velocity_mx106"].as<double>();
+            max_fsr_value        = config["max_fsr_value"].as<float>();
 
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            log_level = config["log_level"].as<NUClear::LogLevel>();
 
             clock_smoothing = config["clock_smoothing"].as<double>();
 
@@ -380,7 +381,9 @@ namespace module::platform {
             }
         });
 
-        on<Trigger<ResetRawSensors>>().then([this]() {
+        // Used to reset our local servo state when the robot is teleported by the referee in the simulation.
+        // Needed to cancel old servo targets and reset the pose to account for the teleportation.
+        on<Trigger<ResetWebotsServos>>().then([this]() {
             // Reset the servo state
             for (auto& servo : servo_state) {
                 servo.dirty            = false;
@@ -391,6 +394,16 @@ namespace module::platform {
                 servo.present_position = 0.0;
                 servo.present_speed    = 0.0;
             }
+
+            auto targets = std::make_unique<ServoTargets>();
+
+            // Clear all servo targets on reset
+            for (int i = 0; i < ServoID::NUMBER_OF_SERVOS; i++) {
+                targets->targets.emplace_back(NUClear::clock::now(), i, 0.0, 1, 0);
+            }
+
+            // Emit it so it's captured by the reaction above
+            emit<Scope::DIRECT>(targets);
         });
     }
 
@@ -740,29 +753,29 @@ namespace module::platform {
                 // We should have eight bumper sensors
                 // Right foot
                 if (bumper.name == "right_touch_sensor_br") {
-                    sensor_data->fsr.right.fsr1 = bumper.value;
+                    sensor_data->fsr.right.fsr1 = bumper.value ? max_fsr_value : 0.0f;
                 }
                 else if (bumper.name == "right_touch_sensor_bl") {
-                    sensor_data->fsr.right.fsr2 = bumper.value;
+                    sensor_data->fsr.right.fsr2 = bumper.value ? max_fsr_value : 0.0f;
                 }
                 else if (bumper.name == "right_touch_sensor_fl") {
-                    sensor_data->fsr.right.fsr3 = bumper.value;
+                    sensor_data->fsr.right.fsr3 = bumper.value ? max_fsr_value : 0.0f;
                 }
                 else if (bumper.name == "right_touch_sensor_fr") {
-                    sensor_data->fsr.right.fsr4 = bumper.value;
+                    sensor_data->fsr.right.fsr4 = bumper.value ? max_fsr_value : 0.0f;
                 }
                 // Left foot
                 else if (bumper.name == "left_touch_sensor_br") {
-                    sensor_data->fsr.left.fsr1 = bumper.value;
+                    sensor_data->fsr.left.fsr1 = bumper.value ? max_fsr_value : 0.0f;
                 }
                 else if (bumper.name == "left_touch_sensor_bl") {
-                    sensor_data->fsr.left.fsr2 = bumper.value;
+                    sensor_data->fsr.left.fsr2 = bumper.value ? max_fsr_value : 0.0f;
                 }
                 else if (bumper.name == "left_touch_sensor_fl") {
-                    sensor_data->fsr.left.fsr3 = bumper.value;
+                    sensor_data->fsr.left.fsr3 = bumper.value ? max_fsr_value : 0.0f;
                 }
                 else if (bumper.name == "left_touch_sensor_fr") {
-                    sensor_data->fsr.left.fsr4 = bumper.value;
+                    sensor_data->fsr.left.fsr4 = bumper.value ? max_fsr_value : 0.0f;
                 }
             }
 
