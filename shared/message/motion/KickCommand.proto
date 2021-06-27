@@ -45,9 +45,9 @@ message KickCommand {
  * @author Brendan Annable
  */
 message KickScriptCommand {
-    /// Force is the magnitude
-    vec3   direction = 1;
-    uint32 leg       = 2;
+    /// Leg to kick with
+    uint32          leg  = 1;
+    KickCommandType type = 2;
 }
 
 message KickPlannerConfig {

@@ -1,5 +1,5 @@
 declare module 'binary' {
-  type Vars = { [key: string]: any}
+  type Vars = { [key: string]: any }
 
   interface Binary {
     vars: any

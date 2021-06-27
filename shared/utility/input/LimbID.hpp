@@ -31,15 +31,15 @@ namespace utility::input {
 
     struct LimbID {
         enum Value { UNKNOWN = 0, LEFT_LEG = 1, RIGHT_LEG = 2, LEFT_ARM = 3, RIGHT_ARM = 4, HEAD = 5 };
-        Value value;
+        Value value = Value::UNKNOWN;
 
         // Constructors
-        LimbID() : value(Value::UNKNOWN) {}
+        LimbID() = default;
         LimbID(uint8_t const& v) : value(static_cast<Value>(v)) {}
         LimbID(uint32_t const& v) : value(static_cast<Value>(v)) {}
         LimbID(uint64_t const& v) : value(static_cast<Value>(v)) {}
         LimbID(int const& v) : value(static_cast<Value>(v)) {}
-        LimbID(Value const& value) : value(value) {}
+        LimbID(Value const& v) : value(v) {}
         LimbID(std::string const& str);
 
         // Operators

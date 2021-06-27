@@ -31,7 +31,7 @@ namespace module::motion {
     using extension::ExecuteScriptByName;
     using extension::Script;
 
-    using message::behaviour::ServoCommand;
+    using message::behaviour::ServoCommands;
 
 
     ScriptEngine::ScriptEngine(std::unique_ptr<NUClear::Environment> environment)
@@ -68,7 +68,7 @@ namespace module::motion {
         });
 
         on<Trigger<ExecuteScript>>().then([this](const ExecuteScript& command) {
-            auto waypoints = std::make_unique<std::vector<ServoCommand>>();
+            auto waypoints = std::make_unique<ServoCommands>();
 
             auto time = command.start;
             for (size_t i = 0; i < command.scripts.size(); i++) {
@@ -81,8 +81,12 @@ namespace module::motion {
 
                     // Loop through all the motors and make a servo waypoint for it
                     for (const auto& target : frame.targets) {
-                        waypoints->push_back(
-                            {command.sourceId, time, target.id, target.position, target.gain, target.torque});
+                        waypoints->commands.emplace_back(command.sourceId,
+                                                         time,
+                                                         target.id,
+                                                         target.position,
+                                                         target.gain,
+                                                         target.torque);
                     }
                 }
             }

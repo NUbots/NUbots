@@ -24,7 +24,7 @@ namespace utility::input {
 
     using ServoID = utility::input::ServoID;
 
-    LimbID::LimbID(std::string const& str) : value(Value::UNKNOWN) {
+    LimbID::LimbID(std::string const& str) {
         // clang-format off
         if      (str == "UNKNOWN")   { value = Value::UNKNOWN;   }
         else if (str == "LEFT_LEG")  { value = Value::LEFT_LEG;  }
@@ -112,7 +112,6 @@ namespace utility::input {
             default:
                 // Can't really happen but in case it does make sure someone pays!
                 return static_cast<LimbID>(-1);
-                ;
         }
     }
 
