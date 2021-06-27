@@ -47,7 +47,7 @@ message Goal {
     message Measurement {
         MeasurementType type = 1;
         // Normal vectors point inwards towards the centre of the object
-        fvec3 position   = 2;
+        fvec3 srGCc      = 2;  // Spherical Reciprocal Coordinates (1/distance, phi, theta)
         fmat3 covariance = 3;
     }
     message Post {
@@ -60,7 +60,6 @@ message Goal {
     repeated Measurement measurements   = 4;
     fvec2                screen_angular = 5;
     fvec2                angular_size   = 6;
-    Team                 team           = 7;
 }
 
 message Goals {

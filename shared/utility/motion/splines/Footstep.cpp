@@ -34,22 +34,22 @@ namespace utility::motion::splines {
         return Eigen::Vector3f(-diff.x() * cos_z + diff.y() * sin_z, -diff.x() * sin_z - diff.y() * cos_z, -diff.z());
     }
 
-    Footstep::Footstep(float foot_distance, bool is_left_support_foot) {
-        if (foot_distance <= 0.0f) {
+    Footstep::Footstep(const float& foot_distance_, const bool& is_left_support_foot_) {
+        if (foot_distance_ <= 0.0f) {
             throw std::logic_error("Footstep invalid distance");
         }
 
         // State initialization
-        this->foot_distance        = foot_distance;
-        this->is_left_support_foot = is_left_support_foot;
+        foot_distance        = foot_distance_;
+        is_left_support_foot = is_left_support_foot_;
         left_in_world.setZero();
         right_in_world.setZero();
         reset(is_left_support_foot);
     }
 
-    void Footstep::reset(bool is_left_support_foot) {
-        this->is_left_support_foot = is_left_support_foot;
-        support_to_last.x()        = 0.0f;
+    void Footstep::reset(const bool& is_left_support_foot_) {
+        is_left_support_foot = is_left_support_foot_;
+        support_to_last.x()  = 0.0f;
         if (is_left_support_foot) {
             support_to_last.y() = -foot_distance;
         }
@@ -60,7 +60,7 @@ namespace utility::motion::splines {
         support_to_next     = support_to_last;
     }
 
-    void Footstep::resetInWorld(bool is_left_support_foot) {
+    void Footstep::resetInWorld(const bool& is_left_support_foot) {
         if (is_left_support_foot) {
             right_in_world.y() = -foot_distance;
         }

@@ -41,13 +41,13 @@ namespace module::motion {
     using ServoID = utility::input::ServoID;
     using extension::Configuration;
     using message::behaviour::ServoCommand;
+    using message::behaviour::ServoCommands;
     using message::input::Sensors;
     using message::motion::HeadCommand;
     using message::motion::KinematicsModel;
     using utility::behaviour::RegisterAction;
     using utility::math::coordinates::cartesianToSpherical;
     using utility::math::coordinates::sphericalToCartesian;
-    using utility::motion::kinematics::calculateCameraLookJoints;
     using utility::motion::kinematics::calculateHeadJoints;
 
     // internal only callback messages to start and stop our action
@@ -71,6 +71,8 @@ namespace module::motion {
         // do a little configurating
         on<Configuration>("HeadController.yaml")
             .then("Head Controller - Configure", [this](const Configuration& config) {
+                log_level = config["log_level"].as<NUClear::LogLevel>();
+
                 // Gains
                 head_motor_gain   = config["head_motors"]["gain"].as<double>();
                 head_motor_torque = config["head_motors"]["torque"].as<double>();
@@ -148,15 +150,19 @@ namespace module::motion {
 
 
                 // Create message
-                auto waypoints = std::make_unique<std::vector<ServoCommand>>();
-                waypoints->reserve(2);
+                auto waypoints = std::make_unique<ServoCommands>();
+                waypoints->commands.reserve(2);
                 auto t = NUClear::clock::now();
                 for (auto& angle : goalAnglesList) {
-                    waypoints->push_back(
-                        {id, t, angle.first, angle.second, float(head_motor_gain), float(head_motor_torque)});
+                    waypoints->commands.emplace_back(id,
+                                                     t,
+                                                     angle.first,
+                                                     angle.second,
+                                                     float(head_motor_gain),
+                                                     float(head_motor_torque));
                 }
                 // Send commands
-                emit(std::move(waypoints));
+                emit(waypoints);
             });
 
         updateHandle.disable();

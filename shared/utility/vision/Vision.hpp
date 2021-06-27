@@ -296,7 +296,7 @@ namespace utility::vision {
         ifs.close();
     }
 
-    const auto getSubImage(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data);
+    auto getSubImage(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data);
     uint8_t conv2d(const Eigen::Matrix<uint8_t, 5, 5>& patch,
                    const Eigen::Matrix<int8_t, 5, 5>& kernel,
                    uint8_t normalisation = BAYER_SCALE);

@@ -26,6 +26,7 @@
 
 /**
  * @author Trent Houliston
+ * @author Alex Biddulph: added vector version of endsWith ans startsWith 01-06-2021
  * @author Alex Biddulph: added trimLeft, trimRight, trim, and removeAll functions 10-12-2012
  * @author Monica Olejniczak added split functions
  * @author Brendan Annable
@@ -40,11 +41,29 @@ namespace utility::strutil {
         }
         return false;
     }
+    inline bool endsWith(const std::string& str, const std::vector<std::string>& endings) {
+
+        for (const auto& ending : endings) {
+            if (endsWith(str, ending)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     inline bool startsWith(const std::string& str, const std::string& start) {
 
         if (str.length() >= start.length()) {
             return (0 == str.compare(0, start.length(), start));
+        }
+        return false;
+    }
+    inline bool startsWith(const std::string& str, const std::vector<std::string>& starts) {
+
+        for (const auto& start : starts) {
+            if (startsWith(str, start)) {
+                return true;
+            }
         }
         return false;
     }
