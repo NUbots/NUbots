@@ -26,6 +26,7 @@ extern "C" {
 }
 
 #include <iostream>
+#include <iterator>
 #include <sstream>
 #include <stack>
 #include <system_error>
@@ -42,6 +43,28 @@ namespace utility::file {
         stream << data.rdbuf();
 
         return stream.str();
+    }
+
+    std::vector<uint8_t> readFile(const std::string& path) {
+        std::ifstream data(path, std::ios::binary);
+
+        // Stop eating new lines in binary mode
+        data.unsetf(std::ios::skipws);
+
+        // Get number of bytes in the file
+        std::streampos num_bytes;
+        data.seekg(0, std::ios::end);
+        num_bytes = data.tellg();
+        data.seekg(0, std::ios::beg);
+
+        // Reserve capacity
+        std::vector<uint8_t> vec;
+        vec.reserve(num_bytes);
+
+        // Read the data
+        vec.insert(vec.begin(), std::istream_iterator<uint8_t>(data), std::istream_iterator<uint8_t>());
+
+        return vec;
     }
 
     bool exists(const std::string& path) {
@@ -114,7 +137,7 @@ namespace utility::file {
             closedir(dir);
         }
         else {
-            // TODO Throw an error or something
+            throw std::runtime_error("Attempted to list directory which didn't exist.");
         }
 
         return result;
@@ -137,9 +160,8 @@ namespace utility::file {
             // Otherwise remove the slash and call recursivly
             return pathSplit(input.substr(0, input.size() - 1));
         }
-        else {
-            return {input.substr(0, lastSlash), input.substr(lastSlash + 1, input.size())};
-        }
+        // Else, the slash was not the last character
+        return {input.substr(0, lastSlash), input.substr(lastSlash + 1, input.size())};
     }
 
     std::vector<std::string> listFiles(const std::string& directory, bool recursive) {

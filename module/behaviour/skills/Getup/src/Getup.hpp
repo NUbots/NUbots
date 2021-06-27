@@ -34,8 +34,11 @@ namespace module::behaviour::skills {
     private:
         const size_t id;
 
+        bool isFront;
+
         bool gettingUp;
         ReactionHandle fallenCheck;
+        ReactionHandle getUp;
 
         /// config settings
         float FALLEN_ANGLE;

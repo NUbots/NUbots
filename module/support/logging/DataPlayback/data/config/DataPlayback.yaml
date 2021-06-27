@@ -17,4 +17,4 @@ buffer_time: 1500
 messages:
   message.output.CompressedImage: false
   message.input.Sensors: false
-  message.platform.darwin.DarwinSensors: true
+  message.platform.RawSensors: true

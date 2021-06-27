@@ -79,8 +79,10 @@ namespace module::input::gamecontroller {
     struct Robot {
         PenaltyState penaltyState;  // penalty state of the player
         uint8_t penalisedTimeLeft;  // estimate of time till unpenalised (seconds)
+        uint8_t numberOfWarnings;   // number of warnings
         uint8_t yellowCardCount;    // number of yellow cards
         uint8_t redCardCount;       // number of red cards
+        bool goalKeeper;            // flags if robot is goal keeper
     };
 
     struct Team {
@@ -103,7 +105,7 @@ namespace module::input::gamecontroller {
         GameType gameType;                       // type of the game (GAME_ROUNDROBIN, GAME_PLAYOFF, GAME_DROPIN)
         State state;                             // state of the game (STATE_READY, STATE_PLAYING, etc)
         bool firstHalf;                          // 1 = game in first half, 0 otherwise
-        TeamColour kickOffTeam;                  // the team number of the next team to kick off or DROPBALL
+        uint8_t kickOffTeam;                     // the team number of the next team to kick off or DROPBALL
         Mode mode;                               // extra state information - (STATE2_NORMAL, STATE2_PENALTYSHOOT, etc)
         std::array<char, 4> secondaryStateInfo;  // Extra info on the secondary state
         TeamColour dropInTeam;                   // number of team that caused last drop in
@@ -125,8 +127,10 @@ namespace module::input::gamecontroller {
     inline std::ostream& operator<<(std::ostream& os, const Robot& robot) {
         os << "\t\tPenalty state......: " << uint(robot.penaltyState) << std::endl
            << "\t\tPenalised time left: " << uint(robot.penalisedTimeLeft) << std::endl
+           << "\t\tNumber of warnings: " << uint(robot.numberOfWarnings) << std::endl
            << "\t\tYellow Card Count..: " << uint(robot.yellowCardCount) << std::endl
-           << "\t\tRed Card Count.....: " << uint(robot.redCardCount) << std::endl;
+           << "\t\tRed Card Count.....: " << uint(robot.redCardCount) << std::endl
+           << "\t\tGoalkeeper: " << std::boolalpha << robot.goalKeeper << std::endl;
         return os;
     }
 

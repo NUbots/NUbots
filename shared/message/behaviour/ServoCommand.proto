@@ -39,3 +39,7 @@ message ServoCommand {
     /// Used to set the servo on or off. Typically either 0 (off) or 100 (on)
     float torque = 6;
 }
+
+message ServoCommands {
+    repeated ServoCommand commands = 1;
+}
