@@ -31,7 +31,7 @@
 #include "message/localisation/Field.hpp"
 #include "message/motion/KinematicsModel.hpp"
 #include "message/motion/WalkCommand.hpp"
-#include "message/platform/darwin/DarwinSensors.hpp"
+#include "message/platform/RawSensors.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/Ball.hpp"
 
@@ -59,7 +59,7 @@ namespace module::behaviour::planning {
     using message::motion::KickPlannerConfig;
     using message::motion::KickScriptCommand;
     using message::motion::KinematicsModel;
-    using message::platform::darwin::ButtonMiddleDown;
+    using message::platform::ButtonMiddleDown;
     using message::support::FieldDescription;
 
     using KickType      = message::behaviour::KickPlan::KickType;
@@ -81,6 +81,8 @@ namespace module::behaviour::planning {
 
 
         on<Configuration>("KickPlanner.yaml").then([this](const Configuration& config) {
+            log_level = config["log_level"].as<NUClear::LogLevel>();
+
             cfg.max_ball_distance        = config["max_ball_distance"].as<float>();
             cfg.kick_corridor_width      = config["kick_corridor_width"].as<float>();
             cfg.seconds_not_seen_limit   = config["seconds_not_seen_limit"].as<float>();
@@ -181,13 +183,13 @@ namespace module::behaviour::planning {
                             // NUClear::log("scripted");
                             if (ballPosition.y() > 0.0) {
                                 emit(std::make_unique<KickScriptCommand>(
-                                    KickScriptCommand(Eigen::Vector3d::UnitX(), LimbID::LEFT_LEG)));
+                                    KickScriptCommand(LimbID::LEFT_LEG, KickCommandType::NORMAL)));
                                 emit(std::make_unique<WantsToKick>(true));
                                 ;
                             }
                             else {
                                 emit(std::make_unique<KickScriptCommand>(
-                                    KickScriptCommand(Eigen::Vector3d::UnitX(), LimbID::RIGHT_LEG)));
+                                    KickScriptCommand(LimbID::RIGHT_LEG, KickCommandType::NORMAL)));
                                 emit(std::make_unique<WantsToKick>(true));
                                 ;
                             }
