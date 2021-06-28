@@ -107,6 +107,8 @@ namespace module::behaviour::skills {
 
         on<Configuration>("HeadBehaviourSoccer.yaml")
             .then("Head Behaviour Soccer Config", [this](const Configuration& config) {
+                log_level = config["log_level"].as<NUClear::LogLevel>();
+
                 lastPlanUpdate     = NUClear::clock::now();
                 timeLastObjectSeen = NUClear::clock::now();
 
@@ -258,8 +260,7 @@ namespace module::behaviour::skills {
                                       ob.screen_angular.cast<double>() / double(goalFixationObjects.goals.size());
                               }
                           }
-                          Eigen::Vector2d currentCentroid_world =
-                              getIMUSpaceDirection(kinematicsModel, currentCentroid, headToIMUSpace);
+                          Eigen::Vector2d currentCentroid_world = getIMUSpaceDirection(currentCentroid, headToIMUSpace);
                           // If our objects have moved, we need to replan
                           if ((currentCentroid_world - lastCentroid).norm()
                               >= fractional_angular_update_threshold * image.lens.fov / 2.0) {
@@ -438,9 +439,9 @@ namespace module::behaviour::skills {
         // Transform to IMU space including compensation for current head pose
         if (!search) {
             for (auto& p : fixationPoints) {
-                p = getIMUSpaceDirection(kinematicsModel, p, headToIMUSpace);
+                p = getIMUSpaceDirection(p, headToIMUSpace);
             }
-            currentPos = getIMUSpaceDirection(kinematicsModel, currentPos, headToIMUSpace);
+            currentPos = getIMUSpaceDirection(currentPos, headToIMUSpace);
         }
 
         headSearcher.replaceSearchPoints(fixationPoints, currentPos);
@@ -479,16 +480,15 @@ namespace module::behaviour::skills {
         // Transform to IMU space including compensation for current head pose
         if (!search) {
             for (auto& p : fixationPoints) {
-                p = getIMUSpaceDirection(kinematicsModel, p, headToIMUSpace);
+                p = getIMUSpaceDirection(p, headToIMUSpace);
             }
-            currentPos = getIMUSpaceDirection(kinematicsModel, currentPos, headToIMUSpace);
+            currentPos = getIMUSpaceDirection(currentPos, headToIMUSpace);
         }
 
         headSearcher.replaceSearchPoints(fixationPoints, currentPos);
     }
 
-    Eigen::Vector2d HeadBehaviourSoccer::getIMUSpaceDirection(const KinematicsModel& kinematicsModel,
-                                                              const Eigen::Vector2d& screenAngles,
+    Eigen::Vector2d HeadBehaviourSoccer::getIMUSpaceDirection(const Eigen::Vector2d& screenAngles,
                                                               const Eigen::Matrix3d& headToIMUSpace) {
 
         // Eigen::Vector3d lookVectorFromHead = objectDirectionFromScreenAngular(screenAngles);
@@ -500,7 +500,7 @@ namespace module::behaviour::skills {
         // Rotate target angles to World space
         Eigen::Vector3d lookVector = headToIMUSpace * lookVectorFromHead;
         // Compute inverse kinematics for head direction angles
-        std::vector<std::pair<ServoID, double>> goalAngles = calculateCameraLookJoints(kinematicsModel, lookVector);
+        std::vector<std::pair<ServoID, double>> goalAngles = calculateCameraLookJoints(lookVector);
 
         Eigen::Vector2d result;
         for (auto& angle : goalAngles) {

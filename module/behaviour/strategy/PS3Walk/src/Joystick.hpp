@@ -26,41 +26,41 @@ private:
     static constexpr unsigned char JS_EVENT_INIT{0x80};    // initial state of device
 
 public:
-    JoystickEvent() {}
+    JoystickEvent() = default;
 
     /**
      * The timestamp of the event, in milliseconds.
      */
-    unsigned int time{0};
+    uint32_t time = 0;
 
     /**
      * The value associated with this joystick event.
      * For buttons this will be either 1 (down) or 0 (up).
      * For axes, this will range between -32768 and 32767.
      */
-    short value{0};
+    int16_t value = 0;
 
     /**
      * The event type.
      */
-    unsigned char type{0};
+    uint8_t type = 0;
 
     /**
      * The axis/button number.
      */
-    unsigned char number{0};
+    uint8_t number = 0;
 
     /**
      * Returns true if this event is the result of a button press.
      */
-    bool isButton() const {
+    [[nodiscard]] bool isButton() const {
         return (type & JS_EVENT_BUTTON) != 0;
     }
 
     /**
      * Returns true if this event is the result of an axis movement.
      */
-    bool isAxis() const {
+    [[nodiscard]] bool isAxis() const {
         return (type & JS_EVENT_AXIS) != 0;
     }
 
@@ -68,7 +68,7 @@ public:
      * Returns true if this event is part of the initial state obtained when
      * the joystick is first connected to.
      */
-    bool isInitialState() const {
+    [[nodiscard]] bool isInitialState() const {
         return (type & JS_EVENT_INIT) != 0;
     }
 };
@@ -80,16 +80,25 @@ class Joystick {
 private:
     void openPath(const std::string& devicePath);
 
-    int _fd{-1};
+    int fd = -1;
     std::string path;
 
 public:
+    /**
+     * Closes the fd and destroys the object
+     */
     ~Joystick();
 
     /**
      * Initialises an instance for the first joystick: /dev/input/js0
      */
     Joystick();
+
+    // Delete the move and copy constructors and operators to maintain file descriptor sanitation
+    Joystick(Joystick& other)  = delete;
+    Joystick(Joystick&& other) = delete;
+    Joystick& operator=(Joystick& other) = delete;
+    Joystick& operator=(Joystick&& other) = delete;
 
     /**
      * Initialises an instance for the joystick with the specified,
@@ -105,12 +114,12 @@ public:
     /**
      * Returns true if the joystick was found and may be used, otherwise false.
      */
-    bool found() const;
+    [[nodiscard]] bool found() const;
 
     /**
      * Returns true if the joystick file descriptor is valid, otherwise false
      */
-    bool valid() const;
+    [[nodiscard]] bool valid() const;
 
     /**
      * Reconnect to the joystick

@@ -47,6 +47,9 @@ if __name__ == "__main__":
         """\
         #include "DataLogging.hpp"
 
+        #include "utility/nbs/get_timestamp.hpp"
+        #include "utility/nbs/get_id.hpp"
+
         #include <nuclear>
         #include <fmt/format.h>
 
@@ -62,11 +65,11 @@ if __name__ == "__main__":
                 // We get the timestamp here from the time the message was emitted
                 // (or now if we can't access the current reaction)
                 const auto* task = NUClear::threading::ReactionTask::get_current_task();
-                log->timestamp = task ? task->stats ? task->stats->emitted : NUClear::clock::now() : NUClear::clock::now();
+                log->timestamp   = task ? task->stats ? task->stats->emitted : NUClear::clock::now() : NUClear::clock::now();
 
                 // Get the data from the message to be used in the index
-                log->message_timestamp = get_timestamp(log->timestamp, data);
-                log->id                = get_id(data);
+                log->message_timestamp = utility::nbs::get_timestamp(log->timestamp, data);
+                log->id                = utility::nbs::get_id(data);
 
                 // Serialise the data and get the hash for it
                 log->data = NUClear::util::serialise::Serialise<T>::serialise(data);
