@@ -1,4 +1,4 @@
-# Darwin Hardware Simulator
+# NUgus Hardware Simulator
 
 ## Description
 
@@ -10,16 +10,16 @@ NUgus Hardware I/O connects at startup to the NUgus controller located on
 `/dev/usbTTY0`. If this does not succeed an exception is thrown and startup is
 aborted.
 
-This module reads the current status of the Darwin 50 times per second and
+This module reads the current status of the NUgus 90 times per second and
 emits it as a `message::platform::RawSensors` object. This includes the CM740 error
 code, LED panel, head and eye LED colour, buttons, voltage, accelerometer,
 gyroscope, left and right force-sensing resistors and each servo.
 
-To change the colour of the Darwin's head or eye LEDs, emit a
+To change the colour of the NUgus's head or eye LEDs, emit a
 `message::platform::RawSensors::EyeLED` or `message::platform::RawSensors::HeadLED`
 containing the colour you wish to set them to.
 
-To control the Darwin's servos, use `message::motion::ServoTarget`. You may
+To control the NUgus's servos, use `message::motion::ServoTarget`. You may
 emit these commands individually or emit several at once in a `message::motion::ServoTargets`.
 
 ## Consumes
@@ -31,4 +31,4 @@ emit these commands individually or emit several at once in a `message::motion::
 
 ## Emits
 
-- `message::platform::RawSensors` containing the current status of the Darwin
+- `message::platform::RawSensors` containing the current status of the NUgus
