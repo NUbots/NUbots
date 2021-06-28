@@ -43,7 +43,7 @@ namespace utility::vision {
         ofs.close();
     }
 
-    const auto getSubImage(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data) {
+    auto getSubImage(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data) {
         // Extract the 5x5 matrix centered at (x, y).
         // Clamped to borders.
         x = x < 2 ? 2 : x > (width - 3) ? width - 3 : x;

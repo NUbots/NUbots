@@ -8,10 +8,11 @@ nuclear_role(
   # Support and Configuration
   support::configuration::GlobalConfig
   network::NUClearNet
-  support::NUsight
+  output::NetworkForwarder
+  output::Overview
   # Hardware Interface
   platform::Gazebo
-  platform::darwin::SensorFilter
+  input::SensorFilter
   # Motion
   motion::QuinticWalk
   motion::ScriptEngine
