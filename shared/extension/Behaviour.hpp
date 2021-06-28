@@ -14,7 +14,7 @@ namespace extension::behaviour {
          * The type of action that the provider performs
          */
         enum class ProviderAction {
-            /// NORMAL providers are the usual provideres that execute in a loop if needed
+            /// NORMAL providers are the usual providers that execute in a loop if needed
             NORMAL,
             /// ENTERING providers are the first point of entry for a type before the main NORMAL reaction runs
             ENTERING,
@@ -271,8 +271,8 @@ namespace extension::behaviour {
      * task executed. The other subtask will be blocked until that task is no longer in the call queue.
      *
      * If a subtask is emitted with optional then it is compared differently to other tasks when it comes to priority.
-     * This task and all its decendents will be considered optional. If it is compared to a task that does not have
-     * optional in it's parantage, the non optional task will win. However decendents of this task that are not optional
+     * This task and all its descendants will be considered optional. If it is compared to a task that does not have
+     * optional in it's parentage, the non optional task will win. However descendants of this task that are not optional
      * will compare to eachother as normal.
      *
      * @tparam T the provider type that this task is for
@@ -314,4 +314,4 @@ namespace extension::behaviour {
 
 }  // namespace extension::behaviour
 
-#endif  // EXTENSION_BEHAVIOUR_H
+#endif  // EXTENSION_BEHAVIOUR_HPP
