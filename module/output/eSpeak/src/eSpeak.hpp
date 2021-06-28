@@ -22,8 +22,7 @@
 
 #include <nuclear>
 
-namespace module {
-namespace output {
+namespace module::output {
 
     /**
      * Takes strings given to it and plays them using text to speech
@@ -34,8 +33,6 @@ namespace output {
     public:
         explicit eSpeak(std::unique_ptr<NUClear::Environment> environment);
     };
-
-}  // namespace output
-}  // namespace module
+}  // namespace module::output
 
 #endif  // MODULES_OUTPUT_ESPEAK_HPP

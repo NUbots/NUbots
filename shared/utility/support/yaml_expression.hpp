@@ -27,8 +27,7 @@
 
 #include "math_string.hpp"
 
-namespace utility {
-namespace support {
+namespace utility::support {
     /**
      * Represents a mathematical expression
      * This could either be represented as a double or as a vector/matrix.
@@ -272,27 +271,26 @@ namespace support {
     private:
         YAML::Node node;
     };
-}  // namespace support
-}  // namespace utility
+}  // namespace utility::support
 
 namespace YAML {
 
-template <>
-struct convert<utility::support::Expression> {
-    static Node encode(const utility::support::Expression& rhs) {
-        Node node;
+    template <>
+    struct convert<utility::support::Expression> {
+        static Node encode(const utility::support::Expression& rhs) {
+            Node node;
 
-        // Treat as a double
-        node = rhs;
+            // Treat as a double
+            node = rhs;
 
-        return node;
-    }
+            return node;
+        }
 
-    static bool decode(const Node& node, utility::support::Expression& rhs) {
-        rhs = utility::support::Expression(node);
-        return true;
-    }
-};
+        static bool decode(const Node& node, utility::support::Expression& rhs) {
+            rhs = utility::support::Expression(node);
+            return true;
+        }
+    };
 }  // namespace YAML
 
 #endif

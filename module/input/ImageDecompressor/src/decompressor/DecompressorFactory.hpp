@@ -8,12 +8,12 @@
 
 namespace module::input::decompressor {
 
-class DecompressorFactory {
-public:
-    virtual std::shared_ptr<Decompressor> make_decompressor(const uint32_t& width,
-                                                            const uint32_t& height,
-                                                            const uint32_t& format) = 0;
-};
+    class DecompressorFactory {
+    public:
+        virtual std::shared_ptr<Decompressor> make_decompressor(const uint32_t& width,
+                                                                const uint32_t& height,
+                                                                const uint32_t& format) = 0;
+    };
 
 }  // namespace module::input::decompressor
 

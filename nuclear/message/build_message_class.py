@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 import sys
 
-from google.protobuf.descriptor_pb2 import FileDescriptorSet
-
 import generator.File
+from google.protobuf.descriptor_pb2 import FileDescriptorSet
 
 base_file = sys.argv[1]
 

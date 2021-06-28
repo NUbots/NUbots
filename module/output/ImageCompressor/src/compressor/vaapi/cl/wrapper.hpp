@@ -25,24 +25,24 @@
 
 namespace module::output::compressor::vaapi::cl {
 
-template <typename T>
-struct opencl_wrapper : public std::shared_ptr<std::remove_pointer_t<T>> {
-    using std::shared_ptr<std::remove_pointer_t<T>>::shared_ptr;
+    template <typename T>
+    struct opencl_wrapper : public std::shared_ptr<std::remove_pointer_t<T>> {
+        using std::shared_ptr<std::remove_pointer_t<T>>::shared_ptr;
 
-    operator T() const {
-        return this->get();
-    }
+        operator T() const {
+            return this->get();
+        }
 
-private:
-    T ptr = nullptr;
-};
+    private:
+        T ptr = nullptr;
+    };
 
-using command_queue = opencl_wrapper<::cl_command_queue>;
-using context       = opencl_wrapper<::cl_context>;
-using event         = opencl_wrapper<::cl_event>;
-using kernel        = opencl_wrapper<::cl_kernel>;
-using mem           = opencl_wrapper<::cl_mem>;
-using program       = opencl_wrapper<::cl_program>;
+    using command_queue = opencl_wrapper<::cl_command_queue>;
+    using context       = opencl_wrapper<::cl_context>;
+    using event         = opencl_wrapper<::cl_event>;
+    using kernel        = opencl_wrapper<::cl_kernel>;
+    using mem           = opencl_wrapper<::cl_mem>;
+    using program       = opencl_wrapper<::cl_program>;
 
 }  // namespace module::output::compressor::vaapi::cl
 

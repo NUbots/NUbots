@@ -3,11 +3,9 @@
 
 #include <nuclear>
 
-namespace utility {
-namespace clock {
+namespace utility::clock {
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     extern double custom_rtf;  // real time factor
-    extern std::chrono::steady_clock::time_point last_Update;
-}  // namespace clock
-}  // namespace utility
+}  // namespace utility::clock
 
 #endif  // UTILITY_CLOCK_HPP

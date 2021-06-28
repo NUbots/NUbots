@@ -17,7 +17,7 @@ steps:
           username: nubotsdocker
           # Dockerhub password is loaded from the environment hook via DOCKER_LOGIN_PASSWORD environment variable
       - docker-compose#v3.1.0:
-          config: .buildkite/docker-compose.yml
+          config: .buildkite/NUbots/docker-compose.yml
           push:
             - generic:nubots/nubots:generic
 
@@ -30,7 +30,7 @@ steps:
           username: nubotsdocker
           # Dockerhub password is loaded from the environment hook via DOCKER_LOGIN_PASSWORD environment variable
       - docker-compose#v3.1.0:
-          config: .buildkite/docker-compose.yml
+          config: .buildkite/NUbots/docker-compose.yml
           push:
             - nuc7i7bnh:nubots/nubots:nuc7i7bnh
 
@@ -43,7 +43,7 @@ steps:
           username: nubotsdocker
           # Dockerhub password is loaded from the environment hook via DOCKER_LOGIN_PASSWORD environment variable
       - docker-compose#v3.1.0:
-          config: .buildkite/docker-compose.yml
+          config: .buildkite/NUbots/docker-compose.yml
           push:
             - nuc8i7beh:nubots/nubots:nuc8i7beh
 
@@ -52,10 +52,10 @@ steps:
 
   # Build generic target and test
   - label: "Build generic and Test"
-    command: "./b configure -- -DBUILD_TESTS=ON && ./b build && ./b build test"
+    command: "./b configure -- -DBUILD_TESTS=ON && ./b build && ./b tests run"
     plugins:
       - docker-compose#v3.0.3:
-          config: .buildkite/docker-compose.yml
+          config: .buildkite/NUbots/docker-compose.yml
           pull: generic_image
           run: generic
           workdir: /home/nubots/NUbots/
@@ -65,7 +65,7 @@ steps:
     command: echo "nuc7i7bnh image successfully built!"
     plugins:
       - docker-compose#v3.0.3:
-          config: .buildkite/docker-compose.yml
+          config: .buildkite/NUbots/docker-compose.yml
           pull: nuc7i7bnh_image
           run: nuc7i7bnh
           workdir: /home/nubots/NUbots/
@@ -73,33 +73,90 @@ steps:
     command: echo "nuc8i7beh image successfully built!"
     plugins:
       - docker-compose#v3.0.3:
-          config: .buildkite/docker-compose.yml
+          config: .buildkite/NUbots/docker-compose.yml
           pull: nuc8i7beh_image
           run: nuc8i7beh
           workdir: /home/nubots/NUbots/
 
+  # Build NUsight2
+  - label: "Build NUsight2"
+    command:
+      - cd ./nusight2
+      - yarn
+      - yarn build:ci
+    plugins:
+      - ./.buildkite/NUsight2/plugins/cache: ~
+      - docker#v3.5.0:
+          image: "node:12"
+          always-pull: true
+          propagate-uid-gid: true
+          environment:
+            - "HOME=/workdir"
+
+  - label: "Build NUsight2 Storybook"
+    command:
+      - cd ./nusight2
+      - yarn
+      - yarn storybook:build
+    plugins:
+      - ./.buildkite/NUsight2/plugins/cache: ~
+      - docker#v3.5.0:
+          image: "node:12"
+          always-pull: true
+          propagate-uid-gid: true
+          environment:
+            - "HOME=/workdir"
+
+  # Test NUsight
+  - label: "Test NUsight2"
+    command:
+      - cd ./nusight2
+      - yarn
+      - yarn test:ci
+    plugins:
+      - ./.buildkite/NUsight2/plugins/cache: ~
+      - docker#v3.5.0:
+          image: "node:12"
+          always-pull: true
+          propagate-uid-gid: true
+          environment:
+            - "HOME=/workdir"
+
   # Formatting
   - label: "Validate C++ and Protobuf formatting"
-    command: ".buildkite/scripts/validate_clang_format.sh"
+    command: ".buildkite/NUbots/scripts/validate_clang_format.sh"
     plugins:
       - docker-compose#v3.0.3:
-          config: .buildkite/docker-compose.yml
+          config: .buildkite/NUbots/docker-compose.yml
           pull: generic_image
           run: generic
           workdir: /home/nubots/NUbots/
   - label: "Validate CMake formatting"
-    command: ".buildkite/scripts/validate_cmake_format.sh"
+    command: ".buildkite/NUbots/scripts/validate_cmake_format.sh"
     plugins:
       - docker-compose#v3.0.3:
-          config: .buildkite/docker-compose.yml
+          config: .buildkite/NUbots/docker-compose.yml
           pull: generic_image
           run: generic
           workdir: /home/nubots/NUbots/
   - label: "Validate Python formatting"
-    command: ".buildkite/scripts/validate_python_format.sh"
+    command: ".buildkite/NUbots/scripts/validate_python_format.sh"
     plugins:
       - docker-compose#v3.0.3:
-          config: .buildkite/docker-compose.yml
+          config: .buildkite/NUbots/docker-compose.yml
           pull: generic_image
           run: generic
           workdir: /home/nubots/NUbots/
+  - label: "Check NUsight code with eslint"
+    command:
+      - cd ./nusight2
+      - yarn
+      - yarn eslint
+    plugins:
+      - ./.buildkite/NUsight2/plugins/cache: ~
+      - docker#v3.5.0:
+          image: "node:12"
+          always-pull: true
+          propagate-uid-gid: true
+          environment:
+            - "HOME=/workdir"

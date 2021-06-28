@@ -31,7 +31,7 @@ message Obstacle {
         CYAN         = 2;
     }
 
-    uint32                    camera_id = 1;
+    uint32                    id        = 1;
     google.protobuf.Timestamp timestamp = 2;
     Polygon                   shape     = 3;
     Team                      team      = 4;

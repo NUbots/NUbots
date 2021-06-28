@@ -23,29 +23,24 @@
 #include <Eigen/Core>
 #include <nuclear>
 
-#include "message/conversion/math_types.hpp"
-
-namespace module {
-namespace vision {
+namespace module::vision {
 
     class BallDetector : public NUClear::Reactor {
     private:
         struct {
-            float confidence_threshold;
-            int cluster_points;
-            float minimum_ball_distance;
-            float distance_disagreement;
-            float maximum_deviation;
-            message::conversion::math::fmat3 ball_angular_cov;
-            bool debug;
-        } config;
+            float confidence_threshold       = 0.0f;
+            int cluster_points               = 0;
+            float minimum_ball_distance      = 0.0f;
+            float distance_disagreement      = 0.0f;
+            float maximum_deviation          = 0.0f;
+            Eigen::Vector3f ball_angular_cov = Eigen::Vector3f::Zero();
+        } config{};
 
     public:
         /// @brief Called by the powerplant to build and setup the BallDetector reactor.
         explicit BallDetector(std::unique_ptr<NUClear::Environment> environment);
     };
-}  // namespace vision
-}  // namespace module
+}  // namespace module::vision
 
 
 #endif

@@ -46,12 +46,12 @@ message Subsumption {
         repeated uint32 limbs = 3;
     }
 
-    message ActionPriorites {
+    message ActionPriorities {
         uint32         id         = 1;
         repeated float priorities = 2;
     }
 
     repeated ActionRegister    action_register        = 1;
     repeated ActionStateChange action_state_change    = 2;
-    repeated ActionPriorites   action_priority_change = 3;
+    repeated ActionPriorities  action_priority_change = 3;
 }

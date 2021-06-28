@@ -23,8 +23,6 @@ package message.motion;
 import "google/protobuf/timestamp.proto";
 
 /**
- * TODO document
- *
  * @author Trent Houliston
  */
 message ServoTarget {

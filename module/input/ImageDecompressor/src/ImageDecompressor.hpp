@@ -9,8 +9,7 @@
 
 #include "decompressor/DecompressorFactory.hpp"
 
-namespace module {
-namespace input {
+namespace module::input {
 
     class ImageDecompressor : public NUClear::Reactor {
     private:
@@ -26,9 +25,9 @@ namespace input {
             std::vector<Decompressor> decompressors;
 
             /// The format so that if these change we can regenerate the decompressors
-            uint32_t width;
-            uint32_t height;
-            uint32_t format;
+            uint32_t width{};
+            uint32_t height{};
+            uint32_t format{};
         };
 
     public:
@@ -51,7 +50,6 @@ namespace input {
         int dropped = 0;
     };
 
-}  // namespace input
-}  // namespace module
+}  // namespace module::input
 
 #endif  // MODULE_INPUT_IMAGEDECOMPRESSOR_HPP

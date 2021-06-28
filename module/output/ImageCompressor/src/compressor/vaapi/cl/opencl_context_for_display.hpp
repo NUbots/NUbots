@@ -7,7 +7,7 @@
 
 namespace module::output::compressor::vaapi::cl {
 
-CompressionContext::OpenCLContext opencl_context_for_display(VADisplay dpy);
+    CompressionContext::OpenCLContext opencl_context_for_display(VADisplay dpy);
 
 }  // namespace module::output::compressor::vaapi::cl
 

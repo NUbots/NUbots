@@ -32,8 +32,8 @@ message SoccerObjectPriority {
         OTHE                    = 7;
     }
 
-    int32      ball       = 1;
-    int32      goal       = 2;
-    int32      line       = 3;
-    SearchType searchType = 4;
+    int32      ball        = 1;
+    int32      goal        = 2;
+    int32      line        = 3;
+    SearchType search_type = 4;
 }

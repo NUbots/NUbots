@@ -20,30 +20,27 @@
 #ifndef MODULES_VISION_GOALDETECTOR_HPP
 #define MODULES_VISION_GOALDETECTOR_HPP
 
+#include <Eigen/Core>
 #include <nuclear>
 
-#include "message/conversion/math_types.hpp"
-
-namespace module {
-namespace vision {
+namespace module::vision {
 
     class GoalDetector : public NUClear::Reactor {
     private:
         struct {
-            float confidence_threshold;
-            int cluster_points;
-            float disagreement_ratio;
-            message::conversion::math::fmat3 goal_angular_cov;
-            bool use_median;
-            bool debug;
-        } config;
+            float confidence_threshold                 = 0.0f;
+            int cluster_points                         = 0;
+            float disagreement_ratio                   = 0.0f;
+            Eigen::Vector3f goal_projection_covariance = Eigen::Vector3f::Zero();
+            bool use_median                            = false;
+            float max_goal_distance                    = 0;
+        } config{};
 
     public:
         /// @brief Called by the powerplant to build and setup the GoalDetector reactor.
         explicit GoalDetector(std::unique_ptr<NUClear::Environment> environment);
     };
-}  // namespace vision
-}  // namespace module
+}  // namespace module::vision
 
 
 #endif

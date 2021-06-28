@@ -8,7 +8,7 @@ from google.protobuf.descriptor_pb2 import FieldOptions, FileDescriptorSet
 
 # Add our cwd to the path so we can import generated python protobufs
 # And extend our options with our Neutron protobuf
-sys.path.append(os.getcwd() + "/..")
+sys.path.append(os.path.join(os.getcwd(), "..", "python"))
 from Neutron_pb2 import PointerType, array_size, pointer  # isort:skip
 
 FieldOptions.RegisterExtension(pointer)
@@ -92,6 +92,9 @@ class Field:
         vector_regex = re.compile(r"^\.([fiuc]?)vec(\d*)$")
         matrix_regex = re.compile(r"^\.([fiuc]?)mat(\d*)$")
 
+        # Nothing is trivially copyable unless it is
+        self.trivially_copyable = False
+
         # Check if it is a map field
         if self.map_type:
             t = "::std::map<{}, {}>".format(t[0].cpp_type, t[1].cpp_type)
@@ -107,25 +110,32 @@ class Field:
         # Timestamps and durations map to real time/duration classes
         elif t == ".google.protobuf.Timestamp":
             t = "::NUClear::clock::time_point"
+            self.trivially_copyable = True
         elif t == ".google.protobuf.Duration":
             t = "::NUClear::clock::duration"
+            self.trivially_copyable = True
 
         # Standard types get mapped to their appropriate type
         elif t in ["double", "float", "bool"]:
             # double and float and bool are fine as is
             special = False
+            self.trivially_copyable = True
         elif t in ["int64", "sint64", "sfixed64"]:
             t = "int64_t"
             special = False
+            self.trivially_copyable = True
         elif t in ["uint64", "fixed64"]:
             t = "uint64_t"
             special = False
+            self.trivially_copyable = True
         elif t in ["int32", "sint32", "sfixed32"]:
             t = "int32_t"
             special = False
+            self.trivially_copyable = True
         elif t in ["uint32", "fixed32"]:
             t = "uint32_t"
             special = False
+            self.trivially_copyable = True
         elif t in ["string"]:
             t = "::std::string"
             special = False
@@ -139,13 +149,17 @@ class Field:
         # If we are using a pointer type do the manipulation here
         if self.pointer == PointerType["RAW"]:
             t = "{}*".format(t)
+            self.trivially_copyable = True
         elif self.pointer == PointerType["SHARED"]:
             t = "::std::shared_ptr<{}>".format(t)
+            self.trivially_copyable = True
         elif self.pointer == PointerType["UNIQUE"]:
             t = "::std::unique_ptr<{}>".format(t)
+            self.trivially_copyable = True
 
         # If it's a repeated field, and not a map, it's a vector
         if self.repeated and not self.map_type:
+            self.trivially_copyable = False
             # If we have a fixed size use std::array instead
             if self.array_size > 0:
                 t = "::std::array<{}, {}>".format(t, self.array_size)

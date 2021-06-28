@@ -25,9 +25,7 @@
 #include <sstream>
 #include <string>
 
-namespace utility {
-
-namespace strutil {
+namespace utility::strutil {
     const char* BANNER_GLYPHS[8][255] = {{R"()",           R"()",
                                           R"()",           R"()",
                                           R"()",           R"()",
@@ -556,7 +554,6 @@ namespace strutil {
 
         return output.str();
     }
-}  // namespace strutil
-}  // namespace utility
+}  // namespace utility::strutil
 
 #endif

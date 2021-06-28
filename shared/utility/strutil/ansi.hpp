@@ -23,9 +23,7 @@
 #include <algorithm>
 #include <string>
 
-namespace utility {
-
-namespace strutil {
+namespace utility::strutil {
 
     enum class ANSICode : int {
         RESET     = 0,
@@ -96,7 +94,7 @@ namespace strutil {
     };
 
     template <enum ANSICode... Codes>
-    typename ANSISGR<Codes...>::Apply operator<<(std::ostream& out, const ANSISGR<Codes...>) {
+    typename ANSISGR<Codes...>::Apply operator<<(std::ostream& out, const ANSISGR<Codes...> /*codes*/) {
         return typename ANSISGR<Codes...>::Apply(out);
     }
 
@@ -126,6 +124,5 @@ namespace strutil {
         static constexpr ANSISGR<ANSICode::BRIGHT, ANSICode::GRAY> brightgray =
             ANSISGR<ANSICode::BRIGHT, ANSICode::GRAY>();
     };
-}  // namespace strutil
-}  // namespace utility
+}  // namespace utility::strutil
 #endif
