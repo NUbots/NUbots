@@ -22,10 +22,6 @@ function(set_target_warnings target_name)
       # -Wformat=2 # warn on security issues around functions that format output (ie printf)
       -Wnull-dereference # warn if a null dereference is detected
       -Wmisleading-indentation # warn if indentation implies blocks where blocks do not exist
-      # * We want the warnings below if clang adds support for them
-      # * Until then, these make clang-tidy mad, and we would have to have an extra CI pipeline step to cover them
-      # * -Wlogical-op # warn about logical operations being used where bitwise were probably wanted
-      # * -Wuseless-cast # warn if you perform a cast to the same type
   )
 
   if(WARNINGS_AS_ERRORS)
