@@ -106,9 +106,7 @@ namespace nsga2 {
         parentPop->FastNDS();
         parentPop->CrowdingDistanceAll();
 
-        currentGen = 1;
-
-        // NUClear::log<NUClear::INFO>("Generation 1 complete!");
+        currentGen = 0;
 
         ReportPop(parentPop, initial_pop_file);
 

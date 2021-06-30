@@ -125,18 +125,16 @@ namespace module {
                     } else {
                         log<NUClear::INFO>("\n\nSending request to evaluator. Generation:", pendingEvaluationRequests.front()->generation, "individual", pendingEvaluationRequests.front()->id);
 
-                        log<NUClear::INFO>("PreEmit Pending: ", pendingEvaluationRequests.size(), "Running :", runningEvaluationRequests.size());
                         runningEvaluationRequests.emplace(pendingEvaluationRequests.front()->id); //hold onto the request in the running queue
                         emit(pendingEvaluationRequests.front());
                         pendingEvaluationRequests.pop(); // remove from the pending queue
-                        log<NUClear::INFO>("PostEmit Pending: ", pendingEvaluationRequests.size(), "Running :", runningEvaluationRequests.size());
                     }
                 });
 
                 on<Trigger<NSGA2FitnessScores>, Single>().then([this](const NSGA2FitnessScores& scores) {
                     log<NUClear::DEBUG>("Got evaluation fitness scores");
 
-                    // Deal with the runningEvaluationRequests queue
+                    // Mark the request as completed
                     auto search = runningEvaluationRequests.find(scores.id);
                     if (search != runningEvaluationRequests.end()) {
                         runningEvaluationRequests.erase(search);
@@ -144,8 +142,7 @@ namespace module {
 
                     // An individual has been evaluation and we've got the scores. This updates the
                     // algorithm with the score, and evaluates the next individual.
-
-                    if (scores.generation == 1) {
+                    if (scores.generation == 0) {
                         processFirstGenerationIndividual(scores.id, scores.generation, scores.objScore, scores.constraints);
                     } else if (scores.generation < nsga2Algorithm.generations) {
                         processOrdinaryGenerationIndividual(scores.id, scores.generation, scores.objScore, scores.constraints);

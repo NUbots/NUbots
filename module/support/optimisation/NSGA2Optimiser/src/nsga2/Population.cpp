@@ -18,7 +18,7 @@ namespace nsga2 {
                            const bool& _crowdObj,
                            std::shared_ptr<RandomGenerator<>> _randGen,
                            const std::vector<double>& _initialRealVars)
-        : generation(1)
+        : generation(0)
         , indConfig({_realVars,
                      _realLimits,
                      _realMutProb,
