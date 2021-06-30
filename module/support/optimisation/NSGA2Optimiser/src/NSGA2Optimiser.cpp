@@ -111,9 +111,7 @@ namespace module {
                     // Subsequent individuals will be evaluated after we get the evaluation scores for this individual
                     // (from the NSGA2FitnessScores trigger)
                     if (nsga2Algorithm.InitializeFirstGeneration()) {
-                        pendingEvaluationRequests.push(constructEvaluationRequest(0,
-                                             nsga2Algorithm.parentPop->generation,
-                                             nsga2Algorithm.parentPop->GetIndReals(0)));
+                        populateFirstGenEvaluationRequests();
                         emit(std::make_unique<NSGA2EvaluatorReady>());
                     } else {
                         log<NUClear::ERROR>("Failed to initialise NSGA2");
@@ -125,11 +123,11 @@ namespace module {
                        log<NUClear::INFO>("Evaluator ready, but optimiser is not");
                        emit<Scope::DELAY>(std::make_unique<NSGA2EvaluatorReady>(), std::chrono::seconds(1)); // Wait for a bit for us to become ready, then ask the evaluator if it is ready
                     } else {
-                        log<NUClear::INFO>("\n\nSending request to evaluator. Generation:", pendingEvaluationRequests.back()->generation, "individual", pendingEvaluationRequests.back()->id);
+                        log<NUClear::INFO>("\n\nSending request to evaluator. Generation:", pendingEvaluationRequests.front()->generation, "individual", pendingEvaluationRequests.front()->id);
 
                         log<NUClear::INFO>("PreEmit Pending: ", pendingEvaluationRequests.size(), "Running :", runningEvaluationRequests.size());
-                        runningEvaluationRequests.emplace(pendingEvaluationRequests.back()->id); //hold onto the request in the running queue
-                        emit(pendingEvaluationRequests.back());
+                        runningEvaluationRequests.emplace(pendingEvaluationRequests.front()->id); //hold onto the request in the running queue
+                        emit(pendingEvaluationRequests.front());
                         pendingEvaluationRequests.pop(); // remove from the pending queue
                         log<NUClear::INFO>("PostEmit Pending: ", pendingEvaluationRequests.size(), "Running :", runningEvaluationRequests.size());
                     }
@@ -164,28 +162,41 @@ namespace module {
                 });
             }
 
+            void NSGA2Optimiser::populateFirstGenEvaluationRequests() {
+                for (int i = 0; i < nsga2Algorithm.popSize; i++) {
+                    pendingEvaluationRequests.push(constructEvaluationRequest(i,
+                                            nsga2Algorithm.parentPop->generation,
+                                            nsga2Algorithm.parentPop->GetIndReals(i)));
+                }
+            }
+
+            void NSGA2Optimiser::populateOrdinaryGenEvaluationRequests() {
+                for (int i = 0; i < nsga2Algorithm.popSize; i++) {
+                    pendingEvaluationRequests.push(constructEvaluationRequest(i,
+                                            nsga2Algorithm.childPop->generation,
+                                            nsga2Algorithm.childPop->GetIndReals(i)));
+                }
+            }
+
+            bool NSGA2Optimiser::atEndOfGeneration() {
+                // We are at the end of a generation when there are no requests left unprocessed (since we evaulate a generation at a time)
+                return runningEvaluationRequests.empty() && pendingEvaluationRequests.empty();
+            }
+
+
             void NSGA2Optimiser::processFirstGenerationIndividual(int id, int generation, const std::vector<double>& objScore, const std::vector<double>& constraints) {
                 // Tell the algorithm the evaluation scores for this individual
                 nsga2Algorithm.parentPop->SetIndObjectiveScore(id, objScore);
                 nsga2Algorithm.parentPop->SetIndConstraints(id, constraints);
 
-                // If we have more individuals then evaluate next individual
-                if (id < nsga2Algorithm.popSize - 1) {
-                    pendingEvaluationRequests.push(constructEvaluationRequest(id + 1,
-                                            nsga2Algorithm.parentPop->generation,
-                                            nsga2Algorithm.parentPop->GetIndReals(id + 1)));
-                } else {
+                if (atEndOfGeneration()) {
                     // End the first generation
                     nsga2Algorithm.CompleteFirstGeneration();
 
                     // Start the next generation (creates the new children for evaluation)
                     nsga2Algorithm.InitializeNextGeneration();
                     log<NUClear::INFO>("Advanced to new generation", nsga2Algorithm.childPop->generation);
-
-                    // Evaluate the first individual in the new generation
-                    pendingEvaluationRequests.push(constructEvaluationRequest(0,
-                                            nsga2Algorithm.childPop->generation,
-                                            nsga2Algorithm.childPop->GetIndReals(0)));
+                    populateOrdinaryGenEvaluationRequests();
                 }
             }
 
@@ -194,23 +205,14 @@ namespace module {
                 nsga2Algorithm.childPop->SetIndObjectiveScore(id, objScore);
                 nsga2Algorithm.childPop->SetIndConstraints(id, constraints);
 
-                // If we have more individuals then evaluate next individual
-                if (id < nsga2Algorithm.popSize - 1) {
-                    pendingEvaluationRequests.push(constructEvaluationRequest(id + 1,
-                                            nsga2Algorithm.childPop->generation,
-                                            nsga2Algorithm.childPop->GetIndReals(id + 1)));
-                } else {
-                // End the generation and save its data
-                nsga2Algorithm.CompleteOrdinaryGeneration();
+                if (atEndOfGeneration()) {
+                    // End the generation and save its data
+                    nsga2Algorithm.CompleteOrdinaryGeneration();
 
-                // Start the next generation (creates the new children for evaluation)
-                nsga2Algorithm.InitializeNextGeneration();
-                log<NUClear::INFO>("Advanced to new generation", nsga2Algorithm.childPop->generation);
-
-                // Evaluate the first individual in the new generation
-                pendingEvaluationRequests.push(constructEvaluationRequest(0,
-                                        nsga2Algorithm.childPop->generation,
-                                        nsga2Algorithm.childPop->GetIndReals(0)));
+                    // Start the next generation (creates the new children for evaluation)
+                    nsga2Algorithm.InitializeNextGeneration();
+                    log<NUClear::INFO>("Advanced to new generation", nsga2Algorithm.childPop->generation);
+                    populateOrdinaryGenEvaluationRequests();
                 }
             }
 
@@ -219,12 +221,7 @@ namespace module {
                 nsga2Algorithm.childPop->SetIndObjectiveScore(id, objScore);
                 nsga2Algorithm.childPop->SetIndConstraints(id, constraints);
 
-                // If we have more individuals then evaluate next individual
-                if (id < nsga2Algorithm.popSize - 1) {
-                    pendingEvaluationRequests.push(constructEvaluationRequest(id + 1,
-                                            nsga2Algorithm.childPop->generation,
-                                            nsga2Algorithm.childPop->GetIndReals(id + 1)));
-                } else {
+                if (atEndOfGeneration()) {
                     // End the generation and save its data
                     nsga2Algorithm.CompleteOrdinaryGeneration();
 

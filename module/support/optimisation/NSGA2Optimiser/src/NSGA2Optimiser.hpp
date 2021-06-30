@@ -22,6 +22,10 @@ namespace module {
                 /// are the individual's parameters to optimise,
                 std::unique_ptr<NSGA2EvaluationRequest> constructEvaluationRequest(int id, int generation, const std::vector<double>& parameters);
 
+                void populateFirstGenEvaluationRequests();
+                void populateOrdinaryGenEvaluationRequests();
+                bool atEndOfGeneration();
+
                 void processFirstGenerationIndividual(int id, int generation, const std::vector<double>& objScore, const std::vector<double>& constraints);
                 void processOrdinaryGenerationIndividual(int id, int generation, const std::vector<double>& objScore, const std::vector<double>& constraints);
                 void processFinalGenerationIndividual(int id, int generation, const std::vector<double>& objScore, const std::vector<double>& constraints);
