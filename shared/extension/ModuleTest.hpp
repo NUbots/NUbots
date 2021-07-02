@@ -21,15 +21,21 @@
 #define EXTENSION_MODULETEST_HPP
 
 #include <nuclear>
+#include <type_traits>
 
 namespace extension {
 
     template <typename Module>
-    class ModuleTest : NUClear::PowerPlant {
+    class ModuleTest : private NUClear::PowerPlant {
     public:
         ModuleTest() = delete;
 
-        explicit ModuleTest(Module m) : module(m), NUClear::PowerPlant(getSingleThreadConfig()) {}
+        explicit ModuleTest(Module m) : module(m), NUClear::PowerPlant(getSingleThreadConfig()) {
+            // This assert could be worth playing with
+            // static_assert(std::isconvertible<Module*, NUClear::Reactor*>);
+            install<Module>();
+            start();
+        }
         ~ModuleTest() {
             shutdown();
         }

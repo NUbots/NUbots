@@ -19,3 +19,16 @@
 
 #include <catch.hpp>
 #include <utility>
+
+#include "extension/ModuleTest.hpp"
+
+// Anon namespace so that this reactor is local to this file
+namespace {
+
+    class TestReactor : public NUClear::Reactor {
+        // Pass the test reactor as the ModuleTest's reactor.
+    }
+
+}  // namespace
+
+TEST_CASE()
