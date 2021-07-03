@@ -43,6 +43,11 @@ namespace module::extension {
     bool Director::challenge_priority(const std::shared_ptr<const DirectorTask>& incumbent,
                                       const std::shared_ptr<const DirectorTask>& challenger) {
 
+        // If there is no incumbent the challenger wins by default
+        if (incumbent == nullptr) {
+            return true;
+        }
+
         // When a provider emits a new updated task we should always swap to the new task regardless of priority
         // In this case though, we also need to compare to every other task in the queue but this will be done elsewhere
         if (incumbent->requester_id == challenger->requester_id) {
