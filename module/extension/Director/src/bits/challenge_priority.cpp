@@ -29,6 +29,7 @@ namespace module::extension {
 
     using ::extension::behaviour::commands::DirectorTask;
 
+    // Scope this struct to just this translation unit
     namespace {
         struct TaskPriority {
             TaskPriority(const uint64_t& id_, const int& priority_, const bool& optional_)
