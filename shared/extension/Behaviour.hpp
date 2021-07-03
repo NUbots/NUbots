@@ -1,214 +1,182 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2021 NUbots <nubots@nubots.net>
+ */
 #ifndef EXTENSION_BEHAVIOUR_HPP
 #define EXTENSION_BEHAVIOUR_HPP
 
 #include <memory>
 #include <nuclear>
 
+#include "behaviour/commands.hpp"
+
 namespace extension::behaviour {
 
-    // This namespace holds the messages and communication elements that operate between the Director module and the DSL
-    // the users of the behaviour system.
-    namespace commands {
-
-        /**
-         * The type of action that the provider performs
-         */
-        enum class ProviderAction {
-            /// NORMAL providers are the usual providers that execute in a loop if needed
-            NORMAL,
-            /// ENTERING providers are the first point of entry for a type before the main NORMAL reaction runs
-            ENTERING,
-            /// LEAVING providers are executed as a module is relinquishing control
-            LEAVING,
-        };
-
-        /**
-         * Message used to tell the Director about a new Provides reaction
-         */
-        struct ProvidesReaction {
-            ProvidesReaction(const std::shared_ptr<NUClear::threading::Reaction>& reaction,
-                             const std::type_index& type,
-                             const ProviderAction& action)
-                : reaction(reaction), type(type), action(action) {}
-
-            /// The reaction for this provider
-            std::shared_ptr<NUClear::threading::Reaction> reaction;
-            /// The data type that this provider services
-            std::type_index type;
-            /// The action type that this provider is using (normal, entering, leaving)
-            ProviderAction action;
-        };
-
-        /**
-         * Message used to tell the Director about a new When condition on a provider
-         */
-        struct WhenExpression {
-            WhenExpression(const std::shared_ptr<NUClear::threading::Reaction>& reaction,
-                           const std::type_index& type,
-                           bool (*validator)(const int&),
-                           int (*current)())
-                : reaction(reaction), type(type), validator(validator), current(current) {}
-
-            /// The provider reaction that is contingent on this when condition
-            std::shared_ptr<NUClear::threading::Reaction> reaction;
-            /// The enum type that this when expression is looking at
-            std::type_index type;
-            /// Function to determine if the passed state is valid
-            bool (*validator)(const int&);
-            /// Function to get the current state from the global cache
-            int (*current)();
-            /// Function to bind a reaction to monitor when this state changes
-            NUClear::threading::ReactionHandle (*binder)(NUClear::Reactor&, std::function<void(const int&)>);
-        };
-
-        /**
-         * Message used to tell the director about a new Causing relationship for this provider
-         */
-        struct CausingExpression {
-            CausingExpression(const std::shared_ptr<NUClear::threading::Reaction>& reaction,
-                              const std::type_index& type,
-                              const int& resulting_state)
-                : reaction(reaction), type(type), resulting_state(resulting_state) {}
-            /// The provider reaction that will cause this state
-            std::shared_ptr<NUClear::threading::Reaction> reaction;
-            /// The enum type that this when expression claiming to manipulate
-            std::type_index type;
-            /// The resulting state this provider is claiming to provide if it is executed
-            int resulting_state;
-        };
-
-        /**
-         * Message to tell the Director that a provider task has finished executing
-         */
-        struct ProviderDone {
-            ProviderDone(const uint64_t& requester_id, const uint64_t& requester_task_id)
-                : requester_id(requester_id), requester_task_id(requester_task_id) {}
-            /// The reaction_id of the provider that finished
-            uint64_t requester_id;
-            /// The specific task_id of the provider that finished
-            uint64_t requester_task_id;
-        };
-
-        /**
-         * A task message that is to be sent to the Director for execution
-         */
-        struct DirectorTask {
-            DirectorTask(std::type_index type,
-                         uint64_t requester_id,
-                         uint64_t requester_task_id,
-                         std::shared_ptr<void> data,
-                         const std::string& name,
-                         const int& priority,
-                         const bool& optional)
-                : type(type)
-                , requester_id(requester_id)
-                , requester_task_id(requester_task_id)
-                , data(data)
-                , name(name)
-                , priority(priority)
-                , optional(optional) {}
-
-            /// The provider type this director task is for
-            std::type_index type;
-            /// The reaction id of the requester (could be the id of a provider)
-            uint64_t requester_id;
-            /// The reaction task id of the requester (if it is a provider later a ProviderDone will be emitted)
-            uint64_t requester_task_id;
-            /// The data for the command, (the data that will be given to the provider)
-            std::shared_ptr<void> data;
-            /// A name for this task to be shown in debugging systems
-            std::string name;
-            /// The priority with which this task is to be executed
-            int priority;
-            /// If this task is optional
-            bool optional;
-        };
-
-        /**
-         * This type is used as a base type for the different provider DSL keywords (Provides, Entering, Leaving) to
-         * handle their common code.
-         *
-         * @tparam T        The type that this provider services
-         * @tparam action   The action type that this provider is
-         */
-        template <typename T, ProviderAction action>
-        struct ProviderBase {
-
-            template <typename DSL>
-            static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
-
-                // Tell the director
-                reaction->reactor.powerplant.emit(std::make_unique<ProvidesReaction>(reaction, typeid(T), action));
-
-                // Add our unbinder
-                reaction->unbinders.emplace_back([](const NUClear::threading::Reaction& r) {
-                    r.reactor.emit<NUClear::dsl::word::emit::Direct>(
-                        std::make_unique<NUClear::dsl::operation::Unbind<commands::ProvidesReaction>>(r.id));
-                });
-            }
-
-            template <typename DSL>
-            static inline std::shared_ptr<T> get(NUClear::threading::Reaction& r) {
-
-                // TODO make this return a special type that can be dereferenced into a T object
-                // TODO then you can add in extra information that can be passed to the provider (like when it is
-                // triggered due to a `Done` event)
-                // TODO here we need to get task information from the director
-                // TODO using r.id we can query the director if this provider is supposed to be running right now and
-                // also get the data for this provider
-                // If this provider is not supposed to be running right now we return a nullptr
-                // By returning nullptr that evaluates to something "falsy" it will prevent this reaction from running
-                // (unless the provider has an optional wrapper around it but then it's the users job to deal with that)
-                return nullptr;
-            }
-
-            template <typename DSL>
-            static inline void postcondition(NUClear::threading::ReactionTask& task) {
-                // Take the task id and send it to the director to let it know that this provider is done
-                task.parent.reactor.emit(std::make_unique<ProviderDone>(task.parent.id, task.id));
-            }
-        };
-    }  // namespace commands
-
     /**
-     * This DSL word used to define an entry transition into a provider.
-     * It should normally be coupled with a Causing DSL word.
-     * When coupled with a Causing DSL word and a provider that has a When condition, this entry will run in place of
-     * the provider until the When condition is fulfilled.
-     * If it is used without a Causing DSL word it will run once as a provider before the actual provider is executed.
+     * A TaskInfo object contains all the state that the Director provides to a running Provider.
+     * This task information includes the task data itself, as well as details about why it was executed such as if it
+     * was triggered by a done task from one of its tasks. This type works with the NUClear reaction system by providing
+     * a dereference operator so that the users can either choose to receive a TaskInfo<T> object or a const T& object
+     * in their callback if they don't care about the extra information the director provides.
      *
-     * @tparam T the provider type that this transition function provides for
+     * This object also ensures that the task will not run when the Director has no information for this Provider.
+     * This can be caused when it should not be running but was triggered by another bind statement (e.g. Every).
+     * In this case it has a bool operator that returns false which will stop the task from running.
+     *
+     * @tparam T the type of task that is stored in this task_info object
      */
     template <typename T>
-    struct Entering : public commands::ProviderBase<T, commands::ProviderAction::ENTERING> {};
+    struct TaskInfo {
+
+        /**
+         * Default constructor, as data will be null NUClear will be told not to execute this task.
+         */
+        TaskInfo() {}
+
+        /**
+         * Construct a new TaskInfo object for the provided task data
+         *
+         * @param data_ the data for this task
+         */
+        TaskInfo(std::shared_ptr<const T> data_) : data(data_) {}
+
+        /**
+         * Having a dereference operator allows NUClear to provide either the TaskInfo<T> object or a const T& object
+         *
+         * @return the data that is contained within this TaskInfo object
+         */
+        const T& operator*() {
+            return *data;
+        }
+
+        /**
+         * This will control if NUClear should run the task
+         *
+         * @return true     there is data, NUClear should run the task
+         * @return false    there is no data, NUClear should not run the task
+         */
+        operator bool() {
+            return data != nullptr;
+        }
+
+        /// The task data, this will be all that is returned if the user asks for a const T& rather than a TaskInfo
+        std::shared_ptr<const T> data;
+    };
+
 
     /**
-     * This DSL word is used to define a leaving transition from a provider.
+     * This type is used as a base extension type for the different Provider DSL keywords (Provides, Entering, Leaving)
+     * to handle their common code.
+     *
+     * @tparam T        The type that this Provider services
+     * @tparam action   The action type that this Provider is
+     */
+    template <typename T, commands::ProviderClassification action>
+    struct ProviderBase {
+
+        /**
+         * Binds a Provider object, sending it to the Director so it can control its execution.
+         *
+         * @tparam DSL the NUClear DSL for the on statement
+         *
+         * @param reaction the reaction object that we are binding the Provider to
+         */
+        template <typename DSL>
+        static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
+
+            // Tell the Director
+            reaction->reactor.powerplant.emit(
+                std::make_unique<commands::ProvidesReaction>(reaction, typeid(T), action));
+
+            // Add our unbinder
+            reaction->unbinders.emplace_back([](const NUClear::threading::Reaction& r) {
+                r.reactor.emit<NUClear::dsl::word::emit::Direct>(
+                    std::make_unique<NUClear::dsl::operation::Unbind<commands::ProvidesReaction>>(r.id));
+            });
+        }
+
+        /**
+         * Gets the information needed by the callbacks of the Provider.
+         *
+         * @tparam DSL the NUClear DSL for the on statement
+         *
+         * @param r the reaction object we are getting data for
+         *
+         * @return the information needed by the on statement
+         */
+        template <typename DSL>
+        static inline TaskInfo<T> get(NUClear::threading::Reaction& r) {
+            // TODO(@TrentHouliston) get the data from the director once it's algorithm is more fleshed out
+            return TaskInfo<T>();
+        }
+
+        /**
+         * Executes once a Provider has finished executing it's reaction so the Director knows which tasks it emitted
+         *
+         * @tparam DSL the NUClear dsl for the on statement
+         *
+         * @param task The reaction task object that just finished
+         */
+        template <typename DSL>
+        static inline void postcondition(NUClear::threading::ReactionTask& task) {
+            // Take the task id and send it to the Director to let it know that this Provider is done
+            task.parent.reactor.emit(std::make_unique<commands::ProviderDone>(task.parent.id, task.id));
+        }
+    };
+
+    /**
+     * This DSL word used to define an entry transition into a Provider.
+     * It should normally be coupled with a Causing DSL word.
+     * When coupled with a Causing DSL word and a Provider that has a When condition, this entry will run in place of
+     * the Provider until the When condition is fulfilled.
+     * If it is used without a Causing DSL word it will run once as a Provider before the actual Provider is executed.
+     *
+     * @tparam T the Provider type that this transition function provides for
+     */
+    template <typename T>
+    struct Entering : public ProviderBase<T, commands::ProviderClassification::ENTERING> {};
+
+    /**
+     * This DSL word is used to define a leaving transition from a Provider.
      * It should normally be combined with a Causing DSL word.
-     * In this case when another provider needs control and uses a When condition, this will run until that
+     * In this case when another Provider needs control and uses a When condition, this will run until that
      * condition is fulfilled. A Leaving condition will be preferred over an Entering condition that provides the
      * same Causing statement (the system will rather a module cleans up after itself than ask another module to do
      * so).
      *
-     * @tparam T the provider type that this transition function provides for
+     * @tparam T the Provider type that this transition function provides for
      */
     template <typename T>
-    struct Leaving : public commands::ProviderBase<T, commands::ProviderAction::LEAVING> {};
+    struct Leaving : public ProviderBase<T, commands::ProviderClassification::LEAVING> {};
 
     /**
-     * This DSL word is used to define a provider for a type.
+     * This DSL word is used to define a Provider for a type.
      * It will execute in the same way as an on<Trigger<T>> statement except that when it executes will be
      * determined by the Director. This ensures that it will only run when it has permission to run and will
-     * transition between providers in a sensible way.
+     * transition between Providers in a sensible way.
      *
-     * @tparam T the provider type that this transition function provides for
+     * @tparam T the Provider type that this transition function provides for
      */
     template <typename T>
-    struct Provides : public commands::ProviderBase<T, commands::ProviderAction::NORMAL> {};
+    struct Provides : public ProviderBase<T, commands::ProviderClassification::NORMAL> {};
 
     /**
-     * The When DSL word is used to limit access to a provider unless a condition is true.
-     * This will prevent a provider from running if the state is false.
+     * The When DSL word is used to limit access to a Provider unless a condition is true.
+     * This will prevent a Provider from running if the state is false.
      * However if there is a Entering<T> or Leaving reaction that has a Causing relationship for this When, it will
      * be executed to ensure that the Provider can run.
      *
@@ -217,15 +185,26 @@ namespace extension::behaviour {
     template <typename State, template <typename> class expr, enum State::Value value>
     struct When {
 
+        /**
+         * Bind a when expression in the Director.
+         *
+         * @tparam DSL the DSL from NUClear
+         *
+         * @param reaction the reaction that is having this when condition bound to it
+         */
         template <typename DSL>
         static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
 
             // Tell the director about this when condition
             reaction->reactor.powerplant.emit(std::make_unique<commands::WhenExpression>(
                 reaction,
+                // typeindex of the enum value
                 typeid(State),
+                // Function that uses expr to determine if the passed value v is valid
                 [](const int& v) { return expr<int>()(v, value); },
+                // Function that uses get to get the current state of the reaction
                 []() { return NUClear::dsl::operation::CacheGet<State>::get(); },
+                // Binder function that lets a reactor bind a function that is called when the state changes
                 [](NUClear::Reactor& reactor,
                    std::function<void(const int&)> fn) -> NUClear::threading::ReactionHandle {
                     return reactor.on<NUClear::dsl::word::Trigger<State>>().then(
@@ -236,14 +215,21 @@ namespace extension::behaviour {
 
     /**
      * This DSL word is used to create a promise that at some point when running this reaction the state indicated
-     * by T will be true. It may not be on any particular run of the reaction, in which case it will continue to run
-     * that reaction until it is true, or another graph jump becomes necessary.
+     * by T will be true. It may not be on any particular run of the Provider, in which case it will continue to run
+     * that reaction when new tasks arrive until it is true, or a change elsewhere changes which Provider to run.
      *
      * @tparam T the condition expression that this reaction will make true before leaving.
      */
     template <typename State, enum State::Value value>
     struct Causing {
 
+        /**
+         * Bind a causing expression in the Director.
+         *
+         * @tparam DSL the DSL from NUClear
+         *
+         * @param reaction the reaction that is having this when condition bound to it
+         */
         template <typename DSL>
         static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
             // Tell the director
@@ -258,28 +244,38 @@ namespace extension::behaviour {
      * There are two different types of tasks that can be created using this emit, root level tasks and subtasks.
      *
      * Root level tasks:
-     * These are created when a reaction that is not a provider (not a Provides, Entering or Leaving) emits the
+     * These are created when a reaction that is not a Provider (not a Provides, Entering or Leaving) emits the
      * task. These tasks form the root of the execution tree and their needs will be met on a highest priority first
-     * basis. These tasks will persist until the provider that they use emits a done task, or the task is re-emitted
+     * basis. These tasks will persist until the Provider that they use emits a done task, or the task is re-emitted
      * with a priority of 0.
      *
      * Subtasks:
-     * These are created when a provider task emits a task to complete. These tasks must be emitted each time that
+     * These are created when a Provider task emits a task to complete. These tasks must be emitted each time that
      * reaction is run to persist as if that reaction runs again and does not emit these tasks they will be
      * cancelled. Within these tasks the priority is used to break ties between two subtasks that share the same
-     * root task. In these cases the subtask that requested the provider with the highest priority will have its
-     * task executed. The other subtask will be blocked until that task is no longer in the call queue.
+     * root task. In these cases the subtask that requested the Provider with the highest priority will have its
+     * task executed. The other subtask will be blocked until the active task is no longer in the call queue.
      *
      * If a subtask is emitted with optional then it is compared differently to other tasks when it comes to priority.
-     * This task and all its descendants will be considered optional. If it is compared to a task that does not have
-     * optional in it's parentage, the non optional task will win. However descendants of this task that are not optional
-     * will compare to eachother as normal.
+     * This task and all its decendents will be considered optional. If it is compared to a task that does not have
+     * optional in it's parentage, the non optional task will win. However decendents of this task that are not optional
+     * will compare to eachother as normal. If two tasks both have optional in their parentage they will be compared as
+     * normal.
      *
-     * @tparam T the provider type that this task is for
+     * @tparam T the Provider type that this task is for
      */
     template <typename T>
     struct Task {
 
+        /**
+         * Emits a new task for the Director to handle.
+         *
+         * @param powerplant the powerplant object this emit is being called on
+         * @param data       the data element of the task
+         * @param name       a string identifier to help with debugging
+         * @param priority   the priority that this task is to be executed with
+         * @param optional   if this task is an optional task and can be taken over by lower priority non optional tasks
+         */
         static void emit(NUClear::PowerPlant& powerplant,
                          std::shared_ptr<T> data,
                          const std::string& name = "",
@@ -303,8 +299,8 @@ namespace extension::behaviour {
     };
 
     /**
-     * This is a special task that should be emitted when a provider finishes the task it was given.
-     * When this is emitted the director will re-execute the provider which caused this task to run.
+     * This is a special task that should be emitted when a Provider finishes the task it was given.
+     * When this is emitted the director will re-execute the Provider which caused this task to run.
      *
      * ```
      * emit<Task>(std::make_unique<Done>());
