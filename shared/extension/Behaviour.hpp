@@ -203,15 +203,15 @@ namespace extension::behaviour {
                 // typeindex of the enum value
                 typeid(State),
                 // Function that uses expr to determine if the passed value v is valid
-                [](const int& v) { return expr<int>()(v, value); },
+                [](const int& v) -> bool { return expr<int>()(v, value); },
                 // Function that uses get to get the current state of the reaction
-                []() {
+                []() -> int {
                     // Check if there is cached data, and if not throw an exception
                     auto ptr = NUClear::dsl::operation::CacheGet<State>::get();
                     if (ptr == nullptr) {
                         throw std::runtime_error("The state requested has not been emitted yet");
                     }
-                    return *ptr;
+                    return static_cast<int>(*ptr);
                 },
                 // Binder function that lets a reactor bind a function that is called when the state changes
                 [](NUClear::Reactor& reactor,
