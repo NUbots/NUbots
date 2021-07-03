@@ -75,7 +75,7 @@ namespace module::extension {
          * @return true     if the challenger has strictly higher priority than the incumbent
          * @return false    if the incumbent task has equal or higher priority
          *
-         * @throws std::runtime_error if the directors provider anscestory is broken
+         * @throws std::runtime_error if the directors provider ancestry is broken
          */
         [[nodiscard]] bool challenge_priority(
             const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& incumbent,
