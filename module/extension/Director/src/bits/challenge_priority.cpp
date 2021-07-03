@@ -94,7 +94,9 @@ namespace module::extension {
             return i_p.back().priority < c_p.back().priority;
         }
 
-        // If the optionals are not equal then return if i_o is true. a being optional would make it less than b
+        // If we got here, then the optional status of the two branches are not equal
+        // In this case we want to return if incumbent is optional but not the challenger
+        // If incumbent is optional this will return true, if it's not this will return false
         return i_o;
     }
 
