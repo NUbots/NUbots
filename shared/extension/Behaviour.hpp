@@ -257,9 +257,9 @@ namespace extension::behaviour {
      * task executed. The other subtask will be blocked until the active task is no longer in the call queue.
      *
      * If a subtask is emitted with optional then it is compared differently to other tasks when it comes to priority.
-     * This task and all its decendents will be considered optional. If it is compared to a task that does not have
-     * optional in it's parentage, the non optional task will win. However decendents of this task that are not optional
-     * will compare to eachother as normal. If two tasks both have optional in their parentage they will be compared as
+     * This task and all its descendants will be considered optional. If it is compared to a task that does not have
+     * optional in it's parentage, the non optional task will win. However, descendants of this task that are not optional
+     * will compare to each other as normal. If two tasks both have optional in their parentage they will be compared as
      * normal.
      *
      * @tparam T the Provider type that this task is for
