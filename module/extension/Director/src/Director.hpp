@@ -62,6 +62,22 @@ namespace module::extension {
          */
         void add_causing(const ::extension::behaviour::commands::CausingExpression& causing);
 
+        /**
+         * Compares the priorities of two director tasks and returns true if the challenger has priority over the
+         * incumbent.
+         *
+         * The function requires that the challengers precendence is strictly greater than the incumbent.
+         * This ensures that we don't change tasks unnecessarily when the priority is equal.
+         *
+         * @param incumbent     the task to compare which is currently the active running task
+         * @param challenger    the task to compare which wants to run but is not currently
+         *
+         * @return true     if the challenger has strictly higher priority than the incumbent
+         * @return false    if the incumbent task has equal or higher priority
+         */
+        bool compare_priority(const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& incumbent,
+                              const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& challenger);
+
     public:
         /// Called by the powerplant to build and setup the Director reactor.
         explicit Director(std::unique_ptr<NUClear::Environment> environment);
