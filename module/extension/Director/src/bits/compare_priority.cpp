@@ -80,7 +80,7 @@ namespace module::extension {
         }
 
         // If neither or both are optional we compare the priority of the tasks when they were siblings
-        return std::get<1>(as.back()) < std::get<1>(bs.back());
+        return std::get<1>(a_p.back()) < std::get<1>(b_p.back());
     }
 
 }  // namespace module::extension
