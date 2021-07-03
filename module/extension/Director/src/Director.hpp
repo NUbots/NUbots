@@ -70,7 +70,7 @@ namespace module::extension {
          * This ensures that we don't change tasks unnecessarily when the priority is equal.
          *
          * @param incumbent     the task to compare which is currently the active running task
-         * @param challenger    the task to compare which wants to run but is not currently
+         * @param challenger    the task to compare which wants to run but is not currently running
          *
          * @return true     if the challenger has strictly higher priority than the incumbent
          * @return false    if the incumbent task has equal or higher priority

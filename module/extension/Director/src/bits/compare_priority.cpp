@@ -71,8 +71,8 @@ namespace module::extension {
         }
 
         // Work out if there are any optionals in either of the tasks parentage
-        bool a_optional = std::any_of(a_p.begin(), a_p.end(), [](const auto& v) { return std::get<2>(v); });
-        bool b_optional = std::any_of(b_p.begin(), b_p.end(), [](const auto& v) { return std::get<2>(v); });
+        const bool a_optional = std::any_of(a_p.begin(), a_p.end(), [](const auto& v) { return std::get<2>(v); });
+        const bool b_optional = std::any_of(b_p.begin(), b_p.end(), [](const auto& v) { return std::get<2>(v); });
 
         // If both or neither are optional then we compare at the point where they were siblings.
         // If both are optional then we would rather that whichever ancestor had higher priority have its optional tasks
