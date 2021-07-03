@@ -73,32 +73,28 @@ namespace module::extension {
             return ancestors;
         };
 
-        // Convenience references for the two to make the code shorter
-        const auto& a = incumbent;
-        const auto& b = challenger;
-
         // Get the ancestor priorities of a and b
-        auto a_p = get_ancestor_priorities(a);
-        auto b_p = get_ancestor_priorities(b);
+        auto i_p = get_ancestor_priorities(incumbent);
+        auto c_p = get_ancestor_priorities(challenger);
 
         // Remove all of the common ancestors
-        while (a_p.back().id == b_p.back().id) {
-            a_p.pop_back();
-            b_p.pop_back();
+        while (i_p.back().id == c_p.back().id) {
+            i_p.pop_back();
+            c_p.pop_back();
         }
 
         // Work out if there are any optionals in either of the tasks parentage
-        const bool a_optional = std::any_of(a_p.begin(), a_p.end(), [](const auto& v) { return v.optional; });
-        const bool b_optional = std::any_of(b_p.begin(), b_p.end(), [](const auto& v) { return v.optional; });
+        const bool i_o = std::any_of(i_p.begin(), i_p.end(), [](const auto& v) { return v.optional; });
+        const bool c_o = std::any_of(c_p.begin(), c_p.end(), [](const auto& v) { return v.optional; });
 
         // If both or neither are optional then we compare at the point where they were siblings.
         // If both are optional then we would rather that whichever ancestor had higher priority have its optional tasks
-        if (a_optional == b_optional) {
-            return a_p.back().priority < b_p.back().priority;
+        if (i_o == c_o) {
+            return i_p.back().priority < c_p.back().priority;
         }
 
-        // If the optionals are not equal then return if a_optional is true. a being optional would make it less than b
-        return a_optional;
+        // If the optionals are not equal then return if i_o is true. a being optional would make it less than b
+        return i_o;
     }
 
 }  // namespace module::extension
