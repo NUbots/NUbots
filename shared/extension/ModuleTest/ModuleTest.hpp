@@ -22,14 +22,13 @@
 
 #include <catch.hpp>
 #include <nuclear>
-#include <type_traits>
 
 #include "EmissionCatcher.hpp"
 
-namespace extension {
+namespace extension::moduletest {
 
     template <typename Module>
-    class ModuleTest : private NUClear::PowerPlant {
+    class ModuleTest : public NUClear::PowerPlant {
     public:
         ModuleTest() = delete;
 
@@ -37,6 +36,7 @@ namespace extension {
 
         explicit ModuleTest(const bool start_powerplant_automatically = true)
             : NUClear::PowerPlant(get_single_thread_config()) {
+            install<EmissionCatcher>();
             install<Module>();
             if (start_powerplant_automatically) {
                 startup_manually();
@@ -59,10 +59,10 @@ namespace extension {
             shutdown();
         }
 
-        template <typename MessageType>
-        void emit(const MessageType& msg) {
-            powerplant.emit(std::make_unique<MessageType>(msg));
-        }
+        // template <typename MessageType>
+        // void emit(const MessageType& msg) {
+        //     powerplant->emit(std::make_unique<MessageType>(msg));
+        // }
 
         template <typename MessageType>
         void bind_catcher_for_next_reaction(std::shared_ptr<MessageType> message) {
@@ -75,16 +75,16 @@ namespace extension {
         ModuleTest&& operator=(ModuleTest&& other) = delete;
 
     private:
-        static const NUClear::PowerPlant::Configuration& get_single_thread_config() {
+        static const NUClear::PowerPlant::Configuration get_single_thread_config() {
             NUClear::PowerPlant::Configuration cfg;
             cfg.thread_count = 1;
             return cfg;
         }
 
-        EmissionCatcher catcher{};
+        extension::moduletest::EmissionCatcher catcher;
         bool started = false;  // TODO: review if this is necessary
     };
 
-}  // namespace extension
+}  // namespace extension::moduletest
 
 #endif  // EXTENSION_MODULETEST_HPP

@@ -22,6 +22,9 @@
 #include <catch.hpp>
 
 namespace extension::moduletest {
+    EmissionCatcher::EmissionCatcher(std::unique_ptr<NUClear::Environment> environment)
+        : Reactor(std::move(environment)) {}
+
     template <typename MessageType>
     void EmissionCatcher::bind_catcher(std::shared_ptr<MessageType> message) {
         INFO("Binding message pointer to catch emitted message.");

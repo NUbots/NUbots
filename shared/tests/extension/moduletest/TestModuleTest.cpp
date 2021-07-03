@@ -37,7 +37,7 @@ namespace {
         SimpleMessage() = default;
         explicit SimpleMessage(const int& data_) : data(data_) {}
         int data = 0;
-    }
+    };
 
     // The reactor which is taking the place of the module being tested. When testing a real module, the real module
     // would take the place of this reactor
@@ -48,13 +48,13 @@ namespace {
                 is_shutdown = false;
                 emit(std::make_unique<SimpleMessage<0>>(42));
             });
-            on<Trigger<SimpleMessage<1>>>().then([this](SimpleMessage /*msg*/) {
+            on<Trigger<SimpleMessage<1>>>().then([this](SimpleMessage<1> /*msg*/) {
                 emit(std::make_unique<SimpleMessage<2>>(42));
                 emit(std::make_unique<SimpleMessage<3>>(31415));
             });
             on<Shutdown>().then([this] { is_shutdown = true; });
         }
-    }
+    };
 
 }  // namespace
 
@@ -62,7 +62,7 @@ TEST_CASE("Testing the module tester on the Startup of the TestReactor", "[exten
 
     // We're testing on<Startup> for this reactor (actually for the ModuleTest), so we disable automatic startup
     static constexpr bool STARTUP_REACTOR_AUTOMATICALLY = false;
-    auto module_test                                    = ModuleTest<TestReactor>(STARTUP_REACTOR_AUTOMATICALLY);
+    auto module_test = extension::moduletest::ModuleTest<TestReactor>(STARTUP_REACTOR_AUTOMATICALLY);
     // Our ground truth/expected message to be emitted when we start up. We'll compare the actual result to this one
     const auto expected_emission_on_startup = SimpleMessage<0>(42);
     // This can be thought of as an out-parameter of a manually triggered reaction. We give ModuleTest a pointer
@@ -81,7 +81,7 @@ TEST_CASE("Testing the module tester on the Startup of the TestReactor", "[exten
 TEST_CASE("Testing the module tester on generic reactions of the TestReactor", "[extension][moduletest][ModuleTest]") {
 
     // We're not testing on<Startup>, so we can start the reactor automatically
-    auto module_test = ModuleTest<TestReactor>(true);
+    auto module_test = extension::moduletest::ModuleTest<TestReactor>(true);
     // Ground truth/expected emissions, to compare to with the actual result
     const auto expected_first_emission  = SimpleMessage<2>(42);
     const auto expected_second_emission = SimpleMessage<3>(31415);
@@ -89,9 +89,9 @@ TEST_CASE("Testing the module tester on generic reactions of the TestReactor", "
     // Set up the actual emissions variables to bind the results to
     // Note that we want them to have different values for their data to the ground truth/expected results, so that
     // if there wasn't an emission of these, the test doesn't pass
-    auto actual_first_emission = std::make_shared<2>();
+    auto actual_first_emission = std::make_shared<SimpleMessage<2>>();
     module_test.bind_catcher_for_next_reaction(actual_first_emission);
-    auto actual_second_emission = std::make_shared<3>();
+    auto actual_second_emission = std::make_shared<SimpleMessage<3>>();
     module_test.bind_catcher_for_next_reaction(actual_second_emission);
 
     // Trigger the reaction manually
@@ -104,7 +104,7 @@ TEST_CASE("Testing the module tester on generic reactions of the TestReactor", "
 
 TEST_CASE("Testing the module tester on the Shutdown of the TestReactor", "[extension][moduletest][ModuleTest]") {
     // We're not testing on<Startup>, so we can start the reactor automatically
-    auto module_test = ModuleTest<TestReactor>(true);
+    auto module_test = extension::moduletest::ModuleTest<TestReactor>(true);
     // Define our ground truth/expected result
     static constexpr bool HAS_SHUTDOWN = true;
     // Set up our actual result variable

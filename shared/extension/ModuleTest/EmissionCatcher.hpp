@@ -26,7 +26,7 @@ namespace extension::moduletest {
 
     class EmissionCatcher : public NUClear::Reactor {
     public:
-        EmissionCatcher() = default;
+        explicit EmissionCatcher(std::unique_ptr<NUClear::Environment> environment);
 
         template <typename MessageType>
         void bind_catcher(std::shared_ptr<MessageType> message);
