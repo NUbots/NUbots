@@ -21,7 +21,7 @@
 
 namespace module::extension {
 
-    void remove_task(const std::shared_ptr<const DirectorTask>& task) {
+    void Director::remove_task(const std::shared_ptr<const DirectorTask>& task) {
 
         // Get the group for this task
         auto& group = groups[task->type];
