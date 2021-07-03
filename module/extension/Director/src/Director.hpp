@@ -70,7 +70,7 @@ namespace module::extension {
         /// A list of Provider groups
         std::map<std::type_index, ProviderGroup> groups;
         /// Maps reaction_id to the Provider which implements it
-        std::map<uint64_t, std::shared_ptr<Provider>> Providers;
+        std::map<uint64_t, std::shared_ptr<Provider>> providers;
 
         /// A list of reaction_task_ids to director_task objects, once the Provider has finished running it will emit
         /// all these as a pack so that the director can work out when Providers change which subtasks they emit
