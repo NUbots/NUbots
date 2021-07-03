@@ -21,14 +21,20 @@
 #include <nuclear>
 #include <utility>
 
-#include "extension/ModuleTest.hpp"
+#include "extension/ModuleTest/ModuleTest.hpp"
 
 // Anon namespace so that this reactor is local to this file
 namespace {
+
+    // We shouldn't emit anything on shutdown, so we'll use this to track whether the shutdown went to plan
+    // This serves as a proxy for testing real on<Shutdown> effects
+    static bool is_shutdown = false;
+
     // Usually you would use ModuleTest to test an existing reactor with existing messages, but testing ModuleTest
     // itself requires a reactor and a message, so we define them here
     template <int id>
     struct SimpleMessage {
+        SimpleMessage() = default;
         explicit SimpleMessage(const int& data_) : data(data_) {}
         int data = 0;
     }
@@ -38,28 +44,72 @@ namespace {
     class TestReactor : public NUClear::Reactor {
     public:
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-            on<Startup>().then([this] { emit(std::make_unique<SimpleMessage>()); });
-            on<Trigger<SimpleMessage>>().then([this](SimpleMessage /*msg*/) {
-                emit(std::make_unique<SimpleMessage>(1));
-                emit(std::make_unique<SimpleMessage>(2));
+            on<Startup>().then([this] {
+                is_shutdown = false;
+                emit(std::make_unique<SimpleMessage<0>>(42));
             });
-            on<Shutdown>().then([this] { shutdown = true; });
+            on<Trigger<SimpleMessage<1>>>().then([this](SimpleMessage /*msg*/) {
+                emit(std::make_unique<SimpleMessage<2>>(42));
+                emit(std::make_unique<SimpleMessage<3>>(31415));
+            });
+            on<Shutdown>().then([this] { is_shutdown = true; });
         }
     }
 
 }  // namespace
 
-TEST_CASE("Testing the module tester and emission catcher", "[extension][moduletest][ModuleTest]") {
+TEST_CASE("Testing the module tester on the Startup of the TestReactor", "[extension][moduletest][ModuleTest]") {
 
-    // We need to test on<Startup> for this reactor (actually for the ModuleTest), so we disable automatic startup
+    // We're testing on<Startup> for this reactor (actually for the ModuleTest), so we disable automatic startup
     static constexpr bool STARTUP_REACTOR_AUTOMATICALLY = false;
     auto module_test                                    = ModuleTest<TestReactor>(STARTUP_REACTOR_AUTOMATICALLY);
-    SimpleMessage expected_emission_on_startup;
-    std::shared_ptr<SimpleMessage> actual_emission_on_startup = std::make_shared<SimpleMessage>();
-    // unbinds automatically after reaction
-    ModuleTest.bind_catcher_for_next_reaction(actual_emission_on_startup);
-    ModuleTest.startup_manually();
+    // Our ground truth/expected message to be emitted when we start up. We'll compare the actual result to this one
+    const auto expected_emission_on_startup = SimpleMessage<0>(42);
+    // This can be thought of as an out-parameter of a manually triggered reaction. We give ModuleTest a pointer
+    // to an instance of the message type(s) we expect to be emitted, to catch the emitted message
+    auto actual_emission_on_startup = std::make_shared<SimpleMessage<0>>();
+    // We pass the pointer to the ModuleTest so that it knows where to write it
+    // The pointer and its associated handle unbinds automatically after reaction
+    module_test.bind_catcher_for_next_reaction(actual_emission_on_startup);
+    // Start up manually, to test our on<Startup>. This binds actual_emission_on_startup to the emitted message
+    module_test.startup_manually();
+    // After we have got the output, we compare it to what we expected
+    // We require that the output is the same as the expected (or within acceptable error)
+    REQUIRE(expected_emission_on_startup.data == (*actual_emission_on_startup).data);
+}
 
-    // After we have got the output, then we compare it to what we expected
-    // We require that the output is the same as the expected (or within acceptable error), which is trivially true here
+TEST_CASE("Testing the module tester on generic reactions of the TestReactor", "[extension][moduletest][ModuleTest]") {
+
+    // We're not testing on<Startup>, so we can start the reactor automatically
+    auto module_test = ModuleTest<TestReactor>(true);
+    // Ground truth/expected emissions, to compare to with the actual result
+    const auto expected_first_emission  = SimpleMessage<2>(42);
+    const auto expected_second_emission = SimpleMessage<3>(31415);
+
+    // Set up the actual emissions variables to bind the results to
+    // Note that we want them to have different values for their data to the ground truth/expected results, so that
+    // if there wasn't an emission of these, the test doesn't pass
+    auto actual_first_emission = std::make_shared<2>();
+    module_test.bind_catcher_for_next_reaction(actual_first_emission);
+    auto actual_second_emission = std::make_shared<3>();
+    module_test.bind_catcher_for_next_reaction(actual_second_emission);
+
+    // Trigger the reaction manually
+    module_test.emit<SimpleMessage<1>>(std::make_unique<SimpleMessage<1>>());
+
+    // Compare actual results to expected results
+    REQUIRE(expected_first_emission.data == (*actual_first_emission).data);
+    REQUIRE(expected_second_emission.data == (*actual_second_emission).data);
+}
+
+TEST_CASE("Testing the module tester on the Shutdown of the TestReactor", "[extension][moduletest][ModuleTest]") {
+    // We're not testing on<Startup>, so we can start the reactor automatically
+    auto module_test = ModuleTest<TestReactor>(true);
+    // Define our ground truth/expected result
+    static constexpr bool HAS_SHUTDOWN = true;
+    // Set up our actual result variable
+    is_shutdown = false;
+    module_test.shutdown_manually();
+    // Compare ground truth/expected result with actual result
+    REQUIRE(HAS_SHUTDOWN == is_shutdown);
 }
