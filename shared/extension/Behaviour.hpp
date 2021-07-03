@@ -85,7 +85,7 @@ namespace extension::behaviour {
      * @tparam T        The type that this Provider services
      * @tparam action   The action type that this Provider is
      */
-    template <typename T, commands::ProviderClassification action>
+    template <typename T, commands::ProviderClassification classification>
     struct ProviderBase {
 
         /**
@@ -100,7 +100,7 @@ namespace extension::behaviour {
 
             // Tell the Director
             reaction->reactor.powerplant.emit(
-                std::make_unique<commands::ProvidesReaction>(reaction, typeid(T), action));
+                std::make_unique<commands::ProvidesReaction>(reaction, typeid(T), classification));
 
             // Add our unbinder
             reaction->unbinders.emplace_back([](const NUClear::threading::Reaction& r) {
@@ -180,7 +180,9 @@ namespace extension::behaviour {
      * However if there is a Entering<T> or Leaving reaction that has a Causing relationship for this When, it will
      * be executed to ensure that the Provider can run.
      *
-     * @tparam T the condition expression that must be true in order to execute this task.
+     * @tparam State    the smart enum that is being mointored for the when condition
+     * @tparam expr     the function used for the comparison (e.g. std::less)
+     * @tparam value    the value that the when condition is looking for
      */
     template <typename State, template <typename> class expr, enum State::Value value>
     struct When {
@@ -203,7 +205,14 @@ namespace extension::behaviour {
                 // Function that uses expr to determine if the passed value v is valid
                 [](const int& v) { return expr<int>()(v, value); },
                 // Function that uses get to get the current state of the reaction
-                []() { return NUClear::dsl::operation::CacheGet<State>::get(); },
+                []() {
+                    // Check if there is cached data, and if not throw an exception
+                    auto ptr = NUClear::dsl::operation::CacheGet<State>::get();
+                    if (ptr == nullptr) {
+                        throw std::runtime_error("The state requested has not been emitted yet");
+                    }
+                    return *ptr;
+                },
                 // Binder function that lets a reactor bind a function that is called when the state changes
                 [](NUClear::Reactor& reactor,
                    std::function<void(const int&)> fn) -> NUClear::threading::ReactionHandle {
@@ -218,7 +227,8 @@ namespace extension::behaviour {
      * by T will be true. It may not be on any particular run of the Provider, in which case it will continue to run
      * that reaction when new tasks arrive until it is true, or a change elsewhere changes which Provider to run.
      *
-     * @tparam T the condition expression that this reaction will make true before leaving.
+     * @tparam State    the smart enum that this causing condition is going to manipulate
+     * @tparam value    the value that will result when the causing is successful
      */
     template <typename State, enum State::Value value>
     struct Causing {
@@ -239,7 +249,8 @@ namespace extension::behaviour {
     };
 
     /**
-     * A Task to be executed by the director, and a priority with which to execute this task.
+     * A Task to be executed by the director and a priority with which to execute this task.
+     * Higher priority tasks are preferred over lower priority tasks.
      *
      * There are two different types of tasks that can be created using this emit, root level tasks and subtasks.
      *
@@ -258,9 +269,9 @@ namespace extension::behaviour {
      *
      * If a subtask is emitted with optional then it is compared differently to other tasks when it comes to priority.
      * This task and all its descendants will be considered optional. If it is compared to a task that does not have
-     * optional in it's parentage, the non optional task will win. However, descendants of this task that are not optional
-     * will compare to each other as normal. If two tasks both have optional in their parentage they will be compared as
-     * normal.
+     * optional in it's parentage, the non optional task will win. However, descendants of this task that are not
+     * optional will compare to each other as normal. If two tasks both have optional in their parentage they will be
+     * compared as normal.
      *
      * @tparam T the Provider type that this task is for
      */
@@ -270,7 +281,7 @@ namespace extension::behaviour {
         /**
          * Emits a new task for the Director to handle.
          *
-         * @param powerplant the powerplant object this emit is being called on
+         * @param powerplant the powerplant context provided by NUClear
          * @param data       the data element of the task
          * @param name       a string identifier to help with debugging
          * @param priority   the priority that this task is to be executed with
@@ -279,8 +290,8 @@ namespace extension::behaviour {
         static void emit(NUClear::PowerPlant& powerplant,
                          std::shared_ptr<T> data,
                          const std::string& name = "",
-                         const int& priority            = 1,
-                         const bool& optional           = false) {
+                         const int& priority     = 1,
+                         const bool& optional    = false) {
 
             // Work out who is sending the task so we can determine if it's a subtask
             auto* task           = NUClear::threading::ReactionTask::get_current_task();
