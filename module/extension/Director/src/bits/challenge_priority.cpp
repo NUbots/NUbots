@@ -39,7 +39,7 @@ namespace module::extension {
 
         // Function to get the priorities of the ancestors of this task
         auto get_ancestor_priorities = [this](const std::shared_ptr<const DirectorTask>& task) {
-            // We are our first anscestor
+            // We are our first ancestor
             std::vector<std::tuple<uint64_t, int, bool>> ancestors;
             ancestors.emplace_back(task->requester_id, task->priority, task->optional);
 
