@@ -104,9 +104,6 @@ namespace module::extension {
             // Erase from our list of Providers
             providers.erase(id);
         }
-        else {
-            throw std::runtime_error("Attempted to remove a Provider that was not loaded");
-        }
     }
 
     void Director::add_when(const WhenExpression& when) {
