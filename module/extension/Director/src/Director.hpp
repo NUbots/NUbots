@@ -66,7 +66,7 @@ namespace module::extension {
          * Compares the priorities of two director tasks and returns true if the challenger has priority over the
          * incumbent.
          *
-         * The function requires that the challengers precendence is strictly greater than the incumbent.
+         * The function requires that the challenger's precendence is strictly greater than the incumbent's.
          * This ensures that we don't change tasks unnecessarily when the priority is equal.
          *
          * @param incumbent     the task to compare which is currently the active running task
@@ -75,7 +75,7 @@ namespace module::extension {
          * @return true     if the challenger has strictly higher priority than the incumbent
          * @return false    if the incumbent task has equal or higher priority
          *
-         * @throws std::runtime_error if the directors provider ancestry is broken
+         * @throws std::runtime_error if the director's provider ancestry is broken
          */
         [[nodiscard]] bool challenge_priority(
             const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& incumbent,
