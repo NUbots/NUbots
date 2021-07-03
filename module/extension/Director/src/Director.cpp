@@ -131,9 +131,9 @@ namespace module::extension {
             auto provider = it->second;
 
             // Add a reaction that will listen for changes to this state and notify the director
-            auto id               = when.reaction->id;
-            auto type             = when.type;
-            auto validator        = when.validator;
+            const auto id               = when.reaction->id;
+            const auto type             = when.type;
+            const auto validator        = when.validator;
             ReactionHandle handle = when.binder(*this, [this, id, type, validator](const int& state) {  //
                 if (validator(state)) {
                     emit(std::make_unique<StateUpdate>(id, type, state));
