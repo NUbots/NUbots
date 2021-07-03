@@ -279,8 +279,8 @@ namespace extension::behaviour {
         static void emit(NUClear::PowerPlant& powerplant,
                          std::shared_ptr<T> data,
                          const std::string& name = "",
-                         int priority            = 1,
-                         bool optional           = false) {
+                         const int& priority            = 1,
+                         const bool& optional           = false) {
 
             // Work out who is sending the task so we can determine if it's a subtask
             auto* task           = NUClear::threading::ReactionTask::get_current_task();
