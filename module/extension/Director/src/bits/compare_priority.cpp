@@ -74,13 +74,14 @@ namespace module::extension {
         bool a_optional = std::any_of(a_p.begin(), a_p.end(), [](const auto& v) { return std::get<2>(v); });
         bool b_optional = std::any_of(b_p.begin(), b_p.end(), [](const auto& v) { return std::get<2>(v); });
 
-        // If one is optional and not the other, the non optional one is true
-        if (a_optional != b_optional) {
-            return a_optional;  // If they are not equal and a is optional, a < b
+        // If both or neither are optional then we compare at the point where they were siblings.
+        // If both are optional then we would rather that whichever ancestor had higher priority have its optional tasks
+        if (a_optional == b_optional) {
+            return std::get<1>(a_p.back()) < std::get<1>(b_p.back());
         }
 
-        // If neither or both are optional we compare the priority of the tasks when they were siblings
-        return std::get<1>(a_p.back()) < std::get<1>(b_p.back());
+        // If the optionals are not equal then return if a_optional is true. a being optional would make it less than b
+        return a_optional;
     }
 
 }  // namespace module::extension
