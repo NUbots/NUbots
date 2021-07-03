@@ -199,7 +199,7 @@ namespace module::extension {
             auto range = pack_builder.equal_range(done.requester_task_id);
             auto tasks = std::make_unique<TaskPack>();
             for (auto it = range.first; it != range.second; ++it) {
-                tasks->emplace_back(it->second);
+                tasks->push_back(it->second);
             }
 
             // Sort the task pack so highest priority tasks come first
