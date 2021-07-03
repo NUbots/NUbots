@@ -81,6 +81,16 @@ namespace module::extension {
             const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& incumbent,
             const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& challenger);
 
+        /**
+         * Remove the provided task from the Director.
+         *
+         * This function also deals with all the consequences of removing the task including looking to see if a queued
+         * task can now be run.
+         *
+         * @param task the task to remove from the Director
+         */
+        void remove_task(const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& task);
+
     public:
         /// Called by the powerplant to build and setup the Director reactor.
         explicit Director(std::unique_ptr<NUClear::Environment> environment);
