@@ -284,8 +284,8 @@ namespace extension::behaviour {
 
             // Work out who is sending the task so we can determine if it's a subtask
             auto* task           = NUClear::threading::ReactionTask::get_current_task();
-            uint64_t reaction_id = task ? task->parent.id : -1;
-            uint64_t task_id     = task ? task->id : -1;
+            uint64_t reaction_id = (task != nullptr) ? task->parent.id : -1;
+            uint64_t task_id     = (task != nullptr) ? task->id : -1;
 
             NUClear::dsl::word::emit::Direct<T>::emit(powerplant,
                                                       std::make_shared<commands::DirectorTask>(typeid(T),
