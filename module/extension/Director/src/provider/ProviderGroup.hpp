@@ -25,7 +25,7 @@
 
 #include "Provider.hpp"
 
-namespace module::extension {
+namespace module::extension::provider {
 
     struct ProviderGroup {
 
@@ -58,6 +58,6 @@ namespace module::extension {
         std::vector<std::map<std::type_index, ProviderGroup>::iterator> subordinates;
     };
 
-}  // namespace module::extension
+}  // namespace module::extension::provider
 
 #endif  // MODULE_EXTENSION_DIRECTOR_PROVIDERGROUP_HPP

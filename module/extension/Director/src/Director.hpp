@@ -22,7 +22,7 @@
 #include <nuclear>
 #include <typeindex>
 
-#include "director/ProviderGroup.hpp"
+#include "provider/ProviderGroup.hpp"
 
 #include "extension/Behaviour.hpp"
 
@@ -87,9 +87,9 @@ namespace module::extension {
 
     private:
         /// A list of Provider groups
-        std::map<std::type_index, ProviderGroup> groups;
+        std::map<std::type_index, provider::ProviderGroup> groups;
         /// Maps reaction_id to the Provider which implements it
-        std::map<uint64_t, std::shared_ptr<Provider>> providers;
+        std::map<uint64_t, std::shared_ptr<provider::Provider>> providers;
 
         /// A list of reaction_task_ids to director_task objects, once the Provider has finished running it will emit
         /// all these as a pack so that the director can work out when Providers change which subtasks they emit

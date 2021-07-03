@@ -23,7 +23,7 @@
 
 #include "extension/Behaviour.hpp"
 
-namespace module::extension {
+namespace module::extension::provider {
 
     /**
      * A Provider instance which is able to execute a specific task type
@@ -70,6 +70,6 @@ namespace module::extension {
         bool active = false;
     };
 
-}  // namespace module::extension
+}  // namespace module::extension::provider
 
 #endif  // MODULE_EXTENSION_DIRECTOR_PROVIDER_HPP
