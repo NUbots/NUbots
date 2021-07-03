@@ -52,13 +52,6 @@ namespace module::extension {
         int state;
     };
 
-    /**
-     * Adds a Provider to the list of active Providers
-     *
-     * @param provides the provides message that contains the details we need to make a new provider
-     *
-     * @throws std::runtime_error if `r` has previously had a Provider added
-     */
     void Director::add_provider(const ProvidesReaction& provides) {
 
         auto& group = groups[provides.type];
@@ -73,13 +66,6 @@ namespace module::extension {
         providers.emplace(provides.reaction->id, provider);
     }
 
-    /**
-     * Removes a Provider from our list when it is unbound
-     *
-     * @param id the reaction id for the Provider to be removed
-     *
-     * @throws std::runtime_error if the Provider which the id refers to has not been loaded
-     */
     void Director::remove_provider(const uint64_t& id) {
 
         // If we can find it, erase it
