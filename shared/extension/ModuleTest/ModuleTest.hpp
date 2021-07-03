@@ -28,31 +28,6 @@
 
 namespace extension {
 
-    class EmissionCatcher : public NUClear::Reactor {
-    public:
-        EmissionCatcher() = default;
-        ~EmissionCatcher() {
-            unbind_all();
-        }
-        EmissionCatcher(EmissionCatcher& other)  = delete;
-        EmissionCatcher(EmissionCatcher&& other) = delete;
-        EmissionCatcher& operator=(EmissionCatcher& other) = delete;
-        EmissionCatcher&& operator=(EmissionCatcher&& other) = delete;
-
-        inline void unbind_all() {
-            for (auto& handle : reaction_handles) {
-                handle.unbind();
-            }
-            reaction_handles.clear();
-        }
-
-        inline
-
-            private
-            : std::vector<NUClear::threading::ReactionHandle>
-                  reaction_handles{};
-    }
-
     template <typename Module>
     class ModuleTest : private NUClear::PowerPlant {
     public:
