@@ -75,7 +75,7 @@ namespace module::extension {
          * @return true     if the challenger has strictly higher priority than the incumbent
          * @return false    if the incumbent task has equal or higher priority
          */
-        bool compare_priority(const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& incumbent,
+        [[nodiscard]] bool compare_priority(const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& incumbent,
                               const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& challenger);
 
     public:
