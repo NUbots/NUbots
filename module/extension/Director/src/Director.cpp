@@ -55,9 +55,8 @@ namespace module::extension {
     /**
      * Adds a Provider to the list of active Providers
      *
-     * @param data_type the data type that this Provider services
-     * @param r         the reaction that is used to run this Provider
-     * @param action    the action type for this Provider (entering, leaving, normal)
+     * @param provides the provides message that contains the details we need to make a new provider
+     *
      * @throws std::runtime_error if `r` has previously had a Provider added
      */
     void Director::add_provider(const ProvidesReaction& provides) {
@@ -70,7 +69,7 @@ namespace module::extension {
         }
 
         auto provider = std::make_shared<Provider>(provides.classification, provides.type, provides.reaction);
-        group.providers.emplace_back(provider);
+        group.providers.push_back(provider);
         providers.emplace(provides.reaction->id, provider);
     }
 
@@ -212,19 +211,19 @@ namespace module::extension {
         // This reaction runs when a Provider finishes to send off the task pack to the main director
         on<Trigger<ProviderDone>, Sync<DirectorTask>>().then("Package Tasks", [this](const ProviderDone& done) {
             // Get all the tasks that were emitted by this provider and send it as a task pack
-            auto e = pack_builder.equal_range(done.requester_task_id);
-            TaskPack tasks;
+            auto e     = pack_builder.equal_range(done.requester_task_id);
+            auto tasks = std::make_unique(tasks);
             for (auto it = e.first; it != e.second; ++it) {
-                tasks.emplace_back(it->second);
+                tasks->emplace_back(it->second);
             }
 
             // Sort the task pack so highest priority tasks come first
-            std::sort(tasks.begin(), tasks.end(), [](const auto& a, const auto& b) {
+            std::sort(tasks->begin(), tasks->end(), [](const auto& a, const auto& b) {
                 return a->priority < b->priority;
             });
 
             // Emit the task pack
-            emit(std::make_unique<TaskPack>(TaskPack(std::move(tasks))));
+            emit(tasks);
 
             // Erase the task pack builder for this id
             pack_builder.erase(done.requester_task_id);
