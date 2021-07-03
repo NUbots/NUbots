@@ -74,9 +74,12 @@ namespace module::extension {
          *
          * @return true     if the challenger has strictly higher priority than the incumbent
          * @return false    if the incumbent task has equal or higher priority
+         *
+         * @throws std::runtime_error if the directors provider anscestory is broken
          */
-        [[nodiscard]] bool compare_priority(const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& incumbent,
-                              const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& challenger);
+        [[nodiscard]] bool challenge_priority(
+            const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& incumbent,
+            const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& challenger);
 
     public:
         /// Called by the powerplant to build and setup the Director reactor.
