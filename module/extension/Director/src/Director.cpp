@@ -96,10 +96,7 @@ namespace module::extension {
             }
 
             // Erase the Provider from this group
-            auto g_it = std::find(group.providers.begin(), group.providers.end(), provider);
-            if (g_it != group.providers.end()) {
-                group.providers.erase(g_it);
-            }
+            group.providers.erase(std::remove(group.providers.begin(), group.providers.end(), provider), group.providers.end());
 
             // Now we need to deal with the cases where this Providers was in use when it was unbound
             if (provider->active) {
