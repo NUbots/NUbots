@@ -29,6 +29,17 @@ namespace module::extension {
 
     using ::extension::behaviour::commands::DirectorTask;
 
+    namespace {
+        struct TaskPriority {
+            TaskPriority(const uint64_t& id_, const int& priority_, const bool& optional_)
+                : id(id_), priority(priority_), optional(optional_) {}
+
+            uint64_t id;
+            int priority;
+            bool optional;
+        };
+    }  // namespace
+
     bool Director::challenge_priority(const std::shared_ptr<const DirectorTask>& incumbent,
                                       const std::shared_ptr<const DirectorTask>& challenger) {
 
@@ -39,8 +50,8 @@ namespace module::extension {
 
         // Function to get the priorities of the ancestors of this task
         auto get_ancestor_priorities = [this](const std::shared_ptr<const DirectorTask>& task) {
-            // We are our first ancestor
-            std::vector<std::tuple<uint64_t, int, bool>> ancestors;
+            // We are our first anscestor
+            std::vector<TaskPriority> ancestors;
             ancestors.emplace_back(task->requester_id, task->priority, task->optional);
 
             // Loop up through the providers until we reach a point where a task was emitted by a non provider
@@ -71,19 +82,19 @@ namespace module::extension {
         auto b_p = get_ancestor_priorities(b);
 
         // Remove all of the common ancestors
-        while (std::get<0>(a_p.back()) == std::get<0>(b_p.back())) {
+        while (a_p.back().id == b_p.back().id) {
             a_p.pop_back();
             b_p.pop_back();
         }
 
         // Work out if there are any optionals in either of the tasks parentage
-        const bool a_optional = std::any_of(a_p.begin(), a_p.end(), [](const auto& v) { return std::get<2>(v); });
-        const bool b_optional = std::any_of(b_p.begin(), b_p.end(), [](const auto& v) { return std::get<2>(v); });
+        const bool a_optional = std::any_of(a_p.begin(), a_p.end(), [](const auto& v) { return v.optional; });
+        const bool b_optional = std::any_of(b_p.begin(), b_p.end(), [](const auto& v) { return v.optional; });
 
         // If both or neither are optional then we compare at the point where they were siblings.
         // If both are optional then we would rather that whichever ancestor had higher priority have its optional tasks
         if (a_optional == b_optional) {
-            return std::get<1>(a_p.back()) < std::get<1>(b_p.back());
+            return a_p.back().priority < b_p.back().priority;
         }
 
         // If the optionals are not equal then return if a_optional is true. a being optional would make it less than b
