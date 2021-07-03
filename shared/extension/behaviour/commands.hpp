@@ -83,10 +83,10 @@ namespace extension::behaviour::commands {
          */
         WhenExpression(const std::shared_ptr<NUClear::threading::Reaction>& reaction_,
                        const std::type_index& type_,
-                       bool (*validator_)(const int&),
-                       int (*current_)(),
-                       NUClear::threading::ReactionHandle (*binder_)(NUClear::Reactor&,
-                                                                     std::function<void(const int&)>))
+                       std::function<bool(const int&)> validator_,
+                       std::function<int()> current_,
+                       std::function<NUClear::threading::ReactionHandle(NUClear::Reactor&,
+                                                                        std::function<void(const int&)>)> binder_)
             : reaction(reaction_), type(type_), validator(validator_), current(current_), binder(binder_) {}
 
         /// The Provider reaction that is contingent on this when condition
@@ -94,11 +94,11 @@ namespace extension::behaviour::commands {
         /// The enum type that this when expression is looking at
         std::type_index type;
         /// Function to determine if the passed state is valid
-        bool (*validator)(const int&);
+        std::function<bool(const int&)> validator;
         /// Function to get the current state from the global cache
-        int (*current)();
+        std::function<int()> current;
         /// Function to bind a reaction to monitor when this state changes
-        NUClear::threading::ReactionHandle (*binder)(NUClear::Reactor&, std::function<void(const int&)>);
+        std::function<NUClear::threading::ReactionHandle(NUClear::Reactor&, std::function<void(const int&)>)> binder;
     };
 
     /**
@@ -138,6 +138,7 @@ namespace extension::behaviour::commands {
          */
         ProviderDone(const uint64_t& requester_id, const uint64_t& requester_task_id)
             : requester_id(requester_id), requester_task_id(requester_task_id) {}
+
         /// The reaction_id of the Provider that finished
         uint64_t requester_id;
         /// The specific task_id of the Provider that finished
@@ -160,9 +161,9 @@ namespace extension::behaviour::commands {
          * @param priority              the priority that this task is to run with
          * @param optional              whether this task is optional or not
          */
-        DirectorTask(std::type_index type_,
-                     uint64_t requester_id_,
-                     uint64_t requester_task_id_,
+        DirectorTask(const std::type_index& type_,
+                     const uint64_t& requester_id_,
+                     const uint64_t& requester_task_id_,
                      std::shared_ptr<void> data_,
                      const std::string& name_,
                      const int& priority_,
@@ -170,7 +171,7 @@ namespace extension::behaviour::commands {
             : type(type_)
             , requester_id(requester_id_)
             , requester_task_id(requester_task_id_)
-            , data(data_)
+            , data(std::move(data_))
             , name(name_)
             , priority(priority_)
             , optional(optional_) {}

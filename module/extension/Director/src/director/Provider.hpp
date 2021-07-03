@@ -31,22 +31,22 @@ namespace module::extension {
     struct Provider {
 
         /**
-         * The data held by a when condition in order to monitor when the condition will be met, as well as to
-         * compare it to causing statements to determine if those causing statements would satisfy this Provider
+         * The data held by a `When` condition in order to monitor when the condition will be met, as well as to
+         * compare it to `Causing` statements to determine if those `Causing` statements would satisfy this Provider
          */
         struct WhenCondition {
             WhenCondition(const std::type_index& type_,
-                          bool (*validator_)(const int&),
-                          int (*current_)(),
+                          std::function<bool(const int&)> validator_,
+                          std::function<int()> current_,
                           NUClear::threading::ReactionHandle handle_)
                 : type(type_), validator(validator_), current(current_), handle(std::move(handle_)) {}
 
             /// The type of state that this condition is checking
             std::type_index type;
             /// Expression to determine if the passed state is valid
-            bool (*validator)(const int&);
+            std::function<bool(const int&)> validator;
             /// Function to get the current state
-            int (*current)();
+            std::function<int()> current;
             /// The reaction handle which is monitoring this state for a valid condition
             NUClear::threading::ReactionHandle handle;
         };

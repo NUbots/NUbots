@@ -183,7 +183,8 @@ namespace module::extension {
             add_causing(causing);
         });
 
-        // A task has arrived, either it's a root task and send it off, or build up our pack for when it's done
+        // A task has arrived, either it's a root task so we send it off immediately, or we build up our pack for when
+        // the Provider has finished executing
         on<Trigger<DirectorTask>, Sync<DirectorTask>>().then(
             "Director Task",
             [this](std::shared_ptr<const DirectorTask> task) {
@@ -208,15 +209,15 @@ namespace module::extension {
         // This reaction runs when a Provider finishes to send off the task pack to the main director
         on<Trigger<ProviderDone>, Sync<DirectorTask>>().then("Package Tasks", [this](const ProviderDone& done) {
             // Get all the tasks that were emitted by this provider and send it as a task pack
-            auto e     = pack_builder.equal_range(done.requester_task_id);
-            auto tasks = std::make_unique(tasks);
-            for (auto it = e.first; it != e.second; ++it) {
+            auto range = pack_builder.equal_range(done.requester_task_id);
+            auto tasks = std::make_unique<TaskPack>();
+            for (auto it = range.first; it != range.second; ++it) {
                 tasks->emplace_back(it->second);
             }
 
             // Sort the task pack so highest priority tasks come first
             std::sort(tasks->begin(), tasks->end(), [](const auto& a, const auto& b) {
-                return a->priority < b->priority;
+                return a->priority > b->priority;
             });
 
             // Emit the task pack

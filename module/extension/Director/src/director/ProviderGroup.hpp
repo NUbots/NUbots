@@ -33,16 +33,16 @@ namespace module::extension {
          * The current state of the Provider group
          */
         enum State {
-            /// This Provider currently isn't doing anything
+            /// This Provider group currently isn't doing anything
             IDLE,
-            /// This Provider is currently in an "Entering" state
+            /// This Provider group is currently in an "Entering" state
             ENTERING,
             /// This Provider group is currently in a "Normal" state
             NORMAL,
             /// This Provider group is currently in a "Leaving" state
             LEAVING,
             /// This Provider group is not running because it has requirements that are not met, in order to meet
-            /// these requirements it is taking control of another currently running Provider
+            /// these requirements it is taking control of another currently running Provider group
             PROXYING
         };
 
