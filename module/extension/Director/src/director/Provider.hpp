@@ -54,7 +54,7 @@ namespace module::extension {
         Provider(const ::extension::behaviour::commands::ProviderClassification& classification_,
                  const std::type_index& type_,
                  const std::shared_ptr<NUClear::threading::Reaction>& reaction_)
-            : classification(classification_), type(type_), reaction(reaction_), active(false) {}
+            : classification(classification_), type(type_), reaction(reaction_) {}
 
         /// The classification of this Provider
         ::extension::behaviour::commands::ProviderClassification classification;
@@ -67,7 +67,7 @@ namespace module::extension {
         /// A list of types and states that are caused by running this Provider
         std::map<std::type_index, int> causing;
         /// A boolean that is true if this Provider is currently active and running (can make subtasks)
-        bool active;
+        bool active = false;
     };
 
 }  // namespace module::extension

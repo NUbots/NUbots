@@ -109,7 +109,7 @@ namespace module::extension {
                     log<NUClear::ERROR>("The last Provider for a type was removed while there were still tasks for it");
                 }
                 else {
-                    // TODO run the current task in the group to refresh which Provider is chosen
+                    // TODO(@TrentHouliston) run the current task in the group to refresh which Provider is chosen
                     // run_task(group.active_task);
                 }
             }

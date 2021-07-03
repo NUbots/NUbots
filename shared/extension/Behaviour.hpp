@@ -45,7 +45,7 @@ namespace extension::behaviour {
         /**
          * Default constructor, as data will be null NUClear will be told not to execute this task.
          */
-        TaskInfo() {}
+        TaskInfo() = default;
 
         /**
          * Construct a new TaskInfo object for the provided task data
@@ -59,7 +59,7 @@ namespace extension::behaviour {
          *
          * @return the data that is contained within this TaskInfo object
          */
-        const T& operator*() {
+        [[nodiscard]] const T& operator*() {
             return *data;
         }
 
@@ -69,7 +69,7 @@ namespace extension::behaviour {
          * @return true     there is data, NUClear should run the task
          * @return false    there is no data, NUClear should not run the task
          */
-        operator bool() {
+        [[nodiscard]] operator bool() {
             return data != nullptr;
         }
 
