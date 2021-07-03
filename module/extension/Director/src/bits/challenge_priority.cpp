@@ -39,22 +39,25 @@ namespace module::extension {
 
         // Function to get the priorities of the ancestors of this task
         auto get_ancestor_priorities = [this](const std::shared_ptr<const DirectorTask>& task) {
-            // Loop up through the providers until we reach a point where a task was emitted by a non provider
+            // We are our first anscestor
             std::vector<std::tuple<uint64_t, int, bool>> ancestors;
+            ancestors.emplace_back(task->requester_id, task->priority, task->optional);
+
+            // Loop up through the providers until we reach a point where a task was emitted by a non provider
             for (auto t = task; providers.count(t->requester_id) != 0;) {
 
                 // Get the provider that emitted this task, and from that the provider group
                 auto provider = providers[t->requester_id];
                 auto& group   = groups[provider->type];
 
-                if (group.active_task != nullptr) {
-
-                    ancestors.emplace_back(t->requester_id, t->priority, t->optional);
-                    t = group.active_task;
-                }
-                else {
+                // If there is no active task something has gone wrong with the algorithm
+                if (group.active_task == nullptr) {
                     throw std::runtime_error("Task has broken parentage");
                 }
+
+                // Add this new parent we found and set t so we can loop up further
+                t = group.active_task;
+                ancestors.emplace_back(t->requester_id, t->priority, t->optional);
             }
             return ancestors;
         };
