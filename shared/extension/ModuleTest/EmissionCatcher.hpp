@@ -17,21 +17,50 @@
  * Copyright 2021 NUbots <nubots@nubots.net>
  */
 
-#ifndef EXTENSION_MODULETEST_EXTENSIONCATCHER_HPP
-#define EXTENSION_MODULETEST_EXTENSIONCATCHER_HPP
+#ifndef EXTENSION_MODULETEST_EMISSIONCATCHER_HPP
+#define EXTENSION_MODULETEST_EMISSIONCATCHER_HPP
 
+#include <catch.hpp>
 #include <nuclear>
 
 namespace extension::moduletest {
 
+    template <typename MessageType>
+    struct EmissionBind {
+        EmissionBind() = delete;
+        explicit EmissionBind(std::shared_ptr<MessageType> message_) : message(message_){};
+        std::shared_ptr<MessageType> message;
+    };
+
     class EmissionCatcher : public NUClear::Reactor {
     public:
-        explicit EmissionCatcher(std::unique_ptr<NUClear::Environment> environment);
+        template <typename MessageType>
+        explicit EmissionCatcher(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+            on<Trigger<extension::moduletest::EmissionBind<MessageType>>>().then(
+                // TODO: This doesn't work, because this wants me to know MessageType when I construct the
+                // EmissionCatcher, but what I want to do is pass in different types after this reactor has been
+                // constructed. So MessageType will change after each expected emission is loaded in. This set up does
+                // not allow that though
+                [this](const EmissionBind<MessageType>& emission_bind) {  //
+                    bind_catcher(emission_bind.message);
+                });
+        }
 
         template <typename MessageType>
-        void bind_catcher(std::shared_ptr<MessageType> message);
+        void bind_catcher(std::shared_ptr<MessageType> message) {
+            INFO("Binding message pointer to catch emitted message.");
+            auto handle = on<MessageType>().then([message](const MessageType& emitted_message) {  //
+                *message = emitted_message;
+            });
+            handles.push_back(handle);
+        }
 
-        void unbind_all();
+        inline void unbind_all() {
+            for (auto& handle : handles) {
+                handle.unbind();
+            }
+            handles.clear();
+        }
 
     private:
         std::vector<NUClear::threading::ReactionHandle> handles{};

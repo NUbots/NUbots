@@ -33,7 +33,6 @@ namespace extension::moduletest {
         ModuleTest() = delete;
 
         // TODO: somehow disable the reactions which aren't on<Trigger<..>>, such as on<Every<..>> or on<Always>
-
         explicit ModuleTest(const bool start_powerplant_automatically = true)
             : NUClear::PowerPlant(get_single_thread_config()) {
             install<EmissionCatcher>();
@@ -66,7 +65,7 @@ namespace extension::moduletest {
 
         template <typename MessageType>
         void bind_catcher_for_next_reaction(std::shared_ptr<MessageType> message) {
-            catcher.bind_catcher(message);
+            powerplant->emit(extension::moduletest::EmissionBind(message));
         }
 
         ModuleTest(ModuleTest& other)  = delete;
@@ -82,7 +81,7 @@ namespace extension::moduletest {
         }
 
         extension::moduletest::EmissionCatcher catcher;
-        bool started = false;  // TODO: review if this is necessary
+        bool started = false;  // TODO: throw if we do something we shouldn't, based on this bool
     };
 
 }  // namespace extension::moduletest
