@@ -22,7 +22,7 @@
 #include <nuclear>
 #include <typeindex>
 
-#include "director/ProviderGroup.hpp"
+#include "provider/ProviderGroup.hpp"
 
 #include "extension/Behaviour.hpp"
 
@@ -62,15 +62,34 @@ namespace module::extension {
          */
         void add_causing(const ::extension::behaviour::commands::CausingExpression& causing);
 
+        /**
+         * Compares the priorities of two director tasks and returns true if the challenger has priority over the
+         * incumbent.
+         *
+         * The function requires that the challenger's precendence is strictly greater than the incumbent's.
+         * This ensures that we don't change tasks unnecessarily when the priority is equal.
+         *
+         * @param incumbent     the task to compare which is currently the active running task
+         * @param challenger    the task to compare which wants to run but is not currently running
+         *
+         * @return true     if the challenger has strictly higher priority than the incumbent
+         * @return false    if the incumbent task has equal or higher priority
+         *
+         * @throws std::runtime_error if the director's provider ancestry is broken
+         */
+        [[nodiscard]] bool challenge_priority(
+            const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& incumbent,
+            const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& challenger);
+
     public:
         /// Called by the powerplant to build and setup the Director reactor.
         explicit Director(std::unique_ptr<NUClear::Environment> environment);
 
     private:
         /// A list of Provider groups
-        std::map<std::type_index, ProviderGroup> groups;
+        std::map<std::type_index, provider::ProviderGroup> groups;
         /// Maps reaction_id to the Provider which implements it
-        std::map<uint64_t, std::shared_ptr<Provider>> providers;
+        std::map<uint64_t, std::shared_ptr<provider::Provider>> providers;
 
         /// A list of reaction_task_ids to director_task objects, once the Provider has finished running it will emit
         /// all these as a pack so that the director can work out when Providers change which subtasks they emit
