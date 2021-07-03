@@ -74,7 +74,7 @@ namespace module::extension {
             return ancestors;
         };
 
-        // Get the ancestor priorities of a and b
+        // Get the ancestor priorities of the two tasks
         auto i_p = get_ancestor_priorities(incumbent);
         auto c_p = get_ancestor_priorities(challenger);
 
