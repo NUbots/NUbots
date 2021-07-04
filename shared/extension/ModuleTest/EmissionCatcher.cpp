@@ -20,29 +20,21 @@
 #include "EmissionCatcher.hpp"
 
 namespace extension::moduletest {
+    using extension::moduletest::EmissionBind;
 
-    // template <typename MessageType>
-    // EmissionCatcher::EmissionCatcher(std::unique_ptr<NUClear::Environment> environment)
-    //     : Reactor(std::move(environment)) {
-    //     on<Trigger<extension::moduletest::EmissionBind<MessageType>>>().then(
-    //         [this](const EmissionBind<MessageType>& emission_bind) {  //
-    //             bind_catcher(emission_bind.message);
-    //         });
-    // }
+    EmissionCatcher::EmissionCatcher(std::unique_ptr<NUClear::Environment> environment)
+        : Reactor(std::move(environment)) {
+        on<Trigger<EmissionBind>>().then([this](const EmissionBind& emission_bind) {
+            auto binding_function = emission_bind.binding_function;
+            auto handle           = binding_function(*this);
+            handles.push_back(handle);
+        });
+    }
 
-    // template <typename MessageType>
-    // void EmissionCatcher::bind_catcher(std::shared_ptr<MessageType> message) {
-    //     INFO("Binding message pointer to catch emitted message.");
-    //     auto handle = on<MessageType>().then([message](const MessageType& emitted_message) {  //
-    //         *message = emitted_message;
-    //     });
-    //     handles.push_back(handle);
-    // }
-
-    // void EmissionCatcher::unbind_all() {
-    //     for (auto& handle : handles) {
-    //         handle.unbind();
-    //     }
-    //     handles.clear();
-    // }
+    void EmissionCatcher::unbind_all() {
+        for (auto& handle : handles) {
+            handle.unbind();
+        }
+        handles.clear();
+    }
 }  // namespace extension::moduletest

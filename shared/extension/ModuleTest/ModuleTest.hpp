@@ -58,14 +58,16 @@ namespace extension::moduletest {
             shutdown();
         }
 
-        // template <typename MessageType>
-        // void emit(const MessageType& msg) {
-        //     powerplant->emit(std::make_unique<MessageType>(msg));
-        // }
-
         template <typename MessageType>
         void bind_catcher_for_next_reaction(std::shared_ptr<MessageType> message) {
-            powerplant->emit(extension::moduletest::EmissionBind(message));
+            auto binding_function =
+                [message](NUClear::Reactor& emission_catcher) -> NUClear::threading::ReactionHandle {
+                return emission_catcher.on<NUClear::dsl::word::Trigger<MessageType>>().then(  //
+                    [message](const MessageType& emitted_message) {                           //
+                        *message = emitted_message;
+                    });
+            };
+            powerplant->emit(std::make_unique<extension::moduletest::EmissionBind>(binding_function));
         }
 
         ModuleTest(ModuleTest& other)  = delete;
