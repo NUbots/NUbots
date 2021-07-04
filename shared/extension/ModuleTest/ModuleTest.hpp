@@ -67,7 +67,7 @@ namespace extension::moduletest {
                         *message = emitted_message;
                     });
             };
-            powerplant->emit(std::make_unique<extension::moduletest::EmissionBind>(binding_function));
+            emit(std::make_unique<extension::moduletest::EmissionBind>(binding_function));
         }
 
         ModuleTest(ModuleTest& other)  = delete;
