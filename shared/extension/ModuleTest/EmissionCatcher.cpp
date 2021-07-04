@@ -17,25 +17,24 @@
  * Copyright 2021 NUbots <nubots@nubots.net>
  */
 
-#include "EmissionCatcher.hpp"
+// #include "EmissionCatcher.hpp"
 
-namespace extension::moduletest {
-    using extension::moduletest::EmissionBind;
+// namespace extension::moduletest {
+//     using extension::moduletest::EmissionBind;
 
-    // EmissionCatcher::EmissionCatcher(std::unique_ptr<NUClear::Environment> environment)
-    //     : Reactor(std::move(environment)) {
-    //     on<Trigger<EmissionBind>>().then([this](const EmissionBind& emission_bind) {
-    //         auto binding_function = emission_bind.binding_function;
-    //         auto handle           = binding_function(*this);
-    //         handles.push_back(handle);
-    //     });
-    //     on<Trigger<UnbindAllCommand>>().then([this](const UnbindAllCommand& /*cmd*/) { unbind_all(); });
-    // }
+//     // EmissionCatcher::EmissionCatcher(std::unique_ptr<NUClear::Environment> environment)
+//     //     : Reactor(std::move(environment)) {
+//     //     on<Trigger<EmissionBind>>().then([this](const EmissionBind& emission_bind) {
+//     //         auto binding_function = emission_bind.binding_function;
+//     //         auto handle           = binding_function(*this);
+//     //         handles.push_back(handle);
+//     //     });
+//     // }
 
-    // void EmissionCatcher::unbind_all() {
-    //     for (auto& handle : handles) {
-    //         handle.unbind();
-    //     }
-    //     handles.clear();
-    // }
-}  // namespace extension::moduletest
+//     // void EmissionCatcher::unbind_all() {
+//     //     for (auto& handle : handles) {
+//     //         handle.unbind();
+//     //     }
+//     //     handles.clear();
+//     // }
+// }  // namespace extension::moduletest

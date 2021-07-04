@@ -27,14 +27,16 @@
 namespace extension::moduletest {
     using NUClear::threading::ReactionHandle;
 
+    class EmissionCatcher;
+
     struct EmissionBind {
         EmissionBind() = delete;
-        explicit EmissionBind(const std::function<ReactionHandle(NUClear::Reactor& emission_catcher)>& b_fn)
-            : binding_function(b_fn) {}
-        std::function<ReactionHandle(NUClear::Reactor& emission_catcher)> binding_function;
+        explicit EmissionBind(const std::function<ReactionHandle(EmissionCatcher& emission_catcher)>& b_fn,
+                              const ssize_t& num_reactions_bound_)
+            : binding_function(b_fn), num_reactions_bound(num_reactions_bound_) {}
+        std::function<ReactionHandle(EmissionCatcher& emission_catcher)> binding_function;
+        ssize_t num_reactions_bound = 0;
     };
-
-    struct UnbindAllCommand {};
 
     class EmissionCatcher : public NUClear::Reactor {
     public:
@@ -44,8 +46,9 @@ namespace extension::moduletest {
                 auto binding_function = emission_bind.binding_function;
                 auto handle           = binding_function(*this);
                 handles.push_back(handle);
+                num_reactions_left = emission_bind.num_reactions_bound;
             });
-            on<Trigger<UnbindAllCommand>>().then([this](const UnbindAllCommand& /*cmd*/) { unbind_all(); });
+            on<Shutdown>().then([this]() { unbind_all(); });
         };
 
         inline void unbind_all() {
@@ -54,6 +57,8 @@ namespace extension::moduletest {
             }
             handles.clear();
         }
+        /// Serves as a counter of emissions yet to be captured. After this hits zero again, shutdown is triggered
+        ssize_t num_reactions_left = 0;
 
     private:
         std::vector<ReactionHandle> handles{};

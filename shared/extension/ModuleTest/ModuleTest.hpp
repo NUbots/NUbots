@@ -22,6 +22,7 @@
 
 #include <catch.hpp>
 #include <nuclear>
+#include <thread>
 
 #include "EmissionCatcher.hpp"
 
@@ -30,44 +31,33 @@ namespace extension::moduletest {
     template <typename Module>
     class ModuleTest : public NUClear::PowerPlant {
     public:
-        ModuleTest() = delete;
-
         // TODO: somehow disable the reactions which aren't on<Trigger<..>>, such as on<Every<..>> or on<Always>
-        explicit ModuleTest(const bool start_powerplant_automatically = true)
-            : NUClear::PowerPlant(get_single_thread_config()) {
+        ModuleTest() : NUClear::PowerPlant(get_single_thread_config()) {
             install<EmissionCatcher>();
             install<Module>();
-            if (start_powerplant_automatically) {
-                startup_manually();
-            }
         }
         ~ModuleTest() {
-            emit<UnbindAllCommand>(std::make_unique<UnbindAllCommand>());
-            started = false;
             shutdown();
         }
-        void startup_manually() {
+        void start_test() {
+
             INFO("Starting up ModuleTest power plant.");
-            started = true;
             start();
-        }
-        void shutdown_manually() {
-            emit<UnbindAllCommand>(std::make_unique<UnbindAllCommand>());
-            INFO("Shutting down ModuleTest power plant. Further use will require a restart.");
-            started = false;
-            shutdown();
         }
 
         template <typename MessageType>
         void bind_catcher_for_next_reaction(std::shared_ptr<MessageType> message) {
-            auto binding_function =
-                [message](NUClear::Reactor& emission_catcher) -> NUClear::threading::ReactionHandle {
-                return emission_catcher.on<NUClear::dsl::word::Trigger<MessageType>>().then(  //
-                    [message](const MessageType& emitted_message) {                           //
+            auto binding_function = [message](EmissionCatcher& emission_catcher) -> NUClear::threading::ReactionHandle {
+                return emission_catcher.on<NUClear::dsl::word::Trigger<MessageType>>().then(
+                    [&emission_catcher, message](const MessageType& emitted_message) {  //
                         *message = emitted_message;
+                        emission_catcher.num_reactions_left--;
+                        if (emission_catcher.num_reactions_left <= 0) {
+                            emission_catcher.powerplant.shutdown();
+                        }
                     });
             };
-            emit(std::make_unique<extension::moduletest::EmissionBind>(binding_function));
+            emit(std::make_unique<extension::moduletest::EmissionBind>(binding_function, num_reactions_this_test));
         }
 
         ModuleTest(ModuleTest& other)  = delete;
@@ -82,8 +72,9 @@ namespace extension::moduletest {
             return cfg;
         }
 
-        bool started = false;  // TODO: throw if we do something we shouldn't, based on this bool
+        ssize_t num_reactions_this_test = 0;
     };
+
 
 }  // namespace extension::moduletest
 
