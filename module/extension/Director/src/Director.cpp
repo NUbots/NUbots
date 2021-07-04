@@ -35,8 +35,6 @@ namespace module::extension {
     using provider::ProviderGroup;
     using Unbind = NUClear::dsl::operation::Unbind<ProvidesReaction>;
 
-    using TaskPack = std::vector<std::shared_ptr<const DirectorTask>>;
-
     /**
      * This message gets emitted when a state we are monitoring is updated.
      * When a `When` condition is being waited on a reaction will start monitoring that state.
@@ -117,7 +115,10 @@ namespace module::extension {
             const auto id         = when.reaction->id;
             const auto type       = when.type;
             const auto validator  = when.validator;
-            ReactionHandle handle = when.binder(*this, [this, id, type, validator](const int& state) {  //
+            ReactionHandle handle = when.binder(*this, [this, id, type, validator](const int& state) {
+                // TODO(@TrentHouliston) only do the state update emit if the state variable actually changed too
+                // Otherwise some module out there might keep emitting that the Standing state has updated to the same
+                // value and then we will be sad because we will constantly reevaluate the director for no reason
                 if (validator(state)) {
                     emit(std::make_unique<StateUpdate>(id, type, state));
                 }
@@ -174,9 +175,9 @@ namespace module::extension {
         on<Trigger<DirectorTask>, Sync<DirectorTask>>().then(
             "Director Task",
             [this](std::shared_ptr<const DirectorTask> task) {
-                // Root level task, make the TaskPack immediately and send it off to be executed as a root task
+                // Root level task, make the pack immediately and send it off to be executed as a root task
                 if (providers.count(task->requester_id) == 0) {
-                    emit(std::make_unique<TaskPack>(TaskPack({task})));
+                    emit(std::make_unique<TaskList>(TaskList({task})));
                 }
                 // Check if this Provider is active and allowed to make subtasks
                 else if (providers[task->requester_id]->active) {
@@ -196,7 +197,7 @@ namespace module::extension {
         on<Trigger<ProviderDone>, Sync<DirectorTask>>().then("Package Tasks", [this](const ProviderDone& done) {
             // Get all the tasks that were emitted by this provider and send it as a task pack
             auto range = pack_builder.equal_range(done.requester_task_id);
-            auto tasks = std::make_unique<TaskPack>();
+            auto tasks = std::make_unique<TaskList>();
             for (auto it = range.first; it != range.second; ++it) {
                 tasks->push_back(it->second);
             }
@@ -213,24 +214,19 @@ namespace module::extension {
             pack_builder.erase(done.requester_task_id);
         });
 
-        // A state that we were monitoring is updated, we might be able to run the reaction now
+        // A state that we were monitoring is updated, we might be able to run the task now
         on<Trigger<StateUpdate>, Sync<Director>>().then("State Updated", [this](const StateUpdate& update) {
-            // TODO ALGORITHM SECTION HERE
-            // This state update event means the conditions for the Provider specified in the update are now met
+            // Get the group that had a state update
+            auto p  = providers[update.provider_id];
+            auto& g = groups[p->type];
+
+            // Go check if this state update has changed any of the tasks that are queued
+            reevaluate_queue(g);
         });
 
-        // We do things when we receive tasks to run
-        on<Trigger<TaskPack>, Sync<Director>>().then("Run Task Pack", [this](const TaskPack& pack) {
-            // TODO ALGORITHM SECTION HERE
-            // We have just been given a new task pack
-
-            // TODO check if there are tasks that were previously in the pack from this Provider and now are gone
-            // For those we need to end execution of those tasks (and their children)
-
-            for (const auto& task : pack) {
-                // TODO run this task through the director's algorithm to work out what to do with it
-                // TODO we need to process this pack as a whole, if one of the required actions fail they all do
-            }
+        // We have a new task pack to run
+        on<Trigger<TaskList>, Sync<Director>>().then("Run Task Pack", [this](const TaskList& pack) {  //
+            run_task_pack(pack);
         });
     }
 
