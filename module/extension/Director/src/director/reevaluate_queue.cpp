@@ -41,6 +41,11 @@ namespace module::extension {
                 auto& g = groups[p->type];
                 run_task_pack(g.subtasks);
             }
+
+            // If running this task pack claimed the active task we can stop looking
+            if (group.active_task == t) {
+                break;
+            }
         }
     }
 
