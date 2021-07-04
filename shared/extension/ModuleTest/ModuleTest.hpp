@@ -42,8 +42,8 @@ namespace extension::moduletest {
             }
         }
         ~ModuleTest() {
+            emit<UnbindAllCommand>(std::make_unique<UnbindAllCommand>());
             started = false;
-            catcher.unbind_all();
             shutdown();
         }
         void startup_manually() {
@@ -52,9 +52,9 @@ namespace extension::moduletest {
             start();
         }
         void shutdown_manually() {
+            emit<UnbindAllCommand>(std::make_unique<UnbindAllCommand>());
             INFO("Shutting down ModuleTest power plant. Further use will require a restart.");
             started = false;
-            catcher.unbind_all();
             shutdown();
         }
 
@@ -82,7 +82,6 @@ namespace extension::moduletest {
             return cfg;
         }
 
-        extension::moduletest::EmissionCatcher catcher;
         bool started = false;  // TODO: throw if we do something we shouldn't, based on this bool
     };
 
