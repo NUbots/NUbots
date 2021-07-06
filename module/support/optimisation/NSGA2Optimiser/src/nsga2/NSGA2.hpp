@@ -19,8 +19,9 @@ namespace nsga2 {
         virtual ~NSGA2() = default;
 
         bool InitializeFirstGeneration();
-        void CompleteGeneration();
+        void CompleteGenerationAndAdvance();
         void InitializeNextGeneration();
+        bool FinishedAllGenerations();
 
         // clang-format off
         void SetSeed(const int& _seed) { randGen->SetSeed(_seed); }
@@ -47,7 +48,6 @@ namespace nsga2 {
 
         void ReportParams(std::ostream& os) const;
         void ReportPop(const std::shared_ptr<Population>& pop, std::ostream& os) const;
-        void ReportFinalGenerationPop();
 
         std::shared_ptr<Population> getCurrentPop();
 

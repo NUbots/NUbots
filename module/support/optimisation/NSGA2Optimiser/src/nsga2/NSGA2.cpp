@@ -114,12 +114,24 @@ namespace nsga2 {
         return true;
     }
 
-    void NSGA2::CompleteGeneration() {
+    void NSGA2::CompleteGenerationAndAdvance() {
         if(currentGen == 0) {
             CompleteFirstGeneration();
         } else {
             CompleteOrdinaryGeneration();
         }
+
+        if(FinishedAllGenerations()) {
+            // Report the population of our final generation
+            ReportPop(parentPop, final_pop_file);
+        } else {
+            // Start the next generation (creates the new children for evaluation)
+            InitializeNextGeneration();
+        }
+    }
+
+    bool NSGA2::FinishedAllGenerations() {
+        return currentGen >= generations;
     }
 
     void NSGA2::CompleteFirstGeneration() {
@@ -195,10 +207,6 @@ namespace nsga2 {
         // all_pop_file << "# gen = " << currentGen << "\n";
         ReportPop(parentPop, all_pop_file);
         // all_pop_file.flush();
-    }
-
-    void NSGA2::ReportFinalGenerationPop() {
-        ReportPop(parentPop, final_pop_file);
     }
 
     void NSGA2::CreateStartingPopulations() {
