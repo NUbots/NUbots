@@ -89,6 +89,7 @@ namespace module {
                 /// @brief Robot state for this evaluation, used during fitness and constraint calculation
                 Eigen::Vector3d robotPosition = Eigen::Vector3d::Zero();
                 double robotDistanceTravelled = 0.0;
+                double maxFieldPlaneSway = 0.0;
 
                 /// @brief Keeps track of the last messages we received
                 NSGA2EvaluationRequest lastEvalRequestMsg;
@@ -113,6 +114,9 @@ namespace module {
 
                 /// @brief Check sensors to see if the robot has fallen
                 void CheckForFall(const RawSensorsMsg& sensors);
+
+                /// @brief Check sensors to update Max Field Plane Sway
+                void UpdateMaxFieldPlaneSway(const RawSensorsMsg& sensors);
 
                 /// @brief Check servo positions to see if the robot is now in the standing pose
                 void CheckForStandDone(const RawSensorsMsg& sensors);

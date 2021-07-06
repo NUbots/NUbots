@@ -149,6 +149,7 @@ namespace module {
 
                 on<Trigger<RawSensorsMsg>, Single>().then([this](const RawSensorsMsg& sensors) {
                     CheckForFall(sensors);
+                    UpdateMaxFieldPlaneSway(sensors);
 
                     if (currentState == State::STANDING) {
                         CheckForStandDone(sensors);
@@ -199,6 +200,18 @@ namespace module {
                                             std::fabs(accelerometer.y),
                                             std::fabs(accelerometer.z));
                         emit(std::make_unique<Event>(Event::Fallen));
+                    }
+                }
+            }
+
+            void NSGA2Evaluator::UpdateMaxFieldPlaneSway(const RawSensorsMsg& sensors) {
+                if (currentState == State::STANDING || currentState == State::WALKING) {
+                    auto accelerometer = sensors.accelerometer;
+
+                    // Calculate the robot sway along the field plane (left/right, forward/backward)
+                    double fieldPlaneSway = std::pow(std::pow(accelerometer.x, 2) + std::pow(accelerometer.y, 2), 0.5);
+                    if(fieldPlaneSway > maxFieldPlaneSway) {
+                        maxFieldPlaneSway = fieldPlaneSway;
                     }
                 }
             }
@@ -338,6 +351,7 @@ namespace module {
                 robotPosition[0]       = 0.0;
                 robotPosition[1]       = 0.0;
                 robotPosition[2]       = 0.0;
+                maxFieldPlaneSway      = 0.0;
 
                 // Tell Webots to reset the world
                 std::unique_ptr<OptimisationCommand> reset = std::make_unique<OptimisationCommand>();
@@ -425,7 +439,7 @@ namespace module {
 
             std::vector<double> NSGA2Evaluator::CalculateScores() {
                 return {
-                    1.0,  // Fix the first score as we're trying to optimise only the distance travelled
+                    maxFieldPlaneSway,  // For now, we want to reduce this
                     1.0 / robotDistanceTravelled  // 1/x since the NSGA2 optimiser is a minimiser
                 };
             }
