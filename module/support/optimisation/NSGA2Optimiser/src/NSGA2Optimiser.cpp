@@ -111,7 +111,7 @@ namespace module {
                     // Subsequent individuals will be evaluated after we get the evaluation scores for this individual
                     // (from the NSGA2FitnessScores trigger)
                     if (nsga2Algorithm.InitializeFirstGeneration()) {
-                        populateFirstGenEvaluationRequests();
+                        populateEvaluationRequests();
                         emit(std::make_unique<NSGA2EvaluatorReady>());
                     } else {
                         log<NUClear::ERROR>("Failed to initialise NSGA2");
@@ -159,19 +159,11 @@ namespace module {
                 });
             }
 
-            void NSGA2Optimiser::populateFirstGenEvaluationRequests() {
+            void NSGA2Optimiser::populateEvaluationRequests() {
                 for (int i = 0; i < nsga2Algorithm.popSize; i++) {
                     pendingEvaluationRequests.push(constructEvaluationRequest(i,
-                                            nsga2Algorithm.parentPop->generation,
-                                            nsga2Algorithm.parentPop->GetIndReals(i)));
-                }
-            }
-
-            void NSGA2Optimiser::populateOrdinaryGenEvaluationRequests() {
-                for (int i = 0; i < nsga2Algorithm.popSize; i++) {
-                    pendingEvaluationRequests.push(constructEvaluationRequest(i,
-                                            nsga2Algorithm.childPop->generation,
-                                            nsga2Algorithm.childPop->GetIndReals(i)));
+                                            nsga2Algorithm.getCurrentPop()->generation,
+                                            nsga2Algorithm.getCurrentPop()->GetIndReals(i)));
                 }
             }
 
@@ -183,8 +175,8 @@ namespace module {
 
             void NSGA2Optimiser::processFirstGenerationIndividual(int id, int generation, const std::vector<double>& objScore, const std::vector<double>& constraints) {
                 // Tell the algorithm the evaluation scores for this individual
-                nsga2Algorithm.parentPop->SetIndObjectiveScore(id, objScore);
-                nsga2Algorithm.parentPop->SetIndConstraints(id, constraints);
+                nsga2Algorithm.getCurrentPop()->SetIndObjectiveScore(id, objScore);
+                nsga2Algorithm.getCurrentPop()->SetIndConstraints(id, constraints);
 
                 if (atEndOfGeneration()) {
                     // End the first generation
@@ -192,15 +184,15 @@ namespace module {
 
                     // Start the next generation (creates the new children for evaluation)
                     nsga2Algorithm.InitializeNextGeneration();
-                    log<NUClear::INFO>("Advanced to new generation", nsga2Algorithm.childPop->generation);
-                    populateOrdinaryGenEvaluationRequests();
+                    log<NUClear::INFO>("Advanced to new generation", nsga2Algorithm.getCurrentPop()->generation);
+                    populateEvaluationRequests();
                 }
             }
 
             void NSGA2Optimiser::processOrdinaryGenerationIndividual(int id, int generation, const std::vector<double>& objScore, const std::vector<double>& constraints) {
                 // Tell the algorithm the evaluation scores for this individual
-                nsga2Algorithm.childPop->SetIndObjectiveScore(id, objScore);
-                nsga2Algorithm.childPop->SetIndConstraints(id, constraints);
+                nsga2Algorithm.getCurrentPop()->SetIndObjectiveScore(id, objScore);
+                nsga2Algorithm.getCurrentPop()->SetIndConstraints(id, constraints);
 
                 if (atEndOfGeneration()) {
                     // End the generation and save its data
@@ -208,15 +200,15 @@ namespace module {
 
                     // Start the next generation (creates the new children for evaluation)
                     nsga2Algorithm.InitializeNextGeneration();
-                    log<NUClear::INFO>("Advanced to new generation", nsga2Algorithm.childPop->generation);
-                    populateOrdinaryGenEvaluationRequests();
+                    log<NUClear::INFO>("Advanced to new generation", nsga2Algorithm.getCurrentPop()->generation);
+                    populateEvaluationRequests();
                 }
             }
 
             void NSGA2Optimiser::processFinalGenerationIndividual(int id, int generation, const std::vector<double>& objScore, const std::vector<double>& constraints) {
                 // Tell the algorithm the evaluation scores for this individual
-                nsga2Algorithm.childPop->SetIndObjectiveScore(id, objScore);
-                nsga2Algorithm.childPop->SetIndConstraints(id, constraints);
+                nsga2Algorithm.getCurrentPop()->SetIndObjectiveScore(id, objScore);
+                nsga2Algorithm.getCurrentPop()->SetIndConstraints(id, constraints);
 
                 if (atEndOfGeneration()) {
                     // End the generation and save its data

@@ -77,6 +77,14 @@ namespace nsga2 {
         }
     }
 
+    std::shared_ptr<Population> NSGA2::getCurrentPop() {
+        if(currentGen == 0) {
+            return parentPop;
+        } else {
+            return childPop;
+        }
+    }
+
     bool NSGA2::InitializeFirstGeneration() {
         NUClear::log<NUClear::INFO>("Initializing NSGA-II");
 
@@ -95,7 +103,11 @@ namespace nsga2 {
         bitLength = std::accumulate(binBits.begin(), binBits.end(), 0);
 
         CreateStartingPopulations();
+        currentGen = 0;
         parentPop->Initialize(randomInitialize);
+        parentPop->generation = currentGen;
+        mixedPop->generation = currentGen;
+        childPop->generation = currentGen;
         NUClear::log<NUClear::INFO>("Initialization done!");
 
         parentPop->Decode();
@@ -106,7 +118,7 @@ namespace nsga2 {
         parentPop->FastNDS();
         parentPop->CrowdingDistanceAll();
 
-        currentGen = 0;
+        currentGen++;
 
         ReportPop(parentPop, initial_pop_file);
 
@@ -119,7 +131,7 @@ namespace nsga2 {
     }
 
     void NSGA2::InitializeNextGeneration() {
-        NUClear::log<NUClear::INFO>("Advancing to generation", currentGen + 1);
+        NUClear::log<NUClear::INFO>("Advancing to generation", currentGen);
 
         // create next population Qt
         Selection(parentPop, childPop);
@@ -128,7 +140,7 @@ namespace nsga2 {
         realMutCount += mutationsCount.first;
         binMutCount += mutationsCount.second;
 
-        childPop->generation = currentGen + 1;
+        childPop->generation = currentGen;
         childPop->Decode();
         // childPop->Evaluate();
     }
@@ -136,15 +148,15 @@ namespace nsga2 {
     void NSGA2::CompleteOrdinaryGeneration() {
         // create population Rt = Pt U Qt
         mixedPop->Merge(*parentPop, *childPop);
-        mixedPop->generation = currentGen + 1;
+        mixedPop->generation = currentGen;
         mixedPop->FastNDS();
 
         // Pt + 1 = empty
         parentPop->inds.clear();
 
-        int i = 0;
+        int i = 0; //we need `i` after the loop
         // until |Pt+1| + |Fi| <= N, i.e. until parent population is filled
-        while (parentPop->GetSize() + int(mixedPop->front[i].size()) < popSize) {
+        for (parentPop->GetSize() + int(mixedPop->front[i].size()) < popSize) {
             std::vector<int>& Fi = mixedPop->front[i];
             mixedPop->CrowdingDistance(i);            // calculate crowding in Fi
             for (int j = 0; j < int(Fi.size()); j++)  // Pt+1 = Pt+1 U Fi

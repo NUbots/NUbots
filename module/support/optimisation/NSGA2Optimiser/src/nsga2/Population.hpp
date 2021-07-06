@@ -26,22 +26,30 @@ namespace nsga2 {
                    std::shared_ptr<RandomGenerator<>> _randGen,
                    const std::vector<double>& _initialRealVars);
         virtual ~Population() = default;
+
         void Initialize(const bool& randomInitialize);
         void Decode();
-        void EvaluateInd(const int& _id);
-        std::vector<double> GetIndReals(const int& _id);
-        void SetIndObjectiveScore(const int& _id, const std::vector<double>& _objScore);
-        void SetIndConstraints(const int& _id, const std::vector<double>& _constraints);
-        void CheckConstraints();
-        void FastNDS();
-        void CrowdingDistanceAll();
-        void CrowdingDistance(const int& _frontI);
-        std::pair<int, int> Mutate();
-        void Merge(const Population& _pop1, const Population& _pop2);
-        void Report(std::ostream& _os, int generation) const;
+
+        //void EvaluateInd(const int& _id);
+
         int GetSize() const {
             return int(inds.size());
         }
+        std::vector<double> GetIndReals(const int& _id);
+
+        void SetIndObjectiveScore(const int& _id, const std::vector<double>& _objScore);
+        void SetIndConstraints(const int& _id, const std::vector<double>& _constraints);
+
+        void CheckConstraints();
+
+        void FastNDS();
+        void CrowdingDistanceAll();
+        void CrowdingDistance(const int& _frontI);
+
+        std::pair<int, int> Mutate();
+
+        void Merge(const Population& _pop1, const Population& _pop2);
+        void Report(std::ostream& _os, int generation) const;
 
         std::vector<Individual> inds;
         int generation;

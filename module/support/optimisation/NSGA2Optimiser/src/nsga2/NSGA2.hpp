@@ -17,6 +17,7 @@ namespace nsga2 {
     public:
         NSGA2() : randGen(std::make_shared<RandomGenerator<>>()) {}
         virtual ~NSGA2() = default;
+
         bool InitializeFirstGeneration();
         void CompleteFirstGeneration();
         void InitializeNextGeneration();
@@ -49,16 +50,7 @@ namespace nsga2 {
         void ReportPop(const std::shared_ptr<Population>& pop, std::ostream& os) const;
         void ReportFinalGenerationPop();
 
-        void Selection(const std::shared_ptr<Population>& oldpop, std::shared_ptr<Population>& newpop);
-        const Individual& Tournament(const Individual& ind1, const Individual& ind2) const;
-        void Crossover(const Individual& parent1, const Individual& parent2, Individual& child1, Individual& child2);
-        void Realcross(const Individual& parent1, const Individual& parent2, Individual& child1, Individual& child2);
-        void Bincross(const Individual& parent1, const Individual& parent2, Individual& child1, Individual& child2);
-
-        std::shared_ptr<Population> parentPop      = nullptr;
-        std::shared_ptr<Population> childPop       = nullptr;
-        std::shared_ptr<Population> mixedPop       = nullptr;
-        std::shared_ptr<RandomGenerator<>> randGen = nullptr;
+        std::shared_ptr<Population> getCurrentPop();
 
         bool crowdObj      = true;
         int reportCount    = 0;
@@ -67,13 +59,6 @@ namespace nsga2 {
         int binCrossCount  = 0;
         int realCrossCount = 0;
         int bitLength      = 0;
-
-        // Output file streams
-        std::ofstream initial_pop_file;
-        std::ofstream final_pop_file;
-        std::ofstream best_pop_file;
-        std::ofstream all_pop_file;
-        std::ofstream nsga2_params_file;
 
         int currentGen;
         int popSize;
@@ -96,10 +81,30 @@ namespace nsga2 {
         bool randomInitialize                             = {};
         std::vector<std::pair<double, double>> realLimits = {};
         std::vector<std::pair<double, double>> binLimits  = {};
+
+        std::shared_ptr<Population> parentPop      = nullptr;
+        std::shared_ptr<Population> childPop       = nullptr;
+        std::shared_ptr<Population> mixedPop       = nullptr;
+        std::shared_ptr<RandomGenerator<>> randGen = nullptr;
+
+        // Output file streams
+        std::ofstream initial_pop_file;
+        std::ofstream final_pop_file;
+        std::ofstream best_pop_file;
+        std::ofstream all_pop_file;
+        std::ofstream nsga2_params_file;
+
         bool ConfigurationIsValid();
         void CreateStartingPopulations();
         void InitializeReportingStreams();
         void InitializePopulationStream(std::ofstream& file_stream, std::string file_name, std::string description);
+
+        void Selection(const std::shared_ptr<Population>& oldpop, std::shared_ptr<Population>& newpop);
+        const Individual& Tournament(const Individual& ind1, const Individual& ind2) const;
+        void Crossover(const Individual& parent1, const Individual& parent2, Individual& child1, Individual& child2);
+        void Realcross(const Individual& parent1, const Individual& parent2, Individual& child1, Individual& child2);
+        void Bincross(const Individual& parent1, const Individual& parent2, Individual& child1, Individual& child2);
+
     };
 }  // namespace nsga2
 
