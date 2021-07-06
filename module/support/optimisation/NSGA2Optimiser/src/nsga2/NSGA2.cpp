@@ -114,7 +114,16 @@ namespace nsga2 {
         return true;
     }
 
+    void NSGA2::CompleteGeneration() {
+        if(currentGen == 0) {
+            CompleteFirstGeneration();
+        } else {
+            CompleteOrdinaryGeneration();
+        }
+    }
+
     void NSGA2::CompleteFirstGeneration() {
+        parentPop->CheckConstraints();
         parentPop->FastNDS();
         parentPop->CrowdingDistanceAll();
 
@@ -146,6 +155,7 @@ namespace nsga2 {
     }
 
     void NSGA2::CompleteOrdinaryGeneration() {
+        childPop->CheckConstraints();
         // create population Rt = Pt U Qt
         mixedPop->Merge(*parentPop, *childPop);
         mixedPop->generation = currentGen;
@@ -156,7 +166,7 @@ namespace nsga2 {
 
         int i = 0; //we need `i` after the loop
         // until |Pt+1| + |Fi| <= N, i.e. until parent population is filled
-        for (parentPop->GetSize() + int(mixedPop->front[i].size()) < popSize) {
+        while (parentPop->GetSize() + int(mixedPop->front[i].size()) < popSize) {
             std::vector<int>& Fi = mixedPop->front[i];
             mixedPop->CrowdingDistance(i);            // calculate crowding in Fi
             for (int j = 0; j < int(Fi.size()); j++)  // Pt+1 = Pt+1 U Fi

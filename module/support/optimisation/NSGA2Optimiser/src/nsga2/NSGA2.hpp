@@ -19,9 +19,8 @@ namespace nsga2 {
         virtual ~NSGA2() = default;
 
         bool InitializeFirstGeneration();
-        void CompleteFirstGeneration();
+        void CompleteGeneration();
         void InitializeNextGeneration();
-        void CompleteOrdinaryGeneration();
 
         // clang-format off
         void SetSeed(const int& _seed) { randGen->SetSeed(_seed); }
@@ -98,6 +97,9 @@ namespace nsga2 {
         void CreateStartingPopulations();
         void InitializeReportingStreams();
         void InitializePopulationStream(std::ofstream& file_stream, std::string file_name, std::string description);
+
+        void CompleteFirstGeneration();
+        void CompleteOrdinaryGeneration();
 
         void Selection(const std::shared_ptr<Population>& oldpop, std::shared_ptr<Population>& newpop);
         const Individual& Tournament(const Individual& ind1, const Individual& ind2) const;

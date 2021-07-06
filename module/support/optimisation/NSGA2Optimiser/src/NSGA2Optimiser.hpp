@@ -25,7 +25,6 @@ namespace module {
                 void populateEvaluationRequests();
                 bool atEndOfGeneration();
 
-                void processFirstGenerationIndividual(int id, int generation, const std::vector<double>& objScore, const std::vector<double>& constraints);
                 void processOrdinaryGenerationIndividual(int id, int generation, const std::vector<double>& objScore, const std::vector<double>& constraints);
                 void processFinalGenerationIndividual(int id, int generation, const std::vector<double>& objScore, const std::vector<double>& constraints);
 
