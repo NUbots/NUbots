@@ -25,9 +25,6 @@ namespace module {
                 void populateEvaluationRequests();
                 bool atEndOfGeneration();
 
-                void processOrdinaryGenerationIndividual(int id, int generation, const std::vector<double>& objScore, const std::vector<double>& constraints);
-                void processFinalGenerationIndividual(int id, int generation, const std::vector<double>& objScore, const std::vector<double>& constraints);
-
                 /// @brief Implementation of the NSGA II algorithm, holds the state of the entire optimisation,
                 /// including the populations, scores, etc
                 nsga2::NSGA2 nsga2Algorithm{};

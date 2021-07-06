@@ -142,10 +142,28 @@ namespace module {
 
                     // An individual has been evaluation and we've got the scores. This updates the
                     // algorithm with the score, and evaluates the next individual.
-                    if (scores.generation < nsga2Algorithm.generations) {
-                        processOrdinaryGenerationIndividual(scores.id, scores.generation, scores.objScore, scores.constraints);
-                    } else {
-                        processFinalGenerationIndividual(scores.id, scores.generation, scores.objScore, scores.constraints);
+                    // Tell the algorithm the evaluation scores for this individual
+                    nsga2Algorithm.getCurrentPop()->SetIndObjectiveScore(scores.id, scores.objScore);
+                    nsga2Algorithm.getCurrentPop()->SetIndConstraints(scores.id, scores.constraints);
+
+                    if(atEndOfGeneration()) {
+                        // End the generation and save its data
+                        nsga2Algorithm.CompleteGenerationAndAdvance();
+
+                        if (nsga2Algorithm.FinishedAllGenerations()) {
+                            log<NUClear::INFO>("NSGA2 evaluation finished!");
+
+                            // Tell Webots to terminate
+                            std::unique_ptr<OptimisationCommand> msg = std::make_unique<OptimisationCommand>();
+                            msg->command                             = OptimisationCommand::CommandType::TERMINATE;
+                            emit(msg);
+
+                            // Tell the NSGA2 components to finish up, but add a delay to give webots time to get the terminate
+                            emit<Scope::DELAY>(std::make_unique<NSGA2Terminate>(), std::chrono::milliseconds(100));
+                        } else {
+                            log<NUClear::INFO>("Advanced to new generation", nsga2Algorithm.getCurrentPop()->generation);
+                            populateEvaluationRequests();
+                        }
                     }
                 });
 
@@ -168,46 +186,6 @@ namespace module {
             bool NSGA2Optimiser::atEndOfGeneration() {
                 // We are at the end of a generation when there are no requests left unprocessed (since we evaulate a generation at a time)
                 return runningEvaluationRequests.empty() && pendingEvaluationRequests.empty();
-            }
-
-            void NSGA2Optimiser::processOrdinaryGenerationIndividual(int id, int generation, const std::vector<double>& objScore, const std::vector<double>& constraints) {
-                // Tell the algorithm the evaluation scores for this individual
-                nsga2Algorithm.getCurrentPop()->SetIndObjectiveScore(id, objScore);
-                nsga2Algorithm.getCurrentPop()->SetIndConstraints(id, constraints);
-
-                if (atEndOfGeneration()) {
-                    // End the generation and save its data
-                    nsga2Algorithm.CompleteGeneration();
-
-                    // Start the next generation (creates the new children for evaluation)
-                    nsga2Algorithm.InitializeNextGeneration();
-                    log<NUClear::INFO>("Advanced to new generation", nsga2Algorithm.getCurrentPop()->generation);
-                    populateEvaluationRequests();
-                }
-            }
-
-            void NSGA2Optimiser::processFinalGenerationIndividual(int id, int generation, const std::vector<double>& objScore, const std::vector<double>& constraints) {
-                // Tell the algorithm the evaluation scores for this individual
-                nsga2Algorithm.getCurrentPop()->SetIndObjectiveScore(id, objScore);
-                nsga2Algorithm.getCurrentPop()->SetIndConstraints(id, constraints);
-
-                if (atEndOfGeneration()) {
-                    // End the generation and save its data
-                    nsga2Algorithm.CompleteGeneration();
-
-                    // Report the population of our final generation
-                    nsga2Algorithm.ReportFinalGenerationPop();
-
-                    log<NUClear::INFO>("NSGA2 evaluation finished!");
-
-                    // Tell Webots to terminate
-                    std::unique_ptr<OptimisationCommand> msg = std::make_unique<OptimisationCommand>();
-                    msg->command                             = OptimisationCommand::CommandType::TERMINATE;
-                    emit(msg);
-
-                    // Tell the NSGA2 components to finish up, but add a delay to give webots time to get the terminate
-                    emit<Scope::DELAY>(std::make_unique<NSGA2Terminate>(), std::chrono::milliseconds(100));
-                }
             }
 
             std::unique_ptr<NSGA2EvaluationRequest> NSGA2Optimiser::constructEvaluationRequest(int id, int generation, const std::vector<double>& parameters) {
