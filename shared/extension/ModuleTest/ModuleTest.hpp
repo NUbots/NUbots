@@ -21,6 +21,7 @@
 #define EXTENSION_MODULETEST_HPP
 
 #include <catch.hpp>
+#include <functional>
 #include <nuclear>
 #include <thread>
 
@@ -42,14 +43,16 @@ namespace extension::moduletest {
         void start_test() {
 
             INFO("Starting up ModuleTest power plant.");
+            // FAIL("Before powerplant start");
             start();
         }
 
         template <typename MessageType>
-        void bind_catcher_for_next_reaction(std::shared_ptr<MessageType> message) {
+        void bind_emit_catcher(std::shared_ptr<MessageType> message) {
             auto binding_function = [message](EmissionCatcher& emission_catcher) -> NUClear::threading::ReactionHandle {
                 return emission_catcher.on<NUClear::dsl::word::Trigger<MessageType>>().then(
                     [&emission_catcher, message](const MessageType& emitted_message) {  //
+                        FAIL("Inside the binding lambda");
                         *message = emitted_message;
                         emission_catcher.num_reactions_left--;
                         if (emission_catcher.num_reactions_left <= 0) {
@@ -58,6 +61,14 @@ namespace extension::moduletest {
                     });
             };
             emit(std::make_unique<extension::moduletest::EmissionBind>(binding_function, num_reactions_this_test));
+        }
+
+        template <typename MessageType>
+        void bind_trigger(const MessageType& trigger_message) {
+            auto emit_function = [this, trigger_message]() {  //
+                emit(std::make_unique<MessageType>(trigger_message));
+            };
+            emit(std::make_unique<std::function<void()>>(emit_function));
         }
 
         ModuleTest(ModuleTest& other)  = delete;
