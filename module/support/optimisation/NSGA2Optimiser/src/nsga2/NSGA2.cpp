@@ -105,16 +105,16 @@ namespace nsga2 {
         CreateStartingPopulations();
         currentGen = 0;
         parentPop->Initialize(randomInitialize);
-        parentPop->generation = currentGen;
-        mixedPop->generation = currentGen;
-        childPop->generation = currentGen;
+        parentPop->SetGeneration(currentGen);
         NUClear::log<NUClear::INFO>("Initialization done!");
 
         parentPop->Decode();
+        parentPop->lockedByGeneticAlgorithm = false;
         return true;
     }
 
     void NSGA2::CompleteGenerationAndAdvance() {
+        childPop->lockedByGeneticAlgorithm = true; //Stop all evaluation while we work out the next childPop
         if(currentGen == 0) {
             CompleteFirstGeneration();
         } else {
@@ -142,8 +142,6 @@ namespace nsga2 {
         currentGen++;
 
         ReportPop(parentPop, initial_pop_file);
-
-        // all_pop_file << "# gen = " << currentGen << "\n";
         ReportPop(parentPop, all_pop_file);
 
         initial_pop_file.flush();
@@ -152,8 +150,6 @@ namespace nsga2 {
     }
 
     void NSGA2::InitializeNextGeneration() {
-        NUClear::log<NUClear::INFO>("Advancing to generation", currentGen);
-
         // create next population Qt
         Selection(parentPop, childPop);
         std::pair<int, int> mutationsCount = childPop->Mutate();
@@ -161,8 +157,11 @@ namespace nsga2 {
         realMutCount += mutationsCount.first;
         binMutCount += mutationsCount.second;
 
-        childPop->generation = currentGen;
+        childPop->SetGeneration(currentGen);
+        childPop->SetIds();
         childPop->Decode();
+        childPop->lockedByGeneticAlgorithm = false;
+        childPop->resetEvaluationState();
         // childPop->Evaluate();
     }
 
@@ -170,7 +169,7 @@ namespace nsga2 {
         childPop->CheckConstraints();
         // create population Rt = Pt U Qt
         mixedPop->Merge(*parentPop, *childPop);
-        mixedPop->generation = currentGen;
+        //mixedPop->generation = currentGen;
         mixedPop->FastNDS();
 
         // Pt + 1 = empty
@@ -202,7 +201,7 @@ namespace nsga2 {
 
         currentGen++;
 
-        parentPop->generation = currentGen;
+        parentPop->SetGeneration(currentGen);
 
         // all_pop_file << "# gen = " << currentGen << "\n";
         ReportPop(parentPop, all_pop_file);
@@ -319,7 +318,7 @@ namespace nsga2 {
     }
 
     void NSGA2::ReportPop(const std::shared_ptr<Population>& _pop, std::ostream& _os) const {
-        _os << "\n# Generation " << _pop->generation << "\n";
+        _os << "\n# Generation " << _pop->GetGeneration() << "\n";
 
         _os << "generation"
             << ","
@@ -350,7 +349,7 @@ namespace nsga2 {
             << ","
             << "crowding_dist" << std::endl;
 
-        _pop->Report(_os, _pop->generation);
+        _pop->Report(_os);
     }
 
     void NSGA2::Selection(const std::shared_ptr<Population>& _oldPop, std::shared_ptr<Population>& _newPop) {

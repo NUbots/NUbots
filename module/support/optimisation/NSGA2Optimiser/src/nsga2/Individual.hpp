@@ -51,8 +51,6 @@ namespace nsga2 {
 
     private:
         std::vector<double> bins;
-
-
         int realMutate();
         int binMutate();
         IndividualConfigurator config;

@@ -27,18 +27,25 @@ namespace nsga2 {
                    const std::vector<double>& _initialRealVars);
         virtual ~Population() = default;
 
+        bool lockedByGeneticAlgorithm = true; //Putting a lock so we know when the population is ready to evaluate (otherwise we can start evaluating before the individuals are initialised)
+        void resetEvaluationState();
+        std::optional<Individual> GetNextIndividual();
+
+        void SetGeneration(const int _generation);
+        int GetGeneration() const;
+        void SetIds();
+
         void Initialize(const bool& randomInitialize);
         void Decode();
-
-        //void EvaluateInd(const int& _id);
 
         int GetSize() const {
             return int(inds.size());
         }
-        std::vector<double> GetIndReals(const int& _id);
 
-        void SetIndObjectiveScore(const int& _id, const std::vector<double>& _objScore);
-        void SetIndConstraints(const int& _id, const std::vector<double>& _constraints);
+        bool IsReadyToEvalulate() const;
+
+        bool AreAllEvaluated() const;
+        void SetEvaluationResults(const int& _id, const std::vector<double>& _objScore, const std::vector<double>& _constraints);
 
         void CheckConstraints();
 
@@ -49,15 +56,17 @@ namespace nsga2 {
         std::pair<int, int> Mutate();
 
         void Merge(const Population& _pop1, const Population& _pop2);
-        void Report(std::ostream& _os, int generation) const;
+        void Report(std::ostream& _os) const;
 
         std::vector<Individual> inds;
-        int generation;
+
         std::vector<std::vector<int>> front = {};
 
     private:
-        IndividualConfigurator indConfig;
+        std::size_t currentInd = 0;
 
+        IndividualConfigurator indConfig;
+        int generation = -1;
         int size;
         bool crowdObj;
 

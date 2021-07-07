@@ -11,6 +11,7 @@ namespace nsga2 {
         constrViolation = 0.0;
         crowdDist       = 0.0;
         evaluated       = false;
+        generation      = -1;
         reals.clear();
         gene.clear();
         bins.clear();
@@ -35,8 +36,8 @@ namespace nsga2 {
 
     void Individual::Initialize(const int& _id, const bool& randomInitialize) {
         id         = _id;
-        generation = 1; //TODO: This is correct, as Initialize is called only on first generation, but should it be here?
-        if (!randomInitialize && id == 0 && generation == 1) {
+        generation = 0;
+        if (!randomInitialize && id == 0 && generation == 0) {
             // First individual get vars from config if not randomInitialize
             //initialise real vars
             for (int i = 0; i < config.realVars; i++) {

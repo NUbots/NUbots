@@ -18,8 +18,7 @@ namespace nsga2 {
                            const bool& _crowdObj,
                            std::shared_ptr<RandomGenerator<>> _randGen,
                            const std::vector<double>& _initialRealVars)
-        : generation(0)
-        , indConfig({_realVars,
+        : indConfig({_realVars,
                      _realLimits,
                      _realMutProb,
                      _binVars,
@@ -51,17 +50,65 @@ namespace nsga2 {
         }
     }
 
-    std::vector<double> Population::GetIndReals(const int& _id) {
-        return inds[_id].reals;
+    void Population::SetGeneration(const int _generation) {
+        generation = _generation;
+        for (auto& ind : inds) {
+            ind.generation = _generation;
+        }
     }
 
-    void Population::SetIndObjectiveScore(const int& _id, const std::vector<double>& _objScore) {
+    int Population::GetGeneration() const {
+        return generation;
+    }
+
+    void Population::SetIds() {
+        for (std::size_t i = 0; i < inds.size(); i++) {
+            inds[i].id = i;
+        }
+    }
+
+    bool Population::IsReadyToEvalulate() const {
+        if(lockedByGeneticAlgorithm) {
+            return false;
+        }
+        for (auto& ind : inds) {
+            if(ind.id == -1) {
+                return false;
+            }
+            if(ind.generation == -1) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void Population::resetEvaluationState() {
+        currentInd = 0;
+    }
+
+    std::optional<Individual> Population::GetNextIndividual() {
+        if(!IsReadyToEvalulate() || currentInd >= inds.size()) {
+            return std::nullopt;
+        } else {
+            return std::optional<Individual>{inds[currentInd++]};
+        }
+    }
+
+    bool Population::AreAllEvaluated() const {
+        for (auto& ind : inds) {
+            if(!ind.evaluated) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    void Population::SetEvaluationResults(const int& _id, const std::vector<double>& _objScore, const std::vector<double>& _constraints) {
         inds[_id].objScore = _objScore;
+        inds[_id].constr = _constraints;
+        inds[_id].CheckConstraints();
     }
 
-    void Population::SetIndConstraints(const int& _id, const std::vector<double>& _constraints) {
-        inds[_id].constr = _constraints;
-    }
 
     void Population::CheckConstraints() {
         for (auto& ind : inds) {
@@ -176,12 +223,11 @@ namespace nsga2 {
         std::copy(_pop2.inds.begin(), _pop2.inds.end(), inds.begin() + _pop1.GetSize());
     }
 
-    void Population::Report(std::ostream& os, int generation) const {
+    void Population::Report(std::ostream& os) const {
         std::vector<Individual>::const_iterator it;
 
-        int counter = 0;
         for (it = inds.begin(); it != inds.end(); it++) {
-            os << generation << "," << counter << ",";
+            os << generation << "," << it->id << ",";
 
             for (int i = 0; i < indConfig.objectives; i++) {
                 os << it->objScore[i] << ",";
@@ -202,7 +248,6 @@ namespace nsga2 {
             }
 
             os << it->constrViolation << "," << it->rank << "," << it->crowdDist << std::endl;
-            counter++; //TODO: propagate ID correctly to reportings
         }
     }
 

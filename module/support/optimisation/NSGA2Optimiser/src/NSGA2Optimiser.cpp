@@ -111,7 +111,6 @@ namespace module {
                     // Subsequent individuals will be evaluated after we get the evaluation scores for this individual
                     // (from the NSGA2FitnessScores trigger)
                     if (nsga2Algorithm.InitializeFirstGeneration()) {
-                        populateEvaluationRequests();
                         emit(std::make_unique<NSGA2EvaluatorReady>());
                     } else {
                         log<NUClear::ERROR>("Failed to initialise NSGA2");
@@ -119,34 +118,41 @@ namespace module {
                 });
 
                 on<Trigger<NSGA2EvaluatorReady>, Single>().then([this](const NSGA2EvaluatorReady& message) {
-                    if (pendingEvaluationRequests.empty()) {
-                       log<NUClear::INFO>("Evaluator ready, but optimiser is not");
-                       emit<Scope::DELAY>(std::make_unique<NSGA2EvaluatorReady>(), std::chrono::seconds(1)); // Wait for a bit for us to become ready, then ask the evaluator if it is ready
-                    } else {
-                        log<NUClear::INFO>("\n\nSending request to evaluator. Generation:", pendingEvaluationRequests.front()->generation, "individual", pendingEvaluationRequests.front()->id);
+                    auto next_ind = nsga2Algorithm.getCurrentPop()->GetNextIndividual();
+                    if(next_ind.has_value()) {
+                        auto ind = next_ind.value();
+                        log<NUClear::INFO>("\n\nSending request to evaluator. Generation:", ind.generation, "individual", ind.id);
+                        // Create a message to request an evaluation of an individual
+                        auto request = std::make_unique<NSGA2EvaluationRequest>();
+                        request->id                                     = ind.id;
+                        request->generation                             = ind.generation;
 
-                        runningEvaluationRequests.emplace(pendingEvaluationRequests.front()->id); //hold onto the request in the running queue
-                        emit(pendingEvaluationRequests.front());
-                        pendingEvaluationRequests.pop(); // remove from the pending queue
+                        // Add the individual's parameters to the message
+                        request->parameters.freq                 = ind.reals[0];
+                        request->parameters.double_support_ratio = ind.reals[1];
+                        request->parameters.foot.distance        = ind.reals[2];
+                        request->parameters.foot.rise            = ind.reals[3];
+                        request->parameters.trunk.height         = ind.reals[4];
+                        request->parameters.trunk.pitch          = ind.reals[5];
+                        request->parameters.trunk.x_offset       = ind.reals[6];
+                        request->parameters.trunk.y_offset       = ind.reals[7];
+                        request->parameters.trunk.swing          = ind.reals[8];
+                        request->parameters.trunk.pause          = ind.reals[9];
+                        request->parameters.pause.duration       = ind.reals[10];
+                        emit(request);
+                    } else {
+                        log<NUClear::INFO>("Evaluator ready, but optimiser is not");
+                        emit<Scope::DELAY>(std::make_unique<NSGA2EvaluatorReady>(), std::chrono::seconds(1)); // Wait for a bit for us to become ready, then ask the evaluator if it is ready
                     }
                 });
 
                 on<Trigger<NSGA2FitnessScores>, Single>().then([this](const NSGA2FitnessScores& scores) {
                     log<NUClear::DEBUG>("Got evaluation fitness scores");
 
-                    // Mark the request as completed
-                    auto search = runningEvaluationRequests.find(scores.id);
-                    if (search != runningEvaluationRequests.end()) {
-                        runningEvaluationRequests.erase(search);
-                    }
-
-                    // An individual has been evaluation and we've got the scores. This updates the
-                    // algorithm with the score, and evaluates the next individual.
                     // Tell the algorithm the evaluation scores for this individual
-                    nsga2Algorithm.getCurrentPop()->SetIndObjectiveScore(scores.id, scores.objScore);
-                    nsga2Algorithm.getCurrentPop()->SetIndConstraints(scores.id, scores.constraints);
+                    nsga2Algorithm.getCurrentPop()->SetEvaluationResults(scores.id, scores.objScore, scores.constraints);
 
-                    if(atEndOfGeneration()) {
+                    if(nsga2Algorithm.getCurrentPop()->AreAllEvaluated()) {
                         // End the generation and save its data
                         nsga2Algorithm.CompleteGenerationAndAdvance();
 
@@ -161,9 +167,10 @@ namespace module {
                             // Tell the NSGA2 components to finish up, but add a delay to give webots time to get the terminate
                             emit<Scope::DELAY>(std::make_unique<NSGA2Terminate>(), std::chrono::milliseconds(100));
                         } else {
-                            log<NUClear::INFO>("Advanced to new generation", nsga2Algorithm.getCurrentPop()->generation);
-                            populateEvaluationRequests();
+                            log<NUClear::INFO>("Advanced to new generation", nsga2Algorithm.getCurrentPop()->GetGeneration());
                         }
+                    } else {
+                        log<NUClear::DEBUG>("Recorded Evaluation for individual", scores.id, "more to come...");
                     }
                 });
 
@@ -173,40 +180,6 @@ namespace module {
                     log<NUClear::INFO>("Powerplant shutdown");
                     powerplant.shutdown();
                 });
-            }
-
-            void NSGA2Optimiser::populateEvaluationRequests() {
-                for (int i = 0; i < nsga2Algorithm.popSize; i++) {
-                    pendingEvaluationRequests.push(constructEvaluationRequest(i,
-                                            nsga2Algorithm.getCurrentPop()->generation,
-                                            nsga2Algorithm.getCurrentPop()->GetIndReals(i)));
-                }
-            }
-
-            bool NSGA2Optimiser::atEndOfGeneration() {
-                // We are at the end of a generation when there are no requests left unprocessed (since we evaulate a generation at a time)
-                return runningEvaluationRequests.empty() && pendingEvaluationRequests.empty();
-            }
-
-            std::unique_ptr<NSGA2EvaluationRequest> NSGA2Optimiser::constructEvaluationRequest(int id, int generation, const std::vector<double>& parameters) {
-                // Create a message to request an evaluation of an individual
-                auto request = std::make_unique<NSGA2EvaluationRequest>();
-                request->id                                     = id;
-                request->generation                             = generation;
-
-                // Add the individual's parameters to the message
-                request->parameters.freq                 = parameters[0];
-                request->parameters.double_support_ratio = parameters[1];
-                request->parameters.foot.distance        = parameters[2];
-                request->parameters.foot.rise            = parameters[3];
-                request->parameters.trunk.height         = parameters[4];
-                request->parameters.trunk.pitch          = parameters[5];
-                request->parameters.trunk.x_offset       = parameters[6];
-                request->parameters.trunk.y_offset       = parameters[7];
-                request->parameters.trunk.swing          = parameters[8];
-                request->parameters.trunk.pause          = parameters[9];
-                request->parameters.pause.duration       = parameters[10];
-                return request;
             }
         }  // namespace optimisation
     }      // namespace support
