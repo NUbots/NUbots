@@ -4,6 +4,11 @@ include(CMakeParseArguments)
 find_package(Threads REQUIRED)
 find_package(NUClear REQUIRED)
 
+# Set up the warnings variable for the modules. Use the default ROLE warnings setting if it's not configured manually
+if(NOT NUCLEAR_MODULE_WARNINGS)
+  set(NUCLEAR_MODULE_WARNINGS ${NUCLEAR_ROLE_WARNINGS})
+endif()
+
 function(NUCLEAR_MODULE)
 
   get_filename_component(module_name ${CMAKE_CURRENT_SOURCE_DIR} NAME)
@@ -195,9 +200,7 @@ function(NUCLEAR_MODULE)
   # Warnings #
   # ####################################################################################################################
 
-  include(CompilerWarnings)
-  # * Set the warnings with this function for the module
-  set_target_warnings(${module_target_name})
+  target_compile_options(${module_target_name} PRIVATE ${NUCLEAR_MODULE_WARNINGS})
 
   # ####################################################################################################################
   # Testing #
@@ -226,7 +229,7 @@ function(NUCLEAR_MODULE)
       set_target_properties(${test_module_target_name} PROPERTIES FOLDER "modules/tests")
 
       # Add warnings for the tests
-      set_target_warnings(${test_module_target_name})
+      target_compile_options(${test_module_target_name} PRIVATE ${NUCLEAR_MODULE_WARNINGS})
 
       # Add the test
       add_test(

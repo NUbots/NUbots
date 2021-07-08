@@ -125,7 +125,7 @@ set(NUCLEAR_ROLE_WARNINGS
 # Treat all normal compiler warnings as errors
 option(WARNINGS_AS_ERRORS "Fail the build when we have compiler warnings" OFF)
 if(WARNINGS_AS_ERRORS)
-  list(APPEND TARGET_WARNINGS -Werror)
+  list(APPEND NUCLEAR_ROLE_WARNINGS -Werror)
 endif()
 
 # Include the NUClear roles system

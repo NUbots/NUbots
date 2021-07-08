@@ -31,5 +31,12 @@ if(NUCLEAR_LINK_TYPE STREQUAL "SHARED")
   set_target_properties(nuclear_utility PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/lib")
 endif()
 
+
+# Add warnings for the utilities. Use the default ROLE warnings setting if it's not configured manually
+if(NOT NUCLEAR_UTILITY_WARNINGS)
+  set(NUCLEAR_UTILITY_WARNINGS ${NUCLEAR_ROLE_WARNINGS})
+endif()
+target_compile_options(nuclear_utility PRIVATE ${NUCLEAR_UTILITY_WARNINGS})
+
 # Alias to the namespaced version
 add_library(nuclear::utility ALIAS nuclear_utility)

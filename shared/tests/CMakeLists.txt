@@ -7,8 +7,11 @@ if(test_src)
 
   set_target_properties(TestShared PROPERTIES FOLDER "shared/tests")
 
-  # Add warnings for the tests
-  set_target_warnings(TestShared)
+  # Add warnings. Use the default ROLE warnings setting if it's not configured manually
+  if(NOT NUCLEAR_UTILITY_WARNINGS)
+    set(NUCLEAR_UTILITY_WARNINGS ${NUCLEAR_ROLE_WARNINGS})
+  endif()
+  target_compile_options(TestShared PRIVATE ${NUCLEAR_UTILITY_WARNINGS})
 
   # Add the test
   add_test(
