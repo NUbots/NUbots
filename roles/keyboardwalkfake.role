@@ -11,10 +11,11 @@ nuclear_role(
   output::NetworkForwarder
   output::Overview
   # Hardware Interface
-  platform::darwin::HardwareSimulator
+  platform::Webots
   input::SensorFilter
   # Motion
-  motion::QuinticWalk
+  motion::walk::MovementController
+  motion::walk::StaticWalk
   motion::HeadController
   # Behaviour
   behaviour::Controller
