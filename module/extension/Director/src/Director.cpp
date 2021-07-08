@@ -31,6 +31,8 @@ namespace module::extension {
     using ::extension::behaviour::commands::ProvidesReaction;
     using ::extension::behaviour::commands::WhenExpression;
     using ::NUClear::threading::Reaction;
+    using provider::Provider;
+    using provider::ProviderGroup;
     using Unbind = NUClear::dsl::operation::Unbind<ProvidesReaction>;
 
     using TaskPack = std::vector<std::shared_ptr<const DirectorTask>>;
