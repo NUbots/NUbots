@@ -5,6 +5,7 @@
 
 namespace nsga2 {
     struct sort_n {
+        // Implementation of operator <n, used to choose the best individuals from a front
         const Population& pop;
         sort_n(const Population& population) : pop(population) {}
         bool operator()(int i, int j) {
@@ -336,19 +337,16 @@ namespace nsga2 {
                     if (randGen->Realu() <= 0.5) {
                         _child1.reals[i] = c2;
                         _child2.reals[i] = c1;
-                    }
-                    else {
+                    } else {
                         _child1.reals[i] = c1;
                         _child2.reals[i] = c2;
                     }
-                }
-                else {
+                } else {
                     _child1.reals[i] = _parent1.reals[i];
                     _child2.reals[i] = _parent2.reals[i];
                 }
             }
-        }
-        else {
+        } else {
             for (int i = 0; i < realVars; i++) {
                 _child1.reals[i] = _parent1.reals[i];
                 _child2.reals[i] = _parent2.reals[i];
@@ -385,8 +383,7 @@ namespace nsga2 {
                     _child1.gene[i][j] = _parent1.gene[i][j];
                     _child2.gene[i][j] = _parent2.gene[i][j];
                 }
-            }
-            else {
+            } else {
                 for (int j = 0; j < binBits[i]; j++) {
                     _child1.gene[i][j] = _parent1.gene[i][j];
                     _child2.gene[i][j] = _parent2.gene[i][j];
