@@ -15,7 +15,6 @@
 #include "utility/behaviour/Action.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
-#include "utility/math/matrix/Transform3D.hpp"
 #include "utility/motion/ForwardKinematics.hpp"
 #include "utility/motion/InverseKinematics.hpp"
 #include "utility/nusight/NUhelpers.hpp"
@@ -26,14 +25,13 @@ namespace module {
         namespace walk {
 
             using extension::Configuration;
-            using message::behaviour::ServoCommand;
+            using message::behaviour::ServoCommands;
             using message::input::Sensors;
             using message::motion::FootTarget;
             using message::motion::KinematicsModel;
             using message::motion::TorsoTarget;
             using utility::input::LimbID;
             using utility::input::ServoID;
-            using utility::math::matrix::Transform3D;
             using utility::motion::kinematics::calculateGroundSpace;
             using utility::motion::kinematics::calculateLegJoints;
             using utility::nusight::graph;
@@ -145,26 +143,28 @@ namespace module {
                             time_point_cast<NUClear::clock::duration>(now + duration<double>(config.time_horizon));
 
                         // Look through each servo
-                        auto waypoints = std::make_unique<std::vector<ServoCommand>>();
+                        auto waypoints = std::make_unique<ServoCommands>();
 
                         for (const auto& joint : left_joints) {
-                            waypoints->emplace_back(foot_target.subsumption_id,
-                                                    projected_time,
-                                                    joint.first,
-                                                    joint.second,
-                                                    torso_target.is_right_foot_support ? w_gain : config.support_gain,
-                                                    100);
+                            waypoints->commands.emplace_back(
+                                foot_target.subsumption_id,
+                                projected_time,
+                                joint.first,
+                                joint.second,
+                                torso_target.is_right_foot_support ? w_gain : config.support_gain,
+                                100);
                         }
-
 
                         for (const auto& joint : right_joints) {
-                            waypoints->emplace_back(foot_target.subsumption_id,
-                                                    projected_time,
-                                                    joint.first,
-                                                    joint.second,
-                                                    torso_target.is_right_foot_support ? config.support_gain : w_gain,
-                                                    100);
+                            waypoints->commands.emplace_back(
+                                foot_target.subsumption_id,
+                                projected_time,
+                                joint.first,
+                                joint.second,
+                                torso_target.is_right_foot_support ? config.support_gain : w_gain,
+                                100);
                         }
+
 
                         // Emit our locations to move to
                         emit(std::move(waypoints));
