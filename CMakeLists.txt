@@ -103,8 +103,30 @@ set(NUCLEAR_ROLE_BANNER_FILE
     CACHE PATH "The path the banner to print at the start of each role execution" FORCE
 )
 
+# Comprehensive list of warnings. Will be used to set warnings for the other targets besides roles too
+set(NUCLEAR_ROLE_WARNINGS
+    -Wall
+    -Wextra # reasonable and standard
+    -Wshadow # warn the user if a variable declaration shadows one from a parent context
+    -Wnon-virtual-dtor # warn the user if a class with virtual functions has a non-virtual destructor. This helps
+                       # catch hard to track down memory errors
+    -Wold-style-cast # warn for c-style casts
+    -Wcast-align # warn for potential performance problem casts
+    -Wunused # warn on anything being unused
+    -Woverloaded-virtual # warn if you overload (not override) a virtual function
+    -Wpedantic # warn if non-standard C++ is used
+    -Wconversion # warn on type conversions that may lose data
+    -Wsign-conversion # warn on sign conversions
+    -Wdouble-promotion # warn if float is implicit promoted to double
+    -Wnull-dereference # warn if a null dereference is detected
+    -Wmisleading-indentation # warn if indentation implies blocks where blocks do not exist
+)
+
 # Treat all normal compiler warnings as errors
 option(WARNINGS_AS_ERRORS "Fail the build when we have compiler warnings" OFF)
+if(WARNINGS_AS_ERRORS)
+  list(APPEND TARGET_WARNINGS -Werror)
+endif()
 
 # Include the NUClear roles system
 add_subdirectory(nuclear)
