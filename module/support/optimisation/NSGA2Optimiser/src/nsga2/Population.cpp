@@ -15,7 +15,6 @@ namespace nsga2 {
                            const double& _binMutProb,
                            const double& _etaM,
                            const double& _epsC,
-                           const bool& _crowdObj,
                            std::shared_ptr<RandomGenerator<>> _randGen,
                            const std::vector<double>& _initialRealVars)
         : indConfig({_realVars,
@@ -31,17 +30,16 @@ namespace nsga2 {
                      _epsC,
                      _randGen,
                      _initialRealVars})
-        , size(_size)
-        , crowdObj(_crowdObj) {
+        , size(_size) {
 
         for (int i = 0; i < _size; i++) {
             inds.emplace_back(indConfig);
         }
     }
 
-    void Population::Initialize(const bool& randomInitialize) {
+    void Population::Initialize() {
         for (int i = 0; i < size; i++) {
-            inds[i].Initialize(i, randomInitialize);
+            inds[i].Initialize(i);
         }
     }
     void Population::Decode() {
@@ -169,40 +167,40 @@ namespace nsga2 {
     }
 
     void Population::CrowdingDistanceAll() {
-        for (int i = 0; i < int(fronts.size()); i++) {
+        for (std::size_t i = 0; i < fronts.size(); i++) {
             CrowdingDistance(i);
         }
     }
 
-    void Population::CrowdingDistance(const int& _frontI) {
-        std::vector<int>& F = fronts[_frontI];
-        if (F.size() == 0) {
-            return;
+    // Calculate how close the next nearest solution is. Boundary solutions have infinite distance.
+    // This allows us to prioritise boundary solutions over solutions crowded together.
+    void Population::CrowdingDistance(const int& _frontIndex) {
+        std::vector<int>& F = fronts[_frontIndex];
+        const std::size_t front_size = F.size();
+        if (front_size == 0) {
+            return; // Don't do anything with an empty front
         }
 
-        const int l = F.size();
-        for (int i = 0; i < l; i++) {
-            inds[F[i]].crowdDist = 0;
+        for (std::size_t i = 0; i < front_size; i++) {
+            inds[F[i]].crowdDist = 0; //Initialise crowding distance
         }
-        const int limit = crowdObj ? indConfig.objectives : indConfig.realVars;
-        for (int i = 0; i < limit; i++) {
+
+        for (int i = 0; i < indConfig.objectives; i++) { //For each objective
+            //Sort the front by objective value
             std::sort(F.begin(), F.end(), [&](const int& a, const int& b) {
-                return crowdObj ? inds[a].objScore[i] < inds[b].objScore[i] : inds[a].reals[i] < inds[b].reals[i];
+                return inds[a].objScore[i] < inds[b].objScore[i];
             });
 
+            //Give the bondary solutions infinite distance
             inds[F[0]].crowdDist = std::numeric_limits<double>::infinity();
-            if (l > 1)
-                inds[F[l - 1]].crowdDist = std::numeric_limits<double>::infinity();
+            inds[F[front_size - 1]].crowdDist = std::numeric_limits<double>::infinity();
 
-            for (int j = 1; j < l - 1; j++) {
+            // Calculate the crowding distance of non-boundary solutions
+            for (std::size_t j = 1; j < front_size - 1; j++) {
                 if (inds[F[j]].crowdDist != std::numeric_limits<double>::infinity()) {
-                    if (crowdObj && inds[F[l - 1]].objScore[i] != inds[F[0]].objScore[i]) {
+                    if (inds[F[front_size - 1]].objScore[i] != inds[F[0]].objScore[i]) {
                         inds[F[j]].crowdDist += (inds[F[j + 1]].objScore[i] - inds[F[j - 1]].objScore[i])
-                                                / (inds[F[l - 1]].objScore[i] - inds[F[0]].objScore[i]);
-                    }
-                    else if (!crowdObj && inds[F[l - 1]].reals[i] != inds[F[0]].reals[i]) {
-                        inds[F[j]].crowdDist += (inds[F[j + 1]].reals[i] - inds[F[j - 1]].reals[i])
-                                                / (inds[F[l - 1]].reals[i] - inds[F[0]].reals[i]);
+                                                / (inds[F[front_size - 1]].objScore[i] - inds[F[0]].objScore[i]);
                     }
                 }
             }

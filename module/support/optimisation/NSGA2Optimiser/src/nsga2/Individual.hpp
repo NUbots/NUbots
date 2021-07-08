@@ -28,7 +28,7 @@ namespace nsga2 {
     public:
         Individual(const IndividualConfigurator& _config);
         virtual ~Individual() = default;
-        void Initialize(const int& _id, const bool& randomInitialize);
+        void Initialize(const int& _id);
         void Decode();
         std::pair<int, int> Mutate();
         int CheckDominance(const Individual& _b) const;
@@ -42,7 +42,7 @@ namespace nsga2 {
         std::vector<double> constr;
         std::vector<int> dominationList; //S_p, the set of individuals that this individual domintates
         int dominatedByCounter; //n_p, the number of individuals that dominate this individual
-        double crowdDist;
+        double crowdDist; //Crowding distance, i.e. how close is the next nearest solution. Boundary solutions have infinite distance.
         bool evaluated;
 
         // Public for report access

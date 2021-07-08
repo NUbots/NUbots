@@ -68,7 +68,7 @@ namespace nsga2 {
         } else if (int(binLimits.size()) != binVars) {
             NUClear::log<NUClear::INFO>("Invalid number of binary variable limits");
             return false;
-        } else if (!randomInitialize && (int(initialRealVars.size()) != realVars)) {
+        } else if ((int(initialRealVars.size()) != realVars)) {
             NUClear::log<NUClear::INFO>("Invalid number of initial real variables");
             return false;
         } else {
@@ -90,7 +90,6 @@ namespace nsga2 {
                                                  binMutProb,
                                                  etaM,
                                                  epsC,
-                                                 crowdObj,
                                                  randGen,
                                                  initialRealVars);
 
@@ -106,7 +105,6 @@ namespace nsga2 {
                                                 binMutProb,
                                                 etaM,
                                                 epsC,
-                                                crowdObj,
                                                 randGen,
                                                 initialRealVars);
 
@@ -122,7 +120,6 @@ namespace nsga2 {
                                                 binMutProb,
                                                 etaM,
                                                 epsC,
-                                                crowdObj,
                                                 randGen,
                                                 initialRealVars);
     }
@@ -152,7 +149,7 @@ namespace nsga2 {
 
         CreateStartingPopulations();
         currentGen = 0;
-        parentPop->Initialize(randomInitialize);
+        parentPop->Initialize();
         parentPop->SetGeneration(currentGen);
         parentPop->Decode();
         parentPop->lockedByGeneticAlgorithm = false;

@@ -83,7 +83,6 @@ namespace module {
                     nsga2Algorithm.SetEtaC(config["eta"]["C"].as<double>());
                     nsga2Algorithm.SetEtaM(config["eta"]["M"].as<double>());
                     nsga2Algorithm.SetRealVarLimits(paramLimits);
-                    nsga2Algorithm.SetRandomInitialize(false);
                     nsga2Algorithm.SetInitialRealVars(paramInitialValues);
 
                     // Zero out binary things

@@ -25,7 +25,6 @@ namespace nsga2 {
 
         // clang-format off
         void SetSeed(const int& _seed) { randGen->SetSeed(_seed); }
-        void SetCrowdObj(const bool& _crowd) { crowdObj = _crowd; }
         void SetRealVariableCount(const int& _realVars) { realVars = _realVars; }
         void SetBinVariableCount(const int& _binVars) { binVars = _binVars; }
         void SetObjectiveCount(const int& _objectives) { objectives = _objectives; }
@@ -43,7 +42,6 @@ namespace nsga2 {
         void SetRealVarLimits(const std::vector<std::pair<double, double>>& _realLimits) { realLimits = _realLimits; }
         void SetBinVarLimits(const std::vector<std::pair<double, double>>& _binLimits) { binLimits = _binLimits; }
         void SetInitialRealVars(const std::vector<double>& _initRealVars) { initialRealVars = _initRealVars; }
-        void SetRandomInitialize(const bool& _randomInitialize) { randomInitialize = _randomInitialize; }
         // clang-format on
 
         void ReportParams(std::ostream& os) const;
@@ -98,8 +96,7 @@ namespace nsga2 {
         void InitializeReportingStreams();
         void InitializePopulationStream(std::ofstream& file_stream, std::string file_name, std::string description);
 
-        void CompleteFirstGeneration();
-        void CompleteOrdinaryGeneration();
+        void CompleteGeneration();
 
         void Selection(const std::shared_ptr<Population>& oldpop, std::shared_ptr<Population>& newpop);
         const Individual& Tournament(const Individual& ind1, const Individual& ind2) const;

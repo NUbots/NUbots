@@ -22,7 +22,6 @@ namespace nsga2 {
                    const double& _binMutProb,
                    const double& _etaM,
                    const double& _epsC,
-                   const bool& _crowdObj,
                    std::shared_ptr<RandomGenerator<>> _randGen,
                    const std::vector<double>& _initialRealVars);
         virtual ~Population() = default;
@@ -35,7 +34,7 @@ namespace nsga2 {
         int GetGeneration() const;
         void SetIds();
 
-        void Initialize(const bool& randomInitialize);
+        void Initialize();
         void Decode();
 
         int GetSize() const {
@@ -49,7 +48,7 @@ namespace nsga2 {
 
         void FastNDS();
         void CrowdingDistanceAll();
-        void CrowdingDistance(const int& _frontI);
+        void CrowdingDistance(const int& _frontIndex);
 
         std::pair<int, int> Mutate();
 
@@ -66,7 +65,6 @@ namespace nsga2 {
         IndividualConfigurator indConfig;
         int generation = -1;
         int size;
-        bool crowdObj;
 
         friend std::ostream& operator<<(std::ostream& _os, const Population& _pop);
     };
