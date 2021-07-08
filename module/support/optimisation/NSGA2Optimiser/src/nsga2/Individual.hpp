@@ -40,8 +40,8 @@ namespace nsga2 {
         std::vector<double> reals;
         std::vector<double> objScore;
         std::vector<double> constr;
-        std::vector<int> dominated;
-        int dominations;
+        std::vector<int> dominationList; //S_p, the set of individuals that this individual domintates
+        int dominatedByCounter; //n_p, the number of individuals that dominate this individual
         double crowdDist;
         bool evaluated;
 

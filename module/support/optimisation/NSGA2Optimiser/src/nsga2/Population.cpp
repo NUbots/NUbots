@@ -109,77 +109,73 @@ namespace nsga2 {
         inds[_id].CheckConstraints();
     }
 
-
-    void Population::CheckConstraints() {
-        for (auto& ind : inds) {
-            ind.CheckConstraints();
-        }
-    }
-
+    //Fast Non-Dominated Sort. This calculates the fronts in the population.
     void Population::FastNDS() {
-        front.resize(1);
-        front[0].clear();
+        //Reset Front
+        fronts.resize(1);
+        fronts[0].clear();
 
-        for (int i = 0; i < int(inds.size()); i++) {
-            std::vector<int> dominationList;
-            int dominationCount = 0;
-            Individual& indP    = inds[i];
+        //Compare each individual `p` to each other individual `q` (also compares p to itself, but doesn't matter)
+        for (std::size_t p = 0; p < inds.size(); p++) {
+            auto& indP = inds[p];
+            indP.dominationList.clear(); //Reset the set of individuals that P dominates
+            indP.dominatedByCounter = 0; //Reset the count of individuals that dominate P
 
-            for (int j = 0; j < int(inds.size()); j++) {
-                const Individual& indQ = inds[j];
+            for (std::size_t q = 0; q < inds.size(); q++) {
+                const auto& indQ = inds[q];
 
                 int comparison = indP.CheckDominance(indQ);
                 if (comparison == 1) {
-                    dominationList.push_back(j);
-                }
-                else if (comparison == -1) {
-                    dominationCount++;
+                    //If P dominates Q, Add Q to the solutions that P dominates
+                    indP.dominationList.push_back(q);
+                } else if (comparison == -1) {
+                    //If Q dominates P, Increment the number of individuals that dominate P
+                    indP.dominatedByCounter++;
                 }
             }
 
-            indP.dominations = dominationCount;
-            indP.dominated.clear();
-            indP.dominated = dominationList;
-
-            if (indP.dominations == 0) {
+            if (indP.dominatedByCounter == 0) {
+                //If no other individuals dominate P, then P must be in the first Front (i.e. Rank 1)
                 indP.rank = 1;
-                front[0].push_back(i);
+                fronts[0].push_back(p);
             }
         }
 
-        std::sort(front[0].begin(), front[0].end());
+        //Sort the first front (sorting by index, since front is `std::vector<std::vector<int>>`)
+        std::sort(fronts[0].begin(), fronts[0].end());
 
-        int fi = 1;
-        while (front[fi - 1].size() > 0) {
-            std::vector<int>& fronti = front[fi - 1];
-            std::vector<int> Q;
-            for (int i = 0; i < int(fronti.size()); i++) {
-                Individual& indP = inds[fronti[i]];
+        std::size_t front_index = 1;
+        while (fronts[front_index - 1].size() > 0) { //While we haven't encountered an empty front
+            std::vector<int>& fronti = fronts[front_index - 1];
+            std::vector<int> next_front; //Known as Q in the original paper, this holds members of the next front
+            for (std::size_t p = 0; p < fronti.size(); p++) {
+                Individual& indP = inds[fronti[p]];
 
-                for (int j = 0; j < int(indP.dominated.size()); j++) {
-                    Individual& indQ = inds[indP.dominated[j]];
-                    indQ.dominations--;
+                //For each of the individuals in the domination list, check if it's part of the next front
+                for (std::size_t q = 0; q < indP.dominationList.size(); q++) {
+                    auto& indQ = inds[indP.dominationList[q]];
+                    indQ.dominatedByCounter--; //Reduce the counter, as we are no longer considering P vs this Q
 
-                    if (indQ.dominations == 0) {
-                        indQ.rank = fi + 1;
-                        Q.push_back(indP.dominated[j]);
+                    if (indQ.dominatedByCounter == 0) {
+                        //If no other individuals outside of current front dominate Q, then Q must be in the next Front
+                        indQ.rank = front_index + 1;
+                        next_front.push_back(indP.dominationList[q]);
                     }
                 }
             }
-
-            fi++;
-            front.push_back(Q);
+            fronts.push_back(next_front);
+            front_index++;
         }
     }
 
     void Population::CrowdingDistanceAll() {
-        for (int i = 0; i < int(front.size()); i++) {
+        for (int i = 0; i < int(fronts.size()); i++) {
             CrowdingDistance(i);
         }
     }
 
     void Population::CrowdingDistance(const int& _frontI) {
-        std::vector<int>& F = front[_frontI];
+        std::vector<int>& F = fronts[_frontI];
         if (F.size() == 0) {
             return;
         }

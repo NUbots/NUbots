@@ -47,8 +47,6 @@ namespace nsga2 {
         bool AreAllEvaluated() const;
         void SetEvaluationResults(const int& _id, const std::vector<double>& _objScore, const std::vector<double>& _constraints);
 
-        void CheckConstraints();
-
         void FastNDS();
         void CrowdingDistanceAll();
         void CrowdingDistance(const int& _frontI);
@@ -60,7 +58,7 @@ namespace nsga2 {
 
         std::vector<Individual> inds;
 
-        std::vector<std::vector<int>> front = {};
+        std::vector<std::vector<int>> fronts = {};
 
     private:
         std::size_t currentInd = 0;
