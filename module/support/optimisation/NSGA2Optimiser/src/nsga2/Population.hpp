@@ -26,8 +26,8 @@ namespace nsga2 {
                    const std::vector<double>& _initialRealVars);
         virtual ~Population() = default;
 
-        bool lockedByGeneticAlgorithm = true; //Putting a lock so we know when the population is ready to evaluate (otherwise we can start evaluating before the individuals are initialised)
-        void resetEvaluationState();
+        bool initialised = false; //So we know when the population is ready to evaluate (otherwise we can start evaluating before the individuals are initialised)
+        void resetCurrentIndividualIndex();
         std::optional<Individual> GetNextIndividual();
 
         void SetGeneration(const int _generation);

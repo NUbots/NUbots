@@ -65,27 +65,12 @@ namespace nsga2 {
         }
     }
 
-    bool Population::IsReadyToEvalulate() const {
-        if(lockedByGeneticAlgorithm) {
-            return false;
-        }
-        for (auto& ind : inds) {
-            if(ind.id == -1) {
-                return false;
-            }
-            if(ind.generation == -1) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    void Population::resetEvaluationState() {
+    void Population::resetCurrentIndividualIndex() {
         currentInd = 0;
     }
 
     std::optional<Individual> Population::GetNextIndividual() {
-        if(!IsReadyToEvalulate() || currentInd >= inds.size()) {
+        if(!initialised || currentInd >= inds.size()) {
             return std::nullopt;
         } else {
             return std::optional<Individual>{inds[currentInd++]};

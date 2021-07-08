@@ -108,7 +108,7 @@ namespace nsga2 {
                                                 randGen,
                                                 initialRealVars);
 
-        mixedPop = std::make_shared<Population>(popSize * 2,
+        combinedPop = std::make_shared<Population>(popSize * 2,
                                                 realVars,
                                                 binVars,
                                                 constraints,
@@ -152,12 +152,12 @@ namespace nsga2 {
         parentPop->Initialize();
         parentPop->SetGeneration(currentGen);
         parentPop->Decode();
-        parentPop->lockedByGeneticAlgorithm = false;
+        parentPop->initialised = true;
         return true;
     }
 
     void NSGA2::CompleteGenerationAndAdvance() {
-        childPop->lockedByGeneticAlgorithm = true; //Stop all evaluation while we work out the next childPop
+        childPop->initialised = false; //Stop all evaluation while we work out the next childPop
         CompleteGeneration();
         if(FinishedAllGenerations()) {
             // Report the population of our final generation
@@ -179,51 +179,40 @@ namespace nsga2 {
             parentPop->CrowdingDistanceAll(); //Calculate the crowding distance of the fronts
 
             ReportPop(parentPop, initial_pop_file);
-            ReportPop(parentPop, all_pop_file);
-
-            currentGen++;
         } else {
-            // create population Rt = Pt U Qt
-            mixedPop->Merge(*parentPop, *childPop);
-            //mixedPop->generation = currentGen;
-            mixedPop->FastNDS();
+            combinedPop->Merge(*parentPop, *childPop); // Create combined population from parent and child populations. Rt = Pt U Qt
+            combinedPop->FastNDS(); //Calculate the fronts
 
-            // Pt + 1 = empty
-            parentPop->inds.clear();
+            parentPop->inds.clear(); //Empty the new parent population, ready to be repopulated
 
-            int i = 0; //we need `i` after the loop
-            // until |Pt+1| + |Fi| <= N, i.e. until parent population is filled
-            while (parentPop->GetSize() + int(mixedPop->fronts[i].size()) < popSize) {
-                std::vector<int>& Fi = mixedPop->fronts[i];
-                mixedPop->CrowdingDistance(i);            // calculate crowding in Fi
-                for (int j = 0; j < int(Fi.size()); j++)  // Pt+1 = Pt+1 U Fi
-                {
-                    parentPop->inds.push_back(mixedPop->inds[Fi[j]]);
+            int i = 0; //we need `i` after the loop, for the final (partial) front, so hold on to it here
+            while (parentPop->GetSize() + int(combinedPop->fronts[i].size()) < popSize) { // stop when adding the next front would go past the population size
+                std::vector<int>& front_i = combinedPop->fronts[i];
+                combinedPop->CrowdingDistance(i);         // calculate crowding in front_i
+                for (std::size_t j = 0; j < front_i.size(); j++) {
+                    // Include the i-th non-dominated front in the parent pop. i.e. Pt+1 = Pt+1 U Fi
+                    parentPop->inds.push_back(combinedPop->inds[front_i[j]]);
                 }
                 i++;
             }
+            //At this point, we don't have space to add the next full front, so we add the best members from that front
+            std::vector<int>& partial_front = combinedPop->fronts[i];
+            combinedPop->CrowdingDistance(i);  // calculate crowding in front_i, so that we can choose the best members
 
-            mixedPop->CrowdingDistance(i);  // calculate crowding in Fi
+            std::sort(partial_front.begin(), partial_front.end(), sort_n(*combinedPop));  // sort remaining front using operator <n
 
-            std::sort(mixedPop->fronts[i].begin(),
-                    mixedPop->fronts[i].end(),
-                    sort_n(*mixedPop));  // sort remaining front using <n
-
-            const int extra = popSize - parentPop->GetSize();
-            for (int j = 0; j < extra; j++)  // Pt+1 = Pt+1 U Fi[1:N-|Pt+1|]
-            {
-                parentPop->inds.push_back(mixedPop->inds[mixedPop->fronts[i][j]]);
+            const int remainingSpace = popSize - parentPop->GetSize();
+            for (int j = 0; j < remainingSpace; j++) {
+                // Include the best members from the remaining front in the next parent population
+                parentPop->inds.push_back(combinedPop->inds[partial_front[j]]);
             }
-
-            ReportPop(parentPop, all_pop_file);
-
-            currentGen++;
-            parentPop->SetGeneration(currentGen);
         }
+        ReportPop(parentPop, all_pop_file);
+        currentGen++;
     }
 
     void NSGA2::InitializeNextGeneration() {
-        // create next population Qt
+        // create next child population, Q_t
         Selection(parentPop, childPop);
         std::pair<int, int> mutationsCount = childPop->Mutate();
         // mutation book-keeping
@@ -233,9 +222,8 @@ namespace nsga2 {
         childPop->SetGeneration(currentGen);
         childPop->SetIds();
         childPop->Decode();
-        childPop->lockedByGeneticAlgorithm = false;
-        childPop->resetEvaluationState();
-        // childPop->Evaluate();
+        childPop->initialised = true;
+        childPop->resetCurrentIndividualIndex();
     }
 
     void NSGA2::Selection(const std::shared_ptr<Population>& _oldPop, std::shared_ptr<Population>& _newPop) {
@@ -269,23 +257,18 @@ namespace nsga2 {
     }
 
     const Individual& NSGA2::Tournament(const Individual& _ind1, const Individual& _ind2) const {
-        const int flag = _ind1.CheckDominance(_ind2);
-        if (flag == 1) {  // ind1 dominates ind2
+        const int comparison = _ind1.CheckDominance(_ind2);
+        if (comparison == 1) {  // ind1 dominates ind2
             return _ind1;
-        }
-        else if (flag == -1) {  // ind2 dominates ind1
+        } else if (comparison == -1) {  // ind2 dominates ind1
             return _ind2;
-        }
-        else if (_ind1.crowdDist > _ind2.crowdDist) {
+        } else if (_ind1.crowdDist > _ind2.crowdDist) {
             return _ind1;
-        }
-        else if (_ind2.crowdDist > _ind1.crowdDist) {
+        } else if (_ind2.crowdDist > _ind1.crowdDist) {
             return _ind2;
-        }
-        else if (randGen->Realu() <= 0.5) {
+        } else if (randGen->Realu() <= 0.5) {
             return _ind1;
-        }
-        else {
+        } else {
             return _ind2;
         }
     }
@@ -412,22 +395,18 @@ namespace nsga2 {
         }
     }
 
-        void NSGA2::InitializeReportingStreams() {
+    void NSGA2::InitializeReportingStreams() {
         InitializePopulationStream(initial_pop_file, "nsga2_initial_pop.csv", "This file contains the data of the initial generation");
         InitializePopulationStream(final_pop_file, "nsga2_final_pop.csv", "This file contains the data of the final population");
-        InitializePopulationStream(best_pop_file,
-                                    "nsga2_best_pop.csv",
-                                    "This file contains the data of final feasible population (if any)");
+        InitializePopulationStream(best_pop_file, "nsga2_best_pop.csv", "This file contains the data of final feasible population (if any)");
         InitializePopulationStream(all_pop_file, "nsga2_all_pop.csv", "This file contains the data of all generations");
 
         nsga2_params_file.open("nsga2_params.csv", std::ios::out | std::ios::trunc);
-        // nsga2_params_file.setf(std::ios::scientific);
         nsga2_params_file.precision(16);
     }
 
     void NSGA2::InitializePopulationStream(std::ofstream& file_stream, std::string file_name, std::string description) {
         file_stream.open(file_name, std::ios::out | std::ios::trunc);
-        // file_stream.setf(std::ios::scientific);
         file_stream.precision(16);
 
         file_stream << "# " << description << "\n";

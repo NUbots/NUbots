@@ -81,7 +81,7 @@ namespace nsga2 {
 
         std::shared_ptr<Population> parentPop      = nullptr;
         std::shared_ptr<Population> childPop       = nullptr;
-        std::shared_ptr<Population> mixedPop       = nullptr;
+        std::shared_ptr<Population> combinedPop    = nullptr;
         std::shared_ptr<RandomGenerator<>> randGen = nullptr;
 
         // Output file streams
