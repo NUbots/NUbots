@@ -35,8 +35,8 @@ namespace module {
                 // Htg.translation() = rGTt
                 // -rGTt = rTGt
                 // Rgt * rTGt = rTGg
-                Eigen::Vector3d rTGg   = -Htg.rotation().transpose() * Htg.translation();
-                Eigen::Vector3d rT_tGg = -Ht_tg.rotation().transpose() * Ht_tg.translation();
+                Eigen::Vector3d rTGg   = Htg.rotation().transpose() * -Htg.translation();
+                Eigen::Vector3d rT_tGg = Ht_tg.rotation().transpose() * -Ht_tg.translation();
 
                 // Get torso to torso target in ground space
                 // and then multiply it by factor to find the next position.
