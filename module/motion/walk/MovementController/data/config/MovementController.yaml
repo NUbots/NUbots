@@ -1,0 +1,18 @@
+foot:
+  # Height that the robot lifts its foot to step
+  step_height: 0.05
+  # How steep the foot comes down to its target
+  step_steep: 2
+  # Size of the well near the target
+  # well_width must be an even number
+  well_width: 0.02
+  scaling_factor: 100
+
+# Gain for the support and swing legs
+gains:
+  support_gain: 15
+  swing_gain: 15
+  swing_lean_gain: 5
+
+# How far in the future we are sending the movements (seconds)
+time_horizon: 0.05
