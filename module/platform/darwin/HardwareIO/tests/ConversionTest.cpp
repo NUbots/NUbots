@@ -131,7 +131,7 @@ TEST_CASE("Testing the hardware position conversions to radians", "[hardware][co
                                                0.0,      0.0,      0.0,       0.0,      0.0,       0.0,       0.0,
                                                0.0,      0.0,      0.0,       0.0,      0.0,       0.0};
 
-    for (size_t i = 0; i < 20; ++i) {
+    for (uint8_t i = 0; i < 20; ++i) {
         Convert::SERVO_DIRECTION[i] = direction[i];
         Convert::SERVO_OFFSET[i]    = float(offset[i]);
     }
