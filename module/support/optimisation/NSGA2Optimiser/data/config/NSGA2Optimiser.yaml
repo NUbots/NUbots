@@ -1,5 +1,5 @@
-population_size: 4
-num_generations: 5
+population_size: 40
+num_generations: 12
 num_objectives: 2
 num_constraints: 2
 num_real_vars: 11
@@ -18,7 +18,7 @@ eta:
 walk:
   # Full walk cycle frequency (how long it takes in seconds for a left + right steps)
   # (in Hz, > 0)
-  freq: [3, 1.5, 3.5]
+  freq: [3, 0.5, 5.0]
   # Length of double support phase in half cycle (how long both legs should be on the ground, as a ratio of how long it takes for a single step)
   # (ratio, [0:1])
   double_support_ratio: [0.1, 0.05, 0.2]
@@ -41,10 +41,10 @@ walk:
     x_offset: [0.03, -0.05, 0.05]
     # Trunk lateral offset (how much we offset the trunk left or right lean when walking)
     # (in m)
-    y_offset: [-0.01, 0.02, 0.02]
+    y_offset: [-0.01, -0.02, 0.02]
     # Trunk lateral oscillation amplitude ratio (how much we swing the trunk left and right when stepping)
     # (ratio, >= 0)
-    swing: [0.03, 0.02, 0.05]
+    swing: [0.03, 0.01, 0.05]
     # Trunk swing pause length in phase at apex (how long we keep the trunk at the max swing position, before swinging back)
     # (half cycle ratio, [0:1])
     pause: [0.1, 0.0, 0.2]
