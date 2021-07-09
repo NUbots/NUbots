@@ -155,7 +155,7 @@ namespace module {
                         // End the generation and save its data
                         nsga2Algorithm.CompleteGenerationAndAdvance();
 
-                        if (nsga2Algorithm.FinishedAllGenerations()) {
+                        if (nsga2Algorithm.HasMetOptimisationTerminalCondition()) {
                             log<NUClear::INFO>("NSGA2 evaluation finished!");
 
                             // Tell Webots to terminate

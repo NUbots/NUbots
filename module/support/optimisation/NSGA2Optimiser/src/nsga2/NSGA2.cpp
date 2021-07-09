@@ -161,7 +161,7 @@ namespace nsga2 {
     void NSGA2::CompleteGenerationAndAdvance() {
         childPop->initialised = false; //Stop all evaluation while we work out the next childPop
         CompleteGeneration();
-        if(FinishedAllGenerations()) {
+        if(HasMetOptimisationTerminalCondition()) {
             // Report the population of our final generation
             ReportPop(parentPop, final_pop_file);
         } else {
@@ -170,8 +170,9 @@ namespace nsga2 {
         }
     }
 
-    bool NSGA2::FinishedAllGenerations() {
-        return currentGen >= generations;
+
+    bool NSGA2::HasMetOptimisationTerminalCondition() {
+        return (currentGen >= generations) || earlyStoppingNoImprovement || earlyStoppingOneFront;
     }
 
     void NSGA2::CompleteGeneration() {
@@ -207,6 +208,22 @@ namespace nsga2 {
             for (int j = 0; j < remainingSpace; j++) {
                 // Include the best members from the remaining front in the next parent population
                 parentPop->inds.push_back(combinedPop->inds[partial_front[j]]);
+            }
+
+            // Early stopping checks
+            if(i == 0) {
+                // If `i` is still 0, that means we only have one front carrying over
+                earlyStoppingOneFront = true;
+            }
+            bool childSurvivesThisGen = false;
+            for (auto& ind : parentPop->inds) {
+                if(ind.generation == currentGen) {
+                    childSurvivesThisGen = true;
+                    break;
+                }
+            }
+            if(childSurvivesThisGen) {
+                earlyStoppingNoImprovement = true;
             }
         }
         ReportPop(parentPop, all_pop_file);

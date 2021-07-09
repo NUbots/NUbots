@@ -21,7 +21,7 @@ namespace nsga2 {
         bool InitializeFirstGeneration();
         void CompleteGenerationAndAdvance();
         void InitializeNextGeneration();
-        bool FinishedAllGenerations();
+        bool HasMetOptimisationTerminalCondition();
 
         // clang-format off
         void SetSeed(const int& _seed) { randGen->SetSeed(_seed); }
@@ -90,6 +90,10 @@ namespace nsga2 {
         std::ofstream best_pop_file;
         std::ofstream all_pop_file;
         std::ofstream nsga2_params_file;
+
+        // EarlyStopping
+        bool earlyStoppingOneFront = false;
+        bool earlyStoppingNoImprovement = false;
 
         bool ConfigurationIsValid();
         void CreateStartingPopulations();
