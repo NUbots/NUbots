@@ -70,8 +70,7 @@ namespace module::behaviour::skills {
 
         /*! @brief Converts from camera space direction to IMU space direction
          */
-        Eigen::Vector2d getIMUSpaceDirection(const message::motion::KinematicsModel& kinematicsModel,
-                                             const Eigen::Vector2d& screenAngles,
+        Eigen::Vector2d getIMUSpaceDirection(const Eigen::Vector2d& screenAngles,
                                              const Eigen::Matrix3d& headToIMUSpace);
 
         /*! @brief Gets points which allow for simultaneous search and viewing of key objects

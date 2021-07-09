@@ -4,7 +4,7 @@ output:
 
 # You can put any messages that is emitted in the system here and it will be logged
 messages:
-  message.output.CompressedImage: true
+  message.output.CompressedImage: false
   message.input.Sensors: true
   message.platform.RawSensors: true
   message.vision.Balls: true
@@ -13,5 +13,5 @@ messages:
   message.localisation.Field: true
   message.localisation.ResetRobotHypotheses: true
   # These two are fairly large, we can turn them off if we're running out of log space
-  message.vision.VisualMesh: true
-  message.vision.GreenHorizon: true
+  message.vision.VisualMesh: false
+  message.vision.GreenHorizon: false

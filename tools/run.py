@@ -48,6 +48,16 @@ def run(args, use_gdb, use_valgrind, **kwargs):
     # Get current environment
     env = os.environ
 
+    # Make sure the log directory exists
+    try:
+        os.makedirs(os.path.join(b.project_dir, "log"), exist_ok=True)
+    # The file exists, and but it's not a directory
+    except FileExistsError:
+        # Move the file to a temporary, make the new directory, then move the temporary file into the new directory
+        os.rename(os.path.join(b.project_dir, "log"), os.path.join(b.project_dir, "log.tmp"))
+        os.makedirs(os.path.join(b.project_dir, "log"))
+        os.rename(os.path.join(b.project_dir, "log.tmp"), os.path.join(b.project_dir, "log", "log"))
+
     # Add necessary ASAN environment variables
     if use_asan:
         cprint("WARN: ASan is enabled. Set USE_ASAN to OFF and rebuild to disable.", "red", attrs=["bold"])
@@ -56,9 +66,9 @@ def run(args, use_gdb, use_valgrind, **kwargs):
         if "ASAN_OPTIONS" in env:
             # Only append log_path if it hasn't already been set
             if "log_path" not in env["ASAN_OPTIONS"]:
-                env["ASAN_OPTIONS"] = "{}:log_path=/home/nubots/NUbots/asan.log".format(env["ASAN_OPTIONS"])
+                env["ASAN_OPTIONS"] = "{}:log_path=/home/nubots/NUbots/log/asan.log".format(env["ASAN_OPTIONS"])
         else:
-            env.update({"ASAN_OPTIONS": "log_path=/home/nubots/NUbots/asan.log"})
+            env.update({"ASAN_OPTIONS": "log_path=/home/nubots/NUbots/log/asan.log"})
 
     # Start role with GDB
     if use_gdb:
@@ -77,7 +87,7 @@ def run(args, use_gdb, use_valgrind, **kwargs):
     elif use_valgrind:
         cmd = [
             "valgrind",
-            "--log-file=/home/nubots/NUbots/valgrind.log",
+            "--log-file=/home/nubots/NUbots/log/valgrind.log",
             "--show-error-list=yes",
             "--leak-check=full",
             "--show-leak-kinds=all",
