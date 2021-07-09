@@ -214,16 +214,18 @@ namespace nsga2 {
             if(i == 0) {
                 // If `i` is still 0, that means we only have one front carrying over
                 earlyStoppingOneFront = true;
+                NUClear::log<NUClear::INFO>("A single front this generation, stopping early");
             }
-            bool noChildSurvivesThisGen = false;
+            bool aChildSurvivesThisGen = false;
             for (auto& ind : parentPop->inds) {
                 if(ind.generation == currentGen) {
-                    noChildSurvivesThisGen = true;
+                    aChildSurvivesThisGen = true;
                     break;
                 }
             }
-            if(noChildSurvivesThisGen) {
+            if(!aChildSurvivesThisGen) {
                 earlyStoppingNoImprovement = true;
+                NUClear::log<NUClear::INFO>("No improvement this generation, stopping early");
             }
         }
         ReportPop(parentPop, all_pop_file);
