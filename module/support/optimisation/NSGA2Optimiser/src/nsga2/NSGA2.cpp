@@ -215,14 +215,14 @@ namespace nsga2 {
                 // If `i` is still 0, that means we only have one front carrying over
                 earlyStoppingOneFront = true;
             }
-            bool childSurvivesThisGen = false;
+            bool noChildSurvivesThisGen = false;
             for (auto& ind : parentPop->inds) {
                 if(ind.generation == currentGen) {
-                    childSurvivesThisGen = true;
+                    noChildSurvivesThisGen = true;
                     break;
                 }
             }
-            if(childSurvivesThisGen) {
+            if(noChildSurvivesThisGen) {
                 earlyStoppingNoImprovement = true;
             }
         }
