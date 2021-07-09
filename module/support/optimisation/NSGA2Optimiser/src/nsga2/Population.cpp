@@ -48,15 +48,10 @@ namespace nsga2 {
         }
     }
 
-    void Population::SetGeneration(const int _generation) {
-        generation = _generation;
+    void Population::SetIndividualsGeneration(const int _generation) {
         for (auto& ind : inds) {
             ind.generation = _generation;
         }
-    }
-
-    int Population::GetGeneration() const {
-        return generation;
     }
 
     void Population::SetIds() {
@@ -206,7 +201,7 @@ namespace nsga2 {
         std::vector<Individual>::const_iterator it;
 
         for (it = inds.begin(); it != inds.end(); it++) {
-            os << generation << "," << it->id << ",";
+            os << it->generation << "," << it->id << ",";
 
             for (int i = 0; i < indConfig.objectives; i++) {
                 os << it->objScore[i] << ",";

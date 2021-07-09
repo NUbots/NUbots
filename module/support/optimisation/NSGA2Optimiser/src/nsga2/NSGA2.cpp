@@ -151,7 +151,8 @@ namespace nsga2 {
         CreateStartingPopulations();
         currentGen = 0;
         parentPop->Initialize();
-        parentPop->SetGeneration(currentGen);
+        parentPop->generation = currentGen;
+        parentPop->SetIndividualsGeneration(currentGen);
         parentPop->Decode();
         parentPop->initialised = true;
         return true;
@@ -220,7 +221,7 @@ namespace nsga2 {
         realMutCount += mutationsCount.first;
         binMutCount += mutationsCount.second;
 
-        childPop->SetGeneration(currentGen);
+        childPop->SetIndividualsGeneration(currentGen);
         childPop->SetIds();
         childPop->Decode();
         childPop->initialised = true;
@@ -449,7 +450,7 @@ namespace nsga2 {
     }
 
     void NSGA2::ReportPop(const std::shared_ptr<Population>& _pop, std::ostream& _os) const {
-        _os << "\n# Generation " << _pop->GetGeneration() << "\n";
+        _os << "\n# Generation " << _pop->generation << "\n";
 
         _os << "generation"
             << ","

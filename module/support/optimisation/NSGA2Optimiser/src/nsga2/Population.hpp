@@ -27,11 +27,12 @@ namespace nsga2 {
         virtual ~Population() = default;
 
         bool initialised = false; //So we know when the population is ready to evaluate (otherwise we can start evaluating before the individuals are initialised)
+        int generation = -1;
+
         void resetCurrentIndividualIndex();
+        void SetIndividualsGeneration(const int _generation);
         std::optional<Individual> GetNextIndividual();
 
-        void SetGeneration(const int _generation);
-        int GetGeneration() const;
         void SetIds();
 
         void Initialize();
@@ -61,9 +62,7 @@ namespace nsga2 {
 
     private:
         std::size_t currentInd = 0;
-
         IndividualConfigurator indConfig;
-        int generation = -1;
         int size;
 
         friend std::ostream& operator<<(std::ostream& _os, const Population& _pop);

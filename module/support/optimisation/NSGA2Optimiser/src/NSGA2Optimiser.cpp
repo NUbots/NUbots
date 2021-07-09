@@ -166,7 +166,7 @@ namespace module {
                             // Tell the NSGA2 components to finish up, but add a delay to give webots time to get the terminate
                             emit<Scope::DELAY>(std::make_unique<NSGA2Terminate>(), std::chrono::milliseconds(100));
                         } else {
-                            log<NUClear::INFO>("Advanced to new generation", nsga2Algorithm.getCurrentPop()->GetGeneration());
+                            log<NUClear::INFO>("Advanced to new generation", nsga2Algorithm.getCurrentPop()->generation);
                         }
                     } else {
                         log<NUClear::DEBUG>("Recorded Evaluation for individual", scores.id, "more to come...");
