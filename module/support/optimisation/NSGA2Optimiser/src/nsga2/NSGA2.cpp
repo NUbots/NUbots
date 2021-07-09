@@ -473,31 +473,32 @@ namespace nsga2 {
         _os << "generation"
             << ","
             << "individual"
-            << ",";
+            << ","
+            << "constraint_violation"
+            << ","
+            << "rank"
+            << ","
+            << "crowding_dist";
 
         for (int i = 0; i < objectives; i++) {
-            _os << "objective_" << i << ",";
+            _os << "," << "objective_" << i;
         }
 
         for (int i = 0; i < constraints; i++) {
-            _os << "constraints_" << i << ",";
+            _os << "," << "constraints_" << i;
         }
 
         for (int i = 0; i < realVars; i++) {
-            _os << "real_param_" << i << ",";
+            _os << "," << "real_param_" << i;
         }
 
         for (int i = 0; i < binVars; i++) {
             for (int j = 0; j < binBits[i]; j++) {
-                _os << "binary_param_" << i << "_" << j << ",";
+                _os << "," << "binary_param_" << i << "_" << j ;
             }
         }
 
-        _os << "constraint_violation"
-            << ","
-            << "rank"
-            << ","
-            << "crowding_dist" << std::endl;
+        _os << std::endl;
 
         _pop->Report(_os);
         _os.flush();

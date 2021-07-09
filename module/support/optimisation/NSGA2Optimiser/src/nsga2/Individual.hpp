@@ -37,15 +37,15 @@ namespace nsga2 {
         int rank;
         double constrViolation;
         std::vector<std::vector<int>> gene;
-        std::vector<double> reals;
-        std::vector<double> objScore;
-        std::vector<double> constr;
+        std::vector<double> reals; //Real Parameters
+        std::vector<double> objScore; //Evaluation score
+        std::vector<double> constr; //Constraint violations
         std::vector<int> dominationList; //S_p, the set of individuals that this individual domintates
         int dominatedByCounter; //n_p, the number of individuals that dominate this individual
         double crowdDist; //Crowding distance, i.e. how close is the next nearest solution. Boundary solutions have infinite distance.
         bool evaluated;
 
-        // Public for report access
+        void Report(std::ostream& _os) const;
         int id;
         int generation;
 

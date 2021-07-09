@@ -207,6 +207,38 @@ namespace nsga2 {
         return mutationCount;
     }
 
+    void Individual::Report(std::ostream& os) const {
+        os << generation
+           << ","
+           << id
+           << ","
+           << constrViolation
+           << ","
+           << rank
+           << ","
+           << crowdDist;
+
+        for (int i = 0; i < config.objectives; i++) {
+            os << "," << objScore[i];
+        }
+
+        for (int i = 0; i < config.constraints; i++) {
+            os << "," << constr[i];
+        }
+
+        for (int i = 0; i < config.realVars; i++) {
+            os << "," << reals[i];
+        }
+
+        for (int i = 0; i < config.binVars; i++) {
+            for (int j = 0; j < config.binBits[i]; j++) {
+                os << "," << gene[i][j];
+            }
+        }
+
+        os << std::endl;
+    }
+
     std::ostream& operator<<(std::ostream& _os, const Individual& _ind) {
         _os << "{Individual rank = " << _ind.rank << "\nconstrViolation = " << _ind.constrViolation;
 
