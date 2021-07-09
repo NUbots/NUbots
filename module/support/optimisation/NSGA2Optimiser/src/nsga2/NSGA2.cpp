@@ -211,6 +211,7 @@ namespace nsga2 {
         }
         ReportPop(parentPop, all_pop_file);
         currentGen++;
+        parentPop->generation = currentGen;
     }
 
     void NSGA2::InitializeNextGeneration() {
