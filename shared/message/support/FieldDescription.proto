@@ -47,6 +47,8 @@ message FieldDescription {
         double       penalty_mark_distance  = 16;
         double       center_circle_diameter = 17;
         double       border_strip_min_width = 18;
+        double       penalty_area_length    = 19;
+        double       penalty_area_width     = 20;
     }
 
     double ball_radius         = 1;

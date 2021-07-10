@@ -23,7 +23,10 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <nuclear>
+#include <random>
 #include <vector>
+
+#include "FieldLineSampling.hpp"
 
 #include "message/input/Sensors.hpp"
 #include "message/support/FieldDescription.hpp"
@@ -43,6 +46,7 @@ namespace module::localisation {
     using utility::localisation::fieldStateToTransform3D;
     using utility::math::angle::normalizeAngle;
     using utility::math::coordinates::cartesianToReciprocalSpherical;
+    using utility::math::coordinates::reciprocalSphericalToCartesian;
 
     template <typename Scalar>
     class RobotModel {
@@ -95,6 +99,43 @@ namespace module::localisation {
             return cartesianToReciprocalSpherical(rGCc);
         }
 
+        Eigen::Matrix<Scalar, Eigen::Dynamic, 3> predict(const StateVec& state,
+                                                         const Eigen::Transform<Scalar, 3, Eigen::Affine>& Hcw,
+                                                         const FieldDescription& fd,
+                                                         const int& num_field_points,
+                                                         const std::string& field_element,
+                                                         const Scalar& fov) {
+
+            // Calculate all of the ground truth points
+            Eigen::Matrix<Scalar, Eigen::Dynamic, 3> rLFf =
+                sample_field_points<Scalar>(fd, num_field_points)[field_element];
+
+            // Create a transform from the field state
+            Eigen::Transform<Scalar, 3, Eigen::Affine> Hfw;
+            Hfw.translation() = Eigen::Matrix<Scalar, 3, 1>(state.x(), state.y(), 0);
+            Hfw.linear() = Eigen::AngleAxis<Scalar>(state.z(), Eigen::Matrix<Scalar, 3, 1>::UnitZ()).toRotationMatrix();
+
+            const Eigen::Transform<Scalar, 3, Eigen::Affine> Hfc = Hcw * Hfw.inverse();
+
+            // Partition all field points into those that are visible and those that are not
+            const Scalar cos_theta = std::cos(fov * Scalar(0.5));
+            std::vector<int> indexes(rLFf.rows(), 0);
+            std::iota(indexes.begin(), indexes.end(), 0);
+            const auto it = std::partition(indexes.begin(), indexes.end(), [&](const int& p) {
+                return Hfc.rotation().template leftCols<1>().dot(rLFf.row(p)) > cos_theta;
+            });
+
+            // Create output matrix of all rLFf points that are onscreen
+            // Transform these points into camera space
+            const Eigen::Transform<Scalar, 3, Eigen::Affine> Hcf = Hfc.inverse();
+            Eigen::Matrix<Scalar, Eigen::Dynamic, 3> uLCc(std::distance(indexes.begin(), it), 3);
+            for (int point = 0; point < uLCc.rows(); ++point) {
+                uLCc.row(point) = Hcf * rLFf.row(indexes[point]).normalized();
+            }
+
+            return uLCc;
+        }
+
         StateVec limit(const StateVec& state) {
             return state;
         }
@@ -106,6 +147,29 @@ namespace module::localisation {
         template <typename T, typename U>
         static auto difference(const T& a, const U& b) {
             return a - b;
+        }
+
+        // uLCc_a are the predictions
+        // uLCc_b are the measurements
+        Eigen::Matrix<Scalar, Eigen::Dynamic, 1> difference(const Eigen::Matrix<Scalar, Eigen::Dynamic, 3>& uLCc_a,
+                                                            const Eigen::Matrix<Scalar, Eigen::Dynamic, 3>& srLCc_b) {
+
+            // Convert measurement to cartesian coordinates
+            const Eigen::Matrix<Scalar, Eigen::Dynamic, 3>& uLCc_b(srLCc_b.rows(), 3);
+            for (int point = 0; point < srLCc_b.rows(); ++point) {
+                uLCc_b.row(point) = reciprocalSphericalToCartesian(srLCc_b.row(point));
+            }
+
+            // Take the dot product of every vector in uRLCc_b with every vector in uLCc_a
+            const Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic> distances = uLCc_b * uLCc_a.transpose();
+
+            // All the rows of differences correspond to the measurement vectors
+            // All of the columns correspond to the prediction vectors
+            // The maximum coefficient in each row will indicate how close the closest onscreen prediction is to that
+            // measurement
+            // These will be cos(theta) differences in the range [-1, 1], where 1 is closest and -1 is furthest
+            // Rescale to [0, 1], where 0 is closest and 1 is furthest away
+            return Scalar(1) - (distances.rowwise().maxCoeff() + Scalar(1)) / Scalar(2);
         }
 
         // Getters

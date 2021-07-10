@@ -12,6 +12,7 @@
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/localisation/ResetRobotHypotheses.hpp"
+#include "message/vision/FieldLine.hpp"
 #include "message/vision/Goal.hpp"
 
 #include "utility/localisation/transform.hpp"
@@ -28,6 +29,8 @@ namespace module::localisation {
     using message::support::FieldDescription;
     using VisionGoal  = message::vision::Goal;
     using VisionGoals = message::vision::Goals;
+    using VisionLine  = message::vision::FieldLine;
+    using VisionLines = message::vision::FieldLines;
 
     using utility::math::coordinates::cartesianToSpherical;
     using utility::nusight::graph;
@@ -71,7 +74,7 @@ namespace module::localisation {
             });
 
         on<Trigger<VisionGoals>, With<FieldDescription>, Sync<RobotParticleLocalisation>>().then(
-            "Measurement Update",
+            "Goal Measurement Update",
             [this](const VisionGoals& goals, const FieldDescription& fd) {
                 if (!goals.goals.empty()) {
                     // Perform time update
@@ -177,6 +180,33 @@ namespace module::localisation {
                             }
                         }
                     }
+                }
+            });
+
+        on<Trigger<VisionLines>, With<FieldDescription>, Sync<RobotParticleLocalisation>>().then(
+            "Field Line Measurement Update",
+            [this](const VisionLines& lines, const FieldDescription& fd) {
+                if (!lines.lines.empty()) {
+                    // Perform time update
+                    using namespace std::chrono;
+                    const auto curr_time  = NUClear::clock::now();
+                    const double seconds  = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
+                    last_time_update_time = curr_time;
+
+                    filter.time(seconds);
+                    std::vector<Eigen::Vector3d> points_rLCc{};
+                    std::vector<Eigen::Matrix3d> points_covariance{};
+                    for (auto line : lines.lines) {
+                        if (line.rLCc.allFinite() && line.covariance.allFinite()) {
+                            points_rLCc.emplace_back(line.rLCc);
+                            points_covariance.emplace_back(line.covariance);
+                        }
+                        else {
+                            log("Received non-finite field line measurements from vision. Discarding ...");
+                        }
+                    }
+
+                    filter.measure(points_rLCc, points_covariance, lines.Hcw, fd, config.num_field_line_points);
                 }
             });
 
