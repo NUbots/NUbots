@@ -23,7 +23,6 @@
 #include <catch.hpp>
 #include <functional>
 #include <nuclear>
-#include <thread>
 
 #include "EmissionCatcher.hpp"
 
@@ -32,19 +31,26 @@ namespace extension::moduletest {
     template <typename Module>
     class ModuleTest {
 
-        Module setup() {
-            // Construct powerplant
-            // Construct Module, with powerplant as environment
-            // Return Module
+        // TODO: Sort out Configuration of the module
+        explicit ModuleTest(std::string module_name)
+            : module_being_tested(std::make_unique<NUClear::Environment>(powerplant, module_name, NUClear::FATAL)) {}
+
+        [[nodiscard]] Module& setup() {
+            return module_being_tested;
         }
 
         // TODO return the resulting emissions SOMEHOW??
         template <typename TriggerMessage>
         void run(NUClear::threading::ReactionHandle& handle_to_trigger, TriggerMessage& trigger) {
-            // Call handle with trigger as arg
+            handle_to_trigger.enable();
+            // Call handle's task function with trigger as argument
             // Catch the response emits (somehow) using TestPowerPlant's overridden `emit`
             // Return the response emits (somehow)
         }
+
+    private:
+        TestPowerPlant powerplant{};
+        Module module_being_tested;
     }
 
 }  // namespace extension::moduletest
