@@ -55,7 +55,7 @@ namespace module::extension::provider {
         /// The queue of tasks waiting to run if the situation changes
         std::vector<std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>> task_queue;
         /// List of current subtasks that have been emitted by this provider group
-        std::vector<std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>> subtasks;
+        TaskList subtasks;
     };
 
 }  // namespace module::extension::provider

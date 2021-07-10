@@ -36,6 +36,7 @@ namespace module::extension {
             group.active_task = nullptr;
 
             // Re-evaluate the queue of tasks for this group
+            // This may set `group.active_task` to a valid value
             reevaluate_queue(group);
 
             // If nothing in the queue updated the active task to a new task we are now idle
