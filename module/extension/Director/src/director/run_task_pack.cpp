@@ -21,7 +21,7 @@
 
 namespace module::extension {
 
-    void Director::run_task_pack(const TaskList& pack) {
+    void Director::run_task_pack(const TaskPack& pack) {
         // TODO(@TrentHouliston) write the algorithm that does what is needed with this task pack
     }
 

@@ -44,11 +44,12 @@ namespace module::extension {
             if (group.active_task == nullptr) {
                 group.state = provider::ProviderGroup::IDLE;
 
-                // TODO if there is a pure leaving provider, run it
-                // TODO maybe I need a new set of DSL keywords so there can be a pure leaving keyword that isn't leaving
-                // TODO what leaving without causing/when providers do are very different from what they do with
+                // TODO(@TrentHouliston)
+                //  if there is a pure leaving provider, run it
+                //  maybe I need a new set of DSL keywords so there can be a pure leaving keyword that isn't leaving
+                //  what leaving without causing/when providers do are very different from what they do with
                 //      when/causing.
-                // TODO maybe the leaving without a causing needs it's own DSL keyword, (might be leaving and current
+                //  maybe the leaving without a causing needs it's own DSL keyword, (might be leaving and current
                 //      leaving needs renaming)
 
                 for (const auto& t : group.subtasks) {

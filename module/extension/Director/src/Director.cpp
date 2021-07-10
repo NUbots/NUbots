@@ -177,7 +177,7 @@ namespace module::extension {
             [this](std::shared_ptr<const DirectorTask> task) {
                 // Root level task, make the pack immediately and send it off to be executed as a root task
                 if (providers.count(task->requester_id) == 0) {
-                    emit(std::make_unique<TaskList>(TaskList({task})));
+                    emit(std::make_unique<TaskPack>(TaskPack({task})));
                 }
                 // Check if this Provider is active and allowed to make subtasks
                 else if (providers[task->requester_id]->active) {
@@ -197,7 +197,7 @@ namespace module::extension {
         on<Trigger<ProviderDone>, Sync<DirectorTask>>().then("Package Tasks", [this](const ProviderDone& done) {
             // Get all the tasks that were emitted by this provider and send it as a task pack
             auto range = pack_builder.equal_range(done.requester_task_id);
-            auto tasks = std::make_unique<TaskList>();
+            auto tasks = std::make_unique<TaskPack>();
             for (auto it = range.first; it != range.second; ++it) {
                 tasks->push_back(it->second);
             }
@@ -225,7 +225,7 @@ namespace module::extension {
         });
 
         // We have a new task pack to run
-        on<Trigger<TaskList>, Sync<Director>>().then("Run Task Pack", [this](const TaskList& pack) {  //
+        on<Trigger<TaskPack>, Sync<Director>>().then("Run Task Pack", [this](const TaskPack& pack) {  //
             run_task_pack(pack);
         });
     }

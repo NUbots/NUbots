@@ -32,8 +32,10 @@ namespace module::extension {
 
     class Director : public NUClear::Reactor {
     public:
-        /// A task list is just a list of tasks
-        using TaskList = std::vector<std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>>;
+        /// A task queue holds tasks in a provider that are waiting to be executed by that group
+        using TaskQueue = std::vector<std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>>;
+        /// A task pack is the result of a set of tasks emitted by a provider that should be run together
+        using TaskPack = std::vector<std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>>;
 
     private:
         /**
@@ -122,7 +124,7 @@ namespace module::extension {
          *
          * @param pack the task pack that represents the queued tasks
          */
-        void run_task_pack(const TaskList& pack);
+        void run_task_pack(const TaskPack& pack);
 
     public:
         /// Called by the powerplant to build and setup the Director reactor.

@@ -53,9 +53,9 @@ namespace module::extension::provider {
         /// The current task that is running on this Provider
         std::shared_ptr<const ::extension::behaviour::commands::DirectorTask> active_task;
         /// The queue of tasks waiting to run if the situation changes
-        std::vector<std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>> task_queue;
+        TaskQueue task_queue;
         /// List of current subtasks that have been emitted by this provider group
-        TaskList subtasks;
+        TaskPack subtasks;
     };
 
 }  // namespace module::extension::provider
