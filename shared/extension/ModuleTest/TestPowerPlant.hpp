@@ -17,39 +17,22 @@
  * Copyright 2021 NUbots <nubots@nubots.net>
  */
 
-#ifndef EXTENSION_MODULETEST_HPP
-#define EXTENSION_MODULETEST_HPP
+#ifndef EXTENSION_MODULETEST_TESTPOWERPLANT_HPP
+#define EXTENSION_MODULETEST_TESTPOWERPLANT_HPP
 
 #include <catch.hpp>
 #include <functional>
 #include <nuclear>
-#include <thread>
-
-#include "EmissionCatcher.hpp"
 
 namespace extension::moduletest {
 
     template <typename Module>
-    class ModuleTest : public NUClear::PowerPlant {
-    public:
-        // TODO: somehow disable the reactions which aren't on<Trigger<..>>, such as on<Every<..>> or on<Always>
-        // ModuleTest() : NUClear::PowerPlant(get_single_thread_config()) {}
-        ModuleTest() = default;
+    class TestPowerPlant : public NUClear::PowerPlant {
 
-        // ModuleTest(ModuleTest& other)  = delete;
-        // ModuleTest(ModuleTest&& other) = delete;
-        // ModuleTest& operator=(ModuleTest& other) = delete;
-        // ModuleTest&& operator=(ModuleTest&& other) = delete;
+        TestPowerPlant() = default;
 
-    private:
-        // static const NUClear::PowerPlant::Configuration get_single_thread_config() {
-        //     NUClear::PowerPlant::Configuration cfg;
-        //     cfg.thread_count = 1;
-        //     return cfg;
-        // }
+        Module& reactor_being_tested;
     };
-
-
 }  // namespace extension::moduletest
 
-#endif  // EXTENSION_MODULETEST_HPP
+#endif  // EXTENSION_MODULETEST_TEST_POWERPLANT_HPP
