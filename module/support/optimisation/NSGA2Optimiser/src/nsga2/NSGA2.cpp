@@ -172,7 +172,7 @@ namespace nsga2 {
 
 
     bool NSGA2::HasMetOptimisationTerminalCondition() {
-        return (currentGen >= generations) || earlyStoppingNoImprovement || earlyStoppingOneFront;
+        return (currentGen >= generations) || (earlyStoppingNoImprovement && earlyStoppingOneFront);
     }
 
     void NSGA2::CompleteGeneration() {
@@ -214,7 +214,7 @@ namespace nsga2 {
             if(i == 0) {
                 // If `i` is still 0, that means we only have one front carrying over
                 earlyStoppingOneFront = true;
-                NUClear::log<NUClear::INFO>("A single front this generation, stopping early");
+                NUClear::log<NUClear::INFO>("A single front this generation, could stop early");
             }
             bool aChildSurvivesThisGen = false;
             for (auto& ind : parentPop->inds) {
@@ -225,7 +225,7 @@ namespace nsga2 {
             }
             if(!aChildSurvivesThisGen) {
                 earlyStoppingNoImprovement = true;
-                NUClear::log<NUClear::INFO>("No improvement this generation, stopping early");
+                NUClear::log<NUClear::INFO>("No improvement this generation, could stop early");
             }
         }
         ReportPop(parentPop, all_pop_file);
