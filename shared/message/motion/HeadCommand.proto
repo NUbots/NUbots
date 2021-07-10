@@ -25,7 +25,7 @@ package message.motion;
  * This command is interpreted such that the robot will use IMU data to fixate at these angles in the world even when
  * rotating.
  *
- * @author Jake Fountain
+ * @author Jade Fountain
  */
 message HeadCommand {
     float yaw         = 1;
