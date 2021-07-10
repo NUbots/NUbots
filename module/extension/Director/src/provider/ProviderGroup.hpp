@@ -29,6 +29,11 @@ namespace module::extension::provider {
 
     struct ProviderGroup {
 
+        /// A task queue holds tasks in a provider that are waiting to be executed by that group
+        using TaskQueue = std::vector<std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>>;
+        /// A task pack is the result of a set of tasks emitted by a provider that should be run together
+        using TaskPack = std::vector<std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>>;
+
         /**
          * The current state of the Provider group
          */
