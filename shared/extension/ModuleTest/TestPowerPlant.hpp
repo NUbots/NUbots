@@ -22,7 +22,9 @@
 
 #include <catch.hpp>
 #include <functional>
+#include <memory>
 #include <nuclear>
+#include <vector>
 
 namespace extension::moduletest {
 
@@ -31,7 +33,10 @@ namespace extension::moduletest {
 
         TestPowerPlant() = default;
 
-        Module& reactor_being_tested;
+        template <typename T>
+        void emit(std::unique_ptr<T>&& data) override {
+            // TODO (somehow) return this data to the tester
+        }
     };
 }  // namespace extension::moduletest
 

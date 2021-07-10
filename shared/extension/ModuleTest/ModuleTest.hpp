@@ -30,25 +30,22 @@
 namespace extension::moduletest {
 
     template <typename Module>
-    class ModuleTest : public NUClear::PowerPlant {
-    public:
-        // TODO: somehow disable the reactions which aren't on<Trigger<..>>, such as on<Every<..>> or on<Always>
-        // ModuleTest() : NUClear::PowerPlant(get_single_thread_config()) {}
-        ModuleTest() = default;
+    class ModuleTest {
 
-        // ModuleTest(ModuleTest& other)  = delete;
-        // ModuleTest(ModuleTest&& other) = delete;
-        // ModuleTest& operator=(ModuleTest& other) = delete;
-        // ModuleTest&& operator=(ModuleTest&& other) = delete;
+        Module setup() {
+            // Construct powerplant
+            // Construct Module, with powerplant as environment
+            // Return Module
+        }
 
-    private:
-        // static const NUClear::PowerPlant::Configuration get_single_thread_config() {
-        //     NUClear::PowerPlant::Configuration cfg;
-        //     cfg.thread_count = 1;
-        //     return cfg;
-        // }
-    };
-
+        // TODO return the resulting emissions SOMEHOW??
+        template <typename TriggerMessage>
+        void run(NUClear::threading::ReactionHandle& handle_to_trigger, TriggerMessage& trigger) {
+            // Call handle with trigger as arg
+            // Catch the response emits (somehow) using TestPowerPlant's overridden `emit`
+            // Return the response emits (somehow)
+        }
+    }
 
 }  // namespace extension::moduletest
 
