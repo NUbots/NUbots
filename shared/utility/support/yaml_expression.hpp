@@ -26,6 +26,7 @@
 #include <system_error>
 
 #include "math_string.hpp"
+#include <yaml-cpp/yaml.h>
 
 namespace utility::support {
     /**
