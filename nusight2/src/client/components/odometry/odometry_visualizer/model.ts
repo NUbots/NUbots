@@ -6,26 +6,47 @@ export class OdometryVisualizerModel {
   @observable.ref Hwt: Matrix4
   @observable.ref accelerometer: Vector3
   @observable.ref camera: OdometryCamera
+  // TODO: make optional?
+  @observable.ref leftFoot: OdometryFootModel
+  @observable.ref rightFoot: OdometryFootModel
 
   constructor({
     Hwt,
     accelerometer,
     camera,
+    leftFoot,
+    rightFoot,
   }: {
     Hwt: Matrix4
     accelerometer: Vector3
     camera: OdometryCamera
+    leftFoot: OdometryFootModel
+    rightFoot: OdometryFootModel
   }) {
     this.Hwt = Hwt
     this.accelerometer = accelerometer
     this.camera = camera
+    this.leftFoot = leftFoot
+    this.rightFoot = rightFoot
   }
 
-  static of({ Hwt = Matrix4.of(), accelerometer }: { Hwt?: Matrix4; accelerometer: Vector3 }) {
+  static of({
+    Hwt = Matrix4.of(),
+    accelerometer,
+    leftFoot,
+    rightFoot,
+  }: {
+    Hwt?: Matrix4
+    accelerometer: Vector3
+    leftFoot: OdometryFootModel
+    rightFoot: OdometryFootModel
+  }) {
     return new OdometryVisualizerModel({
       Hwt,
       accelerometer,
       camera: OdometryCamera.of({ distance: 2 }),
+      leftFoot,
+      rightFoot,
     })
   }
 }
@@ -44,4 +65,10 @@ export class OdometryCamera {
   static of({ distance }: { distance: number }) {
     return new OdometryCamera({ distance, pitch: 0, yaw: 0 })
   }
+}
+
+interface OdometryFootModel {
+  readonly down: boolean
+  readonly Hwf: Matrix4
+  readonly Htf: Matrix4
 }

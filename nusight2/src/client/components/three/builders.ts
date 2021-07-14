@@ -36,12 +36,14 @@ import { Object3D } from 'three'
 import { Mesh } from 'three'
 import { Material } from 'three'
 import { ShaderMaterial } from 'three'
+import { Matrix4 } from '../../math/matrix4'
 
 import { Vector3 } from '../../math/vector3'
 
 import { createUpdatableComputed } from './create_updatable_computed'
 
 type Object3DOpts = {
+  name?: string
   position?: Vector3
   rotation?: Vector3
   rotationOrder?: string
@@ -155,6 +157,7 @@ type MaterialOpts = {
   depthTest?: boolean
   depthWrite?: boolean
   transparent?: boolean
+  opacity?: number
 }
 
 type MeshBasicMaterialOpts = MaterialOpts & {
@@ -171,6 +174,7 @@ export const meshBasicMaterial = createUpdatableComputed(
   (opts: MeshBasicMaterialOpts) => new MeshBasicMaterial(),
   (material, opts) => {
     material.color = opts.color || defaultColor
+    material.opacity = opts.opacity ?? 1
     material.combine = opts.combine || defaultCombine
     material.map = opts.map || null
     material.transparent = opts.transparent != null ? opts.transparent : false
@@ -345,10 +349,14 @@ function updateTexture(texture: Texture, opts: TextureOpts) {
   texture.minFilter = opts.minFilter || LinearFilter
 }
 
-type BoxGeometryOpts = { width: number; height: number; depth: number }
+type BoxGeometryOpts = { width: number; height: number; depth: number; transform?: Matrix4 }
 
 export const boxGeometry = createUpdatableComputed(
-  (opts: BoxGeometryOpts) => new BoxGeometry(opts.width, opts.height, opts.depth),
+  (opts: BoxGeometryOpts) => {
+    const geom = new BoxGeometry(opts.width, opts.height, opts.depth)
+    opts.transform && geom.applyMatrix(opts.transform.toThree())
+    return geom
+  },
   (geometry, opts) => {
     const { width, height, depth } = geometry.parameters
     if (opts.width !== width || opts.height !== height || opts.depth !== depth) {
@@ -363,11 +371,15 @@ type PlaneGeometryOpts = {
   height: number
   widthSegments?: number
   heightSegments?: number
+  transform?: Matrix4
 }
 
 export const planeGeometry = createUpdatableComputed(
-  (opts: PlaneGeometryOpts) =>
-    new PlaneGeometry(opts.width, opts.height, opts.widthSegments, opts.heightSegments),
+  (opts: PlaneGeometryOpts) => {
+    const geom = new PlaneGeometry(opts.width, opts.height, opts.widthSegments, opts.heightSegments)
+    opts.transform && geom.applyMatrix(opts.transform.toThree())
+    return geom
+  },
   (geometry, opts) => {
     const { width, height, widthSegments, heightSegments } = geometry.parameters
     if (
@@ -435,6 +447,7 @@ export const pointLight = createUpdatableComputed(
 )
 
 function updateObject3D(object: Object3D, opts: Object3DOpts) {
+  object.name = opts.name ?? ''
   opts.position && object.position.set(opts.position.x, opts.position.y, opts.position.z)
   opts.rotation &&
     object.rotation.set(opts.rotation.x, opts.rotation.y, opts.rotation.z, opts.rotationOrder)
