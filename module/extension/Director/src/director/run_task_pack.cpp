@@ -14,21 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2021 NUbots <nubots@nubots.net>
  */
-syntax = "proto3";
 
-package message.motion;
+#include "Director.hpp"
 
-/**
- * Tell the head where to look in world space.
- * This command is interpreted such that the robot will use IMU data to fixate at these angles in the world even when
- * rotating.
- *
- * @author Jade Fountain
- */
-message HeadCommand {
-    float yaw         = 1;
-    float pitch       = 2;
-    bool  robot_space = 3;  // if true, the yaw and pitch are interpreted in robot space, instead of IMU space
-}
+namespace module::extension {
+
+    void Director::run_task_pack(const TaskPack& pack) {
+        // TODO(@TrentHouliston) write the algorithm that does what is needed with this task pack
+    }
+
+}  // namespace module::extension
