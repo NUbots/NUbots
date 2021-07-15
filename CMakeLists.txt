@@ -120,6 +120,7 @@ set(NUCLEAR_ROLE_WARNINGS
     -Wdouble-promotion # warn if float is implicit promoted to double
     -Wnull-dereference # warn if a null dereference is detected
     -Wmisleading-indentation # warn if indentation implies blocks where blocks do not exist
+    CACHE STRING "Compiler warnings used during role compilation. Also sets warnings for all other project components"
 )
 
 # Treat all normal compiler warnings as errors

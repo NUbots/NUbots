@@ -32,8 +32,11 @@ if(NUCLEAR_LINK_TYPE STREQUAL "SHARED")
 endif()
 
 # Add warnings for the utilities. Use the default ROLE warnings setting if it's not configured manually
-if(NOT NUCLEAR_UTILITY_WARNINGS)
-  set(NUCLEAR_UTILITY_WARNINGS ${NUCLEAR_ROLE_WARNINGS})
+if(NOT DEFINED NUCLEAR_UTILITY_WARNINGS)
+  set(NUCLEAR_UTILITY_WARNINGS
+      ${NUCLEAR_ROLE_WARNINGS}
+      CACHE STRING "Compiler warnings used during utility compilation"
+  )
 endif()
 target_compile_options(nuclear_utility PRIVATE ${NUCLEAR_UTILITY_WARNINGS})
 

@@ -177,8 +177,11 @@ target_include_directories(nuclear_message PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/in
 target_include_directories(nuclear_message PUBLIC ${nt_out})
 
 # Add warnings for the C++ message files. Use the default ROLE warnings setting if it's not configured manually
-if(NOT NUCLEAR_MESSAGE_WARNINGS)
-  set(NUCLEAR_MESSAGE_WARNINGS ${NUCLEAR_ROLE_WARNINGS})
+if(NOT DEFINED NUCLEAR_MESSAGE_WARNINGS)
+  set(NUCLEAR_MESSAGE_WARNINGS
+      ${NUCLEAR_ROLE_WARNINGS}
+      CACHE STRING "Compiler warnings used during Neutron compilation"
+  )
 endif()
 target_compile_options(nuclear_message PRIVATE ${NUCLEAR_MESSAGE_WARNINGS})
 

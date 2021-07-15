@@ -5,8 +5,11 @@ find_package(Threads REQUIRED)
 find_package(NUClear REQUIRED)
 
 # Set up the warnings variable for the modules. Use the default ROLE warnings setting if it's not configured manually
-if(NOT NUCLEAR_MODULE_WARNINGS)
-  set(NUCLEAR_MODULE_WARNINGS ${NUCLEAR_ROLE_WARNINGS})
+if(NOT DEFINED NUCLEAR_MODULE_WARNINGS)
+  set(NUCLEAR_MODULE_WARNINGS
+      ${NUCLEAR_ROLE_WARNINGS}
+      CACHE STRING "Compiler warnings used during module compilation"
+  )
 endif()
 
 function(NUCLEAR_MODULE)
