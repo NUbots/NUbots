@@ -142,69 +142,71 @@ TEST_CASE("Test Combination", "[utility][motion][splines][Combination]") {
 }
 
 // Each vector represents the polynomial coefficients, the x value, and the y, y', y'', y''' values
-std::vector<std::vector<long int>> P = {{3, 3, 2, 2, 0, 5, 11, 529985, 236357, 84352, 22584},
-                                        {2, 3, 2, 3, 3, 1, 20, 6897261, 1698523, 334646, 49452},
-                                        {1, 3, 2, 1, 5, 5, 2, 115, 209, 330, 396},
-                                        {2, 2, 0, 2, 3, 2, 9, 131411, 71481, 31108, 10152},
-                                        {2, 1, 2, 2, 1, 2, 12, 522158, 215185, 70996, 17580},
-                                        {1, 2, 0, 2, 1, 0, 13, 428766, 160434, 48000, 10764},
-                                        {2, 3, 1, 3, 1, 5, 13, 830991, 312560, 94048, 21222},
-                                        {2, 3, 2, 0, 4, 2, 7, 41533, 28424, 15568, 6396},
-                                        {3, 0, 2, 2, 4, 1, 12, 750289, 311956, 103828, 25932},
-                                        {2, 0, 0, 0, 5, 5, 2, 79, 165, 320, 480},
-                                        {0, 2, 2, 0, 0, 5, 5, 1505, 1150, 660, 252},
-                                        {2, 3, 1, 1, 5, 5, 5, 8305, 7840, 5932, 3366},
-                                        {3, 3, 0, 3, 1, 1, 10, 330311, 162061, 63606, 18720},
-                                        {3, 1, 0, 1, 5, 3, 13, 1142677, 437234, 133850, 30732},
-                                        {0, 0, 1, 3, 1, 3, 11, 1708, 430, 72, 6},
-                                        {0, 0, 0, 0, 0, 4, 13, 4, 0, 0, 0},
-                                        {2, 1, 3, 0, 3, 1, 19, 5103154, 1333898, 279034, 43794},
-                                        {0, 1, 0, 2, 3, 4, 6, 1390, 891, 436, 144},
-                                        {3, 2, 3, 1, 5, 3, 16, 3289427, 1018149, 252194, 46866},
-                                        {2, 3, 3, 2, 5, 5, 10, 233255, 112945, 43784, 12738},
-                                        {2, 0, 3, 3, 5, 4, 9, 120577, 66398, 29328, 9738},
-                                        {3, 1, 0, 1, 1, 1, 13, 1142623, 437230, 133850, 30732},
-                                        {2, 3, 3, 3, 5, 1, 2, 159, 309, 506, 642},
-                                        {1, 3, 2, 3, 5, 0, 12, 314988, 125357, 39894, 9516},
-                                        {2, 2, 1, 2, 3, 3, 16, 2232883, 688963, 170084, 31494},
-                                        {2, 3, 3, 3, 0, 3, 20, 6905203, 1699720, 334766, 49458},
-                                        {1, 0, 0, 3, 3, 4, 12, 249304, 103755, 34566, 8640},
-                                        {3, 3, 1, 1, 4, 4, 5, 11424, 10964, 8432, 4866},
-                                        {0, 3, 0, 1, 2, 2, 5, 1912, 1512, 902, 360},
-                                        {2, 0, 0, 1, 0, 1, 2, 69, 164, 322, 480},
-                                        {3, 2, 2, 2, 3, 0, 7, 56028, 39084, 21844, 9168},
-                                        {3, 3, 3, 0, 2, 1, 11, 531092, 236678, 84414, 22590},
-                                        {3, 0, 2, 1, 5, 0, 0, 0, 5, 2, 12},
-                                        {3, 3, 3, 2, 3, 1, 10, 333231, 162943, 63784, 18738},
-                                        {1, 3, 0, 1, 2, 4, 8, 45140, 26642, 12546, 4416},
-                                        {3, 1, 0, 3, 0, 3, 15, 2329428, 772965, 205206, 40860},
-                                        {2, 2, 1, 2, 1, 5, 12, 541169, 221665, 72652, 17862},
-                                        {3, 3, 0, 2, 1, 3, 1, 12, 32, 100, 252},
-                                        {0, 3, 2, 0, 5, 2, 20, 496102, 98405, 14640, 1452},
-                                        {1, 3, 2, 2, 5, 3, 4, 1975, 2165, 1908, 1260},
-                                        {0, 0, 1, 2, 1, 5, 8, 653, 225, 52, 6},
-                                        {0, 2, 0, 1, 3, 2, 3, 182, 225, 218, 144},
-                                        {0, 2, 0, 3, 0, 4, 4, 564, 536, 390, 192},
-                                        {1, 1, 3, 2, 2, 3, 8, 38547, 23138, 11156, 4050},
-                                        {0, 1, 3, 3, 0, 3, 8, 5827, 2672, 918, 210},
-                                        {2, 3, 0, 0, 1, 3, 9, 137793, 74359, 32076, 10368},
-                                        {1, 2, 1, 2, 5, 1, 3, 466, 665, 778, 690},
-                                        {0, 1, 2, 1, 3, 3, 10, 12133, 4623, 1322, 252},
-                                        {3, 2, 2, 0, 4, 3, 11, 515144, 230993, 82896, 22320},
-                                        {3, 2, 1, 2, 5, 5, 12, 790049, 325349, 107212, 26502}};
+std::vector<std::vector<int>> P = {{3, 3, 2, 2, 0, 5, 11, 529985, 236357, 84352, 22584},
+                                   {2, 3, 2, 3, 3, 1, 20, 6897261, 1698523, 334646, 49452},
+                                   {1, 3, 2, 1, 5, 5, 2, 115, 209, 330, 396},
+                                   {2, 2, 0, 2, 3, 2, 9, 131411, 71481, 31108, 10152},
+                                   {2, 1, 2, 2, 1, 2, 12, 522158, 215185, 70996, 17580},
+                                   {1, 2, 0, 2, 1, 0, 13, 428766, 160434, 48000, 10764},
+                                   {2, 3, 1, 3, 1, 5, 13, 830991, 312560, 94048, 21222},
+                                   {2, 3, 2, 0, 4, 2, 7, 41533, 28424, 15568, 6396},
+                                   {3, 0, 2, 2, 4, 1, 12, 750289, 311956, 103828, 25932},
+                                   {2, 0, 0, 0, 5, 5, 2, 79, 165, 320, 480},
+                                   {0, 2, 2, 0, 0, 5, 5, 1505, 1150, 660, 252},
+                                   {2, 3, 1, 1, 5, 5, 5, 8305, 7840, 5932, 3366},
+                                   {3, 3, 0, 3, 1, 1, 10, 330311, 162061, 63606, 18720},
+                                   {3, 1, 0, 1, 5, 3, 13, 1142677, 437234, 133850, 30732},
+                                   {0, 0, 1, 3, 1, 3, 11, 1708, 430, 72, 6},
+                                   {0, 0, 0, 0, 0, 4, 13, 4, 0, 0, 0},
+                                   {2, 1, 3, 0, 3, 1, 19, 5103154, 1333898, 279034, 43794},
+                                   {0, 1, 0, 2, 3, 4, 6, 1390, 891, 436, 144},
+                                   {3, 2, 3, 1, 5, 3, 16, 3289427, 1018149, 252194, 46866},
+                                   {2, 3, 3, 2, 5, 5, 10, 233255, 112945, 43784, 12738},
+                                   {2, 0, 3, 3, 5, 4, 9, 120577, 66398, 29328, 9738},
+                                   {3, 1, 0, 1, 1, 1, 13, 1142623, 437230, 133850, 30732},
+                                   {2, 3, 3, 3, 5, 1, 2, 159, 309, 506, 642},
+                                   {1, 3, 2, 3, 5, 0, 12, 314988, 125357, 39894, 9516},
+                                   {2, 2, 1, 2, 3, 3, 16, 2232883, 688963, 170084, 31494},
+                                   {2, 3, 3, 3, 0, 3, 20, 6905203, 1699720, 334766, 49458},
+                                   {1, 0, 0, 3, 3, 4, 12, 249304, 103755, 34566, 8640},
+                                   {3, 3, 1, 1, 4, 4, 5, 11424, 10964, 8432, 4866},
+                                   {0, 3, 0, 1, 2, 2, 5, 1912, 1512, 902, 360},
+                                   {2, 0, 0, 1, 0, 1, 2, 69, 164, 322, 480},
+                                   {3, 2, 2, 2, 3, 0, 7, 56028, 39084, 21844, 9168},
+                                   {3, 3, 3, 0, 2, 1, 11, 531092, 236678, 84414, 22590},
+                                   {3, 0, 2, 1, 5, 0, 0, 0, 5, 2, 12},
+                                   {3, 3, 3, 2, 3, 1, 10, 333231, 162943, 63784, 18738},
+                                   {1, 3, 0, 1, 2, 4, 8, 45140, 26642, 12546, 4416},
+                                   {3, 1, 0, 3, 0, 3, 15, 2329428, 772965, 205206, 40860},
+                                   {2, 2, 1, 2, 1, 5, 12, 541169, 221665, 72652, 17862},
+                                   {3, 3, 0, 2, 1, 3, 1, 12, 32, 100, 252},
+                                   {0, 3, 2, 0, 5, 2, 20, 496102, 98405, 14640, 1452},
+                                   {1, 3, 2, 2, 5, 3, 4, 1975, 2165, 1908, 1260},
+                                   {0, 0, 1, 2, 1, 5, 8, 653, 225, 52, 6},
+                                   {0, 2, 0, 1, 3, 2, 3, 182, 225, 218, 144},
+                                   {0, 2, 0, 3, 0, 4, 4, 564, 536, 390, 192},
+                                   {1, 1, 3, 2, 2, 3, 8, 38547, 23138, 11156, 4050},
+                                   {0, 1, 3, 3, 0, 3, 8, 5827, 2672, 918, 210},
+                                   {2, 3, 0, 0, 1, 3, 9, 137793, 74359, 32076, 10368},
+                                   {1, 2, 1, 2, 5, 1, 3, 466, 665, 778, 690},
+                                   {0, 1, 2, 1, 3, 3, 10, 12133, 4623, 1322, 252},
+                                   {3, 2, 2, 0, 4, 3, 11, 515144, 230993, 82896, 22320},
+                                   {3, 2, 1, 2, 5, 5, 12, 790049, 325349, 107212, 26502}};
 
 // Given a polynomial, test that the polynomial class calculates the first, second and third derivatives correctly
 TEST_CASE("Test Polynom", "[utility][motion][splines][Polynom]") {
     // Loop for each test case
-    for (size_t i = 0; i < P.size(); i++) {
+    for (int i = 0; i < int(P.size()); i++) {
         // Get the coefficients for the test polynomial and the true differential values for the given x
-        std::vector<long int> coefs = {P[i][5], P[i][4], P[i][3], P[i][2], P[i][1], P[i][0]};
-        Eigen::Matrix<long int, 4, 1> result_true(P[i][7], P[i][8], P[i][9], P[i][10]);
-        long int x = P[i][6];
+        std::vector<int> coefs =
+            {P[size_t(i)][5], P[size_t(i)][4], P[size_t(i)][3], P[size_t(i)][2], P[size_t(i)][1], P[size_t(i)][0]};
+
+        Eigen::Matrix<int, 4, 1> result_true(P[size_t(i)][7], P[size_t(i)][8], P[size_t(i)][9], P[size_t(i)][10]);
+        int x = P[size_t(i)][6];
 
         // Create the polynomial from test coefficients and get the computed differential values for the given x
         utility::motion::splines::Polynom poly(coefs);
-        Eigen::Matrix<long int, 4, 1> result_calc(poly.pos(x), poly.vel(x), poly.acc(x), poly.jerk(x));
+        Eigen::Matrix<int, 4, 1> result_calc(poly.pos(x), poly.vel(x), poly.acc(x), poly.jerk(x));
 
         // Log the polynomial, expected and computed values
         INFO("p(x) = " << coefs[0] << "x^5 + " << coefs[1] << "x^4 + " << coefs[2] << "x^3 + " << coefs[3] << "x^2 + "
@@ -235,7 +237,7 @@ TEST_CASE("Test Smooth Spline", "[utility][motion][splines][SmoothSpline]") {
         spline.reset();
 
         // Get a random number of points for this spline
-        size_t noPoints = static_cast<size_t>(rand() % 6);
+        const int noPoints = static_cast<int>(rand() % 6);
         std::vector<Eigen::Vector4d> points;
 
         // This value will keep track of the last t value - we want them to be consecutive, so we will check against
@@ -243,7 +245,7 @@ TEST_CASE("Test Smooth Spline", "[utility][motion][splines][SmoothSpline]") {
         double point_t = -1.0;
 
         // Add our points to the spline
-        for (size_t i = 0; i < noPoints; i++) {
+        for (int i = 0; i < noPoints; i++) {
             Eigen::Vector4d point = Eigen::Vector4d::Random();  // random 4d array of numbers between -1 and 1
             point *= 10;                                        // values are between -10 and 10
             point[0] = std::abs(point[0]);
@@ -270,18 +272,18 @@ TEST_CASE("Test Smooth Spline", "[utility][motion][splines][SmoothSpline]") {
         }
 
         // Ensure it has computed the correct number of splines
-        if (spline.size() != (noPoints - 1)) {
+        if (int(spline.size()) != (noPoints - 1)) {
             INFO("Incorrect size. Expected " << (noPoints - 1) << ", got " << spline.size() << ".");
             REQUIRE(false);
         }
 
         // For each spline, check contraints
-        for (size_t i = 0; i < spline.size(); i++) {
+        for (int i = 0; i < int(spline.size()); i++) {
             // This gives us the coefficients for the spline, a_0 to a_5
-            std::vector<double> splineResult = spline.part(i).polynom.getCoefs();
+            std::vector<double> splineResult = spline.part(size_t(i)).polynom.getCoefs();
 
             // Check contraints for first endpoint and then the second endpoint in the polynomial
-            for (size_t k = 0; k < 2; k++) {
+            for (int k = 0; k < 2; k++) {
 
                 // We need to check what this spline actually gives for x, and the first and second derivatives
                 // of x, given an input of t. We will then check they match the expected values.
@@ -291,24 +293,24 @@ TEST_CASE("Test Smooth Spline", "[utility][motion][splines][SmoothSpline]") {
 
                 // Each spline is not made using the given t values. Each spline starts at t = 0 and the next point is
                 // defined as t = second-first
-                double t = ((k == 0) ? 0.0 : points[i + 1][0] - points[i][0]);
+                double t = ((k == 0) ? 0.0 : points[size_t(i + 1)][0] - points[size_t(i)][0]);
 
                 // Loop over the coefficients, add to the calculations for each coefficient.
-                // Position: x += a_l t^l
-                // Velocity: xd = l * a_l * t^(l-1)
-                // Acceleration: xdd = l * (l-1) * a_l * t^(l-2)
-                // If l is less than 0, don't add anything since our derivative has become 0 for that term.
-                for (int l = 0; l < int(splineResult.size()); l++) {
-                    x += splineResult[size_t(l)] * pow(t, l);
-                    xd += (((l - 1) >= 0) ? l * splineResult[size_t(l)] * pow(t, l - 1) : 0.0);
-                    xdd += (((l - 2) >= 0) ? l * (l - 1) * splineResult[size_t(l)] * pow(t, l - 2) : 0.0);
+                // Position: x += a_ii t^ii
+                // Velocity: xd = ii * a_ii * t^(ii-1)
+                // Acceleration: xdd = ii * (ii-1) * a_ii * t^(ii-2)
+                // If ii is less than 0, don't add anything since our derivative has become 0 for that term.
+                for (int ii = 0; ii < int(splineResult.size()); ii++) {
+                    x += splineResult[size_t(ii)] * pow(t, ii);
+                    xd += (((ii - 1) >= 0) ? ii * splineResult[size_t(ii)] * pow(t, ii - 1) : 0.0);
+                    xdd += (((ii - 2) >= 0) ? ii * (ii - 1) * splineResult[size_t(ii)] * pow(t, ii - 2) : 0.0);
                 }
 
                 // Log calculated and expected values of each contraint, and the spline coefficients a_0 to a_5
                 INFO(fmt::format("{} points. t = {}.", noPoints, t));
-                INFO(fmt::format("For x, expected {}, got {}", points[i + k][1], x));
-                INFO(fmt::format("For x', expected {}, got {}", points[i + k][2], x));
-                INFO(fmt::format("For x'', expected {}, got {}", points[i + k][3], x));
+                INFO(fmt::format("For x, expected {}, got {}", points[size_t(i + k)][1], x));
+                INFO(fmt::format("For x', expected {}, got {}", points[size_t(i + k)][2], x));
+                INFO(fmt::format("For x'', expected {}, got {}", points[size_t(i + k)][3], x));
                 INFO(fmt::format("f(t) = {} + {}t + {}t^2 + {}t^3 + {}t^4 + {}t^5",
                                  splineResult[0],
                                  splineResult[1],
@@ -319,9 +321,9 @@ TEST_CASE("Test Smooth Spline", "[utility][motion][splines][SmoothSpline]") {
 
                 // Check that the contraints hold - do the computed values from the spline match the given random values
                 // Check the difference is within a small error since we are using floating point values
-                REQUIRE(std::abs(x - points[i + k][1]) < ERROR);
-                REQUIRE(std::abs(xd - points[i + k][2]) < ERROR);
-                REQUIRE(std::abs(xdd - points[i + k][3]) < ERROR);
+                REQUIRE(std::abs(x - points[size_t(i + k)][1]) < ERROR);
+                REQUIRE(std::abs(xd - points[size_t(i + k)][2]) < ERROR);
+                REQUIRE(std::abs(xdd - points[size_t(i + k)][3]) < ERROR);
             }
         }
     }
