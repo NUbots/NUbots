@@ -131,9 +131,9 @@ TEST_CASE("Testing the hardware position conversions to radians", "[hardware][co
                                                0.0,      0.0,      0.0,       0.0,      0.0,       0.0,       0.0,
                                                0.0,      0.0,      0.0,       0.0,      0.0,       0.0};
 
-    for (uint8_t i = 0; i < 20; ++i) {
-        Convert::SERVO_DIRECTION[i] = direction[i];
-        Convert::SERVO_OFFSET[i]    = float(offset[i]);
+    for (ssize_t i = 0; i < 20; ++i) {
+        Convert::SERVO_DIRECTION[i] = direction[size_t(i)];
+        Convert::SERVO_OFFSET[i]    = float(offset[size_t(i)]);
     }
 
 
@@ -147,7 +147,7 @@ TEST_CASE("Testing the hardware position conversions to radians", "[hardware][co
                                                            {3073, M_PI_2},
                                                            {4095, M_PI}};
 
-        for (uint8_t i = 0; i < 20; ++i) {
+        for (ssize_t i = 0; i < 20; ++i) {
             INFO("Testing forward motor " << i);
 
             std::vector<std::pair<float, uint16_t>> inverseTest;
@@ -156,7 +156,7 @@ TEST_CASE("Testing the hardware position conversions to radians", "[hardware][co
                 INFO("Input: " << test.first << " Expected output: " << test.second);
                 float expected = utility::math::angle::normalizeAngle(test.second * Convert::SERVO_DIRECTION[i]
                                                                       + Convert::SERVO_OFFSET[i]);
-                float actual   = Convert::servoPosition(i, test.first);
+                float actual   = Convert::servoPosition(uint8_t(i), test.first);
 
                 INFO("Expected: " << expected << " Actual: " << actual);
 
@@ -174,41 +174,41 @@ TEST_CASE("Testing the hardware position conversions to radians", "[hardware][co
     {
         INFO("Testing the inverse position conversions");
 
-        for (uint8_t i = 0; i < 20; ++i) {
+        for (ssize_t i = 0; i < 20; ++i) {
 
             INFO("Testing inverse motor " << i);
 
-            for (auto& test : inverseTests[i]) {
+            for (auto& test : inverseTests[size_t(i)]) {
                 int distance, expected, actual;
 
-                actual = Convert::servoPositionInverse(i, test.first);
+                actual = Convert::servoPositionInverse(uint8_t(i), test.first);
                 INFO("Testing Input:" << test.first << " Expected: " << test.second << " Actual: " << actual);
                 expected = test.second;
                 distance = (((actual - expected) + 2048) % 4095) - 2048;
                 REQUIRE(distance <= maxInverseError);
 
-                actual = Convert::servoPositionInverse(i, test.first + float(2 * M_PI));
+                actual = Convert::servoPositionInverse(uint8_t(i), test.first + float(2 * M_PI));
                 INFO("Testing Input:" << test.first - float(2 * M_PI) << " Expected: " << test.second
                                       << " Actual: " << actual);
                 expected = test.second;
                 distance = (((actual - expected) + 2048) % 4095) - 2048;
                 REQUIRE(distance <= maxInverseError);
 
-                actual = Convert::servoPositionInverse(i, test.first - float(2 * M_PI));
+                actual = Convert::servoPositionInverse(uint8_t(i), test.first - float(2 * M_PI));
                 INFO("Testing Input:" << test.first + float(2 * M_PI) << " Expected: " << test.second
                                       << " Actual: " << actual);
                 expected = test.second;
                 distance = (((actual - expected) + 2048) % 4095) - 2048;
                 REQUIRE(distance <= maxInverseError);
 
-                actual = Convert::servoPositionInverse(i, test.first + float(M_PI));
+                actual = Convert::servoPositionInverse(uint8_t(i), test.first + float(M_PI));
                 INFO("Testing Input:" << test.first + float(M_PI) << " Expected: " << test.second - 2048
                                       << " Actual: " << actual);
                 expected = test.second - 2048;
                 distance = (((actual - expected) + 2048) % 4095) - 2048;
                 REQUIRE(distance <= maxInverseError);
 
-                actual = Convert::servoPositionInverse(i, test.first - float(M_PI));
+                actual = Convert::servoPositionInverse(uint8_t(i), test.first - float(M_PI));
                 INFO("Testing Input:" << test.first - float(M_PI) << " Expected: " << test.second - 2048
                                       << " Actual: " << actual);
                 expected = test.second - 2048;
@@ -227,14 +227,14 @@ TEST_CASE("Testing the hardware speed conversions to radians/second", "[hardware
 
         const std::pair<uint16_t, float> tests[] = {{0, 0.0f}, {1023, 1.0f}, {1024, 0.0f}, {2047, -1.0f}};
 
-        for (uint8_t i = 0; i < 20; ++i) {
+        for (ssize_t i = 0; i < 20; ++i) {
             INFO("Testing forward motor " << i);
 
             // Test with MX28s
             INFO("Testing with MX28s");
             for (auto& test : tests) {
                 float expected = test.second * (Convert::SPEED_CONVERSION_FACTOR * 1023) * Convert::SERVO_DIRECTION[i];
-                float actual   = Convert::servoSpeed(i, test.first);
+                float actual   = Convert::servoSpeed(uint8_t(i), test.first);
 
                 INFO("Input: " << test.first << " Expected: " << test.second << " Actual: " << actual);
 
@@ -266,11 +266,11 @@ TEST_CASE("Testing the hardware torque limit conversions to between 0 and 100", 
 
 TEST_CASE("Testing the hardware load conversions to between -100 and 100", "[hardware][conversion][load]") {
 
-    for (uint8_t i = 0; i < 20; ++i) {
-        REQUIRE(Convert::servoLoad(i, 0) == Approx(0 * Convert::SERVO_DIRECTION[i]));
-        REQUIRE(Convert::servoLoad(i, 1024) == Approx(0 * Convert::SERVO_DIRECTION[i]));
-        REQUIRE(Convert::servoLoad(i, 2047) == Approx(-1.0 * Convert::SERVO_DIRECTION[i]));
-        REQUIRE(Convert::servoLoad(i, 1023) == Approx(1.0 * Convert::SERVO_DIRECTION[i]));
+    for (ssize_t i = 0; i < 20; ++i) {
+        REQUIRE(Convert::servoLoad(uint8_t(i), 0) == Approx(0 * Convert::SERVO_DIRECTION[i]));
+        REQUIRE(Convert::servoLoad(uint8_t(i), 1024) == Approx(0 * Convert::SERVO_DIRECTION[i]));
+        REQUIRE(Convert::servoLoad(uint8_t(i), 2047) == Approx(-1.0 * Convert::SERVO_DIRECTION[i]));
+        REQUIRE(Convert::servoLoad(uint8_t(i), 1023) == Approx(1.0 * Convert::SERVO_DIRECTION[i]));
     }
 }
 
