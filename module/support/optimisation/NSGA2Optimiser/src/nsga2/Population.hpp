@@ -54,7 +54,7 @@ namespace nsga2 {
         std::pair<int, int> Mutate();
 
         void Merge(const Population& _pop1, const Population& _pop2);
-        void Report(std::ostream& _os) const;
+        void Report(std::ostream& _os, int currentGen) const;
 
         std::vector<Individual> inds;
 
@@ -64,8 +64,6 @@ namespace nsga2 {
         std::size_t currentInd = 0;
         IndividualConfigurator indConfig;
         int size;
-
-        friend std::ostream& operator<<(std::ostream& _os, const Population& _pop);
     };
 }  // namespace nsga2
 

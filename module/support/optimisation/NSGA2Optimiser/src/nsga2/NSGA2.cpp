@@ -139,7 +139,6 @@ namespace nsga2 {
         }
 
         InitializeReportingStreams();
-        ReportParams(nsga2_params_file);
 
         binMutCount    = 0;
         realMutCount   = 0;
@@ -414,25 +413,59 @@ namespace nsga2 {
     }
 
     void NSGA2::InitializeReportingStreams() {
-        InitializePopulationStream(initial_pop_file, "nsga2_initial_pop.csv", "This file contains the data of the initial generation");
-        InitializePopulationStream(final_pop_file, "nsga2_final_pop.csv", "This file contains the data of the final population");
-        InitializePopulationStream(best_pop_file, "nsga2_best_pop.csv", "This file contains the data of final feasible population (if any)");
-        InitializePopulationStream(all_pop_file, "nsga2_all_pop.csv", "This file contains the data of all generations");
+        WriteReportHeaders(initial_pop_file, "nsga2_initial_pop.csv");
+        WriteReportHeaders(final_pop_file, "nsga2_final_pop.csv");
+        WriteReportHeaders(all_pop_file, "nsga2_all_pop.csv");
 
-        nsga2_params_file.open("nsga2_params.csv", std::ios::out | std::ios::trunc);
-        nsga2_params_file.precision(16);
+        ReportParams(nsga2_params_file, "nsga2_params.csv");
     }
 
-    void NSGA2::InitializePopulationStream(std::ofstream& file_stream, std::string file_name, std::string description) {
-        file_stream.open(file_name, std::ios::out | std::ios::trunc);
-        file_stream.precision(16);
+    void NSGA2::WriteReportHeaders(std::ofstream& _os, std::string file_name) const {
+        _os.open(file_name, std::ios::out | std::ios::trunc);
+        _os.precision(16);
 
-        file_stream << "# " << description << "\n";
-        file_stream << "# num_objectives: " << objectives << ", num_constraints: " << constraints
-                    << ", num_real_variables: " << realVars << ", num_binary_variables: " << bitLength << std::endl;
+        _os << "population_generation"
+            << "individual_generation"
+            << ","
+            << "individual"
+            << ","
+            << "constraint_violation"
+            << ","
+            << "rank"
+            << ","
+            << "crowding_dist";
+
+        for (int i = 0; i < objectives; i++) {
+            _os << "," << "objective_" << i;
+        }
+
+        for (int i = 0; i < constraints; i++) {
+            _os << "," << "constraints_" << i;
+        }
+
+        for (int i = 0; i < realVars; i++) {
+            _os << "," << "real_param_" << i;
+        }
+
+        for (int i = 0; i < binVars; i++) {
+            for (int j = 0; j < binBits[i]; j++) {
+                _os << "," << "binary_param_" << i << "_" << j ;
+            }
+        }
+
+        _os << std::endl;
+        _os.flush();
     }
 
-    void NSGA2::ReportParams(std::ostream& _os) const {
+    void NSGA2::ReportPop(const std::shared_ptr<Population>& _pop, std::ofstream& _os) const {
+        _pop->Report(_os, currentGen);
+        _os.flush();
+    }
+
+    void NSGA2::ReportParams(std::ofstream& _os, std::string file_name) const {
+        _os.open(file_name, std::ios::out | std::ios::trunc);
+        _os.precision(16);
+
         _os << "# General Parameters\n";
         _os << "population_size,num_generations,num_objective_functions,num_constraints,rand_seed"
             << ",num_real_vars,real_var_crossover_prob,real_var_mutation_prob"
@@ -466,43 +499,6 @@ namespace nsga2 {
                 _os << i << "," << binLimits[i].first << "," << binLimits[i].second << "," << binBits[i] << std::endl;
             }
         }
-        _os.flush();
-    }
-
-    void NSGA2::ReportPop(const std::shared_ptr<Population>& _pop, std::ostream& _os) const {
-        _os << "\n# Generation " << _pop->generation << "\n";
-
-        _os << "generation"
-            << ","
-            << "individual"
-            << ","
-            << "constraint_violation"
-            << ","
-            << "rank"
-            << ","
-            << "crowding_dist";
-
-        for (int i = 0; i < objectives; i++) {
-            _os << "," << "objective_" << i;
-        }
-
-        for (int i = 0; i < constraints; i++) {
-            _os << "," << "constraints_" << i;
-        }
-
-        for (int i = 0; i < realVars; i++) {
-            _os << "," << "real_param_" << i;
-        }
-
-        for (int i = 0; i < binVars; i++) {
-            for (int j = 0; j < binBits[i]; j++) {
-                _os << "," << "binary_param_" << i << "_" << j ;
-            }
-        }
-
-        _os << std::endl;
-
-        _pop->Report(_os);
         _os.flush();
     }
 }  // namespace nsga2

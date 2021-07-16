@@ -197,11 +197,6 @@ namespace nsga2 {
         std::copy(_pop2.inds.begin(), _pop2.inds.end(), inds.begin() + _pop1.GetSize());
     }
 
-    void Population::Report(std::ostream& os) const {
-        for (auto it = inds.begin(); it != inds.end(); it++) {
-            it->Report(os);
-        }
-    }
 
     std::pair<int, int> Population::Mutate() {
         std::pair<int, int> mutCount    = std::make_pair(0, 0);
@@ -215,13 +210,9 @@ namespace nsga2 {
         return mutCount;
     }
 
-    std::ostream& operator<<(std::ostream& _os, const Population& _pop) {
-        _os << "Population: {\n";
-        std::vector<Individual>::const_iterator it;
-        for (it = _pop.inds.begin(); it != _pop.inds.end(); it++) {
-            _os << *it;
+    void Population::Report(std::ostream& os, int currentGen) const {
+        for (auto it = inds.begin(); it != inds.end(); it++) {
+            it->Report(os, currentGen);
         }
-        _os << "}";
-        return _os;
     }
 }  // namespace nsga2

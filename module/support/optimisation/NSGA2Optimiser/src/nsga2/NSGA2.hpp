@@ -44,9 +44,6 @@ namespace nsga2 {
         void SetInitialRealVars(const std::vector<double>& _initRealVars) { initialRealVars = _initRealVars; }
         // clang-format on
 
-        void ReportParams(std::ostream& os) const;
-        void ReportPop(const std::shared_ptr<Population>& pop, std::ostream& os) const;
-
         std::shared_ptr<Population> getCurrentPop();
 
         bool crowdObj      = true;
@@ -87,7 +84,6 @@ namespace nsga2 {
         // Output file streams
         std::ofstream initial_pop_file;
         std::ofstream final_pop_file;
-        std::ofstream best_pop_file;
         std::ofstream all_pop_file;
         std::ofstream nsga2_params_file;
 
@@ -98,7 +94,9 @@ namespace nsga2 {
         bool ConfigurationIsValid();
         void CreateStartingPopulations();
         void InitializeReportingStreams();
-        void InitializePopulationStream(std::ofstream& file_stream, std::string file_name, std::string description);
+        void WriteReportHeaders(std::ofstream& _os, std::string file_name) const;
+        void ReportParams(std::ofstream& _os, std::string file_name) const;
+        void ReportPop(const std::shared_ptr<Population>& pop, std::ofstream& os) const;
 
         void CompleteGeneration();
 

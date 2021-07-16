@@ -45,7 +45,7 @@ namespace nsga2 {
         double crowdDist; //Crowding distance, i.e. how close is the next nearest solution. Boundary solutions have infinite distance.
         bool evaluated;
 
-        void Report(std::ostream& _os) const;
+        void Report(std::ostream& _os, int population_generation) const;
         int id;
         int generation;
 
@@ -54,8 +54,6 @@ namespace nsga2 {
         int realMutate();
         int binMutate();
         IndividualConfigurator config;
-
-        friend std::ostream& operator<<(std::ostream& _os, const Individual& _ind);
     };
 }  // namespace nsga2
 

@@ -207,8 +207,10 @@ namespace nsga2 {
         return mutationCount;
     }
 
-    void Individual::Report(std::ostream& os) const {
-        os << generation
+    void Individual::Report(std::ostream& os, int population_generation) const {
+        os << population_generation
+           << ","
+           << generation
            << ","
            << id
            << ","
@@ -237,55 +239,5 @@ namespace nsga2 {
         }
 
         os << std::endl;
-    }
-
-    std::ostream& operator<<(std::ostream& _os, const Individual& _ind) {
-        _os << "{Individual rank = " << _ind.rank << "\nconstrViolation = " << _ind.constrViolation;
-
-        _os << "\nreals = [";
-        std::vector<double>::const_iterator it;
-        for (it = _ind.reals.begin(); it != _ind.reals.end(); it++) {
-            _os << *it;
-            if (it + 1 != _ind.reals.end())
-                _os << ", ";
-        }
-        _os << "]";
-        _os << "\ngene = ";
-        std::vector<std::vector<int>>::const_iterator it1;
-        for (it1 = _ind.gene.begin(); it1 != _ind.gene.end(); it1++) {
-            const std::vector<int>& tmp = *it1;
-            std::vector<int>::const_iterator it2;
-            if (it1 != _ind.gene.begin())
-                _os << " ";
-            for (it2 = tmp.begin(); it2 != tmp.end(); it2++) {
-                _os << *it2;
-            }
-            _os << "\n";
-        }
-
-        _os << "bins = ";
-        for (it = _ind.bins.begin(); it != _ind.bins.end(); it++) {
-            _os << *it;
-            if (it + 1 != _ind.bins.end())
-                _os << ", ";
-        }
-
-        _os << "\nobjective score = ";
-        for (it = _ind.objScore.begin(); it != _ind.objScore.end(); it++) {
-            _os << *it;
-            if (it + 1 != _ind.objScore.end())
-                _os << ", ";
-        }
-
-        _os << "\nconstraints = ";
-        for (it = _ind.constr.begin(); it != _ind.constr.end(); it++) {
-            _os << *it;
-            if (it + 1 != _ind.constr.end())
-                _os << ", ";
-        }
-
-        _os << "\ncrowdDist = " << _ind.crowdDist << " }";
-
-        return _os;
     }
 }  // namespace nsga2
