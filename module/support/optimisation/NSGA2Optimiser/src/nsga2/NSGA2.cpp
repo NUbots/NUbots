@@ -425,6 +425,7 @@ namespace nsga2 {
         _os.precision(16);
 
         _os << "population_generation"
+            << ","
             << "individual_generation"
             << ","
             << "individual"
