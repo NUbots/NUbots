@@ -32,7 +32,7 @@ namespace module::platform::darwin {
      * This NUClear Reactor is responsible for reading in the data for the Darwin Platform and emitting it to
      * the rest of the system
      *
-     * @author Jake Fountain
+     * @author Jade Fountain
      */
     class HardwareSimulator : public NUClear::Reactor {
     private:
