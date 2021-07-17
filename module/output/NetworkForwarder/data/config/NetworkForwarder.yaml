@@ -1,0 +1,33 @@
+log_level: WARN
+
+# List the message types you want to send
+# Depending on what value you put it will influence how it is sent:
+#   false -> don't send this message type and disable the reaction
+#   true -> attempt to send every message that you see of this type
+#   number -> send messages at most at this framerate (e.g. if you put 10 it will send no more than 10 messages per second)
+#             if you put in 0 here, it will act the same as if you put false
+targets:
+  nusight:
+    # Overview packets for the overview screen
+    message.support.nusight.Overview: true
+
+    # DataPoints power the chart view
+    message.support.nusight.DataPoint: true
+
+    # Sensor data
+    message.input.Sensors: true
+
+    # Vision messages
+    message.input.Image: false # You probably don't want this unless you're testing something very weird
+    message.output.CompressedImage: 10
+
+    message.vision.Balls: false
+    message.vision.Goals: false
+    message.vision.GreenHorizon: false
+    message.vision.Lines: false
+    message.vision.Obstacles: false
+    message.vision.VisualMesh: false
+
+    # Localisation Messages
+    message.localisation.Ball: false
+    message.localisation.Field: false

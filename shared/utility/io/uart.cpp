@@ -137,8 +137,7 @@ namespace utility::io {
             }
 
             // Set the speed flags to "Custom Speed" (clear the existing speed, and set the custom speed flags)
-            // TODO(KipHamiltons) Pretty sure this is undefined behaviour
-            serinfo.flags &= ~ASYNC_SPD_MASK;
+            serinfo.flags &= int(~ASYNC_SPD_MASK);
             serinfo.flags |= ASYNC_SPD_CUST;
 
             // Set our serial port to use low latency mode (otherwise the USB driver buffers for 16ms before sending
@@ -162,12 +161,12 @@ namespace utility::io {
         return !(fcntl(fd, F_GETFL) < 0 && errno == EBADF);
     }
 
-    ssize_t uart::read(void* buf, size_t count) const {
+    // `read` and `write` can technically be `const`, but that's deceptive because they change the state of the buffer
+    // associated with the fd, so it can be thought of as "changing" the fd
+    // NOLINTNEXTLINE(readability-make-member-function-const)
+    ssize_t uart::read(void* buf, size_t count) {
         return ::read(fd, buf, count);
     }
-
-    // `write` can technically be `const`, but that's deceptive because it's writing to the buffer associated with the
-    // fd, so it can be thought of as "writing" to the fd
     // NOLINTNEXTLINE(readability-make-member-function-const)
     ssize_t uart::write(const void* buf, size_t count) {
         return ::write(fd, buf, count);

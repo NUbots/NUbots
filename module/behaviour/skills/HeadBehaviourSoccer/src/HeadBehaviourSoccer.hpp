@@ -41,7 +41,7 @@ namespace module::behaviour::skills {
     /**
      * Executes a HeadBehaviourSoccer action.
      *
-     * @author Jake Fountain
+     * @author Jade Fountain
      */
     class HeadBehaviourSoccer : public NUClear::Reactor {
     public:
@@ -69,6 +69,11 @@ namespace module::behaviour::skills {
                             const message::input::Sensors& sensors,
                             const Eigen::Matrix3d& headToIMUSpace,
                             const message::input::Image::Lens& lens);
+
+        /*! @brief Converts from camera space direction to IMU space direction
+         */
+        Eigen::Vector2d getIMUSpaceDirection(const Eigen::Vector2d& screenAngles,
+                                             const Eigen::Matrix3d& headToIMUSpace);
 
         /*! @brief Gets points which allow for simultaneous search and viewing of key objects
          */

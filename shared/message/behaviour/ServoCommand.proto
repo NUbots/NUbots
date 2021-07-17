@@ -30,3 +30,7 @@ message ServoCommand {
     float                     gain     = 5;
     float                     torque   = 6;
 }
+
+message ServoCommands {
+    repeated ServoCommand commands = 1;
+}

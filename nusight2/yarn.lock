@@ -9080,10 +9080,10 @@ nth-check@^1.0.2, nth-check@~1.0.1:
   dependencies:
     boolbase "~1.0.0"
 
-nuclearnet.js@1.5.4:
-  version "1.5.4"
-  resolved "https://registry.yarnpkg.com/nuclearnet.js/-/nuclearnet.js-1.5.4.tgz#1d155ef2f1183ff81d511f4850ef1277ac7fa154"
-  integrity sha512-ZsAyWw6BuKi21vwBCpCMpmFJeFZGsFOyaiDmTSZPqiBedgJ69BCyzplorpbMFLqgfrQxhghXMJIzh68a6Fq2FA==
+nuclearnet.js@1.5.5:
+  version "1.5.5"
+  resolved "https://registry.yarnpkg.com/nuclearnet.js/-/nuclearnet.js-1.5.5.tgz#587a40cc064e0b4bb4d13d242b6d500ee9a80b7c"
+  integrity sha512-CktVBeYGWCaj2RzxWo/7n/utXIUIsRe7pUTK+nB99+3mWufI2Ykgr5Zp/ah6+Dd8W16yWIBQ9sxPVh0DCvWFLA==
   dependencies:
     bindings "^1.5.0"
     nan "^2.14.0"

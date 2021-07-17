@@ -17,33 +17,34 @@ namespace utility::motion::splines {
      */
     class Footstep {
     public:
+        Footstep() = delete;
         /**
          * Initialization with lateral foot distance and support foot
          */
-        Footstep(float foot_distance, bool is_left_support_foot = true);
+        Footstep(const float& foot_distance, const bool& is_left_support_foot = true);
 
         /**
          * Set the lateral foot distance parameters
          */
-        void setFootDistance(float foot_distance) {
-            this->foot_distance = foot_distance;
+        constexpr void setFootDistance(const float& foot_distance_) {
+            foot_distance = foot_distance_;
         }
-        [[nodiscard]] float getFootDistance() const {
+        [[nodiscard]] constexpr float getFootDistance() const {
             return foot_distance;
         }
 
         /**
          * Reset to neutral position the current step (not the integrated odometry)
          */
-        void reset(bool is_left_support_foot);
+        void reset(const bool& is_left_support_foot);
 
         // Reset odometry
-        void resetInWorld(bool is_left_support_foot);
+        void resetInWorld(const bool& is_left_support_foot);
 
         /**
          * Current support foot
          */
-        [[nodiscard]] bool isLeftSupport() const {
+        [[nodiscard]] constexpr bool isLeftSupport() const {
             return is_left_support_foot;
         }
 
@@ -105,15 +106,15 @@ namespace utility::motion::splines {
         /**
          * Pose diff [dx, dy, dtheta] from support foot to flying foot last and next position
          */
-        Eigen::Vector3f support_to_last;
-        Eigen::Vector3f support_to_next;
+        Eigen::Vector3f support_to_last = Eigen::Vector3f::Zero();
+        Eigen::Vector3f support_to_next = Eigen::Vector3f::Zero();
 
         /**
          * Pose integration of left and right foot in initial frame.
          * Set at "future" state taking into account next expected fot pose.
          */
-        Eigen::Vector3f left_in_world;
-        Eigen::Vector3f right_in_world;
+        Eigen::Vector3f left_in_world  = Eigen::Vector3f::Zero();
+        Eigen::Vector3f right_in_world = Eigen::Vector3f::Zero();
     };
 
 }  // namespace utility::motion::splines

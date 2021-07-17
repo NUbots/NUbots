@@ -77,6 +77,9 @@ namespace module::behaviour::planning {
 
         // do a little configurating
         on<Configuration>("SimpleWalkPathPlanner.yaml").then([this](const Configuration& file) {
+            // TODO(KipHamiltons): Make these all consistent with the other files. We don't use .config anywhere else
+            log_level = file.config["log_level"].as<NUClear::LogLevel>();
+
             turnSpeed            = file.config["turnSpeed"].as<float>();
             forwardSpeed         = file.config["forwardSpeed"].as<float>();
             sideSpeed            = file.config["sideSpeed"].as<float>();
@@ -120,21 +123,6 @@ namespace module::behaviour::planning {
             emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {0, 0}}));
         });
 
-        // on<Trigger<std::vector<Ball>>>().then([this]{
-        //     log("std::vector<Ball>");
-        // });
-        // on<Trigger<std::vector<Self>>>().then([this]{
-        //     log("std::vector<Self>");
-        // });
-        // on<Trigger<KickPlan>>().then([this]{
-        //     log("KickPlan");
-        // });
-        // on<Trigger<WantsToKick>>().then([this]{
-        //     log("WantsToKick");
-        // });
-        // on<Trigger<Sensors>>().then([this]{
-        //     log("Sensors");
-        // });
 
         on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
             if (!balls.balls.empty()) {
@@ -142,7 +130,8 @@ namespace module::behaviour::planning {
             }
         });
 
-        on<Every<20, Per<std::chrono::seconds>>,
+        // Freq should be equal to the main loop in soccer strategy
+        on<Every<30, Per<std::chrono::seconds>>,
            With<Ball>,
            With<Field>,
            With<Sensors>,
@@ -162,11 +151,7 @@ namespace module::behaviour::planning {
                 }
 
                 if (latestCommand.type == message::behaviour::MotionCommand::Type::STAND_STILL) {
-
-
                     emit(std::make_unique<StopCommand>(subsumptionId));
-                    // emit(std::make_unique<ActionPriorities>(ActionPriorities { subsumptionId, { 40, 11 }}));
-
                     return;
                 }
                 if (latestCommand.type == message::behaviour::MotionCommand::Type::DIRECT_COMMAND) {
@@ -222,18 +207,12 @@ namespace module::behaviour::planning {
                         sideStep      = 1;
                     }
                 }
-                // Eigen::Vector2d ball_world_position = WorldToRobotTransform(selfs.front().position,
-                // selfs.front().heading, position);
 
 
                 float angle = std::atan2(position.y(), position.x()) + headingChange;
-                // log("ball bearing", angle);
+
                 angle = std::min(turnSpeed, std::max(angle, -turnSpeed));
-                // log("turnSpeed", turnSpeed);
-                // log("ball bearing", angle);
-                // log("ball position", position);
-                // log("loc position", selfs.front().position.t());
-                // log("loc heading", selfs.front().heading);
+
 
                 // Euclidean distance to ball
                 float scaleF            = 2.0 / (1.0 + std::exp(-a * std::fabs(position.x()) + b)) - 1.0;
@@ -242,13 +221,8 @@ namespace module::behaviour::planning {
 
                 float scaleS         = 2.0 / (1.0 + std::exp(-a * std::fabs(position.y()) + b)) - 1.0;
                 float scaleS2        = angle / M_PI;
-                float finalSideSpeed = -speedFactor
-                                       * (static_cast<int>(0.0 < position.y()) - static_cast<int>(position.y() < 0.0))
-                                       * sideStep * sideSpeed * scaleS * (1.0 - scaleS2);
-                // log("forwardSpeed1", forwardSpeed);
-                // log("scale", scale);
-                // log("distanceToBall", distanceToBall);
-                // log("forwardSpeed2", finalForwardSpeed);
+                float finalSideSpeed = -speedFactor * ((0.0 < position.y()) - (position.y() < 0.0)) * sideStep
+                                       * sideSpeed * scaleS * (1.0 - scaleS2);
 
 
                 std::unique_ptr<WalkCommand> command =

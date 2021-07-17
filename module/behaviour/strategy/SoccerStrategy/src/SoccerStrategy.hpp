@@ -67,11 +67,13 @@ namespace module::behaviour::strategy {
 
         std::vector<message::behaviour::FieldTarget> lookTarget{};
 
-        // TODO(unknown): remove horrible
-        bool isGettingUp            = false;
-        bool selfPenalised          = false;
-        bool manualOrientationReset = false;
-        double manualOrientation    = 0.0;
+        bool isGettingUp                                     = false;
+        bool hasKicked                                       = false;
+        bool selfPenalised                                   = false;
+        bool manualOrientationReset                          = false;
+        bool resetInInitial                                  = true;
+        double manualOrientation                             = 0.0;
+        message::input::GameEvents::Context team_kicking_off = message::input::GameEvents::Context::UNKNOWN;
         message::behaviour::KickPlan::KickType kickType{};
         message::behaviour::Behaviour::State currentState = message::behaviour::Behaviour::State::INIT;
 
@@ -79,14 +81,13 @@ namespace module::behaviour::strategy {
 
         NUClear::clock::time_point ballLastMeasured =
             NUClear::clock::now() - std::chrono::seconds(600);  // TODO: unhack
-        NUClear::clock::time_point ballSearchStartTime{};
-        NUClear::clock::time_point goalLastMeasured{};
-        void initialLocalisationReset(const message::support::FieldDescription& fieldDescription);
+        NUClear::clock::time_point ballSearchStartTime;
+        NUClear::clock::time_point goalLastMeasured;
+        void initialLocalisationReset();
         void penaltyShootoutLocalisationReset(const message::support::FieldDescription& fieldDescription);
-        void unpenalisedLocalisationReset(const message::support::FieldDescription& fieldDescription);
+        void unpenalisedLocalisationReset();
 
         void standStill();
-        void searchWalk();
         void walkTo(const message::support::FieldDescription& fieldDescription,
                     const message::behaviour::FieldTarget::Target& target);
         void walkTo(const message::support::FieldDescription& fieldDescription, const Eigen::Vector2d& position);
@@ -102,6 +103,36 @@ namespace module::behaviour::strategy {
                   const message::localisation::Ball& ball,
                   const message::support::FieldDescription& fieldDescription,
                   const message::input::GameState::Data::Mode& mode);
+
+        void penaltyShootout(const message::input::GameState::Data::Phase& phase,
+                             const message::support::FieldDescription& fieldDescription,
+                             const message::localisation::Field& field,
+                             const message::localisation::Ball& ball);
+
+        void normal(const message::input::GameState& gameState,
+                    const message::input::GameState::Data::Phase& phase,
+                    const message::support::FieldDescription& fieldDescription,
+                    const message::localisation::Field& field,
+                    const message::localisation::Ball& ball);
+
+        // PENALTY mode functions
+        void penaltyShootoutInitial();
+        void penaltyShootoutReady();
+        void penaltyShootoutSet(const message::support::FieldDescription& fieldDescription);
+        void penaltyShootoutPlaying(const message::localisation::Field& field, const message::localisation::Ball& ball);
+        void penaltyShootoutTimeout();
+        void penaltyShootoutFinished();
+
+        // NORMAL mode functions
+        void normalInitial();
+        void normalReady(const message::input::GameState& gameState,
+                         const message::support::FieldDescription& fieldDescription);
+        void normalSet();
+        void normalPlaying(const message::localisation::Field& field,
+                           const message::localisation::Ball& ball,
+                           const message::support::FieldDescription& fieldDescription);
+        void normalFinished();
+        void normalTimeout();
 
     public:
         explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);

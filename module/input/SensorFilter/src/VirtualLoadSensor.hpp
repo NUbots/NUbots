@@ -34,8 +34,7 @@ namespace module::input {
     template <typename Scalar>
     class VirtualLoadSensor {
     public:
-        VirtualLoadSensor()
-            : noise_factor(0.0f), current_noise(0.0f), certainty_threshold(0.0f), uncertainty_threshold(0.0f) {}
+        VirtualLoadSensor() = default;
         VirtualLoadSensor(const ::extension::Configuration& config) {
             // Bayes settings
             noise_factor          = config["filter"]["noise_factor"].as<Scalar>();
@@ -75,7 +74,7 @@ namespace module::input {
             }
         }
 
-        std::array<bool, 2> updateFeet(const ::message::input::Sensors& sensors) {
+        [[nodiscard]] std::array<bool, 2> updateFeet(const ::message::input::Sensors& sensors) {
 
             // Build our input data
             int index = 0;
@@ -103,14 +102,15 @@ namespace module::input {
             }
 
             // Run the neural network
-            for (size_t i = 0; i < layers.size(); ++i) {
+            const auto LAYERS_SIZE = layers.size();
+            for (size_t i = 0; i < LAYERS_SIZE; ++i) {
 
                 // Weights and bias
                 logits = logits.transpose() * layers[i].first + layers[i].second.transpose();
 
                 // RELU except last layer
                 if (i + 1 < layers.size()) {
-                    logits = (logits.array() > 0.0f).select(logits, 0.0f);
+                    logits = (logits.array() > Scalar(0.0)).select(logits, Scalar(0.0));
                 }
                 // Sigmoid final layer
                 else {
@@ -122,8 +122,8 @@ namespace module::input {
             // Do the bayes update (1D kalman filter thing)
             Scalar k = current_noise / (current_noise + noise_factor);
             state += k * (logits - state);
-            current_noise *= 1.0f - k;
-            current_noise += 1.0f;
+            current_noise *= Scalar(1.0) - k;
+            current_noise += Scalar(1.0);
 
             for (size_t leg = 0; leg < 2; leg++) {
                 // We have some certainty in our measurement
@@ -137,27 +137,27 @@ namespace module::input {
             return output_state;
         }
 
-        Eigen::Matrix<Scalar, 2, 1> state;
+        Eigen::Matrix<Scalar, 2, 1> state = Eigen::Matrix<Scalar, 2, 1>::Zero();
 
     public:
         enum Field { POSITION, VELOCITY, LOAD };
 
-        Scalar noise_factor;
-        Scalar current_noise;
-        Scalar certainty_threshold;
-        Scalar uncertainty_threshold;
+        Scalar noise_factor          = Scalar(0.0);
+        Scalar current_noise         = Scalar(0.0);
+        Scalar certainty_threshold   = Scalar(0.0);
+        Scalar uncertainty_threshold = Scalar(0.0);
 
-        std::vector<::utility::input::ServoID> servos;
-        std::vector<Field> fields;
+        std::vector<::utility::input::ServoID> servos{};
+        std::vector<Field> fields{};
 
-        bool accelerometer;
-        bool gyroscope;
+        bool accelerometer = false;
+        bool gyroscope     = false;
 
         std::vector<
             std::pair<Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>, Eigen::Matrix<Scalar, Eigen::Dynamic, 1>>>
-            layers;
+            layers{};
 
-        std::array<bool, 2> output_state;
+        std::array<bool, 2> output_state = {false, false};
     };
 }  // namespace module::input
 

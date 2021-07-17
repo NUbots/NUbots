@@ -26,7 +26,7 @@ start. Alternatively you can also emit a `message::ExecuteScript` to run a
 
 ## Emits
 
-- `std::vector<message::ServoTarget>` to set waypoints based on script
+- `message::ServoTargets` to set waypoints based on script
 
 ## Configuration
 

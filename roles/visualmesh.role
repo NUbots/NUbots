@@ -8,7 +8,8 @@ nuclear_role(
   motion::KinematicsConfiguration
   # Support
   network::NUClearNet
-  support::NUsight
+  output::NetworkForwarder
+  output::Overview
   # support::VirtualCamera
   support::configuration::SoccerConfig
   # Sensors
