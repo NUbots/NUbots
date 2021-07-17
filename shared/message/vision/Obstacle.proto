@@ -33,7 +33,7 @@ message Obstacle {
     uint32 id = 1;
     /// When the obstacle was seen
     google.protobuf.Timestamp timestamp = 2;
-    /// The {x, y} point location of the obstacle
+    /// {x, y} points bounding the location of the obstacle
     Polygon shape = 3;
     Team    team  = 4;
 }
