@@ -1,0 +1,46 @@
+log_level: ERROR
+
+buttons:
+  debounce_threshold: 7
+
+foot_down:
+  method: FSR
+  known_methods:
+    - name: FSR # Literal FSR
+      certainty_threshold: 30 # Webots uses a bool sensor, this could be anything > 0. Normal robot uses FSR which is non bool
+    - name: Z_HEIGHT # This uses the difference in Z height of the feet
+      certainty_threshold: 0.01 # Height difference of the Z for the Z height method
+    - name: LOAD # This uses the loads from the servos through a NN
+      noise_factor: 1e-4
+      certainty_threshold: 0.5
+      uncertainty_threshold: 0.5
+
+motion_filter:
+  update:
+    velocity_decay: [0.5, 0.5, 0.5]
+  noise:
+    measurement:
+      accelerometer: [0.1, 0.1, 0.1] # x, y, z
+      accelerometer_magnitude: [0.1, 0.1, 0.1] # x, y, z
+      gyroscope: [0.1, 0.1, 0.1] # x, y, z
+      # Covariance of a foot's translation
+      flat_foot_odometry: [5e-8, 5e-8, 5e-8] # x, y, z
+      # Covariance of the rotation quaternion of the foot, when both feet are down
+      flat_foot_orientation: [0.1, 0.1, 0.1, 0.1] # QX, QY, QZ, QW
+    process:
+      position: [1e-2, 1e-2, 1e-2]
+      velocity: [1e-2, 1e-2, 1e-2]
+      rotational_velocity: [1e-5, 1e-5, 1e-5]
+      rotation: [1e-3, 1e-3, 1e-3, 1e-3]
+
+  initial:
+    mean:
+      position: [0, 0, 0.49] # A little above the ground
+      velocity: [0, 0, 0] # Not moving
+      rotational_velocity: [0, 0, 0] # Not spinning
+      rotation: [0, 0, 0, 1] # Upright (QX, QY, QZ, QW)
+    covariance:
+      position: [1e-3, 1e-3, 1] # We are pretty sure of our x,y when we start
+      velocity: [1e-3, 1e-3, 1e-3] # We are unsure of our velocity
+      rotational_velocity: [0.1, 0.1, 0.1] # Fairly unsure about our rotational velocity
+      rotation: [0.01, 0.01, 0.01, 0.01] # Not very sure of rotation (QX, QY, QZ, QW)

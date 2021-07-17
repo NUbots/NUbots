@@ -25,37 +25,25 @@ import "google/protobuf/timestamp.proto";
 import "Matrix.proto";
 
 message VisualMesh {
-    /// The "almost" concentric rings of the mesh centred about the robot
-    message Row {
-        /// The angle out from the camera
-        float phi = 1;
-        /// The on-screen nodes in the row
-        int32 segments = 2;
-    }
-    /// The camera which took the measurements
-    uint32 id = 1;
-    /// Unit vectors in world space at camera origin. They represent points in the
-    /// mesh (vector projected from optical axis through a pixel coordinate and on
-    /// to the observation plane). This matrix has shape `3 x N`, where N is the
-    /// number of rays in the Visual Mesh
-    fmat rays = 2;
-    /// For a given ray, this provides you with its N neighbours in the mesh. N is
-    /// defined during training. For example with the `RING6` graph, this matrix
-    /// has shape `6 x N`. The entries are indices into the other matrices in this message
-    imat neighbourhood = 3;
-    /// For a given ray, this provides you the confidence level that this ray belongs to each of
-    /// the classes (ball, goal post, field line, etc.). The ordering of the columns is
-    /// defined when the network is trained. The shape of this matrix is N x M, where
-    /// N is the number of classes and M is the ray index
-    fmat classifications = 4;
-    /// Pixel coordinates corresponding to each ray. It's a 2 x N matrix
+    /// Time this message was created
+    google.protobuf.Timestamp timestamp = 1;
+    /// ID of the camera that this mesh was constructed from
+    uint32 id = 2;
+    /// name of the camera that this mesh was constructed from
+    string name = 3;
+    /// World to camera transform that this mesh was constructed with
+    mat4 Hcw = 4;
+    /// Pixel coordinates projected from the rays
     fmat coordinates = 5;
-    /// Indexes to the rays
-    repeated int32 indices = 6 [packed = true];
-    /// Affine3d transform from world space to camera space at the time that the image was taken
-    mat4 Hcw = 7;
-    /// This whole graph/set of rows. There may be separate meshes looking for different
-    /// objects, but this message refers to this mesh alone
-    repeated Row              mesh      = 8;
-    google.protobuf.Timestamp timestamp = 9;
+    /// Neighbours of each node in the mesh. Each row corresponds to a node and the columns are the neighbours
+    imat neighbourhood = 6;
+    /// The corresponding global indices for each on-screen node
+    repeated int32 indices = 7 [packed = true];
+    /// The classification for each pixel/ray. Each row corresponds to a pixel. Each column corresponds to a
+    /// class. The mapping from columns to classes is dependant on how the classes were presented during training
+    fmat classifications = 8;
+    /// Unit vectors pointing from the camera to each node in the mesh
+    fmat rays = 9;
+    /// A mapping from class names to column indices (for accessing the corresponding classification column)
+    map<string, uint32> class_map = 10;
 }

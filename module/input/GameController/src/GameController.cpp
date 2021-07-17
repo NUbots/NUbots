@@ -23,7 +23,7 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/platform/darwin/DarwinSensors.hpp"
+#include "message/platform/RawSensors.hpp"
 #include "message/support/GlobalConfig.hpp"
 
 namespace module::input {
@@ -49,8 +49,8 @@ namespace module::input {
     using GameMode        = GameEvents::GameMode;
     using PenaltyReason   = GameState::Data::PenaltyReason;
     using TeamColourEvent = message::input::GameEvents::TeamColour;
-    using message::platform::darwin::ButtonLeftDown;
-    using message::platform::darwin::ButtonMiddleDown;
+    using message::platform::ButtonLeftDown;
+    using message::platform::ButtonMiddleDown;
 
     GameController::GameController(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
@@ -66,9 +66,13 @@ namespace module::input {
         on<Configuration, Trigger<GlobalConfig>>("GameController.yaml")
             .then("GameController Configuration",
                   [this](const Configuration& config, const GlobalConfig& globalConfig) {
+                      log_level = config["log_level"].as<NUClear::LogLevel>();
+
                       PLAYER_ID = globalConfig.player_id;
                       TEAM_ID   = globalConfig.team_id;
                       send_port = config["send_port"].as<uint>();
+
+                      udp_filter_address = config["udp_filter_address"].as<std::string>("");
 
                       // If we are changing ports (the port starts at 0 so this should start it the first time)
                       if (config["receive_port"].as<uint>() != recieve_port) {
@@ -84,8 +88,26 @@ namespace module::input {
 
                           // Bind our new handle
                           std::tie(listenHandle, std::ignore, std::ignore) =
-                              on<UDP::Broadcast, With<GameState>>(recieve_port)
+                              on<UDP::Broadcast, With<GameState>, Single>(recieve_port)
                                   .then([this](const UDP::Packet& p, const GameState& gameState) {
+                                      std::string remoteAddr = ipAddressIntToString(p.remote.address);
+
+                                      // Apply filtering of packets if udp_filter_address is set in config
+                                      if (!udp_filter_address.empty() && remoteAddr != udp_filter_address) {
+                                          if (std::find(ignored_ip_addresses.begin(),
+                                                        ignored_ip_addresses.end(),
+                                                        remoteAddr)
+                                              == ignored_ip_addresses.end()) {
+                                              ignored_ip_addresses.insert(remoteAddr);
+                                              log<NUClear::INFO>("Ignoring UDP packet from",
+                                                                 remoteAddr,
+                                                                 "as it doesn't match configured filter address",
+                                                                 udp_filter_address);
+                                          }
+
+                                          return;
+                                      }
+
                                       // Get our packet contents
                                       const GameControllerPacket& newPacket =
                                           *reinterpret_cast<const GameControllerPacket*>(p.payload.data());
@@ -140,7 +162,7 @@ namespace module::input {
         packet.playersPerTeam = PLAYERS_PER_TEAM;
         packet.state          = static_cast<gamecontroller::State>(-1);
         packet.firstHalf      = true;
-        packet.kickOffTeam    = static_cast<gamecontroller::TeamColour>(-1);
+        packet.kickOffTeam    = -1;
         packet.mode           = static_cast<gamecontroller::Mode>(-1);
         packet.dropInTeam     = static_cast<gamecontroller::TeamColour>(-1);
         packet.dropInTime     = -1;
@@ -208,7 +230,7 @@ namespace module::input {
             emit(std::make_unique<GameEvents::Score>(GameEvents::Score{newOwnTeam.score, newOpponentTeam.score}));
 
 
-            if (oldOwnTeam.score > newOwnTeam.score) {
+            if (oldOwnTeam.score < newOwnTeam.score) {
                 // we scored! :D
 
                 // Set the team scores in the state packet
@@ -218,7 +240,7 @@ namespace module::input {
                 });
             }
 
-            if (oldOpponentTeam.score > newOpponentTeam.score) {
+            if (oldOpponentTeam.score < newOpponentTeam.score) {
                 // they scored :( boo
 
                 // Set the team scores in the state packet
@@ -273,8 +295,7 @@ namespace module::input {
                         emit(std::make_unique<Penalisation>(
                             Penalisation{GameEvents::Context::Value::SELF, playerId, unpenalisedTime, reason}));
                         sendReplyMessage(ReplyMessage::PENALISED);
-                        selfPenalised   = true;
-                        penaltyOverride = false;
+                        selfPenalised = true;
                     }
                     else {
                         // team mate penalised :'(
@@ -291,8 +312,7 @@ namespace module::input {
                         emit(std::make_unique<Unpenalisation>(
                             Unpenalisation{GameEvents::Context::Value::SELF, playerId}));
                         sendReplyMessage(ReplyMessage::UNPENALISED);
-                        selfPenalised   = false;
-                        penaltyOverride = false;
+                        selfPenalised = false;
                     }
                     else {
                         // team mate unpenalised :)
@@ -401,12 +421,13 @@ namespace module::input {
         if (oldPacket.kickOffTeam != newPacket.kickOffTeam) {
 
             // Update the kickoff team (us or them)
-            state->data.our_kick_off = newPacket.kickOffTeam == newOwnTeam.teamColour;
+            state->data.our_kick_off = newPacket.kickOffTeam == newOwnTeam.teamId;
 
-            // new kick off team? :/
-            GameEvents::Context team = newPacket.kickOffTeam == newOwnTeam.teamColour
+            // Get the new kick off team to emit the team change
+            GameEvents::Context team = newPacket.kickOffTeam == newOwnTeam.teamId
                                            ? GameEvents::Context::Value::TEAM
                                            : GameEvents::Context::Value::OPPONENT;
+
             stateChanges.push_back([this, team] { emit(std::make_unique<KickOffTeam>(KickOffTeam{team})); });
         }
 
@@ -601,5 +622,16 @@ namespace module::input {
         }
 
         throw std::runtime_error("No opponent teams not found");  // should never happen!
+    }
+
+    std::string GameController::ipAddressIntToString(const uint32_t ipAddr) {
+        uint32_t ipAddrN = htonl(ipAddr);
+
+        char c[255];
+        std::memset(c, 0, sizeof(c));
+
+        std::string addr = inet_ntop(AF_INET, &ipAddrN, c, sizeof(c));
+
+        return addr;
     }
 }  // namespace module::input

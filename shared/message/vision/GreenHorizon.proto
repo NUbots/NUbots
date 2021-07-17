@@ -37,4 +37,6 @@ message GreenHorizon {
     /// The visual mesh that this green horizon was calculated from
     VisualMesh                mesh      = 4 [(pointer) = SHARED];
     google.protobuf.Timestamp timestamp = 5;
+    /// A mapping from class names to column indices (for accessing the corresponding classification column)
+    map<string, uint32> class_map = 6;
 }
