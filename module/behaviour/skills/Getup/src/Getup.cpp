@@ -111,20 +111,15 @@ namespace module::behaviour::skills {
             getUp.disable();
         });
 
-        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction {
+        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
             id,
             "Get Up",
             {std::pair<float, std::set<LimbID>>(
                 0,
                 {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
-                if (servoSet.find(ServoID::L_ANKLE_PITCH) != servoSet.end()
-            [this](const std::set<LimbID>&) {
-                emit(std::make_unique<ExecuteGetup>()); },
-            [this](const std::set<LimbID>&) {
-                emit(std::make_unique<KillGetup>()); },
-            [this](const std::set<ServoID>&) {
-                emit(std::make_unique<KillGetup>()); }
-        }));
+            [this](const std::set<LimbID>&) { emit(std::make_unique<ExecuteGetup>()); },
+            [this](const std::set<LimbID>&) { emit(std::make_unique<KillGetup>()); },
+            [this](const std::set<ServoID>&) { emit(std::make_unique<KillGetup>()); }}));
     }
 
     void Getup::updatePriority(const float& priority) {

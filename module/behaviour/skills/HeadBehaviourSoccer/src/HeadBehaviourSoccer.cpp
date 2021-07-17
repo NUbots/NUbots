@@ -61,35 +61,6 @@ namespace module::behaviour::skills {
     using utility::motion::kinematics::calculateCameraLookJoints;
     using utility::support::Expression;
 
-
-    /// @brief Converts from camera space direction to IMU space direction
-    Eigen::Vector2d getIMUSpaceDirection(const KinematicsModel& kinematicsModel,
-                                         const Eigen::Vector2d& screenAngles,
-                                         const Eigen::Matrix3d& headToIMUSpace) {
-
-        // Eigen::Vector3d lookVectorFromHead = objectDirectionFromScreenAngular(screenAngles);
-        // This is an approximation relying on the robots small FOV
-        Eigen::Vector3d lookVectorFromHead =
-            sphericalToCartesian(Eigen::Vector3d(1.0, screenAngles.x(), screenAngles.y()));
-        // Remove pitch from matrix if we are adjusting search points
-
-        // Rotate target angles to World space
-        Eigen::Vector3d lookVector = headToIMUSpace * lookVectorFromHead;
-        // Compute inverse kinematics for head direction angles
-        std::vector<std::pair<ServoID, double>> goalAngles = calculateCameraLookJoints(kinematicsModel, lookVector);
-
-        Eigen::Vector2d result;
-        for (auto& angle : goalAngles) {
-            if (angle.first == ServoID::HEAD_PITCH) {
-                result.y() = angle.second;
-            }
-            else if (angle.first == ServoID::HEAD_YAW) {
-                result.x() = angle.second;
-            }
-        }
-        return result;
-    }
-
     inline Eigen::Vector2d screenAngularFromObjectDirection(const Eigen::Vector3d& v) {
         return {std::atan2(v.y(), v.x()), std::atan2(v.z(), v.x())};
     }
