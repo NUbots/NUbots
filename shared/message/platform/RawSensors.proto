@@ -59,12 +59,14 @@ message RawSensors {
         bool middle = 2;
     }
     /// In m/s^2. Each axis is bounded between -4g and 4g, according to the datasheet
+    /// here https://emanual.robotis.com/docs/en/platform/op2/getting_started/#acc_x-acc_y-acc_z
     message Accelerometer {
         float x = 1;
         float y = 2;
         float z = 3;
     }
     /// In radians per second. Each axis bounded between -500 and 500 degrees per second, according to the datasheet
+    /// here https://emanual.robotis.com/docs/en/platform/op2/getting_started/#gyro_x-gyro_y-gyro_z
     message Gyroscope {
         float x = 1;
         float y = 2;
