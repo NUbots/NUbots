@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import glob
+import multiprocessing
 import os
 import shutil
 import subprocess
@@ -39,6 +40,10 @@ def register(command):
         action="store_false",
         default=True,
         help="Disables cleaning the build volume before compiling",
+    )
+    #
+    build_subcommand.add_argument(
+        "-j", "--jobs", dest="jobs", action="store", help="Dictates the number of CPU cores used when building"
     )
 
     push_subcommand = subparsers.add_parser(
@@ -215,9 +220,11 @@ def exec_push():
         sys.exit(exit_code)
 
 
-def run(sub_command, clean=False, roles=None, role=None, target="g4dnxlarge", **kwargs):
+def run(
+    sub_command, jobs=multiprocessing.cpu_count(), clean=False, roles=None, role=None, target="g4dnxlarge", **kwargs
+):
     if sub_command == "build":
-        exec_build(target, roles, clean)
+        exec_build(target, roles, clean, jobs)
     elif sub_command == "push":
         exec_push()
     elif sub_command == "run":  # For testing docker image
