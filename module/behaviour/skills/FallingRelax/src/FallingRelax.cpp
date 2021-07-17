@@ -47,8 +47,7 @@ namespace module::behaviour::skills {
     using utility::input::LimbID;
     using utility::input::ServoID;
 
-    FallingRelax::FallingRelax(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
+    FallingRelax::FallingRelax(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         // do a little configurating
         on<Configuration>("FallingRelax.yaml").then([this](const Configuration& config) {
@@ -111,7 +110,7 @@ namespace module::behaviour::skills {
             id,
             "Falling Relax",
             {std::pair<float, std::set<LimbID>>(
-                0,
+                0.0f,
                 {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
             [this](const std::set<LimbID>& /*unused*/) { emit(std::make_unique<Falling>()); },
             [this](const std::set<LimbID>& /*unused*/) { emit(std::make_unique<KillFalling>()); },

@@ -30,7 +30,7 @@ namespace module::behaviour::skills {
         explicit Nod(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        const size_t id;
+        const size_t id{size_t(this) * size_t(this) - size_t(this)};
 
         bool value               = false;
         float EXECUTION_PRIORITY = 0.0f;

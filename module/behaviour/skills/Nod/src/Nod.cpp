@@ -43,8 +43,7 @@ namespace module::behaviour::skills {
     using utility::behaviour::ActionPriorities;
     using utility::behaviour::RegisterAction;
 
-    Nod::Nod(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
+    Nod::Nod(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         // do a little configurating
         on<Configuration>("Nod.yaml").then([this](const Configuration& config) {

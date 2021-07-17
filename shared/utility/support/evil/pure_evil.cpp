@@ -62,9 +62,8 @@ cxa_throw_func_type get_real_throw_func() noexcept {
 }
 
 // Find the real __cxa_throw and call it to actually throw the exception
-// TODO(KipHamiltons) This should have "__attribute__((noreturn))", but it doesn't compile with clang without it
-// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables,cert-err58-cpp)
-static void (*const rethrow)(void*, void*, void (*)(void*)) = get_real_throw_func();
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+static void (*const rethrow)(void*, void*, void (*)(void*)) __attribute__((noreturn)) = get_real_throw_func();
 
 /**
  * Add the stack frame to our list we pass in

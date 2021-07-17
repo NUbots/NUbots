@@ -31,7 +31,7 @@ namespace module::behaviour::skills {
      */
     class FallingRelax : public NUClear::Reactor {
     private:
-        const size_t id;
+        const size_t id = size_t(this) * size_t(this) - size_t(this);
 
         bool falling = false;
 

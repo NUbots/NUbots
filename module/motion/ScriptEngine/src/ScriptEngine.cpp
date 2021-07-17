@@ -39,7 +39,7 @@ namespace module::motion {
         on<Script>("").then([this](const Script& script) {
             // Add this script to our list of scripts
             try {
-                scripts.insert(std::make_pair(utility::file::pathSplit(script.fileName).second, script));
+                scripts.insert(std::pair(utility::file::pathSplit(script.fileName).second, script));
             }
             catch (const std::exception& e) {
                 log<NUClear::ERROR>("Script is bad conversion:", script.fileName, e.what());

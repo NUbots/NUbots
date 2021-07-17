@@ -49,10 +49,10 @@ namespace module::behaviour {
                 callback kill_,
                 std::function<void(std::set<utility::input::ServoID>)> completed_)
             : id(id_)
-            , name(std::move(std::move(name_)))
-            , start(std::move(std::move(start_)))
-            , kill(std::move(std::move(kill_)))
-            , completed(std::move(std::move(completed_))) {}
+            , name(std::move(name_))
+            , start(std::move(start_))
+            , kill(std::move(kill_))
+            , completed(std::move(completed_)) {}
 
         /// The ID of this request that will be sent with any motion commands
         size_t id = 0;
@@ -70,7 +70,7 @@ namespace module::behaviour {
         size_t mainElement = 0;
 
         /// The items in this list
-        std::vector<RequestItem> items;
+        std::vector<RequestItem> items{};
 
         /// The callback to execute when a new limb is started
         callback start{};
@@ -80,8 +80,6 @@ namespace module::behaviour {
 
     struct RequestItem {
 
-        // RequestItem() : group(Request()), index(0), active(false), priority(std::numeric_limits<float>::min()),
-        // limbSet() {}
         RequestItem(Request& group_, size_t index_, float priority_, std::set<utility::input::LimbID> limbSet_)
             : group(group_), index(index_), priority(priority_), limbSet(std::move(limbSet_)) {}
 
