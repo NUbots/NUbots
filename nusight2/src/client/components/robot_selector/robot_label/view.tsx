@@ -11,8 +11,6 @@ import { formatSI } from './format-si'
 import { RobotLabelModel } from './model'
 import style from './style.css'
 
-
-
 export type RobotLabelProps = {
   robot: RobotModel
   selectRobot(robot: RobotModel): void
@@ -62,11 +60,11 @@ export const RobotLabel = observer((props: RobotLabelProps) => {
         </div>
         <div className={style.dataCell}>
           <div className={style.dataLabel}>IP Address</div>
-          <div className={style.dataValue}>{(robot.address)}</div>
-        </div>{/*<div></div>*/}
+          <div className={style.dataValue}>{robot.address}</div>
+        </div>
         <div className={style.dataCell}>
           <div className={style.dataLabel}>Port</div>
-          <div className={style.dataValue}>{(robot.port)}</div>
+          <div className={style.dataValue}>{robot.port}</div>
         </div>
       </Collapsible>
     </>
