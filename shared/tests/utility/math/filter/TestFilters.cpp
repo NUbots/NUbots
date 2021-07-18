@@ -165,8 +165,8 @@ static const std::array<MeasurementType, 101> measurements = {
     MeasurementType(-1.08344978673423),   MeasurementType(-1.69966623692842),  MeasurementType(-0.777801698154316),
     MeasurementType(-1.57714784288996),   MeasurementType(-0.971672418368469)};
 
-static constexpr int num_particles = 1000;
-static constexpr double deltaT     = 0.05;
+static constexpr int NUMBER_OF_PARTICLES = 1000;
+static constexpr double deltaT           = 0.05;
 static const MeasurementType measurement_noise(0.2);
 static const Eigen::Vector2d process_noise(0.02, 0.1);
 static const Eigen::Vector2d initial_state(2.0, 0.0);
@@ -245,12 +245,12 @@ TEST_CASE("Test the ParticleFilter", "[utility][math][filter][ParticleFilter]") 
 
     INFO("Configuring the ParticleFilter with")
     INFO("    Time step..........: " << deltaT);
-    INFO("    Number of Particles: " << num_particles)
+    INFO("    Number of Particles: " << NUMBER_OF_PARTICLES)
     INFO("    Process Noise......: " << process_noise.transpose());
     INFO("    Initial State......: " << initial_state.transpose());
     INFO("    Initial Covariance.: \n" << initial_cov);
     model_filter.model.process_noise = process_noise;
-    model_filter.set_state(initial_state, initial_cov, num_particles);
+    model_filter.set_state(initial_state, initial_cov, NUMBER_OF_PARTICLES);
 
     INFO("Feeding noisy measurements into the filter")
     std::array<double, 100> innovations;
