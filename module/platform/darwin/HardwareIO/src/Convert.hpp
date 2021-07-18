@@ -92,16 +92,16 @@ namespace module::platform::darwin {
         static float gain(const uint8_t& value);
         static uint8_t gainInverse(const float& value);
 
-        static float servoPosition(const uint8_t& id, const uint16_t& value);
-        static uint16_t servoPositionInverse(const uint8_t& id, const float& value);
+        static float servoPosition(const int& id, const uint16_t& value);
+        static uint16_t servoPositionInverse(const int& id, const float& value);
 
-        static float servoSpeed(const uint8_t& id, const uint16_t& value);
+        static float servoSpeed(const int& id, const uint16_t& value);
         static uint16_t servoSpeedInverse(const float& value);
 
         static float torqueLimit(const uint16_t& value);
         static uint16_t torqueLimitInverse(const float& value);
 
-        static float servoLoad(const uint8_t& id, const uint16_t& value);
+        static float servoLoad(const int& id, const uint16_t& value);
 
         static float temperature(const uint8_t& value);
     };
