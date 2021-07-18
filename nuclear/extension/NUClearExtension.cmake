@@ -31,9 +31,9 @@ if(NUCLEAR_LINK_TYPE STREQUAL "SHARED")
 endif()
 
 # Add warnings for the extensions. Use the default ROLE warnings setting if it's not configured manually
-if(NOT DEFINED NUCLEAR_ROLE_WARNINGS)
+if(NOT DEFINED NUCLEAR_EXTENSION_WARNINGS)
   set(NUCLEAR_EXTENSION_WARNINGS
-      ${NUCLEAR_ROLE_WARNINGS}
+      ${NUCLEAR_ROLES_WARNINGS}
       CACHE STRING "Compiler warnings used during extension compilation"
   )
 endif()

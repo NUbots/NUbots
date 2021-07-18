@@ -34,7 +34,7 @@ endif()
 # Add warnings for the utilities. Use the default ROLE warnings setting if it's not configured manually
 if(NOT DEFINED NUCLEAR_UTILITY_WARNINGS)
   set(NUCLEAR_UTILITY_WARNINGS
-      ${NUCLEAR_ROLE_WARNINGS}
+      ${NUCLEAR_ROLES_WARNINGS}
       CACHE STRING "Compiler warnings used during utility compilation"
   )
 endif()

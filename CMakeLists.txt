@@ -104,7 +104,7 @@ set(NUCLEAR_ROLE_BANNER_FILE
 )
 
 # Comprehensive list of warnings. Will be used to set warnings for the other targets besides roles too
-set(NUCLEAR_ROLE_WARNINGS
+set(NUCLEAR_ROLES_WARNINGS
     -Wall
     -Wextra # reasonable and standard
     -Wshadow # warn the user if a variable declaration shadows one from a parent context
@@ -125,7 +125,7 @@ set(NUCLEAR_ROLE_WARNINGS
 # Treat all normal compiler warnings as errors
 option(WARNINGS_AS_ERRORS "Fail the build when we have compiler warnings" OFF)
 if(WARNINGS_AS_ERRORS)
-  list(APPEND NUCLEAR_ROLE_WARNINGS -Werror)
+  list(APPEND NUCLEAR_ROLES_WARNINGS -Werror)
 endif()
 
 # Include the NUClear roles system

@@ -1,3 +1,6 @@
+# We use additional modules for the NUClear roles system
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
+
 # Set to off to ignore building tests
 option(BUILD_TESTS "Builds all of the tests for each module." OFF)
 

@@ -179,7 +179,7 @@ target_include_directories(nuclear_message PUBLIC ${nt_out})
 # Add warnings for the C++ message files. Use the default ROLE warnings setting if it's not configured manually
 if(NOT DEFINED NUCLEAR_MESSAGE_WARNINGS)
   set(NUCLEAR_MESSAGE_WARNINGS
-      ${NUCLEAR_ROLE_WARNINGS}
+      ${NUCLEAR_ROLES_WARNINGS}
       CACHE STRING "Compiler warnings used during Neutron compilation"
   )
 endif()

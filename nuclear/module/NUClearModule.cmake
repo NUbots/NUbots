@@ -7,7 +7,7 @@ find_package(NUClear REQUIRED)
 # Set up the warnings variable for the modules. Use the default ROLE warnings setting if it's not configured manually
 if(NOT DEFINED NUCLEAR_MODULE_WARNINGS)
   set(NUCLEAR_MODULE_WARNINGS
-      ${NUCLEAR_ROLE_WARNINGS}
+      ${NUCLEAR_ROLES_WARNINGS}
       CACHE STRING "Compiler warnings used during module compilation"
   )
 endif()
