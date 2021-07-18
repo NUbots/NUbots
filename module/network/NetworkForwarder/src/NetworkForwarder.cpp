@@ -2,6 +2,8 @@
 
 #include "extension/Configuration.hpp"
 
+#include "utility/support/yaml_expression.hpp"
+
 namespace module::network {
 
     using extension::Configuration;
