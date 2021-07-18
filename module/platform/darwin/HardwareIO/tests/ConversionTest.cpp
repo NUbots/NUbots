@@ -131,9 +131,9 @@ TEST_CASE("Testing the hardware position conversions to radians", "[hardware][co
                                                0.0,      0.0,      0.0,       0.0,      0.0,       0.0,       0.0,
                                                0.0,      0.0,      0.0,       0.0,      0.0,       0.0};
 
-    for (ssize_t i = 0; i < 20; ++i) {
-        Convert::SERVO_DIRECTION[i] = direction[size_t(i)];
-        Convert::SERVO_OFFSET[i]    = float(offset[size_t(i)]);
+    for (int i = 0; i < 20; ++i) {
+        Convert::SERVO_DIRECTION[i] = direction[i];
+        Convert::SERVO_OFFSET[i]    = float(offset[i]);
     }
 
 
@@ -147,7 +147,7 @@ TEST_CASE("Testing the hardware position conversions to radians", "[hardware][co
                                                            {3073, M_PI_2},
                                                            {4095, M_PI}};
 
-        for (ssize_t i = 0; i < 20; ++i) {
+        for (int i = 0; i < 20; ++i) {
             INFO("Testing forward motor " << i);
 
             std::vector<std::pair<float, uint16_t>> inverseTest;
@@ -174,11 +174,11 @@ TEST_CASE("Testing the hardware position conversions to radians", "[hardware][co
     {
         INFO("Testing the inverse position conversions");
 
-        for (ssize_t i = 0; i < 20; ++i) {
+        for (int i = 0; i < 20; ++i) {
 
             INFO("Testing inverse motor " << i);
 
-            for (auto& test : inverseTests[size_t(i)]) {
+            for (auto& test : inverseTests[i]) {
                 int distance, expected, actual;
 
                 actual = Convert::servoPositionInverse(uint8_t(i), test.first);
@@ -227,7 +227,7 @@ TEST_CASE("Testing the hardware speed conversions to radians/second", "[hardware
 
         const std::pair<uint16_t, float> tests[] = {{0, 0.0f}, {1023, 1.0f}, {1024, 0.0f}, {2047, -1.0f}};
 
-        for (ssize_t i = 0; i < 20; ++i) {
+        for (int i = 0; i < 20; ++i) {
             INFO("Testing forward motor " << i);
 
             // Test with MX28s
@@ -266,7 +266,7 @@ TEST_CASE("Testing the hardware torque limit conversions to between 0 and 100", 
 
 TEST_CASE("Testing the hardware load conversions to between -100 and 100", "[hardware][conversion][load]") {
 
-    for (ssize_t i = 0; i < 20; ++i) {
+    for (int i = 0; i < 20; ++i) {
         REQUIRE(Convert::servoLoad(uint8_t(i), 0) == Approx(0 * Convert::SERVO_DIRECTION[i]));
         REQUIRE(Convert::servoLoad(uint8_t(i), 1024) == Approx(0 * Convert::SERVO_DIRECTION[i]));
         REQUIRE(Convert::servoLoad(uint8_t(i), 2047) == Approx(-1.0 * Convert::SERVO_DIRECTION[i]));
