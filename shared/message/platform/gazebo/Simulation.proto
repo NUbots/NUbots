@@ -21,8 +21,6 @@ syntax = "proto3";
 package message.platform.gazebo;
 
 message Simulation {
-    // The amount of time that has passed in the simulation
     double simulation_time = 1;
-    // The time that has passed on the wall clock
-    double real_time = 2;
+    double real_time       = 2;
 }

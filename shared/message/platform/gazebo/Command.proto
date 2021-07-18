@@ -22,10 +22,8 @@ package message.platform.gazebo;
 
 message Command {
     enum Type {
-        RESET      = 0;  // Reset the entire simulation
-        RESET_TIME = 1;  // Reset simulation time and realtime clocks back to 0
+        RESET      = 0;  /// Reset entire simulation
+        RESET_TIME = 1;  /// Reset simulation time and realtime clocks back to 0
     }
-
-    // The type of command we are executing
     Type type = 1;
 }
