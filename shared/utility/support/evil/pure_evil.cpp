@@ -25,7 +25,6 @@
     #include <nuclear>
 
 namespace utility::support::evil {
-
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     thread_local std::vector<utility::support::evil::StackFrame> stack =
         std::vector<utility::support::evil::StackFrame>();
@@ -112,6 +111,6 @@ void __cxa_throw(void* ex, void* info, void (*dest)(void*)) {
 
     rethrow(ex, info, dest);
 }
-}
+}  // extern "C"
 
 #endif  // !defined(NDEBUG) and !defined(__APPLE__)

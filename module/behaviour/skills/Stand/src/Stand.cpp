@@ -49,8 +49,8 @@ namespace module::behaviour::skills {
                            {std::pair<float, std::set<LimbID>>(
                                std::numeric_limits<float>::epsilon(),
                                {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
-                           [this](const std::set<LimbID>&) { emit(std::make_unique<ExecuteStand>()); },
-                           [this](const std::set<LimbID>&) {},
-                           [this](const std::set<ServoID>&) {}}));
+                           [this](const std::set<LimbID>& /*unused*/) { emit(std::make_unique<ExecuteStand>()); },
+                           [](const std::set<LimbID>& /*unused*/) {},
+                           [](const std::set<ServoID>& /*unused*/) {}}));
     }
 }  // namespace module::behaviour::skills

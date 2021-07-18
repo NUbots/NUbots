@@ -1,5 +1,5 @@
-#ifndef MODULE_MOTION_QUINTICWALK_H
-#define MODULE_MOTION_QUINTICWALK_H
+#ifndef MODULE_MOTION_QUINTICWALK_HPP
+#define MODULE_MOTION_QUINTICWALK_HPP
 
 #include <map>
 #include <memory>
@@ -75,4 +75,4 @@ namespace module::motion {
     };
 }  // namespace module::motion
 
-#endif
+#endif  // MODULE_MOTION_QUINTICWALK_HPP

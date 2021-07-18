@@ -32,15 +32,14 @@ namespace module::behaviour::skills {
         explicit KickScript(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        const size_t id;
+        const size_t id{size_t(this) * size_t(this) - size_t(this)};
 
-        float KICK_PRIORITY;
-        float EXECUTION_PRIORITY;
+        float KICK_PRIORITY      = 0.0f;
+        float EXECUTION_PRIORITY = 0.0f;
 
-        message::motion::KickScriptCommand kickCommand;
+        message::motion::KickScriptCommand kickCommand{};
 
         void updatePriority(const float& priority);
-        int getDirectionalQuadrant(float x, float y);
     };
 }  // namespace module::behaviour::skills
 
