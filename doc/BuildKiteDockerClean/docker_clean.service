@@ -1,0 +1,10 @@
+[Unit]
+Description=Purge docker objects when hard drive space exceeds threshold
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/bash -c '%h/docker_clean.sh $0 $1' "/dev/sda" "80%"
+
+[Install]
+WantedBy=basic.target
+
