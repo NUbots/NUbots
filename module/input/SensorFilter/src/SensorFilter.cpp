@@ -459,7 +459,7 @@ namespace module::input {
                             sensors->accelerometer = previousSensors->accelerometer;
                         }
                         else {
-                            sensors->accelerometer = input.accelerometer;
+                            sensors->accelerometer = input.accelerometer.cast<double>();
                         }
 
                         // If we have a previous Sensors message and (our platform has errors or we are spinning too
@@ -474,7 +474,7 @@ namespace module::input {
                             sensors->gyroscope = previousSensors->gyroscope;
                         }
                         else {
-                            sensors->gyroscope = input.gyroscope;
+                            sensors->gyroscope = input.gyroscope.cast<double>();
                         }
 
                         /************************************************
