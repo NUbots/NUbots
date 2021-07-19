@@ -73,7 +73,7 @@ namespace module::behaviour::skills {
                 Eigen::Vector3d acc_reading = Eigen::Vector3d::Zero();
 
                 for (const auto& s : sensors) {
-                    acc_reading += Eigen::Vector3d(s->accelerometer.x, s->accelerometer.y, s->accelerometer.z);
+                    acc_reading += s->accelerometer.cast<double>();
                 }
                 acc_reading = (acc_reading / double(sensors.size())).normalized();
 
