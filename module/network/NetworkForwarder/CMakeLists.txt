@@ -9,7 +9,7 @@ add_custom_command(
   COMMAND ${PYTHON_EXECUTABLE} ARGS "${CMAKE_CURRENT_SOURCE_DIR}/src/generate_handles.py"
           "${PROJECT_BINARY_DIR}/nuclear/message/python" "${source_file}"
   DEPENDS nuclear::message "${CMAKE_CURRENT_SOURCE_DIR}/src/generate_handles.py"
-  COMMENT "Generating NUsight handles for all message types"
+  COMMENT "Generating NetworkForwarder handles for all message types"
 )
 
 # Build our NUClear module

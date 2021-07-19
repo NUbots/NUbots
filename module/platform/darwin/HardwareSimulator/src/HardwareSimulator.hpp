@@ -38,9 +38,6 @@ namespace module::platform::darwin {
     private:
         message::platform::RawSensors sensors;
 
-        std::queue<message::platform::RawSensors::Gyroscope> gyroQueue;
-        std::mutex gyroQueueMutex;
-
         float imu_drift_rate                     = 0;
         static constexpr size_t UPDATE_FREQUENCY = 90;
         void addNoise(std::unique_ptr<message::platform::RawSensors>& sensors);

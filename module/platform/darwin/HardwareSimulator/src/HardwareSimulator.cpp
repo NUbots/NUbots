@@ -50,7 +50,7 @@ namespace module::platform::darwin {
     using utility::support::Expression;
 
     HardwareSimulator::HardwareSimulator(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), sensors(), gyroQueue(), gyroQueueMutex(), noise() {
+        : Reactor(std::move(environment)), sensors(), noise() {
 
         /*
          CM740 Data
@@ -164,14 +164,6 @@ namespace module::platform::darwin {
                 bodyTilt = config["body_tilt"].as<Expression>();
             });
 
-        on<Trigger<RawSensors::Gyroscope>>().then("Receive Simulated Gyroscope",
-                                                  [this](const RawSensors::Gyroscope& gyro) {
-                                                      std::lock_guard<std::mutex> lock(gyroQueueMutex);
-                                                      RawSensors::Gyroscope tmpGyro = gyro;
-                                                      gyroQueue.push(tmpGyro);
-                                                  });
-
-
         on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Optional<With<Sensors>>, Single>().then(
             [this](std::shared_ptr<const Sensors> previousSensors) {
                 if (previousSensors) {
@@ -221,29 +213,12 @@ namespace module::platform::darwin {
                     }
                 }
 
-                // Gyro:
-                // Note: This reaction is not (and should not be) synced with the
-                // 'Receive Simulated Gyroscope' reaction above, so we can't
-                // reliably query the size of the gyroQueue.
-                Eigen::Vector3d sumGyro = Eigen::Vector3d::Zero();
-                /* mutext scope */ {
-                    std::lock_guard<std::mutex> lock(gyroQueueMutex);
-                    while (!gyroQueue.empty()) {
-                        RawSensors::Gyroscope g = gyroQueue.front();
-                        sumGyro += Eigen::Vector3d(g.x, g.y, g.z);
-
-                        std::lock_guard<std::mutex> lock(gyroQueueMutex);
-                        gyroQueue.pop();
-                    }
-                }
-                sumGyro                 = (sumGyro * UPDATE_FREQUENCY + Eigen::Vector3d(0.0, 0.0, imu_drift_rate));
-                sumGyro.x()             = -sumGyro.x();
-                sensors.gyroscope.x     = sumGyro.x();
-                sensors.gyroscope.y     = sumGyro.y();
-                sensors.gyroscope.z     = sumGyro.z();
+                sensors.gyroscope.x     = 0.0;
+                sensors.gyroscope.y     = 0.0;
+                sensors.gyroscope.z     = imu_drift_rate;
                 sensors.accelerometer.x = -9.8 * std::sin(bodyTilt);
                 sensors.accelerometer.y = 0.0;
-                sensors.accelerometer.z = -9.8 * std::cos(bodyTilt);
+                sensors.accelerometer.z = 9.8 * std::cos(bodyTilt);
                 sensors.timestamp       = NUClear::clock::now();
 
                 // Add some noise so that sensor fusion doesnt converge to a singularity
