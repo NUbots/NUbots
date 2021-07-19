@@ -35,10 +35,12 @@ message Overview {
     /// The name of the binary this robot is executing
     string role_name = 3;
 
-    /// The current battery voltage as a percentage
+    /// The current battery voltage as a percentage.
+    /// @see message::input::Sensors::battery
     float battery = 4;
 
-    /// The current voltage of the battery
+    /// The current voltage of the battery.
+    /// @see message::input::Sensors::voltage
     float voltage = 5;
 
     /// The current behaviour state. List of possible states in message::behaviour::Behaviour
@@ -54,7 +56,7 @@ message Overview {
 
     /// The {x, y} location we are kicking to
     fvec2 kick_target = 11;
-    /// The type of game being played. For Game Controller
+    /// The type of game being played. From Game Controller
     input.GameState.Data.Mode game_mode = 12;
     /// The current stage of gameplay. For Game Controller
     input.GameState.Data.Phase game_phase = 13;

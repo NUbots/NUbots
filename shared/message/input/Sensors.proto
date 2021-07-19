@@ -112,7 +112,8 @@ message Sensors {
     repeated Servo  servo  = 6;
     repeated Button button = 7;
     repeated LED    led    = 8;
-    /// Voltage for the whole robot, from the main battery
+    /// Present (input) voltage. This value is 10 times larger than the actual voltage.
+    /// For example, when 10V is supplied, the data value is 100 (0x64)
     float voltage = 9;
     float battery = 10;
     /// A set of transforms; one for each servo

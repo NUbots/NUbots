@@ -25,7 +25,7 @@ import "Vector.proto";
 /**
  * Information about location and size of field objects and markers.
  * Details about field measurements can be found in 'Law 1 - The Field of Play',
- * in the RoboCup rulebook.
+ * in the RoboCup rulebook, here https://humanoid.robocup.org/materials/rules/
  * We have these config values mirrored in `SoccerConfig/data/config/`.
  */
 message FieldDescription {
@@ -36,51 +36,44 @@ message FieldDescription {
     }
     /// Measurements of the field which are loaded from config file. In metres
     message FieldDimensions {
-        /// The rules say that the lines must be the same width - approximately
-        /// 5 cm, and no more than 12 cm
+        /// The rules say that the lines must be the same width
         double line_width = 1;
-
-        double mark_width = 2;
-        /// The 'touch line' length, approximately 9 m for kid size according to the rules
-        double field_length = 3;
-        /// The 'goal line' length, approximately 6 m for kid size according to the rules
-        double field_width = 4;
+        /// The 'touch line' length
+        double field_length = 2;
+        /// The 'goal line' length
+        double field_width = 3;
         /// Cross-sectional shape of goal-posts
-        GoalpostType goalpost_type = 5;
-        /// Distance behind the keeper to the net, approximately 0.6 m according to the rules
-        double goal_depth = 6;
-        /// Distance between inner edges of goal posts, approximately 2.6 m for both sizes
-        double goal_width = 7;
-        /// 'Goal area' is equivalent to 6-yard box in soccer
-        /// Approximately 1 m for kid size according to the rules
-        double goal_area_length = 8;
-        /// 'Goal area' is equivalent to 6-yard box in soccer
-        /// Approximately 3 m for kid size according to the rules
-        double goal_area_width = 9;
-        /// Height to the bottom of the crossbar, approximately 1.2 m for kids size according to the rules
-        double goal_crossbar_height = 10;
-        /// The crossbar diameter and the goalpost diameter are (supposed to be) equal
-        /// Between 8 cm and 12 cm
-        double goalpost_width = 11;
-        /// The crossbar diameter and the goalpost diameter are (supposed to be) equal
-        /// Between 8 cm and 12 cm
-        double goalpost_depth = 12;
-        /// The crossbar diameter and the goalpost diameter are (supposed to be) equal
-        /// Between 8 cm and 12 cm
-        double goal_crossbar_width = 13;
-        /// The crossbar diameter and the goalpost diameter are (supposed to be) equal
-        /// Between 8 cm and 12 cm
-        double goal_crossbar_depth = 14;
+        GoalpostType goalpost_type = 4;
+        /// Distance behind the keeper to the net
+        double goal_depth = 5;
+        /// Distance between inner edges of goal posts
+        double goal_width = 6;
+        /// 'Goal area' is equivalent to 6-yard box in soccer. Length is front to back, if you standing in the middle
+        /// of the field facing goals
+        double goal_area_length = 7;
+        /// 'Goal area' is equivalent to 6-yard box in soccer. Width is left to right, if you're standing in the middle
+        /// of the field facing goals
+        double goal_area_width = 8;
+        /// Height to the bottom of the crossbar
+        double goal_crossbar_height = 9;
 
-        double goal_net_height = 15;
+        double goalpost_width = 10;
+
+        double goalpost_depth = 11;
+
+        double goal_crossbar_width = 12;
+
+        double goal_crossbar_depth = 13;
+
+        double goal_net_height = 14;
         /// Measured from the goal line to the middle of the penalty mark
-        double penalty_mark_distance = 16;
-        /// Approximately 1.5 m for kids size according to the rules
-        double center_circle_diameter = 17;
-        /// 1 m for both sizes
-        double border_strip_min_width = 18;
+        double penalty_mark_distance = 15;
+
+        double center_circle_diameter = 16;
+
+        double border_strip_min_width = 17;
     }
-    /// Kids size use FIFA size 1 - between 7.3 cm and 8.1 cm radius. See Law 2
+    /// @see Law 2
     double ball_radius = 1;
     /// Calculated as goal_crossbar_height + goal_crossbar_width
     double goalpost_top_height = 2;
