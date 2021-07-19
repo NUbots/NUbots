@@ -52,7 +52,9 @@ steps:
 
   # Build generic target and test
   - label: "Build generic and Test"
-    command: "./b unused -g && ./b configure -- -DBUILD_TESTS=ON && ./b build && ./b tests run"
+    # We have to configure twice. The first configuration generates the cache for `./b unused`, then the next one
+    # turns on the role which `./b unused -g` generates
+    command: "./b configure -- -DBUILD_TESTS=ON && ./b unused -g && ./b configure && ./b build && ./b tests run"
     plugins:
       - docker-compose#v3.0.3:
           config: .buildkite/NUbots/docker-compose.yml
