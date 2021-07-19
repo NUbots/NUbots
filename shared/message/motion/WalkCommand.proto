@@ -27,14 +27,14 @@ message WalkStarted {}
 message WalkStopped {}
 
 message WalkCommand {
-    /// reservation identifier for servo control
+    /// Reservation identifier for servo control
     uint64 subsumption_id = 1;
     /// {x, y, angle}, x and y are velocity in m/s and angle is in rads/s
     vec3 command = 2;
 }
 
 message StopCommand {
-    /// reservation identifier for servo control
+    /// Reservation identifier for servo control
     uint64 subsumption_id = 1;
 }
 
@@ -43,11 +43,11 @@ message NewWalkCommand {
 }
 
 message EnableWalkEngineCommand {
-    /// reservation identifier for servo control
+    /// Reservation identifier for servo control
     uint64 subsumption_id = 1;
 }
 
 message DisableWalkEngineCommand {
-    /// reservation identifier for servo control
+    /// Reservation identifier for servo control
     uint64 subsumption_id = 1;
 }
