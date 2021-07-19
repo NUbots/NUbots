@@ -154,7 +154,7 @@ namespace module::motion {
         // Sanity check support foot state
         if ((phase < 0.5f && !foot_step.isLeftSupport()) || (phase >= 0.5f && foot_step.isLeftSupport())) {
             NUClear::log<NUClear::WARN>(
-                fmt::format("Invalid state phase={} support={} dt={}", phase, foot_step.isLeftSupport(), dt));
+                fmt::format("Invalid state. phase={}, support={}, dt={}", phase, foot_step.isLeftSupport(), dt));
             return false;
         }
         last_phase = phase;
@@ -170,13 +170,13 @@ namespace module::motion {
                 local_dt = 0.0001f;
             }
             else {
-                NUClear::log<NUClear::WARN>(fmt::format("Negative dt phase={} dt={}", phase, dt));
+                NUClear::log<NUClear::WARN>(fmt::format("Negative dt. phase={}, dt={}", phase, dt));
                 return;
             }
         }
         // Check for too long dt
         if (local_dt > 0.25f / params.freq) {
-            NUClear::log<NUClear::WARN>(fmt::format("dt too long phase={} dt={}", phase, dt));
+            NUClear::log<NUClear::WARN>(fmt::format("dt too long. phase={}, dt={}", phase, dt));
             return;
         }
 
