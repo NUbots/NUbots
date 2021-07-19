@@ -49,13 +49,13 @@ if __name__ == "__main__":
 
         {includes}
 
-        namespace module::output {{
+        namespace module::network {{
 
             void NetworkForwarder::register_handles() {{
         {handles}
             }}
 
-        }}  // namespace module::output
+        }}  // namespace module::network
 
         """
     )

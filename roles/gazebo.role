@@ -8,7 +8,7 @@ nuclear_role(
   # Support and Configuration
   support::configuration::GlobalConfig
   network::NUClearNet
-  output::NetworkForwarder
+  network::NetworkForwarder
   output::Overview
   # Hardware Interface
   platform::Gazebo
