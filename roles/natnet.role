@@ -8,8 +8,8 @@ nuclear_role(
   motion::KinematicsConfiguration
   support::configuration::GlobalConfig
   network::NUClearNet
+  network::NetworkForwarder
   platform::darwin::HardwareIO
   input::SensorFilter
-  output::NetworkForwarder
   input::NatNet
 )
