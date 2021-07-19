@@ -1,12 +1,19 @@
-import styles from './styles.css'
-import { action } from 'mobx'
-import { computed } from 'mobx'
 import React from 'react'
-import { Vector2 } from '../../../math/vector2'
-import { Canvas } from '../../three/three'
-import { Three } from '../../three/three'
 import { OdometryVisualizerModel } from './model'
-import { OdometryVisualizerViewModel } from './view_model'
+import styles from './styles.css'
+
+export type ReactionStatsProps = {
+     name               :string;
+     trigger_name       :string;
+     function_name      :string;
+     reaction_id        :number;
+     task_id            :number;
+     cause_reaction_id  :number;
+     cause_task_id      :number;
+     emitted            :number;
+     started            :number;
+     finished           :number;
+}
 
 export class OdometryVisualizer extends React.Component<{ model: OdometryVisualizerModel }> {
 
