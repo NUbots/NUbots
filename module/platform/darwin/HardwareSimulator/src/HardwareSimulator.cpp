@@ -243,7 +243,7 @@ namespace module::platform::darwin {
                 sensors.gyroscope.z     = sumGyro.z();
                 sensors.accelerometer.x = -9.8 * std::sin(bodyTilt);
                 sensors.accelerometer.y = 0.0;
-                sensors.accelerometer.z = -9.8 * std::cos(bodyTilt);
+                sensors.accelerometer.z = 9.8 * std::cos(bodyTilt);
                 sensors.timestamp       = NUClear::clock::now();
 
                 // Add some noise so that sensor fusion doesnt converge to a singularity
