@@ -21,7 +21,6 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <iostream>
 #include <limits>
 #include <mutex>
 
