@@ -73,7 +73,7 @@ namespace utility::motion::splines {
             Scalar xx  = static_cast<Scalar>(1);
             Scalar val = static_cast<Scalar>(0);
             for (size_t i = 1; i < coefs.size(); i++) {
-                val += float(i) * xx * coefs[i];
+                val += Scalar(i) * xx * coefs[i];
                 xx *= x;
             }
             return val;
@@ -83,7 +83,7 @@ namespace utility::motion::splines {
             Scalar xx  = static_cast<Scalar>(1);
             Scalar val = static_cast<Scalar>(0);
             for (size_t i = 2; i < coefs.size(); i++) {
-                val += float((i - 1) * i) * xx * coefs[i];
+                val += Scalar((i - 1) * i) * xx * coefs[i];
                 xx *= x;
             }
             return val;
@@ -93,7 +93,7 @@ namespace utility::motion::splines {
             Scalar xx  = static_cast<Scalar>(1);
             Scalar val = static_cast<Scalar>(0);
             for (size_t i = 3; i < coefs.size(); i++) {
-                val += float((i - 2) * (i - 1) * i) * xx * coefs[i];
+                val += Scalar((i - 2) * (i - 1) * i) * xx * coefs[i];
                 xx *= x;
             }
             return val;

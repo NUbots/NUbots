@@ -48,7 +48,7 @@ namespace utility::math::quaternion {
         }
 
         // Scale the accumulator matrix
-        A /= std::distance(begin, end);
+        A /= static_cast<double>(std::distance(begin, end));
 
         // Solve for the eigenvectors of the accumulator matrix
         Eigen::SelfAdjointEigenSolver<Eigen::Matrix<Scalar, 4, 4>> eigensolver(A);

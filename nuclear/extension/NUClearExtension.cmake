@@ -30,5 +30,14 @@ if(NUCLEAR_LINK_TYPE STREQUAL "SHARED")
   set_target_properties(nuclear_extension PROPERTIES LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/lib")
 endif()
 
+# Add warnings for the extensions. Use the default ROLE warnings setting if it's not configured manually
+if(NOT DEFINED NUCLEAR_EXTENSION_WARNINGS)
+  set(NUCLEAR_EXTENSION_WARNINGS
+      ${NUCLEAR_ROLES_WARNINGS}
+      CACHE STRING "Compiler warnings used during extension compilation"
+  )
+endif()
+target_compile_options(nuclear_extension PRIVATE ${NUCLEAR_EXTENSION_WARNINGS})
+
 # Alias to the namespaced version
 add_library(nuclear::extension ALIAS nuclear_extension)

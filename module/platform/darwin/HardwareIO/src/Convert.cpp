@@ -80,14 +80,14 @@ namespace module::platform::darwin {
                                : uint8_t(std::round(value / GAIN_CONVERSION_FACTOR));  // Otherwise do our conversion
     }
 
-    float Convert::servoPosition(const uint8_t& id, const uint16_t& value) {
+    float Convert::servoPosition(const int& id, const uint16_t& value) {
         // offset and normalize the angle
         return utility::math::angle::normalizeAngle(float(value - 2048) * POSITION_CONVERSION_FACTOR)
                    * float(SERVO_DIRECTION[id])
                + SERVO_OFFSET[id];
     }
 
-    uint16_t Convert::servoPositionInverse(const uint8_t& id, const float& value) {
+    uint16_t Convert::servoPositionInverse(const int& id, const float& value) {
         float angle = value;
 
         // Undo our conversion operations
@@ -101,7 +101,7 @@ namespace module::platform::darwin {
         return uint16_t(angle / POSITION_CONVERSION_FACTOR) + 2048;
     }
 
-    float Convert::servoSpeed(const uint8_t& id, const uint16_t& value) {
+    float Convert::servoSpeed(const int& id, const uint16_t& value) {
 
         // We only care about the lower bits
         float raw = float(value & 0x3FF) * SPEED_CONVERSION_FACTOR;
@@ -127,7 +127,7 @@ namespace module::platform::darwin {
         return value >= 100.0f ? 1023 : uint16_t(std::round(value / TORQUE_LIMIT_CONVERSION_FACTOR));
     }
 
-    float Convert::servoLoad(const uint8_t& id, const uint16_t& value) {
+    float Convert::servoLoad(const int& id, const uint16_t& value) {
         // We only care about the lower bits if bit 10 is set then we are moving clockwise
         float raw = float(value & 0x3FF) * (value & 0x400 ? -1.0f : 1.0f);
         raw *= LOAD_CONVERSION_FACTOR;

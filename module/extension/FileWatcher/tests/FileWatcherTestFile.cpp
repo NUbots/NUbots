@@ -40,8 +40,8 @@ namespace {
     public:
         TestReactor(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
             // GIVEN a file.
-            std::filesystem::path dir_path = std::filesystem::temp_directory_path() / "file-watcher-test-XXXXXX";
-            std::string dir_path_string    = dir_path.string();
+            dir_path                    = std::filesystem::temp_directory_path() / "file-watcher-test-XXXXXX";
+            std::string dir_path_string = dir_path.string();
             std::vector<char> dir_path_chars(dir_path_string.c_str(),
                                              dir_path_string.c_str() + dir_path_string.size() + 1);
             dir_path = mkdtemp(dir_path_chars.data());

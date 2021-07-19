@@ -42,6 +42,15 @@ function(NUCLEAR_ROLE)
   # modules are used in the role
   set_target_properties(${role} PROPERTIES NUCLEAR_MODULES "${role_modules}")
 
+  # Add warnings for the roles
+  if(NOT DEFINED NUCLEAR_ROLE_WARNINGS)
+    set(NUCLEAR_ROLE_WARNINGS
+        ${NUCLEAR_ROLES_WARNINGS}
+        CACHE STRING "Compiler warnings used during role compilation"
+    )
+  endif()
+  target_compile_options(${role} PRIVATE ${NUCLEAR_ROLE_WARNINGS})
+
   # * We add to the global cache variable here that contains all of the module we are using
   # * Elsewhere, this is used to include the directories for these in order to build them
   set(NUCLEAR_MODULES

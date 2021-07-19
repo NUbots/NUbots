@@ -26,15 +26,9 @@ if(STATIC_LIBRARIES)
 endif()
 
 # We use additional modules that cmake needs to know about
-list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/" "${PROJECT_SOURCE_DIR}/cmake/Modules/"
-     "${PROJECT_SOURCE_DIR}/nuclear/cmake/Modules/"
+list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules/" "${PROJECT_SOURCE_DIR}/nuclear/cmake/Modules/"
+     "${PROJECT_SOURCE_DIR}/nuclear/cmake"
 )
-
-# * We need to tell cmake where the function for the compiler warnings is (src/cmake)
-# * We use additional modules that cmake needs to know about (src/cmake/Modules)
-include(CompilerWarnings)
-option(WARNINGS_AS_ERRORS "Fail the build when we have compiler or clang-tidy warnings" ON)
-set_project_warnings()
 
 # If this option is set we are building using continous integration
 option(CI_BUILD "Enable build options for building in the CI server" OFF)
@@ -108,6 +102,31 @@ set(NUCLEAR_ROLE_BANNER_FILE
     "${PROJECT_SOURCE_DIR}/cmake/banner.png"
     CACHE PATH "The path the banner to print at the start of each role execution" FORCE
 )
+
+# Comprehensive list of warnings. Will be used to set warnings for the other targets besides roles too
+set(NUCLEAR_ROLES_WARNINGS
+    -Wall
+    -Wextra # reasonable and standard
+    -Wshadow # warn the user if a variable declaration shadows one from a parent context
+    -Wnon-virtual-dtor # warn the user if a class with virtual functions has a non-virtual destructor. This helps catch
+                       # hard to track down memory errors
+    -Wold-style-cast # warn for c-style casts
+    -Wcast-align # warn for potential performance problem casts
+    -Wunused # warn on anything being unused
+    -Woverloaded-virtual # warn if you overload (not override) a virtual function
+    -Wpedantic # warn if non-standard C++ is used
+    -Wconversion # warn on type conversions that may lose data
+    -Wdouble-promotion # warn if float is implicit promoted to double
+    -Wnull-dereference # warn if a null dereference is detected
+    -Wmisleading-indentation # warn if indentation implies blocks where blocks do not exist
+    CACHE STRING "Compiler warnings used during role compilation. Also sets warnings for all other project components"
+)
+
+# Treat all normal compiler warnings as errors
+option(WARNINGS_AS_ERRORS "Fail the build when we have compiler warnings" OFF)
+if(WARNINGS_AS_ERRORS)
+  list(APPEND NUCLEAR_ROLES_WARNINGS -Werror)
+endif()
 
 # Include the NUClear roles system
 add_subdirectory(nuclear)

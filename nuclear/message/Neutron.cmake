@@ -176,6 +176,15 @@ target_link_libraries(nuclear_message PUBLIC Eigen3::Eigen)
 target_include_directories(nuclear_message PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(nuclear_message PUBLIC ${nt_out})
 
+# Add warnings for the C++ message files. Use the default ROLE warnings setting if it's not configured manually
+if(NOT DEFINED NUCLEAR_MESSAGE_WARNINGS)
+  set(NUCLEAR_MESSAGE_WARNINGS
+      ${NUCLEAR_ROLES_WARNINGS}
+      CACHE STRING "Compiler warnings used during Neutron compilation"
+  )
+endif()
+target_compile_options(nuclear_message PRIVATE ${NUCLEAR_MESSAGE_WARNINGS})
+
 # Generate in the lib folder so it gets installed
 if(NUCLEAR_LINK_TYPE STREQUAL "SHARED")
   set_property(TARGET nuclear_message PROPERTY LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/lib")
