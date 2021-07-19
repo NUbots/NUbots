@@ -1,8 +1,7 @@
 import React from 'react'
-import { OdometryVisualizerModel } from './model'
 import styles from './styles.css'
 
-export type ReactionStatsProps = {
+export type ReactionStats = {
      name               :string;
      trigger_name       :string;
      function_name      :string;
@@ -15,18 +14,44 @@ export type ReactionStatsProps = {
      finished           :number;
 }
 
-export class OdometryVisualizer extends React.Component<{ model: OdometryVisualizerModel }> {
+export const OdometryVisualizer = ( stats: ReactionStats ) => {
 
-  render() {
+
     return (
       <div className={styles.visualizer}>
-        <div className={styles.legend}>
-          <div className={styles.item}>
-            Oh hi there
-          </div>
+        <div>
+            {stats.name}
         </div>
+        <div>
+            {stats.trigger_name}
+        </div>
+        <div>
+            {stats.function_name}
+        </div>
+        <div>
+            {stats.reaction_id}
+        </div>
+        <div>
+            {stats.task_id}
+        </div>
+        <div>
+            {stats.cause_reaction_id}
+        </div>
+        <div>
+            {stats.cause_task_id}
+        </div>
+        <div>
+            {stats.emitted}
+        </div>
+        <div>
+            {stats.started}
+        </div>
+        <div>
+            {stats.finished}
+        </div>
+
       </div>
     )
-  }
+
 
 }

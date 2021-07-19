@@ -32,7 +32,18 @@ export class OdometryView extends React.Component<{
         </Menu>
         {selectedRobot && (
           <div className={styles.content}>
-            <OdometryVisualizer model={selectedRobot.visualizerModel} />
+            <OdometryVisualizer
+             name               = {"name"}
+             trigger_name       = {"trigger_name"}
+             function_name      ={"function_name"}
+             reaction_id        ={0}
+             task_id            ={0}
+             cause_reaction_id  ={0}
+             cause_task_id     ={0}
+             emitted           ={0}
+             started            ={0}
+             finished          ={0}
+            />
           </div>
         )}
       </div>
