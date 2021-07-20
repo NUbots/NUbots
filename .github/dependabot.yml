@@ -1,6 +1,7 @@
-# Mandatory fields are `version` and `updates`
+# Required fields are `version` and `updates`
 version: 2
 updates:
+  # Required fields are `package-ecosystem`, `directory`, and `schedule.interval`
   # Package ecosystem for yarn is npm
   - package-ecosystem: npm
     directory: /nusight2
@@ -15,3 +16,5 @@ updates:
       - "G-DevTools"
     reviewers:
       - "NUbots/nusight"
+    schedule:
+      interval: "monthly" # Checks on the first day of each month
