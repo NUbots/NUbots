@@ -12,7 +12,8 @@ services:
       - type: bind
         source: ./../..
         target: /home/nubots/NUbots
-        read_only: true
+        # False, so we can generate a role with unused modules and write it
+        read_only: false
         consistency: cached
 
   nuc7i7bnh_image:

@@ -39,7 +39,7 @@ endforeach(rolefile)
 get_cmake_property(vars CACHE_VARIABLES)
 unset(NUCLEAR_ROLES CACHE)
 foreach(var ${vars})
-  if(var MATCHES "^ROLE_[a-zA-Z0-9]+")
+  if(var MATCHES "^ROLE_[a-zA-Z0-9_]+")
     if(${var})
       string(SUBSTRING ${var} 5 -1 role_name)
       set(NUCLEAR_ROLES
