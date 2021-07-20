@@ -9,7 +9,6 @@ updates:
       # include: "scope" tells it to add the names of the
       # upgraded deps to the name, after the prefix
       include: "scope"
-      prefix: "NUsight2 Dependency Update:"
     labels:
       - "-Dependencies"
       - "P-NUsight2"
