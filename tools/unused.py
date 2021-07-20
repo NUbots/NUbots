@@ -97,6 +97,6 @@ def run(generate_role, **kwargs):
         with open(os.path.join(roles_path, UNUSED_ROLE_NAME), "w") as unused_role:
             unused_role.write("nuclear_role(\n  ")
             unused_role.write("\n  ".join(unused_modules))
-            unused_role.write("\n)")
+            unused_role.write("\n)\n")
         # Warn the user that the new role won't build unless they reconfigure
         cprint("You must run ./b configure after generating a new role", "red", attrs=["bold"])
