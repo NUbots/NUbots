@@ -5,10 +5,6 @@ updates:
   # Package ecosystem for yarn is npm
   - package-ecosystem: npm
     directory: /nusight2
-    commit-message:
-      # include: "scope" tells it to add the names of the
-      # upgraded deps to the name, after the prefix
-      include: "scope"
     labels:
       - "-Dependencies"
       - "P-NUsight2"
