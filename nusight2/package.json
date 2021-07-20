@@ -150,7 +150,7 @@
     "serve-favicon": "2.5.0",
     "socket.io": "2.3.0",
     "socket.io-client": "2.3.0",
-    "three": "0.107.0",
+    "three": "0.125.0",
     "throttle-debounce": "2.2.1",
     "worker-loader": "2.0.0",
     "xxhashjs": "0.2.2"
