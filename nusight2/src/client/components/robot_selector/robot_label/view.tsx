@@ -2,12 +2,10 @@ import classNames from 'classnames'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React from 'react'
-
 import { Collapsible } from '../../collapsible/view'
 import { RobotModel } from '../../robot/model'
 import { Switch } from '../../switch/view'
 import { StatusIndicator } from '../status_indicator/view'
-
 import DropdownIcon from './dropdown.svg'
 import { formatSI } from './format-si'
 import { RobotLabelModel } from './model'
@@ -59,6 +57,14 @@ export const RobotLabel = observer((props: RobotLabelProps) => {
         <div className={style.dataCell}>
           <div className={style.dataLabel}>Bytes/s</div>
           <div className={style.dataValue}>{formatSI(model.stats.bytesPerSecond.rate)}</div>
+        </div>
+        <div className={style.dataCell}>
+          <div className={style.dataLabel}>IP Address</div>
+          <div className={style.dataValue}>{robot.address}</div>
+        </div>
+        <div className={style.dataCell}>
+          <div className={style.dataLabel}>Port</div>
+          <div className={style.dataValue}>{robot.port}</div>
         </div>
       </Collapsible>
     </>
