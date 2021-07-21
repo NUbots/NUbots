@@ -1,0 +1,20 @@
+# Required fields are `version` and `updates`
+version: 2
+updates:
+  # Required fields are `package-ecosystem`, `directory`, and `schedule.interval`
+  # Package ecosystem for yarn is npm
+  - package-ecosystem: npm
+    directory: /nusight2
+    commit-message:
+      # include: "scope" tells it to add the names of the
+      # upgraded deps to the name, after the prefix
+      include: "scope"
+      prefix: "NUsight2 Dependency Update:"
+    labels:
+      - "-Dependencies"
+      - "P-NUsight2"
+      - "G-DevTools"
+    reviewers:
+      - "NUbots/nusight"
+    schedule:
+      interval: "monthly" # Checks on the first day of each month
