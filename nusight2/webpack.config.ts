@@ -124,7 +124,6 @@ export function getClientConfig({
     },
     optimization: {
       splitChunks: {
-        name: true,
         cacheGroups: {
           vendor: {
             test: /[\\/]node_modules[\\/]/,
@@ -139,7 +138,7 @@ export function getClientConfig({
         },
       },
     },
-    plugins: ([
+    plugins: [
       new CopyWebpackPlugin({ patterns: [{ from: 'assets', context }] }),
       new ExtractTextPlugin({
         filename: 'styles.css',
@@ -151,13 +150,7 @@ export function getClientConfig({
         chunks: ['main'],
       }),
       new ProgressBarPlugin(),
-    ] as any) as webpack.Plugin[],
-    node: {
-      // workaround for webpack-dev-server issue
-      // https://github.com/webpack/webpack-dev-server/issues/60#issuecomment-103411179
-      fs: 'empty',
-      net: 'empty',
-    },
+    ],
   }
 }
 
@@ -185,7 +178,7 @@ export function getServerConfig({
     resolve: {
       extensions: ['.js', '.ts'],
     },
-    externals: [nodeExternals()],
+    externals: [nodeExternals()] as webpack.Configuration['externals'],
     module: {
       rules: [
         {
