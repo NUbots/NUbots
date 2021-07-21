@@ -1,6 +1,6 @@
 import CopyWebpackPlugin from 'copy-webpack-plugin'
-import ExtractTextPlugin from 'extract-text-webpack-plugin'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
+import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import path from 'path'
 import ProgressBarPlugin from 'progress-bar-webpack-plugin'
 import webpack from 'webpack'
@@ -62,34 +62,29 @@ export function getClientConfig({
         {
           test: /\.css$/,
           exclude: [path.resolve(rootDir, 'node_modules')],
-          use: ExtractTextPlugin.extract({
-            fallback: 'style-loader',
-            use: [
-              {
-                loader: 'css-loader',
-                options: {
-                  modules: {
-                    localIdentName: '[local]__[hash:base64:5]',
-                  },
-                  sourceMap: !isProduction,
-                  importLoaders: 1,
-                },
+          use: [
+            isProduction ? MiniCssExtractPlugin.loader : 'style-loader',
+            {
+              loader: 'css-loader',
+              options: {
+                modules: true,
+                sourceMap: !isProduction,
+                importLoaders: 1,
               },
-              {
-                loader: 'postcss-loader',
-                options: {
-                  ident: 'postcss',
+            },
+            {
+              loader: 'postcss-loader',
+              options: {
+                postcssOptions: {
                   plugins: [
-                    require('postcss-import')({ addDependencyTo: webpack }),
-                    require('postcss-url')(),
-                    require('postcss-cssnext')(),
-                    require('postcss-reporter')(),
-                    require('postcss-browser-reporter')({ disabled: isProduction }),
+                    'postcss-import',
+                    'postcss-url',
+                    'postcss-cssnext',
                   ],
                 },
               },
-            ],
-          }),
+            },
+          ],
         },
         /*
         External libraries generally do not support css modules so the selector mangling will break external components.
@@ -140,14 +135,12 @@ export function getClientConfig({
     },
     plugins: [
       new CopyWebpackPlugin({ patterns: [{ from: 'assets', context }] }),
-      new ExtractTextPlugin({
+      new MiniCssExtractPlugin({
         filename: 'styles.css',
-        disable: !isProduction,
-      }),
+      }), // TODO: disable in prod
       new HtmlWebpackPlugin({
-        template: 'assets/index.html',
-        filename: 'index.html',
-        chunks: ['main'],
+        template: 'client/index.ejs',
+        title: 'NUsight2',
       }),
       new ProgressBarPlugin(),
     ],
