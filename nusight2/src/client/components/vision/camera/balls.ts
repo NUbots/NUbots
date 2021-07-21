@@ -16,11 +16,7 @@ export class BallsViewModel {
   private readonly params: CameraParams
   private readonly lineProjection: LineProjection
 
-  constructor(
-    model: Ball[],
-    params: CameraParams,
-    lineProjection: LineProjection,
-  ) {
+  constructor(model: Ball[], params: CameraParams, lineProjection: LineProjection) {
     this.model = model
     this.params = params
     this.lineProjection = lineProjection

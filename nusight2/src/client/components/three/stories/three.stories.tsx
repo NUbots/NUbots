@@ -116,11 +116,9 @@ class ViewModel {
     return this.model.boxes.map(ViewModel.getBox)
   }
 
-  private static getBox = createTransformer(
-    (box: BoxModel): BoxViewModel => {
-      return BoxViewModel.of(box)
-    },
-  )
+  private static getBox = createTransformer((box: BoxModel): BoxViewModel => {
+    return BoxViewModel.of(box)
+  })
 }
 
 class BoxViewModel {

@@ -22,15 +22,13 @@ export class FieldModel {
     this.robots = opts.robots
   }
 
-  static of = memoize(
-    (robots: DashboardRobotModel[]): FieldModel => {
-      return new FieldModel({
-        orientation: 'right',
-        ground: GroundModel.of(),
-        robots,
-      })
-    },
-  )
+  static of = memoize((robots: DashboardRobotModel[]): FieldModel => {
+    return new FieldModel({
+      orientation: 'right',
+      ground: GroundModel.of(),
+      robots,
+    })
+  })
 
   @computed
   get fieldLength() {

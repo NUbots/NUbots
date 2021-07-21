@@ -32,11 +32,7 @@ class ViewModel {
   private readonly model: () => Object3D
   private readonly cameraPosition: Vector3
 
-  constructor(
-    canvas: Canvas,
-    model: () => Object3D,
-    cameraPosition: Vector3,
-  ) {
+  constructor(canvas: Canvas, model: () => Object3D, cameraPosition: Vector3) {
     this.canvas = canvas
     this.model = model
     this.cameraPosition = cameraPosition

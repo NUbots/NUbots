@@ -9,10 +9,7 @@ export class HorizonViewModel {
   private readonly params: CameraParams
   private readonly lineProjection: LineProjection
 
-  constructor(
-    params: CameraParams,
-    lineProjection: LineProjection,
-  ) {
+  constructor(params: CameraParams, lineProjection: LineProjection) {
     this.params = params
     this.lineProjection = lineProjection
   }

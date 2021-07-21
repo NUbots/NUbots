@@ -106,4 +106,4 @@ onMessage((e: MessageEvent) => {
   }
 })
 
-export default ({} as any) as new () => Worker
+export default {} as any as new () => Worker

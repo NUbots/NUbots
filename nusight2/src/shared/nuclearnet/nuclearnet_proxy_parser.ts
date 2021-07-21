@@ -42,10 +42,7 @@ export class Encoder {
               data: [key, { target, type, payload, reliable }],
             } = packet
             packet.type = PacketType.BINARY_EVENT
-            return [
-              JSON.stringify({ id, nsp, key, header: { target, type, reliable } }),
-              payload,
-            ]
+            return [JSON.stringify({ id, nsp, key, header: { target, type, reliable } }), payload]
           }
 
           // For NUClearNet packets, we send the payload separately to avoid array slicing later
@@ -56,11 +53,7 @@ export class Encoder {
             } = packet
             packet.type = PacketType.BINARY_EVENT
             // Send the header as a JSON and then the payload as binary
-            return [
-              JSON.stringify({ id, nsp, key, header: { peer, reliable } }),
-              hash,
-              payload,
-            ]
+            return [JSON.stringify({ id, nsp, key, header: { peer, reliable } }), hash, payload]
           }
         }
       }

@@ -113,5 +113,8 @@ function lissajous(t: number, a = 3, b = 4) {
   return new Vector2(Math.sin(a * t), Math.sin(b * t))
 }
 
-const mod = (n: number) => (x: number): number => ((x % n) + n) % n
+const mod =
+  (n: number) =>
+  (x: number): number =>
+    ((x % n) + n) % n
 const mod2pi = mod(2 * Math.PI)

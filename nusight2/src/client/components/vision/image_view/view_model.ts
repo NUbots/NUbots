@@ -130,34 +130,32 @@ export class ImageViewModel {
     minFilter: THREE.LinearFilter,
   }))
 
-  private textureFormat = createTransformer(
-    (format: ImageFormat): THREE.PixelFormat => {
-      switch (format) {
-        case ImageFormat.JPEG:
-        case ImageFormat.JPBG:
-        case ImageFormat.JPRG:
-        case ImageFormat.JPGR:
-        case ImageFormat.JPGB:
-        case ImageFormat.PJBG:
-        case ImageFormat.PJRG:
-        case ImageFormat.PJGR:
-        case ImageFormat.PJGB:
-          return THREE.RGBAFormat
-        case ImageFormat.RGB8:
-          return THREE.RGBFormat
-        case ImageFormat.GRBG:
-        case ImageFormat.RGGB:
-        case ImageFormat.GBRG:
-        case ImageFormat.BGGR:
-        case ImageFormat.GREY:
-        case ImageFormat.GRAY:
-        case ImageFormat.Y8__:
-          return THREE.LuminanceFormat
-        default:
-          throw new UnreachableError(format)
-      }
-    },
-  )
+  private textureFormat = createTransformer((format: ImageFormat): THREE.PixelFormat => {
+    switch (format) {
+      case ImageFormat.JPEG:
+      case ImageFormat.JPBG:
+      case ImageFormat.JPRG:
+      case ImageFormat.JPGR:
+      case ImageFormat.JPGB:
+      case ImageFormat.PJBG:
+      case ImageFormat.PJRG:
+      case ImageFormat.PJGR:
+      case ImageFormat.PJGB:
+        return THREE.RGBAFormat
+      case ImageFormat.RGB8:
+        return THREE.RGBFormat
+      case ImageFormat.GRBG:
+      case ImageFormat.RGGB:
+      case ImageFormat.GBRG:
+      case ImageFormat.BGGR:
+      case ImageFormat.GREY:
+      case ImageFormat.GRAY:
+      case ImageFormat.Y8__:
+        return THREE.LuminanceFormat
+      default:
+        throw new UnreachableError(format)
+    }
+  })
 
   private firstRed = createTransformer((format: BayerImageFormat): [number, number] => {
     switch (format) {

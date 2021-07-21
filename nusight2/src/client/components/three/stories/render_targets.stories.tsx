@@ -85,11 +85,7 @@ class WhiteBoxViewModel {
   private readonly model: Model
   private readonly orangeBoxTexture: () => Texture
 
-  constructor(
-    canvas: Canvas,
-    model: Model,
-    orangeBoxTexture: () => Texture,
-  ) {
+  constructor(canvas: Canvas, model: Model, orangeBoxTexture: () => Texture) {
     this.canvas = canvas
     this.model = model
     this.orangeBoxTexture = orangeBoxTexture
@@ -144,11 +140,7 @@ class OrangeBoxViewModel {
   private readonly robotTexture: () => Texture
   private readonly renderTarget: () => WebGLRenderTarget
 
-  constructor(
-    model: Model,
-    robotTexture: () => Texture,
-    renderTarget: () => WebGLRenderTarget,
-  ) {
+  constructor(model: Model, robotTexture: () => Texture, renderTarget: () => WebGLRenderTarget) {
     this.model = model
     this.robotTexture = robotTexture
     this.renderTarget = renderTarget
@@ -207,10 +199,7 @@ class RobotViewModel {
   private readonly model: Model
   private readonly renderTarget: () => WebGLRenderTarget
 
-  constructor(
-    model: Model,
-    renderTarget: () => WebGLRenderTarget,
-  ) {
+  constructor(model: Model, renderTarget: () => WebGLRenderTarget) {
     this.model = model
     this.renderTarget = renderTarget
   }

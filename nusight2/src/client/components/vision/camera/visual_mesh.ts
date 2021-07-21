@@ -11,11 +11,7 @@ export class VisualMeshViewModel {
   private readonly visualMesh: VisualMesh
   private readonly params: CameraParams
 
-  constructor(
-    canvas: Canvas,
-    visualMesh: VisualMesh,
-    params: CameraParams,
-  ) {
+  constructor(canvas: Canvas, visualMesh: VisualMesh, params: CameraParams) {
     this.canvas = canvas
     this.visualMesh = visualMesh
     this.params = params

@@ -16,11 +16,7 @@ export class GreenHorizonViewModel {
   private readonly params: CameraParams
   private readonly lineProjection: LineProjection
 
-  constructor(
-    greenHorizon: GreenHorizon,
-    params: CameraParams,
-    lineProjection: LineProjection,
-  ) {
+  constructor(greenHorizon: GreenHorizon, params: CameraParams, lineProjection: LineProjection) {
     this.greenHorizon = greenHorizon
     this.params = params
     this.lineProjection = lineProjection
