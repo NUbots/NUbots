@@ -28,11 +28,19 @@ export class ModelVisualiser extends Component<{
 }
 
 class ViewModel {
+  private readonly canvas: Canvas
+  private readonly model: () => Object3D
+  private readonly cameraPosition: Vector3
+
   constructor(
-    private readonly canvas: Canvas,
-    private readonly model: () => Object3D,
-    private readonly cameraPosition: Vector3,
-  ) {}
+    canvas: Canvas,
+    model: () => Object3D,
+    cameraPosition: Vector3,
+  ) {
+    this.canvas = canvas
+    this.model = model
+    this.cameraPosition = cameraPosition
+  }
 
   @computed
   get stage(): Stage {

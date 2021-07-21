@@ -13,11 +13,19 @@ import { Goal } from '../camera/model'
 import { LineProjection } from './line_projection'
 
 export class GoalsViewModel {
+  private readonly model: Goal[]
+  private readonly params: CameraParams
+  private readonly lineProjection: LineProjection
+
   constructor(
-    private readonly model: Goal[],
-    private readonly params: CameraParams,
-    private readonly lineProjection: LineProjection,
-  ) {}
+    model: Goal[],
+    params: CameraParams,
+    lineProjection: LineProjection,
+  ) {
+    this.model = model
+    this.params = params
+    this.lineProjection = lineProjection
+  }
 
   static of(model: Goal[], canvas: Canvas, params: CameraParams): GoalsViewModel {
     return new GoalsViewModel(model, params, LineProjection.of(canvas, params.lens))

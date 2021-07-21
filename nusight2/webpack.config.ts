@@ -134,15 +134,15 @@ export function getClientConfig({
     },
     plugins: [
       new CopyWebpackPlugin({ patterns: [{ from: 'assets', context }] }),
-      new MiniCssExtractPlugin({
+      isProduction ? new MiniCssExtractPlugin({
         filename: 'styles.css',
-      }), // TODO: disable in prod
+      }) : undefined,
       new HtmlWebpackPlugin({
         template: 'client/index.ejs',
         title: 'NUsight2',
       }),
       new ProgressBarPlugin(),
-    ],
+    ].filter(x => !!x),
   }
 }
 

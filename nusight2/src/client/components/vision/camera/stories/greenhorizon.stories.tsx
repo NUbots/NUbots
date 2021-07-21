@@ -80,7 +80,11 @@ class GreenHorizonHarness extends Component<{ animate?: boolean }> {
 }
 
 class ViewModel {
-  constructor(private readonly viewModel: GreenHorizonViewModel) {}
+  private readonly viewModel: GreenHorizonViewModel
+
+  constructor(viewModel: GreenHorizonViewModel) {
+    this.viewModel = viewModel
+  }
 
   static of(canvas: Canvas, greenHorizon: GreenHorizon, params: CameraParams) {
     return new ViewModel(GreenHorizonViewModel.of(canvas, greenHorizon, params))

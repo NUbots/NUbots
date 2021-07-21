@@ -22,7 +22,13 @@ import fragmentShader from './shaders/bayer.frag'
 import vertexShader from './shaders/bayer.vert'
 
 export class ImageViewModel {
-  constructor(private readonly source: Image, private readonly geometry: () => Geometry) {}
+  private readonly source: Image
+  private readonly geometry: () => Geometry
+
+  constructor(source: Image, geometry: () => Geometry) {
+    this.source = source
+    this.geometry = geometry
+  }
 
   static of(source: Image) {
     return new ImageViewModel(source, ImageViewModel.geometry)

@@ -81,11 +81,19 @@ class RenderTargetHarness extends React.Component<{ animate?: boolean }> {
 }
 
 class WhiteBoxViewModel {
+  private readonly canvas: Canvas
+  private readonly model: Model
+  private readonly orangeBoxTexture: () => Texture
+
   constructor(
-    private readonly canvas: Canvas,
-    private readonly model: Model,
-    private readonly orangeBoxTexture: () => Texture,
-  ) {}
+    canvas: Canvas,
+    model: Model,
+    orangeBoxTexture: () => Texture,
+  ) {
+    this.canvas = canvas
+    this.model = model
+    this.orangeBoxTexture = orangeBoxTexture
+  }
 
   static of(canvas: Canvas, model: Model, orangeBoxTexture: () => Texture) {
     return new WhiteBoxViewModel(canvas, model, orangeBoxTexture)
@@ -132,11 +140,19 @@ class WhiteBoxViewModel {
 }
 
 class OrangeBoxViewModel {
+  private readonly model: Model
+  private readonly robotTexture: () => Texture
+  private readonly renderTarget: () => WebGLRenderTarget
+
   constructor(
-    private readonly model: Model,
-    private readonly robotTexture: () => Texture,
-    private readonly renderTarget: () => WebGLRenderTarget,
-  ) {}
+    model: Model,
+    robotTexture: () => Texture,
+    renderTarget: () => WebGLRenderTarget,
+  ) {
+    this.model = model
+    this.robotTexture = robotTexture
+    this.renderTarget = renderTarget
+  }
 
   static of(model: Model, robotTexture: () => Texture, renderTarget: () => WebGLRenderTarget) {
     return new OrangeBoxViewModel(model, robotTexture, renderTarget)
@@ -188,10 +204,16 @@ class OrangeBoxViewModel {
 }
 
 class RobotViewModel {
+  private readonly model: Model
+  private readonly renderTarget: () => WebGLRenderTarget
+
   constructor(
-    private readonly model: Model,
-    private readonly renderTarget: () => WebGLRenderTarget,
-  ) {}
+    model: Model,
+    renderTarget: () => WebGLRenderTarget,
+  ) {
+    this.model = model
+    this.renderTarget = renderTarget
+  }
 
   static of(model: Model, renderTarget: () => WebGLRenderTarget) {
     return new RobotViewModel(model, renderTarget)

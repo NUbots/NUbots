@@ -6,10 +6,16 @@ import { LineProjection } from './line_projection'
 import { CameraParams } from './model'
 
 export class HorizonViewModel {
+  private readonly params: CameraParams
+  private readonly lineProjection: LineProjection
+
   constructor(
-    private readonly params: CameraParams,
-    private readonly lineProjection: LineProjection,
-  ) {}
+    params: CameraParams,
+    lineProjection: LineProjection,
+  ) {
+    this.params = params
+    this.lineProjection = lineProjection
+  }
 
   static of(canvas: Canvas, params: CameraParams): HorizonViewModel {
     return new HorizonViewModel(params, LineProjection.of(canvas, params.lens))
