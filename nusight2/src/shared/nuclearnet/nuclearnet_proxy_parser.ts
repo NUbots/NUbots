@@ -41,7 +41,6 @@ export class Encoder {
               id,
               data: [key, { target, type, payload, reliable }],
             } = packet
-            packet.type = PacketType.BINARY_EVENT
             return [JSON.stringify({ id, nsp, key, header: { target, type, reliable } }), payload]
           }
 
@@ -51,7 +50,6 @@ export class Encoder {
               id,
               data: [key, { peer, hash, payload, reliable }],
             } = packet
-            packet.type = PacketType.BINARY_EVENT
             // Send the header as a JSON and then the payload as binary
             return [JSON.stringify({ id, nsp, key, header: { peer, reliable } }), hash, payload]
           }
