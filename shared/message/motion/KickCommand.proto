@@ -34,7 +34,8 @@ enum KickCommandType {
 message KickCommand {
     /// The point to kick
     vec3 target = 1;
-    // Force is the magnitude
+    /// The direction to kick in, with the magnitude of the vector
+    /// corresponding to the force of the kick
     vec3            direction         = 2;
     KickCommandType kick_command_type = 3;
 }
