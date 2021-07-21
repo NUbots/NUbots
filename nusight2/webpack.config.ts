@@ -79,7 +79,6 @@ export function getClientConfig({
                   plugins: [
                     'postcss-import',
                     'postcss-url',
-                    'postcss-cssnext',
                   ],
                 },
               },

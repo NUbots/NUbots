@@ -22,6 +22,7 @@ const server = http.createServer(app)
 const sioNetwork = sio(server, { parser: NUClearNetProxyParser } as any)
 
 app.use(
+  // @ts-expect-error
   history({
     rewrites: [
       // Allows user to navigate to /storybook/ without needing to type /index.html
@@ -29,8 +30,10 @@ app.use(
     ],
   }),
 )
+// @ts-expect-error
 app.use(compression())
 app.use(express.static(path.join('dist', 'public')))
+// @ts-expect-error
 app.use(favicon(path.join('dist', 'public', 'favicon.ico')))
 
 const port = process.env.PORT || 9090
