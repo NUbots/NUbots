@@ -5,11 +5,19 @@ Things the PR does go here
 - points like this
 - if you like
 
+### Pre-PR Checklist:
+
+Have you
+- [ ] Updated NUbook if necessary
+- [ ] Added/Updated tests for your changes, including regression tests for bug fixes
+- [ ] Updated relevant module READMEs
+
 ## Optional Headings
 
 ### Reviewers, Note
 
-Things the reviewers should keep in mind go here
+Things the reviewers should keep in mind go here.
+Also tell reviewers how to verify/test your code's correctness here.
 
 ### Things left to do
 
@@ -18,10 +26,7 @@ Things the reviewers should keep in mind go here
 
 **If there are many things left to do then consider a [_draft_ PR](https://github.blog/2019-02-14-introducing-draft-pull-requests/)**
 
-## Reviewers and Labels Info (delete the rest of this once you have read it)
-
-- Reviewers should be people who know about or are working on the system you're contributing to e.g. your peers, your mentor, your group lead, and the team lead.
-- There isn't really a limit on how many reviewers you should add.
+## Labels Info (delete the rest of this once you have read it)
 
 Most PRs should have these labels:
 
