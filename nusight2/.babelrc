@@ -7,7 +7,6 @@
         "legacy": true
       }
     ],
-    "@babel/plugin-syntax-jsx",
-    "react-hot-loader/babel"
+    "@babel/plugin-syntax-jsx"
   ]
 }
