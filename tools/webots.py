@@ -43,7 +43,7 @@ def register(command):
     )
     #
     build_subcommand.add_argument(
-        "-j", "--jobs", dest="jobs", action="store", help="Dictates the number of CPU cores used when building"
+        "-j", "--jobs", dest="jobs", action="store", help="Dictates the number of jobs to run in parrallel"
     )
 
     push_subcommand = subparsers.add_parser(
@@ -79,7 +79,7 @@ def get_cmake_flags(roles_to_build):
     return ["-DCMAKE_BUILD_TYPE=Release"] + role_flags
 
 
-def exec_build(target, roles, clean):
+def exec_build(target, roles, clean, jobs):
     # Tags correct image as 'selected' for given target
     print("Setting target '{}'...".format(target))
     exit_code = subprocess.run(["./b", "target", target]).returncode
@@ -105,7 +105,7 @@ def exec_build(target, roles, clean):
 
     # Compiles code for correct target
     print("Building code...")
-    exit_code = subprocess.run(["./b", "build"]).returncode
+    exit_code = subprocess.run(["./b", "build", "-j", jobs]).returncode
     if exit_code != 0:
         cprint(f"unable to build code, exit code {exit_code}", "red", attrs=["bold"])
         sys.exit(exit_code)
