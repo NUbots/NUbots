@@ -29,7 +29,7 @@ def register(command):
         action="store",
         dest="enabled_roles",
         default=None,
-        help="Colon-separated list of roles to enable",
+        help="Colon-separated list of roles to enable. Pass 'all' to enable all.",
     )
 
     command.add_argument(
@@ -53,6 +53,7 @@ def run(interactive, enabled_roles, disabled_roles, args, **kwargs):
 
     # If specific roles are disabled, then we enable all of the others
     if disabled_roles:
+        disabled_roles = disabled_roles.strip()
         # roles are a colon separated list, so we split on that character
         disabled_roles = disabled_roles.split(":")
         cprint("Disabling all roles except these: ", end=" ", color="red", attrs=["bold"])
@@ -62,10 +63,15 @@ def run(interactive, enabled_roles, disabled_roles, args, **kwargs):
     # If specific roles are enabled **and** specific roles aren't disabled,
     # then we enable only the enabled_roles
     elif enabled_roles:
-        enabled_roles = enabled_roles.split(":")
-        cprint("Enabling all roles except these:", end=" ", color="green", attrs=["bold"])
-        cprint(str(enabled_roles), color="red", attrs=["bold"])
-        args += b.get_cmake_role_flags(enabled_roles, False)
+        enabled_roles = enabled_roles.strip()
+        if enabled_roles == "all":
+            cprint("Enabling all roles", color="green", attrs=["bold"])
+            args += b.get_cmake_role_flags("", True)
+        else:
+            enabled_roles = enabled_roles.split(":")
+            cprint("Enabling all roles except these:", end=" ", color="green", attrs=["bold"])
+            cprint(str(enabled_roles), color="red", attrs=["bold"])
+            args += b.get_cmake_role_flags(enabled_roles, False)
 
     # To pass arguments to the cmake command you put them after "--"
     # but "--"  isn't a valid argument for cmake, so we remove it here

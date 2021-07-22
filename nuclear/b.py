@@ -91,7 +91,7 @@ def get_cmake_role_flags(roles, disable_instead=False):
     # Ensure that all the roles requested are available
     for role in roles:
         if role not in available_roles:
-            print(f"role '{role}' not found", color="red", attrs=["bold"])
+            print(f"role '{role}' not found")
             sys.exit(1)
 
     # If the roles passed in are meant to be disabled instead of enabled then
