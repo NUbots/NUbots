@@ -74,10 +74,8 @@ namespace module {
                     },
                     [this](const std::set<ServoID>&) {}}));
 
-                // Read the NSGA2Evaluator.yaml config file and set the walk command parameters
+                // Read the NSGA2Evaluator.yaml config file
                 on<Configuration>("NSGA2Evaluator.yaml").then([this](const Configuration& config) {
-                    walk_command_velocity = config["walk_command"]["velocity"].as<Expression>();
-                    walk_command_rotation = config["walk_command"]["rotation"].as<Expression>();
                     trial_duration_limit  = config["trial_duration_limit"].as<Expression>();
                 });
 
@@ -302,9 +300,14 @@ namespace module {
             void NSGA2Evaluator::SettingUpTrial(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
                 log<NUClear::DEBUG>("SettingUpTrial");
 
-                // Set our genration and individual identifiers from the request
+                // Set our generation and individual identifiers from the request
                 generation = lastEvalRequestMsg.generation;
                 individual = lastEvalRequestMsg.id;
+
+                // Set our walk command
+                walk_command_velocity.x() = lastEvalRequestMsg.parameters.velocity;
+                walk_command_velocity.y() = 0.0;
+                walk_command_rotation = 0.0;
 
                 // Read the QuinticWalk config and overwrite the config parameters with the current individual's
                 // parameters

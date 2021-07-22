@@ -1,8 +1,8 @@
-population_size: 40
-num_generations: 12
+population_size: 48
+num_generations: 30
 num_objectives: 2
 num_constraints: 2
-num_real_vars: 11
+num_real_vars: 12
 seed: 7777777
 probabilities:
   real:
@@ -12,7 +12,7 @@ eta:
   C: 12
   M: 30
 
-# The following values are setting the initial values nad limits for the walk engine parameters.
+# The following values are setting the initial values and limits for the walk engine parameters.
 # Each param is the tuple [initial value, minimum, maximum]. These values are merged with the
 # values in QuinticWalk.yaml for an individual, and then evaluated with the walk.
 walk:
@@ -52,6 +52,10 @@ walk:
     # Time that the walking is paused when becoming unstable
     # (in s, [0:10])
     duration: [0.5, 0.0, 2.0]
+
+# The following values are setting the initial values and limits for the walk engine command.
+walk_command:
+  velocity: [0.2, 0.01, 0.99]
 
 gains:
   legs: 13

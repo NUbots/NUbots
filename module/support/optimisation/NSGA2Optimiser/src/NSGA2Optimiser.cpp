@@ -64,11 +64,18 @@ namespace module {
                                                  trunk[element][2].as<Expression>());
                     }
 
-                    auto& pause = walk["pause"];  // config['walk']['pause']
+                    auto& pause = walk["pause"];
                     for (const auto& element : std::vector<std::string>({std::string("duration")})) {
                         paramInitialValues.emplace_back(pause[element][0].as<Expression>());
                         paramLimits.emplace_back(pause[element][1].as<Expression>(),
                                                  pause[element][2].as<Expression>());
+                    }
+
+                    auto& walk_command = config["walk_command"];
+                    for (const auto& element :
+                         std::vector<std::string>({std::string("velocity")})) {
+                        paramInitialValues.emplace_back(walk_command[element][0].as<Expression>());
+                        paramLimits.emplace_back(walk_command[element][1].as<Expression>(), walk_command[element][2].as<Expression>());
                     }
 
                     // Set up the NSGA2 algorithm based on our config values
@@ -138,6 +145,7 @@ namespace module {
                         request->parameters.trunk.swing          = ind.reals[8];
                         request->parameters.trunk.pause          = ind.reals[9];
                         request->parameters.pause.duration       = ind.reals[10];
+                        request->parameters.velocity             = ind.reals[11];
                         emit(request);
                     } else {
                         log<NUClear::INFO>("Evaluator ready, but optimiser is not");

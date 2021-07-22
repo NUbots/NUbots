@@ -170,4 +170,5 @@ message NSGA2EvaluationParameters {
     MaxStep max_step = 8;
     IMU     imu      = 9;
     Gains   gains    = 10;
+    float   velocity = 11;
 }
