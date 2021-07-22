@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 
-import glob
 import os
 import shutil
 import subprocess
 import sys
 import textwrap
-from pathlib import Path
 
 from termcolor import cprint
 
@@ -55,25 +53,6 @@ def register(command):
     run_subcommand.add_argument("role", help="The role to run")
 
 
-def get_cmake_flags(roles_to_build):
-    roles_dir = os.path.join(b.project_dir, "roles")
-    roles_glob = os.path.join(roles_dir, "*.role")
-
-    available_roles = [Path(role_path).stem for role_path in glob.glob(roles_glob)]
-
-    # Ensure that all the roles requested are available
-    for role in roles_to_build:
-        if role not in available_roles:
-            cprint(f"role '{role}' not found", color="red", attrs=["bold"])
-            sys.exit(1)
-
-    role_flags = [f"-DROLE_{role}=ON" for role in available_roles if role in roles_to_build] + [
-        f"-DROLE_{role}=OFF" for role in available_roles if role not in roles_to_build
-    ]
-
-    return ["-DCMAKE_BUILD_TYPE=Release"] + role_flags
-
-
 def exec_build(target, roles, clean):
     # Tags correct image as 'selected' for given target
     print("Setting target '{}'...".format(target))
@@ -92,7 +71,7 @@ def exec_build(target, roles, clean):
 
     # Sets cmake flags and roles
     print("Configuring build...")
-    configure_command = ["./b", "configure", "--"] + get_cmake_flags(roles)
+    configure_command = ["./b", "configure", "--", "-DCMAKE_BUILD_TYPE=Release"] + b.get_cmake_role_flags(roles)
     exit_code = subprocess.run(configure_command).returncode
     if exit_code != 0:
         cprint(f"unable to configure build, exit code {exit_code}", "red", attrs=["bold"])
