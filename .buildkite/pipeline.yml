@@ -70,6 +70,12 @@ steps:
       - ./b unused -g
       - ./b configure
       - ./b build
+    plugins:
+      - docker-compose#v3.0.3:
+          config: .buildkite/NUbots/docker-compose.yml
+          pull: generic_image
+          run: generic
+          workdir: /home/nubots/NUbots/
 
   # Build for both nuc targets
   - label: "Build nuc7i7bnh"
