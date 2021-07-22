@@ -92,15 +92,17 @@ namespace module::behaviour::skills {
             updatePriority(0);
         });
 
-        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
-            RegisterAction{id,
-                           "Kick Script",
-                           {std::pair<float, std::set<LimbID>>(
-                               0,
-                               {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
-                           [this](const std::set<LimbID>& /*unused*/) { emit(std::make_unique<ExecuteKick>()); },
-                           [this](const std::set<LimbID>& /*unused*/) { emit(std::make_unique<FinishKick>()); },
-                           [this](const std::set<ServoID>& /*unused*/) { emit(std::make_unique<FinishKick>()); }}));
+        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
+            id,
+            "Kick Script",
+            {std::pair<float, std::set<LimbID>>(
+                0,
+                {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
+            [this](const std::set<LimbID>& /*limbAssociatedWithAction*/) { emit(std::make_unique<ExecuteKick>()); },
+            [this](const std::set<LimbID>& /*limbAssociatedWithAction*/) { emit(std::make_unique<FinishKick>()); },
+            [this](const std::set<ServoID>& /*servoAssociatedWithCompletion*/) {
+                emit(std::make_unique<FinishKick>());
+            }}));
     }
 
     void KickScript::updatePriority(const float& priority) {
