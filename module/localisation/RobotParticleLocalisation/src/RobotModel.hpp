@@ -24,6 +24,7 @@
 #include <Eigen/Geometry>
 #include <nuclear>
 #include <random>
+#include <utility>
 #include <vector>
 
 #include "FieldLineSampling.hpp"
@@ -36,6 +37,8 @@
 #include "utility/localisation/transform.hpp"
 #include "utility/math/angle.hpp"
 #include "utility/math/coordinates.hpp"
+#include "utility/math/geometry/Circle.hpp"
+#include "utility/math/geometry/Line.hpp"
 
 namespace module::localisation {
 
@@ -46,7 +49,9 @@ namespace module::localisation {
     using utility::localisation::fieldStateToTransform3D;
     using utility::math::angle::normalizeAngle;
     using utility::math::coordinates::cartesianToReciprocalSpherical;
-    using utility::math::coordinates::reciprocalSphericalToCartesian;
+    using utility::math::geometry::Arc;
+    using utility::math::geometry::Circle;
+    using utility::math::geometry::LineSegment;
 
     template <typename Scalar>
     class RobotModel {
@@ -99,16 +104,57 @@ namespace module::localisation {
             return cartesianToReciprocalSpherical(rGCc);
         }
 
+        auto predict(const StateVec& state,
+                     const Eigen::Transform<Scalar, 3, Eigen::Affine>& Hcw,
+                     const FieldDescription& fd,
+                     const std::string& field_element,
+                     const Scalar& fov) {
+
+            // Get the center circle and cut out the visible arc
+            if (field_element == "center_circle") {
+            }
+            // Get the requested field line segment(s) and cut out the visible segment(s)
+            else {
+            }
+            std::map<std::string, std::vector<LineSegment<Scalar, 3, 1>>> field_lines =
+                get_field_lines<Scalar>(fd, point_density)[field_element];
+
+            // Create a transform from the field state
+            Eigen::Transform<Scalar, 3, Eigen::Affine> Hfw;
+            Hfw.translation() = Eigen::Matrix<Scalar, 3, 1>(state.x(), state.y(), 0);
+            Hfw.linear() = Eigen::AngleAxis<Scalar>(state.z(), Eigen::Matrix<Scalar, 3, 1>::UnitZ()).toRotationMatrix();
+
+            const Eigen::Transform<Scalar, 3, Eigen::Affine> Hfc = Hcw * Hfw.inverse();
+
+            // Partition all field points into those that are visible and those that are not
+            const Scalar cos_theta = std::cos(fov * Scalar(0.5));
+            std::vector<int> indexes(rLFf.rows(), 0);
+            std::iota(indexes.begin(), indexes.end(), 0);
+            const auto it = std::partition(indexes.begin(), indexes.end(), [&](const int& p) {
+                return Hfc.rotation().template leftCols<1>().dot(rLFf.row(p)) > cos_theta;
+            });
+
+            // Create output matrix of all rLFf points that are onscreen
+            // Transform these points into camera space
+            const Eigen::Transform<Scalar, 3, Eigen::Affine> Hcf = Hfc.inverse();
+            Eigen::Matrix<Scalar, Eigen::Dynamic, 3> uLCc(std::distance(indexes.begin(), it), 3);
+            for (int point = 0; point < uLCc.rows(); ++point) {
+                uLCc.row(point) = Hcf * rLFf.row(indexes[point]).normalized();
+            }
+
+            return uLCc;
+        }
+
         Eigen::Matrix<Scalar, Eigen::Dynamic, 3> predict(const StateVec& state,
                                                          const Eigen::Transform<Scalar, 3, Eigen::Affine>& Hcw,
                                                          const FieldDescription& fd,
-                                                         const int& num_field_points,
+                                                         const Scalar& point_density,
                                                          const std::string& field_element,
                                                          const Scalar& fov) {
 
             // Calculate all of the ground truth points
             Eigen::Matrix<Scalar, Eigen::Dynamic, 3> rLFf =
-                sample_field_points<Scalar>(fd, num_field_points)[field_element];
+                sample_field_points<Scalar>(fd, point_density)[field_element];
 
             // Create a transform from the field state
             Eigen::Transform<Scalar, 3, Eigen::Affine> Hfw;
@@ -152,12 +198,12 @@ namespace module::localisation {
         // uLCc_a are the predictions
         // uLCc_b are the measurements
         Eigen::Matrix<Scalar, Eigen::Dynamic, 1> difference(const Eigen::Matrix<Scalar, Eigen::Dynamic, 3>& uLCc_a,
-                                                            const Eigen::Matrix<Scalar, Eigen::Dynamic, 3>& srLCc_b) {
+                                                            const Eigen::Matrix<Scalar, Eigen::Dynamic, 3>& uLCc_b) {
 
-            // Convert measurement to cartesian coordinates
-            const Eigen::Matrix<Scalar, Eigen::Dynamic, 3>& uLCc_b(srLCc_b.rows(), 3);
-            for (int point = 0; point < srLCc_b.rows(); ++point) {
-                uLCc_b.row(point) = reciprocalSphericalToCartesian(srLCc_b.row(point));
+            // It is possible to have no predictions, in this instance we return a vector of 1s
+            // It should not be possible to have no measurements
+            if (uLCc_a.rows() == 0) {
+                return Eigen::Matrix<Scalar, Eigen::Dynamic, 1>::Ones(srLCc_b.rows(), 3);
             }
 
             // Take the dot product of every vector in uRLCc_b with every vector in uLCc_a

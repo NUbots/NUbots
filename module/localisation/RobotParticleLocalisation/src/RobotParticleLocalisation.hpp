@@ -25,6 +25,8 @@ namespace module::localisation {
         struct {
             std::vector<Eigen::Vector3d> start_state{};
             Eigen::Vector3d start_variance{};
+            double point_density;
+            double fov;
         } config{};
 
         [[nodiscard]] Eigen::Vector3d getFieldPosition(const message::vision::Goal::Side& side,

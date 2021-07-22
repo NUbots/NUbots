@@ -30,14 +30,108 @@
 
 #include "message/support/FieldDescription.hpp"
 
+#include "utility/math/geometry/Circle.hpp"
+#include "utility/math/geometry/Line.hpp"
+
 namespace module::localisation {
 
     using message::support::FieldDescription;
 
+    using utility::math::geometry::Circle;
+    using utility::math::geometry::LineSegment;
+
+    template <typename Scalar>
+    [[nodiscard]] inline Circle<Scalar, 3> get_center_circle(const FieldDescription& fd) {
+        return Circle(Eigen::Matrix<Scalar, 3, 1>::Zero(), fd.dimensions.center_circle_diameter * Scalar(0.5));
+    }
+
+    template <typename Scalar>
+    [[nodiscard]] inline std::map<std::string, std::vector<LineSegment<Scalar, 3, 1>>> get_field_lines(
+        const FieldDescription& fd) {
+        // Cache needed field dimension to improve readability
+        const Scalar field_length           = fd.dimensions.field_length;
+        const Scalar field_width            = fd.dimensions.field_width;
+        const Scalar half_field_length      = fd.dimensions.field_length * Scalar(0.5);
+        const Scalar half_field_width       = fd.dimensions.field_width * Scalar(0.5);
+        const Scalar line_width             = fd.dimensions.line_width;
+        const Scalar half_line_width        = fd.dimensions.line_width * Scalar(0.5);
+        const Scalar goal_length            = fd.dimensions.goal_area_length;
+        const Scalar goal_width             = fd.dimensions.goal_area_width;
+        const Scalar penalty_length         = fd.dimensions.penalty_area_length;
+        const Scalar penalty_width          = fd.dimensions.penalty_area_width;
+        const Scalar penalty_mark           = fd.dimensions.penalty_mark_distance;
+        const Scalar center_circle_diameter = fd.dimensions.center_circle_diameter;
+
+        std::map<std::string, std::vector<LineSegment<Scalar, 3, 1>>> field_lines;
+
+        field_lines["opp_goal_line"] = {
+            LineSegment(Eigen::Matrix<Scalar, 3, 1>(half_field_length, -half_field_width, Scalar(0)),
+                        Eigen::Matrix<Scalar, 3, 1>(half_field_length, half_field_width, Scalar(0)))};
+        field_lines["mid_line"] = {LineSegment(Eigen::Matrix<Scalar, 3, 1>(Scalar(0), -half_field_width, Scalar(0)),
+                                               Eigen::Matrix<Scalar, 3, 1>(Scalar(0), half_field_width, Scalar(0)))};
+        field_lines["own_goal_line"] = {
+            LineSegment(Eigen::Matrix<Scalar, 3, 1>(-half_field_length, -half_field_width, Scalar(0)),
+                        Eigen::Matrix<Scalar, 3, 1>(-half_field_length, half_field_width, Scalar(0)))};
+        field_lines["left_touch_line"] = {
+            LineSegment(Eigen::Matrix<Scalar, 3, 1>(-half_field_length, -half_field_width, Scalar(0)),
+                        Eigen::Matrix<Scalar, 3, 1>(half_field_length, -half_field_width, Scalar(0)))};
+        field_lines["right_touch_line"] = {
+            LineSegment(Eigen::Matrix<Scalar, 3, 1>(-half_field_length, half_field_width, Scalar(0)),
+                        Eigen::Matrix<Scalar, 3, 1>(half_field_length, half_field_width, Scalar(0)))};
+        field_lines["opp_penalty_mark"] = {
+            LineSegment(Eigen::Matrix<Scalar, 3, 1>(half_field_length - penalty_mark, -line_width, Scalar(0)),
+                        Eigen::Matrix<Scalar, 3, 1>(half_field_length - penalty_mark, line_width, Scalar(0))),
+            LineSegment(
+                Eigen::Matrix<Scalar, 3, 1>(half_field_length - penalty_mark - line_width, Scalar(0), Scalar(0)),
+                Eigen::Matrix<Scalar, 3, 1>(half_field_length - penalty_mark + line_width, Scalar(0), Scalar(0)))};
+        field_lines["center_mark"] = {LineSegment(Eigen::Matrix<Scalar, 3, 1>(-line_width, line_width, Scalar(0)))};
+        field_lines["own_penalty_mark"] = {
+            LineSegment(Eigen::Matrix<Scalar, 3, 1>(-half_field_length + penalty_mark, -line_width, Scalar(0)),
+                        Eigen::Matrix<Scalar, 3, 1>(-half_field_length + penalty_mark, line_width, Scalar(0))),
+            LineSegment(
+                Eigen::Matrix<Scalar, 3, 1>(-half_field_length + penalty_mark - line_width, Scalar(0), Scalar(0)),
+                Eigen::Matrix<Scalar, 3, 1>(-half_field_length + penalty_mark + line_width, Scalar(0), Scalar(0)))};
+        field_lines["opp_goal_box"] = {
+            LineSegment(Eigen::Matrix<Scalar, 3, 1>(half_field_length, -half_goal_width, Scalar(0)),
+                        Eigen::Matrix<Scalar, 3, 1>(half_field_length - goal_length, -half_goal_width, Scalar(0))),
+            LineSegment(Eigen::Matrix<Scalar, 3, 1>(half_field_length, half_goal_width, Scalar(0)),
+                        Eigen::Matrix<Scalar, 3, 1>(half_field_length - goal_length, half_goal_width, Scalar(0))),
+            LineSegment(Eigen::Matrix<Scalar, 3, 1>(half_field_length - goal_length, -half_goal_width, Scalar(0)),
+                        Eigen::Matrix<Scalar, 3, 1>(half_field_length - goal_length, half_goal_width, Scalar(0)))};
+        field_lines["own_goal_box"] = {
+            LineSegment(Eigen::Matrix<Scalar, 3, 1>(-half_field_length, -half_goal_width, Scalar(0)),
+                        Eigen::Matrix<Scalar, 3, 1>(-half_field_length + goal_length, -half_goal_width, Scalar(0))),
+            LineSegment(Eigen::Matrix<Scalar, 3, 1>(-half_field_length, half_goal_width, Scalar(0)),
+                        Eigen::Matrix<Scalar, 3, 1>(-half_field_length + goal_length, half_goal_width, Scalar(0))),
+            LineSegment(Eigen::Matrix<Scalar, 3, 1>(-half_field_length + goal_length, -half_goal_width, Scalar(0)),
+                        Eigen::Matrix<Scalar, 3, 1>(-half_field_length + goal_length, half_goal_width, Scalar(0)))};
+        field_lines["opp_penalty_box"] = {
+            LineSegment(
+                Eigen::Matrix<Scalar, 3, 1>(half_field_length, -half_penalty_width, Scalar(0)),
+                Eigen::Matrix<Scalar, 3, 1>(half_field_length - penalty_length, -half_penalty_width, Scalar(0))),
+            LineSegment(Eigen::Matrix<Scalar, 3, 1>(half_field_length, half_penalty_width, Scalar(0)),
+                        Eigen::Matrix<Scalar, 3, 1>(half_field_length - penalty_length, half_penalty_width, Scalar(0))),
+            LineSegment(
+                Eigen::Matrix<Scalar, 3, 1>(half_field_length - penalty_length, -half_penalty_width, Scalar(0)),
+                Eigen::Matrix<Scalar, 3, 1>(half_field_length - penalty_length, half_penalty_width, Scalar(0)))};
+        field_lines["own_penalty_box"] = {
+            LineSegment(
+                Eigen::Matrix<Scalar, 3, 1>(-half_field_length, -half_penalty_width, Scalar(0)),
+                Eigen::Matrix<Scalar, 3, 1>(-half_field_length + penalty_length, -half_penalty_width, Scalar(0))),
+            LineSegment(
+                Eigen::Matrix<Scalar, 3, 1>(-half_field_length, half_penalty_width, Scalar(0)),
+                Eigen::Matrix<Scalar, 3, 1>(-half_field_length + penalty_length, half_penalty_width, Scalar(0))),
+            LineSegment(
+                Eigen::Matrix<Scalar, 3, 1>(-half_field_length + penalty_length, -half_penalty_width, Scalar(0)),
+                Eigen::Matrix<Scalar, 3, 1>(-half_field_length + penalty_length, half_penalty_width, Scalar(0)))};
+
+        return field_lines;
+    }
+
     template <typename Scalar>
     [[nodiscard]] inline std::map<std::string, Eigen::Matrix<Scalar, Eigen::Dynamic, 3>> sample_field_points(
         const FieldDescription& fd,
-        const int& num_field_points) {
+        const Scalar& point_density) {
 
         // Cache needed field dimension to improve readability
         const Scalar field_length           = fd.dimensions.field_length;
@@ -67,9 +161,8 @@ namespace module::localisation {
                                          + penalty_width * 2
                                          + center_circle_diameter * M_PI;  // Center circle circumference
 
-        // Number of points to sample per meter
-        const Scalar points_per_meter = field_line_length / Scalar(num_field_points);
-        const Scalar meters_per_point = Scalar(num_field_points) / field_line_length;
+        // Number of meters per sampled point
+        const Scalar specific_volume = Scalar(1) / point_density;
 
         std::map<std::string, Eigen::Matrix<Scalar, Eigen::Dynamic, 3>> rLFf;
 
@@ -77,32 +170,32 @@ namespace module::localisation {
         // Top line
         // Bottom line
         // Mid-field line
-        int num_points        = field_width * points_per_meter;
+        int num_points        = field_width * point_density;
         rLFf["opp_goal_line"] = Eigen::Matrix<Scalar, Eigen::Dynamic, 3>(num_points, 3);
         rLFf["mid_line"]      = Eigen::Matrix<Scalar, Eigen::Dynamic, 3>(num_points, 3);
         rLFf["own_goal_line"] = Eigen::Matrix<Scalar, Eigen::Dynamic, 3>(num_points, 3);
         for (int point = 0; point < num_points; ++point) {
             rLFf["opp_goal_line"].row(point) << dis(gen) + half_field_length,
-                -half_field_width + point * meters_per_point, Scalar(0);
-            rLFf["mid_line"].row(point) << dis(gen), -half_field_width + point * meters_per_point, Scalar(0);
+                -half_field_width + point * specific_volume, Scalar(0);
+            rLFf["mid_line"].row(point) << dis(gen), -half_field_width + point * specific_volume, Scalar(0);
             rLFf["own_goal_line"].row(point) << dis(gen) - half_field_length,
-                -half_field_width + point * meters_per_point, Scalar(0);
+                -half_field_width + point * specific_volume, Scalar(0);
         }
 
         // Left line
         // Right line
-        num_points               = field_length * points_per_meter;
+        num_points               = field_length * point_density;
         rLFf["left_touch_line"]  = Eigen::Matrix<Scalar, Eigen::Dynamic, 3>(num_points, 3);
         rLFf["right_touch_line"] = Eigen::Matrix<Scalar, Eigen::Dynamic, 3>(num_points, 3);
         for (int point = 0; point < num_points; ++point) {
-            rLFf["left_touch_line"].row(point) << -half_field_length + point * meters_per_point,
+            rLFf["left_touch_line"].row(point) << -half_field_length + point * specific_volume,
                 dis(gen) + half_field_width, Scalar(0);
-            rLFf["right_touch_line"].row(point) << -half_field_length + point * meters_per_point,
+            rLFf["right_touch_line"].row(point) << -half_field_length + point * specific_volume,
                 dis(gen) - half_field_width, Scalar(0);
         }
 
         // Center circle
-        num_points            = M_PI * center_circle_diameter * points_per_meter;
+        num_points            = M_PI * center_circle_diameter * point_density;
         rLFf["center_circle"] = Eigen::Matrix<Scalar, Eigen::Dynamic, 3>(num_points, 3);
         for (int point = 0; point < num_points; ++point) {
             // Calculate point in polar coordinates
@@ -116,92 +209,92 @@ namespace module::localisation {
 
         // Top penalty mark side to side
         // Bottom penalty mark side to side
-        num_points               = line_width * 3 * points_per_meter;
+        num_points               = line_width * 3 * point_density;
         rLFf["opp_penalty_mark"] = Eigen::Matrix<Scalar, Eigen::Dynamic, 3>(num_points, 3);
         rLFf["own_penalty_mark"] = Eigen::Matrix<Scalar, Eigen::Dynamic, 3>(num_points, 3);
         for (int point = 0; point < num_points; ++point) {
             rLFf["opp_penalty_mark"].row(point) << half_field_length - penalty_mark + dis(gen),
-                line_width - point * meters_per_point, Scalar(0);
+                line_width - point * specific_volume, Scalar(0);
             rLFf["own_penalty_mark"].row(point) << -half_field_length + penalty_mark + dis(gen),
-                line_width - point * meters_per_point, Scalar(0);
+                line_width - point * specific_volume, Scalar(0);
         }
 
         // Top penalty mark end to end
         // Center mark end to end
         // Bottom penalty mark end to end
         int old_num_points = num_points;
-        num_points         = line_width * 3 * points_per_meter;
+        num_points         = line_width * 3 * point_density;
         rLFf["opp_penalty_mark"].conservativeResize(old_num_points + num_points, 3);
         rLFf["center_mark"] = Eigen::Matrix<Scalar, Eigen::Dynamic, 3>(num_points, 3);
         rLFf["own_penalty_mark"].conservativeResize(old_num_points + num_points, 3);
         for (int point = 0; point < num_points; ++point) {
             rLFf["opp_penalty_mark"].row(old_num_points + point)
-                << half_field_length - penalty_mark - line_width + point * meters_per_point,
+                << half_field_length - penalty_mark - line_width + point * specific_volume,
                 dis(gen), Scalar(0);
-            rLFf["center_mark"].row(point) << -line_width + point * meters_per_point, dis(gen), Scalar(0);
+            rLFf["center_mark"].row(point) << -line_width + point * specific_volume, dis(gen), Scalar(0);
             rLFf["own_penalty_mark"].row(old_num_points + point)
-                << -half_field_length + penalty_mark - line_width + point * meters_per_point,
+                << -half_field_length + penalty_mark - line_width + point * specific_volume,
                 dis(gen), Scalar(0);
         }
 
         // Top goal box left and right lines
         // Bottom goal box left and right lines
-        num_points           = goal_length * points_per_meter;
+        num_points           = goal_length * point_density;
         rLFf["opp_goal_box"] = Eigen::Matrix<Scalar, Eigen::Dynamic, 3>(num_points, 3);
         rLFf["own_goal_box"] = Eigen::Matrix<Scalar, Eigen::Dynamic, 3>(num_points, 3);
         for (int point = 0; point < 2 * num_points; point += 2) {
-            rLFf["opp_goal_box"].row(point) << half_field_length - goal_length * point * meters_per_point,
+            rLFf["opp_goal_box"].row(point) << half_field_length - goal_length * point * specific_volume,
                 goal_width * Scalar(0.5) + dis(gen), Scalar(0);
-            rLFf["opp_goal_box"].row(point + 1) << half_field_length - goal_length * point * meters_per_point,
+            rLFf["opp_goal_box"].row(point + 1) << half_field_length - goal_length * point * specific_volume,
                 -goal_width * Scalar(0.5) + dis(gen), Scalar(0);
 
-            rLFf["own_goal_box"].row(point) << -half_field_length + goal_length * point * meters_per_point,
+            rLFf["own_goal_box"].row(point) << -half_field_length + goal_length * point * specific_volume,
                 goal_width * Scalar(0.5) + dis(gen), Scalar(0);
-            rLFf["own_goal_box"].row(point + 1) << -half_field_length + goal_length * point * meters_per_point,
+            rLFf["own_goal_box"].row(point + 1) << -half_field_length + goal_length * point * specific_volume,
                 -goal_width * Scalar(0.5) + dis(gen), Scalar(0);
         }
 
         // Top goal box top/bottom lines
         // Bottom goal box top/bottom lines
         old_num_points = num_points;
-        num_points     = goal_width * points_per_meter;
+        num_points     = goal_width * point_density;
         rLFf["opp_goal_box"].conservativeResize(old_num_points + num_points, 3);
         rLFf["own_goal_box"].conservativeResize(old_num_points + num_points, 3);
         for (int point = 0; point < num_points; ++point) {
             rLFf["opp_goal_box"].row(old_num_points + point) << half_field_length - goal_length + dis(gen),
-                -goal_width * Scalar(0.5) + point * meters_per_point, Scalar(0);
+                -goal_width * Scalar(0.5) + point * specific_volume, Scalar(0);
             rLFf["own_goal_box"].row(old_num_points + point) << -half_field_length + goal_length + dis(gen),
-                -goal_width * Scalar(0.5) + point * meters_per_point, Scalar(0);
+                -goal_width * Scalar(0.5) + point * specific_volume, Scalar(0);
         }
 
         // Top penalty box left and right lines
         // Bottom penalty box left and right lines
-        num_points              = penalty_length * points_per_meter;
+        num_points              = penalty_length * point_density;
         rLFf["opp_penalty_box"] = Eigen::Matrix<Scalar, Eigen::Dynamic, 3>(num_points, 3);
         rLFf["own_penalty_box"] = Eigen::Matrix<Scalar, Eigen::Dynamic, 3>(num_points, 3);
         for (int point = 0; point < 2 * num_points; point += 2) {
-            rLFf["opp_penalty_box"].row(point) << half_field_length - penalty_length + point * meters_per_point,
+            rLFf["opp_penalty_box"].row(point) << half_field_length - penalty_length + point * specific_volume,
                 penalty_width * Scalar(0.5) + dis(gen), Scalar(0);
-            rLFf["opp_penalty_box"].row(point + 1) << half_field_length - penalty_length + point * meters_per_point,
+            rLFf["opp_penalty_box"].row(point + 1) << half_field_length - penalty_length + point * specific_volume,
                 -penalty_width * Scalar(0.5) + dis(gen), Scalar(0);
 
-            rLFf["own_penalty_box"].row(point) << -half_field_length + point * meters_per_point,
+            rLFf["own_penalty_box"].row(point) << -half_field_length + point * specific_volume,
                 penalty_width * Scalar(0.5) + dis(gen), Scalar(0);
-            rLFf["own_penalty_box"].row(point + 1) << -half_field_length + point * meters_per_point,
+            rLFf["own_penalty_box"].row(point + 1) << -half_field_length + point * specific_volume,
                 -penalty_width * Scalar(0.5) + dis(gen), Scalar(0);
         }
 
         // Top penalty box top/bottom lines
         // Bottom penalty box top/bottom lines
         old_num_points = num_points;
-        num_points     = penalty_width * points_per_meter;
+        num_points     = penalty_width * point_density;
         rLFf["opp_penalty_box"].conservativeResize(old_num_points + num_points, 3);
         rLFf["own_penalty_box"].conservativeResize(old_num_points + num_points, 3);
         for (int point = 0; point < num_points; ++point) {
             rLFf["opp_penalty_box"].row(old_num_points + point) << half_field_length - penalty_length + dis(gen),
-                -penalty_width * Scalar(0.5) + point * meters_per_point, Scalar(0);
+                -penalty_width * Scalar(0.5) + point * specific_volume, Scalar(0);
             rLFf["opp_penalty_box"].row(old_num_points + point) << -half_field_length + penalty_length + dis(gen),
-                -penalty_width * Scalar(0.5) + point * meters_per_point, Scalar(0);
+                -penalty_width * Scalar(0.5) + point * specific_volume, Scalar(0);
         }
 
         return rLFf;

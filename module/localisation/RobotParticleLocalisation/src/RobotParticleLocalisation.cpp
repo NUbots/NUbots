@@ -16,6 +16,7 @@
 #include "message/vision/Goal.hpp"
 
 #include "utility/localisation/transform.hpp"
+#include "utility/math/coordinates.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
@@ -33,6 +34,7 @@ namespace module::localisation {
     using VisionLines = message::vision::FieldLines;
 
     using utility::math::coordinates::cartesianToSpherical;
+    using utility::math::coordinates::reciprocalSphericalToCartesian;
     using utility::nusight::graph;
     using utility::support::Expression;
 
@@ -194,19 +196,73 @@ namespace module::localisation {
                     last_time_update_time = curr_time;
 
                     filter.time(seconds);
-                    std::vector<Eigen::Vector3d> points_rLCc{};
-                    std::vector<Eigen::Matrix3d> points_covariance{};
-                    for (auto line : lines.lines) {
-                        if (line.rLCc.allFinite() && line.covariance.allFinite()) {
-                            points_rLCc.emplace_back(line.rLCc);
-                            points_covariance.emplace_back(line.covariance);
-                        }
-                        else {
-                            log("Received non-finite field line measurements from vision. Discarding ...");
+
+                    // Count up the number of finite measurements we have
+                    int line_count = std::accumulate(lines.lines.begin(),
+                                                     lines.lines.end(),
+                                                     0,
+                                                     [&](const int& a, const Eigen::Vector3d& b) {
+                                                         if (b.allFinite()) {
+                                                             return ++a;
+                                                         }
+                                                         return a;
+                                                     });
+
+                    if (line_count < int(lines.lines.size() - 1)) {
+                        log<NUClear::WARN>("Received non-finite field line measurements from vision. Discarding ...");
+                    }
+
+                    // Set the covariance to the the first measurement covariance that is finite
+                    Eigen::Matrix3d covariance = lines.lines[0].covariance;
+                    for (const auto& line : lines.lines) {
+                        if (line.covariance.allFinite()) {
+                            covariance = line.covariance;
+                            break;
                         }
                     }
 
-                    filter.measure(points_rLCc, points_covariance, lines.Hcw, fd, config.num_field_line_points);
+                    // Put all of the finite measurements into a single matrix
+                    // Convert measurements to cartesian and ensure the vectors are normalised
+                    Eigen::Matrix<double, Eigen::Dynamic, 3> uLCc(line_count, 3);
+                    for (int point = 0; point < lines.lines.size(); ++point) {
+                        if (line.srLCc.allFinite()) {
+                            uLCc.row(point) = reciprocalSphericalToCartesian(lines.lines[point].srLCc).normalized();
+                        }
+                    }
+
+                    // Traverse each field element and perform measurements in the filter
+                    // If the measurement improves the filter then we will keep the measurement, if not we discard it
+                    double best_logits = std::numeric_limits<double>::lowest();
+                    auto best_filter   = filter;
+                    for (const std::string& field_element : {std::string("opp_goal_line"),
+                                                             std::string("mid_line"),
+                                                             std::string("own_goal_line"),
+                                                             std::string("left_touch_line"),
+                                                             std::string("right_touch_line"),
+                                                             std::string("center_circle"),
+                                                             std::string("opp_penalty_mark"),
+                                                             std::string("own_penalty_mark"),
+                                                             std::string("center_mark"),
+                                                             std::string("opp_goal_box"),
+                                                             std::string("own_goal_box"),
+                                                             std::string("opp_penalty_box"),
+                                                             std::string("own_penalty_box")}) {
+                        auto current_filter         = filter;
+                        const double current_logits = current_filter.measure(uLCc,
+                                                                             covariance,
+                                                                             lines.Hcw,
+                                                                             fd,
+                                                                             config.point_density,
+                                                                             field_element,
+                                                                             config.fov);
+
+                        if (current_logits > best_logits) {
+                            best_filter = current_filter;
+                            best_logits = current_logits;
+                        }
+                    }
+
+                    filter = best_filter;
                 }
             });
 
@@ -264,6 +320,9 @@ namespace module::localisation {
             filter.model.n_particles          = cfg["n_particles"].as<int>();
 
             config.start_variance = cfg["start_variance"].as<Expression>();
+
+            config.point_density = cfg["field_lines"]["point_density"].as<double>();
+            config.point_density = cfg["field_lines"]["fov"].as<double>();
         });
 
         on<Startup, With<FieldDescription>>().then([this](const FieldDescription& fd) {
