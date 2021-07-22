@@ -74,8 +74,14 @@ except:
     source_dir = project_dir
 
 
-def get_cmake_role_flags(roles_to_build):
-    """Utility function to get list of CMake flags corresponding to the roles passed in"""
+def get_cmake_role_flags(roles, disable_instead=False):
+    """
+    @brief Utility function to get list of CMake flags corresponding to the roles passed in.
+    If disable_instead == True, then those roles are the only ones not enabled in the
+    resulting flag list
+    @param roles The roles to enable (or disable, if disable_instead == True)
+    @param disable_instead Indicates whether the roles passed in should be enabled or disabled
+    """
 
     roles_dir = os.path.join(project_dir, "roles")
     roles_glob = os.path.join(roles_dir, "*.role")
@@ -83,13 +89,18 @@ def get_cmake_role_flags(roles_to_build):
     available_roles = [Path(role_path).stem for role_path in glob.glob(roles_glob)]
 
     # Ensure that all the roles requested are available
-    for role in roles_to_build:
+    for role in roles:
         if role not in available_roles:
             print(f"role '{role}' not found", color="red", attrs=["bold"])
             sys.exit(1)
 
-    role_flags = [f"-DROLE_{role}=ON" for role in available_roles if role in roles_to_build] + [
-        f"-DROLE_{role}=OFF" for role in available_roles if role not in roles_to_build
+    # If the roles passed in are meant to be disabled instead of enabled then
+    # we take the complement of our roles list, in the universe of available_roles
+    if disable_instead:
+        roles = [role for role in available_roles if role not in roles]
+
+    role_flags = [f"-DROLE_{role}=ON" for role in available_roles if role in roles] + [
+        f"-DROLE_{role}=OFF" for role in available_roles if role not in roles
     ]
 
     return role_flags
