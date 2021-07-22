@@ -55,7 +55,7 @@ steps:
     # We have to configure twice. The first configuration generates the cache for `./b unused`, then the next one
     # turns on the role which `./b unused -g` generates
     command:
-      - sudo chmod 777 roles # Required to let ./b unused write the role file
+      - sudo chmod 777 roles # Required to let `./b unused` write the role file
       - ./b configure -- -DBUILD_TESTS=ON
       - ./b unused -g
       - ./b configure
