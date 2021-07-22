@@ -62,11 +62,10 @@ steps:
 
   # Generate role with unused modules and build it
   - label: "Build unused modules"
-    command:
-    # Enable writing in the roles directory for the generated role
-      - sudo chmod 777 roles
     # We have to configure twice. The first configuration generates the cmake cache for `./b unused`, then the next one
     # turns on the role which `./b unused -g` generates
+    command:
+      - sudo chmod 777 roles # Required to write the generated role
       - ./b configure -- -DBUILD_TESTS=ON
       - ./b unused -g
       - ./b configure
