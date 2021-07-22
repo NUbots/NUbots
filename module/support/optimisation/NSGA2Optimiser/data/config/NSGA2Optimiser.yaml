@@ -55,7 +55,7 @@ walk:
 
 # The following values are setting the initial values and limits for the walk engine command.
 walk_command:
-  velocity: [0.2, 0.01, 0.99]
+  velocity: [0.2, 0.01, 0.51]
 
 gains:
   legs: 13

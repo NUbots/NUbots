@@ -87,8 +87,9 @@ namespace module {
                 int individual = 0;
 
                 /// @brief Robot state for this evaluation, used during fitness and constraint calculation
+                Eigen::Vector3d initialRobotPosition = Eigen::Vector3d::Zero();
                 Eigen::Vector3d robotPosition = Eigen::Vector3d::Zero();
-                double robotDistanceTravelled = 0.0;
+                bool initialPositionSet = false;
                 double maxFieldPlaneSway = 0.0;
 
                 /// @brief Keeps track of the last messages we received

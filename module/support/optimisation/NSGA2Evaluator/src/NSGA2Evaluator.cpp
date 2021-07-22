@@ -176,13 +176,15 @@ namespace module {
 
                 on<Trigger<OptimisationRobotPosition>, Single>().then(
                     [this](const OptimisationRobotPosition& position) {
-                        robotDistanceTravelled += std::pow(std::pow(position.value.X - robotPosition[0], 2)
-                                                               + std::pow(position.value.Y - robotPosition[1], 2),
-                                                           0.5);
-
-                        robotPosition[0] = position.value.X;
-                        robotPosition[1] = position.value.Y;
-                        robotPosition[2] = position.value.Z;
+                        if(!initialPositionSet) {
+                            initialPositionSet = true;
+                            initialRobotPosition.x() = position.value.X;
+                            initialRobotPosition.y() = position.value.Y;
+                            initialRobotPosition.z() = position.value.Z;
+                        }
+                        robotPosition.x() = position.value.X;
+                        robotPosition.y() = position.value.Y;
+                        robotPosition.z() = position.value.Z;
                     });
             }
 
@@ -350,10 +352,13 @@ namespace module {
                 // Reset our local state
                 simTimeDelta           = 0.0;
                 trialStartTime         = 0.0;
-                robotDistanceTravelled = 0.0;
-                robotPosition[0]       = 0.0;
-                robotPosition[1]       = 0.0;
-                robotPosition[2]       = 0.0;
+                robotPosition.x()      = 0.0;
+                robotPosition.y()      = 0.0;
+                robotPosition.z()      = 0.0;
+                initialPositionSet = false;
+                initialRobotPosition.x()      = 0.0;
+                initialRobotPosition.y()      = 0.0;
+                initialRobotPosition.z()      = 0.0;
                 maxFieldPlaneSway      = 0.0;
 
                 // Tell Webots to reset the world
@@ -441,6 +446,7 @@ namespace module {
             }
 
             std::vector<double> NSGA2Evaluator::CalculateScores() {
+                auto robotDistanceTravelled = std::fabs(initialRobotPosition.x() - robotPosition.x());
                 return {
                     maxFieldPlaneSway,  // For now, we want to reduce this
                     1.0 / robotDistanceTravelled  // 1/x since the NSGA2 optimiser is a minimiser
