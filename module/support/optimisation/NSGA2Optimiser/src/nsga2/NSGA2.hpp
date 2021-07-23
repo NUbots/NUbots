@@ -103,7 +103,7 @@ namespace nsga2 {
         void Selection(const std::shared_ptr<Population>& oldpop, std::shared_ptr<Population>& newpop);
         const Individual& Tournament(const Individual& ind1, const Individual& ind2) const;
         void Crossover(const Individual& parent1, const Individual& parent2, Individual& child1, Individual& child2);
-        void Realcross(const Individual& parent1, const Individual& parent2, Individual& child1, Individual& child2);
+        void SelfAdaptiveSBX(const Individual& parent1, const Individual& parent2, Individual& child1, Individual& child2);
         void Bincross(const Individual& parent1, const Individual& parent2, Individual& child1, Individual& child2);
 
     };

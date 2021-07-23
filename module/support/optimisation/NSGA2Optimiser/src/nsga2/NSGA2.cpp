@@ -247,18 +247,21 @@ namespace nsga2 {
         childPop->resetCurrentIndividualIndex();
     }
 
+    // Selection implements the tournament and crossover steps of generating the new pop
     void NSGA2::Selection(const std::shared_ptr<Population>& _oldPop, std::shared_ptr<Population>& _newPop) {
         const int oldPopSize = _oldPop->GetSize();
         if (_newPop->GetSize() != oldPopSize) {
             NUClear::log<NUClear::ERROR>("Selection error: new and old pops don't have the same size");
         }
 
+        // Set up lists, ready for random scrambling
         std::vector<int> indList1(oldPopSize), indList2(oldPopSize);
         for (int i = 0; i < oldPopSize; i++) {
             indList1[i] = i;
             indList2[i] = i;
         }
 
+        // Create random pairings
         for (int i = 0; i < oldPopSize; i++) {
             int randInt = randGen->Integer(i, oldPopSize - 1);
             std::swap(indList1[randInt], indList1[i]);
@@ -266,6 +269,7 @@ namespace nsga2 {
             std::swap(indList2[randInt], indList2[i]);
         }
 
+        // Tournament to select the best parents from the pairings, then crossover to combine their params
         for (int i = 0; i < oldPopSize; i += 4) {
             const Individual& p11 = Tournament(_oldPop->inds[indList1[i]], _oldPop->inds[indList1[i + 1]]);
             const Individual& p12 = Tournament(_oldPop->inds[indList1[i + 2]], _oldPop->inds[indList1[i + 3]]);
@@ -277,6 +281,7 @@ namespace nsga2 {
         }
     }
 
+    // Tournament decides which individual is allowed to reproduce
     const Individual& NSGA2::Tournament(const Individual& _ind1, const Individual& _ind2) const {
         const int comparison = _ind1.CheckDominance(_ind2);
         if (comparison == 1) {  // ind1 dominates ind2
@@ -294,12 +299,13 @@ namespace nsga2 {
         }
     }
 
+    // Mix the parameters of the parents
     void NSGA2::Crossover(const Individual& _parent1,
                           const Individual& _parent2,
                           Individual& _child1,
                           Individual& _child2) {
         if (realVars) {
-            Realcross(_parent1, _parent2, _child1, _child2);
+            SelfAdaptiveSBX(_parent1, _parent2, _child1, _child2);
         }
         if (binVars) {
             Bincross(_parent1, _parent2, _child1, _child2);
@@ -309,7 +315,8 @@ namespace nsga2 {
         _child2.evaluated = false;
     }
 
-    void NSGA2::Realcross(const Individual& _parent1,
+    // Self Adaptive Simulated Binary Crossover (SBX) is a particular implementation of crossover
+    void NSGA2::SelfAdaptiveSBX(const Individual& _parent1,
                           const Individual& _parent2,
                           Individual& _child1,
                           Individual& _child2) {
@@ -317,10 +324,12 @@ namespace nsga2 {
         double c1, c2;
         double alpha, beta, betaQ;
 
-        if (randGen->Realu() <= realCrossProb) {
-            realCrossCount++;
-            for (int i = 0; i < realVars; i++) {
+        if (randGen->Realu() <= realCrossProb) { // If we should crossover (determined by RNG)
+            realCrossCount++; // Keep track of the number of times we do crossover
+            for (int i = 0; i < realVars; i++) { //for each real parameter
+                // If the parameters are different
                 if (std::fabs(_parent1.reals[i] - _parent2.reals[i]) > std::numeric_limits<double>::epsilon()) {
+                    // hold the smaller param in y1, the larger param in y2
                     if (_parent1.reals[i] < _parent2.reals[i]) {
                         y1 = _parent1.reals[i];
                         y2 = _parent2.reals[i];
@@ -330,6 +339,7 @@ namespace nsga2 {
                         y2 = _parent1.reals[i];
                     }
 
+                    // keep track of the parameter limits
                     yLower = realLimits[i].first;
                     yUpper = realLimits[i].second;
 
@@ -361,12 +371,12 @@ namespace nsga2 {
                         _child1.reals[i] = c1;
                         _child2.reals[i] = c2;
                     }
-                } else {
+                } else { // If the parameters are the same, then we can just copy them
                     _child1.reals[i] = _parent1.reals[i];
                     _child2.reals[i] = _parent2.reals[i];
                 }
             }
-        } else {
+        } else { // If we shoudn't crossover (determined by RNG)
             for (int i = 0; i < realVars; i++) {
                 _child1.reals[i] = _parent1.reals[i];
                 _child2.reals[i] = _parent2.reals[i];
