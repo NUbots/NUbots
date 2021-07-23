@@ -1,16 +1,21 @@
-population_size: 48
-num_generations: 30
+population_size: 60
+max_generations: 200
 num_objectives: 2
 num_constraints: 2
 num_real_vars: 12
 seed: 7777777
 probabilities:
   real:
-    crossover: 0.8
-    mutation: 0.025
+    # Note that SBX does something like mutation as well
+    crossover: 0.9
+    # recommended nsga2 mutation probability is 1/n, where n is number of parameters
+    mutation: 0.083
 eta:
-  C: 12
-  M: 30
+  # eta_c is distribution index for simulated binary crossover (SBX)
+  # higher values of eta_c makes children more similar to parents
+  # Recommended nsga2 value is 20
+  C: 20
+  M: 20
 
 # The following values are setting the initial values and limits for the walk engine parameters.
 # Each param is the tuple [initial value, minimum, maximum]. These values are merged with the

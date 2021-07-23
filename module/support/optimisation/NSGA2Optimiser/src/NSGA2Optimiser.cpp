@@ -83,7 +83,7 @@ namespace module {
                     nsga2Algorithm.SetObjectiveCount(config["num_objectives"].as<int>());
                     nsga2Algorithm.SetContraintCount(config["num_constraints"].as<int>());
                     nsga2Algorithm.SetPopulationSize(config["population_size"].as<int>());
-                    nsga2Algorithm.SetTargetGenerations(config["num_generations"].as<int>());
+                    nsga2Algorithm.SetTargetGenerations(config["max_generations"].as<int>());
                     nsga2Algorithm.SetRealCrossoverProbability(
                         config["probabilities"]["real"]["crossover"].as<double>());
                     nsga2Algorithm.SetRealMutationProbability(config["probabilities"]["real"]["mutation"].as<double>());
