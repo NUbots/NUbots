@@ -47,7 +47,6 @@ export class WebSocket {
   volatileSend(event: string, ...args: any[]) {
     // SocketIO bug: Cannot use volatile with binary data.
     // https://github.com/socketio/socket.io/issues/3919
-    this.sioSocket /*.volatile*/
-      .emit(event, ...args)
+    this.sioSocket.emit(event, ...args)
   }
 }
