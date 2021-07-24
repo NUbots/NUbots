@@ -19,8 +19,10 @@
 #ifndef MODULE_EXTENSION_DIRECTOR_HPP
 #define MODULE_EXTENSION_DIRECTOR_HPP
 
+#include <memory>
 #include <nuclear>
 #include <typeindex>
+#include <vector>
 
 #include "provider/ProviderGroup.hpp"
 
@@ -29,6 +31,12 @@
 namespace module::extension {
 
     class Director : public NUClear::Reactor {
+    public:
+        /// A task queue holds tasks in a provider that are waiting to be executed by that group
+        using TaskQueue = std::vector<std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>>;
+        /// A task pack is the result of a set of tasks emitted by a provider that should be run together
+        using TaskPack = std::vector<std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>>;
+
     private:
         /**
          * Adds a Provider for a type
@@ -80,6 +88,43 @@ namespace module::extension {
         [[nodiscard]] bool challenge_priority(
             const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& incumbent,
             const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& challenger);
+
+        /**
+         * Remove the provided task from the Director.
+         *
+         * This function also deals with all the consequences of removing the task including looking to see if a queued
+         * task can now be run.
+         *
+         * @param task the task to remove from the Director
+         */
+        void remove_task(const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& task);
+
+        /**
+         * Reevaluates all of the tasks that are queued to execute on a provider group.
+         *
+         * Each of the tasks in the queue are waiting to use this provider group but cannot for some reason or another.
+         * In order to determine if they can now run on the queue we need to look at each queued task and inspect if the
+         * provider that created them can now run. We do this by simply trying to run them all again.
+         *
+         * @param group the group whose queue we want to reevaluate
+         */
+        void reevaluate_queue(provider::ProviderGroup& group);
+
+        /**
+         * Looks at all the tasks that are in the pack and determines if they should run, and if so runs them.
+         *
+         * This function will ensure that if this pack is to be executed it can be executed as a whole. That means that
+         * all of the non optional tasks in it are able to run now given the state of the system. If the system is
+         * unable to run due to priority or due to a when condition not met it will not run any of the tasks in this
+         * pack, but enqueue them on the relevant providers.
+         *
+         * In the event that `When` conditions needs to be met by this pack and it has sufficient priority, it may also
+         * place this provider group into a "PROXYING" state whereby it forces another provider group into a state where
+         * it will make the system reach the causing it requires.
+         *
+         * @param pack the task pack that represents the queued tasks
+         */
+        void run_task_pack(const TaskPack& pack);
 
     public:
         /// Called by the powerplant to build and setup the Director reactor.
