@@ -33,7 +33,7 @@ compiler.watch({}, (err, stats) => {
     process.stderr.write(err + '\n')
     return
   }
-  process.stdout.write(stats.toString({ colors: true }) + '\n')
+  stats && process.stdout.write(stats.toString({ colors: true }) + '\n')
 
   if (!startedServer) {
     nodemon({
