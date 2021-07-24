@@ -41,7 +41,7 @@ def register(command):
         default=True,
         help="Disables cleaning the build volume before compiling",
     )
-    #
+
     build_subcommand.add_argument(
         "-j", "--jobs", dest="jobs", action="store", help="Dictates the number of jobs to run in parallel"
     )
@@ -105,7 +105,11 @@ def exec_build(target, roles, clean, jobs):
 
     # Compiles code for correct target
     print("Building code...")
-    exit_code = subprocess.run(["./b", "build", "-j", jobs]).returncode
+    build_command = ["./b", "build"]
+    # Check if a -j value has been given
+    if jobs != None:
+        build_command.extend(["-j", jobs])
+    exit_code = subprocess.run(build_command).returncode
     if exit_code != 0:
         cprint(f"unable to build code, exit code {exit_code}", "red", attrs=["bold"])
         sys.exit(exit_code)
@@ -220,9 +224,7 @@ def exec_push():
         sys.exit(exit_code)
 
 
-def run(
-    sub_command, jobs=multiprocessing.cpu_count(), clean=False, roles=None, role=None, target="g4dnxlarge", **kwargs
-):
+def run(sub_command, jobs, clean=False, roles=None, role=None, target="g4dnxlarge", **kwargs):
     if sub_command == "build":
         exec_build(target, roles, clean, jobs)
     elif sub_command == "push":
