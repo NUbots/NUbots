@@ -7,7 +7,7 @@ import { DashboardRobotModel } from './dashboard_robot/model'
 import { FieldModel } from './field/model'
 
 export class DashboardModel {
-  @observable.ref private robotModels: RobotModel[]
+  @observable private robotModels: RobotModel[]
 
   constructor(robotModels: RobotModel[]) {
     this.robotModels = robotModels
