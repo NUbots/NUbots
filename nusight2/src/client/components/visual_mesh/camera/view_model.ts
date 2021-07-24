@@ -77,24 +77,22 @@ export class CameraViewModel {
     return scene
   }
 
-  private visualMesh = createTransformer(
-    (mesh: VisualMesh): Object3D => {
-      const meshMaterial = this.meshMaterial
-      meshMaterial.uniforms.image.value = this.decoder.texture
-      meshMaterial.uniforms.dimensions.value = new Vector2(
-        this.model.image!.width,
-        this.model.image!.height,
-      )
+  private visualMesh = createTransformer((mesh: VisualMesh): Object3D => {
+    const meshMaterial = this.meshMaterial
+    meshMaterial.uniforms.image.value = this.decoder.texture
+    meshMaterial.uniforms.dimensions.value = new Vector2(
+      this.model.image!.width,
+      this.model.image!.height,
+    )
 
-      // The UV mapped mesh
-      const m = new Mesh(this.meshGeometry(mesh), meshMaterial)
-      m.frustumCulled = false
+    // The UV mapped mesh
+    const m = new Mesh(this.meshGeometry(mesh), meshMaterial)
+    m.frustumCulled = false
 
-      const obj = new Object3D()
-      obj.add(m)
-      return obj
-    },
-  )
+    const obj = new Object3D()
+    obj.add(m)
+    return obj
+  })
 
   @computed
   get meshMaterial(): RawShaderMaterial {

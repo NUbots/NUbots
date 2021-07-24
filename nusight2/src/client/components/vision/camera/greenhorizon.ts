@@ -12,11 +12,15 @@ import { GreenHorizon } from './model'
 import { CameraParams } from './model'
 
 export class GreenHorizonViewModel {
-  constructor(
-    private readonly greenHorizon: GreenHorizon,
-    private readonly params: CameraParams,
-    private readonly lineProjection: LineProjection,
-  ) {}
+  private readonly greenHorizon: GreenHorizon
+  private readonly params: CameraParams
+  private readonly lineProjection: LineProjection
+
+  constructor(greenHorizon: GreenHorizon, params: CameraParams, lineProjection: LineProjection) {
+    this.greenHorizon = greenHorizon
+    this.params = params
+    this.lineProjection = lineProjection
+  }
 
   static of(
     canvas: Canvas,
