@@ -43,7 +43,7 @@ def register(command):
     )
     #
     build_subcommand.add_argument(
-        "-j", "--jobs", dest="jobs", action="store", help="Dictates the number of jobs to run in parrallel"
+        "-j", "--jobs", dest="jobs", action="store", help="Dictates the number of jobs to run in parallel"
     )
 
     push_subcommand = subparsers.add_parser(
