@@ -355,7 +355,6 @@ namespace module {
                 robotPosition.x()      = 0.0;
                 robotPosition.y()      = 0.0;
                 robotPosition.z()      = 0.0;
-                initialPositionSet = false;
                 initialRobotPosition.x()      = 0.0;
                 initialRobotPosition.y()      = 0.0;
                 initialRobotPosition.z()      = 0.0;
