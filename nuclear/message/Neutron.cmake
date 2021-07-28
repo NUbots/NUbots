@@ -215,8 +215,9 @@ add_custom_command(
   OUTPUT ${py_messages}
   BYPRODUCTS "${PROJECT_BINARY_DIR}/python/nuclear/messages.txt"
   COMMAND
-    ${PYTHON_EXECUTABLE} ARGS "${CMAKE_CURRENT_SOURCE_DIR}/generate_python_messages.py" "${PROJECT_BINARY_DIR}/nuclear/message/python"
-    "${PROJECT_BINARY_DIR}/python/nuclear" "${PROJECT_BINARY_DIR}/python/nuclear/messages.txt"
+    ${PYTHON_EXECUTABLE} ARGS "${CMAKE_CURRENT_SOURCE_DIR}/generate_python_messages.py"
+    "${PROJECT_BINARY_DIR}/nuclear/message/python" "${PROJECT_BINARY_DIR}/python/nuclear"
+    "${PROJECT_BINARY_DIR}/python/nuclear/messages.txt"
   WORKING_DIRECTORY ${message_binary_dir}
   DEPENDS ${src} ${python_src}
   COMMENT "Generating python sub messages"
@@ -240,6 +241,7 @@ target_link_libraries(nuclear_message PUBLIC Eigen3::Eigen)
 target_link_libraries(nuclear_message PUBLIC pybind11::pybind11)
 # TODO(KipHamiltons) Don't know about this one
 target_link_libraries(nuclear_message PUBLIC pybind11::module)
+target_link_libraries(nuclear_message PUBLIC ${PYTHON_LIBRARIES})
 target_include_directories(nuclear_message PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_include_directories(nuclear_message PUBLIC ${nt_out})
 
