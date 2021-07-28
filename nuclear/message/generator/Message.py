@@ -518,14 +518,18 @@ class Message:
                 // Shadow our context with our new context and declare our subclasses
                 auto& context = shadow;
 
+                // Enums, if there are any:
             {enums}
 
+                // Submessages, if there are any:
             {submessages}
 
                 // Declare the functions on our class (which may use the ones in the subclasses)
                 context
             {constructor}
+
             {message_members};
+
                 context.def_static("include_path", [] {{
                     return "{include_path}";
                 }});
