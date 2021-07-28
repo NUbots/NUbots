@@ -4,7 +4,7 @@ import sys
 
 from generator.textutil import dedent, indent
 
-# Get our file we are outputting too
+# Get our file we are outputting to
 base_file = sys.argv[1]
 
 # Get our root message directory
@@ -36,6 +36,7 @@ for dep_file in sys.argv[3:]:
 # Write our file
 with open(base_file, "w") as f:
 
+    # TODO: {function_declarations} and {function_calls} are empty atm. These need to be fixed.
     f.write(
         dedent(
             """\
