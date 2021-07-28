@@ -28,7 +28,7 @@ namespace module::motion {
     /**
      * Executes a HeadController action.
      *
-     * @author Jake Fountain
+     * @author Jade Fountain
      */
     class HeadController : public NUClear::Reactor {
     private:

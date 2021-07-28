@@ -10,11 +10,9 @@ export class RobotLabelModel {
 
   constructor(private robotModel: RobotModel) {}
 
-  static of = createTransformer(
-    (robotModel: RobotModel): RobotLabelModel => {
-      return new RobotLabelModel(robotModel)
-    },
-  )
+  static of = createTransformer((robotModel: RobotModel): RobotLabelModel => {
+    return new RobotLabelModel(robotModel)
+  })
 
   @computed
   get stats() {

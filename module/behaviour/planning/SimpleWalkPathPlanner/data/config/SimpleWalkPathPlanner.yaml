@@ -1,3 +1,5 @@
+log_level: WARN
+
 forwardSpeed: 0.01
 sideSpeed: 0.01
 turnSpeed : 0.08

@@ -3,9 +3,7 @@ import { NUClearNetPacket } from 'nuclearnet.js'
 import { SeededRandom } from '../../../shared/base/random/seeded_random'
 import { Encoder } from '../nuclearnet_proxy_parser'
 import { Decoder } from '../nuclearnet_proxy_parser'
-import { TYPES } from '../nuclearnet_proxy_parser_socketio'
-import { Packet } from '../nuclearnet_proxy_parser_socketio'
-import { EventPacket } from '../nuclearnet_proxy_parser_socketio'
+import { Packet, PacketType } from 'socket.io-parser'
 
 describe('NUClearNetProxyParser', () => {
   let e: Encoder
@@ -34,28 +32,28 @@ describe('NUClearNetProxyParser', () => {
     const packets: Packet[] = [
       {
         nsp: '/',
-        type: TYPES.CONNECT,
+        type: PacketType.CONNECT,
       },
       {
         nsp: '/',
-        type: TYPES.DISCONNECT,
+        type: PacketType.DISCONNECT,
       },
       {
         nsp: '/',
-        type: TYPES.ACK,
+        type: PacketType.ACK,
         data: [],
         id: randomPacketId(),
       },
       {
         nsp: '/',
-        type: TYPES.ERROR,
+        type: PacketType.CONNECT_ERROR,
         data: 'Oh no!',
       },
     ]
 
     // Encode all the packets
     const wire: any[] = []
-    packets.forEach(p => e.encode(p, (chunks: any[]) => wire.push(...chunks)))
+    packets.forEach(p => wire.push(...e.encode(p)))
 
     // Decode all the packets
     const decoded: any[] = []
@@ -69,7 +67,7 @@ describe('NUClearNetProxyParser', () => {
     const packets: Packet[] = [
       {
         nsp: '/',
-        type: TYPES.EVENT,
+        type: PacketType.EVENT,
         data: [
           'nuclear_join',
           {
@@ -82,7 +80,7 @@ describe('NUClearNetProxyParser', () => {
       },
       {
         nsp: '/',
-        type: TYPES.EVENT,
+        type: PacketType.EVENT,
         data: [
           'nuclear_leave',
           {
@@ -95,25 +93,25 @@ describe('NUClearNetProxyParser', () => {
       },
       {
         nsp: '/',
-        type: TYPES.EVENT,
+        type: PacketType.EVENT,
         data: ['nuclear_connect', {}],
         id: randomPacketId(),
       },
       {
         nsp: '/',
-        type: TYPES.EVENT,
+        type: PacketType.EVENT,
         data: ['nuclear_disconnect'],
         id: randomPacketId(),
       },
       {
         nsp: '/',
-        type: TYPES.EVENT,
+        type: PacketType.EVENT,
         data: ['listen', 'message.input.Image', randomEventId()],
         id: randomPacketId(),
       },
       {
         nsp: '/',
-        type: TYPES.EVENT,
+        type: PacketType.EVENT,
         data: ['unlisten', randomEventId()],
         id: randomPacketId(),
       },
@@ -121,7 +119,7 @@ describe('NUClearNetProxyParser', () => {
 
     // Encode all the packets
     const wire: any[] = []
-    packets.forEach(p => e.encode(p, (chunks: any[]) => wire.push(...chunks)))
+    packets.forEach(p => wire.push(...e.encode(p)))
 
     // Decode all the packets
     const decoded: any[] = []
@@ -158,9 +156,9 @@ describe('NUClearNetProxyParser', () => {
     ]
 
     const packets: Packet[] = nuclearPackets.map(
-      (p): EventPacket => ({
+      (p): Packet => ({
         nsp: '/',
-        type: TYPES.EVENT,
+        type: PacketType.EVENT,
         data: ['message.input.Image', p],
         id: randomPacketId(),
       }),
@@ -168,7 +166,7 @@ describe('NUClearNetProxyParser', () => {
 
     // Encode all the packets
     const wire: any[] = []
-    packets.forEach(p => e.encode(p, (chunks: any[]) => wire.push(...chunks)))
+    packets.forEach(p => wire.push(...e.encode(p)))
 
     // Decode all the packets
     const decoded: any[] = []

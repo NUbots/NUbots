@@ -1,9 +1,8 @@
 import Emitter from 'component-emitter'
 import { NUClearNetPacket } from 'nuclearnet.js'
 import { NUClearNetSend } from 'nuclearnet.js'
-
-import { Packet } from './nuclearnet_proxy_parser_socketio'
-import { TYPES } from './nuclearnet_proxy_parser_socketio'
+import { PacketType } from 'socket.io-parser'
+import { Packet } from 'socket.io-parser'
 
 /**
  * These encoder/decoders are used to improve the performance when transporting NUClearNet packets.
@@ -18,10 +17,10 @@ import { TYPES } from './nuclearnet_proxy_parser_socketio'
  */
 
 export class Encoder {
-  encode(packet: Packet, callback: (wire: any[]) => void) {
+  encode(packet: Packet) {
     switch (packet.type) {
-      case TYPES.EVENT:
-      case TYPES.BINARY_EVENT: {
+      case PacketType.EVENT:
+      case PacketType.BINARY_EVENT: {
         const {
           nsp,
           data: [eventName],
@@ -35,17 +34,14 @@ export class Encoder {
           case 'nuclear_disconnect':
           case 'listen':
           case 'unlisten':
-            return callback([JSON.stringify(packet)])
+            return [JSON.stringify(packet)]
 
           case 'packet': {
             const {
               id,
               data: [key, { target, type, payload, reliable }],
             } = packet
-            return callback([
-              JSON.stringify({ id, nsp, key, header: { target, type, reliable } }),
-              payload,
-            ])
+            return [JSON.stringify({ id, nsp, key, header: { target, type, reliable } }), payload]
           }
 
           // For NUClearNet packets, we send the payload separately to avoid array slicing later
@@ -54,18 +50,13 @@ export class Encoder {
               id,
               data: [key, { peer, hash, payload, reliable }],
             } = packet
-
             // Send the header as a JSON and then the payload as binary
-            return callback([
-              JSON.stringify({ id, nsp, key, header: { peer, reliable } }),
-              hash,
-              payload,
-            ])
+            return [JSON.stringify({ id, nsp, key, header: { peer, reliable } }), hash, payload]
           }
         }
       }
       default:
-        return callback([JSON.stringify(packet)])
+        return [JSON.stringify(packet)]
     }
   }
 }
@@ -74,7 +65,7 @@ export class Decoder extends Emitter {
   private state: number = 0
   private nuclearPacket?: {
     nsp: string
-    type: TYPES.EVENT
+    type: PacketType.EVENT
     data: [string, Partial<NUClearNetPacket> | Partial<NUClearNetSend>]
     id: number
   }
@@ -93,7 +84,7 @@ export class Decoder extends Emitter {
         // This is a binary packet header
         this.nuclearPacket = {
           nsp: parsed.nsp,
-          type: TYPES.EVENT,
+          type: PacketType.EVENT,
           id: parsed.id,
           data: [parsed.key, parsed.header],
         }

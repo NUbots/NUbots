@@ -24,10 +24,10 @@ namespace utility::motion::splines {
          * Simple point struture
          */
         struct Point {
-            Scalar time;
-            Scalar position;
-            Scalar velocity;
-            Scalar acceleration;
+            Scalar time         = 0;
+            Scalar position     = 0;
+            Scalar velocity     = 0;
+            Scalar acceleration = 0;
         };
 
         void reset() {
@@ -38,10 +38,10 @@ namespace utility::motion::splines {
         /**
          * Add a new point with its time, position value, velocity and acceleration
          */
-        void addPoint(Scalar time,
-                      Scalar position,
-                      Scalar velocity     = static_cast<Scalar>(0),
-                      Scalar acceleration = static_cast<Scalar>(0)) {
+        void addPoint(const Scalar& time,
+                      const Scalar& position,
+                      const Scalar& velocity     = static_cast<Scalar&>(0),
+                      const Scalar& acceleration = static_cast<Scalar&>(0)) {
             points.push_back({time, position, velocity, acceleration});
             computeSplines();
         }
@@ -49,11 +49,11 @@ namespace utility::motion::splines {
         /**
          * Access to points container
          */
-        const std::vector<Point>& getPoints() const {
+        [[nodiscard]] const std::vector<Point>& getPoints() const {
             return points;
         }
 
-        std::vector<Point>& getPoints() {
+        [[nodiscard]] std::vector<Point>& getPoints() {
             return points;
         }
 
@@ -71,7 +71,7 @@ namespace utility::motion::splines {
             });
 
             for (size_t i = 1; i < points.size(); i++) {
-                Scalar time = points[i].time - points[i - 1].time;
+                const Scalar time = points[i].time - points[i - 1].time;
                 if (time > static_cast<Scalar>(0.00001)) {
                     Spline<Scalar>::splines.push_back({polynomFit(time,
                                                                   points[i - 1].position,
@@ -91,24 +91,24 @@ namespace utility::motion::splines {
          * Inherit Load Points
          */
         virtual void importCallBack() override {
-            size_t size = Spline<Scalar>::splines.size();
+            const size_t size = Spline<Scalar>::splines.size();
             if (size == 0) {
                 return;
             }
 
-            Scalar tBegin = Spline<Scalar>::splines.front().min;
+            const Scalar tBegin = Spline<Scalar>::splines.front().min;
             points.push_back(
                 {tBegin, Spline<Scalar>::pos(tBegin), Spline<Scalar>::vel(tBegin), Spline<Scalar>::acc(tBegin)});
 
             for (size_t i = 1; i < size; i++) {
-                Scalar t1   = Spline<Scalar>::splines[i - 1].max;
-                Scalar t2   = Spline<Scalar>::splines[i].min;
-                Scalar pos1 = Spline<Scalar>::pos(t1);
-                Scalar vel1 = Spline<Scalar>::vel(t1);
-                Scalar acc1 = Spline<Scalar>::acc(t1);
-                Scalar pos2 = Spline<Scalar>::pos(t2);
-                Scalar vel2 = Spline<Scalar>::vel(t2);
-                Scalar acc2 = Spline<Scalar>::acc(t2);
+                const Scalar t1   = Spline<Scalar>::splines[i - 1].max;
+                const Scalar t2   = Spline<Scalar>::splines[i].min;
+                const Scalar pos1 = Spline<Scalar>::pos(t1);
+                const Scalar vel1 = Spline<Scalar>::vel(t1);
+                const Scalar acc1 = Spline<Scalar>::acc(t1);
+                const Scalar pos2 = Spline<Scalar>::pos(t2);
+                const Scalar vel2 = Spline<Scalar>::vel(t2);
+                const Scalar acc2 = Spline<Scalar>::acc(t2);
 
                 if (std::abs(t2 - t1) < static_cast<Scalar>(0.0001)
                     && std::abs(pos2 - pos1) < static_cast<Scalar>(0.0001)
@@ -122,7 +122,7 @@ namespace utility::motion::splines {
                 }
             }
 
-            Scalar tEnd = Spline<Scalar>::splines.back().max;
+            const Scalar tEnd = Spline<Scalar>::splines.back().max;
             points.push_back({tEnd, Spline<Scalar>::pos(tEnd), Spline<Scalar>::vel(tEnd), Spline<Scalar>::acc(tEnd)});
         }
 
@@ -130,21 +130,26 @@ namespace utility::motion::splines {
         /**
          * Points container
          */
-        std::vector<Point> points;
+        std::vector<Point> points{};
 
         /**
          * Fit a polynom between 0 and t with given pos, vel and acc initial and final conditions
          */
-        Polynom<Scalar>
-            polynomFit(Scalar t, Scalar pos1, Scalar vel1, Scalar acc1, Scalar pos2, Scalar vel2, Scalar acc2) const {
+        [[nodiscard]] Polynom<Scalar> polynomFit(const Scalar& t,
+                                                 const Scalar& pos1,
+                                                 const Scalar& vel1,
+                                                 const Scalar& acc1,
+                                                 const Scalar& pos2,
+                                                 const Scalar& vel2,
+                                                 const Scalar& acc2) const {
             if (t <= static_cast<Scalar>(0.00001)) {
                 throw std::logic_error("SmoothSpline invalid spline interval");
             }
-            Scalar t2 = t * t;
-            Scalar t3 = t2 * t;
-            Scalar t4 = t3 * t;
-            Scalar t5 = t4 * t;
-            Polynom<Scalar> p;
+            const Scalar t2 = t * t;
+            const Scalar t3 = t2 * t;
+            const Scalar t4 = t3 * t;
+            const Scalar t5 = t4 * t;
+            Polynom<Scalar> p{};
             p.getCoefs().resize(6);
             p.getCoefs()[0] = pos1;
             p.getCoefs()[1] = vel1;

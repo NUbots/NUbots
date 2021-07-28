@@ -32,12 +32,12 @@ class Encoder:
         # Get the current position so we can add it to the index
         offset = self._file.tell()
 
-        # If we have a id field, we can use them as the subtype for the index
-        subtype = 0
+        # If we have a id field, we can use them as the id for the index
+        id = 0
         if hasattr(message, "id"):
             m_id = message.id
             if isinstance(m_id, int):
-                subtype = m_id
+                id = m_id
 
         # If this type has a timestamp field, use it instead of the message timestamp for the index
         # and make it nanoseconds
@@ -47,8 +47,8 @@ class Encoder:
         else:
             index_timestamp = timestamp * 1000
 
-        # Write the type_hash, subtype, timestamp, offset, and size into the index
-        self._index.write(struct.pack("<QIQQI", pb_hash, subtype, index_timestamp, offset, len(data) + 23))
+        # Write the type_hash, id, timestamp, offset, and size into the index
+        self._index.write(struct.pack("<QIQQI", pb_hash, id, index_timestamp, offset, len(data) + 23))
 
         # Header
         self._file.write(b"\xE2\x98\xA2")

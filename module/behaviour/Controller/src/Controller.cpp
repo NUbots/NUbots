@@ -192,8 +192,11 @@ namespace module::behaviour {
                         }
 
                         // Add to our waypoints
-                        waypoints->targets.push_back(
-                            {command.time, command.id, command.position, command.gain, command.torque});
+                        waypoints->targets.emplace_back(command.time,
+                                                        command.id,
+                                                        command.position,
+                                                        command.gain,
+                                                        command.torque);
 
                         // Dirty hack the waypoint
                         command.source = 0;
