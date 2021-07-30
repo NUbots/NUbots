@@ -50,7 +50,7 @@ function(NUCLEAR_MODULE)
   elseif(MODULE_LANGUAGE STREQUAL "PYTHON")
 
     find_package(PythonInterp 3 REQUIRED)
-    find_package(pybind11 REQUIRED)
+    find_package(pybind11 CONFIG REQUIRED)
     find_package(PythonLibsNew 3 REQUIRED)
 
     # Now copy all our python files across to the python directory of output
