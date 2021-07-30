@@ -42,4 +42,5 @@ nuclear_role(
   motion::ScriptEngine
   motion::QuinticWalk
   motion::HeadController
+  dummy::PyModule
 )
