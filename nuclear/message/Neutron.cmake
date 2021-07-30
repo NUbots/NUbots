@@ -145,8 +145,10 @@ foreach(proto ${message_protobufs})
 
   # Add to the respective outputs
   list(APPEND protobuf_src "${pb}.pb.cc" "${pb}.pb.h")
-  list(APPEND neutron_src "${nt}.cpp" "${nt}.hpp" "${nt}.py.cpp")
+  list(APPEND bindings_src "${nt}.py.cpp")
+  list(APPEND neutron_src "${nt}.cpp" "${nt}.hpp" "${nt}.py.cpp") # TODO(Kip): see if we need ${nt}.py.cpp here at all
   list(APPEND python_src "${py}_pb2.py")
+  set(neutron_names "${neutron_names} ${nt}")
 
 endforeach(proto ${message_protobufs})
 
@@ -164,12 +166,10 @@ list(APPEND neutron_src "${nt_out}/message/reflection.hpp")
 # Build our outer python binding wrapper class
 add_custom_command(
   OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/outer_python_binding.cpp"
-  COMMAND
-    ${PYTHON_EXECUTABLE} ARGS "${CMAKE_CURRENT_SOURCE_DIR}/build_outer_python_binding.py"
-    "${CMAKE_CURRENT_BINARY_DIR}/outer_python_binding.cpp" "${PROJECT_SOURCE_DIR}/${NUCLEAR_MESSAGE_DIR}"
-    ${dependencies}
-  WORKING_DIRECTORY ${message_binary_dir}
-  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/build_outer_python_binding.py" "${source_depends}"
+  COMMAND ${PYTHON_EXECUTABLE} ARGS "${CMAKE_CURRENT_SOURCE_DIR}/build_outer_python_binding.py"
+          "${CMAKE_CURRENT_BINARY_DIR}/outer_python_binding.cpp" "${nt_out}" "${neutron_names}"
+  WORKING_DIRECTORY ${nt_out}
+  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/build_outer_python_binding.py" "${source_depends}" "${bindings_src}"
   COMMENT "Building outer python message binding"
 )
 
@@ -216,7 +216,7 @@ add_custom_command(
     ${PYTHON_EXECUTABLE} ARGS "${CMAKE_CURRENT_SOURCE_DIR}/generate_python_messages.py"
     "${PROJECT_BINARY_DIR}/nuclear/message/python" "${PROJECT_BINARY_DIR}/python/nuclear"
     "${PROJECT_BINARY_DIR}/python/nuclear/messages.txt"
-  WORKING_DIRECTORY ${message_binary_dir}
+  WORKING_DIRECTORY ${nt_out}
   DEPENDS ${src} ${python_src}
   COMMENT "Generating python sub messages"
 )
