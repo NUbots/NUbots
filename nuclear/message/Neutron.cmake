@@ -200,6 +200,7 @@ endmacro(SUBDIRLIST)
 # Generate a list of all of the python message files we will be generating This allows us to tell cmake at configure
 # time what we will be generating at build time This should also allow us to set up proper dependencies and clean up
 # generated files at clean time
+# TODO(Kip): everything related to this `py_messages` variable appears to be broken atm.
 set(py_messages "")
 list(REMOVE_DUPLICATES python_src)
 

@@ -6,6 +6,9 @@ import sys
 
 import google.protobuf.message
 
+# TODO(Kip): This file is broken. See `messages.txt` in the build directory. It's full of duplicates. It's created
+# inside this file. We need to fix the custom command which calls this, and we need to fix this.
+
 
 # Act as a file so we can still use a with statement
 class Dummysink(object):
