@@ -169,9 +169,7 @@ add_custom_command(
     "${CMAKE_CURRENT_BINARY_DIR}/outer_python_binding.cpp" "${PROJECT_SOURCE_DIR}/${NUCLEAR_MESSAGE_DIR}"
     ${dependencies}
   WORKING_DIRECTORY ${message_binary_dir}
-  # * Adding ${dependencies} to the next line makes it think that 'shared/message /usr/local/etc.../timestamp.proto'
-  # * is a dependency, even though ${dependencies} doesn't have 'shared/message' in it at all... very strange
-  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/build_outer_python_binding.py"
+  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/build_outer_python_binding.py" "${source_depends}"
   COMMENT "Building outer python message binding"
 )
 
