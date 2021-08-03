@@ -128,37 +128,35 @@ export class DashboardRobotModel {
     this.walkCommand = walkCommand
   }
 
-  static of = memoize(
-    (robot: RobotModel): DashboardRobotModel => {
-      return new DashboardRobotModel(robot, {
-        ballColor: '#ff9800',
-        ballCovariance: Matrix2.of(),
-        ballPosition: Vector2.of(),
-        ballSightColor: '#4DB6AC',
-        battery: -1,
-        behaviourState: State.UNKNOWN,
-        camera: Transform.of(),
-        gameMode: Mode.UNKNOWN_MODE,
-        gamePhase: Phase.UNKNOWN_PHASE,
-        playerId: -1,
-        kickTarget: Vector2.of(),
-        kickTargetColor: '#00796B',
-        lastCameraImage: 0,
-        lastSeenBall: 0,
-        lastSeenGoal: 0,
-        penaltyReason: PenaltyReason.UNKNOWN_PENALTY_REASON,
-        robotColor: '#015457',
-        robotPosition: Vector3.of(),
-        robotPositionCovariance: Matrix3.of(),
-        roleName: '',
-        textColor: '#ffffff',
-        time: BrowserSystemClock.now(),
-        voltage: -1,
-        walkCommand: Vector3.of(),
-        walkPathPlan: [],
-      })
-    },
-  )
+  static of = memoize((robot: RobotModel): DashboardRobotModel => {
+    return new DashboardRobotModel(robot, {
+      ballColor: '#ff9800',
+      ballCovariance: Matrix2.of(),
+      ballPosition: Vector2.of(),
+      ballSightColor: '#4DB6AC',
+      battery: -1,
+      behaviourState: State.UNKNOWN,
+      camera: Transform.of(),
+      gameMode: Mode.UNKNOWN_MODE,
+      gamePhase: Phase.UNKNOWN_PHASE,
+      playerId: -1,
+      kickTarget: Vector2.of(),
+      kickTargetColor: '#00796B',
+      lastCameraImage: 0,
+      lastSeenBall: 0,
+      lastSeenGoal: 0,
+      penaltyReason: PenaltyReason.UNKNOWN_PENALTY_REASON,
+      robotColor: '#015457',
+      robotPosition: Vector3.of(),
+      robotPositionCovariance: Matrix3.of(),
+      roleName: '',
+      textColor: '#ffffff',
+      time: BrowserSystemClock.now(),
+      voltage: -1,
+      walkCommand: Vector3.of(),
+      walkPathPlan: [],
+    })
+  })
 
   @computed
   get connected(): boolean {

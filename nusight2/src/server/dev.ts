@@ -4,7 +4,7 @@ import express from 'express'
 import http from 'http'
 import minimist from 'minimist'
 import favicon from 'serve-favicon'
-import sio from 'socket.io'
+import { Server } from 'socket.io'
 import webpack from 'webpack'
 import webpackDevMiddleware from 'webpack-dev-middleware'
 import * as path from 'path'
@@ -37,7 +37,7 @@ const nuclearnetAddress = args.address || '10.1.255.255'
 
 const app = express()
 const server = http.createServer(app)
-const sioNetwork = sio(server, { parser: NUClearNetProxyParser } as any)
+const sioNetwork = new Server(server, { parser: NUClearNetProxyParser })
 
 // Initialize socket.io namespace immediately to catch reconnections.
 WebSocketProxyNUClearNetServer.of(WebSocketServer.of(sioNetwork.of('/nuclearnet')), {

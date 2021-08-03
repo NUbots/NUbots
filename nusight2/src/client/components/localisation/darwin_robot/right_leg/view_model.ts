@@ -17,11 +17,9 @@ import RightUpperLegConfig from './config/right_upper_leg.json'
 export class RightLegViewModel {
   constructor(private model: LocalisationRobotModel) {}
 
-  static of = createTransformer(
-    (model: LocalisationRobotModel): RightLegViewModel => {
-      return new RightLegViewModel(model)
-    },
-  )
+  static of = createTransformer((model: LocalisationRobotModel): RightLegViewModel => {
+    return new RightLegViewModel(model)
+  })
 
   @computed
   get rightLeg() {

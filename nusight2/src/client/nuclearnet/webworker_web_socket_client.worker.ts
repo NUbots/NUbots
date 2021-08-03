@@ -21,7 +21,16 @@ const findBuffers = (obj: any): ArrayBuffer[] => {
   return buffers
 }
 
-addEventListener('message', (e: MessageEvent) => {
+function onMessage(cb: (e: MessageEvent) => void) {
+  // Disable this file from having a side-effect when imported in node (e.g. in jest tests)
+  // Until we can use workers from node, this will error. Don't run unless addEventListener is defined.
+  // https://webpack.js.org/guides/web-workers/
+  if (typeof addEventListener != 'undefined') {
+    addEventListener('message', cb)
+  }
+}
+
+onMessage((e: MessageEvent) => {
   switch (e.data.command) {
     case 'construct': {
       const { uri, opts } = e.data
@@ -97,4 +106,4 @@ addEventListener('message', (e: MessageEvent) => {
   }
 })
 
-export default ({} as any) as new () => Worker
+export default {} as any as new () => Worker
