@@ -107,7 +107,7 @@ def exec_build(target, roles, clean, jobs):
     print("Building code...")
     build_command = ["./b", "build"]
     # Check if a -j value has been given
-    if jobs != None:
+    if jobs:
         build_command.extend(["-j", jobs])
     exit_code = subprocess.run(build_command).returncode
     if exit_code != 0:
