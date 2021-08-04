@@ -29,6 +29,7 @@
 #include "utility/support/yaml_expression.hpp"
 
 using utility::support::Expression;
+using utility::support::resolve_expression;
 
 
 TEST_CASE("Test the UKF", "[utility][math][filter][UKF]") {
@@ -45,12 +46,9 @@ TEST_CASE("Test the UKF", "[utility][math][filter][UKF]") {
     const double deltaT = config["parameters"]["delta_t"].as<Expression>();
 
     // Resolve the Expression types into actual types
-    const std::vector<Eigen::Vector2d> true_state(state.begin(), state.end());
-    std::vector<Eigen::Matrix<double, 1, 1>> measurements;
-    measurements.resize(measures.size());
-    std::transform(measures.begin(), measures.end(), measurements.begin(), [](const double& a) {
-        return Eigen::Matrix<double, 1, 1>(a);
-    });
+    const std::vector<Eigen::Vector2d> true_state = resolve_expression<Eigen::Vector2d>(config["true_state"]);
+    const std::vector<Eigen::Matrix<double, 1, 1>> measurements =
+        resolve_expression<Eigen::Matrix<double, 1, 1>, double>(config["measurements"]);
 
     // Make sure the input data is sane
     REQUIRE(true_state.size() == measurements.size());
@@ -133,14 +131,9 @@ TEST_CASE("Test the ParticleFilter", "[utility][math][filter][ParticleFilter]") 
     const int number_of_particles = config["parameters"]["num_particles"].as<Expression>();
 
     // Resolve the Expression types into actual types
-    std::vector<Eigen::Vector2d> true_state;
-    for (const auto& state : config["true_state"].as<std::vector<Expression>>()) {
-        true_state.push_back(state);
-    }
-    std::vector<Eigen::Matrix<double, 1, 1>> measurements;
-    for (const auto& measurement : config["measurements"].as<std::vector<double>>()) {
-        measurements.emplace_back(measurement);
-    }
+    const std::vector<Eigen::Vector2d> true_state = resolve_expression<Eigen::Vector2d>(config["true_state"]);
+    const std::vector<Eigen::Matrix<double, 1, 1>> measurements =
+        resolve_expression<Eigen::Matrix<double, 1, 1>, double>(config["measurements"]);
 
     // Make sure the input data is sane
     REQUIRE(true_state.size() == measurements.size());
