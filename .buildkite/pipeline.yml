@@ -87,7 +87,7 @@ steps:
     plugins:
       - ./.buildkite/NUsight2/plugins/cache: ~
       - docker#v3.5.0:
-          image: "node:12"
+          image: "node:14"
           always-pull: true
           propagate-uid-gid: true
           environment:
@@ -101,7 +101,7 @@ steps:
     plugins:
       - ./.buildkite/NUsight2/plugins/cache: ~
       - docker#v3.5.0:
-          image: "node:12"
+          image: "node:14"
           always-pull: true
           propagate-uid-gid: true
           environment:
@@ -116,7 +116,7 @@ steps:
     plugins:
       - ./.buildkite/NUsight2/plugins/cache: ~
       - docker#v3.5.0:
-          image: "node:12"
+          image: "node:14"
           always-pull: true
           propagate-uid-gid: true
           environment:
@@ -155,7 +155,7 @@ steps:
     plugins:
       - ./.buildkite/NUsight2/plugins/cache: ~
       - docker#v3.5.0:
-          image: "node:12"
+          image: "node:14"
           always-pull: true
           propagate-uid-gid: true
           environment:

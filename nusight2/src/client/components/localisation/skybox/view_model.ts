@@ -16,11 +16,9 @@ import SkyboxVert from './skybox.vert'
 export class SkyboxViewModel {
   constructor(private model: SkyboxModel) {}
 
-  static of = createTransformer(
-    (model: SkyboxModel): SkyboxViewModel => {
-      return new SkyboxViewModel(model)
-    },
-  )
+  static of = createTransformer((model: SkyboxModel): SkyboxViewModel => {
+    return new SkyboxViewModel(model)
+  })
 
   @computed
   get skybox() {
