@@ -272,57 +272,6 @@ namespace utility::support {
     private:
         YAML::Node node;
     };
-
-    //NOTE: Functions with filepaths were an early concept and will probably be removed.
-
-    //Load a yaml file from the given filepath into an array
-    // template<typename T, std::size_t Size>
-    // std::array<T, Size> load_yaml_as_array(const std::string path){
-    //     YAML::Node input = YAML::LoadFile(path);
-    //     std::array<T, Size> result;
-    //     Expression& expr;
-    //     for(auto i = 0; i < result.size(); i++){
-    //         // parse each node
-    //         expr = input[i].as<std::array<Expression>>();
-    //         result[i] = T(expr);
-
-    //     }
-    //     return result;
-    // }
-
-    //pass in a yaml node and convert to std::array
-    template<typename T, std::size_t Size>
-    std::array<T, Size> node_to_array(YAML::Node input){
-        std::array<T, Size> result;
-        Expression& expr;
-        for(auto i = 0; i < result.size(); i++){
-            // parse each node
-            expr = input[i].as<std::array<Expression, Size>>();
-            result[i] = T(expr);
-        }
-        return result;
-    }
-
-    //Load a yaml file from the given filepath into a std::vector
-    // template<typename T>
-    // std::vector<T> load_yaml_as_vec(std::string path){
-    //     YAML::Node input = YAML::LoadFile(path);
-    //     std::vector<T> result;
-    //     for(const Expression& expr : input.as<std:vector<Expression, Size>>()){
-    //         result.emplace_back(T(expr));
-    //     }
-    //     return result;
-    // }
-
-    //pass in a yaml node and convert to std::vector
-    template<typename T>
-    std::vector<T> node_to_vec(YAML::Node input){
-        std::vector<T> result;
-        for(const Expression& expr : input.as<std::vector<Expression>>()){
-            result.emplace_back(T(expr));
-        }
-        return result;
-    }
 }  // namespace utility::support
 
 namespace YAML {
