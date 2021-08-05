@@ -43,7 +43,11 @@ def register(command):
     )
 
     build_subcommand.add_argument(
-        "-j", "--jobs", dest="jobs", action="store", help=f"Dictates the number of jobs to run in parallel ({multiprocessing.cpu_count() + 2} by default"
+        "-j",
+        "--jobs",
+        dest="jobs",
+        action="store",
+        help=f"Dictates the number of jobs to run in parallel",
     )
 
     push_subcommand = subparsers.add_parser(
