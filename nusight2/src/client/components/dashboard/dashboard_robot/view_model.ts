@@ -19,11 +19,9 @@ import { DashboardRobotModel } from './model'
 export class DashboardRobotViewModel {
   constructor(private model: DashboardRobotModel) {}
 
-  static of = createTransformer(
-    (model: DashboardRobotModel): DashboardRobotViewModel => {
-      return new DashboardRobotViewModel(model)
-    },
-  )
+  static of = createTransformer((model: DashboardRobotModel): DashboardRobotViewModel => {
+    return new DashboardRobotViewModel(model)
+  })
 
   @computed
   get robot(): Group {

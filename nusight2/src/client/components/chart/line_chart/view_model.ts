@@ -22,11 +22,9 @@ import { LineChartModel } from './model'
 export class LineChartViewModel {
   constructor(private model: LineChartModel) {}
 
-  static of = createTransformer(
-    (model: LineChartModel): LineChartViewModel => {
-      return new LineChartViewModel(model)
-    },
-  )
+  static of = createTransformer((model: LineChartModel): LineChartViewModel => {
+    return new LineChartViewModel(model)
+  })
 
   @computed
   get bufferSeconds() {

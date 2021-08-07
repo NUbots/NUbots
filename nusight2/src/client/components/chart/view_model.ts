@@ -24,11 +24,9 @@ export class TreeViewModel implements TreeNodeModel {
     this.expanded = false
   }
 
-  static of = createTransformer(
-    (opts: TreeViewModelOpts): TreeViewModel => {
-      return new TreeViewModel(opts)
-    },
-  )
+  static of = createTransformer((opts: TreeViewModelOpts): TreeViewModel => {
+    return new TreeViewModel(opts)
+  })
 
   @computed
   get color(): string {

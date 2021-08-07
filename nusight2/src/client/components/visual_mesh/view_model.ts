@@ -8,11 +8,9 @@ import { VisualMeshRobotModel } from './model'
 export class VisualMeshViewModel {
   constructor(private model: VisualMeshModel) {}
 
-  static of = createTransformer(
-    (model: VisualMeshModel): VisualMeshViewModel => {
-      return new VisualMeshViewModel(model)
-    },
-  )
+  static of = createTransformer((model: VisualMeshModel): VisualMeshViewModel => {
+    return new VisualMeshViewModel(model)
+  })
 
   @computed
   get robots(): RobotViewModel[] {
