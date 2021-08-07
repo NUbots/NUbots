@@ -60,9 +60,11 @@ export class LocalisationNetwork {
   }
 }
 
-function decompose(
-  m: THREE.Matrix4,
-): { translation: THREE.Vector3; rotation: THREE.Quaternion; scale: THREE.Vector3 } {
+function decompose(m: THREE.Matrix4): {
+  translation: THREE.Vector3
+  rotation: THREE.Quaternion
+  scale: THREE.Vector3
+} {
   const translation = new THREE.Vector3()
   const rotation = new THREE.Quaternion()
   const scale = new THREE.Vector3()
