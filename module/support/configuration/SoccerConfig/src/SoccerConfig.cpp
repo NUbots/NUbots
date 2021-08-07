@@ -72,7 +72,6 @@ namespace module::support::configuration {
         d.center_circle_diameter             = config["CenterCircleDiameter"].as<double>();
         d.border_strip_min_width             = config["BorderStripMinWidth"].as<double>();
 
-        desc.penalty_robot_start = config["PenaltyRobotStart"].as<double>();
         desc.goalpost_top_height = d.goal_crossbar_height + d.goal_crossbar_width;
 
         SetGoalpostPositions(desc);

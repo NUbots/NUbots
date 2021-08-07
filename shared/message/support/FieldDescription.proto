@@ -78,8 +78,6 @@ message FieldDescription {
     /// Calculated as goal_crossbar_height + goal_crossbar_width
     double goalpost_top_height = 2;
 
-    double penalty_robot_start = 3;
-
     // Coordinates of goalpost centers calculated from the FieldDimensions:
 
     /// {x, y} of our left goalpost, calculated from goal_width and half_length
