@@ -198,7 +198,7 @@ function(NUCLEAR_MODULE)
   # If we are doing tests then build the tests for this
   if(BUILD_TESTS)
     # Set a different name for our test module
-    set(test_module_target_name "Test${module_target_name}")
+    string(TOLOWER "test${module_target_name}" test_module_target_name)
 
     # Rebuild our sources using the test module
     file(
