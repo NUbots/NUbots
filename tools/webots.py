@@ -11,6 +11,7 @@ from pathlib import Path
 from termcolor import cprint
 
 import b
+from utility.dockerise import platform
 
 # The docker image details for Robocup
 ROBOCUP_IMAGE_NAME = "robocup-vhsc-nubots"  # Provided by the TC and shouldn't be changed
@@ -24,6 +25,21 @@ def register(command):
 
     build_subcommand = subparsers.add_parser("build", help="Build the docker image for use with Webots")
     build_subcommand.add_argument("roles", nargs="+", help="The roles to build for the image")
+    build_subcommand.add_argument(
+        "--target",
+        nargs="?",
+        choices=platform.list(),
+        default="g4dnxlarge",
+        help="The platform to compile for",
+    )
+
+    build_subcommand.add_argument(
+        "--no-clean",
+        dest="clean",
+        action="store_false",
+        default=True,
+        help="Disables cleaning the build volume before compiling",
+    )
 
     push_subcommand = subparsers.add_parser(
         "push",
@@ -58,13 +74,23 @@ def get_cmake_flags(roles_to_build):
     return ["-DCMAKE_BUILD_TYPE=Release"] + role_flags
 
 
-def exec_build(roles):
-    print("Setting target 'generic'...")
-    exit_code = subprocess.run(["./b", "target", "generic"]).returncode
+def exec_build(target, roles, clean):
+    # Tags correct image as 'selected' for given target
+    print("Setting target '{}'...".format(target))
+    exit_code = subprocess.run(["./b", "target", target]).returncode
     if exit_code != 0:
-        cprint("unable to set target, exit code {}".format(exit_code), "red", attrs=["bold"])
+        cprint("unable to set target to '{}', exit code {}".format(target, exit_code), "red", attrs=["bold"])
         sys.exit(exit_code)
 
+    # Cleans build volume to ensure everything gets build for given target
+    if clean:
+        print("Cleaning build volume...")
+        exit_code = subprocess.run(["./b", "configure", "--clean"]).returncode
+        if exit_code != 0:
+            cprint("unable to clean build volume, exit code {}".format(exit_code), "red", attrs=["bold"])
+            sys.exit(exit_code)
+
+    # Sets cmake flags and roles
     print("Configuring build...")
     configure_command = ["./b", "configure", "--"] + get_cmake_flags(roles)
     exit_code = subprocess.run(configure_command).returncode
@@ -72,6 +98,7 @@ def exec_build(roles):
         cprint(f"unable to configure build, exit code {exit_code}", "red", attrs=["bold"])
         sys.exit(exit_code)
 
+    # Compiles code for correct target
     print("Building code...")
     exit_code = subprocess.run(["./b", "build"]).returncode
     if exit_code != 0:
@@ -117,6 +144,16 @@ def exec_build(roles):
             color="red",
             attrs=["bold"],
         )
+        sys.exit(exit_code)
+
+    # Change back into project dir
+    os.chdir(b.project_dir)
+
+    # Set selected image back to 'generic'
+    print("Setting back to target 'generic'...")
+    exit_code = subprocess.run(["./b", "target", "generic"]).returncode
+    if exit_code != 0:
+        cprint("unable to set target to 'generic', exit code {}".format(exit_code), "red", attrs=["bold"])
         sys.exit(exit_code)
 
     # Clean up
@@ -178,12 +215,12 @@ def exec_push():
         sys.exit(exit_code)
 
 
-def run(sub_command, roles=None, role=None, **kwargs):
+def run(sub_command, clean=False, roles=None, role=None, target="g4dnxlarge", **kwargs):
     if sub_command == "build":
-        exec_build(roles)
+        exec_build(target, roles, clean)
     elif sub_command == "push":
         exec_push()
-    elif sub_command == "run":  # For testing
+    elif sub_command == "run":  # For testing docker image
         exec_run(role)
     else:
         print(f"invalid sub command: '{sub_command}'")

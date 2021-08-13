@@ -11,11 +11,9 @@ export const HIP_TO_FOOT = 0.2465
 export class RobotViewModel {
   constructor(private model: LocalisationRobotModel) {}
 
-  static of = createTransformer(
-    (model: LocalisationRobotModel): RobotViewModel => {
-      return new RobotViewModel(model)
-    },
-  )
+  static of = createTransformer((model: LocalisationRobotModel): RobotViewModel => {
+    return new RobotViewModel(model)
+  })
 
   @computed
   get robot(): Object3D {

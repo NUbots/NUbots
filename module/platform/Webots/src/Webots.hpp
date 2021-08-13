@@ -31,7 +31,6 @@
 #include <vector>
 
 #include "message/input/Image.hpp"
-#include "message/platform/webots/ConnectRequest.hpp"
 #include "message/platform/webots/messages.hpp"
 
 namespace module::platform {
@@ -140,6 +139,9 @@ namespace module::platform {
         };
         std::map<std::string, CameraContext> camera_context;
         uint32_t num_cameras = 0;
+
+        /// @brief Max FSR sensor value
+        float max_fsr_value = 0;
 
     public:
         /// @brief Called by the powerplant to build and setup the webots reactor

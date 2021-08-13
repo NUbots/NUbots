@@ -22,6 +22,8 @@ package message.platform;
 
 import "google/protobuf/timestamp.proto";
 
+import "Vector.proto";
+
 /**
  * @author Trent Houliston
  */
@@ -59,18 +61,6 @@ message RawSensors {
     message Buttons {
         bool left   = 1;
         bool middle = 2;
-    }
-
-    message Accelerometer {
-        float x = 1;
-        float y = 2;
-        float z = 3;
-    }
-
-    message Gyroscope {
-        float x = 1;
-        float y = 2;
-        float z = 3;
     }
 
     message FSR {
@@ -134,8 +124,8 @@ message RawSensors {
     EyeLED                    eye_led              = 5;
     Buttons                   buttons              = 6;
     float                     voltage              = 7;
-    Accelerometer             accelerometer        = 8;
-    Gyroscope                 gyroscope            = 9;
+    fvec3                     accelerometer        = 8;
+    fvec3                     gyroscope            = 9;
     FSRs                      fsr                  = 10;
     Servos                    servo                = 11;
 }
@@ -146,5 +136,5 @@ message ButtonLeftUp {}
 message ButtonMiddleDown {}
 message ButtonMiddleUp {}
 
-// Reset sensors in Webots
-message ResetRawSensors {}
+// Reset sensors and servo targets in Webots
+message ResetWebotsServos {}

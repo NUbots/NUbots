@@ -1,5 +1,5 @@
 # Log level of DEBUG will print out compression rates
-log_level: INFO
+log_level: WARN
 
 # The settings for each compressor
 # These compressors will be tried in order per camera id until a free compressor is found

@@ -32,6 +32,7 @@ namespace module::localisation {
 
     using message::input::Sensors;
     using message::support::FieldDescription;
+    using utility::math::coordinates::cartesianToReciprocalSpherical;
     using utility::math::coordinates::cartesianToSpherical;
 
     template <typename Scalar>
@@ -72,8 +73,9 @@ namespace module::localisation {
                                             const Eigen::Matrix<Scalar, 4, 4>& Hcw) const {
 
             const Eigen::Matrix<Scalar, 3, 1> rBWw(state[PX], state[PY], field.ball_radius);
-            const Eigen::Matrix<Scalar, 3, 1> rBCc_cart(Eigen::Affine3d(Hcw) * rBWw);
-            return cartesianToSpherical(rBCc_cart);
+            const Eigen::Matrix<Scalar, 3, 1> rBCc(Eigen::Affine3d(Hcw) * rBWw);
+
+            return cartesianToReciprocalSpherical(rBCc);
         }
 
         StateVec limit(const StateVec& state) const {
@@ -93,7 +95,7 @@ namespace module::localisation {
         inline int getRogueCount() const {
             return n_rogues;
         }
-        Eigen::Matrix<Scalar, 2, 1> getRogueRange() const {
+        [[nodiscard]] StateVec get_rogue() const {
             return resetRange;
         }
 
