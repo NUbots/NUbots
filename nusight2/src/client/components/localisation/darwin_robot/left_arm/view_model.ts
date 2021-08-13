@@ -14,11 +14,9 @@ import LeftUpperArmConfig from './config/left_upper_arm.json'
 export class LeftArmViewModel {
   constructor(private model: LocalisationRobotModel) {}
 
-  static of = createTransformer(
-    (model: LocalisationRobotModel): LeftArmViewModel => {
-      return new LeftArmViewModel(model)
-    },
-  )
+  static of = createTransformer((model: LocalisationRobotModel): LeftArmViewModel => {
+    return new LeftArmViewModel(model)
+  })
 
   @computed
   get leftArm() {

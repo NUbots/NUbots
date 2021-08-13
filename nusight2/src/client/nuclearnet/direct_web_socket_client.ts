@@ -1,4 +1,4 @@
-import SocketIO from 'socket.io-client'
+import { io, Socket, SocketOptions } from 'socket.io-client'
 
 import * as NUClearNetProxyParser from '../../shared/nuclearnet/nuclearnet_proxy_parser'
 
@@ -11,10 +11,10 @@ import { WebSocketClient } from './web_socket_client'
  * There should never be enough logic in here that it needs any testing.
  */
 export class DirectWebSocketClient implements WebSocketClient {
-  constructor(private socket: SocketIOClient.Socket) {}
+  constructor(private socket: Socket) {}
 
-  static of(uri: string, opts: SocketIOClient.ConnectOpts) {
-    const socket = SocketIO(uri, { ...opts, parser: NUClearNetProxyParser } as any)
+  static of(uri: string, opts: SocketOptions) {
+    const socket = io(uri, { ...opts, parser: NUClearNetProxyParser } as any)
     return new DirectWebSocketClient(socket)
   }
 
@@ -26,7 +26,7 @@ export class DirectWebSocketClient implements WebSocketClient {
     this.socket.disconnect()
   }
 
-  on(event: string, fn: Function) {
+  on(event: string, fn: (...args: any[]) => void) {
     this.socket.on(event, fn)
   }
 
