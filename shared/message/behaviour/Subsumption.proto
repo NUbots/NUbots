@@ -29,9 +29,9 @@ message Subsumption {
     }
 
     message ActionRegister {
-        uint32           id       = 1;
-        string           name     = 2;
-        repeated LimbSet limb_set = 3;
+        uint32           subsumptionId = 1;
+        string           name          = 2;
+        repeated LimbSet limb_set      = 3;
     }
 
     message ActionStateChange {
@@ -47,7 +47,8 @@ message Subsumption {
     }
 
     message ActionPriorities {
-        uint32         id         = 1;
+        uint32 subsumptionId = 1;
+        /// List of priorities for each limb relating to the order of limb_set in ActionRegister
         repeated float priorities = 2;
     }
 
