@@ -38,9 +38,9 @@ message FieldDescription {
     message FieldDimensions {
         /// The rules say that the lines must be the same width
         double line_width = 1;
-        /// The 'touch line' length
+        /// The 'touch line' length - AKA the sideline
         double field_length = 2;
-        /// The 'goal line' length
+        /// The 'goal line' length - AKA the baseline
         double field_width = 3;
         /// Cross-sectional shape of goal-posts
         GoalpostType goalpost_type = 4;
@@ -78,17 +78,17 @@ message FieldDescription {
     /// Calculated as goal_crossbar_height + goal_crossbar_width
     double goalpost_top_height = 2;
 
-    // Coordinates of goalpost centers calculated from the FieldDimensions:
+    // Coordinates of goalpost centers calculated from the FieldDimensions, in field space
 
-    /// {x, y} of our left goalpost, calculated from goal_width and half_length
+    /// {x, y} of our left goalpost, calculated from goal_width and field_length
     /// It's the left one, as if you were looking from halfway
     vec2 goalpost_own_l = 4;
-    /// {x, y} of our right goalpost, calculated from goal_width and half_length
+    /// {x, y} of our right goalpost, calculated from goal_width and field_length
     /// It's the right one, as if you were looking from halfway
     vec2 goalpost_own_r = 5;
-    /// {x, y} of opposition left goalpost, calculated from goal_width and half_length
+    /// {x, y} of opposition left goalpost, calculated from goal_width and field_length
     vec2 goalpost_opp_l = 6;
-    /// {x, y} of opposition right goalpost, calculated from goal_width and half_length
+    /// {x, y} of opposition right goalpost, calculated from goal_width and field_length
     vec2 goalpost_opp_r = 7;
     /// Set of field dimensions loaded from config
     FieldDimensions dimensions = 8;

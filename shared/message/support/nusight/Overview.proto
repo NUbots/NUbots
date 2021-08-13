@@ -67,9 +67,7 @@ message Overview {
     /// Last time vision objects were seen
     google.protobuf.Timestamp last_seen_ball = 16;
     google.protobuf.Timestamp last_seen_goal = 17;
-
-    /// Walking path, as a sequence of coordinates
-    repeated fvec3 walk_path_plan = 18;
-    /// Walk command vector, pointing to target spot
-    fvec3 walk_command = 19;
+    /// {x, y, omega} - x and y are the target to walk to and omega is the
+    /// required rotational velocity about the z axis. In torso space
+    fvec3 walk_command = 18;
 }
