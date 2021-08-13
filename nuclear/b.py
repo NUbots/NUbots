@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import argcomplete
 import argparse
 import os
 import pkgutil
@@ -110,6 +111,7 @@ if __name__ == "__main__":
                                 )
 
                             module.register(subcommand.add_parser(components[-1]))
+                            argcomplete.autocomplete(command)
                             module.run(**vars(command.parse_args()))
 
                             # We're done, exit
@@ -150,4 +152,5 @@ if __name__ == "__main__":
                 pass
 
     # Given what we know, this will fail here and give the user some help
+    argcomplete.autocomplete(command)
     command.parse_args()
