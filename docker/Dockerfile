@@ -13,7 +13,7 @@
 FROM archlinux:base-20210110.0.13332
 
 # ↓↓↓ UPDATE MIRRORS HERE ↓↓↓
-RUN echo -e "Server=https://archive.archlinux.org/repos/2021/01/10/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
+RUN echo -e "Server=http://host.docker.internal:7878/\$repo/os/\$arch\nServer=https://archive.archlinux.org/repos/2021/01/10/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
 
 # Arch recommends running this as the first command of the docker image
 # Use "yyuu" to allow for downgrades
