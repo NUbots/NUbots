@@ -8,11 +8,11 @@ Things the PR does go here
 ### Pre-PR Checklist:
 
 Have you
-- [ ] Updated NUbook if necessary
+- [ ] Updated NUbook if necessary (add link to NUbook PR here)
 - [ ] Added/Updated tests for your changes, including regression tests for bug fixes
 - [ ] Updated relevant module READMEs
 
-## Optional Headings
+### Optional Headings (delete this heading and the ones you don't use)
 
 ### Reviewers, Note
 
