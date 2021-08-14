@@ -34,6 +34,7 @@ The keyboard controls are as follows:
 ## Consumes
 
 * `NUClear::message::CommandLineArguments` containing the name of the script to edit
+* `message::platform::RawSensors` to get position of specific servo when locking it
 
 ## Emits
 
