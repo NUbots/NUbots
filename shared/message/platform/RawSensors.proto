@@ -60,20 +60,6 @@ message RawSensors {
         bool left   = 1;
         bool middle = 2;
     }
-    /// In m/s^2. Each axis is bounded between -4g and 4g, according to the datasheet
-    /// here https://emanual.robotis.com/docs/en/platform/op2/getting_started/#acc_x-acc_y-acc_z
-    message Accelerometer {
-        float x = 1;
-        float y = 2;
-        float z = 3;
-    }
-    /// In radians per second. Each axis bounded between -500 and 500 degrees per second, according to the datasheet
-    /// here https://emanual.robotis.com/docs/en/platform/op2/getting_started/#gyro_x-gyro_y-gyro_z
-    message Gyroscope {
-        float x = 1;
-        float y = 2;
-        float z = 3;
-    }
     /// The robot has Force Sensitive Resistors on its feet to detect whether a foot is down.
     /// There are four FSRs per foot, so this message is for one foot
     message FSR {
@@ -87,7 +73,7 @@ message RawSensors {
     }
     message FSRs {
         /// Left foot
-        FSR left  = 1;
+        FSR left = 1;
         /// Right foot
         FSR right = 2;
     }
@@ -163,12 +149,14 @@ message RawSensors {
     Buttons  buttons              = 6;
     /// Voltage for the whole robot, from the main battery, in Volts
     float voltage = 7;
-    /// {x, y, z} acceleration in m/s^2
-    Accelerometer accelerometer = 8;
-    /// Rotational speed measured about the {x, y, z} axes, in radians per second
-    Gyroscope gyroscope = 9;
-    FSRs      fsr       = 10;
-    Servos    servo     = 11;
+    /// In m/s^2. Each axis is bounded between -4g and 4g, according to the datasheet
+    /// here https://emanual.robotis.com/docs/en/platform/op2/getting_started/#acc_x-acc_y-acc_z
+    fvec3 accelerometer = 8;
+    /// In radians per second. Each axis bounded between -500 and 500 degrees per second, according to the datasheet
+    /// here https://emanual.robotis.com/docs/en/platform/op2/getting_started/#gyro_x-gyro_y-gyro_z
+    fvec3  gyroscope = 9;
+    FSRs   fsr       = 10;
+    Servos servo     = 11;
 }
 
 message ButtonLeftDown {}
