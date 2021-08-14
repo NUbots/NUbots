@@ -13,11 +13,9 @@ import { FieldModel } from './model'
 export class FieldViewModel {
   constructor(private model: FieldModel) {}
 
-  static of = createTransformer(
-    (model: FieldModel): FieldViewModel => {
-      return new FieldViewModel(model)
-    },
-  )
+  static of = createTransformer((model: FieldModel): FieldViewModel => {
+    return new FieldViewModel(model)
+  })
 
   @computed
   get field() {
