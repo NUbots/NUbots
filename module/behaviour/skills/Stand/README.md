@@ -20,4 +20,3 @@ Include this module to allow the robot to stand when it is doing nothing.
 ## Dependencies
 
 * The Script Engine module is required to execute the scripts
-* The Darwin Motion Manager module is required to notify when scripts finish

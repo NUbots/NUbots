@@ -21,5 +21,4 @@ Include this module to allow the robot to get up after it has fallen over.
 ## Dependencies
 
 * The Script Engine module is required to execute the scripts
-* The Darwin Motion Manager module is required to notify when scripts finish
 * The Filtered Sensors module is required to retrieve the current orientation

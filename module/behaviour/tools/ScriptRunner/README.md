@@ -23,4 +23,3 @@ finished at which point it terminates the program.
 ## Dependencies
 
 * The Script Engine module is required to execute the scripts
-* The Darwin Motion Manager module is required to notify when scripts finish
