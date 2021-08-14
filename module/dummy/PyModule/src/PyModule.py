@@ -1,7 +1,6 @@
 from message.vision import Goal
 
-# from nuclear import Every, Reactor, Single, Trigger, With, on
-import nuclear
+from nuclear import Reactor, Trigger, on
 
 
 @Reactor
