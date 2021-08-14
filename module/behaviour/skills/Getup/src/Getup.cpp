@@ -67,7 +67,7 @@ namespace module::behaviour::skills {
             EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
         });
 
-        fallenCheck = on<Last<20, Trigger<RawSensors>>, Single>().then(
+        on<Last<20, Trigger<RawSensors>>, Single>().then(
             "Getup Fallen Check",
             [this](const std::list<std::shared_ptr<const RawSensors>>& sensors) {
                 Eigen::Vector3d acc_reading = Eigen::Vector3d::Zero();
@@ -84,11 +84,10 @@ namespace module::behaviour::skills {
                     isFront = (M_PI_2 - std::acos(Eigen::Vector3d::UnitX().dot(acc_reading)) <= 0.0);
 
                     updatePriority(GETUP_PRIORITY);
-                    getUp.enable();
                 }
             });
 
-        getUp = on<Trigger<ExecuteGetup>, Single>().then("Execute Getup", [this]() {
+        on<Trigger<ExecuteGetup>, Single>().then("Execute Getup", [this]() {
             gettingUp = true;
 
             // Check with side we're getting up from
@@ -108,7 +107,6 @@ namespace module::behaviour::skills {
         on<Trigger<KillGetup>>().then([this] {
             gettingUp = false;
             updatePriority(0);
-            getUp.disable();
         });
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
