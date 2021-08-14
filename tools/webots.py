@@ -47,7 +47,7 @@ def register(command):
         "--jobs",
         dest="jobs",
         action="store",
-        help=f"Dictates the number of jobs to run in parallel",
+        help="Dictates the number of jobs to run in parallel",
     )
 
     push_subcommand = subparsers.add_parser(
