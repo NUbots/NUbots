@@ -43,7 +43,6 @@ message Subsumption {
     /// 2. The actions you want to take when control is taken away from you
     /// 3. The actions you want to take once you have completed your actions with the limbs
     message ActionRegister {
-        /// Unique identifier for the action
         uint32 id   = 1;
         string name = 2;
         /// Groups of limbs required to move by this action.
@@ -52,7 +51,6 @@ message Subsumption {
         repeated LimbSet limb_set = 3;
     }
 
-    /// Prompt indicating that there should be a change to a given ActionRegister
     message ActionStateChange {
         enum State {
             UNKNOWN = 0;
