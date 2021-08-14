@@ -29,7 +29,8 @@ message WalkStopped {}
 message WalkCommand {
     /// Reservation identifier for servo control
     uint64 subsumption_id = 1;
-    /// {x, y, angle}, x and y are velocity in m/s and angle is in rads/s
+    /// {x, y, omega} - x and y are the target to walk to and omega is the
+    /// required rotational velocity about the z axis. In torso space
     vec3 command = 2;
 }
 
