@@ -217,7 +217,7 @@ add_custom_command(
     ${PYTHON_EXECUTABLE} ARGS "${CMAKE_CURRENT_SOURCE_DIR}/generate_python_messages.py"
     "${PROJECT_BINARY_DIR}/nuclear/message/python" "${PROJECT_BINARY_DIR}/python/nuclear"
     "${PROJECT_BINARY_DIR}/python/nuclear/messages.txt"
-  WORKING_DIRECTORY ${nt_out}
+  WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/python/nuclear"
   DEPENDS ${src} ${python_src}
   COMMENT "Generating python sub messages"
 )

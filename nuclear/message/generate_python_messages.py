@@ -104,7 +104,7 @@ for message in messages:
         if element not in current:
             current[element] = {}
         current = current[element]
-    current["file"] = message[1].replace(".proto", ".h")
+    current["file"] = message[1].replace(".proto", ".hpp")
 
 with datasink(log_file_path, "a") as log_file:
     recurse(files, output_directory, log_file)
