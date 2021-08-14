@@ -29,7 +29,7 @@ package message.behaviour;
  */
 message Subsumption {
 
-    /// The set of libs required to move for a given action
+    /// The set of limbs required to move for a given action
     message LimbSet {
         /// How important this set of limbs' movements are to the ActionRegister
         float priority = 1;
