@@ -85,9 +85,10 @@ message RawSensors {
         float  centre_y    = 6;
         uint32 error_flags = 7;
     }
-    /// One for each foot
     message FSRs {
+        /// Left foot
         FSR left  = 1;
+        /// Right foot
         FSR right = 2;
     }
     /// Full set of information to use a given servo.
@@ -169,8 +170,6 @@ message RawSensors {
     FSRs      fsr       = 10;
     Servos    servo     = 11;
 }
-
-// Button press events
 
 message ButtonLeftDown {}
 
