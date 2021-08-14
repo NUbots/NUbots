@@ -57,6 +57,7 @@ message Goal {
         fvec3 top = 1;
         /// Vector pointing to bottom point of post in camera space
         fvec3 bottom   = 2;
+        /// Distance from camera to goals, in metres
         float distance = 3;
     }
     Side                 side           = 1;
