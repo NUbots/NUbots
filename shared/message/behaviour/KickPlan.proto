@@ -28,7 +28,7 @@ message KickPlan {
         IK_KICK  = 1;
         PENALTY  = 2;
     }
-    /// Where the robot wants to kick to
+    /// Where the robot wants to kick to. In field space
     vec2 target = 1;
 
     KickType kick_type = 2;
