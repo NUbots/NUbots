@@ -38,21 +38,13 @@ namespace module::platform::darwin {
     private:
         message::platform::RawSensors sensors;
 
-        std::queue<message::platform::RawSensors::Gyroscope> gyroQueue;
-        std::mutex gyroQueueMutex;
-
         float imu_drift_rate                     = 0;
         static constexpr size_t UPDATE_FREQUENCY = 90;
         void addNoise(std::unique_ptr<message::platform::RawSensors>& sensors);
         struct NoiseConfig {
-            NoiseConfig() : accelerometer(), gyroscope() {}
-            struct Vec3Noise {
-                float x = 0.001;
-                float y = 0.001;
-                float z = 0.001;
-            };
-            Vec3Noise accelerometer;
-            Vec3Noise gyroscope;
+            NoiseConfig() = default;
+            Eigen::Vector3f accelerometer{0.001, 0.001, 0.001};
+            Eigen::Vector3f gyroscope{0.001, 0.001, 0.001};
         } noise;
         double bodyTilt                      = 0;
         Eigen::Vector3d integrated_gyroscope = Eigen::Vector3d::Zero();

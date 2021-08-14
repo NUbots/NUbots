@@ -49,15 +49,8 @@ export class Select extends React.Component<SelectProps> {
   }
 
   render(): JSX.Element {
-    const {
-      className,
-      icon,
-      placeholder,
-      dropDirection,
-      empty,
-      options,
-      selectedOption,
-    } = this.props
+    const { className, icon, placeholder, dropDirection, empty, options, selectedOption } =
+      this.props
 
     const button = (
       <Button
