@@ -90,7 +90,16 @@ function(NUCLEAR_MODULE)
         "${CMAKE_CURRENT_SOURCE_DIR}/src/${module_name}.py"
       WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/src"
       DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/${module_name}.py" nuclear::message
+              "${PROJECT_BINARY_DIR}/python/nuclear/nuclear.py"
       COMMENT "Generating bindings for python module ${module_name}"
+    )
+
+    add_custom_command(
+      OUTPUT "${PROJECT_BINARY_DIR}/python/nuclear/nuclear.py"
+      COMMAND ${CMAKE_COMMAND} -E copy "${PROJECT_SOURCE_DIR}/nuclear/module/python/nuclear.py"
+              "${PROJECT_BINARY_DIR}/python/nuclear/nuclear.py"
+      DEPENDS "${PROJECT_SOURCE_DIR}/nuclear/module/python/nuclear.py"
+      COMMENT "Copying nuclear.py to python build directory"
     )
 
     set(src "${CMAKE_CURRENT_BINARY_DIR}/src/${module_name}.hpp" "${CMAKE_CURRENT_BINARY_DIR}/src/${module_name}.cpp"
