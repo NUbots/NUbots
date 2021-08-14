@@ -10,7 +10,7 @@ from banner import ampscii, bigtext
 
 role_name = sys.argv[1]
 banner_file = sys.argv[2]
-module_path = sys.argv[3]
+module_paths = sys.argv[3].split(";")
 role_modules = sys.argv[4:]
 
 # Open our output role file
@@ -36,15 +36,26 @@ with open(role_name, "w", encoding="utf-8") as role_file:
         # replace last name with src/name
         header = re.sub(r"([^\/]+)$", r"\1/src/\1", header)
 
+        # Check for a header in each of the provided module paths
+        header_paths = [(module_path, header) for module_path in module_paths]
+
         # Try several extensions (hpp, hh, h) to see if one exists
-        if os.path.isfile(os.path.join(module_path, "{}.hpp".format(header))):
-            header = "{}.hpp".format(header)
-        elif os.path.isfile(os.path.join(module_path, "{}.hh".format(header))):
-            header = "{}.hh".format(header)
-        elif os.path.isfile(os.path.join(module_path, "{}.h".format(header))):
-            header = "{}.h".format(header)
-        else:
-            raise Exception("Cannot find main header file for {}".format(header))
+        found = False
+        for header_path in header_paths:
+            if os.path.isfile(os.path.join(header_path[0], "{}.hpp".format(header_path[1]))):
+                header = "{}.hpp".format(header_path[1])
+                found = True
+            elif os.path.isfile(os.path.join(header_path[0], "{}.hh".format(header_path[1]))):
+                header = "{}.hh".format(header_path[1])
+                found = True
+            elif os.path.isfile(os.path.join(header_path[0], "{}.h".format(header_path[1]))):
+                header = "{}.h".format(header_path[1])
+                found = True
+
+        if not found:
+            raise Exception(
+                "Cannot find main header file for {} in any of '({})'".format(header, ", ".join(module_paths))
+            )
 
         role_file.write('#include "{}"\n'.format(header))
 

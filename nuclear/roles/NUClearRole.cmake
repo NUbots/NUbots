@@ -13,8 +13,10 @@ function(NUCLEAR_ROLE)
   # Custom command that specifies how to generate ${role}.cpp
   add_custom_command(
     OUTPUT "${role}.cpp"
-    COMMAND ${PYTHON_EXECUTABLE} ARGS "${CMAKE_CURRENT_SOURCE_DIR}/generate_role.py" "${role}.cpp"
-            "${NUCLEAR_ROLE_BANNER_FILE}" "${PROJECT_SOURCE_DIR}/${NUCLEAR_MODULE_DIR}" ${role_modules}
+    COMMAND
+      ${PYTHON_EXECUTABLE} ARGS "${CMAKE_CURRENT_SOURCE_DIR}/generate_role.py" "${role}.cpp"
+      "${NUCLEAR_ROLE_BANNER_FILE}"
+      "'${PROJECT_SOURCE_DIR}/${NUCLEAR_MODULE_DIR};${PROJECT_BINARY_DIR}/${NUCLEAR_MODULE_DIR}'" ${role_modules}
     COMMENT "Generating the ${role} role"
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/generate_role.py" ${NUCLEAR_ROLE_BANNER_FILE}
   )
@@ -26,6 +28,7 @@ function(NUCLEAR_ROLE)
   add_executable(${role} "${role}.cpp")
 
   target_include_directories(${role} PRIVATE "${PROJECT_SOURCE_DIR}/${NUCLEAR_MODULE_DIR}")
+  target_include_directories(${role} PRIVATE "${PROJECT_BINARY_DIR}/${NUCLEAR_MODULE_DIR}")
 
   # Link to the roles module libraries and the shared utility and extension libraries
   target_link_libraries(${role} Threads::Threads)
