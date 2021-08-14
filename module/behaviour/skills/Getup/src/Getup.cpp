@@ -51,8 +51,6 @@ namespace module::behaviour::skills {
         , id(size_t(this) * size_t(this) - size_t(this))
         , isFront(true)
         , gettingUp(false)
-        , fallenCheck()
-        , getUp()
         , FALLEN_ANGLE(M_PI_2)
         , GETUP_PRIORITY(0.0f)
         , EXECUTION_PRIORITY(0.0f) {
