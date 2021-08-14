@@ -13,28 +13,34 @@ started and the file will be created when it is saved.
 
 The keyboard controls are as follows:
 
-* Up/Down arrow: select servo
-* Left/right arrow: select angle or gain
-* , (comma): go to previous frame
-* . (period): go to next frame
-* Enter: edit selected field
-* Space: toggle motor lock
-* S: save script
+* Up/Down arrow: Select servo
+* Left/right arrow: Select angle or gain
+* , (comma): Go to previous frame
+* . (period): Go to next frame
+* Enter: Edit selected field
+* Space: Toggle motor lock
+* : (colon): List available commands
+* A: Save script as
+* G: Allows multiple gain edits at once
+* I: Delete current frame
+* J: "jump" to frame without the robot moving
+* M: Mirror script - flip about Z axis
+* N: Insert a new frame before the current frame
+* R: Refresh the view
+* S: Save script
 * T: edit frame duration
-* N: insert a new frame before the current frame
-* D: delete current frame
+* X: Shutdown powerplant/stop binary
 
 ## Consumes
 
-* `CommandLineArgumentis` containing the name of the script to edit
-* `message::DarwinServos` containing the current positions of each servo
+* `NUClear::message::CommandLineArguments` containing the name of the script to edit
 
 ## Emits
 
-* `message::ServoWaypoint>` to control servos
+* `message::motion::ServoTarget` to control servos
+* `message::motion::ServoTargets` to control servos
+* `extension::ExecuteScript` to play the script
 
 ## Dependencies
 
 * libncurses is used for the user interface
-* The Darwin motion manager module is required to set waypoints
-
