@@ -228,7 +228,7 @@ def exec_push():
         sys.exit(exit_code)
 
 
-def run(sub_command, jobs, clean=False, roles=None, role=None, target="g4dnxlarge", **kwargs):
+def run(sub_command, jobs=None, clean=False, roles=None, role=None, target="g4dnxlarge", **kwargs):
     if sub_command == "build":
         exec_build(target, roles, clean, jobs)
     elif sub_command == "push":
