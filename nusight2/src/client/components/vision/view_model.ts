@@ -7,11 +7,9 @@ import { VisionRobotModel } from './model'
 export class VisionViewModel {
   constructor(private model: VisionModel) {}
 
-  static of = createTransformer(
-    (model: VisionModel): VisionViewModel => {
-      return new VisionViewModel(model)
-    },
-  )
+  static of = createTransformer((model: VisionModel): VisionViewModel => {
+    return new VisionViewModel(model)
+  })
 
   @computed
   get robots(): RobotViewModel[] {
