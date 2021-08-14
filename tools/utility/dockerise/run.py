@@ -121,9 +121,7 @@ def run(func, image):
 
         # Perform the tasks that we only perform on the internal image and add on any extra arguments needed
         if internal_image:
-            docker_args.extend(
-                _setup_internal_image(image=image, rebuild=(rebuild or kwargs["rebuild"]))
-            )
+            docker_args.extend(_setup_internal_image(image=image, rebuild=(rebuild or kwargs["rebuild"])))
 
         # Work out what cwd we need to have on docker to mirror the cwd we have here
         code_to_cwd = os.path.relpath(os.getcwd(), b.project_dir)
@@ -166,7 +164,7 @@ def run(func, image):
             ):
                 cprint("Failed to clean the build volume", "red", attrs=["bold"])
                 exit(1)
-                
+
         # Add the command
         docker_args.extend(["{}/b".format(cwd_to_code), *sys.argv[1:]])
 
