@@ -42,13 +42,13 @@ namespace module::motion {
         });
     }
 
-    void KinematicsConfiguration::configure(KinematicsModel& model, const Configuration& objDarwinModel) {
-        configureLeg(model, objDarwinModel["leg"]);
-        configureHead(model, objDarwinModel["head"]);
-        configureArm(model, objDarwinModel["arm"]);
+    void KinematicsConfiguration::configure(KinematicsModel& model, const Configuration& objNugusModel) {
+        configureLeg(model, objNugusModel["leg"]);
+        configureHead(model, objNugusModel["head"]);
+        configureArm(model, objNugusModel["arm"]);
 
-        configureMassModel(model, objDarwinModel["mass_model"]);
-        configureTensorModel(model, objDarwinModel["tensor_model"]);
+        configureMassModel(model, objNugusModel["mass_model"]);
+        configureTensorModel(model, objNugusModel["tensor_model"]);
     }
 
     void KinematicsConfiguration::configureLeg(KinematicsModel& model, const YAML::Node& objLeg) {
