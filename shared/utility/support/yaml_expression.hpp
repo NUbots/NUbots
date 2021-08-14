@@ -24,6 +24,7 @@
 #include <fmt/format.h>
 #include <limits>
 #include <system_error>
+#include <yaml-cpp/yaml.h>
 
 #include "math_string.hpp"
 

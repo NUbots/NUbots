@@ -203,8 +203,8 @@ namespace module::input {
 
                     for (const auto& s : sensors) {
                         // Accumulate accelerometer and gyroscope readings
-                        acc += Eigen::Vector3d(s->accelerometer.x, s->accelerometer.y, s->accelerometer.z);
-                        gyro += Eigen::Vector3d(s->gyroscope.x, s->gyroscope.y, s->gyroscope.z);
+                        acc += s->accelerometer.cast<double>();
+                        gyro += s->gyroscope.cast<double>();
 
                         // Make sure we have servo positions
                         for (uint32_t id = 0; id < 20; ++id) {
@@ -459,8 +459,7 @@ namespace module::input {
                             sensors->accelerometer = previousSensors->accelerometer;
                         }
                         else {
-                            sensors->accelerometer =
-                                Eigen::Vector3d(input.accelerometer.x, input.accelerometer.y, input.accelerometer.z);
+                            sensors->accelerometer = input.accelerometer.cast<double>();
                         }
 
                         // If we have a previous Sensors message and (our platform has errors or we are spinning too
@@ -470,16 +469,12 @@ namespace module::input {
                                 // One of the gyros would occasionally throw massive numbers without an error flag
                                 // If our hardware is working as intended, it should never read that we're spinning at 2
                                 // revs/s
-                                || Eigen::Vector3d(input.gyroscope.x, input.gyroscope.y, input.gyroscope.z).norm()
-                                       > 4.0 * M_PI)) {
-                            NUClear::log<NUClear::WARN>(
-                                "Bad gyroscope value",
-                                Eigen::Vector3d(input.gyroscope.x, input.gyroscope.y, input.gyroscope.z).norm());
+                                || input.gyroscope.norm() > 4.0 * M_PI)) {
+                            NUClear::log<NUClear::WARN>("Bad gyroscope value", input.gyroscope.norm());
                             sensors->gyroscope = previousSensors->gyroscope;
                         }
                         else {
-                            sensors->gyroscope =
-                                Eigen::Vector3d(input.gyroscope.x, input.gyroscope.y, input.gyroscope.z);
+                            sensors->gyroscope = input.gyroscope.cast<double>();
                         }
 
                         /************************************************
