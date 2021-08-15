@@ -156,14 +156,12 @@ def run(func, image):
 
         # If we are cleaning then delete all files and directories in the build volume
         if kwargs["clean"]:
-            if (
-                pty.spawn(
-                    docker_args + ["/bin/bash", "-c", "find /home/{}/build -mindepth 1 -delete".format(defaults.user)]
-                )
-                != 0
-            ):
+            exit_code = pty.spawn(
+                docker_args + ["/bin/bash", "-c", "find /home/{}/build -mindepth 1 -delete".format(defaults.user)]
+            )
+            if exit_code != 0:
                 cprint("Failed to clean the build volume", "red", attrs=["bold"])
-                exit(1)
+                exit(exit_code)
 
         # Add the command
         docker_args.extend(["{}/b".format(cwd_to_code), *sys.argv[1:]])
