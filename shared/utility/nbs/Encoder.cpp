@@ -2,7 +2,7 @@
 
 namespace utility::nbs {
 
-    Encoder::Encoder(std::filesystem::path path) : output_file(path), index_file(path += ".idx"){}
+    Encoder::Encoder(std::filesystem::path path) : output_file(path), index_file(path += ".idx") {}
 
     Encoder::Encoder(const std::filesystem::path& path, const std::filesystem::path& index_path)
         : output_file(path), index_file(index_path) {}
@@ -80,12 +80,12 @@ namespace utility::nbs {
         if (output_file.is_open()) {
             output_file.close();
         }
-        if(index_file.is_open()){
+        if (index_file.is_open()) {
             index_file.close();
         }
     }
 
-    void Encoder::open(const std::filesystem::path& path){
+    void Encoder::open(const std::filesystem::path& path) {
         output_file.open(path);
         index_file.open(path);
     }
