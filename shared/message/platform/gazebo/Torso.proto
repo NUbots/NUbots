@@ -24,7 +24,7 @@ import "Matrix.proto";
 import "Vector.proto";
 
 message Torso {
-    /// The name of the model in the simulation that these servo targets are for
+    /// The name of the model in the simulation that this position is for
     string model = 1;
     /// The transform from world space to torso space
     mat4 Htw = 2;
