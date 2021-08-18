@@ -10,8 +10,8 @@ namespace module::support::logging {
 
     struct Packet {
 
-        uint64_t hash;
-        std::chrono::microseconds timecode;
+        uint64_t hash{};
+        std::chrono::microseconds timecode{};
         std::vector<char> payload;
     };
 

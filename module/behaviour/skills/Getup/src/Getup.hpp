@@ -39,9 +39,9 @@ namespace module::behaviour::skills {
         bool gettingUp;
 
         /// config settings
-        float FALLEN_ANGLE;
-        float GETUP_PRIORITY;
-        float EXECUTION_PRIORITY;
+        float FALLEN_ANGLE       = 0.0f;
+        float GETUP_PRIORITY     = 0.0f;
+        float EXECUTION_PRIORITY = 0.0f;
 
         void updatePriority(const float& priority);
 

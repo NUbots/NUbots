@@ -30,11 +30,9 @@ namespace module::motion {
                     time_paused     = 0.0f;
                     return false;
                 }
-                else {
-                    // we can continue
-                    engine_state = WalkEngineState::WALKING;
-                    time_paused  = 0.0f;
-                }
+                // we can continue
+                engine_state = WalkEngineState::WALKING;
+                time_paused  = 0.0f;
             }
             else {
                 time_paused += dt;
@@ -206,13 +204,11 @@ namespace module::motion {
 
         // Compute current point in time to save state by multiplying the half period time with the advancement of
         // period time
-        float factor;
-        if (last_phase < 0.5f) {
-            factor = last_phase / 0.5f;
+        float factor = last_phase;
+        if (factor < 0.5f) {
+            factor = factor * 2.0f;
         }
-        else {
-            factor = last_phase;
-        }
+
         float period_time = half_period * factor;
 
         Eigen::Vector2f trunkPos(trajs.get(TrajectoryTypes::TRUNK_POS_X).pos(period_time),
@@ -314,8 +310,8 @@ namespace module::motion {
         point(TrajectoryTypes::IS_DOUBLE_SUPPORT, half_period, 0.0f);
 
         // Set support foot
-        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, 0.0f, foot_step.isLeftSupport());
-        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, half_period, foot_step.isLeftSupport());
+        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, 0.0f, static_cast<float>(foot_step.isLeftSupport()));
+        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, half_period, static_cast<float>(foot_step.isLeftSupport()));
 
         // Flying foot position
         point(TrajectoryTypes::FOOT_POS_X, 0.0f, foot_step.getLast().x());
@@ -539,8 +535,8 @@ namespace module::motion {
         point(TrajectoryTypes::IS_DOUBLE_SUPPORT, half_period, isDoubleSupport);
 
         // Set support foot
-        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, 0.0f, foot_step.isLeftSupport());
-        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, half_period, foot_step.isLeftSupport());
+        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, 0.0f, static_cast<float>(foot_step.isLeftSupport()));
+        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, half_period, static_cast<float>(foot_step.isLeftSupport()));
 
         // Add points for flying foot position
         // Foot x position

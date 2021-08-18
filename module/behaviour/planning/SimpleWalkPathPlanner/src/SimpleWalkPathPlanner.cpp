@@ -54,7 +54,6 @@ namespace module::behaviour::planning {
     using message::localisation::Field;
     using message::motion::DisableWalkEngineCommand;
     using message::motion::EnableWalkEngineCommand;
-    using message::motion::KickFinished;
     using message::motion::StopCommand;
     using message::motion::WalkCommand;
     using message::motion::WalkStopped;
@@ -65,8 +64,6 @@ namespace module::behaviour::planning {
     using utility::behaviour::RegisterAction;
     using utility::input::LimbID;
     using utility::input::ServoID;
-    using utility::localisation::fieldStateToTransform3D;
-    using utility::nusight::graph;
 
     SimpleWalkPathPlanner::SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
@@ -97,29 +94,29 @@ namespace module::behaviour::planning {
             emit(std::make_unique<WantsToKick>(false));
         });
 
-        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
-            subsumptionId,
-            "Simple Walk Path Planner",
-            {
-                // Limb sets required by the walk engine:
-                std::pair<double, std::set<LimbID>>(0, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG}),
-                std::pair<double, std::set<LimbID>>(0, {LimbID::LEFT_ARM, LimbID::RIGHT_ARM}),
-            },
-            [this](const std::set<LimbID>& givenLimbs) {
-                if (givenLimbs.find(LimbID::LEFT_LEG) != givenLimbs.end()) {
-                    // Enable the walk engine.
-                    emit<Scope::DIRECT>(std::move(std::make_unique<EnableWalkEngineCommand>(subsumptionId)));
-                }
-            },
-            [this](const std::set<LimbID>& takenLimbs) {
-                if (takenLimbs.find(LimbID::LEFT_LEG) != takenLimbs.end()) {
-                    // Shut down the walk engine, since we don't need it right now.
-                    emit<Scope::DIRECT>(std::move(std::make_unique<DisableWalkEngineCommand>(subsumptionId)));
-                }
-            },
-            [this](const std::set<ServoID>&) {
-                // nothing
-            }}));
+        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
+            RegisterAction{subsumptionId,
+                           "Simple Walk Path Planner",
+                           {
+                               // Limb sets required by the walk engine:
+                               std::pair<double, std::set<LimbID>>(0, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG}),
+                               std::pair<double, std::set<LimbID>>(0, {LimbID::LEFT_ARM, LimbID::RIGHT_ARM}),
+                           },
+                           [this](const std::set<LimbID>& givenLimbs) {
+                               if (givenLimbs.find(LimbID::LEFT_LEG) != givenLimbs.end()) {
+                                   // Enable the walk engine.
+                                   emit<Scope::DIRECT>(std::make_unique<EnableWalkEngineCommand>(subsumptionId));
+                               }
+                           },
+                           [this](const std::set<LimbID>& takenLimbs) {
+                               if (takenLimbs.find(LimbID::LEFT_LEG) != takenLimbs.end()) {
+                                   // Shut down the walk engine, since we don't need it right now.
+                                   emit<Scope::DIRECT>(std::make_unique<DisableWalkEngineCommand>(subsumptionId));
+                               }
+                           },
+                           [](const std::set<ServoID>& /*unused*/) {
+                               // nothing
+                           }}));
 
         on<Trigger<WalkStopped>>().then([this] {
             emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {0, 0}}));
@@ -127,7 +124,7 @@ namespace module::behaviour::planning {
 
 
         on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
-            if (balls.balls.size() > 0) {
+            if (!balls.balls.empty()) {
                 timeBallLastSeen = NUClear::clock::now();
             }
         });
@@ -156,7 +153,7 @@ namespace module::behaviour::planning {
                     emit(std::make_unique<StopCommand>(subsumptionId));
                     return;
                 }
-                else if (latestCommand.type == message::behaviour::MotionCommand::Type::DIRECT_COMMAND) {
+                if (latestCommand.type == message::behaviour::MotionCommand::Type::DIRECT_COMMAND) {
                     // TO DO, change to Bezier stuff
                     std::unique_ptr<WalkCommand> command =
                         std::make_unique<WalkCommand>(subsumptionId, latestCommand.walk_command);
@@ -185,7 +182,7 @@ namespace module::behaviour::planning {
                 if (useLocalisation) {
 
                     // Transform kick target to torso space
-                    Eigen::Affine2d fieldPosition = Eigen::Affine2d(field.position);
+                    auto fieldPosition = Eigen::Affine2d(field.position);
                     Eigen::Affine3d Hfw;
                     Hfw.translation() =
                         Eigen::Vector3d(fieldPosition.translation().x(), fieldPosition.translation().y(), 0);
