@@ -37,8 +37,6 @@ namespace module::behaviour::skills {
         bool isFront;
 
         bool gettingUp;
-        ReactionHandle fallenCheck;
-        ReactionHandle getUp;
 
         /// config settings
         float FALLEN_ANGLE;
