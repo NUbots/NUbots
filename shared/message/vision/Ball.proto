@@ -45,6 +45,7 @@ message Ball {
     fvec2 screen_angular = 3;
 
     fvec2 angular_size = 4;
+    /// Colour of the ball for NUsight. Changes depending on the perceived ball location
     fvec4 colour = 5;
 }
 message Balls {
