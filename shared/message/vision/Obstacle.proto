@@ -36,7 +36,8 @@ message Obstacle {
     google.protobuf.Timestamp timestamp = 2;
     /// {x, y} points bounding the location of the obstacle
     Polygon shape = 3;
-    Team    team  = 4;
+
+    Team team = 4;
 }
 
 message Obstacles {

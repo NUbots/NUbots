@@ -43,8 +43,9 @@ message Ball {
     repeated Measurement measurements = 2;
     /// Angular positions from the camera
     fvec2 screen_angular = 3;
-    fvec2 angular_size   = 4;
-    fvec4 colour         = 5;
+
+    fvec2 angular_size = 4;
+    fvec4 colour = 5;
 }
 message Balls {
     /// ID of the camera that took the image containing the balls
@@ -52,6 +53,7 @@ message Balls {
     /// When the image was taken that this measurement is derived from
     google.protobuf.Timestamp timestamp = 2;
     /// Affine3d transform from world space to camera space at the time that the image was taken
-    mat4          Hcw   = 3;
+    mat4 Hcw = 3;
+
     repeated Ball balls = 4;
 }
