@@ -21,6 +21,7 @@ Include this module to allow the robot to get up after it has fallen over.
 * `message::motion::ExecuteGetup` instigates a getup
 * `message::motion::KillGetup` stops a getup
 * `utility::behaviour::ActionPriorities` signals when the module's priority changes
+* `utility::behaviour::RegisterAction` registers callbacks for starting or stopping getups
 
 ## Dependencies
 
