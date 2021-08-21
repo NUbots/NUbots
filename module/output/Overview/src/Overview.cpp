@@ -124,13 +124,6 @@ namespace module::output {
                             msg->ball_position_covariance = loc_ball->covariance.cast<float>();
                         }
                     }
-
-                    if (walk_path) {
-                        // Set our walk path plan
-                        for (const auto& state : walk_path->states) {
-                            msg->walk_path_plan.push_back(state);
-                        }
-                    }
                 }
 
                 if (kick_plan) {
