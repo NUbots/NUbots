@@ -38,9 +38,9 @@ namespace module::platform::darwin {
     private:
         message::platform::RawSensors sensors;
 
-        float imu_drift_rate                     = 0;
+        float imu_drift_rate                     = 0.0f;
         static constexpr size_t UPDATE_FREQUENCY = 90;
-        void addNoise(std::unique_ptr<message::platform::RawSensors>& sensors);
+        void addNoise(std::unique_ptr<message::platform::RawSensors>& sensors) const;
         struct NoiseConfig {
             NoiseConfig() = default;
             Eigen::Vector3f accelerometer{0.001, 0.001, 0.001};
