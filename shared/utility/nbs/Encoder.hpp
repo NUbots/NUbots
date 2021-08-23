@@ -13,13 +13,15 @@ namespace utility::nbs {
         /// The size of the radiation symbol at the start of each packet
         static constexpr int HEADER_SIZE = 3;
         /// The file we are outputting to currently
-        std::ofstream output_file;
+        std::ofstream output_file{};
         /// The file we are outputting our index to currently
-        zstr::ofstream index_file;
+        zstr::ofstream index_file{};
         /// The number of bytes written to the nbs file
-        uint64_t bytes_written;
+        uint64_t bytes_written = 0;
 
     public:
+        Encoder() = default;
+
         Encoder(std::filesystem::path path);
 
         Encoder(const std::filesystem::path& path, const std::filesystem::path& index_path);
@@ -54,6 +56,8 @@ namespace utility::nbs {
 
         /// @brief closes the internal nbs file
         void close();
+
+        void open(const std::filesystem::path& path);
 
         /// @brief checks that the nbs file is open
         bool is_open() const;

@@ -2,10 +2,10 @@
 
 namespace utility::nbs {
 
-    Encoder::Encoder(std::filesystem::path path) : output_file(path), index_file(path += ".idx"), bytes_written(0) {}
+    Encoder::Encoder(std::filesystem::path path) : output_file(path), index_file(path += ".idx") {}
 
     Encoder::Encoder(const std::filesystem::path& path, const std::filesystem::path& index_path)
-        : output_file(path), index_file(index_path), bytes_written(0) {}
+        : output_file(path), index_file(index_path) {}
 
     int Encoder::write(const NUClear::clock::time_point& timestamp,
                        const uint64_t& message_timestamp,
@@ -80,10 +80,18 @@ namespace utility::nbs {
         if (output_file.is_open()) {
             output_file.close();
         }
+        if (index_file.is_open()) {
+            index_file.close();
+        }
+    }
+
+    void Encoder::open(const std::filesystem::path& path) {
+        output_file.open(path);
+        index_file.open(path);
     }
 
     bool Encoder::is_open() const {
-        return output_file.is_open();
+        return output_file.is_open() && index_file.is_open();
     }
 
 }  // namespace utility::nbs
