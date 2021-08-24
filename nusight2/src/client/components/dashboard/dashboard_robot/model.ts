@@ -1,6 +1,4 @@
-import { computed } from 'mobx'
-import { observable } from 'mobx'
-
+import { computed, observable } from 'mobx'
 import { message } from '../../../../shared/messages'
 import { memoize } from '../../../base/memoize'
 import { Matrix2 } from '../../../math/matrix2'
@@ -10,6 +8,7 @@ import { Vector2 } from '../../../math/vector2'
 import { Vector3 } from '../../../math/vector3'
 import { BrowserSystemClock } from '../../../time/browser_clock'
 import { RobotModel } from '../../robot/model'
+
 import State = message.behaviour.Behaviour.State
 import Mode = message.input.GameState.Data.Mode
 import PenaltyReason = message.input.GameState.Data.PenaltyReason
@@ -66,8 +65,7 @@ export class DashboardRobotModel {
   @observable lastSeenBall: number
   @observable lastSeenGoal: number
 
-  // The walk plan and the current walk command
-  @observable walkPathPlan: Vector2[]
+  // The current walk command
   @observable walkCommand: Vector3
 
   constructor(
@@ -96,7 +94,6 @@ export class DashboardRobotModel {
       lastCameraImage,
       lastSeenBall,
       lastSeenGoal,
-      walkPathPlan,
       walkCommand,
     }: DashboardRobotModelOpts,
   ) {
@@ -124,7 +121,6 @@ export class DashboardRobotModel {
     this.lastCameraImage = lastCameraImage
     this.lastSeenBall = lastSeenBall
     this.lastSeenGoal = lastSeenGoal
-    this.walkPathPlan = walkPathPlan
     this.walkCommand = walkCommand
   }
 
@@ -154,7 +150,6 @@ export class DashboardRobotModel {
       time: BrowserSystemClock.now(),
       voltage: -1,
       walkCommand: Vector3.of(),
-      walkPathPlan: [],
     })
   })
 
@@ -203,6 +198,5 @@ interface DashboardRobotModelOpts {
   lastCameraImage: number
   lastSeenBall: number
   lastSeenGoal: number
-  walkPathPlan: Vector2[]
   walkCommand: Vector3
 }
