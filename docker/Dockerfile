@@ -39,7 +39,8 @@ RUN install-package \
     npm \
     yarn \
     git \
-    ncurses
+    ncurses \
+    doxygen
 
 # Get python to look in /usr/local for packages
 RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
