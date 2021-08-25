@@ -5,13 +5,13 @@ export type ReactionStats = {
      name               :string;
      trigger_name       :string;
      function_name      :string;
-     reaction_id        :number;
-     task_id            :number;
-     cause_reaction_id  :number;
-     cause_task_id      :number;
-     emitted            :number;
-     started            :number;
-     finished           :number;
+     reaction_id        :Number | Long;
+     task_id            :Number | Long;
+     cause_reaction_id  :Number | Long;
+     cause_task_id      :Number | Long;
+     emitted            :Number | Long;
+     started            :Number | Long;
+     finished           :Number | Long;
 }
 
 export const OdometryVisualizer = ( stats: ReactionStats ) => {

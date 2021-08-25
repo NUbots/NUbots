@@ -1,47 +1,31 @@
 import { observable } from 'mobx'
-import { Matrix4 } from '../../../math/matrix4'
-import { Vector3 } from '../../../math/vector3'
+import { ReactionStats } from './view'
 
 export class OdometryVisualizerModel {
-  @observable.ref Hwt: Matrix4
-  @observable.ref accelerometer: Vector3
-  @observable.ref camera: OdometryCamera
+  @observable.ref reaction : ReactionStats
 
   constructor({
-    Hwt,
-    accelerometer,
-    camera,
+    reaction
   }: {
-    Hwt: Matrix4
-    accelerometer: Vector3
-    camera: OdometryCamera
+    reaction: ReactionStats
   }) {
-    this.Hwt = Hwt
-    this.accelerometer = accelerometer
-    this.camera = camera
+    this.reaction = reaction
   }
 
-  static of({ Hwt = Matrix4.of(), accelerometer }: { Hwt?: Matrix4; accelerometer: Vector3 }) {
+  static of({ reaction}: { reaction: ReactionStats}) {
     return new OdometryVisualizerModel({
-      Hwt,
-      accelerometer,
-      camera: OdometryCamera.of({ distance: 2 }),
+     reaction : {
+       name : reaction.name,
+       trigger_name: reaction.trigger_name,
+       function_name: reaction.function_name,
+       reaction_id: reaction.reaction_id,
+       task_id: reaction.task_id,
+       cause_reaction_id: reaction.cause_reaction_id,
+       cause_task_id: reaction.cause_task_id,
+       emitted: reaction.emitted,
+       started: reaction.started,
+       finished: reaction.finished
+     }
     })
-  }
-}
-
-export class OdometryCamera {
-  @observable.ref distance: number
-  @observable.ref pitch: number
-  @observable.ref yaw: number
-
-  constructor({ distance, pitch, yaw }: { distance: number; pitch: number; yaw: number }) {
-    this.distance = distance
-    this.pitch = pitch
-    this.yaw = yaw
-  }
-
-  static of({ distance }: { distance: number }) {
-    return new OdometryCamera({ distance, pitch: 0, yaw: 0 })
   }
 }

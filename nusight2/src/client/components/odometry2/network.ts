@@ -1,16 +1,15 @@
 import { action } from 'mobx'
-import * as THREE from 'three'
-import { Matrix4 } from '../../math/matrix4'
-import { Vector3 } from '../../math/vector3'
+import { message } from '../../../shared/messages'
 import { Network } from '../../network/network'
 import { NUsightNetwork } from '../../network/nusight_network'
 import { RobotModel } from '../robot/model'
 import { OdometryRobotModel } from './model'
-import { message } from '../../../shared/messages'
+import { OdometryVisualizerModel } from './odometry_visualizer/model'
+import { ReactionStats } from './odometry_visualizer/view'
 
 export class OdometryNetwork {
   constructor(private network: Network) {
-    this.network.on(message.input.Sensors, this.onSensors)
+    this.network.on(message.support.nuclear.ReactionStatistics, this.onReactionStats)
   }
 
   static of(nusightNetwork: NUsightNetwork): OdometryNetwork {
@@ -23,11 +22,21 @@ export class OdometryNetwork {
   }
 
   @action.bound
-  private onSensors(robotModel: RobotModel, packet: message.input.Sensors) {
-    const robot = OdometryRobotModel.of(robotModel)
-    robot.visualizerModel.Hwt = Matrix4.fromThree(
-      new THREE.Matrix4().getInverse(Matrix4.from(packet.Htw).toThree()),
-    )
-    robot.visualizerModel.accelerometer = Vector3.from(packet.accelerometer)
+  private onReactionStats(robotModel: RobotModel, packet: message.support.nuclear.ReactionStatistics) {
+
+    const reaction: ReactionStats = {
+      name: packet.name,
+      trigger_name: packet.triggerName,
+      function_name: packet.functionName,
+      reaction_id: packet.reactionId,
+      task_id: packet.taskId,
+      cause_reaction_id: packet.causeReactionId,
+      cause_task_id: packet.causeTaskId,
+      emitted: packet.emitted,
+      started: packet.started,
+      finished: packet.finished
+    }
+    const visualizerModel = new OdometryVisualizerModel({ reaction })
+    const robot = OdometryRobotModel.of(robotModel, visualizerModel)
   }
 }
