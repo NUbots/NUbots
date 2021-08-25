@@ -19,8 +19,14 @@
 
 
 #include <catch.hpp>
+#include <utility>
+
 #include <yaml-cpp/yaml.h>
 #include "utility/support/yaml_expression.hpp"
+
+
+using utility::support::Expression;
+using utility::support::resolve_expression;
 
 /**
  * @author Liam Craft
@@ -31,11 +37,15 @@
 // Use the BDD macros
 
 //
-// SCENARIO("yaml nodes can be converted to a given container type.", "[utility][support][yaml_expression]"){
-//     GIVEN("A yaml node containing a list of data"){
-//         YAML::Node testInts = YAML::LoadFile("/home/nubots/NUbots/shared/tests/test_data/yamlConversionTestInts.yaml");
-//         WHEN(zzz){
-
-//         }
-//     }
-// }
+SCENARIO("yaml nodes can be converted to a given container type.", "[utility][support][yaml_expression]"){
+    GIVEN("A yaml node containing a list of data"){
+        YAML::Node testInts = YAML::LoadFile("/home/nubots/NUbots/shared/tests/data/yamlConversionTestVals.yaml");
+        WHEN("A vector is declared using the return value of utility::support::resolve_expression(yamlNode)"){
+            const std::vector<int> intVector = resolve_expression<int>(testInts["ints"]);
+        }
+        //Check that the values aren't fucked (container size, data type....)
+        for(size_t i = 0; i < testInts["ints"].size(); i++){
+            REQUIRE(1 == 2);
+        }
+    }
+}
