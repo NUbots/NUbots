@@ -279,7 +279,7 @@ namespace module::vision {
                 // and react based on that last balls message.
                 emit(std::move(balls));
 
-                if (balls.balls.empty()) {
+                if (balls->balls.empty()) {
                     log<NUClear::DEBUG>("Found no balls.");
                 }
             });
