@@ -12,4 +12,4 @@ def register(command):
 @run_on_docker
 def run(**kwargs):
     # Generate the documentation using the config file `.Doxyfile`
-    exit(subprocess.run(["doxygen", ".Doxyfile"]).exitcode)
+    exit(subprocess.run(["doxygen", ".Doxyfile"]).returncode)
