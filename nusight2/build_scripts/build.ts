@@ -15,18 +15,19 @@ const opts: ConfigOptions = {
 }
 
 webpack([getClientConfig(opts), getServerConfig(opts)]).run((err, stats) => {
-  if (stats) {
-    process.stdout.write(stats.toString({ colors: true }) + '\n')
-    if (stats.hasErrors()) {
-      process.exitCode = 1
-    }
-  }
   if (err) {
     process.stderr.write(err.message)
     if (err.stack) {
       process.stderr.write(err.stack)
     }
     process.exitCode = 1
+    return
+  }
+  if (stats) {
+    process.stdout.write(stats.toString({ colors: true }) + '\n')
+    if (stats.hasErrors()) {
+      process.exitCode = 1
+    }
   }
   close()
 })
