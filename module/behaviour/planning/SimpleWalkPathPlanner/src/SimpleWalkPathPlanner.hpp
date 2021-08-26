@@ -64,12 +64,7 @@ namespace module::behaviour::planning {
         float ball_approach_dist = 0.2;
         float slowdown_distance  = 0.2;
         bool useLocalisation     = true;
-
-        //----------- Utility Functions - Designed to allow for the overall behaviour of the robots path planning to be adjusted at a higher level ----
-
-        void walk_directly();
-        void determine_simple_walk_path();
-
+        
     public:
         explicit SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);
     };
