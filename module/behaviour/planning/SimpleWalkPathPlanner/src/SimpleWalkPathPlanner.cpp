@@ -122,14 +122,13 @@ namespace module::behaviour::planning {
             emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {0, 0}}));
         });
 
-
+        // Used to maintain the time since the ball was last seen for a timeout
+        // period (could be implemented outside of the path planner and somewhere
+        // else in strategy to call a particular 'style' of path planning that is
+        // more likely to find the ball)
         on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
             if (!balls.balls.empty()) {
-                timeBallLastSeen =
-                    NUClear::clock::now();  // Used to maintain the time since the ball was last seen for a timeout
-                                            // period (could be implemented outside of the path planner and somewhere
-                                            // else in strategy to call a particular 'style' of path planning that is
-                                            // more likely to find the ball)
+                timeBallLastSeen = NUClear::clock::now();
             }
         });
 
@@ -191,26 +190,28 @@ namespace module::behaviour::planning {
         //-------- UTILITY FUNCTIONS - Add extra behaviours for path planning here and in the switch case of this file
 
         void walkDirectly() {
-            std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(subsumptionId, latestCommand.walk_command);
+            std::unique_ptr<WalkCommand> command =
+                std::make_unique<WalkCommand>(subsumptionId, latestCommand.walk_command);
             emit(std::move(command));
             emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
         }
 
         void determineSimpleWalkPath(const Ball& ball,
-                                    const Field& field,
-                                    const Sensors& sensors,
-                                    const KickPlan& kickPlan,
-                                    const FieldDescription& fieldDescription) {
+                                     const Field& field,
+                                     const Sensors& sensors,
+                                     const KickPlan& kickPlan,
+                                     const FieldDescription& fieldDescription) {
             Eigen::Affine3d Htw(sensors.Htw);
 
-            auto now                = NUClear::clock::now();
-            float timeSinceBallSeen = std::chrono::duration_cast<std::chrono::nanoseconds>(now - timeBallLastSeen).count()
-                                    * (1.0f / std::nano::den);
+            auto now = NUClear::clock::now();
+            float timeSinceBallSeen =
+                std::chrono::duration_cast<std::chrono::nanoseconds>(now - timeBallLastSeen).count()
+                * (1.0f / std::nano::den);
 
 
             Eigen::Vector3d rBWw_temp(ball.position.x(), ball.position.y(), fieldDescription.ball_radius);
             rBWw = timeSinceBallSeen < search_timeout ? rBWw_temp :                         // Place last seen
-                    Htw.inverse().linear().leftCols<1>() + Htw.inverse().translation();  // In front of the robot
+                       Htw.inverse().linear().leftCols<1>() + Htw.inverse().translation();  // In front of the robot
             position = (Htw * rBWw).head<2>();
 
             // TODO Fix Hack Planner:
@@ -223,7 +224,8 @@ namespace module::behaviour::planning {
                 // Transform kick target to torso space
                 auto fieldPosition = Eigen::Affine2d(field.position);
                 Eigen::Affine3d Hfw;
-                Hfw.translation() = Eigen::Vector3d(fieldPosition.translation().x(), fieldPosition.translation().y(), 0);
+                Hfw.translation() =
+                    Eigen::Vector3d(fieldPosition.translation().x(), fieldPosition.translation().y(), 0);
                 Hfw.linear() =
                     Eigen::AngleAxisd(Eigen::Rotation2Dd(fieldPosition.rotation()).angle(), Eigen::Vector3d::UnitZ())
                         .toRotationMatrix();
@@ -268,7 +270,7 @@ namespace module::behaviour::planning {
             float scaleS         = 2.0 / (1.0 + std::exp(-a * std::fabs(position.y()) + b)) - 1.0;
             float scaleS2        = angle / M_PI;
             float finalSideSpeed = -speedFactor * ((0.0 < position.y()) - (position.y() < 0.0)) * sideStep * sideSpeed
-                                * scaleS * (1.0 - scaleS2);
+                                   * scaleS * (1.0 - scaleS2);
 
 
             std::unique_ptr<WalkCommand> command =
