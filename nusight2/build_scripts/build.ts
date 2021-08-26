@@ -14,7 +14,8 @@ const opts: ConfigOptions = {
   rootDir: path.join(__dirname, '..'),
 }
 
-webpack([getClientConfig(opts), getServerConfig(opts)]).run((err, stats) => {
+const compiler = webpack([getClientConfig(opts), getServerConfig(opts)])
+compiler.run((err, stats) => {
   if (err) {
     process.stderr.write(err.message)
     if (err.stack) {
@@ -29,5 +30,6 @@ webpack([getClientConfig(opts), getServerConfig(opts)]).run((err, stats) => {
       process.exitCode = 1
     }
   }
-  close()
+  // Calling close() allows low-priority work (like persistent caching) the opportunity to complete
+  compiler.close((closeErr) => {})
 })
