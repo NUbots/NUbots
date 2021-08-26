@@ -118,6 +118,16 @@ namespace module::vision {
                 log<NUClear::DEBUG>(fmt::format("Found {} clusters below green horizon", clusters.size()));
 
                 auto balls = std::make_unique<Balls>();
+
+                // We still emit if there are no balls otherwise other modules are not aware that we can no longer see a
+                // ball, and they will keep using the last message sent. See head behaviour, where we use 'with' balls
+                // and react based on that last balls message.
+                if (clusters.empty()) {
+                    log<NUClear::DEBUG>("Found no balls.");
+                    emit(std::move(balls));
+                    return;
+                }
+
                 balls->balls.reserve(clusters.size());
 
                 balls->id        = horizon.id;
@@ -274,14 +284,7 @@ namespace module::vision {
                     }
                 }
 
-                // We still emit if there are no balls otherwise other modules are not aware that we can no longer see a
-                // ball, and they will keep using the last message sent. See head behaviour, where we use 'with' balls
-                // and react based on that last balls message.
                 emit(std::move(balls));
-
-                if (balls->balls.empty()) {
-                    log<NUClear::DEBUG>("Found no balls.");
-                }
             });
     }
 }  // namespace module::vision
