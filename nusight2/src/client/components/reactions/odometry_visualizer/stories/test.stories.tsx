@@ -17,7 +17,6 @@ class ReactionVisualizerHarness extends React.Component<{ animate?: boolean }> {
     accelerometer: new Vector3(0, 0, -9.8),
   })
 
-
   render() {
     return <ReactionVisualizer model={this.model} />
   }

@@ -8,8 +8,6 @@ import { OdometryModel } from './model'
 import { OdometryNetwork } from './network'
 import { OdometryView } from './view'
 
-
-
 export function installOdometry({
   nav,
   appModel,

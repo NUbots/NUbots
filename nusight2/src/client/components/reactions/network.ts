@@ -35,11 +35,11 @@ export class ReactionNetwork {
       causeTaskId: packet.causeTaskId,
       emitted: packet.emitted,
       started: packet.started,
-      finished: packet.finished
+      finished: packet.finished,
     }
 
     const robot = ReactionRobotModel.of(robotModel)
 
-    robot.lastReaction = reaction;
+    robot.lastReaction = reaction
   }
 }

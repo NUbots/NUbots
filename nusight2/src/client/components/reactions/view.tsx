@@ -33,12 +33,12 @@ export class ReactionView extends React.Component<{
         </menu>
         {selectedRobot && selectedRobot.lastReaction ? (
           <div className={styles.content}>
-            <ReactionVisualizer
-              stats={selectedRobot.lastReaction}
-            />
+            <ReactionVisualizer stats={selectedRobot.lastReaction} />
             {/*<ReactionVisualizer stats={selectedRobot.visualizerModel} />*/}
           </div>
-        ) : <div>No robot selected or no reactions</div> }
+        ) : (
+          <div>No robot selected or no reactions</div>
+        )}
       </div>
     )
   }

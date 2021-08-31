@@ -5,7 +5,6 @@ import { NUClearNetClient } from '../../shared/nuclearnet/nuclearnet_client'
 import { Message, Simulator } from '../simulator'
 import { periodic } from './periodic'
 
-
 import ReactionStatistics = message.support.nuclear.ReactionStatistics
 
 export class ReactionStatsSimulator extends Simulator {
@@ -47,16 +46,16 @@ export class ReactionStatsSimulator extends Simulator {
     const t = time / 10 - this.robotIndex
 
     const buffer = ReactionStatistics.encode({
-        name: 'test-test',
-        reactionId: 0,
-        causeReactionId: 0,
-        causeTaskId: 0,
-        emitted: this.random.integer(0, 100),
-        finished: 0,
-        functionName: '',
-        started: 0,
-        taskId: t,
-        triggerName: ''
+      name: 'test-test',
+      reactionId: 0,
+      causeReactionId: 0,
+      causeTaskId: 0,
+      emitted: this.random.integer(0, 100),
+      finished: 0,
+      functionName: '',
+      started: 0,
+      taskId: t,
+      triggerName: '',
     }).finish()
 
     const message = { messageType, buffer }

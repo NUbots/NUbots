@@ -8,7 +8,6 @@ import { SensorsSimulator } from './simulators/sensors_simulator'
 import { VisionSimulator } from './simulators/vision_simulator'
 import { VirtualRobot } from './virtual_robot'
 
-
 export class VirtualRobots {
   private robots: VirtualRobot[]
 
