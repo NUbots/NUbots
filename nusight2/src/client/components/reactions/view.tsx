@@ -3,24 +3,23 @@ import { observer } from 'mobx-react'
 import React from 'react'
 import { RobotModel } from '../robot/model'
 import { RobotSelectorSingle } from '../robot_selector_single/view'
-import { OdometryController } from './controller'
-import { OdometryModel } from './model'
-import { OdometryNetwork } from './network'
-import { OdometryVisualizer } from './odometry_visualizer/view'
+import { ReactionController } from './controller'
+import { ReactionModel } from './model'
+import { ReactionVisualizer } from './odometry_visualizer/view'
 import styles from './styles.css'
 
 @observer
-export class OdometryView extends React.Component<{
-  model: OdometryModel
+export class ReactionView extends React.Component<{
+  model: ReactionModel
   menu: React.ComponentType
-  controller: OdometryController
-  network: OdometryNetwork
+  controller: ReactionController
 }> {
   render() {
     const {
       model: { selectedRobot, robots },
       menu,
     } = this.props
+    console.log({ selectedRobot, lastReaction: selectedRobot?.lastReaction })
     return (
       <div className={styles.odometry}>
         <menu>
@@ -32,23 +31,14 @@ export class OdometryView extends React.Component<{
             />
           </div>
         </menu>
-        {selectedRobot && (
+        {selectedRobot && selectedRobot.lastReaction ? (
           <div className={styles.content}>
-            <OdometryVisualizer
-              name={"name"}
-              trigger_name={"trigger_name"}
-              function_name={"function_name"}
-              reaction_id={0}
-              task_id={0}
-              cause_reaction_id={0}
-              cause_task_id={0}
-              emitted={0}
-              started={0}
-              finished={0}
+            <ReactionVisualizer
+              stats={selectedRobot.lastReaction}
             />
-            {/*<OdometryVisualizer stats={selectedRobot.visualizerModel} />*/}
+            {/*<ReactionVisualizer stats={selectedRobot.visualizerModel} />*/}
           </div>
-        )}
+        ) : <div>No robot selected or no reactions</div> }
       </div>
     )
   }

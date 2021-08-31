@@ -1,7 +1,7 @@
 import { observable } from 'mobx'
 import { ReactionStats } from './view'
 
-export class OdometryVisualizerModel {
+export class ReactionVisualizerModel {
   @observable.ref reaction : ReactionStats
 
   constructor({
@@ -12,8 +12,8 @@ export class OdometryVisualizerModel {
     this.reaction = reaction
   }
 
-  static of({ reaction}: { reaction: ReactionStats}) {
-    return new OdometryVisualizerModel({
+  static of({reaction}: { reaction: ReactionStats}) {
+    return new ReactionVisualizerModel({
      reaction : {
        name : reaction.name,
        trigger_name: reaction.trigger_name,
