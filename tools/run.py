@@ -25,7 +25,12 @@ def register(command):
         help="Run the specified program using valgrind",
     )
     command.add_argument(
-        "--dont-append-bin", dest="use_bin", action="store_false", default=True, help="(Advanced) run a shell command"
+        "-p",
+        "--run-program",
+        dest="use_bin",
+        action="store_false",
+        default=True,
+        help="Runs a program installed in the docker image",
     )
     command.add_argument("args", nargs="+", help="the command and any arguments that should be used for the execution")
 
