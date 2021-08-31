@@ -15,7 +15,13 @@ import { NUgusViewModel } from './nugus_robot/view_model'
 import { SkyboxViewModel } from './skybox/view_model'
 
 export class LocalisationViewModel {
-  constructor(private readonly canvas: Canvas, private readonly model: LocalisationModel) {}
+  private readonly canvas: Canvas
+  private readonly model: LocalisationModel
+
+  constructor(canvas: Canvas, model: LocalisationModel) {
+    this.canvas = canvas
+    this.model = model
+  }
 
   static of(canvas: Canvas, model: LocalisationModel) {
     return new LocalisationViewModel(canvas, model)

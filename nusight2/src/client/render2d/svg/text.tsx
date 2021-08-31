@@ -9,17 +9,8 @@ import { toSvgProps, toSvgTransform } from './rendering'
 
 type Props = { model: Shape<TextGeometry>; world: Transform }
 export const Text = observer(({ model: { geometry, appearance }, world }: Props) => {
-  const {
-    x,
-    y,
-    fontFamily,
-    fontSize,
-    text,
-    textAlign,
-    textBaseline,
-    worldAlignment,
-    worldScale,
-  } = geometry
+  const { x, y, fontFamily, fontSize, text, textAlign, textBaseline, worldAlignment, worldScale } =
+    geometry
 
   const t = Transform.of({
     translate: { x, y },
