@@ -24,11 +24,14 @@ def register(command):
         default=False,
         help="Run the specified program using valgrind",
     )
+    command.add_argument(
+        "--dont-append-bin", dest="use_bin", action="store_false", default=True, help="(Advanced) run a shell command"
+    )
     command.add_argument("args", nargs="+", help="the command and any arguments that should be used for the execution")
 
 
 @run_on_docker
-def run(args, use_gdb, use_valgrind, **kwargs):
+def run(args, use_gdb, use_valgrind, use_bin, **kwargs):
 
     # Check to see if ASan was enabled
     use_asan = b.cmake_cache["USE_ASAN"] == "ON"
@@ -42,8 +45,9 @@ def run(args, use_gdb, use_valgrind, **kwargs):
     # Change into the build directory
     os.chdir(os.path.join(b.project_dir, "..", "build"))
 
-    # Add 'bin/` to the command (first argument)
-    args[0] = os.path.join("bin", args[0])
+    if use_bin:
+        # Add 'bin/` to the command (first argument)
+        args[0] = os.path.join("bin", args[0])
 
     # Get current environment
     env = os.environ
