@@ -164,11 +164,11 @@ namespace module::behaviour::planning {
                     case message::behaviour::MotionCommand::Type::DIRECT_COMMAND: walkDirectly(); return;
 
                     case message::behaviour::MotionCommand::Type::BALL_APPROACH:
-                        determineSimpleWalkPath(ball, field, sensors, kickPlan, fieldDescription);
+                        determineSimpleWalkPath(ball, field, sensors, wantsTo, kickPlan, fieldDescription);
                         return;
 
                     case message::behaviour::MotionCommand::Type::WALK_TO_STATE:
-                        determineSimpleWalkPath(ball, field, sensors, kickPlan, fieldDescription);
+                        determineSimpleWalkPath(ball, field, sensors, wantsTo, kickPlan, fieldDescription);
                         return;
 
                     // This line should be UNREACHABLE
@@ -177,103 +177,104 @@ namespace module::behaviour::planning {
                         emit(std::make_unique<StopCommand>(subsumptionId));
                         return;
                 }
-
-
-                //-------- Add extra behaviours for path planning here and in the switch case of this file
-
-                void walkDirectly() {
-                    emit(std::move(std::make_unique<WalkCommand>(subsumptionId, latestCommand.walk_command)));
-                    emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
-                }
-
-                void determineSimpleWalkPath() {
-
-                    Eigen::Affine3d Htw(sensors.Htw);
-
-                    auto now = NUClear::clock::now();
-                    float timeSinceBallSeen =
-                        std::chrono::duration_cast<std::chrono::nanoseconds>(now - timeBallLastSeen).count()
-                        * (1.0f / std::nano::den);
-
-
-                    Eigen::Vector3d rBWw_temp(ball.position.x(), ball.position.y(), fieldDescription.ball_radius);
-
-                    rBWw = timeSinceBallSeen < search_timeout
-                               ? rBWw_temp
-                               : Htw.inverse().linear().leftCols<1>() + Htw.inverse().translation();
-
-                    position = (Htw * rBWw).head<2>();
-
-                    // TODO Fix Hack Planner:
-                    float headingChange = 0;
-                    float sideStep      = 0;
-                    float speedFactor   = 1;
-
-                    if (useLocalisation) {
-
-                        // Transform kick target to torso space
-                        auto fieldPosition = Eigen::Affine2d(field.position);
-                        Eigen::Affine3d Hfw;
-                        Hfw.translation() =
-                            Eigen::Vector3d(fieldPosition.translation().x(), fieldPosition.translation().y(), 0);
-                        Hfw.linear() = Eigen::AngleAxisd(Eigen::Rotation2Dd(fieldPosition.rotation()).angle(),
-                                                         Eigen::Vector3d::UnitZ())
-                                           .toRotationMatrix();
-
-                        Eigen::Affine3d Htf        = Htw * Hfw.inverse();
-                        Eigen::Vector3d kickTarget = Htf * Eigen::Vector3d(kickPlan.target.x(), kickPlan.target.y(), 0);
-
-                        // approach point:
-                        Eigen::Vector2d ballToTarget = (kickTarget.head<2>() - position).normalized();
-                        Eigen::Vector2d kick_point   = position - ballToTarget * ball_approach_dist;
-
-                        if (position.norm() > slowdown_distance) {
-                            position = kick_point;
-                        }
-                        else {
-                            speedFactor   = slow_approach_factor;
-                            headingChange = std::atan2(ballToTarget.y(), ballToTarget.x());
-                            sideStep      = 1;
-                        }
-                    }
-
-                    // If the value of position was less than the slowdown_distance provided in the config file,
-                    // headingChange is potentially non-zero. This causes the requested angle to turn in the move
-                    // command at the end of this function to potentially be the in the same direction resultant of the
-                    // vector between the robot and the ball, as well as the vector from ball to goal (Bryce Tuppurainen
-                    // - Can someone please confirm or clarify this with my in the PR, this was my understanding when
-                    // going through this script initially)
-                    float angle = std::atan2(position.y(), position.x()) + headingChange;
-
-                    // If the angle is bound between the maximum provided turning
-                    // speed use it. Otherwise, the appropriate maximum is used
-                    angle = std::min(turnSpeed, std::max(angle, -turnSpeed));
-
-
-                    // Euclidean distance to ball (scaleF, scaleF2, scaleS, scaleS2 for Forward and Side
-                    // respectively, angle is provided above as some float value in radians from the arc-tan, divding
-                    // this by Pi )
-                    float scaleF            = 2.0 / (1.0 + std::exp(-a * std::fabs(position.x()) + b)) - 1.0;
-                    float scaleF2           = angle / M_PI;
-                    float finalForwardSpeed = speedFactor * forwardSpeed * scaleF * (1.0 - scaleF2);
-
-                    float scaleS         = 2.0 / (1.0 + std::exp(-a * std::fabs(position.y()) + b)) - 1.0;
-                    float scaleS2        = angle / M_PI;
-                    float finalSideSpeed = -speedFactor * ((0.0 < position.y()) - (position.y() < 0.0)) * sideStep
-                                           * sideSpeed * scaleS * (1.0 - scaleS2);
-
-
-                    std::unique_ptr<WalkCommand> command =
-                        std::make_unique<WalkCommand>(subsumptionId,
-                                                      Eigen::Vector3d(finalForwardSpeed, finalSideSpeed, angle));
-
-                    emit(std::move(command));
-                    emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
-                }
             });
 
         // Save the plan cmd into latestCommand
         on<Trigger<MotionCommand>, Sync<SimpleWalkPathPlanner>>().then(
             [this](const MotionCommand& cmd) { latestCommand = cmd; });
+    }
+
+
+    //-------- Add extra behaviours for path planning here and in the switch case of this file
+
+    void SimpleWalkPathPlanner::walkDirectly() {
+        emit(std::move(std::make_unique<WalkCommand>(subsumptionId, latestCommand.walk_command)));
+        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
+    }
+
+    void SimpleWalkPathPlanner::determineSimpleWalkPath(const Ball& ball,
+                         const Field& field,
+                         const Sensors& sensors,
+                         const WantsToKick& wantsTo,
+                         const KickPlan& kickPlan,
+                         const FieldDescription& fieldDescription) {
+
+        Eigen::Affine3d Htw(sensors.Htw);
+
+        auto now                = NUClear::clock::now();
+        float timeSinceBallSeen = std::chrono::duration_cast<std::chrono::nanoseconds>(now - timeBallLastSeen).count()
+                                  * (1.0f / std::nano::den);
+
+
+        Eigen::Vector3d rBWw_temp(ball.position.x(), ball.position.y(), fieldDescription.ball_radius);
+
+        rBWw = timeSinceBallSeen < search_timeout ? rBWw_temp
+                                                  : Htw.inverse().linear().leftCols<1>() + Htw.inverse().translation();
+
+        position = (Htw * rBWw).head<2>();
+
+        // TODO Fix Hack Planner:
+        float headingChange = 0;
+        float sideStep      = 0;
+        float speedFactor   = 1;
+
+        if (useLocalisation) {
+
+            // Transform kick target to torso space
+            auto fieldPosition = Eigen::Affine2d(field.position);
+            Eigen::Affine3d Hfw;
+            Hfw.translation() = Eigen::Vector3d(fieldPosition.translation().x(), fieldPosition.translation().y(), 0);
+            Hfw.linear() =
+                Eigen::AngleAxisd(Eigen::Rotation2Dd(fieldPosition.rotation()).angle(), Eigen::Vector3d::UnitZ())
+                    .toRotationMatrix();
+
+            Eigen::Affine3d Htf        = Htw * Hfw.inverse();
+            Eigen::Vector3d kickTarget = Htf * Eigen::Vector3d(kickPlan.target.x(), kickPlan.target.y(), 0);
+
+            // approach point:
+            Eigen::Vector2d ballToTarget = (kickTarget.head<2>() - position).normalized();
+            Eigen::Vector2d kick_point   = position - ballToTarget * ball_approach_dist;
+
+            if (position.norm() > slowdown_distance) {
+                position = kick_point;
+            }
+            else {
+                speedFactor   = slow_approach_factor;
+                headingChange = std::atan2(ballToTarget.y(), ballToTarget.x());
+                sideStep      = 1;
+            }
+        }
+
+        // If the value of position was less than the slowdown_distance provided in the config file,
+        // headingChange is potentially non-zero. This causes the requested angle to turn in the move
+        // command at the end of this function to potentially be the in the same direction resultant of the
+        // vector between the robot and the ball, as well as the vector from ball to goal (Bryce Tuppurainen
+        // - Can someone please confirm or clarify this with my in the PR, this was my understanding when
+        // going through this script initially)
+        float angle = std::atan2(position.y(), position.x()) + headingChange;
+
+        // If the angle is bound between the maximum provided turning
+        // speed use it. Otherwise, the appropriate maximum is used
+        angle = std::min(turnSpeed, std::max(angle, -turnSpeed));
+
+
+        // Euclidean distance to ball (scaleF, scaleF2, scaleS, scaleS2 for Forward and Side
+        // respectively, angle is provided above as some float value in radians from the arc-tan, divding
+        // this by Pi )
+        float scaleF            = 2.0 / (1.0 + std::exp(-a * std::fabs(position.x()) + b)) - 1.0;
+        float scaleF2           = angle / M_PI;
+        float finalForwardSpeed = speedFactor * forwardSpeed * scaleF * (1.0 - scaleF2);
+
+        float scaleS         = 2.0 / (1.0 + std::exp(-a * std::fabs(position.y()) + b)) - 1.0;
+        float scaleS2        = angle / M_PI;
+        float finalSideSpeed = -speedFactor * ((0.0 < position.y()) - (position.y() < 0.0)) * sideStep * sideSpeed
+                               * scaleS * (1.0 - scaleS2);
+
+
+        std::unique_ptr<WalkCommand> command =
+            std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(finalForwardSpeed, finalSideSpeed, angle));
+
+        emit(std::move(command));
+        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
     }
 }  // namespace module::behaviour::planning
