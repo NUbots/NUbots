@@ -86,7 +86,6 @@ namespace module::behaviour::planning {
         void determineSimpleWalkPath(const Ball& ball,
                                      const Field& field,
                                      const Sensors& sensors,
-                                     const WantsToKick& wantsTo,
                                      const KickPlan& kickPlan,
                                      const FieldDescription& fieldDescription);
 
