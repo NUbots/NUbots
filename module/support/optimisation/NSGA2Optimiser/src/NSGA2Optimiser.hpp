@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "nsga2/NSGA2.hpp"
+#include "tasks/OptimiserTask.hpp"
 
 #include "message/support/optimisation/NSGA2EvaluatorMessages.hpp"
 #include "message/support/optimisation/NSGA2OptimiserMessages.hpp"
@@ -19,6 +20,7 @@ namespace module {
                 /// @brief Implementation of the NSGA II algorithm, holds the state of the entire optimisation,
                 /// including the populations, scores, etc
                 nsga2::NSGA2 nsga2Algorithm{};
+                std::unique_ptr<module::support::optimisation::OptimiserTask> task;
 
             public:
                 /// @brief Called by the powerplant to build and setup the NSGA2Optimiser reactor.

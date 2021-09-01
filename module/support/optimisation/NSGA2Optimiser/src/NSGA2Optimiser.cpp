@@ -9,6 +9,8 @@
 
 #include "utility/support/yaml_expression.hpp"
 
+#include "tasks/WalkOptimiser.hpp"
+
 namespace module {
     namespace support {
         namespace optimisation {
@@ -29,76 +31,9 @@ namespace module {
 
                 // Read NSGA2Optimiser.yaml file and initialize the values we're going to use for the optimisation
                 on<Configuration>("NSGA2Optimiser.yaml").then([this](const Configuration& config) {
-                    // The initial values of the parameters to optimise
-                    std::vector<double> paramInitialValues;
-
-                    // Parallel to paramInitialValues, sets the limit (min, max) of each parameter value
-                    std::vector<std::pair<double, double>> paramLimits;
-
-                    // Extract the initial values and limits and from config file, for all of the parameters
-                    auto& walk = config["walk"];
-                    for (const auto& element :
-                         std::vector<std::string>({std::string("freq"), std::string("double_support_ratio")})) {
-                        paramInitialValues.emplace_back(walk[element][0].as<Expression>());
-                        paramLimits.emplace_back(walk[element][1].as<Expression>(), walk[element][2].as<Expression>());
-                    }
-
-                    auto& foot = walk["foot"];
-                    for (const auto& element :
-                         std::vector<std::string>({std::string("distance"), std::string("rise")})) {
-                        paramInitialValues.emplace_back(foot[element][0].as<Expression>());
-                        paramLimits.emplace_back(foot[element][1].as<Expression>(), foot[element][2].as<Expression>());
-                    }
-
-                    auto& trunk = walk["trunk"];
-                    for (const auto& element : std::vector<std::string>({std::string("height"),
-                                                                         std::string("pitch"),
-                                                                         std::string("x_offset"),
-                                                                         std::string("y_offset"),
-                                                                         std::string("swing"),
-                                                                         std::string("pause")})) {
-                        paramInitialValues.emplace_back(trunk[element][0].as<Expression>());
-                        paramLimits.emplace_back(trunk[element][1].as<Expression>(),
-                                                 trunk[element][2].as<Expression>());
-                    }
-
-                    auto& pause = walk["pause"];
-                    for (const auto& element : std::vector<std::string>({std::string("duration")})) {
-                        paramInitialValues.emplace_back(pause[element][0].as<Expression>());
-                        paramLimits.emplace_back(pause[element][1].as<Expression>(),
-                                                 pause[element][2].as<Expression>());
-                    }
-
-                    auto& walk_command = config["walk_command"];
-                    for (const auto& element :
-                         std::vector<std::string>({std::string("velocity")})) {
-                        paramInitialValues.emplace_back(walk_command[element][0].as<Expression>());
-                        paramLimits.emplace_back(walk_command[element][1].as<Expression>(), walk_command[element][2].as<Expression>());
-                    }
-
-                    // Set up the NSGA2 algorithm based on our config values
-                    nsga2Algorithm.SetRealVariableCount(paramInitialValues.size());
-                    nsga2Algorithm.SetObjectiveCount(config["num_objectives"].as<int>());
-                    nsga2Algorithm.SetContraintCount(config["num_constraints"].as<int>());
-                    nsga2Algorithm.SetPopulationSize(config["population_size"].as<int>());
-                    nsga2Algorithm.SetTargetGenerations(config["max_generations"].as<int>());
-                    nsga2Algorithm.SetRealCrossoverProbability(
-                        config["probabilities"]["real"]["crossover"].as<double>());
-                    nsga2Algorithm.SetRealMutationProbability(config["probabilities"]["real"]["mutation"].as<double>());
-                    nsga2Algorithm.SetEtaC(config["eta"]["C"].as<double>());
-                    nsga2Algorithm.SetEtaM(config["eta"]["M"].as<double>());
-                    nsga2Algorithm.SetRealVarLimits(paramLimits);
-                    nsga2Algorithm.SetInitialRealVars(paramInitialValues);
-
-                    // Zero out binary things
-                    nsga2Algorithm.SetBinCrossoverProbability(0.0);
-                    nsga2Algorithm.SetBinMutationProbability(0.0);
-
-                    // This seg faults, SetSeed in the library dereferences a null pointer
-                    nsga2Algorithm.SetSeed(config["seed"].as<int>());
-
-                    // Not sure what this should be, but it has to be set
-                    nsga2Algorithm.SetBinVariableCount(0);
+                    log<NUClear::INFO>("Trying to setup NSGA2");
+                    task = std::make_unique<WalkOptimiser>();
+                    task->SetupNSGA2(config, nsga2Algorithm);
                 });
 
                 on<Startup>().then([this]() {
@@ -127,24 +62,7 @@ namespace module {
                         auto ind = next_ind.value();
                         log<NUClear::INFO>("\n\nSending request to evaluator. Generation:", ind.generation, "individual", ind.id);
                         // Create a message to request an evaluation of an individual
-                        auto request = std::make_unique<NSGA2EvaluationRequest>();
-                        request->id                                     = ind.id;
-                        request->generation                             = ind.generation;
-
-                        // Add the individual's parameters to the message
-                        request->parameters.freq                 = ind.reals[0];
-                        request->parameters.double_support_ratio = ind.reals[1];
-                        request->parameters.foot.distance        = ind.reals[2];
-                        request->parameters.foot.rise            = ind.reals[3];
-                        request->parameters.trunk.height         = ind.reals[4];
-                        request->parameters.trunk.pitch          = ind.reals[5];
-                        request->parameters.trunk.x_offset       = ind.reals[6];
-                        request->parameters.trunk.y_offset       = ind.reals[7];
-                        request->parameters.trunk.swing          = ind.reals[8];
-                        request->parameters.trunk.pause          = ind.reals[9];
-                        request->parameters.pause.duration       = ind.reals[10];
-                        request->parameters.velocity             = ind.reals[11];
-                        emit(request);
+                        emit(task->MakeEvaluationRequest(ind.id, ind.generation, ind.reals));
                     } else {
                         log<NUClear::INFO>("Evaluator ready, but optimiser is not");
                         emit<Scope::DELAY>(std::make_unique<NSGA2EvaluatorReady>(), std::chrono::seconds(1)); // Wait for a bit for us to become ready, then ask the evaluator if it is ready

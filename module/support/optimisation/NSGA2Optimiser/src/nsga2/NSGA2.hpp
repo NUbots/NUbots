@@ -16,7 +16,6 @@ namespace nsga2 {
     class NSGA2 {
     public:
         NSGA2() : randGen(std::make_shared<RandomGenerator<>>()) {}
-        virtual ~NSGA2() = default;
 
         bool InitializeFirstGeneration();
         void CompleteGenerationAndAdvance();
