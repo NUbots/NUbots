@@ -22,24 +22,24 @@
 
 #include "utility/math/Transform.hpp"
 
+using utility::math::Space;
 using utility::math::Transform;
-using namespace utility::math::space;
 
 namespace {
-    template <typename Scalar, int LTo, int LFrom, int RTo, int RFrom>
+    template <typename Scalar, Space LTo, Space LFrom, Space RTo, Space RFrom>
     [[nodiscard]] bool spaces_are_compatible(Transform<Scalar, LTo, LFrom> /*lTransform*/,
                                              Transform<Scalar, RTo, RFrom> /*rTransform*/) {
         return LFrom == RTo;
     }
 
-    template <typename Scalar, int To, int From, int RequiredTo>
-    [[nodiscard]] bool to_space_correct(Transform<Scalar, To, From> /*transform*/) {
-        return To == RequiredTo;
+    template <typename Scalar, Space ActualTo, Space ActualFrom, Space RequiredTo>
+    [[nodiscard]] bool to_space_correct(Transform<Scalar, ActualTo, ActualFrom> /*transform*/) {
+        return ActualTo == RequiredTo;
     }
 
-    template <typename Scalar, int To, int From, int RequiredFrom>
-    [[nodiscard]] bool from_space_correct(Transform<Scalar, To, From> /*transform*/) {
-        return From == RequiredFrom;
+    template <typename Scalar, Space ActualTo, Space ActualFrom, Space RequiredFrom>
+    [[nodiscard]] bool from_space_correct(Transform<Scalar, ActualTo, ActualFrom> /*transform*/) {
+        return ActualFrom == RequiredFrom;
     }
 }  // namespace
 
@@ -48,8 +48,8 @@ SCENARIO("Transforms can be multiplied") {
 
     GIVEN("Two transforms with compatible spaces") {
 
-        auto Htc = Transform<double, TORSO, CAMERA>();
-        auto Hcf = Transform<double, CAMERA, FIELD>();
+        auto Htc = Transform<double, Space::TORSO, Space::CAMERA>();
+        auto Hcf = Transform<double, Space::CAMERA, Space::FIELD>();
 
         // Validate our GIVEN clause assumption
         THEN("Spaces are compatible") {
@@ -57,11 +57,11 @@ SCENARIO("Transforms can be multiplied") {
         }
 
         WHEN("The Transforms are multiplied") {
-            Transform<double, TORSO, FIELD> Htf = Htc * Hcf;
+            Transform<double, Space::TORSO, Space::FIELD> Htf = Htc * Hcf;
 
             THEN("The result has the correct spaces") {
-                REQUIRE(from_space_correct<double, TORSO, FIELD, FIELD>(Htf));
-                REQUIRE(to_space_correct<double, TORSO, FIELD, TORSO>(Htf));
+                REQUIRE(from_space_correct<double, Space::TORSO, Space::FIELD, Space::FIELD>(Htf));
+                REQUIRE(to_space_correct<double, Space::TORSO, Space::FIELD, Space::TORSO>(Htf));
             }
         }
     }
