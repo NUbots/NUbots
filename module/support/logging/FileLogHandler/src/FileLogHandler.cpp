@@ -98,7 +98,7 @@ namespace module::support::logging {
 
                 // Strip to the last semicolon if we have one
                 size_t last_c = reactor.find_last_of(':');
-                reactor       = last_c == std::string::npos ? reactor : reactor.substr(lastC + 1);
+                reactor       = last_c == std::string::npos ? reactor : reactor.substr(last_c + 1);
 
                 // This is our source
                 source = reactor + " "
