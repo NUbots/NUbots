@@ -191,7 +191,7 @@ namespace module::behaviour::planning {
             emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
         }
 
-        void SimpleWalkPathPlanner::etermineSimpleWalkPath(const Ball& ball,
+        void SimpleWalkPathPlanner::determineSimpleWalkPath(const Ball& ball,
                                      const Field& field,
                                      const Sensors& sensors,
                                      const WantsToKick& wantsTo,
