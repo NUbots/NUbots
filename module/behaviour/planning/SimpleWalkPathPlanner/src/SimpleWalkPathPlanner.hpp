@@ -64,7 +64,14 @@ namespace module::behaviour::planning {
         float ball_approach_dist = 0.2;
         float slowdown_distance  = 0.2;
         bool useLocalisation     = true;
-        
+
+        void walkDirectly();
+        void determineSimpleWalkPath(const Ball& ball,
+                                     const Field& field,
+                                     const Sensors& sensors,
+                                     const KickPlan& kickPlan,
+                                     const FieldDescription& fieldDescription);
+
     public:
         explicit SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);
     };

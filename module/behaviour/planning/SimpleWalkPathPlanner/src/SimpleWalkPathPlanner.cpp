@@ -76,7 +76,7 @@ namespace module::behaviour::planning {
 
         // do a little configurating
         on<Configuration>("SimpleWalkPathPlanner.yaml").then([this](const Configuration& file) {
-            // TODO (KipHamiltons): Make these all consistent with the other files. We don't use .config anywhere else
+            // TODO(KipHamiltons): Make these all consistent with the other files. We don't use .config anywhere else
             log_level = file.config["log_level"].as<NUClear::LogLevel>();
 
             turnSpeed            = file.config["turnSpeed"].as<float>();
@@ -132,7 +132,7 @@ namespace module::behaviour::planning {
             }
         });
 
-        // @brief - Freq should be equal to the main loop in soccer strategy. TODO (Bryce Tuppurainen): Potentially
+        // Freq should be equal to the main loop in soccer strategy. TODO (Bryce Tuppurainen): Potentially
         // change this value to a define in an included header if this will be used again for added design cohesion if
         // this will be something we change in future
         on<Every<30, Per<std::chrono::seconds>>,
@@ -149,17 +149,14 @@ namespace module::behaviour::planning {
                          const WantsToKick& wantsTo,
                          const KickPlan& kickPlan,
                          const FieldDescription& fieldDescription) {
-                // TODO (Bryce Tuppurainen) Determine if this line is necessary. Could this be
+                // TODO(Bryce Tuppurainen) Determine if this line is necessary. Could this be
                 // integrated into the switch?
                 if (wantsTo.kick) {
                     emit(std::make_unique<StopCommand>(subsumptionId));
                     return;
                 }
 
-                // @details - Either calls a function and then continues past the switch statement, or an emit/function
-                // is followed by a return without a break to ensure that an unreachable code warning doesn't appear in
-                // future, and to ensure that only the required emits are called
-                switch (latestCommand.type) {
+                switch (static_cast<int>(latestCommand.type)) {
                     case message::behaviour::MotionCommand::Type::STAND_STILL:
                         emit(std::make_unique<StopCommand>(subsumptionId));
                         return;
@@ -174,8 +171,7 @@ namespace module::behaviour::planning {
                         determineSimpleWalkPath(ball, field, sensors, kickPlan, fieldDescription);
                         return;
 
-                    // @warning - This line should be UNREACHABLE - TODO Throw or otherwise display some warning that
-                    // latestCommand.type was invalid which called the stop command
+                    // This line should be UNREACHABLE
                     default:
                         log<NUClear::WARN>(fmt::format("Invalid walk path planning command {}.", latestCommand.type));
                         emit(std::make_unique<StopCommand>(subsumptionId));
@@ -183,16 +179,14 @@ namespace module::behaviour::planning {
                 }
             });
 
-        // @brief - Save the plan cmd into latestCommand
+        // Save the plan cmd into latestCommand
         on<Trigger<MotionCommand>, Sync<SimpleWalkPathPlanner>>().then(
             [this](const MotionCommand& cmd) { latestCommand = cmd; });
 
         //-------- UTILITY FUNCTIONS - Add extra behaviours for path planning here and in the switch case of this file
 
         void walkDirectly() {
-            std::unique_ptr<WalkCommand> command =
-                std::make_unique<WalkCommand>(subsumptionId, latestCommand.walk_command);
-            emit(std::move(command));
+            emit(std::move(std::make_unique<WalkCommand>(subsumptionId, latestCommand.walk_command)));
             emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
         }
 
@@ -247,7 +241,7 @@ namespace module::behaviour::planning {
                 }
             }
 
-            // @detail - If the value of position was less than the slowdown_distance provided in the config file,
+            // If the value of position was less than the slowdown_distance provided in the config file,
             // headingChange is potentially non-zero. This causes the requested angle to turn in the move command at
             // the end of this function to potentially be the in the same direction resultant of the vector between
             // the robot and the ball, as well as the vector from ball to goal (Bryce Tuppurainen - Can someone
@@ -260,7 +254,7 @@ namespace module::behaviour::planning {
             angle = std::min(turnSpeed, std::max(angle, -turnSpeed));
 
 
-            // @brief - Euclidean distance to ball (scaleF, scaleF2, scaleS, scaleS2 for Forward and Side
+            // Euclidean distance to ball (scaleF, scaleF2, scaleS, scaleS2 for Forward and Side
             // respectively, angle is provided above as some float value in radians from the arc-tan, divding this
             // by Pi )
             float scaleF            = 2.0 / (1.0 + std::exp(-a * std::fabs(position.x()) + b)) - 1.0;
