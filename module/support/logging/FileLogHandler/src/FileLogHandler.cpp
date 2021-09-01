@@ -17,25 +17,25 @@ namespace module::support::logging {
     FileLogHandler::FileLogHandler(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
         , mutex()
-        , logFileName("/home/nubots/log")
-        , logFile(logFileName, std::ios_base::out | std::ios_base::app | std::ios_base::ate) {
+        , log_file_name("/home/nubots/log")
+        , log_file(log_file_name, std::ios_base::out | std::ios_base::app | std::ios_base::ate) {
 
         on<Configuration>("FileLogHandler.yaml").then([this](const Configuration& config) {
             // Use configuration here from file FileLogHandler.yaml
-            logFileName = config["log_file"].as<std::string>();
+            log_file_name = config["log_file"].as<std::string>();
 
-            if (logFile.is_open()) {
-                logFile.close();
+            if (log_file.is_open()) {
+                log_file.close();
             }
 
-            logFile.open(logFileName, std::ios_base::out | std::ios_base::app | std::ios_base::ate);
+            log_file.open(log_file_name, std::ios_base::out | std::ios_base::app | std::ios_base::ate);
 
-            logFile << "\n*********************************************************************\n" << std::endl;
+            log_file << "\n*********************************************************************\n" << std::endl;
         });
 
         on<Shutdown>().then([this] {
-            if (logFile.is_open()) {
-                logFile.close();
+            if (log_file.is_open()) {
+                log_file.close();
             }
         });
 
@@ -54,14 +54,14 @@ namespace module::support::logging {
 #ifndef NDEBUG  // We have a cold hearted monstrosity that got built!
 
                 // Print our exception detals
-                logFile << reactor << " " << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
-                        << Colour::brightred << "Exception:"
-                        << " " << Colour::brightred << utility::support::evil::exception_name << std::endl;
+                log_file << reactor << " " << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
+                         << Colour::brightred << "Exception:"
+                         << " " << Colour::brightred << utility::support::evil::exception_name << std::endl;
 
                 // Print our stack trace
                 for (auto& s : utility::support::evil::stack) {
-                    logFile << "\t" << Colour::brightmagenta << s.file << ":" << Colour::brightmagenta << s.lineno
-                            << " " << s.function << std::endl;
+                    log_file << "\t" << Colour::brightmagenta << s.file << ":" << Colour::brightmagenta << s.lineno
+                             << " " << s.function << std::endl;
                 }
 #else
                 try {
@@ -71,15 +71,15 @@ namespace module::support::logging {
 
                     std::string exceptionName = NUClear::util::demangle(typeid(ex).name());
 
-                    logFile << reactor << " " << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
-                            << Colour::brightred << "Exception:"
-                            << " " << Colour::brightred << exceptionName << " " << ex.what() << std::endl;
+                    log_file << reactor << " " << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
+                             << Colour::brightred << "Exception:"
+                             << " " << Colour::brightred << exceptionName << " " << ex.what() << std::endl;
                 }
                 // We don't actually want to crash
                 catch (...) {
 
-                    logFile << reactor << " " << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
-                            << Colour::brightred << "Exception of unkown type" << std::endl;
+                    log_file << reactor << " " << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
+                             << Colour::brightred << "Exception of unkown type" << std::endl;
                 }
 #endif
             }
@@ -107,16 +107,16 @@ namespace module::support::logging {
 
             // Output the level
             switch (message.level) {
-                case NUClear::TRACE: logFile << source << "TRACE: "; break;
-                case NUClear::DEBUG: logFile << source << Colour::green << "DEBUG: "; break;
-                case NUClear::INFO: logFile << source << Colour::brightblue << "INFO: "; break;
-                case NUClear::WARN: logFile << source << Colour::yellow << "WARN: "; break;
-                case NUClear::ERROR: logFile << source << Colour::brightred << "ERROR: "; break;
-                case NUClear::FATAL: logFile << source << Colour::brightred << "FATAL: "; break;
+                case NUClear::TRACE: log_file << source << "TRACE: "; break;
+                case NUClear::DEBUG: log_file << source << Colour::green << "DEBUG: "; break;
+                case NUClear::INFO: log_file << source << Colour::brightblue << "INFO: "; break;
+                case NUClear::WARN: log_file << source << Colour::yellow << "WARN: "; break;
+                case NUClear::ERROR: log_file << source << Colour::brightred << "ERROR: "; break;
+                case NUClear::FATAL: log_file << source << Colour::brightred << "FATAL: "; break;
             }
 
             // Output the message
-            logFile << message.message << std::endl;
+            log_file << message.message << std::endl;
         });
     }
 }  // namespace module::support::logging

@@ -17,8 +17,8 @@ namespace module::support::logging {
     private:
         std::mutex mutex;
 
-        std::string logFileName;
-        std::ofstream logFile;
+        std::string log_file_name;
+        std::ofstream log_file;
     };
 }  // namespace module::support::logging
 
