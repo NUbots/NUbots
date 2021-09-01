@@ -28,10 +28,26 @@
 
 #include "message/behaviour/KickPlan.hpp"
 #include "message/behaviour/MotionCommand.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/localisation/Ball.hpp"
+#include "message/localisation/Field.hpp"
+#include "message/motion/KickCommand.hpp"
+#include "message/motion/WalkCommand.hpp"
+#include "message/support/FieldDescription.hpp"
+#include "message/vision/Ball.hpp"
 
 namespace module::behaviour::planning {
 
     // using namespace message;
+
+    using message::behaviour::KickPlan;
+    using message::behaviour::MotionCommand;
+    using message::behaviour::WantsToKick;
+    using message::input::Sensors;
+    using message::localisation::Ball;
+    using message::localisation::Field;
+    using message::support::FieldDescription;
+
     /**
      * Executes a getup script if the robot falls over.
      *
@@ -66,13 +82,13 @@ namespace module::behaviour::planning {
         bool useLocalisation     = true;
 
         void walkDirectly();
-        
+
         void determineSimpleWalkPath(const Ball& ball,
-                         const Field& field,
-                         const Sensors& sensors,
-                         const WantsToKick& wantsTo,
-                         const KickPlan& kickPlan,
-                         const FieldDescription& fieldDescription);
+                                     const Field& field,
+                                     const Sensors& sensors,
+                                     const WantsToKick& wantsTo,
+                                     const KickPlan& kickPlan,
+                                     const FieldDescription& fieldDescription);
 
     public:
         explicit SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);
