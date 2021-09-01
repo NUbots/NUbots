@@ -46,11 +46,10 @@ namespace module::platform::darwin {
     using message::platform::RawSensors;
 
     using utility::input::ServoID;
-    using utility::nusight::graph;
     using utility::support::Expression;
 
     HardwareSimulator::HardwareSimulator(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), sensors(), gyroQueue(), gyroQueueMutex(), noise() {
+        : Reactor(std::move(environment)) {
 
         /*
          CM740 Data
@@ -77,9 +76,7 @@ namespace module::platform::darwin {
         sensors.voltage = 0;
 
         // Gyroscope (in radians/second)
-        sensors.gyroscope.x = 0;
-        sensors.gyroscope.y = 0;
-        sensors.gyroscope.z = 0;
+        sensors.gyroscope = Eigen::Vector3f::Zero();
 
         /*
          Force Sensitive Resistor Data
@@ -151,29 +148,14 @@ namespace module::platform::darwin {
 
         on<Configuration>("DarwinHardwareSimulator.yaml")
             .then("Hardware Simulator Config", [this](const Configuration& config) {
-                imu_drift_rate = config["imu_drift_rate"].as<float>();
-
-                noise.accelerometer.x = config["noise"]["accelerometer"]["x"].as<float>();
-                noise.accelerometer.y = config["noise"]["accelerometer"]["y"].as<float>();
-                noise.accelerometer.z = config["noise"]["accelerometer"]["z"].as<float>();
-
-                noise.gyroscope.x = config["noise"]["gyroscope"]["x"].as<float>();
-                noise.gyroscope.y = config["noise"]["gyroscope"]["y"].as<float>();
-                noise.gyroscope.z = config["noise"]["gyroscope"]["z"].as<float>();
-
-                bodyTilt = config["body_tilt"].as<Expression>();
+                imu_drift_rate      = config["imu_drift_rate"].as<float>();
+                noise.accelerometer = config["noise"]["accelerometer"].as<Expression>();
+                noise.gyroscope     = config["noise"]["gyroscope"].as<Expression>();
+                bodyTilt            = config["body_tilt"].as<Expression>();
             });
 
-        on<Trigger<RawSensors::Gyroscope>>().then("Receive Simulated Gyroscope",
-                                                  [this](const RawSensors::Gyroscope& gyro) {
-                                                      std::lock_guard<std::mutex> lock(gyroQueueMutex);
-                                                      RawSensors::Gyroscope tmpGyro = gyro;
-                                                      gyroQueue.push(tmpGyro);
-                                                  });
-
-
         on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Optional<With<Sensors>>, Single>().then(
-            [this](std::shared_ptr<const Sensors> previousSensors) {
+            [this](const std::shared_ptr<const Sensors>& previousSensors) {
                 if (previousSensors) {
                     Eigen::Affine3d Hf_rt(previousSensors->Htx[ServoID::R_ANKLE_ROLL]);
                     Eigen::Affine3d Hf_lt(previousSensors->Htx[ServoID::L_ANKLE_ROLL]);
@@ -221,30 +203,9 @@ namespace module::platform::darwin {
                     }
                 }
 
-                // Gyro:
-                // Note: This reaction is not (and should not be) synced with the
-                // 'Receive Simulated Gyroscope' reaction above, so we can't
-                // reliably query the size of the gyroQueue.
-                Eigen::Vector3d sumGyro = Eigen::Vector3d::Zero();
-                /* mutext scope */ {
-                    std::lock_guard<std::mutex> lock(gyroQueueMutex);
-                    while (!gyroQueue.empty()) {
-                        RawSensors::Gyroscope g = gyroQueue.front();
-                        sumGyro += Eigen::Vector3d(g.x, g.y, g.z);
-
-                        std::lock_guard<std::mutex> lock(gyroQueueMutex);
-                        gyroQueue.pop();
-                    }
-                }
-                sumGyro                 = (sumGyro * UPDATE_FREQUENCY + Eigen::Vector3d(0.0, 0.0, imu_drift_rate));
-                sumGyro.x()             = -sumGyro.x();
-                sensors.gyroscope.x     = sumGyro.x();
-                sensors.gyroscope.y     = sumGyro.y();
-                sensors.gyroscope.z     = sumGyro.z();
-                sensors.accelerometer.x = -9.8 * std::sin(bodyTilt);
-                sensors.accelerometer.y = 0.0;
-                sensors.accelerometer.z = -9.8 * std::cos(bodyTilt);
-                sensors.timestamp       = NUClear::clock::now();
+                sensors.gyroscope     = Eigen::Vector3f(0.0f, 0.0f, imu_drift_rate);
+                sensors.accelerometer = Eigen::Vector3f(-9.8 * std::sin(bodyTilt), 0.0, 9.8 * std::cos(bodyTilt));
+                sensors.timestamp     = NUClear::clock::now();
 
                 // Add some noise so that sensor fusion doesnt converge to a singularity
                 auto sensors_message = std::make_unique<RawSensors>(sensors);
@@ -264,12 +225,9 @@ namespace module::platform::darwin {
                     utility::platform::getRawServo(command.id, sensors).present_position);
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
-                float speed;
+                float speed = 0.0f;
                 if (duration.count() > 0) {
                     speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
-                }
-                else {
-                    speed = 0;
                 }
 
                 // Set our variables
@@ -292,15 +250,10 @@ namespace module::platform::darwin {
         return rand() / float(RAND_MAX) - 0.5f;
     }
 
-    void HardwareSimulator::addNoise(std::unique_ptr<RawSensors>& sensors) {
+    void HardwareSimulator::addNoise(std::unique_ptr<RawSensors>& sensors) const {
         // TODO: Use a more standard c++ random generator.
-        sensors->accelerometer.x += noise.accelerometer.x * centered_noise();
-        sensors->accelerometer.y += noise.accelerometer.y * centered_noise();
-        sensors->accelerometer.z += noise.accelerometer.z * centered_noise();
-
-        sensors->gyroscope.x += noise.gyroscope.x * centered_noise();
-        sensors->gyroscope.y += noise.gyroscope.y * centered_noise();
-        sensors->gyroscope.z += noise.gyroscope.z * centered_noise();
+        sensors->accelerometer += noise.accelerometer * centered_noise();
+        sensors->gyroscope += noise.gyroscope * centered_noise();
     }
 
     void HardwareSimulator::setRightFootDown(bool down) {

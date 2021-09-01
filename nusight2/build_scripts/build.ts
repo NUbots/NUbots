@@ -16,5 +16,5 @@ const opts: ConfigOptions = {
   rootDir: path.join(__dirname, '..'),
 }
 webpack([getClientConfig(opts), getServerConfig(opts)]).run((err, stats) => {
-  process.stdout.write(stats.toString({ colors: true }) + '\n')
+  stats && process.stdout.write(stats.toString({ colors: true }) + '\n')
 })

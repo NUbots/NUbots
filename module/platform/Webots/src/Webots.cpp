@@ -232,7 +232,7 @@ namespace module::platform {
             max_velocity_mx106   = config["max_velocity_mx106"].as<double>();
             max_fsr_value        = config["max_fsr_value"].as<float>();
 
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            log_level = config["log_level"].as<NUClear::LogLevel>();
 
             clock_smoothing = config["clock_smoothing"].as<double>();
 
@@ -733,9 +733,9 @@ namespace module::platform {
                 // Webots has a strictly positive output for the accelerometers. We minus 100 to center the output
                 // over 0 The value 100.0 is based on the Look-up Table from NUgus.proto and should be kept
                 // consistent with that
-                sensor_data->accelerometer.x = static_cast<float>(accelerometer.value.X) - 100.0f;
-                sensor_data->accelerometer.y = static_cast<float>(accelerometer.value.Y) - 100.0f;
-                sensor_data->accelerometer.z = static_cast<float>(accelerometer.value.Z) - 100.0f;
+                sensor_data->accelerometer.x() = static_cast<float>(accelerometer.value.X) - 100.0f;
+                sensor_data->accelerometer.y() = static_cast<float>(accelerometer.value.Y) - 100.0f;
+                sensor_data->accelerometer.z() = static_cast<float>(accelerometer.value.Z) - 100.0f;
             }
 
             if (sensor_measurements.gyros.size() > 0) {
@@ -744,9 +744,9 @@ namespace module::platform {
                 // Webots has a strictly positive output for the gyros. We minus 100 to center the output over 0
                 // The value 100.0 is based on the Look-up Table from NUgus.proto and should be kept consistent with
                 // that
-                sensor_data->gyroscope.x = static_cast<float>(gyro.value.X) - 100.0f;
-                sensor_data->gyroscope.y = static_cast<float>(gyro.value.Y) - 100.0f;
-                sensor_data->gyroscope.z = static_cast<float>(gyro.value.Z) - 100.0f;
+                sensor_data->gyroscope.x() = static_cast<float>(gyro.value.X) - 100.0f;
+                sensor_data->gyroscope.y() = static_cast<float>(gyro.value.Y) - 100.0f;
+                sensor_data->gyroscope.z() = static_cast<float>(gyro.value.Z) - 100.0f;
             }
 
             for (const auto& bumper : sensor_measurements.bumpers) {

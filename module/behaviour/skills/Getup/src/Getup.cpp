@@ -51,22 +51,12 @@ namespace module::behaviour::skills {
         , id(size_t(this) * size_t(this) - size_t(this))
         , isFront(true)
         , gettingUp(false)
-        , fallenCheck()
-        , getUp()
         , FALLEN_ANGLE(M_PI_2)
         , GETUP_PRIORITY(0.0f)
         , EXECUTION_PRIORITY(0.0f) {
         // do a little configurating
         on<Configuration>("Getup.yaml").then([this](const Configuration& config) {
-            // clang-format off
-            std::string lvl = config["log_level"].as<std::string>();
-            if (lvl == "TRACE")      { this->log_level = NUClear::TRACE; }
-            else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
-            else if (lvl == "INFO")  { this->log_level = NUClear::INFO;  }
-            else if (lvl == "WARN")  { this->log_level = NUClear::WARN;  }
-            else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
-            else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
-            // clang-format on
+            log_level = config["log_level"].as<NUClear::LogLevel>();
 
             FALLEN_ANGLE = config["FALLEN_ANGLE"].as<float>();
 
@@ -75,13 +65,13 @@ namespace module::behaviour::skills {
             EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
         });
 
-        fallenCheck = on<Last<20, Trigger<RawSensors>>, Single>().then(
+        on<Last<20, Trigger<RawSensors>>, Single>().then(
             "Getup Fallen Check",
             [this](const std::list<std::shared_ptr<const RawSensors>>& sensors) {
                 Eigen::Vector3d acc_reading = Eigen::Vector3d::Zero();
 
                 for (const auto& s : sensors) {
-                    acc_reading += Eigen::Vector3d(s->accelerometer.x, s->accelerometer.y, s->accelerometer.z);
+                    acc_reading += s->accelerometer.cast<double>();
                 }
                 acc_reading = (acc_reading / double(sensors.size())).normalized();
 
@@ -92,11 +82,10 @@ namespace module::behaviour::skills {
                     isFront = (M_PI_2 - std::acos(Eigen::Vector3d::UnitX().dot(acc_reading)) <= 0.0);
 
                     updatePriority(GETUP_PRIORITY);
-                    getUp.enable();
                 }
             });
 
-        getUp = on<Trigger<ExecuteGetup>, Single>().then("Execute Getup", [this]() {
+        on<Trigger<ExecuteGetup>, Single>().then("Execute Getup", [this]() {
             gettingUp = true;
 
             // Check with side we're getting up from
@@ -116,7 +105,6 @@ namespace module::behaviour::skills {
         on<Trigger<KillGetup>>().then([this] {
             gettingUp = false;
             updatePriority(0);
-            getUp.disable();
         });
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{

@@ -53,7 +53,7 @@ namespace module::vision {
 
         // Trigger the same function when either update
         on<Configuration>("GoalDetector.yaml").then([this](const Configuration& cfg) {
-            this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
+            log_level = cfg["log_level"].as<NUClear::LogLevel>();
 
             config.confidence_threshold       = cfg["confidence_threshold"].as<float>();
             config.cluster_points             = cfg["cluster_points"].as<int>();
@@ -118,6 +118,41 @@ namespace module::vision {
                 clusters.resize(std::distance(clusters.begin(), green_boundary));
 
                 log<NUClear::DEBUG>(fmt::format("Found {} clusters that intersect the green horizon", clusters.size()));
+
+                // Find overlapping clusters and merge them
+                for (auto it = clusters.begin(); it != clusters.end(); it = std::next(it)) {
+                    // Get the largest and smallest theta values
+                    auto range_a = std::minmax_element(it->begin(), it->end(), [&rays](const int& a, const int& b) {
+                        return std::atan2(rays(1, a), rays(0, a)) < std::atan2(rays(1, b), rays(0, b));
+                    });
+
+                    const float min_a = std::atan2(rays(1, *range_a.first), rays(0, *range_a.first));
+                    const float max_a = std::atan2(rays(1, *range_a.second), rays(0, *range_a.second));
+
+                    for (auto it2 = std::next(it); it2 != clusters.end();) {
+                        // Get the largest and smallest theta values
+                        auto range_b =
+                            std::minmax_element(it2->begin(), it2->end(), [&rays](const int& a, const int& b) {
+                                return std::atan2(rays(1, a), rays(0, a)) < std::atan2(rays(1, b), rays(0, b));
+                            });
+
+                        const float min_b = std::atan2(rays(1, *range_b.first), rays(0, *range_b.first));
+                        const float max_b = std::atan2(rays(1, *range_b.second), rays(0, *range_b.second));
+
+                        // The clusters are overlapping, merge them
+                        if (((min_a <= min_b) && (min_b <= max_a)) || ((min_b <= min_a) && (min_a <= max_b))) {
+                            // Append the second cluster on to the first
+                            it->insert(it->end(), it2->begin(), it2->end());
+                            // Delete the second cluster
+                            it2 = clusters.erase(it2);
+                        }
+                        else {
+                            it2 = std::next(it2);
+                        }
+                    }
+                }
+
+                log<NUClear::DEBUG>(fmt::format("{} clusters remaining after merging overlaps", clusters.size()));
 
                 if (clusters.size() > 0) {
                     auto goals = std::make_unique<Goals>();

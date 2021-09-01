@@ -15,11 +15,9 @@ const Phase = message.input.GameState.Data.Phase
 export class RobotPanelViewModel {
   constructor(private model: DashboardRobotModel) {}
 
-  static of = createTransformer(
-    (model: DashboardRobotModel): RobotPanelViewModel => {
-      return new RobotPanelViewModel(model)
-    },
-  )
+  static of = createTransformer((model: DashboardRobotModel): RobotPanelViewModel => {
+    return new RobotPanelViewModel(model)
+  })
 
   @computed get connected(): boolean {
     return this.model.connected
