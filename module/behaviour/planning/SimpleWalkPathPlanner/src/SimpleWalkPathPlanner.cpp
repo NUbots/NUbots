@@ -183,7 +183,7 @@ namespace module::behaviour::planning {
 
                     // This line should be UNREACHABLE
                     default:
-                        log<NUClear::WARN>(fmt::format("Invalid walk path planning command {}.", latestCommand.type));
+                        log<NUClear::WARN>(fmt::format("Invalid walk path planning command {}.", latestCommand.type.value));
                         emit(std::make_unique<StopCommand>(subsumptionId));
                         return;
                 }
