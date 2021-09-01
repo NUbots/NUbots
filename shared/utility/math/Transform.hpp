@@ -25,15 +25,16 @@
 #include <type_traits>
 
 namespace utility::math {
-    namespace space {
-        static constexpr size_t TORSO  = 0;
-        static constexpr size_t FIELD  = 1;
-        static constexpr size_t CAMERA = 2;
-        static constexpr size_t WORLD  = 3;
-        static constexpr size_t GROUND = 4;
-    }  // namespace space
 
-    template <typename Scalar, int TO_SPACE, int FROM_SPACE>
+    enum class Space {
+        TORSO,
+        FIELD,
+        CAMERA,
+        WORLD,
+        GROUND,
+    };
+
+    template <typename Scalar, Space To, Space From>
     class Transform {
     public:
         Eigen::Transform<Scalar, 3, Eigen::Affine> transform = Eigen::Transform<Scalar, 3, Eigen::Affine>::Identity();
@@ -41,14 +42,13 @@ namespace utility::math {
         Transform() = default;
         Transform(Eigen::Transform<Scalar, 3, Eigen::Affine> transform_) : transform(transform_) {}
 
-        template <int OTHER_TO_SPACE, int OTHER_FROM_SPACE>
-        Transform<Scalar, TO_SPACE, OTHER_FROM_SPACE> operator*(
-            const Transform<Scalar, OTHER_TO_SPACE, OTHER_FROM_SPACE>& other) {
-            static_assert(FROM_SPACE == OTHER_TO_SPACE,
+        template <Space OtherTo, Space OtherFrom>
+        Transform<Scalar, To, OtherFrom> operator*(const Transform<Scalar, OtherTo, OtherFrom>& other) {
+            static_assert(From == OtherTo,
                           "Incompatible spaces used in transform multiplication. "
-                          "Left Transform's FROM_SPACE does not match right Transform's TO_SPACE.");
+                          "Left Transform's From Space does not match right Transform's To Space.");
 
-            return Transform<Scalar, TO_SPACE, OTHER_FROM_SPACE>(
+            return Transform<Scalar, To, OtherFrom>(
                 Eigen::Transform<Scalar, 3, Eigen::Affine>(this->matrix() * other.matrix()));
         }
 
