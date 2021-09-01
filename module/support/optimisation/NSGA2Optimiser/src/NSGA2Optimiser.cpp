@@ -29,8 +29,6 @@ namespace module {
 
                 // Read NSGA2Optimiser.yaml file and initialize the values we're going to use for the optimisation
                 on<Configuration>("NSGA2Optimiser.yaml").then([this](const Configuration& config) {
-                    default_leg_gains = config["gains"]["legs"].as<Expression>();
-
                     // The initial values of the parameters to optimise
                     std::vector<double> paramInitialValues;
 

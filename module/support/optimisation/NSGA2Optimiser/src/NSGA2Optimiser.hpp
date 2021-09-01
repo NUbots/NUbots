@@ -20,9 +20,6 @@ namespace module {
                 /// including the populations, scores, etc
                 nsga2::NSGA2 nsga2Algorithm{};
 
-                /// @brief Default leg gains for the walk, read from the config file
-                double default_leg_gains;
-
             public:
                 /// @brief Called by the powerplant to build and setup the NSGA2Optimiser reactor.
                 explicit NSGA2Optimiser(std::unique_ptr<NUClear::Environment> environment);
