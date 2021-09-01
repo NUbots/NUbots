@@ -164,11 +164,11 @@ namespace module::behaviour::planning {
                     case message::behaviour::MotionCommand::Type::DIRECT_COMMAND: walkDirectly(); return;
 
                     case message::behaviour::MotionCommand::Type::BALL_APPROACH:
-                        determineSimpleWalkPath(ball, field, sensors, wantsTo, kickPlan, fieldDescription);
+                        determineSimpleWalkPath(&ball, &field, &sensors, &wantsTo, &kickPlan, &fieldDescription);
                         return;
 
                     case message::behaviour::MotionCommand::Type::WALK_TO_STATE:
-                        determineSimpleWalkPath(ball, field, sensors, wantsTo, kickPlan, fieldDescription);
+                        determineSimpleWalkPath(&ball, &field, &sensors, &wantsTo, &kickPlan, &fieldDescription);
                         return;
 
                     // This line should be UNREACHABLE
