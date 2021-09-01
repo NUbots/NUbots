@@ -48,8 +48,8 @@ namespace module::support::logging {
                 std::string reactor = stats.identifier[1];
 
                 // Strip to the last semicolon if we have one
-                size_t lastC = reactor.find_last_of(':');
-                reactor      = lastC == std::string::npos ? reactor : reactor.substr(lastC + 1);
+                size_t last_c = reactor.find_last_of(':');
+                reactor       = last_c == std::string::npos ? reactor : reactor.substr(last_c + 1);
 
 #ifndef NDEBUG  // We have a cold hearted monstrosity that got built!
 
@@ -69,11 +69,11 @@ namespace module::support::logging {
                 }
                 catch (const std::exception& ex) {
 
-                    std::string exceptionName = NUClear::util::demangle(typeid(ex).name());
+                    std::string exception_name = NUClear::util::demangle(typeid(ex).name());
 
                     log_file << reactor << " " << (stats.identifier[0].empty() ? "" : "- " + stats.identifier[0] + " ")
                              << Colour::brightred << "Exception:"
-                             << " " << Colour::brightred << exceptionName << " " << ex.what() << std::endl;
+                             << " " << Colour::brightred << exception_name << " " << ex.what() << std::endl;
                 }
                 // We don't actually want to crash
                 catch (...) {
@@ -97,8 +97,8 @@ namespace module::support::logging {
                 std::string reactor = message.task->identifier[1];
 
                 // Strip to the last semicolon if we have one
-                size_t lastC = reactor.find_last_of(':');
-                reactor      = lastC == std::string::npos ? reactor : reactor.substr(lastC + 1);
+                size_t last_c = reactor.find_last_of(':');
+                reactor       = last_c == std::string::npos ? reactor : reactor.substr(lastC + 1);
 
                 // This is our source
                 source = reactor + " "
