@@ -96,7 +96,7 @@ RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 
 # LLVM and Clang
 RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-12.0.1.tar.gz \
-    -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" \
+    -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld" \
     -DLLVM_ENABLE_SPHINX=OFF \
     -DLLVM_BUILD_LLVM_DYLIB=ON \
     -DLLVM_LINK_LLVM_DYLIB=ON
@@ -111,15 +111,18 @@ RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/arc
 
 # intel graphics compiler
 COPY usr/local/package/intel-graphics-compiler.sh /usr/local/package/intel-graphics-compiler.sh
-RUN /usr/local/package/intel-graphics-compiler.sh https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.5435.tar.gz \
+RUN /usr/local/package/intel-graphics-compiler.sh https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.8173.tar.gz \
     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
-    -DIGC_PREFERRED_LLVM_VERSION='11.0.0' \
+    -DIGC_OPTION__LLVM_PREFERRED_VERSION='12.0.1' \
     -DVC_INTRINSICS_SRC="../../vc-intrinsics" \
-    -DINSTALL_SPIRVDLL=0
+    -DIGC_OPTION__LLVM_MODE=Prebuilds \
+    -DCMAKE_CXX_FLAGS="-Wno-deprecated-declarations" \
+    -DINSTALL_SPIRVDLL=0 \
+    -DINSTALL_GENX_IR=ON
 
 # intel compute runtime dependencies
 # gmmlib
-RUN install-cmake-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-20.4.1.tar.gz \
+RUN install-cmake-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-21.2.2.tar.gz \
     -DRUN_TEST_SUITE=OFF
 # libpciaccess and libdrm help communicate with graphics hardware
 RUN install-from-source https://xorg.freedesktop.org/releases/individual/lib/libpciaccess-0.16.tar.bz2
