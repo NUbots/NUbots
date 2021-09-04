@@ -48,6 +48,7 @@ namespace {
 
 
 SCENARIO("Transforms can be multiplied") {
+    auto Htc = Transform<double, "Test", "Test2">();
 
     GIVEN("Two transforms with compatible spaces") {
 

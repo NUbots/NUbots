@@ -82,10 +82,10 @@ namespace utility::math {
         }
 
         constexpr Space(const Space& other) {
-            value = other.value;
+            std::copy_n(other.value, N, value);
         }
         constexpr Space(const Space&& other) {
-            value = other.value;
+            std::copy_n(other.value, N, value);
         }
         constexpr Space& operator=(const Space& other) {
             Space new_space(other.value);
