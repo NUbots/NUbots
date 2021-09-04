@@ -130,23 +130,27 @@ RUN install-meson-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.104.
     -Dudev=false \
     -Dvalgrind=false
 # libva
-RUN install-from-source https://github.com/intel/libva/releases/download/2.10.0/libva-2.10.0.tar.bz2 \
-    -DENABLE_VA_MESSAGING=ON
+# Needs -Dwith_x11: see https://github.com/intel/media-driver/issues/899
+# -Dwith_x11 requires x11 to be installed
+RUN pacman -S xorg-server --noconfirm
+RUN install-from-source https://github.com/intel/libva/releases/download/2.12.0/libva-2.12.0.tar.bz2 \
+    -DENABLE_VA_MESSAGING=ON \
+    -Dwith_x11=yes
 
 # intel media driver
-RUN install-cmake-from-source https://github.com/intel/media-driver/archive/intel-media-20.4.5.tar.gz \
+RUN install-cmake-from-source https://github.com/intel/media-driver/archive/intel-media-21.3.2.tar.gz \
     -DINSTALL_DRIVER_SYSCONF=OFF \
     -DLIBVA_DRIVERS_PATH="/usr/local/lib/dri" \
     -DMEDIA_RUN_TEST_SUITE=OFF \
-    -DBUILD_TESTING=OFF \
     -DBUILD_KERNELS=ON \
     -DENABLE_KERNELS=ON \
-    -DENABLE_NONFREE_KERNELS=ON
+    -DENABLE_NONFREE_KERNELS=ON \
+    -DMEDIA_BUILD_FATAL_WARNINGS=OFF
 
 # Install intel compute runtime (OpenCL implementation)
 COPY --chown=root:root etc/OpenCL/vendors/intel.icd /etc/OpenCL/vendors/intel.icd
 COPY usr/local/package/intel-compute-runtime.sh /usr/local/package/intel-compute-runtime.sh
-RUN /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute-runtime/archive/20.48.18558.tar.gz \
+RUN /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute-runtime/archive/21.31.20514.tar.gz \
     -DSKIP_UNIT_TESTS=ON \
     -DIGC_DIR=/usr/local
 
