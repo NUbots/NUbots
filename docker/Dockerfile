@@ -132,7 +132,7 @@ RUN install-meson-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.104.
 # libva
 # Needs -Dwith_x11: see https://github.com/intel/media-driver/issues/899
 # -Dwith_x11 requires x11 to be installed
-RUN pacman -S xorg-server --noconfirm
+RUN install-package xorg-server
 RUN install-from-source https://github.com/intel/libva/releases/download/2.12.0/libva-2.12.0.tar.bz2 \
     -DENABLE_VA_MESSAGING=ON \
     -Dwith_x11=yes
