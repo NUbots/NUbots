@@ -237,7 +237,7 @@ RUN install-meson-from-source https://github.com/AravisProject/aravis/archive/AR
     -Dintrospection=false
 
 # LibUV
-RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.34.1.tar.gz \
+RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.42.0.tar.gz \
     -Dlibuv_buildtests=OFF \
     -DBUILD_TESTING=OFF
 
