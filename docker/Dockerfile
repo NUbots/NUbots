@@ -95,19 +95,19 @@ RUN python /usr/local/generate_toolchain.py --prefix /usr/local
 RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 
 # LLVM and Clang
-RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-11.0.1.tar.gz \
+RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-12.0.1.tar.gz \
     -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" \
     -DLLVM_ENABLE_SPHINX=OFF \
     -DLLVM_BUILD_LLVM_DYLIB=ON \
     -DLLVM_LINK_LLVM_DYLIB=ON
 
 # SPIRV LLVM Translator
-RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v11.0.0.tar.gz \
+RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v12.0.0.tar.gz \
     -DLLVM_INCLUDE_TESTS=OFF
 
 # opencl-clang
 COPY usr/local/package/opencl-clang.sh /usr/local/package/opencl-clang.sh
-RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/archive/v11.0.0.tar.gz
+RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/archive/v12.0.0.tar.gz
 
 # intel graphics compiler
 COPY usr/local/package/intel-graphics-compiler.sh /usr/local/package/intel-graphics-compiler.sh
