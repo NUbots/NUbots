@@ -265,7 +265,7 @@ COPY usr/local/package/espeak.sh /usr/local/package/espeak.sh
 RUN /usr/local/package/espeak.sh https://github.com/espeak-ng/espeak-ng/releases/download/1.50/espeak-ng-1.50.tgz
 
 # mio memory mapping library
-RUN install-from-source https://github.com/mandreyel/mio/archive/master.tar.gz
+RUN install-from-source https://github.com/mandreyel/mio/archive/3f86a95c0784d73ce6815237ec33ed25f233b643.tar.gz
 
 # zstr header to have file streams that do zlib compression
 RUN mkdir -p /usr/local/include/zstr \
