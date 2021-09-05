@@ -4,7 +4,7 @@ import os
 import subprocess
 
 import b
-from dockerise import run_on_docker
+from utility.dockerise import run_on_docker
 
 
 @run_on_docker
@@ -13,11 +13,11 @@ def register(command):
     command.help = "build the codebase"
 
     command.add_argument("args", nargs="...", help="the arguments to pass through to ninja")
+    command.add_argument("-j", help="number of jobs to spawn")
 
 
 @run_on_docker
-def run(args, **kwargs):
-
+def run(j, args, **kwargs):
     # Change into the build directory
     os.chdir(os.path.join(b.project_dir, "..", "build"))
 
@@ -29,5 +29,15 @@ def run(args, **kwargs):
         if exitcode != 0:
             exit(exitcode)
 
+    # To pass arguments to the ninja command you put them after "--"
+    # but "--"  isn't a valid argument for ninja, so we remove it here
+    if "--" in args:
+        args.remove("--")
+
+    command = ["ninja", *args]
+
+    if j:
+        command.insert(1, "-j{}".format(j))
+
     # Return the exit code of ninja
-    exit(subprocess.call(["ninja", *args]))
+    exit(subprocess.run(command).returncode)

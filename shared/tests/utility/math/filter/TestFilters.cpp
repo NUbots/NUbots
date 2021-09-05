@@ -24,8 +24,8 @@
 
 #include "VanDerPolModel.hpp"
 
-#include "utility/math/filter/eigen/ParticleFilter.hpp"
-#include "utility/math/filter/eigen/UKF.hpp"
+#include "utility/math/filter/ParticleFilter.hpp"
+#include "utility/math/filter/UKF.hpp"
 
 static const std::array<Eigen::Vector2d, 101> true_state   = {Eigen::Vector2d(2.0, 0.0),
                                                             Eigen::Vector2d(1.99762085441568, -0.0928337297585024),
@@ -245,12 +245,13 @@ TEST_CASE("Test the ParticleFilter", "[utility][math][filter][ParticleFilter]") 
 
     INFO("Configuring the ParticleFilter with")
     INFO("    Time step..........: " << deltaT);
-    INFO("    Number of Particles: " << number_of_particles)
+    INFO("    Number of Particles: " << number_of_particles);
     INFO("    Process Noise......: " << process_noise.transpose());
     INFO("    Initial State......: " << initial_state.transpose());
     INFO("    Initial Covariance.: \n" << initial_covariance);
+    model_filter.model.n_particles   = number_of_particles;
     model_filter.model.process_noise = process_noise;
-    model_filter.set_state(initial_state, initial_covariance, number_of_particles);
+    model_filter.set_state(initial_state, initial_covariance);
 
     INFO("Feeding noisy measurements into the filter")
     std::array<double, 100> innovations;
@@ -261,8 +262,8 @@ TEST_CASE("Test the ParticleFilter", "[utility][math][filter][ParticleFilter]") 
     for (size_t time_count = 0; time_count < 100; ++time_count) {
         model_filter.measure(measurements[time_count], measurement_noise);
         model_filter.time(deltaT);
-        innovations[time_count]  = measurements[time_count].x() - model_filter.get().x();
-        actual_state[time_count] = std::make_pair(model_filter.get(), model_filter.getCovariance());
+        innovations[time_count]  = measurements[time_count].x() - model_filter.getMean().x();
+        actual_state[time_count] = std::make_pair(model_filter.getMean(), model_filter.getCovariance());
     }
 
     INFO("Calculating statistics")

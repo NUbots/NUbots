@@ -6,9 +6,7 @@
 #include <google/protobuf/timestamp.pb.h>
 #include <nuclear_bits/clock.hpp>
 
-
-namespace message {
-namespace conversion {
+namespace message::conversion {
 
     template <typename Clock>
     ::google::protobuf::Timestamp& convert(::google::protobuf::Timestamp& proto,
@@ -67,7 +65,6 @@ namespace conversion {
         return d;
     }
 
-}  // namespace conversion
-}  // namespace message
+}  // namespace message::conversion
 
 #endif  // MESSAGE_CONVERSION_PROTO_TIME_HPP

@@ -11,7 +11,9 @@
 ### the date in the FROM command
 ### Date format is ISO year/month/day
 FROM archlinux:base-20210110.0.13332
-RUN echo "Server=https://archive.archlinux.org/repos/2021/01/10/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
+
+# ↓↓↓ UPDATE MIRRORS HERE ↓↓↓
+RUN echo -e "Server=http://host.docker.internal:7878/\$repo/os/\$arch\nServer=https://archive.archlinux.org/repos/2021/01/10/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
 
 # Arch recommends running this as the first command of the docker image
 # Use "yyuu" to allow for downgrades
@@ -33,7 +35,11 @@ RUN install-package \
     ninja \
     cmake \
     meson \
-    git
+    nodejs-lts-fermium \
+    npm \
+    yarn \
+    git \
+    ncurses
 
 # Get python to look in /usr/local for packages
 RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
@@ -90,7 +96,7 @@ RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 
 # LLVM and Clang
 RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-11.0.1.tar.gz \
-    -DLLVM_ENABLE_PROJECTS="clang" \
+    -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" \
     -DLLVM_ENABLE_SPHINX=OFF \
     -DLLVM_BUILD_LLVM_DYLIB=ON \
     -DLLVM_LINK_LLVM_DYLIB=ON
@@ -102,11 +108,6 @@ RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Transla
 # opencl-clang
 COPY usr/local/package/opencl-clang.sh /usr/local/package/opencl-clang.sh
 RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/archive/v11.0.0.tar.gz
-
-# ncurses - dependency for IGC. Flags are from the arch PKGBUILD for ncurses
-RUN install-from-source https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.2.tar.gz \
-    --with-shared --with-normal --without-debug --without-ada \
-    --enable-widec --enable-pc-files --with-cxx-binding --with-cxx-shared
 
 # intel graphics compiler
 COPY usr/local/package/intel-graphics-compiler.sh /usr/local/package/intel-graphics-compiler.sh
@@ -148,7 +149,7 @@ RUN /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute
 
 # Install OpenCL C and C++ headers
 COPY usr/local/package/opencl-headers.sh /usr/local/package/opencl-headers.sh
-RUN /usr/local/package/opencl-headers.sh https://github.com/KhronosGroup/OpenCL-Headers/archive/master.tar.gz
+RUN /usr/local/package/opencl-headers.sh https://github.com/KhronosGroup/OpenCL-Headers/archive/v2020.12.18.tar.gz
 RUN install-from-source https://github.com/KhronosGroup/OpenCL-CLHPP/archive/master.tar.gz \
     -DOPENCL_INCLUDE_DIR=/usr/local/include/CL \
     -DOPENCL_LIB_DIR=/usr/local/lib \
@@ -164,12 +165,6 @@ RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/v2.2.14.tar.g
 RUN install-package gcc-fortran
 COPY usr/local/package/openblas/${platform}.sh /usr/local/package/openblas.sh
 RUN /usr/local/package/openblas.sh https://github.com/xianyi/OpenBLAS/archive/v0.3.13.tar.gz
-
-# Armadillo
-RUN install-cmake-from-source https://downloads.sourceforge.net/project/arma/armadillo-9.800.3.tar.xz \
-    -DDETECT_HDF5=OFF \
-    -DBUILD_SHARED_LIBS=ON
-COPY usr/local/include/armadillo_bits/config.hpp /usr/local/include/armadillo_bits/config.hpp
 
 # Eigen3
 COPY usr/local/package/eigen3/deprecated-copy.patch /usr/local/package/deprecated-copy.patch
@@ -240,8 +235,14 @@ RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.34.1.tar
     -DBUILD_TESTING=OFF
 
 # NUClear!
-RUN install-from-source https://github.com/Fastcode/NUClear/archive/master.tar.gz \
+RUN install-from-source https://github.com/Fastcode/NUClear/archive/153ccdb9a13dbc88f3c448e07a3048d67235116e.tar.gz \
     -DBUILD_TESTS=OFF
+
+# Visual Mesh
+RUN install-from-source https://github.com/Fastcode/VisualMesh/archive/9df04eab3b08d2dca1d955a5bfbdbeea75f11d6b.tar.gz \
+    -DBUILD_TENSORFLOW_OP=OFF \
+    -DBUILD_EXAMPLES=OFF \
+    -DBUILD_OPENCL_ENGINE=ON
 
 # Backtrace
 RUN install-from-source https://github.com/ianlancetaylor/libbacktrace/archive/master.tar.gz \
@@ -256,12 +257,22 @@ RUN install-from-source https://github.com/espeak-ng/pcaudiolib/archive/1.1.tar.
 COPY usr/local/package/espeak.sh /usr/local/package/espeak.sh
 RUN /usr/local/package/espeak.sh https://github.com/espeak-ng/espeak-ng/releases/download/1.50/espeak-ng-1.50.tgz
 
+# mio memory mapping library
+RUN install-from-source https://github.com/mandreyel/mio/archive/master.tar.gz
+
+# zstr header to have file streams that do zlib compression
+RUN mkdir -p /usr/local/include/zstr \
+    && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/zstr.hpp -O /usr/local/include/zstr.hpp \
+    && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/strict_fstream.hpp -O /usr/local/include/strict_fstream.hpp \
+    && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/zstr_make_unique_polyfill.h -O /usr/local/include/zstr_make_unique_polyfill.h
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
 
 # Install python libraries
 RUN pip install \
+    xxhash \
     pylint \
     termcolor \
     stringcase \
@@ -280,13 +291,20 @@ RUN install-package \
     colordiff \
     parallel \
     vim \
-    nano
+    nano \
+    clinfo
 
 # Install formatters as last step so if they change the image is easy to update
 RUN pip install --upgrade \
-    cmake-format==0.6.10 \
-    isort==4.3.21 \
-    black==19.10b0
+    cmake-format==0.6.13 \
+    isort==5.7.0 \
+    black==20.8b1
+
+# Enable all the driver capabilities so we can use OpenCL in the container
+ENV NVIDIA_DRIVER_CAPABILITIES=all
+
+# Copy the nvidia OpenCL vendorfile into the container so we can also use OpenCL on nvidia GPUs
+COPY --chown=root:root etc/OpenCL/vendors/nvidia.icd /etc/OpenCL/vendors/nvidia.icd
 
 ##############################
 ### SETUP THE USER ACCOUNT ###

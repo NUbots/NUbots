@@ -72,9 +72,9 @@ except:
 
 if __name__ == "__main__":
 
-    # Add our builtin tools to the path and user tools
-    sys.path.append(user_tools_path)
-    sys.path.append(nuclear_tools_path)
+    # Prepend nuclear and user tools to the path, so we prefer our packages
+    sys.path.insert(0, nuclear_tools_path)
+    sys.path.insert(0, user_tools_path)
 
     # Root parser information
     command = argparse.ArgumentParser(

@@ -138,19 +138,17 @@ export class LocalisationModel {
     this.time = time
   }
 
-  static of = memoize(
-    (appModel: AppModel): LocalisationModel => {
-      return new LocalisationModel(appModel, {
-        field: FieldModel.of(),
-        skybox: SkyboxModel.of(),
-        camera: CameraModel.of(),
-        locked: false,
-        controls: ControlsModel.of(),
-        viewMode: ViewMode.FreeCamera,
-        time: TimeModel.of(),
-      })
-    },
-  )
+  static of = memoize((appModel: AppModel): LocalisationModel => {
+    return new LocalisationModel(appModel, {
+      field: FieldModel.of(),
+      skybox: SkyboxModel.of(),
+      camera: CameraModel.of(),
+      locked: false,
+      controls: ControlsModel.of(),
+      viewMode: ViewMode.FreeCamera,
+      time: TimeModel.of(),
+    })
+  })
 
   @computed get robots(): LocalisationRobotModel[] {
     return this.appModel.robots.map(robot => LocalisationRobotModel.of(robot))

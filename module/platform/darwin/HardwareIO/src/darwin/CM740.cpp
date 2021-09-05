@@ -20,10 +20,10 @@
 #include "CM740.hpp"
 
 namespace Darwin {
-CM740::CM740(UART& coms, int id) : DarwinDevice(coms, id) {}
+    CM740::CM740(UART& coms, int id) : DarwinDevice(coms, id) {}
 
-void CM740::turnOnDynamixel() {
-    // Write true to the DXL_POWER byte
-    write(Address::DXL_POWER, true);
-}
+    void CM740::turnOnDynamixel() {
+        // Write true to the DXL_POWER byte
+        write(Address::DXL_POWER, true);
+    }
 }  // namespace Darwin

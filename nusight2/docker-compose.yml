@@ -1,7 +1,7 @@
 version: "3"
 services:
   nusight:
-    image: node:lts
+    image: node:14
     volumes:
       - .:/var/www/NUsight2
       - node_modules_volume:/var/www/NUsight2/node_modules

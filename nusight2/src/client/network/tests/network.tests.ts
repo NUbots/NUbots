@@ -1,5 +1,5 @@
 import { createMockInstance } from '../../../shared/base/testing/create_mock_instance'
-import { message } from '../../../shared/proto/messages'
+import { message } from '../../../shared/messages'
 import { Network } from '../network'
 import { NUsightNetwork } from '../nusight_network'
 import Mocked = jest.Mocked

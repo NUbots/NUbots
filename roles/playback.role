@@ -6,6 +6,7 @@ nuclear_role(
   support::logging::ConsoleLogHandler
   # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
   network::NUClearNet
+  network::NetworkForwarder
   support::logging::DataPlayback
-  support::NUsight
+  output::Overview
 )

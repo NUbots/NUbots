@@ -30,11 +30,14 @@ message Obstacle {
         MAGENTA      = 1;
         CYAN         = 2;
     }
-
-    uint32                    camera_id = 1;
+    /// ID of the camera that took the image containing the obstacle
+    uint32 id = 1;
+    /// When the obstacle was seen
     google.protobuf.Timestamp timestamp = 2;
-    Polygon                   shape     = 3;
-    Team                      team      = 4;
+    /// {x, y} points bounding the location of the obstacle
+    Polygon shape = 3;
+
+    Team team = 4;
 }
 
 message Obstacles {

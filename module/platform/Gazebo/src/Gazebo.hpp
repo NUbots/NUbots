@@ -3,8 +3,7 @@
 
 #include <nuclear>
 
-namespace module {
-namespace platform {
+namespace module::platform {
 
     class Gazebo : public NUClear::Reactor {
 
@@ -22,8 +21,6 @@ namespace platform {
         double sim_time;
         double real_time;
     };
-
-}  // namespace platform
-}  // namespace module
+}  // namespace module::platform
 
 #endif  // MODULE_PLATFORM_GAZEBO_HPP

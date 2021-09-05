@@ -23,16 +23,23 @@ package message.motion;
 import "google/protobuf/timestamp.proto";
 
 /**
- * TODO document
- *
  * @author Trent Houliston
  */
 message ServoTarget {
-    google.protobuf.Timestamp time     = 1;
-    uint32                    id       = 2;
-    float                     position = 3;
-    float                     gain     = 4;
-    float                     torque   = 5;
+    /// When the target was created
+    google.protobuf.Timestamp time = 1;
+    /// The ID of the servo being controlled
+    uint32 id = 2;
+    /// The position value of the destination. 0 to 4,095 (0xFFF) is available.
+    /// The unit is 0.088 [°]. If Goal Position is out of the range, Angle Limit
+    /// Error Bit (Bit1) of Status Packet is returned as ‘1’ and Alarm is
+    /// triggered as set in Alarm LED/Shutdown
+    float position = 3;
+    /// Proportional gain. In proportion to the servo's position error. Gain
+    /// values are in range 0~254. K_p : p_gain / 8
+    float gain = 4;
+    /// Used to set the servo on or off. Typically either 0 (off) or 100 (on)
+    float torque = 5;
 }
 
 message ServoTargets {

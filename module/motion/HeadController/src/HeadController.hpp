@@ -20,16 +20,15 @@
 #ifndef MODULES_BEHAVIOUR_REFLEX_HEADCONTROLLER_HPP
 #define MODULES_BEHAVIOUR_REFLEX_HEADCONTROLLER_HPP
 
-#include <armadillo>
+#include <Eigen/Core>
 #include <nuclear>
 
-namespace module {
-namespace motion {
+namespace module::motion {
 
     /**
      * Executes a HeadController action.
      *
-     * @author Jake Fountain
+     * @author Jade Fountain
      */
     class HeadController : public NUClear::Reactor {
     private:
@@ -47,12 +46,10 @@ namespace motion {
 
         explicit HeadController(std::unique_ptr<NUClear::Environment> environment);
 
-        arma::vec2 currentAngles;
-        arma::vec2 goalAngles;
+        Eigen::Vector2f currentAngles;
+        Eigen::Vector2f goalAngles;
         bool goalRobotSpace = true;
     };
-
-}  // namespace motion
-}  // namespace module
+}  // namespace module::motion
 
 #endif  // MODULES_BEHAVIOURS_REFLEX_HEADCONTROLLER_HPP

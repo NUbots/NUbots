@@ -34,9 +34,11 @@ def generate_cmake_toolchain(target, prefix):
         set(CMAKE_INSTALL_PREFIX "{prefix}" CACHE STRING "Install path prefix, prepended onto install directories.")
         set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH ON CACHE STRING "Should pkg-config use the cmake prefix path for finding modules.")
         set(CMAKE_PREFIX_PATH "{prefix}" CACHE STRING "")
-        set(CMAKE_INSTALL_LIBDIR "lib" CACHE STRING "Direcxtory into which object files and object code libraries should be installed (Default: lib).")
+        set(CMAKE_INSTALL_LIBDIR "lib" CACHE STRING "Directory into which object files and object code libraries should be installed (Default: lib).")
 
         set(CMAKE_COLOR_MAKEFILE ON CACHE STRING "Enable/Disable color output during build.")
+
+        mark_as_advanced(PKG_CONFIG_USE_CMAKE_PREFIX_PATH CMAKE_PREFIX_PATH CMAKE_NASM_ASM_FLAGS_INIT CMAKE_INSTALL_PREFIX CMAKE_INSTALL_LIBDIR CMAKE_C_FLAGS_INIT CMAKE_CXX_FLAGS_INIT CMAKE_COLOR_MAKEFILE CMAKE_ASM_NASM_OBJECT_FORMAT)
         """
     )
 

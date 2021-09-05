@@ -3,8 +3,7 @@
 
 #include <nuclear>
 
-namespace module {
-namespace support {
+namespace module::support {
 
     class ReactionTimer : public NUClear::Reactor {
 
@@ -12,7 +11,6 @@ namespace support {
         /// @brief Called by the powerplant to build and setup the ReactionTimer reactor.
         explicit ReactionTimer(std::unique_ptr<NUClear::Environment> environment);
     };
-}  // namespace support
-}  // namespace module
+}  // namespace module::support
 
 #endif  // MODULE_SUPPORT_REACTIONTIMER_HPP

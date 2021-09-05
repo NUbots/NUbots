@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
-from tqdm import tqdm
-
 import tensorflow as tf
+from tqdm import tqdm
 
 
 class ExtrinsicProgress(tf.keras.callbacks.Callback):

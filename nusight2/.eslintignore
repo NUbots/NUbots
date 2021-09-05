@@ -1,1 +1,2 @@
-/src/shared/proto/*
+/src/shared/messages.js
+/src/shared/messages.d.ts

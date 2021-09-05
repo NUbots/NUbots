@@ -1,7 +1,5 @@
-import { computed } from 'mobx'
-import { observable } from 'mobx'
-
-import { message } from '../../../../shared/proto/messages'
+import { computed, observable } from 'mobx'
+import { message } from '../../../../shared/messages'
 import { memoize } from '../../../base/memoize'
 import { Matrix2 } from '../../../math/matrix2'
 import { Matrix3 } from '../../../math/matrix3'
@@ -10,6 +8,7 @@ import { Vector2 } from '../../../math/vector2'
 import { Vector3 } from '../../../math/vector3'
 import { BrowserSystemClock } from '../../../time/browser_clock'
 import { RobotModel } from '../../robot/model'
+
 import State = message.behaviour.Behaviour.State
 import Mode = message.input.GameState.Data.Mode
 import PenaltyReason = message.input.GameState.Data.PenaltyReason
@@ -66,8 +65,7 @@ export class DashboardRobotModel {
   @observable lastSeenBall: number
   @observable lastSeenGoal: number
 
-  // The walk plan and the current walk command
-  @observable walkPathPlan: Vector2[]
+  // The current walk command
   @observable walkCommand: Vector3
 
   constructor(
@@ -96,7 +94,6 @@ export class DashboardRobotModel {
       lastCameraImage,
       lastSeenBall,
       lastSeenGoal,
-      walkPathPlan,
       walkCommand,
     }: DashboardRobotModelOpts,
   ) {
@@ -124,41 +121,37 @@ export class DashboardRobotModel {
     this.lastCameraImage = lastCameraImage
     this.lastSeenBall = lastSeenBall
     this.lastSeenGoal = lastSeenGoal
-    this.walkPathPlan = walkPathPlan
     this.walkCommand = walkCommand
   }
 
-  static of = memoize(
-    (robot: RobotModel): DashboardRobotModel => {
-      return new DashboardRobotModel(robot, {
-        ballColor: '#ff9800',
-        ballCovariance: Matrix2.of(),
-        ballPosition: Vector2.of(),
-        ballSightColor: '#4DB6AC',
-        battery: -1,
-        behaviourState: State.UNKNOWN,
-        camera: Transform.of(),
-        gameMode: Mode.UNKNOWN_MODE,
-        gamePhase: Phase.UNKNOWN_PHASE,
-        playerId: -1,
-        kickTarget: Vector2.of(),
-        kickTargetColor: '#00796B',
-        lastCameraImage: 0,
-        lastSeenBall: 0,
-        lastSeenGoal: 0,
-        penaltyReason: PenaltyReason.UNKNOWN_PENALTY_REASON,
-        robotColor: '#015457',
-        robotPosition: Vector3.of(),
-        robotPositionCovariance: Matrix3.of(),
-        roleName: '',
-        textColor: '#ffffff',
-        time: BrowserSystemClock.now(),
-        voltage: -1,
-        walkCommand: Vector3.of(),
-        walkPathPlan: [],
-      })
-    },
-  )
+  static of = memoize((robot: RobotModel): DashboardRobotModel => {
+    return new DashboardRobotModel(robot, {
+      ballColor: '#ff9800',
+      ballCovariance: Matrix2.of(),
+      ballPosition: Vector2.of(),
+      ballSightColor: '#4DB6AC',
+      battery: -1,
+      behaviourState: State.UNKNOWN,
+      camera: Transform.of(),
+      gameMode: Mode.UNKNOWN_MODE,
+      gamePhase: Phase.UNKNOWN_PHASE,
+      playerId: -1,
+      kickTarget: Vector2.of(),
+      kickTargetColor: '#00796B',
+      lastCameraImage: 0,
+      lastSeenBall: 0,
+      lastSeenGoal: 0,
+      penaltyReason: PenaltyReason.UNKNOWN_PENALTY_REASON,
+      robotColor: '#015457',
+      robotPosition: Vector3.of(),
+      robotPositionCovariance: Matrix3.of(),
+      roleName: '',
+      textColor: '#ffffff',
+      time: BrowserSystemClock.now(),
+      voltage: -1,
+      walkCommand: Vector3.of(),
+    })
+  })
 
   @computed
   get connected(): boolean {
@@ -205,6 +198,5 @@ interface DashboardRobotModelOpts {
   lastCameraImage: number
   lastSeenBall: number
   lastSeenGoal: number
-  walkPathPlan: Vector2[]
   walkCommand: Vector3
 }

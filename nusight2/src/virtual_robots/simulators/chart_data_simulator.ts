@@ -1,7 +1,7 @@
 import { autorun } from 'mobx'
 
 import { NUClearNetClient } from '../../shared/nuclearnet/nuclearnet_client'
-import { message } from '../../shared/proto/messages'
+import { message } from '../../shared/messages'
 import { toTimestamp } from '../../shared/time/timestamp'
 import { Simulator } from '../simulator'
 import { Message } from '../simulator'

@@ -5,6 +5,7 @@ nuclear_role(
   # Config
   extension::FileWatcher
   network::NUClearNet
-  support::NUsight
+  network::NetworkForwarder
+  output::Overview
   support::NUsightHarness
 )

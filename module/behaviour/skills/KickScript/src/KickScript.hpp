@@ -24,29 +24,24 @@
 
 #include "message/motion/KickCommand.hpp"
 
-namespace module {
-namespace behaviour {
-    namespace skills {
+namespace module::behaviour::skills {
 
-        class KickScript : public NUClear::Reactor {
-        public:
-            /// @brief Called by the powerplant to build and setup the KickScript reactor.
-            explicit KickScript(std::unique_ptr<NUClear::Environment> environment);
+    class KickScript : public NUClear::Reactor {
+    public:
+        /// @brief Called by the powerplant to build and setup the KickScript reactor.
+        explicit KickScript(std::unique_ptr<NUClear::Environment> environment);
 
-        private:
-            const size_t id;
+    private:
+        const size_t id{size_t(this) * size_t(this) - size_t(this)};
 
-            float KICK_PRIORITY;
-            float EXECUTION_PRIORITY;
+        float KICK_PRIORITY      = 0.0f;
+        float EXECUTION_PRIORITY = 0.0f;
 
-            message::motion::KickScriptCommand kickCommand;
+        message::motion::KickScriptCommand kickCommand{};
 
-            void updatePriority(const float& priority);
-            int getDirectionalQuadrant(float x, float y);
-        };
-    }  // namespace skills
-}  // namespace behaviour
-}  // namespace module
+        void updatePriority(const float& priority);
+    };
+}  // namespace module::behaviour::skills
 
 
 #endif

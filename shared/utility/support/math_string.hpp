@@ -3,8 +3,7 @@
 
 #include <string>
 
-namespace utility {
-namespace support {
+namespace utility::support {
 
     double parse_to_double(const std::string& str);
 
@@ -20,7 +19,6 @@ namespace support {
         return Scalar(parse_to_double(str));
     }
 
-}  // namespace support
-}  // namespace utility
+}  // namespace utility::support
 
 #endif  // UTILITY_SUPPORT_MATH_STRING_HPP

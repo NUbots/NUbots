@@ -22,42 +22,74 @@ package message.support;
 
 import "Vector.proto";
 
+/**
+ * Information about location and size of field objects and markers.
+ * Details about field measurements can be found in 'Law 1 - The Field of Play',
+ * in the RoboCup rulebook, here https://humanoid.robocup.org/materials/rules/
+ * We have these config values mirrored in `SoccerConfig/data/config/`.
+ */
 message FieldDescription {
+    /// The cross-sectional shape of the goalposts
     enum GoalpostType {
         RECTANGLE = 0;
         CIRCLE    = 1;
     }
-
+    /// Measurements of the field which are loaded from config file. In metres
     message FieldDimensions {
-        double       line_width             = 1;
-        double       mark_width             = 2;
-        double       field_length           = 3;
-        double       field_width            = 4;
-        GoalpostType goalpost_type          = 5;
-        double       goal_depth             = 6;
-        double       goal_width             = 7;
-        double       goal_area_length       = 8;
-        double       goal_area_width        = 9;
-        double       goal_crossbar_height   = 10;
-        double       goalpost_width         = 11;
-        double       goalpost_depth         = 12;
-        double       goal_crossbar_width    = 13;
-        double       goal_crossbar_depth    = 14;
-        double       goal_net_height        = 15;
-        double       penalty_mark_distance  = 16;
-        double       center_circle_diameter = 17;
-        double       border_strip_min_width = 18;
+        /// The rules say that the lines must be the same width
+        double line_width = 1;
+        /// The 'touch line' length - AKA the sideline
+        double field_length = 2;
+        /// The 'goal line' length - AKA the baseline
+        double field_width = 3;
+        /// Cross-sectional shape of goal-posts
+        GoalpostType goalpost_type = 4;
+        /// Distance behind the keeper to the net
+        double goal_depth = 5;
+        /// Distance between inner edges of goal posts
+        double goal_width = 6;
+        /// 'Goal area' is equivalent to 6-yard box in soccer. Length is front to back, if you standing in the middle
+        /// of the field facing goals
+        double goal_area_length = 7;
+        /// 'Goal area' is equivalent to 6-yard box in soccer. Width is left to right, if you're standing in the middle
+        /// of the field facing goals
+        double goal_area_width = 8;
+        /// Height to the bottom of the crossbar
+        double goal_crossbar_height = 9;
+
+        double goalpost_width = 10;
+
+        double goalpost_depth = 11;
+
+        double goal_crossbar_width = 12;
+
+        double goal_crossbar_depth = 13;
+
+        double goal_net_height = 14;
+        /// Measured from the goal line to the middle of the penalty mark
+        double penalty_mark_distance = 15;
+
+        double center_circle_diameter = 16;
+
+        double border_strip_min_width = 17;
     }
-
-    double ball_radius         = 1;
+    /// @see Law 2
+    double ball_radius = 1;
+    /// Calculated as goal_crossbar_height + goal_crossbar_width
     double goalpost_top_height = 2;
-    double penalty_robot_start = 3;
 
-    // Coordinates of goalpost centers calculated from the FieldDimensions:
+    // Coordinates of goalpost centers calculated from the FieldDimensions, in field space
+
+    /// {x, y} of our left goalpost, calculated from goal_width and field_length
+    /// It's the left one, as if you were looking from halfway
     vec2 goalpost_own_l = 4;
+    /// {x, y} of our right goalpost, calculated from goal_width and field_length
+    /// It's the right one, as if you were looking from halfway
     vec2 goalpost_own_r = 5;
+    /// {x, y} of opposition left goalpost, calculated from goal_width and field_length
     vec2 goalpost_opp_l = 6;
+    /// {x, y} of opposition right goalpost, calculated from goal_width and field_length
     vec2 goalpost_opp_r = 7;
-
+    /// Set of field dimensions loaded from config
     FieldDimensions dimensions = 8;
 }

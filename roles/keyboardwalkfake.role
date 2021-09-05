@@ -8,10 +8,11 @@ nuclear_role(
   support::configuration::GlobalConfig
   support::configuration::SoccerConfig
   network::NUClearNet
-  support::NUsight
+  network::NetworkForwarder
+  output::Overview
   # Hardware Interface
   platform::darwin::HardwareSimulator
-  platform::darwin::SensorFilter
+  input::SensorFilter
   # Motion
   motion::QuinticWalk
   motion::HeadController

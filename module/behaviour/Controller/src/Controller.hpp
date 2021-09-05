@@ -17,14 +17,15 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_CONTROLLER_HPP
-#define MODULES_BEHAVIOUR_CONTROLLER_HPP
+#ifndef MODULE_BEHAVIOUR_CONTROLLER_HPP
+#define MODULE_BEHAVIOUR_CONTROLLER_HPP
 
 #include <array>
 #include <list>
 #include <map>
 #include <nuclear>
 #include <set>
+#include <utility>
 #include <vector>
 
 #include "message/behaviour/ServoCommand.hpp"
@@ -33,79 +34,63 @@
 #include "utility/behaviour/Action.hpp"
 #include "utility/input/ServoID.hpp"
 
-namespace module {
-namespace behaviour {
+namespace module::behaviour {
 
     struct RequestItem;
 
     struct Request {
         using callback = std::function<void(std::set<utility::input::LimbID>)>;
 
-        Request()
-            : id(0)
-            , name("")
-            , active(false)
-            , maxPriority(std::numeric_limits<float>::min())
-            , mainElement(0)
-            , items()
-            , start()
-            , kill()
-            , completed() {}
+        Request() = default;
 
-        Request(size_t id,
-                std::string name,
-                callback start,
-                callback kill,
-                std::function<void(std::set<utility::input::ServoID>)> completed)
-            : id(id)
-            , name(name)
-            , active(false)
-            , maxPriority(std::numeric_limits<float>::min())
-            , mainElement(0)
-            , items()
-            , start(start)
-            , kill(kill)
-            , completed(completed) {}
+        Request(size_t id_,
+                std::string name_,
+                callback start_,
+                callback kill_,
+                std::function<void(std::set<utility::input::ServoID>)> completed_)
+            : id(id_)
+            , name(std::move(name_))
+            , start(std::move(start_))
+            , kill(std::move(kill_))
+            , completed(std::move(completed_)) {}
 
         /// The ID of this request that will be sent with any motion commands
-        size_t id;
+        size_t id = 0;
 
         /// The name of the requester
-        std::string name;
+        std::string name{};
 
         /// If the main element of this request is active
-        bool active;
+        bool active = false;
 
         /// The maximum priority for any of the items
-        float maxPriority;
+        float maxPriority = std::numeric_limits<float>::min();
 
         /// The index of the main item
-        size_t mainElement;
+        size_t mainElement = 0;
 
         /// The items in this list
-        std::vector<RequestItem> items;
+        std::vector<RequestItem> items{};
 
         /// The callback to execute when a new limb is started
-        callback start;
-        callback kill;
-        std::function<void(std::set<utility::input::ServoID>)> completed;
+        callback start{};
+        callback kill{};
+        std::function<void(std::set<utility::input::ServoID>)> completed{};
     };
 
     struct RequestItem {
 
-        // RequestItem() : group(Request()), index(0), active(false), priority(std::numeric_limits<float>::min()),
-        // limbSet() {}
-        RequestItem(Request& group, size_t index, float priority, const std::set<utility::input::LimbID>& limbSet)
-            : group(group), index(index), active(false), priority(priority), limbSet(limbSet) {}
+        RequestItem(Request& group_, size_t index_, float priority_, std::set<utility::input::LimbID> limbSet_)
+            : group(group_), index(index_), priority(priority_), limbSet(std::move(limbSet_)) {}
 
         Request& group;
 
-        size_t index;
+        size_t index = 0;
 
-        bool active;
+        bool active = false;
 
-        float priority;
-        std::set<utility::input::LimbID> limbSet;
+        float priority = 0.0f;
+        std::set<utility::input::LimbID> limbSet{};
     };
 
     /**
@@ -115,13 +100,12 @@ namespace behaviour {
      */
     class Controller : public NUClear::Reactor {
     private:
-        std::array<std::vector<std::reference_wrapper<RequestItem>>, 5> actions;
-        std::array<size_t, 5> limbAccess;
-        std::map<size_t, std::unique_ptr<Request>> requests;
-        std::vector<std::reference_wrapper<RequestItem>> currentActions;
+        std::array<std::vector<std::reference_wrapper<RequestItem>>, 5> actions{};
+        std::array<size_t, 5> limbAccess{};
+        std::map<size_t, std::unique_ptr<Request>> requests{};
+        std::vector<std::reference_wrapper<RequestItem>> currentActions{};
 
-
-        std::array<std::list<message::behaviour::ServoCommand>, 20> commandQueues;
+        std::array<std::list<message::behaviour::ServoCommand>, 20> commandQueues{};
 
         void selectAction();
 
@@ -129,7 +113,6 @@ namespace behaviour {
         explicit Controller(std::unique_ptr<NUClear::Environment> environment);
     };
 
-}  // namespace behaviour
-}  // namespace module
+}  // namespace module::behaviour
 
-#endif  // MODULES_BEHAVIOUR_CONTROLLER_HPP
+#endif  // MODULE_BEHAVIOUR_CONTROLLER_HPP
