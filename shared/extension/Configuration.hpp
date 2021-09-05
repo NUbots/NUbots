@@ -230,7 +230,7 @@ namespace NUClear::dsl {
                 auto flags = ::extension::FileWatch::RENAMED | ::extension::FileWatch::CHANGED;
 
                 // Get hostname so we can find the correct per-robot config directory.
-                std::string hostname = utility::support::getHostname();
+                const std::string hostname = utility::support::getHostname();
 
                 // Get the command line arguments so we can find the current binary's name.
                 std::shared_ptr<const message::CommandLineArguments> args =
