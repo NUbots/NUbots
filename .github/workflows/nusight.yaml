@@ -22,9 +22,9 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
 
-    # Run on the Node 12 container
+    # Run on the Node 14 (LTS) container
     container:
-      image: node:12
+      image: node:lts-fermium
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -46,9 +46,9 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
 
-    # Run on the Node 12 container
+    # Run on the Node 14 (LTS) container
     container:
-      image: node:12
+      image: node:lts-fermium
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -70,9 +70,9 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
 
-    # Run on the Node 12 container
+    # Run on the Node 14 (LTS) container
     container:
-      image: node:12
+      image: node:lts-fermium
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -94,9 +94,9 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
 
-    # Run on the Node 12 container
+    # Run on the Node 14 (LTS) container
     container:
-      image: node:12
+      image: node:lts-fermium
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
