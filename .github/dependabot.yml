@@ -22,8 +22,7 @@ updates:
     labels:
       - "-Dependencies"
       - "G-DevOps-QA"
-    # TODO: Add devops team as reviewers
-    # reviewers:
-    # - "NUbots/Devops or whatever the team is called"
+    reviewers:
+      - "NUbots/Active/Devops"
     schedule:
       interval: "daily"
