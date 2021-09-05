@@ -18,7 +18,6 @@
  */
 
 #include <catch.hpp>
-#include <type_traits>
 
 #include "utility/math/Transform.hpp"
 

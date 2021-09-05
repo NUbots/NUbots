@@ -22,8 +22,6 @@
 
 #include <Eigen/Geometry>
 #include <algorithm>
-#include <string>
-
 
 namespace utility::math {
 
