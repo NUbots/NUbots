@@ -62,7 +62,7 @@ jobs:
 
       - name: Build NUsight
         working-directory: nusight2
-        run: yarn build
+        run: yarn build:ci
 
   # Build the NUsight Storybook code
   build-nusight-storybook:
