@@ -51,11 +51,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
-      # Install dependencies if we had a yarn cache miss
+      # Check dependencies from cache and install any which weren't cached or were corrupted
       - name: Install Dependencies
         working-directory: nusight2
-        if: steps.yarn-cache.outputs.cache-hit != 'true'
-        run: yarn
+        run: yarn --prefer-offline
 
       - name: Run eslint
         working-directory: nusight2
@@ -96,11 +95,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
-      # Install dependencies if we had a yarn cache miss
+      # Check dependencies from cache and install any which weren't cached or were corrupted
       - name: Install Dependencies
         working-directory: nusight2
-        if: steps.yarn-cache.outputs.cache-hit != 'true'
-        run: yarn
+        run: yarn --prefer-offline
 
       - name: Build NUsight
         working-directory: nusight2
@@ -141,11 +139,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
-      # Install dependencies if we had a yarn cache miss
+      # Check dependencies from cache and install any which weren't cached or were corrupted
       - name: Install Dependencies
         working-directory: nusight2
-        if: steps.yarn-cache.outputs.cache-hit != 'true'
-        run: yarn
+        run: yarn --prefer-offline
 
       - name: Build NUsight
         working-directory: nusight2
@@ -186,11 +183,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
 
-      # Install dependencies if we had a yarn cache miss
+      # Check dependencies from cache and install any which weren't cached or were corrupted
       - name: Install Dependencies
         working-directory: nusight2
-        if: steps.yarn-cache.outputs.cache-hit != 'true'
-        run: yarn
+        run: yarn --prefer-offline
 
       - name: Build NUsight
         working-directory: nusight2
