@@ -17,8 +17,8 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_MATH_TRANSFORM_HPP
-#define UTILITY_MATH_TRANSFORM_HPP
+#ifndef UTILITY_MATH_MATRIX_TRANSFORM_HPP
+#define UTILITY_MATH_MATRIX_TRANSFORM_HPP
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
@@ -184,4 +184,4 @@ namespace utility::math::transform {
         return result;
     }
 }  // namespace utility::math::transform
-#endif  // UTILITY_MATH_TRANSFORM_HPP
+#endif  // UTILITY_MATH_MATRIX_TRANSFORM_HPP
