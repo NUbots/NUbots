@@ -63,10 +63,6 @@ namespace extension {
                       const YAML::Node& config)
             : fileName(fileName), hostname(hostname), binary(binary), config(config) {}
 
-        /// @brief Constructor without binary name
-        Configuration(const std::string& fileName, const std::string& hostname, const YAML::Node& config)
-            : fileName(fileName), hostname(hostname), config(config) {}
-
         /// @brief Constructor without config node
         Configuration(const std::string& fileName, const std::string& hostname, const std::string& binary)
             : fileName(fileName), hostname(hostname), binary(binary) {
