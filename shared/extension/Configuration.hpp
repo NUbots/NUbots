@@ -37,7 +37,7 @@ namespace extension {
     /**
      * @author Trent Houliston
      */
-    struct Configuration {
+    struct [[nodiscard]] Configuration {
         // Rules:
         // 1) Default config file should define a value for every node.
         // 2) Per-robot config overrides default config values. This file need only override the values that nee to be
