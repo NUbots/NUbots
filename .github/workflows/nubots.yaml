@@ -61,8 +61,6 @@ jobs:
         run: echo "::set-output name=image::nubots/nubots:${{ hashFiles('docker/**') }}"
 
   # Build the codebase
-  # TODO: Run clang-tidy too, once the existing warnings have been fixed across the codebase
-  # TODO: Add -DCI_BUILD=ON once clang-tidy is enabled and compiler warnings have been fixed
   build_nubots:
     name: "Build and test NUbots"
 
@@ -92,7 +90,8 @@ jobs:
           cmake .. -GNinja \
                    -DCMAKE_BUILD_TYPE=Release \
                    -DCMAKE_TOOLCHAIN_FILE=/usr/local/toolchain.cmake \
-                   -DBUILD_TESTS=ON
+                   -DBUILD_TESTS=ON \
+                   -DCI_BUILD=ON
 
       - name: Build the code
         run: |

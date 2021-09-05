@@ -42,9 +42,11 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
-# Default not to run the clang-tidy checks, default to whatever our CI_BUILD is
+# Default not to run the clang-tidy checks
 option(ENABLE_CLANG_TIDY "Enable building with clang-tidy checks." OFF)
-if(ENABLE_CLANG_TIDY OR CI_BUILD)
+# * TODO: Add CI_BUILD to this `if`, so that clang-tidy runs on CI builds
+# * Do this once we have clang-tidy warnings fixed across the codebase
+if(ENABLE_CLANG_TIDY)
   find_package(PythonInterp 3 REQUIRED)
   set(CMAKE_CXX_CLANG_TIDY "${PYTHON_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/cmake/scripts/clang-tidy.py"
                            "${PROJECT_BINARY_DIR}/clang-tidy-fixes" clang-tidy
@@ -60,13 +62,14 @@ if(ENABLE_CLANG_TIDY OR CI_BUILD)
   )
 endif()
 
-# If we are doing a CI build then we want to enable -Werror when compiling warnings are bad. We will also make it fail
-# if clang-tidy has an error
-if(CI_BUILD)
-  add_compile_options(-Werror)
-  set(CMAKE_CXX_CLANG_TIDY ${CMAKE_CXX_CLANG_TIDY} -warnings-as-errors=*)
-  set(CMAKE_C_CLANG_TIDY ${CMAKE_C_CLANG_TIDY} -warnings-as-errors=*)
-endif()
+# * If we are doing a CI build then we want to enable -Werror when compiling warnings are bad.
+# * We will also make it fail if clang-tidy has an error
+# * TODO(DevOps): Uncomment this code once we have fixed warnings codebase wide to prevent new warnings being introduced
+# * if(CI_BUILD)
+# * add_compile_options(-Werror)
+# * set(CMAKE_CXX_CLANG_TIDY ${CMAKE_CXX_CLANG_TIDY} -warnings-as-errors=*)
+# * set(CMAKE_C_CLANG_TIDY ${CMAKE_C_CLANG_TIDY} -warnings-as-errors=*)
+# * endif()
 
 # Enable address sanitizer
 option(USE_ASAN "Enable address sanitization" OFF)
