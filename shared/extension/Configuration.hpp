@@ -137,8 +137,8 @@ namespace extension {
 
                         // Its nothing, so overwrite (unset) the value.
                         // Is this really the intended behaviour?
-                        case YAML::NodeType::Null:
-                        case YAML::NodeType::Undefined:
+                        case YAML::NodeType::Null: [[fallthrough]];
+                        case YAML::NodeType::Undefined: [[fallthrough]];
                         default: {
                             NUClear::log<NUClear::WARN>("Unsetting key",
                                                         "'" + key + "'",
