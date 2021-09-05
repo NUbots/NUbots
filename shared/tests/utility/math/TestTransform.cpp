@@ -26,47 +26,45 @@ using utility::math::Space;
 using utility::math::Transform;
 
 namespace {
-    // template <typename Scalar, Space LTo, Space LFrom, Space RTo, Space RFrom>
-    // [[nodiscard]] bool spaces_are_compatible(Transform<Scalar, LTo, LFrom> /*lTransform*/,
-    //                                          Transform<Scalar, RTo, RFrom> /*rTransform*/) {
-    //     // return LFrom == RTo;
-    //     return true;
-    // }
+    template <typename Scalar, Space LTo, Space LFrom, Space RTo, Space RFrom>
+    [[nodiscard]] bool spaces_are_compatible(Transform<Scalar, LTo, LFrom> /*lTransform*/,
+                                             Transform<Scalar, RTo, RFrom> /*rTransform*/) {
+        // return LFrom == RTo;
+        return true;
+    }
 
-    // template <typename Scalar, Space ActualTo, Space ActualFrom, Space RequiredTo>
-    // [[nodiscard]] bool to_space_correct(Transform<Scalar, ActualTo, ActualFrom> /*transform*/) {
-    //     // return ActualTo == RequiredTo;
-    //     return true;
-    // }
+    template <typename Scalar, Space ActualTo, Space ActualFrom, Space RequiredTo>
+    [[nodiscard]] bool to_space_correct(Transform<Scalar, ActualTo, ActualFrom> /*transform*/) {
+        // return ActualTo == RequiredTo;
+        return true;
+    }
 
-    // template <typename Scalar, Space ActualTo, Space ActualFrom, Space RequiredFrom>
-    // [[nodiscard]] bool from_space_correct(Transform<Scalar, ActualTo, ActualFrom> /*transform*/) {
-    //     // return ActualFrom == RequiredFrom;
-    //     return true;
-    // }
+    template <typename Scalar, Space ActualTo, Space ActualFrom, Space RequiredFrom>
+    [[nodiscard]] bool from_space_correct(Transform<Scalar, ActualTo, ActualFrom> /*transform*/) {
+        // return ActualFrom == RequiredFrom;
+        return true;
+    }
 }  // namespace
 
 
 SCENARIO("Transforms can be multiplied") {
-    auto Htc = Transform<double, "Test", "Test2">();
 
     GIVEN("Two transforms with compatible spaces") {
 
-        // auto Htc = Transform<double, "TORSO", "CAMERA">();
-        // auto Hcf = Transform<double, "CAMERA", "FIELD">();
+        auto Htc = Transform<double, "TORSO", "CAMERA">();
+        auto Hcf = Transform<double, "CAMERA", "FIELD">();
 
         // Validate our GIVEN clause assumption
         THEN("Spaces are compatible") {
-            // REQUIRE(spaces_are_compatible(Htc, Hcf));
+            REQUIRE(spaces_are_compatible(Htc, Hcf));
         }
 
         WHEN("The Transforms are multiplied") {
-            // Transform<double, "TORSO", "FIELD"> Htf = Htc * Hcf;
-
+            Transform<double, "TORSO", "FIELD"> Htf = Htc * Hcf;
 
             THEN("The result has the correct spaces") {
-                // REQUIRE(from_space_correct<double, "TORSO", "FIELD", "FIELD">(Htf));
-                // REQUIRE(to_space_correct<double, "TORSO", "FIELD", "TORSO">(Htf));
+                REQUIRE(from_space_correct<double, "TORSO", "FIELD", "FIELD">(Htf));
+                REQUIRE(to_space_correct<double, "TORSO", "FIELD", "TORSO">(Htf));
             }
         }
     }

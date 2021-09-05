@@ -28,14 +28,14 @@
 
 namespace utility::math {
 
-    template <size_t str_len>
+    template <int str_len>
     struct [[nodiscard]] Space {
 
         consteval Space(const char (&str)[str_len]) {
             std::copy_n(str, str_len, value);
         }
 
-        [[nodiscard]] consteval bool operator==(const Space& other) {
+        [[nodiscard]] consteval bool operator==(const Space& other) const {
             for (int i = 0; i < str_len; ++i) {
                 if (value[i] != other.value[i]) {
                     return false;
@@ -56,24 +56,13 @@ namespace utility::math {
         Transform(Eigen::Transform<Scalar, 3, Eigen::Affine> transform_) : transform(transform_) {}
 
         template <Space OtherTo, Space OtherFrom>
-        Transform<Scalar, To, OtherFrom> operator*(const Transform<Scalar, OtherTo, OtherFrom>& other) {
+        Transform<Scalar, To, OtherFrom> operator*(const Transform<Scalar, OtherTo, OtherFrom>& other) const {
             static_assert(From == OtherTo,
                           "Incompatible spaces used in transform multiplication. "
                           "Left Transform's From Space does not match right Transform's To Space.");
 
             return Transform<Scalar, To, OtherFrom>(
-                Eigen::Transform<Scalar, 3, Eigen::Affine>(this->matrix() * other.matrix()));
-        }
-
-        // Matrix stuff
-        // (Inverse will require the spaces to be flipped)
-
-        [[nodiscard]] Eigen::Matrix<Scalar, 4, 4>& matrix() {
-            return transform.matrix();
-        }
-
-        [[nodiscard]] const Eigen::Matrix<Scalar, 4, 4>& matrix() const {
-            return transform.matrix();
+                Eigen::Transform<Scalar, 3, Eigen::Affine>(transform * other.transform));
         }
     };
 
