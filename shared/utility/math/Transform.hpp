@@ -28,94 +28,42 @@
 
 namespace utility::math {
 
-    // enum class Space {
-    //     TORSO,
-    //     FIELD,
-    //     CAMERA,
-    //     WORLD,
-    //     GROUND,
-    // };
+    template <size_t str_len>
+    struct [[nodiscard]] Space {
 
-    // template <size_t str_len>
-    // struct Space {
-
-    //     consteval Space(const char (&str)[str_len]) {
-    //         value = std::basic_string(str, str_len);
-    //     }
-
-    //     [[nodiscard]] consteval bool operator==(const Space& other) {
-    //         return value == other.value;
-    //     }
-
-    //     std::basic_string<char> value;
-
-    //     consteval Space(const Space& other)  = default;
-    //     consteval Space(const Space&& other) = default;
-    //     consteval Space& operator=(const Space& other) = default;
-    //     consteval Space& operator=(const Space&& other) = default;
-
-    //     // consteval Space(const char (&str)[str_len]) {
-    //     //     std::copy_n(str, str_len, value);
-    //     // }
-
-    //     // [[nodiscard]] consteval bool operator==(const Space& other) {
-    //     //     for (int i = 0; i < str_len; ++i) {
-    //     //         if (value[i] != other.value[i]) {
-    //     //             return false;
-    //     //         }
-    //     //     }
-    //     //     return true;
-    //     // }
-
-    //     // char value[str_len];
-    // };
-
-    /**
-     * Literal class type that wraps a constant expression string.
-     *
-     * Uses implicit conversion to allow templates to *seemingly* accept constant strings.
-     */
-    template <size_t N>
-    struct Space {
-        constexpr Space(const char (&str)[N]) {
-            std::copy_n(str, N, value);
+        consteval Space(const char (&str)[str_len]) {
+            std::copy_n(str, str_len, value);
         }
 
-        constexpr Space(const Space& other) {
-            std::copy_n(other.value, N, value);
-        }
-        constexpr Space(const Space&& other) {
-            std::copy_n(other.value, N, value);
-        }
-        constexpr Space& operator=(const Space& other) {
-            Space new_space(other.value);
-            return new_space;
-        }
-        constexpr Space& operator=(const Space&& other) {
-            Space new_space(other.value);
-            return new_space;
+        [[nodiscard]] consteval bool operator==(const Space& other) {
+            for (int i = 0; i < str_len; ++i) {
+                if (value[i] != other.value[i]) {
+                    return false;
+                }
+            }
+            return true;
         }
 
-        char value[N];
+        char value[str_len];
     };
 
     template <typename Scalar, Space To, Space From>
-    class Transform {
+    class [[nodiscard]] Transform {
     public:
         Eigen::Transform<Scalar, 3, Eigen::Affine> transform = Eigen::Transform<Scalar, 3, Eigen::Affine>::Identity();
 
         Transform() = default;
         Transform(Eigen::Transform<Scalar, 3, Eigen::Affine> transform_) : transform(transform_) {}
 
-        // template <Space OtherTo, Space OtherFrom>
-        // Transform<Scalar, To, OtherFrom> operator*(const Transform<Scalar, OtherTo, OtherFrom>& other) {
-        //     // static_assert(From == OtherTo,
-        //     //               "Incompatible spaces used in transform multiplication. "
-        //     //               "Left Transform's From Space does not match right Transform's To Space.");
+        template <Space OtherTo, Space OtherFrom>
+        Transform<Scalar, To, OtherFrom> operator*(const Transform<Scalar, OtherTo, OtherFrom>& other) {
+            static_assert(From == OtherTo,
+                          "Incompatible spaces used in transform multiplication. "
+                          "Left Transform's From Space does not match right Transform's To Space.");
 
-        //     return Transform<Scalar, To, OtherFrom>(
-        //         Eigen::Transform<Scalar, 3, Eigen::Affine>(this->matrix() * other.matrix()));
-        // }
+            return Transform<Scalar, To, OtherFrom>(
+                Eigen::Transform<Scalar, 3, Eigen::Affine>(this->matrix() * other.matrix()));
+        }
 
         // Matrix stuff
         // (Inverse will require the spaces to be flipped)
