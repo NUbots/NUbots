@@ -43,7 +43,7 @@ namespace extension {
         // 2) Per-robot config overrides default config values. This file need only override the values that nee to be
         // overriden.
         // 3) Per-binary config overrides per-robot and default config values. This file need only override the values
-        // that nee to be overriden.
+        // that need to be overriden.
         //
         // Per-robot and per-binary files need not exist.
         // Per-robot and per-binary files can add new nodes to the file, but this is probably unwise.
