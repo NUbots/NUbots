@@ -102,7 +102,7 @@ namespace extension {
             }
         }
 
-        YAML::Node mergeYAML(const YAML::Node& base, const YAML::Node& override) {
+        [[nodiscard]] YAML::Node mergeYAML(const YAML::Node& base, const YAML::Node& override) {
             YAML::Node ret(base);
 
             for (auto it = override.begin(); it != override.end(); it++) {
@@ -153,40 +153,40 @@ namespace extension {
             return ret;
         }
 
-        Configuration operator[](const std::string& key) {
+        [[nodiscard]] Configuration operator[](const std::string& key) {
             return Configuration(fileName, hostname, binary, config[key]);
         }
 
-        const Configuration operator[](const std::string& key) const {
+        [[nodiscard]] const Configuration operator[](const std::string& key) const {
             return Configuration(fileName, hostname, binary, config[key]);
         }
 
-        Configuration operator[](const char* key) {
+        [[nodiscard]] Configuration operator[](const char* key) {
             return Configuration(fileName, hostname, binary, config[key]);
         }
 
-        const Configuration operator[](const char* key) const {
+        [[nodiscard]] const Configuration operator[](const char* key) const {
             return Configuration(fileName, hostname, binary, config[key]);
         }
 
-        Configuration operator[](size_t index) {
+        [[nodiscard]] Configuration operator[](size_t index) {
             return Configuration(fileName, hostname, binary, config[index]);
         }
 
-        const Configuration operator[](size_t index) const {
+        [[nodiscard]] const Configuration operator[](size_t index) const {
             return Configuration(fileName, hostname, binary, config[index]);
         }
 
-        Configuration operator[](int index) {
+        [[nodiscard]] Configuration operator[](int index) {
             return Configuration(fileName, hostname, binary, config[index]);
         }
 
-        const Configuration operator[](int index) const {
+        [[nodiscard]] const Configuration operator[](int index) const {
             return Configuration(fileName, hostname, binary, config[index]);
         }
 
         template <typename T, typename... Args>
-        T as(Args&&... args) const {
+        [[nodiscard]] T as(Args&&... args) const {
             return config.as<T>(std::forward<Args>(args)...);
         }
 
@@ -211,13 +211,13 @@ namespace extension {
                                                      && !std::is_same<std::allocator<char>, Decayed>::value
                                                      && !std::is_same<std::initializer_list<char>, Decayed>::value
                                                      && !std::is_same<char, Decayed>::value>::type>
-        operator T() const {
+        [[nodiscard]] operator T() const {
             return config.as<T>();
         }
 
         // The conversion for string is fully specialised because strings get screwy
         // because of their auto conversion to const char* etc
-        operator std::string() const {
+        [[nodiscard]] operator std::string() const {
             return config.as<std::string>();
         }
     };
@@ -283,7 +283,7 @@ namespace NUClear::dsl {
             }
 
             template <typename DSL>
-            static inline std::shared_ptr<::extension::Configuration> get(threading::Reaction& t) {
+            [[nodiscard]] static inline std::shared_ptr<::extension::Configuration> get(threading::Reaction& t) {
 
                 // Get the file watch event
                 ::extension::FileWatch watch = DSLProxy<::extension::FileWatch>::get<DSL>(t);
