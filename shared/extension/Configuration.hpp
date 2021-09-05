@@ -245,9 +245,9 @@ namespace NUClear::dsl {
                 const auto* binary = basename(data.data());
 
                 // Set paths to the config files.
-                auto defaultConfig = "config" + path;
-                auto robotConfig   = "config" + hostname + path;
-                auto binaryConfig  = "config" + std::string(binary) + path;
+                const auto defaultConfig = "config" + path;
+                const auto robotConfig   = "config" + hostname + path;
+                const auto binaryConfig  = "config" + std::string(binary) + path;
 
                 if (!fs::exists(defaultConfig)) {
                     NUClear::log<NUClear::WARN>("Configuration file '" + defaultConfig
@@ -293,7 +293,7 @@ namespace NUClear::dsl {
                     // Return our yaml file
                     try {
                         // Get hostname so we can find the correct per-robot config directory.
-                        std::string hostname = utility::support::getHostname();
+                        const std::string hostname = utility::support::getHostname();
 
                         // Get the command line arguments so we can find the current binary's name.
                         std::shared_ptr<const message::CommandLineArguments> args =
@@ -304,7 +304,7 @@ namespace NUClear::dsl {
                         const auto* binary = basename(data.data());
 
                         // Get relative path to config file.
-                        auto components = utility::strutil::split(watch.path, '/');
+                        const auto components = utility::strutil::split(watch.path, '/');
                         fs::path relativePath{};
                         bool flag = false;
                         for (const auto& component : components) {
