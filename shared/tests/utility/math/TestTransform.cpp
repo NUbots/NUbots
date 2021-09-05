@@ -29,20 +29,17 @@ namespace {
     template <typename Scalar, Space LTo, Space LFrom, Space RTo, Space RFrom>
     [[nodiscard]] bool spaces_are_compatible(Transform<Scalar, LTo, LFrom> /*lTransform*/,
                                              Transform<Scalar, RTo, RFrom> /*rTransform*/) {
-        // return LFrom == RTo;
-        return true;
+        return LFrom == RTo;
     }
 
     template <typename Scalar, Space ActualTo, Space ActualFrom, Space RequiredTo>
     [[nodiscard]] bool to_space_correct(Transform<Scalar, ActualTo, ActualFrom> /*transform*/) {
-        // return ActualTo == RequiredTo;
-        return true;
+        return ActualTo == RequiredTo;
     }
 
     template <typename Scalar, Space ActualTo, Space ActualFrom, Space RequiredFrom>
     [[nodiscard]] bool from_space_correct(Transform<Scalar, ActualTo, ActualFrom> /*transform*/) {
-        // return ActualFrom == RequiredFrom;
-        return true;
+        return ActualFrom == RequiredFrom;
     }
 }  // namespace
 
