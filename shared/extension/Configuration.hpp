@@ -223,6 +223,16 @@ namespace extension {
 // NUClear configuration extension
 namespace NUClear::dsl {
     namespace operation {
+        namespace {
+            [[nodiscard]] std::string getFirstCommandLineArg() {
+                std::shared_ptr<const message::CommandLineArguments> args =
+                    store::DataStore<message::CommandLineArguments>::get();
+                std::vector<char> data(args->at(0).cbegin(), args->at(0).cend());
+                data.push_back('\0');
+                return std::string(data.data());
+            }
+        }  // namespace
+
         template <>
         struct DSLProxy<::extension::Configuration> {
             template <typename DSL>
@@ -232,18 +242,12 @@ namespace NUClear::dsl {
                 // Get hostname so we can find the correct per-robot config directory.
                 const std::string hostname = utility::support::getHostname();
 
-                // Get the command line arguments so we can find the current binary's name.
-                std::shared_ptr<const message::CommandLineArguments> args =
-                    store::DataStore<message::CommandLineArguments>::get();
-
-                std::vector<char> data(args->at(0).cbegin(), args->at(0).cend());
-                data.push_back('\0');
-                const char* binary = basename(data.data());
+                const auto binary_name = getFirstCommandLineArg();
 
                 // Set paths to the config files.
                 const fs::path defaultConfig = fs::path("config") / path;
                 const fs::path robotConfig   = fs::path("config") / hostname / path;
-                const fs::path binaryConfig  = fs::path("config") / fs::path(binary) / path;
+                const fs::path binaryConfig  = fs::path("config") / binary_name / path;
 
                 if (!fs::exists(defaultConfig)) {
                     NUClear::log<NUClear::WARN>("Configuration file '" + defaultConfig.string()
@@ -290,13 +294,7 @@ namespace NUClear::dsl {
                         // Get hostname so we can find the correct per-robot config directory.
                         const std::string hostname = utility::support::getHostname();
 
-                        // Get the command line arguments so we can find the current binary's name.
-                        std::shared_ptr<const message::CommandLineArguments> args =
-                            store::DataStore<message::CommandLineArguments>::get();
-
-                        std::vector<char> data(args->at(0).cbegin(), args->at(0).cend());
-                        data.push_back('\0');
-                        const char* binary = basename(data.data());
+                        const auto binaryName = getFirstCommandLineArg();
 
                         // Get relative path to config file.
                         const auto components = utility::strutil::split(watch.path, '/');
@@ -304,7 +302,7 @@ namespace NUClear::dsl {
                         bool flag = false;
                         for (const auto& component : components) {
                             // Ignore the hostname/binary name if they are present.
-                            if (flag && (component.compare(hostname) != 0) && (component.compare(binary) != 0)) {
+                            if (flag && (component.compare(hostname) != 0) && (component.compare(binaryName) != 0)) {
                                 relativePath = relativePath / component;
                             }
 
@@ -314,7 +312,7 @@ namespace NUClear::dsl {
                             }
                         }
 
-                        return std::make_shared<::extension::Configuration>(relativePath, hostname, binary);
+                        return std::make_shared<::extension::Configuration>(relativePath, hostname, binaryName);
                     }
                     catch (const YAML::ParserException& e) {
                         throw std::runtime_error(watch.path + " " + std::string(e.what()));
