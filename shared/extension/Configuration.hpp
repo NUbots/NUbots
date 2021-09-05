@@ -19,6 +19,7 @@
 #define EXTENSION_CONFIGURATION_HPP
 
 #include <cstdlib>
+#include <filesystem>
 #include <nuclear>
 #include <yaml-cpp/yaml.h>
 
@@ -28,6 +29,8 @@
 #include "utility/strutil/strutil.hpp"
 #include "utility/support/hostname.hpp"
 #include "utility/support/yaml_log_level.hpp"
+
+namespace fs = ::std::filesystem;
 
 namespace extension {
 
@@ -48,46 +51,53 @@ namespace extension {
         // We have to merge the YAML trees to account for situations where a sub-node is not defined in a higher
         // priority tree.
 
-        std::string fileName, hostname, binary;
-        YAML::Node config;
+        fs::path fileName{};
+        std::string hostname{};
+        std::string binary{};
+        YAML::Node config{};
 
-        Configuration() : fileName(), hostname(), binary(), config(){};
+        Configuration() = default;
         Configuration(const std::string& fileName,
                       const std::string& hostname,
                       const std::string& binary,
                       const YAML::Node& config)
             : fileName(fileName), hostname(hostname), binary(binary), config(config) {}
 
+        /// @brief Constructor without binary name
+        Configuration(const std::string& fileName, const std::string& hostname, const YAML::Node& config)
+            : fileName(fileName), hostname(hostname), config(config) {}
+
+        /// @brief Constructor without config node
         Configuration(const std::string& fileName, const std::string& hostname, const std::string& binary)
-            : fileName(fileName), hostname(hostname), binary(binary), config() {
+            : fileName(fileName), hostname(hostname), binary(binary) {
             bool loaded = false;
 
             // Load the default config file.
-            if (utility::file::exists("config/" + fileName)) {
-                config = YAML::LoadFile("config/" + fileName);
+            if (fs::exists(fs::path("config") / fileName)) {
+                config = YAML::LoadFile(fs::path("config") / fileName);
                 loaded = true;
             }
 
             // If the same file exists in this robots per-robot config directory then load and merge.
-            if (utility::file::exists("config/" + hostname + "/" + fileName)) {
+            if (fs::exists(fs::path("config") / hostname / fileName)) {
                 if (loaded) {
-                    config = mergeYAML(config, YAML::LoadFile("config/" + hostname + "/" + fileName));
+                    config = mergeYAML(config, YAML::LoadFile(fs::path("config") / hostname / fileName));
                 }
 
                 else {
-                    config = YAML::LoadFile("config/" + hostname + "/" + fileName);
+                    config = YAML::LoadFile(fs::path("config") / hostname / fileName);
                     loaded = true;
                 }
             }
 
             // If the same file exists in this binary's per-binary config directory then load and merge.
-            if (utility::file::exists("config/" + binary + "/" + fileName)) {
+            if (fs::exists(fs::path("config") / binary / fileName)) {
                 if (loaded) {
-                    config = mergeYAML(config, YAML::LoadFile("config/" + binary + "/" + fileName));
+                    config = mergeYAML(config, YAML::LoadFile(fs::path("config") / binary / fileName));
                 }
 
                 else {
-                    config = YAML::LoadFile("config/" + binary + "/" + fileName);
+                    config = YAML::LoadFile(fs::path("config") / binary / fileName);
                 }
             }
         }
@@ -235,11 +245,11 @@ namespace NUClear::dsl {
                 const auto* binary = basename(data.data());
 
                 // Set paths to the config files.
-                auto defaultConfig = "config/" + path;
-                auto robotConfig   = "config/" + hostname + "/" + path;
-                auto binaryConfig  = "config/" + std::string(binary) + "/" + path;
+                auto defaultConfig = "config" + path;
+                auto robotConfig   = "config" + hostname + path;
+                auto binaryConfig  = "config" + std::string(binary) + path;
 
-                if (!utility::file::exists(defaultConfig)) {
+                if (!fs::exists(defaultConfig)) {
                     NUClear::log<NUClear::WARN>("Configuration file '" + defaultConfig
                                                 + "' does not exist. Creating it.");
 
@@ -262,12 +272,12 @@ namespace NUClear::dsl {
                 DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, defaultConfig, flags);
 
                 // Bind our robot specific path if it exists
-                if (utility::file::exists(robotConfig)) {
+                if (fs::exists(robotConfig)) {
                     DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, robotConfig, flags);
                 }
 
                 // Bind our binary specific path if it exists
-                if (utility::file::exists(binaryConfig)) {
+                if (fs::exists(binaryConfig)) {
                     DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, binaryConfig, flags);
                 }
             }
@@ -295,22 +305,19 @@ namespace NUClear::dsl {
 
                         // Get relative path to config file.
                         auto components = utility::strutil::split(watch.path, '/');
-                        std::string relativePath("");
+                        fs::path relativePath{};
                         bool flag = false;
                         for (const auto& component : components) {
                             // Ignore the hostname/binary name if they are present.
                             if (flag && (component.compare(hostname) != 0) && (component.compare(binary) != 0)) {
-                                relativePath.append(component + "/");
+                                relativePath = relativePath / component;
                             }
 
                             // We want out paths relative to the config folder.
-                            if (component.compare("config") == 0) {
+                            if (component.compare(fs::path("config")) == 0) {
                                 flag = true;
                             }
                         }
-
-                        // There will be a trailing / character.
-                        relativePath.pop_back();
 
                         return std::make_shared<::extension::Configuration>(relativePath, hostname, binary);
                     }
