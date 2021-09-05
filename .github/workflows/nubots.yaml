@@ -84,24 +84,13 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Configure the code
-        run: |
-          mkdir -p build
-          cd build
-          cmake .. -GNinja \
-                   -DCMAKE_BUILD_TYPE=Release \
-                   -DCMAKE_TOOLCHAIN_FILE=/usr/local/toolchain.cmake \
-                   -DBUILD_TESTS=ON \
-                   -DCI_BUILD=ON
+        run: ./b configure -- -DBUILD_TESTS=ON -DCI_BUILD=ON
 
       - name: Build the code
-        run: |
-          cd build
-          ninja
+        run: ./b build
 
       - name: Test the code
-        run: |
-          cd build
-          ninja test
+        run: ./b tests run
 
   # Check the code is formatted according to clang-format
   clang-format:
