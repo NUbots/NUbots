@@ -102,7 +102,7 @@ namespace extension {
             }
         }
 
-        [[nodiscard]] YAML::Node mergeYAML(const YAML::Node& base, const YAML::Node& override) {
+        [[nodiscard]] static YAML::Node mergeYAML(const YAML::Node& base, const YAML::Node& override) {
             YAML::Node ret(base);
 
             for (auto it = override.begin(); it != override.end(); it++) {
