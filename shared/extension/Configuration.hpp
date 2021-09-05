@@ -226,7 +226,7 @@ namespace NUClear::dsl {
         template <>
         struct DSLProxy<::extension::Configuration> {
             template <typename DSL>
-            static inline void bind(const std::shared_ptr<threading::Reaction>& reaction, const std::string& path) {
+            static inline void bind(const std::shared_ptr<threading::Reaction>& reaction, const fs::path& path) {
                 auto flags = ::extension::FileWatch::RENAMED | ::extension::FileWatch::CHANGED;
 
                 // Get hostname so we can find the correct per-robot config directory.
@@ -238,27 +238,26 @@ namespace NUClear::dsl {
 
                 std::vector<char> data(args->at(0).cbegin(), args->at(0).cend());
                 data.push_back('\0');
-                const auto* binary = basename(data.data());
+                const char* binary = basename(data.data());
 
                 // Set paths to the config files.
-                const auto defaultConfig = "config" + path;
-                const auto robotConfig   = "config" + hostname + path;
-                const auto binaryConfig  = "config" + std::string(binary) + path;
+                const fs::path defaultConfig = fs::path("config") / path;
+                const fs::path robotConfig   = fs::path("config") / hostname / path;
+                const fs::path binaryConfig  = fs::path("config") / fs::path(binary) / path;
 
                 if (!fs::exists(defaultConfig)) {
-                    NUClear::log<NUClear::WARN>("Configuration file '" + defaultConfig
+                    NUClear::log<NUClear::WARN>("Configuration file '" + defaultConfig.string()
                                                 + "' does not exist. Creating it.");
 
                     // Check for a directory.
-                    // If the path ends in a /, or if the end of the string is not ".yaml" it is a directory.
-                    if ((defaultConfig.back() == '/') || (!utility::strutil::endsWith(defaultConfig, ".yaml"))) {
-                        utility::file::makeDir(defaultConfig);
+                    if (fs::is_directory(defaultConfig)) {
+                        fs::create_directory(defaultConfig);
                     }
 
                     else {
-                        std::ofstream ofs(defaultConfig);
+                        std::ofstream ofs(defaultConfig.string());
                         if (!ofs.is_open()) {
-                            throw std::runtime_error("Failed creating file '" + path + "'.");
+                            throw std::runtime_error("Failed creating file '" + path.string() + "'.");
                         }
                         ofs.close();
                     }
@@ -285,7 +284,7 @@ namespace NUClear::dsl {
                 ::extension::FileWatch watch = DSLProxy<::extension::FileWatch>::get<DSL>(t);
 
                 // Check if the watch is valid
-                if (watch && utility::strutil::endsWith(watch.path, ".yaml")) {
+                if (watch && fs::path(watch.path).extension() == ".yaml") {
                     // Return our yaml file
                     try {
                         // Get hostname so we can find the correct per-robot config directory.
@@ -297,7 +296,7 @@ namespace NUClear::dsl {
 
                         std::vector<char> data(args->at(0).cbegin(), args->at(0).cend());
                         data.push_back('\0');
-                        const auto* binary = basename(data.data());
+                        const char* binary = basename(data.data());
 
                         // Get relative path to config file.
                         const auto components = utility::strutil::split(watch.path, '/');
@@ -310,7 +309,7 @@ namespace NUClear::dsl {
                             }
 
                             // We want out paths relative to the config folder.
-                            if (component.compare(fs::path("config")) == 0) {
+                            if (component.compare("config") == 0) {
                                 flag = true;
                             }
                         }
