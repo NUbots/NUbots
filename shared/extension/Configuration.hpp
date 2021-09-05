@@ -105,27 +105,27 @@ namespace extension {
         [[nodiscard]] static YAML::Node mergeYAML(const YAML::Node& base, const YAML::Node& override) {
             YAML::Node ret(base);
 
-            for (auto it = override.begin(); it != override.end(); it++) {
-                const std::string& key = it->first.as<std::string>();
+            for (const auto& item : override) {
+                const std::string& key = item.first.as<std::string>();
 
                 // If the key doesn't exist in the base set then add it and move on.
                 if (!base[key]) {
-                    ret[key] = it->second;
+                    ret[key] = item.second;
                 }
 
                 // If the key does exist then we must go deeper.
                 else {
                     // The type dictates whether we need a recursive call or not.
-                    switch (it->second.Type()) {
+                    switch (item.second.Type()) {
                         // Just a raw value (int, double, etc)
                         case YAML::NodeType::Scalar: {
-                            ret[key] = it->second;
+                            ret[key] = item.second;
                             break;
                         }
 
                         // Essentially a vector.
                         case YAML::NodeType::Sequence: {
-                            ret[key] = it->second;
+                            ret[key] = item.second;
                             break;
                         }
 
@@ -143,7 +143,7 @@ namespace extension {
                             NUClear::log<NUClear::WARN>("Unsetting key",
                                                         "'" + key + "'",
                                                         "in YAML file. Is this what you intended?");
-                            ret[key] = it->second;
+                            ret[key] = item.second;
                             break;
                         }
                     }
