@@ -1,0 +1,84 @@
+# NUC image creation and push to DockerHub
+name: NUC Image Push
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on push events for the main branch
+  push:
+    branches: [main]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # Build the nuc8i7beh image
+  build_nuc8i7beh:
+    name: "Build nuc8i7beh image"
+
+    # The type of runner that the job will run on
+    runs-on: ubuntu-20.04
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      # Setup docker buildx
+      - name: 🐳 Set up docker buildx 🐳
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      # Build the docker image
+      - name: 🐳 Build the docker image 🐳
+        uses: docker/build-push-action@v2
+        with:
+          pull: true
+          tags: "nubots/nubots:nuc8i7beh"
+          file: docker/Dockerfile
+          context: docker
+          build-args: |
+            platform=nuc8i7beh
+          push: true
+          cache-from: type=registry,ref=nubots/nubots:nuc8i7beh
+          cache-to: type=inline
+
+  # Build the nuc7i7bnh image
+  build_nuc7i7bnh:
+    name: "Build nuc7i7bnh image"
+
+    # The type of runner that the job will run on
+    runs-on: ubuntu-20.04
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      # Setup docker buildx
+      - name: 🐳 Set up docker buildx 🐳
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      # Build the docker image
+      - name: 🐳 Build the docker image 🐳
+        uses: docker/build-push-action@v2
+        with:
+          pull: true
+          tags: "nubots/nubots:nuc7i7bnh"
+          file: docker/Dockerfile
+          context: docker
+          build-args: |
+            platform=nuc7i7bnh
+          push: true
+          cache-from: type=registry,ref=nubots/nubots:nuc7i7bnh
+          cache-to: type=inline
