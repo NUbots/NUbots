@@ -56,7 +56,8 @@ namespace utility::math {
         Transform(Eigen::Transform<Scalar, 3, Eigen::Affine> transform_) : transform(transform_) {}
 
         template <Space OtherTo, Space OtherFrom>
-        Transform<Scalar, To, OtherFrom> operator*(const Transform<Scalar, OtherTo, OtherFrom>& other) const {
+        [[nodiscard]] Transform<Scalar, To, OtherFrom> operator*(
+            const Transform<Scalar, OtherTo, OtherFrom>& other) const {
             static_assert(From == OtherTo,
                           "Incompatible spaces used in transform multiplication. "
                           "Left Transform's From Space does not match right Transform's To Space.");
