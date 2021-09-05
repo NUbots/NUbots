@@ -63,7 +63,7 @@ namespace extension {
                       const YAML::Node& config)
             : fileName(fileName), hostname(hostname), binary(binary), config(config) {}
 
-        /// @brief Constructor without config node
+        /// @brief Constructor without config node given. The correct config file has to be deduced from the params
         Configuration(const std::string& fileName, const std::string& hostname, const std::string& binary)
             : fileName(fileName), hostname(hostname), binary(binary) {
             bool loaded = false;
