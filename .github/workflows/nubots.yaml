@@ -83,6 +83,9 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
 
+      - name: Prepare Build Directory
+        run: mkdir -p ../build
+
       - name: Configure the code
         run: ./b configure -- -DBUILD_TESTS=ON -DCI_BUILD=ON
 
