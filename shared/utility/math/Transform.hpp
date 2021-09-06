@@ -66,7 +66,7 @@ namespace utility::math {
 
         template <Space NewFrom>
         [[nodiscard]] Transform<Into, NewFrom, Scalar, Dim> cast_from_space() const {
-            return Transfrom<Into, NewFrom, Scalar, Dim>(transform);
+            return Transform<Into, NewFrom, Scalar, Dim>(transform);
         }
 
         template <Space NewInto>
