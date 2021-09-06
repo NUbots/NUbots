@@ -62,6 +62,22 @@ namespace utility::math {
             return Transform<To, OtherFrom, Scalar, Dim>(
                 Eigen::Transform<Scalar, Dim, Eigen::Affine>(transform * other.transform));
         }
+
+        [[nodiscard]] Eigen::Matrix<Scalar, Dim, 1>& translation() {
+            return transform.translation();
+        }
+
+        [[nodiscard]] const Eigen::Matrix<Scalar, Dim, 1>& translation() const {
+            return transform.translation();
+        }
+
+        [[nodiscard]] Eigen::Matrix<Scalar, Dim, Dim>& rotation() {
+            return transform.linear();
+        }
+
+        [[nodiscard]] const Eigen::Matrix<Scalar, Dim, Dim>& rotation() const {
+            return transform.rotation();
+        }
     };
 
 }  // namespace utility::math
