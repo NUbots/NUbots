@@ -44,9 +44,14 @@ namespace utility::math {
         char value[str_len];
     };
 
-    template <Space Into, Space From, typename Scalar = double, size_t Dim = 3>
+    template <Space Into_, Space From_, typename Scalar_ = double, size_t Dim_ = 3>
     class [[nodiscard]] Transform {
     public:
+        typedef Scalar_ Scalar;
+        static constexpr Space Into = Into_;
+        static constexpr Space From = From_;
+        static constexpr int Dim    = Dim_;
+
         using TransformType = Eigen::Transform<Scalar, Dim, Eigen::Affine>;
 
         TransformType transform = Eigen::Transform<Scalar, 3, Eigen::Affine>::Identity();
