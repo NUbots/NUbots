@@ -44,7 +44,7 @@ namespace utility::math {
         char value[str_len];
     };
 
-    template <Space To, Space From, typename Scalar = double, size_t Dim = 3>
+    template <Space Into, Space From, typename Scalar = double, size_t Dim = 3>
     class [[nodiscard]] Transform {
     public:
         Eigen::Transform<Scalar, Dim, Eigen::Affine> transform = Eigen::Transform<Scalar, 3, Eigen::Affine>::Identity();
@@ -52,19 +52,27 @@ namespace utility::math {
         Transform() = default;
         Transform(Eigen::Transform<Scalar, Dim, Eigen::Affine> transform_) : transform(transform_) {}
 
-        template <Space OtherTo, Space OtherFrom>
-        [[nodiscard]] Transform<To, OtherFrom, Scalar, Dim> operator*(
-            const Transform<OtherTo, OtherFrom, Scalar, Dim>& other) const {
-            static_assert(From == OtherTo,
+        template <Space OtherInto, Space OtherFrom>
+        [[nodiscard]] Transform<Into, OtherFrom, Scalar, Dim> operator*(
+            const Transform<OtherInto, OtherFrom, Scalar, Dim>& other) const {
+            static_assert(From == OtherInto,
                           "Incompatible spaces used in transform multiplication. "
-                          "Left Transform's From Space does not match right Transform's To Space.");
+                          "Left Transform's From Space does not match right Transform's Into Space.");
 
-            return Transform<To, OtherFrom, Scalar, Dim>(
+            return Transform<Into, OtherFrom, Scalar, Dim>(
                 Eigen::Transform<Scalar, Dim, Eigen::Affine>(transform * other.transform));
         }
 
-        [[nodiscard]] Transform<From, To, Scalar, Dim> inverse() {
-            return Transform<From, To, Scalar, Dim>(transform.inverse());
+        template <Space NewFrom>
+        [[nodiscard]] Transform<Into, NewFrom, Scalar, Dim> cast_from_space() {
+            return Transfrom<Into, NewFrom, Scalar, Dim>(transform);
+        }
+
+        template <Space NewInto>
+        [[nodiscard]] Transform<NewInto, From, Scalar, Dim> cast_into_space() {}
+
+        [[nodiscard]] Transform<From, Into, Scalar, Dim> inverse() {
+            return Transform<From, Into, Scalar, Dim>(transform.inverse());
         }
 
         [[nodiscard]] Eigen::Matrix<Scalar, Dim, 1>& translation() {

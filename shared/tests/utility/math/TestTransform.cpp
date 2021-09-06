@@ -25,19 +25,19 @@ using utility::math::Space;
 using utility::math::Transform;
 
 namespace {
-    template <Space LTo, Space LFrom, Space RTo, Space RFrom>
-    [[nodiscard]] bool spaces_are_compatible(Transform<LTo, LFrom> /*lTransform*/,
-                                             Transform<RTo, RFrom> /*rTransform*/) {
-        return LFrom == RTo;
+    template <Space LInto, Space LFrom, Space RInto, Space RFrom>
+    [[nodiscard]] bool spaces_are_compatible(Transform<LInto, LFrom> /*lTransform*/,
+                                             Transform<RInto, RFrom> /*rTransform*/) {
+        return LFrom == RInto;
     }
 
-    template <Space ActualTo, Space ActualFrom, Space RequiredTo>
-    [[nodiscard]] bool to_space_correct(Transform<ActualTo, ActualFrom> /*transform*/) {
-        return ActualTo == RequiredTo;
+    template <Space ActualInto, Space ActualFrom, Space RequiredInto>
+    [[nodiscard]] bool to_space_correct(Transform<ActualInto, ActualFrom> /*transform*/) {
+        return ActualInto == RequiredInto;
     }
 
-    template <Space ActualTo, Space ActualFrom, Space RequiredFrom>
-    [[nodiscard]] bool from_space_correct(Transform<ActualTo, ActualFrom> /*transform*/) {
+    template <Space ActualInto, Space ActualFrom, Space RequiredFrom>
+    [[nodiscard]] bool from_space_correct(Transform<ActualInto, ActualFrom> /*transform*/) {
         return ActualFrom == RequiredFrom;
     }
 }  // namespace
