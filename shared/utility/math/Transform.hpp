@@ -22,6 +22,7 @@
 
 #include <Eigen/Geometry>
 #include <algorithm>
+#include <type_traits>
 
 namespace utility::math {
 
@@ -64,10 +65,9 @@ namespace utility::math {
         template <Space OtherInto, Space OtherFrom>
         [[nodiscard]] Transform<Into, OtherFrom, Scalar, Dim> operator*(
             const Transform<OtherInto, OtherFrom, Scalar, Dim>& other) const {
-            static_assert(From == OtherInto,
+            static_assert(std::is_same<decltype(From), decltype(OtherInto)>(),
                           "Incompatible spaces used in transform multiplication. "
                           "Left Transform's From Space does not match right Transform's Into Space.");
-
             return Transform<Into, OtherFrom, Scalar, Dim>(transform * other.transform);
         }
 
