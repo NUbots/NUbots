@@ -51,6 +51,7 @@ namespace utility::math {
 
         Transform() = default;
         Transform(Eigen::Transform<Scalar, Dim, Eigen::Affine> transform_) : transform(transform_) {}
+        Transform(Eigen::Matrix<Scalar, Dim + 1, Dim + 1> transform_) : transform(transform_) {}
 
         template <Space OtherInto, Space OtherFrom>
         [[nodiscard]] Transform<Into, OtherFrom, Scalar, Dim> operator*(
