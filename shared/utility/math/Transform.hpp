@@ -63,6 +63,10 @@ namespace utility::math {
                 Eigen::Transform<Scalar, Dim, Eigen::Affine>(transform * other.transform));
         }
 
+        [[nodiscard]] Transform<From, To, Scalar, Dim> inverse() {
+            return Transform<From, To, Scalar, Dim>(transform.inverse());
+        }
+
         [[nodiscard]] Eigen::Matrix<Scalar, Dim, 1>& translation() {
             return transform.translation();
         }
