@@ -47,11 +47,14 @@ namespace utility::math {
     template <Space Into, Space From, typename Scalar = double, size_t Dim = 3>
     class [[nodiscard]] Transform {
     public:
-        Eigen::Transform<Scalar, Dim, Eigen::Affine> transform = Eigen::Transform<Scalar, 3, Eigen::Affine>::Identity();
+        using TransformType = Eigen::Transform<Scalar, Dim, Eigen::Affine>;
+
+        TransformType transform = Eigen::Transform<Scalar, 3, Eigen::Affine>::Identity();
 
         Transform() = default;
-        Transform(Eigen::Transform<Scalar, Dim, Eigen::Affine> transform_) : transform(transform_) {}
-        Transform(Eigen::Matrix<Scalar, Dim + 1, Dim + 1> transform_) : transform(transform_) {}
+        Transform(TransformType transform_) : transform(transform_) {}
+        Transform(Eigen::Matrix<Scalar, Dim + 1, Dim + 1> transform_matrix) : transform(transform_matrix) {}
+        Transform(Eigen::Matrix<Scalar, Dim, Dim> rotation_matrix) : transform(rotation_matrix) {}
 
         template <Space OtherInto, Space OtherFrom>
         [[nodiscard]] Transform<Into, OtherFrom, Scalar, Dim> operator*(
@@ -60,8 +63,7 @@ namespace utility::math {
                           "Incompatible spaces used in transform multiplication. "
                           "Left Transform's From Space does not match right Transform's Into Space.");
 
-            return Transform<Into, OtherFrom, Scalar, Dim>(
-                Eigen::Transform<Scalar, Dim, Eigen::Affine>(transform * other.transform));
+            return Transform<Into, OtherFrom, Scalar, Dim>(transform * other.transform);
         }
 
         template <Space NewFrom>
@@ -78,20 +80,30 @@ namespace utility::math {
             return Transform<From, Into, Scalar, Dim>(transform.inverse());
         }
 
-        [[nodiscard]] Eigen::Matrix<Scalar, Dim, 1>& translation() {
+        [[nodiscard]] TransformType::TranslationPart translation() {
             return transform.translation();
         }
 
-        [[nodiscard]] const Eigen::Matrix<Scalar, Dim, 1>& translation() const {
+        [[nodiscard]] const TransformType::ConstTranslationPart translation() const {
             return transform.translation();
         }
 
-        [[nodiscard]] Eigen::Matrix<Scalar, Dim, Dim>& rotation() {
+        [[nodiscard]] TransformType::LinearPart rotation() {
             return transform.linear();
         }
 
-        [[nodiscard]] const Eigen::Matrix<Scalar, Dim, Dim>& rotation() const {
-            return transform.rotation();
+        [[nodiscard]] const TransformType::ConstLinearPart rotation() const {
+            return transform.linear();
+        }
+
+        // To-remove - in here for compatibility reasons for conversion to 4x4 matrix neutrons.
+        //             Once we have Transform neutrons or nicer conversion, this is to be removed
+        [[nodiscard]] TransformType::MatrixType& matrix() {
+            return transform.matrix();
+        }
+
+        [[nodiscard]] const TransformType::MatrixType& matrix() const {
+            return transform.matrix();
         }
     };
 
