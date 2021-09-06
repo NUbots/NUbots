@@ -69,7 +69,9 @@ namespace utility::math {
         }
 
         template <Space NewInto>
-        [[nodiscard]] Transform<NewInto, From, Scalar, Dim> cast_into_space() {}
+        [[nodiscard]] Transform<NewInto, From, Scalar, Dim> cast_into_space() {
+            return Transform<NewInto, From, Scalar, Dim>(transform);
+        }
 
         [[nodiscard]] Transform<From, Into, Scalar, Dim> inverse() {
             return Transform<From, Into, Scalar, Dim>(transform.inverse());
