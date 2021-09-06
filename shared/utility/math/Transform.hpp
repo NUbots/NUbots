@@ -44,23 +44,23 @@ namespace utility::math {
         char value[str_len];
     };
 
-    template <typename Scalar, Space To, Space From>
+    template <Space To, Space From, typename Scalar = double, size_t Dim = 3>
     class [[nodiscard]] Transform {
     public:
-        Eigen::Transform<Scalar, 3, Eigen::Affine> transform = Eigen::Transform<Scalar, 3, Eigen::Affine>::Identity();
+        Eigen::Transform<Scalar, Dim, Eigen::Affine> transform = Eigen::Transform<Scalar, 3, Eigen::Affine>::Identity();
 
         Transform() = default;
-        Transform(Eigen::Transform<Scalar, 3, Eigen::Affine> transform_) : transform(transform_) {}
+        Transform(Eigen::Transform<Scalar, Dim, Eigen::Affine> transform_) : transform(transform_) {}
 
         template <Space OtherTo, Space OtherFrom>
-        [[nodiscard]] Transform<Scalar, To, OtherFrom> operator*(
-            const Transform<Scalar, OtherTo, OtherFrom>& other) const {
+        [[nodiscard]] Transform<To, OtherFrom, Scalar, Dim> operator*(
+            const Transform<OtherTo, OtherFrom, Scalar, Dim>& other) const {
             static_assert(From == OtherTo,
                           "Incompatible spaces used in transform multiplication. "
                           "Left Transform's From Space does not match right Transform's To Space.");
 
-            return Transform<Scalar, To, OtherFrom>(
-                Eigen::Transform<Scalar, 3, Eigen::Affine>(transform * other.transform));
+            return Transform<To, OtherFrom, Scalar, Dim>(
+                Eigen::Transform<Scalar, Dim, Eigen::Affine>(transform * other.transform));
         }
     };
 
