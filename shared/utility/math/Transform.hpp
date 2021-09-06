@@ -65,16 +65,16 @@ namespace utility::math {
         }
 
         template <Space NewFrom>
-        [[nodiscard]] Transform<Into, NewFrom, Scalar, Dim> cast_from_space() {
+        [[nodiscard]] Transform<Into, NewFrom, Scalar, Dim> cast_from_space() const {
             return Transfrom<Into, NewFrom, Scalar, Dim>(transform);
         }
 
         template <Space NewInto>
-        [[nodiscard]] Transform<NewInto, From, Scalar, Dim> cast_into_space() {
+        [[nodiscard]] Transform<NewInto, From, Scalar, Dim> cast_into_space() const {
             return Transform<NewInto, From, Scalar, Dim>(transform);
         }
 
-        [[nodiscard]] Transform<From, Into, Scalar, Dim> inverse() {
+        [[nodiscard]] Transform<From, Into, Scalar, Dim> inverse() const {
             return Transform<From, Into, Scalar, Dim>(transform.inverse());
         }
 
