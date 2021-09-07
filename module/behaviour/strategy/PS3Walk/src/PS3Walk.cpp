@@ -129,7 +129,7 @@ namespace module::behaviour::strategy {
         });
 
         // output walk command based on updated strafe and rotation speed from joystick
-        // TODO: potential performance gain: ignore if value hasn't changed since last emit?
+        // TODO(HardwareTeam): potential performance gain: ignore if value hasn't changed since last emit?
         on<Every<20, Per<std::chrono::seconds>>>().then([this] {
             if (!headLocked) {
                 auto headCommand         = std::make_unique<HeadCommand>();

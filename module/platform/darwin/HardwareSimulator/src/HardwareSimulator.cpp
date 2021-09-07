@@ -251,7 +251,7 @@ namespace module::platform::darwin {
     }
 
     void HardwareSimulator::addNoise(std::unique_ptr<RawSensors>& sensors) const {
-        // TODO: Use a more standard c++ random generator.
+        // TODO(HardwareTeam,DevOpsTeam): Use a more standard c++ random generator.
         sensors->accelerometer += noise.accelerometer * centered_noise();
         sensors->gyroscope += noise.gyroscope * centered_noise();
     }

@@ -125,7 +125,7 @@ namespace module::behaviour::skills {
             });
 
 
-        // TODO: remove this horrible code
+        // TODO(BehaviourTeam): remove this horrible code
         // Check to see if we are currently in the process of getting up.
         on<Trigger<ExecuteGetup>>().then([this] { isGettingUp = true; });
 
@@ -361,14 +361,14 @@ namespace module::behaviour::skills {
             log<NUClear::WARN>("HeadBehaviourSoccer - Multiple object searching currently not supported properly.");
         }
 
-        // TODO: make this a loop over a list of objects or something
+        // TODO(BehaviourTeam): make this a loop over a list of objects or something
         // Get goals
         if (goalPriority == maxPriority) {
             if (vgoals && !vgoals->goals.empty()) {
                 // Fixate on goals and lines and other landmarks
                 timeLastObjectSeen = now;
                 std::set<Goal::Side> visiblePosts;
-                // TODO: treat goals as one object
+                // TODO(BehaviourTeam): treat goals as one object
                 Goals goals;
                 for (const auto& goal : vgoals->goals) {
                     visiblePosts.insert(goal.side);

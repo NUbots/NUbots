@@ -59,7 +59,7 @@ namespace utility::motion::kinematics {
         target = target.translate(Eigen::Vector3d(0.0, 0.0, model.leg.FOOT_HEIGHT));
 
         // Tci = transformation (not necessarily homogeneous) from input coordinates to calculation coordinates
-        // TODO remove this. It was due to wrong convention use
+        // TODO(MotionTeam): remove this. It was due to wrong convention use
         Eigen::Matrix4d Tci;
         // clang-format off
             Tci << 0.0, 1.0,  0.0, 0.0,
@@ -206,7 +206,7 @@ namespace utility::motion::kinematics {
         target = target.translate(Eigen::Vector3f(0.0, 0.0, model.leg.FOOT_HEIGHT));
 
         // Tci = transformation (not necessarily homogeneous) from input coordinates to calculation coordinates
-        // TODO remove this. It was due to wrong convention use
+        // TODO(MotionTeam): remove this. It was due to wrong convention use
         Eigen::Matrix4f Tci;
         // clang-format off
             Tci << 0.0, 1.0,  0.0, 0.0,

@@ -216,7 +216,7 @@ namespace module::tools {
                     // Give the bootloader time to catch its breath
                     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-                    // TODO write in such a way that you get progress
+                    // TODO(HardwareTeam,DevOpsTeam): write in such a way that you get progress
                     ssize_t count = 0;
                     for (count = 0; static_cast<size_t>(count) < cm740.firmware.size();) {
                         ssize_t writeSize = 64;
