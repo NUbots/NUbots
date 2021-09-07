@@ -99,7 +99,7 @@ namespace module::behaviour::tools {
                     emit(std::make_unique<ExecuteNextScript>());
                 });
             },
-            [this](const std::set<LimbID>&) {
+            [](const std::set<LimbID>&) {
                 // We should always be the only running thing
             },
             [this](const std::set<ServoID>&) {

@@ -500,7 +500,7 @@ namespace module::platform {
                                 buffer.resize(old_size + bytes_read);
 
                                 // Function to read the payload length from the buffer
-                                auto read_length = [this](const std::vector<uint8_t>& buffer) {
+                                auto read_length = [](const std::vector<uint8_t>& buffer) {
                                     return buffer.size() >= sizeof(uint32_t)
                                                ? ntohl(*reinterpret_cast<const uint32_t*>(buffer.data()))
                                                : 0u;

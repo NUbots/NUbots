@@ -177,7 +177,7 @@ namespace module::motion {
             [this](const std::set<LimbID>&) {  // Head controll lost
                 updateHandle.disable();
             },
-            [this](const std::set<ServoID>&) {}  // Servos reached target
+            [](const std::set<ServoID>&) {}  // Servos reached target
         }));
     }
 }  // namespace module::motion

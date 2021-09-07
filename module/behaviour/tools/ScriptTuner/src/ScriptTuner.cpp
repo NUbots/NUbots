@@ -115,9 +115,9 @@ namespace module::behaviour::tools {
             {std::pair<float, std::set<LimbID>>(
                 1,
                 {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
-            [this](const std::set<LimbID>&) {},
-            [this](const std::set<LimbID>&) {},
-            [this](const std::set<ServoID>&) {}}));
+            [](const std::set<LimbID>&) {},
+            [](const std::set<LimbID>&) {},
+            [](const std::set<ServoID>&) {}}));
 
         // Start curses mode
         initscr();
