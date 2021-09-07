@@ -168,7 +168,7 @@ namespace utility::vision {
                 };
 
                 uint8_t a;
-            } components{};
+            } components;
 
             uint32_t rgba{};
         };
