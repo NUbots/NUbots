@@ -39,7 +39,7 @@ namespace utility::support {
         Expression(const YAML::Node& node) : node(node) {}
 
         operator double() {
-            double value;
+            double value = 0.0;
 
             try {
                 value = parse_math_string<double>(node.as<std::string>());

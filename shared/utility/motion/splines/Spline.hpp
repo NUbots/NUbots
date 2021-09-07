@@ -100,12 +100,12 @@ namespace utility::motion::splines {
         }
 
         constexpr void importData(std::istream& is) {
-            bool isFormatError;
+            bool isFormatError = true;
             while (is.good()) {
                 isFormatError = true;
                 Scalar min;
                 Scalar max;
-                size_t size;
+                size_t size = 0;
                 Polynom<Scalar> p;
                 // Load spline interval and degree
                 is >> min;

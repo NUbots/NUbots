@@ -111,7 +111,7 @@ namespace module::input {
                     msg->data = utility::file::readFile(images[image_index].first);
 
                     // Extract file dimensions from file data
-                    std::array<int, 2> dimensions;
+                    std::array<int, 2> dimensions{};
                     int subsamp = 0;
                     if (tjDecompressHeader2(decompressor.get(),
                                             msg->data.data(),

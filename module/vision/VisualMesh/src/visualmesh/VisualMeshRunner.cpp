@@ -29,21 +29,21 @@ namespace module::vision::visualmesh {
         std::string engine;
         ::visualmesh::NetworkStructure<float> model;
         std::string mesh_model;
-        int num_classes;
+        int num_classes = 0;
 
         struct {
-            double intersection_tolerance;
+            double intersection_tolerance = 0.0;
 
             struct {
                 double min_height;
                 double max_height;
                 double max_distance;
-            } classifier;
+            } classifier{};
 
             struct {
                 std::string shape;
-                double radius;
-                double intersections;
+                double radius        = 0.0;
+                double intersections = 0.0;
             } geometry;
         } mesh;
     };
@@ -66,7 +66,7 @@ namespace module::vision::visualmesh {
 
             return [shape, mesh, engine](const Image& img, const Eigen::Affine3f& Hcw) {
                 // Create the lens
-                ::visualmesh::Lens<float> lens;
+                ::visualmesh::Lens<float> lens{};
                 lens.dimensions   = {int(img.dimensions[0]), int(img.dimensions[1])};
                 lens.focal_length = img.lens.focal_length * img.dimensions[0];
                 lens.fov          = img.lens.fov;
@@ -83,7 +83,7 @@ namespace module::vision::visualmesh {
                 }
 
                 // Convert our orientation matrix
-                std::array<std::array<float, 4>, 4> Hoc;
+                std::array<std::array<float, 4>, 4> Hoc{};
                 Eigen::Map<Eigen::Matrix<float, 4, 4, Eigen::RowMajor>>(Hoc[0].data()) = Hcw.inverse().matrix();
 
                 // Run the network

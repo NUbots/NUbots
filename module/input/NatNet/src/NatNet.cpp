@@ -105,7 +105,7 @@ namespace module::input {
             packet.insert(packet.end(), data.begin(), data.end());
 
             // Work out our remotes address
-            sockaddr_in address;
+            sockaddr_in address{};
             memset(&address, 0, sizeof(sockaddr_in));
             address.sin_family      = AF_INET;
             address.sin_port        = htons(commandPort);

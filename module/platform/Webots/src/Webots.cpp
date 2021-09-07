@@ -182,13 +182,13 @@ namespace module::platform {
 
     int Webots::tcpip_connect() {
         // Hints for the connection type
-        addrinfo hints;
+        addrinfo hints{};
         memset(&hints, 0, sizeof(addrinfo));  // Defaults on what we do not explicitly set
         hints.ai_family   = AF_UNSPEC;        // IPv4 or IPv6
         hints.ai_socktype = SOCK_STREAM;      // TCP
 
         // Store the ip address information that we will connect to
-        addrinfo* address;
+        addrinfo* address = nullptr;
 
         const int error = getaddrinfo(server_address.c_str(), server_port.c_str(), &hints, &address);
         if (error != 0) {

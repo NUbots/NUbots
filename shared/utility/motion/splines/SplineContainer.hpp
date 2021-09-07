@@ -175,7 +175,7 @@ namespace utility::motion::splines {
                 throw std::runtime_error(fmt::format("SplineContainer unable to read file: ", file_name));
             }
 
-            bool isParseError;
+            bool isParseError = true;
             while (file.good()) {
                 isParseError = true;
                 // Skip name delimitor

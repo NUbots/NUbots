@@ -79,7 +79,7 @@ namespace Darwin {
 
         // Do our setup for the tio settings, you must set BS38400 in order to set custom baud using "baud rate
         // aliasing" http://stackoverflow.com/questions/4968529/how-to-set-baud-rate-to-307200-on-linux
-        termios tio;
+        termios tio{};
         memset(&tio, 0, sizeof(tio));
         // B38400 for alising, CS8 (8bit,no parity,1 stopbit), CLOCAL (local connection, no modem contol), CREAD (enable
         // receiving characters)
@@ -96,7 +96,7 @@ namespace Darwin {
         tcsetattr(fd, TCSANOW, &tio);
 
         // Here we do the baud rate aliasing in order to set the custom baud rate
-        serial_struct serinfo;
+        serial_struct serinfo{};
 
         // Get our serial_info from the system
         if (ioctl(fd, TIOCGSERIAL, &serinfo) < 0) {
@@ -205,7 +205,7 @@ namespace Darwin {
 
         // Clear our connection set and put in our serial device
         fd_set connectionset;
-        timeval timeout;
+        timeval timeout{};
         timeout.tv_sec = 0;
         FD_ZERO(&connectionset);
         FD_SET(fd, &connectionset);
@@ -214,7 +214,7 @@ namespace Darwin {
         timeout.tv_usec = PACKET_WAIT;
         for (int sync = 0; sync < 2;) {
             if (select(fd + 1, &connectionset, nullptr, nullptr, &timeout) == 1) {
-                uint8_t byte;
+                uint8_t byte = 0;
 
                 if (readBytes(&byte, 1) > 0) {
                     sync = (byte == 0xFF) ? (sync + 1) : 0;
