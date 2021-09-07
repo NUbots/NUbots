@@ -22,7 +22,6 @@ syntax = "proto3";
 package message.behaviour;
 
 message Behaviour {
-
     enum State {
         UNKNOWN          = 0;
         INIT             = 1;
@@ -41,6 +40,5 @@ message Behaviour {
         LOCALISING       = 14;
         SHOOTOUT         = 15;
     }
-
     State state = 1;
 }
