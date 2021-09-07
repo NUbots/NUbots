@@ -29,7 +29,7 @@ Also tell reviewers how to verify/test your code's correctness here.
 
 ## Labels Info (delete the rest of this once you have read it)
 
-Most PRs should have these labels:
+We use GitHub's Labels to categorise PRs and Issues. Most PRs should have these labels:
 
 - `G-Group-Name`: G for the group(s) associated with or reviewing the PR.
 - `L-Language-Name`: L for the language(s) which are used most in the PR.
@@ -39,3 +39,5 @@ Less common label categories include:
 - `!!-High-Priority-Reason`: A reason this PR is high priority e.g. it's a bug or it's explicitly for RoboCup.
 - `-General-Thing`: A general PR thing. These are all case-by-case and don't fit well into the other categories.
 - `-D-Difficulty-Level`: The difficulty level of implementing the change. This is mostly used for issues and is usually not applicable to PRs.
+
+A full list of labels is available [here](https://github.com/NUbots/NUbots/labels).
