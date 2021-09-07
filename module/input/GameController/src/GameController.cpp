@@ -214,11 +214,11 @@ namespace module::input {
         std::vector<std::function<void()>> stateChanges;
 
         // game score
-        auto& oldOwnTeam = getOwnTeam(oldPacket);
-        auto& newOwnTeam = getOwnTeam(newPacket);
+        const auto& oldOwnTeam = getOwnTeam(oldPacket);
+        const auto& newOwnTeam = getOwnTeam(newPacket);
 
-        auto& oldOpponentTeam = getOpponentTeam(oldPacket);
-        auto& newOpponentTeam = getOpponentTeam(newPacket);
+        const auto& oldOpponentTeam = getOpponentTeam(oldPacket);
+        const auto& newOpponentTeam = getOpponentTeam(newPacket);
 
         /*******************************************************************************************
          * Process score updates
@@ -260,11 +260,11 @@ namespace module::input {
         // Note: assumes playersPerTeam never changes
         for (uint i = 0; i < newPacket.playersPerTeam; i++) {
             uint playerId      = i + 1;
-            auto& oldOwnPlayer = oldOwnTeam.players[i];
-            auto& newOwnPlayer = newOwnTeam.players[i];
+            const auto& oldOwnPlayer = oldOwnTeam.players[i];
+            const auto& newOwnPlayer = newOwnTeam.players[i];
 
-            auto& oldOpponentPlayer = oldOpponentTeam.players[i];
-            auto& newOpponentPlayer = newOpponentTeam.players[i];
+            const auto& oldOpponentPlayer = oldOpponentTeam.players[i];
+            const auto& newOpponentPlayer = newOpponentTeam.players[i];
 
             // Update our state
             GameState::Data::Robot ownPlayer =
@@ -603,7 +603,7 @@ namespace module::input {
 
     const Team& GameController::getOwnTeam(const GameControllerPacket& state) const {
 
-        for (auto& team : state.teams) {
+        for (const auto& team : state.teams) {
             if (team.teamId == TEAM_ID) {
                 return team;
             }
@@ -613,7 +613,7 @@ namespace module::input {
     }
 
     const Team& GameController::getOpponentTeam(const GameControllerPacket& state) const {
-        for (auto& team : state.teams) {
+        for (const auto& team : state.teams) {
             if (team.teamId != TEAM_ID) {
                 return team;
             }

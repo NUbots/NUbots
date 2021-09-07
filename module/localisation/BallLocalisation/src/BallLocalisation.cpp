@@ -111,7 +111,7 @@ namespace module::localisation {
 
                         // Now call Measurement Update. Supports multiple measurement methods and will treat them as
                         // separate measurements
-                        for (auto& measurement : ball.measurements) {
+                        for (const auto& measurement : ball.measurements) {
                             filter.measure(Eigen::Vector3d(measurement.srBCc.cast<double>()),
                                            Eigen::Matrix3d(measurement.covariance.cast<double>()),
                                            field,

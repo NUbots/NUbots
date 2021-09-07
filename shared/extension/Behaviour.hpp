@@ -294,7 +294,7 @@ namespace extension::behaviour {
                          const bool& optional    = false) {
 
             // Work out who is sending the task so we can determine if it's a subtask
-            auto* task           = NUClear::threading::ReactionTask::get_current_task();
+            const auto* task     = NUClear::threading::ReactionTask::get_current_task();
             uint64_t reaction_id = (task != nullptr) ? task->parent.id : -1;
             uint64_t task_id     = (task != nullptr) ? task->id : -1;
 

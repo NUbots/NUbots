@@ -217,7 +217,7 @@ namespace module::platform::darwin {
 
         // This trigger writes the servo positions to the hardware
         on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
-            for (auto& command : commands.targets) {
+            for (const auto& command : commands.targets) {
 
                 // Calculate our moving speed
                 float diff = utility::math::angle::difference(

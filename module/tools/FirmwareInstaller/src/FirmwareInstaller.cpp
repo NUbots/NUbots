@@ -28,7 +28,7 @@ namespace module::tools {
         on<Configuration>("FirmwareInstaller.yaml").then([this](const Configuration& config) {
             device = config["device"].as<std::string>();
 
-            for (auto& f : config["firmwares"].config) {
+            for (const auto& f : config["firmwares"].config) {
                 std::pair<std::string, std::string> name;
                 name.first       = utility::strutil::toUpper(f["device"].as<std::string>());
                 name.second      = utility::strutil::toUpper(f["battery"].as<std::string>());
