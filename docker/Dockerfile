@@ -1,3 +1,167 @@
+# syntax = docker/dockerfile:1.3-labs
+FROM archlinux:base-20210110.0.13332 as base
+RUN echo -e "Server=http://host.docker.internal:7878/\$repo/os/\$arch\nServer=https://archive.archlinux.org/repos/2021/01/10/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
+RUN pacman -Syyuu --noconfirm --needed --overwrite \*
+COPY usr/local/bin/install-package /usr/local/bin/install-package
+RUN install-package \
+    wget \
+    sudo \
+    python \
+    python-pip \
+    base-devel \
+    ninja \
+    cmake \
+    meson \
+    nodejs-lts-fermium \
+    npm \
+    yarn \
+    git \
+    ncurses
+# Get python to look in /usr/local for packages
+RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
+    > $(python -c "import site; print(site.getsitepackages()[0])")/local.pth
+COPY etc/xdg/pip/pip.conf /etc/xdg/pip/pip.conf
+
+# Make sure /usr/local is checked for libraries and binaries
+COPY etc/ld.so.conf.d/usrlocal.conf /etc/ld.so.conf.d/usrlocal.conf
+RUN ldconfig
+
+# Make a symlink from /usr/local/lib to /usr/local/lib64 so library install location is irrelevant
+RUN cd /usr/local && ln -sf lib lib64
+
+COPY usr/local/toolchain/generate_toolchains.py /usr/local/generate_toolchains.py
+COPY usr/local/toolchain/generate_generic_toolchain.py /usr/local/generate_toolchain.py
+RUN python /usr/local/generate_toolchain.py --prefix /usr
+
+# Copy over a tool to install simple standard conforming libraries from source
+COPY usr/local/bin/download-and-extract /usr/local/bin/download-and-extract
+COPY usr/local/bin/install-from-source /usr/local/bin/install-from-source
+RUN ln -s /usr/local/bin/install-from-source /usr/local/bin/install-header-from-source \
+    && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-cmake-from-source \
+    && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-autotools-from-source \
+    && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-bjam-from-source \
+    && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-make-from-source \
+    && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-meson-from-source \
+    && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-python-from-source \
+    && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-from-source-with-patches
+
+# Generate toolchain files for generic
+COPY usr/local/toolchain/generate_generic_toolchain.py /usr/local/generate_toolchain.py
+RUN python /usr/local/generate_toolchain.py --prefix /usr
+
+##############################
+### SETUP THE USER ACCOUNT ###
+##############################
+
+# Setup the sudo so it can be run without a password
+COPY etc/sudoers.d/user /etc/sudoers.d/user
+RUN chmod 440 /etc/sudoers.d/user
+
+# Create the user, and setup sudo so no password is required
+ARG user_uid=1000
+ARG user_gid=$user_uid
+RUN groupadd --gid $user_gid nubots \
+    && useradd --uid $user_uid --gid $user_gid -m nubots
+USER nubots
+
+# Copy ssh keys over to the system
+RUN install -d -m 0755 -o nubots -g nubots /home/nubots/.ssh
+COPY --chown=nubots:nubots home/nubots/.ssh/id_rsa /home/nubots/.ssh/id_rsa
+COPY --chown=nubots:nubots home/nubots/.ssh/id_rsa.pub /home/nubots/.ssh/id_rsa.pub
+COPY --chown=nubots:nubots home/nubots/.ssh/config /home/nubots/.ssh/config
+COPY --chown=nubots:nubots home/nubots/.gdbinit /home/nubots/.gdbinit
+RUN chmod 600 /home/nubots/.ssh/id_rsa /home/nubots/.ssh/config
+
+# Setup the locations where we will mount our folders
+RUN install -d -m 0755 /home/nubots/NUbots
+RUN install -d -m 0777 /home/nubots/build
+WORKDIR /home/nubots/NUbots
+
+FROM base AS openfst
+
+RUN git clone https://aur.archlinux.org/openfst.git /home/nubots/openfst
+WORKDIR /home/nubots/openfst
+# Enable configure build options for openfst
+RUN sed "34a \ \ OPTIONS+=' --enable-static'" -i PKGBUILD
+RUN sed "35a \ \ OPTIONS+=' --enable-shared'" -i PKGBUILD
+RUN makepkg || true
+RUN test -f openfst-1.7.9-1-x86_64.pkg.tar.zst
+
+FROM base AS kaldi-openfst
+
+RUN install-package python2 subversion unzip sox gcc-fortran gcc-libs
+RUN git clone https://aur.archlinux.org/kaldi-openfst.git /home/nubots/kaldi-openfst
+WORKDIR /home/nubots/kaldi-openfst
+# Set to a better(?) version number.
+RUN sed '/^pkgver=/s/1.6.7/1.7.2/' -i PKGBUILD
+RUN makepkg || true
+RUN test -f kaldi-openfst-1.7.2-2-x86_64.pkg.tar.zst
+
+FROM base AS kaldi
+
+RUN git clone https://aur.archlinux.org/kaldi.git /home/nubots/kaldi
+WORKDIR /home/nubots/kaldi
+RUN install-package lapack python2 cblas
+RUN sed '/^pkgver=/s/5.5.r9114.d6198906f/5.5.r9187.d53b62fd4/' -i PKGBUILD
+COPY --from=kaldi-openfst /home/nubots/kaldi-openfst/kaldi-openfst-1.7.2-2-x86_64.pkg.tar.zst /home/nubots/kaldi/
+RUN sudo pacman -U --noconfirm kaldi-openfst-1.7.2-2-x86_64.pkg.tar.zst
+RUN makepkg || true
+RUN test -f kaldi-5.5.r9193.0f0f362d9-1-x86_64.pkg.tar.zst
+
+FROM base AS ngram
+
+RUN git clone https://aur.archlinux.org/opengrm-ngram.git /home/nubots/opengrm-ngram
+WORKDIR /home/nubots/opengrm-ngram
+COPY --from=openfst /home/nubots/openfst/openfst-1.7.9-1-x86_64.pkg.tar.zst /home/nubots/opengrm-ngram
+RUN sudo pacman -U --noconfirm openfst-1.7.9-1-x86_64.pkg.tar.zst
+
+# Set the package name because it changed recently at opengrm.org
+RUN sed '/^pkgname/s/=.*/=ngram/' -i PKGBUILD
+# Set version number.
+RUN sed '/^pkgver/s/=.*/=1.3.11/' -i PKGBUILD
+# Set source url. The old one didn't exist.
+RUN sed '/^source/s/=.*/=("http:\/\/opengrm.org\/twiki\/pub\/GRM\/NGramDownload\/${pkgname}-${pkgver}.tar.gz")/' -i PKGBUILD
+# Set the hash value. This value wasn't obtained securely (i.e. I downloaded insecure file then ran sha256sum)
+RUN sed "/^md5sums=/s/.*/sha256sums=('05d417b57751dc7eca43b13d5f50eebe9d2338851bc47a854bb9318b91649773')/" -i PKGBUILD
+RUN makepkg || true
+RUN test -f ngram-1.3.11-1-x86_64.pkg.tar.zst
+
+FROM base AS phonetisaurus
+
+RUN git clone https://aur.archlinux.org/python-pybindgen.git /home/nubots/python-pybindgen
+WORKDIR /home/nubots/python-pybindgen
+RUN makepkg
+RUN sudo pacman -U --noconfirm python-pybindgen-0.20.1-1-x86_64.pkg.tar.zst
+
+RUN git clone https://aur.archlinux.org/phonetisaurus-git.git /home/nubots/phonetisaurus-git
+WORKDIR /home/nubots/phonetisaurus-git
+COPY --from=openfst /home/nubots/openfst/openfst-1.7.9-1-x86_64.pkg.tar.zst /home/nubots/phonetisaurus-git/
+RUN sudo pacman -U --noconfirm openfst-1.7.9-1-x86_64.pkg.tar.zst
+
+# Set the version number.
+RUN sed -i PKGBUILD -e '/^pkgver/s/=.*$/=r171.23f182f/'
+# Add configuration options to ./configure
+RUN sed -i PKGBUILD -e '30a\\ \t\t--with-openfst-includes=/usr/include/fst \\'
+RUN sed -i PKGBUILD -e '31a\\ \t\t--with-openfst-libs=/usr/lib \\'
+RUN makepkg || true
+RUN test -f phonetisaurus-git-r171.23f182f-1-x86_64.pkg.tar.zst
+
+FROM base as pocketsphinx
+
+RUN install-package bison swig python2 lapack libpulse gst-plugins-base-libs
+
+RUN git clone https://aur.archlinux.org/sphinxbase.git /home/nubots/sphinxbase
+WORKDIR /home/nubots/sphinxbase
+# Skip dependency checks because we assume LAPACK is provided by openblas?
+RUN makepkg --nodeps || true
+RUN test -f sphinxbase-5prealpha-11-x86_64.pkg.tar.zst
+RUN sudo pacman -U --noconfirm sphinxbase-5prealpha-11-x86_64.pkg.tar.zst
+
+RUN git clone https://aur.archlinux.org/pocketsphinx.git /home/nubots/pocketsphinx
+WORKDIR /home/nubots/pocketsphinx
+RUN makepkg || true
+RUN test -f pocketsphinx-5prealpha-10-x86_64.pkg.tar.zst
+
 ##############################################
 #   ___  ____    ____       _                #
 #  / _ \/ ___|  / ___|  ___| |_ _   _ _ __   #
@@ -306,30 +470,50 @@ ENV NVIDIA_DRIVER_CAPABILITIES=all
 # Copy the nvidia OpenCL vendorfile into the container so we can also use OpenCL on nvidia GPUs
 COPY --chown=root:root etc/OpenCL/vendors/nvidia.icd /etc/OpenCL/vendors/nvidia.icd
 
-##############################
-### SETUP THE USER ACCOUNT ###
-##############################
+WORKDIR /home/nubots/packages/
+COPY --from=kaldi-openfst       /home/nubots/kaldi-openfst/kaldi-openfst-1.7.2-2-x86_64.pkg.tar.zst /home/nubots/packages/
+COPY --from=kaldi               /home/nubots/kaldi/kaldi-5.5.r9193.0f0f362d9-1-x86_64.pkg.tar.zst /home/nubots/packages/
+COPY --from=openfst             /home/nubots/openfst/openfst-1.7.9-1-x86_64.pkg.tar.zst /home/nubots/packages/
+COPY --from=ngram               /home/nubots/opengrm-ngram/ngram-1.3.11-1-x86_64.pkg.tar.zst /home/nubots/packages/
+COPY --from=phonetisaurus       /home/nubots/python-pybindgen/python-pybindgen-0.20.1-1-x86_64.pkg.tar.zst /home/nubots/packages/
+COPY --from=phonetisaurus       /home/nubots/phonetisaurus-git/phonetisaurus-git-r171.23f182f-1-x86_64.pkg.tar.zst /home/nubots/packages/
+# COPY --from=pocketsphinx        /home/nubots/sphinxbase/sphinxbase-5prealpha-11-x86_64.pkg.tar.zst /home/nubots/packages/
+# COPY --from=pocketsphinx        /home/nubots/pocketsphinx/pocketsphinx-5prealpha-10-x86_64.pkg.tar.zst /home/nubots/packages/
 
-# Setup the sudo so it can be run without a password
-COPY etc/sudoers.d/user /etc/sudoers.d/user
-RUN chmod 440 /etc/sudoers.d/user
+WORKDIR /home/nubots/packages
+RUN sudo pacman -U --noconfirm \
+    kaldi-openfst-1.7.2-2-x86_64.pkg.tar.zst \
+    kaldi-5.5.r9193.0f0f362d9-1-x86_64.pkg.tar.zst \
+    openfst-1.7.9-1-x86_64.pkg.tar.zst \
+    ngram-1.3.11-1-x86_64.pkg.tar.zst \
+    python-pybindgen-0.20.1-1-x86_64.pkg.tar.zst \
+    phonetisaurus-git-r171.23f182f-1-x86_64.pkg.tar.zst
+# sphinxbase-5prealpha-11-x86_64.pkg.tar.zst \
+# pocketsphinx-5prealpha-10-x86_64.pkg.tar.zst
 
-# Create the user, and setup sudo so no password is required
-ARG user_uid=1000
-ARG user_gid=$user_uid
-RUN groupadd --gid $user_gid nubots \
-    && useradd --uid $user_uid --gid $user_gid -m nubots
-USER nubots
 
-# Copy ssh keys over to the system
-RUN install -d -m 0755 -o nubots -g nubots /home/nubots/.ssh
-COPY --chown=nubots:nubots home/nubots/.ssh/id_rsa /home/nubots/.ssh/id_rsa
-COPY --chown=nubots:nubots home/nubots/.ssh/id_rsa.pub /home/nubots/.ssh/id_rsa.pub
-COPY --chown=nubots:nubots home/nubots/.ssh/config /home/nubots/.ssh/config
-COPY --chown=nubots:nubots home/nubots/.gdbinit /home/nubots/.gdbinit
-RUN chmod 600 /home/nubots/.ssh/id_rsa /home/nubots/.ssh/config
+# voice2json
+RUN install-package python-wheel swig alsa-lib jack portaudio sox gcc-fortran jq espeak
+RUN git clone https://github.com/synesthesiam/voice2json /home/nubots/voice2json
+WORKDIR /home/nubots/voice2json
+RUN <<EOF cat > mod.sed
+/@ENABLE_POCKETSPHINX@/s//no/
+/@ENABLE_KALDI@/s//yes/
+/@ENABLE_DEEPSPEECH@/s//no/
+/@PACKAGE_NAME@/s//voice2json/
+/@PACKAGE_VERSION@/s//0.2.0/
+/@PACKAGE_BUGREPORT@/s//mike@rhasspy.org/
+EOF
+RUN sed -f mod.sed setup.py.in > setup.py
+RUN sudo python setup.py install
 
-# Setup the locations where we will mount our folders
-RUN install -d -m 0755 /home/nubots/NUbots
-RUN install -d -m 0777 /home/nubots/build
+# Tell voice2json where kaldi is located.
+ENV KALDI_DIR=/opt/kaldi
+# Make sure we search these paths too:
+#   echo /opt/kaldi/src/*bin | sed 's/ /:/g'
+ENV PATH="$PATH:/opt/kaldi/src/bin:/opt/kaldi/src/chainbin:/opt/kaldi/src/cudadecoderbin:/opt/kaldi/src/cudafeatbin:/opt/kaldi/src/featbin:/opt/kaldi/src/fgmmbin:/opt/kaldi/src/fstbin:/opt/kaldi/src/gmmbin:/opt/kaldi/src/ivectorbin:/opt/kaldi/src/kwsbin:/opt/kaldi/src/latbin:/opt/kaldi/src/lmbin:/opt/kaldi/src/nnet2bin:/opt/kaldi/src/nnet3bin:/opt/kaldi/src/nnetbin:/opt/kaldi/src/online2bin:/opt/kaldi/src/rnnlmbin:/opt/kaldi/src/sgmm2bin:/opt/kaldi/src/tfrnnlmbin"
+# Some scripts try to use python23... (make_lexicon_fst.py)
+RUN sudo ln /usr/bin/python3 /usr/bin/python23
+
 WORKDIR /home/nubots/NUbots
+USER nubots
