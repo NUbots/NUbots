@@ -23,9 +23,12 @@ def selected(repository):
             ).communicate()[0],
         )
 
+        # Remove the leading /, so nubots/nubots:generic becomes nubots:generic
+        full_names = [full_tag.split("/")[-1] for full_tag in img_info[0]["RepoTags"]]
+        # Obtain only the tag of the image, so from nubots:generic we only obtain generic
         names = [
             tag.split(":")[-1]
-            for tag in [full_tag.split("/")[-1] for full_tag in img_info[0]["RepoTags"]]
+            for tag in full_names
             if tag != "{}:selected".format(repository) and tag.startswith("{}:".format(repository))
         ]
         if len(names) == 0:
