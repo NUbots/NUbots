@@ -107,10 +107,6 @@ namespace module {
                             currentState = newState;
                             ResettingSimulation(oldState, event);
                             break;
-                        case State::STANDING:
-                            currentState = newState;
-                            Standing(oldState, event);
-                            break;
                         case State::WALKING:
                             currentState = newState;
                             Walking(oldState, event);
@@ -148,10 +144,6 @@ namespace module {
                 on<Trigger<RawSensorsMsg>, Single>().then([this](const RawSensorsMsg& sensors) {
                     CheckForFall(sensors);
                     UpdateMaxFieldPlaneSway(sensors);
-
-                    if (currentState == State::STANDING) {
-                        CheckForStandDone(sensors);
-                    }
                 });
 
                 on<Trigger<WebotsResetDone>, Single>().then([this](const WebotsResetDone&) {
@@ -189,7 +181,7 @@ namespace module {
             }
 
             void NSGA2Evaluator::CheckForFall(const RawSensorsMsg& sensors) {
-                if (currentState == State::STANDING || currentState == State::WALKING) {
+                if (currentState == State::WALKING) {
                     auto accelerometer = sensors.accelerometer;
 
                     if ((std::fabs(accelerometer.x) > 9.2 || std::fabs(accelerometer.y) > 9.2)
@@ -205,7 +197,7 @@ namespace module {
             }
 
             void NSGA2Evaluator::UpdateMaxFieldPlaneSway(const RawSensorsMsg& sensors) {
-                if (currentState == State::STANDING || currentState == State::WALKING) {
+                if (currentState == State::WALKING) {
                     auto accelerometer = sensors.accelerometer;
 
                     // Calculate the robot sway along the field plane (left/right, forward/backward)
@@ -251,14 +243,7 @@ namespace module {
                         }
                     case State::RESETTING_SIMULATION:
                         switch (event) {
-                            case Event::ResetDone: return State::STANDING;
-                            case Event::TerminateEvaluation: return State::FINISHED;
-                            default: return State::UNKNOWN;
-                        }
-                    case State::STANDING:
-                        switch (event) {
-                            case Event::Fallen: return State::TERMINATING_EARLY;
-                            case Event::StandDone: return State::WALKING;
+                            case Event::ResetDone: return State::WALKING;
                             case Event::TerminateEvaluation: return State::FINISHED;
                             default: return State::UNKNOWN;
                         }
@@ -364,30 +349,6 @@ namespace module {
                 std::unique_ptr<OptimisationCommand> reset = std::make_unique<OptimisationCommand>();
                 reset->command                             = OptimisationCommand::CommandType::RESET_WORLD;
                 emit(reset);
-            }
-
-            /// @brief Handle the STANDING state
-            void NSGA2Evaluator::Standing(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
-                log<NUClear::DEBUG>("Standing");
-
-                // Keep track of when we started the trial
-                trialStartTime = simTime;
-
-                // This skips standing and emits StandDone to start walking, to use the walk's stand instead
-                // Remove and uncomment the block that follows to actually do the stand here.
-                emit(std::make_unique<Event>(Event::StandDone));
-
-                // Start the stand script if we just finished resetting the world
-                // if (event == Event::ResetDone) {
-                //     // Reset our local state now that the webots reset is done
-                //     simTimeDelta           = 0.0;
-                //     trialStartTime         = 0.0;
-                //     robotDistanceTravelled = 0.0;
-                //     robotPosition[0]      = 0.0;
-                //     robotPosition[1]      = 0.0;
-                //     robotPosition[2]      = 0.0;
-                //     emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "Stand.yaml"));
-                // }
             }
 
             /// @brief Handle the WALKING state

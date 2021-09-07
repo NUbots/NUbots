@@ -28,11 +28,10 @@ namespace module {
                     WAITING_FOR_REQUEST    = 1,
                     SETTING_UP_TRIAL       = 2,
                     RESETTING_SIMULATION   = 3,
-                    STANDING               = 4,
-                    WALKING                = 5,
-                    TERMINATING_EARLY      = 6,
-                    TERMINATING_GRACEFULLY = 7,
-                    FINISHED               = 8
+                    WALKING                = 4,
+                    TERMINATING_EARLY      = 5,
+                    TERMINATING_GRACEFULLY = 6,
+                    FINISHED               = 7
                 };
 
                 enum Event {
