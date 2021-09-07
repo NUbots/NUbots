@@ -125,8 +125,9 @@ namespace module::localisation {
             const Eigen::Matrix<Scalar, 3, 1>& post_centre,
             const Eigen::Transform<Scalar, 3, Eigen::Affine>& Hcf,
             const message::support::FieldDescription& fd) {
-            if (!(type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL))
+            if (!(type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL)) {
                 return Eigen::Matrix<Scalar, 3, 1>::Zero();
+            }
             // rZFf = field vertical
             const Eigen::Matrix<Scalar, 4, 1> rZFf = Hcf * Eigen::Matrix<Scalar, 4, 1>::UnitZ();
 
@@ -148,8 +149,9 @@ namespace module::localisation {
                                                                 const Eigen::Matrix<Scalar, 3, 1>& post_centre,
                                                                 const Eigen::Transform<Scalar, 3, Eigen::Affine>& Hcf,
                                                                 const message::support::FieldDescription& fd) {
-            if (!(type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL))
+            if (!(type == Goal::MeasurementType::LEFT_NORMAL || type == Goal::MeasurementType::RIGHT_NORMAL)) {
                 return Eigen::Matrix<Scalar, 3, 1>::Zero();
+            }
 
             // Finding 4 corners of goalpost and centre (4 corners and centre)
             Eigen::Matrix<Scalar, 4, 5> goalBaseCorners;

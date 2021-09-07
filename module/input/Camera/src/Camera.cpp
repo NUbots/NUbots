@@ -85,8 +85,9 @@ namespace module::input {
                     std::string device_description = arv_get_device_id(device_no);
                     auto camera =
                         std::shared_ptr<ArvCamera>(arv_camera_new(device_description.c_str()), [](ArvCamera* ptr) {
-                            if (ptr)
+                            if (ptr) {
                                 g_object_unref(ptr);
+                            }
                         });
 
                     if (!ARV_IS_CAMERA(camera.get())) {
@@ -98,8 +99,9 @@ namespace module::input {
                         auto stream =
                             std::shared_ptr<ArvStream>(arv_camera_create_stream(camera.get(), nullptr, nullptr),
                                                        [](ArvStream* ptr) {
-                                                           if (ptr)
+                                                           if (ptr) {
                                                                g_object_unref(ptr);
+                                                           }
                                                        });
 
                         if (!ARV_IS_STREAM(stream.get())) {
