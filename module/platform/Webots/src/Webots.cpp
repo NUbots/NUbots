@@ -58,7 +58,6 @@ namespace module::platform {
     using message::input::Sensors;
     using message::motion::ServoTarget;
     using message::motion::ServoTargets;
-    using message::output::CompressedImage;
     using message::platform::RawSensors;
     using message::platform::ResetWebotsServos;
 
