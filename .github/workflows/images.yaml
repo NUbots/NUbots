@@ -18,7 +18,7 @@ jobs:
 
     strategy:
       matrix:
-        platform: ["generic", "nuc8i7beh", nuc7i7bnh]
+        platform: ["generic", "nuc8i7beh", "nuc7i7bnh"]
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
