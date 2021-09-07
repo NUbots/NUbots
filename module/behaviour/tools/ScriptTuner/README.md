@@ -24,7 +24,7 @@ The keyboard controls are as follows:
 * G: Allows multiple gain edits at once
 * I: Delete current frame
 * J: "jump" to frame without the robot moving
-* M: Mirror script - flip about Z axis
+* M: Mirror script - flip about sagittal plane
 * N: Insert a new frame before the current frame
 * R: Refresh the view
 * S: Save script
@@ -34,13 +34,16 @@ The keyboard controls are as follows:
 ## Consumes
 
 * `NUClear::message::CommandLineArguments` containing the name of the script to edit
+* `module::behaviour::tools::LockServo` (internal to this class only) to trigger servo lock event
 * `message::platform::RawSensors` to get position of specific servo when locking it
 
 ## Emits
 
-* `message::motion::ServoTarget` to control servos
-* `message::motion::ServoTargets` to control servos
+* `message::motion::ServoTarget` to control currently selected servo when locked or unlocked
+* `message::motion::ServoTargets` to control all servos when transitioning between frames
 * `extension::ExecuteScript` to play the script
+* `utility::behaviour::RegisterAction` to register actions during module initialisation
+* `module::behaviour::tools::LockServo` (internal to this class only) to trigger servo lock event
 
 ## Dependencies
 
