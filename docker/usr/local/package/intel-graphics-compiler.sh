@@ -33,21 +33,17 @@ echo "Configuring using cmake file ${CMAKELISTS_FILE}"
 # Clone the dependency
 git clone https://github.com/intel/vc-intrinsics vc-intrinsics
 
-# Download the patches
-curl -L https://raw.githubusercontent.com/archlinux/svntogit-community/packages/intel-graphics-compiler/trunk/llvm12-porting.patch \
-    -o llvm12-porting.patch
-curl -L https://github.com/intel/intel-graphics-compiler/commit/c50d77f3c8a92fae6f43b47580e7d485f9ea5327.patch \
-    -o revert-stack-analysis.patch
-curl -L https://github.com/intel/intel-graphics-compiler/commit/8e1a461d3e6b85a6cf018caf6abf4a3ba9a1758d.patch \
-    -o igc-missing-limits-headers.patch
-curl -L https://github.com/intel/intel-graphics-compiler/commit/fd480731ad77213fbfcd9677d03e8243acbb306c.patch \
-    -o fix-dce.patch
-
-# Apply the patches
-patch -p1 < llvm12-porting.patch
-patch -p1 -R < revert-stack-analysis.patch
-patch -p1 < igc-missing-limits-headers.patch
-patch -p1 < fix-dce.patch
+# TODO(DevOpsTeam): Upgrade IGC version once they support clang12+ properly and remove these patches
+# Download and install the patches. The list of patches is from this LEGEND:
+# https://github.com/intel/intel-graphics-compiler/issues/191#issuecomment-899753344
+# llvm12-porting.patch from arch PKGBUILD for IGC
+wget https://raw.githubusercontent.com/archlinux/svntogit-community/packages/intel-graphics-compiler/trunk/llvm12-porting.patch | patch -p1
+# Revert stack-analysis
+wget https://github.com/intel/intel-graphics-compiler/commit/c50d77f3c8a92fae6f43b47580e7d485f9ea5327.patch | patch -p1 -R
+# igc-missing-limits-headers - one line patch for missing include
+wget https://github.com/intel/intel-graphics-compiler/commit/8e1a461d3e6b85a6cf018caf6abf4a3ba9a1758d.patch | patch -p1
+# fix-dce.patch - Patch by that guy to comment out a troublesome function call
+wget https://github.com/intel/intel-graphics-compiler/commit/fd480731ad77213fbfcd9677d03e8243acbb306c.patch | patch -p1
 
 # The build requires a binary in here to be run (CMCLTranslatorTool)
 # Without this directory in the path, bash can't find it
