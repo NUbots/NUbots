@@ -180,8 +180,8 @@ namespace module::behaviour::skills {
                       bool objectsMissing = false;
 
                       // Get the list of objects which are currently visible
-                      Balls ballFixationObjects = getFixationObjects(std::move(vballs), objectsMissing);
-                      Goals goalFixationObjects = getFixationObjects(std::move(vgoals), objectsMissing);
+                      Balls ballFixationObjects = getFixationObjects(vballs, objectsMissing);
+                      Goals goalFixationObjects = getFixationObjects(vgoals, objectsMissing);
 
                       // Determine state transition variables
                       const bool lost = ((ballFixationObjects.balls.empty()) && (goalFixationObjects.goals.empty()));
