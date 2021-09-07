@@ -155,8 +155,8 @@ namespace module::behaviour::skills {
            Sync<HeadBehaviourSoccer>>()
             .then("Head Behaviour Main Loop",
                   [this](const Sensors& sensors,
-                         std::shared_ptr<const Balls> vballs,
-                         std::shared_ptr<const Goals> vgoals,
+                         const std::shared_ptr<const Balls>& vballs,
+                         const std::shared_ptr<const Goals>& vgoals,
                          const std::shared_ptr<const LocBall>& locBall,
                          const KinematicsModel& kinematicsModel,
                          const Image& image) {

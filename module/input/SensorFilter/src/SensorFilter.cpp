@@ -341,7 +341,7 @@ namespace module::input {
                 .then(
                     "Main Sensors Loop",
                     [this](const RawSensors& input,
-                           std::shared_ptr<const Sensors> previousSensors,
+                           const std::shared_ptr<const Sensors>& previousSensors,
                            const KinematicsModel& kinematicsModel) {
                         auto sensors = std::make_unique<Sensors>();
 

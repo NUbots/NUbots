@@ -215,7 +215,7 @@ namespace extension::behaviour {
                 },
                 // Binder function that lets a reactor bind a function that is called when the state changes
                 [](NUClear::Reactor& reactor,
-                   std::function<void(const int&)> fn) -> NUClear::threading::ReactionHandle {
+                   const std::function<void(const int&)>& fn) -> NUClear::threading::ReactionHandle {
                     return reactor.on<NUClear::dsl::word::Trigger<State>>().then(
                         [fn](const State& s) { fn(static_cast<int>(s)); });
                 }));

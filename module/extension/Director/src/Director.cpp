@@ -170,7 +170,7 @@ namespace module::extension {
         // the Provider has finished executing
         on<Trigger<DirectorTask>, Sync<DirectorTask>>().then(
             "Director Task",
-            [this](std::shared_ptr<const DirectorTask> task) {
+            [this](const std::shared_ptr<const DirectorTask>& task) {
                 // Root level task, make the pack immediately and send it off to be executed as a root task
                 if (providers.count(task->requester_id) == 0) {
                     emit(std::make_unique<TaskPack>(TaskPack({task})));

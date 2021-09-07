@@ -57,7 +57,7 @@ namespace module::input {
                     // Traverse specified directory and locate all image/lens pairs
                     for (auto& p : std::filesystem::recursive_directory_iterator(config.image_folder)) {
                         if (utility::strutil::endsWith(p.path(), std::vector<std::string>{".jpg", ".jpeg"})) {
-                            std::filesystem::path image_file = p.path();
+                            const std::filesystem::path& image_file = p.path();
                             std::filesystem::path lens_file  = p.path();
 
                             // Replace the filename component and change the extension
