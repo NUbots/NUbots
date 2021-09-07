@@ -244,13 +244,8 @@ namespace NUClear::dsl {
                 // Get hostname so we can find the correct per-robot config directory.
                 const std::string hostname = utility::support::getHostname();
 
-                const auto binary_name = getFirstCommandLineArg();
-
-                // Set paths to the config files.
+                // Check if there is a default config. If there isn't, try to make one
                 const fs::path defaultConfig = fs::path("config") / path;
-                const fs::path robotConfig   = fs::path("config") / hostname / path;
-                const fs::path binaryConfig  = fs::path("config") / binary_name / path;
-
                 if (!fs::exists(defaultConfig)) {
                     NUClear::log<NUClear::WARN>("Configuration file '" + defaultConfig.string()
                                                 + "' does not exist. Creating it.");
@@ -273,13 +268,20 @@ namespace NUClear::dsl {
                 DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, defaultConfig, flags);
 
                 // Bind our robot specific path if it exists
+                const fs::path robotConfig = fs::path("config") / hostname / path;
                 if (fs::exists(robotConfig)) {
                     DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, robotConfig, flags);
                 }
 
-                // Bind our binary specific path if it exists
-                if (fs::exists(binaryConfig)) {
-                    DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, binaryConfig, flags);
+                // If there were command line arguments, we can get the binary name, and check for a binary config
+                // If not, we don't bother checking for a binary config to bind
+                const auto binaryName = getFirstCommandLineArg();
+                if (binaryName != "") {
+                    fs::path binaryConfig = fs::path("config") / binaryName / path;
+                    // Bind our binary specific path if it exists
+                    if (fs::exists(binaryConfig)) {
+                        DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, binaryConfig, flags);
+                    }
                 }
             }
 
