@@ -133,17 +133,17 @@ namespace Darwin {
         // We flush our buffer, just in case there was anything random in it
         tcflush(fd, TCIFLUSH);
 
-        while ((bytesWritten != (int) count) && (reconnects < 3)) {
+        while ((bytesWritten != static_cast<int>(count)) && (reconnects < 3)) {
             bytesWritten = write(fd, buf, count);
 
-            if (bytesWritten < (int) count) {
+            if (bytesWritten < static_cast<int>(count)) {
                 reconnect();
                 reconnects++;
             }
         }
 
         if (reconnects > 0) {
-            std::cout << "Bytes Written: " << (int) bytesWritten << " Reconnects: " << (int) reconnects << "\r"
+            std::cout << "Bytes Written: " << bytesWritten << " Reconnects: " << static_cast<int>(reconnects) << "\r"
                       << std::endl;
         }
 
@@ -157,10 +157,10 @@ namespace Darwin {
         uint8_t reconnects = 0;
         int bytesRead      = 0;
 
-        while ((bytesRead != (int) count) && (reconnects < 3)) {
+        while ((bytesRead != static_cast<int>(count)) && (reconnects < 3)) {
             bytesRead = read(fd, buf, count);
 
-            if ((errno == EAGAIN) || ((bytesRead < (int) count) && (bytesRead > 0))) {
+            if ((errno == EAGAIN) || ((bytesRead < static_cast<int>(count)) && (bytesRead > 0))) {
                 break;
             }
 
@@ -171,9 +171,9 @@ namespace Darwin {
         }
 
         if (reconnects > 0) {
-            std::cout << "Bytes Read: " << (int) bytesRead << " Reconnects: " << (int) reconnects << " Data: ";
+            std::cout << "Bytes Read: " << bytesRead << " Reconnects: " << static_cast<int>(reconnects) << " Data: ";
             for (int i = 0; i < bytesRead; i++) {
-                std::cout << (int) (*((uint8_t*) buf + i)) << " ";
+                std::cout << static_cast<int>(*(static_cast<uint8_t*>(buf) + i)) << " ";
             }
             std::cout << "\r" << std::endl;
         }
@@ -243,8 +243,8 @@ namespace Darwin {
         // length
         int length = 0;
         if (result.header.length < 2) {
-            std::cout << "Length: " << (int) result.header.length << ", " << (int) (result.header.length - 2) << "\r"
-                      << std::endl;
+            std::cout << "Length: " << static_cast<int>(result.header.length) << ", " << (result.header.length - 2)
+                      << "\r" << std::endl;
         }
 
         else {

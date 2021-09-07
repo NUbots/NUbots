@@ -1051,7 +1051,7 @@ namespace module::behaviour::tools {
                 }
 
                 // checks user input is within correct range
-                if ((size_t) tempframe2 <= script.frames.size()) {
+                if (static_cast<size_t>(tempframe2) <= script.frames.size()) {
 
                     frame = tempframe2 - 1;
                 }
