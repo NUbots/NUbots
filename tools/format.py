@@ -89,17 +89,17 @@ def register(command):
         help="Skip formatting the cmake",
     )
     command.add_argument(
-        "-A",
-        "--format-all",
-        dest="format_all",
+        "-u",
+        "--format-unchanged",
+        dest="format_unchanged",
         action="store_true",
         default=False,
-        help="Format all files, including files not changed since master",
+        help="Include unmodified files, as well as modified files, compared to main.",
     )
 
 
 @run_on_docker
-def run(skip_typescript, skip_cpp, skip_protobuf, skip_python, skip_cmake, format_all, **kwargs):
+def run(skip_typescript, skip_cpp, skip_protobuf, skip_python, skip_cmake, format_unchanged, **kwargs):
     # Check for eslint in node_modules folder
     eslint_path = find_eslint(os.path.join(b.project_dir, "nusight2", "node_modules"))
 
@@ -113,7 +113,7 @@ def run(skip_typescript, skip_cpp, skip_protobuf, skip_python, skip_cmake, forma
     # Use git to get all of the files that are committed to the repository
     files = (
         check_output(["git", "ls-files"]).decode("utf-8")
-        if format_all
+        if format_unchanged
         else check_output(["git", "diff", "--name-only", "main"]).decode("utf-8")
     )
 
