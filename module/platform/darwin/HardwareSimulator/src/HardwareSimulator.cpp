@@ -237,7 +237,7 @@ namespace module::platform::darwin {
             }
         });
 
-        on<Trigger<ServoTarget>>().then([this](const ServoTarget command) {
+        on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
             auto commandList = std::make_unique<ServoTargets>();
             commandList->targets.push_back(command);
 
