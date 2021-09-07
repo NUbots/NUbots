@@ -224,6 +224,8 @@ namespace extension {
 namespace NUClear::dsl {
     namespace operation {
 
+        /// @brief utility function to fetch the first command line argument, used to get the binary name
+        /// @returns If the first command line argument exists, it is returned. Otherwise, the empty string is returned
         [[nodiscard]] inline std::string getFirstCommandLineArg() {
             std::shared_ptr<const message::CommandLineArguments> args =
                 store::DataStore<message::CommandLineArguments>::get();
@@ -237,6 +239,14 @@ namespace NUClear::dsl {
 
         template <>
         struct DSLProxy<::extension::Configuration> {
+            /// @brief Binds config files, in order from least specific to most specific - default, per-robot, binary
+            ///        The later, more specific configs (if they exist) supersede the less specific ones
+            /// @details If the default config file doesn't exist, we make one
+            ///          The flags used during binding tell FileWatch that the config files have been changed or
+            ///          renamed, which tells FileWatch they should be updated
+            /// @tparam DSL The DSL keyword which is used to bind the reactions when the config files are found
+            /// @param reaction The reaction which the config file is bound to
+            /// @param path The filename of the desired config file
             template <typename DSL>
             static inline void bind(const std::shared_ptr<threading::Reaction>& reaction, const fs::path& path) {
                 auto flags = ::extension::FileWatch::RENAMED | ::extension::FileWatch::CHANGED;
