@@ -88,6 +88,7 @@ add_compile_options(-Wall -Wpedantic -Wextra)
 # This is needed everywhere so that we can catch segmentation faults
 add_compile_options(-fnon-call-exceptions)
 
+# We use C++17
 add_compile_options(-std=c++17)
 
 # Make NUClear use the system clock, as we are syncing it with ptp
