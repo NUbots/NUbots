@@ -76,7 +76,7 @@ namespace module::output {
                          std::shared_ptr<const LocalisationBall> loc_ball,
                          std::shared_ptr<const KickPlan> kick_plan,
                          std::shared_ptr<const GameState> game_state,
-                         std::shared_ptr<const WalkPath> walk_path,
+                         std::shared_ptr<const WalkPath> /*walk_path*/,
                          std::shared_ptr<const WalkCommand> walk_command) {
                 auto msg = std::make_unique<OverviewMsg>();
 

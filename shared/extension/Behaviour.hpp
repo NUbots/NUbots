@@ -119,7 +119,7 @@ namespace extension::behaviour {
          * @return the information needed by the on statement
          */
         template <typename DSL>
-        static inline TaskInfo<T> get(NUClear::threading::Reaction& r) {
+        static inline TaskInfo<T> get(NUClear::threading::Reaction& /*r*/) {
             // TODO(@TrentHouliston) get the data from the director once it's algorithm is more fleshed out
             return TaskInfo<T>();
         }

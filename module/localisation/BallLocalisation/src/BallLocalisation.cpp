@@ -125,9 +125,9 @@ namespace module::localisation {
         on<Trigger<ResetBallHypotheses>, With<Sensors>, With<Field>, With<FieldDescription>, Sync<BallLocalisation>>()
             .then("Reset Ball Hypotheses",
                   [this](const ResetBallHypotheses& locReset,
-                         const Sensors& sensors,
+                         const Sensors& /*sensors*/,
                          const Field& field,
-                         const FieldDescription& fd) {
+                         const FieldDescription& /*fd*/) {
                       // If we've just reset our self localisation we can't trust Htf. So reset balls to the known
                       // starting position
                       if (locReset.self_reset) {
