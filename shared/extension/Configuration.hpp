@@ -223,15 +223,14 @@ namespace extension {
 // NUClear configuration extension
 namespace NUClear::dsl {
     namespace operation {
-        namespace {
-            [[nodiscard]] std::string getFirstCommandLineArg() {
-                std::shared_ptr<const message::CommandLineArguments> args =
-                    store::DataStore<message::CommandLineArguments>::get();
-                std::vector<char> data(args->at(0).cbegin(), args->at(0).cend());
-                data.push_back('\0');
-                return std::string(data.data());
-            }
-        }  // namespace
+
+        [[nodiscard]] inline std::string getFirstCommandLineArg() {
+            std::shared_ptr<const message::CommandLineArguments> args =
+                store::DataStore<message::CommandLineArguments>::get();
+            std::vector<char> data(args->at(0).cbegin(), args->at(0).cend());
+            data.push_back('\0');
+            return std::string(data.data());
+        }
 
         template <>
         struct DSLProxy<::extension::Configuration> {
