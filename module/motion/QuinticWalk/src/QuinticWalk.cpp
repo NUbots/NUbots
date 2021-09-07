@@ -305,14 +305,11 @@ namespace module::motion {
         const Eigen::Affine3f Hft = Hfs * Hst;  // trunk_to_flying_foot_goal
 
         // Calculate leg joints
-        const Eigen::Matrix4d left_foot =
-            walk_engine.getFootstep().isLeftSupport() ? Hst.matrix().cast<double>() : Hft.matrix().cast<double>();
-        const Eigen::Matrix4d right_foot =
-            walk_engine.getFootstep().isLeftSupport() ? Hft.matrix().cast<double>() : Hst.matrix().cast<double>();
+        const Eigen::Matrix4f left_foot  = walk_engine.getFootstep().isLeftSupport() ? Hst.matrix() : Hft.matrix();
+        const Eigen::Matrix4f right_foot = walk_engine.getFootstep().isLeftSupport() ? Hft.matrix() : Hst.matrix();
 
-        const auto joints = calculateLegJoints(kinematicsModel,
-                                               Eigen::Affine3f(left_foot.cast<float>()),
-                                               Eigen::Affine3f(right_foot.cast<float>()));
+        const auto joints =
+            calculateLegJoints(kinematicsModel, Eigen::Affine3f(left_foot), Eigen::Affine3f(right_foot));
 
         auto waypoints = motion(joints);
         emit(std::move(waypoints));

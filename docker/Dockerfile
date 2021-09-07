@@ -299,7 +299,8 @@ RUN install-package \
     parallel \
     vim \
     nano \
-    clinfo
+    clinfo \
+    doxygen
 
 # Install formatters as last step so if they change the image is easy to update
 RUN pip install --upgrade \
