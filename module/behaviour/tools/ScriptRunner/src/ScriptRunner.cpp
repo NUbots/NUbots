@@ -35,7 +35,6 @@ namespace module::behaviour::tools {
 
     using extension::ExecuteScriptByName;
 
-    using message::platform::RawSensors;
     using NUClear::message::CommandLineArguments;
 
     using message::platform::ButtonMiddleDown;

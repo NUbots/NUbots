@@ -40,13 +40,11 @@ namespace module::motion {
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
     using extension::Configuration;
-    using message::behaviour::ServoCommand;
     using message::behaviour::ServoCommands;
     using message::input::Sensors;
     using message::motion::HeadCommand;
     using message::motion::KinematicsModel;
     using utility::behaviour::RegisterAction;
-    using utility::math::coordinates::cartesianToSpherical;
     using utility::math::coordinates::sphericalToCartesian;
     using utility::motion::kinematics::calculateHeadJoints;
 

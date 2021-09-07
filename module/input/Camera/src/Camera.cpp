@@ -27,7 +27,6 @@ namespace module::input {
     using message::input::Sensors;
     using utility::input::ServoID;
     using utility::support::Expression;
-    using utility::vision::fourcc;
 
     /// The amount of time to observe after recalibrating to work out how long image transfer takes (nanoseconds)
     constexpr int64_t TRANSFER_OFFSET_OBSERVE_TIME = 1e9;

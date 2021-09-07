@@ -21,7 +21,6 @@
 
 namespace utility::motion::kinematics {
 
-    using message::input::Sensors;
     using message::motion::KinematicsModel;
 
     using LimbID  = utility::input::LimbID;

@@ -25,7 +25,6 @@ namespace module::localisation {
     using message::localisation::ResetBallHypotheses;
     using message::support::FieldDescription;
 
-    using utility::math::coordinates::cartesianToSpherical;
     using ServoID = utility::input::ServoID;
     using utility::nusight::graph;
     using utility::support::Expression;

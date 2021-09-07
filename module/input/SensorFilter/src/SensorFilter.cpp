@@ -45,12 +45,10 @@ namespace module::input {
     using message::platform::ButtonMiddleUp;
     using message::platform::RawSensors;
 
-    using utility::input::LimbID;
     using utility::input::ServoID;
     using utility::motion::kinematics::calculateAllPositions;
     using utility::motion::kinematics::calculateCentreOfMass;
     using utility::motion::kinematics::calculateInertialTensor;
-    using utility::motion::kinematics::calculateRobotToIMU;
     using utility::nusight::graph;
     using utility::support::Expression;
 

@@ -23,16 +23,12 @@
 namespace module::extension {
 
     using ::extension::Configuration;
-    using ::extension::behaviour::Task;
     using ::extension::behaviour::commands::CausingExpression;
     using ::extension::behaviour::commands::DirectorTask;
-    using ::extension::behaviour::commands::ProviderClassification;
     using ::extension::behaviour::commands::ProviderDone;
     using ::extension::behaviour::commands::ProvidesReaction;
     using ::extension::behaviour::commands::WhenExpression;
-    using ::NUClear::threading::Reaction;
     using provider::Provider;
-    using provider::ProviderGroup;
     using Unbind = NUClear::dsl::operation::Unbind<ProvidesReaction>;
 
     /**

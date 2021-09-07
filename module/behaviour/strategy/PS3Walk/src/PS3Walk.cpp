@@ -34,9 +34,7 @@ namespace module::behaviour::strategy {
 
     using message::behaviour::MotionCommand;
     using message::motion::HeadCommand;
-    using message::motion::KickScriptCommand;
 
-    using utility::input::LimbID;
 
     PS3Walk::PS3Walk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), joystick() {
 
