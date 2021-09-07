@@ -39,8 +39,7 @@ RUN install-package \
     npm \
     yarn \
     git \
-    ncurses \
-    doxygen
+    ncurses
 
 # Get python to look in /usr/local for packages
 RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
@@ -293,7 +292,8 @@ RUN install-package \
     parallel \
     vim \
     nano \
-    clinfo
+    clinfo \
+    doxygen
 
 # Install formatters as last step so if they change the image is easy to update
 RUN pip install --upgrade \
