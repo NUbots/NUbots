@@ -77,7 +77,7 @@ namespace extension {
             // If the same file exists in this robots per-robot config directory then load and merge.
             if (fs::exists(fs::path("config") / hostname / fileName)) {
                 if (loaded) {
-                    config = mergeYAML(config, YAML::LoadFile(fs::path("config") / hostname / fileName));
+                    config = merge_yaml_nodes(config, YAML::LoadFile(fs::path("config") / hostname / fileName));
                 }
 
                 else {
@@ -89,7 +89,7 @@ namespace extension {
             // If the same file exists in this binary's per-binary config directory then load and merge.
             if (fs::exists(fs::path("config") / binary / fileName)) {
                 if (loaded) {
-                    config = mergeYAML(config, YAML::LoadFile(fs::path("config") / binary / fileName));
+                    config = merge_yaml_nodes(config, YAML::LoadFile(fs::path("config") / binary / fileName));
                 }
 
                 else {
@@ -98,7 +98,7 @@ namespace extension {
             }
         }
 
-        [[nodiscard]] static YAML::Node mergeYAML(const YAML::Node& base, const YAML::Node& override) {
+        [[nodiscard]] static YAML::Node merge_yaml_nodes(const YAML::Node& base, const YAML::Node& override) {
             YAML::Node ret(base);
 
             for (const auto& item : override) {
@@ -127,7 +127,7 @@ namespace extension {
 
                         // Recurse.
                         case YAML::NodeType::Map: {
-                            ret[key] = mergeYAML(base[key], override[key]);
+                            ret[key] = merge_yaml_nodes(base[key], override[key]);
                             break;
                         }
 
@@ -226,7 +226,7 @@ namespace NUClear::dsl {
 
         /// @brief utility function to fetch the first command line argument, used to get the binary name
         /// @returns If the first command line argument exists, it is returned. Otherwise, the empty string is returned
-        [[nodiscard]] inline std::string getFirstCommandLineArg() {
+        [[nodiscard]] inline std::string get_first_command_line_arg() {
             std::shared_ptr<const message::CommandLineArguments> args =
                 store::DataStore<message::CommandLineArguments>::get();
             if (!args->empty()) {
@@ -285,7 +285,7 @@ namespace NUClear::dsl {
 
                 // If there were command line arguments, we can get the binary name, and check for a binary config
                 // If not, we don't bother checking for a binary config to bind
-                const auto binaryName = getFirstCommandLineArg();
+                const auto binaryName = get_first_command_line_arg();
                 if (binaryName != "") {
                     fs::path binaryConfig = fs::path("config") / binaryName / path;
                     // Bind our binary specific path if it exists
@@ -308,7 +308,7 @@ namespace NUClear::dsl {
                         // Get hostname so we can find the correct per-robot config directory.
                         const std::string hostname = utility::support::getHostname();
 
-                        const auto binaryName = getFirstCommandLineArg();
+                        const auto binaryName = get_first_command_line_arg();
 
                         // Get relative path to config file.
                         const auto components = utility::strutil::split(watch.path, '/');
