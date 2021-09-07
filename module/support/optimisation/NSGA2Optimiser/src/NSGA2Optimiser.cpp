@@ -32,7 +32,12 @@ namespace module {
                 // Read NSGA2Optimiser.yaml file and initialize the values we're going to use for the optimisation
                 on<Configuration>("NSGA2Optimiser.yaml").then([this](const Configuration& config) {
                     log<NUClear::INFO>("Trying to setup NSGA2");
-                    task = std::make_unique<WalkOptimiser>();
+                    if(true) {
+                        //TODO: 2021-09-07 Add check for which kind of task we're using
+                        task = std::make_unique<WalkOptimiser>();
+                    } else {
+                        log<NUClear::ERROR>("Unrecognised optimiser task");
+                    }
                     task->SetupNSGA2(config, nsga2Algorithm);
                 });
 
