@@ -162,7 +162,7 @@ namespace module::input {
         }
 
         [[nodiscard]] static Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state,
-                                                                 const MeasurementType::ACCELEROMETER&) {
+                                                                 const MeasurementType::ACCELEROMETER& /*unused*/) {
 
             // Rotate world gravity vector into torso space using quaternion conjugation
             //
@@ -183,17 +183,19 @@ namespace module::input {
         }
 
         [[nodiscard]] static Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state,
-                                                                 const MeasurementType::GYROSCOPE&) {
+                                                                 const MeasurementType::GYROSCOPE& /*unused*/) {
             return state.omegaTTt;
         }
 
-        [[nodiscard]] static Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state,
-                                                                 const MeasurementType::FLAT_FOOT_ODOMETRY&) {
+        [[nodiscard]] static Eigen::Matrix<Scalar, 3, 1> predict(
+            const StateVec& state,
+            const MeasurementType::FLAT_FOOT_ODOMETRY& /*unused*/) {
             return state.rTWw;
         }
 
-        [[nodiscard]] static Eigen::Matrix<Scalar, 4, 1> predict(const StateVec& state,
-                                                                 const MeasurementType::FLAT_FOOT_ORIENTATION&) {
+        [[nodiscard]] static Eigen::Matrix<Scalar, 4, 1> predict(
+            const StateVec& state,
+            const MeasurementType::FLAT_FOOT_ORIENTATION& /*unused*/) {
             return state.Rwt.coeffs();
         }
 

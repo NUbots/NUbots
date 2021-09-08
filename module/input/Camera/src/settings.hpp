@@ -93,10 +93,10 @@ namespace module::input {
         static void write(ArvGcBoolean* setting, const bool& v, GError** error) {
             arv_gc_boolean_set_value(setting, v, error);
         }
-        static bool valid(ArvGcBoolean*, const bool&) {
+        static bool valid(ArvGcBoolean* /*unused*/, const bool& /*unused*/) {
             return true;
         }
-        static std::string unit(ArvGcBoolean*) {
+        static std::string unit(ArvGcBoolean* /*unused*/) {
             return "";
         }
     };
@@ -138,7 +138,7 @@ namespace module::input {
 
             return true;
         }
-        static std::string unit(ArvGcEnumeration*) {
+        static std::string unit(ArvGcEnumeration* /*unused*/) {
             return "";
         }
     };

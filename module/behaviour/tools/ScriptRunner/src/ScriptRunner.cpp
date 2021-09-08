@@ -92,16 +92,16 @@ namespace module::behaviour::tools {
             {std::pair<float, std::set<LimbID>>(
                 1,
                 {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
-            [this](const std::set<LimbID>&) {
+            [this](const std::set<LimbID>& /* limbs */) {
                 on<Trigger<ButtonMiddleDown>>().then([this] {
                     std::this_thread::sleep_for(std::chrono::seconds(script_delay));
                     emit(std::make_unique<ExecuteNextScript>());
                 });
             },
-            [](const std::set<LimbID>&) {
+            [](const std::set<LimbID>& /* limbs */) {
                 // We should always be the only running thing
             },
-            [this](const std::set<ServoID>&) {
+            [this](const std::set<ServoID>& /* servos */) {
                 on<Trigger<ButtonMiddleDown>>().then([this] {
                     std::this_thread::sleep_for(std::chrono::seconds(script_delay));
                     emit(std::make_unique<ExecuteNextScript>());

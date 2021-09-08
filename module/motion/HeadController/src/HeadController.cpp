@@ -169,13 +169,13 @@ namespace module::motion {
             id,
             "HeadController",
             {std::pair<float, std::set<LimbID>>(30.0, {LimbID::HEAD})},
-            [this](const std::set<LimbID>&) {  // Head control gained
+            [this](const std::set<LimbID>& /* limbs */) {  // Head control gained
                 updateHandle.enable();
             },
-            [this](const std::set<LimbID>&) {  // Head controll lost
+            [this](const std::set<LimbID>& /* limbs */) {  // Head control lost
                 updateHandle.disable();
             },
-            [](const std::set<ServoID>&) {}  // Servos reached target
+            [](const std::set<ServoID>& /* servos */) {}  // Servos reached target
         }));
     }
 }  // namespace module::motion
