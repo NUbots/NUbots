@@ -22,6 +22,7 @@
 
 #include <Eigen/Core>
 #include <ostream>
+#include <utility>
 #include <vector>
 
 namespace utility::math::geometry {
@@ -203,11 +204,10 @@ namespace utility::math::geometry {
 
         //! @brief output stream operator.
         template <typename Scalar_, int R_, int C_>
-        friend std::ostream& operator<<(std::ostream& output, const Quad<Scalar_, R_, C_>& quad);
+
 
         //! @brief output stream operator for a vector of goals.
         template <typename Scalar_, int R_, int C_>
-        friend std::ostream& operator<<(std::ostream& output, const std::vector<Quad<Scalar_, R_, C_>>& quads);
     };
 
 
