@@ -83,46 +83,44 @@ namespace module::input {
                 std::string device_description = arv_get_device_id(device_no);
                 auto camera =
                     std::shared_ptr<ArvCamera>(arv_camera_new(device_description.c_str()), [](ArvCamera* ptr) {
-                        if (ptr) {
+                        if (ptr != nullptr) {
                             g_object_unref(ptr);
                         }
                     });
 
-                if (!ARV_IS_CAMERA(camera.get())) {
+                if (ARV_IS_CAMERA(camera.get()) == 0) {
                     throw std::runtime_error(fmt::format("Failed to create {} camera ({})", name, device_description));
                 }
-                else {
-                    // Create a new stream object: Store as shared pointer
-                    auto stream = std::shared_ptr<ArvStream>(arv_camera_create_stream(camera.get(), nullptr, nullptr),
-                                                             [](ArvStream* ptr) {
-                                                                 if (ptr) {
-                                                                     g_object_unref(ptr);
-                                                                 }
-                                                             });
+                // Create a new stream object: Store as shared pointer
+                auto stream = std::shared_ptr<ArvStream>(arv_camera_create_stream(camera.get(), nullptr, nullptr),
+                                                         [](ArvStream* ptr) {
+                                                             if (ptr) {
+                                                                 g_object_unref(ptr);
+                                                             }
+                                                         });
 
-                    if (!ARV_IS_STREAM(stream.get())) {
-                        throw std::runtime_error(
-                            fmt::format("Failed to create stream for {} camera ({})", name, device_description));
-                    }
-
-                    // Add camera to list.
-                    it = cameras
-                             .insert(std::make_pair(serial_number,
-                                                    CameraContext{
-                                                        *this,
-                                                        name,
-                                                        0,  // fourcc is set later
-                                                        num_cameras++,
-                                                        Image::Lens(),      // Lens is constructed in settings
-                                                        Eigen::Affine3d(),  // Hpc is set in settings
-                                                        camera,
-                                                        stream,
-                                                        CameraContext::TimeCorrection(),
-                                                    }))
-                             .first;
-
-                    log<NUClear::INFO>(fmt::format("Connected to the {} camera ({})", name, device_description));
+                if (!ARV_IS_STREAM(stream.get())) {
+                    throw std::runtime_error(
+                        fmt::format("Failed to create stream for {} camera ({})", name, device_description));
                 }
+
+                // Add camera to list.
+                it = cameras
+                         .insert(std::make_pair(serial_number,
+                                                CameraContext{
+                                                    *this,
+                                                    name,
+                                                    0,  // fourcc is set later
+                                                    num_cameras++,
+                                                    Image::Lens(),      // Lens is constructed in settings
+                                                    Eigen::Affine3d(),  // Hpc is set in settings
+                                                    camera,
+                                                    stream,
+                                                    CameraContext::TimeCorrection(),
+                                                }))
+                         .first;
+
+                log<NUClear::INFO>(fmt::format("Connected to the {} camera ({})", name, device_description));
             }
 
             /*****************************************************************************
