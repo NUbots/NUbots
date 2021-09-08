@@ -67,7 +67,7 @@ namespace utility::math::filter {
         SigmaVec mean_weights;
         SigmaVec covariance_weights;
 
-    private:
+
         // UKF variables
         Scalar covariance_sigma_weight;
 
