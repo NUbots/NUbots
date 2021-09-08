@@ -62,7 +62,7 @@ namespace utility::motion {
         NUClear::clock::time_point lastBalanceTime;
 
     public:
-        Balancer() {}
+        Balancer() = default;
         void configure(const YAML::Node& config);
         void balance(const message::motion::KinematicsModel& model,
                      Eigen::Affine3f& footToTorso,
