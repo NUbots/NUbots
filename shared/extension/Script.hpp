@@ -23,6 +23,7 @@
 #include <regex>
 #include <string>
 #include <system_error>
+#include <utility>
 #include <yaml-cpp/yaml.h>
 
 #include "FileWatch.hpp"
@@ -42,20 +43,13 @@ namespace extension {
     struct Script {
         struct Frame {
             struct Target {
-                Target() : position(0.0f), gain(0.0f), torque(0.0f) {}
+                Target() {}
                 Target(const ServoID& servo, float pos, float gain, float torque)
                     : id(servo), position(pos), gain(gain), torque(torque) {}
-                Target(const Target& other)
-                    : id(other.id), position(other.position), gain(other.gain), torque(other.torque) {}
+                Target(const Target& other) = default;
                 Target(Target&& other) noexcept
                     : id(other.id), position(other.position), gain(other.gain), torque(other.torque) {}
-                Target& operator=(const Target& other) {
-                    id       = other.id;
-                    position = other.position;
-                    gain     = other.gain;
-                    torque   = other.torque;
-                    return *this;
-                }
+                Target& operator=(const Target& other) = default;
                 Target& operator=(Target&& other) noexcept {
                     id       = other.id;
                     position = other.position;
@@ -65,14 +59,14 @@ namespace extension {
                 }
 
                 ServoID id;
-                float position;
-                float gain;
-                float torque;
+                float position{0.0f};
+                float gain{0.0f};
+                float torque{0.0f};
             };
 
             Frame() : duration() {}
-            Frame(const NUClear::clock::duration& dur, const std::vector<Target>& targets)
-                : duration(dur), targets(targets) {}
+            Frame(const NUClear::clock::duration& dur, std::vector<Target> targets)
+                : duration(dur), targets(std::move(targets)) {}
 
             NUClear::clock::duration duration;
             std::vector<Target> targets;
@@ -224,7 +218,7 @@ namespace extension {
             : sourceId(id), scripts(scripts), duration_modifier(scripts.size(), 1.0), start(start){};
         ExecuteScriptByName(const size_t& id,
                             const std::vector<std::string>& scripts,
-                            const std::vector<double>& duration_mod,
+                            std::vector<double> duration_mod,
                             const NUClear::clock::time_point& start = NUClear::clock::now())
             : sourceId(id), scripts(scripts), duration_modifier(std::move(duration_mod)), start(start) {
             while (scripts.size() > duration_modifier.size()) {
@@ -257,7 +251,7 @@ namespace extension {
             : sourceId(id), scripts(scripts), duration_modifier(scripts.size(), 1.0), start(start){};
         ExecuteScript(const size_t& id,
                       const std::vector<Script>& scripts,
-                      const std::vector<double>& duration_mod,
+                      std::vector<double> duration_mod,
                       NUClear::clock::time_point start = NUClear::clock::now())
             : sourceId(id), scripts(scripts), duration_modifier(std::move(duration_mod)), start(start) {
             while (scripts.size() > duration_modifier.size()) {
