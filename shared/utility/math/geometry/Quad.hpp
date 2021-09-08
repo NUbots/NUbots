@@ -201,13 +201,6 @@ namespace utility::math::geometry {
         T br;  //! @variable The bottom-right of the Quad.
         T tr;  //! @variable The top-right of the Quad.
         T tl;  //! @variable The top-left of the Quad.
-
-        //! @brief output stream operator.
-        template <typename Scalar_, int R_, int C_>
-
-
-        //! @brief output stream operator for a vector of goals.
-        template <typename Scalar_, int R_, int C_>
     };
 
 
