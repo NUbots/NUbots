@@ -28,7 +28,7 @@ namespace module {
                     WAITING_FOR_REQUEST    = 1,
                     SETTING_UP_TRIAL       = 2,
                     RESETTING_SIMULATION   = 3,
-                    WALKING                = 4,
+                    EVALUATING             = 4,
                     TERMINATING_EARLY      = 5,
                     TERMINATING_GRACEFULLY = 6,
                     FINISHED               = 7
@@ -46,9 +46,8 @@ namespace module {
                     // Internal
                     TrialSetupDone    = 4,
                     Fallen            = 5,
-                    //StandDone         = 6,
-                    TrialTimeExpired  = 7,
-                    FitnessScoresSent = 8
+                    TrialTimeExpired  = 6,
+                    FitnessScoresSent = 7
                 };
 
             private:
@@ -136,8 +135,8 @@ namespace module {
                 /// @brief Handle the STANDING state
                 void Standing(State previousState, Event event);
 
-                /// @brief Handle the WALKING state
-                void Walking(State previousState, Event event);
+                /// @brief Handle the EVALUATING state
+                void Evaluating(State previousState, Event event);
 
                 /// @brief Handle the TERMINATING_EARLY state
                 void TerminatingEarly(State previousState, Event event);

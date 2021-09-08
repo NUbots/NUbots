@@ -107,9 +107,9 @@ namespace module {
                             currentState = newState;
                             ResettingSimulation(oldState, event);
                             break;
-                        case State::WALKING:
+                        case State::EVALUATING:
                             currentState = newState;
-                            Walking(oldState, event);
+                            Evaluating(oldState, event);
                             break;
                         case State::TERMINATING_EARLY:
                             currentState = newState;
@@ -181,7 +181,7 @@ namespace module {
             }
 
             void NSGA2Evaluator::CheckForFall(const RawSensorsMsg& sensors) {
-                if (currentState == State::WALKING) {
+                if (currentState == State::EVALUATING) {
                     auto accelerometer = sensors.accelerometer;
 
                     if ((std::fabs(accelerometer.x) > 9.2 || std::fabs(accelerometer.y) > 9.2)
@@ -197,7 +197,7 @@ namespace module {
             }
 
             void NSGA2Evaluator::UpdateMaxFieldPlaneSway(const RawSensorsMsg& sensors) {
-                if (currentState == State::WALKING) {
+                if (currentState == State::EVALUATING) {
                     auto accelerometer = sensors.accelerometer;
 
                     // Calculate the robot sway along the field plane (left/right, forward/backward)
@@ -226,11 +226,11 @@ namespace module {
                         }
                     case State::RESETTING_SIMULATION:
                         switch (event) {
-                            case Event::ResetDone: return State::WALKING;
+                            case Event::ResetDone: return State::EVALUATING;
                             case Event::TerminateEvaluation: return State::FINISHED;
                             default: return State::UNKNOWN;
                         }
-                    case State::WALKING:
+                    case State::EVALUATING:
                         switch (event) {
                             case Event::Fallen: return State::TERMINATING_EARLY;
                             case Event::TrialTimeExpired: return State::TERMINATING_GRACEFULLY;
@@ -334,9 +334,9 @@ namespace module {
                 emit(reset);
             }
 
-            /// @brief Handle the WALKING state
-            void NSGA2Evaluator::Walking(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
-                log<NUClear::DEBUG>("Walking");
+            /// @brief Handle the EVALUATING state
+            void NSGA2Evaluator::Evaluating(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
+                log<NUClear::DEBUG>("Evaluating");
 
                 if (event == Event::ResetDone) {
                     // Create and send the walk command, which will be evaluated when we get back sensors and time
