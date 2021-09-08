@@ -4,6 +4,7 @@ num_objectives: 2
 num_constraints: 2
 num_real_vars: 12
 seed: 7777777
+trial_duration_limit: 40 # number of seconds to run a single trial for
 probabilities:
   real:
     # Note that SBX does something like mutation as well

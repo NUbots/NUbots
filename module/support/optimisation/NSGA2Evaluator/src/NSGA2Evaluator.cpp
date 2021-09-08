@@ -74,19 +74,6 @@ namespace module {
                     },
                     [this](const std::set<ServoID>&) {}}));
 
-                // Read the NSGA2Evaluator.yaml config file
-                on<Configuration>("NSGA2Evaluator.yaml").then([this](const Configuration& config) {
-                    trial_duration_limit  = config["trial_duration_limit"].as<Expression>();
-                });
-
-                // Read the QuinticWalk.yaml config file and set the arm targets
-                on<Configuration>("QuinticWalk.yaml").then([this](const Configuration& walkConfig) {
-                    arms_r_shoulder_pitch = walkConfig["arms"]["right_shoulder_pitch"].as<Expression>();
-                    arms_l_shoulder_pitch = walkConfig["arms"]["left_shoulder_pitch"].as<Expression>();
-                    arms_l_elbow          = walkConfig["arms"]["left_elbow"].as<Expression>();
-                    arms_r_elbow          = walkConfig["arms"]["right_elbow"].as<Expression>();
-                });
-
                 // Handle a state transition event
                 on<Trigger<Event>, Sync<NSGA2Evaluator>>().then([this](const Event& event) {
                     State oldState = currentState;
@@ -137,13 +124,17 @@ namespace module {
                     // Only start terminating gracefully if the trial that just expired is the current one
                     // (and not previous ones that have terminated early)
                     if (message.generation == generation && message.individual == individual) {
-                        emit(std::make_unique<Event>(Event::TrialTimeExpired));
+                        emit(std::make_unique<Event>(Event::TrialCompleted));
                     }
                 });
 
                 on<Trigger<RawSensorsMsg>, Single>().then([this](const RawSensorsMsg& sensors) {
-                    CheckForFall(sensors);
-                    UpdateMaxFieldPlaneSway(sensors);
+                    if (currentState == State::EVALUATING) {
+                        bool shouldTerminateEarly = task->processRawSensorMsg(sensors);
+                        if(shouldTerminateEarly) {
+                            emit(std::make_unique<Event>(Event::TerminateEarly));
+                        }
+                    }
                 });
 
                 on<Trigger<WebotsResetDone>, Single>().then([this](const WebotsResetDone&) {
@@ -152,8 +143,7 @@ namespace module {
                 });
 
                 on<Trigger<WebotsTimeUpdate>, Single>().then([this](const WebotsTimeUpdate& update) {
-                    simTimeDelta = update.sim_time - simTime;
-                    simTime      = update.sim_time;
+                    simTime = update.sim_time;
                 });
 
                 on<Trigger<NSGA2Terminate>, Single>().then([this]() {
@@ -168,44 +158,8 @@ namespace module {
 
                 on<Trigger<OptimisationRobotPosition>, Single>().then(
                     [this](const OptimisationRobotPosition& position) {
-                        if(!initialPositionSet) {
-                            initialPositionSet = true;
-                            initialRobotPosition.x() = position.value.X;
-                            initialRobotPosition.y() = position.value.Y;
-                            initialRobotPosition.z() = position.value.Z;
-                        }
-                        robotPosition.x() = position.value.X;
-                        robotPosition.y() = position.value.Y;
-                        robotPosition.z() = position.value.Z;
+                        task->processOptimisationRobotPosition(position);
                     });
-            }
-
-            void NSGA2Evaluator::CheckForFall(const RawSensorsMsg& sensors) {
-                if (currentState == State::EVALUATING) {
-                    auto accelerometer = sensors.accelerometer;
-
-                    if ((std::fabs(accelerometer.x) > 9.2 || std::fabs(accelerometer.y) > 9.2)
-                        && std::fabs(accelerometer.z) < 0.5) {
-                        log<NUClear::INFO>("Fallen!");
-                        log<NUClear::DEBUG>("acc at fall (x y z):",
-                                            std::fabs(accelerometer.x),
-                                            std::fabs(accelerometer.y),
-                                            std::fabs(accelerometer.z));
-                        emit(std::make_unique<Event>(Event::Fallen));
-                    }
-                }
-            }
-
-            void NSGA2Evaluator::UpdateMaxFieldPlaneSway(const RawSensorsMsg& sensors) {
-                if (currentState == State::EVALUATING) {
-                    auto accelerometer = sensors.accelerometer;
-
-                    // Calculate the robot sway along the field plane (left/right, forward/backward)
-                    double fieldPlaneSway = std::pow(std::pow(accelerometer.x, 2) + std::pow(accelerometer.y, 2), 0.5);
-                    if(fieldPlaneSway > maxFieldPlaneSway) {
-                        maxFieldPlaneSway = fieldPlaneSway;
-                    }
-                }
             }
 
             NSGA2Evaluator::State NSGA2Evaluator::HandleTransition(NSGA2Evaluator::State currentState,
@@ -232,8 +186,8 @@ namespace module {
                         }
                     case State::EVALUATING:
                         switch (event) {
-                            case Event::Fallen: return State::TERMINATING_EARLY;
-                            case Event::TrialTimeExpired: return State::TERMINATING_GRACEFULLY;
+                            case Event::TerminateEarly: return State::TERMINATING_EARLY;
+                            case Event::TrialCompleted: return State::TERMINATING_GRACEFULLY;
                             case Event::TerminateEvaluation: return State::FINISHED;
                             default: return State::UNKNOWN;
                         }
@@ -269,46 +223,9 @@ namespace module {
             /// @brief Handle the SETTING_UP_TRIAL state
             void NSGA2Evaluator::SettingUpTrial(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
                 log<NUClear::DEBUG>("SettingUpTrial");
-
-                // Set our generation and individual identifiers from the request
                 generation = lastEvalRequestMsg.generation;
                 individual = lastEvalRequestMsg.id;
-
-                // Set our walk command
-                walk_command_velocity.x() = lastEvalRequestMsg.parameters.velocity;
-                walk_command_velocity.y() = 0.0;
-                walk_command_rotation = 0.0;
-
-                // Read the QuinticWalk config and overwrite the config parameters with the current individual's
-                // parameters
-                YAML::Node walk_config = YAML::LoadFile("config/webots/QuinticWalk.yaml");
-
-                auto walk                    = walk_config["walk"];
-                walk["freq"]                 = lastEvalRequestMsg.parameters.freq;
-                walk["double_support_ratio"] = lastEvalRequestMsg.parameters.double_support_ratio;
-
-                auto foot        = walk["foot"];
-                foot["distance"] = lastEvalRequestMsg.parameters.foot.distance;
-                foot["rise"]     = lastEvalRequestMsg.parameters.foot.rise;
-
-                auto trunk        = walk["trunk"];
-                trunk["height"]   = lastEvalRequestMsg.parameters.trunk.height;
-                trunk["pitch"]    = lastEvalRequestMsg.parameters.trunk.pitch;
-                trunk["x_offset"] = lastEvalRequestMsg.parameters.trunk.x_offset;
-                trunk["y_offset"] = lastEvalRequestMsg.parameters.trunk.y_offset;
-                trunk["swing"]    = lastEvalRequestMsg.parameters.trunk.swing;
-                trunk["pause"]    = lastEvalRequestMsg.parameters.trunk.pause;
-
-                auto pause        = walk["pause"];
-                pause["duration"] = lastEvalRequestMsg.parameters.pause.duration;
-
-                auto gains    = walk["gains"];
-                gains["legs"] = lastEvalRequestMsg.parameters.gains.legs;
-
-                // Write the updated config to disk
-                std::ofstream output_file_stream("config/webots/QuinticWalk.yaml");
-                output_file_stream << YAML::Dump(walk_config);
-                output_file_stream.close();
+                task->setUpTrial(lastEvalRequestMsg);
 
                 emit(std::make_unique<Event>(Event::TrialSetupDone));
             }
@@ -317,16 +234,7 @@ namespace module {
             void NSGA2Evaluator::ResettingSimulation(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
                 log<NUClear::DEBUG>("ResettingSimulation");
 
-                // Reset our local state
-                simTimeDelta           = 0.0;
-                trialStartTime         = 0.0;
-                robotPosition.x()      = 0.0;
-                robotPosition.y()      = 0.0;
-                robotPosition.z()      = 0.0;
-                initialRobotPosition.x()      = 0.0;
-                initialRobotPosition.y()      = 0.0;
-                initialRobotPosition.z()      = 0.0;
-                maxFieldPlaneSway      = 0.0;
+                task->resetSimulation();
 
                 // Tell Webots to reset the world
                 std::unique_ptr<OptimisationCommand> reset = std::make_unique<OptimisationCommand>();
@@ -337,41 +245,19 @@ namespace module {
             /// @brief Handle the EVALUATING state
             void NSGA2Evaluator::Evaluating(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
                 log<NUClear::DEBUG>("Evaluating");
-
-                if (event == Event::ResetDone) {
-                    // Create and send the walk command, which will be evaluated when we get back sensors and time
-                    // updates
-                    log<NUClear::INFO>(fmt::format("Trialling with walk command: ({}) {}",
-                                                   walk_command_velocity.transpose(),
-                                                   walk_command_rotation));
-
-                    // Send the command to start walking
-                    emit(std::make_unique<WalkCommand>(
-                        subsumptionId,
-                        Eigen::Vector3d(walk_command_velocity.x(), walk_command_velocity.y(), walk_command_rotation)));
-
-                    // Prepare the trial expired message
-                    std::unique_ptr<NSGA2TrialExpired> message = std::make_unique<NSGA2TrialExpired>();
-                    message->time_started                      = simTime;
-                    message->generation                        = generation;
-                    message->individual                        = individual;
-
-                    // Schedule the end of the walk trial after the duration limit
-                    emit<Scope::DELAY>(message, std::chrono::seconds(trial_duration_limit));
-                }
+                bool finishedReset = (event == Event::ResetDone);
+                task->evaluatingState(finishedReset, simTime, generation, individual);
             }
 
             /// @brief Handle the TERMINATING_EARLY state
             void NSGA2Evaluator::TerminatingEarly(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
                 log<NUClear::DEBUG>("TerminatingEarly");
 
+                task->stopCurrentTask();
+                bool constraintsViolated = true;
+                task->sendFitnessScores(constraintsViolated, simTime, generation, individual);
+
                 emit(std::make_unique<Event>(Event::FitnessScoresSent)); // Go back to waiting for the next request
-
-                // Send a zero walk command to stop walking
-                emit(std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(0.0, 0.0, 0.0)));
-
-                // Calculate and send the fitness scores *with* constraint violations
-                SendFitnessScores(CalculateScores(), CalculateConstraints());
             }
 
             /// @brief Handle the TERMINATING_GRACEFULLY state
@@ -379,57 +265,11 @@ namespace module {
                                                        NSGA2Evaluator::Event event) {
                 log<NUClear::DEBUG>("TerminatingGracefully");
 
+                task->stopCurrentTask();
+                bool constraintsViolated = false;
+                task->sendFitnessScores(constraintsViolated, simTime, generation, individual);
+
                 emit(std::make_unique<Event>(Event::FitnessScoresSent)); // Go back to waiting for the next request
-
-                // Send a zero walk command to stop walking
-                emit(std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(0.0, 0.0, 0.0)));
-
-                // Calculate and send the fitness scores *without* constraint violations
-                SendFitnessScores(CalculateScores(), ConstraintsNotViolated());
-            }
-
-            std::vector<double> NSGA2Evaluator::CalculateScores() {
-                auto robotDistanceTravelled = std::fabs(initialRobotPosition.x() - robotPosition.x());
-                return {
-                    maxFieldPlaneSway,  // For now, we want to reduce this
-                    1.0 / robotDistanceTravelled  // 1/x since the NSGA2 optimiser is a minimiser
-                };
-            }
-
-            std::vector<double> NSGA2Evaluator::CalculateConstraints() {
-                // Convert trial duration limit to ms, add 1 for overhead
-                double max_trial_duration = (trial_duration_limit + 1) * 1000;
-                double trialDuration = simTime - trialStartTime;
-                return {
-                    trialDuration - max_trial_duration,  // Punish for falling over, based on how long the trial took
-                                                         // (more negative is worse)
-                                                         // TODO: should we be punishing the distance walked instead
-                                                         // (since that's what we reward?)
-                    0.0                                  // Second constraint unused, fixed to 0
-                };
-            }
-
-            std::vector<double> NSGA2Evaluator::ConstraintsNotViolated() {
-                return {
-                    0,  // Robot didn't fall
-                    0   // Second constraint unused, fixed to 0
-                };
-            }
-
-            void NSGA2Evaluator::SendFitnessScores(std::vector<double> scores, std::vector<double> constraints) {
-                double trialDuration = simTime - trialStartTime;
-                log<NUClear::INFO>("Trial ran for", trialDuration);
-                log<NUClear::INFO>("SendFitnessScores for generation", generation, "individual", individual);
-                log<NUClear::INFO>("    scores:", scores[0], scores[1]);
-                log<NUClear::INFO>("    constraints:", constraints[0], constraints[1]);
-
-                // Create the fitness scores message based on the given results and emit it back to the Optimiser
-                std::unique_ptr<NSGA2FitnessScores> fitnessScores = std::make_unique<NSGA2FitnessScores>();
-                fitnessScores->id                                 = individual;
-                fitnessScores->generation                         = generation;
-                fitnessScores->objScore                           = scores;
-                fitnessScores->constraints                        = constraints;
-                emit(fitnessScores);
             }
 
             void NSGA2Evaluator::Finished(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {

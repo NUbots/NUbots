@@ -9,6 +9,8 @@
 #include "message/support/optimisation/NSGA2EvaluatorMessages.hpp"
 #include "message/support/optimisation/NSGA2OptimiserMessages.hpp"
 
+#include "tasks/EvaluatorTask.hpp"
+
 namespace module {
     namespace support {
         namespace optimisation {
@@ -45,50 +47,27 @@ namespace module {
 
                     // Internal
                     TrialSetupDone    = 4,
-                    Fallen            = 5,
-                    TrialTimeExpired  = 6,
+                    TerminateEarly    = 5,
+                    TrialCompleted  = 6,
                     FitnessScoresSent = 7
                 };
 
             private:
+                std::unique_ptr<EvaluatorTask> task;
+
                 /// @brief Subsumption priority ID for this module
                 size_t subsumptionId;
-
-                /// @brief The amount of time to run a single trial, in seconds. Read from config.
-                int trial_duration_limit = 0.0;
-
-                /// @brief The walk command velocity, read from config
-                Eigen::Vector2d walk_command_velocity = Eigen::Vector2d(0.0, 0.0);
-
-                /// @brief The walk command rotation, read from config
-                double walk_command_rotation = 0.0;
-
-                /// @brief The arm targets during the walk (read from config, used for Stand done detection)
-                double arms_l_shoulder_pitch = 0.0;
-                double arms_r_shoulder_pitch = 0.0;
-                double arms_l_elbow          = 0.0;
-                double arms_r_elbow          = 0.0;
 
                 /// @brief The current simulation time
                 double simTime = 0.0;
 
-                /// @brief Delta between this update and the last update
-                double simTimeDelta = 0.0;
 
-                /// @brief Keep track of when the trial started
-                double trialStartTime = 0.0;
 
                 /// @brief The number of the current generation
                 int generation = 0;
 
                 /// @brief The number of the current individual in the current generation
                 int individual = 0;
-
-                /// @brief Robot state for this evaluation, used during fitness and constraint calculation
-                Eigen::Vector3d initialRobotPosition = Eigen::Vector3d::Zero();
-                Eigen::Vector3d robotPosition = Eigen::Vector3d::Zero();
-                bool initialPositionSet = false;
-                double maxFieldPlaneSway = 0.0;
 
                 /// @brief Keeps track of the last messages we received
                 NSGA2EvaluationRequest lastEvalRequestMsg;
@@ -110,12 +89,6 @@ namespace module {
 
                 /// @brief Returns the appropriate values for the case where no constraints are violated
                 std::vector<double> ConstraintsNotViolated();
-
-                /// @brief Check sensors to see if the robot has fallen
-                void CheckForFall(const RawSensorsMsg& sensors);
-
-                /// @brief Check sensors to update Max Field Plane Sway
-                void UpdateMaxFieldPlaneSway(const RawSensorsMsg& sensors);
 
                 /// @brief The current state of the evaluation
                 State currentState = State::WAITING_FOR_REQUEST;
