@@ -161,29 +161,20 @@ namespace module::behaviour::planning {
                         emit(std::make_unique<StopCommand>(subsumptionId));
                         return;
 
-                    case message::behaviour::MotionCommand::Type::DIRECT_COMMAND:
-                        walkDirectly();
-                        return;
+                    case message::behaviour::MotionCommand::Type::DIRECT_COMMAND: walkDirectly(); return;
 
                     case message::behaviour::MotionCommand::Type::BALL_APPROACH:
-                        determineSimpleWalkPath(ball,
-                                                                       field,
-                                                                       sensors,
-                                                                       kickPlan,
-                                                                       fieldDescription);
+                        determineSimpleWalkPath(ball, field, sensors, kickPlan, fieldDescription);
                         return;
 
                     case message::behaviour::MotionCommand::Type::WALK_TO_STATE:
-                        determineSimpleWalkPath(ball,
-                                                                       field,
-                                                                       sensors,
-                                                                       kickPlan,
-                                                                       fieldDescription);
+                        determineSimpleWalkPath(ball, field, sensors, kickPlan, fieldDescription);
                         return;
 
                     // This line should be UNREACHABLE
                     default:
-                        log<NUClear::WARN>(fmt::format("Invalid walk path planning command {}.", latestCommand.type.value));
+                        log<NUClear::WARN>(
+                            fmt::format("Invalid walk path planning command {}.", latestCommand.type.value));
                         emit(std::make_unique<StopCommand>(subsumptionId));
                         return;
                 }
