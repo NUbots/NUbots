@@ -106,7 +106,7 @@ namespace module::platform::darwin {
         float raw = (value & 0x3FF) * SPEED_CONVERSION_FACTOR;
 
         // If bit 10 is set we are moving Clockwise
-        raw *= value & 0x400 ? -1 : 1;
+        raw *= (value & 0x400) != 0 ? -1 : 1;
 
         // Go the correct direction
         raw *= SERVO_DIRECTION[id];
@@ -128,7 +128,7 @@ namespace module::platform::darwin {
 
     float Convert::servoLoad(const uint8_t id, const uint16_t value) {
         // We only care about the lower bits if bit 10 is set then we are moving clockwise
-        float raw = (value & 0x3FF) * (value & 0x400 ? -1 : 1);
+        float raw = (value & 0x3FF) * ((value & 0x400) != 0 ? -1 : 1);
         raw *= LOAD_CONVERSION_FACTOR;
 
         // Go the correct direction

@@ -25,12 +25,12 @@ namespace module::input {
             GError* error = nullptr;
             std::string u = unit(setting);
             int64_t min   = arv_gc_integer_get_min(setting, &error);
-            if (error) {
+            if (error != nullptr) {
                 g_error_free(error);
                 error = nullptr;
             }
             int64_t max = arv_gc_integer_get_max(setting, &error);
-            if (error) {
+            if (error != nullptr) {
                 g_error_free(error);
                 error = nullptr;
             }
@@ -42,7 +42,7 @@ namespace module::input {
         static std::string unit(ArvGcInteger* setting) {
             GError* error = nullptr;
             const char* u = arv_gc_integer_get_unit(setting, &error);
-            if (error) {
+            if (error != nullptr) {
                 g_error_free(error);
             }
             return u == nullptr ? "" : u;
@@ -61,12 +61,12 @@ namespace module::input {
             GError* error = nullptr;
             std::string u = unit(setting);
             double min    = arv_gc_float_get_min(setting, &error);
-            if (error) {
+            if (error != nullptr) {
                 g_error_free(error);
                 error = nullptr;
             }
             double max = arv_gc_float_get_max(setting, &error);
-            if (error) {
+            if (error != nullptr) {
                 g_error_free(error);
                 error = nullptr;
             }
@@ -78,7 +78,7 @@ namespace module::input {
         static std::string unit(ArvGcFloat* setting) {
             GError* error = nullptr;
             const char* u = arv_gc_float_get_unit(setting, &error);
-            if (error) {
+            if (error != nullptr) {
                 g_error_free(error);
             }
             return u == nullptr ? "" : u;
@@ -114,7 +114,7 @@ namespace module::input {
             GError* error       = nullptr;
             unsigned int len    = 0;
             const char** values = arv_gc_enumeration_get_available_string_values(setting, &len, &error);
-            if (error) {
+            if (error != nullptr) {
                 g_error_free(error);
                 error = nullptr;
             }

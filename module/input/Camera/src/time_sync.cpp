@@ -34,13 +34,14 @@ namespace module::input {
         std::string read_command;
 
         // FLIR like control
-        if (arv_device_get_feature(device, "TimestampLatch") && arv_device_get_feature(device, "TimestampLatchValue")) {
+        if ((arv_device_get_feature(device, "TimestampLatch") != nullptr)
+            && (arv_device_get_feature(device, "TimestampLatchValue") != nullptr)) {
             latch_command = "TimestampLatch";
             read_command  = "TimestampLatchValue";
         }
         // Genicam like control
-        else if (arv_device_get_feature(device, "GevTimestampControlLatch")
-                 && arv_device_get_feature(device, "GevTimestampValue")) {
+        else if ((arv_device_get_feature(device, "GevTimestampControlLatch") != nullptr)
+                 && (arv_device_get_feature(device, "GevTimestampValue") != nullptr)) {
             latch_command = "GevTimestampControlLatch";
             read_command  = "GevTimestampValue";
         }

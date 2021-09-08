@@ -91,7 +91,7 @@ namespace module::support::logging {
             std::string source = "";
 
             // If we know where this log message came from, we display that
-            if (message.task) {
+            if (message.task != nullptr) {
                 // Get our reactor name
                 std::string reactor = message.task->identifier[1];
 

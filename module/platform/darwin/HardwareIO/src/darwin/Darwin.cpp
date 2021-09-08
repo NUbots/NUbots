@@ -179,7 +179,7 @@ namespace Darwin {
                 // Otherwise we assume that it's a servo
                 default:
                     // Only add this servo if we aren't simulating it
-                    if (enabledServoIds[sensor.first - 1]) {
+                    if (enabledServoIds[sensor.first - 1] != 0u) {
                         request.push_back(
                             std::make_tuple(MX28::Address::PRESENT_POSITION_L, sensor.first, sizeof(Types::MX28Data)));
                     }

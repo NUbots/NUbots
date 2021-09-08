@@ -60,25 +60,25 @@ namespace module::input {
         s << ":";
 
 
-        if (errorCode & RawSensors::Error::INPUT_VOLTAGE) {
+        if ((errorCode & RawSensors::Error::INPUT_VOLTAGE) != 0u) {
             s << " Input Voltage ";
         }
-        if (errorCode & RawSensors::Error::ANGLE_LIMIT) {
+        if ((errorCode & RawSensors::Error::ANGLE_LIMIT) != 0u) {
             s << " Angle Limit ";
         }
-        if (errorCode & RawSensors::Error::OVERHEATING) {
+        if ((errorCode & RawSensors::Error::OVERHEATING) != 0u) {
             s << " Overheating ";
         }
-        if (errorCode & RawSensors::Error::OVERLOAD) {
+        if ((errorCode & RawSensors::Error::OVERLOAD) != 0u) {
             s << " Overloaded ";
         }
-        if (errorCode & RawSensors::Error::INSTRUCTION) {
+        if ((errorCode & RawSensors::Error::INSTRUCTION) != 0u) {
             s << " Bad Instruction ";
         }
-        if (errorCode & RawSensors::Error::CORRUPT_DATA) {
+        if ((errorCode & RawSensors::Error::CORRUPT_DATA) != 0u) {
             s << " Corrupt Data ";
         }
-        if (errorCode & RawSensors::Error::TIMEOUT) {
+        if ((errorCode & RawSensors::Error::TIMEOUT) != 0u) {
             s << " Timeout ";
         }
 
@@ -297,10 +297,10 @@ namespace module::input {
 
                 // If we have any downs in the last 20 frames then we are button pushed
                 for (const auto& s : sensors) {
-                    if (s->buttons.left && !s->platform_error_flags) {
+                    if (s->buttons.left && (s->platform_error_flags == 0u)) {
                         ++leftCount;
                     }
-                    if (s->buttons.middle && !s->platform_error_flags) {
+                    if (s->buttons.middle && (s->platform_error_flags == 0u)) {
                         ++middleCount;
                     }
                 }
@@ -379,25 +379,25 @@ namespace module::input {
                                 std::stringstream s;
                                 s << "Error on Servo " << (id + 1) << " (" << static_cast<ServoID>(id) << "):";
 
-                                if (error & RawSensors::Error::INPUT_VOLTAGE) {
+                                if ((error & RawSensors::Error::INPUT_VOLTAGE) != 0u) {
                                     s << " Input Voltage - " << original.voltage;
                                 }
-                                if (error & RawSensors::Error::ANGLE_LIMIT) {
+                                if ((error & RawSensors::Error::ANGLE_LIMIT) != 0u) {
                                     s << " Angle Limit - " << original.present_position;
                                 }
-                                if (error & RawSensors::Error::OVERHEATING) {
+                                if ((error & RawSensors::Error::OVERHEATING) != 0u) {
                                     s << " Overheating - " << original.temperature;
                                 }
-                                if (error & RawSensors::Error::OVERLOAD) {
+                                if ((error & RawSensors::Error::OVERLOAD) != 0u) {
                                     s << " Overloaded - " << original.load;
                                 }
-                                if (error & RawSensors::Error::INSTRUCTION) {
+                                if ((error & RawSensors::Error::INSTRUCTION) != 0u) {
                                     s << " Bad Instruction ";
                                 }
-                                if (error & RawSensors::Error::CORRUPT_DATA) {
+                                if ((error & RawSensors::Error::CORRUPT_DATA) != 0u) {
                                     s << " Corrupt Data ";
                                 }
-                                if (error & RawSensors::Error::TIMEOUT) {
+                                if ((error & RawSensors::Error::TIMEOUT) != 0u) {
                                     s << " Timeout ";
                                 }
 
@@ -453,7 +453,7 @@ namespace module::input {
                         // z axis reports a +1g acceleration when robot is vertical
 
                         // If we have a previous sensors and our platform has errors then reuse our last sensor value
-                        if (input.platform_error_flags && previousSensors) {
+                        if ((input.platform_error_flags != 0u) && previousSensors) {
                             sensors->accelerometer = previousSensors->accelerometer;
                         }
                         else {
@@ -463,7 +463,7 @@ namespace module::input {
                         // If we have a previous Sensors message and (our platform has errors or we are spinning too
                         // quickly), then reuse our last sensor value
                         if (previousSensors
-                            && (input.platform_error_flags
+                            && ((input.platform_error_flags != 0u)
                                 // One of the gyros would occasionally throw massive numbers without an error flag
                                 // If our hardware is working as intended, it should never read that we're spinning at 2
                                 // revs/s

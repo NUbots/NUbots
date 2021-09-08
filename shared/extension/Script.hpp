@@ -381,7 +381,7 @@ namespace YAML {
                 rhs = {node["id"].as<std::string>(),
                        node["position"].as<float>(),
                        node["gain"].as<float>(),
-                       node["torque"] ? node["torque"].as<float>() : 100};
+                       node["torque"] != nullptr ? node["torque"].as<float>() : 100};
             }
             catch (const YAML::Exception& e) {
                 NUClear::log<NUClear::ERROR>("Error parsing script -",
