@@ -562,7 +562,10 @@ namespace module::platform {
 
                             // Create servo PID message
                             actuator_requests.motor_pids.emplace_back(
-                                MotorPID(servo.name, {servo.p_gain, servo.i_gain, servo.d_gain}));
+                                MotorPID(servo.name,
+                                         {servo.p_gain,
+                                          module::platform::Webots::ServoState::i_gain,
+                                          module::platform::Webots::ServoState::d_gain}));
                         }
                     }
 

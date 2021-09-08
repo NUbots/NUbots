@@ -328,7 +328,7 @@ namespace NUClear::dsl {
 
                         for (const auto& component : components) {
                             // Ignore the hostname/platform name if they are present.
-                            if (flag && (component.compare(hostname) != 0) && (component.compare(platform) != 0)) {
+                            if (flag && (component != hostname) && (component != platform)) {
                                 relativePath.append(component + "/");
                             }
 

@@ -299,7 +299,7 @@ namespace NUClear::dsl {
                         bool flag = false;
                         for (const auto& component : components) {
                             // Ignore the hostname/binary name if they are present.
-                            if (flag && (component.compare(hostname) != 0) && (component.compare(binary) != 0)) {
+                            if (flag && (component != hostname) && (component != binary)) {
                                 relativePath.append(component + "/");
                             }
 

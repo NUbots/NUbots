@@ -146,8 +146,8 @@ namespace utility::vision {
     struct Pixel {
         Pixel() : rgba(0) {}
         Pixel(uint32_t rgba) : rgba(rgba) {}
-        Pixel(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : components({r, g, b, a}) {}
-        Pixel(uint8_t r, uint8_t g, uint8_t b) : components({r, g, b, 0}) {}
+        Pixel(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : components({{r}, {g}, {b}, a}) {}
+        Pixel(uint8_t r, uint8_t g, uint8_t b) : components({{r}, {g}, {b}, 0}) {}
         Pixel(const Pixel& pixel) : rgba(pixel.rgba) {}
 
         union {
