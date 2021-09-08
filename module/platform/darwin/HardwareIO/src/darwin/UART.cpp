@@ -44,8 +44,8 @@ namespace Darwin {
         checksum += result.header.length;
         checksum += result.header.errorcode;
 
-        for (size_t i = 0; i < result.data.size(); ++i) {
-            checksum += result.data[i];
+        for (unsigned char i : result.data) {
+            checksum += i;
         }
 
         return (~checksum);

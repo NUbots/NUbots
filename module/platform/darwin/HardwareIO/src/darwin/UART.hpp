@@ -21,11 +21,11 @@
 #define DARWIN_UART_HPP
 
 #include <cassert>
+#include <cerrno>
+#include <cstdint>
 #include <cstring>
-#include <errno.h>
 #include <linux/serial.h>
 #include <mutex>
-#include <stdint.h>
 #include <termios.h>
 #include <unistd.h>
 #include <vector>
@@ -56,7 +56,7 @@ namespace Darwin {
 // This is the header that is contained in the CommandResult
 #pragma pack(push, 1)  // Make sure that this struct is not cache aligned
     struct Header {
-        Header() {}
+        Header()          = default;
         uint8_t id        = -1;
         uint8_t length    = 0;
         uint8_t errorcode = -1;
@@ -67,10 +67,10 @@ namespace Darwin {
 
     // This is the object that is returned when a command is run
     struct CommandResult {
-        CommandResult() : checksum(0) {}
+        CommandResult() {}
         Header header;
         std::vector<uint8_t> data;
-        uint8_t checksum;
+        uint8_t checksum{0};
     };
 
     // This value calculates the checksum for a packet (the command argument is assumed to be in the CM740 format)
