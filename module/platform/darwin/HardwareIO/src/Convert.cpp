@@ -54,10 +54,8 @@ namespace module::platform::darwin {
             // This normalises the value between -1 and 1
             return double(value - 127) / 127.0;
         }
-        else {
-            // This normalises the value between -1 and 1
-            return double(127 - value) / 127.0;
-        }
+        // This normalises the value between -1 and 1
+        return double(127 - value) / 127.0;
     }
 
     std::tuple<uint8_t, uint8_t, uint8_t> Convert::colourLED(uint16_t value) {
