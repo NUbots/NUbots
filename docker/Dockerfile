@@ -262,9 +262,9 @@ RUN install-from-source https://github.com/mandreyel/mio/archive/master.tar.gz
 
 # zstr header to have file streams that do zlib compression
 RUN mkdir -p /usr/local/include/zstr \
-    && wget https://raw.githubusercontent.com/mateidavid/zstr/v1.0.4/src/zstr.hpp -O /usr/local/include/zstr.hpp \
-    && wget https://raw.githubusercontent.com/mateidavid/zstr/v1.0.4/src/strict_fstream.hpp -O /usr/local/include/strict_fstream.hpp \
-    && wget https://raw.githubusercontent.com/mateidavid/zstr/v1.0.4/src/zstr_make_unique_polyfill.h -O /usr/local/include/zstr_make_unique_polyfill.h
+    && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/zstr.hpp -O /usr/local/include/zstr.hpp \
+    && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/strict_fstream.hpp -O /usr/local/include/strict_fstream.hpp \
+    && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/zstr_make_unique_polyfill.h -O /usr/local/include/zstr_make_unique_polyfill.h
 
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
@@ -292,7 +292,8 @@ RUN install-package \
     parallel \
     vim \
     nano \
-    clinfo
+    clinfo \
+    doxygen
 
 # Install formatters as last step so if they change the image is easy to update
 RUN pip install --upgrade \
