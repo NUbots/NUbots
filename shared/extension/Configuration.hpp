@@ -20,6 +20,7 @@
 
 #include <cstdlib>
 #include <nuclear>
+#include <utility>
 #include <yaml-cpp/yaml.h>
 
 #include "FileWatch.hpp"
@@ -52,11 +53,8 @@ namespace extension {
         YAML::Node config;
 
         Configuration() : config(){};
-        Configuration(const std::string& fileName,
+        Configuration(std::string fileName, std::string hostname, std::string binary, const YAML::Node& config)
             : fileName(std::move(fileName)), hostname(std::move(hostname)), binary(std::move(binary)), config(config) {}
-                      const std::string& binary,
-                      const YAML::Node& config)
-            : fileName(fileName), hostname(hostname), binary(binary), config(config) {}
 
         Configuration(const std::string& fileName, const std::string& hostname, const std::string& binary)
             : fileName(fileName), hostname(hostname), binary(binary), config() {
