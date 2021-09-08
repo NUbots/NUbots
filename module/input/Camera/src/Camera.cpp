@@ -143,7 +143,7 @@ namespace module::input {
 
             // Stop the video stream so we can apply the settings
             arv::camera_stop_acquisition(cam.get());
-            arv_stream_set_emit_signals(stream.get(), false);
+            arv_stream_set_emit_signals(stream.get(), 0);
 
             // Synchronise the clocks
             context.time = sync_clocks(device);
@@ -285,7 +285,7 @@ namespace module::input {
                              &it->second);
             // Start aquisition
             arv::camera_start_acquisition(cam.get());
-            arv_stream_set_emit_signals(stream.get(), true);
+            arv_stream_set_emit_signals(stream.get(), 1);
         });
 
         on<Trigger<Sensors>>().then("Buffer Sensors", [this](const Sensors& sensors) {
@@ -307,7 +307,7 @@ namespace module::input {
             for (auto& camera : cameras) {
                 // Stop the video stream.
                 arv::camera_stop_acquisition(camera.second.camera.get());
-                arv_stream_set_emit_signals(camera.second.stream.get(), false);
+                arv_stream_set_emit_signals(camera.second.stream.get(), 0);
             }
             arv_shutdown();
             cameras.clear();
@@ -381,9 +381,9 @@ namespace module::input {
                                 timesync.drift.max_clock_drift / 1e6));
 
                             arv::camera_stop_acquisition(context->camera.get());
-                            arv_stream_set_emit_signals(context->stream.get(), false);
+                            arv_stream_set_emit_signals(context->stream.get(), 0);
                             context->time = sync_clocks(arv_camera_get_device(context->camera.get()));
-                            arv_stream_set_emit_signals(context->stream.get(), true);
+                            arv_stream_set_emit_signals(context->stream.get(), 1);
                             arv::camera_start_acquisition(context->camera.get());
                         }
                     }

@@ -127,7 +127,7 @@ namespace module::behaviour::tools {
         // Don't echo the users messages
         noecho();
         // Hide the cursor
-        curs_set(false);
+        curs_set(0);
 
         // Trigger when stdin has something to read
         on<IO>(STDIN_FILENO, IO::READ).then([this] {
@@ -521,11 +521,11 @@ namespace module::behaviour::tools {
     void ScriptTuner::help() {
 
         move(LINES - 6, 12);
-        curs_set(true);
+        curs_set(1);
         std::string tempcommand = userInput();
 
         if (tempcommand == "help") {
-            curs_set(false);
+            curs_set(0);
 
             const char* ALL_COMMANDS[] =
                 {",", ".", "N", "I", " ", "T", "J", "G", "P", "S", "A", "R", "M", "X", "Ctr C"};
@@ -580,7 +580,7 @@ namespace module::behaviour::tools {
         else {
             refreshView();
         }
-        curs_set(false);
+        curs_set(0);
     }
 
     // emits a message so motion can pick up the script
@@ -592,9 +592,9 @@ namespace module::behaviour::tools {
     void ScriptTuner::jumpToFrame() {
         mvprintw(5, 2, "Jump To Frame:");
         move(5, 17);
-        curs_set(true);
+        curs_set(1);
         userInputToFrame();
-        curs_set(false);
+        curs_set(0);
     }
 
     // switches angle and gains between corresponding left and right motors, flips script around z axis
@@ -688,7 +688,7 @@ namespace module::behaviour::tools {
     // change scriptPath and then call saveScript to Save As
     void ScriptTuner::saveScriptAs() {
         move(5, 2);
-        curs_set(true);
+        curs_set(1);
         std::string saveScriptAs = userInput();
         if (utility::file::exists(saveScriptAs)) {
             bool print = true;
@@ -699,7 +699,7 @@ namespace module::behaviour::tools {
                     case '\n':
                     case KEY_ENTER:
                         move(5, 2);
-                        curs_set(false);
+                        curs_set(0);
                         print      = false;
                         scriptPath = saveScriptAs;
                         saveScript();
@@ -707,7 +707,7 @@ namespace module::behaviour::tools {
                         break;
                     case 'X':
                         move(5, 2);
-                        curs_set(false);
+                        curs_set(0);
                         print = false;
                         refreshView();
                         break;
@@ -718,7 +718,7 @@ namespace module::behaviour::tools {
             scriptPath = saveScriptAs;
             saveScript();
             move(5, 2);
-            curs_set(false);
+            curs_set(0);
             refreshView();
         }
     }
@@ -737,7 +737,7 @@ namespace module::behaviour::tools {
         mvprintw(8, 2, "All: ---.- Upper: ---.- Lower: ---.-");
         mvprintw(10, 2, "Use X to exit Edit Gain");
         move(6, 7);
-        curs_set(false);
+        curs_set(0);
         size_t YPOSITION[3][3] = {{6, 6, 6}, {7, 0, 0}, {8, 8, 8}};
         size_t XPOSITION[3][3] = {{7, 20, 33}, {12, 0, 0}, {7, 20, 33}};
         size_t i               = 0;

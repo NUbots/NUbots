@@ -31,8 +31,7 @@ namespace Darwin {
     // Initialize all of the sensor handler objects using the passed uart
     Darwin::Darwin(const char* name)
         : uart(name)
-        , enabledServoIds(20, true)
-        , bulkReadCommand()
+        , enabledServoIds(20, 1u)
         , cm740(uart, ID::CM740)
         , rShoulderPitch(uart, ID::R_SHOULDER_PITCH)
         , lShoulderPitch(uart, ID::L_SHOULDER_PITCH)
