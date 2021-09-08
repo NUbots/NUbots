@@ -66,7 +66,7 @@ namespace module::behaviour::tools {
         void saveScriptAs();
         void editGain();
         void userInputToFrame();
-        float userInputToGain();
+        static float userInputToGain();
 
         volatile bool running;
 
