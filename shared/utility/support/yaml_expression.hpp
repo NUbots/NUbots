@@ -35,7 +35,7 @@ namespace utility::support {
      */
     struct Expression {
 
-        Expression() {}
+        Expression() = default;
         Expression(const YAML::Node& node) : node(node) {}
 
         operator double() {
