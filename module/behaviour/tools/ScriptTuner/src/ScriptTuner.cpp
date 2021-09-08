@@ -1073,9 +1073,7 @@ namespace module::behaviour::tools {
                 if (tempGain2 >= 0 && tempGain2 <= 100) {
                     return tempGain2;
                 }
-                else {
-                    beep();
-                }
+                beep();
             }
         }
         catch (std::invalid_argument&) {

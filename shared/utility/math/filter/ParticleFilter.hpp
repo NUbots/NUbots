@@ -306,7 +306,7 @@ namespace utility::math::filter {
             if ((resample_method & ResampleMethod::MULTINOMIAL) == 0) {
                 return stats::resample::multinomial(model.n_particles, weights.begin(), weights.end());
             }
-            else if ((resample_method & ResampleMethod::RESIDUAL) == 0) {
+            if ((resample_method & ResampleMethod::RESIDUAL) == 0) {
                 // The residual method uses a secondary method when it resamples the residual particles
                 const int8_t residual_method = resample_method & ~ResampleMethod::RESIDUAL;
                 if ((residual_method & ResampleMethod::MULTINOMIAL) == 0) {

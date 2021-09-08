@@ -25,9 +25,7 @@ namespace module::input::arv {
             g_error_free(error);
             throw std::runtime_error(message);
         }
-        else {
-            return v;
-        }
+        return v;
     }
 
     inline void camera_start_acquisition(ArvCamera* camera) {

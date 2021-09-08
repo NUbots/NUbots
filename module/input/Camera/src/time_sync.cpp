@@ -102,8 +102,6 @@ namespace module::input {
             output.drift.over_time_count = 0;
             return output;
         }
-        else {
-            return output;
-        }
+        return output;
     }
 }  // namespace module::input

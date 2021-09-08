@@ -183,9 +183,7 @@ namespace module::input {
                     g_error_free(error);
                     throw std::runtime_error(msg);
                 }
-                else {
-                    return fmt::format("changed {0}{2} to {1}{2}", current, value, unit);
-                }
+                return fmt::format("changed {0}{2} to {1}{2}", current, value, unit);
             }
         }
         return "";

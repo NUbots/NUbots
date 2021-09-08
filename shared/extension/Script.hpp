@@ -141,11 +141,9 @@ namespace extension {
                 return match[1].str();
             }
 
-            else {
-                throw std::system_error(-1,
-                                        std::system_category(),
-                                        ("Failed to extract platform name from '" + hostname + "'."));
-            }
+            throw std::system_error(-1,
+                                    std::system_category(),
+                                    ("Failed to extract platform name from '" + hostname + "'."));
         }
 
         Script operator[](const std::string& key) {

@@ -119,15 +119,13 @@ namespace utility::motion::splines {
                 if (i == 0) {
                     return true;
                 }
+                const bool isEnd = incrIndexes(i - 1);
+                if (isEnd) {
+                    return true;
+                }
                 else {
-                    const bool isEnd = incrIndexes(i - 1);
-                    if (isEnd) {
-                        return true;
-                    }
-                    else {
-                        indexes[i] = indexes[i - 1] + 1;
-                        return false;
-                    }
+                    indexes[i] = indexes[i - 1] + 1;
+                    return false;
                 }
             }
             else {

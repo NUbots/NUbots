@@ -64,7 +64,7 @@ namespace utility::math::geometry {
             return 1;
         }
         // Anti-clockwise turn
-        else if (cross_z > 0.0f) {
+        if (cross_z > 0.0f) {
             return -1;
         }
         // Colinear
@@ -108,19 +108,17 @@ namespace utility::math::geometry {
         if ((lower_it == rays_end) || (upper_it == rays_end)) {
             return false;
         }
-        else {
-            // lower_bound returns the first ray that has a theta value that is >= our point_theta value
-            // taking the ray immediately before the lower_bound should give us a ray with theta < point_theta
-            // upper_bound returns the first ray that has a theta value that is > our point_theta value
-            const Eigen::Vector2f p0 = project_vector(lower_it == rays_begin ? *lower_it : *std::prev(lower_it));
-            const Eigen::Vector2f p1 = project_vector(point);
-            const Eigen::Vector2f p2 = project_vector(*upper_it);
+        // lower_bound returns the first ray that has a theta value that is >= our point_theta value
+        // taking the ray immediately before the lower_bound should give us a ray with theta < point_theta
+        // upper_bound returns the first ray that has a theta value that is > our point_theta value
+        const Eigen::Vector2f p0 = project_vector(lower_it == rays_begin ? *lower_it : *std::prev(lower_it));
+        const Eigen::Vector2f p1 = project_vector(point);
+        const Eigen::Vector2f p2 = project_vector(*upper_it);
 
-            // Point should make a clockwise turn if it is under the convex hull.
-            // It should be colinear if it is on the convex hull
-            const int threshold = allow_boundary ? -1 : 0;
-            return (turn_direction(p0, p1, p2) > threshold);
-        }
+        // Point should make a clockwise turn if it is under the convex hull.
+        // It should be colinear if it is on the convex hull
+        const int threshold = allow_boundary ? -1 : 0;
+        return (turn_direction(p0, p1, p2) > threshold);
     }
 
     inline std::vector<int> upper_convex_hull(const std::vector<int>& indices,
@@ -310,9 +308,8 @@ namespace utility::math::geometry {
                           return ((p1 - p0).squaredNorm() < (p2 - p0).squaredNorm());
                       }
                       // Otherwise, sort anti-clockwise turns before clockwise turns
-                      else {
-                          return (direction < 0);
-                      }
+                      return (direction < 0);
+                     
                   });
 
         // Remove all colinear points
