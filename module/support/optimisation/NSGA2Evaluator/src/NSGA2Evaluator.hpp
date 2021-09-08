@@ -46,7 +46,7 @@ namespace module {
                     // Internal
                     TrialSetupDone    = 4,
                     Fallen            = 5,
-                    StandDone         = 6,
+                    //StandDone         = 6,
                     TrialTimeExpired  = 7,
                     FitnessScoresSent = 8
                 };
@@ -117,9 +117,6 @@ namespace module {
 
                 /// @brief Check sensors to update Max Field Plane Sway
                 void UpdateMaxFieldPlaneSway(const RawSensorsMsg& sensors);
-
-                /// @brief Check servo positions to see if the robot is now in the standing pose
-                void CheckForStandDone(const RawSensorsMsg& sensors);
 
                 /// @brief The current state of the evaluation
                 State currentState = State::WAITING_FOR_REQUEST;

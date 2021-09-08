@@ -208,23 +208,6 @@ namespace module {
                 }
             }
 
-            void NSGA2Evaluator::CheckForStandDone(const RawSensorsMsg& sensors) {
-                // The acceptable error margin for the target positions
-                float epsilon = 0.015;
-
-                bool l_elbow_ok = std::fabs(sensors.servo.l_elbow.present_position - arms_l_elbow) < epsilon;
-                bool r_elbow_ok = std::fabs(sensors.servo.r_elbow.present_position - arms_r_elbow) < epsilon;
-                bool l_shoulder_pitch_ok =
-                    std::fabs(sensors.servo.l_shoulder_pitch.present_position - arms_l_shoulder_pitch) < epsilon;
-                bool r_shoulder_pitch_ok =
-                    std::fabs(sensors.servo.r_shoulder_pitch.present_position - arms_r_shoulder_pitch) < epsilon;
-
-                if (l_elbow_ok && r_elbow_ok && l_shoulder_pitch_ok && r_shoulder_pitch_ok) {
-                    log<NUClear::INFO>("Stand done");
-                    emit(std::make_unique<Event>(Event::StandDone));
-                }
-            }
-
             NSGA2Evaluator::State NSGA2Evaluator::HandleTransition(NSGA2Evaluator::State currentState,
                                                                    NSGA2Evaluator::Event event) {
                 switch (currentState) {
@@ -355,7 +338,7 @@ namespace module {
             void NSGA2Evaluator::Walking(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
                 log<NUClear::DEBUG>("Walking");
 
-                if (event == Event::StandDone) {
+                if (event == Event::ResetDone) {
                     // Create and send the walk command, which will be evaluated when we get back sensors and time
                     // updates
                     log<NUClear::INFO>(fmt::format("Trialling with walk command: ({}) {}",
