@@ -72,8 +72,7 @@ namespace module::localisation {
         Eigen::Matrix<Scalar, 3, 1> processNoiseDiagonal;
 
         RobotModel()
-            : n_rogues(0)
-            , resetRange(Eigen::Matrix<Scalar, 3, 1>::Zero())
+            : resetRange(Eigen::Matrix<Scalar, 3, 1>::Zero())
             , processNoiseDiagonal(Eigen::Matrix<Scalar, 3, 1>::Ones()) {}
 
         StateVec time(const StateVec& state, double /*deltaT*/) {
