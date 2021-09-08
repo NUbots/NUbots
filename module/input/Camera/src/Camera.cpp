@@ -59,7 +59,7 @@ namespace module::input {
                 auto find_camera = [](const std::string& serial_number) {
                     int devices = arv_get_n_devices();
                     for (int i = 0; i < devices; ++i) {
-                        if (serial_number.compare(arv_get_device_serial_nbr(i)) == 0) {
+                        if (serial_number == arv_get_device_serial_nbr(i)) {
                             return i;
                         }
                     }

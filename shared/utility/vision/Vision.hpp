@@ -261,11 +261,11 @@ namespace utility::vision {
         bool RGB                = 0;
         ifs >> magic_number;
 
-        if (magic_number.compare("P6") == 0) {
+        if (magic_number == "P6") {
             RGB = true;
         }
 
-        else if (magic_number.compare("P5") == 0) {
+        else if (magic_number == "P5") {
             RGB = false;
         }
 

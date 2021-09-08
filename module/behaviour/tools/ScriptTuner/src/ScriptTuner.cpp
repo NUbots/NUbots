@@ -524,7 +524,7 @@ namespace module::behaviour::tools {
         curs_set(true);
         std::string tempcommand = userInput();
 
-        if (tempcommand.compare("help") == 0) {
+        if (tempcommand == "help") {
             curs_set(false);
 
             const char* ALL_COMMANDS[] =

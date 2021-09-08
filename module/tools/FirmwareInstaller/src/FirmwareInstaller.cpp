@@ -65,21 +65,21 @@ namespace module::tools {
                 case NO_MENU: break;
 
                 case DEVICE_MENU:
-                    if (input.compare("CM730") == 0) {
+                    if (input == "CM730") {
                         selected_device  = CM730;
                         selected_battery = NO_BATTERY;
                         menu_state       = BATTERY_MENU;
                         showBatteryMenu();
                     }
 
-                    else if (input.compare("CM740") == 0) {
+                    else if (input == "CM740") {
                         selected_device  = CM740;
                         selected_battery = NO_BATTERY;
                         menu_state       = BATTERY_MENU;
                         showBatteryMenu();
                     }
 
-                    else if (input.compare("DYNXL") == 0) {
+                    else if (input == "DYNXL") {
                         selected_device  = DYNAMIXEL;
                         selected_battery = NO_BATTERY;
                         menu_state       = DEVICE_MENU;  // This will change when we implement this feature.
@@ -87,7 +87,7 @@ namespace module::tools {
                         showDeviceMenu();
                     }
 
-                    else if (input.compare("QUIT") == 0) {
+                    else if (input == "QUIT") {
                         selected_device  = NO_DEVICE;
                         selected_battery = NO_BATTERY;
                         std::cout << "Bye." << std::endl;
@@ -104,19 +104,19 @@ namespace module::tools {
                     break;
 
                 case BATTERY_MENU:
-                    if (input.compare("1") == 0) {
+                    if (input == "1") {
                         selected_battery = BATTERY3;
                         menu_state       = NO_MENU;
                         emit(std::make_unique<FlashCM730>());
                     }
 
-                    else if (input.compare("2") == 0) {
+                    else if (input == "2") {
                         selected_battery = BATTERY4;
                         menu_state       = NO_MENU;
                         emit(std::make_unique<FlashCM730>());
                     }
 
-                    else if (input.compare("0") == 0) {
+                    else if (input == "0") {
                         selected_device  = NO_DEVICE;
                         selected_battery = NO_BATTERY;
                         menu_state       = DEVICE_MENU;
@@ -189,12 +189,12 @@ namespace module::tools {
                     poll(&pfd, 1, 20);
                     read       = uart.read(&recv, sizeof(recv));
                     recv[read] = '\0';
-                } while ((std::string(recv, read).compare("#") != 0) && powerplant.running());
+                } while ((std::string(recv, read) != "#") && powerplant.running());
 
                 std::cout << "\rWaiting for " << name.first << " to reset ....." << std::endl;
 
                 // Check we are good to go
-                if (std::string(recv, read).compare("#") == 0) {
+                if (std::string(recv, read) == "#") {
 
                     log<NUClear::INFO>(name.first, "reset complete...");
 

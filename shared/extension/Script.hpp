@@ -333,7 +333,7 @@ namespace NUClear::dsl {
                             }
 
                             // We want out paths relative to the script folder.
-                            if (component.compare("scripts") == 0) {
+                            if (component == "scripts") {
                                 flag = true;
                             }
                         }
