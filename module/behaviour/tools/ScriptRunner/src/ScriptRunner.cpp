@@ -74,7 +74,7 @@ namespace module::behaviour::tools {
                 }
 
                 // If scripts are in the config file
-                else if (scripts.size() > 0) {
+                else if (!scripts.empty()) {
                     NUClear::log<NUClear::INFO>("Executing: ", scripts.size(), " script from config");
                 }
 

@@ -81,7 +81,7 @@ namespace utility::motion::splines {
         [[nodiscard]] inline std::vector<size_t> nextCombination() {
             std::vector<size_t> result = indexes;
 
-            if (indexes.size() > 0) {
+            if (!indexes.empty()) {
                 bool isEnd = incrIndexes(k - 1);
                 if (isEnd) {
                     indexes.clear();

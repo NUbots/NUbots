@@ -154,7 +154,7 @@ namespace module::vision {
 
                 log<NUClear::DEBUG>(fmt::format("{} clusters remaining after merging overlaps", clusters.size()));
 
-                if (clusters.size() > 0) {
+                if (!clusters.empty()) {
                     auto goals = std::make_unique<Goals>();
                     goals->goals.reserve(clusters.size());
 

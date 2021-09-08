@@ -177,7 +177,7 @@ namespace utility::math::geometry {
 
         static Quad getBoundingBox(const std::vector<T>& points) {
             // Check for
-            if (points.size() <= 0) {
+            if (points.empty()) {
                 throw std::domain_error("Request made for bounding box for empty list of points!");
             }
 

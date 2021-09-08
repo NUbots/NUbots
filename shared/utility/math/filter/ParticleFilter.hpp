@@ -171,7 +171,7 @@ namespace utility::math::filter {
          */
         void set_state(const std::vector<std::pair<StateVec, StateMat>>& hypotheses) {
             // Make sure we have sane inputs
-            if (hypotheses.size() == 0) {
+            if (hypotheses.empty()) {
                 throw std::runtime_error("ParticleFilter::set_state called with invalid data");
             }
 

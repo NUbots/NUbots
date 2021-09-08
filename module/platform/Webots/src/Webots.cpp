@@ -713,8 +713,8 @@ namespace module::platform {
         }
 
         // Only emit RawSensors if there is any data!
-        if (!(sensor_measurements.position_sensors.size() == 0 && sensor_measurements.accelerometers.size() == 0
-              && sensor_measurements.bumpers.size() == 0 && sensor_measurements.gyros.size() == 0)) {
+        if (!(sensor_measurements.position_sensors.empty() && sensor_measurements.accelerometers.empty()
+              && sensor_measurements.bumpers.empty() && sensor_measurements.gyros.empty())) {
 
 
             // Read each field of msg, translate it to our protobuf and emit the data
@@ -726,7 +726,7 @@ namespace module::platform {
                 translate_servo_id(position.name, sensor_data->servo).present_position = position.value;
             }
 
-            if (sensor_measurements.accelerometers.size() > 0) {
+            if (!sensor_measurements.accelerometers.empty()) {
                 // .accelerometers is a list of one, since our robots have only one accelerometer
                 const auto& accelerometer = sensor_measurements.accelerometers[0];
                 // Webots has a strictly positive output for the accelerometers. We minus 100 to center the output
@@ -737,7 +737,7 @@ namespace module::platform {
                 sensor_data->accelerometer.z() = static_cast<float>(accelerometer.value.Z) - 100.0f;
             }
 
-            if (sensor_measurements.gyros.size() > 0) {
+            if (!sensor_measurements.gyros.empty()) {
                 // .gyros is a list of one, since our robots have only one gyroscope
                 const auto& gyro = sensor_measurements.gyros[0];
                 // Webots has a strictly positive output for the gyros. We minus 100 to center the output over 0
