@@ -50,7 +50,7 @@ namespace module::platform::darwin {
         // Flips right foot coordinates to match robot coords
         // See:
         // http://support.robotis.com/en/product/darwin-op/references/reference/hardware_specifications/electronics/optional_components/fsr.htm
-        else if (left) {
+        if (left) {
             // This normalises the value between -1 and 1
             return double(value - 127) / 127.0;
         }

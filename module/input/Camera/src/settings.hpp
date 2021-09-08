@@ -88,7 +88,7 @@ namespace module::input {
     template <>
     struct SettingsFunctions<ArvGcBoolean> {
         static bool read(ArvGcBoolean* setting, GError** error) {
-            return arv_gc_boolean_get_value(setting, error);
+            return arv_gc_boolean_get_value(setting, error) != 0;
         }
         static void write(ArvGcBoolean* setting, const bool& v, GError** error) {
             arv_gc_boolean_set_value(setting, v, error);

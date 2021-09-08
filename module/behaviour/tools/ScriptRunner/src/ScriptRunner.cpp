@@ -58,7 +58,7 @@ namespace module::behaviour::tools {
     }
 
     ScriptRunner::ScriptRunner(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), scripts(), id(size_t(this) * size_t(this) - size_t(this)), script_delay(0) {
+        : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)), script_delay(0) {
 
         // Get the scripts to run from the command line
         on<Configuration, With<CommandLineArguments>>("ScriptRunner.yaml")

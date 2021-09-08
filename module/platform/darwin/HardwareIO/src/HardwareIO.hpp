@@ -56,7 +56,7 @@ namespace module::platform::darwin {
         };
 
         struct Config {
-            Config() : battery() {}
+            Config() {}
 
             struct Battery {
                 Battery() : chargedVoltage(0.0f), nominalVoltage(0.0f), flatVoltage(0.0f) {}

@@ -89,7 +89,7 @@ namespace module::input {
         void processModel(const Packet& packet);
         void processPing(const Packet& packet);
         void processResponse(const Packet& packet);
-        void processString(const Packet& packet);
+        static void processString(const Packet& packet);
         void process(const std::vector<char>& input);
 
         /// @brief Called by the powerplant to build and setup the NatNet reactor.

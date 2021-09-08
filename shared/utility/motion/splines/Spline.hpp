@@ -71,17 +71,13 @@ namespace utility::motion::splines {
             if (splines.empty()) {
                 return static_cast<Scalar>(0);
             }
-            else {
-                return splines.front().min;
-            }
+            return splines.front().min;
         }
         [[nodiscard]] constexpr Scalar max() const {
             if (splines.empty()) {
                 return static_cast<Scalar>(0);
             }
-            else {
-                return splines.back().max;
-            }
+            return splines.back().max;
         }
 
         /**

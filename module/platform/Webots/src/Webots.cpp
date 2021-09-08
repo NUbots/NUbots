@@ -206,7 +206,7 @@ namespace module::platform {
                 // Bad fd
                 continue;
             }
-            else if (connect(fd_temp, addr_ptr->ai_addr, addr_ptr->ai_addrlen) != -1) {
+            if (connect(fd_temp, addr_ptr->ai_addr, addr_ptr->ai_addrlen) != -1) {
                 // Connection successful
                 freeaddrinfo(address);
                 return fd_temp;
