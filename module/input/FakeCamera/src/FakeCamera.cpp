@@ -58,7 +58,7 @@ namespace module::input {
                     for (const auto& p : std::filesystem::recursive_directory_iterator(config.image_folder)) {
                         if (utility::strutil::endsWith(p.path(), std::vector<std::string>{".jpg", ".jpeg"})) {
                             const std::filesystem::path& image_file = p.path();
-                            std::filesystem::path lens_file  = p.path();
+                            std::filesystem::path lens_file         = p.path();
 
                             // Replace the filename component and change the extension
                             // This will take image000001.jpg and return lens000001.yaml

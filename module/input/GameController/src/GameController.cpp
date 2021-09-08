@@ -259,7 +259,7 @@ namespace module::input {
 
         // Note: assumes playersPerTeam never changes
         for (uint i = 0; i < newPacket.playersPerTeam; i++) {
-            uint playerId      = i + 1;
+            uint playerId            = i + 1;
             const auto& oldOwnPlayer = oldOwnTeam.players[i];
             const auto& newOwnPlayer = newOwnTeam.players[i];
 
