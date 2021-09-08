@@ -109,7 +109,7 @@ namespace module::localisation {
         }
 
         // Getters
-        int getRogueCount() const {
+        [[nodiscard]] int getRogueCount() const {
             return n_rogues;
         }
         [[nodiscard]] StateVec get_rogue() const {

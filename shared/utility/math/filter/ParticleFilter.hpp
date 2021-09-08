@@ -204,7 +204,7 @@ namespace utility::math::filter {
          * @return true A valid resampling method configuration has been set
          * @return false An invalid resampling method configuration has been set
          */
-        bool check_resample_method(const int& resample_method_) const {
+        [[nodiscard]] bool check_resample_method(const int& resample_method_) const {
             // Only valid to have multiple bits set if we are using the residual method
             if (((resample_method_ & ~ResampleMethod::MULTINOMIAL) != 0)
                 || ((resample_method_ & ~ResampleMethod::STRATIFIED) != 0)
