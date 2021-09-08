@@ -278,7 +278,7 @@ namespace module::tools {
         });
     }
 
-    void FirmwareInstaller::showDeviceMenu() const {
+    void FirmwareInstaller::showDeviceMenu() {
         std::cout << "\n\n" << std::endl;
         std::cout << "***********************************" << std::endl;
         std::cout << "* Welcome to NUfirmware Installer *" << std::endl;
@@ -290,7 +290,7 @@ namespace module::tools {
         std::cout << "Choice: " << std::flush;
     }
 
-    void FirmwareInstaller::showBatteryMenu() const {
+    void FirmwareInstaller::showBatteryMenu() {
         std::cout << "\n" << std::endl;
         std::cout << "Select battery type: " << std::endl;
         std::cout << "\t1) 11.1V 3 Cell Battery" << std::endl;

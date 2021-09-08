@@ -65,7 +65,7 @@ namespace module::input {
         const gamecontroller::Team& getOwnTeam(const gamecontroller::GameControllerPacket& state) const;
         const gamecontroller::Team& getOpponentTeam(const gamecontroller::GameControllerPacket& state) const;
         static message::input::GameState::Data::PenaltyReason getPenaltyReason(
-            const gamecontroller::PenaltyState& penaltyState) const;
+            const gamecontroller::PenaltyState& penaltyState);
 
         static std::string ipAddressIntToString(uint32_t ipAddr);
 

@@ -577,7 +577,7 @@ namespace module::input {
         }
     }
 
-    PenaltyReason GameController::getPenaltyReason(const gamecontroller::PenaltyState& penaltyState) const {
+    PenaltyReason GameController::getPenaltyReason(const gamecontroller::PenaltyState& penaltyState) {
         // ugly incoming
         switch (penaltyState) {
             case gamecontroller::PenaltyState::UNPENALISED: return PenaltyReason::UNPENALISED;
