@@ -2,8 +2,10 @@ import { NUClearNetSend } from 'nuclearnet.js'
 import { NUClearNetOptions } from 'nuclearnet.js'
 import { NUClearNetPeer } from 'nuclearnet.js'
 import { NUClearNetPacket } from 'nuclearnet.js'
+import { Reader } from 'protobufjs/minimal'
 import { compose } from '../../client/base/compose'
 
+import { messageFieldsIndex } from '../../shared/message_fields_index'
 import { NUClearNetClient } from '../../shared/nuclearnet/nuclearnet_client'
 import { Clock } from '../../shared/time/clock'
 import { NodeSystemClock } from '../time/node_clock'
@@ -193,7 +195,8 @@ class PacketProcessor {
       this.socket.send(event, packet)
     } else {
       // Throttle unreliable packets so that we do not overwhelm the client with traffic.
-      const key = `${event}:${packet.peer.name}:${packet.peer.address}:${packet.peer.port}`
+      const id = decodePacketId(event, packet)
+      const key = `${event}:${id}:${packet.peer.name}:${packet.peer.address}:${packet.peer.port}`
       this.queue.add(key, { event, packet })
       this.maybeSendNextPacket()
     }
@@ -218,4 +221,40 @@ class PacketProcessor {
       }
     }
   }
+}
+
+function decodePacketId(event: string, packet: NUClearNetPacket) {
+  const defaultId = 0
+
+  const messageFields = messageFieldsIndex[event]
+  if (messageFields === undefined) {
+    return defaultId
+  }
+
+  const idField = messageFields['id']
+  if (idField === undefined) {
+    return defaultId
+  }
+
+  const reader = Reader.create(packet.payload)
+  const end = reader.len
+
+  while (reader.pos < end) {
+    // Tag is of the format: (fieldNumber << 3) | wireType
+    // See https://developers.google.com/protocol-buffers/docs/encoding#structure
+    const tag = reader.uint32()
+
+    const fieldNumber = tag >>> 3
+    const wireType = tag & 7
+
+    if (fieldNumber === idField.id && wireType === idField.wireType) {
+      // Assumes id fields are always 32 or 64-bit unsigned ints
+      const id = idField.type === 'uint32' ? reader.uint32() : reader.uint64()
+      return id
+    }
+
+    reader.skipType(wireType)
+  }
+
+  return defaultId
 }
