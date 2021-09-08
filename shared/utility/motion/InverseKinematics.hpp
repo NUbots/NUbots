@@ -68,10 +68,7 @@ namespace utility::motion::kinematics {
         const Eigen::Affine3f& leftTarget,
         const Eigen::Affine3f& rightTarget);
 
-    [[nodiscard]] std::vector<std::pair<ServoID, double>> calculateCameraLookJoints(
-        const Eigen::Vector3d& cameraUnitVector);
-
-    [[nodiscard]] std::vector<std::pair<ServoID, float>> calculateHeadJoints(Eigen::Vector3f cameraUnitVector);
+    [[nodiscard]] std::vector<std::pair<ServoID, float>> calculateHeadJoints(const Eigen::Vector3f& cameraUnitVector);
 
 }  // namespace utility::motion::kinematics
 
