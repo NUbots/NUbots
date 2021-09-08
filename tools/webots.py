@@ -7,7 +7,9 @@ import subprocess
 import sys
 import textwrap
 from pathlib import Path
+from subprocess import DEVNULL
 
+from honcho.manager import Manager
 from termcolor import cprint
 
 import b
@@ -29,7 +31,7 @@ def register(command):
         "--target",
         nargs="?",
         choices=platform.list(),
-        default="g4dnxlarge",
+        default="generic",
         help="The platform to compile for",
     )
 
@@ -53,6 +55,13 @@ def register(command):
 
     run_subcommand = subparsers.add_parser("run", help="Run the simulation docker image for use with Webots")
     run_subcommand.add_argument("role", help="The role to run")
+
+    game_subcommand = subparsers.add_parser("game", help="Run a full game")
+    game_subcommand.add_argument("role", action="store", help="The role to run")
+    game_subcommand.add_argument("-r", "--robots", action="store", dest="num_of_robots", required=True)
+    game_subcommand.add_argument("-a", "--sim-address", action="store", default="127.0.0.1", dest="sim_address")
+
+    stop_subcommand = subparsers.add_parser("stop", help="Stop and remove all nugus_sim containers")
 
 
 def get_cmake_flags(roles_to_build):
@@ -161,31 +170,87 @@ def exec_build(target, roles, clean):
     shutil.rmtree(local_toolchain_dir)
 
 
-def exec_run(role):
+def exec_run(role, num_of_robots=1, sim_address="127.0.0.1"):
+    # Check that image has been built
+    exit_code = subprocess.run(
+        ["docker", "image", "inspect", f"{ROBOCUP_IMAGE_NAME}:{ROBOCUP_IMAGE_TAG}"], stderr=DEVNULL, stdout=DEVNULL
+    ).returncode
+    if exit_code != 0:
+        cprint(
+            f"Image '{ROBOCUP_IMAGE_NAME}:{ROBOCUP_IMAGE_TAG}' not found, please run `./b webots build` to build it",
+            "red",
+            attrs=["bold"],
+        )
+        exit(exit_code)
+
     robocup_logs_dir = os.path.join(b.project_dir, "robocup-logs")
 
     # Ensure the logs directory exists for binding into the container
     os.makedirs(robocup_logs_dir, exist_ok=True)
 
-    docker_run_command = [
-        "docker",
-        "container",
-        "run",
-        "--rm",
-        "--network=host",
-        "--mount",
-        f"type=bind,source={robocup_logs_dir},target=/robocup-logs",
-        "-e",
-        "ROBOCUP_ROBOT_ID=1",
-        "-e",
-        "ROBOCUP_TEAM_COLOR=red",
-        "-e",
-        "ROBOCUP_SIMULATOR_ADDR=127.0.0.1:10001",
-        f"{ROBOCUP_IMAGE_NAME}:{ROBOCUP_IMAGE_TAG}",
-        role,
-    ]
+    process_manager = Manager()
 
-    subprocess.run(docker_run_command)
+    # Add all robot run commands to process_manager
+    for i in range(1, int(num_of_robots) + 1):
+
+        robot_color = "red" if i <= int(num_of_robots) / 2 else "blue"
+
+        docker_run_command = [
+            "docker",
+            "container",
+            "run",
+            "--rm",
+            "--network=host",
+            "--mount",
+            f"type=bind,source={robocup_logs_dir},target=/robocup-logs",
+            "-e",
+            f"ROBOCUP_ROBOT_ID={i}",
+            "-e",
+            f"ROBOCUP_TEAM_COLOR={robot_color}",
+            "-e",
+            f"ROBOCUP_SIMULATOR_ADDR={sim_address}:{1000 + i}",
+            f"{ROBOCUP_IMAGE_NAME}:{ROBOCUP_IMAGE_TAG}",
+            role,
+        ]
+        process_manager.add_process(f"Robot_{i} ({robot_color}):", " ".join(docker_run_command))
+
+    # Start the containers
+    process_manager.loop()
+
+    sys.exit(process_manager.returncode)
+
+
+def exec_stop():
+    # Get all container ID's for containers running the image
+    container_ids = (
+        subprocess.check_output(
+            [
+                "docker",
+                "ps",
+                "-a",
+                "-q",
+                "--filter",
+                f"ancestor={ROBOCUP_IMAGE_NAME}:{ROBOCUP_IMAGE_TAG}",
+                "--format={{.ID}}",
+            ]
+        )
+        .strip()
+        .decode("ascii")
+        .split()
+    )
+    # If there are containers, force stop them
+    if container_ids:
+        cprint(
+            f"Stoping ALL '{ROBOCUP_IMAGE_NAME}:{ROBOCUP_IMAGE_TAG}' containers...",
+            color="red",
+            attrs=["bold"],
+        )
+        subprocess.run(["docker", "container", "rm", "-f"] + container_ids, stderr=DEVNULL, stdout=DEVNULL)
+
+    else:
+        print("There is currently no robot containers running!")
+
+    sys.exit(0)
 
 
 def exec_push():
@@ -215,13 +280,26 @@ def exec_push():
         sys.exit(exit_code)
 
 
-def run(sub_command, clean=False, roles=None, role=None, target="g4dnxlarge", **kwargs):
+def run(
+    sub_command,
+    target="generic",
+    sim_address="127.0.0.1",
+    clean=False,
+    roles=None,
+    role=None,
+    num_of_robots=1,
+    **kwargs,
+):
     if sub_command == "build":
         exec_build(target, roles, clean)
     elif sub_command == "push":
         exec_push()
     elif sub_command == "run":  # For testing docker image
         exec_run(role)
+    elif sub_command == "game":  # For running a full game
+        exec_run(role, num_of_robots, sim_address)
+    elif sub_command == "stop":
+        exec_stop()
     else:
         print(f"invalid sub command: '{sub_command}'")
         sys.exit(1)
