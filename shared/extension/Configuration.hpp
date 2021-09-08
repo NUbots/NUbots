@@ -147,7 +147,7 @@ namespace extension {
             return Configuration(fileName, hostname, binary, config[key]);
         }
 
-        const Configuration operator[](const std::string& key) const {
+        Configuration operator[](const std::string& key) const {
             return Configuration(fileName, hostname, binary, config[key]);
         }
 
@@ -155,7 +155,7 @@ namespace extension {
             return Configuration(fileName, hostname, binary, config[key]);
         }
 
-        const Configuration operator[](const char* key) const {
+        Configuration operator[](const char* key) const {
             return Configuration(fileName, hostname, binary, config[key]);
         }
 
@@ -163,7 +163,7 @@ namespace extension {
             return Configuration(fileName, hostname, binary, config[index]);
         }
 
-        const Configuration operator[](size_t index) const {
+        Configuration operator[](size_t index) const {
             return Configuration(fileName, hostname, binary, config[index]);
         }
 
@@ -171,7 +171,7 @@ namespace extension {
             return Configuration(fileName, hostname, binary, config[index]);
         }
 
-        const Configuration operator[](int index) const {
+        Configuration operator[](int index) const {
             return Configuration(fileName, hostname, binary, config[index]);
         }
 

@@ -144,7 +144,7 @@ namespace extension {
             return Script(fileName, hostname, platform, config[key], frames);
         }
 
-        const Script operator[](const std::string& key) const {
+        Script operator[](const std::string& key) const {
             return Script(fileName, hostname, platform, config[key], frames);
         }
 
@@ -152,7 +152,7 @@ namespace extension {
             return Script(fileName, hostname, platform, config[key], frames);
         }
 
-        const Script operator[](const char* key) const {
+        Script operator[](const char* key) const {
             return Script(fileName, hostname, platform, config[key], frames);
         }
 
@@ -160,7 +160,7 @@ namespace extension {
             return Script(fileName, hostname, platform, config[index], frames);
         }
 
-        const Script operator[](size_t index) const {
+        Script operator[](size_t index) const {
             return Script(fileName, hostname, platform, config[index], frames);
         }
 
@@ -168,7 +168,7 @@ namespace extension {
             return Script(fileName, hostname, platform, config[index], frames);
         }
 
-        const Script operator[](int index) const {
+        Script operator[](int index) const {
             return Script(fileName, hostname, platform, config[index], frames);
         }
 
