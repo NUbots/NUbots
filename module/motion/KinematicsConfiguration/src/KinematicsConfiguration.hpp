@@ -37,7 +37,7 @@ namespace module::motion {
         explicit KinematicsConfiguration(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        void configure(message::motion::KinematicsModel& model, const ::extension::Configuration& objNugusModel);
+        static void configure(message::motion::KinematicsModel& model, const ::extension::Configuration& objNugusModel);
         static void configureLeg(message::motion::KinematicsModel& model, const YAML::Node& objLeg);
         static void configureHead(message::motion::KinematicsModel& model, const YAML::Node& objHead);
         static void configureArm(message::motion::KinematicsModel& model, const YAML::Node& objArm);
