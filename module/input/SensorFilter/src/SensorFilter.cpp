@@ -206,7 +206,7 @@ namespace module::input {
 
                         // Make sure we have servo positions
                         for (uint32_t id = 0; id < 20; ++id) {
-                            auto& original = utility::platform::getRawServo(id, *s);
+                            const auto& original = utility::platform::getRawServo(id, *s);
                             // Add the sensor values to the system properly
                             filtered_sensors->servo.push_back({0,
                                                                id,
@@ -371,8 +371,8 @@ namespace module::input {
 
                         // Read through all of our sensors
                         for (uint32_t id = 0; id < 20; ++id) {
-                            auto& original = utility::platform::getRawServo(id, input);
-                            auto& error    = original.error_flags;
+                            const auto& original = utility::platform::getRawServo(id, input);
+                            const auto& error    = original.error_flags;
 
                             // Check for an error on the servo and report it
                             if (error != RawSensors::Error::OK) {

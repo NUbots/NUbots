@@ -394,7 +394,9 @@ namespace utility::motion::kinematics {
             com = Htx * com;
 
             // Calculate distance to particle CoM from particle origin, using skew-symmetric matrix
-            const double x = com.x(), y = com.y(), z = com.z();
+            const double x = com.x();
+            const double y = com.y();
+            const double z = com.z();
             Eigen::Matrix3d d;
             // clang-format off
                     d <<  y * y + z * z, -x * y,         -x * z,
