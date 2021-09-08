@@ -95,8 +95,8 @@ namespace utility::motion::splines {
         /**
          * Typedefs
          */
-        typedef std::pair<unsigned long, unsigned long> Pair;
-        typedef std::vector<size_t> Comb;
+        using Pair = std::pair<unsigned long, unsigned long>;
+        using Comb = std::vector<size_t>;
 
         /**
          * Hold (n choose k) number of possible combinations for dynamic programming
@@ -123,10 +123,8 @@ namespace utility::motion::splines {
                 if (isEnd) {
                     return true;
                 }
-                else {
-                    indexes[i] = indexes[i - 1] + 1;
-                    return false;
-                }
+                indexes[i] = indexes[i - 1] + 1;
+                return false;
             }
             else {
                 indexes[i]++;
