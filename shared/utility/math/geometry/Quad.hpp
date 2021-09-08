@@ -33,6 +33,19 @@ namespace utility::math::geometry {
         using T = typename Eigen::Matrix<Scalar, R, C>;
         Quad() : bl(T::Zero()), br(T::Zero()), tr(T::Zero()), tl(T::Zero()) {}
         Quad(const Quad& other) : bl(other.bl), br(other.br), tr(other.tr), tl(other.tl) {}
+        Quad(const Quad&& other) : bl(other.bl), br(other.br), tr(other.tr), tl(other.tl) {}
+        [[nodiscard]] Quad& operator=(const Quad& other) {
+            bl = other.bl;
+            br = other.br;
+            tr = other.tr;
+            tl = other.tl;
+        }
+        [[nodiscard]] Quad& operator=(const Quad&& other) {
+            bl = other.bl;
+            br = other.br;
+            tr = other.tr;
+            tl = other.tl;
+        }
         Quad(T bottomLeft, T topLeft, T topRight, T bottomRight)
             : bl(std::move(bottomLeft)), br(std::move(bottomRight)), tr(std::move(topRight)), tl(std::move(topLeft)) {}
         Quad(const Scalar& left, const Scalar& top, const Scalar& right, const Scalar& bottom)
