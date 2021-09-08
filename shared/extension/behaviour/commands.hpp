@@ -55,7 +55,7 @@ namespace extension::behaviour::commands {
          * @param type_             the type that this Provider provides for
          * @param classification_   what kind of provider this ProvidesReaction is for
          */
-        ProvidesReaction(const std::shared_ptr<NUClear::threading::Reaction>& reaction_,
+        ProvidesReaction(std::shared_ptr<NUClear::threading::Reaction> reaction_,
                          const std::type_index& type_,
                          const ProviderClassification& classification_)
             : reaction(std::move(reaction_)), type(type_), classification(classification_) {}
@@ -82,7 +82,7 @@ namespace extension::behaviour::commands {
          * @param current_      a function that will get the current state of the reaction
          * @param binder_       a function that can be used to bind a reaction that monitors when the state changes
          */
-        WhenExpression(const std::shared_ptr<NUClear::threading::Reaction>& reaction_,
+        WhenExpression(std::shared_ptr<NUClear::threading::Reaction> reaction_,
                        const std::type_index& type_,
                        std::function<bool(const int&)> validator_,
                        std::function<int()> current_,
@@ -118,7 +118,7 @@ namespace extension::behaviour::commands {
          * @param type              the enum type that this causing condition is going to manipulate
          * @param resulting_state   the state the enum will be in once the causing has succeeded
          */
-        CausingExpression(const std::shared_ptr<NUClear::threading::Reaction>& reaction,
+        CausingExpression(std::shared_ptr<NUClear::threading::Reaction> reaction,
                           const std::type_index& type,
                           const int& resulting_state)
             : reaction(std::move(reaction)), type(type), resulting_state(resulting_state) {}
@@ -170,7 +170,7 @@ namespace extension::behaviour::commands {
                      const uint64_t& requester_id_,
                      const uint64_t& requester_task_id_,
                      std::shared_ptr<void> data_,
-                     const std::string& name_,
+                     std::string name_,
                      const int& priority_,
                      const bool& optional_)
             : type(type_)
