@@ -84,7 +84,7 @@ namespace module::behaviour::strategy {
         NUClear::clock::time_point ballSearchStartTime;
         NUClear::clock::time_point goalLastMeasured;
         void initialLocalisationReset();
-        void penaltyShootoutLocalisationReset(const message::support::FieldDescription& fieldDescription);
+        void penaltyShootoutLocalisationReset(const message::support::FieldDescription& fd);
         void unpenalisedLocalisationReset();
 
         void standStill();

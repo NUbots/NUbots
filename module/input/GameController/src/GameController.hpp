@@ -62,8 +62,8 @@ namespace module::input {
                      const gamecontroller::GameControllerPacket& oldPacket,
                      const gamecontroller::GameControllerPacket& newPacket);
         void sendReplyMessage(const gamecontroller::ReplyMessage& message);
-        const gamecontroller::Team& getOwnTeam(const gamecontroller::GameControllerPacket& packet) const;
-        const gamecontroller::Team& getOpponentTeam(const gamecontroller::GameControllerPacket& packet) const;
+        const gamecontroller::Team& getOwnTeam(const gamecontroller::GameControllerPacket& state) const;
+        const gamecontroller::Team& getOpponentTeam(const gamecontroller::GameControllerPacket& state) const;
         static message::input::GameState::Data::PenaltyReason getPenaltyReason(
             const gamecontroller::PenaltyState& penaltyState) const;
 
