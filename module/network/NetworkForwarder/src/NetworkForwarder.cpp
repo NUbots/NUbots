@@ -22,7 +22,7 @@ namespace module::network {
             for (const auto& target_config : cfg["targets"]) {
 
                 // Extract the target we are sending to
-                std::string target = target_config.first.as<std::string>();
+                auto target = target_config.first.as<std::string>();
 
                 for (const auto& setting : target_config.second) {
                     // Get the name of the type

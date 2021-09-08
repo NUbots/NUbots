@@ -92,7 +92,7 @@ namespace module::input {
             std::vector<char> packet(sizeof(Packet) - 1);
 
             // Fill in the header
-            Packet* header = reinterpret_cast<Packet*>(packet.data());
+            auto* header   = reinterpret_cast<Packet*>(packet.data());
             header->type   = type;
             header->length = data.size();
 

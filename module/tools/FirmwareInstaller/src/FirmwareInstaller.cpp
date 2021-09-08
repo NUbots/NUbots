@@ -32,7 +32,7 @@ namespace module::tools {
                 std::pair<std::string, std::string> name;
                 name.first       = utility::strutil::toUpper(f["device"].as<std::string>());
                 name.second      = utility::strutil::toUpper(f["battery"].as<std::string>());
-                std::string path = f["path"].as<std::string>();
+                auto path        = f["path"].as<std::string>();
 
                 Firmware fw;
 

@@ -416,8 +416,7 @@ namespace YAML {
                 int millis = node["duration"].as<int>();
                 std::chrono::milliseconds duration(millis);
 
-                std::vector<::extension::Script::Frame::Target> targets =
-                    node["targets"].as<std::vector<::extension::Script::Frame::Target>>();
+                auto targets = node["targets"].as<std::vector<::extension::Script::Frame::Target>>();
                 rhs = {duration, targets};
             }
             catch (const YAML::Exception& e) {
@@ -449,7 +448,7 @@ namespace YAML {
 
         static inline bool decode(const Node& node, ::extension::Script& rhs) {
             try {
-                std::vector<::extension::Script::Frame> frames = node.as<std::vector<::extension::Script::Frame>>();
+                auto frames                                    = node.as<std::vector<::extension::Script::Frame>>();
                 rhs                                            = {frames};
             }
             catch (const YAML::Exception& e) {

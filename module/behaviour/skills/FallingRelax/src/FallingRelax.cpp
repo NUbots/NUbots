@@ -52,7 +52,7 @@ namespace module::behaviour::skills {
         // do a little configurating
         on<Configuration>("FallingRelax.yaml").then([this](const Configuration& config) {
             // Store falling angle as a cosine so we can compare it directly to the z axis value
-            const float fallingAngle = config["FALLING_ANGLE"].as<float>();
+            const auto fallingAngle  = config["FALLING_ANGLE"].as<float>();
             FALLING_ANGLE            = std::cos(fallingAngle);
 
             // When falling the acceleration should drop below this value

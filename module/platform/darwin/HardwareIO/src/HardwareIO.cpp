@@ -218,8 +218,8 @@ namespace module::platform::darwin {
         : Reactor(std::move(environment)), darwin("/dev/CM740"), chargedVoltage(0.0f), flatVoltage(0.0f) {
 
         on<Startup>().then("HardwareIO Startup", [this] {
-            uint16_t CM740Model  = darwin.cm740.read<uint16_t>(Darwin::CM740::Address::MODEL_NUMBER_L);
-            uint8_t CM740Version = darwin.cm740.read<uint8_t>(Darwin::CM740::Address::VERSION);
+            auto CM740Model   = darwin.cm740.read<uint16_t>(Darwin::CM740::Address::MODEL_NUMBER_L);
+            auto CM740Version = darwin.cm740.read<uint8_t>(Darwin::CM740::Address::VERSION);
             std::stringstream version;
             std::stringstream model;
             model << "0x" << std::setw(4) << std::setfill('0') << std::hex << int(CM740Model);
