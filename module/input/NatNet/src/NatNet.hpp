@@ -48,7 +48,7 @@ namespace module::input {
         };
 
         struct MarkerSetModel {
-            MarkerSetModel() : name(""), markerNames() {}
+            MarkerSetModel() : name("") {}
             std::string name;
             std::vector<std::string> markerNames;
         };
@@ -62,7 +62,7 @@ namespace module::input {
         };
 
         struct SkeletonModel {
-            SkeletonModel() : name(""), id(0), boneModels() {}
+            SkeletonModel() : name(""), id(0) {}
             std::string name;
             uint32_t id;
             std::map<uint32_t, RigidBodyModel> boneModels;

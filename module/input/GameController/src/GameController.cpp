@@ -51,14 +51,7 @@ namespace module::input {
     using TeamColourEvent = message::input::GameEvents::TeamColour;
 
     GameController::GameController(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment))
-        , recieve_port(0)
-        , send_port(0)
-        , TEAM_ID(0)
-        , PLAYER_ID(0)
-        , listenHandle()
-        , packet()
-        , mode() {
+        : Reactor(std::move(environment)), recieve_port(0), send_port(0), TEAM_ID(0), PLAYER_ID(0), packet(), mode() {
 
         // Configure
         on<Configuration, Trigger<GlobalConfig>>("GameController.yaml")

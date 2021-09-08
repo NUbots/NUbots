@@ -79,7 +79,7 @@ namespace Darwin {
          * @brief This represents data that comes from the CM740
          */
         struct CM740Data {
-            CM740Data() : buttons(0), gyroscope(), accelerometer(), voltage(0) {}
+            CM740Data() : buttons(0), voltage(0) {}
             uint8_t buttons;
             uint8_t reserved[7] = {0};
             Gyro gyroscope;
@@ -106,7 +106,7 @@ namespace Darwin {
      * @brief This represents the bulk read results we get when we do one
      */
     struct BulkReadResults {
-        BulkReadResults() : cm740() {}
+        BulkReadResults() {}
         /// @brief Holds data from the CM740
         Types::CM740Data cm740;
         /// @brief Holds data from the 20 servos (stored in location ServoID - 1)

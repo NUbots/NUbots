@@ -31,13 +31,7 @@ namespace module::input {
 
     using message::input::MotionCapture;
 
-    NatNet::NatNet(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment))
-        , markerSetModels()
-        , rigidBodyModels()
-        , skeletonModels()
-        , commandHandle()
-        , dataHandle() {
+    NatNet::NatNet(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("NatNet.yaml").then([this](const Configuration& config) {
             // We are updating to a new multicast address

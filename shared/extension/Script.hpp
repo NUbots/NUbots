@@ -42,7 +42,7 @@ namespace extension {
     struct Script {
         struct Frame {
             struct Target {
-                Target() : id(), position(0.0f), gain(0.0f), torque(0.0f) {}
+                Target() : position(0.0f), gain(0.0f), torque(0.0f) {}
                 Target(const ServoID& servo, float pos, float gain, float torque)
                     : id(servo), position(pos), gain(gain), torque(torque) {}
                 Target(const Target& other)
@@ -70,7 +70,7 @@ namespace extension {
                 float torque;
             };
 
-            Frame() : duration(), targets() {}
+            Frame() : duration() {}
             Frame(const NUClear::clock::duration& dur, const std::vector<Target>& targets)
                 : duration(dur), targets(targets) {}
 
@@ -82,16 +82,10 @@ namespace extension {
         YAML::Node config;
         std::vector<Frame> frames;
 
-        Script()
-            : fileName()
-            , hostname(utility::support::getHostname())
-            , platform(Script::getPlatform(hostname))
-            , config()
-            , frames() {}
+        Script() : hostname(utility::support::getHostname()), platform(Script::getPlatform(hostname)), config() {}
 
         Script(const std::vector<Frame>& frames)
-            : fileName()
-            , hostname(utility::support::getHostname())
+            : hostname(utility::support::getHostname())
             , platform(Script::getPlatform(hostname))
             , config()
             , frames(frames) {}
@@ -104,7 +98,7 @@ namespace extension {
             : fileName(fileName), hostname(hostname), platform(platform), config(config), frames(frames) {}
 
         Script(const std::string& fileName, const std::string& hostname, const std::string& platform)
-            : fileName(fileName), hostname(hostname), platform(platform), config(), frames() {
+            : fileName(fileName), hostname(hostname), platform(platform), config() {
 
             // Per robot scripts:    Scripts that are specific to a certain robot (e.g. darwin1).
             //                       These are to account for minor hardware variations in a robot and, as such, take

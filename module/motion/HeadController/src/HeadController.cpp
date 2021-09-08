@@ -61,8 +61,6 @@ namespace module::motion {
         , head_motor_gain(0.0)
         , head_motor_torque(0.0)
         , p_gain(0.0)
-        , updateHandle()
-        , lastTime()
         , currentAngles(Eigen::Vector2f::Zero())
         , goalAngles(Eigen::Vector2f::Zero()) {
 

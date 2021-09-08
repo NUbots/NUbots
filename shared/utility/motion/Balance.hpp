@@ -62,7 +62,7 @@ namespace utility::motion {
         NUClear::clock::time_point lastBalanceTime;
 
     public:
-        Balancer() : lastErrorQuaternion(), lastBalanceTime() {}
+        Balancer() {}
         void configure(const YAML::Node& config);
         void balance(const message::motion::KinematicsModel& hip,
                      Eigen::Affine3f& footToTorso,

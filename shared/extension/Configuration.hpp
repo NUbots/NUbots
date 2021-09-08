@@ -51,7 +51,7 @@ namespace extension {
         std::string fileName, hostname, binary;
         YAML::Node config;
 
-        Configuration() : fileName(), hostname(), binary(), config(){};
+        Configuration() : config(){};
         Configuration(const std::string& fileName,
                       const std::string& hostname,
                       const std::string& binary,

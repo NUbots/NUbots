@@ -58,7 +58,6 @@ namespace module::behaviour::tools {
         : Reactor(std::move(environment))
         , id(size_t(this) * size_t(this) - size_t(this))
         , scriptPath("Initializing...")
-        , script()
         , frame(0)
         , selection(0)
         , angleOrGain(true)

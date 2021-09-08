@@ -67,7 +67,7 @@ namespace Darwin {
 
     // This is the object that is returned when a command is run
     struct CommandResult {
-        CommandResult() : header(), data(), checksum(0) {}
+        CommandResult() : checksum(0) {}
         Header header;
         std::vector<uint8_t> data;
         uint8_t checksum;
