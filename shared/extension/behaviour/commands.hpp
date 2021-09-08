@@ -58,7 +58,7 @@ namespace extension::behaviour::commands {
         ProvidesReaction(const std::shared_ptr<NUClear::threading::Reaction>& reaction_,
                          const std::type_index& type_,
                          const ProviderClassification& classification_)
-            : reaction(reaction_), type(type_), classification(classification_) {}
+            : reaction(std::move(reaction_)), type(type_), classification(classification_) {}
 
         /// The reaction for this Provider
         std::shared_ptr<NUClear::threading::Reaction> reaction;
@@ -88,7 +88,7 @@ namespace extension::behaviour::commands {
                        std::function<int()> current_,
                        std::function<NUClear::threading::ReactionHandle(NUClear::Reactor&,
                                                                         std::function<void(const int&)>)> binder_)
-            : reaction(reaction_)
+            : reaction(std::move(reaction_))
             , type(type_)
             , validator(std::move(validator_))
             , current(std::move(current_))
@@ -121,7 +121,7 @@ namespace extension::behaviour::commands {
         CausingExpression(const std::shared_ptr<NUClear::threading::Reaction>& reaction,
                           const std::type_index& type,
                           const int& resulting_state)
-            : reaction(reaction), type(type), resulting_state(resulting_state) {}
+            : reaction(std::move(reaction)), type(type), resulting_state(resulting_state) {}
         /// The Provider reaction that will cause this state
         std::shared_ptr<NUClear::threading::Reaction> reaction;
         /// The enum type that this `When` expression claims to manipulate
@@ -177,7 +177,7 @@ namespace extension::behaviour::commands {
             , requester_id(requester_id_)
             , requester_task_id(requester_task_id_)
             , data(std::move(data_))
-            , name(name_)
+            , name(std::move(name_))
             , priority(priority_)
             , optional(optional_) {}
 

@@ -53,7 +53,7 @@ namespace extension {
 
         Configuration() : config(){};
         Configuration(const std::string& fileName,
-                      const std::string& hostname,
+            : fileName(std::move(fileName)), hostname(std::move(hostname)), binary(std::move(binary)), config(config) {}
                       const std::string& binary,
                       const YAML::Node& config)
             : fileName(fileName), hostname(hostname), binary(binary), config(config) {}

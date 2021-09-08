@@ -84,18 +84,22 @@ namespace extension {
 
         Script() : hostname(utility::support::getHostname()), platform(Script::getPlatform(hostname)), config() {}
 
-        Script(const std::vector<Frame>& frames)
+        Script(std::vector<Frame> frames)
             : hostname(utility::support::getHostname())
             , platform(Script::getPlatform(hostname))
             , config()
-            , frames(frames) {}
+            , frames(std::move(frames)) {}
 
-        Script(const std::string& fileName,
-               const std::string& hostname,
-               const std::string& platform,
+        Script(std::string fileName,
+               std::string hostname,
+               std::string platform,
                const YAML::Node& config,
-               const std::vector<Frame>& frames)
-            : fileName(fileName), hostname(hostname), platform(platform), config(config), frames(frames) {}
+               std::vector<Frame> frames)
+            : fileName(std::move(fileName))
+            , hostname(std::move(hostname))
+            , platform(std::move(platform))
+            , config(config)
+            , frames(std::move(frames)) {}
 
         Script(const std::string& fileName, const std::string& hostname, const std::string& platform)
             : fileName(fileName), hostname(hostname), platform(platform), config() {
@@ -222,7 +226,7 @@ namespace extension {
                             const std::vector<std::string>& scripts,
                             const std::vector<double>& duration_mod,
                             const NUClear::clock::time_point& start = NUClear::clock::now())
-            : sourceId(id), scripts(scripts), duration_modifier(duration_mod), start(start) {
+            : sourceId(id), scripts(scripts), duration_modifier(std::move(duration_mod)), start(start) {
             while (scripts.size() > duration_modifier.size()) {
                 duration_modifier.push_back(1.0);
             }
@@ -255,7 +259,7 @@ namespace extension {
                       const std::vector<Script>& scripts,
                       const std::vector<double>& duration_mod,
                       NUClear::clock::time_point start = NUClear::clock::now())
-            : sourceId(id), scripts(scripts), duration_modifier(duration_mod), start(start) {
+            : sourceId(id), scripts(scripts), duration_modifier(std::move(duration_mod)), start(start) {
             while (scripts.size() > duration_modifier.size()) {
                 duration_modifier.push_back(1.0);
             }
