@@ -225,7 +225,7 @@ namespace module::behaviour::strategy {
                         // behaviour for overtime.
                         case GameMode::NORMAL:
                         case GameMode::OVERTIME: normal(gameState, phase, fieldDescription, field, ball); break;
-                        default: log<NUClear::WARN>("Game mode BehaviourTeam.");
+                        default: log<NUClear::WARN>("Game mode unknown.");
                     }
 
                     if (currentState != previousState) {
@@ -251,7 +251,7 @@ namespace module::behaviour::strategy {
             case Phase::PLAYING: penaltyShootoutPlaying(field, ball); break;  // Either kicking or goalie.
             case Phase::TIMEOUT: penaltyShootoutTimeout(); break;             // A pause in playing. Not in simulation.
             case Phase::FINISHED: penaltyShootoutFinished(); break;  // Happens when penalty shootout completely ends.
-            default: log<NUClear::WARN>("BehaviourTeam penalty shootout gamemode phase.");
+            default: log<NUClear::WARN>("Unknown penalty shootout gamemode phase.");
         }
     }
 
@@ -272,7 +272,7 @@ namespace module::behaviour::strategy {
             case Phase::PLAYING: normalPlaying(field, ball, fieldDescription); break;
             case Phase::FINISHED: normalFinished(); break;  // Game has finished.
             case Phase::TIMEOUT: normalTimeout(); break;    // A pause in playing. Not in simulation.
-            default: log<NUClear::WARN>("BehaviourTeam normal gamemode phase.");
+            default: log<NUClear::WARN>("Unknown normal gamemode phase.");
         }
     }
 

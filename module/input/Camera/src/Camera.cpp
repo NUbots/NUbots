@@ -327,7 +327,8 @@ namespace module::input {
 
         if (buffer != nullptr) {
             if (arv_buffer_get_status(buffer) == ARV_BUFFER_STATUS_SUCCESS) {
-                int width = 0, height = 0;
+                int width       = 0;
+                int height      = 0;
                 size_t buffSize = 0;
                 arv_buffer_get_image_region(buffer, nullptr, nullptr, &width, &height);
                 const uint8_t* buff = reinterpret_cast<const uint8_t*>(arv_buffer_get_data(buffer, &buffSize));

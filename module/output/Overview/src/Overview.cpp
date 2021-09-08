@@ -64,7 +64,6 @@ namespace module::output {
            Optional<With<LocalisationBall>>,
            Optional<With<KickPlan>>,
            Optional<With<GameState>>,
-           Optional<With<WalkPath>>,
            Optional<With<WalkCommand>>,
            Single,
            Priority::LOW>()
@@ -76,7 +75,6 @@ namespace module::output {
                          const std::shared_ptr<const LocalisationBall>& loc_ball,
                          const std::shared_ptr<const KickPlan>& kick_plan,
                          const std::shared_ptr<const GameState>& game_state,
-                         const std::shared_ptr<const WalkPath>& /*walk_path*/,
                          const std::shared_ptr<const WalkCommand>& walk_command) {
                 auto msg = std::make_unique<OverviewMsg>();
 

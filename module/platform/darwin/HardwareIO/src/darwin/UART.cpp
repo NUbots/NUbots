@@ -143,8 +143,7 @@ namespace Darwin {
         }
 
         if (reconnects > 0) {
-            std::cout << "Bytes Written: " << bytesWritten << " Reconnects: " << static_cast<int>(reconnects) << "\r"
-                      << std::endl;
+            std::cout << "Bytes Written: " << bytesWritten << " Reconnects: " << int(reconnects) << "\r" << std::endl;
         }
 
         assert(reconnects < 3);
@@ -157,10 +156,10 @@ namespace Darwin {
         uint8_t reconnects = 0;
         int bytesRead      = 0;
 
-        while ((bytesRead != static_cast<int>(count)) && (reconnects < 3)) {
+        while ((bytesRead != int(count)) && (reconnects < 3)) {
             bytesRead = read(fd, buf, count);
 
-            if ((errno == EAGAIN) || ((bytesRead < static_cast<int>(count)) && (bytesRead > 0))) {
+            if ((errno == EAGAIN) || ((bytesRead < int(count)) && (bytesRead > 0))) {
                 break;
             }
 
@@ -171,9 +170,9 @@ namespace Darwin {
         }
 
         if (reconnects > 0) {
-            std::cout << "Bytes Read: " << bytesRead << " Reconnects: " << static_cast<int>(reconnects) << " Data: ";
+            std::cout << "Bytes Read: " << bytesRead << " Reconnects: " << int(reconnects) << " Data: ";
             for (int i = 0; i < bytesRead; i++) {
-                std::cout << static_cast<int>(*(static_cast<uint8_t*>(buf) + i)) << " ";
+                std::cout << int(*(static_cast<uint8_t*>(buf) + i)) << " ";
             }
             std::cout << "\r" << std::endl;
         }
@@ -243,8 +242,8 @@ namespace Darwin {
         // length
         int length = 0;
         if (result.header.length < 2) {
-            std::cout << "Length: " << static_cast<int>(result.header.length) << ", " << (result.header.length - 2)
-                      << "\r" << std::endl;
+            std::cout << "Length: " << int(result.header.length) << ", " << (result.header.length - 2) << "\r"
+                      << std::endl;
         }
 
         else {
