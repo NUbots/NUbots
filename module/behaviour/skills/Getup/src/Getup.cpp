@@ -51,9 +51,7 @@ namespace module::behaviour::skills {
         , id(size_t(this) * size_t(this) - size_t(this))
         , isFront(true)
         , gettingUp(false)
-        , FALLEN_ANGLE(M_PI_2)
-        , GETUP_PRIORITY(0.0f)
-        , EXECUTION_PRIORITY(0.0f) {
+        , FALLEN_ANGLE(M_PI_2) {
         // do a little configurating
         on<Configuration>("Getup.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
