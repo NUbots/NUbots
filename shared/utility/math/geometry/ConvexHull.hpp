@@ -68,9 +68,7 @@ namespace utility::math::geometry {
             return -1;
         }
         // Colinear
-        else {
-            return 0;
-        }
+        return 0;
     }
 
     // A point is in the convex hull if, for every pair of points in the hull, an anti-clockwise turn is made
