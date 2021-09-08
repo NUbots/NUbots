@@ -91,7 +91,7 @@ namespace module::input {
             return arv_gc_boolean_get_value(setting, error) != 0;
         }
         static void write(ArvGcBoolean* setting, const bool& v, GError** error) {
-            arv_gc_boolean_set_value(setting, v, error);
+            arv_gc_boolean_set_value(setting, static_cast<gboolean>(v), error);
         }
         static bool valid(ArvGcBoolean* /*unused*/, const bool& /*unused*/) {
             return true;

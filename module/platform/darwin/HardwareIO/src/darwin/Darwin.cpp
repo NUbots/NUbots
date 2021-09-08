@@ -78,7 +78,9 @@ namespace Darwin {
 
         // Set servos to be enabled if they are not simulated
         for (size_t i = 0; i < config["servos"].config.size(); ++i) {
-            enabledServoIds[i] = !config["servos"][i]["simulated"].as<bool>();
+            enabledServoIds[i] =
+                static_cast<__gnu_cxx::__alloc_traits<class std::allocator<unsigned char>, unsigned char>::value_type>(
+                    !config["servos"][i]["simulated"].as<bool>());
         }
 
         // Rebuild our bulk read packet
@@ -129,10 +131,11 @@ namespace Darwin {
 
         // Do a self test so that we can move all the sensors that are currently failing to the end of the list
         std::vector<std::pair<uint8_t, bool>> sensors = selfTest();
-        std::sort(
-            std::begin(sensors),
-            std::end(sensors),
-            [](const std::pair<uint8_t, bool>& a, const std::pair<uint8_t, bool>& b) { return a.second > b.second; });
+        std::sort(std::begin(sensors),
+                  std::end(sensors),
+                  [](const std::pair<uint8_t, bool>& a, const std::pair<uint8_t, bool>& b) {
+                      return static_cast<int>(a.second) > static_cast<int>(b.second);
+                  });
 
         // This holds our request paramters
         std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> request;
