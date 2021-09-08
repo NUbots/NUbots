@@ -161,22 +161,20 @@ namespace utility::motion::kinematics {
                  * std::acos(std::fmax(std::fmin(hipXProjected.dot(Eigen::Vector3d::UnitX()), 1), -1));
 
         if (limb == LimbID::LEFT_LEG) {
-            positions.push_back(std::make_pair(ServoID::L_HIP_YAW, -hipYaw));
-            positions.push_back(std::make_pair(ServoID::L_HIP_ROLL, hipRoll));
-            positions.push_back(std::make_pair(ServoID::L_HIP_PITCH, -hipPitch));
-            positions.push_back(std::make_pair(ServoID::L_KNEE, M_PI - knee));
-            positions.push_back(std::make_pair(ServoID::L_ANKLE_PITCH, -anklePitch));
-            positions.push_back(std::make_pair(ServoID::L_ANKLE_ROLL, ankleRoll));
+            positions.emplace_back(ServoID::L_HIP_YAW, -hipYaw);
+            positions.emplace_back(ServoID::L_HIP_ROLL, hipRoll);
+            positions.emplace_back(ServoID::L_HIP_PITCH, -hipPitch);
+            positions.emplace_back(ServoID::L_KNEE, M_PI - knee);
+            positions.emplace_back(ServoID::L_ANKLE_PITCH, -anklePitch);
+            positions.emplace_back(ServoID::L_ANKLE_ROLL, ankleRoll);
         }
         else {
-            positions.push_back(std::make_pair(ServoID::R_HIP_YAW, (model.leg.LEFT_TO_RIGHT_HIP_YAW) * -hipYaw));
-            positions.push_back(std::make_pair(ServoID::R_HIP_ROLL, (model.leg.LEFT_TO_RIGHT_HIP_ROLL) * hipRoll));
-            positions.push_back(std::make_pair(ServoID::R_HIP_PITCH, (model.leg.LEFT_TO_RIGHT_HIP_PITCH) * -hipPitch));
-            positions.push_back(std::make_pair(ServoID::R_KNEE, (model.leg.LEFT_TO_RIGHT_KNEE) * (M_PI - knee)));
-            positions.push_back(
-                std::make_pair(ServoID::R_ANKLE_PITCH, (model.leg.LEFT_TO_RIGHT_ANKLE_PITCH) * -anklePitch));
-            positions.push_back(
-                std::make_pair(ServoID::R_ANKLE_ROLL, (model.leg.LEFT_TO_RIGHT_ANKLE_ROLL) * ankleRoll));
+            positions.emplace_back(ServoID::R_HIP_YAW, (model.leg.LEFT_TO_RIGHT_HIP_YAW) * -hipYaw);
+            positions.emplace_back(ServoID::R_HIP_ROLL, (model.leg.LEFT_TO_RIGHT_HIP_ROLL) * hipRoll);
+            positions.emplace_back(ServoID::R_HIP_PITCH, (model.leg.LEFT_TO_RIGHT_HIP_PITCH) * -hipPitch);
+            positions.emplace_back(ServoID::R_KNEE, (model.leg.LEFT_TO_RIGHT_KNEE) * (M_PI - knee));
+            positions.emplace_back(ServoID::R_ANKLE_PITCH, (model.leg.LEFT_TO_RIGHT_ANKLE_PITCH) * -anklePitch);
+            positions.emplace_back(ServoID::R_ANKLE_ROLL, (model.leg.LEFT_TO_RIGHT_ANKLE_ROLL) * ankleRoll);
         }
 
         return positions;
@@ -308,22 +306,20 @@ namespace utility::motion::kinematics {
                  * std::acos(std::fmax(std::fmin(hipXProjected.dot(Eigen::Vector3f::UnitX()), 1), -1));
 
         if (limb == LimbID::LEFT_LEG) {
-            positions.push_back(std::make_pair(ServoID::L_HIP_YAW, -hipYaw));
-            positions.push_back(std::make_pair(ServoID::L_HIP_ROLL, hipRoll));
-            positions.push_back(std::make_pair(ServoID::L_HIP_PITCH, -hipPitch));
-            positions.push_back(std::make_pair(ServoID::L_KNEE, M_PI - knee));
-            positions.push_back(std::make_pair(ServoID::L_ANKLE_PITCH, -anklePitch));
-            positions.push_back(std::make_pair(ServoID::L_ANKLE_ROLL, ankleRoll));
+            positions.emplace_back(ServoID::L_HIP_YAW, -hipYaw);
+            positions.emplace_back(ServoID::L_HIP_ROLL, hipRoll);
+            positions.emplace_back(ServoID::L_HIP_PITCH, -hipPitch);
+            positions.emplace_back(ServoID::L_KNEE, M_PI - knee);
+            positions.emplace_back(ServoID::L_ANKLE_PITCH, -anklePitch);
+            positions.emplace_back(ServoID::L_ANKLE_ROLL, ankleRoll);
         }
         else {
-            positions.push_back(std::make_pair(ServoID::R_HIP_YAW, (model.leg.LEFT_TO_RIGHT_HIP_YAW) * -hipYaw));
-            positions.push_back(std::make_pair(ServoID::R_HIP_ROLL, (model.leg.LEFT_TO_RIGHT_HIP_ROLL) * hipRoll));
-            positions.push_back(std::make_pair(ServoID::R_HIP_PITCH, (model.leg.LEFT_TO_RIGHT_HIP_PITCH) * -hipPitch));
-            positions.push_back(std::make_pair(ServoID::R_KNEE, (model.leg.LEFT_TO_RIGHT_KNEE) * (M_PI - knee)));
-            positions.push_back(
-                std::make_pair(ServoID::R_ANKLE_PITCH, (model.leg.LEFT_TO_RIGHT_ANKLE_PITCH) * -anklePitch));
-            positions.push_back(
-                std::make_pair(ServoID::R_ANKLE_ROLL, (model.leg.LEFT_TO_RIGHT_ANKLE_ROLL) * ankleRoll));
+            positions.emplace_back(ServoID::R_HIP_YAW, (model.leg.LEFT_TO_RIGHT_HIP_YAW) * -hipYaw);
+            positions.emplace_back(ServoID::R_HIP_ROLL, (model.leg.LEFT_TO_RIGHT_HIP_ROLL) * hipRoll);
+            positions.emplace_back(ServoID::R_HIP_PITCH, (model.leg.LEFT_TO_RIGHT_HIP_PITCH) * -hipPitch);
+            positions.emplace_back(ServoID::R_KNEE, (model.leg.LEFT_TO_RIGHT_KNEE) * (M_PI - knee));
+            positions.emplace_back(ServoID::R_ANKLE_PITCH, (model.leg.LEFT_TO_RIGHT_ANKLE_PITCH) * -anklePitch);
+            positions.emplace_back(ServoID::R_ANKLE_ROLL, (model.leg.LEFT_TO_RIGHT_ANKLE_ROLL) * ankleRoll);
         }
 
         return positions;
@@ -338,20 +334,20 @@ namespace utility::motion::kinematics {
     }
     std::vector<std::pair<ServoID, double>> calculateCameraLookJoints(const Eigen::Vector3d& cameraUnitVector) {
         std::vector<std::pair<ServoID, double>> positions;
-        positions.push_back(std::make_pair(ServoID::HEAD_YAW, std::atan2(cameraUnitVector.y(), cameraUnitVector.x())));
-        positions.push_back(std::make_pair(ServoID::HEAD_PITCH,
-                                           std::atan2(-cameraUnitVector.z(),
-                                                      std::sqrt(cameraUnitVector.x() * cameraUnitVector.x()
-                                                                + cameraUnitVector.y() * cameraUnitVector.y()))));
+        positions.emplace_back(ServoID::HEAD_YAW, std::atan2(cameraUnitVector.y(), cameraUnitVector.x()));
+        positions.emplace_back(ServoID::HEAD_PITCH,
+                               std::atan2(-cameraUnitVector.z(),
+                                          std::sqrt(cameraUnitVector.x() * cameraUnitVector.x()
+                                                    + cameraUnitVector.y() * cameraUnitVector.y())));
         return positions;
     }
     std::vector<std::pair<ServoID, float>> calculateHeadJoints(Eigen::Vector3f cameraUnitVector) {
         std::vector<std::pair<ServoID, float>> positions;
-        positions.push_back(std::make_pair(ServoID::HEAD_YAW, atan2(cameraUnitVector[1], cameraUnitVector[0])));
-        positions.push_back(std::make_pair(
+        positions.emplace_back(ServoID::HEAD_YAW, atan2(cameraUnitVector[1], cameraUnitVector[0]));
+        positions.emplace_back(
             ServoID::HEAD_PITCH,
             atan2(-cameraUnitVector[2],
-                  std::sqrt(cameraUnitVector[0] * cameraUnitVector[0] + cameraUnitVector[1] * cameraUnitVector[1]))));
+                  std::sqrt(cameraUnitVector[0] * cameraUnitVector[0] + cameraUnitVector[1] * cameraUnitVector[1])));
         return positions;
     }
 

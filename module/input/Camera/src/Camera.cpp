@@ -300,7 +300,7 @@ namespace module::input {
             Eigen::Affine3d Htw(sensors.Htw);
             Eigen::Affine3d Hwp = Htw.inverse() * Htp;
 
-            Hwps.push_back(std::make_pair(sensors.timestamp, Hwp));
+            Hwps.emplace_back(sensors.timestamp, Hwp);
         });
 
         on<Shutdown>().then([this] {

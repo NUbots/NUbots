@@ -94,7 +94,7 @@ namespace Darwin {
         std::vector<std::pair<uint8_t, bool>> results;
 
         // Ping our CM740
-        results.push_back(std::make_pair(ID::CM740, cm740.ping()));
+        results.emplace_back(ID::CM740, cm740.ping());
 
         // Ping all our servos
         for (int i = 0; i < 20; ++i) {
@@ -102,12 +102,12 @@ namespace Darwin {
             if (!result.second) {
                 NUClear::log<NUClear::WARN>("Servo failed self test:", static_cast<ServoID>(i));
             }
-            results.push_back(result);
+            results.emplace_back(result);
         }
 
         // Ping our two FSRs
-        results.push_back(std::make_pair(ID::L_FSR, lFSR.ping()));
-        results.push_back(std::make_pair(ID::R_FSR, rFSR.ping()));
+        results.emplace_back(ID::L_FSR, lFSR.ping());
+        results.emplace_back(ID::R_FSR, rFSR.ping());
 
         return results;
     }
@@ -145,7 +145,7 @@ namespace Darwin {
 
                 // If it's the CM740
                 case ID::CM740:
-                    request.push_back(std::make_tuple(CM740::Address::BUTTON, ID::CM740, sizeof(Types::CM740Data)));
+                    request.emplace_back(CM740::Address::BUTTON, ID::CM740, sizeof(Types::CM740Data));
                     break;
 
                 // If it's the FSRs
@@ -182,8 +182,7 @@ namespace Darwin {
                 default:
                     // Only add this servo if we aren't simulating it
                     if (enabledServoIds[sensor.first - 1] != 0u) {
-                        request.push_back(
-                            std::make_tuple(MX28::Address::PRESENT_POSITION_L, sensor.first, sizeof(Types::MX28Data)));
+                        request.emplace_back(MX28::Address::PRESENT_POSITION_L, sensor.first, sizeof(Types::MX28Data));
                     }
                     break;
             }

@@ -208,19 +208,19 @@ namespace module::input {
                         for (uint32_t id = 0; id < 20; ++id) {
                             const auto& original = utility::platform::getRawServo(id, *s);
                             // Add the sensor values to the system properly
-                            filtered_sensors->servo.push_back({0,
-                                                               id,
-                                                               original.torque_enabled,
-                                                               original.p_gain,
-                                                               original.i_gain,
-                                                               original.d_gain,
-                                                               original.goal_position,
-                                                               original.moving_speed,
-                                                               original.present_position,
-                                                               original.present_speed,
-                                                               original.load,
-                                                               original.voltage,
-                                                               static_cast<float>(original.temperature)});
+                            filtered_sensors->servo.emplace_back(0,
+                                                                 id,
+                                                                 original.torque_enabled,
+                                                                 original.p_gain,
+                                                                 original.i_gain,
+                                                                 original.d_gain,
+                                                                 original.goal_position,
+                                                                 original.moving_speed,
+                                                                 original.present_position,
+                                                                 original.present_speed,
+                                                                 original.load,
+                                                                 original.voltage,
+                                                                 static_cast<float>(original.temperature));
                         }
 
                         // Calculate forward kinematics
@@ -407,36 +407,36 @@ namespace module::input {
                             // message available, then we use our previous sensor values with some updates
                             if (error != RawSensors::Error::OK && previousSensors) {
                                 // Add the sensor values to the system properly
-                                sensors->servo.push_back({error,
-                                                          id,
-                                                          original.torque_enabled,
-                                                          original.p_gain,
-                                                          original.i_gain,
-                                                          original.d_gain,
-                                                          original.goal_position,
-                                                          original.moving_speed,
-                                                          previousSensors->servo[id].present_position,
-                                                          previousSensors->servo[id].present_velocity,
-                                                          previousSensors->servo[id].load,
-                                                          previousSensors->servo[id].voltage,
-                                                          previousSensors->servo[id].temperature});
+                                sensors->servo.emplace_back(error,
+                                                            id,
+                                                            original.torque_enabled,
+                                                            original.p_gain,
+                                                            original.i_gain,
+                                                            original.d_gain,
+                                                            original.goal_position,
+                                                            original.moving_speed,
+                                                            previousSensors->servo[id].present_position,
+                                                            previousSensors->servo[id].present_velocity,
+                                                            previousSensors->servo[id].load,
+                                                            previousSensors->servo[id].voltage,
+                                                            previousSensors->servo[id].temperature);
                             }
                             // Otherwise we can just use the new values as is
                             else {
                                 // Add the sensor values to the system properly
-                                sensors->servo.push_back({error,
-                                                          id,
-                                                          original.torque_enabled,
-                                                          original.p_gain,
-                                                          original.i_gain,
-                                                          original.d_gain,
-                                                          original.goal_position,
-                                                          original.moving_speed,
-                                                          original.present_position,
-                                                          original.present_speed,
-                                                          original.load,
-                                                          original.voltage,
-                                                          static_cast<float>(original.temperature)});
+                                sensors->servo.emplace_back(error,
+                                                            id,
+                                                            original.torque_enabled,
+                                                            original.p_gain,
+                                                            original.i_gain,
+                                                            original.d_gain,
+                                                            original.goal_position,
+                                                            original.moving_speed,
+                                                            original.present_position,
+                                                            original.present_speed,
+                                                            original.load,
+                                                            original.voltage,
+                                                            static_cast<float>(original.temperature));
                             }
                         }
 
@@ -479,14 +479,14 @@ namespace module::input {
                          *               Buttons and LEDs               *
                          ************************************************/
                         sensors->button.reserve(2);
-                        sensors->button.push_back(Sensors::Button(0, input.buttons.left));
-                        sensors->button.push_back(Sensors::Button(1, input.buttons.middle));
+                        sensors->button.emplace_back(0, input.buttons.left);
+                        sensors->button.emplace_back(1, input.buttons.middle);
                         sensors->led.reserve(5);
-                        sensors->led.push_back(Sensors::LED(0, input.led_panel.led2 ? 0xFF0000 : 0));
-                        sensors->led.push_back(Sensors::LED(1, input.led_panel.led3 ? 0xFF0000 : 0));
-                        sensors->led.push_back(Sensors::LED(2, input.led_panel.led4 ? 0xFF0000 : 0));
-                        sensors->led.push_back(Sensors::LED(3, input.head_led.RGB));  // Head
-                        sensors->led.push_back(Sensors::LED(4, input.eye_led.RGB));   // Eye
+                        sensors->led.emplace_back(0, input.led_panel.led2 ? 0xFF0000 : 0);
+                        sensors->led.emplace_back(1, input.led_panel.led3 ? 0xFF0000 : 0);
+                        sensors->led.emplace_back(2, input.led_panel.led4 ? 0xFF0000 : 0);
+                        sensors->led.emplace_back(3, input.head_led.RGB);  // Head
+                        sensors->led.emplace_back(4, input.eye_led.RGB);   // Eye
 
                         /************************************************
                          *                  Kinematics                  *
