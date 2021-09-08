@@ -200,7 +200,7 @@ namespace extension {
             return config.as<std::string>();
         }
 
-        void save(const std::string& file) {
+        void save(const std::string& file) const {
             std::ofstream yaml("scripts/" + hostname + "/" + file, std::ios::trunc | std::ios::out);
             yaml << YAML::convert<std::vector<Frame>>::encode(frames);
             yaml.close();
