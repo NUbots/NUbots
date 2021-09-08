@@ -44,10 +44,10 @@ namespace utility::vision {
             // Ambiguous Classifications
             WHITE_GREEN = 'f'
         };
-        Value value;
+        Value value{Value::UNCLASSIFIED};
 
         // Constructors
-        Colour() : value(Value::UNCLASSIFIED) {}
+        Colour() {}
         Colour(int const& value) : value(static_cast<Value>(value)) {}
         Colour(uint8_t const& value) : value(static_cast<Value>(value)) {}
         Colour(uint32_t const& value) : value(static_cast<Value>(value)) {}
@@ -144,7 +144,7 @@ namespace utility::vision {
     };
 
     struct Pixel {
-        Pixel() : rgba(0) {}
+        Pixel() {}
         Pixel(uint32_t rgba) : rgba(rgba) {}
         Pixel(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : components({{r}, {g}, {b}, a}) {}
         Pixel(uint8_t r, uint8_t g, uint8_t b) : components({{r}, {g}, {b}, 0}) {}
@@ -258,7 +258,7 @@ namespace utility::vision {
         std::string height;
         std::string max_val;
         uint8_t bytes_per_pixel = 0;
-        bool RGB                = 0;
+        bool RGB                = false;
         ifs >> magic_number;
 
         if (magic_number == "P6") {
