@@ -287,8 +287,8 @@ namespace NUClear::dsl {
             static inline void bind(const std::shared_ptr<threading::Reaction>& reaction, const std::string& path) {
                 auto flags = ::extension::FileWatch::RENAMED | ::extension::FileWatch::CHANGED;
 
-                std::string hostname = utility::support::getHostname(),
-                            platform(::extension::Script::getPlatform(hostname));
+                std::string hostname = utility::support::getHostname();
+                std::string platform(::extension::Script::getPlatform(hostname));
 
                 // Set paths to the script files.
                 auto robotScript    = "scripts/" + hostname + "/" + path;
@@ -318,8 +318,8 @@ namespace NUClear::dsl {
                 if (watch && utility::strutil::endsWith(watch.path, ".yaml")) {
                     // Return our yaml file
                     try {
-                        std::string hostname = utility::support::getHostname(),
-                                    platform(::extension::Script::getPlatform(hostname));
+                        std::string hostname = utility::support::getHostname();
+                        std::string platform(::extension::Script::getPlatform(hostname));
 
                         // Get relative path to script file.
                         auto components = utility::strutil::split(watch.path, '/');
