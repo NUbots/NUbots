@@ -315,13 +315,13 @@ namespace utility::math::filter {
                                                      weights.end(),
                                                      stats::resample::multinomial<decltype(weights.begin())>);
                 }
-                else if ((residual_method & ResampleMethod::STRATIFIED) == 0) {
+                if ((residual_method & ResampleMethod::STRATIFIED) == 0) {
                     return stats::resample::residual(model.n_particles,
                                                      weights.begin(),
                                                      weights.end(),
                                                      stats::resample::stratified<decltype(weights.begin())>);
                 }
-                else if ((residual_method & ResampleMethod::SYSTEMATIC) == 0) {
+                if ((residual_method & ResampleMethod::SYSTEMATIC) == 0) {
                     return stats::resample::residual(model.n_particles,
                                                      weights.begin(),
                                                      weights.end(),
@@ -329,7 +329,7 @@ namespace utility::math::filter {
                 }
                 throw std::runtime_error("Invalid setting for residual method.");
             }
-            else if ((resample_method & ResampleMethod::STRATIFIED) == 0) {
+            if ((resample_method & ResampleMethod::STRATIFIED) == 0) {
                 return stats::resample::stratified(model.n_particles, weights.begin(), weights.end());
             }
             else if ((resample_method & ResampleMethod::SYSTEMATIC) == 0) {
