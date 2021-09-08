@@ -66,7 +66,7 @@ namespace module::input {
         }
 
         // Sort all the invalid entries to the end
-        auto end = std::stable_partition(samples.begin(), samples.end(), [](const Sample& s) { return s.valid; });
+        auto* end = std::stable_partition(samples.begin(), samples.end(), [](const Sample& s) { return s.valid; });
 
         // Use the samples to work out the offset between our clock and the cameras clock and if this sync is valid
         int n_samples = 0;  // The number of samples that were valid

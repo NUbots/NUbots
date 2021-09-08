@@ -143,7 +143,7 @@ namespace module::input {
             const auto& name = context.name;
             auto& cam        = context.camera;
             auto& stream     = context.stream;
-            auto device      = arv_camera_get_device(cam.get());
+            auto* device     = arv_camera_get_device(cam.get());
 
             // Stop the video stream so we can apply the settings
             arv::camera_stop_acquisition(cam.get());
@@ -216,7 +216,7 @@ namespace module::input {
                 }
 
                 // Get the feature node
-                auto feature = arv_device_get_feature(device, key.c_str());
+                auto* feature = arv_device_get_feature(device, key.c_str());
                 try {
                     std::string message;
                     if (feature == nullptr) {
@@ -226,29 +226,29 @@ namespace module::input {
                     }
 
                     // Integer setting
-                    else if (ARV_IS_GC_INTEGER_NODE(feature)) {
-                        auto setting  = reinterpret_cast<ArvGcInteger*>(feature);
+                    else if (ARV_IS_GC_INTEGER_NODE(feature) != 0) {
+                        auto* setting = reinterpret_cast<ArvGcInteger*>(feature);
                         int64_t value = std::llround(double(cfg.second.as<Expression>()));
                         message       = set_setting(setting, value);
                     }
 
                     // Floating point setting
-                    else if (ARV_IS_GC_FLOAT_NODE(feature)) {
-                        auto setting = reinterpret_cast<ArvGcFloat*>(feature);
+                    else if (ARV_IS_GC_FLOAT_NODE(feature) != 0) {
+                        auto* setting = reinterpret_cast<ArvGcFloat*>(feature);
                         double value = cfg.second.as<Expression>();
                         message      = set_setting(setting, value);
                     }
 
                     // Boolean setting
-                    else if (ARV_IS_GC_BOOLEAN(feature)) {
-                        auto setting = reinterpret_cast<ArvGcBoolean*>(feature);
+                    else if (ARV_IS_GC_BOOLEAN(feature) != 0) {
+                        auto* setting = reinterpret_cast<ArvGcBoolean*>(feature);
                         bool value   = bool(cfg.second.as<Expression>());
                         message      = set_setting(setting, value);
                     }
 
                     // Enumeration setting
-                    else if (ARV_IS_GC_ENUMERATION(feature)) {
-                        auto setting      = reinterpret_cast<ArvGcEnumeration*>(feature);
+                    else if (ARV_IS_GC_ENUMERATION(feature) != 0) {
+                        auto* setting     = reinterpret_cast<ArvGcEnumeration*>(feature);
                         std::string value = cfg.second.as<std::string>();
                         message           = set_setting(setting, value);
                     }
