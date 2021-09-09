@@ -33,19 +33,49 @@ using utility::support::resolve_expression;
  */
 
 // MY NOTES: test for primitives (int, double), Eigens(vectors, matrices), strings
-// Testing for return types and that data is not fucky
+// Testing for return types and that data is good
 // Use the BDD macros
 
 //
-SCENARIO("yaml nodes can be converted to a given container type.", "[utility][support][yaml_expression]"){
+SCENARIO("yaml nodes can be converted to a given container type", "[utility][support][yaml_expression]"){
     GIVEN("A yaml node containing a list of data"){
-        YAML::Node testInts = YAML::LoadFile("/home/nubots/NUbots/shared/tests/data/yamlConversionTestVals.yaml");
-        WHEN("A vector is declared using the return value of utility::support::resolve_expression(yamlNode)"){
-            const std::vector<int> intVector = resolve_expression<int>(testInts["ints"]);
+        YAML::Node testValues = YAML::LoadFile("/home/nubots/NUbots/shared/tests/data/yamlConversionTestVals.yaml");
+        //ints
+        WHEN("An int vector is declared using the return value of utility::support::resolve_expression(yamlNode[ints])"){
+            std::vector<int> intVector = resolve_expression<int>(testValues["ints"]);
+            //Check that the values are good(container size, data type....)
+            THEN("Container sizes should be equivalent and values in the vector should be the same as the yaml node"){
+                //Check container sizes are equivalent
+                REQUIRE(testValues["ints"].size() == intVector.size());
+                //Check values at each index
+                for(size_t i = 0; i < testValues["ints"].size(); i++){
+                    REQUIRE(testValues["ints"][i].as<int>() == intVector.at(i));
+                }
+            }
         }
-        //Check that the values aren't fucked (container size, data type....)
-        for(size_t i = 0; i < testInts["ints"].size(); i++){
-            REQUIRE(1 == 2);
+        //float
+        WHEN("A float vector is declared using the return value of utility::support::resolve_expression(yamlNode[floats])"){
+            std::vector<float> floatVector = resolve_expression<float>(testValues["floats"]);
+            THEN("Container sizes should be equivalent and values in the vector should be the same as the yaml node"){
+                //Check container sizes are equivalent
+                REQUIRE(testValues["floats"].size() == floatVector.size());
+                //check values at each index
+                for(size_t i = 0; i < testValues["floats"].size(); i++){
+                    REQUIRE(testValues["floats"][i].as<float>() == floatVector.at(i));
+                }
+            }
+        }
+        //double
+        WHEN("A double vector is declared using the return value of utility::support::resolve_expression(yamlNode[doubles])"){
+            std::vector<double> doubleVector = resolve_expression<double>(testValues["doubles"]);
+            THEN("Container sizes should be equivalent and values in the vector should be the same as the yaml node"){
+                //Check container sizes are equivalent
+                REQUIRE(testValues["doubles"].size() == doubleVector.size());
+                //check values at each index
+                for(size_t i = 0; i < testValues["doubles"].size(); i++){
+                    REQUIRE(testValues["doubles"][i].as<double>() == doubleVector.at(i));
+                }
+            }
         }
     }
 }
