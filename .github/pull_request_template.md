@@ -28,7 +28,7 @@ Also tell reviewers how to verify/test your code's correctness here.
 
 **If there are many things left to do then consider a [_draft_ PR](https://github.blog/2019-02-14-introducing-draft-pull-requests/)**
 
-## Labels Info (delete the rest of this once you have read it)
+### Labels Info (delete the rest of this once you have read it)
 
 We use GitHub's Labels to categorise PRs and Issues. Most PRs should have these labels:
 
