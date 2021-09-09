@@ -1,4 +1,4 @@
-FROM archlinux:base-20210110.0.13332
+FROM archlinux:base-20210829.0.32635
 
 WORKDIR /home/nubots/NUbots
 
