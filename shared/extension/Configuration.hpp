@@ -239,23 +239,27 @@ namespace NUClear::dsl {
 
         template <>
         struct DSLProxy<::extension::Configuration> {
-            /// @brief Binds config files, in order from least specific to most specific - default, per-robot, binary
-            ///        The later, more specific configs (if they exist) supersede the less specific ones
-            /// @details If the default config file doesn't exist, we make one
+            /// @brief Sets up the NUClear Reaction for Configuration
+            /// @details Sets up a FileWatch on the path which is passed in
+            ///          The config files are FileWatched in order from least specific to most specific:
+            ///          1. default, 2. per-robot, 3. binary
+            ///          The later, more specific configs (if they exist) supersede the less specific ones
+            ///          If the default config file doesn't exist, we make one
             ///          The flags used during binding tell FileWatch that the config files have been changed or
             ///          renamed, which tells FileWatch they should be updated
-            /// @tparam DSL The DSL keyword which is used to bind the reactions when the config files are found
-            /// @param reaction The reaction which the config file is bound to
-            /// @param path The filename of the desired config file
+            /// @see FileWatch
+            /// @tparam DSL Magic NUClear type. Ignore for the purpose of understanding this function
+            /// @param reaction The reaction we are binding which will watch the config path(s)
+            /// @param filename The filename of the desired config file
             template <typename DSL>
-            static inline void bind(const std::shared_ptr<threading::Reaction>& reaction, const fs::path& path) {
+            static inline void bind(const std::shared_ptr<threading::Reaction>& reaction, const fs::path& filename) {
                 auto flags = ::extension::FileWatch::RENAMED | ::extension::FileWatch::CHANGED;
 
                 // Get hostname so we can find the correct per-robot config directory.
                 const std::string hostname = utility::support::getHostname();
 
                 // Check if there is a default config. If there isn't, try to make one
-                const fs::path defaultConfig = fs::path("config") / path;
+                const fs::path defaultConfig = fs::path("config") / filename;
                 if (!fs::exists(defaultConfig)) {
                     NUClear::log<NUClear::WARN>("Configuration file '" + defaultConfig.string()
                                                 + "' does not exist. Creating it.");
@@ -268,17 +272,17 @@ namespace NUClear::dsl {
                     else {
                         std::ofstream ofs(defaultConfig.string());
                         if (!ofs.is_open()) {
-                            throw std::runtime_error("Failed creating file '" + path.string() + "'.");
+                            throw std::runtime_error("Failed creating file '" + filename.string() + "'.");
                         }
                         ofs.close();
                     }
                 }
 
-                // Bind our default path
+                // Bind our default config file path
                 DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, defaultConfig, flags);
 
-                // Bind our robot specific path if it exists
-                const fs::path robotConfig = fs::path("config") / hostname / path;
+                // Bind our robot specific config file if it exists
+                const fs::path robotConfig = fs::path("config") / hostname / filename;
                 if (fs::exists(robotConfig)) {
                     DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, robotConfig, flags);
                 }
@@ -287,8 +291,8 @@ namespace NUClear::dsl {
                 // If not, we don't bother checking for a binary config to bind
                 const auto binaryName = get_first_command_line_arg();
                 if (binaryName != "") {
-                    fs::path binaryConfig = fs::path("config") / binaryName / path;
-                    // Bind our binary specific path if it exists
+                    fs::path binaryConfig = fs::path("config") / binaryName / filename;
+                    // Bind our binary specific config file if it exists
                     if (fs::exists(binaryConfig)) {
                         DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, binaryConfig, flags);
                     }
