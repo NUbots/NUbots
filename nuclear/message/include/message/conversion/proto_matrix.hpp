@@ -1427,9 +1427,8 @@ namespace message::conversion {
         proto.mutable_v()->resize(vector.size());
 
         // Copy the data across
-        Eigen::Map<::message::conversion::math::cvec>(
-            const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(proto.mutable_v()->data())),
-            proto.v().size()) = vector;
+        Eigen::Map<::message::conversion::math::cvec>(reinterpret_cast<uint8_t*>(proto.mutable_v()->data()),
+                                                      proto.v().size()) = vector;
 
         return proto;
     }
@@ -1454,10 +1453,9 @@ namespace message::conversion {
         proto.mutable_v()->resize(matrix.size());
 
         // Copy it across
-        Eigen::Map<::message::conversion::math::cmat>(
-            const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(proto.mutable_v()->data())),
-            matrix.rows(),
-            matrix.cols()) = matrix;
+        Eigen::Map<::message::conversion::math::cmat>(reinterpret_cast<uint8_t*>(proto.mutable_v()->data()),
+                                                      matrix.rows(),
+                                                      matrix.cols()) = matrix;
 
         return proto;
     }
