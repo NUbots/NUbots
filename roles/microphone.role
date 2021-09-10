@@ -1,0 +1,3 @@
+nuclear_role(
+    input::Microphone
+)
