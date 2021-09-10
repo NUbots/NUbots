@@ -27,6 +27,7 @@
 #include <utility>
 #include <vector>
 
+#include "utility/math/filter/ResampleMethod.hpp"
 #include "utility/math/stats/multivariate.hpp"
 #include "utility/math/stats/resample/multinomial.hpp"
 #include "utility/math/stats/resample/resample.hpp"
@@ -37,52 +38,6 @@
 namespace utility::math::filter {
 
     using utility::math::stats::MultivariateNormal;
-
-    /// @brief Wrapper for resampling methods
-    /// @see http://users.isy.liu.se/rt/schon/Publications/HolSG2006.pdf for an explanation on each one
-    struct [[nodiscard]] ResampleMethod {
-        constexpr ResampleMethod() = default;
-
-        // The possible resampling methods
-
-        // Enabled by default
-        bool residual_enabled   = true;
-        bool systematic_enabled = true;
-
-        // Disabled by default
-        bool multinomial_enabled = false;
-        bool stratified_enabled  = false;
-
-        /// @brief Checks the validity of the resample method
-        /// @retval true A valid resampling method configuration has been set
-        /// @retval false An invalid resampling method configuration has been set
-        [[nodiscard]] constexpr bool is_valid() const {
-            // Only valid to have multiple bits set if we are using the residual method
-            if (disjoint_methods_enabled() || residual_method_only()) {
-                return false;
-            }
-
-            // // The residual resampling method requires a secondary method to resample the residual particles.
-            // if (residual_method_only()) {
-            //     return false;
-            // }
-
-            return true;
-        }
-
-    private:
-        [[nodiscard]] constexpr bool disjoint_methods_enabled() const {
-            // clang-format off
-            return     (systematic_enabled && multinomial_enabled)
-                    || (systematic_enabled && stratified_enabled)
-                    || (multinomial_enabled && stratified_enabled);
-            // clang-format on
-        }
-
-        [[nodiscard]] constexpr bool residual_method_only() const {
-            return residual_enabled && (systematic_enabled || multinomial_enabled || stratified_enabled);
-        }
-    };
 
     /**
      * @author Alex Biddulph, Trent Houliston
