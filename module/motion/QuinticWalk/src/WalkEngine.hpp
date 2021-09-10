@@ -113,7 +113,7 @@ namespace module::motion {
          * Return current walk phase
          * between 0 and 1
          */
-        [[nodiscard]] float getPhase() const {
+        [[nodiscard]] constexpr float getPhase() const {
             return phase;
         }
 
@@ -122,28 +122,28 @@ namespace module::motion {
          * 0 and half period for
          * trajectories evaluation
          */
-        [[nodiscard]] float getTrajsTime() const {
+        [[nodiscard]] constexpr float getTrajsTime() const {
             return phase < 0.5f ? phase / params.freq : (phase - 0.5f) / params.freq;
         }
 
         /**
          * Get the footstep object.
          */
-        [[nodiscard]] inline Footstep getFootstep() const {
+        [[nodiscard]] inline Footstep getFootstep() {
             return foot_step;
         }
 
         /**
          * Return if true if left is current support foot
          */
-        [[nodiscard]] bool isLeftSupport() const {
+        [[nodiscard]] constexpr bool isLeftSupport() {
             return foot_step.isLeftSupport();
         }
 
         /**
          * Return true if both feet are currently on the ground
          */
-        [[nodiscard]] bool isDoubleSupport() const {
+        [[nodiscard]] constexpr bool isDoubleSupport() {
             // returns true if the value of the "is_float_support" spline is currently higher than 0.5
             // the spline should only have values of 0 or 1
             return trajs.get(TrajectoryTypes::IS_DOUBLE_SUPPORT).pos(getTrajsTime()) >= 0.5f;

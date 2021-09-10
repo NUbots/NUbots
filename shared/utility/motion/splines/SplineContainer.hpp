@@ -151,7 +151,7 @@ namespace utility::motion::splines {
         /**
          * Export to and Import from given file name in "spline" CSV format prefixed with spline name
          */
-        void exportData(const std::string& file_name) const {
+        constexpr void exportData(const std::string& file_name) const {
             if (container.size() == 0) {
                 throw std::logic_error("SplineContainer empty");
             }
@@ -169,7 +169,7 @@ namespace utility::motion::splines {
             file.close();
         }
 
-        void importData(const std::string& file_name) const {
+        constexpr void importData(const std::string& file_name) {
             std::ifstream file(file_name);
             if (!file.is_open()) {
                 throw std::runtime_error(fmt::format("SplineContainer unable to read file: ", file_name));
