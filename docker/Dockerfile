@@ -1,4 +1,3 @@
-# syntax = docker/dockerfile:1.3-labs
 ##############################################
 #   ___  ____    ____       _                #
 #  / _ \/ ___|  / ___|  ___| |_ _   _ _ __   #
@@ -320,6 +319,7 @@ ARG user_uid=1000
 ARG user_gid=$user_uid
 RUN groupadd --gid $user_gid nubots \
     && useradd --uid $user_uid --gid $user_gid -m nubots
+USER nubots
 
 # Copy ssh keys over to the system
 RUN install -d -m 0755 -o nubots -g nubots /home/nubots/.ssh
@@ -329,14 +329,12 @@ COPY --chown=nubots:nubots home/nubots/.ssh/config /home/nubots/.ssh/config
 COPY --chown=nubots:nubots home/nubots/.gdbinit /home/nubots/.gdbinit
 RUN chmod 600 /home/nubots/.ssh/id_rsa /home/nubots/.ssh/config
 
+# Setup the locations where we will mount our folders
 RUN install -d -m 0755 /home/nubots/NUbots
 RUN install -d -m 0777 /home/nubots/build
-# Setup the locations where we will mount our folders
-WORKDIR /home/nubots/NUbots
-USER nubots
 
 #############################################
-#           Parallel Build Packages         #
+#               Voice2json                  #
 #############################################
 
 FROM base AS openfst
@@ -368,7 +366,7 @@ RUN sed '/^pkgver=/s/5.5.r9114.d6198906f/5.5.r9187.d53b62fd4/' -i PKGBUILD
 COPY --from=kaldi-openfst /home/nubots/kaldi-openfst/kaldi-openfst-1.7.2-2-x86_64.pkg.tar.zst /home/nubots/kaldi/
 RUN sudo pacman -U --noconfirm kaldi-openfst-1.7.2-2-x86_64.pkg.tar.zst
 RUN makepkg || true
-RUN test -f kaldi-5.5.r9193.0f0f362d9-1-x86_64.pkg.tar.zst
+RUN test -f kaldi-5.5.r9195.3b8a97d85-1-x86_64.pkg.tar.zst
 
 FROM base AS ngram
 
@@ -412,7 +410,7 @@ FROM base
 
 WORKDIR /home/nubots/packages/
 COPY --from=kaldi-openfst       /home/nubots/kaldi-openfst/kaldi-openfst-1.7.2-2-x86_64.pkg.tar.zst /home/nubots/packages/
-COPY --from=kaldi               /home/nubots/kaldi/kaldi-5.5.r9193.0f0f362d9-1-x86_64.pkg.tar.zst /home/nubots/packages/
+COPY --from=kaldi               /home/nubots/kaldi/kaldi-5.5.r9195.3b8a97d85-1-x86_64.pkg.tar.zst /home/nubots/packages/
 COPY --from=openfst             /home/nubots/openfst/openfst-1.7.9-1-x86_64.pkg.tar.zst /home/nubots/packages/
 COPY --from=ngram               /home/nubots/opengrm-ngram/ngram-1.3.11-1-x86_64.pkg.tar.zst /home/nubots/packages/
 COPY --from=phonetisaurus       /home/nubots/python-pybindgen/python-pybindgen-0.20.1-1-x86_64.pkg.tar.zst /home/nubots/packages/
@@ -421,7 +419,7 @@ COPY --from=phonetisaurus       /home/nubots/phonetisaurus-git/phonetisaurus-git
 WORKDIR /home/nubots/packages
 RUN sudo pacman -U --noconfirm \
     kaldi-openfst-1.7.2-2-x86_64.pkg.tar.zst \
-    kaldi-5.5.r9193.0f0f362d9-1-x86_64.pkg.tar.zst \
+    kaldi-5.5.r9195.3b8a97d85-1-x86_64.pkg.tar.zst \
     openfst-1.7.9-1-x86_64.pkg.tar.zst \
     ngram-1.3.11-1-x86_64.pkg.tar.zst \
     python-pybindgen-0.20.1-1-x86_64.pkg.tar.zst \
@@ -431,14 +429,13 @@ RUN sudo pacman -U --noconfirm \
 RUN install-package python-wheel swig alsa-lib jack portaudio sox gcc-fortran jq espeak
 RUN git clone https://github.com/synesthesiam/voice2json /home/nubots/voice2json
 WORKDIR /home/nubots/voice2json
-RUN <<EOF cat > mod.sed
-/@ENABLE_POCKETSPHINX@/s//no/
-/@ENABLE_KALDI@/s//yes/
-/@ENABLE_DEEPSPEECH@/s//no/
-/@PACKAGE_NAME@/s//voice2json/
-/@PACKAGE_VERSION@/s//0.2.0/
-/@PACKAGE_BUGREPORT@/s//mike@rhasspy.org/
-EOF
+RUN touch mod.sed
+RUN echo "/@ENABLE_POCKETSPHINX@/s//no/" >> mod.sed
+RUN echo "/@ENABLE_KALDI@/s//yes/" >> mod.sed
+RUN echo "/@ENABLE_DEEPSPEECH@/s//no/" >> mod.sed
+RUN echo "/@PACKAGE_NAME@/s//voice2json/" >> mod.sed
+RUN echo "/@PACKAGE_VERSION@/s//0.2.0/" >> mod.sed
+RUN echo "/@PACKAGE_BUGREPORT@/s//mike@rhasspy.org/" >> mod.sed
 RUN sed -f mod.sed setup.py.in > setup.py
 RUN sudo python setup.py install
 
@@ -449,3 +446,12 @@ ENV KALDI_DIR=/opt/kaldi
 ENV PATH="$PATH:/opt/kaldi/src/bin:/opt/kaldi/src/chainbin:/opt/kaldi/src/cudadecoderbin:/opt/kaldi/src/cudafeatbin:/opt/kaldi/src/featbin:/opt/kaldi/src/fgmmbin:/opt/kaldi/src/fstbin:/opt/kaldi/src/gmmbin:/opt/kaldi/src/ivectorbin:/opt/kaldi/src/kwsbin:/opt/kaldi/src/latbin:/opt/kaldi/src/lmbin:/opt/kaldi/src/nnet2bin:/opt/kaldi/src/nnet3bin:/opt/kaldi/src/nnetbin:/opt/kaldi/src/online2bin:/opt/kaldi/src/rnnlmbin:/opt/kaldi/src/sgmm2bin:/opt/kaldi/src/tfrnnlmbin"
 # Some scripts try to use python23... (make_lexicon_fst.py)
 RUN sudo ln /usr/bin/python3 /usr/bin/python23
+# Tell voice2json where voice2json is in case you are not within /home/nubots/voice2json.
+ENV voice2json_dir=/home/nubots/voice2json
+# Download the kaldi speech to text model.
+RUN python -m voice2json download-profile
+COPY --chown=nubots:nubots voice2json/sentences.ini /home/nubots/.local/share/voice2json/en-us_kaldi-zamia/
+COPY --chown=nubots:nubots voice2json/slots/ /home/nubots/.local/share/voice2json/en-us_kaldi-zamia/slots/
+RUN python -m voice2json train-profile
+
+WORKDIR /home/nubots/NUbots
