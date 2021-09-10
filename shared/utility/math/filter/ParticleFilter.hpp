@@ -98,7 +98,8 @@ namespace utility::math::filter {
          */
         ParticleFilter(const StateVec& mean,
                        const StateMat& covariance,
-                       const int& resample_method_ = ResampleMethod::RESIDUAL | ResampleMethod::SYSTEMATIC) {
+                       const ResampleMethod& resample_method_ = ResampleMethod(ResampleMethod::RESIDUAL
+                                                                               | ResampleMethod::SYSTEMATIC)) {
 
             if (!check_resample_method(resample_method_)) {
                 throw std::runtime_error("Invalid setting for resampling method");
@@ -127,7 +128,8 @@ namespace utility::math::filter {
          * when the residual method needs to resample residual particles.
          */
         ParticleFilter(const std::vector<std::pair<StateVec, StateMat>>& hypotheses,
-                       const int& resample_method_ = ResampleMethod::RESIDUAL | ResampleMethod::SYSTEMATIC) {
+                       const ResampleMethod& resample_method_ = ResampleMethod(ResampleMethod::RESIDUAL
+                                                                               | ResampleMethod::SYSTEMATIC)) {
 
             if (!check_resample_method(resample_method_)) {
                 throw std::runtime_error("Invalid setting for resampling method");
@@ -204,7 +206,7 @@ namespace utility::math::filter {
          * @return true A valid resampling method configuration has been set
          * @return false An invalid resampling method configuration has been set
          */
-        bool check_resample_method(const int& resample_method_) const {
+        bool check_resample_method(const ResampleMethod& resample_method_) const {
             // Only valid to have multiple bits set if we are using the residual method
             if (((resample_method_ & ~ResampleMethod::MULTINOMIAL) != 0)
                 || ((resample_method_ & ~ResampleMethod::STRATIFIED) != 0)
