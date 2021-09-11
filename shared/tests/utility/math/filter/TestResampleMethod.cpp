@@ -31,7 +31,7 @@ TEST_CASE("Residual method enabled alone is invalid", "[utility][math][filter][r
     REQUIRE(!method_instance.is_valid());
 }
 
-TEST_CASE("Residual + multinomial method is valid") {
+TEST_CASE("Residual + multinomial method is valid", "[utility][math][filter][resample_method]") {
     INFO("Given a ResampleMethod with the residual and multinomial methods enabled");
     auto method_instance = utility::math::filter::ResampleMethod();
 
@@ -42,7 +42,7 @@ TEST_CASE("Residual + multinomial method is valid") {
     REQUIRE(method_instance.is_valid());
 }
 
-TEST_CASE("Residual + systematic method is valid") {
+TEST_CASE("Residual + systematic method is valid", "[utility][math][filter][resample_method]") {
     INFO("Given a ResampleMethod with the residual and systematic methods enabled");
     auto method_instance = utility::math::filter::ResampleMethod();
 
@@ -53,7 +53,7 @@ TEST_CASE("Residual + systematic method is valid") {
     REQUIRE(method_instance.is_valid());
 }
 
-TEST_CASE("Residual + stratified method is valid") {
+TEST_CASE("Residual + stratified method is valid", "[utility][math][filter][resample_method]") {
     INFO("Given a ResampleMethod with the residual and stratified methods enabled");
     auto method_instance = utility::math::filter::ResampleMethod();
 
@@ -64,7 +64,7 @@ TEST_CASE("Residual + stratified method is valid") {
     REQUIRE(method_instance.is_valid());
 }
 
-TEST_CASE("Multinomial method alone is valid") {
+TEST_CASE("Multinomial method alone is valid", "[utility][math][filter][resample_method]") {
     INFO("Given a ResampleMethod with the Multinomial methods enabled");
     auto method_instance = utility::math::filter::ResampleMethod();
 
@@ -74,7 +74,7 @@ TEST_CASE("Multinomial method alone is valid") {
     REQUIRE(method_instance.is_valid());
 }
 
-TEST_CASE("Systematic method alone is valid") {
+TEST_CASE("Systematic method alone is valid", "[utility][math][filter][resample_method]") {
     INFO("Given a ResampleMethod with the Systematic methods enabled");
     auto method_instance = utility::math::filter::ResampleMethod();
 
@@ -84,7 +84,7 @@ TEST_CASE("Systematic method alone is valid") {
     REQUIRE(method_instance.is_valid());
 }
 
-TEST_CASE("Stratified method alone is valid") {
+TEST_CASE("Stratified method alone is valid", "[utility][math][filter][resample_method]") {
     INFO("Given a ResampleMethod with the Stratified methods enabled");
     auto method_instance = utility::math::filter::ResampleMethod();
 
