@@ -21,6 +21,14 @@
 
 #include "utility/math/filter/ResampleMethod.hpp"
 
+TEST_CASE("Enabling no resampling method is invalid", "[utility][math][filter][resample_method]") {
+    INFO("Given a ResampleMethod without any methods enabled");
+    auto method_instance = utility::math::filter::ResampleMethod();
+
+    INFO("The state should be invalid");
+    REQUIRE(!method_instance.is_valid());
+}
+
 TEST_CASE("Residual method enabled alone is invalid", "[utility][math][filter][resample_method]") {
     INFO("Given a ResampleMethod with only residual enabled");
     auto method_instance = utility::math::filter::ResampleMethod();
