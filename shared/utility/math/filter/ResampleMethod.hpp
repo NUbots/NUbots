@@ -63,7 +63,7 @@ namespace utility::math::filter {
         }
 
         [[nodiscard]] constexpr bool residual_method_only() const {
-            return residual_enabled && (systematic_enabled || multinomial_enabled || stratified_enabled);
+            return residual_enabled && !(systematic_enabled || multinomial_enabled || stratified_enabled);
         }
     };
 
