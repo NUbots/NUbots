@@ -68,7 +68,8 @@ namespace utility::motion::kinematics {
         const Eigen::Affine3f& leftTarget,
         const Eigen::Affine3f& rightTarget);
 
-    [[nodiscard]] std::vector<std::pair<ServoID, float>> calculateHeadJoints(const Eigen::Vector3f& cameraUnitVector);
+    template <typename Scalar>
+    std::vector<std::pair<ServoID, Scalar>> calculateHeadJoints(const Eigen::Matrix<Scalar, 3, 1>& cameraUnitVector);
 
 }  // namespace utility::motion::kinematics
 
