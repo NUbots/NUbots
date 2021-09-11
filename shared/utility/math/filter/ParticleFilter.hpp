@@ -190,12 +190,12 @@ namespace utility::math::filter {
 
         ParticleList particles;
         ParticleWeights weights;
-        int8_t resample_method;
+        ResampleMethod resample_method{};
 
         /// @brief Helper to construct the default resample method
         /// @returns ResampleMethod configuration object with only residual and systematic resampling enabled
         [[nodiscard]] constexpr ResampleMethod DefaultResampleMethod() {
-            auto method               = ResampleMethod();
+            auto method               = utility::math::filter::ResampleMethod();
             method.residual_enabled   = true;
             method.systematic_enabled = true;
             return method;
