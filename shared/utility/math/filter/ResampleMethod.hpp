@@ -34,19 +34,16 @@ namespace utility::math::filter {
         bool stratified_enabled  = false;
 
         /// @brief Checks the validity of the resample method
+        /// @details To be a valid method, it must have exactly one of systematic, stratified, or multinomial enabled.
+        ///          Residual resampling can be optionally enabled as well as one of those, but it is invalid on its own
+        ///          That's because residual resampling requires a secondary method to resample the residual particles
         /// @retval true A valid resampling method configuration has been set
         /// @retval false An invalid resampling method configuration has been set
         [[nodiscard]] constexpr bool is_valid() const {
-            // Only valid to have multiple bits set if we are using the residual method
-            if (disjoint_methods_enabled() || residual_method_only()) {
+
+            if (no_methods_enabled() || disjoint_methods_enabled() || residual_method_only()) {
                 return false;
             }
-
-            // // The residual resampling method requires a secondary method to resample the residual particles.
-            // if (residual_method_only()) {
-            //     return false;
-            // }
-
             return true;
         }
 
@@ -61,6 +58,10 @@ namespace utility::math::filter {
 
         [[nodiscard]] constexpr bool residual_method_only() const {
             return residual_enabled && !(systematic_enabled || multinomial_enabled || stratified_enabled);
+        }
+
+        [[nodiscard]] constexpr bool no_methods_enabled() const {
+            return !(residual_enabled || systematic_enabled || multinomial_enabled || stratified_enabled);
         }
     };
 
