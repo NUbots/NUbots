@@ -102,4 +102,84 @@ TEST_CASE("Stratified method alone is valid", "[utility][math][filter][resample_
     REQUIRE(method_instance.is_valid());
 }
 
-// TODO: Add tests for multiple disjoint states
+TEST_CASE("Stratified + Systematic methods together are invalid", "[utility][math][filter][resample_method]") {
+    INFO("Given a ResampleMethod with the Stratified and Systematic methods enabled");
+    auto method_instance = utility::math::filter::ResampleMethod();
+
+    method_instance.stratified_enabled = true;
+    method_instance.systematic_enabled = true;
+
+    INFO("With residual resampling disabled");
+    method_instance.residual_enabled = false;
+
+    INFO("The state should be invalid");
+    REQUIRE(!method_instance.is_valid());
+
+    INFO("and with residual resampling enabled");
+    method_instance.residual_enabled = true;
+
+    INFO("The state should still be invalid");
+    REQUIRE(!method_instance.is_valid());
+}
+
+TEST_CASE("Stratified + Multinomial methods together are invalid", "[utility][math][filter][resample_method]") {
+    INFO("Given a ResampleMethod with the Stratified and Multinomial methods enabled");
+    auto method_instance = utility::math::filter::ResampleMethod();
+
+    method_instance.stratified_enabled  = true;
+    method_instance.multinomial_enabled = true;
+
+    INFO("With residual resampling disabled");
+    method_instance.residual_enabled = false;
+
+    INFO("The state should be invalid");
+    REQUIRE(!method_instance.is_valid());
+
+    INFO("and with residual resampling enabled");
+    method_instance.residual_enabled = true;
+
+    INFO("The state should still be invalid");
+    REQUIRE(!method_instance.is_valid());
+}
+
+TEST_CASE("Systematic + Multinomial methods together are invalid", "[utility][math][filter][resample_method]") {
+    INFO("Given a ResampleMethod with the Systematic and Multinomial methods enabled");
+    auto method_instance = utility::math::filter::ResampleMethod();
+
+    method_instance.systematic_enabled  = true;
+    method_instance.multinomial_enabled = true;
+
+    INFO("With residual resampling disabled");
+    method_instance.residual_enabled = false;
+
+    INFO("The state should be invalid");
+    REQUIRE(!method_instance.is_valid());
+
+    INFO("and with residual resampling enabled");
+    method_instance.residual_enabled = true;
+
+    INFO("The state should still be invalid");
+    REQUIRE(!method_instance.is_valid());
+}
+
+TEST_CASE("Systematic + Multinomial + Stratified methods together are invalid",
+          "[utility][math][filter][resample_method]") {
+    INFO("Given a ResampleMethod with the Systematic, Multinomial, and Stratified methods enabled");
+    auto method_instance = utility::math::filter::ResampleMethod();
+
+    method_instance.systematic_enabled  = true;
+    method_instance.multinomial_enabled = true;
+    method_instance.stratified_enabled  = true;
+
+    INFO("With residual resampling disabled");
+    method_instance.residual_enabled = false;
+
+    INFO("The state should be invalid");
+    REQUIRE(!method_instance.is_valid());
+
+    INFO("and with residual resampling enabled");
+    method_instance.residual_enabled = true;
+
+    INFO("The state should still be invalid");
+    REQUIRE(!method_instance.is_valid());
+}
