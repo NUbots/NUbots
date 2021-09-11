@@ -1,5 +1,5 @@
 /*
- * Particle filter substitute for UKF
+ * Resampling Method Configuration Wrapper
  *
  * This file is part of the NUbots Codebase.
  *
