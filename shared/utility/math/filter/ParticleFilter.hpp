@@ -39,13 +39,6 @@ namespace utility::math::filter {
 
     using utility::math::stats::MultivariateNormal;
 
-    [[nodiscard]] constexpr ResampleMethod DefaultResampleMethod() {
-        auto method               = ResampleMethod();
-        method.residual_enabled   = true;
-        method.systematic_enabled = true;
-        return method;
-    }
-
     /**
      * @author Alex Biddulph, Trent Houliston
      *
@@ -199,27 +192,13 @@ namespace utility::math::filter {
         ParticleWeights weights;
         int8_t resample_method;
 
-        /**
-         * @brief Checks the validity of the resample method bits
-         *
-         * @param resample_method_ The resampling method configuration to check
-         * @return true A valid resampling method configuration has been set
-         * @return false An invalid resampling method configuration has been set
-         */
-        bool check_resample_method(const ResampleMethod& resample_method_) const {
-            // Only valid to have multiple bits set if we are using the residual method
-            if (((resample_method_ & ~ResampleMethod::MULTINOMIAL) != 0)
-                || ((resample_method_ & ~ResampleMethod::STRATIFIED) != 0)
-                || ((resample_method_ & ~ResampleMethod::SYSTEMATIC) != 0)) {
-                return false;
-            }
-
-            // The residual resampling method requires a secondary method to resample the residual particles.
-            if ((resample_method_ & ~ResampleMethod::RESIDUAL) == 0) {
-                return false;
-            }
-
-            return true;
+        /// @brief Helper to construct the default resample method
+        /// @returns ResampleMethod configuration object with only residual and systematic resampling enabled
+        [[nodiscard]] constexpr ResampleMethod DefaultResampleMethod() {
+            auto method               = ResampleMethod();
+            method.residual_enabled   = true;
+            method.systematic_enabled = true;
+            return method;
         }
 
         /**
