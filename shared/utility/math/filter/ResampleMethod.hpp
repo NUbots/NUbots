@@ -27,12 +27,9 @@ namespace utility::math::filter {
         constexpr ResampleMethod() = default;
 
         // The possible resampling methods
-
-        // Enabled by default
-        bool residual_enabled   = true;
-        bool systematic_enabled = true;
-
-        // Disabled by default
+        // All are disabled by default
+        bool residual_enabled    = false;
+        bool systematic_enabled  = false;
         bool multinomial_enabled = false;
         bool stratified_enabled  = false;
 

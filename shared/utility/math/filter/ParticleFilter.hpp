@@ -39,6 +39,13 @@ namespace utility::math::filter {
 
     using utility::math::stats::MultivariateNormal;
 
+    [[nodiscard]] constexpr ResampleMethod DefaultResampleMethod() {
+        auto method               = ResampleMethod();
+        method.residual_enabled   = true;
+        method.systematic_enabled = true;
+        return method;
+    }
+
     /**
      * @author Alex Biddulph, Trent Houliston
      *
@@ -77,7 +84,7 @@ namespace utility::math::filter {
          */
         ParticleFilter() {
             set_state(StateVec::Zero(), StateMat::Identity() * 0.1);
-            resample_method = ResampleMethod();
+            resample_method = DefaultResampleMethod();
         }
 
         /**
@@ -93,7 +100,7 @@ namespace utility::math::filter {
          */
         ParticleFilter(const StateVec& mean,
                        const StateMat& covariance,
-                       const ResampleMethod& resample_method_ = ResampleMethod()) {
+                       const ResampleMethod& resample_method_ = DefaultResampleMethod()) {
 
             if (!resample_method_.is_valid()) {
                 throw std::runtime_error("Invalid setting for resampling method");
@@ -122,7 +129,7 @@ namespace utility::math::filter {
          * when the residual method needs to resample residual particles.
          */
         ParticleFilter(const std::vector<std::pair<StateVec, StateMat>>& hypotheses,
-                       const ResampleMethod& resample_method_ = ResampleMethod()) {
+                       const ResampleMethod& resample_method_ = DefaultResampleMethod()) {
 
             if (!resample_method_.is_valid()) {
                 throw std::runtime_error("Invalid setting for resampling method");
