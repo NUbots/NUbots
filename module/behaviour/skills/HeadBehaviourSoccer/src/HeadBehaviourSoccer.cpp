@@ -479,7 +479,7 @@ namespace module::behaviour::skills {
         // Rotate target angles to World space
         Eigen::Vector3d lookVector = headToIMUSpace * lookVectorFromHead;
         // Compute inverse kinematics for head direction angles
-        std::vector<std::pair<ServoID, float>> goalAngles = calculateHeadJoints(lookVector);
+        std::vector<std::pair<ServoID, double>> goalAngles = calculateHeadJoints(lookVector);
 
         Eigen::Vector2d result;
         for (auto& angle : goalAngles) {
