@@ -48,6 +48,7 @@ namespace utility::math::filter {
         }
 
     private:
+        /// @brief Returns true if mutually exclusive methods are enabled and false otherwise
         [[nodiscard]] constexpr bool disjoint_methods_enabled() const {
             // clang-format off
             return     (systematic_enabled && multinomial_enabled)
@@ -56,10 +57,12 @@ namespace utility::math::filter {
             // clang-format on
         }
 
+        /// @brief Returns true if residual sampling is the only method enabled and false otherwise
         [[nodiscard]] constexpr bool residual_method_only() const {
             return residual_enabled && !(systematic_enabled || multinomial_enabled || stratified_enabled);
         }
 
+        /// @brief Returns true if there aren't any methods enabled and false otherwise
         [[nodiscard]] constexpr bool no_methods_enabled() const {
             return !(residual_enabled || systematic_enabled || multinomial_enabled || stratified_enabled);
         }
