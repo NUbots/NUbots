@@ -256,19 +256,3 @@ TEST_CASE("Test Quaternion", "[utility][math][Quaternion]") {
     REQUIRE(diff_f.vec().norm() <= 1e-6);
     REQUIRE(diff_b.vec().norm() <= 1e-6);
 }
-
-//NOTE: take this out
-TEST_CASE("TEST YAML INPUT", "[utility][math][Quaternion]"){
-    //NOTE: Use full filepath
-    std::cout << "test TEST test TEST" << std::endl;
-    YAML::Node testData = YAML::LoadFile("/home/nubots/NUbots/shared/tests/data/cartTestValues.yaml");
-    REQUIRE(1 == 1);
-    //vector
-
-    const std::vector<Eigen::Vector3d> testVec = resolve_expression<Eigen::Vector3d>(testData["input"]);
-
-    // //array
-    //std::array<Eigen::Vector3d, 200> testArray = resolve_expression<Eigen::Vector3d, 200>(testInput);
-
-
-}
