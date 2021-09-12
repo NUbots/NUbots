@@ -52,11 +52,9 @@ jobs:
           context: docker
           build-args: |
             platform=generic
+            BUILDKIT_INLINE_CACHE=1
           push: true
-          cache-from: |
-            type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}
-            type=registry,ref=nubots/nubots:generic
-            type=inline
+          cache-from: type=inline
           cache-to: type=inline
 
       - id: image_output
