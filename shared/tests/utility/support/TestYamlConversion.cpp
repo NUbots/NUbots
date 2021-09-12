@@ -20,6 +20,7 @@
 
 #include <catch.hpp>
 #include <utility>
+#include <string>
 
 #include <yaml-cpp/yaml.h>
 #include "utility/support/yaml_expression.hpp"
@@ -41,12 +42,13 @@ SCENARIO("yaml nodes can be converted to a given container type", "[utility][sup
     GIVEN("A yaml node containing a list of data"){
         YAML::Node testValues = YAML::LoadFile("/home/nubots/NUbots/shared/tests/data/yamlConversionTestVals.yaml");
         //ints
-        WHEN("An int vector is declared using the return value of utility::support::resolve_expression(yamlNode[ints])"){
+        WHEN("A vector is declared using integers from the YAML node"){
             std::vector<int> intVector = resolve_expression<int>(testValues["ints"]);
             //Check that the values are good(container size, data type....)
-            THEN("Container sizes should be equivalent and values in the vector should be the same as the yaml node"){
-                //Check container sizes are equivalent
+            THEN("Container sizes should be equivalent"){
                 REQUIRE(testValues["ints"].size() == intVector.size());
+            }
+            AND_THEN("Values at each index should be equivalent"){
                 //Check values at each index
                 for(size_t i = 0; i < testValues["ints"].size(); i++){
                     REQUIRE(testValues["ints"][i].as<int>() == intVector.at(i));
@@ -54,28 +56,42 @@ SCENARIO("yaml nodes can be converted to a given container type", "[utility][sup
             }
         }
         //float
-        WHEN("A float vector is declared using the return value of utility::support::resolve_expression(yamlNode[floats])"){
+        AND_WHEN("A vector is declared using float values from the YAML node"){
             std::vector<float> floatVector = resolve_expression<float>(testValues["floats"]);
-            THEN("Container sizes should be equivalent and values in the vector should be the same as the yaml node"){
-                //Check container sizes are equivalent
+            THEN("Container sizes should be equivalent"){
                 REQUIRE(testValues["floats"].size() == floatVector.size());
-                //check values at each index
+            }
+            AND_THEN("Values at each index should be equivalent"){
                 for(size_t i = 0; i < testValues["floats"].size(); i++){
                     REQUIRE(testValues["floats"][i].as<float>() == floatVector.at(i));
                 }
             }
         }
         //double
-        WHEN("A double vector is declared using the return value of utility::support::resolve_expression(yamlNode[doubles])"){
+        AND_WHEN("A vector is declared using doubles from the YAML node"){
             std::vector<double> doubleVector = resolve_expression<double>(testValues["doubles"]);
-            THEN("Container sizes should be equivalent and values in the vector should be the same as the yaml node"){
-                //Check container sizes are equivalent
+            THEN("Container sizes should be equivalent"){
                 REQUIRE(testValues["doubles"].size() == doubleVector.size());
-                //check values at each index
+            }
+            AND_THEN("Values at each index should be equivalent"){
                 for(size_t i = 0; i < testValues["doubles"].size(); i++){
                     REQUIRE(testValues["doubles"][i].as<double>() == doubleVector.at(i));
                 }
             }
         }
+        //strings
+        // AND_WHEN("A Vector is declared using strings from the YAML node"){
+        //     std::vector<std::string> stringVector = resolve_expression<std::string>(testValues["strings"]);
+        //     THEN("Container sizes should be equivalent"){
+        //         REQUIRE(testValues["strings"].size() == stringVector.size());
+        //     }
+        //     AND_THEN("Values at each index should be equivalent"){
+        //         for(size_t i = 0; i < testValues["strings"].size(); i++){
+        //             REQUIRE(testValues["strings"][i].as<std::string>() == stringVector.at(i));
+        //         }
+        //     }
+        // }
+        //Eigen things: Affine2d, Affine3d, AngleAxisd, Vector3d, Vector2d, Rotation2Dd,
+
     }
 }
