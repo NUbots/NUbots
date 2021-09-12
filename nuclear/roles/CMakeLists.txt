@@ -79,7 +79,7 @@ if(BUILD_ALL_MODULES)
   foreach(module ${module_cmakelists})
     # Strip the trailing filename to get the module directory
     string(REPLACE "/CMakeLists.txt" "" module ${module})
-    # Replace path separators with the namespace-style colon pairs nuclear_module expects
+    # Replace path separators with the namespace-style colon pairs nuclear_role() expects
     string(REPLACE "/" "::" module ${module})
     # Add the resulting string to the list of all modules
     list(APPEND ALL_MODULES ${module})
