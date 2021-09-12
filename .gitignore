@@ -74,9 +74,6 @@ packer/build.pwi
 # Tests
 /tests_output/
 
-# Generated role for unused modules
-/roles/__unused__.role
-
 # Logs
 /home/nubots/NUbots/log/*
 log

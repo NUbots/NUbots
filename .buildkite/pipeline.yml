@@ -60,23 +60,6 @@ steps:
           run: generic
           workdir: /home/nubots/NUbots/
 
-  # Generate role with unused modules and build it
-  - label: "Build unused modules"
-    # We have to configure twice. The first configuration generates the cmake cache for `./b unused`, then the next one
-    # turns on the role which `./b unused -g` generates
-    command:
-      - sudo chmod 777 roles # Required to write the generated role
-      - ./b configure -- -DBUILD_TESTS=ON
-      - ./b unused -g
-      - ./b configure
-      - ./b build
-    plugins:
-      - docker-compose#v3.0.3:
-          config: .buildkite/NUbots/docker-compose.yml
-          pull: generic_image
-          run: generic
-          workdir: /home/nubots/NUbots/
-
   # Build for both nuc targets
   - label: "Build nuc7i7bnh"
     command: echo "nuc7i7bnh image successfully built!"
