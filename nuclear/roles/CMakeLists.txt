@@ -63,14 +63,28 @@ endforeach(role)
 
 # If we want to build all the modules, we will list them all in the required format then create the role manually
 if(BUILD_ALL_MODULES)
+
   # ${role} is the name of the role created when you call nuclear_role()
   set(role "allmodules")
-  # The function for listing the modules is here
-  include("${CMAKE_CURRENT_SOURCE_DIR}/ListAllModules.cmake")
-  # * Stores the module names in the ${ALL_MODULES} variable
-  # * They're in the required namespace-style format expected in nuclear_role() calls
-  # * e.g. vision/VisualMesh is represented as vision::VisualMesh
-  listallmodules("${PROJECT_SOURCE_DIR}/${NUCLEAR_MODULE_DIR}")
-  # Actually generate the role
+
+  # * We find all the modules by finding all CMakeLists.txt files in the module directory
+  # * A directory containing a CMakeLists.txt file in the module directory is assumed to be a module
+  file(
+    GLOB_RECURSE module_cmakelists
+    RELATIVE "${PROJECT_SOURCE_DIR}/${NUCLEAR_MODULE_DIR}"
+    "${PROJECT_SOURCE_DIR}/${NUCLEAR_MODULE_DIR}/**/CMakeLists.txt"
+  )
+
+  # The paths are those of the CMakeLists.txt files, so we make them the expected format here
+  foreach(module ${module_cmakelists})
+    # Strip the trailing filename to get the module directory
+    string(REPLACE "/CMakeLists.txt" "" module ${module})
+    # Replace path separators with the namespace-style colon pairs nuclear_module expects
+    string(REPLACE "/" "::" module ${module})
+    # Add the resulting string to the list of all modules
+    list(APPEND ALL_MODULES ${module})
+  endforeach(module ${module_cmakelists})
+
+  # Actually generate the role with the module names
   nuclear_role(${ALL_MODULES})
 endif()
