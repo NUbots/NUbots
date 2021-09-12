@@ -299,7 +299,6 @@ namespace NUClear::dsl {
                 }
             }
 
-            // This runs right before the cb to get the things in the cb (the parameters).
             /// @brief Runs just before the Configuration callback to prepare the Reaction's parameters
             /// @details We check if the FileWatch is a `.yaml` file first. If it is, the Configuration is constructed
             ///          and returned, parsing the YAML in the process. If it's not, `nullptr` is returned, which is to
