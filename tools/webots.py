@@ -206,7 +206,9 @@ def exec_run(role, num_of_robots=1, sim_address="127.0.0.1"):
     # Add all robot run commands to process_manager
     for i in range(1, int(num_of_robots) + 1):
 
-        robot_color = "red" if i <= int(num_of_robots) / 2 else "blue"
+        robot_color, port_num = (
+            ("red", 10000 + i) if i <= int(num_of_robots) / 2 else ("blue", 10020 + i - int(int(num_of_robots) / 2))
+        )
 
         docker_run_command = [
             "docker",
@@ -221,7 +223,7 @@ def exec_run(role, num_of_robots=1, sim_address="127.0.0.1"):
             "-e",
             f"ROBOCUP_TEAM_COLOR={robot_color}",
             "-e",
-            f"ROBOCUP_SIMULATOR_ADDR={sim_address}:{1000 + i}",
+            f"ROBOCUP_SIMULATOR_ADDR={sim_address}:{port_num}",
             f"{ROBOCUP_IMAGE_NAME}:{ROBOCUP_IMAGE_TAG}",
             role,
         ]
