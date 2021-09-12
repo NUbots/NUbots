@@ -11,15 +11,19 @@ Include this module to allow the robot to get up after it has fallen over.
 
 ## Consumes
 
-* `message::Sensors` containing the orientation matrix and accelerometer readings
-* `message::AllServoWaypointsComplete` indicates that a script has finished
+- `message::motion::ExecuteGetup` tells this module to call getup script
+- `message::motion::KillGetup` disables getup and sets priority
+- `message::platform::RawSensors` used to check if robot has fallen
 
 ## Emits
 
-* `message::ExecuteScript` instructs the script engine to run a script
+- `extension::ExecuteScriptByName` to run getup and stand scripts
+- `message::motion::ExecuteGetup` instigates a getup
+- `message::motion::KillGetup` stops a getup
+- `utility::behaviour::ActionPriorities` signals when the module's priority changes
+- `utility::behaviour::RegisterAction` registers callbacks for starting or stopping getups
 
 ## Dependencies
 
-* The Script Engine module is required to execute the scripts
-* The Darwin Motion Manager module is required to notify when scripts finish
-* The Filtered Sensors module is required to retrieve the current orientation
+- The Script Engine module is required to execute the scripts
+- The Filtered Sensors module is required to retrieve the current orientation
