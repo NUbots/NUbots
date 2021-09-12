@@ -55,7 +55,6 @@ jobs:
             BUILDKIT_INLINE_CACHE=1
           push: true
           cache-from: type=inline
-          cache-to: type=inline
 
       - id: image_output
         name: Output the created image

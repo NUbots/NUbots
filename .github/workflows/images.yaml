@@ -49,4 +49,3 @@ jobs:
             BUILDKIT_INLINE_CACHE=1
           push: true
           cache-from: type=registry,ref=nubots/nubots:${{ matrix.platform }}
-          cache-to: type=inline
