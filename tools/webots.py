@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import glob
+import multiprocessing
 import os
 import shutil
 import subprocess
@@ -41,6 +42,14 @@ def register(command):
         help="Disables cleaning the build volume before compiling",
     )
 
+    build_subcommand.add_argument(
+        "-j",
+        "--jobs",
+        dest="jobs",
+        action="store",
+        help="Dictates the number of jobs to run in parallel",
+    )
+
     push_subcommand = subparsers.add_parser(
         "push",
         help=textwrap.dedent(
@@ -74,7 +83,7 @@ def get_cmake_flags(roles_to_build):
     return ["-DCMAKE_BUILD_TYPE=Release"] + role_flags
 
 
-def exec_build(target, roles, clean):
+def exec_build(target, roles, clean, jobs):
     # Tags correct image as 'selected' for given target
     print("Setting target '{}'...".format(target))
     exit_code = subprocess.run(["./b", "target", target]).returncode
@@ -100,7 +109,11 @@ def exec_build(target, roles, clean):
 
     # Compiles code for correct target
     print("Building code...")
-    exit_code = subprocess.run(["./b", "build"]).returncode
+    build_command = ["./b", "build"]
+    # Check if a -j value has been given
+    if jobs:
+        build_command.extend(["-j", jobs])
+    exit_code = subprocess.run(build_command).returncode
     if exit_code != 0:
         cprint(f"unable to build code, exit code {exit_code}", "red", attrs=["bold"])
         sys.exit(exit_code)
@@ -215,9 +228,9 @@ def exec_push():
         sys.exit(exit_code)
 
 
-def run(sub_command, clean=False, roles=None, role=None, target="g4dnxlarge", **kwargs):
+def run(sub_command, jobs=None, clean=False, roles=None, role=None, target="g4dnxlarge", **kwargs):
     if sub_command == "build":
-        exec_build(target, roles, clean)
+        exec_build(target, roles, clean, jobs)
     elif sub_command == "push":
         exec_push()
     elif sub_command == "run":  # For testing docker image
