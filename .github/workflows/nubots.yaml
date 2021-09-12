@@ -57,9 +57,7 @@ jobs:
             type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}
             type=registry,ref=nubots/nubots:generic
             type=inline
-          cache-to: |
-            type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}
-            type=inline
+          cache-to: type=inline
 
       - id: image_output
         name: Output the created image
