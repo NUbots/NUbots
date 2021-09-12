@@ -48,4 +48,7 @@ jobs:
             platform=${{ matrix.platform }}
             BUILDKIT_INLINE_CACHE=1
           push: true
-          cache-from: type=registry,ref=nubots/nubots:${{ matrix.platform }}
+          cache-from: |
+            type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}
+            type=registry,ref=nubots/nubots:generic
+            type=inline
