@@ -358,16 +358,16 @@ namespace module::input {
 
 
                         // This checks for an error on the platform and reports it
-                        if (input.platform_error_flags != RawSensors::Error::OK) {
+                        if (input.platform_error_flags != RawSensors::Error::EVERYTHING_OK) {
                             NUClear::log<NUClear::WARN>(makeErrorString("Platform", input.platform_error_flags));
                         }
 
                         // Output errors on the FSRs
-                        if (input.fsr.left.error_flags != RawSensors::Error::OK) {
+                        if (input.fsr.left.error_flags != RawSensors::Error::EVERYTHING_OK) {
                             NUClear::log<NUClear::WARN>(makeErrorString("Left FSR", input.fsr.left.error_flags));
                         }
 
-                        if (input.fsr.right.error_flags != RawSensors::Error::OK) {
+                        if (input.fsr.right.error_flags != RawSensors::Error::EVERYTHING_OK) {
                             NUClear::log<NUClear::WARN>(makeErrorString("Right FSR", input.fsr.right.error_flags));
                         }
 
@@ -377,7 +377,7 @@ namespace module::input {
                             auto& error    = original.error_flags;
 
                             // Check for an error on the servo and report it
-                            if (error != RawSensors::Error::OK) {
+                            if (error != RawSensors::Error::EVERYTHING_OK) {
                                 std::stringstream s;
                                 s << "Error on Servo " << (id + 1) << " (" << static_cast<ServoID>(id) << "):";
 
@@ -407,7 +407,7 @@ namespace module::input {
                             }
                             // If current Sensors message for this servo has an error and we have a previous sensors
                             // message available, then we use our previous sensor values with some updates
-                            if (error != RawSensors::Error::OK && previousSensors) {
+                            if (error != RawSensors::Error::EVERYTHING_OK && previousSensors) {
                                 // Add the sensor values to the system properly
                                 sensors->servo.push_back({error,
                                                           id,

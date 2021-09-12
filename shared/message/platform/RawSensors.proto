@@ -32,7 +32,7 @@ message RawSensors {
     /// bitmask values.
     /// See https://emanual.robotis.com/docs/en/dxl/protocol1/#protocol
     enum Error {
-        OK            = 0;  // not really a flag but the lack of any other flag
+        EVERYTHING_OK          = 0;  // not really a flag but the lack of any other flag
         INPUT_VOLTAGE = 1;
         ANGLE_LIMIT   = 2;
         OVERHEATING   = 4;
