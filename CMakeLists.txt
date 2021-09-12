@@ -104,6 +104,9 @@ set(NUCLEAR_ROLE_BANNER_FILE
     CACHE PATH "The path the banner to print at the start of each role execution" FORCE
 )
 
+# Build **ALL** modules, even those which aren't otherwise in a role
+option(BUILD_ALL_MODULES "Create a role with all modules included" OFF)
+
 # Include the NUClear roles system
 add_subdirectory(nuclear)
 

@@ -60,3 +60,17 @@ unset(NUCLEAR_MODULES CACHE)
 foreach(role ${NUCLEAR_ROLES})
   include("${role_source_dir}/${role}.role")
 endforeach(role)
+
+# If we want to build all the modules, we will list them all in the required format then create the role manually
+if(BUILD_ALL_MODULES)
+  # ${role} is the name of the role created when you call nuclear_role()
+  set(role "allmodules")
+  # The function for listing the modules is here
+  include("${CMAKE_CURRENT_SOURCE_DIR}/ListAllModules.cmake")
+  # * Stores the module names in the ${ALL_MODULES} variable
+  # * They're in the required namespace-style format expected in nuclear_role() calls
+  # * e.g. vision/VisualMesh is represented as vision::VisualMesh
+  listallmodules("${PROJECT_SOURCE_DIR}/${NUCLEAR_MODULE_DIR}")
+  # Actually generate the role
+  nuclear_role(${ALL_MODULES})
+endif()
