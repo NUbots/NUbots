@@ -95,6 +95,7 @@ namespace utility::math::filter {
          * @param covariance The covariance of the multivariate normal distribution. Used for sampling the initial
          * particles in the filter.
          * @param resample_method_ The method to use when resampling particles during the time update step
+         * @param use_residual_resampling_ Whether residual resampling should be used with the other method
          */
         ParticleFilter(const StateVec& mean,
                        const StateMat& covariance,
@@ -119,8 +120,7 @@ namespace utility::math::filter {
          * @param covariance The covariance of the multivariate normal distribution. Used for sampling the initial
          * particles in the filter.  There is one covariance for each initial hypothesis.
          * @param resample_method_ The method to use when resampling particles during the time update step.
-         * @param residual_method_ When using ResampleMethod::RESIDUAL for the resample method, this method will be used
-         * when the residual method needs to resample residual particles.
+         * @param use_residual_resampling_ Whether residual resampling should be used with the other method
          */
         ParticleFilter(const std::vector<std::pair<StateVec, StateMat>>& hypotheses,
                        const ResampleMethod& resample_method_ = ResampleMethod::SYSTEMATIC,
