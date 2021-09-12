@@ -226,7 +226,7 @@ class PacketProcessor {
 function decodePacketId(event: string, packet: NUClearNetPacket) {
   const defaultId = 0
   
-  const idField = messageFieldsIndex[event].?id
+  const idField = messageFieldsIndex[event]?.id
   if (idField === undefined) {
     return defaultId
   }
