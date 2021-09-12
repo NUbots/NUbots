@@ -53,7 +53,7 @@ jobs:
           build-args: |
             platform=generic
           push: true
-          cache-from: type=registry,ref=nubots/nubots:generic
+          cache-from: type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}
           cache-to: type=inline
 
       - id: image_output
