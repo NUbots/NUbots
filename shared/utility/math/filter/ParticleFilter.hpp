@@ -62,6 +62,8 @@ namespace utility::math::filter {
     template <typename Scalar, template <typename> class FilterModel>
     class ParticleFilter {
     public:
+        /// The possible resampling methods
+        /// @see http://users.isy.liu.se/rt/schon/Publications/HolSG2006.pdf for an explanation on each one
         enum class ResampleMethod { MULTINOMIAL, STRATIFIED, SYSTEMATIC };
         ResampleMethod resample_method = ResampleMethod::SYSTEMATIC;
 
