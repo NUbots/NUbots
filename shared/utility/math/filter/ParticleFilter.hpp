@@ -27,7 +27,6 @@
 #include <utility>
 #include <vector>
 
-#include "utility/math/filter/ResampleMethod.hpp"
 #include "utility/math/stats/multivariate.hpp"
 #include "utility/math/stats/resample/multinomial.hpp"
 #include "utility/math/stats/resample/resample.hpp"
@@ -63,6 +62,11 @@ namespace utility::math::filter {
     template <typename Scalar, template <typename> class FilterModel>
     class ParticleFilter {
     public:
+        enum class ResampleMethod { MULTINOMIAL, STRATIFIED, SYSTEMATIC };
+        ResampleMethod resample_method = ResampleMethod::SYSTEMATIC;
+
+        bool use_residual_resampling = true;
+
         using Model = FilterModel<Scalar>;
         // The model
         Model model;
@@ -77,7 +81,6 @@ namespace utility::math::filter {
          */
         ParticleFilter() {
             set_state(StateVec::Zero(), StateMat::Identity() * 0.1);
-            resample_method = DefaultResampleMethod();
         }
 
         /**
@@ -93,13 +96,9 @@ namespace utility::math::filter {
          */
         ParticleFilter(const StateVec& mean,
                        const StateMat& covariance,
-                       const ResampleMethod& resample_method_ = DefaultResampleMethod()) {
-
-            if (!resample_method_.is_valid()) {
-                throw std::runtime_error("Invalid setting for resampling method");
-            }
-            resample_method = resample_method_;
-
+                       const ResampleMethod& resample_method_ = ResampleMethod::SYSTEMATIC,
+                       const bool& use_residual_resampling_   = true)
+            : resample_method(resample_method_), use_residual_resampling(use_residual_resampling_) {
             set_state(mean, covariance);
         }
 
@@ -122,12 +121,9 @@ namespace utility::math::filter {
          * when the residual method needs to resample residual particles.
          */
         ParticleFilter(const std::vector<std::pair<StateVec, StateMat>>& hypotheses,
-                       const ResampleMethod& resample_method_ = DefaultResampleMethod()) {
-
-            if (!resample_method_.is_valid()) {
-                throw std::runtime_error("Invalid setting for resampling method");
-            }
-            resample_method = resample_method_;
+                       const ResampleMethod& resample_method_ = ResampleMethod::SYSTEMATIC,
+                       const bool& use_residual_resampling_   = true)
+            : resample_method(resample_method_), use_residual_resampling(use_residual_resampling_) {
 
             set_state(hypotheses);
         }
@@ -190,16 +186,6 @@ namespace utility::math::filter {
 
         ParticleList particles;
         ParticleWeights weights;
-        ResampleMethod resample_method{};
-
-        /// @brief Helper to construct the default resample method
-        /// @returns ResampleMethod configuration object with only residual and systematic resampling enabled
-        [[nodiscard]] constexpr ResampleMethod DefaultResampleMethod() {
-            auto method               = utility::math::filter::ResampleMethod();
-            method.residual_enabled   = true;
-            method.systematic_enabled = true;
-            return method;
-        }
 
         /**
          * @brief Clears all particles in the filter and samples new particles from the multivariate normal
@@ -284,37 +270,35 @@ namespace utility::math::filter {
         std::vector<int> resample_particles() {
 
             // Select the resampling method to use
-            if (resample_method.residual_enabled) {
+            if (use_residual_resampling) {
                 // The residual method uses a secondary method when it resamples the residual particles
-                if (resample_method.multinomial_enabled) {
-                    return stats::resample::residual(model.n_particles,
-                                                     weights.begin(),
-                                                     weights.end(),
-                                                     stats::resample::multinomial<decltype(weights.begin())>);
+                switch (resample_method) {
+                    case ResampleMethod::MULTINOMIAL:
+                        return stats::resample::residual(model.n_particles,
+                                                         weights.begin(),
+                                                         weights.end(),
+                                                         stats::resample::multinomial<decltype(weights.begin())>);
+                    case ResampleMethod::STRATIFIED:
+                        return stats::resample::residual(model.n_particles,
+                                                         weights.begin(),
+                                                         weights.end(),
+                                                         stats::resample::stratified<decltype(weights.begin())>);
+                    case ResampleMethod::SYSTEMATIC:
+                        return stats::resample::residual(model.n_particles,
+                                                         weights.begin(),
+                                                         weights.end(),
+                                                         stats::resample::systematic<decltype(weights.begin())>);
                 }
-                else if (resample_method.stratified_enabled) {
-                    return stats::resample::residual(model.n_particles,
-                                                     weights.begin(),
-                                                     weights.end(),
-                                                     stats::resample::stratified<decltype(weights.begin())>);
-                }
-                else if (resample_method.systematic_enabled) {
-                    return stats::resample::residual(model.n_particles,
-                                                     weights.begin(),
-                                                     weights.end(),
-                                                     stats::resample::systematic<decltype(weights.begin())>);
-                }
-                throw std::runtime_error("Invalid setting for residual method.");
             }
-            else if (resample_method.multinomial_enabled) {
-                return stats::resample::multinomial(model.n_particles, weights.begin(), weights.end());
+            switch (resample_method) {
+                case ResampleMethod::MULTINOMIAL:
+                    return stats::resample::multinomial(model.n_particles, weights.begin(), weights.end());
+                case ResampleMethod::STRATIFIED:
+                    return stats::resample::stratified(model.n_particles, weights.begin(), weights.end());
+                case ResampleMethod::SYSTEMATIC:
+                    return stats::resample::systematic(model.n_particles, weights.begin(), weights.end());
             }
-            else if (resample_method.stratified_enabled) {
-                return stats::resample::stratified(model.n_particles, weights.begin(), weights.end());
-            }
-            else if (resample_method.systematic_enabled) {
-                return stats::resample::systematic(model.n_particles, weights.begin(), weights.end());
-            }
+            // This shouldn't happen unless a new enum element is added and the switches aren't updated
             throw std::runtime_error("Invalid setting for resample method.");
         }
 
