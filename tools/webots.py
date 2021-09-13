@@ -3,10 +3,12 @@
 import glob
 import multiprocessing
 import os
+import random
 import shutil
 import subprocess
 import sys
 import textwrap
+from datetime import datetime
 from pathlib import Path
 from subprocess import DEVNULL
 
@@ -182,6 +184,37 @@ def exec_build(target, roles, clean, jobs):
 
 
 def exec_run(role, num_of_robots=1, sim_address="127.0.0.1"):
+    # Signal handler function to kill containers on CTRL+C
+    def exec_stop():
+        # Get all container ID's for containers running running this game
+        container_ids = (
+            subprocess.check_output(
+                [
+                    "docker",
+                    "ps",
+                    "-a",
+                    "-q",
+                    "--filter",
+                    f"name={GAME_IDENTIFIER}_Robot",
+                    "--format={{.ID}}",
+                ]
+            )
+            .strip()
+            .decode("ascii")
+            .split()
+        )
+
+        cprint(
+            f"Stoping ALL '{GAME_IDENTIFIER}_Robotx' containers...",
+            color="red",
+            attrs=["bold"],
+        )
+        exit_code = subprocess.run(
+            ["docker", "container", "rm", "-f"] + container_ids, stderr=DEVNULL, stdout=DEVNULL
+        ).returncode
+
+        sys.exit(exit_code)
+
     # Check that image has been built
     exit_code = subprocess.run(
         ["docker", "image", "inspect", f"{ROBOCUP_IMAGE_NAME}:{ROBOCUP_IMAGE_TAG}"], stderr=DEVNULL, stdout=DEVNULL
@@ -198,6 +231,11 @@ def exec_run(role, num_of_robots=1, sim_address="127.0.0.1"):
 
     # Ensure the logs directory exists for binding into the container
     os.makedirs(robocup_logs_dir, exist_ok=True)
+
+    random.seed(datetime.now())
+
+    # Generate 4 digit random int to act as a unique identifier for this game
+    GAME_IDENTIFIER = str(random.randint(1000, 9999))
 
     process_manager = Manager()
 
@@ -217,6 +255,7 @@ def exec_run(role, num_of_robots=1, sim_address="127.0.0.1"):
             "run",
             "--rm",
             "--network=host",
+            f"--name={GAME_IDENTIFIER + '_Robot' + str(i)}",
             "--mount",
             f"type=bind,source={robocup_logs_dir},target=/robocup-logs",
             "-e",
@@ -234,39 +273,6 @@ def exec_run(role, num_of_robots=1, sim_address="127.0.0.1"):
     process_manager.loop()
 
     sys.exit(process_manager.returncode)
-
-
-def exec_stop():
-    # Get all container ID's for containers running the image
-    container_ids = (
-        subprocess.check_output(
-            [
-                "docker",
-                "ps",
-                "-a",
-                "-q",
-                "--filter",
-                f"ancestor={ROBOCUP_IMAGE_NAME}:{ROBOCUP_IMAGE_TAG}",
-                "--format={{.ID}}",
-            ]
-        )
-        .strip()
-        .decode("ascii")
-        .split()
-    )
-    # If there are containers, force stop them
-    if container_ids:
-        cprint(
-            f"Stoping ALL '{ROBOCUP_IMAGE_NAME}:{ROBOCUP_IMAGE_TAG}' containers...",
-            color="red",
-            attrs=["bold"],
-        )
-        subprocess.run(["docker", "container", "rm", "-f"] + container_ids, stderr=DEVNULL, stdout=DEVNULL)
-
-    else:
-        print("There is currently no robot containers running!")
-
-    sys.exit(0)
 
 
 def exec_push():
