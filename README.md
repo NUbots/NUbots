@@ -16,7 +16,8 @@
 </details>
 
 NUbots is a team in the University of Newcastle's robotics research group focused on developing humanoid soccer-playing robots for the international RoboCup competition.
-The team is made up of a multidisciplinary team of students and academics. The team develops both hardware and software for the robots.
+The multidisciplinary team of students and academics develops both hardware and software for the robots.
+
 This codebase is the current state of our development efforts to compete in the competition as well as active research projects within the laboratory.
 
 # NUbots Documentation and Handbook
