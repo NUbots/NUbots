@@ -1,5 +1,5 @@
-# NUC image creation and push to DockerHub
-name: NUC Image Push
+# Proper tag image creation and push to DockerHub
+name: Normal Target Pushes
 
 # Controls when the action will run.
 on:
@@ -16,6 +16,7 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
 
+    # Run once for each of the platforms
     strategy:
       matrix:
         platform: ["generic", "nuc8i7beh", "nuc7i7bnh"]
