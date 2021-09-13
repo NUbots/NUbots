@@ -18,10 +18,15 @@ from termcolor import cprint
 import b
 from utility.dockerise import platform
 
+random.seed(datetime.now())
+
 # The docker image details for Robocup
 ROBOCUP_IMAGE_NAME = "robocup-vhsc-nubots"  # Provided by the TC and shouldn't be changed
 ROBOCUP_IMAGE_TAG = "robocup2021"  # Submitted in our team_config.json, shouldn't be changed here unless changed there
 ROBOCUP_IMAGE_REGISTRY = "079967072104.dkr.ecr.us-east-2.amazonaws.com/robocup-vhsc-nubots"  # Provided by the TC
+
+# Generate 4 digit random int to act as a unique identifier for this game
+GAME_IDENTIFIER = str(random.randint(1000, 9999))
 
 
 def register(command):
@@ -184,37 +189,6 @@ def exec_build(target, roles, clean, jobs):
 
 
 def exec_run(role, num_of_robots=1, sim_address="127.0.0.1"):
-    # Signal handler function to kill containers on CTRL+C
-    def exec_stop():
-        # Get all container ID's for containers running running this game
-        container_ids = (
-            subprocess.check_output(
-                [
-                    "docker",
-                    "ps",
-                    "-a",
-                    "-q",
-                    "--filter",
-                    f"name={GAME_IDENTIFIER}_Robot",
-                    "--format={{.ID}}",
-                ]
-            )
-            .strip()
-            .decode("ascii")
-            .split()
-        )
-
-        cprint(
-            f"Stoping ALL '{GAME_IDENTIFIER}_Robotx' containers...",
-            color="red",
-            attrs=["bold"],
-        )
-        exit_code = subprocess.run(
-            ["docker", "container", "rm", "-f"] + container_ids, stderr=DEVNULL, stdout=DEVNULL
-        ).returncode
-
-        sys.exit(exit_code)
-
     # Check that image has been built
     exit_code = subprocess.run(
         ["docker", "image", "inspect", f"{ROBOCUP_IMAGE_NAME}:{ROBOCUP_IMAGE_TAG}"], stderr=DEVNULL, stdout=DEVNULL
@@ -231,11 +205,6 @@ def exec_run(role, num_of_robots=1, sim_address="127.0.0.1"):
 
     # Ensure the logs directory exists for binding into the container
     os.makedirs(robocup_logs_dir, exist_ok=True)
-
-    random.seed(datetime.now())
-
-    # Generate 4 digit random int to act as a unique identifier for this game
-    GAME_IDENTIFIER = str(random.randint(1000, 9999))
 
     process_manager = Manager()
 
@@ -273,6 +242,38 @@ def exec_run(role, num_of_robots=1, sim_address="127.0.0.1"):
     process_manager.loop()
 
     sys.exit(process_manager.returncode)
+
+
+# Signal handler function to kill containers on CTRL+C
+def exec_stop():
+    # Get all container ID's for containers running running this game
+    container_ids = (
+        subprocess.check_output(
+            [
+                "docker",
+                "ps",
+                "-a",
+                "-q",
+                "--filter",
+                f"name={GAME_IDENTIFIER}_Robot",
+                "--format={{.ID}}",
+            ]
+        )
+        .strip()
+        .decode("ascii")
+        .split()
+    )
+
+    cprint(
+        f"Stoping ALL '{GAME_IDENTIFIER}_Robotx' containers...",
+        color="red",
+        attrs=["bold"],
+    )
+    exit_code = subprocess.run(
+        ["docker", "container", "rm", "-f"] + container_ids, stderr=DEVNULL, stdout=DEVNULL
+    ).returncode
+
+    sys.exit(exit_code)
 
 
 def exec_push():
