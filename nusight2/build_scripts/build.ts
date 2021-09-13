@@ -31,7 +31,7 @@ compiler.run((err, stats) => {
     }
   }
   // Calling close() allows low-priority work (like persistent caching) the opportunity to complete
-  compiler.close((closeErr) => {
+  compiler.close(closeErr => {
     if (closeErr) {
       process.stderr.write(closeErr.message)
       if (closeErr.stack) {
