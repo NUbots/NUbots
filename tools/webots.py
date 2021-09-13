@@ -203,6 +203,9 @@ def exec_run(role, num_of_robots=1, sim_address="127.0.0.1"):
 
     process_manager = Manager()
 
+    # Override honcho.manager.terminate() method, this is called by its signal handler on CTRL+C
+    process_manager.terminate = exec_stop
+
     # Add all robot run commands to process_manager
     for i in range(1, int(num_of_robots) + 1):
 
