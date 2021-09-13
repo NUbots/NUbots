@@ -70,8 +70,6 @@ def register(command):
     game_subcommand.add_argument("-r", "--robots", action="store", dest="num_of_robots", required=True)
     game_subcommand.add_argument("-a", "--sim-address", action="store", default="127.0.0.1", dest="sim_address")
 
-    stop_subcommand = subparsers.add_parser("stop", help="Stop and remove all nugus_sim containers")
-
 
 def get_cmake_flags(roles_to_build):
     roles_dir = os.path.join(b.project_dir, "roles")
@@ -317,8 +315,6 @@ def run(
         exec_run(role)
     elif sub_command == "game":  # For running a full game
         exec_run(role, num_of_robots, sim_address)
-    elif sub_command == "stop":
-        exec_stop()
     else:
         print(f"invalid sub command: '{sub_command}'")
         sys.exit(1)
