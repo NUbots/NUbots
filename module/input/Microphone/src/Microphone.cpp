@@ -9,19 +9,6 @@ namespace module::input {
 
 using extension::Configuration;
 
-//From:
-//https://stackoverflow.com/questions/13893085/posix-spawnp-and-piping-child-output-to-a-string
-//https://zatrazz.github.io/More-About-Lauching-Processes/
-//https://blog.jessfraz.com/post/docker-containers-on-the-desktop/
-//https://stackoverflow.com/questions/46208266/how-to-create-sound-devices-for-debian-in-docker
-//snd_pcm_poll_descriptors 
-//http://equalarea.com/paul/alsa-audio.html#captureex
-//https://gist.github.com/albanpeignier/104902
-//https://github.com/NUbots/NUbots/blob/198892786914b160e60d68a7b66ff938dcc31dc4/module/behaviour/strategy/KeyboardWalk/src/KeyboardWalk.cpp
-//yaml cpp
-//emit<SCOPE::DIRECT>(message)
-
-
 
 Voice2jsonParsedIntent parse_voice2json_json(char *json_text, size_t size) {
     Voice2jsonParsedIntent intent = {};
@@ -32,9 +19,7 @@ Voice2jsonParsedIntent parse_voice2json_json(char *json_text, size_t size) {
     json_object_element_s *root_element = root_object->start;
     while(root_element) {
         json_string_s *element_name = root_element->name;
-        
-        //printf("%s\n", element_name->string);
-        
+                
         if(strcmp(element_name->string, "text") == 0) {
             json_string_s *text_str = json_value_as_string(root_element->value);
             intent.text = strdup(text_str->string);
@@ -52,7 +37,7 @@ Voice2jsonParsedIntent parse_voice2json_json(char *json_text, size_t size) {
             json_number_s *confidence_num = json_value_as_number(intent_element->value);
             intent.confidence = atof(confidence_num->number);
         } else if(strcmp(element_name->string, "slots") == 0) {
-            
+            //TODO: need to do parsing of slots...
             
         }
         
@@ -84,7 +69,9 @@ bool start_microphone_capture() {
 }
 */
 
-
+//handles: out parameter containing the stdin, stdout, stderr handles from the
+//spawned process
+//first char * in args array refers to the process name
 bool spawn_process(MicProcHandles *handles, char *const *args) {
     bool success = false;
     
@@ -104,7 +91,7 @@ bool spawn_process(MicProcHandles *handles, char *const *args) {
     env_path[written] = 0;
     
     char *const envp[] = { 
-        (char*) "KALDI_DIR=",
+        (char*) "KALDI_DIR=", //KALDI_DIR env var must be blank!
         (char*) env_path, 
         NULL 
     };
@@ -149,10 +136,24 @@ cleanup:
     return success;
 }
 
+//python -m voice2json --base-directory /home/nubots/voice2json/ -p en transcribe-wav
+bool voice2json_transcribe_stream(MicProcHandles *handles) {
+    char *const args[] = {
+        (char*) "python",     
+        (char*) "-m",
+        (char*) "voice2json",
+        (char*) "--base-directory",
+        (char*) "/home/nubots/voice2json/",
+        (char*) "-p",
+        (char*) "en",
+        (char*) "transcribe-stream",
+        NULL
+    };
+    
+    return spawn_process(handles, args);
+}
 
-//python3 -m voice2json --base-directory /home/nubots/voice2json/ -p en transcribe-wav --input-size
-//TODO: should we use the "transcribe-stream" flag or
-//do our own microphone capture using the alsa api
+//python -m voice2json --base-directory /home/nubots/voice2json/ -p en transcribe-wav --input-size
 bool voice2json_transcribe_wav(MicProcHandles *handles) {
     char *const args[] = {
         (char*) "python",     
@@ -207,7 +208,7 @@ cleanup:;
     return output;
 }
 
-void write_audio_to_file(int stdin, char *filename) {
+void write_audio_to_file(int fd, char *filename) {
     FILE *file = fopen(filename, "rb");
     fseek(file, 0, SEEK_END);
     int file_size = ftell(file);
@@ -221,9 +222,9 @@ void write_audio_to_file(int stdin, char *filename) {
     char file_size_buf[64];
     sprintf(file_size_buf, "%d\n", file_size);
         
-    write(stdin, file_size_buf, strlen(file_size_buf));
+    write(fd, file_size_buf, strlen(file_size_buf));
     
-    ssize_t write_res = write(stdin, file_buffer, file_size);
+    ssize_t write_res = write(fd, file_buffer, file_size);
     assert(write_res == file_size);
 
     free(file_buffer);
@@ -271,9 +272,7 @@ Microphone::Microphone(std::unique_ptr<NUClear::Environment> environment) : Reac
         if(bytes_read > 0) {
             assert((size_t)bytes_read < sizeof(buffer)); //TODO
             buffer[bytes_read] = 0;
-            
-            printf("STDOUT (%ld) = %s\n", bytes_read, buffer);
-            
+                        
             if(enabled) {            
                 char *intent_json = voice2json_recognize_intent(buffer);
                 if(!intent_json) {
@@ -335,8 +334,7 @@ Microphone::Microphone(std::unique_ptr<NUClear::Environment> environment) : Reac
                 
                 uint32_t num = atoi(string);
                 printf("%ld,%d - %s \n", bytes_read, num, string);
-
-                //uint32_t num = 23;
+                
                 std::unique_ptr<MicControlMsg> msg = std::make_unique<MicControlMsg>(MicControlMsg{
                     MIC_MSG_TEST_AUDIO, num
                     
@@ -352,7 +350,6 @@ Microphone::Microphone(std::unique_ptr<NUClear::Environment> environment) : Reac
 }
 
 Microphone::~Microphone() {
-    printf("aHSDB\n");
     if(handles.stdout) close(handles.stdout);
     if(handles.stderr) close(handles.stderr);
     if(handles.stdin) close(handles.stdin);
