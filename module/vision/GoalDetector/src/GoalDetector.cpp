@@ -255,7 +255,6 @@ namespace module::vision {
 
                             // Attach the measurement to the object (distance from camera to bottom center of post)
                             g.measurements.push_back(Goal::Measurement());
-                            g.measurements.back().type = Goal::MeasurementType::CENTRE;
 
                             // Spherical Reciprocal Coordinates (1/distance, phi, theta)
                             g.measurements.back().srGCc =
