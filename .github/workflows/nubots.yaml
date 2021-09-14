@@ -90,8 +90,7 @@ jobs:
         run: mkdir -p ../build
 
       - name: Configure the code
-        # TODO(DevOpsTeam): Enable CI_BUILD once we have normal warnings and clang-tidy warnings resolved
-        run: ./b configure -- -DBUILD_TESTS=ON -DCI_BUILD=OFF
+        run: ./b configure -- -DBUILD_TESTS=ON -DCI_BUILD=ON
 
       - name: Build the code
         run: ./b build

@@ -31,6 +31,16 @@ list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules/" "${PROJECT_
 # If this option is set we are building using continous integration
 option(CI_BUILD "Enable build options for building in the CI server" OFF)
 
+# TODO(DevOpsTeam): Remove this once we have fixed warnings (including clang-tidy warnings) codebase wide to add
+# clang-tidy to the builds and prevent new warnings being introduced
+set(CI_BUILD
+    OFF
+    CACHE
+      BOOL
+      "This disables the effects of the CI_BUILD variable. We should remove this set() once warnings have been fixed."
+      FORCE
+)
+
 # Default to do a debug build
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to 'Debug' as none was specified.")
