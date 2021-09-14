@@ -39,8 +39,8 @@
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/localisation/transform.hpp"
+#include "utility/math/coordinates.hpp"
 #include "utility/nusight/NUhelpers.hpp"
-
 
 namespace module::behaviour::planning {
 
@@ -64,6 +64,7 @@ namespace module::behaviour::planning {
     using utility::behaviour::RegisterAction;
     using utility::input::LimbID;
     using utility::input::ServoID;
+    using utility::math::coordinates::sphericalToCartesian;
 
     SimpleWalkPathPlanner::SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
@@ -126,8 +127,13 @@ namespace module::behaviour::planning {
         // period (could be implemented outside of the path planner and somewhere
         // else in strategy to call a particular 'style' of path planning that is
         // more likely to find the ball)
-        on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
-            if (!balls.balls.empty()) {
+        on<Trigger<VisionBalls>, With<Sensors>>().then([this](const VisionBalls& balls, const Sensors& sensors) {
+            if (balls.balls.size() > 0) {
+                Eigen::Vector3f srBCc = balls.balls[0].measurements[0].srBCc;
+                srBCc.x()             = 1.0 / srBCc.x();
+                Eigen::Affine3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
+                rBTt = Htc * Eigen::Vector3f(sphericalToCartesian(srBCc));
+                log("rBTt: ", rBTt.x(), rBTt.y(), rBTt.z());
                 timeBallLastSeen = NUClear::clock::now();
             }
         });
@@ -163,13 +169,9 @@ namespace module::behaviour::planning {
 
                     case message::behaviour::MotionCommand::Type::DIRECT_COMMAND: walkDirectly(); return;
 
-                    case message::behaviour::MotionCommand::Type::BALL_APPROACH:
-                        determineSimpleWalkPath(ball, field, sensors, kickPlan, fieldDescription);
-                        return;
+                    case message::behaviour::MotionCommand::Type::BALL_APPROACH: visionWalkPath(); return;
 
-                    case message::behaviour::MotionCommand::Type::WALK_TO_STATE:
-                        determineSimpleWalkPath(ball, field, sensors, kickPlan, fieldDescription);
-                        return;
+                    case message::behaviour::MotionCommand::Type::WALK_TO_STATE: visionWalkPath(); return;
 
                     // This line should be UNREACHABLE
                     default:
@@ -273,6 +275,19 @@ namespace module::behaviour::planning {
         std::unique_ptr<WalkCommand> command =
             std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(finalForwardSpeed, finalSideSpeed, angle));
 
+        emit(std::move(command));
+        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
+    }
+    void SimpleWalkPathPlanner::visionWalkPath() {
+        std::unique_ptr<WalkCommand> command;
+        log("Walk to rBTt: ", rBTt.x(), rBTt.y(), rBTt.z());
+        Eigen::Vector3f unit_vector_to_ball = rBTt / rBTt.norm();
+        Eigen::Vector3f velocity_vector     = 0.03 * unit_vector_to_ball;
+        log("Walk command: ", velocity_vector.x(), velocity_vector.y(), velocity_vector.z());
+        float heading_angle = std::atan2(velocity_vector.y(), velocity_vector.x());
+        command             = std::make_unique<WalkCommand>(
+            subsumptionId,
+            Eigen::Vector3d(velocity_vector.x(), velocity_vector.y(), 0.9 * heading_angle));
         emit(std::move(command));
         emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
     }
