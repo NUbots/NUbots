@@ -39,7 +39,8 @@ message Goal {
     }
     enum MeasurementType {
         UNKNOWN     = 0;
-        CENTRE      = 1; //distance from camera to bottom center of post
+        /// The distance is from the camera to bottom centre of post
+        CENTRE      = 1;
 
     }
     message Measurement {
