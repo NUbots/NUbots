@@ -41,7 +41,6 @@ message Goal {
         UNKNOWN     = 0;
         /// The distance is from the camera to bottom centre of post
         CENTRE      = 1;
-
     }
     message Measurement {
         MeasurementType type = 1;
