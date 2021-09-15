@@ -240,7 +240,7 @@ namespace NUClear::dsl {
         template <>
         struct DSLProxy<::extension::Configuration> {
             /// @brief Sets up the NUClear Reaction for Configuration
-            /// @details Sets up a FileWatch on the path which is passed in
+            /// @details Sets up a FileWatch on the filename which is passed in
             ///          The config files are FileWatched in order from least specific to most specific:
             ///          1. default, 2. per-robot, 3. binary
             ///          The later, more specific configs (if they exist) supersede the less specific ones
@@ -301,8 +301,8 @@ namespace NUClear::dsl {
 
             /// @brief Runs just before the Configuration callback to prepare the Reaction's parameters
             /// @details We check if the FileWatch is a `.yaml` file first. If it is, the Configuration is constructed
-            ///          and returned, parsing the YAML in the process. If it's not, `nullptr` is returned, which is to
-            ///          be dealt with by the caller
+            ///          and returned, parsing the YAML in the process. If it's not, `nullptr` is returned, which
+            ///          indicates a non-result.
             /// @throws std::runtime_error if there is a YAML parsing error
             /// @tparam DSL Magic NUClear type. Ignore for the purpose of understanding this function
             /// @param t The associated Configuration Reaction
