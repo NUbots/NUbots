@@ -74,8 +74,22 @@ def register(command):
 
     game_subcommand = subparsers.add_parser("game", help="Run a full game")
     game_subcommand.add_argument("role", action="store", help="The role to run")
-    game_subcommand.add_argument("-r", "--robots", action="store", dest="num_of_robots", required=True)
-    game_subcommand.add_argument("-a", "--sim-address", action="store", default="127.0.0.1", dest="sim_address")
+    game_subcommand.add_argument(
+        "-r",
+        "--robots",
+        action="store",
+        dest="num_of_robots",
+        required=True,
+        help="The number of robot instances to start",
+    )
+    game_subcommand.add_argument(
+        "-a",
+        "--sim-address",
+        action="store",
+        default="127.0.0.1",
+        dest="sim_address",
+        help="Address that robot instances use to connect to Webots",
+    )
 
 
 def get_cmake_flags(roles_to_build):
