@@ -21,10 +21,10 @@ check_formatting() {
 export -f check_formatting
 
 # Loop through all c/cpp/proto files and check validation
-git ls-files | grep '.*\.\(c\|cc\|cpp\|cxx\|hpp\|ipp\|proto\)$' \
+git ls-files | grep '.*\.\(c\|cc\|cpp\|cxx\|hpp\|ipp\|proto\|glsl\|vert\|frag\)$' \
     | parallel --joblog /var/tmp/formatting.log -j$(nproc) check_formatting
 
-# Count how many returned a non zero exist status
+# Count how many returned a non zero exit status
 ret=$(tail -n +2 /var/tmp/formatting.log | awk '{ sum += $7; } END {print sum}')
 
 echo "$ret files are not formatted correctly"

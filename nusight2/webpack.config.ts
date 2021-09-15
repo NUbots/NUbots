@@ -76,10 +76,7 @@ export function getClientConfig({
               loader: 'postcss-loader',
               options: {
                 postcssOptions: {
-                  plugins: [
-                    'postcss-import',
-                    'postcss-url',
-                  ],
+                  plugins: ['postcss-import', 'postcss-url'],
                 },
               },
             },
@@ -134,9 +131,11 @@ export function getClientConfig({
     },
     plugins: [
       new CopyWebpackPlugin({ patterns: [{ from: 'assets', context }] }),
-      isProduction ? new MiniCssExtractPlugin({
-        filename: 'styles.css',
-      }) : undefined,
+      isProduction
+        ? new MiniCssExtractPlugin({
+            filename: 'styles.css',
+          })
+        : undefined,
       new HtmlWebpackPlugin({
         template: 'client/index.ejs',
         title: 'NUsight2',
