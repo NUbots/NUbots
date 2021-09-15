@@ -77,6 +77,7 @@ def register(command):
     game_subcommand.add_argument(
         "-r",
         "--robots",
+        type=int,
         action="store",
         dest="num_of_robots",
         required=True,
@@ -226,10 +227,10 @@ def exec_run(role, num_of_robots=1, sim_address="127.0.0.1"):
     process_manager._killall = exec_stop
 
     # Add all robot run commands to process_manager
-    for i in range(1, int(num_of_robots) + 1):
+    for i in range(1, num_of_robots + 1):
 
         robot_color, port_num = (
-            ("red", 10000 + i) if i <= int(num_of_robots) / 2 else ("blue", 10020 + i - int(int(num_of_robots) / 2))
+            ("red", 10000 + i) if i <= num_of_robots // 2 else ("blue", 10020 + i - num_of_robots // 2)
         )
 
         docker_run_command = [
