@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import argcomplete
 import argparse
 import os
 import pkgutil
@@ -111,7 +110,13 @@ if __name__ == "__main__":
                                 )
 
                             module.register(subcommand.add_parser(components[-1]))
-                            argcomplete.autocomplete(command)
+                            # Try to provide completion
+                            try:
+                                import argcomplete
+
+                                argcomplete.autocomplete(command)
+                            except ImportError:
+                                pass
                             module.run(**vars(command.parse_args()))
 
                             # We're done, exit
@@ -151,6 +156,12 @@ if __name__ == "__main__":
             except BaseException as e:
                 pass
 
+    # Try to provide completion
+    try:
+        import argcomplete
+
+        argcomplete.autocomplete(command)
+    except ImportError:
+        pass
     # Given what we know, this will fail here and give the user some help
-    argcomplete.autocomplete(command)
     command.parse_args()

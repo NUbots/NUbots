@@ -59,10 +59,9 @@ namespace utility::nbs {
             }
 
             template <typename U = T>
-            auto get_timestamp(uint64_t /*original*/, const uint8_t* payload, uint32_t length)
-                -> decltype(std::chrono::duration_cast<std::chrono::nanoseconds>(
-                                std::declval<U>().timestamp.time_since_epoch())
-                                .count()) {
+            auto get_timestamp(uint64_t /*original*/, const uint8_t* payload, uint32_t length) -> decltype(
+                std::chrono::duration_cast<std::chrono::nanoseconds>(std::declval<U>().timestamp.time_since_epoch())
+                    .count()) {
                 typename U::protobuf_type pb;
                 pb.ParseFromArray(payload, length);
                 U msg = pb;
