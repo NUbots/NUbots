@@ -71,13 +71,11 @@ namespace utility::motion::kinematics {
     template <typename Scalar>
     [[nodiscard]] std::vector<std::pair<ServoID, Scalar>> calculateHeadJoints(
         const Eigen::Matrix<Scalar, 3, 1>& cameraUnitVector) {
-        std::vector<std::pair<ServoID, Scalar>> positions{};
-        positions.emplace_back(ServoID::HEAD_YAW, atan2(cameraUnitVector.y(), cameraUnitVector.x()));
-        positions.emplace_back(ServoID::HEAD_PITCH,
+        return {std::make_pair(ServoID::HEAD_YAW, atan2(cameraUnitVector.y(), cameraUnitVector.x())),
+                std::make_pair(ServoID::HEAD_PITCH,
                                std::atan2(-cameraUnitVector.z(),
                                           std::sqrt(cameraUnitVector.x() * cameraUnitVector.x()
-                                                    + cameraUnitVector.y() * cameraUnitVector.y())));
-        return positions;
+                                                    + cameraUnitVector.y() * cameraUnitVector.y())))};
     }
 }  // namespace utility::motion::kinematics
 
