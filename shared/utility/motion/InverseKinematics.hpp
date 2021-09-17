@@ -86,7 +86,7 @@ namespace utility::motion::kinematics {
                    0.0, 0.0,  0.0, 1.0;
         // clang-format on
         // Rotate input position from standard robot coords to foot coords
-        Eigen::Matrix<Scalar, 3, 1> translation = (Tci * target.matrix().rightCols<1>()).head<3>();
+        Eigen::Matrix<Scalar, 3, 1> translation = (Tci * target.matrix().template rightCols<1>()).template head<3>();
         target                                  = Tci * target * Tci.transpose();
         target.translation()                    = translation;
 
@@ -99,8 +99,8 @@ namespace utility::motion::kinematics {
             target.translation().x() = -target.translation().x();
         }
 
-        const Eigen::Matrix<Scalar, 3, 1> ankleX   = target.matrix().leftCols<1>().head<3>();
-        const Eigen::Matrix<Scalar, 3, 1> ankleY   = target.matrix().middleCols<1>(1).head<3>();
+        const Eigen::Matrix<Scalar, 3, 1> ankleX   = target.matrix().template leftCols<1>().template head<3>();
+        const Eigen::Matrix<Scalar, 3, 1> ankleY   = target.matrix().template middleCols<1>(1).template head<3>();
         const Eigen::Matrix<Scalar, 3, 1> anklePos = target.translation();
 
         const Eigen::Matrix<Scalar, 3, 1> hipOffset(LENGTH_BETWEEN_LEGS * 0.5,
@@ -208,8 +208,8 @@ namespace utility::motion::kinematics {
         const message::motion::KinematicsModel& model,
         const Eigen::Affine3f& leftTarget,
         const Eigen::Affine3f& rightTarget) {
-        auto joints  = calculateLegJoints(model, leftTarget, LimbID::LEFT_LEG);
-        auto joints2 = calculateLegJoints(model, rightTarget, LimbID::RIGHT_LEG);
+        auto joints  = calculateLegJoints<Scalar>(model, leftTarget, LimbID::LEFT_LEG);
+        auto joints2 = calculateLegJoints<Scalar>(model, rightTarget, LimbID::RIGHT_LEG);
         joints.insert(joints.end(), joints2.begin(), joints2.end());
         return joints;
     }
