@@ -12,6 +12,7 @@
 namespace module {
     namespace support {
         namespace optimisation {
+            using message::support::optimisation::NSGA2FitnessScores;
             using message::support::optimisation::NSGA2EvaluationRequest;
             using message::platform::RawSensors;
             using message::platform::webots::OptimisationRobotPosition;
@@ -23,9 +24,8 @@ namespace module {
                 virtual void processOptimisationRobotPosition(const OptimisationRobotPosition& position) = 0;
                 virtual void setUpTrial(const NSGA2EvaluationRequest& request) = 0;
                 virtual void resetSimulation() = 0;
-                virtual void evaluatingState(bool finishedReset, double simTime, int generation, int individual) = 0;
-                virtual void stopCurrentTask() = 0;
-                virtual void sendFitnessScores(bool constraintsViolated, double simTime, int generation, int individual) = 0;
+                virtual std::map<std::string, float> evaluatingState() = 0;
+                virtual std::unique_ptr<NSGA2FitnessScores> calculateFitnessScores(bool constraintsViolated, double simTime, int generation, int individual) = 0;
             };
 
         }  // namespace optimisation

@@ -22,6 +22,8 @@
 #include "utility/input/ServoID.hpp"
 #include "utility/support/yaml_expression.hpp"
 
+#include "tasks/WalkEvaluator.hpp"
+
 namespace module {
     namespace support {
         namespace optimisation {
@@ -158,7 +160,9 @@ namespace module {
 
                 on<Trigger<OptimisationRobotPosition>, Single>().then(
                     [this](const OptimisationRobotPosition& position) {
-                        task->processOptimisationRobotPosition(position);
+                        if (currentState == State::EVALUATING) {
+                            task->processOptimisationRobotPosition(position);
+                        }
                     });
             }
 
@@ -225,6 +229,13 @@ namespace module {
                 log<NUClear::DEBUG>("SettingUpTrial");
                 generation = lastEvalRequestMsg.generation;
                 individual = lastEvalRequestMsg.id;
+
+                if(lastEvalRequestMsg.task == "walk") {
+                    task = std::make_unique<WalkEvaluator>();
+                } else {
+                    log<NUClear::ERROR>("Unhandled task type:", lastEvalRequestMsg.task);
+                }
+
                 task->setUpTrial(lastEvalRequestMsg);
 
                 emit(std::make_unique<Event>(Event::TrialSetupDone));
@@ -245,17 +256,49 @@ namespace module {
             /// @brief Handle the EVALUATING state
             void NSGA2Evaluator::Evaluating(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
                 log<NUClear::DEBUG>("Evaluating");
-                bool finishedReset = (event == Event::ResetDone);
-                task->evaluatingState(finishedReset, simTime, generation, individual);
+                if (event == Event::ResetDone) {
+                    if(lastEvalRequestMsg.task == "walk") {
+                        EvaluatingWalk(previousState, event);
+                    } else {
+                        log<NUClear::ERROR>("Unhandled task type:", lastEvalRequestMsg.task);
+                    }
+                }
+            }
+
+            // Note: we currently need this in NSGA2Evaluator because we need to be able to access `emit`
+            void NSGA2Evaluator::EvaluatingWalk(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
+                // Create and send the walk command, which will be evaluated when we get back sensors and time
+                // updates
+                auto map = task->evaluatingState();
+                NUClear::log<NUClear::DEBUG>(fmt::format("Trialling with walk command: ({} {}) {}",
+                                                map.at("walk_x"),
+                                                map.at("walk_y"),
+                                                map.at("walk_rotation")));
+
+                // Send the command to start walking
+                emit(std::make_unique<WalkCommand>(
+                    subsumptionId,
+                    Eigen::Vector3d(map.at("walk_x"), map.at("walk_y"), map.at("walk_rotation"))));
+
+                // Prepare the trial expired message
+                std::unique_ptr<NSGA2TrialExpired> message = std::make_unique<NSGA2TrialExpired>();
+                message->time_started                      = simTime;
+                message->generation                        = generation;
+                message->individual                        = individual;
+
+                // Schedule the end of the walk trial after the duration limit
+                emit<Scope::DELAY>(message, std::chrono::seconds(static_cast<int>(map.at("trial_duration_limit"))));
             }
 
             /// @brief Handle the TERMINATING_EARLY state
             void NSGA2Evaluator::TerminatingEarly(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
                 log<NUClear::DEBUG>("TerminatingEarly");
 
-                task->stopCurrentTask();
+                // Send a zero walk command to stop walking
+                emit(std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(0.0, 0.0, 0.0)));
                 bool constraintsViolated = true;
-                task->sendFitnessScores(constraintsViolated, simTime, generation, individual);
+                auto fitnessScores = task->calculateFitnessScores(constraintsViolated, simTime, generation, individual);
+                emit(fitnessScores);
 
                 emit(std::make_unique<Event>(Event::FitnessScoresSent)); // Go back to waiting for the next request
             }
@@ -265,9 +308,11 @@ namespace module {
                                                        NSGA2Evaluator::Event event) {
                 log<NUClear::DEBUG>("TerminatingGracefully");
 
-                task->stopCurrentTask();
+                // Send a zero walk command to stop walking
+                emit(std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(0.0, 0.0, 0.0)));
                 bool constraintsViolated = false;
-                task->sendFitnessScores(constraintsViolated, simTime, generation, individual);
+                auto fitnessScores = task->calculateFitnessScores(constraintsViolated, simTime, generation, individual);
+                emit(fitnessScores);
 
                 emit(std::make_unique<Event>(Event::FitnessScoresSent)); // Go back to waiting for the next request
             }

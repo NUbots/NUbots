@@ -64,6 +64,8 @@ namespace module {
                     paramLimits.emplace_back(walk_command[element][1].as<Expression>(), walk_command[element][2].as<Expression>());
                 }
 
+                trial_duration_limit = config["trial_duration_limit"].as<int>();
+
                 // Set up the NSGA2 algorithm based on our config values
                 nsga2Algorithm.SetObjectiveCount(config["num_objectives"].as<int>());
                 nsga2Algorithm.SetContraintCount(config["num_constraints"].as<int>());
@@ -94,6 +96,9 @@ namespace module {
                 auto request = std::make_unique<NSGA2EvaluationRequest>();
                 request->id = id;
                 request->generation = generation;
+                request->task = "walk";
+
+                request->parameters.trial_duration_limit = trial_duration_limit;
 
                 // Add the individual's parameters to the message
                 request->parameters.freq                 = reals[0];

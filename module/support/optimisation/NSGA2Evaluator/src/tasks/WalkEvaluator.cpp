@@ -30,30 +30,6 @@ namespace module {
             using utility::input::ServoID;
             using utility::support::Expression;
 
-            WalkEvaluator::WalkEvaluator(std::unique_ptr<NUClear::Environment> environment)
-                : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
-
-                emit<Scope::DIRECT>(std::make_unique<RegisterAction>(RegisterAction{
-                    subsumptionId,
-                    "Walk Evaluator",
-                    {std::pair<float, std::set<LimbID>>(
-                        1,
-                        {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
-                    [this](const std::set<LimbID>& given_limbs) {
-                        if (given_limbs.find(LimbID::LEFT_LEG) != given_limbs.end()) {
-                            // Enable the walk engine.},
-                            emit<Scope::DIRECT>(std::make_unique<EnableWalkEngineCommand>(subsumptionId));
-                        }
-                    },
-                    [this](const std::set<LimbID>& taken_limbs) {
-                        if (taken_limbs.find(LimbID::LEFT_LEG) != taken_limbs.end()) {
-                            // Shut down the walk engine, since we don't need it right now.
-                            emit<Scope::DIRECT>(std::make_unique<DisableWalkEngineCommand>(subsumptionId));
-                        }
-                    },
-                    [this](const std::set<ServoID>&) {}}));
-            }
-
             bool WalkEvaluator::processRawSensorMsg(const RawSensors& sensors) {
                 bool shouldTerminateEarly = false;
                 shouldTerminateEarly = checkForFall(sensors);
@@ -76,8 +52,7 @@ namespace module {
             void WalkEvaluator::setUpTrial(const NSGA2EvaluationRequest& currentRequest) {
                 // Set our generation and individual identifiers from the request
 
-                //TODO: 2021-09-08 Joel Wong add this in
-                //trial_duration_limit  = request.trial_duration_limit;
+                trial_duration_limit  = currentRequest.parameters.trial_duration_limit;
 
                 // Set our walk command
                 walk_command_velocity.x() = currentRequest.parameters.velocity;
@@ -124,44 +99,24 @@ namespace module {
                 maxFieldPlaneSway      = 0.0;
             }
 
-            void WalkEvaluator::evaluatingState(bool finishedReset, double simTime, int generation, int individual) {
-                if (finishedReset) {
-                    // Create and send the walk command, which will be evaluated when we get back sensors and time
-                    // updates
-                    log<NUClear::INFO>(fmt::format("Trialling with walk command: ({}) {}",
-                                                   walk_command_velocity.transpose(),
-                                                   walk_command_rotation));
-
-                    // Send the command to start walking
-                    emit(std::make_unique<WalkCommand>(
-                        subsumptionId,
-                        Eigen::Vector3d(walk_command_velocity.x(), walk_command_velocity.y(), walk_command_rotation)));
-
-                    // Prepare the trial expired message
-                    std::unique_ptr<NSGA2TrialExpired> message = std::make_unique<NSGA2TrialExpired>();
-                    message->time_started                      = simTime;
-                    message->generation                        = generation;
-                    message->individual                        = individual;
-
-                    // Schedule the end of the walk trial after the duration limit
-                    emit<Scope::DELAY>(message, std::chrono::seconds(trial_duration_limit));
-                }
+            std::map<std::string, float> WalkEvaluator::evaluatingState() {
+                std::map<std::string, float> map {
+                    {"walk_x", walk_command_velocity.x()},
+                    {"walk_y", walk_command_velocity.y()},
+                    {"walk_rotation", walk_command_rotation},
+                    {"trial_duration_limit", trial_duration_limit}};
+                return map;
             }
 
-            void WalkEvaluator::stopCurrentTask() {
-                // Send a zero walk command to stop walking
-                emit(std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(0.0, 0.0, 0.0)));
-            }
-
-            void WalkEvaluator::sendFitnessScores(bool constraintsViolated, double simTime, int generation, int individual) {
+            std::unique_ptr<NSGA2FitnessScores> WalkEvaluator::calculateFitnessScores(bool constraintsViolated, double simTime, int generation, int individual) {
                 auto scores = calculateScores();
                 auto constraints = constraintsViolated ? calculateConstraints(simTime) : constraintsNotViolated();
 
                 double trialDuration = simTime - trialStartTime;
-                log<NUClear::INFO>("Trial ran for", trialDuration);
-                log<NUClear::INFO>("SendFitnessScores for generation", generation, "individual", individual);
-                log<NUClear::INFO>("    scores:", scores[0], scores[1]);
-                log<NUClear::INFO>("    constraints:", constraints[0], constraints[1]);
+                NUClear::log<NUClear::DEBUG>("Trial ran for", trialDuration);
+                NUClear::log<NUClear::DEBUG>("SendFitnessScores for generation", generation, "individual", individual);
+                NUClear::log<NUClear::DEBUG>("    scores:", scores[0], scores[1]);
+                NUClear::log<NUClear::DEBUG>("    constraints:", constraints[0], constraints[1]);
 
                 // Create the fitness scores message based on the given results and emit it back to the Optimiser
                 std::unique_ptr<NSGA2FitnessScores> fitnessScores = std::make_unique<NSGA2FitnessScores>();
@@ -169,7 +124,7 @@ namespace module {
                 fitnessScores->generation                         = generation;
                 fitnessScores->objScore                           = scores;
                 fitnessScores->constraints                        = constraints;
-                emit(fitnessScores);
+                return fitnessScores;
             }
 
             std::vector<double> WalkEvaluator::calculateScores() {
@@ -206,8 +161,8 @@ namespace module {
 
                 if ((std::fabs(accelerometer.x) > 9.2 || std::fabs(accelerometer.y) > 9.2)
                     && std::fabs(accelerometer.z) < 0.5) {
-                    log<NUClear::INFO>("Fallen!");
-                    log<NUClear::DEBUG>("acc at fall (x y z):",
+                    NUClear::log<NUClear::DEBUG>("Fallen!");
+                    NUClear::log<NUClear::DEBUG>("acc at fall (x y z):",
                                         std::fabs(accelerometer.x),
                                         std::fabs(accelerometer.y),
                                         std::fabs(accelerometer.z));

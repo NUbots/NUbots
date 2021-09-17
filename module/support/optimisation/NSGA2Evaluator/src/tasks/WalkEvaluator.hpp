@@ -15,22 +15,19 @@
 namespace module {
     namespace support {
         namespace optimisation {
+            using message::support::optimisation::NSGA2FitnessScores;
             using message::support::optimisation::NSGA2EvaluationRequest;
             using message::platform::RawSensors;
 
-            class WalkEvaluator: public EvaluatorTask, public NUClear::Reactor {
+            class WalkEvaluator: public EvaluatorTask {
             public:
-                /// @brief Called by the powerplant to build and setup the NSGA2Evaluator reactor.
-                explicit WalkEvaluator(std::unique_ptr<NUClear::Environment> environment);
-
                 // Implementing the EvaluatorTask interface
                 bool processRawSensorMsg(const RawSensors& sensors);
                 void processOptimisationRobotPosition(const OptimisationRobotPosition& position);
                 void setUpTrial(const NSGA2EvaluationRequest& request);
                 void resetSimulation();
-                void evaluatingState(bool finishedReset, double simTime, int generation, int individual);
-                void stopCurrentTask();
-                void sendFitnessScores(bool constraintsViolated, double simTime, int generation, int individual);
+                std::map<std::string, float> evaluatingState();
+                std::unique_ptr<NSGA2FitnessScores> calculateFitnessScores(bool constraintsViolated, double simTime, int generation, int individual);
 
                 // Task-specific functions
                 std::vector<double> calculateScores();

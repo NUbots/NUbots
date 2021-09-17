@@ -22,6 +22,8 @@ namespace module {
                 void SetupNSGA2(const ::extension::Configuration& config, nsga2::NSGA2& nsga2Algorithm);
                 std::unique_ptr<NSGA2EvaluationRequest> MakeEvaluationRequest(const int id, const int generation, std::vector<double> reals);
 
+            private:
+                int trial_duration_limit;
             };
 
         }  // namespace optimisation
