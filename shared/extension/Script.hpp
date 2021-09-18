@@ -19,6 +19,7 @@
 #define EXTENSION_SCRIPT_HPP
 
 #include <cstdlib>
+#include <filesystem>
 #include <nuclear>
 #include <regex>
 #include <string>
@@ -27,7 +28,7 @@
 
 #include "FileWatch.hpp"
 
-#include "utility/file/fileutil.hpp"
+#include "utility/file/fileutil.hpp"  // TODO(Bryce Tuppurainen) Due to be removed
 #include "utility/input/ServoID.hpp"
 #include "utility/strutil/strutil.hpp"
 
@@ -115,12 +116,12 @@ namespace extension {
             //                       These are the default scripts, it is an error for this version of the script to not
             //                       exist.
 
-            if (utility::file::exists("scripts/" + hostname + "/" + fileName)) {
+            if (std::filesystem::exists("scripts/" + hostname + "/" + fileName)) {
                 NUClear::log<NUClear::INFO>("Parsing robot specific script:", fileName);
                 config = YAML::LoadFile("scripts/" + hostname + "/" + fileName);
             }
 
-            else if (utility::file::exists("scripts/" + platform + "/" + fileName)) {
+            else if (std::filesystem::exists("scripts/" + platform + "/" + fileName)) {
                 NUClear::log<NUClear::INFO>("Parsing default platform script:", fileName);
                 config = YAML::LoadFile("scripts/" + platform + "/" + fileName);
             }
@@ -312,7 +313,7 @@ namespace NUClear::dsl {
                 auto platformScript = "scripts/" + platform + "/" + path;
 
                 // The platform script is the default script. This must exist!
-                if (!utility::file::exists(platformScript)) {
+                if (!std::filesystem::exists(platformScript)) {
                     throw std::runtime_error("Script file '" + platformScript + "' does not exist.");
                 }
 
@@ -320,7 +321,7 @@ namespace NUClear::dsl {
                 DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, platformScript, flags);
 
                 // Bind our robot specific path if it exists
-                if (utility::file::exists(robotScript)) {
+                if (std::filesystem::exists(robotScript)) {
                     DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, robotScript, flags);
                 }
             }

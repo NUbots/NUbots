@@ -19,12 +19,13 @@
 #define EXTENSION_CONFIGURATION_HPP
 
 #include <cstdlib>
+#include <filesystem>
 #include <nuclear>
 #include <yaml-cpp/yaml.h>
 
 #include "FileWatch.hpp"
 
-#include "utility/file/fileutil.hpp"
+#include "utility/file/fileutil.hpp"  // TODO(Bryce Tuppurainen) Due to be removed
 #include "utility/strutil/strutil.hpp"
 
 namespace extension {
@@ -61,13 +62,13 @@ namespace extension {
             bool loaded = false;
 
             // Load the default config file.
-            if (utility::file::exists("config/" + fileName)) {
+            if (std::filesystem::exists("config/" + fileName)) {
                 config = YAML::LoadFile("config/" + fileName);
                 loaded = true;
             }
 
             // If the same file exists in this robots per-robot config directory then load and merge.
-            if (utility::file::exists("config/" + hostname + "/" + fileName)) {
+            if (std::filesystem::exists("config/" + hostname + "/" + fileName)) {
                 if (loaded) {
                     config = mergeYAML(config, YAML::LoadFile("config/" + hostname + "/" + fileName));
                 }
@@ -79,7 +80,7 @@ namespace extension {
             }
 
             // If the same file exists in this binary's per-binary config directory then load and merge.
-            if (utility::file::exists("config/" + binary + "/" + fileName)) {
+            if (std::filesystem::exists("config/" + binary + "/" + fileName)) {
                 if (loaded) {
                     config = mergeYAML(config, YAML::LoadFile("config/" + binary + "/" + fileName));
                 }
@@ -224,7 +225,7 @@ namespace NUClear::dsl {
                 auto robotConfig   = "config/" + std::string(hostname) + "/" + path;
                 auto binaryConfig  = "config/" + std::string(binary) + "/" + path;
 
-                if (!utility::file::exists(defaultConfig)) {
+                if (!std::filesystem::exists(defaultConfig)) {
                     NUClear::log<NUClear::WARN>("Configuration file '" + defaultConfig
                                                 + "' does not exist. Creating it.");
 
@@ -247,12 +248,12 @@ namespace NUClear::dsl {
                 DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, defaultConfig, flags);
 
                 // Bind our robot specific path if it exists
-                if (utility::file::exists(robotConfig)) {
+                if (std::filesystem::exists(robotConfig)) {
                     DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, robotConfig, flags);
                 }
 
                 // Bind our binary specific path if it exists
-                if (utility::file::exists(binaryConfig)) {
+                if (std::filesystem::exists(binaryConfig)) {
                     DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, binaryConfig, flags);
                 }
             }

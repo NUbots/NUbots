@@ -25,13 +25,14 @@ extern "C" {
 }
 
 #include <cstdio>
+#include <filesystem>
 #include <sstream>
 
 #include "message/motion/ServoTarget.hpp"
 #include "message/platform/RawSensors.hpp"
 
 #include "utility/behaviour/Action.hpp"
-#include "utility/file/fileutil.hpp"
+#include "utility/file/fileutil.hpp"  // TODO(Bryce Tuppurainen) Due to be removed
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
@@ -73,7 +74,7 @@ namespace module::behaviour::tools {
                 scriptPath = args[1];
 
                 // Check if the script exists and load it if it does.
-                if (utility::file::exists(scriptPath)) {
+                if (std::filesystem::exists(scriptPath)) {
                     NUClear::log<NUClear::DEBUG>("Loading script: ", scriptPath, '\n');
                     loadScript(scriptPath);
                     // Build our initial gui with context from loaded script
@@ -691,7 +692,7 @@ namespace module::behaviour::tools {
         move(5, 2);
         curs_set(true);
         std::string saveScriptAs = userInput();
-        if (utility::file::exists(saveScriptAs)) {
+        if (std::filesystem::exists(saveScriptAs)) {
             bool print = true;
             while (print) {
                 mvprintw(6, 2, "This file already exists.");
