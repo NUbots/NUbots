@@ -16,7 +16,7 @@ namespace module {
             using message::support::optimisation::NSGA2EvaluationRequest;
 
             void WalkOptimiser::SetupNSGA2(const ::extension::Configuration& config, nsga2::NSGA2& nsga2Algorithm) {
-                NUClear::log<NUClear::INFO>("Walk Optimiser Setting up NSGA2");
+                                NUClear::log<NUClear::INFO>("Walk Optimiser Setting up NSGA2");
                 // The initial values of the parameters to optimise
                 std::vector<double> paramInitialValues;
 
@@ -66,30 +66,14 @@ namespace module {
 
                 trial_duration_limit = config["trial_duration_limit"].as<int>();
 
-                // Set up the NSGA2 algorithm based on our config values
-                nsga2Algorithm.SetObjectiveCount(config["num_objectives"].as<int>());
-                nsga2Algorithm.SetContraintCount(config["num_constraints"].as<int>());
-                nsga2Algorithm.SetPopulationSize(config["population_size"].as<int>());
-                nsga2Algorithm.SetTargetGenerations(config["max_generations"].as<int>());
-
                 // Set configuration for real variables
                 NUClear::log<NUClear::INFO>("Real Var Count 1: ", paramInitialValues.size());
                 nsga2Algorithm.SetRealVariableCount(paramInitialValues.size());
                 nsga2Algorithm.SetRealVarLimits(paramLimits);
                 nsga2Algorithm.SetInitialRealVars(paramInitialValues);
-                nsga2Algorithm.SetRealCrossoverProbability(
-                    config["probabilities"]["real"]["crossover"].as<double>());
-                nsga2Algorithm.SetRealMutationProbability(config["probabilities"]["real"]["mutation"].as<double>());
-                nsga2Algorithm.SetEtaC(config["eta"]["C"].as<double>());
-                nsga2Algorithm.SetEtaM(config["eta"]["M"].as<double>());
 
                 // Set configuration for binary variables
                 nsga2Algorithm.SetBinVariableCount(0);
-                nsga2Algorithm.SetBinCrossoverProbability(0.0);
-                nsga2Algorithm.SetBinMutationProbability(0.0);
-
-                // This seg faults, SetSeed in the library dereferences a null pointer
-                nsga2Algorithm.SetSeed(config["seed"].as<int>());
             }
 
             std::unique_ptr<NSGA2EvaluationRequest> WalkOptimiser::MakeEvaluationRequest(const int id, const int generation, std::vector<double> reals) {

@@ -37,9 +37,6 @@ namespace module {
                 void updateMaxFieldPlaneSway(const RawSensors& sensors);
 
             private:
-                /// @brief Subsumption priority ID for this module
-                size_t subsumptionId;
-
                 /// @brief Robot state for this evaluation, used during fitness and constraint calculation
                 bool initialPositionSet = false;
                 Eigen::Vector3d initialRobotPosition = Eigen::Vector3d::Zero();

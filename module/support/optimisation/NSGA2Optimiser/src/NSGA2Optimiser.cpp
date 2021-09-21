@@ -32,6 +32,21 @@ namespace module {
                 // Read NSGA2Optimiser.yaml file and initialize the values we're going to use for the optimisation
                 on<Configuration>("NSGA2Optimiser.yaml").then([this](const Configuration& config) {
                     log<NUClear::INFO>("Trying to setup NSGA2");
+
+                    // Set up the NSGA2 algorithm based on our config values
+                    nsga2Algorithm.SetObjectiveCount(config["num_objectives"].as<int>());
+                    nsga2Algorithm.SetContraintCount(config["num_constraints"].as<int>());
+                    nsga2Algorithm.SetPopulationSize(config["population_size"].as<int>());
+                    nsga2Algorithm.SetTargetGenerations(config["max_generations"].as<int>());
+
+                    nsga2Algorithm.SetRealCrossoverProbability(config["probabilities"]["real"]["crossover"].as<double>());
+                    nsga2Algorithm.SetBinCrossoverProbability(config["probabilities"]["binary"]["crossover"].as<double>());
+                    nsga2Algorithm.SetRealMutationProbability(config["probabilities"]["real"]["mutation"].as<double>());
+                    nsga2Algorithm.SetBinMutationProbability(config["probabilities"]["binary"]["mutation"].as<double>());
+                    nsga2Algorithm.SetEtaC(config["eta"]["C"].as<double>());
+                    nsga2Algorithm.SetEtaM(config["eta"]["M"].as<double>());
+                    nsga2Algorithm.SetSeed(config["seed"].as<int>());
+
                     if(true) {
                         //TODO: 2021-09-07 Add check for which kind of task we're using
                         task = std::make_unique<WalkOptimiser>();
