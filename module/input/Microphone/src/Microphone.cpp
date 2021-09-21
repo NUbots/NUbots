@@ -8,10 +8,11 @@
 namespace module::input {
 
 using extension::Configuration;
+//scriptrunner.cpp
 
 
-Voice2jsonParsedIntent parse_voice2json_json(char *json_text, size_t size) {
-    Voice2jsonParsedIntent intent = {};
+std::unique_ptr<SpeechIntentMessage> parse_voice2json_json(char *json_text, size_t size) {
+    std::unique_ptr<SpeechIntentMessage> intent = std::make_unique<SpeechIntentMessage>();
     
     json_value_s *root = json_parse(json_text, size);
     
@@ -22,23 +23,34 @@ Voice2jsonParsedIntent parse_voice2json_json(char *json_text, size_t size) {
                 
         if(strcmp(element_name->string, "text") == 0) {
             json_string_s *text_str = json_value_as_string(root_element->value);
-            intent.text = strdup(text_str->string);
+            intent->text = strdup(text_str->string);
         } else if(strcmp(element_name->string, "intent") == 0) {
             json_object_s *intent_obj = (json_object_s*) root_element->value->payload;
             json_object_element_s *intent_element = intent_obj->start;
             
             assert(strcmp(intent_element->name->string, "name") == 0);
             json_string_s *intent_name_str = json_value_as_string(intent_element->value);
-            intent.intent = strdup(intent_name_str->string);
+            intent->intent = strdup(intent_name_str->string);
             
             intent_element = intent_element->next;
             
             assert(strcmp(intent_element->name->string, "confidence") == 0);
             json_number_s *confidence_num = json_value_as_number(intent_element->value);
-            intent.confidence = atof(confidence_num->number);
+            intent->confidence = atof(confidence_num->number);
         } else if(strcmp(element_name->string, "slots") == 0) {
-            //TODO: need to do parsing of slots...
-            
+            json_object_s *slots_obj = (json_object_s*) root_element->value->payload;
+            json_object_element_s *slots_element = slots_obj->start;
+            while(slots_element) {
+                json_string_s *slot_name = slots_element->name;
+                json_string_s *slot_value = json_value_as_string(slots_element->value);
+                            
+                char *slot_name_str = strdup(slot_name->string);
+                char *slot_value_str = strdup(slot_value->string);
+                            
+                intent->add_slot(slot_name_str, slot_value_str);
+                            
+                slots_element = slots_element->next;
+            }
         }
         
         root_element = root_element->next;
@@ -189,18 +201,15 @@ char *voice2json_recognize_intent(char *input) {
     };
     
     MicProcHandles handles = {};
-    if(!spawn_process(&handles, args)) {
-        goto cleanup;
+    if(spawn_process(&handles, args)) {
+        write(handles.stdin, input, strlen(input));
+        
+        bytes_read = read(handles.stdout, buffer, sizeof(buffer)-1);
+        assert(bytes_read > 0);
+        buffer[bytes_read] = 0;
+        
+        output = strdup(buffer);
     }
-    write(handles.stdin, input, strlen(input));
-    
-    bytes_read = read(handles.stdout, buffer, sizeof(buffer)-1);
-    assert(bytes_read > 0);
-    buffer[bytes_read] = 0;
-    
-    output = strdup(buffer);
-    
-cleanup:;
     if(handles.stdout) close(handles.stdout);
     if(handles.stderr) close(handles.stderr);
     if(handles.stdin) close(handles.stdin);
@@ -262,6 +271,19 @@ Microphone::Microphone(std::unique_ptr<NUClear::Environment> environment) : Reac
         }
     });
     
+    //THIS IS FOR TESTING
+    on<Trigger<SpeechIntentMessage>>().then([this](const SpeechIntentMessage &msg) {
+        //TODO needs to be freed...
+        printf("msg ptr = %p\n", (void*)&msg);
+        printf("text = %s (%p)\n", msg.text, msg.text);
+        printf("intent = %s (%p)\n", msg.intent, msg.intent);
+        for(Slot slot : msg.slots) {
+            printf("%s = %s\n", slot.name, slot.value);
+        }
+        //need to free the msg...
+        //delete &msg;
+    });
+
     
     on<IO>(handles.stdout, IO::READ).then([this] {
         printf("fds[0].revents & POLLIN\n");
@@ -280,20 +302,8 @@ Microphone::Microphone(std::unique_ptr<NUClear::Environment> environment) : Reac
                 }
                 printf("%s\n", intent_json);
                 
-                Voice2jsonParsedIntent intent = parse_voice2json_json(intent_json, strlen(intent_json));
-                //TODO: emit this as a message
-                printf("intent = %s\ntext = %s\ncondifence = %f\n", intent.intent, intent.text, intent.confidence);
-                
-                
-/*              
-
-                parse_voice2json_json(intent_json, strlen(intent_json));
-                std::unique_ptr<MicSpeechIntent> msg = std::make_unique<MicSpeechIntent>(MicSpeechIntent{
-                    123, 2
-                        
-                });
-                emit(std::move(msg));
-*/    
+                std::unique_ptr<SpeechIntentMessage> intent = parse_voice2json_json(intent_json, strlen(intent_json));
+                emit(std::move(intent));
 
                 free(intent_json);
             }
