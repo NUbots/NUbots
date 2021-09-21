@@ -18,11 +18,12 @@
  */
 
 
+#include <Eigen/Core>
 #include <catch.hpp>
-#include <utility>
 #include <string>
-
+#include <utility>
 #include <yaml-cpp/yaml.h>
+
 #include "utility/support/yaml_expression.hpp"
 
 
@@ -38,60 +39,99 @@ using utility::support::resolve_expression;
 // Use the BDD macros
 
 //
-SCENARIO("yaml nodes can be converted to a given container type", "[utility][support][yaml_expression]"){
-    GIVEN("A yaml node containing a list of data"){
+SCENARIO("yaml nodes can be converted to a given container type", "[utility][support][yaml_expression]") {
+    GIVEN("A yaml node containing a list of data") {
         YAML::Node testValues = YAML::LoadFile("/home/nubots/NUbots/shared/tests/data/yamlConversionTestVals.yaml");
-        //ints
-        WHEN("A vector is declared using integers from the YAML node"){
+        // ints
+        WHEN("A vector is declared using integers from the YAML node") {
             std::vector<int> intVector = resolve_expression<int>(testValues["ints"]);
-            //Check that the values are good(container size, data type....)
-            THEN("Container sizes should be equivalent"){
+            // Check that the values are good(container size, data type....)
+            THEN("Container sizes should be equivalent") {
                 REQUIRE(testValues["ints"].size() == intVector.size());
             }
-            AND_THEN("Values at each index should be equivalent"){
-                //Check values at each index
-                for(size_t i = 0; i < testValues["ints"].size(); i++){
+            AND_THEN("Values at each index should be equivalent") {
+                // Check values at each index
+                for (size_t i = 0; i < testValues["ints"].size(); i++) {
                     REQUIRE(testValues["ints"][i].as<int>() == intVector.at(i));
                 }
             }
         }
-        //float
-        AND_WHEN("A vector is declared using float values from the YAML node"){
+        // float
+        AND_WHEN("A vector is declared using float values from the YAML node") {
             std::vector<float> floatVector = resolve_expression<float>(testValues["floats"]);
-            THEN("Container sizes should be equivalent"){
+            THEN("Container sizes should be equivalent") {
                 REQUIRE(testValues["floats"].size() == floatVector.size());
             }
-            AND_THEN("Values at each index should be equivalent"){
-                for(size_t i = 0; i < testValues["floats"].size(); i++){
+            AND_THEN("Values at each index should be equivalent") {
+                for (size_t i = 0; i < testValues["floats"].size(); i++) {
                     REQUIRE(testValues["floats"][i].as<float>() == floatVector.at(i));
                 }
             }
         }
-        //double
-        AND_WHEN("A vector is declared using doubles from the YAML node"){
+        // double
+        AND_WHEN("A vector is declared using doubles from the YAML node") {
             std::vector<double> doubleVector = resolve_expression<double>(testValues["doubles"]);
-            THEN("Container sizes should be equivalent"){
+            THEN("Container sizes should be equivalent") {
                 REQUIRE(testValues["doubles"].size() == doubleVector.size());
             }
-            AND_THEN("Values at each index should be equivalent"){
-                for(size_t i = 0; i < testValues["doubles"].size(); i++){
+            AND_THEN("Values at each index should be equivalent") {
+                for (size_t i = 0; i < testValues["doubles"].size(); i++) {
                     REQUIRE(testValues["doubles"][i].as<double>() == doubleVector.at(i));
                 }
             }
         }
-        //strings
-        // AND_WHEN("A Vector is declared using strings from the YAML node"){
+        // strings
+        // AND_WHEN("A Vector is declared using strings from the YAML node") {
         //     std::vector<std::string> stringVector = resolve_expression<std::string>(testValues["strings"]);
-        //     THEN("Container sizes should be equivalent"){
+        //     THEN("Container sizes should be equivalent") {
         //         REQUIRE(testValues["strings"].size() == stringVector.size());
         //     }
-        //     AND_THEN("Values at each index should be equivalent"){
-        //         for(size_t i = 0; i < testValues["strings"].size(); i++){
+        //     AND_THEN("Values at each index should be equivalent") {
+        //         for (size_t i = 0; i < testValues["strings"].size(); i++) {
         //             REQUIRE(testValues["strings"][i].as<std::string>() == stringVector.at(i));
         //         }
         //     }
         // }
-        //Eigen things: Affine2d, Affine3d, AngleAxisd, Vector3d, Vector2d, Rotation2Dd,
 
+        // chars?
+
+        // Eigen things: Affine2d, Affine3d, AngleAxisd, Vector3d, Vector2d, Rotation2Dd,
+
+        // Vector2d
+        AND_WHEN("A vector is declared using Vector2d values from the YAML node") {
+            std::vector<Eigen::Vector2d> eigenV2dVector = resolve_expression<Eigen::Vector2d>(testValues["vector2"]);
+            THEN("Container sizes should be equivalent") {
+                REQUIRE(testValues["vector2"].size() == eigenV2dVector.size());
+            }
+            AND_THEN("Values at each index should be equivalent") {
+                for (size_t i = 0; i < testValues["vector2"].size(); i++) {
+                    // NOTE: Must test individual xy values
+                    REQUIRE(testValues["vector2"][i][0].as<double>() == eigenV2dVector.at(i).x());
+                    REQUIRE(testValues["vector2"][i][1].as<double>() == eigenV2dVector.at(i).y());
+                }
+            }
+        }
+
+        // Vector3d
+        AND_WHEN("A vector is declared using Vector3d values from the YAML node") {
+            std::vector<Eigen::Vector3d> eigenV3dVector = resolve_expression<Eigen::Vector3d>(testValues["vector3"]);
+            THEN("Container sizes should be equivalent") {
+                REQUIRE(testValues["vector3"].size() == eigenV3dVector.size());
+            }
+            AND_THEN("Values at each index should be equivalent") {
+                for (size_t i = 0; i < testValues["vector3"].size(); i++) {
+                    // NOTE: Must test individual xyz values
+                    REQUIRE(testValues["vector3"][i][0].as<double>() == eigenV3dVector.at(i).x());
+                    REQUIRE(testValues["vector3"][i][1].as<double>() == eigenV3dVector.at(i).y());
+                    REQUIRE(testValues["vector3"][i][2].as<double>() == eigenV3dVector.at(i).z());
+                }
+            }
+        }
+
+        // Affine2d
+
+        // Affine3d
+
+        // AngleAxisd
     }
 }
