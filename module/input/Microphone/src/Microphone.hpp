@@ -35,33 +35,25 @@ struct Voice2jsonParsedIntent {
 };
 
 struct Slot {
-    char *name;
-    char *value;
+    std::string name;
+    std::string value;
 };
 
 
 class SpeechIntentMessage {
 public:
-    char *text;
-    char *intent;
+    std::string text;
+    std::string intent;
     std::vector<Slot> slots;
     float confidence;
     
-    void add_slot(char *name, char *value) {
+    void add_slot(std::string name, std::string value) {
         Slot slot = {name, value};
         slots.push_back(slot);
     }
     
     ~SpeechIntentMessage() {
         printf("freeing SpeechIntentMessage\n");
-        free(text);
-        free(intent);
-        
-        for(Slot slot : slots) {
-            free(slot.name);
-            free(slot.value);
-        }
-        //delete slots;
     }
 };
 
