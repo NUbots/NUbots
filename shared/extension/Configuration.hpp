@@ -290,7 +290,7 @@ namespace NUClear::dsl {
                 // If there were command line arguments, we can get the binary name, and check for a binary config
                 // If not, we don't bother checking for a binary config to bind
                 const auto binaryName = get_first_command_line_arg();
-                if (binaryName != "") {
+                if (!binaryName.empty()) {
                     fs::path binaryConfig = fs::path("config") / binaryName / filename;
                     // Bind our binary specific config file if it exists
                     if (fs::exists(binaryConfig)) {
