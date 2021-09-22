@@ -16,7 +16,7 @@ namespace module {
             using message::support::optimisation::NSGA2EvaluationRequest;
 
             void WalkOptimiser::SetupNSGA2(const ::extension::Configuration& config, nsga2::NSGA2& nsga2Algorithm) {
-                                NUClear::log<NUClear::INFO>("Walk Optimiser Setting up NSGA2");
+                NUClear::log<NUClear::INFO>("Walk Optimiser Setting up NSGA2");
                 // The initial values of the parameters to optimise
                 std::vector<double> paramInitialValues;
 
@@ -67,7 +67,7 @@ namespace module {
                 trial_duration_limit = config["trial_duration_limit"].as<int>();
 
                 // Set configuration for real variables
-                NUClear::log<NUClear::INFO>("Real Var Count 1: ", paramInitialValues.size());
+                NUClear::log<NUClear::INFO>("Real Var Count: ", paramInitialValues.size());
                 nsga2Algorithm.SetRealVariableCount(paramInitialValues.size());
                 nsga2Algorithm.SetRealVarLimits(paramLimits);
                 nsga2Algorithm.SetInitialRealVars(paramInitialValues);

@@ -10,6 +10,7 @@
 #include "utility/support/yaml_expression.hpp"
 
 #include "tasks/WalkOptimiser.hpp"
+#include "tasks/StandOptimiser.hpp"
 
 namespace module {
     namespace support {
@@ -47,11 +48,16 @@ namespace module {
                     nsga2Algorithm.SetEtaM(config["eta"]["M"].as<double>());
                     nsga2Algorithm.SetSeed(config["seed"].as<int>());
 
-                    if(true) {
-                        //TODO: 2021-09-07 Add check for which kind of task we're using
+                    auto taskType = config["task"].as<std::string>();
+                    if(taskType == "walk") {
+                        log<NUClear::INFO>("Task type is Walk");
                         task = std::make_unique<WalkOptimiser>();
+                    } else if(taskType == "stand") {
+                        log<NUClear::INFO>("Task type is Stand");
+                        task = std::make_unique<StandOptimiser>();
                     } else {
-                        log<NUClear::ERROR>("Unrecognised optimiser task");
+                        log<NUClear::ERROR>("Unrecognised optimiser task", taskType);
+                        powerplant.shutdown();
                     }
                     task->SetupNSGA2(config, nsga2Algorithm);
                 });
