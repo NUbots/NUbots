@@ -246,6 +246,7 @@ namespace module::input {
     //it excepts the first line to be the file size (as asii)
     //followed by the wav file after the newline
     bool write_audio_to_file(int fd, char* filename) {
+        ssize_t write_res = 0;
         if (access(filename, F_OK) != 0) {
             return false;
         }
@@ -263,9 +264,21 @@ namespace module::input {
         char file_size_buf[64];
         sprintf(file_size_buf, "%d\n", file_size);
 
-        write(fd, file_size_buf, strlen(file_size_buf));
+        write_res = write(fd, file_size_buf, strlen(file_size_buf));
+        if(write_res == -1) {
+            NUClear::log<NUClear::FATAL>(
+                fmt::format("({}:{}) write failed, errno", __FILE__, __LINE__, errno));
+            free(file_buffer);
+            return false;
+        }
 
-        ssize_t write_res = write(fd, file_buffer, file_size);
+        write_res = write(fd, file_buffer, file_size);
+        if(write_res == -1) {
+            NUClear::log<NUClear::FATAL>(
+                fmt::format("({}:{}) write failed, errno", __FILE__, __LINE__, errno));
+            free(file_buffer);
+            return false;
+        }
         assert(write_res == file_size);
 
         free(file_buffer);
@@ -358,6 +371,7 @@ namespace module::input {
                 if (!intent_json) {
                     NUClear::log<NUClear::FATAL>(
                         fmt::format("({}:{}) failed to recognize intent, errno = {}", __FILE__, __LINE__, errno));
+                    return;
                 }
 
                 std::unique_ptr<SpeechIntentMessage> intent = parse_voice2json_json(intent_json, strlen(intent_json));
