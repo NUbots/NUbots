@@ -41,10 +41,10 @@ def run(target, build, pull, **kwargs):
         print("Currently selected platform is {}".format(target))
 
     else:
-        # We check if a build is necessary by diffing the docker folder with master
+        # We check if a build is necessary by diffing the docker folder with main
         changed = (
             subprocess.run(
-                ["git", "diff", "--exit-code", "origin/master", os.path.join(b.project_dir, "docker")],
+                ["git", "diff", "--exit-code", "origin/main", os.path.join(b.project_dir, "docker")],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             ).returncode
@@ -55,7 +55,7 @@ def run(target, build, pull, **kwargs):
             # Pull the image from dockerhub
             platform.pull(defaults.image, target)
 
-        # If user wants or needs to build it locally, do that unless the build context is the same as origin/master
+        # If user wants or needs to build it locally, do that unless the build context is the same as origin/main
         if build:
             if not changed:
                 cprint(
@@ -71,7 +71,7 @@ def run(target, build, pull, **kwargs):
         else:
             if changed:
                 cprint(
-                    "Docker build context differs from origin/master, and build not selected. "
+                    "Docker build context differs from origin/main, and build not selected. "
                     "This is likely an error.",
                     "red",
                     attrs=["bold"],

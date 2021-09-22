@@ -1,0 +1,192 @@
+# Continuous Integration tests for NUsight
+name: NUsight CI
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [main]
+  pull_request:
+
+# Set the yarn cache folder to a writable folder
+env:
+  HOME: ${{ github.workspace }}
+  YARN_CACHE_FOLDER: ${{ github.workspace }}/.yarn
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # Validate the NUsight code style and formatting are correct according to eslint and prettier
+  nusight-format:
+    name: NUsight Formatting
+    # The type of runner that the job will run on
+    runs-on: ubuntu-20.04
+
+    # Run on the Node 14 (LTS) container
+    container:
+      image: node:lts-fermium
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Cancels previously running jobs for this workflow
+      - name: Cancel Workflow Action
+        uses: styfle/cancel-workflow-action@0.9.1
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      # Get our yarn cache if it exists
+      # See https://github.com/actions/cache/blob/master/examples.md#node---yarn
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      # Check if the yarn cache directory is valid
+      - uses: actions/cache@v2
+        id: yarn-cache # use this to check for `cache-hit`
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      # Check dependencies from cache and install any which weren't cached or were corrupted
+      - name: Install Dependencies
+        working-directory: nusight2
+        run: yarn --prefer-offline
+
+      - name: Run eslint
+        working-directory: nusight2
+        run: yarn eslint
+
+  # Build the NUsight code
+  build-nusight:
+    name: Build NUsight
+    # The type of runner that the job will run on
+    runs-on: ubuntu-20.04
+
+    # Run on the Node 14 (LTS) container
+    container:
+      image: node:lts-fermium
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Cancels previously running jobs for this workflow
+      - name: Cancel Workflow Action
+        uses: styfle/cancel-workflow-action@0.9.1
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      # Get our yarn cache if it exists
+      # See https://github.com/actions/cache/blob/master/examples.md#node---yarn
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      # Check if the yarn cache directory is valid
+      - uses: actions/cache@v2
+        id: yarn-cache # use this to check for `cache-hit`
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      # Check dependencies from cache and install any which weren't cached or were corrupted
+      - name: Install Dependencies
+        working-directory: nusight2
+        run: yarn --prefer-offline
+
+      - name: Build NUsight
+        working-directory: nusight2
+        run: yarn build:ci
+
+  # Build the NUsight Storybook code
+  build-nusight-storybook:
+    name: Build NUsight Storybook
+    # The type of runner that the job will run on
+    runs-on: ubuntu-20.04
+
+    # Run on the Node 14 (LTS) container
+    container:
+      image: node:lts-fermium
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Cancels previously running jobs for this workflow
+      - name: Cancel Workflow Action
+        uses: styfle/cancel-workflow-action@0.9.1
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      # Get our yarn cache if it exists
+      # See https://github.com/actions/cache/blob/master/examples.md#node---yarn
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      # Check if the yarn cache directory is valid
+      - uses: actions/cache@v2
+        id: yarn-cache # use this to check for `cache-hit`
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      # Check dependencies from cache and install any which weren't cached or were corrupted
+      - name: Install Dependencies
+        working-directory: nusight2
+        run: yarn --prefer-offline
+
+      - name: Build NUsight
+        working-directory: nusight2
+        run: yarn storybook:build
+
+  # Test the NUsight code
+  test-nusight:
+    name: Test NUsight
+    # The type of runner that the job will run on
+    runs-on: ubuntu-20.04
+
+    # Run on the Node 14 (LTS) container
+    container:
+      image: node:lts-fermium
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Cancels previously running jobs for this workflow
+      - name: Cancel Workflow Action
+        uses: styfle/cancel-workflow-action@0.9.1
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      # Get our yarn cache if it exists
+      # See https://github.com/actions/cache/blob/master/examples.md#node---yarn
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      # Check if the yarn cache directory is valid
+      - uses: actions/cache@v2
+        id: yarn-cache # use this to check for `cache-hit`
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      # Check dependencies from cache and install any which weren't cached or were corrupted
+      - name: Install Dependencies
+        working-directory: nusight2
+        run: yarn --prefer-offline
+
+      - name: Build NUsight
+        working-directory: nusight2
+        run: yarn test:ci
