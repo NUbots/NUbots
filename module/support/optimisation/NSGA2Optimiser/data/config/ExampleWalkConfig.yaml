@@ -67,15 +67,3 @@ walk:
 # The following values are setting the initial values and limits for the walk engine command.
 walk_command:
   velocity: [0.2, 0.01, 0.51]
-
-gains:
-  legs: 13
-  arms: 13
-
-arms:
-  right_shoulder_pitch: 1.98
-  left_shoulder_pitch: 1.98
-  right_shoulder_roll: -0.176
-  left_shoulder_roll: 0.176
-  right_elbow: -1
-  left_elbow: -1

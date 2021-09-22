@@ -23,6 +23,7 @@
 #include "utility/support/yaml_expression.hpp"
 
 #include "tasks/WalkEvaluator.hpp"
+#include "tasks/StandEvaluator.hpp"
 
 namespace module {
     namespace support {
@@ -232,6 +233,8 @@ namespace module {
 
                 if(lastEvalRequestMsg.task == "walk") {
                     task = std::make_unique<WalkEvaluator>();
+                } else if(lastEvalRequestMsg.task == "stand") {
+                    task = std::make_unique<StandEvaluator>();
                 } else {
                     log<NUClear::ERROR>("Unhandled task type:", lastEvalRequestMsg.task);
                 }

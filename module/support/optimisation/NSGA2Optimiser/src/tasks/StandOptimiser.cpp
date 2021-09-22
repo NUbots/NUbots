@@ -25,7 +25,7 @@ namespace module {
 
                 // Extract the initial values and limits and from config file, for all of the parameters
                 scriptPath = config["script_path"].as<std::string>();
-                NUClear::log<NUClear::INFO>(scriptPath);
+
                 auto& stand = config["stand"];
                 for (const auto& element : stand) {
                     //This is iterating through each frame of the script
@@ -48,6 +48,8 @@ namespace module {
                 request->id = id;
                 request->generation = generation;
                 request->task = "stand";
+                // Add the individual's parameters to the message
+                request->parameters.real_params = reals;
                 return request;
             }
 
