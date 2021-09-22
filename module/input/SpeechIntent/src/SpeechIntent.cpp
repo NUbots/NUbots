@@ -1,4 +1,4 @@
-#include "Microphone.hpp"
+#include "SpeechIntent.hpp"
 
 #include <alsa/asoundlib.h>
 #include <fmt/format.h>
@@ -111,7 +111,7 @@ namespace module::input {
         int written    = sprintf(env_path, "PATH=%s", path);
         assert(written > 0);
         env_path[written] = 0;
-
+        
         char* const envp[] = {(char*) "KALDI_DIR=",  // KALDI_DIR env var must be blank!
                               (char*) env_path,
                               NULL};
@@ -237,7 +237,8 @@ namespace module::input {
 
     //write out the correct format for voice2json to consume
     //when voice2json is called using the "transcribe-wav --input-size" flags
-    //
+    //it excepts the first line to be the file size (as asii)
+    //followed by the wav file after the newline
     bool write_audio_to_file(int fd, char* filename) {
         if (access(filename, F_OK) != 0) {
             return false;
@@ -267,10 +268,10 @@ namespace module::input {
     }
 
 
-    Microphone::Microphone(std::unique_ptr<NUClear::Environment> environment)
+    SpeechIntent::SpeechIntent(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), config{} {
-        on<Configuration>("Microphone.yaml").then([this](const Configuration& cfg) {
-            // Use configuration here from file Microphone.yaml
+        on<Configuration>("SpeechIntent.yaml").then([this](const Configuration& cfg) {
+            // Use configuration here from file SpeechIntent.yaml
             this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
             this->config.debug_mode = cfg["debug_mode"].as<bool>();
         });
@@ -282,7 +283,7 @@ namespace module::input {
             return;
         }
 
-        //set "debug_mode: true" in Microphone.yaml to enable this
+        //set "debug_mode: true" in SpeechIntent.yaml to enable this
         if (this->config.debug_mode)
         {
             on<Trigger<SpeechIntentMessage>>().then([this](const SpeechIntentMessage& msg) {
@@ -301,7 +302,7 @@ namespace module::input {
                 std::string str = {};
                 getline(std::cin, str);
 
-                log(fmt::format("MICROPHONE STDIN = {}", str));
+                log(fmt::format("SpeechIntent STDIN = {}", str));
 
                 std::stringstream ss(str);
                 std::string cmd = {};
@@ -377,7 +378,7 @@ namespace module::input {
         });
     }
 
-    Microphone::~Microphone() {
+    SpeechIntent::~SpeechIntent() {
         if (voice2json_proc.stdout)
             close(voice2json_proc.stdout);
         if (voice2json_proc.stderr)

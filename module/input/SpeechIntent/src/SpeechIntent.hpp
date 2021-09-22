@@ -1,5 +1,5 @@
-#ifndef MODULE_INPUT_MICROPHONE_HPP
-#define MODULE_INPUT_MICROPHONE_HPP
+#ifndef MODULE_INPUT_SPEECHINTENT_HPP
+#define MODULE_INPUT_SPEECHINTENT_HPP
 
 #include <nuclear>
 
@@ -43,7 +43,7 @@ namespace module::input {
         }
     };
 
-    class Microphone : public NUClear::Reactor {
+    class SpeechIntent : public NUClear::Reactor {
     private:
         /// The configuration variables for this reactor
         struct {
@@ -55,12 +55,12 @@ namespace module::input {
         SpawnedProcess voice2json_proc;
 
     public:
-        /// @brief Called by the powerplant to build and setup the Microphone reactor.
-        explicit Microphone(std::unique_ptr<NUClear::Environment> environment);
-        ~Microphone();
+        /// @brief Called by the powerplant to build and setup the SpeechIntent reactor.
+        explicit SpeechIntent(std::unique_ptr<NUClear::Environment> environment);
+        ~SpeechIntent();
     };
 
 
 }  // namespace module::input
 
-#endif  // MODULE_INPUT_MICROPHONE_HPP
+#endif  // MODULE_INPUT_SPEECHINTENT_HPP
