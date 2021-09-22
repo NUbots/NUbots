@@ -16,11 +16,13 @@ struct MicControlMsg {
     std::string filename;
 };
 
-
-struct MicProcHandles {
+struct SpawnedProcess {
     int stdout;
     int stderr;
     int stdin;
+    pid_t pid;
+    
+    std::string process_name;
 };
 
 struct Slot {
@@ -49,7 +51,9 @@ private:
        bool debug_mode = false;
     } config;
     bool enabled = true;
-    MicProcHandles handles;
+    //MicProcHandles handles;
+    
+    SpawnedProcess voice2json_proc;
 
 public:
     /// @brief Called by the powerplant to build and setup the Microphone reactor.

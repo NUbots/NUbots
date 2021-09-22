@@ -61,6 +61,10 @@ std::unique_ptr<SpeechIntentMessage> parse_voice2json_json(char *json_text, size
     return intent;
 }
 
+std::unique_ptr<SpeechIntentMessage> parse_voice2json_json(std::string str) {
+    return parse_voice2json_json(str.data(), str.size());
+}
+
 //TODO: there no way of testing this for the moment.
 //Use this reference example with "snd_pcm_poll_descriptors"
 //Which returns a file handle we can wait on.
@@ -86,7 +90,7 @@ bool start_microphone_capture() {
 //spawned process
 //first char * in args array refers to the process name
 //args need to be null terminated. meaning that the last member of the should be null
-bool spawn_process(MicProcHandles *handles, char **args) {
+bool spawn_process(SpawnedProcess *process, char **args) {
     bool success = false;
     
     pid_t pid = 0;
@@ -128,13 +132,17 @@ bool spawn_process(MicProcHandles *handles, char **args) {
             
         if(posix_spawnp(&pid, (char const *)args[0], &actions, 0, (char *const *)args, envp) == 0) {
             success = true;
+        } else {
+            NUClear::log<NUClear::FATAL>(fmt::format("failed to spawn process, errno = {}", errno));
         }
+    } else {
+        NUClear::log<NUClear::FATAL>(fmt::format("failed to create pipes, errno = {}", errno));
     }
     if(stdout_pipe[1]) close(stdout_pipe[1]);
     if(stderr_pipe[1]) close(stderr_pipe[1]);
     if(stdin_pipe[0]) close(stdin_pipe[0]);
 
-    *handles = {stdout_pipe[0], stderr_pipe[0], stdin_pipe[1]};
+    *process = {stdout_pipe[0], stderr_pipe[0], stdin_pipe[1], pid, std::string(args[0]) };
     
     if(actions_inited) {
         posix_spawn_file_actions_destroy(&actions);
@@ -147,7 +155,7 @@ bool spawn_process(MicProcHandles *handles, char **args) {
 }
 
 //python -m voice2json --base-directory /home/nubots/voice2json/ -p en transcribe-wav
-bool voice2json_transcribe_stream(MicProcHandles *handles) {
+bool voice2json_transcribe_stream(SpawnedProcess *process) {
     char *args[] = {
         (char*) "python",     
         (char*) "-m",
@@ -160,11 +168,11 @@ bool voice2json_transcribe_stream(MicProcHandles *handles) {
         NULL
     };
     
-    return spawn_process(handles, args);
+    return spawn_process(process, args);
 }
 
 //python -m voice2json --base-directory /home/nubots/voice2json/ -p en transcribe-wav --input-size
-bool voice2json_transcribe_wav(MicProcHandles *handles) {
+bool voice2json_transcribe_wav(SpawnedProcess *process) {
     char *args[] = {
         (char*) "python",     
         (char*) "-m",
@@ -178,7 +186,7 @@ bool voice2json_transcribe_wav(MicProcHandles *handles) {
         NULL
     };
     
-    return spawn_process(handles, args);
+    return spawn_process(process, args);
 }
 
 //python -m voice2json --base-directory /home/nubots/voice2json/ -p en recognize-intent
@@ -199,24 +207,32 @@ char *voice2json_recognize_intent(char *input) {
         NULL
     };
     
-    MicProcHandles handles = {};
-    if(spawn_process(&handles, args)) {
-        write(handles.stdin, input, strlen(input));
+    SpawnedProcess process = {};
+    if(spawn_process(&process, args)) {
+        write(process.stdin, input, strlen(input));
         
-        bytes_read = read(handles.stdout, buffer, sizeof(buffer)-1);
-        assert(bytes_read > 0);
+        bytes_read = read(process.stdout, buffer, sizeof(buffer)-1);
+        if(bytes_read == -1) {
+            NUClear::log<NUClear::FATAL>(
+                fmt::format("failed to read from spawned process "
+                    "(voice2json recognize-intent) stdout - error {}", errno));
+        }
         buffer[bytes_read] = 0;
         
         output = strdup(buffer);
     }
-    if(handles.stdout) close(handles.stdout);
-    if(handles.stderr) close(handles.stderr);
-    if(handles.stdin) close(handles.stdin);
+    if(process.stdout) close(process.stdout);
+    if(process.stderr) close(process.stderr);
+    if(process.stdin) close(process.stdin);
 
     return output;
 }
 
-void write_audio_to_file(int fd, char *filename) {
+bool write_audio_to_file(int fd, char *filename) {
+    if(access(filename, F_OK) != 0) {
+        return false;
+    }
+    
     FILE *file = fopen(filename, "rb");
     fseek(file, 0, SEEK_END);
     int file_size = ftell(file);
@@ -236,11 +252,15 @@ void write_audio_to_file(int fd, char *filename) {
     assert(write_res == file_size);
 
     free(file_buffer);
+    
+    return true;
 }
 
 
 Microphone::Microphone(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), config{} {
     on<Configuration>("Microphone.yaml").then([this](const Configuration& cfg) {
+        printf("wtf\n");
+        fflush(stdout);
         // Use configuration here from file Microphone.yaml
         this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
         //why does this not fire ????????
@@ -249,7 +269,7 @@ Microphone::Microphone(std::unique_ptr<NUClear::Environment> environment) : Reac
     });
     //Spawn voice2json process in transcribe-wav mode 
     //This will accept a wav file in stdin
-    if(!voice2json_transcribe_wav(&handles)) {
+    if(!voice2json_transcribe_wav(&voice2json_proc)) {
         perror("failed to start voice2json");
         return;
     }
@@ -263,13 +283,15 @@ Microphone::Microphone(std::unique_ptr<NUClear::Environment> environment) : Reac
                 enabled = false;
             break;
             case MIC_MSG_TEST_AUDIO:
-                write_audio_to_file(handles.stdin, (char*) msg.filename.data());
+                if(!write_audio_to_file(voice2json_proc.stdin, (char*) msg.filename.data())) {
+                    log(fmt::format("Failed to write to {}", msg.filename.data()));
+                }
             break;
         }
     });
     
     //THIS IS FOR TESTING
-    printf("debug_mode = %d", this->config.debug_mode);
+    printf("debug_mode = %d\n", this->config.debug_mode);
     //if(this->config.debug_mode)
     {
         on<Trigger<SpeechIntentMessage>>().then([this](const SpeechIntentMessage &msg) {
@@ -311,49 +333,47 @@ Microphone::Microphone(std::unique_ptr<NUClear::Environment> environment) : Reac
     }
     
     
-    on<IO>(handles.stdout, IO::READ).then([this] {            
+    on<IO>(voice2json_proc.stdout, IO::READ).then([this] {            
         //TODO: need to read and append to buffer until we reach a newline...
         char buffer[0x1000];
-        ssize_t bytes_read = read(handles.stdout, buffer, sizeof(buffer)-1);
-        if(bytes_read > 0) {
-            assert((size_t)bytes_read < sizeof(buffer)); //TODO
-            buffer[bytes_read] = 0;
+        ssize_t bytes_read = read(voice2json_proc.stdout, buffer, sizeof(buffer)-1);
+        if(bytes_read == -1) {
+            NUClear::log<NUClear::FATAL>(
+                fmt::format("failed to read from spawned process stdout, errno = {}", errno));
+            return;
+        }
+        buffer[bytes_read] = 0;
                         
-            if(enabled) {            
-                char *intent_json = voice2json_recognize_intent(buffer);
-                if(!intent_json) {
-                    perror("error");
-                }
-                
-                std::unique_ptr<SpeechIntentMessage> intent = parse_voice2json_json(intent_json, strlen(intent_json));
-                emit(std::move(intent));
-
-                free(intent_json);
+        if(enabled) {            
+            char *intent_json = voice2json_recognize_intent(buffer);
+            if(!intent_json) {
+                perror("error");
             }
             
+            std::unique_ptr<SpeechIntentMessage> intent = parse_voice2json_json(intent_json, strlen(intent_json));
+            emit(std::move(intent));
+
+            free(intent_json);
         }
     });
     
-    //TODO: have a better story on how we handle this
-    //for the moment we fatally error
-    on<IO>(handles.stderr, IO::READ).then([this] {            
+    on<IO>(voice2json_proc.stderr, IO::READ).then([this] {            
         char buffer[0x1000];
-        ssize_t bytes_read = read(handles.stderr, buffer, sizeof(buffer)-1);
-        if(bytes_read > 0) {
-            assert((size_t)bytes_read < sizeof(buffer)); //TODO
-            buffer[bytes_read] = 0;
-            
-            //NUClear::log<NUClear::FATAL>
-            log(fmt::format("{} = {}", bytes_read, buffer));
-            perror("stderr");
-        } 
+        ssize_t bytes_read = read(voice2json_proc.stderr, buffer, sizeof(buffer)-1);
+        if(bytes_read == -1) {
+            NUClear::log<NUClear::FATAL>(
+                fmt::format("failed to read from spawned process stderr, errno = {}", errno));
+            return;
+        }
+        buffer[bytes_read] = 0;
+        NUClear::log<NUClear::FATAL>(fmt::format("VOICE2JSON stderr ({} bytes) = {}", bytes_read, buffer));
     });
 }
 
 Microphone::~Microphone() {
-    if(handles.stdout) close(handles.stdout);
-    if(handles.stderr) close(handles.stderr);
-    if(handles.stdin) close(handles.stdin);
+    if(voice2json_proc.stdout) close(voice2json_proc.stdout);
+    if(voice2json_proc.stderr) close(voice2json_proc.stderr);
+    if(voice2json_proc.stdin) close(voice2json_proc.stdin);
 }
 
 
