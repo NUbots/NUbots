@@ -1,5 +1,0 @@
-nuclear_role(
-    extension::FileWatcher
-    support::logging::ConsoleLogHandler
-    input::Microphone
-)

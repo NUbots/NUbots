@@ -94,7 +94,7 @@ namespace module::input {
     // spawned process
     // first char * in args array refers to the process name
     // args need to be null terminated. meaning that the last member of the should be null
-    bool spawn_process(SpawnedProcess& process, char** args) {
+    bool spawn_process(SpawnedProcess& process, const char** args) {
         bool success = false;
 
         pid_t pid                          = 0;
@@ -132,7 +132,7 @@ namespace module::input {
             posix_spawn_file_actions_addclose(&actions, stderr_pipe[1]);
             posix_spawn_file_actions_addclose(&actions, stdin_pipe[0]);
 
-            if (posix_spawnp(&pid, (char const*) args[0], &actions, 0, (char* const*) args, envp) == 0) {
+            if (posix_spawnp(&pid, (const char *) args[0], &actions, 0, (char* const *) args, envp) == 0) {
                 success = true;
             }
             else {
@@ -163,31 +163,35 @@ namespace module::input {
 
     // python -m voice2json --base-directory /home/nubots/voice2json/ -p en transcribe-stream
     bool voice2json_transcribe_stream(SpawnedProcess& process) {
-        char* args[] = {(char*) "python",
-                        (char*) "-m",
-                        (char*) "voice2json",
-                        (char*) "--base-directory",
-                        (char*) "/home/nubots/voice2json/",
-                        (char*) "-p",
-                        (char*) "en",
-                        (char*) "transcribe-stream",
-                        NULL};
+        const char* args[] = {
+            "python",
+            "-m",
+            "voice2json",
+            "--base-directory",
+            "/home/nubots/voice2json/",
+            "-p",
+            "en",
+            "transcribe-stream",
+            NULL
+        };
 
         return spawn_process(process, args);
     }
 
     // python -m voice2json --base-directory /home/nubots/voice2json/ -p en transcribe-wav --input-size
     bool voice2json_transcribe_wav(SpawnedProcess& process) {
-        char* args[] = {(char*) "python",
-                        (char*) "-m",
-                        (char*) "voice2json",
-                        (char*) "--base-directory",
-                        (char*) "/home/nubots/voice2json/",
-                        (char*) "-p",
-                        (char*) "en",
-                        (char*) "transcribe-wav",
-                        (char*) "--input-size",
-                        NULL};
+        const char* args[] = {
+            "python",
+            "-m",
+            "voice2json",
+            "--base-directory",
+            "/home/nubots/voice2json/",
+            "-p",
+            "en",
+            "transcribe-wav",
+            "--input-size",
+            NULL
+        };
 
         return spawn_process(process, args);
     }
@@ -198,15 +202,17 @@ namespace module::input {
         char buffer[0x1000];
         ssize_t bytes_read = 0;
 
-        char* args[] = {(char*) "python",
-                        (char*) "-m",
-                        (char*) "voice2json",
-                        (char*) "--base-directory",
-                        (char*) "/home/nubots/voice2json/",
-                        (char*) "-p",
-                        (char*) "en",
-                        (char*) "recognize-intent",
-                        NULL};
+        const char* args[] = {
+            "python",
+            "-m",
+            "voice2json",
+            "--base-directory",
+            "/home/nubots/voice2json/",
+            "-p",
+            "en",
+            "recognize-intent",
+            NULL
+        };
 
         SpawnedProcess process = {};
         if (spawn_process(process, args)) {
@@ -283,6 +289,7 @@ namespace module::input {
             return;
         }
 
+        //TODO: is there an issue
         //set "debug_mode: true" in SpeechIntent.yaml to enable this
         if (this->config.debug_mode)
         {
