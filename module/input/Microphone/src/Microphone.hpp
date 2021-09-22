@@ -8,7 +8,7 @@ namespace module::input {
 enum MicMsgType {
     MIC_MSG_ENABLE,
     MIC_MSG_DISABLE,
-    MIC_MSG_TEST_AUDIO,
+    MIC_MSG_RECOGNIZE_AUDIO_FROM_FILE,
 };
 
 struct MicControlMsg {
@@ -31,8 +31,7 @@ struct Slot {
 };
 
 
-class SpeechIntentMessage {
-public:
+struct SpeechIntentMessage {
     std::string text;
     std::string intent;
     std::vector<Slot> slots;

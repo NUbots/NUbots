@@ -154,7 +154,7 @@ bool spawn_process(SpawnedProcess *process, char **args) {
     return success;
 }
 
-//python -m voice2json --base-directory /home/nubots/voice2json/ -p en transcribe-wav
+//python -m voice2json --base-directory /home/nubots/voice2json/ -p en transcribe-stream
 bool voice2json_transcribe_stream(SpawnedProcess *process) {
     char *args[] = {
         (char*) "python",     
@@ -214,8 +214,8 @@ char *voice2json_recognize_intent(char *input) {
         bytes_read = read(process.stdout, buffer, sizeof(buffer)-1);
         if(bytes_read == -1) {
             NUClear::log<NUClear::FATAL>(
-                fmt::format("failed to read from spawned process "
-                    "(voice2json recognize-intent) stdout - error {}", errno));
+                fmt::format("({}:{}) failed to read from spawned process "
+                    "(voice2json recognize-intent) stdout - error {}", __FILE__, __LINE__, errno));
         }
         buffer[bytes_read] = 0;
         
@@ -259,8 +259,6 @@ bool write_audio_to_file(int fd, char *filename) {
 
 Microphone::Microphone(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), config{} {
     on<Configuration>("Microphone.yaml").then([this](const Configuration& cfg) {
-        printf("wtf\n");
-        fflush(stdout);
         // Use configuration here from file Microphone.yaml
         this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
         //why does this not fire ????????
@@ -268,55 +266,36 @@ Microphone::Microphone(std::unique_ptr<NUClear::Environment> environment) : Reac
         
     });
     //Spawn voice2json process in transcribe-wav mode 
-    //This will accept a wav file in stdin
+    //The process will accept a wav file reading from it's stdin
     if(!voice2json_transcribe_wav(&voice2json_proc)) {
-        perror("failed to start voice2json");
+        NUClear::log<NUClear::FATAL>(
+            fmt::format("({}:{}) Failed to start voice2json, errno", __FILE__, __LINE__, errno));
         return;
     }
     
-    on<Trigger<MicControlMsg>>().then([this](const MicControlMsg& msg) {
-        switch(msg.type) {
-            case MIC_MSG_ENABLE: 
-                enabled = true;
-            break;
-            case MIC_MSG_DISABLE:
-                enabled = false;
-            break;
-            case MIC_MSG_TEST_AUDIO:
-                if(!write_audio_to_file(voice2json_proc.stdin, (char*) msg.filename.data())) {
-                    log(fmt::format("Failed to write to {}", msg.filename.data()));
-                }
-            break;
-        }
-    });
+   
     
     //THIS IS FOR TESTING
     printf("debug_mode = %d\n", this->config.debug_mode);
     //if(this->config.debug_mode)
     {
         on<Trigger<SpeechIntentMessage>>().then([this](const SpeechIntentMessage &msg) {
-            //TODO needs to be freed...
-            log(fmt::format("text = {}", msg.text.data()));
-            log(fmt::format("intent = {}", msg.intent.data()));
-            for(Slot slot : msg.slots) {
-                log(fmt::format("\t{} = {}", slot.name.data(), slot.value.data()));
-            }
-#if 1
             printf("text = %s (%p)\n", msg.text.data(), msg.text.data());
             printf("intent = %s (%p)\n", msg.intent.data(), msg.intent.data());
             for(Slot slot : msg.slots) {
                 printf("%s = %s\n", slot.name.data(), slot.value.data());
             }
-#endif
         });
         //this is just for testing
         //we need this as we do not have an
         //environment for testing the microphone
+        //allows us to simulate sending a MicControlMsg
+        //as if we were another module
         on<IO>(STDIN_FILENO, IO::READ).then([this] {
             std::string str = {};
             getline(std::cin, str);
             
-            log(fmt::format("MICROPHONE STDIN - {}", str));
+            log(fmt::format("MICROPHONE STDIN = {}", str));
                         
             std::stringstream ss(str);
             std::string cmd = {};
@@ -325,12 +304,30 @@ Microphone::Microphone(std::unique_ptr<NUClear::Environment> environment) : Reac
                 std::string filename = {};
                 getline(ss, filename);
                 std::unique_ptr<MicControlMsg> msg = std::make_unique<MicControlMsg>(
-                    MicControlMsg { MIC_MSG_TEST_AUDIO, filename }
+                    MicControlMsg { MIC_MSG_RECOGNIZE_AUDIO_FROM_FILE, filename }
                 );
                 emit(std::move(msg));
             }
         }); 
     }
+    
+     on<Trigger<MicControlMsg>>().then([this](const MicControlMsg& msg) {
+        //Decide on appropriate action based on msg type
+        switch(msg.type) {
+            case MIC_MSG_ENABLE: 
+                enabled = true;
+            break;
+            case MIC_MSG_DISABLE:
+                enabled = false;
+            break;
+            case MIC_MSG_RECOGNIZE_AUDIO_FROM_FILE:
+                if(!write_audio_to_file(voice2json_proc.stdin, (char*) msg.filename.data())) {
+                    NUClear::log<NUClear::FATAL>(
+                        fmt::format("({}:{}) Failed to write to {}", __FILE__, __LINE__, msg.filename.data()));
+                }
+            break;
+        }
+    });
     
     
     on<IO>(voice2json_proc.stdout, IO::READ).then([this] {            
@@ -339,7 +336,7 @@ Microphone::Microphone(std::unique_ptr<NUClear::Environment> environment) : Reac
         ssize_t bytes_read = read(voice2json_proc.stdout, buffer, sizeof(buffer)-1);
         if(bytes_read == -1) {
             NUClear::log<NUClear::FATAL>(
-                fmt::format("failed to read from spawned process stdout, errno = {}", errno));
+                fmt::format("({}:{}) failed to read from spawned process stdout, errno = {}", __FILE__, __LINE__, errno));
             return;
         }
         buffer[bytes_read] = 0;
@@ -347,7 +344,8 @@ Microphone::Microphone(std::unique_ptr<NUClear::Environment> environment) : Reac
         if(enabled) {            
             char *intent_json = voice2json_recognize_intent(buffer);
             if(!intent_json) {
-                perror("error");
+                NUClear::log<NUClear::FATAL>(
+                    fmt::format("({}:{}) failed to recognize intent, errno = {}",  __FILE__, __LINE__, errno));
             }
             
             std::unique_ptr<SpeechIntentMessage> intent = parse_voice2json_json(intent_json, strlen(intent_json));
@@ -362,11 +360,13 @@ Microphone::Microphone(std::unique_ptr<NUClear::Environment> environment) : Reac
         ssize_t bytes_read = read(voice2json_proc.stderr, buffer, sizeof(buffer)-1);
         if(bytes_read == -1) {
             NUClear::log<NUClear::FATAL>(
-                fmt::format("failed to read from spawned process stderr, errno = {}", errno));
+                fmt::format("({}:{}) failed to read from spawned process stderr, errno = {}", __FILE__, __LINE__, errno));
             return;
         }
         buffer[bytes_read] = 0;
-        NUClear::log<NUClear::FATAL>(fmt::format("VOICE2JSON stderr ({} bytes) = {}", bytes_read, buffer));
+        NUClear::log<NUClear::FATAL>(
+            fmt::format("({}:{}) VOICE2JSON stderr ({} bytes) = {}", 
+                __FILE__, __LINE__, bytes_read, buffer));
     });
 }
 
