@@ -13,7 +13,7 @@ enum MicMsgType {
 
 struct MicControlMsg {
     MicMsgType type;
-    uint32_t data;
+    std::string filename;
 };
 
 
@@ -21,17 +21,6 @@ struct MicProcHandles {
     int stdout;
     int stderr;
     int stdin;
-};
-
-struct MicSpeechIntent {
-    
-    
-};
-
-struct Voice2jsonParsedIntent {
-    char *text;
-    char *intent;
-    float confidence;
 };
 
 struct Slot {
@@ -51,16 +40,13 @@ public:
         Slot slot = {name, value};
         slots.push_back(slot);
     }
-    
-    ~SpeechIntentMessage() {
-        printf("freeing SpeechIntentMessage\n");
-    }
 };
 
 class Microphone : public NUClear::Reactor {
 private:
     /// The configuration variables for this reactor
     struct {
+       bool debug_mode = false;
     } config;
     bool enabled = true;
     MicProcHandles handles;

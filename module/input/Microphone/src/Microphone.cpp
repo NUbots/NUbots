@@ -1,5 +1,6 @@
 #include <alsa/asoundlib.h>
 #include <spawn.h>
+#include <fmt/format.h>
 #include "Microphone.hpp"
 
 #include "extension/Configuration.hpp"
@@ -84,7 +85,8 @@ bool start_microphone_capture() {
 //handles: out parameter containing the stdin, stdout, stderr handles from the
 //spawned process
 //first char * in args array refers to the process name
-bool spawn_process(MicProcHandles *handles, char *const *args) {
+//args need to be null terminated. meaning that the last member of the should be null
+bool spawn_process(MicProcHandles *handles, char **args) {
     bool success = false;
     
     pid_t pid = 0;
@@ -92,9 +94,9 @@ bool spawn_process(MicProcHandles *handles, char *const *args) {
     int stderr_pipe[2] = {};
     int stdin_pipe[2] = {};
     posix_spawn_file_actions_t actions = {};
+    bool actions_inited = false;
     
     char *path = getenv("PATH");
-    assert(path);
     
     size_t len = strlen(path) + 5 + 1;
     char *env_path = (char*) malloc(len);
@@ -108,37 +110,33 @@ bool spawn_process(MicProcHandles *handles, char *const *args) {
         NULL 
     };
     
-    if((pipe(stdout_pipe) == -1) || (pipe(stderr_pipe) == -1) || (pipe(stdin_pipe) == -1)) {
-        goto cleanup;
-    }
-    
-    posix_spawn_file_actions_init(&actions);
-    
-    posix_spawn_file_actions_addclose(&actions, stdout_pipe[0]);
-    posix_spawn_file_actions_addclose(&actions, stderr_pipe[0]);
-    posix_spawn_file_actions_addclose(&actions, stdin_pipe[1]);
-
-    posix_spawn_file_actions_adddup2(&actions, stdout_pipe[1], STDOUT_FILENO);
-    posix_spawn_file_actions_adddup2(&actions, stderr_pipe[1], STDERR_FILENO);
-    posix_spawn_file_actions_adddup2(&actions, stdin_pipe[0], STDIN_FILENO);
-    
-    posix_spawn_file_actions_addclose(&actions, stdout_pipe[1]);
-    posix_spawn_file_actions_addclose(&actions, stderr_pipe[1]);
-    posix_spawn_file_actions_addclose(&actions, stdin_pipe[0]);
+    if(!((pipe(stdout_pipe) == -1) || (pipe(stderr_pipe) == -1) || (pipe(stdin_pipe) == -1))) {
+        posix_spawn_file_actions_init(&actions);
+        actions_inited = true;
         
-    if(posix_spawnp(&pid, args[0], &actions, 0, args, envp) != 0) {
-        goto cleanup;
+        posix_spawn_file_actions_addclose(&actions, stdout_pipe[0]);
+        posix_spawn_file_actions_addclose(&actions, stderr_pipe[0]);
+        posix_spawn_file_actions_addclose(&actions, stdin_pipe[1]);
+
+        posix_spawn_file_actions_adddup2(&actions, stdout_pipe[1], STDOUT_FILENO);
+        posix_spawn_file_actions_adddup2(&actions, stderr_pipe[1], STDERR_FILENO);
+        posix_spawn_file_actions_adddup2(&actions, stdin_pipe[0], STDIN_FILENO);
+        
+        posix_spawn_file_actions_addclose(&actions, stdout_pipe[1]);
+        posix_spawn_file_actions_addclose(&actions, stderr_pipe[1]);
+        posix_spawn_file_actions_addclose(&actions, stdin_pipe[0]);
+            
+        if(posix_spawnp(&pid, (char const *)args[0], &actions, 0, (char *const *)args, envp) == 0) {
+            success = true;
+        }
     }
-    
-    success = true;
-cleanup:
     if(stdout_pipe[1]) close(stdout_pipe[1]);
     if(stderr_pipe[1]) close(stderr_pipe[1]);
     if(stdin_pipe[0]) close(stdin_pipe[0]);
 
     *handles = {stdout_pipe[0], stderr_pipe[0], stdin_pipe[1]};
     
-    if(actions.__actions) {
+    if(actions_inited) {
         posix_spawn_file_actions_destroy(&actions);
     }
     if(env_path) {
@@ -150,7 +148,7 @@ cleanup:
 
 //python -m voice2json --base-directory /home/nubots/voice2json/ -p en transcribe-wav
 bool voice2json_transcribe_stream(MicProcHandles *handles) {
-    char *const args[] = {
+    char *args[] = {
         (char*) "python",     
         (char*) "-m",
         (char*) "voice2json",
@@ -167,7 +165,7 @@ bool voice2json_transcribe_stream(MicProcHandles *handles) {
 
 //python -m voice2json --base-directory /home/nubots/voice2json/ -p en transcribe-wav --input-size
 bool voice2json_transcribe_wav(MicProcHandles *handles) {
-    char *const args[] = {
+    char *args[] = {
         (char*) "python",     
         (char*) "-m",
         (char*) "voice2json",
@@ -183,12 +181,13 @@ bool voice2json_transcribe_wav(MicProcHandles *handles) {
     return spawn_process(handles, args);
 }
 
+//python -m voice2json --base-directory /home/nubots/voice2json/ -p en recognize-intent
 char *voice2json_recognize_intent(char *input) {
     char *output = 0;
     char buffer[0x1000];
     ssize_t bytes_read = 0;
     
-    char *const args[] = {
+    char *args[] = {
         (char*) "python",     
         (char*) "-m",
         (char*) "voice2json",
@@ -241,14 +240,15 @@ void write_audio_to_file(int fd, char *filename) {
 
 
 Microphone::Microphone(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), config{} {
-    
     on<Configuration>("Microphone.yaml").then([this](const Configuration& cfg) {
         // Use configuration here from file Microphone.yaml
         this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
+        //why does this not fire ????????
+        this->config.debug_mode = cfg["debug_mode"].as<bool>();
+        
     });
-    
-
-    
+    //Spawn voice2json process in transcribe-wav mode 
+    //This will accept a wav file in stdin
     if(!voice2json_transcribe_wav(&handles)) {
         perror("failed to start voice2json");
         return;
@@ -263,30 +263,55 @@ Microphone::Microphone(std::unique_ptr<NUClear::Environment> environment) : Reac
                 enabled = false;
             break;
             case MIC_MSG_TEST_AUDIO:
-                char filename[1024];
-                sprintf(filename, "/home/nubots/nuhear/audio/voice_%03d.wav", msg.data);
-            
-                write_audio_to_file(handles.stdin, filename);
+                write_audio_to_file(handles.stdin, (char*) msg.filename.data());
             break;
         }
     });
     
     //THIS IS FOR TESTING
-    on<Trigger<SpeechIntentMessage>>().then([this](const SpeechIntentMessage &msg) {
-        //TODO needs to be freed...
-        printf("text = %s (%p)\n", msg.text.data(), msg.text.data());
-        printf("intent = %s (%p)\n", msg.intent.data(), msg.intent.data());
-        for(Slot slot : msg.slots) {
-            printf("%s = %s\n", slot.name.data(), slot.value.data());
-        }
-        //need to free the msg...
-        //delete &msg;
-    });
-
-    
-    on<IO>(handles.stdout, IO::READ).then([this] {
-        printf("fds[0].revents & POLLIN\n");
+    printf("debug_mode = %d", this->config.debug_mode);
+    //if(this->config.debug_mode)
+    {
+        on<Trigger<SpeechIntentMessage>>().then([this](const SpeechIntentMessage &msg) {
+            //TODO needs to be freed...
+            log(fmt::format("text = {}", msg.text.data()));
+            log(fmt::format("intent = {}", msg.intent.data()));
+            for(Slot slot : msg.slots) {
+                log(fmt::format("\t{} = {}", slot.name.data(), slot.value.data()));
+            }
+#if 1
+            printf("text = %s (%p)\n", msg.text.data(), msg.text.data());
+            printf("intent = %s (%p)\n", msg.intent.data(), msg.intent.data());
+            for(Slot slot : msg.slots) {
+                printf("%s = %s\n", slot.name.data(), slot.value.data());
+            }
+#endif
+        });
+        //this is just for testing
+        //we need this as we do not have an
+        //environment for testing the microphone
+        on<IO>(STDIN_FILENO, IO::READ).then([this] {
+            std::string str = {};
+            getline(std::cin, str);
             
+            log(fmt::format("MICROPHONE STDIN - {}", str));
+                        
+            std::stringstream ss(str);
+            std::string cmd = {};
+            getline(ss, cmd, ' ');
+            if(cmd == "file") {
+                std::string filename = {};
+                getline(ss, filename);
+                std::unique_ptr<MicControlMsg> msg = std::make_unique<MicControlMsg>(
+                    MicControlMsg { MIC_MSG_TEST_AUDIO, filename }
+                );
+                emit(std::move(msg));
+            }
+        }); 
+    }
+    
+    
+    on<IO>(handles.stdout, IO::READ).then([this] {            
         //TODO: need to read and append to buffer until we reach a newline...
         char buffer[0x1000];
         ssize_t bytes_read = read(handles.stdout, buffer, sizeof(buffer)-1);
@@ -311,50 +336,18 @@ Microphone::Microphone(std::unique_ptr<NUClear::Environment> environment) : Reac
     
     //TODO: have a better story on how we handle this
     //for the moment we fatally error
-    on<IO>(handles.stderr, IO::READ).then([this] {
-       printf("fds[1].revents & POLLIN\n");
-            
+    on<IO>(handles.stderr, IO::READ).then([this] {            
         char buffer[0x1000];
         ssize_t bytes_read = read(handles.stderr, buffer, sizeof(buffer)-1);
         if(bytes_read > 0) {
             assert((size_t)bytes_read < sizeof(buffer)); //TODO
             buffer[bytes_read] = 0;
             
-            printf("STDERR (%ld) = %s\n", bytes_read, buffer);
-            
+            //NUClear::log<NUClear::FATAL>
+            log(fmt::format("{} = {}", bytes_read, buffer));
             perror("stderr");
         } 
     });
-
-#if 1
-    //this is just for testing
-    //we need this as we do not have an
-    //environment for testing the microphone
-    on<IO>(STDIN_FILENO, IO::READ).then([this] {
-        char b = 0;
-        ssize_t bytes_read = read(STDIN_FILENO, &b, 1);
-        assert(bytes_read == 1);
-        switch(b) {
-            case 'q':
-                char *string = (char*)malloc(100);
-                size_t size = 100;
-                bytes_read = getline(&string, &size, stdin);
-                
-                uint32_t num = atoi(string);
-                printf("%ld,%d - %s \n", bytes_read, num, string);
-                
-                std::unique_ptr<MicControlMsg> msg = std::make_unique<MicControlMsg>(MicControlMsg{
-                    MIC_MSG_TEST_AUDIO, num
-                    
-                });
-                emit(std::move(msg));
-                
-                free(string);
-            break;
-        }        
-    });
-#endif
-    
 }
 
 Microphone::~Microphone() {
