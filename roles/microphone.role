@@ -1,3 +1,1 @@
-nuclear_role(
-    input::Microphone
-)
+nuclear_role(input::Microphone)
