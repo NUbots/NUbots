@@ -94,7 +94,7 @@ namespace module::input {
     // spawned process
     // first char * in args array refers to the process name
     // args need to be null terminated. meaning that the last member of the should be null
-    bool spawn_process(SpawnedProcess* process, char** args) {
+    bool spawn_process(SpawnedProcess& process, char** args) {
         bool success = false;
 
         pid_t pid                          = 0;
@@ -149,7 +149,7 @@ namespace module::input {
         if (stdin_pipe[0])
             close(stdin_pipe[0]);
 
-        *process = {stdout_pipe[0], stderr_pipe[0], stdin_pipe[1], pid, std::string(args[0])};
+        process = {stdout_pipe[0], stderr_pipe[0], stdin_pipe[1], pid, std::string(args[0])};
 
         if (actions_inited) {
             posix_spawn_file_actions_destroy(&actions);
@@ -162,7 +162,7 @@ namespace module::input {
     }
 
     // python -m voice2json --base-directory /home/nubots/voice2json/ -p en transcribe-stream
-    bool voice2json_transcribe_stream(SpawnedProcess* process) {
+    bool voice2json_transcribe_stream(SpawnedProcess& process) {
         char* args[] = {(char*) "python",
                         (char*) "-m",
                         (char*) "voice2json",
@@ -177,7 +177,7 @@ namespace module::input {
     }
 
     // python -m voice2json --base-directory /home/nubots/voice2json/ -p en transcribe-wav --input-size
-    bool voice2json_transcribe_wav(SpawnedProcess* process) {
+    bool voice2json_transcribe_wav(SpawnedProcess& process) {
         char* args[] = {(char*) "python",
                         (char*) "-m",
                         (char*) "voice2json",
@@ -209,7 +209,7 @@ namespace module::input {
                         NULL};
 
         SpawnedProcess process = {};
-        if (spawn_process(&process, args)) {
+        if (spawn_process(process, args)) {
             write(process.stdin, input, strlen(input));
 
             bytes_read = read(process.stdout, buffer, sizeof(buffer) - 1);
@@ -235,6 +235,9 @@ namespace module::input {
         return output;
     }
 
+    //write out the correct format for voice2json to consume
+    //when voice2json is called using the "transcribe-wav --input-size" flags
+    //
     bool write_audio_to_file(int fd, char* filename) {
         if (access(filename, F_OK) != 0) {
             return false;
@@ -269,27 +272,24 @@ namespace module::input {
         on<Configuration>("Microphone.yaml").then([this](const Configuration& cfg) {
             // Use configuration here from file Microphone.yaml
             this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
-            // why does this not fire ????????
             this->config.debug_mode = cfg["debug_mode"].as<bool>();
         });
         // Spawn voice2json process in transcribe-wav mode
         // The process will accept a wav file reading from it's stdin
-        if (!voice2json_transcribe_wav(&voice2json_proc)) {
+        if (!voice2json_transcribe_wav(voice2json_proc)) {
             NUClear::log<NUClear::FATAL>(
                 fmt::format("({}:{}) Failed to start voice2json, errno", __FILE__, __LINE__, errno));
             return;
         }
 
-
-        // THIS IS FOR TESTING
-        printf("debug_mode = %d\n", this->config.debug_mode);
-        // if(this->config.debug_mode)
+        //set "debug_mode: true" in Microphone.yaml to enable this
+        if (this->config.debug_mode)
         {
             on<Trigger<SpeechIntentMessage>>().then([this](const SpeechIntentMessage& msg) {
-                printf("text = %s (%p)\n", msg.text.data(), msg.text.data());
-                printf("intent = %s (%p)\n", msg.intent.data(), msg.intent.data());
+                log(fmt::format("text = {} ({})", msg.text.data(), msg.text.data()));
+                log(fmt::format("intent = {} ({})", msg.intent.data(), msg.intent.data()));
                 for (Slot slot : msg.slots) {
-                    printf("%s = %s\n", slot.name.data(), slot.value.data());
+                    log(fmt::format("{} = {}", slot.name.data(), slot.value.data()));
                 }
             });
             // this is just for testing
@@ -372,7 +372,8 @@ namespace module::input {
             }
             buffer[bytes_read] = 0;
             NUClear::log<NUClear::FATAL>(
-                fmt::format("({}:{}) VOICE2JSON stderr ({} bytes) = {}", __FILE__, __LINE__, bytes_read, buffer));
+                fmt::format("({}:{}) VOICE2JSON stderr, errno = {} ({} bytes) = {}", 
+                    __FILE__, __LINE__, errno, bytes_read, buffer));
         });
     }
 

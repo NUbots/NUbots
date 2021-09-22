@@ -1,1 +1,5 @@
-nuclear_role(input::Microphone)
+nuclear_role(
+    extension::FileWatcher
+    support::logging::ConsoleLogHandler
+    input::Microphone
+)
