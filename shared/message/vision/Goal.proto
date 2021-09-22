@@ -37,14 +37,10 @@ message Goal {
         OWN          = 1;
         OPPONENT     = 2;
     }
-    /// TODO(Vision team): Work out what these mean. See issue #450
     enum MeasurementType {
-        UNKNOWN_MEASUREMENT = 0;
-        CENTRE              = 1;
-        LEFT_NORMAL         = 2;
-        RIGHT_NORMAL        = 3;
-        TOP_NORMAL          = 4;
-        BASE_NORMAL         = 5;
+        UNKNOWN = 0;
+        /// The distance is from the camera to bottom centre of post
+        CENTRE = 1;
     }
     message Measurement {
         MeasurementType type = 1;
