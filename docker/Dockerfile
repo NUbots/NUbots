@@ -188,7 +188,7 @@ RUN install-from-source \
 
 # Protobuf
 RUN install-package protobuf
-RUN install-autotools-from-source https://github.com/protocolbuffers/protobuf/releases/download/v3.11.2/protobuf-cpp-3.11.2.tar.gz \
+RUN install-autotools-from-source https://github.com/protocolbuffers/protobuf/releases/download/v3.17.3/protobuf-cpp-3.17.3.tar.gz \
     --with-zlib=/usr/local \
     --with-protoc=/usr/sbin/protoc
 
@@ -284,7 +284,7 @@ RUN pip install \
     termcolor \
     stringcase \
     Pillow \
-    protobuf==3.11.2 \
+    protobuf==3.17.3 \
     tqdm
 
 # Install tools needed for building individual modules as well as development tools
