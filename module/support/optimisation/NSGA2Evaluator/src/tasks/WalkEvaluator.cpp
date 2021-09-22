@@ -52,10 +52,10 @@ namespace module {
             void WalkEvaluator::setUpTrial(const NSGA2EvaluationRequest& currentRequest) {
                 // Set our generation and individual identifiers from the request
 
-                trial_duration_limit  = currentRequest.parameters.trial_duration_limit;
+                trial_duration_limit  = currentRequest.trial_duration_limit;
 
                 // Set our walk command
-                walk_command_velocity.x() = currentRequest.parameters.velocity;
+                walk_command_velocity.x() = currentRequest.parameters.real_params[11];
                 walk_command_velocity.y() = 0.0;
                 walk_command_rotation = 0.0;
 
@@ -63,27 +63,25 @@ namespace module {
                 // parameters
                 YAML::Node walk_config = YAML::LoadFile("config/webots/QuinticWalk.yaml");
 
+                // The mapping of parameters depends on how the config file was read by the optimiser
                 auto walk                    = walk_config["walk"];
-                walk["freq"]                 = currentRequest.parameters.freq;
-                walk["double_support_ratio"] = currentRequest.parameters.double_support_ratio;
+                walk["freq"]                 = currentRequest.parameters.real_params[0];
+                walk["double_support_ratio"] = currentRequest.parameters.real_params[1];
 
                 auto foot        = walk["foot"];
-                foot["distance"] = currentRequest.parameters.foot.distance;
-                foot["rise"]     = currentRequest.parameters.foot.rise;
+                foot["distance"] = currentRequest.parameters.real_params[2];
+                foot["rise"]     = currentRequest.parameters.real_params[3];
 
                 auto trunk        = walk["trunk"];
-                trunk["height"]   = currentRequest.parameters.trunk.height;
-                trunk["pitch"]    = currentRequest.parameters.trunk.pitch;
-                trunk["x_offset"] = currentRequest.parameters.trunk.x_offset;
-                trunk["y_offset"] = currentRequest.parameters.trunk.y_offset;
-                trunk["swing"]    = currentRequest.parameters.trunk.swing;
-                trunk["pause"]    = currentRequest.parameters.trunk.pause;
+                trunk["height"]   = currentRequest.parameters.real_params[4];
+                trunk["pitch"]    = currentRequest.parameters.real_params[5];
+                trunk["x_offset"] = currentRequest.parameters.real_params[6];
+                trunk["y_offset"] = currentRequest.parameters.real_params[7];
+                trunk["swing"]    = currentRequest.parameters.real_params[8];
+                trunk["pause"]    = currentRequest.parameters.real_params[9];
 
                 auto pause        = walk["pause"];
-                pause["duration"] = currentRequest.parameters.pause.duration;
-
-                auto gains    = walk["gains"];
-                gains["legs"] = currentRequest.parameters.gains.legs;
+                pause["duration"] = currentRequest.parameters.real_params[10];
 
                 // Write the updated config to disk
                 std::ofstream output_file_stream("config/webots/QuinticWalk.yaml");

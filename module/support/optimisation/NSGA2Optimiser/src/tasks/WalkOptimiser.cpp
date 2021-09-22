@@ -82,21 +82,10 @@ namespace module {
                 request->generation = generation;
                 request->task = "walk";
 
-                request->parameters.trial_duration_limit = trial_duration_limit;
+                request->trial_duration_limit = trial_duration_limit;
 
                 // Add the individual's parameters to the message
-                request->parameters.freq                 = reals[0];
-                request->parameters.double_support_ratio = reals[1];
-                request->parameters.foot.distance        = reals[2];
-                request->parameters.foot.rise            = reals[3];
-                request->parameters.trunk.height         = reals[4];
-                request->parameters.trunk.pitch          = reals[5];
-                request->parameters.trunk.x_offset       = reals[6];
-                request->parameters.trunk.y_offset       = reals[7];
-                request->parameters.trunk.swing          = reals[8];
-                request->parameters.trunk.pause          = reals[9];
-                request->parameters.pause.duration       = reals[10];
-                request->parameters.velocity             = reals[11];
+                request->parameters.real_params = reals;
                 return request;
             }
 
