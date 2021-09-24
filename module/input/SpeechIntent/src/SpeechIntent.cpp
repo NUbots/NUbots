@@ -368,7 +368,7 @@ namespace module::input {
                 on<Trigger<SpeechIntentMsg>>().then([this](const SpeechIntentMsg& msg) { print_intent(msg); });
                 recognize_wav(wav_filename);
             }
-            else if (args.size() > 1 && args[1] == "input") {
+            else if (args.size() > 1 && args[1] == "cli") {
                 this->config.transcribe_mode = TRANSCRIBE_MODE_FILE;
                 init();
 
