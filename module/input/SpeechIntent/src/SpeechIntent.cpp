@@ -68,27 +68,6 @@ namespace module::input {
         return parse_voice2json_json(str.data(), str.size());
     }
 
-    // TODO: there no way of testing this for the moment.
-    // Use this reference example with "snd_pcm_poll_descriptors"
-    // Which returns a file handle we can wait on.
-    // https://gist.github.com/albanpeignier/104902
-    /*
-    bool start_microphone_capture() {
-        const char *device_name = "default";
-
-        int err = 0;
-        snd_pcm_t *capture_handle;
-        err = snd_pcm_open(&capture_handle, device_name, SND_PCM_STREAM_CAPTURE, 0);
-        if(err < 0) {
-            return false
-        }
-
-
-
-        return true;
-    }
-    */
-
     // process: out parameter containing the information from the spawned process e.g.
     // stdin, stdout, stderr file handles, pid and process name
     // first char * in args array refers to the process name
@@ -110,7 +89,7 @@ namespace module::input {
         int written    = sprintf(env_path, "PATH=%s", path);
         assert(written > 0);
         env_path[written] = 0;
-        
+
         char* const envp[] = {(char*) "KALDI_DIR=",  // KALDI_DIR env var must be blank!
                               (char*) env_path,
                               NULL};
@@ -131,10 +110,8 @@ namespace module::input {
             posix_spawn_file_actions_addclose(&actions, stderr_pipe[1]);
             posix_spawn_file_actions_addclose(&actions, stdin_pipe[0]);
 
-            if (posix_spawnp(&pid, (const char *) args[0], &actions, 0, (char* const *) args, envp) == 0) {
-                success = true;
-            }
-            else {
+            success = posix_spawnp(&pid, (const char*) args[0], &actions, 0, (char* const*) args, envp) == 0;
+            if (!success) {
                 NUClear::log<NUClear::FATAL>(fmt::format("failed to spawn process, errno = {}", errno));
             }
         }
@@ -162,35 +139,31 @@ namespace module::input {
 
     // python -m voice2json --base-directory /home/nubots/voice2json/ -p en transcribe-stream
     bool voice2json_transcribe_stream(SpawnedProcess& process) {
-        const char* args[] = {
-            "python",
-            "-m",
-            "voice2json",
-            "--base-directory",
-            "/home/nubots/voice2json/",
-            "-p",
-            "en",
-            "transcribe-stream",
-            NULL
-        };
+        const char* args[] = {"python",
+                              "-m",
+                              "voice2json",
+                              "--base-directory",
+                              "/home/nubots/voice2json/",
+                              "-p",
+                              "en",
+                              "transcribe-stream",
+                              NULL};
 
         return spawn_process(process, args);
     }
 
     // python -m voice2json --base-directory /home/nubots/voice2json/ -p en transcribe-wav --input-size
     bool voice2json_transcribe_wav(SpawnedProcess& process) {
-        const char* args[] = {
-            "python",
-            "-m",
-            "voice2json",
-            "--base-directory",
-            "/home/nubots/voice2json/",
-            "-p",
-            "en",
-            "transcribe-wav",
-            "--input-size",
-            NULL
-        };
+        const char* args[] = {"python",
+                              "-m",
+                              "voice2json",
+                              "--base-directory",
+                              "/home/nubots/voice2json/",
+                              "-p",
+                              "en",
+                              "transcribe-wav",
+                              "--input-size",
+                              NULL};
         return spawn_process(process, args);
     }
 
@@ -200,17 +173,15 @@ namespace module::input {
         char buffer[0x1000];
         ssize_t bytes_read = 0;
 
-        const char* args[] = {
-            "python",
-            "-m",
-            "voice2json",
-            "--base-directory",
-            "/home/nubots/voice2json/",
-            "-p",
-            "en",
-            "recognize-intent",
-            NULL
-        };
+        const char* args[] = {"python",
+                              "-m",
+                              "voice2json",
+                              "--base-directory",
+                              "/home/nubots/voice2json/",
+                              "-p",
+                              "en",
+                              "recognize-intent",
+                              NULL};
 
         SpawnedProcess process = {};
         if (spawn_process(process, args)) {
@@ -239,10 +210,10 @@ namespace module::input {
         return output;
     }
 
-    //write out the correct format for voice2json to consume
-    //when voice2json is called using the "transcribe-wav --input-size" flags
-    //it excepts the first line to be the file size (as asii)
-    //followed by the wav file after the newline
+    // write out the correct format for voice2json to consume
+    // when voice2json is called using the "transcribe-wav --input-size" flags
+    // it excepts the first line to be the file size (as asii)
+    // followed by the wav file after the newline
     bool write_audio_to_file(int fd, char* filename) {
         ssize_t write_res = 0;
         if (access(filename, F_OK) != 0) {
@@ -263,17 +234,15 @@ namespace module::input {
         sprintf(file_size_buf, "%d\n", file_size);
 
         write_res = write(fd, file_size_buf, strlen(file_size_buf));
-        if(write_res == -1) {
-            NUClear::log<NUClear::FATAL>(
-                fmt::format("({}:{}) write failed, errno = {}", __FILE__, __LINE__, errno));
+        if (write_res == -1) {
+            NUClear::log<NUClear::FATAL>(fmt::format("({}:{}) write failed, errno = {}", __FILE__, __LINE__, errno));
             free(file_buffer);
             return false;
         }
 
         write_res = write(fd, file_buffer, file_size);
-        if(write_res == -1) {
-            NUClear::log<NUClear::FATAL>(
-                fmt::format("({}:{}) write failed, errno = {}", __FILE__, __LINE__, errno));
+        if (write_res == -1) {
+            NUClear::log<NUClear::FATAL>(fmt::format("({}:{}) write failed, errno = {}", __FILE__, __LINE__, errno));
             free(file_buffer);
             return false;
         }
@@ -284,7 +253,7 @@ namespace module::input {
         return true;
     }
 
-    
+
     void print_intent(const SpeechIntentMsg& msg) {
         NUClear::log(fmt::format("text = {}", msg.text.data()));
         NUClear::log(fmt::format("intent = {}", msg.intent.data()));
@@ -293,17 +262,17 @@ namespace module::input {
             NUClear::log(fmt::format("{} = {}", slot.name.data(), slot.value.data()));
         }
     }
-    
+
     void SpeechIntent::init() {
-        switch(this->config.transcribe_mode) {
+        switch (this->config.transcribe_mode) {
             case TRANSCRIBE_MODE_STREAM:
                 log("transcribings stream");
                 if (!voice2json_transcribe_stream(voice2json_proc)) {
                     NUClear::log<NUClear::FATAL>(
                         fmt::format("({}:{}) Failed to start voice2json, errno", __FILE__, __LINE__, errno));
                     return;
-                }   
-            break;
+                }
+                break;
             case TRANSCRIBE_MODE_FILE:
                 // Spawn voice2json process in transcribe-wav mode
                 // The process will accept a wav file reading from it's stdin
@@ -311,11 +280,9 @@ namespace module::input {
                     NUClear::log<NUClear::FATAL>(
                         fmt::format("({}:{}) Failed to start voice2json, errno", __FILE__, __LINE__, errno));
                     return;
-                }    
-            break;
-            default:
-                assert(false);
-            break;
+                }
+                break;
+            default: assert(false); break;
         }
         on<IO>(voice2json_proc.stdout, IO::READ).then([this] {
             char buffer[0x1000];
@@ -350,45 +317,36 @@ namespace module::input {
             ssize_t bytes_read = read(voice2json_proc.stderr, buffer, sizeof(buffer) - 1);
             if (bytes_read == -1) {
                 NUClear::log<NUClear::FATAL>(
-                    fmt::format("({}:{}) failed to read from spawned process stderr, errno = {}",
-                                __FILE__,
-                                __LINE__,
-                                errno));
+                    fmt::format("({}:{})\nVOICE2JSON stderr, errno = {} ({} bytes)\n{}", 
+                        __FILE__, __LINE__, errno, bytes_read, buffer));
                 return;
             }
             buffer[bytes_read] = 0;
-            NUClear::log<NUClear::FATAL>(
-                fmt::format("({}:{})\nVOICE2JSON stderr, errno = {} ({} bytes)\n{}", 
-                    __FILE__, __LINE__, errno, bytes_read, buffer));
         });
-        
 
 
-        on<Trigger<SpeechInputSetOutputMsg>>().then([this](const SpeechInputSetOutputMsg& msg) {
-            output_enabled = msg.enabled;
-        });
-        
+        on<Trigger<SpeechInputSetOutputMsg>>().then(
+            [this](const SpeechInputSetOutputMsg& msg) { output_enabled = msg.enabled; });
+
         on<Trigger<SpeechInputRecognizeWavFile>>().then([this](const SpeechInputRecognizeWavFile& msg) {
             if (!write_audio_to_file(voice2json_proc.stdin, (char*) msg.filename.data())) {
                 NUClear::log<NUClear::FATAL>(
                     fmt::format("({}:{}) Failed to write to {}", __FILE__, __LINE__, msg.filename.data()));
             }
         });
-        
     }
-    
+
     void SpeechIntent::recognize_wav(std::string wav_filename) {
         std::unique_ptr<SpeechInputRecognizeWavFile> msg =
-            std::make_unique<SpeechInputRecognizeWavFile>(
-                SpeechInputRecognizeWavFile{wav_filename});
+            std::make_unique<SpeechInputRecognizeWavFile>(SpeechInputRecognizeWavFile{wav_filename});
         emit(std::move(msg));
     }
 
     SpeechIntent::SpeechIntent(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), config{} {
-        
-		on<Configuration, With<CommandLineArguments>>("SpeechIntent.yaml").
-			then([this](const Configuration& cfg, const CommandLineArguments& args) {
+
+        on<Configuration, With<CommandLineArguments>>("SpeechIntent.yaml")
+            .then([this](const Configuration& cfg, const CommandLineArguments& args) {
                 this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
                 if(args.size() == 2) {
                     if(args[1] == "file") {
