@@ -6,7 +6,7 @@
 
 namespace module::input {
     /**
-     * @brief @c MicControlMsg is used to enable or disable microphone processing.
+     * @brief @c SpeechInputSetOutputMsg is used to enable or disable microphone processing.
      */
     struct SpeechInputSetOutputMsg {
         /**
@@ -17,7 +17,7 @@ namespace module::input {
     };
 
     /**
-     * @brief @c MicControlMsg is used for testing the module's ability to recognise an intention given an
+     * @brief @c SpeechInputRecognizeWavFile is used for testing the module's ability to recognise an intention given an
      *          wav audio recording.
      */
     struct SpeechInputRecognizeWavFile {

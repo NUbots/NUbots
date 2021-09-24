@@ -212,7 +212,7 @@ namespace module::input {
 
     // write out the correct format for voice2json to consume
     // when voice2json is called using the "transcribe-wav --input-size" flags
-    // it excepts the first line to be the file size (as asii)
+    // it excepts the first line to be the file size (as ascii)
     // followed by the wav file after the newline
     bool write_audio_to_file(int fd, char* filename) {
         ssize_t write_res = 0;
@@ -316,15 +316,19 @@ namespace module::input {
             char buffer[0x1000];
             ssize_t bytes_read = read(voice2json_proc.stderr, buffer, sizeof(buffer) - 1);
             if (bytes_read == -1) {
-                NUClear::log<NUClear::FATAL>(fmt::format("({}:{})\nVOICE2JSON stderr, errno = {} ({} bytes)\n{}",
+                NUClear::log<NUClear::FATAL>(fmt::format("({}:{}) Failed to read from stderr, errno = {}",
+                                                         __FILE__,
+                                                         __LINE__,
+                                                         errno));
+                return;
+            }
+            buffer[bytes_read] = 0;
+            NUClear::log<NUClear::FATAL>(fmt::format("({}:{})\nVOICE2JSON stderr, errno = {} ({} bytes)\n{}",
                                                          __FILE__,
                                                          __LINE__,
                                                          errno,
                                                          bytes_read,
                                                          buffer));
-                return;
-            }
-            buffer[bytes_read] = 0;
         });
 
 
@@ -368,7 +372,7 @@ namespace module::input {
                 on<Trigger<SpeechIntentMsg>>().then([this](const SpeechIntentMsg& msg) { print_intent(msg); });
                 recognize_wav(wav_filename);
             }
-            else if (args.size() > 1 && args[1] == "input") {
+            else if (args.size() > 1 && args[1] == "cli") {
                 this->config.transcribe_mode = TRANSCRIBE_MODE_FILE;
                 init();
 

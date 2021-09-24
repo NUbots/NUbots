@@ -60,14 +60,14 @@ to enable the output send:
 ```
 
 ## Emits
-This module emits a "SpeechIntentMessage" when it has recognized the intent of the provided audio data.  (The defintion of this message can be found in SpeechIntent.hpp). This message contains some fields "text", "intent" and "slots".
+This module emits a "SpeechIntentMsg" when it has recognized the intent of the provided audio data.  (The defintion of this message can be found in SpeechIntent.hpp). This message contains some fields "text", "intent" and "slots".
 
 ```c++
     struct Slot {
         std::string name;
         std::string value;
     };
-    struct SpeechIntentMessage {
+    struct SpeechIntentMsg {
         std::string text;
         std::string intent;
         std::vector<Slot> slots;
