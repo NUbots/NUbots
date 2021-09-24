@@ -6,9 +6,10 @@ This purpose of this module is to recognize the intention of speech audio data. 
 
 ## Usage
 
-Settings are configured in the "SpeechIntent.yaml" settings file. A description of this module's specific configuration settings:
-- "transcribe_mode" - This setting controls the audio source, there are two valid values for this setting, "file" and "stream". When launched in "file" mode the module will wait for "SpeechInputRecognizeWavFile" messages. This is explained in further detail below. When launched in "stream" mode the module will listen for audio data from the microphone.
- 
+Settings are configured in the "SpeechIntent.yaml" settings file. 
+
+When used with the ./b tool e.g. "./b run speechintent" several command line arguments are available:
+- "file" - this argument 
 
 To use this as another module:
 

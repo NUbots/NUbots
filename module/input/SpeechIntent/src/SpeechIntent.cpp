@@ -114,8 +114,6 @@ namespace module::input {
         char* const envp[] = {(char*) "KALDI_DIR=",  // KALDI_DIR env var must be blank!
                               (char*) env_path,
                               NULL};
-                              
-        //try {
 
         if (!((pipe(stdout_pipe) == -1) || (pipe(stderr_pipe) == -1) || (pipe(stdin_pipe) == -1))) {
             posix_spawn_file_actions_init(&actions);
@@ -299,6 +297,7 @@ namespace module::input {
     void SpeechIntent::init() {
         switch(this->config.transcribe_mode) {
             case TRANSCRIBE_MODE_STREAM:
+                log("transcribings stream");
                 if (!voice2json_transcribe_stream(voice2json_proc)) {
                     NUClear::log<NUClear::FATAL>(
                         fmt::format("({}:{}) Failed to start voice2json, errno", __FILE__, __LINE__, errno));
@@ -359,7 +358,7 @@ namespace module::input {
             }
             buffer[bytes_read] = 0;
             NUClear::log<NUClear::FATAL>(
-                fmt::format("({}:{}) VOICE2JSON stderr, errno = {} ({} bytes) = {}", 
+                fmt::format("({}:{})\nVOICE2JSON stderr, errno = {} ({} bytes)\n{}", 
                     __FILE__, __LINE__, errno, bytes_read, buffer));
         });
         
@@ -391,51 +390,48 @@ namespace module::input {
 		on<Configuration, With<CommandLineArguments>>("SpeechIntent.yaml").
 			then([this](const Configuration& cfg, const CommandLineArguments& args) {
                 this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
-
-                if(args[1] == "file") {
-                    if(args.size() != 3) {
-                        NUClear::log<NUClear::FATAL>(
-                            fmt::format("invalid number of arguments, expected 3, got {}", args.size()));
-                    }
-                    this->config.transcribe_mode = TRANSCRIBE_MODE_FILE;
-                    std::string wav_filename = std::string(args[2]);
-                    log(wav_filename);
-
-                    init();
-
-                    on<Trigger<SpeechIntentMsg>>().then([this](const SpeechIntentMsg& msg) {
-                        print_intent(msg);
-                    });
-                    recognize_wav(wav_filename);
-
-                    
-                } else if(args[1] == "input") {
-                    this->config.transcribe_mode = TRANSCRIBE_MODE_FILE;
-                    init();
-                    
-                    on<Trigger<SpeechIntentMsg>>().then([this](const SpeechIntentMsg& msg) {
-                        print_intent(msg);
-                    });
-                    on<IO>(STDIN_FILENO, IO::READ).then([this] {
-                        std::string str = {};
-                        getline(std::cin, str);
-
-                        log(fmt::format("SpeechIntent STDIN = {}", str));
-
-                        std::stringstream ss(str);
-                        std::string cmd = {};
-                        getline(ss, cmd, ' ');
-                        if (cmd == "file") {
-                            std::string filename = {};
-                            getline(ss, filename);
-                            recognize_wav(filename);
+                if(args.size() == 2) {
+                    if(args[1] == "file") {
+                        if(args.size() != 3) {
+                            NUClear::log<NUClear::FATAL>(
+                                fmt::format("invalid number of arguments, expected 3, got {}", args.size()));
                         }
-                    });
-                } else {
-                    init();
+                        this->config.transcribe_mode = TRANSCRIBE_MODE_FILE;
+                        std::string wav_filename = std::string(args[2]);
+
+                        init();
+
+                        on<Trigger<SpeechIntentMsg>>().then([this](const SpeechIntentMsg& msg) {
+                            print_intent(msg);
+                        });
+                        recognize_wav(wav_filename);
+                        return;
+                    } else if(args[1] == "cli") {
+                        this->config.transcribe_mode = TRANSCRIBE_MODE_FILE;
+                        
+                        on<Trigger<SpeechIntentMsg>>().then([this](const SpeechIntentMsg& msg) {
+                            print_intent(msg);
+                        });
+                        on<IO>(STDIN_FILENO, IO::READ).then([this] {
+                            std::string str = {};
+                            getline(std::cin, str);
+
+                            log(fmt::format("SpeechIntent STDIN = {}", str));
+
+                            std::stringstream ss(str);
+                            std::string cmd = {};
+                            getline(ss, cmd, ' ');
+                            if (cmd == "file") {
+                                std::string filename = {};
+                                getline(ss, filename);
+                                recognize_wav(filename);
+                            }
+                        });
+                    }
                 }
-			}
-		);
+                init();
+            }
+        );
     }
 
     SpeechIntent::~SpeechIntent() {
