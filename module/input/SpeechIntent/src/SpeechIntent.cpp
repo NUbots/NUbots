@@ -9,13 +9,12 @@
 #include "extension/Configuration.hpp"
 
 namespace module::input {
+    using NUClear::message::CommandLineArguments;
 
     using extension::Configuration;
-    // scriptrunner.cpp
 
-
-    std::unique_ptr<SpeechIntentMessage> parse_voice2json_json(char* json_text, size_t size) {
-        std::unique_ptr<SpeechIntentMessage> intent = std::make_unique<SpeechIntentMessage>();
+    std::unique_ptr<SpeechIntentMsg> parse_voice2json_json(char* json_text, size_t size) {
+        std::unique_ptr<SpeechIntentMsg> intent = std::make_unique<SpeechIntentMsg>();
 
         json_value_s* root = json_parse(json_text, size);
 
@@ -52,7 +51,7 @@ namespace module::input {
                     std::string slot_name_str  = std::string(slot_name->string);
                     std::string slot_value_str = std::string(slot_value->string);
 
-                    intent->add_slot(slot_name_str, slot_value_str);
+                    intent->slots.push_back({slot_name_str, slot_value_str});
 
                     slots_element = slots_element->next;
                 }
@@ -65,7 +64,7 @@ namespace module::input {
         return intent;
     }
 
-    std::unique_ptr<SpeechIntentMessage> parse_voice2json_json(std::string str) {
+    std::unique_ptr<SpeechIntentMsg> parse_voice2json_json(std::string str) {
         return parse_voice2json_json(str.data(), str.size());
     }
 
@@ -90,8 +89,8 @@ namespace module::input {
     }
     */
 
-    // handles: out parameter containing the stdin, stdout, stderr handles from the
-    // spawned process
+    // process: out parameter containing the information from the spawned process e.g.
+    // stdin, stdout, stderr file handles, pid and process name
     // first char * in args array refers to the process name
     // args need to be null terminated. meaning that the last member of the should be null
     bool spawn_process(SpawnedProcess& process, const char** args) {
@@ -115,6 +114,8 @@ namespace module::input {
         char* const envp[] = {(char*) "KALDI_DIR=",  // KALDI_DIR env var must be blank!
                               (char*) env_path,
                               NULL};
+                              
+        //try {
 
         if (!((pipe(stdout_pipe) == -1) || (pipe(stderr_pipe) == -1) || (pipe(stdin_pipe) == -1))) {
             posix_spawn_file_actions_init(&actions);
@@ -192,7 +193,6 @@ namespace module::input {
             "--input-size",
             NULL
         };
-
         return spawn_process(process, args);
     }
 
@@ -222,7 +222,7 @@ namespace module::input {
             if (bytes_read == -1) {
                 NUClear::log<NUClear::FATAL>(
                     fmt::format("({}:{}) failed to read from spawned process "
-                                "(voice2json recognize-intent) stdout - error {}",
+                                "(voice2json recognize-intent) stdout - errno = {}",
                                 __FILE__,
                                 __LINE__,
                                 errno));
@@ -267,7 +267,7 @@ namespace module::input {
         write_res = write(fd, file_size_buf, strlen(file_size_buf));
         if(write_res == -1) {
             NUClear::log<NUClear::FATAL>(
-                fmt::format("({}:{}) write failed, errno", __FILE__, __LINE__, errno));
+                fmt::format("({}:{}) write failed, errno = {}", __FILE__, __LINE__, errno));
             free(file_buffer);
             return false;
         }
@@ -275,7 +275,7 @@ namespace module::input {
         write_res = write(fd, file_buffer, file_size);
         if(write_res == -1) {
             NUClear::log<NUClear::FATAL>(
-                fmt::format("({}:{}) write failed, errno", __FILE__, __LINE__, errno));
+                fmt::format("({}:{}) write failed, errno = {}", __FILE__, __LINE__, errno));
             free(file_buffer);
             return false;
         }
@@ -286,74 +286,39 @@ namespace module::input {
         return true;
     }
 
-
-    SpeechIntent::SpeechIntent(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), config{} {
-        on<Configuration>("SpeechIntent.yaml").then([this](const Configuration& cfg) {
-            // Use configuration here from file SpeechIntent.yaml
-            this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
-            this->config.debug_mode = cfg["debug_mode"].as<bool>();
-        });
-        // Spawn voice2json process in transcribe-wav mode
-        // The process will accept a wav file reading from it's stdin
-        if (!voice2json_transcribe_wav(voice2json_proc)) {
-            NUClear::log<NUClear::FATAL>(
-                fmt::format("({}:{}) Failed to start voice2json, errno", __FILE__, __LINE__, errno));
-            return;
+    
+    void print_intent(const SpeechIntentMsg& msg) {
+        NUClear::log(fmt::format("text = {}", msg.text.data()));
+        NUClear::log(fmt::format("intent = {}", msg.intent.data()));
+        NUClear::log("slots");
+        for (Slot slot : msg.slots) {
+            NUClear::log(fmt::format("{} = {}", slot.name.data(), slot.value.data()));
         }
-
-        //TODO: is there an issue
-        //set "debug_mode: true" in SpeechIntent.yaml to enable this
-        if (this->config.debug_mode)
-        {
-            on<Trigger<SpeechIntentMessage>>().then([this](const SpeechIntentMessage& msg) {
-                log(fmt::format("text = {} ({})", msg.text.data(), msg.text.data()));
-                log(fmt::format("intent = {} ({})", msg.intent.data(), msg.intent.data()));
-                for (Slot slot : msg.slots) {
-                    log(fmt::format("{} = {}", slot.name.data(), slot.value.data()));
-                }
-            });
-            // this is just for testing
-            // we need this as we do not have an
-            // environment for testing the microphone
-            // allows us to simulate sending a MicControlMsg
-            // as if we were another module
-            on<IO>(STDIN_FILENO, IO::READ).then([this] {
-                std::string str = {};
-                getline(std::cin, str);
-
-                log(fmt::format("SpeechIntent STDIN = {}", str));
-
-                std::stringstream ss(str);
-                std::string cmd = {};
-                getline(ss, cmd, ' ');
-                if (cmd == "file") {
-                    std::string filename = {};
-                    getline(ss, filename);
-                    std::unique_ptr<MicControlMsg> msg =
-                        std::make_unique<MicControlMsg>(MicControlMsg{MIC_MSG_RECOGNIZE_AUDIO_FROM_FILE, filename});
-                    emit(std::move(msg));
-                }
-            });
+    }
+    
+    void SpeechIntent::init() {
+        switch(this->config.transcribe_mode) {
+            case TRANSCRIBE_MODE_STREAM:
+                if (!voice2json_transcribe_stream(voice2json_proc)) {
+                    NUClear::log<NUClear::FATAL>(
+                        fmt::format("({}:{}) Failed to start voice2json, errno", __FILE__, __LINE__, errno));
+                    return;
+                }   
+            break;
+            case TRANSCRIBE_MODE_FILE:
+                // Spawn voice2json process in transcribe-wav mode
+                // The process will accept a wav file reading from it's stdin
+                if (!voice2json_transcribe_wav(voice2json_proc)) {
+                    NUClear::log<NUClear::FATAL>(
+                        fmt::format("({}:{}) Failed to start voice2json, errno", __FILE__, __LINE__, errno));
+                    return;
+                }    
+            break;
+            default:
+                assert(false);
+            break;
         }
-
-        on<Trigger<MicControlMsg>>().then([this](const MicControlMsg& msg) {
-            // Decide on appropriate action based on msg type
-            switch (msg.type) {
-                case MIC_MSG_ENABLE: enabled = true; break;
-                case MIC_MSG_DISABLE: enabled = false; break;
-                case MIC_MSG_RECOGNIZE_AUDIO_FROM_FILE:
-                    if (!write_audio_to_file(voice2json_proc.stdin, (char*) msg.filename.data())) {
-                        NUClear::log<NUClear::FATAL>(
-                            fmt::format("({}:{}) Failed to write to {}", __FILE__, __LINE__, msg.filename.data()));
-                    }
-                    break;
-            }
-        });
-
-
         on<IO>(voice2json_proc.stdout, IO::READ).then([this] {
-            // TODO: need to read and append to buffer until we reach a newline...
             char buffer[0x1000];
             ssize_t bytes_read = read(voice2json_proc.stdout, buffer, sizeof(buffer) - 1);
             if (bytes_read == -1) {
@@ -366,7 +331,7 @@ namespace module::input {
             }
             buffer[bytes_read] = 0;
 
-            if (enabled) {
+            if (output_enabled) {
                 char* intent_json = voice2json_recognize_intent(buffer);
                 if (!intent_json) {
                     NUClear::log<NUClear::FATAL>(
@@ -374,7 +339,7 @@ namespace module::input {
                     return;
                 }
 
-                std::unique_ptr<SpeechIntentMessage> intent = parse_voice2json_json(intent_json, strlen(intent_json));
+                std::unique_ptr<SpeechIntentMsg> intent = parse_voice2json_json(intent_json, strlen(intent_json));
                 emit(std::move(intent));
 
                 free(intent_json);
@@ -397,6 +362,80 @@ namespace module::input {
                 fmt::format("({}:{}) VOICE2JSON stderr, errno = {} ({} bytes) = {}", 
                     __FILE__, __LINE__, errno, bytes_read, buffer));
         });
+        
+
+
+        on<Trigger<SpeechInputSetOutputMsg>>().then([this](const SpeechInputSetOutputMsg& msg) {
+            output_enabled = msg.enabled;
+        });
+        
+        on<Trigger<SpeechInputRecognizeWavFile>>().then([this](const SpeechInputRecognizeWavFile& msg) {
+            if (!write_audio_to_file(voice2json_proc.stdin, (char*) msg.filename.data())) {
+                NUClear::log<NUClear::FATAL>(
+                    fmt::format("({}:{}) Failed to write to {}", __FILE__, __LINE__, msg.filename.data()));
+            }
+        });
+        
+    }
+    
+    void SpeechIntent::recognize_wav(std::string wav_filename) {
+        std::unique_ptr<SpeechInputRecognizeWavFile> msg =
+            std::make_unique<SpeechInputRecognizeWavFile>(
+                SpeechInputRecognizeWavFile{wav_filename});
+        emit(std::move(msg));
+    }
+
+    SpeechIntent::SpeechIntent(std::unique_ptr<NUClear::Environment> environment)
+        : Reactor(std::move(environment)), config{} {
+        
+		on<Configuration, With<CommandLineArguments>>("SpeechIntent.yaml").
+			then([this](const Configuration& cfg, const CommandLineArguments& args) {
+                this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
+
+                if(args[1] == "file") {
+                    if(args.size() != 3) {
+                        NUClear::log<NUClear::FATAL>(
+                            fmt::format("invalid number of arguments, expected 3, got {}", args.size()));
+                    }
+                    this->config.transcribe_mode = TRANSCRIBE_MODE_FILE;
+                    std::string wav_filename = std::string(args[2]);
+                    log(wav_filename);
+
+                    init();
+
+                    on<Trigger<SpeechIntentMsg>>().then([this](const SpeechIntentMsg& msg) {
+                        print_intent(msg);
+                    });
+                    recognize_wav(wav_filename);
+
+                    
+                } else if(args[1] == "input") {
+                    this->config.transcribe_mode = TRANSCRIBE_MODE_FILE;
+                    init();
+                    
+                    on<Trigger<SpeechIntentMsg>>().then([this](const SpeechIntentMsg& msg) {
+                        print_intent(msg);
+                    });
+                    on<IO>(STDIN_FILENO, IO::READ).then([this] {
+                        std::string str = {};
+                        getline(std::cin, str);
+
+                        log(fmt::format("SpeechIntent STDIN = {}", str));
+
+                        std::stringstream ss(str);
+                        std::string cmd = {};
+                        getline(ss, cmd, ' ');
+                        if (cmd == "file") {
+                            std::string filename = {};
+                            getline(ss, filename);
+                            recognize_wav(filename);
+                        }
+                    });
+                } else {
+                    init();
+                }
+			}
+		);
     }
 
     SpeechIntent::~SpeechIntent() {
