@@ -348,7 +348,7 @@ namespace module::input {
         on<Configuration, With<CommandLineArguments>>("SpeechIntent.yaml")
             .then([this](const Configuration& cfg, const CommandLineArguments& args) {
                 this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
-                if(args.size() == 2) {
+                if(args.size() >= 2) {
                     if(args[1] == "file") {
                         if(args.size() != 3) {
                             NUClear::log<NUClear::FATAL>(

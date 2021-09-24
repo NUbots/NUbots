@@ -11,7 +11,8 @@ a messages is emitted into nuclear.
 Settings are configured in the "SpeechIntent.yaml" settings file. 
 
 When used with the ./b tool e.g. "./b run speechintent" several command line arguments are available:
-- "file" - this argument 
+- "file" - this argument will run the module and immediately recognize the intent of the specified file (next argument). For example, "./b run speechintent file /tmp/audio.wav"
+- "cli" - this argument controls whether or not the module will be run in command line mode - in this mode the module will read input from stdin and will respond to the typeds commands. The only command currently available is the "file" command (e.g. "file /tmp/audio.wav")
 
 To use this as another module:
 
@@ -74,7 +75,7 @@ This module emits a "SpeechIntentMessage" when it has recognized the intent of t
     };
 ```
 
-The "text" field describes the raw text as recognized by speech recognition. The "intent" field describe the detected intention of the speech data - . The "slots" fields describes supplementary information about the given intent of the speech. A slot is a name, value pair. For example, .
+The "text" field describes the raw text as recognized by speech recognition. The "intent" field describe the detected intention of the spoken or recorded command . The "slots" fields describes supplementary information about the given intent of the speech. A slot is a name, value pair. For example, .
 
 ## Dependencies
 - Voice2json - this module is depedant on the voice2json project - which is a . This process spawns voice2json via python.
