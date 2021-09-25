@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-URL=https://raw.githubusercontent.com/NUbots/NUbots/master/doc/PacmanCache/docker-compose.yml
+URL=https://raw.githubusercontent.com/NUbots/NUbots/main/doc/PacmanCache/docker-compose.yml
 FILE_NAME=docker-compose.yml
 
 # Download docker-compose.yml for package cache (using nroi/flexo)
