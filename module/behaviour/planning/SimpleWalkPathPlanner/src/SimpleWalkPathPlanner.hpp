@@ -28,10 +28,26 @@
 
 #include "message/behaviour/KickPlan.hpp"
 #include "message/behaviour/MotionCommand.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/localisation/Ball.hpp"
+#include "message/localisation/Field.hpp"
+#include "message/motion/KickCommand.hpp"
+#include "message/motion/WalkCommand.hpp"
+#include "message/support/FieldDescription.hpp"
+#include "message/vision/Ball.hpp"
 
 namespace module::behaviour::planning {
 
     // using namespace message;
+
+    using message::behaviour::KickPlan;
+    using message::behaviour::MotionCommand;
+    using message::behaviour::WantsToKick;
+    using message::input::Sensors;
+    using message::localisation::Ball;
+    using message::localisation::Field;
+    using message::support::FieldDescription;
+
     /**
      * Executes a getup script if the robot falls over.
      *
@@ -49,7 +65,7 @@ namespace module::behaviour::planning {
         float b                    = 0;
         float search_timeout       = 3;
 
-        //-----------non-config variables (not defined in WalkPathPlanner.yaml)-----------
+        //----------- non-config variables (not defined in WalkPathPlanner.yaml)----
 
         // info for the current walk
         Eigen::Vector2d currentTargetPosition;
@@ -64,6 +80,14 @@ namespace module::behaviour::planning {
         float ball_approach_dist = 0.2;
         float slowdown_distance  = 0.2;
         bool useLocalisation     = true;
+
+        void walkDirectly();
+
+        void determineSimpleWalkPath(const Ball& ball,
+                                     const Field& field,
+                                     const Sensors& sensors,
+                                     const KickPlan& kickPlan,
+                                     const FieldDescription& fieldDescription);
 
     public:
         explicit SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);
