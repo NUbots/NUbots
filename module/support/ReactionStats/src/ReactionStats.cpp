@@ -25,9 +25,9 @@ namespace module::support {
             reactionData->task_id           = stats.task_id;
             reactionData->cause_reaction_id = stats.cause_reaction_id;
             reactionData->cause_task_id     = stats.cause_task_id;
-            reactionData->emitted           = 0;
-            reactionData->started           = 0;
-            reactionData->finished          = 0;
+            reactionData->emitted           = stats.emitted.time_since_epoch().count();
+            reactionData->started           = stats.started.time_since_epoch().count();
+            reactionData->finished          = stats.finished.time_since_epoch().count();
             // TODO fix this
             /*reactionData.emitted           = getUtcTimestamp<std::chrono::microseconds>(stats.emitted);
             reactionData.started           = getUtcTimestamp<std::chrono::microseconds>(stats.started);

@@ -1,10 +1,9 @@
 import { storiesOf } from '@storybook/react'
 import React from 'react'
-import * as THREE from 'three'
-import { Matrix4 } from '../../../../math/matrix4'
-import { Vector3 } from '../../../../math/vector3'
+import { RobotModel } from '../../../robot/model'
 import { fullscreen } from '../../../storybook/fullscreen'
-import { OdometryVisualizerModel } from '../model'
+import { ReactionStats } from '../../model'
+import { ReactionVisualizerModel } from '../model'
 import { ReactionVisualizer } from '../view'
 
 storiesOf('components.reactions.reaction_visualizer', module)
@@ -12,12 +11,56 @@ storiesOf('components.reactions.reaction_visualizer', module)
   .add('Renders statically', () => <ReactionVisualizerHarness />)
 
 class ReactionVisualizerHarness extends React.Component<{ animate?: boolean }> {
-  private model = OdometryVisualizerModel.of({
-    Hwt: Matrix4.fromThree(new THREE.Matrix4().makeTranslation(0, 0, 1)),
-    accelerometer: new Vector3(0, 0, -9.8),
-  })
+  const reaction : ReactionStats = getReaction();
+  private model = <ReactionVisualizerModel reaction={this.reaction/>
 
   render() {
-    return <ReactionVisualizer model={this.model} />
+      return <ReactionVisualizer model={this.model} />
+    }
   }
+
+}
+function getReaction(): ReactionStats {
+  return {
+    name: 'a',
+    triggerName: 'string',
+    functionName: 'string',
+    reactionId: 1,
+    taskId: 1,
+    causeReactionId:1,
+    causeTaskId: 1,
+    emitted: 1,
+    started: 1,
+    finished: 1,
+  }
+
+}
+
+function getRobots(): RobotModel[] {
+  return [
+    {
+      id: '1',
+      name: 'Virtual Robot 1',
+      connected: true,
+      enabled: true,
+      address: '10.222.10.14',
+      port: 57619,
+    },
+    {
+      id: '2',
+      name: 'Virtual Robot 2',
+      connected: true,
+      enabled: true,
+      address: '10.222.10.19',
+      port: 36261,
+    },
+    {
+      id: '3',
+      name: 'Virtual Robot 3',
+      connected: false,
+      enabled: true,
+      address: '10.222.10.20',
+      port: 67341,
+    },
+  ]
 }
