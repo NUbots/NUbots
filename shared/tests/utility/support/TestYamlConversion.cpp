@@ -39,161 +39,159 @@ using utility::support::resolve_expression;
 
 SCENARIO("yaml nodes can be converted to a given container type", "[utility][support][yaml_expression]") {
     GIVEN("A yaml node containing a list of data") {
-        YAML::Node testValues = YAML::LoadFile("/home/nubots/NUbots/shared/tests/data/yamlConversionTestVals.yaml");
+        YAML::Node test_values = YAML::LoadFile("/home/nubots/NUbots/shared/tests/data/yamlConversionTestVals.yaml");
         // error threshold when comparing doubles
         static constexpr double ERROR_THRESHOLD = 1e-6;
         // ints
         WHEN("A vector is declared using integers from the YAML node") {
-            std::vector<int> intVector = resolve_expression<int>(testValues["ints"]);
+            std::vector<int> int_vector = resolve_expression<int>(test_values["ints"]);
             // Check that the values are good(container size, data type....)
             THEN("Container sizes should be equivalent") {
-                REQUIRE(testValues["ints"].size() == intVector.size());
+                REQUIRE(test_values["ints"].size() == int_vector.size());
             }
             AND_THEN("Values at each index should be equivalent") {
                 // Check values at each index
-                for (size_t i = 0; i < testValues["ints"].size(); i++) {
-                    REQUIRE(testValues["ints"][i].as<int>() == intVector.at(i));
+                for (size_t i = 0; i < test_values["ints"].size(); i++) {
+                    REQUIRE(test_values["ints"][i].as<int>() == int_vector.at(i));
                 }
             }
         }
 
         // float
-        AND_WHEN("A vector is declared using float values from the YAML node") {
-            std::vector<float> floatVector = resolve_expression<float>(testValues["floats"]);
+        WHEN("A vector is declared using float values from the YAML node") {
+            std::vector<float> float_vector = resolve_expression<float>(test_values["floats"]);
             THEN("Container sizes should be equivalent") {
-                REQUIRE(testValues["floats"].size() == floatVector.size());
+                REQUIRE(test_values["floats"].size() == float_vector.size());
             }
             AND_THEN("Values at each index should be equivalent") {
-                for (size_t i = 0; i < testValues["floats"].size(); i++) {
-                    REQUIRE(testValues["floats"][i].as<float>() == floatVector.at(i));
+                for (size_t i = 0; i < test_values["floats"].size(); i++) {
+                    REQUIRE(test_values["floats"][i].as<float>() == float_vector.at(i));
                 }
             }
         }
 
         // double
-        AND_WHEN("A vector is declared using doubles from the YAML node") {
-            std::vector<double> doubleVector = resolve_expression<double>(testValues["doubles"]);
+        WHEN("A vector is declared using doubles from the YAML node") {
+            std::vector<double> double_vector = resolve_expression<double>(test_values["doubles"]);
             THEN("Container sizes should be equivalent") {
-                REQUIRE(testValues["doubles"].size() == doubleVector.size());
+                REQUIRE(test_values["doubles"].size() == double_vector.size());
             }
             AND_THEN("Values at each index should be equivalent") {
-                for (size_t i = 0; i < testValues["doubles"].size(); i++) {
-                    Approx epsilon_result = Approx(doubleVector.at(i)).epsilon(ERROR_THRESHOLD);
-                    REQUIRE(testValues["doubles"][i].as<double>() == epsilon_result);
+                for (size_t i = 0; i < test_values["doubles"].size(); i++) {
+                    Approx epsilon_result = Approx(double_vector.at(i)).epsilon(ERROR_THRESHOLD);
+                    REQUIRE(test_values["doubles"][i].as<double>() == epsilon_result);
                 }
             }
         }
 
         // Vector2d
-        AND_WHEN("A vector is declared using Vector2d values from the YAML node") {
-            std::vector<Eigen::Vector2d> eigenV2dVector = resolve_expression<Eigen::Vector2d>(testValues["vector2"]);
+        WHEN("A vector is declared using Vector2d values from the YAML node") {
+            std::vector<Eigen::Vector2d> v2d_vec = resolve_expression<Eigen::Vector2d>(test_values["vector2"]);
             THEN("Container sizes should be equivalent") {
-                REQUIRE(testValues["vector2"].size() == eigenV2dVector.size());
+                REQUIRE(test_values["vector2"].size() == v2d_vec.size());
             }
             AND_THEN("Values at each index should be equivalent") {
-                for (size_t i = 0; i < testValues["vector2"].size(); i++) {
-                    Approx epsilon_x = Approx(eigenV2dVector.at(i).x()).epsilon(ERROR_THRESHOLD);
-                    Approx epsilon_y = Approx(eigenV2dVector.at(i).y()).epsilon(ERROR_THRESHOLD);
+                for (size_t i = 0; i < test_values["vector2"].size(); i++) {
+                    Approx epsilon_x = Approx(v2d_vec.at(i).x()).epsilon(ERROR_THRESHOLD);
+                    Approx epsilon_y = Approx(v2d_vec.at(i).y()).epsilon(ERROR_THRESHOLD);
                     // NOTE: Must test individual xy values
-                    REQUIRE(testValues["vector2"][i][0].as<double>() == epsilon_x);
-                    REQUIRE(testValues["vector2"][i][1].as<double>() == epsilon_y);
+                    REQUIRE(test_values["vector2"][i][0].as<double>() == epsilon_x);
+                    REQUIRE(test_values["vector2"][i][1].as<double>() == epsilon_y);
                 }
             }
         }
 
         // Vector3d
-        AND_WHEN("A vector is declared using Vector3d values from the YAML node") {
-            std::vector<Eigen::Vector3d> eigenV3dVector = resolve_expression<Eigen::Vector3d>(testValues["vector3"]);
+        WHEN("A vector is declared using Vector3d values from the YAML node") {
+            std::vector<Eigen::Vector3d> v3d_vec = resolve_expression<Eigen::Vector3d>(test_values["vector3"]);
             THEN("Container sizes should be equivalent") {
-                REQUIRE(testValues["vector3"].size() == eigenV3dVector.size());
+                REQUIRE(test_values["vector3"].size() == v3d_vec.size());
             }
             AND_THEN("Values at each index should be equivalent") {
-                for (size_t i = 0; i < testValues["vector3"].size(); i++) {
-                    Approx epsilon_x = Approx(eigenV3dVector.at(i).x()).epsilon(ERROR_THRESHOLD);
-                    Approx epsilon_y = Approx(eigenV3dVector.at(i).y()).epsilon(ERROR_THRESHOLD);
-                    Approx epsilon_z = Approx(eigenV3dVector.at(i).z()).epsilon(ERROR_THRESHOLD);
+                for (size_t i = 0; i < test_values["vector3"].size(); i++) {
+                    Approx epsilon_x = Approx(v3d_vec.at(i).x()).epsilon(ERROR_THRESHOLD);
+                    Approx epsilon_y = Approx(v3d_vec.at(i).y()).epsilon(ERROR_THRESHOLD);
+                    Approx epsilon_z = Approx(v3d_vec.at(i).z()).epsilon(ERROR_THRESHOLD);
                     // NOTE: Must test individual xyz values
-                    REQUIRE(testValues["vector3"][i][0].as<double>() == epsilon_x);
-                    REQUIRE(testValues["vector3"][i][1].as<double>() == epsilon_y);
-                    REQUIRE(testValues["vector3"][i][2].as<double>() == epsilon_z);
+                    REQUIRE(test_values["vector3"][i][0].as<double>() == epsilon_x);
+                    REQUIRE(test_values["vector3"][i][1].as<double>() == epsilon_y);
+                    REQUIRE(test_values["vector3"][i][2].as<double>() == epsilon_z);
                 }
             }
         }
 
         // Array conversions
         // ints
-        AND_WHEN("An array is declared using integers from the YAML node") {
-            std::array<int, 20> intArray = resolve_expression<int, 20>(testValues["ints"]);
+        WHEN("An array is declared using integers from the YAML node") {
+            std::array<int, 20> int_array = resolve_expression<int, 20>(test_values["ints"]);
             THEN("Container sizes should be equivalent") {
-                REQUIRE(testValues["ints"].size() == intArray.size());
+                REQUIRE(test_values["ints"].size() == int_array.size());
             }
             AND_THEN("Values at each index should be equivalent") {
                 // Check values at each index
-                for (size_t i = 0; i < testValues["ints"].size(); i++) {
-                    REQUIRE(testValues["ints"][i].as<int>() == intArray.at(i));
+                for (size_t i = 0; i < test_values["ints"].size(); i++) {
+                    REQUIRE(test_values["ints"][i].as<int>() == int_array.at(i));
                 }
             }
         }
         // floats
-        AND_WHEN("An array is declared using floats from the YAML node") {
-            std::array<float, 20> floatArray = resolve_expression<float, 20>(testValues["floats"]);
+        WHEN("An array is declared using floats from the YAML node") {
+            std::array<float, 20> float_array = resolve_expression<float, 20>(test_values["floats"]);
             THEN("Container sizes should be equivalent") {
-                REQUIRE(testValues["floats"].size() == floatArray.size());
+                REQUIRE(test_values["floats"].size() == float_array.size());
             }
             AND_THEN("Values at each index should be equivalent") {
                 // Check values at each index
-                for (size_t i = 0; i < testValues["floats"].size(); i++) {
-                    REQUIRE(testValues["floats"][i].as<float>() == floatArray.at(i));
+                for (size_t i = 0; i < test_values["floats"].size(); i++) {
+                    REQUIRE(test_values["floats"][i].as<float>() == float_array.at(i));
                 }
             }
         }
         // doubles
-        AND_WHEN("An array is declared using doubles from the YAML node") {
-            std::array<double, 20> doubleArray = resolve_expression<double, 20>(testValues["doubles"]);
+        WHEN("An array is declared using doubles from the YAML node") {
+            std::array<double, 20> double_array = resolve_expression<double, 20>(test_values["doubles"]);
             THEN("Container sizes should be equivalent") {
-                REQUIRE(testValues["doubles"].size() == doubleArray.size());
+                REQUIRE(test_values["doubles"].size() == double_array.size());
             }
             AND_THEN("Values at each index should be equivalent") {
                 // Check values at each index
-                for (size_t i = 0; i < testValues["doubles"].size(); i++) {
-                    Approx epsilon_result = Approx(doubleArray.at(i)).epsilon(ERROR_THRESHOLD);
-                    REQUIRE(testValues["doubles"][i].as<double>() == epsilon_result);
+                for (size_t i = 0; i < test_values["doubles"].size(); i++) {
+                    Approx epsilon_result = Approx(double_array.at(i)).epsilon(ERROR_THRESHOLD);
+                    REQUIRE(test_values["doubles"][i].as<double>() == epsilon_result);
                 }
             }
         }
         // vector3d
-        AND_WHEN("An array is declared using Vector3d values from the YAML node") {
-            std::array<Eigen::Vector3d, 20> eigenV3dArray =
-                resolve_expression<Eigen::Vector3d, 20>(testValues["vector3"]);
+        WHEN("An array is declared using Vector3d values from the YAML node") {
+            std::array<Eigen::Vector3d, 20> v3d_array = resolve_expression<Eigen::Vector3d, 20>(test_values["vector3"]);
             THEN("Container sizes should be equivalent") {
-                REQUIRE(testValues["vector3"].size() == eigenV3dArray.size());
+                REQUIRE(test_values["vector3"].size() == v3d_array.size());
             }
             AND_THEN("Values at each index should be equivalent") {
-                for (size_t i = 0; i < testValues["vector3"].size(); i++) {
-                    Approx epsilon_x = Approx(eigenV3dArray.at(i).x()).epsilon(ERROR_THRESHOLD);
-                    Approx epsilon_y = Approx(eigenV3dArray.at(i).y()).epsilon(ERROR_THRESHOLD);
-                    Approx epsilon_z = Approx(eigenV3dArray.at(i).z()).epsilon(ERROR_THRESHOLD);
+                for (size_t i = 0; i < test_values["vector3"].size(); i++) {
+                    Approx epsilon_x = Approx(v3d_array.at(i).x()).epsilon(ERROR_THRESHOLD);
+                    Approx epsilon_y = Approx(v3d_array.at(i).y()).epsilon(ERROR_THRESHOLD);
+                    Approx epsilon_z = Approx(v3d_array.at(i).z()).epsilon(ERROR_THRESHOLD);
                     // NOTE: Must test individual xyz values
-                    REQUIRE(testValues["vector3"][i][0].as<double>() == epsilon_x);
-                    REQUIRE(testValues["vector3"][i][1].as<double>() == epsilon_y);
-                    REQUIRE(testValues["vector3"][i][2].as<double>() == epsilon_z);
+                    REQUIRE(test_values["vector3"][i][0].as<double>() == epsilon_x);
+                    REQUIRE(test_values["vector3"][i][1].as<double>() == epsilon_y);
+                    REQUIRE(test_values["vector3"][i][2].as<double>() == epsilon_z);
                 }
             }
         }
         // vector2d
-        AND_WHEN("An array is declared using Vector2d values from the YAML node") {
-            std::array<Eigen::Vector2d, 20> eigenV2dArray =
-                resolve_expression<Eigen::Vector2d, 20>(testValues["vector2"]);
+        WHEN("An array is declared using Vector2d values from the YAML node") {
+            std::array<Eigen::Vector2d, 20> v2d_array = resolve_expression<Eigen::Vector2d, 20>(test_values["vector2"]);
             THEN("Container sizes should be equivalent") {
-                REQUIRE(testValues["vector2"].size() == eigenV2dArray.size());
+                REQUIRE(test_values["vector2"].size() == v2d_array.size());
             }
             AND_THEN("Values at each index should be equivalent") {
-                for (size_t i = 0; i < testValues["vector2"].size(); i++) {
-                    Approx epsilon_x = Approx(eigenV2dArray.at(i).x()).epsilon(ERROR_THRESHOLD);
-                    Approx epsilon_y = Approx(eigenV2dArray.at(i).y()).epsilon(ERROR_THRESHOLD);
+                for (size_t i = 0; i < test_values["vector2"].size(); i++) {
+                    Approx epsilon_x = Approx(v2d_array.at(i).x()).epsilon(ERROR_THRESHOLD);
+                    Approx epsilon_y = Approx(v2d_array.at(i).y()).epsilon(ERROR_THRESHOLD);
                     // NOTE: Must test individual xy values
-                    REQUIRE(testValues["vector2"][i][0].as<double>() == epsilon_x);
-                    REQUIRE(testValues["vector2"][i][1].as<double>() == epsilon_y);
+                    REQUIRE(test_values["vector2"][i][0].as<double>() == epsilon_x);
+                    REQUIRE(test_values["vector2"][i][1].as<double>() == epsilon_y);
                 }
             }
         }
