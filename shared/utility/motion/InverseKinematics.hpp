@@ -68,11 +68,15 @@ namespace utility::motion::kinematics {
         const Eigen::Affine3f& leftTarget,
         const Eigen::Affine3f& rightTarget);
 
-    [[nodiscard]] std::vector<std::pair<ServoID, double>> calculateCameraLookJoints(
-        const Eigen::Vector3d& cameraUnitVector);
-
-    [[nodiscard]] std::vector<std::pair<ServoID, float>> calculateHeadJoints(Eigen::Vector3f cameraUnitVector);
-
+    template <typename Scalar>
+    [[nodiscard]] std::vector<std::pair<ServoID, Scalar>> calculateHeadJoints(
+        const Eigen::Matrix<Scalar, 3, 1>& cameraUnitVector) {
+        return {std::make_pair(ServoID::HEAD_YAW, atan2(cameraUnitVector.y(), cameraUnitVector.x())),
+                std::make_pair(ServoID::HEAD_PITCH,
+                               std::atan2(-cameraUnitVector.z(),
+                                          std::sqrt(cameraUnitVector.x() * cameraUnitVector.x()
+                                                    + cameraUnitVector.y() * cameraUnitVector.y())))};
+    }
 }  // namespace utility::motion::kinematics
 
 #endif  // UTILITY_MOTION_INVERSEKINEMATICS_HPP

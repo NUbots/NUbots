@@ -139,7 +139,7 @@ namespace utility::motion::splines {
          * Expand the given formula (x + y)^degree and return the polynom in x whose coefficient are computed
          * using binomial coefficient
          */
-        [[nodiscard]] constexpr static Polynom<Scalar> expandBinomial(const Scalar& y, const size_t& degree) {
+        [[nodiscard]] static Polynom<Scalar> expandBinomial(const Scalar& y, const size_t& degree) {
             Combination combination{};
             Polynom polynom{};
 
