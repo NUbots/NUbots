@@ -237,8 +237,8 @@ namespace module::input {
                         gyro += s->gyroscope.cast<double>();
                         // Make sure we have servo positions
                         for (uint32_t id = 0; id < 20; ++id) {
-                            auto& original = utility::platform::getRawServo(id, *s);
-                            auto& error    = original.error_flags;
+                            auto& original    = utility::platform::getRawServo(id, *s);
+                            const auto& error = original.error_flags;
 
                             // Check for an error on the servo and report it
                             if (error != RawSensors::Error::OK) {
@@ -410,8 +410,8 @@ namespace module::input {
 
                         // Read through all of our sensors
                         for (uint32_t id = 0; id < 20; ++id) {
-                            auto& original = utility::platform::getRawServo(id, input);
-                            auto& error    = original.error_flags;
+                            auto& original    = utility::platform::getRawServo(id, input);
+                            const auto& error = original.error_flags;
 
                             // Check for an error on the servo and report it
                             if (error != RawSensors::Error::OK) {
