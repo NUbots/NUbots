@@ -43,7 +43,7 @@ TEST_CASE("Test the UKF", "[utility][math][filter][UKF]") {
         Eigen::Vector2d(config["parameters"]["initial"]["covariance"].as<Expression>()).asDiagonal();
     const double deltaT = config["parameters"]["delta_t"].as<Expression>();
 
-    // Resolve the Expression types into actual types
+    // Resolve the Expression list types into actual types
     const std::vector<Eigen::Vector2d> true_state = resolve_expression<Eigen::Vector2d>(config["true_state"]);
     const std::vector<Eigen::Matrix<double, 1, 1>> measurements =
         resolve_expression<Eigen::Matrix<double, 1, 1>, double>(config["measurements"]);
