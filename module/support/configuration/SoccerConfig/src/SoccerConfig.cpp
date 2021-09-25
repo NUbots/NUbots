@@ -55,7 +55,6 @@ namespace module::support::configuration {
 
         FieldDescription::FieldDimensions& d = desc.dimensions;
         d.line_width                         = config["LineWidth"].as<double>();
-        d.mark_width                         = config["MarkWidth"].as<double>();
         d.field_length                       = config["FieldLength"].as<double>();
         d.field_width                        = config["FieldWidth"].as<double>();
         d.goal_depth                         = config["GoalDepth"].as<double>();
@@ -73,7 +72,6 @@ namespace module::support::configuration {
         d.center_circle_diameter             = config["CenterCircleDiameter"].as<double>();
         d.border_strip_min_width             = config["BorderStripMinWidth"].as<double>();
 
-        desc.penalty_robot_start = config["PenaltyRobotStart"].as<double>();
         desc.goalpost_top_height = d.goal_crossbar_height + d.goal_crossbar_width;
 
         SetGoalpostPositions(desc);

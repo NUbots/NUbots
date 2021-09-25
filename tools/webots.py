@@ -1,22 +1,32 @@
 #!/usr/bin/env python3
 
 import glob
+import multiprocessing
 import os
+import random
 import shutil
 import subprocess
 import sys
 import textwrap
+from datetime import datetime
 from pathlib import Path
+from subprocess import DEVNULL
 
+from honcho.manager import Manager
 from termcolor import cprint
 
 import b
 from utility.dockerise import platform
 
+random.seed(datetime.now())
+
 # The docker image details for Robocup
 ROBOCUP_IMAGE_NAME = "robocup-vhsc-nubots"  # Provided by the TC and shouldn't be changed
 ROBOCUP_IMAGE_TAG = "robocup2021"  # Submitted in our team_config.json, shouldn't be changed here unless changed there
 ROBOCUP_IMAGE_REGISTRY = "079967072104.dkr.ecr.us-east-2.amazonaws.com/robocup-vhsc-nubots"  # Provided by the TC
+
+# Generate 4 digit random int to act as a unique identifier for this game
+GAME_IDENTIFIER = str(random.randint(1000, 9999))
 
 
 def register(command):
@@ -29,7 +39,7 @@ def register(command):
         "--target",
         nargs="?",
         choices=platform.list(),
-        default="g4dnxlarge",
+        default="generic",
         help="The platform to compile for",
     )
 
@@ -39,6 +49,14 @@ def register(command):
         action="store_false",
         default=True,
         help="Disables cleaning the build volume before compiling",
+    )
+
+    build_subcommand.add_argument(
+        "-j",
+        "--jobs",
+        dest="jobs",
+        action="store",
+        help="Dictates the number of jobs to run in parallel",
     )
 
     push_subcommand = subparsers.add_parser(
@@ -53,6 +71,26 @@ def register(command):
 
     run_subcommand = subparsers.add_parser("run", help="Run the simulation docker image for use with Webots")
     run_subcommand.add_argument("role", help="The role to run")
+
+    game_subcommand = subparsers.add_parser("game", help="Run a full game")
+    game_subcommand.add_argument("role", action="store", help="The role to run")
+    game_subcommand.add_argument(
+        "-r",
+        "--robots",
+        type=int,
+        action="store",
+        dest="num_of_robots",
+        required=True,
+        help="The number of robot instances to start",
+    )
+    game_subcommand.add_argument(
+        "-a",
+        "--sim-address",
+        action="store",
+        default="127.0.0.1",
+        dest="sim_address",
+        help="Address that robot instances use to connect to Webots",
+    )
 
 
 def get_cmake_flags(roles_to_build):
@@ -74,7 +112,7 @@ def get_cmake_flags(roles_to_build):
     return ["-DCMAKE_BUILD_TYPE=Release"] + role_flags
 
 
-def exec_build(target, roles, clean):
+def exec_build(target, roles, clean, jobs):
     # Tags correct image as 'selected' for given target
     print("Setting target '{}'...".format(target))
     exit_code = subprocess.run(["./b", "target", target]).returncode
@@ -100,7 +138,11 @@ def exec_build(target, roles, clean):
 
     # Compiles code for correct target
     print("Building code...")
-    exit_code = subprocess.run(["./b", "build"]).returncode
+    build_command = ["./b", "build"]
+    # Check if a -j value has been given
+    if jobs:
+        build_command.extend(["-j", jobs])
+    exit_code = subprocess.run(build_command).returncode
     if exit_code != 0:
         cprint(f"unable to build code, exit code {exit_code}", "red", attrs=["bold"])
         sys.exit(exit_code)
@@ -161,31 +203,92 @@ def exec_build(target, roles, clean):
     shutil.rmtree(local_toolchain_dir)
 
 
-def exec_run(role):
+def exec_run(role, num_of_robots=1, sim_address="127.0.0.1"):
+    # Check that image has been built
+    exit_code = subprocess.run(
+        ["docker", "image", "inspect", f"{ROBOCUP_IMAGE_NAME}:{ROBOCUP_IMAGE_TAG}"], stderr=DEVNULL, stdout=DEVNULL
+    ).returncode
+    if exit_code != 0:
+        cprint(
+            f"Image '{ROBOCUP_IMAGE_NAME}:{ROBOCUP_IMAGE_TAG}' not found, please run `./b webots build` to build it",
+            "red",
+            attrs=["bold"],
+        )
+        exit(exit_code)
+
     robocup_logs_dir = os.path.join(b.project_dir, "robocup-logs")
 
     # Ensure the logs directory exists for binding into the container
     os.makedirs(robocup_logs_dir, exist_ok=True)
 
-    docker_run_command = [
-        "docker",
-        "container",
-        "run",
-        "--rm",
-        "--network=host",
-        "--mount",
-        f"type=bind,source={robocup_logs_dir},target=/robocup-logs",
-        "-e",
-        "ROBOCUP_ROBOT_ID=1",
-        "-e",
-        "ROBOCUP_TEAM_COLOR=red",
-        "-e",
-        "ROBOCUP_SIMULATOR_ADDR=127.0.0.1:10001",
-        f"{ROBOCUP_IMAGE_NAME}:{ROBOCUP_IMAGE_TAG}",
-        role,
-    ]
+    process_manager = Manager()
 
-    subprocess.run(docker_run_command)
+    # Override honcho.manager.terminate() method, this is called by its signal handler on CTRL+C
+    process_manager._killall = exec_stop
+
+    # Add all robot run commands to process_manager
+    for i in range(1, num_of_robots + 1):
+
+        robot_color, port_num = (
+            ("red", 10000 + i) if i <= num_of_robots // 2 else ("blue", 10020 + i - num_of_robots // 2)
+        )
+
+        docker_run_command = [
+            "docker",
+            "container",
+            "run",
+            "--rm",
+            "--network=host",
+            f"--name={GAME_IDENTIFIER + '_Robot' + str(i)}",
+            "--mount",
+            f"type=bind,source={robocup_logs_dir},target=/robocup-logs",
+            "-e",
+            f"ROBOCUP_ROBOT_ID={i}",
+            "-e",
+            f"ROBOCUP_TEAM_COLOR={robot_color}",
+            "-e",
+            f"ROBOCUP_SIMULATOR_ADDR={sim_address}:{port_num}",
+            f"{ROBOCUP_IMAGE_NAME}:{ROBOCUP_IMAGE_TAG}",
+            role,
+        ]
+        process_manager.add_process(f"Robot_{i} ({robot_color}):", " ".join(docker_run_command))
+
+    # Start the containers
+    process_manager.loop()
+
+    sys.exit(process_manager.returncode)
+
+
+# Signal handler function to kill containers on CTRL+C
+def exec_stop():
+    # Get all container ID's for containers running running this game
+    container_ids = (
+        subprocess.check_output(
+            [
+                "docker",
+                "ps",
+                "-a",
+                "-q",
+                "--filter",
+                f"name={GAME_IDENTIFIER}_Robot",
+                "--format={{.ID}}",
+            ]
+        )
+        .strip()
+        .decode("ascii")
+        .split()
+    )
+
+    cprint(
+        f"Stoping ALL '{GAME_IDENTIFIER}_Robotx' containers...",
+        color="red",
+        attrs=["bold"],
+    )
+    exit_code = subprocess.run(
+        ["docker", "container", "rm", "-f"] + container_ids, stderr=DEVNULL, stdout=DEVNULL
+    ).returncode
+
+    sys.exit(exit_code)
 
 
 def exec_push():
@@ -215,13 +318,25 @@ def exec_push():
         sys.exit(exit_code)
 
 
-def run(sub_command, clean=False, roles=None, role=None, target="g4dnxlarge", **kwargs):
+def run(
+    sub_command,
+    jobs=None,
+    target="generic",
+    sim_address="127.0.0.1",
+    clean=False,
+    roles=None,
+    role=None,
+    num_of_robots=1,
+    **kwargs,
+):
     if sub_command == "build":
-        exec_build(target, roles, clean)
+        exec_build(target, roles, clean, jobs)
     elif sub_command == "push":
         exec_push()
     elif sub_command == "run":  # For testing docker image
         exec_run(role)
+    elif sub_command == "game":  # For running a full game
+        exec_run(role, num_of_robots, sim_address)
     else:
         print(f"invalid sub command: '{sub_command}'")
         sys.exit(1)

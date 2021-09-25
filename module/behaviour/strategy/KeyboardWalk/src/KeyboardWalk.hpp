@@ -17,8 +17,8 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_STRATEGY_CONTROLLABLEDARWIN_HPP
-#define MODULES_BEHAVIOUR_STRATEGY_CONTROLLABLEDARWIN_HPP
+#ifndef MODULE_BEHAVIOUR_STRATEGY_KEYBOARDWALK_HPP
+#define MODULE_BEHAVIOUR_STRATEGY_KEYBOARDWALK_HPP
 
 #include <Eigen/Core>
 #include <mutex>
@@ -90,4 +90,4 @@ namespace module::behaviour::strategy {
 }  // namespace module::behaviour::strategy
 
 
-#endif
+#endif  // MODULE_BEHAVIOUR_STRATEGY_KEYBOARDWALK_HPP
