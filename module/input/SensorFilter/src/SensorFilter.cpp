@@ -196,16 +196,17 @@ namespace module::input {
             [this](const std::list<std::shared_ptr<const RawSensors>>& sensors, const KinematicsModel& model) {
                 // If we need to reset the filter, do that here
                 if (reset_filter.load()) {
-                    Eigen::Vector3d acc   = Eigen::Vector3d::Zero();
-                    Eigen::Vector3d gyro  = Eigen::Vector3d::Zero();
-                    Eigen::Vector3d rMFt  = Eigen::Vector3d::Zero();
-                    auto filtered_sensors = std::make_unique<Sensors>();
+                    Eigen::Vector3d acc  = Eigen::Vector3d::Zero();
+                    Eigen::Vector3d gyro = Eigen::Vector3d::Zero();
+                    Eigen::Vector3d rMFt = Eigen::Vector3d::Zero();
 
                     for (const auto& s : sensors) {
+
+                        auto filtered_sensors = std::make_unique<Sensors>();
+
                         // Accumulate accelerometer and gyroscope readings
                         acc += s->accelerometer.cast<double>();
                         gyro += s->gyroscope.cast<double>();
-
                         // Make sure we have servo positions
                         for (uint32_t id = 0; id < 20; ++id) {
                             auto& original = utility::platform::getRawServo(id, *s);
@@ -238,8 +239,6 @@ namespace module::input {
 
                         // Accumulator CoM readings
                         rMFt += calculateCentreOfMass(model, filtered_sensors->Htx).head<3>() + rTFt;
-
-                        filtered_sensors->servo.clear();
                     }
 
                     // Average all accumulated readings
