@@ -21,10 +21,8 @@
 #include <array>
 #include <catch.hpp>
 #include <utility>
-//NOTE: Stuff i'm adding
 #include <yaml-cpp/yaml.h>
 #include <string>
-#include <iostream> //remove
 #include "utility/support/yaml_expression.hpp"
 
 #include "utility/math/quaternion.hpp"
