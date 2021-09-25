@@ -21,13 +21,9 @@
 #include <array>
 #include <catch.hpp>
 #include <utility>
-#include <yaml-cpp/yaml.h>
-#include <string>
-#include "utility/support/yaml_expression.hpp"
 
 #include "utility/math/quaternion.hpp"
 
-using utility::support::resolve_expression;
 
 static const std::array<Eigen::Quaterniond, 200> Q = {
     Eigen::Quaterniond(0.812886533020004, -0.185088524394760, -0.548059268662397, -0.0677403912398385),
