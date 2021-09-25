@@ -17,7 +17,7 @@
  * Copyright 2021 NUbots <nubots@nubots.net>
  */
 
-#define CATCH_CONFIG_RUNNER
+#define CATCH_CONFIG_MAIN
 #include <catch.hpp>
 #include <iostream>
 #include <memory>
@@ -37,10 +37,6 @@ namespace {
     using message::motion::KinematicsModel;
     using NUClear::message::LogMessage;
     using utility::strutil::Colour;
-
-    // Set in main so we can construct command line arguments for the powerplant
-    int main_argc;
-    char** main_argv;
 
     class TestLogHandler : public NUClear::Reactor {
     public:
@@ -118,7 +114,7 @@ TEST_CASE("Testing the Kinematics Configuration module", "[module][motion][Kinem
 
     NUClear::PowerPlant::Configuration config;
     config.thread_count = 2;
-    NUClear::PowerPlant plant(config, main_argc, const_cast<const char**>(main_argv));
+    NUClear::PowerPlant plant(config);
 
     INFO("Installing TestLogHandler");
     plant.install<TestLogHandler>();
@@ -137,18 +133,4 @@ TEST_CASE("Testing the Kinematics Configuration module", "[module][motion][Kinem
 
     // Now check values in model to ensure correctness
     REQUIRE(saved_model->head.INTERPUPILLARY_DISTANCE == 0.068f);
-}
-
-int main(int argc, char** argv) {
-    // Preserve command line arguments for when we create the PowerPlant
-    main_argc = argc;
-    main_argv = new char*[argc + 1];
-    for (int i = 0; i <= argc; ++i) {
-        main_argv[i] = argv[i];
-    }
-
-    // Run test cases
-    int result = Catch::Session().run(argc, argv);
-
-    return result;
 }
