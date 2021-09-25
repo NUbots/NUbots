@@ -238,6 +238,8 @@ namespace module::input {
 
                         // Accumulator CoM readings
                         rMFt += calculateCentreOfMass(model, filtered_sensors->Htx).head<3>() + rTFt;
+
+                        filtered_sensors->servo.clear();
                     }
 
                     // Average all accumulated readings
