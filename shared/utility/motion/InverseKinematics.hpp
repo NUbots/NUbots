@@ -123,7 +123,7 @@ namespace utility::motion::kinematics {
         knee                 = std::acos(std::fmax(std::fmin(cosKnee, 1), -1));
 
         const Scalar cosLowerLeg = (sqrLowerLeg + sqrLength - sqrUpperLeg) / (2.0 * LOWER_LEG_LENGTH * length);
-        const Scalar lowerLeg    = std::acos(std::fmax(std::fmin(cosLowerLeg, 1), -1));
+        const Scalar lowerLeg    = std::acos(std::max(std::min(cosLowerLeg, 1), -1));
 
         const Scalar phi2 = std::acos(targetLeg.dot(ankleY) / length);
 
@@ -139,8 +139,7 @@ namespace utility::motion::kinematics {
         else {
             NUClear::log<NUClear::DEBUG>(
                 "InverseKinematics::calculateLegJoints : targetLeg and ankleY parallel. This is unhandled at "
-                "the "
-                "moment. requested pose = \n",
+                "the moment. requested pose = \n",
                 target.matrix());
             return positions;
         }
