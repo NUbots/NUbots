@@ -48,7 +48,6 @@ TEST_CASE("Test the UKF", "[utility][math][filter][UKF]") {
     const std::vector<Eigen::Matrix<double, 1, 1>> measurements =
         resolve_expression<Eigen::Matrix<double, 1, 1>, double>(config["measurements"]);
 
-    // Make sure the input data is sane
     REQUIRE(true_state.size() == measurements.size());
 
     utility::math::filter::UKF<double, shared::tests::VanDerPolModel> model_filter;
