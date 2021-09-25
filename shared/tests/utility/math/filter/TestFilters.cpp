@@ -35,8 +35,6 @@ using utility::support::resolve_expression;
 TEST_CASE("Test the UKF", "[utility][math][filter][UKF]") {
 
     YAML::Node config                   = YAML::LoadFile("tests/TestFilters.yaml");
-    const std::vector<Expression> state = config["true_state"].as<std::vector<Expression>>();
-    const std::vector<double> measures  = config["measurements"].as<std::vector<double>>();
     const Eigen::Vector2d process_noise = config["parameters"]["noise"]["process"].as<Expression>();
     const Eigen::Matrix<double, 1, 1> measurement_noise(
         double(config["parameters"]["noise"]["measurement"].as<Expression>()));
