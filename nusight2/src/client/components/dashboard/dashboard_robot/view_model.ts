@@ -3,6 +3,7 @@ import { createTransformer } from 'mobx-utils'
 
 import { Transform } from '../../../math/transform'
 import { Vector2 } from '../../../math/vector2'
+import { Matrix2 } from '../../../math/matrix2'
 import { BasicAppearance } from '../../../render2d/appearance/basic_appearance'
 import { LineAppearance } from '../../../render2d/appearance/line_appearance'
 import { ArcGeometry } from '../../../render2d/geometry/arc_geometry'
@@ -15,6 +16,7 @@ import { Group } from '../../../render2d/object/group'
 import { Shape } from '../../../render2d/object/shape'
 
 import { DashboardRobotModel } from './model'
+import { PolygonGeometry } from '../../../render2d/geometry/polygon_geometry'
 
 export class DashboardRobotViewModel {
   constructor(private model: DashboardRobotModel) {}
@@ -75,6 +77,75 @@ export class DashboardRobotViewModel {
       BasicAppearance.of({
         stroke: { width: 0.025, color: '#000000' },
       }),
+    )
+  }
+
+  @computed
+  private get ballProbabilities() {
+    console.log('Ball covariance')
+    console.log(this.model.ballCovariance)
+    console.log('Ball position')
+    console.log(this.model.ballPosition)
+    console.log('\n')
+
+    // Different colours of the probabilities
+    const STD_1_COLOR = '#ff0000'
+    const STD_2_COLOR = '#eeff00'
+    const STD_3_COLOR = '#00ff04'
+
+    // Draw the points for the distributions
+    function drawDistribution(
+      numPoints: number = 20,
+      covarianceMatrix: Matrix2,
+      positionVector: Vector2,
+      zScore: number,
+    ) {
+      // Vectors for the standard deviation
+      const vectors: Vector2[] = []
+
+      // Get the variances
+      const stdX = Math.sqrt(covarianceMatrix.x.x) * zScore
+      const stdY = Math.sqrt(covarianceMatrix.y.y) * zScore
+
+      // Get the points that make the ellipse
+      for (let i = 0; i < numPoints; i++) {
+        // Calculate angle and ray of ellipse for probability distribution
+        const angle = (2 * Math.PI * i) / numPoints
+        const hypotenuse =
+          (stdX * stdY) /
+          Math.sqrt(Math.pow(stdX * Math.sin(angle), 2) + Math.pow(stdY * Math.cos(angle), 2))
+
+        // Calculate coords relative to point
+        const relCoordX = hypotenuse * Math.cos(angle)
+        const relCoordY = hypotenuse * Math.sin(angle)
+
+        // Calculate coords of points and add to list
+        const coordX = positionVector.x + relCoordX
+        const coordY = positionVector.y + relCoordY
+        const vector = new Vector2(coordX, coordY)
+        vectors.push(vector)
+      }
+
+      return vectors
+    }
+
+    const vecs1 = drawDistribution(undefined, this.model.ballCovariance, this.model.ballPosition, 1)
+    const vecs2 = drawDistribution(undefined, this.model.ballCovariance, this.model.ballPosition, 2)
+    const vecs3 = drawDistribution(undefined, this.model.ballCovariance, this.model.ballPosition, 3)
+
+    return (
+      Shape.of(
+        PolygonGeometry.of(vecs1),
+        BasicAppearance.of({ fill: { color: STD_1_COLOR, alpha: 0.5 } }),
+      ),
+      Shape.of(
+        PolygonGeometry.of(vecs2),
+        BasicAppearance.of({ fill: { color: STD_2_COLOR, alpha: 0.3 } }),
+      ),
+      Shape.of(
+        PolygonGeometry.of(vecs3),
+        BasicAppearance.of({ fill: { color: STD_3_COLOR, alpha: 0.1 } }),
+      )
     )
   }
 
