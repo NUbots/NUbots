@@ -39,9 +39,9 @@ export class DashboardRobotViewModel {
         this.ballSight,
         this.kickTarget,
         this.ball,
-        this.ballStd1,
-        this.ballStd2,
         this.ballStd3,
+        this.ballStd2,
+        this.ballStd1,
       ],
     })
   }
