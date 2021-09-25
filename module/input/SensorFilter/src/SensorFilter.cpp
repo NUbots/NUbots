@@ -61,7 +61,6 @@ namespace module::input {
         s << src;
         s << ":";
 
-
         if (errorCode & RawSensors::Error::INPUT_VOLTAGE) {
             s << " Input Voltage ";
         }
@@ -81,6 +80,36 @@ namespace module::input {
             s << " Corrupt Data ";
         }
         if (errorCode & RawSensors::Error::TIMEOUT) {
+            s << " Timeout ";
+        }
+
+        return s.str();
+    }
+
+    std::string servoErrorString(uint32_t id, RawSensors::Servo original, uint errorNo) {
+        // Check for an error on the servo and report it
+        std::stringstream s;
+        s << "Error on Servo " << (id + 1) << " (" << static_cast<ServoID>(id) << "):";
+
+        if (errorNo & RawSensors::Error::INPUT_VOLTAGE) {
+            s << " Input Voltage - " << original.voltage;
+        }
+        if (errorNo & RawSensors::Error::ANGLE_LIMIT) {
+            s << " Angle Limit - " << original.present_position;
+        }
+        if (errorNo & RawSensors::Error::OVERHEATING) {
+            s << " Overheating - " << original.temperature;
+        }
+        if (errorNo & RawSensors::Error::OVERLOAD) {
+            s << " Overloaded - " << original.load;
+        }
+        if (errorNo & RawSensors::Error::INSTRUCTION) {
+            s << " Bad Instruction ";
+        }
+        if (errorNo & RawSensors::Error::CORRUPT_DATA) {
+            s << " Corrupt Data ";
+        }
+        if (errorNo & RawSensors::Error::TIMEOUT) {
             s << " Timeout ";
         }
 
@@ -209,20 +238,28 @@ namespace module::input {
                         // Make sure we have servo positions
                         for (uint32_t id = 0; id < 20; ++id) {
                             auto& original = utility::platform::getRawServo(id, *s);
-                            // Add the sensor values to the system properly
-                            filtered_sensors->servo.push_back({0,
-                                                               id,
-                                                               original.torque_enabled,
-                                                               original.p_gain,
-                                                               original.i_gain,
-                                                               original.d_gain,
-                                                               original.goal_position,
-                                                               original.moving_speed,
-                                                               original.present_position,
-                                                               original.present_speed,
-                                                               original.load,
-                                                               original.voltage,
-                                                               static_cast<float>(original.temperature)});
+                            auto& error    = original.error_flags;
+
+                            // Check for an error on the servo and report it
+                            if (error != RawSensors::Error::OK) {
+                                NUClear::log<NUClear::WARN>(servoErrorString(id, original, error));
+                            }
+                            else {
+                                // Add the sensor values to the system properly
+                                filtered_sensors.servo.push_back({0,
+                                                                  id,
+                                                                  original.torque_enabled,
+                                                                  original.p_gain,
+                                                                  original.i_gain,
+                                                                  original.d_gain,
+                                                                  original.goal_position,
+                                                                  original.moving_speed,
+                                                                  original.present_position,
+                                                                  original.present_speed,
+                                                                  original.load,
+                                                                  original.voltage,
+                                                                  static_cast<float>(original.temperature)});
+                            }
                         }
 
                         // Calculate forward kinematics
@@ -378,32 +415,7 @@ namespace module::input {
 
                             // Check for an error on the servo and report it
                             if (error != RawSensors::Error::OK) {
-                                std::stringstream s;
-                                s << "Error on Servo " << (id + 1) << " (" << static_cast<ServoID>(id) << "):";
-
-                                if (error & RawSensors::Error::INPUT_VOLTAGE) {
-                                    s << " Input Voltage - " << original.voltage;
-                                }
-                                if (error & RawSensors::Error::ANGLE_LIMIT) {
-                                    s << " Angle Limit - " << original.present_position;
-                                }
-                                if (error & RawSensors::Error::OVERHEATING) {
-                                    s << " Overheating - " << original.temperature;
-                                }
-                                if (error & RawSensors::Error::OVERLOAD) {
-                                    s << " Overloaded - " << original.load;
-                                }
-                                if (error & RawSensors::Error::INSTRUCTION) {
-                                    s << " Bad Instruction ";
-                                }
-                                if (error & RawSensors::Error::CORRUPT_DATA) {
-                                    s << " Corrupt Data ";
-                                }
-                                if (error & RawSensors::Error::TIMEOUT) {
-                                    s << " Timeout ";
-                                }
-
-                                NUClear::log<NUClear::WARN>(s.str());
+                                NUClear::log<NUClear::WARN>(servoErrorString(id, original, error));
                             }
                             // If current Sensors message for this servo has an error and we have a previous sensors
                             // message available, then we use our previous sensor values with some updates
