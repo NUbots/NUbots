@@ -201,7 +201,7 @@ namespace module::input {
                     Eigen::Vector3d rMFt = Eigen::Vector3d::Zero();
 
                     for (const auto& s : sensors) {
-                        auto filtered_sensors = Sensors();
+                        Sensors filtered_sensors{};
 
                         // Accumulate accelerometer and gyroscope readings
                         acc += s->accelerometer.cast<double>();
