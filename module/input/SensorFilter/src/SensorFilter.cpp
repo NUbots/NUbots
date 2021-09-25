@@ -210,34 +210,34 @@ namespace module::input {
                         for (uint32_t id = 0; id < 20; ++id) {
                             auto& original = utility::platform::getRawServo(id, *s);
                             // Add the sensor values to the system properly
-                            filtered_sensors->servo.push_back({0,
-                                                               id,
-                                                               original.torque_enabled,
-                                                               original.p_gain,
-                                                               original.i_gain,
-                                                               original.d_gain,
-                                                               original.goal_position,
-                                                               original.moving_speed,
-                                                               original.present_position,
-                                                               original.present_speed,
-                                                               original.load,
-                                                               original.voltage,
-                                                               static_cast<float>(original.temperature)});
+                            filtered_sensors.servo.push_back({0,
+                                                              id,
+                                                              original.torque_enabled,
+                                                              original.p_gain,
+                                                              original.i_gain,
+                                                              original.d_gain,
+                                                              original.goal_position,
+                                                              original.moving_speed,
+                                                              original.present_position,
+                                                              original.present_speed,
+                                                              original.load,
+                                                              original.voltage,
+                                                              static_cast<float>(original.temperature)});
                         }
 
                         // Calculate forward kinematics
-                        const auto Htx = calculateAllPositions(model, *filtered_sensors);
+                        const auto Htx = calculateAllPositions(model, filtered_sensors);
                         for (const auto& entry : Htx) {
-                            filtered_sensors->Htx[entry.first] = entry.second.matrix();
+                            filtered_sensors.Htx[entry.first] = entry.second.matrix();
                         }
 
                         // Calculate the average length of both legs from the torso and accumulate this measurement
-                        const Eigen::Affine3d Htr(filtered_sensors->Htx[ServoID::R_ANKLE_ROLL]);
-                        const Eigen::Affine3d Htl(filtered_sensors->Htx[ServoID::L_ANKLE_ROLL]);
+                        const Eigen::Affine3d Htr(filtered_sensors.Htx[ServoID::R_ANKLE_ROLL]);
+                        const Eigen::Affine3d Htl(filtered_sensors.Htx[ServoID::L_ANKLE_ROLL]);
                         const Eigen::Vector3d rTFt = (Htr.translation() + Htl.translation()) * 0.5;
 
                         // Accumulator CoM readings
-                        rMFt += calculateCentreOfMass(model, filtered_sensors->Htx).head<3>() + rTFt;
+                        rMFt += calculateCentreOfMass(model, filtered_sensors.Htx).head<3>() + rTFt;
                     }
 
                     // Average all accumulated readings
