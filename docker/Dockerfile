@@ -353,14 +353,6 @@ COPY --chown=nubots:nubots PKGBUILD/openfst.sh /home/nubots/openfst/PKGBUILD
 RUN makepkg || true
 RUN test -f openfst-1.7.2-1-x86_64.pkg.tar.zst
 
-FROM base AS kaldi-openfst
-
-WORKDIR /home/nubots/kaldi-openfst
-COPY --chown=nubots:nubots PKGBUILD/kaldi-openfst.sh /home/nubots/kaldi-openfst/PKGBUILD
-RUN install-package python2 subversion unzip sox gcc-fortran gcc-libs
-RUN makepkg || true
-RUN test -f kaldi-openfst-1.7.2-2-x86_64.pkg.tar.zst
-
 FROM base AS kaldi
 
 WORKDIR /home/nubots/kaldi
