@@ -32,57 +32,10 @@
 #include "message/motion/KinematicsModel.hpp"
 
 #include "utility/strutil/ansi.hpp"
+#include "utility/support/TestLogHandler.hpp"
 
 namespace {
     using message::motion::KinematicsModel;
-    using NUClear::message::LogMessage;
-    using utility::strutil::Colour;
-
-    class TestLogHandler : public NUClear::Reactor {
-    public:
-        TestLogHandler(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-
-            on<Trigger<LogMessage>>().then([this](const LogMessage& message) {
-                std::lock_guard<std::mutex> lock(mutex);
-
-                // Where this message came from
-                std::string source = "";
-
-                // If we know where this log message came from, we display that
-                if (message.task != nullptr) {
-                    // Get our reactor name
-                    std::string reactor = message.task->identifier[1];
-
-                    // Strip to the last semicolon if we have one
-                    size_t lastC = reactor.find_last_of(':');
-                    reactor      = lastC == std::string::npos ? reactor : reactor.substr(lastC + 1);
-
-                    // This is our source
-                    source = reactor + " "
-                             + (message.task->identifier[0].empty() ? "" : "- " + message.task->identifier[0] + " ");
-                }
-
-                // Output the level
-                std::stringstream log_message;
-                log_message << source;
-                switch (message.level) {
-                    case NUClear::TRACE: log_message << "TRACE: "; break;
-                    case NUClear::DEBUG: log_message << Colour::green << "DEBUG: "; break;
-                    case NUClear::INFO: log_message << Colour::brightblue << "INFO: "; break;
-                    case NUClear::WARN: log_message << Colour::yellow << "WARN: "; break;
-                    case NUClear::ERROR: log_message << Colour::brightred << "(╯°□°）╯︵ ┻━┻: "; break;
-                    case NUClear::FATAL: log_message << Colour::brightred << "(ノಠ益ಠ)ノ彡┻━┻: "; break;
-                }
-
-                // Output the message
-                UNSCOPED_INFO(log_message.str() << message.message);
-            });
-        }
-
-    private:
-        std::mutex mutex;
-    };
-
 
     std::unique_ptr<KinematicsModel> saved_model = nullptr;
 
@@ -117,7 +70,7 @@ TEST_CASE("Testing the Kinematics Configuration module", "[module][motion][Kinem
     NUClear::PowerPlant plant(config);
 
     INFO("Installing TestLogHandler");
-    plant.install<TestLogHandler>();
+    plant.install<utility::support::TestLogHandler>();
     INFO("Installing extension::FileWatcher");
     plant.install<module::extension::FileWatcher>();
     INFO("Installing TestReactor");
