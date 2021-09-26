@@ -36,18 +36,34 @@ namespace utility::support {
     template <typename ModuleToTest, int timeout_ticks = 500, typename TimeoutTimeUnit = std::chrono::milliseconds>
     class [[nodiscard]] ModuleTester {
     public:
+        /// @brief Instantiates the PowerPlant for the tests
+        /// @details Installs a log handler for the tests, so that the module's logs are seen when tests fail
+        /// @param num_threads The number of threads that the PowerPlant will use
         ModuleTester(const int& num_threads = 1) : plant(gen_config(num_threads)) {
 
             INFO("Installing TestLogHandler (automatic for all module tests)");
             plant.install<utility::support::TestLogHandler>();
         }
 
+        /// @brief Installs modules to the test PowerPlant
+        /// @details Modules which the test depends on should be installed with this function. This includes the
+        ///          "intercepter" module, which saves the emissions from the module being tested
+        /// @note Modules which the test depends on should be installed in the order they would be listed in as if they
+        ///       were a part of a role
+        /// @tparam Module The Reactor type to install now
+        /// @param module_name The name of the module being installed. This name is logged before the PowerPlant
+        ///                    installs the module
         template <typename Module>
         void install(const std::string& module_name) {
             INFO("Installing " << module_name);
             plant.install<Module>();
         }
 
+        /// @brief Runs the test with the timeout condition
+        /// @details The module being tested is installed, the timeout condition is set up, and and the PowerPlant is
+        ///          started
+        /// @attention After the last emission has been received by the intercepter, the PowerPlant should be shut down.
+        ///            If it's not shut down, the timeout condition will stop and fail the test
         void run() {
             INFO("Installing the module being tested");
             plant.install<ModuleToTest>();
@@ -60,8 +76,10 @@ namespace utility::support {
         }
 
     private:
+        /// @brief The plant which the test runs on
         NUClear::PowerPlant plant;
 
+        /// @brief Creates a config object to instantiate plant with
         NUClear::PowerPlant::Configuration gen_config(const int& num_threads) {
             NUClear::PowerPlant::Configuration config;
             config.thread_count = num_threads;
