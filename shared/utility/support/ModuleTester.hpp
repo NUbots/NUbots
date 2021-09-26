@@ -26,7 +26,14 @@
 
 namespace utility::support {
 
-    template <typename ModuleToTest>
+    /**
+     * @brief Class for running discrete PowerPlants to test Reactors and Reactions
+     *
+     * @tparam ModuleToTest The module which is to be tested
+     * @tparam timeout_ticks  The number of ticks of the TimeoutTimeUnit before the test times out and fails
+     * @tparam TimeoutTimeUnit The unit of time which the timeout_ticks are
+     */
+    template <typename ModuleToTest, int timeout_ticks = 500, typename TimeoutTimeUnit = std::chrono::milliseconds>
     class [[nodiscard]] ModuleTester {
     public:
         ModuleTester(const int& num_threads = 1) : plant(gen_config(num_threads)) {
@@ -44,6 +51,10 @@ namespace utility::support {
         void run() {
             INFO("Installing the module being tested");
             plant.install<ModuleToTest>();
+
+            INFO("Installing the Timeout Module")
+            plant.install<TimeoutModule>();
+
             INFO("Starting PowerPlant");
             plant.start();
         }
@@ -56,6 +67,33 @@ namespace utility::support {
             config.thread_count = num_threads;
             return config;
         }
+
+        /**
+         * @brief Helper Reactor to timeout tests if they take too long
+         * @details The Watchdog shuts down the PowerPlant and fails the test if the time limit is reached
+         */
+        class TimeoutModule : public NUClear::Reactor {
+        public:
+            /// @brief Registers the reactions to fail the test if it times out
+            explicit TimeoutModule(std::unique_ptr<NUClear::Environment> environment)
+                : Reactor(std::move(environment)) {
+
+                // Start the timeout clock by servicing the watchdog
+                on<Startup>().then([this] { emit<Scope::WATCHDOG>(ServiceWatchdog<TimeoutWatchdogGroup>()); });
+
+                // Shutdown the powerplant if we're out of time
+                on<Watchdog<TimeoutWatchdogGroup, timeout_ticks, TimeoutTimeUnit>>().then([this] {
+                    log<NUClear::FATAL>("Test timeout reached. Shutting down PowerPlant.");
+                    powerplant.shutdown();
+                    FAIL(
+                        "Test timeout was reached. If the test was still running as intended, increase the time limit "
+                        "for the test by changing the `ModuleTest`'s template parameters.");
+                });
+            }
+
+        private:
+            struct TimeoutWatchdogGroup {};
+        };
     };
 
 }  // namespace utility::support

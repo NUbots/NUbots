@@ -40,14 +40,6 @@ namespace module::motion::kinematicsconfigurationtest {
     public:
         TestReactor(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-            on<Startup>().then([this] { emit<Scope::WATCHDOG>(ServiceWatchdog<TestReactor>()); });
-
-            // Auto stop the test after 10 seconds
-            on<Watchdog<TestReactor, 10, std::chrono::seconds>>().then([this] {
-                log<NUClear::INFO>("No KinematicsModel message received in 10 seconds. Aborting.");
-                powerplant.shutdown();
-            });
-
             // Trigger on the KinematicsModel message
             on<Trigger<KinematicsModel>>().then([this](const KinematicsModel& model) {
                 log<NUClear::INFO>("Received a KinematicsModel message. Test is now over.");
