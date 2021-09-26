@@ -17,8 +17,8 @@
  * Copyright 2021 NUbots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_SUPPORT_MODULETESTER
-#define UTILITY_SUPPORT_MODULETESTER
+#ifndef UTILITY_MODULETESTUTILS_MODULETESTER
+#define UTILITY_MODULETESTUTILS_MODULETESTER
 
 #define CATCH_CONFIG_RUNNER
 
@@ -26,7 +26,7 @@
 
 #include "TestLogHandler.hpp"
 
-namespace utility::support {
+namespace utility::module_test {
 
     /**
      * @brief Class for running discrete PowerPlants to test Reactors and Reactions
@@ -44,7 +44,7 @@ namespace utility::support {
         ModuleTester(const int& num_threads = 1) : plant(gen_config(num_threads)) {
 
             INFO("Installing TestLogHandler (automatic for all module tests)");
-            plant.install<utility::support::TestLogHandler>();
+            plant.install<utility::module_test::TestLogHandler>();
         }
 
         /// @brief Installs modules to the test PowerPlant
@@ -116,6 +116,6 @@ namespace utility::support {
         };
     };
 
-}  // namespace utility::support
+}  // namespace utility::module_test
 
-#endif  // UTILITY_SUPPORT_MODULETESTER
+#endif  // UTILITY_MODULETESTUTILS_MODULETESTER

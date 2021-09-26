@@ -17,13 +17,13 @@
  * Copyright 2021 NUbots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_SUPPORT_TESTLOGHANDLER
-#define UTILITY_SUPPORT_TESTLOGHANDLER
+#ifndef UTILITY_MODULETESTUTILS_TESTLOGHANDLER
+#define UTILITY_MODULETESTUTILS_TESTLOGHANDLER
 
 #include <memory>
 #include <nuclear>
 
-namespace utility::support {
+namespace utility::module_test {
 
     /**
      * @brief Handler for logging during tests so we can pass Catch the messages too
@@ -38,6 +38,6 @@ namespace utility::support {
         std::mutex mutex;
     };
 
-}  // namespace utility::support
+}  // namespace utility::module_test
 
-#endif  // UTILITY_SUPPORT_TESTLOGHANDLER
+#endif  // UTILITY_MODULETESTUTILS_TESTLOGHANDLER
