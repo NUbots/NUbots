@@ -56,7 +56,7 @@ TEST_CASE("Testing the Kinematics Configuration module", "[module][motion][Kinem
 
     using module::extension::FileWatcher;
     using module::motion::KinematicsConfiguration;
-    using utility::support::ModuleTester;
+    using utility::module_test::ModuleTester;
 
     static constexpr int NUM_THREADS = 2;
 
