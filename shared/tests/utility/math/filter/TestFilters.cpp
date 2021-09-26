@@ -132,7 +132,6 @@ TEST_CASE("Test the ParticleFilter", "[utility][math][filter][ParticleFilter]") 
     const std::vector<Eigen::Matrix<double, 1, 1>> measurements =
         resolve_expression<Eigen::Matrix<double, 1, 1>, double>(config["measurements"]);
 
-    // Make sure the input data is sane
     REQUIRE(true_state.size() == measurements.size());
 
     utility::math::filter::ParticleFilter<double, shared::tests::VanDerPolModel> model_filter;
