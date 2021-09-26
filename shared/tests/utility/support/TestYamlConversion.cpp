@@ -49,7 +49,7 @@ SCENARIO("yaml nodes can be converted to a given container type", "[utility][sup
             THEN("Container sizes should be equivalent") {
                 REQUIRE(test_values["ints"].size() == int_vector.size());
             }
-            AND_THEN("Values at each index should be equivalent") {
+            THEN("Values at each index should be equivalent") {
                 // Check values at each index
                 for (size_t i = 0; i < test_values["ints"].size(); i++) {
                     REQUIRE(test_values["ints"][i].as<int>() == int_vector.at(i));
@@ -63,7 +63,7 @@ SCENARIO("yaml nodes can be converted to a given container type", "[utility][sup
             THEN("Container sizes should be equivalent") {
                 REQUIRE(test_values["floats"].size() == float_vector.size());
             }
-            AND_THEN("Values at each index should be equivalent") {
+            THEN("Values at each index should be equivalent") {
                 for (size_t i = 0; i < test_values["floats"].size(); i++) {
                     REQUIRE(test_values["floats"][i].as<float>() == float_vector.at(i));
                 }
@@ -76,7 +76,7 @@ SCENARIO("yaml nodes can be converted to a given container type", "[utility][sup
             THEN("Container sizes should be equivalent") {
                 REQUIRE(test_values["doubles"].size() == double_vector.size());
             }
-            AND_THEN("Values at each index should be equivalent") {
+            THEN("Values at each index should be equivalent") {
                 for (size_t i = 0; i < test_values["doubles"].size(); i++) {
                     Approx epsilon_result = Approx(double_vector.at(i)).epsilon(ERROR_THRESHOLD);
                     REQUIRE(test_values["doubles"][i].as<double>() == epsilon_result);
@@ -90,7 +90,7 @@ SCENARIO("yaml nodes can be converted to a given container type", "[utility][sup
             THEN("Container sizes should be equivalent") {
                 REQUIRE(test_values["vector2"].size() == v2d_vec.size());
             }
-            AND_THEN("Values at each index should be equivalent") {
+            THEN("Values at each index should be equivalent") {
                 for (size_t i = 0; i < test_values["vector2"].size(); i++) {
                     Approx epsilon_x = Approx(v2d_vec.at(i).x()).epsilon(ERROR_THRESHOLD);
                     Approx epsilon_y = Approx(v2d_vec.at(i).y()).epsilon(ERROR_THRESHOLD);
@@ -107,7 +107,7 @@ SCENARIO("yaml nodes can be converted to a given container type", "[utility][sup
             THEN("Container sizes should be equivalent") {
                 REQUIRE(test_values["vector3"].size() == v3d_vec.size());
             }
-            AND_THEN("Values at each index should be equivalent") {
+            THEN("Values at each index should be equivalent") {
                 for (size_t i = 0; i < test_values["vector3"].size(); i++) {
                     Approx epsilon_x = Approx(v3d_vec.at(i).x()).epsilon(ERROR_THRESHOLD);
                     Approx epsilon_y = Approx(v3d_vec.at(i).y()).epsilon(ERROR_THRESHOLD);
@@ -127,7 +127,7 @@ SCENARIO("yaml nodes can be converted to a given container type", "[utility][sup
             THEN("Container sizes should be equivalent") {
                 REQUIRE(test_values["ints"].size() == int_array.size());
             }
-            AND_THEN("Values at each index should be equivalent") {
+            THEN("Values at each index should be equivalent") {
                 // Check values at each index
                 for (size_t i = 0; i < test_values["ints"].size(); i++) {
                     REQUIRE(test_values["ints"][i].as<int>() == int_array.at(i));
@@ -140,7 +140,7 @@ SCENARIO("yaml nodes can be converted to a given container type", "[utility][sup
             THEN("Container sizes should be equivalent") {
                 REQUIRE(test_values["floats"].size() == float_array.size());
             }
-            AND_THEN("Values at each index should be equivalent") {
+            THEN("Values at each index should be equivalent") {
                 // Check values at each index
                 for (size_t i = 0; i < test_values["floats"].size(); i++) {
                     REQUIRE(test_values["floats"][i].as<float>() == float_array.at(i));
@@ -153,7 +153,7 @@ SCENARIO("yaml nodes can be converted to a given container type", "[utility][sup
             THEN("Container sizes should be equivalent") {
                 REQUIRE(test_values["doubles"].size() == double_array.size());
             }
-            AND_THEN("Values at each index should be equivalent") {
+            THEN("Values at each index should be equivalent") {
                 // Check values at each index
                 for (size_t i = 0; i < test_values["doubles"].size(); i++) {
                     Approx epsilon_result = Approx(double_array.at(i)).epsilon(ERROR_THRESHOLD);
@@ -167,7 +167,7 @@ SCENARIO("yaml nodes can be converted to a given container type", "[utility][sup
             THEN("Container sizes should be equivalent") {
                 REQUIRE(test_values["vector3"].size() == v3d_array.size());
             }
-            AND_THEN("Values at each index should be equivalent") {
+            THEN("Values at each index should be equivalent") {
                 for (size_t i = 0; i < test_values["vector3"].size(); i++) {
                     Approx epsilon_x = Approx(v3d_array.at(i).x()).epsilon(ERROR_THRESHOLD);
                     Approx epsilon_y = Approx(v3d_array.at(i).y()).epsilon(ERROR_THRESHOLD);
@@ -185,7 +185,7 @@ SCENARIO("yaml nodes can be converted to a given container type", "[utility][sup
             THEN("Container sizes should be equivalent") {
                 REQUIRE(test_values["vector2"].size() == v2d_array.size());
             }
-            AND_THEN("Values at each index should be equivalent") {
+            THEN("Values at each index should be equivalent") {
                 for (size_t i = 0; i < test_values["vector2"].size(); i++) {
                     Approx epsilon_x = Approx(v2d_array.at(i).x()).epsilon(ERROR_THRESHOLD);
                     Approx epsilon_y = Approx(v2d_array.at(i).y()).epsilon(ERROR_THRESHOLD);
