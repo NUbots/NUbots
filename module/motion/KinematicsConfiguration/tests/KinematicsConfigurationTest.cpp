@@ -32,9 +32,9 @@
 #include "message/motion/KinematicsModel.hpp"
 
 #include "utility/strutil/ansi.hpp"
-#include "utility/support/TestLogHandler.hpp"
+#include "utility/support/ModuleTester.hpp"
 
-namespace {
+namespace module::motion::kinematicsconfigurationtest {
     using message::motion::KinematicsModel;
 
     std::unique_ptr<KinematicsModel> saved_model = nullptr;
@@ -61,25 +61,19 @@ namespace {
             });
         }
     };
-}  // namespace
+}  // namespace module::motion::kinematicsconfigurationtest
 
 TEST_CASE("Testing the Kinematics Configuration module", "[module][motion][KinematicsConfiguration]") {
 
-    NUClear::PowerPlant::Configuration config;
-    config.thread_count = 2;
-    NUClear::PowerPlant plant(config);
+    using module::motion::kinematicsconfigurationtest::saved_model;
+    using utility::support::ModuleTester;
 
-    INFO("Installing TestLogHandler");
-    plant.install<utility::support::TestLogHandler>();
-    INFO("Installing extension::FileWatcher");
-    plant.install<module::extension::FileWatcher>();
-    INFO("Installing TestReactor");
-    plant.install<TestReactor>();
-    INFO("Installing motion::KinematicsConfiguration");
-    plant.install<module::motion::KinematicsConfiguration>();
+    static constexpr int NUM_THREADS = 2;
 
-    INFO("Starting PowerPlant");
-    plant.start();
+    ModuleTester<module::motion::KinematicsConfiguration> tester(NUM_THREADS);
+    tester.install<module::extension::FileWatcher>("FileWatcher");
+    tester.install<module::motion::kinematicsconfigurationtest::TestReactor>("TestReactor");
+    tester.run();
 
     // Require that a model was saved
     REQUIRE(saved_model != nullptr);
