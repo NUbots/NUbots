@@ -19,11 +19,8 @@
 
 #define CATCH_CONFIG_MAIN
 #include <catch.hpp>
-#include <iostream>
 #include <memory>
 #include <nuclear>
-#include <sstream>
-#include <string>
 
 #include "KinematicsConfiguration.hpp"
 

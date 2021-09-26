@@ -20,7 +20,6 @@
 #ifndef UTILITY_SUPPORT_MODULETESTER
 #define UTILITY_SUPPORT_MODULETESTER
 
-// #define CATCH_CONFIG_RUNNER
 #include <catch.hpp>
 
 #include "TestLogHandler.hpp"
