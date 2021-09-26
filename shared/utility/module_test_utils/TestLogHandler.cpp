@@ -28,7 +28,7 @@
 
 #include "utility/strutil/ansi.hpp"
 
-utility::support::TestLogHandler::TestLogHandler(std::unique_ptr<NUClear::Environment> environment)
+utility::module_test::TestLogHandler::TestLogHandler(std::unique_ptr<NUClear::Environment> environment)
     : Reactor(std::move(environment)) {
 
     using NUClear::message::LogMessage;
