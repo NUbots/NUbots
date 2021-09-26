@@ -31,7 +31,7 @@
 #include "utility/strutil/ansi.hpp"
 #include "utility/support/ModuleTester.hpp"
 
-namespace module::motion::kinematicsconfigurationtest {
+namespace {
     using message::motion::KinematicsModel;
 
     std::unique_ptr<KinematicsModel> saved_model = nullptr;
@@ -50,23 +50,32 @@ namespace module::motion::kinematicsconfigurationtest {
             });
         }
     };
-}  // namespace module::motion::kinematicsconfigurationtest
+}  // namespace
 
 TEST_CASE("Testing the Kinematics Configuration module", "[module][motion][KinematicsConfiguration]") {
 
-    using module::motion::kinematicsconfigurationtest::saved_model;
+    using module::extension::FileWatcher;
+    using module::motion::KinematicsConfiguration;
     using utility::support::ModuleTester;
 
     static constexpr int NUM_THREADS = 2;
 
-    ModuleTester<module::motion::KinematicsConfiguration> tester(NUM_THREADS);
-    tester.install<module::extension::FileWatcher>("FileWatcher");
-    tester.install<module::motion::kinematicsconfigurationtest::TestReactor>("TestReactor");
+    // Test is for KinematicsConfiguration
+    ModuleTester<KinematicsConfiguration> tester(NUM_THREADS);
+
+    // Configuration tasks depend on FileWatcher
+    tester.install<FileWatcher>("FileWatcher");
+
+    // Finally, we install the emission "intercepter" module, which saves the emissions for us
+    tester.install<TestReactor>("TestReactor");
+
     tester.run();
 
     // Require that a model was saved
     REQUIRE(saved_model != nullptr);
 
+    // TODO(Devops&QA/Motion): Make this test actually check the config values as found in the file, rather than
+    //                         hardcoding this value which is subject to change
     // Now check values in model to ensure correctness
     REQUIRE(saved_model->head.INTERPUPILLARY_DISTANCE == 0.068f);
 }
