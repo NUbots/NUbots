@@ -17,6 +17,9 @@
  * Copyright 2021 NUbots <nubots@nubots.net>
  */
 
+#ifndef UTILITY_SUPPORT_TESTLOGHANDLER
+#define UTILITY_SUPPORT_TESTLOGHANDLER
+
 #include <memory>
 #include <nuclear>
 
@@ -31,3 +34,5 @@ namespace utility::support {
     };
 
 }  // namespace utility::support
+
+#endif  // UTILITY_SUPPORT_TESTLOGHANDLER
