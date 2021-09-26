@@ -18,7 +18,7 @@
  */
 
 #define CATCH_CONFIG_RUNNER
-#include "utility/support/TestLogHandler.hpp"
+#include "TestLogHandler.hpp"
 
 #include <catch.hpp>
 #include <memory>

@@ -28,8 +28,8 @@
 
 #include "message/motion/KinematicsModel.hpp"
 
+#include "utility/module_test_utils/ModuleTester.hpp"
 #include "utility/strutil/ansi.hpp"
-#include "utility/support/ModuleTester.hpp"
 
 namespace {
     using message::motion::KinematicsModel;
