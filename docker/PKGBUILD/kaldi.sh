@@ -4,7 +4,7 @@ pkgdesc='Speech recognition research toolkit'
 # The last version part is the short git ref
 pkgver=5.5.r9195.3b8a97d85
 pkgrel=1
-depends=('cblas' 'kaldi-openfst' 'lapack' 'python2')
+depends=('cblas' 'openfst' 'lapack' 'python2')
 optdepends=('cuda' 'kaldi-irstlm' 'kaldi-kaldi_lm' 'kaldi-sctk' 'kaldi-sph2pipe' 'kaldi-srilm')
 makedepends=('git' 'wget' 'sed')
 arch=('x86_64' 'i686')
@@ -13,20 +13,10 @@ license=('APACHE')
 source=("git+${url}")
 sha256sums=('SKIP')
 
-# pkgver () {
-#     cd "${pkgname}"
-#     (
-#         set -o pipefail
-#         echo -n `cat src/.version`.
-#         git describe --long 2>/dev/null | sed 's/\([^-]*-g\)/r\1/;s/-/./g' ||
-#             printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
-#     )
-# }
-
-prepare(){
+prepare() {
     cd $srcdir/$pkgname
     # Use this specific version instead of build from whatever is in the master branch.
-    git checkout 3b8a97d859464912ddc50877f7280048f654c275
+    git checkout 3b8a97d859464912ddc50877f7280048f654c275 &> /dev/null
 
     find . -name '*.py' -exec sed '1s/python/python2/' -i {} \;
 
@@ -40,22 +30,24 @@ prepare(){
 
     # Removing static libs in https://github.com/kaldi-asr/kaldi/blob/8f94bd0698d503c5c18e02f8fd4209b6802ff17a/src/makefiles/linux_clapack.mk#L16
     sed '/^LDLIBS = /s/\$(CLAPACKLIBS)//' -i src/makefiles/linux_clapack.mk
+    # Replace -isystem with -I because including system headers was broken: https://github.com/kaldi-asr/kaldi/blob/8f94bd0698d503c5c18e02f8fd4209b6802ff17a/src/makefiles/linux_clapack.mk#L20
+    # See also this article explaining the difference: https://stackoverflow.com/questions/2579576/i-dir-vs-isystem-dir#comment2590674_2579576
+    sed '/-isystem/s//-I/' -i src/makefiles/linux_clapack.mk
 }
 
-build () {
+build() {
     cd $srcdir/$pkgname/src
-    #CXX=/opt/cuda/bin/g++ \
     LDFLAGS='-lcblas -llapack' \
     ./configure $_cuda_config_opts \
         --shared \
-        --fst-root=/opt/kaldi/tools/openfst \
+        --fst-root=/usr \
+        --fst-version=1.7.2 \
         --clapack-root=/usr
-    #   --cub-root=/usr/include \
-    make depend
-    make
+    make -j 4 depend
+    make -j 4
 }
 
-package () {
+package() {
     cd  $srcdir/$pkgname
 
     for i in src/lib/*.so

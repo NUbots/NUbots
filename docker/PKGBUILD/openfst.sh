@@ -1,16 +1,16 @@
 # Original Build Script: https://aur.archlinux.org/packages/openfst
 
 pkgname=openfst
-pkgver=1.7.9
+pkgver=1.7.2
 pkgrel=1
 pkgdesc='Library for constructing, combining, optimizing, and searching weighted finite-state transducers (FSTs)'
 arch=(i686 x86_64)
 url='http://www.openfst.org'
 license=(Apache)
-depends=(gcc-libs glibc python)
+depends=(gcc-libs glibc python2)
 options=(!libtool)
 source=(http://www.openfst.org/twiki/pub/FST/FstDownload/$pkgname-$pkgver.tar.gz)
-sha256sums=(9319aeb31d1e2950ae25449884e255cc2bc9dfaf987f601590763e61a10fbdde)
+sha256sums=('SKIP')
 
 build() {
     cd $srcdir/$pkgname-$pkgver
@@ -27,7 +27,7 @@ build() {
     OPTIONS+=' --enable-mpdt'            # Enable MPDT extensions;                          Default: no
     OPTIONS+=' --enable-ngram-fsts'      # Enable NGramFst extensions;                      Default: no
     OPTIONS+=' --enable-pdt'             # Enable PDT extensions;                           Default: no
-    OPTIONS+=' --enable-python PYTHON=python'  # Enable Python extensions;                  Default: no
+    OPTIONS+=' --enable-python PYTHON=python2 PYTHON_VERSION=2.7' # Enable Python extensions; Default: no
 
     # Required in order to build Phonetiasarus
     OPTIONS+=' --enable-static'
@@ -35,7 +35,7 @@ build() {
 
     LIBS='-ldl' ./configure $OPTIONS
 
-    make
+    make -j 2
 }
 
 
