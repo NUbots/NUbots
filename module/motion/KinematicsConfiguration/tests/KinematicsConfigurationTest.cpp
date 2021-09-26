@@ -14,14 +14,68 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2015 NUbots <nubots@nubots.net>
+ * Copyright 2021 NUbots <nubots@nubots.net>
  */
 
-// Uncomment this line when other test files are added
-//#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
-//#include <catch.hpp>
+#define CATCH_CONFIG_MAIN
+#include <catch.hpp>
+#include <memory>
+#include <nuclear>
 
-// Remove this line when test files are added
-int main() {
-    return 0;
+#include "KinematicsConfiguration.hpp"
+
+#include "extension/FileWatcher/src/FileWatcher.hpp"
+
+#include "message/motion/KinematicsModel.hpp"
+
+#include "utility/module_test_utils/ModuleTester.hpp"
+#include "utility/strutil/ansi.hpp"
+
+namespace {
+    using message::motion::KinematicsModel;
+
+    std::unique_ptr<KinematicsModel> saved_model = nullptr;
+
+    class TestReactor : public NUClear::Reactor {
+    public:
+        TestReactor(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+
+            // Trigger on the KinematicsModel message
+            on<Trigger<KinematicsModel>>().then([this](const KinematicsModel& model) {
+                log<NUClear::INFO>("Received a KinematicsModel message. Test is now over.");
+                saved_model = std::make_unique<KinematicsModel>(model);
+
+                // When we receive the KinematicsModel message we can shutdown
+                powerplant.shutdown();
+            });
+        }
+    };
+}  // namespace
+
+TEST_CASE("Testing the Kinematics Configuration module", "[module][motion][KinematicsConfiguration]") {
+
+    using module::extension::FileWatcher;
+    using module::motion::KinematicsConfiguration;
+    using utility::support::ModuleTester;
+
+    static constexpr int NUM_THREADS = 2;
+
+    // Test is for KinematicsConfiguration
+    ModuleTester<KinematicsConfiguration> tester(NUM_THREADS);
+
+    // Configuration tasks depend on FileWatcher
+    tester.install<FileWatcher>("FileWatcher");
+
+    // Finally, we install the emission "intercepter" module, which saves the emissions for us
+    tester.install<TestReactor>("TestReactor");
+
+    tester.run();
+
+    // Require that a model was saved
+    REQUIRE(saved_model != nullptr);
+
+    // TODO(Devops&QA/Motion): Make this test actually check the config values as found in the file, rather than
+    //                         hardcoding this value which is subject to change
+    // Now check values in model to ensure correctness
+    REQUIRE(saved_model->head.INTERPUPILLARY_DISTANCE == 0.068f);
 }
