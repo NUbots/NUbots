@@ -25,11 +25,16 @@
 
 namespace utility::support {
 
+    /**
+     * @brief Handler for logging during tests so we can pass Catch the messages too
+     */
     class TestLogHandler : public NUClear::Reactor {
     public:
+        /// @brief Registers the log handling reaction
         explicit TestLogHandler(std::unique_ptr<NUClear::Environment> environment);
 
     private:
+        /// @brief Used to restrict the log handling reaction so that only one message can be processed at once
         std::mutex mutex;
     };
 

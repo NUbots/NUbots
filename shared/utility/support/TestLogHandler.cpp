@@ -46,8 +46,8 @@ utility::support::TestLogHandler::TestLogHandler(std::unique_ptr<NUClear::Enviro
             std::string reactor = message.task->identifier[1];
 
             // Strip to the last semicolon if we have one
-            const size_t lastC = reactor.find_last_of(':');
-            reactor            = lastC == std::string::npos ? reactor : reactor.substr(lastC + 1);
+            const size_t last_colon = reactor.find_last_of(':');
+            reactor                 = last_colon == std::string::npos ? reactor : reactor.substr(last_colon + 1);
 
             // This is our source
             source =
