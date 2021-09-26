@@ -31,12 +31,10 @@ using utility::support::Expression;
 using utility::support::resolve_expression;
 
 /**
- * Unit tests for [utility][support][yaml_expression]
+ * Unit tests for yaml_expression.cpp
  *
  * @author Liam Craft
  */
-
-
 SCENARIO("yaml nodes can be converted to a given container type", "[utility][support][yaml_expression]") {
     GIVEN("A yaml node containing a list of data") {
         YAML::Node test_values = YAML::LoadFile("tests/yamlConversionTestVals.yaml");
