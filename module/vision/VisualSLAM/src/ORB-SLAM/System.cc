@@ -86,7 +86,7 @@ namespace ORB_SLAM2
     }
 
 
-    cv::Mat System::TrackMonocular(const cv::Mat &im, const double &timestamp)
+    cv::Mat System::TrackMonocular(const cv::Mat& im, const double& timestamp)
     {
         // Check mode change
         {

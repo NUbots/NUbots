@@ -239,7 +239,6 @@ void Tracking::Track()
         else
         {
             // Localization Mode: Local Mapping is deactivated
-
             if(mState==LOST)
             {
                 bOK = Relocalization();
@@ -249,7 +248,6 @@ void Tracking::Track()
                 if(!mbVO)
                 {
                     // In last frame we tracked enough MapPoints in the map
-
                     if(!mVelocity.empty())
                     {
                         bOK = TrackWithMotionModel();
