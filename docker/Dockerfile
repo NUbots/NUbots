@@ -270,6 +270,30 @@ RUN mkdir -p /usr/local/include/zstr \
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
 
+
+#######################################
+# Visual SLAM
+#######################################
+# Mesa, glew - Pangolin dependencies.
+RUN install-package mesa
+RUN install-package glew
+# Pangolin - ORB-SLAM2 dependency.
+RUN install-from-source https://github.com/stevenlovegrove/Pangolin/archive/refs/tags/v0.6.tar.gz \
+    -DBUILD_PANGOLIN_EIGEN=OFF \
+    -DBUILD_EXAMPLES=OFF
+# Eigen3
+RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+# OpenCV contrib - ORB-SLAM2 dependency.
+RUN download-and-extract https://github.com/opencv/opencv_contrib/archive/refs/tags/3.4.15.tar.gz
+# OpenCV - ORB-SLAM2 dependency.
+RUN install-from-source https://github.com/opencv/opencv/archive/refs/tags/3.4.15.tar.gz \
+    -DOPENCV_EXTRA_MODULES_PATH="/opencv_contrib-3.4.15/modules" \
+    -DWITH_GTK_2_X=ON
+RUN sudo rm -r opencv_contrib-3.4.15
+#######################################
+
+
+
 # Install python libraries
 RUN pip install \
     xxhash \

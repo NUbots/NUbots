@@ -1,0 +1,11 @@
+nuclear_role(
+    # Some global modules that are useful
+    extension::FileWatcher
+    support::logging::ConsoleLogHandler
+
+    ## Input from USB3 Cameras
+    #input::Camera
+
+    # Vision
+    vision::VisualSLAM
+)

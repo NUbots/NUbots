@@ -1,0 +1,95 @@
+#--------------------------------------------------------------------------------------------
+# Controls the minimum log level that NUClear log will display.
+log_level: DEBUG
+#--------------------------------------------------------------------------------------------
+
+
+#--------------------------------------------------------------------------------------------
+# Main parameters:
+#--------------------------------------------------------------------------------------------
+# ORB-SLAM vocabulary file, can be .txt or .bin.
+Vocabulary_File: "./vocabulary/ORBvoc.bin"
+# Use local images from disk as a simulated camera input.
+useImageDatabase: "False"
+# Database stream directory if above is True:
+imageDatabaseDirectory: "./database/database_01"
+# imageDatabaseDirectory: "./database/database_02"  # JPG
+# imageDatabaseDirectory: "./database/database_03"  # PNG
+#--------------------------------------------------------------------------------------------
+
+
+
+
+#--------------------------------------------------------------------------------------------
+# WEBOTS - Camera Parameters.
+#--------------------------------------------------------------------------------------------
+# Camera calibration parameters (OpenCV).
+Camera_fx: 320     # fx (float) – The x-axis focal length of the camera in pixels.
+Camera_fy: 320     # fy (float) – The y-axis focal length of the camera in pixels.
+Camera_cx: 320     # cx (float) – The x-axis optical center of the camera in pixels.
+Camera_cy: 240     # cy (float) – The y-axis optical center of the camera in pixels.
+# Camera distortion parameters (OpenCV).
+Camera_k1: 0  # radial distortion
+Camera_k2: 0  # radial distortion
+Camera_k3: 0  # radial distortion
+Camera_p1: 0  # tangential distortion
+Camera_p2: 0  # tangential distortion
+# Camera frames per second.
+Camera_fps: 31
+#--------------------------------------------------------------------------------------------
+
+
+
+##--------------------------------------------------------------------------------------------
+## PHYSICAL ROBOT - Camera Parameters.   (untested)
+##--------------------------------------------------------------------------------------------
+## Camera calibration parameters (OpenCV).
+#Camera_fx: 392.289     # fx (float) – The x-axis focal length of the camera in pixels.
+#Camera_fy: 391.192     # fy (float) – The y-axis focal length of the camera in pixels.
+#Camera_cx: 396.599     # cx (float) – The x-axis optical center of the camera in pixels.
+#Camera_cy: 287.959     # cy (float) – The y-axis optical center of the camera in pixels.
+## Camera distortion parameters (OpenCV).
+#Camera_k1: -0.273264   # radial distortion
+#Camera_k2: 0.0772507   # radial distortion
+#Camera_k3: -0.0101618  # radial distortion
+#Camera_p1: 0.00348281  # tangential distortion
+#Camera_p2: -0.0013676  # tangential distortion
+## Camera frames per second
+#Camera_fps: 31
+##--------------------------------------------------------------------------------------------
+
+
+
+#--------------------------------------------------------------------------------------------
+# ORB Parameters
+#--------------------------------------------------------------------------------------------
+# ORB Extractor: Number of features per image
+ORBextractor_nFeatures: 2000
+# ORB Extractor: Scale factor between levels in the scale pyramid
+ORBextractor_scaleFactor: 1.2
+# ORB Extractor: Number of levels in the scale pyramid
+ORBextractor_nLevels: 8
+# ORB Extractor: Fast threshold
+# Image is divided in a grid. At each cell FAST are extracted imposing a minimum response.
+# Firstly we impose iniThFAST. If no corners are detected we impose a lower value minThFAST
+# You can lower these values if your images have low contrast
+ORBextractor_iniThFAST: 25
+ORBextractor_minThFAST: 10
+#--------------------------------------------------------------------------------------------
+
+
+#--------------------------------------------------------------------------------------------
+# Viewer Parameters
+#--------------------------------------------------------------------------------------------
+# Currently not applicable in Docker.
+Viewer_KeyFrameSize: 0.05
+Viewer_KeyFrameLineWidth: 1
+Viewer_GraphLineWidth: 0.9
+Viewer_PointSize: 2
+Viewer_CameraSize: 0.08
+Viewer_CameraLineWidth: 3
+Viewer_ViewpointX: 0
+Viewer_ViewpointY: -0.7
+Viewer_ViewpointZ: -1.8
+Viewer_ViewpointF: 500
+#--------------------------------------------------------------------------------------------

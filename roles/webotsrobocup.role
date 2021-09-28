@@ -18,10 +18,11 @@ nuclear_role(
   input::SensorFilter
   platform::Webots
   # Vision
-  vision::VisualMesh
-  vision::GreenHorizonDetector
-  vision::GoalDetector
-  vision::BallDetector
+  #vision::VisualMesh
+  #vision::GreenHorizonDetector
+  #vision::GoalDetector
+  #vision::BallDetector
+  vision::VisualSLAM
   output::ImageCompressor
   # Localisation
   localisation::BallLocalisation
