@@ -79,9 +79,7 @@ namespace module::input {
         int stdout_pipe[2]                 = {};
         int stderr_pipe[2]                 = {};
         int stdin_pipe[2]                  = {};
-        posix_spawn_file_actions_t actions = {};
-        bool actions_inited                = false;
-
+        
         char* path = getenv("PATH");
 
         size_t len     = strlen(path) + 5 + 1;
@@ -95,8 +93,8 @@ namespace module::input {
                               NULL};
 
         if (!((pipe(stdout_pipe) == -1) || (pipe(stderr_pipe) == -1) || (pipe(stdin_pipe) == -1))) {
+            posix_spawn_file_actions_t actions = {};
             posix_spawn_file_actions_init(&actions);
-            actions_inited = true;
 
             posix_spawn_file_actions_addclose(&actions, stdout_pipe[0]);
             posix_spawn_file_actions_addclose(&actions, stderr_pipe[0]);
@@ -111,6 +109,7 @@ namespace module::input {
             posix_spawn_file_actions_addclose(&actions, stdin_pipe[0]);
 
             success = posix_spawnp(&pid, (const char*) args[0], &actions, 0, (char* const*) args, envp) == 0;
+            posix_spawn_file_actions_destroy(&actions);
             if (!success) {
                 NUClear::log<NUClear::FATAL>(fmt::format("failed to spawn process, errno = {}", errno));
             }
@@ -127,13 +126,7 @@ namespace module::input {
 
         process = {stdout_pipe[0], stderr_pipe[0], stdin_pipe[1], pid, std::string(args[0])};
 
-        if (actions_inited) {
-            posix_spawn_file_actions_destroy(&actions);
-        }
-        if (env_path) {
-            free(env_path);
-        }
-
+        free(env_path);
         return success;
     }
 

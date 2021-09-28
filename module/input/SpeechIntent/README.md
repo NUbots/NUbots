@@ -75,7 +75,7 @@ This module emits a "SpeechIntentMsg" when it has recognized the intent of the p
     };
 ```
 
-The "text" field describes the raw text as recognized by speech recognition. The "intent" field describe the detected intention of the spoken or recorded command . The "slots" fields describes supplementary information about the given intent of the speech. A slot is a name, value pair. For example, .
+The "text" field describes the raw text as recognized by speech recognition. The "intent" field describe the detected intention of the spoken or recorded command . The "slots" fields describes supplementary information about the given intent of the speech. A slot is a name, value pair. For example, "fruit" : "pear". 
 
 ## Dependencies
 - Voice2json - this module is depedant on the voice2json project - which is a . This process spawns voice2json via python.
