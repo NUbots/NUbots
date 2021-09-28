@@ -86,9 +86,12 @@ namespace module::input {
         return s.str();
     }
 
-    [[nodiscard]] std::string servoErrorString(uint32_t id, uint errorCode) {
+    [[nodiscard]] std::string servoErrorString(uint32_t id, RawSensors::Servo servo, uint errorCode) {
         std::string servoName(static_cast<ServoID>(id));
-        return makeErrorString(servoName, errorCode);
+        std::stringstream s;
+        s << "Voltage: " << servo.voltage << " Position: " << servo.present_position
+          << " Temperature: " << servo.temperature << " Load: " << servo.load;
+        return makeErrorString(servoName, errorCode).append(s.str());
     }
 
     SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment)
@@ -217,7 +220,7 @@ namespace module::input {
 
                             // Check for an error on the servo and report it
                             if (error != RawSensors::Error::OK) {
-                                NUClear::log<NUClear::WARN>(servoErrorString(id, error));
+                                NUClear::log<NUClear::WARN>(servoErrorString(id, original, error));
                             }
                             else {
                                 // Add the sensor values to the system properly
@@ -390,7 +393,7 @@ namespace module::input {
 
                             // Check for an error on the servo and report it
                             if (error != RawSensors::Error::OK) {
-                                NUClear::log<NUClear::WARN>(servoErrorString(id, error));
+                                NUClear::log<NUClear::WARN>(servoErrorString(id, original, error));
                             }
                             // If current Sensors message for this servo has an error and we have a previous sensors
                             // message available, then we use our previous sensor values with some updates
