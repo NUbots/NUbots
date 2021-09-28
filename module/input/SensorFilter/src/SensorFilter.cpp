@@ -54,7 +54,7 @@ namespace module::input {
     using utility::nusight::graph;
     using utility::support::Expression;
 
-    std::string makeErrorString(const std::string& src, uint errorCode) {
+    [[nodiscard]] std::string makeErrorString(const std::string& src, uint errorCode) {
         std::stringstream s;
 
         s << "Error on ";
@@ -86,34 +86,9 @@ namespace module::input {
         return s.str();
     }
 
-    std::string servoErrorString(uint32_t id, RawSensors::Servo original, uint errorNo) {
-        // Check for an error on the servo and report it
-        std::stringstream s;
-        s << "Error on Servo " << (id + 1) << " (" << static_cast<ServoID>(id) << "):";
-
-        if (errorNo & RawSensors::Error::INPUT_VOLTAGE) {
-            s << " Input Voltage - " << original.voltage;
-        }
-        if (errorNo & RawSensors::Error::ANGLE_LIMIT) {
-            s << " Angle Limit - " << original.present_position;
-        }
-        if (errorNo & RawSensors::Error::OVERHEATING) {
-            s << " Overheating - " << original.temperature;
-        }
-        if (errorNo & RawSensors::Error::OVERLOAD) {
-            s << " Overloaded - " << original.load;
-        }
-        if (errorNo & RawSensors::Error::INSTRUCTION) {
-            s << " Bad Instruction ";
-        }
-        if (errorNo & RawSensors::Error::CORRUPT_DATA) {
-            s << " Corrupt Data ";
-        }
-        if (errorNo & RawSensors::Error::TIMEOUT) {
-            s << " Timeout ";
-        }
-
-        return s.str();
+    [[nodiscard]] std::string servoErrorString(uint32_t id, uint errorCode) {
+        std::string servoName(static_cast<ServoID>(id));
+        return makeErrorString(servoName, errorCode);
     }
 
     SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment)
@@ -242,7 +217,7 @@ namespace module::input {
 
                             // Check for an error on the servo and report it
                             if (error != RawSensors::Error::OK) {
-                                NUClear::log<NUClear::WARN>(servoErrorString(id, original, error));
+                                NUClear::log<NUClear::WARN>(servoErrorString(id, error));
                             }
                             else {
                                 // Add the sensor values to the system properly
@@ -415,7 +390,7 @@ namespace module::input {
 
                             // Check for an error on the servo and report it
                             if (error != RawSensors::Error::OK) {
-                                NUClear::log<NUClear::WARN>(servoErrorString(id, original, error));
+                                NUClear::log<NUClear::WARN>(servoErrorString(id, error));
                             }
                             // If current Sensors message for this servo has an error and we have a previous sensors
                             // message available, then we use our previous sensor values with some updates
