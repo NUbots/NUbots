@@ -37,7 +37,7 @@ using utility::support::resolve_expression;
  */
 SCENARIO("yaml nodes can be converted to a given container type", "[utility][support][yaml_expression]") {
     GIVEN("A yaml node containing a list of data") {
-        YAML::Node test_values = YAML::LoadFile("tests/yamlConversionTestVals.yaml");
+        YAML::Node test_values = YAML::LoadFile("tests/YamlConversionTestVals.yaml");
         // error threshold when comparing doubles
         static constexpr double ERROR_THRESHOLD = 1e-6;
         // ints
