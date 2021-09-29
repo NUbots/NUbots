@@ -59,7 +59,7 @@ namespace module::input {
 
         s << "Error on " << src << ":";
 
-        if (errorCode & RawSensors::Error::INPUT_VOLTAGE) {
+        if (errorCode & RawSensors::Error::INPUT_VOLTAGE != 0) {
             s << " Input Voltage ";
         }
         if (errorCode & RawSensors::Error::ANGLE_LIMIT) {
