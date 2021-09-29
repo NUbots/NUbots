@@ -63,7 +63,8 @@ SCENARIO("yaml nodes can be converted to a given container type", "[utility][sup
             }
             THEN("Values at each index should be equivalent") {
                 for (size_t i = 0; i < test_values["floats"].size(); i++) {
-                    REQUIRE(test_values["floats"][i].as<float>() == float_vector.at(i));
+                    Approx epsilon_result = Approx(float_vector.at(i)).epsilon(ERROR_THRESHOLD);
+                    REQUIRE(test_values["floats"][i].as<float>() == epsilon_result);
                 }
             }
         }
@@ -141,7 +142,8 @@ SCENARIO("yaml nodes can be converted to a given container type", "[utility][sup
             THEN("Values at each index should be equivalent") {
                 // Check values at each index
                 for (size_t i = 0; i < test_values["floats"].size(); i++) {
-                    REQUIRE(test_values["floats"][i].as<float>() == float_array.at(i));
+                    Approx epsilon_result = Approx(float_array.at(i)).epsilon(ERROR_THRESHOLD);
+                    REQUIRE(test_values["floats"][i].as<float>() == epsilon_result);
                 }
             }
         }
