@@ -41,7 +41,7 @@ namespace utility::module_test {
         /// @brief Instantiates the PowerPlant for the tests
         /// @details Installs a log handler for the tests, so that the module's logs are seen when tests fail
         /// @param num_threads The number of threads that the PowerPlant will use
-        ModuleTester(const int& num_threads = 1) : plant(gen_config(num_threads)) {
+        ModuleTester(const int& num_threads = 1) : plant(generate_config(num_threads)) {
 
             INFO("Installing TestLogHandler (automatic for all module tests)");
             plant.install<utility::module_test::TestLogHandler>();
@@ -82,7 +82,7 @@ namespace utility::module_test {
         NUClear::PowerPlant plant;
 
         /// @brief Creates a config object to instantiate plant with
-        NUClear::PowerPlant::Configuration gen_config(const int& num_threads) {
+        NUClear::PowerPlant::Configuration generate_config(const int& num_threads) {
             NUClear::PowerPlant::Configuration config;
             config.thread_count = num_threads;
             return config;
