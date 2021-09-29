@@ -3,8 +3,6 @@ include(ToolchainLibraryFinder)
 # Find ALSA for eSpeak
 find_package(ALSA REQUIRED)
 
-find_package(pcaudio REQUIRED)
-
 ToolchainLibraryFinder(
   NAME eSpeak
   HEADER espeak-ng/speak_lib.h
