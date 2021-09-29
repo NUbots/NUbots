@@ -26,7 +26,7 @@
 namespace utility::module_test {
 
     /**
-     * @brief Handler for logging during tests so we can pass Catch the messages too
+     * @brief Handler for logging during tests so we can pass Catch2 (our unit testing framework) the messages too
      */
     class TestLogHandler : public NUClear::Reactor {
     public:
