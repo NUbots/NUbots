@@ -1,0 +1,26 @@
+# Cleans up DockerHub image tag created for the PR
+name: DockerHub Clean-up
+
+# Controls when the action will run.
+on:
+  # Triggers the workflow on closed events for the main branch
+  pull_request:
+    # 'closed' covers merges too
+    types: [closed]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # Remove the extra container tag from DockerHub
+  clear_extra_container:
+    name: "Remove extra DockerHub container"
+
+    # The type of runner that the job will run on
+    runs-on: ubuntu-20.04
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Delete image
+        run: |
+          curl -i -X DELETE \
+            -u "${{ secrets.DOCKERHUB_USERNAME }}:$${{ secrets.DOCKERHUB_PASSWORD }}" \
+            https://cloud.docker.com/v2/repositories/nubots/nubots/tags/pull-request-${{ github.event.number }}/

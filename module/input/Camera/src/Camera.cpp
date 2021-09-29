@@ -52,8 +52,8 @@ namespace module::input {
              *                                                                      *
              ************************************************************************/
             if (it == cameras.end()) {
-                // Strip the .yaml off the name of the file to get the name of the camera
-                std::string name = ::basename(config.fileName.substr(0, config.fileName.find_last_of('.')).c_str());
+                // The camera's name is the filename of the config, with the .yaml stripped of
+                const std::string name = config.fileName.stem();
 
                 // Find the camera with the correct serial number
                 auto find_camera = [](const std::string& serial_number) {

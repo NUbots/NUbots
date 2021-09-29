@@ -15,7 +15,7 @@ mkdir ~/pacman-cache && cd ~/pacman-cache
 
 2. Download install script
 ```
-wget https://raw.githubusercontent.com/NUbots/NUbots/master/doc/PacmanCache/install.sh
+wget https://raw.githubusercontent.com/NUbots/NUbots/main/doc/PacmanCache/install.sh
 ```
 
 3. Make install script executable
