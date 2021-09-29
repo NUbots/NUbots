@@ -57,9 +57,7 @@ namespace module::input {
     [[nodiscard]] std::string makeErrorString(const std::string& src, uint errorCode) {
         std::stringstream s;
 
-        s << "Error on ";
-        s << src;
-        s << ":";
+        s << "Error on " << src << ":";
 
         if (errorCode & RawSensors::Error::INPUT_VOLTAGE) {
             s << " Input Voltage ";
