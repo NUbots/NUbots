@@ -34,7 +34,7 @@ namespace utility::module_test {
         explicit TestLogHandler(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        /// @brief Used to restrict the log handling reaction so that only one message can be processed at once
+        /// @brief Used to restrict the log handling reaction so that only one message can be processed at a time
         std::mutex mutex;
     };
 
