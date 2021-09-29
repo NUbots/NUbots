@@ -84,7 +84,7 @@ namespace module::input {
         return s.str();
     }
 
-    [[nodiscard]] std::string servoErrorString(uint32_t id, RawSensors::Servo servo, uint errorCode) {
+    [[nodiscard]] std::string servoErrorString(uint32_t id, RawSensors::Servo servo, const uint& errorCode) {
         std::string servoName(static_cast<ServoID>(id));
         std::stringstream s;
         s << makeErrorString(servoName, errorCode);
