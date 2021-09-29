@@ -54,7 +54,7 @@ namespace module::input {
     using utility::nusight::graph;
     using utility::support::Expression;
 
-    [[nodiscard]] std::string makeErrorString(const std::string& src, uint errorCode) {
+    [[nodiscard]] std::string makeErrorString(const std::string& src, const uint& errorCode) {
         std::stringstream s;
 
         s << "Error on " << src << ":";
