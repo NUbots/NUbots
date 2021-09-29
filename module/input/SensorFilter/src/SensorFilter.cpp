@@ -87,9 +87,10 @@ namespace module::input {
     [[nodiscard]] std::string servoErrorString(uint32_t id, RawSensors::Servo servo, uint errorCode) {
         std::string servoName(static_cast<ServoID>(id));
         std::stringstream s;
+        s << makeErrorString(servoName, errorCode);
         s << "Voltage: " << servo.voltage << " Position: " << servo.present_position
           << " Temperature: " << servo.temperature << " Load: " << servo.load;
-        return makeErrorString(servoName, errorCode).append(s.str());
+        return s.str();
     }
 
     SensorFilter::SensorFilter(std::unique_ptr<NUClear::Environment> environment)
