@@ -88,7 +88,7 @@ namespace module::input {
         std::string servoName(static_cast<ServoID>(id));
         std::stringstream s;
         s << makeErrorString(servoName, errorCode);
-        s << "Voltage: " << servo.voltage << " Position: " << servo.present_position
+        s << " Values; Voltage: " << servo.voltage << " Position: " << servo.present_position
           << " Temperature: " << servo.temperature << " Load: " << servo.load;
         return s.str();
     }
