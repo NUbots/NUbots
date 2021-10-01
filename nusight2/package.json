@@ -88,7 +88,7 @@
     "jest-css-modules": "2.1.0",
     "mini-css-extract-plugin": "2.1.0",
     "nodemon": "2.0.12",
-    "postcss": "8.3.5",
+    "postcss": "8.3.8",
     "postcss-import": "14.0.2",
     "postcss-loader": "6.1.1",
     "postcss-reporter": "7.0.2",
