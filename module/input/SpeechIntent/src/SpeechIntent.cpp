@@ -117,13 +117,15 @@ namespace module::input {
         else {
             NUClear::log<NUClear::FATAL>(fmt::format("failed to create pipes, errno = {}", errno));
         }
-        if (stdout_pipe[1])
+        if (stdout_pipe[1]) {
             close(stdout_pipe[1]);
-        if (stderr_pipe[1])
+        }
+        if (stderr_pipe[1]) {
             close(stderr_pipe[1]);
-        if (stdin_pipe[0])
+        }
+        if (stdin_pipe[0]) {
             close(stdin_pipe[0]);
-
+        }
         process = {stdout_pipe[0], stderr_pipe[0], stdin_pipe[1], pid, std::string(args[0])};
 
         free(env_path);
@@ -193,13 +195,15 @@ namespace module::input {
 
             output = strdup(buffer);
         }
-        if (process.stdout)
+        if (process.stdout) {
             close(process.stdout);
-        if (process.stderr)
+        }
+        if (process.stderr) {
             close(process.stderr);
-        if (process.stdin)
+        }
+        if (process.stdin) {
             close(process.stdin);
-
+        }
         return output;
     }
 
@@ -246,7 +250,7 @@ namespace module::input {
         return true;
     }
 
-
+    
     void print_intent(const SpeechIntentMsg& msg) {
         NUClear::log(fmt::format("text = {}", msg.text.data()));
         NUClear::log(fmt::format("intent = {}", msg.intent.data()));
@@ -256,10 +260,12 @@ namespace module::input {
         }
     }
 
-    void SpeechIntent::init() {
-        switch (this->config.transcribe_mode) {
+    //Common initialization function
+    void SpeechIntent::init(SpeechIntentTranscribeMode transcribe_mode) {
+        switch (transcribe_mode) {
             case TRANSCRIBE_MODE_STREAM:
-                log("transcribings stream");
+                // Spawn voice2json process in transcribe-stream mode
+                // This will accept audio from the microphone (if available)
                 if (!voice2json_transcribe_stream(voice2json_proc)) {
                     NUClear::log<NUClear::FATAL>(
                         fmt::format("({}:{}) Failed to start voice2json, errno", __FILE__, __LINE__, errno));
@@ -277,6 +283,9 @@ namespace module::input {
                 break;
             default: assert(false); return;
         }
+        
+        //Read from the stdout of the voice2json process which is spawned in either "transcribe-stream" or 
+        //"transcribe-wav" modes. 
         on<IO>(voice2json_proc.stdout, IO::READ).then([this] {
             char buffer[0x1000];
             ssize_t bytes_read = read(voice2json_proc.stdout, buffer, sizeof(buffer) - 1);
@@ -291,6 +300,7 @@ namespace module::input {
             buffer[bytes_read] = 0;
 
             if (output_enabled) {
+                //parse and emit message
                 char* intent_json = voice2json_recognize_intent(buffer);
                 if (!intent_json) {
                     NUClear::log<NUClear::FATAL>(
@@ -305,6 +315,8 @@ namespace module::input {
             }
         });
 
+        //Read any input from stderr and print it. We cannot proceed with normal operations so we just print
+        //the error messages
         on<IO>(voice2json_proc.stderr, IO::READ).then([this] {
             char buffer[0x1000];
             ssize_t bytes_read = read(voice2json_proc.stderr, buffer, sizeof(buffer) - 1);
@@ -324,10 +336,11 @@ namespace module::input {
                                                          buffer));
         });
 
-
+        //This trigger allows the emission of a "SpeechIntentMsg" to be enabled/disabled.
         on<Trigger<SpeechInputSetOutputMsg>>().then(
             [this](const SpeechInputSetOutputMsg& msg) { output_enabled = msg.enabled; });
 
+        //This trigger will recognize the intent of a wav file.
         on<Trigger<SpeechInputRecognizeWavFile>>().then([this](const SpeechInputRecognizeWavFile& msg) {
             if (!write_audio_to_file(voice2json_proc.stdin, (char*) msg.filename.data())) {
                 NUClear::log<NUClear::FATAL>(
@@ -336,6 +349,7 @@ namespace module::input {
         });
     }
 
+    //Convenience function for sending a "SpeechInputRecognizeWavFile" message to this module
     void SpeechIntent::recognize_wav(std::string wav_filename) {
         std::unique_ptr<SpeechInputRecognizeWavFile> msg =
             std::make_unique<SpeechInputRecognizeWavFile>(SpeechInputRecognizeWavFile{wav_filename});
@@ -345,30 +359,37 @@ namespace module::input {
     SpeechIntent::SpeechIntent(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), config{} {
 
-
+        
         on<Configuration>("SpeechIntent.yaml").then([this](const Configuration& cfg) {
             this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
         });
 
+        //@brief Choose between 3 modes based on command line arguments
+        //The "cli" and "file" arguments are for testing purposes. In the case where no cmd line arguments are passed
+        //the module is initialized in "TRANSCRIBE_MODE_STREAM" mode
         on<Trigger<CommandLineArguments>>().then([this](const CommandLineArguments& args) {
+            //for testing modes we initialize in "transcribe-wav" mode
             if (args.size() > 1 && args[1] == "file") {
                 if (args.size() != 3) {
                     NUClear::log<NUClear::FATAL>(
                         fmt::format("invalid number of arguments, expected 3, got {}", args.size()));
                 }
-                this->config.transcribe_mode = TRANSCRIBE_MODE_FILE;
                 std::string wav_filename     = std::string(args[2]);
-                log(wav_filename);
+                
+                init(TRANSCRIBE_MODE_FILE);
 
-                init();
-
+                //For testing we just want to print the message
                 on<Trigger<SpeechIntentMsg>>().then([this](const SpeechIntentMsg& msg) { print_intent(msg); });
+                //Immediately recognize a wav file
                 recognize_wav(wav_filename);
             }
             else if (args.size() > 1 && args[1] == "cli") {
-                this->config.transcribe_mode = TRANSCRIBE_MODE_FILE;
-                init();
+                //"Command line interface" mode. Used for testing purposes. 
+                //The module acts like a command line interface and accepts input from stdin.
+                //Currently only accepts the "file" command, which can regonize the speech intention from a wav file
+                init(TRANSCRIBE_MODE_FILE);
 
+                //For testing we just want to print the message
                 on<Trigger<SpeechIntentMsg>>().then([this](const SpeechIntentMsg& msg) { print_intent(msg); });
                 on<IO>(STDIN_FILENO, IO::READ).then([this] {
                     std::string str = {};
@@ -387,18 +408,22 @@ namespace module::input {
                 });
             }
             else {
-                init();
+                //for non-testing modes we initialize in "transcribe-stream" mode
+                init(TRANSCRIBE_MODE_STREAM);
             }
         });
     }
 
     SpeechIntent::~SpeechIntent() {
-        if (voice2json_proc.stdout)
+        if (voice2json_proc.stdout) {
             close(voice2json_proc.stdout);
-        if (voice2json_proc.stderr)
+        }
+        if (voice2json_proc.stderr) {
             close(voice2json_proc.stderr);
-        if (voice2json_proc.stdin)
+        }
+        if (voice2json_proc.stdin) {
             close(voice2json_proc.stdin);
+        }
     }
 
 

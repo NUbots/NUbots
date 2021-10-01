@@ -150,15 +150,14 @@ namespace module::input {
     private:
         /// The configuration variables for this reactor
         struct {
-            bool debug_mode                            = false;
-            SpeechIntentTranscribeMode transcribe_mode = TRANSCRIBE_MODE_STREAM;
+            
         } config;
         bool output_enabled = true;
         // MicProcHandles handles;
 
         SpawnedProcess voice2json_proc = {};
 
-        void init();
+        void init(SpeechIntentTranscribeMode transcribe_mode);
         void recognize_wav(std::string filename);
 
 
