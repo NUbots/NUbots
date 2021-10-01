@@ -15,14 +15,17 @@
             "-I${workspaceFolder}/nuclear/message/proto"
         ]
     },
-    "python.formatting.provider": "black",    
+    "python.formatting.provider": "black",
     "python.analysis.extraPaths": [
         "${workspaceFolder}/tools",
         "${workspaceFolder}/nuclear"
     ],
     "yaml.format.printWidth": 120,
     "files.associations": {
-        "*.role": "cmake"
+        "*.role": "cmake",
+        "*.ipp": "cpp",
+        "cmath": "cpp",
+        "complex": "cpp"
     },
     "editor.codeActionsOnSave": {
         "source.organizeImports": true

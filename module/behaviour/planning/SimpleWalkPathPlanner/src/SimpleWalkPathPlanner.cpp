@@ -280,14 +280,37 @@ namespace module::behaviour::planning {
     }
     void SimpleWalkPathPlanner::visionWalkPath() {
         std::unique_ptr<WalkCommand> command;
-        log("Walk to rBTt: ", rBTt.x(), rBTt.y(), rBTt.z());
+        log<NUClear::WARN>("Walk to rBTt: ", rBTt.x(), rBTt.y(), rBTt.z());
+        // std::cout << "Walk to rBTt: (" << rBTt.x() << "," << rBTt.y() << "," << rBTt.z() << ")" << std::endl;
         Eigen::Vector3f unit_vector_to_ball = rBTt / rBTt.norm();
         Eigen::Vector3f velocity_vector     = 0.03 * unit_vector_to_ball;
-        log("Walk command: ", velocity_vector.x(), velocity_vector.y(), velocity_vector.z());
+        log<NUClear::WARN>("Walk command: ", velocity_vector.x(), velocity_vector.y(), velocity_vector.z());
         float heading_angle = std::atan2(velocity_vector.y(), velocity_vector.x());
         command             = std::make_unique<WalkCommand>(
             subsumptionId,
             Eigen::Vector3d(velocity_vector.x(), velocity_vector.y(), 0.9 * heading_angle));
+        emit(std::move(command));
+        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
+    }
+
+    void SimpleWalkPathPlanner::rotateAroundSpot() {
+        log<NUClear::WARN>("Rotate around spot");
+        double rotateSpeedX = 0;
+        double rotateSpeedY = 0.1;
+        double rotateSpeed  = 0.1;
+        std::unique_ptr<WalkCommand> command =
+            std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(rotateSpeedX, rotateSpeedY, rotateSpeed));
+        emit(std::move(command));
+        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
+    }
+
+    void SimpleWalkPathPlanner::splineWalkPath()() {
+        log<NUClear::WARN>("Rotate around spot");
+        double rotateSpeedX = 0;
+        double rotateSpeedY = 0.1;
+        double rotateSpeed  = 0.1;
+        std::unique_ptr<WalkCommand> command =
+            std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(rotateSpeedX, rotateSpeedY, rotateSpeed));
         emit(std::move(command));
         emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
     }
