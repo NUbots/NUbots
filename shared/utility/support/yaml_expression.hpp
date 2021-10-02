@@ -269,9 +269,30 @@ namespace utility::support {
             return matrix;
         }
 
+
     private:
         YAML::Node node;
     };
+
+    template <typename T, std::size_t N, typename U = T>
+    inline std::array<T, N> resolve_expression(const YAML::Node& config) {
+        std::array<T, N> result;
+        size_t i = 0;
+        for (auto& data : config.as<std::vector<Expression>>()) {
+            result[i++] = U(data);
+        }
+        assert((fmt::format("We expected {} elements in the YAML file but {} were found", N, i), i == N));
+        return result;
+    }
+
+    template <typename T, typename U = T>
+    inline std::vector<T> resolve_expression(const YAML::Node& config) {
+        std::vector<T> result;
+        for (auto& data : config.as<std::vector<Expression>>()) {
+            result.emplace_back(U(data));
+        }
+        return result;
+    }
 }  // namespace utility::support
 
 namespace YAML {
