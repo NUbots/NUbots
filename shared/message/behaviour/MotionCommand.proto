@@ -35,6 +35,8 @@ message MotionCommand {
         BALL_APPROACH = 2;
         /// Stop all current motion and directly send the given WalkCommand to the WalkEngine
         DIRECT_COMMAND = 3;
+        /// Stop all current motion and directly send the given WalkCommand to the WalkEngine
+        ROTATE_ON_SPOT = 4;
     }
     /// The type of this motion command
     Type type = 1;

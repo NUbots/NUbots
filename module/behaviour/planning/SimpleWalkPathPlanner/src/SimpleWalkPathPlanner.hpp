@@ -91,8 +91,8 @@ namespace module::behaviour::planning {
                                      const FieldDescription& fieldDescription);
 
         void visionWalkPath();
-        void rotateAroundSpot();
-        void splineWalkPath();
+        void rotateOnSpot();
+        // void splineWalkPath();
 
     public:
         explicit SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);
