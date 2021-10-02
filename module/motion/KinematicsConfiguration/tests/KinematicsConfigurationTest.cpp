@@ -71,8 +71,6 @@ TEST_CASE("Testing the Kinematics Configuration module", "[module][motion][Kinem
 
     tester.run();
 
-    std::cout << "Test";
-
     // TODO(Devops&QA/Motion): Make this test actually check the config values as found in the file, rather than
     //                         hardcoding this value which is subject to change
     // Now check values in model to ensure correctness
