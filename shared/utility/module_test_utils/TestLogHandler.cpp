@@ -45,7 +45,7 @@ utility::module_test::TestLogHandler::TestLogHandler(std::unique_ptr<NUClear::En
             // Get our reactor name
             std::string reactor = message.task->identifier[1];
 
-            // Strip to the last semicolon if we have one
+            // Strip to the last colon if we have one
             const size_t last_colon = reactor.find_last_of(':');
             reactor                 = last_colon == std::string::npos ? reactor : reactor.substr(last_colon + 1);
 
