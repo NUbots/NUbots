@@ -73,6 +73,7 @@ namespace module::behaviour::strategy {
         bool manualOrientationReset                          = false;
         bool resetInInitial                                  = true;
         double manualOrientation                             = 0.0;
+        Eigen::Vector3f rBTt                                 = Eigen::Vector3f(1.0, 0.0, 0.0);
         message::input::GameEvents::Context team_kicking_off = message::input::GameEvents::Context::UNKNOWN;
         message::behaviour::KickPlan::KickType kickType{};
         message::behaviour::Behaviour::State currentState = message::behaviour::Behaviour::State::INIT;
