@@ -120,10 +120,10 @@ namespace utility::motion::kinematics {
         const Scalar sqrLowerLeg = LOWER_LEG_LENGTH * LOWER_LEG_LENGTH;
 
         const Scalar cosKnee = (sqrUpperLeg + sqrLowerLeg - sqrLength) / (2.0 * UPPER_LEG_LENGTH * LOWER_LEG_LENGTH);
-        knee                 = std::acos(std::fmax(std::fmin(cosKnee, 1), -1));
+        knee                 = std::acos(std::max(std::min(cosKnee, Scalar(1.0)), Scalar(-1.0)));
 
         const Scalar cosLowerLeg = (sqrLowerLeg + sqrLength - sqrUpperLeg) / (2.0 * LOWER_LEG_LENGTH * length);
-        const Scalar lowerLeg    = std::acos(std::max(std::min(cosLowerLeg, 1), -1));
+        const Scalar lowerLeg    = std::acos(std::max(std::min(cosLowerLeg, Scalar(1.0)), Scalar(-1.0)));
 
         const Scalar phi2 = std::acos(targetLeg.dot(ankleY) / length);
 
@@ -160,7 +160,7 @@ namespace utility::motion::kinematics {
         }
 
         const Scalar cosHipRoll = legPlaneGlobalZ.dot(Eigen::Matrix<Scalar, 3, 1>::UnitZ());
-        hipRoll                 = (hipRollPositive ? 1 : -1) * std::acos(std::fmax(std::fmin(cosHipRoll, 1), -1));
+        hipRoll = (hipRollPositive ? 1 : -1) * std::acos(std::max(std::min(cosHipRoll, Scalar(1)), Scalar(-1)));
 
         const Scalar phi4 = M_PI - knee - lowerLeg;
         // Superposition values:
@@ -169,8 +169,8 @@ namespace utility::motion::kinematics {
             unitTargetLeg * (std::sin(phi2 - phi4) / sinPIminusPhi2) + ankleY * (std::sin(phi4) / sinPIminusPhi2);
         const bool isHipPitchPositive = hipX.dot(unitUpperLeg.cross(legPlaneGlobalZ)) >= 0;
 
-        hipPitch =
-            (isHipPitchPositive ? 1 : -1) * std::acos(std::fmax(std::fmin(legPlaneGlobalZ.dot(unitUpperLeg), 1), -1));
+        hipPitch = (isHipPitchPositive ? 1 : -1)
+                   * std::acos(std::max(std::min(legPlaneGlobalZ.dot(unitUpperLeg), Scalar(1)), Scalar(-1)));
 
         // If leg is above waist then hipX is pointing in the wrong direction in the xy plane
         Eigen::Matrix<Scalar, 3, 1> hipXProjected = (isAnkleAboveWaist ? -1 : 1) * hipX;
@@ -178,7 +178,8 @@ namespace utility::motion::kinematics {
         hipXProjected.normalize();
         const bool isHipYawPositive = hipXProjected.dot(Eigen::Matrix<Scalar, 3, 1>::UnitY()) >= 0;
         hipYaw                      = (isHipYawPositive ? 1 : -1)
-                 * std::acos(std::fmax(std::fmin(hipXProjected.dot(Eigen::Matrix<Scalar, 3, 1>::UnitX()), 1), -1));
+                 * std::acos(std::max(std::min(hipXProjected.dot(Eigen::Matrix<Scalar, 3, 1>::UnitX()), Scalar(1)),
+                                      Scalar(-1)));
 
         if (limb == LimbID::LEFT_LEG) {
             positions.push_back(std::make_pair(ServoID::L_HIP_YAW, -hipYaw));
