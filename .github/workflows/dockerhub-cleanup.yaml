@@ -19,8 +19,9 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: Delete image
+      - name: Delete DockerHub image
         run: |
-          curl -i -X DELETE \
-            -u "${{ secrets.DOCKERHUB_USERNAME }}:$${{ secrets.DOCKERHUB_PASSWORD }}" \
-            https://cloud.docker.com/v2/repositories/nubots/nubots/tags/pull-request-${{ github.event.number }}/
+          DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} \
+          DOCKERHUB_PASSWORD=${{ secrets.DOCKERHUB_PASSWORD }} \
+          TAG=${{ github.event.number }} \
+          .github/workflows/scripts/remove_dockerhub_tag.sh
