@@ -255,7 +255,7 @@ namespace module::behaviour::planning {
 
 
         // Euclidean distance to ball (scaleF, scaleF2, scaleS, scaleS2 for Forward and Side
-        // respectively, angle is provided above as some float value in radians from the arc-tan, divding
+        // respectively, angle is provided above as some float value in radians from the arc-tan, dividing
         // this by Pi )
         float scaleF            = 2.0 / (1.0 + std::exp(-a * std::fabs(position.x()) + b)) - 1.0;
         float scaleF2           = angle / M_PI;
