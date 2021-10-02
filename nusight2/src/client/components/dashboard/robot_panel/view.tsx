@@ -9,6 +9,7 @@ import CameraIcon from './icon/camera.svg'
 import GoalIcon from './icon/goal.svg'
 import WarningIcon from './icon/warning.svg'
 import style from './style.css'
+import LocalisationToggle from './toggle'
 
 export type LastStatus = 'okay' | 'warning' | 'danger'
 
@@ -82,6 +83,9 @@ export const RobotPanel = (props: RobotPanelProps) => {
             {props.walkCommand.x.toFixed(3)}, {props.walkCommand.y.toFixed(3)},{' '}
             {props.walkCommand.z.toFixed(3)}
           </div>
+        </div>
+        <div className={style.row}>
+          <LocalisationToggle />
         </div>
         <div className={style.icons}>
           <span className={cameraClassName}>
