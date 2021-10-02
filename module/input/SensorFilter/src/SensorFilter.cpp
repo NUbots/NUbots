@@ -62,22 +62,22 @@ namespace module::input {
         if (errorCode & RawSensors::Error::INPUT_VOLTAGE != 0) {
             s << " Input Voltage ";
         }
-        if (errorCode & RawSensors::Error::ANGLE_LIMIT) {
+        if (errorCode & RawSensors::Error::ANGLE_LIMIT != 0) {
             s << " Angle Limit ";
         }
-        if (errorCode & RawSensors::Error::OVERHEATING) {
+        if (errorCode & RawSensors::Error::OVERHEATING != 0) {
             s << " Overheating ";
         }
-        if (errorCode & RawSensors::Error::OVERLOAD) {
+        if (errorCode & RawSensors::Error::OVERLOAD != 0) {
             s << " Overloaded ";
         }
-        if (errorCode & RawSensors::Error::INSTRUCTION) {
+        if (errorCode & RawSensors::Error::INSTRUCTION != 0) {
             s << " Bad Instruction ";
         }
-        if (errorCode & RawSensors::Error::CORRUPT_DATA) {
+        if (errorCode & RawSensors::Error::CORRUPT_DATA != 0) {
             s << " Corrupt Data ";
         }
-        if (errorCode & RawSensors::Error::TIMEOUT) {
+        if (errorCode & RawSensors::Error::TIMEOUT != 0) {
             s << " Timeout ";
         }
 
