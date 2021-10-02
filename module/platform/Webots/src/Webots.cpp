@@ -250,8 +250,8 @@ namespace module::platform {
 
 
         on<Configuration>("WebotsCameras").then([this](const Configuration& config) {
-            // Strip the .yaml off the name of the file to get the name of the camera
-            const std::string name = ::basename(config.fileName.substr(0, config.fileName.find_last_of('.')).c_str());
+            // The camera's name is the filename of the config, with the .yaml stripped off
+            const std::string name = config.fileName.stem();
 
             log<NUClear::INFO>(fmt::format("Connected to the webots {} camera", name));
 

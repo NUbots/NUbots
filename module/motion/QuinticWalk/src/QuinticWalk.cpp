@@ -305,7 +305,7 @@ namespace module::motion {
         const Eigen::Matrix4f right_foot = walk_engine.getFootstep().isLeftSupport() ? Hft.matrix() : Hst.matrix();
 
         const auto joints =
-            calculateLegJoints(kinematicsModel, Eigen::Affine3f(left_foot), Eigen::Affine3f(right_foot));
+            calculateLegJoints<float>(kinematicsModel, Eigen::Affine3f(left_foot), Eigen::Affine3f(right_foot));
 
         auto waypoints = motion(joints);
         emit(std::move(waypoints));

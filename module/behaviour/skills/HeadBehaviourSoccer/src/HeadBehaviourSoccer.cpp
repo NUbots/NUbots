@@ -58,7 +58,7 @@ namespace module::behaviour::skills {
     using utility::input::ServoID;
     using utility::math::coordinates::sphericalToCartesian;
     using utility::math::geometry::Quad;
-    using utility::motion::kinematics::calculateCameraLookJoints;
+    using utility::motion::kinematics::calculateHeadJoints;
     using utility::support::Expression;
 
     inline Eigen::Vector2d screenAngularFromObjectDirection(const Eigen::Vector3d& v) {
@@ -479,7 +479,7 @@ namespace module::behaviour::skills {
         // Rotate target angles to World space
         Eigen::Vector3d lookVector = headToIMUSpace * lookVectorFromHead;
         // Compute inverse kinematics for head direction angles
-        std::vector<std::pair<ServoID, double>> goalAngles = calculateCameraLookJoints(lookVector);
+        std::vector<std::pair<ServoID, double>> goalAngles = calculateHeadJoints(lookVector);
 
         Eigen::Vector2d result;
         for (auto& angle : goalAngles) {

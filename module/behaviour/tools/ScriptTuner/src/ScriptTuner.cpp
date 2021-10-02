@@ -175,7 +175,7 @@ namespace module::behaviour::tools {
                 case 'P':  // plays script through with correct durations
                     playScript();
                     break;
-                case 'J':  // changes frame without out robot moving
+                case 'J':  // changes frame without robot moving
                     jumpToFrame();
                     break;
                 case 'R':  // updates visual changes

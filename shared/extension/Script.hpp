@@ -49,7 +49,13 @@ namespace extension {
                 Target(const Target& other) = default;
                 Target(Target&& other) noexcept
                     : id(other.id), position(other.position), gain(other.gain), torque(other.torque) {}
-                Target& operator=(const Target& other) = default;
+                Target& operator=(const Target& other) {
+                    id       = other.id;
+                    position = other.position;
+                    gain     = other.gain;
+                    torque   = other.torque;
+                    return *this;
+                }
                 Target& operator=(Target&& other) noexcept {
                     id       = other.id;
                     position = other.position;
@@ -414,7 +420,8 @@ namespace YAML {
                 int millis = node["duration"].as<int>();
                 std::chrono::milliseconds duration(millis);
 
-                auto targets = node["targets"].as<std::vector<::extension::Script::Frame::Target>>();
+                std::vector<::extension::Script::Frame::Target> targets =
+                    node["targets"].as<std::vector<::extension::Script::Frame::Target>>();
                 rhs = {duration, targets};
             }
             catch (const YAML::Exception& e) {
@@ -446,7 +453,7 @@ namespace YAML {
 
         static inline bool decode(const Node& node, ::extension::Script& rhs) {
             try {
-                auto frames                                    = node.as<std::vector<::extension::Script::Frame>>();
+                std::vector<::extension::Script::Frame> frames = node.as<std::vector<::extension::Script::Frame>>();
                 rhs                                            = {frames};
             }
             catch (const YAML::Exception& e) {

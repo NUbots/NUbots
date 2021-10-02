@@ -68,7 +68,7 @@ namespace module::input {
                             }
                             // We have started connecting but haven't received a return ping
                             else if (remote == packet.remote.address && version == 0) {
-                                // TODO(unknown): maybe set a timeout here to try again
+                                // TODO(HardwareTeam): maybe set a timeout here to try again
                             }
                             // We haven't connected to anything yet
                             else if (remote == 0) {
@@ -180,7 +180,7 @@ namespace module::input {
         mocap->recording              = (params & 0x01) == 0x01;
         mocap->tracked_models_changed = (params & 0x01) == 0x02;
 
-        // TODO(unknown): there is an eod thing here
+        // TODO(HardwareTeam): there is an eod thing here
 
         // Apply the model information we have to the objects
         for (auto& markerSet : mocap->marker_sets) {
@@ -397,7 +397,7 @@ namespace module::input {
     void NatNet::processString(const Packet& packet) {
         std::string str(&packet.data, packet.length);
 
-        // TODO(unknown): do something with this string?
+        // TODO(HardwareTeam): do something with this string?
     }
 
 

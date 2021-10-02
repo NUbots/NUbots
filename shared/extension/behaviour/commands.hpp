@@ -88,7 +88,7 @@ namespace extension::behaviour::commands {
                        std::function<int()> current_,
                        std::function<NUClear::threading::ReactionHandle(NUClear::Reactor&,
                                                                         std::function<void(const int&)>)> binder_)
-            : reaction(std::move(reaction_))
+            : reaction(reaction_)
             , type(type_)
             , validator(std::move(validator_))
             , current(std::move(current_))
