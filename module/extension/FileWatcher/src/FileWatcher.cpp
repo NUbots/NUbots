@@ -19,6 +19,7 @@
 
 #include <filesystem>
 #include <fmt/format.h>
+#include <iostream>
 #include <vector>
 
 #include "extension/FileWatch.hpp"
@@ -291,12 +292,14 @@ namespace module::extension {
     }
 
     FileWatcher::~FileWatcher() {
+        std::cout << "Start of filewatcher destructor" << std::endl;
         for (const auto& path : paths) {
             if (path.second.handle) {
                 uv_fs_event_stop(path.second.handle.get());
                 uv_close(reinterpret_cast<uv_handle_t*>(path.second.handle.get()), [](uv_handle_t*) {});
             }
         }
+        std::cout << "After first loop of filewatcher destructor" << std::endl;
 
         for (const auto& remove : remove_queue) {
             if (remove) {
@@ -304,11 +307,16 @@ namespace module::extension {
                 uv_close(reinterpret_cast<uv_handle_t*>(remove.get()), [](uv_handle_t*) {});
             }
         }
+
+        std::cout << "After second loop of filewatcher destructor" << std::endl;
         uv_close(reinterpret_cast<uv_handle_t*>(remove_watch.get()), [](uv_handle_t*) {});
         uv_close(reinterpret_cast<uv_handle_t*>(add_watch.get()), [](uv_handle_t*) {});
         uv_close(reinterpret_cast<uv_handle_t*>(shutdown.get()), [](uv_handle_t*) {});
+        std::cout << "Before while loop in filewatcher dtor" << std::endl;
         while (uv_run(loop.get(), UV_RUN_NOWAIT) != 0) {
         }
+        std::cout << "After while loop of FW dtor" << std::endl;
         uv_loop_close(loop.get());
+        std::cout << "At the end of the FW dtor" << std::endl;
     }
 }  // namespace module::extension
