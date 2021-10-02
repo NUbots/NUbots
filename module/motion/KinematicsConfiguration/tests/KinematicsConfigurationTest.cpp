@@ -70,9 +70,10 @@ TEST_CASE("Testing the Kinematics Configuration module", "[module][motion][Kinem
     tester.install<TestReactor>("TestReactor");
 
     tester.run();
-
+    std::cout << "Before the deref" << std::endl;
     // TODO(Devops&QA/Motion): Make this test actually check the config values as found in the file, rather than
     //                         hardcoding this value which is subject to change
     // Now check values in model to ensure correctness
     REQUIRE(saved_model.head.INTERPUPILLARY_DISTANCE == 0.068f);
+    std::cout << "After the access" << std::endl;
 }

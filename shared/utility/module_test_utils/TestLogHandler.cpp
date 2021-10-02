@@ -43,7 +43,7 @@ utility::module_test::TestLogHandler::TestLogHandler(std::unique_ptr<NUClear::En
 
         // If we know where this log message came from, we display that
         if (message.task != nullptr) {
-            std::cout << "Inside the block" << std::endl;
+            std::cout << "TLH: Inside the block" << std::endl;
             // Get our reactor name
             std::string reactor = message.task->identifier[1];
 
@@ -54,10 +54,10 @@ utility::module_test::TestLogHandler::TestLogHandler(std::unique_ptr<NUClear::En
             // This is our source
             source =
                 reactor + " " + (message.task->identifier[0].empty() ? "" : "- " + message.task->identifier[0] + " ");
-            std::cout << "At the end of the block" << std::endl;
+            std::cout << "TLH: At the end of the block" << std::endl;
         }
 
-        std::cout << "After the block" << std::endl;
+        std::cout << "TLH: After the block" << std::endl;
 
         // Output the level
         std::stringstream log_message;
@@ -73,5 +73,6 @@ utility::module_test::TestLogHandler::TestLogHandler(std::unique_ptr<NUClear::En
 
         // Output the message
         UNSCOPED_INFO(log_message.str() << message.message);
+        std::cout << "TLH: At the end of the reaction" << std::endl;
     });
 }
