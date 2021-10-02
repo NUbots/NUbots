@@ -13,7 +13,7 @@ export type FieldProps = {
 }
 
 // **** I need to figure out how I can update the state of the field robot and transfer these changes from one component into another
-// **** How does mobx work ???
+// **** I need to wrap mobx in a use context and then I can work with it in the display - https://www.youtube.com/watch?v=oQiMXRsO4o4
 
 @observer
 export class Field extends Component<FieldProps> {
