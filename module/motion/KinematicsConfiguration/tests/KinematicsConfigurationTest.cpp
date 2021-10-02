@@ -34,7 +34,7 @@
 namespace {
     using message::motion::KinematicsModel;
 
-    std::unique_ptr<KinematicsModel> saved_model = nullptr;
+    KinematicsModel saved_model{};
 
     class TestReactor : public NUClear::Reactor {
     public:
@@ -43,7 +43,7 @@ namespace {
             // Trigger on the KinematicsModel message
             on<Trigger<KinematicsModel>>().then([this](const KinematicsModel& model) {
                 log<NUClear::INFO>("Received a KinematicsModel message. Test is now over.");
-                saved_model = std::make_unique<KinematicsModel>(std::move(model));
+                saved_model = model;
 
                 // When we receive the KinematicsModel message we can shutdown
                 powerplant.shutdown();
@@ -74,13 +74,13 @@ TEST_CASE("Testing the Kinematics Configuration module", "[module][motion][Kinem
     std::cout << "Test";
 
     // We needed to have saved a model. If we didn't, we failed the test
-    if (saved_model != nullptr) {
-        // TODO(Devops&QA/Motion): Make this test actually check the config values as found in the file, rather than
-        //                         hardcoding this value which is subject to change
-        // Now check values in model to ensure correctness
-        REQUIRE(saved_model->head.INTERPUPILLARY_DISTANCE == 0.068f);
-    }
-    else {
-        FAIL("No model was saved.");
-    }
+    // if (saved_model != nullptr) {
+    // TODO(Devops&QA/Motion): Make this test actually check the config values as found in the file, rather than
+    //                         hardcoding this value which is subject to change
+    // Now check values in model to ensure correctness
+    REQUIRE(saved_model.head.INTERPUPILLARY_DISTANCE == 0.068f);
+    // }
+    // else {
+    //     FAIL("No model was saved.");
+    // }
 }
