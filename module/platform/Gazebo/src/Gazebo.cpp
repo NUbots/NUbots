@@ -20,7 +20,6 @@ namespace module::platform {
     using message::motion::ServoTarget;
     using message::motion::ServoTargets;
     using message::platform::RawSensors;
-    using message::platform::gazebo::Ball;
     using message::platform::gazebo::Command;
     using GazeboSensors = message::platform::gazebo::RawSensors;
     using GazeboTargets = message::platform::gazebo::ServoTargets;

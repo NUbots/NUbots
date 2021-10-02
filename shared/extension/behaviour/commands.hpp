@@ -23,6 +23,7 @@
 #include <memory>
 #include <nuclear>
 #include <typeindex>
+#include <utility>
 
 /**
  * This namespace holds all of the communication primitives that are used by the Behaviour header to send messages to
@@ -87,7 +88,11 @@ namespace extension::behaviour::commands {
                        std::function<int()> current_,
                        std::function<NUClear::threading::ReactionHandle(NUClear::Reactor&,
                                                                         std::function<void(const int&)>)> binder_)
-            : reaction(reaction_), type(type_), validator(validator_), current(current_), binder(binder_) {}
+            : reaction(reaction_)
+            , type(type_)
+            , validator(std::move(validator_))
+            , current(std::move(current_))
+            , binder(std::move(binder_)) {}
 
         /// The Provider reaction that is contingent on this when condition
         std::shared_ptr<NUClear::threading::Reaction> reaction;

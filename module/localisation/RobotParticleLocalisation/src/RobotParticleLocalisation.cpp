@@ -193,7 +193,7 @@ namespace module::localisation {
                 }
 
                 const Eigen::Affine3d Htw(sensors.Htw);
-                for (auto& s : locReset.hypotheses) {
+                for (const auto& s : locReset.hypotheses) {
 
                     // Calculate the reset state
                     Eigen::Affine3d Hft;

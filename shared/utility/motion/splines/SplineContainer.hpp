@@ -175,28 +175,32 @@ namespace utility::motion::splines {
                 throw std::runtime_error(fmt::format("SplineContainer unable to read file: ", file_name));
             }
 
-            bool isParseError;
+            bool isParseError = true;
             while (file.good()) {
                 isParseError = true;
                 // Skip name delimitor
-                if (file.peek() != '\'')
+                if (file.peek() != '\'') {
                     break;
+                }
                 file.ignore();
-                if (!file.good())
+                if (!file.good()) {
                     break;
+                }
                 // Parse spline name
                 char name[256];
                 file.getline(name, 256, '\'');
                 // Import founded spline
                 add(U(name));
-                if (!file.good())
+                if (!file.good()) {
                     break;
+                }
                 container.at(U(name)).importData(file);
                 isParseError = false;
                 // Skip end line
                 while (file.peek() == ' ' || file.peek() == '\n') {
-                    if (!file.good())
+                    if (!file.good()) {
                         break;
+                    }
                     file.ignore();
                 }
             }
