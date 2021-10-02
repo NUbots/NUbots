@@ -4,6 +4,7 @@ import style from './style.css'
 function LocalisationToggle() {
   function toggleBallStd(std: number) {
     // Set the score to be the opposite of what it currently is
+    console.log(std)
   }
 
   return (
