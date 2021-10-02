@@ -206,8 +206,8 @@ namespace utility::motion::kinematics {
     template <typename Scalar>
     [[nodiscard]] std::vector<std::pair<ServoID, Scalar>> calculateLegJoints(
         const message::motion::KinematicsModel& model,
-        const Eigen::Affine3f& leftTarget,
-        const Eigen::Affine3f& rightTarget) {
+        const Eigen::Transform<Scalar, 3, Eigen::Affine>& leftTarget,
+        const Eigen::Transform<Scalar, 3, Eigen::Affine>& rightTarget) {
         auto joints  = calculateLegJoints<Scalar>(model, leftTarget, LimbID::LEFT_LEG);
         auto joints2 = calculateLegJoints<Scalar>(model, rightTarget, LimbID::RIGHT_LEG);
         joints.insert(joints.end(), joints2.begin(), joints2.end());
