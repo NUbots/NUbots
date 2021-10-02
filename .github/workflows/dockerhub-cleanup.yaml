@@ -27,7 +27,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
 
-      # Run out script which calls the dockerhub API to delete the PR's image
+      # Run our script which calls the dockerhub API to delete the PR's image
       - name: Delete DockerHub image
         run: |
           DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} \
