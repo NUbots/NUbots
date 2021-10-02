@@ -23,7 +23,7 @@ function(NUCLEAR_MODULE)
   # Parse our input arguments
   set(options, "")
   set(oneValueArgs "LANGUAGE")
-  set(multiValueArgs "LIBRARIES" "SOURCES" "DATA_FILES")
+  set(multiValueArgs "LIBRARIES" "SOURCES" "DATA_FILES" "TEST_MODULE_DEPENDENCIES")
   cmake_parse_arguments(MODULE "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   # ####################################################################################################################
@@ -239,6 +239,15 @@ function(NUCLEAR_MODULE)
       target_link_libraries(${test_module_target_name} ${module_target_name})
 
       set_target_properties(${test_module_target_name} PROPERTIES FOLDER "modules/tests")
+
+      # Make sure we can include the headers for other modules
+      target_include_directories(${test_module_target_name} PRIVATE "${PROJECT_SOURCE_DIR}/${NUCLEAR_MODULE_DIR}")
+
+      # Make sure we are linking against all of the dependencies for the test
+      foreach(test_dependency ${MODULE_TEST_MODULE_DEPENDENCIES})
+        string(REPLACE "::" "" test_dependency "${test_dependency}")
+        target_link_libraries(${test_module_target_name} ${test_dependency})
+      endforeach()
 
       # Add the test
       add_test(
