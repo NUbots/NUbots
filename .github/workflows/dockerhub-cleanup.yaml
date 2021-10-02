@@ -17,8 +17,17 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
 
+    # We need `jq` for the script, so we run in a container with it installed
+    container:
+      image: dwdraju:alpine-curl-jq
+
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      # Checks-out the repo under $GITHUB_WORKSPACE so we can access the delete script
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      # Run out script which calls the dockerhub API to delete the PR's image
       - name: Delete DockerHub image
         run: |
           DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} \
