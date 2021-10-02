@@ -23,7 +23,8 @@
 #include <Eigen/Core>
 #include <mutex>
 #include <ncurses.h>
-#undef OK  // ncurses defines OK. We don't need it
+// ncurses defines OK. We don't need it
+#undef OK
 #include <nuclear>
 
 #include "utility/input/LimbID.hpp"
