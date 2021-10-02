@@ -122,27 +122,23 @@ namespace module::localisation {
                 }
             });
 
-        on<Trigger<ResetBallHypotheses>, With<Sensors>, With<Field>, With<FieldDescription>, Sync<BallLocalisation>>()
-            .then("Reset Ball Hypotheses",
-                  [this](const ResetBallHypotheses& locReset,
-                         const Sensors& /*sensors*/,
-                         const Field& field,
-                         const FieldDescription& /*fd*/) {
-                      // If we've just reset our self localisation we can't trust Htf. So reset balls to the known
-                      // starting position
-                      if (locReset.self_reset) {
-                          std::vector<std::pair<Eigen::Vector2d, Eigen::Matrix2d>> hypotheses;
-                          for (const auto& state : config.start_state) {
-                              hypotheses.emplace_back(std::make_pair(state, config.start_variance.asDiagonal()));
-                          }
-                          filter.set_state(hypotheses);
-                      }
-                      // Otherwise reset balls to the [0, 0] field position
-                      else {
-                          // Set the filter state to the field origin relative to us
-                          filter.set_state(Eigen::Affine2d(field.position).translation(),
-                                           config.start_variance.asDiagonal());
-                      }
-                  });
+        on<Trigger<ResetBallHypotheses>, With<Field>, Sync<BallLocalisation>>().then(
+            "Reset Ball Hypotheses",
+            [this](const ResetBallHypotheses& locReset, const Field& field) {
+                // If we've just reset our self localisation we can't trust Htf. So reset balls to the known
+                // starting position
+                if (locReset.self_reset) {
+                    std::vector<std::pair<Eigen::Vector2d, Eigen::Matrix2d>> hypotheses;
+                    for (const auto& state : config.start_state) {
+                        hypotheses.emplace_back(std::make_pair(state, config.start_variance.asDiagonal()));
+                    }
+                    filter.set_state(hypotheses);
+                }
+                // Otherwise reset balls to the [0, 0] field position
+                else {
+                    // Set the filter state to the field origin relative to us
+                    filter.set_state(Eigen::Affine2d(field.position).translation(), config.start_variance.asDiagonal());
+                }
+            });
     }
 }  // namespace module::localisation
