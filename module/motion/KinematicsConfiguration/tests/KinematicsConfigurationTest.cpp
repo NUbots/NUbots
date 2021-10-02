@@ -43,7 +43,7 @@ namespace {
             // Trigger on the KinematicsModel message
             on<Trigger<KinematicsModel>>().then([this](const KinematicsModel& model) {
                 log<NUClear::INFO>("Received a KinematicsModel message. Test is now over.");
-                saved_model = std::make_unique<KinematicsModel>(model);
+                saved_model = std::make_unique<KinematicsModel>(std::move(model));
 
                 // When we receive the KinematicsModel message we can shutdown
                 powerplant.shutdown();
