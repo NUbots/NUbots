@@ -12,15 +12,15 @@ function LocalisationToggle() {
         <span className={style.label}>Ball positions</span>
         <div>
           <div>
-            <input type="checkbox" id="std1" onClick={e => toggleBallStd(1)} checked />
+            <input type="checkbox" id="std1" onClick={() => toggleBallStd(1)} checked />
             <label htmlFor="std1">Std1</label>
           </div>
           <div>
-            <input type="checkbox" id="std2" onClick={e => toggleBallStd(2)} />
+            <input type="checkbox" id="std2" onClick={() => toggleBallStd(2)} />
             <label htmlFor="std2">Std2</label>
           </div>
           <div>
-            <input type="checkbox" id="std3" onClick={e => toggleBallStd(3)} />
+            <input type="checkbox" id="std3" onClick={() => toggleBallStd(3)} />
             <label htmlFor="std3">Std3</label>
           </div>
         </div>
