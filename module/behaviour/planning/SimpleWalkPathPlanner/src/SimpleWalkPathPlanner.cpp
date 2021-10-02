@@ -157,6 +157,7 @@ namespace module::behaviour::planning {
                          const FieldDescription& fieldDescription) {
                 // TODO(Bryce Tuppurainen) Determine if this line is necessary. Could this be
                 // integrated into the switch?
+                log<NUClear::WARN>("wants to kick : ", wantsTo.kick);
                 if (wantsTo.kick) {
                     emit(std::make_unique<StopCommand>(subsumptionId));
                     return;
@@ -172,6 +173,8 @@ namespace module::behaviour::planning {
                     case message::behaviour::MotionCommand::Type::BALL_APPROACH: visionWalkPath(); return;
 
                     case message::behaviour::MotionCommand::Type::WALK_TO_STATE: visionWalkPath(); return;
+
+                    case message::behaviour::MotionCommand::Type::ROTATE_ON_SPOT: rotateOnSpot(); return;
 
                     // This line should be UNREACHABLE
                     default:
@@ -283,7 +286,7 @@ namespace module::behaviour::planning {
         log<NUClear::WARN>("Walk to rBTt: ", rBTt.x(), rBTt.y(), rBTt.z());
         // std::cout << "Walk to rBTt: (" << rBTt.x() << "," << rBTt.y() << "," << rBTt.z() << ")" << std::endl;
         Eigen::Vector3f unit_vector_to_ball = rBTt / rBTt.norm();
-        Eigen::Vector3f velocity_vector     = 0.03 * unit_vector_to_ball;
+        Eigen::Vector3f velocity_vector     = 0.02 * unit_vector_to_ball;
         log<NUClear::WARN>("Walk command: ", velocity_vector.x(), velocity_vector.y(), velocity_vector.z());
         float heading_angle = std::atan2(velocity_vector.y(), velocity_vector.x());
         command             = std::make_unique<WalkCommand>(
@@ -293,25 +296,18 @@ namespace module::behaviour::planning {
         emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
     }
 
-    void SimpleWalkPathPlanner::rotateAroundSpot() {
+    void SimpleWalkPathPlanner::rotateOnSpot() {
         log<NUClear::WARN>("Rotate around spot");
-        double rotateSpeedX = 0;
-        double rotateSpeedY = 0.1;
-        double rotateSpeed  = 0.1;
+        double rotateSpeedX = -0.04;
+        double rotateSpeedY = 0;
+        double rotateSpeed  = 0.2;
         std::unique_ptr<WalkCommand> command =
             std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(rotateSpeedX, rotateSpeedY, rotateSpeed));
         emit(std::move(command));
         emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
     }
 
-    void SimpleWalkPathPlanner::splineWalkPath()() {
-        log<NUClear::WARN>("Rotate around spot");
-        double rotateSpeedX = 0;
-        double rotateSpeedY = 0.1;
-        double rotateSpeed  = 0.1;
-        std::unique_ptr<WalkCommand> command =
-            std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(rotateSpeedX, rotateSpeedY, rotateSpeed));
-        emit(std::move(command));
-        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
-    }
+    // void SimpleWalkPathPlanner::splineWalkPath()() {
+
+    // }
 }  // namespace module::behaviour::planning
