@@ -35,7 +35,6 @@ namespace module::behaviour::tools {
 
     using extension::ExecuteScriptByName;
 
-    using message::platform::RawSensors;
     using NUClear::message::CommandLineArguments;
 
     using message::platform::ButtonMiddleDown;
@@ -99,7 +98,7 @@ namespace module::behaviour::tools {
                     emit(std::make_unique<ExecuteNextScript>());
                 });
             },
-            [this](const std::set<LimbID>&) {
+            [](const std::set<LimbID>&) {
                 // We should always be the only running thing
             },
             [this](const std::set<ServoID>&) {

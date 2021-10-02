@@ -69,7 +69,7 @@ namespace module::support::logging {
         std::chrono::microseconds first_timecode;
 
         // The amount of time into the future to buffer for
-        std::chrono::milliseconds buffer_time;
+        std::chrono::milliseconds buffer_time{};
 
         // When we started playing this file
         NUClear::clock::time_point start_time;

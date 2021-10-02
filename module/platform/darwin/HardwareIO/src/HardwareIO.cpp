@@ -384,7 +384,7 @@ namespace module::platform::darwin {
                     utility::platform::getRawServo(command.id, sensors).present_position);
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
-                float speed;
+                float speed = 0.0f;
                 if (duration.count() > 0) {
                     speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
                 }
@@ -412,7 +412,7 @@ namespace module::platform::darwin {
             }
         });
 
-        on<Trigger<ServoTarget>>().then([this](const ServoTarget command) {
+        on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
             auto commandList = std::make_unique<ServoTargets>();
             commandList->targets.push_back(command);
 
