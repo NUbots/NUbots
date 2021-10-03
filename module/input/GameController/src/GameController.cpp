@@ -615,7 +615,7 @@ namespace module::input {
         throw std::runtime_error("No opponent teams not found");  // should never happen!
     }
 
-    std::string GameController::ipAddressIntToString(const uint32_t ipAddr) {
+    std::string GameController::ipAddressIntToString(const uint32_t& ipAddr) {
         uint32_t ipAddrN = htonl(ipAddr);
 
         char c[255];

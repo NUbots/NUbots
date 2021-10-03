@@ -65,10 +65,10 @@ namespace module::input {
         [[nodiscard]] const gamecontroller::Team& getOwnTeam(const gamecontroller::GameControllerPacket& state) const;
         [[nodiscard]] const gamecontroller::Team& getOpponentTeam(
             const gamecontroller::GameControllerPacket& state) const;
-        static message::input::GameState::Data::PenaltyReason getPenaltyReason(
+        [[nodiscard]] static message::input::GameState::Data::PenaltyReason getPenaltyReason(
             const gamecontroller::PenaltyState& penaltyState);
 
-        static std::string ipAddressIntToString(uint32_t ipAddr);
+        [[nodiscard]] static std::string ipAddressIntToString(const uint32_t& ipAddr);
 
     public:
         explicit GameController(std::unique_ptr<NUClear::Environment> environment);
