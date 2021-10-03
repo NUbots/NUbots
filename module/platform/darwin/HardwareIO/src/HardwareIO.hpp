@@ -59,7 +59,7 @@ namespace module::platform::darwin {
             Config() = default;
 
             struct Battery {
-                Battery() {}
+                Battery() = default;
                 float chargedVoltage{0.0f};
                 float nominalVoltage{0.0f};
                 float flatVoltage{0.0f};
