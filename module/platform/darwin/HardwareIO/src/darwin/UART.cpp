@@ -79,7 +79,7 @@ namespace Darwin {
 
         // Do our setup for the tio settings, you must set BS38400 in order to set custom baud using "baud rate
         // aliasing" http://stackoverflow.com/questions/4968529/how-to-set-baud-rate-to-307200-on-linux
-        termios tio;
+        termios tio{};
         memset(&tio, 0, sizeof(tio));
         // B38400 for alising, CS8 (8bit,no parity,1 stopbit), CLOCAL (local connection, no modem contol), CREAD (enable
         // receiving characters)
@@ -96,7 +96,7 @@ namespace Darwin {
         tcsetattr(fd, TCSANOW, &tio);
 
         // Here we do the baud rate aliasing in order to set the custom baud rate
-        serial_struct serinfo;
+        serial_struct serinfo{};
 
         // Get our serial_info from the system
         if (ioctl(fd, TIOCGSERIAL, &serinfo) < 0) {
@@ -133,18 +133,17 @@ namespace Darwin {
         // We flush our buffer, just in case there was anything random in it
         tcflush(fd, TCIFLUSH);
 
-        while ((bytesWritten != (int) count) && (reconnects < 3)) {
+        while ((bytesWritten != static_cast<int>(count)) && (reconnects < 3)) {
             bytesWritten = write(fd, buf, count);
 
-            if (bytesWritten < (int) count) {
+            if (bytesWritten < static_cast<int>(count)) {
                 reconnect();
                 reconnects++;
             }
         }
 
         if (reconnects > 0) {
-            std::cout << "Bytes Written: " << (int) bytesWritten << " Reconnects: " << (int) reconnects << "\r"
-                      << std::endl;
+            std::cout << "Bytes Written: " << bytesWritten << " Reconnects: " << int(reconnects) << "\r" << std::endl;
         }
 
         assert(reconnects < 3);
@@ -157,10 +156,10 @@ namespace Darwin {
         uint8_t reconnects = 0;
         int bytesRead      = 0;
 
-        while ((bytesRead != (int) count) && (reconnects < 3)) {
+        while ((bytesRead != int(count)) && (reconnects < 3)) {
             bytesRead = read(fd, buf, count);
 
-            if ((errno == EAGAIN) || ((bytesRead < (int) count) && (bytesRead > 0))) {
+            if ((errno == EAGAIN) || ((bytesRead < int(count)) && (bytesRead > 0))) {
                 break;
             }
 
@@ -171,9 +170,9 @@ namespace Darwin {
         }
 
         if (reconnects > 0) {
-            std::cout << "Bytes Read: " << (int) bytesRead << " Reconnects: " << (int) reconnects << " Data: ";
+            std::cout << "Bytes Read: " << bytesRead << " Reconnects: " << int(reconnects) << " Data: ";
             for (int i = 0; i < bytesRead; i++) {
-                std::cout << (int) (*((uint8_t*) buf + i)) << " ";
+                std::cout << int(*(static_cast<uint8_t*>(buf) + i)) << " ";
             }
             std::cout << "\r" << std::endl;
         }
@@ -205,7 +204,7 @@ namespace Darwin {
 
         // Clear our connection set and put in our serial device
         fd_set connectionset;
-        timeval timeout;
+        timeval timeout{};
         timeout.tv_sec = 0;
         FD_ZERO(&connectionset);
         FD_SET(fd, &connectionset);
@@ -214,7 +213,7 @@ namespace Darwin {
         timeout.tv_usec = PACKET_WAIT;
         for (int sync = 0; sync < 2;) {
             if (select(fd + 1, &connectionset, nullptr, nullptr, &timeout) == 1) {
-                uint8_t byte;
+                uint8_t byte = 0;
 
                 if (readBytes(&byte, 1) > 0) {
                     sync = (byte == 0xFF) ? (sync + 1) : 0;
@@ -243,7 +242,7 @@ namespace Darwin {
         // length
         int length = 0;
         if (result.header.length < 2) {
-            std::cout << "Length: " << (int) result.header.length << ", " << (int) (result.header.length - 2) << "\r"
+            std::cout << "Length: " << int(result.header.length) << ", " << (result.header.length - 2) << "\r"
                       << std::endl;
         }
 
