@@ -58,7 +58,7 @@ TEST_CASE("Testing the Kinematics Configuration module", "[module][motion][Kinem
     using module::motion::KinematicsConfiguration;
     using utility::module_test::ModuleTester;
 
-    static constexpr int NUM_THREADS = 2;
+    static constexpr int NUM_THREADS = 1;
 
     // Test is for KinematicsConfiguration
     ModuleTester<KinematicsConfiguration> tester(NUM_THREADS);
