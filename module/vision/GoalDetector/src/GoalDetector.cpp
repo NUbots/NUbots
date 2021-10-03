@@ -254,7 +254,7 @@ namespace module::vision {
                             g.post.distance = distance;
 
                             // Attach the measurement to the object (distance from camera to bottom center of post)
-                            g.measurements.emplace_back();
+                            g.measurements.emplace_back();  // Emplaces default constructed object
                             g.measurements.back().type = Goal::MeasurementType::CENTRE;
 
                             // Spherical Reciprocal Coordinates (1/distance, phi, theta)

@@ -163,7 +163,7 @@ namespace module::vision {
                     float distance = field.ball_radius / std::sqrt(1.0f - radius * radius);
 
                     // Attach the measurement to the object (distance from camera to ball)
-                    b.measurements.emplace_back();
+                    b.measurements.emplace_back();  // Emplaces default constructed object
 
                     // Spherical Reciprocal Coordinates (1/distance, phi, theta)
                     b.measurements.back().srBCc      = cartesianToReciprocalSpherical(b.cone.axis * distance);
