@@ -43,7 +43,7 @@ namespace extension {
     struct Script {
         struct Frame {
             struct Target {
-                Target() {}
+                Target() = default;
                 Target(const ServoID& servo, float pos, float gain, float torque)
                     : id(servo), position(pos), gain(gain), torque(torque) {}
                 Target(const Target& other) = default;

@@ -47,7 +47,7 @@ namespace utility::vision {
         Value value{Value::UNCLASSIFIED};
 
         // Constructors
-        Colour() {}
+        Colour() = default;
         Colour(int const& value) : value(static_cast<Value>(value)) {}
         Colour(uint8_t const& value) : value(static_cast<Value>(value)) {}
         Colour(uint32_t const& value) : value(static_cast<Value>(value)) {}
@@ -144,7 +144,7 @@ namespace utility::vision {
     };
 
     struct Pixel {
-        Pixel() {}
+        Pixel() = default;
         Pixel(uint32_t rgba) : rgba(rgba) {}
         Pixel(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : components({{r}, {g}, {b}, a}) {}
         Pixel(uint8_t r, uint8_t g, uint8_t b) : components({{r}, {g}, {b}, 0}) {}

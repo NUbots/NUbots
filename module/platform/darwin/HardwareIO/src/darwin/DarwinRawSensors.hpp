@@ -34,7 +34,7 @@ namespace Darwin {
          * @brief This represents the raw gyro values from the CM740 (they are read from the board in ZYX)
          */
         struct Gyro {
-            Gyro() {}
+            Gyro() = default;
             uint16_t z{0};
             uint16_t y{0};
             uint16_t x{0};
@@ -44,7 +44,7 @@ namespace Darwin {
          * @brief This represents the raw accelerometer values from the CM740
          */
         struct Accelerometer {
-            Accelerometer() {}
+            Accelerometer() = default;
             uint16_t x{0};
             uint16_t y{0};
             uint16_t z{0};
@@ -54,7 +54,7 @@ namespace Darwin {
          * @brief This represents the data that comes from one of the MX28 motors
          */
         struct MX28Data {
-            MX28Data() {}
+            MX28Data() = default;
             uint16_t presentPosition{0};
             uint16_t presentSpeed{0};
             uint16_t load{0};
@@ -66,7 +66,7 @@ namespace Darwin {
          * This represents data that comes from the Force Sensitive Resistors
          */
         struct FSRData {
-            FSRData() {}
+            FSRData() = default;
             uint16_t fsr1{0};
             uint16_t fsr2{0};
             uint16_t fsr3{0};
@@ -79,7 +79,7 @@ namespace Darwin {
          * @brief This represents data that comes from the CM740
          */
         struct CM740Data {
-            CM740Data() {}
+            CM740Data() = default;
             uint8_t buttons{0};
             uint8_t reserved[7] = {0};
             Gyro gyroscope;
@@ -91,7 +91,7 @@ namespace Darwin {
          * This is a type that is used control the motors, It is sent to the motors to cause a change
          */
         struct ServoValues {
-            ServoValues() {}
+            ServoValues() = default;
             uint8_t servoId{0};
             uint8_t dGain{0};
             uint8_t iGain{0};

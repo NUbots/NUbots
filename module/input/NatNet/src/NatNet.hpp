@@ -41,29 +41,29 @@ namespace module::input {
                 UNRECOGNIZED_REQUEST      = 100
             };
 
-            Packet() {}
+            Packet() = default;
             Type type{Type::PING};
             uint16_t length{0};
             char data{0};
         };
 
         struct MarkerSetModel {
-            MarkerSetModel() : name("") {}
-            std::string name;
+            MarkerSetModel() = default;
+            std::string name{};
             std::vector<std::string> markerNames;
         };
 
         struct RigidBodyModel {
-            RigidBodyModel() : name(""), offset(Eigen::Vector3f::Zero()) {}
-            std::string name;
+            RigidBodyModel() = default;
+            std::string name{};
             uint32_t id{0};
             uint32_t parentId{0};
-            Eigen::Vector3f offset;
+            Eigen::Vector3f offset = Eigen::Vector3f::Zero();
         };
 
         struct SkeletonModel {
-            SkeletonModel() : name("") {}
-            std::string name;
+            SkeletonModel() = default;
+            std::string name{};
             uint32_t id{0};
             std::map<uint32_t, RigidBodyModel> boneModels;
         };
