@@ -153,7 +153,7 @@ namespace module::extension {
 
             for (auto it = reactor.remove_queue.begin(); it != reactor.remove_queue.end();) {
                 uv_fs_event_stop(it->get());
-                uv_close(reinterpret_cast<uv_handle_t*>(it->get()), [](uv_handle_t* /*unused*/) {});
+                uv_close(reinterpret_cast<uv_handle_t*>(it->get()), [](uv_handle_t* /* handle */) {});
                 it = reactor.remove_queue.erase(it);
             }
         });
@@ -294,19 +294,19 @@ namespace module::extension {
         for (const auto& path : paths) {
             if (path.second.handle) {
                 uv_fs_event_stop(path.second.handle.get());
-                uv_close(reinterpret_cast<uv_handle_t*>(path.second.handle.get()), [](uv_handle_t* /*unused*/) {});
+                uv_close(reinterpret_cast<uv_handle_t*>(path.second.handle.get()), [](uv_handle_t* /* handle */) {});
             }
         }
 
         for (const auto& remove : remove_queue) {
             if (remove) {
                 uv_fs_event_stop(remove.get());
-                uv_close(reinterpret_cast<uv_handle_t*>(remove.get()), [](uv_handle_t* /*unused*/) {});
+                uv_close(reinterpret_cast<uv_handle_t*>(remove.get()), [](uv_handle_t* /* handle */) {});
             }
         }
-        uv_close(reinterpret_cast<uv_handle_t*>(remove_watch.get()), [](uv_handle_t* /*unused*/) {});
-        uv_close(reinterpret_cast<uv_handle_t*>(add_watch.get()), [](uv_handle_t* /*unused*/) {});
-        uv_close(reinterpret_cast<uv_handle_t*>(shutdown.get()), [](uv_handle_t* /*unused*/) {});
+        uv_close(reinterpret_cast<uv_handle_t*>(remove_watch.get()), [](uv_handle_t* /* handle */) {});
+        uv_close(reinterpret_cast<uv_handle_t*>(add_watch.get()), [](uv_handle_t* /* handle */) {});
+        uv_close(reinterpret_cast<uv_handle_t*>(shutdown.get()), [](uv_handle_t* /* handle */) {});
         while (uv_run(loop.get(), UV_RUN_NOWAIT) != 0) {
         }
         uv_loop_close(loop.get());
