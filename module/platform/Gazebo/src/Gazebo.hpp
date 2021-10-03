@@ -3,8 +3,7 @@
 
 #include <nuclear>
 
-namespace module {
-namespace platform {
+namespace module::platform {
 
     class Gazebo : public NUClear::Reactor {
 
@@ -16,14 +15,12 @@ namespace platform {
         struct {
             std::string simulator_name;
             std::string model_name;
-            double clock_smoothing;
+            double clock_smoothing = 0.0;
         } config;
 
         double sim_time;
         double real_time;
     };
-
-}  // namespace platform
-}  // namespace module
+}  // namespace module::platform
 
 #endif  // MODULE_PLATFORM_GAZEBO_HPP

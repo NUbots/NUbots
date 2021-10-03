@@ -20,15 +20,13 @@ extern "C" {
 #include "utility/vision/fourcc.hpp"
 #include "utility/vision/projection.hpp"
 
-namespace module {
-namespace input {
+namespace module::input {
 
     using extension::Configuration;
     using message::input::Image;
     using message::input::Sensors;
     using utility::input::ServoID;
     using utility::support::Expression;
-    using utility::vision::fourcc;
 
     /// The amount of time to observe after recalibrating to work out how long image transfer takes (nanoseconds)
     constexpr int64_t TRANSFER_OFFSET_OBSERVE_TIME = 1e9;
@@ -54,8 +52,8 @@ namespace input {
              *                                                                      *
              ************************************************************************/
             if (it == cameras.end()) {
-                // Strip the .yaml off the name of the file to get the name of the camera
-                std::string name = ::basename(config.fileName.substr(0, config.fileName.find_last_of('.')).c_str());
+                // The camera's name is the filename of the config, with the .yaml stripped of
+                const std::string name = config.fileName.stem();
 
                 // Find the camera with the correct serial number
                 auto find_camera = [](const std::string& serial_number) {
@@ -86,8 +84,9 @@ namespace input {
                     std::string device_description = arv_get_device_id(device_no);
                     auto camera =
                         std::shared_ptr<ArvCamera>(arv_camera_new(device_description.c_str()), [](ArvCamera* ptr) {
-                            if (ptr)
+                            if (ptr) {
                                 g_object_unref(ptr);
+                            }
                         });
 
                     if (!ARV_IS_CAMERA(camera.get())) {
@@ -99,8 +98,9 @@ namespace input {
                         auto stream =
                             std::shared_ptr<ArvStream>(arv_camera_create_stream(camera.get(), nullptr, nullptr),
                                                        [](ArvStream* ptr) {
-                                                           if (ptr)
+                                                           if (ptr) {
                                                                g_object_unref(ptr);
+                                                           }
                                                        });
 
                         if (!ARV_IS_STREAM(stream.get())) {
@@ -275,8 +275,8 @@ namespace input {
             // Add buffers to the queue
             int payload_size = arv::camera_get_payload(cam.get());
             for (size_t i = 0; i < config["buffer_count"].as<size_t>(); i++) {
-                // TODO(trent) Eventually we should use preallocated page aligned data so that we can map directly to
-                // the GPU.
+                // TODO(trent) Eventually we should use preallocated page aligned data so that we can map directly
+                // to the GPU.
                 // TODO(trent) Make an std::vector and use it in the buffer to avoid copying to one later
                 arv_stream_push_buffer(stream.get(), arv_buffer_new(payload_size, nullptr));
             }
@@ -327,8 +327,9 @@ namespace input {
 
         if (buffer != nullptr) {
             if (arv_buffer_get_status(buffer) == ARV_BUFFER_STATUS_SUCCESS) {
-                int width, height;
-                size_t buffSize;
+                int width       = 0;
+                int height      = 0;
+                size_t buffSize = 0;
                 arv_buffer_get_image_region(buffer, nullptr, nullptr, &width, &height);
                 const uint8_t* buff = reinterpret_cast<const uint8_t*>(arv_buffer_get_data(buffer, &buffSize));
 
@@ -400,7 +401,7 @@ namespace input {
                 msg->dimensions = Eigen::Matrix<unsigned int, 2, 1>(width, height);
                 // TODO(trent) use an std::vector here to avoid the copy
                 msg->data.insert(msg->data.end(), buff, buff + buffSize);
-                msg->camera_id = context->camera_id;
+                msg->id        = context->id;
                 msg->name      = context->name;
                 msg->timestamp = NUClear::clock::time_point(nanoseconds(ts));
 
@@ -473,6 +474,4 @@ namespace input {
     void Camera::control_lost(ArvGvDevice*, CameraContext* context) {
         NUClear::log<NUClear::FATAL>(fmt::format("Control of a the {} camera has been lost", context->name));
     }
-
-}  // namespace input
-}  // namespace module
+}  // namespace module::input

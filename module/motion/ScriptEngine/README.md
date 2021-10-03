@@ -1,5 +1,4 @@
-Script Engine
-=============
+# Script Engine
 
 ## Description
 
@@ -21,13 +20,13 @@ start. Alternatively you can also emit a `message::ExecuteScript` to run a
 
 ## Consumes
 
-* `message::Configuration<Scripts>` containing the loaded scripts
-* `message::ExecuteScript` to run a script
-* `message::ExecuteScriptByName` to run a script from a file
+- `message::Configuration<Scripts>` containing the loaded scripts
+- `message::ExecuteScript` to run a script
+- `message::ExecuteScriptByName` to run a script from a file
 
 ## Emits
 
-* `std::vector<message::ServoTarget>` to set waypoints based on script
+- `message::behaviour::ServoCommands` to set waypoints based on script
 
 ## Configuration
 
@@ -37,16 +36,16 @@ directory and must have a .yaml extension. They are composed of an array of
 
 Frames are objects with the properties:
 
-* "duration": the number of milliseconds that the frame will be active, how
+- "duration": the number of milliseconds that the frame will be active, how
   long until the next frame should begin
-* "targets": an array of targets for servos to reach by the end of the frame
+- "targets": an array of targets for servos to reach by the end of the frame
 
 Target objects have:
 
-* "id": the servo identifier as a string (see
-  `message::DarwinSensors::Servo::ID` for servo ID names)
-* "position": the desired angle of the servo, in radians
-* "gain": the desired motor gain
+- "id": the servo identifier as a string (see
+  `utility/input/ServoID.cpp` and `utility/input/ServoID.hpp` for servo ID names)
+- "position": the desired angle of the servo, in radians
+- "gain": the desired motor gain
 
 The basic structure of a script is thus:
 
@@ -62,7 +61,4 @@ The basic structure of a script is thus:
 
 ## Dependencies
 
-* The Config System module is required to read script files
-* The Darwin Movement Manager is required to execute the waypoints defined in
-  scripts
-
+- The Config System module is required to read script files

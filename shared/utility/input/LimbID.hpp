@@ -24,23 +24,22 @@
 
 #include "utility/input/ServoID.hpp"
 
-namespace utility {
-namespace input {
+namespace utility::input {
     // LimbID is a higher level of ServoID (see ServoID.h),
     // which contains all the constituent servos (e.g. An arm contains shoulder (pitch + roll)) and elbow.
     using ServoID = utility::input::ServoID;
 
     struct LimbID {
         enum Value { UNKNOWN = 0, LEFT_LEG = 1, RIGHT_LEG = 2, LEFT_ARM = 3, RIGHT_ARM = 4, HEAD = 5 };
-        Value value;
+        Value value = Value::UNKNOWN;
 
         // Constructors
-        LimbID() : value(Value::UNKNOWN) {}
+        LimbID() = default;
         LimbID(uint8_t const& v) : value(static_cast<Value>(v)) {}
         LimbID(uint32_t const& v) : value(static_cast<Value>(v)) {}
         LimbID(uint64_t const& v) : value(static_cast<Value>(v)) {}
         LimbID(int const& v) : value(static_cast<Value>(v)) {}
-        LimbID(Value const& value) : value(value) {}
+        LimbID(Value const& v) : value(v) {}
         LimbID(std::string const& str);
 
         // Operators
@@ -104,7 +103,6 @@ namespace input {
 
         friend std::ostream& operator<<(std::ostream& out, const LimbID& val);
     };
-}  // namespace input
-}  // namespace utility
+}  // namespace utility::input
 
 #endif

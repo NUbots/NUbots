@@ -1,0 +1,14 @@
+nuclear_role(
+  # FileWatcher, ConsoleLogHandler and Signal Catcher Must Go First. KinematicsConfiguration usually goes after these
+  # and without it many roles do not run
+  extension::FileWatcher
+  # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
+  motion::KinematicsConfiguration
+  support::configuration::GlobalConfig
+  platform::Webots
+  behaviour::tools::ScriptTuner
+  behaviour::Controller
+  network::NUClearNet
+  network::NetworkForwarder
+  motion::ScriptEngine
+)

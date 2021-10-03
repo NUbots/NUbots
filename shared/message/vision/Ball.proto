@@ -34,20 +34,27 @@ message Ball {
     }
     message Measurement {
         MeasurementType type = 1;
-        // Vector from camera to ball in camera coordinates
-        fvec3 rBCc       = 2;
+        /// Vector from camera to ball in camera coordinates
+        fvec3 srBCc      = 2;  // Spherical Reciprocal Coordinates (1/distance, phi, theta)
         fmat3 covariance = 3;
     }
-    Cone                 cone           = 1;
-    repeated Measurement measurements   = 2;
-    fvec2                screen_angular = 3;
-    fvec2                angular_size   = 4;
-    fvec4                colour         = 5;
-}
+    /// Cone describing the ball from the camera's perspective
+    Cone                 cone         = 1;
+    repeated Measurement measurements = 2;
+    /// Angular positions from the camera
+    fvec2 screen_angular = 3;
 
+    fvec2 angular_size = 4;
+    /// Colour of the ball for NUsight. Changes depending on the perceived ball location
+    fvec4 colour = 5;
+}
 message Balls {
-    uint32                    camera_id = 1;
+    /// ID of the camera that took the image containing the balls
+    uint32 id = 1;
+    /// When the image was taken that this measurement is derived from
     google.protobuf.Timestamp timestamp = 2;
-    mat4                      Hcw       = 3;
-    repeated Ball             balls     = 4;
+    /// Affine3d transform from world space to camera space at the time that the image was taken
+    mat4 Hcw = 3;
+
+    repeated Ball balls = 4;
 }

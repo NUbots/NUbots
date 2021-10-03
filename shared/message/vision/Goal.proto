@@ -31,28 +31,29 @@ message Goal {
         LEFT         = 1;
         RIGHT        = 2;
     }
+    /// Which team the goals belong to
     enum Team {
         UNKNOWN_TEAM = 0;
         OWN          = 1;
         OPPONENT     = 2;
     }
     enum MeasurementType {
-        UNKNOWN_MEASUREMENT = 0;
-        CENTRE              = 1;
-        LEFT_NORMAL         = 2;
-        RIGHT_NORMAL        = 3;
-        TOP_NORMAL          = 4;
-        BASE_NORMAL         = 5;
+        UNKNOWN = 0;
+        /// The distance is from the camera to bottom centre of post
+        CENTRE = 1;
     }
     message Measurement {
         MeasurementType type = 1;
-        // Normal vectors point inwards towards the centre of the object
-        fvec3 position   = 2;
+        /// Normal vectors point inwards towards the centre of the object
+        fvec3 srGCc      = 2;  // Spherical Reciprocal Coordinates (1/distance, phi, theta)
         fmat3 covariance = 3;
     }
     message Post {
-        fvec3 top      = 1;
-        fvec3 bottom   = 2;
+        /// Vector pointing to top point of post in camera space
+        fvec3 top = 1;
+        /// Vector pointing to bottom point of post in camera space
+        fvec3 bottom = 2;
+        /// Distance from camera to goals, in metres
         float distance = 3;
     }
     Side                 side           = 1;
@@ -60,12 +61,13 @@ message Goal {
     repeated Measurement measurements   = 4;
     fvec2                screen_angular = 5;
     fvec2                angular_size   = 6;
-    Team                 team           = 7;
 }
 
 message Goals {
-    uint32                    camera_id = 1;
+    uint32                    id        = 1;
     google.protobuf.Timestamp timestamp = 2;
-    mat4                      Hcw       = 3;
-    repeated Goal             goals     = 4;
+    /// Affine3d transform from world space to camera space at the time that the image was taken
+    mat4 Hcw = 3;
+
+    repeated Goal goals = 4;
 }

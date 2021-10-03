@@ -20,26 +20,22 @@
 
 #include <stdexcept>
 
-namespace utility {
-namespace input {
+namespace utility::input {
 
     using ServoID = utility::input::ServoID;
 
-    LimbID::LimbID(std::string const& str) : value(Value::UNKNOWN) {
-        if (str == "UNKNOWN")
-            value = Value::UNKNOWN;
-        else if (str == "LEFT_LEG")
-            value = Value::LEFT_LEG;
-        else if (str == "RIGHT_LEG")
-            value = Value::RIGHT_LEG;
-        else if (str == "LEFT_ARM")
-            value = Value::LEFT_ARM;
-        else if (str == "RIGHT_ARM")
-            value = Value::RIGHT_ARM;
-        else if (str == "HEAD")
-            value = Value::HEAD;
-        else
+    LimbID::LimbID(std::string const& str) {
+        // clang-format off
+        if      (str == "UNKNOWN")   { value = Value::UNKNOWN;   }
+        else if (str == "LEFT_LEG")  { value = Value::LEFT_LEG;  }
+        else if (str == "RIGHT_LEG") { value = Value::RIGHT_LEG; }
+        else if (str == "LEFT_ARM")  { value = Value::LEFT_ARM;  }
+        else if (str == "RIGHT_ARM") { value = Value::RIGHT_ARM; }
+        else if (str == "HEAD")      { value = Value::HEAD;      }
+        else {
             throw std::runtime_error("String did not match any enum for LimbID");
+        }
+        // clang-format on
     }
 
 
@@ -116,12 +112,10 @@ namespace input {
             default:
                 // Can't really happen but in case it does make sure someone pays!
                 return static_cast<LimbID>(-1);
-                ;
         }
     }
 
     std::ostream& operator<<(std::ostream& out, const LimbID& val) {
         return out << static_cast<std::string>(val);
     }
-}  // namespace input
-}  // namespace utility
+}  // namespace utility::input

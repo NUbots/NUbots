@@ -1,3 +1,5 @@
+log_level: WARN
+
 output:
   directory: log
   split_size: 5 * GiB
@@ -7,4 +9,4 @@ output:
 messages:
   message.output.CompressedImage: false
   message.input.Sensors: false
-  message.platform.darwin.DarwinSensors: false
+  message.platform.RawSensors: false

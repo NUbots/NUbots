@@ -24,16 +24,14 @@ import "message/behaviour/MotionCommand.proto";
 import "Vector.proto";
 
 message WalkPath {
-    // Sequence of robot states that form a path:
+    /// Sequence of robot states that form a path
     repeated fvec3 states = 1;
-
-    // The ball position and target bearing at the time of planning:
-    fvec3 ballSpace = 2;
-
-    // The start and goal states used for planning:
+    /// The ball position and target bearing at the time of planning
+    fvec3 ball_space = 2;
+    /// The start state used for planning
     fvec3 start = 3;
-    fvec3 goal  = 4;
-
-    // The motion command for which this plan was generated:
+    /// The goal state used for planning
+    fvec3 goal = 4;
+    /// The motion command for which this plan was generated
     MotionCommand command = 5;  // [default = MotionCommand.StandStill]
 }

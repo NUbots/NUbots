@@ -36,7 +36,7 @@ def _is_wsl1():
     return int(major) <= 4 and int(minor) < 19
 
 
-def _setup_internal_image(image, rebuild, clean_volume):
+def _setup_internal_image(image, rebuild):
 
     # Extract the repository and platform
     repository, target = image.split(":")
@@ -53,12 +53,6 @@ def _setup_internal_image(image, rebuild, clean_volume):
         if subprocess.run(["docker", "volume", "inspect", v_name], stderr=DEVNULL, stdout=DEVNULL).returncode == 0
         else None
     )
-
-    # If we are cleaning, remove this volume so we can recreate it
-    if v is not None and clean_volume:
-        if subprocess.run(["docker", "volume", "rm", v], stderr=DEVNULL, stdout=DEVNULL).returncode != 0:
-            raise RuntimeError("Docker volume rm returned a non-zero exit")
-        v = None
 
     # If we don't have a volume, make one
     if v is None:
@@ -97,6 +91,7 @@ def run(func, image):
             "--interactive",
             "--env",
             "EDITOR={}".format(os.environ.get("EDITOR", "nano")),
+            "--privileged",
         ]
 
         # Work out if we are using an internal image
@@ -126,9 +121,7 @@ def run(func, image):
 
         # Perform the tasks that we only perform on the internal image and add on any extra arguments needed
         if internal_image:
-            docker_args.extend(
-                _setup_internal_image(image=image, rebuild=(rebuild or kwargs["rebuild"]), clean_volume=kwargs["clean"])
-            )
+            docker_args.extend(_setup_internal_image(image=image, rebuild=(rebuild or kwargs["rebuild"])))
 
         # Work out what cwd we need to have on docker to mirror the cwd we have here
         code_to_cwd = os.path.relpath(os.getcwd(), b.project_dir)
@@ -160,6 +153,15 @@ def run(func, image):
 
         # Choose the image
         docker_args.append(image)
+
+        # If we are cleaning then delete all files and directories in the build volume
+        if kwargs["clean"]:
+            exit_code = pty.spawn(
+                docker_args + ["/bin/bash", "-c", "find /home/{}/build -mindepth 1 -delete".format(defaults.user)]
+            )
+            if exit_code != 0:
+                cprint("Failed to clean the build volume", "red", attrs=["bold"])
+                exit(exit_code)
 
         # Add the command
         docker_args.extend(["{}/b".format(cwd_to_code), *sys.argv[1:]])

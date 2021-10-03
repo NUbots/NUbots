@@ -19,25 +19,50 @@ class OneOfType:
 
         header_template = dedent(
             """\
-            class {oneof_name} : public enable_shared_from_this {{
+            class {oneof_name} {{
             public:
-                {oneof_name}() : {initialiser_list}, val_index(0) {{}}
+                {oneof_name}() : {initialiser_list} {{}}
+                {oneof_name}(const {oneof_name}& rhs) noexcept : {initialiser_list}, val_index(rhs.val_index), data(rhs.data) {{}}
+                {oneof_name}({oneof_name}&& rhs) noexcept : {initialiser_list}, val_index(std::exchange(rhs.val_index, 0)), data(std::move(rhs.data)) {{}}
+                ~{oneof_name}() = default;
+
+                {oneof_name}& operator=(const {oneof_name}& rhs) noexcept {{
+                    if (&rhs != this) {{
+                        data = rhs.data;
+                        val_index = rhs.val_index;
+                    }}
+                    return *this;
+                }}
+                {oneof_name}& operator=({oneof_name}&& rhs) noexcept {{
+                    data = std::move(rhs.data);
+                    val_index = std::exchange(rhs.val_index, 0);
+                    return *this;
+                }}
 
                 template <typename T, size_t index>
                 class Proxy {{
                 public:
                     Proxy({oneof_name}* oneof) : oneof(oneof) {{}}
+                    ~Proxy() = default;
+                    Proxy(const Proxy&) = delete;
+                    Proxy(Proxy&&) = delete;
+                    Proxy& operator=(const Proxy&) = delete;
+                    Proxy& operator=(Proxy&&) = delete;
+
                     template <typename U = T>
                     Proxy& operator=(U&& t) {{
                         oneof->data      = std::make_shared<T>(std::forward<U>(t));
                         oneof->val_index = index;
                         return *this;
                     }}
-                    bool operator==(const Proxy<T, index>& other) const {{ return get() == other.get(); }}
+
+                    bool operator==(const Proxy<T, index>& rhs) const {{ return get() == rhs.get(); }}
+
                     operator T&() {{ return get(); }}
+
                     operator const T&() const {{ return get(); }}
 
-                    const T& get() const {{
+                    [[nodiscard]] const T& get() const {{
                         if (oneof->val_index == index) {{
                             return *std::static_pointer_cast<T>(oneof->data);
                         }}
@@ -45,7 +70,7 @@ class OneOfType:
                         throw std::range_error("This is not the one of you were looking for.");
                     }}
 
-                    T& get() {{
+                    [[nodiscard]] T& get() {{
                         if (oneof->val_index == index) {{
                             return *std::static_pointer_cast<T>(oneof->data);
                         }}
@@ -57,8 +82,8 @@ class OneOfType:
                     {oneof_name}* oneof;
                 }};
 
-                bool operator==(const {oneof_name}& other) const {{
-                    if (val_index == other.val_index) {{
+                bool operator==(const {oneof_name}& rhs) const {{
+                    if (val_index == rhs.val_index) {{
                         switch (val_index) {{
             {cases}
                             default: return false;
@@ -74,10 +99,10 @@ class OneOfType:
 
             {member_list}
 
-                size_t val_index;
+                size_t val_index{{0}};
 
             private:
-                std::shared_ptr<void> data;
+                std::shared_ptr<void> data{{nullptr}};
             }};
             """
         )
@@ -122,7 +147,7 @@ class OneOfType:
 
         member_list = ["Proxy<{}, {}> {};".format(v.cpp_type, v.number, v.name) for v in self.fields]
         initialiser_list = ["{}(this)".format(v.name) for v in self.fields]
-        cases = ["case {0}: return {1} == other.{1};".format(v.number, v.name) for v in self.fields]
+        cases = ["case {0}: return {1} == rhs.{1};".format(v.number, v.name) for v in self.fields]
 
         return (
             header_template.format(

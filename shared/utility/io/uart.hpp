@@ -3,8 +3,7 @@
 
 #include <string>
 
-namespace utility {
-namespace io {
+namespace utility::io {
 
     /**
      * @brief Class for managing a connection to a serial device
@@ -12,14 +11,14 @@ namespace io {
     class uart {
     private:
         std::string device;
-        int fd;
+        int fd = -1;
 
         /**
          * @brief Set the baud rate of the device
          *
          * @param baud the baud rate to set
          */
-        void set_baud(const int& baud);
+        void set_baud(const unsigned int& baud);
 
     public:
         /**
@@ -30,7 +29,7 @@ namespace io {
         /**
          * @brief Construct a new unconnected uart class
          */
-        uart();
+        uart() = default;
 
         /**
          * @brief Create a new uart class that is connected to the device `device`
@@ -44,7 +43,15 @@ namespace io {
          * @brief We can't copy these because otherwise we might close the device twice
          */
         uart(const uart& uart) = delete;
-        uart(uart&&)           = default;
+        uart& operator=(const uart& uart) = delete;
+
+        /**
+         * @brief Moving these will call the destructors, closing the fd before trying to use it again
+         * TODO(KipHamiltons) implement an RAII fd utility, which would allow the uarts to be moved without that issue
+         */
+        uart(uart&&)  = delete;
+        uart& operator=(uart&& uart) = delete;
+
 
         /**
          * @brief Destructor, close the device on destruction
@@ -56,14 +63,14 @@ namespace io {
          *
          * @return the native file descriptor
          */
-        int native_handle();
+        [[nodiscard]] int native_handle() const;
 
         /**
          * @brief Return true if the connection is valid
          *
          * @return true if the uart is connected and working, false otherwise
          */
-        bool connected() const;
+        [[nodiscard]] bool connected() const;
 
         /**
          * @brief Read from the device into a buffer
@@ -94,12 +101,11 @@ namespace io {
         void open(const std::string& device, const unsigned int& baud_rate = 57600);
 
         /**
-         * @brief Close the open file descriptor
+         * @brief Close the open file descriptor then reset fd = -1
          */
         void close();
     };
 
-}  // namespace io
-}  // namespace utility
+}  // namespace utility::io
 
 #endif  // UTILITY_IO_UART_HPP

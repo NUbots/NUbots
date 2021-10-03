@@ -26,14 +26,14 @@ extern "C" {
 }
 
 #include <iostream>
+#include <iterator>
 #include <sstream>
 #include <stack>
 #include <system_error>
 
 #include "utility/strutil/strutil.hpp"
 
-namespace utility {
-namespace file {
+namespace utility::file {
     std::string loadFromFile(const std::string& path) {
         std::ifstream data(path, std::ios::in);
 
@@ -45,15 +45,37 @@ namespace file {
         return stream.str();
     }
 
+    std::vector<uint8_t> readFile(const std::string& path) {
+        std::ifstream data(path, std::ios::binary);
+
+        // Stop eating new lines in binary mode
+        data.unsetf(std::ios::skipws);
+
+        // Get number of bytes in the file
+        std::streampos num_bytes;
+        data.seekg(0, std::ios::end);
+        num_bytes = data.tellg();
+        data.seekg(0, std::ios::beg);
+
+        // Reserve capacity
+        std::vector<uint8_t> vec;
+        vec.reserve(num_bytes);
+
+        // Read the data
+        vec.insert(vec.begin(), std::istream_iterator<uint8_t>(data), std::istream_iterator<uint8_t>());
+
+        return vec;
+    }
+
     bool exists(const std::string& path) {
         // Shamelessly stolen from: http://stackoverflow.com/a/12774387/1387006
-        struct stat buffer;
+        struct stat buffer {};
         return (stat(path.c_str(), &buffer) == 0);
     }
 
     std::chrono::system_clock::time_point getModificationTime(const std::string& path) {
-        int status;
-        struct stat st_buf;
+        int status = 0;
+        struct stat st_buf {};
 
         // Get the status of the file system object.
         status = stat(path.c_str(), &st_buf);
@@ -67,8 +89,8 @@ namespace file {
     // Test if a passed path is a directory
     bool isDir(const std::string& path) {
 
-        int status;
-        struct stat st_buf;
+        int status = 0;
+        struct stat st_buf {};
 
         // Get the status of the file system object.
         status = stat(path.c_str(), &st_buf);
@@ -81,8 +103,8 @@ namespace file {
     }
 
     void makeDir(const std::string& path) {
-        int status;
-        status = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+        int status = 0;
+        status     = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
         if (status != 0) {
             throw std::system_error(errno, std::system_category(), "Error creating directory '" + path + "'.");
@@ -92,7 +114,7 @@ namespace file {
     // List the contents of a directory
     std::vector<std::string> listDir(const std::string& path) {
 
-        auto dir = opendir(path.c_str());
+        auto* dir = opendir(path.c_str());
         std::vector<std::string> result;
 
         if (dir != nullptr) {
@@ -104,7 +126,7 @@ namespace file {
                     continue;
                 }
 
-                if (ent->d_type & DT_DIR) {
+                if ((ent->d_type & DT_DIR) != 0) {
                     result.push_back(file + "/");
                 }
                 else {
@@ -115,7 +137,7 @@ namespace file {
             closedir(dir);
         }
         else {
-            // TODO Throw an error or something
+            throw std::runtime_error("Attempted to list directory which didn't exist.");
         }
 
         return result;
@@ -136,13 +158,10 @@ namespace file {
                 return {"/", "/"};
             }
             // Otherwise remove the slash and call recursivly
-            else {
-                return pathSplit(input.substr(0, input.size() - 1));
-            }
+            return pathSplit(input.substr(0, input.size() - 1));
         }
-        else {
-            return {input.substr(0, lastSlash), input.substr(lastSlash + 1, input.size())};
-        }
+        // Else, the slash was not the last character
+        return {input.substr(0, lastSlash), input.substr(lastSlash + 1, input.size())};
     }
 
     std::vector<std::string> listFiles(const std::string& directory, bool recursive) {
@@ -184,9 +203,9 @@ namespace file {
         std::vector<std::string> elements;
 
         // Get elements of the path to create.
-        if (parent == true) {
+        if (parent) {
             elements         = utility::strutil::split(directory, '/');
-            elements.front() = elements.front() == "" ? "/" : elements.front();
+            elements.front() = elements.front().empty() ? "/" : elements.front();
         }
         else {
             elements.push_back(directory);
@@ -238,11 +257,10 @@ namespace file {
         int rc = utimensat(AT_FDCWD, file.c_str(), nullptr, 0);
 
         // Failed to update timestamp.
-        if (rc) {
+        if (rc != 0) {
             throw std::runtime_error("Cannot update timestamp for '" + file + "'.");
             return;
         }
     }
 
-}  // namespace file
-}  // namespace utility
+}  // namespace utility::file

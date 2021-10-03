@@ -2,7 +2,7 @@
 log_level: INFO
 
 # The settings for each decompressor
-# These decompressors will be tried in order per camera_id until a free compressor is found
+# These decompressors will be tried in order per camera id until a free decompressor is found
 decompressors:
   - name: turbojpeg
     concurrent: 2

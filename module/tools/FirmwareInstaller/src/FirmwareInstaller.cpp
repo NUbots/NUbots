@@ -11,8 +11,7 @@
 #include "utility/io/uart.hpp"
 #include "utility/strutil/strutil.hpp"
 
-namespace module {
-namespace tools {
+namespace module::tools {
 
     using extension::Configuration;
 
@@ -29,7 +28,7 @@ namespace tools {
         on<Configuration>("FirmwareInstaller.yaml").then([this](const Configuration& config) {
             device = config["device"].as<std::string>();
 
-            for (auto& f : config["firmwares"].config) {
+            for (const auto& f : config["firmwares"].config) {
                 std::pair<std::string, std::string> name;
                 name.first       = utility::strutil::toUpper(f["device"].as<std::string>());
                 name.second      = utility::strutil::toUpper(f["battery"].as<std::string>());
@@ -217,8 +216,8 @@ namespace tools {
                     // Give the bootloader time to catch its breath
                     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-                    // TODO write in such a way that you get progress
-                    ssize_t count;
+                    // TODO(HardwareTeam,DevOpsTeam): write in such a way that you get progress
+                    ssize_t count = 0;
                     for (count = 0; static_cast<size_t>(count) < cm740.firmware.size();) {
                         ssize_t writeSize = 64;
 
@@ -300,5 +299,4 @@ namespace tools {
         std::cout << "Choice: " << std::flush;
     }
 
-}  // namespace tools
-}  // namespace module
+}  // namespace module::tools

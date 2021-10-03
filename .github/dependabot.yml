@@ -1,0 +1,28 @@
+# Required fields are `version` and `updates`
+version: 2
+updates:
+  # Required fields are `package-ecosystem`, `directory`, and `schedule.interval`
+
+  # Maintain dependencies for NUsight2
+  # Package ecosystem for yarn is npm
+  - package-ecosystem: npm
+    directory: /nusight2
+    labels:
+      - "-Dependencies"
+      - "P-NUsight2"
+      - "G-DevTools"
+    reviewers:
+      - "NUbots/nusight"
+    schedule:
+      interval: "monthly" # Checks on the first day of each month
+
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    labels:
+      - "-Dependencies"
+      - "G-DevOps-QA"
+    reviewers:
+      - "NUbots/Active/Devops"
+    schedule:
+      interval: "daily"

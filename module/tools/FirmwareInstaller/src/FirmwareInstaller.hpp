@@ -4,8 +4,7 @@
 #include <nuclear>
 #include <string>
 
-namespace module {
-namespace tools {
+namespace module::tools {
 
     class FirmwareInstaller : public NUClear::Reactor {
     public:
@@ -17,7 +16,7 @@ namespace tools {
         std::string device;
         struct Firmware {
             std::vector<uint8_t> firmware;
-            uint8_t checksum;
+            uint8_t checksum = 0;
         };
 
         std::map<std::pair<std::string, std::string>, Firmware> firmwares;
@@ -33,7 +32,6 @@ namespace tools {
         void showBatteryMenu() const;
     };
 
-}  // namespace tools
-}  // namespace module
+}  // namespace module::tools
 
 #endif  // MODULE_TOOLS_FIRMWAREINSTALLER_HPP

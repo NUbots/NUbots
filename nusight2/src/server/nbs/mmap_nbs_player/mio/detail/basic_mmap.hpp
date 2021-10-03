@@ -34,8 +34,7 @@
     #define INVALID_HANDLE_VALUE -1
 #endif  // ifdef _WIN32
 
-namespace mio {
-namespace detail {
+namespace mio::detail {
 
     enum { map_entire_file = 0 };
 
@@ -200,8 +199,7 @@ namespace detail {
     template <typename ByteT>
     bool operator>=(const basic_mmap<ByteT>& a, const basic_mmap<ByteT>& b);
 
-}  // namespace detail
-}  // namespace mio
+}  // namespace mio::detail
 
 #include "basic_mmap.ipp"
 

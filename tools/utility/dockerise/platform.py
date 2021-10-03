@@ -23,6 +23,7 @@ def selected(repository):
             ).communicate()[0],
         )
 
+        # Obtain only the tag of the image, so from nubots:generic we only obtain generic
         names = [
             tag.split(":")[-1]
             for tag in img_info[0]["RepoTags"]
@@ -38,7 +39,7 @@ def selected(repository):
         else:
             print("WARNING There are multiple platforms with the same image tag.")
             print("        The possible tags are [{}]".format(", ".join(names)))
-            platform = list(sorted(names))[0]
+            platform = sorted(names)[0]
             print("        The platform chosen will be {}".format(platform))
             return platform
 
@@ -67,6 +68,7 @@ def build(repository, platform):
 
     remote_tag = "{0}/{0}:{1}".format(repository, platform)
     local_tag = "{0}:{1}".format(repository, platform)
+    selected_tag = "{}:selected".format(repository)
     dockerdir = os.path.join(b.project_dir, "docker")
 
     # Go through all the files and try to ensure that their permissions are correct
@@ -82,6 +84,15 @@ def build(repository, platform):
     if subprocess.run(["docker", "buildx", "inspect", builder_name], stderr=DEVNULL, stdout=DEVNULL).returncode != 0:
         subprocess.run(["docker", "buildx", "create", "--name", builder_name], stderr=DEVNULL, stdout=DEVNULL)
     subprocess.run(["docker", "buildx", "use", builder_name])
+
+    # Get docker host IP from bridge network
+    docker_gateway = (
+        subprocess.check_output(
+            ["docker", "network", "inspect", "bridge", "--format", "{{range .IPAM.Config}}{{.Gateway}}{{end}}"],
+        )
+        .strip()
+        .decode("ascii")
+    )
 
     # Build the image!
     err = pty.spawn(
@@ -99,6 +110,7 @@ def build(repository, platform):
             "--build-arg",
             "user_uid={}".format(os.getuid()),
             "--output=type=docker",
+            "--add-host=host.docker.internal:{}".format(docker_gateway),
             dockerdir,
         ]
     )
@@ -106,11 +118,19 @@ def build(repository, platform):
         cprint("Docker build returned exit code {}".format(err), "red", attrs=["bold"])
         exit(err)
 
-    # If we were building the selected platform then update our selected tag
-    if _selected:
-        err = subprocess.run(
-            ["docker", "image", "tag", "{}:{}".format(repository, platform), "{}:selected".format(repository)],
-            stdout=subprocess.DEVNULL,
-        ).returncode
-        if err != 0:
-            raise RuntimeError("docker image tag returned a non-zero exit code")
+
+def pull(repository, platform):
+    # Define our tag strings
+    remote_tag = "{0}/{0}:{1}".format(repository, platform)
+    local_tag = "{0}:{1}".format(repository, platform)
+    selected_tag = "{}:selected".format(repository)
+
+    print("Pulling remote image", remote_tag)
+    err = subprocess.run(["docker", "pull", remote_tag]).returncode
+    if err != 0:
+        raise RuntimeError("docker image pull returned a non-zero exit code")
+
+    print("Tagging ", remote_tag, "as", local_tag)
+    err = subprocess.run(["docker", "tag", remote_tag, local_tag]).returncode
+    if err != 0:
+        raise RuntimeError("docker image tag returned a non-zero exit code")

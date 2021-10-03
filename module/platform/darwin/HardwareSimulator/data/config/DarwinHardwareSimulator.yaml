@@ -2,14 +2,7 @@
 imu_drift_rate: 0.0
 
 noise:
-  accelerometer:
-    x: 0.01
-    y: 0.01
-    z: 0.01
+  accelerometer: [0.01, 0.01, 0.01]
+  gyroscope: [0.01, 0.01, 0.01]
 
-  gyroscope:
-    x: 0.01
-    y: 0.01
-    z: 0.01
-
-bodyTilt: 0 #25 * pi / 180 # set this to be the same as the WalkEngine.yaml:stance:bodyTilt TODO: read this from WalkEngine
+body_tilt: 0 #25 * pi / 180 # set this to be the same as the WalkEngine.yaml:stance:bodyTilt TODO: read this from WalkEngine

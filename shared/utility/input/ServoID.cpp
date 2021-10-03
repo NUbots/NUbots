@@ -20,52 +20,34 @@
 
 #include <stdexcept>
 
-namespace utility {
-namespace input {
+namespace utility::input {
 
-    ServoID::ServoID(std::string const& str) : value(Value::R_SHOULDER_PITCH) {
-        if (str == "R_SHOULDER_PITCH")
-            value = Value::R_SHOULDER_PITCH;
-        else if (str == "L_SHOULDER_PITCH")
-            value = Value::L_SHOULDER_PITCH;
-        else if (str == "R_SHOULDER_ROLL")
-            value = Value::R_SHOULDER_ROLL;
-        else if (str == "L_SHOULDER_ROLL")
-            value = Value::L_SHOULDER_ROLL;
-        else if (str == "R_ELBOW")
-            value = Value::R_ELBOW;
-        else if (str == "L_ELBOW")
-            value = Value::L_ELBOW;
-        else if (str == "R_HIP_YAW")
-            value = Value::R_HIP_YAW;
-        else if (str == "L_HIP_YAW")
-            value = Value::L_HIP_YAW;
-        else if (str == "R_HIP_ROLL")
-            value = Value::R_HIP_ROLL;
-        else if (str == "L_HIP_ROLL")
-            value = Value::L_HIP_ROLL;
-        else if (str == "R_HIP_PITCH")
-            value = Value::R_HIP_PITCH;
-        else if (str == "L_HIP_PITCH")
-            value = Value::L_HIP_PITCH;
-        else if (str == "R_KNEE")
-            value = Value::R_KNEE;
-        else if (str == "L_KNEE")
-            value = Value::L_KNEE;
-        else if (str == "R_ANKLE_PITCH")
-            value = Value::R_ANKLE_PITCH;
-        else if (str == "L_ANKLE_PITCH")
-            value = Value::L_ANKLE_PITCH;
-        else if (str == "R_ANKLE_ROLL")
-            value = Value::R_ANKLE_ROLL;
-        else if (str == "L_ANKLE_ROLL")
-            value = Value::L_ANKLE_ROLL;
-        else if (str == "HEAD_YAW")
-            value = Value::HEAD_YAW;
-        else if (str == "HEAD_PITCH")
-            value = Value::HEAD_PITCH;
-        else
+    ServoID::ServoID(std::string const& str) {
+        // clang-format off
+        if      (str == "R_SHOULDER_PITCH") { value = Value::R_SHOULDER_PITCH; }
+        else if (str == "L_SHOULDER_PITCH") { value = Value::L_SHOULDER_PITCH; }
+        else if (str == "R_SHOULDER_ROLL")  { value = Value::R_SHOULDER_ROLL; }
+        else if (str == "L_SHOULDER_ROLL")  { value = Value::L_SHOULDER_ROLL; }
+        else if (str == "R_ELBOW")          { value = Value::R_ELBOW; }
+        else if (str == "L_ELBOW")          { value = Value::L_ELBOW; }
+        else if (str == "R_HIP_YAW")        { value = Value::R_HIP_YAW; }
+        else if (str == "L_HIP_YAW")        { value = Value::L_HIP_YAW; }
+        else if (str == "R_HIP_ROLL")       { value = Value::R_HIP_ROLL; }
+        else if (str == "L_HIP_ROLL")       { value = Value::L_HIP_ROLL; }
+        else if (str == "R_HIP_PITCH")      { value = Value::R_HIP_PITCH; }
+        else if (str == "L_HIP_PITCH")      { value = Value::L_HIP_PITCH; }
+        else if (str == "R_KNEE")           { value = Value::R_KNEE; }
+        else if (str == "L_KNEE")           { value = Value::L_KNEE; }
+        else if (str == "R_ANKLE_PITCH")    { value = Value::R_ANKLE_PITCH; }
+        else if (str == "L_ANKLE_PITCH")    { value = Value::L_ANKLE_PITCH; }
+        else if (str == "R_ANKLE_ROLL")     { value = Value::R_ANKLE_ROLL; }
+        else if (str == "L_ANKLE_ROLL")     { value = Value::L_ANKLE_ROLL; }
+        else if (str == "HEAD_YAW")         { value = Value::HEAD_YAW; }
+        else if (str == "HEAD_PITCH")       { value = Value::HEAD_PITCH; }
+        else {
             throw std::runtime_error("String " + str + " did not match any enum for ServoID");
+        }
+        // clang-format on
     }
 
     ServoID::operator std::string() const {
@@ -98,5 +80,4 @@ namespace input {
     std::ostream& operator<<(std::ostream& out, const ServoID& val) {
         return out << static_cast<std::string>(val);
     }
-}  // namespace input
-}  // namespace utility
+}  // namespace utility::input

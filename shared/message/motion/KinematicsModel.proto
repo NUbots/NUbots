@@ -23,8 +23,12 @@ package message.motion;
 import "Vector.proto";
 import "Matrix.proto";
 
+/**
+ * Contains lots of kinematics config measurements and transforms.
+ * See `KinematicsConfiguration.yaml` for more detail on a particular variable.
+ * Convention: all values positive
+ */
 message KinematicsModel {
-    // Convention: all values positive
     message Leg {
         float HIP_OFFSET_X                = 1;
         float HIP_OFFSET_Y                = 2;
@@ -57,7 +61,7 @@ message KinematicsModel {
         float CAMERA_DECLINATION_ANGLE_OFFSET = 8;
         float INTERPUPILLARY_DISTANCE         = 13;
 
-        // Head movement limits
+        // Head movement limits, in radians
         float MAX_YAW   = 9;
         float MIN_YAW   = 10;
         float MAX_PITCH = 11;
@@ -79,6 +83,8 @@ message KinematicsModel {
         float LOWER_ARM_Z_OFFSET         = 12;
     }
 
+    /// {CoM_x, CoM_y, CoM_z, mass} in SI units
+    /// A Particles CoM is in particle space
     message MassModel {
         vec4 head        = 1;
         vec4 arm_upper   = 2;
@@ -91,6 +97,12 @@ message KinematicsModel {
         vec4 foot        = 9;
     }
 
+    /// Particle inertial tensors (in particle space) with respect to the CoM of
+    /// the particle
+    ///  [[xx, xy, xz],
+    ///  [xy, yy, yz],
+    ///  [xz, yz, zz]]
+    /// SI Units
     message TensorModel {
         mat3 head        = 1;
         mat3 arm_upper   = 2;
@@ -103,9 +115,9 @@ message KinematicsModel {
         mat3 foot        = 9;
     }
 
-    Leg         leg         = 1;
-    Head        head        = 2;
-    Arm         arm         = 3;
-    MassModel   massModel   = 4;
-    TensorModel tensorModel = 5;
+    Leg         leg          = 1;
+    Head        head         = 2;
+    Arm         arm          = 3;
+    MassModel   mass_model   = 4;
+    TensorModel tensor_model = 5;
 }

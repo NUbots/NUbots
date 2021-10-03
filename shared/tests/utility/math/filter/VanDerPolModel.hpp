@@ -22,8 +22,7 @@
 
 #include <Eigen/Core>
 
-namespace shared {
-namespace tests {
+namespace shared::tests {
 
     template <typename Scalar>
     class VanDerPolModel {
@@ -43,6 +42,8 @@ namespace tests {
         // number and range of reset particles
         int n_rogues         = 0;
         StateVec reset_range = StateVec::Zero();
+
+        int n_particles = 100;
 
         StateVec time(const StateVec& state, const Scalar& deltaT) {
             StateVec new_state(state[X2], (Scalar(1) - state[X1] * state[X1]) * state[X2] - state[X1]);
@@ -71,10 +72,13 @@ namespace tests {
         int getRogueCount() const {
             return n_rogues;
         }
-        StateVec getRogueRange() const {
+        [[nodiscard]] StateVec get_rogue() const {
             return reset_range;
         }
+
+        [[nodiscard]] int getParticleCount() const {
+            return n_particles;
+        }
     };
-}  // namespace tests
-}  // namespace shared
+}  // namespace shared::tests
 #endif  // SHARED_TESTS_VANDERPOLMODEL_HPP

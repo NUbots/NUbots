@@ -6,8 +6,7 @@ extern "C" {
 
 #include "aravis_wrap.hpp"
 
-namespace module {
-namespace input {
+namespace module::input {
 
     CameraContext::TimeCorrection sync_clocks(ArvDevice* device) {
         using namespace std::chrono;
@@ -19,7 +18,7 @@ namespace input {
 
         // This is what we return if we can't work out the timestamp offset now
         // Note that all these times are measured in nanoseconds
-        CameraContext::TimeCorrection output;
+        CameraContext::TimeCorrection output{};
         output.live   = true;
         output.offset = 0;
         output.kf.p   = 10e6 * 10e6;    // Initial stddev of about 10 milliseconds
@@ -27,7 +26,7 @@ namespace input {
         output.kf.q   = 1e3 * 1e3;      // 1 microsecond standard deviation of process noise
 
         // The samples of the two clocks
-        std::array<Sample, 20> samples;
+        std::array<Sample, 20> samples{};
         samples.fill(Sample{0, 0, false});
 
         // Commands used to latch the timestamp and read the timestamp
@@ -47,8 +46,9 @@ namespace input {
         }
 
         for (auto& s : samples) {
-            // Get the time before and after sending the command. We know neither are correct and it's likely somewhere
-            // in the middle that the actual latching took place. Therefore take the average of the two to get closer.
+            // Get the time before and after sending the command. We know neither are correct and it's likely
+            // somewhere in the middle that the actual latching took place. Therefore take the average of the two to
+            // get closer.
             try {
 
                 NUClear::clock::time_point t1 = NUClear::clock::now();
@@ -106,6 +106,4 @@ namespace input {
             return output;
         }
     }
-
-}  // namespace input
-}  // namespace module
+}  // namespace module::input

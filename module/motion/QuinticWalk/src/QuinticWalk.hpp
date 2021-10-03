@@ -1,5 +1,5 @@
-#ifndef MODULE_MOTION_QUINTICWALK_H
-#define MODULE_MOTION_QUINTICWALK_H
+#ifndef MODULE_MOTION_QUINTICWALK_HPP
+#define MODULE_MOTION_QUINTICWALK_HPP
 
 #include <map>
 #include <memory>
@@ -8,13 +8,14 @@
 
 #include "WalkEngine.hpp"
 
+#include "extension/Configuration.hpp"
+
 #include "message/behaviour/ServoCommand.hpp"
 #include "message/motion/KinematicsModel.hpp"
 
 #include "utility/input/ServoID.hpp"
 
-namespace module {
-namespace motion {
+namespace module::motion {
 
     class QuinticWalk : public NUClear::Reactor {
 
@@ -29,44 +30,49 @@ namespace motion {
         size_t subsumptionId = 1;
 
         // Reaction handle for the main update loop, disabling when not moving will save unnecessary CPU
-        ReactionHandle update_handle;
-        ReactionHandle imu_reaction;
+        ReactionHandle update_handle{};
+        ReactionHandle imu_reaction{};
 
         void calculateJointGoals();
-        float getTimeDelta();
-        std::unique_ptr<std::vector<message::behaviour::ServoCommand>> motionLegs(
+        [[nodiscard]] float getTimeDelta();
+        [[nodiscard]] std::unique_ptr<message::behaviour::ServoCommands> motion(
             const std::vector<std::pair<utility::input::ServoID, float>>& joints);
 
-        struct {
-            Eigen::Vector3f max_step;
-            float max_step_xy;
+        struct Config {
+            Eigen::Vector3f max_step = Eigen::Vector3f::Zero();
+            float max_step_xy        = 0.0f;
 
-            bool imu_active;
-            float imu_pitch_threshold;
-            float imu_roll_threshold;
-        } config;
+            bool imu_active           = true;
+            float imu_pitch_threshold = 0.0f;
+            float imu_roll_threshold  = 0.0f;
 
-        Eigen::Vector3f current_orders;
-        bool is_left_support;
-        bool falling;
-        bool first_run;
+            WalkingParameter params{};
 
-        NUClear::clock::time_point last_update_time;
+            std::map<utility::input::ServoID, float> jointGains{};
+            std::vector<std::pair<utility::input::ServoID, float>> arm_positions{};
+        } normal_config{}, goalie_config{};
 
-        QuinticWalkEngine walk_engine;
-        WalkingParameter params;
+        static void load_quintic_walk(const ::extension::Configuration& cfg, Config& config);
 
-        message::motion::KinematicsModel kinematicsModel;
+        Config& current_config = normal_config;
+        bool first_config      = true;
 
-        Eigen::Vector3f trunk_pos;
-        Eigen::Vector3f trunk_axis;
-        Eigen::Vector3f foot_pos;
-        Eigen::Vector3f foot_axis;
+        Eigen::Vector3f current_orders = Eigen::Vector3f::Zero();
+        bool is_left_support           = true;
+        bool falling                   = false;
+        bool first_run                 = true;
 
-        std::map<utility::input::ServoID, float> jointGains;
+        NUClear::clock::time_point last_update_time{};
+
+        QuinticWalkEngine walk_engine{};
+
+        message::motion::KinematicsModel kinematicsModel{};
+
+        Eigen::Vector3f trunk_pos  = Eigen::Vector3f::Zero();
+        Eigen::Vector3f trunk_axis = Eigen::Vector3f::Zero();
+        Eigen::Vector3f foot_pos   = Eigen::Vector3f::Zero();
+        Eigen::Vector3f foot_axis  = Eigen::Vector3f::Zero();
     };
+}  // namespace module::motion
 
-}  // namespace motion
-}  // namespace module
-
-#endif
+#endif  // MODULE_MOTION_QUINTICWALK_HPP
