@@ -148,12 +148,7 @@ namespace module::input {
      */
     class SpeechIntent : public NUClear::Reactor {
     private:
-        /// The configuration variables for this reactor
-        struct {
-            
-        } config;
         bool output_enabled = true;
-        // MicProcHandles handles;
 
         SpawnedProcess voice2json_proc = {};
 

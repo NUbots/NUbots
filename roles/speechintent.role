@@ -1,5 +1,5 @@
 nuclear_role(
-    extension::FileWatcher
-    support::logging::ConsoleLogHandler
-    input::SpeechIntent
+  extension::FileWatcher
+  support::logging::ConsoleLogHandler
+  input::SpeechIntent
 )
