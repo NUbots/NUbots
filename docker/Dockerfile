@@ -383,12 +383,12 @@ RUN makepkg
 RUN sudo pacman -U --noconfirm python-pybindgen-0.20.1-1-x86_64.pkg.tar.zst
 
 WORKDIR /home/nubots/phonetisaurus-git
-COPY --chown=nubots:nubots PKGBUILD/phonetisaurus.sh /home/nubots/phonetisaurus-git/PKGBUILD
 COPY --from=openfst /home/nubots/openfst/openfst-1.7.2-1-x86_64.pkg.tar.zst /home/nubots/phonetisaurus-git/
 RUN sudo pacman -U --noconfirm openfst-1.7.2-1-x86_64.pkg.tar.zst
 
+COPY --chown=nubots:nubots PKGBUILD/phonetisaurus.sh /home/nubots/phonetisaurus-git/PKGBUILD
 RUN makepkg || true
-RUN test -f phonetisaurus-git-r171.23f182f-1-x86_64.pkg.tar.zst
+RUN test -f phonetisaurus-0.9.1-1-x86_64.pkg.tar.zst
 
 FROM base
 
@@ -397,7 +397,7 @@ COPY --from=kaldi               /home/nubots/kaldi/kaldi-5.5.r9195.3b8a97d85-1-x
 COPY --from=openfst             /home/nubots/openfst/openfst-1.7.2-1-x86_64.pkg.tar.zst /home/nubots/packages/
 COPY --from=ngram               /home/nubots/opengrm-ngram/ngram-1.3.7-1-x86_64.pkg.tar.zst /home/nubots/packages/
 COPY --from=phonetisaurus       /home/nubots/python-pybindgen/python-pybindgen-0.20.1-1-x86_64.pkg.tar.zst /home/nubots/packages/
-COPY --from=phonetisaurus       /home/nubots/phonetisaurus-git/phonetisaurus-git-r171.23f182f-1-x86_64.pkg.tar.zst /home/nubots/packages/
+COPY --from=phonetisaurus       /home/nubots/phonetisaurus-git/phonetisaurus-0.9.1-1-x86_64.pkg.tar.zst /home/nubots/packages/
 
 WORKDIR /home/nubots/packages
 RUN sudo pacman -U --noconfirm \
@@ -405,7 +405,7 @@ RUN sudo pacman -U --noconfirm \
     openfst-1.7.2-1-x86_64.pkg.tar.zst \
     ngram-1.3.7-1-x86_64.pkg.tar.zst \
     python-pybindgen-0.20.1-1-x86_64.pkg.tar.zst \
-    phonetisaurus-git-r171.23f182f-1-x86_64.pkg.tar.zst
+    phonetisaurus-0.9.1-1-x86_64.pkg.tar.zst
 RUN install-package alsa-utils
 
 RUN rm -r /home/nubots/packages
