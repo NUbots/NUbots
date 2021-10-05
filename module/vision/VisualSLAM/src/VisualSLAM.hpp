@@ -1,7 +1,13 @@
 #ifndef MODULE_VISION_VISUALSLAM_HPP
 #define MODULE_VISION_VISUALSLAM_HPP
 
+// System.
+#include <fstream>
+#include <mutex>
+// NUBots.
 #include <nuclear>
+// NUBots.
+#include "ORB-SLAM/System.h"
 
 
 namespace module::vision
@@ -21,7 +27,27 @@ namespace module::vision
             std::vector<std::string> LoadImageDatabase(const std::string& databaseDirectory);
 
         private:
+            //////////////////////////////////////////////
+            // SLAM components.
+            std::unique_ptr<ORB_SLAM2::System> slamSystem;
+            std::vector<std::pair<std::string, std::string>> slamSettings;
+            std::mutex mutex;
+            //////////////////////////////////////////////
 
+            //////////////////////////////////////////////
+            // VisualSLAM.yaml settings for data logging.
+            bool saveImages;
+            bool saveDataLog;
+            std::ofstream outputFileStream;
+            //////////////////////////////////////////////
+
+             //////////////////////////////////////////////
+            // VisualSLAM.yaml settings for database.
+            bool useImageDatabase;
+            std::string imageDatabaseDirectory;
+            // Local image database - vector of sorted filepaths.
+            std::vector<std::string> imageDataset;
+            //////////////////////////////////////////////
     };
 }
 

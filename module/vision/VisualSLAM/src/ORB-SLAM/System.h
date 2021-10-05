@@ -13,6 +13,7 @@
 #include "ORBVocabulary.h"
 #include "Viewer.h"
 
+
 namespace ORB_SLAM2
 {
     class Viewer;
@@ -26,7 +27,7 @@ namespace ORB_SLAM2
     {
     public:
         // Initialize the SLAM system. It launches the Local Mapping, Loop Closing and Viewer threads.
-        System(const std::vector<std::pair<std::string, std::string>>& parameters, const bool bUseViewer);
+        System(const std::vector<std::pair<std::string, std::string>>& parameters, const bool bUseViewer = false);
 
         // Process the given monocular frame.
         // Input images: grayscale (CV_8U) only - must be converted before passing.
@@ -50,17 +51,17 @@ namespace ORB_SLAM2
         // This function must be called before saving the trajectory.
         void Shutdown();
 
-        // Save keyframe poses in the TUM RGB-D dataset format.
-        // This method works for all sensor input.
-        // Call first Shutdown()
-        // See format details at: http://vision.in.tum.de/data/datasets/rgbd-dataset
-        void SaveKeyFrameTrajectoryTUM(const string& filename);
+        // Save keyframe poses, call Shutdown() first.
+        void SaveTrajectory(const string& filename);
 
         // Information from most recent processed frame
         // You can call this right after TrackMonocular.
         int GetTrackingState();
         std::vector<MapPoint*> GetTrackedMapPoints();
         std::vector<cv::KeyPoint> GetTrackedKeyPointsUn();
+
+    private:
+        bool HasSuffix(const std::string& str, const std::string& suffix);
 
     private:
 

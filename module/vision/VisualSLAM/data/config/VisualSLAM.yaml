@@ -1,20 +1,34 @@
 #--------------------------------------------------------------------------------------------
+# Notes
+#--------------------------------------------------------------------------------------------
+# Copy saved images from docker:
+# - docker cp <containerID>:/home/nubots/build/images /home/yourUserName
+# Copy log file from docker:
+# - docker cp <containerID>:/home/nubots/build/logging /home/yourUserName
+# List docker containers for an id:
+# - docker ps
+#--------------------------------------------------------------------------------------------
+
+
+#--------------------------------------------------------------------------------------------
 # Controls the minimum log level that NUClear log will display.
 log_level: DEBUG
 #--------------------------------------------------------------------------------------------
 
 
 #--------------------------------------------------------------------------------------------
-# Main parameters:
+# Main parameters
 #--------------------------------------------------------------------------------------------
 # ORB-SLAM vocabulary file, can be .txt or .bin.
 Vocabulary_File: "./vocabulary/ORBvoc.bin"
+# Save received images to file.
+saveImages: "True"
+# Save SLAM output to file.
+saveDataLog: "True"
 # Use local images from disk as a simulated camera input.
-useImageDatabase: "False"
-# Database stream directory if above is True:
+useImageDatabase: "True"
+# Database stream directory.
 imageDatabaseDirectory: "./database/database_01"
-# imageDatabaseDirectory: "./database/database_02"  # JPG
-# imageDatabaseDirectory: "./database/database_03"  # PNG
 #--------------------------------------------------------------------------------------------
 
 

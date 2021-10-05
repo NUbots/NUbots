@@ -28,6 +28,8 @@ public:
     // Copy constructor.
     Frame(const Frame &frame);
 
+    Frame& operator=(const Frame&);
+
     // Constructor for Monocular cameras.
     Frame(const cv::Mat &imGray, const double &timeStamp, ORBextractor* extractor,ORBVocabulary* voc, cv::Mat &K, cv::Mat &distCoef, const float &bf);
 

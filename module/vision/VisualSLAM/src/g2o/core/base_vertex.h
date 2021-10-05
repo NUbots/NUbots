@@ -59,7 +59,8 @@ namespace g2o {
 
     static const int Dimension = D;           ///< dimension of the estimate (minimal) in the manifold space
 
-    typedef Eigen::Map<Matrix<double, D, D>, Matrix<double,D,D>::Flags & AlignedBit ? Aligned : Unaligned >  HessianBlockType;
+    // REPLACEMENT - Aligned128 replaced -> EIGEN_DEPRECATED const unsigned int AlignedBit = 0x80.
+    typedef Eigen::Map<Matrix<double, D, D>, Matrix<double,D,D>::Flags & Aligned128 ? Aligned : Unaligned >  HessianBlockType;
 
   public:
     BaseVertex();

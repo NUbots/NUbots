@@ -8,12 +8,6 @@
 
 namespace ORB_SLAM2
 {
-    bool has_suffix(const std::string &str, const std::string& suffix)
-    {
-        std::size_t index = str.find(suffix, str.size() - suffix.size());
-        return (index != std::string::npos);
-    }
-
     System::System(const std::vector<std::pair<std::string, std::string>>& parameters, const bool bUseViewer)
         :
         mpViewer(static_cast<Viewer*>(nullptr)),
@@ -28,7 +22,7 @@ namespace ORB_SLAM2
         {
             if (parameter.first == "Vocabulary_File")
             {
-                if (has_suffix(parameter.second, ".bin"))
+                if (HasSuffix(parameter.second, ".bin"))
                 {
                     vocabularyLoaded = mpVocabulary->loadFromBinaryFile(parameter.second);
                 }
@@ -38,7 +32,7 @@ namespace ORB_SLAM2
                 }
             }
         }
-        if(vocabularyLoaded == false)
+        if (vocabularyLoaded == false)
         {
             std::cout << "VSLAM - could not load provided vocabulary file." << std::endl;
             exit(-1);
@@ -54,15 +48,14 @@ namespace ORB_SLAM2
         mpFrameDrawer = new FrameDrawer(mpMap);
         mpMapDrawer = new MapDrawer(mpMap, parameters);
 
-        //Initialize the Tracking thread
-        //(it will live in the main thread of execution, the one that called this constructor)
+        // Initialize tracker
         mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer, mpMap, mpKeyFrameDatabase, parameters);
 
-        //Initialize the Local Mapping thread and launch
+        // Initialize the Local Mapping
         mpLocalMapper = new LocalMapping(mpMap);
         mptLocalMapping = new thread(&ORB_SLAM2::LocalMapping::Run,mpLocalMapper);
 
-        //Initialize the Loop Closing thread and launch
+        // Initialize the Loop Closing
         mpLoopCloser = new LoopClosing(mpMap, mpKeyFrameDatabase, mpVocabulary);
         mptLoopClosing = new thread(&ORB_SLAM2::LoopClosing::Run, mpLoopCloser);
 
@@ -175,7 +168,7 @@ namespace ORB_SLAM2
         mpLocalMapper->RequestFinish();
         mpLoopCloser->RequestFinish();
 
-        if(mpViewer)
+        if (mpViewer)
         {
             mpViewer->RequestFinish();
             while(!mpViewer->isFinished())
@@ -184,7 +177,7 @@ namespace ORB_SLAM2
             }
         }
 
-        // Wait until all thread have effectively stopped
+        // Wait until all thread have effectively stopped.
         while(!mpLocalMapper->isFinished() || !mpLoopCloser->isFinished() || mpLoopCloser->isRunningGBA())
         {
             usleep(5000);
@@ -196,40 +189,41 @@ namespace ORB_SLAM2
         }
     }
 
-    void System::SaveKeyFrameTrajectoryTUM(const string &filename)
+    void System::SaveTrajectory(const string& filename)
     {
-        cout << endl << "Saving keyframe trajectory to " << filename << " ..." << endl;
-
         vector<KeyFrame*> vpKFs = mpMap->GetAllKeyFrames();
-        sort(vpKFs.begin(),vpKFs.end(),KeyFrame::lId);
+        sort(vpKFs.begin(), vpKFs.end(), KeyFrame::lId);
 
         // Transform all keyframes so that the first keyframe is at the origin.
         // After a loop closure the first keyframe might not be at the origin.
-        //cv::Mat Two = vpKFs[0]->GetPoseInverse();
+        // cv::Mat Two = vpKFs[0]->GetPoseInverse();
 
         ofstream f;
         f.open(filename.c_str());
         f << fixed;
 
-        for(size_t i=0; i<vpKFs.size(); i++)
+        for (size_t i = 0; i < vpKFs.size(); i++)
         {
             KeyFrame* pKF = vpKFs[i];
+            // pKF->SetPose(pKF->GetPose()*Two);
 
-           // pKF->SetPose(pKF->GetPose()*Two);
-
-            if(pKF->isBad())
+            // isBad() is assumed to be a redundant keyframe.
+            // not an invalid keyframe.
+            if (pKF->isBad())
+            {
                 continue;
+            }
 
             cv::Mat R = pKF->GetRotation().t();
             vector<float> q = Converter::toQuaternion(R);
             cv::Mat t = pKF->GetCameraCenter();
-            f << setprecision(6) << pKF->mTimeStamp << setprecision(7) << " " << t.at<float>(0) << " " << t.at<float>(1) << " " << t.at<float>(2)
-              << " " << q[0] << " " << q[1] << " " << q[2] << " " << q[3] << endl;
 
+            f << setprecision(6) << pKF->mTimeStamp << setprecision(7)
+              << " " << t.at<float>(0) << " " << t.at<float>(1) << " " << t.at<float>(2)
+              << " " << q[0] << " " << q[1] << " " << q[2] << " " << q[3] << endl;
         }
 
         f.close();
-        cout << endl << "trajectory saved!" << endl;
     }
 
     int System::GetTrackingState()
@@ -248,5 +242,11 @@ namespace ORB_SLAM2
     {
         unique_lock<mutex> lock(mMutexState);
         return mTrackedKeyPointsUn;
+    }
+
+    bool System::HasSuffix(const std::string& str, const std::string& suffix)
+    {
+        std::size_t index = str.find(suffix, str.size() - suffix.size());
+        return (index != std::string::npos);
     }
 } //namespace ORB_SLAM

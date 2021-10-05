@@ -96,7 +96,9 @@
         "*.proto": "cpp",
         "*.ipp": "cpp",
         "hash_map": "cpp",
-        "hash_set": "cpp"
+        "hash_set": "cpp",
+        "core": "cpp",
+        "filesystem": "cpp"
     },
     "editor.codeActionsOnSave": {
         "source.organizeImports": true

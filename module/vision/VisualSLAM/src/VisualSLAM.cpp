@@ -3,59 +3,25 @@
 #include <algorithm>
 #include <filesystem>
 #include <chrono>
-#include <mutex>
-// Local - NUBots.
+// Eigen.
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+// OpenCV.
+#include <opencv2/core/core.hpp>
+#include <opencv2/core/mat.hpp>
+#include <opencv2/core/eigen.hpp>
+// NUBots.
 #include "VisualSLAM.hpp"
 #include "extension/Configuration.hpp"
 #include "utility/vision/Vision.hpp"
 #include "utility/vision/fourcc.hpp"
 #include "message/input/Image.hpp"
+#include "message/vision/VisualSLAM.hpp"
 #include "clock/clock.hpp"
-// Local - SLAM.
-#include "ORB-SLAM/System.h"
-#include <opencv2/core/core.hpp>
-#include <opencv2/core/mat.hpp>
 
 
 namespace module::vision
 {
-    //////////////////////////////////////////////
-    // SLAM components.
-    //////////////////////////////////////////////
-    std::unique_ptr<ORB_SLAM2::System> slamSystem;
-    std::vector<std::pair<std::string, std::string>> slamSettings;
-    //////////////////////////////////////////////
-
-    //////////////////////////////////////////////
-    // VisualSLAM.yaml settings for database.
-    bool useImageDatabase;
-    std::string imageDatabaseDirectory;
-    // Local image database - vector of filepaths.
-    std::vector<std::string> imageDataset;
-    //////////////////////////////////////////////
-
-
-    // !!! THE TODO LIST !!!
-    // REPO:
-
-    // TODO - log file for transformations.
-        // Figure out how to get webots absolute transform.
-        // Write transforms to file.
-        // Logging flag in yaml.
-
-    // TODO - patch transform emission into particle filter.
-        // Work out how particle filter works / message NUbots team.
-
-    // BONUS:
-    // TODO - when to reset due to tracking loss.
-    // TODO - shutdown slam system somehow.
-    // TODO - add project to git branch.
-
-    // PAPER:
-    // TODO - write the damn lit paper.
-
-
-
     VisualSLAM::VisualSLAM(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), config{}
     {
@@ -63,6 +29,9 @@ namespace module::vision
         {
             // Log level.
             this->log_level         = config["log_level"].as<NUClear::LogLevel>();
+            // Data logging settings.
+            saveImages              = config["saveImages"].as<bool>();
+            saveDataLog             = config["saveDataLog"].as<bool>();
             // Database streaming options.
             useImageDatabase        = config["useImageDatabase"].as<bool>();
             imageDatabaseDirectory  = config["imageDatabaseDirectory"].as<std::string>();
@@ -98,8 +67,17 @@ namespace module::vision
 
         on<Startup>().then([this]
         {
+            if (saveDataLog)
+            {
+                // Create log file for SLAM output.
+                std::filesystem::create_directories("./logging");
+                outputFileStream.open("./logging/log.txt");
+            }
+
+
             // Initialise SLAM system - Pangolin viewer is currently not applicable in NUBots docker.
             slamSystem = std::make_unique<ORB_SLAM2::System>(slamSettings, false);
+
 
             // Running in live mode.
             if (useImageDatabase == false)
@@ -153,9 +131,9 @@ namespace module::vision
                     protoImage->data       = data;
                     protoImage->id         = 0;
                     protoImage->name       = imageDataset[i];
-                    protoImage->timestamp  = NUClear::clock::time_point(std::chrono::nanoseconds(i));
+                    protoImage->timestamp  = NUClear::clock::now();
 
-                    // Emit dataset camera image.
+                    // Emit database camera image.
                     emit<Scope::DIRECT>(std::move(protoImage));
                 }
 
@@ -172,7 +150,6 @@ namespace module::vision
             log<NUClear::DEBUG>(fmt::format("--- Image received : {} --- ", frame++));
 
             // Skip next incoming message if already processing one.
-            static std::mutex mutex;
             if (mutex.try_lock())
             {
                 // Constant image data from protobuf image.
@@ -184,6 +161,7 @@ namespace module::vision
                 const std::string imageFourColourName = utility::vision::fourcc(imageFourColourCode);
                 const std::chrono::time_point imageTimePoint = protoImage.timestamp;
                 //const uint8_t* imageData = const_cast<uint8_t*>(protoImage.data.data());
+                //const Eigen::Affine3d Hcw(protoImage.Hcw);
 
                 if (log_level <= NUClear::DEBUG)
                 {
@@ -196,27 +174,26 @@ namespace module::vision
                     log<NUClear::DEBUG>(fmt::format("Four Colour Name: {}", imageFourColourName));
                     log<NUClear::DEBUG>(fmt::format("Timestamp: {}", imageTimePoint.time_since_epoch().count()));
 
-                    // Image lens:
-                    const auto& lens = protoImage.lens;
-                    //  UNKNOWN = 0, RECTILINEAR = 1, EQUIDISTANT = 2, EQUISOLID   = 3;
-                    const int lensProjection = lens.projection;
-                    /// The angular diameter that the lens covers (the area that light hits on the sensor), in radians.
-                    const float lensFieldOfView = lens.fov;
-                    /// Normalised focal length: focal length in pixels / image width.
-                    const float lensFocalLength = lens.focal_length;
-                    /// Normalised image centre offset: pixels from centre to optical axis / image width.
-                    const float lensCentreX = lens.centre.x();
-                    const float lensCentreY = lens.centre.y();
-                    const float kX = lens.k.x();
-                    const float kY = lens.k.y();
-
-                    log<NUClear::DEBUG>(fmt::format("Lens Projection: {}", lensProjection));
-                    log<NUClear::DEBUG>(fmt::format("Lens Field of View: {}", lensFieldOfView));
-                    log<NUClear::DEBUG>(fmt::format("Lens Focal Length: {}", lensFocalLength));
-                    log<NUClear::DEBUG>(fmt::format("Lens Center X: {}", lensCentreX));
-                    log<NUClear::DEBUG>(fmt::format("Lens Center Y: {}", lensCentreY));
-                    log<NUClear::DEBUG>(fmt::format("Lens K X: {}", kX));
-                    log<NUClear::DEBUG>(fmt::format("Lens K Y: {}", kY));
+                    //// Image lens:
+                    //const auto& lens = protoImage.lens;
+                    ////  UNKNOWN = 0, RECTILINEAR = 1, EQUIDISTANT = 2, EQUISOLID   = 3;
+                    //const int lensProjection = lens.projection;
+                    ///// The angular diameter that the lens covers (the area that light hits on the sensor), in radians.
+                    //const float lensFieldOfView = lens.fov;
+                    ///// Normalised focal length: focal length in pixels / image width.
+                    //const float lensFocalLength = lens.focal_length;
+                    ///// Normalised image centre offset: pixels from centre to optical axis / image width.
+                    //const float lensCentreX = lens.centre.x();
+                    //const float lensCentreY = lens.centre.y();
+                    //const float kX = lens.k.x();
+                    //const float kY = lens.k.y();
+                    //log<NUClear::DEBUG>(fmt::format("Lens Projection: {}", lensProjection));
+                    //log<NUClear::DEBUG>(fmt::format("Lens Field of View: {}", lensFieldOfView));
+                    //log<NUClear::DEBUG>(fmt::format("Lens Focal Length: {}", lensFocalLength));
+                    //log<NUClear::DEBUG>(fmt::format("Lens Center X: {}", lensCentreX));
+                    //log<NUClear::DEBUG>(fmt::format("Lens Center Y: {}", lensCentreY));
+                    //log<NUClear::DEBUG>(fmt::format("Lens K X: {}", kX));
+                    //log<NUClear::DEBUG>(fmt::format("Lens K Y: {}", kY));
                 }
 
 
@@ -255,44 +232,88 @@ namespace module::vision
 
                 if (log_level <= NUClear::DEBUG)
                 {
-                    static bool deleteImages = true;
-                    if (deleteImages)
+                    if (saveDataLog)
                     {
-                        std::filesystem::remove_all("./images");
-                        deleteImages = false;
+                        // Save new data log - overwrites old data entries.
+                        if (outputFileStream.is_open() && outputFileStream.good())
+                        {
+                            outputFileStream << frame << ";" << imageTimePoint.time_since_epoch().count() << ";";
+
+                            if (cameraTrackingPose.empty())
+                            {
+                                outputFileStream << "EMPTY";
+                            }
+                            else
+                            {
+                                for (int i = 0; i < cameraTrackingPose.rows; i++)
+                                {
+                                    for (int j = 0; j < cameraTrackingPose.cols; j++)
+                                    {
+                                        outputFileStream << ";" << cameraTrackingPose.at<double>(i, j);
+                                    }
+                                }
+                            }
+
+                            outputFileStream << ";" << std::endl;
+                        }
                     }
 
-                    static bool write = true;
-                    if (write)
+                    if (saveImages)
                     {
-                        // docker cp 6d5c41befbd3:/home/nubots/build/images /home/brandon/Desktop/Development/ORB_SLAM2-master-3/images
+                        // Delete old images.
+                        static bool deleteImages = true;
+                        if (deleteImages)
+                        {
+                            std::filesystem::remove_all("./images");
+                            std::filesystem::create_directories("./images/input");
+                            std::filesystem::create_directories("./images/output");
+                            deleteImages = false;
+                        }
+
+                        // Save new images.
                         log<NUClear::DEBUG>(fmt::format("Saving image: {}", frame));
-                        std::filesystem::create_directories("./images/input");
-                        std::filesystem::create_directories("./images/output"); //imageTimePoint.time_since_epoch().count()
-                        cv::imwrite("./images/input/" + std::to_string(frame) + ".jpg", cvImageInput);   // inputImage_
-                        cv::imwrite("./images/output/" + std::to_string(frame) + ".jpg", cvImageOutput); //outputImage_
-                        //write = false;
+                        cv::imwrite("./images/input/" + std::to_string(frame) + ".jpg", cvImageInput);
+                        cv::imwrite("./images/output/" + std::to_string(frame) + ".jpg", cvImageOutput);
                     }
                 }
 
 
-                if (cameraTrackingPose.empty())
+                if (!cameraTrackingPose.empty())
                 {
-                    log<NUClear::DEBUG>("Tracking empty.");
-                }
-                else
-                {
-                    log<NUClear::DEBUG>("Tracking M:");
-                    log<NUClear::DEBUG>(cameraTrackingPose);
+                    // Create VSLAM message for emission.
+                    std::unique_ptr<message::vision::VisualSLAM> message = std::make_unique<message::vision::VisualSLAM>();
 
-                    //emit(std::move(Tcw));
-                    //Eigen::Affine3d Hcw(image.Hcw);
+                    // Attach image timestamp to message.
+                    message->timestamp = imageTimePoint;
+                    // Cast OpenCV matrix to Eigen matrix.
+                    Eigen::Matrix<double, 4, 4> eigenMatrix;
+                    cv::cv2eigen(cameraTrackingPose, eigenMatrix);
+                    // Attach Eigen matrix to message.
+                    message->Hcw = eigenMatrix;
+
+                    // Emit message globally.
+                    //emit(std::move(message));
+                    // Emit message locally.
+                    emit<Scope::DIRECT>(std::move(message));
                 }
 
 
                 // Image finished processing - allow next image to enter.
                 mutex.unlock();
             }
+        });
+
+
+        // Message emission debug - set emission to emit<Scope::DIRECT>(std::move(message)) in tracking.
+        on<Trigger<message::vision::VisualSLAM>>().then([this](const message::vision::VisualSLAM& slamMessage)
+        {
+            const Eigen::Affine3d Hcw(slamMessage.Hcw);
+            const std::chrono::time_point messageTimePoint = slamMessage.timestamp;
+
+            // Console log slamMessage Hcw matrix.
+            std::stringstream ss;
+            ss << Hcw.matrix();
+            log<NUClear::DEBUG>(fmt::format("Tracking Data:\n-----------------------------------------------\n {} \n-----------------------------------------------", ss.str()));
         });
     }
 
@@ -310,7 +331,7 @@ namespace module::vision
             imageDatabase.push_back(entry.path().filename());
         }
 
-        // Sort the vector numerically to ensure correct image order. E.g. 0.jpg, 1.jpg, 2.jpg, etc.
+        // Sort the vector numerically to ensure correct image order: 0.jpg, 1.jpg, 2.jpg, etc.
         std::sort(imageDatabase.begin(), imageDatabase.end(), [](const std::string& s1, const std::string& s2)
         {
             std::string::const_iterator it1 = s1.begin(), it2 = s2.begin();

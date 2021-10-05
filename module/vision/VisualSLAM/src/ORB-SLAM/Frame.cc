@@ -12,9 +12,11 @@ namespace ORB_SLAM2
     float Frame::mfGridElementWidthInv, Frame::mfGridElementHeightInv;
 
     Frame::Frame()
-    {}
+    {
 
-    //Copy Constructor
+    }
+
+    // Copy Constructor
     Frame::Frame(const Frame& frame)
         :   mpORBvocabulary(frame.mpORBvocabulary), mpORBextractorLeft(frame.mpORBextractorLeft),
             mTimeStamp(frame.mTimeStamp), mK(frame.mK.clone()), mDistCoef(frame.mDistCoef.clone()),
@@ -34,6 +36,50 @@ namespace ORB_SLAM2
 
         if(!frame.mTcw.empty())
             SetPose(frame.mTcw);
+    }
+
+    Frame& Frame::operator=(const Frame& rhs)
+    {
+        if (this != &rhs)
+        {
+            mpORBvocabulary = rhs.mpORBvocabulary;
+            mpORBextractorLeft = rhs.mpORBextractorLeft;
+            mTimeStamp = rhs.mTimeStamp;
+            mK = rhs.mK.clone();
+            mDistCoef = rhs.mDistCoef.clone();
+            mbf = rhs.mbf;
+            mb = rhs.mb;
+            N = rhs.N;
+            mvKeys = rhs.mvKeys;
+            mvKeysRight = rhs.mvKeysRight;
+            mvKeysUn = rhs.mvKeysUn;
+            mvuRight = rhs.mvuRight;
+            mvDepth = rhs.mvDepth;
+            mBowVec = rhs.mBowVec;
+            mFeatVec = rhs.mFeatVec;
+            mDescriptors = rhs.mDescriptors.clone();
+            mDescriptorsRight = rhs.mDescriptorsRight.clone();
+            mvpMapPoints = rhs.mvpMapPoints;
+            mvbOutlier = rhs.mvbOutlier;
+            mnId = rhs.mnId;
+            mpReferenceKF = rhs.mpReferenceKF;
+            mnScaleLevels = rhs.mnScaleLevels;
+            mfScaleFactor = rhs.mfScaleFactor;
+            mfLogScaleFactor = rhs.mfLogScaleFactor;
+            mvScaleFactors = rhs.mvScaleFactors;
+            mvInvScaleFactors = rhs.mvInvScaleFactors;
+            mvLevelSigma2 = rhs.mvLevelSigma2;
+            mvInvLevelSigma2 = rhs.mvInvLevelSigma2;
+            for(int i=0;i<FRAME_GRID_COLS;i++)
+                for(int j=0; j<FRAME_GRID_ROWS; j++)
+                    mGrid[i][j]=rhs.mGrid[i][j];
+
+            if(!rhs.mTcw.empty()) {
+                SetPose(rhs.mTcw);
+            }
+        }
+
+        return *this;
     }
 
     Frame::Frame(const cv::Mat& imGray,

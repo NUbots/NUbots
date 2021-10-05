@@ -44,11 +44,11 @@ Tracking::Tracking(
     cv::Mat DistCoef(4, 1, CV_32F);
 
     // Load ORB parameters
-    int nFeatures;
-    float fScaleFactor;
-    int nLevels;
-    int fIniThFAST;
-    int fMinThFAST;
+    int nFeatures = 0;
+    float fScaleFactor = 0.0;
+    int nLevels = 0;
+    int fIniThFAST = 0;
+    int fMinThFAST = 0;
 
     // Optional parameters.
     float bf = 0.0f;
@@ -118,29 +118,6 @@ Tracking::Tracking(
 
     mpORBextractorLeft = new ORBextractor(nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST);
     mpIniORBextractor = new ORBextractor(2 * nFeatures, fScaleFactor, nLevels, fIniThFAST, fMinThFAST);
-
-    cout << endl << "Camera Parameters: " << endl;
-    cout << "- fx: " << K.at<float>(0,0) << endl;
-    cout << "- fy: " << K.at<float>(1,1) << endl;
-    cout << "- cx: " << K.at<float>(0,2) << endl;
-    cout << "- cy: " << K.at<float>(1,2) << endl;
-    cout << "- k1: " << DistCoef.at<float>(0) << endl;
-    cout << "- k2: " << DistCoef.at<float>(1) << endl;
-    if (DistCoef.rows==5)
-    {
-        cout << "- k3: " << DistCoef.at<float>(4) << endl;
-    }
-
-    cout << "- p1: " << DistCoef.at<float>(2) << endl;
-    cout << "- p2: " << DistCoef.at<float>(3) << endl;
-    cout << "- fps: " << mMaxFrames << endl;
-
-    cout << endl  << "ORB Extractor Parameters: " << endl;
-    cout << "- Number of Features: " << nFeatures << endl;
-    cout << "- Scale Levels: " << nLevels << endl;
-    cout << "- Scale Factor: " << fScaleFactor << endl;
-    cout << "- Initial Fast Threshold: " << fIniThFAST << endl;
-    cout << "- Minimum Fast Threshold: " << fMinThFAST << endl;
 }
 
 
@@ -1216,7 +1193,7 @@ bool Tracking::Relocalization()
 
 void Tracking::Reset()
 {
-    cout << "System Resetting" << endl;
+    cout << "VSLAM - System Resetting" << endl;
     if(mpViewer)
     {
         mpViewer->RequestStop();
@@ -1227,19 +1204,11 @@ void Tracking::Reset()
     }
 
     // Reset Local Mapping
-    cout << "Resetting Local Mapper...";
     mpLocalMapper->RequestReset();
-
     // Reset Loop Closing
-    cout << "Resetting Loop Closing...";
     mpLoopClosing->RequestReset();
-    cout << " done" << endl;
-
     // Clear BoW Database
-    cout << "Resetting Database...";
     mpKeyFrameDB->clear();
-    cout << " done" << endl;
-
     // Clear Map (this erases MapPoints and KeyFrames)
     mpMap->clear();
 
@@ -1264,7 +1233,7 @@ void Tracking::Reset()
     }
 }
 
-void Tracking::ChangeCalibration(const string &strSettingPath)
+void Tracking::ChangeCalibration(const string& strSettingPath)
 {
     cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
     float fx = fSettings["Camera.fx"];
