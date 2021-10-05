@@ -121,7 +121,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Check clang-format
-        run: .github/workflows/format/validate_clang_format.sh
+        run: .github/workflows/scripts/validate_clang_format.sh
 
   # Validate the formatting is correct according to cmake-format
   cmake-format:
@@ -146,7 +146,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Check cmake-format
-        run: .github/workflows/format/validate_cmake_format.sh
+        run: .github/workflows/scripts/validate_cmake_format.sh
 
   # Validate the formatting is correct according to isort and black
   python-format:
@@ -171,4 +171,4 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Check isort and black
-        run: .github/workflows/format/validate_python_format.sh
+        run: .github/workflows/scripts/validate_python_format.sh

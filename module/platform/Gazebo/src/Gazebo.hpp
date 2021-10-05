@@ -15,7 +15,7 @@ namespace module::platform {
         struct {
             std::string simulator_name;
             std::string model_name;
-            double clock_smoothing;
+            double clock_smoothing = 0.0;
         } config;
 
         double sim_time;

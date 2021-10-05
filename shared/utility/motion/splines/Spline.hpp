@@ -100,26 +100,29 @@ namespace utility::motion::splines {
         }
 
         constexpr void importData(std::istream& is) {
-            bool isFormatError;
+            bool isFormatError = true;
             while (is.good()) {
                 isFormatError = true;
                 Scalar min;
                 Scalar max;
-                size_t size;
+                size_t size = 0;
                 Polynom<Scalar> p;
                 // Load spline interval and degree
                 is >> min;
-                if (!is.good())
+                if (!is.good()) {
                     break;
+                }
                 is >> max;
-                if (!is.good())
+                if (!is.good()) {
                     break;
+                }
                 is >> size;
                 // Load polynom coefficients
                 p.getCoefs().resize(size);
                 for (size_t i = 0; i < size; i++) {
-                    if (!is.good())
+                    if (!is.good()) {
                         break;
+                    }
                     is >> p.getCoefs()[i];
                 }
                 // Save spline part
@@ -127,8 +130,9 @@ namespace utility::motion::splines {
                 splines.push_back({p, min, max});
                 // Exit on line break
                 while (is.peek() == ' ') {
-                    if (!is.good())
+                    if (!is.good()) {
                         break;
+                    }
                     is.ignore();
                 }
                 if (is.peek() == '\n') {
