@@ -24,7 +24,7 @@ namespace module {
                 std::vector<std::pair<double, double>> paramLimits;
 
                 // Extract the initial values and limits and from config file, for all of the parameters
-                scriptPath = config["script_path"].as<std::string>();
+                script_path = config["task_config_path"].as<std::string>();
 
                 auto& stand = config["stand"];
                 for (const auto& element : stand) {
@@ -48,6 +48,7 @@ namespace module {
                 request->id = id;
                 request->generation = generation;
                 request->task = "stand";
+                request->task_config_path = script_path;
                 // Add the individual's parameters to the message
                 request->parameters.real_params = reals;
                 return request;

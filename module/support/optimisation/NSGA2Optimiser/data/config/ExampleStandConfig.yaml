@@ -22,7 +22,7 @@ eta:
   M: 20
 
 task: "stand"
-script_path: "StandUpFront.yaml"
+task_config_path: "StandUpFront.yaml"
 # The following values are setting the initial values and limits for the script engine parameters.
 # Each item is a frame of the script
 # Each param is the tuple [initial value, minimum, maximum].

@@ -23,6 +23,7 @@ eta:
   M: 20
 
 task: "walk"
+task_config_path: "config/webots/QuinticWalk.yaml"
 # The following values are setting the initial values and limits for the walk engine parameters.
 # Each param is the tuple [initial value, minimum, maximum]. These values are merged with the
 # values in QuinticWalk.yaml for an individual, and then evaluated with the walk.

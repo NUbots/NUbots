@@ -64,6 +64,7 @@ namespace module {
                     paramLimits.emplace_back(walk_command[element][1].as<Expression>(), walk_command[element][2].as<Expression>());
                 }
 
+                quintic_walk_path = config["task_config_path"].as<std::string>();
                 trial_duration_limit = config["trial_duration_limit"].as<int>();
 
                 // Set configuration for real variables
@@ -81,6 +82,7 @@ namespace module {
                 request->id = id;
                 request->generation = generation;
                 request->task = "walk";
+                request->task_config_path = quintic_walk_path;
 
                 request->trial_duration_limit = trial_duration_limit;
 

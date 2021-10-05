@@ -24,6 +24,7 @@ namespace module {
 
             private:
                 int trial_duration_limit;
+                std::string quintic_walk_path;
             };
 
         }  // namespace optimisation

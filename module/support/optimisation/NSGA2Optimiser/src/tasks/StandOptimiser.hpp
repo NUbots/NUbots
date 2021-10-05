@@ -23,7 +23,7 @@ namespace module {
                 std::unique_ptr<NSGA2EvaluationRequest> MakeEvaluationRequest(const int id, const int generation, std::vector<double> reals);
 
             private:
-                std::string scriptPath;
+                std::string script_path;
                 int trial_duration_limit;
             };
 
