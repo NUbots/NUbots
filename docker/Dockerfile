@@ -273,6 +273,9 @@ RUN mkdir -p /usr/local/include/zstr \
     && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/strict_fstream.hpp -O /usr/local/include/strict_fstream.hpp \
     && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/zstr_make_unique_polyfill.h -O /usr/local/include/zstr_make_unique_polyfill.h
 
+# json.h
+RUN install-header-from-source https://raw.githubusercontent.com/sheredom/json.h/adf662d166f1890f456b1c86a6d923dbfe6c7397/json.h
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
@@ -403,6 +406,7 @@ RUN sudo pacman -U --noconfirm \
     ngram-1.3.7-1-x86_64.pkg.tar.zst \
     python-pybindgen-0.20.1-1-x86_64.pkg.tar.zst \
     phonetisaurus-git-r171.23f182f-1-x86_64.pkg.tar.zst
+RUN install-package alsa-utils
 
 RUN rm -r /home/nubots/packages
 

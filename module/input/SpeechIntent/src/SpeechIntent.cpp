@@ -2,9 +2,8 @@
 
 #include <alsa/asoundlib.h>
 #include <fmt/format.h>
+#include <json.h>
 #include <spawn.h>
-
-#include "json.h"
 
 #include "extension/Configuration.hpp"
 
