@@ -50,6 +50,9 @@ namespace module {
                 /// @brief Keep track of when the trial started
                 double trialStartTime = 0.0;
 
+                void loadScript(std::string script_path);
+                void saveScript(std::string script_path);
+
                 /// @brief The script object we are using
                 ::extension::Script script;
             };
