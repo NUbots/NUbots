@@ -10,7 +10,7 @@ import ruamel.yaml
 DEFAULT_BINARIES_DIR = os.path.abspath(os.path.join(os.sep, "home", "nubots", "NUbots", "binaries"))
 DEFAULT_CONFIG_DIR = os.path.join(DEFAULT_BINARIES_DIR, "config")
 
-REQUIRED_ENV_VARS = ("ROBOCUP_ROBOT_ID", "ROBOCUP_TEAM_COLOR", "ROBOCUP_SIMULATOR_ADDR")
+REQUIRED_ENV_VARS = ("ROBOCUP_ROBOT_ID", "ROBOCUP_TEAM_ID", "ROBOCUP_TEAM_COLOR", "ROBOCUP_SIMULATOR_ADDR")
 OPTIONAL_ENV_VARS = (
     "ROBOCUP_TEAM_PLAYER1_IP",
     "ROBOCUP_TEAM_PLAYER2_IP",
@@ -91,6 +91,11 @@ def update_config_files(args: dict) -> None:
     # Set `player_id` in GlobalConfig.yaml from ROBOCUP_ROBOT_ID
     global_config = read_config("GlobalConfig.yaml")
     global_config["player_id"] = int(env_vars["ROBOCUP_ROBOT_ID"])
+    write_config("GlobalConfig.yaml", global_config)
+
+    # Set `team_id` in GlobalConfig.yaml from ROBOCUP_ROBOT_ID
+    global_config = read_config("GlobalConfig.yaml")
+    global_config["team_id"] = int(env_vars["ROBOCUP_TEAM_ID"])
     write_config("GlobalConfig.yaml", global_config)
 
     # Set `player_id` in GameController.yaml from ROBOCUP_ROBOT_ID
