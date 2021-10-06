@@ -88,13 +88,9 @@ def update_config_files(args: dict) -> None:
     # Change into the config directory
     os.chdir(args["config_dir"])
 
-    # Set `player_id` in GlobalConfig.yaml from ROBOCUP_ROBOT_ID
+    # Set `player_id` and `team_id` in GlobalConfig.yaml from ROBOCUP_ROBOT_ID and ROBOCUP_TEAM_ID
     global_config = read_config("GlobalConfig.yaml")
     global_config["player_id"] = int(env_vars["ROBOCUP_ROBOT_ID"])
-    write_config("GlobalConfig.yaml", global_config)
-
-    # Set `team_id` in GlobalConfig.yaml from ROBOCUP_ROBOT_ID
-    global_config = read_config("GlobalConfig.yaml")
     global_config["team_id"] = int(env_vars["ROBOCUP_TEAM_ID"])
     write_config("GlobalConfig.yaml", global_config)
 
