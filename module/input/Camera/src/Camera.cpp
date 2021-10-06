@@ -27,7 +27,6 @@ namespace module::input {
     using message::input::Sensors;
     using utility::input::ServoID;
     using utility::support::Expression;
-    using utility::vision::fourcc;
 
     /// The amount of time to observe after recalibrating to work out how long image transfer takes (nanoseconds)
     constexpr int64_t TRANSFER_OFFSET_OBSERVE_TIME = 1e9;
@@ -85,8 +84,9 @@ namespace module::input {
                     std::string device_description = arv_get_device_id(device_no);
                     auto camera =
                         std::shared_ptr<ArvCamera>(arv_camera_new(device_description.c_str()), [](ArvCamera* ptr) {
-                            if (ptr)
+                            if (ptr) {
                                 g_object_unref(ptr);
+                            }
                         });
 
                     if (!ARV_IS_CAMERA(camera.get())) {
@@ -98,8 +98,9 @@ namespace module::input {
                         auto stream =
                             std::shared_ptr<ArvStream>(arv_camera_create_stream(camera.get(), nullptr, nullptr),
                                                        [](ArvStream* ptr) {
-                                                           if (ptr)
+                                                           if (ptr) {
                                                                g_object_unref(ptr);
+                                                           }
                                                        });
 
                         if (!ARV_IS_STREAM(stream.get())) {
@@ -326,8 +327,9 @@ namespace module::input {
 
         if (buffer != nullptr) {
             if (arv_buffer_get_status(buffer) == ARV_BUFFER_STATUS_SUCCESS) {
-                int width, height;
-                size_t buffSize;
+                int width       = 0;
+                int height      = 0;
+                size_t buffSize = 0;
                 arv_buffer_get_image_region(buffer, nullptr, nullptr, &width, &height);
                 const uint8_t* buff = reinterpret_cast<const uint8_t*>(arv_buffer_get_data(buffer, &buffSize));
 

@@ -125,7 +125,7 @@ namespace module::behaviour::skills {
             });
 
 
-        // TODO: remove this horrible code
+        // TODO(BehaviourTeam): remove this horrible code
         // Check to see if we are currently in the process of getting up.
         on<Trigger<ExecuteGetup>>().then([this] { isGettingUp = true; });
 
@@ -155,8 +155,8 @@ namespace module::behaviour::skills {
            Sync<HeadBehaviourSoccer>>()
             .then("Head Behaviour Main Loop",
                   [this](const Sensors& sensors,
-                         std::shared_ptr<const Balls> vballs,
-                         std::shared_ptr<const Goals> vgoals,
+                         const std::shared_ptr<const Balls>& vballs,
+                         const std::shared_ptr<const Goals>& vgoals,
                          const std::shared_ptr<const LocBall>& locBall,
                          const KinematicsModel& kinematicsModel,
                          const Image& image) {
@@ -180,8 +180,8 @@ namespace module::behaviour::skills {
                       bool objectsMissing = false;
 
                       // Get the list of objects which are currently visible
-                      Balls ballFixationObjects = getFixationObjects(std::move(vballs), objectsMissing);
-                      Goals goalFixationObjects = getFixationObjects(std::move(vgoals), objectsMissing);
+                      Balls ballFixationObjects = getFixationObjects(vballs, objectsMissing);
+                      Goals goalFixationObjects = getFixationObjects(vgoals, objectsMissing);
 
                       // Determine state transition variables
                       const bool lost = ((ballFixationObjects.balls.empty()) && (goalFixationObjects.goals.empty()));
@@ -361,14 +361,14 @@ namespace module::behaviour::skills {
             log<NUClear::WARN>("HeadBehaviourSoccer - Multiple object searching currently not supported properly.");
         }
 
-        // TODO: make this a loop over a list of objects or something
+        // TODO(BehaviourTeam): make this a loop over a list of objects or something
         // Get goals
         if (goalPriority == maxPriority) {
             if (vgoals && !vgoals->goals.empty()) {
                 // Fixate on goals and lines and other landmarks
                 timeLastObjectSeen = now;
                 std::set<Goal::Side> visiblePosts;
-                // TODO: treat goals as one object
+                // TODO(BehaviourTeam): treat goals as one object
                 Goals goals;
                 for (const auto& goal : vgoals->goals) {
                     visiblePosts.insert(goal.side);
