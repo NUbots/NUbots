@@ -25,6 +25,10 @@ ROBOCUP_IMAGE_NAME = "robocup-vhsc-nubots"  # Provided by the TC and shouldn't b
 ROBOCUP_IMAGE_TAG = "robocup2021"  # Submitted in our team_config.json, shouldn't be changed here unless changed there
 ROBOCUP_IMAGE_REGISTRY = "079967072104.dkr.ecr.us-east-2.amazonaws.com/robocup-vhsc-nubots"  # Provided by the TC
 
+# Webots team details
+NUBOTS_TEAM_ID = 12
+ALT_TEAM_ID = 13
+
 # Generate 4 digit random int to act as a unique identifier for this game
 GAME_IDENTIFIER = str(random.randint(1000, 9999))
 
@@ -229,8 +233,10 @@ def exec_run(role, num_of_robots=1, sim_address="127.0.0.1"):
     # Add all robot run commands to process_manager
     for i in range(1, num_of_robots + 1):
 
-        robot_color, port_num = (
-            ("red", 10000 + i) if i <= num_of_robots // 2 else ("blue", 10020 + i - num_of_robots // 2)
+        team_id, robot_color, port_num = (
+            (NUBOTS_TEAM_ID, "red", 10000 + i)
+            if i <= num_of_robots // 2
+            else (ALT_TEAM_ID, "blue", 10020 + i - num_of_robots // 2)
         )
 
         docker_run_command = [
@@ -244,6 +250,8 @@ def exec_run(role, num_of_robots=1, sim_address="127.0.0.1"):
             f"type=bind,source={robocup_logs_dir},target=/robocup-logs",
             "-e",
             f"ROBOCUP_ROBOT_ID={i}",
+            "-e",
+            f"ROBOCUP_TEAM_ID={team_id}",
             "-e",
             f"ROBOCUP_TEAM_COLOR={robot_color}",
             "-e",
