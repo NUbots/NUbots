@@ -233,11 +233,15 @@ def exec_run(role, num_of_robots=1, sim_address="127.0.0.1"):
     # Add all robot run commands to process_manager
     for i in range(1, num_of_robots + 1):
 
-        team_id, robot_color, port_num = (
-            (NUBOTS_TEAM_ID, "red", 10000 + i)
-            if i <= num_of_robots // 2
-            else (ALT_TEAM_ID, "blue", 10020 + i - num_of_robots // 2)
-        )
+        # Set team_id, robot_color and port_num based on the number of instances being started
+        if i <= num_of_robots // 2:
+            team_id = NUBOTS_TEAM_ID
+            robot_color = "red"
+            port_num = 10000 + i
+        else:
+            team_id = ALT_TEAM_ID
+            robot_color = "blue"
+            port_num = 10020 + i - num_of_robots // 2
 
         docker_run_command = [
             "docker",
