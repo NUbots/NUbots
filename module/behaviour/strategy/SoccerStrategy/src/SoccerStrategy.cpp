@@ -349,13 +349,27 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::normalReady(const GameState& gameState, const FieldDescription& fieldDescription) {
-        if (gameState.data.our_kick_off) {
-            walkTo(fieldDescription, cfg_.start_position_offensive);
+        log<NUClear::DEBUG>("normalReady()");
+
+        // auto walkTarget = gameState.data.our_kick_off ? cfg_.start_position_offensive :
+        // cfg_.start_position_defensive; walkTo(fieldDescription, walkTarget);
+
+        if (!startedWalkingToReady) {
+            startedWalkingToReadyAt = NUClear::clock::now();
+            startedWalkingToReady   = true;
+        }
+
+        if (NUClear::clock::now() - startedWalkingToReadyAt < std::chrono::milliseconds(17 * 1000)) {
+            emit(std::make_unique<MotionCommand>(utility::behaviour::WalkToReady()));
         }
         else {
-            walkTo(fieldDescription, cfg_.start_position_defensive);
+            log("10 seconds up, stopping walk");
+            standStill();
         }
-        find({FieldTarget(FieldTarget::Target::SELF)});
+
+        // Self localise while we're walking on in READY
+        // find({FieldTarget(FieldTarget::Target::SELF)});
+
         currentState = Behaviour::State::READY;
     }
 
@@ -380,23 +394,26 @@ namespace module::behaviour::strategy {
         }
         else {
             log<NUClear::WARN>(" rBTt : ", rBTt.x());
-            if (rBTt.x() < 0.25) {  // ball in kick radius
-                log<NUClear::WARN>(" KICK ");
-                if (rBTt.y() > 0.0) {
-                    log<NUClear::WARN>("kick left");
-                    emit(std::make_unique<KickScriptCommand>(KickScriptCommand(LimbID::LEFT_LEG, KickType::SCRIPTED)));
+            if (NUClear::clock::now() - ballLastMeasured
+                < cfg_.ball_last_seen_max_time) {  // ball has been seen recently
+                if (rBTt.x() < 0.35) {             // ball in kick radius
+                    log<NUClear::WARN>(" KICK ");
+                    if (rBTt.y() > 0.0) {
+                        log<NUClear::WARN>("kick left");
+                        emit(std::make_unique<KickScriptCommand>(
+                            KickScriptCommand(LimbID::LEFT_LEG, KickType::SCRIPTED)));
+                    }
+                    else {
+                        log<NUClear::WARN>("kick right");
+                        emit(std::make_unique<KickScriptCommand>(
+                            KickScriptCommand(LimbID::RIGHT_LEG, KickType::SCRIPTED)));
+                    }
                 }
                 else {
-                    log<NUClear::WARN>("kick right");
-                    emit(std::make_unique<KickScriptCommand>(KickScriptCommand(LimbID::RIGHT_LEG, KickType::SCRIPTED)));
+                    find({FieldTarget(FieldTarget::Target::BALL)});
+                    walkTo(fieldDescription, FieldTarget::Target::BALL);
+                    currentState = Behaviour::State::WALK_TO_BALL;
                 }
-                // emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
-            }
-            else if (NUClear::clock::now() - ballLastMeasured
-                     < cfg_.ball_last_seen_max_time) {  // ball has been seen recently
-                find({FieldTarget(FieldTarget::Target::BALL)});
-                walkTo(fieldDescription, FieldTarget::Target::BALL);
-                currentState = Behaviour::State::WALK_TO_BALL;
             }
             else {  // ball has not been seen recently
                 currentState = Behaviour::State::SEARCH_FOR_BALL;

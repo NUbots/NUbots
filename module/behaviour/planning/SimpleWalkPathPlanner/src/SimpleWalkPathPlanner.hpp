@@ -57,7 +57,7 @@ namespace module::behaviour::planning {
     private:
         message::behaviour::MotionCommand latestCommand;
         const size_t subsumptionId;
-        float turnSpeed            = 0.8;
+        float turnSpeed            = 0.2;
         float forwardSpeed         = 1;
         float sideSpeed            = 1;
         float slow_approach_factor = 0.5;
@@ -92,6 +92,7 @@ namespace module::behaviour::planning {
 
         void visionWalkPath();
         void rotateOnSpot();
+        void walkToReady();
         // void splineWalkPath();
 
     public:

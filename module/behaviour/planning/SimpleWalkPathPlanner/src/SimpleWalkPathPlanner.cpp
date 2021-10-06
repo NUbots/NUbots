@@ -176,6 +176,7 @@ namespace module::behaviour::planning {
 
                     case message::behaviour::MotionCommand::Type::ROTATE_ON_SPOT: rotateOnSpot(); return;
 
+                    case message::behaviour::MotionCommand::Type::WALK_TO_READY: walkToReady(); return;
                     // This line should be UNREACHABLE
                     default:
                         log<NUClear::WARN>(
@@ -288,10 +289,21 @@ namespace module::behaviour::planning {
         Eigen::Vector3f unit_vector_to_ball = rBTt / rBTt.norm();
         Eigen::Vector3f velocity_vector     = 0.02 * unit_vector_to_ball;
         log<NUClear::WARN>("Walk command: ", velocity_vector.x(), velocity_vector.y(), velocity_vector.z());
-        float heading_angle = std::atan2(velocity_vector.y(), velocity_vector.x());
-        command             = std::make_unique<WalkCommand>(
-            subsumptionId,
-            Eigen::Vector3d(velocity_vector.x(), velocity_vector.y(), 0.9 * heading_angle));
+        float angular_velocity = std::atan2(velocity_vector.y(), velocity_vector.x());
+
+
+        log<NUClear::WARN>("angular_velocity : ", angular_velocity);
+        // compare requested
+        // if (angular_velocity != 0) {
+        //     angular_velocity =
+        //         (angular_velocity / std::abs(angular_velocity) * std::min(turnSpeed, std::abs(angular_velocity)));
+        // }
+
+        log<NUClear::WARN>("angular_velocity after : ", angular_velocity);
+
+        command =
+            std::make_unique<WalkCommand>(subsumptionId,
+                                          Eigen::Vector3d(velocity_vector.x(), velocity_vector.y(), angular_velocity));
         emit(std::move(command));
         emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
     }
@@ -300,9 +312,21 @@ namespace module::behaviour::planning {
         log<NUClear::WARN>("Rotate around spot");
         double rotateSpeedX = -0.04;
         double rotateSpeedY = 0;
-        double rotateSpeed  = 0.2;
+        double rotateSpeed  = 0.15;
         std::unique_ptr<WalkCommand> command =
             std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(rotateSpeedX, rotateSpeedY, rotateSpeed));
+        emit(std::move(command));
+        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
+    }
+
+    void SimpleWalkPathPlanner::walkToReady() {
+        log<NUClear::WARN>("Walk to ready");
+        float walkToReadySpeedX   = 0.1;
+        float walkToReadySpeedY   = 0;
+        float walkToReadyRotation = 0.2;
+        std::unique_ptr<WalkCommand> command =
+            std::make_unique<WalkCommand>(subsumptionId,
+                                          Eigen::Vector3d(walkToReadySpeedX, walkToReadySpeedY, walkToReadyRotation));
         emit(std::move(command));
         emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
     }

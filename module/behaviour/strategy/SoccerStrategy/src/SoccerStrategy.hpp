@@ -67,12 +67,14 @@ namespace module::behaviour::strategy {
 
         std::vector<message::behaviour::FieldTarget> lookTarget{};
 
-        bool isGettingUp                                     = false;
-        bool hasKicked                                       = false;
-        bool selfPenalised                                   = false;
-        bool manualOrientationReset                          = false;
-        bool resetInInitial                                  = true;
-        double manualOrientation                             = 0.0;
+        bool isGettingUp            = false;
+        bool hasKicked              = false;
+        bool selfPenalised          = false;
+        bool manualOrientationReset = false;
+        bool resetInInitial         = true;
+        double manualOrientation    = 0.0;
+        bool startedWalkingToReady  = false;
+        NUClear::clock::time_point startedWalkingToReadyAt;
         Eigen::Vector3f rBTt                                 = Eigen::Vector3f(1.0, 0.0, 0.0);
         message::input::GameEvents::Context team_kicking_off = message::input::GameEvents::Context::UNKNOWN;
         message::behaviour::KickPlan::KickType kickType{};
