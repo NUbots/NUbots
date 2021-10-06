@@ -57,9 +57,15 @@ namespace module::behaviour::planning {
     private:
         message::behaviour::MotionCommand latestCommand;
         const size_t subsumptionId;
-        float turnSpeed            = 0.2;
+        float maxTurnSpeed         = 0.2;
         float forwardSpeed         = 1;
         float sideSpeed            = 1;
+        double rotateSpeedX        = -0.04;
+        double rotateSpeedY        = 0;
+        double rotateSpeed         = 0.2;
+        double walkToReadySpeedX   = 0.1;
+        double walkToReadySpeedY   = 0.1;
+        double walkToReadyRotation = 0.5;
         float slow_approach_factor = 0.5;
         float a                    = 7;
         float b                    = 0;
@@ -93,7 +99,6 @@ namespace module::behaviour::planning {
         void visionWalkPath();
         void rotateOnSpot();
         void walkToReady();
-        // void splineWalkPath();
 
     public:
         explicit SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);

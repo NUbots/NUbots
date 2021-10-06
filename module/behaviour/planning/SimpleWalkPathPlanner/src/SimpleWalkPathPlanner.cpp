@@ -80,9 +80,15 @@ namespace module::behaviour::planning {
             // TODO(KipHamiltons): Make these all consistent with the other files. We don't use .config anywhere else
             log_level = file.config["log_level"].as<NUClear::LogLevel>();
 
-            turnSpeed            = file.config["turnSpeed"].as<float>();
+            maxTurnSpeed         = file.config["maxTurnSpeed"].as<float>();
             forwardSpeed         = file.config["forwardSpeed"].as<float>();
             sideSpeed            = file.config["sideSpeed"].as<float>();
+            rotateSpeedX         = file.config["rotateSpeedX"].as<float>();
+            rotateSpeedY         = file.config["rotateSpeedY"].as<float>();
+            rotateSpeed          = file.config["rotateSpeed"].as<float>();
+            walkToReadySpeedX    = file.config["walkToReadySpeedX"].as<float>();
+            walkToReadySpeedY    = file.config["walkToReadySpeedY"].as<float>();
+            walkToReadyRotation  = file.config["walkToReadyRotation"].as<float>();
             a                    = file.config["a"].as<float>();
             b                    = file.config["b"].as<float>();
             search_timeout       = file.config["search_timeout"].as<float>();
@@ -260,7 +266,7 @@ namespace module::behaviour::planning {
 
         // If the angle is bound between the maximum provided turning
         // speed use it. Otherwise, the appropriate maximum is used
-        angle = std::min(turnSpeed, std::max(angle, -turnSpeed));
+        angle = std::min(maxTurnSpeed, std::max(angle, -maxTurnSpeed));
 
 
         // Euclidean distance to ball (scaleF, scaleF2, scaleS, scaleS2 for Forward and Side
@@ -283,25 +289,14 @@ namespace module::behaviour::planning {
         emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
     }
     void SimpleWalkPathPlanner::visionWalkPath() {
-        std::unique_ptr<WalkCommand> command;
-        log<NUClear::WARN>("Walk to rBTt: ", rBTt.x(), rBTt.y(), rBTt.z());
-        // std::cout << "Walk to rBTt: (" << rBTt.x() << "," << rBTt.y() << "," << rBTt.z() << ")" << std::endl;
+        // Normalize the ball position to obtain the unit vector in torso space
         Eigen::Vector3f unit_vector_to_ball = rBTt / rBTt.norm();
-        Eigen::Vector3f velocity_vector     = 0.02 * unit_vector_to_ball;
-        log<NUClear::WARN>("Walk command: ", velocity_vector.x(), velocity_vector.y(), velocity_vector.z());
-        float angular_velocity = std::atan2(velocity_vector.y(), velocity_vector.x());
-
-
-        log<NUClear::WARN>("angular_velocity : ", angular_velocity);
-        // compare requested
-        // if (angular_velocity != 0) {
-        //     angular_velocity =
-        //         (angular_velocity / std::abs(angular_velocity) * std::min(turnSpeed, std::abs(angular_velocity)));
-        // }
-
-        log<NUClear::WARN>("angular_velocity after : ", angular_velocity);
-
-        command =
+        // Scale the unit vector by forwardSpeed
+        Eigen::Vector3f velocity_vector = forwardSpeed * unit_vector_to_ball;
+        float angular_velocity          = std::atan2(velocity_vector.y(), velocity_vector.x());
+        // Saturate the angular velocity with value maxTurnSpeed
+        angular_velocity = std::min(maxTurnSpeed, std::max(angular_velocity, -maxTurnSpeed));
+        std::unique_ptr<WalkCommand> command =
             std::make_unique<WalkCommand>(subsumptionId,
                                           Eigen::Vector3d(velocity_vector.x(), velocity_vector.y(), angular_velocity));
         emit(std::move(command));
@@ -309,10 +304,10 @@ namespace module::behaviour::planning {
     }
 
     void SimpleWalkPathPlanner::rotateOnSpot() {
-        log<NUClear::WARN>("Rotate around spot");
-        double rotateSpeedX = -0.04;
-        double rotateSpeedY = 0;
-        double rotateSpeed  = 0.15;
+        // Get the sign of the last seen ball positionm, such that the robot hopefully rotates towards the ball after
+        // it loses it
+        int signOfLastSeenBall = rBTt.y() > 0 ? 1 : -1;
+        rotateSpeed            = signOfLastSeenBall * rotateSpeed;
         std::unique_ptr<WalkCommand> command =
             std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(rotateSpeedX, rotateSpeedY, rotateSpeed));
         emit(std::move(command));
@@ -320,10 +315,6 @@ namespace module::behaviour::planning {
     }
 
     void SimpleWalkPathPlanner::walkToReady() {
-        log<NUClear::WARN>("Walk to ready");
-        float walkToReadySpeedX   = 0.1;
-        float walkToReadySpeedY   = 0;
-        float walkToReadyRotation = 0.2;
         std::unique_ptr<WalkCommand> command =
             std::make_unique<WalkCommand>(subsumptionId,
                                           Eigen::Vector3d(walkToReadySpeedX, walkToReadySpeedY, walkToReadyRotation));
@@ -331,7 +322,4 @@ namespace module::behaviour::planning {
         emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
     }
 
-    // void SimpleWalkPathPlanner::splineWalkPath()() {
-
-    // }
 }  // namespace module::behaviour::planning
