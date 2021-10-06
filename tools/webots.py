@@ -25,9 +25,8 @@ ROBOCUP_IMAGE_NAME = "robocup-vhsc-nubots"  # Provided by the TC and shouldn't b
 ROBOCUP_IMAGE_TAG = "robocup2021"  # Submitted in our team_config.json, shouldn't be changed here unless changed there
 ROBOCUP_IMAGE_REGISTRY = "079967072104.dkr.ecr.us-east-2.amazonaws.com/robocup-vhsc-nubots"  # Provided by the TC
 
-# Webots team details
+# NUbots RoboCup team ID
 NUBOTS_TEAM_ID = 12
-ALT_TEAM_ID = 13
 
 # Generate 4 digit random int to act as a unique identifier for this game
 GAME_IDENTIFIER = str(random.randint(1000, 9999))
@@ -239,7 +238,7 @@ def exec_run(role, num_of_robots=1, sim_address="127.0.0.1"):
             robot_color = "red"
             port_num = 10000 + i
         else:
-            team_id = ALT_TEAM_ID
+            team_id = NUBOTS_TEAM_ID + 1
             robot_color = "blue"
             port_num = 10020 + i - num_of_robots // 2
 
