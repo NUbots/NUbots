@@ -182,7 +182,7 @@ def exec_build(target, roles, clean, jobs):
 
     # Build the image!
     exit_code = subprocess.run(
-        ["docker", "build", "-t", f"{ROBOCUP_IMAGE_NAME}:{ROBOCUP_IMAGE_TAG}", "-f", "./nugus_sim.Dockerfile", "."]
+        ["docker", "build", "-t", f"{ROBOCUP_IMAGE_NAME}:{ROBOCUP_IMAGE_TAG}", "-f", "./Dockerfile.nugus_sim", "."]
     ).returncode
     if exit_code != 0:
         cprint(
