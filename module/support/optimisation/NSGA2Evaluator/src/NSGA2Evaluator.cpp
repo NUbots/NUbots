@@ -133,10 +133,7 @@ namespace module {
 
                 on<Trigger<RawSensorsMsg>, Single>().then([this](const RawSensorsMsg& sensors) {
                     if (currentState == State::EVALUATING) {
-                        bool shouldTerminateEarly = task->processRawSensorMsg(sensors);
-                        if(shouldTerminateEarly) {
-                            emit(std::make_unique<Event>(Event::TerminateEarly));
-                        }
+                        task->processRawSensorMsg(sensors, this);
                     }
                 });
 
@@ -272,25 +269,21 @@ namespace module {
             void NSGA2Evaluator::EvaluatingWalk(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
                 // Create and send the walk command, which will be evaluated when we get back sensors and time
                 // updates
-                auto map = task->evaluatingState(subsumptionId, this);
-                NUClear::log<NUClear::DEBUG>(fmt::format("Trialling with walk command: ({} {}) {}",
-                                                map.at("walk_x"),
-                                                map.at("walk_y"),
-                                                map.at("walk_rotation")));
+                task->evaluatingState(subsumptionId, this);
 
-                // Send the command to start walking
-                // emit(std::make_unique<WalkCommand>(
-                //     subsumptionId,
-                //     Eigen::Vector3d(map.at("walk_x"), map.at("walk_y"), map.at("walk_rotation"))));
 
+            }
+
+            void NSGA2Evaluator::ScheduleTrialExpiredMessage(const int trial_stage, const int delay_time) {
                 // Prepare the trial expired message
                 std::unique_ptr<NSGA2TrialExpired> message = std::make_unique<NSGA2TrialExpired>();
-                message->time_started                      = simTime;
-                message->generation                        = generation;
-                message->individual                        = individual;
+                message->time_started = simTime;
+                message->generation   = generation;
+                message->individual   = individual;
+                message->trial_stage  = trial_stage;
 
                 // Schedule the end of the walk trial after the duration limit
-                emit<Scope::DELAY>(message, std::chrono::seconds(static_cast<int>(map.at("trial_duration_limit"))));
+                emit<Scope::DELAY>(message, std::chrono::seconds(delay_time));
             }
 
             /// @brief Handle the TERMINATING_EARLY state

@@ -30,11 +30,11 @@ namespace module {
             using utility::input::ServoID;
             using utility::support::Expression;
 
-            bool WalkEvaluator::processRawSensorMsg(const RawSensors& sensors) {
-                bool shouldTerminateEarly = false;
-                shouldTerminateEarly = checkForFall(sensors);
+            void WalkEvaluator::processRawSensorMsg(const RawSensors& sensors, NSGA2Evaluator* evaluator) {
                 updateMaxFieldPlaneSway(sensors);
-                return shouldTerminateEarly;
+                if(checkForFall(sensors)) {
+                    evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TerminateEarly));
+                }
             }
 
             void WalkEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position) {
@@ -97,18 +97,16 @@ namespace module {
                 maxFieldPlaneSway      = 0.0;
             }
 
-            std::map<std::string, float> WalkEvaluator::evaluatingState(size_t subsumptionId, NSGA2Evaluator* evaluator) {
+            void WalkEvaluator::evaluatingState(size_t subsumptionId, NSGA2Evaluator* evaluator) {
+                NUClear::log<NUClear::DEBUG>(fmt::format("Trialling with walk command: ({} {}) {}",
+                                                walk_command_velocity.x(),
+                                                walk_command_velocity.y(),
+                                                walk_command_rotation));
+
                 evaluator->emit(std::make_unique<WalkCommand>(
                     subsumptionId,
                     Eigen::Vector3d(walk_command_velocity.x(),
                     walk_command_velocity.y(), walk_command_rotation)));
-
-                std::map<std::string, float> map {
-                    {"walk_x", walk_command_velocity.x()},
-                    {"walk_y", walk_command_velocity.y()},
-                    {"walk_rotation", walk_command_rotation},
-                    {"trial_duration_limit", trial_duration_limit}};
-                return map;
             }
 
             std::unique_ptr<NSGA2FitnessScores> WalkEvaluator::calculateFitnessScores(bool constraintsViolated, double simTime, int generation, int individual) {
@@ -159,7 +157,7 @@ namespace module {
 
 
             bool WalkEvaluator::checkForFall(const RawSensors& sensors) {
-                bool shouldTerminateEarly = false;
+                bool fallen = false;
                 auto accelerometer = sensors.accelerometer;
 
                 if ((std::fabs(accelerometer.x) > 9.2 || std::fabs(accelerometer.y) > 9.2)
@@ -169,9 +167,9 @@ namespace module {
                                         std::fabs(accelerometer.x),
                                         std::fabs(accelerometer.y),
                                         std::fabs(accelerometer.z));
-                    shouldTerminateEarly = true;
+                    fallen = true;
                 }
-                return shouldTerminateEarly;
+                return fallen;
             }
 
             void WalkEvaluator::updateMaxFieldPlaneSway(const RawSensors& sensors) {

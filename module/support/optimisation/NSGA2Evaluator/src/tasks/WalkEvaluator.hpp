@@ -22,11 +22,11 @@ namespace module {
             class WalkEvaluator: public EvaluatorTask {
             public:
                 // Implementing the EvaluatorTask interface
-                bool processRawSensorMsg(const RawSensors& sensors);
+                void processRawSensorMsg(const RawSensors& sensors, NSGA2Evaluator* evaluator);
                 void processOptimisationRobotPosition(const OptimisationRobotPosition& position);
                 void setUpTrial(const NSGA2EvaluationRequest& request);
                 void resetSimulation();
-                std::map<std::string, float> evaluatingState(size_t subsumptionId, NSGA2Evaluator *evaluator);
+                void evaluatingState(size_t subsumptionId, NSGA2Evaluator *evaluator);
                 std::unique_ptr<NSGA2FitnessScores> calculateFitnessScores(bool constraintsViolated, double simTime, int generation, int individual);
 
                 // Task-specific functions

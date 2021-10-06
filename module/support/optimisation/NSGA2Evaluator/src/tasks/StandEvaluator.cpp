@@ -30,7 +30,7 @@ namespace module {
             using utility::input::ServoID;
             using utility::support::Expression;
 
-            bool StandEvaluator::processRawSensorMsg(const RawSensors& sensors) {
+            void StandEvaluator::processRawSensorMsg(const RawSensors& sensors, NSGA2Evaluator* evaluator) {
             }
 
             void StandEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position) {
@@ -50,7 +50,7 @@ namespace module {
                 // Reset our local state
             }
 
-            std::map<std::string, float> StandEvaluator::evaluatingState(size_t subsumptionId, NSGA2Evaluator *evaluator) {
+            void StandEvaluator::evaluatingState(size_t subsumptionId, NSGA2Evaluator *evaluator) {
                 // std::map<std::string, float> map {
                 //     {"walk_x", walk_command_velocity.x()},
                 //     {"walk_y", walk_command_velocity.y()},

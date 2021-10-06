@@ -23,11 +23,11 @@ namespace module {
 
             class EvaluatorTask {
             public:
-                virtual bool processRawSensorMsg(const RawSensors& sensors) = 0;
+                virtual void processRawSensorMsg(const RawSensors& sensors, NSGA2Evaluator* evaluator) = 0;
                 virtual void processOptimisationRobotPosition(const OptimisationRobotPosition& position) = 0;
                 virtual void setUpTrial(const NSGA2EvaluationRequest& request) = 0;
                 virtual void resetSimulation() = 0;
-                virtual std::map<std::string, float> evaluatingState(size_t subsumptionId, NSGA2Evaluator *evaluator) = 0;
+                virtual void evaluatingState(size_t subsumptionId, NSGA2Evaluator *evaluator) = 0;
                 virtual std::unique_ptr<NSGA2FitnessScores> calculateFitnessScores(bool constraintsViolated, double simTime, int generation, int individual) = 0;
             };
 
