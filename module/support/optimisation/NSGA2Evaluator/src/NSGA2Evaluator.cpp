@@ -272,16 +272,16 @@ namespace module {
             void NSGA2Evaluator::EvaluatingWalk(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
                 // Create and send the walk command, which will be evaluated when we get back sensors and time
                 // updates
-                auto map = task->evaluatingState();
+                auto map = task->evaluatingState(subsumptionId, this);
                 NUClear::log<NUClear::DEBUG>(fmt::format("Trialling with walk command: ({} {}) {}",
                                                 map.at("walk_x"),
                                                 map.at("walk_y"),
                                                 map.at("walk_rotation")));
 
                 // Send the command to start walking
-                emit(std::make_unique<WalkCommand>(
-                    subsumptionId,
-                    Eigen::Vector3d(map.at("walk_x"), map.at("walk_y"), map.at("walk_rotation"))));
+                // emit(std::make_unique<WalkCommand>(
+                //     subsumptionId,
+                //     Eigen::Vector3d(map.at("walk_x"), map.at("walk_y"), map.at("walk_rotation"))));
 
                 // Prepare the trial expired message
                 std::unique_ptr<NSGA2TrialExpired> message = std::make_unique<NSGA2TrialExpired>();

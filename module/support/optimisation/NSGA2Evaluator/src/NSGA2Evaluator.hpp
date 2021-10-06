@@ -19,6 +19,8 @@ namespace module {
             using message::support::optimisation::NSGA2EvaluationRequest;
             using message::support::optimisation::NSGA2TrialExpired;
 
+            class EvaluatorTask; //Forward declaration
+
             class NSGA2Evaluator : public NUClear::Reactor {
 
             public:

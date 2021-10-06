@@ -61,7 +61,7 @@ namespace module {
 
                 // Read the QuinticWalk config and overwrite the config parameters with the current individual's
                 // parameters
-                YAML::Node walk_config = YAML::LoadFile("config/webots/QuinticWalk.yaml");
+                YAML::Node walk_config = YAML::LoadFile(currentRequest.task_config_path);
 
                 // The mapping of parameters depends on how the config file was read by the optimiser
                 auto walk                    = walk_config["walk"];
@@ -84,7 +84,7 @@ namespace module {
                 pause["duration"] = currentRequest.parameters.real_params[10];
 
                 // Write the updated config to disk
-                std::ofstream output_file_stream("config/webots/QuinticWalk.yaml");
+                std::ofstream output_file_stream(currentRequest.task_config_path);
                 output_file_stream << YAML::Dump(walk_config);
                 output_file_stream.close();
             }
@@ -97,7 +97,12 @@ namespace module {
                 maxFieldPlaneSway      = 0.0;
             }
 
-            std::map<std::string, float> WalkEvaluator::evaluatingState() {
+            std::map<std::string, float> WalkEvaluator::evaluatingState(size_t subsumptionId, NSGA2Evaluator* evaluator) {
+                evaluator->emit(std::make_unique<WalkCommand>(
+                    subsumptionId,
+                    Eigen::Vector3d(walk_command_velocity.x(),
+                    walk_command_velocity.y(), walk_command_rotation)));
+
                 std::map<std::string, float> map {
                     {"walk_x", walk_command_velocity.x()},
                     {"walk_y", walk_command_velocity.y()},
