@@ -84,9 +84,21 @@ namespace module {
                 pause["duration"] = currentRequest.parameters.real_params[10];
 
                 // Write the updated config to disk
-                std::ofstream output_file_stream(currentRequest.task_config_path);
-                output_file_stream << YAML::Dump(walk_config);
-                output_file_stream.close();
+                std::ofstream overwrite_file_stream(currentRequest.task_config_path);
+                overwrite_file_stream << YAML::Dump(walk_config);
+                overwrite_file_stream.close();
+
+                // Write the config to keep for later
+                NUClear::log<NUClear::DEBUG>(fmt::format("Saving as: gen{:03d}_ind{:03d}_task-{}.yaml",
+                                                currentRequest.generation,
+                                                currentRequest.id,
+                                                currentRequest.task));
+                std::ofstream save_file_stream(fmt::format("gen{:03d}_ind{:03d}_task-{}.yaml",
+                                                currentRequest.generation,
+                                                currentRequest.id,
+                                                currentRequest.task));
+                save_file_stream << YAML::Dump(walk_config);
+                save_file_stream.close();
             }
 
             void WalkEvaluator::resetSimulation() {
@@ -107,6 +119,7 @@ namespace module {
                     subsumptionId,
                     Eigen::Vector3d(walk_command_velocity.x(),
                     walk_command_velocity.y(), walk_command_rotation)));
+                evaluator->ScheduleTrialExpiredMessage(0, trial_duration_limit);
             }
 
             std::unique_ptr<NSGA2FitnessScores> WalkEvaluator::calculateFitnessScores(bool constraintsViolated, double simTime, int generation, int individual) {
