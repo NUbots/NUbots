@@ -22,9 +22,14 @@
 
 #include <Eigen/Core>
 #include <mutex>
+
+// clang-format off
+// This include needs to come immediately before the OK undef
 #include <ncurses.h>
-// ncurses defines OK. We don't need it
+// because ncurses defines OK. We don't need (or want) it.
 #undef OK
+// clang-format on
+
 #include <nuclear>
 
 #include "utility/input/LimbID.hpp"
