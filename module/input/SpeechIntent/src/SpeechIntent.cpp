@@ -2,7 +2,8 @@
 
 #include <alsa/asoundlib.h>
 #include <fmt/format.h>
-#include <json.h>
+//#include <json.h>
+#include <yaml-cpp/yaml.h>
 #include <spawn.h>
 
 #include "extension/Configuration.hpp"
@@ -12,59 +13,27 @@ namespace module::input {
 
     using extension::Configuration;
 
-    std::unique_ptr<SpeechIntentMsg> parse_voice2json_json(char* json_text, size_t size) {
+    std::unique_ptr<SpeechIntentMsg> parse_voice2json_json(std::string  json_text) {
         std::unique_ptr<SpeechIntentMsg> intent = std::make_unique<SpeechIntentMsg>();
-
-        json_value_s* root = json_parse(json_text, size);
-
-        json_object_s* root_object          = (json_object_s*) root->payload;
-        json_object_element_s* root_element = root_object->start;
-        while (root_element) {
-            json_string_s* element_name = root_element->name;
-
-            if (strcmp(element_name->string, "text") == 0) {
-                json_string_s* text_str = json_value_as_string(root_element->value);
-                intent->text            = std::string(text_str->string);
-            }
-            else if (strcmp(element_name->string, "intent") == 0) {
-                json_object_s* intent_obj             = (json_object_s*) root_element->value->payload;
-                json_object_element_s* intent_element = intent_obj->start;
-
-                assert(strcmp(intent_element->name->string, "name") == 0);
-                json_string_s* intent_name_str = json_value_as_string(intent_element->value);
-                intent->intent                 = std::string(intent_name_str->string);
-
-                intent_element = intent_element->next;
-
-                assert(strcmp(intent_element->name->string, "confidence") == 0);
-                json_number_s* confidence_num = json_value_as_number(intent_element->value);
-                intent->confidence            = atof(confidence_num->number);
-            }
-            else if (strcmp(element_name->string, "slots") == 0) {
-                json_object_s* slots_obj             = (json_object_s*) root_element->value->payload;
-                json_object_element_s* slots_element = slots_obj->start;
-                while (slots_element) {
-                    json_string_s* slot_name  = slots_element->name;
-                    json_string_s* slot_value = json_value_as_string(slots_element->value);
-
-                    std::string slot_name_str  = std::string(slot_name->string);
-                    std::string slot_value_str = std::string(slot_value->string);
-
-                    intent->slots.push_back({slot_name_str, slot_value_str});
-
-                    slots_element = slots_element->next;
-                }
-            }
-
-            root_element = root_element->next;
+        
+        YAML::Node root = YAML::Load(json_text);
+        intent->text = root["text"].as<std::string>();
+        YAML::Node intent_obj = root["intent"].as<YAML::Node>();
+        intent->intent = intent_obj["name"].as<std::string>();
+        intent->confidence = intent_obj["confidence"].as<float>();
+        
+        YAML::Node slots_obj = root["slots"].as<YAML::Node>();
+        if(slots_obj.Type() != YAML::NodeType::Map) {
+            NUClear::log<NUClear::FATAL>(fmt::format("invalid node type found = {}", slots_obj.Type()));
         }
-        free(root);
-
+        for (auto it = slots_obj.begin(); it != slots_obj.end(); it++) {
+            auto slot_name = it->first.as<std::string>();
+            auto slot_value = it->second.as<std::string>();
+            
+            intent->slots.push_back({slot_name, slot_value});
+        }
+        
         return intent;
-    }
-
-    std::unique_ptr<SpeechIntentMsg> parse_voice2json_json(std::string str) {
-        return parse_voice2json_json(str.data(), str.size());
     }
 
     // process: out parameter containing the information from the spawned process e.g.
@@ -164,7 +133,7 @@ namespace module::input {
     // python -m voice2json --base-directory /home/nubots/voice2json/ -p en recognize-intent
     char* voice2json_recognize_intent(char* input) {
         char* output = 0;
-        char buffer[0x1000];
+        char buffer[read_buffer_size];
         ssize_t bytes_read = 0;
 
         const char* args[] = {"python",
@@ -286,7 +255,7 @@ namespace module::input {
         // Read from the stdout of the voice2json process which is spawned in either "transcribe-stream" or
         // "transcribe-wav" modes.
         on<IO>(voice2json_proc.stdout, IO::READ).then([this] {
-            char buffer[0x1000];
+            char buffer[read_buffer_size];
             ssize_t bytes_read = read(voice2json_proc.stdout, buffer, sizeof(buffer) - 1);
             if (bytes_read == -1) {
                 NUClear::log<NUClear::FATAL>(
@@ -307,7 +276,7 @@ namespace module::input {
                     return;
                 }
 
-                std::unique_ptr<SpeechIntentMsg> intent = parse_voice2json_json(intent_json, strlen(intent_json));
+                std::unique_ptr<SpeechIntentMsg> intent = parse_voice2json_json(std::string(intent_json));
                 emit(std::move(intent));
 
                 free(intent_json);
@@ -317,7 +286,7 @@ namespace module::input {
         // Read any input from stderr and print it. We cannot proceed with normal operations so we just print
         // the error messages
         on<IO>(voice2json_proc.stderr, IO::READ).then([this] {
-            char buffer[0x1000];
+            char buffer[read_buffer_size];
             ssize_t bytes_read = read(voice2json_proc.stderr, buffer, sizeof(buffer) - 1);
             if (bytes_read == -1) {
                 NUClear::log<NUClear::FATAL>(

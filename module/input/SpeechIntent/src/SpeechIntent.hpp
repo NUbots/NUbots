@@ -5,6 +5,8 @@
 #include <spawn.h>
 
 namespace module::input {
+    static constexpr int read_buffer_size = 0x1000;
+
     /**
      * @brief @c SpeechInputSetOutputMsg is used to enable or disable microphone processing.
      */
@@ -107,31 +109,6 @@ namespace module::input {
          */
         float confidence;
 
-        void add_slot(std::string name, std::string value) {
-            Slot slot = {name, value};
-            slots.push_back(slot);
-        }
-    };
-
-    struct ProcessSpawnResources {
-        int stdout_pipe[2]                 = {};
-        int stderr_pipe[2]                 = {};
-        int stdin_pipe[2]                  = {};
-        posix_spawn_file_actions_t actions = {};
-        bool actions_inited                = false;
-        std::string env_path;
-
-        ~ProcessSpawnResources() {
-            if (stdout_pipe[1])
-                close(stdout_pipe[1]);
-            if (stderr_pipe[1])
-                close(stderr_pipe[1]);
-            if (stdin_pipe[0])
-                close(stdin_pipe[0]);
-            if (actions_inited) {
-                posix_spawn_file_actions_destroy(&actions);
-            }
-        }
     };
 
     enum SpeechIntentTranscribeMode {
