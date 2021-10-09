@@ -297,17 +297,20 @@ namespace module::extension {
             if (path.second.handle) {
                 uv_fs_event_stop(path.second.handle.get());
                 std::cout << "Inside if after event stop" << std::endl;
-                auto this_handle = reinterpret_cast<uv_handle_t*>(path.second.handle.get());
-                this_handle->flags |= 0x00000001;  // == UV_HANDLE_CLOSING
-                std::cout << 1 << std::endl;
-                this_handle->close_cb = [](uv_handle_t*) {};
-                std::cout << 2 << std::endl;
+                auto this_handle   = reinterpret_cast<uv_handle_t*>(path.second.handle.get());
                 auto casted_handle = (uv_fs_event_t*) this_handle;
+                std::cout << 1 << std::endl;
+                casted_handle->flags |= 0x00000001;  // == UV_HANDLE_CLOSING
+                std::cout << 2 << std::endl;
+                casted_handle->close_cb = [](uv_handle_t*) {};
                 std::cout << 3 << std::endl;
                 uv_fs_event_stop(casted_handle);
                 std::cout << 4 << std::endl;
-                uv_close(reinterpret_cast<uv_handle_t*>(path.second.handle.get()), [](uv_handle_t*) {});
+                casted_handle->next_closing = casted_handle->loop->closing_handles;
                 std::cout << 5 << std::endl;
+                casted_handle->loop->closing_handles = (uv_handle_t*) casted_handle;
+                std::cout << 6 << std::endl;
+                uv_close(reinterpret_cast<uv_handle_t*>(path.second.handle.get()), [](uv_handle_t*) {});
             }
         }
         std::cout << "After first loop of filewatcher destructor" << std::endl;
