@@ -310,7 +310,7 @@ namespace module::extension {
                 std::cout << 5 << std::endl;
                 casted_handle->loop->closing_handles = (uv_handle_t*) casted_handle;
                 std::cout << 6 << std::endl;
-                uv_close(reinterpret_cast<uv_handle_t*>(path.second.handle.get()), [](uv_handle_t*) {});
+                // uv_close(reinterpret_cast<uv_handle_t*>(path.second.handle.get()), [](uv_handle_t*) {});
             }
         }
         std::cout << "After first loop of filewatcher destructor" << std::endl;
