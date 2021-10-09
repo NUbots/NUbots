@@ -163,7 +163,6 @@ namespace module::behaviour::planning {
                          const FieldDescription& fieldDescription) {
                 // TODO(Bryce Tuppurainen) Determine if this line is necessary. Could this be
                 // integrated into the switch?
-                log<NUClear::WARN>("wants to kick : ", wantsTo.kick);
                 if (wantsTo.kick) {
                     emit(std::make_unique<StopCommand>(subsumptionId));
                     return;
@@ -307,9 +306,9 @@ namespace module::behaviour::planning {
     void SimpleWalkPathPlanner::rotateOnSpot() {
         // Get the sign of the last seen ball positionm, such that the robot hopefully rotates towards the ball after
         // it loses it
-        log<NUClear::WARN>("rotate on spot");
-        int signOfLastSeenBall = rBTt.y() > 0 ? 1 : -1;
-        rotateSpeed            = signOfLastSeenBall * rotateSpeed;
+        // int signOfLastSeenBall = rBTt.y() > 0 ? 1 : -1;
+        // log<NUClear::WARN>("rotate on spot : ", signOfLastSeenBall);
+        rotateSpeed = rotateSpeed;
         std::unique_ptr<WalkCommand> command =
             std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(rotateSpeedX, rotateSpeedY, rotateSpeed));
         emit(std::move(command));

@@ -358,7 +358,7 @@ namespace module::behaviour::strategy {
             startedWalkingToReady   = true;
         }
 
-        if (NUClear::clock::now() - startedWalkingToReadyAt < std::chrono::milliseconds(22 * 1000)) {
+        if (NUClear::clock::now() - startedWalkingToReadyAt < std::chrono::milliseconds(12 * 1000)) {
             emit(std::make_unique<MotionCommand>(utility::behaviour::WalkToReady()));
         }
         else {
@@ -416,6 +416,7 @@ namespace module::behaviour::strategy {
             }
             else {  // ball has not been seen recently
                 currentState = Behaviour::State::SEARCH_FOR_BALL;
+                find({FieldTarget(FieldTarget::Target::BALL)});
                 emit(std::make_unique<MotionCommand>(utility::behaviour::RotateOnSpot()));
             }
         }
