@@ -226,8 +226,8 @@ namespace Darwin {
         }
 
         // We now are now waiting for 4 bytes
-        timeout.tv_usec      = BYTE_WAIT * sizeof(Header);
-        auto* headerBytes    = reinterpret_cast<uint8_t*>(&result.header);
+        timeout.tv_usec   = BYTE_WAIT * sizeof(Header);
+        auto* headerBytes = reinterpret_cast<uint8_t*>(&result.header);
         for (size_t done = 0; done < sizeof(Header);) {
             if (select(fd + 1, &connectionset, nullptr, nullptr, &timeout) == 1) {
                 done += readBytes(&headerBytes[done], sizeof(Header) - done);

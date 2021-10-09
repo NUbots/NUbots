@@ -366,7 +366,6 @@ namespace module::behaviour {
                 return a.index < b.index;
             }
             return false;
-           
         };
 
         // Sort our list

@@ -307,7 +307,6 @@ namespace utility::math::geometry {
                       }
                       // Otherwise, sort anti-clockwise turns before clockwise turns
                       return (direction < 0);
-                     
                   });
 
         // Remove all colinear points
