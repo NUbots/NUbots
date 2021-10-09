@@ -83,7 +83,7 @@ namespace module::behaviour::strategy {
         NUClear::clock::time_point lastLocalised = NUClear::clock::now();
 
         NUClear::clock::time_point ballLastMeasured =
-            NUClear::clock::now() - std::chrono::seconds(600);  // TODO: unhack
+            NUClear::clock::now() - std::chrono::seconds(600);  // TODO(BehaviourTeam): unhack
         NUClear::clock::time_point ballSearchStartTime;
         NUClear::clock::time_point goalLastMeasured;
         void initialLocalisationReset();

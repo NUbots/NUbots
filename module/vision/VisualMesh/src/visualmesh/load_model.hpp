@@ -28,12 +28,12 @@ namespace module::vision::visualmesh {
     struct LoadedModel {
         ::visualmesh::NetworkStructure<float> model;
         std::string mesh_model;
-        int num_classes;
+        int num_classes = 0;
         std::map<std::string, uint32_t> class_map;
         struct {
             std::string shape;
-            double radius;
-            double intersections;
+            double radius        = 0.0;
+            double intersections = 0.0;
         } geometry;
     };
 
