@@ -95,7 +95,7 @@ def run(sub_command, num_jobs=0, test=None, given_ctest_args=[], **kwargs):
         # Default ctest args
         ctest_command = [
             "/usr/bin/ctest",
-            "--parallel",
+            # "--parallel",
             str(num_jobs),
             "--force-new-ctest-process",
             "--output-on-failure",

@@ -96,7 +96,7 @@ jobs:
         run: ./b build
 
       - name: Test the code
-        run: ./b tests run Kine
+        run: ./b tests run
 
   # Check the code is formatted according to clang-format
   clang-format:
