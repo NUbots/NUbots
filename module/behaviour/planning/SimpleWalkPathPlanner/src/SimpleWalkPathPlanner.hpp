@@ -58,6 +58,7 @@ namespace module::behaviour::planning {
         message::behaviour::MotionCommand latestCommand;
         const size_t subsumptionId;
         float maxTurnSpeed         = 0.2;
+        float minTurnSpeed         = 0.2;
         float forwardSpeed         = 1;
         float sideSpeed            = 1;
         float rotateSpeedX         = -0.04;

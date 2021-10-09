@@ -81,6 +81,7 @@ namespace module::behaviour::planning {
             log_level = file.config["log_level"].as<NUClear::LogLevel>();
 
             maxTurnSpeed         = file.config["maxTurnSpeed"].as<float>();
+            minTurnSpeed         = file.config["minTurnSpeed"].as<float>();
             forwardSpeed         = file.config["forwardSpeed"].as<float>();
             sideSpeed            = file.config["sideSpeed"].as<float>();
             rotateSpeedX         = file.config["rotateSpeedX"].as<float>();
@@ -295,7 +296,8 @@ namespace module::behaviour::planning {
         Eigen::Vector3f velocity_vector = forwardSpeed * unit_vector_to_ball;
         float angular_velocity          = std::atan2(velocity_vector.y(), velocity_vector.x());
         // Saturate the angular velocity with value maxTurnSpeed
-        angular_velocity = std::min(maxTurnSpeed, std::max(angular_velocity, -maxTurnSpeed));
+        angular_velocity = std::min(maxTurnSpeed, std::max(angular_velocity, minTurnSpeed));
+        log<NUClear::WARN>("angular_velocity", angular_velocity);
         std::unique_ptr<WalkCommand> command =
             std::make_unique<WalkCommand>(subsumptionId,
                                           Eigen::Vector3d(velocity_vector.x(), velocity_vector.y(), angular_velocity));
