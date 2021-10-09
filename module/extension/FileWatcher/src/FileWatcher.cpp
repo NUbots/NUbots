@@ -293,25 +293,22 @@ namespace module::extension {
 
     FileWatcher::~FileWatcher() {
         std::cout << "Start of filewatcher destructor" << std::endl;
-        int iters = 0;
         for (const auto& path : paths) {
-            std::cout << iters++ << " iterations" << std::endl;
             if (path.second.handle) {
-                std::cout << "Inside if statement" << std::endl;
-                auto path_thing = path.second.handle.get();
-                std::cout << "After first assignment" << std::endl;
-                auto derefd = *path_thing;
-                std::cout << "Deref of ptr was successful" << &derefd << std::endl;
-                uv_fs_event_stop(path_thing);
-                std::cout << "Called the first uv method successfully" << std::endl;
-                auto casted = reinterpret_cast<uv_handle_t*>(path.second.handle.get());
-                std::cout << "Cast successful" << std::endl;
-                auto derefd_again = *casted;
-                std::cout << "deref #2 successful" << &derefd_again << std::endl;
-                uv_close(casted, [](uv_handle_t*) {});
-                std::cout << "At the end of the if" << std::endl;
+                uv_fs_event_stop(path.second.handle.get());
+                std::cout << "Inside if after event stop" << std::endl;
+                auto this_handle = reinterpret_cast<uv_handle_t*>(path.second.handle.get());
+                this_handle->flags |= 0x00000001;  // == UV_HANDLE_CLOSING
+                std::cout << 1 << std::endl;
+                this_handle->close_cb = [](uv_handle_t*) {};
+                std::cout << 2 << std::endl;
+                auto casted_handle = (uv_fs_event_t*) this_handle;
+                std::cout << 3 << std::endl;
+                uv_fs_event_stop(casted_handle);
+                std::cout << 4 << std::endl;
+                uv_close(reinterpret_cast<uv_handle_t*>(path.second.handle.get()), [](uv_handle_t*) {});
+                std::cout << 5 << std::endl;
             }
-            std::cout << "End of iter " << iters << std::endl;
         }
         std::cout << "After first loop of filewatcher destructor" << std::endl;
 
