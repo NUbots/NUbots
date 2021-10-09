@@ -301,13 +301,13 @@ namespace module::extension {
                 auto path_thing = path.second.handle.get();
                 std::cout << "After first assignment" << std::endl;
                 auto derefd = *path_thing;
-                std::cout << "Deref of ptr was successful" << std::endl;
-                uv_fs_event_stop(std::move(path_thing));
+                std::cout << "Deref of ptr was successful" << &derefd << std::endl;
+                uv_fs_event_stop(path_thing);
                 std::cout << "Called the first uv method successfully" << std::endl;
                 auto casted = reinterpret_cast<uv_handle_t*>(path.second.handle.get());
                 std::cout << "Cast successful" << std::endl;
                 auto derefd_again = *casted;
-                std::cout << "deref #2 successful" << std::endl;
+                std::cout << "deref #2 successful" << &derefd_again << std::endl;
                 uv_close(casted, [](uv_handle_t*) {});
                 std::cout << "At the end of the if" << std::endl;
             }
