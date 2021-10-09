@@ -122,8 +122,6 @@ namespace module::behaviour::strategy {
         });
 
         // TODO(BehaviourTeam): unhack
-        emit(std::make_unique<KickPlan>(KickPlan(Eigen::Vector2d(4.5, 0.0), KickType::SCRIPTED)));
-
         on<Trigger<Field>, With<FieldDescription>>().then(
             [this](const Field& field, const FieldDescription& fieldDescription) {
                 Eigen::Vector2d kickTarget = getKickPlan(field, fieldDescription);
@@ -133,6 +131,7 @@ namespace module::behaviour::strategy {
         // For checking last seen times
         on<Trigger<VisionBalls>, With<Sensors>>().then([this](const VisionBalls& balls, const Sensors& sensors) {
             if (!balls.balls.empty()) {
+                std::cout << "ball seen " << std::endl;
                 ballLastMeasured      = NUClear::clock::now();
                 Eigen::Vector3f srBCc = balls.balls[0].measurements[0].srBCc;
                 srBCc.x()             = 1.0 / srBCc.x();
@@ -359,7 +358,7 @@ namespace module::behaviour::strategy {
             startedWalkingToReady   = true;
         }
 
-        if (NUClear::clock::now() - startedWalkingToReadyAt < std::chrono::milliseconds(28 * 1000)) {
+        if (NUClear::clock::now() - startedWalkingToReadyAt < std::chrono::milliseconds(22 * 1000)) {
             emit(std::make_unique<MotionCommand>(utility::behaviour::WalkToReady()));
         }
         else {

@@ -8,12 +8,12 @@ maxTurnSpeed : 0.125
 # rotate on the spot tuning values
 rotateSpeedX : -0.04
 rotateSpeedY: 0
-rotateSpeed: 0.2
+rotateSpeed: 0.15
 
 # walk to ready position tuning values
 walkToReadySpeedX: 0.1
-walkToReadySpeedY: 0
-walkToReadyRotation: 0.2
+walkToReadySpeedY: 0.1
+walkToReadyRotation: 0.5
 
 slow_approach_factor: 0.01
 a: 7

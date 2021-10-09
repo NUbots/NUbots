@@ -289,6 +289,7 @@ namespace module::behaviour::planning {
         emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
     }
     void SimpleWalkPathPlanner::visionWalkPath() {
+        log<NUClear::WARN>("walk to ball");
         // Normalize the ball position to obtain the unit vector in torso space
         Eigen::Vector3f unit_vector_to_ball = rBTt / rBTt.norm();
         // Scale the unit vector by forwardSpeed
@@ -306,6 +307,7 @@ namespace module::behaviour::planning {
     void SimpleWalkPathPlanner::rotateOnSpot() {
         // Get the sign of the last seen ball positionm, such that the robot hopefully rotates towards the ball after
         // it loses it
+        log<NUClear::WARN>("rotate on spot");
         int signOfLastSeenBall = rBTt.y() > 0 ? 1 : -1;
         rotateSpeed            = signOfLastSeenBall * rotateSpeed;
         std::unique_ptr<WalkCommand> command =
@@ -315,6 +317,7 @@ namespace module::behaviour::planning {
     }
 
     void SimpleWalkPathPlanner::walkToReady() {
+        log<NUClear::WARN>("walk to ready");
         std::unique_ptr<WalkCommand> command =
             std::make_unique<WalkCommand>(subsumptionId,
                                           Eigen::Vector3d(walkToReadySpeedX, walkToReadySpeedY, walkToReadyRotation));
