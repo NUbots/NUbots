@@ -131,7 +131,7 @@ namespace module::behaviour::strategy {
         // For checking last seen times
         on<Trigger<VisionBalls>, With<Sensors>>().then([this](const VisionBalls& balls, const Sensors& sensors) {
             if (!balls.balls.empty()) {
-                std::cout << "ball seen " << std::endl;
+                // std::cout << "ball seen " << std::endl;
                 ballLastMeasured      = NUClear::clock::now();
                 Eigen::Vector3f srBCc = balls.balls[0].measurements[0].srBCc;
                 srBCc.x()             = 1.0 / srBCc.x();
@@ -392,7 +392,7 @@ namespace module::behaviour::strategy {
             currentState = Behaviour::State::GOALIE_WALK;
         }
         else {
-            log<NUClear::WARN>(" rBTt : ", rBTt.x());
+            // log<NUClear::WARN>(" rBTt : ", rBTt.x());
             if (NUClear::clock::now() - ballLastMeasured
                 < cfg_.ball_last_seen_max_time) {  // ball has been seen recently
                                                    // if (rBTt.x() < 0.35) {             // ball in kick radius
