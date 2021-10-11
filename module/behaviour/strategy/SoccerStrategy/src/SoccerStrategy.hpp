@@ -67,12 +67,15 @@ namespace module::behaviour::strategy {
 
         std::vector<message::behaviour::FieldTarget> lookTarget{};
 
-        bool isGettingUp                                     = false;
-        bool hasKicked                                       = false;
-        bool selfPenalised                                   = false;
-        bool manualOrientationReset                          = false;
-        bool resetInInitial                                  = true;
-        double manualOrientation                             = 0.0;
+        bool isGettingUp            = false;
+        bool hasKicked              = false;
+        bool selfPenalised          = false;
+        bool manualOrientationReset = false;
+        bool resetInInitial         = true;
+        double manualOrientation    = 0.0;
+        bool startedWalkingToReady  = false;
+        NUClear::clock::time_point startedWalkingToReadyAt;
+        Eigen::Vector3f rBTt                                 = Eigen::Vector3f(1.0, 0.0, 0.0);
         message::input::GameEvents::Context team_kicking_off = message::input::GameEvents::Context::UNKNOWN;
         message::behaviour::KickPlan::KickType kickType{};
         message::behaviour::Behaviour::State currentState = message::behaviour::Behaviour::State::INIT;
@@ -80,7 +83,7 @@ namespace module::behaviour::strategy {
         NUClear::clock::time_point lastLocalised = NUClear::clock::now();
 
         NUClear::clock::time_point ballLastMeasured =
-            NUClear::clock::now() - std::chrono::seconds(600);  // TODO(BehaviourTeam): unhack
+            NUClear::clock::now() - std::chrono::seconds(6000);  // TODO(BehaviourTeam): unhack
         NUClear::clock::time_point ballSearchStartTime;
         NUClear::clock::time_point goalLastMeasured;
         void initialLocalisationReset();

@@ -40,6 +40,7 @@
 
 #include "utility/behaviour/MotionCommand.hpp"
 #include "utility/input/LimbID.hpp"
+#include "utility/math/coordinates.hpp"
 #include "utility/math/matrix/transform.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
@@ -80,6 +81,7 @@ namespace module::behaviour::strategy {
     using VisionGoals = message::vision::Goals;
 
     using utility::input::LimbID;
+    using utility::math::coordinates::sphericalToCartesian;
     using utility::support::Expression;
 
     using utility::support::Expression;
@@ -120,8 +122,6 @@ namespace module::behaviour::strategy {
         });
 
         // TODO(BehaviourTeam): unhack
-        emit(std::make_unique<KickPlan>(KickPlan(Eigen::Vector2d(4.5, 0.0), KickType::SCRIPTED)));
-
         on<Trigger<Field>, With<FieldDescription>>().then(
             [this](const Field& field, const FieldDescription& fieldDescription) {
                 Eigen::Vector2d kickTarget = getKickPlan(field, fieldDescription);
@@ -129,9 +129,14 @@ namespace module::behaviour::strategy {
             });
 
         // For checking last seen times
-        on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
+        on<Trigger<VisionBalls>, With<Sensors>>().then([this](const VisionBalls& balls, const Sensors& sensors) {
             if (!balls.balls.empty()) {
-                ballLastMeasured = NUClear::clock::now();
+                std::cout << "ball seen " << std::endl;
+                ballLastMeasured      = NUClear::clock::now();
+                Eigen::Vector3f srBCc = balls.balls[0].measurements[0].srBCc;
+                srBCc.x()             = 1.0 / srBCc.x();
+                Eigen::Affine3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
+                rBTt = Htc * Eigen::Vector3f(sphericalToCartesian(srBCc));
             }
         });
 
@@ -343,13 +348,27 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::normalReady(const GameState& gameState, const FieldDescription& fieldDescription) {
-        if (gameState.data.our_kick_off) {
-            walkTo(fieldDescription, cfg_.start_position_offensive);
+        // log<NUClear::DEBUG>("normalReady()");
+
+        // auto walkTarget = gameState.data.our_kick_off ? cfg_.start_position_offensive :
+        // cfg_.start_position_defensive; walkTo(fieldDescription, walkTarget);
+
+        if (!startedWalkingToReady) {
+            startedWalkingToReadyAt = NUClear::clock::now();
+            startedWalkingToReady   = true;
+        }
+
+        if (NUClear::clock::now() - startedWalkingToReadyAt < std::chrono::milliseconds(12 * 1000)) {
+            emit(std::make_unique<MotionCommand>(utility::behaviour::WalkToReady()));
         }
         else {
-            walkTo(fieldDescription, cfg_.start_position_defensive);
+            // log("10 seconds up, stopping walk");
+            standStill();
         }
-        find({FieldTarget(FieldTarget::Target::SELF)});
+
+        // Self localise while we're walking on in READY
+        // find({FieldTarget(FieldTarget::Target::SELF)});
+
         currentState = Behaviour::State::READY;
     }
 
@@ -361,6 +380,7 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::normalPlaying(const Field& field, const Ball& ball, const FieldDescription& fieldDescription) {
+        // log<NUClear::WARN>(" normal playing ");
         if (penalised() && !cfg_.forcePlaying) {  // penalised
             standStill();
             find({FieldTarget(FieldTarget::Target::SELF)});
@@ -372,25 +392,32 @@ namespace module::behaviour::strategy {
             currentState = Behaviour::State::GOALIE_WALK;
         }
         else {
+            log<NUClear::WARN>(" rBTt : ", rBTt.x());
             if (NUClear::clock::now() - ballLastMeasured
                 < cfg_.ball_last_seen_max_time) {  // ball has been seen recently
+                                                   // if (rBTt.x() < 0.35) {             // ball in kick radius
+                                                   //     log<NUClear::WARN>(" KICK ");
+                                                   //     if (rBTt.y() > 0.0) {
+                                                   //         log<NUClear::WARN>("kick left");
+                                                   //         emit(std::make_unique<KickScriptCommand>(
+                //             KickScriptCommand(LimbID::LEFT_LEG, KickType::SCRIPTED)));
+                //     }
+                //     else {
+                //         log<NUClear::WARN>("kick right");
+                //         emit(std::make_unique<KickScriptCommand>(
+                //             KickScriptCommand(LimbID::RIGHT_LEG, KickType::SCRIPTED)));
+                //     }
+                // }
+                // else {
                 find({FieldTarget(FieldTarget::Target::BALL)});
                 walkTo(fieldDescription, FieldTarget::Target::BALL);
                 currentState = Behaviour::State::WALK_TO_BALL;
+                // }
             }
             else {  // ball has not been seen recently
-                Eigen::Affine2d position(field.position);
-                if (position.translation().norm() > 1) {  // a long way away from centre
-                    // walk to centre of field
-                    find({FieldTarget(FieldTarget::Target::BALL)});
-                    walkTo(fieldDescription, Eigen::Vector2d::Zero());
-                    currentState = Behaviour::State::MOVE_TO_CENTRE;
-                }
-                else {
-                    find({FieldTarget(FieldTarget::Target::BALL)});
-                    walkTo(fieldDescription, FieldTarget::Target::BALL);
-                    currentState = Behaviour::State::SEARCH_FOR_BALL;
-                }
+                currentState = Behaviour::State::SEARCH_FOR_BALL;
+                find({FieldTarget(FieldTarget::Target::BALL)});
+                emit(std::make_unique<MotionCommand>(utility::behaviour::RotateOnSpot()));
             }
         }
     }
