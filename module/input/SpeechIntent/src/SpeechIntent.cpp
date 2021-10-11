@@ -2,9 +2,11 @@
 
 #include <alsa/asoundlib.h>
 #include <fmt/format.h>
-//#include <json.h>
 #include <yaml-cpp/yaml.h>
 #include <spawn.h>
+
+#include <filesystem>
+#include <fstream>
 
 #include "extension/Configuration.hpp"
 
@@ -13,7 +15,7 @@ namespace module::input {
 
     using extension::Configuration;
 
-    std::unique_ptr<SpeechIntentMsg> parse_voice2json_json(std::string  json_text) {
+    std::unique_ptr<SpeechIntentMsg> parse_voice2json_json(std::string json_text) {
         std::unique_ptr<SpeechIntentMsg> intent = std::make_unique<SpeechIntentMsg>();
         
         YAML::Node root = YAML::Load(json_text);
@@ -49,15 +51,12 @@ namespace module::input {
         int stdin_pipe[2]  = {};
 
         char* path = getenv("PATH");
-
-        size_t len     = strlen(path) + 5 + 1;
-        char* env_path = (char*) malloc(len);
-        int written    = sprintf(env_path, "PATH=%s", path);
-        assert(written > 0);
-        env_path[written] = 0;
+        
+        std::string env_path("PATH=");
+        env_path.append(path);
 
         char* const envp[] = {(char*) "KALDI_DIR=",  // KALDI_DIR env var must be blank!
-                              (char*) env_path,
+                              (char*) (env_path.data()),
                               NULL};
 
         if (!((pipe(stdout_pipe) == -1) || (pipe(stderr_pipe) == -1) || (pipe(stdin_pipe) == -1))) {
@@ -96,7 +95,6 @@ namespace module::input {
         }
         process = {stdout_pipe[0], stderr_pipe[0], stdin_pipe[1], pid, std::string(args[0])};
 
-        free(env_path);
         return success;
     }
 
@@ -131,8 +129,8 @@ namespace module::input {
     }
 
     // python -m voice2json --base-directory /home/nubots/voice2json/ -p en recognize-intent
-    char* voice2json_recognize_intent(char* input) {
-        char* output = 0;
+    std::optional<std::string> voice2json_recognize_intent(char* input) {
+        std::optional<std::string> output = {};
         char buffer[read_buffer_size];
         ssize_t bytes_read = 0;
 
@@ -161,7 +159,7 @@ namespace module::input {
             }
             buffer[bytes_read] = 0;
 
-            output = strdup(buffer);
+            output = std::optional<std::string>{buffer};
         }
         if (process.stdout) {
             close(process.stdout);
@@ -181,40 +179,32 @@ namespace module::input {
     // followed by the wav file after the newline
     bool write_audio_to_file(int fd, char* filename) {
         ssize_t write_res = 0;
-        if (access(filename, F_OK) != 0) {
+        if(!std::filesystem::is_regular_file(filename)) {
             return false;
         }
 
-        FILE* file = fopen(filename, "rb");
-        fseek(file, 0, SEEK_END);
-        int file_size = ftell(file);
-        fseek(file, 0, SEEK_SET);
-        assert(file_size != -1);
-
-        char* file_buffer = (char*) malloc(file_size);
-        fread(file_buffer, file_size, 1, file);
-        fclose(file);
-
-        char file_size_buf[64];
-        sprintf(file_size_buf, "%d\n", file_size);
-
+        std::ifstream file(filename, std::ios::in | std::ios::binary);
+        const std::size_t& file_size = std::filesystem::file_size(filename);
+        auto file_buffer = std::make_unique<char[]>(file_size);
+        file.read(file_buffer.get(), file_size);
+        file.close();
+        
+        char file_size_buf[128];
+        sprintf(file_size_buf, "%ld\n", file_size);
+        
         write_res = write(fd, file_size_buf, strlen(file_size_buf));
         if (write_res == -1) {
             NUClear::log<NUClear::FATAL>(fmt::format("({}:{}) write failed, errno = {}", __FILE__, __LINE__, errno));
-            free(file_buffer);
             return false;
         }
 
-        write_res = write(fd, file_buffer, file_size);
+        write_res = write(fd, file_buffer.get(), file_size);
         if (write_res == -1) {
             NUClear::log<NUClear::FATAL>(fmt::format("({}:{}) write failed, errno = {}", __FILE__, __LINE__, errno));
-            free(file_buffer);
             return false;
         }
-        assert(write_res == file_size);
-
-        free(file_buffer);
-
+        //assert(write_res == file_size);
+        
         return true;
     }
 
@@ -269,17 +259,15 @@ namespace module::input {
 
             if (output_enabled) {
                 // parse and emit message
-                char* intent_json = voice2json_recognize_intent(buffer);
+                auto intent_json = voice2json_recognize_intent(buffer);
                 if (!intent_json) {
                     NUClear::log<NUClear::FATAL>(
                         fmt::format("({}:{}) failed to recognize intent, errno = {}", __FILE__, __LINE__, errno));
                     return;
                 }
 
-                std::unique_ptr<SpeechIntentMsg> intent = parse_voice2json_json(std::string(intent_json));
+                std::unique_ptr<SpeechIntentMsg> intent = parse_voice2json_json(intent_json.value());
                 emit(std::move(intent));
-
-                free(intent_json);
             }
         });
 
@@ -308,7 +296,7 @@ namespace module::input {
 
         // This trigger will recognize the intent of a wav file.
         on<Trigger<SpeechInputRecognizeWavFile>>().then([this](const SpeechInputRecognizeWavFile& msg) {
-            if (!write_audio_to_file(voice2json_proc.stdin, (char*) msg.filename.data())) {
+            if (!write_audio_to_file(voice2json_proc.stdin, (char*)(msg.filename.data()))) {
                 NUClear::log<NUClear::FATAL>(
                     fmt::format("({}:{}) Failed to write to {}", __FILE__, __LINE__, msg.filename.data()));
             }
@@ -392,3 +380,4 @@ namespace module::input {
 
 
 }  // namespace module::input
+

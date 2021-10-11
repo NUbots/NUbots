@@ -80,7 +80,7 @@ namespace module::input {
 
     /**
      * @brief A @c SpeechIntentMsg is emitted when intention recognition has successfully recognised an intention
-     *        from ethier a file or a live stream of audio.
+     *        from either a file or a live stream of audio.
      */
     struct SpeechIntentMsg {
         /**
@@ -127,7 +127,7 @@ namespace module::input {
     private:
         bool output_enabled = true;
 
-        SpawnedProcess voice2json_proc = {};
+        SpawnedProcess voice2json_proc {};
 
         void init(SpeechIntentTranscribeMode transcribe_mode);
         void recognize_wav(std::string filename);
