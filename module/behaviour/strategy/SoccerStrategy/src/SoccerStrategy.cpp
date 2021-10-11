@@ -348,7 +348,7 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::normalReady(const GameState& gameState, const FieldDescription& fieldDescription) {
-        log<NUClear::DEBUG>("normalReady()");
+        // log<NUClear::DEBUG>("normalReady()");
 
         // auto walkTarget = gameState.data.our_kick_off ? cfg_.start_position_offensive :
         // cfg_.start_position_defensive; walkTo(fieldDescription, walkTarget);
@@ -362,7 +362,7 @@ namespace module::behaviour::strategy {
             emit(std::make_unique<MotionCommand>(utility::behaviour::WalkToReady()));
         }
         else {
-            log("10 seconds up, stopping walk");
+            // log("10 seconds up, stopping walk");
             standStill();
         }
 
@@ -380,7 +380,7 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::normalPlaying(const Field& field, const Ball& ball, const FieldDescription& fieldDescription) {
-        log<NUClear::WARN>(" normal playing ");
+        // log<NUClear::WARN>(" normal playing ");
         if (penalised() && !cfg_.forcePlaying) {  // penalised
             standStill();
             find({FieldTarget(FieldTarget::Target::SELF)});

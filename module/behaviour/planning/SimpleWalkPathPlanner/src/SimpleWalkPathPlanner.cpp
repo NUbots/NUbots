@@ -140,7 +140,7 @@ namespace module::behaviour::planning {
                 srBCc.x()             = 1.0 / srBCc.x();
                 Eigen::Affine3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
                 rBTt = Htc * Eigen::Vector3f(sphericalToCartesian(srBCc));
-                log("rBTt: ", rBTt.x(), rBTt.y(), rBTt.z());
+                // log("rBTt: ", rBTt.x(), rBTt.y(), rBTt.z());
                 timeBallLastSeen = NUClear::clock::now();
             }
         });
@@ -289,7 +289,7 @@ namespace module::behaviour::planning {
         emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
     }
     void SimpleWalkPathPlanner::visionWalkPath() {
-        log<NUClear::WARN>("walk to ball");
+        // log<NUClear::WARN>("walk to ball");
         // Normalize the ball position to obtain the unit vector in torso space
         Eigen::Vector3f unit_vector_to_ball = rBTt / rBTt.norm();
         // Scale the unit vector by forwardSpeed
@@ -297,7 +297,7 @@ namespace module::behaviour::planning {
         float angular_velocity          = std::atan2(velocity_vector.y(), velocity_vector.x());
         // Saturate the angular velocity with value maxTurnSpeed
         angular_velocity = std::min(maxTurnSpeed, std::max(angular_velocity, minTurnSpeed));
-        log<NUClear::WARN>("angular_velocity", angular_velocity);
+        // log<NUClear::WARN>("angular_velocity", angular_velocity);
         std::unique_ptr<WalkCommand> command =
             std::make_unique<WalkCommand>(subsumptionId,
                                           Eigen::Vector3d(velocity_vector.x(), velocity_vector.y(), angular_velocity));
@@ -318,7 +318,7 @@ namespace module::behaviour::planning {
     }
 
     void SimpleWalkPathPlanner::walkToReady() {
-        log<NUClear::WARN>("walk to ready");
+        // log<NUClear::WARN>("walk to ready");
         std::unique_ptr<WalkCommand> command =
             std::make_unique<WalkCommand>(subsumptionId,
                                           Eigen::Vector3d(walkToReadySpeedX, walkToReadySpeedY, walkToReadyRotation));
