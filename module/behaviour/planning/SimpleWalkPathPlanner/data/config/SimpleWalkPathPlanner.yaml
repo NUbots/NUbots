@@ -7,7 +7,7 @@ maxTurnSpeed : 0.15
 minTurnSpeed : -0.15
 
 # rotate on the spot tuning values
-rotateSpeed: 0.225
+rotateSpeed: 0.2
 rotateSpeedX: -0.04
 rotateSpeedY: 0
 
