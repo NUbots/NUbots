@@ -52,7 +52,7 @@ namespace module {
             void WalkEvaluator::setUpTrial(const NSGA2EvaluationRequest& currentRequest) {
                 // Set our generation and individual identifiers from the request
 
-                trial_duration_limit  = currentRequest.trial_duration_limit;
+                trial_duration_limit  = std::chrono::seconds(currentRequest.trial_duration_limit);
 
                 // Set our walk command
                 walk_command_velocity.x() = currentRequest.parameters.real_params[11];
@@ -151,8 +151,8 @@ namespace module {
 
             std::vector<double> WalkEvaluator::calculateConstraints(double simTime) {
                 // Convert trial duration limit to ms, add 1 for overhead
-                const double overhead = 1;
-                double max_trial_duration = (trial_duration_limit + overhead) * 1000;
+                const auto overhead = std::chrono::seconds(1);
+                double max_trial_duration = (std::chrono::duration_cast<std::chrono::milliseconds>(trial_duration_limit + overhead)).count();
                 double trialDuration = simTime - trialStartTime;
                 return {
                     trialDuration - max_trial_duration,  // Punish for falling over, based on how long the trial took

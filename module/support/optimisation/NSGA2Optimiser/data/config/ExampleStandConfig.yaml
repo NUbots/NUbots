@@ -23,6 +23,8 @@ eta:
 
 task: "stand"
 task_config_path: "scripts/webots/StandUpFront.yaml"
+initial_translation: [-5.0, -3.0, 0.4]  # x, y, z
+intial_rotation: [0, 1, 0, 1.5]  # x, y, z, angle (rads)
 # The following values are setting the initial values and limits for the script engine parameters.
 # Each item is a frame of the script
 # Each param is the tuple [initial value, minimum, maximum].

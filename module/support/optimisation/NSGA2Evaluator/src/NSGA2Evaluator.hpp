@@ -26,7 +26,7 @@ namespace module {
             public:
                 /// @brief Called by the powerplant to build and setup the NSGA2Evaluator reactor.
                 explicit NSGA2Evaluator(std::unique_ptr<NUClear::Environment> environment);
-                void ScheduleTrialExpiredMessage(const int trial_stage, const int delay_time);
+                void ScheduleTrialExpiredMessage(const int trial_stage, const std::chrono::seconds delay_time);
 
                 enum State {
                     UNKNOWN                = 0,

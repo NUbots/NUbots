@@ -257,7 +257,7 @@ namespace module {
             void NSGA2Evaluator::Evaluating(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
                 log<NUClear::DEBUG>("Evaluating");
                 if (event == Event::ResetDone) {
-                    if(lastEvalRequestMsg.task == "walk") {
+                    if(lastEvalRequestMsg.task == "walk" || lastEvalRequestMsg.task == "stand") {
                         task->evaluatingState(subsumptionId, this);
                     } else {
                         log<NUClear::ERROR>("Unhandled task type:", lastEvalRequestMsg.task);
@@ -265,7 +265,7 @@ namespace module {
                 }
             }
 
-            void NSGA2Evaluator::ScheduleTrialExpiredMessage(const int trial_stage, const int delay_time) {
+            void NSGA2Evaluator::ScheduleTrialExpiredMessage(const int trial_stage, const std::chrono::seconds delay_time) {
                 // Prepare the trial expired message
                 std::unique_ptr<NSGA2TrialExpired> message = std::make_unique<NSGA2TrialExpired>();
                 message->time_started = simTime;
@@ -274,7 +274,8 @@ namespace module {
                 message->trial_stage  = trial_stage;
 
                 // Schedule the end of the walk trial after the duration limit
-                emit<Scope::DELAY>(message, std::chrono::seconds(delay_time));
+                log<NUClear::DEBUG>("Scheduling expired message with time ", delay_time.count());
+                emit<Scope::DELAY>(message, delay_time);
             }
 
             /// @brief Handle the TERMINATING_EARLY state

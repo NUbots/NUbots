@@ -43,12 +43,19 @@ namespace module {
 
             void StandEvaluator::setUpTrial(const NSGA2EvaluationRequest& currentRequest) {
                 loadScript(currentRequest.task_config_path);
-                trial_duration_limit = 0;
+                std::chrono::milliseconds limit_ms = std::chrono::milliseconds(0);
                 for(size_t i = 0; i < currentRequest.parameters.real_params.size(); i++) {
                     int frame_time = currentRequest.parameters.real_params[i];
-                    trial_duration_limit = trial_duration_limit + frame_time;
+                    limit_ms = limit_ms + std::chrono::milliseconds(frame_time);
                     script.frames[i].duration = std::chrono::milliseconds(frame_time);
                 }
+                saveScript(fmt::format("gen{:03d}_ind{:03d}_task-{}.yaml",
+                                                currentRequest.generation,
+                                                currentRequest.id,
+                                                currentRequest.task));
+
+                auto overhead = std::chrono::seconds(2);  // Overhead tacked on to give the robot time to fall over if unstable
+                trial_duration_limit = std::chrono::duration_cast<std::chrono::seconds>(limit_ms) + overhead;
             }
 
             void StandEvaluator::resetSimulation() {
@@ -59,7 +66,9 @@ namespace module {
             }
 
             void StandEvaluator::evaluatingState(size_t subsumptionId, NSGA2Evaluator *evaluator) {
+                NUClear::log<NUClear::DEBUG>("Running Script");
                 runScript(subsumptionId, evaluator);
+                NUClear::log<NUClear::DEBUG>("schedule expire");
                 evaluator->ScheduleTrialExpiredMessage(0, trial_duration_limit);
             }
 
@@ -120,6 +129,7 @@ namespace module {
             }
 
             void StandEvaluator::saveScript(std::string script_path) {
+                NUClear::log<NUClear::DEBUG>("Saving as: ", script_path);
                 YAML::Node n(script);
                 utility::file::writeToFile(script_path, n);
             }

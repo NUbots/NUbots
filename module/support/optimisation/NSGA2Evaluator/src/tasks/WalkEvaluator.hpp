@@ -44,7 +44,7 @@ namespace module {
                 double maxFieldPlaneSway = 0.0;
 
                 /// @brief The amount of time to run a single trial, in seconds.
-                int trial_duration_limit = 0.0;
+                std::chrono::seconds trial_duration_limit = std::chrono::seconds(0);
 
                 /// @brief Keep track of when the trial started
                 double trialStartTime = 0.0;
