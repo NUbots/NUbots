@@ -258,20 +258,11 @@ namespace module {
                 log<NUClear::DEBUG>("Evaluating");
                 if (event == Event::ResetDone) {
                     if(lastEvalRequestMsg.task == "walk") {
-                        EvaluatingWalk(previousState, event);
+                        task->evaluatingState(subsumptionId, this);
                     } else {
                         log<NUClear::ERROR>("Unhandled task type:", lastEvalRequestMsg.task);
                     }
                 }
-            }
-
-            // Note: we currently need this in NSGA2Evaluator because we need to be able to access `emit`
-            void NSGA2Evaluator::EvaluatingWalk(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
-                // Create and send the walk command, which will be evaluated when we get back sensors and time
-                // updates
-                task->evaluatingState(subsumptionId, this);
-
-
             }
 
             void NSGA2Evaluator::ScheduleTrialExpiredMessage(const int trial_stage, const int delay_time) {
