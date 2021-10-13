@@ -32,8 +32,7 @@ namespace module {
 
                 // Task-specific functions
                 std::vector<double> calculateScores(double trialDuration);
-                std::vector<double> calculateConstraints(double simTime);
-                std::vector<double> constraintsNotViolated();
+                std::vector<double> calculateConstraints();
                 bool checkForFall(const RawSensors& sensors);
                 void updateMaxFieldPlaneSway(const RawSensors& sensors);
 
@@ -41,6 +40,7 @@ namespace module {
                 /// @brief Robot state for this evaluation, used during fitness and constraint calculation
                 Eigen::Vector3d robotPosition = Eigen::Vector3d::Zero();
                 double maxFieldPlaneSway = 0.0;
+                RawSensors current_sensors;
 
                 /// @brief The amount of time to run a single trial, in seconds.
                 int trial_duration_limit = 0.0;

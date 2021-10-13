@@ -32,6 +32,7 @@ namespace module {
 
             void StandEvaluator::processRawSensorMsg(const RawSensors& sensors, NSGA2Evaluator* evaluator) {
                 updateMaxFieldPlaneSway(sensors);
+                current_sensors = sensors;
             }
 
             void StandEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position) {
@@ -65,7 +66,7 @@ namespace module {
             std::unique_ptr<NSGA2FitnessScores> StandEvaluator::calculateFitnessScores(bool earlyTermination, double simTime, int generation, int individual) {
                 double trialDuration = simTime - trialStartTime;
                 auto scores = calculateScores(trialDuration);
-                auto constraints = earlyTermination ? calculateConstraints(simTime) : constraintsNotViolated();
+                auto constraints = calculateConstraints();
 
                 NUClear::log<NUClear::DEBUG>("Trial ran for", trialDuration);
                 NUClear::log<NUClear::DEBUG>("SendFitnessScores for generation", generation, "individual", individual);
@@ -88,31 +89,24 @@ namespace module {
                 };
             }
 
-            std::vector<double> StandEvaluator::calculateConstraints(double simTime) {
-
-            }
-
-            std::vector<double> StandEvaluator::constraintsNotViolated() {
+            std::vector<double> StandEvaluator::calculateConstraints() {
+                bool fallen = checkForFall(current_sensors);
+                double fallen_contraint = fallen ? -1.0 : 0;
                 return {
-                    0,  // Robot didn't fall
+                    fallen_contraint,
                     0   // Second constraint unused, fixed to 0
                 };
             }
 
             bool StandEvaluator::checkForFall(const RawSensors& sensors) {
-                bool shouldTerminateEarly = false;
+                bool fallen = false;
                 auto accelerometer = sensors.accelerometer;
 
                 if ((std::fabs(accelerometer.x) > 9.2 || std::fabs(accelerometer.y) > 9.2)
                     && std::fabs(accelerometer.z) < 0.5) {
-                    NUClear::log<NUClear::DEBUG>("Fallen!");
-                    NUClear::log<NUClear::DEBUG>("acc at fall (x y z):",
-                                        std::fabs(accelerometer.x),
-                                        std::fabs(accelerometer.y),
-                                        std::fabs(accelerometer.z));
-                    shouldTerminateEarly = true;
+                    fallen = true;
                 }
-                return shouldTerminateEarly;
+                return fallen;
             }
 
 
