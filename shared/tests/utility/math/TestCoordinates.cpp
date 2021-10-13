@@ -54,7 +54,7 @@ static constexpr double ERROR_THRESHOLD = 1e-6;
 /** Cartesian test coords */
 YAML::Node test_values = YAML::LoadFile("tests/CoordinateTests.yaml");
 
-// BDD cartesian to spherical
+// cartesian to spherical
 SCENARIO("Cartesian coordinates can be converted to spherical coordinates", "[utility][math][coordinates]") {
     GIVEN("A set of cartesian coordinates and a set of expected values") {
         // cart input
@@ -73,6 +73,13 @@ SCENARIO("Cartesian coordinates can be converted to spherical coordinates", "[ut
                     Approx epsilon_y = Approx(cart_to_spher_expected.at(i).y()).epsilon(ERROR_THRESHOLD);
                     Approx epsilon_z = Approx(cart_to_spher_expected.at(i).z()).epsilon(ERROR_THRESHOLD);
                     // This passes!?!?!?
+                    // *******DEBUG OUTPUT ********
+                    INFO(epsilon_x);
+                    INFO(cart_to_spher_expected.at(i).x());
+                    UNSCOPED_INFO("UNSCOPED");
+
+
+                    //****************************
                     REQUIRE((result.x() + 100) == epsilon_x);
                     REQUIRE(result.y() == epsilon_y);
                     REQUIRE(result.z() == epsilon_z);
@@ -90,7 +97,7 @@ SCENARIO("Cartesian coordinates can be converted to spherical coordinates", "[ut
     }
 }
 
-// BDD spherical to cartesian
+// spherical to cartesian
 SCENARIO("Spherical coordinates can be converted to cartesian coordinates", "[utility][math][coordinates]") {
     GIVEN("A set of spherical coordinates and a set of expected values") {
         // spherical input
@@ -106,6 +113,11 @@ SCENARIO("Spherical coordinates can be converted to cartesian coordinates", "[ut
                     Approx epsilon_x = Approx(spher_to_cart_expected.at(i).x()).epsilon(ERROR_THRESHOLD);
                     Approx epsilon_y = Approx(spher_to_cart_expected.at(i).y()).epsilon(ERROR_THRESHOLD);
                     Approx epsilon_z = Approx(spher_to_cart_expected.at(i).z()).epsilon(ERROR_THRESHOLD);
+                    // *******DEBUG OUTPUT ********
+                    INFO("TEST!!!!!!!!!!!!!!!!!!");
+                    UNSCOPED_INFO("UNSCOPED");
+
+                    //****************************
                     REQUIRE(result.x() == epsilon_x);
                     REQUIRE(result.y() == epsilon_y);
                     REQUIRE(result.z() == epsilon_z);
