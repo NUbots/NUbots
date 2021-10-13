@@ -74,6 +74,7 @@ namespace module::behaviour::strategy {
         bool resetInInitial         = true;
         double manualOrientation    = 0.0;
         bool startedWalkingToReady  = false;
+        bool isResetHalf            = false;
         NUClear::clock::time_point startedWalkingToReadyAt;
         Eigen::Vector3f rBTt                                 = Eigen::Vector3f(1.0, 0.0, 0.0);
         message::input::GameEvents::Context team_kicking_off = message::input::GameEvents::Context::UNKNOWN;
