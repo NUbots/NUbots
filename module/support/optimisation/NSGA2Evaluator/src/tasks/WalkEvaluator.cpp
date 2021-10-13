@@ -122,9 +122,9 @@ namespace module {
                 evaluator->ScheduleTrialExpiredMessage(0, trial_duration_limit);
             }
 
-            std::unique_ptr<NSGA2FitnessScores> WalkEvaluator::calculateFitnessScores(bool constraintsViolated, double simTime, int generation, int individual) {
+            std::unique_ptr<NSGA2FitnessScores> WalkEvaluator::calculateFitnessScores(bool earlyTermination, double simTime, int generation, int individual) {
                 auto scores = calculateScores();
-                auto constraints = constraintsViolated ? calculateConstraints(simTime) : constraintsNotViolated();
+                auto constraints = earlyTermination ? calculateConstraints(simTime) : constraintsNotViolated();
 
                 double trialDuration = simTime - trialStartTime;
                 NUClear::log<NUClear::DEBUG>("Trial ran for", trialDuration);

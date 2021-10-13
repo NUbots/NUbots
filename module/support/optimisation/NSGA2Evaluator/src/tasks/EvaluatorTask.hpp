@@ -28,7 +28,7 @@ namespace module {
                 virtual void setUpTrial(const NSGA2EvaluationRequest& request) = 0;
                 virtual void resetSimulation() = 0;
                 virtual void evaluatingState(size_t subsumptionId, NSGA2Evaluator *evaluator) = 0;
-                virtual std::unique_ptr<NSGA2FitnessScores> calculateFitnessScores(bool constraintsViolated, double simTime, int generation, int individual) = 0;
+                virtual std::unique_ptr<NSGA2FitnessScores> calculateFitnessScores(bool earlyTermination, double simTime, int generation, int individual) = 0;
             };
 
         }  // namespace optimisation

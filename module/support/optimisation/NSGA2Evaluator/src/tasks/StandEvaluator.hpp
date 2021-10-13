@@ -28,10 +28,10 @@ namespace module {
                 void setUpTrial(const NSGA2EvaluationRequest& request);
                 void resetSimulation();
                 void evaluatingState(size_t subsumptionId, NSGA2Evaluator *evaluator);
-                std::unique_ptr<NSGA2FitnessScores> calculateFitnessScores(bool constraintsViolated, double simTime, int generation, int individual);
+                std::unique_ptr<NSGA2FitnessScores> calculateFitnessScores(bool earlyTermination, double simTime, int generation, int individual);
 
                 // Task-specific functions
-                std::vector<double> calculateScores();
+                std::vector<double> calculateScores(double trialDuration);
                 std::vector<double> calculateConstraints(double simTime);
                 std::vector<double> constraintsNotViolated();
                 bool checkForFall(const RawSensors& sensors);

@@ -59,12 +59,33 @@ namespace module {
 
             void StandEvaluator::evaluatingState(size_t subsumptionId, NSGA2Evaluator *evaluator) {
                 runScript(subsumptionId, evaluator);
+                evaluator->ScheduleTrialExpiredMessage(0, trial_duration_limit);
             }
 
-            std::unique_ptr<NSGA2FitnessScores> StandEvaluator::calculateFitnessScores(bool constraintsViolated, double simTime, int generation, int individual) {
+            std::unique_ptr<NSGA2FitnessScores> StandEvaluator::calculateFitnessScores(bool earlyTermination, double simTime, int generation, int individual) {
+                double trialDuration = simTime - trialStartTime;
+                auto scores = calculateScores(trialDuration);
+                auto constraints = earlyTermination ? calculateConstraints(simTime) : constraintsNotViolated();
+
+                NUClear::log<NUClear::DEBUG>("Trial ran for", trialDuration);
+                NUClear::log<NUClear::DEBUG>("SendFitnessScores for generation", generation, "individual", individual);
+                NUClear::log<NUClear::DEBUG>("    scores:", scores[0], scores[1]);
+                NUClear::log<NUClear::DEBUG>("    constraints:", constraints[0], constraints[1]);
+
+                // Create the fitness scores message based on the given results and emit it back to the Optimiser
+                std::unique_ptr<NSGA2FitnessScores> fitnessScores = std::make_unique<NSGA2FitnessScores>();
+                fitnessScores->id                                 = individual;
+                fitnessScores->generation                         = generation;
+                fitnessScores->objScore                           = scores;
+                fitnessScores->constraints                        = constraints;
+                return fitnessScores;
             }
 
-            std::vector<double> StandEvaluator::calculateScores() {
+            std::vector<double> StandEvaluator::calculateScores(double trialDuration) {
+                return {
+                    maxFieldPlaneSway,  // For now, we want to reduce this
+                    trialDuration
+                };
             }
 
             std::vector<double> StandEvaluator::calculateConstraints(double simTime) {
@@ -72,7 +93,10 @@ namespace module {
             }
 
             std::vector<double> StandEvaluator::constraintsNotViolated() {
-
+                return {
+                    0,  // Robot didn't fall
+                    0   // Second constraint unused, fixed to 0
+                };
             }
 
             bool StandEvaluator::checkForFall(const RawSensors& sensors) {

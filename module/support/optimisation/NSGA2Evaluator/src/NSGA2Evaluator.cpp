@@ -283,8 +283,8 @@ namespace module {
 
                 // Send a zero walk command to stop walking
                 emit(std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(0.0, 0.0, 0.0)));
-                bool constraintsViolated = true;
-                auto fitnessScores = task->calculateFitnessScores(constraintsViolated, simTime, generation, individual);
+                bool earlyTermination = true;
+                auto fitnessScores = task->calculateFitnessScores(earlyTermination, simTime, generation, individual);
                 emit(fitnessScores);
 
                 emit(std::make_unique<Event>(Event::FitnessScoresSent)); // Go back to waiting for the next request
@@ -297,8 +297,8 @@ namespace module {
 
                 // Send a zero walk command to stop walking
                 emit(std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(0.0, 0.0, 0.0)));
-                bool constraintsViolated = false;
-                auto fitnessScores = task->calculateFitnessScores(constraintsViolated, simTime, generation, individual);
+                bool earlyTermination = false;
+                auto fitnessScores = task->calculateFitnessScores(earlyTermination, simTime, generation, individual);
                 emit(fitnessScores);
 
                 emit(std::make_unique<Event>(Event::FitnessScoresSent)); // Go back to waiting for the next request
