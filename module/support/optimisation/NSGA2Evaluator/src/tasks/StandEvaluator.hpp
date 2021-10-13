@@ -39,8 +39,6 @@ namespace module {
 
             private:
                 /// @brief Robot state for this evaluation, used during fitness and constraint calculation
-                bool initialPositionSet = false;
-                Eigen::Vector3d initialRobotPosition = Eigen::Vector3d::Zero();
                 Eigen::Vector3d robotPosition = Eigen::Vector3d::Zero();
                 double maxFieldPlaneSway = 0.0;
 
@@ -52,6 +50,7 @@ namespace module {
 
                 void loadScript(std::string script_path);
                 void saveScript(std::string script_path);
+                void runScript(size_t subsumptionId, NSGA2Evaluator *evaluator);
 
                 /// @brief The script object we are using
                 ::extension::Script script;

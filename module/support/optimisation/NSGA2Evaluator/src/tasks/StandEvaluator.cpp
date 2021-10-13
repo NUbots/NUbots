@@ -31,9 +31,13 @@ namespace module {
             using utility::support::Expression;
 
             void StandEvaluator::processRawSensorMsg(const RawSensors& sensors, NSGA2Evaluator* evaluator) {
+                updateMaxFieldPlaneSway(sensors);
             }
 
             void StandEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position) {
+                robotPosition.x() = position.value.X;
+                robotPosition.y() = position.value.Y;
+                robotPosition.z() = position.value.Z;
             }
 
             void StandEvaluator::setUpTrial(const NSGA2EvaluationRequest& currentRequest) {
@@ -48,15 +52,13 @@ namespace module {
 
             void StandEvaluator::resetSimulation() {
                 // Reset our local state
+                trialStartTime         = 0.0;
+                robotPosition = Eigen::Vector3d::Zero();
+                maxFieldPlaneSway      = 0.0;
             }
 
             void StandEvaluator::evaluatingState(size_t subsumptionId, NSGA2Evaluator *evaluator) {
-                // std::map<std::string, float> map {
-                //     {"walk_x", walk_command_velocity.x()},
-                //     {"walk_y", walk_command_velocity.y()},
-                //     {"walk_rotation", walk_command_rotation},
-                //     {"trial_duration_limit", trial_duration_limit}};
-                // return map;
+                runScript(subsumptionId, evaluator);
             }
 
             std::unique_ptr<NSGA2FitnessScores> StandEvaluator::calculateFitnessScores(bool constraintsViolated, double simTime, int generation, int individual) {
@@ -104,10 +106,10 @@ namespace module {
                 utility::file::writeToFile(script_path, n);
             }
 
-            // void RunScript(){
-            //     emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "Stand.yaml"));
-            //     emit(std::make_unique<ExecuteScript>(id, script, NUClear::clock::now()));
-            // }
+            void StandEvaluator::runScript(size_t subsumptionId, NSGA2Evaluator *evaluator) {
+                // emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "StandUpFront.yaml")); //Which approach is better?
+                evaluator->emit(std::make_unique<extension::ExecuteScript>(subsumptionId, script, NUClear::clock::now()));
+            }
 
             // void StandEvaluator::CheckForStandDone(const RawSensorsMsg& sensors) {
             //     // The acceptable error margin for the target positions
