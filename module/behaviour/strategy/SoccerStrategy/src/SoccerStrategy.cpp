@@ -348,28 +348,36 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::normalReady(const GameState& gameState, const FieldDescription& fieldDescription) {
-        // log<NUClear::DEBUG>("normalReady()");
-
-        // auto walkTarget = gameState.data.our_kick_off ? cfg_.start_position_offensive :
-        // cfg_.start_position_defensive; walkTo(fieldDescription, walkTarget);
-
-        if (!startedWalkingToReady) {
-            startedWalkingToReadyAt = NUClear::clock::now();
-            startedWalkingToReady   = true;
-        }
-
-        if (NUClear::clock::now() - startedWalkingToReadyAt < std::chrono::milliseconds(12 * 1000)) {
-            emit(std::make_unique<MotionCommand>(utility::behaviour::WalkToReady()));
+        if (penalised()) {  // penalised
+            standStill();
+            find({FieldTarget(FieldTarget::Target::SELF)});
+            currentState = Behaviour::State::PENALISED;
         }
         else {
-            // log("10 seconds up, stopping walk");
-            standStill();
+            if (!gameState.data.first_half & !isResetHalf) {
+                isResetHalf           = true;
+                startedWalkingToReady = false;
+            }
+            // auto walkTarget = gameState.data.our_kick_off ? cfg_.start_position_offensive :
+            // cfg_.start_position_defensive; walkTo(fieldDescription, walkTarget);
+            if (!startedWalkingToReady) {
+                startedWalkingToReadyAt = NUClear::clock::now();
+                startedWalkingToReady   = true;
+            }
+
+            if (NUClear::clock::now() - startedWalkingToReadyAt < std::chrono::milliseconds(12 * 1000)) {
+                emit(std::make_unique<MotionCommand>(utility::behaviour::WalkToReady()));
+            }
+            else {
+                // log("10 seconds up, stopping walk");
+                standStill();
+            }
+
+            // Self localise while we're walking on in READY
+            // find({FieldTarget(FieldTarget::Target::SELF)});
+
+            currentState = Behaviour::State::READY;
         }
-
-        // Self localise while we're walking on in READY
-        // find({FieldTarget(FieldTarget::Target::SELF)});
-
-        currentState = Behaviour::State::READY;
     }
 
     void SoccerStrategy::normalSet() {
