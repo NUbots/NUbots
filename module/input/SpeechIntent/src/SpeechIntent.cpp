@@ -1,12 +1,12 @@
 #include "SpeechIntent.hpp"
 
 #include <alsa/asoundlib.h>
-#include <fmt/format.h>
-#include <yaml-cpp/yaml.h>
-#include <spawn.h>
-
 #include <filesystem>
+#include <fmt/format.h>
 #include <fstream>
+#include <optional>
+#include <spawn.h>
+#include <yaml-cpp/yaml.h>
 
 #include "extension/Configuration.hpp"
 
@@ -17,24 +17,24 @@ namespace module::input {
 
     std::unique_ptr<SpeechIntentMsg> parse_voice2json_json(std::string json_text) {
         std::unique_ptr<SpeechIntentMsg> intent = std::make_unique<SpeechIntentMsg>();
-        
-        YAML::Node root = YAML::Load(json_text);
-        intent->text = root["text"].as<std::string>();
+
+        YAML::Node root       = YAML::Load(json_text);
+        intent->text          = root["text"].as<std::string>();
         YAML::Node intent_obj = root["intent"].as<YAML::Node>();
-        intent->intent = intent_obj["name"].as<std::string>();
-        intent->confidence = intent_obj["confidence"].as<float>();
-        
+        intent->intent        = intent_obj["name"].as<std::string>();
+        intent->confidence    = intent_obj["confidence"].as<float>();
+
         YAML::Node slots_obj = root["slots"].as<YAML::Node>();
-        if(slots_obj.Type() != YAML::NodeType::Map) {
+        if (slots_obj.Type() != YAML::NodeType::Map) {
             NUClear::log<NUClear::FATAL>(fmt::format("invalid node type found = {}", slots_obj.Type()));
         }
         for (auto it = slots_obj.begin(); it != slots_obj.end(); it++) {
-            auto slot_name = it->first.as<std::string>();
+            auto slot_name  = it->first.as<std::string>();
             auto slot_value = it->second.as<std::string>();
-            
+
             intent->slots.push_back({slot_name, slot_value});
         }
-        
+
         return intent;
     }
 
@@ -51,7 +51,7 @@ namespace module::input {
         int stdin_pipe[2]  = {};
 
         char* path = getenv("PATH");
-        
+
         std::string env_path("PATH=");
         env_path.append(path);
 
@@ -179,19 +179,19 @@ namespace module::input {
     // followed by the wav file after the newline
     bool write_audio_to_file(int fd, char* filename) {
         ssize_t write_res = 0;
-        if(!std::filesystem::is_regular_file(filename)) {
+        if (!std::filesystem::is_regular_file(filename)) {
             return false;
         }
 
         std::ifstream file(filename, std::ios::in | std::ios::binary);
         const std::size_t& file_size = std::filesystem::file_size(filename);
-        auto file_buffer = std::make_unique<char[]>(file_size);
+        auto file_buffer             = std::make_unique<char[]>(file_size);
         file.read(file_buffer.get(), file_size);
         file.close();
-        
+
         char file_size_buf[128];
         sprintf(file_size_buf, "%ld\n", file_size);
-        
+
         write_res = write(fd, file_size_buf, strlen(file_size_buf));
         if (write_res == -1) {
             NUClear::log<NUClear::FATAL>(fmt::format("({}:{}) write failed, errno = {}", __FILE__, __LINE__, errno));
@@ -203,8 +203,8 @@ namespace module::input {
             NUClear::log<NUClear::FATAL>(fmt::format("({}:{}) write failed, errno = {}", __FILE__, __LINE__, errno));
             return false;
         }
-        //assert(write_res == file_size);
-        
+        // assert(write_res == file_size);
+
         return true;
     }
 
@@ -296,7 +296,7 @@ namespace module::input {
 
         // This trigger will recognize the intent of a wav file.
         on<Trigger<SpeechInputRecognizeWavFile>>().then([this](const SpeechInputRecognizeWavFile& msg) {
-            if (!write_audio_to_file(voice2json_proc.stdin, (char*)(msg.filename.data()))) {
+            if (!write_audio_to_file(voice2json_proc.stdin, (char*) (msg.filename.data()))) {
                 NUClear::log<NUClear::FATAL>(
                     fmt::format("({}:{}) Failed to write to {}", __FILE__, __LINE__, msg.filename.data()));
             }
@@ -380,4 +380,3 @@ namespace module::input {
 
 
 }  // namespace module::input
-

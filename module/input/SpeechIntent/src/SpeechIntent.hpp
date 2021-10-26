@@ -108,7 +108,6 @@ namespace module::input {
          * or consult voice2json's documentation for a precise interpretation of this value.
          */
         float confidence;
-
     };
 
     enum SpeechIntentTranscribeMode {
@@ -127,7 +126,7 @@ namespace module::input {
     private:
         bool output_enabled = true;
 
-        SpawnedProcess voice2json_proc {};
+        SpawnedProcess voice2json_proc{};
 
         void init(SpeechIntentTranscribeMode transcribe_mode);
         void recognize_wav(std::string filename);
