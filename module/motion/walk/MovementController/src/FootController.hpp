@@ -12,7 +12,7 @@ namespace module {
 
             class FootController {
             public:
-                // Calculates next swing position
+                // Calculates the next swing position
                 Eigen::Affine3d next_swing(const double& time_horizon,
                                            const double& time_left,
                                            const Eigen::Affine3d& Hwg,

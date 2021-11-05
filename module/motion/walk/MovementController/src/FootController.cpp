@@ -23,6 +23,7 @@ namespace module {
                                                        const double& time_left,
                                                        const Eigen::Affine3d& Hwg,
                                                        const Eigen::Affine3d& Htg) {
+                // Amount to move by in the next update to get to the target position in the given amount of time
                 double factor = time_horizon / time_left;
 
 
@@ -30,37 +31,30 @@ namespace module {
                 //-------------VECTOR FIELD--------------------------------------
                 //---------------------------------------------------------------
 
-                // Get the vector from target to ground in ground space
+                // Get the vector from target to ground in ground space and ground to (s)wing foot in ground space
                 // Htg.rotation().transpose() = Rgt
                 // Htg.translation() = rGTt
                 // -rGTt = rTGt
                 // Rgt * rGTt = rGTg
                 const Eigen::Vector3d rTGg = -Htg.rotation().transpose() * Htg.translation();
-
-                // Get the vector from ground to wing foot in ground space
-                // Hwg.rotation().transpose() = Rgw
-                // Hwg.translation() = rGWw
-                // -rGWw = rWGw
-                // Rgw * rWGw = rWGg
                 const Eigen::Vector3d rWGg = -Hwg.rotation().transpose() * Hwg.translation();
 
-                // Get the vector from target to wing foot in ground space
+                // Get the vector from target to (s)wing foot in ground space
                 const Eigen::Vector3d rWTg = rWGg - rTGg;
 
-
-                // Use the vector field to get the wing target to next target position
-                // The vector field gives us the swing foot to next position vector in ground space (rNWg)
-                // rNWg + rWTg = rNTg
-                // We normalize the vector and multiply it by the distance and factor to reach the target at the right
+                // Use the vector field to get the (s)wing target to next target position
+                // The vector field gives the vector from the swing foot to the next swing foot position in ground space (rNWg)
+                // Normalize the vector and multiply it by the distance and factor to reach the target at the right
                 // time
+                float distance = pathlength(rWTg, config.integral_steps, config.scaling_factor, config.step_height);
                 Eigen::Vector3d rNWg =
                     Eigen::Vector3d(f_x(rWTg, config.scaling_factor),
                                     0,
                                     f_z(rWTg, config.step_height, config.scaling_factor))
-                        .normalized()
-                    * factor * pathlength(rWTg, config.integral_steps, config.scaling_factor, config.step_height);
-                Eigen::Vector3d rNTg = rWTg + rNWg;
+                        .normalized() * factor * distance;
+                Eigen::Vector3d rNTg = rNWg + rWTg;
 
+                // todo: why is this here?
                 if (rWTg.z() + rNWg.z() < 0) {
                     rNTg.z() = 0;
                 }
@@ -69,7 +63,7 @@ namespace module {
                 // target
                 rNTg.y() = rWTg.y() * (1 - factor);
 
-                // Retrieve our final vector for the translation component of Hgn
+                // Retrieve the final vector for the translation component of Hgn
                 Eigen::Vector3d rNGg = rNTg + rTGg;
 
                 //---------------------------------------------------------------
