@@ -18,7 +18,7 @@ namespace module::input {
 
         // This is what we return if we can't work out the timestamp offset now
         // Note that all these times are measured in nanoseconds
-        CameraContext::TimeCorrection output;
+        CameraContext::TimeCorrection output{};
         output.live   = true;
         output.offset = 0;
         output.kf.p   = 10e6 * 10e6;    // Initial stddev of about 10 milliseconds
@@ -26,7 +26,7 @@ namespace module::input {
         output.kf.q   = 1e3 * 1e3;      // 1 microsecond standard deviation of process noise
 
         // The samples of the two clocks
-        std::array<Sample, 20> samples;
+        std::array<Sample, 20> samples{};
         samples.fill(Sample{0, 0, false});
 
         // Commands used to latch the timestamp and read the timestamp

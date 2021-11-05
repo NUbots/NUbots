@@ -1,4 +1,5 @@
 import Emitter from 'component-emitter'
+import { SocketOptions } from 'socket.io-client'
 
 import WebSocketWorker from './webworker_web_socket_client.worker'
 import { WebSocketClient } from './web_socket_client'
@@ -9,7 +10,7 @@ export class WebWorkerWebSocketClient extends Emitter implements WebSocketClient
     worker.addEventListener('message', this.handleMessage)
   }
 
-  static of(uri: string, opts: SocketIOClient.ConnectOpts) {
+  static of(uri: string, opts: SocketOptions) {
     const worker = new WebSocketWorker()
     worker.postMessage({
       command: 'construct',

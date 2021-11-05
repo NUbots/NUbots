@@ -12,11 +12,15 @@ import { Cone } from './model'
 import { Ball } from './model'
 
 export class BallsViewModel {
-  constructor(
-    private readonly model: Ball[],
-    private readonly params: CameraParams,
-    private readonly lineProjection: LineProjection,
-  ) {}
+  private readonly model: Ball[]
+  private readonly params: CameraParams
+  private readonly lineProjection: LineProjection
+
+  constructor(model: Ball[], params: CameraParams, lineProjection: LineProjection) {
+    this.model = model
+    this.params = params
+    this.lineProjection = lineProjection
+  }
 
   static of(model: Ball[], canvas: Canvas, params: CameraParams): BallsViewModel {
     return new BallsViewModel(model, params, LineProjection.of(canvas, params.lens))

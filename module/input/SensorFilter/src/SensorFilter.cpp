@@ -45,12 +45,10 @@ namespace module::input {
     using message::platform::ButtonMiddleUp;
     using message::platform::RawSensors;
 
-    using utility::input::LimbID;
     using utility::input::ServoID;
     using utility::motion::kinematics::calculateAllPositions;
     using utility::motion::kinematics::calculateCentreOfMass;
     using utility::motion::kinematics::calculateInertialTensor;
-    using utility::motion::kinematics::calculateRobotToIMU;
     using utility::nusight::graph;
     using utility::support::Expression;
 
@@ -196,48 +194,48 @@ namespace module::input {
             [this](const std::list<std::shared_ptr<const RawSensors>>& sensors, const KinematicsModel& model) {
                 // If we need to reset the filter, do that here
                 if (reset_filter.load()) {
-                    Eigen::Vector3d acc   = Eigen::Vector3d::Zero();
-                    Eigen::Vector3d gyro  = Eigen::Vector3d::Zero();
-                    Eigen::Vector3d rMFt  = Eigen::Vector3d::Zero();
-                    auto filtered_sensors = std::make_unique<Sensors>();
+                    Eigen::Vector3d acc  = Eigen::Vector3d::Zero();
+                    Eigen::Vector3d gyro = Eigen::Vector3d::Zero();
+                    Eigen::Vector3d rMFt = Eigen::Vector3d::Zero();
 
                     for (const auto& s : sensors) {
-                        // Accumulate accelerometer and gyroscope readings
-                        acc += Eigen::Vector3d(s->accelerometer.x, s->accelerometer.y, s->accelerometer.z);
-                        gyro += Eigen::Vector3d(s->gyroscope.x, s->gyroscope.y, s->gyroscope.z);
+                        Sensors filtered_sensors{};
 
+                        // Accumulate accelerometer and gyroscope readings
+                        acc += s->accelerometer.cast<double>();
+                        gyro += s->gyroscope.cast<double>();
                         // Make sure we have servo positions
                         for (uint32_t id = 0; id < 20; ++id) {
                             auto& original = utility::platform::getRawServo(id, *s);
                             // Add the sensor values to the system properly
-                            filtered_sensors->servo.push_back({0,
-                                                               id,
-                                                               original.torque_enabled,
-                                                               original.p_gain,
-                                                               original.i_gain,
-                                                               original.d_gain,
-                                                               original.goal_position,
-                                                               original.moving_speed,
-                                                               original.present_position,
-                                                               original.present_speed,
-                                                               original.load,
-                                                               original.voltage,
-                                                               static_cast<float>(original.temperature)});
+                            filtered_sensors.servo.push_back({0,
+                                                              id,
+                                                              original.torque_enabled,
+                                                              original.p_gain,
+                                                              original.i_gain,
+                                                              original.d_gain,
+                                                              original.goal_position,
+                                                              original.moving_speed,
+                                                              original.present_position,
+                                                              original.present_speed,
+                                                              original.load,
+                                                              original.voltage,
+                                                              static_cast<float>(original.temperature)});
                         }
 
                         // Calculate forward kinematics
-                        const auto Htx = calculateAllPositions(model, *filtered_sensors);
+                        const auto Htx = calculateAllPositions(model, filtered_sensors);
                         for (const auto& entry : Htx) {
-                            filtered_sensors->Htx[entry.first] = entry.second.matrix();
+                            filtered_sensors.Htx[entry.first] = entry.second.matrix();
                         }
 
                         // Calculate the average length of both legs from the torso and accumulate this measurement
-                        const Eigen::Affine3d Htr(filtered_sensors->Htx[ServoID::R_ANKLE_ROLL]);
-                        const Eigen::Affine3d Htl(filtered_sensors->Htx[ServoID::L_ANKLE_ROLL]);
+                        const Eigen::Affine3d Htr(filtered_sensors.Htx[ServoID::R_ANKLE_ROLL]);
+                        const Eigen::Affine3d Htl(filtered_sensors.Htx[ServoID::L_ANKLE_ROLL]);
                         const Eigen::Vector3d rTFt = (Htr.translation() + Htl.translation()) * 0.5;
 
                         // Accumulator CoM readings
-                        rMFt += calculateCentreOfMass(model, filtered_sensors->Htx).head<3>() + rTFt;
+                        rMFt += calculateCentreOfMass(model, filtered_sensors.Htx).head<3>() + rTFt;
                     }
 
                     // Average all accumulated readings
@@ -343,7 +341,7 @@ namespace module::input {
                 .then(
                     "Main Sensors Loop",
                     [this](const RawSensors& input,
-                           std::shared_ptr<const Sensors> previousSensors,
+                           const std::shared_ptr<const Sensors>& previousSensors,
                            const KinematicsModel& kinematicsModel) {
                         auto sensors = std::make_unique<Sensors>();
 
@@ -459,8 +457,7 @@ namespace module::input {
                             sensors->accelerometer = previousSensors->accelerometer;
                         }
                         else {
-                            sensors->accelerometer =
-                                Eigen::Vector3d(input.accelerometer.x, input.accelerometer.y, input.accelerometer.z);
+                            sensors->accelerometer = input.accelerometer.cast<double>();
                         }
 
                         // If we have a previous Sensors message and (our platform has errors or we are spinning too
@@ -470,16 +467,12 @@ namespace module::input {
                                 // One of the gyros would occasionally throw massive numbers without an error flag
                                 // If our hardware is working as intended, it should never read that we're spinning at 2
                                 // revs/s
-                                || Eigen::Vector3d(input.gyroscope.x, input.gyroscope.y, input.gyroscope.z).norm()
-                                       > 4.0 * M_PI)) {
-                            NUClear::log<NUClear::WARN>(
-                                "Bad gyroscope value",
-                                Eigen::Vector3d(input.gyroscope.x, input.gyroscope.y, input.gyroscope.z).norm());
+                                || input.gyroscope.norm() > 4.0 * M_PI)) {
+                            NUClear::log<NUClear::WARN>("Bad gyroscope value", input.gyroscope.norm());
                             sensors->gyroscope = previousSensors->gyroscope;
                         }
                         else {
-                            sensors->gyroscope =
-                                Eigen::Vector3d(input.gyroscope.x, input.gyroscope.y, input.gyroscope.z);
+                            sensors->gyroscope = input.gyroscope.cast<double>();
                         }
 
                         /************************************************

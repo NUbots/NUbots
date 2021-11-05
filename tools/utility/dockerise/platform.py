@@ -23,6 +23,7 @@ def selected(repository):
             ).communicate()[0],
         )
 
+        # Obtain only the tag of the image, so from nubots:generic we only obtain generic
         names = [
             tag.split(":")[-1]
             for tag in img_info[0]["RepoTags"]
@@ -38,7 +39,7 @@ def selected(repository):
         else:
             print("WARNING There are multiple platforms with the same image tag.")
             print("        The possible tags are [{}]".format(", ".join(names)))
-            platform = list(sorted(names))[0]
+            platform = sorted(names)[0]
             print("        The platform chosen will be {}".format(platform))
             return platform
 

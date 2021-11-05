@@ -82,18 +82,18 @@ namespace module::platform::darwin {
         //      z axis reports a +1g acceleration when robot is vertical
         // The CM740 currently has
         //      x is backward, y is to the left, and z is up
-        sensors.accelerometer.x = Convert::accelerometer(data.cm740.accelerometer.x);
-        sensors.accelerometer.y = -Convert::accelerometer(data.cm740.accelerometer.y);
-        sensors.accelerometer.z = -Convert::accelerometer(data.cm740.accelerometer.z);
+        sensors.accelerometer.x() = Convert::accelerometer(data.cm740.accelerometer.x);
+        sensors.accelerometer.y() = -Convert::accelerometer(data.cm740.accelerometer.y);
+        sensors.accelerometer.z() = -Convert::accelerometer(data.cm740.accelerometer.z);
 
         // Gyroscope (in radians/second)
         // Swizzle axes to that
         //      x is forward, y is to the left, and z is up
         // The CM740 currently has
         //      x is to the right, y is backward, and z is down
-        sensors.gyroscope.x = Convert::gyroscope(data.cm740.gyroscope.y);
-        sensors.gyroscope.y = Convert::gyroscope(data.cm740.gyroscope.x);
-        sensors.gyroscope.z = -Convert::gyroscope(data.cm740.gyroscope.z);
+        sensors.gyroscope.x() = Convert::gyroscope(data.cm740.gyroscope.y);
+        sensors.gyroscope.y() = Convert::gyroscope(data.cm740.gyroscope.x);
+        sensors.gyroscope.z() = -Convert::gyroscope(data.cm740.gyroscope.z);
 
         /*
          Force Sensitive Resistor Data
@@ -384,7 +384,7 @@ namespace module::platform::darwin {
                     utility::platform::getRawServo(command.id, sensors).present_position);
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
-                float speed;
+                float speed = 0.0f;
                 if (duration.count() > 0) {
                     speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
                 }
@@ -412,7 +412,7 @@ namespace module::platform::darwin {
             }
         });
 
-        on<Trigger<ServoTarget>>().then([this](const ServoTarget command) {
+        on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
             auto commandList = std::make_unique<ServoTargets>();
             commandList->targets.push_back(command);
 

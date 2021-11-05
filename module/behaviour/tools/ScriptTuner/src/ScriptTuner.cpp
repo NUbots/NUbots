@@ -115,9 +115,9 @@ namespace module::behaviour::tools {
             {std::pair<float, std::set<LimbID>>(
                 1,
                 {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
-            [this](const std::set<LimbID>&) {},
-            [this](const std::set<LimbID>&) {},
-            [this](const std::set<ServoID>&) {}}));
+            [](const std::set<LimbID>&) {},
+            [](const std::set<LimbID>&) {},
+            [](const std::set<ServoID>&) {}}));
 
         // Start curses mode
         initscr();
@@ -176,7 +176,7 @@ namespace module::behaviour::tools {
                 case 'P':  // plays script through with correct durations
                     playScript();
                     break;
-                case 'J':  // changes frame without out robot moving
+                case 'J':  // changes frame without robot moving
                     jumpToFrame();
                     break;
                 case 'R':  // updates visual changes
@@ -1051,7 +1051,7 @@ namespace module::behaviour::tools {
                 }
 
                 // checks user input is within correct range
-                if ((size_t) tempframe2 <= script.frames.size()) {
+                if (static_cast<size_t>(tempframe2) <= script.frames.size()) {
 
                     frame = tempframe2 - 1;
                 }
