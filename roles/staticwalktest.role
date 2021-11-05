@@ -8,7 +8,7 @@ nuclear_role(
   motion::KinematicsConfiguration
   # Support
   network::NUClearNet
-  output::NetworkForwarder
+  network::NetworkForwarder
   output::Overview
   # Sensors
   platform::darwin::HardwareSimulator

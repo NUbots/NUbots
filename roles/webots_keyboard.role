@@ -11,8 +11,8 @@ nuclear_role(
   input::SensorFilter
   platform::Webots
   # Motion
-  motion::MovementController
-  motion::StaticWalk
+  motion::walk::MovementController
+  motion::walk::StaticWalk
   motion::HeadController
   motion::ScriptEngine
   # Behaviour
