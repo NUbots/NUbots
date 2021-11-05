@@ -39,11 +39,12 @@ namespace module {
                 Eigen::Vector3d rT_tGg = Ht_tg.rotation().transpose() * -Ht_tg.translation();
 
                 // Get torso to torso target in ground space
-                // and then multiply it by factor to find the next position.
+                // and then multiply it by `factor` to find the next position.
                 Eigen::Vector3d rT_tTg = rT_tGg - rTGg;
                 Eigen::Vector3d rNTg   = rT_tTg * factor;
 
-                if (rT_tTg.norm() < 0.001) {
+                // If the distance from the torso to the torso's target is very small, go directly to the target
+                if (rT_tTg.norm() < config.translation_threshold) {
                     rNTg = rT_tTg;
                 }
 
@@ -57,12 +58,13 @@ namespace module {
                                    .toRotationMatrix()
                                    .transpose();
 
-                // If the difference between the current rotation and target rotation is small, just go straight to
-                // target rotation
-                if ((Htg.rotation() - Ht_tg.rotation()).maxCoeff() < 0.001 || factor == 1) {
+                // If the difference between the current rotation and target rotation is very small, just go straight to
+                // target rotation. Do the same if time is running out, ie time_left is time_horizon
+                if ((Htg.rotation() - Ht_tg.rotation()).maxCoeff() < config.rotation_threshold || factor == 1) {
                     Hgn.linear() = Ht_tg.rotation().transpose();
                 }
 
+                // Return the homogeneous transformation matrix from the next torso position to ground space
                 return Hgn.inverse();
             }
 

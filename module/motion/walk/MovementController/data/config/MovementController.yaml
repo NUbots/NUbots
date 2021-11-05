@@ -1,3 +1,4 @@
+# Foot controller config
 foot:
   # Height that the robot lifts its foot to step
   step_height: 0.05
@@ -7,6 +8,15 @@ foot:
   # well_width must be an even number
   well_width: 0.02
   scaling_factor: 100
+
+# Torso controller config
+torso:
+  # Once the distance between the current position and the target position is within the threshold, the next position is the target position
+  translation_threshold: 0.001
+  rotation_threshold: 0.001
+  # The maximum distance the servos can move in one command, to prevent sudden large movements
+  max_translation: 0.01
+  max_rotation: 0.01
 
 # Gain for the support and swing legs
 gains:

@@ -16,7 +16,7 @@ namespace module {
                 explicit MovementController(std::unique_ptr<NUClear::Environment> environment);
 
             private:
-                // Controller for the swing foot 
+                // Controller for the swing foot
                 FootController foot_controller;
                 // Controller for the support foot to move the torso
                 TorsoController torso_controller;

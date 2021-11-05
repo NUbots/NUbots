@@ -57,6 +57,13 @@ namespace module {
                     foot_controller.config.c =
                         (std::pow(s, 2 / s) * std::pow(h, 1 / s) * std::pow(s * h + (s * s * h), -1 / s)) / w;
 
+                    // Torso controller config
+                    torso_controller.config.translation_threshold =
+                        cfg["torso"]["translation_threshold"].as<Expression>();
+                    torso_controller.config.rotation_threshold = cfg["torso"]["rotation_threshold"].as<Expression>();
+                    torso_controller.config.max_translation    = cfg["torso"]["max_translation"].as<Expression>();
+                    torso_controller.config.max_rotation       = cfg["torso"]["max_rotation"].as<Expression>();
+
                     // Motion controller config
                     config.time_horizon = cfg["time_horizon"].as<Expression>();
 

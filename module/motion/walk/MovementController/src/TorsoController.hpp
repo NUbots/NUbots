@@ -15,8 +15,14 @@ namespace module {
                                            const Eigen::Affine3d& Ht_tg);
 
                 struct {
-                    double max_rotation;
+                    // Limit the amount that the robot can move in one time step to prevent large sudden movements
                     double max_translation;
+                    double max_rotation;
+                    // If the distance to the target is less than this threshold, go directly to the target
+                    double translation_threshold;
+                    // If the distance to the target rotation is less than this threshold, go directly to the target
+                    // rotation
+                    double rotation_threshold;
                 } config;
 
             private:
