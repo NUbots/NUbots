@@ -39,6 +39,7 @@ message Ball {
         fmat3 covariance = 3;
     }
     /// Cone describing the ball from the camera's perspective
+    /// See Geometry.proto
     Cone                 cone         = 1;
     repeated Measurement measurements = 2;
     /// Angular positions from the camera
