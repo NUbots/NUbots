@@ -14,7 +14,8 @@ nuclear_role(
   platform::darwin::HardwareIO
   input::SensorFilter
   # Motion
-  motion::QuinticWalk
+  motion::MovementController
+  motion::StaticWalk
   motion::ScriptEngine
   motion::HeadController
   # Behaviour
