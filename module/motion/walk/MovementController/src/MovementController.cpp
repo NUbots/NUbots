@@ -89,6 +89,7 @@ namespace module {
                         Eigen::Affine3d Ht_tg(torso_target.Ht_tg);
                         Eigen::Affine3d Hw_tg(foot_target.Hw_tg);
 
+                        // Check if the point to step to is further away than the length of the foot
                         double step_length = Hw_tg.translation().norm();
                         double hip_offset =
                             Eigen::Vector3d(model.leg.HIP_OFFSET_X,
@@ -99,22 +100,24 @@ namespace module {
                                                  + model.leg.FOOT_HEIGHT;
 
                         if (step_length > max_step_length) {
-                            log("Swing foot target out of bounds.");
+                            log<NUClear::WARN>("Swing foot target out of bounds.");
                         }
 
                         // Retrieve world matrix
                         Eigen::Affine3d Htworld(sensors.Htw);
 
-                        // If we are within time_horizon of our target, we always make time_horizon our target
+                        // If we are within time_horizon of our target time, we always make time_horizon our target time
+                        // This slows the approach of the foot to the target as it gets closer, for a smoother landing
                         torso_time_left = torso_time_left < config.time_horizon ? config.time_horizon : torso_time_left;
                         swing_time_left = swing_time_left < config.time_horizon ? config.time_horizon : swing_time_left;
 
+                        // Get the gain of the servo from config based on if the foot is to be lifted off the ground
                         double w_gain = foot_target.lift ? config.swing_gain : config.swing_lean_gain;
 
                         // Get ground space
                         Eigen::Affine3d Htg(calculateGroundSpace(Hts, Htworld.inverse()));
 
-                        // Calculate the next torso and next swing foot positions we are targeting
+                        // Calculate the next torso and next swing foot positions to be targeted
                         Eigen::Affine3d Ht_ng =
                             torso_controller.next_torso(config.time_horizon, torso_time_left, Htg, Ht_tg);
                         Eigen::Affine3d Hw_ng = foot_target.lift ? foot_controller.next_swing(config.time_horizon,
@@ -127,22 +130,29 @@ namespace module {
                                                                                                Hw_tg);
 
                         // Perform IK for the support and swing feet based on the target torso position
+                        // w_n: swing foot next target position
+                        // t_n: torso next target position
                         Eigen::Affine3d Ht_nw_n = Ht_ng * Hw_ng.inverse();
 
-                        // Inverse kinematics
+                        // Get the target homogeneous transformations for each foot
                         // By using g here, we are assuming the support foot is flat on the ground,
                         // and if it's not it'll try to make it flat on the ground
-
                         const Eigen::Affine3d left_foot  = torso_target.is_right_foot_support ? Ht_nw_n : Ht_ng;
                         const Eigen::Affine3d right_foot = torso_target.is_right_foot_support ? Ht_ng : Ht_nw_n;
 
+                        // Get joints based on the matrices from IK
                         auto left_joints  = calculateLegJoints(model, left_foot, LimbID::LEFT_LEG);
                         auto right_joints = calculateLegJoints(model, right_foot, LimbID::RIGHT_LEG);
 
+                        // The time the servos will arrive at the target position at
+                        // Always projecting into the future (time_horizon)
+                        // This is to improve smoothness so that the servos are still moving even if there is the
+                        // occasional error in servo communication
                         auto projected_time =
                             time_point_cast<NUClear::clock::duration>(now + duration<double>(config.time_horizon));
 
-                        // Look through each servo
+                        // Create the servo command for each servo, with the join angles from IK, gains from config and
+                        // time calculated from time_horizon
                         auto waypoints = std::make_unique<ServoCommands>();
 
                         for (const auto& joint : left_joints) {
@@ -165,8 +175,7 @@ namespace module {
                                 100);
                         }
 
-
-                        // Emit our locations to move to
+                        // Emit the servo commands
                         emit(std::move(waypoints));
                     });
             }
