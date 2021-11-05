@@ -48,6 +48,7 @@ namespace module {
                     foot_controller.config.well_width     = cfg["foot"]["well_width"].as<Expression>();
                     foot_controller.config.step_steep     = cfg["foot"]["step_steep"].as<Expression>();
                     foot_controller.config.scaling_factor = cfg["foot"]["scaling_factor"].as<Expression>();
+                    foot_controller.config.integral_steps = cfg["foot"]["integral_steps"].as<Expression>();
 
                     const auto& h = foot_controller.config.step_height;
                     const auto& s = foot_controller.config.step_steep;

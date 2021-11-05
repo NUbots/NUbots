@@ -8,6 +8,7 @@ foot:
   # well_width must be an even number
   well_width: 0.02
   scaling_factor: 100
+  integral_steps: 32
 
 # Torso controller config
 torso:

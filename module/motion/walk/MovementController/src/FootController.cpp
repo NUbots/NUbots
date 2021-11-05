@@ -1,50 +1,14 @@
 #include "FootController.hpp"
 
+#include "utility/motion/walk/vectorfield.hpp"
+
+using utility::motion::walk::f_x;
+using utility::motion::walk::f_z;
+using utility::motion::walk::pathlength;
+
 namespace module {
     namespace motion {
         namespace walk {
-
-            // Returns x-position of vector field. See vectorfield.py for graphical representation of the vector field
-            double FootController::f_x(const Eigen::Vector3d& pos) {
-                // Prevent divide by zero error with 0 position
-                return tanh(pos.x() * config.scaling_factor);
-            }
-
-            // Returns z-position of vector field. See vectorfield.py for graphical representation of the vector field
-            double FootController::f_z(const Eigen::Vector3d& pos) {
-                return -(config.step_height * pow(tanh(pos.x() * config.scaling_factor), 2) - pos.z())
-                       * config.scaling_factor;
-            }
-
-            double integral(double x, double h, double c) {
-                return sqrt(1 + pow(cosh(x) * (c + h * atan(1 / sinh(x))) - h * tanh(x), 2));
-            }
-
-            // path length to origin; x,y=foots starting location; h=step height; -1<x<1 0<y<1 0<h<1
-            double FootController::pathlength(const Eigen::Vector3d& pos) {
-                double x      = config.scaling_factor * pos.x();
-                double y      = config.scaling_factor * pos.z();
-                double h      = config.scaling_factor * config.step_height;
-                double c      = y / sinh(x) - h * atan(1 / sinh(x));
-                int num_steps = 32;
-
-                double x2   = x / num_steps;
-                double x1   = 0;
-                double path = 0;
-
-                int i = 0;
-                while (i < num_steps) {
-                    path = path
-                           + ((x2 - x1) / 6)
-                                 * (integral(x1, h, c) + 4 * (integral((x1 + x2) / 2, h, c)) + integral(x2, h, c));
-                    x1 = x2;
-                    x2 = x2 + x / num_steps;
-                    i++;
-                }
-
-                return path / config.scaling_factor;
-            }
-
             /**
              * Calculates the next swing foot position we should be at in time_horizon amount of time
              *
@@ -90,7 +54,11 @@ namespace module {
                 // We normalize the vector and multiply it by the distance and factor to reach the target at the right
                 // time
                 Eigen::Vector3d rNWg =
-                    Eigen::Vector3d(f_x(rWTg), 0, f_z(rWTg)).normalized() * factor * pathlength(rWTg);
+                    Eigen::Vector3d(f_x(rWTg, config.scaling_factor),
+                                    0,
+                                    f_z(rWTg, config.step_height, config.scaling_factor))
+                        .normalized()
+                    * factor * pathlength(rWTg, config.integral_steps, config.scaling_factor, config.step_height);
                 Eigen::Vector3d rNTg = rWTg + rNWg;
 
                 if (rWTg.z() + rNWg.z() < 0) {

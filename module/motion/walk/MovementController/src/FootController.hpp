@@ -25,16 +25,8 @@ namespace module {
                     double step_steep;
                     double scaling_factor;
                     double c;
+                    double integral_steps;
                 } config;
-
-            private:
-                // Returns x and z positions of vector field. See vectorfield.py for graphical representation of vector
-                // field
-                double f_x(const Eigen::Vector3d& pos);
-                double f_z(const Eigen::Vector3d& pos);
-                double pathlength(const Eigen::Vector3d& pos);
-
-                Eigen::Transform<double, 3, Eigen::Affine, Eigen::DontAlign> Hw_ong;
             };
 
         }  // namespace walk
