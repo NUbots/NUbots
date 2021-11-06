@@ -26,7 +26,7 @@ namespace module {
                 message::motion::KinematicsModel model;
                 // The height of the robots torso (m)
                 double torso_height;
-                // The width of the robots stance as it walks (m)
+                // The width of the robot's stance as it walks (m)
                 double stance_width;
                 bool start_right_lean;
                 double y_offset;

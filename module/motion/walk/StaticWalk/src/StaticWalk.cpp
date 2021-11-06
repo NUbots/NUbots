@@ -7,6 +7,7 @@
 
 #include "message/behaviour/ServoCommand.hpp"
 #include "message/input/Sensors.hpp"
+#include "message/motion/BodySide.hpp"
 #include "message/motion/FootTarget.hpp"
 #include "message/motion/KinematicsModel.hpp"
 #include "message/motion/TorsoTarget.hpp"
@@ -28,6 +29,7 @@ namespace module {
             using extension::Configuration;
             using message::behaviour::ServoCommand;
             using message::input::Sensors;
+            using message::motion::BodySide;
             using message::motion::DisableWalkEngineCommand;
             using message::motion::EnableWalkEngineCommand;
             using message::motion::FootTarget;
@@ -43,7 +45,9 @@ namespace module {
             using utility::support::Expression;
 
             // Retrieves the target for the lean based on COM location
-            Eigen::Affine3d StaticWalk::getLeanTarget(double y_offset_local, const Eigen::Vector3d& rCTt) {
+            Eigen::Affine3d StaticWalk::getLeanTarget(double y_offset_local,
+                                                      const Eigen::Vector3d& rCTt,
+                                                      const BODYSIDE& bodyside) {
                 // This will be the returned matrix, ground to torso target
                 Eigen::Affine3d Htg;
 
@@ -53,9 +57,15 @@ namespace module {
                 // IF rCTt < 0, then CoM is further away from support foot (support is right), and target the ground
                 // should be negative so torso goes past support foot to land CoM on support foot
                 Eigen::Vector3d rGTt(rCTt.x(), rCTt.y(), -torso_height);
+                // Logic was based on if support was the right foot
+                // Negate if it is left
+                if (bodyside == BODYSIDE::LEFT) {
+                    rGTt.x() = -rGTt.x();
+                    rGTt.y() = -rGTt.y();
+                }
 
                 // Set the rotation relative to the ground as the identity matrix,
-                // since we want the torso to rotate into ground space or stay in ground space
+                // since the torso should rotate into ground space or stay in ground space
                 Htg.linear()      = Eigen::Matrix3d::Identity();
                 Htg.translation() = rGTt;
                 return Htg;
@@ -69,7 +79,7 @@ namespace module {
                 // radians/seconds
 
                 // Clamp the rotation to rotation limit
-                double rotation = walkcommand.z() > rotation_limit ? rotation_limit : walkcommand.z();
+                double rotation = min(walkcommand.z(), rotation_limit);
 
                 // Set translation vector, z component is 0
                 Eigen::Vector3d translation = Eigen::Vector3d(walkcommand.x(), walkcommand.y(), 0);
@@ -211,7 +221,7 @@ namespace module {
                     switch (state) {
                         case LEFT_LEAN: {
                             // Get lean target
-                            Eigen::Affine3d lean_target = getLeanTarget(-y_offset, centre_of_mass);
+                            Eigen::Affine3d lean_target = getLeanTarget(-y_offset, centre_of_mass, BODYSIDE::LEFT);
 
                             // Move the torso over the left foot
                             emit(std::make_unique<TorsoTarget>(start_phase + phase_time,
@@ -228,7 +238,7 @@ namespace module {
                         } break;
                         case RIGHT_LEAN: {
                             // Get lean target
-                            Eigen::Affine3d lean_target = getLeanTarget(y_offset, centre_of_mass);
+                            Eigen::Affine3d lean_target = getLeanTarget(y_offset, centre_of_mass, BODYSIDE::RIGHT);
 
                             // Move the torso over the left foot
                             emit(std::make_unique<TorsoTarget>(start_phase + phase_time,
