@@ -45,18 +45,22 @@ namespace module {
 
                     // Foot controller config
                     foot_controller.config.step_height    = cfg["foot"]["step_height"].as<Expression>();
-                    foot_controller.config.well_width     = cfg["foot"]["well_width"].as<Expression>();
-                    foot_controller.config.step_steep     = cfg["foot"]["step_steep"].as<Expression>();
                     foot_controller.config.scaling_factor = cfg["foot"]["scaling_factor"].as<Expression>();
                     foot_controller.config.integral_steps = cfg["foot"]["integral_steps"].as<Expression>();
 
-                    const auto& h = foot_controller.config.step_height;
-                    const auto& s = foot_controller.config.step_steep;
-                    const auto& w = foot_controller.config.well_width;
+                    foot_controller.config.translation_threshold =
+                        cfg["foot"]["translation_threshold"].as<Expression>();
+                    foot_controller.config.rotation_threshold = cfg["foot"]["rotation_threshold"].as<Expression>();
+                    foot_controller.config.max_translation    = cfg["foot"]["max_translation"].as<Expression>();
+                    foot_controller.config.max_rotation       = cfg["foot"]["max_rotation"].as<Expression>();
+
+                    // const auto& h = foot_controller.config.step_height;
+                    // const auto& s = foot_controller.config.step_steep;
+                    // const auto& w = foot_controller.config.well_width;
 
                     // Constant for f_x and f_z
-                    foot_controller.config.c =
-                        (std::pow(s, 2 / s) * std::pow(h, 1 / s) * std::pow(s * h + (s * s * h), -1 / s)) / w;
+                    // foot_controller.config.c =
+                    //     (std::pow(s, 2 / s) * std::pow(h, 1 / s) * std::pow(s * h + (s * s * h), -1 / s)) / w;
 
                     // Torso controller config
                     torso_controller.config.translation_threshold =

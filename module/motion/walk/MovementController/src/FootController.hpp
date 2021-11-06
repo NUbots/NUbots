@@ -18,14 +18,20 @@ namespace module {
                                            const Eigen::Affine3d& Hwg,
                                            const Eigen::Affine3d& Hw_tg);
 
-                // Stores config variables for the vector field
+                // Stores config variables for the foot controller
                 struct {
+                    // Vector field variables
                     double step_height;
-                    double well_width;
-                    double step_steep;
                     double scaling_factor;
-                    double c;
                     double integral_steps;
+                    // Limit the amount that the robot can move in one time step to prevent large sudden movements
+                    double max_translation;
+                    double max_rotation;
+                    // If the distance to the target is less than this threshold, go directly to the target
+                    double translation_threshold;
+                    // If the distance to the target rotation is less than this threshold, go directly to the target
+                    // rotation
+                    double rotation_threshold;
                 } config;
             };
 
