@@ -34,6 +34,7 @@ namespace module {
             using message::motion::EnableWalkEngineCommand;
             using message::motion::FootTarget;
             using message::motion::KinematicsModel;
+            using message::motion::StopCommand;
             using message::motion::TorsoTarget;
             using message::motion::WalkCommand;
             using utility::behaviour::RegisterAction;
@@ -300,14 +301,22 @@ namespace module {
                 // on<Trigger<EnableWalkEngineCommand>>().then([this](const EnableWalkEngineCommand& command) {
                 //     subsumptionId = command.subsumptionId;
 
-                //     state = INITIAL;
-                //     updateHandle.enable();
-                // });
+                on<Trigger<EnableWalkEngineCommand>>().then([this](const EnableWalkEngineCommand& command) {
+                    subsumptionId = command.subsumption_id;
+                    state         = INITIAL;
+                    updateHandle.enable();
+                });
 
-                // on<Trigger<DisableWalkEngineCommand>>().then([this] {
-                //     // Nobody needs the walk engine, so we stop updating it.
-                //     updateHandle.disable();
-                // });
+                // Nobody needs the walk engine, so stop updating it.
+                on<Trigger<DisableWalkEngineCommand>>().then([this](const DisableWalkEngineCommand& command) {
+                    subsumptionId = command.subsumption_id;
+                    updateHandle.disable();
+                });
+
+                on<Trigger<StopCommand>>().then([this](const StopCommand& command) {
+                    subsumptionId = command.subsumption_id;
+                    walkCommand   = Eigen::Vector3d::Zero();
+                });
 
                 emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
                     RegisterAction{subsumptionId,
