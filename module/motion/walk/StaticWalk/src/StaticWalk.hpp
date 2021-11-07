@@ -34,17 +34,16 @@ namespace module {
                 double time;
                 double rotation_limit;
                 size_t subsumptionId;
+                Eigen::Vector3d walkCommand = Eigen::Vector3d::Zero();
 
                 // Reaction handle for the main update loop, disabling when not moving will save unnecessary CPU
-                ReactionHandle updateHandle;
+                ReactionHandle updateHandle{};
 
                 // Returns ground to torso target for specified lean
-                Eigen::Affine3d getLeanTarget(double y_offset_local, const Eigen::Vector3d& rCTt);
+                Eigen::Affine3d getLeanTarget(const Eigen::Vector3d& rCTt);
 
                 // Returns ground to foot target for specified step
-                Eigen::Affine3d getFootTarget(const enum State state,
-                                              const Eigen::Vector3d& walkcommand,
-                                              const bool isLeft);
+                Eigen::Affine3d getFootTarget();
 
             public:
                 /// @brief Called by the powerplant to build and setup the StaticWalk reactor.

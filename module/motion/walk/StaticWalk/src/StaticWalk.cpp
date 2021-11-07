@@ -7,7 +7,6 @@
 
 #include "message/behaviour/ServoCommand.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/motion/BodySide.hpp"
 #include "message/motion/FootTarget.hpp"
 #include "message/motion/KinematicsModel.hpp"
 #include "message/motion/TorsoTarget.hpp"
@@ -29,7 +28,6 @@ namespace module {
             using extension::Configuration;
             using message::behaviour::ServoCommand;
             using message::input::Sensors;
-            using message::motion::BodySide;
             using message::motion::DisableWalkEngineCommand;
             using message::motion::EnableWalkEngineCommand;
             using message::motion::FootTarget;
@@ -42,13 +40,10 @@ namespace module {
             using utility::input::ServoID;
             using utility::motion::kinematics::calculateGroundSpace;
             using utility::motion::kinematics::calculateLegJoints;
-            using utility::nusight::graph;
             using utility::support::Expression;
 
             // Retrieves the target for the lean based on COM location
-            Eigen::Affine3d StaticWalk::getLeanTarget(double y_offset_local,
-                                                      const Eigen::Vector3d& rCTt,
-                                                      const BODYSIDE& bodyside) {
+            Eigen::Affine3d StaticWalk::getLeanTarget(const Eigen::Vector3d& rCTt) {
                 // This will be the returned matrix, ground to torso target
                 Eigen::Affine3d Htg;
 
@@ -60,7 +55,7 @@ namespace module {
                 Eigen::Vector3d rGTt(rCTt.x(), rCTt.y(), -torso_height);
                 // Logic was based on if support was the right foot
                 // Negate if it is left
-                if (bodyside == BODYSIDE::LEFT) {
+                if (state == LEFT_LEAN) {
                     rGTt.x() = -rGTt.x();
                     rGTt.y() = -rGTt.y();
                 }
@@ -73,17 +68,15 @@ namespace module {
             }
 
             // Find the foot target for the step
-            Eigen::Affine3d StaticWalk::getFootTarget(const enum State state,
-                                                      const Eigen::Vector3d& walkcommand,
-                                                      const bool isLeft) {
-                // walkcommand is (x,y,theta) where x,y is velocity in m/s and theta is angle in
-                // radians/seconds
+            // walkcommand is (x,y,theta) where x,y is velocity in m/s and theta is angle in
+            // radians/seconds
+            Eigen::Affine3d StaticWalk::getFootTarget() {
 
                 // Clamp the rotation to rotation limit
-                double rotation = min(walkcommand.z(), rotation_limit);
+                double rotation = std::min(walkCommand.z(), rotation_limit);
 
                 // Set translation vector, z component is 0
-                Eigen::Vector3d translation = Eigen::Vector3d(walkcommand.x(), walkcommand.y(), 0);
+                Eigen::Vector3d translation = Eigen::Vector3d(walkCommand.x(), walkCommand.y(), 0);
 
                 // Foot to foot target matrix
                 Eigen::Affine3d Htf;
@@ -113,7 +106,7 @@ namespace module {
                                      : (translation / std::abs(rotation)) * std::sin(std::abs(rotation) * time)
                                            + (origin * (1 - std::cos(std::abs(rotation) * time)));
                     Eigen::Vector3d target = end_point;
-                    target.y() += (isLeft ? 1 : -1) * stance_width;
+                    target.y() += (state == LEFT_STEP ? 1 : -1) * stance_width;
 
                     const Eigen::Matrix3d Rtf(Eigen::AngleAxisd(-rotation, Eigen::Vector3d::UnitZ()));
 
@@ -148,14 +141,10 @@ namespace module {
                     time = std::chrono::duration_cast<std::chrono::duration<double>>(phase_time).count() * 2;
                 });
 
-                on<Trigger<Sensors>, With<WalkCommand>>().then([this](const Sensors& sensors,
-                                                                      const WalkCommand& walkcommand) {
-                    subsumptionId = walkcommand.subsumption_id;
-
-                    // if (walkcommand.command.x() == 0 && walkcommand.command.y() == 0 && walkcommand.command.z() == 0)
-                    // {
-                    //     state = STOP;
-                    // }
+                updateHandle = on<Trigger<Sensors>>().then([this](const Sensors& sensors) {
+                    if (walkCommand == Eigen::Vector3d::Zero()) {
+                        state = STOP;
+                    }
 
                     // INITIAL state occurs only as the first state in the walk to set the matrix Hff_s
                     if (state == INITIAL) {
@@ -214,15 +203,14 @@ namespace module {
                         }
                     }
 
-                    // Get walk command and centre of mass
-                    Eigen::Vector3d command(walkcommand.command.x(), walkcommand.command.y(), walkcommand.command.z());
+                    // Get centre of mass
                     Eigen::Vector3d centre_of_mass(sensors.rMTt.x(), sensors.rMTt.y(), 0);
 
                     // Put our COM over the correct foot or move foot to target, based on which state we are in
                     switch (state) {
                         case LEFT_LEAN: {
                             // Get lean target
-                            Eigen::Affine3d lean_target = getLeanTarget(-y_offset, centre_of_mass, BODYSIDE::LEFT);
+                            Eigen::Affine3d lean_target = getLeanTarget(centre_of_mass);
 
                             // Move the torso over the left foot
                             emit(std::make_unique<TorsoTarget>(start_phase + phase_time,
@@ -239,7 +227,7 @@ namespace module {
                         } break;
                         case RIGHT_LEAN: {
                             // Get lean target
-                            Eigen::Affine3d lean_target = getLeanTarget(y_offset, centre_of_mass, BODYSIDE::RIGHT);
+                            Eigen::Affine3d lean_target = getLeanTarget(centre_of_mass);
 
                             // Move the torso over the left foot
                             emit(std::make_unique<TorsoTarget>(start_phase + phase_time,
@@ -260,7 +248,7 @@ namespace module {
                             // Move the right foot to the location specified by the walkcommand
                             emit(std::make_unique<FootTarget>(start_phase + phase_time,
                                                               true,
-                                                              getFootTarget(RIGHT_STEP, command, false).matrix(),
+                                                              getFootTarget().matrix(),
                                                               true,
                                                               subsumptionId));
                         } break;
@@ -269,7 +257,7 @@ namespace module {
                             // Move the left foot to the location specified by the walkcommand
                             emit(std::make_unique<FootTarget>(start_phase + phase_time,
                                                               false,
-                                                              getFootTarget(LEFT_STEP, command, true).matrix(),
+                                                              getFootTarget().matrix(),
                                                               true,
                                                               subsumptionId));
                         } break;
@@ -298,8 +286,10 @@ namespace module {
                     }
                 });
 
-                // on<Trigger<EnableWalkEngineCommand>>().then([this](const EnableWalkEngineCommand& command) {
-                //     subsumptionId = command.subsumptionId;
+                on<Trigger<WalkCommand>>().then([this](const WalkCommand& command) {
+                    subsumptionId = command.subsumption_id;
+                    walkCommand   = Eigen::Vector3d(command.command.x(), command.command.y(), command.command.z());
+                });
 
                 on<Trigger<EnableWalkEngineCommand>>().then([this](const EnableWalkEngineCommand& command) {
                     subsumptionId = command.subsumption_id;
