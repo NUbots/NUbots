@@ -269,15 +269,21 @@ namespace module {
 
                             // Move the torso between the feet
                             emit(std::make_unique<TorsoTarget>(start_phase + phase_time,
-                                                               TorsoTarget::SupportFoot::RIGHT,
+                                                               TorsoTarget::SupportFoot::LEFT,
                                                                Htg.matrix(),
                                                                subsumptionId));
 
                             // We want to move the feet to be in line with each other
+                            Hwg                   = Eigen::Affine3d(sensors.Htx[ServoID::R_ANKLE_ROLL]).inverse() * Htg;
                             Hwg.translation().x() = 0;
+                            Hwg.translation().y() = stance_width;
+                            Hwg.translation().z() = 0;
+                            // Force the foot into ground space. TODO: check this
+                            Hwg.linear() = Eigen::Matrix3d::Identity();
+
                             // Keep the swing foot in place relative to support, with ground rotation
                             emit(std::make_unique<FootTarget>(start_phase + phase_time,
-                                                              FootTarget::SwingFoot::LEFT,
+                                                              FootTarget::SwingFoot::RIGHT,
                                                               Hwg.matrix(),
                                                               FootTarget::Mode::NO_LIFT,
                                                               subsumptionId));
@@ -289,6 +295,11 @@ namespace module {
                 on<Trigger<WalkCommand>>().then([this](const WalkCommand& command) {
                     subsumptionId = command.subsumption_id;
                     walkCommand   = Eigen::Vector3d(command.command.x(), command.command.y(), command.command.z());
+
+                    // If we were told to stop, and now we've got a command, move to the initial state to start walking
+                    if (state == STOP) {
+                        state = INITIAL;
+                    }
                 });
 
                 on<Trigger<EnableWalkEngineCommand>>().then([this](const EnableWalkEngineCommand& command) {
