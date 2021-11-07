@@ -148,6 +148,7 @@ namespace module {
 
                     // INITIAL state occurs only as the first state in the walk to set the matrix Hff_s
                     if (state == INITIAL) {
+                        start_phase = NUClear::clock::now();
                         // Set the state based on the config
                         state = start_right_lean ? RIGHT_LEAN : LEFT_LEAN;
 
