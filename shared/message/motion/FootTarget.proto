@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2021 NUbots <nubots@nubots.net>
  */
 
 syntax = "proto3";
@@ -25,12 +25,24 @@ import "Matrix.proto";
 import "google/protobuf/timestamp.proto";
 
 message FootTarget {
+    /// The designated stepping (swing) foot
+    enum SwingFoot {
+        LEFT = 0;
+        RIGHT = 1;
+    }
+
+    /// Stepping mode
+    /// STEP performs a normal step
+    /// NO_LIFT moves the foot without lifting it, for use when leaning
+    enum Mode {
+        STEP = 0;
+        NO_LIFT = 1;
+    }
 
     google.protobuf.Timestamp timestamp = 1;
-    // identifies which foot is the swing foot
-    bool is_right_foot_swing = 2;
-    // Transform from world oriented support foot space (g) to target (a)
+    SwingFoot swing_foot = 2;
+    /// Transform from world oriented support foot space (ground) (g) to (s)wing target (w_t)
     mat4  Hw_tg          = 3;
-    bool  lift           = 4;
+    Mode  mode           = 4;
     int64 subsumption_id = 5;
 }

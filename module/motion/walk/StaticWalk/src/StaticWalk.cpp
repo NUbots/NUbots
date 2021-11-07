@@ -214,15 +214,15 @@ namespace module {
 
                             // Move the torso over the left foot
                             emit(std::make_unique<TorsoTarget>(start_phase + phase_time,
-                                                               false,
+                                                               TorsoTarget::SupportFoot::LEFT,
                                                                lean_target.matrix(),
                                                                subsumptionId));
 
                             // Keep the swing foot in place relative to support, with ground rotation
                             emit(std::make_unique<FootTarget>(start_phase + phase_time / 2,
-                                                              true,
+                                                              FootTarget::SwingFoot::RIGHT,
                                                               Hwg.matrix(),
-                                                              false,
+                                                              FootTarget::Mode::NO_LIFT,
                                                               subsumptionId));
                         } break;
                         case RIGHT_LEAN: {
@@ -231,15 +231,15 @@ namespace module {
 
                             // Move the torso over the left foot
                             emit(std::make_unique<TorsoTarget>(start_phase + phase_time,
-                                                               true,
+                                                               TorsoTarget::SupportFoot::RIGHT,
                                                                lean_target.matrix(),
                                                                subsumptionId));
 
                             // Maintain left foot position while the torso moves over the right foot
                             emit(std::make_unique<FootTarget>(start_phase + phase_time / 2,
-                                                              false,
+                                                              FootTarget::SwingFoot::LEFT,
                                                               Hwg.matrix(),
-                                                              false,
+                                                              FootTarget::Mode::NO_LIFT,
                                                               subsumptionId));
                         } break;
 
@@ -247,18 +247,18 @@ namespace module {
                         case RIGHT_STEP: {
                             // Move the right foot to the location specified by the walkcommand
                             emit(std::make_unique<FootTarget>(start_phase + phase_time,
-                                                              true,
+                                                              FootTarget::SwingFoot::RIGHT,
                                                               getFootTarget().matrix(),
-                                                              true,
+                                                              FootTarget::Mode::STEP,
                                                               subsumptionId));
                         } break;
 
                         case LEFT_STEP: {
                             // Move the left foot to the location specified by the walkcommand
                             emit(std::make_unique<FootTarget>(start_phase + phase_time,
-                                                              false,
+                                                              FootTarget::SwingFoot::LEFT,
                                                               getFootTarget().matrix(),
-                                                              true,
+                                                              FootTarget::Mode::STEP,
                                                               subsumptionId));
                         } break;
                         case STOP: {
@@ -269,7 +269,7 @@ namespace module {
 
                             // Move the torso between the feet
                             emit(std::make_unique<TorsoTarget>(start_phase + phase_time,
-                                                               true,
+                                                               TorsoTarget::SupportFoot::RIGHT,
                                                                Htg.matrix(),
                                                                subsumptionId));
 
@@ -277,9 +277,9 @@ namespace module {
                             Hwg.translation().x() = 0;
                             // Keep the swing foot in place relative to support, with ground rotation
                             emit(std::make_unique<FootTarget>(start_phase + phase_time,
-                                                              true,
+                                                              FootTarget::SwingFoot::LEFT,
                                                               Hwg.matrix(),
-                                                              false,
+                                                              FootTarget::Mode::NO_LIFT,
                                                               subsumptionId));
                         } break;
                         default: break;

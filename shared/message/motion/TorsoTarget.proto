@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2021 NUbots <nubots@nubots.net>
  */
 
 syntax = "proto3";
@@ -25,11 +25,15 @@ import "Matrix.proto";
 import "google/protobuf/timestamp.proto";
 
 message TorsoTarget {
+    /// The designated support foot
+    enum SupportFoot {
+        LEFT = 0;
+        RIGHT = 1;
+    }
 
     google.protobuf.Timestamp timestamp = 1;
-    // identifies which foot is the swing foot
-    bool is_right_foot_support = 2;
-    // Transform from world oriented support foot space (g) to target (t_t)
+    SupportFoot support_foot = 2;
+    /// Transform from world oriented support foot space (ground) (g) to torso target (t_t)
     mat4  Ht_tg          = 3;
     int64 subsumption_id = 4;
 }

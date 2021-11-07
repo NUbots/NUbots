@@ -37,6 +37,7 @@ namespace module {
             using utility::nusight::graph;
             using utility::support::Expression;
 
+
             MovementController::MovementController(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment)) {
 
@@ -85,12 +86,12 @@ namespace module {
                         using namespace std::chrono;
 
                         // Set the support and swing matrices
-                        Eigen::Affine3d Hts = torso_target.is_right_foot_support
-                                                  ? Eigen::Affine3d(sensors.Htx[ServoID::R_ANKLE_ROLL])
-                                                  : Eigen::Affine3d(sensors.Htx[ServoID::L_ANKLE_ROLL]);
-                        Eigen::Affine3d Htw = torso_target.is_right_foot_support
+                        Eigen::Affine3d Hts = torso_target.support_foot == TorsoTarget::SupportFoot::LEFT
                                                   ? Eigen::Affine3d(sensors.Htx[ServoID::L_ANKLE_ROLL])
                                                   : Eigen::Affine3d(sensors.Htx[ServoID::R_ANKLE_ROLL]);
+                        Eigen::Affine3d Htw = torso_target.support_foot == TorsoTarget::SupportFoot::LEFT
+                                                  ? Eigen::Affine3d(sensors.Htx[ServoID::R_ANKLE_ROLL])
+                                                  : Eigen::Affine3d(sensors.Htx[ServoID::L_ANKLE_ROLL]);
 
                         // Set the time now so the calculations are consistent across the methods
                         const auto now       = NUClear::clock::now();
@@ -105,7 +106,8 @@ namespace module {
                         double step_length = Hw_tg.translation().norm();
                         double hip_offset =
                             Eigen::Vector3d(model.leg.HIP_OFFSET_X,
-                                            (foot_target.is_right_foot_swing ? -1 : 1) * model.leg.HIP_OFFSET_Y,
+                                            (foot_target.swing_foot == FootTarget::SwingFoot::LEFT ? 1 : -1)
+                                                * model.leg.HIP_OFFSET_Y,
                                             model.leg.HIP_OFFSET_Z)
                                 .norm();
                         double max_step_length = hip_offset + model.leg.UPPER_LEG_LENGTH + model.leg.LOWER_LEG_LENGTH
@@ -124,7 +126,8 @@ namespace module {
                         swing_time_left = swing_time_left < config.time_horizon ? config.time_horizon : swing_time_left;
 
                         // Get the gain of the servo from config based on if the foot is to be lifted off the ground
-                        double w_gain = foot_target.lift ? config.swing_gain : config.swing_lean_gain;
+                        double w_gain =
+                            foot_target.mode == FootTarget::Mode::STEP ? config.swing_gain : config.swing_lean_gain;
 
                         // Get ground space
                         Eigen::Affine3d Htg(calculateGroundSpace(Hts, Htworld.inverse()));
@@ -132,14 +135,15 @@ namespace module {
                         // Calculate the next torso and next swing foot positions to be targeted
                         Eigen::Affine3d Ht_ng =
                             torso_controller.next_torso(config.time_horizon, torso_time_left, Htg, Ht_tg);
-                        Eigen::Affine3d Hw_ng = foot_target.lift ? foot_controller.next_swing(config.time_horizon,
-                                                                                              swing_time_left,
-                                                                                              Htw.inverse() * Htg,
-                                                                                              Hw_tg)
-                                                                 : torso_controller.next_torso(config.time_horizon,
-                                                                                               swing_time_left,
-                                                                                               Htw.inverse() * Htg,
-                                                                                               Hw_tg);
+                        Eigen::Affine3d Hw_ng = foot_target.mode == FootTarget::Mode::STEP
+                                                    ? foot_controller.next_swing(config.time_horizon,
+                                                                                 swing_time_left,
+                                                                                 Htw.inverse() * Htg,
+                                                                                 Hw_tg)
+                                                    : torso_controller.next_torso(config.time_horizon,
+                                                                                  swing_time_left,
+                                                                                  Htw.inverse() * Htg,
+                                                                                  Hw_tg);
 
                         // Perform IK for the support and swing feet based on the target torso position
                         // w_n: swing foot next target position
@@ -149,8 +153,10 @@ namespace module {
                         // Get the target homogeneous transformations for each foot
                         // By using g here, we are assuming the support foot is flat on the ground,
                         // and if it's not it'll try to make it flat on the ground
-                        const Eigen::Affine3d left_foot  = torso_target.is_right_foot_support ? Ht_nw_n : Ht_ng;
-                        const Eigen::Affine3d right_foot = torso_target.is_right_foot_support ? Ht_ng : Ht_nw_n;
+                        const Eigen::Affine3d left_foot =
+                            torso_target.support_foot == TorsoTarget::SupportFoot::RIGHT ? Ht_nw_n : Ht_ng;
+                        const Eigen::Affine3d right_foot =
+                            torso_target.support_foot == TorsoTarget::SupportFoot::RIGHT ? Ht_ng : Ht_nw_n;
 
                         // Get joints based on the matrices from IK
                         auto left_joints  = calculateLegJoints(model, left_foot, LimbID::LEFT_LEG);
@@ -173,7 +179,8 @@ namespace module {
                                 projected_time,
                                 joint.first,
                                 joint.second,
-                                torso_target.is_right_foot_support ? w_gain : config.support_gain,
+                                torso_target.support_foot == TorsoTarget::SupportFoot::RIGHT ? w_gain
+                                                                                             : config.support_gain,
                                 100);
                         }
 
@@ -183,7 +190,8 @@ namespace module {
                                 projected_time,
                                 joint.first,
                                 joint.second,
-                                torso_target.is_right_foot_support ? config.support_gain : w_gain,
+                                torso_target.support_foot == TorsoTarget::SupportFoot::RIGHT ? config.support_gain
+                                                                                             : w_gain,
                                 100);
                         }
 
