@@ -11,7 +11,7 @@ nuclear_role(
   network::NetworkForwarder
   output::Overview
   # Hardware Interface
-  platform::Webots
+  platform::darwin::HardwareSimulator
   input::SensorFilter
   # Motion
   motion::walk::MovementController

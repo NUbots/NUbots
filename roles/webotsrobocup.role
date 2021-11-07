@@ -37,7 +37,8 @@ nuclear_role(
   behaviour::strategy::SoccerStrategy
   # Motion
   motion::ScriptEngine
-  motion::QuinticWalk
+  motion::walk::MovementController
+  motion::walk::StaticWalk
   motion::HeadController
   # Data logger
   support::logging::DataLogging
