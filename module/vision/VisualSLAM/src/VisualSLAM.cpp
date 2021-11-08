@@ -1,3 +1,22 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUbots <nubots@nubots.net>
+ */
+
 // System.
 #include <iostream>
 #include <algorithm>
@@ -22,10 +41,12 @@
 
 namespace module::vision
 {
+    using extension::Configuration;
+
     VisualSLAM::VisualSLAM(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), config{}
     {
-        on<extension::Configuration>("VisualSLAM.yaml").then([this](const extension::Configuration& config)
+        on<Configuration>("VisualSLAM.yaml").then([this](const Configuration& config)
         {
             // Log level.
             this->log_level         = config["log_level"].as<NUClear::LogLevel>();
@@ -143,163 +164,155 @@ namespace module::vision
         });
 
 
-        on<Trigger<message::input::Image>>().then([this](const message::input::Image& protoImage)
+        on<Trigger<message::input::Image> , Single>().then([this](const message::input::Image& protoImage)
         {
             // Image frame tracker.
             static uint frame = 0;
             log<NUClear::DEBUG>(fmt::format("--- Image received : {} --- ", frame++));
 
-            // Skip next incoming message if already processing one.
-            if (mutex.try_lock())
+            // Constant image data from protobuf image.
+            const int imageID = protoImage.id;
+            const std::string imageName = protoImage.name;
+            const int imageDimensionsX = protoImage.dimensions.x();
+            const int imageDimensionsY = protoImage.dimensions.y();
+            const int imageFourColourCode = protoImage.format;
+            const std::string imageFourColourName = utility::vision::fourcc(imageFourColourCode);
+            const std::chrono::time_point imageTimePoint = protoImage.timestamp;
+            //const uint8_t* imageData = const_cast<uint8_t*>(protoImage.data.data());
+            //const Eigen::Affine3d Hcw(protoImage.Hcw);
+
+            if (log_level <= NUClear::DEBUG)
             {
-                // Constant image data from protobuf image.
-                const int imageID = protoImage.id;
-                const std::string imageName = protoImage.name;
-                const int imageDimensionsX = protoImage.dimensions.x();
-                const int imageDimensionsY = protoImage.dimensions.y();
-                const int imageFourColourCode = protoImage.format;
-                const std::string imageFourColourName = utility::vision::fourcc(imageFourColourCode);
-                const std::chrono::time_point imageTimePoint = protoImage.timestamp;
-                //const uint8_t* imageData = const_cast<uint8_t*>(protoImage.data.data());
-                //const Eigen::Affine3d Hcw(protoImage.Hcw);
+                // Debug log image data.
+                log<NUClear::DEBUG>(fmt::format("ID: {}", imageID));
+                log<NUClear::DEBUG>(fmt::format("Name: {}", imageName));
+                log<NUClear::DEBUG>(fmt::format("Dimension X: {}", imageDimensionsX));
+                log<NUClear::DEBUG>(fmt::format("Dimension Y: {}", imageDimensionsY));
+                log<NUClear::DEBUG>(fmt::format("Four Colour Code: {}", imageFourColourCode));
+                log<NUClear::DEBUG>(fmt::format("Four Colour Name: {}", imageFourColourName));
+                log<NUClear::DEBUG>(fmt::format("Timestamp: {}", imageTimePoint.time_since_epoch().count()));
 
-                if (log_level <= NUClear::DEBUG)
+                //// Image lens:
+                //const auto& lens = protoImage.lens;
+                ////  UNKNOWN = 0, RECTILINEAR = 1, EQUIDISTANT = 2, EQUISOLID   = 3;
+                //const int lensProjection = lens.projection;
+                ///// The angular diameter that the lens covers (the area that light hits on the sensor), in radians.
+                //const float lensFieldOfView = lens.fov;
+                ///// Normalised focal length: focal length in pixels / image width.
+                //const float lensFocalLength = lens.focal_length;
+                ///// Normalised image centre offset: pixels from centre to optical axis / image width.
+                //const float lensCentreX = lens.centre.x();
+                //const float lensCentreY = lens.centre.y();
+                //const float kX = lens.k.x();
+                //const float kY = lens.k.y();
+                //log<NUClear::DEBUG>(fmt::format("Lens Projection: {}", lensProjection));
+                //log<NUClear::DEBUG>(fmt::format("Lens Field of View: {}", lensFieldOfView));
+                //log<NUClear::DEBUG>(fmt::format("Lens Focal Length: {}", lensFocalLength));
+                //log<NUClear::DEBUG>(fmt::format("Lens Center X: {}", lensCentreX));
+                //log<NUClear::DEBUG>(fmt::format("Lens Center Y: {}", lensCentreY));
+                //log<NUClear::DEBUG>(fmt::format("Lens K X: {}", kX));
+                //log<NUClear::DEBUG>(fmt::format("Lens K Y: {}", kY));
+            }
+
+
+            // Cast protobuff input image to greyscale output image.
+            cv::Mat cvImageInput;
+            cv::Mat cvImageOutput;
+            switch (imageFourColourCode)
+            {
+                case utility::vision::FOURCC::RGB3:
+                case utility::vision::FOURCC::JPEG:
+                    cvImageInput = cv::Mat(imageDimensionsY, imageDimensionsX, CV_8UC3, const_cast<uint8_t*>(protoImage.data.data()));
+                    cv::cvtColor(cvImageInput, cvImageOutput, cv::COLOR_RGB2GRAY);
+                    break;
+                case utility::vision::fourcc("BGR3"):   // BGR3 not available in utility::vision::FOURCC.
+                    cvImageInput = cv::Mat(imageDimensionsY, imageDimensionsX, CV_8UC3, const_cast<uint8_t*>(protoImage.data.data()));
+                    cv::cvtColor(cvImageInput, cvImageOutput, cv::COLOR_BGR2GRAY);
+                    break;
+                case utility::vision::FOURCC::GREY:
+                    cvImageInput = cv::Mat(imageDimensionsY, imageDimensionsX, CV_8UC1, const_cast<uint8_t*>(protoImage.data.data()));
+                    cvImageOutput = cvImageInput.clone();
+                    break;
+                default:
+                    log<NUClear::WARN>(fmt::format("Image format not supported: {}", imageFourColourName));
+                    mutex.unlock();
+                    return;
+            }
+
+
+            // Update the slam system tracking with the new black and white image.
+            cv::Mat cameraTrackingPose = slamSystem->TrackMonocular
+            (
+                cvImageOutput,
+                imageTimePoint.time_since_epoch().count()
+            );
+
+
+            if (log_level <= NUClear::DEBUG)
+            {
+                if (saveDataLog)
                 {
-                    // Debug log image data.
-                    log<NUClear::DEBUG>(fmt::format("ID: {}", imageID));
-                    log<NUClear::DEBUG>(fmt::format("Name: {}", imageName));
-                    log<NUClear::DEBUG>(fmt::format("Dimension X: {}", imageDimensionsX));
-                    log<NUClear::DEBUG>(fmt::format("Dimension Y: {}", imageDimensionsY));
-                    log<NUClear::DEBUG>(fmt::format("Four Colour Code: {}", imageFourColourCode));
-                    log<NUClear::DEBUG>(fmt::format("Four Colour Name: {}", imageFourColourName));
-                    log<NUClear::DEBUG>(fmt::format("Timestamp: {}", imageTimePoint.time_since_epoch().count()));
-
-                    //// Image lens:
-                    //const auto& lens = protoImage.lens;
-                    ////  UNKNOWN = 0, RECTILINEAR = 1, EQUIDISTANT = 2, EQUISOLID   = 3;
-                    //const int lensProjection = lens.projection;
-                    ///// The angular diameter that the lens covers (the area that light hits on the sensor), in radians.
-                    //const float lensFieldOfView = lens.fov;
-                    ///// Normalised focal length: focal length in pixels / image width.
-                    //const float lensFocalLength = lens.focal_length;
-                    ///// Normalised image centre offset: pixels from centre to optical axis / image width.
-                    //const float lensCentreX = lens.centre.x();
-                    //const float lensCentreY = lens.centre.y();
-                    //const float kX = lens.k.x();
-                    //const float kY = lens.k.y();
-                    //log<NUClear::DEBUG>(fmt::format("Lens Projection: {}", lensProjection));
-                    //log<NUClear::DEBUG>(fmt::format("Lens Field of View: {}", lensFieldOfView));
-                    //log<NUClear::DEBUG>(fmt::format("Lens Focal Length: {}", lensFocalLength));
-                    //log<NUClear::DEBUG>(fmt::format("Lens Center X: {}", lensCentreX));
-                    //log<NUClear::DEBUG>(fmt::format("Lens Center Y: {}", lensCentreY));
-                    //log<NUClear::DEBUG>(fmt::format("Lens K X: {}", kX));
-                    //log<NUClear::DEBUG>(fmt::format("Lens K Y: {}", kY));
-                }
-
-
-                // Cast protobuff input image to greyscale output image.
-                cv::Mat cvImageInput;
-                cv::Mat cvImageOutput;
-                switch (imageFourColourCode)
-                {
-                    case utility::vision::FOURCC::RGB3:
-                    case utility::vision::FOURCC::JPEG:
-                        cvImageInput = cv::Mat(imageDimensionsY, imageDimensionsX, CV_8UC3, const_cast<uint8_t*>(protoImage.data.data()));
-                        cv::cvtColor(cvImageInput, cvImageOutput, cv::COLOR_RGB2GRAY);
-                        break;
-                    case utility::vision::fourcc("BGR3"):   // BGR3 not available in utility::vision::FOURCC.
-                        cvImageInput = cv::Mat(imageDimensionsY, imageDimensionsX, CV_8UC3, const_cast<uint8_t*>(protoImage.data.data()));
-                        cv::cvtColor(cvImageInput, cvImageOutput, cv::COLOR_BGR2GRAY);
-                        break;
-                    case utility::vision::FOURCC::GREY:
-                        cvImageInput = cv::Mat(imageDimensionsY, imageDimensionsX, CV_8UC1, const_cast<uint8_t*>(protoImage.data.data()));
-                        cvImageOutput = cvImageInput.clone();
-                        break;
-                    default:
-                        log<NUClear::WARN>(fmt::format("Image format not supported: {}", imageFourColourName));
-                        mutex.unlock();
-                        return;
-                }
-
-
-                // Update the slam system tracking with the new black and white image.
-                cv::Mat cameraTrackingPose = slamSystem->TrackMonocular
-                (
-                    cvImageOutput,
-                    imageTimePoint.time_since_epoch().count()
-                );
-
-
-                if (log_level <= NUClear::DEBUG)
-                {
-                    if (saveDataLog)
+                    // Save new data log - overwrites old data entries.
+                    if (outputFileStream.is_open() && outputFileStream.good())
                     {
-                        // Save new data log - overwrites old data entries.
-                        if (outputFileStream.is_open() && outputFileStream.good())
-                        {
-                            outputFileStream << frame << ";" << imageTimePoint.time_since_epoch().count() << ";";
+                        outputFileStream << frame << ";" << imageTimePoint.time_since_epoch().count() << ";";
 
-                            if (cameraTrackingPose.empty())
+                        if (cameraTrackingPose.empty())
+                        {
+                            outputFileStream << "EMPTY";
+                        }
+                        else
+                        {
+                            for (int i = 0; i < cameraTrackingPose.rows; i++)
                             {
-                                outputFileStream << "EMPTY";
-                            }
-                            else
-                            {
-                                for (int i = 0; i < cameraTrackingPose.rows; i++)
+                                for (int j = 0; j < cameraTrackingPose.cols; j++)
                                 {
-                                    for (int j = 0; j < cameraTrackingPose.cols; j++)
-                                    {
-                                        outputFileStream << ";" << cameraTrackingPose.at<double>(i, j);
-                                    }
+                                    outputFileStream << ";" << cameraTrackingPose.at<double>(i, j);
                                 }
                             }
-
-                            outputFileStream << ";" << std::endl;
-                        }
-                    }
-
-                    if (saveImages)
-                    {
-                        // Delete old images.
-                        static bool deleteImages = true;
-                        if (deleteImages)
-                        {
-                            std::filesystem::remove_all("./images");
-                            std::filesystem::create_directories("./images/input");
-                            std::filesystem::create_directories("./images/output");
-                            deleteImages = false;
                         }
 
-                        // Save new images.
-                        log<NUClear::DEBUG>(fmt::format("Saving image: {}", frame));
-                        cv::imwrite("./images/input/" + std::to_string(frame) + ".jpg", cvImageInput);
-                        cv::imwrite("./images/output/" + std::to_string(frame) + ".jpg", cvImageOutput);
+                        outputFileStream << ";" << std::endl;
                     }
                 }
 
-
-                if (!cameraTrackingPose.empty())
+                if (saveImages)
                 {
-                    // Create VSLAM message for emission.
-                    std::unique_ptr<message::vision::VisualSLAM> message = std::make_unique<message::vision::VisualSLAM>();
+                    // Delete old images.
+                    static bool deleteImages = true;
+                    if (deleteImages)
+                    {
+                        std::filesystem::remove_all("./images");
+                        std::filesystem::create_directories("./images/input");
+                        std::filesystem::create_directories("./images/output");
+                        deleteImages = false;
+                    }
 
-                    // Attach image timestamp to message.
-                    message->timestamp = imageTimePoint;
-                    // Cast OpenCV matrix to Eigen matrix.
-                    Eigen::Matrix<double, 4, 4> eigenMatrix;
-                    cv::cv2eigen(cameraTrackingPose, eigenMatrix);
-                    // Attach Eigen matrix to message.
-                    message->Hcw = eigenMatrix;
-
-                    // Emit message globally.
-                    //emit(std::move(message));
-                    // Emit message locally.
-                    emit<Scope::DIRECT>(std::move(message));
+                    // Save new images.
+                    log<NUClear::DEBUG>(fmt::format("Saving image: {}", frame));
+                    cv::imwrite("./images/input/" + std::to_string(frame) + ".jpg", cvImageInput);
+                    cv::imwrite("./images/output/" + std::to_string(frame) + ".jpg", cvImageOutput);
                 }
+            }
 
 
-                // Image finished processing - allow next image to enter.
-                mutex.unlock();
+            if (!cameraTrackingPose.empty())
+            {
+                // Create VSLAM message for emission.
+                std::unique_ptr<message::vision::VisualSLAM> message = std::make_unique<message::vision::VisualSLAM>();
+
+                // Attach image timestamp to message.
+                message->timestamp = imageTimePoint;
+                // Cast OpenCV matrix to Eigen matrix.
+                Eigen::Matrix<double, 4, 4> eigenMatrix;
+                cv::cv2eigen(cameraTrackingPose, eigenMatrix);
+                // Attach Eigen matrix to message.
+                message->Hcw = eigenMatrix;
+
+                // Emit message globally.
+                //emit(std::move(message));
+                // Emit message locally.
+                emit<Scope::DIRECT>(std::move(message));
             }
         });
 
