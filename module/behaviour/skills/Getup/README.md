@@ -20,6 +20,8 @@ Include this module to allow the robot to get up after it has fallen over.
 - `extension::ExecuteScriptByName` to run getup and stand scripts
 - `message::motion::ExecuteGetup` instigates a getup
 - `message::motion::KillGetup` stops a getup
+- `message::motion::DisableWalkEngineCommand` stops the walk engine while getting up
+- `message::motion::EnableWalkEngineCommand` enables the walk engine when finished getting up
 - `utility::behaviour::ActionPriorities` signals when the module's priority changes
 - `utility::behaviour::RegisterAction` registers callbacks for starting or stopping getups
 
