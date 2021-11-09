@@ -27,6 +27,7 @@
 
 #include "message/behaviour/ServoCommand.hpp"
 #include "message/motion/GetupCommand.hpp"
+#include "message/motion/WalkCommand.hpp"
 #include "message/platform/RawSensors.hpp"
 
 #include "utility/behaviour/Action.hpp"
@@ -37,6 +38,8 @@ namespace module::behaviour::skills {
     using extension::Configuration;
     using extension::ExecuteScriptByName;
 
+    using message::motion::DisableWalkEngineCommand;
+    using message::motion::EnableWalkEngineCommand;
     using message::motion::ExecuteGetup;
     using message::motion::KillGetup;
     using message::platform::RawSensors;
@@ -87,6 +90,7 @@ namespace module::behaviour::skills {
 
         on<Trigger<ExecuteGetup>, Single>().then("Execute Getup", [this]() {
             gettingUp = true;
+            emit(std::make_unique<DisableWalkEngineCommand>(id));
 
             // Check with side we're getting up from
             if (isFront) {
@@ -104,6 +108,7 @@ namespace module::behaviour::skills {
 
         on<Trigger<KillGetup>>().then([this] {
             gettingUp = false;
+            emit(std::make_unique<EnableWalkEngineCommand>(id));
             updatePriority(0);
         });
 
