@@ -45,12 +45,10 @@ namespace module::input {
     using message::platform::ButtonMiddleUp;
     using message::platform::RawSensors;
 
-    using utility::input::LimbID;
     using utility::input::ServoID;
     using utility::motion::kinematics::calculateAllPositions;
     using utility::motion::kinematics::calculateCentreOfMass;
     using utility::motion::kinematics::calculateInertialTensor;
-    using utility::motion::kinematics::calculateRobotToIMU;
     using utility::nusight::graph;
     using utility::support::Expression;
 
@@ -357,7 +355,7 @@ namespace module::input {
                 .then(
                     "Main Sensors Loop",
                     [this](const RawSensors& input,
-                           std::shared_ptr<const Sensors> previousSensors,
+                           const std::shared_ptr<const Sensors>& previousSensors,
                            const KinematicsModel& kinematicsModel) {
                         auto sensors = std::make_unique<Sensors>();
 
