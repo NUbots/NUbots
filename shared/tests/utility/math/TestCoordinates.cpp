@@ -72,32 +72,30 @@ SCENARIO("Cartesian coordinates can be converted to spherical coordinates", "[ut
                     Approx epsilon_x = Approx(cart_to_spher_expected.at(i).x()).epsilon(ERROR_THRESHOLD);
                     Approx epsilon_y = Approx(cart_to_spher_expected.at(i).y()).epsilon(ERROR_THRESHOLD);
                     Approx epsilon_z = Approx(cart_to_spher_expected.at(i).z()).epsilon(ERROR_THRESHOLD);
-                    // This passes!?!?!?
-                    // *******DEBUG OUTPUT ********
-                    INFO(epsilon_x);
-                    INFO(cart_to_spher_expected.at(i).x());
-                    UNSCOPED_INFO("UNSCOPED");
+                    // NOTE: Info message is only printed on failure
+                    // NOTE: Info message is only printed on failure
+                    INFO("Calculated x value: " << result.x());
+                    INFO("Expected x value: " << cart_to_spher_expected.at(i).x());
+                    INFO("Expected epsilon x value: " << epsilon_x.toString());
 
+                    INFO("Calculated y value: " << result.y());
+                    INFO("Expected y value: " << cart_to_spher_expected.at(i).y());
+                    INFO("Expected epsilon y value: " << epsilon_y.toString());
 
-                    //****************************
-                    REQUIRE((result.x() + 100) == epsilon_x);
+                    INFO("Calculated z value: " << result.z());
+                    INFO("Expected z value: " << cart_to_spher_expected.at(i).z());
+                    INFO("Expected epsilon z value: " << epsilon_z.toString());
+                    INFO("Failed test value at index: " << i);
+                    REQUIRE(result.x() == epsilon_x);
                     REQUIRE(result.y() == epsilon_y);
                     REQUIRE(result.z() == epsilon_z);
-                    // REQUIRE(1 == 2);
                 }
             }
         }
-
-        // TEST
-        // WHEN("TEST") {
-        //     THEN("Pass") {
-        //         REQUIRE(1 == 1);
-        //     }
-        // }
     }
 }
 
-// spherical to cartesian
+// // spherical to cartesian
 SCENARIO("Spherical coordinates can be converted to cartesian coordinates", "[utility][math][coordinates]") {
     GIVEN("A set of spherical coordinates and a set of expected values") {
         // spherical input
@@ -113,11 +111,20 @@ SCENARIO("Spherical coordinates can be converted to cartesian coordinates", "[ut
                     Approx epsilon_x = Approx(spher_to_cart_expected.at(i).x()).epsilon(ERROR_THRESHOLD);
                     Approx epsilon_y = Approx(spher_to_cart_expected.at(i).y()).epsilon(ERROR_THRESHOLD);
                     Approx epsilon_z = Approx(spher_to_cart_expected.at(i).z()).epsilon(ERROR_THRESHOLD);
-                    // *******DEBUG OUTPUT ********
-                    INFO("TEST!!!!!!!!!!!!!!!!!!");
-                    UNSCOPED_INFO("UNSCOPED");
+                    // NOTE: Info message is only printed on failure
+                    INFO("Calculated x value: " << result.x());
+                    INFO("Expected x value: " << spher_to_cart_expected.at(i).x());
+                    INFO("Expected epsilon x value: " << epsilon_x.toString());
 
-                    //****************************
+                    INFO("Calculated y value: " << result.y());
+                    INFO("Expected y value: " << spher_to_cart_expected.at(i).y());
+                    INFO("Expected epsilon y value: " << epsilon_y.toString());
+
+                    INFO("Calculated z value: " << result.z());
+                    INFO("Expected z value: " << spher_to_cart_expected.at(i).z());
+                    INFO("Expected epsilon z value: " << epsilon_z.toString());
+                    INFO("Failed test value at index: " << i);
+
                     REQUIRE(result.x() == epsilon_x);
                     REQUIRE(result.y() == epsilon_y);
                     REQUIRE(result.z() == epsilon_z);
