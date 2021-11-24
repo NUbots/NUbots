@@ -73,5 +73,4 @@ namespace utility::math::coordinates {
 }  // namespace utility::math::coordinates
 
 
-
 #endif  // UTILITY_MATH_COORDINATES_H
