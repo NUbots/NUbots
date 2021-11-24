@@ -90,11 +90,11 @@ namespace extension {
             , config()
             , frames(std::move(frames)) {}
 
-        Script(std::string fileName,
-               std::string hostname,
-               std::string platform,
+        Script(const std::string& fileName,
+               const std::string& hostname,
+               const std::string& platform,
                const YAML::Node& config,
-               std::vector<Frame> frames)
+               const std::vector<Frame>& frames)
             : fileName(std::move(fileName))
             , hostname(std::move(hostname))
             , platform(std::move(platform))

@@ -31,7 +31,6 @@ namespace Darwin {
     // Initialize all of the sensor handler objects using the passed uart
     Darwin::Darwin(const char* name)
         : uart(name)
-        , enabledServoIds(20, 1u)
         , cm740(uart, ID::CM740)
         , rShoulderPitch(uart, ID::R_SHOULDER_PITCH)
         , lShoulderPitch(uart, ID::L_SHOULDER_PITCH)
@@ -56,6 +55,9 @@ namespace Darwin {
         , rFSR(uart, ID::R_FSR)
         , lFSR(uart, ID::L_FSR) {
 
+        // All servos are enabled on construction
+        enabledServoIds.fill(true);
+
         // Turn on the dynamixel power
         cm740.turnOnDynamixel();
 
@@ -77,9 +79,7 @@ namespace Darwin {
 
         // Set servos to be enabled if they are not simulated
         for (size_t i = 0; i < config["servos"].config.size(); ++i) {
-            enabledServoIds[i] =
-                static_cast<__gnu_cxx::__alloc_traits<class std::allocator<unsigned char>, unsigned char>::value_type>(
-                    !config["servos"][i]["simulated"].as<bool>());
+            enabledServoIds[i] = !config["servos"][i]["simulated"].as<bool>();
         }
 
         // Rebuild our bulk read packet
@@ -130,11 +130,9 @@ namespace Darwin {
 
         // Do a self test so that we can move all the sensors that are currently failing to the end of the list
         std::vector<std::pair<uint8_t, bool>> sensors = selfTest();
-        std::sort(std::begin(sensors),
-                  std::end(sensors),
-                  [](const std::pair<uint8_t, bool>& a, const std::pair<uint8_t, bool>& b) {
-                      return static_cast<int>(a.second) > static_cast<int>(b.second);
-                  });
+        std::partition(std::begin(sensors), std::end(sensors), [](const std::pair<uint8_t, bool>& sensor) {
+            return sensor.second;
+        });
 
         // This holds our request paramters
         std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> request;
@@ -181,7 +179,7 @@ namespace Darwin {
                 // Otherwise we assume that it's a servo
                 default:
                     // Only add this servo if we aren't simulating it
-                    if (enabledServoIds[sensor.first - 1] != 0u) {
+                    if (enabledServoIds[sensor.first - 1]) {
                         request.emplace_back(MX28::Address::PRESENT_POSITION_L, sensor.first, sizeof(Types::MX28Data));
                     }
                     break;

@@ -26,23 +26,23 @@ namespace module::platform::darwin {
     int8_t Convert::SERVO_DIRECTION[20] = {0};
     double Convert::SERVO_OFFSET[20]    = {0};
 
-    float Convert::accelerometer(uint16_t value) {
+    float Convert::accelerometer(const uint16_t& value) {
         return (value - 512) * ACCELEROMETER_CONVERSION_FACTOR;
     }
 
-    float Convert::gyroscope(uint16_t value) {
+    float Convert::gyroscope(const uint16_t& value) {
         return (value - 512) * GYROSCOPE_CONVERSION_FACTOR;
     }
 
-    float Convert::voltage(const uint8_t value) {
+    float Convert::voltage(const uint8_t& value) {
         return value * VOLTAGE_CONVERSION_FACTOR;
     }
 
-    float Convert::fsrForce(const uint16_t value) {
+    float Convert::fsrForce(const uint16_t& value) {
         return value * FSR_FORCE_CONVERSION_FACTOR;
     }
 
-    float Convert::fsrCentre(const bool left, const uint8_t value) {
+    float Convert::fsrCentre(const bool& left, const uint8_t& value) {
         if (value == 0xFF) {
             // Return NaN if there is no centre
             return std::numeric_limits<float>::quiet_NaN();
@@ -58,33 +58,33 @@ namespace module::platform::darwin {
         return double(127 - value) / 127.0;
     }
 
-    std::tuple<uint8_t, uint8_t, uint8_t> Convert::colourLED(uint16_t value) {
+    std::tuple<uint8_t, uint8_t, uint8_t> Convert::colourLED(const uint16_t& value) {
         return std::make_tuple(static_cast<uint8_t>((value & 0x001F) << 3),
                                static_cast<uint8_t>((value & 0x03E0) >> 2),
                                static_cast<uint8_t>((value & 0x7C00) >> 7));
     }
 
-    uint16_t Convert::colourLEDInverse(uint8_t r, uint8_t g, uint8_t b) {
+    uint16_t Convert::colourLEDInverse(const uint8_t& r, const uint8_t& g, const uint8_t& b) {
         return ((r >> 3)) | ((g >> 3) << 5) | ((b >> 3) << 10);
     }
 
-    float Convert::gain(const uint8_t value) {
+    float Convert::gain(const uint8_t& value) {
         return value * GAIN_CONVERSION_FACTOR;
     }
 
-    uint8_t Convert::gainInverse(const float value) {
+    uint8_t Convert::gainInverse(const float& value) {
         return value >= 100 ? 254                                         // If we are greater then 100, then set to 100
                : value < 0  ? 0                                           // If we are less then 0, then set to 0
                             : std::round(value / GAIN_CONVERSION_FACTOR);  // Otherwise do our conversion
     }
 
-    float Convert::servoPosition(const uint8_t id, const uint16_t value) {
+    float Convert::servoPosition(const uint8_t& id, const uint16_t& value) {
         // offset and normalize the angle
         return utility::math::angle::normalizeAngle(
             (((value - 2048) * POSITION_CONVERSION_FACTOR) * SERVO_DIRECTION[id]) + SERVO_OFFSET[id]);
     }
 
-    uint16_t Convert::servoPositionInverse(const uint8_t id, const float value) {
+    uint16_t Convert::servoPositionInverse(const uint8_t& id, const float& value) {
         float angle = value;
 
         // Undo our conversion operations
@@ -98,7 +98,7 @@ namespace module::platform::darwin {
         return (angle / POSITION_CONVERSION_FACTOR) + 2048;
     }
 
-    float Convert::servoSpeed(const uint8_t id, const uint16_t value) {
+    float Convert::servoSpeed(const uint8_t& id, const uint16_t& value) {
 
         // We only care about the lower bits
         float raw = (value & 0x3FF) * SPEED_CONVERSION_FACTOR;
@@ -111,20 +111,20 @@ namespace module::platform::darwin {
 
         return raw;
     }
-    uint16_t Convert::servoSpeedInverse(const float value) {
+    uint16_t Convert::servoSpeedInverse(const float& value) {
         // If the value is greater then 1023, then set to max speed (0)
         return value > 100 ? 0 : uint16_t(round(value / SPEED_CONVERSION_FACTOR));
     }
 
-    float Convert::torqueLimit(const uint16_t value) {
+    float Convert::torqueLimit(const uint16_t& value) {
         return value * TORQUE_LIMIT_CONVERSION_FACTOR;
     }
 
-    uint16_t Convert::torqueLimitInverse(const float value) {
+    uint16_t Convert::torqueLimitInverse(const float& value) {
         return value >= 100 ? 1023.0 : std::round(value / TORQUE_LIMIT_CONVERSION_FACTOR);
     }
 
-    float Convert::servoLoad(const uint8_t id, const uint16_t value) {
+    float Convert::servoLoad(const uint8_t& id, const uint16_t& value) {
         // We only care about the lower bits if bit 10 is set then we are moving clockwise
         float raw = (value & 0x3FF) * ((value & 0x400) != 0 ? -1 : 1);
         raw *= LOAD_CONVERSION_FACTOR;
@@ -133,7 +133,7 @@ namespace module::platform::darwin {
         return raw * SERVO_DIRECTION[id];
     }
 
-    float Convert::temperature(const uint8_t value) {
+    float Convert::temperature(const uint8_t& value) {
         return value * TEMPERATURE_CONVERSION_FACTOR;
     }
 }  // namespace module::platform::darwin
