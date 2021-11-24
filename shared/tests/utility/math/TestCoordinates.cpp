@@ -37,19 +37,10 @@ using utility::support::resolve_expression;
 
 
 /**
- * Test data and functions to validate coordinates.cpp functions.
- *
- * Test value domain to stay between the values of TEST_DBL_MAX = 5.9667e+153, and TEST_DBL_MIN = 1.4853e-307
- * This means the usual domain edge cases - DBL_MAX and DBL_MIN - have been left out or replaced. It has been determined
- * that inputs approaching these edge cases will not be possible in normal operation. See coordinates.h comments for
- * more details.
  * @author Liam Craft
  */
 
 static constexpr double ERROR_THRESHOLD = 1e-6;
-// static constexpr double TEST_DBL_MAX    = 5.9667e+153;
-// static constexpr double TEST_DBL_MIN    = 1.4853e-307;
-
 
 /** Cartesian test coords */
 YAML::Node test_values = YAML::LoadFile("tests/CoordinateTests.yaml");
@@ -73,7 +64,6 @@ SCENARIO("Cartesian coordinates can be converted to spherical coordinates", "[ut
                     Approx epsilon_y = Approx(cart_to_spher_expected.at(i).y()).epsilon(ERROR_THRESHOLD);
                     Approx epsilon_z = Approx(cart_to_spher_expected.at(i).z()).epsilon(ERROR_THRESHOLD);
                     // NOTE: Info message is only printed on failure
-                    // NOTE: Info message is only printed on failure
                     INFO("Calculated x value: " << result.x());
                     INFO("Expected x value: " << cart_to_spher_expected.at(i).x());
                     INFO("Expected epsilon x value: " << epsilon_x.toString());
@@ -95,7 +85,7 @@ SCENARIO("Cartesian coordinates can be converted to spherical coordinates", "[ut
     }
 }
 
-// // spherical to cartesian
+// spherical to cartesian
 SCENARIO("Spherical coordinates can be converted to cartesian coordinates", "[utility][math][coordinates]") {
     GIVEN("A set of spherical coordinates and a set of expected values") {
         // spherical input
@@ -131,12 +121,5 @@ SCENARIO("Spherical coordinates can be converted to cartesian coordinates", "[ut
                 }
             }
         }
-
-        // TEST
-        // WHEN("TEST") {
-        //     THEN("Pass") {
-        //         REQUIRE(1 == 1);
-        //     }
-        // }
     }
 }
