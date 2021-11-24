@@ -42,8 +42,8 @@ using utility::support::resolve_expression;
 
 static constexpr double ERROR_THRESHOLD = 1e-6;
 
-/** Cartesian test coords */
-YAML::Node test_values = YAML::LoadFile("tests/CoordinateTests.yaml");
+/** Test Data */
+static const YAML::Node test_values = YAML::LoadFile("tests/CoordinateTests.yaml");
 
 // cartesian to spherical
 SCENARIO("Cartesian coordinates can be converted to spherical coordinates", "[utility][math][coordinates]") {
