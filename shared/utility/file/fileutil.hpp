@@ -31,18 +31,7 @@
  * @author Trent Houliston
  */
 namespace utility::file {
-    std::string loadFromFile(const std::string& path);
-    std::vector<uint8_t> readFile(const std::string& path);
-
-    template <typename TData>
-    void writeToFile(const std::string& path, const TData& data, bool append = false) {
-        std::ofstream file(path, append ? std::ios::out | std::ios::app : std::ios::out | std::ios::trunc);
-        file << data;
-    }
-
     bool exists(const std::string& path);
-
-    std::chrono::system_clock::time_point getModificationTime(const std::string& path);
 
     bool isDir(const std::string& path);
     void makeDir(const std::string& path);
@@ -69,7 +58,6 @@ namespace utility::file {
      * @param recursive Whether the directories within the specified directory is searched or not.
      * @return The list of file paths within a specified directory.
      */
-    std::vector<std::string> listFiles(const std::string& directory, bool recursive = false);
 
     bool makeDirectory(const std::string& directory, bool parent = false);
 

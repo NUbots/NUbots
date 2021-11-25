@@ -29,7 +29,6 @@
  * @author Monica Olejniczak
  */
 namespace module::support {
-    using utility::file::listFiles;
     using utility::strutil::split;
 
     /**

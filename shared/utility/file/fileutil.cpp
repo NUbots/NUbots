@@ -33,30 +33,6 @@ extern "C" {
 #include "utility/strutil/strutil.hpp"
 
 namespace utility::file {
-    std::string loadFromFile(const std::string& path) {
-        std::ifstream data(path, std::ios::in);
-
-        // There are a lot of nice ways to read a file into a string but this is one of the quickest.
-        // See: http://stackoverflow.com/a/116228
-        std::stringstream stream;
-        stream << data.rdbuf();
-
-        return stream.str();
-    }
-
-    std::chrono::system_clock::time_point getModificationTime(const std::string& path) {
-        int status = 0;
-        struct stat st_buf {};
-
-        // Get the status of the file system object.
-        status = stat(path.c_str(), &st_buf);
-        if (status != 0) {
-            throw std::system_error(errno, std::system_category(), "Error checking if path is file or directory");
-        }
-
-        return (std::chrono::system_clock::from_time_t(st_buf.st_mtime));
-    }
-
     // Test if a passed path is a directory
     bool isDir(const std::string& path) {
 
@@ -134,41 +110,6 @@ namespace utility::file {
         else {
             return {input.substr(0, lastSlash), input.substr(lastSlash + 1, input.size())};
         }
-    }
-
-    std::vector<std::string> listFiles(const std::string& directory, bool recursive) {
-        // create a vector to store the files
-        std::vector<std::string> files;
-        // create a vector to store the directories
-        std::stack<std::string> directories;
-        // adds the specified directory to the vector
-        directories.push(directory);
-        // loop through all the directories using a depth-first search
-        while (!directories.empty()) {
-            // retrieve the last directory in the vector, beginning with the initial directory
-            auto directory = directories.top();
-            // immediately remove the directory that was found
-            directories.pop();
-            // loop through every file within the directory
-            for (auto&& file : listDir(directory)) {
-                // specify the correct path within the directory
-                auto path = directory + "/" + file;
-                // check if the given path is a directory
-                if (isDir(path)) {
-                    // check if the function is recursive
-                    if (recursive) {
-                        // append the path to the directories vector
-                        directories.push(path);
-                    }
-                }
-                else {
-                    // append the path to the paths vector
-                    files.push_back(path);
-                }
-            }
-        }
-        // return the list of files
-        return files;
     }
 
     bool makeDirectory(const std::string& directory, bool parent) {

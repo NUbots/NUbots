@@ -25,7 +25,6 @@
 
 #include "FileWatch.hpp"
 
-#include "utility/file/fileutil.hpp"  // TODO(Bryce Tuppurainen) Due to be removed
 #include "utility/strutil/strutil.hpp"
 
 namespace extension {
@@ -232,7 +231,7 @@ namespace NUClear::dsl {
                     // Check for a directory.
                     // If the path ends in a /, or if the end of the string is not ".yaml" it is a directory.
                     if ((defaultConfig.back() == '/') || (!utility::strutil::endsWith(defaultConfig, ".yaml"))) {
-                        utility::file::makeDir(defaultConfig);
+                        std::filesystem::create_directory(defaultConfig);
                     }
 
                     else {
