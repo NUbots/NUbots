@@ -34,9 +34,6 @@ namespace utility::file {
     bool exists(const std::string& path);
 
     bool isDir(const std::string& path);
-    void makeDir(const std::string& path);
-
-    std::vector<std::string> listDir(const std::string& path);
 
     /**
      * @brief Splits a path into it's basename and dirname components.
@@ -58,10 +55,6 @@ namespace utility::file {
      * @param recursive Whether the directories within the specified directory is searched or not.
      * @return The list of file paths within a specified directory.
      */
-
-    bool makeDirectory(const std::string& directory, bool parent = false);
-
-    void touch(const std::string& file);
 
 }  // namespace utility::file
 #endif

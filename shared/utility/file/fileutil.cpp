@@ -49,47 +49,6 @@ namespace utility::file {
         return S_ISDIR(st_buf.st_mode);
     }
 
-    void makeDir(const std::string& path) {
-        int status = 0;
-        status     = mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-
-        if (status != 0) {
-            throw std::system_error(errno, std::system_category(), "Error creating directory '" + path + "'.");
-        }
-    }
-
-    // List the contents of a directory
-    std::vector<std::string> listDir(const std::string& path) {
-
-        auto* dir = opendir(path.c_str());
-        std::vector<std::string> result;
-
-        if (dir != nullptr) {
-            for (dirent* ent = readdir(dir); ent != nullptr; ent = readdir(dir)) {
-
-                auto file = std::string(ent->d_name);
-
-                if (file == "." || file == "..") {
-                    continue;
-                }
-
-                if ((ent->d_type & DT_DIR) != 0) {
-                    result.push_back(file + "/");
-                }
-                else {
-                    result.push_back(file);
-                }
-            }
-
-            closedir(dir);
-        }
-        else {
-            // TODO Throw an error or something
-        }
-
-        return result;
-    }
-
     std::pair<std::string, std::string> pathSplit(const std::string& input) {
 
         size_t lastSlash = input.rfind('/');
@@ -109,70 +68,6 @@ namespace utility::file {
         }
         else {
             return {input.substr(0, lastSlash), input.substr(lastSlash + 1, input.size())};
-        }
-    }
-
-    bool makeDirectory(const std::string& directory, bool parent) {
-        std::vector<std::string> elements;
-
-        // Get elements of the path to create.
-        if (parent) {
-            elements         = utility::strutil::split(directory, '/');
-            elements.front() = elements.front().empty() ? "/" : elements.front();
-        }
-        else {
-            elements.push_back(directory);
-        }
-
-        std::string path;
-
-        // Traverse all elements of the path.
-        for (const auto& element : elements) {
-
-
-            path.append(element);
-
-            // If the current path doesn't exist, create it.
-            if (!exists(path)) {
-                // Create the current path element with the following permissions.
-                // U = RWX
-                // G = R_X
-                // O = R_X
-                auto status = mkdir(path.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH);
-
-                // If we fail at any point then bail out.
-                if (status != 0) {
-                    return false;
-                }
-            }
-            else if (!isDir(path)) {
-                // THROW EXCEPTION!!!!
-                // OK
-                throw std::runtime_error("Cannot create a directory " + path + " is an ordinary file");
-            }
-
-            path.append("/");
-        }
-
-        return true;
-    }
-
-    // http://chris-sharpe.blogspot.com.au/2013/05/better-than-systemtouch.html
-    void touch(const std::string& file) {
-        int fd = open(file.c_str(), O_WRONLY | O_CREAT | O_NOCTTY | O_NONBLOCK, 0666);
-
-        // Couldn't open that path.
-        if (fd < 0) {
-            throw std::runtime_error("Cannot open/create '" + file + "' with mode 0666.");
-            return;
-        }
-
-        int rc = utimensat(AT_FDCWD, file.c_str(), nullptr, 0);
-
-        // Failed to update timestamp.
-        if (rc != 0) {
-            throw std::runtime_error("Cannot update timestamp for '" + file + "'.");
-            return;
         }
     }
 
