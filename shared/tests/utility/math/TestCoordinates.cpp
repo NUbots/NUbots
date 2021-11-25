@@ -50,35 +50,39 @@ SCENARIO("Cartesian coordinates can be converted to spherical coordinates", "[ut
     GIVEN("A set of cartesian coordinates and a set of expected values") {
         // cart input
         static const std::array<Eigen::Vector3d, 200> cart_coords =
-            resolve_expression<Eigen::Vector3d, 200>(test_values["cartesianInput"]);
+            resolve_expression<Eigen::Vector3d, 200>(test_values["cartesian_input"]);
         // cart to spher results
         static const std::array<Eigen::Vector3d, 200> cart_to_spher_expected =
-            resolve_expression<Eigen::Vector3d, 200>(test_values["cartToSpher_results"]);
+            resolve_expression<Eigen::Vector3d, 200>(test_values["cart_to_spherical_results"]);
         for (size_t i = 0; i < cart_coords.size(); i++) {
             WHEN("Cartesian coordinates are converted to spherical coordinates") {
                 static const Eigen::Vector3d result = cartesianToSpherical(cart_coords.at(i));
                 THEN("The results of the calculation should be approximately equal to the expected values") {
-                    // NOTE:We use approx because floating points dont like being compared
-                    // at the epsilon value of the expected results
-                    Approx epsilon_x = Approx(cart_to_spher_expected.at(i).x()).epsilon(ERROR_THRESHOLD);
-                    Approx epsilon_y = Approx(cart_to_spher_expected.at(i).y()).epsilon(ERROR_THRESHOLD);
-                    Approx epsilon_z = Approx(cart_to_spher_expected.at(i).z()).epsilon(ERROR_THRESHOLD);
-                    // NOTE: Info message is only printed on failure
+                    // Approx is a Catch2 wrapper class used to allow more tolerant comparisons
+                    // when comparing floating point values.
+                    // Epsilon sets the cooeffcient by which the result can differ from Approx's value before
+                    // it's rejected.
+                    Approx approx_x = Approx(cart_to_spher_expected.at(i).x()).epsilon(ERROR_THRESHOLD);
+                    Approx approx_y = Approx(cart_to_spher_expected.at(i).y()).epsilon(ERROR_THRESHOLD);
+                    Approx approx_z = Approx(cart_to_spher_expected.at(i).z()).epsilon(ERROR_THRESHOLD);
+
+                    INFO("Test value at index: " << i);
+
                     INFO("Calculated x value: " << result.x());
                     INFO("Expected x value: " << cart_to_spher_expected.at(i).x());
-                    INFO("Expected epsilon x value: " << epsilon_x.toString());
+                    INFO("Expected approximate x value: " << approx_x.toString());
 
                     INFO("Calculated y value: " << result.y());
                     INFO("Expected y value: " << cart_to_spher_expected.at(i).y());
-                    INFO("Expected epsilon y value: " << epsilon_y.toString());
+                    INFO("Expected approximate y value: " << approx_y.toString());
 
                     INFO("Calculated z value: " << result.z());
                     INFO("Expected z value: " << cart_to_spher_expected.at(i).z());
-                    INFO("Expected epsilon z value: " << epsilon_z.toString());
-                    INFO("Failed test value at index: " << i);
-                    REQUIRE(result.x() == epsilon_x);
-                    REQUIRE(result.y() == epsilon_y);
-                    REQUIRE(result.z() == epsilon_z);
+                    INFO("Expected approximate z value: " << approx_z.toString());
+
+                    REQUIRE(result.x() == approx_x);
+                    REQUIRE(result.y() == approx_y);
+                    REQUIRE(result.z() == approx_z);
                 }
             }
         }
@@ -90,34 +94,39 @@ SCENARIO("Spherical coordinates can be converted to cartesian coordinates", "[ut
     GIVEN("A set of spherical coordinates and a set of expected values") {
         // spherical input
         static const std::array<Eigen::Vector3d, 210> spher_coords =
-            resolve_expression<Eigen::Vector3d, 210>(test_values["sphericalInput"]);
+            resolve_expression<Eigen::Vector3d, 210>(test_values["spherical_input"]);
         // spher to cart results
         static const std::array<Eigen::Vector3d, 210> spher_to_cart_expected =
-            resolve_expression<Eigen::Vector3d, 210>(test_values["spherToCart_results"]);
+            resolve_expression<Eigen::Vector3d, 210>(test_values["spherical_to_cartesian_results"]);
         for (size_t i = 0; i < spher_coords.size(); i++) {
             WHEN("Spherical coordinates are converted to cartesian coordinates") {
                 static const Eigen::Vector3d result = sphericalToCartesian(spher_coords.at(i));
                 THEN("The results of the calculation should be approximately equal to the expected values") {
-                    Approx epsilon_x = Approx(spher_to_cart_expected.at(i).x()).epsilon(ERROR_THRESHOLD);
-                    Approx epsilon_y = Approx(spher_to_cart_expected.at(i).y()).epsilon(ERROR_THRESHOLD);
-                    Approx epsilon_z = Approx(spher_to_cart_expected.at(i).z()).epsilon(ERROR_THRESHOLD);
-                    // NOTE: Info message is only printed on failure
+                    // Approx is a Catch2 wrapper class used to allow more tolerant comparisons
+                    // when comparing floating point values.
+                    // Epsilon sets the cooeffcient by which the result can differ from Approx's value before
+                    // it's rejected.
+                    Approx approx_x = Approx(spher_to_cart_expected.at(i).x()).epsilon(ERROR_THRESHOLD);
+                    Approx approx_y = Approx(spher_to_cart_expected.at(i).y()).epsilon(ERROR_THRESHOLD);
+                    Approx approx_z = Approx(spher_to_cart_expected.at(i).z()).epsilon(ERROR_THRESHOLD);
+
+                    INFO("Test value at index: " << i);
+
                     INFO("Calculated x value: " << result.x());
                     INFO("Expected x value: " << spher_to_cart_expected.at(i).x());
-                    INFO("Expected epsilon x value: " << epsilon_x.toString());
+                    INFO("Expected approximate x value: " << approx_x.toString());
 
                     INFO("Calculated y value: " << result.y());
                     INFO("Expected y value: " << spher_to_cart_expected.at(i).y());
-                    INFO("Expected epsilon y value: " << epsilon_y.toString());
+                    INFO("Expected approximate y value: " << approx_y.toString());
 
                     INFO("Calculated z value: " << result.z());
                     INFO("Expected z value: " << spher_to_cart_expected.at(i).z());
-                    INFO("Expected epsilon z value: " << epsilon_z.toString());
-                    INFO("Failed test value at index: " << i);
+                    INFO("Expected approximate z value: " << approx_z.toString());
 
-                    REQUIRE(result.x() == epsilon_x);
-                    REQUIRE(result.y() == epsilon_y);
-                    REQUIRE(result.z() == epsilon_z);
+                    REQUIRE(result.x() == approx_x);
+                    REQUIRE(result.y() == approx_y);
+                    REQUIRE(result.z() == approx_z);
                 }
             }
         }
