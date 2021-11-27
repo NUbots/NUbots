@@ -228,8 +228,9 @@ namespace utility::math::geometry {
     inline std::ostream& operator<<(std::ostream& output, const std::vector<Quad<Scalar, R, C>>& quads) {
         output << "[";
 
-        for (const auto& quad : quads)
+        for (const auto& quad : quads) {
             output << quad << ", ";
+        }
 
         output << "]";
 

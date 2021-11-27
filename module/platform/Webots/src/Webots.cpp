@@ -58,7 +58,6 @@ namespace module::platform {
     using message::input::Sensors;
     using message::motion::ServoTarget;
     using message::motion::ServoTargets;
-    using message::output::CompressedImage;
     using message::platform::RawSensors;
     using message::platform::ResetWebotsServos;
 
@@ -182,13 +181,13 @@ namespace module::platform {
 
     int Webots::tcpip_connect() {
         // Hints for the connection type
-        addrinfo hints;
+        addrinfo hints{};
         memset(&hints, 0, sizeof(addrinfo));  // Defaults on what we do not explicitly set
         hints.ai_family   = AF_UNSPEC;        // IPv4 or IPv6
         hints.ai_socktype = SOCK_STREAM;      // TCP
 
         // Store the ip address information that we will connect to
-        addrinfo* address;
+        addrinfo* address = nullptr;
 
         const int error = getaddrinfo(server_address.c_str(), server_port.c_str(), &hints, &address);
         if (error != 0) {
@@ -251,8 +250,8 @@ namespace module::platform {
 
 
         on<Configuration>("WebotsCameras").then([this](const Configuration& config) {
-            // Strip the .yaml off the name of the file to get the name of the camera
-            const std::string name = ::basename(config.fileName.substr(0, config.fileName.find_last_of('.')).c_str());
+            // The camera's name is the filename of the config, with the .yaml stripped off
+            const std::string name = config.fileName.stem();
 
             log<NUClear::INFO>(fmt::format("Connected to the webots {} camera", name));
 
@@ -500,7 +499,7 @@ namespace module::platform {
                                 buffer.resize(old_size + bytes_read);
 
                                 // Function to read the payload length from the buffer
-                                auto read_length = [this](const std::vector<uint8_t>& buffer) {
+                                auto read_length = [](const std::vector<uint8_t>& buffer) {
                                     return buffer.size() >= sizeof(uint32_t)
                                                ? ntohl(*reinterpret_cast<const uint32_t*>(buffer.data()))
                                                : 0u;
