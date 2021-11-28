@@ -73,7 +73,7 @@ namespace module::support::logging {
                             start_time = last_emit_time;
 
                             // Open the first file again
-                            if (std::filesystem::exists(files[file_index])) {
+                            if (std::filesystem::is_regular_file(files[file_index])) {
                                 input_file = std::make_unique<std::ifstream>(files[file_index]);
                                 log<NUClear::INFO>("Starting playback of file", files[file_index]);
                             }
@@ -95,7 +95,7 @@ namespace module::support::logging {
                             start_time = last_emit_time;
 
                             // Open the first file again
-                            if (std::filesystem::exists(files[file_index])) {
+                            if (std::filesystem::is_regular_file(files[file_index])) {
                                 input_file = std::make_unique<std::ifstream>(files[file_index]);
                                 log<NUClear::INFO>("Restarting playback with file", files[file_index]);
                             }

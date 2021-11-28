@@ -74,7 +74,7 @@ namespace module::behaviour::tools {
                 scriptPath = args[1];
 
                 // Check if the script exists and load it if it does.
-                if (std::filesystem::exists(scriptPath)) {
+                if (std::filesystem::is_regular_file(scriptPath)) {
                     NUClear::log<NUClear::DEBUG>("Loading script: ", scriptPath, '\n');
                     loadScript(scriptPath);
                     // Build our initial gui with context from loaded script
@@ -692,7 +692,7 @@ namespace module::behaviour::tools {
         move(5, 2);
         curs_set(true);
         std::string saveScriptAs = userInput();
-        if (std::filesystem::exists(saveScriptAs)) {
+        if (std::filesystem::is_regular_file(saveScriptAs)) {
             bool print = true;
             while (print) {
                 mvprintw(6, 2, "This file already exists.");

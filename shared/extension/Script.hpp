@@ -116,12 +116,12 @@ namespace extension {
             //                       These are the default scripts, it is an error for this version of the script to not
             //                       exist.
 
-            if (std::filesystem::exists("scripts/" + hostname + "/" + fileName)) {
+            if (std::filesystem::is_regular_file("scripts/" + hostname + "/" + fileName)) {
                 NUClear::log<NUClear::INFO>("Parsing robot specific script:", fileName);
                 config = YAML::LoadFile("scripts/" + hostname + "/" + fileName);
             }
 
-            else if (std::filesystem::exists("scripts/" + platform + "/" + fileName)) {
+            else if (std::filesystem::is_regular_file("scripts/" + platform + "/" + fileName)) {
                 NUClear::log<NUClear::INFO>("Parsing default platform script:", fileName);
                 config = YAML::LoadFile("scripts/" + platform + "/" + fileName);
             }
@@ -313,7 +313,7 @@ namespace NUClear::dsl {
                 auto platformScript = "scripts/" + platform + "/" + path;
 
                 // The platform script is the default script. This must exist!
-                if (!std::filesystem::exists(platformScript)) {
+                if (!std::filesystem::is_regular_file(platformScript)) {
                     throw std::runtime_error("Script file '" + platformScript + "' does not exist.");
                 }
 
@@ -321,7 +321,7 @@ namespace NUClear::dsl {
                 DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, platformScript, flags);
 
                 // Bind our robot specific path if it exists
-                if (std::filesystem::exists(robotScript)) {
+                if (std::filesystem::is_regular_file(robotScript)) {
                     DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, robotScript, flags);
                 }
             }
