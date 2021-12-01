@@ -33,21 +33,6 @@ extern "C" {
 #include "utility/strutil/strutil.hpp"
 
 namespace utility::file {
-    // Test if a passed path is a directory
-    bool isDir(const std::string& path) {
-
-        int status = 0;
-        struct stat st_buf {};
-
-        // Get the status of the file system object.
-        status = stat(path.c_str(), &st_buf);
-        if (status != 0) {
-            throw std::system_error(errno, std::system_category(), "Error checking if path is file or directory");
-        }
-
-        // Return if our varible is a directory
-        return S_ISDIR(st_buf.st_mode);
-    }
 
     std::pair<std::string, std::string> pathSplit(const std::string& input) {
 
