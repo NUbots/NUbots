@@ -2,3 +2,6 @@ audio/
 *.json
 *.jsonl
 *.txt
+Dockerfile
+*.wav
+*.mp3

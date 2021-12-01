@@ -15,7 +15,7 @@
             "-I${workspaceFolder}/nuclear/message/proto"
         ]
     },
-    "python.formatting.provider": "black",    
+    "python.formatting.provider": "black",
     "python.analysis.extraPaths": [
         "${workspaceFolder}/tools",
         "${workspaceFolder}/nuclear"
@@ -27,5 +27,6 @@
     },
     "editor.codeActionsOnSave": {
         "source.organizeImports": true
-    }
+    },
+    "jupyter.jupyterServerType": "remote"
 }

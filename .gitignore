@@ -98,3 +98,5 @@ tags
 *.sublime-workspace
 \.vscode/ipch
 .ccls-cache
+
+.Trash-1000
