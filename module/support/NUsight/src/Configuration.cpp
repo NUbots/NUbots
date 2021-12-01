@@ -22,7 +22,6 @@
 
 #include "NUsight.hpp"
 
-#include "utility/file/fileutil.hpp"
 #include "utility/strutil/strutil.hpp"
 
 /**

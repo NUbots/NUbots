@@ -32,7 +32,6 @@ extern "C" {
 #include "message/platform/RawSensors.hpp"
 
 #include "utility/behaviour/Action.hpp"
-#include "utility/file/fileutil.hpp"  // TODO(Bryce Tuppurainen) Due to be removed
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"

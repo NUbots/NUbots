@@ -8,7 +8,6 @@
 
 #include "extension/Configuration.hpp"
 
-#include "utility/file/fileutil.hpp"  // TODO(Bryce Tuppurainen) - Due to be removed
 #include "utility/io/uart.hpp"
 #include "utility/strutil/strutil.hpp"
 

@@ -23,8 +23,6 @@
 
 #include "message/behaviour/ServoCommand.hpp"
 
-#include "utility/file/fileutil.hpp"
-
 namespace module::motion {
 
     using extension::ExecuteScript;
@@ -40,7 +38,10 @@ namespace module::motion {
         on<Script>("").then([this](const Script& script) {
             // Add this script to our list of scripts
             try {
-                scripts.insert(std::make_pair(utility::file::pathSplit(script.fileName).second, std::move(script)));
+                // script.fileName.substr in this setup returrns only the filename without the path
+                scripts.insert(
+                    std::make_pair(script.fileName.substr(script.fileName.rfind('/'), script.fileName.size()),
+                                   std::move(script)));
             }
             catch (const std::exception& e) {
                 log<NUClear::ERROR>("Script is bad conversion:", script.fileName, e.what());

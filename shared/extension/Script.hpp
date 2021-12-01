@@ -28,7 +28,6 @@
 
 #include "FileWatch.hpp"
 
-#include "utility/file/fileutil.hpp"  // TODO(Bryce Tuppurainen) Due to be removed
 #include "utility/input/ServoID.hpp"
 #include "utility/strutil/strutil.hpp"
 
