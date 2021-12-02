@@ -32,7 +32,6 @@ export class VisionView extends Component<{
         <Menu>
           <div className={styles.selector}>
             <RobotSelectorSingle
-              autoSelect={true}
               robots={robots}
               selected={selectedRobot?.robotModel}
               onSelect={this.onSelectRobot}
