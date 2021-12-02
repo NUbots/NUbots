@@ -6,7 +6,7 @@ name: Docker Slack Message
 # Control when this will run!
 on:
   #testing on pull request
-  pull-request:
+  pull_request:
     branches: [main]
     paths:
       - 'docker/**'
