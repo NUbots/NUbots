@@ -35,5 +35,5 @@ export class Field extends Component<FieldProps> {
         </div>
       </div>
     )
-    }
+  }
 }

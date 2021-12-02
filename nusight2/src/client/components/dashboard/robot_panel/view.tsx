@@ -2,7 +2,6 @@ import classNames from 'classnames'
 import React from 'react'
 
 import { Vector3 } from '../../../math/vector3'
-import { DrawOptions } from '../dashboard_robot/model'
 
 import BallIcon from './icon/ball.svg'
 import BatteryIcon from './icon/battery.svg'

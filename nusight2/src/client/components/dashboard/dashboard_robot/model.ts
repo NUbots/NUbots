@@ -159,7 +159,7 @@ export class DashboardRobotModel {
         drawStd1: true,
         drawStd2: false,
         drawStd3: false,
-      }
+      },
     })
   })
 
@@ -214,6 +214,6 @@ interface DashboardRobotModelOpts {
   lastCameraImage: number
   lastSeenBall: number
   lastSeenGoal: number
-  walkCommand: Vector3,
+  walkCommand: Vector3
   drawOptions: DrawOptions
 }

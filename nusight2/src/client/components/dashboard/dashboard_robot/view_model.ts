@@ -18,7 +18,6 @@ import { DashboardRobotModel } from './model'
 import { PolygonGeometry } from '../../../render2d/geometry/polygon_geometry'
 import drawDistribution from './helpers'
 import { Geometry } from '../../../render2d/object/geometry'
-import { isUndefined } from 'util'
 
 export class DashboardRobotViewModel {
   constructor(private model: DashboardRobotModel) {}
