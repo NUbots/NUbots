@@ -428,7 +428,10 @@ namespace module::behaviour::tools {
 
     void ScriptTuner::saveScript() {
         YAML::Node n(script);
-        utility::file::writeToFile(scriptPath, n);
+        // Overwrites the file located at scriptPath with the info from n as above
+        std::ofstream file(scriptPath, std::ios::out | std::ios::trunc);
+        file << n;
+        file.close();
     }
 
     void ScriptTuner::editDuration() {
