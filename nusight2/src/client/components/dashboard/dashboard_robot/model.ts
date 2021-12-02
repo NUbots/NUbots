@@ -28,6 +28,9 @@ export class DashboardRobotModel {
   // The timestamp of the last message from the robot (in seconds since an arbitrary time)
   @observable time: number
 
+  // Draw options
+  @observable drawOptions: DrawOptions
+
   // The player id of the robot, typically 1 through N
   @observable playerId: number
 
@@ -95,6 +98,7 @@ export class DashboardRobotModel {
       lastSeenBall,
       lastSeenGoal,
       walkCommand,
+      drawOptions,
     }: DashboardRobotModelOpts,
   ) {
     this.robot = robot
@@ -122,6 +126,7 @@ export class DashboardRobotModel {
     this.lastSeenBall = lastSeenBall
     this.lastSeenGoal = lastSeenGoal
     this.walkCommand = walkCommand
+    this.drawOptions = drawOptions
   }
 
   static of = memoize((robot: RobotModel): DashboardRobotModel => {
@@ -150,6 +155,11 @@ export class DashboardRobotModel {
       time: BrowserSystemClock.now(),
       voltage: -1,
       walkCommand: Vector3.of(),
+      drawOptions: {
+        drawStd1: true,
+        drawStd2: false,
+        drawStd3: false,
+      }
     })
   })
 
@@ -172,6 +182,12 @@ export class DashboardRobotModel {
   get enabled(): boolean {
     return this.robot.enabled
   }
+}
+
+export interface DrawOptions {
+  drawStd1: boolean
+  drawStd2: boolean
+  drawStd3: boolean
 }
 
 interface DashboardRobotModelOpts {
@@ -198,5 +214,6 @@ interface DashboardRobotModelOpts {
   lastCameraImage: number
   lastSeenBall: number
   lastSeenGoal: number
-  walkCommand: Vector3
+  walkCommand: Vector3,
+  drawOptions: DrawOptions
 }

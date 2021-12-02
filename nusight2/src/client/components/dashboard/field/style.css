@@ -1,8 +1,15 @@
-.field, .container {
+.field,
+.container {
   height: 100%;
   left: 0;
-  background-color: #00796B;
+  background-color: #00796b;
   position: absolute;
   top: 0;
   width: 100%;
+}
+
+.fieldMenu {
+  position: absolute;
+  right: 0;
+  top: 0;
 }

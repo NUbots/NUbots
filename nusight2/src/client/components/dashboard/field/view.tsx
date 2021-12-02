@@ -3,6 +3,7 @@ import React from 'react'
 import { Component } from 'react'
 
 import { Renderer } from '../../../render2d/renderer'
+import { SwitchesMenu } from '../../switches_menu/view'
 
 import { FieldModel } from './model'
 import style from './style.css'
@@ -29,7 +30,10 @@ export class Field extends Component<FieldProps> {
           camera={viewModel.camera}
           aspectRatio={viewModel.aspectRatio}
         />
+        <div className={style.fieldMenu}>
+          <SwitchesMenu dropdownMenuPosition="right" options={viewModel.drawOptions} />
+        </div>
       </div>
     )
-  }
+    }
 }
