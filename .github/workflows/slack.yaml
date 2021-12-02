@@ -5,11 +5,19 @@ name: Docker Slack Message
 
 # Control when this will run!
 on:
+  #testing on pull request
+  pull-request:
+    branches: [main]
+    paths:
+      - 'docker/**'
+
   push:
     branches:
       - main
     paths:
       - 'docker/**'
+
+
 
 jobs:
   slack-notifcations:
