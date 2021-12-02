@@ -3,7 +3,7 @@ import { NUClearNetOptions } from 'nuclearnet.js'
 import { NUClearNetPeer } from 'nuclearnet.js'
 import { NUClearNetPacket } from 'nuclearnet.js'
 import { Reader } from 'protobufjs/minimal'
-import { compose } from '../../client/base/compose'
+import { compose } from '../../shared/base/compose'
 
 import { messageFieldsIndex } from '../../shared/message_fields_index'
 import { NUClearNetClient } from '../../shared/nuclearnet/nuclearnet_client'
