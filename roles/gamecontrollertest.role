@@ -13,6 +13,7 @@ nuclear_role(
   support::configuration::GlobalConfig
   support::configuration::SoccerConfig
   network::NUClearNet
-  support::NUsight
+  network::NetworkForwarder
+  output::Overview
   input::GameController
 )

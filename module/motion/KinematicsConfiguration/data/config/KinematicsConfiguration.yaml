@@ -1,5 +1,4 @@
 leg:
-  # darwin says this is [0.008, 0.008, 0.034]
   hip_offset: [0.00, 0.055, 0.045] # [x, y, z]
   upper_leg_length: 0.2
   lower_leg_length: 0.2
@@ -27,7 +26,7 @@ head:
   # head movement limits
   limits: # pitch limit is a function of yaw ... need to calculate this properly
     yaw: [-pi/4, pi/4] # [min_yaw, max_yaw]
-    pitch: [pi/6, pi/6] # [min_pitch, max_pitch]
+    pitch: [0, pi/2] # [min_pitch, max_pitch]
 # rough measurements
 arm:
   distance_between_shoulders: 0.17 # distance between shoulders

@@ -53,12 +53,10 @@ namespace module::behaviour::planning {
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
-    using message::motion::IKKickParams;
     using message::motion::KickCommand;
     using message::motion::KickCommandType;
     using message::motion::KickPlannerConfig;
     using message::motion::KickScriptCommand;
-    using message::motion::KinematicsModel;
     using message::platform::ButtonMiddleDown;
     using message::support::FieldDescription;
 
@@ -69,18 +67,12 @@ namespace module::behaviour::planning {
     using VisionBalls   = message::vision::Balls;
 
     using utility::input::LimbID;
-    using utility::localisation::fieldStateToTransform3D;
-    using utility::math::coordinates::sphericalToCartesian;
-    using utility::nusight::graph;
 
-    KickPlanner::KickPlanner(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment))
-        , cfg()
-        , ballLastSeen(std::chrono::seconds(0))
-        , lastTimeValid(NUClear::clock::now()) {
-
+    KickPlanner::KickPlanner(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("KickPlanner.yaml").then([this](const Configuration& config) {
+            log_level = config["log_level"].as<NUClear::LogLevel>();
+
             cfg.max_ball_distance        = config["max_ball_distance"].as<float>();
             cfg.kick_corridor_width      = config["kick_corridor_width"].as<float>();
             cfg.seconds_not_seen_limit   = config["seconds_not_seen_limit"].as<float>();
@@ -90,7 +82,7 @@ namespace module::behaviour::planning {
         });
 
         on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
-            if (balls.balls.size() > 0) {
+            if (!balls.balls.empty()) {
                 ballLastSeen = NUClear::clock::now();
             }
         });
@@ -108,7 +100,7 @@ namespace module::behaviour::planning {
                          const FieldDescription& fd,
                          const KickPlan& kickPlan,
                          const Sensors& sensors,
-                         std::shared_ptr<const GameState> gameState) {
+                         const std::shared_ptr<const GameState>& gameState) {
                 // Get time since last seen ball
                 auto now = NUClear::clock::now();
                 double secondsSinceLastSeen =
@@ -116,7 +108,7 @@ namespace module::behaviour::planning {
 
                 // Compute target in robot coords
                 // Eigen::Vector3d kickTarget = Eigen::Vector3d::UnitX(); //Kick forwards
-                Eigen::Affine2d position = Eigen::Affine2d(field.position);
+                Eigen::Affine2d position(field.position);
                 Eigen::Affine3d Hfw;
                 Hfw.translation() = Eigen::Vector3d(position.translation().x(), position.translation().y(), 0);
                 Hfw.linear() =
@@ -181,13 +173,13 @@ namespace module::behaviour::planning {
                             // NUClear::log("scripted");
                             if (ballPosition.y() > 0.0) {
                                 emit(std::make_unique<KickScriptCommand>(
-                                    KickScriptCommand(Eigen::Vector3d::UnitX(), LimbID::LEFT_LEG)));
+                                    KickScriptCommand(LimbID::LEFT_LEG, KickCommandType::NORMAL)));
                                 emit(std::make_unique<WantsToKick>(true));
                                 ;
                             }
                             else {
                                 emit(std::make_unique<KickScriptCommand>(
-                                    KickScriptCommand(Eigen::Vector3d::UnitX(), LimbID::RIGHT_LEG)));
+                                    KickScriptCommand(LimbID::RIGHT_LEG, KickCommandType::NORMAL)));
                                 emit(std::make_unique<WantsToKick>(true));
                                 ;
                             }
@@ -203,7 +195,7 @@ namespace module::behaviour::planning {
     }
 
 
-    bool KickPlanner::kickValid(const Eigen::Vector3d& ballPos) {
+    [[nodiscard]] bool KickPlanner::kickValid(const Eigen::Vector3d& ballPos) const {
         return (ballPos.x() > 0.0) && (ballPos.x() < cfg.max_ball_distance)
                && (std::fabs(ballPos.y()) < cfg.kick_corridor_width * 0.5);
     }

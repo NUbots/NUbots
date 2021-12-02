@@ -30,6 +30,7 @@
 
 #include "utility/input/ServoID.hpp"
 #include "utility/strutil/strutil.hpp"
+#include "utility/support/hostname.hpp"
 
 namespace extension {
 
@@ -46,11 +47,8 @@ namespace extension {
                     : id(servo), position(pos), gain(gain), torque(torque) {}
                 Target(const Target& other)
                     : id(other.id), position(other.position), gain(other.gain), torque(other.torque) {}
-                Target(Target&& other)
-                    : id(std::move(other.id))
-                    , position(std::move(other.position))
-                    , gain(std::move(other.gain))
-                    , torque(std::move(other.torque)) {}
+                Target(Target&& other) noexcept
+                    : id(other.id), position(other.position), gain(other.gain), torque(other.torque) {}
                 Target& operator=(const Target& other) {
                     id       = other.id;
                     position = other.position;
@@ -58,11 +56,11 @@ namespace extension {
                     torque   = other.torque;
                     return *this;
                 }
-                Target& operator=(Target&& other) {
-                    id       = std::move(other.id);
-                    position = std::move(other.position);
-                    gain     = std::move(other.gain);
-                    torque   = std::move(other.torque);
+                Target& operator=(Target&& other) noexcept {
+                    id       = other.id;
+                    position = other.position;
+                    gain     = other.gain;
+                    torque   = other.torque;
                     return *this;
                 }
 
@@ -86,14 +84,14 @@ namespace extension {
 
         Script()
             : fileName()
-            , hostname(Script::getHostname())
+            , hostname(utility::support::getHostname())
             , platform(Script::getPlatform(hostname))
             , config()
             , frames() {}
 
         Script(const std::vector<Frame>& frames)
             : fileName()
-            , hostname(Script::getHostname())
+            , hostname(utility::support::getHostname())
             , platform(Script::getPlatform(hostname))
             , config()
             , frames(frames) {}
@@ -126,13 +124,6 @@ namespace extension {
             }
 
             frames = config.as<std::vector<Frame>>();
-        }
-
-        static inline std::string getHostname() {
-            // Get hostname so we can find the correct per-robot script directory.
-            char host[255];
-            gethostname(host, 255);
-            return host;
         }
 
         static inline std::string getPlatform(const std::string& hostname) {
@@ -304,8 +295,8 @@ namespace NUClear::dsl {
             static inline void bind(const std::shared_ptr<threading::Reaction>& reaction, const std::string& path) {
                 auto flags = ::extension::FileWatch::RENAMED | ::extension::FileWatch::CHANGED;
 
-                std::string hostname(::extension::Script::getHostname()),
-                    platform(::extension::Script::getPlatform(hostname));
+                std::string hostname = utility::support::getHostname(),
+                            platform(::extension::Script::getPlatform(hostname));
 
                 // Set paths to the script files.
                 auto robotScript    = "scripts/" + hostname + "/" + path;
@@ -335,8 +326,8 @@ namespace NUClear::dsl {
                 if (watch && utility::strutil::endsWith(watch.path, ".yaml")) {
                     // Return our yaml file
                     try {
-                        std::string hostname(::extension::Script::getHostname()),
-                            platform(::extension::Script::getPlatform(hostname));
+                        std::string hostname = utility::support::getHostname(),
+                                    platform(::extension::Script::getPlatform(hostname));
 
                         // Get relative path to script file.
                         auto components = utility::strutil::split(watch.path, '/');
@@ -435,7 +426,7 @@ namespace YAML {
 
                 std::vector<::extension::Script::Frame::Target> targets =
                     node["targets"].as<std::vector<::extension::Script::Frame::Target>>();
-                rhs = {duration, std::move(targets)};
+                rhs = {duration, targets};
             }
             catch (const YAML::Exception& e) {
                 NUClear::log<NUClear::ERROR>("Error parsing script -",
@@ -467,7 +458,7 @@ namespace YAML {
         static inline bool decode(const Node& node, ::extension::Script& rhs) {
             try {
                 std::vector<::extension::Script::Frame> frames = node.as<std::vector<::extension::Script::Frame>>();
-                rhs                                            = {std::move(frames)};
+                rhs                                            = {frames};
             }
             catch (const YAML::Exception& e) {
                 NUClear::log<NUClear::ERROR>("Error parsing script -",

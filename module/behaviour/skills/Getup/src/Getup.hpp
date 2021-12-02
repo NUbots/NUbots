@@ -34,13 +34,14 @@ namespace module::behaviour::skills {
     private:
         const size_t id;
 
+        bool isFront;
+
         bool gettingUp;
-        ReactionHandle fallenCheck;
 
         /// config settings
-        float FALLEN_ANGLE;
-        float GETUP_PRIORITY;
-        float EXECUTION_PRIORITY;
+        float FALLEN_ANGLE       = 0.0f;
+        float GETUP_PRIORITY     = 0.0f;
+        float EXECUTION_PRIORITY = 0.0f;
 
         void updatePriority(const float& priority);
 

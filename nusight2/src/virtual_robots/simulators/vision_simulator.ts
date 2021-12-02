@@ -63,33 +63,31 @@ export class VisionSimulator extends Simulator {
     return new VisionSimulator(nuclearnetClient, images)
   }
 
-  private image = computedFn(
-    (id: number): Message => {
-      const time = periodic(10)
-      const t = time / 10
-      const numImages = this.images.length
-      const imageIndex = Math.floor(((Math.cos(2 * Math.PI * t) + 1) / 2) * numImages) % numImages
-      const data = this.images[imageIndex]
-      const Hcw = new Matrix4().makeRotationZ(2 * Math.PI * t)
-      return {
-        messageType: 'message.output.CompressedImage',
-        buffer: CompressedImage.encode({
-          format: fourcc('JPEG'),
-          dimensions: { x: 712, y: 463 },
-          data,
-          id,
-          name: `Virtual Camera #${id}`,
-          timestamp: toTimestamp(time),
-          Hcw: toProtoMat44(Hcw),
-          lens: {
-            projection: Projection.RECTILINEAR,
-            focalLength: 415 / 712,
-            fov: 1,
-          },
-        }).finish(),
-      }
-    },
-  )
+  private image = computedFn((id: number): Message => {
+    const time = periodic(10)
+    const t = time / 10
+    const numImages = this.images.length
+    const imageIndex = Math.floor(((Math.cos(2 * Math.PI * t) + 1) / 2) * numImages) % numImages
+    const data = this.images[imageIndex]
+    const Hcw = new Matrix4().makeRotationZ(2 * Math.PI * t)
+    return {
+      messageType: 'message.output.CompressedImage',
+      buffer: CompressedImage.encode({
+        format: fourcc('JPEG'),
+        dimensions: { x: 712, y: 463 },
+        data,
+        id,
+        name: `Virtual Camera #${id}`,
+        timestamp: toTimestamp(time),
+        Hcw: toProtoMat44(Hcw),
+        lens: {
+          projection: Projection.RECTILINEAR,
+          focalLength: 415 / 712,
+          fov: 1,
+        },
+      }).finish(),
+    }
+  })
 
   private get balls(): Message {
     const time = periodic(10)
@@ -113,7 +111,7 @@ export class VisionSimulator extends Simulator {
             measurements: [
               {
                 type: MeasurementType.WIDTH_BASED,
-                rBCc: new Vector3(1, 0, 0),
+                srBCc: new Vector3(1, 0, 0),
               },
             ],
           },

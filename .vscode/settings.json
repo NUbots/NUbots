@@ -7,9 +7,13 @@
   "files.trimTrailingWhitespace": true,
   "files.eol": "\n",
   "cSpell.language": "en-GB",
-  "editor.rulers": [120],
+  "editor.rulers": [
+    120
+  ],
   "protoc": {
-    "options": ["-I${workspaceFolder}/nuclear/message/proto"]
+    "options": [
+      "-I${workspaceFolder}/nuclear/message/proto"
+    ]
   },
   "python.formatting.provider": "black",
   "python.analysis.extraPaths": [
@@ -19,7 +23,7 @@
   "yaml.format.printWidth": 120,
   "files.associations": {
     "*.role": "cmake",
-    "filesystem": "cpp"
+    ".Doxyfile": "properties"
   },
   "editor.codeActionsOnSave": {
     "source.organizeImports": true

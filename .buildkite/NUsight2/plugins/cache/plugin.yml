@@ -1,9 +1,0 @@
-name: Yarn Cache
-description: Caches the yarn directories between builds for speed based on the checksum of yarn.lock
-author: https://github.com/NUbots
-requirements:
-  - sha1sum
-  - rsync
-configuration:
-  properties: {}
-  additionalProperties: false

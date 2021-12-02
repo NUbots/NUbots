@@ -9,6 +9,7 @@ nuclear_role(
   behaviour::tools::ScriptTuner
   behaviour::Controller
   network::NUClearNet
-  support::NUsight
+  network::NetworkForwarder
+  output::Overview
   motion::ScriptEngine
 )

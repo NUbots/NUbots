@@ -10,10 +10,10 @@
 ### The date in the Server command must either match, or be more recent than,
 ### the date in the FROM command
 ### Date format is ISO year/month/day
-FROM archlinux:base-20210110.0.13332
+FROM archlinux:base-20210829.0.32635
 
 # ↓↓↓ UPDATE MIRRORS HERE ↓↓↓
-RUN echo -e "Server=http://host.docker.internal:7878/\$repo/os/\$arch\nServer=https://archive.archlinux.org/repos/2021/01/10/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
+RUN echo -e "Server=http://host.docker.internal:7878/\$repo/os/\$arch\nServer=https://archive.archlinux.org/repos/2021/08/29/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
 
 # Arch recommends running this as the first command of the docker image
 # Use "yyuu" to allow for downgrades
@@ -38,7 +38,8 @@ RUN install-package \
     nodejs-lts-fermium \
     npm \
     yarn \
-    git
+    git \
+    ncurses
 
 # Get python to look in /usr/local for packages
 RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
@@ -94,36 +95,34 @@ RUN python /usr/local/generate_toolchain.py --prefix /usr/local
 RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 
 # LLVM and Clang
-RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-11.0.1.tar.gz \
-    -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra" \
+RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-12.0.1.tar.gz \
+    -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld" \
     -DLLVM_ENABLE_SPHINX=OFF \
     -DLLVM_BUILD_LLVM_DYLIB=ON \
     -DLLVM_LINK_LLVM_DYLIB=ON
 
 # SPIRV LLVM Translator
-RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v11.0.0.tar.gz \
+RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v12.0.0.tar.gz \
     -DLLVM_INCLUDE_TESTS=OFF
 
 # opencl-clang
 COPY usr/local/package/opencl-clang.sh /usr/local/package/opencl-clang.sh
-RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/archive/v11.0.0.tar.gz
-
-# ncurses - dependency for IGC. Flags are from the arch PKGBUILD for ncurses
-RUN install-from-source https://ftp.gnu.org/pub/gnu/ncurses/ncurses-6.2.tar.gz \
-    --with-shared --with-normal --without-debug --without-ada \
-    --enable-widec --enable-pc-files --with-cxx-binding --with-cxx-shared
+RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/archive/v12.0.0.tar.gz
 
 # intel graphics compiler
 COPY usr/local/package/intel-graphics-compiler.sh /usr/local/package/intel-graphics-compiler.sh
-RUN /usr/local/package/intel-graphics-compiler.sh https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.5435.tar.gz \
+RUN /usr/local/package/intel-graphics-compiler.sh https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.8173.tar.gz \
     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
-    -DIGC_PREFERRED_LLVM_VERSION='11.0.0' \
+    -DIGC_OPTION__LLVM_PREFERRED_VERSION='12.0.1' \
     -DVC_INTRINSICS_SRC="../../vc-intrinsics" \
-    -DINSTALL_SPIRVDLL=0
+    -DIGC_OPTION__LLVM_MODE=Prebuilds \
+    -DCMAKE_CXX_FLAGS="-Wno-deprecated-declarations" \
+    -DINSTALL_SPIRVDLL=0 \
+    -DINSTALL_GENX_IR=ON
 
 # intel compute runtime dependencies
 # gmmlib
-RUN install-cmake-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-20.4.1.tar.gz \
+RUN install-cmake-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-21.2.2.tar.gz \
     -DRUN_TEST_SUITE=OFF
 # libpciaccess and libdrm help communicate with graphics hardware
 RUN install-from-source https://xorg.freedesktop.org/releases/individual/lib/libpciaccess-0.16.tar.bz2
@@ -131,23 +130,27 @@ RUN install-meson-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.104.
     -Dudev=false \
     -Dvalgrind=false
 # libva
-RUN install-from-source https://github.com/intel/libva/releases/download/2.10.0/libva-2.10.0.tar.bz2 \
-    -DENABLE_VA_MESSAGING=ON
+# Needs -Dwith_x11: see https://github.com/intel/media-driver/issues/899
+# -Dwith_x11 requires x11 to be installed
+RUN install-package xorg-server
+RUN install-from-source https://github.com/intel/libva/releases/download/2.12.0/libva-2.12.0.tar.bz2 \
+    -DENABLE_VA_MESSAGING=ON \
+    -Dwith_x11=yes
 
 # intel media driver
-RUN install-cmake-from-source https://github.com/intel/media-driver/archive/intel-media-20.4.5.tar.gz \
+RUN install-cmake-from-source https://github.com/intel/media-driver/archive/intel-media-21.3.2.tar.gz \
     -DINSTALL_DRIVER_SYSCONF=OFF \
     -DLIBVA_DRIVERS_PATH="/usr/local/lib/dri" \
     -DMEDIA_RUN_TEST_SUITE=OFF \
-    -DBUILD_TESTING=OFF \
     -DBUILD_KERNELS=ON \
     -DENABLE_KERNELS=ON \
-    -DENABLE_NONFREE_KERNELS=ON
+    -DENABLE_NONFREE_KERNELS=ON \
+    -DMEDIA_BUILD_FATAL_WARNINGS=OFF
 
 # Install intel compute runtime (OpenCL implementation)
 COPY --chown=root:root etc/OpenCL/vendors/intel.icd /etc/OpenCL/vendors/intel.icd
 COPY usr/local/package/intel-compute-runtime.sh /usr/local/package/intel-compute-runtime.sh
-RUN /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute-runtime/archive/20.48.18558.tar.gz \
+RUN /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute-runtime/archive/21.31.20514.tar.gz \
     -DSKIP_UNIT_TESTS=ON \
     -DIGC_DIR=/usr/local
 
@@ -185,7 +188,7 @@ RUN install-from-source \
 
 # Protobuf
 RUN install-package protobuf
-RUN install-autotools-from-source https://github.com/protocolbuffers/protobuf/releases/download/v3.11.2/protobuf-cpp-3.11.2.tar.gz \
+RUN install-autotools-from-source https://github.com/protocolbuffers/protobuf/releases/download/v3.17.3/protobuf-cpp-3.17.3.tar.gz \
     --with-zlib=/usr/local \
     --with-protoc=/usr/sbin/protoc
 
@@ -234,13 +237,19 @@ RUN install-meson-from-source https://github.com/AravisProject/aravis/archive/AR
     -Dintrospection=false
 
 # LibUV
-RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.34.1.tar.gz \
+RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.42.0.tar.gz \
     -Dlibuv_buildtests=OFF \
     -DBUILD_TESTING=OFF
 
 # NUClear!
-RUN install-from-source https://github.com/Fastcode/NUClear/archive/153ccdb9a13dbc88f3c448e07a3048d67235116e.tar.gz \
+RUN install-from-source https://github.com/Fastcode/NUClear/archive/f4a60c7269e277a504635a603c2890fb1a70289d.tar.gz \
     -DBUILD_TESTS=OFF
+
+# Visual Mesh
+RUN install-from-source https://github.com/Fastcode/VisualMesh/archive/9df04eab3b08d2dca1d955a5bfbdbeea75f11d6b.tar.gz \
+    -DBUILD_TENSORFLOW_OP=OFF \
+    -DBUILD_EXAMPLES=OFF \
+    -DBUILD_OPENCL_ENGINE=ON
 
 # Backtrace
 RUN install-from-source https://github.com/ianlancetaylor/libbacktrace/archive/master.tar.gz \
@@ -255,11 +264,14 @@ RUN install-from-source https://github.com/espeak-ng/pcaudiolib/archive/1.1.tar.
 COPY usr/local/package/espeak.sh /usr/local/package/espeak.sh
 RUN /usr/local/package/espeak.sh https://github.com/espeak-ng/espeak-ng/releases/download/1.50/espeak-ng-1.50.tgz
 
+# mio memory mapping library
+RUN install-from-source https://github.com/mandreyel/mio/archive/3f86a95c0784d73ce6815237ec33ed25f233b643.tar.gz
+
 # zstr header to have file streams that do zlib compression
 RUN mkdir -p /usr/local/include/zstr \
-    && wget https://raw.githubusercontent.com/mateidavid/zstr/v1.0.4/src/zstr.hpp -O /usr/local/include/zstr.hpp \
-    && wget https://raw.githubusercontent.com/mateidavid/zstr/v1.0.4/src/strict_fstream.hpp -O /usr/local/include/strict_fstream.hpp \
-    && wget https://raw.githubusercontent.com/mateidavid/zstr/v1.0.4/src/zstr_make_unique_polyfill.h -O /usr/local/include/zstr_make_unique_polyfill.h
+    && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/zstr.hpp -O /usr/local/include/zstr.hpp \
+    && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/strict_fstream.hpp -O /usr/local/include/strict_fstream.hpp \
+    && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/zstr_make_unique_polyfill.h -O /usr/local/include/zstr_make_unique_polyfill.h
 
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
@@ -272,7 +284,7 @@ RUN pip install \
     termcolor \
     stringcase \
     Pillow \
-    protobuf==3.11.2 \
+    protobuf==3.17.3 \
     tqdm
 
 # Install tools needed for building individual modules as well as development tools
@@ -286,13 +298,21 @@ RUN install-package \
     colordiff \
     parallel \
     vim \
-    nano
+    nano \
+    clinfo \
+    doxygen
 
 # Install formatters as last step so if they change the image is easy to update
 RUN pip install --upgrade \
     cmake-format==0.6.13 \
     isort==5.7.0 \
     black==20.8b1
+
+# Enable all the driver capabilities so we can use OpenCL in the container
+ENV NVIDIA_DRIVER_CAPABILITIES=all
+
+# Copy the nvidia OpenCL vendorfile into the container so we can also use OpenCL on nvidia GPUs
+COPY --chown=root:root etc/OpenCL/vendors/nvidia.icd /etc/OpenCL/vendors/nvidia.icd
 
 ##############################
 ### SETUP THE USER ACCOUNT ###

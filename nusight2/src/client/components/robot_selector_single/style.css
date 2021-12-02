@@ -28,3 +28,7 @@
   font-size: 0.93em;
   white-space: nowrap;
 }
+
+.robotSelector {
+  width: 300px;
+}
