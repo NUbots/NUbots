@@ -30,7 +30,7 @@ jobs:
         with:
           slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
           slack-channel: C02PA98RNLC
-          slack-text: "@channel The docker image was updated! Be sure to run `./b target generic` to ensure issues don't occur. Also try `./b configure --clean` if further issues occur."
+          slack-text: "<@channel> The docker image was updated! Be sure to run `./b target generic` to ensure issues don't occur. Also try `./b configure --clean` if further issues occur."
       - name: Result from "Send Message"
         run: echo "The result was ${{ steps.notify.outputs.slack-result }}"
         
