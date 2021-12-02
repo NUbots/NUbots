@@ -1,0 +1,24 @@
+# Send a message to development when the docker image changes!
+# Firstly made by Finn Stevenson!
+
+name: Docker Slack Message
+
+# Control when this will run!
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docker/**'
+
+jobs:
+  slack-notifcations:
+    runs-on: ubuntu-20.04
+    name: Send a message to slack when the docker folder has changes
+    steps:
+      - name: Send a message to Slack API
+        uses: archive/github-actions-slack@v2.0.0
+        id: notify
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.SLACK_BOT_USER_OAUTH_ACCESS_TOKEN }}
+          slack-channel: C02PA98RNLC
+          slack-text: @channel The docker image was updated! Be sure to run `./b target generic` to ensure issues don't occur. Also try `./b configure --clean` if further issues occur.
