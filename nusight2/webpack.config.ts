@@ -67,7 +67,9 @@ export function getClientConfig({
             {
               loader: 'css-loader',
               options: {
-                modules: true,
+                modules: {
+                  localIdentName: '[local]_[hash:base64:5]',
+                },
                 sourceMap: !isProduction,
                 importLoaders: 1,
               },
