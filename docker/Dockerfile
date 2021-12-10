@@ -422,7 +422,9 @@ RUN echo "/@PACKAGE_NAME@/s//voice2json/" >> mod.sed
 RUN echo "/@PACKAGE_VERSION@/s//0.2.0/" >> mod.sed
 RUN echo "/@PACKAGE_BUGREPORT@/s//mike@rhasspy.org/" >> mod.sed
 RUN sed -f mod.sed setup.py.in > setup.py
-RUN sudo python setup.py install
+RUN sudo mkdir -p /usr/local/share/voice2json
+RUN sudo cp --recursive --target-directory=/usr/local/share/voice2json VERSION README.md LICENSE etc/
+RUN sudo pip install --prefix=/usr/local .
 
 # Tell voice2json where kaldi is located.
 ENV KALDI_DIR=/opt/kaldi
@@ -432,11 +434,14 @@ ENV PATH="$PATH:/opt/kaldi/src/bin:/opt/kaldi/src/chainbin:/opt/kaldi/src/cudade
 # Some scripts try to use python23... (make_lexicon_fst.py)
 RUN sudo ln /usr/bin/python3 /usr/bin/python23
 # Tell voice2json where voice2json is in case you are not within /home/nubots/voice2json.
-ENV voice2json_dir=/home/nubots/voice2json
-# Download the kaldi speech to text model.
-RUN python -m voice2json download-profile
-COPY --chown=nubots:nubots voice2json/sentences.ini /home/nubots/.local/share/voice2json/en-us_kaldi-zamia/
-COPY --chown=nubots:nubots voice2json/slots/ /home/nubots/.local/share/voice2json/en-us_kaldi-zamia/slots/
-RUN python -m voice2json train-profile
+ENV voice2json_dir=/usr/local/share/voice2json
+# Tell voice2json where the models are downloaded.
+ENV XDG_DATA_HOME=/usr/local/share/voice2json
+RUN sudo --preserve-env=KALDI_DIR,voice2json_dir,XDG_DATA_HOME python -m voice2json --profile en-us_kaldi-zamia download-profile
+
+COPY --chown=nubots:nubots voice2json/sentences.ini /usr/local/share/voice2json/en-us_kaldi-zamia/
+COPY --chown=nubots:nubots voice2json/slots/ /usr/local/share/voice2json/en-us_kaldi-zamia/slots/
+
+RUN sudo --preserve-env=KALDI_DIR,voice2json_dir,XDG_DATA_HOME python -m voice2json train-profile
 
 WORKDIR /home/nubots/NUbots
