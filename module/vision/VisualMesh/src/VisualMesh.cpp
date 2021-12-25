@@ -70,8 +70,8 @@ namespace module::vision {
                                 msg->id              = image.id;
                                 msg->name            = image.name;
                                 msg->Hcw             = image.Hcw;
-                                msg->rays            = std::move(result.rays);
-                                msg->coordinates     = std::move(result.coordinates);
+                                msg->rays            = result.rays;
+                                msg->coordinates     = result.coordinates;
                                 msg->neighbourhood   = std::move(result.neighbourhood);
                                 msg->indices         = std::move(result.indices);
                                 msg->classifications = std::move(result.classifications);
