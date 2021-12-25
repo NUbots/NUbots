@@ -22,6 +22,7 @@
 
 #include <Eigen/Core>
 #include <ostream>
+#include <utility>
 #include <vector>
 
 namespace utility::math::geometry {
@@ -32,8 +33,21 @@ namespace utility::math::geometry {
         using T = typename Eigen::Matrix<Scalar, R, C>;
         Quad() : bl(T::Zero()), br(T::Zero()), tr(T::Zero()), tl(T::Zero()) {}
         Quad(const Quad& other) : bl(other.bl), br(other.br), tr(other.tr), tl(other.tl) {}
-        Quad(const T& bottomLeft, const T& topLeft, const T& topRight, const T& bottomRight)
-            : bl(bottomLeft), br(bottomRight), tr(topRight), tl(topLeft) {}
+        Quad(const Quad&& other) : bl(other.bl), br(other.br), tr(other.tr), tl(other.tl) {}
+        [[nodiscard]] Quad& operator=(const Quad& other) {
+            bl = other.bl;
+            br = other.br;
+            tr = other.tr;
+            tl = other.tl;
+        }
+        [[nodiscard]] Quad& operator=(const Quad&& other) {
+            bl = other.bl;
+            br = other.br;
+            tr = other.tr;
+            tl = other.tl;
+        }
+        Quad(T bottomLeft, T topLeft, T topRight, T bottomRight)
+            : bl(std::move(bottomLeft)), br(std::move(bottomRight)), tr(std::move(topRight)), tl(std::move(topLeft)) {}
         Quad(const Scalar& left, const Scalar& top, const Scalar& right, const Scalar& bottom)
             : bl(left, bottom), br(right, bottom), tr(right, top), tl(left, top) {}
 
@@ -70,58 +84,58 @@ namespace utility::math::geometry {
         }
 
         //! Returns the bottom centre pixel location of the Quad.
-        T getTopCentre() const {
+        [[nodiscard]] T getTopCentre() const {
             return ((tl + tr) * 0.5);
         }
         //! Returns the bottom centre pixel location of the Quad.
-        T getBottomCentre() const {
+        [[nodiscard]] T getBottomCentre() const {
             return ((bl + br) * 0.5);
         }
-        T getRightCentre() const {
+        [[nodiscard]] T getRightCentre() const {
             return ((br + tr) * 0.5);
         }
-        T getLeftCentre() const {
+        [[nodiscard]] T getLeftCentre() const {
             return ((bl + tl) * 0.5);
         }
 
         //! Returns the centre pixel location  of the Quad.
-        T getCentre() const {
+        [[nodiscard]] T getCentre() const {
             return ((bl + tl + tr + br) * 0.25);
         }
 
         //! Returns the bottom left pixel location  of the Quad.
-        T getBottomLeft() const {
+        [[nodiscard]] T getBottomLeft() const {
             return bl;
         }
         //! Returns the bottom right pixel location  of the Quad.
-        T getBottomRight() const {
+        [[nodiscard]] T getBottomRight() const {
             return br;
         }
         //! Returns the top left pixel location  of the Quad.
-        T getTopLeft() const {
+        [[nodiscard]] T getTopLeft() const {
             return tl;
         }
         //! Returns the top right pixel location  of the Quad.
-        T getTopRight() const {
+        [[nodiscard]] T getTopRight() const {
             return tr;
         }
 
         // Returns the bounding box width and height
-        T getSize() const {
+        [[nodiscard]] T getSize() const {
             Quad boundingBox = getBoundingBox(getVertices());
             return T(boundingBox.getAverageWidth(), boundingBox.getAverageHeight());
         }
 
-        Scalar getLeft() const {
+        [[nodiscard]] Scalar getLeft() const {
             return (0.5 * (bl.x() + tl.x()));
         }
-        Scalar getRight() const {
+        [[nodiscard]] Scalar getRight() const {
             return (0.5 * (br.x() + tr.x()));
         }
-        Scalar getTop() const {
+        [[nodiscard]] Scalar getTop() const {
             return (0.5 * (tl.y() + tr.y()));
         }
-        Scalar getBottom() const {
+        [[nodiscard]] Scalar getBottom() const {
             return (0.5 * (bl.y() + br.y()));
         }
 
@@ -136,32 +150,32 @@ namespace utility::math::geometry {
         // int getRightHeight() const;
 
         //! Returns the average width of the Quad in pixels.
-        Scalar getAverageWidth() const {
+        [[nodiscard]] Scalar getAverageWidth() const {
             return ((0.5 * ((br - bl).norm() + (tr - tl).norm())));
         }
 
         //! Returns the average height of the Quad in pixels.
-        Scalar getAverageHeight() const {
+        [[nodiscard]] Scalar getAverageHeight() const {
             return ((0.5 * ((br - tr).norm() + (bl - tl).norm())));
         }
 
-        Scalar area() const {
+        [[nodiscard]] Scalar area() const {
             // Area of a quadrilateral: A = 0.5 * |diag1 X diag2|
             // In two dimensions, this equates to: A = 0.5 * |(diag1.x)(diag2.y) - (diag2.x)(diag2.y)|
             T diag1 = bl - tr;
             T diag2 = tl - br;
             return std::abs(0.5 * ((diag1.x() * diag2.y()) - (diag1.y() * diag2.x())));
         }
-        Scalar aspectRatio() const {
+        [[nodiscard]] Scalar aspectRatio() const {
             return (((br - tr).norm() + (bl - tl).norm() + 2) / ((br - bl).norm() + (tr - tl).norm() + 2));
         }
 
-        std::vector<T> getVertices() const {
+        [[nodiscard]] std::vector<T> getVertices() const {
             std::vector<T> vert = {tr, br, bl, tl};
             return vert;
         }
 
-        bool overlapsHorizontally(const Quad& other) const {
+        [[nodiscard]] bool overlapsHorizontally(const Quad& other) const {
             // Rough for now.
             Scalar farRight   = std::max(tr.x(), br.x());
             Scalar farLeft    = std::min(tl.x(), bl.x());
@@ -171,13 +185,13 @@ namespace utility::math::geometry {
             return !((farRight < o_farLeft) || (o_farRight < farLeft));
         }
 
-        bool checkCornersValid() const {
+        [[nodiscard]] bool checkCornersValid() const {
             return br.innerSize() == 2 && bl.innerSize() == 2 && tr.innerSize() == 2 && tl.innerSize() == 2;
         }
 
         static Quad getBoundingBox(const std::vector<T>& points) {
             // Check for
-            if (points.size() <= 0) {
+            if (points.empty()) {
                 throw std::domain_error("Request made for bounding box for empty list of points!");
             }
 
@@ -200,14 +214,6 @@ namespace utility::math::geometry {
         T br;  //! @variable The bottom-right of the Quad.
         T tr;  //! @variable The top-right of the Quad.
         T tl;  //! @variable The top-left of the Quad.
-
-        //! @brief output stream operator.
-        template <typename Scalar_, int R_, int C_>
-        friend std::ostream& operator<<(std::ostream& output, const Quad<Scalar_, R_, C_>& quad);
-
-        //! @brief output stream operator for a vector of goals.
-        template <typename Scalar_, int R_, int C_>
-        friend std::ostream& operator<<(std::ostream& output, const std::vector<Quad<Scalar_, R_, C_>>& quads);
     };
 
 

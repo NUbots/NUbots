@@ -365,9 +365,7 @@ namespace module::behaviour {
             if (a.group.id == b.group.id) {
                 return a.index < b.index;
             }
-            else {
-                return false;
-            }
+            return false;
         };
 
         // Sort our list

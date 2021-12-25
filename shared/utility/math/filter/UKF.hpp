@@ -67,7 +67,7 @@ namespace utility::math::filter {
         SigmaVec mean_weights;
         SigmaVec covariance_weights;
 
-    private:
+
         // UKF variables
         Scalar covariance_sigma_weight;
 
@@ -291,11 +291,11 @@ namespace utility::math::filter {
                 });
         }
 
-        const StateVec& get() const {
+        [[nodiscard]] const StateVec& get() const {
             return mean;
         }
 
-        const StateMat& getCovariance() const {
+        [[nodiscard]] const StateMat& getCovariance() const {
             return covariance;
         }
     };

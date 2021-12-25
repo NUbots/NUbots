@@ -28,8 +28,8 @@ namespace module::tools {
         Device selected_device;
         Battery selected_battery;
 
-        void showDeviceMenu() const;
-        void showBatteryMenu() const;
+        static void showDeviceMenu();
+        static void showBatteryMenu();
     };
 
 }  // namespace module::tools
