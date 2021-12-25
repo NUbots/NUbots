@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <filesystem>
 #include <nuclear>
+#include <utility>
 #include <yaml-cpp/yaml.h>
 
 #include "FileWatch.hpp"
@@ -333,7 +334,7 @@ namespace NUClear::dsl {
                             }
 
                             // We want out paths relative to the config folder.
-                            if (component.compare("config") == 0) {
+                            if (component == "config") {
                                 flag = true;
                             }
                         }

@@ -199,14 +199,14 @@ namespace module::platform {
         }
 
         // Loop through the linked list of potential options for connecting. In order of best to worst.
-        for (addrinfo* addr_ptr = address; addr_ptr != NULL; addr_ptr = addr_ptr->ai_next) {
+        for (addrinfo* addr_ptr = address; addr_ptr != nullptr; addr_ptr = addr_ptr->ai_next) {
             const int fd_temp = socket(addr_ptr->ai_family, addr_ptr->ai_socktype, addr_ptr->ai_protocol);
 
             if (fd_temp == -1) {
                 // Bad fd
                 continue;
             }
-            else if (connect(fd_temp, addr_ptr->ai_addr, addr_ptr->ai_addrlen) != -1) {
+            if (connect(fd_temp, addr_ptr->ai_addr, addr_ptr->ai_addrlen) != -1) {
                 // Connection successful
                 freeaddrinfo(address);
                 return fd_temp;
@@ -308,7 +308,7 @@ namespace module::platform {
             Eigen::Affine3d Htw(sensors.Htw);
             Eigen::Affine3d Hwp = Htw.inverse() * Htp;
 
-            Hwps.push_back(std::make_pair(sensors.timestamp, Hwp));
+            Hwps.emplace_back(sensors.timestamp, Hwp);
         });
 
         // This trigger updates our current servo state
@@ -713,8 +713,8 @@ namespace module::platform {
         }
 
         // Only emit RawSensors if there is any data!
-        if (!(sensor_measurements.position_sensors.size() == 0 && sensor_measurements.accelerometers.size() == 0
-              && sensor_measurements.bumpers.size() == 0 && sensor_measurements.gyros.size() == 0)) {
+        if (!(sensor_measurements.position_sensors.empty() && sensor_measurements.accelerometers.empty()
+              && sensor_measurements.bumpers.empty() && sensor_measurements.gyros.empty())) {
 
 
             // Read each field of msg, translate it to our protobuf and emit the data
@@ -726,7 +726,7 @@ namespace module::platform {
                 translate_servo_id(position.name, sensor_data->servo).present_position = position.value;
             }
 
-            if (sensor_measurements.accelerometers.size() > 0) {
+            if (!sensor_measurements.accelerometers.empty()) {
                 // .accelerometers is a list of one, since our robots have only one accelerometer
                 const auto& accelerometer = sensor_measurements.accelerometers[0];
                 // Webots has a strictly positive output for the accelerometers. We minus 100 to center the output
@@ -737,7 +737,7 @@ namespace module::platform {
                 sensor_data->accelerometer.z() = static_cast<float>(accelerometer.value.Z) - 100.0f;
             }
 
-            if (sensor_measurements.gyros.size() > 0) {
+            if (!sensor_measurements.gyros.empty()) {
                 // .gyros is a list of one, since our robots have only one gyroscope
                 const auto& gyro = sensor_measurements.gyros[0];
                 // Webots has a strictly positive output for the gyros. We minus 100 to center the output over 0

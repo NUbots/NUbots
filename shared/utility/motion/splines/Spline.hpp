@@ -68,20 +68,16 @@ namespace utility::motion::splines {
          * Return minimum and maximum abscisse value for which spline is defined
          */
         [[nodiscard]] constexpr Scalar min() const {
-            if (splines.size() == 0) {
+            if (splines.empty()) {
                 return static_cast<Scalar>(0);
             }
-            else {
-                return splines.front().min;
-            }
+            return splines.front().min;
         }
         [[nodiscard]] constexpr Scalar max() const {
-            if (splines.size() == 0) {
+            if (splines.empty()) {
                 return static_cast<Scalar>(0);
             }
-            else {
-                return splines.back().max;
-            }
+            return splines.back().max;
         }
 
         /**
@@ -195,7 +191,7 @@ namespace utility::motion::splines {
         [[nodiscard]] constexpr Scalar interpolation(Scalar x,
                                                      Scalar (Polynom<Scalar>::*func)(const Scalar&) const) const {
             // Empty case
-            if (splines.size() == 0) {
+            if (splines.empty()) {
                 return static_cast<Scalar>(0);
             }
             // Bound asked abscisse into spline range

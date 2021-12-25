@@ -81,7 +81,7 @@ namespace utility::motion::splines {
         [[nodiscard]] inline std::vector<size_t> nextCombination() {
             std::vector<size_t> result = indexes;
 
-            if (indexes.size() > 0) {
+            if (!indexes.empty()) {
                 bool isEnd = incrIndexes(k - 1);
                 if (isEnd) {
                     indexes.clear();
@@ -95,8 +95,8 @@ namespace utility::motion::splines {
         /**
          * Typedefs
          */
-        typedef std::pair<unsigned long, unsigned long> Pair;
-        typedef std::vector<size_t> Comb;
+        using Pair = std::pair<unsigned long, unsigned long>;
+        using Comb = std::vector<size_t>;
 
         /**
          * Hold (n choose k) number of possible combinations for dynamic programming
@@ -119,16 +119,12 @@ namespace utility::motion::splines {
                 if (i == 0) {
                     return true;
                 }
-                else {
-                    const bool isEnd = incrIndexes(i - 1);
-                    if (isEnd) {
-                        return true;
-                    }
-                    else {
-                        indexes[i] = indexes[i - 1] + 1;
-                        return false;
-                    }
+                const bool isEnd = incrIndexes(i - 1);
+                if (isEnd) {
+                    return true;
                 }
+                indexes[i] = indexes[i - 1] + 1;
+                return false;
             }
             else {
                 indexes[i]++;

@@ -49,12 +49,6 @@ namespace module::behaviour::skills {
         bool forward = true;
 
     public:
-        Searcher() {
-            // Init points to something sane
-        }
-
-        ~Searcher() = default;
-
         void sort() {
             // Just set to closest:
             auto relativePoints = points;
