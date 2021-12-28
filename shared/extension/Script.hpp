@@ -89,11 +89,7 @@ namespace extension {
                const std::string& platform,
                const YAML::Node& config,
                const std::vector<Frame>& frames)
-            : fileName(std::move(fileName))
-            , hostname(std::move(hostname))
-            , platform(std::move(platform))
-            , config(config)
-            , frames(std::move(frames)) {}
+            : fileName(fileName), hostname(hostname), platform(platform), config(config), frames(frames) {}
 
         Script(const std::string& fileName, const std::string& hostname, const std::string& platform)
             : fileName(fileName), hostname(hostname), platform(platform), config() {
