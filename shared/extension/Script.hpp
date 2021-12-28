@@ -50,7 +50,7 @@ namespace extension {
                 Target(Target&& other) noexcept
                     : id(other.id), position(other.position), gain(other.gain), torque(other.torque) {}
                 Target& operator=(const Target& other) = default;
-                Target& operator=(Target&& other) noexcept {
+                Target& operator                       =(Target&& other) noexcept {
                     id       = other.id;
                     position = other.position;
                     gain     = other.gain;
@@ -411,7 +411,7 @@ namespace YAML {
                 std::chrono::milliseconds duration(millis);
 
                 auto targets = node["targets"].as<std::vector<::extension::Script::Frame::Target>>();
-                rhs = {duration, targets};
+                rhs          = {duration, targets};
             }
             catch (const YAML::Exception& e) {
                 NUClear::log<NUClear::ERROR>("Error parsing script -",
@@ -442,8 +442,8 @@ namespace YAML {
 
         static inline bool decode(const Node& node, ::extension::Script& rhs) {
             try {
-                auto frames                                    = node.as<std::vector<::extension::Script::Frame>>();
-                rhs                                            = {frames};
+                auto frames = node.as<std::vector<::extension::Script::Frame>>();
+                rhs         = {frames};
             }
             catch (const YAML::Exception& e) {
                 NUClear::log<NUClear::ERROR>("Error parsing script -",

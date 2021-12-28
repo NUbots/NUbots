@@ -231,22 +231,22 @@ namespace module::input {
                     // Floating point setting
                     else if (ARV_IS_GC_FLOAT_NODE(feature) != 0) {
                         auto* setting = reinterpret_cast<ArvGcFloat*>(feature);
-                        double value = cfg.second.as<Expression>();
-                        message      = set_setting(setting, value);
+                        double value  = cfg.second.as<Expression>();
+                        message       = set_setting(setting, value);
                     }
 
                     // Boolean setting
                     else if (ARV_IS_GC_BOOLEAN(feature) != 0) {
                         auto* setting = reinterpret_cast<ArvGcBoolean*>(feature);
-                        bool value   = bool(cfg.second.as<Expression>());
-                        message      = set_setting(setting, value);
+                        bool value    = bool(cfg.second.as<Expression>());
+                        message       = set_setting(setting, value);
                     }
 
                     // Enumeration setting
                     else if (ARV_IS_GC_ENUMERATION(feature) != 0) {
-                        auto* setting     = reinterpret_cast<ArvGcEnumeration*>(feature);
-                        auto value        = cfg.second.as<std::string>();
-                        message           = set_setting(setting, value);
+                        auto* setting = reinterpret_cast<ArvGcEnumeration*>(feature);
+                        auto value    = cfg.second.as<std::string>();
+                        message       = set_setting(setting, value);
                     }
                     else {
                         log<NUClear::ERROR>(fmt::format("The type of setting {} is not currently handled", key));
