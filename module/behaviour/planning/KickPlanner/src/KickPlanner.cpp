@@ -184,7 +184,7 @@ namespace module::behaviour::planning {
                                 ;
                             }
                             break;
-                        default: throw new std::runtime_error("KickPlanner: Invalid KickType");
+                        default: throw std::runtime_error("KickPlanner: Invalid KickType");
                     }
                 }
                 else if (secondsSinceLastSeen > cfg.seconds_not_seen_limit
