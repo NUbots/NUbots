@@ -19,7 +19,6 @@
 namespace module::localisation {
 
     using extension::Configuration;
-    using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
     using message::localisation::ResetBallHypotheses;
