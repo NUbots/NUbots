@@ -38,7 +38,7 @@ namespace module::input {
     Camera::Camera(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("Cameras").then("Configuration", [this](const Configuration& config) {
-            std::string serial_number = config["serial_number"].as<std::string>();
+            auto serial_number = config["serial_number"].as<std::string>();
 
             // Find the camera if it has already been loaded
             auto it = cameras.find(serial_number);
@@ -208,7 +208,7 @@ namespace module::input {
 
             // Go through our settings and apply them to the camera
             for (const auto& cfg : config["settings"].config) {
-                std::string key = cfg.first.as<std::string>();
+                auto key = cfg.first.as<std::string>();
 
                 // Skip the region keys as we handle them above
                 if (key == "Width" || key == "Height" || key == "OffsetX" || key == "OffsetY") {
@@ -249,7 +249,7 @@ namespace module::input {
                     // Enumeration setting
                     else if (ARV_IS_GC_ENUMERATION(feature)) {
                         auto setting      = reinterpret_cast<ArvGcEnumeration*>(feature);
-                        std::string value = cfg.second.as<std::string>();
+                        auto value        = cfg.second.as<std::string>();
                         message           = set_setting(setting, value);
                     }
                     else {
@@ -304,7 +304,7 @@ namespace module::input {
             Eigen::Affine3d Htw(sensors.Htw);
             Eigen::Affine3d Hwp = Htw.inverse() * Htp;
 
-            Hwps.push_back(std::make_pair(sensors.timestamp, Hwp));
+            Hwps.emplace_back(sensors.timestamp, Hwp);
         });
 
         on<Shutdown>().then([this] {
@@ -331,7 +331,7 @@ namespace module::input {
                 int height      = 0;
                 size_t buffSize = 0;
                 arv_buffer_get_image_region(buffer, nullptr, nullptr, &width, &height);
-                const uint8_t* buff = reinterpret_cast<const uint8_t*>(arv_buffer_get_data(buffer, &buffSize));
+                const auto* buff = reinterpret_cast<const uint8_t*>(arv_buffer_get_data(buffer, &buffSize));
 
                 auto& timesync = context->time;
 
