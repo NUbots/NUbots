@@ -80,7 +80,7 @@ namespace Darwin {
         /// Our UART class that we will communicate through
         UART uart;
         /// Which servos we should be building for
-        std::array<bool, 20> enabledServoIds;
+        std::array<bool, 20> enabledServoIds{};
 
         /// Our Prebuilt bulk read command
         std::vector<uint8_t> bulkReadCommand;

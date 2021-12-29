@@ -49,14 +49,8 @@ namespace extension {
                 Target(const Target& other) = default;
                 Target(Target&& other) noexcept
                     : id(other.id), position(other.position), gain(other.gain), torque(other.torque) {}
-                Target& operator=(const Target& other) {
-                    id       = other.id;
-                    position = other.position;
-                    gain     = other.gain;
-                    torque   = other.torque;
-                    return *this;
-                }
-                Target& operator=(Target&& other) noexcept {
+                Target& operator=(const Target& other) = default;
+                Target& operator                       =(Target&& other) noexcept {
                     id       = other.id;
                     position = other.position;
                     gain     = other.gain;
@@ -95,11 +89,7 @@ namespace extension {
                const std::string& platform,
                const YAML::Node& config,
                const std::vector<Frame>& frames)
-            : fileName(std::move(fileName))
-            , hostname(std::move(hostname))
-            , platform(std::move(platform))
-            , config(config)
-            , frames(std::move(frames)) {}
+            : fileName(fileName), hostname(hostname), platform(platform), config(config), frames(frames) {}
 
         Script(const std::string& fileName, const std::string& hostname, const std::string& platform)
             : fileName(fileName), hostname(hostname), platform(platform), config() {
@@ -420,9 +410,8 @@ namespace YAML {
                 int millis = node["duration"].as<int>();
                 std::chrono::milliseconds duration(millis);
 
-                std::vector<::extension::Script::Frame::Target> targets =
-                    node["targets"].as<std::vector<::extension::Script::Frame::Target>>();
-                rhs = {duration, targets};
+                auto targets = node["targets"].as<std::vector<::extension::Script::Frame::Target>>();
+                rhs          = {duration, targets};
             }
             catch (const YAML::Exception& e) {
                 NUClear::log<NUClear::ERROR>("Error parsing script -",
@@ -453,8 +442,8 @@ namespace YAML {
 
         static inline bool decode(const Node& node, ::extension::Script& rhs) {
             try {
-                std::vector<::extension::Script::Frame> frames = node.as<std::vector<::extension::Script::Frame>>();
-                rhs                                            = {frames};
+                auto frames = node.as<std::vector<::extension::Script::Frame>>();
+                rhs         = {frames};
             }
             catch (const YAML::Exception& e) {
                 NUClear::log<NUClear::ERROR>("Error parsing script -",

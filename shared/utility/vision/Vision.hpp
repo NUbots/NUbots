@@ -53,7 +53,7 @@ namespace utility::vision {
         Colour(uint32_t const& value) : value(static_cast<Value>(value)) {}
         Colour(char const& value) : value(static_cast<Value>(value)) {}
         Colour(Value const& value) : value(value) {}
-        Colour(std::string const& str) : value(Value::UNCLASSIFIED) {
+        Colour(std::string const& str) {
             // clang-format off
             if      (str == "UNCLASSIFIED") { value = Value::UNCLASSIFIED; }
             else if (str == "WHITE")        { value = Value::WHITE; }
