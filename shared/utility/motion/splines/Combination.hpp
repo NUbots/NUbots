@@ -126,10 +126,8 @@ namespace utility::motion::splines {
                 indexes[i] = indexes[i - 1] + 1;
                 return false;
             }
-            else {
-                indexes[i]++;
-                return false;
-            }
+            indexes[i]++;
+            return false;
         }
     };
 

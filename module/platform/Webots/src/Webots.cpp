@@ -109,7 +109,7 @@ namespace module::platform {
         if (name == "head_pitch_sensor") { return servos.head_tilt; }
         // clang-format on
 
-        throw std::runtime_error("Unable to translate unknown NUgus.proto sensor name: " + name);
+        throw std::runtime_error(fmt::format("Unable to translate unknown NUgus.proto sensor name: {}", name));
     }
 
     [[nodiscard]] std::string translate_id_servo(const uint32_t& id) {
@@ -136,7 +136,7 @@ namespace module::platform {
             case 19: return "head_pitch";
         }
 
-        throw std::runtime_error("Unable to translate unknown NUgus.proto servo id: " + id);
+        throw std::runtime_error(fmt::format("Unable to translate unknown NUgus.proto servo id: {}", id));
     }
 
     [[nodiscard]] ActuatorRequests create_sensor_time_steps(const uint32_t& sensor_timestep,
