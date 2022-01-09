@@ -412,19 +412,9 @@ RUN rm -r /home/nubots/packages
 
 # voice2json
 RUN install-package python-wheel swig alsa-lib jack portaudio sox gcc-fortran jq espeak
-RUN git clone https://github.com/synesthesiam/voice2json /home/nubots/voice2json
-WORKDIR /home/nubots/voice2json
-RUN touch mod.sed
-RUN echo "/@ENABLE_POCKETSPHINX@/s//no/" >> mod.sed
-RUN echo "/@ENABLE_KALDI@/s//yes/" >> mod.sed
-RUN echo "/@ENABLE_DEEPSPEECH@/s//no/" >> mod.sed
-RUN echo "/@PACKAGE_NAME@/s//voice2json/" >> mod.sed
-RUN echo "/@PACKAGE_VERSION@/s//0.2.0/" >> mod.sed
-RUN echo "/@PACKAGE_BUGREPORT@/s//mike@rhasspy.org/" >> mod.sed
-RUN sed -f mod.sed setup.py.in > setup.py
-RUN sudo mkdir -p /usr/local/share/voice2json
-RUN sudo cp --recursive --target-directory=/usr/local/share/voice2json VERSION README.md LICENSE etc/
-RUN sudo pip install --prefix=/usr/local .
+COPY usr/local/package/voice2json.sh /usr/local/package/voice2json.sh
+# Install voice2json with this specific commit.
+RUN /usr/local/package/voice2json.sh d2b1a709185a61432df88964e2fab9521db953b3
 
 # Tell voice2json where kaldi is located.
 ENV KALDI_DIR=/opt/kaldi
