@@ -56,13 +56,13 @@ namespace module::platform::darwin {
         };
 
         struct Config {
-            Config() : battery() {}
+            Config() = default;
 
             struct Battery {
-                Battery() : chargedVoltage(0.0f), nominalVoltage(0.0f), flatVoltage(0.0f) {}
-                float chargedVoltage;
-                float nominalVoltage;
-                float flatVoltage;
+                Battery() = default;
+                float chargedVoltage{0.0f};
+                float nominalVoltage{0.0f};
+                float flatVoltage{0.0f};
             } battery;
         } config;
 

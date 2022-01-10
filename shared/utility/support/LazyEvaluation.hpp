@@ -21,6 +21,7 @@
 #define UTILITY_SUPPORT_LAZYEVALUATION_HPP
 
 #include <functional>
+#include <utility>
 
 namespace utility::support {
 
@@ -29,7 +30,7 @@ namespace utility::support {
 
         std::function<T()> lazy;
 
-        LazyEvaluation(std::function<T()> lazy) : lazy(lazy) {}
+        LazyEvaluation(std::function<T()> lazy) : lazy(std::move(lazy)) {}
 
         operator T() {
             return lazy();
