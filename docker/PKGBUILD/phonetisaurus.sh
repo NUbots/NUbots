@@ -6,8 +6,8 @@ pkgdesc="WFST-driven grapheme-to-phoneme (g2p) framework suitable for rapid deve
 arch=('i686' 'x86_64' 'arm' 'armv6h' 'armv7h')
 url="https://github.com/AdolfVonKleist/Phonetisaurus"
 license=('BSD')
-depends=('openfst' 'python')
-makedepends=('python-pybindgen' 'python-setuptools' 'git')
+depends=('python') # 'openfst' is installed manually.
+makedepends=('python-setuptools' 'git') # 'python-pybindgen' is installed manually.
 source=("https://github.com/AdolfVonKleist/Phonetisaurus/archive/refs/tags/0.9.1.tar.gz")
 sha256sums=('SKIP')
 provides=('phonetisaurus')
@@ -22,9 +22,9 @@ prepare() {
 build() {
         cd "$srcdir/Phonetisaurus-$pkgver"
         PYTHON=/usr/bin/python ./configure \
-                --prefix=/usr \
-                --with-openfst-includes=/usr/include/fst \
-                --with-openfst-libs=/usr/lib \
+                --prefix=/usr/local \
+                --with-openfst-includes=/usr/local/include/fst \
+                --with-openfst-libs=/usr/local/lib \
                 --enable-python
         make
 }
@@ -37,5 +37,5 @@ package() {
         cd "$srcdir/Phonetisaurus-$pkgver"
         make DESTDIR=${pkgdir} install
 
-        install -Dm644 LICENSE "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE"
+        install -Dm644 LICENSE "${pkgdir}/usr/local/share/licenses/${pkgname}/LICENSE"
 }

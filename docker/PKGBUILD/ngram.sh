@@ -7,7 +7,7 @@ pkgdesc="OpenGrm tool for making n-gram language models as weighted finite-state
 arch=('i686' 'x86_64')
 url="http://www.opengrm.org/"
 license=('APACHE')
-depends=('openfst')
+depends=() # 'openfst' is install manually.
 source=("http://opengrm.org/twiki/pub/GRM/NGramDownload/${pkgname}-${pkgver}.tar.gz")
 sha256sums=('SKIP')
 

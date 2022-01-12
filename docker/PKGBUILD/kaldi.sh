@@ -4,7 +4,7 @@ pkgdesc='Speech recognition research toolkit'
 # The last version part is the short git ref
 pkgver=5.5.r9195.3b8a97d85
 pkgrel=1
-depends=('cblas' 'openfst' 'lapack' 'python2')
+depends=('cblas' 'lapack' 'python2') # 'openfst' is installed manually.
 optdepends=('cuda' 'kaldi-irstlm' 'kaldi-kaldi_lm' 'kaldi-sctk' 'kaldi-sph2pipe' 'kaldi-srilm')
 makedepends=('git' 'wget' 'sed')
 arch=('x86_64' 'i686')
@@ -40,7 +40,7 @@ build() {
     LDFLAGS='-lcblas -llapack' \
     ./configure $_cuda_config_opts \
         --shared \
-        --fst-root=/usr \
+        --fst-root=/usr/local \
         --fst-version=1.7.2 \
         --clapack-root=/usr
     make -j 4 depend
@@ -66,16 +66,17 @@ package() {
     find src -maxdepth 1 -type f -not -name 'kaldi.mk' -exec rm {} \;
     rm -r tools/{ATLAS_headers,CLAPACK,INSTALL,Makefile}
 
-    sed "s|$srcdir|/opt|g" -i `grep $srcdir . -rIl`
-    find . -name 'path.sh' -exec sed 's?^\(export KALDI_ROOT\)=.*$?\1=/opt/'$pkgname'?' -i {} \;
-    echo "export OPENFST=$(find /opt/$pkgname/tools -type d -name 'openfst*')" >> tools/env.sh
+    sed "s|$srcdir|/usr/local|g" -i `grep $srcdir . -rIl`
+    find . -name 'path.sh' -exec sed 's?^\(export KALDI_ROOT\)=.*$?\1=/usr/local/'$pkgname'?' -i {} \;
+    # echo "export OPENFST=$(find /opt/$pkgname/tools -type d -name 'openfst*')" >> tools/env.sh
+    echo "export OPENFST=" >> tools/env.sh
     echo 'export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-}:${OPENFST}/lib' >> tools/env.sh
-    echo "export IRSTLM=/opt/$pkgname/tools/irstlm" >> tools/env.sh
+    echo "export IRSTLM=/usr/local/$pkgname/tools/irstlm" >> tools/env.sh
     echo 'export PATH=${PATH}:${IRSTLM}/bin' >> tools/env.sh
 
     install -dm755 "$pkgdir"/etc/ld.so.conf.d/
-    echo "/opt/$pkgname/src/lib" > "$pkgdir"/etc/ld.so.conf.d/$pkgname.conf
+    echo "/usr/local/$pkgname/src/lib" > "$pkgdir"/etc/ld.so.conf.d/$pkgname.conf
 
-    mkdir -p $pkgdir/opt/$pkgname
-    cp -r src egs tools $pkgdir/opt/$pkgname
+    mkdir -p $pkgdir/usr/local/$pkgname
+    cp -r src egs tools $pkgdir/usr/local/$pkgname
 }

@@ -62,6 +62,7 @@ RUN python /usr/local/generate_toolchain.py --prefix /usr
 COPY usr/local/bin/download-and-extract /usr/local/bin/download-and-extract
 COPY usr/local/bin/install-from-source /usr/local/bin/install-from-source
 RUN ln -s /usr/local/bin/install-from-source /usr/local/bin/install-header-from-source \
+    && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-makepkg-from-source \
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-cmake-from-source \
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-autotools-from-source \
     && ln -s /usr/local/bin/install-from-source /usr/local/bin/install-bjam-from-source \
@@ -273,6 +274,42 @@ RUN mkdir -p /usr/local/include/zstr \
     && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/strict_fstream.hpp -O /usr/local/include/strict_fstream.hpp \
     && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/zstr_make_unique_polyfill.h -O /usr/local/include/zstr_make_unique_polyfill.h
 
+# PyBindGen (required by Phonetisaurus)
+RUN install-python-from-source https://pypi.python.org/packages/source/P/PyBindGen/PyBindGen-0.20.1.tar.gz
+
+# OpenFST (required by NGram, Kalid, and Phonetisaurus)
+RUN install-package python2 gcc-libs glibc
+RUN LIBS='-ldl' install-from-source http://www.openfst.org/twiki/pub/FST/FstDownload/openfst-1.7.2.tar.gz \
+    --disable-dependency-tracking \
+    --enable-bin \
+    --enable-compact-fsts \
+    --enable-compress \
+    --enable-const-fsts \
+    --enable-far \
+    --enable-linear-fsts \
+    --enable-lookahead-fsts \
+    --enable-mpdt \
+    --enable-ngram-fsts \
+    --enable-pdt \
+    --enable-python \
+    PYTHON=python2 \
+    PYTHON_VERSION=2.7 \
+    --enable-static \
+    --enable-shared
+
+# NGram
+RUN install-autotools-from-source http://opengrm.org/twiki/pub/GRM/NGramDownload/ngram-1.3.7.tar.gz \
+    LDFLAGS=-L/usr/local/lib/fst
+
+# Phonetisaurus
+COPY PKGBUILD/phonetisaurus.sh /usr/local/package/phonetisaurus.sh
+RUN install-makepkg-from-source /usr/local/package/phonetisaurus.sh
+
+# Kaldi
+RUN install-package lapack python2 cblas
+COPY PKGBUILD/kaldi.sh /usr/local/package/kaldi.sh
+RUN install-makepkg-from-source /usr/local/package/kaldi.sh
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
@@ -345,90 +382,32 @@ RUN install -d -m 0777 /home/nubots/build
 #               Voice2json                  #
 #############################################
 
-FROM base AS openfst
+RUN install-package python-wheel swig alsa-lib alsa-utils jack portaudio sox gcc-fortran jq espeak
 
-WORKDIR /home/nubots/openfst
-RUN install-package python2
-COPY --chown=nubots:nubots PKGBUILD/openfst.sh /home/nubots/openfst/PKGBUILD
-RUN makepkg || true
-RUN test -f openfst-1.7.2-1-x86_64.pkg.tar.zst
-
-FROM base AS kaldi
-
-WORKDIR /home/nubots/kaldi
-RUN install-package lapack python2 cblas
-COPY --from=openfst /home/nubots/openfst/openfst-1.7.2-1-x86_64.pkg.tar.zst /home/nubots/kaldi
-RUN sudo pacman -U --noconfirm openfst-1.7.2-1-x86_64.pkg.tar.zst
-COPY --chown=nubots:nubots PKGBUILD/kaldi.sh /home/nubots/kaldi/PKGBUILD
-RUN makepkg || true
-RUN test -f kaldi-5.5.r9195.3b8a97d85-1-x86_64.pkg.tar.zst
-
-FROM base AS ngram
-
-WORKDIR /home/nubots/opengrm-ngram
-COPY --from=openfst /home/nubots/openfst/openfst-1.7.2-1-x86_64.pkg.tar.zst /home/nubots/opengrm-ngram
-RUN sudo pacman -U --noconfirm openfst-1.7.2-1-x86_64.pkg.tar.zst
-COPY --chown=nubots:nubots PKGBUILD/ngram.sh /home/nubots/opengrm-ngram/PKGBUILD
-RUN makepkg || true
-RUN test -f ngram-1.3.7-1-x86_64.pkg.tar.zst
-
-FROM base AS phonetisaurus
-
-WORKDIR /home/nubots/python-pybindgen
-COPY --chown=nubots:nubots PKGBUILD/python-pybindgen.sh /home/nubots/python-pybindgen/PKGBUILD
-RUN makepkg
-RUN sudo pacman -U --noconfirm python-pybindgen-0.20.1-1-x86_64.pkg.tar.zst
-
-WORKDIR /home/nubots/phonetisaurus-git
-COPY --from=openfst /home/nubots/openfst/openfst-1.7.2-1-x86_64.pkg.tar.zst /home/nubots/phonetisaurus-git/
-RUN sudo pacman -U --noconfirm openfst-1.7.2-1-x86_64.pkg.tar.zst
-
-COPY --chown=nubots:nubots PKGBUILD/phonetisaurus.sh /home/nubots/phonetisaurus-git/PKGBUILD
-RUN makepkg || true
-RUN test -f phonetisaurus-0.9.1-1-x86_64.pkg.tar.zst
-
-FROM base
-
-WORKDIR /home/nubots/packages/
-COPY --from=kaldi               /home/nubots/kaldi/kaldi-5.5.r9195.3b8a97d85-1-x86_64.pkg.tar.zst /home/nubots/packages/
-COPY --from=openfst             /home/nubots/openfst/openfst-1.7.2-1-x86_64.pkg.tar.zst /home/nubots/packages/
-COPY --from=ngram               /home/nubots/opengrm-ngram/ngram-1.3.7-1-x86_64.pkg.tar.zst /home/nubots/packages/
-COPY --from=phonetisaurus       /home/nubots/python-pybindgen/python-pybindgen-0.20.1-1-x86_64.pkg.tar.zst /home/nubots/packages/
-COPY --from=phonetisaurus       /home/nubots/phonetisaurus-git/phonetisaurus-0.9.1-1-x86_64.pkg.tar.zst /home/nubots/packages/
-
-WORKDIR /home/nubots/packages
-RUN sudo pacman -U --noconfirm \
-    kaldi-5.5.r9195.3b8a97d85-1-x86_64.pkg.tar.zst \
-    openfst-1.7.2-1-x86_64.pkg.tar.zst \
-    ngram-1.3.7-1-x86_64.pkg.tar.zst \
-    python-pybindgen-0.20.1-1-x86_64.pkg.tar.zst \
-    phonetisaurus-0.9.1-1-x86_64.pkg.tar.zst
-RUN install-package alsa-utils
-
-RUN rm -r /home/nubots/packages
-
-# voice2json
-RUN install-package python-wheel swig alsa-lib jack portaudio sox gcc-fortran jq espeak
 COPY usr/local/package/voice2json.sh /usr/local/package/voice2json.sh
+
 # Install voice2json with this specific commit.
-RUN /usr/local/package/voice2json.sh d2b1a709185a61432df88964e2fab9521db953b3
+# RUN /usr/local/package/voice2json.sh d2b1a709185a61432df88964e2fab9521db953b3
 
 # Tell voice2json where kaldi is located.
-ENV KALDI_DIR=/opt/kaldi
+ENV KALDI_DIR=/usr/local/kaldi
+
 # Make sure we search these paths too:
 #   echo /opt/kaldi/src/*bin | sed 's/ /:/g'
-ENV PATH="$PATH:/opt/kaldi/src/bin:/opt/kaldi/src/chainbin:/opt/kaldi/src/cudadecoderbin:/opt/kaldi/src/cudafeatbin:/opt/kaldi/src/featbin:/opt/kaldi/src/fgmmbin:/opt/kaldi/src/fstbin:/opt/kaldi/src/gmmbin:/opt/kaldi/src/ivectorbin:/opt/kaldi/src/kwsbin:/opt/kaldi/src/latbin:/opt/kaldi/src/lmbin:/opt/kaldi/src/nnet2bin:/opt/kaldi/src/nnet3bin:/opt/kaldi/src/nnetbin:/opt/kaldi/src/online2bin:/opt/kaldi/src/rnnlmbin:/opt/kaldi/src/sgmm2bin:/opt/kaldi/src/tfrnnlmbin"
+# ENV PATH="$PATH:/opt/kaldi/src/bin:/opt/kaldi/src/chainbin:/opt/kaldi/src/cudadecoderbin:/opt/kaldi/src/cudafeatbin:/opt/kaldi/src/featbin:/opt/kaldi/src/fgmmbin:/opt/kaldi/src/fstbin:/opt/kaldi/src/gmmbin:/opt/kaldi/src/ivectorbin:/opt/kaldi/src/kwsbin:/opt/kaldi/src/latbin:/opt/kaldi/src/lmbin:/opt/kaldi/src/nnet2bin:/opt/kaldi/src/nnet3bin:/opt/kaldi/src/nnetbin:/opt/kaldi/src/online2bin:/opt/kaldi/src/rnnlmbin:/opt/kaldi/src/sgmm2bin:/opt/kaldi/src/tfrnnlmbin"
+
 # Some scripts try to use python23... (make_lexicon_fst.py)
 RUN sudo ln /usr/bin/python3 /usr/bin/python23
+
 # Tell voice2json where voice2json is in case you are not within /home/nubots/voice2json.
 ENV voice2json_dir=/usr/local/share/voice2json
+
 # Tell voice2json where the models are downloaded.
 ENV XDG_DATA_HOME=/usr/local/share/voice2json
-RUN sudo --preserve-env=KALDI_DIR,voice2json_dir,XDG_DATA_HOME python -m voice2json --profile en-us_kaldi-zamia download-profile
 
+# RUN sudo --preserve-env=KALDI_DIR,voice2json_dir,XDG_DATA_HOME python -m voice2json --profile en-us_kaldi-zamia download-profile
 COPY --chown=nubots:nubots voice2json/sentences.ini /usr/local/share/voice2json/en-us_kaldi-zamia/
 COPY --chown=nubots:nubots voice2json/slots/ /usr/local/share/voice2json/en-us_kaldi-zamia/slots/
-
-RUN sudo --preserve-env=KALDI_DIR,voice2json_dir,XDG_DATA_HOME python -m voice2json train-profile
+# RUN sudo --preserve-env=KALDI_DIR,voice2json_dir,XDG_DATA_HOME python -m voice2json train-profile
 
 WORKDIR /home/nubots/NUbots
