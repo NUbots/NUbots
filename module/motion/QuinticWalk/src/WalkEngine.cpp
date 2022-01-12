@@ -669,7 +669,7 @@ namespace module::motion {
         return computeCartesianPositionAtTime(time);
     }
 
-    QuinticWalkEngine::PositionSupportTuple QuinticWalkEngine::computeCartesianPositionAtTime(const float time) const {
+    QuinticWalkEngine::PositionSupportTuple QuinticWalkEngine::computeCartesianPositionAtTime(const float& time) const {
         // Evaluate target cartesian state from trajectories
         const auto [trunkPos, trunkAxis, footPos, footAxis] = trajectoriesTrunkFootPos(time, trajs);
         // Discard isDoubleSupport because we don't use it

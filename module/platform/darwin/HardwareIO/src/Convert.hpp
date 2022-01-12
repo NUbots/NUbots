@@ -76,34 +76,34 @@ namespace module::platform::darwin {
         static double SERVO_OFFSET[20];
 
         template <int bit>
-        static bool getBit(const uint16_t value) {
+        static bool getBit(const uint16_t& value) {
             return (value & (1 << bit)) == (1 << bit);
         }
 
-        static float accelerometer(const uint16_t value);
-        static float gyroscope(const uint16_t value);
-        static float voltage(const uint8_t value);
-        static float fsrForce(const uint16_t value);
-        static float fsrCentre(const bool left, const uint8_t value);
+        static float accelerometer(const uint16_t& value);
+        static float gyroscope(const uint16_t& value);
+        static float voltage(const uint8_t& value);
+        static float fsrForce(const uint16_t& value);
+        static float fsrCentre(const bool& left, const uint8_t& value);
 
-        static std::tuple<uint8_t, uint8_t, uint8_t> colourLED(uint16_t value);
-        static uint16_t colourLEDInverse(uint8_t r, uint8_t g, uint8_t b);
+        static std::tuple<uint8_t, uint8_t, uint8_t> colourLED(const uint16_t& value);
+        static uint16_t colourLEDInverse(const uint8_t& r, const uint8_t& g, const uint8_t& b);
 
-        static float gain(const uint8_t value);
-        static uint8_t gainInverse(const float value);
+        static float gain(const uint8_t& value);
+        static uint8_t gainInverse(const float& value);
 
-        static float servoPosition(const uint8_t id, const uint16_t value);
-        static uint16_t servoPositionInverse(const uint8_t id, const float value);
+        static float servoPosition(const uint8_t& id, const uint16_t& value);
+        static uint16_t servoPositionInverse(const uint8_t& id, const float& value);
 
-        static float servoSpeed(const uint8_t id, const uint16_t value);
-        static uint16_t servoSpeedInverse(const float value);
+        static float servoSpeed(const uint8_t& id, const uint16_t& value);
+        static uint16_t servoSpeedInverse(const float& value);
 
-        static float torqueLimit(const uint16_t value);
-        static uint16_t torqueLimitInverse(const float value);
+        static float torqueLimit(const uint16_t& value);
+        static uint16_t torqueLimitInverse(const float& value);
 
-        static float servoLoad(const uint8_t id, const uint16_t value);
+        static float servoLoad(const uint8_t& id, const uint16_t& value);
 
-        static float temperature(const uint8_t value);
+        static float temperature(const uint8_t& value);
     };
 }  // namespace module::platform::darwin
 #endif

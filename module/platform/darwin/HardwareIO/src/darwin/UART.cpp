@@ -27,7 +27,7 @@
 namespace Darwin {
     uint8_t calculateChecksum(void* command) {
 
-        uint8_t* data    = static_cast<uint8_t*>(command);
+        auto* data       = static_cast<uint8_t*>(command);
         uint8_t checksum = 0x00;
         // Skip over the magic numbers and checksum the rest of the packet
         for (int i = 2; i < data[Packet::LENGTH] + 3; ++i) {
@@ -44,8 +44,8 @@ namespace Darwin {
         checksum += result.header.length;
         checksum += result.header.errorcode;
 
-        for (size_t i = 0; i < result.data.size(); ++i) {
-            checksum += result.data[i];
+        for (unsigned char i : result.data) {
+            checksum += i;
         }
 
         return (~checksum);
@@ -57,7 +57,7 @@ namespace Darwin {
         BUS_RESET_WAIT_TIME_uS = config["bus_reset_wait_time_us"].as<int>();
     }
 
-    UART::UART(const char* name) : devName(name), fd(-1), mutex() {
+    UART::UART(const char* name) : devName(name), fd(-1) {
         connect();
     }
 
@@ -226,8 +226,8 @@ namespace Darwin {
         }
 
         // We now are now waiting for 4 bytes
-        timeout.tv_usec      = BYTE_WAIT * sizeof(Header);
-        uint8_t* headerBytes = reinterpret_cast<uint8_t*>(&result.header);
+        timeout.tv_usec   = BYTE_WAIT * sizeof(Header);
+        auto* headerBytes = reinterpret_cast<uint8_t*>(&result.header);
         for (size_t done = 0; done < sizeof(Header);) {
             if (select(fd + 1, &connectionset, nullptr, nullptr, &timeout) == 1) {
                 done += readBytes(&headerBytes[done], sizeof(Header) - done);

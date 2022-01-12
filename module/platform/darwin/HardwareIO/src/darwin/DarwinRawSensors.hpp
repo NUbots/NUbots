@@ -20,7 +20,7 @@
 #ifndef DARWIN_DARWINRAWSENSORS_HPP
 #define DARWIN_DARWINRAWSENSORS_HPP
 
-#include <stdint.h>
+#include <cstdint>
 
 namespace Darwin {
 
@@ -34,71 +34,71 @@ namespace Darwin {
          * @brief This represents the raw gyro values from the CM740 (they are read from the board in ZYX)
          */
         struct Gyro {
-            Gyro() : z(0), y(0), x(0) {}
-            uint16_t z;
-            uint16_t y;
-            uint16_t x;
+            Gyro() = default;
+            uint16_t z{0};
+            uint16_t y{0};
+            uint16_t x{0};
         };
 
         /**
          * @brief This represents the raw accelerometer values from the CM740
          */
         struct Accelerometer {
-            Accelerometer() : x(0), y(0), z(0) {}
-            uint16_t x;
-            uint16_t y;
-            uint16_t z;
+            Accelerometer() = default;
+            uint16_t x{0};
+            uint16_t y{0};
+            uint16_t z{0};
         };
 
         /**
          * @brief This represents the data that comes from one of the MX28 motors
          */
         struct MX28Data {
-            MX28Data() : presentPosition(0), presentSpeed(0), load(0), voltage(0), temperature(0) {}
-            uint16_t presentPosition;
-            uint16_t presentSpeed;
-            uint16_t load;
-            uint8_t voltage;
-            uint8_t temperature;
+            MX28Data() = default;
+            uint16_t presentPosition{0};
+            uint16_t presentSpeed{0};
+            uint16_t load{0};
+            uint8_t voltage{0};
+            uint8_t temperature{0};
         };
 
         /**
          * This represents data that comes from the Force Sensitive Resistors
          */
         struct FSRData {
-            FSRData() : fsr1(0), fsr2(0), fsr3(0), fsr4(0), centreX(0), centreY(0) {}
-            uint16_t fsr1;
-            uint16_t fsr2;
-            uint16_t fsr3;
-            uint16_t fsr4;
-            uint8_t centreX;
-            uint8_t centreY;
+            FSRData() = default;
+            uint16_t fsr1{0};
+            uint16_t fsr2{0};
+            uint16_t fsr3{0};
+            uint16_t fsr4{0};
+            uint8_t centreX{0};
+            uint8_t centreY{0};
         };
 
         /**
          * @brief This represents data that comes from the CM740
          */
         struct CM740Data {
-            CM740Data() : buttons(0), gyroscope(), accelerometer(), voltage(0) {}
-            uint8_t buttons;
+            CM740Data() = default;
+            uint8_t buttons{0};
             uint8_t reserved[7] = {0};
             Gyro gyroscope;
             Accelerometer accelerometer;
-            uint8_t voltage;
+            uint8_t voltage{0};
         };
 
         /**
          * This is a type that is used control the motors, It is sent to the motors to cause a change
          */
         struct ServoValues {
-            ServoValues() : servoId(0), dGain(0), iGain(0), pGain(0), reserved(0), goalPostion(0), movingSpeed(0) {}
-            uint8_t servoId;
-            uint8_t dGain;
-            uint8_t iGain;
-            uint8_t pGain;
-            uint8_t reserved;
-            uint16_t goalPostion;
-            uint16_t movingSpeed;
+            ServoValues() = default;
+            uint8_t servoId{0};
+            uint8_t dGain{0};
+            uint8_t iGain{0};
+            uint8_t pGain{0};
+            uint8_t reserved{0};
+            uint16_t goalPostion{0};
+            uint16_t movingSpeed{0};
         };
     }  // namespace Types
 
@@ -106,7 +106,7 @@ namespace Darwin {
      * @brief This represents the bulk read results we get when we do one
      */
     struct BulkReadResults {
-        BulkReadResults() : cm740() {}
+        BulkReadResults() = default;
         /// @brief Holds data from the CM740
         Types::CM740Data cm740;
         /// @brief Holds data from the 20 servos (stored in location ServoID - 1)

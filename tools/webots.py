@@ -23,7 +23,7 @@ random.seed(datetime.now())
 # The docker image details for Robocup
 ROBOCUP_IMAGE_NAME = "robocup-vhsc-nubots"  # Provided by the TC and shouldn't be changed
 ROBOCUP_IMAGE_TAG = "robocup2021"  # Submitted in our team_config.json, shouldn't be changed here unless changed there
-ROBOCUP_IMAGE_REGISTRY = "834282931378.dkr.ecr.us-east-1.amazonaws.com/cbr2021-nubots"  # Provided by the TC
+ROBOCUP_IMAGE_REGISTRY = "047817357099.dkr.ecr.us-east-2.amazonaws.com/hl-vs-nubots"  # Provided by the TC
 
 # NUbots RoboCup team ID
 NUBOTS_TEAM_ID = 12
