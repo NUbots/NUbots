@@ -34,13 +34,14 @@ namespace module::input {
         std::string read_command;
 
         // FLIR like control
-        if (arv_device_get_feature(device, "TimestampLatch") && arv_device_get_feature(device, "TimestampLatchValue")) {
+        if ((arv_device_get_feature(device, "TimestampLatch") != nullptr)
+            && (arv_device_get_feature(device, "TimestampLatchValue") != nullptr)) {
             latch_command = "TimestampLatch";
             read_command  = "TimestampLatchValue";
         }
         // Genicam like control
-        else if (arv_device_get_feature(device, "GevTimestampControlLatch")
-                 && arv_device_get_feature(device, "GevTimestampValue")) {
+        else if ((arv_device_get_feature(device, "GevTimestampControlLatch") != nullptr)
+                 && (arv_device_get_feature(device, "GevTimestampValue") != nullptr)) {
             latch_command = "GevTimestampControlLatch";
             read_command  = "GevTimestampValue";
         }
@@ -65,7 +66,7 @@ namespace module::input {
         }
 
         // Sort all the invalid entries to the end
-        auto end = std::stable_partition(samples.begin(), samples.end(), [](const Sample& s) { return s.valid; });
+        auto* end = std::stable_partition(samples.begin(), samples.end(), [](const Sample& s) { return s.valid; });
 
         // Use the samples to work out the offset between our clock and the cameras clock and if this sync is valid
         int n_samples = 0;  // The number of samples that were valid
@@ -102,8 +103,6 @@ namespace module::input {
             output.drift.over_time_count = 0;
             return output;
         }
-        else {
-            return output;
-        }
+        return output;
     }
 }  // namespace module::input

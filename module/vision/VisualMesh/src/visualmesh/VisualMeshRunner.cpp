@@ -134,42 +134,42 @@ namespace module::vision::visualmesh {
                                                                                       const Shape& shape) {
 
             // clang-format off
-        if (cfg.engine      == "opencl") { return runner<Model, ::visualmesh::engine::opencl::Engine>(cfg, shape); }
-        else if (cfg.engine == "cpu")    { return runner<Model, ::visualmesh::engine::cpu::Engine>(cfg, shape);    }
-        else { throw std::runtime_error("Unknown visual mesh engine type " + cfg.engine); }
+            if (cfg.engine == "opencl") { return runner<Model, ::visualmesh::engine::opencl::Engine>(cfg, shape); }
+            if (cfg.engine == "cpu")    { return runner<Model, ::visualmesh::engine::cpu::Engine>(cfg, shape);    }
             // clang-format on
+            throw std::runtime_error("Unknown visual mesh engine type " + cfg.engine);
         }
 
         template <typename Shape>
         std::function<VisualMeshResults(const Image&, const Eigen::Affine3f&)> model(const VisualMeshModelConfig& cfg,
                                                                                      const Shape& shape) {
             // clang-format off
-        if (cfg.mesh_model      == "RING4")   { return engine<::visualmesh::model::Ring4>(cfg, shape);   }
-        else if (cfg.mesh_model == "RING6")   { return engine<::visualmesh::model::Ring6>(cfg, shape);   }
-        else if (cfg.mesh_model == "RING8")   { return engine<::visualmesh::model::Ring8>(cfg, shape);   }
-        else if (cfg.mesh_model == "XYGRID4") { return engine<::visualmesh::model::XYGrid4>(cfg, shape); }
-        else if (cfg.mesh_model == "XYGRID6") { return engine<::visualmesh::model::XYGrid6>(cfg, shape); }
-        else if (cfg.mesh_model == "XYGRID8") { return engine<::visualmesh::model::XYGrid8>(cfg, shape); }
-        else if (cfg.mesh_model == "XMGRID4") { return engine<::visualmesh::model::XMGrid4>(cfg, shape); }
-        else if (cfg.mesh_model == "XMGRID6") { return engine<::visualmesh::model::XMGrid6>(cfg, shape); }
-        else if (cfg.mesh_model == "XMGRID8") { return engine<::visualmesh::model::XMGrid8>(cfg, shape); }
-        else if (cfg.mesh_model == "NMGRID4") { return engine<::visualmesh::model::NMGrid4>(cfg, shape); }
-        else if (cfg.mesh_model == "NMGRID6") { return engine<::visualmesh::model::NMGrid6>(cfg, shape); }
-        else if (cfg.mesh_model == "NMGRID8") { return engine<::visualmesh::model::NMGrid8>(cfg, shape); }
-        else { throw std::runtime_error("Unknown visual mesh model type " + cfg.mesh_model); }
+            if (cfg.mesh_model == "RING4")   { return engine<::visualmesh::model::Ring4>(cfg, shape);   }
+            if (cfg.mesh_model == "RING6")   { return engine<::visualmesh::model::Ring6>(cfg, shape);   }
+            if (cfg.mesh_model == "RING8")   { return engine<::visualmesh::model::Ring8>(cfg, shape);   }
+            if (cfg.mesh_model == "XYGRID4") { return engine<::visualmesh::model::XYGrid4>(cfg, shape); }
+            if (cfg.mesh_model == "XYGRID6") { return engine<::visualmesh::model::XYGrid6>(cfg, shape); }
+            if (cfg.mesh_model == "XYGRID8") { return engine<::visualmesh::model::XYGrid8>(cfg, shape); }
+            if (cfg.mesh_model == "XMGRID4") { return engine<::visualmesh::model::XMGrid4>(cfg, shape); }
+            if (cfg.mesh_model == "XMGRID6") { return engine<::visualmesh::model::XMGrid6>(cfg, shape); }
+            if (cfg.mesh_model == "XMGRID8") { return engine<::visualmesh::model::XMGrid8>(cfg, shape); }
+            if (cfg.mesh_model == "NMGRID4") { return engine<::visualmesh::model::NMGrid4>(cfg, shape); }
+            if (cfg.mesh_model == "NMGRID6") { return engine<::visualmesh::model::NMGrid6>(cfg, shape); }
+            if (cfg.mesh_model == "NMGRID8") { return engine<::visualmesh::model::NMGrid8>(cfg, shape); }
             // clang-format on
+            throw std::runtime_error("Unknown visual mesh model type " + cfg.mesh_model);
         }
 
         inline std::function<VisualMeshResults(const Image&, const Eigen::Affine3f&)> geometry(
             const VisualMeshModelConfig& cfg) {
 
             // clang-format off
-        if (cfg.mesh.geometry.shape == "SPHERE") {
-            return model(cfg, ::visualmesh::geometry::Sphere<double>(cfg.mesh.geometry.radius)); }
-        else if (cfg.mesh.geometry.shape == "CIRCLE") {
-            return model(cfg, ::visualmesh::geometry::Circle<double>(cfg.mesh.geometry.radius)); }
-        else { throw std::runtime_error("Unknown visual mesh geometry type " + cfg.mesh.geometry.shape); }
+            if (cfg.mesh.geometry.shape == "SPHERE") {
+                return model(cfg, ::visualmesh::geometry::Sphere<double>(cfg.mesh.geometry.radius)); }
+            if (cfg.mesh.geometry.shape == "CIRCLE") {
+                return model(cfg, ::visualmesh::geometry::Circle<double>(cfg.mesh.geometry.radius)); }
             // clang-format on
+            throw std::runtime_error("Unknown visual mesh geometry type " + cfg.mesh.geometry.shape);
         }
 
     }  // namespace generate_runner

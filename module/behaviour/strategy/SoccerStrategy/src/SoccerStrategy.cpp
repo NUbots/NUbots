@@ -415,12 +415,13 @@ namespace module::behaviour::strategy {
     }
 
     // **************************** LOCALISATION RESETS ****************************
-    void SoccerStrategy::penaltyShootoutLocalisationReset(const FieldDescription& fd) {
+    void SoccerStrategy::penaltyShootoutLocalisationReset(const FieldDescription& fieldDescription) {
         auto robot_reset = std::make_unique<ResetRobotHypotheses>();
 
         ResetRobotHypotheses::Self selfSideBaseLine;
-        selfSideBaseLine.rTFf =
-            Eigen::Vector2d((-fd.dimensions.field_length / 2.0) + fd.dimensions.penalty_mark_distance, 0.0);
+        selfSideBaseLine.rTFf = Eigen::Vector2d(
+            (-fieldDescription.dimensions.field_length / 2.0) + fieldDescription.dimensions.penalty_mark_distance,
+            0.0);
         selfSideBaseLine.covariance  = Eigen::Vector2d::Constant(0.01).asDiagonal();
         selfSideBaseLine.heading     = -M_PI;
         selfSideBaseLine.heading_var = 0.005;

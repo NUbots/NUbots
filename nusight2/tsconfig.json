@@ -13,7 +13,7 @@
     "declaration": false,
     "removeComments": true,
     "strict": true,
-    "outDir": "build",
+    "outDir": "dist",
     "lib": [
       "ESNext",
       "dom",

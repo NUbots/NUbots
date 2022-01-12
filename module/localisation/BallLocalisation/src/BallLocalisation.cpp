@@ -19,7 +19,6 @@
 namespace module::localisation {
 
     using extension::Configuration;
-    using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
     using message::localisation::ResetBallHypotheses;
@@ -30,7 +29,7 @@ namespace module::localisation {
     using utility::support::Expression;
 
     BallLocalisation::BallLocalisation(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), filter() {
+        : Reactor(std::move(environment)) {
 
         on<Startup>().then([this] {
             last_measurement_update_time = NUClear::clock::now();

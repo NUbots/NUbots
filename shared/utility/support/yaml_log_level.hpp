@@ -53,14 +53,13 @@ namespace YAML {
         static bool decode(const Node& node, ::NUClear::LogLevel& rhs) {
             try {
                 // clang-format off
-            auto lvl = node.as<std::string>();
-            if (lvl == "TRACE") { rhs = NUClear::TRACE; }
-            else if (lvl == "DEBUG") { rhs = NUClear::DEBUG; }
-            else if (lvl == "INFO") { rhs = NUClear::INFO; }
-            else if (lvl == "WARN") { rhs = NUClear::WARN; }
-            else if (lvl == "ERROR") { rhs = NUClear::ERROR; }
-            else if (lvl == "FATAL") { rhs = NUClear::FATAL; }
-            else { rhs = NUClear::DEBUG; }
+                auto lvl = node.as<std::string>();
+                if      (lvl == "TRACE")       { rhs = NUClear::TRACE; }
+                else if (lvl == "INFO")        { rhs = NUClear::INFO;  }
+                else if (lvl == "WARN")        { rhs = NUClear::WARN;  }
+                else if (lvl == "ERROR")       { rhs = NUClear::ERROR; }
+                else if (lvl == "FATAL")       { rhs = NUClear::FATAL; }
+                else /* or (lvl == "DEBUG") */ { rhs = NUClear::DEBUG; }
                 // clang-format on
             }
             catch (const std::invalid_argument& ex) {
