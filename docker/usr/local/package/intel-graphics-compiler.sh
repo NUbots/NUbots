@@ -37,7 +37,7 @@ git clone https://github.com/intel/vc-intrinsics vc-intrinsics
 # Download and install the patches. The list of patches is from this LEGEND:
 # https://github.com/intel/intel-graphics-compiler/issues/191#issuecomment-899753344
 # llvm12-porting.patch from arch PKGBUILD for IGC
-wget https://github.com/archlinux/svntogit-community/blob/fc78567191acd6d23c2a46d8f5de331a820584b4/trunk/llvm12-porting.patch -O - | patch -p1
+wget https://raw.githubusercontent.com/archlinux/svntogit-community/fc78567191acd6d23c2a46d8f5de331a820584b4/trunk/llvm12-porting.patch -O - | patch -p1
 # Revert stack-analysis
 wget https://github.com/intel/intel-graphics-compiler/commit/c50d77f3c8a92fae6f43b47580e7d485f9ea5327.patch -O - | patch -p1 -R
 # igc-missing-limits-headers - one line patch for missing include
