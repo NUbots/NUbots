@@ -119,7 +119,7 @@ namespace extension::behaviour {
          * @return the information needed by the on statement
          */
         template <typename DSL>
-        static inline TaskInfo<T> get(NUClear::threading::Reaction& r) {
+        static inline TaskInfo<T> get(NUClear::threading::Reaction& /*r*/) {
             // TODO(@TrentHouliston) get the data from the director once it's algorithm is more fleshed out
             return TaskInfo<T>();
         }
@@ -215,7 +215,7 @@ namespace extension::behaviour {
                 },
                 // Binder function that lets a reactor bind a function that is called when the state changes
                 [](NUClear::Reactor& reactor,
-                   std::function<void(const int&)> fn) -> NUClear::threading::ReactionHandle {
+                   const std::function<void(const int&)>& fn) -> NUClear::threading::ReactionHandle {
                     return reactor.on<NUClear::dsl::word::Trigger<State>>().then(
                         [fn](const State& s) { fn(static_cast<int>(s)); });
                 }));
@@ -294,7 +294,7 @@ namespace extension::behaviour {
                          const bool& optional    = false) {
 
             // Work out who is sending the task so we can determine if it's a subtask
-            auto* task           = NUClear::threading::ReactionTask::get_current_task();
+            const auto* task     = NUClear::threading::ReactionTask::get_current_task();
             uint64_t reaction_id = (task != nullptr) ? task->parent.id : -1;
             uint64_t task_id     = (task != nullptr) ? task->id : -1;
 

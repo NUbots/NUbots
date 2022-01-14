@@ -6,3 +6,4 @@ stringcase
 si-prefix
 numpy
 argcomplete
+honcho

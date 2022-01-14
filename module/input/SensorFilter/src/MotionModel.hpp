@@ -142,7 +142,7 @@ namespace module::input {
             if (norm != Scalar(0)) {
                 // The gyroscope has measured a rotation of norm * deltaT around the axis
                 // omegaTTt / norm
-                Eigen::AngleAxis dq(norm * deltaT, newState.omegaTTt / norm);
+                Eigen::AngleAxis<Scalar> dq(norm * deltaT, newState.omegaTTt / norm);
 
                 // Update our orientation
                 newState.Rwt = newState.Rwt * dq;
