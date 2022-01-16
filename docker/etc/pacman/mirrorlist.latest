@@ -1,0 +1,2 @@
+# Intentionally use the latest mirror list so that we can pick up the latest public keys from the core arch linux maintainers.
+Server=https://archive.archlinux.org/repos/last/$repo/os/$arch

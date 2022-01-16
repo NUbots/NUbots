@@ -32,8 +32,8 @@ echo "Configuring using cmake file ${CMAKELISTS_FILE}"
 
 # Clone the dependency
 git clone https://github.com/intel/vc-intrinsics vc-intrinsics
-# Use this specific commit.
-git checkout --git-dir=vc-intrinsics/.git a2f2f10dc61c8161c57cf33ed606c8e3ccf3a921
+# Lock to specific version so future upstream changes do not interfer with our builds.
+git -C vc-intrinsics/ checkout a2f2f10dc61c8161c57cf33ed606c8e3ccf3a921
 
 # TODO(DevOpsTeam): Upgrade IGC version once they support clang12+ properly and remove these patches
 # Download and install the patches. The list of patches is from this LEGEND:
