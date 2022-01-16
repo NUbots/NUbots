@@ -23,6 +23,8 @@ RUN pacman -Syyuu --noconfirm --needed --overwrite \*
 
 # Add a script that installs packages
 COPY usr/local/bin/install-package /usr/local/bin/install-package
+COPY etc/pacman/pacman.latest.conf /etc/pacman.latest.conf
+COPY etc/pacman/mirrorlist.latest /etc/pacman.d/mirrorlist.latest
 
 # Install base packages needed for building general toolchain
 # If you have a tool that's needed for a specific module install it before that module
@@ -129,6 +131,7 @@ RUN install-from-source https://xorg.freedesktop.org/releases/individual/lib/lib
 RUN install-meson-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.104.tar.xz \
     -Dudev=false \
     -Dvalgrind=false
+
 # libva
 # Needs -Dwith_x11: see https://github.com/intel/media-driver/issues/899
 # -Dwith_x11 requires x11 to be installed
