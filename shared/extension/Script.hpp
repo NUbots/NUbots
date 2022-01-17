@@ -20,6 +20,7 @@
 
 #include <cstdlib>
 #include <filesystem>
+#include <fstream>
 #include <nuclear>
 #include <regex>
 #include <string>
