@@ -14,6 +14,8 @@ FROM archlinux:base-20210829.0.32635
 
 # ↓↓↓ UPDATE MIRRORS HERE ↓↓↓
 RUN echo -e "Server=http://host.docker.internal:7878/\$repo/os/\$arch\nServer=https://archive.archlinux.org/repos/2021/08/29/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
+# If you ever update the mirror date, search the repository for UPDATE MIRRORS HERE to find all the places where the URL
+# needs to be altered.
 
 # Arch recommends running this as the first command of the docker image
 # Use "yyuu" to allow for downgrades
