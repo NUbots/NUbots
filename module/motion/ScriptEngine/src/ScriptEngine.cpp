@@ -89,4 +89,26 @@ namespace module::motion {
             emit(std::move(waypoints));
         });
     }
+
+    std::pair<std::string, std::string> pathSplit(const std::string& input) {
+
+        size_t lastSlash = input.rfind('/');
+
+        // There was no slash
+        if (lastSlash == std::string::npos) {
+            return {".", input};
+        }
+        // The slash was the last character
+        if (lastSlash + 1 == input.size()) {
+            // If all we had was a slash
+            if (input.size() == 1) {
+                return {"/", "/"};
+            }
+            // Otherwise remove the slash and call recursivly
+            return pathSplit(input.substr(0, input.size() - 1));
+        }
+        // Else, the slash was not the last character
+        return {input.substr(0, lastSlash), input.substr(lastSlash + 1, input.size())};
+    }
+
 }  // namespace module::motion

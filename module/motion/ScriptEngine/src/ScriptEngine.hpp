@@ -39,6 +39,7 @@ namespace module::motion {
     public:
         explicit ScriptEngine(std::unique_ptr<NUClear::Environment> environment);
         static constexpr const char* CONFIGURATION_PATH = "";
+        std::pair<std::string, std::string> pathSplit(const std::string& input);
     };
 }  // namespace module::motion
 
