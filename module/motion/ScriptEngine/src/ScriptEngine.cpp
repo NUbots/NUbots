@@ -90,7 +90,7 @@ namespace module::motion {
         });
     }
 
-    std::pair<std::string, std::string> pathSplit(const std::string& input) {
+    std::pair<std::string, std::string> ScriptEngine::pathSplit(const std::string& input) {
 
         size_t lastSlash = input.rfind('/');
 
