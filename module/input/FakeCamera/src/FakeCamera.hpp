@@ -34,6 +34,8 @@ namespace module::input {
             }
         });
 
+        std::vector<uint8_t> readFile(const std::filesystem::path& path);
+
     public:
         /// @brief Called by the powerplant to build and setup the FakeCamera reactor.
         explicit FakeCamera(std::unique_ptr<NUClear::Environment> environment);
