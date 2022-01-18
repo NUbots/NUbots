@@ -1,6 +1,8 @@
 #ifndef MODULE_INPUT_FAKECAMERA_HPP
 #define MODULE_INPUT_FAKECAMERA_HPP
 
+
+#include <filesystem>
 #include <memory>
 #include <mutex>
 #include <nuclear>
