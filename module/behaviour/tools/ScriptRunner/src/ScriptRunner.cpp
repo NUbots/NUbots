@@ -58,7 +58,7 @@ namespace module::behaviour::tools {
     }
 
     ScriptRunner::ScriptRunner(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), scripts(), id(size_t(this) * size_t(this) - size_t(this)), script_delay(0) {
+        : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)), script_delay(0) {
 
         // Get the scripts to run from the command line
         on<Configuration, With<CommandLineArguments>>("ScriptRunner.yaml")
@@ -74,7 +74,7 @@ namespace module::behaviour::tools {
                 }
 
                 // If scripts are in the config file
-                else if (scripts.size() > 0) {
+                else if (!scripts.empty()) {
                     NUClear::log<NUClear::INFO>("Executing: ", scripts.size(), " script from config");
                 }
 
@@ -92,16 +92,16 @@ namespace module::behaviour::tools {
             {std::pair<float, std::set<LimbID>>(
                 1,
                 {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
-            [this](const std::set<LimbID>&) {
+            [this](const std::set<LimbID>& /* limbs */) {
                 on<Trigger<ButtonMiddleDown>>().then([this] {
                     std::this_thread::sleep_for(std::chrono::seconds(script_delay));
                     emit(std::make_unique<ExecuteNextScript>());
                 });
             },
-            [](const std::set<LimbID>&) {
+            [](const std::set<LimbID>& /* limbs */) {
                 // We should always be the only running thing
             },
-            [this](const std::set<ServoID>&) {
+            [this](const std::set<ServoID>& /* servos */) {
                 on<Trigger<ButtonMiddleDown>>().then([this] {
                     std::this_thread::sleep_for(std::chrono::seconds(script_delay));
                     emit(std::make_unique<ExecuteNextScript>());

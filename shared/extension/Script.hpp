@@ -25,6 +25,7 @@
 #include <regex>
 #include <string>
 #include <system_error>
+#include <utility>
 #include <yaml-cpp/yaml.h>
 
 #include "FileWatch.hpp"
@@ -43,21 +44,14 @@ namespace extension {
     struct Script {
         struct Frame {
             struct Target {
-                Target() : id(), position(0.0f), gain(0.0f), torque(0.0f) {}
+                Target() = default;
                 Target(const ServoID& servo, float pos, float gain, float torque)
                     : id(servo), position(pos), gain(gain), torque(torque) {}
-                Target(const Target& other)
-                    : id(other.id), position(other.position), gain(other.gain), torque(other.torque) {}
+                Target(const Target& other) = default;
                 Target(Target&& other) noexcept
                     : id(other.id), position(other.position), gain(other.gain), torque(other.torque) {}
-                Target& operator=(const Target& other) {
-                    id       = other.id;
-                    position = other.position;
-                    gain     = other.gain;
-                    torque   = other.torque;
-                    return *this;
-                }
-                Target& operator=(Target&& other) noexcept {
+                Target& operator=(const Target& other) = default;
+                Target& operator                       =(Target&& other) noexcept {
                     id       = other.id;
                     position = other.position;
                     gain     = other.gain;
@@ -66,14 +60,14 @@ namespace extension {
                 }
 
                 ServoID id;
-                float position;
-                float gain;
-                float torque;
+                float position{0.0f};
+                float gain{0.0f};
+                float torque{0.0f};
             };
 
-            Frame() : duration(), targets() {}
-            Frame(const NUClear::clock::duration& dur, const std::vector<Target>& targets)
-                : duration(dur), targets(targets) {}
+            Frame() : duration() {}
+            Frame(const NUClear::clock::duration& dur, std::vector<Target> targets)
+                : duration(dur), targets(std::move(targets)) {}
 
             NUClear::clock::duration duration;
             std::vector<Target> targets;
@@ -83,19 +77,13 @@ namespace extension {
         YAML::Node config;
         std::vector<Frame> frames;
 
-        Script()
-            : fileName()
-            , hostname(utility::support::getHostname())
-            , platform(Script::getPlatform(hostname))
-            , config()
-            , frames() {}
+        Script() : hostname(utility::support::getHostname()), platform(Script::getPlatform(hostname)), config() {}
 
-        Script(const std::vector<Frame>& frames)
-            : fileName()
-            , hostname(utility::support::getHostname())
+        Script(std::vector<Frame> frames)
+            : hostname(utility::support::getHostname())
             , platform(Script::getPlatform(hostname))
             , config()
-            , frames(frames) {}
+            , frames(std::move(frames)) {}
 
         Script(const std::string& fileName,
                const std::string& hostname,
@@ -105,7 +93,7 @@ namespace extension {
             : fileName(fileName), hostname(hostname), platform(platform), config(config), frames(frames) {}
 
         Script(const std::string& fileName, const std::string& hostname, const std::string& platform)
-            : fileName(fileName), hostname(hostname), platform(platform), config(), frames() {
+            : fileName(fileName), hostname(hostname), platform(platform), config() {
 
             // Per robot scripts:    Scripts that are specific to a certain robot (e.g. darwin1).
             //                       These are to account for minor hardware variations in a robot and, as such, take
@@ -142,18 +130,16 @@ namespace extension {
                 return match[1].str();
             }
 
-            else {
-                throw std::system_error(-1,
-                                        std::system_category(),
-                                        ("Failed to extract platform name from '" + hostname + "'."));
-            }
+            throw std::system_error(-1,
+                                    std::system_category(),
+                                    ("Failed to extract platform name from '" + hostname + "'."));
         }
 
         Script operator[](const std::string& key) {
             return Script(fileName, hostname, platform, config[key], frames);
         }
 
-        const Script operator[](const std::string& key) const {
+        Script operator[](const std::string& key) const {
             return Script(fileName, hostname, platform, config[key], frames);
         }
 
@@ -161,7 +147,7 @@ namespace extension {
             return Script(fileName, hostname, platform, config[key], frames);
         }
 
-        const Script operator[](const char* key) const {
+        Script operator[](const char* key) const {
             return Script(fileName, hostname, platform, config[key], frames);
         }
 
@@ -169,7 +155,7 @@ namespace extension {
             return Script(fileName, hostname, platform, config[index], frames);
         }
 
-        const Script operator[](size_t index) const {
+        Script operator[](size_t index) const {
             return Script(fileName, hostname, platform, config[index], frames);
         }
 
@@ -177,7 +163,7 @@ namespace extension {
             return Script(fileName, hostname, platform, config[index], frames);
         }
 
-        const Script operator[](int index) const {
+        Script operator[](int index) const {
             return Script(fileName, hostname, platform, config[index], frames);
         }
 
@@ -203,7 +189,7 @@ namespace extension {
             return config.as<std::string>();
         }
 
-        void save(const std::string& file) {
+        void save(const std::string& file) const {
             std::ofstream yaml("scripts/" + hostname + "/" + file, std::ios::trunc | std::ios::out);
             yaml << YAML::convert<std::vector<Frame>>::encode(frames);
             yaml.close();
@@ -229,9 +215,9 @@ namespace extension {
             : sourceId(id), scripts(scripts), duration_modifier(scripts.size(), 1.0), start(start){};
         ExecuteScriptByName(const size_t& id,
                             const std::vector<std::string>& scripts,
-                            const std::vector<double>& duration_mod,
+                            std::vector<double> duration_mod,
                             const NUClear::clock::time_point& start = NUClear::clock::now())
-            : sourceId(id), scripts(scripts), duration_modifier(duration_mod), start(start) {
+            : sourceId(id), scripts(scripts), duration_modifier(std::move(duration_mod)), start(start) {
             while (scripts.size() > duration_modifier.size()) {
                 duration_modifier.push_back(1.0);
             }
@@ -262,9 +248,9 @@ namespace extension {
             : sourceId(id), scripts(scripts), duration_modifier(scripts.size(), 1.0), start(start){};
         ExecuteScript(const size_t& id,
                       const std::vector<Script>& scripts,
-                      const std::vector<double>& duration_mod,
+                      std::vector<double> duration_mod,
                       NUClear::clock::time_point start = NUClear::clock::now())
-            : sourceId(id), scripts(scripts), duration_modifier(duration_mod), start(start) {
+            : sourceId(id), scripts(scripts), duration_modifier(std::move(duration_mod)), start(start) {
             while (scripts.size() > duration_modifier.size()) {
                 duration_modifier.push_back(1.0);
             }
@@ -296,8 +282,8 @@ namespace NUClear::dsl {
             static inline void bind(const std::shared_ptr<threading::Reaction>& reaction, const std::string& path) {
                 auto flags = ::extension::FileWatch::RENAMED | ::extension::FileWatch::CHANGED;
 
-                std::string hostname = utility::support::getHostname(),
-                            platform(::extension::Script::getPlatform(hostname));
+                std::string hostname = utility::support::getHostname();
+                std::string platform(::extension::Script::getPlatform(hostname));
 
                 // Set paths to the script files.
                 auto robotScript    = "scripts/" + hostname + "/" + path;
@@ -327,8 +313,8 @@ namespace NUClear::dsl {
                 if (watch && utility::strutil::endsWith(watch.path, ".yaml")) {
                     // Return our yaml file
                     try {
-                        std::string hostname = utility::support::getHostname(),
-                                    platform(::extension::Script::getPlatform(hostname));
+                        std::string hostname = utility::support::getHostname();
+                        std::string platform(::extension::Script::getPlatform(hostname));
 
                         // Get relative path to script file.
                         auto components = utility::strutil::split(watch.path, '/');
@@ -337,12 +323,12 @@ namespace NUClear::dsl {
 
                         for (const auto& component : components) {
                             // Ignore the hostname/platform name if they are present.
-                            if (flag && (component.compare(hostname) != 0) && (component.compare(platform) != 0)) {
+                            if (flag && (component != hostname) && (component != platform)) {
                                 relativePath.append(component + "/");
                             }
 
                             // We want out paths relative to the script folder.
-                            if (component.compare("scripts") == 0) {
+                            if (component == "scripts") {
                                 flag = true;
                             }
                         }
@@ -390,7 +376,7 @@ namespace YAML {
                 rhs = {node["id"].as<std::string>(),
                        node["position"].as<float>(),
                        node["gain"].as<float>(),
-                       node["torque"] ? node["torque"].as<float>() : 100};
+                       node["torque"] != nullptr ? node["torque"].as<float>() : 100};
             }
             catch (const YAML::Exception& e) {
                 NUClear::log<NUClear::ERROR>("Error parsing script -",
@@ -425,9 +411,8 @@ namespace YAML {
                 int millis = node["duration"].as<int>();
                 std::chrono::milliseconds duration(millis);
 
-                std::vector<::extension::Script::Frame::Target> targets =
-                    node["targets"].as<std::vector<::extension::Script::Frame::Target>>();
-                rhs = {duration, targets};
+                auto targets = node["targets"].as<std::vector<::extension::Script::Frame::Target>>();
+                rhs          = {duration, targets};
             }
             catch (const YAML::Exception& e) {
                 NUClear::log<NUClear::ERROR>("Error parsing script -",
@@ -458,8 +443,8 @@ namespace YAML {
 
         static inline bool decode(const Node& node, ::extension::Script& rhs) {
             try {
-                std::vector<::extension::Script::Frame> frames = node.as<std::vector<::extension::Script::Frame>>();
-                rhs                                            = {frames};
+                auto frames = node.as<std::vector<::extension::Script::Frame>>();
+                rhs         = {frames};
             }
             catch (const YAML::Exception& e) {
                 NUClear::log<NUClear::ERROR>("Error parsing script -",

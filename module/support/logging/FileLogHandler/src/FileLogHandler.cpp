@@ -16,7 +16,6 @@ namespace module::support::logging {
 
     FileLogHandler::FileLogHandler(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
-        , mutex()
         , log_file_name("/home/nubots/log")
         , log_file(log_file_name, std::ios_base::out | std::ios_base::app | std::ios_base::ate) {
 
@@ -92,7 +91,7 @@ namespace module::support::logging {
             std::string source = "";
 
             // If we know where this log message came from, we display that
-            if (message.task) {
+            if (message.task != nullptr) {
                 // Get our reactor name
                 std::string reactor = message.task->identifier[1];
 

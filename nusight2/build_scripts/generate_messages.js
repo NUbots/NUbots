@@ -22,8 +22,9 @@ function generateMessagesJs(outputFilePath) {
   // prettier-ignore
   const args = [
     '--target', 'static-module',
-    '--wrap', 'commonjs',
+    '--wrap', 'es6',
     '--out', outputFilePath,
+    '--no-create', '--no-verify', '--no-convert', '--no-delimited',
     ...messageSourceDirs.map(dir => ['--path', dir]).flat(),
     ...messageSourceFiles
   ]

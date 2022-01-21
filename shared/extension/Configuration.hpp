@@ -22,6 +22,7 @@
 #include <filesystem>
 #include <fstream>
 #include <nuclear>
+#include <utility>
 #include <yaml-cpp/yaml.h>
 
 #include "FileWatch.hpp"
@@ -153,7 +154,7 @@ namespace extension {
             return Configuration(fileName, hostname, binary, config[key]);
         }
 
-        [[nodiscard]] const Configuration operator[](const std::string& key) const {
+        [[nodiscard]] Configuration operator[](const std::string& key) const {
             return Configuration(fileName, hostname, binary, config[key]);
         }
 
@@ -161,7 +162,7 @@ namespace extension {
             return Configuration(fileName, hostname, binary, config[key]);
         }
 
-        [[nodiscard]] const Configuration operator[](const char* key) const {
+        [[nodiscard]] Configuration operator[](const char* key) const {
             return Configuration(fileName, hostname, binary, config[key]);
         }
 
@@ -169,7 +170,7 @@ namespace extension {
             return Configuration(fileName, hostname, binary, config[index]);
         }
 
-        [[nodiscard]] const Configuration operator[](size_t index) const {
+        [[nodiscard]] Configuration operator[](size_t index) const {
             return Configuration(fileName, hostname, binary, config[index]);
         }
 
@@ -177,7 +178,7 @@ namespace extension {
             return Configuration(fileName, hostname, binary, config[index]);
         }
 
-        [[nodiscard]] const Configuration operator[](int index) const {
+        [[nodiscard]] Configuration operator[](int index) const {
             return Configuration(fileName, hostname, binary, config[index]);
         }
 
@@ -328,12 +329,12 @@ namespace NUClear::dsl {
                         bool flag = false;
                         for (const auto& component : components) {
                             // Ignore the hostname/binary name if they are present.
-                            if (flag && (component.compare(hostname) != 0) && (component.compare(binaryName) != 0)) {
+                            if (flag && (component != hostname) && (component != binaryName)) {
                                 relativePath = relativePath / component;
                             }
 
                             // We want out paths relative to the config folder.
-                            if (component.compare("config") == 0) {
+                            if (component == "config") {
                                 flag = true;
                             }
                         }

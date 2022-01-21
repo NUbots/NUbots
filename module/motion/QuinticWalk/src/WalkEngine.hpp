@@ -175,7 +175,7 @@ namespace module::motion {
          *         {trunkPositionTarget, trunkAxisTarget, footPositionTarget, footAxisTarget, isLeftsupportFoot}
          */
         [[nodiscard]] PositionSupportTuple computeCartesianPosition() const;  // Gets current time and calls below func
-        [[nodiscard]] PositionSupportTuple computeCartesianPositionAtTime(const float time) const;
+        [[nodiscard]] PositionSupportTuple computeCartesianPositionAtTime(const float& time) const;
 
         constexpr void requestKick(const bool& left) {
             if (left) {

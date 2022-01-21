@@ -220,9 +220,8 @@ namespace module::behaviour::planning {
 
                 float scaleS         = 2.0 / (1.0 + std::exp(-a * std::fabs(position.y()) + b)) - 1.0;
                 float scaleS2        = angle / M_PI;
-                float finalSideSpeed = -speedFactor * ((0.0 < position.y()) - (position.y() < 0.0)) * sideStep
-                                       * sideSpeed * scaleS * (1.0 - scaleS2);
-
+                float finalSideSpeed = -speedFactor * (float(0.0f < position.y()) - float(position.y() < 0.0))
+                                       * sideStep * sideSpeed * scaleS * (1.0 - scaleS2);
 
                 std::unique_ptr<WalkCommand> command =
                     std::make_unique<WalkCommand>(subsumptionId,

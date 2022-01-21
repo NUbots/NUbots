@@ -53,7 +53,7 @@ namespace utility::motion::splines {
          * Reset spline to be empty
          */
         inline void reset() {
-            typename Map::iterator it = container.begin();
+            auto it = container.begin();
 
             for (size_t i = 0; i < size(); i++) {
                 container[it->first].reset();

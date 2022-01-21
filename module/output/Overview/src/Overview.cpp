@@ -24,7 +24,6 @@ namespace module::output {
     using extension::Configuration;
     using message::behaviour::Behaviour;
     using message::behaviour::KickPlan;
-    using message::behaviour::WalkPath;
     using message::input::GameState;
     using message::input::Image;
     using message::input::Sensors;
