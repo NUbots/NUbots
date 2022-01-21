@@ -20,8 +20,10 @@ BUILD_FOLDER="/var/tmp/build"
 mkdir -p "${BUILD_FOLDER}"
 cd "${BUILD_FOLDER}"
 
-# Download the source code and extract it
-download-and-extract "${URL}"
+if [ "${METHOD}" != "install-makepkg-from-source" ]; then
+    # Download the source code and extract it
+    download-and-extract "${URL}"
+fi
 
 if [ "${METHOD}" = "install-from-source-with-patches" ]; then
     METHOD="install-from-source"
@@ -126,7 +128,7 @@ elif [ "${METHOD}" = 'install-autotools-from-source' ]; then
     echo "Configuring using configure file ${CONFIGURE_FILE}"
 
     # Run configure
-    CFLAGS="${CFLAGS}" CXXFLAGS="${CXXFLAGS}" FFLAGS="${FFLAGS}" FCFLAGS="${FCFLAGS}" \
+    CFLAGS="${CFLAGS}" CXXFLAGS="${CXXFLAGS}" FFLAGS="${FFLAGS}" FCFLAGS="${FCFLAGS}" LIBS="${LIBS}" \
         ./configure "$@" --prefix="${PREFIX}"
 
     # Run make
@@ -255,8 +257,20 @@ elif [ "${METHOD}" = 'install-python-from-source' ]; then
     CXXFLAGS="${CXXFLAGS}" \
     FFLAGS="${FFLAGS}" \
     FCFLAGS="${FCFLAGS}" \
-    python setup.py install "$@" --prefix="${PREFIX}"
 
+    # https://stackoverflow.com/questions/6301003/stopping-setup-py-from-installing-as-egg
+    python -m pip install . --prefix="${PREFIX}" "$@"
+elif [ "${METHOD}" = 'install-makepkg-from-source' ]; then
+    echo 'Building using makepkg'
+
+    # Copy the PKGBUILD script into the build folder.
+    cp "${URL}" "${BUILD_FOLDER}"/PKGBUILD
+
+    # Ensure that the nobody user has access to the build folder.
+    chown nobody:nobody "${BUILD_FOLDER}"
+    # Build the package as nobody using the PKGBUILD script.
+    sudo -u nobody makepkg
+    sudo pacman -U --noconfirm --needed --noprogressbar "$(sudo -u nobody makepkg --packagelist)"
 fi;
 
 # Now that we have built, cleanup the build directory
