@@ -5,36 +5,18 @@ set -e
 if ! [ $(id -u) = 0 ]; then
     sudo "$0" "$@"
 else
-    # Public keys used for signing packages change over time. For example, run:
-    #
-    #   $ pacman-key --list-keys | grep expired
-    #
-    # to see all the expired keys on the system. The consequence is that when installing packages
-    # verifying the signature can fail because the downloaded package is signed with an expired key.
-    # There is a solution which downloads new keys if available, which 'un-expire' the old key and
-    # allow packages to be installed:
+    # Grab valid public keys from the latest version of Arch Linux.
+    # Equivalently, but much slower:
     #
     #   $ pacman-key --refresh-keys
     #
-    # however it's too slow to be done everytime packages are installed as it tries to refresh every
-    # key in the system. But wait, there is another solution...
-    #
-    # The archlinux-keyring package maintains these keys on a normal system and is kept up to date
-    # with the latest mirror of arch linux. It turns out that repopulating the pacman-key database
-    # is quicker than individually refreshing keys. This is done by installing archlinux-keyring
-    # from the latest mirror and then installing the other packages from the date-locked mirrors.
-    # Therefore, we use a quicker method. Find the latest version of archlinux-keyring,
-    # assume that it *only* updates the keys and has no other dependencies, and install
-    # the package, then use the previous mirror list for installing all other packages.
-    echo 'Updating to the latest keyring.'
-
-    # TODO(Andrew): silence the output from these unless they fail
+    echo 'Updating public keys.'
     pacman-key --init
     pacman -Sy --noconfirm --config /etc/pacman.latest.conf archlinux-keyring
 
     echo 'Resetting the system to the old package database.'
     # The package database is now out of date *and* at a later version than what we use.
-    # Force down grade the package database, upgrade the system if needed.
+    # Force down grade the package database, and perform any upgrades if needed.
     pacman -Syyu --noconfirm --needed
 
     # Install the packages if needed.
