@@ -25,6 +25,7 @@ RUN pacman -Syyuu --noconfirm --needed --overwrite \*
 
 # Add a script that installs packages
 COPY usr/local/bin/install-package /usr/local/bin/install-package
+COPY etc/pacman/pacman.latest.conf /etc/pacman.latest.conf
 
 # Install base packages needed for building general toolchain
 # If you have a tool that's needed for a specific module install it before that module
