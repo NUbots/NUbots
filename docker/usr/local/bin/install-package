@@ -5,11 +5,15 @@ set -e
 if ! [ $(id -u) = 0 ]; then
     sudo "$0" "$@"
 else
-    # Public keys may have expired since the last time the cached layer was added...
-    # So, download the latest version of archlinux-keyring...
-    wget https://www.archlinux.org/packages/core/any/archlinux-keyring/download/ -O /var/tmp/archlinux-keyring.pkg.tar.zst
-    # And install it.
-    pacman -U /var/tmp/archlinux-keyring.pkg.tar.zst --noconfirm
+    if [ -e /usr/sbin/wget ]; then
+        # Public keys may have expired since the last time the cached layer was added...
+        # So, download the latest version of archlinux-keyring...
+        wget https://www.archlinux.org/packages/core/any/archlinux-keyring/download/ -O /var/tmp/archlinux-keyring.pkg.tar.zst
+        # And install it.
+        pacman -U /var/tmp/archlinux-keyring.pkg.tar.zst --noconfirm
+        # And clean up too.
+        rm /var/tmp/archlinux-keyring.pkg.tar.zst
+    fi
 
     # Refresh the repository databases, and upgrade any packages if needed.
     pacman -Syu --noconfirm --needed
@@ -17,5 +21,4 @@ else
     pacman -S --noconfirm --needed "$@"
     # Clean up the cache to make the layer smaller.
     rm -rf /var/cache
-    rm /var/tmp/archlinux-keyring.pkg.tar.zst
 fi
