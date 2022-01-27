@@ -161,7 +161,7 @@ RUN /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute
 # Install OpenCL C and C++ headers
 COPY usr/local/package/opencl-headers.sh /usr/local/package/opencl-headers.sh
 RUN /usr/local/package/opencl-headers.sh https://github.com/KhronosGroup/OpenCL-Headers/archive/v2020.12.18.tar.gz
-RUN install-from-source https://github.com/KhronosGroup/OpenCL-CLHPP/archive/master.tar.gz \
+RUN install-from-source https://github.com/KhronosGroup/OpenCL-CLHPP/archive/refs/tags/v2.0.16.tar.gz \
     -DOPENCL_INCLUDE_DIR=/usr/local/include/CL \
     -DOPENCL_LIB_DIR=/usr/local/lib \
     -DBUILD_DOCS=OFF \
