@@ -10,7 +10,7 @@
 ### The date in the Server command must either match, or be more recent than,
 ### the date in the FROM command
 ### Date format is ISO year/month/day
-FROM archlinux:base-20210829.0.32635
+FROM archlinux:base-20210829.0.32635 as BASE
 
 # ↓↓↓ UPDATE MIRRORS HERE ↓↓↓
 RUN echo -e "Server=http://host.docker.internal:7878/\$repo/os/\$arch\nServer=https://archive.archlinux.org/repos/2021/08/29/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
@@ -94,6 +94,8 @@ ARG platform=generic
 COPY usr/local/toolchain/generate_${platform}_toolchain.py /usr/local/generate_toolchain.py
 RUN python /usr/local/generate_toolchain.py --prefix /usr/local
 
+FROM base AS llvm
+
 # zlib
 RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
 
@@ -103,6 +105,9 @@ RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm
     -DLLVM_ENABLE_SPHINX=OFF \
     -DLLVM_BUILD_LLVM_DYLIB=ON \
     -DLLVM_LINK_LLVM_DYLIB=ON
+
+FROM base as intel-graphics-compiler-and-compute-runtime
+COPY --from=llvm /usr/local/ /usr/local/
 
 # SPIRV LLVM Translator
 RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v12.0.0.tar.gz \
@@ -172,10 +177,14 @@ RUN install-from-source https://github.com/KhronosGroup/OpenCL-CLHPP/archive/ref
 RUN install-package ruby
 RUN install-from-source https://github.com/OCL-dev/ocl-icd/archive/v2.2.14.tar.gz
 
+FROM base AS openblas
+
 # OpenBLAS
 RUN install-package gcc-fortran
 COPY usr/local/package/openblas/${platform}.sh /usr/local/package/openblas.sh
 RUN /usr/local/package/openblas.sh https://github.com/xianyi/OpenBLAS/archive/v0.3.13.tar.gz
+
+FROM base AS other-dependencies
 
 # Eigen3
 COPY usr/local/package/eigen3/deprecated-copy.patch /usr/local/package/deprecated-copy.patch
@@ -276,6 +285,12 @@ RUN mkdir -p /usr/local/include/zstr \
     && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/zstr.hpp -O /usr/local/include/zstr.hpp \
     && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/strict_fstream.hpp -O /usr/local/include/strict_fstream.hpp \
     && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/zstr_make_unique_polyfill.h -O /usr/local/include/zstr_make_unique_polyfill.h
+
+FROM base AS final-image
+COPY --from=llvm /usr/local/ /usr/local/
+COPY --from=intel-graphics-compiler-and-compute-runtime /usr/local/ /usr/local/
+COPY --from=openblas /usr/local/ /usr/local/
+COPY --from=other-dependencies /usr/local/ /usr/local/
 
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
