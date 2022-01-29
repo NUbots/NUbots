@@ -24,6 +24,7 @@
 #include <Eigen/Eigenvalues>
 #include <cmath>
 #include <random>
+#include <utility>
 
 namespace utility::math::stats {
 
@@ -58,8 +59,8 @@ namespace utility::math::stats {
          * @param mean_ The mean for this mean multivariate normal distribution
          * @param covariance_ The covariance matrix for this multivariate normal distribution
          */
-        MultivariateNormal(const Eigen::Matrix<Scalar, N, 1>& mean_, const Eigen::Matrix<Scalar, N, N>& covariance_)
-            : mean(mean_), covariance(covariance_), gen(std::random_device()()) {
+        MultivariateNormal(Eigen::Matrix<Scalar, N, 1> mean_, const Eigen::Matrix<Scalar, N, N>& covariance_)
+            : mean(std::move(mean_)), covariance(covariance_), gen(std::random_device()()) {
 
             // Calculate the spectral decomposition of the covariance matrix
             // This is needed MultivariateNormal::sample

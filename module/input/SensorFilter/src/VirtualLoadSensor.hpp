@@ -139,7 +139,7 @@ namespace module::input {
 
         Eigen::Matrix<Scalar, 2, 1> state = Eigen::Matrix<Scalar, 2, 1>::Zero();
 
-    public:
+
         enum Field { POSITION, VELOCITY, LOAD };
 
         Scalar noise_factor          = Scalar(0.0);

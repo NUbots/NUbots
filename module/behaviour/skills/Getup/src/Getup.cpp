@@ -51,9 +51,7 @@ namespace module::behaviour::skills {
         , id(size_t(this) * size_t(this) - size_t(this))
         , isFront(true)
         , gettingUp(false)
-        , FALLEN_ANGLE(M_PI_2)
-        , GETUP_PRIORITY(0.0f)
-        , EXECUTION_PRIORITY(0.0f) {
+        , FALLEN_ANGLE(M_PI_2) {
         // do a little configurating
         on<Configuration>("Getup.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
@@ -113,9 +111,9 @@ namespace module::behaviour::skills {
             {std::pair<float, std::set<LimbID>>(
                 0,
                 {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
-            [this](const std::set<LimbID>&) { emit(std::make_unique<ExecuteGetup>()); },
-            [this](const std::set<LimbID>&) { emit(std::make_unique<KillGetup>()); },
-            [this](const std::set<ServoID>&) { emit(std::make_unique<KillGetup>()); }}));
+            [this](const std::set<LimbID>& /* limbs */) { emit(std::make_unique<ExecuteGetup>()); },
+            [this](const std::set<LimbID>& /* limbs */) { emit(std::make_unique<KillGetup>()); },
+            [this](const std::set<ServoID>& /* servos */) { emit(std::make_unique<KillGetup>()); }}));
     }
 
     void Getup::updatePriority(const float& priority) {

@@ -36,7 +36,7 @@ namespace module::behaviour::strategy {
     using message::motion::HeadCommand;
 
 
-    PS3Walk::PS3Walk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), joystick() {
+    PS3Walk::PS3Walk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Every<1, std::chrono::milliseconds>, Single>().then([this] {
             JoystickEvent event;

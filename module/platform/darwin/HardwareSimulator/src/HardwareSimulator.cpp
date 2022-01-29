@@ -58,9 +58,9 @@ namespace module::platform::darwin {
         sensors.platform_error_flags = 0;
 
         // LED Panel
-        sensors.led_panel.led2 = 0;
-        sensors.led_panel.led3 = 0;
-        sensors.led_panel.led4 = 0;
+        sensors.led_panel.led2 = false;
+        sensors.led_panel.led3 = false;
+        sensors.led_panel.led4 = false;
 
         // Head LED
         sensors.head_led.RGB = 0;
@@ -69,8 +69,8 @@ namespace module::platform::darwin {
         sensors.eye_led.RGB = 0;
 
         // Buttons
-        sensors.buttons.left   = 0;
-        sensors.buttons.middle = 0;
+        sensors.buttons.left   = false;
+        sensors.buttons.middle = false;
 
         // Voltage (in volts)
         sensors.voltage = 0;
