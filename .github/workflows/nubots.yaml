@@ -137,3 +137,78 @@ jobs:
 
       - name: Test the code
         run: ./b tests run
+
+  # Check the code is formatted according to clang-format
+  clang-format:
+    name: "C++/Protobuf Formatting"
+    # The type of runner that the job will run on
+    runs-on: ubuntu-20.04
+    needs: build_docker
+
+    # Run on the container we just built
+    container:
+      image: nubots/nubots:pull-request-${{ github.event.number }}-final-image
+      options: --user 0:0
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Cancels previously running jobs for this workflow
+      - name: Cancel Workflow Action
+        uses: styfle/cancel-workflow-action@0.9.1
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Check clang-format
+        run: .github/workflows/scripts/validate_clang_format.sh
+
+  # Validate the formatting is correct according to cmake-format
+  cmake-format:
+    name: "CMake Formatting"
+    # The type of runner that the job will run on
+    runs-on: ubuntu-20.04
+    needs: build_docker
+
+    # Run on the container we just built
+    container:
+      image: nubots/nubots:pull-request-${{ github.event.number }}-final-image
+      options: --user 0:0
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Cancels previously running jobs for this workflow
+      - name: Cancel Workflow Action
+        uses: styfle/cancel-workflow-action@0.9.1
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Check cmake-format
+        run: .github/workflows/scripts/validate_cmake_format.sh
+
+  # Validate the formatting is correct according to isort and black
+  python-format:
+    name: "Python Formatting"
+    # The type of runner that the job will run on
+    runs-on: ubuntu-20.04
+    needs: build_docker
+
+    # Run on the container we just built
+    container:
+      image: nubots/nubots:pull-request-${{ github.event.number }}-final-image
+      options: --user 0:0
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Cancels previously running jobs for this workflow
+      - name: Cancel Workflow Action
+        uses: styfle/cancel-workflow-action@0.9.1
+
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Check isort and black
+        run: .github/workflows/scripts/validate_python_format.sh
