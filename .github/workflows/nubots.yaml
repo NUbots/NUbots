@@ -12,7 +12,7 @@ jobs:
   build_llvm:
     name: "Build LLVM"
     # Run the reusable workflow located at .github/workflows/build_part_of_image.yaml
-    uses: mrwerdo/nubots/.github/workflows/build_part_of_image.yaml@0ec9ea134529fde7a907e989d220326f3f2780e0
+    uses: nubots/nubots/.github/workflows/build_part_of_image.yaml@a0576369b1fe04014207dccce69b805daa3df611
     # Note: a *specific version* of the workflow is being used.
     # See here for details about the bug: https://github.community/t/ref-head-in-reusable-workflows/203690/71
 
@@ -22,8 +22,8 @@ jobs:
       target: llvm
       # Use the following images as caches from hub.docker.com.
       cache_from: |
-        type=registry,ref=mrwerdo/nubots:pull-request-${{ github.event.number }}-llvm
-        type=registry,ref=mrwerdo/nubots:generic
+        type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-llvm
+        type=registry,ref=nubots/nubots:generic
         type=inline
     secrets:
       docker_hub_username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -33,7 +33,7 @@ jobs:
   build_intel_graphics_compiler_and_compute_runtime:
     name: "Build Intel Graphics Compiler and Compute Runtime"
     # Run the reusable workflow.
-    uses: mrwerdo/nubots/.github/workflows/build_part_of_image.yaml@0ec9ea134529fde7a907e989d220326f3f2780e0
+    uses: nubots/nubots/.github/workflows/build_part_of_image.yaml@a0576369b1fe04014207dccce69b805daa3df611
     # Wait for the following jobs to complete.
     needs: build_llvm
     # Declare inputs for the reusable workflow.
@@ -41,9 +41,9 @@ jobs:
       target: intel-graphics-compiler-and-compute-runtime
       # Use the following images as caches from hub.docker.com. Notice how llvm is also listed.
       cache_from: |
-        type=registry,ref=mrwerdo/nubots:pull-request-${{ github.event.number }}-llvm
-        type=registry,ref=mrwerdo/nubots:pull-request-${{ github.event.number }}-intel-graphics-compiler-and-compute-runtime
-        type=registry,ref=mrwerdo/nubots:generic
+        type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-llvm
+        type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-intel-graphics-compiler-and-compute-runtime
+        type=registry,ref=nubots/nubots:generic
         type=inline
     secrets:
       docker_hub_username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -51,12 +51,12 @@ jobs:
 
   build_openblas:
     name: "Build OpenBLAS"
-    uses: mrwerdo/nubots/.github/workflows/build_part_of_image.yaml@0ec9ea134529fde7a907e989d220326f3f2780e0
+    uses: nubots/nubots/.github/workflows/build_part_of_image.yaml@a0576369b1fe04014207dccce69b805daa3df611
     with:
       target: openblas
       cache_from: |
-        type=registry,ref=mrwerdo/nubots:pull-request-${{ github.event.number }}-openblas
-        type=registry,ref=mrwerdo/nubots:generic
+        type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-openblas
+        type=registry,ref=nubots/nubots:generic
         type=inline
     secrets:
       docker_hub_username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -64,12 +64,12 @@ jobs:
 
   build_other_dependencies:
     name: "Build Other Dependencies"
-    uses: mrwerdo/nubots/.github/workflows/build_part_of_image.yaml@0ec9ea134529fde7a907e989d220326f3f2780e0
+    uses: nubots/nubots/.github/workflows/build_part_of_image.yaml@a0576369b1fe04014207dccce69b805daa3df611
     with:
       target: other-dependencies
       cache_from: |
-        type=registry,ref=mrwerdo/nubots:pull-request-${{ github.event.number }}-other-dependencies
-        type=registry,ref=mrwerdo/nubots:generic
+        type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-other-dependencies
+        type=registry,ref=nubots/nubots:generic
         type=inline
     secrets:
       docker_hub_username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -78,7 +78,7 @@ jobs:
   # Build the docker image.
   build_docker:
     name: "Build Docker Image"
-    uses: mrwerdo/nubots/.github/workflows/build_part_of_image.yaml@0ec9ea134529fde7a907e989d220326f3f2780e0
+    uses: nubots/nubots/.github/workflows/build_part_of_image.yaml@a0576369b1fe04014207dccce69b805daa3df611
     # Wait for previous jobs to finish before building the final image.
     needs:
       - build_llvm
@@ -90,12 +90,12 @@ jobs:
       target: final-image
       # Use the following images as caches from hub.docker.com.
       cache_from: |
-        type=registry,ref=mrwerdo/nubots:pull-request-${{ github.event.number }}-intel-graphics-compiler-and-compute-runtime
-        type=registry,ref=mrwerdo/nubots:pull-request-${{ github.event.number }}-llvm
-        type=registry,ref=mrwerdo/nubots:pull-request-${{ github.event.number }}-openblas
-        type=registry,ref=mrwerdo/nubots:pull-request-${{ github.event.number }}-other-dependencies
-        type=registry,ref=mrwerdo/nubots:pull-request-${{ github.event.number }}-final-image
-        type=registry,ref=mrwerdo/nubots:generic
+        type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-intel-graphics-compiler-and-compute-runtime
+        type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-llvm
+        type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-openblas
+        type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-other-dependencies
+        type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-final-image
+        type=registry,ref=nubots/nubots:generic
         type=inline
     secrets:
       docker_hub_username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -113,7 +113,7 @@ jobs:
 
     # Run on the container we just built
     container:
-      image: mrwerdo/nubots:pull-request-${{ github.event.number }}-final-image
+      image: nubots/nubots:pull-request-${{ github.event.number }}-final-image
       options: --user 0:0
 
     # Steps represent a sequence of tasks that will be executed as part of the job
