@@ -32,5 +32,33 @@ jobs:
         run: |
           DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} \
           DOCKERHUB_PASSWORD=${{ secrets.DOCKERHUB_PASSWORD }} \
-          TAG=pull-request-${{ github.event.number }} \
+          TAG=pull-request-${{ github.event.number }}-llvm \
+          .github/workflows/scripts/remove_dockerhub_tag.sh
+
+      - name: Delete DockerHub image tag
+        run: |
+          DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} \
+          DOCKERHUB_PASSWORD=${{ secrets.DOCKERHUB_PASSWORD }} \
+          TAG=pull-request-${{ github.event.number }}-intel-graphics-compiler-and-compute-runtime \
+          .github/workflows/scripts/remove_dockerhub_tag.sh
+
+      - name: Delete DockerHub image tag
+        run: |
+          DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} \
+          DOCKERHUB_PASSWORD=${{ secrets.DOCKERHUB_PASSWORD }} \
+          TAG=pull-request-${{ github.event.number }}-openblas \
+          .github/workflows/scripts/remove_dockerhub_tag.sh
+
+      - name: Delete DockerHub image tag
+        run: |
+          DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} \
+          DOCKERHUB_PASSWORD=${{ secrets.DOCKERHUB_PASSWORD }} \
+          TAG=pull-request-${{ github.event.number }}-other-dependencies \
+          .github/workflows/scripts/remove_dockerhub_tag.sh
+
+      - name: Delete DockerHub image tag
+        run: |
+          DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} \
+          DOCKERHUB_PASSWORD=${{ secrets.DOCKERHUB_PASSWORD }} \
+          TAG=pull-request-${{ github.event.number }}-final-image \
           .github/workflows/scripts/remove_dockerhub_tag.sh
