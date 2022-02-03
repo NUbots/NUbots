@@ -13,7 +13,7 @@ jobs:
   build_llvm:
     name: "Build LLVM"
     # Run the reusable workflow located at .github/workflows/build_part_of_image_all_platforms.yaml
-    uses: nubots/nubots/.github/workflows/build_part_of_image_all_platforms.yaml@a0576369b1fe04014207dccce69b805daa3df611
+    uses: nubots/nubots/.github/workflows/build_part_of_image_all_platforms.yaml@7c884a426f6ba6c1efc07b1a8e7abe025c10c74c
     # Note: a *specific version* of the workflow is being used.
     # See here for details about the bug: https://github.community/t/ref-head-in-reusable-workflows/203690/71
 
@@ -35,7 +35,7 @@ jobs:
   build_intel_graphics_compiler_and_compute_runtime:
     name: "Build Intel Graphics Compiler and Compute Runtime"
     # Run the reusable workflow.
-    uses: nubots/nubots/.github/workflows/build_part_of_image_all_platforms.yaml@a0576369b1fe04014207dccce69b805daa3df611
+    uses: nubots/nubots/.github/workflows/build_part_of_image_all_platforms.yaml@7c884a426f6ba6c1efc07b1a8e7abe025c10c74c
     # Wait for the following jobs to complete.
     needs: build_llvm
     # Declare inputs for the reusable workflow.
@@ -54,7 +54,7 @@ jobs:
 
   build_openblas:
     name: "Build OpenBLAS"
-    uses: nubots/nubots/.github/workflows/build_part_of_image_all_platforms.yaml@a0576369b1fe04014207dccce69b805daa3df611
+    uses: nubots/nubots/.github/workflows/build_part_of_image_all_platforms.yaml@7c884a426f6ba6c1efc07b1a8e7abe025c10c74c
     with:
       target: openblas
       # {0} here is substituted with the platform (i.e. generic)
@@ -68,7 +68,7 @@ jobs:
 
   build_other_dependencies:
     name: "Build Other Dependencies"
-    uses: nubots/nubots/.github/workflows/build_part_of_image_all_platforms.yaml@a0576369b1fe04014207dccce69b805daa3df611
+    uses: nubots/nubots/.github/workflows/build_part_of_image_all_platforms.yaml@7c884a426f6ba6c1efc07b1a8e7abe025c10c74c
     with:
       target: other-dependencies
       # {0} here is substituted with the platform (i.e. generic)
@@ -83,7 +83,7 @@ jobs:
   # Build the docker image.
   build_docker:
     name: "Build Docker Image"
-    uses: nubots/nubots/.github/workflows/build_part_of_image_all_platforms.yaml@a0576369b1fe04014207dccce69b805daa3df611
+    uses: nubots/nubots/.github/workflows/build_part_of_image_all_platforms.yaml@7c884a426f6ba6c1efc07b1a8e7abe025c10c74c
     # Wait for previous jobs to finish before building the final image.
     needs:
       - build_llvm
