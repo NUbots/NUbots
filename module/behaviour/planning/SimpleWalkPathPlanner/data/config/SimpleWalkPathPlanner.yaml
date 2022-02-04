@@ -1,7 +1,7 @@
 log_level: WARN
 
 # general playing tuning values for approaching ball
-forwardSpeed: 0.015
+forwardSpeed: 0.0125
 sideSpeed: 0.01
 maxTurnSpeed : 0.15
 minTurnSpeed : -0.15
