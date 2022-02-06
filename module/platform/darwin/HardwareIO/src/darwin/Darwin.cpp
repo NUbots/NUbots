@@ -31,8 +31,6 @@ namespace Darwin {
     // Initialize all of the sensor handler objects using the passed uart
     Darwin::Darwin(const char* name)
         : uart(name)
-        , enabledServoIds(20, true)
-        , bulkReadCommand()
         , cm740(uart, ID::CM740)
         , rShoulderPitch(uart, ID::R_SHOULDER_PITCH)
         , lShoulderPitch(uart, ID::L_SHOULDER_PITCH)
@@ -56,6 +54,9 @@ namespace Darwin {
         , headTilt(uart, ID::HEAD_PITCH)
         , rFSR(uart, ID::R_FSR)
         , lFSR(uart, ID::L_FSR) {
+
+        // All servos are enabled on construction
+        enabledServoIds.fill(true);
 
         // Turn on the dynamixel power
         cm740.turnOnDynamixel();
@@ -93,7 +94,7 @@ namespace Darwin {
         std::vector<std::pair<uint8_t, bool>> results;
 
         // Ping our CM740
-        results.push_back(std::make_pair(ID::CM740, cm740.ping()));
+        results.emplace_back(ID::CM740, cm740.ping());
 
         // Ping all our servos
         for (int i = 0; i < 20; ++i) {
@@ -101,12 +102,12 @@ namespace Darwin {
             if (!result.second) {
                 NUClear::log<NUClear::WARN>("Servo failed self test:", static_cast<ServoID>(i));
             }
-            results.push_back(result);
+            results.emplace_back(result);
         }
 
         // Ping our two FSRs
-        results.push_back(std::make_pair(ID::L_FSR, lFSR.ping()));
-        results.push_back(std::make_pair(ID::R_FSR, rFSR.ping()));
+        results.emplace_back(ID::L_FSR, lFSR.ping());
+        results.emplace_back(ID::R_FSR, rFSR.ping());
 
         return results;
     }
@@ -129,10 +130,9 @@ namespace Darwin {
 
         // Do a self test so that we can move all the sensors that are currently failing to the end of the list
         std::vector<std::pair<uint8_t, bool>> sensors = selfTest();
-        std::sort(
-            std::begin(sensors),
-            std::end(sensors),
-            [](const std::pair<uint8_t, bool>& a, const std::pair<uint8_t, bool>& b) { return a.second > b.second; });
+        std::partition(std::begin(sensors), std::end(sensors), [](const std::pair<uint8_t, bool>& sensor) {
+            return sensor.second;
+        });
 
         // This holds our request paramters
         std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> request;
@@ -143,14 +143,15 @@ namespace Darwin {
 
                 // If it's the CM740
                 case ID::CM740:
-                    request.push_back(std::make_tuple(CM740::Address::BUTTON, ID::CM740, sizeof(Types::CM740Data)));
+                    request.emplace_back(CM740::Address::BUTTON, ID::CM740, sizeof(Types::CM740Data));
                     break;
 
                 // If it's the FSRs
                 case ID::L_FSR:
                 case ID::R_FSR:
-                    // TODO this is where we no longer use the FSRs, if you need them again turn them on here
-                    // request.push_back(std::make_tuple(FSR::Address::FSR1_L, sensor.first, sizeof(Types::FSRData)));
+                    // TODO(HardwareTeam): this is where we no longer use the FSRs, if you need them again turn them on
+                    // here request.push_back(std::make_tuple(FSR::Address::FSR1_L, sensor.first,
+                    // sizeof(Types::FSRData)));
                     break;
 
                 // case ID::L_SHOULDER_PITCH:
@@ -179,8 +180,7 @@ namespace Darwin {
                 default:
                     // Only add this servo if we aren't simulating it
                     if (enabledServoIds[sensor.first - 1]) {
-                        request.push_back(
-                            std::make_tuple(MX28::Address::PRESENT_POSITION_L, sensor.first, sizeof(Types::MX28Data)));
+                        request.emplace_back(MX28::Address::PRESENT_POSITION_L, sensor.first, sizeof(Types::MX28Data));
                     }
                     break;
             }

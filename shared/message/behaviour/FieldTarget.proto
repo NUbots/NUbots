@@ -27,6 +27,5 @@ message FieldTarget {
         BALL = 1;
         GOAL = 2;
     }
-
     Target target = 1;
 }

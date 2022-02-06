@@ -30,7 +30,7 @@ namespace module::network {
         on<Configuration>("NUClearNet.yaml").then([this](const Configuration& config) {
             log_level                   = config["log_level"].as<NUClear::LogLevel>();
             auto netConfig              = std::make_unique<NUClear::message::NetworkConfiguration>();
-            std::string name            = config["name"].as<std::string>();
+            auto name                   = config["name"].as<std::string>();
             netConfig->name             = name.empty() ? utility::support::getHostname() : name;
             netConfig->announce_address = config["address"].as<std::string>();
             netConfig->announce_port    = config["port"].as<uint16_t>();
@@ -41,7 +41,7 @@ namespace module::network {
             char c[255];
             std::memset(c, 0, sizeof(c));
             std::string addr;
-            int port;
+            int port = 0;
 
             switch (event.address.sock.sa_family) {
                 case AF_INET:
@@ -62,7 +62,7 @@ namespace module::network {
             char c[255];
             std::memset(c, 0, sizeof(c));
             std::string addr;
-            int port;
+            int port = 0;
 
             switch (event.address.sock.sa_family) {
                 case AF_INET:

@@ -154,7 +154,7 @@ namespace module::vision {
 
                 log<NUClear::DEBUG>(fmt::format("{} clusters remaining after merging overlaps", clusters.size()));
 
-                if (clusters.size() > 0) {
+                if (!clusters.empty()) {
                     auto goals = std::make_unique<Goals>();
                     goals->goals.reserve(clusters.size());
 
@@ -254,7 +254,7 @@ namespace module::vision {
                             g.post.distance = distance;
 
                             // Attach the measurement to the object (distance from camera to bottom center of post)
-                            g.measurements.push_back(Goal::Measurement());
+                            g.measurements.emplace_back();  // Emplaces default constructed object
                             g.measurements.back().type = Goal::MeasurementType::CENTRE;
 
                             // Spherical Reciprocal Coordinates (1/distance, phi, theta)

@@ -34,11 +34,9 @@ namespace module::behaviour::strategy {
 
     using message::behaviour::MotionCommand;
     using message::motion::HeadCommand;
-    using message::motion::KickScriptCommand;
 
-    using utility::input::LimbID;
 
-    PS3Walk::PS3Walk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), joystick() {
+    PS3Walk::PS3Walk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Every<1, std::chrono::milliseconds>, Single>().then([this] {
             JoystickEvent event;
@@ -129,7 +127,7 @@ namespace module::behaviour::strategy {
         });
 
         // output walk command based on updated strafe and rotation speed from joystick
-        // TODO: potential performance gain: ignore if value hasn't changed since last emit?
+        // TODO(HardwareTeam): potential performance gain: ignore if value hasn't changed since last emit?
         on<Every<20, Per<std::chrono::seconds>>>().then([this] {
             if (!headLocked) {
                 auto headCommand         = std::make_unique<HeadCommand>();

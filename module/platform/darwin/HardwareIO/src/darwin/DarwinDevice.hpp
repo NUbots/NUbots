@@ -20,7 +20,7 @@
 #ifndef DARWIN_DARWINDEVICE_HPP
 #define DARWIN_DARWINDEVICE_HPP
 
-#include <stdint.h>
+#include <cstdint>
 
 #include "UART.hpp"
 

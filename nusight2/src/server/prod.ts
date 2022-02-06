@@ -5,7 +5,7 @@ import http from 'http'
 import minimist from 'minimist'
 import * as path from 'path'
 import favicon from 'serve-favicon'
-import sio from 'socket.io'
+import { Server } from 'socket.io'
 
 import * as NUClearNetProxyParser from '../shared/nuclearnet/nuclearnet_proxy_parser'
 import { VirtualRobots } from '../virtual_robots/virtual_robots'
@@ -19,7 +19,7 @@ const nuclearnetAddress = args.address || '10.1.255.255'
 
 const app = express()
 const server = http.createServer(app)
-const sioNetwork = sio(server, { parser: NUClearNetProxyParser } as any)
+const sioNetwork = new Server(server, { parser: NUClearNetProxyParser } as any)
 
 app.use(
   history({

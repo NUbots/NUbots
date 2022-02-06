@@ -130,7 +130,7 @@ namespace module::support::logging {
                 // Update which types we will be playing
                 for (const auto& setting : config["messages"].config) {
                     // Get the name of the type
-                    std::string name = setting.first.as<std::string>();
+                    auto name = setting.first.as<std::string>();
                     // Hash our type to work out our type on the wire
                     uint64_t hash = XXH64(name.c_str(), name.size(), 0x4e55436c);
                     bool enabled  = setting.second.as<bool>();
@@ -162,7 +162,7 @@ namespace module::support::logging {
                 }
 
                 // Work out what to do on the end of the file
-                std::string end_string = config["on_end"].as<std::string>();
+                auto end_string = config["on_end"].as<std::string>();
                 if (end_string == "STOP") {
                     on_end = STOP_ON_END;
                 }
