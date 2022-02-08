@@ -77,7 +77,7 @@ jobs:
 
   # Build the docker image.
   build_docker:
-    name: "Build Docker Image"
+    name: "Build docker image"
     uses: nubots/nubots/.github/workflows/build_part_of_image.yaml@7c884a426f6ba6c1efc07b1a8e7abe025c10c74c
     # Wait for previous jobs to finish before building the final image.
     needs:
