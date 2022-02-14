@@ -28,10 +28,26 @@
 
 #include "message/behaviour/KickPlan.hpp"
 #include "message/behaviour/MotionCommand.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/localisation/Ball.hpp"
+#include "message/localisation/Field.hpp"
+#include "message/motion/KickCommand.hpp"
+#include "message/motion/WalkCommand.hpp"
+#include "message/support/FieldDescription.hpp"
+#include "message/vision/Ball.hpp"
 
 namespace module::behaviour::planning {
 
     // using namespace message;
+
+    using message::behaviour::KickPlan;
+    using message::behaviour::MotionCommand;
+    using message::behaviour::WantsToKick;
+    using message::input::Sensors;
+    using message::localisation::Ball;
+    using message::localisation::Field;
+    using message::support::FieldDescription;
+
     /**
      * Executes a getup script if the robot falls over.
      *
@@ -41,15 +57,22 @@ namespace module::behaviour::planning {
     private:
         message::behaviour::MotionCommand latestCommand;
         const size_t subsumptionId;
-        float turnSpeed            = 0.8;
+        float maxTurnSpeed         = 0.2;
+        float minTurnSpeed         = 0.2;
         float forwardSpeed         = 1;
         float sideSpeed            = 1;
+        float rotateSpeedX         = -0.04;
+        float rotateSpeedY         = 0;
+        float rotateSpeed          = 0.2;
+        float walkToReadySpeedX    = 0.1;
+        float walkToReadySpeedY    = 0.1;
+        float walkToReadyRotation  = 0.5;
         float slow_approach_factor = 0.5;
         float a                    = 7;
         float b                    = 0;
         float search_timeout       = 3;
 
-        //-----------non-config variables (not defined in WalkPathPlanner.yaml)-----------
+        //----------- non-config variables (not defined in WalkPathPlanner.yaml)----
 
         // info for the current walk
         Eigen::Vector2d currentTargetPosition;
@@ -64,6 +87,19 @@ namespace module::behaviour::planning {
         float ball_approach_dist = 0.2;
         float slowdown_distance  = 0.2;
         bool useLocalisation     = true;
+        Eigen::Vector3f rBTt     = Eigen::Vector3f(1.0, 0.0, 0.0);
+
+        void walkDirectly();
+
+        void determineSimpleWalkPath(const Ball& ball,
+                                     const Field& field,
+                                     const Sensors& sensors,
+                                     const KickPlan& kickPlan,
+                                     const FieldDescription& fieldDescription);
+
+        void visionWalkPath();
+        void rotateOnSpot();
+        void walkToReady();
 
     public:
         explicit SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);
