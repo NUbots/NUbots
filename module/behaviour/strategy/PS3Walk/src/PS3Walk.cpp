@@ -34,6 +34,10 @@ namespace module::behaviour::strategy {
 
     using message::behaviour::MotionCommand;
     using message::motion::HeadCommand;
+    using message::motion::KickCommand;
+    using message::motion::KickCommandType;
+    using message::motion::KickScriptCommand;
+    using utility::input::LimbID;
 
 
     PS3Walk::PS3Walk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -50,13 +54,22 @@ namespace module::behaviour::strategy {
                             // y is left relative to robot
                             // strafe[1] = -event.value;
                             rotationalSpeed = static_cast<float>(-event.value);
+                            log<NUClear::INFO>("Left Joystick Horizontal: ", -event.value);
                             break;
                         case AXIS_LEFT_JOYSTICK_VERTICAL:
                             // x is forward relative to robot
                             strafe[0] = -event.value;
+                            log<NUClear::INFO>("Left Joystick Vertical: ", -event.value);
                             break;
-                        case AXIS_RIGHT_JOYSTICK_VERTICAL: headPitch = static_cast<float>(-event.value); break;
-                        case AXIS_RIGHT_JOYSTICK_HORIZONTAL: headYaw = static_cast<float>(-event.value); break;
+                        case AXIS_RIGHT_JOYSTICK_VERTICAL:
+                            headPitch = static_cast<float>(-event.value);
+                            log<NUClear::INFO>("Right Joystick Vertical: ", -event.value);
+                            break;
+
+                        case AXIS_RIGHT_JOYSTICK_HORIZONTAL:
+                            headYaw = static_cast<float>(-event.value);
+                            log<NUClear::INFO>("Right Joystick Horizontal: ", -event.value);
+                            break;
                     }
                 }
                 else if (event.isButton()) {
@@ -74,49 +87,56 @@ namespace module::behaviour::strategy {
                                 moving = !moving;
                             }
                             break;
+
                         case BUTTON_SQUARE:
                             if (event.value > 0) {  // button down
                                 if (headLocked) {
-                                    NUClear::log("Head unlocked");
+                                    log<NUClear::INFO>("Square button: Head Unlocked");
                                 }
                                 else {
-                                    NUClear::log("Head locked");
+                                    log<NUClear::INFO>("Square button: Head locked");
                                 }
                                 headLocked = !headLocked;
                             }
                             break;
-                            // case BUTTON_L1:
-                            //     if (event.value > 0) {  // button down
-                            //         NUClear::log("Requesting Left Front Kick");
-                            //         emit(std::make_unique<KickScriptCommand>(KickScriptCommand(
-                            //             Eigen::Vector3d::UnitX(),  // vector pointing forward relative to
-                            //             robot LimbID::LEFT_LEG)));
-                            //     }
-                            //     break;
-                            // case BUTTON_R1:
-                            //     if (event.value > 0) {  // button down
-                            //         NUClear::log("Requesting Right Front Kick");
-                            //         emit(std::make_unique<KickScriptCommand>(KickScriptCommand(KickScriptCommand(
-                            //             Eigen::Vector3d::UnitX(),  // vector pointing forward relative to
-                            //             robot LimbID::RIGHT_LEG))));
-                            //     }
-                            //     break;
-                            // case BUTTON_L2:
-                            //     if (event.value > 0) {  // button down
-                            //         NUClear::log("Requesting Left Side Kick");
-                            //         emit(std::make_unique<KickScriptCommand>(KickScriptCommand(
-                            //             -Eigen::Vector3d::UnitY(),  // vector pointing right relative to
-                            //             robot LimbID::LEFT_LEG)));
-                            //     }
-                            //     break;
-                            // case BUTTON_R2:
-                            //     if (event.value > 0) {  // button down
-                            //         NUClear::log("Requesting Right Side Kick");
-                            //         emit(std::make_unique<KickScriptCommand>(KickScriptCommand{
-                            //             Eigen::Vector3d::UnitY(),  // vector pointing left relative to robot
-                            //             LimbID::RIGHT_LEG}));
-                            //     }
-                            //     break;
+
+                        case BUTTON_CROSS:
+                            if (event.value > 0) {  // button down
+                                log<NUClear::INFO>("Cross button: Unassigned");
+                            }
+                            break;
+
+                        case BUTTON_CIRCLE:
+                            if (event.value > 0) {  // button down
+                                log<NUClear::INFO>("Circle button: Unassigned");
+                            }
+                            break;
+
+                        case BUTTON_L1:
+                            if (event.value > 0) {  // button down
+                                log<NUClear::INFO>("L1 Button: Left Kick");
+                                emit(std::make_unique<KickScriptCommand>(LimbID::LEFT_LEG, KickCommandType::NORMAL));
+                            }
+                            break;
+
+                        case BUTTON_R1:
+                            if (event.value > 0) {  // button down
+                                log<NUClear::INFO>("R1 Button: Right Kick");
+                                emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
+                            }
+                            break;
+
+                        case BUTTON_L2:
+                            if (event.value > 0) {  // button down
+                                log<NUClear::INFO>("L2 Button: Unassigned");
+                            }
+                            break;
+
+                        case BUTTON_R2:
+                            if (event.value > 0) {  // button down
+                                log<NUClear::INFO>("R2 Button: Unassigned");
+                            }
+                            break;
                     }
                 }
             }
