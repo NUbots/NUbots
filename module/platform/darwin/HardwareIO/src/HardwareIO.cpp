@@ -215,17 +215,13 @@ namespace module::platform::darwin {
     }
 
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment))
-        , darwin("/dev/CM740")
-        , cm740State()
-        , servoState()
-        , chargedVoltage(0.0f)
-        , flatVoltage(0.0f) {
+        : Reactor(std::move(environment)), darwin("/dev/CM740"), chargedVoltage(0.0f), flatVoltage(0.0f) {
 
         on<Startup>().then("HardwareIO Startup", [this] {
-            uint16_t CM740Model  = darwin.cm740.read<uint16_t>(Darwin::CM740::Address::MODEL_NUMBER_L);
-            uint8_t CM740Version = darwin.cm740.read<uint8_t>(Darwin::CM740::Address::VERSION);
-            std::stringstream version, model;
+            auto CM740Model   = darwin.cm740.read<uint16_t>(Darwin::CM740::Address::MODEL_NUMBER_L);
+            auto CM740Version = darwin.cm740.read<uint8_t>(Darwin::CM740::Address::VERSION);
+            std::stringstream version;
+            std::stringstream model;
             model << "0x" << std::setw(4) << std::setfill('0') << std::hex << int(CM740Model);
             version << "0x" << std::setw(2) << std::setfill('0') << std::hex << int(CM740Version);
             log<NUClear::INFO>("CM740 Model:", model.str());
@@ -384,7 +380,7 @@ namespace module::platform::darwin {
                     utility::platform::getRawServo(command.id, sensors).present_position);
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
-                float speed;
+                float speed = 0.0f;
                 if (duration.count() > 0) {
                     speed = diff / (double(duration.count()) / double(NUClear::clock::period::den));
                 }
@@ -412,7 +408,7 @@ namespace module::platform::darwin {
             }
         });
 
-        on<Trigger<ServoTarget>>().then([this](const ServoTarget command) {
+        on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
             auto commandList = std::make_unique<ServoTargets>();
             commandList->targets.push_back(command);
 
@@ -448,7 +444,7 @@ namespace module::platform::darwin {
             cm740State.ledPanel = led;
 
             darwin.cm740.write(Darwin::CM740::Address::LED_PANNEL,
-                               (static_cast<uint8_t>((led.led2 << 2) | (led.led3 << 1) | (led.led4))));
+                               ((uint8_t(led.led2) << 2) | (uint8_t(led.led3) << 1) | uint8_t((led.led4))));
         });
     }
 }  // namespace module::platform::darwin

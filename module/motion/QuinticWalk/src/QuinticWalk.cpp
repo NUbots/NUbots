@@ -89,16 +89,12 @@ namespace module::motion {
             }
         }
 
-        config.arm_positions.push_back(
-            std::make_pair(ServoID::R_SHOULDER_PITCH, cfg["arms"]["right_shoulder_pitch"].as<float>()));
-        config.arm_positions.push_back(
-            std::make_pair(ServoID::L_SHOULDER_PITCH, cfg["arms"]["left_shoulder_pitch"].as<float>()));
-        config.arm_positions.push_back(
-            std::make_pair(ServoID::R_SHOULDER_ROLL, cfg["arms"]["right_shoulder_roll"].as<float>()));
-        config.arm_positions.push_back(
-            std::make_pair(ServoID::L_SHOULDER_ROLL, cfg["arms"]["left_shoulder_roll"].as<float>()));
-        config.arm_positions.push_back(std::make_pair(ServoID::R_ELBOW, cfg["arms"]["right_elbow"].as<float>()));
-        config.arm_positions.push_back(std::make_pair(ServoID::L_ELBOW, cfg["arms"]["left_elbow"].as<float>()));
+        config.arm_positions.emplace_back(ServoID::R_SHOULDER_PITCH, cfg["arms"]["right_shoulder_pitch"].as<float>());
+        config.arm_positions.emplace_back(ServoID::L_SHOULDER_PITCH, cfg["arms"]["left_shoulder_pitch"].as<float>());
+        config.arm_positions.emplace_back(ServoID::R_SHOULDER_ROLL, cfg["arms"]["right_shoulder_roll"].as<float>());
+        config.arm_positions.emplace_back(ServoID::L_SHOULDER_ROLL, cfg["arms"]["left_shoulder_roll"].as<float>());
+        config.arm_positions.emplace_back(ServoID::R_ELBOW, cfg["arms"]["right_elbow"].as<float>());
+        config.arm_positions.emplace_back(ServoID::L_ELBOW, cfg["arms"]["left_elbow"].as<float>());
     }
 
     QuinticWalk::QuinticWalk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -305,14 +301,11 @@ namespace module::motion {
         const Eigen::Affine3f Hft = Hfs * Hst;  // trunk_to_flying_foot_goal
 
         // Calculate leg joints
-        const Eigen::Matrix4d left_foot =
-            walk_engine.getFootstep().isLeftSupport() ? Hst.matrix().cast<double>() : Hft.matrix().cast<double>();
-        const Eigen::Matrix4d right_foot =
-            walk_engine.getFootstep().isLeftSupport() ? Hft.matrix().cast<double>() : Hst.matrix().cast<double>();
+        const Eigen::Matrix4f left_foot  = walk_engine.getFootstep().isLeftSupport() ? Hst.matrix() : Hft.matrix();
+        const Eigen::Matrix4f right_foot = walk_engine.getFootstep().isLeftSupport() ? Hft.matrix() : Hst.matrix();
 
-        const auto joints = calculateLegJoints(kinematicsModel,
-                                               Eigen::Affine3f(left_foot.cast<float>()),
-                                               Eigen::Affine3f(right_foot.cast<float>()));
+        const auto joints =
+            calculateLegJoints<float>(kinematicsModel, Eigen::Affine3f(left_foot), Eigen::Affine3f(right_foot));
 
         auto waypoints = motion(joints);
         emit(std::move(waypoints));

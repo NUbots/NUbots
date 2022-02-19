@@ -38,8 +38,7 @@ namespace module::behaviour {
     using iterators = std::pair<std::vector<std::reference_wrapper<RequestItem>>::iterator,
                                 std::vector<std::reference_wrapper<RequestItem>>::iterator>;
 
-    Controller::Controller(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), actions(), limbAccess(), requests(), currentActions(), commandQueues() {
+    Controller::Controller(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Trigger<RegisterAction>, Sync<Controller>, Priority::HIGH>().then(
             "Action Registration",
@@ -47,7 +46,7 @@ namespace module::behaviour {
                 if (action.id == 0) {
                     throw std::runtime_error("Action ID 0 is reserved for internal use");
                 }
-                else if (requests.find(action.id) != std::end(requests)) {
+                if (requests.find(action.id) != std::end(requests)) {
                     throw std::runtime_error("The passed action ID has already been registered");
                 }
 
@@ -64,7 +63,7 @@ namespace module::behaviour {
                     request->items.emplace_back(*request, request->items.size(), set.first, set.second);
 
                     // Put our request in the correct queue
-                    for (auto& l : request->items.back().limbSet) {
+                    for (const auto& l : request->items.back().limbSet) {
                         if (l == LimbID::UNKNOWN) {
                             throw std::runtime_error(action.name + " registered an action for an unkown limb.");
                         }
@@ -100,10 +99,8 @@ namespace module::behaviour {
                 uint mainElement = std::distance(std::begin(update.priorities), maxEl);
 
                 // Unless we need to, try not to run the expensive subsumption algorithm
-                bool reselect;
-
                 // If our main changed we have to reselect
-                reselect = mainElement != request->mainElement;
+                bool reselect = mainElement != request->mainElement;
 
                 request->mainElement = mainElement;
                 request->maxPriority = *maxEl;
@@ -137,7 +134,7 @@ namespace module::behaviour {
         });
 
         on<Trigger<ServoCommands>, Sync<Controller>>().then("Command Filter", [this](const ServoCommands& commands) {
-            for (auto& command : commands.commands) {
+            for (const auto& command : commands.commands) {
 
                 // Check if we have access
                 if (this->limbAccess[uint(utility::input::LimbID::limbForServo(command.id)) - 1] == command.source) {
@@ -211,7 +208,7 @@ namespace module::behaviour {
 
                         if (queue.empty()) {
                             // Keep track of what we have emptied
-                            emptiedQueues.push_back(id);
+                            emptiedQueues.emplace_back(id);
                         }
                     }
                 }
@@ -304,7 +301,7 @@ namespace module::behaviour {
                                      if (a.second.first == a.second.second) {
                                          return true;
                                      }
-                                     else if (b.second.first == b.second.second) {
+                                     if (b.second.first == b.second.second) {
                                          return false;
                                      }
                                      // The smaller priority loses
@@ -336,7 +333,7 @@ namespace module::behaviour {
                     newActions.push_back(std::ref(action));
 
                     // Remove the limbs that we have just allocated
-                    for (auto& limb : action.limbSet) {
+                    for (const auto& limb : action.limbSet) {
                         limbs.erase(limbs.find(limb));
                     }
                 }
@@ -354,7 +351,7 @@ namespace module::behaviour {
 
         // Set the permissions for a limb according to our allocations
         for (auto& command : newActions) {
-            for (auto& l : command.get().limbSet) {
+            for (const auto& l : command.get().limbSet) {
                 limbAccess[uint(l) - 1] = command.get().group.id;
             }
         }
@@ -365,12 +362,10 @@ namespace module::behaviour {
             if (a.group.id < b.group.id) {
                 return true;
             }
-            else if (a.group.id == b.group.id) {
+            if (a.group.id == b.group.id) {
                 return a.index < b.index;
             }
-            else {
-                return false;
-            }
+            return false;
         };
 
         // Sort our list

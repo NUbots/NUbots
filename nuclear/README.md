@@ -179,9 +179,9 @@ The ./b script will look for a `tools` directory above the location where the ac
 If it finds one, it will load all `.py` files in that directory and attempt to execute a register and run function on them.
 This allows the tools to register new functionality to the b script that can be accessed from the command line.
 For example three tools that exist in the NUbots codebase are:
-- [this tool](https://github.com/NUbots/NUbots/blob/master/tools/install.py) installs NUClear roles systems onto remote systems using rsync
-- [this tool](https://github.com/NUbots/NUbots/blob/master/tools/format.py) that formats all files using clang-format
-- [this tool](https://github.com/NUbots/NUbots/blob/master/tools/decode.py) decodes `.nbs` files.
+- [this tool](https://github.com/NUbots/NUbots/blob/main/tools/install.py) installs NUClear roles systems onto remote systems using rsync
+- [this tool](https://github.com/NUbots/NUbots/blob/main/tools/format.py) that formats all files using clang-format
+- [this tool](https://github.com/NUbots/NUbots/blob/main/tools/decode.py) decodes `.nbs` files.
 
 Any of the tools that are created in this way have access to the b import which provides access to several useful variables
 - `b.nuclear_dir` the directory that NUClear Roles is stored in

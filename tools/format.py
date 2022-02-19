@@ -88,10 +88,18 @@ def register(command):
         default=False,
         help="Skip formatting the cmake",
     )
+    command.add_argument(
+        "-u",
+        "--format-unchanged",
+        dest="format_unchanged",
+        action="store_true",
+        default=False,
+        help="Include unmodified files, as well as modified files, compared to main.",
+    )
 
 
 @run_on_docker
-def run(skip_typescript, skip_cpp, skip_protobuf, skip_python, skip_cmake, **kwargs):
+def run(skip_typescript, skip_cpp, skip_protobuf, skip_python, skip_cmake, format_unchanged, **kwargs):
     # Check for eslint in node_modules folder
     eslint_path = find_eslint(os.path.join(b.project_dir, "nusight2", "node_modules"))
 
@@ -103,7 +111,11 @@ def run(skip_typescript, skip_cpp, skip_protobuf, skip_python, skip_cmake, **kwa
     os.chdir(b.project_dir)
 
     # Use git to get all of the files that are committed to the repository
-    files = check_output(["git", "ls-files"]).decode("utf-8")
+    files = (
+        check_output(["git", "ls-files"]).decode("utf-8")
+        if format_unchanged
+        else check_output(["git", "diff", "--name-only", "main"]).decode("utf-8")
+    )
 
     with multiprocessing.Pool(multiprocessing.cpu_count()) as pool:
         for r in pool.imap_unordered(

@@ -51,11 +51,7 @@ namespace module::behaviour::skills {
         , id(size_t(this) * size_t(this) - size_t(this))
         , isFront(true)
         , gettingUp(false)
-        , fallenCheck()
-        , getUp()
-        , FALLEN_ANGLE(M_PI_2)
-        , GETUP_PRIORITY(0.0f)
-        , EXECUTION_PRIORITY(0.0f) {
+        , FALLEN_ANGLE(M_PI_2) {
         // do a little configurating
         on<Configuration>("Getup.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
@@ -67,7 +63,7 @@ namespace module::behaviour::skills {
             EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
         });
 
-        fallenCheck = on<Last<20, Trigger<RawSensors>>, Single>().then(
+        on<Last<20, Trigger<RawSensors>>, Single>().then(
             "Getup Fallen Check",
             [this](const std::list<std::shared_ptr<const RawSensors>>& sensors) {
                 Eigen::Vector3d acc_reading = Eigen::Vector3d::Zero();
@@ -84,11 +80,10 @@ namespace module::behaviour::skills {
                     isFront = (M_PI_2 - std::acos(Eigen::Vector3d::UnitX().dot(acc_reading)) <= 0.0);
 
                     updatePriority(GETUP_PRIORITY);
-                    getUp.enable();
                 }
             });
 
-        getUp = on<Trigger<ExecuteGetup>, Single>().then("Execute Getup", [this]() {
+        on<Trigger<ExecuteGetup>, Single>().then("Execute Getup", [this]() {
             gettingUp = true;
 
             // Check with side we're getting up from
@@ -108,7 +103,6 @@ namespace module::behaviour::skills {
         on<Trigger<KillGetup>>().then([this] {
             gettingUp = false;
             updatePriority(0);
-            getUp.disable();
         });
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
@@ -117,9 +111,9 @@ namespace module::behaviour::skills {
             {std::pair<float, std::set<LimbID>>(
                 0,
                 {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
-            [this](const std::set<LimbID>&) { emit(std::make_unique<ExecuteGetup>()); },
-            [this](const std::set<LimbID>&) { emit(std::make_unique<KillGetup>()); },
-            [this](const std::set<ServoID>&) { emit(std::make_unique<KillGetup>()); }}));
+            [this](const std::set<LimbID>& /* limbs */) { emit(std::make_unique<ExecuteGetup>()); },
+            [this](const std::set<LimbID>& /* limbs */) { emit(std::make_unique<KillGetup>()); },
+            [this](const std::set<ServoID>& /* servos */) { emit(std::make_unique<KillGetup>()); }}));
     }
 
     void Getup::updatePriority(const float& priority) {

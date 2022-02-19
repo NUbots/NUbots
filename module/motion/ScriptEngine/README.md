@@ -26,7 +26,7 @@ start. Alternatively you can also emit a `message::ExecuteScript` to run a
 
 ## Emits
 
-- `message::ServoTargets` to set waypoints based on script
+- `message::behaviour::ServoCommands` to set waypoints based on script
 
 ## Configuration
 
@@ -62,5 +62,3 @@ The basic structure of a script is thus:
 ## Dependencies
 
 - The Config System module is required to read script files
-- The Darwin Movement Manager is required to execute the waypoints defined in
-  scripts

@@ -24,7 +24,7 @@ namespace module::vision::visualmesh {
 
     class VisualMeshRunner {
     private:
-        int n_neighbours;
+        int n_neighbours = 0;
         std::function<VisualMeshResults(const message::input::Image&, const Eigen::Affine3f&)> runner;
 
     public:

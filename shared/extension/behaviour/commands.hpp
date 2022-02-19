@@ -23,6 +23,7 @@
 #include <memory>
 #include <nuclear>
 #include <typeindex>
+#include <utility>
 
 /**
  * This namespace holds all of the communication primitives that are used by the Behaviour header to send messages to
@@ -54,10 +55,10 @@ namespace extension::behaviour::commands {
          * @param type_             the type that this Provider provides for
          * @param classification_   what kind of provider this ProvidesReaction is for
          */
-        ProvidesReaction(const std::shared_ptr<NUClear::threading::Reaction>& reaction_,
+        ProvidesReaction(std::shared_ptr<NUClear::threading::Reaction> reaction_,
                          const std::type_index& type_,
                          const ProviderClassification& classification_)
-            : reaction(reaction_), type(type_), classification(classification_) {}
+            : reaction(std::move(reaction_)), type(type_), classification(classification_) {}
 
         /// The reaction for this Provider
         std::shared_ptr<NUClear::threading::Reaction> reaction;
@@ -81,13 +82,17 @@ namespace extension::behaviour::commands {
          * @param current_      a function that will get the current state of the reaction
          * @param binder_       a function that can be used to bind a reaction that monitors when the state changes
          */
-        WhenExpression(const std::shared_ptr<NUClear::threading::Reaction>& reaction_,
+        WhenExpression(std::shared_ptr<NUClear::threading::Reaction> reaction_,
                        const std::type_index& type_,
                        std::function<bool(const int&)> validator_,
                        std::function<int()> current_,
                        std::function<NUClear::threading::ReactionHandle(NUClear::Reactor&,
                                                                         std::function<void(const int&)>)> binder_)
-            : reaction(reaction_), type(type_), validator(validator_), current(current_), binder(binder_) {}
+            : reaction(std::move(reaction_))
+            , type(type_)
+            , validator(std::move(validator_))
+            , current(std::move(current_))
+            , binder(std::move(binder_)) {}
 
         /// The Provider reaction that is contingent on this when condition
         std::shared_ptr<NUClear::threading::Reaction> reaction;
@@ -113,10 +118,10 @@ namespace extension::behaviour::commands {
          * @param type              the enum type that this causing condition is going to manipulate
          * @param resulting_state   the state the enum will be in once the causing has succeeded
          */
-        CausingExpression(const std::shared_ptr<NUClear::threading::Reaction>& reaction,
+        CausingExpression(std::shared_ptr<NUClear::threading::Reaction> reaction,
                           const std::type_index& type,
                           const int& resulting_state)
-            : reaction(reaction), type(type), resulting_state(resulting_state) {}
+            : reaction(std::move(reaction)), type(type), resulting_state(resulting_state) {}
         /// The Provider reaction that will cause this state
         std::shared_ptr<NUClear::threading::Reaction> reaction;
         /// The enum type that this `When` expression claims to manipulate
@@ -165,14 +170,14 @@ namespace extension::behaviour::commands {
                      const uint64_t& requester_id_,
                      const uint64_t& requester_task_id_,
                      std::shared_ptr<void> data_,
-                     const std::string& name_,
+                     std::string name_,
                      const int& priority_,
                      const bool& optional_)
             : type(type_)
             , requester_id(requester_id_)
             , requester_task_id(requester_task_id_)
             , data(std::move(data_))
-            , name(name_)
+            , name(std::move(name_))
             , priority(priority_)
             , optional(optional_) {}
 
