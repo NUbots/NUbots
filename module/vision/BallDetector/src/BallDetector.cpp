@@ -73,7 +73,8 @@ namespace module::vision {
                 std::vector<int> indices(horizon.mesh->indices.size());
                 std::iota(indices.begin(), indices.end(), 0);
 
-                // Partition the indices such that we only have the ball points that dont have ball surrounding them
+                // Partition the indices such that the ball points that dont have ball surrounding them are removed,
+                // and then resize the vector to remove those points
                 auto boundary = utility::vision::visualmesh::partition_points(
                     indices.begin(),
                     indices.end(),
@@ -81,8 +82,6 @@ namespace module::vision {
                     [&](const int& idx) {
                         return idx == int(indices.size()) || (cls(ball_index, idx) >= config.confidence_threshold);
                     });
-
-                // Discard indices that are not on the boundary and are not below the green horizon
                 indices.resize(std::distance(indices.begin(), boundary));
 
                 log<NUClear::DEBUG>(fmt::format("Partitioned {} points", indices.size()));
@@ -106,6 +105,8 @@ namespace module::vision {
 
                 log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
 
+                // Partition the clusters such that clusters above the green horizons are removed,
+                // and then resize the vector to remove them
                 auto green_boundary = utility::vision::visualmesh::check_green_horizon_side(clusters.begin(),
                                                                                             clusters.end(),
                                                                                             horizon.horizon.begin(),
@@ -117,28 +118,32 @@ namespace module::vision {
 
                 log<NUClear::DEBUG>(fmt::format("Found {} clusters below green horizon", clusters.size()));
 
+                // Create the Balls message, which will contain a Ball for every cluster that is a valid ball
                 auto balls = std::make_unique<Balls>();
 
-                // We still emit if there are no balls otherwise other modules are not aware that we can no longer see a
-                // ball, and they will keep using the last message sent. See head behaviour, where we use 'with' balls
-                // and react based on that last balls message.
+                // Balls is still emitted even if there are no balls, to indicate to other modules that no balls can be
+                // seen. An example of this being used is in HeadBehaviourSoccer, which has a reactor that triggers
+                // 'with' balls and reacts based on that last Balls message.
                 if (clusters.empty()) {
                     log<NUClear::DEBUG>("Found no balls.");
                     emit(std::move(balls));
                     return;
                 }
 
+                // Reserve the memory prematurely for efficiency
                 balls->balls.reserve(clusters.size());
 
-                balls->id        = horizon.id;
-                balls->timestamp = horizon.timestamp;
-                balls->Hcw       = horizon.Hcw;
+                balls->id        = horizon.id;         // subsumption id
+                balls->timestamp = horizon.timestamp;  // time when the image was taken
+                balls->Hcw       = horizon.Hcw;        // world to camera transform at the time the image was taken
 
+                // Check each cluster to see if it's a valid ball
                 for (auto& cluster : clusters) {
                     Ball b;
 
                     // Average the cluster to get the cones axis
                     Eigen::Vector3f axis = Eigen::Vector3f::Zero();
+                    // Add up all the unit vectors of each point (camera to point in world space) in the cluster
                     for (const auto& idx : cluster) {
                         axis += rays.col(idx);
                     }
