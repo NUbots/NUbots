@@ -64,10 +64,10 @@ namespace module::vision {
             "Visual Mesh",
             [this](const GreenHorizon& horizon, const FieldDescription& field) {
                 // Convenience variables
-                const auto& CLS                                     = horizon.mesh->classifications;
-                const auto& NEIGHBOURS                              = horizon.mesh->neighbourhood;
-                const Eigen::Matrix<float, 3, Eigen::Dynamic>& RAYS = horizon.mesh->rays;
-                const int BALL_INDEX                                = horizon.class_map.at("ball");
+                const auto& cls                                     = horizon.mesh->classifications;
+                const auto& neighbours                              = horizon.mesh->neighbourhood;
+                const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = horizon.mesh->rays;
+                const int ball_index                                = horizon.class_map.at("ball");
 
                 // Get some indices to partition
                 std::vector<int> indices(horizon.mesh->indices.size());
@@ -77,9 +77,9 @@ namespace module::vision {
                 auto boundary = utility::vision::visualmesh::partition_points(
                     indices.begin(),
                     indices.end(),
-                    NEIGHBOURS,
+                    neighbours,
                     [&](const int& idx) {
-                        return idx == int(indices.size()) || (CLS(BALL_INDEX, idx) >= config.confidence_threshold);
+                        return idx == int(indices.size()) || (cls(ball_index, idx) >= config.confidence_threshold);
                     });
 
                 // Discard indices that are not on the boundary and are not below the green horizon
@@ -100,7 +100,7 @@ namespace module::vision {
                 std::vector<std::vector<int>> clusters;
                 utility::vision::visualmesh::cluster_points(indices.begin(),
                                                             indices.end(),
-                                                            NEIGHBOURS,
+                                                            neighbours,
                                                             config.cluster_points,
                                                             clusters);
 
@@ -110,7 +110,7 @@ namespace module::vision {
                                                                                             clusters.end(),
                                                                                             horizon.horizon.begin(),
                                                                                             horizon.horizon.end(),
-                                                                                            RAYS,
+                                                                                            rays,
                                                                                             false,
                                                                                             true);
                 clusters.resize(std::distance(clusters.begin(), green_boundary));
@@ -140,7 +140,7 @@ namespace module::vision {
                     // Average the cluster to get the cones axis
                     Eigen::Vector3f axis = Eigen::Vector3f::Zero();
                     for (const auto& idx : cluster) {
-                        axis += RAYS.col(idx);
+                        axis += rays.col(idx);
                     }
                     axis /= cluster.size();
                     axis.normalize();
@@ -149,7 +149,7 @@ namespace module::vision {
                     // Should we use the average distance instead?
                     float radius = 1.0f;
                     for (const auto& idx : cluster) {
-                        const Eigen::Vector3f& ray(RAYS.col(idx));
+                        const Eigen::Vector3f& ray(rays.col(idx));
                         if (axis.dot(ray) < radius) {
                             radius = axis.dot(ray);
                         }
@@ -191,7 +191,7 @@ namespace module::vision {
                     float mean             = 0.0f;
                     const float max_radius = std::acos(radius);
                     for (const auto& idx : cluster) {
-                        const float angle = std::acos(axis.dot(RAYS.col(idx))) / max_radius;
+                        const float angle = std::acos(axis.dot(rays.col(idx))) / max_radius;
                         angles.emplace_back(angle);
                         mean += angle;
                     }
@@ -295,9 +295,9 @@ namespace module::vision {
                     // Get axis unit vector from 3 unit vectors
                     auto cone_from_points = [&](const int& a, const int& b, const int& c) {
                         Eigen::Matrix3f A;
-                        A.row(0) = RAYS.row(a);
-                        A.row(1) = RAYS.row(b);
-                        A.row(2) = RAYS.row(c);
+                        A.row(0) = rays.row(a);
+                        A.row(1) = rays.row(b);
+                        A.row(2) = rays.row(c);
                         return A.householderQr().solve(Eigen::Vector3f::Ones()).normalized();
                     };
 
@@ -308,10 +308,10 @@ namespace module::vision {
                     auto point_in_cone = [&](const int& a, const int& b, const int& c, const int& d) {
                         std::array<int, 4> perms = {a, b, c, d};
                         for (int i = 0; i < 4; ++i) {
-                            const Eigen::Vector3f& p0 = RAYS.row(perms[i]);
-                            const Eigen::Vector3f& p1 = RAYS.row(perms[(i + 1) % 4]);
-                            const Eigen::Vector3f& p2 = RAYS.row(perms[(i + 2) % 4]);
-                            const Eigen::Vector3f& p3 = RAYS.row(perms[(i + 3) % 4]);
+                            const Eigen::Vector3f& p0 = rays.row(perms[i]);
+                            const Eigen::Vector3f& p1 = rays.row(perms[(i + 1) % 4]);
+                            const Eigen::Vector3f& p2 = rays.row(perms[(i + 2) % 4]);
+                            const Eigen::Vector3f& p3 = rays.row(perms[(i + 3) % 4]);
                             Eigen::Vector3f x = cone_from_points(perms[i], perms[(i + 1) % 4], perms[(i + 2) % 4]);
 
                             // Cone is valid
@@ -342,7 +342,7 @@ namespace module::vision {
 
                         // The first (only) 3 points left in the cluster are used to form the cone
                         Eigen::Vector3f axis = cone_from_points(cluster[0], cluster[1], cluster[2]);
-                        double radius        = axis.dot(RAYS.row(cluster[0]));
+                        double radius        = axis.dot(rays.row(cluster[0]));
 
                         /// DO MEASUREMENTS AND THROWOUTS
                     }
