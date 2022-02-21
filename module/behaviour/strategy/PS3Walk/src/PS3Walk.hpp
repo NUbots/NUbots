@@ -67,7 +67,12 @@ namespace module::behaviour::strategy {
         bool headLocked        = false;
         float headPitch        = 0.0f;
         float headYaw          = 0.0f;
+
+        // Subsumption stuff
+        const size_t id{size_t(this) * size_t(this) - size_t(this)};
+        void updatePriority(const float& priority);
     };
+
 }  // namespace module::behaviour::strategy
 
 

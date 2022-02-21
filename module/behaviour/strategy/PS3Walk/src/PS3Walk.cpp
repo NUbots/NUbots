@@ -21,6 +21,9 @@
 
 #include <nuclear>
 
+#include "extension/Configuration.hpp"
+#include "extension/Script.hpp"
+
 #include "message/behaviour/MotionCommand.hpp"
 #include "message/behaviour/ServoCommand.hpp"
 #include "message/motion/HeadCommand.hpp"
@@ -32,12 +35,17 @@
 
 namespace module::behaviour::strategy {
 
+    using extension::ExecuteScriptByName;
     using message::behaviour::MotionCommand;
     using message::motion::HeadCommand;
     using message::motion::KickCommand;
     using message::motion::KickCommandType;
     using message::motion::KickScriptCommand;
+
+    using utility::behaviour::ActionPriorities;
+    using utility::behaviour::RegisterAction;
     using utility::input::LimbID;
+    using utility::input::ServoID;
 
 
     PS3Walk::PS3Walk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -54,21 +62,21 @@ namespace module::behaviour::strategy {
                             // y is left relative to robot
                             // strafe[1] = -event.value;
                             rotationalSpeed = static_cast<float>(-event.value);
-                            log<NUClear::INFO>("Left Joystick Horizontal: ", -event.value);
+                            log<NUClear::INFO>("Left Joystick Horizontal (rotate): ", -event.value);
                             break;
                         case AXIS_LEFT_JOYSTICK_VERTICAL:
                             // x is forward relative to robot
                             strafe[0] = -event.value;
-                            log<NUClear::INFO>("Left Joystick Vertical: ", -event.value);
+                            log<NUClear::INFO>("Left Joystick Vertical (strafe): ", -event.value);
                             break;
                         case AXIS_RIGHT_JOYSTICK_VERTICAL:
                             headPitch = static_cast<float>(-event.value);
-                            log<NUClear::INFO>("Right Joystick Vertical: ", -event.value);
+                            log<NUClear::INFO>("Right Joystick Vertical (head pitch): ", -event.value);
                             break;
 
                         case AXIS_RIGHT_JOYSTICK_HORIZONTAL:
                             headYaw = static_cast<float>(-event.value);
-                            log<NUClear::INFO>("Right Joystick Horizontal: ", -event.value);
+                            log<NUClear::INFO>("Right Joystick Horizontal (head yaw): ", -event.value);
                             break;
                     }
                 }
@@ -102,7 +110,9 @@ namespace module::behaviour::strategy {
 
                         case BUTTON_CROSS:
                             if (event.value > 0) {  // button down
-                                log<NUClear::INFO>("Cross button: Unassigned");
+                                log<NUClear::INFO>("Cross button: Dab");
+                                emit(std::make_unique<ActionPriorities>(ActionPriorities{id, {50}}));
+                                emit(std::make_unique<ExecuteScriptByName>(id, "Dab.yaml"));
                             }
                             break;
 
@@ -166,5 +176,21 @@ namespace module::behaviour::strategy {
                 emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(affineParameter)));
             }
         });
+
+        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
+            id,
+            "ps3walk",
+            {std::pair<float, std::set<LimbID>>(
+                0,
+                {LimbID::HEAD, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::LEFT_LEG, LimbID::RIGHT_LEG})},
+            [this](const std::set<LimbID>& /*unused*/) {
+                emit(std::make_unique<ActionPriorities>(ActionPriorities{id, {50}}));
+            },
+            [this](const std::set<LimbID>& /*unused*/) { updatePriority(0); },
+            [this](const std::set<ServoID>& /*unused*/) { updatePriority(0); }}));
+    }
+
+    void PS3Walk::updatePriority(const float& priority) {
+        emit(std::make_unique<ActionPriorities>(ActionPriorities{id, {priority}}));
     }
 }  // namespace module::behaviour::strategy
