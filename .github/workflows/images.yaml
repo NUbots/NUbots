@@ -5,7 +5,7 @@ name: Normal Target Pushes
 on:
   # Triggers the workflow on push events for the main branch
   push:
-    branches: [main]
+    branches: [thompson/main-not-main]
 
 # Only a single workflow will run at a time.
 concurrency:
