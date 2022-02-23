@@ -29,10 +29,6 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Cancels previously running jobs for this workflow
-      - name: Cancel Workflow Action
-        uses: styfle/cancel-workflow-action@0.9.1
-
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
         uses: actions/checkout@v2

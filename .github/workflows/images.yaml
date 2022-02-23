@@ -7,6 +7,13 @@ on:
   push:
     branches: [main]
 
+# Only a single workflow will run at a time.
+concurrency:
+  # A unique key to determine the workflow's group membership.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # Any workflows already running in the group will be cancelled.
+  cancel-in-progress: true
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   # Declare a new job.
@@ -127,10 +134,6 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Cancels previously running jobs for this workflow
-      - name: Cancel Workflow Action
-        uses: styfle/cancel-workflow-action@0.9.1
-
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
         uses: actions/checkout@v2
