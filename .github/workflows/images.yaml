@@ -20,7 +20,7 @@ jobs:
   build_llvm:
     name: "Build LLVM"
     # Run the reusable workflow.
-    uses: .github/workflows/build_part_of_image_all_platforms.yaml
+    uses: ./.github/workflows/build_part_of_image_all_platforms.yaml
 
     # Declare inputs for reusable workflow.
     with:
@@ -40,7 +40,7 @@ jobs:
   build_intel_graphics_compiler_and_compute_runtime:
     name: "Build Intel Graphics Compiler and Compute Runtime"
     # Run the reusable workflow.
-    uses: .github/workflows/build_part_of_image_all_platforms.yaml
+    uses: ./.github/workflows/build_part_of_image_all_platforms.yaml
     # Wait for the following jobs to complete.
     needs: build_llvm
     # Declare inputs for the reusable workflow.
@@ -59,7 +59,7 @@ jobs:
 
   build_openblas:
     name: "Build OpenBLAS"
-    uses: .github/workflows/build_part_of_image_all_platforms.yaml
+    uses: ./.github/workflows/build_part_of_image_all_platforms.yaml
     with:
       target: openblas
       # {0} here is substituted with the platform (i.e. generic)
@@ -73,7 +73,7 @@ jobs:
 
   build_other_dependencies:
     name: "Build Other Dependencies"
-    uses: .github/workflows/build_part_of_image_all_platforms.yaml
+    uses: ./.github/workflows/build_part_of_image_all_platforms.yaml
     with:
       target: other-dependencies
       # {0} here is substituted with the platform (i.e. generic)
@@ -88,7 +88,7 @@ jobs:
   # Build the docker image.
   build_docker:
     name: "Build Docker Image"
-    uses: .github/workflows/build_part_of_image_all_platforms.yaml
+    uses: ./.github/workflows/build_part_of_image_all_platforms.yaml
     # Wait for previous jobs to finish before building the final image.
     needs:
       - build_llvm
