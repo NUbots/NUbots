@@ -67,6 +67,19 @@ jobs:
       docker_hub_username: ${{ secrets.DOCKERHUB_USERNAME }}
       docker_hub_password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
+  build_speech_recognition:
+    name: "Build Speech Recognition Libraries"
+    uses: ./.github/workflows/build_part_of_image.yaml
+    with:
+      target: speech-recognition
+      cache_from: |
+        type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-speech-recognition
+        type=registry,ref=nubots/nubots:generic
+        type=inline
+    secrets:
+      docker_hub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      docker_hub_password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
   build_other_dependencies:
     name: "Build Other Dependencies"
     uses: ./.github/workflows/build_part_of_image.yaml
@@ -89,6 +102,7 @@ jobs:
       - build_llvm
       - build_intel_graphics_compiler_and_compute_runtime
       - build_openblas
+      - build_speech_recognition
       - build_other_dependencies
     with:
       # Build the final-image stage.
@@ -98,6 +112,7 @@ jobs:
         type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-intel-graphics-compiler-and-compute-runtime
         type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-llvm
         type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-openblas
+        type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-speech-recognition
         type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-other-dependencies
         type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-final-image
         type=registry,ref=nubots/nubots:generic

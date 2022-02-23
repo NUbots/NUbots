@@ -191,6 +191,44 @@ RUN install-package gcc-fortran
 COPY usr/local/package/openblas/${platform}.sh /usr/local/package/openblas.sh
 RUN /usr/local/package/openblas.sh https://github.com/xianyi/OpenBLAS/archive/v0.3.13.tar.gz
 
+FROM base AS speech-recognition
+
+# PyBindGen (required by Phonetisaurus)
+RUN install-python-from-source https://pypi.python.org/packages/source/P/PyBindGen/PyBindGen-0.20.1.tar.gz
+
+# OpenFST (required by NGram, Kalid, and Phonetisaurus)
+RUN install-package python2 gcc-libs glibc
+RUN LIBS='-ldl' install-from-source http://www.openfst.org/twiki/pub/FST/FstDownload/openfst-1.7.2.tar.gz \
+    --disable-dependency-tracking \
+    --enable-bin \
+    --enable-compact-fsts \
+    --enable-compress \
+    --enable-const-fsts \
+    --enable-far \
+    --enable-linear-fsts \
+    --enable-lookahead-fsts \
+    --enable-mpdt \
+    --enable-ngram-fsts \
+    --enable-pdt \
+    --enable-python \
+    PYTHON=python2 \
+    PYTHON_VERSION=2.7 \
+    --enable-static \
+    --enable-shared
+
+# NGram
+RUN install-autotools-from-source http://opengrm.org/twiki/pub/GRM/NGramDownload/ngram-1.3.7.tar.gz \
+    LDFLAGS=-L/usr/local/lib/fst
+
+# Phonetisaurus
+COPY PKGBUILD/phonetisaurus.sh /usr/local/package/phonetisaurus.sh
+RUN install-makepkg-from-source /usr/local/package/phonetisaurus.sh
+
+# Kaldi
+RUN install-package lapack python2 cblas
+COPY PKGBUILD/kaldi.sh /usr/local/package/kaldi.sh
+RUN install-makepkg-from-source /usr/local/package/kaldi.sh
+
 FROM base AS other-dependencies
 
 # Eigen3
@@ -266,6 +304,7 @@ COPY --from=llvm /usr/local/ /usr/local/
 COPY --from=intel-graphics-compiler-and-compute-runtime /usr/local/ /usr/local/
 COPY --from=openblas /usr/local/ /usr/local/
 COPY --from=other-dependencies /usr/local/ /usr/local/
+COPY --from=speech-recognition /usr/local /usr/local
 
 # NUClear!
 RUN install-from-source https://github.com/Fastcode/NUClear/archive/f4a60c7269e277a504635a603c2890fb1a70289d.tar.gz \
@@ -298,42 +337,6 @@ RUN mkdir -p /usr/local/include/zstr \
     && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/zstr.hpp -O /usr/local/include/zstr.hpp \
     && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/strict_fstream.hpp -O /usr/local/include/strict_fstream.hpp \
     && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/zstr_make_unique_polyfill.h -O /usr/local/include/zstr_make_unique_polyfill.h
-
-# PyBindGen (required by Phonetisaurus)
-RUN install-python-from-source https://pypi.python.org/packages/source/P/PyBindGen/PyBindGen-0.20.1.tar.gz
-
-# OpenFST (required by NGram, Kalid, and Phonetisaurus)
-RUN install-package python2 gcc-libs glibc
-RUN LIBS='-ldl' install-from-source http://www.openfst.org/twiki/pub/FST/FstDownload/openfst-1.7.2.tar.gz \
-    --disable-dependency-tracking \
-    --enable-bin \
-    --enable-compact-fsts \
-    --enable-compress \
-    --enable-const-fsts \
-    --enable-far \
-    --enable-linear-fsts \
-    --enable-lookahead-fsts \
-    --enable-mpdt \
-    --enable-ngram-fsts \
-    --enable-pdt \
-    --enable-python \
-    PYTHON=python2 \
-    PYTHON_VERSION=2.7 \
-    --enable-static \
-    --enable-shared
-
-# NGram
-RUN install-autotools-from-source http://opengrm.org/twiki/pub/GRM/NGramDownload/ngram-1.3.7.tar.gz \
-    LDFLAGS=-L/usr/local/lib/fst
-
-# Phonetisaurus
-COPY PKGBUILD/phonetisaurus.sh /usr/local/package/phonetisaurus.sh
-RUN install-makepkg-from-source /usr/local/package/phonetisaurus.sh
-
-# Kaldi
-RUN install-package lapack python2 cblas
-COPY PKGBUILD/kaldi.sh /usr/local/package/kaldi.sh
-RUN install-makepkg-from-source /usr/local/package/kaldi.sh
 
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
