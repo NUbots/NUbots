@@ -17,7 +17,9 @@ namespace NUClear {
 
         // Now is multiplied by the real time factor to sync
         // NUClear with the simulation time
-        return(utility::clock::last_update + (NUClear::base_clock::now() - utility::clock::last_update) * utility::clock::custom_rtf);
+        utility::clock::last_update = utility::clock::last_update + (NUClear::base_clock::now() - utility::clock::last_update) 
+                                                                                            * utility::clock::custom_rtf;
+        return(utility::clock::last_update);
     }
 
 }  // namespace NUClear
