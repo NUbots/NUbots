@@ -125,9 +125,9 @@ namespace utility::vision {
         // Work out what pixel type we are
         const int row       = y % 2;
         const int col       = x % 2;
-        BayerPixelType type = row   ? col ? BayerPixelType::GB : BayerPixelType::B
-                              : col ? BayerPixelType::R
-                                    : BayerPixelType::GR;
+        BayerPixelType type = row != 0   ? col != 0 ? BayerPixelType::GB : BayerPixelType::B
+                              : col != 0 ? BayerPixelType::R
+                                         : BayerPixelType::GR;
 
         return getBayerPixel(patch, type);
     }
@@ -146,9 +146,9 @@ namespace utility::vision {
         // Work out what pixel type we are
         const int row       = y % 2;
         const int col       = x % 2;
-        BayerPixelType type = row   ? col ? BayerPixelType::B : BayerPixelType::GB
-                              : col ? BayerPixelType::GR
-                                    : BayerPixelType::R;
+        BayerPixelType type = row != 0   ? col != 0 ? BayerPixelType::B : BayerPixelType::GB
+                              : col != 0 ? BayerPixelType::GR
+                                         : BayerPixelType::R;
 
         return getBayerPixel(patch, type);
     }
@@ -167,9 +167,9 @@ namespace utility::vision {
         // Work out what pixel type we are
         const int row       = y % 2;
         const int col       = x % 2;
-        BayerPixelType type = row   ? col ? BayerPixelType::GR : BayerPixelType::R
-                              : col ? BayerPixelType::B
-                                    : BayerPixelType::GB;
+        BayerPixelType type = row != 0   ? col != 0 ? BayerPixelType::GR : BayerPixelType::R
+                              : col != 0 ? BayerPixelType::B
+                                         : BayerPixelType::GB;
 
         return getBayerPixel(patch, type);
     }
@@ -188,9 +188,9 @@ namespace utility::vision {
         // Work out what pixel type we are
         const int row       = y % 2;
         const int col       = x % 2;
-        BayerPixelType type = row   ? col ? BayerPixelType::R : BayerPixelType::GR
-                              : col ? BayerPixelType::GB
-                                    : BayerPixelType::B;
+        BayerPixelType type = row != 0   ? col != 0 ? BayerPixelType::R : BayerPixelType::GR
+                              : col != 0 ? BayerPixelType::GB
+                                         : BayerPixelType::B;
 
         return getBayerPixel(patch, type);
     }

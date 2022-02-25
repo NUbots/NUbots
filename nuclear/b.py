@@ -110,6 +110,13 @@ if __name__ == "__main__":
                                 )
 
                             module.register(subcommand.add_parser(components[-1]))
+                            # Try to provide completion
+                            try:
+                                import argcomplete
+
+                                argcomplete.autocomplete(command)
+                            except ImportError:
+                                pass
                             module.run(**vars(command.parse_args()))
 
                             # We're done, exit
@@ -149,5 +156,12 @@ if __name__ == "__main__":
             except BaseException as e:
                 pass
 
+    # Try to provide completion
+    try:
+        import argcomplete
+
+        argcomplete.autocomplete(command)
+    except ImportError:
+        pass
     # Given what we know, this will fail here and give the user some help
     command.parse_args()

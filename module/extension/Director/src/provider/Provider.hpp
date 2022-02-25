@@ -57,8 +57,8 @@ namespace module::extension::provider {
 
         Provider(const ::extension::behaviour::commands::ProviderClassification& classification_,
                  const std::type_index& type_,
-                 const std::shared_ptr<NUClear::threading::Reaction>& reaction_)
-            : classification(classification_), type(type_), reaction(reaction_) {}
+                 std::shared_ptr<NUClear::threading::Reaction> reaction_)
+            : classification(classification_), type(type_), reaction(std::move(reaction_)) {}
 
         /// The classification of this Provider
         ::extension::behaviour::commands::ProviderClassification classification;
