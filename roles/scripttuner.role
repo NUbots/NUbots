@@ -8,7 +8,8 @@ nuclear_role(
   platform::darwin::HardwareIO
   behaviour::tools::ScriptTuner
   behaviour::Controller
-  support::configuration::NetworkConfiguration
-  support::NUsight
+  network::NUClearNet
+  network::NetworkForwarder
+  output::Overview
   motion::ScriptEngine
 )

@@ -1,7 +1,7 @@
-import numpy as np
 import math
-import matplotlib.pyplot as plt
 
+import matplotlib.pyplot as plt
+import numpy as np
 
 viewpoint = np.array([-1872.262, 399.786, 450.743])
 tl = np.array([159.1, 1654, -1063.8])

@@ -18,28 +18,28 @@
  */
 
 #include <fmt/format.h>
+#include "PS3Walk.hpp"
 
-#include "PS3Walk.h"
+#include <nuclear>
 
 #include "extension/Configuration.h"
 #include "extension/Script.h"
 
-#include "message/behaviour/MotionCommand.h"
-#include "message/behaviour/ServoCommand.h"
 #include "message/input/PSController.h"
-#include "message/motion/HeadCommand.h"
-#include "message/motion/KickCommand.h"
 
-#include "utility/behaviour/Action.h"
-#include "utility/behaviour/MotionCommand.h"
-#include "utility/input/LimbID.h"
 #include "utility/input/ServoID.h"
 #include "utility/math/matrix/Transform2D.h"
-#include "utility/support/eigen_armadillo.h"
+// #include "utility/support/eigen_armadillo.h"
+#include "message/behaviour/MotionCommand.hpp"
+#include "message/behaviour/ServoCommand.hpp"
+#include "message/motion/HeadCommand.hpp"
+#include "message/motion/KickCommand.hpp"
 
-namespace module {
-namespace behaviour {
-    namespace strategy {
+#include "utility/behaviour/Action.hpp"
+#include "utility/behaviour/MotionCommand.hpp"
+#include "utility/input/LimbID.hpp"
+
+namespace module::behaviour::strategy {
 
         using extension::Configuration;
         using extension::ExecuteScriptByName;

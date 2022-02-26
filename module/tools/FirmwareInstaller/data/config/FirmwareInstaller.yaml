@@ -1,4 +1,4 @@
-device: "/dev/CM730"
+device: "/dev/CM740"
 firmwares:
   - device: CM730
     battery: 3Cell
@@ -6,3 +6,9 @@ firmwares:
   - device: CM730
     battery: 4Cell
     path: "firmware/cm730_4cell.bin"
+  - device: CM740
+    battery: 3Cell
+    path: "firmware/cm740_3cell.bin"
+  - device: CM740
+    battery: 4Cell
+    path: "firmware/cm740_4cell.bin"

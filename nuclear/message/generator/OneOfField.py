@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import stringcase
-
 from generator.Field import Field
 
 
@@ -14,6 +13,7 @@ class OneOfField:
         self.type = "OneOf{}".format(stringcase.pascalcase(self.name))
         self.fqn = "{}.{}".format(context.fqn, self.type)
         self.default_value = "{}()".format(self.type)
+        self.trivially_copyable = False
 
         self.map_type = False
         self.repeated = False

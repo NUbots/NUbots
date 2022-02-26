@@ -1,2 +1,0 @@
-#!/bin/bash
-QUEX_PATH=/nubots/toolchain/etc/quex python /nubots/toolchain/etc/quex/quex-exe.py "$@"

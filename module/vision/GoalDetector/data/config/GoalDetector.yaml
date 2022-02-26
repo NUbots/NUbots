@@ -1,8 +1,12 @@
-confidence_threshold: 0.7              # How confident do we need to be that this is a goal point
-cluster_points: 5                      # How many points do we need to claim this cluster is a viable goal
-disagreement_ratio: 0.20               # How much can the measured goal width vary from actual goal width before we
-                                       # treat the posts as part of separate goals
-goal_angular_cov: [0.1, 0.001, 0.001]  # Measurement certainties
-use_median: false                      # Use median rather than mean we determining position of left and right goal
-                                       # post edges
-debug: false                           # Turn on debug outputs
+# Log level of DEBUG will print out compression rates
+log_level: WARN
+
+confidence_threshold: 0.8             # How confident do we need to be that this is a goal point
+cluster_points: 10                     # How many points do we need to claim this cluster is a viable goal
+disagreement_ratio: 0.5               # How much can the measured goal width vary from actual goal width before we
+                                      # treat the posts as part of separate goals
+goal_projection_covariance: [0.01, 0.01, 0.01] # Measurement certainties for {1/distance, theta, phi}
+use_median: false                     # Use median rather than mean when determining position of left and right goal
+                                      # post edges
+max_goal_distance: 12                 # maximum distance that a goal may be from the robot to be a real goal,
+                                      # measured as diagonal of the field (furthest two points)

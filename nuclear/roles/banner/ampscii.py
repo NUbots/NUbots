@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-import sys
 import math
+import sys
+
 from PIL import Image
 
 # Make a lookup map we can use to find values

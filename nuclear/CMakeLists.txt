@@ -1,50 +1,80 @@
 # We use additional modules for the NUClear roles system
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
-
-# We need NUClear
-find_package(NUClear REQUIRED)
-include_directories(SYSTEM ${NUClear_INCLUDE_DIR})
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules/")
 
 # Set to off to ignore building tests
 option(BUILD_TESTS "Builds all of the tests for each module." OFF)
 
-# Set to on to build as shared libraries
-option(NUCLEAR_SHARED_BUILD "Build each module as a separate shared library." ON)
+# The ways we can link the libraries together
+if(NOT NUCLEAR_LINK_TYPE)
+  set(NUCLEAR_LINK_TYPE
+      SHARED
+      CACHE STRING "Choose method to link the binary" FORCE
+  )
+  # Set the possible values of build type for cmake-gui
+  set_property(CACHE NUCLEAR_LINK_TYPE PROPERTY STRINGS "SHARED" "STATIC" "OBJECT")
+endif()
+
+# RPath variables use, i.e. don't skip the full RPATH for the build tree
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+
+# Build the RPATH into the binary before install
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+
+# Make OSX use the same RPATH as everyone else
+set(CMAKE_MACOSX_RPATH ON)
+
+# Add some useful places to the RPATH. These will allow the binary to run from the build folder
+set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_RPATH} lib/ ../lib/ bin/lib)
 
 # Our banner file for placing at the top of the roles
-set(
-  NUCLEAR_ROLE_BANNER_FILE
-  "${CMAKE_CURRENT_SOURCE_DIR}/roles/banner.png"
-  CACHE PATH "The path the banner to print at the start of each role execution"
+set(NUCLEAR_ROLE_BANNER_FILE
+    "${CMAKE_CURRENT_SOURCE_DIR}/roles/banner.png"
+    CACHE PATH "The path the banner to print at the start of each role execution"
 )
 
-# Our location of our nuclear roles directory
-set(NUCLEAR_ROLES_DIR "${CMAKE_CURRENT_SOURCE_DIR}" CACHE PATH "The path to the nuclear roles system directory")
-
-set(
-  NUCLEAR_ADDITIONAL_SHARED_LIBRARIES
-  ""
-  CACHE STRING "Additional libraries used when linking roles, extensions, and utilities"
-)
-
-set(NUCLEAR_TEST_LIBRARIES "" CACHE STRING "Additional libraries used when linking module tests")
+# We need -fPIC for all code
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Our variables that are used to locate the shared, module, and message folders They are given relative to the current
 # project directory
-set(NUCLEAR_MODULE_DIR "module" CACHE PATH "The path to the module directory for NUClear")
-set(NUCLEAR_MESSAGE_DIR "shared/message" CACHE PATH "The path to the message directory for NUClear")
-set(NUCLEAR_UTILITY_DIR "shared/utility" CACHE PATH "The path to the utility dir for NUClear")
-set(NUCLEAR_EXTENSION_DIR "shared/extension" CACHE PATH "The path to the extension dir for NUClear")
+set(NUCLEAR_MODULE_DIR
+    "module"
+    CACHE PATH "The path to the module directory for NUClear"
+)
+set(NUCLEAR_ROLES_DIR
+    "roles"
+    CACHE PATH "The path to the nuclear roles system directory"
+)
+set(NUCLEAR_SHARED_DIR
+    "shared"
+    CACHE PATH "The path to the shared directory for NUClear"
+)
+set(NUCLEAR_MESSAGE_DIR
+    "${NUCLEAR_SHARED_DIR}/message"
+    CACHE PATH "The path to the message directory for NUClear"
+)
+set(NUCLEAR_UTILITY_DIR
+    "${NUCLEAR_SHARED_DIR}/utility"
+    CACHE PATH "The path to the utility dir for NUClear"
+)
+set(NUCLEAR_EXTENSION_DIR
+    "${NUCLEAR_SHARED_DIR}/extension"
+    CACHE PATH "The path to the extension dir for NUClear"
+)
 
 # You generally shouldn't have to change these
-mark_as_advanced(NUCLEAR_ROLE_BANNER_FILE NUCLEAR_MODULE_DIR NUCLEAR_MESSAGE_DIR NUCLEAR_UTILITY_DIR
-                 NUCLEAR_EXTENSION_DIR)
+mark_as_advanced(
+  NUCLEAR_MODULE_DIR
+  NUCLEAR_ROLES_DIR
+  NUCLEAR_SHARED_DIR
+  NUCLEAR_MESSAGE_DIR
+  NUCLEAR_UTILITY_DIR
+  NUCLEAR_EXTENSION_DIR
+  NUCLEAR_ROLE_BANNER_FILE
+)
 
 # Make our shared directory to output files too
-file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/shared)
-
-# Settings for the compiler to make NUClear work
-include(NUClearCompilerSettings)
+file(MAKE_DIRECTORY ${PROJECT_BINARY_DIR}/${NUCLEAR_SHARED_DIR})
 
 # Add the subdirectory for our messages
 add_subdirectory("message")

@@ -9,14 +9,15 @@ nuclear_role(
   # Support and Configuration
   support::configuration::GlobalConfig
   support::configuration::SoccerConfig
-  support::configuration::NetworkConfiguration
-  support::NUsight
+  network::NUClearNet
+  network::NetworkForwarder
+  output::Overview
   # Hardware Interface
   input::Camera
   platform::darwin::HardwareIO
-  platform::darwin::SensorFilter
+  input::SensorFilter
   # Motion
-  motion::OldWalkEngine
+  motion::QuinticWalk
   motion::ScriptEngine
   # Behaviour
   behaviour::Controller

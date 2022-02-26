@@ -1,0 +1,20 @@
+version: "3.4"
+services:
+  flexo:
+    image: nroi/flexo:1.2.2
+    container_name: flexo
+    restart: always
+    ports:
+      - "7878:7878"
+    volumes:
+      - pacman_cache:/var/cache/flexo/pkg
+    environment:
+      - FLEXO_CACHE_DIRECTORY=/var/cache/flexo/pkg
+      - FLEXO_MIRROR_SELECTION_METHOD=predefined
+      # ↓↓↓ UPDATE MIRRORS HERE ↓↓↓
+      - FLEXO_MIRRORS_PREDEFINED=['https://archive.archlinux.org/repos/2021/01/10/']
+      - RUST_BACKTRACE=1
+
+volumes:
+  pacman_cache:
+    name: pacman_cache

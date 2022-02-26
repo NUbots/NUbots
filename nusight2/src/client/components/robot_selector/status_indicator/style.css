@@ -1,0 +1,15 @@
+.statusIndicator {
+  box-sizing: border-box;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.statusConnected {
+  background-color: #00de46;
+  box-shadow: 0 0 8px #00de46;
+}
+
+.statusDisconnected {
+  border: 2px solid #ccc;
+}

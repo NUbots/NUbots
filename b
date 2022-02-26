@@ -1,2 +1,2 @@
 #!/bin/bash
-exec nuclear/b.py "$@"
+exec $(dirname $0)/nuclear/b.py "$@"

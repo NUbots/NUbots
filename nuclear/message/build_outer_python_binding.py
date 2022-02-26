@@ -1,7 +1,8 @@
 #!/usr/bin/python
-import sys
 import os
-from generator.textutil import indent, dedent
+import sys
+
+from generator.textutil import dedent, indent
 
 # Get our file we are outputting too
 base_file = sys.argv[1]

@@ -1,0 +1,55 @@
+--- a/Eigen/src/Core/util/Macros.h
++++ b/Eigen/src/Core/util/Macros.h
+@@ -408,6 +408,23 @@
+ #endif
+ #endif
+
++// NOTE: the required Apple's clang version is very conservative
++//       and it could be that XCode 9 works just fine.
++// NOTE: the MSVC version is based on https://en.cppreference.com/w/cpp/compiler_support
++//       and not tested.
++#ifndef EIGEN_HAS_CXX17_OVERALIGN
++#if EIGEN_MAX_CPP_VER>=17 && EIGEN_COMP_CXXVER>=17 && (                                 \
++           (EIGEN_COMP_MSVC >= 1912)                                                    \
++        || (EIGEN_GNUC_AT_LEAST(7,0))                                                   \
++        || ((!defined(__apple_build_version__)) && (EIGEN_COMP_CLANG>=500))             \
++        || (( defined(__apple_build_version__)) && (__apple_build_version__>=10000000)) \
++      )
++#define EIGEN_HAS_CXX17_OVERALIGN 1
++#else
++#define EIGEN_HAS_CXX17_OVERALIGN 0
++#endif
++#endif
++
+ // Does the compiler fully support const expressions? (as in c++14)
+ #ifndef EIGEN_HAS_CONSTEXPR
+
+--- a/Eigen/src/Core/util/Memory.h
++++ b/Eigen/src/Core/util/Memory.h
+@@ -653,6 +653,17 @@
+ *** Implementation of EIGEN_MAKE_ALIGNED_OPERATOR_NEW [_IF]                ***
+ *****************************************************************************/
+
++#if EIGEN_HAS_CXX17_OVERALIGN
++
++// C++17 -> no need to bother about alignment anymore :)
++
++#define EIGEN_MAKE_ALIGNED_OPERATOR_NEW_NOTHROW(NeedsToAlign)
++#define EIGEN_MAKE_ALIGNED_OPERATOR_NEW_IF(NeedsToAlign)
++#define EIGEN_MAKE_ALIGNED_OPERATOR_NEW
++#define EIGEN_MAKE_ALIGNED_OPERATOR_NEW_IF_VECTORIZABLE_FIXED_SIZE(Scalar,Size)
++
++#else
++
+ #if EIGEN_MAX_ALIGN_BYTES!=0
+   #define EIGEN_MAKE_ALIGNED_OPERATOR_NEW_NOTHROW(NeedsToAlign) \
+       void* operator new(std::size_t size, const std::nothrow_t&) EIGEN_NO_THROW { \
+@@ -691,6 +702,8 @@
+ #define EIGEN_MAKE_ALIGNED_OPERATOR_NEW_IF_VECTORIZABLE_FIXED_SIZE(Scalar,Size) \
+   EIGEN_MAKE_ALIGNED_OPERATOR_NEW_IF(bool(((Size)!=Eigen::Dynamic) && ((sizeof(Scalar)*(Size))%EIGEN_MAX_ALIGN_BYTES==0)))
+
++#endif
++
+ /****************************************************************************/
+
+ /** \class aligned_allocator

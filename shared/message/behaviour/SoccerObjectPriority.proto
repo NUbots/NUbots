@@ -29,11 +29,12 @@ message SoccerObjectPriority {
         GOAL_RIGHT              = 4;
         GROUND_LEFT             = 5;
         GROUND_RIGHT            = 6;
-        OTHE                    = 7;
+        OTHER                   = 7;
     }
-
-    int32      ball       = 1;
-    int32      goal       = 2;
-    int32      line       = 3;
-    SearchType searchType = 4;
+    /// The list of priorities is stored in these variables, where the lower the priority (always non-negative), the
+    /// more important the object, with the special case that var == 0 => uninitialised priority.
+    int32      ball        = 1;
+    int32      goal        = 2;
+    int32      line        = 3;
+    SearchType search_type = 4;
 }

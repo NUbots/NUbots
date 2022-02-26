@@ -17,27 +17,23 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#include "VirtualCamera.h"
+#include "VirtualCamera.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/vision/LookUpTable.h"
+#include "message/input/Image.hpp"
 
-#include "utility/support/eigen_armadillo.h"
-#include "utility/support/yaml_armadillo.h"
-#include "utility/support/yaml_expression.h"
-#include "utility/vision/LookUpTable.h"
-#include "utility/vision/Vision.h"
+#include "utility/support/yaml_expression.hpp"
+#include "utility/vision/Vision.hpp"
 
-namespace module {
-namespace support {
+namespace module::support {
 
     using extension::Configuration;
 
     using message::input::Image;
-    using message::vision::LookUpTable;
 
-    using FOURCC = utility::vision::FOURCC;
+    using utility::support::Expression;
+    using utility::vision::FOURCC;
 
     VirtualCamera::VirtualCamera(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), emitImageHandle() {
@@ -46,7 +42,7 @@ namespace support {
             on<Every<30, Per<std::chrono::seconds>>, Single>().then("Simulated Images (VCamera)", [this]() {
                 auto msg       = std::make_unique<message::input::Image>();
                 msg->format    = FOURCC::BGGR;
-                msg->camera_id = 0;
+                msg->id        = 0;
                 msg->name      = "VirtualCamera";
                 msg->timestamp = NUClear::clock::now();
                 msg->Hcw       = Hcw;
@@ -55,12 +51,6 @@ namespace support {
                 utility::vision::loadImage(imagePath, *msg);
                 emit(msg);
             });
-
-        on<Configuration>("VirtualLookUpTable.yaml").then([this](const Configuration& config) {
-            auto lut = std::make_unique<LookUpTable>(config.config.as<LookUpTable>());
-            emit(lut);
-        });
-
 
         on<Configuration>("VirtualCamera.yaml").then([this](const Configuration& config) {
             imagePath = config["image"]["path"].as<std::string>();
@@ -73,17 +63,17 @@ namespace support {
 
             if (config["lens_type"].as<std::string>().compare("pinhole") == 0) {
                 // Pinhole specific
-                lens.projection = Image::Lens::Projection::RECTILINEAR;
-                lens.fov << config["FOV_X"].as<float>(), config["FOV_Y"].as<float>();
-                lens.focal_length = (config["imageWidth"].as<float>() * 0.5f) / std::tan(lens.fov.x() * 0.5f);
+                lens.projection   = Image::Lens::Projection::RECTILINEAR;
+                lens.fov          = config["FOV_X"].as<float>();
+                lens.focal_length = (config["image_width"].as<float>() * 0.5f) / std::tan(lens.fov * 0.5f);
                 lens.centre << 0.0f, 0.0f;
             }
             else if (config["lens_type"].as<std::string>().compare("radial") == 0) {
                 // Radial specific
-                lens.projection = Image::Lens::Projection::EQUIDISTANT;
-                lens.fov << config["FOV_X"].as<float>(), config["FOV_Y"].as<float>();
-                lens.focal_length = 1.0f / config["lens"]["radiansPerPixel"].as<float>();
-                lens.centre       = convert(config["lens"]["centreOffset"].as<arma::fvec>());
+                lens.projection   = Image::Lens::Projection::EQUIDISTANT;
+                lens.fov          = config["FOV_X"].as<float>();
+                lens.focal_length = 1.0f / config["lens"]["radians_per_pixel"].as<float>();
+                lens.centre       = config["lens"]["centre_offset"].as<Expression>();
             }
             else {
                 log<NUClear::ERROR>("LENS TYPE UNDEFINED: choose from 'pinhole' or 'radial'");
@@ -98,5 +88,4 @@ namespace support {
             }
         });
     }
-}  // namespace support
-}  // namespace module
+}  // namespace module::support

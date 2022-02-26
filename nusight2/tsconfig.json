@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "esModuleInterop": true,
+    "sourceMap": true,
+    "target": "ESNext",
+    "useDefineForClassFields": false,
+    "jsx": "react",
+    "skipLibCheck": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "declaration": false,
+    "removeComments": true,
+    "strict": true,
+    "outDir": "dist",
+    "lib": [
+      "ESNext",
+      "dom",
+      "webworker"
+    ],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./typings"
+    ]
+  },
+  "include": [
+    "./src/**/*"
+  ],
+  "exclude": [
+    "**/tests/**/*"
+  ]
+}

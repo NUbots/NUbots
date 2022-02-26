@@ -17,25 +17,26 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "GoalDetector.h"
+#include "GoalDetector.hpp"
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <fmt/format.h>
+#include <numeric>
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/support/FieldDescription.h"
-#include "message/vision/Goal.h"
-#include "message/vision/GreenHorizon.h"
+#include "message/support/FieldDescription.hpp"
+#include "message/vision/Goal.hpp"
+#include "message/vision/GreenHorizon.hpp"
 
-#include "utility/math/coordinates.h"
-#include "utility/math/geometry/ConvexHull.h"
-#include "utility/support/eigen_armadillo.h"
-#include "utility/support/yaml_armadillo.h"
-#include "utility/vision/Vision.h"
-#include "utility/vision/visualmesh/VisualMesh.h"
+#include "utility/math/coordinates.hpp"
+#include "utility/math/geometry/ConvexHull.hpp"
+#include "utility/support/yaml_expression.hpp"
+#include "utility/vision/Vision.hpp"
+#include "utility/vision/visualmesh/VisualMesh.hpp"
 
-namespace module {
-namespace vision {
+namespace module::vision {
 
     using extension::Configuration;
 
@@ -44,29 +45,33 @@ namespace vision {
     using message::vision::Goals;
     using message::vision::GreenHorizon;
 
+    using utility::math::coordinates::cartesianToReciprocalSpherical;
     using utility::math::coordinates::cartesianToSpherical;
-
-    static constexpr int GOAL_INDEX = 1;
+    using utility::support::Expression;
 
     GoalDetector::GoalDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         // Trigger the same function when either update
         on<Configuration>("GoalDetector.yaml").then([this](const Configuration& cfg) {
-            config.confidence_threshold = cfg["confidence_threshold"].as<float>();
-            config.cluster_points       = cfg["cluster_points"].as<int>();
-            config.disagreement_ratio   = cfg["disagreement_ratio"].as<float>();
-            config.goal_angular_cov     = convert(cfg["goal_angular_cov"].as<arma::vec>()).cast<float>().asDiagonal();
-            config.use_median           = cfg["use_median"].as<bool>();
-            config.debug                = cfg["debug"].as<bool>();
+            log_level = cfg["log_level"].as<NUClear::LogLevel>();
+
+            config.confidence_threshold       = cfg["confidence_threshold"].as<float>();
+            config.cluster_points             = cfg["cluster_points"].as<int>();
+            config.disagreement_ratio         = cfg["disagreement_ratio"].as<float>();
+            config.goal_projection_covariance = Eigen::Vector3f(cfg["goal_projection_covariance"].as<Expression>());
+            config.use_median                 = cfg["use_median"].as<bool>();
+            config.max_goal_distance          = cfg["max_goal_distance"].as<float>();
         });
 
         on<Trigger<GreenHorizon>, With<FieldDescription>, Buffer<2>>().then(
-            "Goal Detector", [this](const GreenHorizon& horizon, const FieldDescription& field) {
+            "Goal Detector",
+            [this](const GreenHorizon& horizon, const FieldDescription& field) {
                 // Convenience variables
                 const auto& cls                                     = horizon.mesh->classifications;
                 const auto& neighbours                              = horizon.mesh->neighbourhood;
                 const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = horizon.mesh->rays;
                 const float world_offset                            = std::atan2(horizon.Hcw(0, 1), horizon.Hcw(0, 0));
+                const int GOAL_INDEX                                = horizon.class_map.at("goal");
 
                 // Get some indices to partition
                 std::vector<int> indices(horizon.mesh->indices.size());
@@ -74,8 +79,11 @@ namespace vision {
 
                 // Partition the indices such that we only have the goal points that dont have goal surrounding them
                 auto boundary = utility::vision::visualmesh::partition_points(
-                    indices.begin(), indices.end(), neighbours, [&](const int& idx) {
-                        return idx == indices.size() || (cls(GOAL_INDEX, idx) >= config.confidence_threshold);
+                    indices.begin(),
+                    indices.end(),
+                    neighbours,
+                    [&](const int& idx) {
+                        return idx == int(indices.size()) || (cls(GOAL_INDEX, idx) >= config.confidence_threshold);
                     });
 
                 // Discard indices that are not on the boundary and are not below the green horizon
@@ -92,26 +100,65 @@ namespace vision {
                 //    e) Delete all partitions smaller than a given threshold
                 // 2) Discard all clusters that do not intersect the green horizon
                 std::vector<std::vector<int>> clusters;
-                utility::vision::visualmesh::cluster_points(
-                    indices.begin(), indices.end(), neighbours, config.cluster_points, clusters);
+                utility::vision::visualmesh::cluster_points(indices.begin(),
+                                                            indices.end(),
+                                                            neighbours,
+                                                            config.cluster_points,
+                                                            clusters);
 
-                if (config.debug) {
-                    log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
-                }
+                log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
 
-                auto green_boundary = utility::vision::visualmesh::check_green_horizon_side(
-                    clusters.begin(), clusters.end(), horizon.horizon.begin(), horizon.horizon.end(), rays, true, true);
+                auto green_boundary = utility::vision::visualmesh::check_green_horizon_side(clusters.begin(),
+                                                                                            clusters.end(),
+                                                                                            horizon.horizon.begin(),
+                                                                                            horizon.horizon.end(),
+                                                                                            rays,
+                                                                                            true,
+                                                                                            true);
                 clusters.resize(std::distance(clusters.begin(), green_boundary));
 
-                if (config.debug) {
-                    log<NUClear::DEBUG>(fmt::format("Found {} clusters below green horizon", clusters.size()));
+                log<NUClear::DEBUG>(fmt::format("Found {} clusters that intersect the green horizon", clusters.size()));
+
+                // Find overlapping clusters and merge them
+                for (auto it = clusters.begin(); it != clusters.end(); it = std::next(it)) {
+                    // Get the largest and smallest theta values
+                    auto range_a = std::minmax_element(it->begin(), it->end(), [&rays](const int& a, const int& b) {
+                        return std::atan2(rays(1, a), rays(0, a)) < std::atan2(rays(1, b), rays(0, b));
+                    });
+
+                    const float min_a = std::atan2(rays(1, *range_a.first), rays(0, *range_a.first));
+                    const float max_a = std::atan2(rays(1, *range_a.second), rays(0, *range_a.second));
+
+                    for (auto it2 = std::next(it); it2 != clusters.end();) {
+                        // Get the largest and smallest theta values
+                        auto range_b =
+                            std::minmax_element(it2->begin(), it2->end(), [&rays](const int& a, const int& b) {
+                                return std::atan2(rays(1, a), rays(0, a)) < std::atan2(rays(1, b), rays(0, b));
+                            });
+
+                        const float min_b = std::atan2(rays(1, *range_b.first), rays(0, *range_b.first));
+                        const float max_b = std::atan2(rays(1, *range_b.second), rays(0, *range_b.second));
+
+                        // The clusters are overlapping, merge them
+                        if (((min_a <= min_b) && (min_b <= max_a)) || ((min_b <= min_a) && (min_a <= max_b))) {
+                            // Append the second cluster on to the first
+                            it->insert(it->end(), it2->begin(), it2->end());
+                            // Delete the second cluster
+                            it2 = clusters.erase(it2);
+                        }
+                        else {
+                            it2 = std::next(it2);
+                        }
+                    }
                 }
 
-                if (clusters.size() > 0) {
+                log<NUClear::DEBUG>(fmt::format("{} clusters remaining after merging overlaps", clusters.size()));
+
+                if (!clusters.empty()) {
                     auto goals = std::make_unique<Goals>();
                     goals->goals.reserve(clusters.size());
 
-                    goals->camera_id = horizon.camera_id;
+                    goals->id        = horizon.id;
                     goals->timestamp = horizon.timestamp;
                     goals->Hcw       = horizon.Hcw;
 
@@ -124,26 +171,25 @@ namespace vision {
                             cluster.end(),
                             neighbours,
                             [&](const int& idx) {
-                                return idx == indices.size() || (cls(GOAL_INDEX, idx) >= config.confidence_threshold);
+                                return idx == int(indices.size())
+                                       || (cls(GOAL_INDEX, idx) >= config.confidence_threshold);
                             },
-                            {2});
+                            {0});
                         // Return true if the right neighbour is NOT a goal point
                         auto other = utility::vision::visualmesh::partition_points(
                             right,
                             cluster.end(),
                             neighbours,
                             [&](const int& idx) {
-                                return idx == indices.size() || (cls(GOAL_INDEX, idx) >= config.confidence_threshold);
+                                return idx == int(indices.size())
+                                       || (cls(GOAL_INDEX, idx) >= config.confidence_threshold);
                             },
                             {3});
-
-                        if (config.debug) {
-                            log<NUClear::DEBUG>(
-                                fmt::format("Cluster split into {} left points, {} right points, {} top/bottom points",
-                                            std::distance(cluster.begin(), right),
-                                            std::distance(right, other),
-                                            std::distance(other, cluster.end())));
-                        }
+                        log<NUClear::DEBUG>(
+                            fmt::format("Cluster split into {} left points, {} right points, {} top/bottom points",
+                                        std::distance(cluster.begin(), right),
+                                        std::distance(right, other),
+                                        std::distance(other, cluster.end())));
 
                         if ((std::distance(cluster.begin(), right) != 0) && (std::distance(right, other) != 0)) {
                             Eigen::Vector3f left_side    = Eigen::Vector3f::Zero();
@@ -208,18 +254,44 @@ namespace vision {
                             g.post.distance = distance;
 
                             // Attach the measurement to the object (distance from camera to bottom center of post)
-                            g.measurements.push_back(Goal::Measurement());
+                            g.measurements.emplace_back();  // Emplaces default constructed object
                             g.measurements.back().type = Goal::MeasurementType::CENTRE;
-                            g.measurements.back().position =
-                                cartesianToSpherical(Eigen::Vector3f(g.post.bottom * distance));
-                            g.measurements.back().covariance =
-                                config.goal_angular_cov * Eigen::Vector3f(distance, 1, 1).asDiagonal();
+
+                            // Spherical Reciprocal Coordinates (1/distance, phi, theta)
+                            g.measurements.back().srGCc =
+                                cartesianToReciprocalSpherical(Eigen::Vector3f(g.post.bottom * distance));
+
+                            g.measurements.back().covariance = config.goal_projection_covariance.asDiagonal();
 
                             // Angular positions from the camera
                             g.screen_angular = cartesianToSpherical(g.post.bottom).tail<2>();
                             g.angular_size   = Eigen::Vector2f::Constant(std::acos(radius));
 
-                            goals->goals.push_back(std::move(g));
+                            /***********************************************
+                             *                  THROWOUTS                  *
+                             ***********************************************/
+
+
+                            bool keep = true;  // if false then we will not consider this as a valid goal post
+
+                            // If the goal is too far away, get rid of it!
+                            if (distance > config.max_goal_distance) {
+                                keep = false;
+                                log<NUClear::DEBUG>("**************************************************");
+                                log<NUClear::DEBUG>("*                    THROWOUTS                   *");
+                                log<NUClear::DEBUG>("**************************************************");
+
+                                log<NUClear::DEBUG>(
+                                    fmt::format("Goal discarded: goal distance ({}) > maximum_goal_distance ({})",
+                                                distance,
+                                                config.max_goal_distance));
+                                log<NUClear::DEBUG>("--------------------------------------------------");
+                            }
+
+                            if (keep) {
+                                // Passed the tests, this post can go onto the next round as a valid goal post!
+                                goals->goals.push_back(std::move(g));
+                            }
                         }
                     }
 
@@ -261,14 +333,14 @@ namespace vision {
 
                             // Check the width between the posts
                             // If they are close enough then assign left and right sides
-                            if (config.debug) {
-                                log<NUClear::DEBUG>(fmt::format(
-                                    "Camera {}: Goal post 0 distance = {}", horizon.camera_id, it1->post.distance));
-                                log<NUClear::DEBUG>(fmt::format(
-                                    "Camera {}: Goal post 1 distance = {}", horizon.camera_id, it2->post.distance));
-                                log<NUClear::DEBUG>(fmt::format(
-                                    "Camera {}: Goal width = {} ({})", horizon.camera_id, width, disagreement));
-                            }
+
+                            log<NUClear::DEBUG>(
+                                fmt::format("Camera {}: Goal post 0 distance = {}", horizon.id, it1->post.distance));
+                            log<NUClear::DEBUG>(
+                                fmt::format("Camera {}: Goal post 1 distance = {}", horizon.id, it2->post.distance));
+                            log<NUClear::DEBUG>(
+                                fmt::format("Camera {}: Goal width = {} ({})", horizon.id, width, disagreement));
+
                             if (disagreement < config.disagreement_ratio) {
                                 auto it = pairs.find(it1);
                                 if (it != pairs.end()) {
@@ -300,13 +372,10 @@ namespace vision {
                         }
                     }
 
-                    if (config.debug) {
-                        log<NUClear::DEBUG>(fmt::format("Found {} goal posts", goals->goals.size()));
-                    }
+                    log<NUClear::DEBUG>(fmt::format("Found {} goal posts", goals->goals.size()));
 
                     emit(std::move(goals));
                 }
             });
     }
-}  // namespace vision
-}  // namespace module
+}  // namespace module::vision
