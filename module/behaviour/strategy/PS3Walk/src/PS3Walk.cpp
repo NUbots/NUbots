@@ -175,7 +175,11 @@ namespace module::behaviour::strategy {
             // Output walk command based on updated strafe and rotation speed from joystick
             if (moving) {
                 if (((prevWalkCommand - walkCommand).array().abs() > walk_command_threshold).any()) {
-                    Eigen::Vector3d command = walkCommand.cwiseProduct(walkCommandLimits);
+                    // The walk command is a 2d transformation matrix, so convert the 3d vector
+                    Eigen::Affine2d command;
+                    command.translation() = Eigen::Vector2d(walkCommand.x() * walkCommandLimits.x(),
+                                                            walkCommand.y() * walkCommandLimits.y());
+                    command.linear() = Eigen::Rotation2Dd(walkCommand.z() * walkCommandLimits.z()).toRotationMatrix();
                     emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(command)));
                     prevWalkCommand = walkCommand;
                 }
@@ -194,6 +198,4 @@ namespace module::behaviour::strategy {
                 emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {0}}));
             }}));
     }
-}  // namespace strategy
-}  // namespace behaviour
-}  // namespace module
+}  // namespace module::behaviour::strategy
