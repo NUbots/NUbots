@@ -79,10 +79,10 @@ namespace module {
 
             on<Configuration>("PS4Controller.yaml").then([this](const Configuration& config) {
                 // Only reconnect if we are changing the path to the device
-                if ((controller_path.compare(config["controller_path"]) != 0)
-                    || (accelerometer_path.compare(config["accelerometer_path"]) != 0)) {
-                    controller_path    = config["controller_path"];
-                    accelerometer_path = config["accelerometer_path"];
+                if ((controller_path.compare(config["controller_path"].as<std::string>()) != 0)
+                    || (accelerometer_path.compare(config["accelerometer_path"].as<std::string>()) != 0)) {
+                    controller_path    = config["controller_path"].as<std::string>();
+                    accelerometer_path = config["accelerometer_path"].as<std::string>();
                     connect();
                 }
             });
@@ -144,44 +144,31 @@ namespace module {
                             if (is_button) {
                                 switch (static_cast<Button>(event.number)) {
                                     case Button::CROSS:
-                                        emit(std::make_unique<CrossButton>(event.timestamp, event.value > 0, is_init));
+                                        emit(std::make_unique<CrossButton>(event.value > 0, is_init));
                                         break;
                                     case Button::CIRCLE:
-                                        emit(std::make_unique<CircleButton>(event.timestamp, event.value > 0, is_init));
+                                        emit(std::make_unique<CircleButton>(event.value > 0, is_init));
                                         break;
                                     case Button::TRIANGLE:
-                                        emit(std::make_unique<TriangleButton>(event.timestamp,
-                                                                              event.value > 0,
-                                                                              is_init));
+                                        emit(std::make_unique<TriangleButton>(event.value > 0, is_init));
                                         break;
                                     case Button::SQUARE:
-                                        emit(std::make_unique<SquareButton>(event.timestamp, event.value > 0, is_init));
+                                        emit(std::make_unique<SquareButton>(event.value > 0, is_init));
                                         break;
-                                    case Button::L1:
-                                        emit(std::make_unique<L1Button>(event.timestamp, event.value > 0, is_init));
-                                        break;
-                                    case Button::R1:
-                                        emit(std::make_unique<R1Button>(event.timestamp, event.value > 0, is_init));
-                                        break;
+                                    case Button::L1: emit(std::make_unique<L1Button>(event.value > 0, is_init)); break;
+                                    case Button::R1: emit(std::make_unique<R1Button>(event.value > 0, is_init)); break;
                                     case Button::SHARE:
-                                        emit(std::make_unique<ShareButton>(event.timestamp, event.value > 0, is_init));
+                                        emit(std::make_unique<ShareButton>(event.value > 0, is_init));
                                         break;
                                     case Button::OPTIONS:
-                                        emit(
-                                            std::make_unique<OptionsButton>(event.timestamp, event.value > 0, is_init));
+                                        emit(std::make_unique<OptionsButton>(event.value > 0, is_init));
                                         break;
-                                    case Button::PS:
-                                        emit(std::make_unique<PSButton>(event.timestamp, event.value > 0, is_init));
-                                        break;
+                                    case Button::PS: emit(std::make_unique<PSButton>(event.value > 0, is_init)); break;
                                     case Button::JOYSTICK_LEFT:
-                                        emit(std::make_unique<LeftJoystickButton>(event.timestamp,
-                                                                                  event.value > 0,
-                                                                                  is_init));
+                                        emit(std::make_unique<LeftJoystickButton>(event.value > 0, is_init));
                                         break;
                                     case Button::JOYSTICK_RIGHT:
-                                        emit(std::make_unique<RightJoystickButton>(event.timestamp,
-                                                                                   event.value > 0,
-                                                                                   is_init));
+                                        emit(std::make_unique<RightJoystickButton>(event.value > 0, is_init));
                                         break;
                                 }
                             }
@@ -190,61 +177,49 @@ namespace module {
                                                    / static_cast<float>(std::numeric_limits<int16_t>::max());
                                 switch (static_cast<Axis>(event.number)) {
                                     case Axis::JOYSTICK_LEFT_HORIZONTAL:
-                                        emit(std::make_unique<LeftJoystick>(event.timestamp,
-                                                                            LeftJoystick::Direction::HORIZONTAL,
+                                        emit(std::make_unique<LeftJoystick>(LeftJoystick::Direction::HORIZONTAL,
                                                                             normalised,
                                                                             is_init));
                                         break;
                                     case Axis::JOYSTICK_LEFT_VERTICAL:
-                                        emit(std::make_unique<LeftJoystick>(event.timestamp,
-                                                                            LeftJoystick::Direction::VERTICAL,
+                                        emit(std::make_unique<LeftJoystick>(LeftJoystick::Direction::VERTICAL,
                                                                             normalised,
                                                                             is_init));
                                         break;
-                                    case Axis::L2:
-                                        emit(std::make_unique<L2Trigger>(event.timestamp, normalised, is_init));
-                                        break;
+                                    case Axis::L2: emit(std::make_unique<L2Trigger>(normalised, is_init)); break;
                                     case Axis::JOYSTICK_RIGHT_HORIZONTAL:
-                                        emit(std::make_unique<RightJoystick>(event.timestamp,
-                                                                             RightJoystick::Direction::HORIZONTAL,
+                                        emit(std::make_unique<RightJoystick>(RightJoystick::Direction::HORIZONTAL,
                                                                              normalised,
                                                                              is_init));
                                         break;
                                     case Axis::JOYSTICK_RIGHT_VERTICAL:
-                                        emit(std::make_unique<RightJoystick>(event.timestamp,
-                                                                             RightJoystick::Direction::VERTICAL,
+                                        emit(std::make_unique<RightJoystick>(RightJoystick::Direction::VERTICAL,
                                                                              normalised,
                                                                              is_init));
                                         break;
-                                    case Axis::R2:
-                                        emit(std::make_unique<R2Trigger>(event.timestamp, normalised, is_init));
-                                        break;
+                                    case Axis::R2: emit(std::make_unique<R2Trigger>(normalised, is_init)); break;
                                     case Axis::DPAD_HORIZONTAL:
                                         if (event.value < 0) {
-                                            emit(std::make_unique<DPadButton>(event.timestamp,
-                                                                              DPadButton::Direction::LEFT,
+                                            emit(std::make_unique<DPadButton>(DPadButton::Direction::LEFT,
                                                                               true,
                                                                               is_init));
                                             dpad_left_pressed = true;
                                         }
                                         else if (event.value > 0) {
-                                            emit(std::make_unique<DPadButton>(event.timestamp,
-                                                                              DPadButton::Direction::RIGHT,
+                                            emit(std::make_unique<DPadButton>(DPadButton::Direction::RIGHT,
                                                                               true,
                                                                               is_init));
                                             dpad_right_pressed = true;
                                         }
                                         else {
                                             if (dpad_left_pressed) {
-                                                emit(std::make_unique<DPadButton>(event.timestamp,
-                                                                                  DPadButton::Direction::LEFT,
+                                                emit(std::make_unique<DPadButton>(DPadButton::Direction::LEFT,
                                                                                   false,
                                                                                   is_init));
                                                 dpad_left_pressed = false;
                                             }
                                             if (dpad_right_pressed) {
-                                                emit(std::make_unique<DPadButton>(event.timestamp,
-                                                                                  DPadButton::Direction::RIGHT,
+                                                emit(std::make_unique<DPadButton>(DPadButton::Direction::RIGHT,
                                                                                   false,
                                                                                   is_init));
                                                 dpad_right_pressed = false;
@@ -253,30 +228,25 @@ namespace module {
                                         break;
                                     case Axis::DPAD_VERTICAL:
                                         if (event.value < 0) {
-                                            emit(std::make_unique<DPadButton>(event.timestamp,
-                                                                              DPadButton::Direction::UP,
-                                                                              true,
-                                                                              is_init));
+                                            emit(
+                                                std::make_unique<DPadButton>(DPadButton::Direction::UP, true, is_init));
                                             dpad_up_pressed = true;
                                         }
                                         else if (event.value > 0) {
-                                            emit(std::make_unique<DPadButton>(event.timestamp,
-                                                                              DPadButton::Direction::DOWN,
+                                            emit(std::make_unique<DPadButton>(DPadButton::Direction::DOWN,
                                                                               true,
                                                                               is_init));
                                             dpad_down_pressed = true;
                                         }
                                         else {
                                             if (dpad_up_pressed) {
-                                                emit(std::make_unique<DPadButton>(event.timestamp,
-                                                                                  DPadButton::Direction::UP,
+                                                emit(std::make_unique<DPadButton>(DPadButton::Direction::UP,
                                                                                   false,
                                                                                   is_init));
                                                 dpad_up_pressed = false;
                                             }
                                             if (dpad_down_pressed) {
-                                                emit(std::make_unique<DPadButton>(event.timestamp,
-                                                                                  DPadButton::Direction::DOWN,
+                                                emit(std::make_unique<DPadButton>(DPadButton::Direction::DOWN,
                                                                                   false,
                                                                                   is_init));
                                                 dpad_down_pressed = false;
@@ -291,7 +261,6 @@ namespace module {
                             }
                             else {
                                 log<NUClear::WARN>("Unknown event on joystick. Ignoring.");
-                                log<NUClear::WARN>(fmt::format("Timestamp: {}", event.timestamp));
                                 log<NUClear::WARN>(fmt::format("Value....: {}", event.value));
                                 log<NUClear::WARN>(fmt::format(
                                     "Type.....: {}",
