@@ -11,9 +11,9 @@ namespace utility::clock {
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
     NUClear::base_clock::time_point epoch = last_update;
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
-    double rate = 1.0;  // real time factor
+    double rtf = 1.0;  // real time factor
 
-    void update_rtf(const double& rtf) {
+    void update_rtf(const double& new_rtf) {
         auto now = NUClear::base_clock::now();
 
         // Since we are updating our rtf we need to advance our state so the new deltas will be calculated properly
@@ -22,9 +22,9 @@ namespace utility::clock {
         // delta
         epoch = epoch
                 + std::chrono::duration_cast<std::chrono::steady_clock::duration>(
-                    (now - last_update) * rate);  // set before we update the variables
+                    (now - last_update) * new_rtf);  // set before we update the variables
         last_update = now;
-        rate        = rtf;
+        rtf         = new_rtf;
     }
 
 }  // namespace utility::clock
@@ -34,7 +34,7 @@ namespace NUClear {
         // Move along the time
         return utility::clock::epoch
                + std::chrono::duration_cast<std::chrono::steady_clock::duration>(
-                   (NUClear::base_clock::now() - utility::clock::last_update) * utility::clock::rate);
+                   (NUClear::base_clock::now() - utility::clock::last_update) * utility::clock::rtf);
     }
 
 }  // namespace NUClear
