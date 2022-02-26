@@ -23,7 +23,7 @@
 
 #include "utility/math/angle.hpp"
 
-using namespace module::platform::darwin;
+using namespace module::platform::cm740;
 
 TEST_CASE("Testing the hardware accelerometer conversions to SI units", "[hardware][conversion][accelerometer]") {
 

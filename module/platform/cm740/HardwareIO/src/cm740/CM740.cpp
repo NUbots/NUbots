@@ -17,7 +17,7 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "Darwin.hpp"
+#include "CM740.hpp"
 
 #include <algorithm>
 #include <nuclear>
@@ -25,11 +25,11 @@
 
 #include "utility/input/ServoID.hpp"
 
-namespace Darwin {
+namespace CM740 {
     using ServoID = utility::input::ServoID;
 
     // Initialize all of the sensor handler objects using the passed uart
-    Darwin::Darwin(const char* name)
+    CM740::CM740(const char* name)
         : uart(name)
         , cm740(uart, ID::CM740)
         , rShoulderPitch(uart, ID::R_SHOULDER_PITCH)
@@ -69,13 +69,13 @@ namespace Darwin {
 
         // Now that the dynamixels should have started up, set their delay time to 0 (it may not have been configured
         // before)
-        uart.executeWrite(DarwinDevice::WriteCommand<uint8_t>(ID::BROADCAST, CM740::Address::RETURN_DELAY_TIME, 0));
+        uart.executeWrite(CM740Interface::WriteCommand<uint8_t>(ID::BROADCAST, CM740::Address::RETURN_DELAY_TIME, 0));
 
         // Set the dynamixels to not return a status packet when written to (to allow consecutive writes)
-        uart.executeWrite(DarwinDevice::WriteCommand<uint8_t>(ID::BROADCAST, CM740::Address::RETURN_LEVEL, 1));
+        uart.executeWrite(CM740Interface::WriteCommand<uint8_t>(ID::BROADCAST, CM740::Address::RETURN_LEVEL, 1));
     }
 
-    void Darwin::setConfig(const extension::Configuration& config) {
+    void CM740::setConfig(const extension::Configuration& config) {
 
         // Set servos to be enabled if they are not simulated
         for (size_t i = 0; i < config["servos"].config.size(); ++i) {
@@ -89,7 +89,7 @@ namespace Darwin {
         uart.setConfig(config);
     }
 
-    std::vector<std::pair<uint8_t, bool>> Darwin::selfTest() {
+    std::vector<std::pair<uint8_t, bool>> CM740::selfTest() {
 
         std::vector<std::pair<uint8_t, bool>> results;
 
@@ -112,7 +112,7 @@ namespace Darwin {
         return results;
     }
 
-    void Darwin::buildBulkReadPacket() {
+    void CM740::buildBulkReadPacket() {
 
         // Double check that our type is big enough to hold the result
         static_assert(sizeof(Types::CM740Data) == CM740::Address::VOLTAGE - CM740::Address::BUTTON + 1,
@@ -192,7 +192,7 @@ namespace Darwin {
         command[Packet::MAGIC + 1]   = 0xFF;
         command[Packet::ID]          = ID::BROADCAST;
         command[Packet::LENGTH]      = 3 + (request.size() * 3);
-        command[Packet::INSTRUCTION] = DarwinDevice::Instruction::BULK_READ;
+        command[Packet::INSTRUCTION] = CM740Interface::Instruction::BULK_READ;
         command[Packet::PARAMETER]   = 0x00;
 
         // Copy our parameters in
@@ -205,7 +205,7 @@ namespace Darwin {
         bulkReadCommand.swap(command);
     }
 
-    BulkReadResults Darwin::bulkRead() {
+    BulkReadResults CM740::bulkRead() {
 
         // Execute the BulkRead command
         std::vector<CommandResult> results = uart.executeBulk(bulkReadCommand);
@@ -297,7 +297,7 @@ namespace Darwin {
         return data;
     }
 
-    DarwinDevice& Darwin::operator[](int id) {
+    CM740Interface& CM740::operator[](int id) {
         switch (id) {
             case ID::CM740: return cm740;
             case ID::R_SHOULDER_PITCH: return rShoulderPitch;
@@ -326,8 +326,8 @@ namespace Darwin {
         }
     }
 
-    void Darwin::sendRawCommand(std::vector<uint8_t>& packet) {
+    void CM740::sendRawCommand(std::vector<uint8_t>& packet) {
 
         uart.executeBroadcast(packet);
     }
-}  // namespace Darwin
+}  // namespace CM740

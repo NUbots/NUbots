@@ -17,16 +17,16 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef DARWIN_DARWINDEVICE_HPP
-#define DARWIN_DARWINDEVICE_HPP
+#ifndef CM740_INTERFACE_HPP
+#define CM740_INTERFACE_HPP
 
 #include <cstdint>
 
 #include "UART.hpp"
 
-namespace Darwin {
+namespace CM740Interface {
     /**
-     * @brief The darwin device is a device on the serial port that will respond to the command types.
+     * @brief The cm740 device is a device on the serial port that will respond to the command types.
      *
      * @details
      *  This class is extended by the CM740, MX28 and FSR's, this allows them to access various memory locations
@@ -34,7 +34,7 @@ namespace Darwin {
      *
      * @author Trent Houliston
      */
-    class DarwinDevice {
+    class CM740Interface {
 
     public:
         /**
@@ -160,7 +160,7 @@ namespace Darwin {
         int id;
 
     public:
-        DarwinDevice(UART& coms, int id);
+        CM740Interface(UART& coms, int id);
 
         /**
          * @brief Reads from this device at the given memory address.
@@ -264,6 +264,6 @@ namespace Darwin {
          */
         bool ping();
     };
-}  // namespace Darwin
+}  // namespace CM740Interface
 
 #endif

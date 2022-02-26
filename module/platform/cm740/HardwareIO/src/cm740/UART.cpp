@@ -24,7 +24,7 @@
 #include <sys/ioctl.h>
 #include <thread>
 
-namespace Darwin {
+namespace CM740 {
     uint8_t calculateChecksum(void* command) {
 
         auto* data       = static_cast<uint8_t*>(command);
@@ -334,4 +334,4 @@ namespace Darwin {
 
         // There are no responses for broadcast commands
     }
-}  // namespace Darwin
+}  // namespace CM740

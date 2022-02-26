@@ -17,17 +17,13 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "DarwinDevice.hpp"
+#include "CM740Data.hpp"
 
-namespace Darwin {
-    DarwinDevice::DarwinDevice(UART& coms, int id) : coms(coms), id(id) {}
+namespace CM740 {
+    CM740Data::CM740Data(UART& coms, int id) : CM740Device(coms, id) {}
 
-    bool DarwinDevice::ping() {
-
-        // Ping and get the result
-        CommandResult result = coms.executeRead(PingCommand(id));
-
-        // Check if there was an error code
-        return result.header.errorcode == ErrorCode::NONE;
+    void CM740Data::turnOnDynamixel() {
+        // Write true to the DXL_POWER byte
+        write(Address::DXL_POWER, true);
     }
-}  // namespace Darwin
+}  // namespace CM740

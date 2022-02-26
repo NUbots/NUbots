@@ -17,8 +17,8 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "MX28.hpp"
+#include "FSR.hpp"
 
-namespace Darwin {
-    MX28::MX28(UART& coms, int id) : DarwinDevice(coms, id) {}
-}  // namespace Darwin
+namespace CM740 {
+    FSR::FSR(UART& coms, int id) : CM740Interface(coms, id) {}
+}  // namespace CM740
