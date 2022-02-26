@@ -69,10 +69,11 @@ namespace CM740 {
 
         // Now that the dynamixels should have started up, set their delay time to 0 (it may not have been configured
         // before)
-        uart.executeWrite(CM740Interface::WriteCommand<uint8_t>(ID::BROADCAST, CM740::Address::RETURN_DELAY_TIME, 0));
+        uart.executeWrite(
+            CM740Interface::WriteCommand<uint8_t>(ID::BROADCAST, CM740Data::Address::RETURN_DELAY_TIME, 0));
 
         // Set the dynamixels to not return a status packet when written to (to allow consecutive writes)
-        uart.executeWrite(CM740Interface::WriteCommand<uint8_t>(ID::BROADCAST, CM740::Address::RETURN_LEVEL, 1));
+        uart.executeWrite(CM740Interface::WriteCommand<uint8_t>(ID::BROADCAST, CM740Data::Address::RETURN_LEVEL, 1));
     }
 
     void CM740::setConfig(const extension::Configuration& config) {
@@ -115,13 +116,13 @@ namespace CM740 {
     void CM740::buildBulkReadPacket() {
 
         // Double check that our type is big enough to hold the result
-        static_assert(sizeof(Types::CM740Data) == CM740::Address::VOLTAGE - CM740::Address::BUTTON + 1,
+        static_assert(sizeof(Types::CM740Data) == CM740Data::Address::VOLTAGE - CM740Data::Address::BUTTON + 1,
                       "The CM740 type is the wrong size");
 
         // Double check that our type is big enough to hold the result
         static_assert(
-            sizeof(Types::MX28Data) == MX28::Address::PRESENT_TEMPERATURE - MX28::Address::PRESENT_POSITION_L + 1,
-            "The MX28 type is the wrong size");
+            sizeof(Types::ServoData) == Servo::Address::PRESENT_TEMPERATURE - Servo::Address::PRESENT_POSITION_L + 1,
+            "The Servo type is the wrong size");
 
         // Double check that our type is big enough to hold the result
         static_assert(sizeof(Types::FSRData) == FSR::Address::FSR_Y - FSR::Address::FSR1_L + 1,
@@ -143,7 +144,7 @@ namespace CM740 {
 
                 // If it's the CM740
                 case ID::CM740:
-                    request.emplace_back(CM740::Address::BUTTON, ID::CM740, sizeof(Types::CM740Data));
+                    request.emplace_back(CM740Data::Address::BUTTON, ID::CM740, sizeof(Types::CM740Data));
                     break;
 
                 // If it's the FSRs
@@ -180,7 +181,9 @@ namespace CM740 {
                 default:
                     // Only add this servo if we aren't simulating it
                     if (enabledServoIds[sensor.first - 1]) {
-                        request.emplace_back(MX28::Address::PRESENT_POSITION_L, sensor.first, sizeof(Types::MX28Data));
+                        request.emplace_back(Servo::Address::PRESENT_POSITION_L,
+                                             sensor.first,
+                                             sizeof(Types::ServoData));
                     }
                     break;
             }
@@ -223,7 +226,7 @@ namespace CM740 {
 
                 // Copy for servo data
                 if (r.header.id >= ID::R_SHOULDER_PITCH && r.header.id <= ID::HEAD_PITCH) {
-                    memcpy(&data.servos[r.header.id - 1], r.data.data(), sizeof(Types::MX28Data));
+                    memcpy(&data.servos[r.header.id - 1], r.data.data(), sizeof(Types::ServoData));
                     data.servoErrorCodes[r.header.id - 1] = r.header.errorcode;
                 }
 

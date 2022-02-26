@@ -20,7 +20,7 @@
 #include "CM740Data.hpp"
 
 namespace CM740 {
-    CM740Data::CM740Data(UART& coms, int id) : CM740Device(coms, id) {}
+    CM740Data::CM740Data(UART& coms, int id) : CM740Interface(coms, id) {}
 
     void CM740Data::turnOnDynamixel() {
         // Write true to the DXL_POWER byte

@@ -24,12 +24,12 @@
 
 #include "UART.hpp"
 
-namespace CM740Interface {
+namespace CM740 {
     /**
      * @brief The cm740 device is a device on the serial port that will respond to the command types.
      *
      * @details
-     *  This class is extended by the CM740, MX28 and FSR's, this allows them to access various memory locations
+     *  This class is extended by the CM740Data, Servos and FSR's, this allows them to access various memory locations
      *  using the common functionality provided by this class
      *
      * @author Trent Houliston
@@ -264,6 +264,6 @@ namespace CM740Interface {
          */
         bool ping();
     };
-}  // namespace CM740Interface
+}  // namespace CM740
 
 #endif

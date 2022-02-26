@@ -51,10 +51,10 @@ namespace CM740 {
         };
 
         /**
-         * @brief This represents the data that comes from one of the MX28 motors
+         * @brief This represents the data that comes from one of the Servo motors
          */
-        struct MX28Data {
-            MX28Data() = default;
+        struct ServoData {
+            ServoData() = default;
             uint16_t presentPosition{0};
             uint16_t presentSpeed{0};
             uint16_t load{0};
@@ -110,7 +110,7 @@ namespace CM740 {
         /// @brief Holds data from the CM740
         Types::CM740Data cm740;
         /// @brief Holds data from the 20 servos (stored in location ServoID - 1)
-        Types::MX28Data servos[20] = {Types::MX28Data()};
+        Types::ServoData servos[20] = {Types::ServoData()};
         /// @brief Holds data from the 2 FSR (stored as Right Left)
         Types::FSRData fsr[2] = {Types::FSRData()};
 

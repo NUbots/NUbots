@@ -218,8 +218,8 @@ namespace module::platform::cm740 {
         : Reactor(std::move(environment)), cm740("/dev/CM740"), chargedVoltage(0.0f), flatVoltage(0.0f) {
 
         on<Startup>().then("HardwareIO Startup", [this] {
-            auto CM740Model   = cm740.cm740.read<uint16_t>(CM740::CM740::Address::MODEL_NUMBER_L);
-            auto CM740Version = cm740.cm740.read<uint8_t>(CM740::CM740::Address::VERSION);
+            auto CM740Model   = cm740.cm740.read<uint16_t>(CM740::CM740Data::Address::MODEL_NUMBER_L);
+            auto CM740Version = cm740.cm740.read<uint8_t>(CM740::CM740Data::Address::VERSION);
             std::stringstream version;
             std::stringstream model;
             model << "0x" << std::setw(4) << std::setfill('0') << std::hex << int(CM740Model);
@@ -421,7 +421,7 @@ namespace module::platform::cm740 {
             // Update our internal state
             cm740State.headLED = led;
 
-            cm740.cm740.write(CM740::CM740::Address::LED_HEAD_L,
+            cm740.cm740.write(CM740::CM740Data::Address::LED_HEAD_L,
                               Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
                                                         static_cast<uint8_t>((led.RGB & 0x0000FF00) >> 8),
                                                         static_cast<uint8_t>(led.RGB & 0x000000FF)));
@@ -432,7 +432,7 @@ namespace module::platform::cm740 {
             // Update our internal state
             cm740State.eyeLED = led;
 
-            cm740.cm740.write(CM740::CM740::Address::LED_EYE_L,
+            cm740.cm740.write(CM740::CM740Data::Address::LED_EYE_L,
                               Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
                                                         static_cast<uint8_t>((led.RGB & 0x0000FF00) >> 8),
                                                         static_cast<uint8_t>(led.RGB & 0x000000FF)));
@@ -443,7 +443,7 @@ namespace module::platform::cm740 {
             // Update our internal state
             cm740State.ledPanel = led;
 
-            cm740.cm740.write(CM740::CM740::Address::LED_PANNEL,
+            cm740.cm740.write(CM740::CM740Data::Address::LED_PANNEL,
                               ((uint8_t(led.led2) << 2) | (uint8_t(led.led3) << 1) | uint8_t((led.led4))));
         });
     }

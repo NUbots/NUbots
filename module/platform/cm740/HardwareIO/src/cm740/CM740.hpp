@@ -24,7 +24,7 @@
 #include <utility>
 #include <vector>
 
-#include "CM740.hpp"
+#include "CM740Data.hpp"
 #include "FSR.hpp"
 #include "RawSensors.hpp"
 #include "Servo.hpp"
@@ -94,8 +94,8 @@ namespace CM740 {
         void setConfig(const extension::Configuration& config);
 
         /// The CM740
-        CM740 cm740;
-        /// The Right Shoulder Pitch MX28
+        CM740Data cm740;
+        /// The Right Shoulder Pitch Servo
         Servo rShoulderPitch;
         /// The Left Shoulder Pitch Servo
         Servo lShoulderPitch;
