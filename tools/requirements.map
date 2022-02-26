@@ -13,3 +13,6 @@ tqdm            tqdm
 xxhash          xxhash
 si_prefix       si-prefix
 pytimeparse     pytimeparse
+yaml            PyYAML
+argcomplete     argcomplete
+honcho          honcho
