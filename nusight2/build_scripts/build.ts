@@ -1,9 +1,7 @@
 import minimist from 'minimist'
 import * as path from 'path'
 import webpack from 'webpack'
-import { ConfigOptions } from '../webpack.config'
-import { getServerConfig } from '../webpack.config'
-import { getClientConfig } from '../webpack.config'
+import { ConfigOptions, getClientConfig, getServerConfig } from '../webpack.config'
 
 const args = minimist(process.argv.slice(2))
 const isContinuousIntegration = args.ci || false
@@ -15,6 +13,31 @@ const opts: ConfigOptions = {
   sourceMap: isContinuousIntegration ? false : 'source-map',
   rootDir: path.join(__dirname, '..'),
 }
-webpack([getClientConfig(opts), getServerConfig(opts)]).run((err, stats) => {
-  process.stdout.write(stats.toString({ colors: true }) + '\n')
+
+const compiler = webpack([getClientConfig(opts), getServerConfig(opts)])
+compiler.run((err, stats) => {
+  if (err) {
+    process.stderr.write(err.message)
+    if (err.stack) {
+      process.stderr.write(err.stack)
+    }
+    process.exitCode = 1
+    return
+  }
+  if (stats) {
+    process.stdout.write(stats.toString({ colors: true }) + '\n')
+    if (stats.hasErrors()) {
+      process.exitCode = 1
+    }
+  }
+  // Calling close() allows low-priority work (like persistent caching) the opportunity to complete
+  compiler.close(closeErr => {
+    if (closeErr) {
+      process.stderr.write(closeErr.message)
+      if (closeErr.stack) {
+        process.stderr.write(closeErr.stack)
+      }
+      process.exitCode = 1
+    }
+  })
 })

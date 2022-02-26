@@ -58,7 +58,6 @@ namespace module::behaviour::tools {
         : Reactor(std::move(environment))
         , id(size_t(this) * size_t(this) - size_t(this))
         , scriptPath("Initializing...")
-        , script()
         , frame(0)
         , selection(0)
         , angleOrGain(true)
@@ -115,9 +114,9 @@ namespace module::behaviour::tools {
             {std::pair<float, std::set<LimbID>>(
                 1,
                 {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
-            [this](const std::set<LimbID>&) {},
-            [this](const std::set<LimbID>&) {},
-            [this](const std::set<ServoID>&) {}}));
+            [](const std::set<LimbID>& /* limbs */) {},
+            [](const std::set<LimbID>& /* limbs */) {},
+            [](const std::set<ServoID>& /* servos */) {}}));
 
         // Start curses mode
         initscr();
@@ -128,7 +127,7 @@ namespace module::behaviour::tools {
         // Don't echo the users messages
         noecho();
         // Hide the cursor
-        curs_set(false);
+        curs_set(0);
 
         // Trigger when stdin has something to read
         on<IO>(STDIN_FILENO, IO::READ).then([this] {
@@ -176,7 +175,7 @@ namespace module::behaviour::tools {
                 case 'P':  // plays script through with correct durations
                     playScript();
                     break;
-                case 'J':  // changes frame without out robot moving
+                case 'J':  // changes frame without robot moving
                     jumpToFrame();
                     break;
                 case 'R':  // updates visual changes
@@ -522,11 +521,11 @@ namespace module::behaviour::tools {
     void ScriptTuner::help() {
 
         move(LINES - 6, 12);
-        curs_set(true);
+        curs_set(1);
         std::string tempcommand = userInput();
 
-        if (tempcommand.compare("help") == 0) {
-            curs_set(false);
+        if (tempcommand == "help") {
+            curs_set(0);
 
             const char* ALL_COMMANDS[] =
                 {",", ".", "N", "I", " ", "T", "J", "G", "P", "S", "A", "R", "M", "X", "Ctr C"};
@@ -581,7 +580,7 @@ namespace module::behaviour::tools {
         else {
             refreshView();
         }
-        curs_set(false);
+        curs_set(0);
     }
 
     // emits a message so motion can pick up the script
@@ -593,9 +592,9 @@ namespace module::behaviour::tools {
     void ScriptTuner::jumpToFrame() {
         mvprintw(5, 2, "Jump To Frame:");
         move(5, 17);
-        curs_set(true);
+        curs_set(1);
         userInputToFrame();
-        curs_set(false);
+        curs_set(0);
     }
 
     // switches angle and gains between corresponding left and right motors, flips script around z axis
@@ -610,72 +609,100 @@ namespace module::behaviour::tools {
 
                 switch (target.id.value) {
                     case ServoID::HEAD_YAW:
-                        newFrame.targets.push_back({ServoID::HEAD_YAW, target.position, target.gain, target.torque});
+                        newFrame.targets.emplace_back(ServoID::HEAD_YAW, target.position, target.gain, target.torque);
                         break;
                     case ServoID::HEAD_PITCH:
-                        newFrame.targets.push_back({ServoID::HEAD_PITCH, target.position, target.gain, target.torque});
+                        newFrame.targets.emplace_back(ServoID::HEAD_PITCH, target.position, target.gain, target.torque);
                         break;
                     case ServoID::R_SHOULDER_PITCH:
-                        newFrame.targets.push_back(
-                            {ServoID::L_SHOULDER_PITCH, target.position, target.gain, target.torque});
+                        newFrame.targets.emplace_back(ServoID::L_SHOULDER_PITCH,
+                                                      target.position,
+                                                      target.gain,
+                                                      target.torque);
                         break;
                     case ServoID::L_SHOULDER_PITCH:
-                        newFrame.targets.push_back(
-                            {ServoID::R_SHOULDER_PITCH, target.position, target.gain, target.torque});
+                        newFrame.targets.emplace_back(ServoID::R_SHOULDER_PITCH,
+                                                      target.position,
+                                                      target.gain,
+                                                      target.torque);
                         break;
                     case ServoID::R_ELBOW:
-                        newFrame.targets.push_back({ServoID::L_ELBOW, target.position, target.gain, target.torque});
+                        newFrame.targets.emplace_back(ServoID::L_ELBOW, target.position, target.gain, target.torque);
                         break;
                     case ServoID::L_ELBOW:
-                        newFrame.targets.push_back({ServoID::R_ELBOW, target.position, target.gain, target.torque});
+                        newFrame.targets.emplace_back(ServoID::R_ELBOW, target.position, target.gain, target.torque);
                         break;
                     case ServoID::R_HIP_PITCH:
-                        newFrame.targets.push_back({ServoID::L_HIP_PITCH, target.position, target.gain, target.torque});
+                        newFrame.targets.emplace_back(ServoID::L_HIP_PITCH,
+                                                      target.position,
+                                                      target.gain,
+                                                      target.torque);
                         break;
                     case ServoID::L_HIP_PITCH:
-                        newFrame.targets.push_back({ServoID::R_HIP_PITCH, target.position, target.gain, target.torque});
+                        newFrame.targets.emplace_back(ServoID::R_HIP_PITCH,
+                                                      target.position,
+                                                      target.gain,
+                                                      target.torque);
                         break;
                     case ServoID::R_KNEE:
-                        newFrame.targets.push_back({ServoID::L_KNEE, target.position, target.gain, target.torque});
+                        newFrame.targets.emplace_back(ServoID::L_KNEE, target.position, target.gain, target.torque);
                         break;
                     case ServoID::L_KNEE:
-                        newFrame.targets.push_back({ServoID::R_KNEE, target.position, target.gain, target.torque});
+                        newFrame.targets.emplace_back(ServoID::R_KNEE, target.position, target.gain, target.torque);
                         break;
                     case ServoID::R_ANKLE_PITCH:
-                        newFrame.targets.push_back(
-                            {ServoID::L_ANKLE_PITCH, target.position, target.gain, target.torque});
+                        newFrame.targets.emplace_back(ServoID::L_ANKLE_PITCH,
+                                                      target.position,
+                                                      target.gain,
+                                                      target.torque);
                         break;
                     case ServoID::L_ANKLE_PITCH:
-                        newFrame.targets.push_back(
-                            {ServoID::R_ANKLE_PITCH, target.position, target.gain, target.torque});
+                        newFrame.targets.emplace_back(ServoID::R_ANKLE_PITCH,
+                                                      target.position,
+                                                      target.gain,
+                                                      target.torque);
                         break;
                     case ServoID::R_SHOULDER_ROLL:
-                        newFrame.targets.push_back(
-                            {ServoID::L_SHOULDER_ROLL, -target.position, target.gain, target.torque});
+                        newFrame.targets.emplace_back(ServoID::L_SHOULDER_ROLL,
+                                                      -target.position,
+                                                      target.gain,
+                                                      target.torque);
                         break;
                     case ServoID::L_SHOULDER_ROLL:
-                        newFrame.targets.push_back(
-                            {ServoID::R_SHOULDER_ROLL, -target.position, target.gain, target.torque});
+                        newFrame.targets.emplace_back(ServoID::R_SHOULDER_ROLL,
+                                                      -target.position,
+                                                      target.gain,
+                                                      target.torque);
                         break;
                     case ServoID::R_HIP_ROLL:
-                        newFrame.targets.push_back({ServoID::L_HIP_ROLL, -target.position, target.gain, target.torque});
+                        newFrame.targets.emplace_back(ServoID::L_HIP_ROLL,
+                                                      -target.position,
+                                                      target.gain,
+                                                      target.torque);
                         break;
                     case ServoID::L_HIP_ROLL:
-                        newFrame.targets.push_back({ServoID::R_HIP_ROLL, -target.position, target.gain, target.torque});
+                        newFrame.targets.emplace_back(ServoID::R_HIP_ROLL,
+                                                      -target.position,
+                                                      target.gain,
+                                                      target.torque);
                         break;
                     case ServoID::R_ANKLE_ROLL:
-                        newFrame.targets.push_back(
-                            {ServoID::L_ANKLE_ROLL, -target.position, target.gain, target.torque});
+                        newFrame.targets.emplace_back(ServoID::L_ANKLE_ROLL,
+                                                      -target.position,
+                                                      target.gain,
+                                                      target.torque);
                         break;
                     case ServoID::L_ANKLE_ROLL:
-                        newFrame.targets.push_back(
-                            {ServoID::R_ANKLE_ROLL, -target.position, target.gain, target.torque});
+                        newFrame.targets.emplace_back(ServoID::R_ANKLE_ROLL,
+                                                      -target.position,
+                                                      target.gain,
+                                                      target.torque);
                         break;
                     case ServoID::R_HIP_YAW:
-                        newFrame.targets.push_back({ServoID::L_HIP_YAW, -target.position, target.gain, target.torque});
+                        newFrame.targets.emplace_back(ServoID::L_HIP_YAW, -target.position, target.gain, target.torque);
                         break;
                     case ServoID::L_HIP_YAW:
-                        newFrame.targets.push_back({ServoID::R_HIP_YAW, -target.position, target.gain, target.torque});
+                        newFrame.targets.emplace_back(ServoID::R_HIP_YAW, -target.position, target.gain, target.torque);
                         break;
                     case ServoID::NUMBER_OF_SERVOS:
                     default: break;
@@ -689,7 +716,7 @@ namespace module::behaviour::tools {
     // change scriptPath and then call saveScript to Save As
     void ScriptTuner::saveScriptAs() {
         move(5, 2);
-        curs_set(true);
+        curs_set(1);
         std::string saveScriptAs = userInput();
         if (utility::file::exists(saveScriptAs)) {
             bool print = true;
@@ -700,7 +727,7 @@ namespace module::behaviour::tools {
                     case '\n':
                     case KEY_ENTER:
                         move(5, 2);
-                        curs_set(false);
+                        curs_set(0);
                         print      = false;
                         scriptPath = saveScriptAs;
                         saveScript();
@@ -708,7 +735,7 @@ namespace module::behaviour::tools {
                         break;
                     case 'X':
                         move(5, 2);
-                        curs_set(false);
+                        curs_set(0);
                         print = false;
                         refreshView();
                         break;
@@ -719,7 +746,7 @@ namespace module::behaviour::tools {
             scriptPath = saveScriptAs;
             saveScript();
             move(5, 2);
-            curs_set(false);
+            curs_set(0);
             refreshView();
         }
     }
@@ -738,7 +765,7 @@ namespace module::behaviour::tools {
         mvprintw(8, 2, "All: ---.- Upper: ---.- Lower: ---.-");
         mvprintw(10, 2, "Use X to exit Edit Gain");
         move(6, 7);
-        curs_set(false);
+        curs_set(0);
         size_t YPOSITION[3][3] = {{6, 6, 6}, {7, 0, 0}, {8, 8, 8}};
         size_t XPOSITION[3][3] = {{7, 20, 33}, {12, 0, 0}, {7, 20, 33}};
         size_t i               = 0;
@@ -1051,7 +1078,7 @@ namespace module::behaviour::tools {
                 }
 
                 // checks user input is within correct range
-                if ((size_t) tempframe2 <= script.frames.size()) {
+                if (static_cast<size_t>(tempframe2) <= script.frames.size()) {
 
                     frame = tempframe2 - 1;
                 }
@@ -1073,9 +1100,7 @@ namespace module::behaviour::tools {
                 if (tempGain2 >= 0 && tempGain2 <= 100) {
                     return tempGain2;
                 }
-                else {
-                    beep();
-                }
+                beep();
             }
         }
         catch (std::invalid_argument&) {

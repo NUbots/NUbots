@@ -60,8 +60,8 @@ namespace utility::motion::splines {
          * Polynom evaluation, its first, second and third derivative at given x
          */
         [[nodiscard]] constexpr Scalar pos(const Scalar& x) const {
-            Scalar xx  = static_cast<Scalar>(1);
-            Scalar val = static_cast<Scalar>(0);
+            auto xx  = static_cast<Scalar>(1);
+            auto val = static_cast<Scalar>(0);
             for (size_t i = 0; i < coefs.size(); i++) {
                 val += xx * coefs[i];
                 xx *= x;
@@ -70,8 +70,8 @@ namespace utility::motion::splines {
         }
 
         [[nodiscard]] constexpr Scalar vel(const Scalar& x) const {
-            Scalar xx  = static_cast<Scalar>(1);
-            Scalar val = static_cast<Scalar>(0);
+            auto xx  = static_cast<Scalar>(1);
+            auto val = static_cast<Scalar>(0);
             for (size_t i = 1; i < coefs.size(); i++) {
                 val += i * xx * coefs[i];
                 xx *= x;
@@ -80,8 +80,8 @@ namespace utility::motion::splines {
         }
 
         [[nodiscard]] constexpr Scalar acc(const Scalar& x) const {
-            Scalar xx  = static_cast<Scalar>(1);
-            Scalar val = static_cast<Scalar>(0);
+            auto xx  = static_cast<Scalar>(1);
+            auto val = static_cast<Scalar>(0);
             for (size_t i = 2; i < coefs.size(); i++) {
                 val += (i - 1) * i * xx * coefs[i];
                 xx *= x;
@@ -90,8 +90,8 @@ namespace utility::motion::splines {
         }
 
         [[nodiscard]] constexpr Scalar jerk(const Scalar& x) const {
-            Scalar xx  = static_cast<Scalar>(1);
-            Scalar val = static_cast<Scalar>(0);
+            auto xx  = static_cast<Scalar>(1);
+            auto val = static_cast<Scalar>(0);
             for (size_t i = 3; i < coefs.size(); i++) {
                 val += (i - 2) * (i - 1) * i * xx * coefs[i];
                 xx *= x;
@@ -139,7 +139,7 @@ namespace utility::motion::splines {
          * Expand the given formula (x + y)^degree and return the polynom in x whose coefficient are computed
          * using binomial coefficient
          */
-        [[nodiscard]] constexpr static Polynom<Scalar> expandBinomial(const Scalar& y, const size_t& degree) {
+        [[nodiscard]] static Polynom<Scalar> expandBinomial(const Scalar& y, const size_t& degree) {
             Combination combination{};
             Polynom polynom{};
 

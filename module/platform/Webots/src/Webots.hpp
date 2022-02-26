@@ -131,7 +131,7 @@ namespace module::platform {
 
         struct CameraContext {
             std::string name;
-            uint32_t id;
+            uint32_t id = 0;
             message::input::Image::Lens lens;
             // Homogenous transform from camera (c) to platform (p) where platform is the rigid body the camera is
             // attached to

@@ -15,11 +15,9 @@ import { GroundModel } from './model'
 export class GroundViewModel {
   constructor(private model: GroundModel) {}
 
-  static of = createTransformer(
-    (model: GroundModel): GroundViewModel => {
-      return new GroundViewModel(model)
-    },
-  )
+  static of = createTransformer((model: GroundModel): GroundViewModel => {
+    return new GroundViewModel(model)
+  })
 
   @computed
   get ground(): Group {
