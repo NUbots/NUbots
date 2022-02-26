@@ -16,6 +16,7 @@ nuclear_role(
   input::Camera
   platform::darwin::HardwareIO
   input::SensorFilter
+  input::PS3Controller
   # Motion
   motion::QuinticWalk
   motion::ScriptEngine
