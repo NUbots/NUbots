@@ -151,7 +151,6 @@ namespace module::vision {
                     axis.normalize();
 
                     // Find the ray with the greatest distance from the axis
-                    // Should we use the average distance instead?
                     float radius = 1.0f;
                     for (const auto& idx : cluster) {
                         const Eigen::Vector3f& ray(rays.col(idx));
