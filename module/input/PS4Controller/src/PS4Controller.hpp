@@ -1,10 +1,9 @@
-#ifndef MODULE_INPUT_PS4CONTROLLER_H
-#define MODULE_INPUT_PS4CONTROLLER_H
+#ifndef MODULE_INPUT_PS4CONTROLLER_HPP
+#define MODULE_INPUT_PS4CONTROLLER_HPP
 
 #include <nuclear>
 
-namespace module {
-namespace input {
+namespace module::input {
 
     class PS4Controller : public NUClear::Reactor {
 
@@ -29,7 +28,6 @@ namespace input {
         bool dpad_down_pressed;
     };
 
-}  // namespace input
-}  // namespace module
+}  // namespace module::input
 
-#endif  // MODULE_INPUT_PS4CONTROLLER_H
+#endif  // MODULE_INPUT_PS4CONTROLLER_HPP

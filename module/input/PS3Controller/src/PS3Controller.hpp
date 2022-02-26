@@ -1,12 +1,11 @@
-#ifndef MODULE_INPUT_PS3CONTROLLER_H
-#define MODULE_INPUT_PS3CONTROLLER_H
+#ifndef MODULE_INPUT_PS3CONTROLLER_HPP
+#define MODULE_INPUT_PS3CONTROLLER_HPP
 
 #include <nuclear>
 #include <string>
 #include <vector>
 
-namespace module {
-namespace input {
+namespace module::input {
 
     class PS3Controller : public NUClear::Reactor {
 
@@ -26,7 +25,6 @@ namespace input {
         ReactionHandle accelerometer_reaction;
     };
 
-}  // namespace input
-}  // namespace module
+}  // namespace module::input
 
-#endif  // MODULE_INPUT_PS3CONTROLLER_H
+#endif  // MODULE_INPUT_PS3CONTROLLER_HPP
