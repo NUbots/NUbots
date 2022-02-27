@@ -1,4 +1,4 @@
-import { computed } from 'mobx'
+import { autorun, computed } from 'mobx'
 import { observer } from 'mobx-react'
 import React from 'react'
 
@@ -10,6 +10,7 @@ import RobotIcon from './robot.svg'
 import style from './style.css'
 
 export type RobotSelectorSingleProps = {
+  autoSelect?: boolean
   robots: RobotModel[]
   selected?: RobotModel
   dropDirection?: 'up' | 'down'
@@ -18,6 +19,34 @@ export type RobotSelectorSingleProps = {
 
 @observer
 export class RobotSelectorSingle extends React.Component<RobotSelectorSingleProps> {
+  private disposeAutoSelect?: () => void
+
+  componentDidMount() {
+    if (this.props.autoSelect && !this.disposeAutoSelect) {
+      this.disposeAutoSelect = autorun(() => {
+        // Automatically select the first option if we don't have a selection
+        // and there are options
+        if (!this.props.selected && this.props.robots.length > 0) {
+          this.props.onSelect(this.props.robots[0])
+
+          // Clean up after the first run, since we auto select only once
+          // during the lifetime of the component
+          if (this.disposeAutoSelect) {
+            this.disposeAutoSelect()
+            this.disposeAutoSelect = undefined
+          }
+        }
+      })
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.disposeAutoSelect) {
+      this.disposeAutoSelect()
+      this.disposeAutoSelect = undefined
+    }
+  }
+
   render() {
     const { dropDirection } = this.props
     return (
