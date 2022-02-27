@@ -3,7 +3,6 @@ import { storiesOf } from '@storybook/react'
 import { action as mobxAction, observable } from 'mobx'
 import { observer } from 'mobx-react'
 import React from 'react'
-
 import { RobotModel } from '../../robot/model'
 import { RobotSelectorSingle } from '../view'
 
@@ -34,6 +33,27 @@ storiesOf('components.robot_selector_single', module)
     const onSelect = mobxAction((robot: RobotModel) => (model.selected = robot))
     const Component = observer(() => (
       <RobotSelectorSingle robots={model.robots} selected={model.selected} onSelect={onSelect} />
+    ))
+    return <Component />
+  })
+  .add('auto selection of first option', () => {
+    const robots = getRobots()
+    const model = observable<{ robots: RobotModel[]; selected?: RobotModel }>({
+      robots,
+      selected: undefined,
+    })
+    const onSelect = mobxAction((robot: RobotModel) => (model.selected = robot))
+    const Component = observer(() => (
+      <>
+        <div>This has no initial selection, and will select the first option when rendered.</div>
+        <br />
+        <RobotSelectorSingle
+          autoSelect
+          robots={model.robots}
+          selected={model.selected}
+          onSelect={onSelect}
+        />
+      </>
     ))
     return <Component />
   })
