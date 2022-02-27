@@ -121,9 +121,8 @@ namespace module::vision {
                 // Create the Balls message, which will contain a Ball for every cluster that is a valid ball
                 auto balls = std::make_unique<Balls>();
 
-                // Balls is still emitted even if there are no balls, to indicate to other modules that no balls can be
-                // seen. An example of this being used is in HeadBehaviourSoccer, which has a reactor that triggers
-                // 'with' balls and reacts based on that last Balls message.
+                // Balls is still emitted even if there are no balls, to indicate to other modules that no balls are
+                // currently visible
                 if (clusters.empty()) {
                     log<NUClear::DEBUG>("Found no balls.");
                     emit(std::move(balls));
@@ -154,28 +153,44 @@ namespace module::vision {
                     float radius = 1.0f;
                     for (const auto& idx : cluster) {
                         const Eigen::Vector3f& ray(rays.col(idx));
-                        if (axis.dot(ray) < radius) {
-                            radius = axis.dot(ray);
-                        }
+                        // arccos of the dot product gives the angle between the rays
+                        // the smaller arccos is, the bigger the angle - if between 0 and pi
+                        radius = axis.dot(ray) < radius ? axis.dot(ray) : radius;
                     }
 
-                    // Ball cam space info
-                    b.cone.axis   = horizon.Hcw.topLeftCorner<3, 3>().cast<float>() * axis;
-                    b.cone.radius = radius;
+                    // Set cone information for the ball
+                    // The rays are in world space, multiply by Rcw to get the axis in camera space
+                    b.cone.axis = horizon.Hcw.topLeftCorner<3, 3>().cast<float>()
+                                  * axis;    // why is this not horizon.Hcw.linear()?
+                    b.cone.radius = radius;  // **arccos of the angle** between the furthest vectors
 
                     // https://en.wikipedia.org/wiki/Angular_diameter
+                    // From the link, the formula with arcsin is used since a ball is a spherical object
+                    // The variables are:
+                    //      delta: arccos(radius)
+                    //      d_act: field.ball_radius
+                    //      D: distance
+                    // Rearranging the equation gives
+                    //      distance = field.ball_radius / (2 * sin(arccos(radius)/2))
+                    // Using sin(arccos(x)) = sqrt(1 - x^2)
+                    //      distance = field.ball_radius / ( 2 * sqrt( 1 - (radius/2)^2 ) )
+                    // !!
                     float distance = field.ball_radius / std::sqrt(1.0f - radius * radius);
 
                     // Attach the measurement to the object (distance from camera to ball)
                     b.measurements.emplace_back();  // Emplaces default constructed object
 
-                    // Spherical Reciprocal Coordinates (1/distance, phi, theta)
+                    // b.cone.axis is the unit vector from the camera to the center of the ball in camera space (uBCc)
+                    // Convert this unit vector into a position vector and then convert it into Spherical Reciprocal
+                    // Coordinates (1/distance, phi, theta)
                     b.measurements.back().srBCc      = cartesianToReciprocalSpherical(b.cone.axis * distance);
                     b.measurements.back().covariance = config.ball_angular_cov.asDiagonal();
 
-                    // Angular positions from the camera
+                    // Angular positions from the camera, doesn't consider depth - x is removed and unit vector is used
                     b.screen_angular = cartesianToSpherical(axis).tail<2>();
-                    b.angular_size   = Eigen::Vector2f::Constant(std::acos(radius));
+                    // acos(radius) is the angular diameter - ie the radius from the perspective of the camera
+                    // used for both directions since it's a ball
+                    b.angular_size = Eigen::Vector2f::Constant(std::acos(radius));
 
                     /***********************************************
                      *                  THROWOUTS                  *
