@@ -79,9 +79,9 @@ namespace module::input {
         on<Configuration>("PS3Controller.yaml").then([this](const Configuration& config) {
             // Only reconnect if we are changing the path to the device
             if ((controller_path.compare(config["controller_path"].as<std::string>()) != 0)
-                || (accelerometer_path.compare(config["accelerometer_path"].as<std::string>()) != 0)) {
+                /* || (accelerometer_path.compare(config["accelerometer_path"].as<std::string>()) != 0) */) {
                 controller_path    = config["controller_path"].as<std::string>();
-                accelerometer_path = config["accelerometer_path"].as<std::string>();
+                /* accelerometer_path = config["accelerometer_path"].as<std::string>(); */
                 connect();
             }
         });
@@ -91,15 +91,17 @@ namespace module::input {
         // Keep an eye on the joystick devices
         on<Every<1, std::chrono::seconds>, Single>().then([this] {
             // If it's closed then we should try to reconnect
-            if ((controller_fd > -1) && (accelerometer_fd > -1)) {
+            log<NUClear::WARN>("controller_fd: ", controller_fd);
+            // log<NUClear::WARN>("accelerometer_fd: ", accelerometer_fd);
+            if ((controller_fd > -1) /* && (accelerometer_fd > -1) */) {
                 bool controller_valid    = !(fcntl(controller_fd, F_GETFL) < 0 && errno == EBADF);
-                bool accelerometer_valid = !(fcntl(accelerometer_fd, F_GETFL) < 0 && errno == EBADF);
-                if (!controller_valid || !accelerometer_valid) {
+                // bool accelerometer_valid = !(fcntl(accelerometer_fd, F_GETFL) < 0 && errno == EBADF);
+                if (!controller_valid /* || !accelerometer_valid */) {
                     log<NUClear::WARN>("Joystick is not valid. Reconnecting.");
                     connect();
                 }
             }
-            if ((controller_fd < 0) || (accelerometer_fd < 0)) {
+            if ((controller_fd < 0) /* || (accelerometer_fd < 0) */) {
                 log<NUClear::WARN>("Joystick is not valid. Reconnecting.");
                 connect();
             }
@@ -110,9 +112,11 @@ namespace module::input {
         // Make sure joystick file descriptors are closed.
         disconnect();
 
-        NUClear::log<NUClear::INFO>(fmt::format("Connecting to {} and {}", controller_path, accelerometer_path));
+        // NUClear::log<NUClear::INFO>(fmt::format("Connecting to {} and {}", controller_path, accelerometer_path));
+        NUClear::log<NUClear::INFO>(fmt::format("Connecting to {}", controller_path));
         controller_fd    = open(controller_path.c_str(), O_RDONLY | O_NONBLOCK);
-        accelerometer_fd = open(accelerometer_path.c_str(), O_RDONLY | O_NONBLOCK);
+        // accelerometer_fd = open(accelerometer_path.c_str(), O_RDONLY | O_NONBLOCK);
+        // accelerometer_fd = 0;
 
         if (controller_fd > -1) {
             // Details on Linux Joystick API
@@ -235,7 +239,7 @@ namespace module::input {
             });
         }
 
-        if (accelerometer_fd > -1) {
+/*         if (accelerometer_fd > -1) {
             // Trigger when the joystick accelerometer has an event to read
             accelerometer_reaction =
                 on<IO>(accelerometer_fd, IO::READ | IO::ERROR).then([this](const IO::Event& event) {
@@ -245,19 +249,19 @@ namespace module::input {
                     }
                     // Accelerometer comes in here .... if you know which axis is which
                 });
-        }
+        } */
     }
 
     void PS3Controller::disconnect() {
         controller_reaction.unbind();
-        accelerometer_reaction.unbind();
+        // accelerometer_reaction.unbind();
         if (controller_fd != -1) {
             ::close(controller_fd);
             controller_fd = -1;
         }
-        if (accelerometer_fd != -1) {
-            ::close(accelerometer_fd);
-            accelerometer_fd = -1;
-        }
+        // if (accelerometer_fd != -1) {
+        //     ::close(accelerometer_fd);
+        //     accelerometer_fd = -1;
+        // }
     }
 }  // namespace module::input

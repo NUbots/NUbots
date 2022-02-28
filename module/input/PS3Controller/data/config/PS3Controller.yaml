@@ -1,2 +1,2 @@
-controller_path: "/dev/input/js1"
-accelerometer_path: "/dev/input/js0"
+controller_path: "/dev/input/js0"
+# accelerometer_path: "/dev/input/js0"
