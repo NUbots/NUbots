@@ -81,6 +81,8 @@ namespace module::input {
             if ((controller_path.compare(config["controller_path"].as<std::string>()) != 0)
                 /* || (accelerometer_path.compare(config["accelerometer_path"].as<std::string>()) != 0) */) {
                 controller_path    = config["controller_path"].as<std::string>();
+                NUClear::log<NUClear::INFO>(fmt::format("controller path on configuration: ", controller_path));
+
                 /* accelerometer_path = config["accelerometer_path"].as<std::string>(); */
                 connect();
             }
@@ -111,7 +113,8 @@ namespace module::input {
     void PS3Controller::connect() {
         // Make sure joystick file descriptors are closed.
         disconnect();
-
+        //NOTE: Hard coded file path while debugging - L.Craft
+        controller_path = std::filesystem::path("/dev/input/js0");
         // NUClear::log<NUClear::INFO>(fmt::format("Connecting to {} and {}", controller_path, accelerometer_path));
         NUClear::log<NUClear::INFO>(fmt::format("Connecting to {}", controller_path));
         controller_fd    = open(controller_path.c_str(), O_RDONLY | O_NONBLOCK);
