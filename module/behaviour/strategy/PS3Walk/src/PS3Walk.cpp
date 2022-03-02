@@ -51,6 +51,7 @@ namespace module::behaviour::strategy {
     using HeadDirectionEvent = message::input::RightJoystick;
     using HeadControlEvent   = message::input::SquareButton;
     using WalkControlEvent   = message::input::TriangleButton;
+    using WaveEvent          = message::input::L2Trigger;
     using message::motion::HeadCommand;
     using message::motion::KickCommandType;
     using message::motion::KickScriptCommand;
@@ -111,6 +112,14 @@ namespace module::behaviour::strategy {
                 emit(std::make_unique<MotionCommand>(utility::behaviour::StandStill()));
                 emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {90}}));
                 emit(std::make_unique<ExecuteScriptByName>(subsumptionId, actions));
+            }
+        });
+
+        on<Trigger<WaveEvent>>().then([this](const WaveEvent& event) {
+            if (event.value > 0.6) {
+                log<NUClear::INFO>("Waving");
+                emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {90}}));
+                emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "Wave.yaml"));
             }
         });
 

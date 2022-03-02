@@ -1,11 +1,11 @@
-action_scripts: ["WaveLeft.yaml"]
+action_scripts: ["Dab.yaml"]
 max_speed:
   walk:
-    linear: 0.2
-    rotational: 0.5
+    linear: 0.01
+    rotational: 0.0
   head:
     yaw: 1.5
     pitch: 1.0
 threshold:
-  walk: 0.1
+  walk: 0.01
   head: 0.1
