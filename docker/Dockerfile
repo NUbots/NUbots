@@ -225,9 +225,29 @@ COPY PKGBUILD/phonetisaurus.sh /usr/local/package/phonetisaurus.sh
 RUN install-makepkg-from-source /usr/local/package/phonetisaurus.sh
 
 # Kaldi
-RUN install-package lapack python2 cblas
+RUN install-package \
+    python2 \
+    python-wheel \
+    swig \
+    alsa-lib \
+    alsa-utils \
+    jack \
+    portaudio \
+    gcc-fortran \
+    jq \
+    espeak \
+    sox \
+    cblas \
+    lapack
+
 COPY PKGBUILD/kaldi.sh /usr/local/package/kaldi.sh
 RUN install-makepkg-from-source /usr/local/package/kaldi.sh
+
+COPY usr/local/package/voice2json.sh /usr/local/package/voice2json.sh
+COPY voice2json/sentences.ini /usr/local/share/voice2json/en-us_kaldi-zamia/
+COPY voice2json/slots/ /usr/local/share/voice2json/en-us_kaldi-zamia/slots/
+# Install voice2json with this specific commit.
+RUN /usr/local/package/voice2json.sh d2b1a709185a61432df88964e2fab9521db953b3
 
 FROM base AS other-dependencies
 
@@ -405,4 +425,9 @@ RUN chmod 600 /home/nubots/.ssh/id_rsa /home/nubots/.ssh/config
 # Setup the locations where we will mount our folders
 RUN install -d -m 0755 /home/nubots/NUbots
 RUN install -d -m 0777 /home/nubots/build
+
+# voice2json packages that need reinstalling...
+# You'll need to run this on the robot too.
+RUN install-package cblas lapack sox
+
 WORKDIR /home/nubots/NUbots

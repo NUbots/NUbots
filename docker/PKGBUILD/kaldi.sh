@@ -19,13 +19,6 @@ prepare() {
 
     find . -name '*.py' -exec sed '1s/python/python2/' -i {} \;
 
-    if (false && pacman -Q cuda &> /dev/null); then
-        msg2 "Compiling with CUDA support"
-        _cuda_config_opts="--cudatk-dir=/opt/cuda"
-    else
-        msg2 "Compiling without CUDA support"
-        _cuda_config_opts="--use-cuda=no"
-    fi
 
     # Removing static libs in https://github.com/kaldi-asr/kaldi/blob/8f94bd0698d503c5c18e02f8fd4209b6802ff17a/src/makefiles/linux_clapack.mk#L16
     sed '/^LDLIBS = /s/\$(CLAPACKLIBS)//' -i src/makefiles/linux_clapack.mk
@@ -35,6 +28,14 @@ prepare() {
 }
 
 build() {
+    if (false && pacman -Q cuda &> /dev/null); then
+        msg2 "Compiling with CUDA support"
+        _cuda_config_opts="--cudatk-dir=/opt/cuda"
+    else
+        msg2 "Compiling without CUDA support"
+        _cuda_config_opts="--use-cuda=no"
+    fi
+
     cd $srcdir/$pkgname/src
     LDFLAGS='-lcblas -llapack' \
     ./configure $_cuda_config_opts \
@@ -47,35 +48,40 @@ build() {
 }
 
 package() {
-    cd  $srcdir/$pkgname
+    echo "Packaging..."
 
-    for i in src/lib/*.so
-    do
-        mv `realpath $i` $i
-    done
-    rm -f src/*/*.{cc,cu,o,a,orig}
-    rm -r src/{doc,feat/test_data,lm/examples,lm/test_data,makefiles,onlinebin,probe}
-    find src \( \
+    # Create the library directory.
+    mkdir --parents $pkgdir/usr/local/lib/
+    # Copy kaldi libraries into it, always following symbolic links.
+    cp --dereference --target-directory=$pkgdir/usr/local/lib $srcdir/$pkgname/src/lib/*.so
+
+    local kaldi=$pkgdir/usr/local/$pkgname
+
+    mkdir --parents $kaldi
+    cp --recursive --target-directory=$kaldi $srcdir/$pkgname/src $srcdir/$pkgname/egs $srcdir/$pkgname/tools
+
+    rm --force $kaldi/src/*/*.{cc,cu,o,a,orig}
+    rm --recursive $kaldi/src/{doc,feat/test_data,lm/examples,lm/test_data,makefiles,onlinebin,probe}
+    find $kaldi/src \( \
         -name 'Makefile*' \
         -or -name 'README' \
         -or -name 'CMake*' \
         -or -name '*.mk' \
         -not -name 'kaldi.mk'\
         \) -exec rm {} \;
-    find src -maxdepth 1 -type f -not -name 'kaldi.mk' -exec rm {} \;
-    rm -r tools/{ATLAS_headers,CLAPACK,INSTALL,Makefile}
+    find $kaldi/src -maxdepth 1 -type f -not -name 'kaldi.mk' -exec rm {} \;
+    rm --recursive $kaldi/tools/{ATLAS_headers,CLAPACK,INSTALL,Makefile}
 
-    sed "s|$srcdir|/usr/local|g" -i `grep $srcdir . -rIl`
-    find . -name 'path.sh' -exec sed 's?^\(export KALDI_ROOT\)=.*$?\1=/usr/local/'$pkgname'?' -i {} \;
+    # Some python scripts have the wrong program in the shebang line.
+    sed "s|#!/usr/bin/env python23|#!/usr/bin/env python3|g" -i `grep python23 "$kaldi" -rIl`
+
+    # Some scripts hardcode the path that we are building in. Ops...
+    sed "s|$kaldi|/usr/local|g" -i `grep --fixed-strings --recursive --binary-files=without-match --files-with-matches "$srcdir" "$kaldi"`
+
+    find $kaldi -name 'path.sh' -exec sed 's?^\(export KALDI_ROOT\)=.*$?\1=/usr/local/'$pkgname'?' -i {} \;
     # echo "export OPENFST=$(find /opt/$pkgname/tools -type d -name 'openfst*')" >> tools/env.sh
-    echo "export OPENFST=" >> tools/env.sh
-    echo 'export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-}:${OPENFST}/lib' >> tools/env.sh
-    echo "export IRSTLM=/usr/local/$pkgname/tools/irstlm" >> tools/env.sh
-    echo 'export PATH=${PATH}:${IRSTLM}/bin' >> tools/env.sh
-
-    install -dm755 "$pkgdir"/etc/ld.so.conf.d/
-    echo "/usr/local/$pkgname/src/lib" > "$pkgdir"/etc/ld.so.conf.d/$pkgname.conf
-
-    mkdir -p $pkgdir/usr/local/$pkgname
-    cp -r src egs tools $pkgdir/usr/local/$pkgname
+    echo "export OPENFST=" >> $kaldi/tools/env.sh
+    echo 'export LD_LIBRARY_PATH=${LD_LIBRARY_PATH:-}:${OPENFST}/lib' >> $kaldi/tools/env.sh
+    echo "export IRSTLM=/usr/local/$pkgname/tools/irstlm" >> $kaldi/tools/env.sh
+    echo 'export PATH=${PATH}:${IRSTLM}/bin' >> $kaldi/tools/env.sh
 }
