@@ -5,7 +5,7 @@ name: Docker Slack Message
 
 # Control when this will run!
 on:
-  #testing on pull request, sends a message everytime
+  # testing on pull request, sends a message everytime
   # pull_request:
   #   branches: [main]
   #   paths:
@@ -16,6 +16,8 @@ on:
       - main
     paths:
       - 'docker/**'
+      - '!docker/Dockerfile.nugus_sim'
+      - '!docker/nugus_sim/**'
 
 
 
@@ -33,4 +35,3 @@ jobs:
           slack-text: "<!channel> The docker image was updated! Be sure to run `./b target generic` to ensure issues don't occur. Also try `./b configure --clean` if further issues occur."
       - name: Result from "Send Message"
         run: echo "The result was ${{ steps.notify.outputs.slack-result }}"
-
