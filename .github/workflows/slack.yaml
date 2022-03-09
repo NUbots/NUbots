@@ -22,7 +22,7 @@ on:
 jobs:
   slack-notifcations:
     runs-on: ubuntu-20.04
-    name: Send a message to slack when the docker folder has changes
+    name: Send a message to slack when the main docker image's build files change
     steps:
       - name: Send a message to Slack API
         uses: archive/github-actions-slack@v2.0.0
