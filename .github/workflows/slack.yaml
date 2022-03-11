@@ -5,21 +5,22 @@ name: Docker Slack Message
 
 # Control when this will run!
 on:
-  # testing on pull request, sends a message everytime
-  # pull_request:
-  #   branches: [main]
-  #   paths:
-  #     - 'docker/**'
-
-  push:
+  # testing on pull request, sends a message everytime, with testing ignoring things!
+  pull_request:
     branches:
       - main
     paths:
-      - 'docker/**'
-      - '!docker/Dockerfile.nugus_sim'
-      - '!docker/nugus_sim/**'
+      - "docker/**"
+      - "!docker/Dockerfile.nugus_sim"
+      - "!docker/nugus_sim/**"
 
-
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - 'docker/**'
+  #     - '!docker/Dockerfile.nugus_sim'
+  #     - '!docker/nugus_sim/**'
 
 jobs:
   slack-notifcations:

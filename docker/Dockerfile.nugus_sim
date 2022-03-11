@@ -1,5 +1,7 @@
 FROM archlinux:base-20210829.0.32635
 
+
+
 WORKDIR /home/nubots/NUbots
 
 # Add a script that installs packages
