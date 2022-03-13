@@ -1,5 +1,5 @@
-#ifndef MODULE_OUTPUT_NETWORKFORWARDER_HPP
-#define MODULE_OUTPUT_NETWORKFORWARDER_HPP
+#ifndef MODULE_NETWORK_NETWORKFORWARDER_HPP
+#define MODULE_NETWORK_NETWORKFORWARDER_HPP
 
 #include <map>
 #include <memory>
@@ -7,7 +7,7 @@
 
 #include "utility/type_traits/has_id.hpp"
 
-namespace module::output {
+namespace module::network {
 
     namespace id {
         /// @brief Returns the id field of data or, if id does not exist, 0
@@ -80,6 +80,6 @@ namespace module::output {
         std::map<std::string, std::shared_ptr<Handle>> handles;
     };
 
-}  // namespace module::output
+}  // namespace module::network
 
-#endif  // MODULE_OUTPUT_NETWORKFORWARDER_HPP
+#endif  // MODULE_NETWORK_NETWORKFORWARDER_HPP

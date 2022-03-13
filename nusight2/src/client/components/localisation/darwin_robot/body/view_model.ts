@@ -16,11 +16,9 @@ import BodyConfig from './config/body.json'
 export class BodyViewModel {
   constructor(private model: LocalisationRobotModel) {}
 
-  static of = createTransformer(
-    (model: LocalisationRobotModel): BodyViewModel => {
-      return new BodyViewModel(model)
-    },
-  )
+  static of = createTransformer((model: LocalisationRobotModel): BodyViewModel => {
+    return new BodyViewModel(model)
+  })
 
   @computed
   get body(): Mesh {

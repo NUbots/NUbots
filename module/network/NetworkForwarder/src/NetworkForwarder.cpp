@@ -2,9 +2,12 @@
 
 #include "extension/Configuration.hpp"
 
-namespace module::output {
+#include "utility/support/yaml_expression.hpp"
+
+namespace module::network {
 
     using extension::Configuration;
+    using utility::support::Expression;
 
     NetworkForwarder::NetworkForwarder(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -31,7 +34,7 @@ namespace module::output {
                     // First we try reading this field as a double, if it is "true" or "false" it will throw an
                     // exception
                     try {
-                        auto fps = setting.second.as<double>();
+                        auto fps = setting.second.as<Expression>();
                         enabled  = fps != 0.0;
                         period   = enabled ? 1.0 / fps : std::numeric_limits<double>::infinity();
                     }
@@ -66,4 +69,4 @@ namespace module::output {
         });
     }
 
-}  // namespace module::output
+}  // namespace module::network

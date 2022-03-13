@@ -9,7 +9,13 @@ import { Canvas } from '../../three/three'
 import { OdometryVisualizerModel } from './model'
 
 export class OdometryVisualizerViewModel {
-  constructor(private readonly canvas: Canvas, private readonly model: OdometryVisualizerModel) {}
+  private readonly canvas: Canvas
+  private readonly model: OdometryVisualizerModel
+
+  constructor(canvas: Canvas, model: OdometryVisualizerModel) {
+    this.canvas = canvas
+    this.model = model
+  }
 
   static of(canvas: Canvas, model: OdometryVisualizerModel) {
     return new OdometryVisualizerViewModel(canvas, model)
