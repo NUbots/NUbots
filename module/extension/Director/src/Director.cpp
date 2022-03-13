@@ -23,16 +23,12 @@
 namespace module::extension {
 
     using ::extension::Configuration;
-    using ::extension::behaviour::Task;
     using ::extension::behaviour::commands::CausingExpression;
     using ::extension::behaviour::commands::DirectorTask;
-    using ::extension::behaviour::commands::ProviderClassification;
     using ::extension::behaviour::commands::ProviderDone;
     using ::extension::behaviour::commands::ProvidesReaction;
     using ::extension::behaviour::commands::WhenExpression;
-    using ::NUClear::threading::Reaction;
     using provider::Provider;
-    using provider::ProviderGroup;
     using Unbind = NUClear::dsl::operation::Unbind<ProvidesReaction>;
 
     /**
@@ -174,7 +170,7 @@ namespace module::extension {
         // the Provider has finished executing
         on<Trigger<DirectorTask>, Sync<DirectorTask>>().then(
             "Director Task",
-            [this](std::shared_ptr<const DirectorTask> task) {
+            [this](const std::shared_ptr<const DirectorTask>& task) {
                 // Root level task, make the pack immediately and send it off to be executed as a root task
                 if (providers.count(task->requester_id) == 0) {
                     emit(std::make_unique<TaskPack>(TaskPack({task})));

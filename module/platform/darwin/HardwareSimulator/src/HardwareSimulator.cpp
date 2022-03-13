@@ -58,9 +58,9 @@ namespace module::platform::darwin {
         sensors.platform_error_flags = 0;
 
         // LED Panel
-        sensors.led_panel.led2 = 0;
-        sensors.led_panel.led3 = 0;
-        sensors.led_panel.led4 = 0;
+        sensors.led_panel.led2 = false;
+        sensors.led_panel.led3 = false;
+        sensors.led_panel.led4 = false;
 
         // Head LED
         sensors.head_led.RGB = 0;
@@ -69,8 +69,8 @@ namespace module::platform::darwin {
         sensors.eye_led.RGB = 0;
 
         // Buttons
-        sensors.buttons.left   = 0;
-        sensors.buttons.middle = 0;
+        sensors.buttons.left   = false;
+        sensors.buttons.middle = false;
 
         // Voltage (in volts)
         sensors.voltage = 0;
@@ -217,7 +217,7 @@ namespace module::platform::darwin {
 
         // This trigger writes the servo positions to the hardware
         on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
-            for (auto& command : commands.targets) {
+            for (const auto& command : commands.targets) {
 
                 // Calculate our moving speed
                 float diff = utility::math::angle::difference(
@@ -237,7 +237,7 @@ namespace module::platform::darwin {
             }
         });
 
-        on<Trigger<ServoTarget>>().then([this](const ServoTarget command) {
+        on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
             auto commandList = std::make_unique<ServoTargets>();
             commandList->targets.push_back(command);
 
@@ -251,7 +251,7 @@ namespace module::platform::darwin {
     }
 
     void HardwareSimulator::addNoise(std::unique_ptr<RawSensors>& sensors) const {
-        // TODO: Use a more standard c++ random generator.
+        // TODO(HardwareTeam,DevOpsTeam): Use a more standard c++ random generator.
         sensors->accelerometer += noise.accelerometer * centered_noise();
         sensors->gyroscope += noise.gyroscope * centered_noise();
     }

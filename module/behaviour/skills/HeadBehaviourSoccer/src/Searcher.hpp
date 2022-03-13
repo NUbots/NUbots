@@ -49,12 +49,6 @@ namespace module::behaviour::skills {
         bool forward = true;
 
     public:
-        Searcher() {
-            // Init points to something sane
-        }
-
-        ~Searcher() = default;
-
         void sort() {
             // Just set to closest:
             auto relativePoints = points;
@@ -95,7 +89,7 @@ namespace module::behaviour::skills {
         }
 
         void update(bool oscillate) {
-            // TODO: recode this garbage
+            // TODO(BehaviourTeam): recode this garbage
             auto now = NUClear::clock::now();
             if (!new_goal
                 && std::chrono::duration_cast<std::chrono::milliseconds>(now - lastSwitchTime).count()

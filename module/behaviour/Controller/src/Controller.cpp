@@ -134,7 +134,7 @@ namespace module::behaviour {
         });
 
         on<Trigger<ServoCommands>, Sync<Controller>>().then("Command Filter", [this](const ServoCommands& commands) {
-            for (auto& command : commands.commands) {
+            for (const auto& command : commands.commands) {
 
                 // Check if we have access
                 if (this->limbAccess[uint(utility::input::LimbID::limbForServo(command.id)) - 1] == command.source) {
@@ -365,9 +365,7 @@ namespace module::behaviour {
             if (a.group.id == b.group.id) {
                 return a.index < b.index;
             }
-            else {
-                return false;
-            }
+            return false;
         };
 
         // Sort our list

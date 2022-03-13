@@ -64,7 +64,7 @@ namespace module::motion {
 
         model.leg.FOOT_CENTRE_TO_ANKLE_CENTRE = objLeg["foot_centre_to_ankle_centre"].as<float>();
 
-        auto& objFoot         = objLeg["foot"];
+        const auto& objFoot   = objLeg["foot"];
         model.leg.FOOT_WIDTH  = objFoot["width"].as<float>();
         model.leg.FOOT_HEIGHT = objFoot["height"].as<float>();
         model.leg.FOOT_LENGTH = objFoot["length"].as<float>();
@@ -72,7 +72,7 @@ namespace module::motion {
 
         model.leg.LENGTH_BETWEEN_LEGS = 2.0 * model.leg.HIP_OFFSET_Y;
 
-        auto& objLeftRight                  = objLeg["left_to_right"];
+        const auto& objLeftRight            = objLeg["left_to_right"];
         model.leg.LEFT_TO_RIGHT_HIP_YAW     = objLeftRight["hip_yaw"].as<int>();
         model.leg.LEFT_TO_RIGHT_HIP_ROLL    = objLeftRight["hip_roll"].as<int>();
         model.leg.LEFT_TO_RIGHT_HIP_PITCH   = objLeftRight["hip_pitch"].as<int>();
@@ -90,7 +90,7 @@ namespace module::motion {
         model.head.NECK_TO_CAMERA_Z        = head_neckToCamera.z();
         model.head.INTERPUPILLARY_DISTANCE = objHead["ipd"].as<float>();
 
-        auto& objNeck = objHead["neck"];
+        const auto& objNeck = objHead["neck"];
 
         model.head.NECK_LENGTH = objNeck["length"].as<float>();
 
@@ -99,7 +99,7 @@ namespace module::motion {
         model.head.NECK_BASE_POS_FROM_ORIGIN_Y      = neck_basePositionFromOrigin.y();
         model.head.NECK_BASE_POS_FROM_ORIGIN_Z      = neck_basePositionFromOrigin.z();
 
-        auto& objHeadMovementLimits = objHead["limits"];
+        const auto& objHeadMovementLimits = objHead["limits"];
 
         Eigen::Vector2f headMovementLimits_yaw   = objHeadMovementLimits["yaw"].as<Expression>();
         Eigen::Vector2f headMovementLimits_pitch = objHeadMovementLimits["pitch"].as<Expression>();
@@ -110,9 +110,9 @@ namespace module::motion {
     }
 
     void KinematicsConfiguration::configureArm(KinematicsModel& model, const YAML::Node& objArm) {
-        auto& objShoulder = objArm["shoulder"];
-        auto& objUpperArm = objArm["upper_arm"];
-        auto& objLowerArm = objArm["lower_arm"];
+        const auto& objShoulder = objArm["shoulder"];
+        const auto& objUpperArm = objArm["upper_arm"];
+        const auto& objLowerArm = objArm["lower_arm"];
 
         model.arm.DISTANCE_BETWEEN_SHOULDERS = objArm["distance_between_shoulders"].as<float>();
         Eigen::Vector2f shoulderOffset       = objShoulder["offset"].as<Expression>();

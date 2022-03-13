@@ -45,12 +45,10 @@ namespace module::input {
     using message::platform::ButtonMiddleUp;
     using message::platform::RawSensors;
 
-    using utility::input::LimbID;
     using utility::input::ServoID;
     using utility::motion::kinematics::calculateAllPositions;
     using utility::motion::kinematics::calculateCentreOfMass;
     using utility::motion::kinematics::calculateInertialTensor;
-    using utility::motion::kinematics::calculateRobotToIMU;
     using utility::nusight::graph;
     using utility::support::Expression;
 
@@ -62,25 +60,25 @@ namespace module::input {
         s << ":";
 
 
-        if (errorCode & RawSensors::Error::INPUT_VOLTAGE) {
+        if ((errorCode & RawSensors::Error::INPUT_VOLTAGE) != 0u) {
             s << " Input Voltage ";
         }
-        if (errorCode & RawSensors::Error::ANGLE_LIMIT) {
+        if ((errorCode & RawSensors::Error::ANGLE_LIMIT) != 0u) {
             s << " Angle Limit ";
         }
-        if (errorCode & RawSensors::Error::OVERHEATING) {
+        if ((errorCode & RawSensors::Error::OVERHEATING) != 0u) {
             s << " Overheating ";
         }
-        if (errorCode & RawSensors::Error::OVERLOAD) {
+        if ((errorCode & RawSensors::Error::OVERLOAD) != 0u) {
             s << " Overloaded ";
         }
-        if (errorCode & RawSensors::Error::INSTRUCTION) {
+        if ((errorCode & RawSensors::Error::INSTRUCTION) != 0u) {
             s << " Bad Instruction ";
         }
-        if (errorCode & RawSensors::Error::CORRUPT_DATA) {
+        if ((errorCode & RawSensors::Error::CORRUPT_DATA) != 0u) {
             s << " Corrupt Data ";
         }
-        if (errorCode & RawSensors::Error::TIMEOUT) {
+        if ((errorCode & RawSensors::Error::TIMEOUT) != 0u) {
             s << " Timeout ";
         }
 
@@ -196,48 +194,48 @@ namespace module::input {
             [this](const std::list<std::shared_ptr<const RawSensors>>& sensors, const KinematicsModel& model) {
                 // If we need to reset the filter, do that here
                 if (reset_filter.load()) {
-                    Eigen::Vector3d acc   = Eigen::Vector3d::Zero();
-                    Eigen::Vector3d gyro  = Eigen::Vector3d::Zero();
-                    Eigen::Vector3d rMFt  = Eigen::Vector3d::Zero();
-                    auto filtered_sensors = std::make_unique<Sensors>();
+                    Eigen::Vector3d acc  = Eigen::Vector3d::Zero();
+                    Eigen::Vector3d gyro = Eigen::Vector3d::Zero();
+                    Eigen::Vector3d rMFt = Eigen::Vector3d::Zero();
 
                     for (const auto& s : sensors) {
+                        Sensors filtered_sensors{};
+
                         // Accumulate accelerometer and gyroscope readings
                         acc += s->accelerometer.cast<double>();
                         gyro += s->gyroscope.cast<double>();
-
                         // Make sure we have servo positions
                         for (uint32_t id = 0; id < 20; ++id) {
-                            auto& original = utility::platform::getRawServo(id, *s);
+                            const auto& original = utility::platform::getRawServo(id, *s);
                             // Add the sensor values to the system properly
-                            filtered_sensors->servo.push_back({0,
-                                                               id,
-                                                               original.torque_enabled,
-                                                               original.p_gain,
-                                                               original.i_gain,
-                                                               original.d_gain,
-                                                               original.goal_position,
-                                                               original.moving_speed,
-                                                               original.present_position,
-                                                               original.present_speed,
-                                                               original.load,
-                                                               original.voltage,
-                                                               static_cast<float>(original.temperature)});
+                            filtered_sensors.servo.emplace_back(0,
+                                                                id,
+                                                                original.torque_enabled,
+                                                                original.p_gain,
+                                                                original.i_gain,
+                                                                original.d_gain,
+                                                                original.goal_position,
+                                                                original.moving_speed,
+                                                                original.present_position,
+                                                                original.present_speed,
+                                                                original.load,
+                                                                original.voltage,
+                                                                static_cast<float>(original.temperature));
                         }
 
                         // Calculate forward kinematics
-                        const auto Htx = calculateAllPositions(model, *filtered_sensors);
+                        const auto Htx = calculateAllPositions(model, filtered_sensors);
                         for (const auto& entry : Htx) {
-                            filtered_sensors->Htx[entry.first] = entry.second.matrix();
+                            filtered_sensors.Htx[entry.first] = entry.second.matrix();
                         }
 
                         // Calculate the average length of both legs from the torso and accumulate this measurement
-                        const Eigen::Affine3d Htr(filtered_sensors->Htx[ServoID::R_ANKLE_ROLL]);
-                        const Eigen::Affine3d Htl(filtered_sensors->Htx[ServoID::L_ANKLE_ROLL]);
+                        const Eigen::Affine3d Htr(filtered_sensors.Htx[ServoID::R_ANKLE_ROLL]);
+                        const Eigen::Affine3d Htl(filtered_sensors.Htx[ServoID::L_ANKLE_ROLL]);
                         const Eigen::Vector3d rTFt = (Htr.translation() + Htl.translation()) * 0.5;
 
                         // Accumulator CoM readings
-                        rMFt += calculateCentreOfMass(model, filtered_sensors->Htx).head<3>() + rTFt;
+                        rMFt += calculateCentreOfMass(model, filtered_sensors.Htx).head<3>() + rTFt;
                     }
 
                     // Average all accumulated readings
@@ -299,10 +297,10 @@ namespace module::input {
 
                 // If we have any downs in the last 20 frames then we are button pushed
                 for (const auto& s : sensors) {
-                    if (s->buttons.left && !s->platform_error_flags) {
+                    if (s->buttons.left && (s->platform_error_flags == 0u)) {
                         ++leftCount;
                     }
-                    if (s->buttons.middle && !s->platform_error_flags) {
+                    if (s->buttons.middle && (s->platform_error_flags == 0u)) {
                         ++middleCount;
                     }
                 }
@@ -343,7 +341,7 @@ namespace module::input {
                 .then(
                     "Main Sensors Loop",
                     [this](const RawSensors& input,
-                           std::shared_ptr<const Sensors> previousSensors,
+                           const std::shared_ptr<const Sensors>& previousSensors,
                            const KinematicsModel& kinematicsModel) {
                         auto sensors = std::make_unique<Sensors>();
 
@@ -373,33 +371,33 @@ namespace module::input {
 
                         // Read through all of our sensors
                         for (uint32_t id = 0; id < 20; ++id) {
-                            auto& original = utility::platform::getRawServo(id, input);
-                            auto& error    = original.error_flags;
+                            const auto& original = utility::platform::getRawServo(id, input);
+                            const auto& error    = original.error_flags;
 
                             // Check for an error on the servo and report it
                             if (error != RawSensors::Error::OK) {
                                 std::stringstream s;
                                 s << "Error on Servo " << (id + 1) << " (" << static_cast<ServoID>(id) << "):";
 
-                                if (error & RawSensors::Error::INPUT_VOLTAGE) {
+                                if ((error & RawSensors::Error::INPUT_VOLTAGE) != 0u) {
                                     s << " Input Voltage - " << original.voltage;
                                 }
-                                if (error & RawSensors::Error::ANGLE_LIMIT) {
+                                if ((error & RawSensors::Error::ANGLE_LIMIT) != 0u) {
                                     s << " Angle Limit - " << original.present_position;
                                 }
-                                if (error & RawSensors::Error::OVERHEATING) {
+                                if ((error & RawSensors::Error::OVERHEATING) != 0u) {
                                     s << " Overheating - " << original.temperature;
                                 }
-                                if (error & RawSensors::Error::OVERLOAD) {
+                                if ((error & RawSensors::Error::OVERLOAD) != 0u) {
                                     s << " Overloaded - " << original.load;
                                 }
-                                if (error & RawSensors::Error::INSTRUCTION) {
+                                if ((error & RawSensors::Error::INSTRUCTION) != 0u) {
                                     s << " Bad Instruction ";
                                 }
-                                if (error & RawSensors::Error::CORRUPT_DATA) {
+                                if ((error & RawSensors::Error::CORRUPT_DATA) != 0u) {
                                     s << " Corrupt Data ";
                                 }
-                                if (error & RawSensors::Error::TIMEOUT) {
+                                if ((error & RawSensors::Error::TIMEOUT) != 0u) {
                                     s << " Timeout ";
                                 }
 
@@ -409,36 +407,36 @@ namespace module::input {
                             // message available, then we use our previous sensor values with some updates
                             if (error != RawSensors::Error::OK && previousSensors) {
                                 // Add the sensor values to the system properly
-                                sensors->servo.push_back({error,
-                                                          id,
-                                                          original.torque_enabled,
-                                                          original.p_gain,
-                                                          original.i_gain,
-                                                          original.d_gain,
-                                                          original.goal_position,
-                                                          original.moving_speed,
-                                                          previousSensors->servo[id].present_position,
-                                                          previousSensors->servo[id].present_velocity,
-                                                          previousSensors->servo[id].load,
-                                                          previousSensors->servo[id].voltage,
-                                                          previousSensors->servo[id].temperature});
+                                sensors->servo.emplace_back(error,
+                                                            id,
+                                                            original.torque_enabled,
+                                                            original.p_gain,
+                                                            original.i_gain,
+                                                            original.d_gain,
+                                                            original.goal_position,
+                                                            original.moving_speed,
+                                                            previousSensors->servo[id].present_position,
+                                                            previousSensors->servo[id].present_velocity,
+                                                            previousSensors->servo[id].load,
+                                                            previousSensors->servo[id].voltage,
+                                                            previousSensors->servo[id].temperature);
                             }
                             // Otherwise we can just use the new values as is
                             else {
                                 // Add the sensor values to the system properly
-                                sensors->servo.push_back({error,
-                                                          id,
-                                                          original.torque_enabled,
-                                                          original.p_gain,
-                                                          original.i_gain,
-                                                          original.d_gain,
-                                                          original.goal_position,
-                                                          original.moving_speed,
-                                                          original.present_position,
-                                                          original.present_speed,
-                                                          original.load,
-                                                          original.voltage,
-                                                          static_cast<float>(original.temperature)});
+                                sensors->servo.emplace_back(error,
+                                                            id,
+                                                            original.torque_enabled,
+                                                            original.p_gain,
+                                                            original.i_gain,
+                                                            original.d_gain,
+                                                            original.goal_position,
+                                                            original.moving_speed,
+                                                            original.present_position,
+                                                            original.present_speed,
+                                                            original.load,
+                                                            original.voltage,
+                                                            static_cast<float>(original.temperature));
                             }
                         }
 
@@ -455,7 +453,7 @@ namespace module::input {
                         // z axis reports a +1g acceleration when robot is vertical
 
                         // If we have a previous sensors and our platform has errors then reuse our last sensor value
-                        if (input.platform_error_flags && previousSensors) {
+                        if ((input.platform_error_flags != 0u) && previousSensors) {
                             sensors->accelerometer = previousSensors->accelerometer;
                         }
                         else {
@@ -465,7 +463,7 @@ namespace module::input {
                         // If we have a previous Sensors message and (our platform has errors or we are spinning too
                         // quickly), then reuse our last sensor value
                         if (previousSensors
-                            && (input.platform_error_flags
+                            && ((input.platform_error_flags != 0u)
                                 // One of the gyros would occasionally throw massive numbers without an error flag
                                 // If our hardware is working as intended, it should never read that we're spinning at 2
                                 // revs/s
@@ -481,14 +479,14 @@ namespace module::input {
                          *               Buttons and LEDs               *
                          ************************************************/
                         sensors->button.reserve(2);
-                        sensors->button.push_back(Sensors::Button(0, input.buttons.left));
-                        sensors->button.push_back(Sensors::Button(1, input.buttons.middle));
+                        sensors->button.emplace_back(0, input.buttons.left);
+                        sensors->button.emplace_back(1, input.buttons.middle);
                         sensors->led.reserve(5);
-                        sensors->led.push_back(Sensors::LED(0, input.led_panel.led2 ? 0xFF0000 : 0));
-                        sensors->led.push_back(Sensors::LED(1, input.led_panel.led3 ? 0xFF0000 : 0));
-                        sensors->led.push_back(Sensors::LED(2, input.led_panel.led4 ? 0xFF0000 : 0));
-                        sensors->led.push_back(Sensors::LED(3, input.head_led.RGB));  // Head
-                        sensors->led.push_back(Sensors::LED(4, input.eye_led.RGB));   // Eye
+                        sensors->led.emplace_back(0, input.led_panel.led2 ? 0xFF0000 : 0);
+                        sensors->led.emplace_back(1, input.led_panel.led3 ? 0xFF0000 : 0);
+                        sensors->led.emplace_back(2, input.led_panel.led4 ? 0xFF0000 : 0);
+                        sensors->led.emplace_back(3, input.head_led.RGB);  // Head
+                        sensors->led.emplace_back(4, input.eye_led.RGB);   // Eye
 
                         /************************************************
                          *                  Kinematics                  *

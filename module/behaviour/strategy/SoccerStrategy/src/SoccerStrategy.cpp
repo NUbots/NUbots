@@ -119,7 +119,7 @@ namespace module::behaviour::strategy {
             cfg_.forcePenaltyShootout = config["force_penalty_shootout"].as<bool>();
         });
 
-        // TODO: unhack
+        // TODO(BehaviourTeam): unhack
         emit(std::make_unique<KickPlan>(KickPlan(Eigen::Vector2d(4.5, 0.0), KickType::SCRIPTED)));
 
         on<Trigger<Field>, With<FieldDescription>>().then(
@@ -141,7 +141,7 @@ namespace module::behaviour::strategy {
             }
         });
 
-        // TODO: remove this horrible code
+        // TODO(BehaviourTeam): remove this horrible code
         // Check to see if we are currently in the process of getting up.
         on<Trigger<ExecuteGetup>>().then([this] { isGettingUp = true; });
 
@@ -159,8 +159,8 @@ namespace module::behaviour::strategy {
             if (selfPenalisation.context == GameEvents::Context::SELF) {
                 selfPenalised = false;
 
-                // TODO: isSideChecking = true;
-                // TODO: only do this once put down
+                // TODO(BehaviourTeam): isSideChecking = true;
+                // TODO(BehaviourTeam): only do this once put down
                 unpenalisedLocalisationReset();
             }
         });
@@ -213,7 +213,7 @@ namespace module::behaviour::strategy {
                     }
                     // If we're picked up, stand still
                     else if (pickedUp(sensors)) {
-                        // TODO: stand, no moving
+                        // TODO(BehaviourTeam): stand, no moving
                         standStill();
                         currentState = Behaviour::State::PICKED_UP;
                     }
@@ -415,12 +415,13 @@ namespace module::behaviour::strategy {
     }
 
     // **************************** LOCALISATION RESETS ****************************
-    void SoccerStrategy::penaltyShootoutLocalisationReset(const FieldDescription& fd) {
+    void SoccerStrategy::penaltyShootoutLocalisationReset(const FieldDescription& fieldDescription) {
         auto robot_reset = std::make_unique<ResetRobotHypotheses>();
 
         ResetRobotHypotheses::Self selfSideBaseLine;
-        selfSideBaseLine.rTFf =
-            Eigen::Vector2d((-fd.dimensions.field_length / 2.0) + fd.dimensions.penalty_mark_distance, 0.0);
+        selfSideBaseLine.rTFf = Eigen::Vector2d(
+            (-fieldDescription.dimensions.field_length / 2.0) + fieldDescription.dimensions.penalty_mark_distance,
+            0.0);
         selfSideBaseLine.covariance  = Eigen::Vector2d::Constant(0.01).asDiagonal();
         selfSideBaseLine.heading     = -M_PI;
         selfSideBaseLine.heading_var = 0.005;
@@ -444,7 +445,7 @@ namespace module::behaviour::strategy {
     void SoccerStrategy::unpenalisedLocalisationReset() {
         emit(std::make_unique<ResetRobotHypotheses>());
 
-        // TODO This should do some random distribution or something as we don't know where the ball is
+        // TODO(BehaviourTeam): This should do some random distribution or something as we don't know where the ball is
         auto ball_reset        = std::make_unique<ResetBallHypotheses>();
         ball_reset->self_reset = true;
         emit(ball_reset);
@@ -514,7 +515,7 @@ namespace module::behaviour::strategy {
         // of the oppposition goal to the perpendicular distance from the robot to the goal
 
         const float maxKickRange =
-            0.6;  // TODO: make configurable, only want to change at the last kick to avoid smart goalies
+            0.6;  // TODO(BehaviourTeam): make configurable, only want to change at the last kick to avoid smart goalies
         const float xTakeOverBox = maxKickRange;
         const float error        = 0.05;
         const float buffer       = error + 2.0f * fieldDescription.ball_radius;          // 15cm

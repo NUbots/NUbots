@@ -17,7 +17,7 @@ import { WebGLRenderer } from 'three'
 import { Scene } from 'three'
 import { Camera } from 'three'
 import { debounce } from 'throttle-debounce'
-import { compose } from '../../base/compose'
+import { compose } from '../../../shared/base/compose'
 
 import styles from './styles.css'
 

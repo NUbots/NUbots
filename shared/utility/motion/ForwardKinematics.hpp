@@ -103,7 +103,12 @@ namespace utility::motion::kinematics {
         std::map<ServoID, Eigen::Affine3d> positions{};
         Eigen::Affine3d runningTransform = Eigen::Affine3d::Identity();
         // Variables to mask left and right leg differences:
-        ServoID HIP_YAW, HIP_ROLL, HIP_PITCH, KNEE, ANKLE_PITCH, ANKLE_ROLL;
+        ServoID HIP_YAW;
+        ServoID HIP_ROLL;
+        ServoID HIP_PITCH;
+        ServoID KNEE;
+        ServoID ANKLE_PITCH;
+        ServoID ANKLE_ROLL;
         int negativeIfRight = 1;
 
         if (isLeft == BodySide::LEFT) {
@@ -208,7 +213,9 @@ namespace utility::motion::kinematics {
         std::map<ServoID, Eigen::Affine3d> positions{};
         Eigen::Affine3d runningTransform = Eigen::Affine3d::Identity();
         // Variables to mask left and right differences:
-        ServoID SHOULDER_PITCH, SHOULDER_ROLL, ELBOW;
+        ServoID SHOULDER_PITCH;
+        ServoID SHOULDER_ROLL;
+        ServoID ELBOW;
         int negativeIfRight = 1;
 
         if (isLeft == BodySide::LEFT) {
@@ -394,7 +401,9 @@ namespace utility::motion::kinematics {
             com = Htx * com;
 
             // Calculate distance to particle CoM from particle origin, using skew-symmetric matrix
-            const double x = com.x(), y = com.y(), z = com.z();
+            const double x = com.x();
+            const double y = com.y();
+            const double z = com.z();
             Eigen::Matrix3d d;
             // clang-format off
                     d <<  y * y + z * z, -x * y,         -x * z,

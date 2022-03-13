@@ -5,6 +5,7 @@ https://github.com/Rhoban/model/
 */
 #include "WalkEngine.hpp"
 
+#include <cmath>
 #include <fmt/format.h>
 #include <nuclear>
 
@@ -388,14 +389,15 @@ namespace module::motion {
         const float pauseLength = 0.5f * params.trunk_pause * half_period;
 
         // Trunk support foot and next support foot external oscillating position
-        const Eigen::Vector2f trunkPointSupport(params.trunk_x_offset
-                                                    + params.trunk_x_offset_p_coef_forward * foot_step.getNext().x()
-                                                    + params.trunk_x_offset_p_coef_turn * fabs(foot_step.getNext().z()),
-                                                params.trunk_y_offset);
-        const Eigen::Vector2f trunkPointNext(foot_step.getNext().x() + params.trunk_x_offset
-                                                 + params.trunk_x_offset_p_coef_forward * foot_step.getNext().x()
-                                                 + params.trunk_x_offset_p_coef_turn * fabs(foot_step.getNext().z()),
-                                             foot_step.getNext().y() + params.trunk_y_offset);
+        const Eigen::Vector2f trunkPointSupport(
+            params.trunk_x_offset + params.trunk_x_offset_p_coef_forward * foot_step.getNext().x()
+                + params.trunk_x_offset_p_coef_turn * std::fabs(foot_step.getNext().z()),
+            params.trunk_y_offset);
+        const Eigen::Vector2f trunkPointNext(
+            foot_step.getNext().x() + params.trunk_x_offset
+                + params.trunk_x_offset_p_coef_forward * foot_step.getNext().x()
+                + params.trunk_x_offset_p_coef_turn * std::fabs(foot_step.getNext().z()),
+            foot_step.getNext().y() + params.trunk_y_offset);
 
         // Trunk middle neutral (no swing) position
         const Eigen::Vector2f trunkPointMiddle = 0.5f * (trunkPointSupport + trunkPointNext);
@@ -463,12 +465,12 @@ namespace module::motion {
         const Eigen::Vector3f eulerAtSupport(0.0f,
                                              params.trunk_pitch
                                                  + params.trunk_pitch_p_coef_forward * foot_step.getNext().x()
-                                                 + params.trunk_pitch_p_coef_turn * fabs(foot_step.getNext().z()),
+                                                 + params.trunk_pitch_p_coef_turn * std::fabs(foot_step.getNext().z()),
                                              0.5f * foot_step.getLast().z() + 0.5f * foot_step.getNext().z());
         const Eigen::Vector3f eulerAtNext(0.0f,
                                           params.trunk_pitch
                                               + params.trunk_pitch_p_coef_forward * foot_step.getNext().x()
-                                              + params.trunk_pitch_p_coef_turn * fabs(foot_step.getNext().z()),
+                                              + params.trunk_pitch_p_coef_turn * std::fabs(foot_step.getNext().z()),
                                           foot_step.getNext().z());
         const Eigen::Matrix3f matAtSupport  = utility::math::euler::EulerIntrinsicToMatrix(eulerAtSupport);
         const Eigen::Matrix3f matAtNext     = utility::math::euler::EulerIntrinsicToMatrix(eulerAtNext);
@@ -667,7 +669,7 @@ namespace module::motion {
         return computeCartesianPositionAtTime(time);
     }
 
-    QuinticWalkEngine::PositionSupportTuple QuinticWalkEngine::computeCartesianPositionAtTime(const float time) const {
+    QuinticWalkEngine::PositionSupportTuple QuinticWalkEngine::computeCartesianPositionAtTime(const float& time) const {
         // Evaluate target cartesian state from trajectories
         const auto [trunkPos, trunkAxis, footPos, footAxis] = trajectoriesTrunkFootPos(time, trajs);
         // Discard isDoubleSupport because we don't use it
