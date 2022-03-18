@@ -17,12 +17,12 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef DARWIN_DARWINRAWSENSORS_HPP
-#define DARWIN_DARWINRAWSENSORS_HPP
+#ifndef CM740_RAWSENSORS_HPP
+#define CM740_RAWSENSORS_HPP
 
 #include <cstdint>
 
-namespace Darwin {
+namespace CM740 {
 
 /**
  * This namespace contains all of the raw Datatypes that we will use for reading and writing from the hardware
@@ -51,10 +51,10 @@ namespace Darwin {
         };
 
         /**
-         * @brief This represents the data that comes from one of the MX28 motors
+         * @brief This represents the data that comes from one of the Servo motors
          */
-        struct MX28Data {
-            MX28Data() = default;
+        struct ServoData {
+            ServoData() = default;
             uint16_t presentPosition{0};
             uint16_t presentSpeed{0};
             uint16_t load{0};
@@ -110,7 +110,7 @@ namespace Darwin {
         /// @brief Holds data from the CM740
         Types::CM740Data cm740;
         /// @brief Holds data from the 20 servos (stored in location ServoID - 1)
-        Types::MX28Data servos[20] = {Types::MX28Data()};
+        Types::ServoData servos[20] = {Types::ServoData()};
         /// @brief Holds data from the 2 FSR (stored as Right Left)
         Types::FSRData fsr[2] = {Types::FSRData()};
 
@@ -122,6 +122,6 @@ namespace Darwin {
         uint8_t fsrErrorCodes[2] = {0};
     };
 #pragma pack(pop)  // Stop bitpacking our results
-}  // namespace Darwin
+}  // namespace CM740
 
 #endif

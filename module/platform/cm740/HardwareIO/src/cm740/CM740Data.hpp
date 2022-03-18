@@ -17,23 +17,23 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef DARWIN_CM740_HPP_
-#define DARWIN_CM740_HPP_
+#ifndef CM740_CM740_DATA_HPP
+#define CM740_CM740_DATA_HPP
 
-#include "DarwinDevice.hpp"
+#include "CM740Interface.hpp"
 
 #ifdef VERSION
     #undef VERSION
 #endif
 
-namespace Darwin {
+namespace CM740 {
 
     /**
-     * @brief This represents, and gives access to the darwin's CM740 subboard
+     * @brief This represents, and gives access to the CM740 subboard
      *
      * @author Trent Houliston
      */
-    class CM740 : public DarwinDevice {
+    class CM740Data : public CM740Interface {
     public:
         /**
          * @brief Holds the addresses of the various bytes in the CM740.
@@ -102,13 +102,13 @@ namespace Darwin {
             ADC15_H           = 80
         };
 
-        CM740(UART& coms, int id);
+        CM740Data(UART& coms, int id);
 
         /**
          * @brief turns on the Dynamixel power (servos and foot sensors)
          */
         void turnOnDynamixel();
     };
-}  // namespace Darwin
+}  // namespace CM740
 
 #endif

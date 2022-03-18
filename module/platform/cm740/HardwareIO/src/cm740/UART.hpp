@@ -17,8 +17,8 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef DARWIN_UART_HPP
-#define DARWIN_UART_HPP
+#ifndef CM740_UART_HPP
+#define CM740_UART_HPP
 
 #include <cassert>
 #include <cerrno>
@@ -33,7 +33,7 @@
 #include "extension/Configuration.hpp"
 
 
-namespace Darwin {
+namespace CM740 {
     namespace Packet {
         enum { MAGIC = 0, ID = 2, LENGTH = 3, INSTRUCTION = 4, ERRBIT = 4, PARAMETER = 5 };
     }  // namespace Packet
@@ -82,7 +82,7 @@ namespace Darwin {
      *
      * @details
      *  This class handles the communication with the hardware, It has methods that implement the ZigBee protocol used
-     *    in the darwin in order to communicate with the various devices.
+     *    in the NUgus in order to communicate with the various devices.
      *
      * @author Trent Houliston
      */
@@ -230,6 +230,6 @@ namespace Darwin {
          */
         size_t writeBytes(const void* buf, size_t count);
     };
-}  // namespace Darwin
+}  // namespace CM740
 
 #endif

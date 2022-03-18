@@ -17,8 +17,13 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "MX28.hpp"
+#include "CM740Data.hpp"
 
-namespace Darwin {
-    MX28::MX28(UART& coms, int id) : DarwinDevice(coms, id) {}
-}  // namespace Darwin
+namespace CM740 {
+    CM740Data::CM740Data(UART& coms, int id) : CM740Interface(coms, id) {}
+
+    void CM740Data::turnOnDynamixel() {
+        // Write true to the DXL_POWER byte
+        write(Address::DXL_POWER, true);
+    }
+}  // namespace CM740
