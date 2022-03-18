@@ -17,17 +17,8 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "DarwinDevice.hpp"
+#include "FSR.hpp"
 
-namespace Darwin {
-    DarwinDevice::DarwinDevice(UART& coms, int id) : coms(coms), id(id) {}
-
-    bool DarwinDevice::ping() {
-
-        // Ping and get the result
-        CommandResult result = coms.executeRead(PingCommand(id));
-
-        // Check if there was an error code
-        return result.header.errorcode == ErrorCode::NONE;
-    }
-}  // namespace Darwin
+namespace CM740 {
+    FSR::FSR(UART& coms, int id) : CM740Interface(coms, id) {}
+}  // namespace CM740

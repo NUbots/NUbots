@@ -36,7 +36,7 @@
 #include "utility/platform/RawSensors.hpp"
 #include "utility/support/yaml_expression.hpp"
 
-namespace module::platform::darwin {
+namespace module::platform::cm740 {
 
     using extension::Configuration;
 
@@ -146,7 +146,7 @@ namespace module::platform::darwin {
             servo.temperature = 0;
         }
 
-        on<Configuration>("DarwinHardwareSimulator.yaml")
+        on<Configuration>("HardwareSimulator.yaml")
             .then("Hardware Simulator Config", [this](const Configuration& config) {
                 imu_drift_rate      = config["imu_drift_rate"].as<float>();
                 noise.accelerometer = config["noise"]["accelerometer"].as<Expression>();
@@ -285,4 +285,4 @@ namespace module::platform::darwin {
         sensors.fsr.left.centre_x = down ? 1 : std::numeric_limits<double>::quiet_NaN();
         sensors.fsr.left.centre_y = down ? 1 : std::numeric_limits<double>::quiet_NaN();
     }
-}  // namespace module::platform::darwin
+}  // namespace module::platform::cm740

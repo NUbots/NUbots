@@ -33,7 +33,7 @@
 #include "utility/support/yaml_expression.hpp"
 
 
-namespace module::platform::darwin {
+namespace module::platform::cm740 {
 
     using extension::Configuration;
     using message::motion::ServoTarget;
@@ -41,7 +41,7 @@ namespace module::platform::darwin {
     using message::platform::RawSensors;
     using utility::support::Expression;
 
-    RawSensors HardwareIO::parseSensors(const Darwin::BulkReadResults& data) {
+    RawSensors HardwareIO::parseSensors(const CM740::BulkReadResults& data) {
         RawSensors sensors;
 
         // Timestamp when our data was taken
@@ -215,11 +215,11 @@ namespace module::platform::darwin {
     }
 
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), darwin("/dev/CM740"), chargedVoltage(0.0f), flatVoltage(0.0f) {
+        : Reactor(std::move(environment)), cm740("/dev/CM740"), chargedVoltage(0.0f), flatVoltage(0.0f) {
 
         on<Startup>().then("HardwareIO Startup", [this] {
-            auto CM740Model   = darwin.cm740.read<uint16_t>(Darwin::CM740::Address::MODEL_NUMBER_L);
-            auto CM740Version = darwin.cm740.read<uint8_t>(Darwin::CM740::Address::VERSION);
+            auto CM740Model   = cm740.cm740.read<uint16_t>(CM740::CM740Data::Address::MODEL_NUMBER_L);
+            auto CM740Version = cm740.cm740.read<uint8_t>(CM740::CM740Data::Address::VERSION);
             std::stringstream version;
             std::stringstream model;
             model << "0x" << std::setw(4) << std::setfill('0') << std::hex << int(CM740Model);
@@ -230,7 +230,7 @@ namespace module::platform::darwin {
 
         on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
             // Set config for the packet waiting
-            darwin.setConfig(config);
+            cm740.setConfig(config);
 
             for (size_t i = 0; i < config["servos"].config.size(); ++i) {
                 Convert::SERVO_OFFSET[i]    = config["servos"][i]["offset"].as<Expression>();
@@ -249,10 +249,10 @@ namespace module::platform::darwin {
 
             std::vector<uint8_t> command = {0xFF,
                                             0xFF,
-                                            Darwin::ID::BROADCAST,
+                                            CM740::ID::BROADCAST,
                                             0x00,  // The size, fill this in later
-                                            Darwin::DarwinDevice::Instruction::SYNC_WRITE,
-                                            Darwin::MX28::Address::D_GAIN,
+                                            CM740::CM740Interface::Instruction::SYNC_WRITE,
+                                            CM740::Servo::Address::D_GAIN,
                                             0x0A};
 
             for (uint i = 0; i < servoState.size(); ++i) {
@@ -266,14 +266,14 @@ namespace module::platform::darwin {
                     if (servoState[i].torqueEnabled
                         && (std::isnan(servoState[i].goalPosition) || servoState[i].torque == 0)) {
                         servoState[i].torqueEnabled = false;
-                        darwin[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, false);
+                        cm740[i + 1].write(CM740::Servo::Address::TORQUE_ENABLE, false);
                     }
                     else {
                         // If our torque was disabled but is now enabled
                         if (!servoState[i].torqueEnabled && !std::isnan(servoState[i].goalPosition)
                             && servoState[i].torque != 0) {
                             servoState[i].torqueEnabled = true;
-                            darwin[i + 1].write(Darwin::MX28::Address::TORQUE_ENABLE, true);
+                            cm740[i + 1].write(CM740::Servo::Address::TORQUE_ENABLE, true);
                         }
 
                         // Get our goal position and speed
@@ -303,17 +303,17 @@ namespace module::platform::darwin {
             // Write our data (if we need to)
             if (command.size() > 7) {
                 // Calculate our length
-                command[Darwin::Packet::LENGTH] = command.size() - 3;
+                command[CM740::Packet::LENGTH] = command.size() - 3;
 
                 // Do a checksum
                 command.push_back(0);
-                command.back() = Darwin::calculateChecksum(command.data());
+                command.back() = CM740::calculateChecksum(command.data());
 
-                darwin.sendRawCommand(command);
+                cm740.sendRawCommand(command);
             }
 
             // Read our data
-            Darwin::BulkReadResults data = darwin.bulkRead();
+            CM740::BulkReadResults data = cm740.bulkRead();
 
             // Parse our data
             *sensors = parseSensors(data);
@@ -421,10 +421,10 @@ namespace module::platform::darwin {
             // Update our internal state
             cm740State.headLED = led;
 
-            darwin.cm740.write(Darwin::CM740::Address::LED_HEAD_L,
-                               Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
-                                                         static_cast<uint8_t>((led.RGB & 0x0000FF00) >> 8),
-                                                         static_cast<uint8_t>(led.RGB & 0x000000FF)));
+            cm740.cm740.write(CM740::CM740Data::Address::LED_HEAD_L,
+                              Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
+                                                        static_cast<uint8_t>((led.RGB & 0x0000FF00) >> 8),
+                                                        static_cast<uint8_t>(led.RGB & 0x000000FF)));
         });
 
         // If we get a EyeLED command then write it
@@ -432,10 +432,10 @@ namespace module::platform::darwin {
             // Update our internal state
             cm740State.eyeLED = led;
 
-            darwin.cm740.write(Darwin::CM740::Address::LED_EYE_L,
-                               Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
-                                                         static_cast<uint8_t>((led.RGB & 0x0000FF00) >> 8),
-                                                         static_cast<uint8_t>(led.RGB & 0x000000FF)));
+            cm740.cm740.write(CM740::CM740Data::Address::LED_EYE_L,
+                              Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
+                                                        static_cast<uint8_t>((led.RGB & 0x0000FF00) >> 8),
+                                                        static_cast<uint8_t>(led.RGB & 0x000000FF)));
         });
 
         // If we get a EyeLED command then write it
@@ -443,8 +443,8 @@ namespace module::platform::darwin {
             // Update our internal state
             cm740State.ledPanel = led;
 
-            darwin.cm740.write(Darwin::CM740::Address::LED_PANNEL,
-                               ((uint8_t(led.led2) << 2) | (uint8_t(led.led3) << 1) | uint8_t((led.led4))));
+            cm740.cm740.write(CM740::CM740Data::Address::LED_PANNEL,
+                              ((uint8_t(led.led2) << 2) | (uint8_t(led.led3) << 1) | uint8_t((led.led4))));
         });
     }
-}  // namespace module::platform::darwin
+}  // namespace module::platform::cm740

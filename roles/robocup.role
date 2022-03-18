@@ -16,7 +16,7 @@ nuclear_role(
   input::GameController
   # Sensors
   input::Camera
-  platform::darwin::HardwareIO
+  platform::cm740::HardwareIO
   input::SensorFilter
   # Vision
   vision::VisualMesh

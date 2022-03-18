@@ -17,20 +17,20 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_PLATFORM_DARWIN_HARDWAREIO_HPP
-#define MODULES_PLATFORM_DARWIN_HARDWAREIO_HPP
+#ifndef MODULES_PLATFORM_CM740_HARDWAREIO_HPP
+#define MODULES_PLATFORM_CM740_HARDWAREIO_HPP
 
 #include <nuclear>
 #include <yaml-cpp/yaml.h>
 
-#include "darwin/Darwin.hpp"
+#include "cm740/CM740.hpp"
 
 #include "message/platform/RawSensors.hpp"
 
-namespace module::platform::darwin {
+namespace module::platform::cm740 {
 
     /**
-     * This NUClear Reactor is responsible for reading in the data for the Darwin Platform and emitting it to
+     * This NUClear Reactor is responsible for reading in the data from the CM740 and emitting it to
      * the rest of the system
      *
      * @author Trent Houliston
@@ -40,9 +40,9 @@ namespace module::platform::darwin {
         // How often we read the servos
         static constexpr int UPDATE_FREQUENCY = 90;
 
-        /// @brief Our internal darwin class that is used for interacting with the hardware
-        Darwin::Darwin darwin;
-        message::platform::RawSensors parseSensors(const Darwin::BulkReadResults& data);
+        /// @brief Our internal cm740 class that is used for interacting with the hardware
+        CM740::CM740 cm740;
+        message::platform::RawSensors parseSensors(const CM740::BulkReadResults& data);
         float dGain = 0;
         float iGain = 0;
         float pGain = 0;
@@ -105,5 +105,5 @@ namespace module::platform::darwin {
         /// @brief called by a Powerplant to construct this reactor
         explicit HardwareIO(std::unique_ptr<NUClear::Environment> environment);
     };
-}  // namespace module::platform::darwin
+}  // namespace module::platform::cm740
 #endif

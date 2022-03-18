@@ -17,25 +17,26 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef DARWIN_MX28_HPP
-#define DARWIN_MX28_HPP
+#ifndef CM740_SERVO_HPP
+#define CM740_SERVO_HPP
 
-#include "DarwinDevice.hpp"
+#include "CM740Interface.hpp"
 
-namespace Darwin {
+namespace CM740 {
     /**
-     * @brief This represents, and gives access to the darwin's MX28 motors
+     * @brief This represents, and gives access to the servo motors
      *
      * @author Trent Houliston
      */
-    class MX28 : public DarwinDevice {
+    class Servo : public CM740Interface {
 
     public:
         /**
-         * @brief This enum holds the addresses of the various bytes in the MX28.
+         * @brief This enum holds the addresses of the various bytes in the servos.
          *
          * @details
-         *  for additional details see http://support.robotis.com/en/product/dynamixel/mx_series/mx-28.htm
+         *  for additional details see https://emanual.robotis.com/docs/en/dxl/mx/mx-106/
+         *  and https://emanual.robotis.com/docs/en/dxl/mx/mx-64/
          */
         enum Address {
             MODEL_NUMBER_L         = 0,
@@ -108,8 +109,8 @@ namespace Darwin {
             D_ERROR_OUT_H          = 67
         };
 
-        MX28(UART& coms, int id);
+        Servo(UART& coms, int id);
     };
-}  // namespace Darwin
+}  // namespace CM740
 
 #endif
