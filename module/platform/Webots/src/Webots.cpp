@@ -655,7 +655,7 @@ namespace module::platform {
             current_real_time = 0;
 
             // Reset the local raw sensors buffer
-            emit(std::make_unique<ResetRawSensors>());
+            emit(std::make_unique<ResetWebotsServos>());
         }
 
         // Save our previous deltas
