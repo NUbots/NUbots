@@ -8,26 +8,28 @@
 #include "EvaluatorTask.hpp"
 
 #include "message/platform/RawSensors.hpp"
-
 #include "message/support/optimisation/NSGA2EvaluatorMessages.hpp"
 #include "message/support/optimisation/NSGA2OptimiserMessages.hpp"
 
 namespace module {
     namespace support {
         namespace optimisation {
-            using message::support::optimisation::NSGA2FitnessScores;
-            using message::support::optimisation::NSGA2EvaluationRequest;
             using message::platform::RawSensors;
+            using message::support::optimisation::NSGA2EvaluationRequest;
+            using message::support::optimisation::NSGA2FitnessScores;
 
-            class WalkEvaluator: public EvaluatorTask {
+            class WalkEvaluator : public EvaluatorTask {
             public:
                 // Implementing the EvaluatorTask interface
                 void processRawSensorMsg(const RawSensors& sensors, NSGA2Evaluator* evaluator);
                 void processOptimisationRobotPosition(const OptimisationRobotPosition& position);
                 void setUpTrial(const NSGA2EvaluationRequest& request);
                 void resetSimulation();
-                void evaluatingState(size_t subsumptionId, NSGA2Evaluator *evaluator);
-                std::unique_ptr<NSGA2FitnessScores> calculateFitnessScores(bool earlyTermination, double simTime, int generation, int individual);
+                void evaluatingState(size_t subsumptionId, NSGA2Evaluator* evaluator);
+                std::unique_ptr<NSGA2FitnessScores> calculateFitnessScores(bool earlyTermination,
+                                                                           double simTime,
+                                                                           int generation,
+                                                                           int individual);
 
                 // Task-specific functions
                 std::vector<double> calculateScores();
@@ -38,10 +40,10 @@ namespace module {
 
             private:
                 /// @brief Robot state for this evaluation, used during fitness and constraint calculation
-                bool initialPositionSet = false;
+                bool initialPositionSet              = false;
                 Eigen::Vector3d initialRobotPosition = Eigen::Vector3d::Zero();
-                Eigen::Vector3d robotPosition = Eigen::Vector3d::Zero();
-                double maxFieldPlaneSway = 0.0;
+                Eigen::Vector3d robotPosition        = Eigen::Vector3d::Zero();
+                double maxFieldPlaneSway             = 0.0;
 
                 /// @brief The amount of time to run a single trial, in seconds.
                 std::chrono::seconds trial_duration_limit = std::chrono::seconds(0);

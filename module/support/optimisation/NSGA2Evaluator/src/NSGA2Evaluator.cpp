@@ -4,6 +4,9 @@
 #include <fmt/ostream.h>
 #include <yaml-cpp/yaml.h>
 
+#include "tasks/StandEvaluator.hpp"
+#include "tasks/WalkEvaluator.hpp"
+
 #include "extension/Configuration.hpp"
 #include "extension/Script.hpp"
 
@@ -21,9 +24,6 @@
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/support/yaml_expression.hpp"
-
-#include "tasks/WalkEvaluator.hpp"
-#include "tasks/StandEvaluator.hpp"
 
 namespace module {
     namespace support {
@@ -142,9 +142,8 @@ namespace module {
                     emit(std::make_unique<Event>(Event::ResetDone));
                 });
 
-                on<Trigger<WebotsTimeUpdate>, Single>().then([this](const WebotsTimeUpdate& update) {
-                    simTime = update.sim_time;
-                });
+                on<Trigger<WebotsTimeUpdate>, Single>().then(
+                    [this](const WebotsTimeUpdate& update) { simTime = update.sim_time; });
 
                 on<Trigger<NSGA2Terminate>, Single>().then([this]() {
                     // NSGA2Terminate is emitted when we've finished all generations and all individuals
@@ -207,7 +206,8 @@ namespace module {
                         }
                     case State::FINISHED:
                         switch (event) {
-                            // Arguably this should return FINISHED regardless of event, unless we want to be able to reset
+                            // Arguably this should return FINISHED regardless of event, unless we want to be able to
+                            // reset
                             case Event::FitnessScoresSent: return State::FINISHED;
                             case Event::TerminateEvaluation: return State::FINISHED;
                             default: return State::UNKNOWN;
@@ -219,7 +219,7 @@ namespace module {
             /// @brief Handle the WAITING_FOR_REQUEST state
             void NSGA2Evaluator::WaitingForRequest(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
                 log<NUClear::DEBUG>("WaitingForRequest");
-                emit(std::make_unique<NSGA2EvaluatorReady>()); // Let the optimiser know we're ready
+                emit(std::make_unique<NSGA2EvaluatorReady>());  // Let the optimiser know we're ready
             }
 
             /// @brief Handle the SETTING_UP_TRIAL state
@@ -228,11 +228,13 @@ namespace module {
                 generation = lastEvalRequestMsg.generation;
                 individual = lastEvalRequestMsg.id;
 
-                if(lastEvalRequestMsg.task == "walk") {
+                if (lastEvalRequestMsg.task == "walk") {
                     task = std::make_unique<WalkEvaluator>();
-                } else if(lastEvalRequestMsg.task == "stand") {
+                }
+                else if (lastEvalRequestMsg.task == "stand") {
                     task = std::make_unique<StandEvaluator>();
-                } else {
+                }
+                else {
                     log<NUClear::ERROR>("Unhandled task type:", lastEvalRequestMsg.task);
                 }
 
@@ -257,21 +259,23 @@ namespace module {
             void NSGA2Evaluator::Evaluating(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
                 log<NUClear::DEBUG>("Evaluating");
                 if (event == Event::ResetDone) {
-                    if(lastEvalRequestMsg.task == "walk" || lastEvalRequestMsg.task == "stand") {
+                    if (lastEvalRequestMsg.task == "walk" || lastEvalRequestMsg.task == "stand") {
                         task->evaluatingState(subsumptionId, this);
-                    } else {
+                    }
+                    else {
                         log<NUClear::ERROR>("Unhandled task type:", lastEvalRequestMsg.task);
                     }
                 }
             }
 
-            void NSGA2Evaluator::ScheduleTrialExpiredMessage(const int trial_stage, const std::chrono::seconds delay_time) {
+            void NSGA2Evaluator::ScheduleTrialExpiredMessage(const int trial_stage,
+                                                             const std::chrono::seconds delay_time) {
                 // Prepare the trial expired message
                 std::unique_ptr<NSGA2TrialExpired> message = std::make_unique<NSGA2TrialExpired>();
-                message->time_started = simTime;
-                message->generation   = generation;
-                message->individual   = individual;
-                message->trial_stage  = trial_stage;
+                message->time_started                      = simTime;
+                message->generation                        = generation;
+                message->individual                        = individual;
+                message->trial_stage                       = trial_stage;
 
                 // Schedule the end of the walk trial after the duration limit
                 log<NUClear::DEBUG>("Scheduling expired message with time ", delay_time.count());
@@ -285,10 +289,10 @@ namespace module {
                 // Send a zero walk command to stop walking
                 emit(std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(0.0, 0.0, 0.0)));
                 bool earlyTermination = true;
-                auto fitnessScores = task->calculateFitnessScores(earlyTermination, simTime, generation, individual);
+                auto fitnessScores    = task->calculateFitnessScores(earlyTermination, simTime, generation, individual);
                 emit(fitnessScores);
 
-                emit(std::make_unique<Event>(Event::FitnessScoresSent)); // Go back to waiting for the next request
+                emit(std::make_unique<Event>(Event::FitnessScoresSent));  // Go back to waiting for the next request
             }
 
             /// @brief Handle the TERMINATING_GRACEFULLY state
@@ -299,10 +303,10 @@ namespace module {
                 // Send a zero walk command to stop walking
                 emit(std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(0.0, 0.0, 0.0)));
                 bool earlyTermination = false;
-                auto fitnessScores = task->calculateFitnessScores(earlyTermination, simTime, generation, individual);
+                auto fitnessScores    = task->calculateFitnessScores(earlyTermination, simTime, generation, individual);
                 emit(fitnessScores);
 
-                emit(std::make_unique<Event>(Event::FitnessScoresSent)); // Go back to waiting for the next request
+                emit(std::make_unique<Event>(Event::FitnessScoresSent));  // Go back to waiting for the next request
             }
 
             void NSGA2Evaluator::Finished(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {

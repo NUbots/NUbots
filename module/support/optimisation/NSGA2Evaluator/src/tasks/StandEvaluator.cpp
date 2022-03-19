@@ -1,29 +1,29 @@
-#include <fstream>
-#include <fmt/format.h>
-#include <fmt/ostream.h>
-#include <yaml-cpp/yaml.h>
-
 #include "StandEvaluator.hpp"
 
-#include "utility/support/yaml_expression.hpp"
-#include "utility/behaviour/Action.hpp"
-#include "utility/input/LimbID.hpp"
-#include "utility/input/ServoID.hpp"
+#include <fmt/format.h>
+#include <fmt/ostream.h>
+#include <fstream>
+#include <yaml-cpp/yaml.h>
 
 #include "message/motion/WalkCommand.hpp"
 #include "message/support/optimisation/NSGA2EvaluatorMessages.hpp"
 #include "message/support/optimisation/NSGA2OptimiserMessages.hpp"
 
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/support/yaml_expression.hpp"
+
 namespace module {
     namespace support {
         namespace optimisation {
-            using message::support::optimisation::NSGA2EvaluationRequest;
-            using message::platform::RawSensors;
-            using message::motion::WalkCommand;
             using message::motion::DisableWalkEngineCommand;
             using message::motion::EnableWalkEngineCommand;
-            using message::support::optimisation::NSGA2TrialExpired;
+            using message::motion::WalkCommand;
+            using message::platform::RawSensors;
+            using message::support::optimisation::NSGA2EvaluationRequest;
             using message::support::optimisation::NSGA2FitnessScores;
+            using message::support::optimisation::NSGA2TrialExpired;
 
             using utility::behaviour::RegisterAction;
             using utility::input::LimbID;
@@ -44,38 +44,42 @@ namespace module {
             void StandEvaluator::setUpTrial(const NSGA2EvaluationRequest& currentRequest) {
                 loadScript(currentRequest.task_config_path);
                 std::chrono::milliseconds limit_ms = std::chrono::milliseconds(0);
-                for(size_t i = 0; i < currentRequest.parameters.real_params.size(); i++) {
-                    int frame_time = currentRequest.parameters.real_params[i];
-                    limit_ms = limit_ms + std::chrono::milliseconds(frame_time);
+                for (size_t i = 0; i < currentRequest.parameters.real_params.size(); i++) {
+                    int frame_time            = currentRequest.parameters.real_params[i];
+                    limit_ms                  = limit_ms + std::chrono::milliseconds(frame_time);
                     script.frames[i].duration = std::chrono::milliseconds(frame_time);
                 }
                 saveScript(fmt::format("gen{:03d}_ind{:03d}_task-{}.yaml",
-                                                currentRequest.generation,
-                                                currentRequest.id,
-                                                currentRequest.task));
+                                       currentRequest.generation,
+                                       currentRequest.id,
+                                       currentRequest.task));
 
-                auto overhead = std::chrono::seconds(2);  // Overhead tacked on to give the robot time to fall over if unstable
+                auto overhead =
+                    std::chrono::seconds(2);  // Overhead tacked on to give the robot time to fall over if unstable
                 trial_duration_limit = std::chrono::duration_cast<std::chrono::seconds>(limit_ms) + overhead;
             }
 
             void StandEvaluator::resetSimulation() {
                 // Reset our local state
-                trialStartTime         = 0.0;
-                robotPosition = Eigen::Vector3d::Zero();
-                maxFieldPlaneSway      = 0.0;
+                trialStartTime    = 0.0;
+                robotPosition     = Eigen::Vector3d::Zero();
+                maxFieldPlaneSway = 0.0;
             }
 
-            void StandEvaluator::evaluatingState(size_t subsumptionId, NSGA2Evaluator *evaluator) {
+            void StandEvaluator::evaluatingState(size_t subsumptionId, NSGA2Evaluator* evaluator) {
                 NUClear::log<NUClear::DEBUG>("Running Script");
                 runScript(subsumptionId, evaluator);
                 NUClear::log<NUClear::DEBUG>("schedule expire");
                 evaluator->ScheduleTrialExpiredMessage(0, trial_duration_limit);
             }
 
-            std::unique_ptr<NSGA2FitnessScores> StandEvaluator::calculateFitnessScores(bool earlyTermination, double simTime, int generation, int individual) {
+            std::unique_ptr<NSGA2FitnessScores> StandEvaluator::calculateFitnessScores(bool earlyTermination,
+                                                                                       double simTime,
+                                                                                       int generation,
+                                                                                       int individual) {
                 double trialDuration = simTime - trialStartTime;
-                auto scores = calculateScores(trialDuration);
-                auto constraints = calculateConstraints();
+                auto scores          = calculateScores(trialDuration);
+                auto constraints     = calculateConstraints();
 
                 NUClear::log<NUClear::DEBUG>("Trial ran for", trialDuration);
                 NUClear::log<NUClear::DEBUG>("SendFitnessScores for generation", generation, "individual", individual);
@@ -92,23 +96,21 @@ namespace module {
             }
 
             std::vector<double> StandEvaluator::calculateScores(double trialDuration) {
-                return {
-                    maxFieldPlaneSway,  // For now, we want to reduce this
-                    trialDuration
-                };
+                return {maxFieldPlaneSway,  // For now, we want to reduce this
+                        trialDuration};
             }
 
             std::vector<double> StandEvaluator::calculateConstraints() {
-                bool fallen = checkForFall(current_sensors);
+                bool fallen             = checkForFall(current_sensors);
                 double fallen_contraint = fallen ? -1.0 : 0;
                 return {
                     fallen_contraint,
-                    0   // Second constraint unused, fixed to 0
+                    0  // Second constraint unused, fixed to 0
                 };
             }
 
             bool StandEvaluator::checkForFall(const RawSensors& sensors) {
-                bool fallen = false;
+                bool fallen        = false;
                 auto accelerometer = sensors.accelerometer;
 
                 if ((std::fabs(accelerometer.x()) > 9.2 || std::fabs(accelerometer.y()) > 9.2)
@@ -123,7 +125,8 @@ namespace module {
                 if (utility::file::exists(script_path)) {
                     NUClear::log<NUClear::DEBUG>("Loading script: ", script_path, '\n');
                     script = YAML::LoadFile(script_path).as<::extension::Script>();
-                } else {
+                }
+                else {
                     NUClear::log<NUClear::ERROR>("No script found at: ", script_path, '\n');
                 }
             }
@@ -134,9 +137,11 @@ namespace module {
                 utility::file::writeToFile(script_path, n);
             }
 
-            void StandEvaluator::runScript(size_t subsumptionId, NSGA2Evaluator *evaluator) {
-                // emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "StandUpFront.yaml")); //Which approach is better?
-                evaluator->emit(std::make_unique<extension::ExecuteScript>(subsumptionId, script, NUClear::clock::now()));
+            void StandEvaluator::runScript(size_t subsumptionId, NSGA2Evaluator* evaluator) {
+                // emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "StandUpFront.yaml")); //Which approach is
+                // better?
+                evaluator->emit(
+                    std::make_unique<extension::ExecuteScript>(subsumptionId, script, NUClear::clock::now()));
             }
 
             // void StandEvaluator::CheckForStandDone(const RawSensorsMsg& sensors) {
@@ -161,7 +166,7 @@ namespace module {
 
                 // Calculate the robot sway along the field plane (left/right, forward/backward)
                 double fieldPlaneSway = std::pow(std::pow(accelerometer.x(), 2) + std::pow(accelerometer.y(), 2), 0.5);
-                if(fieldPlaneSway > maxFieldPlaneSway) {
+                if (fieldPlaneSway > maxFieldPlaneSway) {
                     maxFieldPlaneSway = fieldPlaneSway;
                 }
             }

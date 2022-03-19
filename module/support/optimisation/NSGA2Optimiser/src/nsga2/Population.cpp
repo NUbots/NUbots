@@ -65,77 +65,81 @@ namespace nsga2 {
     }
 
     std::optional<Individual> Population::GetNextIndividual() {
-        if(!initialised || currentInd >= inds.size()) {
+        if (!initialised || currentInd >= inds.size()) {
             return std::nullopt;
-        } else {
+        }
+        else {
             return std::optional<Individual>{inds[currentInd++]};
         }
     }
 
     bool Population::AreAllEvaluated() const {
         for (auto& ind : inds) {
-            if(!ind.evaluated) {
+            if (!ind.evaluated) {
                 return false;
             }
         }
         return true;
     }
 
-    void Population::SetEvaluationResults(const int& _id, const std::vector<double>& _objScore, const std::vector<double>& _constraints) {
+    void Population::SetEvaluationResults(const int& _id,
+                                          const std::vector<double>& _objScore,
+                                          const std::vector<double>& _constraints) {
         inds[_id].objScore = _objScore;
-        inds[_id].constr = _constraints;
+        inds[_id].constr   = _constraints;
         inds[_id].CheckConstraints();
     }
 
-    //Fast Non-Dominated Sort. This calculates the fronts in the population.
+    // Fast Non-Dominated Sort. This calculates the fronts in the population.
     void Population::FastNDS() {
-        //Reset Front
+        // Reset Front
         fronts.resize(1);
         fronts[0].clear();
 
-        //Compare each individual `p` to each other individual `q` (also compares p to itself, but doesn't matter)
+        // Compare each individual `p` to each other individual `q` (also compares p to itself, but doesn't matter)
         for (std::size_t p = 0; p < inds.size(); p++) {
             auto& indP = inds[p];
-            indP.dominationList.clear(); //Reset the set of individuals that P dominates
-            indP.dominatedByCounter = 0; //Reset the count of individuals that dominate P
+            indP.dominationList.clear();  // Reset the set of individuals that P dominates
+            indP.dominatedByCounter = 0;  // Reset the count of individuals that dominate P
 
             for (std::size_t q = 0; q < inds.size(); q++) {
                 const auto& indQ = inds[q];
 
                 int comparison = indP.CheckDominance(indQ);
                 if (comparison == 1) {
-                    //If P dominates Q, Add Q to the solutions that P dominates
+                    // If P dominates Q, Add Q to the solutions that P dominates
                     indP.dominationList.push_back(q);
-                } else if (comparison == -1) {
-                    //If Q dominates P, Increment the number of individuals that dominate P
+                }
+                else if (comparison == -1) {
+                    // If Q dominates P, Increment the number of individuals that dominate P
                     indP.dominatedByCounter++;
                 }
             }
 
             if (indP.dominatedByCounter == 0) {
-                //If no other individuals dominate P, then P must be in the first Front (i.e. Rank 1)
+                // If no other individuals dominate P, then P must be in the first Front (i.e. Rank 1)
                 indP.rank = 1;
                 fronts[0].push_back(p);
             }
         }
 
-        //Sort the first front (sorting by index, since front is `std::vector<std::vector<int>>`)
+        // Sort the first front (sorting by index, since front is `std::vector<std::vector<int>>`)
         std::sort(fronts[0].begin(), fronts[0].end());
 
         std::size_t front_index = 1;
-        while (fronts[front_index - 1].size() > 0) { //While we haven't encountered an empty front
+        while (fronts[front_index - 1].size() > 0) {  // While we haven't encountered an empty front
             std::vector<int>& fronti = fronts[front_index - 1];
-            std::vector<int> next_front; //Known as Q in the original paper, this holds members of the next front
+            std::vector<int> next_front;  // Known as Q in the original paper, this holds members of the next front
             for (std::size_t p = 0; p < fronti.size(); p++) {
                 Individual& indP = inds[fronti[p]];
 
-                //For each of the individuals in the domination list, check if it's part of the next front
+                // For each of the individuals in the domination list, check if it's part of the next front
                 for (std::size_t q = 0; q < indP.dominationList.size(); q++) {
                     auto& indQ = inds[indP.dominationList[q]];
-                    indQ.dominatedByCounter--; //Reduce the counter, as we are no longer considering P vs this Q
+                    indQ.dominatedByCounter--;  // Reduce the counter, as we are no longer considering P vs this Q
 
                     if (indQ.dominatedByCounter == 0) {
-                        //If no other individuals outside of current front dominate Q, then Q must be in the next Front
+                        // If no other individuals outside of current front dominate Q, then Q must be in the next Front
                         indQ.rank = front_index + 1;
                         next_front.push_back(indP.dominationList[q]);
                     }
@@ -155,24 +159,24 @@ namespace nsga2 {
     // Calculate how close the next nearest solution is. Boundary solutions have infinite distance.
     // This allows us to prioritise boundary solutions over solutions crowded together.
     void Population::CrowdingDistance(const int& _frontIndex) {
-        std::vector<int>& F = fronts[_frontIndex];
+        std::vector<int>& F          = fronts[_frontIndex];
         const std::size_t front_size = F.size();
         if (front_size == 0) {
-            return; // Don't do anything with an empty front
+            return;  // Don't do anything with an empty front
         }
 
         for (std::size_t i = 0; i < front_size; i++) {
-            inds[F[i]].crowdDist = 0; //Initialise crowding distance
+            inds[F[i]].crowdDist = 0;  // Initialise crowding distance
         }
 
-        for (int i = 0; i < indConfig.objectives; i++) { //For each objective
-            //Sort the front by objective value
+        for (int i = 0; i < indConfig.objectives; i++) {  // For each objective
+            // Sort the front by objective value
             std::sort(F.begin(), F.end(), [&](const int& a, const int& b) {
                 return inds[a].objScore[i] < inds[b].objScore[i];
             });
 
-            //Give the bondary solutions infinite distance
-            inds[F[0]].crowdDist = std::numeric_limits<double>::infinity();
+            // Give the bondary solutions infinite distance
+            inds[F[0]].crowdDist              = std::numeric_limits<double>::infinity();
             inds[F[front_size - 1]].crowdDist = std::numeric_limits<double>::infinity();
 
             // Calculate the crowding distance of non-boundary solutions

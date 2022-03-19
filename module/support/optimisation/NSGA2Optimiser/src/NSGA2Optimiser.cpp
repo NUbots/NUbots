@@ -1,5 +1,8 @@
 #include "NSGA2Optimiser.hpp"
 
+#include "tasks/StandOptimiser.hpp"
+#include "tasks/WalkOptimiser.hpp"
+
 #include "extension/Configuration.hpp"
 
 #include "message/platform/webots/WebotsReady.hpp"
@@ -8,9 +11,6 @@
 #include "message/support/optimisation/NSGA2OptimiserMessages.hpp"
 
 #include "utility/support/yaml_expression.hpp"
-
-#include "tasks/WalkOptimiser.hpp"
-#include "tasks/StandOptimiser.hpp"
 
 namespace module {
     namespace support {
@@ -40,22 +40,27 @@ namespace module {
                     nsga2Algorithm.SetPopulationSize(config["population_size"].as<int>());
                     nsga2Algorithm.SetTargetGenerations(config["max_generations"].as<int>());
 
-                    nsga2Algorithm.SetRealCrossoverProbability(config["probabilities"]["real"]["crossover"].as<double>());
-                    nsga2Algorithm.SetBinCrossoverProbability(config["probabilities"]["binary"]["crossover"].as<double>());
+                    nsga2Algorithm.SetRealCrossoverProbability(
+                        config["probabilities"]["real"]["crossover"].as<double>());
+                    nsga2Algorithm.SetBinCrossoverProbability(
+                        config["probabilities"]["binary"]["crossover"].as<double>());
                     nsga2Algorithm.SetRealMutationProbability(config["probabilities"]["real"]["mutation"].as<double>());
-                    nsga2Algorithm.SetBinMutationProbability(config["probabilities"]["binary"]["mutation"].as<double>());
+                    nsga2Algorithm.SetBinMutationProbability(
+                        config["probabilities"]["binary"]["mutation"].as<double>());
                     nsga2Algorithm.SetEtaC(config["eta"]["C"].as<double>());
                     nsga2Algorithm.SetEtaM(config["eta"]["M"].as<double>());
                     nsga2Algorithm.SetSeed(config["seed"].as<int>());
 
                     auto taskType = config["task"].as<std::string>();
-                    if(taskType == "walk") {
+                    if (taskType == "walk") {
                         log<NUClear::INFO>("Task type is Walk");
                         task = std::make_unique<WalkOptimiser>();
-                    } else if(taskType == "stand") {
+                    }
+                    else if (taskType == "stand") {
                         log<NUClear::INFO>("Task type is Stand");
                         task = std::make_unique<StandOptimiser>();
-                    } else {
+                    }
+                    else {
                         log<NUClear::ERROR>("Unrecognised optimiser task", taskType);
                         powerplant.shutdown();
                     }
@@ -77,21 +82,29 @@ namespace module {
                     // (from the NSGA2FitnessScores trigger)
                     if (nsga2Algorithm.InitializeFirstGeneration()) {
                         emit(std::make_unique<NSGA2EvaluatorReady>());
-                    } else {
+                    }
+                    else {
                         log<NUClear::ERROR>("Failed to initialise NSGA2");
                     }
                 });
 
                 on<Trigger<NSGA2EvaluatorReady>, Single>().then([this](const NSGA2EvaluatorReady& message) {
                     auto next_ind = nsga2Algorithm.getCurrentPop()->GetNextIndividual();
-                    if(next_ind.has_value()) {
+                    if (next_ind.has_value()) {
                         auto ind = next_ind.value();
-                        log<NUClear::INFO>("\n\nSending request to evaluator. Generation:", ind.generation, "individual", ind.id);
+                        log<NUClear::INFO>("\n\nSending request to evaluator. Generation:",
+                                           ind.generation,
+                                           "individual",
+                                           ind.id);
                         // Create a message to request an evaluation of an individual
                         emit(task->MakeEvaluationRequest(ind.id, ind.generation, ind.reals));
-                    } else {
+                    }
+                    else {
                         log<NUClear::INFO>("Evaluator ready, but optimiser is not");
-                        emit<Scope::DELAY>(std::make_unique<NSGA2EvaluatorReady>(), std::chrono::seconds(1)); // Wait for a bit for us to become ready, then ask the evaluator if it is ready
+                        emit<Scope::DELAY>(
+                            std::make_unique<NSGA2EvaluatorReady>(),
+                            std::chrono::seconds(
+                                1));  // Wait for a bit for us to become ready, then ask the evaluator if it is ready
                     }
                 });
 
@@ -99,9 +112,11 @@ namespace module {
                     log<NUClear::DEBUG>("Got evaluation fitness scores", scores.objScore[0], scores.objScore[1]);
 
                     // Tell the algorithm the evaluation scores for this individual
-                    nsga2Algorithm.getCurrentPop()->SetEvaluationResults(scores.id, scores.objScore, scores.constraints);
+                    nsga2Algorithm.getCurrentPop()->SetEvaluationResults(scores.id,
+                                                                         scores.objScore,
+                                                                         scores.constraints);
 
-                    if(nsga2Algorithm.getCurrentPop()->AreAllEvaluated()) {
+                    if (nsga2Algorithm.getCurrentPop()->AreAllEvaluated()) {
                         // End the generation and save its data
                         nsga2Algorithm.CompleteGenerationAndAdvance();
 
@@ -113,12 +128,16 @@ namespace module {
                             msg->command                             = OptimisationCommand::CommandType::TERMINATE;
                             emit(msg);
 
-                            // Tell the NSGA2 components to finish up, but add a delay to give webots time to get the terminate
+                            // Tell the NSGA2 components to finish up, but add a delay to give webots time to get the
+                            // terminate
                             emit<Scope::DELAY>(std::make_unique<NSGA2Terminate>(), std::chrono::milliseconds(100));
-                        } else {
-                            log<NUClear::INFO>("Advanced to new generation", nsga2Algorithm.getCurrentPop()->generation);
                         }
-                    } else {
+                        else {
+                            log<NUClear::INFO>("Advanced to new generation",
+                                               nsga2Algorithm.getCurrentPop()->generation);
+                        }
+                    }
+                    else {
                         log<NUClear::DEBUG>("Recorded Evaluation for individual", scores.id, "more to come...");
                     }
                 });

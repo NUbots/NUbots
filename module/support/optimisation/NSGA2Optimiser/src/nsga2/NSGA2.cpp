@@ -24,55 +24,72 @@ namespace nsga2 {
         if (realVars < 0) {
             NUClear::log<NUClear::INFO>("Invalid number of real variables");
             return false;
-        } else if (binVars < 0) {
+        }
+        else if (binVars < 0) {
             NUClear::log<NUClear::INFO>("Invalid number of binary variables");
             return false;
-        } else if (realVars == 0 && binVars == 0) {
+        }
+        else if (realVars == 0 && binVars == 0) {
             NUClear::log<NUClear::INFO>("Zero real and binary variables");
             return false;
-        } else if (objectives < 1) {
+        }
+        else if (objectives < 1) {
             NUClear::log<NUClear::INFO>("Invalid number of objective functions");
             return false;
-        } else if (constraints < 0) {
+        }
+        else if (constraints < 0) {
             NUClear::log<NUClear::INFO>("Invalid number of constraints");
             return false;
-        } else if (popSize < 4 || (popSize % 4) != 0) {
+        }
+        else if (popSize < 4 || (popSize % 4) != 0) {
             NUClear::log<NUClear::INFO>("Invalid size of population");
             return false;
-        } else if (realCrossProb < 0.0 || realCrossProb > 1.0) {
+        }
+        else if (realCrossProb < 0.0 || realCrossProb > 1.0) {
             NUClear::log<NUClear::INFO>("Invalid probability of real crossover");
             return false;
-        } else if (realMutProb < 0.0 || realMutProb > 1.0) {
+        }
+        else if (realMutProb < 0.0 || realMutProb > 1.0) {
             NUClear::log<NUClear::INFO>("Invalid probability of real mutation");
             return false;
-        } else if (binCrossProb < 0.0 || binCrossProb > 1.0) {
+        }
+        else if (binCrossProb < 0.0 || binCrossProb > 1.0) {
             NUClear::log<NUClear::INFO>("Invalid probability of binary crossover");
             return false;
-        } else if (binMutProb < 0.0 || binMutProb > 1.0) {
+        }
+        else if (binMutProb < 0.0 || binMutProb > 1.0) {
             NUClear::log<NUClear::INFO>("Invalid probability of binary mutation");
             return false;
-        } else if (etaC <= 0) {
+        }
+        else if (etaC <= 0) {
             NUClear::log<NUClear::INFO>("Invalid distribution index for crossover");
             return false;
-        } else if (etaM <= 0) {
+        }
+        else if (etaM <= 0) {
             NUClear::log<NUClear::INFO>("Invalid distribution index for mutation");
             return false;
-        } else if (generations < 1) {
+        }
+        else if (generations < 1) {
             NUClear::log<NUClear::INFO>("Invalid number of generations");
             return false;
-        } else if (binVars != 0 && binBits.size() == 0) {
+        }
+        else if (binVars != 0 && binBits.size() == 0) {
             NUClear::log<NUClear::INFO>("Invalid number of bits for binary variables");
             return false;
-        } else if (int(realLimits.size()) != realVars) {
+        }
+        else if (int(realLimits.size()) != realVars) {
             NUClear::log<NUClear::INFO>("Invalid number of real variable limits");
             return false;
-        } else if (int(binLimits.size()) != binVars) {
+        }
+        else if (int(binLimits.size()) != binVars) {
             NUClear::log<NUClear::INFO>("Invalid number of binary variable limits");
             return false;
-        } else if ((int(initialRealVars.size()) != realVars)) {
+        }
+        else if ((int(initialRealVars.size()) != realVars)) {
             NUClear::log<NUClear::INFO>("Invalid number of initial real variables");
             return false;
-        } else {
+        }
+        else {
             NUClear::log<NUClear::INFO>("NSGA-II configuration is valid");
             return true;
         }
@@ -110,31 +127,32 @@ namespace nsga2 {
                                                 initialRealVars);
 
         combinedPop = std::make_shared<Population>(popSize * 2,
-                                                realVars,
-                                                binVars,
-                                                constraints,
-                                                binBits,
-                                                realLimits,
-                                                binLimits,
-                                                objectives,
-                                                realMutProb,
-                                                binMutProb,
-                                                etaM,
-                                                epsC,
-                                                randGen,
-                                                initialRealVars);
+                                                   realVars,
+                                                   binVars,
+                                                   constraints,
+                                                   binBits,
+                                                   realLimits,
+                                                   binLimits,
+                                                   objectives,
+                                                   realMutProb,
+                                                   binMutProb,
+                                                   etaM,
+                                                   epsC,
+                                                   randGen,
+                                                   initialRealVars);
     }
 
     std::shared_ptr<Population> NSGA2::getCurrentPop() {
-        if(currentGen == 0) {
+        if (currentGen == 0) {
             return parentPop;
-        } else {
+        }
+        else {
             return childPop;
         }
     }
 
     bool NSGA2::InitializeFirstGeneration() {
-        if(!ConfigurationIsValid()) {
+        if (!ConfigurationIsValid()) {
             return false;
         }
 
@@ -158,12 +176,13 @@ namespace nsga2 {
     }
 
     void NSGA2::CompleteGenerationAndAdvance() {
-        childPop->initialised = false; //Stop all evaluation while we work out the next childPop
+        childPop->initialised = false;  // Stop all evaluation while we work out the next childPop
         CompleteGeneration();
-        if(HasMetOptimisationTerminalCondition()) {
+        if (HasMetOptimisationTerminalCondition()) {
             // Report the population of our final generation
             ReportPop(parentPop, final_pop_file);
-        } else {
+        }
+        else {
             // Start the next generation (creates the new children for evaluation)
             InitializeNextGeneration();
         }
@@ -175,33 +194,39 @@ namespace nsga2 {
     }
 
     void NSGA2::CompleteGeneration() {
-        if(currentGen == 0) {
-            //In the first generation, we don't have to deal with a previous parent generation
-            parentPop->FastNDS(); //Calculate the fronts
-            parentPop->CrowdingDistanceAll(); //Calculate the crowding distance of the fronts
+        if (currentGen == 0) {
+            // In the first generation, we don't have to deal with a previous parent generation
+            parentPop->FastNDS();              // Calculate the fronts
+            parentPop->CrowdingDistanceAll();  // Calculate the crowding distance of the fronts
 
             ReportPop(parentPop, initial_pop_file);
-        } else {
-            combinedPop->Merge(*parentPop, *childPop); // Create combined population from parent and child populations. Rt = Pt U Qt
-            combinedPop->FastNDS(); //Calculate the fronts
+        }
+        else {
+            combinedPop->Merge(
+                *parentPop,
+                *childPop);          // Create combined population from parent and child populations. Rt = Pt U Qt
+            combinedPop->FastNDS();  // Calculate the fronts
 
-            parentPop->inds.clear(); //Empty the new parent population, ready to be repopulated
+            parentPop->inds.clear();  // Empty the new parent population, ready to be repopulated
 
-            int i = 0; //we need `i` after the loop, for the final (partial) front, so hold on to it here
-            while (parentPop->GetSize() + int(combinedPop->fronts[i].size()) < popSize) { // stop when adding the next front would go past the population size
+            int i = 0;  // we need `i` after the loop, for the final (partial) front, so hold on to it here
+            while (parentPop->GetSize() + int(combinedPop->fronts[i].size())
+                   < popSize) {  // stop when adding the next front would go past the population size
                 std::vector<int>& front_i = combinedPop->fronts[i];
-                combinedPop->CrowdingDistance(i);         // calculate crowding in front_i
+                combinedPop->CrowdingDistance(i);  // calculate crowding in front_i
                 for (std::size_t j = 0; j < front_i.size(); j++) {
                     // Include the i-th non-dominated front in the parent pop. i.e. Pt+1 = Pt+1 U Fi
                     parentPop->inds.push_back(combinedPop->inds[front_i[j]]);
                 }
                 i++;
             }
-            //At this point, we don't have space to add the next full front, so we add the best members from that front
+            // At this point, we don't have space to add the next full front, so we add the best members from that front
             std::vector<int>& partial_front = combinedPop->fronts[i];
             combinedPop->CrowdingDistance(i);  // calculate crowding in front_i, so that we can choose the best members
 
-            std::sort(partial_front.begin(), partial_front.end(), sort_n(*combinedPop));  // sort remaining front using operator <n
+            std::sort(partial_front.begin(),
+                      partial_front.end(),
+                      sort_n(*combinedPop));  // sort remaining front using operator <n
 
             const int remainingSpace = popSize - parentPop->GetSize();
             for (int j = 0; j < remainingSpace; j++) {
@@ -210,19 +235,19 @@ namespace nsga2 {
             }
 
             // Early stopping checks
-            if(i == 0) {
+            if (i == 0) {
                 // If `i` is still 0, that means we only have one front carrying over
                 earlyStoppingOneFront = true;
                 NUClear::log<NUClear::INFO>("A single front this generation, could stop early");
             }
             bool aChildSurvivesThisGen = false;
             for (auto& ind : parentPop->inds) {
-                if(ind.generation == currentGen) {
+                if (ind.generation == currentGen) {
                     aChildSurvivesThisGen = true;
                     break;
                 }
             }
-            if(!aChildSurvivesThisGen) {
+            if (!aChildSurvivesThisGen) {
                 earlyStoppingNoImprovement = true;
                 NUClear::log<NUClear::INFO>("No improvement this generation, could stop early");
             }
@@ -286,15 +311,20 @@ namespace nsga2 {
         const int comparison = _ind1.CheckDominance(_ind2);
         if (comparison == 1) {  // ind1 dominates ind2
             return _ind1;
-        } else if (comparison == -1) {  // ind2 dominates ind1
+        }
+        else if (comparison == -1) {  // ind2 dominates ind1
             return _ind2;
-        } else if (_ind1.crowdDist > _ind2.crowdDist) {
+        }
+        else if (_ind1.crowdDist > _ind2.crowdDist) {
             return _ind1;
-        } else if (_ind2.crowdDist > _ind1.crowdDist) {
+        }
+        else if (_ind2.crowdDist > _ind1.crowdDist) {
             return _ind2;
-        } else if (randGen->Realu() <= 0.5) {
+        }
+        else if (randGen->Realu() <= 0.5) {
             return _ind1;
-        } else {
+        }
+        else {
             return _ind2;
         }
     }
@@ -317,16 +347,16 @@ namespace nsga2 {
 
     // Self Adaptive Simulated Binary Crossover (SBX) is a particular implementation of crossover
     void NSGA2::SelfAdaptiveSBX(const Individual& _parent1,
-                          const Individual& _parent2,
-                          Individual& _child1,
-                          Individual& _child2) {
+                                const Individual& _parent2,
+                                Individual& _child1,
+                                Individual& _child2) {
         double y1, y2, yLower, yUpper;
         double c1, c2;
         double alpha, beta, betaQ;
 
-        if (randGen->Realu() <= realCrossProb) { // If we should crossover (determined by RNG)
-            realCrossCount++; // Keep track of the number of times we do crossover
-            for (int i = 0; i < realVars; i++) { //for each real parameter
+        if (randGen->Realu() <= realCrossProb) {  // If we should crossover (determined by RNG)
+            realCrossCount++;                     // Keep track of the number of times we do crossover
+            for (int i = 0; i < realVars; i++) {  // for each real parameter
                 // If the parameters are different
                 if (std::fabs(_parent1.reals[i] - _parent2.reals[i]) > std::numeric_limits<double>::epsilon()) {
                     // hold the smaller param in y1, the larger param in y2
@@ -367,16 +397,19 @@ namespace nsga2 {
                     if (randGen->Realu() <= 0.5) {
                         _child1.reals[i] = c2;
                         _child2.reals[i] = c1;
-                    } else {
+                    }
+                    else {
                         _child1.reals[i] = c1;
                         _child2.reals[i] = c2;
                     }
-                } else { // If the parameters are the same, then we can just copy them
+                }
+                else {  // If the parameters are the same, then we can just copy them
                     _child1.reals[i] = _parent1.reals[i];
                     _child2.reals[i] = _parent2.reals[i];
                 }
             }
-        } else { // If we shoudn't crossover (determined by RNG)
+        }
+        else {  // If we shoudn't crossover (determined by RNG)
             for (int i = 0; i < realVars; i++) {
                 _child1.reals[i] = _parent1.reals[i];
                 _child2.reals[i] = _parent2.reals[i];
@@ -413,7 +446,8 @@ namespace nsga2 {
                     _child1.gene[i][j] = _parent1.gene[i][j];
                     _child2.gene[i][j] = _parent2.gene[i][j];
                 }
-            } else {
+            }
+            else {
                 for (int j = 0; j < binBits[i]; j++) {
                     _child1.gene[i][j] = _parent1.gene[i][j];
                     _child2.gene[i][j] = _parent2.gene[i][j];
@@ -447,20 +481,24 @@ namespace nsga2 {
             << "crowding_dist";
 
         for (int i = 0; i < objectives; i++) {
-            _os << "," << "objective_" << i;
+            _os << ","
+                << "objective_" << i;
         }
 
         for (int i = 0; i < constraints; i++) {
-            _os << "," << "constraints_" << i;
+            _os << ","
+                << "constraints_" << i;
         }
 
         for (int i = 0; i < realVars; i++) {
-            _os << "," << "real_param_" << i;
+            _os << ","
+                << "real_param_" << i;
         }
 
         for (int i = 0; i < binVars; i++) {
             for (int j = 0; j < binBits[i]; j++) {
-                _os << "," << "binary_param_" << i << "_" << j ;
+                _os << ","
+                    << "binary_param_" << i << "_" << j;
             }
         }
 

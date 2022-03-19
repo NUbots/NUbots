@@ -18,8 +18,10 @@ namespace module {
 
             class OptimiserTask {
             public:
-                virtual void SetupNSGA2(const ::extension::Configuration& config, nsga2::NSGA2& nsga2Algorithm) = 0;
-                virtual std::unique_ptr<NSGA2EvaluationRequest> MakeEvaluationRequest(const int id, const int generation, std::vector<double> reals) = 0;
+                virtual void SetupNSGA2(const ::extension::Configuration& config, nsga2::NSGA2& nsga2Algorithm)  = 0;
+                virtual std::unique_ptr<NSGA2EvaluationRequest> MakeEvaluationRequest(const int id,
+                                                                                      const int generation,
+                                                                                      std::vector<double> reals) = 0;
             };
 
         }  // namespace optimisation

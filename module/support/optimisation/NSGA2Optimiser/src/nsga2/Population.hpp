@@ -27,7 +27,8 @@ namespace nsga2 {
                    const std::vector<double>& _initialRealVars);
         virtual ~Population() = default;
 
-        bool initialised = false; //So we know when the population is ready to evaluate (otherwise we can start evaluating before the individuals are initialised)
+        bool initialised = false;  // So we know when the population is ready to evaluate (otherwise we can start
+                                   // evaluating before the individuals are initialised)
         int generation = -1;
 
         void resetCurrentIndividualIndex();
@@ -46,7 +47,9 @@ namespace nsga2 {
         bool IsReadyToEvalulate() const;
 
         bool AreAllEvaluated() const;
-        void SetEvaluationResults(const int& _id, const std::vector<double>& _objScore, const std::vector<double>& _constraints);
+        void SetEvaluationResults(const int& _id,
+                                  const std::vector<double>& _objScore,
+                                  const std::vector<double>& _constraints);
 
         void FastNDS();
         void CrowdingDistanceAll();

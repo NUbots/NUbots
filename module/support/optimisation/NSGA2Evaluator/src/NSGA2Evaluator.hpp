@@ -5,11 +5,11 @@
 #include <Eigen/Geometry>
 #include <nuclear>
 
+#include "tasks/EvaluatorTask.hpp"
+
 #include "message/platform/RawSensors.hpp"
 #include "message/support/optimisation/NSGA2EvaluatorMessages.hpp"
 #include "message/support/optimisation/NSGA2OptimiserMessages.hpp"
-
-#include "tasks/EvaluatorTask.hpp"
 
 namespace module {
     namespace support {
@@ -19,7 +19,7 @@ namespace module {
             using message::support::optimisation::NSGA2EvaluationRequest;
             using message::support::optimisation::NSGA2TrialExpired;
 
-            class EvaluatorTask; //Forward declaration
+            class EvaluatorTask;  // Forward declaration
 
             class NSGA2Evaluator : public NUClear::Reactor {
 
@@ -44,14 +44,14 @@ namespace module {
                     ResetDone = 0,
 
                     // From optimiser
-                    CheckReady = 1,
-                    EvaluateRequest = 2,
+                    CheckReady          = 1,
+                    EvaluateRequest     = 2,
                     TerminateEvaluation = 3,
 
                     // Internal
                     TrialSetupDone    = 4,
                     TerminateEarly    = 5,
-                    TrialCompleted  = 6,
+                    TrialCompleted    = 6,
                     FitnessScoresSent = 7
                 };
 
@@ -63,7 +63,6 @@ namespace module {
 
                 /// @brief The current simulation time
                 double simTime = 0.0;
-
 
 
                 /// @brief The number of the current generation

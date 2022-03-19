@@ -1,29 +1,29 @@
-#include <fstream>
-#include <fmt/format.h>
-#include <fmt/ostream.h>
-#include <yaml-cpp/yaml.h>
-
 #include "WalkEvaluator.hpp"
 
-#include "utility/support/yaml_expression.hpp"
-#include "utility/behaviour/Action.hpp"
-#include "utility/input/LimbID.hpp"
-#include "utility/input/ServoID.hpp"
+#include <fmt/format.h>
+#include <fmt/ostream.h>
+#include <fstream>
+#include <yaml-cpp/yaml.h>
 
 #include "message/motion/WalkCommand.hpp"
 #include "message/support/optimisation/NSGA2EvaluatorMessages.hpp"
 #include "message/support/optimisation/NSGA2OptimiserMessages.hpp"
 
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/support/yaml_expression.hpp"
+
 namespace module {
     namespace support {
         namespace optimisation {
-            using message::support::optimisation::NSGA2EvaluationRequest;
-            using message::platform::RawSensors;
-            using message::motion::WalkCommand;
             using message::motion::DisableWalkEngineCommand;
             using message::motion::EnableWalkEngineCommand;
-            using message::support::optimisation::NSGA2TrialExpired;
+            using message::motion::WalkCommand;
+            using message::platform::RawSensors;
+            using message::support::optimisation::NSGA2EvaluationRequest;
             using message::support::optimisation::NSGA2FitnessScores;
+            using message::support::optimisation::NSGA2TrialExpired;
 
             using utility::behaviour::RegisterAction;
             using utility::input::LimbID;
@@ -32,14 +32,14 @@ namespace module {
 
             void WalkEvaluator::processRawSensorMsg(const RawSensors& sensors, NSGA2Evaluator* evaluator) {
                 updateMaxFieldPlaneSway(sensors);
-                if(checkForFall(sensors)) {
+                if (checkForFall(sensors)) {
                     evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TerminateEarly));
                 }
             }
 
             void WalkEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position) {
-                if(!initialPositionSet) {
-                    initialPositionSet = true;
+                if (!initialPositionSet) {
+                    initialPositionSet       = true;
                     initialRobotPosition.x() = position.value.X;
                     initialRobotPosition.y() = position.value.Y;
                     initialRobotPosition.z() = position.value.Z;
@@ -52,12 +52,12 @@ namespace module {
             void WalkEvaluator::setUpTrial(const NSGA2EvaluationRequest& currentRequest) {
                 // Set our generation and individual identifiers from the request
 
-                trial_duration_limit  = std::chrono::seconds(currentRequest.trial_duration_limit);
+                trial_duration_limit = std::chrono::seconds(currentRequest.trial_duration_limit);
 
                 // Set our walk command
                 walk_command_velocity.x() = currentRequest.parameters.real_params[11];
                 walk_command_velocity.y() = 0.0;
-                walk_command_rotation = 0.0;
+                walk_command_rotation     = 0.0;
 
                 // Read the QuinticWalk config and overwrite the config parameters with the current individual's
                 // parameters
@@ -90,40 +90,42 @@ namespace module {
 
                 // Write the config to keep for later
                 NUClear::log<NUClear::DEBUG>(fmt::format("Saving as: gen{:03d}_ind{:03d}_task-{}.yaml",
-                                                currentRequest.generation,
-                                                currentRequest.id,
-                                                currentRequest.task));
+                                                         currentRequest.generation,
+                                                         currentRequest.id,
+                                                         currentRequest.task));
                 std::ofstream save_file_stream(fmt::format("gen{:03d}_ind{:03d}_task-{}.yaml",
-                                                currentRequest.generation,
-                                                currentRequest.id,
-                                                currentRequest.task));
+                                                           currentRequest.generation,
+                                                           currentRequest.id,
+                                                           currentRequest.task));
                 save_file_stream << YAML::Dump(walk_config);
                 save_file_stream.close();
             }
 
             void WalkEvaluator::resetSimulation() {
                 // Reset our local state
-                trialStartTime         = 0.0;
-                robotPosition = Eigen::Vector3d::Zero();
+                trialStartTime       = 0.0;
+                robotPosition        = Eigen::Vector3d::Zero();
                 initialRobotPosition = Eigen::Vector3d::Zero();
-                maxFieldPlaneSway      = 0.0;
+                maxFieldPlaneSway    = 0.0;
             }
 
             void WalkEvaluator::evaluatingState(size_t subsumptionId, NSGA2Evaluator* evaluator) {
                 NUClear::log<NUClear::DEBUG>(fmt::format("Trialling with walk command: ({} {}) {}",
-                                                walk_command_velocity.x(),
-                                                walk_command_velocity.y(),
-                                                walk_command_rotation));
+                                                         walk_command_velocity.x(),
+                                                         walk_command_velocity.y(),
+                                                         walk_command_rotation));
 
                 evaluator->emit(std::make_unique<WalkCommand>(
                     subsumptionId,
-                    Eigen::Vector3d(walk_command_velocity.x(),
-                    walk_command_velocity.y(), walk_command_rotation)));
+                    Eigen::Vector3d(walk_command_velocity.x(), walk_command_velocity.y(), walk_command_rotation)));
                 evaluator->ScheduleTrialExpiredMessage(0, trial_duration_limit);
             }
 
-            std::unique_ptr<NSGA2FitnessScores> WalkEvaluator::calculateFitnessScores(bool earlyTermination, double simTime, int generation, int individual) {
-                auto scores = calculateScores();
+            std::unique_ptr<NSGA2FitnessScores> WalkEvaluator::calculateFitnessScores(bool earlyTermination,
+                                                                                      double simTime,
+                                                                                      int generation,
+                                                                                      int individual) {
+                auto scores      = calculateScores();
                 auto constraints = earlyTermination ? calculateConstraints(simTime) : constraintsNotViolated();
 
                 double trialDuration = simTime - trialStartTime;
@@ -144,7 +146,7 @@ namespace module {
             std::vector<double> WalkEvaluator::calculateScores() {
                 auto robotDistanceTravelled = std::fabs(initialRobotPosition.x() - robotPosition.x());
                 return {
-                    maxFieldPlaneSway,  // For now, we want to reduce this
+                    maxFieldPlaneSway,            // For now, we want to reduce this
                     1.0 / robotDistanceTravelled  // 1/x since the NSGA2 optimiser is a minimiser
                 };
             }
@@ -152,7 +154,8 @@ namespace module {
             std::vector<double> WalkEvaluator::calculateConstraints(double simTime) {
                 // Convert trial duration limit to ms, add 1 for overhead
                 const auto overhead = std::chrono::seconds(1);
-                double max_trial_duration = (std::chrono::duration_cast<std::chrono::milliseconds>(trial_duration_limit + overhead)).count();
+                double max_trial_duration =
+                    (std::chrono::duration_cast<std::chrono::milliseconds>(trial_duration_limit + overhead)).count();
                 double trialDuration = simTime - trialStartTime;
                 return {
                     trialDuration - max_trial_duration,  // Punish for falling over, based on how long the trial took
@@ -170,16 +173,16 @@ namespace module {
 
 
             bool WalkEvaluator::checkForFall(const RawSensors& sensors) {
-                bool fallen = false;
+                bool fallen        = false;
                 auto accelerometer = sensors.accelerometer;
 
                 if ((std::fabs(accelerometer.x()) > 9.2 || std::fabs(accelerometer.y()) > 9.2)
                     && std::fabs(accelerometer.z()) < 0.5) {
                     NUClear::log<NUClear::DEBUG>("Fallen!");
                     NUClear::log<NUClear::DEBUG>("acc at fall (x y z):",
-                                        std::fabs(accelerometer.x()),
-                                        std::fabs(accelerometer.y()),
-                                        std::fabs(accelerometer.z()));
+                                                 std::fabs(accelerometer.x()),
+                                                 std::fabs(accelerometer.y()),
+                                                 std::fabs(accelerometer.z()));
                     fallen = true;
                 }
                 return fallen;
@@ -190,7 +193,7 @@ namespace module {
 
                 // Calculate the robot sway along the field plane (left/right, forward/backward)
                 double fieldPlaneSway = std::pow(std::pow(accelerometer.x(), 2) + std::pow(accelerometer.y(), 2), 0.5);
-                if(fieldPlaneSway > maxFieldPlaneSway) {
+                if (fieldPlaneSway > maxFieldPlaneSway) {
                     maxFieldPlaneSway = fieldPlaneSway;
                 }
             }

@@ -38,17 +38,18 @@ namespace nsga2 {
         id = _id;
         if (id == 0) {
             // First individual gets real vars from config
-            //initialise real vars
+            // initialise real vars
             for (int i = 0; i < config.realVars; i++) {
                 reals[i] = config.initialRealVars[i];
             }
-        } else {
-            //initialise real vars
+        }
+        else {
+            // initialise real vars
             for (int i = 0; i < config.realVars; i++) {
                 reals[i] = config.randGen->Real(config.realLimits[i].first, config.realLimits[i].second);
             }
         }
-        //initialise bin vars
+        // initialise bin vars
         for (int i = 0; i < config.binVars; i++) {
             for (int j = 0; j < config.binBits[i]; j++) {
                 gene[i][j] = config.randGen->Realu() <= 0.5 ? 0 : 1;
@@ -208,16 +209,7 @@ namespace nsga2 {
     }
 
     void Individual::Report(std::ostream& os, int population_generation) const {
-        os << population_generation
-           << ","
-           << generation
-           << ","
-           << id
-           << ","
-           << constrViolation
-           << ","
-           << rank
-           << ","
+        os << population_generation << "," << generation << "," << id << "," << constrViolation << "," << rank << ","
            << crowdDist;
 
         for (int i = 0; i < config.objectives; i++) {

@@ -17,10 +17,12 @@ namespace module {
         namespace optimisation {
             using message::support::optimisation::NSGA2EvaluationRequest;
 
-            class WalkOptimiser: public OptimiserTask {
+            class WalkOptimiser : public OptimiserTask {
             public:
                 void SetupNSGA2(const ::extension::Configuration& config, nsga2::NSGA2& nsga2Algorithm);
-                std::unique_ptr<NSGA2EvaluationRequest> MakeEvaluationRequest(const int id, const int generation, std::vector<double> reals);
+                std::unique_ptr<NSGA2EvaluationRequest> MakeEvaluationRequest(const int id,
+                                                                              const int generation,
+                                                                              std::vector<double> reals);
 
             private:
                 int trial_duration_limit;
