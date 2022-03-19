@@ -22,7 +22,7 @@ namespace utility::clock {
         // delta
         epoch = epoch
                 + std::chrono::duration_cast<std::chrono::steady_clock::duration>(
-                    (now - last_update) * new_rtf);  // set before we update the variables
+                    (now - last_update) * rtf);  // set before we update the variables
         last_update = now;
         rtf         = new_rtf;
     }
