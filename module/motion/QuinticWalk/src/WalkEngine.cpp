@@ -5,6 +5,7 @@ https://github.com/Rhoban/model/
 */
 #include "WalkEngine.hpp"
 
+#include <cmath>
 #include <fmt/format.h>
 #include <nuclear>
 
@@ -30,11 +31,9 @@ namespace module::motion {
                     time_paused     = 0.0f;
                     return false;
                 }
-                else {
-                    // we can continue
-                    engine_state = WalkEngineState::WALKING;
-                    time_paused  = 0.0f;
-                }
+                // we can continue
+                engine_state = WalkEngineState::WALKING;
+                time_paused  = 0.0f;
             }
             else {
                 time_paused += dt;
@@ -154,7 +153,7 @@ namespace module::motion {
         // Sanity check support foot state
         if ((phase < 0.5f && !foot_step.isLeftSupport()) || (phase >= 0.5f && foot_step.isLeftSupport())) {
             NUClear::log<NUClear::WARN>(
-                fmt::format("Invalid state phase={} support={} dt={}", phase, foot_step.isLeftSupport(), dt));
+                fmt::format("Invalid state. phase={}, support={}, dt={}", phase, foot_step.isLeftSupport(), dt));
             return false;
         }
         last_phase = phase;
@@ -170,13 +169,13 @@ namespace module::motion {
                 local_dt = 0.0001f;
             }
             else {
-                NUClear::log<NUClear::WARN>(fmt::format("Negative dt phase={} dt={}", phase, dt));
+                NUClear::log<NUClear::WARN>(fmt::format("Negative dt. phase={}, dt={}", phase, dt));
                 return;
             }
         }
         // Check for too long dt
         if (local_dt > 0.25f / params.freq) {
-            NUClear::log<NUClear::WARN>(fmt::format("dt too long phase={} dt={}", phase, dt));
+            NUClear::log<NUClear::WARN>(fmt::format("dt too long. phase={}, dt={}", phase, dt));
             return;
         }
 
@@ -206,13 +205,11 @@ namespace module::motion {
 
         // Compute current point in time to save state by multiplying the half period time with the advancement of
         // period time
-        float factor;
-        if (last_phase < 0.5f) {
-            factor = last_phase / 0.5f;
+        float factor = last_phase;
+        if (factor < 0.5f) {
+            factor = factor * 2.0f;
         }
-        else {
-            factor = last_phase;
-        }
+
         float period_time = half_period * factor;
 
         Eigen::Vector2f trunkPos(trajs.get(TrajectoryTypes::TRUNK_POS_X).pos(period_time),
@@ -314,8 +311,8 @@ namespace module::motion {
         point(TrajectoryTypes::IS_DOUBLE_SUPPORT, half_period, 0.0f);
 
         // Set support foot
-        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, 0.0f, foot_step.isLeftSupport());
-        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, half_period, foot_step.isLeftSupport());
+        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, 0.0f, static_cast<float>(foot_step.isLeftSupport()));
+        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, half_period, static_cast<float>(foot_step.isLeftSupport()));
 
         // Flying foot position
         point(TrajectoryTypes::FOOT_POS_X, 0.0f, foot_step.getLast().x());
@@ -392,14 +389,15 @@ namespace module::motion {
         const float pauseLength = 0.5f * params.trunk_pause * half_period;
 
         // Trunk support foot and next support foot external oscillating position
-        const Eigen::Vector2f trunkPointSupport(params.trunk_x_offset
-                                                    + params.trunk_x_offset_p_coef_forward * foot_step.getNext().x()
-                                                    + params.trunk_x_offset_p_coef_turn * fabs(foot_step.getNext().z()),
-                                                params.trunk_y_offset);
-        const Eigen::Vector2f trunkPointNext(foot_step.getNext().x() + params.trunk_x_offset
-                                                 + params.trunk_x_offset_p_coef_forward * foot_step.getNext().x()
-                                                 + params.trunk_x_offset_p_coef_turn * fabs(foot_step.getNext().z()),
-                                             foot_step.getNext().y() + params.trunk_y_offset);
+        const Eigen::Vector2f trunkPointSupport(
+            params.trunk_x_offset + params.trunk_x_offset_p_coef_forward * foot_step.getNext().x()
+                + params.trunk_x_offset_p_coef_turn * std::fabs(foot_step.getNext().z()),
+            params.trunk_y_offset);
+        const Eigen::Vector2f trunkPointNext(
+            foot_step.getNext().x() + params.trunk_x_offset
+                + params.trunk_x_offset_p_coef_forward * foot_step.getNext().x()
+                + params.trunk_x_offset_p_coef_turn * std::fabs(foot_step.getNext().z()),
+            foot_step.getNext().y() + params.trunk_y_offset);
 
         // Trunk middle neutral (no swing) position
         const Eigen::Vector2f trunkPointMiddle = 0.5f * (trunkPointSupport + trunkPointNext);
@@ -467,12 +465,12 @@ namespace module::motion {
         const Eigen::Vector3f eulerAtSupport(0.0f,
                                              params.trunk_pitch
                                                  + params.trunk_pitch_p_coef_forward * foot_step.getNext().x()
-                                                 + params.trunk_pitch_p_coef_turn * fabs(foot_step.getNext().z()),
+                                                 + params.trunk_pitch_p_coef_turn * std::fabs(foot_step.getNext().z()),
                                              0.5f * foot_step.getLast().z() + 0.5f * foot_step.getNext().z());
         const Eigen::Vector3f eulerAtNext(0.0f,
                                           params.trunk_pitch
                                               + params.trunk_pitch_p_coef_forward * foot_step.getNext().x()
-                                              + params.trunk_pitch_p_coef_turn * fabs(foot_step.getNext().z()),
+                                              + params.trunk_pitch_p_coef_turn * std::fabs(foot_step.getNext().z()),
                                           foot_step.getNext().z());
         const Eigen::Matrix3f matAtSupport  = utility::math::euler::EulerIntrinsicToMatrix(eulerAtSupport);
         const Eigen::Matrix3f matAtNext     = utility::math::euler::EulerIntrinsicToMatrix(eulerAtNext);
@@ -539,8 +537,8 @@ namespace module::motion {
         point(TrajectoryTypes::IS_DOUBLE_SUPPORT, half_period, isDoubleSupport);
 
         // Set support foot
-        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, 0.0f, foot_step.isLeftSupport());
-        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, half_period, foot_step.isLeftSupport());
+        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, 0.0f, static_cast<float>(foot_step.isLeftSupport()));
+        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, half_period, static_cast<float>(foot_step.isLeftSupport()));
 
         // Add points for flying foot position
         // Foot x position
@@ -671,7 +669,7 @@ namespace module::motion {
         return computeCartesianPositionAtTime(time);
     }
 
-    QuinticWalkEngine::PositionSupportTuple QuinticWalkEngine::computeCartesianPositionAtTime(const float time) const {
+    QuinticWalkEngine::PositionSupportTuple QuinticWalkEngine::computeCartesianPositionAtTime(const float& time) const {
         // Evaluate target cartesian state from trajectories
         const auto [trunkPos, trunkAxis, footPos, footAxis] = trajectoriesTrunkFootPos(time, trajs);
         // Discard isDoubleSupport because we don't use it

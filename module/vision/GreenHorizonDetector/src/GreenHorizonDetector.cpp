@@ -24,10 +24,11 @@ namespace module::vision {
 
         on<Configuration>("GreenHorizonDetector.yaml").then([this](const Configuration& cfg) {
             // Use configuration here from file GreenHorizonDetector.yaml
+            log_level = cfg["log_level"].as<NUClear::LogLevel>();
+
             config.confidence_threshold = cfg["confidence_threshold"].as<float>();
             config.cluster_points       = cfg["cluster_points"].as<uint>();
             config.distance_offset      = cfg["distance_offset"].as<float>();
-            config.debug                = cfg["debug"].as<bool>();
         });
 
         on<Trigger<VisualMesh>, Buffer<2>>().then("Green Horizon", [this](const VisualMesh& mesh) {
@@ -59,9 +60,7 @@ namespace module::vision {
             // Discard indices that are not on the boundary
             indices.resize(std::distance(indices.begin(), boundary));
 
-            if (config.debug) {
-                log<NUClear::DEBUG>(fmt::format("Partitioned {} points", indices.size()));
-            }
+            log<NUClear::DEBUG>(fmt::format("Partitioned {} points", indices.size()));
 
             // Cluster the points
             // Points are clustered based on their connectivity to other field points
@@ -82,9 +81,7 @@ namespace module::vision {
                                                         config.cluster_points,
                                                         clusters);
 
-            if (config.debug) {
-                log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
-            }
+            log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
 
             // Merge clusters until only 1 remains
             while (clusters.size() > 1) {
@@ -122,40 +119,32 @@ namespace module::vision {
                             it2 = clusters.erase(it2);
                         }
                         else {
-                            if (config.debug) {
-                                log<NUClear::DEBUG>(
-                                    "The clusters are neither overlapping, nor are they not overlapping. What have "
-                                    "you "
-                                    "done???");
-                                log<NUClear::DEBUG>(fmt::format("[{}, {}] -> [{}, {}], [{}, {}] -> [{}, {}]",
-                                                                *range_a.first,
-                                                                *range_a.second,
-                                                                min_a,
-                                                                max_a,
-                                                                *range_b.first,
-                                                                *range_b.second,
-                                                                min_b,
-                                                                max_b));
-                            }
+                            log<NUClear::DEBUG>(
+                                "The clusters are neither overlapping, nor are they not overlapping. What have "
+                                "you "
+                                "done???");
+                            log<NUClear::DEBUG>(fmt::format("[{}, {}] -> [{}, {}], [{}, {}] -> [{}, {}]",
+                                                            *range_a.first,
+                                                            *range_a.second,
+                                                            min_a,
+                                                            max_a,
+                                                            *range_b.first,
+                                                            *range_b.second,
+                                                            min_b,
+                                                            max_b));
                         }
                     }
                 }
             }
 
-            if (clusters.size() < 1) {
-                if (config.debug) {
-                    log<NUClear::DEBUG>("Found no clusters to make a convex hull from");
-                }
+            if (clusters.empty()) {
+                log<NUClear::DEBUG>("Found no clusters to make a convex hull from");
             }
             else if (clusters.front().size() < 3) {
-                if (config.debug) {
-                    log<NUClear::DEBUG>("Unable to make a convex hull with less than 3 points");
-                }
+                log<NUClear::DEBUG>("Unable to make a convex hull with less than 3 points");
             }
             else {
-                if (config.debug) {
-                    log<NUClear::DEBUG>(fmt::format("Making a convex hull from {} points", clusters.front().size()));
-                }
+                log<NUClear::DEBUG>(fmt::format("Making a convex hull from {} points", clusters.front().size()));
                 // Find the convex hull of the cluster
                 auto hull_indices = utility::math::geometry::upper_convex_hull(clusters.front(), rays, world_offset);
 
@@ -179,13 +168,9 @@ namespace module::vision {
                     ray_projection.head<2>() *= 1.0f + config.distance_offset / norm;
                     msg->horizon.emplace_back(ray_projection.normalized());
                 }
-
-                if (config.debug) {
-                    log<NUClear::DEBUG>(fmt::format("Calculated convex hull with {} points from cluster with {} points",
-                                                    hull_indices.size(),
-                                                    clusters.front().size()));
-                }
-
+                log<NUClear::DEBUG>(fmt::format("Calculated convex hull with {} points from cluster with {} points",
+                                                hull_indices.size(),
+                                                clusters.front().size()));
                 emit(std::move(msg));
             }
         });

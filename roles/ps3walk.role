@@ -10,11 +10,11 @@ nuclear_role(
   support::configuration::GlobalConfig
   support::configuration::SoccerConfig
   network::NUClearNet
-  output::NetworkForwarder
+  network::NetworkForwarder
   output::Overview
   # Hardware Interface
   input::Camera
-  platform::darwin::HardwareIO
+  platform::cm740::HardwareIO
   input::SensorFilter
   # Motion
   motion::QuinticWalk

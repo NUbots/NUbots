@@ -79,7 +79,13 @@ class BoxVisualiser extends Component<{ animate?: boolean }> {
 }
 
 class ViewModel {
-  constructor(private readonly canvas: Canvas, private readonly model: Model) {}
+  private readonly canvas: Canvas
+  private readonly model: Model
+
+  constructor(canvas: Canvas, model: Model) {
+    this.canvas = canvas
+    this.model = model
+  }
 
   @computed
   get stage(): Stage {
@@ -110,17 +116,19 @@ class ViewModel {
     return this.model.boxes.map(ViewModel.getBox)
   }
 
-  private static getBox = createTransformer(
-    (box: BoxModel): BoxViewModel => {
-      return BoxViewModel.of(box)
-    },
-  )
+  private static getBox = createTransformer((box: BoxModel): BoxViewModel => {
+    return BoxViewModel.of(box)
+  })
 }
 
 class BoxViewModel {
+  private readonly model: BoxModel
+
   private static geometry = disposableComputed<Geometry>(() => new BoxGeometry(1, 1, 1))
 
-  constructor(private readonly model: BoxModel) {}
+  constructor(model: BoxModel) {
+    this.model = model
+  }
 
   static of(model: BoxModel): BoxViewModel {
     return new BoxViewModel(model)

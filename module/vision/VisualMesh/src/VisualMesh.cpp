@@ -16,29 +16,21 @@ namespace module::vision {
     VisualMesh::VisualMesh(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("VisualMesh.yaml").then([this](const Configuration& config) {
-            // clang-format off
-            std::string lvl = config["log_level"].as<std::string>();
-            if (lvl == "TRACE")      { this->log_level = NUClear::TRACE; }
-            else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
-            else if (lvl == "INFO")  { this->log_level = NUClear::INFO;  }
-            else if (lvl == "WARN")  { this->log_level = NUClear::WARN;  }
-            else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
-            else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
-            // clang-format on
+            log_level = config["log_level"].as<NUClear::LogLevel>();
 
             // Delete all the old engines
             engines.clear();
 
             for (const auto& camera : config["cameras"].config) {
-                std::string name        = camera.first.as<std::string>();
-                std::string engine_type = camera.second["engine"].as<std::string>();
-                int concurrent          = camera.second["concurrent"].as<int>();
-                std::string network     = camera.second["network"].as<std::string>();
+                auto name        = camera.first.as<std::string>();
+                auto engine_type = camera.second["engine"].as<std::string>();
+                int concurrent   = camera.second["concurrent"].as<int>();
+                auto network     = camera.second["network"].as<std::string>();
 
-                double min_height   = camera.second["classifier"]["height"][0].as<double>();
-                double max_height   = camera.second["classifier"]["height"][1].as<double>();
-                double max_distance = camera.second["classifier"]["max_distance"].as<double>();
-                double tolerance    = camera.second["classifier"]["intersection_tolerance"].as<double>();
+                auto min_height   = camera.second["classifier"]["height"][0].as<double>();
+                auto max_height   = camera.second["classifier"]["height"][1].as<double>();
+                auto max_distance = camera.second["classifier"]["max_distance"].as<double>();
+                auto tolerance    = camera.second["classifier"]["intersection_tolerance"].as<double>();
 
                 // Create a network runner for each concurrent system
                 auto& runners = engines[name];
@@ -78,8 +70,8 @@ namespace module::vision {
                                 msg->id              = image.id;
                                 msg->name            = image.name;
                                 msg->Hcw             = image.Hcw;
-                                msg->rays            = std::move(result.rays);
-                                msg->coordinates     = std::move(result.coordinates);
+                                msg->rays            = result.rays;
+                                msg->coordinates     = result.coordinates;
                                 msg->neighbourhood   = std::move(result.neighbourhood);
                                 msg->indices         = std::move(result.indices);
                                 msg->classifications = std::move(result.classifications);

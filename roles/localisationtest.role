@@ -10,12 +10,12 @@ nuclear_role(
   # Support
   support::configuration::GlobalConfig
   network::NUClearNet
-  output::NetworkForwarder
+  network::NetworkForwarder
   output::Overview
   # Localisation
   localisation::RobotParticleLocalisation
   support::LocalisationSimulator
   # Sensors
   input::SensorFilter
-  # platform::darwin::HardwareSimulator
+  # platform::cm740::HardwareSimulator
 )

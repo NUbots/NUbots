@@ -41,7 +41,7 @@ namespace module::behaviour::skills {
     /**
      * Executes a HeadBehaviourSoccer action.
      *
-     * @author Jake Fountain
+     * @author Jade Fountain
      */
     class HeadBehaviourSoccer : public NUClear::Reactor {
     public:
@@ -49,8 +49,10 @@ namespace module::behaviour::skills {
         enum SearchState { FIXATION = 0, WAIT = 1, SEARCH = 2 };
         SearchState state = SearchState::SEARCH;
 
-        message::vision::Balls getFixationObjects(std::shared_ptr<const message::vision::Balls> vballs, bool& search);
-        message::vision::Goals getFixationObjects(std::shared_ptr<const message::vision::Goals> vgoals, bool& search);
+        message::vision::Balls getFixationObjects(const std::shared_ptr<const message::vision::Balls>& vballs,
+                                                  bool& search);
+        message::vision::Goals getFixationObjects(const std::shared_ptr<const message::vision::Goals>& vgoals,
+                                                  bool& search);
 
 
         /*! @brief Updates the search plan when something has changed
@@ -70,9 +72,8 @@ namespace module::behaviour::skills {
 
         /*! @brief Converts from camera space direction to IMU space direction
          */
-        Eigen::Vector2d getIMUSpaceDirection(const message::motion::KinematicsModel& kinematicsModel,
-                                             const Eigen::Vector2d& screenAngles,
-                                             const Eigen::Matrix3d& headToIMUSpace);
+        static Eigen::Vector2d getIMUSpaceDirection(const Eigen::Vector2d& screenAngles,
+                                                    const Eigen::Matrix3d& headToIMUSpace);
 
         /*! @brief Gets points which allow for simultaneous search and viewing of key objects
          */
@@ -95,48 +96,50 @@ namespace module::behaviour::skills {
 
         /*! @brief Gets a bounding box in screen angular space of a set of vision objects
          */
-        utility::math::geometry::Quad<double, 2, 1> getScreenAngularBoundingBox(const message::vision::Balls& obs);
-        utility::math::geometry::Quad<double, 2, 1> getScreenAngularBoundingBox(const message::vision::Goals& obs);
+        static utility::math::geometry::Quad<double, 2, 1> getScreenAngularBoundingBox(
+            const message::vision::Balls& obs);
+        static utility::math::geometry::Quad<double, 2, 1> getScreenAngularBoundingBox(
+            const message::vision::Goals& obs);
 
         bool orientationHasChanged(const message::input::Sensors& sensors);
 
 
         // CONFIG - loaded elsewhere
-        float max_yaw;
-        float min_yaw;
-        float max_pitch;
-        float min_pitch;
+        float max_yaw   = 0.0f;
+        float min_yaw   = 0.0f;
+        float max_pitch = 0.0f;
+        float min_pitch = 0.0f;
 
 
-        float replan_angle_threshold;
-        Eigen::Matrix3d Rtw;
+        float replan_angle_threshold = 0.0f;
+        Eigen::Matrix3d Rtw{};
 
         // CONFIG from HeadBehaviourSoccer.yaml
-        float pitch_plan_threshold;
-        float pitch_plan_value = 20;
-        double fractional_view_padding;
-        float search_timeout_ms;
-        float fractional_angular_update_threshold;
+        float pitch_plan_threshold                = 0.0f;
+        float pitch_plan_value                    = 20.0f;
+        double fractional_view_padding            = 0.0;
+        float search_timeout_ms                   = 0.0f;
+        float fractional_angular_update_threshold = 0.0f;
 
-        bool oscillate_search;
+        bool oscillate_search = false;
 
         bool locBallReceived = false;
-        message::localisation::Ball lastLocBall;
+        message::localisation::Ball lastLocBall{};
 
-        std::map<message::behaviour::SoccerObjectPriority::SearchType, std::vector<Eigen::Vector2d>> searches;
+        std::map<message::behaviour::SoccerObjectPriority::SearchType, std::vector<Eigen::Vector2d>> searches{};
 
         // State variables
-        Searcher<Eigen::Vector2d> headSearcher;
+        Searcher<Eigen::Vector2d> headSearcher{};
 
         int ballPriority = 0;
         int goalPriority = 0;
         message::behaviour::SoccerObjectPriority::SearchType searchType =
             message::behaviour::SoccerObjectPriority::SearchType::LOST;
 
-        NUClear::clock::time_point lastPlanUpdate;
-        NUClear::clock::time_point timeLastObjectSeen;
+        NUClear::clock::time_point lastPlanUpdate{};
+        NUClear::clock::time_point timeLastObjectSeen{};
 
-        Eigen::Vector2d lastCentroid;
+        Eigen::Vector2d lastCentroid = Eigen::Vector2d::Zero();
 
         bool lostAndSearching = false;
         bool lostLastTime     = false;

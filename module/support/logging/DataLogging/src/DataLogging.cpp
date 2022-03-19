@@ -112,51 +112,51 @@ namespace module::support::logging {
 
         on<Configuration, Trigger<CommandLineArguments>, Sync<DataLog>>("DataLogging.yaml")
             .then([this](const Configuration& cfg, const CommandLineArguments& argv) {
-                {
-                    // Get the details we need to generate a log file name
-                    config.output.directory  = cfg["output"]["directory"].as<std::string>();
-                    config.output.split_size = cfg["output"]["split_size"].as<Expression>();
+                log_level = cfg["log_level"].as<NUClear::LogLevel>();
 
-                    // Get the name of the currently running binary
-                    std::vector<char> data(argv[0].cbegin(), argv[0].cend());
-                    data.push_back('\0');
-                    const auto* base     = basename(data.data());
-                    config.output.binary = std::string(base);
+                // Get the details we need to generate a log file name
+                config.output.directory  = cfg["output"]["directory"].as<std::string>();
+                config.output.split_size = cfg["output"]["split_size"].as<Expression>();
 
-                    // Rescue any existing recorders that we want to keep
-                    std::map<std::string, ReactionHandle> new_handles;
-                    for (const auto& setting : cfg["messages"].config) {
-                        auto name    = setting.first.as<std::string>();
-                        bool enabled = setting.second.as<bool>();
+                // Get the name of the currently running binary
+                std::vector<char> data(argv[0].cbegin(), argv[0].cend());
+                data.push_back('\0');
+                const auto* base     = basename(data.data());
+                config.output.binary = std::string(base);
 
-                        // If it was enabled and we are keeping it enabled, keep it and remove it from the old list
-                        if (handles.count(name) > 0 && enabled) {
-                            new_handles.insert(std::make_pair(name, handles[name]));
-                            handles.erase(handles.find(name));
-                        }
+                // Rescue any existing recorders that we want to keep
+                std::map<std::string, ReactionHandle> new_handles;
+                for (const auto& setting : cfg["messages"].config) {
+                    auto name    = setting.first.as<std::string>();
+                    bool enabled = setting.second.as<bool>();
+
+                    // If it was enabled and we are keeping it enabled, keep it and remove it from the old list
+                    if (handles.count(name) > 0 && enabled) {
+                        new_handles.insert(std::make_pair(name, handles[name]));
+                        handles.erase(handles.find(name));
                     }
-
-                    // Unbind any recorders we didn't save
-                    for (auto& handle : handles) {
-                        log<NUClear::INFO>("Data logging for type", handle.first, "disabled");
-                        handle.second.unbind();
-                    }
-
-                    // Add any new recorders that we don't have yet
-                    for (const auto& setting : cfg["messages"].config) {
-                        auto name    = setting.first.as<std::string>();
-                        bool enabled = setting.second.as<bool>();
-
-                        // If we are enabling this, and it wasn't already enabled, enable it
-                        if (new_handles.count(name) == 0 && enabled) {
-                            log<NUClear::INFO>("Data logging for type", name, "enabled");
-                            new_handles.insert(std::make_pair(name, activate_recorder(name)));
-                        }
-                    }
-
-                    // New handles become the handles
-                    handles = std::move(new_handles);
                 }
+
+                // Unbind any recorders we didn't save
+                for (auto& handle : handles) {
+                    log<NUClear::INFO>("Data logging for type", handle.first, "disabled");
+                    handle.second.unbind();
+                }
+
+                // Add any new recorders that we don't have yet
+                for (const auto& setting : cfg["messages"].config) {
+                    auto name    = setting.first.as<std::string>();
+                    bool enabled = setting.second.as<bool>();
+
+                    // If we are enabling this, and it wasn't already enabled, enable it
+                    if (new_handles.count(name) == 0 && enabled) {
+                        log<NUClear::INFO>("Data logging for type", name, "enabled");
+                        new_handles.insert(std::make_pair(name, activate_recorder(name)));
+                    }
+                }
+
+                // New handles become the handles
+                handles = std::move(new_handles);
             });
     }
 

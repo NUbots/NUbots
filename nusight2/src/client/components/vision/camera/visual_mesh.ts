@@ -7,11 +7,15 @@ import fragmentShader from './shaders/visual_mesh.frag'
 import vertexShader from './shaders/visual_mesh.vert'
 
 export class VisualMeshViewModel {
-  constructor(
-    private readonly canvas: Canvas,
-    private readonly visualMesh: VisualMesh,
-    private readonly params: CameraParams,
-  ) {}
+  private readonly canvas: Canvas
+  private readonly visualMesh: VisualMesh
+  private readonly params: CameraParams
+
+  constructor(canvas: Canvas, visualMesh: VisualMesh, params: CameraParams) {
+    this.canvas = canvas
+    this.visualMesh = visualMesh
+    this.params = params
+  }
 
   static of(canvas: Canvas, visualMesh: VisualMesh, params: CameraParams) {
     return new VisualMeshViewModel(canvas, visualMesh, params)

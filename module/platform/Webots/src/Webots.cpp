@@ -60,9 +60,8 @@ namespace module::platform {
     using message::input::Sensors;
     using message::motion::ServoTarget;
     using message::motion::ServoTargets;
-    using message::output::CompressedImage;
     using message::platform::RawSensors;
-    using message::platform::ResetRawSensors;
+    using message::platform::ResetWebotsServos;
 
     using message::platform::webots::ActuatorRequests;
     using message::platform::webots::Message;
@@ -116,7 +115,7 @@ namespace module::platform {
         if (name == "head_pitch_sensor") { return servos.head_tilt; }
         // clang-format on
 
-        throw std::runtime_error("Unable to translate unknown NUgus.proto sensor name: " + name);
+        throw std::runtime_error(fmt::format("Unable to translate unknown NUgus.proto sensor name: {}", name));
     }
 
     [[nodiscard]] std::string translate_id_servo(const uint32_t& id) {
@@ -143,7 +142,7 @@ namespace module::platform {
             case 19: return "head_pitch";
         }
 
-        throw std::runtime_error("Unable to translate unknown NUgus.proto servo id: " + id);
+        throw std::runtime_error(fmt::format("Unable to translate unknown NUgus.proto servo id: {}", id));
     }
 
     [[nodiscard]] ActuatorRequests create_sensor_time_steps(const uint32_t& sensor_timestep,
@@ -188,13 +187,13 @@ namespace module::platform {
 
     int Webots::tcpip_connect() {
         // Hints for the connection type
-        addrinfo hints;
+        addrinfo hints{};
         memset(&hints, 0, sizeof(addrinfo));  // Defaults on what we do not explicitly set
         hints.ai_family   = AF_UNSPEC;        // IPv4 or IPv6
         hints.ai_socktype = SOCK_STREAM;      // TCP
 
         // Store the ip address information that we will connect to
-        addrinfo* address;
+        addrinfo* address = nullptr;
 
         const int error = getaddrinfo(server_address.c_str(), server_port.c_str(), &hints, &address);
         if (error != 0) {
@@ -206,14 +205,14 @@ namespace module::platform {
         }
 
         // Loop through the linked list of potential options for connecting. In order of best to worst.
-        for (addrinfo* addr_ptr = address; addr_ptr != NULL; addr_ptr = addr_ptr->ai_next) {
+        for (addrinfo* addr_ptr = address; addr_ptr != nullptr; addr_ptr = addr_ptr->ai_next) {
             const int fd_temp = socket(addr_ptr->ai_family, addr_ptr->ai_socktype, addr_ptr->ai_protocol);
 
             if (fd_temp == -1) {
                 // Bad fd
                 continue;
             }
-            else if (connect(fd_temp, addr_ptr->ai_addr, addr_ptr->ai_addrlen) != -1) {
+            if (connect(fd_temp, addr_ptr->ai_addr, addr_ptr->ai_addrlen) != -1) {
                 // Connection successful
                 freeaddrinfo(address);
                 return fd_temp;
@@ -238,7 +237,7 @@ namespace module::platform {
             max_velocity_mx106   = config["max_velocity_mx106"].as<double>();
             max_fsr_value        = config["max_fsr_value"].as<float>();
 
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            log_level = config["log_level"].as<NUClear::LogLevel>();
 
             clock_smoothing = config["clock_smoothing"].as<double>();
 
@@ -257,8 +256,8 @@ namespace module::platform {
 
 
         on<Configuration>("WebotsCameras").then([this](const Configuration& config) {
-            // Strip the .yaml off the name of the file to get the name of the camera
-            const std::string name = ::basename(config.fileName.substr(0, config.fileName.find_last_of('.')).c_str());
+            // The camera's name is the filename of the config, with the .yaml stripped off
+            const std::string name = config.fileName.stem();
 
             log<NUClear::INFO>(fmt::format("Connected to the webots {} camera", name));
 
@@ -315,7 +314,7 @@ namespace module::platform {
             Eigen::Affine3d Htw(sensors.Htw);
             Eigen::Affine3d Hwp = Htw.inverse() * Htp;
 
-            Hwps.push_back(std::make_pair(sensors.timestamp, Hwp));
+            Hwps.emplace_back(sensors.timestamp, Hwp);
         });
 
         // This trigger updates our current servo state
@@ -387,7 +386,9 @@ namespace module::platform {
             }
         });
 
-        on<Trigger<ResetRawSensors>>().then([this]() {
+        // Used to reset our local servo state when the robot is teleported by the referee in the simulation.
+        // Needed to cancel old servo targets and reset the pose to account for the teleportation.
+        on<Trigger<ResetWebotsServos>>().then([this]() {
             // Reset the servo state
             for (auto& servo : servo_state) {
                 servo.dirty            = false;
@@ -398,6 +399,16 @@ namespace module::platform {
                 servo.present_position = 0.0;
                 servo.present_speed    = 0.0;
             }
+
+            auto targets = std::make_unique<ServoTargets>();
+
+            // Clear all servo targets on reset
+            for (int i = 0; i < ServoID::NUMBER_OF_SERVOS; i++) {
+                targets->targets.emplace_back(NUClear::clock::now(), i, 0.0, 1, 0);
+            }
+
+            // Emit it so it's captured by the reaction above
+            emit<Scope::DIRECT>(targets);
         });
 
         on<Trigger<OptimisationCommand>>().then([this](const OptimisationCommand& msg) {
@@ -509,7 +520,7 @@ namespace module::platform {
                                 buffer.resize(old_size + bytes_read);
 
                                 // Function to read the payload length from the buffer
-                                auto read_length = [this](const std::vector<uint8_t>& buffer) {
+                                auto read_length = [](const std::vector<uint8_t>& buffer) {
                                     return buffer.size() >= sizeof(uint32_t)
                                                ? ntohl(*reinterpret_cast<const uint32_t*>(buffer.data()))
                                                : 0u;
@@ -768,8 +779,8 @@ namespace module::platform {
         }
 
         // Only emit RawSensors if there is any data!
-        if (!(sensor_measurements.position_sensors.size() == 0 && sensor_measurements.accelerometers.size() == 0
-              && sensor_measurements.bumpers.size() == 0 && sensor_measurements.gyros.size() == 0)) {
+        if (!(sensor_measurements.position_sensors.empty() && sensor_measurements.accelerometers.empty()
+              && sensor_measurements.bumpers.empty() && sensor_measurements.gyros.empty())) {
 
 
             // Read each field of msg, translate it to our protobuf and emit the data
@@ -781,26 +792,26 @@ namespace module::platform {
                 translate_servo_id(position.name, sensor_data->servo).present_position = position.value;
             }
 
-            if (sensor_measurements.accelerometers.size() > 0) {
+            if (!sensor_measurements.accelerometers.empty()) {
                 // .accelerometers is a list of one, since our robots have only one accelerometer
                 const auto& accelerometer = sensor_measurements.accelerometers[0];
                 // Webots has a strictly positive output for the accelerometers. We minus 100 to center the output
                 // over 0 The value 100.0 is based on the Look-up Table from NUgus.proto and should be kept
                 // consistent with that
-                sensor_data->accelerometer.x = static_cast<float>(accelerometer.value.X) - 100.0f;
-                sensor_data->accelerometer.y = static_cast<float>(accelerometer.value.Y) - 100.0f;
-                sensor_data->accelerometer.z = static_cast<float>(accelerometer.value.Z) - 100.0f;
+                sensor_data->accelerometer.x() = static_cast<float>(accelerometer.value.X) - 100.0f;
+                sensor_data->accelerometer.y() = static_cast<float>(accelerometer.value.Y) - 100.0f;
+                sensor_data->accelerometer.z() = static_cast<float>(accelerometer.value.Z) - 100.0f;
             }
 
-            if (sensor_measurements.gyros.size() > 0) {
+            if (!sensor_measurements.gyros.empty()) {
                 // .gyros is a list of one, since our robots have only one gyroscope
                 const auto& gyro = sensor_measurements.gyros[0];
                 // Webots has a strictly positive output for the gyros. We minus 100 to center the output over 0
                 // The value 100.0 is based on the Look-up Table from NUgus.proto and should be kept consistent with
                 // that
-                sensor_data->gyroscope.x = static_cast<float>(gyro.value.X) - 100.0f;
-                sensor_data->gyroscope.y = static_cast<float>(gyro.value.Y) - 100.0f;
-                sensor_data->gyroscope.z = static_cast<float>(gyro.value.Z) - 100.0f;
+                sensor_data->gyroscope.x() = static_cast<float>(gyro.value.X) - 100.0f;
+                sensor_data->gyroscope.y() = static_cast<float>(gyro.value.Y) - 100.0f;
+                sensor_data->gyroscope.z() = static_cast<float>(gyro.value.Z) - 100.0f;
             }
 
             for (const auto& bumper : sensor_measurements.bumpers) {

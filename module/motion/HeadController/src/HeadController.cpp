@@ -40,13 +40,11 @@ namespace module::motion {
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
     using extension::Configuration;
-    using message::behaviour::ServoCommand;
     using message::behaviour::ServoCommands;
     using message::input::Sensors;
     using message::motion::HeadCommand;
     using message::motion::KinematicsModel;
     using utility::behaviour::RegisterAction;
-    using utility::math::coordinates::cartesianToSpherical;
     using utility::math::coordinates::sphericalToCartesian;
     using utility::motion::kinematics::calculateHeadJoints;
 
@@ -63,14 +61,14 @@ namespace module::motion {
         , head_motor_gain(0.0)
         , head_motor_torque(0.0)
         , p_gain(0.0)
-        , updateHandle()
-        , lastTime()
         , currentAngles(Eigen::Vector2f::Zero())
         , goalAngles(Eigen::Vector2f::Zero()) {
 
         // do a little configurating
         on<Configuration>("HeadController.yaml")
             .then("Head Controller - Configure", [this](const Configuration& config) {
+                log_level = config["log_level"].as<NUClear::LogLevel>();
+
                 // Gains
                 head_motor_gain   = config["head_motors"]["gain"].as<double>();
                 head_motor_torque = config["head_motors"]["torque"].as<double>();
@@ -114,7 +112,7 @@ namespace module::motion {
                 //!!!!!!!!!!!!!!
                 //!!!!!!!!!!!!!!
                 //!!!!!!!!!!!!!!
-                // TODO::::MAKE THIS NOT FAIL FOR ANGLES OVER 90deg
+                // TODO(MotionTeam): :::MAKE THIS NOT FAIL FOR ANGLES OVER 90deg
                 //!!!!!!!!!!!!!!
                 //!!!!!!!!!!!!!!
                 //!!!!!!!!!!!!!!
@@ -169,13 +167,13 @@ namespace module::motion {
             id,
             "HeadController",
             {std::pair<float, std::set<LimbID>>(30.0, {LimbID::HEAD})},
-            [this](const std::set<LimbID>&) {  // Head control gained
+            [this](const std::set<LimbID>& /* limbs */) {  // Head control gained
                 updateHandle.enable();
             },
-            [this](const std::set<LimbID>&) {  // Head controll lost
+            [this](const std::set<LimbID>& /* limbs */) {  // Head control lost
                 updateHandle.disable();
             },
-            [this](const std::set<ServoID>&) {}  // Servos reached target
+            [](const std::set<ServoID>& /* servos */) {}  // Servos reached target
         }));
     }
 }  // namespace module::motion

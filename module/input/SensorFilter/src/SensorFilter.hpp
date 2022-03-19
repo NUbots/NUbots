@@ -35,7 +35,7 @@
 namespace module::input {
 
     /**
-     * @author Jake Fountain
+     * @author Jade Fountain
      * @author Trent Houliston
      */
     class SensorFilter : public NUClear::Reactor {
@@ -79,8 +79,6 @@ namespace module::input {
         };
         struct Config {
             Config() = default;
-
-            bool debug = false;
 
             struct MotionFilter {
                 MotionFilter() = default;

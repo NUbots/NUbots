@@ -1,5 +1,5 @@
 # Controls the minimum log level that NUClear log will display
-log_level: DEBUG
+log_level: WARN
 
 # Maximum FSR sensor value. This is based on the Darwin-OP FSR sensors
 # Max value 65,535 / 1000 (N) = 65.535 N

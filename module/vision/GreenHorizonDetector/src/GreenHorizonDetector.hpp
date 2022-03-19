@@ -18,8 +18,7 @@ namespace module::vision {
             float confidence_threshold;
             uint cluster_points;
             float distance_offset;
-            bool debug;
-        } config;
+        } config{};
     };
 
 }  // namespace module::vision

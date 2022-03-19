@@ -47,7 +47,7 @@ namespace module::behaviour::tools {
         const size_t defaultGain     = 30;
         const size_t defaultDuration = 1000;
 
-        std::string userInput();
+        static std::string userInput();
 
         void refreshView();
         void loadScript(const std::string& path);
@@ -66,7 +66,7 @@ namespace module::behaviour::tools {
         void saveScriptAs();
         void editGain();
         void userInputToFrame();
-        float userInputToGain();
+        static float userInputToGain();
 
         volatile bool running;
 

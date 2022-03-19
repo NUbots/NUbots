@@ -34,13 +34,12 @@ namespace module::motion {
     using message::behaviour::ServoCommands;
 
 
-    ScriptEngine::ScriptEngine(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), scripts() {
+    ScriptEngine::ScriptEngine(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Script>("").then([this](const Script& script) {
             // Add this script to our list of scripts
             try {
-                scripts.insert(std::make_pair(utility::file::pathSplit(script.fileName).second, std::move(script)));
+                scripts.insert(std::pair(utility::file::pathSplit(script.fileName).second, script));
             }
             catch (const std::exception& e) {
                 log<NUClear::ERROR>("Script is bad conversion:", script.fileName, e.what());
@@ -50,20 +49,15 @@ namespace module::motion {
         on<Trigger<ExecuteScriptByName>>().then([this](const ExecuteScriptByName& command) {
             std::vector<Script> scriptList;
 
-            std::cout << "executing scripts by name: ";
-
-            for (size_t i = 0; i < command.scripts.size(); i++) {
-                const auto& scriptName = command.scripts[i];
-                auto script            = scripts.find(scriptName);
+            for (const auto& scriptName : command.scripts) {
+                const auto& script = scripts.find(scriptName);
 
                 std::cout << scriptName;
 
                 if (script == std::end(scripts)) {
                     throw std::runtime_error("The script " + scriptName + " is not loaded in the system");
                 }
-                else {
-                    scriptList.push_back(script->second);
-                }
+                scriptList.push_back(script->second);
             }
 
             std::cout << std::endl;

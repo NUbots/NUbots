@@ -1,4 +1,4 @@
-log_level: INFO
+log_level: WARN
 
 FALLEN_ANGLE: 0.95 # ~55 degrees
 GETUP_PRIORITY: 50

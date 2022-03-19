@@ -64,7 +64,7 @@ namespace utility::vision {
 
         // These terms have been stripped back to only include k1 and k2
         // if more are needed in the future go and get them from the original paper
-        // TODO if performance ever becomes an issue, this can be precomputed for the same k values
+        // TODO(VisionTeam): if performance ever becomes an issue, this can be precomputed for the same k values
         // clang-format off
         const T b1 = -k1;
         const T b2 = 3.0*k1_2 - k2;

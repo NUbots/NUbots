@@ -20,6 +20,7 @@
 #include "HeadBehaviourSoccer.hpp"
 
 #include <string>
+#include <utility>
 
 #include "extension/Configuration.hpp"
 
@@ -45,7 +46,6 @@ namespace module::behaviour::skills {
     using message::input::Image;
     using message::input::Sensors;
     using LocBall = message::localisation::Ball;
-    using message::localisation::Field;
     using message::motion::ExecuteGetup;
     using message::motion::HeadCommand;
     using message::motion::KillGetup;
@@ -58,8 +58,7 @@ namespace module::behaviour::skills {
     using utility::input::ServoID;
     using utility::math::coordinates::sphericalToCartesian;
     using utility::math::geometry::Quad;
-    using utility::motion::kinematics::calculateCameraLookJoints;
-    using utility::nusight::graph;
+    using utility::motion::kinematics::calculateHeadJoints;
     using utility::support::Expression;
 
     inline Eigen::Vector2d screenAngularFromObjectDirection(const Eigen::Vector3d& v) {
@@ -86,27 +85,12 @@ namespace module::behaviour::skills {
     }
 
     HeadBehaviourSoccer::HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment))
-        , max_yaw(0.0f)
-        , min_yaw(0.0f)
-        , max_pitch(0.0f)
-        , min_pitch(0.0f)
-        , replan_angle_threshold(0.0f)
-        , Rtw()
-        , pitch_plan_threshold(0.0f)
-        , fractional_view_padding(0.0)
-        , search_timeout_ms(0.0f)
-        , fractional_angular_update_threshold(0.0f)
-        , oscillate_search(false)
-        , lastLocBall()
-        , searches()
-        , headSearcher()
-        , lastPlanUpdate()
-        , timeLastObjectSeen()
-        , lastCentroid(Eigen::Vector2d::Zero()) {
+        : Reactor(std::move(environment)) {
 
         on<Configuration>("HeadBehaviourSoccer.yaml")
             .then("Head Behaviour Soccer Config", [this](const Configuration& config) {
+                log_level = config["log_level"].as<NUClear::LogLevel>();
+
                 lastPlanUpdate     = NUClear::clock::now();
                 timeLastObjectSeen = NUClear::clock::now();
 
@@ -131,17 +115,17 @@ namespace module::behaviour::skills {
                 pitch_plan_value     = config["pitch_plan_value"].as<float>() * M_PI / 180.0f;
 
                 // Load searches:
-                for (auto& search : config["searches"].config) {
+                for (const auto& search : config["searches"].config) {
                     SearchType s(search["search_type"].as<std::string>());
                     searches[s] = std::vector<Eigen::Vector2d>();
-                    for (auto& p : search["points"]) {
+                    for (const auto& p : search["points"]) {
                         searches[s].push_back(p.as<Expression>());
                     }
                 }
             });
 
 
-        // TODO: remove this horrible code
+        // TODO(BehaviourTeam): remove this horrible code
         // Check to see if we are currently in the process of getting up.
         on<Trigger<ExecuteGetup>>().then([this] { isGettingUp = true; });
 
@@ -171,9 +155,9 @@ namespace module::behaviour::skills {
            Sync<HeadBehaviourSoccer>>()
             .then("Head Behaviour Main Loop",
                   [this](const Sensors& sensors,
-                         std::shared_ptr<const Balls> vballs,
-                         std::shared_ptr<const Goals> vgoals,
-                         std::shared_ptr<const LocBall> locBall,
+                         const std::shared_ptr<const Balls>& vballs,
+                         const std::shared_ptr<const Goals>& vgoals,
+                         const std::shared_ptr<const LocBall>& locBall,
                          const KinematicsModel& kinematicsModel,
                          const Image& image) {
                       max_yaw   = kinematicsModel.head.MAX_YAW;
@@ -191,7 +175,7 @@ namespace module::behaviour::skills {
                           locBallReceived = true;
                           lastLocBall     = *locBall;
                       }
-                      auto now = NUClear::clock::now();
+                      const auto& now = NUClear::clock::now();
 
                       bool objectsMissing = false;
 
@@ -200,18 +184,18 @@ namespace module::behaviour::skills {
                       Goals goalFixationObjects = getFixationObjects(vgoals, objectsMissing);
 
                       // Determine state transition variables
-                      bool lost = ((ballFixationObjects.balls.size() <= 0) && (goalFixationObjects.goals.size() <= 0));
+                      const bool lost = ((ballFixationObjects.balls.empty()) && (goalFixationObjects.goals.empty()));
                       // Do we need to update our plan?
                       bool updatePlan =
                           !isGettingUp && ((lastBallPriority != ballPriority) || (lastGoalPriority != goalPriority));
                       // Has it been a long time since we have seen anything of interest?
-                      bool searchTimedOut =
+                      const bool searchTimedOut =
                           std::chrono::duration_cast<std::chrono::milliseconds>(now - timeLastObjectSeen).count()
                           > search_timeout_ms;
                       // Did the object move in IMUspace?
                       bool objectMoved = false;
 
-                      bool ballMaxPriority = (ballPriority == std::max(ballPriority, goalPriority));
+                      const bool ballMaxPriority = (ballPriority == std::max(ballPriority, goalPriority));
 
                       // log("updatePlan", updatePlan);
                       // log("lost", lost);
@@ -222,7 +206,8 @@ namespace module::behaviour::skills {
                       // State execution
 
                       // Get robot heat to body transform
-                      Eigen::Matrix3d orientation, headToBodyRotation;
+                      Eigen::Matrix3d orientation;
+                      Eigen::Matrix3d headToBodyRotation;
                       if (!lost) {
                           // We need to transform our view points to orientation space
                           if (ballMaxPriority) {
@@ -258,8 +243,7 @@ namespace module::behaviour::skills {
                                       ob.screen_angular.cast<double>() / double(goalFixationObjects.goals.size());
                               }
                           }
-                          Eigen::Vector2d currentCentroid_world =
-                              getIMUSpaceDirection(kinematicsModel, currentCentroid, headToIMUSpace);
+                          Eigen::Vector2d currentCentroid_world = getIMUSpaceDirection(currentCentroid, headToIMUSpace);
                           // If our objects have moved, we need to replan
                           if ((currentCentroid_world - lastCentroid).norm()
                               >= fractional_angular_update_threshold * image.lens.fov / 2.0) {
@@ -341,7 +325,7 @@ namespace module::behaviour::skills {
                   });
     }
 
-    Balls HeadBehaviourSoccer::getFixationObjects(std::shared_ptr<const Balls> vballs, bool& search) {
+    Balls HeadBehaviourSoccer::getFixationObjects(const std::shared_ptr<const Balls>& vballs, bool& search) {
 
         auto now = NUClear::clock::now();
         Balls fixationObjects;
@@ -353,10 +337,10 @@ namespace module::behaviour::skills {
 
         // Get balls
         if (ballPriority == maxPriority) {
-            if (vballs && vballs->balls.size() > 0) {
+            if (vballs && !vballs->balls.empty()) {
                 // Fixate on ball
                 timeLastObjectSeen = now;
-                auto& ball         = vballs->balls.at(0);
+                const auto& ball   = vballs->balls.at(0);
                 fixationObjects.balls.push_back(ball);
             }
             else {
@@ -367,7 +351,7 @@ namespace module::behaviour::skills {
         return fixationObjects;
     }
 
-    Goals HeadBehaviourSoccer::getFixationObjects(std::shared_ptr<const Goals> vgoals, bool& search) {
+    Goals HeadBehaviourSoccer::getFixationObjects(const std::shared_ptr<const Goals>& vgoals, bool& search) {
 
         auto now = NUClear::clock::now();
         Goals fixationObjects;
@@ -377,16 +361,16 @@ namespace module::behaviour::skills {
             log<NUClear::WARN>("HeadBehaviourSoccer - Multiple object searching currently not supported properly.");
         }
 
-        // TODO: make this a loop over a list of objects or something
+        // TODO(BehaviourTeam): make this a loop over a list of objects or something
         // Get goals
         if (goalPriority == maxPriority) {
-            if (vgoals && vgoals->goals.size() > 0) {
+            if (vgoals && !vgoals->goals.empty()) {
                 // Fixate on goals and lines and other landmarks
                 timeLastObjectSeen = now;
                 std::set<Goal::Side> visiblePosts;
-                // TODO treat goals as one object
+                // TODO(BehaviourTeam): treat goals as one object
                 Goals goals;
-                for (auto& goal : vgoals->goals) {
+                for (const auto& goal : vgoals->goals) {
                     visiblePosts.insert(goal.side);
                     goals.goals.push_back(goal);
                 }
@@ -417,12 +401,10 @@ namespace module::behaviour::skills {
         Eigen::Vector2d currentPos = {sensors.servo[ServoID::HEAD_YAW].present_position,
                                       sensors.servo[ServoID::HEAD_PITCH].present_position};
 
-        for (uint i = 0; i < fixationObjects.balls.size(); i++) {
+        for (const auto& ball : fixationObjects.balls) {
             // Should be vec2 (yaw,pitch)
-            fixationPoints.push_back(Eigen::Vector2d(fixationObjects.balls.at(i).screen_angular.x(),
-                                                     fixationObjects.balls.at(i).screen_angular.y()));
-            fixationSizes.push_back(Eigen::Vector2d(fixationObjects.balls.at(i).angular_size.x(),
-                                                    fixationObjects.balls.at(i).angular_size.y()));
+            fixationPoints.emplace_back(ball.screen_angular.x(), ball.screen_angular.y());
+            fixationSizes.emplace_back(ball.angular_size.x(), ball.angular_size.y());
         }
 
         // If there are objects to find
@@ -430,7 +412,7 @@ namespace module::behaviour::skills {
             fixationPoints = getSearchPoints(kinematicsModel, fixationObjects, searchType, sensors, lens);
         }
 
-        if (fixationPoints.size() <= 0) {
+        if (fixationPoints.empty()) {
             log("FOUND NO POINTS TO LOOK AT! - ARE THE SEARCHES PROPERLY CONFIGURED IN "
                 "HEADBEHAVIOURSOCCER.YAML?");
         }
@@ -438,9 +420,9 @@ namespace module::behaviour::skills {
         // Transform to IMU space including compensation for current head pose
         if (!search) {
             for (auto& p : fixationPoints) {
-                p = getIMUSpaceDirection(kinematicsModel, p, headToIMUSpace);
+                p = getIMUSpaceDirection(p, headToIMUSpace);
             }
-            currentPos = getIMUSpaceDirection(kinematicsModel, currentPos, headToIMUSpace);
+            currentPos = getIMUSpaceDirection(currentPos, headToIMUSpace);
         }
 
         headSearcher.replaceSearchPoints(fixationPoints, currentPos);
@@ -458,12 +440,10 @@ namespace module::behaviour::skills {
         Eigen::Vector2d currentPos(sensors.servo[ServoID::HEAD_YAW].present_position,
                                    sensors.servo[ServoID::HEAD_PITCH].present_position);
 
-        for (uint i = 0; i < fixationObjects.goals.size(); i++) {
+        for (const auto& goal : fixationObjects.goals) {
             // Should be vec2 (yaw,pitch)
-            fixationPoints.push_back(Eigen::Vector2d(fixationObjects.goals.at(i).screen_angular.x(),
-                                                     fixationObjects.goals.at(i).screen_angular.y()));
-            fixationSizes.push_back(Eigen::Vector2d(fixationObjects.goals.at(i).angular_size.x(),
-                                                    fixationObjects.goals.at(i).angular_size.y()));
+            fixationPoints.emplace_back(goal.screen_angular.x(), goal.screen_angular.y());
+            fixationSizes.emplace_back(goal.angular_size.x(), goal.angular_size.y());
         }
 
         // If there are objects to find
@@ -471,7 +451,7 @@ namespace module::behaviour::skills {
             fixationPoints = getSearchPoints(kinematicsModel, fixationObjects, searchType, sensors, lens);
         }
 
-        if (fixationPoints.size() <= 0) {
+        if (fixationPoints.empty()) {
             log("FOUND NO POINTS TO LOOK AT! - ARE THE SEARCHES PROPERLY CONFIGURED IN "
                 "HEADBEHAVIOURSOCCER.YAML?");
         }
@@ -479,16 +459,15 @@ namespace module::behaviour::skills {
         // Transform to IMU space including compensation for current head pose
         if (!search) {
             for (auto& p : fixationPoints) {
-                p = getIMUSpaceDirection(kinematicsModel, p, headToIMUSpace);
+                p = getIMUSpaceDirection(p, headToIMUSpace);
             }
-            currentPos = getIMUSpaceDirection(kinematicsModel, currentPos, headToIMUSpace);
+            currentPos = getIMUSpaceDirection(currentPos, headToIMUSpace);
         }
 
         headSearcher.replaceSearchPoints(fixationPoints, currentPos);
     }
 
-    Eigen::Vector2d HeadBehaviourSoccer::getIMUSpaceDirection(const KinematicsModel& kinematicsModel,
-                                                              const Eigen::Vector2d& screenAngles,
+    Eigen::Vector2d HeadBehaviourSoccer::getIMUSpaceDirection(const Eigen::Vector2d& screenAngles,
                                                               const Eigen::Matrix3d& headToIMUSpace) {
 
         // Eigen::Vector3d lookVectorFromHead = objectDirectionFromScreenAngular(screenAngles);
@@ -500,7 +479,7 @@ namespace module::behaviour::skills {
         // Rotate target angles to World space
         Eigen::Vector3d lookVector = headToIMUSpace * lookVectorFromHead;
         // Compute inverse kinematics for head direction angles
-        std::vector<std::pair<ServoID, double>> goalAngles = calculateCameraLookJoints(lookVector);
+        std::vector<std::pair<ServoID, double>> goalAngles = calculateHeadJoints(lookVector);
 
         Eigen::Vector2d result;
         for (auto& angle : goalAngles) {
@@ -517,14 +496,14 @@ namespace module::behaviour::skills {
     /*! Get search points which keep everything in view.
     Returns vector of Eigen::Vector2d
     */
-    std::vector<Eigen::Vector2d> HeadBehaviourSoccer::getSearchPoints(const KinematicsModel&,
+    std::vector<Eigen::Vector2d> HeadBehaviourSoccer::getSearchPoints(const KinematicsModel& /*unused*/,
                                                                       const Balls& fixationObjects,
                                                                       const SearchType& sType,
-                                                                      const Sensors&,
+                                                                      const Sensors& /*unused*/,
                                                                       const Image::Lens& lens) {
         // If there is nothing of interest, we search fot points of interest
         // log("getting search points");
-        if (fixationObjects.balls.size() == 0) {
+        if (fixationObjects.balls.empty()) {
             // log("getting search points 2");
             // Lost searches are normalised in terms of the FOV
             std::vector<Eigen::Vector2d> scaledResults;
@@ -570,9 +549,9 @@ namespace module::behaviour::skills {
         // Interpolate between max and min allowed angles with -1 = min and 1 = max
         std::vector<Eigen::Vector2d> searchPoints;
         for (auto& p : searches[SearchType::FIND_ADDITIONAL_OBJECTS]) {
-            float x = p[0];
-            float y = p[1];
-            searchPoints.push_back(
+            const float x = p[0];
+            const float y = p[1];
+            searchPoints.emplace_back(
                 ((1 - x) * (1 - y) * bl + (1 - x) * (1 + y) * tl + (1 + x) * (1 + y) * tr + (1 + x) * (1 - y) * br)
                 / 4);
         }
@@ -580,14 +559,14 @@ namespace module::behaviour::skills {
         return searchPoints;
     }
 
-    std::vector<Eigen::Vector2d> HeadBehaviourSoccer::getSearchPoints(const KinematicsModel&,
+    std::vector<Eigen::Vector2d> HeadBehaviourSoccer::getSearchPoints(const KinematicsModel& /*unused*/,
                                                                       const Goals& fixationObjects,
                                                                       const SearchType& sType,
-                                                                      const Sensors&,
+                                                                      const Sensors& /*unused*/,
                                                                       const Image::Lens& lens) {
         // If there is nothing of interest, we search fot points of interest
         // log("getting search points");
-        if (fixationObjects.goals.size() == 0) {
+        if (fixationObjects.goals.empty()) {
             // log("getting search points 2");
             // Lost searches are normalised in terms of the FOV
             std::vector<Eigen::Vector2d> scaledResults;
@@ -633,9 +612,9 @@ namespace module::behaviour::skills {
         // Interpolate between max and min allowed angles with -1 = min and 1 = max
         std::vector<Eigen::Vector2d> searchPoints;
         for (auto& p : searches[SearchType::FIND_ADDITIONAL_OBJECTS]) {
-            float x = p[0];
-            float y = p[1];
-            searchPoints.push_back(
+            const float x = p[0];
+            const float y = p[1];
+            searchPoints.emplace_back(
                 ((1 - x) * (1 - y) * bl + (1 - x) * (1 + y) * tl + (1 + x) * (1 + y) * tr + (1 + x) * (1 - y) * br)
                 / 4);
         }
@@ -644,7 +623,7 @@ namespace module::behaviour::skills {
     }
 
     Ball HeadBehaviourSoccer::combineVisionObjects(const Balls& ob) {
-        if (ob.balls.size() == 0) {
+        if (ob.balls.empty()) {
             log<NUClear::WARN>(
                 "HeadBehaviourSoccer::combineVisionBalls - Attempted to combine zero vision objects into one.");
             return Ball();
@@ -658,18 +637,16 @@ namespace module::behaviour::skills {
 
     Quad<double, 2, 1> HeadBehaviourSoccer::getScreenAngularBoundingBox(const Balls& ob) {
         std::vector<Eigen::Vector2d> boundingPoints;
-        for (uint i = 0; i < ob.balls.size(); i++) {
-            boundingPoints.push_back(
-                (ob.balls.at(i).screen_angular + ob.balls.at(i).angular_size * 0.5).cast<double>());
-            boundingPoints.push_back(
-                (ob.balls.at(i).screen_angular - ob.balls.at(i).angular_size * 0.5).cast<double>());
+        for (const auto& ball : ob.balls) {
+            boundingPoints.emplace_back((ball.screen_angular + ball.angular_size * 0.5).cast<double>());
+            boundingPoints.emplace_back((ball.screen_angular - ball.angular_size * 0.5).cast<double>());
         }
         return Quad<double, 2, 1>::getBoundingBox(boundingPoints);
     }
 
 
     Goal HeadBehaviourSoccer::combineVisionObjects(const Goals& ob) {
-        if (ob.goals.size() == 0) {
+        if (ob.goals.empty()) {
             log<NUClear::WARN>(
                 "HeadBehaviourSoccer::combineVisionObjects - Attempted to combine zero vision objects into "
                 "one.");
@@ -680,11 +657,9 @@ namespace module::behaviour::skills {
 
     Quad<double, 2, 1> HeadBehaviourSoccer::getScreenAngularBoundingBox(const Goals& ob) {
         std::vector<Eigen::Vector2d> boundingPoints;
-        for (uint i = 0; i < ob.goals.size(); i++) {
-            boundingPoints.push_back(
-                (ob.goals.at(i).screen_angular + ob.goals.at(i).angular_size * 0.5).cast<double>());
-            boundingPoints.push_back(
-                (ob.goals.at(i).screen_angular - ob.goals.at(i).angular_size * 0.5).cast<double>());
+        for (const auto& goal : ob.goals) {
+            boundingPoints.emplace_back((goal.screen_angular + goal.angular_size * 0.5).cast<double>());
+            boundingPoints.emplace_back((goal.screen_angular - goal.angular_size * 0.5).cast<double>());
         }
         return Quad<double, 2, 1>::getBoundingBox(boundingPoints);
     }
