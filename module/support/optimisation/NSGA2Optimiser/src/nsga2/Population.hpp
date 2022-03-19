@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <optional>
 
 #include "Individual.hpp"
 #include "Random.hpp"
