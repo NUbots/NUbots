@@ -2,7 +2,6 @@
 #include "clock.hpp"
 
 #include <chrono>
-#include <mutex>
 
 namespace utility::clock {
 
