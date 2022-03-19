@@ -26,7 +26,7 @@ namespace module {
                 // Extract the initial values and limits and from config file, for all of the parameters
                 script_path = config["task_config_path"].as<std::string>();
 
-                auto& stand = config["stand"];
+                auto stand = config["stand"];
                 for (const auto& element : stand) {
                     //This is iterating through each frame of the script
                     paramInitialValues.emplace_back(element["duration"][0].as<Expression>());

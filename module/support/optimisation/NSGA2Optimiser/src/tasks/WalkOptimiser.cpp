@@ -24,21 +24,21 @@ namespace module {
                 std::vector<std::pair<double, double>> paramLimits;
 
                 // Extract the initial values and limits and from config file, for all of the parameters
-                auto& walk = config["walk"];
+                auto walk = config["walk"];
                 for (const auto& element :
                         std::vector<std::string>({std::string("freq"), std::string("double_support_ratio")})) {
                     paramInitialValues.emplace_back(walk[element][0].as<Expression>());
                     paramLimits.emplace_back(walk[element][1].as<Expression>(), walk[element][2].as<Expression>());
                 }
 
-                auto& foot = walk["foot"];
+                auto foot = walk["foot"];
                 for (const auto& element :
                         std::vector<std::string>({std::string("distance"), std::string("rise")})) {
                     paramInitialValues.emplace_back(foot[element][0].as<Expression>());
                     paramLimits.emplace_back(foot[element][1].as<Expression>(), foot[element][2].as<Expression>());
                 }
 
-                auto& trunk = walk["trunk"];
+                auto trunk = walk["trunk"];
                 for (const auto& element : std::vector<std::string>({std::string("height"),
                                                                         std::string("pitch"),
                                                                         std::string("x_offset"),
@@ -50,14 +50,14 @@ namespace module {
                                                 trunk[element][2].as<Expression>());
                 }
 
-                auto& pause = walk["pause"];
+                auto pause = walk["pause"];
                 for (const auto& element : std::vector<std::string>({std::string("duration")})) {
                     paramInitialValues.emplace_back(pause[element][0].as<Expression>());
                     paramLimits.emplace_back(pause[element][1].as<Expression>(),
                                                 pause[element][2].as<Expression>());
                 }
 
-                auto& walk_command = config["walk_command"];
+                auto walk_command = config["walk_command"];
                 for (const auto& element :
                         std::vector<std::string>({std::string("velocity")})) {
                     paramInitialValues.emplace_back(walk_command[element][0].as<Expression>());
