@@ -173,13 +173,13 @@ namespace module {
                 bool fallen = false;
                 auto accelerometer = sensors.accelerometer;
 
-                if ((std::fabs(accelerometer.x) > 9.2 || std::fabs(accelerometer.y) > 9.2)
-                    && std::fabs(accelerometer.z) < 0.5) {
+                if ((std::fabs(accelerometer.x()) > 9.2 || std::fabs(accelerometer.y()) > 9.2)
+                    && std::fabs(accelerometer.z()) < 0.5) {
                     NUClear::log<NUClear::DEBUG>("Fallen!");
                     NUClear::log<NUClear::DEBUG>("acc at fall (x y z):",
-                                        std::fabs(accelerometer.x),
-                                        std::fabs(accelerometer.y),
-                                        std::fabs(accelerometer.z));
+                                        std::fabs(accelerometer.x()),
+                                        std::fabs(accelerometer.y()),
+                                        std::fabs(accelerometer.z()));
                     fallen = true;
                 }
                 return fallen;
@@ -189,7 +189,7 @@ namespace module {
                 auto accelerometer = sensors.accelerometer;
 
                 // Calculate the robot sway along the field plane (left/right, forward/backward)
-                double fieldPlaneSway = std::pow(std::pow(accelerometer.x, 2) + std::pow(accelerometer.y, 2), 0.5);
+                double fieldPlaneSway = std::pow(std::pow(accelerometer.x(), 2) + std::pow(accelerometer.y(), 2), 0.5);
                 if(fieldPlaneSway > maxFieldPlaneSway) {
                     maxFieldPlaneSway = fieldPlaneSway;
                 }
