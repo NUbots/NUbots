@@ -18,7 +18,8 @@ namespace utility::clock {
         // Since we are updating our rtf we need to advance our state so the new deltas will be calculated properly
         // We set the variables in this specific order to mimise the error that will occur if the threading reads as we
         // are writing By reducing the delta between state and now any changes in rtf will have a minimal change on
-        // delta
+        // delta. The old rtf is used since it is assume that since the last update the old rtf was in effect and
+        // only now with future calculations the new rtf will be used
         epoch = epoch
                 + std::chrono::duration_cast<std::chrono::steady_clock::duration>(
                     (now - last_update) * rtf);  // set before we update the variables
