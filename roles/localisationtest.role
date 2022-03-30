@@ -17,5 +17,5 @@ nuclear_role(
   support::LocalisationSimulator
   # Sensors
   input::SensorFilter
-  # platform::darwin::HardwareSimulator
+  # platform::cm740::HardwareSimulator
 )

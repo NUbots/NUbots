@@ -20,6 +20,7 @@
 #define MODULE_EXTENSION_DIRECTOR_PROVIDER_HPP
 
 #include <nuclear>
+#include <utility>
 
 #include "extension/Behaviour.hpp"
 
@@ -39,7 +40,10 @@ namespace module::extension::provider {
                           std::function<bool(const int&)> validator_,
                           std::function<int()> current_,
                           NUClear::threading::ReactionHandle handle_)
-                : type(type_), validator(validator_), current(current_), handle(std::move(handle_)) {}
+                : type(type_)
+                , validator(std::move(validator_))
+                , current(std::move(current_))
+                , handle(std::move(handle_)) {}
 
             /// The type of state that this condition is checking
             std::type_index type;
@@ -53,8 +57,8 @@ namespace module::extension::provider {
 
         Provider(const ::extension::behaviour::commands::ProviderClassification& classification_,
                  const std::type_index& type_,
-                 const std::shared_ptr<NUClear::threading::Reaction>& reaction_)
-            : classification(classification_), type(type_), reaction(reaction_) {}
+                 std::shared_ptr<NUClear::threading::Reaction> reaction_)
+            : classification(classification_), type(type_), reaction(std::move(reaction_)) {}
 
         /// The classification of this Provider
         ::extension::behaviour::commands::ProviderClassification classification;

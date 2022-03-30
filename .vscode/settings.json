@@ -22,7 +22,8 @@
     ],
     "yaml.format.printWidth": 120,
     "files.associations": {
-        "*.role": "cmake"
+        "*.role": "cmake",
+        ".Doxyfile": "properties"
     },
     "editor.codeActionsOnSave": {
         "source.organizeImports": true

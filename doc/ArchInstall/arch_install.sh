@@ -36,7 +36,7 @@ pacstrap /mnt base linux linux-firmware
 genfstab -U /mnt >> /mnt/etc/fstab
 
 # Download install script into chroot drive
-curl -L https://raw.githubusercontent.com/NUbots/NUbots/master/doc/ArchInstall/arch-chroot_install.sh \
+curl -L https://raw.githubusercontent.com/NUbots/NUbots/main/doc/ArchInstall/arch-chroot_install.sh \
     -o /mnt/arch-chroot_install.sh
 chmod +x /mnt/arch-chroot_install.sh
 

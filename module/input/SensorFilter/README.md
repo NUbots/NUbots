@@ -16,8 +16,10 @@ The resulting filtered data will then be outputted as `message::input::Sensors` 
 ## Emits
 
 - `message::input::Sensors` with filtered data from the input.
--
+- `message::platform::ButtonLeftDown` when button pressed.
+- `message::platform::ButtonLeftUp` when button released.
+- `message::platform::ButtonMiddleDown` when button pressed.
+- `message::platform::ButtonMiddleUp` when button released.
+- `message::support::nusight::DataPoint` if log_level >= DEBUG, indicating if feet are down.
 
 ## Dependencies
-
-- The Darwin Hardware I/O module is required to provide the data to filter

@@ -68,20 +68,16 @@ namespace utility::motion::splines {
          * Return minimum and maximum abscisse value for which spline is defined
          */
         [[nodiscard]] constexpr Scalar min() const {
-            if (splines.size() == 0) {
+            if (splines.empty()) {
                 return static_cast<Scalar>(0);
             }
-            else {
-                return splines.front().min;
-            }
+            return splines.front().min;
         }
         [[nodiscard]] constexpr Scalar max() const {
-            if (splines.size() == 0) {
+            if (splines.empty()) {
                 return static_cast<Scalar>(0);
             }
-            else {
-                return splines.back().max;
-            }
+            return splines.back().max;
         }
 
         /**
@@ -100,26 +96,29 @@ namespace utility::motion::splines {
         }
 
         constexpr void importData(std::istream& is) {
-            bool isFormatError;
+            bool isFormatError = true;
             while (is.good()) {
                 isFormatError = true;
                 Scalar min;
                 Scalar max;
-                size_t size;
+                size_t size = 0;
                 Polynom<Scalar> p;
                 // Load spline interval and degree
                 is >> min;
-                if (!is.good())
+                if (!is.good()) {
                     break;
+                }
                 is >> max;
-                if (!is.good())
+                if (!is.good()) {
                     break;
+                }
                 is >> size;
                 // Load polynom coefficients
                 p.getCoefs().resize(size);
                 for (size_t i = 0; i < size; i++) {
-                    if (!is.good())
+                    if (!is.good()) {
                         break;
+                    }
                     is >> p.getCoefs()[i];
                 }
                 // Save spline part
@@ -127,8 +126,9 @@ namespace utility::motion::splines {
                 splines.push_back({p, min, max});
                 // Exit on line break
                 while (is.peek() == ' ') {
-                    if (!is.good())
+                    if (!is.good()) {
                         break;
+                    }
                     is.ignore();
                 }
                 if (is.peek() == '\n') {
@@ -191,7 +191,7 @@ namespace utility::motion::splines {
         [[nodiscard]] constexpr Scalar interpolation(Scalar x,
                                                      Scalar (Polynom<Scalar>::*func)(const Scalar&) const) const {
             // Empty case
-            if (splines.size() == 0) {
+            if (splines.empty()) {
                 return static_cast<Scalar>(0);
             }
             // Bound asked abscisse into spline range
