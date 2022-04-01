@@ -310,7 +310,7 @@ RUN install-package \
 RUN pip install --upgrade \
     cmake-format==0.6.13 \
     isort==5.7.0 \
-    black==20.8b1
+    black==22.3.0
 
 # Enable all the driver capabilities so we can use OpenCL in the container
 ENV NVIDIA_DRIVER_CAPABILITIES=all
