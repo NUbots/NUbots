@@ -95,7 +95,7 @@ COPY usr/local/toolchain/generate_${platform}_toolchain.py /usr/local/generate_t
 RUN python /usr/local/generate_toolchain.py --prefix /usr/local
 
 # zlib
-RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
+RUN install-from-source https://www.zlib.net/zlib-1.2.12.tar.gz
 
 # LLVM and Clang
 RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-12.0.1.tar.gz \
