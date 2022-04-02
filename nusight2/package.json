@@ -124,7 +124,7 @@
     "express": "4.17.1",
     "long": "4.0.0",
     "minimist": "1.2.5",
-    "mobx": "5.15.4",
+    "mobx": "5.15.7",
     "mobx-react": "6.2.2",
     "mobx-utils": "5.6.1",
     "nuclearnet.js": "1.5.5",
