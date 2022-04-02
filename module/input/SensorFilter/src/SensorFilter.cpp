@@ -771,11 +771,11 @@ namespace module::input {
                             sensors->Htw      = Hwt.inverse().matrix();
 
                             if (input.odometry_ground_truth.exists) {
-                                Eigen::Affine3d true_Htw = input.odometry_ground_truth.Htw;
+                                Eigen::Affine3d true_Htw(input.odometry_ground_truth.Htw);
 
-                                double translation_error = (true_Htw.translation() - sensors->Htw.translation()).norm();
-                                double rotational_error =
-                                    Eigen::Quaternion(true_Htw.linear() * sensors->Htw.linear().inverse()).w();
+                                double translation_error =
+                                    (true_Htw.translation() - Hwt.inverse().translation()).norm();
+                                double rotational_error = Eigen::Quaterniond(true_Htw.linear() * Hwt.linear()).w();
 
                                 emit(graph("Htw translational error", translation_error));
                                 emit(graph("Htw rotational error", rotational_error));

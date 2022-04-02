@@ -21,6 +21,8 @@ syntax = "proto3";
 
 package message.platform.webots;
 
+import "Matrix.proto";
+
 // Copy of cyberbotics/webots projects/samples/contests/robocup/controllers/player/messages.proto
 
 
@@ -81,6 +83,17 @@ message Message {
     }
     MessageType message_type = 1;
     string      text         = 2;
+}
+
+/// NUbots specific data sent from our own controllers rather than the official RoboCup Webots controller
+message OdometryGroundTruth {
+    /// Indicates if this message exists
+    bool exists = 1;
+    /// Affine3d transform from odometry (world) space to the robot (torso) space.
+    /// It measures the world in robot space
+    mat4 Htw = 2;
+    // /// Torso to Centre of Mass (CoM) in torso space
+    // vec4 rMTt = 17;
 }
 
 message SensorMeasurements {
@@ -149,15 +162,4 @@ message ActuatorRequests {
     repeated SensorTimeStep sensor_time_steps = 6;
     repeated CameraQuality  camera_qualities  = 7;
     repeated CameraExposure camera_exposures  = 8;
-}
-
-/// NUbots specific data sent from our own controllers rather than the official RoboCup Webots controller
-message OdometryGroundTruth {
-    /// Indicates if this message exists
-    bool exists = 1;
-    /// Affine3d transform from odometry (world) space to the robot (torso) space.
-    /// It measures the world in robot space
-    mat4 Htw = 2;
-    // /// Torso to Centre of Mass (CoM) in torso space
-    // vec4 rMTt = 17;
 }

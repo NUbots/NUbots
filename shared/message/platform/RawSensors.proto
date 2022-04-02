@@ -20,10 +20,10 @@ syntax = "proto3";
 
 package message.platform;
 
+import "message/platform/webots/messages.proto";
 import "google/protobuf/timestamp.proto";
 
 import "Vector.proto";
-import "messages.proto";
 
 /**
  * @author Trent Houliston
@@ -159,7 +159,7 @@ message RawSensors {
     FSRs   fsr       = 10;
     Servos servo     = 11;
     /// Ground truth from a simulator
-    OdometryGroundTruth odometry_ground_truth = 12;
+    webots.OdometryGroundTruth odometry_ground_truth = 12;
 }
 
 message ButtonLeftDown {}
