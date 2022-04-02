@@ -72,7 +72,7 @@
     "@types/webpack-node-externals": "2.5.2",
     "@types/xxhashjs": "0.2.2",
     "@typescript-eslint/eslint-plugin": "4.28.4",
-    "@typescript-eslint/parser": "4.28.4",
+    "@typescript-eslint/parser": "4.33.0",
     "copy-webpack-plugin": "9.0.1",
     "css-loader": "6.2.0",
     "eslint": "7.31.0",
