@@ -44,7 +44,7 @@ jobs:
 
       # Build the docker image
       - name: 🐳 Build the docker image 🐳
-        uses: docker/build-push-action@v2.7.0
+        uses: docker/build-push-action@v2.10.0
         with:
           pull: true
           tags: "nubots/nubots:pull-request-${{ github.event.number }}"
