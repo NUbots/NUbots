@@ -50,9 +50,9 @@ def properties_run(context):
 
             d = np.asarray(
                 [
-                    [y ** 2 + z ** 2, -x * y, -x * z],
-                    [-x * y, x ** 2 + z ** 2, -y * z],
-                    [-x * z, -y * z, x ** 2 + y ** 2],
+                    [y**2 + z**2, -x * y, -x * z],
+                    [-x * y, x**2 + z**2, -y * z],
+                    [-x * z, -y * z, x**2 + y**2],
                 ]
             )
 
