@@ -95,7 +95,7 @@ COPY usr/local/toolchain/generate_${platform}_toolchain.py /usr/local/generate_t
 RUN python /usr/local/generate_toolchain.py --prefix /usr/local
 
 # zlib
-RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
+RUN install-from-source https://www.zlib.net/zlib-1.2.12.tar.gz
 
 # LLVM and Clang
 RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-12.0.1.tar.gz \
@@ -277,9 +277,19 @@ RUN mkdir -p /usr/local/include/zstr \
     && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/strict_fstream.hpp -O /usr/local/include/strict_fstream.hpp \
     && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/zstr_make_unique_polyfill.h -O /usr/local/include/zstr_make_unique_polyfill.h
 
+# Pinnochio
+RUN install-from-source https://github.com/ros/console_bridge/archive/refs/tags/1.0.2.tar.gz
+RUN install-from-source https://github.com/ros/urdfdom_headers/archive/refs/tags/1.0.5.tar.gz
+RUN install-package tinyxml
+RUN install-package boost
+RUN install-package python-numpy
+RUN install-from-source https://github.com/stack-of-tasks/eigenpy/releases/download/v2.7.1/eigenpy-2.7.1.tar.gz
+RUN install-from-source https://github.com/ros/urdfdom/archive/refs/tags/3.0.0.tar.gz
+RUN install-from-source https://github.com/stack-of-tasks/pinocchio/releases/download/v2.6.6/pinocchio-2.6.6.tar.gz
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
+
 
 # Install python libraries
 RUN pip install \
