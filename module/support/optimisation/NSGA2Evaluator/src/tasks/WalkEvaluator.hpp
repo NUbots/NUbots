@@ -37,7 +37,7 @@ namespace module {
                 std::vector<double> constraintsNotViolated();
                 bool checkForFall(const RawSensors& sensors);
                 void updateMaxFieldPlaneSway(const RawSensors& sensors);
-                bool checkOfCourse(const RawSensors& sensors);
+                bool checkOffCourse(const RawSensors& sensors);
 
             private:
                 /// @brief Robot state for this evaluation, used during fitness and constraint calculation

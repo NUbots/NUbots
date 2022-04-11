@@ -35,7 +35,7 @@ namespace module {
                 if (checkForFall(sensors)) {
                     evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TerminateEarly));
                 }
-                if(checkOfCourse(sensors))  //Checking if NUgus walks in straght line in the X directon
+                if(checkOffCourse(sensors))  //Checking if NUgus walks in straght line in the X directon
                 {
                     evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TerminateEarly));
                 }
@@ -203,7 +203,7 @@ namespace module {
             }
 
             // Checking if NUgus goes off the Y axis path too far
-            bool WalkEvaluator::checkOfCourse(const RawSensors& sensors)
+            bool WalkEvaluator::checkOffCourse(const RawSensors& sensors)
             {
                 bool offCourse         = false;
                 auto distanceOffCourse = std::fabs(robotPosition.y() - initialRobotPosition.y());
