@@ -35,6 +35,10 @@ namespace module {
                 if (checkForFall(sensors)) {
                     evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TerminateEarly));
                 }
+                if(checkOfCourse(sensors))  //Checking if NUgus walks in straght line in the X directon
+                {
+                    evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TerminateEarly));
+                }
             }
 
             void WalkEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position) {
@@ -196,6 +200,25 @@ namespace module {
                 if (fieldPlaneSway > maxFieldPlaneSway) {
                     maxFieldPlaneSway = fieldPlaneSway;
                 }
+            }
+
+            // Checking if NUgus goes off the Y axis path too far
+            bool WalkEvaluator::checkOfCourse(const RawSensors& sensors)
+            {
+                bool offCourse         = false;
+                auto distanceOffCourse = std::fabs(robotPosition.y() - initialRobotPosition.y());
+
+                if (distanceOffCourse > 0.2)
+                {
+                    NUClear::log<NUClear::DEBUG>("OffCourse!");
+                    NUClear::log<NUClear::DEBUG>("orination on robot (x y z): ", robotPosition.x(),
+                                                                                 robotPosition,y(),
+                                                                                 robotPosition.z());
+
+                    offCourse = true;
+                }
+
+                return offCourse;
             }
 
         }  // namespace optimisation
