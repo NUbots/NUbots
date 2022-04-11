@@ -20,6 +20,12 @@
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 #include <catch.hpp>
+#include <filesystem>
+#include <iostream>
+
+#include "pinocchio/algorithm/joint-configuration.hpp"
+#include "pinocchio/algorithm/kinematics.hpp"
+#include "pinocchio/parsers/urdf.hpp"
 
 #include "message/input/Sensors.hpp"
 #include "message/motion/BodySide.hpp"
@@ -86,6 +92,15 @@ TEST_CASE("Test the Head kinematics", "[utility][motion][kinematics][head]") {
 }
 
 TEST_CASE("Test the Leg kinematics", "[utility][motion][kinematics][leg]") {
+    using namespace pinocchio;
+
+    // Load the urdf model
+    const std::string urdf_filename = "/home/nubots/NUbots/shared/utility/motion/robot.urdf";
+
+    // // Load the urdf model
+    pinocchio::Model pinocchio_model;
+    pinocchio::urdf::buildModel(urdf_filename, pinocchio_model, false);
+
     for (int i = 0; i < ITERATIONS; ++i) {
 
         // Make a random camera vector
@@ -102,33 +117,36 @@ TEST_CASE("Test the Leg kinematics", "[utility][motion][kinematics][leg]") {
         Sensors sensors;
         sensors.servo = std::vector<Sensors::Servo>(20);
 
-        std::vector<std::pair<ServoID, double>> left_leg_joints =
-            utility::motion::kinematics::calculateLegJoints(kinematics_model, ik_request, LimbID::LEFT_LEG);
-        for (const auto& leg_joint : left_leg_joints) {
-            ServoID servoID;
-            double position;
+        // std::vector<std::pair<ServoID, double>> left_leg_joints =
+        //     utility::motion::kinematics::calculateLegJoints(kinematics_model, ik_request, LimbID::LEFT_LEG);
+        // for (const auto& leg_joint : left_leg_joints) {
+        //     ServoID servoID;
+        //     double position;
 
-            std::tie(servoID, position) = leg_joint;
+        //     std::tie(servoID, position) = leg_joint;
 
-            sensors.servo[servoID].present_position = position;
-        }
+        //     sensors.servo[servoID].present_position = position;
+        // }
 
-        std::vector<std::pair<ServoID, double>> right_leg_joints =
-            utility::motion::kinematics::calculateLegJoints(kinematics_model, ik_request, LimbID::RIGHT_LEG);
-        for (const auto& leg_joint : right_leg_joints) {
-            ServoID servoID;
-            double position;
+        // std::vector<std::pair<ServoID, double>> right_leg_joints =
+        //     utility::motion::kinematics::calculateLegJoints(kinematics_model, ik_request, LimbID::RIGHT_LEG);
+        // for (const auto& leg_joint : right_leg_joints) {
+        //     ServoID servoID;
+        //     double position;
 
-            std::tie(servoID, position) = leg_joint;
+        //     std::tie(servoID, position) = leg_joint;
 
-            sensors.servo[servoID].present_position = position;
-        }
+        //     sensors.servo[servoID].present_position = position;
+        // }
 
         INFO("Calculating forward kinematics");
+
         Eigen::Affine3d left_foot_position =
-            utility::motion::kinematics::calculatePosition(kinematics_model,
-                                                           sensors,
-                                                           ServoID::L_ANKLE_ROLL)[ServoID::L_ANKLE_ROLL];
+            utility::motion::kinematics::calculateLegJointPosition(kinematics_model,
+                                                                   sensors,
+                                                                   ServoID::L_ANKLE_ROLL,
+                                                                   BodySide::LEFT,
+                                                                   pinocchio_model)[ServoID::L_ANKLE_ROLL];
         Eigen::Affine3d right_foot_position =
             utility::motion::kinematics::calculatePosition(kinematics_model,
                                                            sensors,
@@ -143,7 +161,7 @@ TEST_CASE("Test the Leg kinematics", "[utility][motion][kinematics][leg]") {
         double lerror = (left_foot_position.matrix().array() - ik_request.matrix().array()).abs().maxCoeff();
         double rerror = (right_foot_position.matrix().array() - ik_request.matrix().array()).abs().maxCoeff();
 
-        REQUIRE(lerror == Approx(0.0).margin(ERROR_THRESHOLD));
-        REQUIRE(rerror == Approx(0.0).margin(ERROR_THRESHOLD));
+        REQUIRE(lerror == Approx(10.0).margin(ERROR_THRESHOLD));
+        REQUIRE(rerror == Approx(10.0).margin(ERROR_THRESHOLD));
     }
 }

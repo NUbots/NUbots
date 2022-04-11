@@ -1,0 +1,1295 @@
+<?xml version="1.0"?>
+<robot name="/home/thomas164/NUgus.urdf" xmlns:xacro="http://ros.org/wiki/xacro">
+  <link name="base_link">
+    <visual>
+      <origin xyz="-0.001241 0.000021 0.115538" rpy="3.141281 0.014529 3.12021"/>
+      <geometry>
+        <box size="0.140936 0.154 0.229"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.001241 0.000021 0.115538" rpy="3.141281 0.014529 3.12021"/>
+      <geometry>
+        <box size="0.140936 0.154 0.229"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="gyroscope">
+  </link>
+  <joint name="base_link_gyroscope_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="gyroscope"/>
+    <origin xyz="0 0 0.2" rpy="0 0 0"/>
+  </joint>
+  <link name="accelerometer">
+  </link>
+  <joint name="base_link_accelerometer_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="accelerometer"/>
+    <origin xyz="0 0 0.2" rpy="0 0 0"/>
+  </joint>
+  <joint name="neck_yaw" type="revolute">
+    <parent link="base_link"/>
+    <child link="start_point_212"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="7.3" lower="-3.14159" upper="3.14159" velocity="8.17"/>
+    <origin xyz="0 0 0.26" rpy="0 0 0"/>
+  </joint>
+  <link name="start_point_212">
+  </link>
+  <joint name="hingejoint" type="continuous">
+    <parent link="start_point_212"/>
+    <child link="neck"/>
+    <axis xyz="0 0 1"/>
+    <origin xyz="0 0 0" rpy="0 0 1.577182"/>
+  </joint>
+  <link name="neck">
+    <visual>
+      <origin xyz="-0.002854 -0.000008 -0.017064" rpy="0 0 -1.570796"/>
+      <geometry>
+        <box size="0.040829 0.050604 0.062673"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.002854 -0.000008 -0.017064" rpy="0 0 -1.570796"/>
+      <geometry>
+        <box size="0.040829 0.050604 0.062673"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="head_pitch" type="revolute">
+    <parent link="neck"/>
+    <child link="start_point_211"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="7.3" lower="-3.14159" upper="3.14159" velocity="8.17"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+  <link name="start_point_211">
+  </link>
+  <joint name="hingejoint_0" type="continuous">
+    <parent link="start_point_211"/>
+    <child link="head"/>
+    <axis xyz="1 0 0"/>
+    <origin xyz="0 0 0" rpy="0.006458 0 0"/>
+  </joint>
+  <link name="head">
+    <visual>
+      <origin xyz="0 0 0.069" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.088"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.069" rpy="0 0 0"/>
+      <geometry>
+        <sphere radius="0.088"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="right_camera">
+  </link>
+  <joint name="head_right_camera_joint" type="fixed">
+    <parent link="head"/>
+    <child link="right_camera"/>
+    <origin xyz="-0.035299 -0.088936 0.071368" rpy="1.585655 -0.048371 -3.125012"/>
+  </joint>
+  <link name="left_camera">
+  </link>
+  <joint name="head_left_camera_joint" type="fixed">
+    <parent link="head"/>
+    <child link="left_camera"/>
+    <origin xyz="0.0353 -0.088936 0.071368" rpy="1.585655 -0.048371 -3.125012"/>
+  </joint>
+  <joint name="left_hip_yaw" type="revolute">
+    <parent link="base_link"/>
+    <child link="start_point_210"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" lower="-3.14159" upper="3.14159" velocity="5.76"/>
+    <origin xyz="0 0.055 0" rpy="0 0 0"/>
+  </joint>
+  <link name="start_point_210">
+  </link>
+  <joint name="hingejoint_1" type="continuous">
+    <parent link="start_point_210"/>
+    <child link="left_hip_yaw"/>
+    <axis xyz="0 0 1"/>
+    <origin xyz="0 0 0" rpy="0 0 1.571668"/>
+  </joint>
+  <link name="left_hip_yaw">
+    <visual>
+      <origin xyz="-0.005 0 -0.015" rpy="3.141593 0 0"/>
+      <geometry>
+        <cylinder radius="0.045" length="0.03"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.005 0 -0.015" rpy="3.141593 0 0"/>
+      <geometry>
+        <cylinder radius="0.045" length="0.03"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0.0475 -0.05" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.04 0.005 0.04"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0.0475 -0.05" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.04 0.005 0.04"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 -0.0475 -0.05" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.04 0.005 0.04"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 -0.0475 -0.05" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.04 0.005 0.04"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_hip_roll [hip]" type="revolute">
+    <parent link="left_hip_yaw"/>
+    <child link="start_point_206"/>
+    <axis xyz="0 -1 0"/>
+    <limit effort="10" lower="-3.14159" upper="3.14159" velocity="5.76"/>
+    <origin xyz="0 0 -0.06" rpy="0 0 0"/>
+  </joint>
+  <link name="start_point_206">
+  </link>
+  <joint name="hingejoint_2" type="continuous">
+    <parent link="start_point_206"/>
+    <child link="left_hip_roll"/>
+    <axis xyz="0 -1 0"/>
+    <origin xyz="0 0 0" rpy="0 -0.004548 0"/>
+  </joint>
+  <link name="left_hip_roll">
+    <visual>
+      <origin xyz="0 0.0025 -0.0025" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.035 0.085 0.065"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0.0025 -0.0025" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.035 0.085 0.065"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_hip_pitch" type="revolute">
+    <parent link="left_hip_roll"/>
+    <child link="start_point_209"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="10" lower="-3.14159" upper="3.14159" velocity="5.76"/>
+    <origin xyz="0 -0.01 0.005" rpy="0 0 0"/>
+  </joint>
+  <link name="start_point_209">
+  </link>
+  <joint name="hingejoint_3" type="continuous">
+    <parent link="start_point_209"/>
+    <child link="left_upper_leg"/>
+    <axis xyz="1 0 0"/>
+    <origin xyz="0 0 0" rpy="-0.055609 0 0"/>
+  </joint>
+  <link name="left_upper_leg">
+    <visual>
+      <origin xyz="0 -0.01345 -0.102006" rpy="-0.261799 0 0"/>
+      <geometry>
+        <box size="0.07 0.037 0.104"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 -0.01345 -0.102006" rpy="-0.261799 0 0"/>
+      <geometry>
+        <box size="0.07 0.037 0.104"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="-0.0375 0.021645 -0.031572" rpy="-0.261799 0 0"/>
+      <geometry>
+        <box size="0.005 0.065 0.05"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.0375 0.021645 -0.031572" rpy="-0.261799 0 0"/>
+      <geometry>
+        <box size="0.005 0.065 0.05"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0.0375 0.021645 -0.031572" rpy="-0.261799 0 0"/>
+      <geometry>
+        <box size="0.005 0.065 0.05"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.0375 0.021645 -0.031572" rpy="-0.261799 0 0"/>
+      <geometry>
+        <box size="0.005 0.065 0.05"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_knee_pitch" type="revolute">
+    <parent link="left_upper_leg"/>
+    <child link="start_point_208"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="10" lower="-3.14159" upper="3.14159" velocity="5.76"/>
+    <origin xyz="0 0.00924 -0.184766" rpy="0 0 0"/>
+  </joint>
+  <link name="start_point_208">
+  </link>
+  <joint name="hingejoint_4" type="continuous">
+    <parent link="start_point_208"/>
+    <child link="left_lower_leg"/>
+    <axis xyz="1 0 0"/>
+    <origin xyz="0 0 0" rpy="0.04297 0 0"/>
+  </joint>
+  <link name="left_lower_leg">
+    <visual>
+      <origin xyz="0 -0.00999 -0.067253" rpy="0.174533 0 0"/>
+      <geometry>
+        <box size="0.06 0.065 0.165"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 -0.00999 -0.067253" rpy="0.174533 0 0"/>
+      <geometry>
+        <box size="0.06 0.065 0.165"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="-0.0275 0.01951 -0.182253" rpy="0.174533 0 0"/>
+      <geometry>
+        <box size="0.005 0.065 0.065"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.0275 0.01951 -0.182253" rpy="0.174533 0 0"/>
+      <geometry>
+        <box size="0.005 0.065 0.065"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0.0275 0.01951 -0.182253" rpy="0.174533 0 0"/>
+      <geometry>
+        <box size="0.005 0.065 0.065"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.0275 0.01951 -0.182253" rpy="0.174533 0 0"/>
+      <geometry>
+        <box size="0.005 0.065 0.065"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_ankle_pitch" type="revolute">
+    <parent link="left_lower_leg"/>
+    <child link="start_point_203"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="10" lower="-3.14159" upper="3.14159" velocity="5.76"/>
+    <origin xyz="0 0.00001 -0.209753" rpy="0 0 0"/>
+  </joint>
+  <link name="start_point_203">
+  </link>
+  <joint name="hingejoint_5" type="continuous">
+    <parent link="start_point_203"/>
+    <child link="left_ankle"/>
+    <axis xyz="-1 -0.000002 0"/>
+    <origin xyz="0 0 0" rpy="-3.136309 0 -3.141591"/>
+  </joint>
+  <link name="left_ankle">
+    <visual>
+      <origin xyz="0 0.02 -0.0175" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.04 0.08 0.065"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0.02 -0.0175" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.04 0.08 0.065"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_ankle_roll" type="revolute">
+    <parent link="left_ankle"/>
+    <child link="start_point_202"/>
+    <axis xyz="0 -1 0"/>
+    <limit effort="10" lower="-3.14159" upper="3.14159" velocity="5.76"/>
+    <origin xyz="0 0.04 0" rpy="0 0.000001 0"/>
+  </joint>
+  <link name="start_point_202">
+  </link>
+  <joint name="hingejoint_6" type="continuous">
+    <parent link="start_point_202"/>
+    <child link="left_foot [foot]"/>
+    <axis xyz="0.000002 -1 0.000002"/>
+    <origin xyz="0 0 0" rpy="-3.141591 0.004152 -3.141591"/>
+  </joint>
+  <link name="left_foot [foot]">
+    <visual>
+      <origin xyz="0.0105 0.037 -0.017" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.125 0.0175 0.0585"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.0105 0.037 -0.017" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.125 0.0175 0.0585"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0.011 -0.128 -0.02" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.125 0.08 0.05"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.011 -0.128 -0.02" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.125 0.08 0.05"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0.011 -0.028 -0.035" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.125 0.12 0.01875"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.011 -0.028 -0.035" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.125 0.12 0.01875"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="left_touch_sensor_fr">
+    <visual>
+      <origin xyz="0 0 0.0056" rpy="3.110796 0 0"/>
+      <geometry>
+        <cylinder radius="0.009" length="0.001"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.0056" rpy="3.110796 0 0"/>
+      <geometry>
+        <cylinder radius="0.009" length="0.001"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0.000015 0.0061" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0.000015 0.0061" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 -0.000015 0.0051" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 -0.000015 0.0051" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_foot [foot]_left_touch_sensor_fr_joint" type="fixed">
+    <parent link="left_foot [foot]"/>
+    <child link="left_touch_sensor_fr"/>
+    <origin xyz="-0.041 -0.154 -0.060997" rpy="0 0 0"/>
+  </joint>
+  <link name="left_touch_sensor_fl">
+    <visual>
+      <origin xyz="0 0 0.0056" rpy="3.110796 0 0"/>
+      <geometry>
+        <cylinder radius="0.009" length="0.001"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.0056" rpy="3.110796 0 0"/>
+      <geometry>
+        <cylinder radius="0.009" length="0.001"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0.000015 0.0061" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0.000015 0.0061" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 -0.000015 0.0051" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 -0.000015 0.0051" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_foot [foot]_left_touch_sensor_fl_joint" type="fixed">
+    <parent link="left_foot [foot]"/>
+    <child link="left_touch_sensor_fl"/>
+    <origin xyz="0.057001 -0.154 -0.060998" rpy="0 0 0"/>
+  </joint>
+  <link name="left_touch_sensor_bl">
+    <visual>
+      <origin xyz="0 0 0.0056" rpy="3.110796 0 0"/>
+      <geometry>
+        <cylinder radius="0.009" length="0.001"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.0056" rpy="3.110796 0 0"/>
+      <geometry>
+        <cylinder radius="0.009" length="0.001"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0.000015 0.0061" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0.000015 0.0061" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 -0.000015 0.0051" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 -0.000015 0.0051" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_foot [foot]_left_touch_sensor_bl_joint" type="fixed">
+    <parent link="left_foot [foot]"/>
+    <child link="left_touch_sensor_bl"/>
+    <origin xyz="0.057 0.024999 -0.060997" rpy="0 0 0"/>
+  </joint>
+  <link name="left_touch_sensor_br">
+    <visual>
+      <origin xyz="0 0 0.0056" rpy="3.110796 0 0"/>
+      <geometry>
+        <cylinder radius="0.009" length="0.001"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.0056" rpy="3.110796 0 0"/>
+      <geometry>
+        <cylinder radius="0.009" length="0.001"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0.000015 0.0061" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0.000015 0.0061" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 -0.000015 0.0051" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 -0.000015 0.0051" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_foot [foot]_left_touch_sensor_br_joint" type="fixed">
+    <parent link="left_foot [foot]"/>
+    <child link="left_touch_sensor_br"/>
+    <origin xyz="-0.041001 0.025 -0.060996" rpy="0 0 0"/>
+  </joint>
+  <joint name="right_hip_yaw" type="revolute">
+    <parent link="base_link"/>
+    <child link="start_point_207"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="10" lower="-3.14159" upper="3.14159" velocity="5.76"/>
+    <origin xyz="0 -0.055 0" rpy="0 0 0"/>
+  </joint>
+  <link name="start_point_207">
+  </link>
+  <joint name="hingejoint_7" type="continuous">
+    <parent link="start_point_207"/>
+    <child link="right_hip_yaw"/>
+    <axis xyz="0 0 1"/>
+    <origin xyz="0 0 0" rpy="0 0 1.571725"/>
+  </joint>
+  <link name="right_hip_yaw">
+    <visual>
+      <origin xyz="0.005 0 -0.015" rpy="3.141593 0 0"/>
+      <geometry>
+        <cylinder radius="0.045" length="0.03"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.005 0 -0.015" rpy="3.141593 0 0"/>
+      <geometry>
+        <cylinder radius="0.045" length="0.03"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0.0475 -0.05" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.04 0.005 0.04"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0.0475 -0.05" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.04 0.005 0.04"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 -0.0475 -0.05" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.04 0.005 0.04"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 -0.0475 -0.05" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.04 0.005 0.04"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_hip_roll [hip]" type="revolute">
+    <parent link="right_hip_yaw"/>
+    <child link="start_point_206_8"/>
+    <axis xyz="0 -1 0"/>
+    <limit effort="10" lower="-3.14159" upper="3.14159" velocity="5.76"/>
+    <origin xyz="0 0 -0.06" rpy="0 0 0"/>
+  </joint>
+  <link name="start_point_206_8">
+  </link>
+  <joint name="hingejoint_9" type="continuous">
+    <parent link="start_point_206_8"/>
+    <child link="right_hip_roll"/>
+    <axis xyz="0 -1 0"/>
+    <origin xyz="0 0 0" rpy="0 -0.005921 0"/>
+  </joint>
+  <link name="right_hip_roll">
+    <visual>
+      <origin xyz="0 0.0025 -0.0025" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.035 0.085 0.065"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0.0025 -0.0025" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.035 0.085 0.065"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_hip_pitch" type="revolute">
+    <parent link="right_hip_roll"/>
+    <child link="start_point_205"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="10" lower="-3.14159" upper="3.14159" velocity="5.76"/>
+    <origin xyz="0 -0.01 0.015" rpy="0 0 0"/>
+  </joint>
+  <link name="start_point_205">
+  </link>
+  <joint name="hingejoint_10" type="continuous">
+    <parent link="start_point_205"/>
+    <child link="right_upper_leg"/>
+    <axis xyz="1 0 0"/>
+    <origin xyz="0 0 0" rpy="-0.055069 0 0"/>
+  </joint>
+  <link name="right_upper_leg">
+    <visual>
+      <origin xyz="0 -0.01295 -0.111994" rpy="-0.261799 0 0"/>
+      <geometry>
+        <box size="0.07 0.037 0.104"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 -0.01295 -0.111994" rpy="-0.261799 0 0"/>
+      <geometry>
+        <box size="0.07 0.037 0.104"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="-0.0375 0.022145 -0.04156" rpy="-0.261799 0 0"/>
+      <geometry>
+        <box size="0.005 0.065 0.05"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.0375 0.022145 -0.04156" rpy="-0.261799 0 0"/>
+      <geometry>
+        <box size="0.005 0.065 0.05"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0.0375 0.022145 -0.04156" rpy="-0.261799 0 0"/>
+      <geometry>
+        <box size="0.005 0.065 0.05"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.0375 0.022145 -0.04156" rpy="-0.261799 0 0"/>
+      <geometry>
+        <box size="0.005 0.065 0.05"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_knee_pitch" type="revolute">
+    <parent link="right_upper_leg"/>
+    <child link="start_point_204"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="10" lower="-3.14159" upper="3.14159" velocity="5.76"/>
+    <origin xyz="0 0.01024 -0.204744" rpy="0 0 0"/>
+  </joint>
+  <link name="start_point_204">
+  </link>
+  <joint name="hingejoint_11" type="continuous">
+    <parent link="start_point_204"/>
+    <child link="right_lower_leg"/>
+    <axis xyz="1 0 0"/>
+    <origin xyz="0 0 0" rpy="0.041619 0 0"/>
+  </joint>
+  <link name="right_lower_leg">
+    <visual>
+      <origin xyz="0 -0.00999 -0.05725" rpy="0.174533 0 0"/>
+      <geometry>
+        <box size="0.06 0.065 0.165"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 -0.00999 -0.05725" rpy="0.174533 0 0"/>
+      <geometry>
+        <box size="0.06 0.065 0.165"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="-0.0275 0.01951 -0.17225" rpy="0.174533 0 0"/>
+      <geometry>
+        <box size="0.005 0.065 0.065"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.0275 0.01951 -0.17225" rpy="0.174533 0 0"/>
+      <geometry>
+        <box size="0.005 0.065 0.065"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0.0275 0.01951 -0.17225" rpy="0.174533 0 0"/>
+      <geometry>
+        <box size="0.005 0.065 0.065"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.0275 0.01951 -0.17225" rpy="0.174533 0 0"/>
+      <geometry>
+        <box size="0.005 0.065 0.065"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_ankle_pitch" type="revolute">
+    <parent link="right_lower_leg"/>
+    <child link="start_point_203_12"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="10" lower="-3.14159" upper="3.14159" velocity="5.76"/>
+    <origin xyz="0 0.00001 -0.19975" rpy="0 0 0"/>
+  </joint>
+  <link name="start_point_203_12">
+  </link>
+  <joint name="hingejoint_13" type="continuous">
+    <parent link="start_point_203_12"/>
+    <child link="right_ankle"/>
+    <axis xyz="-1 -0.000002 0"/>
+    <origin xyz="0 0 0" rpy="-3.13626 0 -3.141591"/>
+  </joint>
+  <link name="right_ankle">
+    <visual>
+      <origin xyz="0 0.02 -0.0175" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.04 0.08 0.065"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0.02 -0.0175" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.04 0.08 0.065"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_ankle_roll" type="revolute">
+    <parent link="right_ankle"/>
+    <child link="start_point_202_14"/>
+    <axis xyz="0 -1 0"/>
+    <limit effort="10" lower="-3.14159" upper="3.14159" velocity="5.76"/>
+    <origin xyz="0 0.04 0" rpy="0 0.000001 0"/>
+  </joint>
+  <link name="start_point_202_14">
+  </link>
+  <joint name="hingejoint_15" type="continuous">
+    <parent link="start_point_202_14"/>
+    <child link="right_foot [foot]"/>
+    <axis xyz="0.000002 -1 0.000002"/>
+    <origin xyz="0 0 0" rpy="-3.141591 -0.005659 -3.141591"/>
+  </joint>
+  <link name="right_foot [foot]">
+    <visual>
+      <origin xyz="-0.0105 0.037 -0.017" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.125 0.0175 0.0585"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.0105 0.037 -0.017" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.125 0.0175 0.0585"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="-0.011 -0.128 -0.02" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.125 0.08 0.05"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.011 -0.128 -0.02" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.125 0.08 0.05"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="-0.011 -0.028 -0.035" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.125 0.12 0.01875"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.011 -0.028 -0.035" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.125 0.12 0.01875"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="right_touch_sensor_fl">
+    <visual>
+      <origin xyz="0 0 0.0056" rpy="3.110796 0 0"/>
+      <geometry>
+        <cylinder radius="0.009" length="0.001"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.0056" rpy="3.110796 0 0"/>
+      <geometry>
+        <cylinder radius="0.009" length="0.001"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0.000015 0.0061" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0.000015 0.0061" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 -0.000015 0.0051" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 -0.000015 0.0051" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_foot [foot]_right_touch_sensor_fl_joint" type="fixed">
+    <parent link="right_foot [foot]"/>
+    <child link="right_touch_sensor_fl"/>
+    <origin xyz="0.0409 -0.154 -0.060997" rpy="0 0 0"/>
+  </joint>
+  <link name="right_touch_sensor_fr">
+    <visual>
+      <origin xyz="0 0 0.0056" rpy="3.110796 0 0"/>
+      <geometry>
+        <cylinder radius="0.009" length="0.001"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.0056" rpy="3.110796 0 0"/>
+      <geometry>
+        <cylinder radius="0.009" length="0.001"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0.000015 0.0061" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0.000015 0.0061" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 -0.000015 0.0051" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 -0.000015 0.0051" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_foot [foot]_right_touch_sensor_fr_joint" type="fixed">
+    <parent link="right_foot [foot]"/>
+    <child link="right_touch_sensor_fr"/>
+    <origin xyz="-0.0575 -0.154 -0.060997" rpy="0 0 0"/>
+  </joint>
+  <link name="right_touch_sensor_bl">
+    <visual>
+      <origin xyz="0 0 0.0056" rpy="3.110796 0 0"/>
+      <geometry>
+        <cylinder radius="0.009" length="0.001"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.0056" rpy="3.110796 0 0"/>
+      <geometry>
+        <cylinder radius="0.009" length="0.001"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0.000015 0.0061" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0.000015 0.0061" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 -0.000015 0.0051" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 -0.000015 0.0051" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_foot [foot]_right_touch_sensor_bl_joint" type="fixed">
+    <parent link="right_foot [foot]"/>
+    <child link="right_touch_sensor_bl"/>
+    <origin xyz="0.041 0.025 -0.060996" rpy="0 0 0"/>
+  </joint>
+  <link name="right_touch_sensor_br">
+    <visual>
+      <origin xyz="0 0 0.0056" rpy="3.110796 0 0"/>
+      <geometry>
+        <cylinder radius="0.009" length="0.001"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.0056" rpy="3.110796 0 0"/>
+      <geometry>
+        <cylinder radius="0.009" length="0.001"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 0.000015 0.0061" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 0.000015 0.0061" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0 -0.000015 0.0051" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0 -0.000015 0.0051" rpy="3.110796 0 0"/>
+      <geometry>
+        <sphere radius="0.009"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_foot [foot]_right_touch_sensor_br_joint" type="fixed">
+    <parent link="right_foot [foot]"/>
+    <child link="right_touch_sensor_br"/>
+    <origin xyz="-0.0575 0.025 -0.060996" rpy="0 0 0"/>
+  </joint>
+  <joint name="left_shoulder_pitch [shoulder]" type="revolute">
+    <parent link="base_link"/>
+    <child link="start_point_201"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="7.3" lower="-3.14159" upper="3.14159" velocity="8.17"/>
+    <origin xyz="0.005 0.115 0.18" rpy="0 0 0"/>
+  </joint>
+  <link name="start_point_201">
+  </link>
+  <joint name="hingejoint_16" type="continuous">
+    <parent link="start_point_201"/>
+    <child link="left_shoulder [arm]"/>
+    <axis xyz="1 0.000001 0.000006"/>
+    <origin xyz="0 0 0" rpy="-1.562817 -0.000001 1.57079"/>
+  </joint>
+  <link name="left_shoulder [arm]">
+    <visual>
+      <origin xyz="0.015 0.0386 0.005" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.06 0.015 0.08"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.015 0.0386 0.005" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.06 0.015 0.08"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0.015 -0.0368 0.005" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.06 0.015 0.08"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.015 -0.0368 0.005" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.06 0.015 0.08"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_shoulder_roll" type="revolute">
+    <parent link="left_shoulder [arm]"/>
+    <child link="start_point_200"/>
+    <axis xyz="0 -1 0"/>
+    <limit effort="7.3" lower="-3.14159" upper="3.14159" velocity="8.17"/>
+    <origin xyz="0.015 0 0.005" rpy="0 0 0"/>
+  </joint>
+  <link name="start_point_200">
+  </link>
+  <joint name="hingejoint_17" type="continuous">
+    <parent link="start_point_200"/>
+    <child link="left_upper_arm [arm]"/>
+    <axis xyz="0 -0.000006 1"/>
+    <origin xyz="0 0 0" rpy="1.57079 -0.005614 0"/>
+  </joint>
+  <link name="left_upper_arm [arm]">
+    <visual>
+      <origin xyz="-0.0075 -0.0625 -0.0015" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.065 0.175 0.057"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.0075 -0.0625 -0.0015" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.065 0.175 0.057"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="-0.0125 -0.175 -0.0175" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.075 0.05 0.025"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.0125 -0.175 -0.0175" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.075 0.05 0.025"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="-0.0475 -0.1825 0.0275" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.005 0.065 0.065"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.0475 -0.1825 0.0275" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.005 0.065 0.065"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0.0225 -0.1825 0.0275" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.005 0.065 0.065"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.0225 -0.1825 0.0275" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.005 0.065 0.065"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="left_elbow_pitch" type="revolute">
+    <parent link="left_upper_arm [arm]"/>
+    <child link="start_point_199"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="7.3" lower="-3.14159" upper="3.14159" velocity="8.17"/>
+    <origin xyz="-0.01 -0.19 0.03999" rpy="0 0 0"/>
+  </joint>
+  <link name="start_point_199">
+  </link>
+  <joint name="hingejoint_18" type="continuous">
+    <parent link="start_point_199"/>
+    <child link="left_lower_arm [arm]"/>
+    <axis xyz="1 0 0"/>
+    <origin xyz="0 0 0" rpy="0.006685 0 0"/>
+  </joint>
+  <link name="left_lower_arm [arm]">
+    <visual>
+      <origin xyz="-0.005 -0.0525 -0.0015" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.05 0.155 0.057"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.005 -0.0525 -0.0015" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.05 0.155 0.057"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="-0.005 -0.1775 0.002" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.05 0.095 0.08"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.005 -0.1775 0.002" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.05 0.095 0.08"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="left_hand [hand]">
+  </link>
+  <joint name="left_lower_arm [arm]_left_hand [hand]_joint" type="fixed">
+    <parent link="left_lower_arm [arm]"/>
+    <child link="left_hand [hand]"/>
+    <origin xyz="0 -0.225 0.014" rpy="0 0 0"/>
+  </joint>
+  <joint name="right_shoulder_pitch [shoulder]" type="revolute">
+    <parent link="base_link"/>
+    <child link="start_point_198"/>
+    <axis xyz="0 1 0"/>
+    <limit effort="7.3" lower="-3.14159" upper="3.14159" velocity="8.17"/>
+    <origin xyz="0.005 -0.115 0.18" rpy="0 0 0"/>
+  </joint>
+  <link name="start_point_198">
+  </link>
+  <joint name="hingejoint_19" type="continuous">
+    <parent link="start_point_198"/>
+    <child link="right_shoulder [arm]"/>
+    <axis xyz="1 0.000001 0.000006"/>
+    <origin xyz="0 0 0" rpy="-1.562479 -0.000001 1.57079"/>
+  </joint>
+  <link name="right_shoulder [arm]">
+    <visual>
+      <origin xyz="-0.008 0.0375 0.005" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.06 0.015 0.08"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.008 0.0375 0.005" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.06 0.015 0.08"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="-0.005 -0.035 0.005" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.06 0.015 0.08"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.005 -0.035 0.005" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.06 0.015 0.08"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_shoulder_roll" type="revolute">
+    <parent link="right_shoulder [arm]"/>
+    <child link="start_point_197"/>
+    <axis xyz="0 -1 0"/>
+    <limit effort="7.3" lower="-3.14159" upper="3.14159" velocity="8.17"/>
+    <origin xyz="-0.015 0 0.005" rpy="0 0 0"/>
+  </joint>
+  <link name="start_point_197">
+  </link>
+  <joint name="hingejoint_20" type="continuous">
+    <parent link="start_point_197"/>
+    <child link="right_upper_arm [arm]"/>
+    <axis xyz="0 -0.000006 1"/>
+    <origin xyz="0 0 0" rpy="1.57079 -0.004769 0"/>
+  </joint>
+  <link name="right_upper_arm [arm]">
+    <visual>
+      <origin xyz="0.0075 -0.0625 -0.0015" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.065 0.175 0.057"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.0075 -0.0625 -0.0015" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.065 0.175 0.057"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0.0125 -0.175 -0.0175" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.075 0.05 0.025"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.0125 -0.175 -0.0175" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.075 0.05 0.025"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0.0475 -0.1825 0.0275" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.005 0.065 0.065"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.0475 -0.1825 0.0275" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.005 0.065 0.065"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="-0.0225 -0.1825 0.0275" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.005 0.065 0.065"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="-0.0225 -0.1825 0.0275" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.005 0.065 0.065"/>
+      </geometry>
+    </collision>
+  </link>
+  <joint name="right_elbow_pitch" type="revolute">
+    <parent link="right_upper_arm [arm]"/>
+    <child link="start_point_196"/>
+    <axis xyz="1 0 0"/>
+    <limit effort="7.3" lower="-3.14159" upper="3.14159" velocity="8.17"/>
+    <origin xyz="0.01 -0.19 0.04" rpy="0 0 0"/>
+  </joint>
+  <link name="start_point_196">
+  </link>
+  <joint name="hingejoint_21" type="continuous">
+    <parent link="start_point_196"/>
+    <child link="right_lower_arm [arm]"/>
+    <axis xyz="1 0 0"/>
+    <origin xyz="0 0 0" rpy="0.005751 0 0"/>
+  </joint>
+  <link name="right_lower_arm [arm]">
+    <visual>
+      <origin xyz="0.005 -0.0525 -0.0015" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.05 0.155 0.057"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.005 -0.0525 -0.0015" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.05 0.155 0.057"/>
+      </geometry>
+    </collision>
+    <visual>
+      <origin xyz="0.005 -0.1775 0.002" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.05 0.095 0.08"/>
+      </geometry>
+    </visual>
+    <collision>
+      <origin xyz="0.005 -0.1775 0.002" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.05 0.095 0.08"/>
+      </geometry>
+    </collision>
+  </link>
+  <link name="right_hand [hand]">
+  </link>
+  <joint name="right_lower_arm [arm]_right_hand [hand]_joint" type="fixed">
+    <parent link="right_lower_arm [arm]"/>
+    <child link="right_hand [hand]"/>
+    <origin xyz="0 -0.225 0.014" rpy="0 0 0"/>
+  </joint>
+</robot>
