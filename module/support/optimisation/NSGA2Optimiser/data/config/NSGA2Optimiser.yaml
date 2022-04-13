@@ -1,7 +1,7 @@
 # Larger population encourages wider search
-population_size: 60
+population_size: 40
 # More generations encourages deeper search
-max_generations: 200
+max_generations: 250
 num_objectives: 2
 num_constraints: 2
 seed: 7777777
@@ -43,7 +43,7 @@ walk:
     # Maximum flying foot height (how high we lift a foot from the ground)
     # (in m, >= 0)
     rise: [0.075, 0.05, 0.17]
-  trunk:
+  trunk: 
     # Height of the trunk from ground (how much we bend the knee, for the entire walk, fully standing is 0.51-ish)
     # (in m, > 0)
     height: [0.45, 0.35, 0.5]
