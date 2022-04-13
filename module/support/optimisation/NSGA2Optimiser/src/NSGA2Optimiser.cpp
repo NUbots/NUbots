@@ -59,7 +59,7 @@ namespace module {
                     else if (taskType == "stand") {
                         log<NUClear::INFO>("Task type is Stand");
                         task = std::make_unique<StandOptimiser>();
-                    }
+                    }// ADD strfe, rotate, vector path here
                     else {
                         log<NUClear::ERROR>("Unrecognised optimiser task", taskType);
                         powerplant.shutdown();
