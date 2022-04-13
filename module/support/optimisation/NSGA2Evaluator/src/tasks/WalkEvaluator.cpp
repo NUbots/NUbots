@@ -35,10 +35,10 @@ namespace module {
                 if (checkForFall(sensors)) {
                     evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TerminateEarly));
                 }
-               /* if(checkOffCourse(sensors))  //Checking if NUgus walks in straght line in the X directon
+                if(checkOffCourse(sensors))  //Checking if NUgus walks in straght line in the X directon
                 {
                     evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TerminateEarly));
-                }*/
+                }
             }
 
             void WalkEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position) {
