@@ -28,6 +28,12 @@
 #include <nuclear>
 #include <vector>
 
+#include "pinocchio/algorithm/jacobian.hpp"
+#include "pinocchio/algorithm/joint-configuration.hpp"
+#include "pinocchio/algorithm/kinematics.hpp"
+#include "pinocchio/parsers/sample-models.hpp"
+#include "pinocchio/spatial/explog.hpp"
+
 #include "message/input/Sensors.hpp"
 #include "message/motion/KinematicsModel.hpp"
 
@@ -198,6 +204,100 @@ namespace utility::motion::kinematics {
                 std::make_pair(ServoID::R_ANKLE_PITCH, (model.leg.LEFT_TO_RIGHT_ANKLE_PITCH) * -anklePitch));
             positions.push_back(
                 std::make_pair(ServoID::R_ANKLE_ROLL, (model.leg.LEFT_TO_RIGHT_ANKLE_ROLL) * ankleRoll));
+        }
+
+        return positions;
+    }
+
+    /*! @brief Calculates the leg joints for a given input ankle position.
+        The robot coordinate system has origin a distance DISTANCE_FROM_BODY_TO_HIP_JOINT above the midpoint
+   of the hips. Robot coordinate system: x is out of the front of the robot y is left, from right shoulder
+   to left z is upward, from feet to head Input ankle coordinate system: x is forward, from heel to toe y is
+   left, z is normal to the plane of the foot
+    @param target The target 4x4 basis matrix for the ankle
+    @param isLeft Request for left leg motors or right leg motors?
+    @param RobotKinematicsModel The class containing the leg model of the robot.
+*/
+    template <typename Scalar>
+    [[nodiscard]] std::vector<std::pair<ServoID, Scalar>> calculateLegJoints(
+        pinocchio::Model& pinocchio_model,
+        const Eigen::Transform<Scalar, 3, Eigen::Affine>& target_,
+        const LimbID& limb) {
+
+        std::vector<std::pair<ServoID, Scalar>> positions;
+
+        pinocchio::Data data(pinocchio_model);
+        int JOINT_ID;
+        if (limb == LimbID::LEFT_LEG) {
+            JOINT_ID = 6;
+        }
+        else {
+            JOINT_ID = 17;
+        }
+        const pinocchio::SE3 oMdes(target_.linear(), target_.translation());
+
+        Eigen::VectorXd q = pinocchio::neutral(pinocchio_model);
+        const double eps  = 1e-4;
+        const int IT_MAX  = 1000;
+        const double DT   = 1e-1;
+        const double damp = 1e-6;
+
+        pinocchio::Data::Matrix6x J(6, pinocchio_model.nv);
+        J.setZero();
+
+        bool success = false;
+        typedef Eigen::Matrix<double, 6, 1> Vector6d;
+        Vector6d err;
+        Eigen::VectorXd v(pinocchio_model.nv);
+        for (int i = 0;; i++) {
+            pinocchio::forwardKinematics(pinocchio_model, data, q);
+            const pinocchio::SE3 dMi = oMdes.actInv(data.oMi[JOINT_ID]);
+            err                      = pinocchio::log6(dMi).toVector();
+            if (err.norm() < eps) {
+                success = true;
+                break;
+            }
+            if (i >= IT_MAX) {
+                success = false;
+                break;
+            }
+            pinocchio::computeJointJacobian(pinocchio_model, data, q, JOINT_ID, J);
+            pinocchio::Data::Matrix6 JJt;
+            JJt.noalias() = J * J.transpose();
+            JJt.diagonal().array() += damp;
+            v.noalias() = -J.transpose() * JJt.ldlt().solve(err);
+            q           = pinocchio::integrate(pinocchio_model, q, v * DT);
+            if (!(i % 10))
+                std::cout << i << ": error = " << err.transpose() << std::endl;
+        }
+
+        if (success) {
+            std::cout << "Convergence achieved!" << std::endl;
+        }
+        else {
+            std::cout << "\nWarning: the iterative algorithm has not reached convergence to the desired precision "
+                      << std::endl;
+        }
+
+        std::cout << "\nresult: " << q.transpose() << std::endl;
+        std::cout << "\nfinal error: " << err.transpose() << std::endl;
+
+
+        if (limb == LimbID::LEFT_LEG) {
+            positions.push_back(std::make_pair(ServoID::L_HIP_YAW, q[1]));
+            positions.push_back(std::make_pair(ServoID::L_HIP_ROLL, q[2]));
+            positions.push_back(std::make_pair(ServoID::L_HIP_PITCH, q[3]));
+            positions.push_back(std::make_pair(ServoID::L_KNEE, q[4]));
+            positions.push_back(std::make_pair(ServoID::L_ANKLE_PITCH, q[5]));
+            positions.push_back(std::make_pair(ServoID::L_ANKLE_ROLL, q[6]));
+        }
+        else {
+            positions.push_back(std::make_pair(ServoID::R_HIP_YAW, q[12]));
+            positions.push_back(std::make_pair(ServoID::R_HIP_ROLL, q[13]));
+            positions.push_back(std::make_pair(ServoID::R_HIP_PITCH, q[14]));
+            positions.push_back(std::make_pair(ServoID::R_KNEE, q[15]));
+            positions.push_back(std::make_pair(ServoID::R_ANKLE_PITCH, q[16]));
+            positions.push_back(std::make_pair(ServoID::R_ANKLE_ROLL, q[17]));
         }
 
         return positions;

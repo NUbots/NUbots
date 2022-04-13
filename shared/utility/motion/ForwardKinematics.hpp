@@ -205,140 +205,6 @@ namespace utility::motion::kinematics {
         return positions;
     }
 
-    [[nodiscard]] inline std::map<ServoID, Eigen::Affine3d> calculateLegJointPosition(
-        const KinematicsModel& model,
-        const Sensors& sensors,
-        const ServoID& servoID,
-        const BodySide& isLeft,
-        pinocchio::Model& pinocchio_model) {
-
-        // Create data required by the algorithms
-        pinocchio::Data data(pinocchio_model);
-
-        // Sample a random configuration
-        Eigen::VectorXd q = randomConfiguration(pinocchio_model);
-        q.setZero();
-        std::cout << "q: " << q.transpose() << std::endl;
-
-        // Perform the forward kinematics over the kinematic tree
-        forwardKinematics(pinocchio_model, data, q);
-
-        std::map<ServoID, Eigen::Affine3d> positions{};
-        Eigen::Affine3d runningTransform = Eigen::Affine3d::Identity();
-        // Variables to mask left and right leg differences:
-        ServoID HIP_YAW;
-        ServoID HIP_ROLL;
-        ServoID HIP_PITCH;
-        ServoID KNEE;
-        ServoID ANKLE_PITCH;
-        ServoID ANKLE_ROLL;
-        int negativeIfRight = 1;
-
-        if (isLeft == BodySide::LEFT) {
-            HIP_YAW     = ServoID::L_HIP_YAW;
-            HIP_ROLL    = ServoID::L_HIP_ROLL;
-            HIP_PITCH   = ServoID::L_HIP_PITCH;
-            KNEE        = ServoID::L_KNEE;
-            ANKLE_PITCH = ServoID::L_ANKLE_PITCH;
-            ANKLE_ROLL  = ServoID::L_ANKLE_ROLL;
-        }
-        else {
-            HIP_YAW         = ServoID::R_HIP_YAW;
-            HIP_ROLL        = ServoID::R_HIP_ROLL;
-            HIP_PITCH       = ServoID::R_HIP_PITCH;
-            KNEE            = ServoID::R_KNEE;
-            ANKLE_PITCH     = ServoID::R_ANKLE_PITCH;
-            ANKLE_ROLL      = ServoID::R_ANKLE_ROLL;
-            negativeIfRight = -1;
-        }
-
-        // Hip pitch
-        runningTransform = runningTransform.translate(
-            Eigen::Vector3d(model.leg.HIP_OFFSET_X, negativeIfRight * model.leg.HIP_OFFSET_Y, -model.leg.HIP_OFFSET_Z));
-        // Rotate to face down the leg (see above for definitions of terms, including 'facing')
-        runningTransform = runningTransform.rotate(Eigen::AngleAxisd(M_PI_2, Eigen::Vector3d::UnitY()));
-        // Using right hand rule along global z gives positive direction of yaw:
-        runningTransform = runningTransform.rotate(
-            Eigen::AngleAxisd(-sensors.servo[HIP_YAW].present_position, Eigen::Vector3d::UnitX()));
-        // Return basis facing from body to hip centre (down) with z aligned with the axis of the hip roll motor
-        // axis. Position at hip joint
-        positions[HIP_YAW] = runningTransform;
-        if (servoID == HIP_YAW) {
-            return positions;
-        }
-
-        runningTransform = runningTransform.rotate(
-            Eigen::AngleAxisd(sensors.servo[HIP_ROLL].present_position, Eigen::Vector3d::UnitZ()));
-        // Return basis facing down leg plane, with z oriented through axis of roll motor. Position still hip
-        // joint
-        positions[HIP_ROLL] = runningTransform;
-        if (servoID == HIP_ROLL) {
-            return positions;
-        }
-
-        // Rotate to face down upper leg
-        runningTransform = runningTransform.rotate(
-            Eigen::AngleAxisd(sensors.servo[HIP_PITCH].present_position, Eigen::Vector3d::UnitY()));
-        // Translate down upper leg
-        runningTransform = runningTransform.translate(Eigen::Vector3d(model.leg.UPPER_LEG_LENGTH, 0.0, 0.0));
-        // Return basis faces down upper leg, with z out of front of thigh. Pos = knee axis centre
-        positions[HIP_PITCH] = runningTransform;
-        if (servoID == HIP_PITCH) {
-            return positions;
-        }
-
-
-        // Rotate to face down lower leg
-        runningTransform =
-            runningTransform.rotate(Eigen::AngleAxisd(sensors.servo[KNEE].present_position, Eigen::Vector3d::UnitY()));
-        // Translate down lower leg
-        runningTransform = runningTransform.translate(Eigen::Vector3d(model.leg.LOWER_LEG_LENGTH, 0.0, 0.0));
-        // Return basis facing down lower leg, with z out of front of shin. Pos = ankle axis centre
-        positions[KNEE] = runningTransform;
-        if (servoID == KNEE) {
-            return positions;
-        }
-
-
-        // Rotate to face down foot (pitch)
-        runningTransform = runningTransform.rotate(
-            Eigen::AngleAxisd(sensors.servo[ANKLE_PITCH].present_position, Eigen::Vector3d::UnitY()));
-        // Return basis facing pitch down to foot with z out the front of the foot. Pos = ankle axis centre
-        positions[ANKLE_PITCH] = runningTransform;
-        if (servoID == ANKLE_PITCH) {
-            return positions;
-        }
-
-        // Rotate to face down foot (roll)
-        runningTransform = runningTransform.rotate(
-            Eigen::AngleAxisd(sensors.servo[ANKLE_ROLL].present_position, Eigen::Vector3d::UnitZ()));
-        // Rotate so x faces toward toes
-        runningTransform = runningTransform.rotate(Eigen::AngleAxisd(-M_PI_2, Eigen::Vector3d::UnitY()));
-        // Translate to ground
-        runningTransform = runningTransform.translate(Eigen::Vector3d(0.0, 0.0, -model.leg.FOOT_HEIGHT));
-        // Return basis with x out of the front of the toe and z out the top of foot. Pos = ankle axis centre
-        // projected to ground
-        positions[ANKLE_ROLL] = runningTransform;
-
-        // Print out the placement of each joint of the kinematic tree
-        for (pinocchio::JointIndex joint_id = 0; joint_id < (pinocchio::JointIndex) pinocchio_model.njoints; ++joint_id)
-            std::cout << std::setw(40) << std::left << pinocchio_model.names[joint_id] << "JOINT_ID : " << joint_id
-                      << " position : " << std::fixed << std::setprecision(4)
-                      << data.oMi[joint_id].translation().transpose()
-                      << " orientation : " << data.oMi[joint_id].rotation().eulerAngles(2, 1, 0).transpose()
-                      << std::endl;
-        std::cout << "positions length: " << positions.size() << std::endl;
-        for (int i = 1; i < positions.size(); i++) {
-            std::cout << std::setw(40) << std::left << "JOINT_ID : " << i
-                      << "position: " << positions[i].translation().transpose() << std::endl;
-        }
-
-        std::cout << "Pinocchio position of left ankle " << data.oMi[6].translation().transpose() << std::endl;
-        std::cout << "NUbots position of left ankle " << positions[ANKLE_ROLL].translation().transpose() << std::endl;
-
-        return positions;
-    }
-
     /*! @brief
         @NOTE read " runningTransform *= utility::math::matrix::_RotationMatrix(angle, 4); " as "Rotate the
        running transform about its local _ coordinate by angle."
@@ -443,6 +309,131 @@ namespace utility::motion::kinematics {
             case ServoID::L_KNEE:
             case ServoID::L_ANKLE_PITCH:
             case ServoID::L_ANKLE_ROLL: return calculateLegJointPosition(model, sensors, servoID, BodySide::LEFT);
+            default: return std::map<ServoID, Eigen::Affine3d>();
+        }
+    }
+
+    /*! @brief
+     */
+    Eigen::Affine3d pinocchio2Eigen(pinocchio::Data data, int JOINT_ID) {
+        // Position
+        Eigen::Vector3d position = data.oMi[JOINT_ID].translation();
+        // Orientation
+        Eigen::Matrix<double, 3, 3> rotation = data.oMi[JOINT_ID].rotation();
+        // Transform
+        Eigen::Affine3d transform = Eigen::Affine3d::Identity();
+        transform.translate(position);
+        transform.linear() = rotation;
+        return transform;
+    }
+
+    /*! @brief
+     */
+    Eigen::VectorXd sensors2Pinocchio(const Sensors& sensors, pinocchio::Model& pinocchio_model) {
+        Eigen::VectorXd q = pinocchio::randomConfiguration(pinocchio_model);
+        q.setZero();
+        q[1]  = sensors.servo[ServoID::L_HIP_YAW].present_position;
+        q[2]  = sensors.servo[ServoID::L_HIP_ROLL].present_position;
+        q[3]  = sensors.servo[ServoID::L_HIP_PITCH].present_position;
+        q[4]  = sensors.servo[ServoID::L_KNEE].present_position;
+        q[5]  = sensors.servo[ServoID::L_ANKLE_PITCH].present_position;
+        q[6]  = sensors.servo[ServoID::L_ANKLE_ROLL].present_position;
+        q[7]  = sensors.servo[ServoID::L_SHOULDER_PITCH].present_position;
+        q[8]  = sensors.servo[ServoID::L_SHOULDER_ROLL].present_position;
+        q[9]  = sensors.servo[ServoID::L_ELBOW].present_position;
+        q[10] = sensors.servo[ServoID::HEAD_YAW].present_position;
+        q[11] = sensors.servo[ServoID::HEAD_PITCH].present_position;
+        q[12] = sensors.servo[ServoID::R_HIP_YAW].present_position;
+        q[13] = sensors.servo[ServoID::R_HIP_ROLL].present_position;
+        q[14] = sensors.servo[ServoID::R_HIP_PITCH].present_position;
+        q[15] = sensors.servo[ServoID::R_KNEE].present_position;
+        q[16] = sensors.servo[ServoID::R_ANKLE_PITCH].present_position;
+        q[17] = sensors.servo[ServoID::R_ANKLE_ROLL].present_position;
+        q[18] = sensors.servo[ServoID::R_SHOULDER_PITCH].present_position;
+        q[19] = sensors.servo[ServoID::R_SHOULDER_ROLL].present_position;
+        q[20] = sensors.servo[ServoID::R_ELBOW].present_position;
+        return q;
+    }
+    /*! @brief
+     */
+    Sensors pinocchio2Sensors(Eigen::VectorXd q) {
+        Sensors sensors;
+        sensors.servo                                             = std::vector<Sensors::Servo>(20);
+        sensors.servo[ServoID::L_HIP_YAW].present_position        = q[1];
+        sensors.servo[ServoID::L_HIP_ROLL].present_position       = q[2];
+        sensors.servo[ServoID::L_HIP_PITCH].present_position      = q[3];
+        sensors.servo[ServoID::L_KNEE].present_position           = q[4];
+        sensors.servo[ServoID::L_ANKLE_PITCH].present_position    = q[5];
+        sensors.servo[ServoID::L_ANKLE_ROLL].present_position     = q[6];
+        sensors.servo[ServoID::L_SHOULDER_PITCH].present_position = q[7];
+        sensors.servo[ServoID::L_SHOULDER_ROLL].present_position  = q[8];
+        sensors.servo[ServoID::L_ELBOW].present_position          = q[9];
+        sensors.servo[ServoID::HEAD_YAW].present_position         = q[10];
+        sensors.servo[ServoID::HEAD_PITCH].present_position       = q[11];
+        sensors.servo[ServoID::R_HIP_YAW].present_position        = q[12];
+        sensors.servo[ServoID::R_HIP_ROLL].present_position       = q[13];
+        sensors.servo[ServoID::R_HIP_PITCH].present_position      = q[14];
+        sensors.servo[ServoID::R_KNEE].present_position           = q[15];
+        sensors.servo[ServoID::R_ANKLE_PITCH].present_position    = q[16];
+        sensors.servo[ServoID::R_ANKLE_ROLL].present_position     = q[17];
+        sensors.servo[ServoID::R_SHOULDER_PITCH].present_position = q[18];
+        sensors.servo[ServoID::R_SHOULDER_ROLL].present_position  = q[19];
+        sensors.servo[ServoID::R_ELBOW].present_position          = q[20];
+        return sensors;
+    }
+
+    /*! @brief
+     */
+    [[nodiscard]] inline std::map<ServoID, Eigen::Affine3d> calculatePosition(pinocchio::Model& pinocchio_model,
+                                                                              const Sensors& sensors,
+                                                                              const ServoID& servoID) {
+        std::map<ServoID, Eigen::Affine3d> positions{};
+        // Create data required by the algorithms
+        pinocchio::Data data(pinocchio_model);
+        // Convert sensor readings into a vector q for pinocchio
+        Eigen::VectorXd q = sensors2Pinocchio(sensors, pinocchio_model);
+        // q.setZero();
+        std::cout << "q: " << q.transpose() << std::endl;
+        // Perform the forward kinematics over the kinematic tree
+        forwardKinematics(pinocchio_model, data, q);
+
+        // Print out the placement of each joint of the kinematic tree
+        for (pinocchio::JointIndex joint_id = 0; joint_id < (pinocchio::JointIndex) pinocchio_model.njoints; ++joint_id)
+            std::cout << std::setw(40) << std::left << pinocchio_model.names[joint_id] << "JOINT_ID : " << joint_id
+                      << " position : " << std::fixed << std::setprecision(4)
+                      << data.oMi[joint_id].translation().transpose()
+                      << " orientation : " << data.oMi[joint_id].rotation().eulerAngles(2, 1, 0).transpose()
+                      << std::endl;
+        std::cout << "positions length: " << positions.size() << std::endl;
+        for (int i = 1; i < positions.size(); i++) {
+            std::cout << std::setw(40) << std::left << "JOINT_ID : " << i
+                      << "position: " << positions[i].translation().transpose() << std::endl;
+        }
+        std::cout << "Pinocchio position of left ankle " << data.oMi[6].translation().transpose() << std::endl;
+        std::cout << "Pinocchio position of right ankle " << data.oMi[17].translation().transpose() << std::endl;
+
+        // TODO: SYNC URDF JOINT IDS AND SERVOID VALUES
+        switch (servoID.value) {
+            case ServoID::HEAD_YAW:
+            case ServoID::HEAD_PITCH:
+            case ServoID::R_SHOULDER_PITCH:
+            case ServoID::R_SHOULDER_ROLL:
+            case ServoID::R_ELBOW:
+            case ServoID::L_SHOULDER_PITCH:
+            case ServoID::L_SHOULDER_ROLL:
+            case ServoID::L_ELBOW:
+            case ServoID::R_HIP_YAW:
+            case ServoID::R_HIP_ROLL:
+            case ServoID::R_HIP_PITCH:
+            case ServoID::R_KNEE:
+            case ServoID::R_ANKLE_PITCH:
+            case ServoID::R_ANKLE_ROLL: positions[ServoID::R_ANKLE_ROLL] = pinocchio2Eigen(data, 17); return positions;
+            case ServoID::L_HIP_YAW:
+            case ServoID::L_HIP_ROLL:
+            case ServoID::L_HIP_PITCH:
+            case ServoID::L_KNEE:
+            case ServoID::L_ANKLE_PITCH:
+            case ServoID::L_ANKLE_ROLL: positions[ServoID::L_ANKLE_ROLL] = pinocchio2Eigen(data, 6); return positions;
             default: return std::map<ServoID, Eigen::Affine3d>();
         }
     }
