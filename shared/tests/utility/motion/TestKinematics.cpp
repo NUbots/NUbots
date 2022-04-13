@@ -50,8 +50,8 @@ static const KinematicsModel kinematics_model = {
     {-0.007, 0.0, 0.21, 0.048, 0.069, 0, 0.065, M_PI / 90.0, 0.068, -M_PI_4, M_PI_4, -M_PI / 6.0, M_PI / 6.0},
 };
 
-static constexpr double ITERATIONS      = 10000;
-static constexpr double ERROR_THRESHOLD = 2e-5;
+static constexpr double ITERATIONS      = 1000;
+static constexpr double ERROR_THRESHOLD = 5e-4;
 
 
 TEST_CASE("Test the Head kinematics", "[utility][motion][kinematics][head]") {
@@ -103,65 +103,83 @@ TEST_CASE("Test the Leg kinematics", "[utility][motion][kinematics][leg]") {
 
     for (int i = 0; i < ITERATIONS; ++i) {
 
-        // Make a random camera vector
-        Eigen::Affine3d ik_request = Eigen::Affine3d::Identity();
-        Eigen::Vector3d rotation   = Eigen::Vector3d::Random() * 2.0 * M_PI;
-        ik_request                 = ik_request.rotate(Eigen::AngleAxisd(rotation.x(), Eigen::Vector3d::UnitX()));
-        ik_request                 = ik_request.rotate(Eigen::AngleAxisd(rotation.y(), Eigen::Vector3d::UnitY()));
-        ik_request                 = ik_request.rotate(Eigen::AngleAxisd(rotation.z(), Eigen::Vector3d::UnitZ()));
-        ik_request.translation()   = ((Eigen::Vector3d::Random() + Eigen::Vector3d::Ones()) * 0.5)
-                                       .cwiseProduct(Eigen::Vector3d(0.03, 0.03, 0.10));
+        // Make a desired feasible pose vector for both feet
+        Eigen::VectorXd q(pinocchio_model.njoints);
+        q    = 0.5 * Eigen::MatrixXd::Random(pinocchio_model.njoints, 1);
+        q[0] = 0;
 
-        INFO("Testing with the random transform, \n" << ik_request.matrix());
+        Sensors sensors = utility::motion::kinematics::pinocchio2Sensors(q);
 
-        Sensors sensors;
-        sensors.servo = std::vector<Sensors::Servo>(20);
+        Eigen::Affine3d left_foot_position_desired =
+            utility::motion::kinematics::calculatePosition(pinocchio_model,
+                                                           sensors,
+                                                           ServoID::L_ANKLE_ROLL)[ServoID::L_ANKLE_ROLL];
+        Eigen::Affine3d right_foot_position_desired =
+            utility::motion::kinematics::calculatePosition(pinocchio_model,
+                                                           sensors,
+                                                           ServoID::R_ANKLE_ROLL)[ServoID::R_ANKLE_ROLL];
 
-        // std::vector<std::pair<ServoID, double>> left_leg_joints =
-        //     utility::motion::kinematics::calculateLegJoints(kinematics_model, ik_request, LimbID::LEFT_LEG);
-        // for (const auto& leg_joint : left_leg_joints) {
-        //     ServoID servoID;
-        //     double position;
 
-        //     std::tie(servoID, position) = leg_joint;
+        std::vector<std::pair<ServoID, double>> left_leg_joints =
+            utility::motion::kinematics::calculateLegJoints(pinocchio_model,
+                                                            left_foot_position_desired,
+                                                            LimbID::LEFT_LEG);
+        for (const auto& leg_joint : left_leg_joints) {
+            ServoID servoID;
+            double position;
 
-        //     sensors.servo[servoID].present_position = position;
-        // }
+            std::tie(servoID, position) = leg_joint;
 
-        // std::vector<std::pair<ServoID, double>> right_leg_joints =
-        //     utility::motion::kinematics::calculateLegJoints(kinematics_model, ik_request, LimbID::RIGHT_LEG);
-        // for (const auto& leg_joint : right_leg_joints) {
-        //     ServoID servoID;
-        //     double position;
+            sensors.servo[servoID].present_position = position;
+        }
 
-        //     std::tie(servoID, position) = leg_joint;
+        std::vector<std::pair<ServoID, double>> right_leg_joints =
+            utility::motion::kinematics::calculateLegJoints(pinocchio_model,
+                                                            right_foot_position_desired,
+                                                            LimbID::RIGHT_LEG);
+        for (const auto& leg_joint : right_leg_joints) {
+            ServoID servoID;
+            double position;
 
-        //     sensors.servo[servoID].present_position = position;
-        // }
+            std::tie(servoID, position) = leg_joint;
+
+            sensors.servo[servoID].present_position = position;
+        }
+
+        for (int i = 0; i < sensors.servo.size(); i++) {
+            std::cout << "Sensor ID: " << i << " , Position: " << sensors.servo[i].present_position << std::endl;
+        }
 
         INFO("Calculating forward kinematics");
 
         Eigen::Affine3d left_foot_position =
-            utility::motion::kinematics::calculateLegJointPosition(kinematics_model,
-                                                                   sensors,
-                                                                   ServoID::L_ANKLE_ROLL,
-                                                                   BodySide::LEFT,
-                                                                   pinocchio_model)[ServoID::L_ANKLE_ROLL];
+            utility::motion::kinematics::calculatePosition(pinocchio_model,
+                                                           sensors,
+                                                           ServoID::L_ANKLE_ROLL)[ServoID::L_ANKLE_ROLL];
         Eigen::Affine3d right_foot_position =
-            utility::motion::kinematics::calculatePosition(kinematics_model,
+            utility::motion::kinematics::calculatePosition(pinocchio_model,
                                                            sensors,
                                                            ServoID::R_ANKLE_ROLL)[ServoID::R_ANKLE_ROLL];
+        // INFO("Testing with the random left transform, \n" << left_foot_position_desired.matrix());
         INFO("Forward Kinematics predicts left foot: \n" << left_foot_position.matrix());
+        INFO("Compared to request left foot: \n" << left_foot_position_desired.matrix());
+
+        // INFO("Testing with the random right transform, \n" << right_foot_position_desired.matrix());
         INFO("Forward Kinematics predicts right foot: \n" << right_foot_position.matrix());
-        INFO("Compared to request: \n" << ik_request.matrix());
+        INFO("Compared to request right foot: \n" << right_foot_position_desired.matrix());
         for (size_t servo_id = 0; servo_id < ServoID::NUMBER_OF_SERVOS; ++servo_id) {
             INFO(ServoID(servo_id) << ": " << sensors.servo[servo_id].present_position);
         }
 
-        double lerror = (left_foot_position.matrix().array() - ik_request.matrix().array()).abs().maxCoeff();
-        double rerror = (right_foot_position.matrix().array() - ik_request.matrix().array()).abs().maxCoeff();
+        double lerror =
+            (left_foot_position.matrix().array() - left_foot_position_desired.matrix().array()).abs().maxCoeff();
+        double rerror =
+            (right_foot_position.matrix().array() - right_foot_position_desired.matrix().array()).abs().maxCoeff();
 
-        REQUIRE(lerror == Approx(10.0).margin(ERROR_THRESHOLD));
-        REQUIRE(rerror == Approx(10.0).margin(ERROR_THRESHOLD));
+        REQUIRE(lerror == Approx(0.0).margin(ERROR_THRESHOLD));
+        REQUIRE(rerror == Approx(0.0).margin(ERROR_THRESHOLD));
+        // if (i == 50) {
+        //     REQUIRE(lerror == Approx(10.0).margin(ERROR_THRESHOLD));
+        // }
     }
 }
