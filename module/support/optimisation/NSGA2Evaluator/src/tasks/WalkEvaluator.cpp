@@ -208,7 +208,7 @@ namespace module {
                 bool offCourse         = false;
                 auto distanceOffCourse = std::fabs(robotPosition.y() - initialRobotPosition.y());
 
-                if (distanceOffCourse > 0.2)
+                if (distanceOffCourse > 10)
                 {
                     NUClear::log<NUClear::DEBUG>("OffCourse!");
                     NUClear::log<NUClear::DEBUG>("orination on robot (x y z): ", robotPosition.x(),
