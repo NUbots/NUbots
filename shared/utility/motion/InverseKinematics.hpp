@@ -26,6 +26,7 @@
 #include <cmath>
 #include <limits>
 #include <nuclear>
+#include <stdlib.h>
 #include <vector>
 
 #include "pinocchio/algorithm/jacobian.hpp"
@@ -236,11 +237,16 @@ namespace utility::motion::kinematics {
         }
         const pinocchio::SE3 oMdes(target_.linear(), target_.translation());
 
-        Eigen::VectorXd q = pinocchio::neutral(pinocchio_model);
-        const double eps  = 1e-4;
-        const int IT_MAX  = 1000;
-        const double DT   = 1e-1;
-        const double damp = 1e-6;
+        Eigen::VectorXd q(pinocchio_model.nq);
+        q.setZero();
+        const double eps         = 1e-4;
+        const int IT_MAX         = 1000;
+        const double DT          = 1e-1;
+        const double damp        = 1e-6;
+        const int max_reattempts = 10;
+        int reattemp_count       = 0;
+        int min                  = -3;
+        int max                  = 3;
 
         pinocchio::Data::Matrix6x J(6, pinocchio_model.nv);
         J.setZero();
@@ -259,7 +265,29 @@ namespace utility::motion::kinematics {
             }
             if (i >= IT_MAX) {
                 success = false;
-                break;
+                // Reset configuration vector to some random values if it gets caught and cannot converge
+                if (limb == LimbID::LEFT_LEG) {
+                    q[pinocchio_model.joints[1].idx_q()] = rand() % (max - min + 1) + min;
+                    q[pinocchio_model.joints[2].idx_q()] = rand() % (max - min + 1) + min;
+                    q[pinocchio_model.joints[3].idx_q()] = rand() % (max - min + 1) + min;
+                    q[pinocchio_model.joints[4].idx_q()] = rand() % (max - min + 1) + min;
+                    q[pinocchio_model.joints[5].idx_q()] = rand() % (max - min + 1) + min;
+                    q[pinocchio_model.joints[6].idx_q()] = rand() % (max - min + 1) + min;
+                }
+                else {
+                    q[pinocchio_model.joints[12].idx_q()] = rand() % (max - min + 1) + min;
+                    q[pinocchio_model.joints[13].idx_q()] = rand() % (max - min + 1) + min;
+                    q[pinocchio_model.joints[14].idx_q()] = rand() % (max - min + 1) + min;
+                    q[pinocchio_model.joints[15].idx_q()] = rand() % (max - min + 1) + min;
+                    q[pinocchio_model.joints[16].idx_q()] = rand() % (max - min + 1) + min;
+                    q[pinocchio_model.joints[17].idx_q()] = rand() % (max - min + 1) + min;
+                }
+                i = 0;
+                reattemp_count += 1;
+                // If it cannot converge after max_reattempts terminate
+                if (reattemp_count >= max_reattempts) {
+                    break;
+                }
             }
             pinocchio::computeJointJacobian(pinocchio_model, data, q, JOINT_ID, J);
             pinocchio::Data::Matrix6 JJt;
@@ -273,6 +301,11 @@ namespace utility::motion::kinematics {
 
         if (success) {
             std::cout << "Convergence achieved!" << std::endl;
+            pinocchio::forwardKinematics(pinocchio_model, data, q);
+            std::cout << "Desired position of JOINT:" << JOINT_ID << " IK: " << oMdes.translation().transpose()
+                      << std::endl;
+            std::cout << "Pinocchio position of JOINT:" << JOINT_ID
+                      << " IK: " << data.oMi[JOINT_ID].translation().transpose() << std::endl;
         }
         else {
             std::cout << "\nWarning: the iterative algorithm has not reached convergence to the desired precision "
@@ -280,24 +313,29 @@ namespace utility::motion::kinematics {
         }
 
         std::cout << "\nresult: " << q.transpose() << std::endl;
+
+        for (pinocchio::JointIndex joint_id = 0; joint_id < (pinocchio::JointIndex) pinocchio_model.njoints; ++joint_id)
+            std::cout << std::setw(40) << std::left << pinocchio_model.names[joint_id] << "JOINT_ID : " << joint_id
+                      << "Joint Angle: " << q[joint_id] << std::endl;
+
         std::cout << "\nfinal error: " << err.transpose() << std::endl;
 
 
         if (limb == LimbID::LEFT_LEG) {
-            positions.push_back(std::make_pair(ServoID::L_HIP_YAW, q[1]));
-            positions.push_back(std::make_pair(ServoID::L_HIP_ROLL, q[2]));
-            positions.push_back(std::make_pair(ServoID::L_HIP_PITCH, q[3]));
-            positions.push_back(std::make_pair(ServoID::L_KNEE, q[4]));
-            positions.push_back(std::make_pair(ServoID::L_ANKLE_PITCH, q[5]));
-            positions.push_back(std::make_pair(ServoID::L_ANKLE_ROLL, q[6]));
+            positions.push_back(std::make_pair(ServoID::L_HIP_YAW, q[pinocchio_model.joints[1].idx_q()]));
+            positions.push_back(std::make_pair(ServoID::L_HIP_ROLL, q[pinocchio_model.joints[2].idx_q()]));
+            positions.push_back(std::make_pair(ServoID::L_HIP_PITCH, q[pinocchio_model.joints[3].idx_q()]));
+            positions.push_back(std::make_pair(ServoID::L_KNEE, q[pinocchio_model.joints[4].idx_q()]));
+            positions.push_back(std::make_pair(ServoID::L_ANKLE_PITCH, q[pinocchio_model.joints[5].idx_q()]));
+            positions.push_back(std::make_pair(ServoID::L_ANKLE_ROLL, q[pinocchio_model.joints[6].idx_q()]));
         }
         else {
-            positions.push_back(std::make_pair(ServoID::R_HIP_YAW, q[12]));
-            positions.push_back(std::make_pair(ServoID::R_HIP_ROLL, q[13]));
-            positions.push_back(std::make_pair(ServoID::R_HIP_PITCH, q[14]));
-            positions.push_back(std::make_pair(ServoID::R_KNEE, q[15]));
-            positions.push_back(std::make_pair(ServoID::R_ANKLE_PITCH, q[16]));
-            positions.push_back(std::make_pair(ServoID::R_ANKLE_ROLL, q[17]));
+            positions.push_back(std::make_pair(ServoID::R_HIP_YAW, q[pinocchio_model.joints[12].idx_q()]));
+            positions.push_back(std::make_pair(ServoID::R_HIP_ROLL, q[pinocchio_model.joints[13].idx_q()]));
+            positions.push_back(std::make_pair(ServoID::R_HIP_PITCH, q[pinocchio_model.joints[14].idx_q()]));
+            positions.push_back(std::make_pair(ServoID::R_KNEE, q[pinocchio_model.joints[15].idx_q()]));
+            positions.push_back(std::make_pair(ServoID::R_ANKLE_PITCH, q[pinocchio_model.joints[16].idx_q()]));
+            positions.push_back(std::make_pair(ServoID::R_ANKLE_ROLL, q[pinocchio_model.joints[17].idx_q()]));
         }
 
         return positions;
