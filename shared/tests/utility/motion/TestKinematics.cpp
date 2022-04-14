@@ -96,20 +96,20 @@ TEST_CASE("Test the Leg kinematics", "[utility][motion][kinematics][leg]") {
 
     // Load the urdf model
     const std::string urdf_filename = "/home/nubots/NUbots/shared/utility/motion/robot.urdf";
-
-    // // Load the urdf model
     pinocchio::Model pinocchio_model;
+    pinocchio::JointModelTranslation root_joint;
     pinocchio::urdf::buildModel(urdf_filename, pinocchio_model, false);
 
     for (int i = 0; i < ITERATIONS; ++i) {
 
         // Make a desired feasible pose vector for both feet
         Eigen::VectorXd q(pinocchio_model.njoints);
-        q    = 0.5 * Eigen::MatrixXd::Random(pinocchio_model.njoints, 1);
+        q    = 3.14 * Eigen::MatrixXd::Random(pinocchio_model.nq, 1);
         q[0] = 0;
-
-        Sensors sensors = utility::motion::kinematics::pinocchio2Sensors(q);
-
+        std::cout << "q random: " << q.transpose() << std::endl;
+        // Create a test set of sensors with the random configuration vector q
+        Sensors sensors = utility::motion::kinematics::pinocchio2Sensors(q, pinocchio_model);
+        // Solve FK for desired foot positions
         Eigen::Affine3d left_foot_position_desired =
             utility::motion::kinematics::calculatePosition(pinocchio_model,
                                                            sensors,
@@ -120,6 +120,7 @@ TEST_CASE("Test the Leg kinematics", "[utility][motion][kinematics][leg]") {
                                                            ServoID::R_ANKLE_ROLL)[ServoID::R_ANKLE_ROLL];
 
 
+        // Perform inverse kinematics on the desired foot positions
         std::vector<std::pair<ServoID, double>> left_leg_joints =
             utility::motion::kinematics::calculateLegJoints(pinocchio_model,
                                                             left_foot_position_desired,
@@ -146,12 +147,8 @@ TEST_CASE("Test the Leg kinematics", "[utility][motion][kinematics][leg]") {
             sensors.servo[servoID].present_position = position;
         }
 
-        for (int i = 0; i < sensors.servo.size(); i++) {
-            std::cout << "Sensor ID: " << i << " , Position: " << sensors.servo[i].present_position << std::endl;
-        }
-
         INFO("Calculating forward kinematics");
-
+        // Perform forwards kinematics with the inverse kinemtiacs solution
         Eigen::Affine3d left_foot_position =
             utility::motion::kinematics::calculatePosition(pinocchio_model,
                                                            sensors,
@@ -160,17 +157,13 @@ TEST_CASE("Test the Leg kinematics", "[utility][motion][kinematics][leg]") {
             utility::motion::kinematics::calculatePosition(pinocchio_model,
                                                            sensors,
                                                            ServoID::R_ANKLE_ROLL)[ServoID::R_ANKLE_ROLL];
-        // INFO("Testing with the random left transform, \n" << left_foot_position_desired.matrix());
         INFO("Forward Kinematics predicts left foot: \n" << left_foot_position.matrix());
         INFO("Compared to request left foot: \n" << left_foot_position_desired.matrix());
-
-        // INFO("Testing with the random right transform, \n" << right_foot_position_desired.matrix());
         INFO("Forward Kinematics predicts right foot: \n" << right_foot_position.matrix());
         INFO("Compared to request right foot: \n" << right_foot_position_desired.matrix());
-        for (size_t servo_id = 0; servo_id < ServoID::NUMBER_OF_SERVOS; ++servo_id) {
-            INFO(ServoID(servo_id) << ": " << sensors.servo[servo_id].present_position);
-        }
+        INFO("Iteration: " << i);
 
+        // Check the error between the desired pose and the calculated pose with IK solution
         double lerror =
             (left_foot_position.matrix().array() - left_foot_position_desired.matrix().array()).abs().maxCoeff();
         double rerror =
@@ -178,8 +171,5 @@ TEST_CASE("Test the Leg kinematics", "[utility][motion][kinematics][leg]") {
 
         REQUIRE(lerror == Approx(0.0).margin(ERROR_THRESHOLD));
         REQUIRE(rerror == Approx(0.0).margin(ERROR_THRESHOLD));
-        // if (i == 50) {
-        //     REQUIRE(lerror == Approx(10.0).margin(ERROR_THRESHOLD));
-        // }
     }
 }
