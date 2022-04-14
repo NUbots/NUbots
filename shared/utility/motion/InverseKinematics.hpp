@@ -240,7 +240,7 @@ namespace utility::motion::kinematics {
         Eigen::VectorXd q(pinocchio_model.nq);
         q.setZero();
         const double eps         = 1e-4;
-        const int IT_MAX         = 1000;
+        const int IT_MAX         = 300;
         const double DT          = 1e-1;
         const double damp        = 1e-6;
         const int max_reattempts = 10;
