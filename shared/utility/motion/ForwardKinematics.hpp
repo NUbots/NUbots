@@ -330,55 +330,55 @@ namespace utility::motion::kinematics {
     /*! @brief
      */
     Eigen::VectorXd sensors2Pinocchio(const Sensors& sensors, pinocchio::Model& pinocchio_model) {
-        Eigen::VectorXd q = pinocchio::randomConfiguration(pinocchio_model);
+        Eigen::VectorXd q(pinocchio_model.nq);
         q.setZero();
-        q[1]  = sensors.servo[ServoID::L_HIP_YAW].present_position;
-        q[2]  = sensors.servo[ServoID::L_HIP_ROLL].present_position;
-        q[3]  = sensors.servo[ServoID::L_HIP_PITCH].present_position;
-        q[4]  = sensors.servo[ServoID::L_KNEE].present_position;
-        q[5]  = sensors.servo[ServoID::L_ANKLE_PITCH].present_position;
-        q[6]  = sensors.servo[ServoID::L_ANKLE_ROLL].present_position;
-        q[7]  = sensors.servo[ServoID::L_SHOULDER_PITCH].present_position;
-        q[8]  = sensors.servo[ServoID::L_SHOULDER_ROLL].present_position;
-        q[9]  = sensors.servo[ServoID::L_ELBOW].present_position;
-        q[10] = sensors.servo[ServoID::HEAD_YAW].present_position;
-        q[11] = sensors.servo[ServoID::HEAD_PITCH].present_position;
-        q[12] = sensors.servo[ServoID::R_HIP_YAW].present_position;
-        q[13] = sensors.servo[ServoID::R_HIP_ROLL].present_position;
-        q[14] = sensors.servo[ServoID::R_HIP_PITCH].present_position;
-        q[15] = sensors.servo[ServoID::R_KNEE].present_position;
-        q[16] = sensors.servo[ServoID::R_ANKLE_PITCH].present_position;
-        q[17] = sensors.servo[ServoID::R_ANKLE_ROLL].present_position;
-        q[18] = sensors.servo[ServoID::R_SHOULDER_PITCH].present_position;
-        q[19] = sensors.servo[ServoID::R_SHOULDER_ROLL].present_position;
-        q[20] = sensors.servo[ServoID::R_ELBOW].present_position;
+        q[pinocchio_model.joints[1].idx_q()]  = sensors.servo[ServoID::L_HIP_YAW].present_position;
+        q[pinocchio_model.joints[2].idx_q()]  = sensors.servo[ServoID::L_HIP_ROLL].present_position;
+        q[pinocchio_model.joints[3].idx_q()]  = sensors.servo[ServoID::L_HIP_PITCH].present_position;
+        q[pinocchio_model.joints[4].idx_q()]  = sensors.servo[ServoID::L_KNEE].present_position;
+        q[pinocchio_model.joints[5].idx_q()]  = sensors.servo[ServoID::L_ANKLE_PITCH].present_position;
+        q[pinocchio_model.joints[6].idx_q()]  = sensors.servo[ServoID::L_ANKLE_ROLL].present_position;
+        q[pinocchio_model.joints[7].idx_q()]  = sensors.servo[ServoID::L_SHOULDER_PITCH].present_position;
+        q[pinocchio_model.joints[8].idx_q()]  = sensors.servo[ServoID::L_SHOULDER_ROLL].present_position;
+        q[pinocchio_model.joints[9].idx_q()]  = sensors.servo[ServoID::L_ELBOW].present_position;
+        q[pinocchio_model.joints[10].idx_q()] = sensors.servo[ServoID::HEAD_YAW].present_position;
+        q[pinocchio_model.joints[11].idx_q()] = sensors.servo[ServoID::HEAD_PITCH].present_position;
+        q[pinocchio_model.joints[12].idx_q()] = sensors.servo[ServoID::R_HIP_YAW].present_position;
+        q[pinocchio_model.joints[13].idx_q()] = sensors.servo[ServoID::R_HIP_ROLL].present_position;
+        q[pinocchio_model.joints[14].idx_q()] = sensors.servo[ServoID::R_HIP_PITCH].present_position;
+        q[pinocchio_model.joints[15].idx_q()] = sensors.servo[ServoID::R_KNEE].present_position;
+        q[pinocchio_model.joints[16].idx_q()] = sensors.servo[ServoID::R_ANKLE_PITCH].present_position;
+        q[pinocchio_model.joints[17].idx_q()] = sensors.servo[ServoID::R_ANKLE_ROLL].present_position;
+        q[pinocchio_model.joints[18].idx_q()] = sensors.servo[ServoID::R_SHOULDER_PITCH].present_position;
+        q[pinocchio_model.joints[19].idx_q()] = sensors.servo[ServoID::R_SHOULDER_ROLL].present_position;
+        q[pinocchio_model.joints[20].idx_q()] = sensors.servo[ServoID::R_ELBOW].present_position;
         return q;
     }
     /*! @brief
      */
-    Sensors pinocchio2Sensors(Eigen::VectorXd q) {
+    Sensors pinocchio2Sensors(Eigen::VectorXd q, pinocchio::Model& pinocchio_model) {
         Sensors sensors;
         sensors.servo                                             = std::vector<Sensors::Servo>(20);
-        sensors.servo[ServoID::L_HIP_YAW].present_position        = q[1];
-        sensors.servo[ServoID::L_HIP_ROLL].present_position       = q[2];
-        sensors.servo[ServoID::L_HIP_PITCH].present_position      = q[3];
-        sensors.servo[ServoID::L_KNEE].present_position           = q[4];
-        sensors.servo[ServoID::L_ANKLE_PITCH].present_position    = q[5];
-        sensors.servo[ServoID::L_ANKLE_ROLL].present_position     = q[6];
-        sensors.servo[ServoID::L_SHOULDER_PITCH].present_position = q[7];
-        sensors.servo[ServoID::L_SHOULDER_ROLL].present_position  = q[8];
-        sensors.servo[ServoID::L_ELBOW].present_position          = q[9];
-        sensors.servo[ServoID::HEAD_YAW].present_position         = q[10];
-        sensors.servo[ServoID::HEAD_PITCH].present_position       = q[11];
-        sensors.servo[ServoID::R_HIP_YAW].present_position        = q[12];
-        sensors.servo[ServoID::R_HIP_ROLL].present_position       = q[13];
-        sensors.servo[ServoID::R_HIP_PITCH].present_position      = q[14];
-        sensors.servo[ServoID::R_KNEE].present_position           = q[15];
-        sensors.servo[ServoID::R_ANKLE_PITCH].present_position    = q[16];
-        sensors.servo[ServoID::R_ANKLE_ROLL].present_position     = q[17];
-        sensors.servo[ServoID::R_SHOULDER_PITCH].present_position = q[18];
-        sensors.servo[ServoID::R_SHOULDER_ROLL].present_position  = q[19];
-        sensors.servo[ServoID::R_ELBOW].present_position          = q[20];
+        sensors.servo[ServoID::L_HIP_YAW].present_position        = q[pinocchio_model.joints[1].idx_q()];
+        sensors.servo[ServoID::L_HIP_ROLL].present_position       = q[pinocchio_model.joints[2].idx_q()];
+        sensors.servo[ServoID::L_HIP_PITCH].present_position      = q[pinocchio_model.joints[3].idx_q()];
+        sensors.servo[ServoID::L_KNEE].present_position           = q[pinocchio_model.joints[4].idx_q()];
+        sensors.servo[ServoID::L_ANKLE_PITCH].present_position    = q[pinocchio_model.joints[5].idx_q()];
+        sensors.servo[ServoID::L_ANKLE_ROLL].present_position     = q[pinocchio_model.joints[6].idx_q()];
+        sensors.servo[ServoID::L_SHOULDER_PITCH].present_position = q[pinocchio_model.joints[7].idx_q()];
+        sensors.servo[ServoID::L_SHOULDER_ROLL].present_position  = q[pinocchio_model.joints[8].idx_q()];
+        sensors.servo[ServoID::L_ELBOW].present_position          = q[pinocchio_model.joints[9].idx_q()];
+        sensors.servo[ServoID::HEAD_YAW].present_position         = q[pinocchio_model.joints[10].idx_q()];
+        sensors.servo[ServoID::HEAD_PITCH].present_position       = q[pinocchio_model.joints[11].idx_q()];
+        sensors.servo[ServoID::R_HIP_YAW].present_position        = q[pinocchio_model.joints[12].idx_q()];
+        sensors.servo[ServoID::R_HIP_ROLL].present_position       = q[pinocchio_model.joints[13].idx_q()];
+        sensors.servo[ServoID::R_HIP_PITCH].present_position      = q[pinocchio_model.joints[14].idx_q()];
+        sensors.servo[ServoID::R_KNEE].present_position           = q[pinocchio_model.joints[15].idx_q()];
+        sensors.servo[ServoID::R_ANKLE_PITCH].present_position    = q[pinocchio_model.joints[16].idx_q()];
+        sensors.servo[ServoID::R_ANKLE_ROLL].present_position     = q[pinocchio_model.joints[17].idx_q()];
+        sensors.servo[ServoID::R_SHOULDER_PITCH].present_position = q[pinocchio_model.joints[18].idx_q()];
+        sensors.servo[ServoID::R_SHOULDER_ROLL].present_position  = q[pinocchio_model.joints[19].idx_q()];
+        sensors.servo[ServoID::R_ELBOW].present_position          = q[pinocchio_model.joints[20].idx_q()];
         return sensors;
     }
 
