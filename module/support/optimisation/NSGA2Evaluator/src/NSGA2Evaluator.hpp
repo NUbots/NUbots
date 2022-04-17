@@ -112,7 +112,7 @@ namespace module {
 
                 /// @brief Handle the EVALUATING state
                 void Evaluating(State previousState, Event event);
-                void EvaluatingWalk(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event);
+                //void EvaluatingWalk(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event); What is this????
 
                 /// @brief Handle the TERMINATING_EARLY state
                 void TerminatingEarly(State previousState, Event event);

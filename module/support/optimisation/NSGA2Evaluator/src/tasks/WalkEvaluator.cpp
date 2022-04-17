@@ -35,10 +35,6 @@ namespace module {
                 if (checkForFall(sensors)) {
                     evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TerminateEarly));
                 }
-                if(checkOffCourse(sensors))  //Checking if NUgus walks in straght line in the X directon
-                {
-                    evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TerminateEarly));
-                }
             }
 
             void WalkEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position) {
@@ -48,9 +44,17 @@ namespace module {
                     initialRobotPosition.y() = position.value.Y;
                     initialRobotPosition.z() = position.value.Z;
                 }
-                robotPosition.x() = position.value.X;
-                robotPosition.y() = position.value.Y;
-                robotPosition.z() = position.value.Z;
+                else
+                {
+                    robotPosition.x() = position.value.X;
+                    robotPosition.y() = position.value.Y;
+                    robotPosition.z() = position.value.Z;
+                }
+
+                if(checkOffCourse())  //Checking if NUgus walks in straght line in the X directon
+                {
+                    evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TerminateEarly));
+                }
             }
 
             void WalkEvaluator::setUpTrial(const NSGA2EvaluationRequest& currentRequest) {
@@ -59,7 +63,7 @@ namespace module {
                 trial_duration_limit = std::chrono::seconds(currentRequest.trial_duration_limit);
 
                 // Set our walk command
-                walk_command_velocity.x() = currentRequest.parameters.real_params[11];
+                walk_command_velocity.x() = currentRequest.parameters.real_params[11]; //param 11 is velocity!!!!!!
                 walk_command_velocity.y() = 0.0;
                 walk_command_rotation     = 0.0;
 
@@ -203,16 +207,18 @@ namespace module {
             }
 
             // Checking if NUgus goes off the Y axis path too far
-            bool WalkEvaluator::checkOffCourse(const RawSensors& sensors)
+            bool WalkEvaluator::checkOffCourse()
             {
                 bool offCourse         = false;
-                auto distanceOffCourse = std::fabs(robotPosition.y() - initialRobotPosition.y());
 
-                if (distanceOffCourse > 0.15)
+                auto distanceOffCourse = std::fabs(robotPosition.y() - initialRobotPosition.y());
+                NUClear::log<NUClear::DEBUG>("OffCourse distance= ", distanceOffCourse);
+
+                if (distanceOffCourse >= 0.015)
                 {
                     NUClear::log<NUClear::DEBUG>("OffCourse!");
                     NUClear::log<NUClear::DEBUG>("orination on robot (x y z): ", robotPosition.x(),
-                                                                                 robotPosition,y(),
+                                                                                 robotPosition.y(),
                                                                                  robotPosition.z());
 
                     offCourse = true;
