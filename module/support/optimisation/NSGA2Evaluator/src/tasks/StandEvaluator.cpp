@@ -35,7 +35,7 @@ namespace module {
                 current_sensors = sensors;
             }
 
-            void StandEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position) {
+            void StandEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position, NSGA2Evaluator* evaluator) {
                 robotPosition.x() = position.value.X;
                 robotPosition.y() = position.value.Y;
                 robotPosition.z() = position.value.Z;

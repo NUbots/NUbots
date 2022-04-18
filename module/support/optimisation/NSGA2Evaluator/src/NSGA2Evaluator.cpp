@@ -158,7 +158,7 @@ namespace module {
                 on<Trigger<OptimisationRobotPosition>, Single>().then(
                     [this](const OptimisationRobotPosition& position) {
                         if (currentState == State::EVALUATING) {
-                            task->processOptimisationRobotPosition(position);
+                            task->processOptimisationRobotPosition(position, this);
                         }
                     });
             }

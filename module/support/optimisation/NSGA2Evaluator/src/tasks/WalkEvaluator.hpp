@@ -22,7 +22,7 @@ namespace module {
             public:
                 // Implementing the EvaluatorTask interface
                 void processRawSensorMsg(const RawSensors& sensors, NSGA2Evaluator* evaluator);
-                void processOptimisationRobotPosition(const OptimisationRobotPosition& position);
+                void processOptimisationRobotPosition(const OptimisationRobotPosition& position, NSGA2Evaluator* evaluator);
                 void setUpTrial(const NSGA2EvaluationRequest& request);
                 void resetSimulation();
                 void evaluatingState(size_t subsumptionId, NSGA2Evaluator* evaluator);
@@ -37,7 +37,7 @@ namespace module {
                 std::vector<double> constraintsNotViolated();
                 bool checkForFall(const RawSensors& sensors);
                 void updateMaxFieldPlaneSway(const RawSensors& sensors);
-                bool checkOffCourse();
+                bool checkOffCourse(const OptimisationRobotPosition& position);
 
             private:
                 /// @brief Robot state for this evaluation, used during fitness and constraint calculation

@@ -37,7 +37,7 @@ namespace module {
                 }
             }
 
-            void WalkEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position) {
+            void WalkEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position, NSGA2Evaluator* evaluator) {
                 if (!initialPositionSet) {
                     initialPositionSet       = true;
                     initialRobotPosition.x() = position.value.X;
@@ -51,7 +51,7 @@ namespace module {
                     robotPosition.z() = position.value.Z;
                 }
 
-                if(checkOffCourse())  //Checking if NUgus walks in straght line in the X directon
+                if(checkOffCourse(position))  //Checking if NUgus walks in straght line in the X directon
                 {
                     evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TerminateEarly));
                 }
@@ -110,7 +110,7 @@ namespace module {
             }
 
             void WalkEvaluator::resetSimulation() {
-                // Reset our local state
+                // Reset our local stateconst OptimisationRobotPosition& position
                 trialStartTime       = 0.0;
                 robotPosition        = Eigen::Vector3d::Zero();
                 initialRobotPosition = Eigen::Vector3d::Zero();
@@ -207,14 +207,16 @@ namespace module {
             }
 
             // Checking if NUgus goes off the Y axis path too far
-            bool WalkEvaluator::checkOffCourse()
+            bool WalkEvaluator::checkOffCourse(const OptimisationRobotPosition& position)
             {
                 bool offCourse         = false;
-
+                robotPosition.x() = position.value.X;
+                    robotPosition.y() = position.value.Y;
+                    robotPosition.z() = position.value.Z;
                 auto distanceOffCourse = std::fabs(robotPosition.y() - initialRobotPosition.y());
-                NUClear::log<NUClear::DEBUG>("OffCourse distance= ", distanceOffCourse);
+                //NUClear::log<NUClear::DEBUG>("OffCourse distance= ", distanceOffCourse);
 
-                if (distanceOffCourse >= 0.015)
+                if (distanceOffCourse >= 0.2)
                 {
                     NUClear::log<NUClear::DEBUG>("OffCourse!");
                     NUClear::log<NUClear::DEBUG>("orination on robot (x y z): ", robotPosition.x(),
