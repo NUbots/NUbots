@@ -95,9 +95,8 @@ TEST_CASE("Test the Leg kinematics", "[utility][motion][kinematics][leg]") {
     using namespace pinocchio;
 
     // Load the urdf model
-    const std::string urdf_filename = "/home/nubots/NUbots/shared/utility/motion/robot.urdf";
+    const std::string urdf_filename = "/home/nubots/NUbots/shared/utility/motion/NUgus2.urdf";
     pinocchio::Model pinocchio_model;
-    pinocchio::JointModelTranslation root_joint;
     pinocchio::urdf::buildModel(urdf_filename, pinocchio_model, false);
 
     for (int i = 0; i < ITERATIONS; ++i) {

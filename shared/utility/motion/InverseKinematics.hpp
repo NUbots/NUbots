@@ -240,10 +240,10 @@ namespace utility::motion::kinematics {
         Eigen::VectorXd q(pinocchio_model.nq);
         q.setZero();
         const double eps         = 1e-4;
-        const int IT_MAX         = 300;
+        const int IT_MAX         = 1000;
         const double DT          = 1e-1;
         const double damp        = 1e-6;
-        const int max_reattempts = 10;
+        const int max_reattempts = 1000;
         int reattemp_count       = 0;
         int min                  = -3;
         int max                  = 3;
@@ -295,30 +295,30 @@ namespace utility::motion::kinematics {
             JJt.diagonal().array() += damp;
             v.noalias() = -J.transpose() * JJt.ldlt().solve(err);
             q           = pinocchio::integrate(pinocchio_model, q, v * DT);
-            if (!(i % 10))
-                std::cout << i << ": error = " << err.transpose() << std::endl;
+            // if (!(i % 10))
+            // std::cout << i << ": error = " << err.transpose() << std::endl;
         }
 
         if (success) {
             std::cout << "Convergence achieved!" << std::endl;
-            pinocchio::forwardKinematics(pinocchio_model, data, q);
-            std::cout << "Desired position of JOINT:" << JOINT_ID << " IK: " << oMdes.translation().transpose()
-                      << std::endl;
-            std::cout << "Pinocchio position of JOINT:" << JOINT_ID
-                      << " IK: " << data.oMi[JOINT_ID].translation().transpose() << std::endl;
+            // pinocchio::forwardKinematics(pinocchio_model, data, q);
+            // std::cout << "Desired position of JOINT:" << JOINT_ID << " IK: " << oMdes.translation().transpose()
+            //           << std::endl;
+            // std::cout << "Pinocchio position of JOINT:" << JOINT_ID
+            //           << " IK: " << data.oMi[JOINT_ID].translation().transpose() << std::endl;
         }
         else {
-            std::cout << "\nWarning: the iterative algorithm has not reached convergence to the desired precision "
-                      << std::endl;
+            std::cout << "\nWarning: Convergence not achieved!" << std::endl;
         }
 
-        std::cout << "\nresult: " << q.transpose() << std::endl;
+        // std::cout << "\nresult: " << q.transpose() << std::endl;
 
-        for (pinocchio::JointIndex joint_id = 0; joint_id < (pinocchio::JointIndex) pinocchio_model.njoints; ++joint_id)
-            std::cout << std::setw(40) << std::left << pinocchio_model.names[joint_id] << "JOINT_ID : " << joint_id
-                      << "Joint Angle: " << q[joint_id] << std::endl;
+        // for (pinocchio::JointIndex joint_id = 0; joint_id < (pinocchio::JointIndex) pinocchio_model.njoints;
+        // ++joint_id)
+        //     std::cout << std::setw(40) << std::left << pinocchio_model.names[joint_id] << "JOINT_ID : " << joint_id
+        //               << "Joint Angle: " << q[joint_id] << std::endl;
 
-        std::cout << "\nfinal error: " << err.transpose() << std::endl;
+        // std::cout << "\nfinal error: " << err.transpose() << std::endl;
 
 
         if (limb == LimbID::LEFT_LEG) {
@@ -348,6 +348,17 @@ namespace utility::motion::kinematics {
         const Eigen::Transform<Scalar, 3, Eigen::Affine>& rightTarget) {
         auto joints  = calculateLegJoints<Scalar>(model, leftTarget, LimbID::LEFT_LEG);
         auto joints2 = calculateLegJoints<Scalar>(model, rightTarget, LimbID::RIGHT_LEG);
+        joints.insert(joints.end(), joints2.begin(), joints2.end());
+        return joints;
+    }
+
+    template <typename Scalar>
+    [[nodiscard]] std::vector<std::pair<ServoID, Scalar>> calculateLegJoints(
+        pinocchio::Model& pinocchio_model,
+        const Eigen::Transform<Scalar, 3, Eigen::Affine>& leftTarget,
+        const Eigen::Transform<Scalar, 3, Eigen::Affine>& rightTarget) {
+        auto joints  = calculateLegJoints(pinocchio_model, leftTarget, LimbID::LEFT_LEG);
+        auto joints2 = calculateLegJoints(pinocchio_model, rightTarget, LimbID::RIGHT_LEG);
         joints.insert(joints.end(), joints2.begin(), joints2.end());
         return joints;
     }
