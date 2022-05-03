@@ -17,11 +17,17 @@ on:
     branches:
       - main
     paths:
-      - 'docker/**'
-      - '!docker/Dockerfile.nugus_sim'
-      - '!docker/nugus_sim/**'
+      - "docker/**"
+      - "!docker/Dockerfile.nugus_sim"
+      - "!docker/nugus_sim/**"
 
-
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - 'docker/**'
+  #     - '!docker/Dockerfile.nugus_sim'
+  #     - '!docker/nugus_sim/**'
 
 jobs:
   slack-notifcations:
