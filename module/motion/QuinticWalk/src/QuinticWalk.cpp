@@ -140,6 +140,22 @@ namespace module::motion {
                 first_config = false;
             }
         });
+                        //Added to call quintic walk backward yaml file
+        on<Configuration>("QuinticWalkBackwards.yaml").then([this](const Configuration& cfg) {
+            log_level = cfg["log_level"].as<NUClear::LogLevel>();
+
+            load_quintic_walk(cfg, normal_config);
+
+            // Make sure the walk engine has the parameters at least once
+            if (first_config) {
+                // Send these parameters to the walk engine
+                walk_engine.setParameters(current_config.params);
+
+                imu_reaction.enable(current_config.imu_active);
+
+                first_config = false;
+            }
+        });
 
         on<Configuration>("goalie/QuinticWalk.yaml").then([this](const Configuration& cfg) {
             load_quintic_walk(cfg, goalie_config);

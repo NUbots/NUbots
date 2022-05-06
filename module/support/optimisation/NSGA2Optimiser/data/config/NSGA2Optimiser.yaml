@@ -23,8 +23,10 @@ eta:
   M: 20
 
 task: "walk"
-task_config_path: "config/webots/QuinticWalk.yaml"
-initial_translation: [-7.0, -3.0, 0.51]  # x, y, z
+task_config_path: "config/webots/QuinticWalk.yaml" #QuinticWalkBackwards.yaml
+#task_config_path: "config/webots/QuinticWalkBackwards.yaml"
+#task_config_path: "config/webots/QuinticWalkStrafe.yaml"
+initial_translation: [-4.0, -3.0, 0.51]  # x, y, z
 intial_rotation: [0, 0, 1, 0]  # x, y, z, angle (rads)
 # The following values are setting the initial values and limits for the walk engine parameters.
 # Each param is the tuple [initial value, minimum, maximum]. These values are merged with the
@@ -49,7 +51,7 @@ walk:
     height: [0.45, 0.35, 0.5]
     # Trunk pitch orientation (how much we lean the torso forward or backward, does not change)
     # (in rad)
-    pitch: [24 * pi / 180, -15 * pi / 180, 30 * pi / 180]
+    pitch:  [-15 * pi / 180, -20 * pi / 180, 0 * pi / 180] #[24 * pi / 180, -15 * pi / 180, 30 * pi / 180]  OPTIMAL!!!!!!! [24 * pi / 180, -10 * pi / 180, 30 * pi / 180]
     # Trunk forward offset (how much we offset the trunk forward or backward lean when walking)
     # (in m)
     x_offset: [0.03, -0.05, 0.05]
@@ -69,4 +71,6 @@ walk:
 
 # The following values are setting the initial values and limits for the walk engine command.
 walk_command:
-  velocity: [0.2, 0.01, 0.51]
+  velocity: [-0.2, -0.51, -0.01] #[0.2, 0.01, 0.51]
+  #velocity: [-0.2, -0.51, 0.01] #[0.0, 0.0, 0.0]
+  #rotation: [0.15, 0.1, 1.57]
