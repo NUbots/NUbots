@@ -11,7 +11,7 @@ nuclear_role(
   network::NetworkForwarder
   output::Overview
   # Hardware Interface
-  platform::darwin::HardwareIO
+  platform::cm740::HardwareIO
   input::SensorFilter
   # Motion
   motion::walk::MovementController

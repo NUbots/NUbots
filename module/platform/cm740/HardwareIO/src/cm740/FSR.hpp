@@ -17,18 +17,18 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef DARWIN_FSR_HPP
-#define DARWIN_FSR_HPP
+#ifndef CM740_FSR_HPP
+#define CM740_FSR_HPP
 
-#include "DarwinDevice.hpp"
+#include "CM740Interface.hpp"
 
-namespace Darwin {
+namespace CM740 {
     /**
-     * @brief This represents, and gives access to the darwin's two Force Sensitive Resistor boards
+     * @brief This represents, and gives access to the Force Sensitive Resistor boards
      *
      * @author Trent Houliston
      */
-    class FSR : public DarwinDevice {
+    class FSR : public CM740Interface {
 
     public:
         /**
@@ -65,6 +65,6 @@ namespace Darwin {
 
         FSR(UART& coms, int id);
     };
-}  // namespace Darwin
+}  // namespace CM740
 
 #endif

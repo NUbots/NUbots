@@ -23,7 +23,7 @@
 
 #include "utility/math/angle.hpp"
 
-using namespace module::platform::darwin;
+using namespace module::platform::cm740;
 
 TEST_CASE("Testing the hardware accelerometer conversions to SI units", "[hardware][conversion][accelerometer]") {
 
@@ -229,8 +229,8 @@ TEST_CASE("Testing the hardware speed conversions to radians/second", "[hardware
         for (size_t i = 0; i < 20; ++i) {
             INFO("Testing forward motor " << i);
 
-            // Test with MX28s
-            INFO("Testing with MX28s");
+            // Test with Servos
+            INFO("Testing with Servos");
             for (auto& test : tests) {
                 float expected = test.second * (Convert::SPEED_CONVERSION_FACTOR * 1023) * Convert::SERVO_DIRECTION[i];
                 float actual   = Convert::servoSpeed(i, test.first);

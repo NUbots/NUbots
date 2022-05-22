@@ -17,8 +17,8 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "FSR.hpp"
+#include "Servo.hpp"
 
-namespace Darwin {
-    FSR::FSR(UART& coms, int id) : DarwinDevice(coms, id) {}
-}  // namespace Darwin
+namespace CM740 {
+    Servo::Servo(UART& coms, int id) : CM740Interface(coms, id) {}
+}  // namespace CM740
