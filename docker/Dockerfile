@@ -282,10 +282,9 @@ RUN install-from-source https://github.com/ros/console_bridge/archive/refs/tags/
 RUN install-from-source https://github.com/ros/urdfdom_headers/archive/refs/tags/1.0.5.tar.gz
 RUN install-package tinyxml
 RUN install-package boost
-RUN install-package python-numpy
-RUN install-from-source https://github.com/stack-of-tasks/eigenpy/releases/download/v2.7.1/eigenpy-2.7.1.tar.gz
 RUN install-from-source https://github.com/ros/urdfdom/archive/refs/tags/3.0.0.tar.gz
-RUN install-from-source https://github.com/stack-of-tasks/pinocchio/releases/download/v2.6.6/pinocchio-2.6.6.tar.gz
+RUN install-from-source https://github.com/stack-of-tasks/pinocchio/releases/download/v2.6.6/pinocchio-2.6.6.tar.gz \
+    -DBUILD_PYTHON_INTERFACE=OFF
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
