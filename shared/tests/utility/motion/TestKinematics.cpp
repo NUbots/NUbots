@@ -172,3 +172,77 @@ TEST_CASE("Test the Leg kinematics", "[utility][motion][kinematics][leg]") {
         REQUIRE(rerror == Approx(0.0).margin(ERROR_THRESHOLD));
     }
 }
+
+TEST_CASE("Test analytical inverse kinematics vs iterative method", "[utility][motion][kinematics][leg]") {
+    using namespace pinocchio;
+
+    // Load the urdf model
+    const std::string urdf_filename = "/home/nubots/NUbots/shared/utility/motion/NUgus2.urdf";
+    pinocchio::Model pinocchio_model;
+    pinocchio::urdf::buildModel(urdf_filename, pinocchio_model, false);
+
+    for (int i = 0; i < ITERATIONS; ++i) {
+
+        // Make a desired feasible pose vector for both feet
+        Eigen::VectorXd q(pinocchio_model.njoints);
+        q    = 3.14 * Eigen::MatrixXd::Random(pinocchio_model.nq, 1);
+        q[0] = 0;
+        std::cout << "q random: " << q.transpose() << std::endl;
+        // Create a test set of sensors with the random configuration vector q
+        Sensors sensors = utility::motion::kinematics::pinocchio2Sensors(q, pinocchio_model);
+        // Solve FK for desired foot positions
+        Eigen::Affine3d left_foot_position_desired =
+            utility::motion::kinematics::calculatePosition(pinocchio_model,
+                                                           sensors,
+                                                           ServoID::L_ANKLE_ROLL)[ServoID::L_ANKLE_ROLL];
+        Eigen::Affine3d right_foot_position_desired =
+            utility::motion::kinematics::calculatePosition(pinocchio_model,
+                                                           sensors,
+                                                           ServoID::R_ANKLE_ROLL)[ServoID::R_ANKLE_ROLL];
+
+
+        // Perform iterative inverse kinematics on the desired foot positions
+        std::vector<std::pair<ServoID, double>> left_leg_joints_iterative =
+            utility::motion::kinematics::calculateLegJoints(pinocchio_model,
+                                                            left_foot_position_desired,
+                                                            LimbID::LEFT_LEG);
+
+        std::vector<std::pair<ServoID, double>> right_leg_joints_iterative =
+            utility::motion::kinematics::calculateLegJoints(pinocchio_model,
+                                                            right_foot_position_desired,
+                                                            LimbID::RIGHT_LEG);
+
+        // Perform analytical inverse kinematics on the desired foot positions
+        std::vector<std::pair<ServoID, double>> left_leg_joints_analytical =
+            utility::motion::kinematics::calculateLegJoints(kinematics_model,
+                                                            left_foot_position_desired,
+                                                            LimbID::LEFT_LEG);
+
+        std::vector<std::pair<ServoID, double>> right_leg_joints_analytical =
+            utility::motion::kinematics::calculateLegJoints(kinematics_model,
+                                                            right_foot_position_desired,
+                                                            LimbID::RIGHT_LEG);
+
+        for (int i = 0; i < left_leg_joints_iterative.size(); i++) {
+            std::cout << "left_leg_joints_iterative " << i << ":" << left_leg_joints_iterative[i].second << std::endl;
+        }
+
+        for (int i = 0; i < left_leg_joints_analytical.size(); i++) {
+            std::cout << "left_leg_joints_analytical " << i << ":" << left_leg_joints_analytical[i].second << std::endl;
+        }
+
+        for (int i = 0; i < right_leg_joints_iterative.size(); i++) {
+            std::cout << "right_leg_joints_iterative " << i << ":" << right_leg_joints_iterative[i].second << std::endl;
+        }
+
+        for (int i = 0; i < right_leg_joints_analytical.size(); i++) {
+            std::cout << "right_leg_joints_analytical " << i << ":" << right_leg_joints_analytical[i].second
+                      << std::endl;
+        }
+
+        // Check the error between the IK solutions
+
+        REQUIRE(10 == Approx(0.0).margin(ERROR_THRESHOLD));
+        // REQUIRE(10 == Approx(0.0).margin(ERROR_THRESHOLD));
+    }
+}

@@ -319,12 +319,13 @@ namespace module::motion {
         const std::vector<std::pair<ServoID, float>> joints =
             calculateLegJoints<float>(kinematicsModel, Eigen::Affine3f(left_foot), Eigen::Affine3f(right_foot));
 
-        const std::vector<std::pair<ServoID, double>> joints2 =
-            calculateLegJoints(pinocchio_model, Eigen::Affine3d(left_foot_double), Eigen::Affine3d(right_foot_double));
+        // const std::vector<std::pair<ServoID, double>> joints2 =
+        //     calculateLegJoints(pinocchio_model, Eigen::Affine3d(left_foot_double),
+        //     Eigen::Affine3d(right_foot_double));
 
-        std::vector<std::pair<ServoID, float>> joints3(joints2.begin(), joints2.end());
+        // std::vector<std::pair<ServoID, float>> joints3(joints2.begin(), joints2.end());
 
-        auto waypoints = motion(joints3);
+        auto waypoints = motion(joints);
         emit(std::move(waypoints));
     }
 
