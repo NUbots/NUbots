@@ -53,8 +53,12 @@ namespace module::behaviour::skills {
     using utility::motion::kinematics::calculateHeadJoints;
     using utility::support::Expression;
 
+    /**
+     * Calculates angles to a 3d vector in world
+     *
+     * @return Eigen::Vector2d of {yaw, pitch}
+     */
     inline Eigen::Vector2d screenAngularFromObjectDirection(const Eigen::Vector3d& v) {
-        // Returns {yaw, pitch}
         return {std::atan2(v.y(), v.x()), std::atan2(v.z(), v.x())};
     }
 
@@ -116,11 +120,14 @@ namespace module::behaviour::skills {
                         emit(std::move(command));
                     }
                     else {
-                        // We haven't seen the ball in a while, lets look around
+                        // Ball hasn't been seen in a while. Look around using search positions
                         float timeSinceLastSearchMoved = std::chrono::duration_cast<std::chrono::duration<float>>(
                                                              NUClear::clock::now() - searchLastMoved)
                                                              .count();
 
+                        // Robot will move through the search positions, and linger for fixation_time_ms. Once
+                        // fixation_time_ms time has passed, send a new head command for the next position in the list
+                        // of search_positions
                         if (timeSinceLastSearchMoved > fixation_time_ms / 1000) {
                             // Move to next search position in list
                             searchLastMoved                      = NUClear::clock::now();
