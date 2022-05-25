@@ -93,7 +93,6 @@ namespace module::motion {
             "Head Controller - Update Head Position",
             [this](const Sensors& sensors, const KinematicsModel& kinematicsModel) {
                 emit(graph("HeadController Goal Angles", goalAngles.x(), goalAngles.y()));
-                log<NUClear::DEBUG>("HeadController Goal Angles", goalAngles.x(), goalAngles.y());
 
                 // If smoothing requested, smooth goal angles with exponential filter
                 currentAngles =
