@@ -91,7 +91,6 @@ namespace module::behaviour::skills {
         // Updates the last seen time of ball
         on<Trigger<VisionBalls>, With<Sensors>>().then([this](const VisionBalls& balls, const Sensors& sensors) {
             if (!balls.balls.empty()) {
-                log<NUClear::DEBUG>("Ball Seen trigger");
                 ballLastMeasured = NUClear::clock::now();
                 rBCc = Eigen::Vector3d(sphericalToCartesian(balls.balls[0].measurements[0].srBCc.cast<double>()));
             }
@@ -104,16 +103,11 @@ namespace module::behaviour::skills {
                 float timeSinceBallLastMeasured =
                     std::chrono::duration_cast<std::chrono::duration<float>>(NUClear::clock::now() - ballLastMeasured)
                         .count();
-                // log<NUClear::DEBUG>("Time since seen ball: ", timeSinceBallLastMeasured);
                 // Only look for ball if not getting up
                 if (!isGettingUp) {
                     if (timeSinceBallLastMeasured < search_timeout_ms / 1000) {
                         // We can see the ball, lets look at it
-                        // Apply a simple exponential filter to the ball position to smooth out the noisy spikes in ball
-                        // position
-                        Eigen::Vector2d angles = screenAngularFromObjectDirection(rBCc);
-                        log<NUClear::DEBUG>("Ball (x,y,z): (", rBCc[0], ",", rBCc[1], ",", rBCc[2], ")");
-                        log<NUClear::DEBUG>("Angle to ball (yaw, pitch): (", angles[0], ",", angles[1], ")");
+                        Eigen::Vector2d angles               = screenAngularFromObjectDirection(rBCc);
                         std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
                         command->yaw                         = angles[0];
                         command->pitch                       = angles[1];
@@ -123,13 +117,12 @@ namespace module::behaviour::skills {
                     }
                     else {
                         // We haven't seen the ball in a while, lets look around
-                        // log<NUClear::DEBUG>("We haven't seen the ball in a while, lets look around");
                         float timeSinceLastSearchMoved = std::chrono::duration_cast<std::chrono::duration<float>>(
                                                              NUClear::clock::now() - searchLastMoved)
                                                              .count();
-                        // log<NUClear::DEBUG>("Time since last moved position: ", timeSinceLastSearchMoved);
 
                         if (timeSinceLastSearchMoved > fixation_time_ms / 1000) {
+                            // Move to next search position in list
                             searchLastMoved                      = NUClear::clock::now();
                             std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
                             command->yaw                         = search_positions[searchIdx][0];
