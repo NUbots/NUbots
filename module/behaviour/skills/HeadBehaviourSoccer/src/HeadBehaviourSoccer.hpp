@@ -47,13 +47,13 @@ namespace module::behaviour::skills {
     public:
     private:
         // CONFIG - loaded elsewhere
-        float max_yaw           = 0.0f;
-        float min_yaw           = 0.0f;
-        float max_pitch         = 0.0f;
-        float min_pitch         = 0.0f;
-        float search_timeout_ms = 0.0f;
-        float fixation_time_ms  = 0.0f;
-        int searchIdx           = 0;
+        float max_yaw               = 0.0f;
+        float min_yaw               = 0.0f;
+        float max_pitch             = 0.0f;
+        float min_pitch             = 0.0f;
+        float search_timeout_ms     = 0.0f;
+        float fixation_time_ms      = 0.0f;
+        long unsigned int searchIdx = 0;
 
         bool isGettingUp = false;
 

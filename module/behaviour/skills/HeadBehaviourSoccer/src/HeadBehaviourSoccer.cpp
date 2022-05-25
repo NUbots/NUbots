@@ -93,16 +93,16 @@ namespace module::behaviour::skills {
         on<Trigger<KillGetup>>().then([this] { isGettingUp = false; });
 
         // Updates the last seen time of ball
-        on<Trigger<VisionBalls>, With<Sensors>>().then([this](const VisionBalls& balls, const Sensors& sensors) {
+        on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
             if (!balls.balls.empty()) {
                 ballLastMeasured = NUClear::clock::now();
                 rBCc = Eigen::Vector3d(sphericalToCartesian(balls.balls[0].measurements[0].srBCc.cast<double>()));
             }
         });
 
-        on<Trigger<Sensors>, Single, Sync<HeadBehaviourSoccer>>().then(
+        on<Every<90, Per<std::chrono::seconds>>, Sync<HeadBehaviourSoccer>>().then(
             "Head Behaviour Main Loop",
-            [this](const Sensors& sensors) {
+            [this]() {
                 // Get the time since the ball was last seen
                 float timeSinceBallLastMeasured =
                     std::chrono::duration_cast<std::chrono::duration<float>>(NUClear::clock::now() - ballLastMeasured)
