@@ -46,15 +46,14 @@ namespace module::behaviour::skills {
     class HeadBehaviourSoccer : public NUClear::Reactor {
     public:
     private:
-        // CONFIG - loaded elsewhere
-        float max_yaw               = 0.0f;
-        float min_yaw               = 0.0f;
-        float max_pitch             = 0.0f;
-        float min_pitch             = 0.0f;
-        float search_timeout_ms     = 0.0f;
-        float fixation_time_ms      = 0.0f;
+        // Time before starting to search for ball after its lost
+        float search_timeout_ms = 0.0f;
+        // Time lingering at each position in lost ballsearch
+        float fixation_time_ms = 0.0f;
+        // Index in the list of search positions
         long unsigned int searchIdx = 0;
 
+        // Flag for if the robot is currently getting up
         bool isGettingUp = false;
 
         // Time between last search position transition

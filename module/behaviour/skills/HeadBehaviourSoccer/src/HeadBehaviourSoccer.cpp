@@ -70,18 +70,11 @@ namespace module::behaviour::skills {
                 log_level         = config["log_level"].as<NUClear::LogLevel>();
                 search_timeout_ms = config["search_timeout_ms"].as<float>();
                 fixation_time_ms  = config["fixation_time_ms"].as<float>();
-                max_yaw           = config["max_yaw"].as<float>();
-                min_yaw           = config["min_yaw"].as<float>();
-                max_pitch         = config["max_pitch"].as<float>();
-                min_pitch         = config["min_pitch"].as<float>();
 
                 // Create vector of search positions
-                search_positions.push_back(Eigen::Vector2d(min_yaw, max_pitch));
-                search_positions.push_back(Eigen::Vector2d(min_yaw, min_pitch));
-                search_positions.push_back(Eigen::Vector2d(0, min_pitch));
-                search_positions.push_back(Eigen::Vector2d(max_yaw, min_pitch));
-                search_positions.push_back(Eigen::Vector2d(max_yaw, max_pitch));
-                search_positions.push_back(Eigen::Vector2d(0, max_pitch));
+                for (const auto& position : config["positions"].config) {
+                    search_positions.push_back(position.as<Expression>());
+                }
             });
 
 
