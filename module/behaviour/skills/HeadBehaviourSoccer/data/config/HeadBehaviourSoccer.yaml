@@ -1,9 +1,9 @@
 log_level: WARN
 
-max_yaw: 0.9
-min_yaw: -0.9
-max_pitch: 0.2
-min_pitch: -0.2
+max_yaw: 0.7
+min_yaw: -0.7
+max_pitch: 0.1
+min_pitch: -0.1
 
 #Minimum time before search starts
 search_timeout_ms: 3000
