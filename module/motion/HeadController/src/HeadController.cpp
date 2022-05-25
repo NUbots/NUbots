@@ -122,11 +122,11 @@ namespace module::motion {
                 float yaw   = 0;
                 for (auto& angle : goalAnglesList) {
                     if (angle.first == ServoID::HEAD_PITCH) {
-                        angle.second = utility::math::clamp(float(min_pitch), angle.second, float(max_pitch));
+                        angle.second = utility::math::clamp(min_pitch, angle.second, max_pitch);
                         pitch        = angle.second;
                     }
                     else if (angle.first == ServoID::HEAD_YAW) {
-                        angle.second = utility::math::clamp(float(min_yaw), angle.second, float(max_yaw));
+                        angle.second = utility::math::clamp(min_yaw, angle.second, max_yaw);
                         yaw          = angle.second;
                     }
                 }
