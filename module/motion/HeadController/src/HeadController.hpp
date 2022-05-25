@@ -33,7 +33,7 @@ namespace module::motion {
     class HeadController : public NUClear::Reactor {
     private:
         const size_t id;
-        double min_yaw, max_yaw, min_pitch, max_pitch, head_motor_gain, head_motor_torque, p_gain;
+        double min_yaw, max_yaw, min_pitch, max_pitch, head_motor_gain, head_motor_torque, smoothing_factor;
         ReactionHandle updateHandle;
         // Debug var:
         NUClear::clock::time_point lastTime;
@@ -49,6 +49,7 @@ namespace module::motion {
         Eigen::Vector2f currentAngles;
         Eigen::Vector2f goalAngles;
         bool goalRobotSpace = true;
+        bool smooth         = true;
     };
 }  // namespace module::motion
 

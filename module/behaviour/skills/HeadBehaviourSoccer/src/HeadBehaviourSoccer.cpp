@@ -111,15 +111,14 @@ namespace module::behaviour::skills {
                         // We can see the ball, lets look at it
                         // Apply a simple exponential filter to the ball position to smooth out the noisy spikes in ball
                         // position
-                        filtered_rBCc = smoothing_factor * rBCc + (1 - smoothing_factor) * filtered_rBCc;
-
-                        Eigen::Vector2d angles = screenAngularFromObjectDirection(filtered_rBCc);
-                        // log<NUClear::DEBUG>("Ball (x,y,z): (", rBCc[0], ",", rBCc[1], ",", rBCc[2], ")");
-                        // log<NUClear::DEBUG>("Angle to ball (yaw, pitch): (", angles[0], ",", angles[1], ")");
+                        Eigen::Vector2d angles = screenAngularFromObjectDirection(rBCc);
+                        log<NUClear::DEBUG>("Ball (x,y,z): (", rBCc[0], ",", rBCc[1], ",", rBCc[2], ")");
+                        log<NUClear::DEBUG>("Angle to ball (yaw, pitch): (", angles[0], ",", angles[1], ")");
                         std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
                         command->yaw                         = angles[0];
                         command->pitch                       = angles[1];
                         command->robot_space                 = true;
+                        command->smooth                      = true;
                         emit(std::move(command));
                     }
                     else {
@@ -135,14 +134,8 @@ namespace module::behaviour::skills {
                             std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
                             command->yaw                         = search_positions[searchIdx][0];
                             command->pitch                       = search_positions[searchIdx][1];
-                            // command->robot_space                 = true;
-                            // log<NUClear::DEBUG>("Search position idx: ",
-                            //                     searchIdx,
-                            //                     " (yaw, pitch) : (",
-                            //                     search_positions[searchIdx][0],
-                            //                     ",",
-                            //                     search_positions[searchIdx][1],
-                            //                     ")");
+                            command->robot_space                 = true;
+                            command->smooth                      = false;
                             searchIdx++;
                             emit(std::move(command));
                         }

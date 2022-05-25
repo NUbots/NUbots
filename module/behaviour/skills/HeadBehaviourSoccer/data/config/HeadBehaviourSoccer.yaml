@@ -9,4 +9,4 @@ min_pitch: -0.2
 search_timeout_ms: 3000
 
 #Time between switching search positions
-fixation_time_ms: 400
+fixation_time_ms: 750

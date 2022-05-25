@@ -55,20 +55,19 @@ namespace module::behaviour::skills {
         float fixation_time_ms  = 0.0f;
         int searchIdx           = 0;
 
-        std::vector<Eigen::Vector2d> search_positions;
         bool isGettingUp = false;
-        // Time last search position was moved
+
+        // Time between last search position transition
         NUClear::clock::time_point searchLastMoved = NUClear::clock::now();
+
+        // List of positions for search
+        std::vector<Eigen::Vector2d> search_positions;
 
         // Time since last ball seen
         NUClear::clock::time_point ballLastMeasured = NUClear::clock::now();
 
         // Position of last seen ball
         Eigen::Vector3d rBCc = Eigen::Vector3d::Zero();
-
-        // https://en.wikipedia.org/wiki/Exponential_smoothing
-        double smoothing_factor       = 0.03;
-        Eigen::Vector3d filtered_rBCc = Eigen::Vector3d::Zero();
 
     public:
         explicit HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment);
