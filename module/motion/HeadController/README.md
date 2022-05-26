@@ -24,7 +24,7 @@ The final goal angle is clamped based on the maximum/minium pitch and yaw of the
 
 * `message::motion::HeadCommand` instructs servo controller to move head to initial position when configuring
 * `message::behaviour::ServoCommands` instructs servo controller to move head to desired goal angle
-* `utility::behaviour::RegisterAction` it registers the module to be allowed to move the servos, and it specifically only registers for the head and gives itself a high priority of 30 (more is higher priority). if it loses priority of the head, it disables the main reaction loop and if it gets back priority it enables the reaction again).
+* `utility::behaviour::RegisterAction` registers the module so it is allowed to move the servos. It registers for access to the head with a priority of 30 (a higher number is a higher priority). If it loses priority of the head, it disables the main reaction loop and if it gets back priority it enables the reaction again.
 
 ## Dependencies
 
