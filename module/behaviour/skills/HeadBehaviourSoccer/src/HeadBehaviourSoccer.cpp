@@ -24,23 +24,19 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/localisation/Field.hpp"
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/HeadCommand.hpp"
 #include "message/vision/Ball.hpp"
-#include "message/vision/Goal.hpp"
 
 #include "utility/input/ServoID.hpp"
 #include "utility/math/coordinates.hpp"
-#include "utility/motion/InverseKinematics.hpp"
-#include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 
 namespace module::behaviour::skills {
 
     using extension::Configuration;
-    using message::input::Sensors;
+
     using message::motion::ExecuteGetup;
     using message::motion::HeadCommand;
     using message::motion::KillGetup;
@@ -49,8 +45,6 @@ namespace module::behaviour::skills {
 
     using utility::input::ServoID;
     using utility::math::coordinates::sphericalToCartesian;
-    using utility::math::geometry::Quad;
-    using utility::motion::kinematics::calculateHeadJoints;
     using utility::support::Expression;
 
     /**

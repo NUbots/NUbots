@@ -23,18 +23,8 @@
 #include <nuclear>
 #include <set>
 
-#include "Searcher.hpp"
-
-#include "message/behaviour/SoccerObjectPriority.hpp"
-#include "message/input/Image.hpp"
-#include "message/input/Sensors.hpp"
-#include "message/localisation/Ball.hpp"
 #include "message/motion/HeadCommand.hpp"
-#include "message/motion/KinematicsModel.hpp"
 #include "message/vision/Ball.hpp"
-#include "message/vision/Goal.hpp"
-
-#include "utility/math/geometry/Quad.hpp"
 
 namespace module::behaviour::skills {
 
