@@ -22,7 +22,6 @@
 
 #include <Eigen/Core>
 #include <nuclear>
-#include <set>
 
 namespace module::behaviour::skills {
 
