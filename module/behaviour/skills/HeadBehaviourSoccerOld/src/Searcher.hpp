@@ -27,7 +27,7 @@
 namespace module::behaviour::skills {
 
     /**
-     * Executes a HeadBehaviourSoccer action.
+     * Executes a HeadBehaviourSoccerOld action.
      *
      * @author Jade Fountain
 
