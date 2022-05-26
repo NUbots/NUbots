@@ -9,7 +9,7 @@ Controls the motion of the head
 
 Takes a HeadCommand message:
 
-- If command requests smoothing (`command->smooth = true`), then the goal angle emitted to is smoothed using exponential filter
+- If command requests smoothing (`command->smooth = true`), then the goal angle emitted to is smoothed using exponential filter, tunable using `smoothing_factor`
 - If command request is in world space (`command->goalRobotSpace = false`) the goal angle is converted from world space to robot space
 
 The final goal angle is clamped based on the maximum/minium pitch and yaw of the head servos before being sent to servo controller
