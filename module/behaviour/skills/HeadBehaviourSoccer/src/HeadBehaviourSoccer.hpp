@@ -20,11 +20,9 @@
 #ifndef MODULES_BEHAVIOUR_REFLEX_HEADBEHAVIOURSOCCER_HPP
 #define MODULES_BEHAVIOUR_REFLEX_HEADBEHAVIOURSOCCER_HPP
 
+#include <Eigen/Core>
 #include <nuclear>
 #include <set>
-
-#include "message/motion/HeadCommand.hpp"
-#include "message/vision/Ball.hpp"
 
 namespace module::behaviour::skills {
 

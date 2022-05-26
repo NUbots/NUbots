@@ -19,7 +19,6 @@
 
 #include "HeadBehaviourSoccer.hpp"
 
-#include <string>
 #include <utility>
 
 #include "extension/Configuration.hpp"
@@ -28,7 +27,6 @@
 #include "message/motion/HeadCommand.hpp"
 #include "message/vision/Ball.hpp"
 
-#include "utility/input/ServoID.hpp"
 #include "utility/math/coordinates.hpp"
 #include "utility/support/yaml_expression.hpp"
 
@@ -40,10 +38,8 @@ namespace module::behaviour::skills {
     using message::motion::ExecuteGetup;
     using message::motion::HeadCommand;
     using message::motion::KillGetup;
-    using message::vision::Ball;
     using VisionBalls = message::vision::Balls;
 
-    using utility::input::ServoID;
     using utility::math::coordinates::sphericalToCartesian;
     using utility::support::Expression;
 
