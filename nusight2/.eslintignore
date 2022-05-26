@@ -1,1 +1,3 @@
-/src/shared/proto/*
+/src/shared/messages.js
+/src/shared/messages.d.ts
+/src/shared/message_fields_index.ts

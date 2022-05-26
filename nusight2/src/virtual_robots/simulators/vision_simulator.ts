@@ -1,18 +1,13 @@
 import fs from 'fs'
 import { autorun } from 'mobx'
 import { computedFn } from 'mobx-utils'
-import { Vector3 } from 'three'
-import { Matrix4 } from 'three'
-
-import { fourcc } from '../../client/image_decoder/fourcc'
+import { Matrix4, Vector3 } from 'three'
 import { FieldDimensions } from '../../shared/field/dimensions'
+import { fourcc } from '../../shared/image_decoder/fourcc'
+import { Imat4, message } from '../../shared/messages'
 import { NUClearNetClient } from '../../shared/nuclearnet/nuclearnet_client'
-import { Imat4 } from '../../shared/proto/messages'
-import { message } from '../../shared/proto/messages'
 import { toTimestamp } from '../../shared/time/timestamp'
-import { Simulator } from '../simulator'
-import { Message } from '../simulator'
-
+import { Message, Simulator } from '../simulator'
 import image0 from './images/0.jpg'
 import image1 from './images/1.jpg'
 import image10 from './images/10.jpg'
@@ -25,6 +20,7 @@ import image7 from './images/7.jpg'
 import image8 from './images/8.jpg'
 import image9 from './images/9.jpg'
 import { periodic } from './periodic'
+
 import CompressedImage = message.output.CompressedImage
 import Projection = message.output.CompressedImage.Lens.Projection
 import MeasurementType = message.vision.Ball.MeasurementType
@@ -67,33 +63,31 @@ export class VisionSimulator extends Simulator {
     return new VisionSimulator(nuclearnetClient, images)
   }
 
-  private image = computedFn(
-    (cameraId: number): Message => {
-      const time = periodic(10)
-      const t = time / 10
-      const numImages = this.images.length
-      const imageIndex = Math.floor(((Math.cos(2 * Math.PI * t) + 1) / 2) * numImages) % numImages
-      const data = this.images[imageIndex]
-      const Hcw = new Matrix4().makeRotationZ(2 * Math.PI * t)
-      return {
-        messageType: 'message.output.CompressedImage',
-        buffer: CompressedImage.encode({
-          format: fourcc('JPEG'),
-          dimensions: { x: 712, y: 463 },
-          data,
-          cameraId,
-          name: `Virtual Camera #${cameraId}`,
-          timestamp: toTimestamp(time),
-          Hcw: toProtoMat44(Hcw),
-          lens: {
-            projection: Projection.RECTILINEAR,
-            focalLength: 415 / 712,
-            fov: 1,
-          },
-        }).finish(),
-      }
-    },
-  )
+  private image = computedFn((id: number): Message => {
+    const time = periodic(10)
+    const t = time / 10
+    const numImages = this.images.length
+    const imageIndex = Math.floor(((Math.cos(2 * Math.PI * t) + 1) / 2) * numImages) % numImages
+    const data = this.images[imageIndex]
+    const Hcw = new Matrix4().makeRotationZ(2 * Math.PI * t)
+    return {
+      messageType: 'message.output.CompressedImage',
+      buffer: CompressedImage.encode({
+        format: fourcc('JPEG'),
+        dimensions: { x: 712, y: 463 },
+        data,
+        id,
+        name: `Virtual Camera #${id}`,
+        timestamp: toTimestamp(time),
+        Hcw: toProtoMat44(Hcw),
+        lens: {
+          projection: Projection.RECTILINEAR,
+          focalLength: 415 / 712,
+          fov: 1,
+        },
+      }).finish(),
+    }
+  })
 
   private get balls(): Message {
     const time = periodic(10)
@@ -105,19 +99,19 @@ export class VisionSimulator extends Simulator {
     return {
       messageType: 'message.vision.Balls',
       buffer: Balls.encode({
-        cameraId: 1,
+        id: 1,
         timestamp: toTimestamp(time),
         Hcw: toProtoMat44(Hcw),
         balls: [
           {
             cone: {
               axis,
-              gradient: Math.cos((Math.PI / 16) * (Math.cos(2 * Math.PI * t) / 5 + 1)),
+              radius: Math.cos((Math.PI / 16) * (Math.cos(2 * Math.PI * t) / 5 + 1)),
             },
             measurements: [
               {
                 type: MeasurementType.WIDTH_BASED,
-                rBCc: new Vector3(1, 0, 0),
+                srBCc: new Vector3(1, 0, 0),
               },
             ],
           },
@@ -134,7 +128,7 @@ export class VisionSimulator extends Simulator {
     return {
       messageType: 'message.vision.Goals',
       buffer: Goals.encode({
-        cameraId: 1,
+        id: 1,
         timestamp: toTimestamp(time),
         Hcw: toProtoMat44(Hcw),
         goals: [

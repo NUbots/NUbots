@@ -20,8 +20,12 @@ syntax = "proto3";
 
 package message.support;
 
-// Field dimensions as defined in the Robocup rules:
 message GlobalConfig {
-    uint32 playerId = 1;
-    uint32 teamId   = 2;
+    /// The robots number in the team. Starts at 1. Should be the same as the robots number (nugus1, nugus2, etc)
+    uint32 player_id = 1;
+    /// Unique team number, assigned by the league. We find out our team number by going here:
+    /// https://github.com/RoboCup-Humanoid-TC/GameController/tree/master/resources/config
+    /// then go to the folder for our league (eg in 2021 it was hl_sim_kid (humanoid league simulation kid size)),
+    /// go to teams.cfg, then find <number>=NUbots and the <number> is our team ID.
+    uint32 team_id = 2;
 }

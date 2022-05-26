@@ -1,5 +1,5 @@
 import { createSingletonFactory } from '../../shared/base/create_singleton_factory'
-import { message } from '../../shared/proto/messages'
+import { message } from '../../shared/messages'
 
 import { MessageType } from './nusight_network'
 

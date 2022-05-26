@@ -21,22 +21,21 @@
 #define UTILITY_SUPPORT_LAZYEVALUATION_HPP
 
 #include <functional>
+#include <utility>
 
-namespace utility {
-namespace support {
+namespace utility::support {
 
     template <typename T>
     struct LazyEvaluation {
 
         std::function<T()> lazy;
 
-        LazyEvaluation(std::function<T()> lazy) : lazy(lazy) {}
+        LazyEvaluation(std::function<T()> lazy) : lazy(std::move(lazy)) {}
 
         operator T() {
             return lazy();
         }
     };
-}  // namespace support
-}  // namespace utility
+}  // namespace utility::support
 
 #endif  // UTILITY_SUPPORT_LAZYEVALUATION_HPP

@@ -1,11 +1,8 @@
-import { action } from 'mobx'
-import { runInAction } from 'mobx'
-
+import { action, runInAction } from 'mobx'
 import { UnreachableError } from '../../../shared/base/unreachable_error'
-import { message } from '../../../shared/proto/messages'
+import { fourcc, fourccToString } from '../../../shared/image_decoder/fourcc'
+import { message } from '../../../shared/messages'
 import { toSeconds } from '../../../shared/time/timestamp'
-import { fourccToString } from '../../image_decoder/fourcc'
-import { fourcc } from '../../image_decoder/fourcc'
 import { Matrix4 } from '../../math/matrix4'
 import { Vector2 } from '../../math/vector2'
 import { Vector3 } from '../../math/vector3'
@@ -13,12 +10,7 @@ import { Vector4 } from '../../math/vector4'
 import { Network } from '../../network/network'
 import { NUsightNetwork } from '../../network/nusight_network'
 import { RobotModel } from '../robot/model'
-
-import { GreenHorizon } from './camera/model'
-import { Lens } from './camera/model'
-import { CameraParams } from './camera/model'
-import { Projection } from './camera/model'
-import { CameraModel } from './camera/model'
+import { CameraModel, CameraParams, GreenHorizon, Lens, Projection } from './camera/model'
 import { ImageFormat } from './image'
 import { VisionRobotModel } from './model'
 
@@ -46,16 +38,16 @@ export class VisionNetwork {
     image: message.input.Image | message.output.CompressedImage,
   ) => {
     const robot = VisionRobotModel.of(robotModel)
-    const { cameraId, name, dimensions, format, data, Hcw } = image
+    const { id, name, dimensions, format, data, Hcw } = image
     const { projection, focalLength, centre, k } = image?.lens!
 
     const element = await jpegBufferToImage(data)
 
     runInAction(() => {
-      const camera = robot.cameras.get(cameraId)
+      const camera = robot.cameras.get(id)
       const model = CameraModel.of({
         ...camera,
-        id: cameraId,
+        id: id,
         name,
         image: {
           type: 'element',
@@ -74,15 +66,15 @@ export class VisionNetwork {
           Hcw: Matrix4.from(Hcw),
         }),
       })
-      robot.cameras.set(cameraId, (model && camera?.copy(model)) || model)
+      robot.cameras.set(id, (model && camera?.copy(model)) || model)
     })
   }
 
   @action
   onMesh(robotModel: RobotModel, packet: message.vision.VisualMesh) {
     const robot = VisionRobotModel.of(robotModel)
-    const { cameraId, neighbourhood, rays, classifications } = packet
-    const camera = robot.cameras.get(cameraId)
+    const { id, neighbourhood, rays, classifications } = packet
+    const camera = robot.cameras.get(id)
     if (!camera) {
       return
     }
@@ -96,8 +88,8 @@ export class VisionNetwork {
   @action
   private onBalls(robotModel: RobotModel, packet: message.vision.Balls) {
     const robot = VisionRobotModel.of(robotModel)
-    const { cameraId, timestamp, Hcw, balls } = packet
-    const camera = robot.cameras.get(cameraId)
+    const { id, timestamp, Hcw, balls } = packet
+    const camera = robot.cameras.get(id)
     if (!camera) {
       return
     }
@@ -108,7 +100,7 @@ export class VisionNetwork {
         axis: Vector3.from(ball.cone?.axis),
         radius: ball.cone?.radius!,
       },
-      distance: Math.abs(ball.measurements?.[0].rBCc?.x!),
+      distance: Math.abs(ball.measurements?.[0].srBCc?.x!),
       colour: Vector4.from(ball.colour),
     }))
   }
@@ -116,8 +108,8 @@ export class VisionNetwork {
   @action
   private onGoals(robotModel: RobotModel, packet: message.vision.Goals) {
     const robot = VisionRobotModel.of(robotModel)
-    const { cameraId, timestamp, Hcw, goals } = packet
-    const camera = robot.cameras.get(cameraId)
+    const { id, timestamp, Hcw, goals } = packet
+    const camera = robot.cameras.get(id)
     if (!camera) {
       return
     }
@@ -141,8 +133,8 @@ export class VisionNetwork {
   @action
   private onGreenHorizon(robotModel: RobotModel, packet: message.vision.GreenHorizon) {
     const robot = VisionRobotModel.of(robotModel)
-    const { horizon, Hcw, cameraId } = packet
-    const camera = robot.cameras.get(cameraId)
+    const { horizon, Hcw, id } = packet
+    const camera = robot.cameras.get(id)
     if (!camera) {
       return
     }

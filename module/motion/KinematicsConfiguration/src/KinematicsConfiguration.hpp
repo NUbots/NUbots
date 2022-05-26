@@ -20,7 +20,7 @@
 #ifndef MODULE_MOTION_KINEMATICSCONFIGURATION_HPP
 #define MODULE_MOTION_KINEMATICSCONFIGURATION_HPP
 
-#include <armadillo>
+#include <Eigen/Core>
 #include <nuclear>
 #include <yaml-cpp/yaml.h>
 
@@ -28,8 +28,7 @@
 
 #include "message/motion/KinematicsModel.hpp"
 
-namespace module {
-namespace motion {
+namespace module::motion {
 
     class KinematicsConfiguration : public NUClear::Reactor {
 
@@ -38,14 +37,13 @@ namespace motion {
         explicit KinematicsConfiguration(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        void configure(message::motion::KinematicsModel& model, const ::extension::Configuration& objDarwinModel);
-        void configureLeg(message::motion::KinematicsModel& model, const YAML::Node& objLeg);
-        void configureHead(message::motion::KinematicsModel& model, const YAML::Node& objHead);
-        void configureArm(message::motion::KinematicsModel& model, const YAML::Node& objArm);
-        void configureMassModel(message::motion::KinematicsModel& model, const YAML::Node& objMassModel);
-        void configureTensorModel(message::motion::KinematicsModel& model, const YAML::Node& objTensorModel);
+        static void configure(message::motion::KinematicsModel& model, const ::extension::Configuration& objNugusModel);
+        static void configureLeg(message::motion::KinematicsModel& model, const YAML::Node& objLeg);
+        static void configureHead(message::motion::KinematicsModel& model, const YAML::Node& objHead);
+        static void configureArm(message::motion::KinematicsModel& model, const YAML::Node& objArm);
+        static void configureMassModel(message::motion::KinematicsModel& model, const YAML::Node& objMassModel);
+        static void configureTensorModel(message::motion::KinematicsModel& model, const YAML::Node& objTensorModel);
     };
-}  // namespace motion
-}  // namespace module
+}  // namespace module::motion
 
 #endif  // MODULE_MOTION_KINEMATICSCONFIGURATION_HPP

@@ -24,16 +24,16 @@ import "Matrix.proto";
 import "Vector.proto";
 
 message Torso {
-    // The name of the model in the simulation that this position is for
+    /// The name of the model in the simulation that this position is for
     string model = 1;
-    // The transform from world space to torso space
+    /// The transform from world space to torso space
     mat4 Htw = 2;
-    // Angular velocity of torso in world space
+    /// Angular velocity of torso in world space
     vec3 omegaTw = 3;
-    // Angular acceleration of torso in world space
+    /// Angular acceleration of torso in world space
     vec3 alphaTw = 4;
-    // Linear velocity of torso in world space
+    /// Linear velocity of torso in world space
     vec3 vTw = 5;
-    // Linear acceleration of torso in world space
+    /// Linear acceleration of torso in world space
     vec3 aTw = 6;
 }

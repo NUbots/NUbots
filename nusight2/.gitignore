@@ -24,8 +24,9 @@ yarn-debug.log*
 yarn-error.log*
 
 # Generated protocol buffer files
-/src/shared/proto/messages.js
-/src/shared/proto/messages.d.ts
+/src/shared/messages.js
+/src/shared/messages.d.ts
+src/shared/message_fields_index.ts
 
 # NBS recordings
-recordings
+/recordings

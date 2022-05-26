@@ -22,35 +22,32 @@
 
 #include <nuclear>
 
-namespace module {
-namespace behaviour {
-    namespace skills {
+namespace module::behaviour::skills {
 
-        /**
-         * Executes a getup script if the robot falls over.
-         *
-         * @author Josiah Walker
-         * @author Trent Houliston
-         */
-        class Getup : public NUClear::Reactor {
-        private:
-            const size_t id;
+    /**
+     * Executes a getup script if the robot falls over.
+     *
+     * @author Josiah Walker
+     * @author Trent Houliston
+     */
+    class Getup : public NUClear::Reactor {
+    private:
+        const size_t id;
 
-            bool gettingUp;
-            ReactionHandle fallenCheck;
+        bool isFront;
 
-            /// config settings
-            float FALLEN_ANGLE;
-            float GETUP_PRIORITY;
-            float EXECUTION_PRIORITY;
+        bool gettingUp;
 
-            void updatePriority(const float& priority);
+        /// config settings
+        float FALLEN_ANGLE       = 0.0f;
+        float GETUP_PRIORITY     = 0.0f;
+        float EXECUTION_PRIORITY = 0.0f;
 
-        public:
-            explicit Getup(std::unique_ptr<NUClear::Environment> environment);
-        };
-    }  // namespace skills
-}  // namespace behaviour
-}  // namespace module
+        void updatePriority(const float& priority);
+
+    public:
+        explicit Getup(std::unique_ptr<NUClear::Environment> environment);
+    };
+}  // namespace module::behaviour::skills
 
 #endif  // MODULES_BEHAVIOUR_REFLEX_GETUP_HPP

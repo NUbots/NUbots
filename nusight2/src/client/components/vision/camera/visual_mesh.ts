@@ -1,21 +1,21 @@
 import * as THREE from 'three'
 import { Vector2 } from '../../../math/vector2'
-import { bufferGeometry } from '../../three/builders'
-import { rawShader } from '../../three/builders'
-import { shaderMaterial } from '../../three/builders'
-import { mesh } from '../../three/builders'
+import { bufferGeometry, mesh, rawShader, shaderMaterial } from '../../three/builders'
 import { Canvas } from '../../three/three'
-import { CameraParams } from './model'
-import { VisualMesh } from './model'
+import { CameraParams, VisualMesh } from './model'
 import fragmentShader from './shaders/visual_mesh.frag'
 import vertexShader from './shaders/visual_mesh.vert'
 
 export class VisualMeshViewModel {
-  constructor(
-    private readonly canvas: Canvas,
-    private readonly visualMesh: VisualMesh,
-    private readonly params: CameraParams,
-  ) {}
+  private readonly canvas: Canvas
+  private readonly visualMesh: VisualMesh
+  private readonly params: CameraParams
+
+  constructor(canvas: Canvas, visualMesh: VisualMesh, params: CameraParams) {
+    this.canvas = canvas
+    this.visualMesh = visualMesh
+    this.params = params
+  }
 
   static of(canvas: Canvas, visualMesh: VisualMesh, params: CameraParams) {
     return new VisualMeshViewModel(canvas, visualMesh, params)

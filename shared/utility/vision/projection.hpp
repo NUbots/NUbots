@@ -6,8 +6,7 @@
 #include <Eigen/Core>
 #include <cmath>
 
-namespace utility {
-namespace vision {
+namespace utility::vision {
 
     template <typename T>
     inline T equidistant_theta(const T& r, const T& f) {
@@ -65,7 +64,7 @@ namespace vision {
 
         // These terms have been stripped back to only include k1 and k2
         // if more are needed in the future go and get them from the original paper
-        // TODO if performance ever becomes an issue, this can be precomputed for the same k values
+        // TODO(VisionTeam): if performance ever becomes an issue, this can be precomputed for the same k values
         // clang-format off
         const T b1 = -k1;
         const T b2 = 3.0*k1_2 - k2;
@@ -132,8 +131,9 @@ namespace vision {
     }
 
     /**
-     * @brief Projects the pixel coordinates measured in coordinate system with origin in the centre of the image where
-     * x is left and y is up. And projects to a coordinate system where x is forward, y is to the left and z is up.
+     * @brief Projects the pixel coordinates measured in coordinate system with origin in the centre of the image
+     * where x is left and y is up. And projects to a coordinate system where x is forward, y is to the left and z
+     * is up.
      *
      * @param px    the coordinates of the pixel measured as a fraction of the width
      * @param f     the focal length measured as a ratio of the width of the image
@@ -167,7 +167,6 @@ namespace vision {
         return Eigen::Matrix<T, 3, 1>(std::cos(theta), sin_theta * px.x() / r_d, sin_theta * px.y() / r_d);
     }
 
-}  // namespace vision
-}  // namespace utility
+}  // namespace utility::vision
 
 #endif  // UTILITY_VISION_PROJECTION_HPP

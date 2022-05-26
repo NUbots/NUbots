@@ -1,4 +1,3 @@
-import CopyWebpackPlugin from 'copy-webpack-plugin'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import * as path from 'path'
 import webpack from 'webpack'
@@ -16,26 +15,17 @@ export default ({ config: storybookConfig }: { config: webpack.Configuration }) 
     ...storybookConfig,
     module: {
       ...storybookConfig.module,
-      rules: config.module && config.module.rules,
+      rules: config.module?.rules,
     },
     plugins: [
       ...(storybookConfig.plugins || []),
-      ...(config.plugins || []).filter(
-        p =>
-          !(
-            (
-              p instanceof HtmlWebpackPlugin || // Storybook handles page generation.
-              p instanceof webpack.HotModuleReplacementPlugin || // Disable HMR.
-              p instanceof CopyWebpackPlugin
-            ) // Avoids overwriting index.html.
-          ),
-      ),
+      ...(config.plugins || []).filter(p => !(p instanceof HtmlWebpackPlugin)), // Storybook handles page generation.
     ],
     resolve: {
       ...storybookConfig.resolve,
       extensions: [
-        ...((storybookConfig.resolve && storybookConfig.resolve.extensions) || []),
-        ...((config.resolve && config.resolve.extensions) || []),
+        ...(storybookConfig.resolve?.extensions || []),
+        ...(config.resolve?.extensions || []),
       ],
     },
   }

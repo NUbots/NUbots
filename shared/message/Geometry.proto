@@ -24,6 +24,9 @@ package message;
 import "Vector.proto";
 import "Matrix.proto";
 
+/**
+ * Hesse normal form representation of a line. See https://en.wikipedia.org/wiki/Hesse_normal_form
+ */
 message Line {
     fvec3 normal   = 1;
     float distance = 2;
@@ -34,11 +37,17 @@ message Circle {
     vec2   centre = 2;
 }
 
+/**
+ * A 3D matrix representation of the Ellipse
+ */
 message Ellipse {
-    // See http://en.wikipedia.org/wiki/Matrix_representation_of_conic_sections
+    /// See http://en.wikipedia.org/wiki/Matrix_representation_of_conic_sections
     mat3 ellipse = 1;
 }
 
+/**
+ * Four corner points of a quadrilateral
+ */
 message Quad {
     vec2 tl = 1;
     vec2 tr = 2;
@@ -47,9 +56,12 @@ message Quad {
 }
 
 message Polygon {
-    vec2 point = 1;
+    repeated vec2 vertices = 1;
 }
 
+/**
+ * Contains the positions of the four corners of a frustrum
+ */
 message Frustum {
     vec3 tl = 1;
     vec3 tr = 2;
@@ -58,7 +70,8 @@ message Frustum {
 }
 
 message Cone {
+    /// 3D axis of the centre of the cone
     fvec3 axis = 1;
-    // Cos(theta) of the cone angle
+    /// Cos(theta) of the cone angle
     float radius = 3;
 }

@@ -5,8 +5,7 @@
 #include <nuclear>
 #include <vector>
 
-namespace module {
-namespace vision {
+namespace module::vision {
 
     class GreenHorizonDetector : public NUClear::Reactor {
 
@@ -19,11 +18,9 @@ namespace vision {
             float confidence_threshold;
             uint cluster_points;
             float distance_offset;
-            bool debug;
-        } config;
+        } config{};
     };
 
-}  // namespace vision
-}  // namespace module
+}  // namespace module::vision
 
 #endif  // MODULE_VISION_GREENHORIZONDETECTOR_HPP

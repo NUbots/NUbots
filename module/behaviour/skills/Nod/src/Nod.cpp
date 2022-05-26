@@ -30,56 +30,48 @@
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 
-namespace module {
-namespace behaviour {
-    namespace skills {
+namespace module::behaviour::skills {
 
-        struct ExecuteNod {};
+    struct ExecuteNod {};
 
-        using extension::Configuration;
-        using extension::ExecuteScriptByName;
+    using extension::Configuration;
+    using extension::ExecuteScriptByName;
 
-        using LimbID  = utility::input::LimbID;
-        using ServoID = utility::input::ServoID;
+    using LimbID  = utility::input::LimbID;
+    using ServoID = utility::input::ServoID;
 
-        using utility::behaviour::ActionPriorites;
-        using utility::behaviour::RegisterAction;
+    using utility::behaviour::ActionPriorities;
+    using utility::behaviour::RegisterAction;
 
-        Nod::Nod(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment))
-            , id(size_t(this) * size_t(this) - size_t(this))
-            , value(false)
-            , EXECUTION_PRIORITY(0.0f) {
+    Nod::Nod(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-            // do a little configurating
-            on<Configuration>("Nod.yaml").then([this](const Configuration& config) {
-                EXECUTION_PRIORITY = config["execution_priority"].as<float>();
-            });
+        // do a little configurating
+        on<Configuration>("Nod.yaml").then([this](const Configuration& config) {
+            EXECUTION_PRIORITY = config["execution_priority"].as<float>();
+        });
 
-            on<Trigger<message::behaviour::Nod>>().then([this](const message::behaviour::Nod& nod) {
-                value = nod.value;
-                updatePriority(EXECUTION_PRIORITY);
-            });
+        on<Trigger<message::behaviour::Nod>>().then([this](const message::behaviour::Nod& nod) {
+            value = nod.value;
+            updatePriority(EXECUTION_PRIORITY);
+        });
 
-            emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
-                id,
-                "Nod",
-                {std::pair<float, std::set<LimbID>>(0, {LimbID::HEAD})},
-                [this](const std::set<LimbID>&) {
-                    if (value) {
-                        emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"NodYes.yaml"})));
-                    }
-                    else {
-                        emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"NodNo.yaml"})));
-                    }
-                },
-                [this](const std::set<LimbID>&) { updatePriority(0); },
-                [this](const std::set<ServoID>&) { updatePriority(0); }}));
-        }
+        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
+            id,
+            "Nod",
+            {std::pair<float, std::set<LimbID>>(0, {LimbID::HEAD})},
+            [this](const std::set<LimbID>& /*unused*/) {
+                if (value) {
+                    emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"NodYes.yaml"})));
+                }
+                else {
+                    emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"NodNo.yaml"})));
+                }
+            },
+            [this](const std::set<LimbID>& /*unused*/) { updatePriority(0); },
+            [this](const std::set<ServoID>& /*unused*/) { updatePriority(0); }}));
+    }
 
-        void Nod::updatePriority(const float& priority) {
-            emit(std::make_unique<ActionPriorites>(ActionPriorites{id, {priority}}));
-        }
-    }  // namespace skills
-}  // namespace behaviour
-}  // namespace module
+    void Nod::updatePriority(const float& priority) {
+        emit(std::make_unique<ActionPriorities>(ActionPriorities{id, {priority}}));
+    }
+}  // namespace module::behaviour::skills

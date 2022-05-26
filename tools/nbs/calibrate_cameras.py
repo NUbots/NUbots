@@ -5,19 +5,18 @@ if True:
     # Make tensorflow quiet unless we tell it to talk
     import os
 
-    if "TF_CPP_MIN_LOG_LEVEL" not in os.environ:
-        os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
-
-import os
-
-import b
+import cv2
 import numpy as np
 import tensorflow as tf
 from ruamel.yaml import YAML
+from tqdm import tqdm, trange
 
-from .camera_calibration.callback import Progress
-from .camera_calibration.grid import find_grids
-from .camera_calibration.matrix import compose
+import b
+
+from .camera_calibration.callback import ExtrinsicProgress, IntrinsicProgress
+from .camera_calibration.grid_distance import grid_distance
+from .camera_calibration.loss import extrinsic_loss
+from .camera_calibration.metric import *
 from .camera_calibration.model import *
 
 # The dtype we will use to calibrate, 64 bit floats tend to be a little more numerically stable
@@ -39,14 +38,15 @@ def register(command):
         required=True,
         help="The directory containing the configuration files for the cameras",
     )
+    command.add_argument("--rows", default=4, type=int, help="the number of rows in the asymmetric circles grid")
+    command.add_argument("--cols", default=11, type=int, help="the number of columns in the asymmetric circles grid")
     command.add_argument(
-        "--cols", default=4, type=int, help="the number of cols in the asymmetric circles grid (the zig zag lines)"
+        "--grid_size", default=0.04, type=float, help="the distance between rows/cols in the grid in meters"
     )
     command.add_argument(
-        "--rows", default=11, type=int, help="the number of rows in the asymmetric circles grid (the straight lines)"
-    )
-    command.add_argument(
-        "--grid_size", default=0.04, type=float, help="the distance between cols/rows in the grid in meters"
+        "--no-intrinsics",
+        action="store_true",
+        help="use the intrinsics provided in the configuration file and do not attempt to optimise them",
     )
     command.add_argument(
         "--patience", default=100, type=int, help="how many epochs of the loss not reducing before we terminate"

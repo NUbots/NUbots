@@ -1,0 +1,171 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUbots <nubots@nubots.net>
+ */
+syntax = "proto3";
+
+package message.platform;
+
+import "google/protobuf/timestamp.proto";
+
+import "Vector.proto";
+
+/**
+ * @author Trent Houliston
+ */
+message RawSensors {
+    /// Set of error flags/statuses.
+    /// bitmask values.
+    /// See https://emanual.robotis.com/docs/en/dxl/protocol1/#protocol
+    enum Error {
+        OK            = 0;  // not really a flag but the lack of any other flag
+        INPUT_VOLTAGE = 1;
+        ANGLE_LIMIT   = 2;
+        OVERHEATING   = 4;
+        RANGE         = 8;
+        CHECKSUM      = 16;
+        OVERLOAD      = 32;
+        INSTRUCTION   = 64;
+        CORRUPT_DATA  = 128;
+        TIMEOUT       = 256;
+    }
+    message LEDPanel {
+        bool led2 = 1;
+        bool led3 = 2;
+        bool led4 = 3;
+    }
+    message HeadLED {
+        /// Encode as 0x00 0xRR 0xGG 0xBB
+        uint32 RGB = 1;
+    }
+    message EyeLED {
+        /// Encode as 0x00 0xRR 0xGG 0xBB
+        uint32 RGB = 1;
+    }
+    message Buttons {
+        bool left   = 1;
+        bool middle = 2;
+    }
+    /// The robot has Force Sensitive Resistors on its feet to detect whether a foot is down.
+    /// There are four FSRs per foot, so this message is for one foot
+    message FSR {
+        float  fsr1        = 1;
+        float  fsr2        = 2;
+        float  fsr3        = 3;
+        float  fsr4        = 4;
+        float  centre_x    = 5;
+        float  centre_y    = 6;
+        uint32 error_flags = 7;
+    }
+    message FSRs {
+        /// Left foot
+        FSR left = 1;
+        /// Right foot
+        FSR right = 2;
+    }
+    /// Full set of information to use a given servo.
+    /// Ref: https://emanual.robotis.com/docs/en/dxl/mx/mx-64/ ; https://emanual.robotis.com/docs/en/dxl/mx/mx-106/
+    message Servo {
+        /// Set of things which can or have gone wrong.
+        /// https://emanual.robotis.com/docs/en/dxl/mx/mx-106/#alarm-led17-shutdown18
+        uint32 error_flags    = 1;
+        bool   torque_enabled = 2;
+        /// Proportional gain. In proportion to the servo's position error. Gain values are in range 0~100
+        float p_gain = 3;
+        /// Integral gain. Increases in relation to the error, and how long the error has persisted. Gain values are in
+        /// range 0~100
+        float i_gain = 4;
+        /// Derivative gain. Does not consider error, just dampens forces to reduce derivatives. Gain values are in
+        /// range 0~100
+        float d_gain = 5;
+        /// In radians
+        /// (FROM https://emanual.robotis.com/docs/en/dxl/mx/mx-64/#specifications):
+        /// If Goal Position is out of the range, Angle Limit Error Bit (Bit1) of Status Packet is returned as ‘1’ and
+        /// Alarm is triggered as set in Alarm LED/Shutdown
+        float goal_position = 6;
+        /// What dynamixel servos call velocity. In radians per second
+        float moving_speed = 7;
+        /// Used to set the servo on or off. Typically either 0 (off) or 100 (on). Not really in any unit
+        float torque = 8;
+        /// In radians
+        float present_position = 9;
+        /// In radians per second
+        float present_speed = 10;
+        /// A percentage load between -1 and 1. The sign depends on the rotation direction - negative is CCW, positive
+        /// is clockwise
+        float load = 11;
+        /// The unit is Volts
+        /// If Present Voltage(42) value is out of range, Voltage Range Error Bit (Bit0) of Status Packet is
+        /// returned as ‘1’ and Alarm is triggered and set the address 17 and set 1 to the Bit 0 of the address 18
+        float voltage = 12;
+        /// In degrees Celsius
+        float temperature = 13;
+    };
+    /// Set of all the servos on the robot
+    message Servos {
+        Servo r_shoulder_pitch = 1;
+        Servo l_shoulder_pitch = 2;
+        Servo r_shoulder_roll  = 3;
+        Servo l_shoulder_roll  = 4;
+        Servo r_elbow          = 5;
+        Servo l_elbow          = 6;
+        Servo r_hip_yaw        = 7;
+        Servo l_hip_yaw        = 8;
+        Servo r_hip_roll       = 9;
+        Servo l_hip_roll       = 10;
+        Servo r_hip_pitch      = 11;
+        Servo l_hip_pitch      = 12;
+        Servo r_knee           = 13;
+        Servo l_knee           = 14;
+        Servo r_ankle_pitch    = 15;
+        Servo l_ankle_pitch    = 16;
+        Servo r_ankle_roll     = 17;
+        Servo l_ankle_roll     = 18;
+        Servo head_pan         = 19;
+        Servo head_tilt        = 20;
+    }
+    /// Timestamp when our data were taken
+    google.protobuf.Timestamp timestamp = 1;
+    /// Holds the error code (if any) from the CM740
+    /// The list of errors is here: https://emanual.robotis.com/docs/en/dxl/protocol1/#status-packetreturn-packet
+    uint32   platform_error_flags = 2;
+    LEDPanel led_panel            = 3;
+    HeadLED  head_led             = 4;
+    EyeLED   eye_led              = 5;
+    Buttons  buttons              = 6;
+    /// Voltage for the whole robot, from the main battery, in Volts
+    float voltage = 7;
+    /// In m/s^2. Each axis is bounded between -4g and 4g, according to the datasheet
+    /// here https://emanual.robotis.com/docs/en/platform/op2/getting_started/#acc_x-acc_y-acc_z
+    fvec3 accelerometer = 8;
+    /// In radians per second. Each axis bounded between -500 and 500 degrees per second, according to the datasheet
+    /// here https://emanual.robotis.com/docs/en/platform/op2/getting_started/#gyro_x-gyro_y-gyro_z
+    fvec3  gyroscope = 9;
+    FSRs   fsr       = 10;
+    Servos servo     = 11;
+}
+
+message ButtonLeftDown {}
+
+message ButtonLeftUp {}
+
+message ButtonMiddleDown {}
+
+message ButtonMiddleUp {}
+
+// Reset sensors and servo targets in Webots
+message ResetWebotsServos {}

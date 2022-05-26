@@ -5,7 +5,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/motion/ServoTarget.hpp"
-#include "message/platform/darwin/DarwinSensors.hpp"
+#include "message/platform/RawSensors.hpp"
 #include "message/platform/gazebo/Ball.hpp"
 #include "message/platform/gazebo/Command.hpp"
 #include "message/platform/gazebo/RawSensors.hpp"
@@ -13,17 +13,15 @@
 #include "message/platform/gazebo/Simulation.hpp"
 #include "message/platform/gazebo/Torso.hpp"
 
-namespace module {
-namespace platform {
+namespace module::platform {
 
     using extension::Configuration;
 
     using message::motion::ServoTarget;
     using message::motion::ServoTargets;
-    using message::platform::darwin::DarwinSensors;
-    using message::platform::gazebo::Ball;
+    using message::platform::RawSensors;
     using message::platform::gazebo::Command;
-    using message::platform::gazebo::RawSensors;
+    using GazeboSensors = message::platform::gazebo::RawSensors;
     using GazeboTargets = message::platform::gazebo::ServoTargets;
     using message::platform::gazebo::Simulation;
     using message::platform::gazebo::Torso;
@@ -62,14 +60,14 @@ namespace platform {
             }
         });
 
-        on<Network<RawSensors>>().then([this](const NetworkSource& network_source, const RawSensors& sensors) {
+        on<Network<GazeboSensors>>().then([this](const NetworkSource& network_source, const GazeboSensors& sensors) {
             // Only listen to the target model in the target simulation
             if (network_source.name == config.simulator_name && sensors.model == config.model_name) {
                 // Swizzle the IMU axes so that they match the CM740
-                DarwinSensors msg(sensors.sensors);
-                msg.accelerometer = {-msg.accelerometer.y, -msg.accelerometer.x, -msg.accelerometer.z};
-                msg.gyroscope     = {-msg.gyroscope.x, -msg.gyroscope.y, msg.gyroscope.z};
-                emit(std::make_unique<DarwinSensors>(msg));
+                RawSensors msg(sensors.sensors);
+                msg.accelerometer = -msg.accelerometer;
+                msg.gyroscope     = Eigen::Vector3f(-msg.gyroscope.x(), -msg.gyroscope.y(), msg.gyroscope.z());
+                emit(std::make_unique<RawSensors>(msg));
             }
         });
 
@@ -84,14 +82,6 @@ namespace platform {
             emit(msg);
         });
 
-        on<Trigger<std::vector<ServoTarget>>>().then([this](const std::vector<ServoTarget>& commands) {
-            auto msg = std::make_unique<ServoTargets>();
-            for (const auto& command : commands) {
-                msg->targets.push_back(command);
-            }
-            emit(msg);
-        });
-
         on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
             auto msg     = std::make_unique<GazeboTargets>();
             msg->model   = config.model_name;
@@ -100,5 +90,4 @@ namespace platform {
             emit<Scope::NETWORK>(msg, config.simulator_name, false);
         });
     }
-}  // namespace platform
-}  // namespace module
+}  // namespace module::platform

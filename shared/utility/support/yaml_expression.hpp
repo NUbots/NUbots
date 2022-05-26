@@ -24,22 +24,22 @@
 #include <fmt/format.h>
 #include <limits>
 #include <system_error>
+#include <yaml-cpp/yaml.h>
 
 #include "math_string.hpp"
 
-namespace utility {
-namespace support {
+namespace utility::support {
     /**
      * Represents a mathematical expression
      * This could either be represented as a double or as a vector/matrix.
      */
     struct Expression {
 
-        Expression() {}
+        Expression() = default;
         Expression(const YAML::Node& node) : node(node) {}
 
         operator double() {
-            double value;
+            double value = 0.0;
 
             try {
                 value = parse_math_string<double>(node.as<std::string>());
@@ -269,30 +269,50 @@ namespace support {
             return matrix;
         }
 
+
     private:
         YAML::Node node;
     };
-}  // namespace support
-}  // namespace utility
+
+    template <typename T, std::size_t N, typename U = T>
+    inline std::array<T, N> resolve_expression(const YAML::Node& config) {
+        std::array<T, N> result;
+        size_t i = 0;
+        for (auto& data : config.as<std::vector<Expression>>()) {
+            result[i++] = U(data);
+        }
+        assert((fmt::format("We expected {} elements in the YAML file but {} were found", N, i), i == N));
+        return result;
+    }
+
+    template <typename T, typename U = T>
+    inline std::vector<T> resolve_expression(const YAML::Node& config) {
+        std::vector<T> result;
+        for (auto& data : config.as<std::vector<Expression>>()) {
+            result.emplace_back(U(data));
+        }
+        return result;
+    }
+}  // namespace utility::support
 
 namespace YAML {
 
-template <>
-struct convert<utility::support::Expression> {
-    static Node encode(const utility::support::Expression& rhs) {
-        Node node;
+    template <>
+    struct convert<utility::support::Expression> {
+        static Node encode(const utility::support::Expression& rhs) {
+            Node node;
 
-        // Treat as a double
-        node = rhs;
+            // Treat as a double
+            node = rhs;
 
-        return node;
-    }
+            return node;
+        }
 
-    static bool decode(const Node& node, utility::support::Expression& rhs) {
-        rhs = utility::support::Expression(node);
-        return true;
-    }
-};
+        static bool decode(const Node& node, utility::support::Expression& rhs) {
+            rhs = utility::support::Expression(node);
+            return true;
+        }
+    };
 }  // namespace YAML
 
 #endif

@@ -24,8 +24,7 @@
 
 #include "extension/Script.hpp"
 
-namespace module {
-namespace motion {
+namespace module::motion {
 
     /**
      * Executes scripts as a series of waypoints.
@@ -41,8 +40,6 @@ namespace motion {
         explicit ScriptEngine(std::unique_ptr<NUClear::Environment> environment);
         static constexpr const char* CONFIGURATION_PATH = "";
     };
-
-}  // namespace motion
-}  // namespace module
+}  // namespace module::motion
 
 #endif  // MODULES_MOTION_SCRIPTENGINE_HPP

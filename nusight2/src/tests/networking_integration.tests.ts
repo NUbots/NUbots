@@ -5,7 +5,7 @@ import { Network } from '../client/network/network'
 import { NUsightNetwork } from '../client/network/nusight_network'
 import { FakeNUClearNetClient } from '../server/nuclearnet/fake_nuclearnet_client'
 import { FakeNUClearNetServer } from '../server/nuclearnet/fake_nuclearnet_server'
-import { message } from '../shared/proto/messages'
+import { message } from '../shared/messages'
 import Sensors = message.input.Sensors
 
 import CompressedImage = message.output.CompressedImage

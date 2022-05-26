@@ -28,8 +28,7 @@
 
 #include "message/input/Image.hpp"
 
-namespace utility {
-namespace vision {
+namespace utility::vision {
 
     struct Colour {
         enum Value : char {
@@ -45,34 +44,29 @@ namespace vision {
             // Ambiguous Classifications
             WHITE_GREEN = 'f'
         };
-        Value value;
+        Value value{Value::UNCLASSIFIED};
 
         // Constructors
-        Colour() : value(Value::UNCLASSIFIED) {}
+        Colour() = default;
         Colour(int const& value) : value(static_cast<Value>(value)) {}
         Colour(uint8_t const& value) : value(static_cast<Value>(value)) {}
         Colour(uint32_t const& value) : value(static_cast<Value>(value)) {}
         Colour(char const& value) : value(static_cast<Value>(value)) {}
         Colour(Value const& value) : value(value) {}
-        Colour(std::string const& str) : value(Value::UNCLASSIFIED) {
-            if (str == "UNCLASSIFIED")
-                value = Value::UNCLASSIFIED;
-            else if (str == "WHITE")
-                value = Value::WHITE;
-            else if (str == "GREEN")
-                value = Value::GREEN;
-            else if (str == "ORANGE")
-                value = Value::ORANGE;
-            else if (str == "YELLOW")
-                value = Value::YELLOW;
-            else if (str == "CYAN")
-                value = Value::CYAN;
-            else if (str == "MAGENTA")
-                value = Value::MAGENTA;
-            else if (str == "WHITE_GREEN")
-                value = Value::WHITE_GREEN;
-            else
+        Colour(std::string const& str) {
+            // clang-format off
+            if      (str == "UNCLASSIFIED") { value = Value::UNCLASSIFIED; }
+            else if (str == "WHITE")        { value = Value::WHITE; }
+            else if (str == "GREEN")        { value = Value::GREEN; }
+            else if (str == "ORANGE")       { value = Value::ORANGE; }
+            else if (str == "YELLOW")       { value = Value::YELLOW; }
+            else if (str == "CYAN")         { value = Value::CYAN; }
+            else if (str == "MAGENTA")      { value = Value::MAGENTA; }
+            else if (str == "WHITE_GREEN")  { value = Value::WHITE_GREEN; }
+            else {
                 throw std::runtime_error("String " + str + " did not match any enum for Colour");
+            }
+            // clang-format on
         }
 
 
@@ -150,10 +144,10 @@ namespace vision {
     };
 
     struct Pixel {
-        Pixel() : rgba(0) {}
+        Pixel() = default;
         Pixel(uint32_t rgba) : rgba(rgba) {}
-        Pixel(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : components({r, g, b, a}) {}
-        Pixel(uint8_t r, uint8_t g, uint8_t b) : components({r, g, b, 0}) {}
+        Pixel(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : components({{r}, {g}, {b}, a}) {}
+        Pixel(uint8_t r, uint8_t g, uint8_t b) : components({{r}, {g}, {b}, 0}) {}
         Pixel(const Pixel& pixel) : rgba(pixel.rgba) {}
 
         union {
@@ -176,7 +170,7 @@ namespace vision {
                 uint8_t a;
             } components;
 
-            uint32_t rgba;
+            uint32_t rgba{};
         };
     };
 
@@ -259,16 +253,19 @@ namespace vision {
     template <typename T>
     inline void loadImage(const std::string& file, T& image) {
         std::ifstream ifs(file, std::ios::in | std::ios::binary);
-        std::string magic_number, width, height, max_val;
-        uint8_t bytes_per_pixel;
-        bool RGB;
+        std::string magic_number;
+        std::string width;
+        std::string height;
+        std::string max_val;
+        uint8_t bytes_per_pixel = 0;
+        bool RGB                = false;
         ifs >> magic_number;
 
-        if (magic_number.compare("P6") == 0) {
+        if (magic_number == "P6") {
             RGB = true;
         }
 
-        else if (magic_number.compare("P5") == 0) {
+        else if (magic_number == "P5") {
             RGB = false;
         }
 
@@ -299,7 +296,7 @@ namespace vision {
         ifs.close();
     }
 
-    const auto getSubImage(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data);
+    auto getSubImage(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data);
     uint8_t conv2d(const Eigen::Matrix<uint8_t, 5, 5>& patch,
                    const Eigen::Matrix<int8_t, 5, 5>& kernel,
                    uint8_t normalisation = BAYER_SCALE);
@@ -318,7 +315,6 @@ namespace vision {
     Pixel getPixel(uint x, uint y, uint width, uint height, const std::vector<uint8_t>& data, const FOURCC& fourcc);
 
 
-}  // namespace vision
-}  // namespace utility
+}  // namespace utility::vision
 
 #endif  // UTILITY_VISION_VISION_HPP

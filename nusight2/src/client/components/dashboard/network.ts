@@ -1,6 +1,5 @@
 import { action } from 'mobx'
-
-import { message } from '../../../shared/proto/messages'
+import { message } from '../../../shared/messages'
 import { toSeconds } from '../../../shared/time/timestamp'
 import { Matrix2 } from '../../math/matrix2'
 import { Matrix3 } from '../../math/matrix3'
@@ -9,8 +8,8 @@ import { Vector3 } from '../../math/vector3'
 import { Network } from '../../network/network'
 import { NUsightNetwork } from '../../network/nusight_network'
 import { RobotModel } from '../robot/model'
-
 import { DashboardRobotModel } from './dashboard_robot/model'
+
 import Overview = message.support.nusight.Overview
 
 export class DashboardNetwork {
@@ -73,6 +72,5 @@ export class DashboardNetwork {
 
     // The walk command and
     robot.walkCommand = Vector3.from(overview.walkCommand)
-    robot.walkPathPlan = overview.walkPathPlan.map(Vector2.from)
   }
 }

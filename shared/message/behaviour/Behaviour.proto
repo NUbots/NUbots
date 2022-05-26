@@ -22,7 +22,6 @@ syntax = "proto3";
 package message.behaviour;
 
 message Behaviour {
-
     enum State {
         UNKNOWN          = 0;
         INIT             = 1;
@@ -39,7 +38,7 @@ message Behaviour {
         GOALIE_WALK      = 12;
         MOVE_TO_CENTRE   = 13;
         LOCALISING       = 14;
+        SHOOTOUT         = 15;
     }
-
     State state = 1;
 }

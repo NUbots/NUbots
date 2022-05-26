@@ -8,15 +8,6 @@ import textwrap
 
 from banner import ampscii, bigtext
 
-#
-# File:   generate.py
-# Authors:
-#   Brendan Annable <brendan.annable@uon.edu.au>
-#   Jake Woods <jake.f.woods@gmail.com>
-#   Trent Houliston <trent@houliston.me>
-#
-
-
 role_name = sys.argv[1]
 banner_file = sys.argv[2]
 module_path = sys.argv[3]
@@ -34,7 +25,7 @@ with open(role_name, "w", encoding="utf-8") as role_file:
         # we need to replace the ::'s with /'s so we can include them.
 
         # module::a::b::C
-        # module/a/b/C/src/C.h
+        # module/a/b/C/src/C.hpp
 
         # replace :: with /
         header = re.sub(r"::", r"/", module)
@@ -85,6 +76,7 @@ with open(role_name, "w", encoding="utf-8") as role_file:
     unsigned int nThreads = std::thread::hardware_concurrency() + 2;
     config.thread_count = nThreads >= 4 ? nThreads : 4;
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
     NUClear::PowerPlant plant(config, argc, const_cast<const char**>(argv));"""
 
     role_file.write(start)

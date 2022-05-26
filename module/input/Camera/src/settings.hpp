@@ -9,8 +9,7 @@ extern "C" {
 #include <aravis-0.8/arv.h>
 }
 
-namespace module {
-namespace input {
+namespace module::input {
     template <typename T>
     struct SettingsFunctions;
 
@@ -26,12 +25,12 @@ namespace input {
             GError* error = nullptr;
             std::string u = unit(setting);
             int64_t min   = arv_gc_integer_get_min(setting, &error);
-            if (error) {
+            if (error != nullptr) {
                 g_error_free(error);
                 error = nullptr;
             }
             int64_t max = arv_gc_integer_get_max(setting, &error);
-            if (error) {
+            if (error != nullptr) {
                 g_error_free(error);
                 error = nullptr;
             }
@@ -43,7 +42,7 @@ namespace input {
         static std::string unit(ArvGcInteger* setting) {
             GError* error = nullptr;
             const char* u = arv_gc_integer_get_unit(setting, &error);
-            if (error) {
+            if (error != nullptr) {
                 g_error_free(error);
             }
             return u == nullptr ? "" : u;
@@ -62,12 +61,12 @@ namespace input {
             GError* error = nullptr;
             std::string u = unit(setting);
             double min    = arv_gc_float_get_min(setting, &error);
-            if (error) {
+            if (error != nullptr) {
                 g_error_free(error);
                 error = nullptr;
             }
             double max = arv_gc_float_get_max(setting, &error);
-            if (error) {
+            if (error != nullptr) {
                 g_error_free(error);
                 error = nullptr;
             }
@@ -79,7 +78,7 @@ namespace input {
         static std::string unit(ArvGcFloat* setting) {
             GError* error = nullptr;
             const char* u = arv_gc_float_get_unit(setting, &error);
-            if (error) {
+            if (error != nullptr) {
                 g_error_free(error);
             }
             return u == nullptr ? "" : u;
@@ -89,15 +88,15 @@ namespace input {
     template <>
     struct SettingsFunctions<ArvGcBoolean> {
         static bool read(ArvGcBoolean* setting, GError** error) {
-            return arv_gc_boolean_get_value(setting, error);
+            return arv_gc_boolean_get_value(setting, error) != 0;
         }
         static void write(ArvGcBoolean* setting, const bool& v, GError** error) {
-            arv_gc_boolean_set_value(setting, v, error);
+            arv_gc_boolean_set_value(setting, static_cast<gboolean>(v), error);
         }
-        static bool valid(ArvGcBoolean*, const bool&) {
+        static bool valid(ArvGcBoolean* /* setting */, const bool& /* error */) {
             return true;
         }
-        static std::string unit(ArvGcBoolean*) {
+        static std::string unit(ArvGcBoolean* /* setting */) {
             return "";
         }
     };
@@ -115,7 +114,7 @@ namespace input {
             GError* error       = nullptr;
             unsigned int len    = 0;
             const char** values = arv_gc_enumeration_get_available_string_values(setting, &len, &error);
-            if (error) {
+            if (error != nullptr) {
                 g_error_free(error);
                 error = nullptr;
             }
@@ -139,7 +138,7 @@ namespace input {
 
             return true;
         }
-        static std::string unit(ArvGcEnumeration*) {
+        static std::string unit(ArvGcEnumeration* /* setting */) {
             return "";
         }
     };
@@ -184,15 +183,11 @@ namespace input {
                     g_error_free(error);
                     throw std::runtime_error(msg);
                 }
-                else {
-                    return fmt::format("changed {0}{2} to {1}{2}", current, value, unit);
-                }
+                return fmt::format("changed {0}{2} to {1}{2}", current, value, unit);
             }
         }
         return "";
     }
-
-}  // namespace input
-}  // namespace module
+}  // namespace module::input
 
 #endif  // MODULE_INPUT_CAMERA_SETTINGS_HPP

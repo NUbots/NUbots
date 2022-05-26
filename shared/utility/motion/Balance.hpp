@@ -20,22 +20,19 @@
 #ifndef UTILITY_MOTION_BALANCE_HPP
 #define UTILITY_MOTION_BALANCE_HPP
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <nuclear>
 #include <yaml-cpp/yaml.h>
-
-#include "extension/Configuration.hpp"
 
 #include "message/input/Sensors.hpp"
 #include "message/motion/KinematicsModel.hpp"
 
 #include "utility/input/LimbID.hpp"
-//#include "utility/input/ServoID.h"
-#include "utility/math/geometry/UnitQuaternion.hpp"
-#include "utility/math/matrix/Rotation3D.hpp"
-#include "utility/math/matrix/Transform3D.hpp"
+#include "utility/math/matrix/transform.hpp"
+//#include "utility/input/ServoID.hpp"
 
-namespace utility {
-namespace motion {
+namespace utility::motion {
 
     class Balancer {
     private:
@@ -61,18 +58,17 @@ namespace motion {
         float lastPitch = 0;
         float lastRoll  = 0;
 
-        utility::math::geometry::UnitQuaternion lastErrorQuaternion;
+        Eigen::Quaternion<float> lastErrorQuaternion;
         NUClear::clock::time_point lastBalanceTime;
 
     public:
-        Balancer() : lastErrorQuaternion(), lastBalanceTime() {}
+        Balancer() = default;
         void configure(const YAML::Node& config);
-        void balance(const message::motion::KinematicsModel& hip,
-                     utility::math::matrix::Transform3D& footToTorso,
+        void balance(const message::motion::KinematicsModel& model,
+                     Eigen::Affine3f& footToTorso,
                      const utility::input::LimbID& leg,
                      const message::input::Sensors& sensors);
     };
-}  // namespace motion
-}  // namespace utility
+}  // namespace utility::motion
 
 #endif

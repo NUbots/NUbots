@@ -16,11 +16,9 @@ import NeckConfig from './config/neck.json'
 export class HeadViewModel {
   constructor(private model: LocalisationRobotModel) {}
 
-  static of = createTransformer(
-    (model: LocalisationRobotModel): HeadViewModel => {
-      return new HeadViewModel(model)
-    },
-  )
+  static of = createTransformer((model: LocalisationRobotModel): HeadViewModel => {
+    return new HeadViewModel(model)
+  })
 
   @computed
   get head() {

@@ -20,22 +20,38 @@
 #ifndef MODULES_LOCALISATION_ROBOTMODEL_HPP
 #define MODULES_LOCALISATION_ROBOTMODEL_HPP
 
-#include <armadillo>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
+#include <nuclear>
+#include <vector>
 
 #include "message/input/Sensors.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/Goal.hpp"
 
-#include "utility/math/matrix/Rotation3D.hpp"
-#include "utility/math/matrix/Transform3D.hpp"
+#include "utility/input/ServoID.hpp"
+#include "utility/localisation/transform.hpp"
+#include "utility/math/angle.hpp"
+#include "utility/math/coordinates.hpp"
 
+namespace module::localisation {
 
-namespace module {
-namespace localisation {
+    using message::input::Sensors;
+    using message::support::FieldDescription;
+    using message::vision::Goal;
+    using utility::input::ServoID;
+    using utility::localisation::fieldStateToTransform3D;
+    using utility::math::angle::normalizeAngle;
+    using utility::math::coordinates::cartesianToReciprocalSpherical;
 
+    template <typename Scalar>
     class RobotModel {
     public:
         static constexpr size_t size = 3;
+
+        using StateVec = Eigen::Matrix<Scalar, size, 1>;
+        using StateMat = Eigen::Matrix<Scalar, size, size>;
+
 
         enum Components : int {
             // Field center in world space
@@ -45,46 +61,63 @@ namespace localisation {
             kAngle = 2
         };
 
+        // Local variables for this model. Set their values from config file
+        // Number of reset particles
+        int n_rogues = 0;
+        // Number of particles
+        int n_particles = 100;
+        // Range of reset particles
+        Eigen::Matrix<Scalar, 3, 1> resetRange;
+        // Diagonal for 3x3 noise matrix (which is diagonal)
+        Eigen::Matrix<Scalar, 3, 1> processNoiseDiagonal;
 
-        RobotModel() {}
+        RobotModel()
+            : resetRange(Eigen::Matrix<Scalar, 3, 1>::Zero())
+            , processNoiseDiagonal(Eigen::Matrix<Scalar, 3, 1>::Ones()) {}
 
-        arma::vec::fixed<RobotModel::size> timeUpdate(const arma::vec::fixed<RobotModel::size>& state, double deltaT);
+        StateVec time(const StateVec& state, double /*deltaT*/) {
+            return state;
+        }
 
-        arma::vec predictedObservation(const arma::vec::fixed<RobotModel::size>& state,
-                                       const arma::vec& actual_position,
-                                       const utility::math::matrix::Transform3D& Hcw,
-                                       const message::vision::Goal::MeasurementType& type,
-                                       const message::support::FieldDescription& fd);
+        Eigen::Matrix<Scalar, Eigen::Dynamic, 1> predict(const StateVec& state,
+                                                         const Eigen::Matrix<Scalar, 3, 1>& rGFf,  // true goal position
+                                                         const Eigen::Matrix<Scalar, 4, 4>& Hcw) {
 
-        arma::vec observationDifference(const arma::vec& a, const arma::vec& b);
+            // Create a transform from the field state
+            Eigen::Transform<Scalar, 3, Eigen::Affine> Hfw;
+            Hfw.translation() = Eigen::Matrix<Scalar, 3, 1>(state.x(), state.y(), 0);
+            Hfw.linear() = Eigen::AngleAxis<Scalar>(state.z(), Eigen::Matrix<Scalar, 3, 1>::UnitZ()).toRotationMatrix();
 
-        arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state);
+            const Eigen::Transform<Scalar, 3, Eigen::Affine> Hcf(Hcw * Hfw.inverse().matrix());
 
-        arma::mat::fixed<size, size> processNoise();
+            const Eigen::Matrix<Scalar, 3, 1> rGCc(Hcf * rGFf);
+            return cartesianToReciprocalSpherical(rGCc);
+        }
 
-        arma::vec3 processNoiseDiagonal;
+        StateVec limit(const StateVec& state) {
+            return state;
+        }
 
-        // number and range of reset particles
-        int n_rogues          = 0;
-        arma::vec3 resetRange = {0, 0, 0};
+        StateMat noise(const Scalar& deltaT) {
+            return processNoiseDiagonal.asDiagonal() * deltaT;
+        }
+
+        template <typename T, typename U>
+        static auto difference(const T& a, const U& b) {
+            return a - b;
+        }
 
         // Getters
-        int getRogueCount() const {
+        [[nodiscard]] int getRogueCount() const {
             return n_rogues;
         }
-        arma::vec getRogueRange() const {
+        [[nodiscard]] StateVec get_rogue() const {
             return resetRange;
         }
 
-        arma::vec3 getCylindricalPostCamSpaceNormal(const message::vision::Goal::MeasurementType& type,
-                                                    const arma::vec3& post_centre,
-                                                    const utility::math::matrix::Transform3D& Hcf,
-                                                    const message::support::FieldDescription& fd);
-        arma::vec3 getSquarePostCamSpaceNormal(const message::vision::Goal::MeasurementType& type,
-                                               const arma::vec3& post_centre,
-                                               const utility::math::matrix::Transform3D& Hcf,
-                                               const message::support::FieldDescription& fd);
+        [[nodiscard]] int getParticleCount() const {
+            return n_particles;
+        }
     };
-}  // namespace localisation
-}  // namespace module
+}  // namespace module::localisation
 #endif

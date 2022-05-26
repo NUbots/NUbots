@@ -20,16 +20,22 @@
 #ifndef MODULE_LOCALISATION_BALLMODEL_HPP
 #define MODULE_LOCALISATION_BALLMODEL_HPP
 
-#include <armadillo>
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 
 #include "message/input/Sensors.hpp"
 #include "message/support/FieldDescription.hpp"
 
-#include "utility/math/matrix/Transform3D.hpp"
+#include "utility/math/coordinates.hpp"
 
-namespace module {
-namespace localisation {
+namespace module::localisation {
 
+    using message::input::Sensors;
+    using message::support::FieldDescription;
+    using utility::math::coordinates::cartesianToReciprocalSpherical;
+    using utility::math::coordinates::cartesianToSpherical;
+
+    template <typename Scalar>
     class BallModel {
     public:
         // The indicies for our vector
@@ -38,40 +44,64 @@ namespace localisation {
 
         static constexpr size_t size = 2;
 
+        using StateVec = Eigen::Matrix<Scalar, size, 1>;
+        using StateMat = Eigen::Matrix<Scalar, size, size>;
+
         struct MeasurementType {
             struct BALL {};
         };
 
-        arma::vec2 processNoiseDiagonal;
+        // Local variables for this model. Set their values from config file
+        // Number of reset particles
+        int n_rogues = 0;
 
+        // Number of particles
+        int n_particles = 100;
+        // Range of reset particles
+        Eigen::Matrix<Scalar, 2, 1> resetRange;
+        // Diagonal noise matrix
+        Eigen::Matrix<Scalar, 2, 1> processNoiseDiagonal;
 
-        BallModel() : processNoiseDiagonal(arma::fill::eye) {}  // empty constructor
+        BallModel() : n_rogues(10), resetRange(10, 10), processNoiseDiagonal() {}
 
-        arma::vec::fixed<size> timeUpdate(const arma::vec::fixed<size>& state, double deltaT);
+        [[nodiscard]] StateVec time(const StateVec& state, const Scalar& /*deltaT*/) const {
+            return state;
+        }
 
-        arma::vec3 predictedObservation(const arma::vec::fixed<size>& state,
-                                        const message::support::FieldDescription& field,
-                                        const utility::math::matrix::Transform3D& Hcw) const;
+        [[nodiscard]] Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state,
+                                                          const message::support::FieldDescription& field,
+                                                          const Eigen::Matrix<Scalar, 4, 4>& Hcw) const {
 
-        arma::vec observationDifference(const arma::vec& measurement, const arma::vec3& rBCc) const;
+            const Eigen::Matrix<Scalar, 3, 1> rBWw(state[PX], state[PY], field.ball_radius);
+            const Eigen::Matrix<Scalar, 3, 1> rBCc(Eigen::Affine3d(Hcw) * rBWw);
 
-        arma::vec::fixed<size> limitState(const arma::vec::fixed<size>& state) const;
+            return cartesianToReciprocalSpherical(rBCc);
+        }
 
-        arma::mat::fixed<size, size> processNoise() const;
+        [[nodiscard]] StateVec limit(const StateVec& state) const {
+            return state;
+        }
 
+        StateMat noise(const Scalar& deltaT) {
+            return processNoiseDiagonal.asDiagonal() * deltaT;
+        }
 
-        // number and range of reset particles
-        int n_rogues          = 10;
-        arma::vec2 resetRange = {10, 10};
+        template <typename T, typename U>
+        static auto difference(const T& a, const U& b) {
+            return a - b;
+        }
 
         // Getters
-        int getRogueCount() const {
+        [[nodiscard]] inline int getRogueCount() const {
             return n_rogues;
         }
-        arma::vec getRogueRange() const {
+        [[nodiscard]] StateVec get_rogue() const {
             return resetRange;
         }
+
+        [[nodiscard]] int getParticleCount() const {
+            return n_particles;
+        }
     };
-}  // namespace localisation
-}  // namespace module
+}  // namespace module::localisation
 #endif  // MODULE_LOCALISATION_BALLMODEL_HPP

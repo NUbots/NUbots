@@ -1,17 +1,14 @@
 import { autorun } from 'mobx'
-
 import { Vector2 } from '../../client/math/vector2'
 import { Vector3 } from '../../client/math/vector3'
 import { SeededRandom } from '../../shared/base/random/seeded_random'
 import { FieldDimensions } from '../../shared/field/dimensions'
+import { Ivec2, message } from '../../shared/messages'
 import { NUClearNetClient } from '../../shared/nuclearnet/nuclearnet_client'
-import { message } from '../../shared/proto/messages'
-import { Ivec2 } from '../../shared/proto/messages'
 import { toTimestamp } from '../../shared/time/timestamp'
-import { Simulator } from '../simulator'
-import { Message } from '../simulator'
-
+import { Message, Simulator } from '../simulator'
 import { periodic } from './periodic'
+
 import State = message.behaviour.Behaviour.State
 import Mode = message.input.GameState.Data.Mode
 import PenaltyReason = message.input.GameState.Data.PenaltyReason
@@ -104,13 +101,6 @@ export class OverviewSimulator extends Simulator {
         y: Math.cos(time / 5 + this.robotIndex),
         z: Math.cos(time / 7 + this.robotIndex),
       },
-      walkPathPlan: [
-        robotPosition,
-        this.randomFieldPosition(),
-        this.randomFieldPosition(),
-        this.randomFieldPosition(),
-        ballPosition,
-      ],
     }).finish()
 
     const message = { messageType, buffer }

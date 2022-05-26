@@ -12,26 +12,23 @@
 #include "utility/math/geometry/ConvexHull.hpp"
 #include "utility/vision/visualmesh/VisualMesh.hpp"
 
-namespace module {
-namespace vision {
+namespace module::vision {
 
     using extension::Configuration;
 
     using message::vision::VisualMesh;
     using GreenHorizonMsg = message::vision::GreenHorizon;
 
-    static constexpr int LINE_INDEX  = 2;
-    static constexpr int FIELD_INDEX = 3;
-
     GreenHorizonDetector::GreenHorizonDetector(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
         on<Configuration>("GreenHorizonDetector.yaml").then([this](const Configuration& cfg) {
             // Use configuration here from file GreenHorizonDetector.yaml
+            log_level = cfg["log_level"].as<NUClear::LogLevel>();
+
             config.confidence_threshold = cfg["confidence_threshold"].as<float>();
             config.cluster_points       = cfg["cluster_points"].as<uint>();
             config.distance_offset      = cfg["distance_offset"].as<float>();
-            config.debug                = cfg["debug"].as<bool>();
         });
 
         on<Trigger<VisualMesh>, Buffer<2>>().then("Green Horizon", [this](const VisualMesh& mesh) {
@@ -40,29 +37,30 @@ namespace vision {
             const auto& neighbours                              = mesh.neighbourhood;
             const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = mesh.rays;
             const float world_offset                            = std::atan2(mesh.Hcw(0, 1), mesh.Hcw(0, 0));
+            const uint32_t LINE_INDEX                           = mesh.class_map.at("line");
+            const uint32_t FIELD_INDEX                          = mesh.class_map.at("field");
 
             // Get some indices to partition
             std::vector<int> indices(mesh.indices.size());
             std::iota(indices.begin(), indices.end(), 0);
 
             // Partition the indices such that we only have the field points that dont have field surrounding them
+            // Only check the top two neighbours of each point
             auto boundary = utility::vision::visualmesh::partition_points(
                 indices.begin(),
                 indices.end(),
                 neighbours,
                 [&](const int& idx) {
-                    return idx == int(indices.size())
-                           || (cls(FIELD_INDEX, idx) + cls(LINE_INDEX, idx) >= config.confidence_threshold);
+                    return idx == int(indices.size()) || cls(FIELD_INDEX, idx) >= config.confidence_threshold
+                           || cls(LINE_INDEX, idx) >= config.confidence_threshold;
                 },
-                {4, 5});
+                {1, 2});
 
 
             // Discard indices that are not on the boundary
             indices.resize(std::distance(indices.begin(), boundary));
 
-            if (config.debug) {
-                log<NUClear::DEBUG>(fmt::format("Partitioned {} points", indices.size()));
-            }
+            log<NUClear::DEBUG>(fmt::format("Partitioned {} points", indices.size()));
 
             // Cluster the points
             // Points are clustered based on their connectivity to other field points
@@ -83,9 +81,7 @@ namespace vision {
                                                         config.cluster_points,
                                                         clusters);
 
-            if (config.debug) {
-                log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
-            }
+            log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
 
             // Merge clusters until only 1 remains
             while (clusters.size() > 1) {
@@ -123,39 +119,32 @@ namespace vision {
                             it2 = clusters.erase(it2);
                         }
                         else {
-                            if (config.debug) {
-                                log<NUClear::DEBUG>(
-                                    "The clusters are neither overlapping, nor are they not overlapping. What have you "
-                                    "done???");
-                                log<NUClear::DEBUG>(fmt::format("[{}, {}] -> [{}, {}], [{}, {}] -> [{}, {}]",
-                                                                *range_a.first,
-                                                                *range_a.second,
-                                                                min_a,
-                                                                max_a,
-                                                                *range_b.first,
-                                                                *range_b.second,
-                                                                min_b,
-                                                                max_b));
-                            }
+                            log<NUClear::DEBUG>(
+                                "The clusters are neither overlapping, nor are they not overlapping. What have "
+                                "you "
+                                "done???");
+                            log<NUClear::DEBUG>(fmt::format("[{}, {}] -> [{}, {}], [{}, {}] -> [{}, {}]",
+                                                            *range_a.first,
+                                                            *range_a.second,
+                                                            min_a,
+                                                            max_a,
+                                                            *range_b.first,
+                                                            *range_b.second,
+                                                            min_b,
+                                                            max_b));
                         }
                     }
                 }
             }
 
-            if (clusters.size() < 1) {
-                if (config.debug) {
-                    log<NUClear::DEBUG>("Found no clusters to make a convex hull from");
-                }
+            if (clusters.empty()) {
+                log<NUClear::DEBUG>("Found no clusters to make a convex hull from");
             }
             else if (clusters.front().size() < 3) {
-                if (config.debug) {
-                    log<NUClear::DEBUG>("Unable to make a convex hull with less than 3 points");
-                }
+                log<NUClear::DEBUG>("Unable to make a convex hull with less than 3 points");
             }
             else {
-                if (config.debug) {
-                    log<NUClear::DEBUG>(fmt::format("Making a convex hull from {} points", clusters.front().size()));
-                }
+                log<NUClear::DEBUG>(fmt::format("Making a convex hull from {} points", clusters.front().size()));
                 // Find the convex hull of the cluster
                 auto hull_indices = utility::math::geometry::upper_convex_hull(clusters.front(), rays, world_offset);
 
@@ -164,9 +153,10 @@ namespace vision {
                 // Preserve mesh so that anyone using the GreenHorizon can access the original data
                 msg->mesh = const_cast<VisualMesh*>(&mesh)->shared_from_this();
 
-                msg->camera_id = mesh.camera_id;
+                msg->id        = mesh.id;
                 msg->Hcw       = mesh.Hcw;
                 msg->timestamp = mesh.timestamp;
+                msg->class_map = mesh.class_map;
 
                 // Find the convex hull of the cluster
                 msg->horizon.reserve(hull_indices.size());
@@ -178,16 +168,11 @@ namespace vision {
                     ray_projection.head<2>() *= 1.0f + config.distance_offset / norm;
                     msg->horizon.emplace_back(ray_projection.normalized());
                 }
-
-                if (config.debug) {
-                    log<NUClear::DEBUG>(fmt::format("Calculated convex hull with {} points from cluster with {} points",
-                                                    hull_indices.size(),
-                                                    clusters.front().size()));
-                }
-
+                log<NUClear::DEBUG>(fmt::format("Calculated convex hull with {} points from cluster with {} points",
+                                                hull_indices.size(),
+                                                clusters.front().size()));
                 emit(std::move(msg));
             }
         });
-    }  // namespace vision
-}  // namespace vision
-}  // namespace module
+    }
+}  // namespace module::vision

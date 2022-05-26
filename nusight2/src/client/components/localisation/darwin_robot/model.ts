@@ -141,17 +141,15 @@ export class LocalisationRobotModel {
     this.motors = motors
   }
 
-  static of = memoize(
-    (model: RobotModel): LocalisationRobotModel => {
-      return new LocalisationRobotModel({
-        model,
-        name: model.name,
-        rWTt: Vector3.of(),
-        Rwt: Quaternion.of(),
-        motors: DarwinMotorSet.of(),
-      })
-    },
-  )
+  static of = memoize((model: RobotModel): LocalisationRobotModel => {
+    return new LocalisationRobotModel({
+      model,
+      name: model.name,
+      rWTt: Vector3.of(),
+      Rwt: Quaternion.of(),
+      motors: DarwinMotorSet.of(),
+    })
+  })
 
   @computed get visible() {
     return this.model.enabled

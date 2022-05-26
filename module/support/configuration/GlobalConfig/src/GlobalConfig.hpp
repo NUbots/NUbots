@@ -22,18 +22,14 @@
 
 #include <nuclear>
 
-namespace module {
-namespace support {
-    namespace configuration {
+namespace module::support::configuration {
 
-        class GlobalConfig : public NUClear::Reactor {
-        public:
-            /// @brief Called by the powerplant to build and setup the GlobalConfig reactor.
-            explicit GlobalConfig(std::unique_ptr<NUClear::Environment> environment);
-        };
-    }  // namespace configuration
-}  // namespace support
-}  // namespace module
+    class GlobalConfig : public NUClear::Reactor {
+    public:
+        /// @brief Called by the powerplant to build and setup the GlobalConfig reactor.
+        explicit GlobalConfig(std::unique_ptr<NUClear::Environment> environment);
+    };
+}  // namespace module::support::configuration
 
 
 #endif

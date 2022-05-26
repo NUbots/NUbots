@@ -20,13 +20,11 @@ syntax = "proto3";
 
 package message.localisation;
 
-import "Vector.proto";
 import "Matrix.proto";
 
 message Field {
-    // Measures the position of the field centre in world space position[0,1] = (rFWw)
-    // and measures the orientation of the field from the world position[2] = (thetafw)
-    vec3 position = 1;
-    // Covariance of the measurement
+    /// Affine2d position transform
+    mat3 position = 1;
+    /// Covariance of (x, y, theta)
     mat3 covariance = 2;
 }

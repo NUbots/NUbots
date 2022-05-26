@@ -20,159 +20,143 @@
 #ifndef MODULES_BEHAVIOUR_SKILLS_SEARCHER_HPP
 #define MODULES_BEHAVIOUR_SKILLS_SEARCHER_HPP
 
-#include <armadillo>
+#include <Eigen/Core>
 #include <nuclear>
 
 
-namespace module {
-namespace behaviour {
-    namespace skills {
+namespace module::behaviour::skills {
 
-        /**
-         * Executes a HeadBehaviourSoccer action.
-         *
-         * @author Jake Fountain
+    /**
+     * Executes a HeadBehaviourSoccer action.
+     *
+     * @author Jade Fountain
 
-         Template argument T must be a normed linear space using arma::norm();
-         */
-        template <class T>
-        class Searcher {
+     Template argument T must be a normed linear space using Eigen::norm();
+     */
+    template <class T>
+    class Searcher {
 
-        private:
-            std::vector<T> points;
-            int current;
-            T refPoint;
+    private:
+        std::vector<T> points{1, Eigen::Vector2d::Zero()};
+        int current = 0;
+        T refPoint{};
 
-            bool new_goal;
+        bool new_goal = false;
 
-            NUClear::clock::time_point lastSwitchTime;
-            float switch_period;
+        NUClear::clock::time_point lastSwitchTime{NUClear::clock::now()};
+        float switch_period = 1000.0f;
 
-            bool forward = true;
+        bool forward = true;
 
-        public:
-            Searcher()
-                : points(std::vector<T>(1, arma::zeros<arma::vec>(2)))
-                , current(0)
-                , refPoint()
-                , new_goal(false)
-                , lastSwitchTime(NUClear::clock::now())
-                , switch_period(1000.0f) {
-                // Init points to something sane
+    public:
+        void sort() {
+            // Just set to closest:
+            auto relativePoints = points;
+            for (auto& p : relativePoints) {
+                p = p - refPoint;
             }
+            // auto iter = std::min_element(relativePoints.begin(),relativePoints.end(),comparator);
+            // current = std::distance(relativePoints.begin(), iter);
+            current = current % int(points.size());
 
-            ~Searcher() {}
+            // Full sort
+            // std::vector<std::pair<int, T>> relativePoints;
+            // for (uint i = 0; i < points.size(); i++){
+            //  relativePoints.push_back(std::pair<int, T>(i,points[i] - refPoint));
+            // }
+            // std::sort(relativePoints.begin(),relativePoints.end(),pair_comparator);
+            // std::vector<T> newPoints(relativePoints.size());
+            // for(uint i = 0; i < relativePoints.size(); i++){
+            //  newPoints[i] = points[relativePoints[i].first];
+            // }
+            // points = newPoints;
+        }
 
-            void sort() {
-                // Just set to closest:
-                auto relativePoints = points;
-                for (auto& p : relativePoints) {
-                    p = p - refPoint;
-                }
-                // auto iter = std::min_element(relativePoints.begin(),relativePoints.end(),comparator);
-                // current = std::distance(relativePoints.begin(), iter);
-                current = current % int(points.size());
+        int size() {
+            return points.size();
+        }
 
-                // Full sort
-                // std::vector<std::pair<int, T>> relativePoints;
-                // for (uint i = 0; i < points.size(); i++){
-                //  relativePoints.push_back(std::pair<int, T>(i,points[i] - refPoint));
-                // }
-                // std::sort(relativePoints.begin(),relativePoints.end(),pair_comparator);
-                // std::vector<T> newPoints(relativePoints.size());
-                // for(uint i = 0; i < relativePoints.size(); i++){
-                //  newPoints[i] = points[relativePoints[i].first];
-                // }
-                // points = newPoints;
-            }
+        static bool pair_comparator(const std::pair<int, T>& a, const std::pair<int, T>& b) {
+            return a.second.norm() < b.second.norm();
+        }
 
-            int size() {
-                return points.size();
-            }
+        static bool comparator(const T& a, const T& b) {
+            return a.norm() < b.norm();
+        }
 
-            static bool pair_comparator(const std::pair<int, T>& a, const std::pair<int, T>& b) {
-                return arma::norm(a.second) < arma::norm(b.second);
-            }
+        void setSwitchTime(float dt) {
+            switch_period = dt;
+        }
 
-            static bool comparator(const T& a, const T& b) {
-                return arma::norm(a) < arma::norm(b);
-            }
-
-            void setSwitchTime(float dt) {
-                switch_period = dt;
-            }
-
-            void update(bool oscillate) {
-                // TODO: recode this garbage
-                auto now = NUClear::clock::now();
-                if (!new_goal
-                    && std::chrono::duration_cast<std::chrono::milliseconds>(now - lastSwitchTime).count()
-                           > switch_period) {
-                    new_goal = true;
-                    if (forward) {
-                        int new_index = current + 1;
-                        if (oscillate) {
-                            // Moves search forward and backward along path
-                            if (new_index >= int(points.size())) {
-                                forward = false;
-                                current = std::max(current - 1, 0);
-                            }
-                            else {
-                                current = new_index;
-                            }
+        void update(bool oscillate) {
+            // TODO(BehaviourTeam): recode this garbage
+            auto now = NUClear::clock::now();
+            if (!new_goal
+                && std::chrono::duration_cast<std::chrono::milliseconds>(now - lastSwitchTime).count()
+                       > switch_period) {
+                new_goal = true;
+                if (forward) {
+                    int new_index = current + 1;
+                    if (oscillate) {
+                        // Moves search forward and backward along path
+                        if (new_index >= int(points.size())) {
+                            forward = false;
+                            current = std::max(current - 1, 0);
                         }
                         else {
-                            // Loops path
-                            current = new_index % int(points.size());
+                            current = new_index;
                         }
                     }
                     else {
-                        int new_index = current - 1;
-                        if (oscillate) {
-                            // Moves search forward and backward along path
-                            if (new_index < 0) {
-                                forward = true;
-                                current = std::min(int(points.size()) - 1, 1);
-                            }
-                            else {
-                                current = new_index;
-                            }
+                        // Loops path
+                        current = new_index % int(points.size());
+                    }
+                }
+                else {
+                    int new_index = current - 1;
+                    if (oscillate) {
+                        // Moves search forward and backward along path
+                        if (new_index < 0) {
+                            forward = true;
+                            current = std::min(int(points.size()) - 1, 1);
                         }
                         else {
-                            // Loops path
-                            current = new_index % int(points.size());
+                            current = new_index;
                         }
                     }
-                    lastSwitchTime = now;
+                    else {
+                        // Loops path
+                        current = new_index % int(points.size());
+                    }
                 }
+                lastSwitchTime = now;
             }
+        }
 
-            bool newGoal() {
-                return new_goal;
+        bool newGoal() {
+            return new_goal;
+        }
+
+        T getState() {
+            new_goal = false;
+            return points[current % points.size()];
+        }
+
+        void replaceSearchPoints(const std::vector<T>& ps, const T& refPoint_) {
+            refPoint = refPoint_;
+            points   = ps;
+            sort();
+            new_goal = true;
+        }
+
+        void translate(const T& delta) {
+            for (auto& p : points) {
+                p += delta;
             }
+            new_goal = true;
+        }
+    };
 
-            T getState() {
-                new_goal = false;
-                return points[current % points.size()];
-            }
-
-            void replaceSearchPoints(const std::vector<T>& ps, const T& refPoint_) {
-                refPoint = refPoint_;
-                points   = ps;
-                sort();
-                new_goal = true;
-            }
-
-            void translate(const T& delta) {
-                for (auto& p : points) {
-                    p += delta;
-                }
-                new_goal = true;
-            }
-        };
-
-    }  // namespace skills
-}  // namespace behaviour
-}  // namespace module
+}  // namespace module::behaviour::skills
 
 #endif  // MODULES_BEHAVIOURS_SKILLS_SEARCHER_HPP

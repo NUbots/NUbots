@@ -14,10 +14,9 @@ unset(NUCLEAR_MODULE_DATA_FILES CACHE)
 
 # Build each of our modules and their corresponding tests
 foreach(module ${NUCLEAR_MODULES})
-  string(REPLACE "::" "/" module_path "${module}")
-  string(REPLACE "::" "" module_name "${module}")
 
   # Add the subdirectories
+  string(REPLACE "::" "/" module_path "${module}")
   add_subdirectory(
     "${PROJECT_SOURCE_DIR}/${NUCLEAR_MODULE_DIR}/${module_path}"
     "${PROJECT_BINARY_DIR}/${NUCLEAR_MODULE_DIR}/${module_path}"

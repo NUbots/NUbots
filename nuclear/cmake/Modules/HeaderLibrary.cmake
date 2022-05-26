@@ -63,4 +63,7 @@ function(HeaderLibrary)
     VERSION_VAR ${PACKAGE_NAME}_VERSION
   )
 
+  add_library(${PACKAGE_NAME}::${PACKAGE_NAME} INTERFACE IMPORTED)
+  target_include_directories(${PACKAGE_NAME}::${PACKAGE_NAME} SYSTEM INTERFACE ${${PACKAGE_NAME}_INCLUDE_DIR})
+
 endfunction(HeaderLibrary)

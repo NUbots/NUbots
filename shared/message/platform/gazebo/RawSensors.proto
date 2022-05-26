@@ -20,11 +20,11 @@ syntax = "proto3";
 
 package message.platform.gazebo;
 
-import "message/platform/darwin/DarwinSensors.proto";
+import "message/platform/RawSensors.proto";
 
 message RawSensors {
-    // The name of the model in the simulation that these sensors are from
+    /// The name of the model in the simulation that these sensors are from
     string model = 1;
     // The sensors object for this model
-    platform.darwin.DarwinSensors sensors = 2;
+    platform.RawSensors sensors = 2;
 }

@@ -24,60 +24,55 @@
 
 #include "extension/Script.hpp"
 
-namespace module {
-namespace behaviour {
-    namespace tools {
+namespace module::behaviour::tools {
 
-        /**
-         * Provides a Curses interface to let the user customize scripts
-         *
-         * @author Trent Houliston
-         */
-        class ScriptTuner : public NUClear::Reactor {
-        private:
-            const size_t id;
-            /// The path to the script we are editing
-            std::string scriptPath;
-            /// The script object we are editing
-            ::extension::Script script;
-            /// The index of the frame we are currently editing
-            size_t frame;
-            /// The index of the item we are selecting
-            size_t selection;
-            /// If we are selecting the angle or gain for this item
-            bool angleOrGain;
-            const size_t defaultGain     = 30;
-            const size_t defaultDuration = 1000;
+    /**
+     * Provides a Curses interface to let the user customize scripts
+     *
+     * @author Trent Houliston
+     */
+    class ScriptTuner : public NUClear::Reactor {
+    private:
+        const size_t id;
+        /// The path to the script we are editing
+        std::string scriptPath;
+        /// The script object we are editing
+        ::extension::Script script;
+        /// The index of the frame we are currently editing
+        size_t frame;
+        /// The index of the item we are selecting
+        size_t selection;
+        /// If we are selecting the angle or gain for this item
+        bool angleOrGain;
+        const size_t defaultGain     = 30;
+        const size_t defaultDuration = 1000;
 
-            std::string userInput();
+        static std::string userInput();
 
-            void refreshView();
-            void loadScript(const std::string& path);
-            void saveScript();
-            void editDuration();
-            void editSelection();
-            void activateFrame(int frame);
-            void toggleLockMotor();
-            void newFrame();
-            void deleteFrame();
-            void playScript();
-            void jumpToFrame();
-            void help();
-            void editGainInput();
-            void mirrorScript();
-            void saveScriptAs();
-            void editGain();
-            void userInputToFrame();
-            float userInputToGain();
+        void refreshView();
+        void loadScript(const std::string& path);
+        void saveScript();
+        void editDuration();
+        void editSelection();
+        void activateFrame(int frame);
+        void toggleLockMotor();
+        void newFrame();
+        void deleteFrame();
+        void playScript();
+        void jumpToFrame();
+        void help();
+        void editGainInput();
+        void mirrorScript();
+        void saveScriptAs();
+        void editGain();
+        void userInputToFrame();
+        static float userInputToGain();
 
-            volatile bool running;
+        volatile bool running;
 
-        public:
-            explicit ScriptTuner(std::unique_ptr<NUClear::Environment> environment);
-        };
-
-    }  // namespace tools
-}  // namespace behaviour
-}  // namespace module
+    public:
+        explicit ScriptTuner(std::unique_ptr<NUClear::Environment> environment);
+    };
+}  // namespace module::behaviour::tools
 
 #endif  // MODULES_BEHAVIOURS_UTILITY_SCRIPTTUNER_HPP

@@ -1,11 +1,11 @@
 lens_type: radial
 
 lens:
-  radiansPerPixel: 0.0026768
-  centreOffset: [0,0]
+  radians_per_pixel: 0.0026768
+  centre_offset: [0, 0]
 
-imageWidth: 1280
-imageHeight: 1024
+image_width: 1280
+image_height: 1024
 FOV_X: 3.14
 FOV_Y: 3.14
 DISTORTION_FACTOR: -0.0000
@@ -20,15 +20,14 @@ image:
     - [0.007905001503454995 0.22453518201604927 0.9744339192517109 -0.7546671765968381]
     - [0.0 0.0 0.0 1.0]
 
-
 # lens_type: pinhole
 
 # lens:
-#   radiansPerPixel: 0.01
-#   centreOffset: [0,0]
+#   radians_per_pixel: 0.01
+#   centre_offset: [0,0]
 
-# imageWidth: 320
-# imageHeight: 240
+# image_width: 320
+# image_height: 240
 # FOV_X: 1.0472
 # FOV_Y: 0.785398
 # DISTORTION_FACTOR: -0.0000

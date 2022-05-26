@@ -7,8 +7,7 @@
 
 #include "exprtk.hpp"
 
-namespace utility {
-namespace support {
+namespace utility::support {
 
     double parse_to_double(const std::string& str) {
 
@@ -35,7 +34,6 @@ namespace support {
         return expression.value();
     }
 
-}  // namespace support
-}  // namespace utility
+}  // namespace utility::support
 
 #endif  // UTILITY_SUPPORT_MATH_STRING_HPP

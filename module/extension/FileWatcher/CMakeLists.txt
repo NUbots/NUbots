@@ -17,4 +17,4 @@
 find_package(uv REQUIRED)
 
 # Build our NUClear module
-nuclear_module(INCLUDES ${uv_INCLUDE_DIRS} LIBRARIES ${uv_LIBRARIES})
+nuclear_module(LIBRARIES uv::uv)

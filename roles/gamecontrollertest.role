@@ -7,12 +7,13 @@ nuclear_role(
   # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
   motion::KinematicsConfiguration
   # Hardware for button testing
-  platform::darwin::HardwareIO
-  platform::darwin::SensorFilter
+  platform::cm740::HardwareIO
+  input::SensorFilter
   # Support and Configuration
   support::configuration::GlobalConfig
   support::configuration::SoccerConfig
   network::NUClearNet
-  support::NUsight
+  network::NetworkForwarder
+  output::Overview
   input::GameController
 )

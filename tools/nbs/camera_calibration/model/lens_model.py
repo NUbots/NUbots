@@ -158,9 +158,13 @@ class LensModel(tf.keras.Model):
             tf.gather(tf.pad(p_normals, [[0, 0], [0, 1], [0, 0]]), tf.reshape(self.l_idx, [-1]), axis=1),
             [-1, *self.l_idx.shape, 3],
         )
-        l_normals = tf.linalg.svd(l_points)[2][..., 2]
-        l_angles = tf.acos(tf.einsum("ijkl,ijl->ijk", l_points, l_normals))
-        l_totals = tf.acos(tf.einsum("ijk,ijk->ij", l_points[:, :, 0], l_points[:, :, -1]))
+        h1_co = tf.reduce_mean(
+            tf.square(tf.subtract(pi_2, tf.acos(tf.einsum("abcd,abd->abc", h_1[:, :, 1:-1, :], hp_1)))), axis=[1, 2]
+        )
+        h2_co = tf.reduce_mean(
+            tf.square(tf.subtract(pi_2, tf.acos(tf.einsum("abcd,abd->abc", h_2[:, :, 1:-1, :], hp_2)))), axis=[1, 2]
+        )
+        collinearity_loss = tf.math.accumulate_n([v_co, h1_co, h2_co]) / 3.0
 
         # We can then take each of these parallel line normals and they should form the plane created by the board
         # We can check how flat this board is to ensure that the calibration isn't trying to sneak 3d distortions in
