@@ -17,6 +17,7 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
+
 #include "HeadBehaviourSoccerOld.hpp"
 
 #include <string>
