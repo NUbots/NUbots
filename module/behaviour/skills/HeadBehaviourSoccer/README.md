@@ -7,7 +7,7 @@ Controls the state of the head
 
 ## Usage
 
-Include this module to allow the robot to focus on a ball or search for a ball if it is not visble
+Include this module to allow the robot to focus on a ball or search for a ball if it is not visible
 
 ## Consumes
 
