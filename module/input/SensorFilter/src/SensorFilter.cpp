@@ -468,7 +468,7 @@ namespace module::input {
                                 // If our hardware is working as intended, it should never read that we're spinning at 2
                                 // revs/s
                                 || input.gyroscope.norm() > 4.0 * M_PI)) {
-                            NUClear::log<NUClear::WARN>("Bad gyroscope value", input.gyroscope.norm());
+                            // NUClear::log<NUClear::WARN>("Bad gyroscope value", input.gyroscope.norm());
                             sensors->gyroscope = previousSensors->gyroscope;
                         }
                         else {
@@ -603,6 +603,36 @@ namespace module::input {
                             bool prev_foot_down = previous_foot_down[side];
                             Eigen::Affine3d Htf(
                                 sensors->Htx[side == BodySide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL]);
+
+                            Eigen::Matrix4d Htf_left  = sensors->Htx[ServoID::L_ANKLE_ROLL].matrix();
+                            Eigen::Matrix4d Htf_right = sensors->Htx[ServoID::R_ANKLE_ROLL].matrix();
+
+                            emit(graph("robot left foot actual = ",
+                                       Htf_left.coeff(0, 3),
+                                       Htf_left.coeff(1, 3),
+                                       Htf_left.coeff(2, 3)));
+                            emit(graph("robot right foot actual = ",
+                                       Htf_right.coeff(0, 3),
+                                       Htf_right.coeff(1, 3),
+                                       Htf_right.coeff(2, 3)));
+
+                            log<NUClear::DEBUG>("Sensors left foot (x,y,z):(",
+                                                Htf_left.coeff(0, 3),
+                                                ",",
+                                                Htf_left.coeff(1, 3),
+                                                ",",
+                                                Htf_left.coeff(2, 3),
+                                                ")");
+
+
+                            log<NUClear::DEBUG>("Sensor right foot (x,y,z):(",
+                                                Htf_right.coeff(0, 3),
+                                                ",",
+                                                Htf_right.coeff(1, 3),
+                                                ",",
+                                                Htf_right.coeff(2, 3),
+                                                ")");
+
 
                             // If this side's foot is down, and it was not down at the previous time step, then we
                             // calculate our new footlanding_Hwf value, because our foot has just landed
