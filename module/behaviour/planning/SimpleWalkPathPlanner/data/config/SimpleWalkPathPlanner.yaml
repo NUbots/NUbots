@@ -2,7 +2,7 @@ log_level: WARN
 
 forwardSpeed: 0.01
 sideSpeed: 0.01
-turnSpeed: 0.08
+turnSpeed : 0.08
 slow_approach_factor: 0.01
 a: 7
 b: 0
