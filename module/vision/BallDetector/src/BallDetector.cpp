@@ -67,7 +67,7 @@ namespace module::vision {
                 const auto& cls                                     = horizon.mesh->classifications;
                 const auto& neighbours                              = horizon.mesh->neighbourhood;
                 const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = horizon.mesh->rays;
-                const int ball_index                                = horizon.class_map.at("ball");
+                const int BALL_INDEX                                = horizon.class_map.at("ball");
 
                 // Get some indices to partition
                 std::vector<int> indices(horizon.mesh->indices.size());
@@ -80,7 +80,7 @@ namespace module::vision {
                     indices.end(),
                     neighbours,
                     [&](const int& idx) {
-                        return idx == int(indices.size()) || (cls(ball_index, idx) >= config.confidence_threshold);
+                        return idx == int(indices.size()) || (cls(BALL_INDEX, idx) >= config.confidence_threshold);
                     });
                 indices.resize(std::distance(indices.begin(), boundary));
 
