@@ -161,7 +161,7 @@ namespace module::vision {
                     // Set cone information for the ball
                     // The rays are in world space, multiply by Rcw to get the axis in camera space
                     b.cone.axis = horizon.Hcw.topLeftCorner<3, 3>().cast<float>()
-                                  * axis;    // why is this not horizon.Hcw.linear()?
+                                  * axis;    // Hcw is not an affine transform type (cannot use linear())
                     b.cone.radius = radius;  // **arccos of the angle** between the furthest vectors
 
                     // https://en.wikipedia.org/wiki/Angular_diameter
