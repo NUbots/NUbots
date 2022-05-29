@@ -17,21 +17,21 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef DARWIN_DARWIN_HPP
-#define DARWIN_DARWIN_HPP
+#ifndef CM740_CM740_HPP
+#define CM740_CM740_HPP
 
 #include <cstdint>
 #include <utility>
 #include <vector>
 
-#include "CM740.hpp"
-#include "DarwinRawSensors.hpp"
+#include "CM740Data.hpp"
 #include "FSR.hpp"
-#include "MX28.hpp"
+#include "RawSensors.hpp"
+#include "Servo.hpp"
 
 #include "extension/Configuration.hpp"
 
-namespace Darwin {
+namespace CM740 {
 
     /**
      * Contains all of the dynamixel IDs in the system
@@ -75,7 +75,7 @@ namespace Darwin {
      *
      * @author Trent Houliston
      */
-    class Darwin {
+    class CM740 {
     private:
         /// Our UART class that we will communicate through
         UART uart;
@@ -94,67 +94,67 @@ namespace Darwin {
         void setConfig(const extension::Configuration& config);
 
         /// The CM740
-        CM740 cm740;
-        /// The Right Shoulder Pitch MX28
-        MX28 rShoulderPitch;
-        /// The Left Shoulder Pitch MX28
-        MX28 lShoulderPitch;
-        /// The Right Shoulder Roll MX28
-        MX28 rShoulderRoll;
-        /// The Left Shoulder Roll MX28
-        MX28 lShoulderRoll;
-        /// The Right Elbow MX28
-        MX28 rElbow;
-        /// The Left Elbow MX28
-        MX28 lElbow;
-        /// The Right Hip Yaw MX28
-        MX28 rHipYaw;
-        /// The Left Hip Yaw MX28
-        MX28 lHipYaw;
-        /// The Right Hip Roll MX28
-        MX28 rHipRoll;
-        /// The Left Hip Roll MX28
-        MX28 lHipRoll;
-        /// The Right Hip Pitch MX28
-        MX28 rHipPitch;
-        /// The Left Hip Pitch MX28
-        MX28 lHipPitch;
-        /// The Right Knee MX28
-        MX28 rKnee;
-        /// The Left Knee MX28
-        MX28 lKnee;
-        /// The Right Ankle Pitch MX28
-        MX28 rAnklePitch;
-        /// The Left Ankle Pitch MX28
-        MX28 lAnklePitch;
-        /// The Right Ankle Roll MX28
-        MX28 rAnkleRoll;
-        /// The Left Ankle Roll MX28
-        MX28 lAnkleRoll;
-        /// The Head Pan MX28
-        MX28 headPan;
-        /// The Head Tilt MX28
-        MX28 headTilt;
+        CM740Data cm740;
+        /// The Right Shoulder Pitch Servo
+        Servo rShoulderPitch;
+        /// The Left Shoulder Pitch Servo
+        Servo lShoulderPitch;
+        /// The Right Shoulder Roll Servo
+        Servo rShoulderRoll;
+        /// The Left Shoulder Roll Servo
+        Servo lShoulderRoll;
+        /// The Right Elbow Servo
+        Servo rElbow;
+        /// The Left Elbow Servo
+        Servo lElbow;
+        /// The Right Hip Yaw Servo
+        Servo rHipYaw;
+        /// The Left Hip Yaw Servo
+        Servo lHipYaw;
+        /// The Right Hip Roll Servo
+        Servo rHipRoll;
+        /// The Left Hip Roll Servo
+        Servo lHipRoll;
+        /// The Right Hip Pitch Servo
+        Servo rHipPitch;
+        /// The Left Hip Pitch Servo
+        Servo lHipPitch;
+        /// The Right Knee Servo
+        Servo rKnee;
+        /// The Left Knee Servo
+        Servo lKnee;
+        /// The Right Ankle Pitch Servo
+        Servo rAnklePitch;
+        /// The Left Ankle Pitch Servo
+        Servo lAnklePitch;
+        /// The Right Ankle Roll Servo
+        Servo rAnkleRoll;
+        /// The Left Ankle Roll Servo
+        Servo lAnkleRoll;
+        /// The Head Pan Servo
+        Servo headPan;
+        /// The Head Tilt Servo
+        Servo headTilt;
         /// The Right Foot FSR
         FSR rFSR;
         /// The Left Foot FSR
         FSR lFSR;
 
         /**
-         * @brief Gets the darwin device with the given sensor id
+         * @brief Gets the device with the given sensor id
          *
-         * @param id the ID of the device to get (e.g. 200 for the CM740)
+         * @param id the ID of the device to get (e.g. 200 for the CM740 itself)
          *
-         * @return the DarwinDevice object that controls this id
+         * @return the CM740Interface object that controls this id
          */
-        DarwinDevice& operator[](int id);
+        CM740Interface& operator[](int id);
 
         /**
-         * @brief Constructs a new Darwin instance and sets up communication with the CM740.
+         * @brief Constructs a new CM740 instance and sets up communication with the CM740.
          *
          * @param name the file handle for the device the CM740 is connected to (e.g. /dev/ttyUSB0)
          */
-        explicit Darwin(const char* name);
+        explicit CM740(const char* name);
 
         /**
          * @brief Pings all of the attached devices, and returns a map containing their ID and if they were contactable.
@@ -176,6 +176,6 @@ namespace Darwin {
          */
         void sendRawCommand(std::vector<uint8_t>& packet);
     };
-}  // namespace Darwin
+}  // namespace CM740
 
 #endif

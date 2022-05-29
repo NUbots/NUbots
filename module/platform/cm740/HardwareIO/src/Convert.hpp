@@ -17,23 +17,23 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_PLATFORM_DARWIN_CONVERT_HPP
-#define MODULES_PLATFORM_DARWIN_CONVERT_HPP
+#ifndef MODULES_PLATFORM_CM740_CONVERT_HPP
+#define MODULES_PLATFORM_CM740_CONVERT_HPP
 
 #include <nuclear>
 
-namespace module::platform::darwin {
+namespace module::platform::cm740 {
 
     /**
      * @author Trent Houliston
      */
     struct Convert {
 
-        /// The value from the Darwin is between 0 and 1023, representing a value between -4g and 4g.
+        /// The value from the CM740 is between 0 and 1023, representing a value between -4g and 4g.
         /// This means 512 = 0
         static constexpr double ACCELEROMETER_CONVERSION_FACTOR = (4 * 9.80665) / 512.0;
 
-        /// The Gyrosocope value from the Darwin is between 0 and 1023, representing a value between -500 and
+        /// The Gyrosocope value from the CM740 is between 0 and 1023, representing a value between -500 and
         /// 500 degrees per second. This means 512 = 0
         /// 1880.0 is an empirically measured value for this factor, which was calculated by spinning the robot on an
         /// office chair and comparing how far the robot thought it spun to how much it actually spun.
@@ -41,10 +41,10 @@ namespace module::platform::darwin {
         /// periodically
         static constexpr double GYROSCOPE_CONVERSION_FACTOR = (1880.0 * (M_PI / 180.0)) / 512.0;
 
-        /// The value that comes from the darwin is measured in decivolts (0.1 of a volt)
+        /// The value that comes from the CM740 is measured in decivolts (0.1 of a volt)
         static constexpr double VOLTAGE_CONVERSION_FACTOR = 0.1;
 
-        /// The FSR values that are measured by the darwins feet are measured in millinewtons
+        /// The FSR values that are measured by the NUgus' feet are measured in millinewtons
         static constexpr double FSR_FORCE_CONVERSION_FACTOR = 0.001;
 
         /// The gain is a value between 0 and 254, we want a value between 0 and 100
@@ -105,5 +105,5 @@ namespace module::platform::darwin {
 
         static float temperature(const uint8_t& value);
     };
-}  // namespace module::platform::darwin
+}  // namespace module::platform::cm740
 #endif

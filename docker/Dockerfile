@@ -95,7 +95,7 @@ COPY usr/local/toolchain/generate_${platform}_toolchain.py /usr/local/generate_t
 RUN python /usr/local/generate_toolchain.py --prefix /usr/local
 
 # zlib
-RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
+RUN install-from-source https://www.zlib.net/zlib-1.2.12.tar.gz
 
 # LLVM and Clang
 RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-12.0.1.tar.gz \
@@ -310,7 +310,7 @@ RUN install-package \
 RUN pip install --upgrade \
     cmake-format==0.6.13 \
     isort==5.7.0 \
-    black==20.8b1
+    black==22.3.0
 
 # Enable all the driver capabilities so we can use OpenCL in the container
 ENV NVIDIA_DRIVER_CAPABILITIES=all

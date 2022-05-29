@@ -17,8 +17,8 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_PLATFORM_DARWIN_HARDWARESIMULATOR_HPP
-#define MODULES_PLATFORM_DARWIN_HARDWARESIMULATOR_HPP
+#ifndef MODULES_PLATFORM_CM740_HARDWARESIMULATOR_HPP
+#define MODULES_PLATFORM_CM740_HARDWARESIMULATOR_HPP
 
 #include <Eigen/Core>
 #include <mutex>
@@ -26,10 +26,10 @@
 
 #include "message/platform/RawSensors.hpp"
 
-namespace module::platform::darwin {
+namespace module::platform::cm740 {
 
     /**
-     * This NUClear Reactor is responsible for reading in the data for the Darwin Platform and emitting it to
+     * This NUClear Reactor is responsible for reading in the data for the CM740 Platform and emitting it to
      * the rest of the system
      *
      * @author Jade Fountain
@@ -55,5 +55,5 @@ namespace module::platform::darwin {
         /// @brief called by a Powerplant to construct this reactor
         explicit HardwareSimulator(std::unique_ptr<NUClear::Environment> environment);
     };
-}  // namespace module::platform::darwin
+}  // namespace module::platform::cm740
 #endif
