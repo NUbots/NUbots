@@ -1,11 +1,12 @@
-BallDetector
-============
+# BallDetector
 
 ## Description
 
-The BallDetector module performs post-processing on the output of the VisualMesh to determine where balls are in the image, if any.
+The BallDetector module performs post-processing on the output of the VisualMesh to determine where balls are in the image, if any. If there are no balls, it will emit an empty `Balls` message.
 
 ## Usage
+
+Add this module to get positions of balls, given the required messages are present.
 
 ## Consumes
 
