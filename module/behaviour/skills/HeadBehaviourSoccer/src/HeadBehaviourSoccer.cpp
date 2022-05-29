@@ -226,10 +226,7 @@ namespace module::behaviour::skills {
                           headToBodyRotation = Htc.rotation();
                           orientation        = Eigen::Affine3d(sensors.Htw).rotation().transpose();
                       }
-
-                      //   Eigen::Matrix3d headToIMUSpace = orientation * headToBodyRotation;
-                      Eigen::Matrix3d headToIMUSpace = headToBodyRotation;
-
+                      Eigen::Matrix3d headToIMUSpace = orientation * headToBodyRotation;
 
                       // If objects visible, check current centroid to see if it moved
                       if (!lost) {

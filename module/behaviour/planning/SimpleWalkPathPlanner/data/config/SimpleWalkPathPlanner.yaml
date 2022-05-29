@@ -1,21 +1,8 @@
 log_level: WARN
 
-# general playing tuning values for approaching ball
-forwardSpeed: 0.0125
+forwardSpeed: 0.01
 sideSpeed: 0.01
-maxTurnSpeed : 0.15
-minTurnSpeed : -0.15
-
-# rotate on the spot tuning values
-rotateSpeed: 0.2
-rotateSpeedX: -0.04
-rotateSpeedY: 0
-
-# walk to ready position tuning values
-walkToReadySpeedX: 0.1
-walkToReadySpeedY: 0.05
-walkToReadyRotation: 0.4
-
+turnSpeed: 0.08
 slow_approach_factor: 0.01
 a: 7
 b: 0
