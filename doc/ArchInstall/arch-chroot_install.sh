@@ -39,8 +39,8 @@ EOF
 pacman -S --noconfirm --needed sudo
 
 # Setup users of the wheel group to be able to execute sudo commands with no password
-echo "%wheel ALL=(ALL:ALL) NOPASSWD: ALL" > /etc/sudoers.d/nubots_sudo
-chmod 440 /etc/sudoers.d/nubots_sudo
+echo "%wheel ALL=(ALL:ALL) NOPASSWD: ALL" > /etc/sudoers.d/wheel_sudo
+chmod 440 /etc/sudoers.d/wheel_sudo
 
 # Get sudo to insult users when they type a password wrong
 echo "Defaults insults" > /etc/sudoers.d/insults
