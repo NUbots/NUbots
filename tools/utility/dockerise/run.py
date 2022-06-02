@@ -73,10 +73,15 @@ def run(func, image):
             func(**kwargs)
             exit(0)
 
-        # Set hostname to webots if the binary contains the word webots
-        # Else set it to docker
-        # This is for configuration purposes
-        # hostname = webots if (binary regex contains 'webots') else docker
+        # If this is the run command, then use the binary name to determine if
+        # the hostname should be docker or webots
+        # Binaries containing 'webots' should be given the hostname 'webots'
+        # to ensure the config files are chosen correctly
+        if kwargs["command"] == "run":
+            binary = kwargs["args"][0]  # the binary name is the first argument in the run command
+            hostname = "webots" if re.search("webots", binary) else "docker"
+        else:
+            hostname = "docker"
 
         # Docker arguments
         docker_args = [
