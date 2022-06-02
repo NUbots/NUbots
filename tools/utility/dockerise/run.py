@@ -73,6 +73,11 @@ def run(func, image):
             func(**kwargs)
             exit(0)
 
+        # Set hostname to webots if the binary contains the word webots
+        # Else set it to docker
+        # This is for configuration purposes
+        # hostname = webots if (binary regex contains 'webots') else docker
+
         # Docker arguments
         docker_args = [
             "docker",
@@ -87,7 +92,7 @@ def run(func, image):
             "--attach",
             "stderr",
             "--hostname",
-            "docker",
+            hostname,
             "--interactive",
             "--env",
             "EDITOR={}".format(os.environ.get("EDITOR", "nano")),
