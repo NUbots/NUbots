@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <filesystem>
 #include <nuclear>
+#include <regex>
 #include <utility>
 #include <yaml-cpp/yaml.h>
 
@@ -295,7 +296,7 @@ namespace NUClear::dsl {
 
                 // Get hostname so we can find the correct per-robot config directory.
                 const std::string hostname = utility::support::getHostname();
-                const std::string platform(::extension::Script::getPlatform(hostname));
+                const std::string platform(::extension::Configuration::getPlatform(hostname));
 
                 // Check if there is a default config. If there isn't, try to make one
                 const fs::path defaultConfig = fs::path("config") / filename;
@@ -364,7 +365,7 @@ namespace NUClear::dsl {
                     try {
                         // Get hostname so we can find the correct per-robot config directory.
                         const std::string hostname = utility::support::getHostname();
-                        const std::string platform(::extension::Script::getPlatform(hostname));
+                        const std::string platform(::extension::Configuration::getPlatform(hostname));
 
                         const auto binaryName = get_first_command_line_arg();
 
