@@ -9,20 +9,11 @@ log_level: WARN
 #     radius: the search radius to do at that distance (NOT THE RADIUS OF THE OBJECT)
 
 cameras:
-  Left:
-   concurrent: 2
-   network: config/networks/RobocupNetwork.yaml
-   engine: opencl
-   classifier:
-     height: [0.5, 1.0]
-     max_distance: 15
-     intersection_tolerance: 0.25
-
- Right:
-   concurrent: 2
-   network: config/networks/RobocupNetwork.yaml
-   engine: opencl
-   classifier:
-     height: [0.5, 1.0]
-     max_distance: 15
-     intersection_tolerance: 0.25
+  left_camera:
+    concurrent: 2
+    network: config/networks/WebotsNetwork.yaml
+    engine: cpu
+    classifier:
+      height: [0.5, 1.0]
+      max_distance: 15
+      intersection_tolerance: 0.25
