@@ -14,6 +14,8 @@ FROM archlinux:base-20210829.0.32635
 
 # ↓↓↓ UPDATE MIRRORS HERE ↓↓↓
 RUN echo -e "Server=http://host.docker.internal:7878/\$repo/os/\$arch\nServer=https://archive.archlinux.org/repos/2021/08/29/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
+# If you ever update the mirror date, search the repository for UPDATE MIRRORS HERE to find all the places where the URL
+# needs to be altered.
 
 # Arch recommends running this as the first command of the docker image
 # Use "yyuu" to allow for downgrades
@@ -23,6 +25,7 @@ RUN pacman -Syyuu --noconfirm --needed --overwrite \*
 
 # Add a script that installs packages
 COPY usr/local/bin/install-package /usr/local/bin/install-package
+COPY etc/pacman/pacman.latest.conf /etc/pacman.latest.conf
 
 # Install base packages needed for building general toolchain
 # If you have a tool that's needed for a specific module install it before that module
@@ -92,7 +95,7 @@ COPY usr/local/toolchain/generate_${platform}_toolchain.py /usr/local/generate_t
 RUN python /usr/local/generate_toolchain.py --prefix /usr/local
 
 # zlib
-RUN install-from-source https://www.zlib.net/zlib-1.2.11.tar.gz
+RUN install-from-source https://www.zlib.net/zlib-1.2.12.tar.gz
 
 # LLVM and Clang
 RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-12.0.1.tar.gz \
@@ -129,6 +132,7 @@ RUN install-from-source https://xorg.freedesktop.org/releases/individual/lib/lib
 RUN install-meson-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.104.tar.xz \
     -Dudev=false \
     -Dvalgrind=false
+
 # libva
 # Needs -Dwith_x11: see https://github.com/intel/media-driver/issues/899
 # -Dwith_x11 requires x11 to be installed
@@ -157,7 +161,7 @@ RUN /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute
 # Install OpenCL C and C++ headers
 COPY usr/local/package/opencl-headers.sh /usr/local/package/opencl-headers.sh
 RUN /usr/local/package/opencl-headers.sh https://github.com/KhronosGroup/OpenCL-Headers/archive/v2020.12.18.tar.gz
-RUN install-from-source https://github.com/KhronosGroup/OpenCL-CLHPP/archive/master.tar.gz \
+RUN install-from-source https://github.com/KhronosGroup/OpenCL-CLHPP/archive/refs/tags/v2.0.16.tar.gz \
     -DOPENCL_INCLUDE_DIR=/usr/local/include/CL \
     -DOPENCL_LIB_DIR=/usr/local/lib \
     -DBUILD_DOCS=OFF \
@@ -306,7 +310,7 @@ RUN install-package \
 RUN pip install --upgrade \
     cmake-format==0.6.13 \
     isort==5.7.0 \
-    black==20.8b1
+    black==22.3.0
 
 # Enable all the driver capabilities so we can use OpenCL in the container
 ENV NVIDIA_DRIVER_CAPABILITIES=all

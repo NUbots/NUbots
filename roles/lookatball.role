@@ -14,7 +14,7 @@ nuclear_role(
   output::Overview
   # Sensors
   input::Camera
-  platform::darwin::HardwareIO
+  platform::cm740::HardwareIO
   input::SensorFilter
   # Vision
   vision::VisualMesh
