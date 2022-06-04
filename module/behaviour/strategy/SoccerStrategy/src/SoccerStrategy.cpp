@@ -93,33 +93,35 @@ namespace module::behaviour::strategy {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
             using namespace std::chrono;
-            cfg_.ball_last_seen_max_time = duration_cast<NUClear::clock::duration>(
+            cfg.ball_last_seen_max_time = duration_cast<NUClear::clock::duration>(
                 duration<double>(config["ball_last_seen_max_time"].as<double>()));
-            cfg_.goal_last_seen_max_time = duration_cast<NUClear::clock::duration>(
+            cfg.goal_last_seen_max_time = duration_cast<NUClear::clock::duration>(
                 duration<double>(config["goal_last_seen_max_time"].as<double>()));
 
-            cfg_.localisation_interval =
+            cfg.localisation_interval =
                 duration_cast<NUClear::clock::duration>(duration<double>(config["localisation_interval"].as<double>()));
-            cfg_.localisation_duration =
+            cfg.localisation_duration =
                 duration_cast<NUClear::clock::duration>(duration<double>(config["localisation_duration"].as<double>()));
 
-            cfg_.start_position_offensive = config["start_position_offensive"].as<Expression>();
-            cfg_.start_position_defensive = config["start_position_defensive"].as<Expression>();
+            cfg.start_position_offensive = config["start_position_offensive"].as<Expression>();
+            cfg.start_position_defensive = config["start_position_defensive"].as<Expression>();
 
-            cfg_.is_goalie = config["goalie"].as<bool>();
+            cfg.is_goalie = config["goalie"].as<bool>();
 
             // Use configuration here from file SoccerStrategy.yaml
-            cfg_.goalie_command_timeout           = config["goalie_command_timeout"].as<float>();
-            cfg_.goalie_rotation_speed_factor     = config["goalie_rotation_speed_factor"].as<float>();
-            cfg_.goalie_max_rotation_speed        = config["goalie_max_rotation_speed"].as<float>();
-            cfg_.goalie_translation_speed_factor  = config["goalie_translation_speed_factor"].as<float>();
-            cfg_.goalie_max_translation_speed     = config["goalie_max_translation_speed"].as<float>();
-            cfg_.goalie_side_walk_angle_threshold = config["goalie_side_walk_angle_threshold"].as<float>();
+            cfg.goalie_command_timeout           = config["goalie_command_timeout"].as<float>();
+            cfg.goalie_rotation_speed_factor     = config["goalie_rotation_speed_factor"].as<float>();
+            cfg.goalie_max_rotation_speed        = config["goalie_max_rotation_speed"].as<float>();
+            cfg.goalie_translation_speed_factor  = config["goalie_translation_speed_factor"].as<float>();
+            cfg.goalie_max_translation_speed     = config["goalie_max_translation_speed"].as<float>();
+            cfg.goalie_side_walk_angle_threshold = config["goalie_side_walk_angle_threshold"].as<float>();
 
-            cfg_.alwaysPowerKick = config["always_power_kick"].as<bool>();
+            cfg.alwaysPowerKick = config["always_power_kick"].as<bool>();
 
-            cfg_.force_playing          = config["force_playing"].as<bool>();
-            cfg_.force_penalty_shootout = config["force_penalty_shootout"].as<bool>();
+            cfg.force_playing          = config["force_playing"].as<bool>();
+            cfg.force_penalty_shootout = config["force_penalty_shootout"].as<bool>();
+
+            cfg.walk_to_ready_time = config["walk_to_ready_time"].as<int>();
         });
 
         // TODO(BehaviourTeam): unhack
@@ -169,10 +171,10 @@ namespace module::behaviour::strategy {
 
         on<Trigger<ButtonMiddleDown>, Single>().then([this] {
             log("Middle button pressed!");
-            if (!cfg_.force_playing) {
+            if (!cfg.force_playing) {
                 log("Force playing started.");
                 emit(std::make_unique<Nod>(true));
-                cfg_.force_playing = true;
+                cfg.force_playing = true;
             }
         });
 
@@ -203,13 +205,13 @@ namespace module::behaviour::strategy {
                     }
                     else {
                         // Overide SoccerStrategy and force normal playing behaviour
-                        if (cfg_.force_playing) {
+                        if (cfg.force_playing) {
                             normal_playing(field, ball, field_description);
                         }
                         else {
                             // Switch gamemode statemachine based on GameController state
                             auto mode =
-                                cfg_.force_penalty_shootout ? GameMode::PENALTY_SHOOTOUT : game_state.data.mode.value;
+                                cfg.force_penalty_shootout ? GameMode::PENALTY_SHOOTOUT : game_state.data.mode.value;
                             switch (mode) {
                                 case GameMode::PENALTY_SHOOTOUT:
                                     penalty_shootout(phase, field_description, field, ball);
@@ -357,7 +359,9 @@ namespace module::behaviour::strategy {
                 started_walking_to_ready    = true;
             }
 
-            if (NUClear::clock::now() - started_walking_to_ready_at < std::chrono::milliseconds(20 * 1000)) {
+            // Walk forwards for cfg.walk_to_ready_time seconds
+            if (NUClear::clock::now() - started_walking_to_ready_at
+                < std::chrono::milliseconds(cfg.walk_to_ready_time)) {
                 emit(std::make_unique<MotionCommand>(utility::behaviour::WalkToReady()));
             }
             else {
@@ -378,12 +382,12 @@ namespace module::behaviour::strategy {
     void SoccerStrategy::normal_playing(const Field& field,
                                         const Ball& ball,
                                         const FieldDescription& field_description) {
-        if (penalised() && !cfg_.force_playing) {  // penalised
+        if (penalised() && !cfg.force_playing) {  // penalised
             stand_still();
             currentState = Behaviour::State::PENALISED;
         }
         else {
-            if (NUClear::clock::now() - ball_last_measured < cfg_.ball_last_seen_max_time) {
+            if (NUClear::clock::now() - ball_last_measured < cfg.ball_last_seen_max_time) {
                 // Ball has been seen recently, request walk planner to walk to the ball
                 Eigen::Vector2d kick_target(0, 0);
                 emit(std::make_unique<MotionCommand>(utility::behaviour::BallApproach(kick_target)));
@@ -549,26 +553,26 @@ namespace module::behaviour::strategy {
             std::chrono::duration_cast<std::chrono::duration<float>>(NUClear::clock::now() - ball_last_measured)
                 .count();
 
-        if (time_since_ball_seen < cfg_.goalie_command_timeout) {
+        if (time_since_ball_seen < cfg.goalie_command_timeout) {
 
             Eigen::Affine2d position(field.position);
-            const float field_bearing  = Eigen::Rotation2Dd(position.rotation()).angle();
-            const int sign_bearing     = field_bearing > 0 ? 1 : -1;
-            const float rotation_speed = -sign_bearing
-                                         * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * field_bearing),
-                                                     cfg_.goalie_max_rotation_speed);
+            const float field_bearing = Eigen::Rotation2Dd(position.rotation()).angle();
+            const int sign_bearing    = field_bearing > 0 ? 1 : -1;
+            const float rotation_speed =
+                -sign_bearing
+                * std::fmin(std::fabs(cfg.goalie_rotation_speed_factor * field_bearing), cfg.goalie_max_rotation_speed);
 
             const int sign_translation = ball.position.y() > 0 ? 1 : -1;
             const float translation_speed =
                 sign_translation
-                * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.position[1]),
-                            cfg_.goalie_max_translation_speed);
+                * std::fmin(std::fabs(cfg.goalie_translation_speed_factor * ball.position[1]),
+                            cfg.goalie_max_translation_speed);
 
             Eigen::Affine2d cmd{};
             cmd.linear()      = Eigen::Rotation2Dd(rotation_speed).matrix();
             cmd.translation() = Eigen::Vector2d::Zero();
             motion_command    = std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(cmd));
-            if (std::fabs(field_bearing) < cfg_.goalie_side_walk_angle_threshold) {
+            if (std::fabs(field_bearing) < cfg.goalie_side_walk_angle_threshold) {
                 motion_command->walk_command.y() = translation_speed;
             }
         }

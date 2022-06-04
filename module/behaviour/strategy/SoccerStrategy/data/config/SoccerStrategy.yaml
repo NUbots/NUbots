@@ -25,3 +25,6 @@ force_playing: true
 force_penalty_shootout: false
 
 always_power_kick: true
+
+# Time to walk forward in ready (in milliseconds)
+walk_to_ready_time: 20000

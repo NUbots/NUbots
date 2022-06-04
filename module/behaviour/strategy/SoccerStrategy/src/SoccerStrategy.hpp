@@ -58,7 +58,8 @@ namespace module::behaviour::strategy {
             bool alwaysPowerKick        = false;
             bool force_playing          = false;
             bool force_penalty_shootout = false;
-        } cfg_;
+            int walk_to_ready_time      = 0;
+        } cfg;
 
         message::behaviour::FieldTarget walkTarget{};
 
@@ -70,6 +71,8 @@ namespace module::behaviour::strategy {
         bool reset_in_initial         = true;
         bool started_walking_to_ready = false;
         bool is_reset_half            = false;
+
+
         NUClear::clock::time_point started_walking_to_ready_at;
         message::input::GameEvents::Context team_kicking_off = message::input::GameEvents::Context::UNKNOWN;
         message::behaviour::KickPlan::KickType kick_type{};
