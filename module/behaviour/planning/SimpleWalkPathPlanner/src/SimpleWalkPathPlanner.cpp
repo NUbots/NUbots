@@ -149,6 +149,7 @@ namespace module::behaviour::planning {
                          const Sensors& sensors,
                          const WantsToKick& wants_to,
                          const FieldDescription& field_description) {
+                // If the robot wants to kick, stop path planning and walking
                 if (wants_to.kick) {
                     emit(std::make_unique<StopCommand>(subsumptionId));
                     return;
