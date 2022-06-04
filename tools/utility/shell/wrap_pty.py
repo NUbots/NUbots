@@ -32,7 +32,7 @@ class WrapPty:
         Signal handler for SIGWINCH - window size has changed.
         """
         self._set_pty_size()
-        
+
     def _signal_int(self, signum, frame):
         """
         Signal handler for
@@ -81,7 +81,7 @@ class WrapPty:
             tty.setraw(pty.STDIN_FILENO)
         except tty.error:  # This is the same as termios.error
             pass
-        
+
         if sys.stdout.isatty():
             self._set_pty_size()
 
@@ -89,7 +89,7 @@ class WrapPty:
             pty._copy(self.fd)
         except (IOError, OSError):
             pass
-        
+
         # Restore the terminals original settings
         if self.mode:
             tty.tcsetattr(pty.STDIN_FILENO, tty.TCSAFLUSH, self.mode)
