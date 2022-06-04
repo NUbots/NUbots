@@ -41,15 +41,12 @@ namespace module::behaviour::strategy {
             Config() = default;
             NUClear::clock::duration ball_last_seen_max_time{};
             NUClear::clock::duration goal_last_seen_max_time{};
-
             float ball_search_walk_start_speed = 0.0f;
             float ball_search_walk_stop_speed  = 0.0f;
             float ball_search_walk_slow_time   = 0.0f;
-
             Eigen::Vector2d start_position_offensive{Eigen::Vector2d::Zero()};
             Eigen::Vector2d start_position_defensive{Eigen::Vector2d::Zero()};
-            bool is_goalie = false;
-
+            bool is_goalie                         = false;
             float goalie_command_timeout           = 0.0f;
             float goalie_rotation_speed_factor     = 0.0f;
             float goalie_max_rotation_speed        = 0.0f;
@@ -58,9 +55,9 @@ namespace module::behaviour::strategy {
             float goalie_side_walk_angle_threshold = 0.0f;
             NUClear::clock::duration localisation_interval{};
             NUClear::clock::duration localisation_duration{};
-            bool alwaysPowerKick      = false;
-            bool forcePlaying         = false;
-            bool forcePenaltyShootout = false;
+            bool alwaysPowerKick       = false;
+            bool force_playing         = false;
+            bool force_penaltyshootout = false;
         } cfg_;
 
         message::behaviour::FieldTarget walkTarget{};

@@ -20,7 +20,8 @@ goalie_side_walk_angle_threshold: 0.01
 localisation_interval: 30
 localisation_duration: 5
 
-force_playing: false
-force_penalty_shootout: false
+# Enables forced game mode and phase if set to true
+force_playing: true
+force_penaltyshootout: false
 
 always_power_kick: true

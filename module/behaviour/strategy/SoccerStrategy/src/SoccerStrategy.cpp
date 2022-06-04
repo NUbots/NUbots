@@ -116,9 +116,10 @@ namespace module::behaviour::strategy {
             cfg_.goalie_max_translation_speed     = config["goalie_max_translation_speed"].as<float>();
             cfg_.goalie_side_walk_angle_threshold = config["goalie_side_walk_angle_threshold"].as<float>();
 
-            cfg_.alwaysPowerKick      = config["always_power_kick"].as<bool>();
-            cfg_.forcePlaying         = config["force_playing"].as<bool>();
-            cfg_.forcePenaltyShootout = config["force_penalty_shootout"].as<bool>();
+            cfg_.alwaysPowerKick = config["always_power_kick"].as<bool>();
+
+            cfg_.force_playing         = config["force_playing"].as<bool>();
+            cfg_.force_penaltyshootout = config["force_penaltyshootout"].as<bool>();
         });
 
         // TODO(BehaviourTeam): unhack
@@ -173,10 +174,10 @@ namespace module::behaviour::strategy {
 
         on<Trigger<ButtonMiddleDown>, Single>().then([this] {
             log("Middle button pressed!");
-            if (!cfg_.forcePlaying) {
+            if (!cfg_.force_playing) {
                 log("Force playing started.");
                 emit(std::make_unique<Nod>(true));
-                cfg_.forcePlaying = true;
+                cfg_.force_playing = true;
             }
         });
 
@@ -200,39 +201,36 @@ namespace module::behaviour::strategy {
                          const Ball& ball) {
                 try {
 
-                    // Force penalty shootout mode if set in config
-                    auto mode = cfg_.forcePenaltyShootout ? GameMode::PENALTY_SHOOTOUT : gameState.data.mode.value;
-
-                    kickType = KickType::SCRIPTED;  // Use the scripted kick
-
-                    Behaviour::State previousState = currentState;  // Update previous state
-
-                    // If force playing, just run the play functions based on mode
-                    if (cfg_.forcePlaying) {
-                        if (mode == GameMode::PENALTY_SHOOTOUT) {
-                            penaltyShootoutPlaying(field, ball);
-                        }
-                        else {
-                            normalPlaying(field, ball, fieldDescription);
-                        }
-                    }
                     // If we're picked up, stand still
-                    else if (pickedUp(sensors)) {
+                    if (pickedUp(sensors)) {
                         // TODO(BehaviourTeam): stand, no moving
                         standStill();
                         currentState = Behaviour::State::PICKED_UP;
                     }
-
-                    // Switch gamemode statemachine based on GameController state
-                    switch (mode) {
-                        case GameMode::PENALTY_SHOOTOUT: penaltyShootout(phase, fieldDescription, field, ball); break;
-                        // We handle NORMAL and OVERTIME the same at the moment because we don't have any special
-                        // behaviour for overtime.
-                        case GameMode::NORMAL:
-                        case GameMode::OVERTIME: normal(gameState, phase, fieldDescription, field, ball); break;
-                        default: log<NUClear::WARN>("Game mode unknown.");
+                    else {
+                        // Overide SoccerStrategy and force normal playing behaviour
+                        if (cfg_.force_playing) {
+                            normalPlaying(field, ball, fieldDescription);
+                        }
+                        else {
+                            // Switch gamemode statemachine based on GameController state
+                            auto mode =
+                                cfg_.force_penaltyshootout ? GameMode::PENALTY_SHOOTOUT : gameState.data.mode.value;
+                            switch (mode) {
+                                case GameMode::PENALTY_SHOOTOUT:
+                                    penaltyShootout(phase, fieldDescription, field, ball);
+                                    break;
+                                // We handle NORMAL and OVERTIME the same at the moment because we don't have any
+                                // special behaviour for overtime.
+                                case GameMode::NORMAL:
+                                case GameMode::OVERTIME: normal(gameState, phase, fieldDescription, field, ball); break;
+                                default: log<NUClear::WARN>("Game mode unknown.");
+                            }
+                        }
                     }
 
+                    // Update previous state
+                    Behaviour::State previousState = currentState;
                     if (currentState != previousState) {
                         emit(std::make_unique<Behaviour::State>(currentState));
                     }
@@ -389,42 +387,20 @@ namespace module::behaviour::strategy {
 
     void SoccerStrategy::normalPlaying(const Field& field, const Ball& ball, const FieldDescription& fieldDescription) {
         // log<NUClear::WARN>(" normal playing ");
-        if (penalised() && !cfg_.forcePlaying) {  // penalised
+        if (penalised() && !cfg_.force_playing) {  // penalised
             standStill();
-            find({FieldTarget(FieldTarget::Target::SELF)});
             currentState = Behaviour::State::PENALISED;
         }
-        else if (cfg_.is_goalie) {  // goalie
-            find({FieldTarget(FieldTarget::Target::BALL)});
-            goalieWalk(field, ball);
-            currentState = Behaviour::State::GOALIE_WALK;
-        }
         else {
-            // log<NUClear::WARN>(" rBTt : ", rBTt.x());
-            if (NUClear::clock::now() - ballLastMeasured
-                < cfg_.ball_last_seen_max_time) {  // ball has been seen recently
-                                                   // if (rBTt.x() < 0.35) {             // ball in kick radius
-                                                   //     log<NUClear::WARN>(" KICK ");
-                                                   //     if (rBTt.y() > 0.0) {
-                                                   //         log<NUClear::WARN>("kick left");
-                                                   //         emit(std::make_unique<KickScriptCommand>(
-                //             KickScriptCommand(LimbID::LEFT_LEG, KickType::SCRIPTED)));
-                //     }
-                //     else {
-                //         log<NUClear::WARN>("kick right");
-                //         emit(std::make_unique<KickScriptCommand>(
-                //             KickScriptCommand(LimbID::RIGHT_LEG, KickType::SCRIPTED)));
-                //     }
-                // }
-                // else {
-                find({FieldTarget(FieldTarget::Target::BALL)});
-                walkTo(fieldDescription, FieldTarget::Target::BALL);
+            if (NUClear::clock::now() - ballLastMeasured < cfg_.ball_last_seen_max_time) {
+                // Ball has been seen recently, request walk planner to walk to the ball
+                Eigen::Vector2d kick_target(0, 0);
+                emit(std::make_unique<MotionCommand>(utility::behaviour::BallApproach(kick_target)));
                 currentState = Behaviour::State::WALK_TO_BALL;
-                // }
             }
-            else {  // ball has not been seen recently
+            else {
+                // ball has not been seen recently,
                 currentState = Behaviour::State::SEARCH_FOR_BALL;
-                find({FieldTarget(FieldTarget::Target::BALL)});
                 emit(std::make_unique<MotionCommand>(utility::behaviour::RotateOnSpot()));
             }
         }
