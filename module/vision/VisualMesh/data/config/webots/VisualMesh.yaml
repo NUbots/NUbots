@@ -1,6 +1,3 @@
-log_level: WARN
-
-# When making a visualmesh config file for a new platform, specify the cameras as follows:
 # The settings for each camera
 # CameraName:
 #   concurrent: How many engines to make available to concurrently execute networks
@@ -8,3 +5,13 @@ log_level: WARN
 #   spotlight:
 #     distance: the distance range for the spotlight mesh to be generated for
 #     radius: the search radius to do at that distance (NOT THE RADIUS OF THE OBJECT)
+
+cameras:
+  left_camera:
+    concurrent: 2
+    network: config/networks/WebotsNetwork.yaml
+    engine: cpu
+    classifier:
+      height: [0.5, 1.0]
+      max_distance: 15
+      intersection_tolerance: 0.25
