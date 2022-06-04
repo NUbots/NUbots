@@ -181,7 +181,7 @@ namespace module::behaviour::planning {
                     case message::behaviour::MotionCommand::Type::WALK_TO_READY: walk_to_ready(); return;
                     // This line should be UNREACHABLE
                     default:
-                        log<NUClear::WARN>(
+                        log<NUClear::ERROR>(
                             fmt::format("Invalid walk path planning command {}.", latestCommand.type.value));
                         emit(std::make_unique<StopCommand>(subsumptionId));
                         return;
