@@ -22,6 +22,6 @@ localisation_duration: 5
 
 # Enables forced game mode and phase if set to true
 force_playing: true
-force_penaltyshootout: false
+force_penalty_shootout: false
 
 always_power_kick: true

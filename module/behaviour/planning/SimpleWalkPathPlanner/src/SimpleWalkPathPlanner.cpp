@@ -70,34 +70,34 @@ namespace module::behaviour::planning {
         : Reactor(std::move(environment))
         , latestCommand(utility::behaviour::StandStill())
         , subsumptionId(size_t(this) * size_t(this) - size_t(this))
-        , currentTargetPosition(Eigen::Vector2d::Zero())
-        , currentTargetHeading(Eigen::Vector2d::Zero())
-        , targetHeading(Eigen::Vector2d::Zero(), KickPlan::KickType::SCRIPTED)
-        , timeBallLastSeen(NUClear::clock::now()) {
+        , current_target_position(Eigen::Vector2d::Zero())
+        , current_target_heading(Eigen::Vector2d::Zero())
+        , target_heading(Eigen::Vector2d::Zero(), KickPlan::KickType::SCRIPTED)
+        , time_ball_last_seen(NUClear::clock::now()) {
 
         // do a little configurating
         on<Configuration>("SimpleWalkPathPlanner.yaml").then([this](const Configuration& file) {
             // TODO(KipHamiltons): Make these all consistent with the other files. We don't use .config anywhere else
             log_level = file.config["log_level"].as<NUClear::LogLevel>();
 
-            maxTurnSpeed         = file.config["maxTurnSpeed"].as<float>();
-            minTurnSpeed         = file.config["minTurnSpeed"].as<float>();
-            forwardSpeed         = file.config["forwardSpeed"].as<float>();
-            sideSpeed            = file.config["sideSpeed"].as<float>();
-            rotateSpeedX         = file.config["rotateSpeedX"].as<float>();
-            rotateSpeedY         = file.config["rotateSpeedY"].as<float>();
-            rotateSpeed          = file.config["rotateSpeed"].as<float>();
-            walkToReadySpeedX    = file.config["walkToReadySpeedX"].as<float>();
-            walkToReadySpeedY    = file.config["walkToReadySpeedY"].as<float>();
-            walkToReadyRotation  = file.config["walkToReadyRotation"].as<float>();
-            a                    = file.config["a"].as<float>();
-            b                    = file.config["b"].as<float>();
-            search_timeout       = file.config["search_timeout"].as<float>();
-            robot_ground_space   = file.config["robot_ground_space"].as<bool>();
-            ball_approach_dist   = file.config["ball_approach_dist"].as<float>();
-            slowdown_distance    = file.config["slowdown_distance"].as<float>();
-            useLocalisation      = file.config["useLocalisation"].as<bool>();
-            slow_approach_factor = file.config["slow_approach_factor"].as<float>();
+            max_turn_speed         = file.config["max_turn_speed"].as<float>();
+            min_turn_speed         = file.config["min_turn_speed"].as<float>();
+            forward_speed          = file.config["forward_speed"].as<float>();
+            side_speed             = file.config["side_speed"].as<float>();
+            rotate_speed_x         = file.config["rotate_speed_x"].as<float>();
+            rotate_speed_y         = file.config["rotate_speed_y"].as<float>();
+            rotate_speed           = file.config["rotate_speed"].as<float>();
+            walk_to_ready_speed_x  = file.config["walk_to_ready_speed_x"].as<float>();
+            walk_to_ready_speed_y  = file.config["walk_to_ready_speed_y"].as<float>();
+            walk_to_ready_rotation = file.config["walk_to_ready_rotation"].as<float>();
+            a                      = file.config["a"].as<float>();
+            b                      = file.config["b"].as<float>();
+            search_timeout         = file.config["search_timeout"].as<float>();
+            robot_ground_space     = file.config["robot_ground_space"].as<bool>();
+            ball_approach_dist     = file.config["ball_approach_dist"].as<float>();
+            slowdown_distance      = file.config["slowdown_distance"].as<float>();
+            use_localisation       = file.config["use_localisation"].as<bool>();
+            slow_approach_factor   = file.config["slow_approach_factor"].as<float>();
 
             emit(std::make_unique<WantsToKick>(false));
         });
@@ -141,7 +141,7 @@ namespace module::behaviour::planning {
                 Eigen::Affine3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
                 rBTt = Htc * Eigen::Vector3f(sphericalToCartesian(srBCc));
                 // log("rBTt: ", rBTt.x(), rBTt.y(), rBTt.z());
-                timeBallLastSeen = NUClear::clock::now();
+                time_ball_last_seen = NUClear::clock::now();
             }
         });
 
@@ -159,12 +159,12 @@ namespace module::behaviour::planning {
             .then([this](const Ball& ball,
                          const Field& field,
                          const Sensors& sensors,
-                         const WantsToKick& wantsTo,
+                         const WantsToKick& wants_to,
                          const KickPlan& kickPlan,
-                         const FieldDescription& fieldDescription) {
+                         const FieldDescription& field_description) {
                 // TODO(Bryce Tuppurainen) Determine if this line is necessary. Could this be
                 // integrated into the switch?
-                if (wantsTo.kick) {
+                if (wants_to.kick) {
                     emit(std::make_unique<StopCommand>(subsumptionId));
                     return;
                 }
@@ -174,15 +174,15 @@ namespace module::behaviour::planning {
                         emit(std::make_unique<StopCommand>(subsumptionId));
                         return;
 
-                    case message::behaviour::MotionCommand::Type::DIRECT_COMMAND: walkDirectly(); return;
+                    case message::behaviour::MotionCommand::Type::DIRECT_COMMAND: walk_directly(); return;
 
-                    case message::behaviour::MotionCommand::Type::BALL_APPROACH: visionWalkPath(); return;
+                    case message::behaviour::MotionCommand::Type::BALL_APPROACH: vision_walk_path(); return;
 
-                    case message::behaviour::MotionCommand::Type::WALK_TO_STATE: visionWalkPath(); return;
+                    case message::behaviour::MotionCommand::Type::WALK_TO_STATE: vision_walk_path(); return;
 
-                    case message::behaviour::MotionCommand::Type::ROTATE_ON_SPOT: rotateOnSpot(); return;
+                    case message::behaviour::MotionCommand::Type::ROTATE_ON_SPOT: rotate_on_spot(); return;
 
-                    case message::behaviour::MotionCommand::Type::WALK_TO_READY: walkToReady(); return;
+                    case message::behaviour::MotionCommand::Type::WALK_TO_READY: walk_to_ready(); return;
                     // This line should be UNREACHABLE
                     default:
                         log<NUClear::WARN>(
@@ -199,104 +199,106 @@ namespace module::behaviour::planning {
 
     //-------- Add extra behaviours for path planning here and in the switch case of this file
 
-    void SimpleWalkPathPlanner::walkDirectly() {
+    void SimpleWalkPathPlanner::walk_directly() {
         emit(std::move(std::make_unique<WalkCommand>(subsumptionId, latestCommand.walk_command)));
         emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
     }
 
-    void SimpleWalkPathPlanner::determineSimpleWalkPath(const Ball& ball,
-                                                        const Field& field,
-                                                        const Sensors& sensors,
-                                                        const KickPlan& kickPlan,
-                                                        const FieldDescription& fieldDescription) {
+    void SimpleWalkPathPlanner::determine_simple_walk_path(const Ball& ball,
+                                                           const Field& field,
+                                                           const Sensors& sensors,
+                                                           const KickPlan& kick_plan,
+                                                           const FieldDescription& field_description) {
 
         Eigen::Affine3d Htw(sensors.Htw);
 
-        auto now                = NUClear::clock::now();
-        float timeSinceBallSeen = std::chrono::duration_cast<std::chrono::nanoseconds>(now - timeBallLastSeen).count()
-                                  * (1.0f / std::nano::den);
+        auto now = NUClear::clock::now();
+        float time_since_ball_seen =
+            std::chrono::duration_cast<std::chrono::nanoseconds>(now - time_ball_last_seen).count()
+            * (1.0f / std::nano::den);
 
 
-        Eigen::Vector3d rBWw_temp(ball.position.x(), ball.position.y(), fieldDescription.ball_radius);
+        Eigen::Vector3d rBWw_temp(ball.position.x(), ball.position.y(), field_description.ball_radius);
 
-        rBWw = timeSinceBallSeen < search_timeout ? rBWw_temp
-                                                  : Htw.inverse().linear().leftCols<1>() + Htw.inverse().translation();
+        rBWw = time_since_ball_seen < search_timeout
+                   ? rBWw_temp
+                   : Htw.inverse().linear().leftCols<1>() + Htw.inverse().translation();
 
         position = (Htw * rBWw).head<2>();
 
         // TODO Fix Hack Planner:
-        float headingChange = 0;
-        float sideStep      = 0;
-        float speedFactor   = 1;
+        float heading_change = 0;
+        float side_step      = 0;
+        float speed_factor   = 1;
 
-        if (useLocalisation) {
+        if (use_localisation) {
 
             // Transform kick target to torso space
-            auto fieldPosition = Eigen::Affine2d(field.position);
+            auto field_position = Eigen::Affine2d(field.position);
             Eigen::Affine3d Hfw;
-            Hfw.translation() = Eigen::Vector3d(fieldPosition.translation().x(), fieldPosition.translation().y(), 0);
+            Hfw.translation() = Eigen::Vector3d(field_position.translation().x(), field_position.translation().y(), 0);
             Hfw.linear() =
-                Eigen::AngleAxisd(Eigen::Rotation2Dd(fieldPosition.rotation()).angle(), Eigen::Vector3d::UnitZ())
+                Eigen::AngleAxisd(Eigen::Rotation2Dd(field_position.rotation()).angle(), Eigen::Vector3d::UnitZ())
                     .toRotationMatrix();
 
-            Eigen::Affine3d Htf        = Htw * Hfw.inverse();
-            Eigen::Vector3d kickTarget = Htf * Eigen::Vector3d(kickPlan.target.x(), kickPlan.target.y(), 0);
+            Eigen::Affine3d Htf         = Htw * Hfw.inverse();
+            Eigen::Vector3d kick_target = Htf * Eigen::Vector3d(kick_plan.target.x(), kick_plan.target.y(), 0);
 
             // approach point:
-            Eigen::Vector2d ballToTarget = (kickTarget.head<2>() - position).normalized();
-            Eigen::Vector2d kick_point   = position - ballToTarget * ball_approach_dist;
+            Eigen::Vector2d ball_to_target = (kick_target.head<2>() - position).normalized();
+            Eigen::Vector2d kick_point     = position - ball_to_target * ball_approach_dist;
 
             if (position.norm() > slowdown_distance) {
                 position = kick_point;
             }
             else {
-                speedFactor   = slow_approach_factor;
-                headingChange = std::atan2(ballToTarget.y(), ballToTarget.x());
-                sideStep      = 1;
+                speed_factor   = slow_approach_factor;
+                heading_change = std::atan2(ball_to_target.y(), ball_to_target.x());
+                side_step      = 1;
             }
         }
 
         // If the value of position was less than the slowdown_distance provided in the config file,
-        // headingChange is potentially non-zero. This causes the requested angle to turn in the move
+        // heading_change is potentially non-zero. This causes the requested angle to turn in the move
         // command at the end of this function to potentially be the in the same direction resultant of the
         // vector between the robot and the ball, as well as the vector from ball to goal (Bryce Tuppurainen
         // - Can someone please confirm or clarify this with my in the PR, this was my understanding when
         // going through this script initially)
-        float angle = std::atan2(position.y(), position.x()) + headingChange;
+        float angle = std::atan2(position.y(), position.x()) + heading_change;
 
         // If the angle is bound between the maximum provided turning
         // speed use it. Otherwise, the appropriate maximum is used
-        angle = std::min(maxTurnSpeed, std::max(angle, -maxTurnSpeed));
+        angle = std::min(max_turn_speed, std::max(angle, -max_turn_speed));
 
 
         // Euclidean distance to ball (scaleF, scaleF2, scaleS, scaleS2 for Forward and Side
         // respectively, angle is provided above as some float value in radians from the arc-tan, divding
         // this by Pi )
-        float scaleF            = 2.0 / (1.0 + std::exp(-a * std::fabs(position.x()) + b)) - 1.0;
-        float scaleF2           = angle / M_PI;
-        float finalForwardSpeed = speedFactor * forwardSpeed * scaleF * (1.0 - scaleF2);
+        float scaleF              = 2.0 / (1.0 + std::exp(-a * std::fabs(position.x()) + b)) - 1.0;
+        float scaleF2             = angle / M_PI;
+        float final_forward_speed = speed_factor * forward_speed * scaleF * (1.0 - scaleF2);
 
-        float scaleS         = 2.0 / (1.0 + std::exp(-a * std::fabs(position.y()) + b)) - 1.0;
-        float scaleS2        = angle / M_PI;
-        float finalSideSpeed = -speedFactor * ((0.0 < position.y()) - (position.y() < 0.0)) * sideStep * sideSpeed
-                               * scaleS * (1.0 - scaleS2);
+        float scaleS           = 2.0 / (1.0 + std::exp(-a * std::fabs(position.y()) + b)) - 1.0;
+        float scaleS2          = angle / M_PI;
+        float final_side_speed = -speed_factor * ((0.0 < position.y()) - (position.y() < 0.0)) * side_step * side_speed
+                                 * scaleS * (1.0 - scaleS2);
 
 
         std::unique_ptr<WalkCommand> command =
-            std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(finalForwardSpeed, finalSideSpeed, angle));
+            std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(final_forward_speed, final_side_speed, angle));
 
         emit(std::move(command));
         emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
     }
-    void SimpleWalkPathPlanner::visionWalkPath() {
+    void SimpleWalkPathPlanner::vision_walk_path() {
         // log<NUClear::WARN>("walk to ball");
         // Normalize the ball position to obtain the unit vector in torso space
         Eigen::Vector3f unit_vector_to_ball = rBTt / rBTt.norm();
-        // Scale the unit vector by forwardSpeed
-        Eigen::Vector3f velocity_vector = forwardSpeed * unit_vector_to_ball;
+        // Scale the unit vector by forward_speed
+        Eigen::Vector3f velocity_vector = forward_speed * unit_vector_to_ball;
         float angular_velocity          = std::atan2(velocity_vector.y(), velocity_vector.x());
-        // Saturate the angular velocity with value maxTurnSpeed
-        angular_velocity = std::min(maxTurnSpeed, std::max(angular_velocity, minTurnSpeed));
+        // Saturate the angular velocity with value max_turn_speed
+        angular_velocity = std::min(max_turn_speed, std::max(angular_velocity, min_turn_speed));
         // log<NUClear::WARN>("angular_velocity", angular_velocity);
         std::unique_ptr<WalkCommand> command =
             std::make_unique<WalkCommand>(subsumptionId,
@@ -305,23 +307,19 @@ namespace module::behaviour::planning {
         emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
     }
 
-    void SimpleWalkPathPlanner::rotateOnSpot() {
-        // Get the sign of the last seen ball positionm, such that the robot hopefully rotates towards the ball after
-        // it loses it
-        // int signOfLastSeenBall = rBTt.y() > 0 ? 1 : -1;
+    void SimpleWalkPathPlanner::rotate_on_spot() {
         // log<NUClear::WARN>("rotate on spot : ", signOfLastSeenBall);
-        rotateSpeed = rotateSpeed;
         std::unique_ptr<WalkCommand> command =
-            std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(rotateSpeedX, rotateSpeedY, rotateSpeed));
+            std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(rotate_speed_x, rotate_speed_y, rotate_speed));
         emit(std::move(command));
         emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
     }
 
-    void SimpleWalkPathPlanner::walkToReady() {
+    void SimpleWalkPathPlanner::walk_to_ready() {
         // log<NUClear::WARN>("walk to ready");
-        std::unique_ptr<WalkCommand> command =
-            std::make_unique<WalkCommand>(subsumptionId,
-                                          Eigen::Vector3d(walkToReadySpeedX, walkToReadySpeedY, walkToReadyRotation));
+        std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(
+            subsumptionId,
+            Eigen::Vector3d(walk_to_ready_speed_x, walk_to_ready_speed_y, walk_to_ready_rotation));
         emit(std::move(command));
         emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
     }

@@ -1,20 +1,20 @@
 log_level: WARN
 
 # general playing tuning values for approaching ball
-forwardSpeed: 0.0125
-sideSpeed: 0.01
-maxTurnSpeed : 0.15
-minTurnSpeed : -0.15
+forward_speed: 0.0125
+side_speed: 0.01
+max_turn_speed: 0.15
+min_turn_speed: -0.15
 
 # rotate on the spot tuning values
-rotateSpeed: 0.2
-rotateSpeedX: -0.04
-rotateSpeedY: 0
+rotate_speed: 0.2
+rotate_speed_x: -0.04
+rotate_speed_y: 0
 
 # walk to ready position tuning values
-walkToReadySpeedX: 0.1
-walkToReadySpeedY: 0.05
-walkToReadyRotation: 0.4
+walk_to_ready_speed_x: 0.1
+walk_to_ready_speed_y: 0.05
+walk_to_ready_rotation: 0.4
 
 slow_approach_factor: 0.01
 a: 7
@@ -25,4 +25,4 @@ robot_ground_space: false
 
 ball_approach_dist: 0.2
 slowdown_distance: 0.3
-useLocalisation: true
+use_localisation: true

@@ -57,49 +57,49 @@ namespace module::behaviour::planning {
     private:
         message::behaviour::MotionCommand latestCommand;
         const size_t subsumptionId;
-        float maxTurnSpeed         = 0.2;
-        float minTurnSpeed         = 0.2;
-        float forwardSpeed         = 1;
-        float sideSpeed            = 1;
-        float rotateSpeedX         = -0.04;
-        float rotateSpeedY         = 0;
-        float rotateSpeed          = 0.2;
-        float walkToReadySpeedX    = 0.1;
-        float walkToReadySpeedY    = 0.1;
-        float walkToReadyRotation  = 0.5;
-        float slow_approach_factor = 0.5;
-        float a                    = 7;
-        float b                    = 0;
-        float search_timeout       = 3;
+        float max_turn_speed         = 0.2;
+        float min_turn_speed         = 0.2;
+        float forward_speed          = 1;
+        float side_speed             = 1;
+        float rotate_speed_x         = -0.04;
+        float rotate_speed_y         = 0;
+        float rotate_speed           = 0.2;
+        float walk_to_ready_speed_x  = 0.1;
+        float walk_to_ready_speed_y  = 0.1;
+        float walk_to_ready_rotation = 0.5;
+        float slow_approach_factor   = 0.5;
+        float a                      = 7;
+        float b                      = 0;
+        float search_timeout         = 3;
 
         //----------- non-config variables (not defined in WalkPathPlanner.yaml)----
 
         // info for the current walk
-        Eigen::Vector2d currentTargetPosition;
-        Eigen::Vector2d currentTargetHeading;
-        message::behaviour::KickPlan targetHeading;
-        Eigen::Vector2d targetPosition = Eigen::Vector2d::Zero();
+        Eigen::Vector2d current_target_position;
+        Eigen::Vector2d current_target_heading;
+        message::behaviour::KickPlan target_heading;
+        Eigen::Vector2d target_position = Eigen::Vector2d::Zero();
 
-        NUClear::clock::time_point timeBallLastSeen;
+        NUClear::clock::time_point time_ball_last_seen;
         Eigen::Vector3d rBWw     = Eigen::Vector3d(10.0, 0.0, 0.0);
         bool robot_ground_space  = true;
         Eigen::Vector2d position = Eigen::Vector2d::UnitX();  // ball pos rel to robot
         float ball_approach_dist = 0.2;
         float slowdown_distance  = 0.2;
-        bool useLocalisation     = true;
+        bool use_localisation    = true;
         Eigen::Vector3f rBTt     = Eigen::Vector3f(1.0, 0.0, 0.0);
 
-        void walkDirectly();
+        void walk_directly();
 
-        void determineSimpleWalkPath(const Ball& ball,
-                                     const Field& field,
-                                     const Sensors& sensors,
-                                     const KickPlan& kickPlan,
-                                     const FieldDescription& fieldDescription);
+        void determine_simple_walk_path(const Ball& ball,
+                                        const Field& field,
+                                        const Sensors& sensors,
+                                        const KickPlan& kickPlan,
+                                        const FieldDescription& field_description);
 
-        void visionWalkPath();
-        void rotateOnSpot();
-        void walkToReady();
+        void vision_walk_path();
+        void rotate_on_spot();
+        void walk_to_ready();
 
     public:
         explicit SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);

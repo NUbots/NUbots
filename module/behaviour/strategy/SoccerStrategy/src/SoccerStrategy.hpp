@@ -55,85 +55,79 @@ namespace module::behaviour::strategy {
             float goalie_side_walk_angle_threshold = 0.0f;
             NUClear::clock::duration localisation_interval{};
             NUClear::clock::duration localisation_duration{};
-            bool alwaysPowerKick       = false;
-            bool force_playing         = false;
-            bool force_penaltyshootout = false;
+            bool alwaysPowerKick        = false;
+            bool force_playing          = false;
+            bool force_penalty_shootout = false;
         } cfg_;
 
         message::behaviour::FieldTarget walkTarget{};
 
         std::vector<message::behaviour::FieldTarget> lookTarget{};
 
-        bool isGettingUp            = false;
-        bool hasKicked              = false;
-        bool selfPenalised          = false;
-        bool manualOrientationReset = false;
-        bool resetInInitial         = true;
-        double manualOrientation    = 0.0;
-        bool startedWalkingToReady  = false;
-        bool isResetHalf            = false;
-        NUClear::clock::time_point startedWalkingToReadyAt;
-        Eigen::Vector3f rBTt                                 = Eigen::Vector3f(1.0, 0.0, 0.0);
+        bool is_getting_up            = false;
+        bool has_kicked               = false;
+        bool self_penalised           = false;
+        bool reset_in_initial         = true;
+        bool started_walking_to_ready = false;
+        bool is_reset_half            = false;
+        NUClear::clock::time_point started_walking_to_ready_at;
         message::input::GameEvents::Context team_kicking_off = message::input::GameEvents::Context::UNKNOWN;
-        message::behaviour::KickPlan::KickType kickType{};
+        message::behaviour::KickPlan::KickType kick_type{};
         message::behaviour::Behaviour::State currentState = message::behaviour::Behaviour::State::INIT;
 
-        NUClear::clock::time_point lastLocalised = NUClear::clock::now();
-
-        NUClear::clock::time_point ballLastMeasured =
+        NUClear::clock::time_point ball_last_measured =
             NUClear::clock::now() - std::chrono::seconds(6000);  // TODO(BehaviourTeam): unhack
-        NUClear::clock::time_point ballSearchStartTime;
-        NUClear::clock::time_point goalLastMeasured;
-        void initialLocalisationReset();
-        void penaltyShootoutLocalisationReset(const message::support::FieldDescription& fieldDescription);
-        void unpenalisedLocalisationReset();
+        NUClear::clock::time_point goal_last_measured;
+        void initial_localisation_reset();
+        void penalty_shootout_localisation_reset(const message::support::FieldDescription& field_description);
+        void unpenalised_localisation_reset();
 
-        void standStill();
-        void walkTo(const message::support::FieldDescription& fieldDescription,
-                    const message::behaviour::FieldTarget::Target& target);
-        void walkTo(const message::support::FieldDescription& fieldDescription, const Eigen::Vector2d& position);
+        void stand_still();
+        void walk_to(const message::support::FieldDescription& field_description,
+                     const message::behaviour::FieldTarget::Target& target);
+        void walk_to(const message::support::FieldDescription& field_description, const Eigen::Vector2d& position);
         void find(const std::vector<message::behaviour::FieldTarget>& objects);
-        void spinWalk();
-        bool pickedUp(const message::input::Sensors& sensors) const;
+        bool picked_up(const message::input::Sensors& sensors) const;
         bool penalised() const;
-        static bool ballDistance(const message::localisation::Ball& ball);
-        void goalieWalk(const message::localisation::Field& field, const message::localisation::Ball& ball);
-        static Eigen::Vector2d getKickPlan(const message::localisation::Field& field,
-                                           const message::support::FieldDescription& fieldDescription);
+        static bool ball_distance(const message::localisation::Ball& ball);
+        void goalie_walk(const message::localisation::Field& field, const message::localisation::Ball& ball);
+        static Eigen::Vector2d get_kick_plan(const message::localisation::Field& field,
+                                             const message::support::FieldDescription& field_description);
         void play(const message::localisation::Field& field,
                   const message::localisation::Ball& ball,
-                  const message::support::FieldDescription& fieldDescription,
+                  const message::support::FieldDescription& field_description,
                   const message::input::GameState::Data::Mode& mode);
 
-        void penaltyShootout(const message::input::GameState::Data::Phase& phase,
-                             const message::support::FieldDescription& fieldDescription,
-                             const message::localisation::Field& field,
-                             const message::localisation::Ball& ball);
+        void penalty_shootout(const message::input::GameState::Data::Phase& phase,
+                              const message::support::FieldDescription& field_description,
+                              const message::localisation::Field& field,
+                              const message::localisation::Ball& ball);
 
-        void normal(const message::input::GameState& gameState,
+        void normal(const message::input::GameState& game_state,
                     const message::input::GameState::Data::Phase& phase,
-                    const message::support::FieldDescription& fieldDescription,
+                    const message::support::FieldDescription& field_description,
                     const message::localisation::Field& field,
                     const message::localisation::Ball& ball);
 
         // PENALTY mode functions
-        void penaltyShootoutInitial();
-        void penaltyShootoutReady();
-        void penaltyShootoutSet(const message::support::FieldDescription& fieldDescription);
-        void penaltyShootoutPlaying(const message::localisation::Field& field, const message::localisation::Ball& ball);
-        void penaltyShootoutTimeout();
-        void penaltyShootoutFinished();
+        void penalty_shootout_initial();
+        void penalty_shootout_ready();
+        void penalty_shootout_set(const message::support::FieldDescription& field_description);
+        void penalty_shootout_playing(const message::localisation::Field& field,
+                                      const message::localisation::Ball& ball);
+        void penalty_shootout_timeout();
+        void penalty_shootout_finished();
 
         // NORMAL mode functions
-        void normalInitial();
-        void normalReady(const message::input::GameState& gameState,
-                         const message::support::FieldDescription& fieldDescription);
-        void normalSet();
-        void normalPlaying(const message::localisation::Field& field,
-                           const message::localisation::Ball& ball,
-                           const message::support::FieldDescription& fieldDescription);
-        void normalFinished();
-        void normalTimeout();
+        void normal_initial();
+        void normal_ready(const message::input::GameState& game_state,
+                          const message::support::FieldDescription& field_description);
+        void normal_set();
+        void normal_playing(const message::localisation::Field& field,
+                            const message::localisation::Ball& ball,
+                            const message::support::FieldDescription& field_description);
+        void normal_finished();
+        void normal_timeout();
 
     public:
         explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);
