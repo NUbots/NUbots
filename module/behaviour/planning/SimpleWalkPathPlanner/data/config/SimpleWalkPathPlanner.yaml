@@ -15,14 +15,3 @@ rotate_speed_y: 0
 walk_to_ready_speed_x: 0.1
 walk_to_ready_speed_y: 0.05
 walk_to_ready_rotation: 0.4
-
-slow_approach_factor: 0.01
-a: 7
-b: 0
-search_timeout: 3
-
-robot_ground_space: false
-
-ball_approach_dist: 0.2
-slowdown_distance: 0.3
-use_localisation: true
