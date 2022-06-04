@@ -153,17 +153,13 @@ namespace module::behaviour::planning {
            With<Field>,
            With<Sensors>,
            With<WantsToKick>,
-           With<KickPlan>,
            With<FieldDescription>,
            Sync<SimpleWalkPathPlanner>>()
             .then([this](const Ball& ball,
                          const Field& field,
                          const Sensors& sensors,
                          const WantsToKick& wants_to,
-                         const KickPlan& kickPlan,
                          const FieldDescription& field_description) {
-                // TODO(Bryce Tuppurainen) Determine if this line is necessary. Could this be
-                // integrated into the switch?
                 if (wants_to.kick) {
                     emit(std::make_unique<StopCommand>(subsumptionId));
                     return;
@@ -290,8 +286,8 @@ namespace module::behaviour::planning {
         emit(std::move(command));
         emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
     }
+
     void SimpleWalkPathPlanner::vision_walk_path() {
-        // log<NUClear::WARN>("walk to ball");
         // Normalize the ball position to obtain the unit vector in torso space
         Eigen::Vector3f unit_vector_to_ball = rBTt / rBTt.norm();
         // Scale the unit vector by forward_speed
@@ -299,7 +295,6 @@ namespace module::behaviour::planning {
         float angular_velocity          = std::atan2(velocity_vector.y(), velocity_vector.x());
         // Saturate the angular velocity with value max_turn_speed
         angular_velocity = std::min(max_turn_speed, std::max(angular_velocity, min_turn_speed));
-        // log<NUClear::WARN>("angular_velocity", angular_velocity);
         std::unique_ptr<WalkCommand> command =
             std::make_unique<WalkCommand>(subsumptionId,
                                           Eigen::Vector3d(velocity_vector.x(), velocity_vector.y(), angular_velocity));
@@ -308,7 +303,6 @@ namespace module::behaviour::planning {
     }
 
     void SimpleWalkPathPlanner::rotate_on_spot() {
-        // log<NUClear::WARN>("rotate on spot : ", signOfLastSeenBall);
         std::unique_ptr<WalkCommand> command =
             std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(rotate_speed_x, rotate_speed_y, rotate_speed));
         emit(std::move(command));
@@ -316,7 +310,6 @@ namespace module::behaviour::planning {
     }
 
     void SimpleWalkPathPlanner::walk_to_ready() {
-        // log<NUClear::WARN>("walk to ready");
         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(
             subsumptionId,
             Eigen::Vector3d(walk_to_ready_speed_x, walk_to_ready_speed_y, walk_to_ready_rotation));

@@ -195,7 +195,6 @@ namespace module::behaviour::strategy {
                          const Field& field,
                          const Ball& ball) {
                 try {
-
                     // If we're picked up, stand still
                     if (picked_up(sensors)) {
                         // TODO(BehaviourTeam): stand, no moving
@@ -353,8 +352,6 @@ namespace module::behaviour::strategy {
                 is_reset_half            = true;
                 started_walking_to_ready = false;
             }
-            // auto walkTarget = game_state.data.our_kick_off ? cfg_.start_position_offensive :
-            // cfg_.start_position_defensive; walk_to(field_description, walkTarget);
             if (!started_walking_to_ready) {
                 started_walking_to_ready_at = NUClear::clock::now();
                 started_walking_to_ready    = true;
@@ -364,12 +361,8 @@ namespace module::behaviour::strategy {
                 emit(std::make_unique<MotionCommand>(utility::behaviour::WalkToReady()));
             }
             else {
-                // log("10 seconds up, stopping walk");
                 stand_still();
             }
-
-            // Self localise while we're walking on in READY
-            // find({FieldTarget(FieldTarget::Target::SELF)});
 
             currentState = Behaviour::State::READY;
         }
@@ -385,7 +378,6 @@ namespace module::behaviour::strategy {
     void SoccerStrategy::normal_playing(const Field& field,
                                         const Ball& ball,
                                         const FieldDescription& field_description) {
-        // log<NUClear::WARN>(" normal playing ");
         if (penalised() && !cfg_.force_playing) {  // penalised
             stand_still();
             currentState = Behaviour::State::PENALISED;
@@ -442,11 +434,11 @@ namespace module::behaviour::strategy {
 
         auto ball_reset = std::make_unique<ResetBallHypotheses>();
 
-        ResetBallHypotheses::Ball atFeet;
-        atFeet.rBWw       = Eigen::Vector2d(0.2, 0);
-        atFeet.covariance = Eigen::Vector2d::Constant(0.01).asDiagonal();
+        ResetBallHypotheses::Ball at_feet;
+        at_feet.rBWw       = Eigen::Vector2d(0.2, 0);
+        at_feet.covariance = Eigen::Vector2d::Constant(0.01).asDiagonal();
 
-        ball_reset->hypotheses.push_back(atFeet);
+        ball_reset->hypotheses.push_back(at_feet);
         ball_reset->self_reset = true;
 
         emit(ball_reset);
@@ -471,9 +463,9 @@ namespace module::behaviour::strategy {
             throw std::runtime_error("SoccerStrategy::walk_to: Only FieldTarget::Target::BALL is supported.");
         }
 
-        Eigen::Vector2d enemyGoal(field_description.dimensions.field_length * 0.5, 0.0);
+        Eigen::Vector2d enemy_goal(field_description.dimensions.field_length * 0.5, 0.0);
 
-        emit(std::make_unique<MotionCommand>(utility::behaviour::BallApproach(enemyGoal)));
+        emit(std::make_unique<MotionCommand>(utility::behaviour::BallApproach(enemy_goal)));
     }
 
     void SoccerStrategy::walk_to(const FieldDescription& field_description, const Eigen::Vector2d& position) {
@@ -566,9 +558,9 @@ namespace module::behaviour::strategy {
                                          * std::fmin(std::fabs(cfg_.goalie_rotation_speed_factor * field_bearing),
                                                      cfg_.goalie_max_rotation_speed);
 
-            const int signTranslation = ball.position.y() > 0 ? 1 : -1;
-            const float translationSpeed =
-                signTranslation
+            const int sign_translation = ball.position.y() > 0 ? 1 : -1;
+            const float translation_speed =
+                sign_translation
                 * std::fmin(std::fabs(cfg_.goalie_translation_speed_factor * ball.position[1]),
                             cfg_.goalie_max_translation_speed);
 
@@ -577,7 +569,7 @@ namespace module::behaviour::strategy {
             cmd.translation() = Eigen::Vector2d::Zero();
             motion_command    = std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(cmd));
             if (std::fabs(field_bearing) < cfg_.goalie_side_walk_angle_threshold) {
-                motion_command->walk_command.y() = translationSpeed;
+                motion_command->walk_command.y() = translation_speed;
             }
         }
         else {
