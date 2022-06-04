@@ -228,7 +228,7 @@ namespace module::behaviour::skills {
                       }
 
                       //   Eigen::Matrix3d headToIMUSpace = orientation * headToBodyRotation;
-                      Eigen::Matrix3d headToIMUSpace = headToBodyRotation;
+                      Eigen::Matrix3d headToIMUSpace = orientation * headToBodyRotation;
 
 
                       // If objects visible, check current centroid to see if it moved
