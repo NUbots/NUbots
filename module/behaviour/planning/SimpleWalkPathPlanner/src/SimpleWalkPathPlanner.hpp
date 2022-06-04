@@ -44,9 +44,6 @@ namespace module::behaviour::planning {
     using message::behaviour::MotionCommand;
     using message::behaviour::WantsToKick;
     using message::input::Sensors;
-    using message::localisation::Ball;
-    using message::localisation::Field;
-    using message::support::FieldDescription;
 
     /**
      *
@@ -74,9 +71,6 @@ namespace module::behaviour::planning {
         // Stores the latest
         message::behaviour::MotionCommand latest_command;
         const size_t subsumptionId;
-
-        /// @brief Stores the time stamp of when the last ball was seen
-        NUClear::clock::time_point time_ball_last_seen;
 
         /// @brief Stores the position of the last ball seen
         Eigen::Vector3f rBTt = Eigen::Vector3f(1.0, 0.0, 0.0);

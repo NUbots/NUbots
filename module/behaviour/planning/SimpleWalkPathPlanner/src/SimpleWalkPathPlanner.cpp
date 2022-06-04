@@ -49,14 +49,11 @@ namespace module::behaviour::planning {
     using message::behaviour::MotionCommand;
     using message::behaviour::WantsToKick;
     using message::input::Sensors;
-    using message::localisation::Ball;
-    using message::localisation::Field;
     using message::motion::DisableWalkEngineCommand;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::StopCommand;
     using message::motion::WalkCommand;
     using message::motion::WalkStopped;
-    using message::support::FieldDescription;
     using VisionBalls = message::vision::Balls;
 
     using utility::behaviour::ActionPriorities;
@@ -68,8 +65,7 @@ namespace module::behaviour::planning {
     SimpleWalkPathPlanner::SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
         , latest_command(utility::behaviour::StandStill())
-        , subsumptionId(size_t(this) * size_t(this) - size_t(this))
-        , time_ball_last_seen(NUClear::clock::now()) {
+        , subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
         // do a little configurating
         on<Configuration>("SimpleWalkPathPlanner.yaml").then([this](const Configuration& config) {
@@ -129,8 +125,6 @@ namespace module::behaviour::planning {
                 Eigen::Affine3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
                 rBTt = Htc * rBCc;
                 log<NUClear::DEBUG>("rBTt (x,y,z): (", rBTt.x(), ",", rBTt.y(), ",", rBTt.z(), ")");
-                // Store the time stamp of the last ball seen
-                time_ball_last_seen = NUClear::clock::now();
             }
         });
 
