@@ -112,10 +112,9 @@ namespace module::behaviour::planning {
             emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {0, 0}}));
         });
 
-        // Used to maintain the time since the ball was last seen for a timeout
-        // period (could be implemented outside of the path planner and somewhere
-        // else in strategy to call a particular 'style' of path planning that is
-        // more likely to find the ball)
+        // Used to maintain the position of the last seen ball
+        // TODO(LocalisationTeam): Should be implemented outside of the path planner in something like
+        // BallLocalisation
         on<Trigger<VisionBalls>, With<Sensors>>().then([this](const VisionBalls& balls, const Sensors& sensors) {
             if (balls.balls.size() > 0) {
                 // Get the latest vision ball measurement in camera space
@@ -189,7 +188,7 @@ namespace module::behaviour::planning {
         // Obtain the unit vector  to ball in torso space and scale by cfg.forward_speed
         Eigen::Vector3f vBt = cfg.forward_speed * (rBTt / rBTt.norm());
 
-        // Set angular velocity to be the angular displacement to ball, then saturate with value cfg.max_turn_speed
+        // Set angular velocity to be just the angular displacement to ball, then saturate with value cfg.max_turn_speed
         float wTt = std::atan2(vBt.y(), vBt.x());
         wTt       = std::min(cfg.max_turn_speed, std::max(wTt, cfg.min_turn_speed));
         log<NUClear::DEBUG>("Vision walk command: (vBt.x(),vBt.x(),wTt): (", vBt.x(), ",", vBt.y(), ",", wTt, ")");
