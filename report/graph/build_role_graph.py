@@ -183,7 +183,7 @@ class NUClearGraphBuilder:
             "overlap": "prism10000",
             "layout": "fdp",
             "epsilon": 0.01,
-            "start": int(random.random() * 2 ** 32),
+            "start": int(random.random() * 2**32),
         }
 
         graph = Dot(**graph)
@@ -319,7 +319,7 @@ class NUClearGraphBuilder:
             overlap="prism10000",
             layout="fdp",
             epsilon=0.01,
-            start=int(random.random() * 2 ** 32),
+            start=int(random.random() * 2**32),
         )
 
         for m1 in compressed_modules:
