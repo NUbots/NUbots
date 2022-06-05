@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2022 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_VISION_BALLDETECTOR_HPP
@@ -27,6 +27,7 @@ namespace module::vision {
 
     class BallDetector : public NUClear::Reactor {
     private:
+        // See BallDetector.yaml for info on configuration variables and their values
         struct {
             float confidence_threshold       = 0.0f;
             int cluster_points               = 0;

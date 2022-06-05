@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUBots <nubots@nubots.net>
+ * Copyright 2022 NUbots <nubots@nubots.net>
  */
 
 #include "BallDetector.hpp"
@@ -89,7 +89,7 @@ namespace module::vision {
                 // Cluster all points into ball candidates
                 // Points are clustered based on their connectivity to other ball points
                 // Clustering is down in two steps
-                // 1) We take the set of ball points found above and partition them into potential clusters by
+                // 1) Take the set of ball points found above and partition them into potential clusters by
                 //    a) Add the first point and its ball neighbours to a cluster
                 //    b) Find all other ball points who are neighbours of the points in the cluster
                 //    c) Partition all of the indices that are in the cluster
@@ -162,7 +162,7 @@ namespace module::vision {
                     // The rays are in world space, multiply by Rcw to get the axis in camera space
                     b.cone.axis = horizon.Hcw.topLeftCorner<3, 3>().cast<float>()
                                   * axis;    // Hcw is not an affine transform type (cannot use linear())
-                    b.cone.radius = radius;  // **arccos of the angle** between the furthest vectors
+                    b.cone.radius = radius;  // arccos(radius) is the angle between the furthest vectors
 
                     // https://en.wikipedia.org/wiki/Angular_diameter
                     // From the link, the formula with arcsin is used since a ball is a spherical object
@@ -196,66 +196,77 @@ namespace module::vision {
                      *                  THROWOUTS                  *
                      ***********************************************/
 
+                    // For this particular ball, see if it should be thrown out
+                    // For debugging purposes, go through each check
                     log<NUClear::DEBUG>("**************************************************");
                     log<NUClear::DEBUG>("*                    THROWOUTS                   *");
                     log<NUClear::DEBUG>("**************************************************");
                     bool keep = true;
-                    b.colour.fill(1.0f);
+                    b.colour.fill(1.0f);  // a valid ball has a white colour in NUsight
 
-                    // CALCULATE DEGREE OF FIT
+                    // CALCULATE DEGREE OF FIT - DISCARD IF STANDARD DEVIATION OF ANGLES IS TOO LARGE
                     // Degree of fit defined as the standard deviation of angle between every rays on the
-                    // cluster / and the cone axis. If the standard deviation exceeds a given threshold then we
-                    // have a bad fit
+                    // cluster / and the cone axis. If the standard deviation exceeds a given threshold then
+                    // it is a bad fit
                     std::vector<float> angles;
                     float mean             = 0.0f;
-                    const float max_radius = std::acos(radius);
+                    const float max_radius = std::acos(radius);  // largest angle between vectors
+                    // Get mean of all the angles in the cluster to then find the standard deviation
                     for (const auto& idx : cluster) {
                         const float angle = std::acos(axis.dot(rays.col(idx))) / max_radius;
                         angles.emplace_back(angle);
                         mean += angle;
                     }
                     mean /= angles.size();
+                    // Calculate standard deviation of angles in cluster
                     float deviation = 0.0f;
                     for (const auto& angle : angles) {
                         deviation += (mean - angle) * (mean - angle);
                     }
                     deviation = std::sqrt(deviation / (angles.size() - 1));
 
+                    // If the deviation is more than the maximum allowed, then discard this ball
                     if (deviation > config.maximum_deviation) {
 
                         log<NUClear::DEBUG>(fmt::format("Ball discarded: deviation ({}) > maximum_deviation ({})",
                                                         deviation,
                                                         config.maximum_deviation));
                         log<NUClear::DEBUG>("--------------------------------------------------");
+                        // Balls that violate degree of fit will show as green in NUsight
                         b.colour = keep ? message::conversion::math::fvec4(0.0f, 1.0f, 0.0f, 1.0f) : b.colour;
                         keep     = false;
                     }
 
-                    // DISTANCE IS TOO CLOSE
+                    // DISCARD IF THE DISTANCE FROM THE BALL TO THE ROBOT IS TOO CLOSE
+                    // Prevents the robot itself being classed as a ball, ie its arms/hands
                     if (distance < config.minimum_ball_distance) {
 
                         log<NUClear::DEBUG>(fmt::format("Ball discarded: distance ({}) < minimum_ball_distance ({})",
                                                         distance,
                                                         config.minimum_ball_distance));
                         log<NUClear::DEBUG>("--------------------------------------------------");
+                        // Balls that violate this but not previous checks will show as red in NUsight
                         b.colour = keep ? message::conversion::math::fvec4(1.0f, 0.0f, 0.0f, 1.0f) : b.colour;
                         keep     = false;
                     }
 
-                    // IF THE DISAGREEMENT BETWEEN THE ANGULAR AND PROJECTION BASED DISTANCES ARE TOO LARGE
-                    // Intersect cone axis vector with a plane midway through the ball with normal vector (0, 0,
+                    // DISCARD IF THE DISAGREEMENT BETWEEN THE ANGULAR AND PROJECTION BASED DISTANCES ARE TOO LARGE
+                    // Intersect cone axis vector with a plane midway through the ball with normal vector (0, 0, 1)
                     // 1) Do this in world space, not camera space!
                     // https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection#Algebraic_form
                     // Plane normal = (0, 0, 1)
                     // Point in plane = (0, 0, field.ball_radius)
                     // Line direction = axis
-                    // Point on line = camera = Hcw.topRightCorner<3, 1>()
+                    // Point on line = camera = Hwc.translation.z() = rCWw.z()
                     Eigen::Affine3f Hcw(horizon.Hcw.cast<float>());
+                    // Since the plane normal zeros out x and y, only consider z
+                    // why is this not (ball_radius - rCWw.z()) / axis.z()?
                     const float d = (Hcw.inverse().translation().z() - field.ball_radius) / std::abs(axis.z());
-                    const Eigen::Vector3f srBCc     = axis * d;
+                    const Eigen::Vector3f srBCc     = axis * d;  // used later, so save it in a variable
                     const float projection_distance = srBCc.norm();
                     const float max_distance        = std::max(projection_distance, distance);
 
+                    // Discard this ball if projection_distance and distance are too far apart
                     if ((std::abs(projection_distance - distance) / max_distance) > config.distance_disagreement) {
 
                         log<NUClear::DEBUG>(
@@ -264,11 +275,12 @@ namespace module::vision {
                                         distance,
                                         projection_distance));
                         log<NUClear::DEBUG>("--------------------------------------------------");
+                        // Balls that violate this but not previous checks will show as blue in NUsight
                         b.colour = keep ? message::conversion::math::fvec4(0.0f, 0.0f, 1.0f, 1.0f) : b.colour;
                         keep     = false;
                     }
 
-                    // IF THE BALL IS FURTHER THAN THE LENGTH OF THE FIELD
+                    // DISCARD IF THE BALL IS FURTHER THAN THE LENGTH OF THE FIELD
                     if (distance > field.dimensions.field_length) {
 
                         log<NUClear::DEBUG>(
@@ -277,7 +289,7 @@ namespace module::vision {
                                         distance,
                                         field.dimensions.field_length));
                         log<NUClear::DEBUG>("--------------------------------------------------");
-
+                        // Balls that violate this but not previous checks will show as yellow in NUsight
                         b.colour = keep ? message::conversion::math::fvec4(1.0f, 0.0f, 1.0f, 1.0f) : b.colour;
                         keep     = false;
                     }
@@ -295,14 +307,18 @@ namespace module::vision {
                         fmt::format("Distance Throwout {}", std::abs(projection_distance - distance) / max_distance));
                     log<NUClear::DEBUG>("**************************************************");
 
+                    // If this ball didn't pass the checks, don't keep it
                     if (!keep) {
                         b.measurements.clear();
                     }
-                    if (log_level <= NUClear::DEBUG || keep) {
+                    // If the ball passed the checks, add it to the Balls message to be emitted
+                    // If it didn't pass the checks, but we're debugging, then emit the ball to see throwouts in NUsight
+                    if (keep || log_level <= NUClear::DEBUG) {
                         balls->balls.push_back(std::move(b));
                     }
                 }
 
+                // Emit the Balls message, even if no balls were found
                 emit(std::move(balls));
             });
     }
