@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <filesystem>
 #include <nuclear>
+#include <regex>
 #include <utility>
 #include <yaml-cpp/yaml.h>
 
@@ -41,13 +42,13 @@ namespace extension {
     struct [[nodiscard]] Configuration {
         // Rules:
         // 1) Default config file should define a value for every node.
-        // 2) Per-robot config overrides default config values. This file need only override the values that nee to be
-        // overriden.
-        // 3) Per-binary config overrides per-robot and default config values. This file need only override the values
-        // that need to be overriden.
+        // 2) Platform config overrides default config values.
+        // 2) Per-robot config overrides default and platform config values. This file need only override the values
+        // that need to be overriden. 3) Per-binary config overrides per-robot, platform and default config values. This
+        // file need only override the values that need to be overriden.
         //
-        // Per-robot and per-binary files need not exist.
-        // Per-robot and per-binary files can add new nodes to the file, but this is probably unwise.
+        // Per-robot, per-platform and per-binary files need not exist.
+        // Per-robot, per-platform and per-binary files can add new nodes to the file, but this is probably unwise.
         //
         // We have to merge the YAML trees to account for situations where a sub-node is not defined in a higher
         // priority tree.
@@ -55,24 +56,41 @@ namespace extension {
         fs::path fileName{};
         std::string hostname{};
         std::string binary{};
+        std::string platform{};
         YAML::Node config{};
 
         Configuration() = default;
         Configuration(const std::string& fileName,
                       const std::string& hostname,
                       const std::string& binary,
+                      const std::string& platform,
                       const YAML::Node& config)
-            : fileName(fileName), hostname(hostname), binary(binary), config(config) {}
+            : fileName(fileName), hostname(hostname), binary(binary), platform(platform), config(config) {}
 
         /// @brief Constructor without config node given. The correct config file has to be deduced from the params
-        Configuration(const std::string& fileName, const std::string& hostname, const std::string& binary)
-            : fileName(fileName), hostname(hostname), binary(binary) {
+        Configuration(const std::string& fileName,
+                      const std::string& hostname,
+                      const std::string& binary,
+                      const std::string& platform)
+            : fileName(fileName), hostname(hostname), binary(binary), platform(platform) {
             bool loaded = false;
 
             // Load the default config file.
             if (fs::exists(fs::path("config") / fileName)) {
                 config = YAML::LoadFile(fs::path("config") / fileName);
                 loaded = true;
+            }
+
+            // If the same file exists in this platform's per-platform config directory then load and merge
+            if (fs::exists(fs::path("config") / platform / fileName)) {
+                if (loaded) {
+                    config = merge_yaml_nodes(config, YAML::LoadFile(fs::path("config") / platform / fileName));
+                }
+
+                else {
+                    config = YAML::LoadFile(fs::path("config") / platform / fileName);
+                    loaded = true;
+                }
             }
 
             // If the same file exists in this robots per-robot config directory then load and merge.
@@ -150,36 +168,56 @@ namespace extension {
             return ret;
         }
 
+        static inline std::string getPlatform(const std::string& hostname) {
+            // It is assumed that all hostnames are in the format <platform name><robot number>,
+            // such that the regular expression
+            // [a-z]+[0-9]+?
+            // will match all hostnames
+            std::regex re("([a-z]+)([0-9]+)?");
+            std::smatch match;
+
+            if (std::regex_match(hostname, match, re)) {
+                // match[0] will be the full string
+                // match[1] the first match (platform name)
+                // match[2] the second match (robot number)
+                return match[1].str();
+            }
+
+            throw std::system_error(-1,
+                                    std::system_category(),
+                                    ("Failed to extract platform name from '" + hostname + "'."));
+        }
+
         [[nodiscard]] Configuration operator[](const std::string& key) {
-            return Configuration(fileName, hostname, binary, config[key]);
+            return Configuration(fileName, hostname, binary, platform, config[key]);
         }
 
         [[nodiscard]] Configuration operator[](const std::string& key) const {
-            return Configuration(fileName, hostname, binary, config[key]);
+            return Configuration(fileName, hostname, binary, platform, config[key]);
         }
 
         [[nodiscard]] Configuration operator[](const char* key) {
-            return Configuration(fileName, hostname, binary, config[key]);
+            return Configuration(fileName, hostname, binary, platform, config[key]);
         }
 
         [[nodiscard]] Configuration operator[](const char* key) const {
-            return Configuration(fileName, hostname, binary, config[key]);
+            return Configuration(fileName, hostname, binary, platform, config[key]);
         }
 
         [[nodiscard]] Configuration operator[](size_t index) {
-            return Configuration(fileName, hostname, binary, config[index]);
+            return Configuration(fileName, hostname, binary, platform, config[index]);
         }
 
         [[nodiscard]] Configuration operator[](size_t index) const {
-            return Configuration(fileName, hostname, binary, config[index]);
+            return Configuration(fileName, hostname, binary, platform, config[index]);
         }
 
         [[nodiscard]] Configuration operator[](int index) {
-            return Configuration(fileName, hostname, binary, config[index]);
+            return Configuration(fileName, hostname, binary, platform, config[index]);
         }
 
         [[nodiscard]] Configuration operator[](int index) const {
-            return Configuration(fileName, hostname, binary, config[index]);
+            return Configuration(fileName, hostname, binary, platform, config[index]);
         }
 
         template <typename T, typename... Args>
@@ -258,6 +296,7 @@ namespace NUClear::dsl {
 
                 // Get hostname so we can find the correct per-robot config directory.
                 const std::string hostname = utility::support::getHostname();
+                const std::string platform(::extension::Configuration::getPlatform(hostname));
 
                 // Check if there is a default config. If there isn't, try to make one
                 const fs::path defaultConfig = fs::path("config") / filename;
@@ -286,6 +325,12 @@ namespace NUClear::dsl {
                 const fs::path robotConfig = fs::path("config") / hostname / filename;
                 if (fs::exists(robotConfig)) {
                     DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, robotConfig, flags);
+                }
+
+                // Bind our robot specific config file if it exists
+                const fs::path platformConfig = fs::path("config") / platform / filename;
+                if (fs::exists(platformConfig)) {
+                    DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, platformConfig, flags);
                 }
 
                 // If there were command line arguments, we can get the binary name, and check for a binary config
@@ -320,6 +365,7 @@ namespace NUClear::dsl {
                     try {
                         // Get hostname so we can find the correct per-robot config directory.
                         const std::string hostname = utility::support::getHostname();
+                        const std::string platform(::extension::Configuration::getPlatform(hostname));
 
                         const auto binaryName = get_first_command_line_arg();
 
@@ -329,7 +375,8 @@ namespace NUClear::dsl {
                         bool flag = false;
                         for (const auto& component : components) {
                             // Ignore the hostname/binary name if they are present.
-                            if (flag && (component != hostname) && (component != binaryName)) {
+                            if (flag && (component != hostname) && (component != binaryName)
+                                && (component != platform)) {
                                 relativePath = relativePath / component;
                             }
 
@@ -339,7 +386,10 @@ namespace NUClear::dsl {
                             }
                         }
 
-                        return std::make_shared<::extension::Configuration>(relativePath, hostname, binaryName);
+                        return std::make_shared<::extension::Configuration>(relativePath,
+                                                                            hostname,
+                                                                            binaryName,
+                                                                            platform);
                     }
                     catch (const YAML::ParserException& e) {
                         throw std::runtime_error(watch.path + " " + std::string(e.what()));
