@@ -132,7 +132,7 @@ namespace module::behaviour::strategy {
             });
 
         // For checking last seen times
-        on<Trigger<VisionBalls>, With<Sensors>>().then([this](const VisionBalls& balls, const Sensors& sensors) {
+        on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
             if (!balls.balls.empty()) {
                 ball_last_measured = NUClear::clock::now();
             }
@@ -206,7 +206,7 @@ namespace module::behaviour::strategy {
                     else {
                         // Overide SoccerStrategy and force normal playing behaviour
                         if (cfg.force_playing) {
-                            normal_playing(field, ball, field_description);
+                            normal_playing();
                         }
                         else {
                             // Switch gamemode statemachine based on GameController state
@@ -219,9 +219,7 @@ namespace module::behaviour::strategy {
                                 // We handle NORMAL and OVERTIME the same at the moment because we don't have any
                                 // special behaviour for overtime.
                                 case GameMode::NORMAL:
-                                case GameMode::OVERTIME:
-                                    normal(game_state, phase, field_description, field, ball);
-                                    break;
+                                case GameMode::OVERTIME: normal(game_state, phase); break;
                                 default: log<NUClear::WARN>("Game mode unknown.");
                             }
                         }
@@ -257,20 +255,16 @@ namespace module::behaviour::strategy {
     }
 
     // ********************NORMAL GAMEMODE STATE MACHINE********************************
-    void SoccerStrategy::normal(const GameState& game_state,
-                                const Phase& phase,
-                                const FieldDescription& field_description,
-                                const Field& field,
-                                const Ball& ball) {
+    void SoccerStrategy::normal(const GameState& game_state, const Phase& phase) {
         switch (phase.value) {
             // Beginning of game and half time
             case Phase::INITIAL: normal_initial(); break;
             // After initial, robots position on their half of the field.
-            case Phase::READY: normal_ready(game_state, field_description); break;
+            case Phase::READY: normal_ready(game_state); break;
             // Happens after ready. Robot should stop moving.
             case Phase::SET: normal_set(); break;
             // After set, main game where we should walk to ball and kick.
-            case Phase::PLAYING: normal_playing(field, ball, field_description); break;
+            case Phase::PLAYING: normal_playing(); break;
             case Phase::FINISHED: normal_finished(); break;  // Game has finished.
             case Phase::TIMEOUT: normal_timeout(); break;    // A pause in playing. Not in simulation.
             default: log<NUClear::WARN>("Unknown normal gamemode phase.");
@@ -343,7 +337,7 @@ namespace module::behaviour::strategy {
         currentState = Behaviour::State::INITIAL;
     }
 
-    void SoccerStrategy::normal_ready(const GameState& game_state, const FieldDescription& field_description) {
+    void SoccerStrategy::normal_ready(const GameState& game_state) {
         if (penalised()) {  // penalised
             stand_still();
             find({FieldTarget(FieldTarget::Target::SELF)});
@@ -379,9 +373,7 @@ namespace module::behaviour::strategy {
         currentState     = Behaviour::State::SET;
     }
 
-    void SoccerStrategy::normal_playing(const Field& field,
-                                        const Ball& ball,
-                                        const FieldDescription& field_description) {
+    void SoccerStrategy::normal_playing() {
         if (penalised() && !cfg.force_playing) {  // penalised
             stand_still();
             currentState = Behaviour::State::PENALISED;

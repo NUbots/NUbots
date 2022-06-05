@@ -26,12 +26,8 @@
 
 #include "message/behaviour/KickPlan.hpp"
 #include "message/behaviour/MotionCommand.hpp"
-#include "message/input/Sensors.hpp"
-#include "message/localisation/Ball.hpp"
-#include "message/localisation/Field.hpp"
 #include "message/motion/KickCommand.hpp"
 #include "message/motion/WalkCommand.hpp"
-#include "message/support/FieldDescription.hpp"
 #include "message/vision/Ball.hpp"
 
 #include "utility/behaviour/Action.hpp"
@@ -48,7 +44,6 @@ namespace module::behaviour::planning {
 
     using message::behaviour::MotionCommand;
     using message::behaviour::WantsToKick;
-    using message::input::Sensors;
     using message::motion::DisableWalkEngineCommand;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::StopCommand;
@@ -130,18 +125,8 @@ namespace module::behaviour::planning {
         // Freq should be equal to the main loop in soccer strategy. TODO (Bryce Tuppurainen): Potentially
         // change this value to a define in an included header if this will be used again for added design cohesion if
         // this will be something we change in future
-        on<Every<30, Per<std::chrono::seconds>>,
-           With<Ball>,
-           With<Field>,
-           With<Sensors>,
-           With<WantsToKick>,
-           With<FieldDescription>,
-           Sync<SimpleWalkPathPlanner>>()
-            .then([this](const Ball& ball,
-                         const Field& field,
-                         const Sensors& sensors,
-                         const WantsToKick& wants_to,
-                         const FieldDescription& field_description) {
+        on<Every<30, Per<std::chrono::seconds>>, With<WantsToKick>, Sync<SimpleWalkPathPlanner>>().then(
+            [this](const WantsToKick& wants_to) {
                 // If the robot wants to kick, stop path planning and walking
                 if (wants_to.kick) {
                     emit(std::make_unique<StopCommand>(subsumptionId));
