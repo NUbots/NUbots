@@ -106,7 +106,7 @@ namespace module::behaviour::strategy {
             cfg.start_position_offensive = config["start_position_offensive"].as<Expression>();
             cfg.start_position_defensive = config["start_position_defensive"].as<Expression>();
 
-            cfg.is_goalie = config["goalie"].as<bool>();
+            cfg.is_goalie = config["is_goalie"].as<bool>();
 
             // Use configuration here from file SoccerStrategy.yaml
             cfg.goalie_command_timeout           = config["goalie_command_timeout"].as<float>();
@@ -116,7 +116,7 @@ namespace module::behaviour::strategy {
             cfg.goalie_max_translation_speed     = config["goalie_max_translation_speed"].as<float>();
             cfg.goalie_side_walk_angle_threshold = config["goalie_side_walk_angle_threshold"].as<float>();
 
-            cfg.alwaysPowerKick = config["always_power_kick"].as<bool>();
+            cfg.always_power_kick = config["always_power_kick"].as<bool>();
 
             cfg.force_playing          = config["force_playing"].as<bool>();
             cfg.force_penalty_shootout = config["force_penalty_shootout"].as<bool>();

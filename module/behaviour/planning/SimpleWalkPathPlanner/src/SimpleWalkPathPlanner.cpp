@@ -185,16 +185,22 @@ namespace module::behaviour::planning {
     }
 
     void SimpleWalkPathPlanner::vision_walk_path() {
-        // Obtain the unit vector  to ball in torso space and scale by cfg.forward_speed
-        Eigen::Vector3f vBt = cfg.forward_speed * (rBTt / rBTt.norm());
+        // Obtain the unit vector to ball in torso space and scale by cfg.forward_speed
+        Eigen::Vector3f vBTt = cfg.forward_speed * (rBTt / rBTt.norm());
 
         // Set angular velocity to be just the angular displacement to ball, then saturate with value cfg.max_turn_speed
-        float wTt = std::atan2(vBt.y(), vBt.x());
-        wTt       = std::min(cfg.max_turn_speed, std::max(wTt, cfg.min_turn_speed));
-        log<NUClear::DEBUG>("Vision walk command: (vBt.x(),vBt.x(),wTt): (", vBt.x(), ",", vBt.y(), ",", wTt, ")");
+        float omegaTTt = std::atan2(vBTt.y(), vBTt.x());
+        omegaTTt       = std::min(cfg.max_turn_speed, std::max(omegaTTt, cfg.min_turn_speed));
+        log<NUClear::DEBUG>("Vision walk command: (vBTt.x(),vBTt.x(),omegaTTt): (",
+                            vBTt.x(),
+                            ",",
+                            vBTt.y(),
+                            ",",
+                            omegaTTt,
+                            ")");
 
         std::unique_ptr<WalkCommand> command =
-            std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(vBt.x(), vBt.y(), wTt));
+            std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(vBTt.x(), vBTt.y(), omegaTTt));
         emit(std::move(command));
         emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
     }

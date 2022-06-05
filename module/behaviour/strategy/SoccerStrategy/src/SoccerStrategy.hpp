@@ -55,7 +55,7 @@ namespace module::behaviour::strategy {
             float goalie_side_walk_angle_threshold = 0.0f;
             NUClear::clock::duration localisation_interval{};
             NUClear::clock::duration localisation_duration{};
-            bool alwaysPowerKick        = false;
+            bool always_power_kick      = false;
             bool force_playing          = false;
             bool force_penalty_shootout = false;
             int walk_to_ready_time      = 0;
