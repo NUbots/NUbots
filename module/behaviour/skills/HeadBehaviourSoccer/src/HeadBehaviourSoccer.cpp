@@ -40,6 +40,7 @@ namespace module::behaviour::skills {
     using message::motion::KillGetup;
     using VisionBalls = message::vision::Balls;
 
+    using utility::math::coordinates::reciprocalSphericalToCartesian;
     using utility::math::coordinates::sphericalToCartesian;
     using utility::support::Expression;
 
@@ -79,7 +80,7 @@ namespace module::behaviour::skills {
         on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
             if (!balls.balls.empty()) {
                 ballLastMeasured = NUClear::clock::now();
-                rBCc = Eigen::Vector3d(sphericalToCartesian(balls.balls[0].measurements[0].srBCc.cast<double>()));
+                rBCc             = reciprocalSphericalToCartesian(balls.balls[0].measurements[0].srBCc.cast<double>());
             }
         });
 
