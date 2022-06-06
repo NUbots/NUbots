@@ -35,8 +35,10 @@ message Ball {
     message Measurement {
         MeasurementType type = 1;
         /// Vector from camera to ball in camera coordinates
-        fvec3 srBCc      = 2;  // Spherical Reciprocal Coordinates (1/distance, phi, theta)
-        fmat3 covariance = 3;
+        fvec3 rBCc      = 2;
+        // Spherical Reciprocal Coordinates (1/distance, phi, theta)
+        fvec3 srBCc      = 3;
+        fmat3 covariance = 4;
     }
     /// Cone describing the ball from the camera's perspective
     Cone                 cone         = 1;

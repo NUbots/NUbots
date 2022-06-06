@@ -113,8 +113,7 @@ namespace module::behaviour::planning {
         on<Trigger<VisionBalls>, With<Sensors>>().then([this](const VisionBalls& balls, const Sensors& sensors) {
             if (balls.balls.size() > 0) {
                 // Get the latest vision ball measurement in camera space
-                Eigen::Vector3f rBCc =
-                    Eigen::Vector3f(sphericalToCartesian(balls.balls[0].measurements[0].srBCc.cast<float>()));
+                Eigen::Vector3f rBCc = balls.balls[0].measurements[0].rBCc;
                 // Transform the vision ball measurement into torso space
                 Eigen::Affine3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
                 rBTt = Htc * rBCc;
@@ -176,13 +175,13 @@ namespace module::behaviour::planning {
         // Set angular velocity to be just the angular displacement to ball, then saturate with value cfg.max_turn_speed
         float omegaTTt = std::atan2(vBTt.y(), vBTt.x());
         omegaTTt       = std::min(cfg.max_turn_speed, std::max(omegaTTt, cfg.min_turn_speed));
-        log<NUClear::DEBUG>("Vision walk command: (vBTt.x(),vBTt.x(),omegaTTt): (",
-                            vBTt.x(),
-                            ",",
-                            vBTt.y(),
-                            ",",
-                            omegaTTt,
-                            ")");
+        // log<NUClear::DEBUG>("Vision walk command: (vBTt.x(),vBTt.x(),omegaTTt): (",
+        //                     vBTt.x(),
+        //                     ",",
+        //                     vBTt.y(),
+        //                     ",",
+        //                     omegaTTt,
+        //                     ")");
 
         std::unique_ptr<WalkCommand> command =
             std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(vBTt.x(), vBTt.y(), omegaTTt));
