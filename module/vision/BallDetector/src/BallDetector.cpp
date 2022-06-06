@@ -164,8 +164,7 @@ namespace module::vision {
 
                     // Attach the measurement to the object (distance from camera to ball)
                     b.measurements.emplace_back();  // Emplaces default constructed object
-                    // Vector from camera to ball in camera coordinates
-                    b.measurements.back().rBCc = b.cone.axis * distance;
+
                     // Spherical Reciprocal Coordinates (1/distance, phi, theta)
                     b.measurements.back().srBCc      = cartesianToReciprocalSpherical(b.cone.axis * distance);
                     b.measurements.back().covariance = config.ball_angular_cov.asDiagonal();
