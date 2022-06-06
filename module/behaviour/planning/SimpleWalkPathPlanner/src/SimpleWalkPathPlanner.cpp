@@ -55,6 +55,7 @@ namespace module::behaviour::planning {
     using utility::behaviour::RegisterAction;
     using utility::input::LimbID;
     using utility::input::ServoID;
+    using utility::math::coordinates::reciprocalSphericalToCartesian;
     using utility::math::coordinates::sphericalToCartesian;
 
     SimpleWalkPathPlanner::SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment)
@@ -114,7 +115,7 @@ namespace module::behaviour::planning {
             if (balls.balls.size() > 0) {
                 // Get the latest vision ball measurement in camera space
                 Eigen::Vector3f rBCc =
-                    Eigen::Vector3f(sphericalToCartesian(balls.balls[0].measurements[0].srBCc.cast<float>()));
+                    reciprocalSphericalToCartesian(balls.balls[0].measurements[0].srBCc.cast<float>());
                 // Transform the vision ball measurement into torso space
                 Eigen::Affine3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
                 rBTt = Htc * rBCc;
@@ -171,21 +172,22 @@ namespace module::behaviour::planning {
 
     void SimpleWalkPathPlanner::vision_walk_path() {
         // Obtain the unit vector to ball in torso space and scale by cfg.forward_speed
-        Eigen::Vector3f vBTt = cfg.forward_speed * (rBTt / rBTt.norm());
+        Eigen::Vector3f walk_command = cfg.forward_speed * (rBTt / rBTt.norm());
 
-        // Set angular velocity to be just the angular displacement to ball, then saturate with value cfg.max_turn_speed
-        float omegaTTt = std::atan2(vBTt.y(), vBTt.x());
-        omegaTTt       = std::min(cfg.max_turn_speed, std::max(omegaTTt, cfg.min_turn_speed));
-        log<NUClear::DEBUG>("Vision walk command: (vBTt.x(),vBTt.x(),omegaTTt): (",
-                            vBTt.x(),
+        // Overide the z component of walk_command with angular velocity, which is just the angular displacement to
+        // ball, saturated with value cfg.max_turn_speed float
+        walk_command.z() = std::atan2(walk_command.y(), walk_command.x());
+        walk_command.z() = std::min(cfg.max_turn_speed, std::max(walk_command.z(), cfg.min_turn_speed));
+        log<NUClear::DEBUG>("Walk command: (walk_command.x(),walk_command.x(),omegaTTt): (",
+                            walk_command.x(),
                             ",",
-                            vBTt.y(),
+                            walk_command.y(),
                             ",",
-                            omegaTTt,
+                            walk_command.z(),
                             ")");
 
         std::unique_ptr<WalkCommand> command =
-            std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(vBTt.x(), vBTt.y(), omegaTTt));
+            std::make_unique<WalkCommand>(subsumptionId, walk_command.cast<double>());
         emit(std::move(command));
         emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
     }
