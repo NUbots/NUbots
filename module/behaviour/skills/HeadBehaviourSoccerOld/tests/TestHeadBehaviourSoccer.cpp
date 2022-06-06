@@ -16,24 +16,6 @@
  *
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
-syntax = "proto3";
 
-package message.motion;
-
-/**
- * Tell the head where to look in world space.
- * This command is interpreted such that the robot will use IMU data to fixate
- * at these angles in the world even when rotating.
- *
- * @author Jade Fountain
- */
-message HeadCommand {
-    /// Target head yaw in radians
-    float yaw = 1;
-    /// Target head pitch in radians
-    float pitch = 2;
-    /// If true, the yaw and pitch are interpreted in robot space, instead of IMU space
-    bool robot_space = 3;
-    /// If true, smooth the goal angle using expoential smoothing
-    bool smooth = 4;
-}
+#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+#include <catch.hpp>

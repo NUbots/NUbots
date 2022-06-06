@@ -2,11 +2,11 @@ log_level: WARN
 
 #Servo controller parameters
 head_motors:
-  gain: 30.0
+  gain: 10.0
   torque: 100.0
 #Initial head position; arbitrary and useful for controlling the head when no headbehavior is installed
 initial:
   yaw: 0
   pitch: 0
-#Gain for controller to reduce look judder and oscillation
-p_gain: 0.1
+# Smoothing factor for goal angle to reduce look judder and oscillation, https://en.wikipedia.org/wiki/Exponential_smoothing
+smoothing_factor: 0.01
