@@ -70,6 +70,17 @@ namespace utility::math::coordinates {
         return {U(1) / sphericalCoordinates.x(), sphericalCoordinates.y(), sphericalCoordinates.z()};
     }
 
+    template <typename T, typename U = typename T::Scalar>
+    [[nodiscard]] inline Eigen::Matrix<U, 3, 1> reciprocalSphericalToCartesian(
+        const Eigen::MatrixBase<T>& reciprocalSphericalCoordinates) {
+        Eigen::Matrix<U, 3, 1> sphericalCoordinates;
+        sphericalCoordinates.x()                          = U(1) / reciprocalSphericalCoordinates.x();
+        sphericalCoordinates.y()                          = reciprocalSphericalCoordinates.y();
+        sphericalCoordinates.z()                          = reciprocalSphericalCoordinates.z();
+        const Eigen::Matrix<U, 3, 1> cartesianCoordinates = sphericalToCartesian(sphericalCoordinates);
+        return cartesianCoordinates;
+    }
+
 }  // namespace utility::math::coordinates
 
 

@@ -60,7 +60,7 @@ namespace module::motion {
         , max_pitch(0.0)
         , head_motor_gain(0.0)
         , head_motor_torque(0.0)
-        , p_gain(0.0)
+        , smoothing_factor(0.0)
         , currentAngles(Eigen::Vector2f::Zero())
         , goalAngles(Eigen::Vector2f::Zero()) {
 
@@ -76,76 +76,64 @@ namespace module::motion {
                 emit(std::make_unique<HeadCommand>(
                     HeadCommand{config["initial"]["yaw"].as<float>(), config["initial"]["pitch"].as<float>(), false}));
 
-                p_gain = config["p_gain"].as<float>();
+                smoothing_factor = config["smoothing_factor"].as<float>();
             });
 
         on<Trigger<HeadCommand>>().then("Head Controller - Register Head Command", [this](const HeadCommand& command) {
-            goalRobotSpace = command.robot_space;
-            if (goalRobotSpace) {
-                goalAngles = {utility::math::clamp(float(min_yaw), command.yaw, float(max_yaw)),
-                              utility::math::clamp(float(min_pitch), command.pitch, float(max_pitch))};
+            goalAngles = {command.yaw, command.pitch};
+            // If switching from non-smoothed to smoothed angle command, reset the initial goal angle to help locking on
+            // to the target
+            if (smooth == false && command.smooth == true) {
+                currentAngles = goalAngles;
             }
-            else {
-                goalAngles = {utility::math::clamp(float(min_yaw), command.yaw, float(max_yaw)),
-                              -utility::math::clamp(float(min_pitch), command.pitch, float(max_pitch))};
-            }
+            smooth = command.smooth;
         });
 
         updateHandle = on<Trigger<Sensors>, With<KinematicsModel>, Single, Priority::HIGH>().then(
             "Head Controller - Update Head Position",
             [this](const Sensors& sensors, const KinematicsModel& kinematicsModel) {
                 emit(graph("HeadController Goal Angles", goalAngles.x(), goalAngles.y()));
-                // P controller
-                currentAngles = p_gain * goalAngles + (1 - p_gain) * currentAngles;
+
+                // If smoothing requested, smooth goal angles with exponential filter
+                currentAngles =
+                    smooth ? (smoothing_factor * goalAngles + (1 - smoothing_factor) * currentAngles) : goalAngles;
 
                 // Get goal vector from angles
-                // Pitch is positive when the robot is looking down by Right hand rule, so negate the pitch
-                // The goal angles are for the neck directly, so we have to offset the camera declination again
                 Eigen::Vector3f goalHeadUnitVector_world =
                     sphericalToCartesian(Eigen::Vector3f(1, currentAngles.x(), currentAngles.y()));
-                // Convert to robot space
+                // Convert to robot space if requested angle is in world space
                 Eigen::Vector3f headUnitVector =
                     goalRobotSpace ? goalHeadUnitVector_world
                                    : Eigen::Affine3d(sensors.Htw).rotation().cast<float>() * goalHeadUnitVector_world;
-                // Compute inverse kinematics for head
-                //!!!!!!!!!!!!!!
-                //!!!!!!!!!!!!!!
-                //!!!!!!!!!!!!!!
-                //!!!!!!!!!!!!!!
-                // TODO(MotionTeam): :::MAKE THIS NOT FAIL FOR ANGLES OVER 90deg
-                //!!!!!!!!!!!!!!
-                //!!!!!!!!!!!!!!
-                //!!!!!!!!!!!!!!
-                //!!!!!!!!!!!!!!
-                //!!!!!!!!!!!!!!
-                std::vector<std::pair<ServoID, float>> goalAnglesList = calculateHeadJoints(headUnitVector);
-                // Eigen::Vector2f goalAngles = cartesianToSpherical(headUnitVector).tail<2>();
 
-                // head limits
+
+                // Compute inverse kinematics for head
+                // TODO(MotionTeam): MAKE THIS NOT FAIL FOR ANGLES OVER 90deg
+                std::vector<std::pair<ServoID, float>> goalAnglesList = calculateHeadJoints(headUnitVector);
+
+                // Clamp head angles
                 max_yaw   = kinematicsModel.head.MAX_YAW;
                 min_yaw   = kinematicsModel.head.MIN_YAW;
                 max_pitch = kinematicsModel.head.MAX_PITCH;
                 min_pitch = kinematicsModel.head.MIN_PITCH;
 
-                // Clamp head angles
+                // Store commands for logging
                 float pitch = 0;
                 float yaw   = 0;
                 for (auto& angle : goalAnglesList) {
                     if (angle.first == ServoID::HEAD_PITCH) {
-                        angle.second = std::fmin(std::fmax(angle.second, min_pitch), max_pitch);
+                        angle.second = utility::math::clamp(min_pitch, angle.second, max_pitch);
                         pitch        = angle.second;
                     }
                     else if (angle.first == ServoID::HEAD_YAW) {
-                        angle.second = std::fmin(std::fmax(angle.second, min_yaw), max_yaw);
+                        angle.second = utility::math::clamp(min_yaw, angle.second, max_yaw);
                         yaw          = angle.second;
                     }
                 }
 
-                emit(graph("HeadController Final Angles", yaw, -pitch));
-                // log("HeadController Final Angles", yaw, -pitch);
+                emit(graph("HeadController Final Angles", yaw, pitch));
 
-
-                // Create message
+                // Create servo command message
                 auto waypoints = std::make_unique<ServoCommands>();
                 waypoints->commands.reserve(2);
                 auto t = NUClear::clock::now();
