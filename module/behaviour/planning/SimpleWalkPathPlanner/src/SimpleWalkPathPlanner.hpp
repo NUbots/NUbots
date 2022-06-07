@@ -52,6 +52,7 @@ namespace module::behaviour::planning {
      */
     class SimpleWalkPathPlanner : public NUClear::Reactor {
     private:
+        /// @brief Stores configuration values
         struct Config {
             Config()                     = default;
             float forward_speed          = 0;
@@ -66,8 +67,10 @@ namespace module::behaviour::planning {
             float walk_to_ready_rotation = 0;
         } cfg;
 
-        // Stores the latest
+        /// @brief Stores the latest MotionCommand
         message::behaviour::MotionCommand latest_command;
+
+        /// @brief Stores the servo access priority
         const size_t subsumptionId;
 
         /// @brief Stores the position of the last ball seen
