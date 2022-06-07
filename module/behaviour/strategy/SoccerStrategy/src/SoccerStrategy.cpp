@@ -226,9 +226,9 @@ namespace module::behaviour::strategy {
                         }
                     }
 
-                    // Update previous state
-                    Behaviour::State previousState = currentState;
+                    // Update current behaviour state if it has changed
                     if (currentState != previousState) {
+                        previousState = currentState;
                         emit(std::make_unique<Behaviour::State>(currentState));
                     }
                 }
