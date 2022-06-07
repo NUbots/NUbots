@@ -73,7 +73,7 @@ namespace module::vision {
                 std::vector<int> indices(horizon.mesh->indices.size());
                 std::iota(indices.begin(), indices.end(), 0);
 
-                // Partition the indices such that the ball points that dont have ball surrounding them are removed,
+                // Partition the indices such that the ball points that have ball points surrounding them are removed,
                 // and then resize the vector to remove those points
                 auto boundary = utility::vision::visualmesh::partition_points(
                     indices.begin(),
@@ -129,10 +129,10 @@ namespace module::vision {
                     return;
                 }
 
-                // Reserve the memory prematurely for efficiency
+                // Reserve the memory in advance for efficiency
                 balls->balls.reserve(clusters.size());
 
-                balls->id        = horizon.id;         // subsumption id
+                balls->id        = horizon.id;         // camera id
                 balls->timestamp = horizon.timestamp;  // time when the image was taken
                 balls->Hcw       = horizon.Hcw;        // world to camera transform at the time the image was taken
 
@@ -142,7 +142,7 @@ namespace module::vision {
 
                     // Average the cluster to get the cones axis
                     Eigen::Vector3f axis = Eigen::Vector3f::Zero();
-                    // Add up all the unit vectors of each point (camera to point in world space) in the cluster
+                    // Add up all the unit vectors of each point (camera to point in world space) in the cluster to find an average vector, which represents the central cone axis
                     for (const auto& idx : cluster) {
                         axis += rays.col(idx);
                     }
@@ -160,7 +160,7 @@ namespace module::vision {
 
                     // Set cone information for the ball
                     // The rays are in world space, multiply by Rcw to get the axis in camera space
-                    b.cone.axis = horizon.Hcw.topLeftCorner<3, 3>().cast<float>()
+                    b.cone.axis = Eigen::Affine3d(horizon.Hcw).cast<float>().rotation()
                                   * axis;    // Hcw is not an affine transform type (cannot use linear())
                     b.cone.radius = radius;  // arccos(radius) is the angle between the furthest vectors
 
@@ -168,12 +168,12 @@ namespace module::vision {
                     // From the link, the formula with arcsin is used since a ball is a spherical object
                     // The variables are:
                     //      delta: arccos(radius)
-                    //      d_act: field.ball_radius
+                    //      d_act: 2 * field.ball_radius
                     //      D: distance
                     // Rearranging the equation gives
-                    //      distance = field.ball_radius / (2 * sin(arccos(radius)/2))
+                    //      distance = (2 * field.ball_radius) / (2 * sin(arccos(radius)/2))
                     // Using sin(arccos(x)) = sqrt(1 - x^2)
-                    //      distance = field.ball_radius / ( 2 * sqrt( 1 - (radius/2)^2 ) )
+                    //      distance = field.ball_radius / sqrt(1 - (radius/2)^2
                     // !!
                     float distance = field.ball_radius / std::sqrt(1.0f - radius * radius);
 
