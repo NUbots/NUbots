@@ -131,7 +131,8 @@ namespace module::behaviour::planning {
         // this will be something we change in future
         on<Every<30, Per<std::chrono::seconds>>, With<WantsToKick>, Sync<SimpleWalkPathPlanner>>().then(
             [this](const WantsToKick& wants_to) {
-                // If the robot wants to kick, stop path planning and walking
+                //  Stop the walk engine and path planner if the KickPlanner module emits a WantsToKick message saying
+                //  it is executing a kick
                 if (wants_to.kick) {
                     emit(std::make_unique<StopCommand>(subsumptionId));
                     return;
