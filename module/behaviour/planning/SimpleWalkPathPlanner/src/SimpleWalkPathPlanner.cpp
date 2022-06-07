@@ -35,6 +35,7 @@
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/localisation/transform.hpp"
+#include "utility/math/comparison.hpp"
 #include "utility/math/coordinates.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 
@@ -57,6 +58,7 @@ namespace module::behaviour::planning {
     using utility::input::ServoID;
     using utility::math::coordinates::reciprocalSphericalToCartesian;
     using utility::math::coordinates::sphericalToCartesian;
+
 
     SimpleWalkPathPlanner::SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
@@ -172,13 +174,13 @@ namespace module::behaviour::planning {
 
     void SimpleWalkPathPlanner::vision_walk_path() {
         // Obtain the unit vector to ball in torso space and scale by cfg.forward_speed
-        Eigen::Vector3f walk_command = cfg.forward_speed * (rBTt / rBTt.norm());
+        Eigen::Vector3f walk_command = cfg.forward_speed * (rBTt.normalized());
 
         // Overide the z component of walk_command with angular velocity, which is just the angular displacement to
         // ball, saturated with value cfg.max_turn_speed float
         walk_command.z() = std::atan2(walk_command.y(), walk_command.x());
-        walk_command.z() = std::min(cfg.max_turn_speed, std::max(walk_command.z(), cfg.min_turn_speed));
-        log<NUClear::DEBUG>("Walk command: (walk_command.x(),walk_command.x(),omegaTTt): (",
+        walk_command.z() = utility::math::clamp(cfg.min_turn_speed, walk_command.z(), cfg.max_turn_speed);
+        log<NUClear::DEBUG>("walk_command.x(),walk_command.x(),walk_command.z()): (",
                             walk_command.x(),
                             ",",
                             walk_command.y(),
