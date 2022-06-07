@@ -40,10 +40,8 @@ namespace module::behaviour::planning {
 
     // using namespace message;
 
-    using message::behaviour::KickPlan;
     using message::behaviour::MotionCommand;
-    using message::behaviour::WantsToKick;
-    using message::input::Sensors;
+
 
     /**
      *

@@ -45,6 +45,7 @@ namespace module::behaviour::planning {
 
     using message::behaviour::MotionCommand;
     using message::behaviour::WantsToKick;
+    using message::input::Sensors;
     using message::motion::DisableWalkEngineCommand;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::StopCommand;
