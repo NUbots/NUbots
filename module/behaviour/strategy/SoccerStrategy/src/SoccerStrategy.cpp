@@ -124,7 +124,6 @@ namespace module::behaviour::strategy {
             cfg.walk_to_ready_time = config["walk_to_ready_time"].as<int>();
         });
 
-        // TODO(BehaviourTeam): unhack
         on<Trigger<Field>, With<FieldDescription>>().then(
             [this](const Field& field, const FieldDescription& field_description) {
                 Eigen::Vector2d kick_target = get_kick_plan(field, field_description);
@@ -204,21 +203,23 @@ namespace module::behaviour::strategy {
                         currentState = Behaviour::State::PICKED_UP;
                     }
                     else {
-                        // Overide SoccerStrategy and force normal playing behaviour
+                        // Overide SoccerStrategy and force normal mode in playing phase
                         if (cfg.force_playing) {
                             normal_playing();
                         }
+                        // Overide SoccerStrategy and force penalty mode in playing phase
+                        else if (cfg.force_penalty_shootout) {
+                            team_kicking_off = GameEvents::Context::TEAM;
+                            penalty_shootout_playing(field, ball);
+                        }
                         else {
                             // Switch gamemode statemachine based on GameController state
-                            auto mode =
-                                cfg.force_penalty_shootout ? GameMode::PENALTY_SHOOTOUT : game_state.data.mode.value;
+                            auto mode = game_state.data.mode.value;
                             switch (mode) {
                                 case GameMode::PENALTY_SHOOTOUT:
                                     penalty_shootout(phase, field_description, field, ball);
                                     break;
-                                // We handle NORMAL and OVERTIME the same at the moment because we don't have any
-                                // special behaviour for overtime.
-                                case GameMode::NORMAL:
+                                case GameMode::NORMAL: normal(game_state, phase); break;
                                 case GameMode::OVERTIME: normal(game_state, phase); break;
                                 default: log<NUClear::WARN>("Game mode unknown.");
                             }
@@ -386,7 +387,7 @@ namespace module::behaviour::strategy {
                 currentState = Behaviour::State::WALK_TO_BALL;
             }
             else {
-                // ball has not been seen recently,
+                // Ball has not been seen recently, request walk planner to rotate on the spot
                 currentState = Behaviour::State::SEARCH_FOR_BALL;
                 emit(std::make_unique<MotionCommand>(utility::behaviour::RotateOnSpot()));
             }

@@ -76,7 +76,8 @@ namespace module::behaviour::strategy {
         NUClear::clock::time_point started_walking_to_ready_at;
         message::input::GameEvents::Context team_kicking_off = message::input::GameEvents::Context::UNKNOWN;
         message::behaviour::KickPlan::KickType kick_type{};
-        message::behaviour::Behaviour::State currentState = message::behaviour::Behaviour::State::INIT;
+        message::behaviour::Behaviour::State currentState  = message::behaviour::Behaviour::State::INIT;
+        message::behaviour::Behaviour::State previousState = message::behaviour::Behaviour::State::INIT;
 
         NUClear::clock::time_point ball_last_measured =
             NUClear::clock::now() - std::chrono::seconds(6000);  // TODO(BehaviourTeam): unhack
