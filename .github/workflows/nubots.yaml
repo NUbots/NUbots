@@ -3,65 +3,117 @@ name: NUbots CI
 
 # Controls when the action will run.
 on:
-  # Triggers the workflow on push or pull request events but only for the main branch
-  push:
-    branches: [main]
   # Triggers on PRs to any branch
   pull_request:
 
+# Only a single workflow will run at a time.
+concurrency:
+  # A unique key to determine the workflow's group membership.
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # Any workflows already running in the group will be cancelled.
+  cancel-in-progress: true
+
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # Build the docker image
+  # Declare a new job.
+  build_llvm:
+    name: "Build LLVM"
+    # Run the reusable workflow.
+    uses: ./.github/workflows/build_part_of_image.yaml
+
+    # Declare inputs for reusable workflow.
+    with:
+      # Specify which stage in the Dockerfile is being built (i.e. `FROM ... AS ...`)
+      target: llvm
+      # Use the following images as caches from hub.docker.com.
+      cache_from: |
+        type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-llvm
+        type=registry,ref=nubots/nubots:generic
+        type=inline
+    secrets:
+      docker_hub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      docker_hub_password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+  # Declare another job.
+  build_intel_graphics_compiler_and_compute_runtime:
+    name: "Build Intel Graphics Compiler and Compute Runtime"
+    # Run the reusable workflow.
+    uses: ./.github/workflows/build_part_of_image.yaml
+    # Wait for the following jobs to complete.
+    needs: build_llvm
+    # Declare inputs for the reusable workflow.
+    with:
+      target: intel-graphics-compiler-and-compute-runtime
+      # Use the following images as caches from hub.docker.com. Notice how llvm is also listed.
+      cache_from: |
+        type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-llvm
+        type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-intel-graphics-compiler-and-compute-runtime
+        type=registry,ref=nubots/nubots:generic
+        type=inline
+    secrets:
+      docker_hub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      docker_hub_password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+  build_openblas:
+    name: "Build OpenBLAS"
+    uses: ./.github/workflows/build_part_of_image.yaml
+    with:
+      target: openblas
+      cache_from: |
+        type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-openblas
+        type=registry,ref=nubots/nubots:generic
+        type=inline
+    secrets:
+      docker_hub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      docker_hub_password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+  build_other_dependencies:
+    name: "Build Other Dependencies"
+    uses: ./.github/workflows/build_part_of_image.yaml
+    with:
+      target: other-dependencies
+      cache_from: |
+        type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-other-dependencies
+        type=registry,ref=nubots/nubots:generic
+        type=inline
+    secrets:
+      docker_hub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      docker_hub_password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+  # Build the docker image.
   build_docker:
     name: "Build docker image"
+    uses: ./.github/workflows/build_part_of_image.yaml
+    # Wait for previous jobs to finish before building the final image.
+    needs:
+      - build_llvm
+      - build_intel_graphics_compiler_and_compute_runtime
+      - build_openblas
+      - build_other_dependencies
+    with:
+      # Build the final-image stage.
+      target: final-image
+      # Use the following images as caches from hub.docker.com.
+      cache_from: |
+        type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-intel-graphics-compiler-and-compute-runtime
+        type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-llvm
+        type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-openblas
+        type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-other-dependencies
+        type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}-final-image
+        type=registry,ref=nubots/nubots:generic
+        type=inline
+    secrets:
+      docker_hub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      docker_hub_password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-    # The type of runner that the job will run on
+  # Add a no-op so pull request checks pass.
+  # For some reason, pull request checks do not detect the previous job with
+  # the same name, most likely because it calls a reusable workflow.
+  build_docker_image:
+    name: "Build docker image"
     runs-on: ubuntu-20.04
-
-    # We output the image tag that we create so the other jobs can use it
-    outputs:
-      image: ${{ steps.image_output.outputs.image }}
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Cancels previously running jobs for this workflow
-      - name: Cancel Workflow Action
-        uses: styfle/cancel-workflow-action@0.9.1
-
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Checkout Code
-        uses: actions/checkout@v2
-
-      # Setup docker buildx
-      - name: 🐳 Set up docker buildx 🐳
-        uses: docker/setup-buildx-action@v1
-
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-
-      # Build the docker image
-      - name: 🐳 Build the docker image 🐳
-        uses: docker/build-push-action@v2.7.0
-        with:
-          pull: true
-          tags: "nubots/nubots:pull-request-${{ github.event.number }}"
-          file: docker/Dockerfile
-          context: docker
-          build-args: |
-            platform=generic
-            BUILDKIT_INLINE_CACHE=1
-          push: true
-          cache-from: |
-            type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}
-            type=registry,ref=nubots/nubots:generic
-            type=inline
-
-      - id: image_output
-        name: Output the created image
-        run: echo "::set-output name=image::nubots/nubots:pull-request-${{ github.event.number }}"
+      - run: echo 'Already complete step.'
 
   # Build the codebase
   build_nubots:
@@ -69,19 +121,17 @@ jobs:
 
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
+
+    # Wait until the image is built.
     needs: build_docker
 
     # Run on the container we just built
     container:
-      image: "${{ needs.build_docker.outputs.image }}"
+      image: nubots/nubots:pull-request-${{ github.event.number }}-final-image
       options: --user 0:0
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Cancels previously running jobs for this workflow
-      - name: Cancel Workflow Action
-        uses: styfle/cancel-workflow-action@0.9.1
-
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -107,15 +157,11 @@ jobs:
 
     # Run on the container we just built
     container:
-      image: "${{ needs.build_docker.outputs.image }}"
+      image: nubots/nubots:pull-request-${{ github.event.number }}-final-image
       options: --user 0:0
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Cancels previously running jobs for this workflow
-      - name: Cancel Workflow Action
-        uses: styfle/cancel-workflow-action@0.9.1
-
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -132,15 +178,11 @@ jobs:
 
     # Run on the container we just built
     container:
-      image: "${{ needs.build_docker.outputs.image }}"
+      image: nubots/nubots:pull-request-${{ github.event.number }}-final-image
       options: --user 0:0
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Cancels previously running jobs for this workflow
-      - name: Cancel Workflow Action
-        uses: styfle/cancel-workflow-action@0.9.1
-
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -157,15 +199,11 @@ jobs:
 
     # Run on the container we just built
     container:
-      image: "${{ needs.build_docker.outputs.image }}"
+      image: nubots/nubots:pull-request-${{ github.event.number }}-final-image
       options: --user 0:0
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Cancels previously running jobs for this workflow
-      - name: Cancel Workflow Action
-        uses: styfle/cancel-workflow-action@0.9.1
-
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
         uses: actions/checkout@v2
