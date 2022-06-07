@@ -75,7 +75,7 @@ namespace module::behaviour::planning {
         /// @brief Stores the position of the last ball seen
         Eigen::Vector3f rBTt = Eigen::Vector3f(1.0, 0.0, 0.0);
 
-        /// @brief Walk using the latest walk commands request
+        /// @brief Walk using the walk command from a direct motion command.
         void walk_directly();
 
         /// @brief Walk directly towards the ball relative to the robot based on the latest VisionBall ball position
