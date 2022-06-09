@@ -146,8 +146,7 @@ namespace module::vision {
                     for (const auto& idx : cluster) {
                         axis += rays.col(idx);
                     }
-                    axis /= cluster.size();  // can this line be skipped if it's being normalised in the next line?
-                    axis.normalize();
+                    axis.normalize();   // get cone axis as a unit vector
 
                     // Find the ray with the greatest distance from the axis
                     float radius = 1.0f;
