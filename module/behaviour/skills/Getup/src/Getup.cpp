@@ -63,7 +63,7 @@ namespace module::behaviour::skills {
             EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
         });
 
-        on<Last<20, Trigger<RawSensors>>, Single>().then(
+        on<Last<1000, Trigger<RawSensors>>, Single>().then(
             "Getup Fallen Check",
             [this](const std::list<std::shared_ptr<const RawSensors>>& sensors) {
                 Eigen::Vector3d acc_reading = Eigen::Vector3d::Zero();
