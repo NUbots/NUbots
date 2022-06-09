@@ -135,6 +135,9 @@ namespace module::vision {
                 balls->id        = horizon.id;         // camera id
                 balls->timestamp = horizon.timestamp;  // time when the image was taken
                 balls->Hcw       = horizon.Hcw;        // world to camera transform at the time the image was taken
+                
+                // World to camera transform, to be used in for loop below
+                const Eigen::Affine3f Hcw(horizon.Hcw.cast<float>());
 
                 // Check each cluster to see if it's a valid ball
                 for (auto& cluster : clusters) {
@@ -159,7 +162,7 @@ namespace module::vision {
 
                     // Set cone information for the ball
                     // The rays are in world space, multiply by Rcw to get the axis in camera space
-                    b.cone.axis = Eigen::Affine3d(horizon.Hcw).cast<float>().rotation()
+                    b.cone.axis = Hcw.rotation()
                                   * axis;    // Hcw is not an affine transform type (cannot use linear())
                     b.cone.radius = radius;  // arccos(radius) is the angle between the furthest vectors
 
@@ -256,7 +259,6 @@ namespace module::vision {
                     // Point in plane = (0, 0, field.ball_radius)
                     // Line direction = axis
                     // Point on line = camera = Hwc.translation.z() = rCWw.z()
-                    Eigen::Affine3f Hcw(horizon.Hcw.cast<float>());
                     // Since the plane normal zeros out x and y, only consider z
                     // why is this not (ball_radius - rCWw.z()) / axis.z()?
                     const float d = (Hcw.inverse().translation().z() - field.ball_radius) / std::abs(axis.z());
