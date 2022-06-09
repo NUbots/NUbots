@@ -135,7 +135,7 @@ namespace module::vision {
                 balls->id        = horizon.id;         // camera id
                 balls->timestamp = horizon.timestamp;  // time when the image was taken
                 balls->Hcw       = horizon.Hcw;        // world to camera transform at the time the image was taken
-                
+
                 // World to camera transform, to be used in for loop below
                 const Eigen::Affine3f Hcw(horizon.Hcw.cast<float>());
 
@@ -145,11 +145,12 @@ namespace module::vision {
 
                     // Average the cluster to get the cones axis
                     Eigen::Vector3f axis = Eigen::Vector3f::Zero();
-                    // Add up all the unit vectors of each point (camera to point in world space) in the cluster to find an average vector, which represents the central cone axis
+                    // Add up all the unit vectors of each point (camera to point in world space) in the cluster to find
+                    // an average vector, which represents the central cone axis
                     for (const auto& idx : cluster) {
                         axis += rays.col(idx);
                     }
-                    axis.normalize();   // get cone axis as a unit vector
+                    axis.normalize();  // get cone axis as a unit vector
 
                     // Find the ray with the greatest distance from the axis
                     float radius = 1.0f;
@@ -162,8 +163,7 @@ namespace module::vision {
 
                     // Set cone information for the ball
                     // The rays are in world space, multiply by Rcw to get the axis in camera space
-                    b.cone.axis = Hcw.rotation()
-                                  * axis;    // Hcw is not an affine transform type (cannot use linear())
+                    b.cone.axis   = Hcw.rotation() * axis;
                     b.cone.radius = radius;  // arccos(radius) is the angle between the furthest vectors
 
                     // https://en.wikipedia.org/wiki/Angular_diameter
