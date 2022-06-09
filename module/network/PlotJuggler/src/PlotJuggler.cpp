@@ -3,6 +3,8 @@
 #include <cmath>
 #include <string>
 
+#include "json.hpp"
+
 #include "extension/Configuration.hpp"
 
 #include "message/support/nusight/DataPoint.hpp"
@@ -51,54 +53,40 @@ namespace module::network {
             long timestamp_ms        = toMillisecondsSinceEpoch(datapoint.timestamp) - start_time_ms;
             double timestamp_seconds = timestamp_ms * 1e-3;
 
-            // Values to send to PlotJuggler, in JSON format
-            std::string values;
+            nlohmann::json json;
+            json["timestamp"] = timestamp_seconds;
 
             // If there is only one value in the DataPoint, label it with the DataPoint's label without any nesting
             if (datapoint.value.size() == 1) {
-                values = fmt::format("\"{}\": {}", datapoint.label, datapoint.value[0]);
+                json[hostname][datapoint.label] = datapoint.value[0];
             }
             // If there are less than 5 values in the DataPoint, label them x, y, z, w respectively
             // and nest them in an JSON object labelled with the DataPoint's label
             else if (datapoint.value.size() < 5) {
                 std::array<std::string, 4> keys{"x", "y", "z", "w"};
-                std::string nestedValues;
+
+                json[hostname][datapoint.label] = {};
 
                 for (uint i = 0; i < datapoint.value.size(); i++) {
-                    nestedValues += i > 0 ? ",\n" : "";
-                    nestedValues += fmt::format(R"("{}": {})", keys[i], datapoint.value[i]);
+                    json[hostname][datapoint.label][keys[i]] = datapoint.value[i];
                 }
-
-                values = fmt::format(R"("{}": {{ {} }})", datapoint.label, nestedValues);
             }
             // Otherwise (with 5 or more values), label them s0, s1, s2, s3, etc
             // and nest them in an JSON object labelled with the DataPoint's label
             else {
-                std::string nestedValues;
+                json[hostname][datapoint.label] = {};
 
                 for (uint i = 0; i < datapoint.value.size(); i++) {
-                    nestedValues += i > 0 ? "," : "";
-                    nestedValues += fmt::format(R"("s{}": {})", i, datapoint.value[i]);
+                    json[hostname][datapoint.label][fmt::format("s{}", i)] = datapoint.value[i];
                 }
-
-                values = fmt::format(R"("{}": {{ {} }})", datapoint.label, nestedValues);
             }
 
-            // The JSON template, looks like
-            // {
-            //   "timestamp": <timestamp_in_seconds>,
-            //   "robot_hostname": {
-            //      "Data/Point/Label": <some_value>
-            //   }
-            // }
-            std::string json_template = R"({{ "timestamp": {}, "{}": {{ {} }} }})";
-
             // Add the data to the template
-            std::string json = fmt::format(json_template, timestamp_seconds, hostname, values);
-            // log<NUClear::INFO>("Sending JSON packet", json);
+            std::string json_string = json.dump();
+            // log<NUClear::INFO>("Sending JSON packet", json_string);
 
             // Send it off to PlotJuggler
-            auto packet = std::make_unique<std::string>(json);
+            auto packet = std::make_unique<std::string>(json_string);
             emit<Scope::UDP>(packet, send_address, send_port);
         });
 
@@ -108,7 +96,17 @@ namespace module::network {
             double timestamp_seconds = timestamp_ms * 1e-3;
 
             emit(graph("Sensor/Foot Down/Left", std::sin(timestamp_seconds)));
-            emit(graph("Sensor/Foot Down/Right", std::cos(timestamp_seconds)));
+            emit(graph("Sensor/Foot Down/Right",
+                       std::cos(timestamp_seconds),
+                       std::cos(timestamp_seconds),
+                       std::cos(timestamp_seconds),
+                       std::cos(timestamp_seconds)));
+            emit(graph("Sensor/Foot Down/Center",
+                       std::cos(timestamp_seconds),
+                       std::cos(timestamp_seconds),
+                       std::cos(timestamp_seconds),
+                       std::cos(timestamp_seconds),
+                       std::cos(timestamp_seconds)));
         });
     }
 
