@@ -167,14 +167,13 @@ namespace module::vision {
                     // https://en.wikipedia.org/wiki/Angular_diameter
                     // From the link, the formula with arcsin is used since a ball is a spherical object
                     // The variables are:
-                    //      delta: arccos(radius)
+                    //      delta: 2 * arccos(radius)
                     //      d_act: 2 * field.ball_radius
                     //      D: distance
                     // Rearranging the equation gives
-                    //      distance = (2 * field.ball_radius) / (2 * sin(arccos(radius)/2))
+                    //      distance = (field.ball_radius) / (sin(arccos(radius)))
                     // Using sin(arccos(x)) = sqrt(1 - x^2)
-                    //      distance = field.ball_radius / sqrt(1 - (radius/2)^2
-                    // !!
+                    //      distance = field.ball_radius / sqrt(1 - radius^2)
                     float distance = field.ball_radius / std::sqrt(1.0f - radius * radius);
 
                     // Attach the measurement to the object (distance from camera to ball)
