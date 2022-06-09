@@ -189,9 +189,6 @@ namespace module::vision {
 
                     // Angular positions from the camera, doesn't consider depth - x is removed and unit vector is used
                     b.screen_angular = cartesianToSpherical(axis).tail<2>();
-                    // acos(radius) is the angular diameter - ie the radius from the perspective of the camera
-                    // used for both directions since it's a ball
-                    b.angular_size = Eigen::Vector2f::Constant(std::acos(radius));
 
                     /***********************************************
                      *                  THROWOUTS                  *
