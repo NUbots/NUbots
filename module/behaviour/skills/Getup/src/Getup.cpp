@@ -26,8 +26,8 @@
 #include "extension/Script.hpp"
 
 #include "message/behaviour/ServoCommand.hpp"
+#include "message/input/Sensors.hpp"
 #include "message/motion/GetupCommand.hpp"
-#include "message/platform/RawSensors.hpp"
 
 #include "utility/behaviour/Action.hpp"
 #include "utility/input/LimbID.hpp"
@@ -37,9 +37,9 @@ namespace module::behaviour::skills {
     using extension::Configuration;
     using extension::ExecuteScriptByName;
 
+    using message::input::Sensors;
     using message::motion::ExecuteGetup;
     using message::motion::KillGetup;
-    using message::platform::RawSensors;
 
     using utility::behaviour::ActionPriorities;
     using utility::behaviour::RegisterAction;
@@ -63,9 +63,9 @@ namespace module::behaviour::skills {
             EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
         });
 
-        on<Last<1000, Trigger<RawSensors>>, Single>().then(
+        on<Last<250, Trigger<Sensors>>, Single>().then(
             "Getup Fallen Check",
-            [this](const std::list<std::shared_ptr<const RawSensors>>& sensors) {
+            [this](const std::list<std::shared_ptr<const Sensors>>& sensors) {
                 Eigen::Vector3d acc_reading = Eigen::Vector3d::Zero();
 
                 for (const auto& s : sensors) {
