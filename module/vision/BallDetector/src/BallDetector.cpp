@@ -199,12 +199,13 @@ namespace module::vision {
                     // Given a flat X-Y plane that intersects through the middle of the ball, find the point where
                     // the central axis vector (uBCw) intersects with this place. Get the distance from this point.
                     // https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection#Algebraic_form
-                    // Plane normal = (0, 0, 1)
-                    // Point on plane = (0, 0, field.ball_radius) // SHOULD THIS BE (0,0, BALL RADIUS + rWCw)
-                    // Line direction = uBCw
-                    // Point on line = camera = Hwc.translation.z() = rCWw.z() // SHOULD THIS BE (0,0,0)
+                    //      Plane normal: (0, 0, 1)
+                    //      Point on plane: (0, 0, rWCw.z() + field.ball_radius)
+                    //      Line direction: uBCw
+                    //      Point on line: (0, 0, 0)
                     // Since the plane normal zeros out x and y, only consider z
-                    const float d = (Hcw.inverse().translation().z() - field.ball_radius) / std::abs(uBCw.z());
+                    // rWCw = -Hcw.inverse().translation().z()
+                    const float d                   = (field.ball_radius - Hcw.inverse().translation().z()) / uBCw.z();
                     const Eigen::Vector3f srBCc     = uBCw * d;  // used later, so save it in a variable
                     const float projection_distance = srBCc.norm();
                     const float max_distance        = std::max(projection_distance, distance);
