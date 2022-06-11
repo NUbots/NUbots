@@ -62,7 +62,6 @@ namespace module::behaviour::skills {
             // load priorities for the getup
             GETUP_PRIORITY     = config["GETUP_PRIORITY"].as<float>();
             EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
-            log<NUClear::WARN>("CONFIGURED");
         });
 
         on<Last<250, Trigger<Sensors>>, Single>().then(
