@@ -68,7 +68,7 @@ namespace module::behaviour::skills {
 
             LimbID leg = kickCommand.leg;
 
-            // Check if command has a valid LimbID
+            // Check if kick command has a valid LimbID
             if (leg == LimbID::UNKNOWN) {
                 log<NUClear::WARN>("Kick command LimbID is unknown");
                 return;
@@ -91,9 +91,9 @@ namespace module::behaviour::skills {
                         std::vector<std::string>({"Stand.yaml", "KickLeft.yaml", "Stand.yaml"})));
                 }
             }
-            // The kick command does not have a valid command type
+            // The kick command does not have a valid kick type
             else {
-                log<NUClear::WARN>("Kick command type is unknown");
+                log<NUClear::WARN>("Kick command KickCommandType is unknown");
                 return;
             }
 
