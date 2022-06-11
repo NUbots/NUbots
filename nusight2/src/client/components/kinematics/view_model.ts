@@ -57,8 +57,8 @@ export class KinematicsViewModel {
       newModel = NUgusViewModel.of(KinematicsRobotModel.of(this.model.robots[0]))
     }
     const newRobot = newModel.robot
-    for (let joint of Object.keys(this.model.enabledJoints)) {
-      let object = newRobot.getObjectByName(`${joint}_kinematics`)
+    for (const joint of Object.keys(this.model.enabledJoints)) {
+      const object = newRobot.getObjectByName(`${joint}_kinematics`)
       if (this.model.enabledJoints[joint]) {
         if (!object) newRobot.getObjectByName(joint)?.add(this.jointLines(joint))
       } else {
