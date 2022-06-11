@@ -235,7 +235,7 @@ namespace module::behaviour::skills {
                           if (ballMaxPriority) {
                               for (auto& ob : ballFixationObjects.balls) {
                                   currentCentroid +=
-                                      (ob.screen_angular.cast<double>() / double(ballFixationObjects.balls.size()));
+                                      (ob.screen_angular_BCw.cast<double>() / double(ballFixationObjects.balls.size()));
                               }
                           }
                           else {
@@ -404,7 +404,7 @@ namespace module::behaviour::skills {
 
         for (const auto& ball : fixationObjects.balls) {
             // Should be vec2 (yaw,pitch)
-            fixationPoints.emplace_back(ball.screen_angular.x(), ball.screen_angular.y());
+            fixationPoints.emplace_back(ball.screen_angular_BCw.x(), ball.screen_angular_BCw.y());
             fixationSizes.emplace_back(ball.angular_size.x(), ball.angular_size.y());
         }
 
@@ -631,7 +631,7 @@ namespace module::behaviour::skills {
         }
         Quad<double, 2, 1> q = getScreenAngularBoundingBox(ob);
         Ball v               = ob.balls.at(0);
-        v.screen_angular     = q.getCentre().cast<float>();
+        v.screen_angular_BCw = q.getCentre().cast<float>();
         v.angular_size       = q.getSize().cast<float>();
         return v;
     }
@@ -639,8 +639,8 @@ namespace module::behaviour::skills {
     Quad<double, 2, 1> HeadBehaviourSoccer::getScreenAngularBoundingBox(const Balls& ob) {
         std::vector<Eigen::Vector2d> boundingPoints;
         for (const auto& ball : ob.balls) {
-            boundingPoints.emplace_back((ball.screen_angular + ball.angular_size * 0.5).cast<double>());
-            boundingPoints.emplace_back((ball.screen_angular - ball.angular_size * 0.5).cast<double>());
+            boundingPoints.emplace_back((ball.screen_angular_BCw + ball.angular_size * 0.5).cast<double>());
+            boundingPoints.emplace_back((ball.screen_angular_BCw - ball.angular_size * 0.5).cast<double>());
         }
         return Quad<double, 2, 1>::getBoundingBox(boundingPoints);
     }
