@@ -78,7 +78,8 @@ namespace module::behaviour::skills {
             if (kickCommand.type == KickCommandType::PENALTY) {
                 emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"KickPenalty.yaml"})));
             }
-            else {
+            // Execute the penalty kick if the type is PENALTY
+            else if (kickCommand.type == KickCommandType::NORMAL) {
                 if (leg == LimbID::RIGHT_LEG) {
                     emit(std::make_unique<ExecuteScriptByName>(
                         id,
@@ -89,6 +90,11 @@ namespace module::behaviour::skills {
                         id,
                         std::vector<std::string>({"Stand.yaml", "KickLeft.yaml", "Stand.yaml"})));
                 }
+            }
+            // The kick command does not have a valid command type
+            else {
+                log<NUClear::WARN>("Kick command type is unknown");
+                return;
             }
 
             updatePriority(EXECUTION_PRIORITY);
