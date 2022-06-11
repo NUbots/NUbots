@@ -152,12 +152,14 @@ namespace module::vision {
                     }
                     axis.normalize();  // get cone axis as a unit vector
 
-                    // Find the ray with the greatest distance from the axis
+                    // Find the ray with the greatest distance from the central axis to then determine the largest
+                    // radius possible from the edge points available. The radius is the upper bound on the ball radius,
+                    // ADD IN HERE WHAT RADIUS ACTUALLY MEANS
+                    // arccos(radius) is the angle between the central axis and the edge of the ball.
                     float radius = 1.0f;
                     for (const auto& idx : cluster) {
                         const Eigen::Vector3f& ray(rays.col(idx));
-                        // arccos of the dot product gives the angle between the rays
-                        // the smaller arccos is, the bigger the angle - if between 0 and pi
+                        // Choose this ray if it's further than previously seen rays, to get the largest ray
                         radius = axis.dot(ray) < radius ? axis.dot(ray) : radius;
                     }
 
