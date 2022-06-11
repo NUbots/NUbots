@@ -323,9 +323,8 @@ namespace module::vision {
     }
 }  // namespace module::vision
 
-
-// Can we delete the below code?
 /*****************************************************************************
+ * TODO(VisionTeam) BallDetector improvements issue is on GitHub
  * Cone fitting ... kind of broken
                     // Get axis unit vector from 3 unit vectors
                     auto cone_from_points = [&](const int& a, const int& b, const int& c) {
