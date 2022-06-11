@@ -64,33 +64,22 @@ namespace module::behaviour::skills {
             EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
         });
 
-        on<Last<250, Trigger<Sensors>>, Single>().then(
-            "Getup Fallen Check",
-            [this](const std::list<std::shared_ptr<const Sensors>>& sensors) {
-                // Transform to torso {t} from world {w} space
-                Eigen::Affine3d Hwt;
-                // Basis Z vector of torso {t} in world {w} space
-                Eigen::Vector3d uZTw = Eigen::Vector3d::Zero();
-                // Basis X vector of torso {t} in world {w} space
-                Eigen::Vector3d uXTw = Eigen::Vector3d::Zero();
+        on<Trigger<Sensors>>().then("Getup Fallen Check", [this](const Sensors& sensors) {
+            // Transform to torso {t} from world {w} space
+            Eigen::Matrix4d Hwt = sensors.Htw.inverse();
+            // Basis Z vector of torso {t} in world {w} space
+            Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
+            // Basis X vector of torso {t} in world {w} space
+            Eigen::Vector3d uXTw = Hwt.block(0, 0, 3, 1);
 
-                // Average of the last 250 sensors measurments
-                for (const auto& s : sensors) {
-                    Hwt = s->Htw.inverse().matrix().cast<double>();
-                    uZTw += Hwt.rotation().block(0, 2, 3, 1);
-                    uXTw += Hwt.rotation().block(0, 0, 3, 1);
-                }
-                uZTw = uZTw.normalized();
-                uXTw = uXTw.normalized();
-
-                // Check if angle between torso and world z axis is greater than config value FALLEN_ANGLE
-                if (!gettingUp && std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > FALLEN_ANGLE) {
-                    // If the z component of the torso's x basis in world space is negative, the robot is fallen on
-                    // its front
-                    isFront = (uXTw.z() <= 0);
-                    updatePriority(GETUP_PRIORITY);
-                }
-            });
+            // Check if angle between torso z axis and world z axis is greater than config value FALLEN_ANGLE
+            if (!gettingUp && std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > FALLEN_ANGLE) {
+                // If the z component of the torso's x basis in world space is negative, the robot is fallen on
+                // its front
+                isFront = (uXTw.z() <= 0);
+                updatePriority(GETUP_PRIORITY);
+            }
+        });
 
         on<Trigger<ExecuteGetup>, Single>().then("Execute Getup", [this]() {
             gettingUp = true;
