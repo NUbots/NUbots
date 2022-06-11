@@ -144,29 +144,29 @@ namespace module::vision {
                     Ball b;
 
                     // Average the cluster to get the cones axis
-                    Eigen::Vector3f axis = Eigen::Vector3f::Zero();
+                    Eigen::Vector3f uBCw = Eigen::Vector3f::Zero();
                     // Add up all the unit vectors of each point (camera to point in world space) in the cluster to find
                     // an average vector, which represents the central cone axis
                     for (const auto& idx : cluster) {
-                        axis += rays.col(idx);
+                        uBCw += rays.col(idx);
                     }
-                    axis.normalize();  // get cone axis as a unit vector
+                    uBCw.normalize();  // get cone axis as a unit vector
 
-                    // Find the ray with the greatest distance from the central axis to then determine the largest
-                    // radius possible from the edge points available. The radius is the upper bound on the ball radius,
-                    // ADD IN HERE WHAT RADIUS ACTUALLY MEANS
-                    // arccos(radius) is the angle between the central axis and the edge of the ball.
+                    // Find the ray with the greatest distance from the central axis (uBCw) to then determine the
+                    // largest radius possible from the edge points available. The radius is the upper bound on the ball
+                    // radius, ADD IN HERE WHAT RADIUS ACTUALLY MEANS arccos(radius) is the angle between the central
+                    // axis (uBCw) and the edge of the ball.
                     float radius = 1.0f;
                     for (const auto& idx : cluster) {
                         const Eigen::Vector3f& ray(rays.col(idx));
                         // Choose this ray if it's further than previously seen rays, to get the largest ray
-                        radius = axis.dot(ray) < radius ? axis.dot(ray) : radius;
+                        radius = uBCw.dot(ray) < radius ? uBCw.dot(ray) : radius;
                     }
 
                     // Set cone information for the ball
-                    // The rays are in world space, multiply by Rcw to get the axis in camera space
-                    b.cone.axis   = Hcw.rotation() * axis;
-                    b.cone.radius = radius;  // arccos(radius) is the angle between the furthest vectors
+                    // The rays are in world space, multiply by Rcw to get the central axis in camera space
+                    b.uBCc   = Hcw.rotation() * uBCw;
+                    b.radius = radius;  // arccos(radius) is the angle between the furthest vectors
 
                     // https://en.wikipedia.org/wiki/Angular_diameter
                     // From the link, the formula with arcsin is used since a ball is a spherical object
@@ -183,14 +183,14 @@ namespace module::vision {
                     // Attach the measurement to the object (distance from camera to ball)
                     b.measurements.emplace_back();  // Emplaces default constructed object
 
-                    // b.cone.axis is the unit vector from the camera to the center of the ball in camera space (uBCc)
+                    // b.uBCc is the unit vector from the camera to the center of the ball in camera space (uBCc)
                     // Convert this unit vector into a position vector and then convert it into Spherical Reciprocal
                     // Coordinates (1/distance, phi, theta)
-                    b.measurements.back().srBCc      = cartesianToReciprocalSpherical(b.cone.axis * distance);
+                    b.measurements.back().srBCc      = cartesianToReciprocalSpherical(b.uBCc * distance);
                     b.measurements.back().covariance = config.ball_angular_cov.asDiagonal();
 
                     // Angular positions from the camera, doesn't consider depth - x is removed and unit vector is used
-                    b.screen_angular = cartesianToSpherical(axis).tail<2>();
+                    b.screen_angular = cartesianToSpherical(uBCw).tail<2>();
 
                     /***********************************************
                      *                  THROWOUTS                  *
@@ -206,14 +206,14 @@ namespace module::vision {
 
                     // CALCULATE DEGREE OF FIT - DISCARD IF STANDARD DEVIATION OF ANGLES IS TOO LARGE
                     // Degree of fit defined as the standard deviation of angle between every rays on the
-                    // cluster / and the cone axis. If the standard deviation exceeds a given threshold then
+                    // cluster / and the cone axis (uBCw). If the standard deviation exceeds a given threshold then
                     // it is a bad fit
                     std::vector<float> angles;
                     float mean             = 0.0f;
                     const float max_radius = std::acos(radius);  // largest angle between vectors
                     // Get mean of all the angles in the cluster to then find the standard deviation
                     for (const auto& idx : cluster) {
-                        const float angle = std::acos(axis.dot(rays.col(idx))) / max_radius;
+                        const float angle = std::acos(uBCw.dot(rays.col(idx))) / max_radius;
                         angles.emplace_back(angle);
                         mean += angle;
                     }
@@ -251,17 +251,19 @@ namespace module::vision {
                     }
 
                     // DISCARD IF THE DISAGREEMENT BETWEEN THE ANGULAR AND PROJECTION BASED DISTANCES ARE TOO LARGE
-                    // Intersect cone axis vector with a plane midway through the ball with normal vector (0, 0, 1)
-                    // 1) Do this in world space, not camera space!
+                    // Above, `distance` represents the distance using the angular diameter formula
+                    // Now, try a projection-based distance method that imagines a flat X-Y plane that intersects
+                    // through the middle of the ball. The point where the central axis vector (uBCw) intersects with
+                    // this plane gives a distance to the ball. 1) Do this in world space, not camera space!
                     // https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection#Algebraic_form
                     // Plane normal = (0, 0, 1)
                     // Point in plane = (0, 0, field.ball_radius)
-                    // Line direction = axis
+                    // Line direction = uBCw
                     // Point on line = camera = Hwc.translation.z() = rCWw.z()
                     // Since the plane normal zeros out x and y, only consider z
-                    // why is this not (ball_radius - rCWw.z()) / axis.z()?
-                    const float d = (Hcw.inverse().translation().z() - field.ball_radius) / std::abs(axis.z());
-                    const Eigen::Vector3f srBCc     = axis * d;  // used later, so save it in a variable
+                    // why is this not (ball_radius - rCWw.z()) / uBCw.z()?
+                    const float d = (Hcw.inverse().translation().z() - field.ball_radius) / std::abs(uBCw.z());
+                    const Eigen::Vector3f srBCc     = uBCw * d;  // used later, so save it in a variable
                     const float projection_distance = srBCc.norm();
                     const float max_distance        = std::max(projection_distance, distance);
 
@@ -294,8 +296,8 @@ namespace module::vision {
                     }
 
                     log<NUClear::DEBUG>(fmt::format("Camera {}", balls->id));
-                    log<NUClear::DEBUG>(fmt::format("radius {}", b.cone.radius));
-                    log<NUClear::DEBUG>(fmt::format("Axis {}", b.cone.axis.transpose()));
+                    log<NUClear::DEBUG>(fmt::format("radius {}", b.radius));
+                    log<NUClear::DEBUG>(fmt::format("Axis {}", b.uBCc.transpose()));
                     log<NUClear::DEBUG>(
                         fmt::format("Distance {} - srBCc {}", distance, b.measurements.back().srBCc.transpose()));
                     log<NUClear::DEBUG>(fmt::format("screen_angular {} - angular_size {}",
@@ -375,8 +377,8 @@ namespace module::vision {
                         }
 
                         // The first (only) 3 points left in the cluster are used to form the cone
-                        Eigen::Vector3f axis = cone_from_points(cluster[0], cluster[1], cluster[2]);
-                        double radius        = axis.dot(rays.row(cluster[0]));
+                        Eigen::Vector3f uBCw = cone_from_points(cluster[0], cluster[1], cluster[2]);
+                        double radius        = uBCw.dot(rays.row(cluster[0]));
 
                         /// DO MEASUREMENTS AND THROWOUTS
                     }

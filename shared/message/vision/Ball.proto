@@ -40,10 +40,11 @@ message Ball {
     }
     /// Cone describing the ball from the camera's perspective
     /// See Geometry.proto
-    Cone                 cone         = 1;
-    repeated Measurement measurements = 2;
+    fvec3 uBCc = 1;
+    float radius = 2;
+    repeated Measurement measurements = 3;
     /// Angular positions from the camera
-    fvec2 screen_angular = 3;
+    fvec2 screen_angular = 4;
     /// Colour of the ball for NUsight. Changes depending on the perceived ball location
     fvec4 colour = 5;
 }
