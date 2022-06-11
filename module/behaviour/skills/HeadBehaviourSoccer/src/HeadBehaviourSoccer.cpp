@@ -80,7 +80,7 @@ namespace module::behaviour::skills {
         on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
             if (!balls.balls.empty()) {
                 ballLastMeasured = NUClear::clock::now();
-                rBCc             = reciprocalSphericalToCartesian(balls.balls[0].measurements[0].srBCc.cast<double>());
+                rBCc             = reciprocalSphericalToCartesian(balls.balls[0].srBCc.cast<double>());
             }
         });
 
