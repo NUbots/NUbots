@@ -64,10 +64,13 @@ namespace module::vision {
             "Visual Mesh",
             [this](const GreenHorizon& horizon, const FieldDescription& field) {
                 // Convenience variables
-                const auto& cls                                     = horizon.mesh->classifications;
-                const auto& neighbours                              = horizon.mesh->neighbourhood;
-                const Eigen::Matrix<float, 3, Eigen::Dynamic>& rays = horizon.mesh->rays;
+                const auto& cls        = horizon.mesh->classifications;
+                const auto& neighbours = horizon.mesh->neighbourhood;
+                // Unit vectors from camera to a point in the mesh, in world space
+                const Eigen::Matrix<float, 3, Eigen::Dynamic>& uPCw = horizon.mesh->rays;
                 const int BALL_INDEX                                = horizon.class_map.at("ball");
+
+                // PARTITION INDICES AND CLUSTER
 
                 // Get some indices to partition
                 std::vector<int> indices(horizon.mesh->indices.size());
@@ -111,7 +114,7 @@ namespace module::vision {
                                                                                             clusters.end(),
                                                                                             horizon.horizon.begin(),
                                                                                             horizon.horizon.end(),
-                                                                                            rays,
+                                                                                            uPCw,
                                                                                             false,
                                                                                             true);
                 clusters.resize(std::distance(clusters.begin(), green_boundary));
@@ -139,35 +142,43 @@ namespace module::vision {
                 // World to camera transform, to be used in for loop below
                 const Eigen::Affine3f Hcw(horizon.Hcw.cast<float>());
 
-                // Check each cluster to see if it's a valid ball
+                // CHECK EACH CLUSTER FOR VALID BALL
                 for (auto& cluster : clusters) {
                     Ball b;
+                    b.covariance = config.ball_angular_cov.asDiagonal();
 
-                    // Average the cluster to get the cones axis
-                    Eigen::Vector3f uBCw = Eigen::Vector3f::Zero();
+                    // FIND CENTRAL AXIS OF BALL
                     // Add up all the unit vectors of each point (camera to point in world space) in the cluster to find
                     // an average vector, which represents the central cone axis
+                    // uBCw: unit vector from camera to ball central axis in world space
+                    Eigen::Vector3f uBCw = Eigen::Vector3f::Zero();
                     for (const auto& idx : cluster) {
-                        uBCw += rays.col(idx);
+                        uBCw += uPCw.col(idx);
                     }
                     uBCw.normalize();  // get cone axis as a unit vector
 
-                    // Find the ray with the greatest distance from the central axis (uBCw) to then determine the
+                    // FIND UNIT RADIUS OF BALL
+                    // Find the ray (uPCw) with the greatest distance from the central axis (uBCw) to then determine the
                     // largest radius possible from the edge points available. The radius is the upper bound on the ball
-                    // radius, ADD IN HERE WHAT RADIUS ACTUALLY MEANS arccos(radius) is the angle between the central
-                    // axis (uBCw) and the edge of the ball.
+                    // radius if it were a metre away. arccos(radius) is the angle between the central ball
+                    // axis (uBCw) and the edge of the ball. This helps to find the approximate distance to the ball
                     float radius = 1.0f;
                     for (const auto& idx : cluster) {
-                        const Eigen::Vector3f& ray(rays.col(idx));
-                        // Choose this ray if it's further than previously seen rays, to get the largest ray
-                        radius = uBCw.dot(ray) < radius ? uBCw.dot(ray) : radius;
+                        // Unit vector from the camera to the ball edge, in world space
+                        const Eigen::Vector3f& uECw(uPCw.col(idx));
+                        // Choose this vector if it's further than previously seen vectors, to get the largest angle
+                        radius = uBCw.dot(uECw) < radius ? uBCw.dot(uECw) : radius;
                     }
 
-                    // Set cone information for the ball
-                    // The rays are in world space, multiply by Rcw to get the central axis in camera space
+                    // The vectors are in world space, multiply by Rcw to get the central axis in camera space
                     b.uBCc   = Hcw.rotation() * uBCw;
-                    b.radius = radius;  // arccos(radius) is the angle between the furthest vectors
+                    b.radius = radius;  // arccos(radius) is the angle between the central axis and edge of the ball
 
+                    // CALCULATE DISTANCE TO BALL WITH TWO METHODS
+                    // 1. Angular-based distance
+                    // 2. Projection-based distance
+
+                    // Angular-based distance
                     // https://en.wikipedia.org/wiki/Angular_diameter
                     // From the link, the formula with arcsin is used since a ball is a spherical object
                     // The variables are:
@@ -179,18 +190,25 @@ namespace module::vision {
                     // Using sin(arccos(x)) = sqrt(1 - x^2)
                     //      distance = field.ball_radius / sqrt(1 - radius^2)
                     float distance = field.ball_radius / std::sqrt(1.0f - radius * radius);
-
-                    // Attach the measurement to the object (distance from camera to ball)
-                    b.measurements.emplace_back();  // Emplaces default constructed object
-
-                    // b.uBCc is the unit vector from the camera to the center of the ball in camera space (uBCc)
-                    // Convert this unit vector into a position vector and then convert it into Spherical Reciprocal
+                    // Convert uBCc into a position vector (rBCc) and then convert it into Spherical Reciprocal
                     // Coordinates (1/distance, phi, theta)
-                    b.measurements.back().srBCc      = cartesianToReciprocalSpherical(b.uBCc * distance);
-                    b.measurements.back().covariance = config.ball_angular_cov.asDiagonal();
+                    b.srBCc              = cartesianToReciprocalSpherical(b.uBCc * distance);
+                    b.screen_angular_BCw = cartesianToSpherical(uBCw).tail<2>();  // no depth (x-coordinate)
 
-                    // Angular positions from the camera, doesn't consider depth - x is removed and unit vector is used
-                    b.screen_angular = cartesianToSpherical(uBCw).tail<2>();
+                    // Projection-based distance
+                    // Given a flat X-Y plane that intersects through the middle of the ball, find the point where
+                    // the central axis vector (uBCw) intersects with this place. Get the distance from this point.
+                    // https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection#Algebraic_form
+                    // Plane normal = (0, 0, 1)
+                    // Point on plane = (0, 0, field.ball_radius) // SHOULD THIS BE (0,0, BALL RADIUS + rWCw)
+                    // Line direction = uBCw
+                    // Point on line = camera = Hwc.translation.z() = rCWw.z() // SHOULD THIS BE (0,0,0)
+                    // Since the plane normal zeros out x and y, only consider z
+                    const float d = (Hcw.inverse().translation().z() - field.ball_radius) / std::abs(uBCw.z());
+                    const Eigen::Vector3f srBCc     = uBCw * d;  // used later, so save it in a variable
+                    const float projection_distance = srBCc.norm();
+                    const float max_distance        = std::max(projection_distance, distance);
+
 
                     /***********************************************
                      *                  THROWOUTS                  *
@@ -213,7 +231,7 @@ namespace module::vision {
                     const float max_radius = std::acos(radius);  // largest angle between vectors
                     // Get mean of all the angles in the cluster to then find the standard deviation
                     for (const auto& idx : cluster) {
-                        const float angle = std::acos(uBCw.dot(rays.col(idx))) / max_radius;
+                        const float angle = std::acos(uBCw.dot(uPCw.col(idx))) / max_radius;
                         angles.emplace_back(angle);
                         mean += angle;
                     }
@@ -250,23 +268,6 @@ namespace module::vision {
                         keep     = false;
                     }
 
-                    // DISCARD IF THE DISAGREEMENT BETWEEN THE ANGULAR AND PROJECTION BASED DISTANCES ARE TOO LARGE
-                    // Above, `distance` represents the distance using the angular diameter formula
-                    // Now, try a projection-based distance method that imagines a flat X-Y plane that intersects
-                    // through the middle of the ball. The point where the central axis vector (uBCw) intersects with
-                    // this plane gives a distance to the ball. 1) Do this in world space, not camera space!
-                    // https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection#Algebraic_form
-                    // Plane normal = (0, 0, 1)
-                    // Point in plane = (0, 0, field.ball_radius)
-                    // Line direction = uBCw
-                    // Point on line = camera = Hwc.translation.z() = rCWw.z()
-                    // Since the plane normal zeros out x and y, only consider z
-                    // why is this not (ball_radius - rCWw.z()) / uBCw.z()?
-                    const float d = (Hcw.inverse().translation().z() - field.ball_radius) / std::abs(uBCw.z());
-                    const Eigen::Vector3f srBCc     = uBCw * d;  // used later, so save it in a variable
-                    const float projection_distance = srBCc.norm();
-                    const float max_distance        = std::max(projection_distance, distance);
-
                     // Discard this ball if projection_distance and distance are too far apart
                     if ((std::abs(projection_distance - distance) / max_distance) > config.distance_disagreement) {
 
@@ -298,20 +299,15 @@ namespace module::vision {
                     log<NUClear::DEBUG>(fmt::format("Camera {}", balls->id));
                     log<NUClear::DEBUG>(fmt::format("radius {}", b.radius));
                     log<NUClear::DEBUG>(fmt::format("Axis {}", b.uBCc.transpose()));
-                    log<NUClear::DEBUG>(
-                        fmt::format("Distance {} - srBCc {}", distance, b.measurements.back().srBCc.transpose()));
+                    log<NUClear::DEBUG>(fmt::format("Distance {} - srBCc {}", distance, b.srBCc.transpose()));
                     log<NUClear::DEBUG>(fmt::format("screen_angular {} - angular_size {}",
-                                                    b.screen_angular.transpose(),
+                                                    b.screen_angular_BCw.transpose(),
                                                     b.angular_size.transpose()));
                     log<NUClear::DEBUG>(fmt::format("Projection Distance {}", projection_distance));
                     log<NUClear::DEBUG>(
                         fmt::format("Distance Throwout {}", std::abs(projection_distance - distance) / max_distance));
                     log<NUClear::DEBUG>("**************************************************");
 
-                    // If this ball didn't pass the checks, don't keep it
-                    if (!keep) {
-                        b.measurements.clear();
-                    }
                     // If the ball passed the checks, add it to the Balls message to be emitted
                     // If it didn't pass the checks, but we're debugging, then emit the ball to see throwouts in NUsight
                     if (keep || log_level <= NUClear::DEBUG) {
@@ -331,9 +327,9 @@ namespace module::vision {
                     // Get axis unit vector from 3 unit vectors
                     auto cone_from_points = [&](const int& a, const int& b, const int& c) {
                         Eigen::Matrix3f A;
-                        A.row(0) = rays.row(a);
-                        A.row(1) = rays.row(b);
-                        A.row(2) = rays.row(c);
+                        A.row(0) = uPCw.row(a);
+                        A.row(1) = uPCw.row(b);
+                        A.row(2) = uPCw.row(c);
                         return A.householderQr().solve(Eigen::Vector3f::Ones()).normalized();
                     };
 
@@ -344,10 +340,10 @@ namespace module::vision {
                     auto point_in_cone = [&](const int& a, const int& b, const int& c, const int& d) {
                         std::array<int, 4> perms = {a, b, c, d};
                         for (int i = 0; i < 4; ++i) {
-                            const Eigen::Vector3f& p0 = rays.row(perms[i]);
-                            const Eigen::Vector3f& p1 = rays.row(perms[(i + 1) % 4]);
-                            const Eigen::Vector3f& p2 = rays.row(perms[(i + 2) % 4]);
-                            const Eigen::Vector3f& p3 = rays.row(perms[(i + 3) % 4]);
+                            const Eigen::Vector3f& p0 = uPCw.row(perms[i]);
+                            const Eigen::Vector3f& p1 = uPCw.row(perms[(i + 1) % 4]);
+                            const Eigen::Vector3f& p2 = uPCw.row(perms[(i + 2) % 4]);
+                            const Eigen::Vector3f& p3 = uPCw.row(perms[(i + 3) % 4]);
                             Eigen::Vector3f x = cone_from_points(perms[i], perms[(i + 1) % 4], perms[(i + 2) % 4]);
 
                             // Cone is valid
@@ -378,7 +374,7 @@ namespace module::vision {
 
                         // The first (only) 3 points left in the cluster are used to form the cone
                         Eigen::Vector3f uBCw = cone_from_points(cluster[0], cluster[1], cluster[2]);
-                        double radius        = uBCw.dot(rays.row(cluster[0]));
+                        double radius        = uBCw.dot(uPCw.row(cluster[0]));
 
                         /// DO MEASUREMENTS AND THROWOUTS
                     }

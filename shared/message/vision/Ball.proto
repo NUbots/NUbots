@@ -23,29 +23,22 @@ package message.vision;
 
 import "google/protobuf/timestamp.proto";
 import "Vector.proto";
-import "message/Geometry.proto";
 import "Matrix.proto";
 
 message Ball {
-    enum MeasurementType {
-        UNKNOWN      = 0;
-        REPROJECTION = 1;
-        WIDTH_BASED  = 2;
-    }
-    message Measurement {
-        MeasurementType type = 1;
-        /// Vector from camera to ball in camera coordinates
-        fvec3 srBCc      = 2;  // Spherical Reciprocal Coordinates (1/distance, phi, theta)
-        fmat3 covariance = 3;
-    }
-    /// Cone describing the ball from the camera's perspective
-    /// See Geometry.proto
+    /// Central axis unit vector of the ball from the camera in camera space
     fvec3 uBCc = 1;
+    // Spherical Reciprocal Coordinates (1/distance, phi, theta)
+    fvec3 srBCc = 2;
+    /// Unit radius of the ball from the camera in world space
+    /// Cosine of the angle from the centre of the ball to the edge of the ball
     float radius = 2;
-    repeated Measurement measurements = 3;
     /// Angular positions from the camera
-    fvec2 screen_angular = 4;
-    /// Colour of the ball for NUsight. Changes depending on the perceived ball location
+    fvec2 screen_angular_BCw = 4;
+    /// Confidence of this measurement, for localisation
+    fmat3 covariance = 3;
+    /// Colour of the ball for NUsight. In debug mode, discarded balls are emitted in different colours depending on
+    /// the reason it was discarded
     fvec4 colour = 5;
 }
 message Balls {
@@ -55,6 +48,6 @@ message Balls {
     google.protobuf.Timestamp timestamp = 2;
     /// Affine3d transform from world space to camera space at the time that the image was taken
     mat4 Hcw = 3;
-
+    /// Could be empty, if there were no balls detected in the image
     repeated Ball balls = 4;
 }
