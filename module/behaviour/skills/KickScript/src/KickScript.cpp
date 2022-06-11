@@ -78,7 +78,7 @@ namespace module::behaviour::skills {
             if (kickCommand.type == KickCommandType::PENALTY) {
                 emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"KickPenalty.yaml"})));
             }
-            // Execute the penalty kick if the type is PENALTY
+            // Execute a normal kick if the type is NORMAL
             else if (kickCommand.type == KickCommandType::NORMAL) {
                 if (leg == LimbID::RIGHT_LEG) {
                     emit(std::make_unique<ExecuteScriptByName>(
