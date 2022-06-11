@@ -65,7 +65,14 @@ namespace module::behaviour::skills {
 
         on<Trigger<ExecuteKick>>().then([this] {
             // auto direction = kickCommand.direction;
+
             LimbID leg = kickCommand.leg;
+
+            // Check if command has a valid LimbID
+            if (leg == LimbID::UNKNOWN) {
+                log<NUClear::WARN>("Kick command LimbID is unknown");
+                return;
+            }
 
             // Execute the penalty kick if the type is PENALTY
             if (kickCommand.type == KickCommandType::PENALTY) {
@@ -77,7 +84,7 @@ namespace module::behaviour::skills {
                         id,
                         std::vector<std::string>({"Stand.yaml", "KickRight.yaml", "Stand.yaml"})));
                 }
-                else {  // if (leg == LimbID::LEFT_LEG) {
+                else if (leg == LimbID::LEFT_LEG) {
                     emit(std::make_unique<ExecuteScriptByName>(
                         id,
                         std::vector<std::string>({"Stand.yaml", "KickLeft.yaml", "Stand.yaml"})));
