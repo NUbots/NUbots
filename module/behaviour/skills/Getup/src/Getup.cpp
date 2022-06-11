@@ -20,6 +20,7 @@
 #include "Getup.hpp"
 
 #include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <cmath>
 
 #include "extension/Configuration.hpp"
