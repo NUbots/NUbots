@@ -288,7 +288,8 @@ namespace extension::behaviour {
      *
      * It has two main uses
      *   It allows you to see what would happen if you emitted a task (run, block proxy, etc)
-     *   It allows you to see what has happened in previous calls, e.g. are we re-running because that was emitted done
+     *   It allows you to see what has happened in previous calls, e.g. are we re-running because our previous task
+     *   emitted that it was done
      *
      * @tparam Provider the type of the provider this uses is for
      */
