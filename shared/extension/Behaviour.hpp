@@ -300,73 +300,77 @@ namespace extension::behaviour {
             // TODO(@TrentHouliston) get the data from the director from the context of this reaction
         }
     };
-}
-
-/**
- * A Task to be executed by the director and a priority with which to execute this task.
- * Higher priority tasks are preferred over lower priority tasks.
- *
- * There are two different types of tasks that can be created using this emit, root level tasks and subtasks.
- *
- * Root level tasks:
- * These are created when a reaction that is not a Provider (not a Provide or Leave) emits the
- * task. These tasks form the root of the execution tree and their needs will be met on a highest priority first
- * basis. These tasks will persist until the Provider that they use emits a done task, or the task is re-emitted
- * with a priority of 0.
- *
- * Subtasks:
- * These are created when a Provider task emits a task to complete. These tasks must be emitted each time that
- * reaction is run to persist as if that reaction runs again and does not emit these tasks they will be
- * cancelled. Within these tasks the priority is used to break ties between two subtasks that share the same
- * root task. In these cases the subtask that requested the Provider with the highest priority will have its
- * task executed. The other subtask will be blocked until the active task is no longer in the call queue.
- *
- * If a subtask is emitted with optional then it is compared differently to other tasks when it comes to priority.
- * This task and all its descendants will be considered optional. If it is compared to a task that does not have
- * optional in its parentage, the non optional task will win. However, descendants of this task that are not
- * optional will compare to each other as normal. If two tasks both have optional in their parentage they will be
- * compared as normal.
- *
- * @tparam T the Provider type that this task is for
- */
-template <typename T>
-struct Task {
 
     /**
-     * Emits a new task for the Director to handle.
+     * A Task to be executed by the director and a priority with which to execute this task.
+     * Higher priority tasks are preferred over lower priority tasks.
      *
-     * @param powerplant the powerplant context provided by NUClear
-     * @param data       the data element of the task
-     * @param name       a string identifier to help with debugging
-     * @param priority   the priority that this task is to be executed with
-     * @param optional   if this task is an optional task and can be taken over by lower priority non optional tasks
+     * There are two different types of tasks that can be created using this emit, root level tasks and subtasks.
+     *
+     * Root level tasks:
+     * These are created when a reaction that is not a Provider (not a Provide or Leave) emits the
+     * task. These tasks form the root of the execution tree and their needs will be met on a highest priority first
+     * basis. These tasks will persist until the Provider that they use emits a done task, or the task is re-emitted
+     * with a priority of 0.
+     *
+     * Subtasks:
+     * These are created when a Provider task emits a task to complete. These tasks must be emitted each time that
+     * reaction is run to persist as if that reaction runs again and does not emit these tasks they will be
+     * cancelled. Within these tasks the priority is used to break ties between two subtasks that share the same
+     * root task. In these cases the subtask that requested the Provider with the highest priority will have its
+     * task executed. The other subtask will be blocked until the active task is no longer in the call queue.
+     *
+     * If a subtask is emitted with optional then it is compared differently to other tasks when it comes to priority.
+     * This task and all its descendants will be considered optional. If it is compared to a task that does not have
+     * optional in its parentage, the non optional task will win. However, descendants of this task that are not
+     * optional will compare to each other as normal. If two tasks both have optional in their parentage they will be
+     * compared as normal.
+     *
+     * @tparam T the Provider type that this task is for
      */
-    static void emit(NUClear::PowerPlant& powerplant,
-                     std::shared_ptr<T> data,
-                     const std::string& name = "",
-                     const int& priority     = 1,
-                     const bool& optional    = false) {
+    template <typename T>
+    struct Task {
 
-        // Work out who is sending the task so we can determine if it's a subtask
-        const auto* task     = NUClear::threading::ReactionTask::get_current_task();
-        uint64_t reaction_id = (task != nullptr) ? task->parent.id : -1;
-        uint64_t task_id     = (task != nullptr) ? task->id : -1;
+        /**
+         * Emits a new task for the Director to handle.
+         *
+         * @param powerplant the powerplant context provided by NUClear
+         * @param data       the data element of the task
+         * @param name       a string identifier to help with debugging
+         * @param priority   the priority that this task is to be executed with
+         * @param optional   if this task is an optional task and can be taken over by lower priority non optional tasks
+         */
+        static void emit(NUClear::PowerPlant& powerplant,
+                         std::shared_ptr<T> data,
+                         const std::string& name = "",
+                         const int& priority     = 1,
+                         const bool& optional    = false) {
 
-        NUClear::dsl::word::emit::Direct<T>::emit(
-            powerplant,
-            std::make_shared<commands::DirectorTask>(typeid(T), reaction_id, task_id, data, name, priority, optional));
-    }
-};
+            // Work out who is sending the task so we can determine if it's a subtask
+            const auto* task     = NUClear::threading::ReactionTask::get_current_task();
+            uint64_t reaction_id = (task != nullptr) ? task->parent.id : -1;
+            uint64_t task_id     = (task != nullptr) ? task->id : -1;
 
-/**
- * This is a special task that should be emitted when a Provider finishes the task it was given.
- * When this is emitted the director will re-execute the Provider which caused this task to run.
- *
- * ```
- * emit<Task>(std::make_unique<Done>());
- * ```
- */
-struct Done {};
+            NUClear::dsl::word::emit::Direct<T>::emit(powerplant,
+                                                      std::make_shared<commands::DirectorTask>(typeid(T),
+                                                                                               reaction_id,
+                                                                                               task_id,
+                                                                                               data,
+                                                                                               name,
+                                                                                               priority,
+                                                                                               optional));
+        }
+    };
+
+    /**
+     * This is a special task that should be emitted when a Provider finishes the task it was given.
+     * When this is emitted the director will re-execute the Provider which caused this task to run.
+     *
+     * ```
+     * emit<Task>(std::make_unique<Done>());
+     * ```
+     */
+    struct Done {};
 
 }  // namespace extension::behaviour
 
