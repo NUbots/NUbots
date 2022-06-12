@@ -162,7 +162,7 @@ namespace module::extension {
         if (it != providers.end()) {
             auto provider = it->second;
 
-            // Can't add causing to a Start or Stop
+            // Can't add needs to a Start or Stop
             if (provider->classification == ProviderClassification::STOP
                 || provider->classification == ProviderClassification::START) {
                 throw std::runtime_error("You cannot use the 'Needs' DSL word with Start or Stop.");
