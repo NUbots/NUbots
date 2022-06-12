@@ -32,7 +32,6 @@
 
 namespace module::behaviour::skills {
 
-    struct ExecuteKick {};
     struct FinishKick {};
 
     using extension::Configuration;
@@ -52,57 +51,51 @@ namespace module::behaviour::skills {
 
         // do a little configurating
         on<Configuration>("KickScript.yaml").then([this](const Configuration& config) {
-            log_level = config["log_level"].as<NUClear::LogLevel>();
-
-            KICK_PRIORITY      = config["KICK_PRIORITY"].as<float>();
-            EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
+            log_level     = config["log_level"].as<NUClear::LogLevel>();
+            KICK_PRIORITY = config["KICK_PRIORITY"].as<float>();
         });
 
-        on<Trigger<KickScriptCommand>>().then([this](const KickScriptCommand& cmd) {
-            kickCommand = cmd;
-            updatePriority(KICK_PRIORITY);
-        });
-
-        on<Trigger<ExecuteKick>>().then([this] {
-            // auto direction = kickCommand.direction;
-
-            LimbID leg = kickCommand.leg;
-
-            // Check if kick command has a valid LimbID
-            if (leg == LimbID::UNKNOWN) {
-                log<NUClear::WARN>("Kick command LimbID is unknown");
-                return;
-            }
-
-            // Execute the penalty kick if the type is PENALTY
-            if (kickCommand.type == KickCommandType::PENALTY) {
-                emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"KickPenalty.yaml"})));
-            }
-            // Execute a normal kick if the type is NORMAL
-            else if (kickCommand.type == KickCommandType::NORMAL) {
-                if (leg == LimbID::RIGHT_LEG) {
-                    emit(std::make_unique<ExecuteScriptByName>(
-                        id,
-                        std::vector<std::string>({"Stand.yaml", "KickRight.yaml", "Stand.yaml"})));
+        /**
+         * @brief Executes a kick script based on specified kick type
+         */
+        on<Trigger<KickScriptCommand>>().then([this](const KickScriptCommand& kick_command) {
+            // If we are already in the process of kicking, ignore this command
+            if (!is_kicking) {
+                if (kick_command.type == KickCommandType::PENALTY) {
+                    emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"KickPenalty.yaml"})));
                 }
-                else if (leg == LimbID::LEFT_LEG) {
-                    emit(std::make_unique<ExecuteScriptByName>(
-                        id,
-                        std::vector<std::string>({"Stand.yaml", "KickLeft.yaml", "Stand.yaml"})));
+                else if (kick_command.type == KickCommandType::NORMAL) {
+                    LimbID leg = kick_command.leg;
+                    if (leg == LimbID::RIGHT_LEG) {
+                        emit(std::make_unique<ExecuteScriptByName>(
+                            id,
+                            std::vector<std::string>({"Stand.yaml", "KickRight.yaml", "Stand.yaml"})));
+                    }
+                    else if (leg == LimbID::LEFT_LEG) {
+                        emit(std::make_unique<ExecuteScriptByName>(
+                            id,
+                            std::vector<std::string>({"Stand.yaml", "KickLeft.yaml", "Stand.yaml"})));
+                    }
+                    else {
+                        log<NUClear::WARN>("Kick command LimbID is unknown");
+                        return;
+                    }
                 }
+                else {
+                    log<NUClear::WARN>("Kick command KickCommandType is unknown");
+                    return;
+                }
+                is_kicking = true;
+                // Increases the priority of executing a kick in the subsumption system,
+                // so that the kick script can take priority over other behaviours
+                update_priority(KICK_PRIORITY);
             }
-            // The kick command does not have a valid kick type
-            else {
-                log<NUClear::WARN>("Kick command KickCommandType is unknown");
-                return;
-            }
-
-            updatePriority(EXECUTION_PRIORITY);
         });
 
         on<Trigger<FinishKick>>().then([this] {
+            is_kicking = false;
             emit(std::make_unique<KickFinished>());
-            updatePriority(0);
+            update_priority(0);
         });
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
@@ -111,15 +104,16 @@ namespace module::behaviour::skills {
             {std::pair<float, std::set<LimbID>>(
                 0,
                 {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
-            [this](const std::set<LimbID>& /*limbAssociatedWithAction*/) { emit(std::make_unique<ExecuteKick>()); },
+            [this](const std::set<LimbID>& /*limbAssociatedWithAction*/) {
+                emit(std::make_unique<KickScriptCommand>());
+            },
             [this](const std::set<LimbID>& /*limbAssociatedWithAction*/) { emit(std::make_unique<FinishKick>()); },
             [this](const std::set<ServoID>& /*servoAssociatedWithCompletion*/) {
                 emit(std::make_unique<FinishKick>());
             }}));
     }
 
-    void KickScript::updatePriority(const float& priority) {
+    void KickScript::update_priority(const float& priority) {
         emit(std::make_unique<ActionPriorities>(ActionPriorities{id, {priority}}));
     }
-
 }  // namespace module::behaviour::skills

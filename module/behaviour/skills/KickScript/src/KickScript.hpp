@@ -34,12 +34,14 @@ namespace module::behaviour::skills {
     private:
         const size_t id{size_t(this) * size_t(this) - size_t(this)};
 
-        float KICK_PRIORITY      = 0.0f;
-        float EXECUTION_PRIORITY = 0.0f;
+        /// @brief Stores the priority the kick execution has in subsumption system
+        float KICK_PRIORITY = 0.0f;
 
-        message::motion::KickScriptCommand kickCommand{};
+        /// @brief Stores if the kick is currently executing
+        bool is_kicking = false;
 
-        void updatePriority(const float& priority);
+        /// @brief Updates the priority the kick has in subsumption system
+        void update_priority(const float& priority);
     };
 }  // namespace module::behaviour::skills
 
