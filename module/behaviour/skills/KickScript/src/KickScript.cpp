@@ -60,7 +60,11 @@ namespace module::behaviour::skills {
         });
 
         // Check to see if we are currently in the process of getting up.
-        on<Trigger<ExecuteGetup>>().then([this] { is_getting_up = true; });
+        on<Trigger<ExecuteGetup>>().then([this] {
+            is_getting_up = true;
+            // If we are getting up, ensure kicking priority is low
+            update_priority(0);
+        });
 
         // Check to see if we have finished getting up.
         on<Trigger<KillGetup>>().then([this] { is_getting_up = false; });
