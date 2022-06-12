@@ -166,7 +166,8 @@ namespace module::vision {
                     for (const auto& idx : cluster) {
                         // Unit vector from the camera to the ball edge, in world space
                         const Eigen::Vector3f& uECw(uPCw.col(idx));
-                        // Choose this vector if it's further than previously seen vectors, to get the largest angle
+                        // Find the vector that gives the largest angle between the central axis and ball edge
+                        // Radius is cos(theta), where theta is the angle, so a smaller radius gives a larger angle.
                         radius = uBCw.dot(uECw) < radius ? uBCw.dot(uECw) : radius;
                     }
 
