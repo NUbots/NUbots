@@ -6,12 +6,12 @@ The BallDetector module performs post-processing on the output of the VisualMesh
 
 The BallDetector first tries to create balls, and then removes candidate balls if they fail to pass a set of checks.
 
-Balls are created by clustering neighbouring Visual Mesh points that have a high enough confidence that they are a ball point.
+Balls are created by clustering neighbouring Visual Mesh points that have a high enough confidence that they are a ball point and are not surrounded by ball points. That is, clusters are made up of ball edge points.
 
 Each cluster is checked to see if
 
 1. It is below the green horizon
-2. It has a high enough degree of fit
+2. It has a high enough degree of fit to a circle
 3. It is not too close to the robot
 4. It's angular and projection based distances are close enough
 5. It is closer or equal to the length of the field
@@ -29,7 +29,7 @@ Add this module to get information about balls, given the required messages are 
 ## Consumes
 
 - `message::vision::GreenHorizon` which contains points that represent the green horizon, and the Visual Mesh output. The Visual Mesh output is used to create the ball clusters and the green horizon is used to remove balls above the horizon.
-- `message::support::FieldDescription` which contains parameters that define the structure and size of the field. This is used in the checks mentioned above, to determine if the ball candidate is likely to be a ball.
+- `message::support::FieldDescription` which contains parameters that define the structure of the field and size of the ball. This is used in the checks mentioned above, to determine if the ball candidate is likely to be a ball.
 
 ## Emits
 
