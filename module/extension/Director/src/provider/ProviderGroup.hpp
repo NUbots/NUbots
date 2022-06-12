@@ -40,8 +40,6 @@ namespace module::extension::provider {
         enum State {
             /// This Provider group currently isn't doing anything
             IDLE,
-            /// This Provider group is currently in an "Entering" state
-            ENTERING,
             /// This Provider group is currently in a "Normal" state
             NORMAL,
             /// This Provider group is currently in a "Leaving" state

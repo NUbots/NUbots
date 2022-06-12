@@ -79,7 +79,7 @@ namespace extension::behaviour {
 
 
     /**
-     * This type is used as a base extension type for the different Provider DSL keywords (Provides, Entering, Leaving)
+     * This type is used as a base extension type for the different Provider DSL keywords (Start Stop, Provide, Leave)
      * to handle their common code.
      *
      * @tparam T        The type that this Provider services
@@ -100,12 +100,12 @@ namespace extension::behaviour {
 
             // Tell the Director
             reaction->reactor.powerplant.emit(
-                std::make_unique<commands::ProvidesReaction>(reaction, typeid(T), classification));
+                std::make_unique<commands::ProvideReaction>(reaction, typeid(T), classification));
 
             // Add our unbinder
             reaction->unbinders.emplace_back([](const NUClear::threading::Reaction& r) {
                 r.reactor.emit<NUClear::dsl::word::emit::Direct>(
-                    std::make_unique<NUClear::dsl::operation::Unbind<commands::ProvidesReaction>>(r.id));
+                    std::make_unique<NUClear::dsl::operation::Unbind<commands::ProvideReaction>>(r.id));
             });
         }
 
@@ -139,48 +139,54 @@ namespace extension::behaviour {
     };
 
     /**
-     * This DSL word used to define an entry transition into a Provider.
-     * It should normally be coupled with a Causing DSL word.
-     * When coupled with a Causing DSL word and a Provider that has a When condition, this entry will run in place of
-     * the Provider until the When condition is fulfilled.
-     * If it is used without a Causing DSL word it will run once as a Provider before the actual Provider is executed.
-     *
-     * @tparam T the Provider type that this transition function provides for
-     */
-    template <typename T>
-    struct Entering : public ProviderBase<T, commands::ProviderClassification::ENTERING> {};
-
-    /**
-     * This DSL word is used to define a leaving transition from a Provider.
+     * Define a Leave Provider.
      * It should normally be combined with a Causing DSL word.
-     * In this case when another Provider needs control and uses a When condition, this will run until that
-     * condition is fulfilled. A Leaving condition will be preferred over an Entering condition that provides the
-     * same Causing statement (the system will rather a module cleans up after itself than ask another module to do
-     * so).
+     * In this case when another Provider with higher priority needs a causing that this provider is able to handle it
+     * will force the provider to use this leave.
      *
-     * @tparam T the Provider type that this transition function provides for
+     * @tparam T the Provider type that this function provides for
      */
     template <typename T>
-    struct Leaving : public ProviderBase<T, commands::ProviderClassification::LEAVING> {};
+    struct Leave : public ProviderBase<T, commands::ProviderClassification::LEAVE> {};
 
     /**
-     * This DSL word is used to define a Provider for a type.
+     * Define a Provider for a type.
      * It will execute in the same way as an on<Trigger<T>> statement except that when it executes will be
      * determined by the Director. This ensures that it will only run when it has permission to run and will
      * transition between Providers in a sensible way.
      *
+     * @tparam T the Provider type that this function provides for
+     */
+    template <typename T>
+    struct Provide : public ProviderBase<T, commands::ProviderClassification::PROVIDE> {};
+
+    /**
+     * Define a Start provider for a type
+     * It will execute before a task is first provided to the provider group.
+     * It is not allowed to have any other words such as when/causing/needs and must not emit any tasks.
+     *
      * @tparam T the Provider type that this transition function provides for
      */
     template <typename T>
-    struct Provides : public ProviderBase<T, commands::ProviderClassification::NORMAL> {};
+    struct Start : public ProviderBase<T, commands::ProviderClassification::START> {};
 
     /**
-     * The When DSL word is used to limit access to a Provider unless a condition is true.
-     * This will prevent a Provider from running if the state is false.
-     * However if there is a Entering<T> or Leaving reaction that has a Causing relationship for this When, it will
-     * be executed to ensure that the Provider can run.
+     * Define a Stop provider for a type
+     * It will execute after a task is no longer provided to the provider group.
+     * It is not allowed to have any other words such as when/causing/needs and must not emit any tasks.
      *
-     * @tparam State    the smart enum that is being mointored for the when condition
+     * @tparam T the Provider type that this transition function provides for
+     */
+    template <typename T>
+    struct Stop : public ProviderBase<T, commands::ProviderClassification::STOP> {};
+
+    /**
+     * Limit access to this Provider unless a condition is true.
+     * This will prevent a Provider from running if the state is false.
+     * However if there is a `Provide` or `Leave` reaction that has a Causing relationship for this When, then depending
+     * on the priority of this task, it can force a change in which provider will be run
+     *
+     * @tparam State    the smart enum that is being monitored for the when condition
      * @tparam expr     the function used for the comparison (e.g. std::less)
      * @tparam value    the value that the when condition is looking for
      */
@@ -198,7 +204,7 @@ namespace extension::behaviour {
         static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
 
             // Tell the director about this when condition
-            reaction->reactor.powerplant.emit(std::make_unique<commands::WhenExpression>(
+            reaction->reactor.emit<NUClear::dsl::word::emit::Direct>(std::make_unique<commands::WhenExpression>(
                 reaction,
                 // typeindex of the enum value
                 typeid(State),
@@ -223,9 +229,9 @@ namespace extension::behaviour {
     };
 
     /**
-     * This DSL word is used to create a promise that at some point when running this reaction the state indicated
-     * by T will be true. It may not be on any particular run of the Provider, in which case it will continue to run
-     * that reaction when new tasks arrive until it is true, or a change elsewhere changes which Provider to run.
+     * Create a promise that at some point when running this reaction the state indicated by `State` will be `value`. It
+     * may not be on any particular run of the Provider, in which case it will continue to run that reaction when new
+     * tasks arrive until it is true, or a change elsewhere changes which Provider to run.
      *
      * @tparam State    the smart enum that this causing condition is going to manipulate
      * @tparam value    the value that will result when the causing is successful
@@ -243,81 +249,137 @@ namespace extension::behaviour {
         template <typename DSL>
         static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
             // Tell the director
-            reaction->reactor.powerplant.emit(
+            reaction->reactor.emit<NUClear::dsl::word::emit::Direct>(
                 std::make_unique<commands::CausingExpression>(reaction, typeid(State), value));
         }
     };
 
     /**
-     * A Task to be executed by the director and a priority with which to execute this task.
-     * Higher priority tasks are preferred over lower priority tasks.
+     * Create a Needs relationship between this provider and the provider specified by `T`.
      *
-     * There are two different types of tasks that can be created using this emit, root level tasks and subtasks.
+     * A needs relationship ensures that this provider will only run if it is able to run the provider specified by `T`.
+     * This relationship operates recursevly, as if the provider specified by `T` needs another provider, this provider
+     * will only run if it will be able to obtain those providers as well.
      *
-     * Root level tasks:
-     * These are created when a reaction that is not a Provider (not a Provides, Entering or Leaving) emits the
-     * task. These tasks form the root of the execution tree and their needs will be met on a highest priority first
-     * basis. These tasks will persist until the Provider that they use emits a done task, or the task is re-emitted
-     * with a priority of 0.
-     *
-     * Subtasks:
-     * These are created when a Provider task emits a task to complete. These tasks must be emitted each time that
-     * reaction is run to persist as if that reaction runs again and does not emit these tasks they will be
-     * cancelled. Within these tasks the priority is used to break ties between two subtasks that share the same
-     * root task. In these cases the subtask that requested the Provider with the highest priority will have its
-     * task executed. The other subtask will be blocked until the active task is no longer in the call queue.
-     *
-     * If a subtask is emitted with optional then it is compared differently to other tasks when it comes to priority.
-     * This task and all its descendants will be considered optional. If it is compared to a task that does not have
-     * optional in it's parentage, the non optional task will win. However, descendants of this task that are not
-     * optional will compare to each other as normal. If two tasks both have optional in their parentage they will be
-     * compared as normal.
-     *
-     * @tparam T the Provider type that this task is for
+     * @tparam T the provider that this provider needs
      */
     template <typename T>
-    struct Task {
+    struct Needs {
 
         /**
-         * Emits a new task for the Director to handle.
+         * Bind a needs expression in the Director.
          *
-         * @param powerplant the powerplant context provided by NUClear
-         * @param data       the data element of the task
-         * @param name       a string identifier to help with debugging
-         * @param priority   the priority that this task is to be executed with
-         * @param optional   if this task is an optional task and can be taken over by lower priority non optional tasks
+         * @tparam DSL the DSL from NUClear
+         *
+         * @param reaction the reaction that is having this needs condition bound to it
          */
-        static void emit(NUClear::PowerPlant& powerplant,
-                         std::shared_ptr<T> data,
-                         const std::string& name = "",
-                         const int& priority     = 1,
-                         const bool& optional    = false) {
-
-            // Work out who is sending the task so we can determine if it's a subtask
-            const auto* task     = NUClear::threading::ReactionTask::get_current_task();
-            uint64_t reaction_id = (task != nullptr) ? task->parent.id : -1;
-            uint64_t task_id     = (task != nullptr) ? task->id : -1;
-
-            NUClear::dsl::word::emit::Direct<T>::emit(powerplant,
-                                                      std::make_shared<commands::DirectorTask>(typeid(T),
-                                                                                               reaction_id,
-                                                                                               task_id,
-                                                                                               data,
-                                                                                               name,
-                                                                                               priority,
-                                                                                               optional));
+        template <typename DSL>
+        static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
+            reaction->reactor.emit<NUClear::dsl::word::emit::Direct>(
+                std::make_unique<commands::NeedsExpression>(reaction->id, typeid(T)));
         }
     };
 
     /**
-     * This is a special task that should be emitted when a Provider finishes the task it was given.
-     * When this is emitted the director will re-execute the Provider which caused this task to run.
+     * Adds a Uses object to the callback to allow access to information from the context of this provider.
      *
-     * ```
-     * emit<Task>(std::make_unique<Done>());
-     * ```
+     * The uses object provides information about what would happen if you were to emit a specific task from this
+     * provider as well as what has happened in previous calls.
+     *
+     * It has two main uses
+     *   It allows you to see what would happen if you emitted a task (run, block proxy, etc)
+     *   It allows you to see what has happened in previous calls, e.g. are we re-running because that was emitted done
+     *
+     * @tparam T the type of the provider this uses is for
      */
-    struct Done {};
+    template <typename T>
+    struct Uses {
+
+        /**
+         * Bind a uses expression in the Director.
+         *
+         * @tparam DSL the DSL from NUClear
+         *
+         * @param reaction the reaction that is having this uses condition bound to it
+         */
+        template <typename DSL>
+        static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
+            reaction->reactor.emit<NUClear::dsl::word::emit::Direct>(
+                std::make_unique<commands::UsesExpression>(reaction->id, typeid(T)));
+        }
+
+        template <typename T>
+        static inline std::shared_ptr<Uses<T>> get(NUClear::threading::Reaction& /*r*/) {
+            // TODO(@TrentHouliston) get the data from the director from the context of this reaction
+        }
+    };
+}
+
+/**
+ * A Task to be executed by the director and a priority with which to execute this task.
+ * Higher priority tasks are preferred over lower priority tasks.
+ *
+ * There are two different types of tasks that can be created using this emit, root level tasks and subtasks.
+ *
+ * Root level tasks:
+ * These are created when a reaction that is not a Provider (not a Provide or Leave) emits the
+ * task. These tasks form the root of the execution tree and their needs will be met on a highest priority first
+ * basis. These tasks will persist until the Provider that they use emits a done task, or the task is re-emitted
+ * with a priority of 0.
+ *
+ * Subtasks:
+ * These are created when a Provider task emits a task to complete. These tasks must be emitted each time that
+ * reaction is run to persist as if that reaction runs again and does not emit these tasks they will be
+ * cancelled. Within these tasks the priority is used to break ties between two subtasks that share the same
+ * root task. In these cases the subtask that requested the Provider with the highest priority will have its
+ * task executed. The other subtask will be blocked until the active task is no longer in the call queue.
+ *
+ * If a subtask is emitted with optional then it is compared differently to other tasks when it comes to priority.
+ * This task and all its descendants will be considered optional. If it is compared to a task that does not have
+ * optional in its parentage, the non optional task will win. However, descendants of this task that are not
+ * optional will compare to each other as normal. If two tasks both have optional in their parentage they will be
+ * compared as normal.
+ *
+ * @tparam T the Provider type that this task is for
+ */
+template <typename T>
+struct Task {
+
+    /**
+     * Emits a new task for the Director to handle.
+     *
+     * @param powerplant the powerplant context provided by NUClear
+     * @param data       the data element of the task
+     * @param name       a string identifier to help with debugging
+     * @param priority   the priority that this task is to be executed with
+     * @param optional   if this task is an optional task and can be taken over by lower priority non optional tasks
+     */
+    static void emit(NUClear::PowerPlant& powerplant,
+                     std::shared_ptr<T> data,
+                     const std::string& name = "",
+                     const int& priority     = 1,
+                     const bool& optional    = false) {
+
+        // Work out who is sending the task so we can determine if it's a subtask
+        const auto* task     = NUClear::threading::ReactionTask::get_current_task();
+        uint64_t reaction_id = (task != nullptr) ? task->parent.id : -1;
+        uint64_t task_id     = (task != nullptr) ? task->id : -1;
+
+        NUClear::dsl::word::emit::Direct<T>::emit(
+            powerplant,
+            std::make_shared<commands::DirectorTask>(typeid(T), reaction_id, task_id, data, name, priority, optional));
+    }
+};
+
+/**
+ * This is a special task that should be emitted when a Provider finishes the task it was given.
+ * When this is emitted the director will re-execute the Provider which caused this task to run.
+ *
+ * ```
+ * emit<Task>(std::make_unique<Done>());
+ * ```
+ */
+struct Done {};
 
 }  // namespace extension::behaviour
 

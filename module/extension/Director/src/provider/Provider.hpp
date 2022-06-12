@@ -70,6 +70,8 @@ namespace module::extension::provider {
         std::vector<WhenCondition> when;
         /// A list of types and states that are caused by running this Provider
         std::map<std::type_index, int> causing;
+        /// A list of provider types that this provider needs in order to run
+        std::set<std::type_index> needs;
         /// A boolean that is true if this Provider is currently active and running (can make subtasks)
         bool active = false;
     };
