@@ -149,7 +149,7 @@ namespace extension::behaviour::commands {
         std::shared_ptr<NUClear::threading::Reaction> reaction;
         /// The provider type that this needs relationship is referring to
         std::type_index type;
-    }
+    };
 
     /**
      * Message to tell the Director that a Provider task has finished executing
