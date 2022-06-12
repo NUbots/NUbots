@@ -295,19 +295,6 @@ namespace extension::behaviour {
     template <typename Provider>
     struct Uses {
 
-        /**
-         * Bind a uses expression in the Director.
-         *
-         * @tparam DSL the DSL from NUClear
-         *
-         * @param reaction the reaction that is having this uses condition bound to it
-         */
-        template <typename DSL>
-        static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
-            reaction->reactor.emit<NUClear::dsl::word::emit::Direct>(
-                std::make_unique<commands::UsesExpression>(reaction->id, typeid(T)));
-        }
-
         template <typename T = Provider>
         static inline std::shared_ptr<Uses<T>> get(NUClear::threading::Reaction& /*r*/) {
             // TODO(@TrentHouliston) get the data from the director from the context of this reaction
