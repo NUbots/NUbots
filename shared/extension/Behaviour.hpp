@@ -261,9 +261,9 @@ namespace extension::behaviour {
      * This relationship operates recursevly, as if the provider specified by `T` needs another provider, this provider
      * will only run if it will be able to obtain those providers as well.
      *
-     * @tparam T the provider that this provider needs
+     * @tparam Provider the provider that this provider needs
      */
-    template <typename T>
+    template <typename Provider>
     struct Needs {
 
         /**
@@ -276,7 +276,7 @@ namespace extension::behaviour {
         template <typename DSL>
         static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
             reaction->reactor.emit<NUClear::dsl::word::emit::Direct>(
-                std::make_unique<commands::NeedsExpression>(reaction->id, typeid(T)));
+                std::make_unique<commands::NeedsExpression>(reaction->id, typeid(Provider)));
         }
     };
 
@@ -290,9 +290,9 @@ namespace extension::behaviour {
      *   It allows you to see what would happen if you emitted a task (run, block proxy, etc)
      *   It allows you to see what has happened in previous calls, e.g. are we re-running because that was emitted done
      *
-     * @tparam T the type of the provider this uses is for
+     * @tparam Provider the type of the provider this uses is for
      */
-    template <typename T>
+    template <typename Provider>
     struct Uses {
 
         /**
@@ -308,7 +308,7 @@ namespace extension::behaviour {
                 std::make_unique<commands::UsesExpression>(reaction->id, typeid(T)));
         }
 
-        template <typename T>
+        template <typename T = Provider>
         static inline std::shared_ptr<Uses<T>> get(NUClear::threading::Reaction& /*r*/) {
             // TODO(@TrentHouliston) get the data from the director from the context of this reaction
         }
