@@ -79,7 +79,7 @@ namespace extension::behaviour {
 
 
     /**
-     * This type is used as a base extension type for the different Provider DSL keywords (Start Stop, Provide, Leave)
+     * This type is used as a base extension type for the different Provider DSL keywords (Start, Stop, Provide, Leave)
      * to handle their common code.
      *
      * @tparam T        The type that this Provider services
