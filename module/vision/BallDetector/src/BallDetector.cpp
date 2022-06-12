@@ -197,7 +197,7 @@ namespace module::vision {
 
                     // Projection-based distance
                     // Given a flat X-Y plane that intersects through the middle of the ball, find the point where
-                    // the central axis vector (uBCw) intersects with this place. Get the distance from this point.
+                    // the central axis vector (uBCw) intersects with this plane. Get the distance from the camera to this point.
                     // https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection#Algebraic_form
                     //      Plane normal: (0, 0, 1)
                     //      Point on plane: (0, 0, rWCw.z() + field.ball_radius)
