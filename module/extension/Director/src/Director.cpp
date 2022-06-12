@@ -25,6 +25,7 @@ namespace module::extension {
     using ::extension::Configuration;
     using ::extension::behaviour::commands::CausingExpression;
     using ::extension::behaviour::commands::DirectorTask;
+    using ::extension::behaviour::commands::ProviderClassification;
     using ::extension::behaviour::commands::ProviderDone;
     using ::extension::behaviour::commands::ProvideReaction;
     using ::extension::behaviour::commands::WhenExpression;
@@ -109,7 +110,8 @@ namespace module::extension {
             auto provider = it->second;
 
             // Can't add causing to a Start or Stop
-            if (provider->classification == STOP || provider->classification == START) {
+            if (provider->classification == ProviderClassification::STOP
+                || provider->classification == ProviderClassification::START) {
                 throw std::runtime_error("You cannot use the 'When' DSL word with Start or Stop.");
             }
 
@@ -141,7 +143,8 @@ namespace module::extension {
             auto provider = it->second;
 
             // Can't add causing to a Start or Stop
-            if (provider->classification == STOP || provider->classification == START) {
+            if (provider->classification == ProviderClassification::STOP
+                || provider->classification == ProviderClassification::START) {
                 throw std::runtime_error("You cannot use the 'Causing' DSL word with Start or Stop.");
             }
 
@@ -159,7 +162,8 @@ namespace module::extension {
             auto provider = it->second;
 
             // Can't add causing to a Start or Stop
-            if (provider->classification == STOP || provider->classification == START) {
+            if (provider->classification == ProviderClassification::STOP
+                || provider->classification == ProviderClassification::START) {
                 throw std::runtime_error("You cannot use the 'Needs' DSL word with Start or Stop.");
             }
 
