@@ -40,6 +40,9 @@ namespace module::behaviour::skills {
         /// @brief Stores if the kick is currently executing
         bool is_kicking = false;
 
+        /// @brief Stores if the robot is currently trying to getup
+        bool is_getting_up = false;
+
         /// @brief Updates the priority the kick has in subsumption system
         void update_priority(const float& priority);
     };

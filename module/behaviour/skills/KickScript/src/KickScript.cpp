@@ -24,6 +24,7 @@
 #include "extension/Script.hpp"
 
 #include "message/behaviour/ServoCommand.hpp"
+#include "message/motion/GetupCommand.hpp"
 #include "message/motion/WalkCommand.hpp"
 
 #include "utility/behaviour/Action.hpp"
@@ -40,9 +41,12 @@ namespace module::behaviour::skills {
     using LimbID  = utility::input::LimbID;
     using ServoID = utility::input::ServoID;
 
+    using message::motion::ExecuteGetup;
     using message::motion::KickCommandType;
     using message::motion::KickFinished;
     using message::motion::KickScriptCommand;
+    using message::motion::KillGetup;
+
 
     using utility::behaviour::ActionPriorities;
     using utility::behaviour::RegisterAction;
@@ -55,12 +59,19 @@ namespace module::behaviour::skills {
             KICK_PRIORITY = config["KICK_PRIORITY"].as<float>();
         });
 
+        // Check to see if we are currently in the process of getting up.
+        on<Trigger<ExecuteGetup>>().then([this] { is_getting_up = true; });
+
+        // Check to see if we have finished getting up.
+        on<Trigger<KillGetup>>().then([this] { is_getting_up = false; });
+
+
         /**
          * @brief Executes a kick script based on specified kick type
          */
         on<Trigger<KickScriptCommand>>().then([this](const KickScriptCommand& kick_command) {
-            // If we are already in the process of kicking, ignore this command
-            if (!is_kicking) {
+            // If we are already in the process of kicking or getting up, ignore this command
+            if (!is_kicking && !is_getting_up) {
                 if (kick_command.type == KickCommandType::PENALTY) {
                     emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"KickPenalty.yaml"})));
                 }
