@@ -26,6 +26,7 @@ namespace module::extension {
     using ::extension::behaviour::commands::CausingExpression;
     using ::extension::behaviour::commands::DirectorTask;
     using ::extension::behaviour::commands::ProviderClassification;
+    using ::extension::behaviour::commands::NeedsExpression;
     using ::extension::behaviour::commands::ProviderDone;
     using ::extension::behaviour::commands::ProvideReaction;
     using ::extension::behaviour::commands::WhenExpression;
