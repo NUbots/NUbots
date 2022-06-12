@@ -71,6 +71,13 @@ namespace module::extension {
         void add_causing(const ::extension::behaviour::commands::CausingExpression& causing);
 
         /**
+         * Add a needs to an existing Provider
+         *
+         * @param needs the description of the Needs expression from the behaviour extension
+         */
+        void add_needs(const ::extension::behaviour::commands::NeedsExpression& needs);
+
+        /**
          * Compares the priorities of two director tasks and returns true if the challenger has priority over the
          * incumbent.
          *
