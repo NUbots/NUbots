@@ -27,8 +27,9 @@ import "Vector.proto";
  * @author Brendan Annable
  */
 enum KickCommandType {
-    NORMAL  = 0;
-    PENALTY = 1;
+    UNKNOWN = 0;
+    NORMAL  = 1;
+    PENALTY = 2;
 }
 
 message KickCommand {
