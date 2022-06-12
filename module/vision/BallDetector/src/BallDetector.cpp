@@ -263,10 +263,10 @@ namespace module::vision {
 
                     // DISCARD IF THE DISTANCE FROM THE BALL TO THE ROBOT IS TOO CLOSE
                     // Prevents the robot itself being classed as a ball, ie its arms/hands
-                    if (distance < config.minimum_ball_distance) {
+                    if (angular_distance < config.minimum_ball_distance) {
 
                         log<NUClear::DEBUG>(fmt::format("Ball discarded: distance ({}) < minimum_ball_distance ({})",
-                                                        distance,
+                                                        angular_distance,
                                                         config.minimum_ball_distance));
                         log<NUClear::DEBUG>("--------------------------------------------------");
                         // Balls that violate this but not previous checks will show as red in NUsight
@@ -297,7 +297,7 @@ namespace module::vision {
                         log<NUClear::DEBUG>(
                             fmt::format("Ball discarded: Distance to ball greater than field length: distance = "
                                         "{}, field length = {}",
-                                        distance,
+                                        angular_distance,
                                         field.dimensions.field_length));
                         log<NUClear::DEBUG>("--------------------------------------------------");
                         // Balls that violate this but not previous checks will show as yellow in NUsight
@@ -306,7 +306,7 @@ namespace module::vision {
                     }
 
                     const Eigen::Vector2f angular_size   = Eigen::Vector2f::Constant(std::acos(radius));
-                    const Eigen::Vector2f screen_angular = cartesianToSpherical(axis).tail<2>();
+                    const Eigen::Vector2f screen_angular = cartesianToSpherical(uBCw).tail<2>();
 
                     log<NUClear::DEBUG>(fmt::format("Camera {}", balls->id));
                     log<NUClear::DEBUG>(fmt::format("radius {}", b.radius));
