@@ -145,7 +145,6 @@ namespace module::vision {
                 // CHECK EACH CLUSTER FOR VALID BALL
                 for (auto& cluster : clusters) {
                     Ball b;
-                    b.covariance = config.ball_angular_cov.asDiagonal();
 
                     // FIND CENTRAL AXIS OF BALL
                     // Add up all the unit vectors of each point (camera to point in world space) in the cluster to find
@@ -157,11 +156,11 @@ namespace module::vision {
                     }
                     uBCw.normalize();  // get cone axis as a unit vector
 
-                    // FIND UNIT RADIUS OF BALL
+                    // FIND ANGULAR RADIUS OF BALL
                     // Find the ray (uPCw) with the greatest distance from the central axis (uBCw) to then determine the
-                    // largest radius possible from the edge points available. The radius is the upper bound on the ball
-                    // radius if it were a metre away. arccos(radius) is the angle between the central ball
-                    // axis (uBCw) and the edge of the ball. This helps to find the approximate distance to the ball
+                    // largest angular radius possible from the edge points available. Equal to cos(theta), where theta
+                    // is the angle between the central ball axis (uBCw) and the edge of the ball. This helps to find
+                    // the approximate distance to the ball.
                     float radius = 1.0f;
                     for (const auto& idx : cluster) {
                         // Unit vector from the camera to the ball edge, in world space
@@ -172,8 +171,9 @@ namespace module::vision {
                     }
 
                     // The vectors are in world space, multiply by Rcw to get the central axis in camera space
-                    b.uBCc   = Hcw.rotation() * uBCw;
-                    b.radius = radius;  // arccos(radius) is the angle between the central axis and edge of the ball
+                    b.uBCc = Hcw.rotation() * uBCw;
+                    // Angular radius, or cos(theta) where theta is the angle between central axis and ball edge
+                    b.radius = radius;
 
                     // CALCULATE DISTANCE TO BALL WITH TWO METHODS
                     // 1. Angular-based distance
@@ -190,26 +190,30 @@ namespace module::vision {
                     //      distance = (field.ball_radius) / (sin(arccos(radius)))
                     // Using sin(arccos(x)) = sqrt(1 - x^2)
                     //      distance = field.ball_radius / sqrt(1 - radius^2)
-                    float distance = field.ball_radius / std::sqrt(1.0f - radius * radius);
+                    const float angular_distance = field.ball_radius / std::sqrt(1.0f - radius * radius);
                     // Convert uBCc into a position vector (rBCc) and then convert it into Spherical Reciprocal
                     // Coordinates (1/distance, phi, theta)
-                    b.srBCc              = cartesianToReciprocalSpherical(b.uBCc * distance);
-                    b.screen_angular_BCw = cartesianToSpherical(uBCw).tail<2>();  // no depth (x-coordinate)
+                    b.measurements.emplace_back();
+                    b.measurements.back().type       = Ball::MeasurementType::ANGULAR;
+                    b.measurements.back().srBCc      = cartesianToReciprocalSpherical(b.uBCc * angular_distance);
+                    b.measurements.back().covariance = config.ball_angular_cov.asDiagonal();
 
                     // Projection-based distance
                     // Given a flat X-Y plane that intersects through the middle of the ball, find the point where
-                    // the central axis vector (uBCw) intersects with this plane. Get the distance from the camera to this point.
-                    // https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection#Algebraic_form
+                    // the central axis vector (uBCw) intersects with this plane. Get the distance from the camera to
+                    // this point. https://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection#Algebraic_form
                     //      Plane normal: (0, 0, 1)
                     //      Point on plane: (0, 0, rWCw.z() + field.ball_radius)
                     //      Line direction: uBCw
                     //      Point on line: (0, 0, 0)
                     // Since the plane normal zeros out x and y, only consider z
                     // rWCw = -Hcw.inverse().translation().z()
-                    const float d                   = (field.ball_radius - Hcw.inverse().translation().z()) / uBCw.z();
-                    const Eigen::Vector3f srBCc     = uBCw * d;  // used later, so save it in a variable
-                    const float projection_distance = srBCc.norm();
-                    const float max_distance        = std::max(projection_distance, distance);
+                    const float projection_distance = (field.ball_radius - Hcw.inverse().translation().z()) / uBCw.z();
+                    // Create a ball measurement message for this calculation
+                    b.measurements.emplace_back();
+                    b.measurements.back().type       = Ball::MeasurementType::PROJECTION;
+                    b.measurements.back().srBCc      = cartesianToReciprocalSpherical(b.uBCc * projection_distance);
+                    b.measurements.back().covariance = config.ball_angular_cov.asDiagonal();
 
 
                     /***********************************************
@@ -271,12 +275,15 @@ namespace module::vision {
                     }
 
                     // Discard this ball if projection_distance and distance are too far apart
-                    if ((std::abs(projection_distance - distance) / max_distance) > config.distance_disagreement) {
+                    const float max_distance = std::max(projection_distance, angular_distance);
+
+                    if ((std::abs(projection_distance - angular_distance) / max_distance)
+                        > config.distance_disagreement) {
 
                         log<NUClear::DEBUG>(
                             fmt::format("Ball discarded: Width and proj distance disagree too much: width = "
                                         "{}, proj = {}",
-                                        distance,
+                                        angular_distance,
                                         projection_distance));
                         log<NUClear::DEBUG>("--------------------------------------------------");
                         // Balls that violate this but not previous checks will show as blue in NUsight
@@ -285,7 +292,7 @@ namespace module::vision {
                     }
 
                     // DISCARD IF THE BALL IS FURTHER THAN THE LENGTH OF THE FIELD
-                    if (distance > field.dimensions.field_length) {
+                    if (angular_distance > field.dimensions.field_length) {
 
                         log<NUClear::DEBUG>(
                             fmt::format("Ball discarded: Distance to ball greater than field length: distance = "
@@ -298,18 +305,26 @@ namespace module::vision {
                         keep     = false;
                     }
 
+                    const Eigen::Vector2f angular_size   = Eigen::Vector2f::Constant(std::acos(radius));
+                    const Eigen::Vector2f screen_angular = cartesianToSpherical(axis).tail<2>();
+
                     log<NUClear::DEBUG>(fmt::format("Camera {}", balls->id));
                     log<NUClear::DEBUG>(fmt::format("radius {}", b.radius));
                     log<NUClear::DEBUG>(fmt::format("Axis {}", b.uBCc.transpose()));
-                    log<NUClear::DEBUG>(fmt::format("Distance {} - srBCc {}", distance, b.srBCc.transpose()));
-                    log<NUClear::DEBUG>(fmt::format("screen_angular {} - angular_size {}",
-                                                    b.screen_angular_BCw.transpose(),
-                                                    Eigen::Vector2f::Constant(std::acos(radius)).transpose()));
-                    log<NUClear::DEBUG>(fmt::format("Projection Distance {}", projection_distance));
                     log<NUClear::DEBUG>(
-                        fmt::format("Distance Throwout {}", std::abs(projection_distance - distance) / max_distance));
+                        fmt::format("Distance {} - srBCc {}", angular_distance, b.measurements[0].srBCc.transpose()));
+                    log<NUClear::DEBUG>(
+                        fmt::format("screen_angular {} - angular_size {}", screen_angular.transpose(), angular_size));
+                    log<NUClear::DEBUG>(fmt::format("Projection Distance {} - srBCc",
+                                                    projection_distance,
+                                                    b.measurements[1].srBCc.transpose()));
+                    log<NUClear::DEBUG>(fmt::format("Distance Throwout {}",
+                                                    std::abs(projection_distance - angular_distance) / max_distance));
                     log<NUClear::DEBUG>("**************************************************");
 
+                    if (!keep) {
+                        b.measurements.clear();
+                    }
                     // If the ball passed the checks, add it to the Balls message to be emitted
                     // If it didn't pass the checks, but we're debugging, then emit the ball to see throwouts in NUsight
                     if (keep || log_level <= NUClear::DEBUG) {
