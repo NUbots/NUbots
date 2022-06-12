@@ -105,19 +105,14 @@ namespace module::localisation {
                 const double seconds  = duration_cast<duration<double>>(curr_time - last_time_update_time).count();
                 last_time_update_time = curr_time;
                 filter.time(seconds);
-                for (const auto& ball : balls.balls) {
-                    if (!ball.measurements.empty()) {
 
-                        // Now call Measurement Update. Supports multiple measurement methods and will treat them as
-                        // separate measurements
-                        for (const auto& measurement : ball.measurements) {
-                            filter.measure(Eigen::Vector3d(measurement.srBCc.cast<double>()),
-                                           Eigen::Matrix3d(measurement.covariance.cast<double>()),
-                                           field,
-                                           balls.Hcw);
-                        }
-                        last_measurement_update_time = curr_time;
-                    }
+                // Call ball measurements update with each ball
+                for (const auto& ball : balls.balls) {
+                    filter.measure(Eigen::Vector3d(ball.srBCc.cast<double>()),
+                                   Eigen::Matrix3d(ball.covariance.cast<double>()),
+                                   field,
+                                   balls.Hcw);
+                    last_measurement_update_time = curr_time;
                 }
             });
 

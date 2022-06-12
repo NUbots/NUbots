@@ -303,7 +303,7 @@ namespace module::vision {
                     log<NUClear::DEBUG>(fmt::format("Distance {} - srBCc {}", distance, b.srBCc.transpose()));
                     log<NUClear::DEBUG>(fmt::format("screen_angular {} - angular_size {}",
                                                     b.screen_angular_BCw.transpose(),
-                                                    b.angular_size.transpose()));
+                                                    Eigen::Vector2f::Constant(std::acos(radius)).transpose()));
                     log<NUClear::DEBUG>(fmt::format("Projection Distance {}", projection_distance));
                     log<NUClear::DEBUG>(
                         fmt::format("Distance Throwout {}", std::abs(projection_distance - distance) / max_distance));

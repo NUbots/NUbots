@@ -32,14 +32,14 @@ message Ball {
     fvec3 srBCc = 2;
     /// Unit radius of the ball from the camera in world space
     /// Cosine of the angle from the centre of the ball to the edge of the ball
-    float radius = 2;
+    float radius = 3;
     /// Angular positions from the camera
     fvec2 screen_angular_BCw = 4;
     /// Confidence of this measurement, for localisation
-    fmat3 covariance = 3;
+    fmat3 covariance = 5;
     /// Colour of the ball for NUsight. In debug mode, discarded balls are emitted in different colours depending on
     /// the reason it was discarded
-    fvec4 colour = 5;
+    fvec4 colour = 6;
 }
 message Balls {
     /// ID of the camera that took the image containing the balls
