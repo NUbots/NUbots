@@ -37,7 +37,7 @@ namespace module::behaviour::skills {
         float KICK_PRIORITY      = 0.0f;
         float EXECUTION_PRIORITY = 0.0f;
 
-        message::motion::KickScriptCommand kickCommand{};
+        std::shared_ptr<message::motion::KickScriptCommand> kickCommand{nullptr};
 
         void updatePriority(const float& priority);
     };

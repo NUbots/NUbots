@@ -54,21 +54,28 @@ namespace module::behaviour::skills {
         on<Configuration>("KickScript.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            KICK_PRIORITY      = config["KICK_PRIORITY"].as<float>();
+            KICK_PRIORITY = config["KICK_PRIORITY"].as<float>();
             EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
         });
 
         on<Trigger<KickScriptCommand>>().then([this](const KickScriptCommand& cmd) {
             kickCommand = cmd;
+            kickCommand = std::make_shared<KickScriptCommand>(cmd);
             updatePriority(KICK_PRIORITY);
         });
 
         on<Trigger<ExecuteKick>>().then([this] {
+            // Don't kick if there is no command
+            // This may happen if we get priority initially with 0 priority and no KickScriptCommand
+            if (kickCommand == nullptr) {
+                return;
+            }
+
             // auto direction = kickCommand.direction;
-            LimbID leg = kickCommand.leg;
+            LimbID leg = kickCommand->leg;
 
             // Execute the penalty kick if the type is PENALTY
-            if (kickCommand.type == KickCommandType::PENALTY) {
+            if (kickCommand->type == KickCommandType::PENALTY) {
                 emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"KickPenalty.yaml"})));
             }
             else {
@@ -83,8 +90,6 @@ namespace module::behaviour::skills {
                         std::vector<std::string>({"Stand.yaml", "KickLeft.yaml", "Stand.yaml"})));
                 }
             }
-
-            updatePriority(EXECUTION_PRIORITY);
         });
 
         on<Trigger<FinishKick>>().then([this] {
