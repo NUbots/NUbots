@@ -8,6 +8,14 @@ on:
     branches: [main]
   pull_request:
 
+# Ensure that only one instance of the workflow is run at a time for each branch/tag.
+# Jobs currently running on the branch/tag will be cancelled when new commits are pushed.
+# See https://docs.github.com/en/actions/learn-github-actions/workflow-syntax-for-github-actions#concurrency.
+concurrency:
+  # `github.workflow` is the workflow name, `github.ref` is the current branch/tag identifier
+  group: ${{ format('{0}:{1}', github.workflow, github.ref) }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
 # Set the yarn cache folder to a writable folder
 env:
   HOME: ${{ github.workspace }}
@@ -15,9 +23,42 @@ env:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
+  # Detects changes to NUsight related files, for conditionally running other jobs
+  check_for_changes:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-20.04
+
+    # Output the detected changes for conditionally running other jobs
+    outputs:
+      has_workflow_changes: ${{ steps.filter.outputs.workflow_changes }}
+      has_nusight_changes: ${{ steps.filter.outputs.nusight_changes }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Check for NUsight Changes
+        uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            workflow_changes:
+              - '.github/workflows/nusight.yaml'
+            nusight_changes:
+              - 'nusight2/**'
+              - 'shared/message/**/*.proto'
+              - 'nuclear/message/proto/**/*.proto'
+
   # Validate the NUsight code style and formatting are correct according to eslint and prettier
   nusight-format:
     name: NUsight Formatting
+    needs: check_for_changes
+
+    # Run only if the workflow or NUsight related files have changed
+    if: >
+      needs.check_for_changes.outputs.has_workflow_changes == 'true' ||
+      needs.check_for_changes.outputs.has_nusight_changes == 'true'
+
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
 
@@ -27,13 +68,9 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Cancels previously running jobs for this workflow
-      - name: Cancel Workflow Action
-        uses: styfle/cancel-workflow-action@0.9.1
-
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       # Get our yarn cache if it exists
       # See https://github.com/actions/cache/blob/master/examples.md#node---yarn
@@ -62,6 +99,13 @@ jobs:
   # Build the NUsight code
   build-nusight:
     name: Build NUsight
+    needs: check_for_changes
+
+    # Run only if the workflow or NUsight related files have changed
+    if: >
+      needs.check_for_changes.outputs.has_workflow_changes == 'true' ||
+      needs.check_for_changes.outputs.has_nusight_changes == 'true'
+
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
 
@@ -71,13 +115,9 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Cancels previously running jobs for this workflow
-      - name: Cancel Workflow Action
-        uses: styfle/cancel-workflow-action@0.9.1
-
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       # Get our yarn cache if it exists
       # See https://github.com/actions/cache/blob/master/examples.md#node---yarn
@@ -106,6 +146,13 @@ jobs:
   # Build the NUsight Storybook code
   build-nusight-storybook:
     name: Build NUsight Storybook
+    needs: check_for_changes
+
+    # Run only if the workflow or NUsight related files have changed
+    if: >
+      needs.check_for_changes.outputs.has_workflow_changes == 'true' ||
+      needs.check_for_changes.outputs.has_nusight_changes == 'true'
+
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
 
@@ -115,13 +162,9 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Cancels previously running jobs for this workflow
-      - name: Cancel Workflow Action
-        uses: styfle/cancel-workflow-action@0.9.1
-
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       # Get our yarn cache if it exists
       # See https://github.com/actions/cache/blob/master/examples.md#node---yarn
@@ -150,6 +193,13 @@ jobs:
   # Test the NUsight code
   test-nusight:
     name: Test NUsight
+    needs: check_for_changes
+
+    # Run only if the workflow or NUsight related files have changed
+    if: >
+      needs.check_for_changes.outputs.has_workflow_changes == 'true' ||
+      needs.check_for_changes.outputs.has_nusight_changes == 'true'
+
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
 
@@ -159,13 +209,9 @@ jobs:
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Cancels previously running jobs for this workflow
-      - name: Cancel Workflow Action
-        uses: styfle/cancel-workflow-action@0.9.1
-
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       # Get our yarn cache if it exists
       # See https://github.com/actions/cache/blob/master/examples.md#node---yarn
