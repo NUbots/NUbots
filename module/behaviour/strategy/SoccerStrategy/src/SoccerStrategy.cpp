@@ -116,8 +116,6 @@ namespace module::behaviour::strategy {
             cfg.goalie_max_translation_speed     = config["goalie_max_translation_speed"].as<float>();
             cfg.goalie_side_walk_angle_threshold = config["goalie_side_walk_angle_threshold"].as<float>();
 
-            cfg.always_power_kick = config["always_power_kick"].as<bool>();
-
             cfg.force_playing          = config["force_playing"].as<bool>();
             cfg.force_penalty_shootout = config["force_penalty_shootout"].as<bool>();
 
@@ -355,8 +353,7 @@ namespace module::behaviour::strategy {
             }
 
             // Walk forwards for cfg.walk_to_ready_time seconds
-            if (NUClear::clock::now() - started_walking_to_ready_at
-                < std::chrono::milliseconds(cfg.walk_to_ready_time)) {
+            if (NUClear::clock::now() - started_walking_to_ready_at < std::chrono::seconds(cfg.walk_to_ready_time)) {
                 emit(std::make_unique<MotionCommand>(utility::behaviour::WalkToReady()));
             }
             else {

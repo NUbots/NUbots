@@ -55,7 +55,6 @@ namespace module::behaviour::strategy {
             float goalie_side_walk_angle_threshold = 0.0f;
             NUClear::clock::duration localisation_interval{};
             NUClear::clock::duration localisation_duration{};
-            bool always_power_kick      = false;
             bool force_playing          = false;
             bool force_penalty_shootout = false;
             int walk_to_ready_time      = 0;
@@ -102,14 +101,16 @@ namespace module::behaviour::strategy {
                   const message::support::FieldDescription& field_description,
                   const message::input::GameState::Data::Mode& mode);
 
+        // PENALTY mode
         void penalty_shootout(const message::input::GameState::Data::Phase& phase,
                               const message::support::FieldDescription& field_description,
                               const message::localisation::Field& field,
                               const message::localisation::Ball& ball);
 
+        // NORMAL mode
         void normal(const message::input::GameState& game_state, const message::input::GameState::Data::Phase& phase);
 
-        // PENALTY mode functions
+        // PENALTY mode, phase functions
         void penalty_shootout_initial();
         void penalty_shootout_ready();
         void penalty_shootout_set(const message::support::FieldDescription& field_description);
@@ -118,7 +119,7 @@ namespace module::behaviour::strategy {
         void penalty_shootout_timeout();
         void penalty_shootout_finished();
 
-        // NORMAL mode functions
+        // NORMAL mode, phase functions
         void normal_initial();
         void normal_ready(const message::input::GameState& game_state);
         void normal_set();
