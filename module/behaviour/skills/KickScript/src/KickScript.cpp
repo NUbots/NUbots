@@ -55,7 +55,6 @@ namespace module::behaviour::skills {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
             KICK_PRIORITY = config["KICK_PRIORITY"].as<float>();
-            EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
         });
 
         on<Trigger<KickScriptCommand>>().then([this](const KickScriptCommand& cmd) {
