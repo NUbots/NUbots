@@ -34,8 +34,7 @@ namespace module::behaviour::skills {
     private:
         const size_t id{size_t(this) * size_t(this) - size_t(this)};
 
-        float KICK_PRIORITY      = 0.0f;
-        float EXECUTION_PRIORITY = 0.0f;
+        float kick_priority = 0.0f;
         int message_timeout = 0;
         NUClear::clock::time_point time_since_message{NUClear::clock::now()};
 

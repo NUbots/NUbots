@@ -57,14 +57,14 @@ namespace module::behaviour::skills {
         on<Configuration>("KickScript.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            KICK_PRIORITY   = config["KICK_PRIORITY"].as<float>();
+            kick_priority   = config["kick_priority"].as<float>();
             message_timeout = config["message_timeout"].as<Expression>();
         });
 
         on<Trigger<KickScriptCommand>>().then([this](const KickScriptCommand& cmd) {
             kickCommand        = std::make_shared<KickScriptCommand>(cmd);
             time_since_message = NUClear::clock::now();
-            updatePriority(KICK_PRIORITY);
+            updatePriority(kick_priority);
         });
 
         on<Trigger<ExecuteKick>>().then([this] {
