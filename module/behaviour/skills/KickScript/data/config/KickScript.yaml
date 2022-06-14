@@ -1,3 +1,4 @@
 log_level: WARN
 
 "KICK_PRIORITY": 50
+message_timeout: 3000

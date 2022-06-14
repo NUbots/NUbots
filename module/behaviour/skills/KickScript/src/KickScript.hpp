@@ -36,6 +36,8 @@ namespace module::behaviour::skills {
 
         float KICK_PRIORITY      = 0.0f;
         float EXECUTION_PRIORITY = 0.0f;
+        int message_timeout = 0;
+        NUClear::clock::time_point time_since_message{NUClear::clock::now()};
 
         std::shared_ptr<message::motion::KickScriptCommand> kickCommand{nullptr};
 

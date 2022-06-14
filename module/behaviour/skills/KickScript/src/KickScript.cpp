@@ -29,6 +29,7 @@
 #include "utility/behaviour/Action.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module::behaviour::skills {
 
@@ -48,18 +49,21 @@ namespace module::behaviour::skills {
     using utility::behaviour::ActionPriorities;
     using utility::behaviour::RegisterAction;
 
+    using utility::support::Expression;
+
     KickScript::KickScript(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         // do a little configurating
         on<Configuration>("KickScript.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            KICK_PRIORITY = config["KICK_PRIORITY"].as<float>();
+            KICK_PRIORITY   = config["KICK_PRIORITY"].as<float>();
+            message_timeout = config["message_timeout"].as<Expression>();
         });
 
         on<Trigger<KickScriptCommand>>().then([this](const KickScriptCommand& cmd) {
-            kickCommand = cmd;
-            kickCommand = std::make_shared<KickScriptCommand>(cmd);
+            kickCommand        = std::make_shared<KickScriptCommand>(cmd);
+            time_since_message = NUClear::clock::now();
             updatePriority(KICK_PRIORITY);
         });
 
@@ -67,6 +71,15 @@ namespace module::behaviour::skills {
             // Don't kick if there is no command
             // This may happen if we get priority initially with 0 priority and no KickScriptCommand
             if (kickCommand == nullptr) {
+                updatePriority(0);
+                return;
+            }
+
+            // Don't kick if it's been a while since we got the KickScriptCommand
+            if (std::chrono::duration_cast<std::chrono::milliseconds>(NUClear::clock::now() - time_since_message)
+                    .count()
+                > message_timeout) {
+                updatePriority(0);
                 return;
             }
 
