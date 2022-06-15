@@ -211,7 +211,7 @@ namespace module::behaviour::strategy {
                             penalty_shootout_playing(field, ball);
                         }
                         else {
-                            // Switch gamemode statemachine based on GameController state
+                            // Switch gamemode statemachine based on GameController mode
                             auto mode = game_state.data.mode.value;
                             switch (mode) {
                                 case GameMode::PENALTY_SHOOTOUT:
