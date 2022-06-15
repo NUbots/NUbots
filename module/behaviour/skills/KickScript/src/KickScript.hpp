@@ -45,7 +45,7 @@ namespace module::behaviour::skills {
 
         /// @brief Updates the priority of the module by emitting an ActionPriorities message
         /// @param priority The priority used in the ActionPriorities message
-        void updatePriority(const float& priority);
+        void update_priority(const float& priority);
     };
 }  // namespace module::behaviour::skills
 

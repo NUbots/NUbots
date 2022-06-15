@@ -121,7 +121,7 @@ namespace module::behaviour::skills {
             }}));
     }
 
-    void KickScript::updatePriority(const float& priority) {
+    void KickScript::update_priority(const float& priority) {
         emit(std::make_unique<ActionPriorities>(ActionPriorities{id, {priority}}));
     }
 
