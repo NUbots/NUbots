@@ -353,7 +353,8 @@ namespace module::behaviour::strategy {
             }
 
             // Walk forwards for cfg.walk_to_ready_time seconds
-            if (NUClear::clock::now() - started_walking_to_ready_at < std::chrono::seconds(cfg.walk_to_ready_time)) {
+            if (NUClear::clock::now() - started_walking_to_ready_at
+                < std::chrono::milliseconds(cfg.walk_to_ready_time * 1000)) {
                 emit(std::make_unique<MotionCommand>(utility::behaviour::WalkToReady()));
             }
             else {
