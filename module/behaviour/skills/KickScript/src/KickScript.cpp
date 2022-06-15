@@ -64,14 +64,14 @@ namespace module::behaviour::skills {
         on<Trigger<KickScriptCommand>>().then([this](const KickScriptCommand& cmd) {
             kick_command       = std::make_shared<KickScriptCommand>(cmd);
             time_since_message = NUClear::clock::now();
-            updatePriority(kick_priority);
+            update_priority(kick_priority);
         });
 
         on<Trigger<ExecuteKick>>().then([this] {
             // Don't kick if there is no command
             // This may happen if we get priority initially with 0 priority and no KickScriptCommand
             if (kick_command == nullptr) {
-                updatePriority(0);
+                update_priority(0);
                 return;
             }
 
@@ -79,7 +79,7 @@ namespace module::behaviour::skills {
             if (std::chrono::duration_cast<std::chrono::milliseconds>(NUClear::clock::now() - time_since_message)
                     .count()
                 > message_timeout) {
-                updatePriority(0);
+                update_priority(0);
                 return;
             }
 
@@ -105,7 +105,7 @@ namespace module::behaviour::skills {
 
         on<Trigger<FinishKick>>().then([this] {
             emit(std::make_unique<KickFinished>());
-            updatePriority(0);
+            update_priority(0);
         });
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
