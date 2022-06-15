@@ -36,12 +36,12 @@ namespace module::behaviour::skills {
         const size_t id{size_t(this) * size_t(this) - size_t(this)};
         /// @brief Value that priority is set to when wanting to kick
         float kick_priority = 0.0f;
-        /// @brief Time between kick command message and kicking before kick is discarded
+        /// @brief Time between kick command message and kicking before kick is discarded (milliseconds)
         int message_timeout = 0;
-        /// @brief Time since the last kick command message was received
+        /// @brief Time when the last kick command message was received
         NUClear::clock::time_point time_since_message{NUClear::clock::now()};
         /// @brief The last kick command received, nullptr if none received yet
-        std::shared_ptr<message::motion::KickScriptCommand> kickCommand{nullptr};
+        std::shared_ptr<message::motion::KickScriptCommand> kick_command{nullptr};
 
         /// @brief Updates the priority of the module by emitting an ActionPriorities message
         /// @param priority The priority used in the ActionPriorities message

@@ -62,7 +62,7 @@ namespace module::behaviour::skills {
         });
 
         on<Trigger<KickScriptCommand>>().then([this](const KickScriptCommand& cmd) {
-            kickCommand        = std::make_shared<KickScriptCommand>(cmd);
+            kick_command       = std::make_shared<KickScriptCommand>(cmd);
             time_since_message = NUClear::clock::now();
             updatePriority(kick_priority);
         });
@@ -70,7 +70,7 @@ namespace module::behaviour::skills {
         on<Trigger<ExecuteKick>>().then([this] {
             // Don't kick if there is no command
             // This may happen if we get priority initially with 0 priority and no KickScriptCommand
-            if (kickCommand == nullptr) {
+            if (kick_command == nullptr) {
                 updatePriority(0);
                 return;
             }
@@ -83,11 +83,10 @@ namespace module::behaviour::skills {
                 return;
             }
 
-            // auto direction = kickCommand.direction;
-            LimbID leg = kickCommand->leg;
+            LimbID leg = kick_command->leg;
 
             // Execute the penalty kick if the type is PENALTY
-            if (kickCommand->type == KickCommandType::PENALTY) {
+            if (kick_command->type == KickCommandType::PENALTY) {
                 emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"KickPenalty.yaml"})));
             }
             else {
@@ -96,7 +95,7 @@ namespace module::behaviour::skills {
                         id,
                         std::vector<std::string>({"Stand.yaml", "KickRight.yaml", "Stand.yaml"})));
                 }
-                else {  // if (leg == LimbID::LEFT_LEG) {
+                else {  // LEFT_LEG
                     emit(std::make_unique<ExecuteScriptByName>(
                         id,
                         std::vector<std::string>({"Stand.yaml", "KickLeft.yaml", "Stand.yaml"})));
