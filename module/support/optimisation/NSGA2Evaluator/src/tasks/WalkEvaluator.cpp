@@ -44,14 +44,13 @@ namespace module {
                     initialRobotPosition.y() = position.value.Y;
                     initialRobotPosition.z() = position.value.Z;
                 }
-                else
-                {
-                    robotPosition.x() = position.value.X;
-                    robotPosition.y() = position.value.Y;
-                    robotPosition.z() = position.value.Z;
-                }
+            
+                robotPosition.x() = position.value.X;
+                robotPosition.y() = position.value.Y;
+                robotPosition.z() = position.value.Z;
+               
 
-                if(checkOffCourse(position))  //Checking if NUgus walks in straght line in the X directon
+                if(checkOffCourse())  //Checking if NUgus walks in straght line in the X directon
                 {
                     evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TerminateEarly));
                 }
@@ -207,14 +206,11 @@ namespace module {
             }
 
             // Checking if NUgus goes off the Y axis path too far
-            bool WalkEvaluator::checkOffCourse(const OptimisationRobotPosition& position)
+            bool WalkEvaluator::checkOffCourse()
             {
                 bool offCourse         = false;
-                robotPosition.x() = position.value.X;
-                    robotPosition.y() = position.value.Y;
-                    robotPosition.z() = position.value.Z;
+        
                 auto distanceOffCourse = std::fabs(robotPosition.y() - initialRobotPosition.y());
-                //NUClear::log<NUClear::DEBUG>("OffCourse distance= ", distanceOffCourse);
 
                 if (distanceOffCourse >= 0.2)
                 {

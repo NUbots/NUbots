@@ -39,7 +39,7 @@ walk:
   foot:
     # Lateral distance between the feet center (how spread apart the feet should be)
     # (in m, >= 0)
-    distance: [0.18, 0.12, 0.24]
+    distance: [0.18, 0.12, 0.24]  #This can be wider fpor strafe
     # Maximum flying foot height (how high we lift a foot from the ground)
     # (in m, >= 0)
     rise: [0.075, 0.05, 0.17]
