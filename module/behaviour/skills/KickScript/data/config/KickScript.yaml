@@ -1,4 +1,6 @@
 log_level: WARN
 
-"KICK_PRIORITY": 50
-"EXECUTION_PRIORITY": 50
+# Value that priority is set to when wanting to kick
+kick_priority: 40
+# Time between kick command message and kicking before kick is discarded (milliseconds)
+message_timeout: 3000
