@@ -629,7 +629,7 @@ namespace module::motion {
         // Trunk y axis orientation
         point(TrajectoryTypes::TRUNK_AXIS_Y,
               0.0f,
-              params.trunk_pitch,
+              trunk_axis_pos_at_last.y(),
               trunk_axis_vel_at_last.y(),
               trunk_axis_acc_at_last.y());
         point(TrajectoryTypes::TRUNK_AXIS_Y, half_period, params.trunk_pitch);
