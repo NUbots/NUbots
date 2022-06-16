@@ -37,8 +37,8 @@ namespace extension::behaviour::commands {
     enum class ProviderClassification {
         /// Provide providers are typical providers that run when given a task
         PROVIDE,
-        /// Leave providers are able to be forced to run when a higher priority task needs a causing it makes
-        LEAVE,
+        /// Pushed providers are able to be forced to run when a higher priority task needs a causing it makes
+        PUSHED,
         /// Start providers run once when a provider group first gets a task
         START,
         /// Stop providers run once there are no tasks running for any provider of this group

@@ -134,7 +134,7 @@ namespace module::extension {
             provider->when.emplace_back(when.type, when.validator, when.current, handle);
         }
         else {
-            throw std::runtime_error("When statements must come after a Provide or Leave statement");
+            throw std::runtime_error("When statements must come after a Provide or Pushed statement");
         }
     }
 
@@ -152,7 +152,7 @@ namespace module::extension {
             provider->causing.emplace(causing.type, causing.resulting_state);
         }
         else {
-            throw std::runtime_error("Causing statements must come after a Provide or Leave statement");
+            throw std::runtime_error("Causing statements must come after a Provide or Pushed statement");
         }
     }
 
@@ -171,7 +171,7 @@ namespace module::extension {
             provider->needs.emplace(needs.type);
         }
         else {
-            throw std::runtime_error("Needs statements must come after a Provide or Leave statement");
+            throw std::runtime_error("Needs statements must come after a Provide or Pushed statement");
         }
     }
 

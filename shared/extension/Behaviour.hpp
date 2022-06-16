@@ -139,15 +139,15 @@ namespace extension::behaviour {
     };
 
     /**
-     * Define a Leave Provider.
+     * Define a Pushed Provider.
      * It should normally be combined with a Causing DSL word.
      * In this case when another Provider with higher priority needs a causing that this provider is able to handle it
-     * will force the provider to use this leave.
+     * will force the provider group to use this provider.
      *
      * @tparam T the Provider type that this function provides for
      */
     template <typename T>
-    struct Leave : public ProviderBase<T, commands::ProviderClassification::LEAVE> {};
+    struct Pushed : public ProviderBase<T, commands::ProviderClassification::PUSHED> {};
 
     /**
      * Define a Provider for a type.
@@ -183,8 +183,8 @@ namespace extension::behaviour {
     /**
      * Limit access to this Provider unless a condition is true.
      * This will prevent a Provider from running if the state is false.
-     * However if there is a `Provide` or `Leave` reaction that has a Causing relationship for this When, then depending
-     * on the priority of this task, it can force a change in which provider will be run
+     * However if there is a `Provide` or `Pushed` reaction that has a Causing relationship for this When, then
+     * depending on the priority of this task, it can force a change in which provider will be run
      *
      * @tparam State    the smart enum that is being monitored for the when condition
      * @tparam expr     the function used for the comparison (e.g. std::less)
@@ -309,7 +309,7 @@ namespace extension::behaviour {
      * There are two different types of tasks that can be created using this emit, root level tasks and subtasks.
      *
      * Root level tasks:
-     * These are created when a reaction that is not a Provider (not a Provide or Leave) emits the
+     * These are created when a reaction that is not a Provider (not a Provide or Pushed) emits the
      * task. These tasks form the root of the execution tree and their needs will be met on a highest priority first
      * basis. These tasks will persist until the Provider that they use emits a done task, or the task is re-emitted
      * with a priority of 0.
