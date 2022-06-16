@@ -15,8 +15,9 @@ namespace utility::clock {
     };
 
     static clockStruct clockArray[2];
+    static clockStruct clockArrayPtr;
 
-    static std::atomic_char clockArrayIndex = 0;
+    static std::atomic_int clockArrayIndex = 0;
 
     void update_rtf(const double& new_rtf) {
         auto now = NUClear::base_clock::now();
@@ -44,10 +45,10 @@ namespace utility::clock {
 namespace NUClear {
     clock::time_point clock::now() {
         // Move along the time
-        return utility::clock::clockArray[clockArrayIndex].epoch
+        return utility::clock::clockArray[utility::clock::clockArrayIndex].epoch
                + std::chrono::duration_cast<std::chrono::steady_clock::duration>(
-                   (NUClear::base_clock::now() - utility::clock::clockArray[clockArrayIndex].last_update)
-                   * utility::clock::clockArrayPtr.rtf);
+                   (NUClear::base_clock::now() - utility::clock::clockArray[utility::clock::clockArrayIndex].last_update)
+                   * utility::clock::clockArrayPtr.rtf); //utility::clock::clockArray[utility::clock::clockArrayIndex].rtf);
     }
 
 }  // namespace NUClear
