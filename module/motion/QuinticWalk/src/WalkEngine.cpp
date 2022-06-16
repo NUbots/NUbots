@@ -499,7 +499,7 @@ namespace module::motion {
               trunk_axis_vel_at_last.y(),
               trunk_axis_acc_at_last.y());
         point(TrajectoryTypes::TRUNK_AXIS_Y, half_period + timeShift, eulerAtSupport.y(), axisVel.y());
-        point(TrajectoryTypes::TRUNK_AXIS_Y, period + timeShift, eulerAtNext.z(), axisVel.y());
+        point(TrajectoryTypes::TRUNK_AXIS_Y, period + timeShift, eulerAtNext.y(), axisVel.y());
 
         // Trunk z axis orientation (yaw)
         point(TrajectoryTypes::TRUNK_AXIS_Z,
