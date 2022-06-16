@@ -210,16 +210,9 @@ namespace module {
             bool WalkEvaluator::checkOffCourse()
             {
                 bool offCourse         = false;
-<<<<<<< HEAD
         
                 auto distanceOffCourse = std::fabs(robotPosition.y() - initialRobotPosition.y());
-=======
-                robotPosition.x()      = position.value.X;
-                robotPosition.y()      = position.value.Y;
-                robotPosition.z()      = position.value.Z;
-                auto distanceOffCourse = std::fabs(robotPosition.x() - initialRobotPosition.x());
-                //NUClear::log<NUClear::DEBUG>("OffCourse distance= ", distanceOffCourse);
->>>>>>> 5b9aa4f8a21e2eddbee819efd815edd53ae6a7a4
+
 
                 if (distanceOffCourse >= 0.2)
                 {
