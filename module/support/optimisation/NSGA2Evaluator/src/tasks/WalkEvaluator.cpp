@@ -62,9 +62,9 @@ namespace module {
                 trial_duration_limit = std::chrono::seconds(currentRequest.trial_duration_limit);
 
                 // Set our walk command
-                walk_command_velocity.x() = currentRequest.parameters.real_params[11]; //param 11 is velocity!!!!!!
-                walk_command_velocity.y() = 0.0;
-                walk_command_rotation     = 0.0;
+                walk_command_velocity.x() = currentRequest.parameters.real_params[11]; //param 11 is X velocity!!!!!!
+                walk_command_velocity.y() = 0.0; // currentRequest.parameters.real_params[11]; //0.0;
+                walk_command_rotation     = 0.0; // currentRequest.parameters.real_params[13]; // 0.0;
 
                 // Read the QuinticWalk config and overwrite the config parameters with the current individual's
                 // parameters
@@ -84,6 +84,7 @@ namespace module {
                 trunk["pitch"]    = currentRequest.parameters.real_params[5];
                 trunk["x_offset"] = currentRequest.parameters.real_params[6];
                 trunk["y_offset"] = currentRequest.parameters.real_params[7];
+  
                 trunk["swing"]    = currentRequest.parameters.real_params[8];
                 trunk["pause"]    = currentRequest.parameters.real_params[9];
 
@@ -151,7 +152,7 @@ namespace module {
             }
 
             std::vector<double> WalkEvaluator::calculateScores() {
-                auto robotDistanceTravelled = std::fabs(initialRobotPosition.x() - robotPosition.x());
+                auto robotDistanceTravelled = std::fabs(initialRobotPosition.y() - robotPosition.y());
                 return {
                     maxFieldPlaneSway,            // For now, we want to reduce this
                     1.0 / robotDistanceTravelled  // 1/x since the NSGA2 optimiser is a minimiser
@@ -209,8 +210,16 @@ namespace module {
             bool WalkEvaluator::checkOffCourse()
             {
                 bool offCourse         = false;
+<<<<<<< HEAD
         
                 auto distanceOffCourse = std::fabs(robotPosition.y() - initialRobotPosition.y());
+=======
+                robotPosition.x()      = position.value.X;
+                robotPosition.y()      = position.value.Y;
+                robotPosition.z()      = position.value.Z;
+                auto distanceOffCourse = std::fabs(robotPosition.x() - initialRobotPosition.x());
+                //NUClear::log<NUClear::DEBUG>("OffCourse distance= ", distanceOffCourse);
+>>>>>>> 5b9aa4f8a21e2eddbee819efd815edd53ae6a7a4
 
                 if (distanceOffCourse >= 0.2)
                 {
