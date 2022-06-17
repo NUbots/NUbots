@@ -20,14 +20,15 @@
 #include "Getup.hpp"
 
 #include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <cmath>
 
 #include "extension/Configuration.hpp"
 #include "extension/Script.hpp"
 
 #include "message/behaviour/ServoCommand.hpp"
+#include "message/input/Sensors.hpp"
 #include "message/motion/GetupCommand.hpp"
-#include "message/platform/RawSensors.hpp"
 
 #include "utility/behaviour/Action.hpp"
 #include "utility/input/LimbID.hpp"
@@ -37,9 +38,9 @@ namespace module::behaviour::skills {
     using extension::Configuration;
     using extension::ExecuteScriptByName;
 
+    using message::input::Sensors;
     using message::motion::ExecuteGetup;
     using message::motion::KillGetup;
-    using message::platform::RawSensors;
 
     using utility::behaviour::ActionPriorities;
     using utility::behaviour::RegisterAction;
@@ -63,25 +64,22 @@ namespace module::behaviour::skills {
             EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
         });
 
-        on<Last<20, Trigger<RawSensors>>, Single>().then(
-            "Getup Fallen Check",
-            [this](const std::list<std::shared_ptr<const RawSensors>>& sensors) {
-                Eigen::Vector3d acc_reading = Eigen::Vector3d::Zero();
+        on<Trigger<Sensors>>().then("Getup Fallen Check", [this](const Sensors& sensors) {
+            // Transform to torso {t} from world {w} space
+            Eigen::Matrix4d Hwt = sensors.Htw.inverse();
+            // Basis Z vector of torso {t} in world {w} space
+            Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
+            // Basis X vector of torso {t} in world {w} space
+            Eigen::Vector3d uXTw = Hwt.block(0, 0, 3, 1);
 
-                for (const auto& s : sensors) {
-                    acc_reading += s->accelerometer.cast<double>();
-                }
-                acc_reading = (acc_reading / double(sensors.size())).normalized();
-
-                // check that the accelerometer reading is less than some predetermined
-                // amount
-                if (!gettingUp && std::acos(Eigen::Vector3d::UnitZ().dot(acc_reading)) > FALLEN_ANGLE) {
-                    // If we are on our side, treat it as being on our front, hopefully the rollover will help matters
-                    isFront = (M_PI_2 - std::acos(Eigen::Vector3d::UnitX().dot(acc_reading)) <= 0.0);
-
-                    updatePriority(GETUP_PRIORITY);
-                }
-            });
+            // Check if angle between torso z axis and world z axis is greater than config value FALLEN_ANGLE
+            if (!gettingUp && std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > FALLEN_ANGLE) {
+                // If the z component of the torso's x basis in world space is negative, the robot is fallen on
+                // its front
+                isFront = (uXTw.z() <= 0);
+                updatePriority(GETUP_PRIORITY);
+            }
+        });
 
         on<Trigger<ExecuteGetup>, Single>().then("Execute Getup", [this]() {
             gettingUp = true;
