@@ -122,7 +122,6 @@ namespace module::behaviour::planning {
                 // Transform the vision ball measurement into torso space
                 Eigen::Affine3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
                 rBTt = Htc * rBCc;
-                log<NUClear::DEBUG>("rBTt (x,y,z): (", rBTt.x(), ",", rBTt.y(), ",", rBTt.z(), ")");
             }
         });
 
@@ -182,13 +181,6 @@ namespace module::behaviour::planning {
         // ball, saturated with value cfg.max_turn_speed float
         walk_command.z() = std::atan2(walk_command.y(), walk_command.x());
         walk_command.z() = utility::math::clamp(cfg.min_turn_speed, walk_command.z(), cfg.max_turn_speed);
-        log<NUClear::DEBUG>("walk_command.x(),walk_command.x(),walk_command.z()): (",
-                            walk_command.x(),
-                            ",",
-                            walk_command.y(),
-                            ",",
-                            walk_command.z(),
-                            ")");
 
         std::unique_ptr<WalkCommand> command =
             std::make_unique<WalkCommand>(subsumptionId, walk_command.cast<double>());
