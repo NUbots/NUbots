@@ -455,6 +455,9 @@ namespace module::motion {
 
         // Define trunk yaw target orientation position and velocity in euler angle and convertion to axis
         // vector
+
+        // TODO(MotionTeam): Investigate why the added pitch and yaw coef's cause the robot to drift left for forward
+        // walk commands
         // const Eigen::Vector3f eulerAtSupport(0.0f,
         //                                      params.trunk_pitch
         //                                          + params.trunk_pitch_p_coef_forward * foot_step.getNext().x()
@@ -466,10 +469,6 @@ namespace module::motion {
         //                                       + params.trunk_pitch_p_coef_forward * foot_step.getNext().x()
         //                                       + params.trunk_pitch_p_coef_turn * std::fabs(foot_step.getNext().z()),
         //                                   foot_step.getNext().z());
-        // const Eigen::Matrix3f matAtSupport  = utility::math::euler::EulerIntrinsicToMatrix(eulerAtSupport);
-        // const Eigen::Matrix3f matAtNext     = utility::math::euler::EulerIntrinsicToMatrix(eulerAtNext);
-        // const Eigen::Vector3f axisAtSupport = Eigen::AngleAxisf(matAtSupport).axis();
-        // const Eigen::Vector3f axisAtNext    = Eigen::AngleAxisf(matAtNext).axis();
 
         const Eigen::Vector3f eulerAtSupport(0.0f,
                                              params.trunk_pitch,
