@@ -20,9 +20,9 @@ namespace utility::clock {
     static std::atomic_int clockArrayIndex = 0;
 
     void update_rtf(const double& new_rtf) {
-        auto now = NUClear::clock::now(); //changed from base_clock
+        auto now = NUClear::clock::now();   // changed from base_clock
 
-        clockArrayIndex ^= 1; //Switch from other clock in array
+        clockArrayIndex ^= 1;   // Switch from other clock in array
 
         // Since we are updating our rtf we need to advance our state so the new deltas will be calculated properly
         // We set the variables in this specific order to mimise the error that will occur if the threading reads as we
@@ -37,9 +37,9 @@ namespace utility::clock {
                 * clockArray[clockArrayIndex].rtf);  // set before we update the variables
         clockArray[clockArrayIndex].last_update = now;
         clockArray[clockArrayIndex].rtf         = new_rtf;
-        clockArrayRead                           = clockArray[clockArrayIndex];
+        clockArrayRead                          = clockArray[clockArrayIndex];
 
-        //clockArrayIndex ^= 1;
+        // clockArrayIndex ^= 1;
     }
 
 }  // namespace utility::clock
@@ -47,10 +47,11 @@ namespace utility::clock {
 namespace NUClear {
     clock::time_point clock::now() {
         // Move along the time
-        return utility::clock::clockArrayRead.epoch //[utility::clock::clockArrayIndex].epoch
+        return utility::clock::clockArrayRead.epoch                 // [utility::clock::clockArrayIndex].epoch
                + std::chrono::duration_cast<std::chrono::steady_clock::duration>(
-                   (NUClear::base_clock::now() - utility::clock::clockArrayRead.last_update) //[utility::clock::clockArrayIndex].last_update)
-                   * utility::clock::clockArrayRead.rtf); //[utility::clock::clockArrayIndex].rtf);
+                   (NUClear::base_clock::now() 
+                   - utility::clock::clockArrayRead.last_update)    // [utility::clock::clockArrayIndex].last_update)
+                   * utility::clock::clockArrayRead.rtf);           // [utility::clock::clockArrayIndex].rtf);
     }
 
 }  // namespace NUClear
