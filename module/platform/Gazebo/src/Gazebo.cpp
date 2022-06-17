@@ -51,7 +51,8 @@ namespace module::platform {
                 if (real_time != 0 || sim_time != 0) {
                     double real_delta = simulation.real_time - real_time;
                     double sim_delta  = simulation.simulation_time - sim_time;
-                    config.rtf        = config.rtf * config.clock_smoothing + (1.0 - config.clock_smoothing) * (real_delta / sim_delta);
+                    config.rtf =
+                        config.rtf * config.clock_smoothing + (1.0 - config.clock_smoothing) * (real_delta / sim_delta);
                     utility::clock::update_rtf(config.rtf);
                 }
 

@@ -49,8 +49,7 @@ namespace NUClear {
         // Move along the time
         return utility::clock::clockArrayRead.epoch
                + std::chrono::duration_cast<std::chrono::steady_clock::duration>(
-                   (NUClear::base_clock::now() 
-                    - utility::clock::clockArrayRead.last_update)
+                   (NUClear::base_clock::now() - utility::clock::clockArrayRead.last_update)
                    * utility::clock::clockArrayRead.rtf);
     }
 
