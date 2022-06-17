@@ -57,19 +57,16 @@ namespace module::behaviour::strategy {
             NUClear::clock::duration localisation_duration{};
             bool force_playing          = false;
             bool force_penalty_shootout = false;
-            int walk_to_ready_time      = 0;
         } cfg;
 
         message::behaviour::FieldTarget walkTarget{};
 
         std::vector<message::behaviour::FieldTarget> lookTarget{};
 
-        bool is_getting_up            = false;
-        bool has_kicked               = false;
-        bool self_penalised           = false;
-        bool reset_in_initial         = true;
-        bool started_walking_to_ready = false;
-        bool is_reset_half            = false;
+        bool is_getting_up    = false;
+        bool has_kicked       = false;
+        bool self_penalised   = false;
+        bool reset_in_initial = true;
 
 
         NUClear::clock::time_point started_walking_to_ready_at;
@@ -121,7 +118,7 @@ namespace module::behaviour::strategy {
 
         // NORMAL mode, phase functions
         void normal_initial();
-        void normal_ready(const message::input::GameState& game_state);
+        void normal_ready();
         void normal_set();
         void normal_playing();
         void normal_finished();

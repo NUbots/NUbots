@@ -118,8 +118,6 @@ namespace module::behaviour::strategy {
 
             cfg.force_playing          = config["force_playing"].as<bool>();
             cfg.force_penalty_shootout = config["force_penalty_shootout"].as<bool>();
-
-            cfg.walk_to_ready_time = config["walk_to_ready_time"].as<int>();
         });
 
         on<Trigger<Field>, With<FieldDescription>>().then(
@@ -259,7 +257,7 @@ namespace module::behaviour::strategy {
             // Beginning of game and half time
             case Phase::INITIAL: normal_initial(); break;
             // After initial, robots position on their half of the field.
-            case Phase::READY: normal_ready(game_state); break;
+            case Phase::READY: normal_ready(); break;
             // Happens after ready. Robot should stop moving.
             case Phase::SET: normal_set(); break;
             // After set, main game where we should walk to ball and kick.
@@ -336,31 +334,12 @@ namespace module::behaviour::strategy {
         currentState = Behaviour::State::INITIAL;
     }
 
-    void SoccerStrategy::normal_ready(const GameState& game_state) {
-        if (penalised()) {  // penalised
-            stand_still();
-            find({FieldTarget(FieldTarget::Target::SELF)});
+    void SoccerStrategy::normal_ready() {
+        stand_still();
+        if (penalised()) {
             currentState = Behaviour::State::PENALISED;
         }
         else {
-            if (!game_state.data.first_half & !is_reset_half) {
-                is_reset_half            = true;
-                started_walking_to_ready = false;
-            }
-            if (!started_walking_to_ready) {
-                started_walking_to_ready_at = NUClear::clock::now();
-                started_walking_to_ready    = true;
-            }
-
-            // Walk forwards for cfg.walk_to_ready_time seconds
-            if (NUClear::clock::now() - started_walking_to_ready_at
-                < std::chrono::milliseconds(cfg.walk_to_ready_time * 1000)) {
-                emit(std::make_unique<MotionCommand>(utility::behaviour::WalkToReady()));
-            }
-            else {
-                stand_still();
-            }
-
             currentState = Behaviour::State::READY;
         }
     }
