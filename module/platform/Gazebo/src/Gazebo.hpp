@@ -19,11 +19,12 @@ namespace module::platform {
             /// updates from Gazebo
             double clock_smoothing = 0.0;
             /// @brief Real time factor of the simulation clock
-            double rtf = 1.0;
+            // double rtf = 1.0;
         } config;
 
         double sim_time;
         double real_time;
+        double rtf;
     };
 }  // namespace module::platform
 
