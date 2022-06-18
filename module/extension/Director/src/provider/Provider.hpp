@@ -38,19 +38,14 @@ namespace module::extension::provider {
         struct WhenCondition {
             WhenCondition(const std::type_index& type_,
                           std::function<bool(const int&)> validator_,
-                          std::function<int()> current_,
-                          NUClear::threading::ReactionHandle handle_)
-                : type(type_)
-                , validator(std::move(validator_))
-                , current(std::move(current_))
-                , handle(std::move(handle_)) {}
-
+                          const bool& current_)
+                : type(type_), validator(std::move(validator_)), current(current_) {}
             /// The type of state that this condition is checking
             std::type_index type;
             /// Expression to determine if the passed state is valid
             std::function<bool(const int&)> validator;
             /// Function to get the current state
-            std::function<int()> current;
+            bool current;
             /// The reaction handle which is monitoring this state for a valid condition
             NUClear::threading::ReactionHandle handle;
         };
@@ -67,7 +62,7 @@ namespace module::extension::provider {
         /// The reaction object to run in order to run this Provider
         std::shared_ptr<NUClear::threading::Reaction> reaction;
         /// Any when conditions that are required by this Provider
-        std::vector<WhenCondition> when;
+        std::vector<std::shared_ptr<WhenCondition>> when;
         /// A list of types and states that are caused by running this Provider
         std::map<std::type_index, int> causing;
         /// A list of provider types that this provider needs in order to run

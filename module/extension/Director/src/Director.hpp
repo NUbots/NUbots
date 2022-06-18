@@ -81,7 +81,7 @@ namespace module::extension {
          * Compares the priorities of two director tasks and returns true if the challenger has priority over the
          * incumbent.
          *
-         * The function requires that the challenger's precendence is strictly greater than the incumbent's.
+         * The function requires that the challenger's precedence is strictly greater than the incumbent's.
          * This ensures that we don't change tasks unnecessarily when the priority is equal.
          *
          * @param incumbent     the task to compare which is currently the active running task
@@ -116,6 +116,59 @@ namespace module::extension {
          * @param group the group whose queue we want to reevaluate
          */
         void reevaluate_queue(provider::ProviderGroup& group);
+
+        /**
+         * Finds a provider that we can push to satisfy the passed when condition.
+         *
+         * Will search through all the provider groups that are currently running and find one which we have higher
+         * priority than. Then we search the causings that they have to see if any of them will satisfy the passed when
+         * condition.
+         *
+         * @param authority this task is used as an authority token to determine if we have priority
+         * @param when      the when condition we are trying to meet
+         *
+         * @return a provider that we can push to satisfy the when condition or nullptr if we couldn't find one
+         */
+        std::shared_ptr<provider::Provider> find_push(
+            const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& authority,
+            const provider::Provider::WhenCondition& when);
+
+        /**
+         * An object which holds the series of providers we can run that are a solution to executing a given task.
+         * In the event that a currently runnable solution couldn't be found it instead returns a series of providers
+         * that can be pushed so this can run.
+         */
+        struct Solution {
+            enum class Type { SOLUTION = 0, PUSHABLE = 1, BLOCKED = 2 };
+            Type type;
+            /// Either the providers we can use in the case of a solution, or the providers we can push to in the case
+            /// of a pushable solution
+            std::vector<std::shared_ptr<provider::Provider>> providers;
+        };
+
+        /**
+         * Finds a solution of providers for a given task
+         *
+         * @param task the task to solve for
+         *
+         * @return the solution or pushable solution to executing this task, or blocked if it cannot be run
+         */
+        Solution director_solution(const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& task);
+
+        /**
+         * Finds a solution for using the provider group for the type given in requester.
+         * The task object that is provided is used as an authority token to ensure that we have priority.
+         *
+         * This will recursively run through every `Needs` relationship that the provider in requester has.
+         *
+         * @param authority the task that is used as an authority token to ensure that we have priority
+         * @param requester the type of provider group we are trying to find a solution for
+         *
+         * @return the solution or pushable solution to executing this task, or blocked if it cannot be run
+         */
+        Solution director_solution(
+            const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& authority,
+            const std::type_index& requester);
 
         /**
          * Looks at all the tasks that are in the pack and determines if they should run, and if so runs them.
