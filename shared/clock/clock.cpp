@@ -57,7 +57,7 @@ namespace NUClear {
         int c = active;
 
         // Calculate the time
-        return data[active].epoch + dc((NUClear::base_clock::now() - data[c].last_update) * data[c].rtf);
+        return data[c].epoch + dc((NUClear::base_clock::now() - data[c].last_update) * data[c].rtf);
     }
 
 }  // namespace NUClear
