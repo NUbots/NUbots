@@ -94,7 +94,7 @@ namespace module::extension {
         const bool i_o = std::any_of(i_p.begin(), i_p.end(), [](const auto& v) { return v.optional; });
         const bool c_o = std::any_of(c_p.begin(), c_p.end(), [](const auto& v) { return v.optional; });
 
-        // If both or neither are optional then we compare at the point where they were siblings.
+        // If both or neither are optional then we compare at the point where their ancestors were siblings.
         // If both are optional then we would rather that whichever ancestor had higher priority have its optional tasks
         if (i_o == c_o) {
             return i_p.back().priority < c_p.back().priority;

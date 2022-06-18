@@ -467,11 +467,11 @@
       gain: 10
       torque: 100
     - id: R_HIP_PITCH
-      position: -1
+      position: -0.800000012
       gain: 20
       torque: 100
     - id: L_HIP_PITCH
-      position: -1
+      position: -0.800000012
       gain: 20
       torque: 100
     - id: R_KNEE
@@ -517,19 +517,19 @@
       gain: 10
       torque: 100
     - id: R_HIP_PITCH
-      position: -0.649999976
+      position: -0.800000012
       gain: 15
       torque: 100
     - id: L_HIP_PITCH
-      position: -0.649999976
+      position: -0.800000012
       gain: 15
       torque: 100
     - id: R_KNEE
-      position: 0.785494089
+      position: 1
       gain: 20
       torque: 100
     - id: L_KNEE
-      position: 0.826921582
+      position: 1
       gain: 20
       torque: 100
     - id: R_ANKLE_PITCH

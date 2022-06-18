@@ -23,6 +23,7 @@
 namespace module::extension {
 
     using ::extension::behaviour::commands::DirectorTask;
+    using ::extension::behaviour::commands::ProviderClassification;
 
     void Director::remove_task(const std::shared_ptr<const DirectorTask>& task) {
 
@@ -36,7 +37,7 @@ namespace module::extension {
             group.active_task = nullptr;
 
             // Re-evaluate the queue of tasks for this group
-            // This may set `group.active_task` to a valid value
+            // This may set `group.active_task` to a valid value if a new task is picked up
             reevaluate_queue(group);
 
             // If nothing in the queue updated the active task to a new task we are now idle
@@ -44,17 +45,23 @@ namespace module::extension {
             if (group.active_task == nullptr) {
                 group.state = provider::ProviderGroup::IDLE;
 
-                // TODO(@TrentHouliston)
-                //  if there is a pure leaving provider, run it
-                //  maybe I need a new set of DSL keywords so there can be a pure leaving keyword that isn't leaving
-                //  what leaving without causing/when providers do are very different from what they do with
-                //      when/causing.
-                //  maybe the leaving without a causing needs it's own DSL keyword, (might be leaving and current
-                //      leaving needs renaming)
+                // Run the Stop reactions for this provider group since it is no longer running
+                for (auto& provider : group.providers) {
+                    if (provider->classification == ProviderClassification::STOP) {
+                        auto task = provider->reaction->get_task();
+                        if (task) {
+                            task->run(std::move(task));
+                        }
+                    }
+                }
 
+                // Remove any subtasks this group had recursively
                 for (const auto& t : group.subtasks) {
                     remove_task(t);
                 }
+
+                // We now have no subtasks
+                group.subtasks.clear();
             }
         }
         else {
