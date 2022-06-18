@@ -27,7 +27,6 @@ namespace utility::clock {
     }
 
     void update_rtf(const double& rtf) {
-        using namespace std::chrono;  // Using namespace is fine in a function scope
 
         auto now = NUClear::base_clock::now();
 
@@ -50,8 +49,7 @@ namespace utility::clock {
 namespace NUClear {
     clock::time_point clock::now() {
 
-        using namespace utility::clock;
-        using namespace std::chrono;  // Using namespace is fine in a function scope
+        using namespace utility::clock;  // Using namespace is fine in a function scope
 
         // Get the current index in a variable in case it changes while we use it
         int c = active;
