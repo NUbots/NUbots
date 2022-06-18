@@ -17,7 +17,7 @@ namespace utility::clock {
     static clockStruct clockArray[2];
     //static clockStruct clockArrayRead;
 
-    static std::atomic_int clockArrayIndex = 0;
+    static std::atomic_int clockArrayIndex  = 0;
     static std::atomic_int updateClockIndex = 0;
 
     void update_rtf(const double& new_rtf) {
@@ -38,7 +38,7 @@ namespace utility::clock {
                 * clockArray[updateClockIndex].rtf);  // set before we update the variables
         clockArray[updateClockIndex].last_update = now;
         clockArray[updateClockIndex].rtf         = new_rtf;
-        //clockArrayRead                          = clockArray[clockArrayIndex];
+        // clockArrayRead                          = clockArray[clockArrayIndex];
 
         clockArrayIndex ^= 1;
     }
@@ -50,7 +50,8 @@ namespace NUClear {
         // Move along the time
         return utility::clock::clockArray[utility::clock::clockArrayIndex].epoch
                + std::chrono::duration_cast<std::chrono::steady_clock::duration>(
-                   (NUClear::base_clock::now() - utility::clock::clockArray[utility::clock::clockArrayIndex].last_update)
+                   (NUClear::base_clock::now()
+                    - utility::clock::clockArray[utility::clock::clockArrayIndex].last_update)
                    * utility::clock::clockArray[utility::clock::clockArrayIndex].rtf);
     }
 
