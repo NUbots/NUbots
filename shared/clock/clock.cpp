@@ -17,12 +17,11 @@ namespace utility::clock {
     static clockStruct clockArray[2];
 
     static std::atomic_int clockArrayIndex  = 0;
-    static std::atomic_int updateClockIndex = 0;
 
     void update_rtf(const double& new_rtf) {
         auto now = NUClear::clock::now();  // Changed from base_clock
 
-        updateClockIndex = clockArrayIndex ^ 1;  // Switch to other clock in array
+        static std::atomic_int updateClockIndex = clockArrayIndex ^ 1;  // Switch to other clock in array
 
         // Since we are updating our rtf we need to advance our state so the new deltas will be calculated properly
         // We set the variables in this specific order to mimise the error that will occur if the threading reads as we
@@ -38,7 +37,7 @@ namespace utility::clock {
         clockArray[updateClockIndex].last_update = now;
         clockArray[updateClockIndex].rtf         = new_rtf;
 
-        clockArrayIndex ^= 1;  // Set read 
+        clockArrayIndex ^= 1;  // Set read
     }
 
 }  // namespace utility::clock
