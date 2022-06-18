@@ -15,7 +15,6 @@ namespace utility::clock {
     };
 
     static clockStruct clockArray[2];
-    //static clockStruct clockArrayRead;
 
     static std::atomic_int clockArrayIndex  = 0;
     static std::atomic_int updateClockIndex = 0;
@@ -38,9 +37,8 @@ namespace utility::clock {
                 * clockArray[updateClockIndex].rtf);  // set before we update the variables
         clockArray[updateClockIndex].last_update = now;
         clockArray[updateClockIndex].rtf         = new_rtf;
-        // clockArrayRead                          = clockArray[clockArrayIndex];
 
-        clockArrayIndex ^= 1;
+        clockArrayIndex ^= 1;  // Set read 
     }
 
 }  // namespace utility::clock
