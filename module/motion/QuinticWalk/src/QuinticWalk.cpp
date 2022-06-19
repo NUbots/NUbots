@@ -53,7 +53,7 @@ namespace module::motion {
         config.params.foot_overshoot_ratio          = cfg["walk"]["foot"]["overshoot"]["ratio"].as<float>();
         config.params.foot_overshoot_phase          = cfg["walk"]["foot"]["overshoot"]["phase"].as<float>();
         config.params.trunk_height                  = cfg["walk"]["trunk"]["height"].as<float>();
-        config.params.trunk_pitch                   = 1.0f + cfg["walk"]["trunk"]["pitch"].as<Expression>();
+        config.params.trunk_pitch                   = cfg["walk"]["trunk"]["pitch"].as<Expression>();
         config.params.trunk_phase                   = cfg["walk"]["trunk"]["phase"].as<float>();
         config.params.trunk_x_offset                = cfg["walk"]["trunk"]["x_offset"].as<float>();
         config.params.trunk_y_offset                = cfg["walk"]["trunk"]["y_offset"].as<float>();
