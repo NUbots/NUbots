@@ -384,8 +384,16 @@ namespace NUClear::dsl {
                             if (component == "config") {
                                 flag = true;
                             }
-                        }
 
+                            // If the event is NO_OP, ie we are at the installing phase of the program, and if
+                            // we are not looking at the default config, then skip this so we don't run the
+                            // Configuration reactors multiple times on the same data
+                            if (watch.events == ::extension::FileWatch::Event::NO_OP
+                                && ((component == hostname) || (component == binaryName) || (component == platform))) {
+                                log<NUClear::WARN>("in if", watch.path);
+                                return std::shared_ptr<::extension::Configuration>(nullptr);
+                            }
+                        }
                         return std::make_shared<::extension::Configuration>(relativePath,
                                                                             hostname,
                                                                             binaryName,
