@@ -34,13 +34,9 @@
 
 
 namespace utility::math::filter::gaussian {
-    // --------------------------------------------------------------------------------------
-    // --------------------------------------------------------------------------------------
-    //
-    // conditionGaussianOnMarginal
-    //
-    // -------------------------------------------------------------------------------- ------
-    // --------------------------------------------------------------------------------------
+    /**
+     * @brief conditionGaussianOnMarginal
+     */
 
     void conditionGaussianOnMarginal(const Eigen::VectorXd& muyx,
                                      const Eigen::MatrixXd& Syx,
@@ -59,13 +55,9 @@ namespace utility::math::filter::gaussian {
     }
 
 
-    // --------------------------------------------------------------------------------------
-    // --------------------------------------------------------------------------------------
-    //
-    // gaussianConfidenceEllipse
-    //
-    // --------------------------------------------------------------------------------------
-    // --------------------------------------------------------------------------------------
+    /**
+     * @brief gaussianConfidenceEllipse
+     */
 
     void gaussianConfidenceEllipse3Sigma(const Eigen::VectorXd& mu, const Eigen::MatrixXd& S, Eigen::MatrixXd& x) {
         assert(mu.rows() == 2);
@@ -115,14 +107,9 @@ namespace utility::math::filter::gaussian {
         Q.resize(4, 4);
         Q << topLeft, topRight, bottomLeft, bottomRight;
     }
-    // --------------------------------------------------------------------------------------
-    // --------------------------------------------------------------------------------------
-    //
-    // logGaussian
-    //
-    // --------------------------------------------------------------------------------------
-    // --------------------------------------------------------------------------------------
-
+    /**
+     * @brief logGaussian
+     */
     template <typename Scalar>
     Scalar logGaussian(const Eigen::Matrix<Scalar, Eigen::Dynamic, 1>& x,
                        const Eigen::Matrix<Scalar, Eigen::Dynamic, 1>& mu,
@@ -168,13 +155,9 @@ namespace utility::math::filter::gaussian {
     }
 
 
-    // --------------------------------------------------------------------------------------
-    // --------------------------------------------------------------------------------------
-    //
-    // affineTransform
-    //
-    // --------------------------------------------------------------------------------------
-    // --------------------------------------------------------------------------------------
+    /**
+     * @brief affineTransform
+     */
     template <typename Func>
     void affineTransform(const Eigen::VectorXd& mux,  // Input
                          const Eigen::MatrixXd& Sxx,  // Input
@@ -214,13 +197,9 @@ namespace utility::math::filter::gaussian {
         Syy = R.block(0, 0, SR.rows(), SR.cols());
     }
 
-    // --------------------------------------------------------------------------------------
-    // --------------------------------------------------------------------------------------
-    //
-    // Augment Gradients
-    //
-    // --------------------------------------------------------------------------------------
-    // --------------------------------------------------------------------------------------
+    /**
+     * @brief Augment Gradients
+     */
     template <typename ProcessFunc, typename ParamStruct>
     void augmentGradients(ProcessFunc func,
                           const Eigen::MatrixXd& X,
@@ -245,13 +224,9 @@ namespace utility::math::filter::gaussian {
     }
 
 
-    // --------------------------------------------------------------------------------------
-    // --------------------------------------------------------------------------------------
-    //
-    // RK4SDEHelper
-    //
-    // --------------------------------------------------------------------------------------
-    // --------------------------------------------------------------------------------------
+    /**
+     * @brief RK4SDEHelper
+     */
     template <typename ProcessFunc, typename ParamStruct>
     struct RK4SDEHelper {
         void operator()(ProcessFunc func,
@@ -332,13 +307,9 @@ namespace utility::math::filter::gaussian {
         }
     };
 
-    // --------------------------------------------------------------------------------------
-    // --------------------------------------------------------------------------------------
-    //
-    // AugmentIdentityAdapter
-    //
-    // --------------------------------------------------------------------------------------
-    // --------------------------------------------------------------------------------------
+    /**
+     * @brief AugmentIdentityAdapter
+     */
     template <typename Func, typename ParamStruct>
     struct AugmentIdentityAdapter {
         void operator()(Func h,
@@ -429,13 +400,9 @@ namespace utility::math::filter::gaussian {
     };
 
 
-    // --------------------------------------------------------------------------------------
-    // --------------------------------------------------------------------------------------
-    //
-    // timeUpdateContinuous
-    //
-    // --------------------------------------------------------------------------------------
-    // --------------------------------------------------------------------------------------
+    /**
+     * @brief timeUpdateContinuous
+     */
     template <typename ProcessFunc, typename ParamStruct>
     void timeUpdateContinuous(const Eigen::VectorXd& mukm1,  // Input
                               const Eigen::MatrixXd& Skm1,   // Input
@@ -484,13 +451,9 @@ namespace utility::math::filter::gaussian {
     }
 
 
-    // --------------------------------------------------------------------------------------
-    // --------------------------------------------------------------------------------------
-    //
-    // measurementUpdateEKF
-    //
-    // --------------------------------------------------------------------------------------
-    // --------------------------------------------------------------------------------------
+    /**
+     * @brief measurementUpdateEKF
+     */
     template <typename Func, typename ParamStruct>
     void measurementUpdateEKF(const Eigen::VectorXd& mux,  // Input
                               const Eigen::MatrixXd& Sxx,  // Input
@@ -524,13 +487,9 @@ namespace utility::math::filter::gaussian {
         conditionGaussianOnMarginal(muyx, Syx, y, muxGy, SxxGy);
     }
 
-    // --------------------------------------------------------------------------------------
-    // --------------------------------------------------------------------------------------
-    //
-    // measurementUpdateIEKF
-    //
-    // --------------------------------------------------------------------------------------
-    // --------------------------------------------------------------------------------------
+    /**
+     * @brief measurementUpdateIEKF
+     */
     template <typename LogLikFunc, typename ParamStruct>
     struct CostJointDensity {
         double operator()(LogLikFunc logLikelihood,
