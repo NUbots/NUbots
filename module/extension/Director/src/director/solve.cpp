@@ -74,13 +74,17 @@ namespace module::extension {
         // in the event that there are none, this solution will have no options and therefore be blocked
         for (auto& group : groups) {
             auto& g = group.second;
-            for (const auto& p : g.providers) {
-                if (p->causing.count(when.type) != 0 && when.validator(p->causing[when.type])) {
-                    if (challenge_priority(g.pushing_task, authority)) {
-                        s.options.push_back(solve_provider(p, authority, visited));
-                    }
-                    else {
-                        // TODO Don't have the priority to push, but we could queue to push?
+
+            // A provider already needs to be running to push it
+            if (g.active_task != nullptr) {
+                for (const auto& p : g.providers) {
+                    if (p->causing.count(when.type) != 0 && when.validator(p->causing[when.type])) {
+                        if (challenge_priority(g.pushing_task, authority)) {
+                            s.options.push_back(solve_provider(p, authority, visited));
+                        }
+                        else {
+                            // TODO Don't have the priority to push, but we could queue to push?
+                        }
                     }
                 }
             }
