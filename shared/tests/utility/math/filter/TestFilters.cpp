@@ -23,9 +23,11 @@
 #include <utility>
 
 #include "VanDerPolModel.hpp"
+#include "localisation.h"
 
 #include "utility/math/filter/ParticleFilter.hpp"
 #include "utility/math/filter/UKF.hpp"
+#include "utility/math/filter/gaussian.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 using utility::support::Expression;
@@ -198,4 +200,68 @@ TEST_CASE("Test the ParticleFilter", "[utility][math][filter][ParticleFilter]") 
     INFO("The mean 1\u03C3 boundary for state 2 is [" << -mean_x2_boundary << ", " << mean_x2_boundary << "]");
 
     REQUIRE(percentage_x1 <= 30.0);
+}
+
+TEST_CASE("Test the EKF", "[utility][math][filter][EKF]") {
+
+    // Load our config
+    const YAML::Node config = YAML::LoadFile("tests/TestLocalisation.yaml");
+
+
+    // Model parameters
+    LocalisationProcessModel pm;
+    LocalisationMeasurementModel mm;
+    LocalisationParameters param;
+    Eigen::Matrix2d process_noise =
+        Eigen::Vector2d(config["parameters"]["noise"]["process"].as<Expression>()).asDiagonal();
+    param.process_noise = process_noise;
+    Eigen::Matrix2d measurement_noise =
+        Eigen::Vector2d(config["parameters"]["noise"]["measurement"].as<Expression>()).asDiagonal();
+    param.measurement_noise = measurement_noise;
+
+    Eigen::Vector2d initial_state = config["parameters"]["initial"]["state"].as<Expression>();
+    Eigen::Matrix2d initial_covariance =
+        Eigen::Vector2d(config["parameters"]["initial"]["covariance"].as<Expression>()).asDiagonal();
+
+    // Get our simulated measurements and true state
+    const std::vector<Eigen::Vector2d> measurements = resolve_expression<Eigen::Vector2d>(config["measurements"]);
+    const std::vector<Eigen::Vector2d> true_state   = resolve_expression<Eigen::Vector2d>(config["true_state"]);
+    double timestep                                 = config["parameters"]["timestep"].as<double>();
+
+    // Simulate measurements
+    int nx = 2;
+    // Initialise filter
+    Eigen::MatrixXd SEKF(nx, nx);
+    Eigen::VectorXd muEKF(nx);
+    SEKF  = initial_covariance;
+    muEKF = initial_state;
+    // Info initial state and covariance
+    INFO("Initial state: " << muEKF.transpose());
+    INFO("Initial covariance: \n" << SEKF);
+    INFO("Process noise: \n" << process_noise);
+    INFO("Measurement noise: \n" << measurement_noise);
+    INFO("Time step: " << timestep);
+
+    // Run the filter
+    for (int k = 0; k < 1; ++k) {
+        Eigen::VectorXd xk, yk, muf, mup, u;
+        Eigen::MatrixXd Sf, Sp;
+        // Calculate prediction density
+        utility::math::filter::gaussian::timeUpdateContinuous(muEKF, SEKF, u, pm, param, timestep, mup, Sp);
+        std::cout << "Mup: \n" << mup << std::endl;
+        std::cout << "SP: \n" << Sp << std::endl;
+
+        // // Calculate filtered density
+        utility::math::filter::gaussian::measurementUpdateEKF(mup, Sp, u, yk, mm, param, muf, Sf);
+        std::cout << "Muf: \n" << muf << std::endl;
+        std::cout << "SF: \n" << Sf << std::endl;
+
+        muEKF = muf;
+        SEKF  = Sf;
+    }
+
+    // Print the final state and covariance
+    INFO("Final state: " << muEKF.transpose());
+    INFO("Final covariance: \n" << SEKF);
+    REQUIRE(0 == 10);
 }

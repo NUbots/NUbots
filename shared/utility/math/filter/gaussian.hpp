@@ -29,6 +29,7 @@
 #include <Eigen/QR>
 #include <cassert>
 #include <functional>
+#include <iostream>
 
 #include "fmin.hpp"
 
@@ -43,6 +44,7 @@ namespace utility::math::filter::gaussian {
                                      const Eigen::VectorXd& y,
                                      Eigen::VectorXd& muxGy,
                                      Eigen::MatrixXd& SxGy) {
+        // TODO: Copy from Lab 4
         int ny              = y.rows();
         int nx              = Syx.cols() - ny;
         Eigen::MatrixXd S1  = Syx.topLeftCorner(ny, ny);
@@ -52,60 +54,6 @@ namespace utility::math::filter::gaussian {
         Eigen::MatrixXd muy = muyx.head(ny);
         muxGy               = mux + S2.transpose() * (S1.triangularView<Eigen::Upper>().transpose().solve(y - muy));
         SxGy                = S3;
-    }
-
-
-    /**
-     * @brief gaussianConfidenceEllipse
-     */
-
-    void gaussianConfidenceEllipse3Sigma(const Eigen::VectorXd& mu, const Eigen::MatrixXd& S, Eigen::MatrixXd& x) {
-        assert(mu.rows() == 2);
-        assert(S.rows() == 2);
-        assert(S.cols() == 2);
-
-        int nsamples = 100;
-        x.resize(2, nsamples);
-        Eigen::VectorXd t = Eigen::VectorXd::LinSpaced(nsamples, 0, 2 * M_PI);
-        Eigen::MatrixXd Z;
-        Z.resize(2, nsamples);
-        double r = sqrt(11.8292);
-        Eigen::MatrixXd zx;
-        zx.resize(nsamples, 1);
-        zx = r * t.array().cos();
-        Eigen::MatrixXd zy;
-        zy.resize(nsamples, 1);
-        zy = r * t.array().sin();
-        Z << zx.transpose(), zy.transpose();
-        x = (S.transpose() * Z).colwise() + mu;
-        assert(x.cols() == nsamples);
-        assert(x.rows() == 2);
-    }
-
-
-    void gaussianConfidenceQuadric3Sigma(const Eigen::VectorXd& mu, const Eigen::MatrixXd& S, Eigen::MatrixXd& Q) {
-        const int nx = 3;
-        assert(mu.rows() == nx);
-        assert(S.rows() == nx);
-        assert(S.cols() == nx);
-        Eigen::MatrixXd z = S.triangularView<Eigen::Upper>().transpose().solve(
-                                Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>::Identity(S.rows(), S.rows()))
-                            * mu;
-        Eigen::MatrixXd topLeft =
-            S.triangularView<Eigen::Upper>().solve(S.triangularView<Eigen::Upper>().transpose().solve(
-                Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>::Identity(S.rows(), S.rows())));
-        Eigen::MatrixXd topRight =
-            -S.triangularView<Eigen::Upper>().solve(
-                Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>::Identity(S.rows(), S.rows()))
-            * z;
-        Eigen::MatrixXd bottomLeft =
-            -z.transpose()
-            * S.triangularView<Eigen::Upper>().transpose().solve(
-                Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>::Identity(S.rows(), S.rows()));
-        Eigen::MatrixXd zTz = z.transpose() * z;
-        double bottomRight  = zTz(0) - 14.1564;
-        Q.resize(4, 4);
-        Q << topLeft, topRight, bottomLeft, bottomRight;
     }
     /**
      * @brief logGaussian
@@ -173,7 +121,12 @@ namespace utility::math::filter::gaussian {
         //  Transform function
         Eigen::MatrixXd SR;
         Eigen::MatrixXd C;
+        // Print Mux
+        std::cout << "Mux: " << mux << std::endl;
         h(mux, muy, SR, C);
+        // Print SR
+        std::cout << "SR: " << SR << std::endl;
+        std::cout << "muy: " << muy << std::endl;
 
         //  Check outputs of h
         assert(muy.cols() == 1);
@@ -413,7 +366,7 @@ namespace utility::math::filter::gaussian {
                               Eigen::VectorXd& muk,          // Output
                               Eigen::MatrixXd& Sk            // Output
     ) {
-
+        // Print here
         // Noise mean
         assert(mukm1.size() > 0);
         Eigen::VectorXd muxdw(2 * mukm1.size());
@@ -423,17 +376,14 @@ namespace utility::math::filter::gaussian {
         // Noise covariance
         Eigen::VectorXd f;
         Eigen::MatrixXd SQ;
-
         pm(mukm1, u, param, f, SQ);
 
         assert(f.size() > 0);
         assert(SQ.size() > 0);
-
         Eigen::MatrixXd Sxdw(2 * mukm1.size(), 2 * mukm1.size());
-        Sxdw.fill(0.);
+        Sxdw.fill(0);
         Sxdw.topLeftCorner(mukm1.size(), mukm1.size())     = Skm1;
         Sxdw.bottomRightCorner(mukm1.size(), mukm1.size()) = SQ * std::sqrt(timestep);
-
         // RK4SDEHelper::operator()(func, xdw, u, param, dt, f, SR, J)
         // https://www.cplusplus.com/reference/functional/bind/
         RK4SDEHelper<ProcessFunc, ParamStruct> func;
@@ -446,7 +396,6 @@ namespace utility::math::filter::gaussian {
                            std::placeholders::_2,
                            std::placeholders::_3,
                            std::placeholders::_4);
-
         affineTransform(muxdw, Sxdw, h, muk, Sk);
     }
 
@@ -484,6 +433,8 @@ namespace utility::math::filter::gaussian {
         Eigen::VectorXd muyx;
         Eigen::MatrixXd Syx;
         affineTransform(mux, Sxx, jointFunc, muyx, Syx);
+        std::cout << "muyx: " << muyx << std::endl;
+        std::cout << "Syx: " << Syx << std::endl;
         conditionGaussianOnMarginal(muyx, Syx, y, muxGy, SxxGy);
     }
 
