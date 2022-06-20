@@ -118,57 +118,101 @@ namespace module::extension {
         void reevaluate_queue(provider::ProviderGroup& group);
 
         /**
-         * Finds a provider that we can push to satisfy the passed when condition.
-         *
-         * Will search through all the provider groups that are currently running and find one which we have higher
-         * priority than. Then we search the causings that they have to see if any of them will satisfy the passed when
-         * condition.
-         *
-         * @param authority this task is used as an authority token to determine if we have priority
-         * @param when      the when condition we are trying to meet
-         *
-         * @return a provider that we can push to satisfy the when condition or nullptr if we couldn't find one
-         */
-        std::shared_ptr<provider::Provider> find_push(
-            const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& authority,
-            const provider::Provider::WhenCondition& when);
-
-        /**
-         * An object which holds the series of providers we can run that are a solution to executing a given task.
-         * In the event that a currently runnable solution couldn't be found it instead returns a series of providers
-         * that can be pushed so this can run.
+         * An object which holds the possible solutions to running a task.
+         * Each solution represents how a single task could be executed. As each provider group can have more than one
+         * provider, there can be more than one option for how to run the task. For each option that we can choose, they
+         * can themselves have their own requirements for provider groups they need to execute. Therefore each of these
+         * requirements is themselves a solution to another task that could be emitted.
          */
         struct Solution {
-            enum class Type { SOLUTION = 0, PUSHABLE = 1, BLOCKED = 2 };
-            Type type;
-            /// Either the providers we can use in the case of a solution, or the providers we can push to in the case
-            /// of a pushable solution
-            std::vector<std::shared_ptr<provider::Provider>> providers;
+
+            /**
+             * A single option for how a provider could be executed
+             */
+            struct Option {
+                /// The state of this provider if it is blocked along with a description of why it is blocked
+                enum State {
+                    /// This option is not blocked to us
+                    OK,
+                    /// This provider is blocked as the task given didn't have enough authority to run it
+                    BLOCKED_PRIORITY,
+                    /// This provider is blocked due to a when condition that cannot be met
+                    BLOCKED_WHEN,
+                    /// This provider is blocked as executing it would cause a loop of providers
+                    BLOCKED_LOOP,
+                };
+
+                /// The provider we are executing in this
+                std::shared_ptr<const provider::Provider> provider;
+                /// The set of solutions needed for this option to be executed
+                std::vector<Solution> requirements;
+                /// The state of this option, holds if it is blocked and if so why
+                State state;
+            };
+
+            /// This value is true if this solution is a pushing solution. Meaning that the main solution cannot run but
+            /// running solution can enable a when condition to be met
+            bool pushed;
+            /// The list of options for this solution
+            std::vector<Option> options;
         };
 
         /**
-         * Finds a solution of providers for a given task
+         * Return the passed provider it as an option for a solution along with its requirements.
+         * It will recursively find Solutions for each of the requirements of the provider including its unmet when
+         * conditions and needs relationships.
          *
-         * @param task the task to solve for
+         * @param provider  the provider that we are trying to find a solution for
+         * @param authority the task that we are using as our authority token for permission checks
+         * @param visited   the set of providers that have already been visited to prevent loops
          *
-         * @return the solution or pushable solution to executing this task, or blocked if it cannot be run
+         * @return
          */
-        Solution director_solution(const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& task);
+        Solution::Option solve_provider(
+            const std::shared_ptr<provider::Provider>& provider,
+            const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& authority,
+            std::set<std::shared_ptr<const provider::Provider>> visited);
 
         /**
-         * Finds a solution for using the provider group for the type given in requester.
-         * The task object that is provided is used as an authority token to ensure that we have priority.
+         * Finds the providers that can cause the passed when condition to be met.
+         * It will then recursively find Solutions for each of the requirements of the provider potentially including
+         * more when conditions that need to be met. The final solution for a task could end up with several steps
+         * removed from the original task.
          *
-         * This will recursively run through every `Needs` relationship that the provider in requester has.
+         * @param when      the when condition we want to meet by finding causings that will allow a provider to run
+         * @param authority the task that we are using as our authority token for permission checks
+         * @param visited   the set of providers that have already been visited to prevent loops
          *
-         * @param authority the task that is used as an authority token to ensure that we have priority
-         * @param requester the type of provider group we are trying to find a solution for
-         *
-         * @return the solution or pushable solution to executing this task, or blocked if it cannot be run
+         * @return         the set of providers that when run can meet the provided when condition
          */
-        Solution director_solution(
-            const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& authority,
-            const std::type_index& requester);
+        Solution solve_when(const provider::Provider::WhenCondition& when,
+                            const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& authority,
+                            const std::set<std::shared_ptr<const provider::Provider>>& visited);
+
+        /**
+         * Creates options for each provider in a provider group specified by the passed type.
+         * This function will check each provider in the group and make an option for it.
+         *
+         * @param type      the type of task we are trying to run
+         * @param authority the task that we are using as our authority token for permission checks
+         * @param visited   the set of providers that have already been visited to prevent loops
+         *
+         * @return the set of possible solution options for the provider group of the passed type
+         */
+        Solution solve_group(const std::type_index& type,
+                             const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& authority,
+                             const std::set<std::shared_ptr<const provider::Provider>>& visited);
+
+        /**
+         * Finds a solution for a given task. It will start with the provider group for the given task and recursively
+         * work its way down to find all possible solutions. It will use the passed task as an authority token for the
+         * permission checks on providers that it needs to run.
+         *
+         * @param task the task we are finding solutions for
+         *
+         * @return the set of possible solution options for this task
+         */
+        Solution solve_task(const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& task);
 
         /**
          * Looks at all the tasks that are in the pack and determines if they should run, and if so runs them.
@@ -179,7 +223,7 @@ namespace module::extension {
          * pack, but enqueue them on the relevant providers.
          *
          * In the event that `When` conditions needs to be met by this pack and it has sufficient priority, it may also
-         * place this provider group into a "PROXYING" state whereby it forces another provider group into a state where
+         * place this provider group into a "Pushing" state whereby it forces another provider group into a state where
          * it will make the system reach the causing it requires.
          *
          * @param pack the task pack that represents the queued tasks
