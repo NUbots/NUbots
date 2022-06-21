@@ -57,6 +57,7 @@ namespace module::behaviour::strategy {
             NUClear::clock::duration localisation_duration{};
             bool force_playing          = false;
             bool force_penalty_shootout = false;
+            int walk_to_ready_time      = 0;
         } cfg;
 
         /// @brief Bool to indicate  if the robot is currently getting up
@@ -81,6 +82,15 @@ namespace module::behaviour::strategy {
 
         /// @brief Stores which behaviour state the robot was previosuly in
         message::behaviour::Behaviour::State previousState = message::behaviour::Behaviour::State::INIT;
+
+        /// @brief Stores the time stamp of when the robot starts walking to the ready position
+        NUClear::clock::time_point started_walking_to_ready_at;
+
+        /// @brief Bool to indicate that the robot is currently walking to the ready position
+        bool started_walking_to_ready = false;
+
+        /// @brief Bool to indicate that the half has reset
+        bool is_reset_half = false;
 
         /// @brief The time since the last ball was measured
         // TODO(BehaviourTeam): Currently the time is initialised long enough in the past to ensure that the robot
@@ -128,7 +138,7 @@ namespace module::behaviour::strategy {
                               const message::localisation::Ball& ball);
 
         /// @brief Normal mode state machine, used to decide what phase behaviour to use.
-        void normal(const message::input::GameState::Data::Phase& phase);
+        void normal(const message::input::GameState& game_state, const message::input::GameState::Data::Phase& phase);
 
         /// @brief Penalty mode, initial phase behaviour/strategy
         void penalty_shootout_initial();
@@ -153,7 +163,7 @@ namespace module::behaviour::strategy {
         void normal_initial();
 
         /// @brief Normal mode, ready phase behaviour/strategy
-        void normal_ready();
+        void normal_ready(const message::input::GameState& game_state);
 
         /// @brief Normal mode, set phase behaviour/strategy
         void normal_set();
