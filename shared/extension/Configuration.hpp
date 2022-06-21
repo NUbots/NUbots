@@ -345,6 +345,44 @@ namespace NUClear::dsl {
                 }
             }
 
+            /// @brief Checks if the Configuration Reaction's parameters are valid
+            /// @details Parameters are not valid if the FileWatch object doesn't exist or it isn't a yaml file.
+            /// If this is the installation phase (denoted by the NO_OP FileWatch event), and this is not the default
+            /// configuration file, then the Reaction will also not run. This is to prevent Configuration Reactors
+            /// running multiple times during installation for one module.
+            /// @throws std::runtime_error if there is a YAML parsing error
+            /// @tparam DSL Magic NUClear type. Ignore for the purpose of understanding this function
+            /// @param t The associated Configuration Reaction
+            /// @return False is the reaction is not to be run, otherwise true
+            template <typename DSL>
+            [[nodiscard]] static inline bool precondition(threading::Reaction& t) {
+                ::extension::FileWatch watch = DSLProxy<::extension::FileWatch>::get<DSL>(t);
+                // Check if the watch is valid and the file is a yaml file
+                if (!watch || fs::path(watch.path).extension() != ".yaml") {
+                    return false;
+                }
+
+                // Get hostname, platform and binary name to check if this is not a default configuration file
+                const std::string hostname = utility::support::getHostname();
+                const std::string platform(::extension::Configuration::getPlatform(hostname));
+                const auto binaryName = get_first_command_line_arg();
+
+                // Get the components of the path
+                const auto c = utility::strutil::split(watch.path, '/');
+
+                // Returns true if the string exists in the vector
+                auto str_exists = [&](const std::string& key) { return std::find(c.begin(), c.end(), key) != c.end(); };
+
+                // If it's the installation phase, and the path contains anything indicating it is not default config,
+                // then don't let the reaction run
+                if (watch.events == ::extension::FileWatch::Event::NO_OP
+                    && (str_exists(hostname) || str_exists(platform) || str_exists(binaryName))) {
+                    return false;
+                }
+                // Satisfied all the checks, the reaction can run
+                return true;
+            }
+
             /// @brief Runs just before the Configuration callback to prepare the Reaction's parameters
             /// @details The Configuration is constructed and returned, parsing the YAML in the process. Checks are done
             /// in the precondition function, preventing invalid or unwanted files.
@@ -384,44 +422,6 @@ namespace NUClear::dsl {
                 catch (const YAML::ParserException& e) {
                     throw std::runtime_error(watch.path + " " + std::string(e.what()));
                 }
-            }
-
-            /// @brief Checks if the Configuration Reaction's parameters are valid
-            /// @details Parameters are not valid if the FileWatch object doesn't exist or it isn't a yaml file.
-            /// If this is the installation phase (denoted by the NO_OP FileWatch event), and this is not the default
-            /// configuration file, then the Reaction will also not run. This is to prevent Configuration Reactors
-            /// running multiple times during installation for one module.
-            /// @throws std::runtime_error if there is a YAML parsing error
-            /// @tparam DSL Magic NUClear type. Ignore for the purpose of understanding this function
-            /// @param t The associated Configuration Reaction
-            /// @return False is the reaction is not to be run, otherwise true
-            template <typename DSL>
-            [[nodiscard]] static inline bool precondition(threading::Reaction& t) {
-                ::extension::FileWatch watch = DSLProxy<::extension::FileWatch>::get<DSL>(t);
-                // Check if the watch is valid and the file is a yaml file
-                if (!watch || fs::path(watch.path).extension() != ".yaml") {
-                    return false;
-                }
-
-                // Get hostname, platform and binary name to check if this is not a default configuration file
-                const std::string hostname = utility::support::getHostname();
-                const std::string platform(::extension::Configuration::getPlatform(hostname));
-                const auto binaryName = get_first_command_line_arg();
-
-                // Get the components of the path
-                const auto c = utility::strutil::split(watch.path, '/');
-
-                // Returns true if the string exists in the vector
-                auto str_exists = [&](const std::string& key) { return std::find(c.begin(), c.end(), key) != c.end(); };
-
-                // If it's the installation phase, and the path contains anything indicating it is not default config,
-                // then don't let the reaction run
-                if (watch.events == ::extension::FileWatch::Event::NO_OP
-                    && (str_exists(hostname) || str_exists(platform) || str_exists(binaryName))) {
-                    return false;
-                }
-                // Satisfied all the checks, the reaction can run
-                return true;
             }
         };
     }  // namespace operation
