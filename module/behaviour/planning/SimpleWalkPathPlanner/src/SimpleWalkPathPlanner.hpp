@@ -26,15 +26,7 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/behaviour/KickPlan.hpp"
 #include "message/behaviour/MotionCommand.hpp"
-#include "message/input/Sensors.hpp"
-#include "message/localisation/Ball.hpp"
-#include "message/localisation/Field.hpp"
-#include "message/motion/KickCommand.hpp"
-#include "message/motion/WalkCommand.hpp"
-#include "message/support/FieldDescription.hpp"
-#include "message/vision/Ball.hpp"
 
 namespace module::behaviour::planning {
 

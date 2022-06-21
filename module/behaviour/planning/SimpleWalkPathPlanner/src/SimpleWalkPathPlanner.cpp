@@ -26,6 +26,9 @@
 
 #include "message/behaviour/KickPlan.hpp"
 #include "message/behaviour/MotionCommand.hpp"
+#include "message/input/Sensors.hpp"
+#include "message/motion/WalkCommand.hpp"
+#include "message/vision/Ball.hpp"
 
 #include "utility/behaviour/Action.hpp"
 #include "utility/behaviour/MotionCommand.hpp"
