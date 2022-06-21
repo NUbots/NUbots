@@ -346,67 +346,82 @@ namespace NUClear::dsl {
             }
 
             /// @brief Runs just before the Configuration callback to prepare the Reaction's parameters
-            /// @details We check if the FileWatch is a `.yaml` file first. If it is, the Configuration is constructed
-            ///          and returned, parsing the YAML in the process. If it's not, `nullptr` is returned, which
-            ///          indicates a non-result.
+            /// @details The Configuration is constructed and returned, parsing the YAML in the process. Checks are done
+            /// in the precondition function, preventing invalid or unwanted files.
             /// @throws std::runtime_error if there is a YAML parsing error
             /// @tparam DSL Magic NUClear type. Ignore for the purpose of understanding this function
             /// @param t The associated Configuration Reaction
-            /// @return If the Configuration file is valid a Configuration object is returned. If not, null is returned
+            /// @return A Configuration object is returned.
             template <typename DSL>
             [[nodiscard]] static inline std::shared_ptr<::extension::Configuration> get(threading::Reaction& t) {
-
                 // Get the file watch event
                 ::extension::FileWatch watch = DSLProxy<::extension::FileWatch>::get<DSL>(t);
 
-                // Check if the watch is valid
-                if (watch && fs::path(watch.path).extension() == ".yaml") {
-                    // Return our yaml file
-                    try {
-                        // Get hostname so we can find the correct per-robot config directory.
-                        const std::string hostname = utility::support::getHostname();
-                        const std::string platform(::extension::Configuration::getPlatform(hostname));
+                // Return our yaml file
+                try {
+                    // Get hostname so we can find the correct per-robot config directory.
+                    const std::string hostname = utility::support::getHostname();
+                    const std::string platform(::extension::Configuration::getPlatform(hostname));
+                    const auto binaryName = get_first_command_line_arg();
 
-                        const auto binaryName = get_first_command_line_arg();
-
-                        // Get relative path to config file.
-                        const auto components = utility::strutil::split(watch.path, '/');
-                        fs::path relativePath{};
-                        bool flag = false;
-                        for (const auto& component : components) {
-                            // Ignore the hostname/binary name if they are present.
-                            if (flag && (component != hostname) && (component != binaryName)
-                                && (component != platform)) {
-                                relativePath = relativePath / component;
-                            }
-
-                            // We want out paths relative to the config folder.
-                            if (component == "config") {
-                                flag = true;
-                            }
-
-                            // If the event is NO_OP, ie we are at the installing phase of the program, and if
-                            // we are not looking at the default config, then skip this so we don't run the
-                            // Configuration reactors multiple times on the same data
-                            if (watch.events == ::extension::FileWatch::Event::NO_OP
-                                && ((component == hostname) || (component == binaryName) || (component == platform))) {
-                                log<NUClear::WARN>("in if", watch.path);
-                                return std::shared_ptr<::extension::Configuration>(nullptr);
-                            }
+                    // Get relative path to config file.
+                    const auto components = utility::strutil::split(watch.path, '/');
+                    fs::path relativePath{};
+                    bool flag = false;
+                    for (const auto& component : components) {
+                        // Ignore the hostname/binary name if they are present.
+                        if (flag && (component != hostname) && (component != binaryName) && (component != platform)) {
+                            relativePath = relativePath / component;
                         }
-                        return std::make_shared<::extension::Configuration>(relativePath,
-                                                                            hostname,
-                                                                            binaryName,
-                                                                            platform);
+
+                        // Want paths relative to the config folder.
+                        if (component == "config") {
+                            flag = true;
+                        }
                     }
-                    catch (const YAML::ParserException& e) {
-                        throw std::runtime_error(watch.path + " " + std::string(e.what()));
-                    }
+                    return std::make_shared<::extension::Configuration>(relativePath, hostname, binaryName, platform);
                 }
-                else {
-                    // Return an empty configuration (which will show up invalid)
-                    return std::shared_ptr<::extension::Configuration>(nullptr);
+                catch (const YAML::ParserException& e) {
+                    throw std::runtime_error(watch.path + " " + std::string(e.what()));
                 }
+            }
+
+            /// @brief Checks if the Configuration Reaction's parameters are valid
+            /// @details Parameters are not valid if the FileWatch object doesn't exist or it isn't a yaml file.
+            /// If this is the installation phase (denoted by the NO_OP FileWatch event), and this is not the default
+            /// configuration file, then the Reaction will also not run. This is to prevent Configuration Reactors
+            /// running multiple times during installation for one module.
+            /// @throws std::runtime_error if there is a YAML parsing error
+            /// @tparam DSL Magic NUClear type. Ignore for the purpose of understanding this function
+            /// @param t The associated Configuration Reaction
+            /// @return True if the file is valid, otherwise false.
+            template <typename DSL>
+            [[nodiscard]] static inline bool precondition(threading::Reaction& t) {
+                ::extension::FileWatch watch = DSLProxy<::extension::FileWatch>::get<DSL>(t);
+                // Check if the watch is valid and the file is a yaml file
+                if (!watch || fs::path(watch.path).extension() != ".yaml") {
+                    return false;
+                }
+
+                // Get hostname, platform and binary name to check if this is not a default configuration file
+                const std::string hostname = utility::support::getHostname();
+                const std::string platform(::extension::Configuration::getPlatform(hostname));
+                const auto binaryName = get_first_command_line_arg();
+
+                // Get the components of the path
+                const auto c = utility::strutil::split(watch.path, '/');
+
+                // Returns true if the string exists in the vector
+                auto str_exists = [&](const std::string& key) { return std::find(c.begin(), c.end(), key) != c.end(); };
+
+                // If it's the installation phase, and the path contains anything indicating it is not default config,
+                // then don't let the reaction run
+                if (watch.events == ::extension::FileWatch::Event::NO_OP
+                    && (str_exists(hostname) || str_exists(platform) || str_exists(binaryName))) {
+                    return false;
+                }
+                // Satisfied all the checks, the reaction can run
+                return true;
             }
         };
     }  // namespace operation
