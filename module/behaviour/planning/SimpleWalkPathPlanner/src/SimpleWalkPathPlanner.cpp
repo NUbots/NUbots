@@ -26,9 +26,6 @@
 
 #include "message/behaviour/KickPlan.hpp"
 #include "message/behaviour/MotionCommand.hpp"
-#include "message/motion/KickCommand.hpp"
-#include "message/motion/WalkCommand.hpp"
-#include "message/vision/Ball.hpp"
 
 #include "utility/behaviour/Action.hpp"
 #include "utility/behaviour/MotionCommand.hpp"
@@ -150,8 +147,7 @@ namespace module::behaviour::planning {
                     case message::behaviour::MotionCommand::Type::ROTATE_ON_SPOT: rotate_on_spot(); return;
 
                     case message::behaviour::MotionCommand::Type::WALK_TO_READY: walk_to_ready(); return;
-                    // This line should be UNREACHABLE
-                    default:
+                    default:  // This line should be UNREACHABLE
                         log<NUClear::ERROR>(
                             fmt::format("Invalid walk path planning command {}.", latest_command.type.value));
                         emit(std::make_unique<StopCommand>(subsumptionId));
