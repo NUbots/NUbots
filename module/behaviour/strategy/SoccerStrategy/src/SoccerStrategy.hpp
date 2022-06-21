@@ -59,72 +59,115 @@ namespace module::behaviour::strategy {
             bool force_penalty_shootout = false;
         } cfg;
 
-        message::behaviour::FieldTarget walkTarget{};
+        /// @brief Bool to indicate  if the robot is currently getting up
+        bool is_getting_up = false;
 
-        std::vector<message::behaviour::FieldTarget> lookTarget{};
+        /// @brief Bool to indicate if the robot has finished kicking in penalty shootout
+        bool has_kicked = false;
 
-        bool is_getting_up    = false;
-        bool has_kicked       = false;
-        bool self_penalised   = false;
+        /// @brief Bool to indicate if we are currently penalised
+        bool self_penalised = false;
+
+        /// @brief Bool to indicate if we want to reset localisation in initial phase
         bool reset_in_initial = true;
 
-
-        NUClear::clock::time_point started_walking_to_ready_at;
+        /// @brief Used to indicate which team is kicking off
         message::input::GameEvents::Context team_kicking_off = message::input::GameEvents::Context::UNKNOWN;
+
         message::behaviour::KickPlan::KickType kick_type{};
-        message::behaviour::Behaviour::State currentState  = message::behaviour::Behaviour::State::INIT;
+
+        /// @brief Stores which behaviour state the robot is in
+        message::behaviour::Behaviour::State currentState = message::behaviour::Behaviour::State::INIT;
+
+        /// @brief Stores which behaviour state the robot was previosuly in
         message::behaviour::Behaviour::State previousState = message::behaviour::Behaviour::State::INIT;
 
-        NUClear::clock::time_point ball_last_measured =
-            NUClear::clock::now() - std::chrono::seconds(6000);  // TODO(BehaviourTeam): unhack
+        /// @brief The time since the last ball was measured
+        // TODO(BehaviourTeam): Currently the time is initialised long enough in the past to ensure that the robot
+        // starts in a state where it hasn't seen ball
+        NUClear::clock::time_point ball_last_measured = NUClear::clock::now() - std::chrono::seconds(6000);
+
+        /// @brief The time since the last goal was measured
         NUClear::clock::time_point goal_last_measured;
-        void initial_localisation_reset();
+
+        /// @brief Resets ball localisation for use in initial phase of normal mode
+
+        /// @brief Resets robot and ball localisation for use in initial phase of penalty mode
         void penalty_shootout_localisation_reset(const message::support::FieldDescription& field_description);
+
+        /// @brief Resets ball localisation for use after we are unpenalised
         void unpenalised_localisation_reset();
 
+        /// @brief Makes the robot stand still
         void stand_still();
-        void walk_to(const message::support::FieldDescription& field_description,
-                     const message::behaviour::FieldTarget::Target& target);
-        void walk_to(const message::support::FieldDescription& field_description, const Eigen::Vector2d& position);
-        void find(const std::vector<message::behaviour::FieldTarget>& objects);
+
+        /// @brief Playing behaviour when ball is visible, currently just walks to the ball
+        void play();
+
+        /// @brief Playing behaviour when ball is lost, currently just rotate on spot
+        void find();
+
+        /// @brief Determines if robot is currently picked up based on foot down sensors
         bool picked_up(const message::input::Sensors& sensors) const;
+
+        /// @brief Determines if robot is currently penalised
         bool penalised() const;
-        static bool ball_distance(const message::localisation::Ball& ball);
+
+        /// @brief Goalie playing behaviour
         void goalie_walk(const message::localisation::Field& field, const message::localisation::Ball& ball);
+
+        /// @brief Generated a kick plan on localisation updates
         static Eigen::Vector2d get_kick_plan(const message::localisation::Field& field,
                                              const message::support::FieldDescription& field_description);
-        void play(const message::localisation::Field& field,
-                  const message::localisation::Ball& ball,
-                  const message::support::FieldDescription& field_description,
-                  const message::input::GameState::Data::Mode& mode);
 
-        // PENALTY mode
+        /// @brief Penalty mode state machine, used to decide what phase behaviour to use.
         void penalty_shootout(const message::input::GameState::Data::Phase& phase,
                               const message::support::FieldDescription& field_description,
                               const message::localisation::Field& field,
                               const message::localisation::Ball& ball);
 
-        // NORMAL mode
+        /// @brief Normal mode state machine, used to decide what phase behaviour to use.
         void normal(const message::input::GameState& game_state, const message::input::GameState::Data::Phase& phase);
 
-        // PENALTY mode, phase functions
+        /// @brief Penalty mode, initial phase behaviour/strategy
         void penalty_shootout_initial();
+
+        /// @brief Penalty mode, ready phase behaviour/strategy
         void penalty_shootout_ready();
+
+        /// @brief Penalty mode, set phase behaviour/strategy
         void penalty_shootout_set(const message::support::FieldDescription& field_description);
+
+        /// @brief Penalty mode, playing phase behaviour/strategy
         void penalty_shootout_playing(const message::localisation::Field& field,
                                       const message::localisation::Ball& ball);
+
+        /// @brief Penalty mode, timeout phase behaviour/strategy
         void penalty_shootout_timeout();
+
+        /// @brief Penalty mode, finished phase behaviour/strategy
         void penalty_shootout_finished();
 
-        // NORMAL mode, phase functions
+        /// @brief Normal mode, initial phase behaviour/strategy
         void normal_initial();
+
+        /// @brief Normal mode, ready phase behaviour/strategy
         void normal_ready();
+
+        /// @brief Normal mode, set phase behaviour/strategy
         void normal_set();
+
+        /// @brief Normal mode, playing phase behaviour/strategy
         void normal_playing();
+
+        /// @brief Normal mode, finished phase behaviour/strategy
         void normal_finished();
+
+        /// @brief Normal mode, time phase behaviour/strategy
         void normal_timeout();
 
     public:
+        static constexpr int UPDATE_FREQUENCY = 30;
         explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);
     };
 }  // namespace module::behaviour::strategy
