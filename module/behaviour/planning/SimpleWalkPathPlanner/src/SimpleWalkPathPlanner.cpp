@@ -79,8 +79,6 @@ namespace module::behaviour::planning {
             cfg.walk_to_ready_speed_x  = config["walk_to_ready_speed_x"].as<float>();
             cfg.walk_to_ready_speed_y  = config["walk_to_ready_speed_y"].as<float>();
             cfg.walk_to_ready_rotation = config["walk_to_ready_rotation"].as<float>();
-
-            emit(std::make_unique<WantsToKick>(false));
         });
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
