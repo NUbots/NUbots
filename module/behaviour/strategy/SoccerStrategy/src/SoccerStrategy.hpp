@@ -91,6 +91,7 @@ namespace module::behaviour::strategy {
         NUClear::clock::time_point goal_last_measured;
 
         /// @brief Resets ball localisation for use in initial phase of normal mode
+        void initial_localisation_reset();
 
         /// @brief Resets robot and ball localisation for use in initial phase of penalty mode
         void penalty_shootout_localisation_reset(const message::support::FieldDescription& field_description);
