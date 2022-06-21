@@ -79,8 +79,10 @@ namespace module::behaviour::strategy {
     using message::support::FieldDescription;
     using VisionBalls = message::vision::Balls;
     using VisionGoals = message::vision::Goals;
+    using LimbID      = utility::input::LimbID;
 
     using utility::input::LimbID;
+    using utility::math::coordinates::reciprocalSphericalToCartesian;
     using utility::math::coordinates::sphericalToCartesian;
     using utility::support::Expression;
 
@@ -120,6 +122,9 @@ namespace module::behaviour::strategy {
             cfg.force_penalty_shootout = config["force_penalty_shootout"].as<bool>();
 
             cfg.walk_to_ready_time = config["walk_to_ready_time"].as<int>();
+
+            cfg.kicking_distance = config["kicking_distance"].as<float>();
+            cfg.kicking_angle    = config["kicking_angle"].as<float>();
         });
 
         on<Trigger<Field>, With<FieldDescription>>().then(
@@ -128,10 +133,18 @@ namespace module::behaviour::strategy {
                 emit(std::make_unique<KickPlan>(KickPlan(kick_target, kick_type)));
             });
 
-        // For checking last seen times
-        on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
-            if (!balls.balls.empty()) {
+        on<Trigger<VisionBalls>, With<Sensors>>().then([this](const VisionBalls& balls, const Sensors& sensors) {
+            if (balls.balls.size() > 0) {
                 ball_last_measured = NUClear::clock::now();
+                // Get the latest vision ball measurement in camera space
+                Eigen::Vector3f rBCc =
+                    reciprocalSphericalToCartesian(balls.balls[0].measurements[0].srBCc.cast<float>());
+                // Transform the vision ball measurement into torso space
+                Eigen::Affine3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
+                rBTt = Htc * rBCc;
+            }
+            else {
+                rBTt = Eigen::Vector3f::Zero();
             }
         });
 
@@ -372,6 +385,24 @@ namespace module::behaviour::strategy {
             currentState = Behaviour::State::PENALISED;
         }
         else {
+
+            log<NUClear::WARN>("Distance to ball", std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2)));
+            log<NUClear::WARN>("Angle to ball", std::asin(std::abs(rBTt.y()) / std::abs(rBTt.x())));
+
+            if (std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2)) < cfg.kicking_distance
+                && std::asin(std::abs(rBTt.y()) / std::abs(rBTt.x())) < cfg.kicking_angle) {
+
+                // We are close to the ball, kick it
+
+                log<NUClear::WARN>("We are close to the ball, kick it");
+
+                emit(std::make_unique<KickScriptCommand>(LimbID::LEFT_LEG, KickCommandType::NORMAL));
+
+
+                log<NUClear::WARN>("Kicked");
+            }
+
+
             if (NUClear::clock::now() - ball_last_measured < cfg.ball_last_seen_max_time) {
                 // Ball has been seen recently, request walk planner to walk to the ball
                 play();
@@ -433,7 +464,8 @@ namespace module::behaviour::strategy {
     void SoccerStrategy::unpenalised_localisation_reset() {
         emit(std::make_unique<ResetRobotHypotheses>());
 
-        // TODO(BehaviourTeam): This should do some random distribution or something as we don't know where the ball is
+        // TODO(BehaviourTeam): This should do some random distribution or something as we don't know where the ball
+        // is
         auto ball_reset        = std::make_unique<ResetBallHypotheses>();
         ball_reset->self_reset = true;
         emit(ball_reset);
@@ -465,8 +497,8 @@ namespace module::behaviour::strategy {
         // Defines the box within in which the kick target is changed from the centre
         // of the oppposition goal to the perpendicular distance from the robot to the goal
 
-        const float max_kick_range =
-            0.6;  // TODO(BehaviourTeam): make configurable, only want to change at the last kick to avoid smart goalies
+        const float max_kick_range = 0.6;  // TODO(BehaviourTeam): make configurable, only want to change at the
+                                           // last kick to avoid smart goalies
         const float x_take_over_box = max_kick_range;
         const float error           = 0.05;
         const float buffer          = error + 2.0f * field_description.ball_radius;          // 15cm

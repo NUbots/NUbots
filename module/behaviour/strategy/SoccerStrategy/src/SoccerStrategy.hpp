@@ -58,6 +58,8 @@ namespace module::behaviour::strategy {
             bool force_playing          = false;
             bool force_penalty_shootout = false;
             int walk_to_ready_time      = 0;
+            float kicking_distance      = 0.0f;
+            float kicking_angle         = 0.0f;
         } cfg;
 
         /// @brief Bool to indicate  if the robot is currently getting up
@@ -71,6 +73,9 @@ namespace module::behaviour::strategy {
 
         /// @brief Bool to indicate if we want to reset localisation in initial phase
         bool reset_in_initial = true;
+
+        /// @brief Stores the position of the last ball seen
+        Eigen::Vector3f rBTt = Eigen::Vector3f(1.0, 0.0, 0.0);
 
         /// @brief Used to indicate which team is kicking off
         message::input::GameEvents::Context team_kicking_off = message::input::GameEvents::Context::UNKNOWN;

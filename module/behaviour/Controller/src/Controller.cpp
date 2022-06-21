@@ -92,7 +92,9 @@ namespace module::behaviour {
             [this](const ActionPriorities& update) {
                 auto& request = requests[update.id];
 
-                // Find the largest priority
+                // TODO(BehaviourTeam): This can be converted to min_element
+                // ! in order to have the highest priority being
+                // ! 0 rather than the upper limit being extremely high Find the largest priority
                 auto maxEl = std::max_element(std::begin(update.priorities), std::end(update.priorities));
 
                 // Find its index
