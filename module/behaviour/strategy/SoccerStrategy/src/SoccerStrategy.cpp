@@ -297,7 +297,6 @@ namespace module::behaviour::strategy {
         }
         // If we are not kicking off then be a goalie
         else if (team_kicking_off == GameEvents::Context::OPPONENT) {
-            find({FieldTarget(FieldTarget::Target::BALL)});
             goalie_walk(field, ball);
             currentState = Behaviour::State::GOALIE_WALK;
         }
@@ -323,8 +322,6 @@ namespace module::behaviour::strategy {
     // ********************NORMAL GAMEMODE STATES********************************
     void SoccerStrategy::normal_initial() {
         stand_still();
-        find({FieldTarget(FieldTarget::Target::SELF)});
-
         if (reset_in_initial) {
             initial_localisation_reset();
             emit(std::make_unique<ResetWebotsServos>());
@@ -346,40 +343,37 @@ namespace module::behaviour::strategy {
 
     void SoccerStrategy::normal_set() {
         stand_still();
-        find({FieldTarget(FieldTarget::Target::BALL)});
         reset_in_initial = true;
         currentState     = Behaviour::State::SET;
     }
 
     void SoccerStrategy::normal_playing() {
-        if (penalised() && !cfg.force_playing) {  // penalised
+        if (penalised() && !cfg.force_playing) {
+            // We are penalised, stand still
             stand_still();
             currentState = Behaviour::State::PENALISED;
         }
         else {
             if (NUClear::clock::now() - ball_last_measured < cfg.ball_last_seen_max_time) {
                 // Ball has been seen recently, request walk planner to walk to the ball
-                Eigen::Vector2d kick_target(0, 0);
-                emit(std::make_unique<MotionCommand>(utility::behaviour::BallApproach(kick_target)));
+                play();
                 currentState = Behaviour::State::WALK_TO_BALL;
             }
             else {
                 // Ball has not been seen recently, request walk planner to rotate on the spot
+                find();
                 currentState = Behaviour::State::SEARCH_FOR_BALL;
-                emit(std::make_unique<MotionCommand>(utility::behaviour::RotateOnSpot()));
             }
         }
     }
 
     void SoccerStrategy::normal_finished() {
         stand_still();
-        find({FieldTarget(FieldTarget::Target::SELF)});
         currentState = Behaviour::State::FINISHED;
     }
 
     void SoccerStrategy::normal_timeout() {
         stand_still();
-        find({FieldTarget(FieldTarget::Target::SELF)});
         currentState = Behaviour::State::TIMEOUT;
     }
 
@@ -432,22 +426,6 @@ namespace module::behaviour::strategy {
         emit(std::make_unique<MotionCommand>(utility::behaviour::StandStill()));
     }
 
-    void SoccerStrategy::walk_to(const FieldDescription& field_description, const FieldTarget::Target& target) {
-        if (target != FieldTarget::Target::BALL) {
-            throw std::runtime_error("SoccerStrategy::walk_to: Only FieldTarget::Target::BALL is supported.");
-        }
-
-        Eigen::Vector2d enemy_goal(field_description.dimensions.field_length * 0.5, 0.0);
-
-        emit(std::make_unique<MotionCommand>(utility::behaviour::BallApproach(enemy_goal)));
-    }
-
-    void SoccerStrategy::walk_to(const FieldDescription& field_description, const Eigen::Vector2d& position) {
-        emit(std::make_unique<MotionCommand>(utility::behaviour::WalkToState(
-            utility::math::transform::lookAt(position,
-                                             Eigen::Vector2d(field_description.dimensions.field_length * 0.5, 0.0)))));
-    }
-
     bool SoccerStrategy::picked_up(const Sensors& sensors) const {
         bool feet_off_ground = !sensors.feet[BodySide::LEFT].down && !sensors.feet[BodySide::RIGHT].down;
         return false && feet_off_ground && !is_getting_up && sensors.Htw(2, 2) < 0.92 && sensors.Htw(2, 2) > 0.88;
@@ -457,33 +435,12 @@ namespace module::behaviour::strategy {
         return self_penalised;
     }
 
-    bool SoccerStrategy::ball_distance(const Ball& ball) {
-        return ball.position.norm() != 0.0;
+    void SoccerStrategy::find() {
+        emit(std::make_unique<MotionCommand>(utility::behaviour::RotateOnSpot()));
     }
 
-    void SoccerStrategy::find(const std::vector<FieldTarget>& field_objects) {
-        // Create the soccer object priority pointer and initialise each value to 0.
-        auto soccer_object_priority  = std::make_unique<SoccerObjectPriority>();
-        soccer_object_priority->ball = 0;
-        soccer_object_priority->goal = 0;
-        soccer_object_priority->line = 0;
-        for (const auto& field_object : field_objects) {
-            switch (field_object.target.value) {
-                case FieldTarget::Target::SELF: {
-                    soccer_object_priority->goal        = 1;
-                    soccer_object_priority->search_type = SearchType::GOAL_SEARCH;
-
-                    break;
-                }
-                case FieldTarget::Target::BALL: {
-                    soccer_object_priority->ball        = 1;
-                    soccer_object_priority->search_type = SearchType::LOST;
-                    break;
-                }
-                default: throw std::runtime_error("Soccer strategy attempted to find a bad object");
-            }
-        }
-        emit(std::move(soccer_object_priority));
+    void SoccerStrategy::play() {
+        emit(std::make_unique<MotionCommand>(utility::behaviour::BallApproach()));
     }
 
     Eigen::Vector2d SoccerStrategy::get_kick_plan(const Field& field, const FieldDescription& field_description) {

@@ -167,7 +167,6 @@ namespace module::behaviour::strategy {
         void normal_timeout();
 
     public:
-        static constexpr int UPDATE_FREQUENCY = 30;
         explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);
     };
 }  // namespace module::behaviour::strategy
