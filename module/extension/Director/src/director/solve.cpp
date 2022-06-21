@@ -109,9 +109,10 @@ namespace module::extension {
         return s;
     }
 
-    Director::Solution Director::solve_task(const std::shared_ptr<const DirectorTask>& task) {
+    Director::Solution Director::solve_task(const std::shared_ptr<const DirectorTask>& task,
+                                            const std::shared_ptr<const DirectorTask>& authority) {
         std::set<std::shared_ptr<const Provider>> visited;
-        return solve_group(task->type, task, visited);
+        return solve_group(task->type, authority, visited);
     }
 
 }  // namespace module::extension
