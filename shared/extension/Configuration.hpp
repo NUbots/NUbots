@@ -394,7 +394,7 @@ namespace NUClear::dsl {
             /// @throws std::runtime_error if there is a YAML parsing error
             /// @tparam DSL Magic NUClear type. Ignore for the purpose of understanding this function
             /// @param t The associated Configuration Reaction
-            /// @return True if the file is valid, otherwise false.
+            /// @return False is the reaction is not to be run, otherwise true
             template <typename DSL>
             [[nodiscard]] static inline bool precondition(threading::Reaction& t) {
                 ::extension::FileWatch watch = DSLProxy<::extension::FileWatch>::get<DSL>(t);
