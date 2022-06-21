@@ -215,8 +215,8 @@ namespace module::behaviour::strategy {
                                 case GameMode::PENALTY_SHOOTOUT:
                                     penalty_shootout(phase, field_description, field, ball);
                                     break;
-                                case GameMode::NORMAL: normal(game_state, phase); break;
-                                case GameMode::OVERTIME: normal(game_state, phase); break;
+                                case GameMode::NORMAL: normal(phase); break;
+                                case GameMode::OVERTIME: normal(phase); break;
                                 default: log<NUClear::WARN>("Game mode unknown.");
                             }
                         }
@@ -252,7 +252,7 @@ namespace module::behaviour::strategy {
     }
 
     // ********************NORMAL GAMEMODE STATE MACHINE********************************
-    void SoccerStrategy::normal(const GameState& game_state, const Phase& phase) {
+    void SoccerStrategy::normal(const Phase& phase) {
         switch (phase.value) {
             // Beginning of game and half time
             case Phase::INITIAL: normal_initial(); break;
