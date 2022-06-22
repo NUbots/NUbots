@@ -93,6 +93,6 @@ namespace module::behaviour::skills {
     }
 
     void DirectWalkController::update_priority(const float& priority) {
-        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {priority}}));
+        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {priority, priority}}));
     }
 }  // namespace module::behaviour::skills
