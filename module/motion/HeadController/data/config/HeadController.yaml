@@ -1,7 +1,7 @@
 log_level: WARN
 
 # Priority in subsumption system
-head_controller_priority: 3
+head_controller_priority: 5
 
 #Servo controller parameters
 head_motors:

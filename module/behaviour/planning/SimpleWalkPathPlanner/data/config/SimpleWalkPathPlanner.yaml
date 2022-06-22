@@ -1,7 +1,7 @@
 log_level: WARN
 
 # Priority in subsumption system
-walk_path_planner_priority: 1
+walk_path_planner_priority: 3
 
 # General playing tuning values for approaching ball
 forward_speed: 0.0125
