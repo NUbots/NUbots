@@ -52,81 +52,80 @@ namespace module::motion {
     struct ExecuteHeadController {};
 
     HeadController::HeadController(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment))
-        , id(size_t(this) * size_t(this) - size_t(this))
-        , min_yaw(0.0)
-        , max_yaw(0.0)
-        , min_pitch(0.0)
-        , max_pitch(0.0)
-        , head_motor_gain(0.0)
-        , head_motor_torque(0.0)
-        , smoothing_factor(0.0)
-        , currentAngles(Eigen::Vector2f::Zero())
-        , goalAngles(Eigen::Vector2f::Zero()) {
+        : Reactor(std::move(environment)), subsumption_id(size_t(this) * size_t(this) - size_t(this)) {
 
         // do a little configurating
         on<Configuration>("HeadController.yaml")
             .then("Head Controller - Configure", [this](const Configuration& config) {
-                log_level = config["log_level"].as<NUClear::LogLevel>();
+                log_level                    = config["log_level"].as<NUClear::LogLevel>();
+                cfg.head_controller_priority = config["head_controller_priority"].as<double>();
+                cfg.head_motor_gain          = config["head_motors"]["gain"].as<double>();
+                cfg.head_motor_torque        = config["head_motors"]["torque"].as<double>();
+                cfg.smoothing_factor         = config["smoothing_factor"].as<float>();
 
-                // Gains
-                head_motor_gain   = config["head_motors"]["gain"].as<double>();
-                head_motor_torque = config["head_motors"]["torque"].as<double>();
-
+                //  Move the head to its config specified initial conditions
                 emit(std::make_unique<HeadCommand>(
                     HeadCommand{config["initial"]["yaw"].as<float>(), config["initial"]["pitch"].as<float>(), false}));
-
-                smoothing_factor = config["smoothing_factor"].as<float>();
             });
 
+        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
+            RegisterAction{subsumption_id,
+                           "HeadController",
+                           {std::pair<float, std::set<LimbID>>(cfg.head_controller_priority, {LimbID::HEAD})},
+                           [this](const std::set<LimbID>& /* limbs */) { /* Head control gained */ },
+                           [this](const std::set<LimbID>& /* limbs */) { /* Head control lost */ },
+                           [](const std::set<ServoID>& /* servos */) { /* Servos reached target */ }}));
+
         on<Trigger<HeadCommand>>().then("Head Controller - Register Head Command", [this](const HeadCommand& command) {
-            goalAngles = {command.yaw, command.pitch};
+            goal_angles = {command.yaw, command.pitch};
             // If switching from non-smoothed to smoothed angle command, reset the initial goal angle to help locking on
             // to the target
             if (smooth == false && command.smooth == true) {
-                currentAngles = goalAngles;
+                current_angles = goal_angles;
             }
             smooth = command.smooth;
         });
 
-        updateHandle = on<Trigger<Sensors>, With<KinematicsModel>, Single, Priority::HIGH>().then(
+        on<Trigger<Sensors>, With<KinematicsModel>, Single, Priority::HIGH>().then(
             "Head Controller - Update Head Position",
             [this](const Sensors& sensors, const KinematicsModel& kinematicsModel) {
-                emit(graph("HeadController Goal Angles", goalAngles.x(), goalAngles.y()));
+                emit(graph("HeadController Goal Angles", goal_angles.x(), goal_angles.y()));
 
                 // If smoothing requested, smooth goal angles with exponential filter
-                currentAngles =
-                    smooth ? (smoothing_factor * goalAngles + (1 - smoothing_factor) * currentAngles) : goalAngles;
+                current_angles =
+                    smooth ? (cfg.smoothing_factor * goal_angles + (1 - cfg.smoothing_factor) * current_angles)
+                           : goal_angles;
 
                 // Get goal vector from angles
-                Eigen::Vector3f goalHeadUnitVector_world =
-                    sphericalToCartesian(Eigen::Vector3f(1, currentAngles.x(), currentAngles.y()));
+                Eigen::Vector3f goal_head_unit_vector_world =
+                    sphericalToCartesian(Eigen::Vector3f(1, current_angles.x(), current_angles.y()));
                 // Convert to robot space if requested angle is in world space
                 Eigen::Vector3f headUnitVector =
-                    goalRobotSpace ? goalHeadUnitVector_world
-                                   : Eigen::Affine3d(sensors.Htw).rotation().cast<float>() * goalHeadUnitVector_world;
+                    goal_robot_space
+                        ? goal_head_unit_vector_world
+                        : Eigen::Affine3d(sensors.Htw).rotation().cast<float>() * goal_head_unit_vector_world;
 
 
                 // Compute inverse kinematics for head
                 // TODO(MotionTeam): MAKE THIS NOT FAIL FOR ANGLES OVER 90deg
-                std::vector<std::pair<ServoID, float>> goalAnglesList = calculateHeadJoints(headUnitVector);
+                std::vector<std::pair<ServoID, float>> goal_angles_list = calculateHeadJoints(headUnitVector);
 
                 // Clamp head angles
-                max_yaw   = kinematicsModel.head.MAX_YAW;
-                min_yaw   = kinematicsModel.head.MIN_YAW;
-                max_pitch = kinematicsModel.head.MAX_PITCH;
-                min_pitch = kinematicsModel.head.MIN_PITCH;
+                cfg.max_yaw   = kinematicsModel.head.MAX_YAW;
+                cfg.min_yaw   = kinematicsModel.head.MIN_YAW;
+                cfg.max_pitch = kinematicsModel.head.MAX_PITCH;
+                cfg.min_pitch = kinematicsModel.head.MIN_PITCH;
 
                 // Store commands for logging
                 float pitch = 0;
                 float yaw   = 0;
-                for (auto& angle : goalAnglesList) {
+                for (auto& angle : goal_angles_list) {
                     if (angle.first == ServoID::HEAD_PITCH) {
-                        angle.second = utility::math::clamp(min_pitch, angle.second, max_pitch);
+                        angle.second = utility::math::clamp(cfg.min_pitch, angle.second, cfg.max_pitch);
                         pitch        = angle.second;
                     }
                     else if (angle.first == ServoID::HEAD_YAW) {
-                        angle.second = utility::math::clamp(min_yaw, angle.second, max_yaw);
+                        angle.second = utility::math::clamp(cfg.min_yaw, angle.second, cfg.max_yaw);
                         yaw          = angle.second;
                     }
                 }
@@ -137,31 +136,16 @@ namespace module::motion {
                 auto waypoints = std::make_unique<ServoCommands>();
                 waypoints->commands.reserve(2);
                 auto t = NUClear::clock::now();
-                for (auto& angle : goalAnglesList) {
-                    waypoints->commands.emplace_back(id,
+                for (auto& angle : goal_angles_list) {
+                    waypoints->commands.emplace_back(subsumption_id,
                                                      t,
                                                      angle.first,
                                                      angle.second,
-                                                     float(head_motor_gain),
-                                                     float(head_motor_torque));
+                                                     float(cfg.head_motor_gain),
+                                                     float(cfg.head_motor_torque));
                 }
                 // Send commands
                 emit(waypoints);
             });
-
-        updateHandle.disable();
-
-        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
-            id,
-            "HeadController",
-            {std::pair<float, std::set<LimbID>>(30.0, {LimbID::HEAD})},
-            [this](const std::set<LimbID>& /* limbs */) {  // Head control gained
-                updateHandle.enable();
-            },
-            [this](const std::set<LimbID>& /* limbs */) {  // Head control lost
-                updateHandle.disable();
-            },
-            [](const std::set<ServoID>& /* servos */) {}  // Servos reached target
-        }));
     }
 }  // namespace module::motion
