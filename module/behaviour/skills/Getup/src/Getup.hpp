@@ -45,10 +45,10 @@ namespace module::behaviour::skills {
         } cfg;
 
         /// @brief Bool to indicate if the robot has fallen on its front or back
-        bool is_front;
+        bool is_front = false;
 
         /// @brief Bool to indicate if the robot is currently getting up
-        bool getting_up;
+        bool getting_up = false;
 
         /// @brief Updates the priority of the module by emitting an ActionPriorities message
         /// @param priority The priority used in the ActionPriorities message
