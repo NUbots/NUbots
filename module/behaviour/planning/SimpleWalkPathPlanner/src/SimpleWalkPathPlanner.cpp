@@ -62,27 +62,25 @@ namespace module::behaviour::planning {
 
 
     SimpleWalkPathPlanner::SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment))
-        , latest_command(utility::behaviour::StandStill())
-        , subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
+        : Reactor(std::move(environment)), subsumption_id(size_t(this) * size_t(this) - size_t(this)) {
 
         // do a little configurating
         on<Configuration>("SimpleWalkPathPlanner.yaml").then([this](const Configuration& config) {
-            log_level                  = config["log_level"].as<NUClear::LogLevel>();
-            cfg.max_turn_speed         = config["max_turn_speed"].as<float>();
-            cfg.min_turn_speed         = config["min_turn_speed"].as<float>();
-            cfg.forward_speed          = config["forward_speed"].as<float>();
-            cfg.side_speed             = config["side_speed"].as<float>();
-            cfg.rotate_speed_x         = config["rotate_speed_x"].as<float>();
-            cfg.rotate_speed_y         = config["rotate_speed_y"].as<float>();
-            cfg.rotate_speed           = config["rotate_speed"].as<float>();
-            cfg.walk_to_ready_speed_x  = config["walk_to_ready_speed_x"].as<float>();
-            cfg.walk_to_ready_speed_y  = config["walk_to_ready_speed_y"].as<float>();
-            cfg.walk_to_ready_rotation = config["walk_to_ready_rotation"].as<float>();
+            log_level                      = config["log_level"].as<NUClear::LogLevel>();
+            cfg.max_turn_speed             = config["max_turn_speed"].as<float>();
+            cfg.min_turn_speed             = config["min_turn_speed"].as<float>();
+            cfg.forward_speed              = config["forward_speed"].as<float>();
+            cfg.rotate_speed_x             = config["rotate_speed_x"].as<float>();
+            cfg.rotate_speed_y             = config["rotate_speed_y"].as<float>();
+            cfg.rotate_speed               = config["rotate_speed"].as<float>();
+            cfg.walk_to_ready_speed_x      = config["walk_to_ready_speed_x"].as<float>();
+            cfg.walk_to_ready_speed_y      = config["walk_to_ready_speed_y"].as<float>();
+            cfg.walk_to_ready_rotation     = config["walk_to_ready_rotation"].as<float>();
+            cfg.walk_path_planner_priority = config["walk_path_planner_priority"].as<float>();
         });
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
-            RegisterAction{subsumptionId,
+            RegisterAction{subsumption_id,
                            "Simple Walk Path Planner",
                            {
                                // Limb sets required by the walk engine:
@@ -92,22 +90,20 @@ namespace module::behaviour::planning {
                            [this](const std::set<LimbID>& givenLimbs) {
                                if (givenLimbs.find(LimbID::LEFT_LEG) != givenLimbs.end()) {
                                    // Enable the walk engine.
-                                   emit<Scope::DIRECT>(std::make_unique<EnableWalkEngineCommand>(subsumptionId));
+                                   emit<Scope::DIRECT>(std::make_unique<EnableWalkEngineCommand>(subsumption_id));
                                }
                            },
                            [this](const std::set<LimbID>& takenLimbs) {
                                if (takenLimbs.find(LimbID::LEFT_LEG) != takenLimbs.end()) {
                                    // Shut down the walk engine, since we don't need it right now.
-                                   emit<Scope::DIRECT>(std::make_unique<DisableWalkEngineCommand>(subsumptionId));
+                                   emit<Scope::DIRECT>(std::make_unique<DisableWalkEngineCommand>(subsumption_id));
                                }
                            },
                            [](const std::set<ServoID>& /*unused*/) {
                                // nothing
                            }}));
 
-        on<Trigger<WalkStopped>>().then([this] {
-            emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {0, 0}}));
-        });
+        on<Trigger<WalkStopped>>().then([this] { update_priority(0); });
 
         // Used to maintain the position of the last seen ball
         // TODO(LocalisationTeam): Should be implemented outside of the path planner in something like
@@ -131,13 +127,13 @@ namespace module::behaviour::planning {
                 //  Stop the walk engine and path planner if the KickPlanner module emits a WantsToKick message saying
                 //  it is executing a kick
                 if (wants_to.kick) {
-                    emit(std::make_unique<StopCommand>(subsumptionId));
+                    emit(std::make_unique<StopCommand>(subsumption_id));
                     return;
                 }
 
                 switch (static_cast<int>(latest_command.type.value)) {
                     case message::behaviour::MotionCommand::Type::STAND_STILL:
-                        emit(std::make_unique<StopCommand>(subsumptionId));
+                        emit(std::make_unique<StopCommand>(subsumption_id));
                         return;
 
                     case message::behaviour::MotionCommand::Type::DIRECT_COMMAND: walk_directly(); return;
@@ -153,7 +149,7 @@ namespace module::behaviour::planning {
                     default:  // This line should be UNREACHABLE
                         log<NUClear::ERROR>(
                             fmt::format("Invalid walk path planning command {}.", latest_command.type.value));
-                        emit(std::make_unique<StopCommand>(subsumptionId));
+                        emit(std::make_unique<StopCommand>(subsumption_id));
                         return;
                 }
             });
@@ -166,8 +162,8 @@ namespace module::behaviour::planning {
     //-------- Add extra behaviours for path planning here and in the switch case of this file
 
     void SimpleWalkPathPlanner::walk_directly() {
-        emit(std::move(std::make_unique<WalkCommand>(subsumptionId, latest_command.walk_command)));
-        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
+        emit(std::move(std::make_unique<WalkCommand>(subsumption_id, latest_command.walk_command)));
+        update_priority(cfg.walk_path_planner_priority);
     }
 
     void SimpleWalkPathPlanner::vision_walk_path() {
@@ -180,25 +176,29 @@ namespace module::behaviour::planning {
         walk_command.z() = utility::math::clamp(cfg.min_turn_speed, walk_command.z(), cfg.max_turn_speed);
 
         std::unique_ptr<WalkCommand> command =
-            std::make_unique<WalkCommand>(subsumptionId, walk_command.cast<double>());
+            std::make_unique<WalkCommand>(subsumption_id, walk_command.cast<double>());
         emit(std::move(command));
-        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
+        update_priority(cfg.walk_path_planner_priority);
     }
 
     void SimpleWalkPathPlanner::rotate_on_spot() {
         std::unique_ptr<WalkCommand> command =
-            std::make_unique<WalkCommand>(subsumptionId,
+            std::make_unique<WalkCommand>(subsumption_id,
                                           Eigen::Vector3d(cfg.rotate_speed_x, cfg.rotate_speed_y, cfg.rotate_speed));
         emit(std::move(command));
-        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
+        update_priority(cfg.walk_path_planner_priority);
     }
 
     void SimpleWalkPathPlanner::walk_to_ready() {
         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(
-            subsumptionId,
+            subsumption_id,
             Eigen::Vector3d(cfg.walk_to_ready_speed_x, cfg.walk_to_ready_speed_y, cfg.walk_to_ready_rotation));
         emit(std::move(command));
-        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumptionId, {40, 11}}));
+        update_priority(cfg.walk_path_planner_priority);
+    }
+
+    void SimpleWalkPathPlanner::update_priority(const float& priority) {
+        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {priority}}));
     }
 
 }  // namespace module::behaviour::planning
