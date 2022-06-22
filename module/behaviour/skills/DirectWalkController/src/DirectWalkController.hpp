@@ -25,11 +25,6 @@
 namespace module::behaviour::skills {
 
     class DirectWalkController : public NUClear::Reactor {
-
-    public:
-        /// @brief Called by the powerplant to build and setup the DirectWalkController reactor.
-        explicit DirectWalkController(std::unique_ptr<NUClear::Environment> environment);
-
     private:
         /// @brief Subsumption ID key to access motors
         const size_t subsumption_id;
@@ -44,6 +39,10 @@ namespace module::behaviour::skills {
         /// @brief Updates the priority of the module by emitting an ActionPriorities message
         /// @param priority The priority used in the ActionPriorities message
         void update_priority(const float& priority);
+
+    public:
+        /// @brief Called by the powerplant to build and setup the DirectWalkController reactor.
+        explicit DirectWalkController(std::unique_ptr<NUClear::Environment> environment);
     };
 }  // namespace module::behaviour::skills
 
