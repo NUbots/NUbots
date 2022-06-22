@@ -1,0 +1,4 @@
+log_level: WARN
+
+# Priority in subsumption system
+direct_walk_priority: 1

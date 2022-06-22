@@ -32,7 +32,18 @@ namespace module::behaviour::skills {
 
     private:
         /// @brief Subsumption ID key to access motors
-        const size_t subsumptionId;
+        const size_t subsumption_id;
+
+        /// @brief Stores configuration values
+        struct Config {
+            Config() = default;
+            /// @brief DirectWalkController priority in the subsumption system
+            float direct_walk_priority = 0.0f;
+        } cfg;
+
+        /// @brief Updates the priority of the module by emitting an ActionPriorities message
+        /// @param priority The priority used in the ActionPriorities message
+        void update_priority(const float& priority);
     };
 }  // namespace module::behaviour::skills
 
