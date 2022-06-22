@@ -368,10 +368,18 @@ namespace NUClear::dsl {
                 const auto binaryName = get_first_command_line_arg();
 
                 // Get the components of the path
-                const auto c = utility::strutil::split(watch.path, '/');
+                auto c = utility::strutil::split(watch.path, '/');
+
+                // Remove the yaml file name from the vector since we don't care what it is
+                c.pop_back();
 
                 // Returns true if the string exists in the vector
                 auto str_exists = [&](const std::string& key) { return std::find(c.begin(), c.end(), key) != c.end(); };
+
+                // Remove all parts of the path before and including config since we don't care about them
+                while (str_exists("config")) {
+                    c.erase(c.begin());
+                }
 
                 // If it's the installation phase, and the path contains anything indicating it is not default config,
                 // then don't let the reaction run
