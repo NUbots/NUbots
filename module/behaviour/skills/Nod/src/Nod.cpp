@@ -47,24 +47,27 @@ namespace module::behaviour::skills {
 
         // do a little configurating
         on<Configuration>("Nod.yaml").then([this](const Configuration& config) {
-            EXECUTION_PRIORITY = config["execution_priority"].as<float>();
+            log_level    = config["log_level"].as<NUClear::LogLevel>();
+            nod_priority = config["nod_priority"].as<float>();
         });
 
         on<Trigger<message::behaviour::Nod>>().then([this](const message::behaviour::Nod& nod) {
-            value = nod.value;
-            updatePriority(EXECUTION_PRIORITY);
+            nod_yes = nod.value;
+            updatePriority(nod_priority);
         });
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
-            id,
+            subsumption_id,
             "Nod",
             {std::pair<float, std::set<LimbID>>(0, {LimbID::HEAD})},
             [this](const std::set<LimbID>& /*unused*/) {
-                if (value) {
-                    emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"NodYes.yaml"})));
+                if (nod_yes) {
+                    emit(std::make_unique<ExecuteScriptByName>(subsumption_id,
+                                                               std::vector<std::string>({"NodYes.yaml"})));
                 }
                 else {
-                    emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"NodNo.yaml"})));
+                    emit(std::make_unique<ExecuteScriptByName>(subsumption_id,
+                                                               std::vector<std::string>({"NodNo.yaml"})));
                 }
             },
             [this](const std::set<LimbID>& /*unused*/) { updatePriority(0); },
@@ -72,6 +75,6 @@ namespace module::behaviour::skills {
     }
 
     void Nod::updatePriority(const float& priority) {
-        emit(std::make_unique<ActionPriorities>(ActionPriorities{id, {priority}}));
+        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {priority}}));
     }
 }  // namespace module::behaviour::skills
