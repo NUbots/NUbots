@@ -58,8 +58,9 @@ namespace module::behaviour::skills {
                            "DirectWalkController",
                            {
                                // Limb sets required by the walk engine:
-                               std::pair<double, std::set<LimbID>>(0, {LimbID::LEFT_LEG, LimbID::RIGHT_LEG}),
-                               std::pair<double, std::set<LimbID>>(0, {LimbID::LEFT_ARM, LimbID::RIGHT_ARM}),
+                               std::pair<double, std::set<LimbID>>(
+                                   0,
+                                   {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM}),
                            },
                            [this](const std::set<LimbID>& givenLimbs) {
                                if (givenLimbs.find(LimbID::LEFT_LEG) != givenLimbs.end()) {
@@ -93,6 +94,6 @@ namespace module::behaviour::skills {
     }
 
     void DirectWalkController::update_priority(const float& priority) {
-        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {priority, priority}}));
+        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {priority}}));
     }
 }  // namespace module::behaviour::skills
