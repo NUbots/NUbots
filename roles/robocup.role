@@ -34,6 +34,7 @@ nuclear_role(
   behaviour::planning::KickPlanner
   behaviour::planning::SimpleWalkPathPlanner
   behaviour::strategy::SoccerStrategy
+  behaviour::skills::Nod
   # Motion
   motion::ScriptEngine
   motion::QuinticWalk
