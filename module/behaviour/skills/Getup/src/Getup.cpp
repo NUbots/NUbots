@@ -93,7 +93,7 @@ namespace module::behaviour::skills {
             else {
                 emit(std::make_unique<ExecuteScriptByName>(
                     id,
-                    std::vector<std::string>({"StandUpBack.yaml", "Stand.yaml"})));
+                    std::vector<std::string>({"RollOverBack.yaml", "StandUpFront.yaml", "Stand.yaml"})));
             }
             updatePriority(EXECUTION_PRIORITY);
         });
