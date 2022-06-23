@@ -47,13 +47,13 @@ namespace module::behaviour::skills {
 
         // do a little configurating
         on<Configuration>("Nod.yaml").then([this](const Configuration& config) {
-            log_level    = config["log_level"].as<NUClear::LogLevel>();
-            nod_priority = config["nod_priority"].as<float>();
+            log_level        = config["log_level"].as<NUClear::LogLevel>();
+            cfg.nod_priority = config["nod_priority"].as<float>();
         });
 
         on<Trigger<message::behaviour::Nod>>().then([this](const message::behaviour::Nod& nod) {
             nod_yes = nod.value;
-            updatePriority(nod_priority);
+            updatePriority(cfg.nod_priority);
         });
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
