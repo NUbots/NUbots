@@ -100,32 +100,31 @@ namespace module::motion {
                 Eigen::Vector3f goal_head_unit_vector_world =
                     sphericalToCartesian(Eigen::Vector3f(1, current_angles.x(), current_angles.y()));
                 // Convert to robot space if requested angle is in world space
-                Eigen::Vector3f headUnitVector =
+                Eigen::Vector3f head_unit_vector =
                     goal_robot_space
                         ? goal_head_unit_vector_world
                         : Eigen::Affine3d(sensors.Htw).rotation().cast<float>() * goal_head_unit_vector_world;
 
-
                 // Compute inverse kinematics for head
                 // TODO(MotionTeam): MAKE THIS NOT FAIL FOR ANGLES OVER 90deg
-                std::vector<std::pair<ServoID, float>> goal_angles_list = calculateHeadJoints(headUnitVector);
+                std::vector<std::pair<ServoID, float>> goal_angles_list = calculateHeadJoints(head_unit_vector);
 
-                // Clamp head angles
-                cfg.max_yaw   = kinematicsModel.head.MAX_YAW;
-                cfg.min_yaw   = kinematicsModel.head.MIN_YAW;
-                cfg.max_pitch = kinematicsModel.head.MAX_PITCH;
-                cfg.min_pitch = kinematicsModel.head.MIN_PITCH;
-
-                // Store commands for logging
+                // Store angles for logging
                 float pitch = 0;
                 float yaw   = 0;
+
+                // Clamp requested head angles with max/min limits
+                float max_yaw   = kinematicsModel.head.MAX_YAW;
+                float min_yaw   = kinematicsModel.head.MIN_YAW;
+                float max_pitch = kinematicsModel.head.MAX_PITCH;
+                float min_pitch = kinematicsModel.head.MIN_PITCH;
                 for (auto& angle : goal_angles_list) {
                     if (angle.first == ServoID::HEAD_PITCH) {
-                        angle.second = utility::math::clamp(cfg.min_pitch, angle.second, cfg.max_pitch);
+                        angle.second = utility::math::clamp(min_pitch, angle.second, max_pitch);
                         pitch        = angle.second;
                     }
                     else if (angle.first == ServoID::HEAD_YAW) {
-                        angle.second = utility::math::clamp(cfg.min_yaw, angle.second, cfg.max_yaw);
+                        angle.second = utility::math::clamp(min_yaw, angle.second, max_yaw);
                         yaw          = angle.second;
                     }
                 }

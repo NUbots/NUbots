@@ -40,14 +40,6 @@ namespace module::motion {
             Config() = default;
             /// @brief Head controller priority in the subsumption system
             float head_controller_priority = 0;
-            /// @brief Minimum yaw value for clamping head command
-            float min_yaw = 0;
-            /// @brief Maxiumum yaw value for clamping head command
-            float max_yaw = 0;
-            /// @brief Minimum pitch value for clamping head command
-            float min_pitch = 0;
-            /// @brief Maximum pitch value for clamping head command
-            float max_pitch = 0;
             /// @brief Motor gain for head commands
             float head_motor_gain = 0;
             /// @brief Motor torque for head commands
