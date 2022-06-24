@@ -58,9 +58,13 @@ namespace module::behaviour::strategy {
             bool force_playing          = false;
             bool force_penalty_shootout = false;
             int walk_to_ready_time      = 0;
-            float kicking_distance      = 0.0f;
-            float kicking_angle         = 0.0f;
+
+            float kicking_distance = 0.0f;
+            float kicking_angle    = 0.0f;
         } cfg;
+
+        /// @brief Float to maintain the filtered ball distance in SoccerStrategy
+        float distance_to_ball = 1.0f;
 
         /// @brief Bool to indicate  if the robot is currently getting up
         bool is_getting_up = false;

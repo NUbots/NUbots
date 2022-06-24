@@ -10,6 +10,7 @@ nuclear_role(
   support::configuration::GlobalConfig
   network::NUClearNet
   network::NetworkForwarder
+  output::ImageCompressor
   output::Overview
   support::configuration::SoccerConfig
   # input

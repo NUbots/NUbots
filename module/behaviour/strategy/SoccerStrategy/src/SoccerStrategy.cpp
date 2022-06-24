@@ -20,6 +20,7 @@
 #include "SoccerStrategy.hpp"
 
 #include <Eigen/Geometry>
+#include <cmath>
 
 #include "extension/Configuration.hpp"
 
@@ -91,10 +92,12 @@ namespace module::behaviour::strategy {
     SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
+
         on<Configuration>("SoccerStrategy.yaml").then([this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
 
             using namespace std::chrono;
+
             cfg.ball_last_seen_max_time = duration_cast<NUClear::clock::duration>(
                 duration<double>(config["ball_last_seen_max_time"].as<double>()));
             cfg.goal_last_seen_max_time = duration_cast<NUClear::clock::duration>(
@@ -124,7 +127,8 @@ namespace module::behaviour::strategy {
             cfg.walk_to_ready_time = config["walk_to_ready_time"].as<int>();
 
             cfg.kicking_distance = config["kicking_distance"].as<float>();
-            cfg.kicking_angle    = config["kicking_angle"].as<float>();
+
+            cfg.kicking_angle = config["kicking_angle"].as<float>();
         });
 
         on<Trigger<Field>, With<FieldDescription>>().then(
@@ -143,8 +147,16 @@ namespace module::behaviour::strategy {
                 Eigen::Affine3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
                 rBTt = Htc * rBCc;
 
-                if (std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2) != 0)) {
-                    log<NUClear::WARN>("Distance to ball", std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2)));
+                if (std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2)) < 1.0
+                    && !std::isnan(std::asin(std::abs(rBTt.y()) / std::abs(rBTt.x())))) {
+                    log<NUClear::WARN>("Distance to ball (measured):",
+                                       std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2)));
+
+                    // TODO(BehaviourTeam): Yeesh, needs work...
+                    distance_to_ball = std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2));
+
+                    log<NUClear::WARN>("Distance to ball ('filtered'):", distance_to_ball);
+
                     log<NUClear::WARN>("Angle to ball", std::asin(std::abs(rBTt.y()) / std::abs(rBTt.x())));
                 }
             }
@@ -391,15 +403,15 @@ namespace module::behaviour::strategy {
         }
         else {
 
-            if (std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2)) < cfg.kicking_distance
+            if (distance_to_ball < cfg.kicking_distance
                 && std::asin(std::abs(rBTt.y()) / std::abs(rBTt.x())) < cfg.kicking_angle) {
 
                 // We are close to the ball, kick it
 
                 log<NUClear::WARN>("We are close to the ball, kick it");
 
-                emit(std::make_unique<KickScriptCommand>(LimbID::LEFT_LEG, KickCommandType::NORMAL));
 
+                emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
 
                 log<NUClear::WARN>("Kicked");
             }
