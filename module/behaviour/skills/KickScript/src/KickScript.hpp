@@ -24,29 +24,40 @@
 
 #include "message/motion/KickCommand.hpp"
 
+
 namespace module::behaviour::skills {
 
     class KickScript : public NUClear::Reactor {
-    public:
-        /// @brief Called by the powerplant to build and setup the KickScript reactor.
-        explicit KickScript(std::unique_ptr<NUClear::Environment> environment);
 
     private:
         /// @brief The id registered in the subsumption system for this module
-        const size_t id{size_t(this) * size_t(this) - size_t(this)};
-        /// @brief Value that priority is set to when wanting to kick
-        float kick_priority = 0.0f;
-        /// @brief Time between kick command message and kicking before kick is discarded (milliseconds)
-        int message_timeout = 0;
+        const size_t subsumption_id;
+
+        /// @brief Stores configuration values
+        struct Config {
+            Config() = default;
+            /// @brief Value that priority is set to when kick is requested
+            float kick_priority = 0.0f;
+            /// @brief Time between kick command message and kicking before kick is discarded (milliseconds)
+            int message_timeout = 0;
+        } cfg;
+
         /// @brief Time when the last kick command message was received
         NUClear::clock::time_point time_since_message{NUClear::clock::now()};
+
         /// @brief The last kick command received, nullptr if none received yet
         std::shared_ptr<message::motion::KickScriptCommand> kick_command{nullptr};
 
         /// @brief Updates the priority of the module by emitting an ActionPriorities message
         /// @param priority The priority used in the ActionPriorities message
         void update_priority(const float& priority);
+
+    public:
+        /// @brief Called by the powerplant to build and setup the KickScript reactor.
+        explicit KickScript(std::unique_ptr<NUClear::Environment> environment);
     };
+
+
 }  // namespace module::behaviour::skills
 
 
