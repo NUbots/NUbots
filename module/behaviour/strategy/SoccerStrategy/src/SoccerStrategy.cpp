@@ -142,6 +142,11 @@ namespace module::behaviour::strategy {
                 // Transform the vision ball measurement into torso space
                 Eigen::Affine3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
                 rBTt = Htc * rBCc;
+
+                if (std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2) != 0)) {
+                    log<NUClear::WARN>("Distance to ball", std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2)));
+                    log<NUClear::WARN>("Angle to ball", std::asin(std::abs(rBTt.y()) / std::abs(rBTt.x())));
+                }
             }
             else {
                 rBTt = Eigen::Vector3f::Zero();
@@ -385,9 +390,6 @@ namespace module::behaviour::strategy {
             currentState = Behaviour::State::PENALISED;
         }
         else {
-
-            log<NUClear::WARN>("Distance to ball", std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2)));
-            log<NUClear::WARN>("Angle to ball", std::asin(std::abs(rBTt.y()) / std::abs(rBTt.x())));
 
             if (std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2)) < cfg.kicking_distance
                 && std::asin(std::abs(rBTt.y()) / std::abs(rBTt.x())) < cfg.kicking_angle) {
