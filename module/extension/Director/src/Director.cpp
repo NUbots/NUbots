@@ -76,7 +76,7 @@ namespace module::extension {
 
             // Unbind any when state monitors
             for (auto& when : provider->when) {
-                when.handle.unbind();
+                when->handle.unbind();
             }
 
             // Erase the Provider from this group
@@ -116,22 +116,25 @@ namespace module::extension {
                 throw std::runtime_error("You cannot use the 'When' DSL word with Start or Stop.");
             }
 
+            // The when condition object
+            auto w  = std::make_shared<provider::Provider::WhenCondition>(when.type,
+                                                                         when.validator,
+                                                                         when.validator(when.current()));
+            auto id = when.reaction->id;
+
             // Add a reaction that will listen for changes to this state and notify the director
-            const auto id         = when.reaction->id;
-            const auto type       = when.type;
-            const auto validator  = when.validator;
-            ReactionHandle handle = when.binder(*this, [this, id, type, validator](const int& state) {
-                // TODO(@TrentHouliston) only do the state update emit if the state variable actually changed too
-                // Otherwise some module out there might keep emitting that the Standing state has updated to the same
-                // value and then we will be sad because we will constantly reevaluate the director for no reason
-                if (validator(state)) {
-                    emit(std::make_unique<StateUpdate>(id, type, state));
+            w->handle = when.binder(*this, [this, id, w](const int& state) {
+                // Only update if the validity changes
+                bool valid = w->validator(state);
+                if (valid != w->current) {
+                    w->current = valid;
+                    emit(std::make_unique<StateUpdate>(id, w->type, state));
                 }
             });
-            handle.disable();
+            w->handle.disable();
 
             // Add it to the list of when conditions
-            provider->when.emplace_back(when.type, when.validator, when.current, handle);
+            provider->when.push_back(w);
         }
         else {
             throw std::runtime_error("When statements must come after a Provide statement");
