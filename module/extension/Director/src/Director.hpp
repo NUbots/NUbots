@@ -158,7 +158,7 @@ namespace module::extension {
         };
 
         /**
-         * Return the passed provider it as an option for a solution along with its requirements.
+         * Return the passed provider as an option for a solution along with its requirements.
          * It will recursively find Solutions for each of the requirements of the provider including its unmet when
          * conditions and needs relationships.
          *

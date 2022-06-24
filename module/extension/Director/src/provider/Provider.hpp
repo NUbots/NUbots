@@ -44,7 +44,7 @@ namespace module::extension::provider {
             std::type_index type;
             /// Expression to determine if the passed state is valid
             std::function<bool(const int&)> validator;
-            /// Function to get the current state
+            /// The current state of the condition when it was last seen by the Director
             bool current;
             /// The reaction handle which is monitoring this state for a valid condition
             NUClear::threading::ReactionHandle handle;
