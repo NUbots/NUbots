@@ -149,15 +149,8 @@ namespace module::behaviour::strategy {
 
                 if (std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2)) < 1.0
                     && !std::isnan(std::asin(std::abs(rBTt.y()) / std::abs(rBTt.x())))) {
-                    log<NUClear::WARN>("Distance to ball (measured):",
-                                       std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2)));
-
                     // TODO(BehaviourTeam): Yeesh, needs work...
                     distance_to_ball = std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2));
-
-                    log<NUClear::WARN>("Distance to ball ('filtered'):", distance_to_ball);
-
-                    log<NUClear::WARN>("Angle to ball", std::asin(std::abs(rBTt.y()) / std::abs(rBTt.x())));
                 }
             }
             else {
@@ -403,10 +396,20 @@ namespace module::behaviour::strategy {
         }
         else {
 
+            if (!std::isnan(std::asin(std::abs(rBTt.y()) / std::abs(rBTt.x())))) {
+                log<NUClear::WARN>("Distance to ball :",
+                                   distance_to_ball,
+                                   " with expected kicking distance: ",
+                                   cfg.kicking_distance);
+
+                log<NUClear::WARN>("Angle to ball",
+                                   std::asin(std::abs(rBTt.y()) / std::abs(rBTt.x())),
+                                   " with expected kicking angle: ",
+                                   cfg.kicking_angle);
+            }
+
             if (distance_to_ball < cfg.kicking_distance
                 && std::asin(std::abs(rBTt.y()) / std::abs(rBTt.x())) < cfg.kicking_angle) {
-
-                // We are close to the ball, kick it
 
                 log<NUClear::WARN>("We are close to the ball, kick it");
 
