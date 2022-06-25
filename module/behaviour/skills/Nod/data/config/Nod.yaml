@@ -1,1 +1,3 @@
-execution_priority: 40
+log_level: WARN
+
+nod_priority: 2

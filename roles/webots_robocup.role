@@ -28,10 +28,10 @@ nuclear_role(
   localisation::RobotParticleLocalisation
   # Behaviour
   behaviour::Controller
-  behaviour::skills::Stand
   behaviour::skills::Getup
   
   behaviour::skills::HeadBehaviourSoccer
+  behaviour::skills::Stand
   behaviour::planning::KickPlanner
   behaviour::planning::SimpleWalkPathPlanner # Creates WalkPaths.
   behaviour::skills::KickScript

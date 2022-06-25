@@ -51,21 +51,33 @@ namespace module::behaviour::skills {
 
     using utility::support::Expression;
 
-    KickScript::KickScript(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    KickScript::KickScript(std::unique_ptr<NUClear::Environment> environment)
+        : Reactor(std::move(environment)), subsumption_id(size_t(this) * size_t(this) - size_t(this)) {
 
         // do a little configurating
         on<Configuration>("KickScript.yaml").then([this](const Configuration& config) {
-            log_level = config["log_level"].as<NUClear::LogLevel>();
-
-            kick_priority   = config["kick_priority"].as<float>();
-            message_timeout = config["message_timeout"].as<Expression>();
+            log_level           = config["log_level"].as<NUClear::LogLevel>();
+            cfg.kick_priority   = config["kick_priority"].as<float>();
+            cfg.message_timeout = config["message_timeout"].as<Expression>();
         });
+
+        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
+            subsumption_id,
+            "Kick Script",
+            {std::pair<float, std::set<LimbID>>(
+                0,
+                {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
+            [this](const std::set<LimbID>& /*limbAssociatedWithAction*/) { emit(std::make_unique<ExecuteKick>()); },
+            [this](const std::set<LimbID>& /*limbAssociatedWithAction*/) { emit(std::make_unique<FinishKick>()); },
+            [this](const std::set<ServoID>& /*servoAssociatedWithCompletion*/) {
+                emit(std::make_unique<FinishKick>());
+            }}));
 
         on<Trigger<KickScriptCommand>>().then([this](const KickScriptCommand& cmd) {
             log<NUClear::WARN>("KickScript Command Recieved...");
             kick_command       = std::make_shared<KickScriptCommand>(cmd);
             time_since_message = NUClear::clock::now();
-            update_priority(kick_priority);
+            update_priority(cfg.kick_priority);
         });
 
         on<Trigger<ExecuteKick>>().then([this] {
@@ -80,7 +92,7 @@ namespace module::behaviour::skills {
             // Don't kick if it's been a while since we got the KickScriptCommand
             if (std::chrono::duration_cast<std::chrono::milliseconds>(NUClear::clock::now() - time_since_message)
                     .count()
-                > message_timeout) {
+                > cfg.message_timeout) {
                 update_priority(0);
                 return;
             }
@@ -89,18 +101,19 @@ namespace module::behaviour::skills {
 
             // Execute the penalty kick if the type is PENALTY
             if (kick_command->type == KickCommandType::PENALTY) {
-                emit(std::make_unique<ExecuteScriptByName>(id, std::vector<std::string>({"KickPenalty.yaml"})));
+                emit(std::make_unique<ExecuteScriptByName>(subsumption_id,
+                                                           std::vector<std::string>({"KickPenalty.yaml"})));
             }
             else {
                 if (leg == LimbID::RIGHT_LEG) {
                     log<NUClear::WARN>("Kicking right leg");
                     emit(std::make_unique<ExecuteScriptByName>(
-                        id,
+                        subsumption_id,
                         std::vector<std::string>({"Stand.yaml", "KickRight.yaml", "Stand.yaml"})));
                 }
                 else {  // LEFT_LEG
                     emit(std::make_unique<ExecuteScriptByName>(
-                        id,
+                        subsumption_id,
                         std::vector<std::string>({"Stand.yaml", "KickLeft.yaml", "Stand.yaml"})));
                 }
             }
@@ -110,22 +123,10 @@ namespace module::behaviour::skills {
             emit(std::make_unique<KickFinished>());
             update_priority(0);
         });
-
-        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
-            id,
-            "Kick Script",
-            {std::pair<float, std::set<LimbID>>(
-                0,
-                {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
-            [this](const std::set<LimbID>& /*limbAssociatedWithAction*/) { emit(std::make_unique<ExecuteKick>()); },
-            [this](const std::set<LimbID>& /*limbAssociatedWithAction*/) { emit(std::make_unique<FinishKick>()); },
-            [this](const std::set<ServoID>& /*servoAssociatedWithCompletion*/) {
-                emit(std::make_unique<FinishKick>());
-            }}));
     }
 
     void KickScript::update_priority(const float& priority) {
-        emit(std::make_unique<ActionPriorities>(ActionPriorities{id, {priority}}));
+        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {priority}}));
     }
 
 }  // namespace module::behaviour::skills

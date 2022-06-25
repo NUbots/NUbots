@@ -1,6 +1,7 @@
 log_level: WARN
 
-# Value that priority is set to when wanting to kick
-kick_priority: 41
+# Priority in subsumption system when a kick is requested
+kick_priority: 4
+
 # Time between kick command message and kicking before kick is discarded (milliseconds)
 message_timeout: 3000
