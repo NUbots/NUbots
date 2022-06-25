@@ -38,15 +38,12 @@ nuclear_role(
 
   # Behaviour
   behaviour::Controller
-  behaviour::skills::Stand
-  behaviour::skills::FallingRelax
   behaviour::skills::Getup
   behaviour::skills::KickScript
   behaviour::skills::HeadBehaviourSoccer
+  behaviour::skills::Stand
   behaviour::planning::KickPlanner
-  behaviour::planning::SimpleWalkPathPlanner # Creates WalkPaths. behaviour::planning::BezierWalkPathPlanner  # Creates
-
-  # WalkPaths.
+  behaviour::planning::SimpleWalkPathPlanner
   behaviour::strategy::SoccerStrategy
   behaviour::skills::Nod
 
