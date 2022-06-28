@@ -62,9 +62,9 @@ namespace module {
                 trial_duration_limit = std::chrono::seconds(currentRequest.trial_duration_limit);
 
                 // Set our walk command
-                walk_command_velocity.x() = currentRequest.parameters.real_params[11]; //param 11 is X velocity!!!!!!
-                walk_command_velocity.y() = 0.0; // currentRequest.parameters.real_params[11]; //0.0;
-                walk_command_rotation     = 0.0; // currentRequest.parameters.real_params[13]; // 0.0;
+                walk_command_velocity.x() = currentRequest.parameters.real_params[11]; 
+                walk_command_velocity.y() = currentRequest.parameters.real_params[12]; // 0.0;
+                walk_command_rotation     = currentRequest.parameters.real_params[13]; // 0.0;
 
                 // Read the QuinticWalk config and overwrite the config parameters with the current individual's
                 // parameters
@@ -150,7 +150,7 @@ namespace module {
                 fitnessScores->constraints                        = constraints;
                 return fitnessScores;
             }
-
+                                    //I want a pattern here passed as an arg
             std::vector<double> WalkEvaluator::calculateScores() {
                 auto robotDistanceTravelled = std::fabs(initialRobotPosition.y() - robotPosition.y());
                 return {
@@ -183,9 +183,8 @@ namespace module {
             bool WalkEvaluator::checkForFall(const RawSensors& sensors) {
                 bool fallen        = false;
                 auto accelerometer = sensors.accelerometer;
-
-                if ((std::fabs(accelerometer.x()) > 9.2 || std::fabs(accelerometer.y()) > 9.2)
-                    && std::fabs(accelerometer.z()) < 0.5) {
+               
+                if ((std::fabs(accelerometer.x()) > 9.2 || std::fabs(accelerometer.y()) > 9.2) && std::fabs(accelerometer.z()) < 0.5) {
                     NUClear::log<NUClear::DEBUG>("Fallen!");
                     NUClear::log<NUClear::DEBUG>("acc at fall (x y z):",
                                                  std::fabs(accelerometer.x()),
