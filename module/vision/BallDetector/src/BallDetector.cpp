@@ -249,7 +249,7 @@ namespace module::vision {
                     }
                     deviation = std::sqrt(deviation / (angles.size() - 1));
 
-                    // If the deviation is more than the maximum allowed, then discard this ball
+                    // DISCARD IF THE STANDARD DEVIATION IS TOO HIGH
                     if (deviation > config.maximum_deviation) {
 
                         log<NUClear::DEBUG>(fmt::format("Ball discarded: deviation ({}) > maximum_deviation ({})",
@@ -261,7 +261,7 @@ namespace module::vision {
                         keep     = false;
                     }
 
-                    // DISCARD THIS BALL IF PROJECTION_DISTANCE AND ANGULAR_DISTANCE ARE TOO FAR APART
+                    // DISCARD IF PROJECTION_DISTANCE AND ANGULAR_DISTANCE ARE TOO FAR APART
                     const float max_distance = std::max(projection_distance, angular_distance);
 
                     if ((std::abs(projection_distance - angular_distance) / max_distance)
