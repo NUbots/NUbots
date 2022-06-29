@@ -305,16 +305,11 @@ namespace module::vision {
                         keep     = false;
                     }
 
-                    const Eigen::Vector2f angular_size   = Eigen::Vector2f::Constant(std::acos(radius));
-                    const Eigen::Vector2f screen_angular = cartesianToSpherical(uBCw).tail<2>();
-
                     log<NUClear::DEBUG>(fmt::format("Camera {}", balls->id));
                     log<NUClear::DEBUG>(fmt::format("radius {}", b.radius));
                     log<NUClear::DEBUG>(fmt::format("Axis {}", b.uBCc.transpose()));
                     log<NUClear::DEBUG>(
                         fmt::format("Distance {} - srBCc {}", angular_distance, b.measurements[0].srBCc.transpose()));
-                    log<NUClear::DEBUG>(
-                        fmt::format("screen_angular {} - angular_size {}", screen_angular.transpose(), angular_size));
                     log<NUClear::DEBUG>(fmt::format("Projection Distance {} - srBCc",
                                                     projection_distance,
                                                     b.measurements[1].srBCc.transpose()));
