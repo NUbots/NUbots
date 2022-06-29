@@ -110,7 +110,7 @@ export class VisionSimulator extends Simulator {
             },
             measurements: [
               {
-                type: MeasurementType.WIDTH_BASED,
+                type: MeasurementType.ANGULAR,
                 srBCc: new Vector3(1, 0, 0),
               },
             ],
