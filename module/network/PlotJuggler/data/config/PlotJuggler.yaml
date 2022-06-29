@@ -1,0 +1,9 @@
+log_level: WARN
+
+# Set to true to forward DataPoint messages to PlotJuggler
+forward_datapoints: true
+
+# Config for the PlotJuggler UDP server
+udp_server:
+  ip_address: 127.0.0.1
+  port: 9870
