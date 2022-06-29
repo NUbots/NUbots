@@ -12,8 +12,8 @@ Each cluster is checked to see if
 
 1. It is below the green horizon
 2. It has a high enough degree of fit to a circle
-3. It is not too close to the robot
-4. It's angular and projection based distances are close enough
+3. It's angular and projection based distances are close enough
+4. It is not too close to the robot
 5. It is closer or equal to the length of the field
 
 If it doesn't meet any of these criterion, the cluster is not considered to be a ball.

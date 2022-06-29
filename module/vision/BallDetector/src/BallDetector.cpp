@@ -228,7 +228,7 @@ namespace module::vision {
                     bool keep = true;
                     b.colour.fill(1.0f);  // a valid ball has a white colour in NUsight
 
-                    // CALCULATE DEGREE OF FIT - DISCARD IF STANDARD DEVIATION OF ANGLES IS TOO LARGE
+                    // DISCARD IF STANDARD DEVIATION OF ANGLES IS TOO LARGE - CALCULATE DEGREE OF FIT TO CIRCLE
                     // Degree of fit defined as the standard deviation of angle between every rays on the
                     // cluster / and the cone axis (uBCw). If the standard deviation exceeds a given threshold then
                     // it is a bad fit
@@ -249,7 +249,7 @@ namespace module::vision {
                     }
                     deviation = std::sqrt(deviation / (angles.size() - 1));
 
-                    // DISCARD IF THE STANDARD DEVIATION IS TOO HIGH
+                    // Check if standard deviation is low enough
                     if (deviation > config.maximum_deviation) {
 
                         log<NUClear::DEBUG>(fmt::format("Ball discarded: deviation ({}) > maximum_deviation ({})",
