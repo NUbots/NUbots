@@ -28,9 +28,9 @@ import "Matrix.proto";
 message Ball {
     /// Method of measuring the ball position
     enum MeasurementType {
-        UNKNOWN      = 0;
-        PROJECTION = 1; // project the axis vector to the ball plane
-        ANGULAR  = 2;   // use angular distance formula
+        UNKNOWN    = 0;
+        PROJECTION = 1;  // project the axis vector to the ball plane
+        ANGULAR    = 2;  // use angular distance formula
     }
     /// Contains the way the ball measurement was determined, the position of the ball given this measurement type,
     /// and the certainty of the measurement
@@ -38,7 +38,7 @@ message Ball {
         MeasurementType type = 1;
         /// Spherical Reciprocal Coordinates (1/distance, phi, theta)
         /// Gives a better representation of the error of the measurement, since error comes from the angular position
-        fvec3 srBCc      = 2;
+        fvec3 srBCc = 2;
         /// Confidence of this measurement, for localisation
         fmat3 covariance = 3;
     }
