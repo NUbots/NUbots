@@ -43,7 +43,6 @@ namespace module::extension {
             // If nothing in the queue updated the active task to a new task we are now idle
             // That also means we need to remove any subtasks this group had recursively
             if (group.active_task == nullptr) {
-                group.state = provider::ProviderGroup::IDLE;
 
                 // Run the Stop reactions for this provider group since it is no longer running
                 for (auto& provider : group.providers) {

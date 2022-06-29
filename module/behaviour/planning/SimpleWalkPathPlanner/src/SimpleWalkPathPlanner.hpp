@@ -27,6 +27,9 @@
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/MotionCommand.hpp"
+#include "message/motion/WalkCommand.hpp"
+
+#include "utility/behaviour/MotionCommand.hpp"
 
 namespace module::behaviour::planning {
 
@@ -46,24 +49,34 @@ namespace module::behaviour::planning {
     private:
         /// @brief Stores configuration values
         struct Config {
-            Config()                     = default;
-            float forward_speed          = 0;
-            float side_speed             = 0;
-            float max_turn_speed         = 0;
-            float min_turn_speed         = 0;
-            float rotate_speed           = 0;
-            float rotate_speed_x         = 0;
-            float rotate_speed_y         = 0;
-            float walk_to_ready_speed_x  = 0;
-            float walk_to_ready_speed_y  = 0;
+            Config() = default;
+            /// @brief Walk path planner priority in the subsumption system
+            float walk_path_planner_priority = 0;
+            /// @brief Walk command velocity for walking to ball
+            float forward_speed = 0;
+            /// @brief Maximum angular velocity command for walking to ball
+            float max_turn_speed = 0;
+            /// @brief Minimum angular velocity command for walking to ball
+            float min_turn_speed = 0;
+            /// @brief Rotate on spot walk command angular velocity
+            float rotate_speed = 0;
+            /// @brief Rotate on spot walk command forward velocity
+            float rotate_speed_x = 0;
+            /// @brief Rotate on spot walk command side velocity
+            float rotate_speed_y = 0;
+            /// @brief Walk to ready walk command forward velocity
+            float walk_to_ready_speed_x = 0;
+            /// @brief Walk to ready walk command side velocity
+            float walk_to_ready_speed_y = 0;
+            /// @brief Walk to ready walk command angular velocity
             float walk_to_ready_rotation = 0;
         } cfg;
 
         /// @brief Stores the latest MotionCommand
-        message::behaviour::MotionCommand latest_command;
+        message::behaviour::MotionCommand latest_command = utility::behaviour::StandStill();
 
-        /// @brief Stores the servo access priority
-        const size_t subsumptionId;
+        /// @brief The id registered in the subsumption system for this module
+        const size_t subsumption_id;
 
         /// @brief Stores the position of the last ball seen
         Eigen::Vector3f rBTt = Eigen::Vector3f(1.0, 0.0, 0.0);
@@ -81,6 +94,10 @@ namespace module::behaviour::planning {
         /// @brief Configured to emit a walk command that results in robot being in desired position after the ready
         /// phase
         void walk_to_ready();
+
+        /// @brief Updates the priority of the module by emitting an ActionPriorities message
+        /// @param priority The priority used in the ActionPriorities message
+        void update_priority(const float& priority);
 
     public:
         explicit SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);
