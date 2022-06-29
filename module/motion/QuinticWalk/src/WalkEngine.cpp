@@ -376,17 +376,14 @@ namespace module::motion {
 
         // Trunk yaw
         float trunk_yaw_vel =
-            utility::math::angle::angleDistance(foot_step.getLast().z(), foot_step.getNext().z()) / period;
+            utility::math::angle::angleDistance(foot_step.getLast().z(), foot_step.getNext().z()) / half_period;
 
         point(TrajectoryTypes::TRUNK_AXIS_Z,
               0.0f,
               trunk_axis_pos_at_last.z(),
               trunk_axis_vel_at_last.z(),
               trunk_axis_acc_at_last.z());
-        point(TrajectoryTypes::TRUNK_AXIS_Z,
-              half_period,
-              0.5f * foot_step.getLast().z() + 0.5f * foot_step.getNext().z(),
-              trunk_yaw_vel);
+        point(TrajectoryTypes::TRUNK_AXIS_Z, half_period, foot_step.getNext().z(), trunk_yaw_vel);
     }
 
     void QuinticWalkEngine::buildWalkDisableTrajectories(const Eigen::Vector3f& orders,
