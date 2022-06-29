@@ -49,15 +49,15 @@ namespace module::vision {
 
     BallDetector::BallDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
-        on<Configuration>("BallDetector.yaml").then([this](const Configuration& cfg) {
-            log_level = cfg["log_level"].as<NUClear::LogLevel>();
+        on<Configuration>("BallDetector.yaml").then([this](const Configuration& config) {
+            log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            config.confidence_threshold  = cfg["confidence_threshold"].as<float>();
-            config.cluster_points        = cfg["cluster_points"].as<int>();
-            config.minimum_ball_distance = cfg["minimum_ball_distance"].as<float>();
-            config.distance_disagreement = cfg["distance_disagreement"].as<float>();
-            config.maximum_deviation     = cfg["maximum_deviation"].as<float>();
-            config.ball_angular_cov      = Eigen::Vector3f(cfg["ball_angular_cov"].as<Expression>());
+            cfg.confidence_threshold  = config["confidence_threshold"].as<float>();
+            cfg.cluster_points        = config["cluster_points"].as<int>();
+            cfg.minimum_ball_distance = config["minimum_ball_distance"].as<float>();
+            cfg.distance_disagreement = config["distance_disagreement"].as<float>();
+            cfg.maximum_deviation     = config["maximum_deviation"].as<float>();
+            cfg.ball_angular_cov      = Eigen::Vector3f(config["ball_angular_cov"].as<Expression>());
         });
 
         on<Trigger<GreenHorizon>, With<FieldDescription>, Buffer<2>>().then(
@@ -83,7 +83,7 @@ namespace module::vision {
                     indices.end(),
                     neighbours,
                     [&](const int& idx) {
-                        return idx == int(indices.size()) || (cls(BALL_INDEX, idx) >= config.confidence_threshold);
+                        return idx == int(indices.size()) || (cls(BALL_INDEX, idx) >= cfg.confidence_threshold);
                     });
                 indices.resize(std::distance(indices.begin(), boundary));
 
@@ -103,7 +103,7 @@ namespace module::vision {
                 utility::vision::visualmesh::cluster_points(indices.begin(),
                                                             indices.end(),
                                                             neighbours,
-                                                            config.cluster_points,
+                                                            cfg.cluster_points,
                                                             clusters);
 
                 log<NUClear::DEBUG>(fmt::format("Found {} clusters", clusters.size()));
@@ -196,7 +196,7 @@ namespace module::vision {
                     b.measurements.emplace_back();
                     b.measurements.back().type       = Ball::MeasurementType::ANGULAR;
                     b.measurements.back().srBCc      = cartesianToReciprocalSpherical(b.uBCc * angular_distance);
-                    b.measurements.back().covariance = config.ball_angular_cov.asDiagonal();
+                    b.measurements.back().covariance = cfg.ball_angular_cov.asDiagonal();
 
                     // Projection-based distance
                     // Given a flat X-Y plane that intersects through the middle of the ball, find the point where
@@ -213,7 +213,7 @@ namespace module::vision {
                     b.measurements.emplace_back();
                     b.measurements.back().type       = Ball::MeasurementType::PROJECTION;
                     b.measurements.back().srBCc      = cartesianToReciprocalSpherical(b.uBCc * projection_distance);
-                    b.measurements.back().covariance = config.ball_angular_cov.asDiagonal();
+                    b.measurements.back().covariance = cfg.ball_angular_cov.asDiagonal();
 
 
                     /***********************************************
@@ -250,11 +250,11 @@ namespace module::vision {
                     deviation = std::sqrt(deviation / (angles.size() - 1));
 
                     // Check if standard deviation is low enough
-                    if (deviation > config.maximum_deviation) {
+                    if (deviation > cfg.maximum_deviation) {
 
                         log<NUClear::DEBUG>(fmt::format("Ball discarded: deviation ({}) > maximum_deviation ({})",
                                                         deviation,
-                                                        config.maximum_deviation));
+                                                        cfg.maximum_deviation));
                         log<NUClear::DEBUG>("--------------------------------------------------");
                         // Balls that violate degree of fit will show as green in NUsight
                         b.colour = keep ? message::conversion::math::fvec4(0.0f, 1.0f, 0.0f, 1.0f) : b.colour;
@@ -264,8 +264,7 @@ namespace module::vision {
                     // DISCARD IF PROJECTION_DISTANCE AND ANGULAR_DISTANCE ARE TOO FAR APART
                     const float max_distance = std::max(projection_distance, angular_distance);
 
-                    if ((std::abs(projection_distance - angular_distance) / max_distance)
-                        > config.distance_disagreement) {
+                    if ((std::abs(projection_distance - angular_distance) / max_distance) > cfg.distance_disagreement) {
 
                         log<NUClear::DEBUG>(
                             fmt::format("Ball discarded: Width and proj distance disagree too much: width = "
@@ -280,11 +279,11 @@ namespace module::vision {
 
                     // DISCARD IF THE DISTANCE FROM THE BALL TO THE ROBOT IS TOO CLOSE
                     // Prevents the robot itself being classed as a ball, ie its arms/hands
-                    if (angular_distance < config.minimum_ball_distance) {
+                    if (angular_distance < cfg.minimum_ball_distance) {
 
                         log<NUClear::DEBUG>(fmt::format("Ball discarded: distance ({}) < minimum_ball_distance ({})",
                                                         angular_distance,
-                                                        config.minimum_ball_distance));
+                                                        cfg.minimum_ball_distance));
                         log<NUClear::DEBUG>("--------------------------------------------------");
                         // Balls that violate this but not previous checks will show as red in NUsight
                         b.colour = keep ? message::conversion::math::fvec4(1.0f, 0.0f, 0.0f, 1.0f) : b.colour;

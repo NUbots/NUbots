@@ -42,7 +42,7 @@ namespace module::vision {
             float maximum_deviation = 0.0f;
             /// @brief Measurement certainties for ball localisation
             Eigen::Vector3f ball_angular_cov = Eigen::Vector3f::Zero();
-        } config{};
+        } cfg{};
 
     public:
         /// @brief Called by the powerplant to build and setup the BallDetector reactor.
