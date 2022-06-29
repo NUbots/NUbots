@@ -1,6 +1,6 @@
 [
     {
-        "duration": 25,
+        "duration": 2000,
         "targets": [
             { "id": "R_SHOULDER_PITCH", "position": 0.7, "gain": .NaN, "torque": 0 },
             { "id": "L_SHOULDER_PITCH", "position": 0.7, "gain": .NaN, "torque": 0  },

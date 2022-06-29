@@ -15,11 +15,11 @@ nuclear_role(
   # input
   input::GameController
   # Sensors
-  input::Camera
+  # input::Camera
   platform::cm740::HardwareIO
   input::SensorFilter
   # Vision
-  vision::VisualMesh
+  # vision::VisualMesh
   vision::GreenHorizonDetector
   vision::GoalDetector
   vision::BallDetector
@@ -28,14 +28,15 @@ nuclear_role(
   localisation::RobotParticleLocalisation
   # Behaviour
   behaviour::Controller
-  behaviour::skills::Getup
+  # behaviour::skills::Getup
   behaviour::skills::KickScript
-  behaviour::skills::HeadBehaviourSoccer
+  # behaviour::skills::HeadBehaviourSoccer
   behaviour::skills::Stand
   behaviour::planning::KickPlanner
   behaviour::planning::SimpleWalkPathPlanner
   behaviour::strategy::SoccerStrategy
   behaviour::skills::Nod
+  behaviour::skills::FallingRelax
   # Motion
   motion::ScriptEngine
   motion::QuinticWalk

@@ -31,17 +31,39 @@ namespace module::behaviour::skills {
      */
     class FallingRelax : public NUClear::Reactor {
     private:
+        /// @brief The id registered in the subsumption system for this module
+        const size_t subsumption_id;
         const size_t id = size_t(this) * size_t(this) - size_t(this);
 
-        bool falling = false;
+        /// @brief Stores configuration values
+        struct Config {
+            Config() = default;
+            /// @brief Value that priority is set to when getup is requested
+            float relax_fall_priority = 0.0f;
+            /// @brief Threshold angle for executing getup, between torso z axis and world z axis
+            float falling_angle = 0.0f;
+            float falling_acceleration= 0.0f;
+            std::vector<float> recovery_acceleration{};
+        } cfg;
 
-        /// config settings
-        float FALLING_ANGLE        = 0.0f;
-        float FALLING_ACCELERATION = 0.0f;
-        float PRIORITY             = 0.0f;
-        std::vector<float> RECOVERY_ACCELERATION{};
+        /// @brief Bool to indicate if the robot is currently relaxed
+        bool relaxed = false;
 
-        void updatePriority(const float& priority);
+        /// @brief Updates the priority of the module by emitting an ActionPriorities message
+        /// @param priority The priority used in the ActionPriorities message
+        void update_priority(const float& priority);
+
+        // const size_t id = size_t(this) * size_t(this) - size_t(this);
+
+        // bool falling = false;
+
+        // /// config settings
+        // float FALLING_ANGLE        = 0.0f;
+        // float FALLING_ACCELERATION = 0.0f;
+        // float PRIORITY             = 0.0f;
+        // std::vector<float> RECOVERY_ACCELERATION{};
+
+        // void updatePriority(const float& priority);
 
     public:
         explicit FallingRelax(std::unique_ptr<NUClear::Environment> environment);
