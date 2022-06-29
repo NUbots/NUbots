@@ -3,7 +3,7 @@ set(role_source_dir "${PROJECT_SOURCE_DIR}/${NUCLEAR_ROLES_DIR}")
 set(role_binary_dir "${PROJECT_BINARY_DIR}/${NUCLEAR_ROLES_DIR}")
 
 # This gets all of our source files
-file(GLOB rolefiles "${role_source_dir}/*.role")
+file(GLOB_RECURSE rolefiles "${role_source_dir}/*.role")
 
 # Backup the state of all the role variables before we re read them This is needed so we can delete roles that no longer
 # exist
@@ -25,11 +25,15 @@ foreach(rolefile ${rolefiles})
     # Get role name and add it to our list of roles
     get_filename_component(role_name ${rolefile} NAME_WE)
 
+    # Roles may be within subfolders - get the subfolder
+    file(RELATIVE_PATH role_folder ${role_source_dir} ${rolefile})
+    cmake_path(REMOVE_EXTENSION role_folder)
+
     # If we had a backup as to if this role is enabled use it. Otherwise default to true.
-    if(DEFINED "BACKUP_ROLE_${role_name}")
-      option("ROLE_${role_name}" "Build the role ${role_name}" ${BACKUP_ROLE_${role_name}})
+    if(DEFINED "BACKUP_ROLE_${role_folder}")
+      option("ROLE_${role_folder}" "Build the role ${role_folder}" ${BACKUP_ROLE_${role_folder}})
     else()
-      option("ROLE_${role_name}" "Build the role ${role_name}" ON)
+      option("ROLE_${role_folder}" "Build the role ${role_folder}" ON)
     endif()
   endif()
 endforeach(rolefile)
@@ -41,9 +45,9 @@ unset(NUCLEAR_ROLES CACHE)
 foreach(var ${vars})
   if(var MATCHES "^ROLE_[a-zA-Z0-9_]+")
     if(${var})
-      string(SUBSTRING ${var} 5 -1 role_name)
+      string(SUBSTRING ${var} 5 -1 role_folder)
       set(NUCLEAR_ROLES
-          ${NUCLEAR_ROLES} ${role_name}
+          ${NUCLEAR_ROLES} ${role_folder}
           CACHE INTERNAL "A list of the roles that are enabled to be built." FORCE
       )
     endif()
@@ -58,7 +62,7 @@ unset(NUCLEAR_MODULES CACHE)
 
 # Note that the loop value of this for loop sets the local role variable that is used in the included role file
 foreach(role ${NUCLEAR_ROLES})
-  include("${role_source_dir}/${role}.role")
+  include_directories("${role_source_dir}/${role}.role")
 endforeach(role)
 
 # If we want to build all the modules, we will list them all in the required format then create the role manually

@@ -33,7 +33,9 @@ function(NUCLEAR_ROLE)
   target_link_libraries(${role} NUClear::nuclear)
 
   # Set our output directory to be bin
+  message("role ${role}")
   set_target_properties(${role} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/")
+  # fix up for folder
 
   # IDE folder
   set_target_properties(${role} PROPERTIES FOLDER "roles/")
