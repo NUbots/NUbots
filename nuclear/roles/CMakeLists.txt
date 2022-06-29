@@ -22,10 +22,7 @@ foreach(rolefile ${rolefiles})
   # Check it is a .role file
   if(roleext STREQUAL .role)
 
-    # Get role name and add it to our list of roles
-    get_filename_component(role_name ${rolefile} NAME_WE)
-
-    # Roles may be within subfolders - get the subfolder
+    # Roles may be within subfolders - get the subfolder and name
     file(RELATIVE_PATH role_folder ${role_source_dir} ${rolefile})
     cmake_path(REMOVE_EXTENSION role_folder)
 
@@ -43,9 +40,11 @@ endforeach(rolefile)
 get_cmake_property(vars CACHE_VARIABLES)
 unset(NUCLEAR_ROLES CACHE)
 foreach(var ${vars})
-  if(var MATCHES "^ROLE_[a-zA-Z0-9_]+")
+  if(var MATCHES "^ROLE_[a-zA-Z0-9]+[/]?[a-zA-Z0-9]+")
     if(${var})
+      message("var is ${var}")
       string(SUBSTRING ${var} 5 -1 role_folder)
+      message("something ${role_folder}")
       set(NUCLEAR_ROLES
           ${NUCLEAR_ROLES} ${role_folder}
           CACHE INTERNAL "A list of the roles that are enabled to be built." FORCE
@@ -63,7 +62,8 @@ unset(NUCLEAR_MODULES CACHE)
 # Note that the loop value of this for loop sets the local role variable that is used in the included role file
 foreach(role ${NUCLEAR_ROLES})
   message("hello yes this is ${role_source_dir} and I have ${role}")
-  include("${role_source_dir}/${role}.role")
+  # include("${role_source_dir}/${role}.role")
+  add_subdirectory("${role_source_dir}/${role}.role")
 endforeach(role)
 
 # If we want to build all the modules, we will list them all in the required format then create the role manually
