@@ -9,7 +9,7 @@ file(GLOB_RECURSE rolefiles "${role_source_dir}/*.role")
 # exist
 get_cmake_property(vars CACHE_VARIABLES)
 foreach(var ${vars})
-  if(var MATCHES "^ROLE_[a-zA-Z0-9]+")
+if(var MATCHES "^ROLE_[a-zA-Z0-9]+[/]?[a-zA-Z0-9]+")
     set("BACKUP_${var}" ${${var}})
     unset(${var} CACHE)
   endif()
@@ -62,7 +62,8 @@ unset(NUCLEAR_MODULES CACHE)
 
 # Note that the loop value of this for loop sets the local role variable that is used in the included role file
 foreach(role ${NUCLEAR_ROLES})
-  include_directories("${role_source_dir}/${role}.role")
+  message("hello yes this is ${role_source_dir} and I have ${role}")
+  include("${role_source_dir}/${role}.role")
 endforeach(role)
 
 # If we want to build all the modules, we will list them all in the required format then create the role manually
