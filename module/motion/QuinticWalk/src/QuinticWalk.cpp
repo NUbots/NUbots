@@ -9,10 +9,12 @@
 #include "message/motion/KinematicsModel.hpp"
 #include "message/motion/WalkCommand.hpp"
 #include "message/support/SaveConfiguration.hpp"
+#include "message/support/nusight/DataPoint.hpp"
 
 #include "utility/math/comparison.hpp"
 #include "utility/math/euler.hpp"
 #include "utility/motion/InverseKinematics.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::motion {
@@ -33,7 +35,7 @@ namespace module::motion {
 
     using utility::input::ServoID;
     using utility::motion::kinematics::calculateLegJoints;
-
+    using utility::nusight::graph;
     /**
      * @brief loads the configuration from cfg into config
      * @param cfg A Configuration provided by the Configuration extension
@@ -290,19 +292,29 @@ namespace module::motion {
         std::tie(trunk_pos, trunk_axis, foot_pos, foot_axis, is_left_support) = walk_engine.computeCartesianPosition();
 
         // Change goals from support foot based coordinate system to trunk based coordinate system
-        Eigen::Affine3f Hst;  // trunk_to_support_foot_goal
-        Hst.linear()      = setRPY(trunk_axis.x(), trunk_axis.y(), trunk_axis.z()).transpose();
-        Hst.translation() = -Hst.rotation() * trunk_pos;
 
-        Eigen::Affine3f Hfs;  // support_to_flying_foot
-        Hfs.linear()      = setRPY(foot_axis.x(), foot_axis.y(), foot_axis.z());
-        Hfs.translation() = foot_pos;
+        // Support to trunk
+        Eigen::Affine3f Hst;
+        Hst.linear()      = setRPY(trunk_axis.x(), trunk_axis.y(), trunk_axis.z());
+        Hst.translation() = trunk_pos;
 
-        const Eigen::Affine3f Hft = Hfs * Hst;  // trunk_to_flying_foot_goal
+        // Support to flying foot
+        Eigen::Affine3f Hsf;
+        Hsf.linear()      = setRPY(foot_axis.x(), foot_axis.y(), foot_axis.z());
+        Hsf.translation() = foot_pos;
+
+        // Support from trunk
+        const Eigen::Affine3f Hts = Hst.inverse();
+
+        // Fly foot from trunk
+        const Eigen::Affine3f Htf = Hts * Hsf;
 
         // Calculate leg joints
-        const Eigen::Matrix4f left_foot  = walk_engine.getFootstep().isLeftSupport() ? Hst.matrix() : Hft.matrix();
-        const Eigen::Matrix4f right_foot = walk_engine.getFootstep().isLeftSupport() ? Hft.matrix() : Hst.matrix();
+        const Eigen::Matrix4f left_foot  = walk_engine.getFootstep().isLeftSupport() ? Hts.matrix() : Htf.matrix();
+        const Eigen::Matrix4f right_foot = walk_engine.getFootstep().isLeftSupport() ? Htf.matrix() : Hts.matrix();
+
+        emit(graph("Left foot (x,y,z)", left_foot(0, 3), left_foot(1, 3), left_foot(2, 3)));
+        emit(graph("Right foot (x,y,z)", right_foot(0, 3), right_foot(1, 3), right_foot(2, 3)));
 
         const auto joints =
             calculateLegJoints<float>(kinematicsModel, Eigen::Affine3f(left_foot), Eigen::Affine3f(right_foot));
