@@ -261,20 +261,7 @@ namespace module::vision {
                         keep     = false;
                     }
 
-                    // DISCARD IF THE DISTANCE FROM THE BALL TO THE ROBOT IS TOO CLOSE
-                    // Prevents the robot itself being classed as a ball, ie its arms/hands
-                    if (angular_distance < config.minimum_ball_distance) {
-
-                        log<NUClear::DEBUG>(fmt::format("Ball discarded: distance ({}) < minimum_ball_distance ({})",
-                                                        angular_distance,
-                                                        config.minimum_ball_distance));
-                        log<NUClear::DEBUG>("--------------------------------------------------");
-                        // Balls that violate this but not previous checks will show as red in NUsight
-                        b.colour = keep ? message::conversion::math::fvec4(1.0f, 0.0f, 0.0f, 1.0f) : b.colour;
-                        keep     = false;
-                    }
-
-                    // Discard this ball if projection_distance and distance are too far apart
+                    // DISCARD THIS BALL IF PROJECTION_DISTANCE AND ANGULAR_DISTANCE ARE TOO FAR APART
                     const float max_distance = std::max(projection_distance, angular_distance);
 
                     if ((std::abs(projection_distance - angular_distance) / max_distance)
@@ -288,6 +275,19 @@ namespace module::vision {
                         log<NUClear::DEBUG>("--------------------------------------------------");
                         // Balls that violate this but not previous checks will show as blue in NUsight
                         b.colour = keep ? message::conversion::math::fvec4(0.0f, 0.0f, 1.0f, 1.0f) : b.colour;
+                        keep     = false;
+                    }
+
+                    // DISCARD IF THE DISTANCE FROM THE BALL TO THE ROBOT IS TOO CLOSE
+                    // Prevents the robot itself being classed as a ball, ie its arms/hands
+                    if (angular_distance < config.minimum_ball_distance) {
+
+                        log<NUClear::DEBUG>(fmt::format("Ball discarded: distance ({}) < minimum_ball_distance ({})",
+                                                        angular_distance,
+                                                        config.minimum_ball_distance));
+                        log<NUClear::DEBUG>("--------------------------------------------------");
+                        // Balls that violate this but not previous checks will show as red in NUsight
+                        b.colour = keep ? message::conversion::math::fvec4(1.0f, 0.0f, 0.0f, 1.0f) : b.colour;
                         keep     = false;
                     }
 
