@@ -22,7 +22,7 @@ namespace {
                 emit<Task>(std::make_unique<Done>());
             });
 
-            on<Provide<SimpleTask>>().then([this](const SimpleTask& task) {
+            on<Provide<SimpleTask>>().then([this] {
                 if (!executed) {
                     // Task has been executed!
                     events.push_back("task executed");

@@ -38,7 +38,7 @@ namespace {
                 emit<Task>(std::make_unique<SimpleTask>("complex task 2"));
             });
 
-            on<Provide<VeryComplexTask>, Needs<ComplexTask<2>>>().then([this](const VeryComplexTask& task) {  //
+            on<Provide<VeryComplexTask>, Needs<ComplexTask<2>>>().then([this] {
                 events.push_back("emitting tasks from very complex task");
                 emit<Task>(std::make_unique<ComplexTask<2>>());
             });

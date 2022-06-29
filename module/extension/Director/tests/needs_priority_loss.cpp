@@ -29,7 +29,7 @@ namespace {
                 emit<Task>(std::make_unique<SimpleTask<2>>("complex 1"));
             });
             // Second complex task only needs one
-            on<Provide<ComplexTask<2>>, Needs<SimpleTask<1>>>().then([this](const ComplexTask<2>& task) {
+            on<Provide<ComplexTask<2>>, Needs<SimpleTask<1>>>().then([this] {
                 events.push_back("emitting complex task 2");
                 emit<Task>(std::make_unique<SimpleTask<1>>("complex 2"));
             });

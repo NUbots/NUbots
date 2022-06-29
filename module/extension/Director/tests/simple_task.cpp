@@ -16,7 +16,7 @@ namespace {
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
             : TestBase<TestReactor>(std::move(environment)) {
 
-            on<Provide<SimpleTask>>().then([this](const SimpleTask& task) {
+            on<Provide<SimpleTask>>().then([this] {
                 // Task has been executed!
                 events.push_back("task executed");
             });
@@ -35,7 +35,7 @@ namespace {
     };
 }  // namespace
 
-TEST_CASE("Test that a simple task is executed through the director", "[director][!mayfail]") {
+TEST_CASE("Test that a simple task is executed through the director", "[director][simple][!mayfail]") {
 
     NUClear::PowerPlant::Configuration config;
     config.thread_count = 1;
