@@ -24,12 +24,14 @@ import "Matrix.proto";
 import "Vector.proto";
 
 message ResetRobotHypotheses {
+
     message Self {
-        vec2   position     = 1;
-        mat2   position_cov = 2;
+        /// Estimate of the robot's {x, y} position in field space
+        vec2   rTFf         = 1;
+        mat2   covariance   = 2;
         double heading      = 3;
         double heading_var  = 4;
-        bool   absoluteYaw  = 5;
+        bool   absolute_yaw = 5;
     }
 
     repeated Self hypotheses = 1;

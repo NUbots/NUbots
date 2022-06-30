@@ -21,24 +21,24 @@
 
 #include "message/motion/ServoTarget.hpp"
 
-namespace module {
-namespace behaviour {
+namespace module::behaviour {
 
-    using LimbID  = utility::input::LimbID;
-    using ServoID = utility::input::ServoID;
     using message::behaviour::ServoCommand;
-    using message::motion::ServoTarget;
+    using message::behaviour::ServoCommands;
+    using message::motion::ServoTargets;
+
     using utility::behaviour::ActionKill;
-    using utility::behaviour::ActionPriorites;
+    using utility::behaviour::ActionPriorities;
     using utility::behaviour::ActionStart;
     using utility::behaviour::RegisterAction;
+    using utility::input::LimbID;
+    using utility::input::ServoID;
 
     // So we don't need a huge long type declaration everywhere...
     using iterators = std::pair<std::vector<std::reference_wrapper<RequestItem>>::iterator,
                                 std::vector<std::reference_wrapper<RequestItem>>::iterator>;
 
-    Controller::Controller(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), actions(), limbAccess(), requests(), currentActions(), commandQueues() {
+    Controller::Controller(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Trigger<RegisterAction>, Sync<Controller>, Priority::HIGH>().then(
             "Action Registration",
@@ -46,7 +46,7 @@ namespace behaviour {
                 if (action.id == 0) {
                     throw std::runtime_error("Action ID 0 is reserved for internal use");
                 }
-                else if (requests.find(action.id) != std::end(requests)) {
+                if (requests.find(action.id) != std::end(requests)) {
                     throw std::runtime_error("The passed action ID has already been registered");
                 }
 
@@ -63,7 +63,7 @@ namespace behaviour {
                     request->items.emplace_back(*request, request->items.size(), set.first, set.second);
 
                     // Put our request in the correct queue
-                    for (auto& l : request->items.back().limbSet) {
+                    for (const auto& l : request->items.back().limbSet) {
                         if (l == LimbID::UNKNOWN) {
                             throw std::runtime_error(action.name + " registered an action for an unkown limb.");
                         }
@@ -87,9 +87,9 @@ namespace behaviour {
             selectAction();
         });
 
-        on<Trigger<ActionPriorites>, Sync<Controller>, Priority::HIGH>().then(
+        on<Trigger<ActionPriorities>, Sync<Controller>, Priority::HIGH>().then(
             "Action Priority Update",
-            [this](const ActionPriorites& update) {
+            [this](const ActionPriorities& update) {
                 auto& request = requests[update.id];
 
                 // Find the largest priority
@@ -99,10 +99,8 @@ namespace behaviour {
                 uint mainElement = std::distance(std::begin(update.priorities), maxEl);
 
                 // Unless we need to, try not to run the expensive subsumption algorithm
-                bool reselect;
-
                 // If our main changed we have to reselect
-                reselect = mainElement != request->mainElement;
+                bool reselect = mainElement != request->mainElement;
 
                 request->mainElement = mainElement;
                 request->maxPriority = *maxEl;
@@ -115,7 +113,6 @@ namespace behaviour {
                     bool active = request->items[i].active;
 
                     // Short circuit if we can
-                    // TODO see if we can add more here
                     reselect |= (up != down) && ((active && down) || (!active && up));
 
                     // Update our priority
@@ -131,58 +128,52 @@ namespace behaviour {
         // For single waypoints
         on<Trigger<ServoCommand>>().then([this](const ServoCommand& point) {
             // Make a vector of the command
-            auto points = std::make_unique<std::vector<ServoCommand>>();
-            points->push_back(point);
-            emit<Scope::DIRECT>(std::move(points));
+            auto points = std::make_unique<ServoCommands>();
+            points->commands.push_back(point);
+            emit<Scope::DIRECT>(points);
         });
 
-        on<Trigger<std::vector<ServoCommand>>, Sync<Controller>>().then(
-            "Command Filter",
-            [this](const std::vector<ServoCommand>& commands) {
-                for (auto& command : commands) {
+        on<Trigger<ServoCommands>, Sync<Controller>>().then("Command Filter", [this](const ServoCommands& commands) {
+            for (const auto& command : commands.commands) {
 
-                    // Check if we have access
-                    if (this->limbAccess[uint(utility::input::LimbID::limbForServo(command.id)) - 1]
-                        == command.source) {
+                // Check if we have access
+                if (this->limbAccess[uint(utility::input::LimbID::limbForServo(command.id)) - 1] == command.source) {
 
-                        // Get our queue
-                        auto& queue = commandQueues[uint(command.id)];
+                    // Get our queue
+                    auto& queue = commandQueues[uint(command.id)];
 
-                        // Clear commands until we get back one that we are after
-                        while (!queue.empty() && queue.back().time > command.time) {
-                            queue.pop_back();
-                        }
+                    // Clear commands until we get back one that we are after
+                    while (!queue.empty() && queue.back().time > command.time) {
+                        queue.pop_back();
+                    }
 
-                        // Push our command onto the queue
-                        queue.push_back(command);
+                    // Push our command onto the queue
+                    queue.push_back(command);
+                }
+                else {
+                    auto source = requests.find(command.source);
+
+                    // If we don't have a source
+                    if (source == requests.end()) {
+                        log<NUClear::WARN>("Motor command from unregistered source",
+                                           command.source,
+                                           "denied access: SERVO",
+                                           int(command.id));
                     }
                     else {
-                        auto source = requests.find(command.source);
-
-                        // If we don't have a source
-                        if (source == requests.end()) {
-                            log<NUClear::WARN>("Motor command from unregistered source",
-                                               command.source,
-                                               "denied access: SERVO",
-                                               int(command.id));
-                        }
-                        else {
-                            auto& name = requests.find(command.source)->second->name;
-                            log<NUClear::WARN>("Motor command (from ",
-                                               name,
-                                               ") denied access: SERVO ",
-                                               int(command.id));
-                        }
+                        auto& name = requests.find(command.source)->second->name;
+                        log<NUClear::WARN>("Motor command (from ", name, ") denied access: SERVO ", int(command.id));
                     }
                 }
-            });
+            }
+        });
 
         on<Every<90, Per<std::chrono::seconds>>, Single, Sync<Controller>, Priority::HIGH>().then(
             "Controller Update Waypoints",
             [this] {
                 auto now = NUClear::clock::now();
                 std::list<ServoID> emptiedQueues;
-                std::unique_ptr<std::vector<ServoTarget>> waypoints;
+                std::unique_ptr<ServoTargets> waypoints;
 
                 for (auto& queue : commandQueues) {
 
@@ -194,12 +185,15 @@ namespace behaviour {
 
                         // Lazy initialize
                         if (!waypoints) {
-                            waypoints = std::make_unique<std::vector<ServoTarget>>();
+                            waypoints = std::make_unique<ServoTargets>();
                         }
 
                         // Add to our waypoints
-                        waypoints->push_back(
-                            {command.time, command.id, command.position, command.gain, command.torque});
+                        waypoints->targets.emplace_back(command.time,
+                                                        command.id,
+                                                        command.position,
+                                                        command.gain,
+                                                        command.torque);
 
                         // Dirty hack the waypoint
                         command.source = 0;
@@ -214,7 +208,7 @@ namespace behaviour {
 
                         if (queue.empty()) {
                             // Keep track of what we have emptied
-                            emptiedQueues.push_back(id);
+                            emptiedQueues.emplace_back(id);
                         }
                     }
                 }
@@ -307,7 +301,7 @@ namespace behaviour {
                                      if (a.second.first == a.second.second) {
                                          return true;
                                      }
-                                     else if (b.second.first == b.second.second) {
+                                     if (b.second.first == b.second.second) {
                                          return false;
                                      }
                                      // The smaller priority loses
@@ -339,7 +333,7 @@ namespace behaviour {
                     newActions.push_back(std::ref(action));
 
                     // Remove the limbs that we have just allocated
-                    for (auto& limb : action.limbSet) {
+                    for (const auto& limb : action.limbSet) {
                         limbs.erase(limbs.find(limb));
                     }
                 }
@@ -357,7 +351,7 @@ namespace behaviour {
 
         // Set the permissions for a limb according to our allocations
         for (auto& command : newActions) {
-            for (auto& l : command.get().limbSet) {
+            for (const auto& l : command.get().limbSet) {
                 limbAccess[uint(l) - 1] = command.get().group.id;
             }
         }
@@ -368,12 +362,10 @@ namespace behaviour {
             if (a.group.id < b.group.id) {
                 return true;
             }
-            else if (a.group.id == b.group.id) {
+            if (a.group.id == b.group.id) {
                 return a.index < b.index;
             }
-            else {
-                return false;
-            }
+            return false;
         };
 
         // Sort our list
@@ -445,5 +437,4 @@ namespace behaviour {
         currentActions = std::move(newActions);
     }
 
-}  // namespace behaviour
-}  // namespace module
+}  // namespace module::behaviour

@@ -5,13 +5,13 @@
 
 namespace module::output::compressor::vaapi::operation {
 
-VABufferID picture_parameter(VADisplay dpy,
-                             VAContextID context,
-                             VABufferID encoded,
-                             const uint32_t& width,
-                             const uint32_t& height,
-                             const uint32_t& quality,
-                             const bool& monochrome);
+    VABufferID picture_parameter(VADisplay dpy,
+                                 VAContextID context,
+                                 VABufferID encoded,
+                                 const uint32_t& width,
+                                 const uint32_t& height,
+                                 const uint32_t& quality,
+                                 const bool& monochrome);
 
 }  // namespace module::output::compressor::vaapi::operation
 

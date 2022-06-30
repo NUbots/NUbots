@@ -1,6 +1,6 @@
 # Get our role directories
-set(role_source_dir "${PROJECT_SOURCE_DIR}/roles")
-set(role_binary_dir "${PROJECT_BINARY_DIR}/role")
+set(role_source_dir "${PROJECT_SOURCE_DIR}/${NUCLEAR_ROLES_DIR}")
+set(role_binary_dir "${PROJECT_BINARY_DIR}/${NUCLEAR_ROLES_DIR}")
 
 # This gets all of our source files
 file(GLOB rolefiles "${role_source_dir}/*.role")
@@ -39,7 +39,7 @@ endforeach(rolefile)
 get_cmake_property(vars CACHE_VARIABLES)
 unset(NUCLEAR_ROLES CACHE)
 foreach(var ${vars})
-  if(var MATCHES "^ROLE_[a-zA-Z0-9]+")
+  if(var MATCHES "^ROLE_[a-zA-Z0-9_]+")
     if(${var})
       string(SUBSTRING ${var} 5 -1 role_name)
       set(NUCLEAR_ROLES
@@ -60,3 +60,31 @@ unset(NUCLEAR_MODULES CACHE)
 foreach(role ${NUCLEAR_ROLES})
   include("${role_source_dir}/${role}.role")
 endforeach(role)
+
+# If we want to build all the modules, we will list them all in the required format then create the role manually
+if(BUILD_ALL_MODULES)
+
+  # ${role} is the name of the role created when you call nuclear_role()
+  set(role "allmodules")
+
+  # * We find all the modules by finding all CMakeLists.txt files in the module directory
+  # * A directory containing a CMakeLists.txt file in the module directory is assumed to be a module
+  file(
+    GLOB_RECURSE module_cmakelists
+    RELATIVE "${PROJECT_SOURCE_DIR}/${NUCLEAR_MODULE_DIR}"
+    "${PROJECT_SOURCE_DIR}/${NUCLEAR_MODULE_DIR}/**/CMakeLists.txt"
+  )
+
+  # The paths are those of the CMakeLists.txt files, so we make them the expected format here
+  foreach(module ${module_cmakelists})
+    # Strip the trailing filename to get the module directory
+    string(REPLACE "/CMakeLists.txt" "" module ${module})
+    # Replace path separators with the namespace-style colon pairs nuclear_role() expects
+    string(REPLACE "/" "::" module ${module})
+    # Add the resulting string to the list of all modules
+    list(APPEND ALL_MODULES ${module})
+  endforeach(module ${module_cmakelists})
+
+  # Actually generate the role with the module names
+  nuclear_role(${ALL_MODULES})
+endif()

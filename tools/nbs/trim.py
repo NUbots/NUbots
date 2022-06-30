@@ -3,10 +3,10 @@
 from datetime import timedelta
 from pathlib import Path
 
+from pytimeparse import parse
 from termcolor import colored
 from tqdm import tqdm
 
-from pytimeparse import parse
 from utility.nbs import Encoder, LinearDecoder
 
 

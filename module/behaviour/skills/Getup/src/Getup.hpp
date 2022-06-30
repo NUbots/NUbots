@@ -22,35 +22,41 @@
 
 #include <nuclear>
 
-namespace module {
-namespace behaviour {
-    namespace skills {
+namespace module::behaviour::skills {
 
-        /**
-         * Executes a getup script if the robot falls over.
-         *
-         * @author Josiah Walker
-         * @author Trent Houliston
-         */
-        class Getup : public NUClear::Reactor {
-        private:
-            const size_t id;
+    /**
+     * Executes a getup script if the robot falls over.
+     *
+     * @author Josiah Walker
+     * @author Trent Houliston
+     */
+    class Getup : public NUClear::Reactor {
+    private:
+        /// @brief The id registered in the subsumption system for this module
+        const size_t subsumption_id;
 
-            bool gettingUp;
-            ReactionHandle fallenCheck;
+        /// @brief Stores configuration values
+        struct Config {
+            Config() = default;
+            /// @brief Value that priority is set to when getup is requested
+            float getup_priority = 0.0f;
+            /// @brief Threshold angle for executing getup, between torso z axis and world z axis
+            float fallen_angle = 0.0f;
+        } cfg;
 
-            /// config settings
-            float FALLEN_ANGLE;
-            float GETUP_PRIORITY;
-            float EXECUTION_PRIORITY;
+        /// @brief Bool to indicate if the robot has fallen on its front or back
+        bool is_front = false;
 
-            void updatePriority(const float& priority);
+        /// @brief Bool to indicate if the robot is currently getting up
+        bool getting_up = false;
 
-        public:
-            explicit Getup(std::unique_ptr<NUClear::Environment> environment);
-        };
-    }  // namespace skills
-}  // namespace behaviour
-}  // namespace module
+        /// @brief Updates the priority of the module by emitting an ActionPriorities message
+        /// @param priority The priority used in the ActionPriorities message
+        void update_priority(const float& priority);
+
+    public:
+        explicit Getup(std::unique_ptr<NUClear::Environment> environment);
+    };
+}  // namespace module::behaviour::skills
 
 #endif  // MODULES_BEHAVIOUR_REFLEX_GETUP_HPP

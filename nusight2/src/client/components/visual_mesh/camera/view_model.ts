@@ -1,23 +1,21 @@
-import bounds from 'binary-search-bounds'
-import { autorun } from 'mobx'
-import { observable } from 'mobx'
-import { computed } from 'mobx'
+import { autorun, computed, observable } from 'mobx'
 import { createTransformer } from 'mobx-utils'
-import { InterleavedBuffer, InterleavedBufferAttribute, Object3D } from 'three'
-import { RawShaderMaterial } from 'three'
-import { Float32BufferAttribute } from 'three'
-import { Scene } from 'three'
-import { WebGLRenderer } from 'three'
-import { Mesh } from 'three'
-import { BufferGeometry } from 'three'
-import { Camera } from 'three'
-import { OrthographicCamera } from 'three'
-import { Vector2 } from 'three'
-
+import {
+  BufferGeometry,
+  Camera,
+  Float32BufferAttribute,
+  InterleavedBuffer,
+  InterleavedBufferAttribute,
+  Mesh,
+  Object3D,
+  OrthographicCamera,
+  RawShaderMaterial,
+  Scene,
+  Vector2,
+  WebGLRenderer,
+} from 'three'
 import { ImageDecoder } from '../../../image_decoder/image_decoder'
-
-import { CameraModel } from './model'
-import { VisualMesh } from './model'
+import { CameraModel, VisualMesh } from './model'
 import meshFragmentShader from './shaders/mesh.frag'
 import meshVertexShader from './shaders/mesh.vert'
 
@@ -79,24 +77,22 @@ export class CameraViewModel {
     return scene
   }
 
-  private visualMesh = createTransformer(
-    (mesh: VisualMesh): Object3D => {
-      const meshMaterial = this.meshMaterial
-      meshMaterial.uniforms.image.value = this.decoder.texture
-      meshMaterial.uniforms.dimensions.value = new Vector2(
-        this.model.image!.width,
-        this.model.image!.height,
-      )
+  private visualMesh = createTransformer((mesh: VisualMesh): Object3D => {
+    const meshMaterial = this.meshMaterial
+    meshMaterial.uniforms.image.value = this.decoder.texture
+    meshMaterial.uniforms.dimensions.value = new Vector2(
+      this.model.image!.width,
+      this.model.image!.height,
+    )
 
-      // The UV mapped mesh
-      const m = new Mesh(this.meshGeometry(mesh), meshMaterial)
-      m.frustumCulled = false
+    // The UV mapped mesh
+    const m = new Mesh(this.meshGeometry(mesh), meshMaterial)
+    m.frustumCulled = false
 
-      const obj = new Object3D()
-      obj.add(m)
-      return obj
-    },
-  )
+    const obj = new Object3D()
+    obj.add(m)
+    return obj
+  })
 
   @computed
   get meshMaterial(): RawShaderMaterial {
@@ -112,30 +108,30 @@ export class CameraViewModel {
 
   private meshGeometry = createTransformer(
     (mesh: VisualMesh): BufferGeometry => {
-      const { rows, indices, neighbours, coordinates, classifications } = mesh
+      const { neighbours, coordinates, classifications } = mesh
 
       const nElem = coordinates.length / 2
 
       // Cumulative sum so we can work out which row our segments are on
-      const cRows = rows.reduce(
-        (acc, v, i) => {
-          acc.push(acc[i] + v)
-          return acc
-        },
-        [0],
-      )
+      // const cRows = rows.reduce(
+      //   (acc, v, i) => {
+      //     acc.push(acc[i] + v)
+      //     return acc
+      //   },
+      //   [0],
+      // )
 
       // Calculate our position
-      const position = ([] as number[]).concat(
-        ...indices.map(i => {
-          // Which ring we are on as a value between 0 and 1
-          const idx = bounds.le(cRows, i)
-          const phi = idx / rows.length
-          // How far around the ring we are as a value between 0 and 1
-          const theta = (i - cRows[idx]) / rows[idx]
-          return [phi, theta]
-        }),
-      )
+      // const position = ([] as number[]).concat(
+      //   ...indices.map(i => {
+      //     // Which ring we are on as a value between 0 and 1
+      //     const idx = bounds.le(cRows, i)
+      //     const phi = idx / rows.length
+      //     // How far around the ring we are as a value between 0 and 1
+      //     const theta = (i - cRows[idx]) / rows[idx]
+      //     return [phi, theta]
+      //   }),
+      // )
 
       // Calculate our triangle indexes
       const triangles = []
@@ -156,7 +152,7 @@ export class CameraViewModel {
 
       const geometry = new BufferGeometry()
       geometry.setIndex(triangles)
-      geometry.addAttribute('position', new Float32BufferAttribute(position, 2))
+      // geometry.addAttribute('position', new Float32BufferAttribute(position, 2))
       geometry.addAttribute('uv', new Float32BufferAttribute(uvs, 2))
 
       // Read each class into a separate attribute

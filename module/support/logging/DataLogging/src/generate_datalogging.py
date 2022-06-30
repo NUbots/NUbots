@@ -47,49 +47,52 @@ if __name__ == "__main__":
         """\
         #include "DataLogging.hpp"
 
+        #include "utility/nbs/get_timestamp.hpp"
+        #include "utility/nbs/get_id.hpp"
+
         #include <nuclear>
         #include <fmt/format.h>
 
         {includes}
 
-        namespace module {{
-        namespace support {{
-            namespace logging {{
+        namespace module::support::logging {{
 
-                template <typename T>
-                std::unique_ptr<DataLogging::DataLog> log_encode(const T& data) {{
+            template <typename T>
+            std::unique_ptr<DataLogging::DataLog> log_encode(const T& data) {{
 
-                    auto log = std::make_unique<DataLogging::DataLog>();
+                auto log = std::make_unique<DataLogging::DataLog>();
 
-                    // We get the timestamp here from the time the message was emitted
-                    // (or now if we can't access the current reaction)
-                    auto task = NUClear::threading::ReactionTask::get_current_task();
-                    log->timestamp = task ? task->stats ? task->stats->emitted : NUClear::clock::now() : NUClear::clock::now();
+                // We get the timestamp here from the time the message was emitted
+                // (or now if we can't access the current reaction)
+                const auto* task = NUClear::threading::ReactionTask::get_current_task();
+                log->timestamp   = task ? task->stats ? task->stats->emitted : NUClear::clock::now() : NUClear::clock::now();
 
-                    // Serialise the data and get the hash for it
-                    log->data = NUClear::util::serialise::Serialise<T>::serialise(data);
-                    log->hash = NUClear::util::serialise::Serialise<T>::hash();
+                // Get the data from the message to be used in the index
+                log->message_timestamp = utility::nbs::get_timestamp(log->timestamp, data);
+                log->id                = utility::nbs::get_id(data);
 
-                    return log;
-                }}
+                // Serialise the data and get the hash for it
+                log->data = NUClear::util::serialise::Serialise<T>::serialise(data);
+                log->hash = NUClear::util::serialise::Serialise<T>::hash();
 
-                NUClear::threading::ReactionHandle DataLogging::activate_recorder(const std::string& name) {{
-                    // Find the reaction handle we are activating
+                return log;
+            }}
+
+            NUClear::threading::ReactionHandle DataLogging::activate_recorder(const std::string& name) {{
+                // Find the reaction handle we are activating
         {record_handles}
 
-                    // We didn't find the one we were looking for, throw an error
-                    throw std::runtime_error(fmt::format("Could not find message type {{}}", name));
-                }}
-            }}  // namespace logging
-        }}  // namespace support
-        }}  // namespace module\n"""
+                // We didn't find the one we were looking for, throw an error
+                throw std::runtime_error(fmt::format("Could not find message type {{}}", name));
+            }}
+        }}  // namespace module::support::logging\n"""
     )
 
     # Work out our includes
     includes = ['#include "{}"'.format(i) for i in includes]
 
     # Make our recording handles
-    handle_template = '            if (name == "{0}") return on<Trigger<{1}>>().then([this](const {1}& d) {{ emit(log_encode(d)); }});'
+    handle_template = '        if (name == "{0}") {{ return on<Trigger<{1}>>().then([this](const {1}& d) {{ emit(log_encode(d)); }}); }}'
     handles = [handle_template.format(m, m.replace(".", "::")) for m in sorted(messages)]
 
     with open(cpp_file, "w") as f:

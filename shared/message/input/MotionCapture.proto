@@ -23,7 +23,13 @@ package message.input;
 
 import "Vector.proto";
 
+/**
+ * Contains Marker, Rigidbody, and message metadata information.
+ * We use optitrack for our mocap system. Their documentation is here:
+ * https://v22.wiki.optitrack.com/index.php?title=OptiTrack_Documentation_Wiki
+ */
 message MotionCapture {
+    /// Mocap reference points to track
     message Marker {
         uint32 id       = 1;
         fvec3  position = 2;
@@ -35,13 +41,18 @@ message MotionCapture {
         repeated Marker markers = 2;
     }
 
+    /// A collection of three or more markers on an object that are interconnected
+    /// to each other with an assumption that the tracked object is undeformable.
+    /// See https://v22.wiki.optitrack.com/index.php?title=Rigid_Body_Tracking The
+    /// bones which make up skeletons are RigidBodys
     message RigidBody {
-        uint32          id            = 1;
-        fvec3           position      = 2;
-        fvec4           rotation      = 3;
-        repeated Marker markers       = 4;
-        float           error         = 5;
-        bool            trackingValid = 6;
+        uint32 id       = 1;
+        fvec3  position = 2;
+        /// Quaternion representation of the rigid body's rotation
+        fvec4           rotation       = 3;
+        repeated Marker markers        = 4;
+        float           error          = 5;
+        bool            tracking_valid = 6;
 
         // Information added by the model
         string          name     = 7;
@@ -50,6 +61,7 @@ message MotionCapture {
         repeated uint32 children = 10;
     }
 
+    /// The whole character for which the motion represents
     message Skeleton {
         uint32             id    = 1;
         repeated RigidBody bones = 2;
@@ -59,33 +71,44 @@ message MotionCapture {
     }
 
     message LabeledMarker {
-        Marker marker           = 1;
-        bool   occluded         = 2;
-        bool   pointCloudSolved = 3;
-        bool   modelSolved      = 4;
+        Marker marker             = 1;
+        bool   occluded           = 2;
+        bool   point_cloud_solved = 3;
+        bool   model_solved       = 4;
     }
 
+    /// Each bone within a skeleton can be subject to position,
+    /// orientation and scale changes over the course of the animation,
+    /// where each parameter is referred to as a Channel or Degree of Freedom
+    /// (DOF)
     message Channel {
+        /// The changes for this degree of freedom over a given timespan
         repeated float channel = 1;
     }
 
+    /// Contains the data output from the force plate, which can be synced with
+    /// mocap footage
     message ForcePlate {
-        uint32           id       = 1;
+        uint32 id = 1;
+        /// Set of Channels/Degrees of Freedom and their data, representing their
+        /// change over time
         repeated Channel channels = 2;
     }
-
-    uint32 frameNumber          = 1;
-    float  latency              = 2;
-    uint32 timecode             = 3;
-    uint32 timecodeSub          = 4;
-    double timestamp            = 5;
-    bool   recording            = 6;
-    bool   trackedModelsChanged = 7;
-
-    repeated MarkerSet     markerSets     = 8;
-    repeated Marker        markers        = 9;
-    repeated RigidBody     rigidBodies    = 10;
-    repeated Skeleton      skeletons      = 11;
-    repeated LabeledMarker labeledMarkers = 12;
-    repeated ForcePlate    forcePlates    = 13;
+    uint32 frame_number = 1;
+    float  latency      = 2;
+    /// Encoded timestamp - 0 := the first timecode. hour:minute:second:frame
+    /// bytes, in binary coded decimal see
+    /// https://en.wikipedia.org/wiki/SMPTE_timecode
+    uint32 timecode         = 3;
+    uint32 timecode_sub     = 4;
+    double natnet_timestamp = 5;
+    /// Whether or not this frame is to be recorded
+    bool                   recording              = 6;
+    bool                   tracked_models_changed = 7;
+    repeated MarkerSet     marker_sets            = 8;
+    repeated Marker        markers                = 9;
+    repeated RigidBody     rigid_bodies           = 10;
+    repeated Skeleton      skeletons              = 11;
+    repeated LabeledMarker labeled_markers        = 12;
+    repeated ForcePlate    force_plates           = 13;
 }

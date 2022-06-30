@@ -1,3 +1,6 @@
-playerId: 1
-recieve_port: 3838
+log_level: WARN
+
+player_id: 1
+receive_port: 3838
 send_port: 3939
+udp_filter_address: "" # If set, will only accept GameController packets from this IP address

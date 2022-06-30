@@ -25,23 +25,21 @@
 
 #include "utility/file/fileutil.hpp"
 
-namespace module {
-namespace motion {
+namespace module::motion {
 
     using extension::ExecuteScript;
     using extension::ExecuteScriptByName;
     using extension::Script;
 
-    using message::behaviour::ServoCommand;
+    using message::behaviour::ServoCommands;
 
 
-    ScriptEngine::ScriptEngine(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), scripts() {
+    ScriptEngine::ScriptEngine(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Script>("").then([this](const Script& script) {
             // Add this script to our list of scripts
             try {
-                scripts.insert(std::make_pair(utility::file::pathSplit(script.fileName).second, std::move(script)));
+                scripts.insert(std::pair(utility::file::pathSplit(script.fileName).second, script));
             }
             catch (const std::exception& e) {
                 log<NUClear::ERROR>("Script is bad conversion:", script.fileName, e.what());
@@ -51,16 +49,13 @@ namespace motion {
         on<Trigger<ExecuteScriptByName>>().then([this](const ExecuteScriptByName& command) {
             std::vector<Script> scriptList;
 
-            for (size_t i = 0; i < command.scripts.size(); i++) {
-                const auto& scriptName = command.scripts[i];
-                auto script            = scripts.find(scriptName);
+            for (const auto& scriptName : command.scripts) {
+                const auto& script = scripts.find(scriptName);
 
                 if (script == std::end(scripts)) {
                     throw std::runtime_error("The script " + scriptName + " is not loaded in the system");
                 }
-                else {
-                    scriptList.push_back(script->second);
-                }
+                scriptList.push_back(script->second);
             }
             emit<Scope::DIRECT>(std::make_unique<ExecuteScript>(command.sourceId,
                                                                 scriptList,
@@ -69,7 +64,7 @@ namespace motion {
         });
 
         on<Trigger<ExecuteScript>>().then([this](const ExecuteScript& command) {
-            auto waypoints = std::make_unique<std::vector<ServoCommand>>();
+            auto waypoints = std::make_unique<ServoCommands>();
 
             auto time = command.start;
             for (size_t i = 0; i < command.scripts.size(); i++) {
@@ -82,8 +77,12 @@ namespace motion {
 
                     // Loop through all the motors and make a servo waypoint for it
                     for (const auto& target : frame.targets) {
-                        waypoints->push_back(
-                            {command.sourceId, time, target.id, target.position, target.gain, target.torque});
+                        waypoints->commands.emplace_back(command.sourceId,
+                                                         time,
+                                                         target.id,
+                                                         target.position,
+                                                         target.gain,
+                                                         target.torque);
                     }
                 }
             }
@@ -92,6 +91,4 @@ namespace motion {
             emit(std::move(waypoints));
         });
     }
-
-}  // namespace motion
-}  // namespace module
+}  // namespace module::motion

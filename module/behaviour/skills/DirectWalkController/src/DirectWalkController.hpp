@@ -22,22 +22,28 @@
 
 #include <nuclear>
 
-namespace module {
-namespace behaviour {
-    namespace skills {
+namespace module::behaviour::skills {
 
-        class DirectWalkController : public NUClear::Reactor {
+    class DirectWalkController : public NUClear::Reactor {
+    private:
+        /// @brief Subsumption ID key to access motors
+        const size_t subsumption_id;
 
-        public:
-            /// @brief Called by the powerplant to build and setup the DirectWalkController reactor.
-            explicit DirectWalkController(std::unique_ptr<NUClear::Environment> environment);
+        /// @brief Stores configuration values
+        struct Config {
+            Config() = default;
+            /// @brief DirectWalkController priority in the subsumption system
+            float direct_walk_priority = 0.0f;
+        } cfg;
 
-        private:
-            /// @brief Subsumption ID key to access motors
-            const size_t subsumptionId;
-        };
-    }  // namespace skills
-}  // namespace behaviour
-}  // namespace module
+        /// @brief Updates the priority of the module by emitting an ActionPriorities message
+        /// @param priority The priority used in the ActionPriorities message
+        void update_priority(const float& priority);
+
+    public:
+        /// @brief Called by the powerplant to build and setup the DirectWalkController reactor.
+        explicit DirectWalkController(std::unique_ptr<NUClear::Environment> environment);
+    };
+}  // namespace module::behaviour::skills
 
 #endif  // MODULES_BEHAVIOUR_SKILLS_DIRECTWALKCONTROLLER_HPP

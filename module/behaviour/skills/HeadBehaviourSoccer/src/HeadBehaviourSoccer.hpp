@@ -20,144 +20,45 @@
 #ifndef MODULES_BEHAVIOUR_REFLEX_HEADBEHAVIOURSOCCER_HPP
 #define MODULES_BEHAVIOUR_REFLEX_HEADBEHAVIOURSOCCER_HPP
 
-#include <armadillo>
+#include <Eigen/Core>
 #include <nuclear>
-#include <set>
 
-#include "Searcher.hpp"
+namespace module::behaviour::skills {
 
-#include "message/behaviour/SoccerObjectPriority.hpp"
-#include "message/input/Image.hpp"
-#include "message/input/Sensors.hpp"
-#include "message/localisation/Ball.hpp"
-#include "message/motion/HeadCommand.hpp"
-#include "message/motion/KinematicsModel.hpp"
-#include "message/vision/Ball.hpp"
-#include "message/vision/Goal.hpp"
+    /**
+     * Executes a HeadBehaviourSoccer action.
+     *
+     * @author Thomas O'Brien
+     */
+    class HeadBehaviourSoccer : public NUClear::Reactor {
+    public:
+    private:
+        // Time before starting to search for ball after its lost
+        float search_timeout_ms = 0.0f;
+        // Time lingering at each position in lost ballsearch
+        float fixation_time_ms = 0.0f;
+        // Index in the list of search positions
+        long unsigned int searchIdx = 0;
 
-#include "utility/math/geometry/Quad.hpp"
-#include "utility/math/matrix/Rotation3D.hpp"
+        // Flag for if the robot is currently getting up
+        bool isGettingUp = false;
 
-namespace module {
-namespace behaviour {
-    namespace skills {
+        // Time between last search position transition
+        NUClear::clock::time_point searchLastMoved = NUClear::clock::now();
 
-        /**
-         * Executes a HeadBehaviourSoccer action.
-         *
-         * @author Jake Fountain
-         */
-        class HeadBehaviourSoccer : public NUClear::Reactor {
-        public:
-        private:
-            enum SearchState { FIXATION = 0, WAIT = 1, SEARCH = 2 };
-            SearchState state = SearchState::SEARCH;
+        // List of positions for search
+        std::vector<Eigen::Vector2d> search_positions;
 
-            message::vision::Balls getFixationObjects(std::shared_ptr<const message::vision::Balls> vballs,
-                                                      bool& search);
-            message::vision::Goals getFixationObjects(std::shared_ptr<const message::vision::Goals> vgoals,
-                                                      bool& search);
+        // Time since last ball seen
+        NUClear::clock::time_point ballLastMeasured = NUClear::clock::now();
 
+        // Position of last seen ball
+        Eigen::Vector3d rBCc = Eigen::Vector3d::Zero();
 
-            /*! @brief Updates the search plan when something has changed
-             */
-            void updateHeadPlan(const message::motion::KinematicsModel& kinematicsModel,
-                                const message::vision::Balls& fixationObjects,
-                                const bool& search,
-                                const message::input::Sensors& sensors,
-                                const utility::math::matrix::Rotation3D& headToIMUSpace,
-                                const message::input::Image::Lens& lens);
-            void updateHeadPlan(const message::motion::KinematicsModel& kinematicsModel,
-                                const message::vision::Goals& fixationObjects,
-                                const bool& search,
-                                const message::input::Sensors& sensors,
-                                const utility::math::matrix::Rotation3D& headToIMUSpace,
-                                const message::input::Image::Lens& lens);
+    public:
+        explicit HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment);
+    };
 
-            /*! @brief Converts from camera space direction to IMU space direction
-             */
-            arma::vec2 getIMUSpaceDirection(const message::motion::KinematicsModel& kinematicsModel,
-                                            const arma::vec2& screenAngles,
-                                            utility::math::matrix::Rotation3D headToIMUSpace);
-
-            /*! @brief Gets points which allow for simultaneous search and viewing of key objects
-             */
-            std::vector<arma::vec2> getSearchPoints(const message::motion::KinematicsModel& kinematicsModel,
-                                                    message::vision::Balls fixationObjects,
-                                                    message::behaviour::SoccerObjectPriority::SearchType sType,
-                                                    const message::input::Sensors& sensors,
-                                                    const message::input::Image::Lens& lens);
-            std::vector<arma::vec2> getSearchPoints(const message::motion::KinematicsModel& kinematicsModel,
-                                                    message::vision::Goals fixationObjects,
-                                                    message::behaviour::SoccerObjectPriority::SearchType sType,
-                                                    const message::input::Sensors& sensors,
-                                                    const message::input::Image::Lens& lens);
-
-            /*! @brief Combines a collection of vision objects. The screen resulting screen angular region is the
-             * bounding box of the objects
-             */
-            message::vision::Ball combineVisionObjects(const message::vision::Balls& obs);
-            message::vision::Goal combineVisionObjects(const message::vision::Goals& obs);
-
-            /*! @brief Gets a bounding box in screen angular space of a set of vision objects
-             */
-            utility::math::geometry::Quad<arma::vec> getScreenAngularBoundingBox(const message::vision::Balls& obs);
-            utility::math::geometry::Quad<arma::vec> getScreenAngularBoundingBox(const message::vision::Goals& obs);
-
-            bool orientationHasChanged(const message::input::Sensors& sensors);
-
-
-            // CONFIG - loaded elsewhere
-            float max_yaw;
-            float min_yaw;
-            float max_pitch;
-            float min_pitch;
-
-
-            float replan_angle_threshold;
-            utility::math::matrix::Rotation3D lastPlanOrientation;
-
-            // CONFIG from HeadBehaviourSoccer.yaml
-            float pitch_plan_threshold;
-            float pitch_plan_value = 20;
-            double fractional_view_padding;
-            float search_timeout_ms;
-            float fractional_angular_update_threshold;
-
-            bool oscillate_search;
-
-            bool locBallReceived = false;
-            message::localisation::Ball lastLocBall;
-
-            std::map<message::behaviour::SoccerObjectPriority::SearchType, std::vector<arma::vec2>> searches;
-
-            // State variables
-            Searcher<arma::vec2> headSearcher;
-
-            int ballPriority = 0;
-            int goalPriority = 0;
-            message::behaviour::SoccerObjectPriority::SearchType searchType =
-                message::behaviour::SoccerObjectPriority::SearchType::LOST;
-
-            NUClear::clock::time_point lastPlanUpdate;
-            NUClear::clock::time_point timeLastObjectSeen;
-
-            arma::vec2 lastCentroid;
-
-            bool lostAndSearching = false;
-            bool lostLastTime     = false;
-
-            bool isGettingUp = false;
-
-            int lastBallPriority = 0;
-            int lastGoalPriority = 0;
-
-        public:
-            explicit HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment);
-        };
-
-    }  // namespace skills
-}  // namespace behaviour
-}  // namespace module
+}  // namespace module::behaviour::skills
 
 #endif  // MODULES_BEHAVIOURS_REFLEX_HEADBEHAVIOURSOCCER_HPP

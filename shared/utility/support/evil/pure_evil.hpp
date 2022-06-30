@@ -1,54 +1,50 @@
 /*
- * This file is part of the NUbots Codebase.
+ * Copyright (C) 2013-2021 Trent Houliston <trent@houliston.me>
  *
- * The NUbots Codebase is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+ * documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
- * The NUbots Codebase is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+ * Software.
  *
- * You should have received a copy of the GNU General Public License
- * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
- *
- * Copyright 2016 NUbots <nubots@nubots.net>
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ * WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 #ifndef UTILITY_SUPPORT_EVIL_PUREEVIL_HPP
 #define UTILITY_SUPPORT_EVIL_PUREEVIL_HPP
 
 #include <string>
+#include <utility>
 #include <vector>
 
 // If we are not in debug mode, don't build it! Please don't build it!
-#ifndef NDEBUG
+#if !defined(NDEBUG) and !defined(__APPLE__)
 
-namespace utility {
-namespace support {
-    namespace evil {
+namespace utility::support::evil {
 
-        struct StackFrame {
+    struct StackFrame {
 
-            StackFrame() : pc(), file(), lineno(), function() {}
+        StackFrame() = default;
 
-            StackFrame(uintptr_t pc, std::string file, int lineno, std::string function)
-                : pc(pc), file(file), lineno(lineno), function(function) {}
+        StackFrame(uintptr_t pc_, std::string file_, int lineno_, std::string function_)
+            : pc(pc_), file(std::move(file_)), lineno(lineno_), function(std::move(function_)) {}
 
-            uintptr_t pc;
-            std::string file;
-            int lineno;
-            std::string function;
-        };
+        uintptr_t pc{};
+        std::string file;
+        int lineno{};
+        std::string function;
+    };
 
-        extern thread_local std::vector<StackFrame> stack;
-        extern thread_local std::string exception_name;
-    }  // namespace evil
-}  // namespace support
-}  // namespace utility
+    extern thread_local std::vector<StackFrame> stack;  // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
+    extern thread_local std::string exception_name;     // NOLINT(cppcoreguidelines-avoid-non-const-global-variables)
 
-#endif  // NDEBUG
+}  // namespace utility::support::evil
+
+#endif  // !defined(NDEBUG) and !defined(__APPLE__)
 
 #endif  // UTILITY_SUPPORT_EVIL_PUREEVIL_HPP

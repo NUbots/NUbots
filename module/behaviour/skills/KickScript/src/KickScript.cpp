@@ -29,146 +29,101 @@
 #include "utility/behaviour/Action.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
+#include "utility/support/yaml_expression.hpp"
 
-namespace module {
-namespace behaviour {
-    namespace skills {
+namespace module::behaviour::skills {
 
-        struct ExecuteKick {};
-        struct FinishKick {};
+    struct ExecuteKick {};
+    struct FinishKick {};
 
-        using extension::Configuration;
-        using extension::ExecuteScriptByName;
+    using extension::Configuration;
+    using extension::ExecuteScriptByName;
 
-        using LimbID  = utility::input::LimbID;
-        using ServoID = utility::input::ServoID;
+    using LimbID  = utility::input::LimbID;
+    using ServoID = utility::input::ServoID;
 
-        using message::motion::KickFinished;
-        using message::motion::KickScriptCommand;
+    using message::motion::KickCommandType;
+    using message::motion::KickFinished;
+    using message::motion::KickScriptCommand;
 
-        using utility::behaviour::ActionPriorites;
-        using utility::behaviour::RegisterAction;
+    using utility::behaviour::ActionPriorities;
+    using utility::behaviour::RegisterAction;
 
-        KickScript::KickScript(std::unique_ptr<NUClear::Environment> environment)
-            : Reactor(std::move(environment))
-            , id(size_t(this) * size_t(this) - size_t(this))
-            , KICK_PRIORITY(0.0f)
-            , EXECUTION_PRIORITY(0.0f)
-            , kickCommand() {
+    using utility::support::Expression;
 
-            // do a little configurating
-            on<Configuration>("KickScript.yaml").then([this](const Configuration& config) {
-                KICK_PRIORITY      = config["KICK_PRIORITY"].as<float>();
-                EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
-            });
+    KickScript::KickScript(std::unique_ptr<NUClear::Environment> environment)
+        : Reactor(std::move(environment)), subsumption_id(size_t(this) * size_t(this) - size_t(this)) {
 
-            on<Trigger<KickScriptCommand>>().then([this](const KickScriptCommand& kickCommand) {
-                auto direction = kickCommand.direction;
-                LimbID leg     = kickCommand.leg;
+        // do a little configurating
+        on<Configuration>("KickScript.yaml").then([this](const Configuration& config) {
+            log_level           = config["log_level"].as<NUClear::LogLevel>();
+            cfg.kick_priority   = config["kick_priority"].as<float>();
+            cfg.message_timeout = config["message_timeout"].as<Expression>();
+        });
 
-                int quadrant = getDirectionalQuadrant(direction[0], direction[1]);
+        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
+            subsumption_id,
+            "Kick Script",
+            {std::pair<float, std::set<LimbID>>(
+                0,
+                {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
+            [this](const std::set<LimbID>& /*limbAssociatedWithAction*/) { emit(std::make_unique<ExecuteKick>()); },
+            [this](const std::set<LimbID>& /*limbAssociatedWithAction*/) { emit(std::make_unique<FinishKick>()); },
+            [this](const std::set<ServoID>& /*servoAssociatedWithCompletion*/) {
+                emit(std::make_unique<FinishKick>());
+            }}));
 
-                // check if the command was valid
-                bool valid = true;
-                if (leg == LimbID::RIGHT_LEG) {
-                    if (quadrant == 2 || quadrant == 3) {
-                        NUClear::log<NUClear::WARN>("Right leg cannot kick towards: ", direction);
-                        valid = false;
-                    }
-                }
-                else if (leg == LimbID::LEFT_LEG) {
-                    if (quadrant == 2 || quadrant == 1) {
-                        NUClear::log<NUClear::WARN>("Left leg cannot kick towards: ", direction);
-                        valid = false;
-                    }
-                }
-                else {
-                    NUClear::log<NUClear::WARN>("Cannot kick with limb: ", leg);
-                    updatePriority(0);
-                    valid = false;
-                }
+        on<Trigger<KickScriptCommand>>().then([this](const KickScriptCommand& cmd) {
+            kick_command       = std::make_shared<KickScriptCommand>(cmd);
+            time_since_message = NUClear::clock::now();
+            update_priority(cfg.kick_priority);
+        });
 
-                if (valid) {
-                    this->kickCommand = kickCommand;
-                    updatePriority(KICK_PRIORITY);
-                }
-            });
+        on<Trigger<ExecuteKick>>().then([this] {
+            // Don't kick if there is no command
+            // This may happen if we get priority initially with 0 priority and no KickScriptCommand
+            if (kick_command == nullptr) {
+                update_priority(0);
+                return;
+            }
 
-            on<Trigger<ExecuteKick>>().then([this] {
-                // auto direction = kickCommand.direction;
-                LimbID leg = kickCommand.leg;
+            // Don't kick if it's been a while since we got the KickScriptCommand
+            if (std::chrono::duration_cast<std::chrono::milliseconds>(NUClear::clock::now() - time_since_message)
+                    .count()
+                > cfg.message_timeout) {
+                update_priority(0);
+                return;
+            }
 
+            LimbID leg = kick_command->leg;
+
+            // Execute the penalty kick if the type is PENALTY
+            if (kick_command->type == KickCommandType::PENALTY) {
+                emit(std::make_unique<ExecuteScriptByName>(subsumption_id,
+                                                           std::vector<std::string>({"KickPenalty.yaml"})));
+            }
+            else {
                 if (leg == LimbID::RIGHT_LEG) {
                     emit(std::make_unique<ExecuteScriptByName>(
-                        id,
+                        subsumption_id,
                         std::vector<std::string>({"Stand.yaml", "KickRight.yaml", "Stand.yaml"})));
                 }
-                else {  // if (leg == LimbID::LEFT_LEG) {
+                else {  // LEFT_LEG
                     emit(std::make_unique<ExecuteScriptByName>(
-                        id,
+                        subsumption_id,
                         std::vector<std::string>({"Stand.yaml", "KickLeft.yaml", "Stand.yaml"})));
                 }
+            }
+        });
 
-                // if (kickCommand.kickCommandType == KickType::SCRIPTED) {
-                // } else {
-                // int quadrant = getDirectionalQuadrant(direction[0], direction[1]);
-                // // assume valid at this point as this is checked on the walkcommand trigger
-                // if (leg == LimbID::RIGHT_LEG) {
-                //     if (quadrant == 0) {
-                //         // front
-                //         emit(std::make_unique<ExecuteScriptByName>(id,
-                //         std::vector<std::string>({"RightFootKickForward3.yaml", "Stand.yaml"})));
-                //     } else if (quadrant == 1) {
-                //         // side
-                //         emit(std::make_unique<ExecuteScriptByName>(id,
-                //         std::vector<std::string>({"RightFootKickLeft.yaml", "Stand.yaml"})));
-                //     }
-                // } else if (leg == LimbID::LEFT_LEG) {
-                //     if (quadrant == 0) {
-                //         // front
-                //         emit(std::make_unique<ExecuteScriptByName>(id,
-                //         std::vector<std::string>({"LeftFootKickForward3.yaml", "Stand.yaml"})));
-                //     } else if (quadrant == 3) {
-                //         // side
-                //         emit(std::make_unique<ExecuteScriptByName>(id,
-                //         std::vector<std::string>({"LeftFootKickRight.yaml", "Stand.yaml"})));
-                //     }
-                // }
-                // }
+        on<Trigger<FinishKick>>().then([this] {
+            emit(std::make_unique<KickFinished>());
+            update_priority(0);
+        });
+    }
 
-                updatePriority(EXECUTION_PRIORITY);
-            });
+    void KickScript::update_priority(const float& priority) {
+        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {priority}}));
+    }
 
-            on<Trigger<FinishKick>>().then([this] {
-                emit(std::move(std::make_unique<KickFinished>()));
-                updatePriority(0);
-            });
-
-            emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
-                RegisterAction{id,
-                               "Kick Script",
-                               {std::pair<float, std::set<LimbID>>(
-                                   0,
-                                   {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
-                               [this](const std::set<LimbID>&) { emit(std::make_unique<ExecuteKick>()); },
-                               [this](const std::set<LimbID>&) { emit(std::make_unique<FinishKick>()); },
-                               [this](const std::set<ServoID>&) { emit(std::make_unique<FinishKick>()); }}));
-        }
-
-        void KickScript::updatePriority(const float& priority) {
-            emit(std::make_unique<ActionPriorites>(ActionPriorites{id, {priority}}));
-        }
-
-        int KickScript::getDirectionalQuadrant(float x, float y) {
-
-            // These represent 4 directions of looking, see https://www.desmos.com/calculator/mm8cnsnpdt for a graph of
-            // the 4 quadrants
-            // Note that x is forward in relation to the robot so the forward quadrant is x >= |y|
-            return x >= std::abs(y)    ? 0   // forward
-                   : y >= std::abs(x)  ? 1   // left
-                   : x <= -std::abs(y) ? 2   // backward
-                                       : 3;  // right
-        }
-    }  // namespace skills
-}  // namespace behaviour
-}  // namespace module
+}  // namespace module::behaviour::skills

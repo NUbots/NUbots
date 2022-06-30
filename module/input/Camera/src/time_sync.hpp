@@ -7,10 +7,8 @@ extern "C" {
 
 #include "CameraContext.hpp"
 
-namespace module {
-namespace input {
+namespace module::input {
     CameraContext::TimeCorrection sync_clocks(ArvDevice* device);
-}  // namespace input
-}  // namespace module
+}  // namespace module::input
 
 #endif  // MODULE_INPUT_CAMERA_TIMESYNC_HPP

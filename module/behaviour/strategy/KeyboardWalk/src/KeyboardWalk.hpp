@@ -17,81 +17,84 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_STRATEGY_CONTROLLABLEDARWIN_HPP
-#define MODULES_BEHAVIOUR_STRATEGY_CONTROLLABLEDARWIN_HPP
+#ifndef MODULE_BEHAVIOUR_STRATEGY_KEYBOARDWALK_HPP
+#define MODULE_BEHAVIOUR_STRATEGY_KEYBOARDWALK_HPP
 
-#include <armadillo>
+#include <Eigen/Core>
 #include <mutex>
+
+// clang-format off
+// This include needs to come immediately before the OK undef
 #include <ncurses.h>
+// because ncurses defines OK. We don't need (or want) it.
+#undef OK
+// clang-format on
+
 #include <nuclear>
 
 #include "utility/input/LimbID.hpp"
 
-namespace module {
-namespace behaviour {
-    namespace strategy {
+namespace module::behaviour::strategy {
 
-        enum class LogColours : short {
-            TRACE_COLOURS = 1,
-            DEBUG_COLOURS = 2,
-            INFO_COLOURS  = 3,
-            WARN_COLOURS  = 4,
-            ERROR_COLOURS = 5,
-            FATAL_COLOURS = 6
-        };
+    enum class LogColours : short {
+        TRACE_COLOURS = 1,
+        DEBUG_COLOURS = 2,
+        INFO_COLOURS  = 3,
+        WARN_COLOURS  = 4,
+        ERROR_COLOURS = 5,
+        FATAL_COLOURS = 6
+    };
 
-        class KeyboardWalk : public NUClear::Reactor {
-        private:
-            static constexpr const double DIFF     = 0.01;
-            static constexpr const double ROT_DIFF = 0.10;
+    class KeyboardWalk : public NUClear::Reactor {
+    private:
+        static constexpr const float DIFF     = 0.01f;
+        static constexpr const float ROT_DIFF = 0.1f;
 
-            static constexpr const double HEAD_DIFF = 1 * M_PI / 180;
+        static constexpr const float HEAD_DIFF = 1.0f * float(M_PI) / 180.0f;
 
-            bool moving = false;
-            arma::vec2 velocity;
-            float rotation = 0;
+        bool moving = false;
+        Eigen::Vector2f velocity;
+        float rotation = 0.0f;
 
-            float head_yaw   = 0.0f;
-            float head_pitch = 0.0f;
+        float head_yaw   = 0.0f;
+        float head_pitch = 0.0f;
 
-            std::shared_ptr<WINDOW> command_window;
-            std::shared_ptr<WINDOW> log_window;
-            bool colours_enabled;
+        std::shared_ptr<WINDOW> command_window;
+        std::shared_ptr<WINDOW> log_window;
+        bool colours_enabled;
 
-            std::mutex mutex;
+        std::mutex mutex;
 
-            void create_windows();
-            void forward();
-            void left();
-            void back();
-            void right();
-            void turn_left();
-            void turn_right();
-            void get_up();
-            void reset();
-            void kick(utility::input::LimbID::Value l);
-            void look_left();
-            void look_right();
-            void look_up();
-            void look_down();
-            void walk_toggle();
-            void quit();
+        void create_windows();
+        void forward();
+        void left();
+        void back();
+        void right();
+        void turn_left();
+        void turn_right();
+        void get_up();
+        void reset();
+        void kick(utility::input::LimbID::Value l);
+        void look_left();
+        void look_right();
+        void look_up();
+        void look_down();
+        void walk_toggle();
 
-            void update_command();
-            void print_status();
-            void update_window(const std::shared_ptr<WINDOW>& window,
-                               const LogColours& colours,
-                               const std::string& source,
-                               const std::string& message,
-                               const bool& print_level);
+        void update_command();
+        void print_status();
+        void update_window(const std::shared_ptr<WINDOW>& window,
+                           const LogColours& colours,
+                           const std::string& source,
+                           const std::string& message,
+                           const bool& print_level);
 
-        public:
-            /// @brief Called by the powerplant to build and setup the KeyboardWalk reactor.
-            explicit KeyboardWalk(std::unique_ptr<NUClear::Environment> environment);
-        };
-    }  // namespace strategy
-}  // namespace behaviour
-}  // namespace module
+    public:
+        /// @brief Called by the powerplant to build and setup the KeyboardWalk reactor.
+        explicit KeyboardWalk(std::unique_ptr<NUClear::Environment> environment);
+    };
+
+}  // namespace module::behaviour::strategy
 
 
-#endif
+#endif  // MODULE_BEHAVIOUR_STRATEGY_KEYBOARDWALK_HPP

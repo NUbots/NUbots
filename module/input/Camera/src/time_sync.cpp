@@ -6,8 +6,7 @@ extern "C" {
 
 #include "aravis_wrap.hpp"
 
-namespace module {
-namespace input {
+namespace module::input {
 
     CameraContext::TimeCorrection sync_clocks(ArvDevice* device) {
         using namespace std::chrono;
@@ -19,7 +18,7 @@ namespace input {
 
         // This is what we return if we can't work out the timestamp offset now
         // Note that all these times are measured in nanoseconds
-        CameraContext::TimeCorrection output;
+        CameraContext::TimeCorrection output{};
         output.live   = true;
         output.offset = 0;
         output.kf.p   = 10e6 * 10e6;    // Initial stddev of about 10 milliseconds
@@ -27,7 +26,7 @@ namespace input {
         output.kf.q   = 1e3 * 1e3;      // 1 microsecond standard deviation of process noise
 
         // The samples of the two clocks
-        std::array<Sample, 20> samples;
+        std::array<Sample, 20> samples{};
         samples.fill(Sample{0, 0, false});
 
         // Commands used to latch the timestamp and read the timestamp
@@ -35,20 +34,22 @@ namespace input {
         std::string read_command;
 
         // FLIR like control
-        if (arv_device_get_feature(device, "TimestampLatch") && arv_device_get_feature(device, "TimestampLatchValue")) {
+        if ((arv_device_get_feature(device, "TimestampLatch") != nullptr)
+            && (arv_device_get_feature(device, "TimestampLatchValue") != nullptr)) {
             latch_command = "TimestampLatch";
             read_command  = "TimestampLatchValue";
         }
         // Genicam like control
-        else if (arv_device_get_feature(device, "GevTimestampControlLatch")
-                 && arv_device_get_feature(device, "GevTimestampValue")) {
+        else if ((arv_device_get_feature(device, "GevTimestampControlLatch") != nullptr)
+                 && (arv_device_get_feature(device, "GevTimestampValue") != nullptr)) {
             latch_command = "GevTimestampControlLatch";
             read_command  = "GevTimestampValue";
         }
 
         for (auto& s : samples) {
-            // Get the time before and after sending the command. We know neither are correct and it's likely somewhere
-            // in the middle that the actual latching took place. Therefore take the average of the two to get closer.
+            // Get the time before and after sending the command. We know neither are correct and it's likely
+            // somewhere in the middle that the actual latching took place. Therefore take the average of the two to
+            // get closer.
             try {
 
                 NUClear::clock::time_point t1 = NUClear::clock::now();
@@ -65,7 +66,7 @@ namespace input {
         }
 
         // Sort all the invalid entries to the end
-        auto end = std::stable_partition(samples.begin(), samples.end(), [](const Sample& s) { return s.valid; });
+        auto* end = std::stable_partition(samples.begin(), samples.end(), [](const Sample& s) { return s.valid; });
 
         // Use the samples to work out the offset between our clock and the cameras clock and if this sync is valid
         int n_samples = 0;  // The number of samples that were valid
@@ -102,10 +103,6 @@ namespace input {
             output.drift.over_time_count = 0;
             return output;
         }
-        else {
-            return output;
-        }
+        return output;
     }
-
-}  // namespace input
-}  // namespace module
+}  // namespace module::input

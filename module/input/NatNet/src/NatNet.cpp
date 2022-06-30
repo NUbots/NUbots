@@ -25,20 +25,13 @@
 
 #include "extension/Configuration.hpp"
 
-namespace module {
-namespace input {
+namespace module::input {
 
     using extension::Configuration;
 
     using message::input::MotionCapture;
 
-    NatNet::NatNet(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment))
-        , markerSetModels()
-        , rigidBodyModels()
-        , skeletonModels()
-        , commandHandle()
-        , dataHandle() {
+    NatNet::NatNet(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("NatNet.yaml").then([this](const Configuration& config) {
             // We are updating to a new multicast address
@@ -62,32 +55,33 @@ namespace input {
 
                 // Create a listening UDP port for commands
                 std::tie(commandHandle, std::ignore, commandFd) =
-                    on<UDP>().then("NatNet Command", [this](UDP::Packet packet) { process(packet.payload); });
+                    on<UDP>().then("NatNet Command", [this](const UDP::Packet& packet) { process(packet.payload); });
 
                 // Create a listening UDP port for data
                 std::tie(dataHandle, std::ignore, std::ignore) =
-                    on<UDP::Multicast>(multicastAddress, dataPort).then("NatNet Data", [this](UDP::Packet packet) {
-                        // Test if we are "connected" to this remote
-                        // And if we are we can use the data
-                        if (remote == packet.remote.address && version != 0) {
-                            process(packet.payload);
-                        }
-                        // We have started connecting but haven't received a return ping
-                        else if (remote == packet.remote.address && version == 0) {
-                            // TODO maybe set a timeout here to try again
-                        }
-                        // We haven't connected to anything yet
-                        else if (remote == 0) {
-                            // This is now our remote
-                            remote = packet.remote.address;
+                    on<UDP::Multicast>(multicastAddress, dataPort)
+                        .then("NatNet Data", [this](const UDP::Packet& packet) {
+                            // Test if we are "connected" to this remote
+                            // And if we are we can use the data
+                            if (remote == packet.remote.address && version != 0) {
+                                process(packet.payload);
+                            }
+                            // We have started connecting but haven't received a return ping
+                            else if (remote == packet.remote.address && version == 0) {
+                                // TODO(HardwareTeam): maybe set a timeout here to try again
+                            }
+                            // We haven't connected to anything yet
+                            else if (remote == 0) {
+                                // This is now our remote
+                                remote = packet.remote.address;
 
-                            // Send a ping command
-                            sendCommand(Packet::Type::PING);
-                        }
-                        else if (remote != packet.remote.address) {
-                            log<NUClear::WARN>("There is more than one NatNet server running on this network");
-                        }
-                    });
+                                // Send a ping command
+                                sendCommand(Packet::Type::PING);
+                            }
+                            else if (remote != packet.remote.address) {
+                                log<NUClear::WARN>("There is more than one NatNet server running on this network");
+                            }
+                        });
             }
         });
     }
@@ -98,7 +92,7 @@ namespace input {
             std::vector<char> packet(sizeof(Packet) - 1);
 
             // Fill in the header
-            Packet* header = reinterpret_cast<Packet*>(packet.data());
+            auto* header   = reinterpret_cast<Packet*>(packet.data());
             header->type   = type;
             header->length = data.size();
 
@@ -106,7 +100,7 @@ namespace input {
             packet.insert(packet.end(), data.begin(), data.end());
 
             // Work out our remotes address
-            sockaddr_in address;
+            sockaddr_in address{};
             memset(&address, 0, sizeof(sockaddr_in));
             address.sin_family      = AF_INET;
             address.sin_port        = htons(commandPort);
@@ -134,16 +128,16 @@ namespace input {
         const char* ptr = &packet.data;
 
         // Read frame number
-        mocap->frameNumber = ReadData<uint32_t>::read(ptr, version);
+        mocap->frame_number = ReadData<uint32_t>::read(ptr, version);
 
         // Read the markersets
-        mocap->markerSets = ReadData<std::vector<MotionCapture::MarkerSet>>::read(ptr, version);
+        mocap->marker_sets = ReadData<std::vector<MotionCapture::MarkerSet>>::read(ptr, version);
 
         // Read the free floating markers
-        auto freeMarkers = ReadData<std::vector<Eigen::Matrix<float, 3, 1, Eigen::DontAlign>>>::read(ptr, version);
+        auto freeMarkers = ReadData<std::vector<Eigen::Vector3f>>::read(ptr, version);
         mocap->markers.reserve(freeMarkers.size());
         // Build markers
-        for (auto position : freeMarkers) {
+        for (const auto& position : freeMarkers) {
             MotionCapture::Marker marker;
             marker.position = position;
             marker.id       = -1;
@@ -152,7 +146,7 @@ namespace input {
         }
 
         // Read the Rigid Bodies
-        mocap->rigidBodies = ReadData<std::vector<MotionCapture::RigidBody>>::read(ptr, version);
+        mocap->rigid_bodies = ReadData<std::vector<MotionCapture::RigidBody>>::read(ptr, version);
 
         // Read the skeletons
         if (version >= 0x02010000) {
@@ -161,35 +155,35 @@ namespace input {
 
         // Read the labeled markers
         if (version >= 0x02030000) {
-            mocap->labeledMarkers = ReadData<std::vector<MotionCapture::LabeledMarker>>::read(ptr, version);
+            mocap->labeled_markers = ReadData<std::vector<MotionCapture::LabeledMarker>>::read(ptr, version);
         }
 
         // Read the force plates
         if (version >= 0x02090000) {
-            mocap->forcePlates = ReadData<std::vector<MotionCapture::ForcePlate>>::read(ptr, version);
+            mocap->force_plates = ReadData<std::vector<MotionCapture::ForcePlate>>::read(ptr, version);
         }
 
         // Read our metadata
-        mocap->latency     = ReadData<float>::read(ptr, version);
-        mocap->timecode    = ReadData<uint32_t>::read(ptr, version);
-        mocap->timecodeSub = ReadData<uint32_t>::read(ptr, version);
+        mocap->latency      = ReadData<float>::read(ptr, version);
+        mocap->timecode     = ReadData<uint32_t>::read(ptr, version);
+        mocap->timecode_sub = ReadData<uint32_t>::read(ptr, version);
 
-        // In version 2.9 timestamp went from a float to a double
+        // In version 2.9 natnet_timestamp went from a float to a double
         if (version >= 0x02090000) {
-            mocap->timestamp = ReadData<double>::read(ptr, version);
+            mocap->natnet_timestamp = ReadData<double>::read(ptr, version);
         }
         else {
-            mocap->timestamp = ReadData<float>::read(ptr, version);
+            mocap->natnet_timestamp = ReadData<float>::read(ptr, version);
         }
 
-        short params                = ReadData<short>::read(ptr, version);
-        mocap->recording            = (params & 0x01) == 0x01;
-        mocap->trackedModelsChanged = (params & 0x01) == 0x02;
+        short params                  = ReadData<short>::read(ptr, version);
+        mocap->recording              = (params & 0x01) == 0x01;
+        mocap->tracked_models_changed = (params & 0x01) == 0x02;
 
-        // TODO there is an eod thing here
+        // TODO(HardwareTeam): there is an eod thing here
 
         // Apply the model information we have to the objects
-        for (auto& markerSet : mocap->markerSets) {
+        for (auto& markerSet : mocap->marker_sets) {
 
             auto model = markerSetModels.find(markerSet.name);
 
@@ -209,7 +203,7 @@ namespace input {
             }
         }
 
-        for (auto& rigidBody : mocap->rigidBodies) {
+        for (auto& rigidBody : mocap->rigid_bodies) {
 
             auto model = rigidBodyModels.find(rigidBody.id);
 
@@ -220,15 +214,15 @@ namespace input {
                 rigidBody.offset = model->second.offset;
 
                 auto parent =
-                    std::find_if(mocap->rigidBodies.begin(),
-                                 mocap->rigidBodies.end(),
+                    std::find_if(mocap->rigid_bodies.begin(),
+                                 mocap->rigid_bodies.end(),
                                  [model](const MotionCapture::RigidBody& rb) { return rb.id == model->second.id; });
 
                 // Get a pointer to our parent if it exists and is not us
                 rigidBody.parent = parent->id == rigidBody.id ? 0
-                                   : parent == mocap->rigidBodies.end()
+                                   : parent == mocap->rigid_bodies.end()
                                        ? -1
-                                       : std::distance(mocap->rigidBodies.begin(), parent);
+                                       : std::distance(mocap->rigid_bodies.begin(), parent);
             }
             // We need to update our models
             else {
@@ -244,10 +238,10 @@ namespace input {
         }
 
         // Now we reverse link all our rigid bodies
-        for (auto rigidBody = mocap->rigidBodies.begin(); rigidBody != mocap->rigidBodies.end(); rigidBody++) {
+        for (auto rigidBody = mocap->rigid_bodies.begin(); rigidBody != mocap->rigid_bodies.end(); rigidBody++) {
             if (rigidBody->parent > 0) {
-                mocap->rigidBodies.at(rigidBody->parent)
-                    .children.push_back(std::distance(mocap->rigidBodies.begin(), rigidBody));
+                mocap->rigid_bodies.at(rigidBody->parent)
+                    .children.push_back(std::distance(mocap->rigid_bodies.begin(), rigidBody));
             }
         }
 
@@ -403,7 +397,7 @@ namespace input {
     void NatNet::processString(const Packet& packet) {
         std::string str(&packet.data, packet.length);
 
-        // TODO do something with this string?
+        // TODO(HardwareTeam): do something with this string?
     }
 
 
@@ -431,5 +425,4 @@ namespace input {
             default: log<NUClear::ERROR>("The NatNet server sent an unexpected packet type"); break;
         }
     }
-}  // namespace input
-}  // namespace module
+}  // namespace module::input

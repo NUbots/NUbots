@@ -22,26 +22,29 @@
 
 #include <nuclear>
 
-namespace module {
-namespace behaviour {
-    namespace skills {
+namespace module::behaviour::skills {
 
-        class Nod : public NUClear::Reactor {
-        public:
-            /// @brief Called by the powerplant to build and setup the KickScript reactor.
-            explicit Nod(std::unique_ptr<NUClear::Environment> environment);
+    class Nod : public NUClear::Reactor {
+    private:
+        const size_t subsumption_id{size_t(this) * size_t(this) - size_t(this)};
 
-        private:
-            const size_t id;
+        /// @brief Stores configuration values
+        struct Config {
+            Config() = default;
+            /// @brief Nod priority in the subsumption system
+            float nod_priority = 0.0f;
+        } cfg;
 
-            bool value;
-            float EXECUTION_PRIORITY;
+        /// @brief Bool to indicate if the robot should nod yes, else it nods no
+        bool nod_yes = false;
 
-            void updatePriority(const float& priority);
-        };
-    }  // namespace skills
-}  // namespace behaviour
-}  // namespace module
+        void updatePriority(const float& priority);
+
+    public:
+        /// @brief Called by the powerplant to build and setup the KickScript reactor.
+        explicit Nod(std::unique_ptr<NUClear::Environment> environment);
+    };
+}  // namespace module::behaviour::skills
 
 
 #endif  // MODULE_BEHAVIOUR_SKILLS_NOD_HPP

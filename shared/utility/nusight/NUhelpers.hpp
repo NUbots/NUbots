@@ -20,43 +20,22 @@
 #ifndef NUHELPERS_HPP
 #define NUHELPERS_HPP
 
-#include <armadillo>
 #include <nuclear>
+#include <utility>
 
 #include "message/support/nusight/DataPoint.hpp"
-#include "message/vision/Line.hpp"
 
-namespace utility {
-namespace nusight {
+#include "utility/type_traits/is_iterable.hpp"
 
-    namespace {
+namespace utility::nusight {
 
+    using message::support::nusight::DataPoint;
+
+    namespace helpers {
         using message::support::nusight::DataPoint;
+        using utility::type_traits::is_iterable;
 
-        constexpr float TIMEOUT = 2.5;
-
-        template <typename T>
-        struct is_iterable {
-        private:
-            typedef std::true_type yes;
-            typedef std::false_type no;
-
-            template <typename U>
-            static auto test_begin(int) -> decltype(std::declval<U>().begin(), yes());
-            template <typename>
-            static no test_begin(...);
-
-            template <typename U>
-            static auto test_end(int) -> decltype(std::declval<U>().end(), yes());
-            template <typename>
-            static no test_end(...);
-
-        public:
-            static constexpr bool value = std::is_same<decltype(test_begin<T>(0)), yes>::value
-                                          && std::is_same<decltype(test_end<T>(0)), yes>::value;
-        };
-
-        inline void buildGraph(DataPoint&) {}
+        inline void buildGraph(DataPoint& /*dataPoint*/) {}
 
         template <typename First, typename... Remainder>
         typename std::enable_if<!is_iterable<First>::value>::type buildGraph(DataPoint& dataPoint,
@@ -75,17 +54,15 @@ namespace nusight {
             }
             buildGraph(dataPoint, remainder...);
         }
-    }  // namespace
+    }  // namespace helpers
 
     template <typename... Values>
     inline std::unique_ptr<message::support::nusight::DataPoint> graph(std::string label, Values... values) {
         auto dataPoint   = std::make_unique<DataPoint>();
-        dataPoint->label = label;
-        buildGraph(*dataPoint, values...);
+        dataPoint->label = std::move(label);
+        helpers::buildGraph(*dataPoint, values...);
         return dataPoint;
     }
 
-}  // namespace nusight
-}  // namespace utility
-
+}  // namespace utility::nusight
 #endif

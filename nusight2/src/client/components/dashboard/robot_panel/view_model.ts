@@ -1,7 +1,7 @@
 import { computed } from 'mobx'
 import { createTransformer } from 'mobx-utils'
 
-import { message } from '../../../../shared/proto/messages'
+import { message } from '../../../../shared/messages'
 import { Vector3 } from '../../../math/vector3'
 import { DashboardRobotModel } from '../dashboard_robot/model'
 
@@ -15,11 +15,9 @@ const Phase = message.input.GameState.Data.Phase
 export class RobotPanelViewModel {
   constructor(private model: DashboardRobotModel) {}
 
-  static of = createTransformer(
-    (model: DashboardRobotModel): RobotPanelViewModel => {
-      return new RobotPanelViewModel(model)
-    },
-  )
+  static of = createTransformer((model: DashboardRobotModel): RobotPanelViewModel => {
+    return new RobotPanelViewModel(model)
+  })
 
   @computed get connected(): boolean {
     return this.model.connected

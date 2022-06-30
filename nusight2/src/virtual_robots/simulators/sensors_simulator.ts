@@ -4,8 +4,8 @@ import { Vector3 } from 'three'
 import { Quaternion } from 'three'
 
 import { NUClearNetClient } from '../../shared/nuclearnet/nuclearnet_client'
-import { message } from '../../shared/proto/messages'
-import { Imat4 } from '../../shared/proto/messages'
+import { message } from '../../shared/messages'
+import { Imat4 } from '../../shared/messages'
 import { Message, Simulator } from '../simulator'
 
 import { periodic } from './periodic'

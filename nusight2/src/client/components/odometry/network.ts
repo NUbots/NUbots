@@ -6,7 +6,7 @@ import { Network } from '../../network/network'
 import { NUsightNetwork } from '../../network/nusight_network'
 import { RobotModel } from '../robot/model'
 import { OdometryRobotModel } from './model'
-import { message } from '../../../shared/proto/messages'
+import { message } from '../../../shared/messages'
 
 export class OdometryNetwork {
   constructor(private network: Network) {

@@ -23,8 +23,7 @@
 #include <Eigen/Core>
 #include <nuclear>
 
-namespace module {
-namespace input {
+namespace module::input {
 
     class NatNet : public NUClear::Reactor {
     public:
@@ -42,30 +41,30 @@ namespace input {
                 UNRECOGNIZED_REQUEST      = 100
             };
 
-            Packet() : type(Type::PING), length(0), data(0) {}
-            Type type;
-            uint16_t length;
-            char data;
+            Packet() = default;
+            Type type{Type::PING};
+            uint16_t length{0};
+            char data{0};
         };
 
         struct MarkerSetModel {
-            MarkerSetModel() : name(""), markerNames() {}
-            std::string name;
+            MarkerSetModel() = default;
+            std::string name{};
             std::vector<std::string> markerNames;
         };
 
         struct RigidBodyModel {
-            RigidBodyModel() : name(""), id(0), parentId(0), offset(Eigen::Vector3f::Zero()) {}
-            std::string name;
-            uint32_t id;
-            uint32_t parentId;
-            Eigen::Vector3f offset;
+            RigidBodyModel() = default;
+            std::string name{};
+            uint32_t id{0};
+            uint32_t parentId{0};
+            Eigen::Vector3f offset = Eigen::Vector3f::Zero();
         };
 
         struct SkeletonModel {
-            SkeletonModel() : name(""), id(0), boneModels() {}
-            std::string name;
-            uint32_t id;
+            SkeletonModel() = default;
+            std::string name{};
+            uint32_t id{0};
             std::map<uint32_t, RigidBodyModel> boneModels;
         };
 
@@ -90,13 +89,12 @@ namespace input {
         void processModel(const Packet& packet);
         void processPing(const Packet& packet);
         void processResponse(const Packet& packet);
-        void processString(const Packet& packet);
+        static void processString(const Packet& packet);
         void process(const std::vector<char>& input);
 
         /// @brief Called by the powerplant to build and setup the NatNet reactor.
         explicit NatNet(std::unique_ptr<NUClear::Environment> environment);
     };
-}  // namespace input
-}  // namespace module
+}  // namespace module::input
 
 #endif  // MODULES_INPUT_NATNET_HPP

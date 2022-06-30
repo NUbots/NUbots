@@ -21,8 +21,7 @@
 #include <nuclear>
 #include <uv.h>
 
-namespace module {
-namespace extension {
+namespace module::extension {
 
     class FileWatcher : public NUClear::Reactor {
     private:
@@ -64,15 +63,24 @@ namespace extension {
         std::unique_ptr<uv_async_t> remove_watch;
         std::unique_ptr<uv_async_t> shutdown;
 
+        /// True on the first loop then turns false after the FileWatcherReady event is emitted
+        bool first_loop = true;
+
     public:
         /// @brief Called by the powerplant to build and setup the FileWatcher reactor.
         explicit FileWatcher(std::unique_ptr<NUClear::Environment> environment);
-        ~FileWatcher();
+        ~FileWatcher() override;
+
         static void file_watch_callback(uv_fs_event_t* handle, const char* filename, int events, int status);
+
+        // Delete the move and copy constructors and operators, because we only want one filewatcher per powerplant
+        // and it shouldn't change (rule of 5)
+        FileWatcher(FileWatcher& other)  = delete;
+        FileWatcher(FileWatcher&& other) = delete;
+        FileWatcher& operator=(FileWatcher& other) = delete;
+        FileWatcher&& operator=(FileWatcher&& other) = delete;
     };
 
-
-}  // namespace extension
-}  // namespace module
+}  // namespace module::extension
 
 #endif  // MODULES_EXTENSION_FILEWATCHER_HPP

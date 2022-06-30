@@ -5,38 +5,21 @@ https://github.com/Rhoban/model/
 */
 #include "WalkEngine.hpp"
 
+#include <cmath>
 #include <fmt/format.h>
 #include <nuclear>
 
 #include "utility/math/angle.hpp"
-#include "utility/math/euler.h"
+#include "utility/math/euler.hpp"
 
-namespace module {
-namespace motion {
+namespace module::motion {
 
-    QuinticWalkEngine::QuinticWalkEngine()
-        : foot_step(0.14f, true)
-        , phase(0.0f)
-        , last_phase(0.0f)
-        , time_paused(0.0f)
-        , params()
-        , half_period(0.0f)
-        , left_kick_requested(false)
-        , right_kick_requested(false)
-        , pause_requested(false)
-        , trunk_pos_at_last()
-        , trunk_vel_at_last()
-        , trunk_acc_at_last()
-        , trunk_axis_pos_at_last()
-        , trunk_axis_vel_at_last()
-        , trunk_axis_acc_at_last()
-        , trajs() {
-        // Make sure to call the reset method after having the parameters
-        TrajectoriesInit(trajs);
+    QuinticWalkEngine::QuinticWalkEngine() {
+        trajectoriesInit(trajs);
     }
 
-    bool QuinticWalkEngine::updateState(const float dt, const Eigen::Vector3f& orders) {
-        bool ordersZero = orders.isZero();
+    bool QuinticWalkEngine::updateState(const float& dt, const Eigen::Vector3f& orders) {
+        const bool ordersZero = orders.isZero();
         // First check if we are currently in pause state or idle, since we don't want to update the phase in this
         // case
         if (engine_state == WalkEngineState::PAUSED) {
@@ -48,11 +31,9 @@ namespace motion {
                     time_paused     = 0.0f;
                     return false;
                 }
-                else {
-                    // we can continue
-                    engine_state = WalkEngineState::WALKING;
-                    time_paused  = 0.0f;
-                }
+                // we can continue
+                engine_state = WalkEngineState::WALKING;
+                time_paused  = 0.0f;
             }
             else {
                 time_paused += dt;
@@ -71,13 +52,13 @@ namespace motion {
         updatePhase(dt);
 
         // check if we will finish a half step with this update
-        bool halfStepFinished = (last_phase < 0.5f && phase >= 0.5f) || (last_phase > 0.5f && phase < 0.5f);
+        const bool halfStepFinished = (last_phase < 0.5f && phase >= 0.5f) || (last_phase > 0.5f && phase < 0.5f);
 
         // small state machine
         switch (engine_state) {
             case WalkEngineState::IDLE:
                 // state is idle and orders are not zero, we can start walking
-                buildStartTrajectories(orders);
+                buildStartMovementTrajectories(orders);
                 engine_state = WalkEngineState::START_MOVEMENT;
                 break;
             case WalkEngineState::START_MOVEMENT:
@@ -89,7 +70,7 @@ namespace motion {
                     }
                     else {
                         // start step is finished, go to next state
-                        buildTrajectories(orders, false, true, false);
+                        buildNormalTrajectories(orders);
                         engine_state = WalkEngineState::START_STEP;
                     }
                 }
@@ -172,7 +153,7 @@ namespace motion {
         // Sanity check support foot state
         if ((phase < 0.5f && !foot_step.isLeftSupport()) || (phase >= 0.5f && foot_step.isLeftSupport())) {
             NUClear::log<NUClear::WARN>(
-                fmt::format("Invalid state phase={} support={} dt={}", phase, foot_step.isLeftSupport(), dt));
+                fmt::format("Invalid state. phase={}, support={}, dt={}", phase, foot_step.isLeftSupport(), dt));
             return false;
         }
         last_phase = phase;
@@ -180,7 +161,7 @@ namespace motion {
         return true;
     }
 
-    void QuinticWalkEngine::updatePhase(const float dt) {
+    void QuinticWalkEngine::updatePhase(const float& dt) {
         float local_dt = dt;
         // Check for negative time step
         if (local_dt <= 0.0f) {
@@ -188,13 +169,13 @@ namespace motion {
                 local_dt = 0.0001f;
             }
             else {
-                NUClear::log<NUClear::WARN>(fmt::format("Negative dt phase={} dt={}", phase, dt));
+                NUClear::log<NUClear::WARN>(fmt::format("Negative dt. phase={}, dt={}", phase, dt));
                 return;
             }
         }
         // Check for too long dt
         if (local_dt > 0.25f / params.freq) {
-            NUClear::log<NUClear::WARN>(fmt::format("dt too long phase={} dt={}", phase, dt));
+            NUClear::log<NUClear::WARN>(fmt::format("dt too long. phase={}, dt={}", phase, dt));
             return;
         }
 
@@ -224,13 +205,11 @@ namespace motion {
 
         // Compute current point in time to save state by multiplying the half period time with the advancement of
         // period time
-        float factor;
-        if (last_phase < 0.5f) {
-            factor = last_phase / 0.5f;
+        float factor = last_phase;
+        if (factor < 0.5f) {
+            factor = factor * 2.0f;
         }
-        else {
-            factor = last_phase;
-        }
+
         float period_time = half_period * factor;
 
         Eigen::Vector2f trunkPos(trajs.get(TrajectoryTypes::TRUNK_POS_X).pos(period_time),
@@ -262,19 +241,12 @@ namespace motion {
 
         // Evaluate and save trunk orientation in next support foot frame
         Eigen::Vector3f trunkAxis(trajs.get(TrajectoryTypes::TRUNK_AXIS_X).pos(period_time),
-                                  params.trunk_pitch - trajs.get(TrajectoryTypes::TRUNK_AXIS_Y).pos(period_time),
+                                  trajs.get(TrajectoryTypes::TRUNK_AXIS_Y).pos(period_time),
                                   trajs.get(TrajectoryTypes::TRUNK_AXIS_Z).pos(period_time));
 
-        // Convert in intrinsic euler angle
-        Eigen::Matrix3f trunkMat   = Eigen::AngleAxisf(trunkAxis.norm(), trunkAxis.normalized()).toRotationMatrix();
-        Eigen::Vector3f trunkEuler = utility::math::euler::MatrixToEulerIntrinsic(trunkMat);
-
         // Transform to next support foot
-        trunkEuler.z() -= foot_step.getNext().z();
+        trunkAxis.z() -= foot_step.getNext().z();
 
-        // Reconvert to axis and save it
-        trunkMat               = utility::math::euler::EulerIntrinsicToMatrix(trunkEuler);
-        trunkAxis              = Eigen::AngleAxisf(trunkMat).axis();
         trunk_axis_pos_at_last = trunkAxis;
 
         // Evaluate trunk orientation velocity and acceleration without frame transformation
@@ -287,9 +259,9 @@ namespace motion {
     }
 
     void QuinticWalkEngine::buildTrajectories(const Eigen::Vector3f& orders,
-                                              const bool startMovement,
-                                              const bool startStep,
-                                              const bool kickStep) {
+                                              const bool& startMovement,
+                                              const bool& startStep,
+                                              const bool& kickStep) {
         // Save the current trunk state to use it later and compute next step position
         if (!startMovement) {
             saveCurrentTrunkState();
@@ -301,23 +273,23 @@ namespace motion {
         }
 
         // Reset the trajectories
-        TrajectoriesInit(trajs);
+        trajectoriesInit(trajs);
 
         // full period (float step) is needed for trunk splines
-        float period = 2.0f * half_period;
+        const float period = 2.0f * half_period;
 
         // Time length of double and single support phase during the half cycle
         float doubleSupportLength = params.double_support_ratio * half_period;
         float singleSupportLength = half_period - doubleSupportLength;
 
         // Sign of support foot with respect to lateral
-        float supportSign = foot_step.isLeftSupport() ? 1.0f : -1.0f;
+        const float supportSign = foot_step.isLeftSupport() ? 1.0f : -1.0f;
 
         // The trunk trajectory is defined for a complete cycle to handle trunk phase shift
         // Trunk phase shift is done due to the length of the float support phase and can be adjusted optionally by
         // a parameter. 0.5halfPeriod to be acyclic to the feet, 0.5floatSupportLength to keep the float support
         // phase centered between feet
-        float timeShift = (doubleSupportLength - half_period) * 0.5f + params.trunk_phase * half_period;
+        const float timeShift = (doubleSupportLength - half_period) * 0.5f + params.trunk_phase * half_period;
 
         // Only move the trunk on the first half cycle after a walk enable
         if (startMovement) {
@@ -332,8 +304,8 @@ namespace motion {
         point(TrajectoryTypes::IS_DOUBLE_SUPPORT, half_period, 0.0f);
 
         // Set support foot
-        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, 0.0f, foot_step.isLeftSupport());
-        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, half_period, foot_step.isLeftSupport());
+        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, 0.0f, static_cast<float>(foot_step.isLeftSupport()));
+        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, half_period, static_cast<float>(foot_step.isLeftSupport()));
 
         // Flying foot position
         point(TrajectoryTypes::FOOT_POS_X, 0.0f, foot_step.getLast().x());
@@ -407,20 +379,21 @@ namespace motion {
         point(TrajectoryTypes::FOOT_AXIS_Z, half_period, foot_step.getNext().z());
 
         // Half pause length of trunk swing lateral oscillation
-        float pauseLength = 0.5f * params.trunk_pause * half_period;
+        const float pauseLength = 0.5f * params.trunk_pause * half_period;
 
         // Trunk support foot and next support foot external oscillating position
-        Eigen::Vector2f trunkPointSupport(params.trunk_x_offset
-                                              + params.trunk_x_offset_p_coef_forward * foot_step.getNext().x()
-                                              + params.trunk_x_offset_p_coef_turn * fabs(foot_step.getNext().z()),
-                                          params.trunk_y_offset);
-        Eigen::Vector2f trunkPointNext(foot_step.getNext().x() + params.trunk_x_offset
-                                           + params.trunk_x_offset_p_coef_forward * foot_step.getNext().x()
-                                           + params.trunk_x_offset_p_coef_turn * fabs(foot_step.getNext().z()),
-                                       foot_step.getNext().y() + params.trunk_y_offset);
+        const Eigen::Vector2f trunkPointSupport(
+            params.trunk_x_offset + params.trunk_x_offset_p_coef_forward * foot_step.getNext().x()
+                + params.trunk_x_offset_p_coef_turn * std::fabs(foot_step.getNext().z()),
+            params.trunk_y_offset);
+        const Eigen::Vector2f trunkPointNext(
+            foot_step.getNext().x() + params.trunk_x_offset
+                + params.trunk_x_offset_p_coef_forward * foot_step.getNext().x()
+                + params.trunk_x_offset_p_coef_turn * std::fabs(foot_step.getNext().z()),
+            foot_step.getNext().y() + params.trunk_y_offset);
 
         // Trunk middle neutral (no swing) position
-        Eigen::Vector2f trunkPointMiddle = 0.5f * (trunkPointSupport + trunkPointNext);
+        const Eigen::Vector2f trunkPointMiddle = 0.5f * (trunkPointSupport + trunkPointNext);
 
         // Trunk vector from middle to support apex
         Eigen::Vector2f trunkVect = trunkPointSupport - trunkPointMiddle;
@@ -429,12 +402,12 @@ namespace motion {
         trunkVect.y() *= params.trunk_swing;
 
         // Trunk support and next apex position
-        Eigen::Vector2f trunkApexSupport = trunkPointMiddle + trunkVect;
-        Eigen::Vector2f trunkApexNext    = trunkPointMiddle - trunkVect;
+        const Eigen::Vector2f trunkApexSupport = trunkPointMiddle + trunkVect;
+        const Eigen::Vector2f trunkApexNext    = trunkPointMiddle - trunkVect;
 
         // Trunk forward velocity
-        float trunkVelSupport = (foot_step.getNext().x() - foot_step.getLast().x()) / period;
-        float trunkVelNext    = foot_step.getNext().x() / half_period;
+        const float trunkVelSupport = (foot_step.getNext().x() - foot_step.getLast().x()) / period;
+        const float trunkVelNext    = foot_step.getNext().x() / half_period;
 
         // Set points for trunk
         // Trunk x position
@@ -482,80 +455,86 @@ namespace motion {
 
         // Define trunk yaw target orientation position and velocity in euler angle and convertion to axis
         // vector
-        Eigen::Vector3f eulerAtSupport(0.0f,
-                                       params.trunk_pitch + params.trunk_pitch_p_coef_forward * foot_step.getNext().x()
-                                           + params.trunk_pitch_p_coef_turn * fabs(foot_step.getNext().z()),
-                                       0.5f * foot_step.getLast().z() + 0.5f * foot_step.getNext().z());
-        Eigen::Vector3f eulerAtNext(0.0f,
-                                    params.trunk_pitch + params.trunk_pitch_p_coef_forward * foot_step.getNext().x()
-                                        + params.trunk_pitch_p_coef_turn * fabs(foot_step.getNext().z()),
-                                    foot_step.getNext().z());
-        Eigen::Matrix3f matAtSupport  = utility::math::euler::EulerIntrinsicToMatrix(eulerAtSupport);
-        Eigen::Matrix3f matAtNext     = utility::math::euler::EulerIntrinsicToMatrix(eulerAtNext);
-        Eigen::Vector3f axisAtSupport = Eigen::AngleAxisf(matAtSupport).axis();
-        Eigen::Vector3f axisAtNext    = Eigen::AngleAxisf(matAtNext).axis();
 
-        Eigen::Vector3f axisVel(
+        // TODO(MotionTeam): Investigate why the added pitch and yaw coef's cause the robot to drift left for forward
+        // walk commands
+        // const Eigen::Vector3f eulerAtSupport(0.0f,
+        //                                      params.trunk_pitch
+        //                                          + params.trunk_pitch_p_coef_forward * foot_step.getNext().x()
+        //                                          + params.trunk_pitch_p_coef_turn *
+        //                                          std::fabs(foot_step.getNext().z()), 0.5f * foot_step.getLast().z() +
+        //                                          0.5f * foot_step.getNext().z());
+        // const Eigen::Vector3f eulerAtNext(0.0f,
+        //                                   params.trunk_pitch
+        //                                       + params.trunk_pitch_p_coef_forward * foot_step.getNext().x()
+        //                                       + params.trunk_pitch_p_coef_turn * std::fabs(foot_step.getNext().z()),
+        //                                   foot_step.getNext().z());
+
+        const Eigen::Vector3f eulerAtSupport(0.0f,
+                                             params.trunk_pitch,
+                                             0.5f * foot_step.getLast().z() + 0.5f * foot_step.getNext().z());
+        const Eigen::Vector3f eulerAtNext(0.0f, params.trunk_pitch, foot_step.getNext().z());
+
+
+        const Eigen::Vector3f axisVel(
             0.0f,
             0.0f,
             utility::math::angle::angleDistance(foot_step.getLast().z(), foot_step.getNext().z()) / period);
 
         // Add points for trunk orientation
-        // Trunk x axis orientation
+        // Trunk x axis orientation (roll)
         point(TrajectoryTypes::TRUNK_AXIS_X,
               0.0f,
               trunk_axis_pos_at_last.x(),
               trunk_axis_vel_at_last.x(),
               trunk_axis_acc_at_last.x());
-        point(TrajectoryTypes::TRUNK_AXIS_X, half_period + timeShift, axisAtSupport.x(), axisVel.x());
-        point(TrajectoryTypes::TRUNK_AXIS_X, period + timeShift, axisAtNext.x(), axisVel.x());
+        point(TrajectoryTypes::TRUNK_AXIS_X, half_period + timeShift, eulerAtSupport.x(), axisVel.x());
+        point(TrajectoryTypes::TRUNK_AXIS_X, period + timeShift, eulerAtNext.x(), axisVel.x());
 
-        // Trunk y axis orientation
+        // Trunk y axis orientation (pitch)
         point(TrajectoryTypes::TRUNK_AXIS_Y,
               0.0f,
-              params.trunk_pitch - trunk_axis_pos_at_last.y(),
+              trunk_axis_pos_at_last.y(),
               trunk_axis_vel_at_last.y(),
               trunk_axis_acc_at_last.y());
-        point(TrajectoryTypes::TRUNK_AXIS_Y,
-              half_period + timeShift,
-              params.trunk_pitch - axisAtSupport.y(),
-              axisVel.y());
-        point(TrajectoryTypes::TRUNK_AXIS_Y, period + timeShift, params.trunk_pitch - axisAtNext.y(), axisVel.y());
+        point(TrajectoryTypes::TRUNK_AXIS_Y, half_period + timeShift, eulerAtSupport.y(), axisVel.y());
+        point(TrajectoryTypes::TRUNK_AXIS_Y, period + timeShift, eulerAtNext.y(), axisVel.y());
 
-        // Trunk z axis orientation
+        // Trunk z axis orientation (yaw)
         point(TrajectoryTypes::TRUNK_AXIS_Z,
               0.0f,
               trunk_axis_pos_at_last.z(),
               trunk_axis_vel_at_last.z(),
               trunk_axis_acc_at_last.z());
-        point(TrajectoryTypes::TRUNK_AXIS_Z, half_period + timeShift, axisAtSupport.z(), axisVel.z());
-        point(TrajectoryTypes::TRUNK_AXIS_Z, period + timeShift, axisAtNext.z(), axisVel.z());
+        point(TrajectoryTypes::TRUNK_AXIS_Z, half_period + timeShift, eulerAtSupport.z(), axisVel.z());
+        point(TrajectoryTypes::TRUNK_AXIS_Z, period + timeShift, eulerAtNext.z(), axisVel.z());
     }
 
-    void QuinticWalkEngine::buildWalkDisableTrajectories(const Eigen::Vector3f& orders, const bool footInIdlePosition) {
+    void QuinticWalkEngine::buildWalkDisableTrajectories(const Eigen::Vector3f& orders,
+                                                         const bool& footInIdlePosition) {
         // Save the current trunk state to use it later
         saveCurrentTrunkState();
         // Update support foot and compute odometry
         foot_step.stepFromOrders(orders);
 
         // Reset the trajectories
-        TrajectoriesInit(trajs);
+        trajectoriesInit(trajs);
 
         // Time length of float and single support phase during the half cycle
-        float doubleSupportLength = params.double_support_ratio * half_period;
-        float singleSupportLength = half_period - doubleSupportLength;
+        const float doubleSupportLength = params.double_support_ratio * half_period;
+        const float singleSupportLength = half_period - doubleSupportLength;
 
         // Sign of support foot with respect to lateral
-        float supportSign = foot_step.isLeftSupport() ? 1.0f : -1.0f;
+        const float supportSign = foot_step.isLeftSupport() ? 1.0f : -1.0f;
 
         // Set float support phase
-        float isDoubleSupport = footInIdlePosition ? 1.0f : 0.0f;
+        const float isDoubleSupport = footInIdlePosition ? 1.0f : 0.0f;
         point(TrajectoryTypes::IS_DOUBLE_SUPPORT, 0.0f, isDoubleSupport);
         point(TrajectoryTypes::IS_DOUBLE_SUPPORT, half_period, isDoubleSupport);
 
         // Set support foot
-        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, 0.0f, foot_step.isLeftSupport());
-        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, half_period, foot_step.isLeftSupport());
+        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, 0.0f, static_cast<float>(foot_step.isLeftSupport()));
+        point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, half_period, static_cast<float>(foot_step.isLeftSupport()));
 
         // Add points for flying foot position
         // Foot x position
@@ -638,7 +617,6 @@ namespace motion {
         point(TrajectoryTypes::TRUNK_POS_Z, 0.0f, trunk_pos_at_last.z(), trunk_vel_at_last.z(), trunk_acc_at_last.z());
         point(TrajectoryTypes::TRUNK_POS_Z, half_period, params.trunk_height);
 
-        // Add points for trunk orientation
         // Trunk x axis orientation
         point(TrajectoryTypes::TRUNK_AXIS_X,
               0.0f,
@@ -650,10 +628,10 @@ namespace motion {
         // Trunk y axis orientation
         point(TrajectoryTypes::TRUNK_AXIS_Y,
               0.0f,
-              params.trunk_pitch - trunk_axis_pos_at_last.y(),
+              trunk_axis_pos_at_last.y(),
               trunk_axis_vel_at_last.y(),
               trunk_axis_acc_at_last.y());
-        point(TrajectoryTypes::TRUNK_AXIS_Y, half_period, params.trunk_pitch - 1.0f);
+        point(TrajectoryTypes::TRUNK_AXIS_Y, half_period, params.trunk_pitch);
 
         // Trunk z axis orientation
         point(TrajectoryTypes::TRUNK_AXIS_Z,
@@ -680,28 +658,19 @@ namespace motion {
         trunk_axis_acc_at_last.setZero();
     }
 
-    void QuinticWalkEngine::computeCartesianPosition(Eigen::Vector3f& trunkPos,
-                                                     Eigen::Vector3f& trunkAxis,
-                                                     Eigen::Vector3f& footPos,
-                                                     Eigen::Vector3f& footAxis,
-                                                     bool isLeftsupportFoot) {
+    QuinticWalkEngine::PositionSupportTuple QuinticWalkEngine::computeCartesianPosition() const {
         // Compute trajectories time
-        float time = getTrajsTime();
-
-        computeCartesianPositionAtTime(trunkPos, trunkAxis, footPos, footAxis, isLeftsupportFoot, time);
+        const float time = getTrajsTime();
+        return computeCartesianPositionAtTime(time);
     }
 
-
-    void QuinticWalkEngine::computeCartesianPositionAtTime(Eigen::Vector3f& trunkPos,
-                                                           Eigen::Vector3f& trunkAxis,
-                                                           Eigen::Vector3f& footPos,
-                                                           Eigen::Vector3f& footAxis,
-                                                           bool isLeftsupportFoot,
-                                                           float time) {
+    QuinticWalkEngine::PositionSupportTuple QuinticWalkEngine::computeCartesianPositionAtTime(const float& time) const {
         // Evaluate target cartesian state from trajectories
-        bool isDoubleSupport;
-        TrajectoriesTrunkFootPos(time, trajs, trunkPos, trunkAxis, footPos, footAxis);
-        TrajectoriesSupportFootState(time, trajs, isDoubleSupport, isLeftsupportFoot);
+        const auto [trunkPos, trunkAxis, footPos, footAxis] = trajectoriesTrunkFootPos(time, trajs);
+        // Discard isDoubleSupport because we don't use it
+        const auto [_, isLeftSupportFoot] = trajectoriesSupportFootState(time, trajs);
+        return {trunkPos, trunkAxis, footPos, footAxis, isLeftSupportFoot};
     }
-}  // namespace motion
-}  // namespace module
+
+
+}  // namespace module::motion

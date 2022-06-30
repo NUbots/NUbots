@@ -1,107 +1,43 @@
----
-Checks: 'clang-analyzer-*,cppcoreguidelines-*,-cppcoreguidelines-pro-type-union-access,-cppcoreguidelines-pro-type-reinterpret-cast,-cppcoreguidelines-pro-type-vararg,-cppcoreguidelines-pro-bounds-pointer-arithmetic,cert-err60-cpp,cert-flp30-c,google-readability-todo,google-runtime-member-string-references,google-runtime-memset,google-readability-casting,llvm-header-guard,llvm-namespace-comment,misc-*,modernize-*,performance-*,readability-*'
-  # # The clang static analyzer, checks for problems in the code
-  # - clang-analyzer-*
-  # # Generally useful rules based on https://github.com/isocpp/CppCoreGuidelines
-  # - cppcoreguidelines-*
-  # # We disable the union access, because we are not using c++17 or boost so variant is out
-  # - -cppcoreguidelines-pro-type-union-access
-  # # Without reinterpret_cast there would be no networking
-  # - -cppcoreguidelines-pro-type-reinterpret-cast
-  # # Pointer arithmatic is used a lot in networking
-  # - -cppcoreguidelines-pro-bounds-pointer-arithmetic
-  # # ioctl, htonl htons and friends are important for networking therefore we can't have this one
-  # - -cppcoreguidelines-pro-type-vararg
-  # # Check that all static and thread_local variables don't throw exceptions
-  # - cert-err58-cpp
-  # # Thrown objects must be nothrow copy constructable
-  # - cert-err60-cpp
-  # # Don't use floating point variables as loop counters
-  # - cert-flp30-c
-  # # Enforce that todos must have an issue number
-  # - google-readability-todo
-  # # const string references should't be members as they can easily be temporaries
-  # - google-runtime-member-string-references
-  # # memset with a 0 length probably has the arguments swapped
-  # - google-runtime-memset
-  # # No using c style casts
-  # - google-readability-casting
-  # # Enforce a standard for header guards
-  # - llvm-header-guard
-  # # have a closing comment for namespaces
-  # - llvm-namespace-comment
-  # # Many miscellaneous checks
-  # - misc-*
-  # # Checks that help improve the use of c++11 and beyond features where appropriate
-  # - modernize-*
-  # # Code performance improvements
-  # - performance-*
-  # # Code readability and consistency checks
-  # - readability-*
-WarningsAsErrors: ''
-HeaderFilterRegex: ''
+Checks: >
+  -*,
+  bugprone-*,
+  cert-*,
+  clang-diagnostic-*,
+  clang-analyzer-*,
+  cppcoreguidelines-*,
+  -cppcoreguidelines-avoid-magic-numbers,
+  -cppcoreguidelines-non-private-member-variables-in-classes,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -cppcoreguidelines-pro-bounds-constant-array-index,
+  -cppcoreguidelines-pro-bounds-pointer-arithmetic,
+  -cppcoreguidelines-pro-type-reinterpret-cast,
+  -cppcoreguidelines-pro-type-union-access,
+  -cppcoreguidelines-pro-type-vararg,
+  google-*,
+  -google-explicit-constructor,
+  -google-runtime-references,
+  misc-*,
+  -misc-non-private-member-variables-in-classes,
+  -misc-no-recursion,
+  performance-*,
+  readability-*,
+  -readability-uppercase-literal-suffix,
+  -readability-magic-numbers,
+  -readability-redundant-string-init,
+  modernize-*,
+  -modernize-use-trailing-return-type
+WarningsAsErrors: ""
+HeaderFilterRegex: ".*"
 AnalyzeTemporaryDtors: false
+FormatStyle: file
 CheckOptions:
-  - key:             llvm-header-guard.HeaderFileExtensions
-    value:           ',h,hh,hpp,hxx'
-  - key:             llvm-namespace-comment.ShortNamespaceLines
-    value:           '1'
-  - key:             llvm-namespace-comment.SpacesBeforeComments
-    value:           '2'
-  - key:             misc-definitions-in-headers.HeaderFileExtensions
-    value:           ',h,hh,hpp,hxx,ipp'
-  - key:             misc-definitions-in-headers.UseHeaderFileExtension
-    value:           '1'
-  - key:             misc-move-constructor-init.IncludeStyle
-    value:           google
-  - key:             modernize-loop-convert.NamingStyle
-    value:           lower_case
-  - key:             modernize-pass-by-value.IncludeStyle
-    value:           google
-  - key:             modernize-replace-auto-ptr.IncludeStyle
-    value:           google
-  - key:             performance-for-range-copy.WarnOnAllAutoCopies
-    value:           '1'
-  - key:             performance-type-promotion-in-math-fn.IncludeStyle
-    value:           google
-  - key:             performance-unnecessary-value-param.IncludeStyle
-    value:           google
-  - key:             readability-braces-around-statements.ShortStatementLines
-    value:           '1'
-  - key:             readability-identifier-naming.ClassCase
-    value:           CamelCase
-  - key:             readability-identifier-naming.ConstantCase
-    value:           UPPER_CASE
-  - key:             readability-identifier-naming.EnumCase
-    value:           CamelCase
-  - key:             readability-identifier-naming.EnumConstantCase
-    value:           UPPER_CASE
-  - key:             readability-identifier-naming.FunctionCase
-    value:           lower_case
-  - key:             readability-identifier-naming.MacroDefinitionCase
-    value:           UPPER_CASE
-  - key:             readability-identifier-naming.MemberCase
-    value:           lower_case
-  - key:             readability-identifier-naming.MethodCase
-    value:           lower_case
-  - key:             readability-identifier-naming.NamespaceCase
-    value:           aNy_CasE
-  - key:             readability-identifier-naming.ParameterCase
-    value:           lower_case
-  - key:             readability-identifier-naming.ParameterPackCase
-    value:           lower_case
-  - key:             readability-identifier-naming.StructCase
-    value:           CamelCase
-  - key:             readability-identifier-naming.TemplateParameterCase
-    value:           CamelCase
-  - key:             readability-identifier-naming.TypeAliasCase
-    value:           CamelCase
-  - key:             readability-identifier-naming.TypedefCase
-    value:           CamelCase
-  - key:             readability-identifier-naming.UnionCase
-    value:           CamelCase
-  - key:             readability-identifier-naming.ValueTemplateParameterCase
-    value:           lower_case
-  - key:             readability-identifier-naming.VariableCase
-    value:           lower_case
-...
+  - key: cppcoreguidelines-avoid-magic-numbers.IgnoredFloatingPointValues
+    value: "0.5;1.0;2.0;3.0;4.0;100.0;"
+  - key: readability-magic-numbers.IgnoredFloatingPointValues
+    value: "0.5;1.0;2.0;3.0;4.0;100.0;"
+  - key: cppcoreguidelines-avoid-magic-numbers.IgnoredIntegerValues
+    value: "1;2;3;4;"
+  - key: readability-magic-numbers.IgnoredIntegerValues
+    value: "1;2;3;4;"
+  - key: modernize-loop-convert.NamingStyle
+    value: lower_case

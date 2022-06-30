@@ -20,59 +20,88 @@
 #ifndef MODULES_BEHAVIOUR_PLANNERS_SIMPLEWALKPATHPLANNER_HPP
 #define MODULES_BEHAVIOUR_PLANNERS_SIMPLEWALKPATHPLANNER_HPP
 
-#include <armadillo>
+#include <Eigen/Core>
 #include <cmath>
 #include <nuclear>
 
 #include "extension/Configuration.hpp"
 
-#include "message/behaviour/KickPlan.hpp"
 #include "message/behaviour/MotionCommand.hpp"
+#include "message/motion/WalkCommand.hpp"
 
-namespace module {
-namespace behaviour {
-    namespace planning {
+#include "utility/behaviour/MotionCommand.hpp"
 
-        // using namespace message;
-        /**
-         * Executes a getup script if the robot falls over.
-         *
-         * @author Josiah Walker
-         */
-        class SimpleWalkPathPlanner : public NUClear::Reactor {
-        private:
-            message::behaviour::MotionCommand latestCommand;
-            const size_t subsumptionId;
-            float turnSpeed            = 0.8;
-            float forwardSpeed         = 1;
-            float sideSpeed            = 1;
-            float slow_approach_factor = 0.5;
-            float a                    = 7;
-            float b                    = 0;
-            float search_timeout       = 3;
+namespace module::behaviour::planning {
 
-            //-----------non-config variables (not defined in WalkPathPlanner.yaml)-----------
+    // using namespace message;
 
-            // info for the current walk
-            arma::vec2 currentTargetPosition;
-            arma::vec2 currentTargetHeading;
-            message::behaviour::KickPlan targetHeading;
-            arma::vec2 targetPosition = {0, 0};
+    using message::behaviour::MotionCommand;
 
-            NUClear::clock::time_point timeBallLastSeen;
-            arma::vec3 rBWw          = {10, 0, 0};
-            bool robot_ground_space  = true;
-            arma::vec2 position      = {1, 0};  // ball pos rel to robot
-            float ball_approach_dist = 0.2;
-            float slowdown_distance  = 0.2;
-            bool useLocalisation     = true;
 
-        public:
-            explicit SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);
-        };
+    /**
+     *
+     * @author Thomas O'Brien
+     *
+     * Creates various walk path plans
+     *
+     */
+    class SimpleWalkPathPlanner : public NUClear::Reactor {
+    private:
+        /// @brief Stores configuration values
+        struct Config {
+            Config() = default;
+            /// @brief Walk path planner priority in the subsumption system
+            float walk_path_planner_priority = 0;
+            /// @brief Walk command velocity for walking to ball
+            float forward_speed = 0;
+            /// @brief Maximum angular velocity command for walking to ball
+            float max_turn_speed = 0;
+            /// @brief Minimum angular velocity command for walking to ball
+            float min_turn_speed = 0;
+            /// @brief Rotate on spot walk command angular velocity
+            float rotate_speed = 0;
+            /// @brief Rotate on spot walk command forward velocity
+            float rotate_speed_x = 0;
+            /// @brief Rotate on spot walk command side velocity
+            float rotate_speed_y = 0;
+            /// @brief Walk to ready walk command forward velocity
+            float walk_to_ready_speed_x = 0;
+            /// @brief Walk to ready walk command side velocity
+            float walk_to_ready_speed_y = 0;
+            /// @brief Walk to ready walk command angular velocity
+            float walk_to_ready_rotation = 0;
+        } cfg;
 
-    }  // namespace planning
-}  // namespace behaviour
-}  // namespace module
+        /// @brief Stores the latest MotionCommand
+        message::behaviour::MotionCommand latest_command = utility::behaviour::StandStill();
+
+        /// @brief The id registered in the subsumption system for this module
+        const size_t subsumption_id;
+
+        /// @brief Stores the position of the last ball seen
+        Eigen::Vector3f rBTt = Eigen::Vector3f(1.0, 0.0, 0.0);
+
+        /// @brief Walk using the walk command from a direct motion command.
+        void walk_directly();
+
+        /// @brief Walk directly towards the ball relative to the robot based on the latest VisionBall ball position
+        /// measurement
+        void vision_walk_path();
+
+        /// @brief Rotate on the spot
+        void rotate_on_spot();
+
+        /// @brief Configured to emit a walk command that results in robot being in desired position after the ready
+        /// phase
+        void walk_to_ready();
+
+        /// @brief Updates the priority of the module by emitting an ActionPriorities message
+        /// @param priority The priority used in the ActionPriorities message
+        void update_priority(const float& priority);
+
+    public:
+        explicit SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);
+    };
+}  // namespace module::behaviour::planning
 
 #endif  // MODULES_BEHAVIOUR_PLANNERS_SIMPLEWALKPATHPLANNER_HPP
