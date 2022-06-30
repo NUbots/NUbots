@@ -25,7 +25,7 @@ parse_args = [
 ]
 
 # A list of folders that could have interesting things
-# These folders should have c++ files that have reactors or call emit and/or on in the powerplant
+# These folders should have c++ files that have reactors or call `emit` and/or `on` in the powerplant
 whitelist = [
     "/usr/local/include/nuclear_bits/",
 ]
@@ -57,7 +57,7 @@ def repr_tree(node, tabs=0):
         tab (int, optional): The amount this should be indented. Defaults to 0.
 
     Returns:
-        str: A string with the ast in a kinda human readable form
+        str: A string with the AST in a kinda human readable form
     """
     out = ""
     out += repr_node(node, tabs) + "\n"
@@ -67,7 +67,8 @@ def repr_tree(node, tabs=0):
 
 
 def parse_module(files, folder):
-    """Parses all files in a folder for interesting information
+    """
+    Parses all files in a folder for interesting information
 
     Args:
         files (str): A list of files to parse
@@ -127,11 +128,11 @@ def parse_module(files, folder):
 
 def _tree_parse(node, module):
     """
-    Look at the node, if it is a reactor, function or alias parse it, else recursively loop over it's children
+    Look at the node, if it is a reactor, function or alias parse it, else recursively loop over its children
 
     Args:
-        node (clang.cindex.Cursor): The node who we will parse
-        module (struct.Module): The module struct for this module
+        node (clang.cindex.Cursor): The node which we will parse
+        module (struct.Module): A struct containing reactors, functions, and the alias stack for this module
     """
     # Work out where the start of the scope is so we know where our using statements are meant to be
     scope_start = False
@@ -159,7 +160,7 @@ def _tree_parse(node, module):
         for child in node.get_children():
             _tree_parse(child, module)
 
-    # If the node was the start of a scope, only it's children will be in that scope
+    # If the node was the start of a scope, only its children will be in that scope
     if scope_start:
         module.alias_stack.pop()
 
@@ -170,7 +171,7 @@ def make_function(node, module):
 
     Args:
         node (clang.cindex.Cursor): A node that refers to a definition of a function
-        module (struct.Module): The module struct for this module
+        module (struct.Module): A struct containing reactors, functions, and the alias stack for this module
 
     Returns:
         struct.Function or None: A struct with the information of the function or None if the function was not
@@ -192,19 +193,19 @@ def make_function(node, module):
     except StopIteration as e:
         pass  # Function was a forward declared and not a method
 
-    # Check that the function is interesting i.e. has an emit, on or calls another interesting function
+    # Check that the function has an `emit`, `on`, or calls another function which does
     if (not function.emits == []) or (not function.ons == []) or (not function.calls == []):
         return function
 
 
 def _function_parse(node, function, module):
     """
-    Recursively loop through the AST finding information about a function
+    Recursively loop through the AST finding information about a function and adding it to the module struct
 
     Args:
         node (clang.cindex.Cursor): A node that is a child of the function
-        function (struct.Function): The struct that we will save the information we find
-        module (struct.Module): The module struct for this module
+        function (struct.Function): The function struct to be parsed
+        module (struct.Module): A struct containing reactors, functions, and the alias stack for this module
     """
     for child in node.get_children():
         if is_call(child):
@@ -242,14 +243,14 @@ def _function_parse(node, function, module):
 
 def make_on(node, module):
     """
-    Parse a node that defines an on statement
+    Parse a node that defines an `on` statement
 
     Args:
-        node (clang.cindex.Cursor): The cursor that calls the on function
-        module (struct.Module): The module struct for this module
+        node (clang.cindex.Cursor): The cursor that calls the `on` function
+        module (struct.Module): A struct containing reactors, functions, and the alias stack for this module
 
     Returns:
-        struct.On: The struct holding the information about this on statement
+        struct.On: The struct holding the information about this `on` statement
     """
     on = On(node)
     children = node.get_children()
@@ -378,7 +379,7 @@ def make_reactor(node, module):
 
 def parse_alias(node):
     """
-    Parse using statements to get the type aliases
+    Parse `using` statements to get the type aliases
 
     Args:
         node (clang.cindex.Cursor): The node that defines this alias
@@ -431,10 +432,10 @@ def apply_aliases(dsl, aliases):
 
     Args:
         dsl (str): The type to be resolved into its proper type
-        aliases (iter(struct.Alias)): An iterator of aliases to apply
+        aliases (iter(struct.Alias)): An iterable of aliases to apply
 
     Returns:
-        str: The type after aliases have been applied
+        str: The type name after aliases have been applied
     """
     # If the type was aliased, instead store the original type
     for alias in aliases:
@@ -466,13 +467,13 @@ def is_function(node):
 
 def is_using(node):
     """
-    Checks if the node is a using statement
+    Checks if the node is a `using` statement
 
     Args:
         node (clang.cindex.Cursor): The node to check
 
     Returns:
-        bool: If the node is a using statement
+        bool: If the node is a `using` statement
     """
     return (
         node.kind == clang.cindex.CursorKind.USING_DECLARATION

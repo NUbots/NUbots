@@ -31,13 +31,13 @@ def generate_location_JSON(location):
 
 def generate_emit_JSON(emit):
     """
-    Generates JSON for a NUClear emit statement
+    Generates JSON for a NUClear `emit` statement
 
     Args:
-        emit (analyse.struct.Emit): A structure with information about an emit statement
+        emit (analyse.struct.Emit): A structure with information about an `emit` statement
 
     Returns:
-        str: The JSON representation of the emit statement information
+        str: The JSON representation of the `emit` statement information
     """
     out = "{"
     out += f'"scope":"{emit.scope}",'
@@ -49,13 +49,13 @@ def generate_emit_JSON(emit):
 
 def generate_on_JSON(on):
     """
-    Generates JSON for a NUClear on statement
+    Generates JSON for a NUClear `on` statement
 
     Args:
-        on (analyse.struct.On): A structure with information about an on statement
+        on (analyse.struct.On): A structure with information about an `on` statement
 
     Returns:
-        str: The JSON representation of the on statement information
+        str: The JSON representation of the `on` statement information
     """
     out = "{"
     out += '"dsl":"{}",'.format(on.dsl)
@@ -64,12 +64,11 @@ def generate_on_JSON(on):
         for emit in on.callback.emits:
             out += generate_emit_JSON(emit)
             out += ","
-    if on.callback and on.callback.calls:
         for call in on.callback.calls:
             for emit in call.emits:
                 out += generate_emit_JSON(emit)
                 out += ","
-    if out[-1] != "[":
+    if out[-1] == ",":
         out = out[:-1]
     out += "],"
     out += '"location":{}'.format(generate_location_JSON(on.node.location))
@@ -93,7 +92,7 @@ def generate_reactor_JSON(reactor):
     for method in reactor.methods:
         for on in method.ons:
             out += generate_on_JSON(on) + ","
-    if out[-1] != "[":
+    if out[-1] == ",":
         out = out[:-1]
     out += "],"
     out += '"location":{}'.format(generate_location_JSON(reactor.node.location))
@@ -117,7 +116,7 @@ def generate_module_JSON(module, name):
     for reactor in module.reactors:
         out += generate_reactor_JSON(reactor)
         out += ","
-    if out[-1] != "[":
+    if out[-1] == ",":
         out = out[:-1]
     out += "]}"
     return out
@@ -127,7 +126,7 @@ def parse(module, files, outdir):
     """
     Generates JSON for a module and writes it to the file _reactors.json
 
-    This also uses the lock that is passed into the process at initProcess to stop concurrent writes to the file
+    This uses the lock that is passed into the process at `initProcess` to stop concurrent writes to the file
 
     Args:
         module (str): Module directory
@@ -185,7 +184,7 @@ def run(outdir, indir, multiprocess, **kwargs):
     src_dirs = []
 
     # Find all modules by walking the file tree
-    for dirpath, dirnames, filenames in os.walk(indir):
+    for dirpath, dirnames, _ in os.walk(indir):
         for dir in dirnames:
             if dir == "src":
                 dirnames.remove("src")  # Don't look into the src directory
@@ -195,8 +194,8 @@ def run(outdir, indir, multiprocess, **kwargs):
 
     # Find all the files in the source directories that aren't python files
     for src_dir in src_dirs:
-        modules["/".join(src_dir.split("/")[0:-1])] = []
-        for dirpath, dirnames, filenames in os.walk(src_dir):
+        modules["/".join(src_dir.split("/")[:-1])] = []
+        for dirpath, _, filenames in os.walk(src_dir):
             for filename in filenames:
                 if os.path.splitext(filename)[1] == ".hpp" or os.path.splitext(filename)[1] == ".cpp":
                     modules["/".join(src_dir.split("/")[0:-1])].append(os.path.join(dirpath, filename))

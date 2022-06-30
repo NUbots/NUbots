@@ -91,7 +91,7 @@ class Reactor:
         self.methods = methods
 
     def get_name(self):
-        """ Returns the name defined for this reactor"""
+        """Returns the name defined for this reactor"""
         return self.node.type.spelling
 
 

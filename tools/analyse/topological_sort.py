@@ -16,18 +16,18 @@ class AdjacencyList:
         Args:
             u (hashable): The object to set as the vertex
         """
-        if not self.inner_list.get(u):
+        if u not in self.inner_list:
             self.inner_list[u] = []
 
     def add_edge(self, u, v):
         """
-        Creates an edge between two vertices. Adding the vertice u if not present.
+        Creates an edge between two vertices. If `u` is not already a vertex, this method adds it.
 
         Args:
             u (hashable): The vertex the edge comes from
             v (hashable): The vertex the edge goes to
         """
-        if not self.inner_list.get(u):
+        if u not in self.inner_list:
             self.inner_list[u] = []
         self.inner_list[u].append(v)
 
