@@ -54,7 +54,7 @@ namespace {
             });
             on<Trigger<Step<5>>, Priority::LOW>().then([this] {
                 // This task should run fine since it's allowed
-                events.push_back("emitting task again x2");
+                events.push_back("emitting task again #2");
                 emit<Task>(std::make_unique<SimpleTask>());
             });
             on<Startup>().then([this] {
@@ -85,7 +85,7 @@ TEST_CASE("Test that the when keyword blocks and allows running as expected", "[
                 "emitting task again",
                 "emitting allowed condition",
                 "task executed",
-                "emitting task again x2",
+                "emitting task again #2",
                 "task executed",
             });
 }

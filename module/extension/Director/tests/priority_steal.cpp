@@ -8,13 +8,13 @@
 namespace {
 
     struct SimpleTask {
-        SimpleTask(std::string msg) : msg(msg) {}
+        SimpleTask(const std::string& msg_) : msg(msg_) {}
         std::string msg;
     };
 
     template <int i>
     struct UniqueProvider {
-        UniqueProvider(std::string msg) : msg(msg) {}
+        UniqueProvider(const std::string& msg) : msg(msg_) {}
         std::string msg;
     };
 

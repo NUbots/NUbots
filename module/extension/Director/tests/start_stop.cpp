@@ -7,9 +7,6 @@
 // Anonymous namespace to avoid name collisions
 namespace {
 
-    template <int i>
-    struct Step {};
-
     struct SimpleTask {};
 
     std::vector<std::string> events;

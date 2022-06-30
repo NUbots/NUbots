@@ -7,16 +7,15 @@
 // Anonymous namespace to avoid name collisions
 namespace {
 
-    template <int i>
-    struct Step {};
-
     struct SimpleTask {};
     struct TriggerTest {};
     template <int i>
     struct DependentTask {
+        DependentTask(const int& id_) : id(id_) {}
         int id;
     };
     struct OtherData {
+        OtherData(const int& id_) : id(id_) {}
         int id;
     };
 
@@ -32,11 +31,11 @@ namespace {
 
                 if (d.id % 2 == 0) {
                     events.push_back("emitting dependent task 1");
-                    emit<Task>(std::make_unique<DependentTask<1>>(DependentTask<1>{d.id}));
+                    emit<Task>(std::make_unique<DependentTask<1>>(d.id));
                 }
                 else {
                     events.push_back("emitting dependent task 2");
-                    emit<Task>(std::make_unique<DependentTask<2>>(DependentTask<2>{d.id}));
+                    emit<Task>(std::make_unique<DependentTask<2>>(d.id));
                 }
             });
 
@@ -55,7 +54,7 @@ namespace {
             on<Trigger<Step<1>>, Priority::LOW>().then([this] {
                 // Emit inital data so it's in the cache and the triggers can run
                 events.push_back("emitting data 0");
-                emit(std::make_unique<OtherData>(OtherData{0}));
+                emit(std::make_unique<OtherData>(0));
                 events.push_back("emitting Trigger Test");
                 emit(std::make_unique<TriggerTest>());
 
@@ -70,7 +69,7 @@ namespace {
 
                 // Emit another data
                 events.push_back("emitting data 1");
-                emit(std::make_unique<OtherData>(OtherData{1}));
+                emit(std::make_unique<OtherData>(1));
             });
             on<Trigger<Step<3>>, Priority::LOW>().then([this] {
                 // Emit a trigger test to see if the dependent tasks are blocked

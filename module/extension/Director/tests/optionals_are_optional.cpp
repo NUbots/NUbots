@@ -9,9 +9,11 @@ namespace {
 
     template <int i>
     struct SimpleTask {
+        SimpleTask(const std::string& msg_) : msg(msg_) {}
         std::string msg;
     };
     struct ComplexTask {
+        ComplexTask(const std::string& msg_) : msg(msg_) {}
         std::string msg;
     };
     struct BlockerTask {};
@@ -33,13 +35,13 @@ namespace {
             on<Provide<ComplexTask>>().then([this](const ComplexTask& t) {
                 events.push_back("emitting tasks from complex " + t.msg);
                 // One required, one optional
-                emit<Task>(std::make_unique<SimpleTask<0>>(SimpleTask<0>{"from complex " + t.msg}), 1, true);
-                emit<Task>(std::make_unique<SimpleTask<1>>(SimpleTask<1>{"from complex " + t.msg}), 1, false);
+                emit<Task>(std::make_unique<SimpleTask<0>>("from complex " + t.msg), 1, true);
+                emit<Task>(std::make_unique<SimpleTask<1>>("from complex " + t.msg), 1, false);
             });
 
             on<Provide<BlockerTask>>().then([this] {  //
                 events.push_back("emitting blocker task");
-                emit<Task>(std::make_unique<SimpleTask<0>>(SimpleTask<0>{"from blocker"}), 10);
+                emit<Task>(std::make_unique<SimpleTask<0>>("from blocker"), 10);
             });
 
             /**************
@@ -53,12 +55,12 @@ namespace {
             on<Trigger<Step<2>>, Priority::LOW>().then([this] {
                 // Emit the complex task that should be blocked by the blocker task
                 events.push_back("emitting low priority complex task");
-                emit<Task>(std::make_unique<ComplexTask>(ComplexTask{"low priority"}), 10);
+                emit<Task>(std::make_unique<ComplexTask>("low priority"), 10);
             });
             on<Trigger<Step<3>>, Priority::LOW>().then([this] {
                 // Emit another complex task that should have high enough priority to execute over the blocker
                 events.push_back("emitting high priority complex task");
-                emit<Task>(std::make_unique<ComplexTask>(ComplexTask{"high priority"}), 100);
+                emit<Task>(std::make_unique<ComplexTask>("high priority"), 100);
             });
             on<Startup>().then([this] {
                 emit(std::make_unique<Step<1>>());

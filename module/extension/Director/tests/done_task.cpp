@@ -25,6 +25,7 @@ namespace {
             on<Provide<SimpleTask>>().then([this] {
                 if (!executed) {
                     // Task has been executed!
+                    executed = true;
                     events.push_back("task executed");
                     emit<Task>(std::make_unique<SubTask>());
                 }

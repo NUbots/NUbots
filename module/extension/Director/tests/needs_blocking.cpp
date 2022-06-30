@@ -8,11 +8,11 @@
 namespace {
 
     struct SimpleTask {
-        SimpleTask(const std::string& msg) : msg(msg) {}
+        SimpleTask(const std::string& msg_) : msg(msg_) {}
         std::string msg;
     };
     struct ComplexTask {
-        ComplexTask(const std::string& msg) : msg(msg) {}
+        ComplexTask(const std::string& msg_) : msg(msg_) {}
         std::string msg;
     };
 

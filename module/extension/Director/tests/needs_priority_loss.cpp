@@ -9,7 +9,7 @@ namespace {
 
     template <int i>
     struct SimpleTask {
-        SimpleTask(const std::string& msg) : msg(msg) {}
+        SimpleTask(const std::string& msg_) : msg(msg_) {}
         std::string msg;
     };
     template <int i>
