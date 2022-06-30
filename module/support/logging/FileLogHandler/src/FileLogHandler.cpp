@@ -37,7 +37,6 @@ namespace module::support::logging {
             if (log_file.is_open()) {
                 log_file << "\n*********************************************************************\n" << std::endl;
             }
-
             else {
                 log<NUClear::ERROR>("Failed to open log file");
             }
