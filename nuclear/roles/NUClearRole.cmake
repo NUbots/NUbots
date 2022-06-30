@@ -6,7 +6,6 @@ find_package(NUClear REQUIRED)
 find_package(Threads REQUIRED)
 
 function(NUCLEAR_ROLE)
-  message("yo, ${CMAKE_CURRENT_SOURCE_DIR}")
   # Store our role_modules in a sane variable
   set(role_modules ${ARGN})
 
@@ -19,37 +18,19 @@ function(NUCLEAR_ROLE)
     DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/generate_role.py" ${NUCLEAR_ROLE_BANNER_FILE}
   )
 
-
-#   macro ( build_sample_cpp_file project cpp_file )
-#   GET_FILENAME_COMPONENT( tmp_cpp_file ${cpp_file} NAME )
-#   STRING(REGEX REPLACE "\\.cpp$" "" binary_name ${tmp_cpp_file})
-#   ADD_EXECUTABLE( "${project}_${binary_name}" ${cpp_file} )
-#   SET_TARGET_PROPERTIES( "${project}_${binary_name}" PROPERTIES
-# OUTPUT_NAME  ${binary_name} )
-#   TARGET_LINK_LIBRARIES( "${project}_${binary_name}"  ${LINK_LIBS} )
-# endmacro ( build_sample_cpp_file )
-
   # Remove the :: from each module to make a valid target name for the module
   string(REPLACE "::" "" role_module_targets "${role_modules}")
 
-  # Build our executable from the generated role
+  # Get separate components of role path to properly set the output folder, target name and executable
   get_filename_component(role_name ${role} NAME)
-  message("In NUClearRoles cmake the role_name is ${role_name} and the role is ${role}")
   cmake_path(GET role PARENT_PATH role_folder)
-  message("and the role path is ${role_folder}")
 
-  # Normal role files
-  if("${role_folder}" STREQUAL "")
-    message("BANANA role path is ${role_folder} and role is ${role}")
-    add_executable(${role} "${role}.cpp")
-    set(target_name ${role})
-  else()  # role files in folders
-    message("APPLE role path is ${role_folder} and role is ${role}")
-    message("${role_folder}_${role_name}")
-    add_executable("${role_folder}_${role_name}" "${role_name}.cpp")
-    SET_TARGET_PROPERTIES("${role_folder}_${role_name}" PROPERTIES OUTPUT_NAME ${role_name})
-    set(target_name "${role_folder}_${role_name}")
-  endif()
+  # Target name must be unique and can't be a path, so if this is in a folder then change the slashes to underscores
+  string(REPLACE "/" "_" target_name "${role}")
+
+  # Build our executable from the generated role
+  add_executable(${target_name} "${role_name}.cpp")
+  SET_TARGET_PROPERTIES(${target_name} PROPERTIES OUTPUT_NAME ${role_name})
 
   target_include_directories(${target_name} PRIVATE "${PROJECT_SOURCE_DIR}/${NUCLEAR_MODULE_DIR}")
 
@@ -59,9 +40,7 @@ function(NUCLEAR_ROLE)
   target_link_libraries(${target_name} NUClear::nuclear)
 
   # Set our output directory to be bin
-  message("role ${role}, ${PROJECT_BINARY_DIR}")
   set_target_properties(${target_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/${role_folder}")
-  # fix up for folder
 
   # IDE folder
   set_target_properties(${target_name} PROPERTIES FOLDER "roles/${role_folder}")

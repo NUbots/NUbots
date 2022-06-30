@@ -9,7 +9,7 @@ file(GLOB_RECURSE rolefiles "${role_source_dir}/*.role")
 # exist
 get_cmake_property(vars CACHE_VARIABLES)
 foreach(var ${vars})
-if(var MATCHES "^ROLE_[a-zA-Z0-9]+[/]?[a-zA-Z0-9]+")
+if(var MATCHES "^ROLE_[a-zA-Z0-9]+([/]?[a-zA-Z0-9]+)*")
     set("BACKUP_${var}" ${${var}})
     unset(${var} CACHE)
   endif()
@@ -40,11 +40,9 @@ endforeach(rolefile)
 get_cmake_property(vars CACHE_VARIABLES)
 unset(NUCLEAR_ROLES CACHE)
 foreach(var ${vars})
-  if(var MATCHES "^ROLE_[a-zA-Z0-9]+[/]?[a-zA-Z0-9]+")
+  if(var MATCHES "^ROLE_[a-zA-Z0-9]+([/]?[a-zA-Z0-9]+)*")
     if(${var})
-      message("var is ${var}")
       string(SUBSTRING ${var} 5 -1 role_folder)
-      message("something ${role_folder}")
       set(NUCLEAR_ROLES
           ${NUCLEAR_ROLES} ${role_folder}
           CACHE INTERNAL "A list of the roles that are enabled to be built." FORCE
@@ -61,7 +59,6 @@ unset(NUCLEAR_MODULES CACHE)
 
 # Note that the loop value of this for loop sets the local role variable that is used in the included role file
 foreach(role ${NUCLEAR_ROLES})
-  message("hello yes this is ${role_source_dir} and I have ${role}")
   include("${role_source_dir}/${role}.role")
 endforeach(role)
 
