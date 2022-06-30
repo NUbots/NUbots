@@ -39,7 +39,8 @@ EOF
 pacman -S --noconfirm --needed sudo
 
 # Setup users of the wheel group to be able to execute sudo commands with no password
-sed --in-place 's/^#\s*\(%wheel\s\+ALL=(ALL)\s\+NOPASSWD:\s\+ALL\)/\1/' /etc/sudoers
+echo "%wheel ALL=(ALL:ALL) NOPASSWD: ALL" > /etc/sudoers.d/wheel_sudo
+chmod 440 /etc/sudoers.d/wheel_sudo
 
 # Get sudo to insult users when they type a password wrong
 echo "Defaults insults" > /etc/sudoers.d/insults
@@ -95,9 +96,9 @@ systemctl enable sshd.service
 
 # Setup the ssh issue file
 mkdir banner
-wget https://raw.githubusercontent.com/NUbots/NUbots/master/nuclear/roles/banner/bigtext.py -O bigtext.py
-wget https://raw.githubusercontent.com/NUbots/NUbots/master/cmake/banner.png -O banner.png
-wget https://raw.githubusercontent.com/NUbots/NUbots/master/doc/ArchInstall/motd -O /etc/motd
+wget https://raw.githubusercontent.com/NUbots/NUbots/main/nuclear/roles/banner/bigtext.py -O bigtext.py
+wget https://raw.githubusercontent.com/NUbots/NUbots/main/cmake/banner.png -O banner.png
+wget https://raw.githubusercontent.com/NUbots/NUbots/main/doc/ArchInstall/motd -O /etc/motd
 cat << EOF > generate_banner.py
 import bigtext
 
@@ -243,7 +244,7 @@ ldconfig
 # Make sure python checks /usr/local for packages
 echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
     > $(python -c "import site; print(site.getsitepackages()[0])")/local.pth
-wget https://raw.githubusercontent.com/NUbots/NUbots/master/docker/etc/pip.conf -O /etc/pip.conf
+wget https://raw.githubusercontent.com/NUbots/NUbots/main/docker/etc/pip.conf -O /etc/pip.conf
 
 #############
 # ZSH SHELL #
@@ -279,7 +280,7 @@ EOF
 mkdir -p ${HOME}/.ssh
 
 # Register docker client as an authorized user
-wget https://raw.githubusercontent.com/NUbots/NUbots/master/docker/home/nubots/.ssh/id_rsa.pub \
+wget https://raw.githubusercontent.com/NUbots/NUbots/main/docker/home/nubots/.ssh/id_rsa.pub \
     -O ${HOME}/.ssh/authorized_keys
 
 # Fix permissions so ssh will accept our authorized keys
@@ -291,7 +292,7 @@ chmod 600 ${HOME}/.ssh/authorized_keys
 
 # Install the OpenCL icd file
 mkdir -p /etc/OpenCL/vendors
-wget https://raw.githubusercontent.com/NUbots/NUbots/master/docker/etc/OpenCL/vendors/intel.icd \
+wget https://raw.githubusercontent.com/NUbots/NUbots/main/docker/etc/OpenCL/vendors/intel.icd \
     -O /etc/OpenCL/vendors/intel.icd
 
 ###############
@@ -309,7 +310,7 @@ chown -R ${USER}:${USER} /usr/local
 ################
 
 # Download the post-install script into chroot drive
-wget https://raw.githubusercontent.com/NUbots/NUbots/master/doc/ArchInstall/arch-post_install.sh \
+wget https://raw.githubusercontent.com/NUbots/NUbots/main/doc/ArchInstall/arch-post_install.sh \
     -O /arch-post_install.sh
 chmod +x /arch-post_install.sh
 

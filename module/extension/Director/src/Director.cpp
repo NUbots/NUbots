@@ -23,17 +23,15 @@
 namespace module::extension {
 
     using ::extension::Configuration;
-    using ::extension::behaviour::Task;
     using ::extension::behaviour::commands::CausingExpression;
     using ::extension::behaviour::commands::DirectorTask;
+    using ::extension::behaviour::commands::NeedsExpression;
     using ::extension::behaviour::commands::ProviderClassification;
     using ::extension::behaviour::commands::ProviderDone;
-    using ::extension::behaviour::commands::ProvidesReaction;
+    using ::extension::behaviour::commands::ProvideReaction;
     using ::extension::behaviour::commands::WhenExpression;
-    using ::NUClear::threading::Reaction;
     using provider::Provider;
-    using provider::ProviderGroup;
-    using Unbind = NUClear::dsl::operation::Unbind<ProvidesReaction>;
+    using Unbind = NUClear::dsl::operation::Unbind<ProvideReaction>;
 
     /**
      * This message gets emitted when a state we are monitoring is updated.
@@ -52,18 +50,18 @@ namespace module::extension {
         int state;
     };
 
-    void Director::add_provider(const ProvidesReaction& provides) {
+    void Director::add_provider(const ProvideReaction& provide) {
 
-        auto& group = groups[provides.type];
+        auto& group = groups[provide.type];
 
         // Check if we already inserted this element as a Provider
-        if (providers.count(provides.reaction->id) != 0) {
+        if (providers.count(provide.reaction->id) != 0) {
             throw std::runtime_error("You cannot have multiple Provider DSL words in a single on statement.");
         }
 
-        auto provider = std::make_shared<Provider>(provides.classification, provides.type, provides.reaction);
+        auto provider = std::make_shared<Provider>(provide.classification, provide.type, provide.reaction);
         group.providers.push_back(provider);
-        providers.emplace(provides.reaction->id, provider);
+        providers.emplace(provide.reaction->id, provider);
     }
 
     void Director::remove_provider(const uint64_t& id) {
@@ -78,7 +76,7 @@ namespace module::extension {
 
             // Unbind any when state monitors
             for (auto& when : provider->when) {
-                when.handle.unbind();
+                when->handle.unbind();
             }
 
             // Erase the Provider from this group
@@ -92,8 +90,9 @@ namespace module::extension {
                     log<NUClear::ERROR>("The last Provider for a type was removed while there were still tasks for it");
                 }
                 else {
-                    // TODO(@TrentHouliston) run the current task in the group to refresh which Provider is chosen
-                    // run_task(group.active_task);
+                    // Reevaluate the group to see if the loss of this provider changes anything
+                    // Since we already removed the provider from the group it won't get reassigned
+                    reevaluate_queue(group);
                 }
             }
 
@@ -111,25 +110,34 @@ namespace module::extension {
         if (it != providers.end()) {
             auto provider = it->second;
 
+            // Can't add causing to a Start or Stop
+            if (provider->classification == ProviderClassification::STOP
+                || provider->classification == ProviderClassification::START) {
+                throw std::runtime_error("You cannot use the 'When' DSL word with Start or Stop.");
+            }
+
+            // The when condition object
+            auto w  = std::make_shared<provider::Provider::WhenCondition>(when.type,
+                                                                         when.validator,
+                                                                         when.validator(when.current()));
+            auto id = when.reaction->id;
+
             // Add a reaction that will listen for changes to this state and notify the director
-            const auto id         = when.reaction->id;
-            const auto type       = when.type;
-            const auto validator  = when.validator;
-            ReactionHandle handle = when.binder(*this, [this, id, type, validator](const int& state) {
-                // TODO(@TrentHouliston) only do the state update emit if the state variable actually changed too
-                // Otherwise some module out there might keep emitting that the Standing state has updated to the same
-                // value and then we will be sad because we will constantly reevaluate the director for no reason
-                if (validator(state)) {
-                    emit(std::make_unique<StateUpdate>(id, type, state));
+            w->handle = when.binder(*this, [this, id, w](const int& state) {
+                // Only update if the validity changes
+                bool valid = w->validator(state);
+                if (valid != w->current) {
+                    w->current = valid;
+                    emit(std::make_unique<StateUpdate>(id, w->type, state));
                 }
             });
-            handle.disable();
+            w->handle.disable();
 
             // Add it to the list of when conditions
-            provider->when.emplace_back(when.type, when.validator, when.current, handle);
+            provider->when.push_back(w);
         }
         else {
-            throw std::runtime_error("When statements must come after a Provides, Entering or Leaving statement");
+            throw std::runtime_error("When statements must come after a Provide statement");
         }
     }
 
@@ -137,10 +145,36 @@ namespace module::extension {
         auto it = providers.find(causing.reaction->id);
         if (it != providers.end()) {
             auto provider = it->second;
+
+            // Can't add causing to a Start or Stop
+            if (provider->classification == ProviderClassification::STOP
+                || provider->classification == ProviderClassification::START) {
+                throw std::runtime_error("You cannot use the 'Causing' DSL word with Start or Stop.");
+            }
+
             provider->causing.emplace(causing.type, causing.resulting_state);
         }
         else {
-            throw std::runtime_error("Causing statements must come after a Provides, Entering or Leaving statement");
+            throw std::runtime_error("Causing statements must come after a Provide statement");
+        }
+    }
+
+    void Director::add_needs(const NeedsExpression& needs) {
+        auto it = providers.find(needs.reaction->id);
+
+        if (it != providers.end()) {
+            auto provider = it->second;
+
+            // Can't add needs to a Start or Stop
+            if (provider->classification == ProviderClassification::STOP
+                || provider->classification == ProviderClassification::START) {
+                throw std::runtime_error("You cannot use the 'Needs' DSL word with Start or Stop.");
+            }
+
+            provider->needs.emplace(needs.type);
+        }
+        else {
+            throw std::runtime_error("Needs statements must come after a Provide statement");
         }
     }
 
@@ -156,8 +190,8 @@ namespace module::extension {
         });
 
         // Add a Provider
-        on<Trigger<ProvidesReaction>, Sync<Director>>().then("Add Provider", [this](const ProvidesReaction& provides) {
-            add_provider(provides);
+        on<Trigger<ProvideReaction>, Sync<Director>>().then("Add Provider", [this](const ProvideReaction& provide) {
+            add_provider(provide);
         });
 
         // Add a when expression to this Provider
@@ -170,11 +204,16 @@ namespace module::extension {
             add_causing(causing);
         });
 
+        // Add a needs relationship to this Provider
+        on<Trigger<NeedsExpression>, Sync<Director>>().then("Add Needs", [this](const NeedsExpression& needs) {  //
+            add_needs(needs);
+        });
+
         // A task has arrived, either it's a root task so we send it off immediately, or we build up our pack for when
         // the Provider has finished executing
         on<Trigger<DirectorTask>, Sync<DirectorTask>>().then(
             "Director Task",
-            [this](std::shared_ptr<const DirectorTask> task) {
+            [this](const std::shared_ptr<const DirectorTask>& task) {
                 // Root level task, make the pack immediately and send it off to be executed as a root task
                 if (providers.count(task->requester_id) == 0) {
                     emit(std::make_unique<TaskPack>(TaskPack({task})));

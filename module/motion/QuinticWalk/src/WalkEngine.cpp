@@ -5,6 +5,7 @@ https://github.com/Rhoban/model/
 */
 #include "WalkEngine.hpp"
 
+#include <cmath>
 #include <fmt/format.h>
 #include <nuclear>
 
@@ -57,7 +58,7 @@ namespace module::motion {
         switch (engine_state) {
             case WalkEngineState::IDLE:
                 // state is idle and orders are not zero, we can start walking
-                buildStartTrajectories(orders);
+                buildStartMovementTrajectories(orders);
                 engine_state = WalkEngineState::START_MOVEMENT;
                 break;
             case WalkEngineState::START_MOVEMENT:
@@ -69,7 +70,7 @@ namespace module::motion {
                     }
                     else {
                         // start step is finished, go to next state
-                        buildTrajectories(orders, false, true, false);
+                        buildNormalTrajectories(orders);
                         engine_state = WalkEngineState::START_STEP;
                     }
                 }
@@ -240,19 +241,12 @@ namespace module::motion {
 
         // Evaluate and save trunk orientation in next support foot frame
         Eigen::Vector3f trunkAxis(trajs.get(TrajectoryTypes::TRUNK_AXIS_X).pos(period_time),
-                                  params.trunk_pitch - trajs.get(TrajectoryTypes::TRUNK_AXIS_Y).pos(period_time),
+                                  trajs.get(TrajectoryTypes::TRUNK_AXIS_Y).pos(period_time),
                                   trajs.get(TrajectoryTypes::TRUNK_AXIS_Z).pos(period_time));
 
-        // Convert in intrinsic euler angle
-        Eigen::Matrix3f trunkMat   = Eigen::AngleAxisf(trunkAxis.norm(), trunkAxis.normalized()).toRotationMatrix();
-        Eigen::Vector3f trunkEuler = utility::math::euler::MatrixToEulerIntrinsic(trunkMat);
-
         // Transform to next support foot
-        trunkEuler.z() -= foot_step.getNext().z();
+        trunkAxis.z() -= foot_step.getNext().z();
 
-        // Reconvert to axis and save it
-        trunkMat               = utility::math::euler::EulerIntrinsicToMatrix(trunkEuler);
-        trunkAxis              = Eigen::AngleAxisf(trunkMat).axis();
         trunk_axis_pos_at_last = trunkAxis;
 
         // Evaluate trunk orientation velocity and acceleration without frame transformation
@@ -388,14 +382,15 @@ namespace module::motion {
         const float pauseLength = 0.5f * params.trunk_pause * half_period;
 
         // Trunk support foot and next support foot external oscillating position
-        const Eigen::Vector2f trunkPointSupport(params.trunk_x_offset
-                                                    + params.trunk_x_offset_p_coef_forward * foot_step.getNext().x()
-                                                    + params.trunk_x_offset_p_coef_turn * fabs(foot_step.getNext().z()),
-                                                params.trunk_y_offset);
-        const Eigen::Vector2f trunkPointNext(foot_step.getNext().x() + params.trunk_x_offset
-                                                 + params.trunk_x_offset_p_coef_forward * foot_step.getNext().x()
-                                                 + params.trunk_x_offset_p_coef_turn * fabs(foot_step.getNext().z()),
-                                             foot_step.getNext().y() + params.trunk_y_offset);
+        const Eigen::Vector2f trunkPointSupport(
+            params.trunk_x_offset + params.trunk_x_offset_p_coef_forward * foot_step.getNext().x()
+                + params.trunk_x_offset_p_coef_turn * std::fabs(foot_step.getNext().z()),
+            params.trunk_y_offset);
+        const Eigen::Vector2f trunkPointNext(
+            foot_step.getNext().x() + params.trunk_x_offset
+                + params.trunk_x_offset_p_coef_forward * foot_step.getNext().x()
+                + params.trunk_x_offset_p_coef_turn * std::fabs(foot_step.getNext().z()),
+            foot_step.getNext().y() + params.trunk_y_offset);
 
         // Trunk middle neutral (no swing) position
         const Eigen::Vector2f trunkPointMiddle = 0.5f * (trunkPointSupport + trunkPointNext);
@@ -460,20 +455,26 @@ namespace module::motion {
 
         // Define trunk yaw target orientation position and velocity in euler angle and convertion to axis
         // vector
+
+        // TODO(MotionTeam): Investigate why the added pitch and yaw coef's cause the robot to drift left for forward
+        // walk commands
+        // const Eigen::Vector3f eulerAtSupport(0.0f,
+        //                                      params.trunk_pitch
+        //                                          + params.trunk_pitch_p_coef_forward * foot_step.getNext().x()
+        //                                          + params.trunk_pitch_p_coef_turn *
+        //                                          std::fabs(foot_step.getNext().z()), 0.5f * foot_step.getLast().z() +
+        //                                          0.5f * foot_step.getNext().z());
+        // const Eigen::Vector3f eulerAtNext(0.0f,
+        //                                   params.trunk_pitch
+        //                                       + params.trunk_pitch_p_coef_forward * foot_step.getNext().x()
+        //                                       + params.trunk_pitch_p_coef_turn * std::fabs(foot_step.getNext().z()),
+        //                                   foot_step.getNext().z());
+
         const Eigen::Vector3f eulerAtSupport(0.0f,
-                                             params.trunk_pitch
-                                                 + params.trunk_pitch_p_coef_forward * foot_step.getNext().x()
-                                                 + params.trunk_pitch_p_coef_turn * fabs(foot_step.getNext().z()),
+                                             params.trunk_pitch,
                                              0.5f * foot_step.getLast().z() + 0.5f * foot_step.getNext().z());
-        const Eigen::Vector3f eulerAtNext(0.0f,
-                                          params.trunk_pitch
-                                              + params.trunk_pitch_p_coef_forward * foot_step.getNext().x()
-                                              + params.trunk_pitch_p_coef_turn * fabs(foot_step.getNext().z()),
-                                          foot_step.getNext().z());
-        const Eigen::Matrix3f matAtSupport  = utility::math::euler::EulerIntrinsicToMatrix(eulerAtSupport);
-        const Eigen::Matrix3f matAtNext     = utility::math::euler::EulerIntrinsicToMatrix(eulerAtNext);
-        const Eigen::Vector3f axisAtSupport = Eigen::AngleAxisf(matAtSupport).axis();
-        const Eigen::Vector3f axisAtNext    = Eigen::AngleAxisf(matAtNext).axis();
+        const Eigen::Vector3f eulerAtNext(0.0f, params.trunk_pitch, foot_step.getNext().z());
+
 
         const Eigen::Vector3f axisVel(
             0.0f,
@@ -481,35 +482,32 @@ namespace module::motion {
             utility::math::angle::angleDistance(foot_step.getLast().z(), foot_step.getNext().z()) / period);
 
         // Add points for trunk orientation
-        // Trunk x axis orientation
+        // Trunk x axis orientation (roll)
         point(TrajectoryTypes::TRUNK_AXIS_X,
               0.0f,
               trunk_axis_pos_at_last.x(),
               trunk_axis_vel_at_last.x(),
               trunk_axis_acc_at_last.x());
-        point(TrajectoryTypes::TRUNK_AXIS_X, half_period + timeShift, axisAtSupport.x(), axisVel.x());
-        point(TrajectoryTypes::TRUNK_AXIS_X, period + timeShift, axisAtNext.x(), axisVel.x());
+        point(TrajectoryTypes::TRUNK_AXIS_X, half_period + timeShift, eulerAtSupport.x(), axisVel.x());
+        point(TrajectoryTypes::TRUNK_AXIS_X, period + timeShift, eulerAtNext.x(), axisVel.x());
 
-        // Trunk y axis orientation
+        // Trunk y axis orientation (pitch)
         point(TrajectoryTypes::TRUNK_AXIS_Y,
               0.0f,
-              params.trunk_pitch - trunk_axis_pos_at_last.y(),
+              trunk_axis_pos_at_last.y(),
               trunk_axis_vel_at_last.y(),
               trunk_axis_acc_at_last.y());
-        point(TrajectoryTypes::TRUNK_AXIS_Y,
-              half_period + timeShift,
-              params.trunk_pitch - axisAtSupport.y(),
-              axisVel.y());
-        point(TrajectoryTypes::TRUNK_AXIS_Y, period + timeShift, params.trunk_pitch - axisAtNext.y(), axisVel.y());
+        point(TrajectoryTypes::TRUNK_AXIS_Y, half_period + timeShift, eulerAtSupport.y(), axisVel.y());
+        point(TrajectoryTypes::TRUNK_AXIS_Y, period + timeShift, eulerAtNext.y(), axisVel.y());
 
-        // Trunk z axis orientation
+        // Trunk z axis orientation (yaw)
         point(TrajectoryTypes::TRUNK_AXIS_Z,
               0.0f,
               trunk_axis_pos_at_last.z(),
               trunk_axis_vel_at_last.z(),
               trunk_axis_acc_at_last.z());
-        point(TrajectoryTypes::TRUNK_AXIS_Z, half_period + timeShift, axisAtSupport.z(), axisVel.z());
-        point(TrajectoryTypes::TRUNK_AXIS_Z, period + timeShift, axisAtNext.z(), axisVel.z());
+        point(TrajectoryTypes::TRUNK_AXIS_Z, half_period + timeShift, eulerAtSupport.z(), axisVel.z());
+        point(TrajectoryTypes::TRUNK_AXIS_Z, period + timeShift, eulerAtNext.z(), axisVel.z());
     }
 
     void QuinticWalkEngine::buildWalkDisableTrajectories(const Eigen::Vector3f& orders,
@@ -619,7 +617,6 @@ namespace module::motion {
         point(TrajectoryTypes::TRUNK_POS_Z, 0.0f, trunk_pos_at_last.z(), trunk_vel_at_last.z(), trunk_acc_at_last.z());
         point(TrajectoryTypes::TRUNK_POS_Z, half_period, params.trunk_height);
 
-        // Add points for trunk orientation
         // Trunk x axis orientation
         point(TrajectoryTypes::TRUNK_AXIS_X,
               0.0f,
@@ -631,10 +628,10 @@ namespace module::motion {
         // Trunk y axis orientation
         point(TrajectoryTypes::TRUNK_AXIS_Y,
               0.0f,
-              params.trunk_pitch - trunk_axis_pos_at_last.y(),
+              trunk_axis_pos_at_last.y(),
               trunk_axis_vel_at_last.y(),
               trunk_axis_acc_at_last.y());
-        point(TrajectoryTypes::TRUNK_AXIS_Y, half_period, params.trunk_pitch - 1.0f);
+        point(TrajectoryTypes::TRUNK_AXIS_Y, half_period, params.trunk_pitch);
 
         // Trunk z axis orientation
         point(TrajectoryTypes::TRUNK_AXIS_Z,
@@ -667,7 +664,7 @@ namespace module::motion {
         return computeCartesianPositionAtTime(time);
     }
 
-    QuinticWalkEngine::PositionSupportTuple QuinticWalkEngine::computeCartesianPositionAtTime(const float time) const {
+    QuinticWalkEngine::PositionSupportTuple QuinticWalkEngine::computeCartesianPositionAtTime(const float& time) const {
         // Evaluate target cartesian state from trajectories
         const auto [trunkPos, trunkAxis, footPos, footAxis] = trajectoriesTrunkFootPos(time, trajs);
         // Discard isDoubleSupport because we don't use it

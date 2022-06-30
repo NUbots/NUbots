@@ -32,23 +32,39 @@ namespace module::motion {
      */
     class HeadController : public NUClear::Reactor {
     private:
-        const size_t id;
-        double min_yaw, max_yaw, min_pitch, max_pitch, head_motor_gain, head_motor_torque, p_gain;
-        ReactionHandle updateHandle;
-        // Debug var:
-        NUClear::clock::time_point lastTime;
+        /// @brief The id registered in the subsumption system for this module
+        const size_t subsumption_id;
+
+        /// @brief Stores configuration values
+        struct Config {
+            Config() = default;
+            /// @brief Head controller priority in the subsumption system
+            float head_controller_priority = 0;
+            /// @brief Motor gain for head commands
+            float head_motor_gain = 0;
+            /// @brief Motor torque for head commands
+            float head_motor_torque = 0;
+            /// @brief Smoothing factor for smoothing goal_angles with exponential filter
+            float smoothing_factor = 0;
+        } cfg;
+
+        /// @brief Updates the priority of the module in the subsumption system
+        void update_priority(const float& priority);
 
     public:
-        static constexpr const char* CONFIGURATION_PATH = "HeadController.yaml";
-        static constexpr const char* CONFIGURATION_MSSG = "Head Controller - Configure";
-        static constexpr const char* ONTRIGGER_HEAD_CMD = "Head Controller - Register Head Command";
-        static constexpr const char* ONTRIGGER_HEAD_POS = "Head Controller - Update Head Position";
-
         explicit HeadController(std::unique_ptr<NUClear::Environment> environment);
 
-        Eigen::Vector2f currentAngles;
-        Eigen::Vector2f goalAngles;
-        bool goalRobotSpace = true;
+        /// @brief Stores the latest goal angle from HeadCommand message
+        Eigen::Vector2f goal_angles = Eigen::Vector2f::Zero();
+
+        /// @brief Stores angles to be sent to head servos
+        Eigen::Vector2f current_angles = Eigen::Vector2f::Zero();
+
+        /// @brief Bool to inidicate if the goal_angles are in robot space or world space (true if world space)
+        bool goal_robot_space = true;
+
+        /// @brief Bool to indicate if goal_angles should be smoothed with exponential filter
+        bool smooth = true;
     };
 }  // namespace module::motion
 

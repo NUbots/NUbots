@@ -24,7 +24,6 @@ namespace module::output {
     using extension::Configuration;
     using message::behaviour::Behaviour;
     using message::behaviour::KickPlan;
-    using message::behaviour::WalkPath;
     using message::input::GameState;
     using message::input::Image;
     using message::input::Sensors;
@@ -64,20 +63,18 @@ namespace module::output {
            Optional<With<LocalisationBall>>,
            Optional<With<KickPlan>>,
            Optional<With<GameState>>,
-           Optional<With<WalkPath>>,
            Optional<With<WalkCommand>>,
            Single,
            Priority::LOW>()
-            .then([this](std::shared_ptr<const GlobalConfig> global,
-                         std::shared_ptr<const CommandLineArguments> cli,
-                         std::shared_ptr<const Sensors> sensors,
-                         std::shared_ptr<const Behaviour::State> behaviour_state,
-                         std::shared_ptr<const Field> field,
-                         std::shared_ptr<const LocalisationBall> loc_ball,
-                         std::shared_ptr<const KickPlan> kick_plan,
-                         std::shared_ptr<const GameState> game_state,
-                         std::shared_ptr<const WalkPath> walk_path,
-                         std::shared_ptr<const WalkCommand> walk_command) {
+            .then([this](const std::shared_ptr<const GlobalConfig>& global,
+                         const std::shared_ptr<const CommandLineArguments>& cli,
+                         const std::shared_ptr<const Sensors>& sensors,
+                         const std::shared_ptr<const Behaviour::State>& behaviour_state,
+                         const std::shared_ptr<const Field>& field,
+                         const std::shared_ptr<const LocalisationBall>& loc_ball,
+                         const std::shared_ptr<const KickPlan>& kick_plan,
+                         const std::shared_ptr<const GameState>& game_state,
+                         const std::shared_ptr<const WalkCommand>& walk_command) {
                 auto msg = std::make_unique<OverviewMsg>();
 
                 // Set properties

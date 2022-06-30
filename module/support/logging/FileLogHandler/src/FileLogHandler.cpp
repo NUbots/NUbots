@@ -19,7 +19,6 @@ namespace module::support::logging {
 
     FileLogHandler::FileLogHandler(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
-        , mutex()
         , log_file_name("/home/nubots/log")
         , log_file(log_file_name, std::ios_base::out | std::ios_base::app | std::ios_base::ate) {
 
