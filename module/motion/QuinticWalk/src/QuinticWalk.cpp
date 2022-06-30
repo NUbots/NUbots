@@ -293,12 +293,14 @@ namespace module::motion {
 
         // Change goals from support foot based coordinate system to trunk based coordinate system
 
-        // Support to trunk
+        // Trunk from support foot
         Eigen::Affine3f Hst;
         Hst.linear()      = setRPY(trunk_axis.x(), trunk_axis.y(), trunk_axis.z());
         Hst.translation() = trunk_pos;
 
-        // Support to flying foot
+        emit(graph("Trunk from support foot (x,y,z)", Hst(0, 3), Hst(1, 3), Hst(2, 3)));
+
+        // Flying foot from support foot
         Eigen::Affine3f Hsf;
         Hsf.linear()      = setRPY(foot_axis.x(), foot_axis.y(), foot_axis.z());
         Hsf.translation() = foot_pos;
