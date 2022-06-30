@@ -9,7 +9,7 @@ file(GLOB_RECURSE rolefiles "${role_source_dir}/*.role")
 # exist
 get_cmake_property(vars CACHE_VARIABLES)
 foreach(var ${vars})
-if(var MATCHES "^ROLE_[a-zA-Z0-9]+([/]?[a-zA-Z0-9]+)*")
+  if(var MATCHES "^ROLE_[a-zA-Z0-9]+([/]?[a-zA-Z0-9]+)*")
     set("BACKUP_${var}" ${${var}})
     unset(${var} CACHE)
   endif()

@@ -6,6 +6,7 @@ find_package(NUClear REQUIRED)
 find_package(Threads REQUIRED)
 
 function(NUCLEAR_ROLE)
+
   # Store our role_modules in a sane variable
   set(role_modules ${ARGN})
 

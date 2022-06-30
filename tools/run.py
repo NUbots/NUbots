@@ -29,6 +29,7 @@ def register(command):
 
 @run_on_docker
 def run(args, use_gdb, use_valgrind, **kwargs):
+
     # Check to see if ASan was enabled
     use_asan = b.cmake_cache["USE_ASAN"] == "ON"
 
