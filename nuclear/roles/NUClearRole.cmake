@@ -29,7 +29,7 @@ function(NUCLEAR_ROLE)
   string(REPLACE "/" "_" target_name "${role}")
 
   # Build our executable from the generated role
-  add_executable(${target_name} "${role_name}.cpp")
+  add_executable(${target_name} "${role}.cpp")
   SET_TARGET_PROPERTIES(${target_name} PROPERTIES OUTPUT_NAME ${role_name})
 
   target_include_directories(${target_name} PRIVATE "${PROJECT_SOURCE_DIR}/${NUCLEAR_MODULE_DIR}")
