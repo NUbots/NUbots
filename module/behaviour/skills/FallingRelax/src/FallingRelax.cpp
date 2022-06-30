@@ -184,23 +184,24 @@ namespace module::behaviour::skills {
             NUClear::log<NUClear::DEBUG>("Angle from accel", std::acos(Eigen::Vector3d::UnitZ().dot(acc_reading)));
 
 
-            if (!relaxed && !sensors.empty() && std::acos(Eigen::Vector3d::UnitZ().dot(acc_reading)) > 0.6) {
+            //if (!relaxed && !sensors.empty() && std::acos(Eigen::Vector3d::UnitZ().dot(acc_reading)) > 0.6) {
+            if (!relaxed && !sensors.empty() && fabs(sensors.back()->Htw(2, 2)) < cfg.falling_angle) {
                 // We might be falling, check the accelerometer
                 //double magnitude = 0;
 
                 NUClear::log<NUClear::DEBUG>("Checking if falling");
-                NUClear::log<NUClear::DEBUG>("Htw is ", sensors.back()->Htw(2, 2), "Config angle is ", cfg.falling_angle);
+                NUClear::log<NUClear::DEBUG>("Htw is ", sensors.back()->Htw(2, 2), "Angle from acceration is ", acc_reading);
 
                 for (const auto& sensor : sensors) {
                     magnitude += sensor->accelerometer.norm();
                 }
 
                 magnitude /= sensors.size();
-                NUClear::log<NUClear::DEBUG>("Magnitude is ", magnitude, " Falling acceration is ", cfg.falling_acceleration);
+                NUClear::log<NUClear::DEBUG>("Magnitude is ", magnitude, " Config Falling acceration is ", cfg.falling_acceleration);
 
                // if (magnitude > cfg.falling_acceleration) {
                     relaxed = true;
-                    NUClear::log<NUClear::DEBUG>("Magnitude is greater than ", cfg.falling_acceleration);
+                    NUClear::log<NUClear::DEBUG>("IF Magnitude ", magnitude, " is greater than ", cfg.falling_acceleration, " YES it is");
                     update_priority(cfg.relax_fall_priority);
                 //}
             }
