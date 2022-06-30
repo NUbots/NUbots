@@ -62,8 +62,7 @@ unset(NUCLEAR_MODULES CACHE)
 # Note that the loop value of this for loop sets the local role variable that is used in the included role file
 foreach(role ${NUCLEAR_ROLES})
   message("hello yes this is ${role_source_dir} and I have ${role}")
-  # include("${role_source_dir}/${role}.role")
-  add_subdirectory("${role_source_dir}/${role}.role")
+  include("${role_source_dir}/${role}.role")
 endforeach(role)
 
 # If we want to build all the modules, we will list them all in the required format then create the role manually
