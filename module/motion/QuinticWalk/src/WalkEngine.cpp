@@ -265,8 +265,6 @@ namespace module::motion {
                                               const bool& kickStep) {
 
 
-        // Key time points for trajectories are : [0 -> double_support_length -> single_support_length/2 -> half_period]
-
         // Time length of double and single support phase during the half cycle
         float double_support_length = params.double_support_ratio * half_period;
         float single_support_length = half_period - double_support_length;
@@ -300,17 +298,19 @@ namespace module::motion {
 
         //  ******************************** Flying foot position******************************** //
 
-        // Add points for the foot x position
+        // Key time points for trajectories are : [0 -> double_support_length -> single_support_length/2 -> half_period]
+
+        //  Flying foot x position
         point(TrajectoryTypes::FOOT_POS_X, 0.0f, foot_step.getLast().x());
         point(TrajectoryTypes::FOOT_POS_X, double_support_length, foot_step.getLast().x());
         point(TrajectoryTypes::FOOT_POS_X, half_period, foot_step.getNext().x());
 
-        // Add points for the foot y position
+        //  Flying foot y position
         point(TrajectoryTypes::FOOT_POS_Y, 0.0f, foot_step.getLast().y());
         point(TrajectoryTypes::FOOT_POS_Y, double_support_length, foot_step.getLast().y());
         point(TrajectoryTypes::FOOT_POS_Y, half_period, foot_step.getNext().y());
 
-        // Add points for the foot z position
+        //  Flying foot z position
         point(TrajectoryTypes::FOOT_POS_Z, 0.0f, 0.0f);
         point(TrajectoryTypes::FOOT_POS_Z, double_support_length, 0.0f);
         point(TrajectoryTypes::FOOT_POS_Z, double_support_length + 0.5f * single_support_length, params.foot_rise);
@@ -334,27 +334,79 @@ namespace module::motion {
 
         //  ******************************** Trunk position******************************** //
 
-        // Trunk position at next support (half way between the support and swing foot) and apply lateral y swing
-        // amplitude ratio
-        Eigen::Vector2f trunk_point_next(0.5f * foot_step.getNext().x() + params.trunk_x_offset,
-                                         0.5f * foot_step.getNext().y()
-                                             + 0.5f * foot_step.getNext().y() * params.trunk_swing
-                                             + params.trunk_y_offset);
+        const float period      = 2.0f * half_period;
+        const float pauseLength = 0.5f * params.trunk_pause * half_period;
+        const float timeShift   = (double_support_length - half_period) * 0.5f + params.trunk_phase * half_period;
 
-        // Trunk forward velocity
-        const float trunk_vel_next = foot_step.getNext().x() / half_period;
+        const Eigen::Vector2f trunk_point_support(
+            params.trunk_x_offset + params.trunk_x_offset_p_coef_forward * foot_step.getNext().x()
+                + params.trunk_x_offset_p_coef_turn * std::fabs(foot_step.getNext().z()),
+            params.trunk_y_offset);
+
+        const Eigen::Vector2f trunk_point_next(
+            foot_step.getNext().x() + params.trunk_x_offset
+                + params.trunk_x_offset_p_coef_forward * foot_step.getNext().x()
+                + params.trunk_x_offset_p_coef_turn * std::fabs(foot_step.getNext().z()),
+            foot_step.getNext().y() + params.trunk_y_offset);
+
+        // Trunk middle neutral (no swing) position
+        const Eigen::Vector2f trunk_point_middle = 0.5f * (trunk_point_support + trunk_point_next);
+
+        // Trunk vector from middle to support apex
+        Eigen::Vector2f trunk_vect = trunk_point_support - trunk_point_middle;
+
+        // Apply swing amplitude ratio
+        trunk_vect.y() *= params.trunk_swing;
+
+        // Trunk support and next apex position
+        const Eigen::Vector2f trunkApexSupport = trunk_point_middle + trunk_vect;
+        const Eigen::Vector2f trunkApexNext    = trunk_point_middle - trunk_vect;
+
+        const float trunkVelSupport = (foot_step.getNext().x() - foot_step.getLast().x()) / period;
+        const float trunkVelNext    = foot_step.getNext().x() / half_period;
 
         // Trunk x position
-        point(TrajectoryTypes::TRUNK_POS_X, 0.0f, trunk_pos_at_last.x(), trunk_vel_at_last.x(), trunk_acc_at_last.x());
-        point(TrajectoryTypes::TRUNK_POS_X, half_period, trunk_point_next.x(), trunk_vel_next);
+        if (startStep) {
+            point(TrajectoryTypes::TRUNK_POS_X, 0.0f, 0.0f, 0.0f, 0.0f);
+        }
+        else {
+            point(TrajectoryTypes::TRUNK_POS_X,
+                  0.0f,
+                  trunk_pos_at_last.x(),
+                  trunk_vel_at_last.x(),
+                  trunk_acc_at_last.x());
+            point(TrajectoryTypes::TRUNK_POS_X, half_period + timeShift, trunkApexSupport.x(), trunkVelSupport);
+        }
+        point(TrajectoryTypes::TRUNK_POS_X, period + timeShift, trunkApexNext.x(), trunkVelNext);
 
         // Trunk y position
         point(TrajectoryTypes::TRUNK_POS_Y, 0.0f, trunk_pos_at_last.y(), trunk_vel_at_last.y(), trunk_acc_at_last.y());
-        point(TrajectoryTypes::TRUNK_POS_Y, half_period, trunk_point_next.y());
+        if (startStep || startMovement) {
+            point(TrajectoryTypes::TRUNK_POS_Y,
+                  half_period + timeShift - pauseLength,
+                  trunk_point_middle.y() + trunk_vect.y() * params.first_step_swing_factor);
+            point(TrajectoryTypes::TRUNK_POS_Y,
+                  half_period + timeShift + pauseLength,
+                  trunk_point_middle.y() + trunk_vect.y() * params.first_step_swing_factor);
+            point(TrajectoryTypes::TRUNK_POS_Y,
+                  period + timeShift - pauseLength,
+                  trunk_point_middle.y() - trunk_vect.y() * params.first_step_swing_factor);
+            point(TrajectoryTypes::TRUNK_POS_Y,
+                  period + timeShift + pauseLength,
+                  trunk_point_middle.y() - trunk_vect.y() * params.first_step_swing_factor);
+        }
+        else {
+            point(TrajectoryTypes::TRUNK_POS_Y, half_period + timeShift - pauseLength, trunkApexSupport.y());
+            point(TrajectoryTypes::TRUNK_POS_Y, half_period + timeShift + pauseLength, trunkApexSupport.y());
+            point(TrajectoryTypes::TRUNK_POS_Y, period + timeShift - pauseLength, trunkApexNext.y());
+            point(TrajectoryTypes::TRUNK_POS_Y, period + timeShift + pauseLength, trunkApexNext.y());
+        }
 
         // Trunk z position
         point(TrajectoryTypes::TRUNK_POS_Z, 0.0f, trunk_pos_at_last.z(), trunk_vel_at_last.z(), trunk_acc_at_last.z());
-        point(TrajectoryTypes::TRUNK_POS_Z, half_period, params.trunk_height);
+        point(TrajectoryTypes::TRUNK_POS_Z, half_period + timeShift, params.trunk_height);
+        point(TrajectoryTypes::TRUNK_POS_Z, period + timeShift, params.trunk_height);
+
 
         //  ******************************** Trunk orientation ******************************** //
 
@@ -364,7 +416,8 @@ namespace module::motion {
               trunk_axis_pos_at_last.x(),
               trunk_axis_vel_at_last.x(),
               trunk_axis_acc_at_last.x());
-        point(TrajectoryTypes::TRUNK_AXIS_X, half_period, 0.0f, 0.0f);
+        point(TrajectoryTypes::TRUNK_AXIS_X, half_period + timeShift, 0.0f, 0.0f);
+        point(TrajectoryTypes::TRUNK_AXIS_X, period + timeShift, 0.0f, 0.0f);
 
         // Trunk pitch
         point(TrajectoryTypes::TRUNK_AXIS_Y,
@@ -373,6 +426,7 @@ namespace module::motion {
               trunk_axis_vel_at_last.y(),
               trunk_axis_acc_at_last.y());
         point(TrajectoryTypes::TRUNK_AXIS_Y, half_period, params.trunk_pitch, 0.0f);
+        point(TrajectoryTypes::TRUNK_AXIS_Y, period + timeShift, params.trunk_pitch, 0.0f);
 
         // Trunk yaw
         float trunk_yaw_vel =
@@ -383,7 +437,11 @@ namespace module::motion {
               trunk_axis_pos_at_last.z(),
               trunk_axis_vel_at_last.z(),
               trunk_axis_acc_at_last.z());
-        point(TrajectoryTypes::TRUNK_AXIS_Z, half_period, foot_step.getNext().z(), trunk_yaw_vel);
+        point(TrajectoryTypes::TRUNK_AXIS_Z,
+              half_period + timeShift,
+              0.5f * foot_step.getLast().z() + 0.5f * foot_step.getNext().z(),
+              trunk_yaw_vel);
+        point(TrajectoryTypes::TRUNK_AXIS_Z, period + timeShift, foot_step.getNext().z(), trunk_yaw_vel);
     }
 
     void QuinticWalkEngine::buildWalkDisableTrajectories(const Eigen::Vector3f& orders,
