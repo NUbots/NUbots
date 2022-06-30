@@ -45,8 +45,8 @@ function(NUCLEAR_ROLE)
   # IDE folder
   set_target_properties(${target_name} PROPERTIES FOLDER "roles/${role_folder}")
 
-  # Store the used NUClear modules on the target as a property This can be used later in scripts to work out what
-  # modules are used in the role
+  # Store the used NUClear modules on the target as a property
+  # This can be used later in scripts to work out what modules are used in the role
   set_target_properties(${target_name} PROPERTIES NUCLEAR_MODULES "${role_modules}")
 
   # * We add to the global cache variable here that contains all of the module we are using
