@@ -71,9 +71,6 @@ namespace module::behaviour::strategy {
         /// @brief Bool to indicate  if the robot is currently getting up
         bool is_getting_up = false;
 
-        /// @brief Bool to indicate if the robot has finished kicking in penalty shootout
-        bool has_kicked = false;
-
         /// @brief Bool to indicate if we are currently penalised
         bool self_penalised = false;
 

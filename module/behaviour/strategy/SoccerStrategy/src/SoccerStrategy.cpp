@@ -126,7 +126,7 @@ namespace module::behaviour::strategy {
 
             cfg.walk_to_ready_time = config["walk_to_ready_time"].as<int>();
 
-            cfg.kicking_distance_threshold = config["kicking_distance_threshold "].as<float>();
+            cfg.kicking_distance_threshold = config["kicking_distance_threshold"].as<float>();
 
             cfg.kicking_angle_threshold = config["kicking_angle_threshold"].as<float>();
         });
@@ -304,29 +304,27 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::penalty_shootout_set(const FieldDescription& field_description) {
-        emit(std::make_unique<ResetWebotsServos>());             // we were teleported, so reset
-        has_kicked = false;                                      // reset the has_kicked flag between kicks
-        penalty_shootout_localisation_reset(field_description);  // Reset localisation
         stand_still();
         currentState = Behaviour::State::SET;
     }
 
     void SoccerStrategy::penalty_shootout_playing(const Field& field, const Ball& ball) {
         // Execute penalty kick script once if we haven't yet, and if we are not goalie
-        if (!has_kicked && team_kicking_off == GameEvents::Context::TEAM) {
-            emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::PENALTY));
-            has_kicked   = true;  // Set this so we do not kick again, otherwise the script will keep trying to execute
+        if (team_kicking_off == GameEvents::Context::TEAM) {
+            if (NUClear::clock::now() - ball_last_measured < cfg.ball_last_seen_max_time) {
+                // Ball has been seen recently
+                play();
+            }
+            else {
+                // Ball has not been seen recently, request walk planner to rotate on the spot
+                stand_still();
+            }
             currentState = Behaviour::State::SHOOTOUT;
         }
         // If we are not kicking off then be a goalie
         else if (team_kicking_off == GameEvents::Context::OPPONENT) {
             goalie_walk(field, ball);
             currentState = Behaviour::State::GOALIE_WALK;
-        }
-        // Else we are not a goalie but we've already kicked. Current behaviour is to do nothing.
-        else {
-            stand_still();
-            currentState = Behaviour::State::SHOOTOUT;
         }
     }
 
@@ -406,16 +404,7 @@ namespace module::behaviour::strategy {
 
             if (NUClear::clock::now() - ball_last_measured < cfg.ball_last_seen_max_time) {
                 // Ball has been seen recently
-                if (distance_to_ball < cfg.kicking_distance_threshold && angle_to_ball < cfg.kicking_angle_threshold) {
-                    // Ball is close enough and in the correct direction to kick
-                    log<NUClear::DEBUG>("We are close to the ball, kick it");
-                    emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
-                    log<NUClear::DEBUG>("Kicked");
-                }
-                else {
-                    // Request walk planner to walk to the ball
-                    play();
-                }
+                play();
                 currentState = Behaviour::State::WALK_TO_BALL;
             }
             else {
@@ -500,7 +489,15 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::play() {
-        emit(std::make_unique<MotionCommand>(utility::behaviour::BallApproach()));
+        if (distance_to_ball < cfg.kicking_distance_threshold && angle_to_ball < cfg.kicking_angle_threshold) {
+            // Ball is close enough and in the correct direction to kick
+            log<NUClear::DEBUG>("We are close to the ball, kick it");
+            emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
+        }
+        else {
+            // Request walk planner to walk to the ball
+            emit(std::make_unique<MotionCommand>(utility::behaviour::BallApproach()));
+        }
     }
 
     Eigen::Vector2d SoccerStrategy::get_kick_plan(const Field& field, const FieldDescription& field_description) {
