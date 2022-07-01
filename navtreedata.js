@@ -44,9 +44,6 @@ var NAVTREE =
         [ "Enumerator", "functions_eval.html", null ]
       ] ]
     ] ],
-    [ "Files", "files.html", [
-      [ "File List", "files.html", "files_dup" ]
-    ] ],
     [ "Examples", "examples.html", "examples" ]
   ] ]
 ];
@@ -54,19 +51,17 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 ".html",
-"classCM740_1_1CM740Data.html#a2df133e8f4aedc26c26ea45a04c676f9a77b6cdfa4ce2d38f3caf4728d8416e4f",
-"classmodule_1_1behaviour_1_1skills_1_1HeadBehaviourSoccer.html#a9506ec9e26f8ec548959ca6d9402b0f0",
-"classmodule_1_1extension_1_1Director.html#ad8e40bc7359663f1ee81654d3156fcb9",
-"classmodule_1_1motion_1_1IKKick.html#a4b38b46c0ba655fe5b9097543ee003cc",
-"classmodule_1_1platform_1_1Webots.html#ac0568dd06b9e0beaa729bf7064d882d8",
-"classutility_1_1math_1_1geometry_1_1Quad.html#aa6eb5441f1ef87e1c9d4176c4877d936",
-"dir_5ad6abd53cc5dfb828c0666582684728.html",
-"shared_2utility_2platform_2RawSensors_8hpp_source.html",
-"structextension_1_1behaviour_1_1Provide.html",
-"structmodule_1_1input_1_1NatNet_1_1Packet.html#a3499a1260b028b390cc150eb0e417b20aa2131922388c17ef97618dd682206ab9",
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1Compressor.html#a0aaa4a6f8a1336de68899b84075eb792",
-"structutility_1_1behaviour_1_1RegisterAction.html#ab8005b448ffe936ac91f18dc9a48b969",
-"structutility_1_1type__traits_1_1has__timestamp.html"
+"classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61eaa4edd309c2d1868e177776defa3f7db8",
+"classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html#ae74a62fc96cbff97f61273d7412988a7",
+"classmodule_1_1input_1_1VirtualLoadSensor.html#a08c0aa5e013d31e1d0d4f4b116bfba35a596bc8d6b30385bf44bfc22ca1f4fc6a",
+"classmodule_1_1motion_1_1SixDOFFootController.html#a1561d52b26c87766387ebcacac2d0c77",
+"classmodule_1_1vision_1_1BallDetector.html#ad4acc293ec65745618f524c175b42a8d",
+"classutility_1_1motion_1_1splines_1_1SplineContainer.html#a0cddc595219dde123c9a265f02453895",
+"structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html#ad02dc9609e3af81f7b92b854a8f5f438",
+"structmodule_1_1behaviour_1_1skills_1_1Getup_1_1Config.html#a3e284f969dbff817329cf9620ae8aef4",
+"structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Noise_1_1Process.html",
+"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#aedae29c5b347dfcb84afeafbf4ed4586",
+"structutility_1_1input_1_1ServoID.html#af184f60da6834cd3cb9211fa7ea1b6d4"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
