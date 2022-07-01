@@ -126,9 +126,9 @@ namespace module::behaviour::strategy {
 
             cfg.walk_to_ready_time = config["walk_to_ready_time"].as<int>();
 
-            cfg.kicking_distance = config["kicking_distance"].as<float>();
+            cfg.kicking_distance_threshold = config["kicking_distance_threshold "].as<float>();
 
-            cfg.kicking_angle = config["kicking_angle"].as<float>();
+            cfg.kicking_angle_threshold = config["kicking_angle_threshold"].as<float>();
         });
 
         on<Trigger<Field>, With<FieldDescription>>().then(
@@ -147,11 +147,9 @@ namespace module::behaviour::strategy {
                 Eigen::Affine3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
                 rBTt = Htc * rBCc;
 
-                if (std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2)) < 1.0
-                    && !std::isnan(std::asin(std::abs(rBTt.y()) / std::abs(rBTt.x())))) {
-                    // TODO(BehaviourTeam): Yeesh, needs work...
-                    distance_to_ball = std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2));
-                }
+                distance_to_ball = std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2));
+
+                angle_to_ball = std::asin(std::abs(rBTt.y()) / std::abs(rBTt.x()));
             }
             else {
                 rBTt = Eigen::Vector3f::Zero();
@@ -396,33 +394,28 @@ namespace module::behaviour::strategy {
         }
         else {
 
-            if (!std::isnan(std::asin(std::abs(rBTt.y()) / std::abs(rBTt.x())))) {
-                log<NUClear::WARN>("Distance to ball :",
-                                   distance_to_ball,
-                                   " with expected kicking distance: ",
-                                   cfg.kicking_distance);
+            log<NUClear::DEBUG>("Distance to ball :",
+                                distance_to_ball,
+                                " with expected kicking distance: ",
+                                cfg.kicking_distance_threshold);
 
-                log<NUClear::WARN>("Angle to ball",
-                                   std::asin(std::abs(rBTt.y()) / std::abs(rBTt.x())),
-                                   " with expected kicking angle: ",
-                                   cfg.kicking_angle);
-            }
-
-            if (distance_to_ball < cfg.kicking_distance
-                && std::asin(std::abs(rBTt.y()) / std::abs(rBTt.x())) < cfg.kicking_angle) {
-
-                log<NUClear::WARN>("We are close to the ball, kick it");
-
-
-                emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
-
-                log<NUClear::WARN>("Kicked");
-            }
-
+            log<NUClear::DEBUG>("Angle to ball",
+                                angle_to_ball,
+                                " with expected kicking angle: ",
+                                cfg.kicking_angle_threshold);
 
             if (NUClear::clock::now() - ball_last_measured < cfg.ball_last_seen_max_time) {
-                // Ball has been seen recently, request walk planner to walk to the ball
-                play();
+                // Ball has been seen recently
+                if (distance_to_ball < cfg.kicking_distance_threshold && angle_to_ball < cfg.kicking_angle_threshold) {
+                    // Ball is close enough and in the correct direction to kick
+                    log<NUClear::DEBUG>("We are close to the ball, kick it");
+                    emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
+                    log<NUClear::DEBUG>("Kicked");
+                }
+                else {
+                    // Request walk planner to walk to the ball
+                    play();
+                }
                 currentState = Behaviour::State::WALK_TO_BALL;
             }
             else {
