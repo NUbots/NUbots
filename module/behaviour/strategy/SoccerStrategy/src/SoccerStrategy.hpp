@@ -59,7 +59,7 @@ namespace module::behaviour::strategy {
             bool force_penalty_shootout      = false;
             int walk_to_ready_time           = 0;
             float kicking_distance_threshold = 0.0f;
-            float kicking_angle _threshold   = 0.0f;
+            float kicking_angle_threshold    = 0.0f;
         } cfg;
 
         /// @brief Distance to the ball from robot torso
