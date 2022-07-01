@@ -98,9 +98,9 @@ namespace module::behaviour::skills {
                         Eigen::Vector2d angles               = screenAngularFromObjectDirection(rBCc);
                         std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
                         command->yaw                         = angles[0];
-                        command->pitch = angles[1] - M_PI / 6;  // TODO(BehaviourTeam): magic number, this is a hack
-                        command->robot_space = true;
-                        command->smooth      = true;
+                        command->pitch                       = angles[1];
+                        command->robot_space                 = true;
+                        command->smooth                      = true;
                         emit(std::move(command));
                     }
                     else {
