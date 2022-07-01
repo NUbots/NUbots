@@ -1,5 +1,4 @@
 name: 'Doxygen GitHub Pages Deploy Action'
-description: 'Deploy Doxygen to github pages'
 on: [push]
 permissions:
   contents: write
