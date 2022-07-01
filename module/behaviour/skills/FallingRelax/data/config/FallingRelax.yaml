@@ -1,7 +1,7 @@
 # Common
 log_level: WARN
 relax_fall_priority: 99
-falling_angle: 0.785 # 0.611
+falling_angle: 0.611
 
 # Old
 falling_acceleration: 8

@@ -164,63 +164,79 @@ namespace module::behaviour::skills {
             [this](const std::set<ServoID>& /* servos */) { emit(std::make_unique<KillFallingRelax>()); }}));
 
         // ERROR IS HERE ON LINE 167
-        on<Last<5, Trigger<Sensors>>, Single>().then("FallingRelax Fallen Check",
-            [this](const std::list<std::shared_ptr<const Sensors>>& sensors) {
+        //on<Last<5, Trigger<Sensors>>>().then("FallingRelax Fallen Check",
+          //  [this](const std::list<std::shared_ptr<const Sensors>>& sensors) {
         //on<Last<5, Trigger<Sensors>>, Single>([this](const std::list<std::shared_ptr<const Sensors>>& sensors) {
             // DELTETE AFTER TESTING SHOULD RELAX AS SOON AS ./robocup IS STARTED.
             // MAKE SURE YOU ARE HOLDING THE ROBOT AT THE SAME TIME.
             // REPLACE WITH LINE 167 WITH LINE 53 TO SEE EXPECTED BEHAVIOUR.
             // LINE 53 DOES NOT WORK WITH THE CODE WITH LINES 174 TO 204.
             //update_priority(cfg.relax_fall_priority);
-            double magnitude = 0;
-            Eigen::Vector3d acc_reading = Eigen::Vector3d::Zero();
-            for (const auto& sensor : sensors) {
-                    magnitude += sensor->accelerometer.norm();
-                    acc_reading += sensor->accelerometer.cast<double>();
-            }
-            acc_reading = (acc_reading / double(sensors.size())).normalized();
-            NUClear::log<NUClear::DEBUG>("Magnitude is ", magnitude/sensors.size());
-            NUClear::log<NUClear::DEBUG>("Angle ", fabs(sensors.back()->Htw(2, 2)));
-            NUClear::log<NUClear::DEBUG>("Angle from accel", std::acos(Eigen::Vector3d::UnitZ().dot(acc_reading)));
+
+        on<Trigger<Sensors>>().then("Getup Fallen Check", [this](const Sensors& sensors) {
+            //Transform to torso {t} from world {w} space
+            Eigen::Matrix4d Hwt = sensors.Htw.inverse();
+            // Basis Z vector of torso {t} in world {w} space
+            Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
+            // Basis X vector of torso {t} in world {w} space
+            //Eigen::Vector3d uXTw = Hwt.block(0, 0, 3, 1);
+
+            // double magnitude = 0;
+            // Eigen::Vector3d acc_reading = Eigen::Vector3d::Zero();
+            // for (const auto& sensor : sensors) {
+            //         magnitude += sensor->accelerometer.norm();
+            //         acc_reading += sensor->accelerometer.cast<double>();
+            // }
+            // acc_reading = (acc_reading / double(sensors.size())).normalized();
+            // magnitude  /= sensors.size();
+            // NUClear::log<NUClear::DEBUG>("Magnitude is ", magnitude/sensors.size());
+            // NUClear::log<NUClear::DEBUG>("Angle ", fabs(sensors.back()->Htw(2, 2)));
+            NUClear::log<NUClear::DEBUG>("Angle T to W", std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)));
 
 
             //if (!relaxed && !sensors.empty() && std::acos(Eigen::Vector3d::UnitZ().dot(acc_reading)) > 0.6) {
-            if (!relaxed && !sensors.empty() && fabs(sensors.back()->Htw(2, 2)) < cfg.falling_angle) {
+            //if (!relaxed && !sensors.empty() && fabs(sensors.back()->Htw(2, 2)) < cfg.falling_angle) {
+            //if (!relaxed && magnitude <= cfg.falling_acceleration) {
+            if (!relaxed && std::acos(Eigen::Vector3d::UnitZ().dot(uZTw) > cfg.falling_angle)) {
                 // We might be falling, check the accelerometer
                 //double magnitude = 0;
 
                 NUClear::log<NUClear::DEBUG>("Checking if falling");
-                NUClear::log<NUClear::DEBUG>("Htw is ", sensors.back()->Htw(2, 2), "Angle from acceration is ", acc_reading);
+                //NUClear::log<NUClear::DEBUG>("Htw is ", sensors.back()->Htw(2, 2));
+                //NUClear::log<NUClear::DEBUG>("Htw is ", sensors.back()->Htw(2, 2), "Angle from acceration is ", acc_reading);
 
-                for (const auto& sensor : sensors) {
-                    magnitude += sensor->accelerometer.norm();
-                }
+                //for (const auto& sensor : sensors) {
+                   // magnitude += sensor->accelerometer.norm();
+                //}
 
-                magnitude /= sensors.size();
-                NUClear::log<NUClear::DEBUG>("Magnitude is ", magnitude, " Config Falling acceration is ", cfg.falling_acceleration);
-
-               // if (magnitude > cfg.falling_acceleration) {
+                //magnitude /= sensors.size();
+                //NUClear::log<NUClear::DEBUG>("Magnitude is ", magnitude);//, " Config Falling acceration is ", cfg.falling_acceleration);
+                double n = sensors.accelerometer.norm();
+                //if (magnitude >= cfg.falling_acceleration) {
+                //if (fabs(sensors.back()->Htw(2, 2)) < cfg.falling_angle) {
+               // if (n < cfg.falling_acceleration) {
                     relaxed = true;
-                    NUClear::log<NUClear::DEBUG>("IF Magnitude ", magnitude, " is greater than ", cfg.falling_acceleration, " YES it is");
                     update_priority(cfg.relax_fall_priority);
+                    NUClear::log<NUClear::DEBUG>("Acceleration is ", n);
+                    //NUClear::log<NUClear::DEBUG>("Htw is ", sensors.back()->Htw(2, 2), " less than ", cfg.falling_angle);
                 //}
             }
-            else if (relaxed) {
+            //else if (relaxed) {
                 // We might be recovered, check the accelerometer
                 //double magnitude = 0;
 
-                for (const auto& sensor : sensors) {
-                    magnitude += sensor->accelerometer.norm();
-                }
+                //for (const auto& sensor : sensors) {
+                    //magnitude += sensor->accelerometer.norm();
+                //}
 
-                magnitude /= sensors.size();
+                //magnitude /= sensors.size();
 
                 // See if we recover
-                if (magnitude > cfg.recovery_acceleration[0] && magnitude < cfg.recovery_acceleration[1]) {
-                    relaxed = false;
-                    update_priority(0);
-                }
-            }
+                //if (magnitude > cfg.recovery_acceleration[0] && magnitude < cfg.recovery_acceleration[1]) {
+                  //  relaxed = false;
+                    //update_priority(0);
+                //}
+            //}
         });
         on<Trigger<ExecuteFallingRelax>, Single>().then("Execute Relax", [this]() {
             relaxed = true;

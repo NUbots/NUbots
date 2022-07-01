@@ -21,7 +21,7 @@
 #define MODULES_BEHAVIOUR_REFLEX_FALLINGRELAX_HPP
 
 #include <nuclear>
-#include <atomic>
+
 
 namespace module::behaviour::skills {
 
@@ -48,7 +48,7 @@ namespace module::behaviour::skills {
         } cfg;
 
         /// @brief Bool to indicate if the robot is currently relaxed
-        std::atomic_bool relaxed = false;
+        bool relaxed = false;
 
         /// @brief Updates the priority of the module by emitting an ActionPriorities message
         /// @param priority The priority used in the ActionPriorities message
