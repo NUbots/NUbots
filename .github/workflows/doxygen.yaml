@@ -13,7 +13,7 @@ jobs:
         run: sudo apt-get install doxygen -y
 
       - name: Install and Build 🔧
-        run: Doxygen .Doxyfile
+        run: doxygen .Doxyfile
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
