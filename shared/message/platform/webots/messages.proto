@@ -92,8 +92,6 @@ message OdometryGroundTruth {
     /// Affine3d transform from odometry (world) space to the robot (torso) space.
     /// It measures the world in robot space
     mat4 Htw = 2;
-    // /// Torso to Centre of Mass (CoM) in torso space
-    // vec4 rMTt = 17;
 }
 
 message SensorMeasurements {
