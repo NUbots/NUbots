@@ -9,7 +9,7 @@ file(GLOB_RECURSE rolefiles "${role_source_dir}/*.role")
 # exist
 get_cmake_property(vars CACHE_VARIABLES)
 foreach(var ${vars})
-  if(var MATCHES "^ROLE_[a-zA-Z0-9]+([/]?[a-zA-Z0-9]+)*")
+  if(var MATCHES "^ROLE_[a-zA-Z0-9]+")
     set("BACKUP_${var}" ${${var}})
     unset(${var} CACHE)
   endif()
@@ -25,6 +25,7 @@ foreach(rolefile ${rolefiles})
     # Roles may be within subfolders - get the subfolder and name
     file(RELATIVE_PATH role_folder ${role_source_dir} ${rolefile})
     cmake_path(REMOVE_EXTENSION role_folder)
+    string(REPLACE "/" "." role_folder ${role_folder})
 
     # If we had a backup as to if this role is enabled use it. Otherwise default to true.
     if(DEFINED "BACKUP_ROLE_${role_folder}")
@@ -40,9 +41,10 @@ endforeach(rolefile)
 get_cmake_property(vars CACHE_VARIABLES)
 unset(NUCLEAR_ROLES CACHE)
 foreach(var ${vars})
-  if(var MATCHES "^ROLE_[a-zA-Z0-9]+([/]?[a-zA-Z0-9]+)*")
+  if(var MATCHES "^ROLE_[a-zA-Z0-9]+")
     if(${var})
       string(SUBSTRING ${var} 5 -1 role_folder)
+      string(REPLACE "." "/" role_folder ${role_folder})
       set(NUCLEAR_ROLES
           ${NUCLEAR_ROLES} ${role_folder}
           CACHE INTERNAL "A list of the roles that are enabled to be built." FORCE
