@@ -141,7 +141,7 @@ namespace module::behaviour::strategy {
 
                 distance_to_ball = std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2));
 
-                angle_to_ball = std::asin(std::abs(rBTt.y()) / std::abs(rBTt.x()));
+                angle_to_ball = std::abs(std::atan2(rBTt.y(), rBTt.x()));
             }
         });
 
