@@ -64,7 +64,14 @@ def run(target, local, user, config, toolchain, **kwargs):
     build_dir = b.binary_dir
 
     cprint("Installing binaries to " + target_binaries_dir, "blue", attrs=["bold"])
-    files = glob.glob(os.path.join(build_dir, "bin", "*"))
+
+    # Get all of the binaries in the bin folder
+    files = []
+    for dirpath, _, filenames in os.walk(os.path.join(build_dir, "bin")):
+        if not "lib" in dirpath:  # lib folder contains libraries, not binaries
+            for filename in filenames:
+                files.append(os.path.join(dirpath, filename))
+
     subprocess.run(["rsync", "-avPl", "--checksum", "-e ssh"] + files + [target_binaries_dir])
 
     if toolchain:
