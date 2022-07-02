@@ -93,7 +93,7 @@ export class VisionSimulator extends Simulator {
     const time = periodic(10)
     const t = time / 10
     const Hcw = new Matrix4().makeRotationZ(2 * Math.PI * t)
-    const axis = new Vector3(10, 1, 0)
+    const uBCc = new Vector3(10, 1, 0)
       .normalize()
       .applyMatrix4(new Matrix4().makeRotationX(2 * Math.PI * t))
     return {
@@ -104,13 +104,11 @@ export class VisionSimulator extends Simulator {
         Hcw: toProtoMat44(Hcw),
         balls: [
           {
-            cone: {
-              axis,
-              radius: Math.cos((Math.PI / 16) * (Math.cos(2 * Math.PI * t) / 5 + 1)),
-            },
+            uBCc,
+            radius: Math.cos((Math.PI / 16) * (Math.cos(2 * Math.PI * t) / 5 + 1)),
             measurements: [
               {
-                type: MeasurementType.WIDTH_BASED,
+                type: MeasurementType.ANGULAR,
                 srBCc: new Vector3(1, 0, 0),
               },
             ],
