@@ -123,15 +123,8 @@ namespace module::behaviour::planning {
         // Freq should be equal to the main loop in soccer strategy. TODO (Bryce Tuppurainen): Potentially
         // change this value to a define in an included header if this will be used again for added design cohesion if
         // this will be something we change in future
-        on<Every<30, Per<std::chrono::seconds>>, With<WantsToKick>, Sync<SimpleWalkPathPlanner>>().then(
-            [this](const WantsToKick& wants_to) {
-                //  Stop the walk engine and path planner if the KickPlanner module emits a WantsToKick message saying
-                //  it is executing a kick
-                if (wants_to.kick) {
-                    emit(std::make_unique<StopCommand>(subsumption_id));
-                    return;
-                }
-
+        on<Every<30, Per<std::chrono::seconds>>, Sync<SimpleWalkPathPlanner>>().then(
+            [this]() {
                 switch (static_cast<int>(latest_command.type.value)) {
                     case message::behaviour::MotionCommand::Type::STAND_STILL:
                         emit(std::make_unique<StopCommand>(subsumption_id));

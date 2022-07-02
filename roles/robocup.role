@@ -42,7 +42,7 @@ nuclear_role(
   behaviour::skills::KickScript
   behaviour::skills::HeadBehaviourSoccer
   behaviour::skills::Stand
-  behaviour::planning::KickPlanner
+  # behaviour::planning::KickPlanner
   behaviour::planning::SimpleWalkPathPlanner
   behaviour::strategy::SoccerStrategy
   behaviour::skills::Nod

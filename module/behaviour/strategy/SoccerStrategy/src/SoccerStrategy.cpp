@@ -52,8 +52,6 @@ namespace module::behaviour::strategy {
 
     using message::behaviour::Behaviour;
     using message::behaviour::FieldTarget;
-    using message::behaviour::KickPlan;
-    using KickType = message::behaviour::KickPlan::KickType;
     using message::behaviour::MotionCommand;
     using message::behaviour::Nod;
     using message::behaviour::SoccerObjectPriority;
@@ -132,12 +130,6 @@ namespace module::behaviour::strategy {
 
             cfg.rBTt_smoothing_factor = config["rBTt_smoothing_factor"].as<float>();
         });
-
-        on<Trigger<Field>, With<FieldDescription>>().then(
-            [this](const Field& field, const FieldDescription& field_description) {
-                Eigen::Vector2d kick_target = get_kick_plan(field, field_description);
-                emit(std::make_unique<KickPlan>(KickPlan(kick_target, kick_type)));
-            });
 
         on<Trigger<VisionBalls>, With<Sensors>>().then([this](const VisionBalls& balls, const Sensors& sensors) {
             if (balls.balls.size() > 0) {
