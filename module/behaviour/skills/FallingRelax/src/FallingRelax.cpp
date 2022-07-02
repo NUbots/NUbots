@@ -1,3 +1,154 @@
+// /*
+//  * This file is part of the NUbots Codebase.
+//  *
+//  * The NUbots Codebase is free software: you can redistribute it and/or modify
+//  * it under the terms of the GNU General Public License as published by
+//  * the Free Software Foundation, either version 3 of the License, or
+//  * (at your option) any later version.
+//  *
+//  * The NUbots Codebase is distributed in the hope that it will be useful,
+//  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  * GNU General Public License for more details.
+//  *
+//  * You should have received a copy of the GNU General Public License
+//  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+//  *
+//  * Copyright 2013 NUbots <nubots@nubots.net>
+//  */
+
+// #include "FallingRelax.hpp"
+
+// #include <cmath>
+
+// #include "extension/Configuration.hpp"
+// #include "extension/Script.hpp"
+
+// #include "message/behaviour/ServoCommand.hpp"
+// #include "message/input/Sensors.hpp"
+
+// #include "utility/behaviour/Action.hpp"
+// #include "utility/input/LimbID.hpp"
+// #include "utility/input/ServoID.hpp"
+
+// namespace module::behaviour::skills {
+
+//     // internal only callback messages to start and stop our action
+//     struct Falling {};
+//     struct KillFalling {};
+
+//     using extension::Configuration;
+//     using extension::ExecuteScriptByName;
+
+//     using message::input::Sensors;
+
+//     using utility::behaviour::ActionPriorities;
+//     using utility::behaviour::RegisterAction;
+//     using utility::input::LimbID;
+//     using utility::input::ServoID;
+
+//     FallingRelax::FallingRelax(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+
+//         // do a little configurating
+//         on<Configuration>("FallingRelax.yaml").then([this](const Configuration& config) {
+//             log_level          = config["log_level"].as<NUClear::LogLevel>();
+//             // Store falling angle as a cosine so we can compare it directly to the z axis value
+//             const auto fallingAngle = config["FALLING_ANGLE"].as<float>();
+//             FALLING_ANGLE           = std::cos(fallingAngle);
+
+//             // When falling the acceleration should drop below this value
+//             FALLING_ACCELERATION = config["FALLING_ACCELERATION"].as<float>();
+
+//             // Once the acceleration has stabalized, we are no longer falling
+//             RECOVERY_ACCELERATION = config["RECOVERY_ACCELERATION"].as<std::vector<float>>();
+
+//             PRIORITY = config["PRIORITY"].as<float>();
+//             log<NUClear::INFO>("FallingRelax - Config");
+//         });
+
+// //         on<Trigger<Sensors>>([this](const Sensors& sensors) {
+//             log<NUClear::INFO>("FallingRelax - H1");
+//             if (!falling && !sensors.empty() && fabs(sensors.back()->Htw(2, 2)) < FALLING_ANGLE) {
+
+//                 // We might be falling, check the accelerometer
+//                 double magnitude = 0;
+
+//                 for (const auto& sensor : sensors) {
+//                     magnitude += sensor->accelerometer.norm();
+//                 }
+
+//                 magnitude /= sensors.size();
+
+//                 if (magnitude < FALLING_ACCELERATION) {
+//                     falling = true;
+//                     updatePriority(PRIORITY);
+//                 }
+//             }
+//             else if (falling) {
+//                 // We might be recovered, check the accelerometer
+//                 double magnitude = 0;
+
+//                 for (const auto& sensor : sensors) {
+//                     magnitude += sensor->accelerometer.norm();
+//                 }
+
+//                 magnitude /= sensors.size();
+
+//                 // See if we recover
+//                 if (magnitude > RECOVERY_ACCELERATION[0] && magnitude < RECOVERY_ACCELERATION[1]) {
+//                     falling = false;
+//                     updatePriority(0);
+//                 }
+//             }
+//         });
+
+//         on<Trigger<Falling>>().then([this] {
+//             NUClear::log<NUClear::INFO>("FallingRelax - H2");
+//             emit(std::make_unique<ExecuteScriptByName>(id, "Relax.yaml"));
+//         });
+
+//         on<Trigger<KillFalling>>().then([this] {
+//             falling = false;
+//             updatePriority(0);
+//         });
+
+//         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
+//             id,
+//             "Falling Relax",
+//             {std::pair<float, std::set<LimbID>>(
+//                 0.0f,
+//                 {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
+//             [this](const std::set<LimbID>& /*unused*/) { emit(std::make_unique<Falling>()); },
+//             [this](const std::set<LimbID>& /*unused*/) { emit(std::make_unique<KillFalling>()); },
+//             [](const std::set<ServoID>& /*unused*/) {
+//                 // Ignore
+//             }}));
+//     }
+
+//     void FallingRelax::updatePcfg.fallen_angle   = config["fallen_angle"].as<float>();
+//             cfg.getup_priority = config["getup_priority"].as<float>();
+
+
+// /*
+//  * This file is part of the NUbots Codebase.
+//  *
+//  * The NUbots Codebase is free software: you can redistribute it and/or modify
+//  * it under the terms of the GNU General Public License as published by
+//  * the Free Software Foundation, either version 3 of the License, or
+//  * (at your option) any later version.
+//  *
+//  * The NUbots Codebase is distributed in the hope that it will be useful,
+//  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  * GNU General Public License for more details.
+//  *
+//  * You should have received a copy of the GNU General Public License
+//  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+//  *
+//  * Copyright 2013 NUbots <nubots@nubots.net>
+//  */
+
+
 // #include "FallingRelax.hpp"
 
 // #include <Eigen/Core>
@@ -144,12 +295,12 @@ namespace module::behaviour::skills {
         // do a little configurating
         on<Configuration>("FallingRelax.yaml").then([this](const Configuration& config) {
             log<NUClear::INFO>("FallingRelax - Config");
-            log_level                 = config["log_level"].as<NUClear::LogLevel>();
+            log_level          = config["log_level"].as<NUClear::LogLevel>();
             const auto fallingAngle   = config["falling_angle"].as<float>();
-            cfg.falling_angle         = std::cos(fallingAngle);
-            cfg.falling_acceleration  = config["falling_acceleration"].as<float>();
-            cfg.recovery_acceleration = config["recovery_acceleration"].as<std::vector<float>>();
-            cfg.relax_fall_priority   = config["relax_fall_priority"].as<float>();
+            cfg.falling_angle   = std::cos(fallingAngle);
+            cfg.falling_acceleration   = config["falling_acceleration"].as<float>();
+            cfg.recovery_acceleration   = config["recovery_acceleration"].as<std::vector<float>>();
+            cfg.relax_fall_priority = config["relax_fall_priority"].as<float>();
 
         });
 
@@ -163,80 +314,59 @@ namespace module::behaviour::skills {
             [this](const std::set<LimbID>& /* limbs */) { emit(std::make_unique<KillFallingRelax>()); },
             [this](const std::set<ServoID>& /* servos */) { emit(std::make_unique<KillFallingRelax>()); }}));
 
-        // ERROR IS HERE ON LINE 167
-        //on<Last<5, Trigger<Sensors>>>().then("FallingRelax Fallen Check",
-          //  [this](const std::list<std::shared_ptr<const Sensors>>& sensors) {
-        //on<Last<5, Trigger<Sensors>>, Single>([this](const std::list<std::shared_ptr<const Sensors>>& sensors) {
-            // DELTETE AFTER TESTING SHOULD RELAX AS SOON AS ./robocup IS STARTED.
-            // MAKE SURE YOU ARE HOLDING THE ROBOT AT THE SAME TIME.
-            // REPLACE WITH LINE 167 WITH LINE 53 TO SEE EXPECTED BEHAVIOUR.
-            // LINE 53 DOES NOT WORK WITH THE CODE WITH LINES 174 TO 204.
-            //update_priority(cfg.relax_fall_priority);
+        on<Last<5, Trigger<Sensors>>, Single>().then("FallingRelax Fallen Check",
+            [this](const std::list<std::shared_ptr<const Sensors>>& sensors) {
 
-        on<Trigger<Sensors>>().then("Getup Fallen Check", [this](const Sensors& sensors) {
             //Transform to torso {t} from world {w} space
-            Eigen::Matrix4d Hwt = sensors.Htw.inverse();
+            Eigen::Matrix4d Hwt = sensors.back()->Htw.inverse();
             // Basis Z vector of torso {t} in world {w} space
             Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
-            // Basis X vector of torso {t} in world {w} space
-            //Eigen::Vector3d uXTw = Hwt.block(0, 0, 3, 1);
 
-            // double magnitude = 0;
-            // Eigen::Vector3d acc_reading = Eigen::Vector3d::Zero();
-            // for (const auto& sensor : sensors) {
-            //         magnitude += sensor->accelerometer.norm();
-            //         acc_reading += sensor->accelerometer.cast<double>();
-            // }
-            // acc_reading = (acc_reading / double(sensors.size())).normalized();
-            // magnitude  /= sensors.size();
-            // NUClear::log<NUClear::DEBUG>("Magnitude is ", magnitude/sensors.size());
-            // NUClear::log<NUClear::DEBUG>("Angle ", fabs(sensors.back()->Htw(2, 2)));
-            NUClear::log<NUClear::DEBUG>("Angle T to W", std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)));
+            double magnitude = 0;
+            for (const auto& sensor : sensors) {
+                    magnitude += sensor->accelerometer.norm();
+                }
+            magnitude /= sensors.size();
 
+            NUClear::log<NUClear::DEBUG>("Gravity is ", magnitude);
+            NUClear::log<NUClear::DEBUG>("Z angle is ", Eigen::Vector3d::UnitZ().dot(uZTw));
 
-            //if (!relaxed && !sensors.empty() && std::acos(Eigen::Vector3d::UnitZ().dot(acc_reading)) > 0.6) {
             //if (!relaxed && !sensors.empty() && fabs(sensors.back()->Htw(2, 2)) < cfg.falling_angle) {
-            //if (!relaxed && magnitude <= cfg.falling_acceleration) {
-            if (!relaxed && std::acos(Eigen::Vector3d::UnitZ().dot(uZTw) > cfg.falling_angle)) {
+            if (!relaxed && !sensors.empty() && acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > cfg.falling_angle) {
+                NUClear::log<NUClear::DEBUG>("Inside");
+
                 // We might be falling, check the accelerometer
-                //double magnitude = 0;
+                double magnitude = 0;
 
-                NUClear::log<NUClear::DEBUG>("Checking if falling");
-                //NUClear::log<NUClear::DEBUG>("Htw is ", sensors.back()->Htw(2, 2));
-                //NUClear::log<NUClear::DEBUG>("Htw is ", sensors.back()->Htw(2, 2), "Angle from acceration is ", acc_reading);
+                for (const auto& sensor : sensors) {
+                    magnitude += sensor->accelerometer.norm();
+                }
 
-                //for (const auto& sensor : sensors) {
-                   // magnitude += sensor->accelerometer.norm();
-                //}
+                magnitude /= sensors.size();
 
-                //magnitude /= sensors.size();
-                //NUClear::log<NUClear::DEBUG>("Magnitude is ", magnitude);//, " Config Falling acceration is ", cfg.falling_acceleration);
-                double n = sensors.accelerometer.norm();
-                //if (magnitude >= cfg.falling_acceleration) {
-                //if (fabs(sensors.back()->Htw(2, 2)) < cfg.falling_angle) {
-               // if (n < cfg.falling_acceleration) {
+                if (magnitude < cfg.falling_acceleration) {
                     relaxed = true;
                     update_priority(cfg.relax_fall_priority);
-                    NUClear::log<NUClear::DEBUG>("Acceleration is ", n);
-                    //NUClear::log<NUClear::DEBUG>("Htw is ", sensors.back()->Htw(2, 2), " less than ", cfg.falling_angle);
-                //}
+                    NUClear::log<NUClear::DEBUG>("Magnitude is less than gravity");
+                    NUClear::log<NUClear::DEBUG>("Gravity magnitude was ", magnitude);
+                }
             }
-            //else if (relaxed) {
-                // We might be recovered, check the accelerometer
-                //double magnitude = 0;
+            // else if (relaxed && Eigen::Vector3d::UnitZ().dot(uZTw) < cfg.falling_angle) {
+            //     // We might be recovered, check the accelerometer
+            //     double magnitude = 0;
 
-                //for (const auto& sensor : sensors) {
-                    //magnitude += sensor->accelerometer.norm();
-                //}
+            //     for (const auto& sensor : sensors) {
+            //         magnitude += sensor->accelerometer.norm();
+            //     }
 
-                //magnitude /= sensors.size();
+            //     magnitude /= sensors.size();
 
-                // See if we recover
-                //if (magnitude > cfg.recovery_acceleration[0] && magnitude < cfg.recovery_acceleration[1]) {
-                  //  relaxed = false;
-                    //update_priority(0);
-                //}
-            //}
+            //     // See if we recover
+            //     if (magnitude > cfg.recovery_acceleration[0] && magnitude < cfg.recovery_acceleration[1]) {
+            //         relaxed = false;
+            //         update_priority(0);
+            //     }
+            // }
         });
         on<Trigger<ExecuteFallingRelax>, Single>().then("Execute Relax", [this]() {
             relaxed = true;
