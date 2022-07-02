@@ -151,9 +151,6 @@ namespace module::behaviour::strategy {
 
                 angle_to_ball = std::asin(std::abs(rBTt.y()) / std::abs(rBTt.x()));
             }
-            else {
-                rBTt = Eigen::Vector3f::Zero();
-            }
         });
 
         on<Trigger<VisionGoals>>().then([this](const VisionGoals& goals) {
