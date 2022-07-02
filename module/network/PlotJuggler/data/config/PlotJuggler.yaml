@@ -1,7 +1,10 @@
-log_level: WARN
+log_level: INFO
 
 # Set to true to forward DataPoint messages to PlotJuggler
 forward_datapoints: true
+
+# Set to true to generate and emit sample datapoints for testing
+send_debug_waves: true
 
 # Config for the PlotJuggler UDP server
 udp_server:

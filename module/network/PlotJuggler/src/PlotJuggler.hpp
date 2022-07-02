@@ -17,9 +17,6 @@ namespace module::network {
         /// Used to normalise timestamps in forwarded DataPoint messages.
         long start_time_ms;
 
-        /// @brief Whether or not forwarding of DataPoint messages to PlotJuggler is enabled
-        bool forward_datapoints;
-
         /// @brief The robot's current hostname (included in data sent, to enable filtering)
         std::string hostname;
 
@@ -28,6 +25,12 @@ namespace module::network {
 
         /// @brief The port of the PlotJuggler UDP server
         int send_port;
+
+        /// @brief Handle to the reaction that forwards DataPoints to PlotJuggler
+        ReactionHandle forwarder_reaction{};
+
+        /// @brief Handle to the reaction that generates debug waves for testing PlotJuggler connection
+        ReactionHandle debug_waves_reaction{};
 
         /// @brief Convert the given timepoint to a count of milliseconds since Epoch
         static inline long toMillisecondsSinceEpoch(NUClear::clock::time_point timepoint) {
