@@ -129,6 +129,8 @@ namespace module::behaviour::strategy {
             cfg.kicking_distance_threshold = config["kicking_distance_threshold"].as<float>();
 
             cfg.kicking_angle_threshold = config["kicking_angle_threshold"].as<float>();
+
+            cfg.rBTt_smoothing_factor = config["rBTt_smoothing_factor"].as<float>();
         });
 
         on<Trigger<Field>, With<FieldDescription>>().then(
@@ -147,9 +149,11 @@ namespace module::behaviour::strategy {
                 Eigen::Affine3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
                 rBTt = Htc * rBCc;
 
-                distance_to_ball = std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2));
+                // Apply exponential filter to rBTt
+                rBTt_smoothed = cfg.rBTt_smoothing_factor * rBTt + (1.0 - cfg.rBTt_smoothing_factor) * rBTt_smoothed;
 
-                angle_to_ball = std::asin(std::abs(rBTt.y()) / std::abs(rBTt.x()));
+                distance_to_ball = std::sqrt(std::pow(rBTt_smoothed.x(), 2) + std::pow(rBTt_smoothed.y(), 2));
+                angle_to_ball    = std::abs(std::atan2(rBTt_smoothed.y(), rBTt_smoothed.x()));
             }
         });
 
@@ -488,7 +492,7 @@ namespace module::behaviour::strategy {
     void SoccerStrategy::play() {
         if (distance_to_ball < cfg.kicking_distance_threshold && angle_to_ball < cfg.kicking_angle_threshold) {
             // Ball is close enough and in the correct direction to kick
-            if (rBTt.y() > 0) {
+            if (rBTt_smoothed.y() > 0) {
                 log<NUClear::DEBUG>("We are close to the ball, kick it left");
                 emit(std::make_unique<KickScriptCommand>(LimbID::LEFT_LEG, KickCommandType::NORMAL));
             }

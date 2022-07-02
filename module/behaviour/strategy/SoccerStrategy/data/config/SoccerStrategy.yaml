@@ -32,3 +32,6 @@ kicking_distance_threshold: 0.55
 
 # Angle from the front to begin kicking the ball (in radians)
 kicking_angle_threshold: 0.2
+
+# Exponential filter smoothing factor on ball position
+rBTt_smoothing_factor: 0.1
