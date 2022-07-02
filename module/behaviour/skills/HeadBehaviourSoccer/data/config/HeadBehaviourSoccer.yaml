@@ -4,7 +4,7 @@ log_level: WARN
 min_yaw: &min_yaw -0.7
 max_yaw: &max_yaw 0.7
 min_pitch: &min_pitch -0.1
-max_pitch: &max_pitch -0.1
+max_pitch: &max_pitch 0.1
 positions:
   [
     [*min_yaw, *max_pitch],
@@ -16,7 +16,7 @@ positions:
   ]
 
 #Minimum time before search starts (milliseconds)
-search_timeout_ms: 10000
+search_timeout_ms: 3000
 
 #Time between switching search positions
-fixation_time_ms: 2000
+fixation_time_ms: 750
