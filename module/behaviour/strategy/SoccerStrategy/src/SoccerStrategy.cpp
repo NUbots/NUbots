@@ -491,8 +491,14 @@ namespace module::behaviour::strategy {
     void SoccerStrategy::play() {
         if (distance_to_ball < cfg.kicking_distance_threshold && angle_to_ball < cfg.kicking_angle_threshold) {
             // Ball is close enough and in the correct direction to kick
-            log<NUClear::DEBUG>("We are close to the ball, kick it");
-            emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
+            if (rBTt.y() > 0) {
+                log<NUClear::DEBUG>("We are close to the ball, kick it left");
+                emit(std::make_unique<KickScriptCommand>(LimbID::LEFT_LEG, KickCommandType::NORMAL));
+            }
+            else {
+                log<NUClear::DEBUG>("We are close to the ball, kick it right");
+                emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
+            }
         }
         else {
             // Request walk planner to walk to the ball
