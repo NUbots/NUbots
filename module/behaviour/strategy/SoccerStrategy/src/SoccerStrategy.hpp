@@ -60,6 +60,7 @@ namespace module::behaviour::strategy {
             int walk_to_ready_time           = 0;
             float kicking_distance_threshold = 0.0f;
             float kicking_angle_threshold    = 0.0f;
+            float rBTt_smoothing_factor      = 0.0f;
         } cfg;
 
         /// @brief Distance to the ball from robot torso
@@ -79,6 +80,9 @@ namespace module::behaviour::strategy {
 
         /// @brief Stores the position of the last ball seen
         Eigen::Vector3f rBTt = Eigen::Vector3f(1.0, 0.0, 0.0);
+
+        /// @brief Stores the position of the filtered ball
+        Eigen::Vector3f rBTt_smoothed = Eigen::Vector3f(1.0, 0.0, 0.0);
 
         /// @brief Used to indicate which team is kicking off
         message::input::GameEvents::Context team_kicking_off = message::input::GameEvents::Context::UNKNOWN;
