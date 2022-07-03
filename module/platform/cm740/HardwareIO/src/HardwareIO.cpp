@@ -56,7 +56,7 @@ namespace module::platform::cm740 {
             data.cm740ErrorCode == 0xFF ? RawSensors::Error::TIMEOUT : RawSensors::Error(data.cm740ErrorCode).value;
 
         // LED Panel
-        sensors.led_panel = cm740State.ledPanel;
+        sensors.led_panel = ledPanel;
 
         // Buttons
         sensors.buttons.left   = Convert::getBit<0>(data.cm740.buttons);
@@ -386,7 +386,7 @@ namespace module::platform::cm740 {
         // If we get a LEDPanel command then write it
         on<Trigger<RawSensors::LEDPanel>>().then([this](const RawSensors::LEDPanel& led) {
             // Update our internal state
-            cm740State.ledPanel = led;
+            ledPanel = led;
 
             cm740.cm740.write(CM740::CM740Data::Address::LED_PANNEL,
                               ((uint8_t(led.led2) << 2) | (uint8_t(led.led3) << 1) | uint8_t((led.led4))));

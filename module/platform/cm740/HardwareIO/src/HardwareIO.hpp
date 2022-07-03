@@ -47,10 +47,7 @@ namespace module::platform::cm740 {
         float iGain = 0;
         float pGain = 0;
 
-
-        struct CM740State {
-            message::platform::RawSensors::LEDPanel ledPanel = {false, false, false};
-        };
+        message::platform::RawSensors::LEDPanel ledPanel = {false, false, false};
 
         struct Config {
             Config() = default;
