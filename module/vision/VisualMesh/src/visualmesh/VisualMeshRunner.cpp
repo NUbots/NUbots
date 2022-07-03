@@ -50,19 +50,23 @@ namespace module::vision::visualmesh {
 
     namespace generate_runner {
 
-        template <typename T>
+        template <template <typename> class Engine, typename Scalar>
         struct BuildEngine;
 
-        template <>
-        struct BuildEngine<::visualmesh::engine::opencl::Engine> {
-            static std::shared_ptr<::visualmesh::engine::opencl::Engine<float>> build(net, cache) {
-                return std::make_shared<::visualmesh::engine::opencl::Engine<float>>(net, cache);
+        template <typename Scalar>
+        struct BuildEngine<::visualmesh::engine::opencl::Engine, Scalar> {
+            static std::shared_ptr<::visualmesh::engine::opencl::Engine<Scalar>> build(
+                ::visualmesh::NetworkStructure<float> net,
+                std::string cache) {
+                return std::make_shared<::visualmesh::engine::opencl::Engine<Scalar>>(net, cache);
             }
         };
 
-        template <>
-        struct BuildEngine<::visualmesh::engine::cpu::Engine> {
-            static std::shared_ptr<::visualmesh::engine::cpu::Engine<float>> build(net, cache) {
+        template <typename Scalar>
+        struct BuildEngine<::visualmesh::engine::cpu::Engine, Scalar> {
+            static std::shared_ptr<::visualmesh::engine::cpu::Engine<Scalar>> build(
+                ::visualmesh::NetworkStructure<float> net,
+                std::string cache) {
                 return std::make_shared<::visualmesh::engine::cpu::Engine<float>>(net)
             }
         };
@@ -79,7 +83,7 @@ namespace module::vision::visualmesh {
                                                         cfg.mesh.geometry.intersections,
                                                         cfg.mesh.intersection_tolerance,
                                                         cfg.mesh.classifier.max_distance));
-            auto engine = BuildEngine<Engine>::build(cfg.model, "./vision_cache/");
+            auto engine = BuildEngine<Engine, float>::build(cfg.model, "./vision_cache/");
 
             return [shape, mesh, engine](const Image& img, const Eigen::Affine3f& Hcw) {
                 // Create the lens
