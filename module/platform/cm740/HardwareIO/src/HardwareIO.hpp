@@ -41,7 +41,7 @@ namespace module::platform::cm740 {
         static constexpr int UPDATE_FREQUENCY = 90;
 
         /// @brief Internal cm740 class that is used for interacting with the hardware.
-        CM740::CM740 cm740;
+        CM740::CM740 cm740{"/dev/CM740"};
 
         /// @brief Reads information from CM740 packet and processes it into a RawSensors message.
         /// @param data CM740 packet information.
@@ -55,7 +55,7 @@ namespace module::platform::cm740 {
         float p_gain = 0;
 
         /// @brief Status of the three LED lights on the back panel.
-        message::platform::RawSensors::LEDPanel ledPanel = {false, false, false};
+        message::platform::RawSensors::LEDPanel led_panel = {false, false, false};
 
         /// @brief Configuration values
         struct Config {
@@ -67,7 +67,7 @@ namespace module::platform::cm740 {
                 float nominal_voltage{0.0f};
                 float flat_voltage{0.0f};
             } battery;
-        } config;
+        } cfg;
 
         struct ServoState {
             /// @brief True if new values should be written to the hardware.

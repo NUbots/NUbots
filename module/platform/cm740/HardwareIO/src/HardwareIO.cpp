@@ -65,7 +65,7 @@ namespace module::platform::cm740 {
         // Voltage (in volts)
         sensors.voltage = Convert::voltage(data.cm740.voltage);
 
-        if (sensors.voltage <= config.charged_voltage) {
+        if (sensors.voltage <= cfg.battery.charged_voltage) {
             sensors.platform_error_flags &= ~RawSensors::Error::INPUT_VOLTAGE;
         }
 
@@ -191,8 +191,8 @@ namespace module::platform::cm740 {
                                                                     : RawSensors::Error(data.servoErrorCodes[i]).value;
 
                 // Present Data
-                servo.present_position = Convert::servoPosition(i, data.servos[i].present_position);
-                servo.present_speed    = Convert::servoSpeed(i, data.servos[i].present_speed);
+                servo.present_position = Convert::servoPosition(i, data.servos[i].presentPosition);
+                servo.present_speed    = Convert::servoSpeed(i, data.servos[i].presentSpeed);
                 servo.load             = Convert::servoLoad(i, data.servos[i].load);
 
                 // Diagnostic Information
@@ -200,7 +200,7 @@ namespace module::platform::cm740 {
                 servo.temperature = Convert::temperature(data.servos[i].temperature);
 
                 // Clear Overvoltage flag if current voltage is greater than maximum expected voltage
-                if (servo.voltage <= config.charged_voltage) {
+                if (servo.voltage <= cfg.battery.charged_voltage) {
                     servo.error_flags &= ~RawSensors::Error::INPUT_VOLTAGE;
                 }
             }
@@ -208,11 +208,7 @@ namespace module::platform::cm740 {
         return sensors;
     }
 
-    HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment))
-        , cm740("/dev/CM740")
-        , config.charged_voltage(0.0f)
-        , config.flat_voltage(0.0f) {
+    HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Startup>().then("HardwareIO Startup", [this] {
             auto CM740Model   = cm740.cm740.read<uint16_t>(CM740::CM740Data::Address::MODEL_NUMBER_L);
@@ -235,9 +231,9 @@ namespace module::platform::cm740 {
                 servo_state[i].simulated    = config["servos"][i]["simulated"].as<bool>();
             }
 
-            config.battery.charged_voltage = config["battery"]["charged_voltage"].as<float>();
-            config.battery.nominal_voltage = config["battery"]["nominal_voltage"].as<float>();
-            config.battery.flat_voltage    = config["battery"]["flat_voltage"].as<float>();
+            cfg.battery.charged_voltage = config["battery"]["charged_voltage"].as<float>();
+            cfg.battery.nominal_voltage = config["battery"]["nominal_voltage"].as<float>();
+            cfg.battery.flat_voltage    = config["battery"]["flat_voltage"].as<float>();
         });
 
         // This trigger gets the sensor data from the CM740
@@ -261,16 +257,16 @@ namespace module::platform::cm740 {
                     servo_state[i].dirty = false;
 
                     // If our torque should be disabled then we disable our torque
-                    if (servo_state[i].torqueEnabled
+                    if (servo_state[i].torque_enabled
                         && (std::isnan(servo_state[i].goal_position) || servo_state[i].torque == 0)) {
-                        servo_state[i].torqueEnabled = false;
+                        servo_state[i].torque_enabled = false;
                         cm740[i + 1].write(CM740::Servo::Address::TORQUE_ENABLE, false);
                     }
                     else {
                         // If our torque was disabled but is now enabled
-                        if (!servo_state[i].torqueEnabled && !std::isnan(servo_state[i].goal_position)
+                        if (!servo_state[i].torque_enabled && !std::isnan(servo_state[i].goal_position)
                             && servo_state[i].torque != 0) {
-                            servo_state[i].torqueEnabled = true;
+                            servo_state[i].torque_enabled = true;
                             cm740[i + 1].write(CM740::Servo::Address::TORQUE_ENABLE, true);
                         }
 
@@ -317,9 +313,9 @@ namespace module::platform::cm740 {
             *sensors = parseSensors(data);
 
             // Work out a battery charged percentage
-            sensors->voltage =
-                std::max(0.0f,
-                         (sensors->voltage - config.flat_voltage) / (config.charged_voltage - config.flat_voltage));
+            sensors->voltage = std::max(0.0f,
+                                        (sensors->voltage - cfg.battery.flat_voltage)
+                                            / (cfg.battery.charged_voltage - cfg.battery.flat_voltage));
 
             // cm740 leds to display battery voltage
             std::array<bool, 3> ledp = {false, false, false};
