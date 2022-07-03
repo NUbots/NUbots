@@ -37,63 +37,77 @@ namespace module::platform::cm740 {
      */
     class HardwareIO : public NUClear::Reactor {
     private:
-        // How often we read the servos
+        /// @brief How often the servos are read.
         static constexpr int UPDATE_FREQUENCY = 90;
 
-        /// @brief Our internal cm740 class that is used for interacting with the hardware
+        /// @brief Internal cm740 class that is used for interacting with the hardware.
         CM740::CM740 cm740;
-        message::platform::RawSensors parseSensors(const CM740::BulkReadResults& data);
-        float dGain = 0;
-        float iGain = 0;
-        float pGain = 0;
 
+        /// @brief Reads information from CM740 packet and processes it into a RawSensors message.
+        /// @param data CM740 packet information.
+        /// @return A RawSensors message created from the data sent by the CM740 subcontroller.
+        message::platform::RawSensors parseSensors(const CM740::BulkReadResults& data);
+        /// @brief Derivative gain of the servos.
+        float d_gain = 0;
+        /// @brief Integral gain of the servos.
+        float i_gain = 0;
+        /// @brief Proportional gain of the servos.
+        float p_gain = 0;
+
+        /// @brief Status of the three LED lights on the back panel.
         message::platform::RawSensors::LEDPanel ledPanel = {false, false, false};
 
+        /// @brief Configuration values
         struct Config {
             Config() = default;
-
+            /// @brief Battery voltage information.
             struct Battery {
                 Battery() = default;
-                float chargedVoltage{0.0f};
-                float nominalVoltage{0.0f};
-                float flatVoltage{0.0f};
+                float charged_voltage{0.0f};
+                float nominal_voltage{0.0f};
+                float flat_voltage{0.0f};
             } battery;
         } config;
 
         struct ServoState {
-            // True if we need to write new values to the hardware
+            /// @brief True if new values should be written to the hardware.
             bool dirty = false;
 
-            // True if we simulate where we think the servos should be
-            // Note that we still write the commands to hardware
+            /// @brief True if servo positions are simulated.
+            /// @details Note that commands can still be written to the hardware.
             bool simulated = false;
 
-            bool torqueEnabled = true;
+            /// @brief Whether the servo torque is enabled.
+            bool torque_enabled = true;
 
-            // Cached values that are never read
-            float pGain        = 32.0 / 255.0;
-            float iGain        = 0;
-            float dGain        = 0;
-            float movingSpeed  = 0;
-            float goalPosition = 0;
-            float torque       = 0;  // 0.0 to 1.0
+            /// @brief Proportional gain. Cached value that is never read.
+            float p_gain = 32.0 / 255.0;
+            /// @brief Integral gain. Cached value that is never read.
+            float i_gain = 0;
+            /// @brief Derivative gain. Cached value that is never read.
+            float d_gain = 0;
+            /// @brief Speed of the servo. Cached value that is never read.
+            float moving_speed = 0;
+            /// @brief Position the servo is attempting to reach. Cached value that is never read.
+            float goal_position = 0;
+            /// @brief Torque of the servo. Cached value that is never read.
+            /// @details Ranges from 0.0 to 1.0.
+            float torque = 0;
 
-            // Values that are either simulated or read
-            float presentPosition = 0;
-            float presentSpeed    = 0;
-            float load            = 0;
-            float voltage         = 10;
-            float temperature     = 40;
+            /// @brief Current angle position of the servo. Simulated or read.
+            float present_position = 0;
+            /// @brief Current speed of the servo. Simulated or read.
+            float present_speed = 0;
+            /// @brief Current load of the servo. Simulated or read.
+            float load = 0;
+            /// @brief Current voltage of the servo. Simulated or read.
+            float voltage = 10;
+            /// @brief Current temperature of the servo. Simulated or read.
+            float temperature = 40;
         };
 
-        /// @brief Our state for our CM740 for variables we send to it
-        CM740State cm740State;
-
-        /// @brief Our state for or MX28s for variables we send to it
-        std::array<ServoState, 20> servoState;
-
-        float chargedVoltage;
-        float flatVoltage;
+        /// @brief Stores the current state of the servos and the data being sent to the servos.
+        std::array<ServoState, 20> servo_state;
 
     public:
         /// @brief called by a Powerplant to construct this reactor
