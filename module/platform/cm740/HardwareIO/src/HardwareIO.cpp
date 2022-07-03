@@ -331,7 +331,7 @@ namespace module::platform::cm740 {
             else {
                 ledp = {false, false, false};
             }
-            emit(std::make_unique<RawSensors::LEDPanel>(ledp[0]));
+            emit(std::make_unique<RawSensors::LEDPanel>(ledp[2], ledp[1], ledp[0]));
 
             // Send our nicely computed sensor data out to the world
             emit(std::move(sensors));
