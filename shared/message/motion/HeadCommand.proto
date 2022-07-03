@@ -34,4 +34,6 @@ message HeadCommand {
     float pitch = 2;
     /// If true, the yaw and pitch are interpreted in robot space, instead of IMU space
     bool robot_space = 3;
+    /// If true, smooth the goal angle using expoential smoothing
+    bool smooth = 4;
 }
