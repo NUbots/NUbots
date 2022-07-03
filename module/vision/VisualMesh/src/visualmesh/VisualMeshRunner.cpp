@@ -67,7 +67,7 @@ namespace module::vision::visualmesh {
             static std::shared_ptr<::visualmesh::engine::cpu::Engine<Scalar>> build(
                 ::visualmesh::NetworkStructure<float> net,
                 std::string cache) {
-                return std::make_shared<::visualmesh::engine::cpu::Engine<float>>(net)
+                return std::make_shared<::visualmesh::engine::cpu::Engine<float>>(net);
             }
         };
 
