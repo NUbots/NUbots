@@ -50,6 +50,23 @@ namespace module::vision::visualmesh {
 
     namespace generate_runner {
 
+        template <typename T>
+        struct BuildEngine;
+
+        template <>
+        struct BuildEngine<::visualmesh::engine::opencl::Engine> {
+            static std::shared_ptr<::visualmesh::engine::opencl::Engine<float>> build(net, cache) {
+                return std::make_shared<::visualmesh::engine::opencl::Engine<float>>(net, cache);
+            }
+        };
+
+        template <>
+        struct BuildEngine<::visualmesh::engine::cpu::Engine> {
+            static std::shared_ptr<::visualmesh::engine::cpu::Engine<float>> build(net, cache) {
+                return std::make_shared<::visualmesh::engine::cpu::Engine<float>>(net)
+            }
+        };
+
         template <template <typename> class Model, template <typename> class Engine, typename Shape>
         std::function<VisualMeshResults(const Image&, const Eigen::Affine3f&)> runner(const VisualMeshModelConfig& cfg,
                                                                                       const Shape& shape) {
@@ -62,7 +79,7 @@ namespace module::vision::visualmesh {
                                                         cfg.mesh.geometry.intersections,
                                                         cfg.mesh.intersection_tolerance,
                                                         cfg.mesh.classifier.max_distance));
-            auto engine = std::make_shared<Engine<float>>(cfg.model);
+            auto engine = BuildEngine<Engine>::build(cfg.model, "./vision_cache/");
 
             return [shape, mesh, engine](const Image& img, const Eigen::Affine3f& Hcw) {
                 // Create the lens
@@ -72,8 +89,8 @@ namespace module::vision::visualmesh {
                 lens.fov          = img.lens.fov;
                 lens.centre       = {img.lens.centre[0] * img.dimensions[0], img.lens.centre[1] * img.dimensions[0]};
                 lens.k            = std::array<float, 2>{
-                    float(img.lens.k[0] / std::pow(img.dimensions[0], 2)),
-                    float(img.lens.k[1] / std::pow(img.dimensions[0], 4)),
+                               float(img.lens.k[0] / std::pow(img.dimensions[0], 2)),
+                               float(img.lens.k[1] / std::pow(img.dimensions[0], 4)),
                 };
                 switch (img.lens.projection.value) {
                     case Image::Lens::Projection::EQUIDISTANT: lens.projection = ::visualmesh::EQUIDISTANT; break;
