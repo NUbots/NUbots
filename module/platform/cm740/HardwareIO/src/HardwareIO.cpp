@@ -58,12 +58,6 @@ namespace module::platform::cm740 {
         // LED Panel
         sensors.led_panel = cm740State.ledPanel;
 
-        // Head LED
-        sensors.head_led = cm740State.headLED;
-
-        // Eye LED
-        sensors.eye_led = cm740State.eyeLED;
-
         // Buttons
         sensors.buttons.left   = Convert::getBit<0>(data.cm740.buttons);
         sensors.buttons.middle = Convert::getBit<1>(data.cm740.buttons);
@@ -363,8 +357,6 @@ namespace module::platform::cm740 {
                 ledr = (uint8_t(0x00) << 16) | (uint8_t(0x00) << 8) | uint8_t(0xFF);
             }
             emit(std::make_unique<RawSensors::LEDPanel>(ledp[2], ledp[1], ledp[0]));
-            emit(std::make_unique<RawSensors::EyeLED>(ledl));
-            emit(std::make_unique<RawSensors::HeadLED>(ledr));
 
             // Send our nicely computed sensor data out to the world
             emit(std::move(sensors));
@@ -416,29 +408,7 @@ namespace module::platform::cm740 {
             emit<Scope::DIRECT>(commandList);
         });
 
-        // If we get a HeadLED command then write it
-        on<Trigger<RawSensors::HeadLED>>().then([this](const RawSensors::HeadLED& led) {
-            // Update our internal state
-            cm740State.headLED = led;
-
-            cm740.cm740.write(CM740::CM740Data::Address::LED_HEAD_L,
-                              Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
-                                                        static_cast<uint8_t>((led.RGB & 0x0000FF00) >> 8),
-                                                        static_cast<uint8_t>(led.RGB & 0x000000FF)));
-        });
-
-        // If we get a EyeLED command then write it
-        on<Trigger<RawSensors::EyeLED>>().then([this](const RawSensors::EyeLED& led) {
-            // Update our internal state
-            cm740State.eyeLED = led;
-
-            cm740.cm740.write(CM740::CM740Data::Address::LED_EYE_L,
-                              Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
-                                                        static_cast<uint8_t>((led.RGB & 0x0000FF00) >> 8),
-                                                        static_cast<uint8_t>(led.RGB & 0x000000FF)));
-        });
-
-        // If we get a EyeLED command then write it
+        // If we get a LEDPanel command then write it
         on<Trigger<RawSensors::LEDPanel>>().then([this](const RawSensors::LEDPanel& led) {
             // Update our internal state
             cm740State.ledPanel = led;

@@ -48,14 +48,6 @@ message RawSensors {
         bool led3 = 2;
         bool led4 = 3;
     }
-    message HeadLED {
-        /// Encode as 0x00 0xRR 0xGG 0xBB
-        uint32 RGB = 1;
-    }
-    message EyeLED {
-        /// Encode as 0x00 0xRR 0xGG 0xBB
-        uint32 RGB = 1;
-    }
     message Buttons {
         bool left   = 1;
         bool middle = 2;
@@ -144,8 +136,6 @@ message RawSensors {
     /// The list of errors is here: https://emanual.robotis.com/docs/en/dxl/protocol1/#status-packetreturn-packet
     uint32   platform_error_flags = 2;
     LEDPanel led_panel            = 3;
-    HeadLED  head_led             = 4;
-    EyeLED   eye_led              = 5;
     Buttons  buttons              = 6;
     /// Voltage for the whole robot, from the main battery, in Volts
     float voltage = 7;

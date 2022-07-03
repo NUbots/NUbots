@@ -485,8 +485,6 @@ namespace module::input {
                         sensors->led.emplace_back(0, input.led_panel.led2 ? 0xFF0000 : 0);
                         sensors->led.emplace_back(1, input.led_panel.led3 ? 0xFF0000 : 0);
                         sensors->led.emplace_back(2, input.led_panel.led4 ? 0xFF0000 : 0);
-                        sensors->led.emplace_back(3, input.head_led.RGB);  // Head
-                        sensors->led.emplace_back(4, input.eye_led.RGB);   // Eye
 
                         /************************************************
                          *                  Kinematics                  *

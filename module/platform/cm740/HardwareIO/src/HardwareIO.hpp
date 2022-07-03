@@ -50,9 +50,6 @@ namespace module::platform::cm740 {
 
         struct CM740State {
             message::platform::RawSensors::LEDPanel ledPanel = {false, false, false};
-            //  0x00, 0xRR, 0xGG, 0xBB
-            message::platform::RawSensors::HeadLED headLED = {0x0000FF00};
-            message::platform::RawSensors::EyeLED eyeLED   = {0x000000FF};
         };
 
         struct Config {

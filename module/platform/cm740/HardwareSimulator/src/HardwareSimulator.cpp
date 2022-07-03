@@ -62,12 +62,6 @@ namespace module::platform::cm740 {
         sensors.led_panel.led3 = false;
         sensors.led_panel.led4 = false;
 
-        // Head LED
-        sensors.head_led.RGB = 0;
-
-        // Head LED
-        sensors.eye_led.RGB = 0;
-
         // Buttons
         sensors.buttons.left   = false;
         sensors.buttons.middle = false;
