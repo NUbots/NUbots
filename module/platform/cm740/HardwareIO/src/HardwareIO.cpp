@@ -316,47 +316,22 @@ namespace module::platform::cm740 {
             sensors->voltage = std::max(0.0f, (sensors->voltage - flatVoltage) / (chargedVoltage - flatVoltage));
 
             // cm740 leds to display battery voltage
-            uint32_t ledl            = 0;
-            uint32_t ledr            = 0;
             std::array<bool, 3> ledp = {false, false, false};
 
             if (sensors->voltage > 0.9) {
                 ledp = {true, true, true};
-                ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
-                ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
             }
             else if (sensors->voltage > 0.7) {
                 ledp = {false, true, true};
-                ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
-                ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
             }
             else if (sensors->voltage > 0.5) {
                 ledp = {false, false, true};
-                ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
-                ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
-            }
-            else if (sensors->voltage > 0.3) {
-                ledp = {false, false, false};
-                ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
-                ledr = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
-            }
-            else if (sensors->voltage > 0.2) {
-                ledp = {false, false, false};
-                ledl = (uint8_t(0x00) << 16) | (uint8_t(0xFF) << 8) | uint8_t(0x00);
-                ledr = (uint8_t(0xFF) << 16) | (uint8_t(0x00) << 8) | uint8_t(0x00);
-            }
-            else if (sensors->voltage > 0) {
-                ledp = {false, false, false};
-                ledl = (uint8_t(0xFF) << 16) | (uint8_t(0x00) << 8) | uint8_t(0x00);
-                ledr = (uint8_t(0xFF) << 16) | (uint8_t(0x00) << 8) | uint8_t(0x00);
             }
             // Error in reading voltage blue
             else {
                 ledp = {false, false, false};
-                ledl = (uint8_t(0x00) << 16) | (uint8_t(0x00) << 8) | uint8_t(0xFF);
-                ledr = (uint8_t(0x00) << 16) | (uint8_t(0x00) << 8) | uint8_t(0xFF);
             }
-            emit(std::make_unique<RawSensors::LEDPanel>(ledp[2], ledp[1], ledp[0]));
+            emit(std::make_unique<RawSensors::LEDPanel>(ledp[0]));
 
             // Send our nicely computed sensor data out to the world
             emit(std::move(sensors));
