@@ -35,7 +35,8 @@ namespace module::vision::visualmesh {
                          const double& max_height,
                          const double& max_distance,
                          const double& intersection_tolerance,
-                         const std::string& path);
+                         const std::string& path,
+                         const std::string& cache_directory);
         VisualMeshResults operator()(const message::input::Image& image, const Eigen::Affine3f& Htc);
 
         std::unique_ptr<std::atomic<bool>> active;

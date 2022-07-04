@@ -215,7 +215,7 @@ namespace module::vision::visualmesh {
         cfg.mesh.classifier.min_height   = min_height;
         cfg.mesh.classifier.max_height   = max_height;
         cfg.mesh.classifier.max_distance = max_distance;
-        cfg.cache_director               = cache_directory;
+        cfg.cache_directory              = cache_directory;
 
         // Load the properties from the model
         auto loaded                     = load_model(path);
