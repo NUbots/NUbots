@@ -36,7 +36,13 @@ namespace module::vision {
                 // Create a network runner for each concurrent system
                 auto& runners = engines[name];
                 for (int i = 0; i < concurrent; ++i) {
-                    runners.emplace_back(engine_type, min_height, max_height, max_distance, tolerance, network);
+                    runners.emplace_back(engine_type,
+                                         min_height,
+                                         max_height,
+                                         max_distance,
+                                         tolerance,
+                                         network,
+                                         cache_directory);
                 }
             }
         });
