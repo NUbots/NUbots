@@ -250,7 +250,7 @@ RUN install-from-source https://github.com/Fastcode/NUClear/archive/f4a60c7269e2
     -DBUILD_TESTS=OFF
 
 # Visual Mesh
-RUN install-from-source https://github.com/Fastcode/VisualMesh/archive/9df04eab3b08d2dca1d955a5bfbdbeea75f11d6b.tar.gz \
+RUN install-from-source https://github.com/ysims/VisualMesh/archive/5cbdcc7023baf8b6b70bf07d072ae911ee4d5f50.tar.gz \
     -DBUILD_TENSORFLOW_OP=OFF \
     -DBUILD_EXAMPLES=OFF \
     -DBUILD_OPENCL_ENGINE=ON
