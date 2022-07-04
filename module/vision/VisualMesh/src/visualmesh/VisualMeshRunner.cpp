@@ -32,6 +32,7 @@ namespace module::vision::visualmesh {
         ::visualmesh::NetworkStructure<float> model;
         std::string mesh_model;
         int num_classes = 0;
+        std::string cache_directory;
 
         struct {
             double intersection_tolerance = 0.0;
@@ -86,7 +87,7 @@ namespace module::vision::visualmesh {
                                                         cfg.mesh.geometry.intersections,
                                                         cfg.mesh.intersection_tolerance,
                                                         cfg.mesh.classifier.max_distance));
-            auto engine = BuildEngine<Engine, float>::build(cfg.model, "./vision_cache/");
+            auto engine = BuildEngine<Engine, float>::build(cfg.model, cfg.cache_directory);
 
             return [shape, mesh, engine](const Image& img, const Eigen::Affine3f& Hcw) {
                 // Create the lens
@@ -203,7 +204,8 @@ namespace module::vision::visualmesh {
                                        const double& max_height,
                                        const double& max_distance,
                                        const double& intersection_tolerance,
-                                       const std::string& path)
+                                       const std::string& path,
+                                       const std::string& cache_directory)
         : active(std::make_unique<std::atomic<bool>>()) {
 
         // Add the configuration properties we were passed
@@ -213,6 +215,7 @@ namespace module::vision::visualmesh {
         cfg.mesh.classifier.min_height   = min_height;
         cfg.mesh.classifier.max_height   = max_height;
         cfg.mesh.classifier.max_distance = max_distance;
+        cfg.cache_director               = cache_directory;
 
         // Load the properties from the model
         auto loaded                     = load_model(path);

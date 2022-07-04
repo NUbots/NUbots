@@ -22,10 +22,11 @@ namespace module::vision {
             engines.clear();
 
             for (const auto& camera : config["cameras"].config) {
-                auto name        = camera.first.as<std::string>();
-                auto engine_type = camera.second["engine"].as<std::string>();
-                int concurrent   = camera.second["concurrent"].as<int>();
-                auto network     = camera.second["network"].as<std::string>();
+                auto name            = camera.first.as<std::string>();
+                auto engine_type     = camera.second["engine"].as<std::string>();
+                int concurrent       = camera.second["concurrent"].as<int>();
+                auto network         = camera.second["network"].as<std::string>();
+                auto cache_directory = camera.second["cache_directory"].as<std::string>();
 
                 auto min_height   = camera.second["classifier"]["height"][0].as<double>();
                 auto max_height   = camera.second["classifier"]["height"][1].as<double>();
