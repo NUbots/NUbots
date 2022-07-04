@@ -75,7 +75,7 @@ namespace module::behaviour::skills {
             Eigen::Vector3d uXTw = Hwt.block(0, 0, 3, 1);
 
             // Check if angle between torso z axis and world z axis is greater than config value cfg.fallen_angle
-            if (!getting_up && std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > cfg.fallen_angle) {
+            if (std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > cfg.fallen_angle) {
                 // If the z component of the torso's x basis in world space is negative, the robot is fallen on
                 // its front
                 is_front = (uXTw.z() <= 0);

@@ -164,12 +164,13 @@ namespace module::behaviour::skills {
         // do a little configurating
         on<Configuration>("FallingRelax.yaml").then([this](const Configuration& config) {
             log<NUClear::INFO>("FallingRelax - Config");
-            log_level          = config["log_level"].as<NUClear::LogLevel>();
-            const auto fallingAngle   = config["falling_angle"].as<float>();
-            cfg.falling_angle   = std::cos(fallingAngle);
-            cfg.falling_acceleration   = config["falling_acceleration"].as<float>();
-            cfg.recovery_acceleration   = config["recovery_acceleration"].as<std::vector<float>>();
-            cfg.relax_fall_priority = config["relax_fall_priority"].as<float>();
+            log_level                 = config["log_level"].as<NUClear::LogLevel>();
+            //const auto fallingAngle   = config["falling_angle"].as<float>();
+            //cfg.falling_angle   = std::cos(fallingAngle);
+            cfg.falling_angle         = config["falling_angle"].as<float>();
+            cfg.falling_acceleration  = config["falling_acceleration"].as<float>();
+            cfg.recovery_acceleration = config["recovery_acceleration"].as<std::vector<float>>();
+            cfg.relax_fall_priority   = config["relax_fall_priority"].as<float>();
 
         });
 
@@ -191,19 +192,8 @@ namespace module::behaviour::skills {
             // Basis Z vector of torso {t} in world {w} space
             Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
 
-            double magnitude = 0;
-            for (const auto& sensor : sensors) {
-                    magnitude += sensor->accelerometer.norm();
-                }
-            magnitude /= sensors.size();
-
-            NUClear::log<NUClear::DEBUG>("Gravity is ", magnitude);
-            NUClear::log<NUClear::DEBUG>("Z angle is ", Eigen::Vector3d::UnitZ().dot(uZTw));
-
-
             if (!relaxed && !sensors.empty() && acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > cfg.falling_angle) {
-                NUClear::log<NUClear::DEBUG>("Inside");
-
+                NUClear::log<NUClear::DEBUG>("We tilted far enough ");
                 // We might be falling, check the accelerometer
                 double magnitude = 0;
 
@@ -212,37 +202,37 @@ namespace module::behaviour::skills {
                 }
 
                 magnitude /= sensors.size();
+                NUClear::log<NUClear::DEBUG>(magnitude);
 
                 if (magnitude < cfg.falling_acceleration) {
+                    NUClear::log<NUClear::DEBUG>("Grtavity is ", magnitude);
                     relaxed = true;
                     update_priority(cfg.relax_fall_priority);
-                    NUClear::log<NUClear::DEBUG>("Magnitude is less than gravity");
-                    NUClear::log<NUClear::DEBUG>("Gravity magnitude was ", magnitude);
                 }
             }
-            // else if (relaxed && Eigen::Vector3d::UnitZ().dot(uZTw) < cfg.falling_angle) {
-            //     // We might be recovered, check the accelerometer
-            //     double magnitude = 0;
+            else if (relaxed && Eigen::Vector3d::UnitZ().dot(uZTw) < cfg.falling_angle) {
+                // We might be recovered, check the accelerometer
+                double magnitude = 0;
 
-            //     for (const auto& sensor : sensors) {
-            //         magnitude += sensor->accelerometer.norm();
-            //     }
+                for (const auto& sensor : sensors) {
+                    magnitude += sensor->accelerometer.norm();
+                }
 
-            //     magnitude /= sensors.size();
+                magnitude /= sensors.size();
 
-            //     // See if we recover
-            //     if (magnitude > cfg.recovery_acceleration[0] && magnitude < cfg.recovery_acceleration[1]) {
-            //         relaxed = false;
-            //         update_priority(0);
-            //     }
-            // }
+                // See if we recover
+                if (magnitude > cfg.recovery_acceleration[0] && magnitude < cfg.recovery_acceleration[1]) {
+                    relaxed = false;
+                    update_priority(0);
+                }
+            }
         });
         on<Trigger<ExecuteFallingRelax>, Single>().then("Execute Relax", [this]() {
             relaxed = true;
             emit(std::make_unique<ExecuteScriptByName>(
                     subsumption_id,
                     std::vector<std::string>({"Relax.yaml"})));
-
+            update_priority(cfg.relax_fall_priority);
         });
 
         on<Trigger<KillFallingRelax>>().then([this] {

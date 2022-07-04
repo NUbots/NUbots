@@ -28,7 +28,7 @@ nuclear_role(
   localisation::RobotParticleLocalisation
   # Behaviour
   behaviour::Controller
-  # behaviour::skills::Getup
+  behaviour::skills::Getup
   behaviour::skills::KickScript
   # behaviour::skills::HeadBehaviourSoccer
   behaviour::skills::Stand
