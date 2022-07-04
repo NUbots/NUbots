@@ -1,5 +1,6 @@
 #include "VisualMeshRunner.hpp"
 
+#include <filesystem>
 #include <visualmesh/engine/cpu/engine.hpp>
 #include <visualmesh/engine/opencl/engine.hpp>
 #include <visualmesh/geometry/Circle.hpp>
@@ -24,6 +25,7 @@
 namespace module::vision::visualmesh {
 
     using message::input::Image;
+    namespace fs = std::filesystem;
 
     struct VisualMeshModelConfig {
         std::string engine;
@@ -58,6 +60,7 @@ namespace module::vision::visualmesh {
             static std::shared_ptr<::visualmesh::engine::opencl::Engine<Scalar>> build(
                 ::visualmesh::NetworkStructure<float> net,
                 std::string cache) {
+                fs::create_directory(cache);  // create the cache folder if it doesn't exist
                 return std::make_shared<::visualmesh::engine::opencl::Engine<Scalar>>(net, cache);
             }
         };
