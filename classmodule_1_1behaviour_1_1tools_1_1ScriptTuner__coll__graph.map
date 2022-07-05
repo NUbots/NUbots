@@ -1,0 +1,5 @@
+<map id="module::behaviour::tools::ScriptTuner" name="module::behaviour::tools::ScriptTuner">
+<area shape="rect" id="node1" title="Provides a Curses interface to let the user customize scripts." alt="" coords="28,95,180,136"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,5,77,32"/>
+<area shape="rect" id="node3" href="$structextension_1_1Script.html" title=" " alt="" coords="101,5,232,32"/>
+</map>

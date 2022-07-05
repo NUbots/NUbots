@@ -1,0 +1,5 @@
+<map id="module::output::compressor::CompressorFactory" name="module::output::compressor::CompressorFactory">
+<area shape="rect" id="node1" title=" " alt="" coords="5,39,211,80"/>
+<area shape="rect" id="node2" href="$classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Factory.html" title=" " alt="" coords="259,5,464,47"/>
+<area shape="rect" id="node3" href="$classmodule_1_1output_1_1compressor_1_1vaapi_1_1Factory.html" title=" " alt="" coords="259,71,464,112"/>
+</map>

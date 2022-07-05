@@ -1,0 +1,5 @@
+<map id="module::motion::QuinticWalkEngine" name="module::motion::QuinticWalkEngine">
+<area shape="rect" id="node1" title="QuinticWalkEngine." alt="" coords="142,109,353,151"/>
+<area shape="rect" id="node2" href="$structmodule_1_1motion_1_1WalkingParameter.html" title=" " alt="" coords="5,13,257,39"/>
+<area shape="rect" id="node3" href="$classutility_1_1motion_1_1splines_1_1Footstep.html" title="Footstep." alt="" coords="281,5,448,47"/>
+</map>

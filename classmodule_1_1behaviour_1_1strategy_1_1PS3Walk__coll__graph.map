@@ -1,0 +1,5 @@
+<map id="module::behaviour::strategy::PS3Walk" name="module::behaviour::strategy::PS3Walk">
+<area shape="rect" id="node1" title=" " alt="" coords="13,95,165,136"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,5,77,32"/>
+<area shape="rect" id="node3" href="$classJoystick.html" title="Represents a joystick device." alt="" coords="102,5,175,32"/>
+</map>

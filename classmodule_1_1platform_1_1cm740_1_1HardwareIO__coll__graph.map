@@ -1,0 +1,13 @@
+<map id="module::platform::cm740::HardwareIO" name="module::platform::cm740::HardwareIO">
+<area shape="rect" id="node1" title="This NUClear Reactor is responsible for reading in the data from the CM740 and emitting it to the res..." alt="" coords="1116,81,1303,122"/>
+<area shape="rect" id="node2" title=" " alt="" coords="852,5,924,32"/>
+<area shape="rect" id="node3" href="$structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1CM740State.html" title=" " alt="" coords="791,57,985,98"/>
+<area shape="rect" id="node4" href="$structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config.html" title=" " alt="" coords="795,122,981,163"/>
+<area shape="rect" id="node5" href="$structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config_1_1Battery.html" title=" " alt="" coords="461,87,648,143"/>
+<area shape="rect" id="node6" href="$classCM740_1_1CM740.html" title="The main class that others will use to interact with the CM740 and attached devices." alt="" coords="828,216,948,243"/>
+<area shape="rect" id="node7" href="$classCM740_1_1FSR.html" title="This represents, and gives access to the Force Sensitive Resistor boards." alt="" coords="505,225,604,252"/>
+<area shape="rect" id="node8" href="$classCM740_1_1CM740Interface.html" title="The cm740 device is a device on the serial port that will respond to the command types." alt="" coords="204,243,383,269"/>
+<area shape="rect" id="node10" href="$classCM740_1_1Servo.html" title="This represents, and gives access to the servo motors." alt="" coords="499,309,611,336"/>
+<area shape="rect" id="node11" href="$classCM740_1_1CM740Data.html" title="This represents, and gives access to the CM740 subboard." alt="" coords="479,427,630,453"/>
+<area shape="rect" id="node9" href="$classCM740_1_1UART.html" title="Communicates with the components via the UART (through a USB TTY device)" alt="" coords="5,192,116,219"/>
+</map>

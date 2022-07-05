@@ -1,0 +1,5 @@
+<map id="module::motion::SixDOFFootController" name="module::motion::SixDOFFootController">
+<area shape="rect" id="node1" title=" " alt="" coords="119,5,329,47"/>
+<area shape="rect" id="node2" href="$classmodule_1_1motion_1_1KickBalancer.html" title=" " alt="" coords="5,95,224,121"/>
+<area shape="rect" id="node3" href="$classmodule_1_1motion_1_1Kicker.html" title=" " alt="" coords="248,95,421,121"/>
+</map>

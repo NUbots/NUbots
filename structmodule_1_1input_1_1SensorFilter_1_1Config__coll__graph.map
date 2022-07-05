@@ -1,0 +1,13 @@
+<map id="module::input::SensorFilter::Config" name="module::input::SensorFilter::Config">
+<area shape="rect" id="node1" title=" " alt="" coords="1035,71,1232,112"/>
+<area shape="rect" id="node2" href="$structmodule_1_1input_1_1SensorFilter_1_1Config_1_1Button.html" title=" " alt="" coords="705,5,903,47"/>
+<area shape="rect" id="node3" href="$structmodule_1_1input_1_1SensorFilter_1_1Config_1_1FootDown.html" title=" " alt="" coords="705,71,903,112"/>
+<area shape="rect" id="node4" href="$structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html" title=" " alt="" coords="349,67,547,108"/>
+<area shape="rect" id="node5" href="$structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter.html" title=" " alt="" coords="705,140,903,181"/>
+<area shape="rect" id="node6" href="$structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial.html" title=" " alt="" coords="349,133,547,189"/>
+<area shape="rect" id="node7" href="$structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Mean.html" title=" " alt="" coords="5,53,203,109"/>
+<area shape="rect" id="node8" href="$structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Covariance.html" title=" " alt="" coords="5,133,203,189"/>
+<area shape="rect" id="node9" href="$structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Noise.html" title=" " alt="" coords="347,220,549,261"/>
+<area shape="rect" id="node10" href="$structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Noise_1_1Process.html" title=" " alt="" coords="5,213,203,269"/>
+<area shape="rect" id="node11" href="$structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Noise_1_1Measurement.html" title=" " alt="" coords="5,293,203,349"/>
+</map>

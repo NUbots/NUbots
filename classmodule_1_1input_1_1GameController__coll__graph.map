@@ -1,0 +1,5 @@
+<map id="module::input::GameController" name="module::input::GameController">
+<area shape="rect" id="node1" title="Monitors the match Game Controller." alt="" coords="14,109,237,136"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,13,77,39"/>
+<area shape="rect" id="node3" href="$structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html" title=" " alt="" coords="101,5,320,47"/>
+</map>
