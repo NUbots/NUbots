@@ -13,9 +13,9 @@ To plot data from a role you're working on using PlotJuggler, do the following.
 
    ![Screenshot of PlotJuggler showing UDP server details](./plotjuggler-udp-server.jpg)
 
-   a. Under the **Streaming** section at the left of the PlotJuggler UI, select "UDP Server" and click "Start".
-   b. In the window that pops up, enter a port, select "JSON" for **Message Protocol**, and check the box to use timestamp field if available.
-   c. Take note of the port and click "OK".
+   A. Under the **Streaming** section at the left of the PlotJuggler UI, select "UDP Server" and click "Start".
+
+   B. In the window that pops up, enter a port, select "JSON" for **Message Protocol**, and check the box to use timestamp field if available. Take note of the port and click "OK".
 
 3. Add the `network::PlotJuggler` module to the role you're working on.
 4. Update the `PlotJuggler.yaml` config file.
