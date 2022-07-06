@@ -51,7 +51,7 @@ To plot data from a role you're working on using PlotJuggler, do the following.
 6. Build and run your role
 7. Data should start appearing in the PlotJuggler sidebar when the role is running. To plot a data point, drag its label from the sidebar to the graph space at the right.
 
-> **NOTE**
+> **Note**
 > If you're not seeing data in PlotJuggler, double check that the UDP server is running, `PlotJuggler.yaml` has the right configuration, and your role is sending data. You can also set the `send_debug_waves` config option to `true` to send sample data to PlotJuggler to test the connection.
 
 ## Dependencies
