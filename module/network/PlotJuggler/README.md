@@ -8,14 +8,14 @@ This module allows for sending data from NUbots to [PlotJuggler](https://www.plo
 
 To plot data from a role you're working on using PlotJuggler, do the following.
 
-1. [Install PlotJuggler](https://github.com/facontidavide/PlotJuggler#installation) on your computer.
+1. [Download and install PlotJuggler](https://github.com/facontidavide/PlotJuggler#installation).
 2. Launch PlotJuggler and start the UDP server.
 
    ![Screenshot of PlotJuggler showing UDP server details](./plotjuggler-udp-server.jpg)
 
    A. Under the **Streaming** section at the left of the PlotJuggler UI, select "UDP Server" and click "Start".
 
-   B. In the window that pops up, enter a port, select "JSON" for **Message Protocol**, and check the box to use timestamp field if available. Take note of the port and click "OK".
+   B. In the window that pops up, enter a port, select "JSON" for **Message Protocol**, and check the box to use the timestamp field if available. Take note of the port and click "OK".
 
 3. Add the `network::PlotJuggler` module to the role you're working on.
 4. Update the `PlotJuggler.yaml` config file.
@@ -49,14 +49,16 @@ To plot data from a role you're working on using PlotJuggler, do the following.
      ```
 
 6. Build and run your role
-7. Data should start appearing in the PlotJuggler sidebar when the role is running. To plot a data point, drag its label from the sidebar to graph space at the right.
+7. Data should start appearing in the PlotJuggler sidebar when the role is running. To plot a data point, drag its label from the sidebar to the graph space at the right.
+
+> **NOTE**
+> If you're not seeing data in PlotJuggler, double check that the UDP server is running, `PlotJuggler.yaml` has the right configuration, and your role is sending data. You can also set the `send_debug_waves` config option to `true` to send sample data to PlotJuggler to test the connection.
 
 ## Dependencies
 
 - `message::support::nusight::DataPoint` - listens for these from the rest of the codebase, transforming and forwarding them to PlotJuggler
-- JSON-formatted UDP packets to PlotJuggler
 
 ## Emits
 
-- `message::support::nusight::DataPoint` when debug waves are enabled for testing the connection to PlotJuggler
+- `message::support::nusight::DataPoint` - when debug waves are enabled for testing the connection to PlotJuggler
 - JSON-formatted packets to PlotJuggler via UDP
