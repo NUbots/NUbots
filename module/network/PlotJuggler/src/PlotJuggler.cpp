@@ -1,9 +1,8 @@
 #include "PlotJuggler.hpp"
 
 #include <cmath>
-#include <string>
-
 #include <json.hpp>
+#include <string>
 
 #include "extension/Configuration.hpp"
 
