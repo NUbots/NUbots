@@ -21,14 +21,14 @@ localisation_interval: 30
 localisation_duration: 5
 
 # Enables forced game mode and phase if set to true
-force_playing: false
+force_playing: true
 force_penalty_shootout: false
 
 # Time to walk forward in ready (in seconds)
 walk_to_ready_time: 20
 
 # Distance to begin the kick on the ball while normally playing (in metres)
-kicking_distance_threshold: 0.35
+kicking_distance_threshold: 0.50 # "REAL (rather than Webots)" Robot Suggested Value 0.35
 
 # Angle from the front to begin kicking the ball (in radians)
 kicking_angle_threshold: 0.2

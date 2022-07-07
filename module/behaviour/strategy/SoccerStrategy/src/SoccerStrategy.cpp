@@ -164,8 +164,10 @@ namespace module::behaviour::strategy {
                 // Apply exponential filter to rBTt
                 rBTt_smoothed = cfg.rBTt_smoothing_factor * rBTt + (1.0 - cfg.rBTt_smoothing_factor) * rBTt_smoothed;
 
-                distance_to_ball = std::sqrt(std::pow(rBTt_smoothed.x(), 2) + std::pow(rBTt_smoothed.y(), 2));
-                angle_to_ball    = std::abs(std::atan2(rBTt_smoothed.y(), rBTt_smoothed.x()));
+                distance_to_ball = std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2));
+                angle_to_ball    = std::abs(std::atan2(rBTt.y(), rBTt.x()));
+                log<NUClear::WARN>("Current distance to ball: ", distance_to_ball);
+                log<NUClear::WARN>("Current angle to ball: ", angle_to_ball);
             }
         });
 
