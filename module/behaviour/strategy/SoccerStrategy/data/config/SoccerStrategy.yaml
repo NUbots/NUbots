@@ -28,7 +28,10 @@ force_penalty_shootout: false
 walk_to_ready_time: 20
 
 # Distance to begin the kick on the ball while normally playing (in metres)
-kicking_distance: 0.5
+kicking_distance_threshold: 0.35
 
 # Angle from the front to begin kicking the ball (in radians)
-kicking_angle: 0.2
+kicking_angle_threshold: 0.2
+
+# Exponential filter smoothing factor on ball position
+rBTt_smoothing_factor: 0.1

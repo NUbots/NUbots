@@ -52,8 +52,6 @@ namespace module::behaviour::strategy {
 
     using message::behaviour::Behaviour;
     using message::behaviour::FieldTarget;
-    using message::behaviour::KickPlan;
-    using KickType = message::behaviour::KickPlan::KickType;
     using message::behaviour::MotionCommand;
     using message::behaviour::Nod;
     using message::behaviour::SoccerObjectPriority;
@@ -126,16 +124,12 @@ namespace module::behaviour::strategy {
 
             cfg.walk_to_ready_time = config["walk_to_ready_time"].as<int>();
 
-            cfg.kicking_distance = config["kicking_distance"].as<float>();
+            cfg.kicking_distance_threshold = config["kicking_distance_threshold"].as<float>();
 
-            cfg.kicking_angle = config["kicking_angle"].as<float>();
+            cfg.kicking_angle_threshold = config["kicking_angle_threshold"].as<float>();
+
+            cfg.rBTt_smoothing_factor = config["rBTt_smoothing_factor"].as<float>();
         });
-
-        on<Trigger<Field>, With<FieldDescription>>().then(
-            [this](const Field& field, const FieldDescription& field_description) {
-                Eigen::Vector2d kick_target = get_kick_plan(field, field_description);
-                emit(std::make_unique<KickPlan>(KickPlan(kick_target, kick_type)));
-            });
 
         on<Trigger<VisionBalls>, With<Sensors>>().then([this](const VisionBalls& balls, const Sensors& sensors) {
             if (balls.balls.size() > 0) {
@@ -147,14 +141,11 @@ namespace module::behaviour::strategy {
                 Eigen::Affine3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
                 rBTt = Htc * rBCc;
 
-                if (std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2)) < 1.0
-                    && !std::isnan(std::asin(std::abs(rBTt.y()) / std::abs(rBTt.x())))) {
-                    // TODO(BehaviourTeam): Yeesh, needs work...
-                    distance_to_ball = std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2));
-                }
-            }
-            else {
-                rBTt = Eigen::Vector3f::Zero();
+                // Apply exponential filter to rBTt
+                rBTt_smoothed = cfg.rBTt_smoothing_factor * rBTt + (1.0 - cfg.rBTt_smoothing_factor) * rBTt_smoothed;
+
+                distance_to_ball = std::sqrt(std::pow(rBTt_smoothed.x(), 2) + std::pow(rBTt_smoothed.y(), 2));
+                angle_to_ball    = std::abs(std::atan2(rBTt_smoothed.y(), rBTt_smoothed.x()));
             }
         });
 
@@ -306,29 +297,27 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::penalty_shootout_set(const FieldDescription& field_description) {
-        emit(std::make_unique<ResetWebotsServos>());             // we were teleported, so reset
-        has_kicked = false;                                      // reset the has_kicked flag between kicks
-        penalty_shootout_localisation_reset(field_description);  // Reset localisation
         stand_still();
         currentState = Behaviour::State::SET;
     }
 
     void SoccerStrategy::penalty_shootout_playing(const Field& field, const Ball& ball) {
         // Execute penalty kick script once if we haven't yet, and if we are not goalie
-        if (!has_kicked && team_kicking_off == GameEvents::Context::TEAM) {
-            emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::PENALTY));
-            has_kicked   = true;  // Set this so we do not kick again, otherwise the script will keep trying to execute
+        if (team_kicking_off == GameEvents::Context::TEAM) {
+            if (NUClear::clock::now() - ball_last_measured < cfg.ball_last_seen_max_time) {
+                // Ball has been seen recently
+                play();
+            }
+            else {
+                // Ball has not been seen recently, request walk planner to rotate on the spot
+                stand_still();
+            }
             currentState = Behaviour::State::SHOOTOUT;
         }
         // If we are not kicking off then be a goalie
         else if (team_kicking_off == GameEvents::Context::OPPONENT) {
             goalie_walk(field, ball);
             currentState = Behaviour::State::GOALIE_WALK;
-        }
-        // Else we are not a goalie but we've already kicked. Current behaviour is to do nothing.
-        else {
-            stand_still();
-            currentState = Behaviour::State::SHOOTOUT;
         }
     }
 
@@ -396,32 +385,18 @@ namespace module::behaviour::strategy {
         }
         else {
 
-            if (!std::isnan(std::asin(std::abs(rBTt.y()) / std::abs(rBTt.x())))) {
-                log<NUClear::WARN>("Distance to ball :",
-                                   distance_to_ball,
-                                   " with expected kicking distance: ",
-                                   cfg.kicking_distance);
+            log<NUClear::DEBUG>("Distance to ball :",
+                                distance_to_ball,
+                                " with expected kicking distance: ",
+                                cfg.kicking_distance_threshold);
 
-                log<NUClear::WARN>("Angle to ball",
-                                   std::asin(std::abs(rBTt.y()) / std::abs(rBTt.x())),
-                                   " with expected kicking angle: ",
-                                   cfg.kicking_angle);
-            }
-
-            if (distance_to_ball < cfg.kicking_distance
-                && std::asin(std::abs(rBTt.y()) / std::abs(rBTt.x())) < cfg.kicking_angle) {
-
-                log<NUClear::WARN>("We are close to the ball, kick it");
-
-
-                emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
-
-                log<NUClear::WARN>("Kicked");
-            }
-
+            log<NUClear::DEBUG>("Angle to ball",
+                                angle_to_ball,
+                                " with expected kicking angle: ",
+                                cfg.kicking_angle_threshold);
 
             if (NUClear::clock::now() - ball_last_measured < cfg.ball_last_seen_max_time) {
-                // Ball has been seen recently, request walk planner to walk to the ball
+                // Ball has been seen recently
                 play();
                 currentState = Behaviour::State::WALK_TO_BALL;
             }
@@ -507,7 +482,21 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::play() {
-        emit(std::make_unique<MotionCommand>(utility::behaviour::BallApproach()));
+        if (distance_to_ball < cfg.kicking_distance_threshold && angle_to_ball < cfg.kicking_angle_threshold) {
+            // Ball is close enough and in the correct direction to kick
+            if (rBTt_smoothed.y() > 0) {
+                log<NUClear::DEBUG>("We are close to the ball, kick it left");
+                emit(std::make_unique<KickScriptCommand>(LimbID::LEFT_LEG, KickCommandType::NORMAL));
+            }
+            else {
+                log<NUClear::DEBUG>("We are close to the ball, kick it right");
+                emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
+            }
+        }
+        else {
+            // Request walk planner to walk to the ball
+            emit(std::make_unique<MotionCommand>(utility::behaviour::BallApproach()));
+        }
     }
 
     Eigen::Vector2d SoccerStrategy::get_kick_plan(const Field& field, const FieldDescription& field_description) {

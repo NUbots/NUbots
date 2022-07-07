@@ -5,7 +5,7 @@ head_controller_priority: 5
 
 #Servo controller parameters
 head_motors:
-  gain: 10.0
+  gain: 5
   torque: 100.0
 #Initial head position; arbitrary and useful for controlling the head when no headbehavior is installed
 initial:

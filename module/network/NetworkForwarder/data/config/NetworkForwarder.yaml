@@ -19,7 +19,7 @@ targets:
 
     # Vision messages
     message.input.Image: false # You probably don't want this unless you're testing something very weird
-    message.output.CompressedImage: 6
+    message.output.CompressedImage: 10
 
     message.vision.Balls: false
     message.vision.Goals: false
