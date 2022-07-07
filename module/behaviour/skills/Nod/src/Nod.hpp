@@ -25,17 +25,24 @@
 namespace module::behaviour::skills {
 
     class Nod : public NUClear::Reactor {
+    private:
+        const size_t subsumption_id{size_t(this) * size_t(this) - size_t(this)};
+
+        /// @brief Stores configuration values
+        struct Config {
+            Config() = default;
+            /// @brief Nod priority in the subsumption system
+            float nod_priority = 0.0f;
+        } cfg;
+
+        /// @brief Bool to indicate if the robot should nod yes, else it nods no
+        bool nod_yes = false;
+
+        void updatePriority(const float& priority);
+
     public:
         /// @brief Called by the powerplant to build and setup the KickScript reactor.
         explicit Nod(std::unique_ptr<NUClear::Environment> environment);
-
-    private:
-        const size_t id;
-
-        bool value;
-        float EXECUTION_PRIORITY;
-
-        void updatePriority(const float& priority);
     };
 }  // namespace module::behaviour::skills
 

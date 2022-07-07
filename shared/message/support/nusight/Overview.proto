@@ -28,49 +28,46 @@ import "Vector.proto";
 import "Matrix.proto";
 
 message Overview {
-
-    // The timestamp this overview packet was sent
+    /// The timestamp this overview packet was sent
     google.protobuf.Timestamp timestamp = 1;
+    uint32                    robot_id  = 2;
 
-    // The ID number of this robot
-    uint32 robot_id = 2;
-
-    // The name of the binary this robot is executing
+    /// The name of the binary this robot is executing
     string role_name = 3;
 
-    // The current battery voltage as a percentage
+    /// The current battery voltage as a percentage.
+    /// @see message::input::Sensors::battery
     float battery = 4;
 
-    // The current voltage of the battery
+    /// The current voltage of the battery.
+    /// @see message::input::Sensors::voltage
     float voltage = 5;
 
-    // The current behaviour state
+    /// The current behaviour state. List of possible states in message::behaviour::Behaviour
     behaviour.Behaviour.State behaviour_state = 6;
 
-    // Localisation measured in field space
+    /// Localisation measured in field space
     fvec3 robot_position            = 7;
     fmat3 robot_position_covariance = 8;
 
-    // The ball position measured in field space
+    /// The ball position measured in field space
     fvec2 ball_position            = 9;
     fmat2 ball_position_covariance = 10;
 
-    // The location we are kicking to
+    /// The {x, y} location we are kicking to
     fvec2 kick_target = 11;
-
-    // Game controller
-    input.GameState.Data.Mode          game_mode      = 12;
-    input.GameState.Data.Phase         game_phase     = 13;
+    /// The type of game being played. From Game Controller
+    input.GameState.Data.Mode game_mode = 12;
+    /// The current stage of gameplay. For Game Controller
+    input.GameState.Data.Phase game_phase = 13;
+    /// Why the penalty was given. For Game Controller
     input.GameState.Data.PenaltyReason penalty_reason = 14;
-
-    // Last time the camera image was seen
+    /// Last time the camera image was seen
     google.protobuf.Timestamp last_camera_image = 15;
-
-    // Last time vision objects were seen
+    /// Last time vision objects were seen
     google.protobuf.Timestamp last_seen_ball = 16;
     google.protobuf.Timestamp last_seen_goal = 17;
-
-    // Walking path
-    repeated fvec3 walk_path_plan = 18;
-    fvec3          walk_command   = 19;
+    /// {x, y, omega} - x and y are the target to walk to and omega is the
+    /// required rotational velocity about the z axis. In torso space
+    fvec3 walk_command = 18;
 }

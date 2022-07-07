@@ -64,13 +64,13 @@ namespace module::localisation {
 
         BallModel() : n_rogues(10), resetRange(10, 10), processNoiseDiagonal() {}
 
-        StateVec time(const StateVec& state, const Scalar& /*deltaT*/) const {
+        [[nodiscard]] StateVec time(const StateVec& state, const Scalar& /*deltaT*/) const {
             return state;
         }
 
-        Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state,
-                                            const message::support::FieldDescription& field,
-                                            const Eigen::Matrix<Scalar, 4, 4>& Hcw) const {
+        [[nodiscard]] Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state,
+                                                          const message::support::FieldDescription& field,
+                                                          const Eigen::Matrix<Scalar, 4, 4>& Hcw) const {
 
             const Eigen::Matrix<Scalar, 3, 1> rBWw(state[PX], state[PY], field.ball_radius);
             const Eigen::Matrix<Scalar, 3, 1> rBCc(Eigen::Affine3d(Hcw) * rBWw);
@@ -78,7 +78,7 @@ namespace module::localisation {
             return cartesianToReciprocalSpherical(rBCc);
         }
 
-        StateVec limit(const StateVec& state) const {
+        [[nodiscard]] StateVec limit(const StateVec& state) const {
             return state;
         }
 
@@ -92,7 +92,7 @@ namespace module::localisation {
         }
 
         // Getters
-        inline int getRogueCount() const {
+        [[nodiscard]] inline int getRogueCount() const {
             return n_rogues;
         }
         [[nodiscard]] StateVec get_rogue() const {

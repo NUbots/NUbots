@@ -1,15 +1,20 @@
 log_level: WARN
 
-forwardSpeed: 0.01
-sideSpeed: 0.01
-turnSpeed : 0.08
-slow_approach_factor: 0.01
-a: 7
-b: 0
-search_timeout: 3
+# Priority in subsumption system
+walk_path_planner_priority: 3
 
-robot_ground_space: false
+# General playing tuning values for approaching ball
+forward_speed: 0.0125
+side_speed: 0.01
+max_turn_speed: 0.15
+min_turn_speed: -0.15
 
-ball_approach_dist: 0.2
-slowdown_distance: 0.3
-useLocalisation: true
+# Rotate on the spot tuning values
+rotate_speed: 0.2
+rotate_speed_x: -0.04
+rotate_speed_y: 0
+
+# Walk to ready position tuning values
+walk_to_ready_speed_x: 0.1
+walk_to_ready_speed_y: 0.05
+walk_to_ready_rotation: 0.4

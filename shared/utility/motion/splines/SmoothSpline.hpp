@@ -90,7 +90,7 @@ namespace utility::motion::splines {
         /**
          * Inherit Load Points
          */
-        virtual void importCallBack() override {
+        void importCallBack() override {
             const size_t size = Spline<Scalar>::splines.size();
             if (size == 0) {
                 return;

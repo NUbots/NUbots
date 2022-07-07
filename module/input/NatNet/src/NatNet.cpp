@@ -31,13 +31,7 @@ namespace module::input {
 
     using message::input::MotionCapture;
 
-    NatNet::NatNet(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment))
-        , markerSetModels()
-        , rigidBodyModels()
-        , skeletonModels()
-        , commandHandle()
-        , dataHandle() {
+    NatNet::NatNet(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("NatNet.yaml").then([this](const Configuration& config) {
             // We are updating to a new multicast address
@@ -61,32 +55,33 @@ namespace module::input {
 
                 // Create a listening UDP port for commands
                 std::tie(commandHandle, std::ignore, commandFd) =
-                    on<UDP>().then("NatNet Command", [this](UDP::Packet packet) { process(packet.payload); });
+                    on<UDP>().then("NatNet Command", [this](const UDP::Packet& packet) { process(packet.payload); });
 
                 // Create a listening UDP port for data
                 std::tie(dataHandle, std::ignore, std::ignore) =
-                    on<UDP::Multicast>(multicastAddress, dataPort).then("NatNet Data", [this](UDP::Packet packet) {
-                        // Test if we are "connected" to this remote
-                        // And if we are we can use the data
-                        if (remote == packet.remote.address && version != 0) {
-                            process(packet.payload);
-                        }
-                        // We have started connecting but haven't received a return ping
-                        else if (remote == packet.remote.address && version == 0) {
-                            // TODO maybe set a timeout here to try again
-                        }
-                        // We haven't connected to anything yet
-                        else if (remote == 0) {
-                            // This is now our remote
-                            remote = packet.remote.address;
+                    on<UDP::Multicast>(multicastAddress, dataPort)
+                        .then("NatNet Data", [this](const UDP::Packet& packet) {
+                            // Test if we are "connected" to this remote
+                            // And if we are we can use the data
+                            if (remote == packet.remote.address && version != 0) {
+                                process(packet.payload);
+                            }
+                            // We have started connecting but haven't received a return ping
+                            else if (remote == packet.remote.address && version == 0) {
+                                // TODO(HardwareTeam): maybe set a timeout here to try again
+                            }
+                            // We haven't connected to anything yet
+                            else if (remote == 0) {
+                                // This is now our remote
+                                remote = packet.remote.address;
 
-                            // Send a ping command
-                            sendCommand(Packet::Type::PING);
-                        }
-                        else if (remote != packet.remote.address) {
-                            log<NUClear::WARN>("There is more than one NatNet server running on this network");
-                        }
-                    });
+                                // Send a ping command
+                                sendCommand(Packet::Type::PING);
+                            }
+                            else if (remote != packet.remote.address) {
+                                log<NUClear::WARN>("There is more than one NatNet server running on this network");
+                            }
+                        });
             }
         });
     }
@@ -97,7 +92,7 @@ namespace module::input {
             std::vector<char> packet(sizeof(Packet) - 1);
 
             // Fill in the header
-            Packet* header = reinterpret_cast<Packet*>(packet.data());
+            auto* header   = reinterpret_cast<Packet*>(packet.data());
             header->type   = type;
             header->length = data.size();
 
@@ -105,7 +100,7 @@ namespace module::input {
             packet.insert(packet.end(), data.begin(), data.end());
 
             // Work out our remotes address
-            sockaddr_in address;
+            sockaddr_in address{};
             memset(&address, 0, sizeof(sockaddr_in));
             address.sin_family      = AF_INET;
             address.sin_port        = htons(commandPort);
@@ -142,7 +137,7 @@ namespace module::input {
         auto freeMarkers = ReadData<std::vector<Eigen::Vector3f>>::read(ptr, version);
         mocap->markers.reserve(freeMarkers.size());
         // Build markers
-        for (auto position : freeMarkers) {
+        for (const auto& position : freeMarkers) {
             MotionCapture::Marker marker;
             marker.position = position;
             marker.id       = -1;
@@ -185,7 +180,7 @@ namespace module::input {
         mocap->recording              = (params & 0x01) == 0x01;
         mocap->tracked_models_changed = (params & 0x01) == 0x02;
 
-        // TODO there is an eod thing here
+        // TODO(HardwareTeam): there is an eod thing here
 
         // Apply the model information we have to the objects
         for (auto& markerSet : mocap->marker_sets) {
@@ -402,7 +397,7 @@ namespace module::input {
     void NatNet::processString(const Packet& packet) {
         std::string str(&packet.data, packet.length);
 
-        // TODO do something with this string?
+        // TODO(HardwareTeam): do something with this string?
     }
 
 

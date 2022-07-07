@@ -10,11 +10,11 @@ nuclear_role(
   # Support
   support::configuration::GlobalConfig
   network::NUClearNet
-  output::NetworkForwarder
+  network::NetworkForwarder
   output::Overview
   # Sensors
   input::Camera
-  platform::darwin::HardwareIO
+  platform::cm740::HardwareIO
   input::SensorFilter
   # Vision
   vision::VisualMesh

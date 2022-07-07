@@ -39,9 +39,11 @@ EOF
 pacman -S --noconfirm --needed sudo
 
 # Setup users of the wheel group to be able to execute sudo commands with no password
-echo "%wheel ALL=(ALL) ALL" > /etc/sudoers.d/wheel
-chown root:root /etc/sudoers.d/wheel
-chmod 0440 /etc/sudoers.d/wheel
+echo "%wheel ALL=(ALL:ALL) NOPASSWD: ALL" > /etc/sudoers.d/wheel_sudo
+chmod 440 /etc/sudoers.d/wheel_sudo
+
+# Get sudo to insult users when they type a password wrong
+echo "Defaults insults" > /etc/sudoers.d/insults
 
 # Add u3v group and create our user
 groupadd u3v
@@ -160,7 +162,7 @@ chsh -s /usr/bin/zsh ${USER}
 mkdir -p ${HOME}/.ssh
 
 # Register docker client as an authorized user
-wget https://raw.githubusercontent.com/NUbots/NUbots/master/docker/home/nubots/.ssh/id_rsa.pub \
+wget https://raw.githubusercontent.com/NUbots/NUbots/main/docker/home/nubots/.ssh/id_rsa.pub \
     -O ${HOME}/.ssh/authorized_keys
 
 # Fix permissions so ssh will accept our authorized keys
@@ -181,7 +183,7 @@ chown -R ${USER}:${USER} /usr/local
 ################
 
 # Download the post-install script into chroot drive
-wget https://raw.githubusercontent.com/NUbots/NUbots/master/doc/ArchInstall/arch-post_install.sh \
+wget https://raw.githubusercontent.com/NUbots/NUbots/main/doc/ArchInstall/arch-post_install.sh \
     -O /arch-post_install.sh
 chmod +x /arch-post_install.sh
 

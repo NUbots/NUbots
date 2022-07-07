@@ -8,14 +8,14 @@ nuclear_role(
   motion::KinematicsConfiguration
   # Support
   network::NUClearNet
-  output::NetworkForwarder
+  network::NetworkForwarder
   output::Overview
   # support::VirtualCamera
   support::configuration::SoccerConfig
   # Sensors
   input::Camera
-  platform::darwin::HardwareIO
-  # platform::darwin::HardwareSimulator
+  platform::cm740::HardwareIO
+  # platform::cm740::HardwareSimulator
   input::SensorFilter
   # Vision
   vision::VisualMesh

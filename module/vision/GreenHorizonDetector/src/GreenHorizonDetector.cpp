@@ -137,7 +137,7 @@ namespace module::vision {
                 }
             }
 
-            if (clusters.size() < 1) {
+            if (clusters.empty()) {
                 log<NUClear::DEBUG>("Found no clusters to make a convex hull from");
             }
             else if (clusters.front().size() < 3) {

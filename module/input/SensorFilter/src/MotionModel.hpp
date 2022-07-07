@@ -142,7 +142,7 @@ namespace module::input {
             if (norm != Scalar(0)) {
                 // The gyroscope has measured a rotation of norm * deltaT around the axis
                 // omegaTTt / norm
-                Eigen::AngleAxis dq(norm * deltaT, newState.omegaTTt / norm);
+                Eigen::AngleAxis<Scalar> dq(norm * deltaT, newState.omegaTTt / norm);
 
                 // Update our orientation
                 newState.Rwt = newState.Rwt * dq;
@@ -161,8 +161,9 @@ namespace module::input {
             return newState;
         }
 
-        [[nodiscard]] static Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state,
-                                                                 const MeasurementType::ACCELEROMETER&) {
+        [[nodiscard]] static Eigen::Matrix<Scalar, 3, 1> predict(
+            const StateVec& state,
+            const MeasurementType::ACCELEROMETER& /* acc_indicator */) {
 
             // Rotate world gravity vector into torso space using quaternion conjugation
             //
@@ -182,18 +183,21 @@ namespace module::input {
                 .vec();
         }
 
-        [[nodiscard]] static Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state,
-                                                                 const MeasurementType::GYROSCOPE&) {
+        [[nodiscard]] static Eigen::Matrix<Scalar, 3, 1> predict(
+            const StateVec& state,
+            const MeasurementType::GYROSCOPE& /* gyro_indicator */) {
             return state.omegaTTt;
         }
 
-        [[nodiscard]] static Eigen::Matrix<Scalar, 3, 1> predict(const StateVec& state,
-                                                                 const MeasurementType::FLAT_FOOT_ODOMETRY&) {
+        [[nodiscard]] static Eigen::Matrix<Scalar, 3, 1> predict(
+            const StateVec& state,
+            const MeasurementType::FLAT_FOOT_ODOMETRY& /* ff_odometry_indicator */) {
             return state.rTWw;
         }
 
-        [[nodiscard]] static Eigen::Matrix<Scalar, 4, 1> predict(const StateVec& state,
-                                                                 const MeasurementType::FLAT_FOOT_ORIENTATION&) {
+        [[nodiscard]] static Eigen::Matrix<Scalar, 4, 1> predict(
+            const StateVec& state,
+            const MeasurementType::FLAT_FOOT_ORIENTATION& /* ff_orientation_indicator */) {
             return state.Rwt.coeffs();
         }
 

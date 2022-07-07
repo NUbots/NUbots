@@ -9,14 +9,14 @@ nuclear_role(
   # Support
   support::configuration::GlobalConfig
   network::NUClearNet
-  output::NetworkForwarder
+  network::NetworkForwarder
   output::Overview
   support::configuration::SoccerConfig
   # input
   input::GameController
   # Sensors
   input::Camera
-  platform::darwin::HardwareIO
+  platform::cm740::HardwareIO
   input::SensorFilter
   # Vision
   vision::VisualMesh
@@ -28,14 +28,12 @@ nuclear_role(
   localisation::RobotParticleLocalisation
   # Behaviour
   behaviour::Controller
-  behaviour::skills::Stand
-  behaviour::skills::FallingRelax
   behaviour::skills::Getup
   behaviour::skills::KickScript
   behaviour::skills::HeadBehaviourSoccer
+  behaviour::skills::Stand
   behaviour::planning::KickPlanner
-  behaviour::planning::SimpleWalkPathPlanner # Creates WalkPaths. behaviour::planning::BezierWalkPathPlanner  # Creates
-                                             # WalkPaths.
+  behaviour::planning::SimpleWalkPathPlanner
   behaviour::strategy::SoccerStrategy
   behaviour::skills::Nod
   # Motion

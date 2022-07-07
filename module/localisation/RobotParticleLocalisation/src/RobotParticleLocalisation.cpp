@@ -193,7 +193,7 @@ namespace module::localisation {
                 }
 
                 const Eigen::Affine3d Htw(sensors.Htw);
-                for (auto& s : locReset.hypotheses) {
+                for (const auto& s : locReset.hypotheses) {
 
                     // Calculate the reset state
                     Eigen::Affine3d Hft;
@@ -277,7 +277,7 @@ namespace module::localisation {
     [[nodiscard]] Eigen::Vector3d RobotParticleLocalisation::getFieldPosition(
         const VisionGoal::Side& side,
         const message::support::FieldDescription& fd,
-        const bool& isOwn) const {
+        const bool& isOwn) {
         const bool left  = (side == VisionGoal::Side::LEFT);
         const bool right = (side == VisionGoal::Side::RIGHT);
 

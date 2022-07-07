@@ -16,7 +16,7 @@ namespace module::tools {
         std::string device;
         struct Firmware {
             std::vector<uint8_t> firmware;
-            uint8_t checksum;
+            uint8_t checksum = 0;
         };
 
         std::map<std::pair<std::string, std::string>, Firmware> firmwares;
@@ -28,8 +28,8 @@ namespace module::tools {
         Device selected_device;
         Battery selected_battery;
 
-        void showDeviceMenu() const;
-        void showBatteryMenu() const;
+        static void showDeviceMenu();
+        static void showBatteryMenu();
     };
 
 }  // namespace module::tools
