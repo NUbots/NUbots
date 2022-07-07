@@ -1,5 +1,6 @@
 var structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig =
 [
+    [ "cache_directory", "structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig.html#af4e81aff534e2f5cfd9151cd315e0a5e", null ],
     [ "classifier", "structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig.html#aff9998727098e5f4deeb0917a3a6ee8d", null ],
     [ "engine", "structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig.html#a5766c0334e0816a00c195359fb26e79f", null ],
     [ "geometry", "structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig.html#a57de3cda89d090197e4c2a42d3323b64", null ],

@@ -1,5 +1,6 @@
 var NAVTREEINDEX6 =
 {
+"classutility_1_1motion_1_1splines_1_1SplineContainer.html#a06546a930c1dea930e0307f1e4c86610":[1,0,5,5,0,5,5],
 "classutility_1_1motion_1_1splines_1_1SplineContainer.html#a0cddc595219dde123c9a265f02453895":[1,0,5,5,0,5,4],
 "classutility_1_1motion_1_1splines_1_1SplineContainer.html#a18134125896ee0fcf40cb70ef66263cc":[1,0,5,5,0,5,6],
 "classutility_1_1motion_1_1splines_1_1SplineContainer.html#a2ea49b1b5f59a61f2dec46aee86a5d57":[1,0,5,5,0,5,9],
@@ -66,8 +67,8 @@ var NAVTREEINDEX6 =
 "classutility_1_1vision_1_1Mosaic.html#ab6433eaaf2506c7798f7591d7fe432c3":[1,0,5,10,1,4],
 "classutility_1_1vision_1_1Mosaic.html#aeeda811ebe518c7b870b2c0c58adecff":[1,0,5,10,1,2],
 "examples.html":[2],
-"functions.html":[1,3,0,0],
 "functions.html":[1,3,0],
+"functions.html":[1,3,0,0],
 "functions_b.html":[1,3,0,1],
 "functions_c.html":[1,3,0,2],
 "functions_d.html":[1,3,0,3],
@@ -75,8 +76,8 @@ var NAVTREEINDEX6 =
 "functions_enum.html":[1,3,4],
 "functions_eval.html":[1,3,5],
 "functions_f.html":[1,3,0,5],
-"functions_func.html":[1,3,1,0],
 "functions_func.html":[1,3,1],
+"functions_func.html":[1,3,1,0],
 "functions_func_b.html":[1,3,1,1],
 "functions_func_c.html":[1,3,1,2],
 "functions_func_d.html":[1,3,1,3],
@@ -248,6 +249,5 @@ var NAVTREEINDEX6 =
 "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html#a14ca8bb2c0558f55aa92b525c4bd6767":[1,0,3,0,0,0,2],
 "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html#a7325b6091386271d087ab70e20734509":[1,0,3,0,0,0,0],
 "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html#abe09729679a99b3de222ed4f73c0cbe7":[1,0,3,0,0,0,1],
-"structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html":[1,0,3,0,0,1],
-"structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html#a96aea758637de7091dbad998b0a969c3":[1,0,3,0,0,1,1]
+"structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html":[1,0,3,0,0,1]
 };

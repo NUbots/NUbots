@@ -1,5 +1,6 @@
 var NAVTREEINDEX4 =
 {
+"classmodule_1_1motion_1_1SixDOFFootController.html":[1,0,2,4,12],
 "classmodule_1_1motion_1_1SixDOFFootController.html#a1561d52b26c87766387ebcacac2d0c77":[1,0,2,4,12,14],
 "classmodule_1_1motion_1_1SixDOFFootController.html#a19d26ea9c6105906a34ad223d8c1c5c0":[1,0,2,4,12,23],
 "classmodule_1_1motion_1_1SixDOFFootController.html#a3409be31b2daf03d99cc435c573ac934":[1,0,2,4,12,5],
@@ -248,6 +249,5 @@ var NAVTREEINDEX4 =
 "classmodule_1_1vision_1_1BallDetector.html#a1d11876da2dc92451e94f4344028e9c3":[1,0,2,10,1,0],
 "classmodule_1_1vision_1_1BallDetector.html#a2519d88b77f7cf6cadbd00a2d6ffd0ad":[1,0,2,10,1,4],
 "classmodule_1_1vision_1_1BallDetector.html#a2c4e394ad29d20d31c901b286676d74b":[1,0,2,10,1,7],
-"classmodule_1_1vision_1_1BallDetector.html#a3c71262b721a63d157a5c6f258bfcad7":[1,0,2,10,1,5],
-"classmodule_1_1vision_1_1BallDetector.html#acf5627528f8b85dba93c938a064ce65c":[1,0,2,10,1,1]
+"classmodule_1_1vision_1_1BallDetector.html#a3c71262b721a63d157a5c6f258bfcad7":[1,0,2,10,1,5]
 };

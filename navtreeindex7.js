@@ -1,5 +1,6 @@
 var NAVTREEINDEX7 =
 {
+"structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html#a96aea758637de7091dbad998b0a969c3":[1,0,3,0,0,1,1],
 "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html#ad02dc9609e3af81f7b92b854a8f5f438":[1,0,3,0,0,1,0],
 "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Script_01_4.html":[1,0,3,0,0,2],
 "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Script_01_4.html#a1bfc7bfd8a87c8ada601b1f82b9cac4f":[1,0,3,0,0,2,0],
@@ -248,6 +249,5 @@ var NAVTREEINDEX7 =
 "structmodule_1_1behaviour_1_1skills_1_1ExecuteNod.html":[1,0,2,0,1,2],
 "structmodule_1_1behaviour_1_1skills_1_1ExecuteStand.html":[1,0,2,0,1,3],
 "structmodule_1_1behaviour_1_1skills_1_1Falling.html":[1,0,2,0,1,4],
-"structmodule_1_1behaviour_1_1skills_1_1FinishKick.html":[1,0,2,0,1,6],
-"structmodule_1_1behaviour_1_1skills_1_1Getup_1_1Config.html":[1,0,2,0,1,7,0]
+"structmodule_1_1behaviour_1_1skills_1_1FinishKick.html":[1,0,2,0,1,6]
 };

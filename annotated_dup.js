@@ -230,6 +230,11 @@ var annotated_dup =
       ] ],
       [ "vision", null, [
         [ "visualmesh", null, [
+          [ "generate_runner", null, [
+            [ "BuildEngine", "structmodule_1_1vision_1_1visualmesh_1_1generate__runner_1_1BuildEngine.html", null ],
+            [ "BuildEngine<::visualmesh::engine::cpu::Engine, Scalar >", "structmodule_1_1vision_1_1visualmesh_1_1generate__runner_1_1BuildEngine_3_1_1visualmesh_1_1engin3a4d06ab9f1aca0a3451fe14a035002a.html", "structmodule_1_1vision_1_1visualmesh_1_1generate__runner_1_1BuildEngine_3_1_1visualmesh_1_1engin3a4d06ab9f1aca0a3451fe14a035002a" ],
+            [ "BuildEngine<::visualmesh::engine::opencl::Engine, Scalar >", "structmodule_1_1vision_1_1visualmesh_1_1generate__runner_1_1BuildEngine_3_1_1visualmesh_1_1enginf686d48a39f2134786a409c084d63bbf.html", "structmodule_1_1vision_1_1visualmesh_1_1generate__runner_1_1BuildEngine_3_1_1visualmesh_1_1enginf686d48a39f2134786a409c084d63bbf" ]
+          ] ],
           [ "LoadedModel", "structmodule_1_1vision_1_1visualmesh_1_1LoadedModel.html", "structmodule_1_1vision_1_1visualmesh_1_1LoadedModel" ],
           [ "VisualMeshModelConfig", "structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig.html", "structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig" ],
           [ "VisualMeshResults", "structmodule_1_1vision_1_1visualmesh_1_1VisualMeshResults.html", "structmodule_1_1vision_1_1visualmesh_1_1VisualMeshResults" ],

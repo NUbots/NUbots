@@ -21,9 +21,12 @@ var searchData=
   ['br_58',['br',['../classutility_1_1math_1_1geometry_1_1Quad.html#a189a569997c42a9f47897df89a85f8a7',1,'utility::math::geometry::Quad']]],
   ['buffer_59',['buffer',['../classmodule_1_1platform_1_1Webots.html#a14ce2e31b4513dd1edaae6884f12d0a7',1,'module::platform::Webots']]],
   ['buildbulkreadpacket_60',['buildBulkReadPacket',['../classCM740_1_1CM740.html#a2c8d669d3177cb728871e8bd3ad298a0',1,'CM740::CM740']]],
-  ['bulkread_61',['bulkRead',['../classCM740_1_1CM740.html#a2620c98fb513aeb029ec0cc7a4329f1b',1,'CM740::CM740']]],
-  ['bulkreadcommand_62',['bulkReadCommand',['../classCM740_1_1CM740.html#afe0ee7891690ff10e15a3ada419a6039',1,'CM740::CM740']]],
-  ['bulkreadresults_63',['BulkReadResults',['../structCM740_1_1BulkReadResults.html',1,'CM740']]],
-  ['button_64',['Button',['../structmodule_1_1input_1_1SensorFilter_1_1Config_1_1Button.html',1,'module::input::SensorFilter::Config']]],
-  ['bytes_5fwritten_65',['bytes_written',['../classutility_1_1nbs_1_1Encoder.html#a6dc18d96400ed6f4c0b3fbdee0bb3a3c',1,'utility::nbs::Encoder']]]
+  ['buildengine_61',['BuildEngine',['../structmodule_1_1vision_1_1visualmesh_1_1generate__runner_1_1BuildEngine.html',1,'module::vision::visualmesh::generate_runner']]],
+  ['buildengine_3c_3a_3avisualmesh_3a_3aengine_3a_3acpu_3a_3aengine_2c_20scalar_20_3e_62',['BuildEngine&lt;::visualmesh::engine::cpu::Engine, Scalar &gt;',['../structmodule_1_1vision_1_1visualmesh_1_1generate__runner_1_1BuildEngine_3_1_1visualmesh_1_1engin3a4d06ab9f1aca0a3451fe14a035002a.html',1,'module::vision::visualmesh::generate_runner']]],
+  ['buildengine_3c_3a_3avisualmesh_3a_3aengine_3a_3aopencl_3a_3aengine_2c_20scalar_20_3e_63',['BuildEngine&lt;::visualmesh::engine::opencl::Engine, Scalar &gt;',['../structmodule_1_1vision_1_1visualmesh_1_1generate__runner_1_1BuildEngine_3_1_1visualmesh_1_1enginf686d48a39f2134786a409c084d63bbf.html',1,'module::vision::visualmesh::generate_runner']]],
+  ['bulkread_64',['bulkRead',['../classCM740_1_1CM740.html#a2620c98fb513aeb029ec0cc7a4329f1b',1,'CM740::CM740']]],
+  ['bulkreadcommand_65',['bulkReadCommand',['../classCM740_1_1CM740.html#afe0ee7891690ff10e15a3ada419a6039',1,'CM740::CM740']]],
+  ['bulkreadresults_66',['BulkReadResults',['../structCM740_1_1BulkReadResults.html',1,'CM740']]],
+  ['button_67',['Button',['../structmodule_1_1input_1_1SensorFilter_1_1Config_1_1Button.html',1,'module::input::SensorFilter::Config']]],
+  ['bytes_5fwritten_68',['bytes_written',['../classutility_1_1nbs_1_1Encoder.html#a6dc18d96400ed6f4c0b3fbdee0bb3a3c',1,'utility::nbs::Encoder']]]
 ];

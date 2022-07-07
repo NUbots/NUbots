@@ -1,5 +1,6 @@
 var NAVTREEINDEX3 =
 {
+"classmodule_1_1input_1_1VirtualLoadSensor.html#a08c0aa5e013d31e1d0d4f4b116bfba35":[1,0,2,2,29,0],
 "classmodule_1_1input_1_1VirtualLoadSensor.html#a08c0aa5e013d31e1d0d4f4b116bfba35a596bc8d6b30385bf44bfc22ca1f4fc6a":[1,0,2,2,29,0,1],
 "classmodule_1_1input_1_1VirtualLoadSensor.html#a08c0aa5e013d31e1d0d4f4b116bfba35a5c7f31e6afe03beab4d97640a47e685d":[1,0,2,2,29,0,2],
 "classmodule_1_1input_1_1VirtualLoadSensor.html#a08c0aa5e013d31e1d0d4f4b116bfba35a9db68a83d26d8c8e85ec320d755f5ec1":[1,0,2,2,29,0,0],
@@ -248,6 +249,5 @@ var NAVTREEINDEX3 =
 "classmodule_1_1motion_1_1ScriptEngine.html":[1,0,2,4,11],
 "classmodule_1_1motion_1_1ScriptEngine.html#a05a32bfbd87746693e4ff7e700edda6c":[1,0,2,4,11,2],
 "classmodule_1_1motion_1_1ScriptEngine.html#a215d225cd0b62180acacf9e7815e8fe1":[1,0,2,4,11,1],
-"classmodule_1_1motion_1_1ScriptEngine.html#ab3301ed9b6bc3a77a71fdd397c0b00ff":[1,0,2,4,11,0],
-"classmodule_1_1motion_1_1SixDOFFootController.html":[1,0,2,4,12]
+"classmodule_1_1motion_1_1ScriptEngine.html#ab3301ed9b6bc3a77a71fdd397c0b00ff":[1,0,2,4,11,0]
 };

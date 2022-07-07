@@ -1,5 +1,6 @@
 var NAVTREEINDEX2 =
 {
+"classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html#adda97f4bb77ebb866714b7ed1c8c282e":[1,0,2,0,2,0,22],
 "classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html#ae74a62fc96cbff97f61273d7412988a7":[1,0,2,0,2,0,25],
 "classmodule_1_1behaviour_1_1strategy_1_1PS3Walk.html":[1,0,2,0,2,1],
 "classmodule_1_1behaviour_1_1strategy_1_1PS3Walk.html#a0e6a519dc551e329675a124a738ad25a":[1,0,2,0,2,1,28],
@@ -248,6 +249,5 @@ var NAVTREEINDEX2 =
 "classmodule_1_1input_1_1SensorFilter.html#ab686a5107ed9851c3b84430f1dc3eeaf":[1,0,2,2,23,9],
 "classmodule_1_1input_1_1SensorFilter.html#ad23093814064786615ef70018ed74f29":[1,0,2,2,23,4],
 "classmodule_1_1input_1_1SensorFilter.html#ae6e450c01d7b3bc63200bda4554ef958":[1,0,2,2,23,3],
-"classmodule_1_1input_1_1VirtualLoadSensor.html":[1,0,2,2,29],
-"classmodule_1_1input_1_1VirtualLoadSensor.html#a08c0aa5e013d31e1d0d4f4b116bfba35":[1,0,2,2,29,0]
+"classmodule_1_1input_1_1VirtualLoadSensor.html":[1,0,2,2,29]
 };
