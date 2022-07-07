@@ -12,7 +12,6 @@
 
 #include "message/input/Image.hpp"
 
-
 namespace module::vision::visualmesh {
 
     struct VisualMeshResults {
@@ -22,7 +21,6 @@ namespace module::vision::visualmesh {
         std::vector<int> indices;
         Eigen::MatrixXf classifications;
     };
-
 
     class VisualMeshRunner {
     private:
