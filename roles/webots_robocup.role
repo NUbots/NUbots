@@ -24,7 +24,7 @@ nuclear_role(
   vision::BallDetector
   output::ImageCompressor
   # Localisation
-  localisation::BallLocalisation
+  localisation::VisionBallLocalisation
   localisation::RobotParticleLocalisation
   # Behaviour
   behaviour::Controller
