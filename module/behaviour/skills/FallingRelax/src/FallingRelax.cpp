@@ -182,7 +182,7 @@ namespace module::behaviour::skills {
             [this](const std::set<LimbID>& /* limbs */) { emit(std::make_unique<KillFallingRelax>()); },
             [this](const std::set<ServoID>& /* servos */) { emit(std::make_unique<KillFallingRelax>()); }}));
 
-        on<Last<5, Trigger<Sensors>>, Single>().then("FallingRelax Fallen Check",
+        on<Last<5, Trigger<Sensors>>>().then("FallingRelax Fallen Check",
             [this](const std::list<std::shared_ptr<const Sensors>>& sensors) {
 
             //Transform to torso {t} from world {w} space
