@@ -61,7 +61,7 @@ namespace module::vision::visualmesh {
             static std::shared_ptr<::visualmesh::engine::opencl::Engine<Scalar>> build(
                 ::visualmesh::NetworkStructure<float> net,
                 std::string cache) {
-                fs::create_directory(cache);  // create the cache folder if it doesn't exist
+                fs::create_directories(cache);  // create the cache folder if it doesn't exist
                 return std::make_shared<::visualmesh::engine::opencl::Engine<Scalar>>(net, cache);
             }
         };
