@@ -31,6 +31,12 @@ cat << EOF > /etc/hosts
 127.0.1.1       ${HOSTNAME}
 EOF
 
+# Lock the pacman date
+# ↓↓↓ UPDATE MIRRORS HERE ↓↓↓
+cat > /etc/pacman.d/mirrorlist << EOF
+Server=https://archive.archlinux.org/repos/2021/08/29/\$repo/os/\$arch
+EOF
+
 #########
 # USERS #
 #########
