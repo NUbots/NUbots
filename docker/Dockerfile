@@ -154,7 +154,7 @@ RUN install-cmake-from-source https://github.com/intel/media-driver/archive/inte
 # Install intel compute runtime (OpenCL implementation)
 COPY --chown=root:root etc/OpenCL/vendors/intel.icd /etc/OpenCL/vendors/intel.icd
 COPY usr/local/package/intel-compute-runtime.sh /usr/local/package/intel-compute-runtime.sh
-RUN /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute-runtime/archive/21.31.20514.tar.gz \
+RUN /usr/local/package/intel-compute-runtime.sh https://github.com/CMurtagh-LGTM/compute-runtime/archive/a815678f41898b18635bd57819ac8c555cb3bfb5.tar.gz \
     -DSKIP_UNIT_TESTS=ON \
     -DIGC_DIR=/usr/local
 
