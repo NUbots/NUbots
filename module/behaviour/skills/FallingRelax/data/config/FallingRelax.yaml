@@ -1,8 +1,8 @@
 # Common
 log_level: WARN
-relax_fall_priority: 9
+relax_fall_priority: 5
 falling_angle: 0.65 #0.611
 
 # Old
-falling_acceleration: 8
+falling_acceleration: 8.91
 recovery_acceleration: [9.5, 10.5]

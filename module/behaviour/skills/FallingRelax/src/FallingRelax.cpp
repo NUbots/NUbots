@@ -165,8 +165,6 @@ namespace module::behaviour::skills {
         on<Configuration>("FallingRelax.yaml").then([this](const Configuration& config) {
             log<NUClear::INFO>("FallingRelax - Config");
             log_level                 = config["log_level"].as<NUClear::LogLevel>();
-            //const auto fallingAngle   = config["falling_angle"].as<float>();
-            //cfg.falling_angle   = std::cos(fallingAngle);
             cfg.falling_angle         = config["falling_angle"].as<float>();
             cfg.falling_acceleration  = config["falling_acceleration"].as<float>();
             cfg.recovery_acceleration = config["recovery_acceleration"].as<std::vector<float>>();
@@ -195,22 +193,15 @@ namespace module::behaviour::skills {
             if (!relaxed && !sensors.empty() && acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > cfg.falling_angle) {
                 NUClear::log<NUClear::DEBUG>("We tilted far enough ");
                 // We might be falling, check the accelerometer
-                double magnitude = 0;
+                double gravity = sensors.back()->accelerometer.norm();
 
-                for (const auto& sensor : sensors) {
-                    magnitude += sensor->accelerometer.norm();
-                }
-
-                magnitude /= sensors.size();
-                NUClear::log<NUClear::DEBUG>(magnitude);
-
-                if (magnitude < cfg.falling_acceleration) {
-                    NUClear::log<NUClear::DEBUG>("Grtavity is ", magnitude);
+                if (gravity < cfg.falling_acceleration) {
+                    NUClear::log<NUClear::DEBUG>("Grtavity is ", gravity);
                     relaxed = true;
                     update_priority(cfg.relax_fall_priority);
                 }
             }
-            else if (relaxed && Eigen::Vector3d::UnitZ().dot(uZTw) < cfg.falling_angle) {
+            else if (relaxed) {
                 // We might be recovered, check the accelerometer
                 double magnitude = 0;
 
@@ -223,7 +214,7 @@ namespace module::behaviour::skills {
                 // See if we recover
                 if (magnitude > cfg.recovery_acceleration[0] && magnitude < cfg.recovery_acceleration[1]) {
                     relaxed = false;
-                    update_priority(0);
+                    update_priority(4);
                 }
             }
         });
@@ -232,12 +223,11 @@ namespace module::behaviour::skills {
             emit(std::make_unique<ExecuteScriptByName>(
                     subsumption_id,
                     std::vector<std::string>({"Relax.yaml"})));
-            update_priority(cfg.relax_fall_priority);
         });
 
         on<Trigger<KillFallingRelax>>().then([this] {
             relaxed = false;
-            update_priority(0);
+            //update_priority(4);
         });
     }
 
