@@ -135,10 +135,30 @@ namespace module::behaviour::strategy {
             if (balls.balls.size() > 0) {
                 ball_last_measured = NUClear::clock::now();
                 // Get the latest vision ball measurement in camera space
+
                 Eigen::Vector3f rBCc =
                     reciprocalSphericalToCartesian(balls.balls[0].measurements[0].srBCc.cast<float>());
-                // Transform the vision ball measurement into torso space
+
                 Eigen::Affine3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
+
+                rBTt = Htc * rBCc;
+
+                auto raw_lowest_distance = std::sqrt(std::pow(rBTt_smoothed.x(), 2) + std::pow(rBTt_smoothed.y(), 2));
+
+                for (const auto& ball : balls.balls) {
+
+                    rBCc = reciprocalSphericalToCartesian(ball.measurements[0].srBCc.cast<float>());
+                    Eigen::Affine3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
+                    auto T_rBTt = Htc * rBCc;
+
+                    if (std::sqrt(std::pow(rBTt_smoothed.x(), 2) + std::pow(rBTt_smoothed.y(), 2))
+                        < raw_lowest_distance) {
+                        raw_lowest_distance =
+                            std::sqrt(std::pow(rBTt_smoothed.x(), 2) + std::pow(rBTt_smoothed.y(), 2));
+                        rBTt = T_rBTt;
+                    }
+                }
+
                 rBTt = Htc * rBCc;
 
                 // Apply exponential filter to rBTt
