@@ -191,12 +191,11 @@ namespace module::behaviour::skills {
             Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
 
             if (!relaxed && !sensors.empty() && acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > cfg.falling_angle) {
-                NUClear::log<NUClear::DEBUG>("We tilted far enough ");
+
                 // We might be falling, check the accelerometer
                 double gravity = sensors.back()->accelerometer.norm();
 
                 if (gravity < cfg.falling_acceleration) {
-                    NUClear::log<NUClear::DEBUG>("Grtavity is ", gravity);
                     relaxed = true;
                     update_priority(cfg.relax_fall_priority);
                 }
@@ -214,7 +213,7 @@ namespace module::behaviour::skills {
                 // See if we recover
                 if (magnitude > cfg.recovery_acceleration[0] && magnitude < cfg.recovery_acceleration[1]) {
                     relaxed = false;
-                    update_priority(4);
+                    update_priority(0);
                 }
             }
         });
@@ -227,7 +226,7 @@ namespace module::behaviour::skills {
 
         on<Trigger<KillFallingRelax>>().then([this] {
             relaxed = false;
-            //update_priority(4);
+            update_priority(0);
         });
     }
 
