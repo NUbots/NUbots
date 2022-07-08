@@ -14,7 +14,7 @@ namespace {
 
     template <int i>
     struct UniqueProvider {
-        UniqueProvider(const std::string& msg) : msg(msg_) {}
+        UniqueProvider(const std::string& msg_) : msg(msg_) {}
         std::string msg;
     };
 
