@@ -2,8 +2,8 @@ import fs from 'fs'
 import { autorun } from 'mobx'
 import { computedFn } from 'mobx-utils'
 import { Matrix4, Vector3 } from 'three'
-import { fourcc } from '../../client/image_decoder/fourcc'
 import { FieldDimensions } from '../../shared/field/dimensions'
+import { fourcc } from '../../shared/image_decoder/fourcc'
 import { Imat4, message } from '../../shared/messages'
 import { NUClearNetClient } from '../../shared/nuclearnet/nuclearnet_client'
 import { toTimestamp } from '../../shared/time/timestamp'
@@ -93,7 +93,7 @@ export class VisionSimulator extends Simulator {
     const time = periodic(10)
     const t = time / 10
     const Hcw = new Matrix4().makeRotationZ(2 * Math.PI * t)
-    const axis = new Vector3(10, 1, 0)
+    const uBCc = new Vector3(10, 1, 0)
       .normalize()
       .applyMatrix4(new Matrix4().makeRotationX(2 * Math.PI * t))
     return {
@@ -104,13 +104,11 @@ export class VisionSimulator extends Simulator {
         Hcw: toProtoMat44(Hcw),
         balls: [
           {
-            cone: {
-              axis,
-              radius: Math.cos((Math.PI / 16) * (Math.cos(2 * Math.PI * t) / 5 + 1)),
-            },
+            uBCc,
+            radius: Math.cos((Math.PI / 16) * (Math.cos(2 * Math.PI * t) / 5 + 1)),
             measurements: [
               {
-                type: MeasurementType.WIDTH_BASED,
+                type: MeasurementType.ANGULAR,
                 srBCc: new Vector3(1, 0, 0),
               },
             ],

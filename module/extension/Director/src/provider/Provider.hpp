@@ -20,6 +20,7 @@
 #define MODULE_EXTENSION_DIRECTOR_PROVIDER_HPP
 
 #include <nuclear>
+#include <utility>
 
 #include "extension/Behaviour.hpp"
 
@@ -37,24 +38,22 @@ namespace module::extension::provider {
         struct WhenCondition {
             WhenCondition(const std::type_index& type_,
                           std::function<bool(const int&)> validator_,
-                          std::function<int()> current_,
-                          NUClear::threading::ReactionHandle handle_)
-                : type(type_), validator(validator_), current(current_), handle(std::move(handle_)) {}
-
+                          const bool& current_)
+                : type(type_), validator(std::move(validator_)), current(current_) {}
             /// The type of state that this condition is checking
             std::type_index type;
             /// Expression to determine if the passed state is valid
             std::function<bool(const int&)> validator;
-            /// Function to get the current state
-            std::function<int()> current;
+            /// The current state of the condition when it was last seen by the Director
+            bool current;
             /// The reaction handle which is monitoring this state for a valid condition
             NUClear::threading::ReactionHandle handle;
         };
 
         Provider(const ::extension::behaviour::commands::ProviderClassification& classification_,
                  const std::type_index& type_,
-                 const std::shared_ptr<NUClear::threading::Reaction>& reaction_)
-            : classification(classification_), type(type_), reaction(reaction_) {}
+                 std::shared_ptr<NUClear::threading::Reaction> reaction_)
+            : classification(classification_), type(type_), reaction(std::move(reaction_)) {}
 
         /// The classification of this Provider
         ::extension::behaviour::commands::ProviderClassification classification;
@@ -63,9 +62,11 @@ namespace module::extension::provider {
         /// The reaction object to run in order to run this Provider
         std::shared_ptr<NUClear::threading::Reaction> reaction;
         /// Any when conditions that are required by this Provider
-        std::vector<WhenCondition> when;
+        std::vector<std::shared_ptr<WhenCondition>> when;
         /// A list of types and states that are caused by running this Provider
         std::map<std::type_index, int> causing;
+        /// A list of provider types that this provider needs in order to run
+        std::set<std::type_index> needs;
         /// A boolean that is true if this Provider is currently active and running (can make subtasks)
         bool active = false;
     };

@@ -24,7 +24,7 @@ namespace module::vision::visualmesh {
 
     class VisualMeshRunner {
     private:
-        int n_neighbours;
+        int n_neighbours = 0;
         std::function<VisualMeshResults(const message::input::Image&, const Eigen::Affine3f&)> runner;
 
     public:
@@ -33,7 +33,8 @@ namespace module::vision::visualmesh {
                          const double& max_height,
                          const double& max_distance,
                          const double& intersection_tolerance,
-                         const std::string& path);
+                         const std::string& path,
+                         const std::string& cache_directory);
         VisualMeshResults operator()(const message::input::Image& image, const Eigen::Affine3f& Htc);
 
         std::unique_ptr<std::atomic<bool>> active;

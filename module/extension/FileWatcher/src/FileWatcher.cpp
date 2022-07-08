@@ -154,7 +154,7 @@ namespace module::extension {
 
             for (auto it = reactor.remove_queue.begin(); it != reactor.remove_queue.end();) {
                 uv_fs_event_stop(it->get());
-                uv_close(reinterpret_cast<uv_handle_t*>(it->get()), [](uv_handle_t*) { return; });
+                uv_close(reinterpret_cast<uv_handle_t*>(it->get()), [](uv_handle_t* /* handle */) {});
                 it = reactor.remove_queue.erase(it);
             }
         });
@@ -303,14 +303,13 @@ namespace module::extension {
         for (const auto& remove : remove_queue) {
             if (remove) {
                 uv_fs_event_stop(remove.get());
-                uv_close(reinterpret_cast<uv_handle_t*>(remove.get()), [](uv_handle_t*) {});
+                uv_close(reinterpret_cast<uv_handle_t*>(remove.get()), [](uv_handle_t* /* handle */) {});
             }
         }
-
         std::cout << "After second loop of filewatcher destructor" << std::endl;
-        uv_close(reinterpret_cast<uv_handle_t*>(remove_watch.get()), [](uv_handle_t*) {});
-        uv_close(reinterpret_cast<uv_handle_t*>(add_watch.get()), [](uv_handle_t*) {});
-        uv_close(reinterpret_cast<uv_handle_t*>(shutdown.get()), [](uv_handle_t*) {});
+        uv_close(reinterpret_cast<uv_handle_t*>(remove_watch.get()), [](uv_handle_t* /* handle */) {});
+        uv_close(reinterpret_cast<uv_handle_t*>(add_watch.get()), [](uv_handle_t* /* handle */) {});
+        uv_close(reinterpret_cast<uv_handle_t*>(shutdown.get()), [](uv_handle_t* /* handle */) {});
         std::cout << "Before while loop in filewatcher dtor" << std::endl;
         while (uv_run(loop.get(), UV_RUN_NOWAIT) != 0) {
         }

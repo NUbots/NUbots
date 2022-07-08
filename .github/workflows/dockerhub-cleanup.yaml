@@ -17,10 +17,20 @@ jobs:
     # The type of runner that the job will run on
     runs-on: ubuntu-20.04
 
+    # We need `jq` for the script, so we run in a container with it installed
+    container:
+      image: dwdraju/alpine-curl-jq
+
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: Delete image
+      # Checks-out the repo under $GITHUB_WORKSPACE so we can access the delete script
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Run our script which calls the dockerhub API to delete the PR's tag
+      - name: Delete DockerHub image tag
         run: |
-          curl -i -X DELETE \
-            -u "${{ secrets.DOCKERHUB_USERNAME }}:$${{ secrets.DOCKERHUB_PASSWORD }}" \
-            https://cloud.docker.com/v2/repositories/nubots/nubots/tags/pull-request-${{ github.event.number }}/
+          DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }} \
+          DOCKERHUB_PASSWORD=${{ secrets.DOCKERHUB_PASSWORD }} \
+          TAG=pull-request-${{ github.event.number }} \
+          .github/workflows/scripts/remove_dockerhub_tag.sh

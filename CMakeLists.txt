@@ -98,8 +98,8 @@ add_compile_options(-Wall -Wpedantic -Wextra)
 # This is needed everywhere so that we can catch segmentation faults
 add_compile_options(-fnon-call-exceptions)
 
-# We use C++17
-add_compile_options(-std=c++17)
+# We use C++20
+add_compile_options(-std=c++20)
 
 # Make NUClear use the system clock, as we are syncing it with ptp
 add_compile_definitions(NUCLEAR_CLOCK_TYPE=std::chrono::steady_clock)
@@ -116,6 +116,9 @@ set(NUCLEAR_ROLE_BANNER_FILE
     "${PROJECT_SOURCE_DIR}/cmake/banner.png"
     CACHE PATH "The path the banner to print at the start of each role execution" FORCE
 )
+
+# Build **ALL** modules, even those which aren't otherwise in a role
+option(BUILD_ALL_MODULES "Create a role with all modules included" OFF)
 
 # Include the NUClear roles system
 add_subdirectory(nuclear)

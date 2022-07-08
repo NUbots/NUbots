@@ -20,7 +20,6 @@ namespace module::platform {
     using message::motion::ServoTarget;
     using message::motion::ServoTargets;
     using message::platform::RawSensors;
-    using message::platform::gazebo::Ball;
     using message::platform::gazebo::Command;
     using GazeboSensors = message::platform::gazebo::RawSensors;
     using GazeboTargets = message::platform::gazebo::ServoTargets;
@@ -50,10 +49,10 @@ namespace module::platform {
             // Only listen to our target simulation
             if (network_source.name == config.simulator_name) {
                 if (real_time != 0 || sim_time != 0) {
-                    double real_delta          = simulation.real_time - real_time;
-                    double sim_delta           = simulation.simulation_time - sim_time;
-                    utility::clock::custom_rtf = utility::clock::custom_rtf * config.clock_smoothing
-                                                 + (1.0 - config.clock_smoothing) * (real_delta / sim_delta);
+                    double real_delta = simulation.real_time - real_time;
+                    double sim_delta  = simulation.simulation_time - sim_time;
+                    rtf = rtf * config.clock_smoothing + (1.0 - config.clock_smoothing) * (real_delta / sim_delta);
+                    utility::clock::update_rtf(rtf);
                 }
 
                 sim_time  = simulation.simulation_time;

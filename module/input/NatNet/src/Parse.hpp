@@ -132,7 +132,7 @@ namespace module::input {
             set.markers.reserve(markersPositions.size());
 
             // Build markers
-            for (auto position : markersPositions) {
+            for (const auto& position : markersPositions) {
                 Marker marker;
                 marker.position = position;
                 marker.id       = -1;

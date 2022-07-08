@@ -175,7 +175,7 @@ namespace module::motion {
          *         {trunkPositionTarget, trunkAxisTarget, footPositionTarget, footAxisTarget, isLeftsupportFoot}
          */
         [[nodiscard]] PositionSupportTuple computeCartesianPosition() const;  // Gets current time and calls below func
-        [[nodiscard]] PositionSupportTuple computeCartesianPositionAtTime(const float time) const;
+        [[nodiscard]] PositionSupportTuple computeCartesianPositionAtTime(const float& time) const;
 
         constexpr void requestKick(const bool& left) {
             if (left) {
@@ -256,16 +256,25 @@ namespace module::motion {
 
         void updatePhase(const float& dt);
 
-        void buildNormalTrajectories(const Eigen::Vector3f& orders) {
-            buildTrajectories(orders, false, false, false);
+        void buildTrajectories(const Eigen::Vector3f& orders,
+                               const bool& startMovement,
+                               const bool& startStep,
+                               const bool& kickStep);
+
+        void buildStartMovementTrajectories(const Eigen::Vector3f& orders) {
+            buildTrajectories(orders, true, false, false);
+        }
+
+        void buildStartStepTrajectories(const Eigen::Vector3f& orders) {
+            buildTrajectories(orders, false, true, false);
         }
 
         void buildKickTrajectories(const Eigen::Vector3f& orders) {
             buildTrajectories(orders, false, false, true);
         }
 
-        void buildStartTrajectories(const Eigen::Vector3f& orders) {
-            buildTrajectories(orders, true, false, false);
+        void buildNormalTrajectories(const Eigen::Vector3f& orders) {
+            buildTrajectories(orders, false, false, false);
         }
 
         void buildStopStepTrajectories(const Eigen::Vector3f& orders) {
@@ -275,10 +284,7 @@ namespace module::motion {
         void buildStopMovementTrajectories(const Eigen::Vector3f& orders) {
             buildWalkDisableTrajectories(orders, true);
         }
-        void buildTrajectories(const Eigen::Vector3f& orders,
-                               const bool& startMovement,
-                               const bool& startStep,
-                               const bool& kickStep);
+
 
         void buildWalkDisableTrajectories(const Eigen::Vector3f& orders, const bool& footInIdlePosition);
 
