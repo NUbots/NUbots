@@ -3,11 +3,22 @@ log_level: WARN
 # Search path positions # TODO(BehaviourTeam) Confirm that this is correct: (values in radians)
 min_yaw: &min_yaw -0.7
 max_yaw: &max_yaw 0.7
-min_pitch: &min_pitch -0.1
-max_pitch: &max_pitch -0.1
-positions: [[*min_yaw, *min_pitch], [0, *min_pitch], [*max_yaw, *min_pitch], [0, *min_pitch]]
 
-#Minimum time before search starts (milliseconds)
+# TODO(BehaviourTeam Thailand) Tuning required on these values
+min_pitch: &min_pitch -0.1
+max_pitch: &max_pitch 0.1
+
+positions:
+  [
+    [*min_yaw, *max_pitch],
+    [*min_yaw, *min_pitch],
+    [0, *min_pitch],
+    [*max_yaw, *min_pitch],
+    [*max_yaw, *max_pitch],
+    [0, *max_pitch],
+  ]
+
+#Minimum time before search starts (milliseconds)DELAY
 search_timeout_ms: 1500
 
 #Time between switching search positions
