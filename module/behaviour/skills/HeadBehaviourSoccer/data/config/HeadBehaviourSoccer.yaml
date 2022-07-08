@@ -1,6 +1,6 @@
 log_level: WARN
 
-# Search path positions # TODO(BehaviourTeam) Confirm that this is correct: (values in radians)
+# Search path positions
 min_yaw: &min_yaw -0.7
 max_yaw: &max_yaw 0.7
 

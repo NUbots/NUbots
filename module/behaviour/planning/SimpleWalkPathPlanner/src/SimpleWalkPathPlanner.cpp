@@ -123,30 +123,29 @@ namespace module::behaviour::planning {
         // Freq should be equal to the main loop in soccer strategy. TODO (Bryce Tuppurainen): Potentially
         // change this value to a define in an included header if this will be used again for added design cohesion if
         // this will be something we change in future
-        on<Every<30, Per<std::chrono::seconds>>, Sync<SimpleWalkPathPlanner>>().then(
-            [this]() {
-                switch (static_cast<int>(latest_command.type.value)) {
-                    case message::behaviour::MotionCommand::Type::STAND_STILL:
-                        emit(std::make_unique<StopCommand>(subsumption_id));
-                        return;
+        on<Every<30, Per<std::chrono::seconds>>, Sync<SimpleWalkPathPlanner>>().then([this]() {
+            switch (static_cast<int>(latest_command.type.value)) {
+                case message::behaviour::MotionCommand::Type::STAND_STILL:
+                    emit(std::make_unique<StopCommand>(subsumption_id));
+                    return;
 
-                    case message::behaviour::MotionCommand::Type::DIRECT_COMMAND: walk_directly(); return;
+                case message::behaviour::MotionCommand::Type::DIRECT_COMMAND: walk_directly(); return;
 
-                    case message::behaviour::MotionCommand::Type::BALL_APPROACH: vision_walk_path(); return;
+                case message::behaviour::MotionCommand::Type::BALL_APPROACH: vision_walk_path(); return;
 
-                    // TODO(MotionTeam): Walk to a given position and heading on the field, avoiding obstacles
-                    case message::behaviour::MotionCommand::Type::WALK_TO_STATE: return;
+                // TODO(MotionTeam): Walk to a given position and heading on the field, avoiding obstacles
+                case message::behaviour::MotionCommand::Type::WALK_TO_STATE: return;
 
-                    case message::behaviour::MotionCommand::Type::ROTATE_ON_SPOT: rotate_on_spot(); return;
+                case message::behaviour::MotionCommand::Type::ROTATE_ON_SPOT: rotate_on_spot(); return;
 
-                    case message::behaviour::MotionCommand::Type::WALK_TO_READY: walk_to_ready(); return;
-                    default:  // This line should be UNREACHABLE
-                        log<NUClear::ERROR>(
-                            fmt::format("Invalid walk path planning command {}.", latest_command.type.value));
-                        emit(std::make_unique<StopCommand>(subsumption_id));
-                        return;
-                }
-            });
+                case message::behaviour::MotionCommand::Type::WALK_TO_READY: walk_to_ready(); return;
+                default:  // This line should be UNREACHABLE
+                    log<NUClear::ERROR>(
+                        fmt::format("Invalid walk path planning command {}.", latest_command.type.value));
+                    emit(std::make_unique<StopCommand>(subsumption_id));
+                    return;
+            }
+        });
 
         // Save the plan cmd into latest_command
         on<Trigger<MotionCommand>, Sync<SimpleWalkPathPlanner>>().then(
