@@ -110,9 +110,9 @@ namespace module::extension {
     FileWatcher::FileWatcher(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
         , loop(std::make_unique<uv_loop_t>())
-        , add_watch(std::make_unique<uv_async_t>())
-        , remove_watch(std::make_unique<uv_async_t>())
-        , shutdown(std::make_unique<uv_async_t>()) {
+        , add_watch(new uv_async_t)
+        , remove_watch(new uv_async_t)
+        , shutdown(new uv_async_t) {
 
         // Initialise our UV loop
         uv_loop_init(loop.get());
@@ -235,8 +235,8 @@ namespace module::extension {
                 // If this is a new path to watch
                 if (paths.find(dir) == paths.end()) {
                     auto& p        = paths[path];
-                    p.handle       = std::make_unique<uv_fs_event_t>();
-                    uv_fs_event_init(loop.get(), p.handle);
+                    p.handle       = unique_ptr_uv<uv_fs_event_s>(new uv_fs_event_t);
+                    uv_fs_event_init(loop.get(), p.handle.get());
                     p.handle->data = this;
                     p.path         = dir;
                     add_queue.push_back(&p);
@@ -292,22 +292,20 @@ namespace module::extension {
     }
 
     FileWatcher::~FileWatcher() {
-        for (const auto& path : paths) {
+        // Set all the ptrs to null so the loop will finish
+        for (auto& path : paths) {
             if (path.second.handle) {
-                uv_fs_event_stop(path.second.handle.get());
-                uv_close(reinterpret_cast<uv_handle_t*>(path.second.handle.get()), [](uv_handle_t* /* handle */) {});
+                path.second.handle.reset();
             }
         }
-
-        for (const auto& remove : remove_queue) {
+        for (auto& remove : remove_queue) {
             if (remove) {
-                uv_fs_event_stop(remove.get());
-                uv_close(reinterpret_cast<uv_handle_t*>(remove.get()), [](uv_handle_t* /* handle */) {});
+                remove.reset();
             }
         }
-        uv_close(reinterpret_cast<uv_handle_t*>(remove_watch.get()), [](uv_handle_t* /* handle */) {});
-        uv_close(reinterpret_cast<uv_handle_t*>(add_watch.get()), [](uv_handle_t* /* handle */) {});
-        uv_close(reinterpret_cast<uv_handle_t*>(shutdown.get()), [](uv_handle_t* /* handle */) {});
+        remove_watch.reset();
+        add_watch.reset();
+        shutdown.reset();
         while (uv_run(loop.get(), UV_RUN_NOWAIT) != 0) {
         }
         uv_loop_close(loop.get());
