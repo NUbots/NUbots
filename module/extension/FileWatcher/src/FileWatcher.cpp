@@ -292,7 +292,7 @@ namespace module::extension {
     }
 
     FileWatcher::~FileWatcher() {
-        // Set all the ptrs to null so the loop will finish
+        // Remove all the handles to the uv loop will finish
         for (auto& path : paths) {
             if (path.second.handle) {
                 path.second.handle.reset();
