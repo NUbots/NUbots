@@ -24,7 +24,9 @@
 namespace module::extension {
 
 
-    template<typename T> 
+    ///@brief Call the cleanup function and delete the ptr
+    ///@tparam must be be reinterpret castable into uv_handle_t
+    template <typename T>
     struct uv_handle_deleter {
         void operator()(T* handle) const {
             uv_close(reinterpret_cast<uv_handle_t*>(handle), [](uv_handle_t* /* handle */) {});
@@ -32,7 +34,7 @@ namespace module::extension {
         }
     };
 
-    template<typename T> 
+    template <typename T>
     using unique_ptr_uv = std::unique_ptr<T, uv_handle_deleter<T>>;
 
     class FileWatcher : public NUClear::Reactor {
