@@ -27,6 +27,7 @@
 
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
+#include "utility/math/filter/MahonyFilter.hpp"
 #include "utility/motion/ForwardKinematics.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/platform/RawSensors.hpp"
@@ -103,11 +104,11 @@ namespace module::input {
             config.footDown.set_method(method, thresholds);
 
             // Mahony config
-            this->Kp           = config["mahony"]["Kp"].as<double>();
-            this->Ki           = config["mahony"]["Ki"].as<double>();
-            this->ts           = config["mahony"]["ts"].as<double>();
-            this->initial_quat = config["mahony"]["initial_quat"].as<Expression>();
-            this->bias         = config["mahony"]["bias"].as<Expression>();
+            this->Kp           = cfg["mahony"]["Kp"].as<double>();
+            this->Ki           = cfg["mahony"]["Ki"].as<double>();
+            this->ts           = cfg["mahony"]["ts"].as<double>();
+            this->initial_quat = cfg["mahony"]["initial_quat"].as<Expression>();
+            this->bias         = cfg["mahony"]["bias"].as<Expression>();
 
             // Motion filter config
             // Set velocity decay
