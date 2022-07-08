@@ -169,6 +169,14 @@ namespace extension {
         }
 
         static inline std::string getPlatform(const std::string& hostname) {
+            // Its assumed that the ci provides a hostname of exactly 12 characters of digits
+            std::regex test_re("([a-z0-9]{12})");
+            std::smatch test_match;
+
+            if (std::regex_match(hostname, test_match, test_re)){
+                return "test";
+            }
+
             // It is assumed that all hostnames are in the format <platform name><robot number>,
             // such that the regular expression
             // [a-z]+[0-9]+?
