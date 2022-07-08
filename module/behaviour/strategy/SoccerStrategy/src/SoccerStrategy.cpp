@@ -145,17 +145,18 @@ namespace module::behaviour::strategy {
 
                 auto raw_lowest_distance = std::sqrt(std::pow(rBTt_smoothed.x(), 2) + std::pow(rBTt_smoothed.y(), 2));
 
-                for (const auto& ball : balls.balls) {
+                // TODO(BehaviourTeam Thailand): This is due to be moved into the VisionBall module
 
+                for (const auto& ball : balls.balls) {
                     rBCc = reciprocalSphericalToCartesian(ball.measurements[0].srBCc.cast<float>());
                     Eigen::Affine3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
-                    auto T_rBTt = Htc * rBCc;
+                    auto temp_rBTt = Htc * rBCc;
 
                     if (std::sqrt(std::pow(rBTt_smoothed.x(), 2) + std::pow(rBTt_smoothed.y(), 2))
                         < raw_lowest_distance) {
                         raw_lowest_distance =
                             std::sqrt(std::pow(rBTt_smoothed.x(), 2) + std::pow(rBTt_smoothed.y(), 2));
-                        rBTt = T_rBTt;
+                        rBTt = temp_rBTt;
                     }
                 }
 
@@ -166,8 +167,6 @@ namespace module::behaviour::strategy {
 
                 distance_to_ball = std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2));
                 angle_to_ball    = std::abs(std::atan2(rBTt.y(), rBTt.x()));
-                log<NUClear::WARN>("Current distance to ball: ", distance_to_ball);
-                log<NUClear::WARN>("Current angle to ball: ", angle_to_ball);
             }
         });
 
@@ -234,7 +233,7 @@ namespace module::behaviour::strategy {
                     if (picked_up(sensors)) {
                         // TODO(BehaviourTeam): stand, no moving
                         stand_still();
-                        currentState = Behaviour::State::PICKED_UP;
+                        current_state = Behaviour::State::PICKED_UP;
                     }
                     else {
                         // Overide SoccerStrategy and force normal mode in playing phase
@@ -261,9 +260,9 @@ namespace module::behaviour::strategy {
                     }
 
                     // Update current behaviour state if it has changed
-                    if (currentState != previousState) {
-                        previousState = currentState;
-                        emit(std::make_unique<Behaviour::State>(currentState));
+                    if (current_state != previous_state) {
+                        previous_state = current_state;
+                        emit(std::make_unique<Behaviour::State>(current_state));
                     }
                 }
                 catch (std::runtime_error& err) {
@@ -310,17 +309,17 @@ namespace module::behaviour::strategy {
     void SoccerStrategy::penalty_shootout_initial() {
         // There's no point in doing anything since we'll be teleported over to a penalty shootout position
         stand_still();
-        currentState = Behaviour::State::INITIAL;
+        current_state = Behaviour::State::INITIAL;
     }
 
     void SoccerStrategy::penalty_shootout_ready() {
         // Should not happen
-        currentState = Behaviour::State::READY;
+        current_state = Behaviour::State::READY;
     }
 
     void SoccerStrategy::penalty_shootout_set(const FieldDescription& field_description) {
         stand_still();
-        currentState = Behaviour::State::SET;
+        current_state = Behaviour::State::SET;
     }
 
     void SoccerStrategy::penalty_shootout_playing(const Field& field, const Ball& ball) {
@@ -334,25 +333,25 @@ namespace module::behaviour::strategy {
                 // Ball has not been seen recently, request walk planner to rotate on the spot
                 stand_still();
             }
-            currentState = Behaviour::State::SHOOTOUT;
+            current_state = Behaviour::State::SHOOTOUT;
         }
         // If we are not kicking off then be a goalie
         else if (team_kicking_off == GameEvents::Context::OPPONENT) {
             goalie_walk(field, ball);
-            currentState = Behaviour::State::GOALIE_WALK;
+            current_state = Behaviour::State::GOALIE_WALK;
         }
     }
 
     void SoccerStrategy::penalty_shootout_timeout() {
         // Don't need to do anything
         stand_still();
-        currentState = Behaviour::State::TIMEOUT;
+        current_state = Behaviour::State::TIMEOUT;
     }
 
     void SoccerStrategy::penalty_shootout_finished() {
         // Don't need to do anything
         stand_still();
-        currentState = Behaviour::State::FINISHED;
+        current_state = Behaviour::State::FINISHED;
     }
 
     // ********************NORMAL GAMEMODE STATES********************************
@@ -364,13 +363,13 @@ namespace module::behaviour::strategy {
             reset_in_initial = false;
         }
 
-        currentState = Behaviour::State::INITIAL;
+        current_state = Behaviour::State::INITIAL;
     }
 
     void SoccerStrategy::normal_ready(const GameState& game_state) {
         if (penalised()) {  // penalised
             stand_still();
-            currentState = Behaviour::State::PENALISED;
+            current_state = Behaviour::State::PENALISED;
         }
         else {
             if (!game_state.data.first_half & !is_reset_half) {
@@ -389,21 +388,21 @@ namespace module::behaviour::strategy {
             else {
                 stand_still();
             }
-            currentState = Behaviour::State::READY;
+            current_state = Behaviour::State::READY;
         }
     }
 
     void SoccerStrategy::normal_set() {
         stand_still();
         reset_in_initial = true;
-        currentState     = Behaviour::State::SET;
+        current_state    = Behaviour::State::SET;
     }
 
     void SoccerStrategy::normal_playing() {
         if (penalised() && !cfg.force_playing) {
             // We are penalised, stand still
             stand_still();
-            currentState = Behaviour::State::PENALISED;
+            current_state = Behaviour::State::PENALISED;
         }
         else {
 
@@ -420,24 +419,24 @@ namespace module::behaviour::strategy {
             if (NUClear::clock::now() - ball_last_measured < cfg.ball_last_seen_max_time) {
                 // Ball has been seen recently
                 play();
-                currentState = Behaviour::State::WALK_TO_BALL;
+                current_state = Behaviour::State::WALK_TO_BALL;
             }
             else {
                 // Ball has not been seen recently, request walk planner to rotate on the spot
                 find();
-                currentState = Behaviour::State::SEARCH_FOR_BALL;
+                current_state = Behaviour::State::SEARCH_FOR_BALL;
             }
         }
     }
 
     void SoccerStrategy::normal_finished() {
         stand_still();
-        currentState = Behaviour::State::FINISHED;
+        current_state = Behaviour::State::FINISHED;
     }
 
     void SoccerStrategy::normal_timeout() {
         stand_still();
-        currentState = Behaviour::State::TIMEOUT;
+        current_state = Behaviour::State::TIMEOUT;
     }
 
     void SoccerStrategy::initial_localisation_reset() {

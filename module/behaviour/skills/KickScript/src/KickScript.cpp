@@ -74,7 +74,7 @@ namespace module::behaviour::skills {
             }}));
 
         on<Trigger<KickScriptCommand>>().then([this](const KickScriptCommand& cmd) {
-            log<NUClear::WARN>("KickScript Command Recieved...");
+            log<NUClear::DEBUG>("KickScript Command Recieved...");
             kick_command       = std::make_shared<KickScriptCommand>(cmd);
             time_since_message = NUClear::clock::now();
             update_priority(cfg.kick_priority);
@@ -83,7 +83,7 @@ namespace module::behaviour::skills {
         on<Trigger<ExecuteKick>>().then([this] {
             // Don't kick if there is no command
             // This may happen if we get priority initially with 0 priority and no KickScriptCommand
-            log<NUClear::WARN>("ExecuteKick Trigger Recieved...");
+            log<NUClear::DEBUG>("ExecuteKick Trigger Recieved...");
             if (kick_command == nullptr) {
                 update_priority(0);
                 return;
@@ -106,7 +106,6 @@ namespace module::behaviour::skills {
             }
             else {
                 if (leg == LimbID::RIGHT_LEG) {
-                    log<NUClear::WARN>("Kicking right leg");
                     emit(std::make_unique<ExecuteScriptByName>(
                         subsumption_id,
                         std::vector<std::string>({"Stand.yaml", "KickRight.yaml", "Stand.yaml"})));

@@ -90,10 +90,10 @@ namespace module::behaviour::strategy {
         message::behaviour::KickPlan::KickType kick_type{};
 
         /// @brief Stores which behaviour state the robot is in
-        message::behaviour::Behaviour::State currentState = message::behaviour::Behaviour::State::INIT;
+        message::behaviour::Behaviour::State current_state = message::behaviour::Behaviour::State::INIT;
 
         /// @brief Stores which behaviour state the robot was previosuly in
-        message::behaviour::Behaviour::State previousState = message::behaviour::Behaviour::State::INIT;
+        message::behaviour::Behaviour::State previous_state = message::behaviour::Behaviour::State::INIT;
 
         /// @brief Stores the time stamp of when the robot starts walking to the ready position
         NUClear::clock::time_point started_walking_to_ready_at;
