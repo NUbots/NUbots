@@ -1,0 +1,41 @@
+ shared/source/memory_manager/host_ptr_defines.h      | 1 +
+ shared/source/os_interface/linux/drm_allocation.h    | 1 +
+ shared/source/os_interface/windows/wddm_allocation.h | 1 +
+ 3 files changed, 3 insertions(+)
+
+diff --git a/shared/source/memory_manager/host_ptr_defines.h b/shared/source/memory_manager/host_ptr_defines.h
+index e27446481..1725ee05d 100644
+--- a/shared/source/memory_manager/host_ptr_defines.h
++++ b/shared/source/memory_manager/host_ptr_defines.h
+@@ -14,6 +14,7 @@
+ namespace NEO {
+ 
+ struct OsHandle {
++    virtual ~OsHandle() = default;
+   protected:
+     OsHandle() = default;
+ };
+diff --git a/shared/source/os_interface/linux/drm_allocation.h b/shared/source/os_interface/linux/drm_allocation.h
+index bc2061eb4..4c02dd14f 100644
+--- a/shared/source/os_interface/linux/drm_allocation.h
++++ b/shared/source/os_interface/linux/drm_allocation.h
+@@ -16,6 +16,7 @@ class Drm;
+ enum class CacheRegion : uint16_t;
+ 
+ struct OsHandleLinux : OsHandle {
++    ~OsHandleLinux() override = default;
+     BufferObject *bo = nullptr;
+ };
+ 
+diff --git a/shared/source/os_interface/windows/wddm_allocation.h b/shared/source/os_interface/windows/wddm_allocation.h
+index 7ffb3898b..1bb4e74cd 100644
+--- a/shared/source/os_interface/windows/wddm_allocation.h
++++ b/shared/source/os_interface/windows/wddm_allocation.h
+@@ -16,6 +16,7 @@
+ namespace NEO {
+ 
+ struct OsHandleWin : OsHandle {
++    ~OsHandleWin() override = default;
+     D3DKMT_HANDLE handle = 0;
+     D3DGPU_VIRTUAL_ADDRESS gpuPtr = 0;
+     Gmm *gmm = nullptr;
