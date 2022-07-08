@@ -2,7 +2,6 @@
 # CameraName:
 #   concurrent: How many engines to make available to concurrently execute networks
 #   engine: Which engine to use (opencl, cpu)
-#   cache_directory: directory to save compiled opencl binaries
 #   spotlight:
 #     distance: the distance range for the spotlight mesh to be generated for
 #     radius: the search radius to do at that distance (NOT THE RADIUS OF THE OBJECT)
@@ -12,7 +11,6 @@ cameras:
     concurrent: 2
     network: config/networks/WebotsNetwork.yaml
     engine: cpu
-    cache_directory: "" # unneeded for cpu engine
     classifier:
       height: [0.5, 1.0]
       max_distance: 15
