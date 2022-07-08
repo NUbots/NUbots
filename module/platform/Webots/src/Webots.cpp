@@ -109,7 +109,7 @@ namespace module::platform {
         if (name == "head_pitch_sensor") { return servos.head_tilt; }
         // clang-format on
 
-        throw std::runtime_error("Unable to translate unknown NUgus.proto sensor name: " + name);
+        throw std::runtime_error(fmt::format("Unable to translate unknown NUgus.proto sensor name: {}", name));
     }
 
     [[nodiscard]] std::string translate_id_servo(const uint32_t& id) {
@@ -136,7 +136,7 @@ namespace module::platform {
             case 19: return "head_pitch";
         }
 
-        throw std::runtime_error("Unable to translate unknown NUgus.proto servo id: " + id);
+        throw std::runtime_error(fmt::format("Unable to translate unknown NUgus.proto servo id: {}", id));
     }
 
     [[nodiscard]] ActuatorRequests create_sensor_time_steps(const uint32_t& sensor_timestep,
@@ -614,7 +614,8 @@ namespace module::platform {
             static_cast<double>(sim_delta + prev_sim_delta) / static_cast<double>(real_delta + prev_real_delta);
 
         // Exponential filter to do the smoothing
-        utility::clock::custom_rtf = utility::clock::custom_rtf * clock_smoothing + (1.0 - clock_smoothing) * ratio;
+        rtf = rtf * clock_smoothing + (1.0 - clock_smoothing) * ratio;
+        utility::clock::update_rtf(rtf);
 
         // Update our current times
         current_sim_time  = sensor_measurements.time;

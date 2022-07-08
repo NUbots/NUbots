@@ -38,7 +38,7 @@ namespace module::input {
     Camera::Camera(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Configuration>("Cameras").then("Configuration", [this](const Configuration& config) {
-            std::string serial_number = config["serial_number"].as<std::string>();
+            auto serial_number = config["serial_number"].as<std::string>();
 
             // Find the camera if it has already been loaded
             auto it = cameras.find(serial_number);
@@ -59,7 +59,7 @@ namespace module::input {
                 auto find_camera = [](const std::string& serial_number) {
                     int devices = arv_get_n_devices();
                     for (int i = 0; i < devices; ++i) {
-                        if (serial_number.compare(arv_get_device_serial_nbr(i)) == 0) {
+                        if (serial_number == arv_get_device_serial_nbr(i)) {
                             return i;
                         }
                     }
@@ -78,54 +78,50 @@ namespace module::input {
                     throw std::runtime_error(
                         fmt::format("{} camera with serial number {} not found", name, serial_number));
                 }
-                else {
 
-                    // Open the camera: Store as shared pointer
-                    std::string device_description = arv_get_device_id(device_no);
-                    auto camera =
-                        std::shared_ptr<ArvCamera>(arv_camera_new(device_description.c_str()), [](ArvCamera* ptr) {
-                            if (ptr) {
-                                g_object_unref(ptr);
-                            }
-                        });
-
-                    if (!ARV_IS_CAMERA(camera.get())) {
-                        throw std::runtime_error(
-                            fmt::format("Failed to create {} camera ({})", name, device_description));
-                    }
-                    else {
-                        // Create a new stream object: Store as shared pointer
-                        auto stream =
-                            std::shared_ptr<ArvStream>(arv_camera_create_stream(camera.get(), nullptr, nullptr),
-                                                       [](ArvStream* ptr) {
-                                                           if (ptr) {
-                                                               g_object_unref(ptr);
-                                                           }
-                                                       });
-
-                        if (!ARV_IS_STREAM(stream.get())) {
-                            throw std::runtime_error(
-                                fmt::format("Failed to create stream for {} camera ({})", name, device_description));
+                // Open the camera: Store as shared pointer
+                std::string device_description = arv_get_device_id(device_no);
+                auto camera =
+                    std::shared_ptr<ArvCamera>(arv_camera_new(device_description.c_str()), [](ArvCamera* ptr) {
+                        if (ptr) {
+                            g_object_unref(ptr);
                         }
+                    });
 
-                        // Add camera to list.
-                        it = cameras
-                                 .insert(std::make_pair(serial_number,
-                                                        CameraContext{
-                                                            *this,
-                                                            name,
-                                                            0,  // fourcc is set later
-                                                            num_cameras++,
-                                                            Image::Lens(),      // Lens is constructed in settings
-                                                            Eigen::Affine3d(),  // Hpc is set in settings
-                                                            camera,
-                                                            stream,
-                                                            CameraContext::TimeCorrection(),
-                                                        }))
-                                 .first;
+                if (!ARV_IS_CAMERA(camera.get())) {
+                    throw std::runtime_error(fmt::format("Failed to create {} camera ({})", name, device_description));
+                }
+                else {
+                    // Create a new stream object: Store as shared pointer
+                    auto stream = std::shared_ptr<ArvStream>(arv_camera_create_stream(camera.get(), nullptr, nullptr),
+                                                             [](ArvStream* ptr) {
+                                                                 if (ptr) {
+                                                                     g_object_unref(ptr);
+                                                                 }
+                                                             });
 
-                        log<NUClear::INFO>(fmt::format("Connected to the {} camera ({})", name, device_description));
+                    if (!ARV_IS_STREAM(stream.get())) {
+                        throw std::runtime_error(
+                            fmt::format("Failed to create stream for {} camera ({})", name, device_description));
                     }
+
+                    // Add camera to list.
+                    it = cameras
+                             .insert(std::make_pair(serial_number,
+                                                    CameraContext{
+                                                        *this,
+                                                        name,
+                                                        0,  // fourcc is set later
+                                                        num_cameras++,
+                                                        Image::Lens(),      // Lens is constructed in settings
+                                                        Eigen::Affine3d(),  // Hpc is set in settings
+                                                        camera,
+                                                        stream,
+                                                        CameraContext::TimeCorrection(),
+                                                    }))
+                             .first;
+
+                    log<NUClear::INFO>(fmt::format("Connected to the {} camera ({})", name, device_description));
                 }
             }
 
@@ -143,11 +139,11 @@ namespace module::input {
             const auto& name = context.name;
             auto& cam        = context.camera;
             auto& stream     = context.stream;
-            auto device      = arv_camera_get_device(cam.get());
+            auto* device     = arv_camera_get_device(cam.get());
 
             // Stop the video stream so we can apply the settings
             arv::camera_stop_acquisition(cam.get());
-            arv_stream_set_emit_signals(stream.get(), false);
+            arv_stream_set_emit_signals(stream.get(), 0);
 
             // Synchronise the clocks
             context.time = sync_clocks(device);
@@ -208,7 +204,7 @@ namespace module::input {
 
             // Go through our settings and apply them to the camera
             for (const auto& cfg : config["settings"].config) {
-                std::string key = cfg.first.as<std::string>();
+                auto key = cfg.first.as<std::string>();
 
                 // Skip the region keys as we handle them above
                 if (key == "Width" || key == "Height" || key == "OffsetX" || key == "OffsetY") {
@@ -216,7 +212,7 @@ namespace module::input {
                 }
 
                 // Get the feature node
-                auto feature = arv_device_get_feature(device, key.c_str());
+                auto* feature = arv_device_get_feature(device, key.c_str());
                 try {
                     std::string message;
                     if (feature == nullptr) {
@@ -226,31 +222,31 @@ namespace module::input {
                     }
 
                     // Integer setting
-                    else if (ARV_IS_GC_INTEGER_NODE(feature)) {
-                        auto setting  = reinterpret_cast<ArvGcInteger*>(feature);
+                    else if (ARV_IS_GC_INTEGER_NODE(feature) != 0) {
+                        auto* setting = reinterpret_cast<ArvGcInteger*>(feature);
                         int64_t value = std::llround(double(cfg.second.as<Expression>()));
                         message       = set_setting(setting, value);
                     }
 
                     // Floating point setting
-                    else if (ARV_IS_GC_FLOAT_NODE(feature)) {
-                        auto setting = reinterpret_cast<ArvGcFloat*>(feature);
-                        double value = cfg.second.as<Expression>();
-                        message      = set_setting(setting, value);
+                    else if (ARV_IS_GC_FLOAT_NODE(feature) != 0) {
+                        auto* setting = reinterpret_cast<ArvGcFloat*>(feature);
+                        double value  = cfg.second.as<Expression>();
+                        message       = set_setting(setting, value);
                     }
 
                     // Boolean setting
-                    else if (ARV_IS_GC_BOOLEAN(feature)) {
-                        auto setting = reinterpret_cast<ArvGcBoolean*>(feature);
-                        bool value   = bool(cfg.second.as<Expression>());
-                        message      = set_setting(setting, value);
+                    else if (ARV_IS_GC_BOOLEAN(feature) != 0) {
+                        auto* setting = reinterpret_cast<ArvGcBoolean*>(feature);
+                        bool value    = bool(cfg.second.as<Expression>());
+                        message       = set_setting(setting, value);
                     }
 
                     // Enumeration setting
-                    else if (ARV_IS_GC_ENUMERATION(feature)) {
-                        auto setting      = reinterpret_cast<ArvGcEnumeration*>(feature);
-                        std::string value = cfg.second.as<std::string>();
-                        message           = set_setting(setting, value);
+                    else if (ARV_IS_GC_ENUMERATION(feature) != 0) {
+                        auto* setting = reinterpret_cast<ArvGcEnumeration*>(feature);
+                        auto value    = cfg.second.as<std::string>();
+                        message       = set_setting(setting, value);
                     }
                     else {
                         log<NUClear::ERROR>(fmt::format("The type of setting {} is not currently handled", key));
@@ -267,7 +263,7 @@ namespace module::input {
             }
 
             // Check for gigevision device and set packet size to jumbo packets
-            if (arv_camera_is_gv_device(cam.get())) {
+            if (arv_camera_is_gv_device(cam.get()) != 0) {
                 arv::camera_gv_set_packet_size(cam.get(), 8192);
                 g_object_set(stream.get(), "packet-resend", ARV_GV_STREAM_PACKET_RESEND_NEVER, nullptr);
             }
@@ -289,7 +285,7 @@ namespace module::input {
                              &it->second);
             // Start aquisition
             arv::camera_start_acquisition(cam.get());
-            arv_stream_set_emit_signals(stream.get(), true);
+            arv_stream_set_emit_signals(stream.get(), 1);
         });
 
         on<Trigger<Sensors>>().then("Buffer Sensors", [this](const Sensors& sensors) {
@@ -304,14 +300,14 @@ namespace module::input {
             Eigen::Affine3d Htw(sensors.Htw);
             Eigen::Affine3d Hwp = Htw.inverse() * Htp;
 
-            Hwps.push_back(std::make_pair(sensors.timestamp, Hwp));
+            Hwps.emplace_back(sensors.timestamp, Hwp);
         });
 
         on<Shutdown>().then([this] {
             for (auto& camera : cameras) {
                 // Stop the video stream.
                 arv::camera_stop_acquisition(camera.second.camera.get());
-                arv_stream_set_emit_signals(camera.second.stream.get(), false);
+                arv_stream_set_emit_signals(camera.second.stream.get(), 0);
             }
             arv_shutdown();
             cameras.clear();
@@ -331,7 +327,7 @@ namespace module::input {
                 int height      = 0;
                 size_t buffSize = 0;
                 arv_buffer_get_image_region(buffer, nullptr, nullptr, &width, &height);
-                const uint8_t* buff = reinterpret_cast<const uint8_t*>(arv_buffer_get_data(buffer, &buffSize));
+                const auto* buff = reinterpret_cast<const uint8_t*>(arv_buffer_get_data(buffer, &buffSize));
 
                 auto& timesync = context->time;
 
@@ -385,9 +381,9 @@ namespace module::input {
                                 timesync.drift.max_clock_drift / 1e6));
 
                             arv::camera_stop_acquisition(context->camera.get());
-                            arv_stream_set_emit_signals(context->stream.get(), false);
+                            arv_stream_set_emit_signals(context->stream.get(), 0);
                             context->time = sync_clocks(arv_camera_get_device(context->camera.get()));
-                            arv_stream_set_emit_signals(context->stream.get(), true);
+                            arv_stream_set_emit_signals(context->stream.get(), 1);
                             arv::camera_start_acquisition(context->camera.get());
                         }
                     }

@@ -4,7 +4,7 @@ buttons:
   debounce_threshold: 7
 
 foot_down:
-  method: FSR
+  method: Z_HEIGHT
   known_methods:
     - name: FSR # Literal FSR
       certainty_threshold: 30 # Webots uses a bool sensor, this could be anything > 0. Normal robot uses FSR which is non bool
