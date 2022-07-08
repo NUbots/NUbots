@@ -19,6 +19,7 @@
 
 #include "Stand.hpp"
 
+#include "extension/Configuration.hpp"
 #include "extension/Script.hpp"
 
 #include "message/behaviour/ServoCommand.hpp"
@@ -29,6 +30,7 @@
 
 namespace module::behaviour::skills {
 
+    using extension::Configuration;
     using extension::ExecuteScriptByName;
 
     using utility::behaviour::RegisterAction;
@@ -39,18 +41,25 @@ namespace module::behaviour::skills {
     struct ExecuteStand {};
 
     Stand::Stand(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), id(size_t(this) * size_t(this) - size_t(this)) {
+        : Reactor(std::move(environment)), subsumption_id(size_t(this) * size_t(this) - size_t(this)) {
 
-        on<Trigger<ExecuteStand>>().then([this] { emit(std::make_unique<ExecuteScriptByName>(id, "Stand.yaml")); });
+        // do a little configurating
+        on<Configuration>("Stand.yaml").then([this](const Configuration& config) {
+            log_level          = config["log_level"].as<NUClear::LogLevel>();
+            cfg.stand_priority = config["stand_priority"].as<float>();
+        });
+
+        on<Trigger<ExecuteStand>>().then(
+            [this] { emit(std::make_unique<ExecuteScriptByName>(subsumption_id, "Stand.yaml")); });
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
-            RegisterAction{id,
+            RegisterAction{subsumption_id,
                            "Stand",
                            {std::pair<float, std::set<LimbID>>(
-                               std::numeric_limits<float>::epsilon(),
+                               cfg.stand_priority,
                                {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM})},
-                           [this](const std::set<LimbID>&) { emit(std::make_unique<ExecuteStand>()); },
-                           [this](const std::set<LimbID>&) {},
-                           [this](const std::set<ServoID>&) {}}));
+                           [this](const std::set<LimbID>& /*unused*/) { emit(std::make_unique<ExecuteStand>()); },
+                           [](const std::set<LimbID>& /*unused*/) {},
+                           [](const std::set<ServoID>& /*unused*/) {}}));
     }
 }  // namespace module::behaviour::skills

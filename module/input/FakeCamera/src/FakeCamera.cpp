@@ -37,9 +37,9 @@ namespace module::input {
             else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
             // clang-format on
 
-            const std::string image_folder = cfg["image_folder"].as<std::string>();
-            const std::string image_prefix = cfg["image_prefix"].as<std::string>();
-            const std::string lens_prefix  = cfg["lens_prefix"].as<std::string>();
+            const auto image_folder = cfg["image_folder"].as<std::string>();
+            const auto image_prefix = cfg["image_prefix"].as<std::string>();
+            const auto lens_prefix  = cfg["lens_prefix"].as<std::string>();
 
             if ((std::filesystem::is_directory(image_folder) && image_folder != config.image_folder)
                 || image_prefix != config.image_prefix || lens_prefix != config.lens_prefix) {
@@ -55,10 +55,10 @@ namespace module::input {
                     image_index = 0;
 
                     // Traverse specified directory and locate all image/lens pairs
-                    for (auto& p : std::filesystem::recursive_directory_iterator(config.image_folder)) {
+                    for (const auto& p : std::filesystem::recursive_directory_iterator(config.image_folder)) {
                         if (utility::strutil::endsWith(p.path(), std::vector<std::string>{".jpg", ".jpeg"})) {
-                            std::filesystem::path image_file = p.path();
-                            std::filesystem::path lens_file  = p.path();
+                            const std::filesystem::path& image_file = p.path();
+                            std::filesystem::path lens_file         = p.path();
 
                             // Replace the filename component and change the extension
                             // This will take image000001.jpg and return lens000001.yaml
@@ -111,7 +111,7 @@ namespace module::input {
                     msg->data = utility::file::readFile(images[image_index].first);
 
                     // Extract file dimensions from file data
-                    std::array<int, 2> dimensions;
+                    std::array<int, 2> dimensions{};
                     int subsamp = 0;
                     if (tjDecompressHeader2(decompressor.get(),
                                             msg->data.data(),

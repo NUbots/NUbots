@@ -22,76 +22,76 @@ namespace module::motion {
     struct WalkingParameter {
         // Full walk cycle frequency
         //(in Hz, > 0)
-        float freq;
+        float freq = 0.0f;
         // Length of double support phase in half cycle
         //(ratio, [0:1])
-        float double_support_ratio;
+        float double_support_ratio = 0.0f;
         // Lateral distance between the feet center
         //(in m, >= 0)
-        float foot_distance;
+        float foot_distance = 0.0f;
         // Maximum flying foot height
         //(in m, >= 0)
-        float foot_rise;
+        float foot_rise = 0.0f;
         // Pause of Z movement on highest point
         //(single support cycle ratio, [0,1])
-        float foot_z_pause;
+        float foot_z_pause = 0.0f;
         // Let the foot's downward trajectory end above the ground
         // this is helpful if the support leg bends
         //(in m, >= 0)
-        float foot_put_down_z_offset;
+        float foot_put_down_z_offset = 0.0f;
         // Phase time for moving the foot from Z offset to ground,
         // also used for X and Y since they should not move after contact to the ground
         //(phase between apex and single support end [0:1])
-        float foot_put_down_phase;
+        float foot_put_down_phase = 0.0f;
         // Phase of flying foot apex
         //(single support cycle phase, [0:1])
-        float foot_apex_phase;
+        float foot_apex_phase = 0.0f;
         // Foot X/Y overshoot in ratio of step length
         //(ratio, >= 0)
-        float foot_overshoot_ratio;
+        float foot_overshoot_ratio = 0.0f;
         // Foot X/Y overshoot phase
         //(single support cycle phase, [footApexPhase:1]
-        float foot_overshoot_phase;
+        float foot_overshoot_phase = 0.0f;
         // Height of the trunk from ground
         //(in m, > 0)
-        float trunk_height;
+        float trunk_height = 0.0f;
         // Trunk pitch orientation
         //(in rad)
-        float trunk_pitch;
+        float trunk_pitch = 0.0f;
         // Phase offset of trunk oscillation
         //(half cycle phase, [0:1])
-        float trunk_phase;
+        float trunk_phase = 0.0f;
         // Trunk forward offset
         //(in m)
-        float trunk_x_offset;
+        float trunk_x_offset = 0.0f;
         // Trunk lateral offset
         //(in m)
-        float trunk_y_offset;
+        float trunk_y_offset = 0.0f;
         // Trunk lateral oscillation amplitude ratio
         //(ratio, >= 0)
-        float trunk_swing;
+        float trunk_swing = 0.0f;
         // Trunk swing pause length in phase at apex
         //(half cycle ratio, [0:1])
-        float trunk_pause;
+        float trunk_pause = 0.0f;
         // Trunk forward offset proportional to forward step
         //(in 1)
-        float trunk_x_offset_p_coef_forward;
+        float trunk_x_offset_p_coef_forward = 0.0f;
         // Trunk forward offset proportional to rotation step
         //(in m/rad)
-        float trunk_x_offset_p_coef_turn;
+        float trunk_x_offset_p_coef_turn = 0.0f;
         // Trunk pitch orientation proportional to forward step
         //(in rad/m)
-        float trunk_pitch_p_coef_forward;
+        float trunk_pitch_p_coef_forward = 0.0f;
         // Trunk pitch orientation proportional to rotation step
         //(in 1)
-        float trunk_pitch_p_coef_turn;
-        float trunk_y_only_in_double_support;
-        float kick_length;
-        float kick_phase;
-        float foot_put_down_roll_offset;
-        float kick_vel;
-        float pause_duration;
-        float first_step_swing_factor;
+        float trunk_pitch_p_coef_turn        = 0.0f;
+        float trunk_y_only_in_double_support = 0.0f;
+        float kick_length                    = 0.0f;
+        float kick_phase                     = 0.0f;
+        float foot_put_down_roll_offset      = 0.0f;
+        float kick_vel                       = 0.0f;
+        float pause_duration                 = 0.0f;
+        float first_step_swing_factor        = 0.0f;
     };
 
     enum class WalkEngineState { IDLE, PAUSED, START_MOVEMENT, START_STEP, WALKING, STOP_STEP, STOP_MOVEMENT, KICK };
@@ -113,7 +113,7 @@ namespace module::motion {
          * Return current walk phase
          * between 0 and 1
          */
-        [[nodiscard]] constexpr float getPhase() const {
+        [[nodiscard]] float getPhase() const {
             return phase;
         }
 
@@ -122,28 +122,28 @@ namespace module::motion {
          * 0 and half period for
          * trajectories evaluation
          */
-        [[nodiscard]] constexpr float getTrajsTime() const {
+        [[nodiscard]] float getTrajsTime() const {
             return phase < 0.5f ? phase / params.freq : (phase - 0.5f) / params.freq;
         }
 
         /**
          * Get the footstep object.
          */
-        [[nodiscard]] inline Footstep getFootstep() {
+        [[nodiscard]] inline Footstep getFootstep() const {
             return foot_step;
         }
 
         /**
          * Return if true if left is current support foot
          */
-        [[nodiscard]] constexpr bool isLeftSupport() {
+        [[nodiscard]] bool isLeftSupport() const {
             return foot_step.isLeftSupport();
         }
 
         /**
          * Return true if both feet are currently on the ground
          */
-        [[nodiscard]] constexpr bool isDoubleSupport() {
+        [[nodiscard]] bool isDoubleSupport() const {
             // returns true if the value of the "is_float_support" spline is currently higher than 0.5
             // the spline should only have values of 0 or 1
             return trajs.get(TrajectoryTypes::IS_DOUBLE_SUPPORT).pos(getTrajsTime()) >= 0.5f;
@@ -175,7 +175,7 @@ namespace module::motion {
          *         {trunkPositionTarget, trunkAxisTarget, footPositionTarget, footAxisTarget, isLeftsupportFoot}
          */
         [[nodiscard]] PositionSupportTuple computeCartesianPosition() const;  // Gets current time and calls below func
-        [[nodiscard]] PositionSupportTuple computeCartesianPositionAtTime(const float time) const;
+        [[nodiscard]] PositionSupportTuple computeCartesianPositionAtTime(const float& time) const;
 
         constexpr void requestKick(const bool& left) {
             if (left) {
@@ -256,16 +256,25 @@ namespace module::motion {
 
         void updatePhase(const float& dt);
 
-        void buildNormalTrajectories(const Eigen::Vector3f& orders) {
-            buildTrajectories(orders, false, false, false);
+        void buildTrajectories(const Eigen::Vector3f& orders,
+                               const bool& startMovement,
+                               const bool& startStep,
+                               const bool& kickStep);
+
+        void buildStartMovementTrajectories(const Eigen::Vector3f& orders) {
+            buildTrajectories(orders, true, false, false);
+        }
+
+        void buildStartStepTrajectories(const Eigen::Vector3f& orders) {
+            buildTrajectories(orders, false, true, false);
         }
 
         void buildKickTrajectories(const Eigen::Vector3f& orders) {
             buildTrajectories(orders, false, false, true);
         }
 
-        void buildStartTrajectories(const Eigen::Vector3f& orders) {
-            buildTrajectories(orders, true, false, false);
+        void buildNormalTrajectories(const Eigen::Vector3f& orders) {
+            buildTrajectories(orders, false, false, false);
         }
 
         void buildStopStepTrajectories(const Eigen::Vector3f& orders) {
@@ -275,10 +284,7 @@ namespace module::motion {
         void buildStopMovementTrajectories(const Eigen::Vector3f& orders) {
             buildWalkDisableTrajectories(orders, true);
         }
-        void buildTrajectories(const Eigen::Vector3f& orders,
-                               const bool& startMovement,
-                               const bool& startStep,
-                               const bool& kickStep);
+
 
         void buildWalkDisableTrajectories(const Eigen::Vector3f& orders, const bool& footInIdlePosition);
 

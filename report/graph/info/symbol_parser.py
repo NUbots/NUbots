@@ -137,20 +137,25 @@ class SymbolParser:
         parensGroup = pp.Suppress("(") + pp.Group(nsType) + pp.Suppress(")")
 
         # Fill ns type (which is made up of several types separated by ::)
-        nsType << locator + pp.delimitedList(
-            pp.Suppress(typeModifiers)
-            + (lambdaType | fundamentalType | operatorType | cType | parensGroup)
-            + pp.Suppress(typeModifiers)
-            + pp.Optional(templateType)
-            + pp.Suppress(typeModifiers)
-            + pp.Optional(funcOrArrayModifier)
-            + pp.Suppress(typeModifiers)
-            + pp.Optional(arrayType)
-            + pp.Suppress(typeModifiers)
-            + pp.Optional(funcCall)
-            + pp.Suppress(typeModifiers),
-            pp.Literal("::") | pp.Literal("."),
-        ) + locator
+        (
+            nsType
+            << locator
+            + pp.delimitedList(
+                pp.Suppress(typeModifiers)
+                + (lambdaType | fundamentalType | operatorType | cType | parensGroup)
+                + pp.Suppress(typeModifiers)
+                + pp.Optional(templateType)
+                + pp.Suppress(typeModifiers)
+                + pp.Optional(funcOrArrayModifier)
+                + pp.Suppress(typeModifiers)
+                + pp.Optional(arrayType)
+                + pp.Suppress(typeModifiers)
+                + pp.Optional(funcCall)
+                + pp.Suppress(typeModifiers),
+                pp.Literal("::") | pp.Literal("."),
+            )
+            + locator
+        )
 
         self.parser = pp.OneOrMore(pp.Group(nsType)) + trailingInfo + pp.StringEnd()
         self.locate = False

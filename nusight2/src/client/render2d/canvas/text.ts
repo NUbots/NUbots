@@ -10,17 +10,8 @@ export function renderText(
   shape: Shape<TextGeometry>,
   world: Transform,
 ): void {
-  const {
-    x,
-    y,
-    text,
-    fontSize,
-    fontFamily,
-    textAlign,
-    textBaseline,
-    worldAlignment,
-    worldScale,
-  } = shape.geometry
+  const { x, y, text, fontSize, fontFamily, textAlign, textBaseline, worldAlignment, worldScale } =
+    shape.geometry
 
   ctx.font = `${fontSize} ${fontFamily}`
   ctx.textAlign = textAlign === 'middle' ? 'center' : textAlign

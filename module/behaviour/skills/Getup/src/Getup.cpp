@@ -20,14 +20,15 @@
 #include "Getup.hpp"
 
 #include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <cmath>
 
 #include "extension/Configuration.hpp"
 #include "extension/Script.hpp"
 
 #include "message/behaviour/ServoCommand.hpp"
+#include "message/input/Sensors.hpp"
 #include "message/motion/GetupCommand.hpp"
-#include "message/platform/RawSensors.hpp"
 
 #include "utility/behaviour/Action.hpp"
 #include "utility/input/LimbID.hpp"
@@ -37,9 +38,9 @@ namespace module::behaviour::skills {
     using extension::Configuration;
     using extension::ExecuteScriptByName;
 
+    using message::input::Sensors;
     using message::motion::ExecuteGetup;
     using message::motion::KillGetup;
-    using message::platform::RawSensors;
 
     using utility::behaviour::ActionPriorities;
     using utility::behaviour::RegisterAction;
@@ -47,91 +48,65 @@ namespace module::behaviour::skills {
     using ServoID = utility::input::ServoID;
 
     Getup::Getup(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment))
-        , id(size_t(this) * size_t(this) - size_t(this))
-        , isFront(true)
-        , gettingUp(false)
-        , fallenCheck()
-        , getUp()
-        , FALLEN_ANGLE(M_PI_2)
-        , GETUP_PRIORITY(0.0f)
-        , EXECUTION_PRIORITY(0.0f) {
+        : Reactor(std::move(environment)), subsumption_id(size_t(this) * size_t(this) - size_t(this)) {
         // do a little configurating
         on<Configuration>("Getup.yaml").then([this](const Configuration& config) {
-            // clang-format off
-            std::string lvl = config["log_level"].as<std::string>();
-            if (lvl == "TRACE")      { this->log_level = NUClear::TRACE; }
-            else if (lvl == "DEBUG") { this->log_level = NUClear::DEBUG; }
-            else if (lvl == "INFO")  { this->log_level = NUClear::INFO;  }
-            else if (lvl == "WARN")  { this->log_level = NUClear::WARN;  }
-            else if (lvl == "ERROR") { this->log_level = NUClear::ERROR; }
-            else if (lvl == "FATAL") { this->log_level = NUClear::FATAL; }
-            // clang-format on
-
-            FALLEN_ANGLE = config["FALLEN_ANGLE"].as<float>();
-
-            // load priorities for the getup
-            GETUP_PRIORITY     = config["GETUP_PRIORITY"].as<float>();
-            EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
-        });
-
-        fallenCheck = on<Last<20, Trigger<RawSensors>>, Single>().then(
-            "Getup Fallen Check",
-            [this](const std::list<std::shared_ptr<const RawSensors>>& sensors) {
-                Eigen::Vector3d acc_reading = Eigen::Vector3d::Zero();
-
-                for (const auto& s : sensors) {
-                    acc_reading += Eigen::Vector3d(s->accelerometer.x, s->accelerometer.y, s->accelerometer.z);
-                }
-                acc_reading = (acc_reading / double(sensors.size())).normalized();
-
-                // check that the accelerometer reading is less than some predetermined
-                // amount
-                if (!gettingUp && std::acos(Eigen::Vector3d::UnitZ().dot(acc_reading)) > FALLEN_ANGLE) {
-                    // If we are on our side, treat it as being on our front, hopefully the rollover will help matters
-                    isFront = (M_PI_2 - std::acos(Eigen::Vector3d::UnitX().dot(acc_reading)) <= 0.0);
-
-                    updatePriority(GETUP_PRIORITY);
-                    getUp.enable();
-                }
-            });
-
-        getUp = on<Trigger<ExecuteGetup>, Single>().then("Execute Getup", [this]() {
-            gettingUp = true;
-
-            // Check with side we're getting up from
-            if (isFront) {
-                emit(std::make_unique<ExecuteScriptByName>(
-                    id,
-                    std::vector<std::string>({"StandUpFront.yaml", "Stand.yaml"})));
-            }
-            else {
-                emit(std::make_unique<ExecuteScriptByName>(
-                    id,
-                    std::vector<std::string>({"StandUpBack.yaml", "Stand.yaml"})));
-            }
-            updatePriority(EXECUTION_PRIORITY);
-        });
-
-        on<Trigger<KillGetup>>().then([this] {
-            gettingUp = false;
-            updatePriority(0);
-            getUp.disable();
+            log_level          = config["log_level"].as<NUClear::LogLevel>();
+            cfg.fallen_angle   = config["fallen_angle"].as<float>();
+            cfg.getup_priority = config["getup_priority"].as<float>();
         });
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
-            id,
+            subsumption_id,
             "Get Up",
             {std::pair<float, std::set<LimbID>>(
                 0,
                 {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
-            [this](const std::set<LimbID>&) { emit(std::make_unique<ExecuteGetup>()); },
-            [this](const std::set<LimbID>&) { emit(std::make_unique<KillGetup>()); },
-            [this](const std::set<ServoID>&) { emit(std::make_unique<KillGetup>()); }}));
+            [this](const std::set<LimbID>& /* limbs */) { emit(std::make_unique<ExecuteGetup>()); },
+            [this](const std::set<LimbID>& /* limbs */) { emit(std::make_unique<KillGetup>()); },
+            [this](const std::set<ServoID>& /* servos */) { emit(std::make_unique<KillGetup>()); }}));
+
+        on<Trigger<Sensors>>().then("Getup Fallen Check", [this](const Sensors& sensors) {
+            // Transform to torso {t} from world {w} space
+            Eigen::Matrix4d Hwt = sensors.Htw.inverse();
+            // Basis Z vector of torso {t} in world {w} space
+            Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
+            // Basis X vector of torso {t} in world {w} space
+            Eigen::Vector3d uXTw = Hwt.block(0, 0, 3, 1);
+
+            // Check if angle between torso z axis and world z axis is greater than config value cfg.fallen_angle
+            if (!getting_up && std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > cfg.fallen_angle) {
+                // If the z component of the torso's x basis in world space is negative, the robot is fallen on
+                // its front
+                is_front = (uXTw.z() <= 0);
+                update_priority(cfg.getup_priority);
+            }
+        });
+
+        on<Trigger<ExecuteGetup>, Single>().then("Execute Getup", [this]() {
+            getting_up = true;
+
+            // Check with side we're getting up from
+            if (is_front) {
+                emit(std::make_unique<ExecuteScriptByName>(
+                    subsumption_id,
+                    std::vector<std::string>({"StandUpFront.yaml", "Stand.yaml"})));
+            }
+            else {
+                emit(std::make_unique<ExecuteScriptByName>(
+                    subsumption_id,
+                    std::vector<std::string>({"RollOverBack.yaml", "StandUpFront.yaml", "Stand.yaml"})));
+            }
+        });
+
+        on<Trigger<KillGetup>>().then([this] {
+            getting_up = false;
+            update_priority(0);
+        });
     }
 
-    void Getup::updatePriority(const float& priority) {
-        emit(std::make_unique<ActionPriorities>(ActionPriorities{id, {priority}}));
+    void Getup::update_priority(const float& priority) {
+        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {priority}}));
     }
 
 }  // namespace module::behaviour::skills

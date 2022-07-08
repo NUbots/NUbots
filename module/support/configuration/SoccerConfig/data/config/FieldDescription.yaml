@@ -1,8 +1,8 @@
+log_level: WARN
+
 Units: m
 BallRadius: 0.07
 LineWidth: 0.05
-
-MarkWidth: 0.1
 
 FieldLength: 9
 FieldWidth: 6

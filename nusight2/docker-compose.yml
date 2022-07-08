@@ -1,11 +1,11 @@
 version: "3"
 services:
   nusight:
-    image: node:lts
+    image: node:14
     volumes:
-      - .:/var/www/NUsight2
-      - node_modules_volume:/var/www/NUsight2/node_modules
-    working_dir: /var/www/NUsight2
+      - ../:/var/www/NUbots
+      - node_modules_volume:/var/www/NUbots/nusight2/node_modules
+    working_dir: /var/www/NUbots/nusight2
 networks:
   default:
     external:

@@ -17,12 +17,19 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_STRATEGY_CONTROLLABLEDARWIN_HPP
-#define MODULES_BEHAVIOUR_STRATEGY_CONTROLLABLEDARWIN_HPP
+#ifndef MODULE_BEHAVIOUR_STRATEGY_KEYBOARDWALK_HPP
+#define MODULE_BEHAVIOUR_STRATEGY_KEYBOARDWALK_HPP
 
 #include <Eigen/Core>
 #include <mutex>
+
+// clang-format off
+// This include needs to come immediately before the OK undef
 #include <ncurses.h>
+// because ncurses defines OK. We don't need (or want) it.
+#undef OK
+// clang-format on
+
 #include <nuclear>
 
 #include "utility/input/LimbID.hpp"
@@ -90,4 +97,4 @@ namespace module::behaviour::strategy {
 }  // namespace module::behaviour::strategy
 
 
-#endif
+#endif  // MODULE_BEHAVIOUR_STRATEGY_KEYBOARDWALK_HPP

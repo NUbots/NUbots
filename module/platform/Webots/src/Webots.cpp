@@ -28,6 +28,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/Image.hpp"
+#include "message/input/Sensors.hpp"
 #include "message/motion/ServoTarget.hpp"
 #include "message/output/CompressedImage.hpp"
 #include "message/platform/RawSensors.hpp"
@@ -36,7 +37,9 @@
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 #include "utility/platform/RawSensors.hpp"
+#include "utility/support/yaml_expression.hpp"
 #include "utility/vision/fourcc.hpp"
+#include "utility/vision/projection.hpp"
 
 // Include headers needed for TCP connection
 extern "C" {
@@ -52,10 +55,11 @@ namespace module::platform {
 
     using extension::Configuration;
     using message::input::Image;
+    using message::input::Sensors;
     using message::motion::ServoTarget;
     using message::motion::ServoTargets;
-    using message::output::CompressedImage;
     using message::platform::RawSensors;
+    using message::platform::ResetWebotsServos;
 
     using message::platform::webots::ActuatorRequests;
     using message::platform::webots::Message;
@@ -67,6 +71,7 @@ namespace module::platform {
 
     using utility::input::ServoID;
     using utility::platform::getRawServo;
+    using utility::support::Expression;
     using utility::vision::fourcc;
 
     // Converts the NUgus.proto servo name to the equivalent RawSensor.proto name
@@ -104,7 +109,7 @@ namespace module::platform {
         if (name == "head_pitch_sensor") { return servos.head_tilt; }
         // clang-format on
 
-        throw std::runtime_error("Unable to translate unknown NUgus.proto sensor name: " + name);
+        throw std::runtime_error(fmt::format("Unable to translate unknown NUgus.proto sensor name: {}", name));
     }
 
     [[nodiscard]] std::string translate_id_servo(const uint32_t& id) {
@@ -131,7 +136,7 @@ namespace module::platform {
             case 19: return "head_pitch";
         }
 
-        throw std::runtime_error("Unable to translate unknown NUgus.proto servo id: " + id);
+        throw std::runtime_error(fmt::format("Unable to translate unknown NUgus.proto servo id: {}", id));
     }
 
     [[nodiscard]] ActuatorRequests create_sensor_time_steps(const uint32_t& sensor_timestep,
@@ -176,13 +181,13 @@ namespace module::platform {
 
     int Webots::tcpip_connect() {
         // Hints for the connection type
-        addrinfo hints;
+        addrinfo hints{};
         memset(&hints, 0, sizeof(addrinfo));  // Defaults on what we do not explicitly set
         hints.ai_family   = AF_UNSPEC;        // IPv4 or IPv6
         hints.ai_socktype = SOCK_STREAM;      // TCP
 
         // Store the ip address information that we will connect to
-        addrinfo* address;
+        addrinfo* address = nullptr;
 
         const int error = getaddrinfo(server_address.c_str(), server_port.c_str(), &hints, &address);
         if (error != 0) {
@@ -194,14 +199,14 @@ namespace module::platform {
         }
 
         // Loop through the linked list of potential options for connecting. In order of best to worst.
-        for (addrinfo* addr_ptr = address; addr_ptr != NULL; addr_ptr = addr_ptr->ai_next) {
+        for (addrinfo* addr_ptr = address; addr_ptr != nullptr; addr_ptr = addr_ptr->ai_next) {
             const int fd_temp = socket(addr_ptr->ai_family, addr_ptr->ai_socktype, addr_ptr->ai_protocol);
 
             if (fd_temp == -1) {
                 // Bad fd
                 continue;
             }
-            else if (connect(fd_temp, addr_ptr->ai_addr, addr_ptr->ai_addrlen) != -1) {
+            if (connect(fd_temp, addr_ptr->ai_addr, addr_ptr->ai_addrlen) != -1) {
                 // Connection successful
                 freeaddrinfo(address);
                 return fd_temp;
@@ -224,8 +229,9 @@ namespace module::platform {
             min_sensor_time_step = config["min_sensor_time_step"].as<int>();
             max_velocity_mx64    = config["max_velocity_mx64"].as<double>();
             max_velocity_mx106   = config["max_velocity_mx106"].as<double>();
+            max_fsr_value        = config["max_fsr_value"].as<float>();
 
-            this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            log_level = config["log_level"].as<NUClear::LogLevel>();
 
             clock_smoothing = config["clock_smoothing"].as<double>();
 
@@ -242,9 +248,72 @@ namespace module::platform {
             setup_connection();
         });
 
+
+        on<Configuration>("WebotsCameras").then([this](const Configuration& config) {
+            // The camera's name is the filename of the config, with the .yaml stripped off
+            const std::string name = config.fileName.stem();
+
+            log<NUClear::INFO>(fmt::format("Connected to the webots {} camera", name));
+
+            CameraContext context;
+            context.name = name;
+            context.id   = num_cameras++;
+            context.Hpc  = Eigen::Matrix4d(config["lens"]["Hpc"].as<Expression>());  // Load Hpc from configuration
+
+            int width  = config["settings"]["Width"].as<Expression>();
+            int height = config["settings"]["Height"].as<Expression>();
+
+            // Renormalise the focal length
+            float focal_length = config["lens"]["focal_length"].as<Expression>();
+            float fov          = config["lens"]["fov"].as<Expression>();
+
+            // Recentre/renormalise the centre
+            Eigen::Vector2f centre = Eigen::Vector2f(config["lens"]["centre"].as<Expression>());
+
+            // Adjust the distortion parameters for the new width units
+            Eigen::Vector2f k = config["lens"]["k"].as<Expression>();
+
+            // Set the lens parameters from configuration
+            context.lens = Image::Lens{
+                config["lens"]["projection"].as<std::string>(),
+                focal_length,
+                fov,
+                centre,
+                k,
+            };
+
+            // If the lens fov was auto we need to correct it
+            if (!std::isfinite(context.lens.fov)) {
+                double a = height / width;
+                std::array<double, 4> options{
+                    utility::vision::unproject(Eigen::Vector2f(0, 0), context.lens, Eigen::Vector2f(1, a)).x(),
+                    utility::vision::unproject(Eigen::Vector2f(1, 0), context.lens, Eigen::Vector2f(1, a)).x(),
+                    utility::vision::unproject(Eigen::Vector2f(0, a), context.lens, Eigen::Vector2f(1, a)).x(),
+                    utility::vision::unproject(Eigen::Vector2f(1, a), context.lens, Eigen::Vector2f(1, a)).x()};
+                context.lens.fov = std::acos(*std::min_element(options.begin(), options.end())) * 2.0;
+            }
+
+            camera_context[name] = std::move(context);
+        });
+
+        on<Trigger<Sensors>>().then("Buffer Sensors", [this](const Sensors& sensors) {
+            std::lock_guard<std::mutex> lock(sensors_mutex);
+            auto now = NUClear::clock::now();
+            Hwps.resize(std::distance(Hwps.begin(), std::remove_if(Hwps.begin(), Hwps.end(), [now](const auto& v) {
+                                          return v.first < (now - std::chrono::milliseconds(500));
+                                      })));
+
+            // Get torso to head, and torso to world
+            Eigen::Affine3d Htp(sensors.Htx[ServoID::HEAD_PITCH]);
+            Eigen::Affine3d Htw(sensors.Htw);
+            Eigen::Affine3d Hwp = Htw.inverse() * Htp;
+
+            Hwps.emplace_back(sensors.timestamp, Hwp);
+        });
+
         // This trigger updates our current servo state
-        on<Trigger<ServoTargets>, With<RawSensors>>().then([this](const ServoTargets& targets,
-                                                                  const RawSensors& sensors) {
+        on<Trigger<ServoTargets>, With<RawSensors>, Sync<ServoState>>().then([this](const ServoTargets& targets,
+                                                                                    const RawSensors& sensors) {
             // Loop through each of our commands
             for (const auto& target : targets.targets) {
                 // Get the difference between the current servo position and our servo target
@@ -255,9 +324,9 @@ namespace module::platform {
                 NUClear::clock::duration duration = target.time - NUClear::clock::now();
 
                 // If we have a positive duration, find the velocity.
-                // Otherwise, if the duration is negative or 0, the servo should have reached its position before now
-                // Because of this, we move the servo as fast as we can to reach the position.
-                // The fastest speed is determined by the config, which comes from the max servo velocity from
+                // Otherwise, if the duration is negative or 0, the servo should have reached its position
+                // before now Because of this, we move the servo as fast as we can to reach the position. The
+                // fastest speed is determined by the config, which comes from the max servo velocity from
                 // NUgus.proto in Webots
                 double max_velocity = 0.0;
                 if (target.id >= ServoID::R_HIP_YAW && target.id <= ServoID::L_ANKLE_ROLL) {
@@ -310,6 +379,31 @@ namespace module::platform {
                 fd = -1;
             }
         });
+
+        // Used to reset our local servo state when the robot is teleported by the referee in the simulation.
+        // Needed to cancel old servo targets and reset the pose to account for the teleportation.
+        on<Trigger<ResetWebotsServos>>().then([this]() {
+            // Reset the servo state
+            for (auto& servo : servo_state) {
+                servo.dirty            = false;
+                servo.p_gain           = 32.0 / 255.0;
+                servo.moving_speed     = 0.0;
+                servo.goal_position    = 0.0;
+                servo.torque           = 0.0;
+                servo.present_position = 0.0;
+                servo.present_speed    = 0.0;
+            }
+
+            auto targets = std::make_unique<ServoTargets>();
+
+            // Clear all servo targets on reset
+            for (int i = 0; i < ServoID::NUMBER_OF_SERVOS; i++) {
+                targets->targets.emplace_back(NUClear::clock::now(), i, 0.0, 1, 0);
+            }
+
+            // Emit it so it's captured by the reaction above
+            emit<Scope::DIRECT>(targets);
+        });
     }
 
     void Webots::setup_connection() {
@@ -346,8 +440,8 @@ namespace module::platform {
                             // If we have not seen the welcome message yet, look for it
                             if (!connection_active) {
                                 // Initialise the string with 0s
-                                // make sure we have an extra character just in case we read something that isn't a null
-                                // terminator
+                                // make sure we have an extra character just in case we read something that isn't a
+                                // null terminator
                                 std::array<char, 9> initial_message{};
                                 const int n = ::read(fd, initial_message.data(), initial_message.size() - 1);
 
@@ -388,8 +482,8 @@ namespace module::platform {
                                 connection_active = true;
                             }
                             else {
-                                // Work out how many bytes are available to read in the buffer and ensure we have enough
-                                // space to read them in our data buffer
+                                // Work out how many bytes are available to read in the buffer and ensure we have
+                                // enough space to read them in our data buffer
                                 unsigned long available = 0;
                                 if (::ioctl(fd, FIONREAD, &available) < 0) {
                                     log<NUClear::ERROR>(
@@ -405,7 +499,7 @@ namespace module::platform {
                                 buffer.resize(old_size + bytes_read);
 
                                 // Function to read the payload length from the buffer
-                                auto read_length = [this](const std::vector<uint8_t>& buffer) {
+                                auto read_length = [](const std::vector<uint8_t>& buffer) {
                                     return buffer.size() >= sizeof(uint32_t)
                                                ? ntohl(*reinterpret_cast<const uint32_t*>(buffer.data()))
                                                : 0u;
@@ -428,8 +522,8 @@ namespace module::platform {
                             }
                         }
 
-                        // For IO::ERROR and IO::CLOSE conditions the watchdog will handle reconnections so just report
-                        // the error
+                        // For IO::ERROR and IO::CLOSE conditions the watchdog will handle reconnections so just
+                        // report the error
                         else if ((event.events & IO::ERROR) != 0) {
                             if (!active_reconnect.exchange(true)) {
                                 log<NUClear::WARN>(fmt::format(
@@ -443,11 +537,11 @@ namespace module::platform {
                         }
                     });
 
-            send_io = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then(
+            send_io = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Sync<ServoState>, Priority::HIGH>().then(
                 "Simulator Update Loop",
                 [this] {
-                    // Bound the time_step for the cameras and other sensors by the minimum allowed time_step for the
-                    // competition
+                    // Bound the time_step for the cameras and other sensors by the minimum allowed time_step for
+                    // the competition
                     const uint32_t sensor_timestep = std::max(min_sensor_time_step, time_step);
                     const uint32_t camera_timestep = std::max(min_camera_time_step, time_step);
 
@@ -514,12 +608,14 @@ namespace module::platform {
         real_delta = sensor_measurements.real_time - current_real_time;
         sim_delta  = sensor_measurements.time - current_sim_time;
 
-        // Calculate our custom rtf - the ratio of the past two sim deltas and the past two real time deltas, smoothed
+        // Calculate our custom rtf - the ratio of the past two sim deltas and the past two real time deltas,
+        // smoothed
         const double ratio =
             static_cast<double>(sim_delta + prev_sim_delta) / static_cast<double>(real_delta + prev_real_delta);
 
         // Exponential filter to do the smoothing
-        utility::clock::custom_rtf = utility::clock::custom_rtf * clock_smoothing + (1.0 - clock_smoothing) * ratio;
+        rtf = rtf * clock_smoothing + (1.0 - clock_smoothing) * ratio;
+        utility::clock::update_rtf(rtf);
 
         // Update our current times
         current_sim_time  = sensor_measurements.time;
@@ -618,8 +714,8 @@ namespace module::platform {
         }
 
         // Only emit RawSensors if there is any data!
-        if (!(sensor_measurements.position_sensors.size() == 0 && sensor_measurements.accelerometers.size() == 0
-              && sensor_measurements.bumpers.size() == 0 && sensor_measurements.gyros.size() == 0)) {
+        if (!(sensor_measurements.position_sensors.empty() && sensor_measurements.accelerometers.empty()
+              && sensor_measurements.bumpers.empty() && sensor_measurements.gyros.empty())) {
 
 
             // Read each field of msg, translate it to our protobuf and emit the data
@@ -631,55 +727,55 @@ namespace module::platform {
                 translate_servo_id(position.name, sensor_data->servo).present_position = position.value;
             }
 
-            if (sensor_measurements.accelerometers.size() > 0) {
+            if (!sensor_measurements.accelerometers.empty()) {
                 // .accelerometers is a list of one, since our robots have only one accelerometer
                 const auto& accelerometer = sensor_measurements.accelerometers[0];
-                // Webots has a strictly positive output for the accelerometers. We minus 100 to center the output over
-                // 0 The value 100.0 is based on the Look-up Table from NUgus.proto and should be kept consistent with
-                // that
-                sensor_data->accelerometer.x = static_cast<float>(accelerometer.value.X) - 100.0f;
-                sensor_data->accelerometer.y = static_cast<float>(accelerometer.value.Y) - 100.0f;
-                sensor_data->accelerometer.z = static_cast<float>(accelerometer.value.Z) - 100.0f;
+                // Webots has a strictly positive output for the accelerometers. We minus 100 to center the output
+                // over 0 The value 100.0 is based on the Look-up Table from NUgus.proto and should be kept
+                // consistent with that
+                sensor_data->accelerometer.x() = static_cast<float>(accelerometer.value.X) - 100.0f;
+                sensor_data->accelerometer.y() = static_cast<float>(accelerometer.value.Y) - 100.0f;
+                sensor_data->accelerometer.z() = static_cast<float>(accelerometer.value.Z) - 100.0f;
             }
 
-            if (sensor_measurements.gyros.size() > 0) {
+            if (!sensor_measurements.gyros.empty()) {
                 // .gyros is a list of one, since our robots have only one gyroscope
                 const auto& gyro = sensor_measurements.gyros[0];
                 // Webots has a strictly positive output for the gyros. We minus 100 to center the output over 0
                 // The value 100.0 is based on the Look-up Table from NUgus.proto and should be kept consistent with
                 // that
-                sensor_data->gyroscope.x = static_cast<float>(gyro.value.X) - 100.0f;
-                sensor_data->gyroscope.y = static_cast<float>(gyro.value.Y) - 100.0f;
-                sensor_data->gyroscope.z = static_cast<float>(gyro.value.Z) - 100.0f;
+                sensor_data->gyroscope.x() = static_cast<float>(gyro.value.X) - 100.0f;
+                sensor_data->gyroscope.y() = static_cast<float>(gyro.value.Y) - 100.0f;
+                sensor_data->gyroscope.z() = static_cast<float>(gyro.value.Z) - 100.0f;
             }
 
             for (const auto& bumper : sensor_measurements.bumpers) {
                 // We should have eight bumper sensors
                 // Right foot
                 if (bumper.name == "right_touch_sensor_br") {
-                    sensor_data->fsr.right.fsr1 = bumper.value;
+                    sensor_data->fsr.right.fsr1 = bumper.value ? max_fsr_value : 0.0f;
                 }
                 else if (bumper.name == "right_touch_sensor_bl") {
-                    sensor_data->fsr.right.fsr2 = bumper.value;
+                    sensor_data->fsr.right.fsr2 = bumper.value ? max_fsr_value : 0.0f;
                 }
                 else if (bumper.name == "right_touch_sensor_fl") {
-                    sensor_data->fsr.right.fsr3 = bumper.value;
+                    sensor_data->fsr.right.fsr3 = bumper.value ? max_fsr_value : 0.0f;
                 }
                 else if (bumper.name == "right_touch_sensor_fr") {
-                    sensor_data->fsr.right.fsr4 = bumper.value;
+                    sensor_data->fsr.right.fsr4 = bumper.value ? max_fsr_value : 0.0f;
                 }
                 // Left foot
                 else if (bumper.name == "left_touch_sensor_br") {
-                    sensor_data->fsr.left.fsr1 = bumper.value;
+                    sensor_data->fsr.left.fsr1 = bumper.value ? max_fsr_value : 0.0f;
                 }
                 else if (bumper.name == "left_touch_sensor_bl") {
-                    sensor_data->fsr.left.fsr2 = bumper.value;
+                    sensor_data->fsr.left.fsr2 = bumper.value ? max_fsr_value : 0.0f;
                 }
                 else if (bumper.name == "left_touch_sensor_fl") {
-                    sensor_data->fsr.left.fsr3 = bumper.value;
+                    sensor_data->fsr.left.fsr3 = bumper.value ? max_fsr_value : 0.0f;
                 }
                 else if (bumper.name == "left_touch_sensor_fr") {
-                    sensor_data->fsr.left.fsr4 = bumper.value;
+                    sensor_data->fsr.left.fsr4 = bumper.value ? max_fsr_value : 0.0f;
                 }
             }
 
@@ -693,8 +789,49 @@ namespace module::platform {
             image->name           = camera.name;
             image->dimensions.x() = camera.width;
             image->dimensions.y() = camera.height;
-            image->format         = fourcc("RGB3");  // Change to "JPEG" when webots compression is implemented
+            image->format         = fourcc("BGR3");  // Change to "JPEG" when webots compression is implemented
             image->data           = camera.image;
+
+            image->id        = camera_context[camera.name].id;
+            image->timestamp = NUClear::clock::time_point(std::chrono::nanoseconds(sensor_measurements.time));
+
+            Eigen::Affine3d Hcw;
+
+            /* Mutex Scope */ {
+                std::lock_guard<std::mutex> lock(sensors_mutex);
+
+                const Eigen::Affine3d& Hpc = camera_context[camera.name].Hpc;
+                Eigen::Affine3d Hwp        = Eigen::Affine3d::Identity();
+                if (!Hwps.empty()) {
+                    // Find the first time that is not less than the target time
+                    auto Hwp_it = std::lower_bound(Hwps.begin(),
+                                                   Hwps.end(),
+                                                   std::make_pair(image->timestamp, Eigen::Affine3d::Identity()),
+                                                   [](const auto& a, const auto& b) { return a.first < b.first; });
+
+                    if (Hwp_it == Hwps.end()) {
+                        // Image is newer than most recent sensors
+                        Hwp = std::prev(Hwp_it)->second;
+                    }
+                    else if (Hwp_it == Hwps.begin()) {
+                        // Image is older than oldest sensors
+                        Hwp = Hwp_it->second;
+                    }
+                    else {
+                        // Check Hwp_it and std::prev(Hwp) for closest match
+                        Hwp = std::abs((Hwp_it->first - image->timestamp).count())
+                                      < std::abs((std::prev(Hwp_it)->first - image->timestamp).count())
+                                  ? Hwp_it->second
+                                  : std::prev(Hwp_it)->second;
+                    }
+                }
+
+                Hcw = Eigen::Affine3d(Hwp * Hpc).inverse();
+            }
+
+            image->lens = camera_context[camera.name].lens;
+            image->Hcw  = Hcw.matrix();
+
             emit(image);
         }
     }

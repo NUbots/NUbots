@@ -103,7 +103,12 @@ namespace utility::motion::kinematics {
         std::map<ServoID, Eigen::Affine3d> positions{};
         Eigen::Affine3d runningTransform = Eigen::Affine3d::Identity();
         // Variables to mask left and right leg differences:
-        ServoID HIP_YAW, HIP_ROLL, HIP_PITCH, KNEE, ANKLE_PITCH, ANKLE_ROLL;
+        ServoID HIP_YAW;
+        ServoID HIP_ROLL;
+        ServoID HIP_PITCH;
+        ServoID KNEE;
+        ServoID ANKLE_PITCH;
+        ServoID ANKLE_ROLL;
         int negativeIfRight = 1;
 
         if (isLeft == BodySide::LEFT) {
@@ -208,7 +213,9 @@ namespace utility::motion::kinematics {
         std::map<ServoID, Eigen::Affine3d> positions{};
         Eigen::Affine3d runningTransform = Eigen::Affine3d::Identity();
         // Variables to mask left and right differences:
-        ServoID SHOULDER_PITCH, SHOULDER_ROLL, ELBOW;
+        ServoID SHOULDER_PITCH;
+        ServoID SHOULDER_ROLL;
+        ServoID ELBOW;
         int negativeIfRight = 1;
 
         if (isLeft == BodySide::LEFT) {
@@ -325,13 +332,12 @@ namespace utility::motion::kinematics {
         @return [x_com, y_com, z_com, total_mass] relative to the torso basis
     */
     [[nodiscard]] inline Eigen::Vector4d calculateCentreOfMass(const message::motion::KinematicsModel& model,
-                                                               const std::array<Eigen::Matrix4d, 20>& Htx,
-                                                               const Eigen::Matrix4d& Hwt) {
+                                                               const std::array<Eigen::Matrix4d, 20>& Htx) {
 
         // Convenience function to transform particle-space CoM to torso-space CoM
         // Htx - transform from particle space to torso space
         // particle - CoM coordinates in particle space
-        auto com = [&Hwt](const Eigen::Matrix4d& Htx, const Eigen::Vector4d& particle) {
+        auto com = [](const Eigen::Matrix4d& Htx, const Eigen::Vector4d& particle) {
             // Split out CoM and mass
             Eigen::Vector4d com(particle.x(), particle.y(), particle.z(), 1.0);
             const double mass = particle.w();
@@ -374,7 +380,7 @@ namespace utility::motion::kinematics {
         }
 
         return Eigen::Vector4d{robot_com.first.x(), robot_com.first.y(), robot_com.first.z(), robot_com.second};
-    }  // namespace kinematics
+    }
 
     /*! @brief Transforms inertial tensors for each robot particle into torso space and sums to find the total
        inertial tensor
@@ -395,7 +401,9 @@ namespace utility::motion::kinematics {
             com = Htx * com;
 
             // Calculate distance to particle CoM from particle origin, using skew-symmetric matrix
-            const double x = com.x(), y = com.y(), z = com.z();
+            const double x = com.x();
+            const double y = com.y();
+            const double z = com.z();
             Eigen::Matrix3d d;
             // clang-format off
                     d <<  y * y + z * z, -x * y,         -x * z,
@@ -478,7 +486,7 @@ namespace utility::motion::kinematics {
     }
 
     template <typename T, typename Scalar = typename T::Scalar, typename MatrixType = typename T::LinearMatrixType>
-    [[nodiscard]] T calculateGroundSpace(const T& Htf, const T& Hwt) {
+    [[nodiscard]] inline T calculateGroundSpace(const T& Htf, const T& Hwt) {
         // Retrieve rotations needed for creating the space
         // support foot to torso rotation, and world to torso rotation
         const MatrixType Rtf(Htf.rotation());

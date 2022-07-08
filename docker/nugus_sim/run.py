@@ -12,6 +12,7 @@ DEFAULT_CONFIG_DIR = os.path.join(DEFAULT_BINARIES_DIR, "config")
 
 REQUIRED_ENV_VARS = ("ROBOCUP_ROBOT_ID", "ROBOCUP_TEAM_COLOR", "ROBOCUP_SIMULATOR_ADDR")
 OPTIONAL_ENV_VARS = (
+    "ROBOCUP_TEAM_ID",
     "ROBOCUP_TEAM_PLAYER1_IP",
     "ROBOCUP_TEAM_PLAYER2_IP",
     "ROBOCUP_TEAM_PLAYER3_IP",
@@ -23,13 +24,21 @@ yaml = ruamel.yaml.YAML()  # Can't use `typ="safe"` since we want round-tripping
 
 
 def read_config(file_path):
-    with open(file_path, "r") as file:
-        return yaml.load(file)
+    try:
+        with open(file_path, "r") as file:
+            return yaml.load(file)
+    except FileNotFoundError:
+        print(f"config file not found: {file_path}")
+        sys.exit(1)
 
 
 def write_config(file_path, config):
-    with open(file_path, "w") as file:
-        yaml.dump(config, file)
+    try:
+        with open(file_path, "w") as file:
+            yaml.dump(config, file)
+    except FileNotFoundError:
+        print(f"config file not found: {file_path}")
+        sys.exit(1)
 
 
 def read_args() -> dict:
@@ -100,6 +109,12 @@ def update_config_files(args: dict) -> None:
     webots_config["port"] = int(port)
     write_config("webots.yaml", webots_config)
 
+    # Set `team_id` if it is provided
+    if "ROBOCUP_TEAM_ID" in env_vars:
+        global_config = read_config("GlobalConfig.yaml")
+        global_config["team_id"] = int(env_vars["ROBOCUP_TEAM_ID"])
+        write_config("GlobalConfig.yaml", global_config)
+
     # Configure logging to /robocup-logs if it exists
     if os.path.exists("/robocup-logs"):
         # Compute the log directory for this robot, based on ROBOCUP_ROBOT_ID
@@ -134,10 +149,14 @@ def run_role(role: str, binaries_dir: str, env_vars: dict) -> None:
     modified_env["ROBOT_HOSTNAME"] = f"webots{env_vars['ROBOCUP_ROBOT_ID']}"
 
     # Run the role binary
-    sys.exit(subprocess.run(f"./{role}", env=modified_env).returncode)
+    while True:
+        print(f"Binary '{role}' starting...")  # For debugging
+        exit_code = subprocess.run(f"./{role}", env=modified_env).returncode
+        print(f"Binary '{role}' crashed! Exit code: {exit_code}")  # For debugging
 
 
 if __name__ == "__main__":
     args = read_args()
+    print("main args: ", args)  # For Debugging
     update_config_files(args)
     run_role(args["role"], args["binaries_dir"], args["env_vars"])

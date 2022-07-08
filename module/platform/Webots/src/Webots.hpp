@@ -20,13 +20,17 @@
 #ifndef MODULE_PLATFORM_WEBOTS_HPP
 #define MODULE_PLATFORM_WEBOTS_HPP
 
+#include <Eigen/Core>
+#include <Eigen/Geometry>
 #include <array>
 #include <atomic>
+#include <map>
+#include <mutex>
 #include <nuclear>
 #include <string>
 #include <vector>
 
-#include "message/platform/webots/ConnectRequest.hpp"
+#include "message/input/Image.hpp"
 #include "message/platform/webots/messages.hpp"
 
 namespace module::platform {
@@ -73,9 +77,11 @@ namespace module::platform {
         uint32_t current_sim_time = 0;
         /// @brief The current real time in milliseconds (unix time)
         uint64_t current_real_time = 0;
-        /// @brief Interpolation factor to smooth clock. 0.0 is no smoothing (raw updates from webots), 1.0 takes no
-        /// updates from webots
+        /// @brief Interpolation factor to smooth clock. 0.0 is no smoothing (raw updates from Webots), 1.0 takes no
+        /// updates from Webots
         double clock_smoothing = 0.0;
+        /// @brief Real time factor of the simulation clock
+        double rtf = 1.0;
 
         /// @brief The time between two measurements, expressed in milliseconds
         int time_step;
@@ -121,6 +127,23 @@ namespace module::platform {
         /// @brief Atomic variable indicating that a reconnect is currently in progress
         std::atomic_bool active_reconnect{false};
         bool connection_active = false;
+
+        std::mutex sensors_mutex;
+        std::vector<std::pair<NUClear::clock::time_point, Eigen::Affine3d>> Hwps;
+
+        struct CameraContext {
+            std::string name;
+            uint32_t id = 0;
+            message::input::Image::Lens lens;
+            // Homogenous transform from camera (c) to platform (p) where platform is the rigid body the camera is
+            // attached to
+            Eigen::Affine3d Hpc;
+        };
+        std::map<std::string, CameraContext> camera_context;
+        uint32_t num_cameras = 0;
+
+        /// @brief Max FSR sensor value
+        float max_fsr_value = 0;
 
     public:
         /// @brief Called by the powerplant to build and setup the webots reactor
