@@ -66,7 +66,6 @@ namespace module::platform {
     using message::platform::webots::MotorPID;
     using message::platform::webots::MotorPosition;
     using message::platform::webots::MotorVelocity;
-    using message::platform::webots::OdometryGroundTruth;
     using message::platform::webots::SensorMeasurements;
     using message::platform::webots::SensorTimeStep;
 
@@ -703,11 +702,6 @@ namespace module::platform {
             log<NUClear::TRACE>("      value:", sensor.value);
         }
 
-        log<NUClear::TRACE>("  sm.odometry_ground_truth:");
-        if (sensor_measurements.odometry_ground_truth.exists) {
-            log<NUClear::TRACE>("    Htw:\n", sensor_measurements.odometry_ground_truth.Htw);
-        }
-
 
         // Parse the errors and warnings from Webots and log them.
         // Note that this is where we should deal with specific messages passed in SensorMeasurements.messages.
@@ -783,12 +777,6 @@ namespace module::platform {
                 else if (bumper.name == "left_touch_sensor_fr") {
                     sensor_data->fsr.left.fsr4 = bumper.value ? max_fsr_value : 0.0f;
                 }
-            }
-
-            // If we got ground truth data, send it through with the sensors
-            if (sensor_measurements.odometry_ground_truth.exists) {
-                sensor_data->odometry_ground_truth.exists = true;
-                sensor_data->odometry_ground_truth.Htw    = sensor_measurements.odometry_ground_truth.Htw;
             }
 
             emit(sensor_data);
