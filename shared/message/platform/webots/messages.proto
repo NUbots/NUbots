@@ -85,6 +85,17 @@ message Message {
     string      text         = 2;
 }
 
+message VisionGroundTruth {
+    /// Indicates if this message exists
+    bool exists = 1;
+    /// Affine3d transform from world to ball space.
+    mat4 Hbw = 2;
+    /// Affine3d transform from world to goal space.
+    ///mat4 Hgw = 3;
+    Vector3 rBWw = 5;
+    Vector3 rFWw = 6;
+}
+
 /// NUbots specific data sent from our own controllers rather than the official RoboCup Webots controller
 message OdometryGroundTruth {
     /// Indicates if this message exists
@@ -111,6 +122,7 @@ message SensorMeasurements {
     repeated GyroMeasurement           gyros            = 10;
     repeated PositionSensorMeasurement position_sensors = 11;
     OdometryGroundTruth                odometry_ground_truth = 100;
+    VisionGroundTruth                  vision_ground_truth = 200;
 }
 
 message MotorPosition {

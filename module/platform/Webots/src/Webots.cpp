@@ -43,9 +43,9 @@
 
 // Include headers needed for TCP connection
 extern "C" {
-#include <netdb.h>      /* definition of gethostbyname */
+#include <netdb.h> /* definition of gethostbyname */
 #include <netinet/in.h> /* definition of struct sockaddr_in */
-#include <sys/ioctl.h>  /* definition of ioctl and FIONREAD */
+#include <sys/ioctl.h> /* definition of ioctl and FIONREAD */
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <unistd.h> /* definition of close */
@@ -69,6 +69,7 @@ namespace module::platform {
     using message::platform::webots::OdometryGroundTruth;
     using message::platform::webots::SensorMeasurements;
     using message::platform::webots::SensorTimeStep;
+    using message::platform::webots::VisionGroundTruth;
 
     using utility::input::ServoID;
     using utility::platform::getRawServo;
@@ -702,12 +703,6 @@ namespace module::platform {
             log<NUClear::TRACE>("      value:", sensor.value);
         }
 
-        log<NUClear::TRACE>("  sm.odometry_ground_truth:");
-        if (sensor_measurements.odometry_ground_truth.exists) {
-            log<NUClear::TRACE>("    Htw:\n", sensor_measurements.odometry_ground_truth.Htw);
-        }
-
-
         // Parse the errors and warnings from Webots and log them.
         // Note that this is where we should deal with specific messages passed in SensorMeasurements.messages.
         // Or check if those messages have specific information
@@ -842,6 +837,13 @@ namespace module::platform {
 
             image->lens = camera_context[camera.name].lens;
             image->Hcw  = Hcw.matrix();
+
+            // If we got ground truth data, send it through with the sensors
+            if (sensor_measurements.vision_ground_truth.exists) {
+                image->vision_ground_truth.exists = true;
+                image->vision_ground_truth.rBWw   = sensor_measurements.vision_ground_truth.rBWw;
+                image->vision_ground_truth.rFWw   = sensor_measurements.vision_ground_truth.rFWw;
+            }
 
             emit(image);
         }
