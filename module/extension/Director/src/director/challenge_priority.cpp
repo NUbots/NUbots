@@ -32,10 +32,10 @@ namespace module::extension {
     // Scope this struct to just this translation unit
     namespace {
         struct TaskPriority {
-            TaskPriority(const uint64_t& id_, const int& priority_, const bool& optional_)
-                : id(id_), priority(priority_), optional(optional_) {}
+            TaskPriority(const std::type_index& requester_, const int& priority_, const bool& optional_)
+                : requester(requester_), priority(priority_), optional(optional_) {}
 
-            uint64_t id;
+            std::type_index requester;
             int priority;
             bool optional;
         };
@@ -48,9 +48,11 @@ namespace module::extension {
         if (incumbent == nullptr) {
             return true;
         }
+        if (challenger == nullptr) {
+            return false;
+        }
 
-        // When a provider emits a new updated task we should always swap to the new task regardless of priority
-        // In this case though, we also need to compare to every other task in the queue but this will be done elsewhere
+        // A provider can always replace its own task with a new challenger
         if (incumbent->requester_id == challenger->requester_id) {
             return true;
         }
@@ -59,7 +61,13 @@ namespace module::extension {
         auto get_ancestor_priorities = [this](const std::shared_ptr<const DirectorTask>& task) {
             // We are our first ancestor
             std::vector<TaskPriority> ancestors;
-            ancestors.emplace_back(task->requester_id, task->priority, task->optional);
+
+            // The task might be a root task, in which case we won't have any provider
+            // In that case we set the type to nullptr_t to indicate that we are a root task
+            ancestors.emplace_back(
+                providers.count(task->requester_id) != 0 ? providers[task->requester_id]->type : typeid(nullptr_t),
+                task->priority,
+                task->optional);
 
             // Loop up through the providers until we reach a point where a task was emitted by a non provider
             for (auto t = task; providers.count(t->requester_id) != 0;) {
@@ -75,7 +83,7 @@ namespace module::extension {
 
                 // Add this new parent we found and set t so we can loop up further
                 t = group.active_task;
-                ancestors.emplace_back(t->requester_id, t->priority, t->optional);
+                ancestors.emplace_back(provider->type, t->priority, t->optional);
             }
             return ancestors;
         };
@@ -85,9 +93,27 @@ namespace module::extension {
         auto c_p = get_ancestor_priorities(challenger);
 
         // Remove all of the common ancestors
-        while (i_p.back().id == c_p.back().id) {
+        // If one of the lists ends up empty that means that it is a direct ancestor of the other
+        // If either ends up as nullptr_t that means that it is a root task and we don't remove it
+        while ((!i_p.empty() && !c_p.empty())
+               && (i_p.back().requester != typeid(nullptr_t) && c_p.back().requester != typeid(nullptr_t))
+               && (i_p.back().requester == c_p.back().requester)) {
             i_p.pop_back();
             c_p.pop_back();
+        }
+
+        // If the challenger parentage is empty it means that the challenger is a direct ancestor of the incumbent.
+        // This can happen when we are checking tasks with a `Needs` relationship against a task higher in the tree and
+        // we already own that task. In that case we say that the challenger wins because we already own it and can
+        // replace it.
+        if (c_p.empty()) {
+            return true;
+        }
+
+        // If the incumbent is empty it means that the incumbent is a direct ancestor of the challenger.
+        // As an inverse to the line above, we can't challenge our parents to ensure sane sorting order
+        if (i_p.empty()) {
+            return false;
         }
 
         // Work out if there are any optionals in either of the tasks parentage

@@ -48,21 +48,23 @@ namespace module::behaviour::skills {
     using ServoID = utility::input::ServoID;
 
     Getup::Getup(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment))
-        , id(size_t(this) * size_t(this) - size_t(this))
-        , isFront(true)
-        , gettingUp(false)
-        , FALLEN_ANGLE(M_PI_2) {
+        : Reactor(std::move(environment)), subsumption_id(size_t(this) * size_t(this) - size_t(this)) {
         // do a little configurating
         on<Configuration>("Getup.yaml").then([this](const Configuration& config) {
-            log_level = config["log_level"].as<NUClear::LogLevel>();
-
-            FALLEN_ANGLE = config["FALLEN_ANGLE"].as<float>();
-
-            // load priorities for the getup
-            GETUP_PRIORITY     = config["GETUP_PRIORITY"].as<float>();
-            EXECUTION_PRIORITY = config["EXECUTION_PRIORITY"].as<float>();
+            log_level          = config["log_level"].as<NUClear::LogLevel>();
+            cfg.fallen_angle   = config["fallen_angle"].as<float>();
+            cfg.getup_priority = config["getup_priority"].as<float>();
         });
+
+        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
+            subsumption_id,
+            "Get Up",
+            {std::pair<float, std::set<LimbID>>(
+                0,
+                {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
+            [this](const std::set<LimbID>& /* limbs */) { emit(std::make_unique<ExecuteGetup>()); },
+            [this](const std::set<LimbID>& /* limbs */) { emit(std::make_unique<KillGetup>()); },
+            [this](const std::set<ServoID>& /* servos */) { emit(std::make_unique<KillGetup>()); }}));
 
         on<Trigger<Sensors>>().then("Getup Fallen Check", [this](const Sensors& sensors) {
             // Transform to torso {t} from world {w} space
@@ -72,50 +74,39 @@ namespace module::behaviour::skills {
             // Basis X vector of torso {t} in world {w} space
             Eigen::Vector3d uXTw = Hwt.block(0, 0, 3, 1);
 
-            // Check if angle between torso z axis and world z axis is greater than config value FALLEN_ANGLE
-            if (!gettingUp && std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > FALLEN_ANGLE) {
+            // Check if angle between torso z axis and world z axis is greater than config value cfg.fallen_angle
+            if (!getting_up && std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > cfg.fallen_angle) {
                 // If the z component of the torso's x basis in world space is negative, the robot is fallen on
                 // its front
-                isFront = (uXTw.z() <= 0);
-                updatePriority(GETUP_PRIORITY);
+                is_front = (uXTw.z() <= 0);
+                update_priority(cfg.getup_priority);
             }
         });
 
         on<Trigger<ExecuteGetup>, Single>().then("Execute Getup", [this]() {
-            gettingUp = true;
+            getting_up = true;
 
             // Check with side we're getting up from
-            if (isFront) {
+            if (is_front) {
                 emit(std::make_unique<ExecuteScriptByName>(
-                    id,
+                    subsumption_id,
                     std::vector<std::string>({"StandUpFront.yaml", "Stand.yaml"})));
             }
             else {
                 emit(std::make_unique<ExecuteScriptByName>(
-                    id,
-                    std::vector<std::string>({"StandUpBack.yaml", "Stand.yaml"})));
+                    subsumption_id,
+                    std::vector<std::string>({"RollOverBack.yaml", "StandUpFront.yaml", "Stand.yaml"})));
             }
-            updatePriority(EXECUTION_PRIORITY);
         });
 
         on<Trigger<KillGetup>>().then([this] {
-            gettingUp = false;
-            updatePriority(0);
+            getting_up = false;
+            update_priority(0);
         });
-
-        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
-            id,
-            "Get Up",
-            {std::pair<float, std::set<LimbID>>(
-                0,
-                {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::HEAD})},
-            [this](const std::set<LimbID>& /* limbs */) { emit(std::make_unique<ExecuteGetup>()); },
-            [this](const std::set<LimbID>& /* limbs */) { emit(std::make_unique<KillGetup>()); },
-            [this](const std::set<ServoID>& /* servos */) { emit(std::make_unique<KillGetup>()); }}));
     }
 
-    void Getup::updatePriority(const float& priority) {
-        emit(std::make_unique<ActionPriorities>(ActionPriorities{id, {priority}}));
+    void Getup::update_priority(const float& priority) {
+        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {priority}}));
     }
 
 }  // namespace module::behaviour::skills

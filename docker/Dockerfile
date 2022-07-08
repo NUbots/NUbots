@@ -251,11 +251,6 @@ RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.42.0.tar
 RUN install-from-source https://github.com/Fastcode/NUClear/archive/f4a60c7269e277a504635a603c2890fb1a70289d.tar.gz \
     -DBUILD_TESTS=OFF
 
-# Visual Mesh
-RUN install-from-source https://github.com/Fastcode/VisualMesh/archive/9df04eab3b08d2dca1d955a5bfbdbeea75f11d6b.tar.gz \
-    -DBUILD_TENSORFLOW_OP=OFF \
-    -DBUILD_EXAMPLES=OFF \
-    -DBUILD_OPENCL_ENGINE=ON
 
 # Backtrace
 RUN install-from-source https://github.com/ianlancetaylor/libbacktrace/archive/master.tar.gz \
@@ -278,6 +273,12 @@ RUN mkdir -p /usr/local/include/zstr \
     && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/zstr.hpp -O /usr/local/include/zstr.hpp \
     && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/strict_fstream.hpp -O /usr/local/include/strict_fstream.hpp \
     && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/zstr_make_unique_polyfill.h -O /usr/local/include/zstr_make_unique_polyfill.h
+
+# Visual Mesh
+RUN install-from-source https://github.com/Fastcode/VisualMesh/archive/refs/tags/v2.1.1.tar.gz \
+    -DBUILD_TENSORFLOW_OP=OFF \
+    -DBUILD_EXAMPLES=OFF \
+    -DBUILD_OPENCL_ENGINE=ON
 
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
