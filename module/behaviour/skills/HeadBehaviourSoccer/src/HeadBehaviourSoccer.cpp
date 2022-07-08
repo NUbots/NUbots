@@ -119,7 +119,7 @@ namespace module::behaviour::skills {
                             command->yaw                         = search_positions[searchIdx][0];
                             command->pitch                       = search_positions[searchIdx][1];
                             command->robot_space                 = true;
-                            command->smooth                      = true;
+                            command->smooth                      = false;
                             searchIdx++;
                             emit(std::move(command));
                         }
