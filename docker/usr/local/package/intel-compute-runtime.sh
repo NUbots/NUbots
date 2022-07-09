@@ -22,6 +22,30 @@ cd "${BUILD_FOLDER}"
 # Download the source code
 download-and-extract "${URL}"
 
+
+SOURCE_DIR=$(find . -maxdepth 1 -type d | tail -n1)
+cd "${SOURCE_DIR}"
+
+# Iterate through each argument until we find a --
+while [ "$#" -gt 0 ] && [ "$1" != "--" ]; do
+    if [ "$1" = "${1#http}" ] && [ "$1" = "${1#ftp}" ]; then
+        # Patch is a local file, apply it
+        patch -Np1 -i "$1"
+    else
+        # Patch is a remote file, download and apply it
+        wget "$1" -O - | patch -Np1
+    fi;
+    shift
+done
+
+# Shift off the --
+if [ "$#" -gt 0 ]; then
+    shift
+fi
+
+# Change back to where we should be
+cd "${BUILD_FOLDER}"
+
 echo "Configuring using cmake"
 
 # Find the closest configure file to the root
