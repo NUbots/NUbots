@@ -19,7 +19,7 @@ positions:
   ]
 
 #Minimum time before search starts (milliseconds)DELAY
-search_timeout_ms: 1500
+search_timeout_ms: 3000
 
 #Time between switching search positions
-fixation_time_ms: 500
+fixation_time_ms: 750
