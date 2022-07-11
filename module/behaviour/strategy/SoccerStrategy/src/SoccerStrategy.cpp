@@ -416,6 +416,7 @@ namespace module::behaviour::strategy {
                                 " with expected kicking angle: ",
                                 cfg.kicking_angle_threshold);
 
+            // TODO(BehaviourTeam): This can likely be improved by reducing ball_last_seen_max_time significantly
             if (NUClear::clock::now() - ball_last_measured < cfg.ball_last_seen_max_time) {
                 // Ball has been seen recently
                 play();
@@ -499,6 +500,7 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::find() {
+        // TODO(BehaviourTeam): Rotate in the direction that the ball was last seen (i.e. direction of rotation)
         emit(std::make_unique<MotionCommand>(utility::behaviour::RotateOnSpot()));
     }
 
