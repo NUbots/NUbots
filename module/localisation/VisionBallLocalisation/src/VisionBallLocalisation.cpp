@@ -1,7 +1,7 @@
-#include "VisionBallLocalisation.hpp"
-
 #include <Eigen/Geometry>
 #include <chrono>
+
+#include "VisionBallLocalisation.hpp"
 
 #include "extension/Configuration.hpp"
 

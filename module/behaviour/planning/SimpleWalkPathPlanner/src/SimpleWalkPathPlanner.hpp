@@ -27,6 +27,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/MotionCommand.hpp"
+#include "message/localisation/SimpleBall.hpp"
 #include "message/motion/WalkCommand.hpp"
 
 #include "utility/behaviour/MotionCommand.hpp"
@@ -36,6 +37,8 @@ namespace module::behaviour::planning {
     // using namespace message;
 
     using message::behaviour::MotionCommand;
+
+    using SimpleBall = message::localisation::SimpleBall;
 
 
     /**
@@ -86,7 +89,7 @@ namespace module::behaviour::planning {
 
         /// @brief Walk directly towards the ball relative to the robot based on the latest VisionBall ball position
         /// measurement
-        void vision_walk_path();
+        void vision_walk_path(const SimpleBall& ball);
 
         /// @brief Rotate on the spot
         void rotate_on_spot();

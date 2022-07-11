@@ -30,6 +30,7 @@
 #include "message/input/Sensors.hpp"
 #include "message/localisation/ResetBallHypotheses.hpp"
 #include "message/localisation/ResetRobotHypotheses.hpp"
+#include "message/localisation/SimpleBall.hpp"
 #include "message/motion/BodySide.hpp"
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/KickCommand.hpp"
@@ -77,7 +78,11 @@ namespace module::behaviour::strategy {
     using message::platform::ButtonMiddleDown;
     using message::platform::ResetWebotsServos;
     using message::support::FieldDescription;
-    using VisionBalls = message::vision::Balls;
+
+    using SimpleBalls = message::vision::Balls;
+
+    using SimpleBall = message::localisation::SimpleBall;
+
     using VisionGoals = message::vision::Goals;
 
     using utility::input::LimbID;
@@ -98,10 +103,10 @@ namespace module::behaviour::strategy {
             cfg.goal_last_seen_max_time = duration_cast<NUClear::clock::duration>(
                 duration<double>(config["goal_last_seen_max_time"].as<double>()));
 
-            cfg.localisation_interval =
-                duration_cast<NUClear::clock::duration>(duration<double>(config["localisation_interval"].as<double>()));
-            cfg.localisation_duration =
-                duration_cast<NUClear::clock::duration>(duration<double>(config["localisation_duration"].as<double>()));
+            cfg.localisation_interval = std::chrono::duration_cast<NUClear::clock::duration>(
+                duration<double>(config["localisation_interval"].as<double>()));
+            cfg.localisation_duration = std::chrono::duration_cast<NUClear::clock::duration>(
+                duration<double>(config["localisation_duration"].as<double>()));
 
             cfg.start_position_offensive = config["start_position_offensive"].as<Expression>();
             cfg.start_position_defensive = config["start_position_defensive"].as<Expression>();
@@ -129,11 +134,11 @@ namespace module::behaviour::strategy {
             });
 
         // For checking last seen times
-        on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
-            if (!balls.balls.empty()) {
-                ball_last_measured = NUClear::clock::now();
-            }
-        });
+        // on<Trigger<SimpleBalls>>().then([this](const SimpleBalls& balls) {
+        //     if (!balls.balls.empty()) {
+        //         ball_last_measured = NUClear::clock::now();
+        //     }
+        // });
 
         on<Trigger<VisionGoals>>().then([this](const VisionGoals& goals) {
             if (!goals.goals.empty()) {
@@ -185,14 +190,14 @@ namespace module::behaviour::strategy {
            With<Phase>,
            With<FieldDescription>,
            With<Field>,
-           With<Ball>,
+           With<SimpleBall>,
            Single>()
             .then([this](const Sensors& sensors,
                          const GameState& game_state,
                          const Phase& phase,
                          const FieldDescription& field_description,
                          const Field& field,
-                         const Ball& ball) {
+                         const SimpleBall& ball) {
                 try {
                     // If we're picked up, stand still
                     if (picked_up(sensors)) {
@@ -203,7 +208,7 @@ namespace module::behaviour::strategy {
                     else {
                         // Overide SoccerStrategy and force normal mode in playing phase
                         if (cfg.force_playing) {
-                            normal_playing();
+                            normal_playing(ball);
                         }
                         // Overide SoccerStrategy and force penalty mode in playing phase
                         else if (cfg.force_penalty_shootout) {
@@ -217,8 +222,8 @@ namespace module::behaviour::strategy {
                                 case GameMode::PENALTY_SHOOTOUT:
                                     penalty_shootout(phase, field_description, field, ball);
                                     break;
-                                case GameMode::NORMAL: normal(game_state, phase); break;
-                                case GameMode::OVERTIME: normal(game_state, phase); break;
+                                case GameMode::NORMAL: normal(game_state, phase, ball); break;
+                                case GameMode::OVERTIME: normal(game_state, phase, ball); break;
                                 default: log<NUClear::WARN>("Game mode unknown.");
                             }
                         }
@@ -241,7 +246,7 @@ namespace module::behaviour::strategy {
     void SoccerStrategy::penalty_shootout(const Phase& phase,
                                           const FieldDescription& field_description,
                                           const Field& field,
-                                          const Ball& ball) {
+                                          const SimpleBall& ball) {
         switch (phase.value) {
             case Phase::INITIAL: penalty_shootout_initial(); break;           // Happens at beginning.
             case Phase::READY: penalty_shootout_ready(); break;               // Should not happen.
@@ -254,7 +259,9 @@ namespace module::behaviour::strategy {
     }
 
     // ********************NORMAL GAMEMODE STATE MACHINE********************************
-    void SoccerStrategy::normal(const message::input::GameState& game_state, const Phase& phase) {
+    void SoccerStrategy::normal(const message::input::GameState& game_state,
+                                const Phase& phase,
+                                const SimpleBall& ball) {
         switch (phase.value) {
             // Beginning of game and half time
             case Phase::INITIAL: normal_initial(); break;
@@ -263,7 +270,7 @@ namespace module::behaviour::strategy {
             // Happens after ready. Robot should stop moving.
             case Phase::SET: normal_set(); break;
             // After set, main game where we should walk to ball and kick.
-            case Phase::PLAYING: normal_playing(); break;
+            case Phase::PLAYING: normal_playing(ball); break;
             case Phase::FINISHED: normal_finished(); break;  // Game has finished.
             case Phase::TIMEOUT: normal_timeout(); break;    // A pause in playing. Not in simulation.
             default: log<NUClear::WARN>("Unknown normal gamemode phase.");
@@ -290,7 +297,7 @@ namespace module::behaviour::strategy {
         currentState = Behaviour::State::SET;
     }
 
-    void SoccerStrategy::penalty_shootout_playing(const Field& field, const Ball& ball) {
+    void SoccerStrategy::penalty_shootout_playing(const Field& field, const SimpleBall& ball) {
         // Execute penalty kick script once if we haven't yet, and if we are not goalie
         if (!has_kicked && team_kicking_off == GameEvents::Context::TEAM) {
             emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::PENALTY));
@@ -365,14 +372,14 @@ namespace module::behaviour::strategy {
         currentState     = Behaviour::State::SET;
     }
 
-    void SoccerStrategy::normal_playing() {
+    void SoccerStrategy::normal_playing(const SimpleBall& ball) {
         if (penalised() && !cfg.force_playing) {
             // We are penalised, stand still
             stand_still();
             currentState = Behaviour::State::PENALISED;
         }
         else {
-            if (NUClear::clock::now() - ball_last_measured < cfg.ball_last_seen_max_time) {
+            if (NUClear::clock::now() - ball.time_of_measurement < cfg.ball_last_seen_max_time) {
                 // Ball has been seen recently, request walk planner to walk to the ball
                 play();
                 currentState = Behaviour::State::WALK_TO_BALL;
@@ -491,7 +498,7 @@ namespace module::behaviour::strategy {
         return new_target;
     }
 
-    void SoccerStrategy::goalie_walk(const Field& field, const Ball& ball) {
+    void SoccerStrategy::goalie_walk(const Field& field, const SimpleBall& ball) {
         auto motion_command = std::make_unique<MotionCommand>();
 
         float time_since_ball_seen =
@@ -507,11 +514,10 @@ namespace module::behaviour::strategy {
                 -sign_bearing
                 * std::fmin(std::fabs(cfg.goalie_rotation_speed_factor * field_bearing), cfg.goalie_max_rotation_speed);
 
-            const int sign_translation = ball.position.y() > 0 ? 1 : -1;
-            const float translation_speed =
-                sign_translation
-                * std::fmin(std::fabs(cfg.goalie_translation_speed_factor * ball.position[1]),
-                            cfg.goalie_max_translation_speed);
+            const int sign_translation    = ball.rBTt.y() > 0 ? 1 : -1;
+            const float translation_speed = sign_translation
+                                            * std::fmin(std::fabs(cfg.goalie_translation_speed_factor * ball.rBTt.x()),
+                                                        cfg.goalie_max_translation_speed);
 
             Eigen::Affine2d cmd{};
             cmd.linear()      = Eigen::Rotation2Dd(rotation_speed).matrix();

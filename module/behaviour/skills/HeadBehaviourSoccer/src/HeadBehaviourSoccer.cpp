@@ -23,6 +23,7 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/localisation/SimpleBall.hpp"
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/HeadCommand.hpp"
 #include "message/vision/Ball.hpp"
@@ -39,6 +40,8 @@ namespace module::behaviour::skills {
     using message::motion::HeadCommand;
     using message::motion::KillGetup;
     using VisionBalls = message::vision::Balls;
+    using SimpleBall  = message::localisation::SimpleBall;
+
 
     using utility::math::coordinates::reciprocalSphericalToCartesian;
     using utility::math::coordinates::sphericalToCartesian;
@@ -58,23 +61,25 @@ namespace module::behaviour::skills {
 
         on<Configuration>("HeadBehaviourSoccer.yaml")
             .then("Head Behaviour Soccer Config", [this](const Configuration& config) {
-                log_level         = config["log_level"].as<NUClear::LogLevel>();
-                search_timeout_ms = config["search_timeout_ms"].as<float>();
-                fixation_time_ms  = config["fixation_time_ms"].as<float>();
-
+                log_level = config["log_level"].as<NUClear::LogLevel>();
+                // search_timeout_ms           = config["search_timeout_ms"].as<float>();
+                // fixation_time_ms        = config["fixation_time_ms"].as<float>();
+                cfg.search_timeout_ms = duration_cast<NUClear::clock::duration>(
+                    std::chrono::duration<double>(config["search_timeout_ms"].as<double>()));
+                cfg.fixation_time_ms = config["fixation_time_ms"].as<float>();
                 // Create vector of search positions
                 for (const auto& position : config["positions"].config) {
-                    search_positions.push_back(position.as<Expression>());
+                    cfg.search_positions.push_back(position.as<Expression>());
                 }
             });
 
 
         // TODO(BehaviourTeam): remove this horrible code
         // Check to see if we are currently in the process of getting up.
-        on<Trigger<ExecuteGetup>>().then([this] { isGettingUp = true; });
+        on<Trigger<ExecuteGetup>>().then([this] { is_getting_up = true; });
 
         // Check to see if we have finished getting up.
-        on<Trigger<KillGetup>>().then([this] { isGettingUp = false; });
+        on<Trigger<KillGetup>>().then([this] { is_getting_up = false; });
 
         // Updates the last seen time of ball
         on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
@@ -84,16 +89,16 @@ namespace module::behaviour::skills {
             }
         });
 
-        on<Every<90, Per<std::chrono::seconds>>, Sync<HeadBehaviourSoccer>>().then(
+        on<Every<90, Per<std::chrono::seconds>>, With<SimpleBall>, Sync<HeadBehaviourSoccer>>().then(
             "Head Behaviour Main Loop",
-            [this]() {
+            [this](const SimpleBall& ball) {
                 // Get the time since the ball was last seen
-                float timeSinceBallLastMeasured =
-                    std::chrono::duration_cast<std::chrono::duration<float>>(NUClear::clock::now() - ballLastMeasured)
-                        .count();
+                // float timeSinceBallLastMeasured = ball.time_of_measurement;
+                // std::chrono::duration_cast<std::chrono::duration<float>>(NUClear::clock::now() - ballLastMeasured)
+                //     .count();
                 // Only look for ball if not getting up
-                if (!isGettingUp) {
-                    if (timeSinceBallLastMeasured < search_timeout_ms / 1000) {
+                if (!is_getting_up) {
+                    if (NUClear::clock::now() - ball.time_of_measurement < cfg.search_timeout_ms) {
                         // We can see the ball, lets look at it
                         Eigen::Vector2d angles               = screenAngularFromObjectDirection(rBCc);
                         std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
@@ -111,22 +116,22 @@ namespace module::behaviour::skills {
 
                         // Robot will move through the search positions, and linger for fixation_time_ms. Once
                         // fixation_time_ms time has passed, send a new head command for the next position in the list
-                        // of search_positions
-                        if (timeSinceLastSearchMoved > fixation_time_ms / 1000) {
+                        // of cfg.search_positions
+                        if (timeSinceLastSearchMoved > cfg.fixation_time_ms / 1000) {
                             // Move to next search position in list
                             searchLastMoved                      = NUClear::clock::now();
                             std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
-                            command->yaw                         = search_positions[searchIdx][0];
-                            command->pitch                       = search_positions[searchIdx][1];
+                            command->yaw                         = cfg.search_positions[search_idx][0];
+                            command->pitch                       = cfg.search_positions[search_idx][1];
                             command->robot_space                 = true;
                             command->smooth                      = false;
-                            searchIdx++;
+                            search_idx++;
                             emit(std::move(command));
                         }
 
                         // Reset the search position index if at end of list
-                        if (searchIdx == search_positions.size()) {
-                            searchIdx = 0;
+                        if (search_idx == cfg.search_positions.size()) {
+                            search_idx = 0;
                         }
                     }
                 }

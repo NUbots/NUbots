@@ -23,10 +23,14 @@ package message.localisation;
 import "Vector.proto";
 import "google/protobuf/timestamp.proto";
 
-message VisionBall {
-    /// The ball's position measured in torso space
-    vec2 rBTt   = 1;
+message SimpleBall {
+    /// The ball's cartesian position measured in torso space {t}
+    fvec3 rBTt   = 1;
     /// The time the ball was seen
     google.protobuf.Timestamp time_of_measurement   = 2;
+    /// Distance to ball
+    float distance = 3;
+    /// Angle to ball
+    float angle = 4;
 
 }

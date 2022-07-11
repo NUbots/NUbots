@@ -27,6 +27,7 @@
 #include "message/behaviour/KickPlan.hpp"
 #include "message/behaviour/MotionCommand.hpp"
 #include "message/input/Sensors.hpp"
+#include "message/localisation/SimpleBall.hpp"
 #include "message/motion/WalkCommand.hpp"
 #include "message/vision/Ball.hpp"
 
@@ -52,6 +53,7 @@ namespace module::behaviour::planning {
     using message::motion::WalkCommand;
     using message::motion::WalkStopped;
     using VisionBalls = message::vision::Balls;
+    using SimpleBall  = message::localisation::SimpleBall;
 
     using utility::behaviour::ActionPriorities;
     using utility::behaviour::RegisterAction;
@@ -123,15 +125,8 @@ namespace module::behaviour::planning {
         // Freq should be equal to the main loop in soccer strategy. TODO (Bryce Tuppurainen): Potentially
         // change this value to a define in an included header if this will be used again for added design cohesion if
         // this will be something we change in future
-        on<Every<30, Per<std::chrono::seconds>>, With<WantsToKick>, Sync<SimpleWalkPathPlanner>>().then(
-            [this](const WantsToKick& wants_to) {
-                //  Stop the walk engine and path planner if the KickPlanner module emits a WantsToKick message saying
-                //  it is executing a kick
-                if (wants_to.kick) {
-                    emit(std::make_unique<StopCommand>(subsumption_id));
-                    return;
-                }
-
+        on<Every<30, Per<std::chrono::seconds>>, With<SimpleBall>, Sync<SimpleWalkPathPlanner>>().then(
+            [this](const SimpleBall& ball) {
                 switch (static_cast<int>(latest_command.type.value)) {
                     case message::behaviour::MotionCommand::Type::STAND_STILL:
                         emit(std::make_unique<StopCommand>(subsumption_id));
@@ -139,7 +134,7 @@ namespace module::behaviour::planning {
 
                     case message::behaviour::MotionCommand::Type::DIRECT_COMMAND: walk_directly(); return;
 
-                    case message::behaviour::MotionCommand::Type::BALL_APPROACH: vision_walk_path(); return;
+                    case message::behaviour::MotionCommand::Type::BALL_APPROACH: vision_walk_path(ball); return;
 
                     // TODO(MotionTeam): Walk to a given position and heading on the field, avoiding obstacles
                     case message::behaviour::MotionCommand::Type::WALK_TO_STATE: return;
@@ -167,9 +162,9 @@ namespace module::behaviour::planning {
         update_priority(cfg.walk_path_planner_priority);
     }
 
-    void SimpleWalkPathPlanner::vision_walk_path() {
+    void SimpleWalkPathPlanner::vision_walk_path(const SimpleBall& ball) {
         // Obtain the unit vector to ball in torso space and scale by cfg.forward_speed
-        Eigen::Vector3f walk_command = cfg.forward_speed * (rBTt.normalized());
+        Eigen::Vector3f walk_command = cfg.forward_speed * (ball.rBTt.normalized());
 
         // Overide the z component of walk_command with angular velocity, which is just the angular displacement to
         // ball, saturated with value cfg.max_turn_speed float

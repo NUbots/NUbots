@@ -31,6 +31,7 @@
 #include "message/input/Sensors.hpp"
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
+#include "message/localisation/SimpleBall.hpp"
 #include "message/support/FieldDescription.hpp"
 
 namespace module::behaviour::strategy {
@@ -125,7 +126,7 @@ namespace module::behaviour::strategy {
         bool penalised() const;
 
         /// @brief Goalie playing behaviour
-        void goalie_walk(const message::localisation::Field& field, const message::localisation::Ball& ball);
+        void goalie_walk(const message::localisation::Field& field, const message::localisation::SimpleBall& ball);
 
         /// @brief Generated a kick plan on localisation updates
         static Eigen::Vector2d get_kick_plan(const message::localisation::Field& field,
@@ -135,10 +136,12 @@ namespace module::behaviour::strategy {
         void penalty_shootout(const message::input::GameState::Data::Phase& phase,
                               const message::support::FieldDescription& field_description,
                               const message::localisation::Field& field,
-                              const message::localisation::Ball& ball);
+                              const message::localisation::SimpleBall& ball);
 
         /// @brief Normal mode state machine, used to decide what phase behaviour to use.
-        void normal(const message::input::GameState& game_state, const message::input::GameState::Data::Phase& phase);
+        void normal(const message::input::GameState& game_state,
+                    const message::input::GameState::Data::Phase& phase,
+                    const message::localisation::SimpleBall& ball);
 
         /// @brief Penalty mode, initial phase behaviour/strategy
         void penalty_shootout_initial();
@@ -151,7 +154,7 @@ namespace module::behaviour::strategy {
 
         /// @brief Penalty mode, playing phase behaviour/strategy
         void penalty_shootout_playing(const message::localisation::Field& field,
-                                      const message::localisation::Ball& ball);
+                                      const message::localisation::SimpleBall& ball);
 
         /// @brief Penalty mode, timeout phase behaviour/strategy
         void penalty_shootout_timeout();
@@ -169,7 +172,7 @@ namespace module::behaviour::strategy {
         void normal_set();
 
         /// @brief Normal mode, playing phase behaviour/strategy
-        void normal_playing();
+        void normal_playing(const message::localisation::SimpleBall& ball);
 
         /// @brief Normal mode, finished phase behaviour/strategy
         void normal_finished();
