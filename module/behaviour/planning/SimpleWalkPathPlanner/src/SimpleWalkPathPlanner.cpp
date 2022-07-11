@@ -108,20 +108,6 @@ namespace module::behaviour::planning {
 
         on<Trigger<WalkStopped>>().then([this] { update_priority(0); });
 
-        // Used to maintain the position of the last seen ball
-        // TODO(LocalisationTeam): Should be implemented outside of the path planner in something like
-        // BallLocalisation
-        on<Trigger<VisionBalls>, With<Sensors>>().then([this](const VisionBalls& balls, const Sensors& sensors) {
-            if (balls.balls.size() > 0) {
-                // Get the latest vision ball measurement in camera space
-                Eigen::Vector3f rBCc =
-                    reciprocalSphericalToCartesian(balls.balls[0].measurements[0].srBCc.cast<float>());
-                // Transform the vision ball measurement into torso space
-                Eigen::Affine3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
-                rBTt = Htc * rBCc;
-            }
-        });
-
         // Freq should be equal to the main loop in soccer strategy. TODO (Bryce Tuppurainen): Potentially
         // change this value to a define in an included header if this will be used again for added design cohesion if
         // this will be something we change in future
