@@ -155,6 +155,7 @@ RUN install-cmake-from-source https://github.com/intel/media-driver/archive/inte
 COPY --chown=root:root etc/OpenCL/vendors/intel.icd /etc/OpenCL/vendors/intel.icd
 COPY usr/local/package/intel-compute-runtime.sh /usr/local/package/intel-compute-runtime.sh
 RUN /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute-runtime/archive/21.31.20514.tar.gz \
+    https://patch-diff.githubusercontent.com/raw/intel/compute-runtime/pull/550.patch -- \
     -DSKIP_UNIT_TESTS=ON \
     -DIGC_DIR=/usr/local
 
