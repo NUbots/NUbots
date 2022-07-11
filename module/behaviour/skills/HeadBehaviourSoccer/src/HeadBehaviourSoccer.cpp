@@ -82,12 +82,13 @@ namespace module::behaviour::skills {
         on<Trigger<KillGetup>>().then([this] { is_getting_up = false; });
 
         // Updates the last seen time of ball
-        on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
-            if (!balls.balls.empty()) {
-                ballLastMeasured = NUClear::clock::now();
-                rBCc             = reciprocalSphericalToCartesian(balls.balls[0].measurements[0].srBCc.cast<double>());
-            }
-        });
+        // on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
+        //     if (!balls.balls.empty()) {
+        //         ballLastMeasured = NUClear::clock::now();
+        //         rBCc             =
+        //         reciprocalSphericalToCartesian(balls.balls[0].measurements[0].srBCc.cast<double>());
+        //     }
+        // });
 
         on<Every<90, Per<std::chrono::seconds>>, With<SimpleBall>, Sync<HeadBehaviourSoccer>>().then(
             "Head Behaviour Main Loop",
@@ -100,7 +101,8 @@ namespace module::behaviour::skills {
                 if (!is_getting_up) {
                     if (NUClear::clock::now() - ball.time_of_measurement < cfg.search_timeout_ms) {
                         // We can see the ball, lets look at it
-                        Eigen::Vector2d angles               = screenAngularFromObjectDirection(rBCc);
+                        Eigen::Vector3d rBCc   = reciprocalSphericalToCartesian(ball.srBCc.cast<double>());
+                        Eigen::Vector2d angles = screenAngularFromObjectDirection(rBCc);
                         std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
                         command->yaw                         = angles[0];
                         command->pitch                       = angles[1];

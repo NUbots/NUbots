@@ -57,9 +57,6 @@ namespace module::behaviour::skills {
         // Time since last ball seen
         NUClear::clock::time_point ballLastMeasured = NUClear::clock::now();
 
-        // Position of last seen ball
-        Eigen::Vector3d rBCc = Eigen::Vector3d::Zero();
-
     public:
         explicit HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment);
     };

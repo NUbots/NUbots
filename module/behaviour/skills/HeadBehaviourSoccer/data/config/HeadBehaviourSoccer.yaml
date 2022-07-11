@@ -16,7 +16,7 @@ positions:
   ]
 
 #Minimum time before search starts
-search_timeout_ms: 3000
+search_timeout_ms: 3
 
 #Time between switching search positions
 fixation_time_ms: 750
