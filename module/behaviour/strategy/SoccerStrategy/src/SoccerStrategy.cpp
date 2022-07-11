@@ -133,13 +133,6 @@ namespace module::behaviour::strategy {
                 emit(std::make_unique<KickPlan>(KickPlan(kick_target, kick_type)));
             });
 
-        // For checking last seen times
-        // on<Trigger<SimpleBalls>>().then([this](const SimpleBalls& balls) {
-        //     if (!balls.balls.empty()) {
-        //         ball_last_measured = NUClear::clock::now();
-        //     }
-        // });
-
         on<Trigger<VisionGoals>>().then([this](const VisionGoals& goals) {
             if (!goals.goals.empty()) {
                 goal_last_measured = NUClear::clock::now();
