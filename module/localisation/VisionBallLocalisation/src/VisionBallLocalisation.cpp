@@ -1,7 +1,7 @@
+#include "VisionBallLocalisation.hpp"
+
 #include <Eigen/Geometry>
 #include <chrono>
-
-#include "VisionBallLocalisation.hpp"
 
 #include "extension/Configuration.hpp"
 
@@ -45,6 +45,7 @@ namespace module::localisation {
                 // Get the first vision ball measurement and treat as the closest measurement to our estimate
                 Eigen::Vector3f rBCc =
                     reciprocalSphericalToCartesian(balls.balls[0].measurements[0].srBCc.cast<float>());
+                Eigen::Vector3f srBCc = balls.balls[0].measurements[0].srBCc.cast<float>();
                 Eigen::Affine3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
                 Eigen::Vector3f rBTt     = Htc * rBCc;
                 auto raw_lowest_distance = std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2));
@@ -56,18 +57,21 @@ namespace module::localisation {
                     if (std::sqrt(std::pow(temp_rBTt.x(), 2) + std::pow(temp_rBTt.y(), 2)) < raw_lowest_distance) {
                         raw_lowest_distance = std::sqrt(std::pow(temp_rBTt.x(), 2) + std::pow(temp_rBTt.y(), 2));
                         rBTt                = temp_rBTt;
+                        srBCc               = ball.measurements[0].srBCc.cast<float>();
                     }
                 }
                 // TODO: Apply filter to rBTt
 
                 // Generate message and emit
-                auto time_of_measurment = NUClear::clock::now();
-                float distance_to_ball  = std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2));
-                float angle_to_ball     = std::abs(std::atan2(rBTt.y(), rBTt.x()));
-                auto ball               = std::make_unique<SimpleBall>();
-                ball->rBTt              = rBTt;
-                ball->distance          = distance_to_ball;
-                ball->angle             = angle_to_ball;
+                auto time_of_measurement  = NUClear::clock::now();
+                float distance_to_ball    = std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2));
+                float angle_to_ball       = std::abs(std::atan2(rBTt.y(), rBTt.x()));
+                auto ball                 = std::make_unique<SimpleBall>();
+                ball->rBTt                = rBTt;
+                ball->time_of_measurement = time_of_measurement;
+                ball->distance            = distance_to_ball;
+                ball->angle               = angle_to_ball;
+                ball->srBCc               = srBCc;
                 emit(ball);
 
                 // Logging

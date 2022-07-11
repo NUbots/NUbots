@@ -27,10 +27,12 @@ message SimpleBall {
     /// The ball's cartesian position measured in torso space {t}
     fvec3 rBTt   = 1;
     /// The time the ball was seen
-    google.protobuf.Timestamp time_of_measurement   = 2;
-    /// Distance to ball
+    google.protobuf.Timestamp time_of_measurement = 2;
+    /// Distance to ball in torso space {t}
     float distance = 3;
-    /// Angle to ball
+    /// Absolute angle to ball in torso space {t}
     float angle = 4;
+    /// Spherical Reciprocal Coordinates (1/distance, phi, theta)
+    fvec3 srBCc = 5;
 
 }
