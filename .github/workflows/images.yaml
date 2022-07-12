@@ -42,7 +42,7 @@ jobs:
         uses: docker/build-push-action@v3.0.0
         with:
           pull: true
-          tags: "nubots/nubots:${{ matrix.platform }}"
+          tags: "crafty15/nubots:${{ matrix.platform }}"
           file: docker/Dockerfile
           context: docker
           build-args: |
@@ -50,5 +50,5 @@ jobs:
             BUILDKIT_INLINE_CACHE=1
           push: true
           cache-from: |
-            type=registry,ref=nubots/nubots:${{ matrix.platform }}
+            type=registry,ref=crafty15/nubots:${{ matrix.platform }}
             type=inline
