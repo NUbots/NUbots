@@ -28,8 +28,8 @@ COPY usr/local/bin/install-package /usr/local/bin/install-package
 COPY etc/pacman/pacman.latest.conf /etc/pacman.latest.conf
 
 # Update the pacman keyring
-RUN pacman -Sy archlinux-keyring --noconfirm
 RUN pacman-key --init
+RUN pacman -Sy archlinux-keyring --noconfirm
 RUN pacman -Su --noconfirm
 
 # Install base packages needed for building general toolchain
