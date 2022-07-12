@@ -34,5 +34,4 @@ message SimpleBall {
     float absolute_yaw_angle = 4;
     /// Spherical Reciprocal Coordinates (1/distance, phi, theta) in camera space {t}
     fvec3 srBCc = 5;
-
 }
