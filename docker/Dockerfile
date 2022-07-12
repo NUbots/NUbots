@@ -29,8 +29,8 @@ COPY etc/pacman/pacman.latest.conf /etc/pacman.latest.conf
 
 # Update the pacman keyring
 RUN pacman -Sy archlinux-keyring --noconfirm
-RUN pacman -Su --noconfirm
 RUN pacman-key --init
+RUN pacman -Su --noconfirm
 
 # Install base packages needed for building general toolchain
 # If you have a tool that's needed for a specific module install it before that module
