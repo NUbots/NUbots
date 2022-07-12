@@ -37,9 +37,9 @@ namespace module::behaviour::skills {
             Config() = default;
             /// @brief Walk path planner priority in the subsumption system
             // Time before starting to search for ball after its lost
-            NUClear::clock::duration search_timeout_ms{};
+            NUClear::clock::duration search_timeout{};
             // Time lingering at each position in lost ballsearch
-            float fixation_time_ms = 0.0f;
+            float fixation_time = 0.0f;
             // List of positions for search
             std::vector<Eigen::Vector2d> search_positions;
         } cfg;
@@ -51,11 +51,11 @@ namespace module::behaviour::skills {
         bool is_getting_up = false;
 
         // Time between last search position transition
-        NUClear::clock::time_point searchLastMoved = NUClear::clock::now();
+        NUClear::clock::time_point search_last_moved = NUClear::clock::now();
 
 
         // Time since last ball seen
-        NUClear::clock::time_point ballLastMeasured = NUClear::clock::now();
+        NUClear::clock::time_point ball_last_measured = NUClear::clock::now();
 
     public:
         explicit HeadBehaviourSoccer(std::unique_ptr<NUClear::Environment> environment);

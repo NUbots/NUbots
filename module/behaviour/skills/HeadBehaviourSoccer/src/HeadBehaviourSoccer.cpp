@@ -62,11 +62,11 @@ namespace module::behaviour::skills {
         on<Configuration>("HeadBehaviourSoccer.yaml")
             .then("Head Behaviour Soccer Config", [this](const Configuration& config) {
                 log_level = config["log_level"].as<NUClear::LogLevel>();
-                // search_timeout_ms           = config["search_timeout_ms"].as<float>();
-                // fixation_time_ms        = config["fixation_time_ms"].as<float>();
-                cfg.search_timeout_ms = duration_cast<NUClear::clock::duration>(
-                    std::chrono::duration<double>(config["search_timeout_ms"].as<double>()));
-                cfg.fixation_time_ms = config["fixation_time_ms"].as<float>();
+                // search_timeout           = config["search_timeout"].as<float>();
+                // fixation_time        = config["fixation_time"].as<float>();
+                cfg.search_timeout = duration_cast<NUClear::clock::duration>(
+                    std::chrono::duration<double>(config["search_timeout"].as<double>()));
+                cfg.fixation_time = config["fixation_time"].as<float>();
                 // Create vector of search positions
                 for (const auto& position : config["positions"].config) {
                     cfg.search_positions.push_back(position.as<Expression>());
@@ -95,7 +95,7 @@ namespace module::behaviour::skills {
             [this](const std::shared_ptr<const SimpleBall>& ball) {
                 // Only look for ball if not getting up
                 if (!is_getting_up) {
-                    if (ball && NUClear::clock::now() - ball->time_of_measurement < cfg.search_timeout_ms) {
+                    if (ball && NUClear::clock::now() - ball->time_of_measurement < cfg.search_timeout) {
                         // We can see the ball, lets look at it
                         Eigen::Vector3d rBCc   = reciprocalSphericalToCartesian(ball->srBCc.cast<double>());
                         Eigen::Vector2d angles = screenAngularFromObjectDirection(rBCc);
@@ -108,16 +108,16 @@ namespace module::behaviour::skills {
                     }
                     else {
                         // Ball hasn't been seen in a while. Look around using search positions
-                        float timeSinceLastSearchMoved = std::chrono::duration_cast<std::chrono::duration<float>>(
-                                                             NUClear::clock::now() - searchLastMoved)
-                                                             .count();
+                        float time_since_last_search_moved = std::chrono::duration_cast<std::chrono::duration<float>>(
+                                                                 NUClear::clock::now() - search_last_moved)
+                                                                 .count();
 
-                        // Robot will move through the search positions, and linger for fixation_time_ms. Once
-                        // fixation_time_ms time has passed, send a new head command for the next position in the list
+                        // Robot will move through the search positions, and linger for fixation_time. Once
+                        // fixation_time time has passed, send a new head command for the next position in the list
                         // of cfg.search_positions
-                        if (timeSinceLastSearchMoved > cfg.fixation_time_ms / 1000) {
+                        if (time_since_last_search_moved > cfg.fixation_time) {
                             // Move to next search position in list
-                            searchLastMoved                      = NUClear::clock::now();
+                            search_last_moved                    = NUClear::clock::now();
                             std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
                             command->yaw                         = cfg.search_positions[search_idx][0];
                             command->pitch                       = cfg.search_positions[search_idx][1];

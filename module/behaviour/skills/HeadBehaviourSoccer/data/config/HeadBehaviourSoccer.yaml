@@ -10,7 +10,7 @@ min_pitch: &min_pitch -0.2
 positions: [[*min_yaw, *min_pitch], [0, *min_pitch], [*max_yaw, *min_pitch], [0, *min_pitch]]
 
 #Minimum time before search starts
-search_timeout_ms: 3
+search_timeout: 3
 
 #Time between switching search positions
-fixation_time_ms: 750
+fixation_time: 1
