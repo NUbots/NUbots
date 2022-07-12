@@ -37,20 +37,19 @@ RUN pacman -Sy archlinux-keyring --noconfirm && pacman -Su --noconfirm
 
 # Install base packages needed for building general toolchain
 # If you have a tool that's needed for a specific module install it before that module
-RUN install-package \
-    wget \
-    sudo \
-    python \
-    python-pip \
-    base-devel \
-    ninja \
-    cmake \
-    meson \
-    nodejs-lts-fermium \
-    npm \
-    yarn \
-    git \
-    ncurses
+RUN install-package wget
+RUN install-package sudo
+RUN install-package python
+RUN install-package python-pip
+RUN install-package base-devel
+RUN install-package ninja
+RUN install-package cmake
+RUN install-package meson
+RUN install-package nodejs-lts-fermium
+RUN install-package npm
+RUN install-package yarn
+RUN install-package git
+RUN install-package ncurses
 
 # Get python to look in /usr/local for packages
 RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
