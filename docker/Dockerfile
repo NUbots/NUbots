@@ -18,7 +18,7 @@ RUN echo -e "Server=https://archive.archlinux.org/repos/2021/08/29/\$repo/os/\$a
 # needs to be altered.
 
 # Update the pacman file so it doesn't do signature checks
-COPY etc/pacman/pacman.conf /etc/pacman/pacman.conf
+COPY etc/pacman/pacman.conf /etc/pacman.conf
 
 # Arch recommends running this as the first command of the docker image
 # Use "yyuu" to allow for downgrades
