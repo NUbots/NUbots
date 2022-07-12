@@ -31,8 +31,10 @@ COPY etc/pacman/pacman.latest.conf /etc/pacman.latest.conf
 # RUN pacman-key --refresh-keys
 # RUN pacman -S gnupg --noconfirm
 RUN pacman-key --init
-RUN pacman-key --populate
-RUN pacman -Sy archlinux-keyring --noconfirm && pacman -Su --noconfirm
+RUN pacman-key --populate archlinux
+RUN pacman -Sy archlinux-keyring --noconfirm
+RUN pacman -Su --noconfirm
+RUN pacman -Syu python-pip --noconfirm
 # RUN pacman -Su --noconfirm
 
 # Install base packages needed for building general toolchain
