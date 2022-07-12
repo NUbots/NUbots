@@ -479,36 +479,6 @@ namespace module::behaviour::strategy {
         }
     }
 
-    Eigen::Vector2d SoccerStrategy::get_kick_plan(const Field& field, const FieldDescription& field_description) {
-        // Defines the box within in which the kick target is changed from the centre
-        // of the oppposition goal to the perpendicular distance from the robot to the goal
-
-        const float max_kick_range = 0.6;  // TODO(BehaviourTeam): make configurable, only want to change at the
-                                           // last kick to avoid smart goalies
-        const float x_take_over_box = max_kick_range;
-        const float error           = 0.05;
-        const float buffer          = error + 2.0f * field_description.ball_radius;          // 15cm
-        const float y_take_over_box = field_description.dimensions.goal_width / 2 - buffer;  // 90-15 = 75cm
-        Eigen::Affine2d position(field.position);
-        const float x_robot = position.translation().x();
-        const float y_robot = position.translation().y();
-        Eigen::Vector2d new_target{};
-
-        if ((field_description.dimensions.field_length * 0.5) - x_take_over_box < x_robot && -y_take_over_box < y_robot
-            && y_robot < y_take_over_box) {
-            // Aims for behind the point that gives the shortest distance
-            new_target.x() =
-                field_description.dimensions.field_length * 0.5 + field_description.dimensions.goal_depth * 0.5;
-            new_target.y() = y_robot;
-        }
-        else {
-            // Aims for the centre of the goal
-            new_target.x() = field_description.dimensions.field_length * 0.5;
-            new_target.y() = 0;
-        }
-        return new_target;
-    }
-
     void SoccerStrategy::goalie_walk(const Field& field, const std::shared_ptr<const SimpleBall>& ball) {
         if (ball) {
             auto motion_command = std::make_unique<MotionCommand>();
