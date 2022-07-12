@@ -111,8 +111,8 @@ namespace module::behaviour::planning {
         // Freq should be equal to the main loop in soccer strategy. TODO (Bryce Tuppurainen): Potentially
         // change this value to a define in an included header if this will be used again for added design cohesion if
         // this will be something we change in future
-        on<Every<30, Per<std::chrono::seconds>>, With<SimpleBall>, Sync<SimpleWalkPathPlanner>>().then(
-            [this](const SimpleBall& ball) {
+        on<Every<30, Per<std::chrono::seconds>>, Optional<With<SimpleBall>>, Sync<SimpleWalkPathPlanner>>().then(
+            [this](const std::shared_ptr<const SimpleBall>& ball) {
                 switch (static_cast<int>(latest_command.type.value)) {
                     case message::behaviour::MotionCommand::Type::STAND_STILL:
                         emit(std::make_unique<StopCommand>(subsumption_id));
@@ -148,19 +148,21 @@ namespace module::behaviour::planning {
         update_priority(cfg.walk_path_planner_priority);
     }
 
-    void SimpleWalkPathPlanner::vision_walk_path(const SimpleBall& ball) {
-        // Obtain the unit vector to ball in torso space and scale by cfg.forward_speed
-        Eigen::Vector3f walk_command = cfg.forward_speed * (ball.rBTt.normalized());
+    void SimpleWalkPathPlanner::vision_walk_path(const std::shared_ptr<const SimpleBall>& ball) {
+        if (ball) {
+            // Obtain the unit vector to ball in torso space and scale by cfg.forward_speed
+            Eigen::Vector3f walk_command = cfg.forward_speed * (ball->rBTt.normalized());
 
-        // Overide the z component of walk_command with angular velocity, which is just the angular displacement to
-        // ball, saturated with value cfg.max_turn_speed float
-        walk_command.z() = std::atan2(walk_command.y(), walk_command.x());
-        walk_command.z() = utility::math::clamp(cfg.min_turn_speed, walk_command.z(), cfg.max_turn_speed);
+            // Overide the z component of walk_command with angular velocity, which is just the angular displacement to
+            // ball, saturated with value cfg.max_turn_speed float
+            walk_command.z() = std::atan2(walk_command.y(), walk_command.x());
+            walk_command.z() = utility::math::clamp(cfg.min_turn_speed, walk_command.z(), cfg.max_turn_speed);
 
-        std::unique_ptr<WalkCommand> command =
-            std::make_unique<WalkCommand>(subsumption_id, walk_command.cast<double>());
-        emit(std::move(command));
-        update_priority(cfg.walk_path_planner_priority);
+            std::unique_ptr<WalkCommand> command =
+                std::make_unique<WalkCommand>(subsumption_id, walk_command.cast<double>());
+            emit(std::move(command));
+            update_priority(cfg.walk_path_planner_priority);
+        }
     }
 
     void SimpleWalkPathPlanner::rotate_on_spot() {

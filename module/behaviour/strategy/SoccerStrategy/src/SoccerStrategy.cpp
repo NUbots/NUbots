@@ -183,14 +183,14 @@ namespace module::behaviour::strategy {
            With<Phase>,
            With<FieldDescription>,
            With<Field>,
-           With<SimpleBall>,
+           Optional<With<SimpleBall>>,
            Single>()
             .then([this](const Sensors& sensors,
                          const GameState& game_state,
                          const Phase& phase,
                          const FieldDescription& field_description,
                          const Field& field,
-                         const SimpleBall& ball) {
+                         const std::shared_ptr<const SimpleBall>& ball) {
                 try {
                     // If we're picked up, stand still
                     if (picked_up(sensors)) {
@@ -239,7 +239,7 @@ namespace module::behaviour::strategy {
     void SoccerStrategy::penalty_shootout(const Phase& phase,
                                           const FieldDescription& field_description,
                                           const Field& field,
-                                          const SimpleBall& ball) {
+                                          const std::shared_ptr<const SimpleBall>& ball) {
         switch (phase.value) {
             case Phase::INITIAL: penalty_shootout_initial(); break;           // Happens at beginning.
             case Phase::READY: penalty_shootout_ready(); break;               // Should not happen.
@@ -254,7 +254,7 @@ namespace module::behaviour::strategy {
     // ********************NORMAL GAMEMODE STATE MACHINE********************************
     void SoccerStrategy::normal(const message::input::GameState& game_state,
                                 const Phase& phase,
-                                const SimpleBall& ball) {
+                                const std::shared_ptr<const SimpleBall>& ball) {
         switch (phase.value) {
             // Beginning of game and half time
             case Phase::INITIAL: normal_initial(); break;
@@ -290,7 +290,7 @@ namespace module::behaviour::strategy {
         currentState = Behaviour::State::SET;
     }
 
-    void SoccerStrategy::penalty_shootout_playing(const Field& field, const SimpleBall& ball) {
+    void SoccerStrategy::penalty_shootout_playing(const Field& field, const std::shared_ptr<const SimpleBall>& ball) {
         // Execute penalty kick script once if we haven't yet, and if we are not goalie
         if (!has_kicked && team_kicking_off == GameEvents::Context::TEAM) {
             emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::PENALTY));
@@ -365,14 +365,14 @@ namespace module::behaviour::strategy {
         currentState     = Behaviour::State::SET;
     }
 
-    void SoccerStrategy::normal_playing(const SimpleBall& ball) {
+    void SoccerStrategy::normal_playing(const std::shared_ptr<const SimpleBall>& ball) {
         if (penalised() && !cfg.force_playing) {
             // We are penalised, stand still
             stand_still();
             currentState = Behaviour::State::PENALISED;
         }
         else {
-            if (NUClear::clock::now() - ball.time_of_measurement < cfg.ball_last_seen_max_time) {
+            if (ball && NUClear::clock::now() - ball->time_of_measurement < cfg.ball_last_seen_max_time) {
                 // Ball has been seen recently, request walk planner to walk to the ball
                 play();
                 currentState = Behaviour::State::WALK_TO_BALL;
@@ -491,39 +491,42 @@ namespace module::behaviour::strategy {
         return new_target;
     }
 
-    void SoccerStrategy::goalie_walk(const Field& field, const SimpleBall& ball) {
-        auto motion_command = std::make_unique<MotionCommand>();
+    void SoccerStrategy::goalie_walk(const Field& field, const std::shared_ptr<const SimpleBall>& ball) {
+        if (ball) {
+            auto motion_command = std::make_unique<MotionCommand>();
 
-        float time_since_ball_seen =
-            std::chrono::duration_cast<std::chrono::duration<float>>(NUClear::clock::now() - ball_last_measured)
-                .count();
+            float time_since_ball_seen =
+                std::chrono::duration_cast<std::chrono::duration<float>>(NUClear::clock::now() - ball_last_measured)
+                    .count();
 
-        if (time_since_ball_seen < cfg.goalie_command_timeout) {
+            if (time_since_ball_seen < cfg.goalie_command_timeout) {
 
-            Eigen::Affine2d position(field.position);
-            const float field_bearing = Eigen::Rotation2Dd(position.rotation()).angle();
-            const int sign_bearing    = field_bearing > 0 ? 1 : -1;
-            const float rotation_speed =
-                -sign_bearing
-                * std::fmin(std::fabs(cfg.goalie_rotation_speed_factor * field_bearing), cfg.goalie_max_rotation_speed);
+                Eigen::Affine2d position(field.position);
+                const float field_bearing  = Eigen::Rotation2Dd(position.rotation()).angle();
+                const int sign_bearing     = field_bearing > 0 ? 1 : -1;
+                const float rotation_speed = -sign_bearing
+                                             * std::fmin(std::fabs(cfg.goalie_rotation_speed_factor * field_bearing),
+                                                         cfg.goalie_max_rotation_speed);
 
-            const int sign_translation    = ball.rBTt.y() > 0 ? 1 : -1;
-            const float translation_speed = sign_translation
-                                            * std::fmin(std::fabs(cfg.goalie_translation_speed_factor * ball.rBTt.x()),
-                                                        cfg.goalie_max_translation_speed);
+                const int sign_translation = ball->rBTt.y() > 0 ? 1 : -1;
+                const float translation_speed =
+                    sign_translation
+                    * std::fmin(std::fabs(cfg.goalie_translation_speed_factor * ball->rBTt.x()),
+                                cfg.goalie_max_translation_speed);
 
-            Eigen::Affine2d cmd{};
-            cmd.linear()      = Eigen::Rotation2Dd(rotation_speed).matrix();
-            cmd.translation() = Eigen::Vector2d::Zero();
-            motion_command    = std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(cmd));
-            if (std::fabs(field_bearing) < cfg.goalie_side_walk_angle_threshold) {
-                motion_command->walk_command.y() = translation_speed;
+                Eigen::Affine2d cmd{};
+                cmd.linear()      = Eigen::Rotation2Dd(rotation_speed).matrix();
+                cmd.translation() = Eigen::Vector2d::Zero();
+                motion_command    = std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(cmd));
+                if (std::fabs(field_bearing) < cfg.goalie_side_walk_angle_threshold) {
+                    motion_command->walk_command.y() = translation_speed;
+                }
             }
+            else {
+                motion_command =
+                    std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(Eigen::Affine2d::Identity()));
+            }
+            emit(std::move(motion_command));
         }
-        else {
-            motion_command =
-                std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(Eigen::Affine2d::Identity()));
-        }
-        emit(std::move(motion_command));
     }
 }  // namespace module::behaviour::strategy

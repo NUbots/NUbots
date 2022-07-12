@@ -90,18 +90,14 @@ namespace module::behaviour::skills {
         //     }
         // });
 
-        on<Every<90, Per<std::chrono::seconds>>, With<SimpleBall>, Sync<HeadBehaviourSoccer>>().then(
+        on<Every<90, Per<std::chrono::seconds>>, Optional<With<SimpleBall>>, Sync<HeadBehaviourSoccer>>().then(
             "Head Behaviour Main Loop",
-            [this](const SimpleBall& ball) {
-                // Get the time since the ball was last seen
-                // float timeSinceBallLastMeasured = ball.time_of_measurement;
-                // std::chrono::duration_cast<std::chrono::duration<float>>(NUClear::clock::now() - ballLastMeasured)
-                //     .count();
+            [this](const std::shared_ptr<const SimpleBall>& ball) {
                 // Only look for ball if not getting up
                 if (!is_getting_up) {
-                    if (NUClear::clock::now() - ball.time_of_measurement < cfg.search_timeout_ms) {
+                    if (ball && NUClear::clock::now() - ball->time_of_measurement < cfg.search_timeout_ms) {
                         // We can see the ball, lets look at it
-                        Eigen::Vector3d rBCc   = reciprocalSphericalToCartesian(ball.srBCc.cast<double>());
+                        Eigen::Vector3d rBCc   = reciprocalSphericalToCartesian(ball->srBCc.cast<double>());
                         Eigen::Vector2d angles = screenAngularFromObjectDirection(rBCc);
                         std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
                         command->yaw                         = angles[0];

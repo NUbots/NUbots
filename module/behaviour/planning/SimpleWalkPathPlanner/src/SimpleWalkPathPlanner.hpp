@@ -89,7 +89,7 @@ namespace module::behaviour::planning {
 
         /// @brief Walk directly towards the ball relative to the robot based on the latest VisionBall ball position
         /// measurement
-        void vision_walk_path(const SimpleBall& ball);
+        void vision_walk_path(const std::shared_ptr<const SimpleBall>& ball);
 
         /// @brief Rotate on the spot
         void rotate_on_spot();
