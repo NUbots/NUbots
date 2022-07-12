@@ -32,7 +32,3 @@ kicking_distance_threshold: 0.52 # "REAL (rather than Webots)" Robot Suggested V
 
 # Angle from the front to begin kicking the ball (in radians)
 kicking_angle_threshold: 0.3
-
-# Exponential filter smoothing factor on ball position
-# TODO(BehaviourTeam Thailand): Needs to be moved and tested
-rBTt_smoothing_factor: 0.1

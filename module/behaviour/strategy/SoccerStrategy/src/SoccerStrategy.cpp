@@ -132,8 +132,6 @@ namespace module::behaviour::strategy {
             cfg.kicking_distance_threshold = config["kicking_distance_threshold"].as<float>();
 
             cfg.kicking_angle_threshold = config["kicking_angle_threshold"].as<float>();
-
-            cfg.rBTt_smoothing_factor = config["rBTt_smoothing_factor"].as<float>();
         });
 
         on<Trigger<VisionGoals>>().then([this](const VisionGoals& goals) {
