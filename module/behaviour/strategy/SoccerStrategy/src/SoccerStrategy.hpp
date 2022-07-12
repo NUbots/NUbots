@@ -133,10 +133,6 @@ namespace module::behaviour::strategy {
         /// @brief Goalie playing behaviour
         void goalie_walk(const message::localisation::Field& field, const std::shared_ptr<const SimpleBall>& ball);
 
-        /// @brief Generated a kick plan on localisation updates
-        static Eigen::Vector2d get_kick_plan(const message::localisation::Field& field,
-                                             const message::support::FieldDescription& field_description);
-
         /// @brief Penalty mode state machine, used to decide what phase behaviour to use.
         void penalty_shootout(const message::input::GameState::Data::Phase& phase,
                               const message::localisation::Field& field,
