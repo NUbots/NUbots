@@ -1,0 +1,6 @@
+# Controls the minimum log level that NUClear log will display
+log_level: DEBUG
+
+initial_theta: 0
+
+smoothing_factor: 0.2
