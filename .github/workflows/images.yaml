@@ -49,6 +49,6 @@ jobs:
             platform=${{ matrix.platform }}
             BUILDKIT_INLINE_CACHE=1
           push: true
-          cache-from: |
-            type=registry,ref=crafty15/nubots:${{ matrix.platform }}
-            type=inline
+          # cache-from: |
+          #   type=registry,ref=crafty15/nubots:${{ matrix.platform }}
+          #   type=inline
