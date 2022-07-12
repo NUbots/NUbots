@@ -276,7 +276,8 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::penalty_shootout_ready() {
-        // Should not happen
+        // Should be unreachable
+        log<NUClear::ERROR>("penalty_shootout_ready should be unreachable!");
         current_state = Behaviour::State::READY;
     }
 
@@ -286,21 +287,22 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::penalty_shootout_playing(const Field& field, const std::shared_ptr<const SimpleBall>& ball) {
-        // Execute penalty kick script once if we haven't yet, and if we are not goalie
-        if (team_kicking_off == GameEvents::Context::TEAM) {
+        // Execute penalty kick script once if we haven't yet, and if we are not goalie (team_kicking_off will not be us
+        // if we are the goalie)
+        if (team_kicking_off == GameEvents::Context::TEAM && !cfg.is_goalie) {
             if (NUClear::clock::now() - ball_last_measured < cfg.ball_last_seen_max_time) {
-                // Ball has been seen recently
+                // Go kick the ball directly into the goals... i.e. regular playing
                 play(ball);
             }
             else {
-                // Ball has not been seen recently, request walk planner to rotate on the spot
+                // We are penalised players but not the goalie, so we should just stand still
                 stand_still();
             }
             current_state = Behaviour::State::SHOOTOUT;
         }
-        // If we are not kicking off then be a goalie
-        else if (team_kicking_off == GameEvents::Context::OPPONENT) {
-            goalie_walk(field, ball);
+        else {
+            // TODO(BehaviourTeam): Can add a dive or walk in-front of the ball here to attempt to block in future
+            stand_still();
             current_state = Behaviour::State::GOALIE_WALK;
         }
     }
@@ -429,8 +431,7 @@ namespace module::behaviour::strategy {
     void SoccerStrategy::unpenalised_localisation_reset() {
         emit(std::make_unique<ResetRobotHypotheses>());
 
-        // TODO(BehaviourTeam): This should do some random distribution or something as we don't know where the ball
-        // is
+        // TODO(BehaviourTeam): This should do some random distribution or something as we don't know where the ball is
         auto ball_reset        = std::make_unique<ResetBallHypotheses>();
         ball_reset->self_reset = true;
         emit(ball_reset);
@@ -451,7 +452,6 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::find(const std::shared_ptr<const SimpleBall>& ball) {
-        // TODO(BehaviourTeam): Waiting on Tom's changes to use this
         if (ball && ball->rBTt.y() < 0.0) {
             emit(std::make_unique<MotionCommand>(utility::behaviour::RotateOnSpot(true)));
         }
@@ -465,11 +465,9 @@ namespace module::behaviour::strategy {
             && ball->absolute_yaw_angle < cfg.kicking_angle_threshold) {
             // Ball is close enough and in the correct direction to kick
             if (ball->rBTt.y() > 0) {
-                log<NUClear::DEBUG>("We are close to the ball, kick it left");
                 emit(std::make_unique<KickScriptCommand>(LimbID::LEFT_LEG, KickCommandType::NORMAL));
             }
             else {
-                log<NUClear::DEBUG>("We are close to the ball, kick it right");
                 emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
             }
         }
@@ -479,72 +477,4 @@ namespace module::behaviour::strategy {
         }
     }
 
-    Eigen::Vector2d SoccerStrategy::get_kick_plan(const Field& field, const FieldDescription& field_description) {
-        // Defines the box within in which the kick target is changed from the centre
-        // of the oppposition goal to the perpendicular distance from the robot to the goal
-
-        const float max_kick_range = 0.6;  // TODO(BehaviourTeam): make configurable, only want to change at the
-                                           // last kick to avoid smart goalies
-        const float x_take_over_box = max_kick_range;
-        const float error           = 0.05;
-        const float buffer          = error + 2.0f * field_description.ball_radius;          // 15cm
-        const float y_take_over_box = field_description.dimensions.goal_width / 2 - buffer;  // 90-15 = 75cm
-        Eigen::Affine2d position(field.position);
-        const float x_robot = position.translation().x();
-        const float y_robot = position.translation().y();
-        Eigen::Vector2d new_target{};
-
-        if ((field_description.dimensions.field_length * 0.5) - x_take_over_box < x_robot && -y_take_over_box < y_robot
-            && y_robot < y_take_over_box) {
-            // Aims for behind the point that gives the shortest distance
-            new_target.x() =
-                field_description.dimensions.field_length * 0.5 + field_description.dimensions.goal_depth * 0.5;
-            new_target.y() = y_robot;
-        }
-        else {
-            // Aims for the centre of the goal
-            new_target.x() = field_description.dimensions.field_length * 0.5;
-            new_target.y() = 0;
-        }
-        return new_target;
-    }
-
-    void SoccerStrategy::goalie_walk(const Field& field, const std::shared_ptr<const SimpleBall>& ball) {
-        if (ball) {
-            auto motion_command = std::make_unique<MotionCommand>();
-
-            float time_since_ball_seen =
-                std::chrono::duration_cast<std::chrono::duration<float>>(NUClear::clock::now() - ball_last_measured)
-                    .count();
-
-            if (time_since_ball_seen < cfg.goalie_command_timeout) {
-
-                Eigen::Affine2d position(field.position);
-                const float field_bearing  = Eigen::Rotation2Dd(position.rotation()).angle();
-                const int sign_bearing     = field_bearing > 0 ? 1 : -1;
-                const float rotation_speed = -sign_bearing
-                                             * std::fmin(std::fabs(cfg.goalie_rotation_speed_factor * field_bearing),
-                                                         cfg.goalie_max_rotation_speed);
-
-                const int sign_translation = ball->rBTt.y() > 0 ? 1 : -1;
-                const float translation_speed =
-                    sign_translation
-                    * std::fmin(std::fabs(cfg.goalie_translation_speed_factor * ball->rBTt.x()),
-                                cfg.goalie_max_translation_speed);
-
-                Eigen::Affine2d cmd{};
-                cmd.linear()      = Eigen::Rotation2Dd(rotation_speed).matrix();
-                cmd.translation() = Eigen::Vector2d::Zero();
-                motion_command    = std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(cmd));
-                if (std::fabs(field_bearing) < cfg.goalie_side_walk_angle_threshold) {
-                    motion_command->walk_command.y() = translation_speed;
-                }
-            }
-            else {
-                motion_command =
-                    std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(Eigen::Affine2d::Identity()));
-            }
-            emit(std::move(motion_command));
-        }
-    }
 }  // namespace module::behaviour::strategy
