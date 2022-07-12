@@ -28,7 +28,7 @@ force_penalty_shootout: false
 walk_to_ready_time: 20
 
 # Distance to begin the kick on the ball while normally playing (in metres)
-kicking_distance_threshold: 0.5 # "REAL (rather than Webots)" Robot Suggested Value 0.35
+kicking_distance_threshold: 0.52 # "REAL (rather than Webots)" Robot Suggested Value 0.35
 
 # Angle from the front to begin kicking the ball (in radians)
 kicking_angle_threshold: 0.3

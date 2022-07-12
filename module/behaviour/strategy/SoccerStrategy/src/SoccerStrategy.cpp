@@ -461,7 +461,8 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::play(const std::shared_ptr<const SimpleBall>& ball) {
-        if (ball && ball->distance < cfg.kicking_distance_threshold && ball->angle < cfg.kicking_angle_threshold) {
+        if (ball && ball->distance < cfg.kicking_distance_threshold
+            && ball->absolute_yaw_angle < cfg.kicking_angle_threshold) {
             // Ball is close enough and in the correct direction to kick
             if (ball->rBTt.y() > 0) {
                 log<NUClear::DEBUG>("We are close to the ball, kick it left");
