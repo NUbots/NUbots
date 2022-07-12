@@ -189,7 +189,6 @@ namespace module::behaviour::strategy {
             .then([this](const Sensors& sensors,
                          const GameState& game_state,
                          const Phase& phase,
-                         const FieldDescription& field_description,
                          const Field& field,
                          const std::shared_ptr<const SimpleBall>& ball) {
                 try {
@@ -401,31 +400,8 @@ namespace module::behaviour::strategy {
     }
 
     // **************************** LOCALISATION RESETS ****************************
-    void SoccerStrategy::penalty_shootout_localisation_reset(const FieldDescription& field_description) {
-        auto robot_reset = std::make_unique<ResetRobotHypotheses>();
-
-        ResetRobotHypotheses::Self self_side_base_line;
-        self_side_base_line.rTFf = Eigen::Vector2d(
-            (-field_description.dimensions.field_length / 2.0) + field_description.dimensions.penalty_mark_distance,
-            0.0);
-        self_side_base_line.covariance  = Eigen::Vector2d::Constant(0.01).asDiagonal();
-        self_side_base_line.heading     = -M_PI;
-        self_side_base_line.heading_var = 0.005;
-
-        robot_reset->hypotheses.push_back(self_side_base_line);
-
-        emit(robot_reset);
-
-        auto ball_reset = std::make_unique<ResetBallHypotheses>();
-
-        ResetBallHypotheses::Ball at_feet;
-        at_feet.rBWw       = Eigen::Vector2d(0.2, 0);
-        at_feet.covariance = Eigen::Vector2d::Constant(0.01).asDiagonal();
-
-        ball_reset->hypotheses.push_back(at_feet);
-        ball_reset->self_reset = true;
-
-        emit(ball_reset);
+    void SoccerStrategy::penalty_shootout_localisation_reset() {
+        // TODO(BehaviourTeam): See version control for previous implementation, my need to be rewritten
     }
 
     void SoccerStrategy::unpenalised_localisation_reset() {
