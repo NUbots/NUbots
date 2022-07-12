@@ -140,9 +140,7 @@ namespace module::extension {
                   // Lock our mutex as we are editing our datastructure
                   std::lock_guard<std::mutex> lock(reactor.paths_mutex);
 
-                  for (auto it = reactor.remove_queue.begin(); it != reactor.remove_queue.end();) {
-                      it = reactor.remove_queue.erase(it);
-                  }
+                  reactor.remove_queue.clear();
               },
               this) {
 
@@ -277,6 +275,8 @@ namespace module::extension {
     }
 
     FileWatcher::~FileWatcher() {
+        // Lock our mutex as we are editing our datastructure
+        std::lock_guard<std::mutex> lock(paths_mutex);
         // Remove all the handles to the uv loop will finish
         paths.clear();
         remove_queue.clear();
