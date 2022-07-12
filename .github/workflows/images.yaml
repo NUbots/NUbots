@@ -5,7 +5,7 @@ name: Normal Target Pushes
 on:
   # Triggers the workflow on push events for the main branch
   push:
-    branches: [main]
+    branches: [craft/robocup2022-docker-image]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -34,8 +34,8 @@ jobs:
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          username: ${{ secrets.LIAM_DOCKER_USERNAME }}
+          password: ${{ secrets.LIAM_DOCKER_PASSWORD }}
 
       # Build the docker image
       - name: 🐳 Build the docker image 🐳
