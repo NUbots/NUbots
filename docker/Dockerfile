@@ -10,7 +10,7 @@
 ### The date in the Server command must either match, or be more recent than,
 ### the date in the FROM command
 ### Date format is ISO year/month/day
-FROM archlinux:base-20210829.0.32635
+FROM archlinux:latest
 
 # ↓↓↓ UPDATE MIRRORS HERE ↓↓↓
 RUN echo -e "Server=https://archive.archlinux.org/repos/2021/08/29/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
