@@ -17,6 +17,9 @@ RUN echo -e "Server=https://archive.archlinux.org/repos/2021/08/29/\$repo/os/\$a
 # If you ever update the mirror date, search the repository for UPDATE MIRRORS HERE to find all the places where the URL
 # needs to be altered.
 
+# Update the pacman file so it doesn't do signature checks
+COPY etc/pacman/pacman.conf /etc/pacman.confv
+
 # Arch recommends running this as the first command of the docker image
 # Use "yyuu" to allow for downgrades
 # There wont be any downgrades provided the date in Server line above is the same
@@ -25,7 +28,6 @@ RUN pacman -Syyuu --noconfirm --needed --overwrite \*
 
 # Add a script that installs packages
 COPY usr/local/bin/install-package /usr/local/bin/install-package
-COPY etc/pacman/pacman.latest.conf /etc/pacman.latest.conf
 
 # Update the pacman keyring
 # RUN pacman-key --refresh-keys
