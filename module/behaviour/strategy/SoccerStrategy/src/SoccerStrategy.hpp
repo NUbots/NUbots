@@ -139,7 +139,6 @@ namespace module::behaviour::strategy {
 
         /// @brief Penalty mode state machine, used to decide what phase behaviour to use.
         void penalty_shootout(const message::input::GameState::Data::Phase& phase,
-                              const message::support::FieldDescription& field_description,
                               const message::localisation::Field& field,
                               const std::shared_ptr<const SimpleBall>& ball);
 
@@ -155,7 +154,7 @@ namespace module::behaviour::strategy {
         void penalty_shootout_ready();
 
         /// @brief Penalty mode, set phase behaviour/strategy
-        void penalty_shootout_set(const message::support::FieldDescription& field_description);
+        void penalty_shootout_set();
 
         /// @brief Penalty mode, playing phase behaviour/strategy
         void penalty_shootout_playing(const message::localisation::Field& field,

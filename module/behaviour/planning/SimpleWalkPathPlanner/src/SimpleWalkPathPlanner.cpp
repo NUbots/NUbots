@@ -123,12 +123,8 @@ namespace module::behaviour::planning {
                     // TODO(MotionTeam): Walk to a given position and heading on the field, avoiding obstacles
                     case message::behaviour::MotionCommand::Type::WALK_TO_STATE: return;
 
-                    case message::behaviour::MotionCommand::Type::ROTATE_ON_SPOT_CLOCKWISE:
-                        rotate_on_spot(true);
-                        return;
-
-                    case message::behaviour::MotionCommand::Type::ROTATE_ON_SPOT_ANTICLOCKWISE:
-                        rotate_on_spot(false);
+                    case message::behaviour::MotionCommand::Type::ROTATE_ON_SPOT:
+                        rotate_on_spot(latest_command.clockwise);
                         return;
 
                     case message::behaviour::MotionCommand::Type::WALK_TO_READY: walk_to_ready(); return;
@@ -170,20 +166,12 @@ namespace module::behaviour::planning {
     }
 
     void SimpleWalkPathPlanner::rotate_on_spot(bool clockwise) {
-
-        log<NUClear::DEBUG>("Rotate on spot (clockwise?): ", clockwise);
-
-
-        std::unique_ptr<WalkCommand> command =
-            std::make_unique<WalkCommand>(subsumption_id,
-                                          Eigen::Vector3d(cfg.rotate_speed_x, cfg.rotate_speed_y, cfg.rotate_speed));
-
-        if (!clockwise) {
-            command = std::make_unique<WalkCommand>(
-                subsumption_id,
-                Eigen::Vector3d(cfg.rotate_speed_x, cfg.rotate_speed_y, -cfg.rotate_speed));
-        }
-
+        // log
+        log<NUClear::DEBUG>("Rotate on spot");
+        int sign                             = clockwise ? -1 : 1;
+        std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(
+            subsumption_id,
+            Eigen::Vector3d(cfg.rotate_speed_x, cfg.rotate_speed_y, sign * cfg.rotate_speed));
         emit(std::move(command));
         update_priority(cfg.walk_path_planner_priority);
     }

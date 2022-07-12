@@ -213,9 +213,7 @@ namespace module::behaviour::strategy {
                             // Switch gamemode statemachine based on GameController mode
                             auto mode = game_state.data.mode.value;
                             switch (mode) {
-                                case GameMode::PENALTY_SHOOTOUT:
-                                    penalty_shootout(phase, field_description, field, ball);
-                                    break;
+                                case GameMode::PENALTY_SHOOTOUT: penalty_shootout(phase, field, ball); break;
                                 case GameMode::NORMAL: normal(game_state, phase, ball); break;
                                 case GameMode::OVERTIME: normal(game_state, phase, ball); break;
                                 default: log<NUClear::WARN>("Game mode unknown.");
@@ -238,13 +236,12 @@ namespace module::behaviour::strategy {
 
     // ********************PENALTY GAMEMODE STATE MACHINE********************************
     void SoccerStrategy::penalty_shootout(const Phase& phase,
-                                          const FieldDescription& field_description,
                                           const Field& field,
                                           const std::shared_ptr<const SimpleBall>& ball) {
         switch (phase.value) {
-            case Phase::INITIAL: penalty_shootout_initial(); break;           // Happens at beginning.
-            case Phase::READY: penalty_shootout_ready(); break;               // Should not happen.
-            case Phase::SET: penalty_shootout_set(field_description); break;  // Happens on beginning of each kick try.
+            case Phase::INITIAL: penalty_shootout_initial(); break;  // Happens at beginning.
+            case Phase::READY: penalty_shootout_ready(); break;      // Should not happen.
+            case Phase::SET: penalty_shootout_set(); break;          // Happens on beginning of each kick try.
             case Phase::PLAYING: penalty_shootout_playing(field, ball); break;  // Either kicking or goalie.
             case Phase::TIMEOUT: penalty_shootout_timeout(); break;    // A pause in playing. Not in simulation.
             case Phase::FINISHED: penalty_shootout_finished(); break;  // Happens when penalty shootout completely ends.
@@ -283,7 +280,7 @@ namespace module::behaviour::strategy {
         current_state = Behaviour::State::READY;
     }
 
-    void SoccerStrategy::penalty_shootout_set(const FieldDescription& field_description) {
+    void SoccerStrategy::penalty_shootout_set() {
         stand_still();
         current_state = Behaviour::State::SET;
     }
@@ -455,11 +452,11 @@ namespace module::behaviour::strategy {
 
     void SoccerStrategy::find(const std::shared_ptr<const SimpleBall>& ball) {
         // TODO(BehaviourTeam): Waiting on Tom's changes to use this
-        if (ball->rBTt.y() < 0.0) {
-            emit(std::make_unique<MotionCommand>(utility::behaviour::rotate_on_spot(true)));
+        if (ball && ball->rBTt.y() < 0.0) {
+            emit(std::make_unique<MotionCommand>(utility::behaviour::RotateOnSpot(true)));
         }
         else {
-            emit(std::make_unique<MotionCommand>(utility::behaviour::rotate_on_spot(false)));
+            emit(std::make_unique<MotionCommand>(utility::behaviour::RotateOnSpot(false)));
         }
     }
 
