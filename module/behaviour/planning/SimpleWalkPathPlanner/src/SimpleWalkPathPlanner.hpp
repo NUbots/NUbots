@@ -81,9 +81,6 @@ namespace module::behaviour::planning {
         /// @brief The id registered in the subsumption system for this module
         const size_t subsumption_id;
 
-        /// @brief Stores the position of the last ball seen
-        Eigen::Vector3f rBTt = Eigen::Vector3f(1.0, 0.0, 0.0);
-
         /// @brief Walk using the walk command from a direct motion command.
         void walk_directly();
 
