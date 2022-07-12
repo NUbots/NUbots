@@ -66,12 +66,6 @@ namespace module::behaviour::strategy {
             float rBTt_smoothing_factor      = 0.0f;
         } cfg;
 
-        /// @brief Distance to the ball from robot torso
-        float distance_to_ball = 1.0f;
-
-        /// @brief Angle to ball from robot torso
-        float angle_to_ball = 1.0f;
-
         /// @brief Bool to indicate  if the robot is currently getting up
         bool is_getting_up = false;
 
@@ -80,12 +74,6 @@ namespace module::behaviour::strategy {
 
         /// @brief Bool to indicate if we want to reset localisation in initial phase
         bool reset_in_initial = true;
-
-        /// @brief Stores the position of the last ball seen
-        Eigen::Vector3f rBTt = Eigen::Vector3f(1.0, 0.0, 0.0);
-
-        /// @brief Stores the position of the filtered ball
-        Eigen::Vector3f rBTt_smoothed = Eigen::Vector3f(1.0, 0.0, 0.0);
 
         /// @brief Used to indicate which team is kicking off
         message::input::GameEvents::Context team_kicking_off = message::input::GameEvents::Context::UNKNOWN;
@@ -128,7 +116,7 @@ namespace module::behaviour::strategy {
         void stand_still();
 
         /// @brief Playing behaviour when ball is visible, currently just walks to the ball
-        void play();
+        void play(const std::shared_ptr<const SimpleBall>& ball);
 
         /// @brief Playing behaviour when ball is lost, currently just rotate on spot
         void find();

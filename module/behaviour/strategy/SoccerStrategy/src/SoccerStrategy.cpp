@@ -136,12 +136,6 @@ namespace module::behaviour::strategy {
             cfg.rBTt_smoothing_factor = config["rBTt_smoothing_factor"].as<float>();
         });
 
-        on<Trigger<Field>, With<FieldDescription>>().then(
-            [this](const Field& field, const FieldDescription& field_description) {
-                Eigen::Vector2d kick_target = get_kick_plan(field, field_description);
-                emit(std::make_unique<KickPlan>(KickPlan(kick_target, kick_type)));
-            });
-
         on<Trigger<VisionGoals>>().then([this](const VisionGoals& goals) {
             if (!goals.goals.empty()) {
                 goal_last_measured = NUClear::clock::now();
@@ -301,7 +295,7 @@ namespace module::behaviour::strategy {
         if (team_kicking_off == GameEvents::Context::TEAM) {
             if (NUClear::clock::now() - ball_last_measured < cfg.ball_last_seen_max_time) {
                 // Ball has been seen recently
-                play();
+                play(ball);
             }
             else {
                 // Ball has not been seen recently, request walk planner to rotate on the spot
@@ -381,7 +375,7 @@ namespace module::behaviour::strategy {
         else {
             if (ball && NUClear::clock::now() - ball->time_of_measurement < cfg.ball_last_seen_max_time) {
                 // Ball has been seen recently, request walk planner to walk to the ball
-                play();
+                play(ball);
                 current_state = Behaviour::State::WALK_TO_BALL;
             }
             else {
@@ -466,10 +460,10 @@ namespace module::behaviour::strategy {
         emit(std::make_unique<MotionCommand>(utility::behaviour::RotateOnSpot()));
     }
 
-    void SoccerStrategy::play() {
-        if (distance_to_ball < cfg.kicking_distance_threshold && angle_to_ball < cfg.kicking_angle_threshold) {
+    void SoccerStrategy::play(const std::shared_ptr<const SimpleBall>& ball) {
+        if (ball && ball->distance < cfg.kicking_distance_threshold && ball->angle < cfg.kicking_angle_threshold) {
             // Ball is close enough and in the correct direction to kick
-            if (rBTt_smoothed.y() > 0) {
+            if (ball->rBTt.y() > 0) {
                 log<NUClear::DEBUG>("We are close to the ball, kick it left");
                 emit(std::make_unique<KickScriptCommand>(LimbID::LEFT_LEG, KickCommandType::NORMAL));
             }
