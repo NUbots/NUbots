@@ -23,6 +23,8 @@ option(STATIC_LIBRARIES
 
 if(STATIC_LIBRARIES)
   set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_SHARED_LIBRARY_SUFFIX})
+  # resolv needs position independent code
+  set(CMAKE_POSITION_INDEPENDENT_CODE)
 endif()
 
 # We use additional modules that cmake needs to know about
