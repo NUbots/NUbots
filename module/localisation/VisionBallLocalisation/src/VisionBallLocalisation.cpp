@@ -42,43 +42,47 @@ namespace module::localisation {
         /* To run whenever a ball has been detected */
         on<Trigger<VisionBalls>, With<Sensors>>().then([this](const VisionBalls& balls, const Sensors& sensors) {
             if (balls.balls.size() > 0) {
-                // Get the first vision ball measurement and treat as the closest measurement to our estimate
-                Eigen::Vector3f rBCc =
-                    reciprocalSphericalToCartesian(balls.balls[0].measurements[0].srBCc.cast<float>());
-                Eigen::Vector3f srBCc = balls.balls[0].measurements[0].srBCc.cast<float>();
+
+                // Get the transform from camera {c} to torso space {t}
                 Eigen::Affine3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
-                Eigen::Vector3f rBTt     = Htc * rBCc;
-                auto raw_lowest_distance = std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2));
+
+                // Get the first vision ball measurement and treat it as the closest measurement to our estimate
+                Eigen::Vector3f srBCc = balls.balls[0].measurements[0].srBCc.cast<float>();
+                Eigen::Vector3f rBCc  = reciprocalSphericalToCartesian(srBCc);
+                Eigen::Vector3f rBTt  = Htc * rBCc;
 
                 // Loop through all our ball measurements and find the closest measurement to our current estimate
                 for (const auto& ball : balls.balls) {
-                    rBCc           = reciprocalSphericalToCartesian(ball.measurements[0].srBCc.cast<float>());
-                    auto temp_rBTt = Htc * rBCc;
-                    if (std::sqrt(std::pow(temp_rBTt.x(), 2) + std::pow(temp_rBTt.y(), 2)) < raw_lowest_distance) {
-                        raw_lowest_distance = std::sqrt(std::pow(temp_rBTt.x(), 2) + std::pow(temp_rBTt.y(), 2));
-                        rBTt                = temp_rBTt;
-                        srBCc               = ball.measurements[0].srBCc.cast<float>();
+                    rBCc = reciprocalSphericalToCartesian(ball.measurements[0].srBCc.cast<float>());
+                    Eigen::Vector3f temp_rBTt = Htc * rBCc;
+                    if (get_distance(temp_rBTt) < get_distance(rBTt)) {
+                        rBTt  = temp_rBTt;
+                        srBCc = ball.measurements[0].srBCc.cast<float>();
                     }
                 }
+
                 // TODO: Apply filter to rBTt
 
                 // Generate message and emit
-                auto time_of_measurement  = NUClear::clock::now();
-                float distance_to_ball    = std::sqrt(std::pow(rBTt.x(), 2) + std::pow(rBTt.y(), 2));
-                float angle_to_ball       = std::abs(std::atan2(rBTt.y(), rBTt.x()));
                 auto ball                 = std::make_unique<SimpleBall>();
                 ball->rBTt                = rBTt;
-                ball->time_of_measurement = time_of_measurement;
-                ball->distance            = distance_to_ball;
-                ball->angle               = angle_to_ball;
                 ball->srBCc               = srBCc;
+                ball->time_of_measurement = NUClear::clock::now();
+                ball->distance            = get_distance(rBTt);
+                float absolute_yaw_angle  = std::abs(std::atan2(rBTt.y(), rBTt.x()));
+                ball->absolute_yaw_angle  = absolute_yaw_angle;
                 emit(ball);
 
                 // Logging
+                log<NUClear::DEBUG>("srBCc: ", srBCc.transpose());
                 log<NUClear::DEBUG>("rBTt: ", rBTt.transpose());
-                log<NUClear::DEBUG>("Distance: ", distance_to_ball);
-                log<NUClear::DEBUG>("Angle: ", angle_to_ball);
+                log<NUClear::DEBUG>("Distance: ", get_distance(rBTt));
+                log<NUClear::DEBUG>("Angle: ", absolute_yaw_angle);
             }
         });
     }
+    float VisionBallLocalisation::get_distance(Eigen::Matrix<float, 3, 1> v) {
+        return std::sqrt(std::pow(v.x(), 2) + std::pow(v.y(), 2));
+    }
+
 }  // namespace module::localisation
