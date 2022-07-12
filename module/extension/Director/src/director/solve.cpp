@@ -21,13 +21,13 @@
 
 namespace module::extension {
 
-    using ::extension::behaviour::commands::DirectorTask;
+    using ::extension::behaviour::commands::BehaviourTask;
     using ::module::extension::provider::Provider;
     using ::module::extension::provider::ProviderGroup;
 
 
     Director::Solution::Option Director::solve_provider(const std::shared_ptr<Provider>& provider,
-                                                        const std::shared_ptr<const DirectorTask>& authority,
+                                                        const std::shared_ptr<const BehaviourTask>& authority,
                                                         std::set<std::shared_ptr<const Provider>> visited) {
 
 
@@ -65,7 +65,7 @@ namespace module::extension {
 
 
     Director::Solution Director::solve_when(const Provider::WhenCondition& when,
-                                            const std::shared_ptr<const DirectorTask>& authority,
+                                            const std::shared_ptr<const BehaviourTask>& authority,
                                             const std::set<std::shared_ptr<const Provider>>& visited) {
         Solution s;
         s.pushed = true;
@@ -94,7 +94,7 @@ namespace module::extension {
     }
 
     Director::Solution Director::solve_group(const std::type_index& type,
-                                             const std::shared_ptr<const DirectorTask>& authority,
+                                             const std::shared_ptr<const BehaviourTask>& authority,
                                              const std::set<std::shared_ptr<const Provider>>& visited) {
         Solution s;
         s.pushed = false;
@@ -109,10 +109,7 @@ namespace module::extension {
         return s;
     }
 
-    Director::Solution Director::solve_task(const std::shared_ptr<const DirectorTask>& task,
-                                            const std::shared_ptr<const DirectorTask>& authority) {
-        std::set<std::shared_ptr<const Provider>> visited;
-        return solve_group(task->type, authority, visited);
+    Director::Solution Director::solve_task(const std::shared_ptr<const BehaviourTask>& task) {
     }
 
 }  // namespace module::extension

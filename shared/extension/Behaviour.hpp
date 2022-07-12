@@ -322,7 +322,7 @@ namespace extension::behaviour {
     struct Task {
 
         /**
-         * Emits a new task for the Director to handle.
+         * Emits a new task for the behaviour system to handle.
          *
          * @param powerplant the powerplant context provided by NUClear
          * @param data       the data element of the task
@@ -341,15 +341,15 @@ namespace extension::behaviour {
             uint64_t reaction_id = (task != nullptr) ? task->parent.id : -1;
             uint64_t task_id     = (task != nullptr) ? task->id : -1;
 
-            NUClear::dsl::word::emit::Direct<commands::DirectorTask>::emit(
+            NUClear::dsl::word::emit::Direct<commands::BehaviourTask>::emit(
                 powerplant,
-                std::make_shared<commands::DirectorTask>(typeid(T),
-                                                         reaction_id,
-                                                         task_id,
-                                                         data,
-                                                         name,
-                                                         priority,
-                                                         optional));
+                std::make_shared<commands::BehaviourTask>(typeid(T),
+                                                          reaction_id,
+                                                          task_id,
+                                                          data,
+                                                          name,
+                                                          priority,
+                                                          optional));
         }
     };
 
