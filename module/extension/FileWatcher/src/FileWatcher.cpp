@@ -110,34 +110,41 @@ namespace module::extension {
     FileWatcher::FileWatcher(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
         , loop()
-        , add_watch(loop, [](uv_async_t* async_handle) {
-            // Grab our reactor context back
-            FileWatcher& reactor = *reinterpret_cast<FileWatcher*>(async_handle->data);
+        , shutdown(loop,
+                   [](uv_async_t* handle) {
+                       // Stop the loop
+                       uv_stop(handle->loop);
+                   })
+        , add_watch(
+              loop,
+              [](uv_async_t* async_handle) {
+                  // Grab our reactor context back
+                  FileWatcher& reactor = *reinterpret_cast<FileWatcher*>(async_handle->data);
 
-            // Lock our mutex as we are editing our datastructure
-            std::lock_guard<std::mutex> lock(reactor.paths_mutex);
+                  // Lock our mutex as we are editing our datastructure
+                  std::lock_guard<std::mutex> lock(reactor.paths_mutex);
 
-            for (auto it = reactor.add_queue.begin(); it != reactor.add_queue.end();) {
-                auto& map = *it;
-                map->handle->start(&FileWatcher::file_watch_callback, map->path);
-                it = reactor.add_queue.erase(it);
-            }
-        }, this)
-        , remove_watch(loop, [](uv_async_t* async_handle) {
-            // Grab our reactor context back
-            FileWatcher& reactor = *reinterpret_cast<FileWatcher*>(async_handle->data);
+                  for (auto it = reactor.add_queue.begin(); it != reactor.add_queue.end();) {
+                      auto& map = *it;
+                      map->handle->start(&FileWatcher::file_watch_callback, map->path);
+                      it = reactor.add_queue.erase(it);
+                  }
+              },
+              this)
+        , remove_watch(
+              loop,
+              [](uv_async_t* async_handle) {
+                  // Grab our reactor context back
+                  FileWatcher& reactor = *reinterpret_cast<FileWatcher*>(async_handle->data);
 
-            // Lock our mutex as we are editing our datastructure
-            std::lock_guard<std::mutex> lock(reactor.paths_mutex);
+                  // Lock our mutex as we are editing our datastructure
+                  std::lock_guard<std::mutex> lock(reactor.paths_mutex);
 
-            for (auto it = reactor.remove_queue.begin(); it != reactor.remove_queue.end();) {
-                it = reactor.remove_queue.erase(it);
-            }
-        }, this)
-        , shutdown(loop, [](uv_async_t* handle) {
-            // Stop the loop
-            uv_stop(handle->loop);
-        }) {
+                  for (auto it = reactor.remove_queue.begin(); it != reactor.remove_queue.end();) {
+                      it = reactor.remove_queue.erase(it);
+                  }
+              },
+              this) {
 
         on<Always>().then("FileWatcher", [this] {
             if (first_loop) {
@@ -216,7 +223,7 @@ namespace module::extension {
                 if (paths.find(dir) == paths.end()) {
                     auto& p  = paths[path];
                     p.handle = std::make_unique<uv::fs_event_t>(loop, this);
-                    p.path         = dir;
+                    p.path   = dir;
                     add_queue.push_back(&p);
                     add_watch.send();
                 }
