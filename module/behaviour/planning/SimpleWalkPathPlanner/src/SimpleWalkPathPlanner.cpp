@@ -118,8 +118,6 @@ namespace module::behaviour::planning {
                         emit(std::make_unique<StopCommand>(subsumption_id));
                         return;
 
-                    case message::behaviour::MotionCommand::Type::DIRECT_COMMAND: walk_directly(); return;
-
                     case message::behaviour::MotionCommand::Type::BALL_APPROACH: vision_walk_path(ball); return;
 
                     // TODO(MotionTeam): Walk to a given position and heading on the field, avoiding obstacles

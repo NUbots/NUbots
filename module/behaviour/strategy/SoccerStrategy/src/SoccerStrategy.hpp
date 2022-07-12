@@ -58,16 +58,22 @@ namespace module::behaviour::strategy {
             float goalie_side_walk_angle_threshold = 0.0f;
             NUClear::clock::duration localisation_interval{};
             NUClear::clock::duration localisation_duration{};
-            bool force_playing          = false;
-            bool force_penalty_shootout = false;
-            int walk_to_ready_time      = 0;
+            bool force_playing               = false;
+            bool force_penalty_shootout      = false;
+            int walk_to_ready_time           = 0;
+            float kicking_distance_threshold = 0.0f;
+            float kicking_angle_threshold    = 0.0f;
+            float rBTt_smoothing_factor      = 0.0f;
         } cfg;
+
+        /// @brief Distance to the ball from robot torso
+        float distance_to_ball = 1.0f;
+
+        /// @brief Angle to ball from robot torso
+        float angle_to_ball = 1.0f;
 
         /// @brief Bool to indicate  if the robot is currently getting up
         bool is_getting_up = false;
-
-        /// @brief Bool to indicate if the robot has finished kicking in penalty shootout
-        bool has_kicked = false;
 
         /// @brief Bool to indicate if we are currently penalised
         bool self_penalised = false;
@@ -75,16 +81,22 @@ namespace module::behaviour::strategy {
         /// @brief Bool to indicate if we want to reset localisation in initial phase
         bool reset_in_initial = true;
 
+        /// @brief Stores the position of the last ball seen
+        Eigen::Vector3f rBTt = Eigen::Vector3f(1.0, 0.0, 0.0);
+
+        /// @brief Stores the position of the filtered ball
+        Eigen::Vector3f rBTt_smoothed = Eigen::Vector3f(1.0, 0.0, 0.0);
+
         /// @brief Used to indicate which team is kicking off
         message::input::GameEvents::Context team_kicking_off = message::input::GameEvents::Context::UNKNOWN;
 
         message::behaviour::KickPlan::KickType kick_type{};
 
         /// @brief Stores which behaviour state the robot is in
-        message::behaviour::Behaviour::State currentState = message::behaviour::Behaviour::State::INIT;
+        message::behaviour::Behaviour::State current_state = message::behaviour::Behaviour::State::INIT;
 
         /// @brief Stores which behaviour state the robot was previosuly in
-        message::behaviour::Behaviour::State previousState = message::behaviour::Behaviour::State::INIT;
+        message::behaviour::Behaviour::State previous_state = message::behaviour::Behaviour::State::INIT;
 
         /// @brief Stores the time stamp of when the robot starts walking to the ready position
         NUClear::clock::time_point started_walking_to_ready_at;
