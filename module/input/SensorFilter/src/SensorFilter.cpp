@@ -27,7 +27,6 @@
 
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
-#include "utility/math/filter/MahonyFilter.hpp"
 #include "utility/motion/ForwardKinematics.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/platform/RawSensors.hpp"
@@ -102,13 +101,6 @@ namespace module::input {
                 thresholds[threshold["name"].as<std::string>()] = threshold["certainty_threshold"].as<float>();
             }
             config.footDown.set_method(method, thresholds);
-
-            // Mahony config
-            this->Kp           = cfg["mahony"]["Kp"].as<double>();
-            this->Ki           = cfg["mahony"]["Ki"].as<double>();
-            this->ts           = cfg["mahony"]["ts"].as<double>();
-            this->initial_quat = cfg["mahony"]["initial_quat"].as<Expression>();
-            this->bias         = cfg["mahony"]["bias"].as<Expression>();
 
             // Motion filter config
             // Set velocity decay
@@ -603,23 +595,6 @@ namespace module::input {
                         // Accelerometer measurement update
                         motionFilter.measure(sensors->accelerometer, acc_noise, MeasurementType::ACCELEROMETER());
 
-                        // Mahony calculation for Rtw
-                        Eigen::Quaterniond quat =
-                            previousSensors == NULL
-                                ? Eigen::Quaterniond(initial_quat[0], initial_quat[1], initial_quat[2], initial_quat[3])
-                                : Eigen::Quaterniond(Eigen::Affine3d(previousSensors->Htw).rotation().transpose());
-                        utility::math::filter::MahonyUpdate(sensors->accelerometer,
-                                                            sensors->gyroscope,
-                                                            ts,
-                                                            Ki,
-                                                            Kp,
-                                                            quat,
-                                                            bias);
-
-                        // Gyroscope measurement update
-                        motionFilter.measure(sensors->gyroscope,
-                                             config.motionFilter.noise.measurement.gyroscope,
-                                             MeasurementType::GYROSCOPE());
                         // This loop calculates the Hwf transform for feet if they have just hit the ground. If they
                         // have not just hit the ground, it uses the previous Hwf value. This assumes that once the foot
                         // hits the ground, it doesn't move at all i.e. we're ASSUMING the foot cannot slip/slide
@@ -791,7 +766,7 @@ namespace module::input {
 
                             // Map from world to torso coordinates (Rtw)
                             Eigen::Affine3d Hwt;
-                            Hwt.linear()      = quat.toRotationMatrix();
+                            Hwt.linear()      = o.Rwt.toRotationMatrix();
                             Hwt.translation() = o.rTWw;
                             sensors->Htw      = Hwt.inverse().matrix();
 
