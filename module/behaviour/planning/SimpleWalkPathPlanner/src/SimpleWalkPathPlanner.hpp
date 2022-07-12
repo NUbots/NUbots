@@ -89,7 +89,7 @@ namespace module::behaviour::planning {
         void vision_walk_path(const std::shared_ptr<const SimpleBall>& ball);
 
         /// @brief Rotate on the spot
-        void rotate_on_spot();
+        void rotate_on_spot(bool clockwise);
 
         /// @brief Configured to emit a walk command that results in robot being in desired position after the ready
         /// phase

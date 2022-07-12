@@ -36,9 +36,11 @@ message MotionCommand {
         /// Stop all current motion and directly send the given WalkCommand to the WalkEngine
         DIRECT_COMMAND = 3;
         /// Rotates on the spot
-        ROTATE_ON_SPOT = 4;
+        ROTATE_ON_SPOT_CLOCKWISE = 4;
+        /// Rotates on the spot
+        ROTATE_ON_SPOT_ANTICLOCKWISE = 5;
         /// Walks to ready position
-        WALK_TO_READY = 5;
+        WALK_TO_READY = 6;
     }
     /// The type of this motion command
     Type type = 1;

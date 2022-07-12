@@ -58,9 +58,14 @@ namespace utility::behaviour {
         return cmd;
     }
 
-    inline MotionCommand RotateOnSpot() {
+    inline MotionCommand rotate_on_spot(bool clockwise) {
         MotionCommand cmd;
-        cmd.type = MotionCommand::Type::Value::ROTATE_ON_SPOT;
+        if (clockwise) {
+            cmd.type = MotionCommand::Type::Value::ROTATE_ON_SPOT_CLOCKWISE;
+        }
+        else {
+            cmd.type = MotionCommand::Type::Value::ROTATE_ON_SPOT_ANTICLOCKWISE;
+        }
         return cmd;
     }
 

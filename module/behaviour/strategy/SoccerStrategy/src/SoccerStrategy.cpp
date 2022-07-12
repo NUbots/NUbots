@@ -378,7 +378,7 @@ namespace module::behaviour::strategy {
             }
             else {
                 // Ball has not been seen recently, request walk planner to rotate on the spot
-                find();
+                find(ball);
                 current_state = Behaviour::State::SEARCH_FOR_BALL;
             }
         }
@@ -453,9 +453,14 @@ namespace module::behaviour::strategy {
         return self_penalised;
     }
 
-    void SoccerStrategy::find() {
-        // TODO(BehaviourTeam): Rotate in the direction that the ball was last seen (i.e. direction of rotation)
-        emit(std::make_unique<MotionCommand>(utility::behaviour::RotateOnSpot()));
+    void SoccerStrategy::find(const std::shared_ptr<const SimpleBall>& ball) {
+        // TODO(BehaviourTeam): Waiting on Tom's changes to use this
+        if (ball->rBTt.y() < 0.0) {
+            emit(std::make_unique<MotionCommand>(utility::behaviour::rotate_on_spot(true)));
+        }
+        else {
+            emit(std::make_unique<MotionCommand>(utility::behaviour::rotate_on_spot(false)));
+        }
     }
 
     void SoccerStrategy::play(const std::shared_ptr<const SimpleBall>& ball) {

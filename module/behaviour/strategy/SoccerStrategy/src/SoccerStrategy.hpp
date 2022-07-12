@@ -66,6 +66,9 @@ namespace module::behaviour::strategy {
             float rBTt_smoothing_factor      = 0.0f;
         } cfg;
 
+        /// @brief Flag to determine whether the ball is on the left or right side of the robot
+        float ball_lost_clockwise = true;
+
         /// @brief Bool to indicate  if the robot is currently getting up
         bool is_getting_up = false;
 
@@ -119,7 +122,7 @@ namespace module::behaviour::strategy {
         void play(const std::shared_ptr<const SimpleBall>& ball);
 
         /// @brief Playing behaviour when ball is lost, currently just rotate on spot
-        void find();
+        void find(const std::shared_ptr<const SimpleBall>& ball);
 
         /// @brief Determines if robot is currently picked up based on foot down sensors
         bool picked_up(const message::input::Sensors& sensors) const;
