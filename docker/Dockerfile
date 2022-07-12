@@ -278,6 +278,12 @@ RUN mkdir -p /usr/local/include/zstr \
     && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/strict_fstream.hpp -O /usr/local/include/strict_fstream.hpp \
     && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/zstr_make_unique_polyfill.h -O /usr/local/include/zstr_make_unique_polyfill.h
 
+# Visual Mesh
+RUN install-from-source https://github.com/ysims/VisualMesh/archive/1c8d08b8d93a438acce2dce0bcfe7e1f58509e1a.tar.gz \
+    -DBUILD_TENSORFLOW_OP=OFF \
+    -DBUILD_EXAMPLES=OFF \
+    -DBUILD_OPENCL_ENGINE=ON
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
