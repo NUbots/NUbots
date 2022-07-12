@@ -9,11 +9,7 @@ walk:
   double_support_ratio: 0.1
   # Give extra swing to first step for better start
   # (in ?, [0:10])
-<<<<<<< HEAD
-  first_step_swing_factor: 0.8 #1.0 I think this is a PROBLEM!!!
-=======
   first_step_swing_factor: 0.5 #0.8 #1.0
->>>>>>> 5b9aa4f8a21e2eddbee819efd815edd53ae6a7a4
   foot:
     # Lateral distance between the feet center (how spread apart the feet should be)
     # (in m, >= 0)

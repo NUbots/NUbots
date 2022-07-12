@@ -1,7 +1,7 @@
 # Larger population encourages wider search
 population_size: 40
 # More generations encourages deeper search
-max_generations: 250
+max_generations: 60
 num_objectives: 2
 num_constraints: 2
 seed: 7777777
@@ -26,9 +26,9 @@ task: "walk"
 task_config_path: "config/webots/QuinticWalk.yaml" #QuinticWalkBackwards.yaml
 #task_config_path: "config/webots/QuinticWalkBackwards.yaml"
 #task_config_path: "config/webots/QuinticWalkStrafe.yaml"
-task_pattern: "0"
-initial_translation: [-4.0, -3.0, 0.51]  # x, y, z
-intial_rotation: [0, 0, 1, 0]  # x, y, z, angle (rads)
+#task_pattern: "0"
+initial_translation: [-4.0, -3.0, 0.51] # x, y, z
+intial_rotation: [0, 0, 1, 0] # x, y, z, angle (rads)
 # The following values are setting the initial values and limits for the walk engine parameters.
 # Each param is the tuple [initial value, minimum, maximum]. These values are merged with the
 # values in QuinticWalk.yaml for an individual, and then evaluated with the walk.
@@ -42,7 +42,7 @@ walk:
   foot:
     # Lateral distance between the feet center (how spread apart the feet should be)
     # (in m, >= 0)
-    distance: [0.18, 0.12, 0.24]  #This can be wider fpor strafe
+    distance: [0.18, 0.12, 0.24] #This can be wider fpor strafe
     # Maximum flying foot height (how high we lift a foot from the ground)
     # (in m, >= 0)
     rise: [0.075, 0.05, 0.17]
@@ -52,7 +52,7 @@ walk:
     height: [0.45, 0.35, 0.5]
     # Trunk pitch orientation (how much we lean the torso forward or backward, does not change)
     # (in rad)
-    pitch:  [-15 * pi / 180, -20 * pi / 180, 0 * pi / 180] #[24 * pi / 180, -15 * pi / 180, 30 * pi / 180]  OPTIMAL!!!!!!! [24 * pi / 180, -10 * pi / 180, 30 * pi / 180]
+    pitch: [-15 * pi / 180, -20 * pi / 180, 0 * pi / 180] #[24 * pi / 180, -15 * pi / 180, 30 * pi / 180]  OPTIMAL!!!!!!! [24 * pi / 180, -10 * pi / 180, 30 * pi / 180]
     # Trunk forward offset (how much we offset the trunk forward or backward lean when walking)
     # (in m)
     x_offset: [0.03, -0.05, 0.05]
@@ -72,6 +72,6 @@ walk:
 
 # The following values are setting the initial values and limits for the walk engine command.
 walk_command:
-  velocity_X: [0.2, 0.01, 0.51]
-  velocity_Y: [0.0, 0.0, 0.0]  #[-0.2, -0.51, 0.01]
-  rotation:   [0.0, 0.0, 0.0]  #[0.15, 0.1, 1.57]
+  velocity: [0.2, 0.01, 0.51]
+  #velocity_Y: [0.0, 0.0, 0.0] #[-0.2, -0.51, 0.01]
+  #rotation: [0.0, 0.0, 0.0] #[0.15, 0.1, 1.57]
