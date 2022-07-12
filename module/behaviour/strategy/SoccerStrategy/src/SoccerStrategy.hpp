@@ -110,7 +110,8 @@ namespace module::behaviour::strategy {
         void initial_localisation_reset();
 
         /// @brief Resets robot and ball localisation for use in initial phase of penalty mode
-        void penalty_shootout_localisation_reset(const message::support::FieldDescription& field_description);
+        // TODO(BehaviourTeam): This method needs a rewrite
+        void penalty_shootout_localisation_reset();
 
         /// @brief Resets ball localisation for use after we are unpenalised
         void unpenalised_localisation_reset();
@@ -130,12 +131,8 @@ namespace module::behaviour::strategy {
         /// @brief Determines if robot is currently penalised
         bool penalised() const;
 
-        /// @brief Goalie playing behaviour
-        void goalie_walk(const message::localisation::Field& field, const std::shared_ptr<const SimpleBall>& ball);
-
         /// @brief Penalty mode state machine, used to decide what phase behaviour to use.
         void penalty_shootout(const message::input::GameState::Data::Phase& phase,
-                              const message::localisation::Field& field,
                               const std::shared_ptr<const SimpleBall>& ball);
 
         /// @brief Normal mode state machine, used to decide what phase behaviour to use.
@@ -153,8 +150,7 @@ namespace module::behaviour::strategy {
         void penalty_shootout_set();
 
         /// @brief Penalty mode, playing phase behaviour/strategy
-        void penalty_shootout_playing(const message::localisation::Field& field,
-                                      const std::shared_ptr<const SimpleBall>& ball);
+        void penalty_shootout_playing(const std::shared_ptr<const SimpleBall>& ball);
 
         /// @brief Penalty mode, timeout phase behaviour/strategy
         void penalty_shootout_timeout();
