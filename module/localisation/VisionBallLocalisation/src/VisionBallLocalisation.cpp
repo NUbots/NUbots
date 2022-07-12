@@ -33,11 +33,8 @@ namespace module::localisation {
         using utility::math::coordinates::reciprocalSphericalToCartesian;
 
         on<Configuration>("VisionBallLocalisation.yaml")
-            .then("VisionBallLocalisation Config", [this](const Configuration& config) {
-                log_level = config["log_level"].as<NUClear::LogLevel>();
-                // Emit on config to ensure other modules relying on VisionBall run (CHECK IF ACTUALLY NEEDED)
-                emit(std::make_unique<VisionBall>());
-            });
+            .then("VisionBallLocalisation Config",
+                  [this](const Configuration& config) { log_level = config["log_level"].as<NUClear::LogLevel>(); });
 
         /* To run whenever a ball has been detected */
         on<Trigger<VisionBalls>, With<Sensors>>().then([this](const VisionBalls& balls, const Sensors& sensors) {
