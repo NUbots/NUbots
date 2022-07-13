@@ -32,13 +32,11 @@
 #include "message/localisation/Ball.hpp"
 #include "message/localisation/Field.hpp"
 #include "message/localisation/SimpleBall.hpp"
-#include "message/localisation/Theta.hpp"
 #include "message/support/FieldDescription.hpp"
 
 namespace module::behaviour::strategy {
 
     using SimpleBall = message::localisation::SimpleBall;
-    using Theta      = message::localisation::Theta;
 
     class SoccerStrategy : public NUClear::Reactor {
     private:
@@ -123,7 +121,7 @@ namespace module::behaviour::strategy {
         void stand_still();
 
         /// @brief Playing behaviour when ball is visible, currently just walks to the ball
-        void play(const std::shared_ptr<const SimpleBall>& ball, const Theta& theta);
+        void play(const std::shared_ptr<const SimpleBall>& ball);
 
         /// @brief Playing behaviour when ball is lost, currently just rotate on spot
         void find(const std::shared_ptr<const SimpleBall>& ball);
@@ -136,14 +134,12 @@ namespace module::behaviour::strategy {
 
         /// @brief Penalty mode state machine, used to decide what phase behaviour to use.
         void penalty_shootout(const message::input::GameState::Data::Phase& phase,
-                              const std::shared_ptr<const SimpleBall>& ball,
-                              const Theta& theta);
+                              const std::shared_ptr<const SimpleBall>& ball);
 
         /// @brief Normal mode state machine, used to decide what phase behaviour to use.
         void normal(const message::input::GameState& game_state,
                     const message::input::GameState::Data::Phase& phase,
-                    const std::shared_ptr<const SimpleBall>& ball,
-                    const Theta& theta);
+                    const std::shared_ptr<const SimpleBall>& ball);
 
         /// @brief Penalty mode, initial phase behaviour/strategy
         void penalty_shootout_initial();
@@ -155,7 +151,7 @@ namespace module::behaviour::strategy {
         void penalty_shootout_set();
 
         /// @brief Penalty mode, playing phase behaviour/strategy
-        void penalty_shootout_playing(const std::shared_ptr<const SimpleBall>& ball, const Theta& theta);
+        void penalty_shootout_playing(const std::shared_ptr<const SimpleBall>& ball);
 
         /// @brief Penalty mode, timeout phase behaviour/strategy
         void penalty_shootout_timeout();
@@ -173,7 +169,7 @@ namespace module::behaviour::strategy {
         void normal_set();
 
         /// @brief Normal mode, playing phase behaviour/strategy
-        void normal_playing(const std::shared_ptr<const SimpleBall>& ball, const Theta& theta);
+        void normal_playing(const std::shared_ptr<const SimpleBall>& ball);
 
         /// @brief Normal mode, finished phase behaviour/strategy
         void normal_finished();

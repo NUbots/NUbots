@@ -32,7 +32,6 @@
 #include "message/localisation/ResetBallHypotheses.hpp"
 #include "message/localisation/ResetRobotHypotheses.hpp"
 #include "message/localisation/SimpleBall.hpp"
-#include "message/localisation/Theta.hpp"
 #include "message/motion/BodySide.hpp"
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/KickCommand.hpp"
@@ -82,7 +81,6 @@ namespace module::behaviour::strategy {
     using SimpleBalls = message::vision::Balls;
 
     using SimpleBall = message::localisation::SimpleBall;
-    using Theta      = message::localisation::Theta;
 
     using VisionGoals = message::vision::Goals;
     using LimbID      = utility::input::LimbID;
@@ -187,13 +185,11 @@ namespace module::behaviour::strategy {
            With<Phase>,
            With<FieldDescription>,
            With<Field>,
-           With<Theta>,
            Optional<With<SimpleBall>>,
            Single>()
             .then([this](const Sensors& sensors,
                          const GameState& game_state,
                          const Phase& phase,
-                         const Theta& theta,
                          const std::shared_ptr<const SimpleBall>& ball) {
                 try {
                     // If we're picked up, stand still
@@ -205,20 +201,20 @@ namespace module::behaviour::strategy {
                     else {
                         // Overide SoccerStrategy and force normal mode in playing phase
                         if (cfg.force_playing) {
-                            normal_playing(ball, theta);
+                            normal_playing(ball);
                         }
                         // Overide SoccerStrategy and force penalty mode in playing phase
                         else if (cfg.force_penalty_shootout) {
                             team_kicking_off = GameEvents::Context::TEAM;
-                            penalty_shootout_playing(ball, theta);
+                            penalty_shootout_playing(ball);
                         }
                         else {
                             // Switch gamemode statemachine based on GameController mode
                             auto mode = game_state.data.mode.value;
                             switch (mode) {
-                                case GameMode::PENALTY_SHOOTOUT: penalty_shootout(phase, ball, theta); break;
-                                case GameMode::NORMAL: normal(game_state, phase, ball, theta); break;
-                                case GameMode::OVERTIME: normal(game_state, phase, ball, theta); break;
+                                case GameMode::PENALTY_SHOOTOUT: penalty_shootout(phase, ball); break;
+                                case GameMode::NORMAL: normal(game_state, phase, ball); break;
+                                case GameMode::OVERTIME: normal(game_state, phase, ball); break;
                                 default: log<NUClear::WARN>("Game mode unknown.");
                             }
                         }
@@ -238,15 +234,13 @@ namespace module::behaviour::strategy {
     }
 
     // ********************PENALTY GAMEMODE STATE MACHINE********************************
-    void SoccerStrategy::penalty_shootout(const Phase& phase,
-                                          const std::shared_ptr<const SimpleBall>& ball,
-                                          const Theta& theta) {
+    void SoccerStrategy::penalty_shootout(const Phase& phase, const std::shared_ptr<const SimpleBall>& ball) {
         switch (phase.value) {
-            case Phase::INITIAL: penalty_shootout_initial(); break;  // Happens at beginning.
-            case Phase::READY: penalty_shootout_ready(); break;      // Should not happen.
-            case Phase::SET: penalty_shootout_set(); break;          // Happens on beginning of each kick try.
-            case Phase::PLAYING: penalty_shootout_playing(ball, theta); break;  // Either kicking or goalie.
-            case Phase::TIMEOUT: penalty_shootout_timeout(); break;    // A pause in playing. Not in simulation.
+            case Phase::INITIAL: penalty_shootout_initial(); break;      // Happens at beginning.
+            case Phase::READY: penalty_shootout_ready(); break;          // Should not happen.
+            case Phase::SET: penalty_shootout_set(); break;              // Happens on beginning of each kick try.
+            case Phase::PLAYING: penalty_shootout_playing(ball); break;  // Either kicking or goalie.
+            case Phase::TIMEOUT: penalty_shootout_timeout(); break;      // A pause in playing. Not in simulation.
             case Phase::FINISHED: penalty_shootout_finished(); break;  // Happens when penalty shootout completely ends.
             default: log<NUClear::WARN>("Unknown penalty shootout gamemode phase.");
         }
@@ -255,8 +249,7 @@ namespace module::behaviour::strategy {
     // ********************NORMAL GAMEMODE STATE MACHINE********************************
     void SoccerStrategy::normal(const message::input::GameState& game_state,
                                 const Phase& phase,
-                                const std::shared_ptr<const SimpleBall>& ball,
-                                const Theta& theta) {
+                                const std::shared_ptr<const SimpleBall>& ball) {
         switch (phase.value) {
             // Beginning of game and half time
             case Phase::INITIAL: normal_initial(); break;
@@ -265,7 +258,7 @@ namespace module::behaviour::strategy {
             // Happens after ready. Robot should stop moving.
             case Phase::SET: normal_set(); break;
             // After set, main game where we should walk to ball and kick.
-            case Phase::PLAYING: normal_playing(ball, theta); break;
+            case Phase::PLAYING: normal_playing(ball); break;
             case Phase::FINISHED: normal_finished(); break;  // Game has finished.
             case Phase::TIMEOUT: normal_timeout(); break;    // A pause in playing. Not in simulation.
             default: log<NUClear::WARN>("Unknown normal gamemode phase.");
@@ -290,7 +283,7 @@ namespace module::behaviour::strategy {
         current_state = Behaviour::State::SET;
     }
 
-    void SoccerStrategy::penalty_shootout_playing(const std::shared_ptr<const SimpleBall>& ball, const Theta& theta) {
+    void SoccerStrategy::penalty_shootout_playing(const std::shared_ptr<const SimpleBall>& ball) {
         // Execute penalty kick script once if we haven't yet, and if we are not goalie (team_kicking_off will not be us
         // if we are the goalie)
         log<NUClear::DEBUG>("Entering penalty shootout playing...");
@@ -299,7 +292,7 @@ namespace module::behaviour::strategy {
             // May have some redundancy...
 
             // Go kick the ball directly into the goals... i.e. regular playing
-            play(ball, theta);
+            play(ball);
             current_state = Behaviour::State::SHOOTOUT;
         }
         else {
@@ -365,7 +358,7 @@ namespace module::behaviour::strategy {
         current_state    = Behaviour::State::SET;
     }
 
-    void SoccerStrategy::normal_playing(const std::shared_ptr<const SimpleBall>& ball, const Theta& theta) {
+    void SoccerStrategy::normal_playing(const std::shared_ptr<const SimpleBall>& ball) {
         if (penalised() && !cfg.force_playing) {
             // We are penalised, stand still
             stand_still();
@@ -382,7 +375,7 @@ namespace module::behaviour::strategy {
                 // We are not goalie or the ball is close enough, request walk planner to walk to the ball if
                 // ball has been seen recently
 
-                play(ball, theta);
+                play(ball);
                 current_state = Behaviour::State::WALK_TO_BALL;
             }
             else {
@@ -449,7 +442,7 @@ namespace module::behaviour::strategy {
         }
     }
 
-    void SoccerStrategy::play(const std::shared_ptr<const SimpleBall>& ball, const Theta& theta) {
+    void SoccerStrategy::play(const std::shared_ptr<const SimpleBall>& ball) {
         if (ball && ball->distance < cfg.kicking_distance_threshold
             && ball->absolute_yaw_angle < cfg.kicking_angle_threshold) {
             // We are in range, lets kick

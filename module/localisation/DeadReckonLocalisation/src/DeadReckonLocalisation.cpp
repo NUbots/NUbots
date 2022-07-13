@@ -184,12 +184,13 @@ namespace module::localisation {
             }
             theta_msg->accurate = accurate;
             emit(theta_msg);
-
-            emit(graph("accurate: ", accurate));
-            emit(graph("time_since_startup: ", time_since_startup));
-            emit(graph("deltaT: ", dt));
-            emit(graph("Theta: ", theta));
-            emit(graph("filtered_theta: ", filtered_theta));
+            if (log_level <= NUClear::DEBUG) {
+                emit(graph("accurate: ", accurate));
+                emit(graph("time_since_startup: ", time_since_startup));
+                emit(graph("deltaT: ", dt));
+                emit(graph("Theta: ", theta));
+                emit(graph("filtered_theta: ", filtered_theta));
+            }
         });
     }
 
