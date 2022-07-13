@@ -29,20 +29,24 @@ function(ToolchainLibraryFinder)
       DOC "The ${PACKAGE_NAME} (${PACKAGE_LIBRARY}) library"
     )
 
-    # Add the link type to cache
-    if(NOT ${PACKAGE_NAME}_LINK_TYPE)
-      if(NOT PACKAGE_LINK_TYPE)
-        # Default to use UNKNOWN link type
-        set(${PACKAGE_NAME}_LINK_TYPE UNKNOWN CACHE STRING "Choose method to link the library" FORCE)
-      else()
-        set(${PACKAGE_NAME}_LINK_TYPE ${PACKAGE_LINK_TYPE} CACHE STRING "Choose method to link the library" FORCE)
-      endif()
-      set_property(CACHE ${PACKAGE_NAME}_LINK_TYPE PROPERTY STRINGS "SHARED" "STATIC" "MODULE" "UNKNOWN")
-      mark_as_advanced(${PACKAGE_NAME}_LINK_TYPE)
+    # Make the link type to be configurable
+    set(${PACKAGE_NAME}_LINK_TYPE DEFAULT CACHE STRING "Choose method to link the library")
+    set_property(CACHE ${PACKAGE_NAME}_LINK_TYPE PROPERTY STRINGS "SHARED" "STATIC" "MODULE" "UNKNOWN" "DEFAULT")
+    mark_as_advanced(${PACKAGE_NAME}_LINK_TYPE)
+
+    # Work out the linkage that we will use
+    set(LINK_TYPE ${DEFAULT_LINK_TYPE})
+    if(NOT ${PACKAGE_NAME}_LINK_TYPE STREQUAL "DEFAULT")
+        # The user has specified in the cmake cache
+        set(LINK_TYPE ${${PACKAGE_NAME}_LINK_TYPE})
+    elseif(PACKAGE_LINK_TYPE)
+        # Link type was specified in function call
+        set(LINK_TYPE ${PACKAGE_LINK_TYPE})
     endif()
+    message(STATUS "Link Type ${LINK_TYPE}")
 
     # Setup an imported target for this library
-    add_library(${PACKAGE_NAME}::${PACKAGE_NAME} ${${PACKAGE_NAME}_LINK_TYPE} IMPORTED)
+    add_library(${PACKAGE_NAME}::${PACKAGE_NAME} ${LINK_TYPE} IMPORTED)
     set_target_properties(${PACKAGE_NAME}::${PACKAGE_NAME} PROPERTIES IMPORTED_LOCATION ${${PACKAGE_NAME}_LIBRARY})
 
     # Setup and export our variables
@@ -54,17 +58,22 @@ function(ToolchainLibraryFinder)
     mark_as_advanced(${PACKAGE_NAME}_LIBRARY ${PACKAGE_NAME}_LIBRARIES)
 
   elseif(PACKAGE_LIBRARIES)
-    # Add the link type to cache
-    if(NOT ${PACKAGE_NAME}_LINK_TYPE)
-      if(NOT PACKAGE_LINK_TYPE)
-        # Default to use UNKNOWN link type
-        set(${PACKAGE_NAME}_LINK_TYPE UNKNOWN CACHE STRING "Choose method to link the library" FORCE)
-      else()
-        set(${PACKAGE_NAME}_LINK_TYPE ${PACKAGE_LINK_TYPE} CACHE STRING "Choose method to link the library" FORCE)
-      endif()
-      set_property(CACHE ${PACKAGE_NAME}_LINK_TYPE PROPERTY STRINGS "SHARED" "STATIC" "MODULE" "UNKNOWN")
-      mark_as_advanced(${PACKAGE_NAME}_LINK_TYPE)
+    # Make the link type to be configurable
+    set(${PACKAGE_NAME}_LINK_TYPE DEFAULT CACHE STRING "Choose method to link the library")
+    set_property(CACHE ${PACKAGE_NAME}_LINK_TYPE PROPERTY STRINGS "SHARED" "STATIC" "MODULE" "UNKNOWN" "DEFAULT")
+    mark_as_advanced(${PACKAGE_NAME}_LINK_TYPE)
+
+    # Work out the linkage that we will use
+    set(LINK_TYPE ${DEFAULT_LINK_TYPE})
+    if(NOT ${PACKAGE_NAME}_LINK_TYPE STREQUAL "DEFAULT")
+        # The user has specified in the cmake cache
+        set(LINK_TYPE ${${PACKAGE_NAME}_LINK_TYPE})
+    elseif(PACKAGE_LINK_TYPE)
+        # Link type was specified in function call
+        set(LINK_TYPE ${PACKAGE_LINK_TYPE})
     endif()
+    message(STATUS "Link Type ${LINK_TYPE}")
+
     foreach(lib ${PACKAGE_LIBRARIES})
       find_library(
         "${PACKAGE_NAME}_${lib}_LIBRARY"
@@ -74,7 +83,7 @@ function(ToolchainLibraryFinder)
       )
 
       # Setup an imported target for this library
-      add_library(${PACKAGE_NAME}::${lib} ${${PACKAGE_NAME}_LINK_TYPE} IMPORTED)
+      add_library(${PACKAGE_NAME}::${lib} ${LINK_TYPE} IMPORTED)
       set_target_properties(${PACKAGE_NAME}::${lib} PROPERTIES IMPORTED_LOCATION ${${PACKAGE_NAME}_${lib}_LIBRARY})
 
       # Setup and export our variables

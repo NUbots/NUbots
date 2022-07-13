@@ -18,6 +18,10 @@ endif()
 # We use additional modules that cmake needs to know about
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules/" "${PROJECT_SOURCE_DIR}/nuclear/cmake/Modules/")
 
+# Set the default linkage type
+set(DEFAULT_LINK_TYPE UNKNOWN CACHE STRING "Choose the default method to link external libraries")
+set_property(CACHE DEFAULT_LINK_TYPE PROPERTY STRINGS "SHARED" "STATIC" "MODULE" "UNKNOWN")
+
 # If this option is set we are building using continous integration
 option(CI_BUILD "Enable build options for building in the CI server" OFF)
 
