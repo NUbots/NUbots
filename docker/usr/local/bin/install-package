@@ -12,7 +12,7 @@ else
     #
     echo 'Updating public keys.'
     pacman-key --init
-    pacman -Sy --noconfirm --config /etc/pacman.latest.conf archlinux-keyring
+    pacman -Sy --noconfirm --config /etc/pacman.conf archlinux-keyring
 
     echo 'Resetting the system to the old package database.'
     # The package database is now out of date *and* at a later version than what we use.
