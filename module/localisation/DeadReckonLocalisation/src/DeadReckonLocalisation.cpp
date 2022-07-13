@@ -152,8 +152,6 @@ namespace module::localisation {
             // Get the delta time
             float dt =
                 std::chrono::duration_cast<std::chrono::duration<float>>(NUClear::clock::now() - last_update).count();
-            // Log dt
-            log<NUClear::DEBUG>("dt: ", dt);
             float gyro_dtheta = dt * sensors.gyroscope.z();
 
             theta += gyro_dtheta;
