@@ -67,6 +67,7 @@ namespace module::behaviour::skills {
                 cfg.search_timeout = duration_cast<NUClear::clock::duration>(
                     std::chrono::duration<double>(config["search_timeout"].as<double>()));
                 cfg.fixation_time = config["fixation_time"].as<float>();
+                cfg.pitch_offset  = config["pitch_offset"].as<float>();
                 // Create vector of search positions
                 for (const auto& position : config["positions"].config) {
                     cfg.search_positions.push_back(position.as<Expression>());
@@ -101,7 +102,7 @@ namespace module::behaviour::skills {
                         Eigen::Vector2d angles = screenAngularFromObjectDirection(rBCc);
                         std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
                         command->yaw                         = angles[0];
-                        command->pitch                       = angles[1];
+                        command->pitch                       = angles[1] + cfg.pitch_offset;
                         command->robot_space                 = true;
                         command->smooth                      = true;
                         emit(std::move(command));
