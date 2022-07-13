@@ -5,7 +5,7 @@ name: Normal Target Pushes
 on:
   # Triggers the workflow on push events for the main branch
   push:
-    branches: [main]
+    branches: [robocup2022]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -19,7 +19,7 @@ jobs:
     # Run once for each of the platforms
     strategy:
       matrix:
-        platform: ["generic", "nuc8i7beh", "nuc7i7bnh"]
+        platform: ["generic", "nuc7i7bnh"]
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -34,15 +34,15 @@ jobs:
       - name: Login to DockerHub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          username: crafty15
+          password: ${{ secrets.LIAMS_DOCKER_PASSWORD }}
 
       # Build the docker image
       - name: 🐳 Build the docker image 🐳
         uses: docker/build-push-action@v3.0.0
         with:
           pull: true
-          tags: "nubots/nubots:${{ matrix.platform }}"
+          tags: "crafty15/nubots:${{ matrix.platform }}"
           file: docker/Dockerfile
           context: docker
           build-args: |
@@ -50,5 +50,6 @@ jobs:
             BUILDKIT_INLINE_CACHE=1
           push: true
           cache-from: |
-            type=registry,ref=nubots/nubots:${{ matrix.platform }}
+            type=registry,ref=crafty15/nubots:${{ matrix.platform }}
+            type=registry,ref=crafty15/nubots:generic
             type=inline

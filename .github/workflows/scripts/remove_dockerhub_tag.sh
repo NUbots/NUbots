@@ -19,8 +19,8 @@ elif [[ ! -v TAG ]]; then
     exit 1
 fi
 
-# These are always the same
-ORGANIZATION="nubots"
+# These are always the same (except when they're not - L.Craft, Robocup 2022 image stuff)
+ORGANIZATION="crafty15"
 IMAGE="nubots"
 
 login_json() {

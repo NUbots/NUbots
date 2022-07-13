@@ -13,9 +13,12 @@
 FROM archlinux:base-20210829.0.32635
 
 # ↓↓↓ UPDATE MIRRORS HERE ↓↓↓
-RUN echo -e "Server=http://host.docker.internal:7878/\$repo/os/\$arch\nServer=https://archive.archlinux.org/repos/2021/08/29/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
+RUN echo -e "Server=https://archive.archlinux.org/repos/2021/08/29/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
 # If you ever update the mirror date, search the repository for UPDATE MIRRORS HERE to find all the places where the URL
 # needs to be altered.
+
+# Update the pacman file so it doesn't do signature checks
+COPY etc/pacman/pacman.conf /etc/pacman.conf
 
 # Arch recommends running this as the first command of the docker image
 # Use "yyuu" to allow for downgrades
@@ -25,7 +28,6 @@ RUN pacman -Syyuu --noconfirm --needed --overwrite \*
 
 # Add a script that installs packages
 COPY usr/local/bin/install-package /usr/local/bin/install-package
-COPY etc/pacman/pacman.latest.conf /etc/pacman.latest.conf
 
 # Install base packages needed for building general toolchain
 # If you have a tool that's needed for a specific module install it before that module
