@@ -149,7 +149,13 @@ namespace module::behaviour::planning {
         // If ball exists...
         if (ball) {
             // Obtain the unit vector to ball in torso space and scale by cfg.forward_speed
-            Eigen::Vector3f walk_command = cfg.forward_speed * (ball->rBTt.normalized());
+
+            auto T_rBTt = ball->rBTt;
+
+            // TODO(BehaviourTeam): Magic Offset Value :( Must match soccer strategy
+            T_rBTt.y() += 0.05;
+
+            Eigen::Vector3f walk_command = cfg.forward_speed * (T_rBTt.normalized());
 
             // Overide the z component of walk_command with angular velocity, which is just the angular displacement to
             // ball, saturated with value cfg.max_turn_speed float
