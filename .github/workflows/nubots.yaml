@@ -97,7 +97,7 @@ jobs:
         uses: docker/build-push-action@v3.0.0
         with:
           pull: true
-          tags: pull-request-${{ github.event.number }}
+          tags: "crafty15/nubots:pull-request-${{ github.event.number }}"
           file: docker/Dockerfile
           context: docker
           build-args: |
