@@ -97,7 +97,7 @@ jobs:
         uses: docker/build-push-action@v3.0.0
         with:
           pull: true
-          tags: "nubots/nubots:pull-request-${{ github.event.number }}"
+          tags: "crafty15/nubots:pull-request-${{ github.event.number }}"
           file: docker/Dockerfile
           context: docker
           build-args: |
@@ -105,13 +105,13 @@ jobs:
             BUILDKIT_INLINE_CACHE=1
           push: true
           cache-from: |
-            type=registry,ref=nubots/nubots:pull-request-${{ github.event.number }}
-            type=registry,ref=nubots/nubots:generic
+            type=registry,ref=crafty15/nubots:pull-request-${{ github.event.number }}
+            type=registry,ref=crafty15/nubots:generic
             type=inline
 
       - id: image_output
         name: Output the created image
-        run: echo "::set-output name=image::nubots/nubots:pull-request-${{ github.event.number }}"
+        run: echo "::set-output name=image::crafty15/nubots:pull-request-${{ github.event.number }}"
 
   # Build the codebase
   build_nubots:
