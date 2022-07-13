@@ -5,7 +5,7 @@ name: Normal Target Pushes
 on:
   # Triggers the workflow on push events for the main branch
   push:
-    branches: [main]
+    branches: [robocup2022]
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
@@ -51,4 +51,5 @@ jobs:
           push: true
           cache-from: |
             type=registry,ref=crafty15/nubots:${{ matrix.platform }}
+            type=registry,ref=crafty15/nubots:generic
             type=inline
