@@ -5,7 +5,7 @@ name: NUbots CI
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [main]
+    branches: [robocup2022, robocup-docker-image]
   # Triggers on PRs to any branch
   pull_request:
 
