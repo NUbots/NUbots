@@ -26,7 +26,6 @@ nuclear_role(
   output::ImageCompressor
   # Localisation
   localisation::VisionBallLocalisation
-  localisation::DeadReckonLocalisation
   localisation::RobotParticleLocalisation
   # Behaviour
   behaviour::Controller
