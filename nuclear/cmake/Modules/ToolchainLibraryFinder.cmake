@@ -20,30 +20,43 @@ function(ToolchainLibraryFinder)
   # Clear our required_vars variable
   unset(required_vars)
 
+  if(PACKAGE_LIBRARY OR PACKAGE_LIBRARIES)
+    # Make the link type to be configurable
+    set(${PACKAGE_NAME}_LINK_TYPE UNKNOWN CACHE STRING "Choose method to link the library")
+    set_property(CACHE ${PACKAGE_NAME}_LINK_TYPE PROPERTY STRINGS "SHARED" "STATIC" "MODULE" "UNKNOWN")
+    mark_as_advanced(${PACKAGE_NAME}_LINK_TYPE)
+
+    # Work out the linkage that we will use
+    # Default or the user has specified in the cmake cache
+    set(LINK_TYPE ${${PACKAGE_NAME}_LINK_TYPE})
+    if(PACKAGE_LINK_TYPE)
+        # Link type was specified in function call
+        set(LINK_TYPE ${PACKAGE_LINK_TYPE})
+    endif()
+    message(STATUS "${PACKAGE_NAME} Link Type ${LINK_TYPE}")
+
+    # Search only for specified libraries
+    if(LINK_TYPE STREQUAL "STATIC")
+        set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_STATIC_LIBRARY_SUFFIX})
+    elseif(LINK_TYPE STREQUAL "SHARED")
+        set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_SHARED_LIBRARY_SUFFIX})
+    endif()
+    message(STATUS  "libsuffix ${CMAKE_FIND_LIBRARY_SUFFIXES}")
+
+    message(STATUS "${${PACKAGE_NAME}_LIBRARY}")
+  endif()
+
   # Find our library from the named library files
   if(PACKAGE_LIBRARY)
+      #TODO remove NO_CACHE
     find_library(
       "${PACKAGE_NAME}_LIBRARY"
       NAMES ${PACKAGE_LIBRARY}
       PATH_SUFFIXES ${PACKAGE_PATH_SUFFIX}
       DOC "The ${PACKAGE_NAME} (${PACKAGE_LIBRARY}) library"
+      NO_CACHE
     )
-
-    # Make the link type to be configurable
-    set(${PACKAGE_NAME}_LINK_TYPE DEFAULT CACHE STRING "Choose method to link the library")
-    set_property(CACHE ${PACKAGE_NAME}_LINK_TYPE PROPERTY STRINGS "SHARED" "STATIC" "MODULE" "UNKNOWN" "DEFAULT")
-    mark_as_advanced(${PACKAGE_NAME}_LINK_TYPE)
-
-    # Work out the linkage that we will use
-    set(LINK_TYPE ${DEFAULT_LINK_TYPE})
-    if(NOT ${PACKAGE_NAME}_LINK_TYPE STREQUAL "DEFAULT")
-        # The user has specified in the cmake cache
-        set(LINK_TYPE ${${PACKAGE_NAME}_LINK_TYPE})
-    elseif(PACKAGE_LINK_TYPE)
-        # Link type was specified in function call
-        set(LINK_TYPE ${PACKAGE_LINK_TYPE})
-    endif()
-    message(STATUS "Link Type ${LINK_TYPE}")
+    message(STATUS ${${PACKAGE_NAME}_LIBRARY})
 
     # Setup an imported target for this library
     add_library(${PACKAGE_NAME}::${PACKAGE_NAME} ${LINK_TYPE} IMPORTED)
@@ -58,28 +71,13 @@ function(ToolchainLibraryFinder)
     mark_as_advanced(${PACKAGE_NAME}_LIBRARY ${PACKAGE_NAME}_LIBRARIES)
 
   elseif(PACKAGE_LIBRARIES)
-    # Make the link type to be configurable
-    set(${PACKAGE_NAME}_LINK_TYPE DEFAULT CACHE STRING "Choose method to link the library")
-    set_property(CACHE ${PACKAGE_NAME}_LINK_TYPE PROPERTY STRINGS "SHARED" "STATIC" "MODULE" "UNKNOWN" "DEFAULT")
-    mark_as_advanced(${PACKAGE_NAME}_LINK_TYPE)
-
-    # Work out the linkage that we will use
-    set(LINK_TYPE ${DEFAULT_LINK_TYPE})
-    if(NOT ${PACKAGE_NAME}_LINK_TYPE STREQUAL "DEFAULT")
-        # The user has specified in the cmake cache
-        set(LINK_TYPE ${${PACKAGE_NAME}_LINK_TYPE})
-    elseif(PACKAGE_LINK_TYPE)
-        # Link type was specified in function call
-        set(LINK_TYPE ${PACKAGE_LINK_TYPE})
-    endif()
-    message(STATUS "Link Type ${LINK_TYPE}")
-
     foreach(lib ${PACKAGE_LIBRARIES})
       find_library(
         "${PACKAGE_NAME}_${lib}_LIBRARY"
         NAMES ${lib}
         PATH_SUFFIXES ${PACKAGE_PATH_SUFFIX}
         DOC "The ${PACKAGE_NAME} (${lib}) library"
+        NO_CACHE
       )
 
       # Setup an imported target for this library
