@@ -106,7 +106,6 @@ jobs:
           push: true
           cache-from: |
             type=registry,ref=crafty15/nubots:pull-request-${{ github.event.number }}
-            type=registry,ref=crafty15/nubots:generic
             type=inline
 
       - id: image_output
