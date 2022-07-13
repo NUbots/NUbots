@@ -119,10 +119,10 @@ def build(repository, platform):
         exit(err)
 
 
-def pull(repository, platform):
+def pull(repository, image, platform):
     # Define our tag strings
-    remote_tag = "{0}/{0}:{1}".format(repository, platform)
-    local_tag = "{0}:{1}".format(repository, platform)
+    remote_tag = "{0}/{1}:{2}".format(repository, image, platform)
+    local_tag = "{0}:{1}".format(image, platform)
     selected_tag = "{}:selected".format(repository)
 
     print("Pulling remote image", remote_tag)
