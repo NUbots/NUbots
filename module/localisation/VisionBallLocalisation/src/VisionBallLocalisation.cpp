@@ -7,6 +7,7 @@
 
 #include "message/input/Sensors.hpp"
 #include "message/localisation/SimpleBall.hpp"
+#include "message/support/nusight/DataPoint.hpp"
 #include "message/vision/Ball.hpp"
 
 #include "utility/input/ServoID.hpp"
@@ -20,7 +21,9 @@ namespace module::localisation {
     using SimpleBall  = message::localisation::SimpleBall;
     using VisionBalls = message::vision::Balls;
     using VisionBall  = message::vision::Ball;
+
     using message::input::Sensors;
+    using message::support::nusight::DataPoint;
 
     using utility::math::coordinates::reciprocalSphericalToCartesian;
     using utility::nusight::graph;
@@ -47,18 +50,29 @@ namespace module::localisation {
                 Eigen::Vector3f srBCc = balls.balls[0].measurements[0].srBCc.cast<float>();
                 Eigen::Vector3f rBCc  = reciprocalSphericalToCartesian(srBCc);
                 Eigen::Vector3f rBTt  = Htc * rBCc;
+                float lowest_distance = get_distance(rBTt - filtered_rBTt);
 
                 // Loop through all our ball measurements and find the closest measurement to our current estimate
                 for (const auto& ball : balls.balls) {
                     rBCc = reciprocalSphericalToCartesian(ball.measurements[0].srBCc.cast<float>());
                     Eigen::Vector3f temp_rBTt = Htc * rBCc;
-                    if (get_distance(temp_rBTt) < get_distance(rBTt)) {
-                        rBTt  = temp_rBTt;
-                        srBCc = ball.measurements[0].srBCc.cast<float>();
+                    if (get_distance(temp_rBTt - filtered_rBTt) < lowest_distance) {
+                        lowest_distance = get_distance(temp_rBTt - filtered_rBTt);
+                        rBTt            = temp_rBTt;
+                        srBCc           = ball.measurements[0].srBCc.cast<float>();
                     }
                 }
 
-                // TODO: Apply filter to rBTt
+                // TODO: Apply exponential filter to rBTt
+                float smoothing_factor = 0.1;
+                filtered_rBTt          = smoothing_factor * rBTt + (1 - smoothing_factor) * filtered_rBTt;
+
+                if (log_level <= NUClear::DEBUG) {
+                    emit(graph("rBTt: ", rBTt.x(), rBTt.y(), rBTt.z()));
+                    emit(graph("filtered_rBTt: ", filtered_rBTt.x(), filtered_rBTt.y(), filtered_rBTt.z()));
+                    log<NUClear::DEBUG>("rBTt: ", rBTt.transpose());
+                    log<NUClear::DEBUG>("filtered_rBTt: ", filtered_rBTt.transpose());
+                }
 
                 // Generate message and emit
                 auto ball                 = std::make_unique<SimpleBall>();

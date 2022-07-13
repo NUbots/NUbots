@@ -365,13 +365,6 @@ namespace module::vision {
                         const Eigen::Vector3f& rGCc1 = pair.second.first->post.bottom;
                         float distance1              = pair.second.first->post.distance;
 
-
-                        log<NUClear::WARN>("rGCc0: ", (distance0 * rGCc0).transpose());
-
-                        log<NUClear::WARN>("rGCc1: ", (distance1 * rGCc1).transpose());
-
-                        // Log the pair
-
                         // Construct a pair of goals message and emit it
                         auto goal_pair = std::make_unique<GoalPair>();
 
