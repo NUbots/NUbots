@@ -4,13 +4,13 @@ log_level: WARN
 walk_path_planner_priority: 3
 
 # General playing tuning values for approaching ball
-forward_speed: 0.1
-side_speed: 0.05
-max_turn_speed: 0.15
-min_turn_speed: -0.15
+forward_speed: 0.15
+side_speed: 0.15
+max_turn_speed: 0.3
+min_turn_speed: -0.3
 
 # Rotate on the spot tuning values
-rotate_speed: 0.2
+rotate_speed: 0.4
 rotate_speed_x: -0.04
 rotate_speed_y: 0
 

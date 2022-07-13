@@ -52,6 +52,7 @@ namespace module::behaviour::strategy {
             Eigen::Vector2d start_position_offensive{Eigen::Vector2d::Zero()};
             Eigen::Vector2d start_position_defensive{Eigen::Vector2d::Zero()};
             bool is_goalie                         = false;
+            float goalie_max_ball_distance         = 0.0f;
             float goalie_command_timeout           = 0.0f;
             float goalie_rotation_speed_factor     = 0.0f;
             float goalie_max_rotation_speed        = 0.0f;

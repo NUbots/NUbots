@@ -116,7 +116,8 @@ namespace module::behaviour::strategy {
             cfg.start_position_offensive = config["start_position_offensive"].as<Expression>();
             cfg.start_position_defensive = config["start_position_defensive"].as<Expression>();
 
-            cfg.is_goalie = config["is_goalie"].as<bool>();
+            cfg.is_goalie                = config["is_goalie"].as<bool>();
+            cfg.goalie_max_ball_distance = config["goalie_max_ball_distance"].as<float>();
 
             // Use configuration here from file SoccerStrategy.yaml
             cfg.goalie_command_timeout           = config["goalie_command_timeout"].as<float>();
@@ -371,14 +372,24 @@ namespace module::behaviour::strategy {
             current_state = Behaviour::State::PENALISED;
         }
         else {
-            if (ball && NUClear::clock::now() - ball->time_of_measurement < cfg.ball_last_seen_max_time) {
-                // Ball has been seen recently, request walk planner to walk to the ball
+            if (ball && cfg.is_goalie && ball->distance > cfg.goalie_max_ball_distance) {
+                // We are goalie and the ball is too far away, stand still
+                stand_still();
+                current_state = Behaviour::State::SEARCH_FOR_BALL;
+                // current_state = Behaviour::State::GOALIE_WALK;
+            }
+            else if (ball && NUClear::clock::now() - ball->time_of_measurement < cfg.ball_last_seen_max_time) {
+                // We are not goalie or the ball is close enough, request walk planner to walk to the ball if
+                // ball has been seen recently
+
                 play(ball, theta);
                 current_state = Behaviour::State::WALK_TO_BALL;
             }
             else {
                 // Ball has not been seen recently, request walk planner to rotate on the spot
-                find(ball);
+                if (!cfg.is_goalie) {
+                    find(ball);
+                }
                 current_state = Behaviour::State::SEARCH_FOR_BALL;
             }
         }
@@ -448,7 +459,7 @@ namespace module::behaviour::strategy {
                 emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
             }
             else {
-                if (theta.accurate) {
+                if (!theta.accurate) {
                     log<NUClear::INFO>("Stand still");
                     stand_still();
                 }
