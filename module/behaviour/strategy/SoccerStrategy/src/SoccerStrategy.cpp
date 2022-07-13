@@ -450,24 +450,10 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::play(const std::shared_ptr<const SimpleBall>& ball, const Theta& theta) {
-
-        // TODO(BehaviourTeam): Magic Offset Value :( Must match path planner
         if (ball && ball->distance < cfg.kicking_distance_threshold
             && ball->absolute_yaw_angle < cfg.kicking_angle_threshold) {
-            if (theta.theta < M_PI_2 && theta.theta > -M_PI_2 && ball->rBTt.y() + 0.05 < 0) {
-                log<NUClear::INFO>("Kicking");
-                emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
-            }
-            else {
-                if (!theta.accurate) {
-                    log<NUClear::INFO>("Stand still");
-                    stand_still();
-                }
-                else {
-                    // We are not accurate anyway so yeet
-                    emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
-                }
-            }
+            // We are in range, lets kick
+            emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
         }
         else {
             // Request walk planner to walk to the ball
