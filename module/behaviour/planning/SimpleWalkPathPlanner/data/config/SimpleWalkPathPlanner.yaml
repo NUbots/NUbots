@@ -16,5 +16,5 @@ rotate_speed_y: 0
 
 # Walk to ready position tuning values
 walk_to_ready_speed_x: 0.1
-walk_to_ready_speed_y: 0.05
-walk_to_ready_rotation: 0.4
+walk_to_ready_speed_y: 0
+walk_to_ready_rotation: 0

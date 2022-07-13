@@ -5,12 +5,12 @@ min_yaw: &min_yaw -0.7
 max_yaw: &max_yaw 0.7
 
 # TODO(BehaviourTeam Thailand) Tuning required on these values
-min_pitch: &min_pitch -0.2
+min_pitch: &min_pitch -0.4
 
 positions: [[*min_yaw, *min_pitch], [0, *min_pitch], [*max_yaw, *min_pitch], [0, *min_pitch]]
 
-#Minimum time before search starts
-search_timeout: 3
+#Minimum time before search starts (seconds)
+search_timeout: 4
 
-#Time between switching search positions
-fixation_time: 1
+#Time between switching search positions (seconds)
+fixation_time: 2.5

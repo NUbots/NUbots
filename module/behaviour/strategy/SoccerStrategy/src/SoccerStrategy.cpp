@@ -285,15 +285,13 @@ namespace module::behaviour::strategy {
     void SoccerStrategy::penalty_shootout_playing(const std::shared_ptr<const SimpleBall>& ball) {
         // Execute penalty kick script once if we haven't yet, and if we are not goalie (team_kicking_off will not be us
         // if we are the goalie)
-        if (team_kicking_off == GameEvents::Context::TEAM && !cfg.is_goalie) {
-            if (NUClear::clock::now() - ball_last_measured < cfg.ball_last_seen_max_time) {
-                // Go kick the ball directly into the goals... i.e. regular playing
-                play(ball);
-            }
-            else {
-                // We are penalised players but not the goalie, so we should just stand still
-                stand_still();
-            }
+        log<NUClear::DEBUG>("Entering penalty shootout playing...");
+        if (team_kicking_off == GameEvents::Context::TEAM) {
+            // TODO(BehaviourTeam Thailand): Change this to recognise whether we are the kicking player or not.
+            // May have some redundancy...
+
+            // Go kick the ball directly into the goals... i.e. regular playing
+            play(ball);
             current_state = Behaviour::State::SHOOTOUT;
         }
         else {
@@ -434,15 +432,11 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::play(const std::shared_ptr<const SimpleBall>& ball) {
+
+        // TODO(BehaviourTeam): Magic Offset Value :( Must match path planner
         if (ball && ball->distance < cfg.kicking_distance_threshold
-            && ball->absolute_yaw_angle < cfg.kicking_angle_threshold) {
-            // Ball is close enough and in the correct direction to kick
-            if (ball->rBTt.y() > 0) {
-                emit(std::make_unique<KickScriptCommand>(LimbID::LEFT_LEG, KickCommandType::NORMAL));
-            }
-            else {
-                emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
-            }
+            && ball->absolute_yaw_angle < cfg.kicking_angle_threshold && ball->rBTt.y() + 0.05 < 0) {
+            emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
         }
         else {
             // Request walk planner to walk to the ball
