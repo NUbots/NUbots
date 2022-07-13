@@ -1,5 +1,5 @@
 #!/bin/bash
-
+# TEST DIFF
 # Script for deleting tags with the DockerHub REST API
 # Method adapted from here
 # https://devopsheaven.com/docker/dockerhub/2018/04/09/delete-docker-image-tag-dockerhub.html
