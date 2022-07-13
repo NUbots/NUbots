@@ -38,7 +38,6 @@ set(CI_BUILD
     CACHE
       BOOL
       "This disables the effects of the CI_BUILD variable. We should remove this set() once warnings have been fixed."
-      FORCE
 )
 
 # Default to do a debug build
