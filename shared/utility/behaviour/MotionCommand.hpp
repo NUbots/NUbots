@@ -71,6 +71,12 @@ namespace utility::behaviour {
         return cmd;
     }
 
+    inline MotionCommand RotateAroundBall() {
+        MotionCommand cmd;
+        cmd.type = MotionCommand::Type::Value::ROTATE_AROUND_BALL;
+        return cmd;
+    }
+
     // TODO(BehaviourTeam): Create accessor methods that throw errors if the data
     // accessed does not correspond to the command type?
 

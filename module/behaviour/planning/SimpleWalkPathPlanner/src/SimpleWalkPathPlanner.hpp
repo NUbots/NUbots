@@ -73,6 +73,14 @@ namespace module::behaviour::planning {
             float walk_to_ready_speed_y = 0;
             /// @brief Walk to ready walk command angular velocity
             float walk_to_ready_rotation = 0;
+            /// @brief rotate_around_ball command angular velocity
+            float rotate_around_ball_speed = 0;
+            /// @brief rotate_around_ball forward velocity
+            float rotate_around_ball_speed_x = 0;
+            /// @brief rotate_around_ball side velocity
+            float rotate_around_ball_speed_y = 0;
+
+
         } cfg;
 
         /// @brief Stores the latest MotionCommand
@@ -90,6 +98,9 @@ namespace module::behaviour::planning {
 
         /// @brief Rotate on the spot
         void rotate_on_spot(bool clockwise);
+
+        /// @brief rotate_around_ball
+        void rotate_around_ball();
 
         /// @brief Configured to emit a walk command that results in robot being in desired position after the ready
         /// phase

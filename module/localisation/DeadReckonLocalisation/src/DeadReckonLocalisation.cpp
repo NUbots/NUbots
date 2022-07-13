@@ -9,6 +9,8 @@
 #include "message/input/Image.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/SimpleBall.hpp"
+#include "message/localisation/Theta.hpp"
+#include "message/motion/GetupCommand.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/support/nusight/DataPoint.hpp"
 #include "message/vision/Ball.hpp"
@@ -23,11 +25,14 @@ namespace module::localisation {
 
     using extension::Configuration;
     using SimpleBall  = message::localisation::SimpleBall;
+    using Theta       = message::localisation::Theta;
     using VisionBalls = message::vision::Balls;
     using VisionBall  = message::vision::Ball;
 
+
     using message::input::Image;
     using message::input::Sensors;
+    using message::motion::ExecuteGetup;
     using message::support::FieldDescription;
     using message::vision::GoalPair;
 
@@ -50,6 +55,9 @@ namespace module::localisation {
                 filtered_theta       = config["initial_theta"].as<float>();
                 cfg.smoothing_factor = config["smoothing_factor"].as<float>();
             });
+
+        // Check to see if we are currently in the process of getting up.
+        on<Trigger<ExecuteGetup>>().then([this] { is_getting_up = true; });
 
         /* Runs on sensors updates */
         // on<Last<10, Trigger<GoalPair>, With<Image>, With<Sensors>, With<FieldDescription>>>().then(
@@ -153,6 +161,7 @@ namespace module::localisation {
             float dt =
                 std::chrono::duration_cast<std::chrono::duration<float>>(NUClear::clock::now() - last_update).count();
             float gyro_dtheta = dt * sensors.gyroscope.z();
+            time_since_startup += dt;
 
             theta += gyro_dtheta;
             if (theta > 2 * M_PI) {
@@ -166,6 +175,18 @@ namespace module::localisation {
             // Store the current timestamp for next time update
             last_update = current_time;
 
+            // Make a theta message
+            auto theta_msg   = std::make_unique<Theta>();
+            theta_msg->theta = filtered_theta;
+            // Update wether we believe our theta to be accurate or not //time_since_startup > 120 ||
+            if (is_getting_up) {
+                accurate = false;
+            }
+            theta_msg->accurate = accurate;
+            emit(theta_msg);
+
+            emit(graph("accurate: ", accurate));
+            emit(graph("time_since_startup: ", time_since_startup));
             emit(graph("deltaT: ", dt));
             emit(graph("Theta: ", theta));
             emit(graph("filtered_theta: ", filtered_theta));

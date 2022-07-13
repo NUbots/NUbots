@@ -14,6 +14,11 @@ rotate_speed: 0.2
 rotate_speed_x: -0.04
 rotate_speed_y: 0
 
+# rotate_around_ball tuning values
+rotate_around_ball_speed: 0.5
+rotate_around_ball_speed_x: 0
+rotate_around_ball_speed_y: -0.4
+
 # Walk to ready position tuning values
 walk_to_ready_speed_x: 0.1
 walk_to_ready_speed_y: 0

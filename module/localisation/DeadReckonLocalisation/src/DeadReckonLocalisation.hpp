@@ -31,6 +31,16 @@ namespace module::localisation {
         /// @brief Time of last sensor measurement update
         NUClear::clock::time_point last_update = NUClear::clock::now();
 
+        /// @brief Time since startup (in seconds)
+        float time_since_startup = 0;
+
+        /// @brief Accurate flag
+        bool accurate = true;
+
+        /// @brief Bool to indicate if the robot is currently getting up
+        bool is_getting_up = false;
+
+
     public:
         /// @brief Called by the powerplant to build and setup the DeadReckonLocalisation reactor.
         explicit DeadReckonLocalisation(std::unique_ptr<NUClear::Environment> environment);
