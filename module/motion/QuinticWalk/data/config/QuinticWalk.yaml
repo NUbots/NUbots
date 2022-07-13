@@ -6,7 +6,7 @@ walk:
   freq: 2.00
   # Length of double support phase in half cycle (how long both legs should be on the ground, as a ratio of how long it takes for a single step)
   # (ratio, [0:1])
-  double_support_ratio: 0.7
+  double_support_ratio: 0.5
   # Give extra swing to first step for better start
   # (in ?, [0:10])
   first_step_swing_factor: 1.0 #1.0
@@ -95,7 +95,7 @@ walk:
 max_step:
   # Maximal step length in X
   # (in m, [0:1])
-  x: 0.1
+  x: 0.2
   # Maximal step length in Y
   # (in m, [0:1])
   y: 0.1
