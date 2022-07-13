@@ -31,7 +31,7 @@ jobs:
       # Run our script which calls the dockerhub API to delete the PR's tag
       - name: Delete DockerHub image tag
         run: |
-          DOCKERHUB_USERNAME=${{ secrets.LIAMS_DOCKER_USERNAME }} \
+          DOCKERHUB_USERNAME=crafty15 \
           DOCKERHUB_PASSWORD=${{ secrets.LIAMS_DOCKER_PASSWORD }} \
           TAG=pull-request-${{ github.event.number }} \
           .github/workflows/scripts/remove_dockerhub_tag.sh
