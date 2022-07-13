@@ -28,6 +28,9 @@ namespace module::localisation {
         /// @brief Filtered rotation clockwise in field space {f} z axis
         float filtered_theta = 0;
 
+        /// @brief Time of last sensor measurement update
+        NUClear::clock::time_point last_update = NUClear::clock::now();
+
     public:
         /// @brief Called by the powerplant to build and setup the DeadReckonLocalisation reactor.
         explicit DeadReckonLocalisation(std::unique_ptr<NUClear::Environment> environment);

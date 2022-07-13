@@ -32,9 +32,9 @@ namespace module::localisation {
         using message::localisation::SimpleBall;
         using utility::math::coordinates::reciprocalSphericalToCartesian;
 
-        on<Configuration>("VisionBallLocalisation.yaml")
-            .then("VisionBallLocalisation Config",
-                  [this](const Configuration& config) { log_level = config["log_level"].as<NUClear::LogLevel>(); });
+        on<Configuration>("VisionBallLocalisation.yaml").then([this](const Configuration& cfg) {
+            log_level = cfg["log_level"].as<NUClear::LogLevel>();
+        });
 
         /* To run whenever a ball has been detected */
         on<Trigger<VisionBalls>, With<Sensors>>().then([this](const VisionBalls& balls, const Sensors& sensors) {
@@ -71,10 +71,10 @@ namespace module::localisation {
                 emit(ball);
 
                 // Logging
-                log<NUClear::DEBUG>("srBCc: ", srBCc.transpose());
-                log<NUClear::DEBUG>("rBTt: ", rBTt.transpose());
-                log<NUClear::DEBUG>("Distance: ", get_distance(rBTt));
-                log<NUClear::DEBUG>("Angle: ", absolute_yaw_angle);
+                // log<NUClear::DEBUG>("srBCc: ", srBCc.transpose());
+                // log<NUClear::DEBUG>("rBTt: ", rBTt.transpose());
+                // log<NUClear::DEBUG>("Distance: ", get_distance(rBTt));
+                // log<NUClear::DEBUG>("Angle: ", absolute_yaw_angle);
             }
         });
     }

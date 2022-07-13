@@ -28,6 +28,7 @@
 
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/Goal.hpp"
+#include "message/vision/GoalPair.hpp"
 #include "message/vision/GreenHorizon.hpp"
 
 #include "utility/math/coordinates.hpp"
@@ -42,6 +43,7 @@ namespace module::vision {
 
     using message::support::FieldDescription;
     using message::vision::Goal;
+    using message::vision::GoalPair;
     using message::vision::Goals;
     using message::vision::GreenHorizon;
 
@@ -359,17 +361,34 @@ namespace module::vision {
                     for (const auto& pair : pairs) {
                         // Divide by distance to get back to unit vectors
                         const Eigen::Vector3f& rGCc0 = pair.first->post.bottom;
+                        float distance0              = pair.first->post.distance;
                         const Eigen::Vector3f& rGCc1 = pair.second.first->post.bottom;
+                        float distance1              = pair.second.first->post.distance;
+
+
+                        log<NUClear::WARN>("rGCc0: ", (distance0 * rGCc0).transpose());
+
+                        log<NUClear::WARN>("rGCc1: ", (distance1 * rGCc1).transpose());
+
+                        // Log the pair
+
+                        // Construct a pair of goals message and emit it
+                        auto goal_pair = std::make_unique<GoalPair>();
 
                         // Determine which post is the left one
                         if (is_left_of(rGCc0, rGCc1)) {
                             pair.first->side        = Goal::Side::LEFT;
                             pair.second.first->side = Goal::Side::RIGHT;
+                            goal_pair->rGlCc        = distance0 * rGCc0;
+                            goal_pair->rGrCc        = distance1 * rGCc1;
                         }
                         else {
                             pair.first->side        = Goal::Side::RIGHT;
                             pair.second.first->side = Goal::Side::LEFT;
+                            goal_pair->rGlCc        = distance1 * rGCc1;
+                            goal_pair->rGrCc        = distance0 * rGCc0;
                         }
+                        emit(goal_pair);
                     }
 
                     log<NUClear::DEBUG>(fmt::format("Found {} goal posts", goals->goals.size()));
