@@ -21,29 +21,28 @@ function(ToolchainLibraryFinder)
   unset(required_vars)
 
   if(PACKAGE_LIBRARY OR PACKAGE_LIBRARIES)
-    # Make the link type to be configurable
-    set(${PACKAGE_NAME}_LINK_TYPE
-        UNKNOWN
-        CACHE STRING "Choose method to link the library"
-    )
+    if(PACKAGE_LINK_TYPE)
+      set(${PACKAGE_NAME}_LINK_TYPE
+          ${PACKAGE_LINK_TYPE}
+          CACHE STRING "Choose method to link the library"
+      )
+    else()
+      set(${PACKAGE_NAME}_LINK_TYPE
+          UNKNOWN
+          CACHE STRING "Choose method to link the library"
+      )
+    endif()
     set_property(CACHE ${PACKAGE_NAME}_LINK_TYPE PROPERTY STRINGS "SHARED" "STATIC" "MODULE" "UNKNOWN")
     mark_as_advanced(${PACKAGE_NAME}_LINK_TYPE)
 
-    # Work out the linkage that we will use Default or the user has specified in the cmake cache
-    set(LINK_TYPE ${${PACKAGE_NAME}_LINK_TYPE})
-    if(PACKAGE_LINK_TYPE)
-      # Link type was specified in function call
-      set(LINK_TYPE ${PACKAGE_LINK_TYPE})
-    endif()
-
     # Search only for specified libraries
-    if(LINK_TYPE STREQUAL "STATIC")
+    if(${PACKAGE_NAME}_LINK_TYPE STREQUAL "STATIC")
       set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_STATIC_LIBRARY_SUFFIX})
       # Uncache the incorrect value
       if(${PACKAGE_NAME}_LIBRARY MATCHES ".*\.so$")
         unset(${PACKAGE_NAME}_LIBRARY CACHE)
       endif()
-    elseif(LINK_TYPE STREQUAL "SHARED")
+    elseif(${PACKAGE_NAME}_LINK_TYPE STREQUAL "SHARED")
       set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_SHARED_LIBRARY_SUFFIX})
       # Uncache the incorrect value
       if(${PACKAGE_NAME}_LIBRARY MATCHES ".*\.a$")
@@ -62,7 +61,7 @@ function(ToolchainLibraryFinder)
     )
 
     # Setup an imported target for this library
-    add_library(${PACKAGE_NAME}::${PACKAGE_NAME} ${LINK_TYPE} IMPORTED)
+    add_library(${PACKAGE_NAME}::${PACKAGE_NAME} ${${PACKAGE_NAME}_LINK_TYPE} IMPORTED)
     set_target_properties(${PACKAGE_NAME}::${PACKAGE_NAME} PROPERTIES IMPORTED_LOCATION ${${PACKAGE_NAME}_LIBRARY})
 
     # Setup and export our variables
@@ -83,7 +82,7 @@ function(ToolchainLibraryFinder)
       )
 
       # Setup an imported target for this library
-      add_library(${PACKAGE_NAME}::${lib} ${LINK_TYPE} IMPORTED)
+      add_library(${PACKAGE_NAME}::${lib} ${${PACKAGE_NAME}_LINK_TYPE} IMPORTED)
       set_target_properties(${PACKAGE_NAME}::${lib} PROPERTIES IMPORTED_LOCATION ${${PACKAGE_NAME}_${lib}_LIBRARY})
 
       # Setup and export our variables
