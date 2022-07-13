@@ -76,11 +76,11 @@ namespace module::localisation {
 
                 // Generate message and emit
                 auto ball                 = std::make_unique<SimpleBall>();
-                ball->rBTt                = rBTt;
+                ball->rBTt                = filtered_rBTt;
                 ball->srBCc               = srBCc;
                 ball->time_of_measurement = NUClear::clock::now();
-                ball->distance            = get_distance(rBTt);
-                float absolute_yaw_angle  = std::abs(std::atan2(rBTt.y(), rBTt.x()));
+                ball->distance            = get_distance(filtered_rBTt);
+                float absolute_yaw_angle  = std::abs(std::atan2(filtered_rBTt.y(), filtered_rBTt.x()));
                 ball->absolute_yaw_angle  = absolute_yaw_angle;
                 emit(ball);
 
