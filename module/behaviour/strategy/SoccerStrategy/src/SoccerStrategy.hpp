@@ -205,7 +205,6 @@ namespace module::behaviour::strategy {
         void direct_freekick_end_placing();
 
 
-
     public:
         explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);
     };

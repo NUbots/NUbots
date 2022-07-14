@@ -305,17 +305,17 @@ namespace module::behaviour::strategy {
         direct_freekick(game_state);
     }
 
-     // ********************CORNER GAMEMODE STATE MACHINE********************************
+    // ********************CORNER GAMEMODE STATE MACHINE********************************
     void SoccerStrategy::corner_kick(const message::input::GameState& game_state) {
         direct_freekick(game_state);
     }
 
-     // ********************GOAL GAMEMODE STATE MACHINE********************************
+    // ********************GOAL GAMEMODE STATE MACHINE********************************
     void SoccerStrategy::goal_kick(const message::input::GameState& game_state) {
         direct_freekick(game_state);
     }
 
-     // ********************THROW IN GAMEMODE STATE MACHINE********************************
+    // ********************THROW IN GAMEMODE STATE MACHINE********************************
     void SoccerStrategy::throw_in(const message::input::GameState& game_state) {
         direct_freekick(game_state);
     }
@@ -452,29 +452,27 @@ namespace module::behaviour::strategy {
         emit(ball_reset);
     }
 
-     // ********************DIRECT FREEKICK GAMEMODE STATES********************************
+    // ********************DIRECT FREEKICK GAMEMODE STATES********************************
     void SoccerStrategy::direct_freekick_wait() {
         stand_still();
     }
 
     void SoccerStrategy::direct_freekick_placing() {
         if (NUClear::clock::now() - ball_last_measured < cfg.ball_last_seen_max_time) {
-                // Ball has been seen recently, request walk planner to walk to the ball
-                play();
-                currentState = Behaviour::State::WALK_TO_BALL;
-            }
-            else {
-                // Ball has not been seen recently, request walk planner to rotate on the spot
-                find();
-                currentState = Behaviour::State::SEARCH_FOR_BALL;
-            }
+            // Ball has been seen recently, request walk planner to walk to the ball
+            play();
+            currentState = Behaviour::State::WALK_TO_BALL;
+        }
+        else {
+            // Ball has not been seen recently, request walk planner to rotate on the spot
+            find();
+            currentState = Behaviour::State::SEARCH_FOR_BALL;
+        }
     }
 
     void SoccerStrategy::direct_freekick_end_placing() {
         emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
     }
-
-
 
 
     // **************************** LOCALISATION RESETS ****************************

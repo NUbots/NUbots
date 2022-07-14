@@ -496,15 +496,17 @@ namespace module::input {
         }
 
 
-        if ((state->data.mode != GameState::Data::Mode::NORMAL && state->data.mode != GameState::Data::Mode::PENALTY_SHOOTOUT &&
-        state->data.mode != GameState::Data::Mode::OVERTIME)
-        && (newPacket.secondaryStateInfo[0] != state->data.secondary_state.team_performing || newPacket.secondaryStateInfo[1] != state->data.secondary_state.sub_mode)
-        && newPacket.secondaryStateInfo[0] != 0) {
+        if ((state->data.mode != GameState::Data::Mode::NORMAL
+             && state->data.mode != GameState::Data::Mode::PENALTY_SHOOTOUT
+             && state->data.mode != GameState::Data::Mode::OVERTIME)
+            && (newPacket.secondaryStateInfo[0] != state->data.secondary_state.team_performing
+                || newPacket.secondaryStateInfo[1] != state->data.secondary_state.sub_mode)
+            && newPacket.secondaryStateInfo[0] != 0) {
             if (newPacket.secondaryStateInfo[1] != state->data.secondary_state.sub_mode) {
-                stateChanges.emplace_back([]{});
+                stateChanges.emplace_back([] {});
             }
             state->data.secondary_state.team_performing = newPacket.secondaryStateInfo[0];
-            state->data.secondary_state.sub_mode = newPacket.secondaryStateInfo[1];
+            state->data.secondary_state.sub_mode        = newPacket.secondaryStateInfo[1];
         }
 
         if (oldPacket.mode != gamecontroller::Mode::TIMEOUT && newPacket.mode == gamecontroller::Mode::TIMEOUT) {
