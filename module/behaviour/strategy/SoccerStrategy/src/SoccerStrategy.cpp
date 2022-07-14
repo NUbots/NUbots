@@ -220,6 +220,11 @@ namespace module::behaviour::strategy {
                                 case GameMode::NORMAL: normal(game_state, phase); break;
                                 case GameMode::OVERTIME: normal(game_state, phase); break;
                                 case GameMode::DIRECT_FREEKICK: direct_freekick(game_state); break;
+                                case GameMode::INDIRECT_FREEKICK: indirect_freekick(game_state); break;
+                                case GameMode::PENALTYKICK: penalty_kick(game_state); break;
+                                case GameMode::CORNER_KICK: corner_kick(game_state); break;
+                                case GameMode::GOAL_KICK: goal_kick(game_state); break;
+                                case GameMode::THROW_IN: throw_in(game_state); break;
                                 default: log<NUClear::WARN>("Game mode unknown.");
                             }
                         }
@@ -277,7 +282,6 @@ namespace module::behaviour::strategy {
             direct_freekick_wait();
         }
         else {
-            log("Sub mode", game_state.data.secondary_state.sub_mode);
             switch (game_state.data.secondary_state.sub_mode) {
                 // Beginning of game and half time
                 case 0: direct_freekick_wait(); break;
@@ -286,9 +290,34 @@ namespace module::behaviour::strategy {
                 // Happens after ready. Robot should stop moving.
                 case 2: direct_freekick_end_placing(); break;
                 // After set, main game where we should walk to ball and kick.
-                default: log<NUClear::WARN>("Unknown direct freekick sub mode.");
+                default: log<NUClear::WARN>("Unknown sub mode.");
             }
         }
+    }
+
+    // ********************INDIRECT_FREEKICK GAMEMODE STATE MACHINE********************************
+    void SoccerStrategy::indirect_freekick(const message::input::GameState& game_state) {
+        direct_freekick(game_state);
+    }
+
+    // ********************PENTALTY_KICK GAMEMODE STATE MACHINE********************************
+    void SoccerStrategy::penalty_kick(const message::input::GameState& game_state) {
+        direct_freekick(game_state);
+    }
+
+     // ********************CORNER GAMEMODE STATE MACHINE********************************
+    void SoccerStrategy::corner_kick(const message::input::GameState& game_state) {
+        direct_freekick(game_state);
+    }
+
+     // ********************GOAL GAMEMODE STATE MACHINE********************************
+    void SoccerStrategy::goal_kick(const message::input::GameState& game_state) {
+        direct_freekick(game_state);
+    }
+
+     // ********************THROW IN GAMEMODE STATE MACHINE********************************
+    void SoccerStrategy::throw_in(const message::input::GameState& game_state) {
+        direct_freekick(game_state);
     }
 
     // ********************PENALTY GAMEMODE STATES********************************
@@ -429,12 +458,23 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::direct_freekick_placing() {
-        stand_still();
+        if (NUClear::clock::now() - ball_last_measured < cfg.ball_last_seen_max_time) {
+                // Ball has been seen recently, request walk planner to walk to the ball
+                play();
+                currentState = Behaviour::State::WALK_TO_BALL;
+            }
+            else {
+                // Ball has not been seen recently, request walk planner to rotate on the spot
+                find();
+                currentState = Behaviour::State::SEARCH_FOR_BALL;
+            }
     }
 
     void SoccerStrategy::direct_freekick_end_placing() {
-        stand_still();
+        emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
     }
+
+
 
 
     // **************************** LOCALISATION RESETS ****************************
