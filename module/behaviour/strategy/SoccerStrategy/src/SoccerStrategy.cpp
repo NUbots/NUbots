@@ -270,6 +270,26 @@ namespace module::behaviour::strategy {
         }
     }
 
+    // ********************DIRECT_FREEKICK GAMEMODE STATE MACHINE********************************
+    void SoccerStrategy::direct_freekick(const message::input::GameState& game_state, const Phase& phase) {
+        if (game_state.data.secondary_state.team_performing != game_state.data.team.team_id) {
+            direct_freekick_wait();
+        }
+        else {
+            log("Sub mode", game_state.data.secondary_state.sub_mode);
+            switch (game_state.data.secondary_state.sub_mode) {
+                // Beginning of game and half time
+                case 0: direct_freekick_wait(); break;
+                // After initial, robots position on their half of the field.
+                case 1: direct_freekick_placing(); break;
+                // Happens after ready. Robot should stop moving.
+                case 2: direct_freekick_end_placing(); break;
+                // After set, main game where we should walk to ball and kick.
+                default: log<NUClear::WARN>("Unknown direct freekick sub mode.");
+            }
+        }
+    }
+
     // ********************PENALTY GAMEMODE STATES********************************
     void SoccerStrategy::penalty_shootout_initial() {
         // There's no point in doing anything since we'll be teleported over to a penalty shootout position
@@ -401,6 +421,20 @@ namespace module::behaviour::strategy {
         ball_reset->self_reset = true;
         emit(ball_reset);
     }
+
+     // ********************DIRECT FREEKICK GAMEMODE STATES********************************
+    void SoccerStrategy::direct_freekick_wait() {
+        stand_still();
+    }
+
+    void SoccerStrategy::direct_freekick_placing() {
+        stand_still();
+    }
+
+    void SoccerStrategy::direct_freekick_end_placing() {
+        stand_still();
+    }
+
 
     // **************************** LOCALISATION RESETS ****************************
     void SoccerStrategy::penalty_shootout_localisation_reset(const FieldDescription& field_description) {

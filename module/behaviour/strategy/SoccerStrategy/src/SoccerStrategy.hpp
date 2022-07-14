@@ -140,6 +140,9 @@ namespace module::behaviour::strategy {
         /// @brief Normal mode state machine, used to decide what phase behaviour to use.
         void normal(const message::input::GameState& game_state, const message::input::GameState::Data::Phase& phase);
 
+        /// @brief Normal mode state machine, used to decide what phase behaviour to use.
+        void direct_freekick(const message::input::GameState& game_state, const message::input::GameState::Data::Phase& phase);
+
         /// @brief Penalty mode, initial phase behaviour/strategy
         void penalty_shootout_initial();
 
@@ -176,6 +179,15 @@ namespace module::behaviour::strategy {
 
         /// @brief Normal mode, time phase behaviour/strategy
         void normal_timeout();
+
+        /// @brief Direct Freekick mode, initial phase behaviour/strategy
+        void direct_freekick_wait();
+
+        /// @brief Direct Freekick mode, ready phase behaviour/strategy
+        void direct_freekick_placing();
+
+        /// @brief Direct Freekick mode, set phase behaviour/strategy
+        void direct_freekick_end_placing();
 
     public:
         explicit SoccerStrategy(std::unique_ptr<NUClear::Environment> environment);

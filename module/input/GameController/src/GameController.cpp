@@ -458,12 +458,22 @@ namespace module::input {
                     stateChanges.emplace_back(
                         [this] { emit(std::make_unique<GameMode>(GameState::Data::Mode::Value::OVERTIME)); });
                     break;
+                case gamecontroller::Mode::DIRECT_FREEKICK:
+                    state->data.mode = GameState::Data::Mode::DIRECT_FREEKICK;
+                    stateChanges.emplace_back(
+                        [this] { emit(std::make_unique<GameMode>(GameState::Data::Mode::Value::DIRECT_FREEKICK)); });
+                    break;
                 default:
                     throw std::runtime_error("Invalid mode change");
                     emit(std::make_unique<GameState::Data::Mode>(state->data.mode));
             }
         }
 
+
+        if (state->data.mode == GameState::Data::Mode::DIRECT_FREEKICK && newPacket.secondaryStateInfo[0] != 0) {
+            state->data.secondary_state.team_performing = newPacket.secondaryStateInfo[0];
+            state->data.secondary_state.sub_mode = (int)newPacket.secondaryStateInfo[1];
+        }
         if (oldPacket.mode != gamecontroller::Mode::TIMEOUT && newPacket.mode == gamecontroller::Mode::TIMEOUT) {
 
             // Change the game state to timeout
