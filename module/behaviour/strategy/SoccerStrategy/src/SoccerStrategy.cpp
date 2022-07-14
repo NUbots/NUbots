@@ -78,8 +78,6 @@ namespace module::behaviour::strategy {
     using message::platform::ResetWebotsServos;
     using message::support::FieldDescription;
 
-    using SimpleBalls = message::vision::Balls;
-
     using SimpleBall = message::localisation::SimpleBall;
 
     using VisionGoals = message::vision::Goals;

@@ -24,7 +24,6 @@
 #include "message/input/Sensors.hpp"
 #include "message/motion/BodySide.hpp"
 #include "message/platform/RawSensors.hpp"
-#include "message/support/nusight/DataPoint.hpp"
 
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
@@ -746,7 +745,6 @@ namespace module::input {
                                         const Eigen::Vector3d rMFt_update = current_rMFt - rMFt[side];
                                         const Eigen::Quaterniond q(
                                             Eigen::Vector4d(rMFt_update.x(), rMFt_update.y(), rMFt_update.z(), 0.0));
-                                        log<NUClear::DEBUG>("Update amount: ", (Rwt * q * Rwt.conjugate()).vec());
                                         rTWw += (Rwt * q * Rwt.conjugate()).vec();
 
                                         // Make sure we don't do another update
@@ -771,15 +769,6 @@ namespace module::input {
                             Hwt.linear()      = o.Rwt.toRotationMatrix();
                             Hwt.translation() = o.rTWw;
                             sensors->Htw      = Hwt.inverse().matrix();
-
-                            // Log odometry pose
-                            emit(graph("Position (x,y,z)",
-                                       Hwt.translation().x(),
-                                       Hwt.translation().y(),
-                                       Hwt.translation().z()));
-                            Eigen::Vector3d euler_angles = Hwt.linear().eulerAngles(2, 1, 0);
-                            emit(graph("Orientation (r,p,y)", euler_angles.x(), euler_angles.y(), euler_angles.z()));
-
 
                             /************************************************
                              *                  Kinematics Horizon          *
