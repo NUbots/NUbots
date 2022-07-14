@@ -78,7 +78,7 @@ message GameState {
 
         message SecondaryState {
             uint32 team_performing = 1;
-            uint32 sub_mode = 2;
+            uint32 sub_mode        = 2;
         }
 
         Phase                     phase            = 1;
