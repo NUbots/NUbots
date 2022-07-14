@@ -20,6 +20,7 @@
 #include "GameController.hpp"
 
 #include <atomic>
+#include <iostream>
 
 #include "extension/Configuration.hpp"
 
@@ -83,6 +84,8 @@ namespace module::input {
                                   .then([this](const UDP::Packet& p, const GameState& gameState) {
                                       std::string remoteAddr = ipAddressIntToString(p.remote.address);
 
+                                      log<NUClear::WARN>("UDP running");
+
                                       // Apply filtering of packets if udp_filter_address is set in config
                                       if (!udp_filter_address.empty() && remoteAddr != udp_filter_address) {
                                           if (std::find(ignored_ip_addresses.begin(),
@@ -130,9 +133,9 @@ namespace module::input {
     void GameController::sendReplyMessage(const ReplyMessage& message) {
         auto packet     = std::make_unique<GameControllerReplyPacket>();
         packet->header  = {gamecontroller::RETURN_HEADER[0],
-                          gamecontroller::RETURN_HEADER[1],
-                          gamecontroller::RETURN_HEADER[2],
-                          gamecontroller::RETURN_HEADER[3]};
+                           gamecontroller::RETURN_HEADER[1],
+                           gamecontroller::RETURN_HEADER[2],
+                           gamecontroller::RETURN_HEADER[3]};
         packet->version = gamecontroller::RETURN_VERSION;
         packet->team    = TEAM_ID;
         packet->player  = PLAYER_ID;
@@ -202,6 +205,7 @@ namespace module::input {
                                  const GameControllerPacket& oldPacket,
                                  const GameControllerPacket& newPacket) {
 
+
         auto state = std::make_unique<GameState>(oldGameState);
 
         std::vector<std::function<void()>> stateChanges;
@@ -212,6 +216,8 @@ namespace module::input {
 
         const auto& oldOpponentTeam = getOpponentTeam(oldPacket);
         const auto& newOpponentTeam = getOpponentTeam(newPacket);
+
+        log<NUClear::WARN>("Packet Recieved");
 
         /*******************************************************************************************
          * Process score updates
@@ -438,6 +444,8 @@ namespace module::input {
          ******************************************************************************************/
         if (newPacket.mode != mode && oldPacket.mode != gamecontroller::Mode::TIMEOUT
             && newPacket.mode != gamecontroller::Mode::TIMEOUT) {
+
+            std::cout << "State change. " << std::endl;
 
             mode = newPacket.mode;
 
