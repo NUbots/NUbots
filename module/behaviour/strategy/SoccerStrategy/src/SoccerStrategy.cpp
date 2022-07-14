@@ -219,6 +219,7 @@ namespace module::behaviour::strategy {
                                     break;
                                 case GameMode::NORMAL: normal(game_state, phase); break;
                                 case GameMode::OVERTIME: normal(game_state, phase); break;
+                                case GameMode::DIRECT_FREEKICK: direct_freekick(game_state); break;
                                 default: log<NUClear::WARN>("Game mode unknown.");
                             }
                         }
@@ -271,7 +272,7 @@ namespace module::behaviour::strategy {
     }
 
     // ********************DIRECT_FREEKICK GAMEMODE STATE MACHINE********************************
-    void SoccerStrategy::direct_freekick(const message::input::GameState& game_state, const Phase& phase) {
+    void SoccerStrategy::direct_freekick(const message::input::GameState& game_state) {
         if (game_state.data.secondary_state.team_performing != game_state.data.team.team_id) {
             direct_freekick_wait();
         }

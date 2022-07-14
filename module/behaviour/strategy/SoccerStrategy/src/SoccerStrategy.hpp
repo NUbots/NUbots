@@ -141,7 +141,7 @@ namespace module::behaviour::strategy {
         void normal(const message::input::GameState& game_state, const message::input::GameState::Data::Phase& phase);
 
         /// @brief Normal mode state machine, used to decide what phase behaviour to use.
-        void direct_freekick(const message::input::GameState& game_state, const message::input::GameState::Data::Phase& phase);
+        void direct_freekick(const message::input::GameState& game_state);
 
         /// @brief Penalty mode, initial phase behaviour/strategy
         void penalty_shootout_initial();
