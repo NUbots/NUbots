@@ -1,4 +1,4 @@
-#include "WalkEvaluator.hpp"
+#include "StrafeEvaluator.hpp"
 
 #include <fmt/format.h>
 #include <fmt/ostream.h>
@@ -30,15 +30,15 @@ namespace module {
             using utility::input::ServoID;
             using utility::support::Expression;
 
-            void WalkEvaluator::processRawSensorMsg(const RawSensors& sensors, NSGA2Evaluator* evaluator) {
+            void StrafeEvaluator::processRawSensorMsg(const RawSensors& sensors, NSGA2Evaluator* evaluator) {
                 updateMaxFieldPlaneSway(sensors);
                 if (checkForFall(sensors)) {
                     evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TerminateEarly));
                 }
             }
 
-            void WalkEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position,
-                                                                 NSGA2Evaluator* evaluator) {
+            void StrafeEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position,
+                                                                   NSGA2Evaluator* evaluator) {
                 if (!initialPositionSet) {
                     initialPositionSet       = true;
                     initialRobotPosition.x() = position.value.X;
@@ -51,21 +51,21 @@ namespace module {
                 robotPosition.z() = position.value.Z;
 
 
-                // if (checkOffCourse())  // Checking if NUgus walks in straght line in the X directon
-                // {
-                //     evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TerminateEarly));
-                // }
+                if (checkOffCourse())  // Checking if NUgus walks in straght line in the Y directon
+                {
+                    evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TerminateEarly));
+                }
             }
 
-            void WalkEvaluator::setUpTrial(const NSGA2EvaluationRequest& currentRequest) {
+            void StrafeEvaluator::setUpTrial(const NSGA2EvaluationRequest& currentRequest) {
                 // Set our generation and individual identifiers from the request
 
                 trial_duration_limit = std::chrono::seconds(currentRequest.trial_duration_limit);
 
                 // Set our walk command
-                walk_command_velocity.x() = currentRequest.parameters.real_params[11];
-                walk_command_velocity.y() = 0.0;  // 0.0;
-                walk_command_rotation     = 0.0;  // currentRequest.parameters.real_params[11];  // -0.785;  // 0.0;
+                walk_command_velocity.x() = 0.0;
+                walk_command_velocity.y() = currentRequest.parameters.real_params[11];
+                walk_command_rotation     = 0.0;
 
                 // Read the QuinticWalk config and overwrite the config parameters with the current individual's
                 // parameters
@@ -110,7 +110,7 @@ namespace module {
                 save_file_stream.close();
             }
 
-            void WalkEvaluator::resetSimulation() {
+            void StrafeEvaluator::resetSimulation() {
                 // Reset our local stateconst OptimisationRobotPosition& position
                 trialStartTime       = 0.0;
                 robotPosition        = Eigen::Vector3d::Zero();
@@ -118,7 +118,7 @@ namespace module {
                 maxFieldPlaneSway    = 0.0;
             }
 
-            void WalkEvaluator::evaluatingState(size_t subsumptionId, NSGA2Evaluator* evaluator) {
+            void StrafeEvaluator::evaluatingState(size_t subsumptionId, NSGA2Evaluator* evaluator) {
                 NUClear::log<NUClear::DEBUG>(fmt::format("Trialling with walk command: ({} {}) {}",
                                                          walk_command_velocity.x(),
                                                          walk_command_velocity.y(),
@@ -130,10 +130,10 @@ namespace module {
                 evaluator->ScheduleTrialExpiredMessage(0, trial_duration_limit);
             }
 
-            std::unique_ptr<NSGA2FitnessScores> WalkEvaluator::calculateFitnessScores(bool earlyTermination,
-                                                                                      double simTime,
-                                                                                      int generation,
-                                                                                      int individual) {
+            std::unique_ptr<NSGA2FitnessScores> StrafeEvaluator::calculateFitnessScores(bool earlyTermination,
+                                                                                        double simTime,
+                                                                                        int generation,
+                                                                                        int individual) {
                 auto scores      = calculateScores();
                 auto constraints = earlyTermination ? calculateConstraints(simTime) : constraintsNotViolated();
 
@@ -152,15 +152,15 @@ namespace module {
                 return fitnessScores;
             }
             // I want a pattern here passed as an arg
-            std::vector<double> WalkEvaluator::calculateScores() {
-                auto robotDistanceTravelled = std::fabs(initialRobotPosition.x() - robotPosition.x());
+            std::vector<double> StrafeEvaluator::calculateScores() {
+                auto robotDistanceTravelled = std::fabs(initialRobotPosition.y() - robotPosition.y());
                 return {
                     maxFieldPlaneSway,            // For now, we want to reduce this
                     1.0 / robotDistanceTravelled  // 1/x since the NSGA2 optimiser is a minimiser
                 };
             }
 
-            std::vector<double> WalkEvaluator::calculateConstraints(double simTime) {
+            std::vector<double> StrafeEvaluator::calculateConstraints(double simTime) {
                 // Convert trial duration limit to ms, add 1 for overhead
                 const auto overhead = std::chrono::seconds(1);
                 double max_trial_duration =
@@ -173,7 +173,7 @@ namespace module {
                 };
             }
 
-            std::vector<double> WalkEvaluator::constraintsNotViolated() {
+            std::vector<double> StrafeEvaluator::constraintsNotViolated() {
                 return {
                     0,  // Robot didn't fall
                     0   // Second constraint unused, fixed to 0
@@ -181,21 +181,9 @@ namespace module {
             }
 
 
-            bool WalkEvaluator::checkForFall(const RawSensors& sensors) {
+            bool StrafeEvaluator::checkForFall(const RawSensors& sensors) {
                 bool fallen        = false;
                 auto accelerometer = sensors.accelerometer;
-
-                // Transform to torso {t} from world {w} space
-                // Eigen::Matrix4d Hwt = sensors.Htw.inverse();
-                // // Basis Z vector of torso {t} in world {w} space
-                // Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
-
-                // NUClear::log<NUClear::DEBUG>("X roatation is ", sensors.gyroscope.x());
-                // NUClear::log<NUClear::DEBUG>("Y roatation is ", sensors.gyroscope.y());
-                // NUClear::log<NUClear::DEBUG>("Z roatation is ", sensors.gyroscope.z());
-                // NUClear::log<NUClear::DEBUG>(sensors);
-
-                // if (!falling && std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > cfg.falling_angle)
 
                 if ((std::fabs(accelerometer.x()) > 9.2 || std::fabs(accelerometer.y()) > 9.2)
                     && std::fabs(accelerometer.z()) < 0.5) {
@@ -209,7 +197,7 @@ namespace module {
                 return fallen;
             }
 
-            void WalkEvaluator::updateMaxFieldPlaneSway(const RawSensors& sensors) {
+            void StrafeEvaluator::updateMaxFieldPlaneSway(const RawSensors& sensors) {
                 auto accelerometer = sensors.accelerometer;
 
                 // Calculate the robot sway along the field plane (left/right, forward/backward)
@@ -220,13 +208,13 @@ namespace module {
             }
 
             // Checking if NUgus goes off the Y axis path too far
-            bool WalkEvaluator::checkOffCourse() {
+            bool StrafeEvaluator::checkOffCourse() {
                 bool offCourse = false;
 
-                auto distanceOffCourse = std::fabs(robotPosition.y() - initialRobotPosition.y());
+                auto distanceOffCourse = std::fabs(robotPosition.x() - initialRobotPosition.x());
 
 
-                if (distanceOffCourse >= 0.2) {
+                if (distanceOffCourse >= 0.45) {
                     NUClear::log<NUClear::DEBUG>("OffCourse!");
                     NUClear::log<NUClear::DEBUG>("orination on robot (x y z): ",
                                                  robotPosition.x(),
