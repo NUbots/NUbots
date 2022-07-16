@@ -95,7 +95,7 @@ walk:
 max_step:
   # Maximal step length in X
   # (in m, [0:1])
-  x: 0.1
+  x: 0.3
   # Maximal step length in Y
   # (in m, [0:1])
   y: 0.1
