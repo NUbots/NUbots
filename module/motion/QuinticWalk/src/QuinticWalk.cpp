@@ -31,13 +31,14 @@ namespace module::motion {
     using message::motion::KinematicsModel;
     using message::motion::StopCommand;
     using message::motion::WalkCommand;
-    using utility::support::Expression;
 
     using utility::input::ServoID;
     using utility::math::euler::rot2rpy;
     using utility::math::euler::rpy2rot;
     using utility::motion::kinematics::calculateLegJoints;
     using utility::nusight::graph;
+    using utility::support::Expression;
+
     /**
      * @brief loads the configuration from cfg into config
      * @param cfg A Configuration provided by the Configuration extension
