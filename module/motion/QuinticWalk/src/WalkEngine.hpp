@@ -258,7 +258,7 @@ namespace module::motion {
         void update_phase(const float& dt);
 
         void build_trajectories(const Eigen::Vector3f& orders,
-                                const bool& startMovement,
+                                const bool& start_movement,
                                 const bool& startStep,
                                 const bool& kickStep);
 

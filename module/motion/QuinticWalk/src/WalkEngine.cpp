@@ -260,7 +260,7 @@ namespace module::motion {
     }
 
     void QuinticWalkEngine::build_trajectories(const Eigen::Vector3f& orders,
-                                               const bool& startMovement,
+                                               const bool& start_movement,
                                                const bool& startStep,
                                                const bool& kickStep) {
 
@@ -270,7 +270,7 @@ namespace module::motion {
         float single_support_length = half_period - double_support_length;
 
         // Save the current trunk state to use it later and compute next step position
-        if (startMovement) {
+        if (start_movement) {
             trunk_pos_at_last.y() -= foot_step.get_next().y();
             foot_step.step_from_orders(Eigen::Vector3f::Zero());
             // Only move the trunk on the first half cycle after a walk enable
@@ -380,7 +380,7 @@ namespace module::motion {
 
         // Trunk y position
         point(TrajectoryTypes::TRUNK_POS_Y, 0.0f, trunk_pos_at_last.y(), trunk_vel_at_last.y(), trunk_acc_at_last.y());
-        if (startStep || startMovement) {
+        if (startStep || start_movement) {
             point(TrajectoryTypes::TRUNK_POS_Y,
                   half_period + timeShift - pauseLength,
                   trunk_point_middle.y() + trunk_vect.y() * params.first_step_swing_factor);
