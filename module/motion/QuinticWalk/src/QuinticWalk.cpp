@@ -34,6 +34,8 @@ namespace module::motion {
     using utility::support::Expression;
 
     using utility::input::ServoID;
+    using utility::math::euler::rot2rpy;
+    using utility::math::euler::rpy2rot;
     using utility::motion::kinematics::calculateLegJoints;
     using utility::nusight::graph;
     /**
@@ -178,12 +180,12 @@ namespace module::motion {
         on<Trigger<KillGetup>>().then([this]() { falling = false; });
 
         on<Trigger<StopCommand>>().then([this](const StopCommand& walkCommand) {
-            subsumptionId = walkCommand.subsumption_id;
+            subsumption_id = walkCommand.subsumption_id;
             current_orders.setZero();
         });
 
         on<Trigger<WalkCommand>>().then([this](const WalkCommand& walkCommand) {
-            subsumptionId = walkCommand.subsumption_id;
+            subsumption_id = walkCommand.subsumption_id;
 
             // the engine expects orders in [m] not [m/s]. We have to compute by dividing by step frequency which is
             // a double step factor 2 since the order distance is only for a single step, not double step
@@ -219,18 +221,18 @@ namespace module::motion {
         });
 
         on<Trigger<EnableWalkEngineCommand>>().then([this](const EnableWalkEngineCommand& command) {
-            subsumptionId = command.subsumption_id;
+            subsumption_id = command.subsumption_id;
             walk_engine.reset();
             update_handle.enable();
         });
 
         on<Trigger<DisableWalkEngineCommand>>().then([this](const DisableWalkEngineCommand& command) {
-            subsumptionId = command.subsumption_id;
+            subsumption_id = command.subsumption_id;
             update_handle.disable();
         });
 
         update_handle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single>().then([this]() {
-            const float dt = getTimeDelta();
+            const float dt = get_time_delta();
 
             if (falling) {
                 // We are falling, reset walk engine
@@ -240,13 +242,13 @@ namespace module::motion {
 
                 // see if the walk engine has new goals for us
                 if (walk_engine.update_state(dt, current_orders)) {
-                    calculateJointGoals();
+                    calculate_joint_goals();
                 }
             }
         });
     }
 
-    float QuinticWalk::getTimeDelta() {
+    float QuinticWalk::get_time_delta() {
         // compute time delta depended if we are currently in simulation or reality
         const auto current_time = NUClear::clock::now();
         float dt =
@@ -267,63 +269,69 @@ namespace module::motion {
         return dt;
     }
 
-    void QuinticWalk::calculateJointGoals() {
-        /*
-        This method computes the next motor goals and publishes them.
-        */
-        auto setRPY = [&](const float& roll, const float& pitch, const float& yaw) {
-            const float halfYaw   = yaw * 0.5f;
-            const float halfPitch = pitch * 0.5f;
-            const float halfRoll  = roll * 0.5f;
-            const float cosYaw    = std::cos(halfYaw);
-            const float sinYaw    = std::sin(halfYaw);
-            const float cosPitch  = std::cos(halfPitch);
-            const float sinPitch  = std::sin(halfPitch);
-            const float cosRoll   = std::cos(halfRoll);
-            const float sinRoll   = std::sin(halfRoll);
-            return Eigen::Quaternionf(Eigen::Vector4f(sinRoll * cosPitch * cosYaw - cosRoll * sinPitch * sinYaw,   // x
-                                                      cosRoll * sinPitch * cosYaw + sinRoll * cosPitch * sinYaw,   // y
-                                                      cosRoll * cosPitch * sinYaw - sinRoll * sinPitch * cosYaw,   // z
-                                                      cosRoll * cosPitch * cosYaw + sinRoll * sinPitch * sinYaw))  // w
-                .normalized()  // Rotation quaternions should have unit norm
-                .toRotationMatrix();
-        };
+    /*
+    This method computes the next motor goals and publishes them.
+    */
+    void QuinticWalk::calculate_joint_goals() {
+
+        // Position of trunk {t} relative to support foot {s}
+        Eigen::Vector3f rTSs = Eigen::Vector3f::Zero();
+        // Euler angles [Roll, Pitch, Yaw] of trunk {t} relative to support foot {s}
+        Eigen::Vector3f Thetast = Eigen::Vector3f::Zero();
+        // Position of flying foot {f} relative to support foot {s}
+        Eigen::Vector3f rFSs = Eigen::Vector3f::Zero();
+        // Euler angles [Roll, Pitch, Yaw] of flying foot {f} relative to support foot {s}
+        Eigen::Vector3f Thetasf = Eigen::Vector3f::Zero();
+
         // Read the cartesian positions and orientations for trunk and fly foot
-        std::tie(trunk_pos, trunk_axis, foot_pos, foot_axis, is_left_support) =
-            walk_engine.compute_cartesian_position();
+        std::tie(rTSs, Thetast, rFSs, Thetasf, is_left_support) = walk_engine.compute_cartesian_position();
 
         // Change goals from support foot based coordinate system to trunk based coordinate system
-
-        // Trunk from support foot
+        // Trunk {t} from support foot {s}
         Eigen::Affine3f Hst;
-        Hst.linear()      = setRPY(trunk_axis.x(), trunk_axis.y(), trunk_axis.z());
-        Hst.translation() = trunk_pos;
+        Hst.linear()      = rpy2rot<float>(Thetast);
+        Hst.translation() = rTSs;
 
-        emit(graph("Trunk from support foot (x,y,z)", Hst(0, 3), Hst(1, 3), Hst(2, 3)));
-
-        // Flying foot from support foot
+        // Flying foot {f} from support foot {s}
         Eigen::Affine3f Hsf;
-        Hsf.linear()      = setRPY(foot_axis.x(), foot_axis.y(), foot_axis.z());
-        Hsf.translation() = foot_pos;
+        Hsf.linear()      = rpy2rot<float>(Thetasf);
+        Hsf.translation() = rFSs;
 
-        // Support from trunk
+        // Support foot {s} from trunk {t}
         const Eigen::Affine3f Hts = Hst.inverse();
 
-        // Fly foot from trunk
+        // Flying foot {f} from trunk {t}
         const Eigen::Affine3f Htf = Hts * Hsf;
 
-        // Calculate leg joints
-        const Eigen::Matrix4f left_foot  = walk_engine.get_footstep().is_left_support() ? Hts.matrix() : Htf.matrix();
-        const Eigen::Matrix4f right_foot = walk_engine.get_footstep().is_left_support() ? Htf.matrix() : Hts.matrix();
+        // Get desired transform for left foot {l}
+        const Eigen::Matrix4f Htl = walk_engine.get_footstep().is_left_support() ? Hts.matrix() : Htf.matrix();
 
-        emit(graph("Left foot (x,y,z)", left_foot(0, 3), left_foot(1, 3), left_foot(2, 3)));
-        emit(graph("Right foot (x,y,z)", right_foot(0, 3), right_foot(1, 3), right_foot(2, 3)));
+        // Get desired transform for right foot {r}
+        const Eigen::Matrix4f Htr = walk_engine.get_footstep().is_left_support() ? Htf.matrix() : Hts.matrix();
 
-        const auto joints =
-            calculateLegJoints<float>(kinematicsModel, Eigen::Affine3f(left_foot), Eigen::Affine3f(right_foot));
-
-        auto waypoints = motion(joints);
+        // Compute inverse kinematics for left and right foot
+        const auto joints = calculateLegJoints<float>(kinematicsModel, Eigen::Affine3f(Htl), Eigen::Affine3f(Htr));
+        auto waypoints    = motion(joints);
         emit(std::move(waypoints));
+
+        // Plot graphs of desired trajectories
+        if (log_level <= NUClear::DEBUG) {
+            emit(graph("Left foot desired position (x,y,z)", Htl(0, 3), Htl(1, 3), Htl(2, 3)));
+            emit(graph("Right foot desired position (x,y,z)", Htr(0, 3), Htr(1, 3), Htr(2, 3)));
+            emit(graph("Left foot desired orientation (r,p,y)",
+                       rot2rpy<float>(Htl.block(0, 0, 3, 3)).x(),
+                       rot2rpy<float>(Htl.block(0, 0, 3, 3)).y(),
+                       rot2rpy<float>(Htl.block(0, 0, 3, 3)).z()));
+            emit(graph("Right foot desired orientation (r,p,y)",
+                       rot2rpy<float>(Htr.block(0, 0, 3, 3)).x(),
+                       rot2rpy<float>(Htr.block(0, 0, 3, 3)).y(),
+                       rot2rpy<float>(Htr.block(0, 0, 3, 3)).z()));
+            emit(graph("Trunk desired position (x,y,z)", Hst(0, 3), Hst(1, 3), Hst(2, 3)));
+            emit(graph("Trunk desired orientation (r,p,y)",
+                       rot2rpy<float>(Hst.linear()).x(),
+                       rot2rpy<float>(Hst.linear()).y(),
+                       rot2rpy<float>(Hst.linear()).z()));
+        }
     }
 
     std::unique_ptr<ServoCommands> QuinticWalk::motion(const std::vector<std::pair<ServoID, float>>& joints) {
@@ -333,7 +341,7 @@ namespace module::motion {
         const NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
 
         for (const auto& joint : joints) {
-            waypoints->commands.emplace_back(subsumptionId,
+            waypoints->commands.emplace_back(subsumption_id,
                                              time,
                                              joint.first,
                                              joint.second,
@@ -342,7 +350,7 @@ namespace module::motion {
         }
 
         for (const auto& joint : current_config.arm_positions) {
-            waypoints->commands.emplace_back(subsumptionId,
+            waypoints->commands.emplace_back(subsumption_id,
                                              time,
                                              joint.first,
                                              joint.second,
