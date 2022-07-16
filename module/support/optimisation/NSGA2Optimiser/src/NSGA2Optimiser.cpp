@@ -1,6 +1,8 @@
 #include "NSGA2Optimiser.hpp"
 
+#include "tasks/RotationOptimiser.hpp"
 #include "tasks/StandOptimiser.hpp"
+#include "tasks/StrafeOptimiser.hpp"
 #include "tasks/WalkOptimiser.hpp"
 
 #include "extension/Configuration.hpp"
@@ -55,11 +57,23 @@ namespace module {
                     if (taskType == "walk") {
                         log<NUClear::INFO>("Task type is Walk");
                         task = std::make_unique<WalkOptimiser>();
+                    }  // ADD strfe, rotate, vector path here
+                    else if (taskType == "strafe") {
+                        log<NUClear::INFO>("Task type is Strafe");
+                        task = std::make_unique<StrafeOptimiser>();  // Chasnge to StafeOptimiser
                     }
+                    else if (taskType == "rotation") {
+                        log<NUClear::INFO>("Task type is Rotate");
+                        task = std::make_unique<RotationOptimiser>();  // Chasnge to RotateOptimiser
+                    }
+                    // else if (taskType == "vector") {
+                    //     log<NUClear::INFO>("Task type is Vector");
+                    //     task = std::make_unique<WalkOptimiser>();  // Chasnge to VectorOptimiser
+                    // }
                     else if (taskType == "stand") {
                         log<NUClear::INFO>("Task type is Stand");
                         task = std::make_unique<StandOptimiser>();
-                    }// ADD strfe, rotate, vector path here
+                    }
                     else {
                         log<NUClear::ERROR>("Unrecognised optimiser task", taskType);
                         powerplant.shutdown();
@@ -78,8 +92,8 @@ namespace module {
                     log<NUClear::INFO>("webots ready, starting first evaluation");
 
                     // If initialisation succeeded, evaluate the first individual of the first generation
-                    // Subsequent individuals will be evaluated after we get the evaluation scores for this individual
-                    // (from the NSGA2FitnessScores trigger)
+                    // Subsequent individuals will be evaluated after we get the evaluation scores for this
+                    // individual (from the NSGA2FitnessScores trigger)
                     if (nsga2Algorithm.InitializeFirstGeneration()) {
                         emit(std::make_unique<NSGA2EvaluatorReady>());
                     }
@@ -101,10 +115,9 @@ namespace module {
                     }
                     else {
                         log<NUClear::INFO>("Evaluator ready, but optimiser is not");
-                        emit<Scope::DELAY>(
-                            std::make_unique<NSGA2EvaluatorReady>(),
-                            std::chrono::seconds(
-                                1));  // Wait for a bit for us to become ready, then ask the evaluator if it is ready
+                        emit<Scope::DELAY>(std::make_unique<NSGA2EvaluatorReady>(),
+                                           std::chrono::seconds(1));  // Wait for a bit for us to become ready, then
+                                                                      // ask the evaluator if it is ready
                     }
                 });
 
@@ -128,8 +141,8 @@ namespace module {
                             msg->command                             = OptimisationCommand::CommandType::TERMINATE;
                             emit(msg);
 
-                            // Tell the NSGA2 components to finish up, but add a delay to give webots time to get the
-                            // terminate
+                            // Tell the NSGA2 components to finish up, but add a delay to give webots time to get
+                            // the terminate
                             emit<Scope::DELAY>(std::make_unique<NSGA2Terminate>(), std::chrono::milliseconds(100));
                         }
                         else {

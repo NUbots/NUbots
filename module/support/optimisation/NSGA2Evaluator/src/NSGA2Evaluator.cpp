@@ -5,6 +5,7 @@
 #include <yaml-cpp/yaml.h>
 
 #include "tasks/StandEvaluator.hpp"
+#include "tasks/StrafeEvaluator.hpp"
 #include "tasks/WalkEvaluator.hpp"
 
 #include "extension/Configuration.hpp"
@@ -231,6 +232,15 @@ namespace module {
                 if (lastEvalRequestMsg.task == "walk") {
                     task = std::make_unique<WalkEvaluator>();
                 }
+                else if (lastEvalRequestMsg.task == "strafe") {
+                    task = std::make_unique<StrafeEvaluator>();
+                }
+                // else if (lastEvalRequestMsg.task == "rotation") {
+                //     task = std::make_unique<RotationEvaluator>();
+                // }
+                // else if (lastEvalRequestMsg.task == "vector") {
+                //     task = std::make_unique<VectorEvaluator>();
+                // }
                 else if (lastEvalRequestMsg.task == "stand") {
                     task = std::make_unique<StandEvaluator>();
                 }
@@ -259,7 +269,8 @@ namespace module {
             void NSGA2Evaluator::Evaluating(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
                 log<NUClear::DEBUG>("Evaluating");
                 if (event == Event::ResetDone) {
-                    if (lastEvalRequestMsg.task == "walk" || lastEvalRequestMsg.task == "stand") {
+                    if (lastEvalRequestMsg.task == "walk" || lastEvalRequestMsg.task == "stand"
+                        || lastEvalRequestMsg.task == "strafe") {
                         task->evaluatingState(subsumptionId, this);
                     }
                     else {

@@ -47,7 +47,7 @@ walk:
     height: 0.45
     # Trunk pitch orientation (how much we lean the torso forward or backward, does not change)
     # (in rad)
-    pitch: 24 * pi / 180 #28
+    pitch: 10 * pi / 180 #24 #28
     # Phase offset of trunk oscillation
     # (half cycle phase, [-1:1])
     phase: 0.15
@@ -95,10 +95,10 @@ walk:
 max_step:
   # Maximal step length in X
   # (in m, [0:1])
-  x: 0.1
+  x: 0.3 #0.1
   # Maximal step length in Y
   # (in m, [0:1])
-  y: 0.04
+  y: 0.3 #0.04
   # Maximal step turn in yaw
   # (in rad, [0:1.5])
   z: 0.50
