@@ -6,23 +6,23 @@
     <DockSplitter sizes="0.333333;0.333333;0.333333" orientation="-" count="3">
      <DockArea name="...">
       <plot flip_y="false" style="Lines" mode="TimeSeries" flip_x="false">
-       <range left="0.000000" right="4.995571" top="0.036786" bottom="0.012630"/>
+       <range left="0.006278" right="5.003860" top="0.071183" bottom="-0.011732"/>
        <limitY/>
-       <curve name="/webots/Trunk from support foot (x,y,z)/x" color="#1f77b4"/>
+       <curve name="/webots/Trunk desired position (x,y,z)/x" color="#1ac938"/>
       </plot>
      </DockArea>
      <DockArea name="...">
       <plot flip_y="false" style="Lines" mode="TimeSeries" flip_x="false">
-       <range left="0.000000" right="4.995571" top="0.094512" bottom="-0.081331"/>
+       <range left="0.006278" right="5.003860" top="0.094512" bottom="-0.081331"/>
        <limitY/>
-       <curve name="/webots/Trunk from support foot (x,y,z)/y" color="#d62728"/>
+       <curve name="/webots/Trunk desired position (x,y,z)/y" color="#ff7f0e"/>
       </plot>
      </DockArea>
      <DockArea name="...">
       <plot flip_y="false" style="Lines" mode="TimeSeries" flip_x="false">
-       <range left="0.000000" right="4.995571" top="0.525872" bottom="0.325872"/>
+       <range left="0.006278" right="5.003860" top="0.525872" bottom="0.325872"/>
        <limitY/>
-       <curve name="/webots/Trunk from support foot (x,y,z)/z" color="#1ac938"/>
+       <curve name="/webots/Trunk desired position (x,y,z)/z" color="#f14cc1"/>
       </plot>
      </DockArea>
     </DockSplitter>
@@ -33,21 +33,21 @@
     <DockSplitter sizes="0.333333;0.333333;0.333333" orientation="-" count="3">
      <DockArea name="...">
       <plot flip_y="false" style="Lines" mode="TimeSeries" flip_x="false">
-       <range left="3162.683295" right="3167.679898" top="0.100000" bottom="-0.100000"/>
+       <range left="0.006278" right="5.003860" top="0.100000" bottom="-0.100000"/>
        <limitY/>
        <curve name="/webots/Trunk desired orientation (r,p,y)/x" color="#ff7f0e"/>
       </plot>
      </DockArea>
      <DockArea name="...">
       <plot flip_y="false" style="Lines" mode="TimeSeries" flip_x="false">
-       <range left="3162.683295" right="3167.679898" top="0.496058" bottom="0.296058"/>
+       <range left="0.006278" right="5.003860" top="0.496058" bottom="0.296058"/>
        <limitY/>
        <curve name="/webots/Trunk desired orientation (r,p,y)/y" color="#f14cc1"/>
       </plot>
      </DockArea>
      <DockArea name="...">
       <plot flip_y="false" style="Lines" mode="TimeSeries" flip_x="false">
-       <range left="3162.683295" right="3167.679898" top="0.074462" bottom="-0.054256"/>
+       <range left="0.006278" right="5.003860" top="0.100000" bottom="-0.100000"/>
        <limitY/>
        <curve name="/webots/Trunk desired orientation (r,p,y)/z" color="#9467bd"/>
       </plot>
@@ -60,21 +60,21 @@
     <DockSplitter sizes="0.333333;0.333333;0.333333" orientation="-" count="3">
      <DockArea name="...">
       <plot flip_y="false" style="Lines" mode="TimeSeries" flip_x="false">
-       <range left="3162.683295" right="3167.679898" top="0.150099" bottom="0.105718"/>
+       <range left="0.006278" right="5.003860" top="0.178935" bottom="0.080639"/>
        <limitY/>
        <curve name="/webots/Right foot desired position (x,y,z)/x" color="#17becf"/>
       </plot>
      </DockArea>
      <DockArea name="...">
       <plot flip_y="false" style="Lines" mode="TimeSeries" flip_x="false">
-       <range left="3162.683295" right="3167.679898" top="-0.085652" bottom="-0.092146"/>
+       <range left="0.006278" right="5.003860" top="-0.086802" bottom="-0.092139"/>
        <limitY/>
        <curve name="/webots/Right foot desired position (x,y,z)/y" color="#bcbd22"/>
       </plot>
      </DockArea>
      <DockArea name="...">
       <plot flip_y="false" style="Lines" mode="TimeSeries" flip_x="false">
-       <range left="3162.683295" right="3167.679898" top="-0.334036" bottom="-0.405510"/>
+       <range left="0.006278" right="5.003860" top="-0.336506" bottom="-0.423150"/>
        <limitY/>
        <curve name="/webots/Right foot desired position (x,y,z)/z" color="#1f77b4"/>
       </plot>
@@ -87,21 +87,21 @@
     <DockSplitter sizes="0.333333;0.333333;0.333333" orientation="-" count="3">
      <DockArea name="...">
       <plot flip_y="false" style="Lines" mode="TimeSeries" flip_x="false">
-       <range left="3162.683295" right="3167.679898" top="0.149460" bottom="0.109409"/>
+       <range left="0.006278" right="5.003860" top="0.178931" bottom="0.080632"/>
        <limitY/>
        <curve name="/webots/Left foot desired position (x,y,z)/x" color="#d62728"/>
       </plot>
      </DockArea>
      <DockArea name="...">
       <plot flip_y="false" style="Lines" mode="TimeSeries" flip_x="false">
-       <range left="3162.683295" right="3167.679898" top="0.079789" bottom="0.073058"/>
+       <range left="0.006278" right="5.003860" top="0.078934" bottom="0.073597"/>
        <limitY/>
        <curve name="/webots/Left foot desired position (x,y,z)/y" color="#1ac938"/>
       </plot>
      </DockArea>
      <DockArea name="...">
       <plot flip_y="false" style="Lines" mode="TimeSeries" flip_x="false">
-       <range left="3162.683295" right="3167.679898" top="-0.334145" bottom="-0.405019"/>
+       <range left="0.006278" right="5.003860" top="-0.336521" bottom="-0.423175"/>
        <limitY/>
        <curve name="/webots/Left foot desired position (x,y,z)/z" color="#ff7f0e"/>
       </plot>
@@ -114,21 +114,21 @@
     <DockSplitter sizes="0.333333;0.333333;0.333333" orientation="-" count="3">
      <DockArea name="...">
       <plot flip_y="false" style="Lines" mode="TimeSeries" flip_x="false">
-       <range left="3162.683295" right="3167.679898" top="0.031260" bottom="-0.023115"/>
+       <range left="0.006278" right="5.003860" top="0.100000" bottom="-0.100000"/>
        <limitY/>
        <curve name="/webots/Left foot desired orientation (r,p,y)/x" color="#f14cc1"/>
       </plot>
      </DockArea>
      <DockArea name="...">
       <plot flip_y="false" style="Lines" mode="TimeSeries" flip_x="false">
-       <range left="3162.683295" right="3167.679898" top="-0.394956" bottom="-0.396085"/>
+       <range left="0.006278" right="5.003860" top="-0.296058" bottom="-0.496058"/>
        <limitY/>
        <curve name="/webots/Left foot desired orientation (r,p,y)/y" color="#9467bd"/>
       </plot>
      </DockArea>
      <DockArea name="...">
       <plot flip_y="false" style="Lines" mode="TimeSeries" flip_x="false">
-       <range left="3162.683295" right="3167.679898" top="0.059944" bottom="-0.081099"/>
+       <range left="0.006278" right="5.003860" top="0.100000" bottom="-0.100000"/>
        <limitY/>
        <curve name="/webots/Left foot desired orientation (r,p,y)/z" color="#17becf"/>
       </plot>
@@ -141,21 +141,21 @@
     <DockSplitter sizes="0.333333;0.333333;0.333333" orientation="-" count="3">
      <DockArea name="...">
       <plot flip_y="false" style="Lines" mode="TimeSeries" flip_x="false">
-       <range left="3303.410595" right="3308.406059" top="0.100000" bottom="-0.100000"/>
+       <range left="0.006278" right="5.003860" top="0.100000" bottom="-0.100000"/>
        <limitY/>
        <curve name="/webots/Right foot desired orientation (r,p,y)/x" color="#bcbd22"/>
       </plot>
      </DockArea>
      <DockArea name="...">
       <plot flip_y="false" style="Lines" mode="TimeSeries" flip_x="false">
-       <range left="3303.410595" right="3308.406059" top="-0.296058" bottom="-0.496058"/>
+       <range left="0.006278" right="5.003860" top="-0.296058" bottom="-0.496058"/>
        <limitY/>
        <curve name="/webots/Right foot desired orientation (r,p,y)/y" color="#1f77b4"/>
       </plot>
      </DockArea>
      <DockArea name="...">
       <plot flip_y="false" style="Lines" mode="TimeSeries" flip_x="false">
-       <range left="3303.410595" right="3308.406059" top="0.100000" bottom="-0.100000"/>
+       <range left="0.006278" right="5.003860" top="0.100000" bottom="-0.100000"/>
        <limitY/>
        <curve name="/webots/Right foot desired orientation (r,p,y)/z" color="#d62728"/>
       </plot>
@@ -163,7 +163,7 @@
     </DockSplitter>
    </Container>
   </Tab>
-  <currentTabIndex index="5"/>
+  <currentTabIndex index="0"/>
  </tabbed_widget>
  <use_relative_time_offset enabled="1"/>
  <!-- - - - - - - - - - - - - - - -->
@@ -185,7 +185,6 @@
  </Plugins>
  <!-- - - - - - - - - - - - - - - -->
  <previouslyLoaded_Datafiles/>
- <previouslyLoaded_Streamer name="UDP Server"/>
  <!-- - - - - - - - - - - - - - - -->
  <customMathEquations/>
  <snippets/>
