@@ -108,8 +108,8 @@ namespace module::motion {
             // compute the pitch offset to the currently wanted pitch of the engine
             float wanted_pitch =
                 current_config.params.trunk_pitch
-                + current_config.params.trunk_pitch_p_coef_forward * walk_engine.getFootstep().getNext().x()
-                + current_config.params.trunk_pitch_p_coef_turn * std::abs(walk_engine.getFootstep().getNext().z());
+                + current_config.params.trunk_pitch_p_coef_forward * walk_engine.get_footstep().get_next().x()
+                + current_config.params.trunk_pitch_p_coef_turn * std::abs(walk_engine.get_footstep().get_next().z());
             RPY.y() += wanted_pitch;
 
             // threshold pitch and roll
@@ -117,13 +117,13 @@ namespace module::motion {
                 log<NUClear::WARN>(fmt::format("Robot roll exceeds threshold - {} > {}",
                                                std::abs(RPY.x()),
                                                current_config.imu_roll_threshold));
-                walk_engine.requestPause();
+                walk_engine.request_pause();
             }
             else if (std::abs(RPY.y()) > current_config.imu_pitch_threshold) {
                 log<NUClear::WARN>(fmt::format("Robot pitch exceeds threshold - {} > {}",
                                                std::abs(RPY.y()),
                                                current_config.imu_pitch_threshold));
-                walk_engine.requestPause();
+                walk_engine.request_pause();
             }
         });
 
@@ -135,7 +135,7 @@ namespace module::motion {
             // Make sure the walk engine has the parameters at least once
             if (first_config) {
                 // Send these parameters to the walk engine
-                walk_engine.setParameters(current_config.params);
+                walk_engine.set_parameters(current_config.params);
 
                 imu_reaction.enable(current_config.imu_active);
 
@@ -158,7 +158,7 @@ namespace module::motion {
             }
 
             // Send these parameters to the walk engine
-            walk_engine.setParameters(current_config.params);
+            walk_engine.set_parameters(current_config.params);
 
             imu_reaction.enable(current_config.imu_active);
         });
@@ -239,7 +239,7 @@ namespace module::motion {
             else {
 
                 // see if the walk engine has new goals for us
-                if (walk_engine.updateState(dt, current_orders)) {
+                if (walk_engine.update_state(dt, current_orders)) {
                     calculateJointGoals();
                 }
             }
@@ -289,7 +289,8 @@ namespace module::motion {
                 .toRotationMatrix();
         };
         // Read the cartesian positions and orientations for trunk and fly foot
-        std::tie(trunk_pos, trunk_axis, foot_pos, foot_axis, is_left_support) = walk_engine.computeCartesianPosition();
+        std::tie(trunk_pos, trunk_axis, foot_pos, foot_axis, is_left_support) =
+            walk_engine.compute_cartesian_position();
 
         // Change goals from support foot based coordinate system to trunk based coordinate system
 
@@ -312,8 +313,8 @@ namespace module::motion {
         const Eigen::Affine3f Htf = Hts * Hsf;
 
         // Calculate leg joints
-        const Eigen::Matrix4f left_foot  = walk_engine.getFootstep().isLeftSupport() ? Hts.matrix() : Htf.matrix();
-        const Eigen::Matrix4f right_foot = walk_engine.getFootstep().isLeftSupport() ? Htf.matrix() : Hts.matrix();
+        const Eigen::Matrix4f left_foot  = walk_engine.get_footstep().is_left_support() ? Hts.matrix() : Htf.matrix();
+        const Eigen::Matrix4f right_foot = walk_engine.get_footstep().is_left_support() ? Htf.matrix() : Hts.matrix();
 
         emit(graph("Left foot (x,y,z)", left_foot(0, 3), left_foot(1, 3), left_foot(2, 3)));
         emit(graph("Right foot (x,y,z)", right_foot(0, 3), right_foot(1, 3), right_foot(2, 3)));
