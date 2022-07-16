@@ -259,8 +259,8 @@ namespace module::motion {
 
         void build_trajectories(const Eigen::Vector3f& orders,
                                 const bool& start_movement,
-                                const bool& startStep,
-                                const bool& kickStep);
+                                const bool& start_step,
+                                const bool& kick_step);
 
         void build_start_movement_trajectories(const Eigen::Vector3f& orders) {
             build_trajectories(orders, true, false, false);
@@ -287,7 +287,7 @@ namespace module::motion {
         }
 
 
-        void build_walk_disable_trajectories(const Eigen::Vector3f& orders, const bool& footInIdlePosition);
+        void build_walk_disable_trajectories(const Eigen::Vector3f& orders, const bool& foot_in_idle_position);
 
         void save_current_trunk_state();
 

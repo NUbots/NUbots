@@ -241,14 +241,14 @@ namespace module::motion {
         trunk_acc_at_last.z() = trajs.get(TrajectoryTypes::TRUNK_POS_Z).acc(period_time);
 
         // Evaluate and save trunk orientation in next support foot frame
-        Eigen::Vector3f trunkAxis(trajs.get(TrajectoryTypes::TRUNK_AXIS_X).pos(period_time),
-                                  trajs.get(TrajectoryTypes::TRUNK_AXIS_Y).pos(period_time),
-                                  trajs.get(TrajectoryTypes::TRUNK_AXIS_Z).pos(period_time));
+        Eigen::Vector3f trunk_axis(trajs.get(TrajectoryTypes::TRUNK_AXIS_X).pos(period_time),
+                                   trajs.get(TrajectoryTypes::TRUNK_AXIS_Y).pos(period_time),
+                                   trajs.get(TrajectoryTypes::TRUNK_AXIS_Z).pos(period_time));
 
         // Transform to next support foot
-        trunkAxis.z() -= foot_step.get_next().z();
+        trunk_axis.z() -= foot_step.get_next().z();
 
-        trunk_axis_pos_at_last = trunkAxis;
+        trunk_axis_pos_at_last = trunk_axis;
 
         // Evaluate trunk orientation velocity and acceleration without frame transformation
         trunk_axis_vel_at_last.x() = trajs.get(TrajectoryTypes::TRUNK_AXIS_X).vel(period_time);
@@ -261,8 +261,8 @@ namespace module::motion {
 
     void QuinticWalkEngine::build_trajectories(const Eigen::Vector3f& orders,
                                                const bool& start_movement,
-                                               const bool& startStep,
-                                               const bool& kickStep) {
+                                               const bool& start_step,
+                                               const bool& kick_step) {
 
 
         // Time length of double and single support phase during the half cycle
@@ -296,12 +296,17 @@ namespace module::motion {
         point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, 0.0f, static_cast<float>(foot_step.is_left_support()));
         point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, half_period, static_cast<float>(foot_step.is_left_support()));
 
-        //  ******************************** Flying foot position******************************** //
-        // Key time points for trajectories are : [0 -> double_support_length -> single_support_length/2 -> half_period]
+        //  ******************************** Flying foot position ******************************** //
 
         //  Flying foot x position
         point(TrajectoryTypes::FOOT_POS_X, 0.0f, foot_step.get_last().x());
         point(TrajectoryTypes::FOOT_POS_X, double_support_length, foot_step.get_last().x());
+        if (kick_step) {
+            point(TrajectoryTypes::FOOT_POS_X,
+                  double_support_length + single_support_length * params.kick_phase,
+                  foot_step.get_next().x() + params.kick_length,
+                  params.kick_vel);
+        }
         point(TrajectoryTypes::FOOT_POS_X, half_period, foot_step.get_next().x());
 
         //  Flying foot y position
@@ -316,6 +321,7 @@ namespace module::motion {
         point(TrajectoryTypes::FOOT_POS_Z, half_period, 0.0f);
 
         //  ******************************** Flying foot orientation ******************************** //
+
         // Flying foot roll
         point(TrajectoryTypes::FOOT_AXIS_X, 0.0f, 0.0f);
         point(TrajectoryTypes::FOOT_AXIS_X, double_support_length, 0.0f);
@@ -331,7 +337,7 @@ namespace module::motion {
         point(TrajectoryTypes::FOOT_AXIS_Z, double_support_length, foot_step.get_last().z());
         point(TrajectoryTypes::FOOT_AXIS_Z, half_period, foot_step.get_next().z());
 
-        //  ******************************** Trunk position******************************** //
+        //  ******************************** Trunk position ******************************** //
 
         const float period      = 2.0f * half_period;
         const float pauseLength = 0.5f * params.trunk_pause * half_period;
@@ -365,7 +371,7 @@ namespace module::motion {
         const float trunk_velNext    = foot_step.get_next().x() / half_period;
 
         // Trunk x position
-        if (startStep) {
+        if (start_step) {
             point(TrajectoryTypes::TRUNK_POS_X, 0.0f, 0.0f, 0.0f, 0.0f);
         }
         else {
@@ -380,7 +386,7 @@ namespace module::motion {
 
         // Trunk y position
         point(TrajectoryTypes::TRUNK_POS_Y, 0.0f, trunk_pos_at_last.y(), trunk_vel_at_last.y(), trunk_acc_at_last.y());
-        if (startStep || start_movement) {
+        if (start_step || start_movement) {
             point(TrajectoryTypes::TRUNK_POS_Y,
                   half_period + timeShift - pauseLength,
                   trunk_point_middle.y() + trunk_vect.y() * params.first_step_swing_factor);
@@ -444,7 +450,7 @@ namespace module::motion {
     }
 
     void QuinticWalkEngine::build_walk_disable_trajectories(const Eigen::Vector3f& orders,
-                                                            const bool& footInIdlePosition) {
+                                                            const bool& foot_in_idle_position) {
         // Save the current trunk state to use it later
         save_current_trunk_state();
         // Update support foot and compute odometry
@@ -461,7 +467,7 @@ namespace module::motion {
         const float support_sign = foot_step.is_left_support() ? 1.0f : -1.0f;
 
         // Set float support phase
-        const float is_double_support = footInIdlePosition ? 1.0f : 0.0f;
+        const float is_double_support = foot_in_idle_position ? 1.0f : 0.0f;
         point(TrajectoryTypes::IS_DOUBLE_SUPPORT, 0.0f, is_double_support);
         point(TrajectoryTypes::IS_DOUBLE_SUPPORT, half_period, is_double_support);
 
@@ -469,7 +475,9 @@ namespace module::motion {
         point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, 0.0f, static_cast<float>(foot_step.is_left_support()));
         point(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT, half_period, static_cast<float>(foot_step.is_left_support()));
 
-        // Add points for flying foot position
+        //  ******************************** Flying foot position ******************************** //
+
+
         // Foot x position
         point(TrajectoryTypes::FOOT_POS_X, 0.0f, foot_step.get_last().x());
         point(TrajectoryTypes::FOOT_POS_X, double_support_length, foot_step.get_last().x());
@@ -480,6 +488,7 @@ namespace module::motion {
               double_support_length + single_support_length * params.foot_put_down_phase,
               0.0f);
         point(TrajectoryTypes::FOOT_POS_X, half_period, 0.0f);
+
 
         // Foot y position
         point(TrajectoryTypes::FOOT_POS_Y, 0.0f, foot_step.get_last().y());
@@ -495,7 +504,7 @@ namespace module::motion {
 
         // Foot z position
         // If the walk has just been disabled, make one single step to neutral pose
-        if (!footInIdlePosition) {
+        if (!foot_in_idle_position) {
             point(TrajectoryTypes::FOOT_POS_Z, 0.0f, 0.0f);
             point(TrajectoryTypes::FOOT_POS_Z, double_support_length, 0.0f);
             point(TrajectoryTypes::FOOT_POS_Z,
@@ -518,7 +527,7 @@ namespace module::motion {
             point(TrajectoryTypes::FOOT_POS_Z, half_period, 0.0f);
         }
 
-        // Add points for flying foot orientation
+        //  ******************************** Flying foot orientation ******************************** //
         // Flying foot x axis orientation
         point(TrajectoryTypes::FOOT_AXIS_X, 0.0f, 0.0f);
         point(TrajectoryTypes::FOOT_AXIS_X, half_period, 0.0f);
@@ -535,7 +544,7 @@ namespace module::motion {
               0.0f);
         point(TrajectoryTypes::FOOT_AXIS_Z, half_period, 0.0f);
 
-        // Add points for trunk position
+        //  ******************************** Trunk position******************************** //
         // Trunk x position
         point(TrajectoryTypes::TRUNK_POS_X, 0.0f, trunk_pos_at_last.x(), trunk_vel_at_last.x(), trunk_acc_at_last.x());
         point(TrajectoryTypes::TRUNK_POS_X, half_period, params.trunk_x_offset);
@@ -550,6 +559,7 @@ namespace module::motion {
         point(TrajectoryTypes::TRUNK_POS_Z, 0.0f, trunk_pos_at_last.z(), trunk_vel_at_last.z(), trunk_acc_at_last.z());
         point(TrajectoryTypes::TRUNK_POS_Z, half_period, params.trunk_height);
 
+        //  ******************************** Trunk orientation ******************************** //
         // Trunk x axis orientation
         point(TrajectoryTypes::TRUNK_AXIS_X,
               0.0f,
@@ -600,10 +610,10 @@ namespace module::motion {
     QuinticWalkEngine::PositionSupportTuple QuinticWalkEngine::compute_cartesian_position_at_time(
         const float& time) const {
         // Evaluate target cartesian state from trajectories
-        const auto [trunk_pos, trunkAxis, footPos, footAxis] = trajectoriesTrunkFootPos(time, trajs);
+        const auto [trunk_pos, trunk_axis, footPos, footAxis] = trajectories_trunk_foot_pos(time, trajs);
         // Discard is_double_support because we don't use it
-        const auto [_, is_left_supportFoot] = trajectoriesSupportFootState(time, trajs);
-        return {trunk_pos, trunkAxis, footPos, footAxis, is_left_supportFoot};
+        const auto [_, is_left_supportFoot] = trajectories_support_foot_state(time, trajs);
+        return {trunk_pos, trunk_axis, footPos, footAxis, is_left_supportFoot};
     }
 
 
