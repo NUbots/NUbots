@@ -785,6 +785,13 @@ namespace module::input {
                             sensors->Hgt = Rgt.matrix();
                         }
 
+                        if (log_level <= NUClear::DEBUG) {
+                            const Eigen::Affine3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
+                            const Eigen::Affine3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
+                            emit(graph("Left Foot Actual Position", Htl(0, 3), Htl(1, 3), Htl(2, 3)));
+                            emit(graph("Right Foot Actual Position", Htr(0, 3), Htr(1, 3), Htr(2, 3)));
+                        }
+
                         emit(std::move(sensors));
                     })
                 .disable();
