@@ -155,6 +155,7 @@ RUN install-cmake-from-source https://github.com/intel/media-driver/archive/inte
 COPY --chown=root:root etc/OpenCL/vendors/intel.icd /etc/OpenCL/vendors/intel.icd
 COPY usr/local/package/intel-compute-runtime.sh /usr/local/package/intel-compute-runtime.sh
 RUN /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute-runtime/archive/21.31.20514.tar.gz \
+    https://patch-diff.githubusercontent.com/raw/intel/compute-runtime/pull/550.patch -- \
     -DSKIP_UNIT_TESTS=ON \
     -DIGC_DIR=/usr/local
 
@@ -273,7 +274,7 @@ RUN mkdir -p /usr/local/include/zstr \
     && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/zstr_make_unique_polyfill.h -O /usr/local/include/zstr_make_unique_polyfill.h
 
 # Visual Mesh
-RUN install-from-source https://github.com/Fastcode/VisualMesh/archive/refs/tags/v2.1.1.tar.gz \
+RUN install-from-source https://github.com/ysims/VisualMesh/archive/1c8d08b8d93a438acce2dce0bcfe7e1f58509e1a.tar.gz \
     -DBUILD_TENSORFLOW_OP=OFF \
     -DBUILD_EXAMPLES=OFF \
     -DBUILD_OPENCL_ENGINE=ON
