@@ -4,6 +4,7 @@
 #include <fmt/ostream.h>
 #include <yaml-cpp/yaml.h>
 
+#include "tasks/RotationEvaluator.hpp"
 #include "tasks/StandEvaluator.hpp"
 #include "tasks/StrafeEvaluator.hpp"
 #include "tasks/WalkEvaluator.hpp"
@@ -235,9 +236,9 @@ namespace module {
                 else if (lastEvalRequestMsg.task == "strafe") {
                     task = std::make_unique<StrafeEvaluator>();
                 }
-                // else if (lastEvalRequestMsg.task == "rotation") {
-                //     task = std::make_unique<RotationEvaluator>();
-                // }
+                else if (lastEvalRequestMsg.task == "rotation") {
+                    task = std::make_unique<RotationEvaluator>();
+                }
                 // else if (lastEvalRequestMsg.task == "vector") {
                 //     task = std::make_unique<VectorEvaluator>();
                 // }
