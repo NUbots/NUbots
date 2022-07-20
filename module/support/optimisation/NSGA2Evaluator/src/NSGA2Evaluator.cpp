@@ -271,7 +271,7 @@ namespace module {
                 log<NUClear::DEBUG>("Evaluating");
                 if (event == Event::ResetDone) {
                     if (lastEvalRequestMsg.task == "walk" || lastEvalRequestMsg.task == "stand"
-                        || lastEvalRequestMsg.task == "strafe") {
+                        || lastEvalRequestMsg.task == "strafe" || lastEvalRequestMsg.task == "rotation") {
                         task->evaluatingState(subsumptionId, this);
                     }
                     else {

@@ -59,6 +59,8 @@ namespace module {
 
                 /// @brief The walk command rotation.
                 double walk_command_rotation = 0.0;
+
+                double rotVal = 0.0;
             };
 
         }  // namespace optimisation

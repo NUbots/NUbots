@@ -31,9 +31,14 @@ namespace module {
             using utility::support::Expression;
 
             void RotationEvaluator::processRawSensorMsg(const RawSensors& sensors, NSGA2Evaluator* evaluator) {
+
                 updateMaxFieldPlaneSway(sensors);
                 if (checkForFall(sensors)) {
                     evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TerminateEarly));
+                }
+                if (initialPositionSet) {
+                    rotVal = sensors.gyroscope.z();
+                    NUClear::log<NUClear::DEBUG>("Rotation Value is: ", rotVal);
                 }
             }
 
@@ -44,11 +49,15 @@ namespace module {
                     initialRobotPosition.x() = position.value.X;
                     initialRobotPosition.y() = position.value.Y;
                     initialRobotPosition.z() = position.value.Z;
+
+                    rotVal = 0.0;
                 }
 
                 robotPosition.x() = position.value.X;
                 robotPosition.y() = position.value.Y;
                 robotPosition.z() = position.value.Z;
+
+                // rotVal += position.gyroscope.z();
 
 
                 // if (checkOffCourse())  // Checking if NUgus walks in straght line in the X directon
@@ -63,9 +72,9 @@ namespace module {
                 trial_duration_limit = std::chrono::seconds(currentRequest.trial_duration_limit);
 
                 // Set our walk command
-                walk_command_velocity.x() = currentRequest.parameters.real_params[11];
-                walk_command_velocity.y() = 0.0;  // 0.0;
-                walk_command_rotation     = 0.0;  // currentRequest.parameters.real_params[11];  // -0.785;  // 0.0;
+                walk_command_velocity.x() = -0.05;  // currentRequest.parameters.real_params[11];
+                walk_command_velocity.y() = -0.05;  // currentRequest.parameters.real_params[11];  // 0.0;
+                walk_command_rotation     = currentRequest.parameters.real_params[11];  // -0.785;  // 0.0;
 
                 // Read the QuinticWalk config and overwrite the config parameters with the current individual's
                 // parameters
@@ -155,8 +164,8 @@ namespace module {
             std::vector<double> RotationEvaluator::calculateScores() {
                 auto robotDistanceTravelled = std::fabs(initialRobotPosition.x() - robotPosition.x());
                 return {
-                    maxFieldPlaneSway,            // For now, we want to reduce this
-                    1.0 / robotDistanceTravelled  // 1/x since the NSGA2 optimiser is a minimiser
+                    maxFieldPlaneSway,      // For now, we want to reduce this
+                    robotDistanceTravelled  // finish closer to where we start the better. Minumiser!!!
                 };
             }
 
@@ -193,7 +202,6 @@ namespace module {
                 // NUClear::log<NUClear::DEBUG>("X roatation is ", sensors.gyroscope.x());
                 // NUClear::log<NUClear::DEBUG>("Y roatation is ", sensors.gyroscope.y());
                 // NUClear::log<NUClear::DEBUG>("Z roatation is ", sensors.gyroscope.z());
-                // NUClear::log<NUClear::DEBUG>(sensors);
 
                 // if (!falling && std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > cfg.falling_angle)
 

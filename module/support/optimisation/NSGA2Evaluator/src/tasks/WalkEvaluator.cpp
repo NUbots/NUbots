@@ -185,18 +185,6 @@ namespace module {
                 bool fallen        = false;
                 auto accelerometer = sensors.accelerometer;
 
-                // Transform to torso {t} from world {w} space
-                // Eigen::Matrix4d Hwt = sensors.Htw.inverse();
-                // // Basis Z vector of torso {t} in world {w} space
-                // Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
-
-                // NUClear::log<NUClear::DEBUG>("X roatation is ", sensors.gyroscope.x());
-                // NUClear::log<NUClear::DEBUG>("Y roatation is ", sensors.gyroscope.y());
-                // NUClear::log<NUClear::DEBUG>("Z roatation is ", sensors.gyroscope.z());
-                // NUClear::log<NUClear::DEBUG>(sensors);
-
-                // if (!falling && std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > cfg.falling_angle)
-
                 if ((std::fabs(accelerometer.x()) > 9.2 || std::fabs(accelerometer.y()) > 9.2)
                     && std::fabs(accelerometer.z()) < 0.5) {
                     NUClear::log<NUClear::DEBUG>("Fallen!");
