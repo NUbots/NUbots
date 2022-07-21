@@ -1,0 +1,102 @@
+#include <catch.hpp>
+#include <nuclear>
+
+#include "Director.hpp"
+#include "TestBase.hpp"
+
+// Anonymous namespace to avoid name collisions
+namespace {
+
+    struct SimpleTask {};
+    struct Helper {};
+
+    struct Condition {
+        enum Value { LEVEL_0, LEVEL_1, LEVEL_2, LEVEL_3, LEVEL_4 } value;
+        Condition(const Value& v) : value(v) {}
+        operator int() const {
+            return value;
+        }
+    };
+
+    std::vector<std::string> events;
+
+    class TestReactor : public TestBase<TestReactor> {
+    public:
+        explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
+            : TestBase<TestReactor>(std::move(environment)) {
+
+            on<Provide<SimpleTask>, When<Condition, std::equal_to, Condition::LEVEL_4>>().then([this] {  //
+                events.push_back("task executed");
+            });
+
+            on<Provide<Helper>>().then([this] {  //
+                events.push_back("helper waiting");
+            });
+            on<Provide<Helper>,
+               Causing<Condition, Condition::LEVEL_4>,
+               When<Condition, std::equal_to, Condition::LEVEL_3>>()
+                .then([this] {
+                    events.push_back("helper causing level 4");
+                    emit(std::make_unique<Condition>(Condition::LEVEL_4));
+                });
+            on<Provide<Helper>,
+               Causing<Condition, Condition::LEVEL_3>,
+               When<Condition, std::equal_to, Condition::LEVEL_2>>()
+                .then([this] {
+                    events.push_back("helper causing level 3");
+                    emit(std::make_unique<Condition>(Condition::LEVEL_3));
+                });
+            on<Provide<Helper>,
+               Causing<Condition, Condition::LEVEL_2>,
+               When<Condition, std::equal_to, Condition::LEVEL_1>>()
+                .then([this] {
+                    events.push_back("helper causing level 2");
+                    emit(std::make_unique<Condition>(Condition::LEVEL_2));
+                });
+            on<Provide<Helper>, Causing<Condition, Condition::LEVEL_1>>().then([this] {
+                events.push_back("helper causing level 1");
+                emit(std::make_unique<Condition>(Condition::LEVEL_1));
+            });
+
+            /**************
+             * TEST STEPS *
+             **************/
+            on<Trigger<Step<1>>, Priority::LOW>().then([this] {
+                // Start up the helper
+                events.push_back("emitting helper task");
+                emit<Task>(std::make_unique<Helper>(), 10);
+            });
+            on<Trigger<Step<2>>, Priority::LOW>().then([this] {
+                // Emit the task
+                events.push_back("emitting task");
+                emit<Task>(std::make_unique<SimpleTask>());
+            });
+            on<Startup>().then([this] {
+                emit(std::make_unique<Step<1>>());
+                emit(std::make_unique<Step<2>>());
+            });
+        }
+    };
+}  // namespace
+
+TEST_CASE("Test that when/causing relationships can be cascaded", "[director][!mayfail]") {
+
+    NUClear::PowerPlant::Configuration config;
+    config.thread_count = 1;
+    NUClear::PowerPlant powerplant(config);
+    powerplant.install<module::extension::Director>();
+    powerplant.install<TestReactor>();
+    powerplant.start();
+
+    // Check the events fired in order and only those events
+    REQUIRE(events
+            == std::vector<std::string>{"emitting helper task",
+                                        "helper waiting",
+                                        "emitting task",
+                                        "helper causing level 1",
+                                        "helper causing level 2",
+                                        "helper causing level 3",
+                                        "helper causing level 4",
+                                        "task executed",
+                                        "helper waiting"});
+}
