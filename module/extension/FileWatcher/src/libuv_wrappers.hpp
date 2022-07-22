@@ -75,7 +75,7 @@ namespace module::extension::uv {
             close();
         }
         /// We ignore the flag variable as it is not implemented
-        void start(uv_fs_event_cb cb, std::string& path) {
+        void start(uv_fs_event_cb cb, std::string path) {
             uv_fs_event_start(&fs_event, cb, path.c_str(), 0);
         }
 
