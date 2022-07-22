@@ -60,9 +60,9 @@ namespace module::extension {
 
         // The libuv event loop
         uv::loop_t loop;
-        uv::async_t shutdown;
         uv::async_t add_watch;
         uv::async_t remove_watch;
+        uv::async_t shutdown;
 
         /// True on the first loop then turns false after the FileWatcherReady event is emitted
         bool first_loop = true;
