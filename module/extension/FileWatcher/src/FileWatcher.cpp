@@ -293,15 +293,17 @@ namespace module::extension {
     FileWatcher::~FileWatcher() {
         for (const auto& path : paths) {
             if (path.second.handle) {
-                uv_fs_event_stop(path.second.handle.get());
-                uv_close(reinterpret_cast<uv_handle_t*>(path.second.handle.get()), [](uv_handle_t* /* handle */) {});
+                if(uv__is_active(path.second.handle)){
+                    uv_close(reinterpret_cast<uv_handle_t*>(path.second.handle.get()), [](uv_handle_t* /* handle */) {});
+                }
             }
         }
 
         for (const auto& remove : remove_queue) {
             if (remove) {
-                uv_fs_event_stop(remove.get());
-                uv_close(reinterpret_cast<uv_handle_t*>(remove.get()), [](uv_handle_t* /* handle */) {});
+                if(uv__is_active(remove)){
+                    uv_close(reinterpret_cast<uv_handle_t*>(remove.get()), [](uv_handle_t* /* handle */) {});
+                }
             }
         }
         uv_close(reinterpret_cast<uv_handle_t*>(remove_watch.get()), [](uv_handle_t* /* handle */) {});
