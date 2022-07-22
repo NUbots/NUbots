@@ -293,9 +293,10 @@ namespace module::extension {
         // Make sure that the shutdown has been run
         uv_run(loop.get(), UV_RUN_NOWAIT);
         // Add close callbacks to all the handles
-        uv_walk(loop.get(), [](uv_handle_t* handle, void*) {
-            uv_close(handle, [](uv_handle_t* /* handle */){});
-        }, nullptr);
+        uv_walk(
+            loop.get(),
+            [](uv_handle_t* handle, void*) { uv_close(handle, [](uv_handle_t* /* handle */) {}); },
+            nullptr);
         // Run all the close callbacks
         uv_run(loop.get(), UV_RUN_NOWAIT);
         uv_loop_close(loop.get());
