@@ -23,18 +23,6 @@
 
 namespace module::extension {
 
-
-    template<typename T> 
-    struct uv_handle_deleter {
-        void operator()(T* handle) const {
-            uv_close(reinterpret_cast<uv_handle_t*>(handle), [](uv_handle_t* /* handle */) {});
-            delete handle;
-        }
-    };
-
-    template<typename T> 
-    using unique_ptr_uv = std::unique_ptr<T, uv_handle_deleter<T>>;
-
     class FileWatcher : public NUClear::Reactor {
     private:
         struct ReactionMap {
@@ -58,7 +46,7 @@ namespace module::extension {
             std::string path;
 
             // The libuv handle for this folder
-            unique_ptr_uv<uv_fs_event_t> handle;
+            std::unique_ptr<uv_fs_event_t> handle;
         };
 
         // The storage for paths
@@ -67,13 +55,13 @@ namespace module::extension {
 
         // The event queue for adding and removing watches
         std::vector<PathMap*> add_queue;
-        std::vector<unique_ptr_uv<uv_fs_event_t>> remove_queue;
+        std::vector<std::unique_ptr<uv_fs_event_t>> remove_queue;
 
         // The libuv event loop
         std::unique_ptr<uv_loop_t> loop;
-        unique_ptr_uv<uv_async_t> add_watch;
-        unique_ptr_uv<uv_async_t> remove_watch;
-        unique_ptr_uv<uv_async_t> shutdown;
+        std::unique_ptr<uv_async_t> add_watch;
+        std::unique_ptr<uv_async_t> remove_watch;
+        std::unique_ptr<uv_async_t> shutdown;
 
         /// True on the first loop then turns false after the FileWatcherReady event is emitted
         bool first_loop = true;
