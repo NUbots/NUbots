@@ -235,7 +235,7 @@ namespace module::extension {
                 if (paths.find(dir) == paths.end()) {
                     auto& p        = paths[path];
                     p.handle       = std::make_unique<uv_fs_event_t>();
-                    uv_fs_event_init(loop.get(), p.handle);
+                    uv_fs_event_init(loop.get(), p.handle.get());
                     p.handle->data = this;
                     p.path         = dir;
                     add_queue.push_back(&p);
