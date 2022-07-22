@@ -109,8 +109,22 @@ namespace module::extension {
 
     FileWatcher::FileWatcher(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
-        , loop()
-        , add_watch(loop, [](uv_async_t* async_handle) {
+        , loop(std::make_unique<uv_loop_t>())
+        , add_watch(new uv_async_t)
+        , remove_watch(new uv_async_t)
+        , shutdown(new uv_async_t) {
+
+        // Initialise our UV loop
+        uv_loop_init(loop.get());
+
+        // Initialise our shutdown event to stop uv
+        uv_async_init(loop.get(), shutdown.get(), [](uv_async_t* handle) {
+            // Stop the loop
+            uv_stop(handle->loop);
+        });
+
+        // Initialise our add_watch event to add new watches
+        uv_async_init(loop.get(), add_watch.get(), [](uv_async_t* async_handle) {
             // Grab our reactor context back
             FileWatcher& reactor = *reinterpret_cast<FileWatcher*>(async_handle->data);
 
@@ -119,11 +133,18 @@ namespace module::extension {
 
             for (auto it = reactor.add_queue.begin(); it != reactor.add_queue.end();) {
                 auto& map = *it;
-                map->handle->start(&FileWatcher::file_watch_callback, map->path);
+                uv_fs_event_init(async_handle->loop, map->handle.get());
+                uv_fs_event_start(map->handle.get(),
+                                  &FileWatcher::file_watch_callback,
+                                  map->path.c_str(),
+                                  UV_RENAME | UV_CHANGE);
                 it = reactor.add_queue.erase(it);
             }
-        }, this)
-        , remove_watch(loop, [](uv_async_t* async_handle) {
+        });
+        add_watch->data = this;
+
+        // Initialise our remove_watch event to remove watches
+        uv_async_init(loop.get(), remove_watch.get(), [](uv_async_t* async_handle) {
             // Grab our reactor context back
             FileWatcher& reactor = *reinterpret_cast<FileWatcher*>(async_handle->data);
 
@@ -131,31 +152,30 @@ namespace module::extension {
             std::lock_guard<std::mutex> lock(reactor.paths_mutex);
 
             for (auto it = reactor.remove_queue.begin(); it != reactor.remove_queue.end();) {
+                uv_fs_event_stop(it->get());
+                uv_close(reinterpret_cast<uv_handle_t*>(it->get()), [](uv_handle_t* /* handle */) {});
                 it = reactor.remove_queue.erase(it);
             }
-        }, this)
-        , shutdown(loop, [](uv_async_t* handle) {
-            // Stop the loop
-            uv_stop(handle->loop);
-        }) {
+        });
+        remove_watch->data = this;
 
         on<Always>().then("FileWatcher", [this] {
             if (first_loop) {
                 // The first time run with no wait so if there are no events we won't get stuck
-                loop.run(UV_RUN_NOWAIT);
+                uv_run(loop.get(), UV_RUN_NOWAIT);
                 first_loop = false;
                 emit(std::make_unique<::extension::FileWatcherReady>());
             }
             else {
                 // Run our event loop
-                loop.run(UV_RUN_DEFAULT);
+                uv_run(loop.get(), UV_RUN_DEFAULT);
             }
         });
 
         // Shutdown with the system
         on<Shutdown>().then("Shutdown FileWatcher", [this] {
             // Send an event to shutdown
-            shutdown.send();
+            uv_async_send(shutdown.get());
         });
 
         on<Trigger<Unbind>>().then("Unbind FileWatch", [this](const Unbind& fw) {
@@ -215,10 +235,12 @@ namespace module::extension {
                 // If this is a new path to watch
                 if (paths.find(dir) == paths.end()) {
                     auto& p  = paths[path];
-                    p.handle = std::make_unique<uv::fs_event_t>(loop, this);
+                    p.handle = unique_ptr_uv<uv_fs_event_s>(new uv_fs_event_t);
+                    uv_fs_event_init(loop.get(), p.handle.get());
+                    p.handle->data = this;
                     p.path         = dir;
                     add_queue.push_back(&p);
-                    add_watch.send();
+                    uv_async_send(add_watch.get());
                 }
 
                 // Add our reaction here into the correct spot
@@ -271,13 +293,21 @@ namespace module::extension {
 
     FileWatcher::~FileWatcher() {
         // Remove all the handles to the uv loop will finish
-        paths.clear();
-        remove_queue.clear();
-        remove_watch.close();
-        add_watch.close();
-        shutdown.close();
-        while (loop.run(UV_RUN_NOWAIT) != 0) {
+        for (auto& path : paths) {
+            if (path.second.handle) {
+                path.second.handle.reset();
+            }
         }
-        loop.close();
+        for (auto& remove : remove_queue) {
+            if (remove) {
+                remove.reset();
+            }
+        }
+        remove_watch.reset();
+        add_watch.reset();
+        shutdown.reset();
+        while (uv_run(loop.get(), UV_RUN_NOWAIT) != 0) {
+        }
+        uv_loop_close(loop.get());
     }
 }  // namespace module::extension
