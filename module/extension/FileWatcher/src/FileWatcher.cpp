@@ -133,6 +133,7 @@ namespace module::extension {
 
             for (auto it = reactor.add_queue.begin(); it != reactor.add_queue.end();) {
                 auto& map = *it;
+                uv_fs_event_init(async_handle->loop, map->handle.get());
                 uv_fs_event_start(map->handle.get(),
                                   &FileWatcher::file_watch_callback,
                                   map->path.c_str(),
@@ -233,9 +234,8 @@ namespace module::extension {
 
                 // If this is a new path to watch
                 if (paths.find(dir) == paths.end()) {
-                    auto& p  = paths[path];
-                    p.handle = std::make_unique<uv_fs_event_t>();
-                    uv_fs_event_init(loop.get(), p.handle.get());
+                    auto& p        = paths[path];
+                    p.handle       = std::make_unique<uv_fs_event_t>();
                     p.handle->data = this;
                     p.path         = dir;
                     add_queue.push_back(&p);
