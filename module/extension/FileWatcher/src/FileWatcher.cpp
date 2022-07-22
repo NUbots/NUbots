@@ -133,7 +133,6 @@ namespace module::extension {
 
             for (auto it = reactor.add_queue.begin(); it != reactor.add_queue.end();) {
                 auto& map = *it;
-                uv_fs_event_init(async_handle->loop, map->handle.get());
                 uv_fs_event_start(map->handle.get(),
                                   &FileWatcher::file_watch_callback,
                                   map->path.c_str(),
