@@ -55,14 +55,17 @@ namespace module {
                     FitnessScoresSent = 7
                 };
 
+                /// @brief The current simulation time
+                double simTime = 0.0;
+
             private:
                 std::unique_ptr<EvaluatorTask> task;
 
                 /// @brief Subsumption priority ID for this module
                 size_t subsumptionId;
 
-                /// @brief The current simulation time
-                double simTime = 0.0;
+                // /// @brief The current simulation time
+                // double simTime = 0.0;
 
 
                 /// @brief The number of the current generation
@@ -112,7 +115,8 @@ namespace module {
 
                 /// @brief Handle the EVALUATING state
                 void Evaluating(State previousState, Event event);
-                //void EvaluatingWalk(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event); What is this????
+                // void EvaluatingWalk(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event); What is
+                // this????
 
                 /// @brief Handle the TERMINATING_EARLY state
                 void TerminatingEarly(State previousState, Event event);

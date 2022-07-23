@@ -36,10 +36,14 @@ namespace module {
                 if (checkForFall(sensors)) {
                     evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TerminateEarly));
                 }
-                if (initialPositionSet) {
-                    rotVal = sensors.gyroscope.z();
-                    NUClear::log<NUClear::DEBUG>("Rotation Value is: ", rotVal);
-                }
+                double simTime = evaluator->simTime;
+                omega          = sensors.gyroscope.z();
+                deltaT         = simTime - oldTime;
+                oldTime        = simTime;
+                theta += omega * deltaT / 1000;
+                // NUClear::log<NUClear::DEBUG>("Theta =", theta);
+                // NUClear::log<NUClear::DEBUG>("Omega =", omega);
+                // NUClear::log<NUClear::DEBUG>("DeltaT =", deltaT);
             }
 
             void RotationEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position,
@@ -49,21 +53,11 @@ namespace module {
                     initialRobotPosition.x() = position.value.X;
                     initialRobotPosition.y() = position.value.Y;
                     initialRobotPosition.z() = position.value.Z;
-
-                    rotVal = 0.0;
                 }
 
                 robotPosition.x() = position.value.X;
                 robotPosition.y() = position.value.Y;
                 robotPosition.z() = position.value.Z;
-
-                // rotVal += position.gyroscope.z();
-
-
-                // if (checkOffCourse())  // Checking if NUgus walks in straght line in the X directon
-                // {
-                //     evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TerminateEarly));
-                // }
             }
 
             void RotationEvaluator::setUpTrial(const NSGA2EvaluationRequest& currentRequest) {
@@ -160,12 +154,17 @@ namespace module {
                 fitnessScores->constraints                        = constraints;
                 return fitnessScores;
             }
-            // I want a pattern here passed as an arg
+
             std::vector<double> RotationEvaluator::calculateScores() {
-                auto robotDistanceTravelled = std::fabs(initialRobotPosition.x() - robotPosition.x());
+                // make this pythagorean
+                auto robotDistanceTravelled_X = std::fabs(initialRobotPosition.x() - robotPosition.x());
+                auto robotDistanceTravelled_Y = std::fabs(initialRobotPosition.y() - robotPosition.y());
+                auto robotDistanceTravelled =
+                    std::pow(std::pow(robotDistanceTravelled_X, 2) + std::pow(robotDistanceTravelled_Y, 2), 0.5);
+
                 return {
-                    maxFieldPlaneSway,      // For now, we want to reduce this
-                    robotDistanceTravelled  // finish closer to where we start the better. Minumiser!!!
+                    maxFieldPlaneSway,                    // For now, we want to reduce this
+                    1.0 / theta + robotDistanceTravelled  // finish closer to where we start the better. Minumiser!!!
                 };
             }
 
@@ -194,17 +193,6 @@ namespace module {
                 bool fallen        = false;
                 auto accelerometer = sensors.accelerometer;
 
-                // Transform to torso {t} from world {w} space
-                // Eigen::Matrix4d Hwt = sensors.Htw.inverse();
-                // // Basis Z vector of torso {t} in world {w} space
-                // Eigen::Vector3d uZTw = Hwt.block(0, 2, 3, 1);
-
-                // NUClear::log<NUClear::DEBUG>("X roatation is ", sensors.gyroscope.x());
-                // NUClear::log<NUClear::DEBUG>("Y roatation is ", sensors.gyroscope.y());
-                // NUClear::log<NUClear::DEBUG>("Z roatation is ", sensors.gyroscope.z());
-
-                // if (!falling && std::acos(Eigen::Vector3d::UnitZ().dot(uZTw)) > cfg.falling_angle)
-
                 if ((std::fabs(accelerometer.x()) > 9.2 || std::fabs(accelerometer.y()) > 9.2)
                     && std::fabs(accelerometer.z()) < 0.5) {
                     NUClear::log<NUClear::DEBUG>("Fallen!");
@@ -225,26 +213,6 @@ namespace module {
                 if (fieldPlaneSway > maxFieldPlaneSway) {
                     maxFieldPlaneSway = fieldPlaneSway;
                 }
-            }
-
-            // Checking if NUgus goes off the Y axis path too far
-            bool RotationEvaluator::checkOffCourse() {
-                bool offCourse = false;
-
-                auto distanceOffCourse = std::fabs(robotPosition.y() - initialRobotPosition.y());
-
-
-                if (distanceOffCourse >= 0.2) {
-                    NUClear::log<NUClear::DEBUG>("OffCourse!");
-                    NUClear::log<NUClear::DEBUG>("orination on robot (x y z): ",
-                                                 robotPosition.x(),
-                                                 robotPosition.y(),
-                                                 robotPosition.z());
-
-                    offCourse = true;
-                }
-
-                return offCourse;
             }
 
         }  // namespace optimisation

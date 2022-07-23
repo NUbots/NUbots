@@ -39,7 +39,6 @@ namespace module {
                 std::vector<double> constraintsNotViolated();
                 bool checkForFall(const RawSensors& sensors);
                 void updateMaxFieldPlaneSway(const RawSensors& sensors);
-                bool checkOffCourse();
 
             private:
                 /// @brief Robot state for this evaluation, used during fitness and constraint calculation
@@ -60,7 +59,10 @@ namespace module {
                 /// @brief The walk command rotation.
                 double walk_command_rotation = 0.0;
 
-                double rotVal = 0.0;
+                double theta   = 0.0;
+                double omega   = 0.0;
+                double deltaT  = 0.0;
+                double oldTime = 0.0;
             };
 
         }  // namespace optimisation
