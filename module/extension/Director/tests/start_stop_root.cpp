@@ -8,10 +8,6 @@
 namespace {
 
     struct SimpleTask {};
-    struct Runner {
-        Runner(const bool& task_) : task(task_) {}
-        bool task;
-    };
 
     std::vector<std::string> events;
 
@@ -24,29 +20,18 @@ namespace {
             on<Provide<SimpleTask>>().then([this] { events.push_back("provide"); });
             on<Stop<SimpleTask>>().then([this] { events.push_back("stop"); });
 
-            on<Provide<Runner>>().then([this](const Runner& runner) {
-                // Emit a task to execute
-                if (runner.task) {
-                    events.push_back("running task");
-                    emit<Task>(std::make_unique<SimpleTask>());
-                }
-                else {
-                    events.push_back("removing task");
-                }
-            });
-
             /**************
              * TEST STEPS *
              **************/
             on<Trigger<Step<1>>, Priority::LOW>().then([this] {
                 // Emit a task to execute
                 events.push_back("initiating");
-                emit<Task>(std::make_unique<Runner>(true));
+                emit<Task>(std::make_unique<SimpleTask>());
             });
             on<Trigger<Step<2>>, Priority::LOW>().then([this] {
                 // Emit a null task to remove the task
                 events.push_back("finishing");
-                emit<Task>(std::make_unique<Runner>(false));
+                emit<Task>(std::unique_ptr<SimpleTask>(nullptr));
             });
             on<Startup>().then([this] {
                 emit(std::make_unique<Step<1>>());
@@ -57,8 +42,8 @@ namespace {
 
 }  // namespace
 
-TEST_CASE("Test that the start and stop events fire when a provider gains/loses a task",
-          "[director][start][stop][!mayfail]") {
+TEST_CASE("Test that the start and stop events fire when a provider gains/loses a root task",
+          "[director][start][stop][root][!mayfail]") {
 
     NUClear::PowerPlant::Configuration config;
     config.thread_count = 1;
@@ -71,11 +56,9 @@ TEST_CASE("Test that the start and stop events fire when a provider gains/loses 
     REQUIRE(events
             == std::vector<std::string>{
                 "initiating",
-                "running task",
                 "start",
                 "provide",
                 "finishing",
-                "removing task",
                 "stop",
             });
 }
