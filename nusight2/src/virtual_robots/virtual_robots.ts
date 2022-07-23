@@ -1,8 +1,8 @@
 import { DirectNUClearNetClient } from '../server/nuclearnet/direct_nuclearnet_client'
 import { FakeNUClearNetClient } from '../server/nuclearnet/fake_nuclearnet_client'
-
 import { ChartSimulator } from './simulators/chart_data_simulator'
 import { OverviewSimulator } from './simulators/overview_simulator'
+import { ReactionStatsSimulator } from './simulators/reaction_stats_simulator'
 import { ScriptDataSimulator } from './simulators/script_data_simulator'
 import { SensorsSimulator } from './simulators/sensors_simulator'
 import { VisionSimulator } from './simulators/vision_simulator'
@@ -34,6 +34,7 @@ export class VirtualRobots {
         nuclearnetAddress,
         simulators: [
           OverviewSimulator.of({ nuclearnetClient, robotIndex: i, numRobots }),
+          ReactionStatsSimulator.of({ nuclearnetClient, robotIndex: i, numRobots }),
           SensorsSimulator.of({ nuclearnetClient, robotIndex: i, numRobots }),
           ChartSimulator.of({ nuclearnetClient }),
           VisionSimulator.of({ nuclearnetClient }),

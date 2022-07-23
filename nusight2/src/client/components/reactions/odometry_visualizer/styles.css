@@ -1,0 +1,38 @@
+.visualizer {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+
+.legend {
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+  box-sizing: border-box;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 16px;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+.item:not(:last-child) {
+  margin-right: 8px;
+}
+
+.color {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: none;
+  border: none;
+  margin-right: 8px;
+}

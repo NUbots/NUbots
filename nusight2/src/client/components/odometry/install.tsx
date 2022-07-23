@@ -1,11 +1,8 @@
-import React from 'react'
-import { ComponentType } from 'react'
-
+import React, { ComponentType } from 'react'
 import { NavigationConfiguration } from '../../navigation'
 import { NUsightNetwork } from '../../network/nusight_network'
 import { AppModel } from '../app/model'
 import { OdometryController } from './controller'
-
 import Icon from './icon.svg'
 import { OdometryModel } from './model'
 import { OdometryNetwork } from './network'
