@@ -11,7 +11,7 @@ function(ToolchainLibraryFinder)
       "PATH_SUFFIX"
       "BINARY"
       "VERSION_FILE"
-      "VERSION_BINARY_ARGUMENTS"
+      "BINARY_ARGUMENTS"
       "VERSION_REGEX"
   )
   cmake_parse_arguments(PACKAGE "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -119,7 +119,7 @@ function(ToolchainLibraryFinder)
   endif()
 
   # Find our version if we can
-  if((PACKAGE_VERSION_FILE AND PACKAGE_HEADER) OR (PACKAGE_VERSION_BINARY_ARGUMENTS AND PACKAGE_BINARY))
+  if((PACKAGE_VERSION_FILE AND PACKAGE_HEADER) OR (PACKAGE_BINARY_ARGUMENTS AND PACKAGE_BINARY))
     unset(full_version_string)
 
     # Read our package version file into a variable
@@ -128,10 +128,10 @@ function(ToolchainLibraryFinder)
     endif()
 
     # Execute our binary to get a version string
-    if(PACKAGE_VERSION_BINARY_ARGUMENTS AND PACKAGE_BINARY)
+    if(PACKAGE_BINARY_ARGUMENTS AND PACKAGE_BINARY)
       exec_program(
         ${${PACKAGE_NAME}_BINARY} ARGS
-        ${PACKAGE_VERSION_BINARY_ARGUMENTS}
+        ${PACKAGE_BINARY_ARGUMENTS}
         OUTPUT_VARIABLE full_version_string
       )
     endif()
