@@ -100,70 +100,91 @@ RUN python /usr/local/generate_toolchain.py --prefix /usr/local
 RUN install-from-source https://www.zlib.net/zlib-1.2.12.tar.gz
 
 # LLVM and Clang
-RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-12.0.1.tar.gz \
+RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-14.0.6.tar.gz \
     -DLLVM_ENABLE_PROJECTS="clang;clang-tools-extra;lld" \
     -DLLVM_ENABLE_SPHINX=OFF \
     -DLLVM_BUILD_LLVM_DYLIB=ON \
     -DLLVM_LINK_LLVM_DYLIB=ON
 
 # SPIRV LLVM Translator
-RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v12.0.0.tar.gz \
+RUN install-cmake-from-source https://github.com/KhronosGroup/SPIRV-LLVM-Translator/archive/v14.0.0.tar.gz \
     -DLLVM_INCLUDE_TESTS=OFF
 
 # opencl-clang
-COPY usr/local/package/opencl-clang.sh /usr/local/package/opencl-clang.sh
-RUN /usr/local/package/opencl-clang.sh https://github.com/intel/opencl-clang/archive/v12.0.0.tar.gz
+RUN install-from-source-with-patches https://github.com/intel/opencl-clang/archive/v14.0.0.tar.gz \
+    https://gist.githubusercontent.com/TrentHouliston/4281ecb27d1990f77cc43659ac888aaf/raw/4ddad7c87feb38e5c53917cc06036d0fead97791/resource_linker_skip_cross.patch
+
+# Intel graphics compiler dependencies
+RUN install-from-source https://github.com/intel/vc-intrinsics/archive/refs/tags/v0.5.0.tar.gz \
+    -DLLVM_DIR=/usr/local/lib/cmake/llvm
+RUN install-from-source https://github.com/KhronosGroup/SPIRV-Headers/archive/refs/tags/sdk-1.3.216.0.tar.gz
+RUN install-from-source https://github.com/KhronosGroup/SPIRV-Tools/archive/refs/tags/v2022.2.tar.gz \
+    -DSPIRV_WERROR=Off \
+    -DBUILD_SHARED_LIBS=ON \
+    -DSPIRV_TOOLS_BUILD_STATIC=OFF \
+    -DSPIRV-Headers_SOURCE_DIR=/usr/local
+RUN install-from-source https://download.savannah.nongnu.org/releases/libunwind/libunwind-1.6.2.tar.gz
+
+# We install ncurses rather than building it as it's used by many of the build tools and they don't like it when it changes
+RUN install-package ncurses
 
 # intel graphics compiler
-COPY usr/local/package/intel-graphics-compiler.sh /usr/local/package/intel-graphics-compiler.sh
-RUN /usr/local/package/intel-graphics-compiler.sh https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.8173.tar.gz \
+RUN install-from-source-with-patches https://github.com/intel/intel-graphics-compiler/archive/igc-1.0.11485.tar.gz \
+    https://raw.githubusercontent.com/archlinux/svntogit-community/f557b1f70d15c5f991ca6b20c06113069ac5c30b/trunk/fix-zlib-linking.patch \
+    https://github.com/intel/intel-graphics-compiler/commit/12c99343388eba6e6275856b25e0fa8978585dfb.patch \
+    https://github.com/intel/intel-graphics-compiler/commit/1d5ceafdbc005f3adc58be5af1dc92f068908e16.patch \
+    https://github.com/intel/intel-graphics-compiler/commit/d9535cc5c3e54b21d56c492d4e21cb13c80b9b7a.patch \
+    https://github.com/intel/intel-graphics-compiler/commit/49f4d4e3e904179bf3a0b880732b92f8bfb2c64a.patch \
+    https://github.com/intel/intel-graphics-compiler/commit/12332c1ee8e92238c919ad7c2aa36119259cb622.patch \
+    https://github.com/intel/intel-graphics-compiler/commit/6a13fa903f380e17378286a7cd43995b0ae162ad.patch \
+    https://raw.githubusercontent.com/archlinux/svntogit-community/49c729c11b765c19bc8cc5d3f38022efd5078204/trunk/fix-AlignmentAnalysis-test-failures-on-LLVM-14.patch \
+    https://github.com/intel/intel-graphics-compiler/commit/8b49f42e8148284815b4c31bf1c280e7ae2b03be.patch \
+    https://gist.githubusercontent.com/TrentHouliston/acc374481f58800a4d409725f49b5247/raw/687fa40cf693b6f38daeded623ec89ad77311bf3/built_tools_target.patch \
+    -- \
     -DIGC_OPTION__ARCHITECTURE_TARGET='Linux64' \
-    -DIGC_OPTION__LLVM_PREFERRED_VERSION='12.0.1' \
-    -DVC_INTRINSICS_SRC="../../vc-intrinsics" \
+    -DIGC_OPTION__CLANG_MODE=Prebuilds \
+    -DIGC_OPTION__LLD_MODE=Prebuilds \
+    -DIGC_OPTION__LLVM_PREFERRED_VERSION='14.0.6' \
     -DIGC_OPTION__LLVM_MODE=Prebuilds \
-    -DCMAKE_CXX_FLAGS="-Wno-deprecated-declarations" \
-    -DINSTALL_SPIRVDLL=0 \
+    -DIGC_OPTION__LINK_KHRONOS_SPIRV_TRANSLATOR=ON \
+    -DIGC_OPTION__USE_PREINSTALLED_SPRIV_HEADERS=ON \
+    -DIGC_OPTION__SPIRV_TOOLS_MODE=Prebuilds \
+    -DIGC_OPTION__SPIRV_TRANSLATOR_MODE=Prebuilds \
+    -DIGC_OPTION__VC_INTRINSICS_MODE=Prebuilds \
     -DINSTALL_GENX_IR=ON
 
-# intel compute runtime dependencies
 # gmmlib
-RUN install-cmake-from-source https://github.com/intel/gmmlib/archive/intel-gmmlib-21.2.2.tar.gz \
+RUN install-cmake-from-source https://github.com/intel/gmmlib/archive/refs/tags/intel-gmmlib-22.1.6.tar.gz \
     -DRUN_TEST_SUITE=OFF
-# libpciaccess and libdrm help communicate with graphics hardware
+
+# Libpci access and libdrm for communicating with graphics hardware
 RUN install-from-source https://xorg.freedesktop.org/releases/individual/lib/libpciaccess-0.16.tar.bz2
-RUN install-meson-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.104.tar.xz \
+RUN install-meson-from-source https://dri.freedesktop.org/libdrm/libdrm-2.4.112.tar.xz \
     -Dudev=false \
     -Dvalgrind=false
 
-# libva
-# Needs -Dwith_x11: see https://github.com/intel/media-driver/issues/899
-# -Dwith_x11 requires x11 to be installed
-RUN install-package xorg-server
-RUN install-from-source https://github.com/intel/libva/releases/download/2.12.0/libva-2.12.0.tar.bz2 \
-    -DENABLE_VA_MESSAGING=ON \
-    -Dwith_x11=yes
+# Libva and the iHD driver for hardware compression
+RUN install-from-source https://github.com/intel/libva/archive/refs/tags/2.15.0.tar.gz
 
-# intel media driver
-RUN install-cmake-from-source https://github.com/intel/media-driver/archive/intel-media-21.3.2.tar.gz \
+RUN install-cmake-from-source https://github.com/intel/media-driver/archive/refs/tags/intel-media-22.4.4.tar.gz \
     -DINSTALL_DRIVER_SYSCONF=OFF \
     -DLIBVA_DRIVERS_PATH="/usr/local/lib/dri" \
     -DMEDIA_RUN_TEST_SUITE=OFF \
+    -DBUILD_TESTING=OFF \
     -DBUILD_KERNELS=ON \
     -DENABLE_KERNELS=ON \
-    -DENABLE_NONFREE_KERNELS=ON \
-    -DMEDIA_BUILD_FATAL_WARNINGS=OFF
+    -DENABLE_NONFREE_KERNELS=ON
 
 # Install intel compute runtime (OpenCL implementation)
 COPY --chown=root:root etc/OpenCL/vendors/intel.icd /etc/OpenCL/vendors/intel.icd
-COPY usr/local/package/intel-compute-runtime.sh /usr/local/package/intel-compute-runtime.sh
-RUN /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute-runtime/archive/21.31.20514.tar.gz \
-    https://patch-diff.githubusercontent.com/raw/intel/compute-runtime/pull/550.patch -- \
+RUN --mount=type=bind,source=usr/local/package/intel-compute-runtime.sh,target=/usr/local/package/intel-compute-runtime.sh \
+    /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute-runtime/archive/refs/tags/22.27.23681.tar.gz \
     -DSKIP_UNIT_TESTS=ON \
     -DIGC_DIR=/usr/local
 
 # Install OpenCL C and C++ headers
-COPY usr/local/package/opencl-headers.sh /usr/local/package/opencl-headers.sh
-RUN /usr/local/package/opencl-headers.sh https://github.com/KhronosGroup/OpenCL-Headers/archive/v2020.12.18.tar.gz
+RUN --mount=type=bind,source=usr/local/package/opencl-headers.sh,target=/usr/local/package/opencl-headers.sh \
+    /usr/local/package/opencl-headers.sh https://github.com/KhronosGroup/OpenCL-Headers/archive/v2020.12.18.tar.gz
 RUN install-from-source https://github.com/KhronosGroup/OpenCL-CLHPP/archive/refs/tags/v2.0.16.tar.gz \
     -DOPENCL_INCLUDE_DIR=/usr/local/include/CL \
     -DOPENCL_LIB_DIR=/usr/local/lib \
