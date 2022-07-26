@@ -51,13 +51,10 @@ var annotated_dup =
           [ "FinishKick", "structmodule_1_1behaviour_1_1skills_1_1FinishKick.html", null ],
           [ "Getup", "classmodule_1_1behaviour_1_1skills_1_1Getup.html", "classmodule_1_1behaviour_1_1skills_1_1Getup" ],
           [ "HeadBehaviourSoccer", "classmodule_1_1behaviour_1_1skills_1_1HeadBehaviourSoccer.html", "classmodule_1_1behaviour_1_1skills_1_1HeadBehaviourSoccer" ],
-          [ "HeadBehaviourSoccerOld", "classmodule_1_1behaviour_1_1skills_1_1HeadBehaviourSoccerOld.html", "classmodule_1_1behaviour_1_1skills_1_1HeadBehaviourSoccerOld" ],
           [ "KickScript", "classmodule_1_1behaviour_1_1skills_1_1KickScript.html", "classmodule_1_1behaviour_1_1skills_1_1KickScript" ],
           [ "KillFalling", "structmodule_1_1behaviour_1_1skills_1_1KillFalling.html", null ],
           [ "Nod", "classmodule_1_1behaviour_1_1skills_1_1Nod.html", "classmodule_1_1behaviour_1_1skills_1_1Nod" ],
-          [ "Searcher", "classmodule_1_1behaviour_1_1skills_1_1Searcher.html", "classmodule_1_1behaviour_1_1skills_1_1Searcher" ],
-          [ "Stand", "classmodule_1_1behaviour_1_1skills_1_1Stand.html", "classmodule_1_1behaviour_1_1skills_1_1Stand" ],
-          [ "WalkEngineStand", "classmodule_1_1behaviour_1_1skills_1_1WalkEngineStand.html", "classmodule_1_1behaviour_1_1skills_1_1WalkEngineStand" ]
+          [ "Stand", "classmodule_1_1behaviour_1_1skills_1_1Stand.html", "classmodule_1_1behaviour_1_1skills_1_1Stand" ]
         ] ],
         [ "strategy", null, [
           [ "KeyboardWalk", "classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html", "classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk" ],
@@ -202,7 +199,6 @@ var annotated_dup =
           [ "HardwareIO", "classmodule_1_1platform_1_1cm740_1_1HardwareIO.html", "classmodule_1_1platform_1_1cm740_1_1HardwareIO" ],
           [ "HardwareSimulator", "classmodule_1_1platform_1_1cm740_1_1HardwareSimulator.html", "classmodule_1_1platform_1_1cm740_1_1HardwareSimulator" ]
         ] ],
-        [ "Gazebo", "classmodule_1_1platform_1_1Gazebo.html", "classmodule_1_1platform_1_1Gazebo" ],
         [ "Webots", "classmodule_1_1platform_1_1Webots.html", "classmodule_1_1platform_1_1Webots" ]
       ] ],
       [ "support", null, [
@@ -220,8 +216,7 @@ var annotated_dup =
         [ "LocalisationSimulator", "classmodule_1_1support_1_1LocalisationSimulator.html", "classmodule_1_1support_1_1LocalisationSimulator" ],
         [ "NUsightHarness", "classmodule_1_1support_1_1NUsightHarness.html", "classmodule_1_1support_1_1NUsightHarness" ],
         [ "ReactionTimer", "classmodule_1_1support_1_1ReactionTimer.html", "classmodule_1_1support_1_1ReactionTimer" ],
-        [ "SignalCatcher", "classmodule_1_1support_1_1SignalCatcher.html", "classmodule_1_1support_1_1SignalCatcher" ],
-        [ "VirtualCamera", "classmodule_1_1support_1_1VirtualCamera.html", "classmodule_1_1support_1_1VirtualCamera" ]
+        [ "SignalCatcher", "classmodule_1_1support_1_1SignalCatcher.html", "classmodule_1_1support_1_1SignalCatcher" ]
       ] ],
       [ "tools", null, [
         [ "FirmwareInstaller", "classmodule_1_1tools_1_1FirmwareInstaller.html", "classmodule_1_1tools_1_1FirmwareInstaller" ],
