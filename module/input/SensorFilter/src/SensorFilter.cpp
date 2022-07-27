@@ -477,9 +477,7 @@ namespace module::input {
 
                         // Add gyro and acc graphs if in debug
                         if (log_level <= NUClear::DEBUG) {
-                            emit(graph("Gyro x-axis", sensors->gyroscope.x()));
-                            emit(graph("Gyro y-axis", sensors->gyroscope.y()));
-                            emit(graph("Gyro z-axis", sensors->gyroscope.z()));
+                            emit(graph("Gyro", sensors->gyroscope.x(), sensors->gyroscope.y(), sensors->gyroscope.z()));
 
                             emit(graph("Acc x-axis", sensors->accelerometer.x()));
                             emit(graph("Acc y-axis", sensors->accelerometer.y()));
