@@ -6,9 +6,9 @@ set -e
 URL="$1"
 
 # Download the file and see what was added
-ORIGINAL_FILES=$(find . -type f -maxdepth 1 | sort)
+ORIGINAL_FILES=$(find . -maxdepth 1 -type f | sort)
 wget "${URL}"
-POST_DOWNLOAD_FILES=$(find . -type f -maxdepth 1 | sort)
+POST_DOWNLOAD_FILES=$(find . -maxdepth 1 -type f | sort)
 
 # The new file was the one that was just added
 ARCHIVE_FILE=$(comm -13 <(echo "${ORIGINAL_FILES}") <(echo "${POST_DOWNLOAD_FILES}"))

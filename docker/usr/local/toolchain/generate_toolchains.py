@@ -67,10 +67,12 @@ def generate_meson_cross_file(target):
         cpu = 'x86_64'
         endian = 'little'
 
-        [properties]
+        [built-in options]
         c_args = [{flags}]
         cpp_args = [{flags}]
         fortran_args = [{flags}]
+
+        [properties]
         growing_stack = false
 
         [binaries]
@@ -110,10 +112,10 @@ def generate_toolchain_script(target):
 
         # Set our optimisation flags
         export CFLAGS="${{CFLAGS}} {flags}"
-        export CXXFLAGS="${{CXXFLAG}} ${{CFLAGS}}"
-        export CPPFLAGS="${{CPPFLAGS}} ${{CFLAGS}}"
-        export FFLAGS="${{FFLAGS}} ${{CFLAGS}}"
-        export FCFLAGS="${{FCFLAGS}} ${{CFLAGS}}"
+        export CXXFLAGS="${{CXXFLAG}} {flags}"
+        export CPPFLAGS="${{CPPFLAGS}} {flags}"
+        export FFLAGS="${{FFLAGS}} {flags}"
+        export FCFLAGS="${{FCFLAGS}} {flags}"
         """
     )
 

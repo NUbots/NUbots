@@ -16,6 +16,13 @@ BUILD_FOLDER="/var/tmp/build"
 # Pull in the toolchain arguments
 . "${PREFIX}/toolchain.sh"
 
+# Check for extra flags to append
+export CFLAGS="${CFLAGS} ${EXTRA_CFLAGS}"
+export CXXFLAGS="${CXXFLAGS} ${EXTRA_CXXFLAGS}"
+export CPPFLAGS="${CPPFLAGS} ${EXTRA_CPPFLAGS}"
+export FFLAGS="${FFLAGS} ${EXTRA_FFLAGS}"
+export FCFLAGS="${FCFLAGS} ${EXTRA_FCFLAGS}"
+
 # Setup the temporary build directories
 mkdir -p "${BUILD_FOLDER}"
 cd "${BUILD_FOLDER}"
