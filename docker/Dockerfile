@@ -10,10 +10,10 @@
 ### The date in the Server command must either match, or be more recent than,
 ### the date in the FROM command
 ### Date format is ISO year/month/day
-FROM archlinux:base-20210829.0.32635
+FROM archlinux:base-devel-20220710.0.67642
 
 # ↓↓↓ UPDATE MIRRORS HERE ↓↓↓
-RUN echo -e "Server=http://host.docker.internal:7878/\$repo/os/\$arch\nServer=https://archive.archlinux.org/repos/2021/08/29/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
+RUN echo -e "Server=http://host.docker.internal:7878/\$repo/os/\$arch\nServer=https://archive.archlinux.org/repos/2022/07/10/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
 # If you ever update the mirror date, search the repository for UPDATE MIRRORS HERE to find all the places where the URL
 # needs to be altered.
 
@@ -178,9 +178,8 @@ RUN install-cmake-from-source https://github.com/intel/media-driver/archive/refs
 # Install intel compute runtime (OpenCL implementation)
 COPY --chown=root:root etc/OpenCL/vendors/intel.icd /etc/OpenCL/vendors/intel.icd
 RUN --mount=type=bind,source=usr/local/package/intel-compute-runtime.sh,target=/usr/local/package/intel-compute-runtime.sh \
-    /usr/local/package/intel-compute-runtime.sh \
+    /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute-runtime/archive/refs/tags/22.27.23681.tar.gz \
     # Add patches here:
-    https://github.com/intel/compute-runtime/archive/refs/tags/22.27.23681.tar.gz \
     -- \
     # Add compiler arguments here:
     -DSKIP_UNIT_TESTS=ON \
