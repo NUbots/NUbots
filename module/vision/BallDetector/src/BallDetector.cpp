@@ -32,6 +32,7 @@
 #include "message/vision/GreenHorizon.hpp"
 
 #include "utility/math/coordinates.hpp"
+#include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 #include "utility/vision/visualmesh/VisualMesh.hpp"
 
@@ -47,6 +48,7 @@ namespace module::vision {
 
     using utility::math::coordinates::cartesianToReciprocalSpherical;
     using utility::math::coordinates::cartesianToSpherical;
+    using utility::nusight::graph;
     using utility::support::Expression;
 
     BallDetector::BallDetector(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -297,13 +299,15 @@ namespace module::vision {
 
                         Eigen::Vector3f axisScaled = axis * distance;
 
-                        log<NUClear::DEBUG>(
-                            fmt::format("ground_truth_rBCc: x:{}, y:{}, z{}", rBCc(0, 0), rBCc(1, 0), rBCc(2, 0)));
+                        Eigen::Vector3f ball_error;
 
-                        log<NUClear::DEBUG>(fmt::format("Difference rBCc: x:{}, y:{}, z{}",
-                                                        axisScaled(0, 0) - rBCc(0, 0),
-                                                        axisScaled(1, 0) - rBCc(1, 0),
-                                                        axisScaled(2, 0) - rBCc(2, 0)));
+                        ball_error[0] = axisScaled(0, 0) - rBCc(0, 0);
+                        ball_error[1] = axisScaled(1, 0) - rBCc(1, 0);
+                        ball_error[2] = axisScaled(2, 0) - rBCc(2, 0);
+
+                        emit(graph("Ball x error", ball_error[0]));
+                        emit(graph("Ball y error", ball_error[1]));
+                        emit(graph("Ball z error", ball_error[2]));
                     }
                 }
 
