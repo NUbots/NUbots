@@ -788,17 +788,24 @@ namespace module::input {
                                 Eigen::Affine3d true_Htw(input.odometry_ground_truth.Htw);
 
                                 // Determine translational distance error and emit it
-                                double translation_error =
-                                    (true_Htw.translation() - Hwt.inverse().translation()).norm();
-                                emit(graph("Htw translational error", translation_error));
+                                Eigen::Vector3d rWTt    = Hwt.inverse().translation();
+                                Eigen::Vector3d t_error = true_Htw.translation() - rWTt;
+
+                                // Graph translation and its error
+                                emit(graph("Htw translation (rWTt)", rWTt.x(), rWTt.y(), rWTt.z()));
+                                emit(graph("Htw translation error",
+                                           std::abs(t_error.x()),
+                                           std::abs(t_error.y()),
+                                           std::abs(t_error.z())));
 
                                 // Determine yaw, pitch and roll error
                                 Eigen::Matrix3d rotational_error = true_Htw.linear() * Hwt.linear();
-                                Eigen::Vector3d angles           = rotational_error.eulerAngles(2, 1, 0);
+                                Eigen::Vector3d r_error          = rotational_error.eulerAngles(2, 1, 0);
+                                Eigen::Vector3d angles           = Hwt.linear().eulerAngles(2, 1, 0);
 
-                                emit(graph("Htw yaw error", angles[0]));
-                                emit(graph("Htw pitch error", angles[1]));
-                                emit(graph("Htw roll error", angles[2]));
+                                // Graph angles and error
+                                emit(graph("Htw angles (yaw, pitch, roll)", angles[0], angles[1], angles[2]));
+                                emit(graph("Htw angle error (yaw, pitch, roll)", r_error[0], r_error[1], r_error[2]));
                             }
 
                             /************************************************
