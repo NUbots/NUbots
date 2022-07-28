@@ -17,6 +17,9 @@ RUN echo -e "Server=http://host.docker.internal:7878/\$repo/os/\$arch\nServer=ht
 # If you ever update the mirror date, search the repository for UPDATE MIRRORS HERE to find all the places where the URL
 # needs to be altered.
 
+# Setup pacman first before we install so we can turn off pgp
+COPY etc/pacman.conf /etc/pacman.conf
+
 # Arch recommends running this as the first command of the docker image
 # Use "yyuu" to allow for downgrades
 # There wont be any downgrades provided the date in Server line above is the same
@@ -25,7 +28,6 @@ RUN pacman -Syyuu --noconfirm --needed --overwrite \*
 
 # Add a script that installs packages
 COPY usr/local/bin/install-package /usr/local/bin/install-package
-COPY etc/pacman/pacman.latest.conf /etc/pacman.latest.conf
 
 # Install base packages needed for building general toolchain
 # If you have a tool that's needed for a specific module install it before that module
@@ -155,6 +157,7 @@ RUN install-cmake-from-source https://github.com/intel/media-driver/archive/inte
 COPY --chown=root:root etc/OpenCL/vendors/intel.icd /etc/OpenCL/vendors/intel.icd
 COPY usr/local/package/intel-compute-runtime.sh /usr/local/package/intel-compute-runtime.sh
 RUN /usr/local/package/intel-compute-runtime.sh https://github.com/intel/compute-runtime/archive/21.31.20514.tar.gz \
+    https://patch-diff.githubusercontent.com/raw/intel/compute-runtime/pull/550.patch -- \
     -DSKIP_UNIT_TESTS=ON \
     -DIGC_DIR=/usr/local
 
@@ -249,11 +252,6 @@ RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.42.0.tar
 RUN install-from-source https://github.com/Fastcode/NUClear/archive/f4a60c7269e277a504635a603c2890fb1a70289d.tar.gz \
     -DBUILD_TESTS=OFF
 
-# Visual Mesh
-RUN install-from-source https://github.com/Fastcode/VisualMesh/archive/9df04eab3b08d2dca1d955a5bfbdbeea75f11d6b.tar.gz \
-    -DBUILD_TENSORFLOW_OP=OFF \
-    -DBUILD_EXAMPLES=OFF \
-    -DBUILD_OPENCL_ENGINE=ON
 
 # Backtrace
 RUN install-from-source https://github.com/ianlancetaylor/libbacktrace/archive/master.tar.gz \
@@ -276,6 +274,12 @@ RUN mkdir -p /usr/local/include/zstr \
     && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/zstr.hpp -O /usr/local/include/zstr.hpp \
     && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/strict_fstream.hpp -O /usr/local/include/strict_fstream.hpp \
     && wget https://raw.githubusercontent.com/mateidavid/zstr/946ab409380e90e4a46c88c2da4f645a7ffaa51d/src/zstr_make_unique_polyfill.h -O /usr/local/include/zstr_make_unique_polyfill.h
+
+# Visual Mesh
+RUN install-from-source https://github.com/ysims/VisualMesh/archive/1c8d08b8d93a438acce2dce0bcfe7e1f58509e1a.tar.gz \
+    -DBUILD_TENSORFLOW_OP=OFF \
+    -DBUILD_EXAMPLES=OFF \
+    -DBUILD_OPENCL_ENGINE=ON
 
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
