@@ -25,7 +25,7 @@ jobs:
     steps:
       # Checks-out the repo under $GITHUB_WORKSPACE so we can access the delete script
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       # Run our script which calls the dockerhub API to delete the PR's tag
       - name: Delete DockerHub image tag
