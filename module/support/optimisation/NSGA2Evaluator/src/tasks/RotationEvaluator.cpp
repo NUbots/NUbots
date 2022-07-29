@@ -163,8 +163,9 @@ namespace module {
                     std::pow(std::pow(robotDistanceTravelled_X, 2) + std::pow(robotDistanceTravelled_Y, 2), 0.5);
 
                 return {
-                    maxFieldPlaneSway,                    // For now, we want to reduce this
-                    1.0 / theta + robotDistanceTravelled  // finish closer to where we start the better. Minumiser!!!
+                    maxFieldPlaneSway,  // For now, we want to reduce this
+                    1.0 / theta         // + robotDistanceTravelled  // finish closer to where we start the better.
+                                        // Minumiser!!!
                 };
             }
 
