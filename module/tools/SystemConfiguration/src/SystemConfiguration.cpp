@@ -53,6 +53,38 @@ namespace module::tools {
         return output.str();
     }
 
+    void symlink(const fs::path& link, const fs::path& target, const NUClear::PowerPlant& powerplant){
+        powerplant.log<NUClear::TRACE>(fmt::format("Checking link {} -> {}", link.string(), target.string()));
+        if (!fs::exists(target)) {
+            powerplant.log<NUClear::WARN>(fmt::format("Link target '{}' doesn't exist. Skipping", target.string()));
+        }
+        else if (fs::exists(link)) {
+            if (!fs::is_symlink(link)) {
+                powerplant.log<NUClear::WARN>(
+                    fmt::format("File '{}' already exists but is not a symlink. Deleting it", link.string()));
+
+                // Backup the old file and the delete the conflict
+                fs::path new_link = link;
+                new_link += ".old";
+                fs::copy_file(link, new_link);
+                fs::remove(link);
+            }
+            else if (fs::read_symlink(link).compare(target) != 0) {
+                powerplant.log<NUClear::WARN>(
+                    fmt::format("Link '{}' already exists but has a different target. Deleting it", link.string()));
+                fs::remove(link);
+            }
+        }
+
+        if (fs::exists(link) && fs::is_symlink(link) && fs::read_symlink(link).compare(target) == 0) {
+            powerplant.log<NUClear::INFO>(fmt::format("Link {} -> {} already exists. Skipping", target.string(), link.string()));
+        }
+        else {
+            powerplant.log<NUClear::INFO>(fmt::format("Creating link {} -> {}", target.string(), link.string()));
+            fs::create_symlink(target, link);
+        }
+    }
+
     SystemConfiguration::SystemConfiguration(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
 
@@ -145,35 +177,7 @@ namespace module::tools {
             for (const auto& l : config["links"].config) {
                 std::string target = l.first.as<std::string>();
                 std::string link   = l.second.as<std::string>();
-                log<NUClear::TRACE>(fmt::format("Checking link {} -> {}", link, target));
-                if (!fs::exists(target)) {
-                    log<NUClear::WARN>(fmt::format("Link target '{}' doesn't exist. Skipping", target));
-                }
-                else if (fs::exists(link)) {
-                    if (!fs::is_symlink(link)) {
-                        log<NUClear::WARN>(
-                            fmt::format("File '{}' already exists but is not a symlink. Deleting it", link));
-
-                        // Backup the old file and the delete the conflict
-                        fs::path new_link = link;
-                        new_link += ".old";
-                        fs::copy_file(link, new_link);
-                        fs::remove(link);
-                    }
-                    else if (fs::read_symlink(link).compare(target) != 0) {
-                        log<NUClear::WARN>(
-                            fmt::format("Link '{}' already exists but has a different target. Deleting it", link));
-                        fs::remove(link);
-                    }
-                }
-
-                if (fs::exists(link) && fs::is_symlink(link) && fs::read_symlink(link).compare(target) == 0) {
-                    log<NUClear::INFO>(fmt::format("Link {} -> {} already exists. Skipping", target, link));
-                }
-                else {
-                    log<NUClear::INFO>(fmt::format("Creating link {} -> {}", target, link));
-                    fs::create_symlink(target, link);
-                }
+                symlink(link, target, powerplant);
             }
 
             /**********
@@ -287,9 +291,7 @@ namespace module::tools {
                 if (p.is_regular_file() && p.path().filename().string()[0] == 'z') {
                     fs::path target = p.path();
                     fs::path link   = home / fmt::format(".{}", p.path().filename().string());
-
-                    log<NUClear::TRACE>("Making link {} -> {}", link.string(), target.string());
-                    fs::create_symlink(target, link);
+                    symlink(link, target, powerplant);
                 }
             }
 
