@@ -53,7 +53,7 @@ namespace module::tools {
         return output.str();
     }
 
-    void symlink(const fs::path& link, const fs::path& target){
+    void symlink(const fs::path& link, const fs::path& target) {
         NUClear::log<NUClear::TRACE>(fmt::format("Checking link {} -> {}", link.string(), target.string()));
         if (!fs::exists(target)) {
             NUClear::log<NUClear::WARN>(fmt::format("Link target '{}' doesn't exist. Skipping", target.string()));
@@ -77,7 +77,8 @@ namespace module::tools {
         }
 
         if (fs::exists(link) && fs::is_symlink(link) && fs::read_symlink(link).compare(target) == 0) {
-            NUClear::log<NUClear::INFO>(fmt::format("Link {} -> {} already exists. Skipping", target.string(), link.string()));
+            NUClear::log<NUClear::INFO>(
+                fmt::format("Link {} -> {} already exists. Skipping", target.string(), link.string()));
         }
         else {
             NUClear::log<NUClear::INFO>(fmt::format("Creating link {} -> {}", target.string(), link.string()));
