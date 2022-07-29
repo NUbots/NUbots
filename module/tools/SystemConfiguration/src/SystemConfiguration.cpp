@@ -69,17 +69,7 @@ namespace module::tools {
             std::string user = config["user"].as<std::string>();
 
             // Get the hostname
-            std::string hostname;
-            if (config["hostname"]) {
-                hostname = config["hostname"].as<std::string>();
-            }
-            else {
-                char hostname_c[255];
-                if (gethostname(hostname_c, 255) != 0) {
-                    throw std::system_error(errno, std::system_category(), "Error getting hostname.");
-                }
-                hostname = hostname_c;
-            }
+            std::string hostname = config.hostname;
 
             // The base path that stores the files
             fs::path base_path = "system";
@@ -249,10 +239,6 @@ namespace module::tools {
             ofs_hosts << "::1             localhost" << std::endl;
             ofs_hosts << "127.0.1.1       " << hostname << std::endl;
             ofs_hosts.close();
-            log<NUClear::INFO>("Ensuring hostname is generated");
-            std::ofstream ofs_hostname("/etc/hostname");
-            ofs_hostname << hostname << std::endl;
-            ofs_hostname.close();
 
             /**********
              * GROUPS *

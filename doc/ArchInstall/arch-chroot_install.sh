@@ -6,9 +6,9 @@ HOME="/home/${USER}"
 
 HOST="nugus"
 HOSTNAME="${HOST}${ROBOT_NUMBER}"
-IP_ADDR="10.1.1.${ROBOT_NUMBER}"
+IP_ADDR="10.1.0.${ROBOT_NUMBER}"
 ETHERNET_INTERFACE="eno1"
-WIFI_INTERFACE=$(udevadm test-builtin net_id /sys/class/net/wlan0 2>/dev/null | grep ID_NET_NAME_PATH | cut -d = -f2)
+WIFI_INTERFACE=$(udevadm test-builtin net_id /sys/class/net/wlp58s0 2>/dev/null | grep ID_NET_NAME_PATH | cut -d = -f2)
 
 # Setup timezone information
 ln -sf /usr/share/zoneinfo/Australia/Sydney /etc/localtime
