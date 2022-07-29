@@ -322,7 +322,7 @@ namespace module::tools {
             }
             ifs_zshrc.close();
 
-            if (fuzzy_found) {
+            if (!fuzzy_found) {
                 std::ofstream ofs_zshrc(home / ".zshrc", std::ios_base::out | std::ios_base::app | std::ios_base::ate);
                 ofs_zshrc << std::endl
                           << "# Source the fuzzy find scripts" << std::endl
