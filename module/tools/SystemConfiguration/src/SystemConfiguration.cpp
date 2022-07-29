@@ -324,8 +324,8 @@ namespace module::tools {
              **********/
             // Make sure python checks /usr/local for packages
             std::system(
-                R"X(echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))")
-            > $(python - c "import site; print(site.getsitepackages()[0])") / local.pth)X");
+                R"X(echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
+            > $(python -c "import site; print(site.getsitepackages()[0],'/local.pth',sep='')"))X");
 
             /***********
              * CLEANUP *
