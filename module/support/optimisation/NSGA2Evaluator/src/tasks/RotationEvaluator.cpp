@@ -66,9 +66,9 @@ namespace module {
                 trial_duration_limit = std::chrono::seconds(currentRequest.trial_duration_limit);
 
                 // Set our walk command
-                walk_command_velocity.x() = -0.05;  // currentRequest.parameters.real_params[11];
-                walk_command_velocity.y() = -0.05;  // currentRequest.parameters.real_params[11];  // 0.0;
-                walk_command_rotation     = currentRequest.parameters.real_params[11];  // -0.785;  // 0.0;
+                walk_command_velocity.x() = -0.01;
+                walk_command_velocity.y() = -0.05;
+                walk_command_rotation     = currentRequest.parameters.real_params[11];
 
                 // Read the QuinticWalk config and overwrite the config parameters with the current individual's
                 // parameters
@@ -156,16 +156,10 @@ namespace module {
             }
 
             std::vector<double> RotationEvaluator::calculateScores() {
-                // make this pythagorean
-                auto robotDistanceTravelled_X = std::fabs(initialRobotPosition.x() - robotPosition.x());
-                auto robotDistanceTravelled_Y = std::fabs(initialRobotPosition.y() - robotPosition.y());
-                auto robotDistanceTravelled =
-                    std::pow(std::pow(robotDistanceTravelled_X, 2) + std::pow(robotDistanceTravelled_Y, 2), 0.5);
 
                 return {
-                    maxFieldPlaneSway,  // For now, we want to reduce this
-                    1.0 / theta         // + robotDistanceTravelled  // finish closer to where we start the better.
-                                        // Minumiser!!!
+                    maxFieldPlaneSway,     // For now, we want to reduce this
+                    1.0 / std::abs(theta)  // Minimiser!!!
                 };
             }
 

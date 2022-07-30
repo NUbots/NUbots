@@ -1,7 +1,7 @@
 # Larger population encourages wider search
 population_size: 40
 # More generations encourages deeper search
-max_generations: 60
+max_generations: 50
 num_objectives: 2
 num_constraints: 2
 seed: 7777777

@@ -57,19 +57,15 @@ namespace module {
                     if (taskType == "walk") {
                         log<NUClear::INFO>("Task type is Walk");
                         task = std::make_unique<WalkOptimiser>();
-                    }  // ADD strfe, rotate, vector path here
+                    }
                     else if (taskType == "strafe") {
                         log<NUClear::INFO>("Task type is Strafe");
-                        task = std::make_unique<StrafeOptimiser>();  // Chasnge to StafeOptimiser
+                        task = std::make_unique<StrafeOptimiser>();
                     }
                     else if (taskType == "rotation") {
                         log<NUClear::INFO>("Task type is Rotate");
-                        task = std::make_unique<RotationOptimiser>();  // Chasnge to RotateOptimiser
+                        task = std::make_unique<RotationOptimiser>();
                     }
-                    // else if (taskType == "vector") {
-                    //     log<NUClear::INFO>("Task type is Vector");
-                    //     task = std::make_unique<WalkOptimiser>();  // Chasnge to VectorOptimiser
-                    // }
                     else if (taskType == "stand") {
                         log<NUClear::INFO>("Task type is Stand");
                         task = std::make_unique<StandOptimiser>();
