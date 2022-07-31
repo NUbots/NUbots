@@ -26,7 +26,6 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/input/Image.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/vision/Ball.hpp"
 #include "message/vision/GreenHorizon.hpp"
@@ -40,7 +39,6 @@ namespace module::vision {
 
     using extension::Configuration;
 
-    using message::input::Image;
     using message::support::FieldDescription;
     using message::vision::Ball;
     using message::vision::Balls;
@@ -64,9 +62,9 @@ namespace module::vision {
             config.ball_angular_cov      = Eigen::Vector3f(cfg["ball_angular_cov"].as<Expression>());
         });
 
-        on<Trigger<GreenHorizon>, With<FieldDescription, Image>, Buffer<2>>().then(
+        on<Trigger<GreenHorizon>, With<FieldDescription>, Buffer<2>>().then(
             "Visual Mesh",
-            [this](const GreenHorizon& horizon, const FieldDescription& field, const Image image) {
+            [this](const GreenHorizon& horizon, const FieldDescription& field) {
                 // Convenience variables
                 const auto& cls                                     = horizon.mesh->classifications;
                 const auto& neighbours                              = horizon.mesh->neighbourhood;
@@ -287,27 +285,27 @@ namespace module::vision {
                         balls->balls.push_back(std::move(b));
                     }
 
-                    if (image.vision_ground_truth.exists) {
-
-                        Eigen::Affine3f Hcw(image.Hcw.cast<float>());
+                    if (horizon.vision_ground_truth.exists) {
+                        Eigen::Affine3f Hcw(horizon.Hcw.cast<float>());
 
                         const Eigen::Vector3f rBCc = Hcw
-                                                     * Eigen::Vector3f(image.vision_ground_truth.rBWw.X,
-                                                                       image.vision_ground_truth.rBWw.Y,
-                                                                       image.vision_ground_truth.rBWw.Z);
+                                                     * Eigen::Vector3f(horizon.vision_ground_truth.rBWw.X,
+                                                                       horizon.vision_ground_truth.rBWw.Y,
+                                                                       horizon.vision_ground_truth.rBWw.Z);
 
+
+                        const Eigen::Vector3f rBWw = Eigen::Vector3f(horizon.vision_ground_truth.rBWw.X,
+                                                                     horizon.vision_ground_truth.rBWw.Y,
+                                                                     horizon.vision_ground_truth.rBWw.Z);
 
                         Eigen::Vector3f axisScaled = axis * distance;
-
                         Eigen::Vector3f ball_error;
+                        ball_error[0] = axisScaled.x() - rBCc.x();
+                        ball_error[1] = axisScaled.y() - rBCc.y();
+                        ball_error[2] = axisScaled.z() - rBCc.z();
 
-                        ball_error[0] = axisScaled(0, 0) - rBCc(0, 0);
-                        ball_error[1] = axisScaled(1, 0) - rBCc(1, 0);
-                        ball_error[2] = axisScaled(2, 0) - rBCc(2, 0);
-
-                        emit(graph("Ball x error", ball_error[0]));
-                        emit(graph("Ball y error", ball_error[1]));
-                        emit(graph("Ball z error", ball_error[2]));
+                        emit(graph("rBCc", rBCc.x(), rBCc.y(), rBCc.z()));
+                        emit(graph("Ball error", ball_error[0], ball_error[1], ball_error[2]));
                     }
                 }
 

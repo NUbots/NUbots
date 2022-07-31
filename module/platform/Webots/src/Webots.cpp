@@ -844,7 +844,6 @@ namespace module::platform {
                 image->vision_ground_truth.rBWw   = sensor_measurements.vision_ground_truth.rBWw;
                 image->vision_ground_truth.rFWw   = sensor_measurements.vision_ground_truth.rFWw;
             }
-
             emit(image);
         }
     }

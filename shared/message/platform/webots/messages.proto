@@ -122,7 +122,7 @@ message SensorMeasurements {
     repeated GyroMeasurement           gyros            = 10;
     repeated PositionSensorMeasurement position_sensors = 11;
     OdometryGroundTruth                odometry_ground_truth = 100;
-    VisionGroundTruth                  vision_ground_truth = 200;
+    VisionGroundTruth                  vision_ground_truth = 101;
 }
 
 message MotorPosition {
