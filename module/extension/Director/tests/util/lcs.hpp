@@ -14,7 +14,7 @@ namespace util {
      * @tparam T    the type of the elements to be compared
      *
      * @param a the first list to compare
-     * @param b the second list o compare
+     * @param b the second list to compare
      *
      * @return two vectors of bools indicating which elements participate in the longest common subexpression
      */
