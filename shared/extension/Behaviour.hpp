@@ -22,61 +22,10 @@
 #include <memory>
 #include <nuclear>
 
+#include "behaviour/InformationSource.hpp"
 #include "behaviour/commands.hpp"
 
 namespace extension::behaviour {
-
-    /**
-     * A TaskInfo object contains all the state that the Director provides to a running Provider.
-     * This task information includes the task data itself, as well as details about why it was executed such as if it
-     * was triggered by a done task from one of its tasks. This type works with the NUClear reaction system by providing
-     * a dereference operator so that the users can either choose to receive a TaskInfo<T> object or a const T& object
-     * in their callback if they don't care about the extra information the director provides.
-     *
-     * This object also ensures that the task will not run when the Director has no information for this Provider.
-     * This can be caused when it should not be running but was triggered by another bind statement (e.g. Every).
-     * In this case it has a bool operator that returns false which will stop the task from running.
-     *
-     * @tparam T the type of task that is stored in this task_info object
-     */
-    template <typename T>
-    struct TaskInfo {
-
-        /**
-         * Default constructor, as data will be null NUClear will be told not to execute this task.
-         */
-        TaskInfo() = default;
-
-        /**
-         * Construct a new TaskInfo object for the provided task data
-         *
-         * @param data_ the data for this task
-         */
-        TaskInfo(std::shared_ptr<const T> data_) : data(data_) {}
-
-        /**
-         * Having a dereference operator allows NUClear to provide either the TaskInfo<T> object or a const T& object
-         *
-         * @return the data that is contained within this TaskInfo object
-         */
-        [[nodiscard]] const T& operator*() const {
-            return *data;
-        }
-
-        /**
-         * This will control if NUClear should run the task
-         *
-         * @return true     there is data, NUClear should run the task
-         * @return false    there is no data, NUClear should not run the task
-         */
-        [[nodiscard]] operator bool() const {
-            return data != nullptr;
-        }
-
-        /// The task data, this will be all that is returned if the user asks for a const T& rather than a TaskInfo
-        std::shared_ptr<const T> data;
-    };
-
 
     /**
      * This type is used as a base extension type for the different Provider DSL keywords (Start, Stop, Provide)
@@ -119,9 +68,8 @@ namespace extension::behaviour {
          * @return the information needed by the on statement
          */
         template <typename DSL>
-        static inline TaskInfo<T> get(NUClear::threading::Reaction& /*r*/) {
-            // TODO(@TrentHouliston) get the data from the director once it's algorithm is more fleshed out
-            return TaskInfo<T>();
+        static inline std::shared_ptr<T> get(NUClear::threading::Reaction& r) {
+            return std::static_pointer_cast<T>(information::InformationSource::get_task_data(r.id));
         }
 
         /**

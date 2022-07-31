@@ -30,7 +30,9 @@
 
 namespace module::extension {
 
-    class Director : public NUClear::Reactor {
+    class Director
+        : public NUClear::Reactor
+        , ::extension::behaviour::information::InformationSource {
     public:
         /// A task queue holds tasks in a provider that are waiting to be executed by that group
         using TaskQueue = std::vector<std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>>;
@@ -233,6 +235,16 @@ namespace module::extension {
     public:
         /// Called by the powerplant to build and setup the Director reactor.
         explicit Director(std::unique_ptr<NUClear::Environment> environment);
+        virtual ~Director();
+
+        /**
+         * @brief Provides the task data via the InformationSource interface so it can be accessed
+         *
+         * @param reaction_id the provider reaction that is requesting its information.
+         *
+         * @return the data that is stored in this reaction, or nullptr if it shouldn't be executing
+         */
+        std::shared_ptr<void> _get_task_data(const uint64_t& reaction_id) override;
 
     private:
         /// A list of Provider groups
@@ -242,7 +254,10 @@ namespace module::extension {
 
         /// A list of reaction_task_ids to director_task objects, once the Provider has finished running it will emit
         /// all these as a pack so that the director can work out when Providers change which subtasks they emit
-        std::multimap<uint64_t, std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>> pack_builder;
+        std::multimap<uint64_t, std::shared_ptr<const BehaviourTask>> pack_builder;
+
+    public:
+        friend class InformationSource;
     };
 
 }  // namespace module::extension

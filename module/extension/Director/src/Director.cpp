@@ -179,6 +179,10 @@ namespace module::extension {
     }
 
     Director::Director(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+        if (source != nullptr) {
+            throw std::runtime_error("Multiple behaviour directors are not allowed.");
+        }
+        source = this;
 
         on<Configuration>("Director.yaml").then("Configure", [this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
@@ -267,6 +271,11 @@ namespace module::extension {
         on<Trigger<TaskPack>, Sync<Director>>().then("Run Task Pack", [this](const TaskPack& pack) {  //
             run_task_pack(pack);
         });
+    }
+
+    Director::~Director() {
+        // Remove this director as the information source
+        source = nullptr;
     }
 
 }  // namespace module::extension
