@@ -65,7 +65,7 @@ namespace {
                 emit<Task>(std::make_unique<UniqueProvider<3>>("middling"), 50);
             });
             on<Trigger<Step<4>>, Priority::LOW>().then([this] {
-                // Emit a third task with middling priority that should't displace the high priority task
+                // Emit a fourth task with very high priority that should't displace the high priority task
                 events.push_back("Starting very high priority provider");
                 emit<Task>(std::make_unique<UniqueProvider<4>>("very high"), 200);
             });
@@ -81,7 +81,7 @@ namespace {
 }  // namespace
 
 TEST_CASE("Test that when a higher priority task is emitted it overwrites lower priority tasks",
-          "[director][!mayfail]") {
+          "[director][priority][steal][!mayfail]") {
 
     NUClear::PowerPlant::Configuration config;
     config.thread_count = 1;
@@ -95,10 +95,10 @@ TEST_CASE("Test that when a higher priority task is emitted it overwrites lower 
             == std::vector<std::string>{
                 "Starting low priority provider",
                 "trying: low",
-                "low"
+                "low",
                 "Starting high priority provider",
                 "trying: high",
-                "high"
+                "high",
                 "Starting middling priority provider",
                 "trying: middling",
                 "Starting very high priority provider",

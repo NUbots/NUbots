@@ -40,7 +40,7 @@ namespace {
             });
 
             on<Provide<BlockerTask>>().then([this] {  //
-                events.push_back("emitting blocker task");
+                events.push_back("emitting blocker simple task");
                 emit<Task>(std::make_unique<SimpleTask<0>>("from blocker"), 10);
             });
 
@@ -73,7 +73,7 @@ namespace {
 }  // namespace
 
 TEST_CASE("Test that if a task is optional then it does not need to be executed for the other tasks to run",
-          "[director][!mayfail]") {
+          "[director][priority][optional][!mayfail]") {
 
     NUClear::PowerPlant::Configuration config;
     config.thread_count = 1;
@@ -86,6 +86,7 @@ TEST_CASE("Test that if a task is optional then it does not need to be executed 
     REQUIRE(events
             == std::vector<std::string>{
                 "emitting blocker task",
+                "emitting blocker simple task",
                 "from blocker",
                 "emitting low priority complex task",
                 "emitting tasks from complex low priority",

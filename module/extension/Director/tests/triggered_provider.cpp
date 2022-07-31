@@ -66,12 +66,13 @@ namespace {
                 // Emit a trigger test to see if the dependent tasks are blocked
                 events.push_back("emitting Trigger Test");
                 emit(std::make_unique<TriggerTest>());
-
+            });
+            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
                 // Emit another data
                 events.push_back("emitting data 1");
                 emit(std::make_unique<OtherData>(1));
             });
-            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
+            on<Trigger<Step<4>>, Priority::LOW>().then([this] {
                 // Emit a trigger test to see if the dependent tasks are blocked
                 events.push_back("emitting Trigger Test");
                 emit(std::make_unique<TriggerTest>());
@@ -81,6 +82,7 @@ namespace {
                 emit(std::make_unique<Step<1>>());
                 emit(std::make_unique<Step<2>>());
                 emit(std::make_unique<Step<3>>());
+                emit(std::make_unique<Step<4>>());
             });
         }
     };
@@ -88,7 +90,7 @@ namespace {
 }  // namespace
 
 TEST_CASE("Test that providers that are active are able to be triggered from other bind statements",
-          "[director][!mayfail]") {
+          "[director][triggered][!mayfail]") {
 
     // Run the module
     NUClear::PowerPlant::Configuration config;
