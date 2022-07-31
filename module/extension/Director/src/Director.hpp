@@ -254,7 +254,7 @@ namespace module::extension {
 
         /// A list of reaction_task_ids to director_task objects, once the Provider has finished running it will emit
         /// all these as a pack so that the director can work out when Providers change which subtasks they emit
-        std::multimap<uint64_t, std::shared_ptr<const BehaviourTask>> pack_builder;
+        std::multimap<uint64_t, std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>> pack_builder;
 
     public:
         friend class InformationSource;
