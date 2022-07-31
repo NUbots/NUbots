@@ -22,6 +22,7 @@
 namespace module::extension {
 
     std::shared_ptr<void> Director::_get_task_data(const uint64_t& reaction_id) {
+
         // How did we get here?
         if (providers.count(reaction_id) == 0) {
             return nullptr;
@@ -32,7 +33,7 @@ namespace module::extension {
         auto group    = provider->group;
 
         // Only the active provider is allowed to have data
-        if (provider == group.active_provider) {
+        if (provider != group.active_provider) {
             return nullptr;
         }
 
