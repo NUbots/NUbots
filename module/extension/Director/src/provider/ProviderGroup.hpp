@@ -29,17 +29,18 @@ namespace module::extension::provider {
 
     struct ProviderGroup {
 
+        using BehaviourTask = ::extension::behaviour::commands::BehaviourTask;
         /// A task queue holds tasks in a provider that are waiting to be executed by that group
-        using TaskQueue = std::vector<std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>>;
+        using TaskQueue = std::vector<std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>>;
         /// A task pack is the result of a set of tasks emitted by a provider that should be run together
-        using TaskPack = std::vector<std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>>;
+        using TaskPack = std::vector<std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>>;
 
         /// List of individual Providers that can service tasks for this type
         std::vector<std::shared_ptr<Provider>> providers;
         /// The current task that is running on this Provider
-        std::shared_ptr<const ::extension::behaviour::commands::DirectorTask> active_task;
+        std::shared_ptr<const BehaviourTask> active_task;
         /// The task that is pushing this provider to run in a different way
-        std::shared_ptr<const ::extension::behaviour::commands::DirectorTask> pushing_task;
+        std::shared_ptr<const BehaviourTask> pushing_task;
         /// The queue of tasks waiting to run if the situation changes
         TaskQueue task_queue;
         /// List of current subtasks that have been emitted by this provider group
