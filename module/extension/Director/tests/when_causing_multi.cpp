@@ -3,6 +3,7 @@
 
 #include "Director.hpp"
 #include "TestBase.hpp"
+#include "util/diff_string.hpp"
 
 // Anonymous namespace to avoid name collisions
 namespace {
@@ -102,19 +103,25 @@ TEST_CASE("Test that if multiple things that are needed have when+causings all w
     powerplant.install<TestReactor>();
     powerplant.start();
 
+    std::vector<std::string> expected = {
+        "emitting helper tasks",
+        "helper 1 waiting",
+        "helper 2 waiting",
+        "emitting blocked conditions",
+        "emitting task at low priority",
+        "emitting task at high priority",
+        "helper 1 causing allow 1",
+        "helper 2 causing allow 2",
+        "task executed",
+        "subtask 1 executed",
+        "subtask 2 executed",
+        "helper 1 waiting",
+        "helper 2 waiting",
+    };
+
+    // Make an info print the diff in an easy to read way if we fail
+    INFO(util::diff_string(events, expected))
+
     // Check the events fired in order and only those events
-    REQUIRE(events
-            == std::vector<std::string>{"emitting helper tasks",
-                                        "helper 1 waiting",
-                                        "helper 2 waiting",
-                                        "emitting blocked conditions",
-                                        "emitting task at low priority",
-                                        "emitting task at high priority",
-                                        "helper 1 causing allow 1",
-                                        "helper 2 causing allow 2",
-                                        "task executed",
-                                        "subtask 1 executed",
-                                        "subtask 2 executed",
-                                        "helper 1 waiting",
-                                        "helper 2 waiting"});
+    REQUIRE(events == expected);
 }

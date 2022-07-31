@@ -3,6 +3,7 @@
 
 #include "Director.hpp"
 #include "TestBase.hpp"
+#include "util/diff_string.hpp"
 
 // Anonymous namespace to avoid name collisions
 namespace {
@@ -68,7 +69,7 @@ namespace {
     };
 }  // namespace
 
-TEST_CASE("Test that the when keyword blocks and allows running as expected", "[director][!mayfail]") {
+TEST_CASE("Test that the when keyword blocks and allows running as expected", "[director][when][blocking][!mayfail]") {
 
     NUClear::PowerPlant::Configuration config;
     config.thread_count = 1;
@@ -77,15 +78,19 @@ TEST_CASE("Test that the when keyword blocks and allows running as expected", "[
     powerplant.install<TestReactor>();
     powerplant.start();
 
+    std::vector<std::string> expected = {
+        "emitting task",
+        "emitting blocked condition",
+        "emitting task again",
+        "emitting allowed condition",
+        "task executed",
+        "emitting task again #2",
+        "task executed",
+    };
+
+    // Make an info print the diff in an easy to read way if we fail
+    INFO(util::diff_string(events, expected));
+
     // Check the events fired in order and only those events
-    REQUIRE(events
-            == std::vector<std::string>{
-                "emitting task",
-                "emitting blocked condition",
-                "emitting task again",
-                "emitting allowed condition",
-                "task executed",
-                "emitting task again #2",
-                "task executed",
-            });
+    REQUIRE(events == expected);
 }

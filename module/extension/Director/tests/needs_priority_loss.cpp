@@ -3,6 +3,7 @@
 
 #include "Director.hpp"
 #include "TestBase.hpp"
+#include "util/diff_string.hpp"
 
 // Anonymous namespace to avoid name collisions
 namespace {
@@ -74,18 +75,22 @@ TEST_CASE("Tests that if a provider loses one of its dependent needs it stops ru
     powerplant.install<TestReactor>();
     powerplant.start();
 
+    std::vector<std::string> expected = {
+        "requesting complex task 1",
+        "emitting complex task 1",
+        "start 1: complex 1",
+        "start 2: complex 1",
+        "p1: complex 1",
+        "p2: complex 1",
+        "requesting complex task 2",
+        "stop 2: complex 1",
+        "emitting complex task 2",
+        "p1: complex 2",
+    };
+
+    // Make an info print the diff in an easy to read way if we fail
+    INFO(util::diff_string(events, expected));
+
     // Check the events fired in order and only those events
-    REQUIRE(events
-            == std::vector<std::string>{
-                "requesting complex task 1",
-                "emitting complex task 1",
-                "start 1: complex 1",
-                "start 2: complex 1",
-                "p1: complex 1",
-                "p2: complex 1",
-                "requesting complex task 2",
-                "stop 2: complex 1",
-                "emitting complex task 2",
-                "p1: complex 2",
-            });
+    REQUIRE(events == expected);
 }

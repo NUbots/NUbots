@@ -3,6 +3,7 @@
 
 #include "Director.hpp"
 #include "TestBase.hpp"
+#include "util/diff_string.hpp"
 
 // Anonymous namespace to avoid name collisions
 namespace {
@@ -90,19 +91,23 @@ TEST_CASE("Test that when a higher priority task is emitted it overwrites lower 
     powerplant.install<TestReactor>();
     powerplant.start();
 
+    std::vector<std::string> expected = {
+        "Starting low priority provider",
+        "trying: low",
+        "low",
+        "Starting high priority provider",
+        "trying: high",
+        "high",
+        "Starting middling priority provider",
+        "trying: middling",
+        "Starting very high priority provider",
+        "trying: very high",
+        "very high",
+    };
+
+    // Make an info print the diff in an easy to read way if we fail
+    INFO(util::diff_string(events, expected));
+
     // Check the events fired in order and only those events
-    REQUIRE(events
-            == std::vector<std::string>{
-                "Starting low priority provider",
-                "trying: low",
-                "low",
-                "Starting high priority provider",
-                "trying: high",
-                "high",
-                "Starting middling priority provider",
-                "trying: middling",
-                "Starting very high priority provider",
-                "trying: very high",
-                "very high",
-            });
+    REQUIRE(events == expected);
 }

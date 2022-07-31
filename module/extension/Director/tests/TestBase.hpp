@@ -23,7 +23,7 @@
 
 #include "extension/Behaviour.hpp"
 
-template <typename BaseClass, int timeout = 100>
+template <typename BaseClass, int timeout = 1000>
 class TestBase : public extension::behaviour::BehaviourReactor {
 public:
     // Struct to use to emit each step of the test, by doing each step in a separate reaction with low priority, it will
@@ -36,7 +36,10 @@ public:
     explicit TestBase(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
         // Timeout if the test doesn't complete in time
-        on<Watchdog<BaseClass, timeout, std::chrono::milliseconds>>().then([this] { powerplant.shutdown(); });
+        on<Watchdog<BaseClass, timeout, std::chrono::milliseconds>>().then([this] {
+            std::cout << "Test timed out" << std::endl;
+            powerplant.shutdown();
+        });
 
         // Shutdown if the system is idle
         on<Trigger<ShutdownOnIdle>, Priority::IDLE>().then([this] { powerplant.shutdown(); });

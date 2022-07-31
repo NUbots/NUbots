@@ -3,6 +3,7 @@
 
 #include "Director.hpp"
 #include "TestBase.hpp"
+#include "util/diff_string.hpp"
 
 // Anonymous namespace to avoid name collisions
 namespace {
@@ -69,7 +70,7 @@ namespace {
             on<Trigger<Step<2>>, Priority::LOW>().then([this] {
                 // Emit the task
                 events.push_back("emitting task");
-                emit<Task>(std::make_unique<SimpleTask>());
+                emit<Task>(std::make_unique<SimpleTask>(), 50);
             });
             on<Startup>().then([this] {
                 emit(std::make_unique<Step<1>>());
@@ -88,15 +89,21 @@ TEST_CASE("Test that when/causing relationships can be cascaded", "[director][!m
     powerplant.install<TestReactor>();
     powerplant.start();
 
+    std::vector<std::string> expected = {
+        "emitting helper task",
+        "helper waiting",
+        "emitting task",
+        "helper causing level 1",
+        "helper causing level 2",
+        "helper causing level 3",
+        "helper causing level 4",
+        "task executed",
+        "helper waiting",
+    };
+
+    // Make an info print the diff in an easy to read way if we fail
+    INFO(util::diff_string(events, expected))
+
     // Check the events fired in order and only those events
-    REQUIRE(events
-            == std::vector<std::string>{"emitting helper task",
-                                        "helper waiting",
-                                        "emitting task",
-                                        "helper causing level 1",
-                                        "helper causing level 2",
-                                        "helper causing level 3",
-                                        "helper causing level 4",
-                                        "task executed",
-                                        "helper waiting"});
+    REQUIRE(events == expected);
 }

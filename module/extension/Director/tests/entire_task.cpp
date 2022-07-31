@@ -3,6 +3,7 @@
 
 #include "Director.hpp"
 #include "TestBase.hpp"
+#include "util/diff_string.hpp"
 
 // Anonymous namespace to avoid name collisions
 namespace {
@@ -77,17 +78,21 @@ TEST_CASE("Test that if all the non optional tasks can't be executed none of the
     powerplant.install<TestReactor>();
     powerplant.start();
 
+    std::vector<std::string> expected = {
+        "emitting blocker task",
+        "emitting blocker simple task",
+        "from blocker",
+        "emitting low priority complex task",
+        "emitting tasks from complex low priority",
+        "emitting high priority complex task",
+        "emitting tasks from complex high priority",
+        "from complex high priority",
+        "from complex high priority",
+    };
+
+    // Make an info print the diff in an easy to read way if we fail
+    INFO(util::diff_string(events, expected));
+
     // Check the events fired in order and only those events
-    REQUIRE(events
-            == std::vector<std::string>{
-                "emitting blocker task",
-                "emitting blocker simple task",
-                "from blocker",
-                "emitting low priority complex task",
-                "emitting tasks from complex low priority",
-                "emitting high priority complex task",
-                "emitting tasks from complex high priority",
-                "from complex high priority",
-                "from complex high priority",
-            });
+    REQUIRE(events == expected);
 }
