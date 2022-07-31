@@ -1,15 +1,11 @@
 var searchData=
 [
-  ['camera_1066',['Camera',['../classmodule_1_1input_1_1Camera.html#a81af0369c1dfff43949f94131bbbce7c',1,'module::input::Camera']]],
-  ['causingexpression_1067',['CausingExpression',['../structextension_1_1behaviour_1_1commands_1_1CausingExpression.html#a3a1024238d22802d992b44fdb14e2c36',1,'extension::behaviour::commands::CausingExpression']]],
-  ['challenge_5fpriority_1068',['challenge_priority',['../classmodule_1_1extension_1_1Director.html#aee7a7fa469161951a33a871e7c8e4fae',1,'module::extension::Director']]],
-  ['close_1069',['close',['../classutility_1_1io_1_1uart.html#a228598d0165d9952402efded6e1a3e05',1,'utility::io::uart::close()'],['../classutility_1_1nbs_1_1Encoder.html#a036a7fd33cd0c7436ae13874fa7215e1',1,'utility::nbs::Encoder::close()']]],
-  ['cm740_1070',['CM740',['../classCM740_1_1CM740.html#a60699ca75777cc26297a7865ec0526d2',1,'CM740::CM740']]],
-  ['computecartesianposition_1071',['computeCartesianPosition',['../classmodule_1_1motion_1_1QuinticWalkEngine.html#a16e7dd0a41aba78db19a70193e63a43a',1,'module::motion::QuinticWalkEngine']]],
-  ['computesplines_1072',['computeSplines',['../classutility_1_1motion_1_1splines_1_1SmoothSpline.html#a21c67e61de57403a1005d6f7cc4325f5',1,'utility::motion::splines::SmoothSpline']]],
-  ['configuration_1073',['Configuration',['../structextension_1_1Configuration.html#ae86cb3aed1f65b8d3e851d1e06a4e775',1,'extension::Configuration']]],
-  ['configure_1074',['configure',['../classCM740_1_1UART.html#ad30e00e1763c86aa7f14be0ecdc3ca9e',1,'CM740::UART']]],
-  ['connect_1075',['connect',['../classCM740_1_1UART.html#a254b0701c2f587a5f6b0fdd8b13ea13a',1,'CM740::UART']]],
-  ['connected_1076',['connected',['../classutility_1_1io_1_1uart.html#a191683ecb6d0e0c828b5e77f7b9063c5',1,'utility::io::uart']]],
-  ['copydata_1077',['copyData',['../classutility_1_1motion_1_1splines_1_1Spline.html#a6e45d56710b0ed048f09f35f0618c543',1,'utility::motion::splines::Spline']]]
+  ['balldetector_1061',['BallDetector',['../classmodule_1_1vision_1_1BallDetector.html#a1d11876da2dc92451e94f4344028e9c3',1,'module::vision::BallDetector']]],
+  ['balllocalisation_1062',['BallLocalisation',['../classmodule_1_1localisation_1_1BallLocalisation.html#a1b74f959a8666a57fe02c9f877dc4c71',1,'module::localisation::BallLocalisation']]],
+  ['begin_1063',['begin',['../classutility_1_1nbs_1_1Index.html#a99da9d60d8b19e3231f24290fb774db7',1,'utility::nbs::Index']]],
+  ['behaviourtask_1064',['BehaviourTask',['../structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html#a6392a59b40cc09973dc46c74eeecc53e',1,'extension::behaviour::commands::BehaviourTask']]],
+  ['bind_1065',['bind',['../structextension_1_1behaviour_1_1ProviderBase.html#ae027d8828caf62973265960481a98bcc',1,'extension::behaviour::ProviderBase::bind()'],['../structextension_1_1behaviour_1_1When.html#a2710f87cc125bf9c449ab66994883c49',1,'extension::behaviour::When::bind()'],['../structextension_1_1behaviour_1_1Causing.html#a1e62867eb96b62dfa70b2ee369da85ef',1,'extension::behaviour::Causing::bind()'],['../structextension_1_1behaviour_1_1Needs.html#a52b6a9f257c60c96f2baea9e84bed77e',1,'extension::behaviour::Needs::bind()'],['../structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html#a7325b6091386271d087ab70e20734509',1,'NUClear::dsl::operation::DSLProxy&lt;::extension::Configuration &gt;::bind()']]],
+  ['binomialcoefficient_1066',['binomialCoefficient',['../classutility_1_1motion_1_1splines_1_1Combination.html#aae01a7026f53d91b4bb59ae33df5da03',1,'utility::motion::splines::Combination']]],
+  ['buildbulkreadpacket_1067',['buildBulkReadPacket',['../classCM740_1_1CM740.html#a2c8d669d3177cb728871e8bd3ad298a0',1,'CM740::CM740']]],
+  ['bulkread_1068',['bulkRead',['../classCM740_1_1CM740.html#a2620c98fb513aeb029ec0cc7a4329f1b',1,'CM740::CM740']]]
 ];

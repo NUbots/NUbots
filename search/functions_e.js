@@ -1,14 +1,18 @@
 var searchData=
 [
-  ['odometrylocalisation_1184',['OdometryLocalisation',['../classmodule_1_1localisation_1_1OdometryLocalisation.html#ac28a332640e958fc6ffa2b5340bc6b5c',1,'module::localisation::OdometryLocalisation']]],
-  ['on_1185',['on',['../classutility_1_1nbs_1_1Decoder.html#af3fc6e739ed8e79110a59b7dd6931872',1,'utility::nbs::Decoder']]],
-  ['open_1186',['open',['../classutility_1_1io_1_1uart.html#a575335d772428e6cac047da73fc15c90',1,'utility::io::uart']]],
-  ['operator_20bool_1187',['operator bool',['../structextension_1_1behaviour_1_1TaskInfo.html#a3cd456f502fdb7fbb7d77c8da04368d6',1,'extension::behaviour::TaskInfo::operator bool()'],['../classutility_1_1vision_1_1Mosaic.html#aeeda811ebe518c7b870b2c0c58adecff',1,'utility::vision::Mosaic::operator bool()']]],
-  ['operator_28_29_1188',['operator()',['../structutility_1_1math_1_1stats_1_1resample_1_1Multinomial.html#a02da430d6476d129b0d286683f3581a0',1,'utility::math::stats::resample::Multinomial::operator()()'],['../structutility_1_1math_1_1stats_1_1resample_1_1Stratified.html#a7ad7c28624b01d74e44d535619ed5610',1,'utility::math::stats::resample::Stratified::operator()()'],['../structutility_1_1math_1_1stats_1_1resample_1_1Systematic.html#a0c49b5064ce01ef70243553e6326d393',1,'utility::math::stats::resample::Systematic::operator()()'],['../classutility_1_1motion_1_1splines_1_1Polynom.html#a93dc366324586e4a5c64282bd170408d',1,'utility::motion::splines::Polynom::operator()()']]],
-  ['operator_2a_1189',['operator*',['../structextension_1_1behaviour_1_1TaskInfo.html#a7dada730be14c160011881246ca812f8',1,'extension::behaviour::TaskInfo']]],
-  ['operator_2a_3d_1190',['operator*=',['../classutility_1_1motion_1_1splines_1_1Polynom.html#a1e1af727e5234961dbc157f3b2885e97',1,'utility::motion::splines::Polynom']]],
-  ['operator_3c_1191',['operator&lt;',['../structutility_1_1nbs_1_1IndexItem.html#a64ec3c003a29ea53e942c937451f96fa',1,'utility::nbs::IndexItem']]],
-  ['operator_3c_3c_1192',['operator&lt;&lt;',['../classutility_1_1math_1_1geometry_1_1Quad.html#a36ac28683b5354a1a22de163899c005d',1,'utility::math::geometry::Quad::operator&lt;&lt;(std::ostream &amp;output, const Quad&lt; Scalar, R, C &gt; &amp;quad)'],['../classutility_1_1math_1_1geometry_1_1Quad.html#a4b825e3a419c099083fa482842b17f2c',1,'utility::math::geometry::Quad::operator&lt;&lt;(std::ostream &amp;output, const std::vector&lt; Quad&lt; Scalar, R, C &gt;&gt; &amp;quads)']]],
-  ['operator_5b_5d_1193',['operator[]',['../classCM740_1_1CM740.html#aedc5e9200f977de7e08fa3d4c4f9d076',1,'CM740::CM740']]],
-  ['overview_1194',['Overview',['../classmodule_1_1output_1_1Overview.html#a8d72cb9a643ca69b385b8108be2feb10',1,'module::output::Overview']]]
+  ['native_5fhandle_1173',['native_handle',['../classutility_1_1io_1_1uart.html#a583cecd2d46723b9f6dc0e0f63955039',1,'utility::io::uart']]],
+  ['natnet_1174',['NatNet',['../classmodule_1_1input_1_1NatNet.html#af91ccca272638d23211dd7eb8e69c461',1,'module::input::NatNet']]],
+  ['needsexpression_1175',['NeedsExpression',['../structextension_1_1behaviour_1_1commands_1_1NeedsExpression.html#a1efdf2b92898e547d34f46f1a71b884d',1,'extension::behaviour::commands::NeedsExpression']]],
+  ['networkforwarder_1176',['NetworkForwarder',['../classmodule_1_1network_1_1NetworkForwarder.html#a34504105c0c1798f990e9ac5258ea993',1,'module::network::NetworkForwarder']]],
+  ['nextcombination_1177',['nextCombination',['../classutility_1_1motion_1_1splines_1_1Combination.html#aab92c37f0b145cff0d513cc481f352ae',1,'utility::motion::splines::Combination']]],
+  ['nod_1178',['Nod',['../classmodule_1_1behaviour_1_1skills_1_1Nod.html#a5afb4df207624809c2648f4cb9b5c13b',1,'module::behaviour::skills::Nod']]],
+  ['normal_1179',['normal',['../classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a95a9e4de68f3dd0a514b96cf9a2b1fd0',1,'module::behaviour::strategy::SoccerStrategy']]],
+  ['normal_5ffinished_1180',['normal_finished',['../classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#ae632f26b2b2f20f962f7b7a95b3892fd',1,'module::behaviour::strategy::SoccerStrategy']]],
+  ['normal_5finitial_1181',['normal_initial',['../classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a430fd3d09a7126c373f4a4986b0f1aa8',1,'module::behaviour::strategy::SoccerStrategy']]],
+  ['normal_5fplaying_1182',['normal_playing',['../classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#aac31c6d83fde1a744029ee13c365f6b4',1,'module::behaviour::strategy::SoccerStrategy']]],
+  ['normal_5fready_1183',['normal_ready',['../classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#aeb241db4d2444c4b406a4acb85468976',1,'module::behaviour::strategy::SoccerStrategy']]],
+  ['normal_5fset_1184',['normal_set',['../classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#ad4cdab3ea39486ad738e5b8bfd6fe886',1,'module::behaviour::strategy::SoccerStrategy']]],
+  ['normal_5ftimeout_1185',['normal_timeout',['../classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a096e5b10ef21eaa17ecb03040a656d61',1,'module::behaviour::strategy::SoccerStrategy']]],
+  ['normalizeangle_1186',['normalizeAngle',['../namespaceutility_1_1math_1_1angle.html#a8dde4f83b354755ccea82a77538302e3',1,'utility::math::angle']]],
+  ['nuclearnet_1187',['NUClearNet',['../classmodule_1_1network_1_1NUClearNet.html#a7ca7f8d938afaafe6f17c2c4c4397306',1,'module::network::NUClearNet']]]
 ];

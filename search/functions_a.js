@@ -1,7 +1,4 @@
 var searchData=
 [
-  ['keyboardwalk_1157',['KeyboardWalk',['../classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html#aaf71cd8f28275f6094f678fd5b1a4b5c',1,'module::behaviour::strategy::KeyboardWalk']]],
-  ['kickplanner_1158',['KickPlanner',['../classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html#a3690813d0c18e4b0a43bafc2672c9f3f',1,'module::behaviour::planning::KickPlanner']]],
-  ['kickscript_1159',['KickScript',['../classmodule_1_1behaviour_1_1skills_1_1KickScript.html#a0c381f2bc5b7ea7077b8d96c3e42f1cf',1,'module::behaviour::skills::KickScript']]],
-  ['kinematicsconfiguration_1160',['KinematicsConfiguration',['../classmodule_1_1motion_1_1KinematicsConfiguration.html#a73cae73732ef2296349a1a332b1adc71',1,'module::motion::KinematicsConfiguration']]]
+  ['joystick_1160',['Joystick',['../classJoystick.html#a158b1f77b78717efbf1b8fac43b1fcef',1,'Joystick::Joystick()'],['../classJoystick.html#a0bd88249a8e103fe326d5345019a3de2',1,'Joystick::Joystick(int joystickNumber)'],['../classJoystick.html#a34b4f12c9b867cdda4499b9b2cccc7a8',1,'Joystick::Joystick(const std::string &amp;devicePath)']]]
 ];

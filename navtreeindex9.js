@@ -1,5 +1,10 @@
 var NAVTREEINDEX9 =
 {
+"structmodule_1_1input_1_1gamecontroller_1_1Robot.html#a5c6a1a3cb7800d2f719adf73c42b7b31":[1,0,2,2,1,2,3],
+"structmodule_1_1input_1_1gamecontroller_1_1Robot.html#a7f7b55a68a1bcd12e5ddc6e6cca73002":[1,0,2,2,1,2,0],
+"structmodule_1_1input_1_1gamecontroller_1_1Robot.html#a8c519d4aff13dda9d7e404e50d393141":[1,0,2,2,1,2,5],
+"structmodule_1_1input_1_1gamecontroller_1_1Robot.html#aa88fd24f59543e583a9f37653e0c4aae":[1,0,2,2,1,2,4],
+"structmodule_1_1input_1_1gamecontroller_1_1Team.html":[1,0,2,2,1,3],
 "structmodule_1_1input_1_1gamecontroller_1_1Team.html#a19b249139bf7eb8441055bbf1d25e70e":[1,0,2,2,1,3,2],
 "structmodule_1_1input_1_1gamecontroller_1_1Team.html#a1a3f285922c1a4b881ed62cdfa3ece39":[1,0,2,2,1,3,4],
 "structmodule_1_1input_1_1gamecontroller_1_1Team.html#a21717fe4ad896a4b424f8cf4796076f0":[1,0,2,2,1,3,3],
@@ -244,10 +249,5 @@ var NAVTREEINDEX9 =
 "structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1CM740State.html#a4e8404c3fb59b11163a60b1f1a81ac89":[1,0,2,7,0,1,0,0],
 "structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1CM740State.html#aba7cbd2879413de85c60bcf62b7729b1":[1,0,2,7,0,1,0,1],
 "structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config.html":[1,0,2,7,0,1,1],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config.html#ad1e21bc16589e3366521ae6632043662":[1,0,2,7,0,1,1,1],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config.html#ae53d77ce2ed30c17bae25d6d715f13ca":[1,0,2,7,0,1,1,2],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config_1_1Battery.html":[1,0,2,7,0,1,1,0],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config_1_1Battery.html#a85ee00e40b7a3a32e3b8743ff612dd2c":[1,0,2,7,0,1,1,0,1],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config_1_1Battery.html#aa1b088c55353a3d111decec7f73f089d":[1,0,2,7,0,1,1,0,0],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config_1_1Battery.html#adf2cb4c687b2725337b9377578a67f37":[1,0,2,7,0,1,1,0,2]
+"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config.html#ad1e21bc16589e3366521ae6632043662":[1,0,2,7,0,1,1,1]
 };

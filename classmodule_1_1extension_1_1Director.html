@@ -120,6 +120,7 @@ $(document).ready(function(){initNavTree('classmodule_1_1extension_1_1Director.h
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
+<a href="#friends">Friends</a> &#124;
 <a href="classmodule_1_1extension_1_1Director-members.html">List of all members</a>  </div>
   <div class="headertitle">
 <div class="title">module::extension::Director Class Reference</div>  </div>
@@ -130,8 +131,9 @@ Inheritance diagram for module::extension::Director:</div>
 <div class="dyncontent">
 <div class="center"><img src="classmodule_1_1extension_1_1Director__inherit__graph.png" border="0" usemap="#module_1_1extension_1_1Director_inherit__map" alt="Inheritance graph"/></div>
 <map name="module_1_1extension_1_1Director_inherit__map" id="module_1_1extension_1_1Director_inherit__map">
-<area shape="rect" title=" " alt="" coords="5,80,156,121"/>
-<area shape="rect" title=" " alt="" coords="45,5,117,32"/>
+<area shape="rect" title=" " alt="" coords="54,95,205,136"/>
+<area shape="rect" title=" " alt="" coords="5,13,77,39"/>
+<area shape="rect" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html" title="This class is an abstract class that allows the static Behaviour DSL to access the relevant state fro..." alt="" coords="101,5,336,47"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <div class="dynheader">
@@ -139,8 +141,9 @@ Collaboration diagram for module::extension::Director:</div>
 <div class="dyncontent">
 <div class="center"><img src="classmodule_1_1extension_1_1Director__coll__graph.png" border="0" usemap="#module_1_1extension_1_1Director_coll__map" alt="Collaboration graph"/></div>
 <map name="module_1_1extension_1_1Director_coll__map" id="module_1_1extension_1_1Director_coll__map">
-<area shape="rect" title=" " alt="" coords="5,80,156,121"/>
-<area shape="rect" title=" " alt="" coords="45,5,117,32"/>
+<area shape="rect" title=" " alt="" coords="18,96,169,137"/>
+<area shape="rect" title=" " alt="" coords="5,13,77,39"/>
+<area shape="rect" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html" title="This class is an abstract class that allows the static Behaviour DSL to access the relevant state fro..." alt="" coords="101,5,336,47"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
@@ -167,6 +170,9 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#ab5586dc9feb7878dd9a6a6234088d8a3">Director</a> (std::unique_ptr&lt; NUClear::Environment &gt; environment)</td></tr>
 <tr class="memdesc:ab5586dc9feb7878dd9a6a6234088d8a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called by the powerplant to build and setup the <a class="el" href="classmodule_1_1extension_1_1Director.html">Director</a> reactor. <br /></td></tr>
 <tr class="separator:ab5586dc9feb7878dd9a6a6234088d8a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac75deae1643268535343886608a697ea"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; void &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#ac75deae1643268535343886608a697ea">_get_task_data</a> (const uint64_t &amp;reaction_id) override</td></tr>
+<tr class="memdesc:ac75deae1643268535343886608a697ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Provides the task data via the InformationSource interface so it can be accessed.  <a href="classmodule_1_1extension_1_1Director.html#ac75deae1643268535343886608a697ea">More...</a><br /></td></tr>
+<tr class="separator:ac75deae1643268535343886608a697ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
@@ -224,8 +230,63 @@ std::multimap&lt; uint64_t, std::shared_ptr&lt; const ::<a class="el" href="stru
 std::map&lt; uint64_t, std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html">provider::Provider</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a420ddbdc1d8df6ce35e6c938e760fae4">providers</a></td></tr>
 <tr class="memdesc:a420ddbdc1d8df6ce35e6c938e760fae4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Maps reaction_id to the Provider which implements it. <br /></td></tr>
 <tr class="separator:a420ddbdc1d8df6ce35e6c938e760fae4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="friends"></a>
+Friends</h2></td></tr>
+<tr class="memitem:a8bb1cbbac1238620c272ee22344093e9"><td class="memItemLeft" align="right" valign="top"><a id="a8bb1cbbac1238620c272ee22344093e9"></a>
+class&#160;</td><td class="memItemRight" valign="bottom"><b>InformationSource</b></td></tr>
+<tr class="separator:a8bb1cbbac1238620c272ee22344093e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="inherited"></a>
+Additional Inherited Members</h2></td></tr>
+<tr class="inherit_header pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td colspan="2" onclick="javascript:toggleInherit('pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource')"><img src="closed.png" alt="-"/>&#160;Static Private Member Functions inherited from <a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html">extension::behaviour::information::InformationSource</a></td></tr>
+<tr class="memitem:ade48b09cd7c578384ed21137d17ad453 inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="memItemLeft" align="right" valign="top">static std::shared_ptr&lt; void &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#ade48b09cd7c578384ed21137d17ad453">get_task_data</a> (const uint64_t &amp;reaction_id)</td></tr>
+<tr class="memdesc:ade48b09cd7c578384ed21137d17ad453 inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static method that redirects to the singleton instance providing the <a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html" title="This class is an abstract class that allows the static Behaviour DSL to access the relevant state fro...">InformationSource</a>.  <a href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#ade48b09cd7c578384ed21137d17ad453">More...</a><br /></td></tr>
+<tr class="separator:ade48b09cd7c578384ed21137d17ad453 inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_static_attribs_classextension_1_1behaviour_1_1information_1_1InformationSource"><td colspan="2" onclick="javascript:toggleInherit('pub_static_attribs_classextension_1_1behaviour_1_1information_1_1InformationSource')"><img src="closed.png" alt="-"/>&#160;Static Private Attributes inherited from <a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html">extension::behaviour::information::InformationSource</a></td></tr>
+<tr class="memitem:ad1978e857d2131c1fc57e5b9ff896028 inherit pub_static_attribs_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="memItemLeft" align="right" valign="top"><a id="ad1978e857d2131c1fc57e5b9ff896028"></a>
+static <a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html">InformationSource</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#ad1978e857d2131c1fc57e5b9ff896028">source</a> = nullptr</td></tr>
+<tr class="memdesc:ad1978e857d2131c1fc57e5b9ff896028 inherit pub_static_attribs_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="mdescLeft">&#160;</td><td class="mdescRight">This static variable gets set by whatever class is acting as the information source. <br /></td></tr>
+<tr class="separator:ad1978e857d2131c1fc57e5b9ff896028 inherit pub_static_attribs_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="ac75deae1643268535343886608a697ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac75deae1643268535343886608a697ea">&#9670;&nbsp;</a></span>_get_task_data()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::shared_ptr&lt; void &gt; module::extension::Director::_get_task_data </td>
+          <td>(</td>
+          <td class="paramtype">const uint64_t &amp;&#160;</td>
+          <td class="paramname"><em>reaction_id</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Provides the task data via the InformationSource interface so it can be accessed. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">reaction_id</td><td>the provider reaction that is requesting its information.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the data that is stored in this reaction, or nullptr if it shouldn't be executing </dd></dl>
+
+<p>Implements <a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#a58c78909ce4539d686ca4eee8318760b">extension::behaviour::information::InformationSource</a>.</p>
+
+</div>
+</div>
 <a id="ae38a0f87a58faec7521d61eb4faaae7a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ae38a0f87a58faec7521d61eb4faaae7a">&#9670;&nbsp;</a></span>add_causing()</h2>
 
@@ -775,6 +836,7 @@ false if the incumbent task has equal or higher priority</dd></dl>
 <li>module/extension/Director/src/director/run_task_pack.cpp</li>
 <li>module/extension/Director/src/director/solve.cpp</li>
 <li>module/extension/Director/src/Director.cpp</li>
+<li>module/extension/Director/src/information/get_task_data.cpp</li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
@@ -782,7 +844,7 @@ false if the incumbent task has equal or higher priority</dd></dl>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>extension</b></li><li class="navelem"><a class="el" href="classmodule_1_1extension_1_1Director.html">Director</a></li>
-    <li class="footer">Generated on Sun Jul 31 2022 09:14:30 for NUbots by
+    <li class="footer">Generated on Sun Jul 31 2022 10:25:17 for NUbots by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.17 </li>
   </ul>

@@ -1,5 +1,10 @@
 var NAVTREEINDEX10 =
 {
+"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config.html#ae53d77ce2ed30c17bae25d6d715f13ca":[1,0,2,7,0,1,1,2],
+"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config_1_1Battery.html":[1,0,2,7,0,1,1,0],
+"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config_1_1Battery.html#a85ee00e40b7a3a32e3b8743ff612dd2c":[1,0,2,7,0,1,1,0,1],
+"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config_1_1Battery.html#aa1b088c55353a3d111decec7f73f089d":[1,0,2,7,0,1,1,0,0],
+"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config_1_1Battery.html#adf2cb4c687b2725337b9377578a67f37":[1,0,2,7,0,1,1,0,2],
 "structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config_1_1Battery.html#af600572efd70fc4ff82e8b157fe12cff":[1,0,2,7,0,1,1,0,3],
 "structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html":[1,0,2,7,0,1,2],
 "structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a02b92a0dc3a2f726b902d374871472b4":[1,0,2,7,0,1,2,5],
@@ -244,10 +249,5 @@ var NAVTREEINDEX10 =
 "structutility_1_1motion_1_1splines_1_1SmoothSpline_1_1Point.html#a4d79c1e05f9fcfa7db0d3025f754210e":[1,0,5,5,0,3,0,2],
 "structutility_1_1motion_1_1splines_1_1SmoothSpline_1_1Point.html#a8aa6305cebcaff6eaf5ddbc110704b33":[1,0,5,5,0,3,0,1],
 "structutility_1_1motion_1_1splines_1_1Spline_1_1Spline__t.html":[1,0,5,5,0,4,0],
-"structutility_1_1motion_1_1splines_1_1Spline_1_1Spline__t.html#a0dc9721d1e1f7cd0201b108189082fe2":[1,0,5,5,0,4,0,0],
-"structutility_1_1motion_1_1splines_1_1Spline_1_1Spline__t.html#a32cb7b95c46ee8404e1b9ae5401c8407":[1,0,5,5,0,4,0,1],
-"structutility_1_1motion_1_1splines_1_1Spline_1_1Spline__t.html#a5299dbe7c2dbda05e2591b5413abd5bb":[1,0,5,5,0,4,0,2],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html":[1,0,5,5,0,6],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a00d4bc7b78fcfe117e424fa74dfc27df":[1,0,5,5,0,6,16],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a04362c734f46ab57001737c514f4cfe3":[1,0,5,5,0,6,5]
+"structutility_1_1motion_1_1splines_1_1Spline_1_1Spline__t.html#a0dc9721d1e1f7cd0201b108189082fe2":[1,0,5,5,0,4,0,0]
 };

@@ -1,16 +1,20 @@
 var searchData=
 [
-  ['vaapi_5ferror_5fcategory_5ft_707',['vaapi_error_category_t',['../classmodule_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__category__t.html',1,'module::output::compressor::vaapi']]],
-  ['vaapicontext_708',['VAAPIContext',['../structmodule_1_1output_1_1compressor_1_1vaapi_1_1CompressionContext_1_1VAAPIContext.html',1,'module::output::compressor::vaapi::CompressionContext']]],
-  ['valid_709',['valid',['../classJoystick.html#a3c3f62dd4a36f259dc20e0f18b668f82',1,'Joystick']]],
-  ['validator_710',['validator',['../structmodule_1_1extension_1_1provider_1_1Provider_1_1WhenCondition.html#ace2d14e33e5b4164188f0359a82cff49',1,'module::extension::provider::Provider::WhenCondition::validator()'],['../structextension_1_1behaviour_1_1commands_1_1WhenExpression.html#a319c2a9e9e1e0a83c97dc427fc67800e',1,'extension::behaviour::commands::WhenExpression::validator()']]],
-  ['value_711',['value',['../classJoystickEvent.html#a9841834d3b572e04dd541135691e7fda',1,'JoystickEvent']]],
-  ['virtualloadsensor_712',['VirtualLoadSensor',['../classmodule_1_1input_1_1VirtualLoadSensor.html',1,'module::input']]],
-  ['virtualloadsensor_3c_20float_20_3e_713',['VirtualLoadSensor&lt; float &gt;',['../classmodule_1_1input_1_1VirtualLoadSensor.html',1,'module::input']]],
-  ['vision_5fwalk_5fpath_714',['vision_walk_path',['../classmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner.html#a87d27b8449fd305a3bcdb23124832371',1,'module::behaviour::planning::SimpleWalkPathPlanner']]],
-  ['visualmesh_715',['VisualMesh',['../classmodule_1_1vision_1_1VisualMesh.html',1,'module::vision::VisualMesh'],['../classmodule_1_1vision_1_1VisualMesh.html#a943a1ba3251329653f204e9402419eae',1,'module::vision::VisualMesh::VisualMesh()']]],
-  ['visualmeshmodelconfig_716',['VisualMeshModelConfig',['../structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig.html',1,'module::vision::visualmesh']]],
-  ['visualmeshresults_717',['VisualMeshResults',['../structmodule_1_1vision_1_1visualmesh_1_1VisualMeshResults.html',1,'module::vision::visualmesh']]],
-  ['visualmeshrunner_718',['VisualMeshRunner',['../classmodule_1_1vision_1_1visualmesh_1_1VisualMeshRunner.html',1,'module::vision::visualmesh']]],
-  ['voltage_5fconversion_5ffactor_719',['VOLTAGE_CONVERSION_FACTOR',['../structmodule_1_1platform_1_1cm740_1_1Convert.html#a492ebb0ae3d67c809659ab37278bb55f',1,'module::platform::cm740::Convert']]]
+  ['angle_692',['angle',['../namespaceutility_1_1math_1_1angle.html',1,'utility::math']]],
+  ['coordinates_693',['coordinates',['../namespaceutility_1_1math_1_1coordinates.html',1,'utility::math']]],
+  ['file_694',['file',['../namespaceutility_1_1file.html',1,'utility']]],
+  ['strutil_695',['strutil',['../namespaceutility_1_1strutil.html',1,'utility']]],
+  ['transform_696',['transform',['../namespaceutility_1_1math_1_1transform.html',1,'utility::math']]],
+  ['uart_697',['UART',['../classCM740_1_1UART.html',1,'CM740::UART'],['../classutility_1_1io_1_1uart.html',1,'utility::io::uart'],['../classCM740_1_1CM740.html#a721dc40b31068505edeb6dbeaa52d0bf',1,'CM740::CM740::uart()'],['../classutility_1_1io_1_1uart.html#a4b64a29a05078f63330e0610f78d1025',1,'utility::io::uart::uart()=default'],['../classutility_1_1io_1_1uart.html#a93a1196c7db582ed70a5a095aa39837c',1,'utility::io::uart::uart(const std::string &amp;device, const unsigned int &amp;baud_rate=57600)'],['../classutility_1_1io_1_1uart.html#ab0855a5f5657cb2cb0604d400c00f737',1,'utility::io::uart::uart(const uart &amp;uart)=delete'],['../classutility_1_1io_1_1uart.html#ac243011d992751019819f26bde7f23dc',1,'utility::io::uart::uart(uart &amp;&amp;)=delete'],['../classCM740_1_1UART.html#ad71339ff8cafcd6f58f4b7bff9f482c5',1,'CM740::UART::UART()']]],
+  ['ukf_698',['UKF',['../classutility_1_1math_1_1filter_1_1UKF.html',1,'utility::math::filter']]],
+  ['ukf_3c_20double_2c_20module_3a_3ainput_3a_3amotionmodel_20_3e_699',['UKF&lt; double, module::input::MotionModel &gt;',['../classutility_1_1math_1_1filter_1_1UKF.html',1,'utility::math::filter']]],
+  ['unit_700',['unit',['../classutility_1_1support_1_1ProgressBar.html#afe738a2efea2a51e9eb72f21f0da522d',1,'utility::support::ProgressBar']]],
+  ['unpenalised_5flocalisation_5freset_701',['unpenalised_localisation_reset',['../classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a1f622fa251388a2d8bd93addeabe67a0',1,'module::behaviour::strategy::SoccerStrategy']]],
+  ['unpermute_702',['unpermute',['../classutility_1_1vision_1_1Mosaic.html#a4419f66cc50baa9b02f8c021bfd75e01',1,'utility::vision::Mosaic::unpermute(const uint8_t *src, uint8_t *dst) const'],['../classutility_1_1vision_1_1Mosaic.html#a0c399039354964705f25ae938653d6a4',1,'utility::vision::Mosaic::unpermute(const std::vector&lt; uint8_t &gt; &amp;data) const']]],
+  ['update_703',['update',['../classutility_1_1support_1_1ProgressBar.html#ac927f0e3e836c732af784a4bd9f5eb83',1,'utility::support::ProgressBar::update(const double &amp;current, const double &amp;total, const std::string &amp;status=&quot;&quot;)'],['../classutility_1_1support_1_1ProgressBar.html#a41cfa3efd0a1a73c10ca1687be39abec',1,'utility::support::ProgressBar::update(const T &amp;current, const U &amp;total, const std::string &amp;status=&quot;&quot;)']]],
+  ['update_5ffrequency_704',['UPDATE_FREQUENCY',['../classmodule_1_1platform_1_1Webots.html#ac0568dd06b9e0beaa729bf7064d882d8',1,'module::platform::Webots']]],
+  ['update_5fpriority_705',['update_priority',['../classmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner.html#a753fb4543a57b1ba538f2dab817931f4',1,'module::behaviour::planning::SimpleWalkPathPlanner::update_priority()'],['../classmodule_1_1behaviour_1_1skills_1_1DirectWalkController.html#afd3f8ed8e9930e22650e47d8d2e56cc2',1,'module::behaviour::skills::DirectWalkController::update_priority()'],['../classmodule_1_1behaviour_1_1skills_1_1Getup.html#a1cdcba8e891b871ccdb2eebb38a7546f',1,'module::behaviour::skills::Getup::update_priority()'],['../classmodule_1_1behaviour_1_1skills_1_1KickScript.html#a3ed14fecb7b6b257feab709dbb3df214',1,'module::behaviour::skills::KickScript::update_priority()'],['../classmodule_1_1motion_1_1HeadController.html#ab9e8094d01e3d86eda81d013574c2d3f',1,'module::motion::HeadController::update_priority()']]],
+  ['updates_5fper_5fsecond_706',['updates_per_second',['../classutility_1_1support_1_1ProgressBar.html#ab73479c172156c6894b34822c659706e',1,'utility::support::ProgressBar']]],
+  ['updatestate_707',['updateState',['../classmodule_1_1motion_1_1QuinticWalkEngine.html#ae92e12df61ab2f194e8b96868f1499c8',1,'module::motion::QuinticWalkEngine']]],
+  ['uses_708',['Uses',['../structextension_1_1behaviour_1_1Uses.html',1,'extension::behaviour']]]
 ];

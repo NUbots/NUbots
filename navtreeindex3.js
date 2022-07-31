@@ -1,5 +1,14 @@
 var NAVTREEINDEX3 =
 {
+"classmodule_1_1localisation_1_1BallLocalisation.html#ad4943e4390ee393bb23b98c4e3b66102":[1,0,2,3,0,1],
+"classmodule_1_1localisation_1_1BallModel.html":[1,0,2,3,1],
+"classmodule_1_1localisation_1_1BallModel.html#a008b1b8518a56083de1cec13777017f2":[1,0,2,3,1,6],
+"classmodule_1_1localisation_1_1BallModel.html#a0cb24a6bd773c01f0da74cd4b9bc5812":[1,0,2,3,1,17],
+"classmodule_1_1localisation_1_1BallModel.html#a10c7de6e622109d856bee6a59bee0433":[1,0,2,3,1,8],
+"classmodule_1_1localisation_1_1BallModel.html#a1275e4124413c906e869c242879d0cc0":[1,0,2,3,1,18],
+"classmodule_1_1localisation_1_1BallModel.html#a49853ac84c105e7d6c4cd5ba067f1aaa":[1,0,2,3,1,4],
+"classmodule_1_1localisation_1_1BallModel.html#a69a2bc05e009f8803d51425e86674898":[1,0,2,3,1,2],
+"classmodule_1_1localisation_1_1BallModel.html#a732d391bf450828c24cd5445d35ef7fd":[1,0,2,3,1,12],
 "classmodule_1_1localisation_1_1BallModel.html#a7cbc5f07b7a6c3e955c586d084083a2d":[1,0,2,3,1,14],
 "classmodule_1_1localisation_1_1BallModel.html#a93bd0e086fad27d2ffa968d7ea7b2400":[1,0,2,3,1,13],
 "classmodule_1_1localisation_1_1BallModel.html#a9a8abe047b8c9dbd6ccd60c2cefc7b4a":[1,0,2,3,1,5],
@@ -240,14 +249,5 @@ var NAVTREEINDEX3 =
 "classmodule_1_1output_1_1ImageCompressor.html#abb3292c28a120489f83162277c09cc47":[1,0,2,6,2,4],
 "classmodule_1_1output_1_1ImageCompressor.html#adee0dc26ceb56b6900916fdca4a63afb":[1,0,2,6,2,3],
 "classmodule_1_1output_1_1Overview.html":[1,0,2,6,3],
-"classmodule_1_1output_1_1Overview.html#a2cf3f00ec0c2ff27f67eaae7760ecdf5":[1,0,2,6,3,1],
-"classmodule_1_1output_1_1Overview.html#a338e246fa08309483ed4473bc1a259f0":[1,0,2,6,3,3],
-"classmodule_1_1output_1_1Overview.html#a8d72cb9a643ca69b385b8108be2feb10":[1,0,2,6,3,0],
-"classmodule_1_1output_1_1Overview.html#a90d4e1ee64c9bb7657e25f698924d48c":[1,0,2,6,3,2],
-"classmodule_1_1output_1_1compressor_1_1Compressor.html":[1,0,2,6,0,2],
-"classmodule_1_1output_1_1compressor_1_1Compressor.html#a682e70487d748d21a32334166041a99b":[1,0,2,6,0,2,0],
-"classmodule_1_1output_1_1compressor_1_1CompressorFactory.html":[1,0,2,6,0,3],
-"classmodule_1_1output_1_1compressor_1_1CompressorFactory.html#a95fdea211a1c72ede6004d080659254a":[1,0,2,6,0,3,0],
-"classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Compressor.html":[1,0,2,6,0,0,0],
-"classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Compressor.html#a1d1a413a14abc5ddc2130dcb90ad862b":[1,0,2,6,0,0,0,8]
+"classmodule_1_1output_1_1Overview.html#a2cf3f00ec0c2ff27f67eaae7760ecdf5":[1,0,2,6,3,1]
 };

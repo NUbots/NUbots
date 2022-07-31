@@ -1,15 +1,11 @@
 var searchData=
 [
-  ['emit_1086',['emit',['../structextension_1_1behaviour_1_1Task.html#ac53ed3720298f3bbcdaf94ee156b705a',1,'extension::behaviour::Task']]],
-  ['encode_1087',['encode',['../structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4.html#a838f2e8c7dcaa81cafe9b24d8cf7a7d7',1,'YAML::convert&lt;::NUClear::LogLevel &gt;']]],
-  ['end_1088',['end',['../classutility_1_1nbs_1_1Index.html#af9ca671c3b6341d2ce34db5993987d90',1,'utility::nbs::Index']]],
-  ['endstep_1089',['endStep',['../classmodule_1_1motion_1_1QuinticWalkEngine.html#a023fe408984c0e963e5c6a10a5b2ff13',1,'module::motion::QuinticWalkEngine']]],
-  ['executebroadcast_1090',['executeBroadcast',['../classCM740_1_1UART.html#a016e12a58f3acff1e62cc572eabc0e99',1,'CM740::UART']]],
-  ['executebulk_1091',['executeBulk',['../classCM740_1_1UART.html#ab1573fad1341198744db8b30af2eb2e6',1,'CM740::UART']]],
-  ['executenextscript_1092',['executeNextScript',['../classmodule_1_1behaviour_1_1tools_1_1ScriptRunner.html#a5b1f07fbd5d3859ae54049f9da1230d6',1,'module::behaviour::tools::ScriptRunner']]],
-  ['executeread_1093',['executeRead',['../classCM740_1_1UART.html#a435e6729ca7bcd1abdc1e36080ee9a98',1,'CM740::UART']]],
-  ['executewrite_1094',['executeWrite',['../classCM740_1_1UART.html#af01de59b866370aadf3caeaa4e1c00ee',1,'CM740::UART']]],
-  ['exist_1095',['exist',['../classutility_1_1motion_1_1splines_1_1SplineContainer.html#a69de9ba2f40d63f2d393641676ad1d3b',1,'utility::motion::splines::SplineContainer']]],
-  ['expandbinomial_1096',['expandBinomial',['../classutility_1_1motion_1_1splines_1_1Polynom.html#ab111fb9a6913a5f3fd36b6b5e476b91c',1,'utility::motion::splines::Polynom']]],
-  ['exportdata_1097',['exportData',['../classutility_1_1motion_1_1splines_1_1Spline.html#a2bba3fa3eeedff46c70e4e911127f7cb',1,'utility::motion::splines::Spline::exportData()'],['../classutility_1_1motion_1_1splines_1_1SplineContainer.html#af28bc2526310a755c4c550a843fc8c67',1,'utility::motion::splines::SplineContainer::exportData()']]]
+  ['datalogging_1081',['DataLogging',['../classmodule_1_1support_1_1logging_1_1DataLogging.html#a10d2fd93911d7e43c1f52ab0792b2419',1,'module::support::logging::DataLogging']]],
+  ['dataplayback_1082',['DataPlayback',['../classmodule_1_1support_1_1logging_1_1DataPlayback.html#a5f890307185b64f98f4656674caa63df',1,'module::support::logging::DataPlayback']]],
+  ['decode_1083',['decode',['../structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4.html#aa61b4c1ce809a016b1776c7d90f1999e',1,'YAML::convert&lt;::NUClear::LogLevel &gt;']]],
+  ['degree_1084',['degree',['../classutility_1_1motion_1_1splines_1_1Polynom.html#a7fc40b9b5229003847d20777e265abf1',1,'utility::motion::splines::Polynom']]],
+  ['density_1085',['density',['../structutility_1_1math_1_1stats_1_1MultivariateNormal.html#ad535e117d4a152975060ce1a286aa432',1,'utility::math::stats::MultivariateNormal']]],
+  ['difference_1086',['difference',['../namespaceutility_1_1math_1_1angle.html#ad91bef38b35b68069631b2101ad70945',1,'utility::math::angle']]],
+  ['director_1087',['Director',['../classmodule_1_1extension_1_1Director.html#ab5586dc9feb7878dd9a6a6234088d8a3',1,'module::extension::Director']]],
+  ['directwalkcontroller_1088',['DirectWalkController',['../classmodule_1_1behaviour_1_1skills_1_1DirectWalkController.html#ad559b2d53cd97bccb752c9ee7fa4a28f',1,'module::behaviour::skills::DirectWalkController']]]
 ];

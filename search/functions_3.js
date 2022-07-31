@@ -1,11 +1,15 @@
 var searchData=
 [
-  ['datalogging_1078',['DataLogging',['../classmodule_1_1support_1_1logging_1_1DataLogging.html#a10d2fd93911d7e43c1f52ab0792b2419',1,'module::support::logging::DataLogging']]],
-  ['dataplayback_1079',['DataPlayback',['../classmodule_1_1support_1_1logging_1_1DataPlayback.html#a5f890307185b64f98f4656674caa63df',1,'module::support::logging::DataPlayback']]],
-  ['decode_1080',['decode',['../structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4.html#aa61b4c1ce809a016b1776c7d90f1999e',1,'YAML::convert&lt;::NUClear::LogLevel &gt;']]],
-  ['degree_1081',['degree',['../classutility_1_1motion_1_1splines_1_1Polynom.html#a7fc40b9b5229003847d20777e265abf1',1,'utility::motion::splines::Polynom']]],
-  ['density_1082',['density',['../structutility_1_1math_1_1stats_1_1MultivariateNormal.html#ad535e117d4a152975060ce1a286aa432',1,'utility::math::stats::MultivariateNormal']]],
-  ['difference_1083',['difference',['../namespaceutility_1_1math_1_1angle.html#ad91bef38b35b68069631b2101ad70945',1,'utility::math::angle']]],
-  ['director_1084',['Director',['../classmodule_1_1extension_1_1Director.html#ab5586dc9feb7878dd9a6a6234088d8a3',1,'module::extension::Director']]],
-  ['directwalkcontroller_1085',['DirectWalkController',['../classmodule_1_1behaviour_1_1skills_1_1DirectWalkController.html#ad559b2d53cd97bccb752c9ee7fa4a28f',1,'module::behaviour::skills::DirectWalkController']]]
+  ['camera_1069',['Camera',['../classmodule_1_1input_1_1Camera.html#a81af0369c1dfff43949f94131bbbce7c',1,'module::input::Camera']]],
+  ['causingexpression_1070',['CausingExpression',['../structextension_1_1behaviour_1_1commands_1_1CausingExpression.html#a3a1024238d22802d992b44fdb14e2c36',1,'extension::behaviour::commands::CausingExpression']]],
+  ['challenge_5fpriority_1071',['challenge_priority',['../classmodule_1_1extension_1_1Director.html#aee7a7fa469161951a33a871e7c8e4fae',1,'module::extension::Director']]],
+  ['close_1072',['close',['../classutility_1_1io_1_1uart.html#a228598d0165d9952402efded6e1a3e05',1,'utility::io::uart::close()'],['../classutility_1_1nbs_1_1Encoder.html#a036a7fd33cd0c7436ae13874fa7215e1',1,'utility::nbs::Encoder::close()']]],
+  ['cm740_1073',['CM740',['../classCM740_1_1CM740.html#a60699ca75777cc26297a7865ec0526d2',1,'CM740::CM740']]],
+  ['computecartesianposition_1074',['computeCartesianPosition',['../classmodule_1_1motion_1_1QuinticWalkEngine.html#a16e7dd0a41aba78db19a70193e63a43a',1,'module::motion::QuinticWalkEngine']]],
+  ['computesplines_1075',['computeSplines',['../classutility_1_1motion_1_1splines_1_1SmoothSpline.html#a21c67e61de57403a1005d6f7cc4325f5',1,'utility::motion::splines::SmoothSpline']]],
+  ['configuration_1076',['Configuration',['../structextension_1_1Configuration.html#ae86cb3aed1f65b8d3e851d1e06a4e775',1,'extension::Configuration']]],
+  ['configure_1077',['configure',['../classCM740_1_1UART.html#ad30e00e1763c86aa7f14be0ecdc3ca9e',1,'CM740::UART']]],
+  ['connect_1078',['connect',['../classCM740_1_1UART.html#a254b0701c2f587a5f6b0fdd8b13ea13a',1,'CM740::UART']]],
+  ['connected_1079',['connected',['../classutility_1_1io_1_1uart.html#a191683ecb6d0e0c828b5e77f7b9063c5',1,'utility::io::uart']]],
+  ['copydata_1080',['copyData',['../classutility_1_1motion_1_1splines_1_1Spline.html#a6e45d56710b0ed048f09f35f0618c543',1,'utility::motion::splines::Spline']]]
 ];

@@ -15,6 +15,9 @@ var annotated_dup =
     [ "extension", null, [
       [ "behaviour", null, [
         [ "commands", "namespaceextension_1_1behaviour_1_1commands.html", "namespaceextension_1_1behaviour_1_1commands" ],
+        [ "information", null, [
+          [ "InformationSource", "classextension_1_1behaviour_1_1information_1_1InformationSource.html", "classextension_1_1behaviour_1_1information_1_1InformationSource" ]
+        ] ],
         [ "BehaviourReactor", "classextension_1_1behaviour_1_1BehaviourReactor.html", "classextension_1_1behaviour_1_1BehaviourReactor" ],
         [ "Causing", "structextension_1_1behaviour_1_1Causing.html", "structextension_1_1behaviour_1_1Causing" ],
         [ "Done", "structextension_1_1behaviour_1_1Done.html", null ],
@@ -24,7 +27,6 @@ var annotated_dup =
         [ "Start", "structextension_1_1behaviour_1_1Start.html", null ],
         [ "Stop", "structextension_1_1behaviour_1_1Stop.html", null ],
         [ "Task", "structextension_1_1behaviour_1_1Task.html", "structextension_1_1behaviour_1_1Task" ],
-        [ "TaskInfo", "structextension_1_1behaviour_1_1TaskInfo.html", "structextension_1_1behaviour_1_1TaskInfo" ],
         [ "Uses", "structextension_1_1behaviour_1_1Uses.html", "structextension_1_1behaviour_1_1Uses" ],
         [ "When", "structextension_1_1behaviour_1_1When.html", "structextension_1_1behaviour_1_1When" ]
       ] ],

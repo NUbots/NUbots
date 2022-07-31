@@ -133,10 +133,10 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:ae027d8828caf62973265960481a98bcc"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1ProviderBase.html#ae027d8828caf62973265960481a98bcc">bind</a> (const std::shared_ptr&lt; NUClear::threading::Reaction &gt; &amp;reaction)</td></tr>
 <tr class="memdesc:ae027d8828caf62973265960481a98bcc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Binds a Provider object, sending it to the Director so it can control its execution.  <a href="structextension_1_1behaviour_1_1ProviderBase.html#ae027d8828caf62973265960481a98bcc">More...</a><br /></td></tr>
 <tr class="separator:ae027d8828caf62973265960481a98bcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1b2cccd594f011b88dc7377a78ab808f"><td class="memTemplParams" colspan="2">template&lt;typename DSL &gt; </td></tr>
-<tr class="memitem:a1b2cccd594f011b88dc7377a78ab808f"><td class="memTemplItemLeft" align="right" valign="top">static <a class="el" href="structextension_1_1behaviour_1_1TaskInfo.html">TaskInfo</a>&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1ProviderBase.html#a1b2cccd594f011b88dc7377a78ab808f">get</a> (NUClear::threading::Reaction &amp;)</td></tr>
-<tr class="memdesc:a1b2cccd594f011b88dc7377a78ab808f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the information needed by the callbacks of the Provider.  <a href="structextension_1_1behaviour_1_1ProviderBase.html#a1b2cccd594f011b88dc7377a78ab808f">More...</a><br /></td></tr>
-<tr class="separator:a1b2cccd594f011b88dc7377a78ab808f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad3a1f42b69f92a6c4788ccf4fad5c805"><td class="memTemplParams" colspan="2">template&lt;typename DSL &gt; </td></tr>
+<tr class="memitem:ad3a1f42b69f92a6c4788ccf4fad5c805"><td class="memTemplItemLeft" align="right" valign="top">static std::shared_ptr&lt; T &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1ProviderBase.html#ad3a1f42b69f92a6c4788ccf4fad5c805">get</a> (NUClear::threading::Reaction &amp;r)</td></tr>
+<tr class="memdesc:ad3a1f42b69f92a6c4788ccf4fad5c805"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the information needed by the callbacks of the Provider.  <a href="structextension_1_1behaviour_1_1ProviderBase.html#ad3a1f42b69f92a6c4788ccf4fad5c805">More...</a><br /></td></tr>
+<tr class="separator:ad3a1f42b69f92a6c4788ccf4fad5c805"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a30fdf46c679f9478d646d0c8f6dfce45"><td class="memTemplParams" colspan="2">template&lt;typename DSL &gt; </td></tr>
 <tr class="memitem:a30fdf46c679f9478d646d0c8f6dfce45"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1ProviderBase.html#a30fdf46c679f9478d646d0c8f6dfce45">postcondition</a> (NUClear::threading::ReactionTask &amp;task)</td></tr>
 <tr class="memdesc:a30fdf46c679f9478d646d0c8f6dfce45"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes once a Provider has finished executing it's reaction so the Director knows which tasks it emitted.  <a href="structextension_1_1behaviour_1_1ProviderBase.html#a30fdf46c679f9478d646d0c8f6dfce45">More...</a><br /></td></tr>
@@ -199,8 +199,8 @@ template&lt;typename DSL &gt; </div>
 
 </div>
 </div>
-<a id="a1b2cccd594f011b88dc7377a78ab808f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1b2cccd594f011b88dc7377a78ab808f">&#9670;&nbsp;</a></span>get()</h2>
+<a id="ad3a1f42b69f92a6c4788ccf4fad5c805"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad3a1f42b69f92a6c4788ccf4fad5c805">&#9670;&nbsp;</a></span>get()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -213,10 +213,10 @@ template&lt;typename DSL &gt; </div>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static <a class="el" href="structextension_1_1behaviour_1_1TaskInfo.html">TaskInfo</a>&lt;T&gt; <a class="el" href="structextension_1_1behaviour_1_1ProviderBase.html">extension::behaviour::ProviderBase</a>&lt; T, classification &gt;::get </td>
+          <td class="memname">static std::shared_ptr&lt;T&gt; <a class="el" href="structextension_1_1behaviour_1_1ProviderBase.html">extension::behaviour::ProviderBase</a>&lt; T, classification &gt;::get </td>
           <td>(</td>
           <td class="paramtype">NUClear::threading::Reaction &amp;&#160;</td>
-          <td class="paramname"></td><td>)</td>
+          <td class="paramname"><em>r</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -297,7 +297,7 @@ template&lt;typename DSL &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>extension</b></li><li class="navelem"><b>behaviour</b></li><li class="navelem"><a class="el" href="structextension_1_1behaviour_1_1ProviderBase.html">ProviderBase</a></li>
-    <li class="footer">Generated on Sun Jul 31 2022 09:14:30 for NUbots by
+    <li class="footer">Generated on Sun Jul 31 2022 10:25:16 for NUbots by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.17 </li>
   </ul>

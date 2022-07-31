@@ -1,0 +1,4 @@
+<map id="extension::behaviour::information::InformationSource" name="extension::behaviour::information::InformationSource">
+<area shape="rect" id="node1" title="This class is an abstract class that allows the static Behaviour DSL to access the relevant state fro..." alt="" coords="5,5,240,47"/>
+<area shape="rect" id="node2" href="$classmodule_1_1extension_1_1Director.html" title=" " alt="" coords="47,95,198,136"/>
+</map>
