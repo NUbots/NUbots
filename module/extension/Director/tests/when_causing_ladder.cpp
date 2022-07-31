@@ -102,7 +102,7 @@ TEST_CASE("Test that when/causing relationships can be cascaded", "[director][!m
     };
 
     // Make an info print the diff in an easy to read way if we fail
-    INFO(util::diff_string(events, expected))
+    INFO(util::diff_string(expected, events));
 
     // Check the events fired in order and only those events
     REQUIRE(events == expected);
