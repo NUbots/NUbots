@@ -59,7 +59,6 @@ namespace module::extension {
             if (r.pushed) {
                 blocked = true;
                 blocking_groups.insert(option.provider->type);
-                std::cout << "Oh no I'm blocked :(" << std::endl;
             }
             else {
                 // Choose the best option for this requirement

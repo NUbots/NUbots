@@ -321,8 +321,6 @@ namespace module::extension {
             auto p  = providers.at(update.provider_id);
             auto& g = p->group;
 
-            std::cout << "State update" << std::endl;
-
             // Go check if this state update has changed any of the tasks that are queued
             reevaluate_group(g);
         });
