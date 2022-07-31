@@ -27,6 +27,7 @@
 
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
+#include "utility/math/angle.hpp"
 #include "utility/motion/ForwardKinematics.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/platform/RawSensors.hpp"
@@ -51,6 +52,8 @@ namespace module::input {
     using utility::motion::kinematics::calculateInertialTensor;
     using utility::nusight::graph;
     using utility::support::Expression;
+
+    using utility::math::angle::normalizeAngle;
 
     std::string makeErrorString(const std::string& src, uint errorCode) {
         std::stringstream s;
@@ -787,21 +790,25 @@ namespace module::input {
                             if (input.odometry_ground_truth.exists) {
                                 Eigen::Affine3d true_Htw(input.odometry_ground_truth.Htw);
 
-                                // Determine translational distance error and emit it
+                                // Determine translational distance error
                                 Eigen::Vector3d rWTt    = Hwt.inverse().translation();
                                 Eigen::Vector3d t_error = true_Htw.translation() - rWTt;
-
-                                // Graph translation and its error
-                                emit(graph("Htw translation (rWTt)", rWTt.x(), rWTt.y(), rWTt.z()));
-                                emit(graph("Htw translation error",
-                                           std::abs(t_error.x()),
-                                           std::abs(t_error.y()),
-                                           std::abs(t_error.z())));
 
                                 // Determine yaw, pitch and roll error
                                 Eigen::Matrix3d rotational_error = true_Htw.linear() * Hwt.linear();
                                 Eigen::Vector3d r_error          = rotational_error.eulerAngles(2, 1, 0);
                                 Eigen::Vector3d angles           = Hwt.linear().eulerAngles(2, 1, 0);
+
+                                // Normalise angles and make error positive
+                                for (int i = 0; i < 3; i++) {
+                                    r_error[i] = normalizeAngle(r_error[i]);
+                                    angles[i]  = normalizeAngle(angles[i]);
+                                    t_error[i] = std::abs(t_error[i]);
+                                }
+
+                                // Graph translation and its error
+                                emit(graph("Htw translation (rWTt)", rWTt.x(), rWTt.y(), rWTt.z()));
+                                emit(graph("Htw translation error", t_error.x(), t_error.y(), t_error.z()));
 
                                 // Graph angles and error
                                 emit(graph("Htw angles (yaw, pitch, roll)", angles[0], angles[1], angles[2]));
