@@ -110,6 +110,8 @@ namespace module::extension {
     }
 
     Director::Solution Director::solve_task(const std::shared_ptr<const BehaviourTask>& task) {
+        std::set<std::shared_ptr<const Provider>> visited;
+        return solve_group(task->type, task, visited);
     }
 
 }  // namespace module::extension

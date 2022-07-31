@@ -209,12 +209,10 @@ namespace module::extension {
          * permission checks on providers that it needs to run.
          *
          * @param task      the task we are finding solutions for
-         * @param authority the task that we are using as our authority token for permission checks
          *
          * @return the set of possible solution options for this task
          */
-        Solution solve_task(const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& task,
-                            const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& authority);
+        Solution solve_task(const std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>& task);
 
         /**
          * Looks at all the tasks that are in the pack and determines if they should run, and if so runs them.
