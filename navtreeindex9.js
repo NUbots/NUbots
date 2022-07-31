@@ -1,5 +1,16 @@
 var NAVTREEINDEX9 =
 {
+"structmodule_1_1input_1_1gamecontroller_1_1Team.html#a19b249139bf7eb8441055bbf1d25e70e":[1,0,2,2,1,3,2],
+"structmodule_1_1input_1_1gamecontroller_1_1Team.html#a1a3f285922c1a4b881ed62cdfa3ece39":[1,0,2,2,1,3,4],
+"structmodule_1_1input_1_1gamecontroller_1_1Team.html#a21717fe4ad896a4b424f8cf4796076f0":[1,0,2,2,1,3,3],
+"structmodule_1_1input_1_1gamecontroller_1_1Team.html#a35005fe22fa392cd5fd5288c23204dda":[1,0,2,2,1,3,1],
+"structmodule_1_1input_1_1gamecontroller_1_1Team.html#a55d40c4a44ed8780e6782a45ba501f3e":[1,0,2,2,1,3,6],
+"structmodule_1_1input_1_1gamecontroller_1_1Team.html#a5bb0da11344a6802843389c31db7cc4a":[1,0,2,2,1,3,5],
+"structmodule_1_1input_1_1gamecontroller_1_1Team.html#abe2b25b6158254047e1112238403a0fa":[1,0,2,2,1,3,0],
+"structmodule_1_1input_1_1gamecontroller_1_1Team.html#ad6fd832c93987f9451e8d1608f946798":[1,0,2,2,1,3,7],
+"structmodule_1_1input_1_1gamecontroller_1_1Team.html#ae26000b5aef378a11eeae2c5150aab1c":[1,0,2,2,1,3,8],
+"structmodule_1_1localisation_1_1BallModel_1_1MeasurementType.html":[1,0,2,3,1,0],
+"structmodule_1_1localisation_1_1BallModel_1_1MeasurementType_1_1BALL.html":[1,0,2,3,1,0,0],
 "structmodule_1_1motion_1_1ExecuteHeadController.html":[1,0,2,4,1],
 "structmodule_1_1motion_1_1ExecuteKick.html":[1,0,2,4,2],
 "structmodule_1_1motion_1_1FinishKick.html":[1,0,2,4,3],
@@ -238,16 +249,5 @@ var NAVTREEINDEX9 =
 "structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config_1_1Battery.html":[1,0,2,7,0,1,1,0],
 "structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config_1_1Battery.html#a85ee00e40b7a3a32e3b8743ff612dd2c":[1,0,2,7,0,1,1,0,1],
 "structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config_1_1Battery.html#aa1b088c55353a3d111decec7f73f089d":[1,0,2,7,0,1,1,0,0],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config_1_1Battery.html#adf2cb4c687b2725337b9377578a67f37":[1,0,2,7,0,1,1,0,2],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config_1_1Battery.html#af600572efd70fc4ff82e8b157fe12cff":[1,0,2,7,0,1,1,0,3],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html":[1,0,2,7,0,1,2],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a02b92a0dc3a2f726b902d374871472b4":[1,0,2,7,0,1,2,5],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a18a81be239168a3fd4f78ca6fd539c41":[1,0,2,7,0,1,2,8],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a31c89ee5a3bb20b11c6f7cdae19cf142":[1,0,2,7,0,1,2,12],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a3cd2fb57cf40f4287e00b10cfa46a241":[1,0,2,7,0,1,2,4],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a42907cd8a0fb656a6ee70060494a92dc":[1,0,2,7,0,1,2,10],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a437626fbb77baf06dec7faff3cf7eb15":[1,0,2,7,0,1,2,0],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a44a195c6faba0a58747ca93bf0f9019f":[1,0,2,7,0,1,2,7],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a4612df68469fe27e6113f71304e117f8":[1,0,2,7,0,1,2,2],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a65b05bfaa259cd9d93d54893358d4a3e":[1,0,2,7,0,1,2,11]
+"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config_1_1Battery.html#adf2cb4c687b2725337b9377578a67f37":[1,0,2,7,0,1,1,0,2]
 };

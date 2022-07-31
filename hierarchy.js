@@ -37,8 +37,8 @@ var hierarchy =
     [ "CM740::Types::ServoValues", "structCM740_1_1Types_1_1ServoValues.html", null ],
     [ "CM740::UART", "classCM740_1_1UART.html", null ],
     [ "extension::behaviour::Causing< State, value >", "structextension_1_1behaviour_1_1Causing.html", null ],
+    [ "extension::behaviour::commands::BehaviourTask", "structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html", null ],
     [ "extension::behaviour::commands::CausingExpression", "structextension_1_1behaviour_1_1commands_1_1CausingExpression.html", null ],
-    [ "extension::behaviour::commands::DirectorTask", "structextension_1_1behaviour_1_1commands_1_1DirectorTask.html", null ],
     [ "extension::behaviour::commands::NeedsExpression", "structextension_1_1behaviour_1_1commands_1_1NeedsExpression.html", null ],
     [ "extension::behaviour::commands::ProviderDone", "structextension_1_1behaviour_1_1commands_1_1ProviderDone.html", null ],
     [ "extension::behaviour::commands::ProvideReaction", "structextension_1_1behaviour_1_1commands_1_1ProvideReaction.html", null ],
@@ -207,6 +207,7 @@ var hierarchy =
     [ "NUClear::dsl::operation::DSLProxy<::extension::FileWatch >", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html", null ],
     [ "NUClear::dsl::operation::DSLProxy<::extension::Script >", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Script_01_4.html", null ],
     [ "Reactor", null, [
+      [ "extension::behaviour::BehaviourReactor", "classextension_1_1behaviour_1_1BehaviourReactor.html", null ],
       [ "module::behaviour::Controller", "classmodule_1_1behaviour_1_1Controller.html", null ],
       [ "module::behaviour::planning::KickPlanner", "classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html", null ],
       [ "module::behaviour::planning::SimpleWalkPathPlanner", "classmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner.html", null ],

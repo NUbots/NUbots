@@ -15,6 +15,7 @@ var annotated_dup =
     [ "extension", null, [
       [ "behaviour", null, [
         [ "commands", "namespaceextension_1_1behaviour_1_1commands.html", "namespaceextension_1_1behaviour_1_1commands" ],
+        [ "BehaviourReactor", "classextension_1_1behaviour_1_1BehaviourReactor.html", "classextension_1_1behaviour_1_1BehaviourReactor" ],
         [ "Causing", "structextension_1_1behaviour_1_1Causing.html", "structextension_1_1behaviour_1_1Causing" ],
         [ "Done", "structextension_1_1behaviour_1_1Done.html", null ],
         [ "Needs", "structextension_1_1behaviour_1_1Needs.html", "structextension_1_1behaviour_1_1Needs" ],

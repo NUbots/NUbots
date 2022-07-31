@@ -129,9 +129,9 @@ $(document).ready(function(){initNavTree('structextension_1_1behaviour_1_1Task.h
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:a5d6b5f535a038fcd9aae9f550c085be3"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1Task.html#a5d6b5f535a038fcd9aae9f550c085be3">emit</a> (NUClear::PowerPlant &amp;powerplant, std::shared_ptr&lt; T &gt; data, const std::string &amp;name=&quot;&quot;, const int &amp;priority=1, const bool &amp;optional=false)</td></tr>
-<tr class="memdesc:a5d6b5f535a038fcd9aae9f550c085be3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Emits a new task for the Director to handle.  <a href="structextension_1_1behaviour_1_1Task.html#a5d6b5f535a038fcd9aae9f550c085be3">More...</a><br /></td></tr>
-<tr class="separator:a5d6b5f535a038fcd9aae9f550c085be3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac53ed3720298f3bbcdaf94ee156b705a"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1Task.html#ac53ed3720298f3bbcdaf94ee156b705a">emit</a> (NUClear::PowerPlant &amp;powerplant, std::shared_ptr&lt; T &gt; data, const int &amp;priority=0, const bool &amp;optional=false, const std::string &amp;name=&quot;&quot;)</td></tr>
+<tr class="memdesc:ac53ed3720298f3bbcdaf94ee156b705a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Emits a new task for the behaviour system to handle.  <a href="structextension_1_1behaviour_1_1Task.html#ac53ed3720298f3bbcdaf94ee156b705a">More...</a><br /></td></tr>
+<tr class="separator:ac53ed3720298f3bbcdaf94ee156b705a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><h3>template&lt;typename T&gt;<br />
@@ -140,7 +140,7 @@ struct extension::behaviour::Task&lt; T &gt;</h3>
 <p>A <a class="el" href="structextension_1_1behaviour_1_1Task.html" title="A Task to be executed by the director and a priority with which to execute this task.">Task</a> to be executed by the director and a priority with which to execute this task. </p>
 <p>Higher priority tasks are preferred over lower priority tasks.</p>
 <p>There are two different types of tasks that can be created using this emit, root level tasks and subtasks.</p>
-<p>Root level tasks: These are created when a reaction that is not a Provider emits the task. These tasks form the root of the execution tree and their needs will be met on a highest priority first basis. These tasks will persist until the Provider that they use emits a done task, or the task is re-emitted with a priority of 0.</p>
+<p>Root level tasks: These are created when a reaction that is not a Provider emits the task. These tasks form the root of the execution tree and their needs will be met on a highest priority first basis. These tasks will persist until the Provider that they use emits a done task, or the task is re-emitted from anywhere with nullptr as the data. They will also be overridden if a new task is emitted anywhere in the system even if it is at a lower priority.</p>
 <p>Subtasks: These are created when a Provider task emits a task to complete. These tasks must be emitted each time that reaction is run to persist as if that reaction runs again and does not emit these tasks they will be cancelled. Within these tasks the priority is used to break ties between two subtasks that share the same root task. In these cases the subtask that requested the Provider with the highest priority will have its task executed. The other subtask will be blocked until the active task is no longer in the call queue.</p>
 <p>If a subtask is emitted with optional then it is compared differently to other tasks when it comes to priority. This task and all its descendants will be considered optional. If it is compared to a task that does not have optional in its parentage, the non optional task will win. However, descendants of this task that are not optional will compare to each other as normal. If two tasks both have optional in their parentage they will be compared as normal.</p>
 <dl class="tparams"><dt>Template Parameters</dt><dd>
@@ -150,8 +150,8 @@ struct extension::behaviour::Task&lt; T &gt;</h3>
   </dd>
 </dl>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a5d6b5f535a038fcd9aae9f550c085be3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5d6b5f535a038fcd9aae9f550c085be3">&#9670;&nbsp;</a></span>emit()</h2>
+<a id="ac53ed3720298f3bbcdaf94ee156b705a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac53ed3720298f3bbcdaf94ee156b705a">&#9670;&nbsp;</a></span>emit()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -176,20 +176,20 @@ template&lt;typename T &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>name</em> = <code>&quot;&quot;</code>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
           <td class="paramtype">const int &amp;&#160;</td>
-          <td class="paramname"><em>priority</em> = <code>1</code>, </td>
+          <td class="paramname"><em>priority</em> = <code>0</code>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const bool &amp;&#160;</td>
-          <td class="paramname"><em>optional</em> = <code>false</code>&#160;</td>
+          <td class="paramname"><em>optional</em> = <code>false</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>name</em> = <code>&quot;&quot;</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -204,7 +204,7 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Emits a new task for the Director to handle. </p>
+<p>Emits a new task for the behaviour system to handle. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">powerplant</td><td>the powerplant context provided by NUClear </td></tr>
@@ -227,7 +227,7 @@ template&lt;typename T &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>extension</b></li><li class="navelem"><b>behaviour</b></li><li class="navelem"><a class="el" href="structextension_1_1behaviour_1_1Task.html">Task</a></li>
-    <li class="footer">Generated on Tue Jul 26 2022 20:51:57 for NUbots by
+    <li class="footer">Generated on Sun Jul 31 2022 09:14:30 for NUbots by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.17 </li>
   </ul>

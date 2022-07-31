@@ -137,12 +137,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a39d386feb4dc993563ec0c3c75952312"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1TaskInfo.html#a39d386feb4dc993563ec0c3c75952312">TaskInfo</a> (std::shared_ptr&lt; const T &gt; data_)</td></tr>
 <tr class="memdesc:a39d386feb4dc993563ec0c3c75952312"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a new <a class="el" href="structextension_1_1behaviour_1_1TaskInfo.html" title="A TaskInfo object contains all the state that the Director provides to a running Provider.">TaskInfo</a> object for the provided task data.  <a href="structextension_1_1behaviour_1_1TaskInfo.html#a39d386feb4dc993563ec0c3c75952312">More...</a><br /></td></tr>
 <tr class="separator:a39d386feb4dc993563ec0c3c75952312"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad89e11804dde52e04d5884433670b455"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1TaskInfo.html#ad89e11804dde52e04d5884433670b455">operator bool</a> ()</td></tr>
-<tr class="memdesc:ad89e11804dde52e04d5884433670b455"><td class="mdescLeft">&#160;</td><td class="mdescRight">This will control if NUClear should run the task.  <a href="structextension_1_1behaviour_1_1TaskInfo.html#ad89e11804dde52e04d5884433670b455">More...</a><br /></td></tr>
-<tr class="separator:ad89e11804dde52e04d5884433670b455"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad66f8b49d304fa16d2d175fcdd06c718"><td class="memItemLeft" align="right" valign="top">const T &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1TaskInfo.html#ad66f8b49d304fa16d2d175fcdd06c718">operator*</a> ()</td></tr>
-<tr class="memdesc:ad66f8b49d304fa16d2d175fcdd06c718"><td class="mdescLeft">&#160;</td><td class="mdescRight">Having a dereference operator allows NUClear to provide either the TaskInfo&lt;T&gt; object or a const T&amp; object.  <a href="structextension_1_1behaviour_1_1TaskInfo.html#ad66f8b49d304fa16d2d175fcdd06c718">More...</a><br /></td></tr>
-<tr class="separator:ad66f8b49d304fa16d2d175fcdd06c718"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3cd456f502fdb7fbb7d77c8da04368d6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1TaskInfo.html#a3cd456f502fdb7fbb7d77c8da04368d6">operator bool</a> () const</td></tr>
+<tr class="memdesc:a3cd456f502fdb7fbb7d77c8da04368d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">This will control if NUClear should run the task.  <a href="structextension_1_1behaviour_1_1TaskInfo.html#a3cd456f502fdb7fbb7d77c8da04368d6">More...</a><br /></td></tr>
+<tr class="separator:a3cd456f502fdb7fbb7d77c8da04368d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7dada730be14c160011881246ca812f8"><td class="memItemLeft" align="right" valign="top">const T &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1TaskInfo.html#a7dada730be14c160011881246ca812f8">operator*</a> () const</td></tr>
+<tr class="memdesc:a7dada730be14c160011881246ca812f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Having a dereference operator allows NUClear to provide either the TaskInfo&lt;T&gt; object or a const T&amp; object.  <a href="structextension_1_1behaviour_1_1TaskInfo.html#a7dada730be14c160011881246ca812f8">More...</a><br /></td></tr>
+<tr class="separator:a7dada730be14c160011881246ca812f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
@@ -202,8 +202,8 @@ template&lt;typename T &gt; </div>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="ad89e11804dde52e04d5884433670b455"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad89e11804dde52e04d5884433670b455">&#9670;&nbsp;</a></span>operator bool()</h2>
+<a id="a3cd456f502fdb7fbb7d77c8da04368d6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3cd456f502fdb7fbb7d77c8da04368d6">&#9670;&nbsp;</a></span>operator bool()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -217,7 +217,7 @@ template&lt;typename T &gt; </div>
           <td class="memname"><a class="el" href="structextension_1_1behaviour_1_1TaskInfo.html">extension::behaviour::TaskInfo</a>&lt; T &gt;::operator bool </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
-          <td></td>
+          <td> const</td>
         </tr>
       </table>
   </td>
@@ -234,8 +234,8 @@ false there is no data, NUClear should not run the task </dd></dl>
 
 </div>
 </div>
-<a id="ad66f8b49d304fa16d2d175fcdd06c718"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad66f8b49d304fa16d2d175fcdd06c718">&#9670;&nbsp;</a></span>operator*()</h2>
+<a id="a7dada730be14c160011881246ca812f8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7dada730be14c160011881246ca812f8">&#9670;&nbsp;</a></span>operator*()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -249,7 +249,7 @@ template&lt;typename T &gt; </div>
           <td class="memname">const T&amp; <a class="el" href="structextension_1_1behaviour_1_1TaskInfo.html">extension::behaviour::TaskInfo</a>&lt; T &gt;::operator* </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
-          <td></td>
+          <td> const</td>
         </tr>
       </table>
   </td>
@@ -273,7 +273,7 @@ template&lt;typename T &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>extension</b></li><li class="navelem"><b>behaviour</b></li><li class="navelem"><a class="el" href="structextension_1_1behaviour_1_1TaskInfo.html">TaskInfo</a></li>
-    <li class="footer">Generated on Tue Jul 26 2022 20:51:57 for NUbots by
+    <li class="footer">Generated on Sun Jul 31 2022 09:14:30 for NUbots by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.17 </li>
   </ul>

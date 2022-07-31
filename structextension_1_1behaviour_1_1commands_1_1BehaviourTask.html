@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.8.17"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>NUbots: extension::behaviour::commands::DirectorTask Struct Reference</title>
+<title>NUbots: extension::behaviour::commands::BehaviourTask Struct Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -95,7 +95,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
-$(document).ready(function(){initNavTree('structextension_1_1behaviour_1_1commands_1_1DirectorTask.html',''); initResizable(); });
+$(document).ready(function(){initNavTree('structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html',''); initResizable(); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -117,59 +117,59 @@ $(document).ready(function(){initNavTree('structextension_1_1behaviour_1_1comman
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
-<a href="structextension_1_1behaviour_1_1commands_1_1DirectorTask-members.html">List of all members</a>  </div>
+<a href="structextension_1_1behaviour_1_1commands_1_1BehaviourTask-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">extension::behaviour::commands::DirectorTask Struct Reference</div>  </div>
+<div class="title">extension::behaviour::commands::BehaviourTask Struct Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
 
-<p>A task message that is to be sent to the Director for execution.  
- <a href="structextension_1_1behaviour_1_1commands_1_1DirectorTask.html#details">More...</a></p>
+<p>A task message that is to be sent to the behaviour system for execution.  
+ <a href="structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="commands_8hpp_source.html">commands.hpp</a>&gt;</code></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:adaf8948d84b55a1ecd6f4b6a7882f1fd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1DirectorTask.html#adaf8948d84b55a1ecd6f4b6a7882f1fd">DirectorTask</a> (const std::type_index &amp;type_, const uint64_t &amp;requester_id_, const uint64_t &amp;requester_task_id_, std::shared_ptr&lt; void &gt; data_, std::string name_, const int &amp;priority_, const bool &amp;optional_)</td></tr>
-<tr class="memdesc:adaf8948d84b55a1ecd6f4b6a7882f1fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a new <a class="el" href="structextension_1_1behaviour_1_1Task.html" title="A Task to be executed by the director and a priority with which to execute this task.">Task</a> object to send to the Director.  <a href="structextension_1_1behaviour_1_1commands_1_1DirectorTask.html#adaf8948d84b55a1ecd6f4b6a7882f1fd">More...</a><br /></td></tr>
-<tr class="separator:adaf8948d84b55a1ecd6f4b6a7882f1fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6392a59b40cc09973dc46c74eeecc53e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html#a6392a59b40cc09973dc46c74eeecc53e">BehaviourTask</a> (const std::type_index &amp;type_, const uint64_t &amp;requester_id_, const uint64_t &amp;requester_task_id_, std::shared_ptr&lt; void &gt; data_, std::string name_, const int &amp;priority_, const bool &amp;optional_)</td></tr>
+<tr class="memdesc:a6392a59b40cc09973dc46c74eeecc53e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Construct a new <a class="el" href="structextension_1_1behaviour_1_1Task.html" title="A Task to be executed by the director and a priority with which to execute this task.">Task</a> object to send to the behaviour system.  <a href="structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html#a6392a59b40cc09973dc46c74eeecc53e">More...</a><br /></td></tr>
+<tr class="separator:a6392a59b40cc09973dc46c74eeecc53e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a9b2c20874c0485be13024f977da98e41"><td class="memItemLeft" align="right" valign="top"><a id="a9b2c20874c0485be13024f977da98e41"></a>
-std::shared_ptr&lt; void &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1DirectorTask.html#a9b2c20874c0485be13024f977da98e41">data</a></td></tr>
-<tr class="memdesc:a9b2c20874c0485be13024f977da98e41"><td class="mdescLeft">&#160;</td><td class="mdescRight">The data for the command, (the data that will be given to the Provider) <br /></td></tr>
-<tr class="separator:a9b2c20874c0485be13024f977da98e41"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa5c0cd63e82b39344d6165375b4ad63d"><td class="memItemLeft" align="right" valign="top"><a id="aa5c0cd63e82b39344d6165375b4ad63d"></a>
-std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1DirectorTask.html#aa5c0cd63e82b39344d6165375b4ad63d">name</a></td></tr>
-<tr class="memdesc:aa5c0cd63e82b39344d6165375b4ad63d"><td class="mdescLeft">&#160;</td><td class="mdescRight">A name for this task to be shown in debugging systems. <br /></td></tr>
-<tr class="separator:aa5c0cd63e82b39344d6165375b4ad63d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abdabb0bea37ded1308522dd9ad527cc4"><td class="memItemLeft" align="right" valign="top"><a id="abdabb0bea37ded1308522dd9ad527cc4"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1DirectorTask.html#abdabb0bea37ded1308522dd9ad527cc4">optional</a></td></tr>
-<tr class="memdesc:abdabb0bea37ded1308522dd9ad527cc4"><td class="mdescLeft">&#160;</td><td class="mdescRight">If this task is optional. <br /></td></tr>
-<tr class="separator:abdabb0bea37ded1308522dd9ad527cc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a175997b34a9b9c56ec002c0774578838"><td class="memItemLeft" align="right" valign="top"><a id="a175997b34a9b9c56ec002c0774578838"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1DirectorTask.html#a175997b34a9b9c56ec002c0774578838">priority</a></td></tr>
-<tr class="memdesc:a175997b34a9b9c56ec002c0774578838"><td class="mdescLeft">&#160;</td><td class="mdescRight">The priority with which this task is to be executed. <br /></td></tr>
-<tr class="separator:a175997b34a9b9c56ec002c0774578838"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab5488def96460b37325aa251217f9020"><td class="memItemLeft" align="right" valign="top"><a id="ab5488def96460b37325aa251217f9020"></a>
-uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1DirectorTask.html#ab5488def96460b37325aa251217f9020">requester_id</a></td></tr>
-<tr class="memdesc:ab5488def96460b37325aa251217f9020"><td class="mdescLeft">&#160;</td><td class="mdescRight">The reaction id of the requester (could be the id of a Provider) <br /></td></tr>
-<tr class="separator:ab5488def96460b37325aa251217f9020"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad402969dcd65ede9a4713381b9c10119"><td class="memItemLeft" align="right" valign="top"><a id="ad402969dcd65ede9a4713381b9c10119"></a>
-uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1DirectorTask.html#ad402969dcd65ede9a4713381b9c10119">requester_task_id</a></td></tr>
-<tr class="memdesc:ad402969dcd65ede9a4713381b9c10119"><td class="mdescLeft">&#160;</td><td class="mdescRight">The reaction task id of the requester (if it is a Provider later a <a class="el" href="structextension_1_1behaviour_1_1commands_1_1ProviderDone.html" title="Message to tell the Director that a Provider task has finished executing.">ProviderDone</a> will be emitted) <br /></td></tr>
-<tr class="separator:ad402969dcd65ede9a4713381b9c10119"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6bb59b35092cf60a1dffa0db366d3585"><td class="memItemLeft" align="right" valign="top"><a id="a6bb59b35092cf60a1dffa0db366d3585"></a>
-std::type_index&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1DirectorTask.html#a6bb59b35092cf60a1dffa0db366d3585">type</a></td></tr>
-<tr class="memdesc:a6bb59b35092cf60a1dffa0db366d3585"><td class="mdescLeft">&#160;</td><td class="mdescRight">The Provider type this Director task is for. <br /></td></tr>
-<tr class="separator:a6bb59b35092cf60a1dffa0db366d3585"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa055c32855c112904b30c4ca92fac450"><td class="memItemLeft" align="right" valign="top"><a id="aa055c32855c112904b30c4ca92fac450"></a>
+std::shared_ptr&lt; void &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html#aa055c32855c112904b30c4ca92fac450">data</a></td></tr>
+<tr class="memdesc:aa055c32855c112904b30c4ca92fac450"><td class="mdescLeft">&#160;</td><td class="mdescRight">The data for the command, (the data that will be given to the Provider) <br /></td></tr>
+<tr class="separator:aa055c32855c112904b30c4ca92fac450"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a18923bd51a1110850d2db581044cbcfe"><td class="memItemLeft" align="right" valign="top"><a id="a18923bd51a1110850d2db581044cbcfe"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html#a18923bd51a1110850d2db581044cbcfe">name</a></td></tr>
+<tr class="memdesc:a18923bd51a1110850d2db581044cbcfe"><td class="mdescLeft">&#160;</td><td class="mdescRight">A name for this task to be shown in debugging systems. <br /></td></tr>
+<tr class="separator:a18923bd51a1110850d2db581044cbcfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaf825e6734bf8f7a4b006874b00fc564"><td class="memItemLeft" align="right" valign="top"><a id="aaf825e6734bf8f7a4b006874b00fc564"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html#aaf825e6734bf8f7a4b006874b00fc564">optional</a></td></tr>
+<tr class="memdesc:aaf825e6734bf8f7a4b006874b00fc564"><td class="mdescLeft">&#160;</td><td class="mdescRight">If this task is optional. <br /></td></tr>
+<tr class="separator:aaf825e6734bf8f7a4b006874b00fc564"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8e005b5c3bcdb4b3dc44d7e02afe6868"><td class="memItemLeft" align="right" valign="top"><a id="a8e005b5c3bcdb4b3dc44d7e02afe6868"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html#a8e005b5c3bcdb4b3dc44d7e02afe6868">priority</a></td></tr>
+<tr class="memdesc:a8e005b5c3bcdb4b3dc44d7e02afe6868"><td class="mdescLeft">&#160;</td><td class="mdescRight">The priority with which this task is to be executed. <br /></td></tr>
+<tr class="separator:a8e005b5c3bcdb4b3dc44d7e02afe6868"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a62b7ef45286bff29fa23f049e0332399"><td class="memItemLeft" align="right" valign="top"><a id="a62b7ef45286bff29fa23f049e0332399"></a>
+uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html#a62b7ef45286bff29fa23f049e0332399">requester_id</a></td></tr>
+<tr class="memdesc:a62b7ef45286bff29fa23f049e0332399"><td class="mdescLeft">&#160;</td><td class="mdescRight">The reaction id of the requester (could be the id of a Provider) <br /></td></tr>
+<tr class="separator:a62b7ef45286bff29fa23f049e0332399"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a554790d4a1450ca309ea1f37cdab6b1c"><td class="memItemLeft" align="right" valign="top"><a id="a554790d4a1450ca309ea1f37cdab6b1c"></a>
+uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html#a554790d4a1450ca309ea1f37cdab6b1c">requester_task_id</a></td></tr>
+<tr class="memdesc:a554790d4a1450ca309ea1f37cdab6b1c"><td class="mdescLeft">&#160;</td><td class="mdescRight">The reaction task id of the requester (if it is a Provider later a <a class="el" href="structextension_1_1behaviour_1_1commands_1_1ProviderDone.html" title="Message to tell the behaviour system that a Provider task has finished executing.">ProviderDone</a> will be emitted) <br /></td></tr>
+<tr class="separator:a554790d4a1450ca309ea1f37cdab6b1c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab4d3b0a77624e74410a2df38bcf59533"><td class="memItemLeft" align="right" valign="top"><a id="ab4d3b0a77624e74410a2df38bcf59533"></a>
+std::type_index&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html#ab4d3b0a77624e74410a2df38bcf59533">type</a></td></tr>
+<tr class="memdesc:ab4d3b0a77624e74410a2df38bcf59533"><td class="mdescLeft">&#160;</td><td class="mdescRight">The Provider type this task is for. <br /></td></tr>
+<tr class="separator:ab4d3b0a77624e74410a2df38bcf59533"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>A task message that is to be sent to the Director for execution. </p>
+<div class="textblock"><p>A task message that is to be sent to the behaviour system for execution. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="adaf8948d84b55a1ecd6f4b6a7882f1fd"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adaf8948d84b55a1ecd6f4b6a7882f1fd">&#9670;&nbsp;</a></span>DirectorTask()</h2>
+<a id="a6392a59b40cc09973dc46c74eeecc53e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6392a59b40cc09973dc46c74eeecc53e">&#9670;&nbsp;</a></span>BehaviourTask()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -178,7 +178,7 @@ std::type_index&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">extension::behaviour::commands::DirectorTask::DirectorTask </td>
+          <td class="memname">extension::behaviour::commands::BehaviourTask::BehaviourTask </td>
           <td>(</td>
           <td class="paramtype">const std::type_index &amp;&#160;</td>
           <td class="paramname"><em>type_</em>, </td>
@@ -232,7 +232,7 @@ std::type_index&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 </table>
 </div><div class="memdoc">
 
-<p>Construct a new <a class="el" href="structextension_1_1behaviour_1_1Task.html" title="A Task to be executed by the director and a priority with which to execute this task.">Task</a> object to send to the Director. </p>
+<p>Construct a new <a class="el" href="structextension_1_1behaviour_1_1Task.html" title="A Task to be executed by the director and a priority with which to execute this task.">Task</a> object to send to the behaviour system. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">type_</td><td>the type that this task is for </td></tr>
@@ -256,8 +256,8 @@ std::type_index&#160;</td><td class="memItemRight" valign="bottom"><a class="el"
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><b>extension</b></li><li class="navelem"><b>behaviour</b></li><li class="navelem"><a class="el" href="namespaceextension_1_1behaviour_1_1commands.html">commands</a></li><li class="navelem"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1DirectorTask.html">DirectorTask</a></li>
-    <li class="footer">Generated on Tue Jul 26 2022 20:51:57 for NUbots by
+    <li class="navelem"><b>extension</b></li><li class="navelem"><b>behaviour</b></li><li class="navelem"><a class="el" href="namespaceextension_1_1behaviour_1_1commands.html">commands</a></li><li class="navelem"><a class="el" href="structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html">BehaviourTask</a></li>
+    <li class="footer">Generated on Sun Jul 31 2022 09:14:30 for NUbots by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.17 </li>
   </ul>

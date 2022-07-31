@@ -1,5 +1,16 @@
 var NAVTREEINDEX10 =
 {
+"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config_1_1Battery.html#af600572efd70fc4ff82e8b157fe12cff":[1,0,2,7,0,1,1,0,3],
+"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html":[1,0,2,7,0,1,2],
+"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a02b92a0dc3a2f726b902d374871472b4":[1,0,2,7,0,1,2,5],
+"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a18a81be239168a3fd4f78ca6fd539c41":[1,0,2,7,0,1,2,8],
+"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a31c89ee5a3bb20b11c6f7cdae19cf142":[1,0,2,7,0,1,2,12],
+"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a3cd2fb57cf40f4287e00b10cfa46a241":[1,0,2,7,0,1,2,4],
+"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a42907cd8a0fb656a6ee70060494a92dc":[1,0,2,7,0,1,2,10],
+"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a437626fbb77baf06dec7faff3cf7eb15":[1,0,2,7,0,1,2,0],
+"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a44a195c6faba0a58747ca93bf0f9019f":[1,0,2,7,0,1,2,7],
+"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a4612df68469fe27e6113f71304e117f8":[1,0,2,7,0,1,2,2],
+"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a65b05bfaa259cd9d93d54893358d4a3e":[1,0,2,7,0,1,2,11],
 "structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a87af03325495526807dd2ed8befe0d3b":[1,0,2,7,0,1,2,6],
 "structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a90209359f716235067496858024812e8":[1,0,2,7,0,1,2,13],
 "structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#aa7daedb49178f28e2becdd1a717e2fbf":[1,0,2,7,0,1,2,1],
@@ -238,16 +249,5 @@ var NAVTREEINDEX10 =
 "structutility_1_1motion_1_1splines_1_1Spline_1_1Spline__t.html#a5299dbe7c2dbda05e2591b5413abd5bb":[1,0,5,5,0,4,0,2],
 "structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html":[1,0,5,5,0,6],
 "structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a00d4bc7b78fcfe117e424fa74dfc27df":[1,0,5,5,0,6,16],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a04362c734f46ab57001737c514f4cfe3":[1,0,5,5,0,6,5],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704c":[1,0,5,5,0,6,0],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca033c902a42ce564f5e69a3b461f9dd14":[1,0,5,5,0,6,0,10],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca0891f1a3b43f353370f4c6947a115308":[1,0,5,5,0,6,0,8],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca164397eac73e6c94c3e629929e41096b":[1,0,5,5,0,6,0,13],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca42ffec145a4a466ba4a35410661e0386":[1,0,5,5,0,6,0,5],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca4d52cbbc35f27d5f3d7976155c1546bf":[1,0,5,5,0,6,0,7],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca52ef05a415d066c376d2b54cf6349cc1":[1,0,5,5,0,6,0,6],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca5ad1b67a42b7c16f27ff66eacb7112a3":[1,0,5,5,0,6,0,9],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca7f37b687fb8070d7c0a9746da3bcf95d":[1,0,5,5,0,6,0,2],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca81bca027b1f8f24af9159fcb0b4862a9":[1,0,5,5,0,6,0,12],
-"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a048ab6307d0e6d25b5b0a3b72cab704ca93fe30d3bb2755dbb5e76358213c78ba":[1,0,5,5,0,6,0,0]
+"structutility_1_1motion_1_1splines_1_1TrajectoryTypes.html#a04362c734f46ab57001737c514f4cfe3":[1,0,5,5,0,6,5]
 };

@@ -125,35 +125,38 @@ $(document).ready(function(){initNavTree('structmodule_1_1extension_1_1provider_
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:ae4e1595f701d42c17b2acf032ada658c"><td class="memItemLeft" align="right" valign="top"><a id="ae4e1595f701d42c17b2acf032ada658c"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#ae4e1595f701d42c17b2acf032ada658c">TaskPack</a> = std::vector&lt; std::shared_ptr&lt; const ::<a class="el" href="structextension_1_1behaviour_1_1commands_1_1DirectorTask.html">extension::behaviour::commands::DirectorTask</a> &gt; &gt;</td></tr>
-<tr class="memdesc:ae4e1595f701d42c17b2acf032ada658c"><td class="mdescLeft">&#160;</td><td class="mdescRight">A task pack is the result of a set of tasks emitted by a provider that should be run together. <br /></td></tr>
-<tr class="separator:ae4e1595f701d42c17b2acf032ada658c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a42d1e7710b27a69ad8cea81f1cc36bf5"><td class="memItemLeft" align="right" valign="top"><a id="a42d1e7710b27a69ad8cea81f1cc36bf5"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#a42d1e7710b27a69ad8cea81f1cc36bf5">TaskQueue</a> = std::vector&lt; std::shared_ptr&lt; const ::<a class="el" href="structextension_1_1behaviour_1_1commands_1_1DirectorTask.html">extension::behaviour::commands::DirectorTask</a> &gt; &gt;</td></tr>
-<tr class="memdesc:a42d1e7710b27a69ad8cea81f1cc36bf5"><td class="mdescLeft">&#160;</td><td class="mdescRight">A task queue holds tasks in a provider that are waiting to be executed by that group. <br /></td></tr>
-<tr class="separator:a42d1e7710b27a69ad8cea81f1cc36bf5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac12cb0034c7f0711221b4660f2c3fe9e"><td class="memItemLeft" align="right" valign="top"><a id="ac12cb0034c7f0711221b4660f2c3fe9e"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>BehaviourTask</b> = ::<a class="el" href="structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html">extension::behaviour::commands::BehaviourTask</a></td></tr>
+<tr class="separator:ac12cb0034c7f0711221b4660f2c3fe9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add7a4c2a1cd656516cf2c6c379000279"><td class="memItemLeft" align="right" valign="top"><a id="add7a4c2a1cd656516cf2c6c379000279"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#add7a4c2a1cd656516cf2c6c379000279">TaskPack</a> = std::vector&lt; std::shared_ptr&lt; const ::<a class="el" href="structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html">extension::behaviour::commands::BehaviourTask</a> &gt; &gt;</td></tr>
+<tr class="memdesc:add7a4c2a1cd656516cf2c6c379000279"><td class="mdescLeft">&#160;</td><td class="mdescRight">A task pack is the result of a set of tasks emitted by a provider that should be run together. <br /></td></tr>
+<tr class="separator:add7a4c2a1cd656516cf2c6c379000279"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5927d711bb26b30d2cb4547bc5eec495"><td class="memItemLeft" align="right" valign="top"><a id="a5927d711bb26b30d2cb4547bc5eec495"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#a5927d711bb26b30d2cb4547bc5eec495">TaskQueue</a> = std::vector&lt; std::shared_ptr&lt; const ::<a class="el" href="structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html">extension::behaviour::commands::BehaviourTask</a> &gt; &gt;</td></tr>
+<tr class="memdesc:a5927d711bb26b30d2cb4547bc5eec495"><td class="mdescLeft">&#160;</td><td class="mdescRight">A task queue holds tasks in a provider that are waiting to be executed by that group. <br /></td></tr>
+<tr class="separator:a5927d711bb26b30d2cb4547bc5eec495"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a9db8929632b34f6f641c2f56bb5642da"><td class="memItemLeft" align="right" valign="top"><a id="a9db8929632b34f6f641c2f56bb5642da"></a>
-std::shared_ptr&lt; const ::<a class="el" href="structextension_1_1behaviour_1_1commands_1_1DirectorTask.html">extension::behaviour::commands::DirectorTask</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#a9db8929632b34f6f641c2f56bb5642da">active_task</a></td></tr>
-<tr class="memdesc:a9db8929632b34f6f641c2f56bb5642da"><td class="mdescLeft">&#160;</td><td class="mdescRight">The current task that is running on this <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html" title="A Provider instance which is able to execute a specific task type.">Provider</a>. <br /></td></tr>
-<tr class="separator:a9db8929632b34f6f641c2f56bb5642da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaf9b2f53ba9f2cefb22143cda50a20fe"><td class="memItemLeft" align="right" valign="top"><a id="aaf9b2f53ba9f2cefb22143cda50a20fe"></a>
+std::shared_ptr&lt; const <a class="el" href="structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html">BehaviourTask</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#aaf9b2f53ba9f2cefb22143cda50a20fe">active_task</a></td></tr>
+<tr class="memdesc:aaf9b2f53ba9f2cefb22143cda50a20fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">The current task that is running on this <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html" title="A Provider instance which is able to execute a specific task type.">Provider</a>. <br /></td></tr>
+<tr class="separator:aaf9b2f53ba9f2cefb22143cda50a20fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab562bc6d6d7dcd4b5b68e70b77f24ec5"><td class="memItemLeft" align="right" valign="top"><a id="ab562bc6d6d7dcd4b5b68e70b77f24ec5"></a>
 std::vector&lt; std::shared_ptr&lt; <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html">Provider</a> &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#ab562bc6d6d7dcd4b5b68e70b77f24ec5">providers</a></td></tr>
 <tr class="memdesc:ab562bc6d6d7dcd4b5b68e70b77f24ec5"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of individual Providers that can service tasks for this type. <br /></td></tr>
 <tr class="separator:ab562bc6d6d7dcd4b5b68e70b77f24ec5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a652aef8d4bb6008f29059a2298a5ece4"><td class="memItemLeft" align="right" valign="top"><a id="a652aef8d4bb6008f29059a2298a5ece4"></a>
-std::shared_ptr&lt; const ::<a class="el" href="structextension_1_1behaviour_1_1commands_1_1DirectorTask.html">extension::behaviour::commands::DirectorTask</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#a652aef8d4bb6008f29059a2298a5ece4">pushing_task</a></td></tr>
-<tr class="memdesc:a652aef8d4bb6008f29059a2298a5ece4"><td class="mdescLeft">&#160;</td><td class="mdescRight">The task that is pushing this provider to run in a different way. <br /></td></tr>
-<tr class="separator:a652aef8d4bb6008f29059a2298a5ece4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acaeec0457e171664ad0d817e94cbc1e6"><td class="memItemLeft" align="right" valign="top"><a id="acaeec0457e171664ad0d817e94cbc1e6"></a>
+std::shared_ptr&lt; const <a class="el" href="structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html">BehaviourTask</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#acaeec0457e171664ad0d817e94cbc1e6">pushing_task</a></td></tr>
+<tr class="memdesc:acaeec0457e171664ad0d817e94cbc1e6"><td class="mdescLeft">&#160;</td><td class="mdescRight">The task that is pushing this provider to run in a different way. <br /></td></tr>
+<tr class="separator:acaeec0457e171664ad0d817e94cbc1e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a26874fbec26144a97f9bedc048427588"><td class="memItemLeft" align="right" valign="top"><a id="a26874fbec26144a97f9bedc048427588"></a>
-<a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#ae4e1595f701d42c17b2acf032ada658c">TaskPack</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#a26874fbec26144a97f9bedc048427588">subtasks</a></td></tr>
+<a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#add7a4c2a1cd656516cf2c6c379000279">TaskPack</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#a26874fbec26144a97f9bedc048427588">subtasks</a></td></tr>
 <tr class="memdesc:a26874fbec26144a97f9bedc048427588"><td class="mdescLeft">&#160;</td><td class="mdescRight">List of current subtasks that have been emitted by this provider group. <br /></td></tr>
 <tr class="separator:a26874fbec26144a97f9bedc048427588"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:addbedfa49c3d1f16ed382874949e3a6c"><td class="memItemLeft" align="right" valign="top"><a id="addbedfa49c3d1f16ed382874949e3a6c"></a>
-<a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#a42d1e7710b27a69ad8cea81f1cc36bf5">TaskQueue</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#addbedfa49c3d1f16ed382874949e3a6c">task_queue</a></td></tr>
+<a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#a5927d711bb26b30d2cb4547bc5eec495">TaskQueue</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#addbedfa49c3d1f16ed382874949e3a6c">task_queue</a></td></tr>
 <tr class="memdesc:addbedfa49c3d1f16ed382874949e3a6c"><td class="mdescLeft">&#160;</td><td class="mdescRight">The queue of tasks waiting to run if the situation changes. <br /></td></tr>
 <tr class="separator:addbedfa49c3d1f16ed382874949e3a6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
@@ -166,7 +169,7 @@ std::shared_ptr&lt; const ::<a class="el" href="structextension_1_1behaviour_1_1
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>extension</b></li><li class="navelem"><b>provider</b></li><li class="navelem"><a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html">ProviderGroup</a></li>
-    <li class="footer">Generated on Tue Jul 26 2022 20:51:57 for NUbots by
+    <li class="footer">Generated on Sun Jul 31 2022 09:14:30 for NUbots by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.17 </li>
   </ul>
