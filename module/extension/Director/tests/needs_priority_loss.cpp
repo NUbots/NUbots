@@ -36,8 +36,8 @@ namespace {
             });
 
             // Monitor which events run and by who
-            on<Provide<SimpleTask<1>>>().then([this](const SimpleTask<1>& t) { events.push_back("p 1: " + t.msg); });
-            on<Provide<SimpleTask<2>>>().then([this](const SimpleTask<2>& t) { events.push_back("p 2: " + t.msg); });
+            on<Provide<SimpleTask<1>>>().then([this](const SimpleTask<1>& t) { events.push_back("p1: " + t.msg); });
+            on<Provide<SimpleTask<2>>>().then([this](const SimpleTask<2>& t) { events.push_back("p2: " + t.msg); });
             on<Start<SimpleTask<1>>>().then([this](const SimpleTask<1>& t) { events.push_back("start 1: " + t.msg); });
             on<Start<SimpleTask<2>>>().then([this](const SimpleTask<2>& t) { events.push_back("start 2: " + t.msg); });
             on<Stop<SimpleTask<1>>>().then([this](const SimpleTask<1>& t) { events.push_back("stop 1: " + t.msg); });
@@ -89,7 +89,7 @@ TEST_CASE("Tests that if a provider loses one of its dependent needs it stops ru
     };
 
     // Make an info print the diff in an easy to read way if we fail
-    INFO(util::diff_string(events, expected));
+    INFO(util::diff_string(expected, events));
 
     // Check the events fired in order and only those events
     REQUIRE(events == expected);
