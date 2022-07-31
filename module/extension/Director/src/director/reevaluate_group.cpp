@@ -23,26 +23,22 @@ namespace module::extension {
 
     void Director::reevaluate_group(provider::ProviderGroup& group) {
 
+        // We need to take a copy of the watchers before we start as reevaluting the group will alter this order
+        std::vector<std::shared_ptr<const BehaviourTask>> watchers = group.watchers;
+
         // Sort the interested parties by priority with highest first
-        std::sort(group.watchers.begin(), group.watchers.end(), [this](const auto& a, const auto& b) {
+        std::sort(watchers.begin(), watchers.end(), [this](const auto& a, const auto& b) {
             return !challenge_priority(a, b);
         });
 
-        std::cout << group.active_task << ":" << group.watchers.size() << std::endl;
         // Store our initial task to see if it changed later
         auto initial_task = group.active_task;
 
         // Go through each of the watchers and try to re-run them and their siblings
-        for (const auto& t : group.watchers) {
-            // TODO this is a problem, calling reevaluate_group can mess with the group.watchers list
-
-            std::cout << "Looking for stuff" << std::endl;
+        for (const auto& t : watchers) {
 
             // Check if we have the priority to override the currently active task
             if (challenge_priority(group.active_task, t)) {
-
-                std::cout << "Found something to run" << std::endl;
-
                 // Find the provider group that requested this task and reevaluate it
                 // Maybe it's blocked on something else and that's why it's not our active task
                 auto p  = providers.at(t->requester_id);
@@ -51,7 +47,6 @@ namespace module::extension {
 
                 // If running this task pack claimed the active task we can stop looking
                 if (group.active_task == t) {
-                    std::cout << "Looks like I ran a thing" << std::endl;
                     break;
                 }
             }
