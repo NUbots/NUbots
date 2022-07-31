@@ -29,10 +29,10 @@ namespace module::extension {
 
         // Get the provider and group for the reaction
         auto provider = providers.at(reaction_id);
-        auto group    = provider->group;
+        auto group    = groups[provider->type];
 
         // Only the active provider is allowed to have data
-        if (group.active_provider != provider) {
+        if (provider->active) {
             return nullptr;
         }
 
