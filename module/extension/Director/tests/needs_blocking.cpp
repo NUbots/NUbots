@@ -59,7 +59,7 @@ namespace {
 }  // namespace
 
 TEST_CASE("Test that a provider will be blocked if its needs aren't met but will run if they are",
-          "[director][needs][priority][blocking][!mayfail]") {
+          "[director][needs][priority][blocking]") {
 
     NUClear::PowerPlant::Configuration config;
     config.thread_count = 1;

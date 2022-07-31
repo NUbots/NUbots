@@ -70,7 +70,7 @@ namespace {
 }  // namespace
 
 TEST_CASE("Test that when the needs a higher task is blocked on are released, the higher task will run",
-          "[director][needs][!mayfail]") {
+          "[director][needs]") {
 
     NUClear::PowerPlant::Configuration config;
     config.thread_count = 1;

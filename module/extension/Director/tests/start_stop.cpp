@@ -58,8 +58,7 @@ namespace {
 
 }  // namespace
 
-TEST_CASE("Test that the start and stop events fire when a provider gains/loses a task",
-          "[director][start][stop][!mayfail]") {
+TEST_CASE("Test that the start and stop events fire when a provider gains/loses a task", "[director][start][stop]") {
 
     NUClear::PowerPlant::Configuration config;
     config.thread_count = 1;

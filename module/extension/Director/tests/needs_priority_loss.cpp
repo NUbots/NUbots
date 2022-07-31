@@ -66,7 +66,7 @@ namespace {
 }  // namespace
 
 TEST_CASE("Tests that if a provider loses one of its dependent needs it stops running everything",
-          "[director][priority][needs][!mayfail]") {
+          "[director][priority][needs]") {
 
     NUClear::PowerPlant::Configuration config;
     config.thread_count = 1;

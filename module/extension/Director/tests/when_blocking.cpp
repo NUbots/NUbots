@@ -69,7 +69,7 @@ namespace {
     };
 }  // namespace
 
-TEST_CASE("Test that the when keyword blocks and allows running as expected", "[director][when][blocking][!mayfail]") {
+TEST_CASE("Test that the when keyword blocks and allows running as expected", "[director][when][blocking]") {
 
     NUClear::PowerPlant::Configuration config;
     config.thread_count = 1;

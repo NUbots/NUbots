@@ -69,7 +69,7 @@ namespace {
 }  // namespace
 
 TEST_CASE("Test that if all the non optional tasks can't be executed none of them will be",
-          "[director][priority][entire][!mayfail]") {
+          "[director][priority][entire]") {
 
     NUClear::PowerPlant::Configuration config;
     config.thread_count = 1;

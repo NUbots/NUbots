@@ -91,7 +91,7 @@ namespace {
 }  // namespace
 
 TEST_CASE("Test that providers that are active are able to be triggered from other bind statements",
-          "[director][triggered][!mayfail]") {
+          "[director][triggered]") {
 
     // Run the module
     NUClear::PowerPlant::Configuration config;

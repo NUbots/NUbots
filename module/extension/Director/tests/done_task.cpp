@@ -51,7 +51,7 @@ namespace {
     };
 }  // namespace
 
-TEST_CASE("Test that a done task causes the parent task that emitted it to rerun", "[director][done][!mayfail]") {
+TEST_CASE("Test that a done task causes the parent task that emitted it to rerun", "[director][done]") {
 
     NUClear::PowerPlant::Configuration config;
     config.thread_count = 1;
