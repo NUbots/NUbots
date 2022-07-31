@@ -26,10 +26,23 @@
 
 namespace module::extension::provider {
 
+    struct ProviderGroup;
+
     /**
      * A Provider instance which is able to execute a specific task type
      */
     struct Provider {
+
+        enum class Classification {
+            /// Provide providers are typical providers that run when given a task
+            PROVIDE = int(::extension::behaviour::commands::ProviderClassification::PROVIDE),
+            /// Start providers run once when a provider group first gets a task
+            START = int(::extension::behaviour::commands::ProviderClassification::START),
+            /// Stop providers run once there are no tasks running for any provider of this group
+            STOP = int(::extension::behaviour::commands::ProviderClassification::STOP),
+            /// A root virtual provider to use when working with root tasks
+            ROOT,
+        };
 
         /**
          * The data held by a `When` condition in order to monitor when the condition will be met, as well as to
@@ -50,13 +63,19 @@ namespace module::extension::provider {
             NUClear::threading::ReactionHandle handle;
         };
 
-        Provider(const ::extension::behaviour::commands::ProviderClassification& classification_,
+        Provider(ProviderGroup& group_,
+                 const uint64_t& id_,
+                 const Classification& classification_,
                  const std::type_index& type_,
                  std::shared_ptr<NUClear::threading::Reaction> reaction_)
-            : classification(classification_), type(type_), reaction(std::move(reaction_)) {}
+            : group(group_), id(id_), classification(classification_), type(type_), reaction(std::move(reaction_)) {}
 
+        /// The provider group this provider belongs to
+        ProviderGroup& group;
+        /// The id for this provider. Will either be reaction->id or a generated one for root providers
+        uint64_t id;
         /// The classification of this Provider
-        ::extension::behaviour::commands::ProviderClassification classification;
+        Classification classification;
         /// The data type this Provider is for
         std::type_index type;
         /// The reaction object to run in order to run this Provider
@@ -67,8 +86,6 @@ namespace module::extension::provider {
         std::map<std::type_index, int> causing;
         /// A list of provider types that this provider needs in order to run
         std::set<std::type_index> needs;
-        /// A boolean that is true if this Provider is currently active and running (can make subtasks)
-        bool active = false;
     };
 
 }  // namespace module::extension::provider

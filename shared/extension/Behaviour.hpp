@@ -48,7 +48,7 @@ namespace extension::behaviour {
         static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
 
             // Tell the Director
-            reaction->reactor.powerplant.emit(
+            reaction->reactor.powerplant.emit<NUClear::dsl::word::emit::Direct>(
                 std::make_unique<commands::ProvideReaction>(reaction, typeid(T), classification));
 
             // Add our unbinder
@@ -82,7 +82,8 @@ namespace extension::behaviour {
         template <typename DSL>
         static inline void postcondition(NUClear::threading::ReactionTask& task) {
             // Take the task id and send it to the Director to let it know that this Provider is done
-            task.parent.reactor.emit(std::make_unique<commands::ProviderDone>(task.parent.id, task.id));
+            task.parent.reactor.emit<NUClear::dsl::word::emit::Direct>(
+                std::make_unique<commands::ProviderDone>(task.parent.id, task.id));
         }
     };
 
@@ -147,7 +148,7 @@ namespace extension::behaviour {
                 typeid(State),
                 // Function that uses expr to determine if the passed value v is valid
                 [](const int& v) -> bool { return expr<int>()(v, value); },
-                // Function that uses get to get the current state of the reaction
+                // Function that uses get to get the current state of the condition
                 [reaction]() -> int {
                     // Check if there is cached data, and if not throw an exception
                     auto ptr = NUClear::dsl::operation::CacheGet<State>::template get<DSL>(*reaction);
@@ -292,6 +293,7 @@ namespace extension::behaviour {
             NUClear::dsl::word::emit::Direct<commands::BehaviourTask>::emit(
                 powerplant,
                 std::make_shared<commands::BehaviourTask>(typeid(T),
+                                                          typeid(commands::RootType<T>),
                                                           reaction_id,
                                                           task_id,
                                                           data,

@@ -92,8 +92,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS
     CACHE STRING "Enable/Disable output of compile commands during generation." FORCE
 )
 
-# Enable all warnings that we can
-add_compile_options(-Wall -Wpedantic -Wextra)
+# Enable warnings
+add_compile_options(-Wall -Wextra)
 
 # This is needed everywhere so that we can catch segmentation faults
 add_compile_options(-fnon-call-exceptions)

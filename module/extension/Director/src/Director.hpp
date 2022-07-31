@@ -34,10 +34,12 @@ namespace module::extension {
         : public NUClear::Reactor
         , ::extension::behaviour::information::InformationSource {
     public:
-        /// A task queue holds tasks in a provider that are waiting to be executed by that group
-        using TaskQueue = std::vector<std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>>;
+        /// Behaviour task
+        using BehaviourTask = ::extension::behaviour::commands::BehaviourTask;
+        /// A task list holds a list of tasks
+        using TaskList = std::vector<std::shared_ptr<const BehaviourTask>>;
         /// A task pack is the result of a set of tasks emitted by a provider that should be run together
-        using TaskPack = std::vector<std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>>;
+        using TaskPack = std::pair<std::shared_ptr<provider::Provider>, TaskList>;
 
     private:
         /**
@@ -94,9 +96,8 @@ namespace module::extension {
          *
          * @throws std::runtime_error if the director's provider ancestry is broken
          */
-        [[nodiscard]] bool challenge_priority(
-            const std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>& incumbent,
-            const std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>& challenger);
+        [[nodiscard]] bool challenge_priority(const std::shared_ptr<const BehaviourTask>& incumbent,
+                                              const std::shared_ptr<const BehaviourTask>& challenger);
 
         /**
          * Remove the provided task from the Director.
@@ -106,7 +107,7 @@ namespace module::extension {
          *
          * @param task the task to remove from the Director
          */
-        void remove_task(const std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>& task);
+        void remove_task(const std::shared_ptr<const BehaviourTask>& task);
 
         /**
          * Reevaluates all of the tasks that are queued to execute on a provider group.
@@ -117,7 +118,7 @@ namespace module::extension {
          *
          * @param group the group whose queue we want to reevaluate
          */
-        void reevaluate_queue(provider::ProviderGroup& group);
+        void reevaluate_group(provider::ProviderGroup& group);
 
         /**
          * An object which holds the possible solutions to running a task.
@@ -145,7 +146,7 @@ namespace module::extension {
                 };
 
                 /// The provider we are executing in this
-                std::shared_ptr<const provider::Provider> provider;
+                std::shared_ptr<provider::Provider> provider;
                 /// The set of solutions needed for this option to be executed
                 std::vector<Solution> requirements;
                 /// The state of this option, holds if it is blocked and if so why
@@ -166,14 +167,13 @@ namespace module::extension {
          *
          * @param provider  the provider that we are trying to find a solution for
          * @param authority the task that we are using as our authority token for permission checks
-         * @param visited   the set of providers that have already been visited to prevent loops
+         * @param visited   the set of provider groups that have already been visited to prevent loops
          *
          * @return
          */
-        Solution::Option solve_provider(
-            const std::shared_ptr<provider::Provider>& provider,
-            const std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>& authority,
-            std::set<std::shared_ptr<const provider::Provider>> visited);
+        Solution::Option solve_provider(const std::shared_ptr<provider::Provider>& provider,
+                                        const std::shared_ptr<const BehaviourTask>& authority,
+                                        std::set<std::type_index> visited);
 
         /**
          * Finds the providers that can cause the passed when condition to be met.
@@ -183,13 +183,13 @@ namespace module::extension {
          *
          * @param when      the when condition we want to meet by finding causings that will allow a provider to run
          * @param authority the task that we are using as our authority token for permission checks
-         * @param visited   the set of providers that have already been visited to prevent loops
+         * @param visited   the set of provider groups that have already been visited to prevent loops
          *
          * @return         the set of providers that when run can meet the provided when condition
          */
         Solution solve_when(const provider::Provider::WhenCondition& when,
-                            const std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>& authority,
-                            const std::set<std::shared_ptr<const provider::Provider>>& visited);
+                            const std::shared_ptr<const BehaviourTask>& authority,
+                            const std::set<std::type_index>& visited);
 
         /**
          * Creates options for each provider in a provider group specified by the passed type.
@@ -197,24 +197,60 @@ namespace module::extension {
          *
          * @param type      the type of task we are trying to run
          * @param authority the task that we are using as our authority token for permission checks
-         * @param visited   the set of providers that have already been visited to prevent loops
+         * @param visited   the set of provider groups that have already been visited to prevent loops
          *
          * @return the set of possible solution options for the provider group of the passed type
          */
         Solution solve_group(const std::type_index& type,
-                             const std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>& authority,
-                             const std::set<std::shared_ptr<const provider::Provider>>& visited);
+                             const std::shared_ptr<const BehaviourTask>& authority,
+                             const std::set<std::type_index>& visited);
 
         /**
          * Finds a solution for a given task. It will start with the provider group for the given task and recursively
          * work its way down to find all possible solutions. It will use the passed task as an authority token for the
          * permission checks on providers that it needs to run.
          *
-         * @param task      the task we are finding solutions for
+         * @param task      the task we are finding solutions for, also used for authority checks
          *
          * @return the set of possible solution options for this task
          */
-        Solution solve_task(const std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>& task);
+        Solution solve_task(const std::shared_ptr<const BehaviourTask>& task);
+
+        struct OkSolution {
+            OkSolution(const bool& blocked_, std::set<std::type_index>&& blocking_groups_)
+                : blocked(blocked_), blocking_groups(blocking_groups_) {}
+            OkSolution(const bool& blocked_,
+                       const std::shared_ptr<provider::Provider>& provider_,
+                       std::vector<std::shared_ptr<provider::Provider>>&& requirements_,
+                       std::set<std::type_index>&& used_,
+                       std::set<std::type_index>&& blocking_groups_)
+                : blocked(blocked_)
+                , provider(provider_)
+                , requirements(requirements_)
+                , used(used_)
+                , blocking_groups(blocking_groups_) {}
+
+            /// If this entire path is blocked and unusable
+            bool blocked;
+            /// The main provider that this solution is for
+            std::shared_ptr<provider::Provider> provider;
+            /// The list of providers that are needed for each of the requirements
+            std::vector<std::shared_ptr<provider::Provider>> requirements;
+            /// Which groups have been used in this solution
+            std::set<std::type_index> used;
+            /// Groups which we wanted to use but were blocked to us
+            std::set<std::type_index> blocking_groups;
+        };
+
+        OkSolution find_ok_solution(const Solution::Option& option, std::set<std::type_index> used_types);
+        OkSolution find_ok_solution(const Solution& requirement, const std::set<std::type_index>& used_types);
+        std::vector<OkSolution> find_ok_solutions(const std::vector<Solution>& option);
+
+        void run_task_on_provider(const std::shared_ptr<const BehaviourTask>& task,
+                                  const std::shared_ptr<provider::Provider>& provider);
+
+        enum RunLevel { OK, PUSH, BLOCKED };
+        RunLevel run_tasks(provider::ProviderGroup& group, const TaskList& pack, const RunLevel& run_level);
 
         /**
          * Looks at all the tasks that are in the pack and determines if they should run, and if so runs them.
@@ -252,9 +288,12 @@ namespace module::extension {
         /// Maps reaction_id to the Provider which implements it
         std::map<uint64_t, std::shared_ptr<provider::Provider>> providers;
 
+        /// A source for unique reaction ids when making root task providers. Starts at 0 and wraps around to maxvalue.
+        uint64_t unique_id_source = 0;
+
         /// A list of reaction_task_ids to director_task objects, once the Provider has finished running it will emit
         /// all these as a pack so that the director can work out when Providers change which subtasks they emit
-        std::multimap<uint64_t, std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>> pack_builder;
+        std::multimap<uint64_t, std::shared_ptr<const BehaviourTask>> pack_builder;
 
     public:
         friend class InformationSource;
