@@ -35,7 +35,7 @@ namespace {
              **************/
             on<Trigger<Step<1>>, Priority::LOW>().then([this] {
                 // At this point condition hasn't been emitted, so this task should be blocked by default
-                events.push_back("emitting task");
+                events.push_back("emitting task #1");
                 emit<Task>(std::make_unique<SimpleTask>());
             });
             on<Trigger<Step<2>>, Priority::LOW>().then([this] {
@@ -45,7 +45,7 @@ namespace {
             });
             on<Trigger<Step<3>>, Priority::LOW>().then([this] {
                 // Emitting the task again to ensure it's not executed
-                events.push_back("emitting task again");
+                events.push_back("emitting task #2");
                 emit<Task>(std::make_unique<SimpleTask>());
             });
             on<Trigger<Step<4>>, Priority::LOW>().then([this] {
@@ -55,7 +55,7 @@ namespace {
             });
             on<Trigger<Step<5>>, Priority::LOW>().then([this] {
                 // This task should run fine since it's allowed
-                events.push_back("emitting task again #2");
+                events.push_back("emitting task #3");
                 emit<Task>(std::make_unique<SimpleTask>());
             });
             on<Startup>().then([this] {
@@ -79,12 +79,12 @@ TEST_CASE("Test that the when keyword blocks and allows running as expected", "[
     powerplant.start();
 
     std::vector<std::string> expected = {
-        "emitting task",
+        "emitting task #1",
         "emitting blocked condition",
-        "emitting task again",
+        "emitting task #2",
         "emitting allowed condition",
         "task executed",
-        "emitting task again #2",
+        "emitting task #3",
         "task executed",
     };
 

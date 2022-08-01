@@ -244,6 +244,7 @@ namespace module::extension {
                                                                    nullptr);
                         group.providers.push_back(provider);
                         providers.emplace(unique, provider);
+                        group.active_provider = provider;
                     }
                     auto root_provider = group.providers.front();
 

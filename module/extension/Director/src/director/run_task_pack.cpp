@@ -68,9 +68,7 @@ namespace module::extension {
 
                 // Loop through each pair of solutions and task
                 for (int i = 0; i < int(tasks.size()); ++i) {
-                    auto& task = tasks[i];
-                    auto& sol  = ok_solutions[i];
-
+                    auto& sol                    = ok_solutions[i];
                     const auto& needed_providers = sol.requirements;
                     const auto& main_provider    = sol.provider;
                     auto& main_group             = main_provider->group;
@@ -83,7 +81,8 @@ namespace module::extension {
                         // If we emitted the last task that went here we can just run and do a replacement
                         // No need to check any lower down providers as they'll already be handled from last time
                         if (current_task != nullptr
-                            && providers.at(current_task->requester_id)->type == main_provider->type) {
+                            && providers.at(current_task->requester_id)->type
+                                   == providers.at(new_task->requester_id)->type) {
 
                             // TODO what if provider changes within the group?
 
@@ -148,6 +147,7 @@ namespace module::extension {
         const auto& provider = pack.first;
         auto& group          = provider->group;
 
+        // Remove null data tasks from the list, this allows root tasks to be cleared
         TaskList tasks;
         tasks.reserve(pack.second.size());
         for (const auto& t : pack.second) {
