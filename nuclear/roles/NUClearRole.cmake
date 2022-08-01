@@ -31,7 +31,7 @@ function(NUCLEAR_ROLE)
 
   # Build our executable from the generated role
   add_executable(${target_name} "${role}.cpp")
-  SET_TARGET_PROPERTIES(${target_name} PROPERTIES OUTPUT_NAME ${role_name})
+  set_target_properties(${target_name} PROPERTIES OUTPUT_NAME ${role_name})
 
   target_include_directories(${target_name} PRIVATE "${PROJECT_SOURCE_DIR}/${NUCLEAR_MODULE_DIR}")
 
@@ -46,8 +46,8 @@ function(NUCLEAR_ROLE)
   # IDE folder
   set_target_properties(${target_name} PROPERTIES FOLDER "roles/${role_folder}")
 
-  # Store the used NUClear modules on the target as a property
-  # This can be used later in scripts to work out what modules are used in the role
+  # Store the used NUClear modules on the target as a property This can be used later in scripts to work out what
+  # modules are used in the role
   set_target_properties(${target_name} PROPERTIES NUCLEAR_MODULES "${role_modules}")
 
   # * We add to the global cache variable here that contains all of the module we are using
