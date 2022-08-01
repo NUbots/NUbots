@@ -293,16 +293,11 @@ namespace module::vision {
                                                                        horizon.vision_ground_truth.rBWw.Y,
                                                                        horizon.vision_ground_truth.rBWw.Z);
 
-
-                        const Eigen::Vector3f rBWw = Eigen::Vector3f(horizon.vision_ground_truth.rBWw.X,
-                                                                     horizon.vision_ground_truth.rBWw.Y,
-                                                                     horizon.vision_ground_truth.rBWw.Z);
-
-                        Eigen::Vector3f axisScaled = axis * distance;
+                        Eigen::Vector3f ball_position = axis * distance;
                         Eigen::Vector3f ball_error;
-                        ball_error[0] = axisScaled.x() - rBCc.x();
-                        ball_error[1] = axisScaled.y() - rBCc.y();
-                        ball_error[2] = axisScaled.z() - rBCc.z();
+                        ball_error[0] = ball_position.x() - rBCc.x();
+                        ball_error[1] = ball_position.y() - rBCc.y();
+                        ball_error[2] = ball_position.z() - rBCc.z();
 
                         emit(graph("rBCc", rBCc.x(), rBCc.y(), rBCc.z()));
                         emit(graph("Ball error", ball_error[0], ball_error[1], ball_error[2]));

@@ -88,11 +88,9 @@ message Message {
 message VisionGroundTruth {
     /// Indicates if this message exists
     bool exists = 1;
-    /// Affine3d transform from world to ball space.
-    mat4 Hbw = 2;
-    /// Affine3d transform from world to goal space.
-    ///mat4 Hgw = 3;
+    /// Vector from the world to the ball in world space.
     Vector3 rBWw = 5;
+    /// Vector from the world to the field in world space.
     Vector3 rFWw = 6;
 }
 
@@ -111,18 +109,18 @@ message SensorMeasurements {
     // simulation time stamp at which the measurements were performed expressed in [ms] from the start of the connection
     uint32 time = 1;
     // real unix time stamp at which the measurements were performed in [ms]
-    uint64                             real_time        = 2;
-    repeated Message                   messages         = 3;
-    repeated AccelerometerMeasurement  accelerometers   = 4;
-    repeated BumperMeasurement         bumpers          = 5;
-    repeated CameraMeasurement         cameras          = 6;
-    repeated ForceMeasurement          forces           = 7;
-    repeated Force3DMeasurement        force3ds         = 8;
-    repeated Force6DMeasurement        force6ds         = 9;
-    repeated GyroMeasurement           gyros            = 10;
-    repeated PositionSensorMeasurement position_sensors = 11;
+    uint64                             real_time             = 2;
+    repeated Message                   messages              = 3;
+    repeated AccelerometerMeasurement  accelerometers        = 4;
+    repeated BumperMeasurement         bumpers               = 5;
+    repeated CameraMeasurement         cameras               = 6;
+    repeated ForceMeasurement          forces                = 7;
+    repeated Force3DMeasurement        force3ds              = 8;
+    repeated Force6DMeasurement        force6ds              = 9;
+    repeated GyroMeasurement           gyros                 = 10;
+    repeated PositionSensorMeasurement position_sensors      = 11;
     OdometryGroundTruth                odometry_ground_truth = 100;
-    VisionGroundTruth                  vision_ground_truth = 101;
+    VisionGroundTruth                  vision_ground_truth   = 101;
 }
 
 message MotorPosition {
