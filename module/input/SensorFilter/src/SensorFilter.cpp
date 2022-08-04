@@ -27,6 +27,7 @@
 
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
+#include "utility/math/angle.hpp"
 #include "utility/motion/ForwardKinematics.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/platform/RawSensors.hpp"
@@ -51,6 +52,8 @@ namespace module::input {
     using utility::motion::kinematics::calculateInertialTensor;
     using utility::nusight::graph;
     using utility::support::Expression;
+
+    using utility::math::angle::normalizeAngle;
 
     std::string makeErrorString(const std::string& src, uint errorCode) {
         std::stringstream s;
@@ -475,6 +478,18 @@ namespace module::input {
                             sensors->gyroscope = input.gyroscope.cast<double>();
                         }
 
+                        // Add gyro and acc graphs if in debug
+                        if (log_level <= NUClear::DEBUG) {
+                            emit(graph("Gyroscope",
+                                       sensors->gyroscope.x(),
+                                       sensors->gyroscope.y(),
+                                       sensors->gyroscope.z()));
+                            emit(graph("Accelerometer",
+                                       sensors->accelerometer.x(),
+                                       sensors->accelerometer.y(),
+                                       sensors->accelerometer.z()));
+                        }
+
                         /************************************************
                          *               Buttons and LEDs               *
                          ************************************************/
@@ -770,23 +785,34 @@ namespace module::input {
                             Hwt.translation() = o.rTWw;
                             sensors->Htw      = Hwt.inverse().matrix();
 
+                            // If there is ground truth data, determine the error in the odometry calculation
+                            // and emit graphs of those errors
                             if (input.odometry_ground_truth.exists) {
                                 Eigen::Affine3d true_Htw(input.odometry_ground_truth.Htw);
-                                double translation_error =
-                                    (true_Htw.translation() - Hwt.inverse().translation()).norm();
-                                Eigen::Matrix3d rotational_error = true_Htw.linear() * Hwt.linear();
-                                Eigen::Vector3d angles;  //          = rotational_error.eulerAngles(2, 1, 0);
 
-                                angles[2] = atan2(rotational_error(2, 1), rotational_error(2, 2));
-                                angles[1] = atan2(-rotational_error(2, 0),
-                                                  std::pow(rotational_error(2, 1) * rotational_error(2, 1)
-                                                               + rotational_error(2, 2) * rotational_error(2, 2),
-                                                           0.5));
-                                angles[0] = atan2(rotational_error(1, 0), rotational_error(0, 0));
-                                emit(graph("Htw translational error", translation_error));
-                                emit(graph("Htw yaw error", angles[0]));
-                                emit(graph("Htw pitch error", angles[1]));
-                                emit(graph("Htw roll error", angles[2]));
+                                // Determine translational distance error
+                                Eigen::Vector3d rWTt    = Hwt.inverse().translation();
+                                Eigen::Vector3d t_error = true_Htw.translation() - rWTt;
+
+                                // Determine yaw, pitch and roll error
+                                Eigen::Matrix3d rotational_error = true_Htw.linear() * Hwt.linear();
+                                Eigen::Vector3d r_error          = rotational_error.eulerAngles(2, 1, 0);
+                                Eigen::Vector3d angles           = Hwt.linear().eulerAngles(2, 1, 0);
+
+                                // Normalise angles and make error positive
+                                for (int i = 0; i < 3; i++) {
+                                    r_error[i] = normalizeAngle(r_error[i]);
+                                    angles[i]  = normalizeAngle(angles[i]);
+                                    t_error[i] = std::abs(t_error[i]);
+                                }
+
+                                // Graph translation and its error
+                                emit(graph("Htw translation (rWTt)", rWTt.x(), rWTt.y(), rWTt.z()));
+                                emit(graph("Htw translation error", t_error.x(), t_error.y(), t_error.z()));
+
+                                // Graph angles and error
+                                emit(graph("Htw angles (yaw, pitch, roll)", angles[0], angles[1], angles[2]));
+                                emit(graph("Htw angle error (yaw, pitch, roll)", r_error[0], r_error[1], r_error[2]));
                             }
 
                             /************************************************

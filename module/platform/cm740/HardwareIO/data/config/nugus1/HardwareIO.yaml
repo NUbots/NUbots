@@ -10,11 +10,11 @@ packet_wait: 100000
 servos:
   -  # [0]  R_SHOULDER_PITCH
     direction: -1
-    offset:  pi / 4
+    offset:  0.0
     simulated: false
   -  # [1]  L_SHOULDER_PITCH
     direction:  1
-    offset:  pi / 4
+    offset:  0.0
     simulated: false
   -  # [2]  R_SHOULDER_ROLL
     direction: -1
@@ -50,19 +50,19 @@ servos:
     simulated: false
   -  # [10] R_HIP_PITCH
     direction:  1
-    offset:  0.0
+    offset:  0.345
     simulated: false
   -  # [11] L_HIP_PITCH
     direction: -1
-    offset:  0.0
+    offset:  0.359
     simulated: false
   -  # [12] R_KNEE
     direction:  1
-    offset:  pi / 8
+    offset:  0.331
     simulated: false
   -  # [13] L_KNEE
     direction: -1
-    offset:  pi / 8
+    offset:  0.363
     simulated: false
   -  # [14] R_ANKLE_PITCH
     direction: -1

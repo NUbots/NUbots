@@ -26,44 +26,78 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/behaviour/KickPlan.hpp"
 #include "message/behaviour/MotionCommand.hpp"
+#include "message/motion/WalkCommand.hpp"
+
+#include "utility/behaviour/MotionCommand.hpp"
 
 namespace module::behaviour::planning {
 
     // using namespace message;
+
+    using message::behaviour::MotionCommand;
+
+
     /**
-     * Executes a getup script if the robot falls over.
      *
-     * @author Josiah Walker
+     * @author Thomas O'Brien
+     *
+     * Creates various walk path plans
+     *
      */
     class SimpleWalkPathPlanner : public NUClear::Reactor {
     private:
-        message::behaviour::MotionCommand latestCommand;
-        const size_t subsumptionId;
-        float turnSpeed            = 0.8;
-        float forwardSpeed         = 1;
-        float sideSpeed            = 1;
-        float slow_approach_factor = 0.5;
-        float a                    = 7;
-        float b                    = 0;
-        float search_timeout       = 3;
+        /// @brief Stores configuration values
+        struct Config {
+            Config() = default;
+            /// @brief Walk path planner priority in the subsumption system
+            float walk_path_planner_priority = 0;
+            /// @brief Walk command velocity for walking to ball
+            float forward_speed = 0;
+            /// @brief Maximum angular velocity command for walking to ball
+            float max_turn_speed = 0;
+            /// @brief Minimum angular velocity command for walking to ball
+            float min_turn_speed = 0;
+            /// @brief Rotate on spot walk command angular velocity
+            float rotate_speed = 0;
+            /// @brief Rotate on spot walk command forward velocity
+            float rotate_speed_x = 0;
+            /// @brief Rotate on spot walk command side velocity
+            float rotate_speed_y = 0;
+            /// @brief Walk to ready walk command forward velocity
+            float walk_to_ready_speed_x = 0;
+            /// @brief Walk to ready walk command side velocity
+            float walk_to_ready_speed_y = 0;
+            /// @brief Walk to ready walk command angular velocity
+            float walk_to_ready_rotation = 0;
+        } cfg;
 
-        //-----------non-config variables (not defined in WalkPathPlanner.yaml)-----------
+        /// @brief Stores the latest MotionCommand
+        message::behaviour::MotionCommand latest_command = utility::behaviour::StandStill();
 
-        // info for the current walk
-        Eigen::Vector2d currentTargetPosition;
-        Eigen::Vector2d currentTargetHeading;
-        message::behaviour::KickPlan targetHeading;
-        Eigen::Vector2d targetPosition = Eigen::Vector2d::Zero();
+        /// @brief The id registered in the subsumption system for this module
+        const size_t subsumption_id;
 
-        NUClear::clock::time_point timeBallLastSeen;
-        Eigen::Vector3d rBWw     = Eigen::Vector3d(10.0, 0.0, 0.0);
-        bool robot_ground_space  = true;
-        Eigen::Vector2d position = Eigen::Vector2d::UnitX();  // ball pos rel to robot
-        float ball_approach_dist = 0.2;
-        float slowdown_distance  = 0.2;
-        bool useLocalisation     = true;
+        /// @brief Stores the position of the last ball seen
+        Eigen::Vector3f rBTt = Eigen::Vector3f(1.0, 0.0, 0.0);
+
+        /// @brief Walk using the walk command from a direct motion command.
+        void walk_directly();
+
+        /// @brief Walk directly towards the ball relative to the robot based on the latest VisionBall ball position
+        /// measurement
+        void vision_walk_path();
+
+        /// @brief Rotate on the spot
+        void rotate_on_spot();
+
+        /// @brief Configured to emit a walk command that results in robot being in desired position after the ready
+        /// phase
+        void walk_to_ready();
+
+        /// @brief Updates the priority of the module by emitting an ActionPriorities message
+        /// @param priority The priority used in the ActionPriorities message
+        void update_priority(const float& priority);
 
     public:
         explicit SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);

@@ -1,5 +1,6 @@
 #include "VisualMeshRunner.hpp"
 
+#include <filesystem>
 #include <visualmesh/engine/cpu/engine.hpp>
 #include <visualmesh/engine/opencl/engine.hpp>
 #include <visualmesh/geometry/Circle.hpp>
@@ -24,12 +25,14 @@
 namespace module::vision::visualmesh {
 
     using message::input::Image;
+    namespace fs = std::filesystem;
 
     struct VisualMeshModelConfig {
         std::string engine;
         ::visualmesh::NetworkStructure<float> model;
         std::string mesh_model;
         int num_classes = 0;
+        std::string cache_directory;
 
         struct {
             double intersection_tolerance = 0.0;
@@ -50,6 +53,28 @@ namespace module::vision::visualmesh {
 
     namespace generate_runner {
 
+        template <template <typename> class Engine, typename Scalar>
+        struct BuildEngine;
+
+        template <typename Scalar>
+        struct BuildEngine<::visualmesh::engine::opencl::Engine, Scalar> {
+            static std::shared_ptr<::visualmesh::engine::opencl::Engine<Scalar>> build(
+                ::visualmesh::NetworkStructure<float> net,
+                std::string cache) {
+                fs::create_directories(cache);  // create the cache folder if it doesn't exist
+                return std::make_shared<::visualmesh::engine::opencl::Engine<Scalar>>(net, cache);
+            }
+        };
+
+        template <typename Scalar>
+        struct BuildEngine<::visualmesh::engine::cpu::Engine, Scalar> {
+            static std::shared_ptr<::visualmesh::engine::cpu::Engine<Scalar>> build(
+                ::visualmesh::NetworkStructure<float> net,
+                std::string /* cache */) {
+                return std::make_shared<::visualmesh::engine::cpu::Engine<float>>(net);
+            }
+        };
+
         template <template <typename> class Model, template <typename> class Engine, typename Shape>
         std::function<VisualMeshResults(const Image&, const Eigen::Affine3f&)> runner(const VisualMeshModelConfig& cfg,
                                                                                       const Shape& shape) {
@@ -62,7 +87,7 @@ namespace module::vision::visualmesh {
                                                         cfg.mesh.geometry.intersections,
                                                         cfg.mesh.intersection_tolerance,
                                                         cfg.mesh.classifier.max_distance));
-            auto engine = std::make_shared<Engine<float>>(cfg.model);
+            auto engine = BuildEngine<Engine, float>::build(cfg.model, cfg.cache_directory);
 
             return [shape, mesh, engine](const Image& img, const Eigen::Affine3f& Hcw) {
                 // Create the lens
@@ -72,8 +97,8 @@ namespace module::vision::visualmesh {
                 lens.fov          = img.lens.fov;
                 lens.centre       = {img.lens.centre[0] * img.dimensions[0], img.lens.centre[1] * img.dimensions[0]};
                 lens.k            = std::array<float, 2>{
-                    float(img.lens.k[0] * std::pow(img.dimensions[0], 2)),
-                    float(img.lens.k[1] * std::pow(img.dimensions[0], 4)),
+                    float(img.lens.k[0] / std::pow(img.dimensions[0], 2)),
+                    float(img.lens.k[1] / std::pow(img.dimensions[0], 4)),
                 };
                 switch (img.lens.projection.value) {
                     case Image::Lens::Projection::EQUIDISTANT: lens.projection = ::visualmesh::EQUIDISTANT; break;
@@ -179,7 +204,8 @@ namespace module::vision::visualmesh {
                                        const double& max_height,
                                        const double& max_distance,
                                        const double& intersection_tolerance,
-                                       const std::string& path)
+                                       const std::string& path,
+                                       const std::string& cache_directory)
         : active(std::make_unique<std::atomic<bool>>()) {
 
         // Add the configuration properties we were passed
@@ -189,6 +215,7 @@ namespace module::vision::visualmesh {
         cfg.mesh.classifier.min_height   = min_height;
         cfg.mesh.classifier.max_height   = max_height;
         cfg.mesh.classifier.max_distance = max_distance;
+        cfg.cache_directory              = cache_directory;
 
         // Load the properties from the model
         auto loaded                     = load_model(path);
