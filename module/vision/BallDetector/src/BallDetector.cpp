@@ -330,19 +330,13 @@ namespace module::vision {
                     if (horizon.vision_ground_truth.exists) {
                         Eigen::Affine3f Hcw(horizon.Hcw.cast<float>());
 
-                        const Eigen::Vector3f rBCc = Hcw
-                                                     * Eigen::Vector3f(horizon.vision_ground_truth.rBWw.X,
-                                                                       horizon.vision_ground_truth.rBWw.Y,
-                                                                       horizon.vision_ground_truth.rBWw.Z);
+                        const Eigen::Vector3f rBCc = Hcw * rBWw;
 
-                        Eigen::Vector3f ball_position = axis * distance;
-                        Eigen::Vector3f ball_error;
-                        ball_error[0] = ball_position.x() - rBCc.x();
-                        ball_error[1] = ball_position.y() - rBCc.y();
-                        ball_error[2] = ball_position.z() - rBCc.z();
+                        Eigen::Vector3f ball_position = uBCw * projection_distance;
+                        Eigen::Vector3f ball_error    = ball_position - rBCc;
 
                         emit(graph("rBCc", rBCc.x(), rBCc.y(), rBCc.z()));
-                        emit(graph("Ball error", ball_error[0], ball_error[1], ball_error[2]));
+                        emit(graph("Ball error", ball_error.x(), ball_error.y(), ball_error.z()));
                     }
                 }
 
