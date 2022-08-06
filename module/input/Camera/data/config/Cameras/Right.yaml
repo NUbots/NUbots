@@ -11,6 +11,15 @@ settings:
   Gain: 15 # Range: 0.00 - 18.01
   GammaEnable: true # Set to false to adjust gamma. Default = false
   Gamma: 0.50
-  BalanceWhiteAuto: Continuous
+  BalanceWhiteAuto: Continuous # Options: Off, Once, Continuous
+  BalanceRatioSelector: Red # Options: Red or Blue. Controls the balance ratio of the selected color relative to green. Used for white balancing.
+  BalanceRatio: 2.56
+
+  # The EV compensation value used in the exposure compensation. This allows you to adjust the resultant image
+  # intensity with one control. A positive value makes the image brighter. A negative value makes the image darker.
+  # Range from -3 to 3 with a step of 1/3. Default = 0.
+  AutoExposureEVCompensation: 0
   AcquisitionFrameRateEnable: true
   AcquisitionFrameRate: 20.00
+  SaturationEnable: false
+  Saturation: 0
