@@ -7,7 +7,7 @@ settings:
   OffsetX: 0
   OffsetY: 0
   ExposureAuto: Continuous
-  GainAuto: Continuous # Set to 'Off' when manually adjusting gain
+  GainAuto: Off # Set to 'Off' when manually adjusting gain
   Gain: 15 # Range: 0.00 - 18.01
   GammaEnable: true # Set to false to adjust gamma. Default = false
   Gamma: 0.50
