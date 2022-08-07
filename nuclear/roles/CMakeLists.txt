@@ -23,15 +23,15 @@ foreach(rolefile ${rolefiles})
   if(roleext STREQUAL .role)
 
     # Roles may be within subfolders - get the subfolder and name
-    file(RELATIVE_PATH role_folder ${role_source_dir} ${rolefile})
-    cmake_path(REMOVE_EXTENSION role_folder)
-    string(REPLACE "/" "." role_folder ${role_folder})
+    file(RELATIVE_PATH role_path ${role_source_dir} ${rolefile})
+    cmake_path(REMOVE_EXTENSION role_path)
+    string(REPLACE "/" "." role_path ${role_path})
 
     # If we had a backup as to if this role is enabled use it. Otherwise default to true.
-    if(DEFINED "BACKUP_ROLE_${role_folder}")
-      option("ROLE_${role_folder}" "Build the role ${role_folder}" ${BACKUP_ROLE_${role_folder}})
+    if(DEFINED "BACKUP_ROLE_${role_path}")
+      option("ROLE_${role_path}" "Build the role ${role_path}" ${BACKUP_ROLE_${role_path}})
     else()
-      option("ROLE_${role_folder}" "Build the role ${role_folder}" ON)
+      option("ROLE_${role_path}" "Build the role ${role_path}" ON)
     endif()
   endif()
 endforeach(rolefile)
@@ -43,10 +43,10 @@ unset(NUCLEAR_ROLES CACHE)
 foreach(var ${vars})
   if(var MATCHES "^ROLE_[a-zA-Z0-9]+")
     if(${var})
-      string(SUBSTRING ${var} 5 -1 role_folder)
-      string(REPLACE "." "/" role_folder ${role_folder})
+      string(SUBSTRING ${var} 5 -1 role_path)
+      string(REPLACE "." "/" role_path ${role_path})
       set(NUCLEAR_ROLES
-          ${NUCLEAR_ROLES} ${role_folder}
+          ${NUCLEAR_ROLES} ${role_path}
           CACHE INTERNAL "A list of the roles that are enabled to be built." FORCE
       )
     endif()
