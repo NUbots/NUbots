@@ -68,28 +68,27 @@ def run(target, local, user, config, toolchain, **kwargs):
 
     # Traverse all binaries, including in subfolders
     for dirpath, _, filenames in os.walk(os.path.join(build_dir, "bin")):
-        if not "lib" in dirpath:  # lib folder contains libraries, not binaries
-            # Get the paths locally and on the robot for this binary folder
-            binary_subdirectory = os.path.normpath(dirpath).split(os.path.join(build_dir, "bin"))[1].strip("/")
-            target_subdirectory = os.path.join(target_binaries_dir, binary_subdirectory)
+        # Get the paths locally and on the robot for this binary folder
+        binary_subdirectory = os.path.normpath(dirpath).split(os.path.join(build_dir, "bin"))[1].strip("/")
+        target_subdirectory = os.path.join(target_binaries_dir, binary_subdirectory)
 
-            cprint(
-                "Installing binaries to " + target_subdirectory,
-                "blue",
-                attrs=["bold"],
-            )
+        cprint(
+            "Installing binaries to " + target_subdirectory,
+            "blue",
+            attrs=["bold"],
+        )
 
-            # Get all of the binaries in the bin (sub)folder
-            files = []
-            for filename in filenames:
-                files.append(os.path.join(dirpath, filename))
+        # Get all of the binaries in the bin (sub)folder
+        files = []
+        for filename in filenames:
+            files.append(os.path.join(dirpath, filename))
 
-            # Make the subdirectory if it doesn't exist on the robot
-            directory_to_make = os.path.normpath(target_subdirectory).split(":")[1]
-            subprocess.run(["ssh", target_name, "mkdir", "-p", directory_to_make])
+        # Make the subdirectory if it doesn't exist on the robot
+        directory_to_make = os.path.normpath(target_subdirectory).split(":")[1]
+        subprocess.run(["ssh", target_name, "mkdir", "-p", directory_to_make])
 
-            # Send the binaries for this folder across to the robot
-            subprocess.run(["rsync", "-avPl", "--checksum", "-e ssh"] + files + [target_subdirectory])
+        # Send the binaries for this folder across to the robot
+        subprocess.run(["rsync", "-avPl", "--checksum", "-e ssh"] + files + [target_subdirectory])
 
     if toolchain:
         # Get all of our required shared libraries in our toolchain and send them
