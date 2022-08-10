@@ -22,61 +22,10 @@
 #include <memory>
 #include <nuclear>
 
+#include "behaviour/InformationSource.hpp"
 #include "behaviour/commands.hpp"
 
 namespace extension::behaviour {
-
-    /**
-     * A TaskInfo object contains all the state that the Director provides to a running Provider.
-     * This task information includes the task data itself, as well as details about why it was executed such as if it
-     * was triggered by a done task from one of its tasks. This type works with the NUClear reaction system by providing
-     * a dereference operator so that the users can either choose to receive a TaskInfo<T> object or a const T& object
-     * in their callback if they don't care about the extra information the director provides.
-     *
-     * This object also ensures that the task will not run when the Director has no information for this Provider.
-     * This can be caused when it should not be running but was triggered by another bind statement (e.g. Every).
-     * In this case it has a bool operator that returns false which will stop the task from running.
-     *
-     * @tparam T the type of task that is stored in this task_info object
-     */
-    template <typename T>
-    struct TaskInfo {
-
-        /**
-         * Default constructor, as data will be null NUClear will be told not to execute this task.
-         */
-        TaskInfo() = default;
-
-        /**
-         * Construct a new TaskInfo object for the provided task data
-         *
-         * @param data_ the data for this task
-         */
-        TaskInfo(std::shared_ptr<const T> data_) : data(data_) {}
-
-        /**
-         * Having a dereference operator allows NUClear to provide either the TaskInfo<T> object or a const T& object
-         *
-         * @return the data that is contained within this TaskInfo object
-         */
-        [[nodiscard]] const T& operator*() {
-            return *data;
-        }
-
-        /**
-         * This will control if NUClear should run the task
-         *
-         * @return true     there is data, NUClear should run the task
-         * @return false    there is no data, NUClear should not run the task
-         */
-        [[nodiscard]] operator bool() {
-            return data != nullptr;
-        }
-
-        /// The task data, this will be all that is returned if the user asks for a const T& rather than a TaskInfo
-        std::shared_ptr<const T> data;
-    };
-
 
     /**
      * This type is used as a base extension type for the different Provider DSL keywords (Start, Stop, Provide)
@@ -119,9 +68,8 @@ namespace extension::behaviour {
          * @return the information needed by the on statement
          */
         template <typename DSL>
-        static inline TaskInfo<T> get(NUClear::threading::Reaction& /*r*/) {
-            // TODO(@TrentHouliston) get the data from the director once it's algorithm is more fleshed out
-            return TaskInfo<T>();
+        static inline std::shared_ptr<T> get(NUClear::threading::Reaction& r) {
+            return std::static_pointer_cast<T>(information::InformationSource::get_task_data(r.id));
         }
 
         /**
@@ -200,9 +148,9 @@ namespace extension::behaviour {
                 // Function that uses expr to determine if the passed value v is valid
                 [](const int& v) -> bool { return expr<int>()(v, value); },
                 // Function that uses get to get the current state of the reaction
-                []() -> int {
+                [reaction]() -> int {
                     // Check if there is cached data, and if not throw an exception
-                    auto ptr = NUClear::dsl::operation::CacheGet<State>::get();
+                    auto ptr = NUClear::dsl::operation::CacheGet<State>::template get<DSL>(*reaction);
                     if (ptr == nullptr) {
                         throw std::runtime_error("The state requested has not been emitted yet");
                     }
@@ -247,7 +195,7 @@ namespace extension::behaviour {
      * Create a Needs relationship between this provider and the provider specified by `T`.
      *
      * A needs relationship ensures that this provider will only run if it is able to run the provider specified by `T`.
-     * This relationship operates recursevly, as if the provider specified by `T` needs another provider, this provider
+     * This relationship operates recursively, as if the provider specified by `T` needs another provider, this provider
      * will only run if it will be able to obtain those providers as well.
      *
      * @tparam Provider the provider that this provider needs
@@ -265,7 +213,7 @@ namespace extension::behaviour {
         template <typename DSL>
         static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
             reaction->reactor.emit<NUClear::dsl::word::emit::Direct>(
-                std::make_unique<commands::NeedsExpression>(reaction->id, typeid(Provider)));
+                std::make_unique<commands::NeedsExpression>(reaction, typeid(Provider)));
         }
     };
 
@@ -300,7 +248,8 @@ namespace extension::behaviour {
      * Root level tasks:
      * These are created when a reaction that is not a Provider emits the task. These tasks form the root of the
      * execution tree and their needs will be met on a highest priority first basis. These tasks will persist until the
-     * Provider that they use emits a done task, or the task is re-emitted with a priority of 0.
+     * Provider that they use emits a done task, or the task is re-emitted from anywhere with nullptr as the data. They
+     * will also be overridden if a new task is emitted anywhere in the system even if it is at a lower priority.
      *
      * Subtasks:
      * These are created when a Provider task emits a task to complete. These tasks must be emitted each time that
@@ -321,7 +270,7 @@ namespace extension::behaviour {
     struct Task {
 
         /**
-         * Emits a new task for the Director to handle.
+         * Emits a new task for the behaviour system to handle.
          *
          * @param powerplant the powerplant context provided by NUClear
          * @param data       the data element of the task
@@ -331,24 +280,24 @@ namespace extension::behaviour {
          */
         static void emit(NUClear::PowerPlant& powerplant,
                          std::shared_ptr<T> data,
-                         const std::string& name = "",
-                         const int& priority     = 1,
-                         const bool& optional    = false) {
+                         const int& priority     = 0,
+                         const bool& optional    = false,
+                         const std::string& name = "") {
 
             // Work out who is sending the task so we can determine if it's a subtask
             const auto* task     = NUClear::threading::ReactionTask::get_current_task();
             uint64_t reaction_id = (task != nullptr) ? task->parent.id : -1;
             uint64_t task_id     = (task != nullptr) ? task->id : -1;
 
-            NUClear::dsl::word::emit::Direct<commands::DirectorTask>::emit(
+            NUClear::dsl::word::emit::Direct<commands::BehaviourTask>::emit(
                 powerplant,
-                std::make_shared<commands::DirectorTask>(typeid(T),
-                                                         reaction_id,
-                                                         task_id,
-                                                         data,
-                                                         name,
-                                                         priority,
-                                                         optional));
+                std::make_shared<commands::BehaviourTask>(typeid(T),
+                                                          reaction_id,
+                                                          task_id,
+                                                          data,
+                                                          name,
+                                                          priority,
+                                                          optional));
         }
     };
 
@@ -361,6 +310,36 @@ namespace extension::behaviour {
      * ```
      */
     struct Done {};
+
+    /**
+     * A reactor subtype that can be used when making a behaviour reactor.
+     *
+     * It exposes the additional DSL words that are added by the Behaviour DSL so they can be used without the need for
+     * using statements
+     */
+    class BehaviourReactor : public NUClear::Reactor {
+    public:
+        using NUClear::Reactor::Reactor;
+
+    protected:
+        template <typename T>
+        using Provide = ::extension::behaviour::Provide<T>;
+        template <typename T>
+        using Start = ::extension::behaviour::Start<T>;
+        template <typename T>
+        using Stop = ::extension::behaviour::Stop<T>;
+        template <typename State, template <typename> class expr, enum State::Value value>
+        using When = ::extension::behaviour::When<State, expr, value>;
+        template <typename State, enum State::Value value>
+        using Causing = ::extension::behaviour::Causing<State, value>;
+        template <typename T>
+        using Needs = ::extension::behaviour::Needs<T>;
+        template <typename T>
+        using Uses = ::extension::behaviour::Uses<T>;
+        template <typename T>
+        using Task = ::extension::behaviour::Task<T>;
+        using Done = ::extension::behaviour::Done;
+    };
 
 }  // namespace extension::behaviour
 
