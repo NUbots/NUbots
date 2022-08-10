@@ -330,7 +330,7 @@ namespace module::vision {
                     if (horizon.vision_ground_truth.exists) {
                         Eigen::Affine3f Hcw(horizon.Hcw.cast<float>());
 
-                        const Eigen::Vector3f rBCc = Hcw * rBWw;
+                        const Eigen::Vector3f rBCc = Hcw * horizon.vision_ground_truth.rBWw;
 
                         Eigen::Vector3f ball_position = uBCw * projection_distance;
                         Eigen::Vector3f ball_error    = ball_position - rBCc;
