@@ -9,7 +9,8 @@ import google.protobuf.message
 
 if __name__ == "__main__":
     shared_folder = sys.argv[1]
-    cpp_file = sys.argv[2]
+    python_message_root = sys.argv[2]
+    cpp_file = sys.argv[3]
 
     # Load all our protocol buffer files as modules into this file
     includes = []
