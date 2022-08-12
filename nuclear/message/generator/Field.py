@@ -11,8 +11,6 @@ from google.protobuf.descriptor_pb2 import FieldOptions, FileDescriptorSet
 sys.path.append(os.path.join(os.getcwd(), "..", "python"))
 from Neutron_pb2 import PointerType, array_size, pointer  # isort:skip
 
-FieldOptions.RegisterExtension(pointer)
-FieldOptions.RegisterExtension(array_size)
 PointerType = dict(PointerType.items())
 
 
