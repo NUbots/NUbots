@@ -81,12 +81,17 @@ namespace module::input {
 
                 // Open the camera: Store as shared pointer
                 std::string device_description = arv_get_device_id(device_no);
+                GError* error = nullptr;
                 auto camera =
-                    std::shared_ptr<ArvCamera>(arv_camera_new(device_description.c_str()), [](ArvCamera* ptr) {
+                    std::shared_ptr<ArvCamera>(arv_camera_new(device_description.c_str(), &error), [](ArvCamera* ptr) {
                         if (ptr) {
                             g_object_unref(ptr);
                         }
                     });
+                if (error != nullptr) {
+                    g_error_free(error);
+                    error = nullptr;
+                }
 
                 if (!ARV_IS_CAMERA(camera.get())) {
                     throw std::runtime_error(fmt::format("Failed to create {} camera ({})", name, device_description));
