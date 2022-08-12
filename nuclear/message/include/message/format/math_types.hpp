@@ -5,8 +5,6 @@
 
 namespace fmt {
 
-    template <> struct formatter<Eigen::Transpose<Eigen::Matrix<float, 3, 1>>> : ostream_formatter {};
-
     template <> struct formatter<Eigen::Matrix<double, Eigen::Dynamic, 1>> : ostream_formatter {};
     template <> struct formatter<Eigen::Matrix<int, Eigen::Dynamic, 1>> : ostream_formatter {};
     template <> struct formatter<Eigen::Matrix<unsigned int, Eigen::Dynamic, 1>> : ostream_formatter {};
