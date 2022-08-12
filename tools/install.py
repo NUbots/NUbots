@@ -38,7 +38,7 @@ def run(target, local, user, config, toolchain, **kwargs):
     if not local:
         num_robots = 4
         target = {
-            "{}{}".format(k, num): "10.1.0.{}".format(num)
+            "{}{}".format(k, num): "10.1.1.{}".format(num)
             for num in range(1, num_robots + 1)
             for k, v in zip(("nugus", "n", "i", "igus"), [num] * num_robots)
         }.get(target, target)
