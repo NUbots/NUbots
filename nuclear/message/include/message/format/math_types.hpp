@@ -9,5 +9,4 @@ namespace message::format::math {
 
 }  // namespace message::conversion::math
 
-
 #endif // MESSAGE_FORMAT_MATRIX_TYPES_HPP

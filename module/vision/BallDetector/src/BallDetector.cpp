@@ -21,7 +21,6 @@
 
 #include <Eigen/Geometry>
 #include <fmt/format.h>
-#include <fmt/ostream.h>
 #include <numeric>
 
 #include "extension/Configuration.hpp"
