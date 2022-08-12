@@ -9,8 +9,7 @@ import google.protobuf.message
 
 if __name__ == "__main__":
     shared_folder = sys.argv[1]
-    python_message_root = sys.argv[2]
-    cpp_file = sys.argv[3]
+    cpp_file = sys.argv[2]
 
     # Load all our protocol buffer files as modules into this file
     includes = []
@@ -29,7 +28,7 @@ if __name__ == "__main__":
 
                 # Load our protobuf module
                 fqdn = os.path.normpath(
-                    os.path.join(os.path.relpath(dir_name, python_message_root), module_name)
+                    os.path.join(os.path.relpath(dir_name, shared_folder), module_name)
                 ).replace(os.sep, ".")
                 if fqdn not in sys.modules:
                     loader.find_module(fqdn).load_module(fqdn)

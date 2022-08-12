@@ -7,8 +7,7 @@ set(source_file "${CMAKE_CURRENT_BINARY_DIR}/src/register_handles.cpp")
 add_custom_command(
   OUTPUT "${source_file}"
   COMMAND ${PYTHON_EXECUTABLE} ARGS "${CMAKE_CURRENT_SOURCE_DIR}/src/generate_handles.py"
-          "${PROJECT_BINARY_DIR}/nuclear/message/python" "${PROJECT_BINARY_DIR}/nuclear/message/neutron"
-          "${source_file}"
+          "${PROJECT_BINARY_DIR}/nuclear/message/python"
   DEPENDS nuclear::message "${CMAKE_CURRENT_SOURCE_DIR}/src/generate_handles.py"
   COMMENT "Generating NetworkForwarder handles for all message types"
 )
