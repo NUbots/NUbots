@@ -306,7 +306,7 @@ namespace module::vision {
 
                     log<NUClear::DEBUG>(fmt::format("Camera {}", balls->id));
                     log<NUClear::DEBUG>(fmt::format("radius {}", b.radius));
-                    log<NUClear::DEBUG>(fmt::format("Axis {}", b.uBCc.transpose()));
+                    log<NUClear::DEBUG>(fmt::streamed("Axis {}", b.uBCc.transpose()));
                     log<NUClear::DEBUG>(
                         fmt::format("Distance {} - srBCc {}", angular_distance, b.measurements[0].srBCc.transpose()));
                     log<NUClear::DEBUG>(fmt::format("Projection Distance {} - srBCc",
