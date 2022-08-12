@@ -1,11 +1,10 @@
 #ifndef MODULE_INPUT_CAMERA_SETTINGS_HPP
 #define MODULE_INPUT_CAMERA_SETTINGS_HPP
 
+#include <aravis-0.8/arv.h>
 #include <fmt/format.h>
 #include <stdexcept>
 #include <string>
-
-#include <aravis-0.8/arv.h>
 
 namespace module::input {
     template <typename T>

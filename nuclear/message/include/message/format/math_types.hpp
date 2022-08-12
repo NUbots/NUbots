@@ -6,14 +6,14 @@
 namespace fmt {
 
     template <typename T, int X, int Y>
-    struct formatter<Eigen::Matrix<T,X,Y>> : ostream_formatter {};
+    struct formatter<Eigen::Matrix<T, X, Y>> : ostream_formatter {};
 
     template <typename T, int X, int Y>
-    struct formatter<Eigen::Transpose<Eigen::Matrix<T,X,Y>>> : ostream_formatter {};
+    struct formatter<Eigen::Transpose<Eigen::Matrix<T, X, Y>>> : ostream_formatter {};
 
     template <typename T, int X, int Y>
-    struct formatter<Eigen::Transpose<const Eigen::Matrix<T,X,Y>>> : ostream_formatter {};
+    struct formatter<Eigen::Transpose<const Eigen::Matrix<T, X, Y>>> : ostream_formatter {};
 
-} // namespace fmt
+}  // namespace fmt
 
-#endif // MESSAGE_FORMAT_MATRIX_TYPES_HPP
+#endif  // MESSAGE_FORMAT_MATRIX_TYPES_HPP

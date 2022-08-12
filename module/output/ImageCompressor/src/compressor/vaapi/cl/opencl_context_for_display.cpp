@@ -1,9 +1,9 @@
 #include "opencl_context_for_display.hpp"
 
 #include <CL/cl.h>
+#include <array>
 #include <va/va.h>
 #include <vector>
-#include <array>
 
 #include "opencl_error_category.hpp"
 

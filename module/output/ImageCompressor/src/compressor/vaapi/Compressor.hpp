@@ -1,9 +1,9 @@
 #ifndef MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_COMPRESSOR_HPP
 #define MODULE_OUTPUT_IMAGECOMPRESSOR_COMPRESSOR_VAAPI_COMPRESSOR_HPP
 
+#include <array>
 #include <memory>
 #include <va/va.h>
-#include <array>
 
 #include "../Compressor.hpp"
 #include "CompressionContext.hpp"

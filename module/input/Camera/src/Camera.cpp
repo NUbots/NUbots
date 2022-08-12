@@ -1,7 +1,6 @@
 #include "Camera.hpp"
 
 #include <aravis-0.8/arv.h>
-
 #include <cmath>
 #include <fmt/format.h>
 
@@ -79,7 +78,7 @@ namespace module::input {
 
                 // Open the camera: Store as shared pointer
                 std::string device_description = arv_get_device_id(device_no);
-                GError* error = nullptr;
+                GError* error                  = nullptr;
                 auto camera =
                     std::shared_ptr<ArvCamera>(arv_camera_new(device_description.c_str(), &error), [](ArvCamera* ptr) {
                         if (ptr) {
@@ -97,12 +96,13 @@ namespace module::input {
                 else {
                     // Create a new stream object: Store as shared pointer
                     GError* error = nullptr;
-                    auto stream = std::shared_ptr<ArvStream>(arv_camera_create_stream(camera.get(), nullptr, nullptr, &error),
-                                                             [](ArvStream* ptr) {
-                                                                 if (ptr) {
-                                                                     g_object_unref(ptr);
-                                                                 }
-                                                             });
+                    auto stream =
+                        std::shared_ptr<ArvStream>(arv_camera_create_stream(camera.get(), nullptr, nullptr, &error),
+                                                   [](ArvStream* ptr) {
+                                                       if (ptr) {
+                                                           g_object_unref(ptr);
+                                                       }
+                                                   });
                     if (error != nullptr) {
                         g_error_free(error);
                         error = nullptr;

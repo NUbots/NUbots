@@ -27,9 +27,9 @@ if __name__ == "__main__":
                     includes.append(include)
 
                 # Load our protobuf module
-                fqdn = os.path.normpath(
-                    os.path.join(os.path.relpath(dir_name, shared_folder), module_name)
-                ).replace(os.sep, ".")
+                fqdn = os.path.normpath(os.path.join(os.path.relpath(dir_name, shared_folder), module_name)).replace(
+                    os.sep, "."
+                )
                 if fqdn not in sys.modules:
                     loader.find_module(fqdn).load_module(fqdn)
 
