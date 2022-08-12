@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <va/va.h>
+#include <array>
 
 #include "../Compressor.hpp"
 #include "CompressionContext.hpp"
