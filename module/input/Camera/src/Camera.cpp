@@ -97,7 +97,7 @@ namespace module::input {
                 else {
                     // Create a new stream object: Store as shared pointer
                     GError* error = nullptr;
-                    auto stream = std::shared_ptr<ArvStream>(arv_camera_create_stream(camera.get(), nullptr, nullptr),
+                    auto stream = std::shared_ptr<ArvStream>(arv_camera_create_stream(camera.get(), nullptr, nullptr, &error),
                                                              [](ArvStream* ptr) {
                                                                  if (ptr) {
                                                                      g_object_unref(ptr);
