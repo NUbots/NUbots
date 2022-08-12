@@ -3,6 +3,7 @@
 #include <CL/cl.h>
 #include <va/va.h>
 #include <vector>
+#include <array>
 
 #include "opencl_error_category.hpp"
 
