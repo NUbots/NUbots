@@ -5,9 +5,7 @@
 #include <stdexcept>
 #include <string>
 
-extern "C" {
 #include <aravis-0.8/arv.h>
-}
 
 namespace module::input {
     template <typename T>
