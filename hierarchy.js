@@ -261,6 +261,7 @@ var hierarchy =
       [ "module::support::ReactionTimer", "classmodule_1_1support_1_1ReactionTimer.html", null ],
       [ "module::support::SignalCatcher", "classmodule_1_1support_1_1SignalCatcher.html", null ],
       [ "module::tools::FirmwareInstaller", "classmodule_1_1tools_1_1FirmwareInstaller.html", null ],
+      [ "module::tools::SystemConfiguration", "classmodule_1_1tools_1_1SystemConfiguration.html", null ],
       [ "module::vision::BallDetector", "classmodule_1_1vision_1_1BallDetector.html", null ],
       [ "module::vision::GoalDetector", "classmodule_1_1vision_1_1GoalDetector.html", null ],
       [ "module::vision::GreenHorizonDetector", "classmodule_1_1vision_1_1GreenHorizonDetector.html", null ],

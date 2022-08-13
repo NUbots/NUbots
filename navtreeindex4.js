@@ -181,6 +181,8 @@ var NAVTREEINDEX4 =
 "classmodule_1_1tools_1_1FirmwareInstaller.html#a9d12532158bb842e4d75832f134d174f":[1,0,2,9,0,6],
 "classmodule_1_1tools_1_1FirmwareInstaller.html#adccf9735f699d7069746ac92a1b6bd6e":[1,0,2,9,0,4],
 "classmodule_1_1tools_1_1FirmwareInstaller.html#af9fb541b04d2b37bef15fc593c92084f":[1,0,2,9,0,8],
+"classmodule_1_1tools_1_1SystemConfiguration.html":[1,0,2,9,3],
+"classmodule_1_1tools_1_1SystemConfiguration.html#a272ed36c30b133276492cb8f4bcfecfd":[1,0,2,9,3,0],
 "classmodule_1_1vision_1_1BallDetector.html":[1,0,2,10,1],
 "classmodule_1_1vision_1_1BallDetector.html#a1bd43a7e2be88f3c4924ec311af6213f":[1,0,2,10,1,2],
 "classmodule_1_1vision_1_1BallDetector.html#a1d11876da2dc92451e94f4344028e9c3":[1,0,2,10,1,0],
@@ -247,7 +249,5 @@ var NAVTREEINDEX4 =
 "classutility_1_1math_1_1filter_1_1ParticleFilter.html#a79f83c5172e0287cfa440b2ee92b6b84":[1,0,5,4,0,0,11],
 "classutility_1_1math_1_1filter_1_1ParticleFilter.html#a7f783aa0df5b44f9ba9bf82ba3bd39ac":[1,0,5,4,0,0,20],
 "classutility_1_1math_1_1filter_1_1ParticleFilter.html#a87076f25b757729992aef7362f4dacf6":[1,0,5,4,0,0,7],
-"classutility_1_1math_1_1filter_1_1ParticleFilter.html#a87b84437479faf42b4ce81fbc70bdb9d":[1,0,5,4,0,0,5],
-"classutility_1_1math_1_1filter_1_1ParticleFilter.html#a87b84437479faf42b4ce81fbc70bdb9da015f5deae845959e63f7fc7452cf167b":[1,0,5,4,0,0,5,2],
-"classutility_1_1math_1_1filter_1_1ParticleFilter.html#a87b84437479faf42b4ce81fbc70bdb9da0ea498e9e5b064b5c8d63d4324c45617":[1,0,5,4,0,0,5,1]
+"classutility_1_1math_1_1filter_1_1ParticleFilter.html#a87b84437479faf42b4ce81fbc70bdb9d":[1,0,5,4,0,0,5]
 };

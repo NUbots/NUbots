@@ -1,5 +1,7 @@
 var NAVTREEINDEX7 =
 {
+"structextension_1_1Configuration.html#a2a6058e3314b32811a804f00875b8ff8":[1,0,1,1,21],
+"structextension_1_1Configuration.html#a3048211e75d0fea5dd42b36ac9df5589":[1,0,1,1,13],
 "structextension_1_1Configuration.html#a3df5e2904642c197adffd10f28f57e0e":[1,0,1,1,15],
 "structextension_1_1Configuration.html#a50c4e1e1127d831c860d534a01ceb471":[1,0,1,1,1],
 "structextension_1_1Configuration.html#a537082ae4077c006fe3ad3397c9c8712":[1,0,1,1,14],
@@ -247,7 +249,5 @@ var NAVTREEINDEX7 =
 "structmodule_1_1extension_1_1StateUpdate.html#a5ae3bfce027fe7031776783761f8780e":[1,0,2,1,3,3],
 "structmodule_1_1extension_1_1StateUpdate.html#a6f87c3f0352902b5b9c382675009e717":[1,0,2,1,3,1],
 "structmodule_1_1extension_1_1StateUpdate.html#ac6b7348dfcd3f0df22f963259ccc2939":[1,0,2,1,3,0],
-"structmodule_1_1extension_1_1provider_1_1Provider.html":[1,0,2,1,0,0],
-"structmodule_1_1extension_1_1provider_1_1Provider.html#a528e562ecdaca99d14d9d9cbfa4ffc9c":[1,0,2,1,0,0,3],
-"structmodule_1_1extension_1_1provider_1_1Provider.html#a8bf95b56824b6519fec09f1e0db8f751":[1,0,2,1,0,0,1]
+"structmodule_1_1extension_1_1provider_1_1Provider.html":[1,0,2,1,0,0]
 };

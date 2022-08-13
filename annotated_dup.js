@@ -224,7 +224,8 @@ var annotated_dup =
       [ "tools", null, [
         [ "FirmwareInstaller", "classmodule_1_1tools_1_1FirmwareInstaller.html", "classmodule_1_1tools_1_1FirmwareInstaller" ],
         [ "FlashCM730", "structmodule_1_1tools_1_1FlashCM730.html", null ],
-        [ "FlashComplete", "structmodule_1_1tools_1_1FlashComplete.html", null ]
+        [ "FlashComplete", "structmodule_1_1tools_1_1FlashComplete.html", null ],
+        [ "SystemConfiguration", "classmodule_1_1tools_1_1SystemConfiguration.html", "classmodule_1_1tools_1_1SystemConfiguration" ]
       ] ],
       [ "vision", null, [
         [ "visualmesh", null, [

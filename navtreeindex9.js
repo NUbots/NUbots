@@ -1,5 +1,7 @@
 var NAVTREEINDEX9 =
 {
+"structmodule_1_1input_1_1gamecontroller_1_1Robot.html#a4b78874185cc755f80ac661b3620bfb2":[1,0,2,2,1,2,2],
+"structmodule_1_1input_1_1gamecontroller_1_1Robot.html#a5af89d7f8025ae236d65a8e93f7754aa":[1,0,2,2,1,2,1],
 "structmodule_1_1input_1_1gamecontroller_1_1Robot.html#a5c6a1a3cb7800d2f719adf73c42b7b31":[1,0,2,2,1,2,3],
 "structmodule_1_1input_1_1gamecontroller_1_1Robot.html#a7f7b55a68a1bcd12e5ddc6e6cca73002":[1,0,2,2,1,2,0],
 "structmodule_1_1input_1_1gamecontroller_1_1Robot.html#a8c519d4aff13dda9d7e404e50d393141":[1,0,2,2,1,2,5],
@@ -247,7 +249,5 @@ var NAVTREEINDEX9 =
 "structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1CM740State.html":[1,0,2,7,0,1,0],
 "structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1CM740State.html#a381d6e4c5d95c508d0dbf97406d3c3ae":[1,0,2,7,0,1,0,2],
 "structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1CM740State.html#a4e8404c3fb59b11163a60b1f1a81ac89":[1,0,2,7,0,1,0,0],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1CM740State.html#aba7cbd2879413de85c60bcf62b7729b1":[1,0,2,7,0,1,0,1],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config.html":[1,0,2,7,0,1,1],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config.html#ad1e21bc16589e3366521ae6632043662":[1,0,2,7,0,1,1,1]
+"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1CM740State.html#aba7cbd2879413de85c60bcf62b7729b1":[1,0,2,7,0,1,0,1]
 };

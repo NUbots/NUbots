@@ -1,5 +1,7 @@
 var NAVTREEINDEX10 =
 {
+"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config.html":[1,0,2,7,0,1,1],
+"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config.html#ad1e21bc16589e3366521ae6632043662":[1,0,2,7,0,1,1,1],
 "structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config.html#ae53d77ce2ed30c17bae25d6d715f13ca":[1,0,2,7,0,1,1,2],
 "structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config_1_1Battery.html":[1,0,2,7,0,1,1,0],
 "structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config_1_1Battery.html#a85ee00e40b7a3a32e3b8743ff612dd2c":[1,0,2,7,0,1,1,0,1],
@@ -247,7 +249,5 @@ var NAVTREEINDEX10 =
 "structutility_1_1motion_1_1splines_1_1SmoothSpline_1_1Point.html#a29d684c9e25a9cd664e1e16722df8dea":[1,0,5,5,0,3,0,3],
 "structutility_1_1motion_1_1splines_1_1SmoothSpline_1_1Point.html#a29da34407ee837b2bcce80fe1d8da9ea":[1,0,5,5,0,3,0,0],
 "structutility_1_1motion_1_1splines_1_1SmoothSpline_1_1Point.html#a4d79c1e05f9fcfa7db0d3025f754210e":[1,0,5,5,0,3,0,2],
-"structutility_1_1motion_1_1splines_1_1SmoothSpline_1_1Point.html#a8aa6305cebcaff6eaf5ddbc110704b33":[1,0,5,5,0,3,0,1],
-"structutility_1_1motion_1_1splines_1_1Spline_1_1Spline__t.html":[1,0,5,5,0,4,0],
-"structutility_1_1motion_1_1splines_1_1Spline_1_1Spline__t.html#a0dc9721d1e1f7cd0201b108189082fe2":[1,0,5,5,0,4,0,0]
+"structutility_1_1motion_1_1splines_1_1SmoothSpline_1_1Point.html#a8aa6305cebcaff6eaf5ddbc110704b33":[1,0,5,5,0,3,0,1]
 };
