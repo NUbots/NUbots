@@ -3,7 +3,8 @@
 GRUB_DEFAULT=0
 GRUB_TIMEOUT=0
 GRUB_DISTRIBUTOR="Arch"
-GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet"
+# Only turn mitigations off on the robot! On the robot we're not risking too much, but on anything else this is bad.
+GRUB_CMDLINE_LINUX_DEFAULT="loglevel=3 quiet mitigations=off"
 GRUB_CMDLINE_LINUX=""
 
 # Preload both GPT and MBR modules so that they are not missed
