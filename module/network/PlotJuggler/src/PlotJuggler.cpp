@@ -52,7 +52,9 @@ namespace module::network {
         forwarder_reaction = on<Trigger<DataPoint>>().then([this](const DataPoint& datapoint) {
             // Get the timestamp in seconds relative to the start time
             nlohmann::json json;
-            json["timestamp"] = std::chono::duration_cast<std::chrono::duration<double>>(datapoint.timestamp.time_since_epoch()) - start_time_ms;
+            json["timestamp"] =
+                std::chono::duration_cast<std::chrono::duration<double>>(datapoint.timestamp.time_since_epoch())
+                - start_time_ms;
 
             // If there's only one value in the DataPoint, label it with the DataPoint's label without any nesting
             if (datapoint.value.size() == 1) {
