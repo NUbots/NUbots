@@ -7,13 +7,13 @@ export interface ReactionStats {
   name: string
   triggerName: string
   functionName: string
-  reactionId: Number | Long
-  taskId: Number | Long
-  causeReactionId: Number | Long
-  causeTaskId: Number | Long
-  emitted: Number | Long
-  started: Number | Long
-  finished: Number | Long
+  reactionId: number | Long
+  taskId: number | Long
+  causeReactionId: number | Long
+  causeTaskId: number | Long
+  emitted: number | Long
+  started: number | Long
+  finished: number | Long
 }
 
 export class ReactionModel {

@@ -36,11 +36,11 @@ namespace module::support {
             emit(reactionData);
 
 
-            log(stats.identifier[0],
-                1000.0
-                    * (double((stats.finished - stats.started).count())
-                       / double(NUClear::clock::duration::period::den)),
-                "ms");
+            // log(stats.identifier[0],
+            //     1000.0
+            //         * (double((stats.finished - stats.started).count())
+            //            / double(NUClear::clock::duration::period::den)),
+            //     "ms");
         });
     }
 }  // namespace module::support
