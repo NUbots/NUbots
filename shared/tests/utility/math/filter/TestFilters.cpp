@@ -18,14 +18,24 @@
  */
 
 #include <Eigen/Core>
+#include <Eigen/Dense>
 #include <array>
+// #include <boost/algorithm/string.hpp>
 #include <catch.hpp>
+#include <chrono>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <string>
 #include <utility>
+#include <vector>
 
 #include "VanDerPolModel.hpp"
 
+#include "utility/math/filter/InEKF.h"
 #include "utility/math/filter/ParticleFilter.hpp"
 #include "utility/math/filter/UKF.hpp"
+#include "utility/strutil/strutil.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 using utility::support::Expression;
@@ -198,4 +208,147 @@ TEST_CASE("Test the ParticleFilter", "[utility][math][filter][ParticleFilter]") 
     INFO("The mean 1\u03C3 boundary for state 2 is [" << -mean_x2_boundary << ", " << mean_x2_boundary << "]");
 
     REQUIRE(percentage_x1 <= 30.0);
+}
+
+#define DT_MIN 1e-6
+#define DT_MAX 1
+using namespace std::chrono;
+
+TEST_CASE("Test the InEKF", "[utility][math][filter][InEKF]") {
+    auto start  = high_resolution_clock::now();
+    int n_count = 0;
+    //  ---- Initialize invariant extended Kalman filter ----- //
+    inekf::RobotState initial_state;
+
+    // Initialize state mean
+    Eigen::Matrix3d R0;
+    Eigen::Vector3d v0, p0, bg0, ba0;
+    R0 << 1, 0, 0,  // initial orientation
+        0, -1, 0,   // IMU frame is rotated 90deg about the x-axis
+        0, 0, -1;
+    v0 << 0, 0, 0;   // initial velocity
+    p0 << 0, 0, 0;   // initial position
+    bg0 << 0, 0, 0;  // initial gyroscope bias
+    ba0 << 0, 0, 0;  // initial accelerometer bias
+    initial_state.setRotation(R0);
+    initial_state.setVelocity(v0);
+    initial_state.setPosition(p0);
+    initial_state.setGyroscopeBias(bg0);
+    initial_state.setAccelerometerBias(ba0);
+
+    // Initialize state covariance
+    inekf::NoiseParams noise_params;
+    noise_params.setGyroscopeNoise(0.01);
+    noise_params.setAccelerometerNoise(0.1);
+    noise_params.setGyroscopeBiasNoise(0.00001);
+    noise_params.setAccelerometerBiasNoise(0.0001);
+    noise_params.setContactNoise(0.01);
+
+    // Initialize filter
+    inekf::InEKF filter(initial_state, noise_params);
+    std::cout << "Noise parameters are initialized to: \n";
+    std::cout << filter.getNoiseParams() << std::endl;
+    std::cout << "Robot's state is initialized to: \n";
+    std::cout << filter.getState() << std::endl;
+
+    // Open data file
+    std::ifstream infile("/home/nubots/NUbots/shared/tests/data/imu_kinematic_measurements.txt");
+    std::string line;
+    Eigen::Matrix<double, 6, 1> imu_measurement      = Eigen::Matrix<double, 6, 1>::Zero();
+    Eigen::Matrix<double, 6, 1> imu_measurement_prev = Eigen::Matrix<double, 6, 1>::Zero();
+    double t                                         = 0;
+    double t_prev                                    = 0;
+
+    // ---- Loop through data file and read in measurements line by line ---- //
+    while (getline(infile, line)) {
+        std::vector<std::string> measurement = utility::strutil::split(line, ' ');
+        // boost::split(measurement, line, boost::is_any_of(" "));
+        // // Handle measurements
+        if (measurement[0].compare("IMU") == 0) {
+            // cout << "Received IMU Data, propagating state\n";
+            assert((measurement.size() - 2) == 6);
+            t = atof(measurement[1].c_str());
+            // Read in IMU data
+            imu_measurement << std::stod(measurement[2]), std::stod(measurement[3]), std::stod(measurement[4]),
+                std::stod(measurement[5]), std::stod(measurement[6]), std::stod(measurement[7]);
+
+            // Propagate using IMU data
+            double dt = t - t_prev;
+            if (dt > DT_MIN && dt < DT_MAX) {
+                filter.Propagate(imu_measurement_prev, dt);
+            }
+        }
+        else if (measurement[0].compare("CONTACT") == 0) {
+            // cout << "Received CONTACT Data, setting filter's contact state\n";
+            assert((measurement.size() - 2) % 2 == 0);
+            std::vector<std::pair<int, bool>> contacts;
+            int id;
+            bool indicator;
+            t = std::stod(measurement[1]);
+            // Read in contact data
+            for (int i = 2; i < measurement.size(); i += 2) {
+                id        = std::stoi(measurement[i]);
+                indicator = bool(std::stod(measurement[i + 1]));
+                contacts.push_back(std::pair<int, bool>(id, indicator));
+            }
+            // Set filter's contact state
+            filter.setContacts(contacts);
+        }
+        else if (measurement[0].compare("KINEMATIC") == 0) {
+            // cout << "Received KINEMATIC observation, correcting state\n";
+            assert((measurement.size() - 2) % 44 == 0);
+            int id;
+            Eigen::Quaternion<double> q;
+            Eigen::Vector3d p;
+            Eigen::Matrix4d pose = Eigen::Matrix4d::Identity();
+            Eigen::Matrix<double, 6, 6> covariance;
+            inekf::vectorKinematics measured_kinematics;
+            t = std::stod(measurement[1]);
+            // Read in kinematic data
+            for (int i = 2; i < measurement.size(); i += 44) {
+                id = std::stoi(measurement[i]);
+                q  = Eigen::Quaternion<double>(std::stod(measurement[i + 1]),
+                                              std::stod(measurement[i + 2]),
+                                              std::stod(measurement[i + 3]),
+                                              std::stod(measurement[i + 4]));
+                q.normalize();
+                p << std::stod(measurement[i + 5]), std::stod(measurement[i + 6]), std::stod(measurement[i + 7]);
+                pose.block<3, 3>(0, 0) = q.toRotationMatrix();
+                pose.block<3, 1>(0, 3) = p;
+                for (int j = 0; j < 6; ++j) {
+                    for (int k = 0; k < 6; ++k) {
+                        covariance(j, k) = std::stod(measurement[i + 8 + j * 6 + k]);
+                    }
+                }
+                inekf::Kinematics frame(id, pose, covariance);
+                measured_kinematics.push_back(frame);
+            }
+            // Correct state using kinematic measurements
+            filter.CorrectKinematics(measured_kinematics);
+        }
+
+        // Store previous timestamp
+        t_prev               = t;
+        imu_measurement_prev = imu_measurement;
+        n_count++;
+    }
+
+    // Print final state
+    std::cout << "n count : " << n_count << std::endl;
+    std::cout << filter.getState() << std::endl;
+    // After function call
+    auto stop = high_resolution_clock::now();
+    // Subtract stop and start timepoints and
+    // cast it to required unit. Predefined units
+    // are nanoseconds, microseconds, milliseconds,
+    // seconds, minutes, hours. Use std::chrono::duration_cast()
+    // function.
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+
+    // To get the value of duration use the count()
+    // member function on the duration object
+    std::cout << "Total time [microseconds] : " << duration.count() << std::endl;
+    std::cout << "Total time average [microseconds] : " << duration.count() / n_count << std::endl;
+
+    REQUIRE(10 == 0);
 }
