@@ -6,5 +6,4 @@ export class ReactionVisualizerViewModel {
   static of(model: ReactionVisualizerModel) {
     return new ReactionVisualizerViewModel(model)
   }
-
 }

@@ -4,8 +4,8 @@ import styles from './styles.css'
 
 export const ReactionVisualizer = ({ reaction }: { reaction: ReactionStats }) => {
   //const emittedReaction = reaction.emitted
-  const emitted = reaction.emitted//new Date( emittedReaction ).toISOString().slice(11, -1)
-  return (<div />)
+  const emitted = reaction.emitted //new Date( emittedReaction ).toISOString().slice(11, -1)
+  return <div />
   return (
     <div className={styles.visualizer}>
       <div>{stats.name}</div>
