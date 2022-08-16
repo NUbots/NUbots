@@ -30,6 +30,7 @@
 #include "message/vision/GreenHorizon.hpp"
 
 #include "utility/math/coordinates.hpp"
+#include "utility/math/format.hpp"
 #include "utility/support/yaml_expression.hpp"
 #include "utility/vision/visualmesh/VisualMesh.hpp"
 

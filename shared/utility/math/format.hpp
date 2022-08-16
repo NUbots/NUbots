@@ -1,5 +1,5 @@
-#ifndef MESSAGE_FORMAT_MATRIX_TYPES_HPP
-#define MESSAGE_FORMAT_MATRIX_TYPES_HPP
+#ifndef SHARED_UTILITY_MATH_FORMAT_HPP
+#define SHARED_UTILITY_MATH_FORMAT_HPP
 #include <Eigen/Core>
 #include <fmt/ostream.h>
 
@@ -16,4 +16,4 @@ namespace fmt {
 
 }  // namespace fmt
 
-#endif  // MESSAGE_FORMAT_MATRIX_TYPES_HPP
+#endif  // SHARED_UTILITY_MATH_FORMAT_HPP

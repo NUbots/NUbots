@@ -1,3 +1,8 @@
+# This is needed for the protobuf deps
+if(POLICY CMP0116)
+  cmake_policy(SET CMP0116 NEW)
+endif()
+
 # Get the path to our parent directory above the message folder
 get_filename_component(message_parent_dir "${PROJECT_SOURCE_DIR}/${NUCLEAR_MESSAGE_DIR}/.." ABSOLUTE)
 

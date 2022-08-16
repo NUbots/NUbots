@@ -10,11 +10,6 @@ if(POLICY CMP0079)
   cmake_policy(SET CMP0079 NEW)
 endif()
 
-# This is needed for the protobuf deps
-if(POLICY CMP0116)
-  cmake_policy(SET CMP0116 NEW)
-endif()
-
 # Enable testing if we are building tests
 if(BUILD_TESTS)
   enable_testing()
