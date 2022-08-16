@@ -86,8 +86,10 @@ namespace module::input {
                         }
                     });
                 if (error != nullptr) {
+                    std::string message = error->message;
                     g_error_free(error);
                     error = nullptr;
+                    throw std::runtime_error(message);
                 }
 
                 if (!ARV_IS_CAMERA(camera.get())) {
@@ -104,8 +106,10 @@ namespace module::input {
                                                        }
                                                    });
                     if (error != nullptr) {
+                        std::string message = error->message;
                         g_error_free(error);
                         error = nullptr;
+                        throw std::runtime_error(message);
                     }
 
                     if (!ARV_IS_STREAM(stream.get())) {
