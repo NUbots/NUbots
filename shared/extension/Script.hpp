@@ -454,7 +454,9 @@ namespace YAML {
                                              "Pos:",
                                              e.mark.pos,
                                              "Message:",
-                                             e.msg);
+                                             e.msg,
+                                             "Filename:",
+                                             rhs.name);
                 return false;
             }
 
