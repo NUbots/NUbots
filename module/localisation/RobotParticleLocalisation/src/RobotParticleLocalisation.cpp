@@ -2,7 +2,6 @@
 
 #include <Eigen/Geometry>
 #include <fmt/format.h>
-#include <fmt/ostream.h>
 #include <initializer_list>
 #include <limits>
 #include <utility>
@@ -17,6 +16,7 @@
 #include "utility/localisation/transform.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
+#include "utility/math/format.hpp"
 
 namespace module::localisation {
 
