@@ -378,7 +378,7 @@ namespace YAML {
                        !node["torque"].IsNull() ? node["torque"].as<float>() : 100};
             }
             catch (const YAML::Exception& e) {
-                NUClear::log<NUClear::ERROR>("Error parsing script -",
+                NUClear::log<NUClear::ERROR>("Error parsing script target -",
                                              "Line:",
                                              e.mark.line,
                                              "Column:",
@@ -414,7 +414,7 @@ namespace YAML {
                 rhs          = {duration, targets};
             }
             catch (const YAML::Exception& e) {
-                NUClear::log<NUClear::ERROR>("Error parsing script -",
+                NUClear::log<NUClear::ERROR>("Error parsing script frame -",
                                              "Line:",
                                              e.mark.line,
                                              "Column:",
@@ -446,7 +446,7 @@ namespace YAML {
                 rhs         = {frames};
             }
             catch (const YAML::Exception& e) {
-                NUClear::log<NUClear::ERROR>("Error parsing script -",
+                NUClear::log<NUClear::ERROR>("Error parsing script file -",
                                              "Line:",
                                              e.mark.line,
                                              "Column:",
@@ -456,7 +456,7 @@ namespace YAML {
                                              "Message:",
                                              e.msg,
                                              "Filename:",
-                                             rhs.name);
+                                             rhs.fileName);
                 return false;
             }
 
