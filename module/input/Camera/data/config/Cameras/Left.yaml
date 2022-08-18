@@ -8,14 +8,6 @@ settings:
   OffsetY: 0
   ExposureAuto: Continuous # Options: Off, Once, Continuous
   GainAuto: Continuous # Options: Off, Once, Continuous
-  Gain: 15 # Range: 0.00 - 18.01'
-  GammaEnable: true # Set to false to adjust gamma. Default = true
-  Gamma: 0.50
   BalanceWhiteAuto: Once # Options: Off, Once, Continuous
-  BalanceRatioSelector: Red # Options: Red or Blue. Controls the balance ratio of the selected color relative to green. Used for white balancing.
-  BalanceRatio: 2.56
-  AutoExposureEVCompensation: 0 # Range from -3(darker) to 3(lighter) with a step of 1/3. Default = 0.
   AcquisitionFrameRateEnable: true
   AcquisitionFrameRate: 20.00
-  SaturationEnable: false
-  Saturation: 0
