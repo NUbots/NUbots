@@ -10,4 +10,4 @@ settings:
   GainAuto: Continuous # Options: Off, Once, Continuous
   BalanceWhiteAuto: Once # Options: Off, Once, Continuous
   AcquisitionFrameRateEnable: true
-  AcquisitionFrameRate: 20.00
+  AcquisitionFrameRate: 20.00 # Adjusting frame rate can help remove flickering from lighting
