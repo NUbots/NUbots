@@ -34,8 +34,7 @@ namespace module::network {
 
         /// @brief Convert the given timepoint to a count of milliseconds since Epoch
         static inline long toMillisecondsSinceEpoch(NUClear::clock::time_point timepoint) {
-            auto timepoint_ms = std::chrono::time_point_cast<std::chrono::milliseconds>(timepoint);
-            return timepoint_ms.time_since_epoch().count();
+            return std::chrono::time_point_cast<std::chrono::milliseconds>(timepoint).time_since_epoch().count();
         }
     };
 

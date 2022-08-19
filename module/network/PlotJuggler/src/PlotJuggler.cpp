@@ -50,11 +50,10 @@ namespace module::network {
 
         // Forward any DataPoint messages we get to PlotJuggler via UDP
         forwarder_reaction = on<Trigger<DataPoint>>().then([this](const DataPoint& datapoint) {
-            // Get the timestamp in seconds relative to the start time
             nlohmann::json json;
-            json["timestamp"] =
-                std::chono::duration_cast<std::chrono::duration<double>>(datapoint.timestamp.time_since_epoch())
-                - start_time_ms;
+
+            // Set the timestamp in seconds relative to the start time
+            json["timestamp"] = (toMillisecondsSinceEpoch(datapoint.timestamp) - start_time_ms) * 1e-3;
 
             // If there's only one value in the DataPoint, label it with the DataPoint's label without any nesting
             if (datapoint.value.size() == 1) {
