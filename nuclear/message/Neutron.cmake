@@ -1,4 +1,4 @@
-# This is needed for the protobuf deps
+# Silence warnings about DEPFILE behaviour, we want the new behaviour
 if(POLICY CMP0116)
   cmake_policy(SET CMP0116 NEW)
 endif()
@@ -39,6 +39,7 @@ foreach(proto ${builtin_protobufs})
             --dependency_out=${dep_out}/${file_we}.d -I${builtin_dir} ${CMAKE_CURRENT_SOURCE_DIR}/proto/${file_we}.proto
     DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/proto/${file_we}.proto
     DEPFILE ${dep_out}/${file_we}.d
+    COMMENT "Compiling builtin protocol buffer ${proto}"
   )
 
   list(APPEND protobuf_src ${pb_out}/${file_we}.pb.cc ${pb_out}/${file_we}.pb.h)
@@ -56,7 +57,6 @@ foreach(proto ${message_protobufs})
   set(pb ${pb_out}/${output_path}/${file_we})
   set(py ${py_out}/${output_path}/${file_we})
   set(nt ${nt_out}/${output_path}/${file_we})
-
   set(dep ${dep_out}/${output_path}/${file_we})
 
   #
