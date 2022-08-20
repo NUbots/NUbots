@@ -22,7 +22,6 @@ cd "${BUILD_FOLDER}"
 # Download the source code
 download-and-extract "${URL}"
 
-
 SOURCE_DIR=$(find . -maxdepth 1 -type d | tail -n1)
 cd "${SOURCE_DIR}"
 
@@ -46,6 +45,7 @@ fi
 # Change back to where we should be
 cd "${BUILD_FOLDER}"
 
+
 echo "Configuring using cmake"
 
 # Find the closest configure file to the root
@@ -64,10 +64,11 @@ cmake .. "$@" \
     -DCMAKE_C_FLAGS_RELEASE="${EXTRA_CFLAGS} ${CFLAGS}" \
     -DCMAKE_CXX_FLAGS_RELEASE="${EXTRA_CXXFLAGS} ${CXXFLAGS}" \
     -DPKG_CONFIG_USE_CMAKE_PREFIX_PATH=ON \
-    -Wno-dev
+    -Wno-dev \
+    -GNinja
 
 # Run make
-make -j$(nproc)
+ninja
 
 # Now install
 install -dm755 "${PREFIX}/lib/intel-opencl"
