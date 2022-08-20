@@ -241,7 +241,7 @@ RUN install-from-source https://github.com/fmtlib/fmt/archive/refs/tags/9.0.0.ta
     -DFMT_TEST=OFF
 
 # Catch unit testing library
-RUN install-header-from-source https://github.com/catchorg/Catch2/releases/download/v2.11.1/catch.hpp
+RUN install-header-from-source https://github.com/catchorg/Catch2/releases/download/v2.13.9/catch.hpp
 
 # Aravis
 RUN install-from-source https://github.com/libusb/libusb/archive/refs/tags/v1.0.26.tar.gz
