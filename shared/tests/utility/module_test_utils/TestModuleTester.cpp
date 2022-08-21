@@ -76,14 +76,14 @@ TEST_CASE("Modules install in the right order", "[shared][utility][module_test_u
     class FirstToInstall : public NUClear::Reactor {
     public:
         explicit FirstToInstall(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-            on<Startup>().then([install_log] { install_log.push_back("FirstToInstall"); });
+            on<Startup>().then([] { install_log.push_back("FirstToInstall"); });
         }
     };
 
     class SecondToInstall : public NUClear::Reactor {
     public:
         explicit SecondToInstall(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-            on<Startup>().then([install_log, this] {
+            on<Startup>().then([this] {
                 install_log.push_back("SecondToInstall");
                 powerplant.shutdown();
             });
