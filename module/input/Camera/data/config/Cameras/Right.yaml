@@ -6,6 +6,8 @@ settings:
   Height: 1024
   OffsetX: 0
   OffsetY: 0
-  ExposureAuto: Continuous
-  GainAuto: Continuous
-  BalanceWhiteAuto: Continuous
+  ExposureAuto: Continuous # Options: Off, Once, Continuous
+  GainAuto: Continuous # Options: Off, Once, Continuous
+  BalanceWhiteAuto: Once # Options: Off, Once, Continuous
+  AcquisitionFrameRateEnable: true
+  AcquisitionFrameRate: 20.00 # Adjusting frame rate can help remove flickering from lighting
