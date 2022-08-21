@@ -25,12 +25,37 @@
 
 using utility::module_test::ModuleTester;
 
-TEST_CASE("Testing that tests fail if the timeout finishes", "[shared][utility][module_test_utils][ModuleTester][TimeoutModule][!shouldfail]") {
-
+namespace {
     class DummyReactor : public NUClear::Reactor {
     public:
-        explicit DummyReactor(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {};
+        explicit DummyReactor(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+
+            // Reaction to stop test after 1 second delay
+            on<Every<1, std::chrono::seconds>>().then([this]() {
+                if (is_first) {
+                    is_first = false;
+                    return;
+                }
+                powerplant.shutdown();
+            });
+        }
+        bool is_first = true;
     };
+}  // namespace
+
+TEST_CASE("Testing that tests don't timeout if they complete in time",
+          "[shared][utility][module_test_utils][ModuleTester][TimeoutModule]") {
+
+    static constexpr int NUM_THREADS = 1;
+
+    ModuleTester<DummyReactor, 5, std::chrono::seconds> tester(NUM_THREADS);
+
+    tester.run();
+}
+
+TEST_CASE("Testing that tests fail if the timeout finishes",
+          "[shared][utility][module_test_utils][ModuleTester][TimeoutModule][!shouldfail]") {
+
 
     static constexpr int NUM_THREADS = 1;
 
@@ -38,4 +63,3 @@ TEST_CASE("Testing that tests fail if the timeout finishes", "[shared][utility][
 
     tester.run();
 }
-

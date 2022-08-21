@@ -23,9 +23,9 @@
 #define CATCH_CONFIG_RUNNER
 
 #include <catch.hpp>
+#include <memory>
 #include <nuclear>
 #include <string>
-#include <memory>
 
 #include "TestLogHandler.hpp"
 
