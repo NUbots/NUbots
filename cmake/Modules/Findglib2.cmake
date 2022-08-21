@@ -1,4 +1,7 @@
 include(ToolchainLibraryFinder)
+
+find_package(libmount REQUIRED)
+
 ToolchainLibraryFinder(
   NAME glib2
   HEADER glib.h
@@ -16,3 +19,4 @@ ToolchainLibraryFinder(
 
 # Glib has some internal dependencies between its libraries
 target_link_libraries(glib2::gobject-2.0 INTERFACE glib2::glib-2.0)
+target_link_libraries(glib2::glib2 INTERFACE libmount::libmount)
