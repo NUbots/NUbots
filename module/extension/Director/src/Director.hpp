@@ -30,12 +30,14 @@
 
 namespace module::extension {
 
-    class Director : public NUClear::Reactor {
+    class Director
+        : public NUClear::Reactor
+        , ::extension::behaviour::information::InformationSource {
     public:
         /// A task queue holds tasks in a provider that are waiting to be executed by that group
-        using TaskQueue = std::vector<std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>>;
+        using TaskQueue = std::vector<std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>>;
         /// A task pack is the result of a set of tasks emitted by a provider that should be run together
-        using TaskPack = std::vector<std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>>;
+        using TaskPack = std::vector<std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>>;
 
     private:
         /**
@@ -93,8 +95,8 @@ namespace module::extension {
          * @throws std::runtime_error if the director's provider ancestry is broken
          */
         [[nodiscard]] bool challenge_priority(
-            const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& incumbent,
-            const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& challenger);
+            const std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>& incumbent,
+            const std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>& challenger);
 
         /**
          * Remove the provided task from the Director.
@@ -104,7 +106,7 @@ namespace module::extension {
          *
          * @param task the task to remove from the Director
          */
-        void remove_task(const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& task);
+        void remove_task(const std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>& task);
 
         /**
          * Reevaluates all of the tasks that are queued to execute on a provider group.
@@ -170,7 +172,7 @@ namespace module::extension {
          */
         Solution::Option solve_provider(
             const std::shared_ptr<provider::Provider>& provider,
-            const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& authority,
+            const std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>& authority,
             std::set<std::shared_ptr<const provider::Provider>> visited);
 
         /**
@@ -186,7 +188,7 @@ namespace module::extension {
          * @return         the set of providers that when run can meet the provided when condition
          */
         Solution solve_when(const provider::Provider::WhenCondition& when,
-                            const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& authority,
+                            const std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>& authority,
                             const std::set<std::shared_ptr<const provider::Provider>>& visited);
 
         /**
@@ -200,7 +202,7 @@ namespace module::extension {
          * @return the set of possible solution options for the provider group of the passed type
          */
         Solution solve_group(const std::type_index& type,
-                             const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& authority,
+                             const std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>& authority,
                              const std::set<std::shared_ptr<const provider::Provider>>& visited);
 
         /**
@@ -209,12 +211,10 @@ namespace module::extension {
          * permission checks on providers that it needs to run.
          *
          * @param task      the task we are finding solutions for
-         * @param authority the task that we are using as our authority token for permission checks
          *
          * @return the set of possible solution options for this task
          */
-        Solution solve_task(const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& task,
-                            const std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>& authority);
+        Solution solve_task(const std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>& task);
 
         /**
          * Looks at all the tasks that are in the pack and determines if they should run, and if so runs them.
@@ -235,6 +235,16 @@ namespace module::extension {
     public:
         /// Called by the powerplant to build and setup the Director reactor.
         explicit Director(std::unique_ptr<NUClear::Environment> environment);
+        virtual ~Director();
+
+        /**
+         * @brief Provides the task data via the InformationSource interface so it can be accessed
+         *
+         * @param reaction_id the provider reaction that is requesting its information.
+         *
+         * @return the data that is stored in this reaction, or nullptr if it shouldn't be executing
+         */
+        std::shared_ptr<void> _get_task_data(const uint64_t& reaction_id) override;
 
     private:
         /// A list of Provider groups
@@ -244,7 +254,10 @@ namespace module::extension {
 
         /// A list of reaction_task_ids to director_task objects, once the Provider has finished running it will emit
         /// all these as a pack so that the director can work out when Providers change which subtasks they emit
-        std::multimap<uint64_t, std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>> pack_builder;
+        std::multimap<uint64_t, std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>> pack_builder;
+
+    public:
+        friend class InformationSource;
     };
 
 }  // namespace module::extension
