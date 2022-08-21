@@ -22,7 +22,6 @@
 
 #include "utility/module_test_utils/ModuleTester.hpp"
 
-
 using utility::module_test::ModuleTester;
 
 namespace {
@@ -66,14 +65,14 @@ TEST_CASE("Testing that tests fail if the timeout finishes",
 }
 
 namespace {
-// It's a global, but DO NOT USE IT IN OTHER TEST CASES
-std::vector<std::string> install_log;
-}
+    // It's a global, but DO NOT USE IT IN OTHER TEST CASES
+    std::vector<std::string> install_log;
+}  // namespace
 
 TEST_CASE("Modules install in the right order", "[shared][utility][module_test_utils][ModuleTester]") {
     // When we have modules which are dependencies of the test, we need to install them before calling tester.run().
     // This test makes sure that these dependencies are installed properly and in the right order
-    
+
     class FirstToInstall : public NUClear::Reactor {
     public:
         explicit FirstToInstall(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
@@ -84,8 +83,8 @@ TEST_CASE("Modules install in the right order", "[shared][utility][module_test_u
     class SecondToInstall : public NUClear::Reactor {
     public:
         explicit SecondToInstall(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
-            on<Startup>().then([install_log, this] { 
-                install_log.push_back("SecondToInstall"); 
+            on<Startup>().then([install_log, this] {
+                install_log.push_back("SecondToInstall");
                 powerplant.shutdown();
             });
         }
