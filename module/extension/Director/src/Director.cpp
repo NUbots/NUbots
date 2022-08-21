@@ -23,8 +23,8 @@
 namespace module::extension {
 
     using ::extension::Configuration;
+    using ::extension::behaviour::commands::BehaviourTask;
     using ::extension::behaviour::commands::CausingExpression;
-    using ::extension::behaviour::commands::DirectorTask;
     using ::extension::behaviour::commands::NeedsExpression;
     using ::extension::behaviour::commands::ProviderClassification;
     using ::extension::behaviour::commands::ProviderDone;
@@ -179,6 +179,10 @@ namespace module::extension {
     }
 
     Director::Director(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+        if (source != nullptr) {
+            throw std::runtime_error("Multiple behaviour directors are not allowed.");
+        }
+        source = this;
 
         on<Configuration>("Director.yaml").then("Configure", [this](const Configuration& config) {
             log_level = config["log_level"].as<NUClear::LogLevel>();
@@ -211,9 +215,9 @@ namespace module::extension {
 
         // A task has arrived, either it's a root task so we send it off immediately, or we build up our pack for when
         // the Provider has finished executing
-        on<Trigger<DirectorTask>, Sync<DirectorTask>>().then(
+        on<Trigger<BehaviourTask>, Sync<BehaviourTask>>().then(
             "Director Task",
-            [this](const std::shared_ptr<const DirectorTask>& task) {
+            [this](const std::shared_ptr<const BehaviourTask>& task) {
                 // Root level task, make the pack immediately and send it off to be executed as a root task
                 if (providers.count(task->requester_id) == 0) {
                     emit(std::make_unique<TaskPack>(TaskPack({task})));
@@ -233,7 +237,7 @@ namespace module::extension {
             });
 
         // This reaction runs when a Provider finishes to send off the task pack to the main director
-        on<Trigger<ProviderDone>, Sync<DirectorTask>>().then("Package Tasks", [this](const ProviderDone& done) {
+        on<Trigger<ProviderDone>, Sync<BehaviourTask>>().then("Package Tasks", [this](const ProviderDone& done) {
             // Get all the tasks that were emitted by this provider and send it as a task pack
             auto range = pack_builder.equal_range(done.requester_task_id);
             auto tasks = std::make_unique<TaskPack>();
@@ -267,6 +271,11 @@ namespace module::extension {
         on<Trigger<TaskPack>, Sync<Director>>().then("Run Task Pack", [this](const TaskPack& pack) {  //
             run_task_pack(pack);
         });
+    }
+
+    Director::~Director() {
+        // Remove this director as the information source
+        source = nullptr;
     }
 
 }  // namespace module::extension

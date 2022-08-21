@@ -19,7 +19,6 @@
 
 #include <filesystem>
 #include <fmt/format.h>
-#include <iostream>
 #include <vector>
 
 #include "extension/FileWatch.hpp"
@@ -111,9 +110,9 @@ namespace module::extension {
     FileWatcher::FileWatcher(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment))
         , loop(std::make_unique<uv_loop_t>())
-        , add_watch(new uv_async_t)
-        , remove_watch(new uv_async_t)
-        , shutdown(new uv_async_t) {
+        , add_watch(std::make_unique<uv_async_t>())
+        , remove_watch(std::make_unique<uv_async_t>())
+        , shutdown(std::make_unique<uv_async_t>()) {
 
         // Initialise our UV loop
         uv_loop_init(loop.get());
@@ -235,9 +234,8 @@ namespace module::extension {
 
                 // If this is a new path to watch
                 if (paths.find(dir) == paths.end()) {
-                    auto& p  = paths[path];
-                    p.handle = unique_ptr_uv<uv_fs_event_s>(new uv_fs_event_t);
-                    uv_fs_event_init(loop.get(), p.handle.get());
+                    auto& p        = paths[path];
+                    p.handle       = std::make_unique<uv_fs_event_t>();
                     p.handle->data = this;
                     p.path         = dir;
                     add_queue.push_back(&p);
@@ -293,28 +291,24 @@ namespace module::extension {
     }
 
     FileWatcher::~FileWatcher() {
-        std::cout << "Start of filewatcher destructor" << std::endl;
-        // Remove all the handles to the uv loop will finish
-        for (auto& path : paths) {
+        for (const auto& path : paths) {
             if (path.second.handle) {
-                path.second.handle.reset();
+                uv_fs_event_stop(path.second.handle.get());
+                uv_close(reinterpret_cast<uv_handle_t*>(path.second.handle.get()), [](uv_handle_t* /* handle */) {});
             }
         }
-        std::cout << "After first loop of filewatcher destructor" << std::endl;
-        for (auto& remove : remove_queue) {
+
+        for (const auto& remove : remove_queue) {
             if (remove) {
-                remove.reset();
+                uv_fs_event_stop(remove.get());
+                uv_close(reinterpret_cast<uv_handle_t*>(remove.get()), [](uv_handle_t* /* handle */) {});
             }
         }
-        std::cout << "After second loop of filewatcher destructor" << std::endl;
-        remove_watch.reset();
-        add_watch.reset();
-        shutdown.reset();
-        std::cout << "Before while loop in filewatcher dtor" << std::endl;
+        uv_close(reinterpret_cast<uv_handle_t*>(remove_watch.get()), [](uv_handle_t* /* handle */) {});
+        uv_close(reinterpret_cast<uv_handle_t*>(add_watch.get()), [](uv_handle_t* /* handle */) {});
+        uv_close(reinterpret_cast<uv_handle_t*>(shutdown.get()), [](uv_handle_t* /* handle */) {});
         while (uv_run(loop.get(), UV_RUN_NOWAIT) != 0) {
         }
-        std::cout << "After while loop of FW dtor" << std::endl;
         uv_loop_close(loop.get());
-        std::cout << "At the end of the FW dtor" << std::endl;
     }
 }  // namespace module::extension

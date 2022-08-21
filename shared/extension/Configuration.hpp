@@ -173,7 +173,7 @@ namespace extension {
             std::regex test_re("([a-z0-9]{12})");
             std::smatch test_match;
 
-            if (std::regex_match(hostname, test_match, test_re)){
+            if (std::regex_match(hostname, test_match, test_re)) {
                 return "test";
             }
 

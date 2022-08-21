@@ -22,10 +22,10 @@
 
 namespace module::extension {
 
-    using ::extension::behaviour::commands::DirectorTask;
+    using ::extension::behaviour::commands::BehaviourTask;
     using ::extension::behaviour::commands::ProviderClassification;
 
-    void Director::remove_task(const std::shared_ptr<const DirectorTask>& task) {
+    void Director::remove_task(const std::shared_ptr<const BehaviourTask>& task) {
 
         // Get the group for this task
         auto& group = groups[task->type];
