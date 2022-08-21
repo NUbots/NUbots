@@ -124,7 +124,7 @@ namespace module::motion {
             }
         });
 
-        on<Configuration, MainThread>("QuinticWalk.yaml").then([this](const Configuration& cfg) {
+        on<Configuration>("QuinticWalk.yaml").then([this](const Configuration& cfg) {
             log_level = cfg["log_level"].as<NUClear::LogLevel>();
 
             load_quintic_walk(cfg, normal_config);
@@ -140,11 +140,11 @@ namespace module::motion {
             }
         });
 
-        on<Configuration, MainThread>("goalie/QuinticWalk.yaml").then([this](const Configuration& cfg) {
+        on<Configuration>("goalie/QuinticWalk.yaml").then([this](const Configuration& cfg) {
             load_quintic_walk(cfg, goalie_config);
         });
 
-        on<Trigger<Behaviour::State>, MainThread>().then("Switching walk state", [this](const Behaviour::State& behaviour) {
+        on<Trigger<Behaviour::State>>().then("Switching walk state", [this](const Behaviour::State& behaviour) {
             imu_reaction.enable(false);
 
             if (behaviour == Behaviour::State::GOALIE_WALK) {
@@ -160,7 +160,7 @@ namespace module::motion {
             imu_reaction.enable(current_config.imu_active);
         });
 
-        on<Startup, Trigger<KinematicsModel>, MainThread>().then("Update Kinematics Model", [this](const KinematicsModel& model) {
+        on<Startup, Trigger<KinematicsModel>>().then("Update Kinematics Model", [this](const KinematicsModel& model) {
             kinematicsModel = model;
             first_run       = true;
             current_orders.setZero();
@@ -170,16 +170,16 @@ namespace module::motion {
             walk_engine.reset();
         });
 
-        on<Trigger<ExecuteGetup>, MainThread>().then([this]() { falling = true; });
+        on<Trigger<ExecuteGetup>>().then([this]() { falling = true; });
 
-        on<Trigger<KillGetup>, MainThread>().then([this]() { falling = false; });
+        on<Trigger<KillGetup>>().then([this]() { falling = false; });
 
-        on<Trigger<StopCommand>, MainThread>().then([this](const StopCommand& walkCommand) {
+        on<Trigger<StopCommand>>().then([this](const StopCommand& walkCommand) {
             subsumptionId = walkCommand.subsumption_id;
             current_orders.setZero();
         });
 
-        on<Trigger<WalkCommand>, MainThread>().then([this](const WalkCommand& walkCommand) {
+        on<Trigger<WalkCommand>>().then([this](const WalkCommand& walkCommand) {
             subsumptionId = walkCommand.subsumption_id;
 
             // the engine expects orders in [m] not [m/s]. We have to compute by dividing by step frequency which is
@@ -215,13 +215,13 @@ namespace module::motion {
             current_orders = orders;
         });
 
-        on<Trigger<EnableWalkEngineCommand>, MainThread>().then([this](const EnableWalkEngineCommand& command) {
+        on<Trigger<EnableWalkEngineCommand>>().then([this](const EnableWalkEngineCommand& command) {
             subsumptionId = command.subsumption_id;
             walk_engine.reset();
             update_handle.enable();
         });
 
-        on<Trigger<DisableWalkEngineCommand>, MainThread>().then([this](const DisableWalkEngineCommand& command) {
+        on<Trigger<DisableWalkEngineCommand>>().then([this](const DisableWalkEngineCommand& command) {
             subsumptionId = command.subsumption_id;
             update_handle.disable();
         });
