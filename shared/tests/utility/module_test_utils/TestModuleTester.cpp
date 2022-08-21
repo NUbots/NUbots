@@ -19,7 +19,7 @@
 
 #include <catch.hpp>
 #include <nuclear>
-#include <nuclear>
+
 #include "utility/module_test_utils/ModuleTester.hpp"
 
 
