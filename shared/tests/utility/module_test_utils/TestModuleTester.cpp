@@ -23,4 +23,19 @@
 #include "utility/module_test_utils/ModuleTester.hpp"
 
 
+using utility::module_test::ModuleTester;
+
+TEST_CASE("Testing that tests fail if the timeout finishes", "[shared][utility][module_test_utils][ModuleTester][TimeoutModule][!shouldfail]") {
+
+    class DummyReactor : public NUClear::Reactor {
+    public:
+        explicit DummyReactor(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {};
+    };
+
+    static constexpr int NUM_THREADS = 1;
+
+    ModuleTester<DummyReactor, 1, std::chrono::nanoseconds> tester(NUM_THREADS);
+
+    tester.run();
+}
 
