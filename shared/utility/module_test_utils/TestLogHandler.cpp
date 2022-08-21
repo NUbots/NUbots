@@ -21,7 +21,6 @@
 #include "TestLogHandler.hpp"
 
 #include <catch.hpp>
-#include <iostream>
 #include <memory>
 #include <nuclear>
 #include <sstream>
