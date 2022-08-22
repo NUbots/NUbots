@@ -159,7 +159,8 @@ var annotated_dup =
       ] ],
       [ "network", null, [
         [ "NetworkForwarder", "classmodule_1_1network_1_1NetworkForwarder.html", "classmodule_1_1network_1_1NetworkForwarder" ],
-        [ "NUClearNet", "classmodule_1_1network_1_1NUClearNet.html", "classmodule_1_1network_1_1NUClearNet" ]
+        [ "NUClearNet", "classmodule_1_1network_1_1NUClearNet.html", "classmodule_1_1network_1_1NUClearNet" ],
+        [ "PlotJuggler", "classmodule_1_1network_1_1PlotJuggler.html", "classmodule_1_1network_1_1PlotJuggler" ]
       ] ],
       [ "output", null, [
         [ "compressor", null, [

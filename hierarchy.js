@@ -244,6 +244,7 @@ var hierarchy =
       [ "module::motion::ScriptEngine", "classmodule_1_1motion_1_1ScriptEngine.html", null ],
       [ "module::network::NetworkForwarder", "classmodule_1_1network_1_1NetworkForwarder.html", null ],
       [ "module::network::NUClearNet", "classmodule_1_1network_1_1NUClearNet.html", null ],
+      [ "module::network::PlotJuggler", "classmodule_1_1network_1_1PlotJuggler.html", null ],
       [ "module::output::eSpeak", "classmodule_1_1output_1_1eSpeak.html", null ],
       [ "module::output::ImageCompressor", "classmodule_1_1output_1_1ImageCompressor.html", null ],
       [ "module::output::Overview", "classmodule_1_1output_1_1Overview.html", null ],

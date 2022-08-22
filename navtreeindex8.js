@@ -1,5 +1,14 @@
 var NAVTREEINDEX8 =
 {
+"structmodule_1_1extension_1_1FileWatcher_1_1ReactionMap.html":[1,0,2,1,2,2],
+"structmodule_1_1extension_1_1FileWatcher_1_1ReactionMap.html#aa244c5c3a7c1607ec94feb747c50ac36":[1,0,2,1,2,2,1],
+"structmodule_1_1extension_1_1FileWatcher_1_1ReactionMap.html#ac0ad77dce953ee6748b11ab83e4b272b":[1,0,2,1,2,2,0],
+"structmodule_1_1extension_1_1StateUpdate.html":[1,0,2,1,3],
+"structmodule_1_1extension_1_1StateUpdate.html#a14c8851da07f29c7f18592f3e5429b84":[1,0,2,1,3,2],
+"structmodule_1_1extension_1_1StateUpdate.html#a5ae3bfce027fe7031776783761f8780e":[1,0,2,1,3,3],
+"structmodule_1_1extension_1_1StateUpdate.html#a6f87c3f0352902b5b9c382675009e717":[1,0,2,1,3,1],
+"structmodule_1_1extension_1_1StateUpdate.html#ac6b7348dfcd3f0df22f963259ccc2939":[1,0,2,1,3,0],
+"structmodule_1_1extension_1_1provider_1_1Provider.html":[1,0,2,1,0,0],
 "structmodule_1_1extension_1_1provider_1_1Provider.html#a528e562ecdaca99d14d9d9cbfa4ffc9c":[1,0,2,1,0,0,3],
 "structmodule_1_1extension_1_1provider_1_1Provider.html#a8bf95b56824b6519fec09f1e0db8f751":[1,0,2,1,0,0,1],
 "structmodule_1_1extension_1_1provider_1_1Provider.html#a95d4bc1144be2abd6dc93224821f4e66":[1,0,2,1,0,0,7],
@@ -240,14 +249,5 @@ var NAVTREEINDEX8 =
 "structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#a97f61d5fdce1438315202323ba7dd488":[1,0,2,2,1,0,10],
 "structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#aaaa8118f4a7a649c76a64133380ad3d4":[1,0,2,2,1,0,3],
 "structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#abe059f09b4ab1ac82d3acf4b4579a284":[1,0,2,2,1,0,14],
-"structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#abe68d8d10a444f8092af635ddb7e928c":[1,0,2,2,1,0,12],
-"structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#aee25e8f1d8bc0abf2ddc1a0036ee71ee":[1,0,2,2,1,0,7],
-"structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#af4cae3d0c443f0cf19c781a35a6569d8":[1,0,2,2,1,0,4],
-"structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html":[1,0,2,2,1,1],
-"structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html#a13341653821760b5b7768a7637f58e1d":[1,0,2,2,1,1,2],
-"structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html#a451f21f9e2be26065233df8a7ba2e2d1":[1,0,2,2,1,1,3],
-"structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html#a670c53eb15981282b63b1af58536b006":[1,0,2,2,1,1,1],
-"structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html#aa03b772c50cc1b707c8ff39a7021d243":[1,0,2,2,1,1,4],
-"structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html#ab2ad5ebed46cc3f8d916e08b1c328581":[1,0,2,2,1,1,0],
-"structmodule_1_1input_1_1gamecontroller_1_1Robot.html":[1,0,2,2,1,2]
+"structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#abe68d8d10a444f8092af635ddb7e928c":[1,0,2,2,1,0,12]
 };

@@ -1,5 +1,14 @@
 var NAVTREEINDEX9 =
 {
+"structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#aee25e8f1d8bc0abf2ddc1a0036ee71ee":[1,0,2,2,1,0,7],
+"structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#af4cae3d0c443f0cf19c781a35a6569d8":[1,0,2,2,1,0,4],
+"structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html":[1,0,2,2,1,1],
+"structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html#a13341653821760b5b7768a7637f58e1d":[1,0,2,2,1,1,2],
+"structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html#a451f21f9e2be26065233df8a7ba2e2d1":[1,0,2,2,1,1,3],
+"structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html#a670c53eb15981282b63b1af58536b006":[1,0,2,2,1,1,1],
+"structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html#aa03b772c50cc1b707c8ff39a7021d243":[1,0,2,2,1,1,4],
+"structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html#ab2ad5ebed46cc3f8d916e08b1c328581":[1,0,2,2,1,1,0],
+"structmodule_1_1input_1_1gamecontroller_1_1Robot.html":[1,0,2,2,1,2],
 "structmodule_1_1input_1_1gamecontroller_1_1Robot.html#a4b78874185cc755f80ac661b3620bfb2":[1,0,2,2,1,2,2],
 "structmodule_1_1input_1_1gamecontroller_1_1Robot.html#a5af89d7f8025ae236d65a8e93f7754aa":[1,0,2,2,1,2,1],
 "structmodule_1_1input_1_1gamecontroller_1_1Robot.html#a5c6a1a3cb7800d2f719adf73c42b7b31":[1,0,2,2,1,2,3],
@@ -240,14 +249,5 @@ var NAVTREEINDEX9 =
 "structmodule_1_1platform_1_1cm740_1_1Convert.html#ac17acb28107ec3a62a7adfd5eb6d9786":[1,0,2,7,0,0,23],
 "structmodule_1_1platform_1_1cm740_1_1Convert.html#ac1b2a67e719242274788e776637b72f0":[1,0,2,7,0,0,24],
 "structmodule_1_1platform_1_1cm740_1_1Convert.html#ac83f52396e56e2ed4f1df5bad580db08":[1,0,2,7,0,0,19],
-"structmodule_1_1platform_1_1cm740_1_1Convert.html#acd5a22e3ad67d719329a4e729b526602":[1,0,2,7,0,0,7],
-"structmodule_1_1platform_1_1cm740_1_1Convert.html#ade0a6d26a0963f523674a297055c95e1":[1,0,2,7,0,0,17],
-"structmodule_1_1platform_1_1cm740_1_1Convert.html#ae151e7a824da9b1948d5cf9b389168b4":[1,0,2,7,0,0,15],
-"structmodule_1_1platform_1_1cm740_1_1Convert.html#ae18c2554fbe5ac3e2f7bb4ad1c50752d":[1,0,2,7,0,0,18],
-"structmodule_1_1platform_1_1cm740_1_1Convert.html#af0ef1347a95f06fb7289f3d656a3354c":[1,0,2,7,0,0,20],
-"structmodule_1_1platform_1_1cm740_1_1Convert.html#af432e5ec63583a8a7307be8b59f44b01":[1,0,2,7,0,0,0],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1CM740State.html":[1,0,2,7,0,1,0],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1CM740State.html#a381d6e4c5d95c508d0dbf97406d3c3ae":[1,0,2,7,0,1,0,2],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1CM740State.html#a4e8404c3fb59b11163a60b1f1a81ac89":[1,0,2,7,0,1,0,0],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1CM740State.html#aba7cbd2879413de85c60bcf62b7729b1":[1,0,2,7,0,1,0,1]
+"structmodule_1_1platform_1_1cm740_1_1Convert.html#acd5a22e3ad67d719329a4e729b526602":[1,0,2,7,0,0,7]
 };
