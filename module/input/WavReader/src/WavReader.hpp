@@ -5,16 +5,16 @@
 
 namespace module::input {
 
-class WavReader : public NUClear::Reactor {
-private:
-    /// The configuration variables for this reactor
-    struct {
-    } config;
+    class WavReader : public NUClear::Reactor {
+    private:
+        /// The configuration variables for this reactor
+        struct {
+        } config;
 
-public:
-    /// @brief Called by the powerplant to build and setup the WavReader reactor.
-    explicit WavReader(std::unique_ptr<NUClear::Environment> environment);
-};
+    public:
+        /// @brief Called by the powerplant to build and setup the WavReader reactor.
+        explicit WavReader(std::unique_ptr<NUClear::Environment> environment);
+    };
 
 }  // namespace module::input
 

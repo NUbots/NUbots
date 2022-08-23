@@ -1,7 +1,17 @@
 #include "WavReader.hpp"
 
-#include "extension/Configuration.hpp"
+#include <cstdint>
+#include <fstream>
+#include <iostream>
+#include <string>
 
+using std::cin;
+using std::cout;
+using std::endl;
+using std::fstream;
+using std::string;
+
+#include "extension/Configuration.hpp"
 namespace module::input {
 
     using extension::Configuration;
