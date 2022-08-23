@@ -27,5 +27,6 @@
     },
     "editor.codeActionsOnSave": {
         "source.organizeImports": true
-    }
+    },
+    "cmake.configureOnOpen": true
 }
