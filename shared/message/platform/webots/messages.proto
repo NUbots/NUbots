@@ -89,9 +89,9 @@ message VisionGroundTruth {
     /// Indicates if this message exists
     bool exists = 1;
     /// Vector from the world to the ball in world space.
-    Vector3 rBWw = 5;
+    fvec3 rBWw = 2;
     /// Vector from the world to the field in world space.
-    Vector3 rFWw = 6;
+    fvec3 rFWw = 3;
 }
 
 /// NUbots specific data sent from our own controllers rather than the official RoboCup Webots controller
