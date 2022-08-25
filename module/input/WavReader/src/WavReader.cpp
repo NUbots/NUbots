@@ -18,7 +18,9 @@ namespace module::input {
         on<Configuration>("WavReader.yaml").then([this](const Configuration& cfg) {
             // Use configuration here from file WavReader.yaml
             this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
-            this->wav_path = cfg["wav_path"].as<std::string>>();
+            this->config.wav_path = cfg["wav_path"].as<std::string>>(); //config is the name of the struct
+            std::cout << config.wav_path << std::endl;
+            log<NUClear::DEBUG>(config.wav_path);
         });
     }
 
