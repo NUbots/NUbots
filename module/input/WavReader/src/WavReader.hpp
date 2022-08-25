@@ -2,13 +2,14 @@
 #define MODULE_INPUT_WAVREADER_HPP
 
 #include <nuclear>
-
+#include <string>
 namespace module::input {
 
     class WavReader : public NUClear::Reactor {
     private:
         /// The configuration variables for this reactor
         struct {
+            std::string wav_path;
         } config;
 
     public:
