@@ -1,5 +1,6 @@
 #include "NSGA2Optimiser.hpp"
 
+#include "tasks/MultiPathOptimiser.hpp"
 #include "tasks/RotationOptimiser.hpp"
 #include "tasks/StandOptimiser.hpp"
 #include "tasks/StrafeOptimiser.hpp"
@@ -69,6 +70,10 @@ namespace module {
                     else if (taskType == "stand") {
                         log<NUClear::INFO>("Task type is Stand");
                         task = std::make_unique<StandOptimiser>();
+                    }
+                    else if (taskType == "multipath") {
+                        log<NUClear::INFO>("Task type is Multipath");
+                        task = std::make_unique<MultiPathOptimiser>();
                     }
                     else {
                         log<NUClear::ERROR>("Unrecognised optimiser task", taskType);

@@ -4,6 +4,7 @@
 #include <fmt/ostream.h>
 #include <yaml-cpp/yaml.h>
 
+#include "tasks/MultiPathEvaluator.hpp"
 #include "tasks/RotationEvaluator.hpp"
 #include "tasks/StandEvaluator.hpp"
 #include "tasks/StrafeEvaluator.hpp"
@@ -239,9 +240,11 @@ namespace module {
                 else if (lastEvalRequestMsg.task == "rotation") {
                     task = std::make_unique<RotationEvaluator>();
                 }
-                // else if (lastEvalRequestMsg.task == "vector") {
-                //     task = std::make_unique<VectorEvaluator>();
-                // }
+                else if (lastEvalRequestMsg.task == "multipath") {
+                    task = std::make_unique<MultiPathEvaluator>();
+                    // task = std::make_unique<WalkEvaluator>();
+                    // task = std::make_unique<StrafeEvaluator>();
+                }
                 else if (lastEvalRequestMsg.task == "stand") {
                     task = std::make_unique<StandEvaluator>();
                 }
@@ -273,6 +276,11 @@ namespace module {
                     if (lastEvalRequestMsg.task == "walk" || lastEvalRequestMsg.task == "stand"
                         || lastEvalRequestMsg.task == "strafe" || lastEvalRequestMsg.task == "rotation") {
                         task->evaluatingState(subsumptionId, this);
+                    }
+                    else if (lastEvalRequestMsg.task == "multipath") {
+                        // task = std::make_unique<WalkEvaluator>();
+                        task->evaluatingState(subsumptionId, this);
+                        // log<NUClear::ERROR>("Multipath event:", event);
                     }
                     else {
                         log<NUClear::ERROR>("Unhandled task type:", lastEvalRequestMsg.task);
