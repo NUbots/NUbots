@@ -9,7 +9,7 @@ Have you
 - [ ] Updated NUbook if necessary (add link to NUbook PR here)
 - [ ] Added/updated tests for your changes, including regression tests for bug fixes
 - [ ] Updated relevant module READMEs
-- [ ] Added/modified [documentation directives](https://nubook.nubots.net/guides/general/documentation#extra-formatting) in relevant code
+- [ ] Added/modified [documentation directives](https://nubook.nubots.net/guides/general/code-conventions#documentation) in relevant code
 - [ ] Added a descriptive title and relevant labels to the PR
 
 ### Optional Headings (delete this heading and the ones you don't use)
