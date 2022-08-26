@@ -49,7 +49,6 @@ namespace module::input {
         : Reactor(std::move(environment)), config{} {
 
         on<Configuration>("FakeCamera.yaml").then([this](const Configuration& cfg) {
-
             // clang-format off
             auto lvl = cfg["log_level"].as<std::string>();
             if (lvl == "TRACE") { this->log_level = NUClear::TRACE; }
