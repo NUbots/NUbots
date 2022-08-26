@@ -36,7 +36,10 @@ namespace module::input {
             }
         });
 
-        std::vector<uint8_t> readFile(const std::filesystem::path& path);
+        /// @brief Read binary data from a file
+        /// @param path Path to the file to read
+        /// @return Vector of binary data
+        std::vector<uint8_t> read_file(const std::filesystem::path& path);
 
     public:
         /// @brief Called by the powerplant to build and setup the FakeCamera reactor.

@@ -23,7 +23,7 @@ namespace module::input {
 
     using utility::support::Expression;
 
-    std::vector<uint8_t> FakeCamera::readFile(const std::filesystem::path& path) {
+    std::vector<uint8_t> FakeCamera::read_file(const std::filesystem::path& path) {
         std::ifstream data(path, std::ios::binary);
 
         // Stop eating new lines in binary mode

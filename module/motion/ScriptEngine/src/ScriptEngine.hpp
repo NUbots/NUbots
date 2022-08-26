@@ -39,7 +39,11 @@ namespace module::motion {
     public:
         explicit ScriptEngine(std::unique_ptr<NUClear::Environment> environment);
         static constexpr const char* CONFIGURATION_PATH = "";
-        std::pair<std::string, std::string> pathSplit(const std::string& input);
+
+        /// @brief Split a path into directory path and filename with extension
+        /// @param input String representing the path to split
+        /// @return The directory path and filename with extension of the input string
+        std::pair<std::string, std::string> path_split(const std::string& input);
     };
 }  // namespace module::motion
 

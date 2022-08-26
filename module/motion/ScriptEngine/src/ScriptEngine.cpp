@@ -90,7 +90,7 @@ namespace module::motion {
         });
     }
 
-    std::pair<std::string, std::string> ScriptEngine::pathSplit(const std::string& input) {
+    std::pair<std::string, std::string> ScriptEngine::path_split(const std::string& input) {
 
         size_t lastSlash = input.rfind('/');
 
@@ -104,8 +104,8 @@ namespace module::motion {
             if (input.size() == 1) {
                 return {"/", "/"};
             }
-            // Otherwise remove the slash and call recursivly
-            return pathSplit(input.substr(0, input.size() - 1));
+            // Otherwise remove the slash and call recursively
+            return path_split(input.substr(0, input.size() - 1));
         }
         // Else, the slash was not the last character
         return {input.substr(0, lastSlash), input.substr(lastSlash + 1, input.size())};
