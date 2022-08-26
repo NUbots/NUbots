@@ -22,10 +22,11 @@ namespace module::vision {
             engines.clear();
 
             for (const auto& camera : config["cameras"].config) {
-                auto name        = camera.first.as<std::string>();
-                auto engine_type = camera.second["engine"].as<std::string>();
-                int concurrent   = camera.second["concurrent"].as<int>();
-                auto network     = camera.second["network"].as<std::string>();
+                auto name            = camera.first.as<std::string>();
+                auto engine_type     = camera.second["engine"].as<std::string>();
+                int concurrent       = camera.second["concurrent"].as<int>();
+                auto network         = camera.second["network"].as<std::string>();
+                auto cache_directory = camera.second["cache_directory"].as<std::string>();
 
                 auto min_height   = camera.second["classifier"]["height"][0].as<double>();
                 auto max_height   = camera.second["classifier"]["height"][1].as<double>();
@@ -35,7 +36,13 @@ namespace module::vision {
                 // Create a network runner for each concurrent system
                 auto& runners = engines[name];
                 for (int i = 0; i < concurrent; ++i) {
-                    runners.emplace_back(engine_type, min_height, max_height, max_distance, tolerance, network);
+                    runners.emplace_back(engine_type,
+                                         min_height,
+                                         max_height,
+                                         max_distance,
+                                         tolerance,
+                                         network,
+                                         cache_directory);
                 }
             }
         });

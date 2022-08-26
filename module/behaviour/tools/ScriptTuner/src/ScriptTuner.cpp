@@ -353,7 +353,7 @@ namespace module::behaviour::tools {
     void ScriptTuner::toggleLockMotor() {
 
         // This finds if we have this particular motor stored in the frame
-        auto targetFinder = [=](const Script::Frame::Target& target) {
+        auto targetFinder = [=, this](const Script::Frame::Target& target) {
             return (static_cast<uint32_t>(target.id) + 2) % 20 == selection;
         };
 
@@ -475,7 +475,7 @@ namespace module::behaviour::tools {
                 double num = stod(result);
 
                 // This finds if we have this particular motor stored in the frame
-                auto targetFinder = [=](const Script::Frame::Target& target) {
+                auto targetFinder = [=, this](const Script::Frame::Target& target) {
                     return (static_cast<uint32_t>(target.id) + 2) % 20 == selection;
                 };
 

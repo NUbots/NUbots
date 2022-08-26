@@ -7,7 +7,6 @@
 
 #include "message/behaviour/Behaviour.hpp"
 #include "message/behaviour/KickPlan.hpp"
-#include "message/behaviour/WalkPath.hpp"
 #include "message/input/GameState.hpp"
 #include "message/input/Image.hpp"
 #include "message/input/Sensors.hpp"

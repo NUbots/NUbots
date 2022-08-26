@@ -95,10 +95,10 @@ namespace extension {
         Script(const std::string& fileName, const std::string& hostname, const std::string& platform)
             : fileName(fileName), hostname(hostname), platform(platform), config() {
 
-            // Per robot scripts:    Scripts that are specific to a certain robot (e.g. darwin1).
+            // Per robot scripts:    Scripts that are specific to a certain robot (e.g. nugus1).
             //                       These are to account for minor hardware variations in a robot and, as such, take
             //                       precedence over per platform scripts.
-            // Per platform scripts: Scripts that are specific to a certain platform (e.g. darwin, igus, etc).
+            // Per platform scripts: Scripts that are specific to a certain platform (e.g. nugus).
             //                       These are the default scripts, it is an error for this version of the script to not
             //                       exist.
 

@@ -97,8 +97,8 @@ export class VisionNetwork {
       timestamp: toSeconds(timestamp),
       Hcw: Matrix4.from(Hcw),
       cone: {
-        axis: Vector3.from(ball.cone?.axis),
-        radius: ball.cone?.radius!,
+        axis: Vector3.from(ball.uBCc),
+        radius: ball.radius!,
       },
       distance: Math.abs(ball.measurements?.[0].srBCc?.x!),
       colour: Vector4.from(ball.colour),
