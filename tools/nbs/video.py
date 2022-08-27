@@ -50,7 +50,7 @@ def packetise_stream(decoder):
 
     for packet in decoder:
         # Check for compressed images
-        if packet.type.name in ("message.output.CompressedImage", "message.input.Image"):
+        if packet.type in ("message.output.CompressedImage", "message.input.Image"):
             # Get some useful info into a pickleable format
             yield {
                 "camera_name": packet.msg.name,
