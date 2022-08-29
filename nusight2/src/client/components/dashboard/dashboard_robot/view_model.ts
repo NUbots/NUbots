@@ -15,6 +15,9 @@ import { Group } from '../../../render2d/object/group'
 import { Shape } from '../../../render2d/object/shape'
 
 import { DashboardRobotModel } from './model'
+import { PolygonGeometry } from '../../../render2d/geometry/polygon_geometry'
+import drawDistribution from './helpers'
+import { Geometry } from '../../../render2d/object/geometry'
 
 export class DashboardRobotViewModel {
   constructor(private model: DashboardRobotModel) {}
@@ -33,7 +36,14 @@ export class DashboardRobotViewModel {
   @computed
   get fieldSpaceGroup() {
     return Group.of({
-      children: [this.ballSight, this.kickTarget, this.ball],
+      children: [
+        this.ballSight,
+        this.kickTarget,
+        this.ball,
+        this.ballStd1,
+        this.ballStd2,
+        this.ballStd3,
+      ].filter(child => child !== undefined) as (Group | Shape<Geometry>)[],
     })
   }
 
@@ -76,6 +86,39 @@ export class DashboardRobotViewModel {
         stroke: { width: 0.025, color: '#000000' },
       }),
     )
+  }
+
+  @computed
+  private get ballStd1() {
+    if (this.model.drawOptions.drawStd1)
+      return Shape.of(
+        PolygonGeometry.of(
+          drawDistribution(undefined, this.model.ballCovariance, this.model.ballPosition, 1),
+        ),
+        BasicAppearance.of({ fill: { color: '#ff0000', alpha: 0.5 } }),
+      )
+  }
+
+  @computed
+  private get ballStd2() {
+    if (this.model.drawOptions.drawStd2)
+      return Shape.of(
+        PolygonGeometry.of(
+          drawDistribution(undefined, this.model.ballCovariance, this.model.ballPosition, 2),
+        ),
+        BasicAppearance.of({ fill: { color: '#c98308', alpha: 0.3 } }),
+      )
+  }
+
+  @computed
+  private get ballStd3() {
+    if (this.model.drawOptions.drawStd3)
+      return Shape.of(
+        PolygonGeometry.of(
+          drawDistribution(undefined, this.model.ballCovariance, this.model.ballPosition, 3),
+        ),
+        BasicAppearance.of({ fill: { color: '#00ff04', alpha: 0.1 } }),
+      )
   }
 
   @computed

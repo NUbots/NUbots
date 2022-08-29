@@ -3,6 +3,7 @@ import React from 'react'
 import { Component } from 'react'
 
 import { Renderer } from '../../../render2d/renderer'
+import { SwitchesMenu } from '../../switches_menu/view'
 
 import { FieldModel } from './model'
 import style from './style.css'
@@ -11,6 +12,9 @@ import { FieldViewModel } from './view_model'
 export type FieldProps = {
   model: FieldModel
 }
+
+// **** I need to figure out how I can update the state of the field robot and transfer these changes from one component into another
+// **** I need to wrap mobx in a use context and then I can work with it in the display - https://www.youtube.com/watch?v=oQiMXRsO4o4
 
 @observer
 export class Field extends Component<FieldProps> {
@@ -26,6 +30,9 @@ export class Field extends Component<FieldProps> {
           camera={viewModel.camera}
           aspectRatio={viewModel.aspectRatio}
         />
+        <div className={style.fieldMenu}>
+          <SwitchesMenu dropdownMenuPosition="right" options={viewModel.drawOptions} />
+        </div>
       </div>
     )
   }
