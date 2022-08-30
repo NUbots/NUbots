@@ -6,10 +6,7 @@ extern "C" {
 
 #include <cmath>
 #include <fmt/format.h>
-#include <fstream>
-#include <iostream>
 
-//#include "../tinyxml2/tinyxml2.hpp"
 #include "aravis_wrap.hpp"
 #include "description_to_fourcc.hpp"
 #include "settings.hpp"
@@ -42,6 +39,7 @@ namespace module::input {
 
         on<Configuration>("Cameras").then("Configuration", [this](const Configuration& config) {
             auto serial_number = config["serial_number"].as<std::string>();
+
             // Find the camera if it has already been loaded
             auto it = cameras.find(serial_number);
 
@@ -203,13 +201,6 @@ namespace module::input {
 
             // Apply the region to the camera
             arv::camera_set_region(cam.get(), offset_x, offset_y, width, height);
-
-            //################################################
-            // NOTE: Temp stuff to print out camera settings
-            //################################################
-            size_t size;
-            const auto& xml = arv_device_get_genicam_xml(device, &size);
-            NUClear::log<NUClear::ERROR>(fmt::format(xml));
 
             // Go through our settings and apply them to the camera
             for (const auto& cfg : config["settings"].config) {
