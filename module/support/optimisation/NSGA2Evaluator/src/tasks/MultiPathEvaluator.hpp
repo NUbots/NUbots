@@ -39,7 +39,7 @@ namespace module {
                 std::vector<double> constraintsNotViolated();
                 bool checkForFall(const RawSensors& sensors);
                 void updateMaxFieldPlaneSway(const RawSensors& sensors);
-                bool checkOffCourse();
+                void processRotation(const RawSensors& sensors, NSGA2Evaluator* evaluator);
 
             private:
                 /// @brief Robot state for this evaluation, used during fitness and constraint calculation
@@ -74,6 +74,8 @@ namespace module {
 
                 std::array<Eigen::Vector2d, 6> pathScores;
                 std::array<double, 11> params;
+
+                size_t subsumptionID = 0;
             };
 
         }  // namespace optimisation

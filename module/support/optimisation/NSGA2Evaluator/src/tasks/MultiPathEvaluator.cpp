@@ -32,20 +32,31 @@ namespace module {
 
             void MultiPathEvaluator::processRawSensorMsg(const RawSensors& sensors, NSGA2Evaluator* evaluator) {
                 updateMaxFieldPlaneSway(sensors);
+                // NUClear::log<NUClear::DEBUG>("Sim Time:", evaluator->simTime);
+
+                if (pathNo == ROTCCW || pathNo == ROTCW) {
+                    // processRotation(sensors, evaluator);
+                }
+
                 if (checkForFall(sensors)) {
                     evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TerminateEarly));
                 }
-                if (pathNo == ROTCCW || pathNo == ROTCW) {
-                    double rotTime = evaluator->simTime;
-                    omega          = sensors.gyroscope.z();
-                    deltaT         = rotTime - oldTime;
-                    oldTime        = rotTime;
-                    theta += omega * deltaT / 1000;
-                }
 
-                walk_command_velocity.x() = walk_command_velocity_X;
-                walk_command_velocity.y() = 0.0;
-                walk_command_rotation     = 0.0;
+                if ((int) evaluator->simTime % 20000 == 0) {
+                    //&& evaluator->simTime < 21.0) {  // == 0 && evaluator->simTime > 1.0) {
+                    walk_command_velocity.x() = 0.0;
+                    walk_command_velocity.y() = walk_command_velocity_Y;
+                    walk_command_rotation     = 0.0;
+
+                    NUClear::log<NUClear::DEBUG>(fmt::format("Trialling with walk command: ({} {}) {}",
+                                                             walk_command_velocity.x(),
+                                                             walk_command_velocity.y(),
+                                                             walk_command_rotation));
+
+                    evaluator->emit(std::make_unique<WalkCommand>(
+                        subsumptionID,
+                        Eigen::Vector3d(walk_command_velocity.x(), walk_command_velocity.y(), walk_command_rotation)));
+                }
             }
 
             void MultiPathEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position,
@@ -62,6 +73,14 @@ namespace module {
                 robotPosition.z() = position.value.Z;
             }
 
+            void MultiPathEvaluator::processRotation(const RawSensors& sensors, NSGA2Evaluator* evaluator) {
+                double rotTime = evaluator->simTime;
+                omega          = sensors.gyroscope.z();
+                deltaT         = rotTime - oldTime;
+                oldTime        = rotTime;
+                theta += omega * deltaT / 1000;
+            }
+
             void MultiPathEvaluator::setUpTrial(const NSGA2EvaluationRequest& currentRequest) {
                 // Set our generation and individual identifiers from the request
 
@@ -69,7 +88,7 @@ namespace module {
 
                 // Set our walk command
                 walk_command_velocity_X = currentRequest.parameters.real_params[11];
-                walk_command_velocity_Y = 0.0;  // 0.0;
+                walk_command_velocity_Y = currentRequest.parameters.real_params[11];  // 0.0;
                 walk_command_rotation   = 0.0;  // currentRequest.parameters.real_params[11];  // -0.785;  // 0.0;
 
                 // Read the QuinticWalk config and overwrite the config parameters with the current individual's
@@ -132,6 +151,12 @@ namespace module {
             }
 
             void MultiPathEvaluator::evaluatingState(size_t subsumptionId, NSGA2Evaluator* evaluator) {
+                walk_command_velocity.x() = walk_command_velocity_X;
+                walk_command_velocity.y() = 0.0;
+                walk_command_rotation     = 0.0;
+                subsumptionID             = subsumptionId;
+                NUClear::log<NUClear::DEBUG>("SubsumptionID =", subsumptionID);
+
                 NUClear::log<NUClear::DEBUG>(fmt::format("Trialling with walk command: ({} {}) {}",
                                                          walk_command_velocity.x(),
                                                          walk_command_velocity.y(),
