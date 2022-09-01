@@ -365,4 +365,4 @@ RUN install -d -m 0755 /home/nubots/NUbots && install -d -m 0777 /home/nubots/bu
 # Configure the ccache directory
 ENV CCACHE_DIR /home/nubots/build/ccache
 
-WORKDIR /home/fourtel/Horus
+WORKDIR /home/nubots/NUbots
