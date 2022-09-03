@@ -140,6 +140,13 @@ namespace utility::math::angle {
         return alpha + acos_clamped(c_);
     }
 
+
+    /**
+     * @brief Calculates roll, pitch and yaw from a rotation matrix
+     * @details See equations at http://nghiaho.com/?page_id=846.
+     * @param rotation The rotation to calculate roll, pitch and yaw from.
+     * @return an Eigen vector with three values in the order of roll, pitch and yaw
+     */
     template <typename Scalar>
     inline Eigen::Matrix<Scalar, 3, 1> anglesFromRotation(Eigen::Matrix<Scalar, 3, 3> rotation) {
         Scalar rot_roll  = normalizeAngle(std::atan2(rotation.coeff(2, 1), rotation.coeff(2, 2)));
