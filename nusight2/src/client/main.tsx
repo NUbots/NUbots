@@ -1,6 +1,6 @@
 import { configure } from 'mobx'
 import React from 'react'
-import ReactDOM from 'react-dom'
+import { createRoot } from 'react-dom/client'
 
 import { AppController } from './components/app/controller'
 import { AppModel } from './components/app/model'
@@ -33,4 +33,4 @@ installVision({ nav, appModel, nusightNetwork, Menu: menu })
 installVisualMesh({ nav, appModel, nusightNetwork, Menu: menu })
 
 configure({ enforceActions: 'observed' })
-ReactDOM.render(<AppView nav={nav} />, document.getElementById('root'))
+createRoot(document.getElementById('root')!).render(<AppView nav={nav} />)

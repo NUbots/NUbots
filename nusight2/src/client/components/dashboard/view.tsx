@@ -1,4 +1,5 @@
 import { observer } from 'mobx-react'
+import { PropsWithChildren } from 'react'
 import React from 'react'
 import { Component } from 'react'
 import { ComponentType } from 'react'
@@ -12,8 +13,8 @@ import style from './style.css'
 
 export type DashboardProps = {
   controller: DashboardController
-  Field: ComponentType<{}>
-  menu: ComponentType<{}>
+  Field: ComponentType
+  menu: ComponentType<PropsWithChildren>
   model: DashboardModel
   network: DashboardNetwork
 }
