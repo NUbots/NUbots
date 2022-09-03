@@ -29,7 +29,6 @@ export function installDashboard({
   }
   nav.addRoute({
     path: '/',
-    exact: true,
     Icon,
     label: 'Dashboard',
     Content: () => {

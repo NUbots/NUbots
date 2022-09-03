@@ -3,6 +3,7 @@ import { computed } from 'mobx'
 import { disposeOnUnmount } from 'mobx-react'
 import { observer } from 'mobx-react'
 import { now } from 'mobx-utils'
+import { PropsWithChildren } from 'react'
 import React from 'react'
 import { ComponentType } from 'react'
 
@@ -112,7 +113,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
 }
 
 interface LocalisationMenuBarProps {
-  menu: ComponentType<{}>
+  menu: ComponentType<PropsWithChildren>
 
   onHawkEyeClick(): void
 }

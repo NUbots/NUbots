@@ -1,4 +1,5 @@
 import { observer } from 'mobx-react'
+import { PropsWithChildren } from 'react'
 import React from 'react'
 import { Component } from 'react'
 import { ComponentType } from 'react'
@@ -16,7 +17,7 @@ import { TreeLabel } from './tree_label/view'
 
 @observer
 export class ChartView extends Component<{
-  Menu: ComponentType
+  Menu: ComponentType<PropsWithChildren>
   model: ChartModel
   network: ChartNetwork
   controller: ChartController
@@ -29,7 +30,7 @@ export class ChartView extends Component<{
     LineChart,
   }: {
     model: ChartModel
-    menu: ComponentType
+    menu: ComponentType<PropsWithChildren>
     nusightNetwork: NUsightNetwork
     LineChart: ComponentType<LineChartProps>
   }): ComponentType {

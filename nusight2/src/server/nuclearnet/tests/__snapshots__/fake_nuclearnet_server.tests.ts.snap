@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FakeNUClearNetServer #hashType matches previous snapshots 1`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     225,
     233,
     240,
@@ -17,8 +17,8 @@ Object {
 `;
 
 exports[`FakeNUClearNetServer #hashType matches previous snapshots 2`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     188,
     214,
     134,
@@ -33,8 +33,8 @@ Object {
 `;
 
 exports[`FakeNUClearNetServer #hashType matches previous snapshots 3`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     11,
     128,
     31,
@@ -49,8 +49,8 @@ Object {
 `;
 
 exports[`FakeNUClearNetServer #hashType matches previous snapshots 4`] = `
-Object {
-  "data": Array [
+{
+  "data": [
     89,
     255,
     223,

@@ -1,5 +1,6 @@
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
+import { PropsWithChildren } from 'react'
 import React from 'react'
 import { RobotModel } from '../robot/model'
 import { RobotSelectorSingle } from '../robot_selector_single/view'
@@ -12,7 +13,7 @@ import styles from './styles.css'
 export class OdometryView extends React.Component<{
   controller: OdometryController
   model: OdometryModel
-  Menu: React.ComponentType
+  Menu: React.ComponentType<PropsWithChildren>
 }> {
   render() {
     const {
