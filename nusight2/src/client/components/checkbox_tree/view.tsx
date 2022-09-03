@@ -11,7 +11,7 @@ export type CheckboxTreeProps = {
   onExpand?(node: TreeNodeModel): void
 }
 
-export const CheckboxTree = React.memo((props: CheckboxTreeProps) => {
+export const CheckboxTree = (props: CheckboxTreeProps) => {
   return (
     <div>
       {props.model.nodes.map((node, i) => (
@@ -26,4 +26,4 @@ export const CheckboxTree = React.memo((props: CheckboxTreeProps) => {
       ))}
     </div>
   )
-})
+}

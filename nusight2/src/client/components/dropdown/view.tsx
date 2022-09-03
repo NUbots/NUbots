@@ -6,7 +6,7 @@ import { MouseEvent } from 'react'
 import style from './style.css'
 
 export interface DropdownProps {
-  children?: ReactNode | undefined
+  children?: ReactNode
   className?: string
   dropdownToggle: ReactNode
   isOpen: boolean
