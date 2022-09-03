@@ -53,7 +53,7 @@ namespace module::input {
     using utility::nusight::graph;
     using utility::support::Expression;
 
-    using utility::math::angle::normalizeAngle;
+    using utility::math::angle::anglesFromRotation;
 
     std::string makeErrorString(const std::string& src, uint errorCode) {
         std::stringstream s;
@@ -791,28 +791,31 @@ namespace module::input {
                                 Eigen::Affine3d true_Htw(input.odometry_ground_truth.Htw);
 
                                 // Determine translational distance error
-                                Eigen::Vector3d rWTt    = Hwt.inverse().translation();
-                                Eigen::Vector3d t_error = true_Htw.translation() - rWTt;
+                                Eigen::Vector3d rWTt      = Hwt.inverse().translation();
+                                Eigen::Vector3d true_rWTt = true_Htw.translation();
+                                Eigen::Vector3d t_error   = true_Htw.translation() - rWTt;
 
-                                // Determine yaw, pitch and roll error
-                                Eigen::Matrix3d rotational_error = true_Htw.linear() * Hwt.linear();
-                                Eigen::Vector3d r_error          = rotational_error.eulerAngles(2, 1, 0);
-                                Eigen::Vector3d angles           = Hwt.linear().eulerAngles(2, 1, 0);
-
-                                // Normalise angles and make error positive
+                                // Make error positive
                                 for (int i = 0; i < 3; i++) {
-                                    r_error[i] = normalizeAngle(r_error[i]);
-                                    angles[i]  = normalizeAngle(angles[i]);
                                     t_error[i] = std::abs(t_error[i]);
                                 }
 
+                                // Determine yaw, pitch and roll error
+                                Eigen::Matrix3d rot_error = true_Htw.linear() * Hwt.linear();
+                                Eigen::Vector3d r_error   = anglesFromRotation(rot_error);
+                                Eigen::Vector3d true_Rtw  = anglesFromRotation(true_Htw.rotation());
+                                Eigen::Vector3d calc_Rtw  = anglesFromRotation(Hwt.inverse().rotation());
+
+
                                 // Graph translation and its error
-                                emit(graph("Htw translation (rWTt)", rWTt.x(), rWTt.y(), rWTt.z()));
+                                emit(graph("Htw calculated translation (rWTt)", rWTt.x(), rWTt.y(), rWTt.z()));
+                                emit(graph("Htw true translation (rWTt)", true_rWTt.x(), true_rWTt.y(), true_rWTt.z()));
                                 emit(graph("Htw translation error", t_error.x(), t_error.y(), t_error.z()));
 
                                 // Graph angles and error
-                                emit(graph("Htw angles (yaw, pitch, roll)", angles[0], angles[1], angles[2]));
-                                emit(graph("Htw angle error (yaw, pitch, roll)", r_error[0], r_error[1], r_error[2]));
+                                emit(graph("Rtw calculated angles (rpy)", calc_Rtw.x(), calc_Rtw.y(), calc_Rtw.z()));
+                                emit(graph("Rtw true angles (rpy)", true_Rtw.x(), true_Rtw.y(), true_Rtw.z()));
+                                emit(graph("Rtw error (rpy)", r_error.x(), r_error.y(), r_error.z()));
                             }
 
                             /************************************************
