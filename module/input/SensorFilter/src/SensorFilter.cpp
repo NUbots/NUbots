@@ -791,31 +791,30 @@ namespace module::input {
                                 Eigen::Affine3d true_Htw(input.odometry_ground_truth.Htw);
 
                                 // Determine translational distance error
-                                Eigen::Vector3d rWTt      = Hwt.inverse().translation();
-                                Eigen::Vector3d true_rWTt = true_Htw.translation();
-                                Eigen::Vector3d t_error   = true_Htw.translation() - rWTt;
+                                Eigen::Vector3d est_rWTt   = Hwt.inverse().translation();
+                                Eigen::Vector3d true_rWTt  = true_Htw.translation();
+                                Eigen::Vector3d error_rWTt = true_Htw.translation() - est_rWTt;
+
+                                // Determine yaw, pitch and roll error
+                                Eigen::Vector3d true_Rtw  = anglesFromRotation(true_Htw.rotation());
+                                Eigen::Vector3d est_Rtw   = anglesFromRotation(Hwt.inverse().rotation());
+                                Eigen::Vector3d error_Rtw = true_Rtw - est_Rtw;
 
                                 // Make error positive
                                 for (int i = 0; i < 3; i++) {
-                                    t_error[i] = std::abs(t_error[i]);
+                                    error_rWTt[i] = std::abs(error_rWTt[i]);
+                                    error_Rtw[i]  = std::abs(error_Rtw[i]);
                                 }
 
-                                // Determine yaw, pitch and roll error
-                                Eigen::Matrix3d rot_error = true_Htw.linear() * Hwt.linear();
-                                Eigen::Vector3d r_error   = anglesFromRotation(rot_error);
-                                Eigen::Vector3d true_Rtw  = anglesFromRotation(true_Htw.rotation());
-                                Eigen::Vector3d calc_Rtw  = anglesFromRotation(Hwt.inverse().rotation());
-
-
                                 // Graph translation and its error
-                                emit(graph("Htw calculated translation (rWTt)", rWTt.x(), rWTt.y(), rWTt.z()));
+                                emit(graph("Htw est translation (rWTt)", est_rWTt.x(), est_rWTt.y(), est_rWTt.z()));
                                 emit(graph("Htw true translation (rWTt)", true_rWTt.x(), true_rWTt.y(), true_rWTt.z()));
-                                emit(graph("Htw translation error", t_error.x(), t_error.y(), t_error.z()));
+                                emit(graph("Htw translation error", error_rWTt.x(), error_rWTt.y(), error_rWTt.z()));
 
                                 // Graph angles and error
-                                emit(graph("Rtw calculated angles (rpy)", calc_Rtw.x(), calc_Rtw.y(), calc_Rtw.z()));
+                                emit(graph("Rtw est angles (rpy)", est_Rtw.x(), est_Rtw.y(), est_Rtw.z()));
                                 emit(graph("Rtw true angles (rpy)", true_Rtw.x(), true_Rtw.y(), true_Rtw.z()));
-                                emit(graph("Rtw error (rpy)", r_error.x(), r_error.y(), r_error.z()));
+                                emit(graph("Rtw error (rpy)", error_Rtw.x(), error_Rtw.y(), error_Rtw.z()));
                             }
 
                             /************************************************
