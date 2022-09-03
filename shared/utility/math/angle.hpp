@@ -142,9 +142,9 @@ namespace utility::math::angle {
 
     template <typename Scalar>
     inline Eigen::Matrix<Scalar, 3, 1> anglesFromRotation(Eigen::Matrix<Scalar, 3, 3> rotation) {
-        Scalar rot_roll  = normalizeAngle(std::atan2(rotation.coeff(2, 1), rotation.coeff(1, 1)));
-        Scalar rot_pitch = normalizeAngle(std::atan2(rotation.coeff(3, 2), rotation.coeff(3, 3)));
-        Scalar rot_yaw   = normalizeAngle(-std::asin(rotation.coeff(3, 1)));
+        Scalar rot_roll  = normalizeAngle(std::atan2(rotation.coeff(2, 1), rotation.coeff(2, 2)));
+        Scalar rot_pitch = normalizeAngle(-std::asin(rotation.coeff(2, 0)));
+        Scalar rot_yaw   = normalizeAngle(std::atan2(rotation.coeff(1, 0), rotation.coeff(0, 0)));
         return Eigen::Matrix<Scalar, 3, 1>(rot_roll, rot_pitch, rot_yaw);
     }
 }  // namespace utility::math::angle
