@@ -12,6 +12,7 @@ import { installLocalisation } from './components/localisation/install'
 import { withRobotSelectorMenuBar } from './components/menu_bar/view'
 import { installOdometry } from './components/odometry/install'
 import { installVision } from './components/vision/install'
+import { installVision as installVision2 } from './components/vision2/install'
 import { installVisualMesh } from './components/visual_mesh/install'
 import { NavigationConfiguration } from './navigation'
 import { NUsightNetwork } from './network/nusight_network'
@@ -29,7 +30,14 @@ installDashboard({ nav, appModel, nusightNetwork, menu })
 installLocalisation({ nav, appModel, nusightNetwork, menu })
 installOdometry({ nav, appModel, nusightNetwork, Menu: menu })
 installChart({ nav, appModel, nusightNetwork, menu })
-installVision({ nav, appModel, nusightNetwork, Menu: menu })
+
+const url = new URL(window.location.href)
+if (url.searchParams.has('vision2')) {
+  installVision2({ nav, appModel, nusightNetwork, Menu: menu })
+} else {
+  installVision({ nav, appModel, nusightNetwork, Menu: menu })
+}
+
 installVisualMesh({ nav, appModel, nusightNetwork, Menu: menu })
 
 configure({ enforceActions: 'observed' })
