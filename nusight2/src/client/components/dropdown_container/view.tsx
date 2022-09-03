@@ -9,7 +9,7 @@ import { DropdownProps } from '../dropdown/view'
 import { Dropdown } from '../dropdown/view'
 
 export type DropdownContainerProps = {
-  children?: ReactNode | undefined
+  children?: ReactNode
   dropdownToggle: ReactNode
   dropdownPosition?: 'left' | 'right'
 }

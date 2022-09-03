@@ -19,7 +19,7 @@ export interface DropdownProps {
   onToggleClick?(event: MouseEvent<HTMLSpanElement>): void
 }
 
-export const Dropdown = React.memo((props: DropdownProps) => {
+export const Dropdown = (props: DropdownProps) => {
   const fullwidth = props.isFullwidth ? style.dropdownMenuFullwidth : ''
   const position = props.dropdownPosition === 'right' ? style.dropdownMenuRight : ''
   const direction = props.dropDirection === 'up' ? style.dropdownMenuUp : style.dropdownMenuDown
@@ -33,4 +33,4 @@ export const Dropdown = React.memo((props: DropdownProps) => {
       {props.isOpen && <div className={dropdownMenuClassName}>{props.children}</div>}
     </div>
   )
-})
+}
