@@ -22,7 +22,8 @@ namespace module {
             public:
                 // Implementing the EvaluatorTask interface
                 void processRawSensorMsg(const RawSensors& sensors, NSGA2Evaluator* evaluator);
-                void processOptimisationRobotPosition(const OptimisationRobotPosition& position, NSGA2Evaluator* evaluator);
+                void processOptimisationRobotPosition(const OptimisationRobotPosition& position,
+                                                      NSGA2Evaluator* evaluator);
                 void setUpTrial(const NSGA2EvaluationRequest& request);
                 void resetSimulation();
                 void evaluatingState(size_t subsumptionId, NSGA2Evaluator* evaluator);

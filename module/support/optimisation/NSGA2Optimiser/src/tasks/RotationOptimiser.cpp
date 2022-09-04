@@ -57,7 +57,7 @@ namespace module {
                 }
 
                 auto walk_command = config["walk_command"];
-                for (const auto& element : std::vector<std::string>({std::string("velocity")})) {
+                for (const auto& element : std::vector<std::string>({std::string("rotation")})) {
                     paramInitialValues.emplace_back(walk_command[element][0].as<Expression>());
                     paramLimits.emplace_back(walk_command[element][1].as<Expression>(),
                                              walk_command[element][2].as<Expression>());  // Here!!!!!!!!!!!!!!!!!!!!

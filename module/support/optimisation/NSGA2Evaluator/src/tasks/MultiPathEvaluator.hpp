@@ -40,6 +40,9 @@ namespace module {
                 bool checkForFall(const RawSensors& sensors);
                 void updateMaxFieldPlaneSway(const RawSensors& sensors);
                 void processRotation(const RawSensors& sensors, NSGA2Evaluator* evaluator);
+                void processRoundEnd();
+                void processNextPath();
+                double processDistanceTravelled();
 
             private:
                 /// @brief Robot state for this evaluation, used during fitness and constraint calculation
@@ -58,8 +61,8 @@ namespace module {
                 Eigen::Vector2d walk_command_velocity = Eigen::Vector2d(0.0, 0.0);
 
                 /// @brief The walk command rotation.
-                double walk_command_velocity_X = 0.0;  // currentRequest.parameters.real_params[11];
-                double walk_command_velocity_Y = 0.0;  // 0.0;
+                double walk_command_velocity_X = 0.0;
+                double walk_command_velocity_Y = 0.0;
                 double walk_command_rotation   = 0.0;
 
                 double theta   = 0.0;
@@ -72,7 +75,8 @@ namespace module {
                 int pathNo  = 0;
                 int roundNo = 0;
 
-                std::array<Eigen::Vector2d, 6> pathScores;
+                // std::array<std::vector<double>, 6> pathScores;
+                std::vector<std::vector<double>> pathScores;
                 std::array<double, 11> params;
 
                 size_t subsumptionID = 0;

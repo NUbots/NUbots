@@ -35,18 +35,23 @@ namespace module {
                 // NUClear::log<NUClear::DEBUG>("Sim Time:", evaluator->simTime);
 
                 if (pathNo == ROTCCW || pathNo == ROTCW) {
-                    // processRotation(sensors, evaluator);
+                    processRotation(sensors, evaluator);
+                    // NUClear::log<NUClear::DEBUG>("Theta:", theta);
                 }
 
                 if (checkForFall(sensors)) {
+                    processRoundEnd();
                     evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TerminateEarly));
                 }
 
-                if ((int) evaluator->simTime % 20000 == 0) {
-                    //&& evaluator->simTime < 21.0) {  // == 0 && evaluator->simTime > 1.0) {
-                    walk_command_velocity.x() = 0.0;
-                    walk_command_velocity.y() = walk_command_velocity_Y;
-                    walk_command_rotation     = 0.0;
+                if ((int) evaluator->simTime % 10000 == 0) {
+                    processRoundEnd();
+                    pathNo++;
+                    processNextPath();
+
+                    // walk_command_velocity.x() = 0.0;
+                    // walk_command_velocity.y() = walk_command_velocity_Y;
+                    // walk_command_rotation     = 0.0;
 
                     NUClear::log<NUClear::DEBUG>(fmt::format("Trialling with walk command: ({} {}) {}",
                                                              walk_command_velocity.x(),
@@ -75,10 +80,85 @@ namespace module {
 
             void MultiPathEvaluator::processRotation(const RawSensors& sensors, NSGA2Evaluator* evaluator) {
                 double rotTime = evaluator->simTime;
-                omega          = sensors.gyroscope.z();
+                omega          = std::fabs(sensors.gyroscope.z());
                 deltaT         = rotTime - oldTime;
                 oldTime        = rotTime;
                 theta += omega * deltaT / 1000;
+            }
+
+            double MultiPathEvaluator::processDistanceTravelled() {
+                if (pathNo == ROTCCW || pathNo == ROTCW) {
+                    auto t = theta;
+                    theta  = 0.0;
+                    return t;
+                }
+                auto dta = std::fabs(initialRobotPosition.x() - robotPosition.x());
+                auto dtb = std::fabs(initialRobotPosition.y() - robotPosition.y());
+
+                initialRobotPosition.x() = robotPosition.x();
+                initialRobotPosition.y() = robotPosition.y();
+                initialRobotPosition.z() = robotPosition.z();
+
+                return std::pow(std::pow(dta, 2) + std::pow(dtb, 2), 0.5);
+            }
+
+            void MultiPathEvaluator::processRoundEnd() {
+                std::vector<double> scores = {processDistanceTravelled(), maxFieldPlaneSway};
+                // scores.push_back(processDistanceTravelled());
+                // scores.push_back(maxFieldPlaneSway);
+                maxFieldPlaneSway = 0.0;
+                for (double i : scores) {
+                    NUClear::log<NUClear::DEBUG>("Scores:", i);
+                }
+
+                pathScores.push_back(scores);
+                NUClear::log<NUClear::DEBUG>("Path Scores Size:", pathScores.size());
+            }
+
+            void MultiPathEvaluator::processNextPath() {
+                switch (pathNo) {
+                    case 0:
+                        walk_command_velocity.x() = walk_command_velocity_X;
+                        walk_command_velocity.y() = 0.0;
+                        walk_command_rotation     = 0.0;
+                        break;
+
+                    case 1:
+                        walk_command_velocity.x() = -walk_command_velocity_X;
+                        walk_command_velocity.y() = 0.0;
+                        walk_command_rotation     = 0.0;
+                        break;
+
+                    case 2:
+                        walk_command_velocity.x() = 0.0;
+                        walk_command_velocity.y() = walk_command_velocity_Y;
+                        walk_command_rotation     = 0.0;
+                        break;
+
+                    case 3:
+                        walk_command_velocity.x() = 0.0;
+                        walk_command_velocity.y() = -walk_command_velocity_Y;
+                        walk_command_rotation     = 0.0;
+                        break;
+
+                    case 4:
+                        walk_command_velocity.x() = -0.05;
+                        walk_command_velocity.y() = 0.05;
+                        walk_command_rotation     = 0.645;
+                        break;
+
+                    case 5:
+                        walk_command_velocity.x() = -0.05;
+                        walk_command_velocity.y() = -0.05;
+                        walk_command_rotation     = -0.645;
+                        break;
+
+                    default:
+                        walk_command_velocity.x() = 0.0;
+                        walk_command_velocity.y() = 0.0;
+                        walk_command_rotation     = 0.0;
+                        break;
+                }
             }
 
             void MultiPathEvaluator::setUpTrial(const NSGA2EvaluationRequest& currentRequest) {
@@ -151,11 +231,10 @@ namespace module {
             }
 
             void MultiPathEvaluator::evaluatingState(size_t subsumptionId, NSGA2Evaluator* evaluator) {
-                walk_command_velocity.x() = walk_command_velocity_X;
-                walk_command_velocity.y() = 0.0;
-                walk_command_rotation     = 0.0;
-                subsumptionID             = subsumptionId;
+
+                subsumptionID = subsumptionId;
                 NUClear::log<NUClear::DEBUG>("SubsumptionID =", subsumptionID);
+                processNextPath();
 
                 NUClear::log<NUClear::DEBUG>(fmt::format("Trialling with walk command: ({} {}) {}",
                                                          walk_command_velocity.x(),
@@ -175,7 +254,7 @@ namespace module {
                 auto scores      = calculateScores();
                 auto constraints = earlyTermination ? calculateConstraints(simTime) : constraintsNotViolated();
 
-                double trialDuration = simTime - trialStartTime;
+                // double trialDuration = simTime - trialStartTime;
 
                 NUClear::log<NUClear::DEBUG>("SendFitnessScores for generation", generation, "individual", individual);
                 NUClear::log<NUClear::DEBUG>("    scores:", scores[0], scores[1]);
@@ -191,10 +270,22 @@ namespace module {
             }
             // I want a pattern here passed as an arg
             std::vector<double> MultiPathEvaluator::calculateScores() {
-                auto robotDistanceTravelled = std::fabs(initialRobotPosition.x() - robotPosition.x());
+                auto robotDistanceTravelled = 0.0;
+                auto maxSway                = 0.0;
+                auto finalScore             = 0.0;
+
+                for (std::vector<double> score : pathScores) {
+                    // robotDistanceTravelled += score.at(0);
+                    // maxSway += score.at(1);
+                    for (auto param : params) {
+                        finalScore += (score.at(0) * param) + (score.at(1) * param);
+                    }
+                }
+
+                NUClear::log<NUClear::DEBUG>("Final Score:", finalScore);
                 return {
-                    maxFieldPlaneSway,            // For now, we want to reduce this
-                    1.0 / robotDistanceTravelled  // 1/x since the NSGA2 optimiser is a minimiser
+                    maxSway,          // For now, we want to reduce this
+                    1.0 / finalScore  // robotDistanceTravelled  // 1/x since the NSGA2 optimiser is a minimiser
                 };
             }
 

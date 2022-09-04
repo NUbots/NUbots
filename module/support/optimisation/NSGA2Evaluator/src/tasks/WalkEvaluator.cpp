@@ -4,6 +4,7 @@
 #include <fmt/ostream.h>
 #include <fstream>
 #include <yaml-cpp/yaml.h>
+//#include "tasks/EvaluatorTask.hpp"
 
 #include "message/motion/WalkCommand.hpp"
 #include "message/support/optimisation/NSGA2EvaluatorMessages.hpp"
