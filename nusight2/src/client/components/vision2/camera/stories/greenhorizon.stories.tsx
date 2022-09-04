@@ -1,9 +1,11 @@
 import { storiesOf } from '@storybook/react'
-import { computed } from 'mobx'
-import { reaction } from 'mobx'
-import { disposeOnUnmount } from 'mobx-react'
+import { autorun } from 'mobx'
+import { observable } from 'mobx'
+import { observer } from 'mobx-react'
 import { now } from 'mobx-utils'
-import { Component } from 'react'
+import { useEffect } from 'react'
+import { useState } from 'react'
+import { useMemo } from 'react'
 import React from 'react'
 import * as THREE from 'three'
 
@@ -12,18 +14,14 @@ import { Matrix4 } from '../../../../math/matrix4'
 import { Vector2 } from '../../../../math/vector2'
 import { Vector3 } from '../../../../math/vector3'
 import { fullscreen } from '../../../storybook/fullscreen'
-import { scene } from '../../../three/builders'
-import { orthographicCamera } from '../../../three/builders'
-import { stage } from '../../../three/builders'
-import { Canvas } from '../../../three/three'
-import { Three } from '../../../three/three'
-import { GreenHorizonViewModel } from '../greenhorizon'
+import { GreenHorizonView } from '../greenhorizon'
 import { Lens } from '../model'
 import { CameraParams } from '../model'
 import { Projection } from '../model'
 import { GreenHorizon } from '../model'
+import { Canvas } from '@react-three/fiber'
 
-storiesOf('components.vision.camera.greenhorizon', module)
+storiesOf('components/vision2/camera/greenhorizon', module)
   .addDecorator(fullscreen)
   .add('Renders statically', () => <GreenHorizonHarness />)
   .add('Renders animated', () => <GreenHorizonHarness animate />)
@@ -36,72 +34,55 @@ const Hwc = Matrix4.fromThree(
 )
 const Hcw = Matrix4.fromThree(new THREE.Matrix4().getInverse(Hwc.toThree()))
 
-class GreenHorizonHarness extends Component<{ animate?: boolean }> {
-  render() {
-    return <Three stage={this.stage} objectFit={{ type: 'contain', aspect: 1 }} />
-  }
+const GreenHorizonHarness = observer(({ animate }: { animate?: boolean }) => {
+  const camera = useMemo(() => {
+    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1, 1)
+    ;(camera as any).manual = true
+    return camera
+  }, [])
 
-  private readonly stage = (canvas: Canvas) => {
-    const viewModel = this.createViewModel(canvas)
-    return computed(() => [viewModel.stage])
-  }
-
-  private createViewModel(canvas: Canvas): ViewModel {
-    const greenHorizon = new GreenHorizon({ horizon: this.generateHorizon(0), Hcw })
-    const params = new CameraParams({
-      Hcw,
-      lens: new Lens({
-        projection: Projection.RECTILINEAR,
-        focalLength: 415 / 800,
-      }),
+  const [model] = useState(() => (
+    observable({
+      greenHorizon: new GreenHorizon({ horizon: generateHorizon(0), Hcw }),
+      params: new CameraParams({
+        Hcw,
+        lens: new Lens({
+          projection: Projection.RECTILINEAR,
+          focalLength: 415 / 800,
+        }),
+      })
     })
-    this.props.animate &&
-      disposeOnUnmount(
-        this,
-        reaction(
-          () => now('frame') / 1000,
-          t => (greenHorizon.horizon = this.generateHorizon(t)),
-        ),
-      )
-    return ViewModel.of(canvas, greenHorizon, params)
-  }
+  ))
 
-  private generateHorizon(time: number): Vector3[] {
-    const focalLength = 415 / 800
-    const n = 50
-    return range(n + 1).map(i => {
-      const t = mod2pi(2 * Math.PI * (i / n) + time / 10)
-      const p = lissajous(t).multiplyScalar(0.4) // Why lissajous? Why not.
-      const rFCc = unprojectRectilinear(p, focalLength)
-      const Rwc = new THREE.Matrix4().extractRotation(Hwc.toThree())
-      return Vector3.fromThree(rFCc.toThree().applyMatrix4(Rwc)) // rFCw
+  useEffect(() => (
+    autorun(() => {
+      const t = animate ? now('frame') / 1000 : 0
+      model.greenHorizon.horizon = generateHorizon(t)
     })
-  }
-}
+  ))
 
-class ViewModel {
-  private readonly viewModel: GreenHorizonViewModel
+  return <Canvas
+    gl={{ antialias: false, alpha: false, depth: false, stencil: false }}
+    orthographic={true}
+    camera={camera}
+    linear={true}
+    flat={true}
+    style={{ backgroundColor: 'black' }}
+  >
+    <GreenHorizonView greenHorizon={model.greenHorizon} params={model.params}/>
+  </Canvas>
+})
 
-  constructor(viewModel: GreenHorizonViewModel) {
-    this.viewModel = viewModel
-  }
-
-  static of(canvas: Canvas, greenHorizon: GreenHorizon, params: CameraParams) {
-    return new ViewModel(GreenHorizonViewModel.of(canvas, greenHorizon, params))
-  }
-
-  readonly stage = stage(() => ({ camera: this.camera(), scene: this.scene() }))
-
-  private readonly camera = orthographicCamera(() => ({
-    left: -1,
-    right: 1,
-    top: 1,
-    bottom: -1,
-    near: 0,
-    far: 1,
-  }))
-
-  private readonly scene = scene(() => ({ children: [this.viewModel.greenhorizon()] }))
+function generateHorizon(time: number): Vector3[] {
+  const focalLength = 415 / 800
+  const n = 50
+  return range(n + 1).map(i => {
+    const t = mod2pi(2 * Math.PI * (i / n) + time / 10)
+    const p = lissajous(t).multiplyScalar(0.4) // Why lissajous? Why not.
+    const rFCc = unprojectRectilinear(p, focalLength)
+    const Rwc = new THREE.Matrix4().extractRotation(Hwc.toThree())
+    return Vector3.fromThree(rFCc.toThree().applyMatrix4(Rwc)) // rFCw
+  })
 }
 
 function unprojectRectilinear(point: Vector2, focalLength: number): Vector3 {
