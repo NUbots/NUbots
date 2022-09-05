@@ -12,6 +12,7 @@ import { shaderMaterial } from '../../three/builders'
 import { rawShader } from '../../three/builders'
 import { mesh } from '../../three/builders'
 import { planeGeometry } from '../../three/builders'
+import { BitmapImage } from '../image'
 import { ImageFormat } from '../image'
 import { BayerImageFormat } from '../image'
 import { ElementImage } from '../image'
@@ -105,6 +106,8 @@ export class ImageViewModel {
         return this.dataTexture(this.source)
       case 'element':
         return this.elementTexture(this.source)
+      case 'bitmap':
+        return this.bitmapTexture(this.source)
       default:
         throw new UnreachableError(this.source)
     }
@@ -113,6 +116,17 @@ export class ImageViewModel {
   private readonly elementTexture = imageTexture(
     ({ element, width, height, format }: ElementImage) => ({
       image: element,
+      width,
+      height,
+      format: this.textureFormat(format),
+      magFilter: THREE.LinearFilter,
+      minFilter: THREE.LinearFilter,
+    }),
+  )
+
+  private readonly bitmapTexture = imageTexture(
+    ({ bitmap, width, height, format }: BitmapImage) => ({
+      image: bitmap,
       width,
       height,
       format: this.textureFormat(format),
