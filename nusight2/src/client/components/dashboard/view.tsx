@@ -9,7 +9,7 @@ import { DashboardModel } from './model'
 import { DashboardNetwork } from './network'
 import { RobotPanel } from './robot_panel/view'
 import { RobotPanelViewModel } from './robot_panel/view_model'
-import style from './style.css'
+import style from './style.module.css'
 
 export type DashboardProps = {
   controller: DashboardController

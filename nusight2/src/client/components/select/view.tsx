@@ -10,7 +10,7 @@ import { Dropdown } from '../dropdown/view'
 
 import DropdownIcon from './dropdown.svg'
 import { SelectOption } from './option'
-import style from './style.css'
+import style from './style.module.css'
 
 export interface Option {
   id: string | number

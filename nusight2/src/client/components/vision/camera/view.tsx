@@ -11,7 +11,7 @@ import { Canvas } from '../../three/three'
 import { Three } from '../../three/three'
 
 import { CameraModel } from './model'
-import styles from './styles.css'
+import styles from './style.module.css'
 import { CameraViewModel } from './view_model'
 
 export type CameraViewProps = {
