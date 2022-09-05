@@ -8,43 +8,43 @@ import { CheckedState, TreeModel, TreeNodeModel } from './model'
 
 import { CheckboxTree } from './view'
 
-class DataPoint {
-  @observable value: number
+class TreeData {
   @observable checked: CheckedState
+  // This is where data for the tree node would be stored, e.g. on a `value` property.
+  // Omitted here as it's not necessary for demonstrating the CheckboxTree component.
 
-  constructor({ value, checked }: { value: number; checked?: CheckedState }) {
-    this.value = value
+  constructor({ checked }: { checked?: CheckedState } = {}) {
     this.checked = checked ?? CheckedState.Checked
   }
 }
 
-type ToggleTreeChildren = { [key: string]: DataPoint | ToggleTreeChildren }
+type ToggleTreeChildren = { [key: string]: TreeData | ToggleTreeChildren }
 
 class ToggleTree {
-  @observable model: ToggleTreeChildren | DataPoint
+  @observable model: ToggleTreeChildren | TreeData
   @observable label: string
   @observable expanded: boolean
 
-  constructor(opts: { label: string; model: ToggleTreeChildren | DataPoint }) {
+  constructor(opts: { label: string; model: ToggleTreeChildren | TreeData }) {
     this.model = opts.model
     this.label = opts.label
     this.expanded = false
   }
 
   static of = createTransformer(
-    (opts: { label: string; model: ToggleTreeChildren | DataPoint }): ToggleTree => {
+    (opts: { label: string; model: ToggleTreeChildren | TreeData }): ToggleTree => {
       return new ToggleTree(opts)
     },
   )
 
   @computed
   get leaf(): boolean {
-    return this.model instanceof DataPoint
+    return this.model instanceof TreeData
   }
 
   @computed
   get checked(): CheckedState {
-    if (this.model instanceof DataPoint) {
+    if (this.model instanceof TreeData) {
       return this.model.checked
     }
 
@@ -60,7 +60,7 @@ class ToggleTree {
   }
 
   set checked(checked: CheckedState) {
-    if (this.model instanceof DataPoint) {
+    if (this.model instanceof TreeData) {
       this.model.checked = checked
     } else {
       this.children.forEach(child => {
@@ -71,7 +71,7 @@ class ToggleTree {
 
   @computed
   get children(): TreeNodeModel[] {
-    if (this.model instanceof DataPoint) {
+    if (this.model instanceof TreeData) {
       return []
     }
 
@@ -92,26 +92,26 @@ storiesOf('components/CheckboxTree', module)
     const rawData: ToggleTreeChildren = {
       'Robot 1': {
         'Debug Waves': {
-          'sin()': new DataPoint({ value: 1 }),
-          'cos()': new DataPoint({ value: 2 }),
-          'tan()': new DataPoint({ value: 3 }),
+          'sin()': new TreeData(),
+          'cos()': new TreeData(),
+          'tan()': new TreeData(),
         },
         Position: {
-          x: new DataPoint({ value: 5 }),
-          y: new DataPoint({ value: 6 }),
-          z: new DataPoint({ value: 7 }),
+          x: new TreeData(),
+          y: new TreeData(),
+          z: new TreeData(),
         },
       },
       'Robot 2': {
         'Debug Waves': {
-          'sin()': new DataPoint({ value: 8 }),
-          'cos()': new DataPoint({ value: 9 }),
-          'tan()': new DataPoint({ value: 10 }),
+          'sin()': new TreeData(),
+          'cos()': new TreeData(),
+          'tan()': new TreeData(),
         },
         Position: {
-          x: new DataPoint({ value: 11 }),
-          y: new DataPoint({ value: 12 }),
-          z: new DataPoint({ value: 13 }),
+          x: new TreeData(),
+          y: new TreeData(),
+          z: new TreeData(),
         },
       },
     }
@@ -134,7 +134,8 @@ storiesOf('components/CheckboxTree', module)
       node.expanded = !node.expanded
     })
 
-    // Used to render the label, can be any arbitrary content
+    // Used to render the label, can be any arbitrary content, e.g. a color picker
+    // similar to the one used in the Chart view's checkbox tree.
     const renderLabel = (node: TreeNodeModel) => {
       return <span>{node.label}</span>
     }
