@@ -25,6 +25,7 @@ const classifications = Object.freeze([
 
 storiesOf('classifier.visualizer', module)
   .addDecorator(fullscreen)
+  .addParameters({ layout: 'fullscreen' })
   .add('renders statically', () => {
     const random = SeededRandom.of('classifier')
     const model = VisualizerModel.of(generateLut(random))

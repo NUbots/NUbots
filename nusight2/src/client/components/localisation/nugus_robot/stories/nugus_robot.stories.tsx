@@ -13,6 +13,7 @@ import { NUgusViewModel } from '../view_model'
 
 storiesOf('component.localisation.nugus_robot', module)
   .addDecorator(fullscreen)
+  .addParameters({ layout: 'fullscreen' })
   .add('renders statically', () => <NUgusVisualizer />)
   .add('renders animated', () => <NUgusVisualizer animate />)
 

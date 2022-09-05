@@ -18,6 +18,7 @@ import { VisionView } from '../view'
 
 storiesOf('components.vision.layout', module)
   .addDecorator(fullscreen)
+  .addParameters({ layout: 'fullscreen' })
   .add('renders', () => {
     const appModel = AppModel.of({
       robots: [

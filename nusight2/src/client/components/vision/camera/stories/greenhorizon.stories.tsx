@@ -25,6 +25,7 @@ import { GreenHorizon } from '../model'
 
 storiesOf('components.vision.camera.greenhorizon', module)
   .addDecorator(fullscreen)
+  .addParameters({ layout: 'fullscreen' })
   .add('Renders statically', () => <GreenHorizonHarness />)
   .add('Renders animated', () => <GreenHorizonHarness animate />)
 

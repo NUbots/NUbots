@@ -19,6 +19,7 @@ const createModel = () => observable<{ image: Image | undefined }>({ image: unde
 
 storiesOf('components.vision.image_view', module)
   .addDecorator(fullscreen)
+  .addParameters({ layout: 'fullscreen' })
   .add('JPEG', () => {
     const model = createModel()
     loadImageElement(jpegUrl, ImageFormat.JPEG).then(

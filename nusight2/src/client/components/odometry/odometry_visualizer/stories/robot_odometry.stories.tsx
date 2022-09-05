@@ -12,6 +12,7 @@ import { OdometryVisualizer } from '../view'
 
 storiesOf('components.odometry.odometry_visualizer', module)
   .addDecorator(fullscreen)
+  .addParameters({ layout: 'fullscreen' })
   .add('Renders statically', () => <OdometryVisualizerHarness />)
   .add('Renders animated', () => <OdometryVisualizerHarness animate />)
 

@@ -21,6 +21,7 @@ import { CameraView } from '../view'
 
 storiesOf('components.vision.camera', module)
   .addDecorator(fullscreen)
+  .addParameters({ layout: 'fullscreen' })
   .add('vision objects', () => {
     const box = observable<{ model: CameraModel | undefined }>({ model: undefined })
     fakeCameraModel().then(model => (box.model = model))

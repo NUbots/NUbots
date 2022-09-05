@@ -35,6 +35,7 @@ import robotSvgUrl from './robot.file.svg'
 
 storiesOf('component.three', module)
   .addDecorator(fullscreen)
+  .addParameters({ layout: 'fullscreen' })
   .add('renders static scene with render targets', () => {
     return <RenderTargetHarness />
   })

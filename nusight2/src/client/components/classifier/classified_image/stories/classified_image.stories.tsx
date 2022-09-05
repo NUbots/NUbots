@@ -20,6 +20,7 @@ import imageUrl from './image.jpg'
 
 storiesOf('classifier.classified_image', module)
   .addDecorator(fullscreen)
+  .addParameters({ layout: 'fullscreen' })
   .add('renders statically', () => {
     const random = SeededRandom.of('classifier')
     const lut = generateLut(random)
