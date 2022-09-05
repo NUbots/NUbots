@@ -41,7 +41,7 @@ const GreenHorizonHarness = observer(({ animate }: { animate?: boolean }) => {
     return camera
   }, [])
 
-  const [model] = useState(() => (
+  const [model] = useState(() =>
     observable({
       greenHorizon: new GreenHorizon({ horizon: generateHorizon(0), Hcw }),
       params: new CameraParams({
@@ -50,27 +50,29 @@ const GreenHorizonHarness = observer(({ animate }: { animate?: boolean }) => {
           projection: Projection.RECTILINEAR,
           focalLength: 415 / 800,
         }),
-      })
-    })
-  ))
+      }),
+    }),
+  )
 
-  useEffect(() => (
+  useEffect(() =>
     autorun(() => {
       const t = animate ? now('frame') / 1000 : 0
       model.greenHorizon.horizon = generateHorizon(t)
-    })
-  ))
+    }),
+  )
 
-  return <Canvas
-    gl={{ antialias: false, alpha: false, depth: false, stencil: false }}
-    orthographic={true}
-    camera={camera}
-    linear={true}
-    flat={true}
-    style={{ backgroundColor: 'black' }}
-  >
-    <GreenHorizonView greenHorizon={model.greenHorizon} params={model.params}/>
-  </Canvas>
+  return (
+    <Canvas
+      gl={{ antialias: false, alpha: false, depth: false, stencil: false }}
+      orthographic={true}
+      camera={camera}
+      linear={true}
+      flat={true}
+      style={{ backgroundColor: 'black' }}
+    >
+      <GreenHorizonView greenHorizon={model.greenHorizon} params={model.params} />
+    </Canvas>
+  )
 })
 
 function generateHorizon(time: number): Vector3[] {
