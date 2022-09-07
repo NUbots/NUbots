@@ -1,7 +1,6 @@
 import React from 'react'
 import { storiesOf } from '@storybook/react'
 import { action, computed, observable } from 'mobx'
-import { observer } from 'mobx-react'
 import { createTransformer } from 'mobx-utils'
 
 import { CheckedState, TreeModel, TreeNodeModel } from './model'
@@ -140,14 +139,12 @@ storiesOf('components/CheckboxTree', module)
       return <span>{node.label}</span>
     }
 
-    const Story = observer(() => (
+    return (
       <CheckboxTree
         model={model}
         onCheck={onNodeCheck}
         onExpand={onNodeExpand}
         renderLabel={renderLabel}
       />
-    ))
-
-    return <Story />
+    )
   })
