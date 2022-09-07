@@ -105,17 +105,16 @@ export class ImageViewModel {
       case 'data':
         return this.dataTexture(this.source)
       case 'element':
-        return this.elementTexture(this.source)
       case 'bitmap':
-        return this.bitmapTexture(this.source)
+        return this.imageTexture(this.source)
       default:
         throw new UnreachableError(this.source)
     }
   }
 
-  private readonly elementTexture = imageTexture(
-    ({ element, width, height, format }: ElementImage) => ({
-      image: element,
+  private readonly imageTexture = imageTexture(
+    ({ image, width, height, format }: ElementImage | BitmapImage) => ({
+      image,
       width,
       height,
       format: this.textureFormat(format),
@@ -124,9 +123,9 @@ export class ImageViewModel {
     }),
   )
 
-  private readonly bitmapTexture = imageTexture(
-    ({ bitmap, width, height, format }: BitmapImage) => ({
-      image: bitmap,
+  private readonly dataTexture = dataTexture(
+    ({ image: data, width, height, format }: DataImage) => ({
+      data: data.get(),
       width,
       height,
       format: this.textureFormat(format),
@@ -134,15 +133,6 @@ export class ImageViewModel {
       minFilter: THREE.LinearFilter,
     }),
   )
-
-  private readonly dataTexture = dataTexture(({ data, width, height, format }: DataImage) => ({
-    data: data.get(),
-    width,
-    height,
-    format: this.textureFormat(format),
-    magFilter: THREE.LinearFilter,
-    minFilter: THREE.LinearFilter,
-  }))
 
   private textureFormat = createTransformer((format: ImageFormat): THREE.PixelFormat => {
     switch (format) {

@@ -10,17 +10,17 @@ interface BaseImage {
 
 export interface DataImage extends BaseImage {
   type: 'data'
-  data: IComputedValue<Uint8Array>
+  image: IComputedValue<Uint8Array>
 }
 
 export interface ElementImage extends BaseImage {
   type: 'element'
-  element: HTMLImageElement
+  image: HTMLImageElement
 }
 
 export interface BitmapImage extends BaseImage {
   type: 'bitmap'
-  bitmap: ImageBitmap
+  image: ImageBitmap
 }
 
 export enum ImageFormat {
