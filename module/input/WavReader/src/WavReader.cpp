@@ -20,6 +20,7 @@ namespace module::input {
 	char buf[3200];
 	int nread = 1, final = 0; 
 	
+	//Wasn't complaing when there was no test.wav, where is this coming from?
 	wavin = fopen("test.wav", "rb");
 	fseek(wavin, 44, SEEK_SET);
 	while (!feof(wavin)) {
