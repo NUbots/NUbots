@@ -51,7 +51,7 @@ export class VisionNetwork {
         name,
         image: {
           type: 'bitmap',
-          bitmap,
+          image: bitmap,
           width: dimensions?.x!,
           height: dimensions?.y!,
           format: getImageFormat(format),
