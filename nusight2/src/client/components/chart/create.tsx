@@ -5,7 +5,7 @@ import { AppModel } from '../app/model'
 
 import { LineChart as LineChartImpl } from './line_chart/view'
 import { ChartModel } from './model'
-import { ChartView as ChartViewImpl } from './view'
+import { ChartView } from './view'
 
 export function createChartView({
   appModel,
@@ -18,6 +18,5 @@ export function createChartView({
 }) {
   const model = ChartModel.of({ robotModels: appModel.robots })
   const LineChart = LineChartImpl.of(model)
-  const ChartView = ChartViewImpl.of({ model, menu: Menu, nusightNetwork, LineChart })
-  return ChartView
+  return ChartView.of({ model, menu: Menu, nusightNetwork, LineChart })
 }
