@@ -20,6 +20,7 @@
   width: 18px;
   height: 18px;
   margin-right: 4px;
+  flex-shrink: 0;
 }
 
 .treenode__icon svg {
@@ -35,14 +36,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .treenode__label {
   flex-grow: 1;
   line-height: 1;
+  min-width: 0;
 }
 
 .treenode__header:hover {
-  background-color: #EEE;
+  background-color: #eee;
   color: #1197d3;
 }
