@@ -23,7 +23,7 @@ export function installVisualMesh({
     Icon,
     label: 'Visual Mesh',
     Content: React.lazy(async () => {
-      const { createVisualMeshView } = await import('./main')
+      const { createVisualMeshView } = await import('./create')
       return {
         default: createVisualMeshView({ appModel, nusightNetwork, Menu }),
       }

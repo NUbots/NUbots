@@ -23,7 +23,7 @@ export function installChart({
     Icon,
     label: 'Chart',
     Content: React.lazy(async () => {
-      const { createChartView } = await import('./main')
+      const { createChartView } = await import('./create')
       return {
         default: createChartView({ appModel, nusightNetwork, Menu }),
       }

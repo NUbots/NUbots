@@ -23,7 +23,7 @@ export function installDashboard({
     Icon,
     label: 'Dashboard',
     Content: React.lazy(async () => {
-      const { createDashboardView } = await import('./main')
+      const { createDashboardView } = await import('./create')
       return {
         default: createDashboardView({ appModel, nusightNetwork, Menu }),
       }

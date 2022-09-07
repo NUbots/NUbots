@@ -23,7 +23,7 @@ export function installLocalisation({
     Icon,
     label: 'Localisation',
     Content: React.lazy(async () => {
-      const { createLocalisationView } = await import('./main')
+      const { createLocalisationView } = await import('./create')
       return {
         default: createLocalisationView({ appModel, nusightNetwork, Menu }),
       }

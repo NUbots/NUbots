@@ -23,7 +23,7 @@ export function installOdometry({
     Icon,
     label: 'Odometry',
     Content: React.lazy(async () => {
-      const { createOdometryView } = await import('./main')
+      const { createOdometryView } = await import('./create')
       return {
         default: createOdometryView({ appModel, nusightNetwork, Menu }),
       }

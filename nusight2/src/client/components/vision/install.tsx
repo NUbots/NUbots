@@ -22,7 +22,7 @@ export function installVision({
     Icon,
     label: 'Vision',
     Content: React.lazy(async () => {
-      const { createVisionView } = await import('./main')
+      const { createVisionView } = await import('./create')
       return {
         default: createVisionView({ appModel, nusightNetwork, Menu }),
       }
