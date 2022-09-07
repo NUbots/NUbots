@@ -27,6 +27,7 @@ export class CameraView extends Component<CameraViewProps> {
         <div className={styles.menu}>
           <SwitchesMenu dropdownMenuPosition="right" options={this.drawOptions} />
         </div>
+        <div className={styles.cameraName}>{this.props.model.name} </div>
       </div>
     )
   }
