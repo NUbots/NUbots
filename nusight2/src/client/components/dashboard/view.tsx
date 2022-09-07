@@ -14,7 +14,7 @@ import style from './style.css'
 export type DashboardProps = {
   controller: DashboardController
   Field: ComponentType
-  menu: ComponentType<PropsWithChildren>
+  Menu: ComponentType<PropsWithChildren>
   model: DashboardModel
   network: DashboardNetwork
 }
@@ -26,7 +26,7 @@ export class Dashboard extends Component<DashboardProps> {
   }
 
   render() {
-    const { menu: Menu, model } = this.props
+    const { Menu, model } = this.props
     const showPanels = model.robots.some(robot => robot.enabled)
     const Field = this.props.Field
     return (
