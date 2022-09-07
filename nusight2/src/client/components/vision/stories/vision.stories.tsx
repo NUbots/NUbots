@@ -66,7 +66,7 @@ storiesOf('components.vision.layout', module)
             type: 'element',
             width: 320,
             height: 240,
-            element: {} as HTMLImageElement,
+            image: {} as HTMLImageElement,
             format: ImageFormat.JPEG,
           },
           params: new CameraParams({
@@ -84,7 +84,7 @@ storiesOf('components.vision.layout', module)
             type: 'element',
             width: 320,
             height: 240,
-            element: {} as HTMLImageElement,
+            image: {} as HTMLImageElement,
             format: ImageFormat.JPEG,
           },
           params: new CameraParams({
