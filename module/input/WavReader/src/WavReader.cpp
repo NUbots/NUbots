@@ -35,20 +35,25 @@ namespace module::input {
 		fseek(wavin, 44, SEEK_SET);
 		
 		fessk(wavin, 0, SEEK_END);
-		lSize = ftell (wavin);
-		rewind(pFile);
-		while (!feof(wavin)) {
-		 nread = fread(buf, 1, sizeof(buf), wavin);
-
-		 if (var) {
-		     printf("test1\n");
-		 } else {
-		     printf(wavin->);
-		 }
+		long size = ftell (wavin);
+		rewind(wavin);
+		
+		nread = fread(buf, 1, size, wavin);
+		if(nread != size){
+        		throw std::invalid_argument( "received negative value" );
 		}
-
+		else{
+			printf(std::string(buf));
+		}
+		
 		fclose(wavin);
 	}
+		
+		//make protobuf file message /w stirng of data, timestamp, 
+		//auto audioData = Make_Unique<AudioData>();
+		//emit(audioData);
+		//generate new speech recognition module
+			//make reactor onTrigger audiodata (receives audiodata from this file)
     }
 
 }  // namespace module::input
