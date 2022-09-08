@@ -28,6 +28,8 @@ pacman:
   - zsh
   - zsh-completions
   - git
+  - alsa-lib
+  - alsa-utils
 
 # Systemd units that should be enabled
 systemd:

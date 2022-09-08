@@ -284,6 +284,10 @@ RUN install-from-source https://github.com/ysims/VisualMesh/archive/1c8d08b8d93a
 # JSON for modern C++ (https://github.com/nlohmann/json)
 RUN install-header-from-source https://github.com/nlohmann/json/releases/download/v3.10.5/json.hpp
 
+# PortAudio
+RUN install-cmake-from-source http://files.portaudio.com/archives/pa_stable_v190700_20210406.tgz
+
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
