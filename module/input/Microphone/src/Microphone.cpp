@@ -35,9 +35,9 @@ namespace module::input {
                                                      paFramesPerBufferUnspecified, which
                                                      tells PortAudio to pick the best,
                                                      possibly changing, buffer size.*/
-                                         PaStreamCallback,             /* this is your callback function */
-                                         &data);                       /*This is a pointer that will be passed to
-                                                                                 your callback*/
+                                         microphone_callback,          /* this is your callback function */
+                                         nullptr);                     /*This is a pointer that will be passed to
+                                                                               your callback*/
             check_error(error);
 
             // Start the microphone stream
@@ -58,57 +58,27 @@ namespace module::input {
     }
 
     // PortAudio callback function
-    int PaStreamCallback(const void* input,
-                         void* output,
-                         unsigned long frameCount,
-                         const PaStreamCallbackTimeInfo* timeInfo,
-                         PaStreamCallbackFlags statusFlags,
-                         void* userData) {
+    static int Microphone::microphone_callback(const void* input,
+                                               void* output,
+                                               unsigned long frameCount,
+                                               const PaStreamCallbackTimeInfo* timeInfo,
+                                               PaStreamCallbackFlags statusFlags,
+                                               void* userData) {
 
-        /* copied from example, to look through
-        paTestData* data   = (paTestData*) userData;
-        const SAMPLE* rptr = (const SAMPLE*) inputBuffer;
-        SAMPLE* wptr       = &data->recordedSamples[data->frameIndex * NUM_CHANNELS];
-        long framesToCalc;
-        long i;
-        int finished;
-        unsigned long framesLeft = data->maxFrameIndex - data->frameIndex;
+        float* microphone_input    = (float*) input;
+        std::vector<float> m_input = {};
 
-        (void) outputBuffer; // Prevent unused variable warnings.
-        (void) timeInfo;
-        (void) statusFlags;
-        (void) userData;
-
-        if (framesLeft < framesPerBuffer) {
-            framesToCalc = framesLeft;
-            finished     = paComplete;
-        }
-        else {
-            framesToCalc = framesPerBuffer;
-            finished     = paContinue;
+        for (int i = 0; i < frameCount; i++) {
+            m_input.push_back(microphone_input[i]);
+            log<NUClear::DEBUG>(microphone_input[i]);
         }
 
-        if (inputBuffer == NULL) {
-            for (i = 0; i < framesToCalc; i++) {
-                *wptr++ = SAMPLE_SILENCE; // left
-                if (NUM_CHANNELS == 2)
-                    *wptr++ = SAMPLE_SILENCE; // right
-            }
-        }
-        else {
-            for (i = 0; i < framesToCalc; i++) {
-                *wptr++ = *rptr++; // left
-                if (NUM_CHANNELS == 2)
-                    *wptr++ = *rptr++; // right
-            }
-        }
-        data->frameIndex += framesToCalc;
-        return finished;*/
+        return 0;
     }
 
     void Microphone::check_error(PaError err) {
         if (err != paNoError) {
-            throw std::runtime_error("Error: {}".format(Pa_GetErrorText(err)));
+            throw std::runtime_error(fmt::format("Error: {}", Pa_GetErrorText(err)));
         }
     }
 }  // namespace module::input

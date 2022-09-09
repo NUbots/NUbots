@@ -16,9 +16,15 @@ namespace module::input {
 
         PaStream* stream = nullptr;
         PaError error    = 0;
-        paTestData data;
 
         void check_error(PaError err);
+
+        static int microphone_callback(const void* input,
+                                       void* output,
+                                       unsigned long frameCount,
+                                       const PaStreamCallbackTimeInfo* timeInfo,
+                                       PaStreamCallbackFlags statusFlags,
+                                       void* userData);
 
 
     public:
