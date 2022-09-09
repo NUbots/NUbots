@@ -4,9 +4,12 @@ import json
 import os
 import types
 
+import tensorflow as tf
 from tqdm import tqdm
 
 from utility.nbs import LinearDecoder
+
+from .images import decode_image
 
 
 def register(command):
@@ -38,7 +41,9 @@ def run(files, output, **kwargs):
             ),
             "wb",
         ) as f:
-            f.write(packet.msg.data)
+            data = decode_image(packet.msg.data, packet.msg.format)
+            data = tf.io.encode_jpeg(data[0]["image"])
+            f.write(data)
         with open(
             os.path.join(
                 output,
