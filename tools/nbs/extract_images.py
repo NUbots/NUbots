@@ -9,8 +9,8 @@ from tqdm import tqdm
 
 from utility.nbs import LinearDecoder
 
-from .images import decode_image
-
+from .images import decode_image, fourcc
+import cv2
 
 def register(command):
     command.help = "Decode an nbs file and extract any compressed jpeg files into jpeg files"
@@ -32,18 +32,26 @@ def run(files, output, **kwargs):
         unit_scale=True,
         dynamic_ncols=True,
     ):
-        with open(
-            os.path.join(
-                output,
-                "{}_{:012d}.jpg".format(
-                    packet.msg.name, int(packet.msg.timestamp.seconds * 1e9 + packet.msg.timestamp.nanos)
-                ),
-            ),
-            "wb",
-        ) as f:
-            data = decode_image(packet.msg.data, packet.msg.format)
-            data = tf.io.encode_jpeg(data[0]["image"])
-            f.write(data)
+        data = decode_image(packet.msg.data, packet.msg.format)
+
+        img = data[0]["image"].numpy()
+        fmt = data[0]["fourcc"]
+
+        # Debayer if we need to
+        if fmt == fourcc("BGGR"):
+            img = cv2.cvtColor(img, cv2.COLOR_BayerBG2RGB)
+        elif fmt == fourcc("RGGB"):
+            img = cv2.cvtColor(img, cv2.COLOR_BayerRG2RGB)
+        elif fmt == fourcc("GRBG"):
+            img = cv2.cvtColor(img, cv2.COLOR_BayerGR2RGB)
+        elif fmt == fourcc("GBRG"):
+            img = cv2.cvtColor(img, cv2.COLOR_BayerGB2RGB)
+
+        cv2.imwrite(os.path.join(
+            output,
+            "{}_{:012d}.jpg".format(
+                packet.msg.name, int(packet.msg.timestamp.seconds * 1e9 + packet.msg.timestamp.nanos)
+                )), img)
         with open(
             os.path.join(
                 output,
