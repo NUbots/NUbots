@@ -1,6 +1,8 @@
 #include "Microphone.hpp"
 
-#include "PortAudio.h"
+#include <stdexcept>
+
+#include "portaudio.h"
 
 #include "extension/Configuration.hpp"
 
@@ -43,9 +45,9 @@ namespace module::input {
             check_error(error);
         });
 
-        on<Shutdown>().then([]() {
+        on<Shutdown>().then([this]() {
             // Abort to stop the callback processing audio data
-            Pa_AbortStream();
+            Pa_AbortStream(stream);
             // Close the stream to free up resources
             error = Pa_CloseStream(stream);
             check_error(error);
@@ -104,9 +106,9 @@ namespace module::input {
         return finished;*/
     }
 
-    void Microphone::check_error(PaError error) {
-        if (error != paNoError) {
-            throw std::runtime("Error: ", Pa_GetErrorTest(err));
+    void Microphone::check_error(PaError err) {
+        if (err != paNoError) {
+            throw std::runtime_error("Error: {}".format(Pa_GetErrorText(err)));
         }
     }
 }  // namespace module::input

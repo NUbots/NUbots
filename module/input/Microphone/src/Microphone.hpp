@@ -3,6 +3,8 @@
 
 #include <nuclear>
 
+#include "portaudio.h"
+
 namespace module::input {
 
     class Microphone : public NUClear::Reactor {
@@ -15,6 +17,8 @@ namespace module::input {
         PaStream* stream = nullptr;
         PaError error    = 0;
         paTestData data;
+
+        void check_error(PaError err);
 
 
     public:
