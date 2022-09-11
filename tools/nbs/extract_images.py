@@ -13,6 +13,7 @@ from .images import decode_image, fourcc
 import cv2
 import numpy as np
 import yaml
+from wand.image import Image
 
 def register(command):
     command.help = "Decode an nbs file and extract any compressed jpeg files into jpeg files"
@@ -41,11 +42,15 @@ def process_image(packet, output):
         img = cv2.cvtColor(img, cv2.COLOR_BayerGB2RGB_VNG)
 
     # Save the image
-    cv2.imwrite(os.path.join(
+    file_name = os.path.join(
         output,
         "{}_{:012d}.jpg".format(
             packet.msg.name, int(packet.msg.timestamp.seconds * 1e9 + packet.msg.timestamp.nanos)
-            )), img)
+            ))
+    cv2.imwrite(file_name, img)
+    # Hacky! Image saved above has strange behaviour
+    Image(filename=file_name).convert('jpg').save(filename=file_name)
+
 
 def process_metadata(packet, output):
     # Get the image width for calculations below
