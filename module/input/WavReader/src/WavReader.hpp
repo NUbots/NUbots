@@ -15,6 +15,8 @@ namespace module::input {
     public:
         /// @brief Called by the powerplant to build and setup the WavReader reactor.
         explicit WavReader(std::unique_ptr<NUClear::Environment> environment);
+        void readWav();
+        //void fessk(FILE*, int, );
     };
 
 }  // namespace module::input

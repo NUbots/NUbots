@@ -4,7 +4,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-
+#include <stdio.h>
 #include "extension/Configuration.hpp"
 namespace module::input {
 
@@ -22,19 +22,24 @@ namespace module::input {
             this->config.wav_path = cfg["wav_path"].as<std::string>(); //config is the name of the struct
             std::cout << config.wav_path << std::endl;
             log<NUClear::DEBUG>(config.wav_path);
-		read();
+		readWav();
         });
 		
-	WavReader::read(){
+		//auto audioData = Make_Unique<AudioData>();
+		//emit(audioData);
+		//generate new speech recognition module
+		//make reactor onTrigger audiodata (receives audiodata from this file)
+    }
+    
+    void WavReader::readWav(){
 		FILE *wavin;
 		char* buf;
 		int nread = 1, var = 0; //What is var, need to understand what these two variables are doing
 
-		//Wasn't complaing when there was no test.wav, where is this coming from?
-		wavin = fopen(config.wav_path, "rb");
+		wavin = fopen(config.wav_path.c_str(), "rb");
 		fseek(wavin, 44, SEEK_SET);
 		
-		fessk(wavin, 0, SEEK_END);
+		//fessk(wavin, 0, SEEK_END); //NOT SURE WHAT THIS IS SUPOSED TO DO
 		long size = ftell (wavin);
 		rewind(wavin);
 		
@@ -43,17 +48,10 @@ namespace module::input {
         		throw std::invalid_argument( "received negative value" );
 		}
 		else{
-			printf(std::string(buf));
+			std::cout << buf << std::endl;
 		}
 		
 		fclose(wavin);
 	}
-		
-		//make protobuf file message /w stirng of data, timestamp, 
-		//auto audioData = Make_Unique<AudioData>();
-		//emit(audioData);
-		//generate new speech recognition module
-			//make reactor onTrigger audiodata (receives audiodata from this file)
-    }
 
 }  // namespace module::input
