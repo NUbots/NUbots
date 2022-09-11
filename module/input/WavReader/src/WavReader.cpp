@@ -25,16 +25,15 @@ namespace module::input {
 		readWav();
         });
 		
-		//auto audioData = Make_Unique<AudioData>();
-		//emit(audioData);
+	
 		//generate new speech recognition module
 		//make reactor onTrigger audiodata (receives audiodata from this file)
     }
     
     void WavReader::readWav(){
 		FILE *wavin;
-		char* buf;
-		int nread = 1, var = 0; //What is var, need to understand what these two variables are doing
+		char* buf = new char();
+		int nread = 1, var = 0; //Not sur what var is, was called 'final' earlier
 
 		wavin = fopen(config.wav_path.c_str(), "rb");
 		fseek(wavin, 44, SEEK_SET);
@@ -52,6 +51,9 @@ namespace module::input {
 		}
 		
 		fclose(wavin);
+		
+		auto audioData = std::make_unique<AudioData>();
+		emit(audioData);
 	}
 
 }  // namespace module::input
