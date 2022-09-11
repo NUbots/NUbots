@@ -95,7 +95,7 @@ def process_metadata(packet, output):
 
     save_path = os.path.join(
                 output,
-                "{}_{:012d}.json".format(
+                "{}_{:012d}.yaml".format(
                     packet.msg.name, int(packet.msg.timestamp.seconds * 1e9 + packet.msg.timestamp.nanos)
                 ),
             )
