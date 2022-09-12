@@ -63,7 +63,7 @@ storiesOf('components.vision.layout', module)
           id: 1,
           name: 'Camera #1',
           image: {
-            type: 'element',
+            type: 'element-or-bitmap',
             width: 320,
             height: 240,
             image: {} as HTMLImageElement,
@@ -81,7 +81,7 @@ storiesOf('components.vision.layout', module)
           id: 2,
           name: 'Camera #2',
           image: {
-            type: 'element',
+            type: 'element-or-bitmap',
             width: 320,
             height: 240,
             image: {} as HTMLImageElement,

@@ -103,7 +103,7 @@ async function fakeCameraModel(): Promise<CameraModel> {
 async function loadImageElement(url: string, format: ImageFormat): Promise<Image> {
   const image = await loadImage(url)
   const { width, height } = image
-  return { type: 'element', width, height, image, format }
+  return { type: 'element-or-bitmap', width, height, image, format }
 }
 
 async function loadImage(url: string): Promise<HTMLImageElement> {

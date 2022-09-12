@@ -50,7 +50,7 @@ export class VisionNetwork {
         id: id,
         name,
         image: {
-          type: 'bitmap',
+          type: 'element-or-bitmap',
           image: bitmap,
           width: dimensions?.x!,
           height: dimensions?.y!,

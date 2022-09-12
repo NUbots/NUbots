@@ -59,7 +59,7 @@ storiesOf('components.vision.image_view', module)
 async function loadImageElement(url: string, format: ImageFormat): Promise<Image> {
   const image = await loadImage(url)
   const { width, height } = image
-  return { type: 'element', width, height, image, format }
+  return { type: 'element-or-bitmap', width, height, image, format }
 }
 
 async function loadImageData(
