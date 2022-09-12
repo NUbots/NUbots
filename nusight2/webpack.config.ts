@@ -68,6 +68,9 @@ export function getClientConfig({
               loader: 'css-loader',
               options: {
                 modules: {
+                  // Enable CSS modules for files matching *.module.css
+                  // See https://github.com/webpack-contrib/css-loader#auto
+                  auto: true,
                   localIdentName: '[local]_[hash:base64:5]',
                 },
                 sourceMap: !isProduction,
