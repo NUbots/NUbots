@@ -88,8 +88,8 @@ export function getClientConfig({
           ],
         },
         /*
-        External libraries generally do not support css modules so the selector mangling will break external components.
-        This separate simplified loader is used for anything within the node_modules folder instead.
+        Separate simplified loader for CSS files within the node_modules folder.
+        No CSS modules (to avoid name mangling) and no import() or url() processing.
         */
         {
           test: /\.css$/,
