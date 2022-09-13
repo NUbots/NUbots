@@ -25,24 +25,22 @@ namespace module::input {
 		readWav();
         });
 		
-	
+	//make reactor onTrigger audiodata (receives audiodata from this file)
 		//generate new speech recognition module
-		//make reactor onTrigger audiodata (receives audiodata from this file)
     }
     
     void WavReader::readWav(){
 		FILE *wavin;
 		char* buf = new char();
-		int nread = 1, var = 0; //Not sur what var is, was called 'final' earlier
+		int nread = 1, var = 0; //var stores some int value which depicts if a return result is partial or final, as in if a particular utterance is completed its considered  a final speech, its based on a few rules we shouldn't worry about 
 
 		wavin = fopen(config.wav_path.c_str(), "rb");
 		fseek(wavin, 44, SEEK_SET);
 		
-		//fessk(wavin, 0, SEEK_END); //NOT SURE WHAT THIS IS SUPOSED TO DO
 		long size = ftell (wavin);
 		rewind(wavin);
 		
-		nread = fread(buf, 1, size, wavin);
+		nread = fread(buf, 1, size, wavin); //nread is the audio's chunk which has been read from the stream 
 		if(nread != size){
         		throw std::invalid_argument( "received negative value" );
 		}
