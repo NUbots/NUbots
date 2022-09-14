@@ -4,8 +4,9 @@
 if [ "$1" == "yarn" ]; then
     shift 1
     docker-compose run \
-        -p 3000:3000 \
-        -p 9090:9090 \
+        -p 3000:3000 \ # dev
+        -p 3010:3010 \ # vite hmr
+        -p 9090:9090 \ # prod
         nusight \
         yarn "$@"
 
@@ -14,6 +15,7 @@ elif [ "$1" == "shell" ]; then
     shift 1
     docker-compose run \
         -p 3000:3000 \
+        -p 3010:3010 \
         -p 9090:9090 \
         nusight \
         bash
