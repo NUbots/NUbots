@@ -5,7 +5,7 @@ import { Component } from 'react'
 import { Renderer } from '../../../render2d/renderer'
 
 import { FieldModel } from './model'
-import style from './style.css'
+import style from './style.module.css'
 import { FieldViewModel } from './view_model'
 
 export type FieldProps = {

@@ -14,7 +14,7 @@ import { LocalisationController } from './controller'
 import { LocalisationModel } from './model'
 import { ViewMode } from './model'
 import { LocalisationNetwork } from './network'
-import style from './style.css'
+import style from './style.module.css'
 import { LocalisationViewModel } from './view_model'
 
 type LocalisationViewProps = {

@@ -3,7 +3,7 @@ import { action } from 'mobx'
 import { observer } from 'mobx-react'
 import React from 'react'
 
-import style from './style.css'
+import style from './style.module.css'
 import { Option } from './view'
 
 export type SelectOptionProps = {

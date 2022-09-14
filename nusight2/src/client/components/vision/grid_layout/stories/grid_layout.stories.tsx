@@ -9,7 +9,7 @@ import { range } from '../../../../../shared/base/range'
 import { fullscreen } from '../../../storybook/fullscreen'
 import images from '../../image_view/stories/images/image.jpg'
 import { GridLayout } from '../grid_layout'
-import styles from './styles.css'
+import styles from './style.module.css'
 import useInterval from '@use-it/interval'
 
 const imageWidth = 600
