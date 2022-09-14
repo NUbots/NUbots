@@ -32,7 +32,7 @@ export const NavigationView = ({ nav }: { nav: NavigationConfiguration }) => (
   <header className={style.header}>
     <h1 className={style.header__title}>NUsight</h1>
     <ul className={style.header__list}>
-      {...nav.getRoutes().map(config => (
+      {nav.getRoutes().map(config => (
         <NavigationItemView key={config.path} url={config.path} Icon={config.Icon}>
           {config.label}
         </NavigationItemView>
