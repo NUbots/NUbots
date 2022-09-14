@@ -20,11 +20,9 @@ export class AppView extends Component<{ nav: NavigationConfiguration }> {
             <div className={style.app__content}>
               <Suspense fallback={<div>Loading...</div>}>
                 <Routes>
-                  {...this.props.nav
-                    .getRoutes()
-                    .map(config => (
-                      <Route key={config.path} path={config.path} element={<config.Content />} />
-                    ))}
+                  {this.props.nav.getRoutes().map(config => (
+                    <Route key={config.path} path={config.path} element={<config.Content />} />
+                  ))}
                 </Routes>
               </Suspense>
             </div>
