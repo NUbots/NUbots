@@ -40,4 +40,5 @@ module.exports = {
     '**/tests/**/*.tests.{ts,tsx}',
   ],
   preset: 'ts-jest/presets/js-with-ts',
+  resolver: '<rootDir>/jest.resolver.js',
 }
