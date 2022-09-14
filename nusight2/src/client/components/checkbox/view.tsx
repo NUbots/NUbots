@@ -1,7 +1,6 @@
 import classNames from 'classnames'
 import React from 'react'
 import { ChangeEvent } from 'react'
-import { StatelessComponent } from 'react'
 
 import CheckIcon from './check.svg'
 import style from './style.module.css'
@@ -13,7 +12,7 @@ export interface CheckboxProps {
   onChange(event: ChangeEvent<HTMLInputElement>): void
 }
 
-export const Checkbox: StatelessComponent<CheckboxProps> = (props: CheckboxProps) => {
+export const Checkbox = (props: CheckboxProps) => {
   const { checked, disabled, onChange } = props
 
   const backgroundClassName = classNames(style.background, {
