@@ -115,7 +115,7 @@ export function getClientConfig({
         { test: /\.html$/, use: 'html-loader' },
         { test: /\.png$/, use: 'url-loader?limit=10000' },
         { test: /\.(jpg|glb|bin)$/, use: 'file-loader' },
-        { test: /\.(vert|frag)$/, use: path.resolve('build_scripts/glsl_loader.js') },
+        { test: /\.(vert|frag)$/, use: path.resolve('build_scripts/glsl_webpack_loader.js') },
       ],
     },
     optimization: {

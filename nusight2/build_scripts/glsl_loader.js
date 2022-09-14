@@ -1,4 +1,3 @@
-const fs = require('fs')
 const path = require('path')
 
 const includeRegex = /^[ \t]*#include[ \t]+"([^"\r\n]+)"/gm
@@ -26,22 +25,8 @@ async function expandIncludes(source, { parentDir, readFile }) {
   })
 }
 
-export default function glslLoader(source) {
-  const callback = this.async()
-
-  expandIncludes(source, {
-    parentDir: this.context,
-    readFile: async filePath => {
-      // add the file to the webpack dependency graph, to watch for changes
-      this.addDependency(filePath)
-
-      try {
-        return await fs.promises.readFile(filePath, 'utf-8')
-      } catch (error) {
-        callback(error)
-      }
-    },
-  }).then(expandedSource => {
+async function loadGlsl(source, { parentDir, readFile }) {
+  return expandIncludes(source, { parentDir, readFile }).then(expandedSource => {
     const json = JSON.stringify(expandedSource)
       // Escape paragraph and line separators which `JSON.stringify()` may allow.
       // Because we're generating JS source, unescaped paragraph and line separators
@@ -50,6 +35,8 @@ export default function glslLoader(source) {
       .replace(/\u2028/g, '\\u2028')
       .replace(/\u2029/g, '\\u2029')
 
-    callback(null, `export default ${json};`)
+    return `export default ${json};`
   })
 }
+
+module.exports.loadGlsl = loadGlsl
