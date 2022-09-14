@@ -3,6 +3,6 @@ const storybook = require('@storybook/react/standalone')
 storybook({
   mode: 'static',
   staticDir: ['src/assets'],
-  outputDir: 'dist/public/storybook',
+  outputDir: 'dist/storybook',
   configDir: __dirname,
 })
