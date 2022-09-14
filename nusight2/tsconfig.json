@@ -22,7 +22,8 @@
     "typeRoots": [
       "./node_modules/@types",
       "./typings"
-    ]
+    ],
+    "rootDir": "./"
   },
   "include": [
     "./src/**/*"

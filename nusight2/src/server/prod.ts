@@ -30,8 +30,8 @@ app.use(
   }),
 )
 app.use(compression())
-app.use(express.static(path.join('dist', 'public')))
-app.use(favicon(path.join('dist', 'public', 'favicon.ico')))
+app.use(express.static(path.join('dist')))
+app.use(favicon(path.join('dist', 'favicon.ico')))
 
 const port = process.env.PORT || 9090
 server.listen(port, () => {
