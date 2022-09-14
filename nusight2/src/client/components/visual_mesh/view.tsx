@@ -5,7 +5,7 @@ import { ComponentType } from 'react'
 
 import { CameraView } from './camera/view'
 import { VisualMeshNetwork } from './network'
-import styles from './styles.css'
+import styles from './style.module.css'
 import { VisualMeshViewModel } from './view_model'
 
 @observer

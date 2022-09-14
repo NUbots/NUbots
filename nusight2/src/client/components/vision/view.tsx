@@ -13,7 +13,7 @@ import { VisionController } from './controller'
 import { GridLayout } from './grid_layout/grid_layout'
 
 import { VisionModel } from './model'
-import styles from './styles.css'
+import styles from './style.module.css'
 
 @observer
 export class VisionView extends Component<{

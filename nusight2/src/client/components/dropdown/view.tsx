@@ -3,7 +3,7 @@ import React from 'react'
 import { ReactNode } from 'react'
 import { MouseEvent } from 'react'
 
-import style from './style.css'
+import style from './style.module.css'
 
 export interface DropdownProps {
   children?: ReactNode
