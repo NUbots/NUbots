@@ -16,9 +16,7 @@ const imageWidth = 600
 const imageHeight = 480
 const aspectRatio = imageHeight / imageWidth
 
-storiesOf('components.vision.grid_layout', module)
-  .addDecorator(fullscreen)
-  .addParameters({ layout: 'fullscreen' })
+fullscreen(storiesOf('components.vision.grid_layout', module))
   .addDecorator(withKnobs)
   .add('Renders static', () => {
     const numItems = number('Items', 2)

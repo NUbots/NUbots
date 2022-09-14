@@ -11,9 +11,7 @@ import { LocalisationRobotModel } from '../../darwin_robot/model'
 import { ModelVisualiser } from '../../darwin_robot/stories/model_visualizer'
 import { NUgusViewModel } from '../view_model'
 
-storiesOf('component.localisation.nugus_robot', module)
-  .addDecorator(fullscreen)
-  .addParameters({ layout: 'fullscreen' })
+fullscreen(storiesOf('component.localisation.nugus_robot', module))
   .add('renders statically', () => <NUgusVisualizer />)
   .add('renders animated', () => <NUgusVisualizer animate />)
 

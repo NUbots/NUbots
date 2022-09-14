@@ -10,9 +10,7 @@ import { fullscreen } from '../../../storybook/fullscreen'
 import { OdometryVisualizerModel } from '../model'
 import { OdometryVisualizer } from '../view'
 
-storiesOf('components.odometry.odometry_visualizer', module)
-  .addDecorator(fullscreen)
-  .addParameters({ layout: 'fullscreen' })
+fullscreen(storiesOf('components.odometry.odometry_visualizer', module))
   .add('Renders statically', () => <OdometryVisualizerHarness />)
   .add('Renders animated', () => <OdometryVisualizerHarness animate />)
 

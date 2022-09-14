@@ -19,9 +19,7 @@ import { Projection } from '../model'
 import { CameraModel } from '../model'
 import { CameraView } from '../view'
 
-storiesOf('components.vision.camera', module)
-  .addDecorator(fullscreen)
-  .addParameters({ layout: 'fullscreen' })
+fullscreen(storiesOf('components.vision.camera', module))
   .add('vision objects', () => {
     const box = observable<{ model: CameraModel | undefined }>({ model: undefined })
     fakeCameraModel().then(model => (box.model = model))

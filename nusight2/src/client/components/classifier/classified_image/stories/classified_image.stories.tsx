@@ -18,9 +18,7 @@ import { ClassifiedImageView } from '../view'
 
 import imageUrl from './image.jpg'
 
-storiesOf('classifier.classified_image', module)
-  .addDecorator(fullscreen)
-  .addParameters({ layout: 'fullscreen' })
+fullscreen(storiesOf('classifier.classified_image', module))
   .add('renders statically', () => {
     const random = SeededRandom.of('classifier')
     const lut = generateLut(random)
