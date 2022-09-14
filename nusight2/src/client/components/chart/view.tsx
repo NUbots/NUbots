@@ -12,7 +12,7 @@ import { ChartController } from './controller'
 import { LineChartProps } from './line_chart/view'
 import { ChartModel } from './model'
 import { ChartNetwork } from './network'
-import style from './style.css'
+import style from './style.module.css'
 import { TreeLabel } from './tree_label/view'
 
 @observer

@@ -5,7 +5,7 @@ import { ReactNode } from 'react'
 import { RobotModel } from '../robot/model'
 import { RobotSelector } from '../robot_selector/view'
 
-import style from './style.css'
+import style from './style.module.css'
 
 export function withRobotSelectorMenuBar(
   robots: RobotModel[],

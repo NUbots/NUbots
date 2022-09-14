@@ -8,7 +8,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { NavigationConfiguration } from '../../navigation'
 import { NavigationView } from '../navigation/view'
 
-import style from './style.css'
+import style from './style.module.css'
 
 export class AppView extends Component<{ nav: NavigationConfiguration }> {
   render() {

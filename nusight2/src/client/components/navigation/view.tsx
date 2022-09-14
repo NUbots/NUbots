@@ -4,7 +4,7 @@ import { NavLink } from 'react-router-dom'
 
 import { NavigationConfiguration } from '../../navigation'
 
-import style from './style.css'
+import style from './style.module.css'
 
 interface NavigationItemViewProps {
   url: string
