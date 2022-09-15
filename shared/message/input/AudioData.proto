@@ -24,7 +24,5 @@ package message.input;
 import "google/protobuf/timestamp.proto";
 
 message WavMessage{
-        string WavData {
-        }
-      
+        string WavData = 1;
 }
