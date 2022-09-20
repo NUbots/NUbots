@@ -9,17 +9,17 @@ walk:
   double_support_ratio: 0.02126588783229817
   # Give extra swing to first step for better start
   # (in ?, [0:10])
-  first_step_swing_factor: 1.0 #1.0
+  first_step_swing_factor: 1.0
   foot:
     # Lateral distance between the feet center (how spread apart the feet should be)
     # (in m, >= 0)
-    distance: 0.16573612838905935 #0.28
+    distance: 0.16573612838905935
     # Maximum flying foot height (how high we lift a foot from the ground)
     # (in m, >= 0)
-    rise: 0.06696921459985106 #0.1
+    rise: 0.06696921459985106
     # Pause of Z movement on highest point (how long we hold a foot at the top, as a ratio of how long we're standing on one foot)
     # (single support cycle ratio, [0,1])
-    z_pause: 0.0 #0.04
+    z_pause: 0.0
     put_down:
       # Let the foot's downward trajectory end above the ground
       # this is helpful if the support leg bends
@@ -37,7 +37,7 @@ walk:
     overshoot:
       # Foot X/Y overshoot in ratio of step length
       # (ratio, >= 0)
-      ratio: 0.0 #0
+      ratio: 0.0
       # Foot X/Y overshoot phase
       # (single support cycle phase, [footApexPhase:1]
       phase: 1.0
@@ -47,36 +47,36 @@ walk:
     height: 0.42587245947072816
     # Trunk pitch orientation (how much we lean the torso forward or backward, does not change)
     # (in rad)
-    pitch: 0.3960581214540991 #28
+    pitch: 0.3960581214540991
     # Phase offset of trunk oscillation
     # (half cycle phase, [-1:1])
     phase: -0.10781713685949587
     # Trunk forward offset (how much we offset the trunk forward or backward lean when walking)
     # (in m)
-    x_offset: 0.022805009368515608 # 0.045
+    x_offset: 0.022805009368515608
     # Trunk lateral offset (how much we offset the trunk left or right lean when walking)
     # (in m)
     y_offset: 0.0066027606288281675
     # Trunk lateral oscillation amplitude ratio (how much we swing the trunk left and right when stepping)
     # (ratio, >= 0)
-    swing: 0.03066984644163803 #0.05
+    swing: 0.03066984644163803
     # Trunk swing pause length in phase at apex (how long we keep the trunk at the max swing position, before swinging back)
     # (half cycle ratio, [0:1])
-    pause: 0 #0
+    pause: 0
     x_offset_p_coef:
       # Trunk forward offset proportional to forward step
       # (in 1)
-      forward: 0.0 # 0.04
+      forward: 0.0
       # Trunk forward offset proportional to rotation step
       # (in m/rad)
-      turn: 0.0 #0.09
+      turn: 0.0
     pitch_p_coef:
       # Trunk pitch orientation proportional to forward step
       # (in rad/m)
       forward: -1.098538426705446
       # Trunk pitch orientation proportional to rotation step
       # (in 1)
-      turn: 0.23005408256772517 #18
+      turn: 0.23005408256772517
   kick:
     # Length of kick movement
     # (in m, [0:1])
