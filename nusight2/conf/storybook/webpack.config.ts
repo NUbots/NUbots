@@ -28,5 +28,8 @@ export default ({ config: storybookConfig }: { config: webpack.Configuration }) 
         ...(config.resolve?.extensions || []),
       ],
     },
+    stats: {
+      errorDetails: true,
+    },
   }
 }

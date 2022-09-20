@@ -6,10 +6,6 @@ import { NUsightNetwork } from '../../network/nusight_network'
 import { AppModel } from '../app/model'
 
 import Icon from './icon.svg'
-import { VisualMeshModel } from './model'
-import { VisualMeshNetwork } from './network'
-import { VisualMeshView } from './view'
-import { VisualMeshViewModel } from './view_model'
 
 export function installVisualMesh({
   nav,
@@ -22,15 +18,15 @@ export function installVisualMesh({
   nusightNetwork: NUsightNetwork
   Menu: ComponentType
 }) {
-  const model = VisualMeshModel.of(appModel)
   nav.addRoute({
     path: '/visualmesh',
     Icon,
     label: 'Visual Mesh',
-    Content: () => {
-      const viewModel = VisualMeshViewModel.of(model)
-      const network = VisualMeshNetwork.of(nusightNetwork)
-      return <VisualMeshView viewModel={viewModel} network={network} Menu={Menu} />
-    },
+    Content: React.lazy(async () => {
+      const { createVisualMeshView } = await import('./create')
+      return {
+        default: createVisualMeshView({ appModel, nusightNetwork, Menu }),
+      }
+    }),
   })
 }

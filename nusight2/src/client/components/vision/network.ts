@@ -39,7 +39,7 @@ export class VisionNetwork {
   ) => {
     const robot = VisionRobotModel.of(robotModel)
     const { id, name, dimensions, format, data, Hcw } = image
-    const { projection, focalLength, centre, k } = image?.lens!
+    const { projection, focalLength, centre, k } = image.lens!
 
     const element = await jpegBufferToImage(data)
 
