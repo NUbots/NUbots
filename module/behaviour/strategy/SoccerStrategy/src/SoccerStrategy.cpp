@@ -25,7 +25,6 @@
 
 #include "message/behaviour/MotionCommand.hpp"
 #include "message/behaviour/Nod.hpp"
-#include "message/behaviour/SoccerObjectPriority.hpp"
 #include "message/input/GameEvents.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/localisation/ResetBallHypotheses.hpp"
@@ -50,13 +49,10 @@ namespace module::behaviour::strategy {
     using extension::Configuration;
 
     using message::behaviour::Behaviour;
-    using message::behaviour::FieldTarget;
     using message::behaviour::KickPlan;
     using KickType = message::behaviour::KickPlan::KickType;
     using message::behaviour::MotionCommand;
     using message::behaviour::Nod;
-    using message::behaviour::SoccerObjectPriority;
-    using SearchType = message::behaviour::SoccerObjectPriority::SearchType;
     using message::input::GameEvents;
     using message::input::GameState;
     using Phase          = message::input::GameState::Data::Phase;

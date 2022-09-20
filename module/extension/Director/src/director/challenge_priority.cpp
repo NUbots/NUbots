@@ -27,7 +27,7 @@
 
 namespace module::extension {
 
-    using ::extension::behaviour::commands::DirectorTask;
+    using ::extension::behaviour::commands::BehaviourTask;
 
     // Scope this struct to just this translation unit
     namespace {
@@ -41,8 +41,8 @@ namespace module::extension {
         };
     }  // namespace
 
-    bool Director::challenge_priority(const std::shared_ptr<const DirectorTask>& incumbent,
-                                      const std::shared_ptr<const DirectorTask>& challenger) {
+    bool Director::challenge_priority(const std::shared_ptr<const BehaviourTask>& incumbent,
+                                      const std::shared_ptr<const BehaviourTask>& challenger) {
 
         // If there is no incumbent the challenger wins by default
         if (incumbent == nullptr) {
@@ -58,7 +58,7 @@ namespace module::extension {
         }
 
         // Function to get the priorities of the ancestors of this task
-        auto get_ancestor_priorities = [this](const std::shared_ptr<const DirectorTask>& task) {
+        auto get_ancestor_priorities = [this](const std::shared_ptr<const BehaviourTask>& task) {
             // We are our first ancestor
             std::vector<TaskPriority> ancestors;
 

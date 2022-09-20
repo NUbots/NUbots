@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2022 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_VISION_BALLDETECTOR_HPP
@@ -27,14 +27,22 @@ namespace module::vision {
 
     class BallDetector : public NUClear::Reactor {
     private:
+        /// Configuration values
         struct {
-            float confidence_threshold       = 0.0f;
-            int cluster_points               = 0;
-            float minimum_ball_distance      = 0.0f;
-            float distance_disagreement      = 0.0f;
-            float maximum_deviation          = 0.0f;
+            /// @brief Minimum confidence required for a ball point to be a ball point
+            float confidence_threshold = 0.0f;
+            /// @brief Minimum number of points for a cluster to be a viable ball
+            int cluster_points = 0;
+            /// @brief Minimum distance for a cluster to be a viable ball
+            float minimum_ball_distance = 0.0f;
+            /// @brief Percentage difference between width and projection based distances. 0.0 means that the distance
+            /// measurements must match perfectly
+            float distance_disagreement = 0.0f;
+            /// @brief A threshold on how large the standard deviation of the angle between ray and cone axis can be
+            float maximum_deviation = 0.0f;
+            /// @brief Measurement certainties for ball localisation
             Eigen::Vector3f ball_angular_cov = Eigen::Vector3f::Zero();
-        } config{};
+        } cfg{};
 
     public:
         /// @brief Called by the powerplant to build and setup the BallDetector reactor.

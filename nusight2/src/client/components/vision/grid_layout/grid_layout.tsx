@@ -8,7 +8,7 @@ import { ContentRect } from 'react-measure'
 import Measure from 'react-measure'
 import { debounce } from 'throttle-debounce'
 import { objectFit } from '../../three/three'
-import styles from './styles.css'
+import styles from './style.module.css'
 
 @observer
 export class GridLayout extends Component<{

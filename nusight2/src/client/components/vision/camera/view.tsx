@@ -11,7 +11,7 @@ import { Canvas } from '../../three/three'
 import { Three } from '../../three/three'
 
 import { CameraModel } from './model'
-import styles from './styles.css'
+import styles from './style.module.css'
 import { CameraViewModel } from './view_model'
 
 export type CameraViewProps = {
@@ -27,6 +27,7 @@ export class CameraView extends Component<CameraViewProps> {
         <div className={styles.menu}>
           <SwitchesMenu dropdownMenuPosition="right" options={this.drawOptions} />
         </div>
+        <div className={styles.cameraName}>{this.props.model.name} </div>
       </div>
     )
   }

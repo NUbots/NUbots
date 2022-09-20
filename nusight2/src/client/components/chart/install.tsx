@@ -1,3 +1,4 @@
+import React from 'react'
 import { ComponentType } from 'react'
 
 import { NavigationConfiguration } from '../../navigation'
@@ -5,23 +6,27 @@ import { NUsightNetwork } from '../../network/nusight_network'
 import { AppModel } from '../app/model'
 
 import Icon from './icon.svg'
-import { LineChart as LineChartImpl } from './line_chart/view'
-import { ChartModel } from './model'
-import { ChartView as ChartViewImpl } from './view'
 
 export function installChart({
   nav,
   appModel,
   nusightNetwork,
-  menu,
+  Menu,
 }: {
   nav: NavigationConfiguration
   appModel: AppModel
   nusightNetwork: NUsightNetwork
-  menu: ComponentType
+  Menu: ComponentType
 }) {
-  const model = ChartModel.of({ robotModels: appModel.robots })
-  const LineChart = LineChartImpl.of(model)
-  const ChartView = ChartViewImpl.of({ model, menu, nusightNetwork, LineChart })
-  nav.addRoute({ path: '/chart', exact: true, Icon, label: 'Chart', Content: ChartView })
+  nav.addRoute({
+    path: '/chart',
+    Icon,
+    label: 'Chart',
+    Content: React.lazy(async () => {
+      const { createChartView } = await import('./create')
+      return {
+        default: createChartView({ appModel, nusightNetwork, Menu }),
+      }
+    }),
+  })
 }
