@@ -8,7 +8,6 @@
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/KinematicsModel.hpp"
 #include "message/motion/WalkCommand.hpp"
-#include "message/support/SaveConfiguration.hpp"
 #include "message/support/nusight/DataPoint.hpp"
 
 #include "utility/math/comparison.hpp"
