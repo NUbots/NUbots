@@ -32,8 +32,8 @@ namespace module::motion {
     using message::motion::WalkCommand;
 
     using utility::input::ServoID;
-    using utility::math::euler::rot2rpy;
-    using utility::math::euler::rpy2rot;
+    using utility::math::euler::EulerIntrinsicToMatrix;
+    using utility::math::euler::MatrixToEulerIntrinsic;
     using utility::motion::kinematics::calculateLegJoints;
     using utility::nusight::graph;
     using utility::support::Expression;
@@ -289,12 +289,12 @@ namespace module::motion {
         // Change goals from support foot based coordinate system to trunk based coordinate system
         // Trunk {t} from support foot {s}
         Eigen::Affine3f Hst;
-        Hst.linear()      = rpy2rot<float>(Thetast);
+        Hst.linear()      = EulerIntrinsicToMatrix(Thetast);
         Hst.translation() = rTSs;
 
         // Flying foot {f} from support foot {s}
         Eigen::Affine3f Hsf;
-        Hsf.linear()      = rpy2rot<float>(Thetasf);
+        Hsf.linear()      = EulerIntrinsicToMatrix(Thetasf);
         Hsf.translation() = rFSs;
 
         // Support foot {s} from trunk {t}
@@ -318,19 +318,16 @@ namespace module::motion {
         if (log_level <= NUClear::DEBUG) {
             emit(graph("Left foot desired position (x,y,z)", Htl(0, 3), Htl(1, 3), Htl(2, 3)));
             emit(graph("Right foot desired position (x,y,z)", Htr(0, 3), Htr(1, 3), Htr(2, 3)));
-            emit(graph("Left foot desired orientation (r,p,y)",
-                       rot2rpy<float>(Htl.block(0, 0, 3, 3)).x(),
-                       rot2rpy<float>(Htl.block(0, 0, 3, 3)).y(),
-                       rot2rpy<float>(Htl.block(0, 0, 3, 3)).z()));
-            emit(graph("Right foot desired orientation (r,p,y)",
-                       rot2rpy<float>(Htr.block(0, 0, 3, 3)).x(),
-                       rot2rpy<float>(Htr.block(0, 0, 3, 3)).y(),
-                       rot2rpy<float>(Htr.block(0, 0, 3, 3)).z()));
+            Eigen::Matrix<float, 3, 3> Rtl     = Htl.block(0, 0, 3, 3);
+            Eigen::Matrix<float, 3, 1> Rtl_rpy = MatrixToEulerIntrinsic(Rtl);
+            emit(graph("Left foot desired orientation (r,p,y)", Rtl_rpy.x(), Rtl_rpy.y(), Rtl_rpy.z()));
+            Eigen::Matrix<float, 3, 3> Rtr     = Htr.block(0, 0, 3, 3);
+            Eigen::Matrix<float, 3, 1> Rtr_rpy = MatrixToEulerIntrinsic(Rtr);
+            emit(graph("Right foot desired orientation (r,p,y)", Rtr_rpy.x(), Rtr_rpy.y(), Rtr_rpy.z()));
             emit(graph("Trunk desired position (x,y,z)", Hst(0, 3), Hst(1, 3), Hst(2, 3)));
-            emit(graph("Trunk desired orientation (r,p,y)",
-                       rot2rpy<float>(Hst.linear()).x(),
-                       rot2rpy<float>(Hst.linear()).y(),
-                       rot2rpy<float>(Hst.linear()).z()));
+            Eigen::Matrix<float, 3, 3> Rst     = Hst.linear();
+            Eigen::Matrix<float, 3, 1> Rst_rpy = MatrixToEulerIntrinsic(Rst);
+            emit(graph("Trunk desired orientation (r,p,y)", Rst_rpy.x(), Rst_rpy.y(), Rst_rpy.z()));
         }
     }
 
