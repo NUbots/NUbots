@@ -23,6 +23,6 @@ package message.input;
 
 import "google/protobuf/timestamp.proto";
 
-message WavMessage{
+message AudioData{
         string WavData = 1;
 }

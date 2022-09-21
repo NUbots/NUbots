@@ -5,13 +5,16 @@
 #include <iostream>
 #include <string>
 #include <stdio.h>
+
 #include "extension/Configuration.hpp"
+
+#include "message/support/GlobalConfig.hpp"
+#include "message/input/AudioData.hpp"
+
 namespace module::input {
 
     using extension::Configuration;
- 
-    //function to read wav file - See example of functions in
- 
+    using message::input::AudioData;
 	
     WavReader::WavReader(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), config{} {
@@ -25,8 +28,11 @@ namespace module::input {
 		readWav();
         });
 		
-	//make reactor onTrigger audiodata (receives audiodata from this file)
-		//generate new speech recognition module
+		//make reactor onTrigger audiodata (receives audiodata from this file)
+		//on<Trigger<AudioData>>().then([this] (AudioData& audioData ) {
+		    // reactor code
+		//});
+
     }
     
     void WavReader::readWav(){
