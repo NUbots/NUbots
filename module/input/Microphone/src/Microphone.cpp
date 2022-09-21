@@ -1,5 +1,6 @@
 #include "Microphone.hpp"
 
+#include <iostream>
 #include <stdexcept>
 
 #include "portaudio.h"
@@ -9,6 +10,28 @@
 namespace module::input {
 
     using extension::Configuration;
+
+    // PortAudio callback function
+    static int microphone_callback(const void* input,
+                                   void* output,
+                                   unsigned long frameCount,
+                                   const PaStreamCallbackTimeInfo* timeInfo,
+                                   PaStreamCallbackFlags statusFlags,
+                                   void* userData) {
+
+        float* microphone_input    = (float*) input;
+        std::vector<float> m_input = {};
+
+        // log<NUClear::DEBUG>(microphone_input);
+
+        for (long unsigned int i = 0; i < frameCount; i++) {
+            m_input.push_back(microphone_input[i]);
+            std::cout << microphone_input[i] << std::endl;
+        }
+
+
+        return 0;
+    }
 
     Microphone::Microphone(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), config{} {
@@ -57,24 +80,6 @@ namespace module::input {
         });
     }
 
-    // PortAudio callback function
-    static int Microphone::microphone_callback(const void* input,
-                                               void* output,
-                                               unsigned long frameCount,
-                                               const PaStreamCallbackTimeInfo* timeInfo,
-                                               PaStreamCallbackFlags statusFlags,
-                                               void* userData) {
-
-        float* microphone_input    = (float*) input;
-        std::vector<float> m_input = {};
-
-        for (int i = 0; i < frameCount; i++) {
-            m_input.push_back(microphone_input[i]);
-            log<NUClear::DEBUG>(microphone_input[i]);
-        }
-
-        return 0;
-    }
 
     void Microphone::check_error(PaError err) {
         if (err != paNoError) {
