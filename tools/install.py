@@ -51,44 +51,28 @@ def run(target, local, user, config, toolchain, **kwargs):
 
     # Target location to install to
     if local:
-        target_name = target
-        target_binaries_dir = os.path.abspath(os.path.join(target, "binaries"))
-        target_toolchain_dir = os.path.abspath(os.path.join(target, "toolchain"))
+        target_binaries_dir = os.path.abspath(os.path.join(target, f"binaries{os.sep}"))
+        target_toolchain_dir = os.path.abspath(os.path.join(target, f"toolchain{os.sep}"))
 
         # Ensure the directories exist
         os.makedirs(target_binaries_dir, exist_ok=True)
         os.makedirs(target_toolchain_dir, exist_ok=True)
     else:
-        target_name = "{0}@{1}".format(user, target)
         target_binaries_dir = "{0}@{1}:/home/{0}/".format(user, target)
         target_toolchain_dir = "{0}@{1}:/usr/".format(user, target)
 
     # Build directory on the robot
     build_dir = b.binary_dir
 
-    # Traverse all binaries, including in subfolders
-    for dirpath, _, filenames in os.walk(os.path.join(build_dir, "bin")):
-        # Get the paths locally and on the robot for this binary folder
-        binary_subdirectory = os.path.normpath(dirpath).split(os.path.join(build_dir, "bin"))[1].strip("/")
-        target_subdirectory = os.path.join(target_binaries_dir, binary_subdirectory)
+    # Recursively gather all files under build/bin
+    cprint("Installing binaries to " + target_binaries_dir, "blue", attrs=["bold"])
+    files = glob.glob(os.path.join(build_dir, "bin", "**", "*"), recursive=True)
 
-        cprint(
-            "Installing binaries to " + target_subdirectory,
-            "blue",
-            attrs=["bold"],
-        )
-
-        # Get all of the binaries in the bin (sub)folder
-        files = []
-        for filename in filenames:
-            files.append(os.path.join(dirpath, filename))
-
-        # Make the subdirectory if it doesn't exist on the robot
-        directory_to_make = os.path.normpath(target_subdirectory).split(":")[1]
-        subprocess.run(["ssh", target_name, "mkdir", "-p", directory_to_make])
-
-        # Send the binaries for this folder across to the robot
-        subprocess.run(["rsync", "-avPl", "--checksum", "-e ssh"] + files + [target_subdirectory])
+    # Add a /./ to files so rsync --relative/-R behaves how we want it to
+    # For example, /home/fourtel/build/bin/horus will become /home/fourtel/build/bin/./horus
+    common_path = os.path.commonpath(files)
+    files = [os.path.join(common_path, f.replace(common_path, ".")) for f in files]
+    subprocess.call(["rsync", "-avPlR", "--checksum", "-e ssh"] + files + [target_binaries_dir])
 
     if toolchain:
         # Get all of our required shared libraries in our toolchain and send them
