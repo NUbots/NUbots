@@ -1,6 +1,7 @@
 import { computed } from 'mobx'
 import { action } from 'mobx'
 import { observer } from 'mobx-react'
+import { PropsWithChildren } from 'react'
 import React from 'react'
 import { Component } from 'react'
 import { ComponentType } from 'react'
@@ -12,13 +13,13 @@ import { VisionController } from './controller'
 import { GridLayout } from './grid_layout/grid_layout'
 
 import { VisionModel } from './model'
-import styles from './styles.css'
+import styles from './style.module.css'
 
 @observer
 export class VisionView extends Component<{
   controller: VisionController
   model: VisionModel
-  Menu: ComponentType
+  Menu: ComponentType<PropsWithChildren>
   CameraView: ComponentType<CameraViewProps>
 }> {
   render() {
