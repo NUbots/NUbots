@@ -3,7 +3,10 @@ import argparse
 import os
 import pkgutil
 import re
+import subprocess
 import sys
+
+from dependencies import find_dependency, install_dependency
 
 # Don't make .pyc files
 sys.dont_write_bytecode = True
@@ -98,7 +101,22 @@ if __name__ == "__main__":
                     if sys.argv[1 : len(components) + 1] == components:
 
                         # Load the module
-                        module = pkgutil.find_loader(".".join(components)).load_module()
+                        try:
+                            module = pkgutil.find_loader(".".join(components)).load_module()
+                        except ModuleNotFoundError as e:
+                            print(f'missing command dependency "{e.name}"')
+
+                            dependency = find_dependency(e.name, user_tools_path)
+                            package = dependency["version"]
+
+                            print(f'installing missing dependency "{package}"...')
+                            print()
+
+                            install_dependency(package)
+
+                            # Try re-running the current command now that the library exists
+                            sys.exit(subprocess.call([sys.executable, *sys.argv]))
+
                         if hasattr(module, "register") and hasattr(module, "run"):
 
                             # Build up the base subcommands to this point
@@ -108,6 +126,7 @@ if __name__ == "__main__":
                                     dest="{}_command".format(c),
                                     help="Commands related to working with {} functionality".format(c),
                                 )
+                            subcommand.required = True
 
                             module.register(subcommand.add_parser(components[-1]))
                             # Try to provide completion
