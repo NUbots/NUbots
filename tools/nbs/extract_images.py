@@ -4,16 +4,17 @@ import json
 import os
 import types
 
+import cv2
+import numpy as np
 import tensorflow as tf
+import yaml
 from tqdm import tqdm
+from wand.image import Image
 
 from utility.nbs import LinearDecoder
 
 from .images import decode_image, fourcc
-import cv2
-import numpy as np
-import yaml
-from wand.image import Image
+
 
 def register(command):
     command.help = "Decode an nbs file and extract any compressed jpeg files into jpeg files"
@@ -23,6 +24,7 @@ def register(command):
         "files", metavar="files", nargs="+", help="The nbs files to extract the compressed images from"
     )
     command.add_argument("--output", "-o", nargs="?", default=os.getcwd(), help="The folder to extract the images into")
+
 
 # Gets the image and debayers if needed, then saves the image
 def process_image(packet, output):
@@ -44,12 +46,11 @@ def process_image(packet, output):
     # Save the image
     file_name = os.path.join(
         output,
-        "{}_{:012d}.jpg".format(
-            packet.msg.name, int(packet.msg.timestamp.seconds * 1e9 + packet.msg.timestamp.nanos)
-            ))
+        "{}_{:012d}.jpg".format(packet.msg.name, int(packet.msg.timestamp.seconds * 1e9 + packet.msg.timestamp.nanos)),
+    )
     cv2.imwrite(file_name, img)
     # Hacky! Image saved above has strange behaviour
-    Image(filename=file_name).convert('jpg').save(filename=file_name)
+    Image(filename=file_name).convert("jpg").save(filename=file_name)
 
 
 def process_metadata(packet, output):
@@ -75,11 +76,7 @@ def process_metadata(packet, output):
     # Get the Hwc matrix
     Hco = packet.msg.Hcw
     rCOc = np.array([-Hco.x.t, -Hco.y.t, -Hco.z.t])
-    Roc = np.array([
-        [Hco.x.x, Hco.y.x, Hco.z.x],
-        [Hco.x.y, Hco.y.y, Hco.z.y],
-        [Hco.x.z, Hco.y.z, Hco.z.z]
-    ])
+    Roc = np.array([[Hco.x.x, Hco.y.x, Hco.z.x], [Hco.x.y, Hco.y.y, Hco.z.y], [Hco.x.z, Hco.y.z, Hco.z.z]])
     rCOo = np.matmul(Roc, rCOc).tolist()
 
     Hoc = [
@@ -92,20 +89,19 @@ def process_metadata(packet, output):
     camera_data = {
         "projection": projection,
         "focal_length": focal_length,
-        'centre': centre,
+        "centre": centre,
         "k": k,
         "fov": fov,
         "Hoc": Hoc,
     }
 
     save_path = os.path.join(
-                output,
-                "{}_{:012d}.yaml".format(
-                    packet.msg.name, int(packet.msg.timestamp.seconds * 1e9 + packet.msg.timestamp.nanos)
-                ),
-            )
-    with open(save_path, 'w') as file:
+        output,
+        "{}_{:012d}.yaml".format(packet.msg.name, int(packet.msg.timestamp.seconds * 1e9 + packet.msg.timestamp.nanos)),
+    )
+    with open(save_path, "w") as file:
         yaml.safe_dump(camera_data, file, default_flow_style=True)
+
 
 def run(files, output, **kwargs):
 
