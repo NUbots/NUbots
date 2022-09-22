@@ -8,7 +8,7 @@ import BatteryIcon from './icon/battery.svg'
 import CameraIcon from './icon/camera.svg'
 import GoalIcon from './icon/goal.svg'
 import WarningIcon from './icon/warning.svg'
-import style from './style.css'
+import style from './style.module.css'
 
 export type LastStatus = 'okay' | 'warning' | 'danger'
 
