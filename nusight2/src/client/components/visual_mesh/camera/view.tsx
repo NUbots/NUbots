@@ -5,7 +5,7 @@ import React from 'react'
 import { Component } from 'react'
 import ReactResizeDetector from 'react-resize-detector'
 
-import styles from './styles.css'
+import styles from './style.module.css'
 import { CameraViewModel } from './view_model'
 
 @observer

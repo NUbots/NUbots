@@ -17,6 +17,9 @@ RUN echo -e "Server=http://host.docker.internal:7878/\$repo/os/\$arch\nServer=ht
 # If you ever update the mirror date, search the repository for UPDATE MIRRORS HERE to find all the places where the URL
 # needs to be altered.
 
+# Setup pacman first before we install so we can turn off pgp
+COPY etc/pacman.conf /etc/pacman.conf
+
 # Arch recommends running this as the first command of the docker image
 # Use "yyuu" to allow for downgrades
 # There wont be any downgrades provided the date in Server line above is the same
@@ -25,7 +28,6 @@ RUN pacman -Syyuu --noconfirm --needed --overwrite \*
 
 # Add a script that installs packages
 COPY usr/local/bin/install-package /usr/local/bin/install-package
-COPY etc/pacman/pacman.latest.conf /etc/pacman.latest.conf
 
 # Install base packages needed for building general toolchain
 # If you have a tool that's needed for a specific module install it before that module
@@ -278,6 +280,9 @@ RUN install-from-source https://github.com/ysims/VisualMesh/archive/1c8d08b8d93a
     -DBUILD_TENSORFLOW_OP=OFF \
     -DBUILD_EXAMPLES=OFF \
     -DBUILD_OPENCL_ENGINE=ON
+
+# JSON for modern C++ (https://github.com/nlohmann/json)
+RUN install-header-from-source https://github.com/nlohmann/json/releases/download/v3.10.5/json.hpp
 
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
