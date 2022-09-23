@@ -4,7 +4,7 @@ import { ChangeEvent } from 'react'
 import { StatelessComponent } from 'react'
 
 import CheckIcon from './check.svg'
-import style from './style.css'
+import style from './style.module.css'
 
 export interface CheckboxProps {
   checked: boolean

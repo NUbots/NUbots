@@ -3,6 +3,7 @@ import { computed } from 'mobx'
 import { disposeOnUnmount } from 'mobx-react'
 import { observer } from 'mobx-react'
 import { now } from 'mobx-utils'
+import { PropsWithChildren } from 'react'
 import React from 'react'
 import { ComponentType } from 'react'
 
@@ -13,12 +14,12 @@ import { LocalisationController } from './controller'
 import { LocalisationModel } from './model'
 import { ViewMode } from './model'
 import { LocalisationNetwork } from './network'
-import style from './style.css'
+import style from './style.module.css'
 import { LocalisationViewModel } from './view_model'
 
 type LocalisationViewProps = {
   controller: LocalisationController
-  menu: ComponentType<{}>
+  Menu: ComponentType<{}>
   model: LocalisationModel
   network: LocalisationNetwork
 }
@@ -51,7 +52,7 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
   render(): JSX.Element {
     return (
       <div className={style.localisation}>
-        <LocalisationMenuBar menu={this.props.menu} onHawkEyeClick={this.onHawkEyeClick} />
+        <LocalisationMenuBar Menu={this.props.Menu} onHawkEyeClick={this.onHawkEyeClick} />
         <div className={style.localisation__canvas}>
           <Three ref={this.canvas} onClick={this.onClick} stage={this.stage} />
         </div>
@@ -112,13 +113,13 @@ export class LocalisationView extends React.Component<LocalisationViewProps> {
 }
 
 interface LocalisationMenuBarProps {
-  menu: ComponentType<{}>
+  Menu: ComponentType<PropsWithChildren>
 
   onHawkEyeClick(): void
 }
 
 const LocalisationMenuBar = observer((props: LocalisationMenuBarProps) => {
-  const { menu: Menu } = props
+  const { Menu } = props
   return (
     <Menu>
       <ul className={style.localisation__menu}>
