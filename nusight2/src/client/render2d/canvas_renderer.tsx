@@ -14,7 +14,7 @@ import { Vector2 } from '../math/vector2'
 import { renderObject2d } from './canvas/rendering'
 import { applyTransform } from './canvas/rendering'
 import { RendererProps } from './renderer_props'
-import style from './style.css'
+import style from './style.module.css'
 
 @observer
 export class CanvasRenderer extends Component<RendererProps> {
