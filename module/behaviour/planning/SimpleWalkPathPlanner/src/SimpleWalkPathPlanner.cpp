@@ -118,8 +118,7 @@ namespace module::behaviour::planning {
 
                     case message::behaviour::MotionCommand::Type::BALL_APPROACH: vision_walk_path(ball); return;
 
-                    // TODO(MotionTeam): Walk to a given position and heading on the field, avoiding obstacles
-                    case message::behaviour::MotionCommand::Type::WALK_TO_STATE: return;
+                    case message::behaviour::MotionCommand::Type::ROTATE_ON_SPOT: rotate_on_spot(); return;
 
                     case message::behaviour::MotionCommand::Type::ROTATE_ON_SPOT:
                         rotate_on_spot(latest_command.clockwise);

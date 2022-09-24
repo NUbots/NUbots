@@ -7,7 +7,7 @@ import { TwitterPicker } from 'react-color'
 import { TreeNodeModel } from '../../checkbox_tree/model'
 import { TreeViewModel } from '../view_model'
 
-import style from './style.css'
+import style from './style.module.css'
 
 type TreeLabelProps = {
   node: TreeNodeModel

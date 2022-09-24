@@ -2,7 +2,7 @@
 
 ## Description
 
-This module allows for sending data from NUbots to [PlotJuggler](https://www.plotjuggler.io/) for plotting in real time. It does this by listening for `DataPoint` messages (what we use for plotting in NUsight), transforming them to a format suitable for PlotJuggler, and sending them to PlotJuggler via UDP.
+This module allows for sending data from NUbots to [PlotJuggler](https://www.plotjuggler.io) for plotting in real time. It does this by listening for `DataPoint` messages (what we use for plotting in NUsight), transforming them to a suitable format and sending them to PlotJuggler via UDP.
 
 ## Usage
 
@@ -54,7 +54,7 @@ To plot data from a role you're working on using PlotJuggler, do the following.
 > **Note**
 > If you're not seeing data in PlotJuggler, double check that the UDP server is running, `PlotJuggler.yaml` has the right configuration, and your role is sending data. You can also set the `send_debug_waves` config option to `true` to send sample data to PlotJuggler to test the connection.
 
-## Dependencies
+## Consumes
 
 - `message::support::nusight::DataPoint` - listens for these from the rest of the codebase, transforming and forwarding them to PlotJuggler
 
@@ -62,3 +62,7 @@ To plot data from a role you're working on using PlotJuggler, do the following.
 
 - `message::support::nusight::DataPoint` - when debug waves are enabled for testing the connection to PlotJuggler
 - JSON-formatted packets to PlotJuggler via UDP
+
+## Dependencies
+
+- JSON for modern C++ library

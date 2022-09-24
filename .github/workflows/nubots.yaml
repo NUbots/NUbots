@@ -94,7 +94,7 @@ jobs:
 
       # Build the docker image
       - name: 🐳 Build the docker image 🐳
-        uses: docker/build-push-action@v3.0.0
+        uses: docker/build-push-action@v3.1.0
         with:
           pull: true
           tags: "crafty15/nubots:pull-request-${{ github.event.number }}"
@@ -142,7 +142,7 @@ jobs:
         run: mkdir -p ../build
 
       - name: Configure the code
-        run: ./b configure -- -DBUILD_TESTS=ON -DCI_BUILD=ON
+        run: ./b configure -- -DBUILD_TESTS=ON # -DCI_BUILD=ON
 
       - name: Build the code
         run: ./b build
