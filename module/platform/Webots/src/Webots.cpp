@@ -703,8 +703,8 @@ namespace module::platform {
             log<NUClear::TRACE>("      value:", sensor.value);
         }
 
-        log<NUClear::TRACE>("  sm.odometry_ground_truth:");
         if (sensor_measurements.odometry_ground_truth.exists) {
+            log<NUClear::TRACE>("  sm.odometry_ground_truth:");
             log<NUClear::TRACE>("    Htw:\n", sensor_measurements.odometry_ground_truth.Htw);
         }
 
