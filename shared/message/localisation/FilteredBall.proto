@@ -16,22 +16,22 @@
  *
  * Copyright 2017 NUbots <nubots@nubots.net>
  */
- syntax = "proto3";
+syntax = "proto3";
 
- package message.localisation;
+package message.localisation;
 
- import "Vector.proto";
- import "google/protobuf/timestamp.proto";
+import "Vector.proto";
+import "google/protobuf/timestamp.proto";
 
- message FilteredBall {
-     /// Ball's cartesian position measured in torso space {t}
-     fvec3 rBTt = 1;
-     /// Time the ball measurement was taken
-     google.protobuf.Timestamp time_of_measurement = 2;
-     /// Distance to ball in x-y plane in torso space {t}
-     float distance = 3;
-     /// Absolute yaw angle to ball in torso space {t}
-     float absolute_yaw_angle = 4;
-     /// Spherical Reciprocal Coordinates (1/distance, phi, theta) in camera space {t}
-     fvec3 srBCc = 5;
- }
+message FilteredBall {
+    /// Ball's cartesian position measured in torso space {t}
+    fvec3 rBTt = 1;
+    /// Time the ball measurement was taken
+    google.protobuf.Timestamp time_of_measurement = 2;
+    /// Distance to ball in x-y plane in torso space {t}
+    float distance = 3;
+    /// Absolute yaw angle to ball in torso space {t}
+    float absolute_yaw_angle = 4;
+    /// Spherical Reciprocal Coordinates (1/distance, phi, theta) in camera space {t}
+    fvec3 srBCc = 5;
+}
