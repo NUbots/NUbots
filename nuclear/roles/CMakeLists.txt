@@ -36,11 +36,8 @@ foreach(role_file ${role_files})
 
   # Join the role name with the role path again
   if(role_path)
-    string(REPLACE "/" "_" role_folder ${role_path})
-    string(CONCAT role_folder ${role_folder} ";" ${role_name})
     string(CONCAT role_var "ROLE_" ${role_path} "-" ${role_name})
   else()
-    string(CONCAT role_folder ".;" ${role_name})
     string(CONCAT role_var "ROLE_" ${role_name})
   endif()
 

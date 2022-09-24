@@ -36,14 +36,14 @@ function(NUCLEAR_ROLE)
 
   # IDE folder
   if(role_path)
-    set_property(TARGET ${role} PROPERTY FOLDER "roles/${role_path}/")
+    set_target_properties(${role} PROPERTY FOLDER "roles/${role_path}/")
   else()
-    set_property(TARGET ${role} PROPERTY FOLDER "roles/")
+    set_target_properties(${role} PROPERTY FOLDER "roles/")
   endif()
 
   # Store the used NUClear modules on the target as a property This can be used later in scripts to work out what
   # modules are used in the role
-  set_property(TARGET ${role} PROPERTY NUCLEAR_MODULES ${role_modules})
+  set_target_properties(${role} PROPERTY NUCLEAR_MODULES ${role_modules})
 
   # * We add to the global cache variable here that contains all of the module we are using
   # * Elsewhere, this is used to include the directories for these in order to build them
