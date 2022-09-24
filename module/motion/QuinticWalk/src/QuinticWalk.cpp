@@ -316,17 +316,16 @@ namespace module::motion {
 
         // Plot graphs of desired trajectories
         if (log_level <= NUClear::DEBUG) {
+            Eigen::Vector3f thetaTL = MatrixToEulerIntrinsic(Htl.linear());
             emit(graph("Left foot desired position (x,y,z)", Htl(0, 3), Htl(1, 3), Htl(2, 3)));
+            emit(graph("Left foot desired orientation (r,p,y)", thetaTL.x(), thetaTL.y(), thetaTL.z()));
+
+            Eigen::Vector3f thetaTR = MatrixToEulerIntrinsic(Htr.linear());
             emit(graph("Right foot desired position (x,y,z)", Htr(0, 3), Htr(1, 3), Htr(2, 3)));
+            emit(graph("Right foot desired orientation (r,p,y)", thetaTR.x(), thetaTR.y(), thetaTR.z()));
 
-            Eigen::Vector3f Rtl_rpy = MatrixToEulerIntrinsic(Htl.linear());
-            emit(graph("Left foot desired orientation (r,p,y)", Rtl_rpy.x(), Rtl_rpy.y(), Rtl_rpy.z()));
-
-            Eigen::Vector3f Rtr_rpy = MatrixToEulerIntrinsic(Htr.linear());
-            emit(graph("Right foot desired orientation (r,p,y)", Rtr_rpy.x(), Rtr_rpy.y(), Rtr_rpy.z()));
             emit(graph("Trunk desired position (x,y,z)", Hst(0, 3), Hst(1, 3), Hst(2, 3)));
-            Eigen::Vector3f Rst_rpy = MatrixToEulerIntrinsic(Hst.linear());
-            emit(graph("Trunk desired orientation (r,p,y)", Rst_rpy.x(), Rst_rpy.y(), Rst_rpy.z()));
+            emit(graph("Trunk desired orientation (r,p,y)", thetaST.x(), thetaST.y(), thetaST.z()));
         }
     }
 
