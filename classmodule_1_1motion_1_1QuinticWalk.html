@@ -170,12 +170,12 @@ static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>UPDAT
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
-<tr class="memitem:a5a0294539b1879195c14b29a89d75741"><td class="memItemLeft" align="right" valign="top"><a id="a5a0294539b1879195c14b29a89d75741"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>calculateJointGoals</b> ()</td></tr>
-<tr class="separator:a5a0294539b1879195c14b29a89d75741"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0df70eb4e58b714f896899ab855b0b0e"><td class="memItemLeft" align="right" valign="top"><a id="a0df70eb4e58b714f896899ab855b0b0e"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>getTimeDelta</b> ()</td></tr>
-<tr class="separator:a0df70eb4e58b714f896899ab855b0b0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2b122b948b51333281bb48b682632352"><td class="memItemLeft" align="right" valign="top"><a id="a2b122b948b51333281bb48b682632352"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>calculate_joint_goals</b> ()</td></tr>
+<tr class="separator:a2b122b948b51333281bb48b682632352"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4be0ec8b85f8b511812f7e308c57bbc8"><td class="memItemLeft" align="right" valign="top"><a id="a4be0ec8b85f8b511812f7e308c57bbc8"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><b>get_time_delta</b> ()</td></tr>
+<tr class="separator:a4be0ec8b85f8b511812f7e308c57bbc8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3d5e014f81a1dff1852d1aed42a0779c"><td class="memItemLeft" align="right" valign="top"><a id="a3d5e014f81a1dff1852d1aed42a0779c"></a>
 std::unique_ptr&lt; message::behaviour::ServoCommands &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>motion</b> (const std::vector&lt; std::pair&lt; <a class="el" href="structutility_1_1input_1_1ServoID.html">utility::input::ServoID</a>, float &gt;&gt; &amp;joints)</td></tr>
 <tr class="separator:a3d5e014f81a1dff1852d1aed42a0779c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -203,12 +203,6 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>first_config</b> = tr
 <tr class="memitem:abe3b227ff4b467a79fbfca93a4f4db1f"><td class="memItemLeft" align="right" valign="top"><a id="abe3b227ff4b467a79fbfca93a4f4db1f"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>first_run</b> = true</td></tr>
 <tr class="separator:abe3b227ff4b467a79fbfca93a4f4db1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9b8340e2bed2f706836a9e8e123d3ff2"><td class="memItemLeft" align="right" valign="top"><a id="a9b8340e2bed2f706836a9e8e123d3ff2"></a>
-Eigen::Vector3f&#160;</td><td class="memItemRight" valign="bottom"><b>foot_axis</b> = Eigen::Vector3f::Zero()</td></tr>
-<tr class="separator:a9b8340e2bed2f706836a9e8e123d3ff2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aea90d6d34923a5d1984a637a52781ba8"><td class="memItemLeft" align="right" valign="top"><a id="aea90d6d34923a5d1984a637a52781ba8"></a>
-Eigen::Vector3f&#160;</td><td class="memItemRight" valign="bottom"><b>foot_pos</b> = Eigen::Vector3f::Zero()</td></tr>
-<tr class="separator:aea90d6d34923a5d1984a637a52781ba8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2c4771bbf7c1ebd0161e12a7b709bdab"><td class="memItemLeft" align="right" valign="top"><a id="a2c4771bbf7c1ebd0161e12a7b709bdab"></a>
 struct <a class="el" href="structmodule_1_1motion_1_1QuinticWalk_1_1Config.html">module::motion::QuinticWalk::Config</a>&#160;</td><td class="memItemRight" valign="bottom"><b>goalie_config</b></td></tr>
 <tr class="separator:a2c4771bbf7c1ebd0161e12a7b709bdab"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -227,16 +221,10 @@ NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><b
 <tr class="memitem:ae7b8482047f25ccbf4b7d9f8a9ddb96a"><td class="memItemLeft" align="right" valign="top"><a id="ae7b8482047f25ccbf4b7d9f8a9ddb96a"></a>
 struct <a class="el" href="structmodule_1_1motion_1_1QuinticWalk_1_1Config.html">module::motion::QuinticWalk::Config</a>&#160;</td><td class="memItemRight" valign="bottom"><b>normal_config</b></td></tr>
 <tr class="separator:ae7b8482047f25ccbf4b7d9f8a9ddb96a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a641fc409c871d14486f33ef8d6c4b022"><td class="memItemLeft" align="right" valign="top"><a id="a641fc409c871d14486f33ef8d6c4b022"></a>
-size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1motion_1_1QuinticWalk.html#a641fc409c871d14486f33ef8d6c4b022">subsumptionId</a> = 1</td></tr>
-<tr class="memdesc:a641fc409c871d14486f33ef8d6c4b022"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current subsumption ID key to access motors. <br /></td></tr>
-<tr class="separator:a641fc409c871d14486f33ef8d6c4b022"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a914985515d72baab32182d2ad1d56896"><td class="memItemLeft" align="right" valign="top"><a id="a914985515d72baab32182d2ad1d56896"></a>
-Eigen::Vector3f&#160;</td><td class="memItemRight" valign="bottom"><b>trunk_axis</b> = Eigen::Vector3f::Zero()</td></tr>
-<tr class="separator:a914985515d72baab32182d2ad1d56896"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a54264508c70b3783ed86d928bfec995e"><td class="memItemLeft" align="right" valign="top"><a id="a54264508c70b3783ed86d928bfec995e"></a>
-Eigen::Vector3f&#160;</td><td class="memItemRight" valign="bottom"><b>trunk_pos</b> = Eigen::Vector3f::Zero()</td></tr>
-<tr class="separator:a54264508c70b3783ed86d928bfec995e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3062c39f5d65d9460979d297b368096b"><td class="memItemLeft" align="right" valign="top"><a id="a3062c39f5d65d9460979d297b368096b"></a>
+size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1motion_1_1QuinticWalk.html#a3062c39f5d65d9460979d297b368096b">subsumption_id</a> = 1</td></tr>
+<tr class="memdesc:a3062c39f5d65d9460979d297b368096b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current subsumption ID key to access motors. <br /></td></tr>
+<tr class="separator:a3062c39f5d65d9460979d297b368096b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a20ccab9156762e4060022a5eadb831f8"><td class="memItemLeft" align="right" valign="top"><a id="a20ccab9156762e4060022a5eadb831f8"></a>
 ReactionHandle&#160;</td><td class="memItemRight" valign="bottom"><b>update_handle</b> {}</td></tr>
 <tr class="separator:a20ccab9156762e4060022a5eadb831f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -300,7 +288,7 @@ ReactionHandle&#160;</td><td class="memItemRight" valign="bottom"><b>update_hand
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>motion</b></li><li class="navelem"><a class="el" href="classmodule_1_1motion_1_1QuinticWalk.html">QuinticWalk</a></li>
-    <li class="footer">Generated on Sat Sep 24 2022 01:36:37 for NUbots by
+    <li class="footer">Generated on Sat Sep 24 2022 03:16:27 for NUbots by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.17 </li>
   </ul>

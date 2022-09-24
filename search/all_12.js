@@ -47,7 +47,7 @@ var searchData=
   ['resamplemethod_551',['ResampleMethod',['../classutility_1_1math_1_1filter_1_1ParticleFilter.html#a87b84437479faf42b4ce81fbc70bdb9d',1,'utility::math::filter::ParticleFilter']]],
   ['reset_552',['reset',['../classmodule_1_1motion_1_1QuinticWalkEngine.html#a6fe28a9c1e3a88678ca3799b8757041b',1,'module::motion::QuinticWalkEngine::reset()'],['../classutility_1_1motion_1_1splines_1_1Footstep.html#a49725499d4b1571292353c18a322c385',1,'utility::motion::splines::Footstep::reset()'],['../classutility_1_1motion_1_1splines_1_1SplineContainer.html#ad9d9010a06b0c92703ad81a69cbeb7f1',1,'utility::motion::splines::SplineContainer::reset()']]],
   ['reset_5fin_5finitial_553',['reset_in_initial',['../classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#aa03a7b3351b7e2bf842d613a0ec2576a',1,'module::behaviour::strategy::SoccerStrategy']]],
-  ['resettrunklaststate_554',['resetTrunkLastState',['../classmodule_1_1motion_1_1QuinticWalkEngine.html#a8eb4dad9dee5136b6f11fcd15609726a',1,'module::motion::QuinticWalkEngine']]],
+  ['reset_5ftrunk_5flast_5fstate_554',['reset_trunk_last_state',['../classmodule_1_1motion_1_1QuinticWalkEngine.html#afa43a9bccdb5b347d9bb0ed8e936bef4',1,'module::motion::QuinticWalkEngine']]],
   ['resulting_5fstate_555',['resulting_state',['../structextension_1_1behaviour_1_1commands_1_1CausingExpression.html#a5cfdaad83deb11449b3a4d851bb62a0b',1,'extension::behaviour::commands::CausingExpression']]],
   ['rfsr_556',['rFSR',['../classCM740_1_1CM740.html#a3b9873093913922eb45a1af5bb46d027',1,'CM740::CM740']]],
   ['rhippitch_557',['rHipPitch',['../classCM740_1_1CM740.html#a101907d004fee8572456986b587b34bc',1,'CM740::CM740']]],

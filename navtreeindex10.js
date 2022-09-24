@@ -1,9 +1,5 @@
 var NAVTREEINDEX10 =
 {
-"structmodule_1_1platform_1_1cm740_1_1Convert.html#ade0a6d26a0963f523674a297055c95e1":[1,0,2,7,0,0,17],
-"structmodule_1_1platform_1_1cm740_1_1Convert.html#ae151e7a824da9b1948d5cf9b389168b4":[1,0,2,7,0,0,15],
-"structmodule_1_1platform_1_1cm740_1_1Convert.html#ae18c2554fbe5ac3e2f7bb4ad1c50752d":[1,0,2,7,0,0,18],
-"structmodule_1_1platform_1_1cm740_1_1Convert.html#af0ef1347a95f06fb7289f3d656a3354c":[1,0,2,7,0,0,20],
 "structmodule_1_1platform_1_1cm740_1_1Convert.html#af432e5ec63583a8a7307be8b59f44b01":[1,0,2,7,0,0,0],
 "structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1CM740State.html":[1,0,2,7,0,1,0],
 "structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1CM740State.html#a381d6e4c5d95c508d0dbf97406d3c3ae":[1,0,2,7,0,1,0,2],
@@ -249,5 +245,9 @@ var NAVTREEINDEX10 =
 "structutility_1_1math_1_1stats_1_1resample_1_1Stratified.html#a8bcd0d821e496fdcc393d9847a892f34":[1,0,5,4,3,0,1,3],
 "structutility_1_1math_1_1stats_1_1resample_1_1Systematic.html":[1,0,5,4,3,0,2],
 "structutility_1_1math_1_1stats_1_1resample_1_1Systematic.html#a0c49b5064ce01ef70243553e6326d393":[1,0,5,4,3,0,2,1],
-"structutility_1_1math_1_1stats_1_1resample_1_1Systematic.html#a36c9aaa5698f5757aad0c4a0f025895a":[1,0,5,4,3,0,2,2]
+"structutility_1_1math_1_1stats_1_1resample_1_1Systematic.html#a36c9aaa5698f5757aad0c4a0f025895a":[1,0,5,4,3,0,2,2],
+"structutility_1_1math_1_1stats_1_1resample_1_1Systematic.html#a412ccf2b0b4b3aedb0b82b084babadb0":[1,0,5,4,3,0,2,0],
+"structutility_1_1math_1_1stats_1_1resample_1_1Systematic.html#a640eb32ea161703a4b4014df35c2bfcc":[1,0,5,4,3,0,2,4],
+"structutility_1_1math_1_1stats_1_1resample_1_1Systematic.html#a7719c0291badd80c7dbfe50b065defc5":[1,0,5,4,3,0,2,5],
+"structutility_1_1math_1_1stats_1_1resample_1_1Systematic.html#af3230523a82b28f2fd5b9d6ce4b1c8a8":[1,0,5,4,3,0,2,3]
 };

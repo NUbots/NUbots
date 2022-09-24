@@ -6,7 +6,7 @@ var searchData=
   ['encode_167',['encode',['../structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4.html#a838f2e8c7dcaa81cafe9b24d8cf7a7d7',1,'YAML::convert&lt;::NUClear::LogLevel &gt;']]],
   ['encoder_168',['Encoder',['../classutility_1_1nbs_1_1Encoder.html',1,'utility::nbs::Encoder'],['../classmodule_1_1support_1_1logging_1_1DataLogging.html#a47da8596822e52798fa445f47a6ee818',1,'module::support::logging::DataLogging::encoder()']]],
   ['end_169',['end',['../classutility_1_1nbs_1_1Index.html#af9ca671c3b6341d2ce34db5993987d90',1,'utility::nbs::Index']]],
-  ['endstep_170',['endStep',['../classmodule_1_1motion_1_1QuinticWalkEngine.html#a023fe408984c0e963e5c6a10a5b2ff13',1,'module::motion::QuinticWalkEngine']]],
+  ['end_5fstep_170',['end_step',['../classmodule_1_1motion_1_1QuinticWalkEngine.html#a676f01d53ff308055c06d5aa6a62051e',1,'module::motion::QuinticWalkEngine']]],
   ['epoch_171',['epoch',['../structutility_1_1clock_1_1ClockData.html#a888a9015a04bcee16592b8ab782259a0',1,'utility::clock::ClockData']]],
   ['error_5fio_172',['error_io',['../classmodule_1_1platform_1_1Webots.html#a82791865473327c6ce3bfcbf32410a9c',1,'module::platform::Webots']]],
   ['espeak_173',['eSpeak',['../classmodule_1_1output_1_1eSpeak.html',1,'module::output']]],

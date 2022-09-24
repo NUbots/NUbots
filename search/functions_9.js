@@ -10,10 +10,10 @@ var searchData=
   ['initial_5flocalisation_5freset_1162',['initial_localisation_reset',['../classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a6b56b51cedfe96d962fd80e0dbb3019d',1,'module::behaviour::strategy::SoccerStrategy']]],
   ['interpolation_1163',['interpolation',['../classutility_1_1motion_1_1splines_1_1Spline.html#a2b13d450ab95dcaa636c46ce2d65de0e',1,'utility::motion::splines::Spline']]],
   ['interpolationmod_1164',['interpolationMod',['../classutility_1_1motion_1_1splines_1_1Spline.html#a7b0e22f59e9dd551cc0970d0093d03d1',1,'utility::motion::splines::Spline']]],
-  ['is_5fopen_1165',['is_open',['../classutility_1_1nbs_1_1Encoder.html#a5c831b7529083e10cb45073a78486c3d',1,'utility::nbs::Encoder']]],
-  ['isaxis_1166',['isAxis',['../classJoystickEvent.html#a98e8965ed08d07a244e03f37ea97732c',1,'JoystickEvent']]],
-  ['isbutton_1167',['isButton',['../classJoystickEvent.html#adbedaff5b4bafa911d2263b744e97b77',1,'JoystickEvent']]],
-  ['isdoublesupport_1168',['isDoubleSupport',['../classmodule_1_1motion_1_1QuinticWalkEngine.html#ad5e8fcdaaf6c4fc6553d3fc8a87d5bae',1,'module::motion::QuinticWalkEngine']]],
-  ['isinitialstate_1169',['isInitialState',['../classJoystickEvent.html#afc99dd63c9bae9027860b1673c81e369',1,'JoystickEvent']]],
-  ['isleftsupport_1170',['isLeftSupport',['../classmodule_1_1motion_1_1QuinticWalkEngine.html#aff3f9a8ec03a2036403adb739d5c3435',1,'module::motion::QuinticWalkEngine::isLeftSupport()'],['../classutility_1_1motion_1_1splines_1_1Footstep.html#a2fd6d4ad08d5b893d06a023f05fd8833',1,'utility::motion::splines::Footstep::isLeftSupport()']]]
+  ['is_5fdouble_5fsupport_1165',['is_double_support',['../classmodule_1_1motion_1_1QuinticWalkEngine.html#af974f7693dd09ab37dc32a18e1214b52',1,'module::motion::QuinticWalkEngine']]],
+  ['is_5fleft_5fsupport_1166',['is_left_support',['../classmodule_1_1motion_1_1QuinticWalkEngine.html#af71863bbbb32dad6ce574c15f71f401c',1,'module::motion::QuinticWalkEngine::is_left_support()'],['../classutility_1_1motion_1_1splines_1_1Footstep.html#a393354e71899832cd7de708d84f82ab2',1,'utility::motion::splines::Footstep::is_left_support()']]],
+  ['is_5fopen_1167',['is_open',['../classutility_1_1nbs_1_1Encoder.html#a5c831b7529083e10cb45073a78486c3d',1,'utility::nbs::Encoder']]],
+  ['isaxis_1168',['isAxis',['../classJoystickEvent.html#a98e8965ed08d07a244e03f37ea97732c',1,'JoystickEvent']]],
+  ['isbutton_1169',['isButton',['../classJoystickEvent.html#adbedaff5b4bafa911d2263b744e97b77',1,'JoystickEvent']]],
+  ['isinitialstate_1170',['isInitialState',['../classJoystickEvent.html#afc99dd63c9bae9027860b1673c81e369',1,'JoystickEvent']]]
 ];
