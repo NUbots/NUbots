@@ -277,24 +277,24 @@ namespace module::motion {
         // Position of trunk {t} relative to support foot {s}
         Eigen::Vector3f rTSs = Eigen::Vector3f::Zero();
         // Euler angles [Roll, Pitch, Yaw] of trunk {t} relative to support foot {s}
-        Eigen::Vector3f Thetast = Eigen::Vector3f::Zero();
+        Eigen::Vector3f thetaST = Eigen::Vector3f::Zero();
         // Position of flying foot {f} relative to support foot {s}
         Eigen::Vector3f rFSs = Eigen::Vector3f::Zero();
         // Euler angles [Roll, Pitch, Yaw] of flying foot {f} relative to support foot {s}
-        Eigen::Vector3f Thetasf = Eigen::Vector3f::Zero();
+        Eigen::Vector3f thetaSF = Eigen::Vector3f::Zero();
 
         // Read the cartesian positions and orientations for trunk and fly foot
-        std::tie(rTSs, Thetast, rFSs, Thetasf, is_left_support) = walk_engine.compute_cartesian_position();
+        std::tie(rTSs, thetaST, rFSs, thetaSF, is_left_support) = walk_engine.compute_cartesian_position();
 
         // Change goals from support foot based coordinate system to trunk based coordinate system
         // Trunk {t} from support foot {s}
         Eigen::Affine3f Hst;
-        Hst.linear()      = EulerIntrinsicToMatrix(Thetast);
+        Hst.linear()      = EulerIntrinsicToMatrix(thetaST);
         Hst.translation() = rTSs;
 
         // Flying foot {f} from support foot {s}
         Eigen::Affine3f Hsf;
-        Hsf.linear()      = EulerIntrinsicToMatrix(Thetasf);
+        Hsf.linear()      = EulerIntrinsicToMatrix(thetaSF);
         Hsf.translation() = rFSs;
 
         // Support foot {s} from trunk {t}
@@ -304,13 +304,13 @@ namespace module::motion {
         const Eigen::Affine3f Htf = Hts * Hsf;
 
         // Get desired transform for left foot {l}
-        const Eigen::Matrix4f Htl = walk_engine.get_footstep().is_left_support() ? Hts.matrix() : Htf.matrix();
+        const Eigen::Affine3f Htl = walk_engine.get_footstep().is_left_support() ? Hts : Htf;
 
         // Get desired transform for right foot {r}
-        const Eigen::Matrix4f Htr = walk_engine.get_footstep().is_left_support() ? Htf.matrix() : Hts.matrix();
+        const Eigen::Affine3f Htr = walk_engine.get_footstep().is_left_support() ? Htf : Hts;
 
         // Compute inverse kinematics for left and right foot
-        const auto joints = calculateLegJoints<float>(kinematicsModel, Eigen::Affine3f(Htl), Eigen::Affine3f(Htr));
+        const auto joints = calculateLegJoints<float>(kinematicsModel, Htl, Htr);
         auto waypoints    = motion(joints);
         emit(std::move(waypoints));
 
@@ -318,15 +318,14 @@ namespace module::motion {
         if (log_level <= NUClear::DEBUG) {
             emit(graph("Left foot desired position (x,y,z)", Htl(0, 3), Htl(1, 3), Htl(2, 3)));
             emit(graph("Right foot desired position (x,y,z)", Htr(0, 3), Htr(1, 3), Htr(2, 3)));
-            Eigen::Matrix<float, 3, 3> Rtl     = Htl.block(0, 0, 3, 3);
-            Eigen::Matrix<float, 3, 1> Rtl_rpy = MatrixToEulerIntrinsic(Rtl);
+
+            Eigen::Vector3f Rtl_rpy = MatrixToEulerIntrinsic(Htl.linear());
             emit(graph("Left foot desired orientation (r,p,y)", Rtl_rpy.x(), Rtl_rpy.y(), Rtl_rpy.z()));
-            Eigen::Matrix<float, 3, 3> Rtr     = Htr.block(0, 0, 3, 3);
-            Eigen::Matrix<float, 3, 1> Rtr_rpy = MatrixToEulerIntrinsic(Rtr);
+
+            Eigen::Vector3f Rtr_rpy = MatrixToEulerIntrinsic(Htr.linear());
             emit(graph("Right foot desired orientation (r,p,y)", Rtr_rpy.x(), Rtr_rpy.y(), Rtr_rpy.z()));
             emit(graph("Trunk desired position (x,y,z)", Hst(0, 3), Hst(1, 3), Hst(2, 3)));
-            Eigen::Matrix<float, 3, 3> Rst     = Hst.linear();
-            Eigen::Matrix<float, 3, 1> Rst_rpy = MatrixToEulerIntrinsic(Rst);
+            Eigen::Vector3f Rst_rpy = MatrixToEulerIntrinsic(Hst.linear());
             emit(graph("Trunk desired orientation (r,p,y)", Rst_rpy.x(), Rst_rpy.y(), Rst_rpy.z()));
         }
     }
