@@ -282,9 +282,6 @@ namespace module::behaviour::strategy {
         // if we are the goalie)
         log<NUClear::DEBUG>("Entering penalty shootout playing...");
         if (team_kicking_off == GameEvents::Context::TEAM) {
-            // TODO(BehaviourTeam Thailand): Change this to recognise whether we are the kicking player or not.
-            // May have some redundancy...
-
             // Go kick the ball directly into the goals... i.e. regular playing
             play(ball);
             current_state = Behaviour::State::SHOOTOUT;
@@ -400,9 +397,7 @@ namespace module::behaviour::strategy {
     }
 
     // **************************** LOCALISATION RESETS ****************************
-    void SoccerStrategy::penalty_shootout_localisation_reset() {
-        // TODO(BehaviourTeam): See version control for previous implementation, my need to be rewritten
-    }
+    void SoccerStrategy::penalty_shootout_localisation_reset() {}
 
     void SoccerStrategy::unpenalised_localisation_reset() {
         emit(std::make_unique<ResetRobotHypotheses>());

@@ -83,12 +83,6 @@ namespace module::localisation {
                 float absolute_yaw_angle  = std::abs(std::atan2(filtered_rBTt.y(), filtered_rBTt.x()));
                 ball->absolute_yaw_angle  = absolute_yaw_angle;
                 emit(ball);
-
-                // Logging
-                // log<NUClear::DEBUG>("srBCc: ", srBCc.transpose());
-                // log<NUClear::DEBUG>("rBTt: ", rBTt.transpose());
-                // log<NUClear::DEBUG>("Distance: ", get_distance(rBTt));
-                // log<NUClear::DEBUG>("Angle: ", absolute_yaw_angle);
             }
         });
     }

@@ -82,15 +82,6 @@ namespace module::behaviour::skills {
         // Check to see if we have finished getting up.
         on<Trigger<KillGetup>>().then([this] { is_getting_up = false; });
 
-        // Updates the last seen time of ball
-        // on<Trigger<VisionBalls>>().then([this](const VisionBalls& balls) {
-        //     if (!balls.balls.empty()) {
-        //         ballLastMeasured = NUClear::clock::now();
-        //         rBCc             =
-        //         reciprocalSphericalToCartesian(balls.balls[0].measurements[0].srBCc.cast<double>());
-        //     }
-        // });
-
         on<Every<90, Per<std::chrono::seconds>>, Optional<With<FilteredBall>>, Sync<HeadBehaviourSoccer>>().then(
             "Head Behaviour Main Loop",
             [this](const std::shared_ptr<const FilteredBall>& ball) {
