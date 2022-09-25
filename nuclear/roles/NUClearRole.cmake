@@ -36,9 +36,9 @@ function(NUCLEAR_ROLE)
 
   # IDE folder
   if(role_path)
-    set_target_properties(${role} PROPERTY FOLDER "roles/${role_path}/")
+    set_target_properties(${role} PROPERTIES FOLDER "roles/${role_path}/")
   else()
-    set_target_properties(${role} PROPERTY FOLDER "roles/")
+    set_target_properties(${role} PROPERTIES FOLDER "roles/")
   endif()
 
   # Store the used NUClear modules on the target as a property This can be used later in scripts to work out what
