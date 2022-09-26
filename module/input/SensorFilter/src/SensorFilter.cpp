@@ -27,7 +27,7 @@
 
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
-#include "utility/math/angle.hpp"
+#include "utility/math/euler.hpp"
 #include "utility/motion/ForwardKinematics.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/platform/RawSensors.hpp"
@@ -47,6 +47,7 @@ namespace module::input {
     using message::platform::RawSensors;
 
     using utility::input::ServoID;
+    using utility::math::euler::MatrixToEulerIntrinsic;
     using utility::motion::kinematics::calculateAllPositions;
     using utility::motion::kinematics::calculateCentreOfMass;
     using utility::motion::kinematics::calculateInertialTensor;
@@ -829,6 +830,19 @@ namespace module::input {
                             // createRotationZ : Mat size [3x3]
                             // Rwt : Mat size [3x3]
                             sensors->Hgt = Rgt.matrix();
+                        }
+
+                        if (log_level <= NUClear::DEBUG) {
+                            const Eigen::Affine3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
+                            const Eigen::Affine3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
+                            Eigen::Matrix<double, 3, 3> Rtl     = Htl.linear();
+                            Eigen::Matrix<double, 3, 1> Rtl_rpy = MatrixToEulerIntrinsic(Rtl);
+                            emit(graph("Left Foot Actual Position", Htl(0, 3), Htl(1, 3), Htl(2, 3)));
+                            emit(graph("Left Foot Actual Orientation (r,p,y)", Rtl_rpy.x(), Rtl_rpy.y(), Rtl_rpy.z()));
+                            Eigen::Matrix<double, 3, 3> Rtr     = Htr.linear();
+                            Eigen::Matrix<double, 3, 1> Rtr_rpy = MatrixToEulerIntrinsic(Rtr);
+                            emit(graph("Right Foot Actual Position", Htr(0, 3), Htr(1, 3), Htr(2, 3)));
+                            emit(graph("Right Foot Actual Orientation (r,p,y)", Rtr_rpy.x(), Rtr_rpy.y(), Rtr_rpy.z()));
                         }
 
                         emit(std::move(sensors));

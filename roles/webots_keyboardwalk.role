@@ -15,6 +15,9 @@ nuclear_role(
   # Platform
   input::SensorFilter
   platform::Webots
+  # Network
+  network::NUClearNet
+  network::PlotJuggler
   # Motion
   motion::QuinticWalk
   motion::HeadController
