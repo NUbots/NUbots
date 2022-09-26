@@ -53,7 +53,6 @@ namespace module::input {
     using utility::motion::kinematics::calculateInertialTensor;
     using utility::nusight::graph;
     using utility::support::Expression;
-    using utility::math::angle::anglesFromRotation;
 
     std::string makeErrorString(const std::string& src, uint errorCode) {
         std::stringstream s;
@@ -796,8 +795,8 @@ namespace module::input {
                                 Eigen::Vector3d error_rWTt = true_rWTt - est_rWTt;
 
                                 // Determine yaw, pitch and roll error
-                                Eigen::Vector3d true_Rtw  = anglesFromRotation(true_Htw.rotation());
-                                Eigen::Vector3d est_Rtw   = anglesFromRotation(Hwt.inverse().rotation());
+                                Eigen::Vector3d true_Rtw  = MatrixToEulerIntrinsic(true_Htw.rotation());
+                                Eigen::Vector3d est_Rtw   = MatrixToEulerIntrinsic(Hwt.inverse().rotation());
                                 Eigen::Vector3d error_Rtw = true_Rtw - est_Rtw;
 
                                 // Make error positive
