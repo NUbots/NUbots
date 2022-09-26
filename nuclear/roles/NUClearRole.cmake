@@ -43,7 +43,7 @@ function(NUCLEAR_ROLE)
 
   # Store the used NUClear modules on the target as a property This can be used later in scripts to work out what
   # modules are used in the role
-  set_target_properties(${role} PROPERTIES NUCLEAR_MODULES ${role_modules})
+  set_target_properties(${role} PROPERTIES NUCLEAR_MODULES "${role_modules}")
 
   # * We add to the global cache variable here that contains all of the module we are using
   # * Elsewhere, this is used to include the directories for these in order to build them
