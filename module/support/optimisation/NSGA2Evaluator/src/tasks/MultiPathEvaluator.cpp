@@ -49,10 +49,6 @@ namespace module {
                     pathNo++;
                     processNextPath();
 
-                    // walk_command_velocity.x() = 0.0;
-                    // walk_command_velocity.y() = walk_command_velocity_Y;
-                    // walk_command_rotation     = 0.0;
-
                     NUClear::log<NUClear::DEBUG>(fmt::format("Trialling with walk command: ({} {}) {}",
                                                              walk_command_velocity.x(),
                                                              walk_command_velocity.y(),
@@ -103,7 +99,18 @@ namespace module {
             }
 
             void MultiPathEvaluator::processRoundEnd() {
-                std::vector<double> scores = {processDistanceTravelled(), maxFieldPlaneSway};
+                auto travelScore = processDistanceTravelled();
+
+                if(pathNo == FWD || pathNo == BKWD || pathNo == STRFL || pathNo == STRFR)
+                {
+                    travelScore = 1.0/travelScore * 20;
+                }
+                else if(pathNo == ROTCCW || pathNo == ROTCW)
+                {
+                    travelScore = 1.0/travelScore * 5;
+                }
+
+                std::vector<double> scores = {travelScore, maxFieldPlaneSway};
 
                 maxFieldPlaneSway = 0.0;
                 for (double i : scores) {
@@ -269,7 +276,7 @@ namespace module {
             }
             // I want a pattern here passed as an arg
             std::vector<double> MultiPathEvaluator::calculateScores() {
-                auto robotDistanceTravelled = 0.0;
+                // auto robotDistanceTravelled = 0.0;
                 auto maxSway                = 0.0;
                 auto finalScore             = 0.0;
 
@@ -284,7 +291,7 @@ namespace module {
                 NUClear::log<NUClear::DEBUG>("Final Score:", finalScore);
                 return {
                     maxSway,          // For now, we want to reduce this
-                    1.0 / finalScore  // robotDistanceTravelled  // 1/x since the NSGA2 optimiser is a minimiser
+                    finalScore  // robotDistanceTravelled  // 1/x since the NSGA2 optimiser is a minimiser
                 };
             }
 
