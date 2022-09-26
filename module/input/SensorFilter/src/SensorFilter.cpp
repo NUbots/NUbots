@@ -792,18 +792,12 @@ namespace module::input {
                                 // Determine translational distance error
                                 Eigen::Vector3d est_rWTt   = Hwt.inverse().translation();
                                 Eigen::Vector3d true_rWTt  = true_Htw.translation();
-                                Eigen::Vector3d error_rWTt = true_rWTt - est_rWTt;
+                                Eigen::Vector3d error_rWTt = (true_rWTt - est_rWTt).cwiseAbs();
 
                                 // Determine yaw, pitch and roll error
                                 Eigen::Vector3d true_Rtw  = MatrixToEulerIntrinsic(true_Htw.rotation());
                                 Eigen::Vector3d est_Rtw   = MatrixToEulerIntrinsic(Hwt.inverse().rotation());
-                                Eigen::Vector3d error_Rtw = true_Rtw - est_Rtw;
-
-                                // Make error positive
-                                for (int i = 0; i < 3; i++) {
-                                    error_rWTt[i] = std::abs(error_rWTt[i]);
-                                    error_Rtw[i]  = std::abs(error_Rtw[i]);
-                                }
+                                Eigen::Vector3d error_Rtw = (true_Rtw - est_Rtw).cwiseAbs();
 
                                 // Graph translation and its error
                                 emit(graph("Htw est translation (rWTt)", est_rWTt.x(), est_rWTt.y(), est_rWTt.z()));
