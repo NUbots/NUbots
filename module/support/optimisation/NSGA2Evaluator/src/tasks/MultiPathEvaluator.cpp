@@ -104,8 +104,7 @@ namespace module {
 
             void MultiPathEvaluator::processRoundEnd() {
                 std::vector<double> scores = {processDistanceTravelled(), maxFieldPlaneSway};
-                // scores.push_back(processDistanceTravelled());
-                // scores.push_back(maxFieldPlaneSway);
+
                 maxFieldPlaneSway = 0.0;
                 for (double i : scores) {
                     NUClear::log<NUClear::DEBUG>("Scores:", i);
@@ -144,13 +143,13 @@ namespace module {
                     case 4:
                         walk_command_velocity.x() = -0.05;
                         walk_command_velocity.y() = 0.05;
-                        walk_command_rotation     = 0.645;
+                        walk_command_rotation     = walk_command_Rotation;
                         break;
 
                     case 5:
                         walk_command_velocity.x() = -0.05;
                         walk_command_velocity.y() = -0.05;
-                        walk_command_rotation     = -0.645;
+                        walk_command_rotation     = -walk_command_Rotation;
                         break;
 
                     default:
@@ -169,7 +168,7 @@ namespace module {
                 // Set our walk command
                 walk_command_velocity_X = currentRequest.parameters.real_params[11];
                 walk_command_velocity_Y = currentRequest.parameters.real_params[11];  // 0.0;
-                walk_command_rotation   = 0.0;  // currentRequest.parameters.real_params[11];  // -0.785;  // 0.0;
+                walk_command_Rotation   = currentRequest.parameters.real_params[12];  // -0.785;  // 0.0;
 
                 // Read the QuinticWalk config and overwrite the config parameters with the current individual's
                 // parameters

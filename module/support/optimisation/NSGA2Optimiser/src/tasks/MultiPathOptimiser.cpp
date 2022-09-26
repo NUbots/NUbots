@@ -64,6 +64,12 @@ namespace module {
                                              walk_command[element][2].as<Expression>());  // Here!!!!!!!!!!!!!!!!!!!!
                 }
 
+                for (const auto& element : std::vector<std::string>({std::string("rotation")})) {
+                    paramInitialValues.emplace_back(walk_command[element][0].as<Expression>());
+                    paramLimits.emplace_back(walk_command[element][1].as<Expression>(),
+                                             walk_command[element][2].as<Expression>());
+                }
+
                 quintic_walk_path    = config["task_config_path"].as<std::string>();
                 trial_duration_limit = config["trial_duration_limit"].as<int>();
 

@@ -63,6 +63,7 @@ namespace module {
                 /// @brief The walk command rotation.
                 double walk_command_velocity_X = 0.0;
                 double walk_command_velocity_Y = 0.0;
+                double walk_command_Rotation   = 0.0;
                 double walk_command_rotation   = 0.0;
 
                 double theta   = 0.0;
