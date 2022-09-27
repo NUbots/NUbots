@@ -15,12 +15,18 @@ namespace module::input {
 
     using extension::Configuration;
     using message::input::AudioData;
-	
+    
     WavReader::WavReader(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), config{} {
-    
+	
+	//uncomment if you want to check if the path exists.
+	//bool filepathExists = std::filesystem::exists("/home/nubots/NUbots/module/input/WavReader/data/audio/test.wav");;
+	//std::cout << filepathExists << std::endl;
+            
+        
         on<Configuration>("WavReader.yaml").then([this](const Configuration& cfg) {
             // Use configuration here from file WavReader.yaml
+
             this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
             this->config.wav_path = cfg["wav_path"].as<std::string>(); //config is the name of the struct
             std::cout << config.wav_path << std::endl;
@@ -28,10 +34,10 @@ namespace module::input {
 		readWav();
         });
 		
-		//make reactor onTrigger audiodata (receives audiodata from this file)
-		//on<Trigger<AudioData>>().then([this] (AudioData& audioData ) {
-		    // reactor code
-		//});
+	//This reactor receives audiodata from emission
+	//on<Trigger<AudioData>>().then([this] (AudioData& audioData ) {
+	    // reactor code
+	//});
 
     }
     
@@ -39,12 +45,12 @@ namespace module::input {
 		FILE *wavin;
 		char* buf = new char();
 		int nread = 0; 
-// 	    	int var = 0; //var stores some int value which depicts if a return result is partial or final, as in if a particular utterance is completed its considered  a final speech, its based on a few rules we shouldn't worry about 
+ 	    	//int var = 0; var (aka final) stores some int value which depicts if a return result is partial or final, if a particular utterance is completed its considered a final speech
 
 		wavin = fopen(config.wav_path.c_str(), "rb");
 		fseek(wavin, 44, SEEK_SET);
 		
-		long size = ftell (wavin);
+		long size = ftell(wavin);
 		rewind(wavin);
 		
 		nread = fread(buf, 1, size, wavin); //nread is the audio's chunk which has been read from the stream 
@@ -52,7 +58,10 @@ namespace module::input {
         		throw std::invalid_argument( "received negative value" );
 		}
 		else{
-			std::cout << buf << std::endl;
+			for(int i = 0; i < size; i++){
+				std::cout << buf[i] << std::endl;
+			}
+
 		}
 		
 		fclose(wavin);
