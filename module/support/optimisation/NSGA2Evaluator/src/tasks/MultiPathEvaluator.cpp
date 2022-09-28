@@ -32,11 +32,9 @@ namespace module {
 
             void MultiPathEvaluator::processRawSensorMsg(const RawSensors& sensors, NSGA2Evaluator* evaluator) {
                 updateMaxFieldPlaneSway(sensors);
-                // NUClear::log<NUClear::DEBUG>("Sim Time:", evaluator->simTime);
 
                 if (pathNo == ROTCCW || pathNo == ROTCW) {
                     processRotation(sensors, evaluator);
-                    // NUClear::log<NUClear::DEBUG>("Theta:", theta);
                 }
 
                 if (checkForFall(sensors)) {
@@ -60,8 +58,7 @@ namespace module {
                 }
             }
 
-            void MultiPathEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position,
-                                                                      NSGA2Evaluator* evaluator) {
+            void MultiPathEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position) {
                 if (!initialPositionSet) {
                     initialPositionSet       = true;
                     initialRobotPosition.x() = position.value.X;
@@ -174,8 +171,8 @@ namespace module {
 
                 // Set our walk command
                 walk_command_velocity_X = currentRequest.parameters.real_params[11];
-                walk_command_velocity_Y = currentRequest.parameters.real_params[11];  // 0.0;
-                walk_command_Rotation   = currentRequest.parameters.real_params[12];  // -0.785;  // 0.0;
+                walk_command_velocity_Y = currentRequest.parameters.real_params[11];  
+                walk_command_Rotation   = currentRequest.parameters.real_params[12];  
 
                 // Read the QuinticWalk config and overwrite the config parameters with the current individual's
                 // parameters
@@ -260,8 +257,6 @@ namespace module {
                 auto scores      = calculateScores();
                 auto constraints = earlyTermination ? calculateConstraints(simTime) : constraintsNotViolated();
 
-                // double trialDuration = simTime - trialStartTime;
-
                 NUClear::log<NUClear::DEBUG>("SendFitnessScores for generation", generation, "individual", individual);
                 NUClear::log<NUClear::DEBUG>("    scores:", scores[0], scores[1]);
                 NUClear::log<NUClear::DEBUG>("    constraints:", constraints[0], constraints[1]);
@@ -281,8 +276,6 @@ namespace module {
                 auto finalScore             = 0.0;
 
                 for (std::vector<double> score : pathScores) {
-                    // robotDistanceTravelled += score.at(0);
-                    // maxSway += score.at(1);
                     for (auto param : params) {
                         finalScore += (score.at(0) * param) + (score.at(1) * param);
                     }
@@ -290,8 +283,8 @@ namespace module {
 
                 NUClear::log<NUClear::DEBUG>("Final Score:", finalScore);
                 return {
-                    maxSway,          // For now, we want to reduce this
-                    finalScore  // robotDistanceTravelled  // 1/x since the NSGA2 optimiser is a minimiser
+                    maxSway,              // For now, we want to reduce this
+                    1.0 / finalScore      // 1/x since the NSGA2 optimiser is a minimiser
                 };
             }
 

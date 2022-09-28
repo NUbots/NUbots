@@ -90,31 +90,31 @@ namespace module {
                     switch (newState) {
                         case State::WAITING_FOR_REQUEST:
                             currentState = newState;
-                            WaitingForRequest(oldState, event);
+                            WaitingForRequest();
                             break;
                         case State::SETTING_UP_TRIAL:
                             currentState = newState;
-                            SettingUpTrial(oldState, event);
+                            SettingUpTrial();
                             break;
                         case State::RESETTING_SIMULATION:
                             currentState = newState;
-                            ResettingSimulation(oldState, event);
+                            ResettingSimulation();
                             break;
                         case State::EVALUATING:
                             currentState = newState;
-                            Evaluating(oldState, event);
+                            Evaluating(event);
                             break;
                         case State::TERMINATING_EARLY:
                             currentState = newState;
-                            TerminatingEarly(oldState, event);
+                            TerminatingEarly();
                             break;
                         case State::TERMINATING_GRACEFULLY:
                             currentState = newState;
-                            TerminatingGracefully(oldState, event);
+                            TerminatingGracefully();
                             break;
                         case State::FINISHED:
                             currentState = newState;
-                            Finished(oldState, event);
+                            Finished();
                             break;
                         default:
                             log<NUClear::WARN>("Unable to transition to unknown state from", currentState, "on", event);
@@ -161,7 +161,7 @@ namespace module {
                 on<Trigger<OptimisationRobotPosition>, Single>().then(
                     [this](const OptimisationRobotPosition& position) {
                         if (currentState == State::EVALUATING) {
-                            task->processOptimisationRobotPosition(position, this);
+                            task->processOptimisationRobotPosition(position);
                         }
                     });
             }
@@ -220,13 +220,13 @@ namespace module {
             }
 
             /// @brief Handle the WAITING_FOR_REQUEST state
-            void NSGA2Evaluator::WaitingForRequest(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
+            void NSGA2Evaluator::WaitingForRequest() {
                 log<NUClear::DEBUG>("WaitingForRequest");
                 emit(std::make_unique<NSGA2EvaluatorReady>());  // Let the optimiser know we're ready
             }
 
             /// @brief Handle the SETTING_UP_TRIAL state
-            void NSGA2Evaluator::SettingUpTrial(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
+            void NSGA2Evaluator::SettingUpTrial() {
                 log<NUClear::DEBUG>("SettingUpTrial");
                 generation = lastEvalRequestMsg.generation;
                 individual = lastEvalRequestMsg.id;
@@ -242,8 +242,6 @@ namespace module {
                 }
                 else if (lastEvalRequestMsg.task == "multipath") {
                     task = std::make_unique<MultiPathEvaluator>();
-                    // task = std::make_unique<WalkEvaluator>();
-                    // task = std::make_unique<StrafeEvaluator>();
                 }
                 else if (lastEvalRequestMsg.task == "stand") {
                     task = std::make_unique<StandEvaluator>();
@@ -258,7 +256,7 @@ namespace module {
             }
 
             /// @brief Handle the RESETTING_SIMULATION state
-            void NSGA2Evaluator::ResettingSimulation(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
+            void NSGA2Evaluator::ResettingSimulation() {
                 log<NUClear::DEBUG>("ResettingSimulation");
 
                 task->resetSimulation();
@@ -270,7 +268,7 @@ namespace module {
             }
 
             /// @brief Handle the EVALUATING state
-            void NSGA2Evaluator::Evaluating(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
+            void NSGA2Evaluator::Evaluating(NSGA2Evaluator::Event event) {
                 log<NUClear::DEBUG>("Evaluating");
                 if (event == Event::ResetDone) {
                     if (lastEvalRequestMsg.task == "walk" || lastEvalRequestMsg.task == "stand"
@@ -303,7 +301,7 @@ namespace module {
             }
 
             /// @brief Handle the TERMINATING_EARLY state
-            void NSGA2Evaluator::TerminatingEarly(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
+            void NSGA2Evaluator::TerminatingEarly() {
                 log<NUClear::DEBUG>("TerminatingEarly");
 
                 // Send a zero walk command to stop walking
@@ -316,8 +314,7 @@ namespace module {
             }
 
             /// @brief Handle the TERMINATING_GRACEFULLY state
-            void NSGA2Evaluator::TerminatingGracefully(NSGA2Evaluator::State previousState,
-                                                       NSGA2Evaluator::Event event) {
+            void NSGA2Evaluator::TerminatingGracefully() {
                 log<NUClear::DEBUG>("TerminatingGracefully");
 
                 // Send a zero walk command to stop walking
@@ -329,7 +326,7 @@ namespace module {
                 emit(std::make_unique<Event>(Event::FitnessScoresSent));  // Go back to waiting for the next request
             }
 
-            void NSGA2Evaluator::Finished(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event) {
+            void NSGA2Evaluator::Finished() {
                 log<NUClear::INFO>("Finished");
             }
         }  // namespace optimisation

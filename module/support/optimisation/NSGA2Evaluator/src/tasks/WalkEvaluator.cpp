@@ -38,8 +38,7 @@ namespace module {
                 }
             }
 
-            void WalkEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position,
-                                                                 NSGA2Evaluator* evaluator) {
+            void WalkEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position) {
                 if (!initialPositionSet) {
                     initialPositionSet       = true;
                     initialRobotPosition.x() = position.value.X;
@@ -50,12 +49,6 @@ namespace module {
                 robotPosition.x() = position.value.X;
                 robotPosition.y() = position.value.Y;
                 robotPosition.z() = position.value.Z;
-
-
-                // if (checkOffCourse())  // Checking if NUgus walks in straght line in the X directon
-                // {
-                //     evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TerminateEarly));
-                // }
             }
 
             void WalkEvaluator::setUpTrial(const NSGA2EvaluationRequest& currentRequest) {
@@ -65,8 +58,8 @@ namespace module {
 
                 // Set our walk command
                 walk_command_velocity.x() = currentRequest.parameters.real_params[11];
-                walk_command_velocity.y() = 0.0;  // 0.0;
-                walk_command_rotation     = 0.0;  // currentRequest.parameters.real_params[11];  // -0.785;  // 0.0;
+                walk_command_velocity.y() = 0.0; 
+                walk_command_rotation     = 0.0; 
 
                 // Read the QuinticWalk config and overwrite the config parameters with the current individual's
                 // parameters
@@ -152,7 +145,7 @@ namespace module {
                 fitnessScores->constraints                        = constraints;
                 return fitnessScores;
             }
-            // I want a pattern here passed as an arg
+            
             std::vector<double> WalkEvaluator::calculateScores() {
                 auto robotDistanceTravelled = std::fabs(initialRobotPosition.x() - robotPosition.x());
                 return {
@@ -206,26 +199,6 @@ namespace module {
                 if (fieldPlaneSway > maxFieldPlaneSway) {
                     maxFieldPlaneSway = fieldPlaneSway;
                 }
-            }
-
-            // Checking if NUgus goes off the Y axis path too far
-            bool WalkEvaluator::checkOffCourse() {
-                bool offCourse = false;
-
-                auto distanceOffCourse = std::fabs(robotPosition.y() - initialRobotPosition.y());
-
-
-                if (distanceOffCourse >= 0.2) {
-                    NUClear::log<NUClear::DEBUG>("OffCourse!");
-                    NUClear::log<NUClear::DEBUG>("orination on robot (x y z): ",
-                                                 robotPosition.x(),
-                                                 robotPosition.y(),
-                                                 robotPosition.z());
-
-                    offCourse = true;
-                }
-
-                return offCourse;
             }
 
         }  // namespace optimisation

@@ -89,7 +89,7 @@ namespace module {
                     emit<Scope::DELAY>(message, std::chrono::seconds(4));
                 });
 
-                on<Trigger<WebotsReady>, Single>().then([this](const WebotsReady& message) {
+                on<Trigger<WebotsReady>, Single>().then([this](){//const WebotsReady& message) {
                     log<NUClear::INFO>("webots ready, starting first evaluation");
 
                     // If initialisation succeeded, evaluate the first individual of the first generation
@@ -103,7 +103,7 @@ namespace module {
                     }
                 });
 
-                on<Trigger<NSGA2EvaluatorReady>, Single>().then([this](const NSGA2EvaluatorReady& message) {
+                on<Trigger<NSGA2EvaluatorReady>, Single>().then([this](){//const NSGA2EvaluatorReady& message) {
                     auto next_ind = nsga2Algorithm.getCurrentPop()->GetNextIndividual();
                     if (next_ind.has_value()) {
                         auto ind = next_ind.value();

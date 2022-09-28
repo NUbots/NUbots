@@ -24,7 +24,7 @@ namespace module {
             class EvaluatorTask {
             public:
                 virtual void processRawSensorMsg(const RawSensors& sensors, NSGA2Evaluator* evaluator)   = 0;
-                virtual void processOptimisationRobotPosition(const OptimisationRobotPosition& position, NSGA2Evaluator* evaluator) = 0;
+                virtual void processOptimisationRobotPosition(const OptimisationRobotPosition& position) = 0;
                 virtual void setUpTrial(const NSGA2EvaluationRequest& request)                           = 0;
                 virtual void resetSimulation()                                                           = 0;
                 virtual void evaluatingState(size_t subsumptionId, NSGA2Evaluator* evaluator)            = 0;

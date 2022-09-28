@@ -37,8 +37,7 @@ namespace module {
                 }
             }
 
-            void StrafeEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position,
-                                                                   NSGA2Evaluator* evaluator) {
+            void StrafeEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position) {
                 if (!initialPositionSet) {
                     initialPositionSet       = true;
                     initialRobotPosition.x() = position.value.X;
@@ -49,12 +48,6 @@ namespace module {
                 robotPosition.x() = position.value.X;
                 robotPosition.y() = position.value.Y;
                 robotPosition.z() = position.value.Z;
-
-
-                if (checkOffCourse())  // Checking if NUgus walks in straght line in the Y directon
-                {
-                    evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TerminateEarly));
-                }
             }
 
             void StrafeEvaluator::setUpTrial(const NSGA2EvaluationRequest& currentRequest) {
@@ -205,26 +198,6 @@ namespace module {
                 if (fieldPlaneSway > maxFieldPlaneSway) {
                     maxFieldPlaneSway = fieldPlaneSway;
                 }
-            }
-
-            // Checking if NUgus goes off the Y axis path too far
-            bool StrafeEvaluator::checkOffCourse() {
-                bool offCourse = false;
-
-                auto distanceOffCourse = std::fabs(robotPosition.x() - initialRobotPosition.x());
-
-
-                if (distanceOffCourse >= 0.45) {
-                    NUClear::log<NUClear::DEBUG>("OffCourse!");
-                    NUClear::log<NUClear::DEBUG>("orination on robot (x y z): ",
-                                                 robotPosition.x(),
-                                                 robotPosition.y(),
-                                                 robotPosition.z());
-
-                    offCourse = true;
-                }
-
-                return offCourse;
             }
 
         }  // namespace optimisation

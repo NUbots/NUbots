@@ -31,11 +31,14 @@ namespace module {
             using utility::support::Expression;
 
             void StandEvaluator::processRawSensorMsg(const RawSensors& sensors, NSGA2Evaluator* evaluator) {
+                double simTime = evaluator->simTime;
+                simTime++;
+
                 updateMaxFieldPlaneSway(sensors);
                 current_sensors = sensors;
             }
 
-            void StandEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position, NSGA2Evaluator* evaluator) {
+            void StandEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position) {
                 robotPosition.x() = position.value.X;
                 robotPosition.y() = position.value.Y;
                 robotPosition.z() = position.value.Z;
@@ -79,7 +82,8 @@ namespace module {
                                                                                        int individual) {
                 double trialDuration = simTime - trialStartTime;
                 auto scores          = calculateScores(trialDuration);
-                auto constraints     = calculateConstraints();
+                auto constraints = earlyTermination ? calculateConstraints() : calculateConstraints(); //constraintsNotViolated();
+                //auto constraints     = calculateConstraints();
 
                 NUClear::log<NUClear::DEBUG>("Trial ran for", trialDuration);
                 NUClear::log<NUClear::DEBUG>("SendFitnessScores for generation", generation, "individual", individual);
@@ -138,28 +142,8 @@ namespace module {
             }
 
             void StandEvaluator::runScript(size_t subsumptionId, NSGA2Evaluator* evaluator) {
-                // emit(std::make_unique<ExecuteScriptByName>(subsumptionId, "StandUpFront.yaml")); //Which approach is
-                // better?
-                evaluator->emit(
-                    std::make_unique<extension::ExecuteScript>(subsumptionId, script, NUClear::clock::now()));
+                evaluator->emit(std::make_unique<extension::ExecuteScript>(subsumptionId, script, NUClear::clock::now()));
             }
-
-            // void StandEvaluator::CheckForStandDone(const RawSensorsMsg& sensors) {
-            //     // The acceptable error margin for the target positions
-            //     float epsilon = 0.015;
-
-            //     bool l_elbow_ok = std::fabs(sensors.servo.l_elbow.present_position - arms_l_elbow) < epsilon;
-            //     bool r_elbow_ok = std::fabs(sensors.servo.r_elbow.present_position - arms_r_elbow) < epsilon;
-            //     bool l_shoulder_pitch_ok =
-            //         std::fabs(sensors.servo.l_shoulder_pitch.present_position - arms_l_shoulder_pitch) < epsilon;
-            //     bool r_shoulder_pitch_ok =
-            //         std::fabs(sensors.servo.r_shoulder_pitch.present_position - arms_r_shoulder_pitch) < epsilon;
-
-            //     if (l_elbow_ok && r_elbow_ok && l_shoulder_pitch_ok && r_shoulder_pitch_ok) {
-            //         log<NUClear::INFO>("Stand done");
-            //         emit(std::make_unique<Event>(Event::StandDone));
-            //     }
-            // }
 
             void StandEvaluator::updateMaxFieldPlaneSway(const RawSensors& sensors) {
                 auto accelerometer = sensors.accelerometer;

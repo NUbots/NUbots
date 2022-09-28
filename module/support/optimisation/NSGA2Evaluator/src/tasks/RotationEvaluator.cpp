@@ -36,18 +36,15 @@ namespace module {
                 if (checkForFall(sensors)) {
                     evaluator->emit(std::make_unique<NSGA2Evaluator::Event>(NSGA2Evaluator::Event::TerminateEarly));
                 }
+
                 double simTime = evaluator->simTime;
                 omega          = sensors.gyroscope.z();
                 deltaT         = simTime - oldTime;
                 oldTime        = simTime;
                 theta += omega * deltaT / 1000;
-                // NUClear::log<NUClear::DEBUG>("Theta =", theta);
-                // NUClear::log<NUClear::DEBUG>("Omega =", omega);
-                // NUClear::log<NUClear::DEBUG>("DeltaT =", deltaT);
             }
 
-            void RotationEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position,
-                                                                     NSGA2Evaluator* evaluator) {
+            void RotationEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position){
                 if (!initialPositionSet) {
                     initialPositionSet       = true;
                     initialRobotPosition.x() = position.value.X;
@@ -66,7 +63,7 @@ namespace module {
                 trial_duration_limit = std::chrono::seconds(currentRequest.trial_duration_limit);
 
                 // Set our walk command
-                walk_command_velocity.x() = -0.01;
+                walk_command_velocity.x() = -0.05;
                 walk_command_velocity.y() = -0.05;
                 walk_command_rotation     = currentRequest.parameters.real_params[11];
 
