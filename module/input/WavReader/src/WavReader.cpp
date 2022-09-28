@@ -45,23 +45,30 @@ namespace module::input {
 		FILE *wavin;
 		char* buf = new char();
 		int nread = 0; 
- 	    	//int var = 0; var (aka final) stores some int value which depicts if a return result is partial or final, if a particular utterance is completed its considered a final speech
 
 		wavin = fopen(config.wav_path.c_str(), "rb");
 		fseek(wavin, 44, SEEK_SET);
 		
+	    	
+
 		long size = ftell(wavin);
 		rewind(wavin);
-		
-		nread = fread(buf, 1, size, wavin); //nread is the audio's chunk which has been read from the stream 
-		if(nread != size){
-        		throw std::invalid_argument( "received negative value" );
-		}
-		else{
-			for(int i = 0; i < size; i++){
-				std::cout << buf[i] << std::endl;
+			    	
+		while (!feof(wavin)) {
+		//for(int i = 0; i< 20; i++){
+			nread = fread(buf, 1, size, wavin); //nread is the audio's chunk which has been read from the stream 
+			
+			
+			if(nread != size){
+        			throw std::invalid_argument( "received negative value" );
 			}
-
+			
+			else{
+				std::cout << "New buf created printing first 10 values of it.\n" << std::endl;
+				for(int i = 0; i < size; i++){
+					std::cout << buf[i] << std::endl;
+				}
+			}
 		}
 		
 		fclose(wavin);
