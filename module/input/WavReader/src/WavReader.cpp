@@ -48,7 +48,6 @@ namespace module::input {
 
 		wavin = fopen(config.wav_path.c_str(), "rb");
 		fseek(wavin, 44, SEEK_SET);
-		
 	    	
 
 		long size = ftell(wavin);
