@@ -102,30 +102,28 @@ namespace module {
                 State HandleTransition(State currentState, Event event);
 
                 /// @brief Handle the WAITING_FOR_REQUEST state
-                void WaitingForRequest(State previousState, Event event);
+                void WaitingForRequest();
 
                 /// @brief Handle the SETTING_UP_TRIAL state
-                void SettingUpTrial(State previousState, Event event);
+                void SettingUpTrial();
 
                 /// @brief Handle the RESETTING_SIMULATION state
-                void ResettingSimulation(State previousState, Event event);
+                void ResettingSimulation();
 
                 /// @brief Handle the STANDING state
-                void Standing(State previousState, Event event);
+                void Standing();
 
                 /// @brief Handle the EVALUATING state
-                void Evaluating(State previousState, Event event);
-                // void EvaluatingWalk(NSGA2Evaluator::State previousState, NSGA2Evaluator::Event event); What is
-                // this????
+                void Evaluating(Event event);
 
                 /// @brief Handle the TERMINATING_EARLY state
-                void TerminatingEarly(State previousState, Event event);
+                void TerminatingEarly();
 
                 /// @brief Handle the TERMINATING_GRACEFULLY state
-                void TerminatingGracefully(State previousState, Event event);
+                void TerminatingGracefully();
 
                 /// @brief Handle the FINISHED state
-                void Finished(State previousState, Event event);
+                void Finished();
             };
 
         }  // namespace optimisation
