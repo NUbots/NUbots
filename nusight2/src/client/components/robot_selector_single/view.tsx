@@ -7,7 +7,7 @@ import { Option, Select } from '../select/view'
 
 import PlugIcon from './plug.svg'
 import RobotIcon from './robot.svg'
-import style from './style.css'
+import style from './style.module.css'
 
 export type RobotSelectorSingleProps = {
   autoSelect?: boolean

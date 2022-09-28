@@ -29,34 +29,18 @@ namespace module::extension::provider {
 
     struct ProviderGroup {
 
+        using BehaviourTask = ::extension::behaviour::commands::BehaviourTask;
         /// A task queue holds tasks in a provider that are waiting to be executed by that group
-        using TaskQueue = std::vector<std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>>;
+        using TaskQueue = std::vector<std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>>;
         /// A task pack is the result of a set of tasks emitted by a provider that should be run together
-        using TaskPack = std::vector<std::shared_ptr<const ::extension::behaviour::commands::DirectorTask>>;
+        using TaskPack = std::vector<std::shared_ptr<const ::extension::behaviour::commands::BehaviourTask>>;
 
-        /**
-         * The current state of the Provider group
-         */
-        enum State {
-            /// This Provider group currently isn't doing anything
-            IDLE,
-            /// This Provider group is currently in an "Entering" state
-            ENTERING,
-            /// This Provider group is currently in a "Normal" state
-            NORMAL,
-            /// This Provider group is currently in a "Leaving" state
-            LEAVING,
-            /// This Provider group is not running because it has requirements that are not met, in order to meet
-            /// these requirements it is taking control of another currently running Provider group
-            PROXYING
-        };
-
-        /// The current state of this Provider group
-        State state = State::IDLE;
         /// List of individual Providers that can service tasks for this type
         std::vector<std::shared_ptr<Provider>> providers;
         /// The current task that is running on this Provider
-        std::shared_ptr<const ::extension::behaviour::commands::DirectorTask> active_task;
+        std::shared_ptr<const BehaviourTask> active_task;
+        /// The task that is pushing this provider to run in a different way
+        std::shared_ptr<const BehaviourTask> pushing_task;
         /// The queue of tasks waiting to run if the situation changes
         TaskQueue task_queue;
         /// List of current subtasks that have been emitted by this provider group

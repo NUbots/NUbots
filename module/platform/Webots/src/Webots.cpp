@@ -672,7 +672,8 @@ namespace module::platform {
             static_cast<double>(sim_delta + prev_sim_delta) / static_cast<double>(real_delta + prev_real_delta);
 
         // Exponential filter to do the smoothing
-        utility::clock::custom_rtf = utility::clock::custom_rtf * clock_smoothing + (1.0 - clock_smoothing) * ratio;
+        rtf = rtf * clock_smoothing + (1.0 - clock_smoothing) * ratio;
+        utility::clock::update_rtf(rtf);
 
         // Update our current times
         current_sim_time  = sensor_measurements.time;

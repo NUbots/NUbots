@@ -1,4 +1,4 @@
-import styles from './styles.css'
+import styles from './style.module.css'
 import { action } from 'mobx'
 import { computed } from 'mobx'
 import React from 'react'
