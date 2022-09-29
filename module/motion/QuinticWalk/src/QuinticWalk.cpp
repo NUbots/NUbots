@@ -283,7 +283,8 @@ namespace module::motion {
     float QuinticWalk::get_time_delta() {
         // compute time delta depended if we are currently in simulation or reality
         const auto current_time = NUClear::clock::now();
-        float dt = std::chrono::duration_cast<std::chrono::duration<float>>(current_time - last_update_time).count();
+        float dt =
+            std::chrono::duration_cast<std::chrono::milliseconds>(current_time - last_update_time).count() / 1000.0f;
 
         if (dt == 0.0f) {
             // log<NUClear::WARN>(fmt::format("dt was 0 ({})", time_diff_ms.count()));

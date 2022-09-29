@@ -589,7 +589,7 @@ namespace module::platform {
                         // Set the terminate command if the flag is set to terminate the simulator, used by the walk
                         // simulator
                         if (terminate_simulation) {
-                            std::cout << "setting terminate on ActuatorRequests to send" << std::endl;
+                            log<NUClear::DEBUG>("Setting terminate on ActuatorRequests to send.")
                             actuator_requests.optimisation_command.command =
                                 OptimisationCommand::CommandType::TERMINATE;
                             terminate_simulation = false;
