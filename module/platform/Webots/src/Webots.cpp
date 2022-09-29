@@ -597,13 +597,13 @@ namespace module::platform {
 
                         // Set the reset command if the flag is set to reset the simulator, used by the walk simulator
                         if (reset_simulation_world) {
-                            std::cout << "setting RESET_WORLD on ActuatorRequests to send" << std::endl;
+                            std::cout << "setting RESET_WORLD ActuatorRequests to send" << std::endl;
                             actuator_requests.optimisation_command.command =
                                 OptimisationCommand::CommandType::RESET_WORLD;
                             reset_simulation_world = false;
                         }
                         else if (reset_simulation_time) {
-                            std::cout << "setting RESET_TIME on ActuatorRequests to send" << std::endl;
+                            std::cout << "setting RESET_TIME ActuatorRequests to send" << std::endl;
                             actuator_requests.optimisation_command.command =
                                 OptimisationCommand::CommandType::RESET_TIME;
                             reset_simulation_time = false;

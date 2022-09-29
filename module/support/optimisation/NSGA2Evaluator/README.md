@@ -3,7 +3,7 @@ NSGA2Evaluator
 
 ## Description
 
-The evaluator half of the Non-Dominated Sorting Genetic Algorithm II (NSGA2) optimisation of our walk engine. Evaluates walk engine parameters for an individual from the NSGA2Optimiser module for fitness, using the robot sway and ball travel distance.
+The evaluator half of the Non-Dominated Sorting Genetic Algorithm II (NSGA2) optimisation of our walk engine. Evaluates walk engine parameters for an individual from the NSGA2Optimiser module for fitness, using the robot sway and robot travel distance.
 
 ## Usage
 

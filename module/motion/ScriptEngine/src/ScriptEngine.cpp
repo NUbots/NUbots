@@ -52,15 +52,11 @@ namespace module::motion {
             for (const auto& scriptName : command.scripts) {
                 const auto& script = scripts.find(scriptName);
 
-                std::cout << scriptName;
-
                 if (script == std::end(scripts)) {
                     throw std::runtime_error("The script " + scriptName + " is not loaded in the system");
                 }
                 scriptList.push_back(script->second);
             }
-
-            std::cout << std::endl;
 
             emit<Scope::DIRECT>(std::make_unique<ExecuteScript>(command.sourceId,
                                                                 scriptList,
