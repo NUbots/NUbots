@@ -169,8 +169,8 @@ namespace module {
 
             std::vector<double> WalkEvaluator::constraintsNotViolated() {
                 return {
-                    0,  // Robot didn't fall
-                    0   // Second constraint unused, fixed to 0
+                    0.0,  // Robot didn't fall
+                    0.0   // Second constraint unused, fixed to 0
                 };
             }
 
