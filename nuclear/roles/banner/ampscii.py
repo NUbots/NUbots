@@ -273,17 +273,17 @@ colour_map = [
 # First two elements are the filled elements
 # The second two are the shape and its inverse
 tile_map = [
-    ((1, 1), (1, 1), u"\u2588", u"\u2588"),  # |█| Full block
-    ((0, 0), (1, 1), u"\u2584", u"\u2580"),  # |▄| Lower half block
-    ((0, 1), (0, 1), u"\u2590", u"\u258C"),  # |▐| Right half block
-    ((0, 1), (1, 0), u"\u259E", u"\u259A"),  # |▞| Quadrant upper right and lower left
-    ((0, 1), (1, 1), u"\u259F", u"\u2598"),  # |▟| Quadrant upper right and lower left and lower right
-    ((1, 0), (0, 1), u"\u259A", u"\u259E"),  # |▚| Quadrant upper left and lower right
-    ((1, 0), (1, 0), u"\u258C", u"\u2590"),  # |▌| Left half block
-    ((1, 0), (1, 1), u"\u2599", u"\u259D"),  # |▙| Quadrant upper left and lower left and lower right
-    ((1, 1), (0, 0), u"\u2580", u"\u2584"),  # |▀| Upper half block
-    ((1, 1), (0, 1), u"\u259C", u"\u2596"),  # |▜| Quadrant upper left and upper right and lower right
-    ((1, 1), (1, 0), u"\u259B", u"\u2597"),  # |▛| Quadrant upper left and upper right and lower left
+    ((1, 1), (1, 1), "\u2588", "\u2588"),  # |█| Full block
+    ((0, 0), (1, 1), "\u2584", "\u2580"),  # |▄| Lower half block
+    ((0, 1), (0, 1), "\u2590", "\u258C"),  # |▐| Right half block
+    ((0, 1), (1, 0), "\u259E", "\u259A"),  # |▞| Quadrant upper right and lower left
+    ((0, 1), (1, 1), "\u259F", "\u2598"),  # |▟| Quadrant upper right and lower left and lower right
+    ((1, 0), (0, 1), "\u259A", "\u259E"),  # |▚| Quadrant upper left and lower right
+    ((1, 0), (1, 0), "\u258C", "\u2590"),  # |▌| Left half block
+    ((1, 0), (1, 1), "\u2599", "\u259D"),  # |▙| Quadrant upper left and lower left and lower right
+    ((1, 1), (0, 0), "\u2580", "\u2584"),  # |▀| Upper half block
+    ((1, 1), (0, 1), "\u259C", "\u2596"),  # |▜| Quadrant upper left and upper right and lower right
+    ((1, 1), (1, 0), "\u259B", "\u2597"),  # |▛| Quadrant upper left and upper right and lower left
 ]
 
 
@@ -395,7 +395,7 @@ def ampscii(src, unicode=True):
         rows.append(row)
 
     # Now convert those rows into a string
-    output = u""
+    output = ""
 
     for l in rows:
         fg = None
@@ -405,12 +405,12 @@ def ampscii(src, unicode=True):
             # Change foreground colour
             if v[0] != fg:
                 fg = v[0]
-                output += u"\x1b[38;5;{}m".format(fg)
+                output += "\x1b[38;5;{}m".format(fg)
 
             # Change background colour
             if v[1] != bg:
                 bg = v[1]
-                output += u"\x1b[48;5;{}m".format(bg)
+                output += "\x1b[48;5;{}m".format(bg)
 
             # TODO check if we can flip the FG and BG colours to not change
 
@@ -421,6 +421,6 @@ def ampscii(src, unicode=True):
                 output += "#"
 
         # Reset and make a new line
-        output += u"\x1b[0m\n"
+        output += "\x1b[0m\n"
 
     return output

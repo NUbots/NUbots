@@ -3,7 +3,7 @@ import { observer } from 'mobx-react'
 import React from 'react'
 import { CSSTransition } from 'react-transition-group'
 
-import style from './style.css'
+import style from './style.module.css'
 
 export type CollapsibleProps = {
   className?: string

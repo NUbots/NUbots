@@ -15,16 +15,6 @@ if(BUILD_TESTS)
   enable_testing()
 endif()
 
-# Set on to prefer .a files over .so files for linking
-option(STATIC_LIBRARIES
-       "Prefer using static .a files rather than .so files. NOTE: This must be enabled from an empty build directory!"
-       OFF
-)
-
-if(STATIC_LIBRARIES)
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_SHARED_LIBRARY_SUFFIX})
-endif()
-
 # We use additional modules that cmake needs to know about
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules/" "${PROJECT_SOURCE_DIR}/nuclear/cmake/Modules/")
 
@@ -38,7 +28,6 @@ set(CI_BUILD
     CACHE
       BOOL
       "This disables the effects of the CI_BUILD variable. We should remove this set() once warnings have been fixed."
-      FORCE
 )
 
 # Default to do a debug build
@@ -98,8 +87,8 @@ add_compile_options(-Wall -Wpedantic -Wextra)
 # This is needed everywhere so that we can catch segmentation faults
 add_compile_options(-fnon-call-exceptions)
 
-# We use C++17
-add_compile_options(-std=c++17)
+# We use C++20
+add_compile_options(-std=c++20)
 
 # Make NUClear use the system clock, as we are syncing it with ptp
 add_compile_definitions(NUCLEAR_CLOCK_TYPE=std::chrono::steady_clock)
