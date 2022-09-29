@@ -95,7 +95,7 @@ walk:
 max_step:
   # Maximal step length in X
   # (in m, [0:1])
-  x: 0.3
+  x: 0.1
   # Maximal step length in Y
   # (in m, [0:1])
   y: 0.1
@@ -123,8 +123,8 @@ gains:
   arms: 8
 
 arms:
-  right_shoulder_pitch: 2.25 #1.98
-  left_shoulder_pitch: 2.25 #1.98
+  right_shoulder_pitch: 2.25
+  left_shoulder_pitch: 2.25
   right_shoulder_roll: -0.176
   left_shoulder_roll: 0.176
   right_elbow: -1.8
