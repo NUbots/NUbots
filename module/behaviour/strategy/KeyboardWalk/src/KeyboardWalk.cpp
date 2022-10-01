@@ -32,8 +32,10 @@
 #include "message/motion/HeadCommand.hpp"
 #include "message/motion/KickCommand.hpp"
 
+#include "utility/behaviour/Action.hpp"
 #include "utility/behaviour/MotionCommand.hpp"
 #include "utility/input/LimbID.hpp"
+#include "utility/input/ServoID.hpp"
 
 namespace module::behaviour::strategy {
 
@@ -42,6 +44,11 @@ namespace module::behaviour::strategy {
     using NUClear::message::LogMessage;
     using LimbID = utility::input::LimbID;
     using extension::ExecuteScriptByName;
+
+    using utility::behaviour::ActionPriorities;
+    using utility::behaviour::RegisterAction;
+    using utility::input::LimbID;
+    using utility::input::ServoID;
 
     void quit() {
         endwin();
@@ -142,6 +149,18 @@ namespace module::behaviour::strategy {
 
             update_window(log_window, colours, source, packet.message, true);
         });
+
+        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(RegisterAction{
+            subsumption_id,
+            "Keyboard Walk",
+            {std::pair<float, std::set<LimbID>>(
+                0,
+                {LimbID::HEAD, LimbID::LEFT_ARM, LimbID::RIGHT_ARM, LimbID::LEFT_LEG, LimbID::RIGHT_LEG})},
+            [this](const std::set<LimbID>& /*unused*/) {
+                emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {50}}));
+            },
+            [this](const std::set<LimbID>& /*unused*/) { updatePriority(0); },
+            [this](const std::set<ServoID>& /*unused*/) { updatePriority(0); }}));
 
         on<Shutdown>().then(endwin);
 
@@ -331,15 +350,21 @@ namespace module::behaviour::strategy {
     void KeyboardWalk::execute_dance_move(DanceMove dm) {
         switch (dm) {
             case DanceMove::CLAP_OPEN:
-                emit(std::make_unique<ExecuteScriptByName>(subsumption_id, 'StepClap1.yaml'));
+                emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {50}}));
+                emit(std::make_unique<ExecuteScriptByName>(subsumption_id, "StepClap1.yaml"));
                 log<NUClear::INFO>("clap open");
                 break;
             case DanceMove::CLAP_CLOSE:
-                emit(std::make_unique<ExecuteScriptByName>(subsumption_id, 'StepClap2.yaml'));
+                emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {50}}));
+                emit(std::make_unique<ExecuteScriptByName>(subsumption_id, "StepClap2.yaml"));
                 log<NUClear::INFO>("clap close");
                 break;
             default: log<NUClear::ERROR>(fmt::format("Invalid dance script command")); break;
         }
+    }
+
+    void KeyboardWalk::updatePriority(const float& priority) {
+        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {priority}}));
     }
 
     void KeyboardWalk::reset() {

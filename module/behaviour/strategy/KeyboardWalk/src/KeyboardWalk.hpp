@@ -92,6 +92,7 @@ namespace module::behaviour::strategy {
                            const std::string& source,
                            const std::string& message,
                            const bool& print_level);
+        void updatePriority(const float& priority);
 
     public:
         /// @brief Called by the powerplant to build and setup the KeyboardWalk reactor.
