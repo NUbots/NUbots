@@ -44,6 +44,8 @@ namespace module::behaviour::strategy {
         ERROR_COLOURS = 5,
         FATAL_COLOURS = 6
     };
+    // Dance move enums
+    enum DanceMove { CLAP_OPEN, CLAP_CLOSE };
 
     class KeyboardWalk : public NUClear::Reactor {
     private:
@@ -56,8 +58,9 @@ namespace module::behaviour::strategy {
         Eigen::Vector2f velocity;
         float rotation = 0.0f;
 
-        float head_yaw   = 0.0f;
-        float head_pitch = 0.0f;
+        float head_yaw              = 0.0f;
+        float head_pitch            = 0.0f;
+        const size_t subsumption_id = size_t(this) * size_t(this) - size_t(this);
 
         std::shared_ptr<WINDOW> command_window;
         std::shared_ptr<WINDOW> log_window;
@@ -80,6 +83,7 @@ namespace module::behaviour::strategy {
         void look_up();
         void look_down();
         void walk_toggle();
+        void execute_dance_move(DanceMove dm);
 
         void update_command();
         void print_status();
