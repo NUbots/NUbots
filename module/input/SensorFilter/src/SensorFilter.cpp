@@ -799,6 +799,8 @@ namespace module::input {
                                 Eigen::Vector3d est_Rtw   = MatrixToEulerIntrinsic(Hwt.inverse().rotation());
                                 Eigen::Vector3d error_Rtw = (true_Rtw - est_Rtw).cwiseAbs();
 
+                                double quat_rot_error = Eigen::Quaterniond(true_Htw.linear() * Hwt.linear()).w();
+
                                 // Graph translation and its error
                                 emit(graph("Htw est translation (rWTt)", est_rWTt.x(), est_rWTt.y(), est_rWTt.z()));
                                 emit(graph("Htw true translation (rWTt)", true_rWTt.x(), true_rWTt.y(), true_rWTt.z()));
@@ -808,6 +810,7 @@ namespace module::input {
                                 emit(graph("Rtw est angles (rpy)", est_Rtw.x(), est_Rtw.y(), est_Rtw.z()));
                                 emit(graph("Rtw true angles (rpy)", true_Rtw.x(), true_Rtw.y(), true_Rtw.z()));
                                 emit(graph("Rtw error (rpy)", error_Rtw.x(), error_Rtw.y(), error_Rtw.z()));
+                                emit(graph("Quaternion rotational error", quat_rot_error))
                             }
 
                             /************************************************
