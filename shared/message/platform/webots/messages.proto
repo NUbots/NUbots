@@ -108,6 +108,7 @@ message SensorMeasurements {
     repeated Force6DMeasurement        force6ds              = 9;
     repeated GyroMeasurement           gyros                 = 10;
     repeated PositionSensorMeasurement position_sensors      = 11;
+    // NUbots-specific data. Set to 100 in case other data is added in by the RoboCup TC
     OdometryGroundTruth                odometry_ground_truth = 100;
 }
 
