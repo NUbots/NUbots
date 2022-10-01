@@ -810,7 +810,7 @@ namespace module::input {
                                 emit(graph("Rtw est angles (rpy)", est_Rtw.x(), est_Rtw.y(), est_Rtw.z()));
                                 emit(graph("Rtw true angles (rpy)", true_Rtw.x(), true_Rtw.y(), true_Rtw.z()));
                                 emit(graph("Rtw error (rpy)", error_Rtw.x(), error_Rtw.y(), error_Rtw.z()));
-                                emit(graph("Quaternion rotational error", quat_rot_error))
+                                emit(graph("Quaternion rotational error", quat_rot_error));
                             }
 
                             /************************************************
