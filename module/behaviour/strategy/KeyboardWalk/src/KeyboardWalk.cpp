@@ -38,14 +38,21 @@ namespace module::behaviour::strategy {
     using message::motion::HeadCommand;
     using NUClear::message::LogMessage;
     using LimbID = utility::input::LimbID;
+    using extension::ExecuteScriptByName;
 
     void quit() {
         endwin();
         std::raise(SIGTERM);  // Change back to SIGINT if required by NUbots messaging system//
     }
 
-    KeyboardWalk::KeyboardWalk(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), velocity(Eigen::Vector2f::Zero()) {
+    // Dance move enums
+    enum DanceMove {
+        CLAP_OPEN,
+        CLAP_CLOSE
+    }
+
+    KeyboardWalk::KeyboardWalk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)),
+        velocity(Eigen::Vector2f::Zero()) {
 
         // Ensure UTF-8 is enabled
         std::setlocale(LC_ALL, "en_US.UTF-8");
@@ -96,6 +103,8 @@ namespace module::behaviour::strategy {
                 case KEY_RIGHT: look_right(); break;
                 case KEY_UP: look_up(); break;
                 case KEY_DOWN: look_down(); break;
+                case '1': execute_dance_move(DanceMove::CLAP_OPEN); break;
+                case '2': execute_dance_move(DanceMove::CLAP_CLOSE; break;
                 case 'q': quit(); return;
                 default:
                     log<NUClear::ERROR>("Unknown Command");
@@ -318,6 +327,20 @@ namespace module::behaviour::strategy {
             update_command();
         }
         print_status();
+    }
+
+    // NOTE: Could have this as a config and map whatever scripts we need to the number keys.
+    void KeyboardWalk::execute_dance_move(enum DanceMove) {
+        size_t subsumption_id = 1;  // Not sure what this should be, but we are only dancing so it shouldn't matter
+        switch (DanceMove) {
+            DanceMove::CLAP_OPEN : emit(std::make_unique<ExecuteScriptByName>(subsumption_id, 'StepClap1.yaml'));
+            log<NUClear::INFO>("clap open");
+            break;
+            DanceMove::CLAP_CLOSE : emit(std::make_unique<ExecuteScriptByName>(subsumption_id, 'StepClap2.yaml'));
+            log<NUClear::INFO>("clap close");
+            break;
+            default: log<NUClear::ERROR>(fmt::format("Invalid dance script command")); break;
+        }
     }
 
     void KeyboardWalk::reset() {
