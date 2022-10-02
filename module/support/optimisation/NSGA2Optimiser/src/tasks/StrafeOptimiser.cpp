@@ -6,8 +6,8 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/support/optimisation/NSGA2EvaluatorMessages.hpp"
-#include "message/support/optimisation/NSGA2OptimiserMessages.hpp"
+#include "message/support/optimisation/NSGA2Evaluator.hpp"
+#include "message/support/optimisation/NSGA2Optimiser.hpp"
 
 #include "utility/support/yaml_expression.hpp"
 
@@ -60,7 +60,7 @@ namespace module {
                 for (const auto& element : std::vector<std::string>({std::string("velocity")})) {
                     paramInitialValues.emplace_back(walk_command[element][0].as<Expression>());
                     paramLimits.emplace_back(walk_command[element][1].as<Expression>(),
-                                             walk_command[element][2].as<Expression>()); 
+                                             walk_command[element][2].as<Expression>());
                 }
 
                 quintic_walk_path    = config["task_config_path"].as<std::string>();

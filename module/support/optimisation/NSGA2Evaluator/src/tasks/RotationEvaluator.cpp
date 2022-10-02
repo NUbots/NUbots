@@ -6,8 +6,8 @@
 #include <yaml-cpp/yaml.h>
 
 #include "message/motion/WalkCommand.hpp"
-#include "message/support/optimisation/NSGA2EvaluatorMessages.hpp"
-#include "message/support/optimisation/NSGA2OptimiserMessages.hpp"
+#include "message/support/optimisation/NSGA2Evaluator.hpp"
+#include "message/support/optimisation/NSGA2Optimiser.hpp"
 
 #include "utility/behaviour/Action.hpp"
 #include "utility/input/LimbID.hpp"
@@ -44,7 +44,7 @@ namespace module {
                 theta += omega * deltaT / 1000;
             }
 
-            void RotationEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position){
+            void RotationEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position) {
                 if (!initialPositionSet) {
                     initialPositionSet       = true;
                     initialRobotPosition.x() = position.value.X;

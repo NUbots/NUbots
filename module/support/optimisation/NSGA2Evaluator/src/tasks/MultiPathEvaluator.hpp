@@ -9,8 +9,8 @@
 #include "EvaluatorTask.hpp"
 
 #include "message/platform/RawSensors.hpp"
-#include "message/support/optimisation/NSGA2EvaluatorMessages.hpp"
-#include "message/support/optimisation/NSGA2OptimiserMessages.hpp"
+#include "message/support/optimisation/NSGA2Evaluator.hpp"
+#include "message/support/optimisation/NSGA2Optimiser.hpp"
 
 namespace module {
     namespace support {
@@ -59,7 +59,7 @@ namespace module {
                 /// @brief The walk command velocity.
                 Eigen::Vector2d walk_command_velocity = Eigen::Vector2d(0.0, 0.0);
 
-                /// @brief The walk command rotation.
+                /// @brief The walk command and rotation command.
                 double walk_command_velocity_X = 0.0;
                 double walk_command_velocity_Y = 0.0;
                 double walk_command_Rotation   = 0.0;

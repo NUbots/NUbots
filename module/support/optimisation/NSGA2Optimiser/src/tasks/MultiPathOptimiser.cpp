@@ -6,8 +6,8 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/support/optimisation/NSGA2EvaluatorMessages.hpp"
-#include "message/support/optimisation/NSGA2OptimiserMessages.hpp"
+#include "message/support/optimisation/NSGA2Evaluator.hpp"
+#include "message/support/optimisation/NSGA2Optimiser.hpp"
 
 #include "utility/support/yaml_expression.hpp"
 
@@ -19,7 +19,7 @@ namespace module {
 
             void MultiPathOptimiser::SetupNSGA2(const ::extension::Configuration& config,
                                                 nsga2::NSGA2& nsga2Algorithm) {
-                NUClear::log<NUClear::INFO>("Walk Optimiser Setting up NSGA2");
+                NUClear::log<NUClear::INFO>("Multipath Optimiser Setting up NSGA2");
                 // The initial values of the parameters to optimise
                 std::vector<double> paramInitialValues;
 

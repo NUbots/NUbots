@@ -6,8 +6,8 @@
 #include <yaml-cpp/yaml.h>
 
 #include "message/motion/WalkCommand.hpp"
-#include "message/support/optimisation/NSGA2EvaluatorMessages.hpp"
-#include "message/support/optimisation/NSGA2OptimiserMessages.hpp"
+#include "message/support/optimisation/NSGA2Evaluator.hpp"
+#include "message/support/optimisation/NSGA2Optimiser.hpp"
 
 #include "utility/behaviour/Action.hpp"
 #include "utility/input/LimbID.hpp"
@@ -98,13 +98,11 @@ namespace module {
             void MultiPathEvaluator::processRoundEnd() {
                 auto travelScore = processDistanceTravelled();
 
-                if(pathNo == FWD || pathNo == BKWD || pathNo == STRFL || pathNo == STRFR)
-                {
-                    travelScore = 1.0/travelScore * 20;
+                if (pathNo == FWD || pathNo == BKWD || pathNo == STRFL || pathNo == STRFR) {
+                    travelScore = 1.0 / travelScore * 20;
                 }
-                else if(pathNo == ROTCCW || pathNo == ROTCW)
-                {
-                    travelScore = 1.0/travelScore * 5;
+                else if (pathNo == ROTCCW || pathNo == ROTCW) {
+                    travelScore = 1.0 / travelScore * 5;
                 }
 
                 std::vector<double> scores = {travelScore, maxFieldPlaneSway};
@@ -171,8 +169,8 @@ namespace module {
 
                 // Set our walk command
                 walk_command_velocity_X = currentRequest.parameters.real_params[11];
-                walk_command_velocity_Y = currentRequest.parameters.real_params[11];  
-                walk_command_Rotation   = currentRequest.parameters.real_params[12];  
+                walk_command_velocity_Y = currentRequest.parameters.real_params[11];
+                walk_command_Rotation   = currentRequest.parameters.real_params[12];
 
                 // Read the QuinticWalk config and overwrite the config parameters with the current individual's
                 // parameters
@@ -272,8 +270,8 @@ namespace module {
             // I want a pattern here passed as an arg
             std::vector<double> MultiPathEvaluator::calculateScores() {
                 // auto robotDistanceTravelled = 0.0;
-                auto maxSway                = 0.0;
-                auto finalScore             = 0.0;
+                auto maxSway    = 0.0;
+                auto finalScore = 0.0;
 
                 for (std::vector<double> score : pathScores) {
                     for (auto param : params) {
@@ -283,8 +281,8 @@ namespace module {
 
                 NUClear::log<NUClear::DEBUG>("Final Score:", finalScore);
                 return {
-                    maxSway,              // For now, we want to reduce this
-                    1.0 / finalScore      // 1/x since the NSGA2 optimiser is a minimiser
+                    maxSway,          // For now, we want to reduce this
+                    1.0 / finalScore  // 1/x since the NSGA2 optimiser is a minimiser
                 };
             }
 
