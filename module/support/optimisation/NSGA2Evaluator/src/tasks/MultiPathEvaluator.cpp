@@ -43,6 +43,9 @@ namespace module {
                 }
 
                 if ((int) evaluator->simTime % 10000 == 0) {
+                    // Stop robot
+                    evaluator->emit(std::make_unique<WalkCommand>(subsumptionID, Eigen::Vector3d(0.0, 0.0, 0.0)));
+
                     processRoundEnd();
                     pathNo++;
                     processNextPath();
@@ -98,12 +101,12 @@ namespace module {
             void MultiPathEvaluator::processRoundEnd() {
                 auto travelScore = processDistanceTravelled();
 
-                if (pathNo == FWD || pathNo == BKWD || pathNo == STRFL || pathNo == STRFR) {
-                    travelScore = 1.0 / travelScore * 20;
-                }
-                else if (pathNo == ROTCCW || pathNo == ROTCW) {
-                    travelScore = 1.0 / travelScore * 5;
-                }
+                // if (pathNo == FWD || pathNo == BKWD || pathNo == STRFL || pathNo == STRFR) {
+                //     travelScore = 1.0 / travelScore * 20;
+                // }
+                // else if (pathNo == ROTCCW || pathNo == ROTCW) {
+                //     travelScore = 1.0 / travelScore * 5;
+                // }
 
                 std::vector<double> scores = {travelScore, maxFieldPlaneSway};
 
@@ -143,13 +146,13 @@ namespace module {
                         break;
 
                     case 4:
-                        walk_command_velocity.x() = -0.05;
+                        walk_command_velocity.x() = 0.05;
                         walk_command_velocity.y() = 0.05;
                         walk_command_rotation     = walk_command_Rotation;
                         break;
 
                     case 5:
-                        walk_command_velocity.x() = -0.05;
+                        walk_command_velocity.x() = 0.05;
                         walk_command_velocity.y() = -0.05;
                         walk_command_rotation     = -walk_command_Rotation;
                         break;
@@ -269,14 +272,20 @@ namespace module {
             }
             // I want a pattern here passed as an arg
             std::vector<double> MultiPathEvaluator::calculateScores() {
-                auto maxSway                = 0.0;
-                auto finalScore             = 0.0;
+                auto maxSway    = 0.0;
+                auto finalScore = 0.0;
 
                 for (std::vector<double> score : pathScores) {
-                    for (auto param : params) {
-                        finalScore += (score.at(0) * param) + (score.at(1) * param);
-                    }
+                    // for (auto param : params) {
+                    //     finalScore += (score.at(0) * param) + (score.at(1) * param); //For singlr objective
+                    // }
+
+                    finalScore += score.at(0);
+                    maxSway += score.at(1);
                 }
+
+                // finalScore /= pathScores.size();
+                maxSway /= pathScores.size();
 
                 NUClear::log<NUClear::DEBUG>("Final Score:", finalScore);
                 return {
