@@ -6,8 +6,8 @@
 #include <yaml-cpp/yaml.h>
 
 #include "message/motion/WalkCommand.hpp"
-#include "message/support/optimisation/NSGA2EvaluatorMessages.hpp"
-#include "message/support/optimisation/NSGA2OptimiserMessages.hpp"
+#include "message/support/optimisation/NSGA2Evaluator.hpp"
+#include "message/support/optimisation/NSGA2Optimiser.hpp"
 
 #include "utility/behaviour/Action.hpp"
 #include "utility/input/LimbID.hpp"

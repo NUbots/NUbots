@@ -8,8 +8,8 @@
 #include "EvaluatorTask.hpp"
 
 #include "message/platform/RawSensors.hpp"
-#include "message/support/optimisation/NSGA2EvaluatorMessages.hpp"
-#include "message/support/optimisation/NSGA2OptimiserMessages.hpp"
+#include "message/support/optimisation/NSGA2Evaluator.hpp"
+#include "message/support/optimisation/NSGA2Optimiser.hpp"
 
 namespace module {
     namespace support {
@@ -57,6 +57,10 @@ namespace module {
 
                 /// @brief The walk command rotation.
                 double walk_command_rotation = 0.0;
+
+                /// @brief Configuration Min and Max values
+                double gravityMAX = 0.0;
+                double gravityMin = 0.0;
             };
 
         }  // namespace optimisation

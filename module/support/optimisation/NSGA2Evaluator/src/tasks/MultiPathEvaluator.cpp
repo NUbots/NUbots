@@ -6,8 +6,8 @@
 #include <yaml-cpp/yaml.h>
 
 #include "message/motion/WalkCommand.hpp"
-#include "message/support/optimisation/NSGA2EvaluatorMessages.hpp"
-#include "message/support/optimisation/NSGA2OptimiserMessages.hpp"
+#include "message/support/optimisation/NSGA2Evaluator.hpp"
+#include "message/support/optimisation/NSGA2Optimiser.hpp"
 
 #include "utility/behaviour/Action.hpp"
 #include "utility/input/LimbID.hpp"
@@ -271,7 +271,6 @@ namespace module {
             }
             // I want a pattern here passed as an arg
             std::vector<double> MultiPathEvaluator::calculateScores() {
-                // auto robotDistanceTravelled = 0.0;
                 auto maxSway                = 0.0;
                 auto finalScore             = 0.0;
 

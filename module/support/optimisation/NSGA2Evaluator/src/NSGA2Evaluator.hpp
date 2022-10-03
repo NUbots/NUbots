@@ -8,8 +8,8 @@
 #include "tasks/EvaluatorTask.hpp"
 
 #include "message/platform/RawSensors.hpp"
-#include "message/support/optimisation/NSGA2EvaluatorMessages.hpp"
-#include "message/support/optimisation/NSGA2OptimiserMessages.hpp"
+#include "message/support/optimisation/NSGA2Evaluator.hpp"
+#include "message/support/optimisation/NSGA2Optimiser.hpp"
 
 namespace module {
     namespace support {
@@ -63,10 +63,6 @@ namespace module {
 
                 /// @brief Subsumption priority ID for this module
                 size_t subsumptionId;
-
-                // /// @brief The current simulation time
-                // double simTime = 0.0;
-
 
                 /// @brief The number of the current generation
                 int generation = 0;

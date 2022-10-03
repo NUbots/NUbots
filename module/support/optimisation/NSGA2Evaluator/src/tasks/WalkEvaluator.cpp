@@ -4,11 +4,12 @@
 #include <fmt/ostream.h>
 #include <fstream>
 #include <yaml-cpp/yaml.h>
-//#include "tasks/EvaluatorTask.hpp"
+
+#include "extension/Configuration.hpp"
 
 #include "message/motion/WalkCommand.hpp"
-#include "message/support/optimisation/NSGA2EvaluatorMessages.hpp"
-#include "message/support/optimisation/NSGA2OptimiserMessages.hpp"
+#include "message/support/optimisation/NSGA2Evaluator.hpp"
+#include "message/support/optimisation/NSGA2Optimiser.hpp"
 
 #include "utility/behaviour/Action.hpp"
 #include "utility/input/LimbID.hpp"
@@ -30,6 +31,12 @@ namespace module {
             using utility::input::LimbID;
             using utility::input::ServoID;
             using utility::support::Expression;
+
+            using extension::Configuration;
+
+            on<Configuration>("NSGA2Evaluator.yaml").then([this](const Configuration& config) {
+                    log<NUClear::INFO>("Setting up NSGA2 walk evaluator");
+                }
 
             void WalkEvaluator::processRawSensorMsg(const RawSensors& sensors, NSGA2Evaluator* evaluator) {
                 updateMaxFieldPlaneSway(sensors);
@@ -53,7 +60,6 @@ namespace module {
 
             void WalkEvaluator::setUpTrial(const NSGA2EvaluationRequest& currentRequest) {
                 // Set our generation and individual identifiers from the request
-
                 trial_duration_limit = std::chrono::seconds(currentRequest.trial_duration_limit);
 
                 // Set our walk command

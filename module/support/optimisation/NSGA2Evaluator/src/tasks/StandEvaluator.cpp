@@ -6,8 +6,8 @@
 #include <yaml-cpp/yaml.h>
 
 #include "message/motion/WalkCommand.hpp"
-#include "message/support/optimisation/NSGA2EvaluatorMessages.hpp"
-#include "message/support/optimisation/NSGA2OptimiserMessages.hpp"
+#include "message/support/optimisation/NSGA2Evaluator.hpp"
+#include "message/support/optimisation/NSGA2Optimiser.hpp"
 
 #include "utility/behaviour/Action.hpp"
 #include "utility/input/LimbID.hpp"
@@ -82,8 +82,7 @@ namespace module {
                                                                                        int individual) {
                 double trialDuration = simTime - trialStartTime;
                 auto scores          = calculateScores(trialDuration);
-                auto constraints = earlyTermination ? calculateConstraints() : calculateConstraints(); //constraintsNotViolated();
-                //auto constraints     = calculateConstraints();
+                auto constraints = earlyTermination ? calculateConstraints() : calculateConstraints(); 
 
                 NUClear::log<NUClear::DEBUG>("Trial ran for", trialDuration);
                 NUClear::log<NUClear::DEBUG>("SendFitnessScores for generation", generation, "individual", individual);

@@ -2,7 +2,7 @@
 population_size: 40
 # More generations encourages deeper search
 max_generations: 50
-num_objectives:  1 
+num_objectives:  2 
 num_constraints: 2
 seed: 7777777
 trial_duration_limit: 60 # number of seconds to run a single trial for
@@ -21,6 +21,7 @@ eta:
   # Recommended nsga2 value for eta_c is 20
   C: 20
   M: 20
+
 
 task: "multipath"
 task_config_path: "config/webots/QuinticWalk.yaml"
