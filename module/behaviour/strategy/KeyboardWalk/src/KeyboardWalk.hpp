@@ -45,7 +45,7 @@ namespace module::behaviour::strategy {
         FATAL_COLOURS = 6
     };
     // Dance move enums
-    enum DanceMove { CLAP_OPEN, CLAP_CLOSE };
+    enum DanceMove { CLAP_OPEN, CLAP_CLOSE, OH_THRUST_R, OH_THRUST_L, STAR_1, STAR_2 };
 
     class KeyboardWalk : public NUClear::Reactor {
     private:

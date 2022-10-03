@@ -110,6 +110,10 @@ namespace module::behaviour::strategy {
                 case KEY_DOWN: look_down(); break;
                 case '1': execute_dance_move(DanceMove::CLAP_OPEN); break;
                 case '2': execute_dance_move(DanceMove::CLAP_CLOSE); break;
+                case '3': execute_dance_move(DanceMove::OH_THRUST_R); break;
+                case '4': execute_dance_move(DanceMove::OH_THRUST_L); break;
+                case '5': execute_dance_move(DanceMove::STAR_1); break;
+                case '6': execute_dance_move(DanceMove::STAR_2); break;
                 case 'q': quit(); return;
                 default:
                     log<NUClear::ERROR>("Unknown Command");
@@ -358,6 +362,26 @@ namespace module::behaviour::strategy {
                 emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {50}}));
                 emit(std::make_unique<ExecuteScriptByName>(subsumption_id, "StepClap2.yaml"));
                 log<NUClear::INFO>("clap close");
+                break;
+            case DanceMove::OH_THRUST_R:
+                emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {50}}));
+                emit(std::make_unique<ExecuteScriptByName>(subsumption_id, "OverheadThrust1.yaml"));
+                log<NUClear::INFO>("overhead thrust right");
+                break;
+            case DanceMove::OH_THRUST_L:
+                emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {50}}));
+                emit(std::make_unique<ExecuteScriptByName>(subsumption_id, "OverheadThrust2.yaml"));
+                log<NUClear::INFO>("overhead thrust left");
+                break;
+            case DanceMove::STAR_1:
+                emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {50}}));
+                emit(std::make_unique<ExecuteScriptByName>(subsumption_id, "Star1.yaml"));
+                log<NUClear::INFO>("star 1");
+                break;
+            case DanceMove::STAR_2:
+                emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {50}}));
+                emit(std::make_unique<ExecuteScriptByName>(subsumption_id, "Star2.yaml"));
+                log<NUClear::INFO>("star 2");
                 break;
             default: log<NUClear::ERROR>(fmt::format("Invalid dance script command")); break;
         }
