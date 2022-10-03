@@ -60,6 +60,16 @@ namespace module {
             NSGA2Evaluator::NSGA2Evaluator(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
 
+                // on<Configuration>("NSGA2Evaluator.yaml").then([this](const Configuration& config) {
+                //     log<NUClear::INFO>("Setting up NSGA2 walk path evaluator");
+                //     //log<NUClear::INFO>("Config", config);
+                //     auto gravityMax = config["gravity"]["MAX"].as<double>();
+                //     auto gravityMin = config["gravity"]["MIN"].as<double>();
+                //     //auto min = config["MIN"].as<double>();
+                //     //log<NUClear::INFO>("G", gravity);
+                //     //log<NUClear::INFO>("Min", min);
+                // });
+
                 emit<Scope::DIRECT>(std::make_unique<RegisterAction>(RegisterAction{
                     subsumptionId,
                     "NSGA2 Evaluator",

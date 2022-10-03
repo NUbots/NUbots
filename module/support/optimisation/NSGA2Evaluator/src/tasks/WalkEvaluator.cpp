@@ -5,6 +5,8 @@
 #include <fstream>
 #include <yaml-cpp/yaml.h>
 
+#include "utility/support/yaml_expression.hpp"
+
 #include "extension/Configuration.hpp"
 
 #include "message/motion/WalkCommand.hpp"
@@ -33,10 +35,6 @@ namespace module {
             using utility::support::Expression;
 
             using extension::Configuration;
-
-            on<Configuration>("NSGA2Evaluator.yaml").then([this](const Configuration& config) {
-                    log<NUClear::INFO>("Setting up NSGA2 walk evaluator");
-                }
 
             void WalkEvaluator::processRawSensorMsg(const RawSensors& sensors, NSGA2Evaluator* evaluator) {
                 updateMaxFieldPlaneSway(sensors);
@@ -70,6 +68,14 @@ namespace module {
                 // Read the QuinticWalk config and overwrite the config parameters with the current individual's
                 // parameters
                 YAML::Node walk_config = YAML::LoadFile(currentRequest.task_config_path);
+                //NUClear::log<NUClear::INFO>("CurrentConfigPath", currentRequest.task_config_path);
+                YAML::Node eval_config = YAML::LoadFile("config/NSGA2Evaluator.yaml");
+
+                // gravityMax = eval_config["gravity"]["MAX"].as<double>();
+                // gravityMin = eval_config["gravity"]["MIN"].as<double>();
+                // //     //auto min = config["MIN"].as<double>();
+                // NUClear::log<NUClear::INFO>("MAX", gravityMax);
+                // NUClear::log<NUClear::INFO>("Min", gravityMin);
 
                 // The mapping of parameters depends on how the config file was read by the optimiser
                 auto walk                    = walk_config["walk"];

@@ -23,7 +23,7 @@ eta:
   M: 20
 
 
-task: "multipath"
+task: "walk" #"multipath"
 task_config_path: "config/webots/QuinticWalk.yaml"
 
 initial_translation: [-4.0, -3.0, 0.51] # x, y, z
@@ -73,3 +73,7 @@ walk:
 walk_command:
   velocity: [0.2, 0.01, 0.51]
   rotation: [0.15, 0.1, 1.57]
+
+gravity:
+  MIN: 0.5
+  MAX: 9.2
