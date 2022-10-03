@@ -44,7 +44,7 @@ namespace module {
                 theta += omega * deltaT / 1000;
             }
 
-            void RotationEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position){
+            void RotationEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position) {
                 if (!initialPositionSet) {
                     initialPositionSet       = true;
                     initialRobotPosition.x() = position.value.X;

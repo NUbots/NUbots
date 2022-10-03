@@ -141,7 +141,8 @@ namespace module {
             }
 
             void StandEvaluator::runScript(size_t subsumptionId, NSGA2Evaluator* evaluator) {
-                evaluator->emit(std::make_unique<extension::ExecuteScript>(subsumptionId, script, NUClear::clock::now()));
+                evaluator->emit(
+                    std::make_unique<extension::ExecuteScript>(subsumptionId, script, NUClear::clock::now()));
             }
 
             void StandEvaluator::updateMaxFieldPlaneSway(const RawSensors& sensors) {

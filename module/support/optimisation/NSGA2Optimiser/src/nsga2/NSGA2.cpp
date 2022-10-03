@@ -111,6 +111,22 @@ namespace nsga2 {
                                                  randGen,
                                                  initialRealVars);
 
+        NUClear::log<NUClear::INFO>("Parent Pop", parentPop->GetSize());
+
+        for (auto b : binLimits) {  //= binBits.begin(); bin != binBits.end(); ++bin) {
+                                    // for (auto i : b) {
+            NUClear::log<NUClear::INFO>("Bin bit 1", b.first);
+            NUClear::log<NUClear::INFO>("Bin bit 2", b.second);
+            //}
+            // NUClear::log<NUClear::INFO>("Bin bit", b);
+        }
+
+
+        for (std::pair<double, double> i : realLimits) {
+            NUClear::log<NUClear::INFO>("Real limit 1", i.first);
+            NUClear::log<NUClear::INFO>("Real limit 2", i.second);
+        }
+
         childPop = std::make_shared<Population>(popSize,
                                                 realVars,
                                                 binVars,
@@ -126,6 +142,8 @@ namespace nsga2 {
                                                 randGen,
                                                 initialRealVars);
 
+        NUClear::log<NUClear::INFO>("Child Pop", childPop->GetSize());
+
         combinedPop = std::make_shared<Population>(popSize * 2,
                                                    realVars,
                                                    binVars,
@@ -140,6 +158,8 @@ namespace nsga2 {
                                                    epsC,
                                                    randGen,
                                                    initialRealVars);
+
+        NUClear::log<NUClear::INFO>("Combined Pop", combinedPop->GetSize());
     }
 
     std::shared_ptr<Population> NSGA2::getCurrentPop() {

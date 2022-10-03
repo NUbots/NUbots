@@ -98,13 +98,11 @@ namespace module {
             void MultiPathEvaluator::processRoundEnd() {
                 auto travelScore = processDistanceTravelled();
 
-                if(pathNo == FWD || pathNo == BKWD || pathNo == STRFL || pathNo == STRFR)
-                {
-                    travelScore = 1.0/travelScore * 20;
+                if (pathNo == FWD || pathNo == BKWD || pathNo == STRFL || pathNo == STRFR) {
+                    travelScore = 1.0 / travelScore * 20;
                 }
-                else if(pathNo == ROTCCW || pathNo == ROTCW)
-                {
-                    travelScore = 1.0/travelScore * 5;
+                else if (pathNo == ROTCCW || pathNo == ROTCW) {
+                    travelScore = 1.0 / travelScore * 5;
                 }
 
                 std::vector<double> scores = {travelScore, maxFieldPlaneSway};
@@ -171,8 +169,8 @@ namespace module {
 
                 // Set our walk command
                 walk_command_velocity_X = currentRequest.parameters.real_params[11];
-                walk_command_velocity_Y = currentRequest.parameters.real_params[11];  
-                walk_command_Rotation   = currentRequest.parameters.real_params[12];  
+                walk_command_velocity_Y = currentRequest.parameters.real_params[11];
+                walk_command_Rotation   = currentRequest.parameters.real_params[12];
 
                 // Read the QuinticWalk config and overwrite the config parameters with the current individual's
                 // parameters
@@ -282,8 +280,8 @@ namespace module {
 
                 NUClear::log<NUClear::DEBUG>("Final Score:", finalScore);
                 return {
-                    maxSway,              // For now, we want to reduce this
-                    1.0 / finalScore      // 1/x since the NSGA2 optimiser is a minimiser
+                    maxSway,          // For now, we want to reduce this
+                    1.0 / finalScore  // 1/x since the NSGA2 optimiser is a minimiser
                 };
             }
 

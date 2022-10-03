@@ -5,7 +5,7 @@ max_generations: 50
 num_objectives:  2 
 num_constraints: 2
 seed: 7777777
-trial_duration_limit: 60 # number of seconds to run a single trial for
+trial_duration_limit: 61 # number of seconds to run a single trial for
 probabilities:
   real:
     # Note that simulated binary crossover (SBX) does something like mutation as well
@@ -51,7 +51,7 @@ walk:
     height: [0.45, 0.35, 0.5]
     # Trunk pitch orientation (how much we lean the torso forward or backward, does not change)
     # (in rad)
-    pitch: [10 * pi / 180, -10 * pi / 180, 30 * pi / 180] 
+    pitch: [10 * pi / 180, -10 * pi / 180, 30 * pi / 180]
     # Trunk forward offset (how much we offset the trunk forward or backward lean when walking)
     # (in m)
     x_offset: [0.03, -0.05, 0.05]
@@ -72,4 +72,4 @@ walk:
 # The following values are setting the initial values and limits for the walk engine command.
 walk_command:
   velocity: [0.2, 0.01, 0.51]
-  rotation:  [0.15, 0.1, 1.57]
+  rotation: [0.15, 0.1, 1.57]

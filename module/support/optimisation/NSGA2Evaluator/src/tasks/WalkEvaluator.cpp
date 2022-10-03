@@ -64,8 +64,8 @@ namespace module {
 
                 // Set our walk command
                 walk_command_velocity.x() = currentRequest.parameters.real_params[11];
-                walk_command_velocity.y() = 0.0; 
-                walk_command_rotation     = 0.0; 
+                walk_command_velocity.y() = 0.0;
+                walk_command_rotation     = 0.0;
 
                 // Read the QuinticWalk config and overwrite the config parameters with the current individual's
                 // parameters
@@ -151,7 +151,7 @@ namespace module {
                 fitnessScores->constraints                        = constraints;
                 return fitnessScores;
             }
-            
+
             std::vector<double> WalkEvaluator::calculateScores() {
                 auto robotDistanceTravelled = std::fabs(initialRobotPosition.x() - robotPosition.x());
                 return {

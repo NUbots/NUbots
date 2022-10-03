@@ -19,7 +19,7 @@ namespace module {
 
             void MultiPathOptimiser::SetupNSGA2(const ::extension::Configuration& config,
                                                 nsga2::NSGA2& nsga2Algorithm) {
-                NUClear::log<NUClear::INFO>("Walk Optimiser Setting up NSGA2");
+                NUClear::log<NUClear::INFO>("Multipath Optimiser Setting up NSGA2");
                 // The initial values of the parameters to optimise
                 std::vector<double> paramInitialValues;
 
