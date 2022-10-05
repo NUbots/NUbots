@@ -477,6 +477,18 @@ namespace module::input {
                             sensors->gyroscope = input.gyroscope.cast<double>();
                         }
 
+                        // Add gyro and acc graphs if in debug
+                        if (log_level <= NUClear::DEBUG) {
+                            emit(graph("Gyroscope",
+                                       sensors->gyroscope.x(),
+                                       sensors->gyroscope.y(),
+                                       sensors->gyroscope.z()));
+                            emit(graph("Accelerometer",
+                                       sensors->accelerometer.x(),
+                                       sensors->accelerometer.y(),
+                                       sensors->accelerometer.z()));
+                        }
+
                         /************************************************
                          *               Buttons and LEDs               *
                          ************************************************/
@@ -771,6 +783,35 @@ namespace module::input {
                             Hwt.linear()      = o.Rwt.toRotationMatrix();
                             Hwt.translation() = o.rTWw;
                             sensors->Htw      = Hwt.inverse().matrix();
+
+                            // If there is ground truth data, determine the error in the odometry calculation
+                            // and emit graphs of those errors
+                            if (input.odometry_ground_truth.exists) {
+                                Eigen::Affine3d true_Htw(input.odometry_ground_truth.Htw);
+
+                                // Determine translational distance error
+                                Eigen::Vector3d est_rWTt   = Hwt.inverse().translation();
+                                Eigen::Vector3d true_rWTt  = true_Htw.translation();
+                                Eigen::Vector3d error_rWTt = (true_rWTt - est_rWTt).cwiseAbs();
+
+                                // Determine yaw, pitch and roll error
+                                Eigen::Vector3d true_Rtw  = MatrixToEulerIntrinsic(true_Htw.rotation());
+                                Eigen::Vector3d est_Rtw   = MatrixToEulerIntrinsic(Hwt.inverse().rotation());
+                                Eigen::Vector3d error_Rtw = (true_Rtw - est_Rtw).cwiseAbs();
+
+                                double quat_rot_error = Eigen::Quaterniond(true_Htw.linear() * Hwt.linear()).w();
+
+                                // Graph translation and its error
+                                emit(graph("Htw est translation (rWTt)", est_rWTt.x(), est_rWTt.y(), est_rWTt.z()));
+                                emit(graph("Htw true translation (rWTt)", true_rWTt.x(), true_rWTt.y(), true_rWTt.z()));
+                                emit(graph("Htw translation error", error_rWTt.x(), error_rWTt.y(), error_rWTt.z()));
+
+                                // Graph angles and error
+                                emit(graph("Rtw est angles (rpy)", est_Rtw.x(), est_Rtw.y(), est_Rtw.z()));
+                                emit(graph("Rtw true angles (rpy)", true_Rtw.x(), true_Rtw.y(), true_Rtw.z()));
+                                emit(graph("Rtw error (rpy)", error_Rtw.x(), error_Rtw.y(), error_Rtw.z()));
+                                emit(graph("Quaternion rotational error", quat_rot_error));
+                            }
 
                             /************************************************
                              *                  Kinematics Horizon          *
