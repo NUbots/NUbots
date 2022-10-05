@@ -74,17 +74,7 @@ def process_metadata(packet, output):
     focal_length = packet.msg.lens.focal_length * width
 
     # Get the Hwc matrix
-    Hco = packet.msg.Hcw
-    rCOc = np.array([-Hco.x.t, -Hco.y.t, -Hco.z.t])
-    Roc = np.array([[Hco.x.x, Hco.y.x, Hco.z.x], [Hco.x.y, Hco.y.y, Hco.z.y], [Hco.x.z, Hco.y.z, Hco.z.z]])
-    rCOo = np.matmul(Roc, rCOc).tolist()
-
-    Hoc = [
-        [Roc[0][0].item(), Roc[1][0].item(), Roc[2][0].item(), rCOo[0]],
-        [Roc[0][1].item(), Roc[1][1].item(), Roc[2][1].item(), rCOo[1]],
-        [Roc[0][2].item(), Roc[1][2].item(), Roc[2][2].item(), rCOo[2]],
-        [0, 0, 0, 1],
-    ]
+    Hoc = np.linalg.inv(packet.msg.Hcw)
 
     camera_data = {
         "projection": projection,
