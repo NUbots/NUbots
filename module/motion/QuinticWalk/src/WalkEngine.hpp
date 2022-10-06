@@ -113,7 +113,7 @@ namespace module::motion {
          * Return current walk phase
          * between 0 and 1
          */
-        [[nodiscard]] constexpr float getPhase() const {
+        [[nodiscard]] float get_phase() const {
             return phase;
         }
 
@@ -122,41 +122,41 @@ namespace module::motion {
          * 0 and half period for
          * trajectories evaluation
          */
-        [[nodiscard]] constexpr float getTrajsTime() const {
+        [[nodiscard]] float get_trajs_time() const {
             return phase < 0.5f ? phase / params.freq : (phase - 0.5f) / params.freq;
         }
 
         /**
          * Get the footstep object.
          */
-        [[nodiscard]] inline Footstep getFootstep() {
+        [[nodiscard]] inline Footstep get_footstep() const {
             return foot_step;
         }
 
         /**
          * Return if true if left is current support foot
          */
-        [[nodiscard]] constexpr bool isLeftSupport() {
-            return foot_step.isLeftSupport();
+        [[nodiscard]] bool is_left_support() const {
+            return foot_step.is_left_support();
         }
 
         /**
          * Return true if both feet are currently on the ground
          */
-        [[nodiscard]] constexpr bool isDoubleSupport() {
+        [[nodiscard]] bool is_double_support() const {
             // returns true if the value of the "is_float_support" spline is currently higher than 0.5
             // the spline should only have values of 0 or 1
-            return trajs.get(TrajectoryTypes::IS_DOUBLE_SUPPORT).pos(getTrajsTime()) >= 0.5f;
+            return trajs.get(TrajectoryTypes::IS_DOUBLE_SUPPORT).pos(get_trajs_time()) >= 0.5f;
         }
 
 
         /**
          * Assign given parameters vector
          */
-        constexpr void setParameters(const WalkingParameter& params_) {
+        constexpr void set_parameters(const WalkingParameter& params_) {
             params      = params_;
             half_period = 1.0f / (2.0f * params.freq);
-            foot_step.setFootDistance(params.foot_distance);
+            foot_step.set_foot_distance(params.foot_distance);
         }
 
         /**
@@ -164,7 +164,7 @@ namespace module::motion {
          * (phase, trajectories) from given
          * elapsed time since last update() call
          */
-        bool updateState(const float& dt, const Eigen::Vector3f& orders);
+        bool update_state(const float& dt, const Eigen::Vector3f& orders);
 
         // Return type for the following two functions
         using PositionSupportTuple =
@@ -172,12 +172,13 @@ namespace module::motion {
         /**
          * @brief Compute current cartesian target from trajectories
          * @return PositionSupportTuple The computed vectors with the bool indicating the support foot:
-         *         {trunkPositionTarget, trunkAxisTarget, footPositionTarget, footAxisTarget, isLeftsupportFoot}
+         *         {trunk_positionTarget, trunkAxisTarget, footPositionTarget, footAxisTarget, is_left_supportFoot}
          */
-        [[nodiscard]] PositionSupportTuple computeCartesianPosition() const;  // Gets current time and calls below func
-        [[nodiscard]] PositionSupportTuple computeCartesianPositionAtTime(const float time) const;
+        [[nodiscard]] PositionSupportTuple compute_cartesian_position()
+            const;  // Gets current time and calls below func
+        [[nodiscard]] PositionSupportTuple compute_cartesian_position_at_time(const float& time) const;
 
-        constexpr void requestKick(const bool& left) {
+        constexpr void request_kick(const bool& left) {
             if (left) {
                 left_kick_requested  = true;
                 right_kick_requested = false;
@@ -188,14 +189,14 @@ namespace module::motion {
             }
         }
 
-        constexpr void requestPause() {
+        constexpr void request_pause() {
             pause_requested = true;
         }
 
         /**
          * Ends the current step earlier. Useful if foot hits ground to early.
          */
-        constexpr void endStep() {
+        constexpr void end_step() {
             // ends the step earlier, e.g. when foot has already contact to ground
             phase = phase < 0.5f ? 0.5f : 0.0f;
         }
@@ -254,37 +255,43 @@ namespace module::motion {
          */
         Trajectories trajs{};
 
-        void updatePhase(const float& dt);
+        void update_phase(const float& dt);
 
-        void buildNormalTrajectories(const Eigen::Vector3f& orders) {
-            buildTrajectories(orders, false, false, false);
+        void build_trajectories(const Eigen::Vector3f& orders,
+                                const bool& start_movement,
+                                const bool& start_step,
+                                const bool& kick_step);
+
+        void build_start_movement_trajectories(const Eigen::Vector3f& orders) {
+            build_trajectories(orders, true, false, false);
         }
 
-        void buildKickTrajectories(const Eigen::Vector3f& orders) {
-            buildTrajectories(orders, false, false, true);
+        void build_start_step_trajectories(const Eigen::Vector3f& orders) {
+            build_trajectories(orders, false, true, false);
         }
 
-        void buildStartTrajectories(const Eigen::Vector3f& orders) {
-            buildTrajectories(orders, true, false, false);
+        void build_kick_trajectories(const Eigen::Vector3f& orders) {
+            build_trajectories(orders, false, false, true);
         }
 
-        void buildStopStepTrajectories(const Eigen::Vector3f& orders) {
-            buildWalkDisableTrajectories(orders, false);
+        void build_normal_trajectories(const Eigen::Vector3f& orders) {
+            build_trajectories(orders, false, false, false);
         }
 
-        void buildStopMovementTrajectories(const Eigen::Vector3f& orders) {
-            buildWalkDisableTrajectories(orders, true);
+        void build_stop_step_trajectories(const Eigen::Vector3f& orders) {
+            build_walk_disable_trajectories(orders, false);
         }
-        void buildTrajectories(const Eigen::Vector3f& orders,
-                               const bool& startMovement,
-                               const bool& startStep,
-                               const bool& kickStep);
 
-        void buildWalkDisableTrajectories(const Eigen::Vector3f& orders, const bool& footInIdlePosition);
+        void build_stop_movement_trajectories(const Eigen::Vector3f& orders) {
+            build_walk_disable_trajectories(orders, true);
+        }
 
-        void saveCurrentTrunkState();
 
-        void useCurrentTrunkState();
+        void build_walk_disable_trajectories(const Eigen::Vector3f& orders, const bool& foot_in_idle_position);
+
+        void save_current_trunk_state();
+
+        void use_current_trunk_state();
 
         void point(const TrajectoryTypes& spline,
                    const float& t,
@@ -299,7 +306,7 @@ namespace module::motion {
          * orientation state vectors at last
          * half cycle as stopped pose
          */
-        void resetTrunkLastState();
+        void reset_trunk_last_state();
     };
 }  // namespace module::motion
 #endif

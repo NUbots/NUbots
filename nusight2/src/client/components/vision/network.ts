@@ -1,8 +1,8 @@
 import { action, runInAction } from 'mobx'
 import { UnreachableError } from '../../../shared/base/unreachable_error'
+import { fourcc, fourccToString } from '../../../shared/image_decoder/fourcc'
 import { message } from '../../../shared/messages'
 import { toSeconds } from '../../../shared/time/timestamp'
-import { fourcc, fourccToString } from '../../image_decoder/fourcc'
 import { Matrix4 } from '../../math/matrix4'
 import { Vector2 } from '../../math/vector2'
 import { Vector3 } from '../../math/vector3'
@@ -39,7 +39,7 @@ export class VisionNetwork {
   ) => {
     const robot = VisionRobotModel.of(robotModel)
     const { id, name, dimensions, format, data, Hcw } = image
-    const { projection, focalLength, centre, k } = image?.lens!
+    const { projection, focalLength, centre, k } = image.lens!
 
     const element = await jpegBufferToImage(data)
 
@@ -97,8 +97,8 @@ export class VisionNetwork {
       timestamp: toSeconds(timestamp),
       Hcw: Matrix4.from(Hcw),
       cone: {
-        axis: Vector3.from(ball.cone?.axis),
-        radius: ball.cone?.radius!,
+        axis: Vector3.from(ball.uBCc),
+        radius: ball.radius!,
       },
       distance: Math.abs(ball.measurements?.[0].srBCc?.x!),
       colour: Vector4.from(ball.colour),

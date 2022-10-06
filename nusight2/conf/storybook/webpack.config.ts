@@ -1,4 +1,3 @@
-import CopyWebpackPlugin from 'copy-webpack-plugin'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import * as path from 'path'
 import webpack from 'webpack'
@@ -19,15 +18,18 @@ export default ({ config: storybookConfig }: { config: webpack.Configuration }) 
       rules: config.module?.rules,
     },
     plugins: [
-      ...storybookConfig.plugins || [],
+      ...(storybookConfig.plugins || []),
       ...(config.plugins || []).filter(p => !(p instanceof HtmlWebpackPlugin)), // Storybook handles page generation.
     ],
     resolve: {
       ...storybookConfig.resolve,
       extensions: [
-        ...storybookConfig.resolve?.extensions || [],
-        ...config.resolve?.extensions || [],
+        ...(storybookConfig.resolve?.extensions || []),
+        ...(config.resolve?.extensions || []),
       ],
+    },
+    stats: {
+      errorDetails: true,
     },
   }
 }

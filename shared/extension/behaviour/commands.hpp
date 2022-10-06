@@ -23,10 +23,11 @@
 #include <memory>
 #include <nuclear>
 #include <typeindex>
+#include <utility>
 
 /**
  * This namespace holds all of the communication primitives that are used by the Behaviour header to send messages to
- * the Director algorithm. You shouln't be emitting any of these messages outside of the behaviour header.
+ * the behaviour system. You shouldn't be emitting any of these messages outside of the behaviour header.
  */
 namespace extension::behaviour::commands {
 
@@ -34,46 +35,46 @@ namespace extension::behaviour::commands {
      * The classification type of the Provider
      */
     enum class ProviderClassification {
-        /// NORMAL Providers are the usual Providers that execute in a loop if needed
-        NORMAL,
-        /// ENTERING Providers are the first point of entry for a type before the main NORMAL reaction runs
-        ENTERING,
-        /// LEAVING Providers are executed as a module is relinquishing control
-        LEAVING,
+        /// Provide providers are typical providers that run when given a task
+        PROVIDE,
+        /// Start providers run once when a provider group first gets a task
+        START,
+        /// Stop providers run once there are no tasks running for any provider of this group
+        STOP
     };
 
     /**
-     * Message used to tell the Director about a new Provides reaction
+     * Message used to tell the behaviour system about a new Provides reaction
      */
-    struct ProvidesReaction {
+    struct ProvideReaction {
 
         /**
-         * @brief Construct a new Provides Reaction object to send to the Director
+         * @brief Construct a new Provide Reaction object to send to the behaviour system
          *
          * @param reaction_         the reaction for this provides object
          * @param type_             the type that this Provider provides for
-         * @param classification_   what kind of provider this ProvidesReaction is for
+         * @param classification_   what kind of provider this ProvideReaction is for
          */
-        ProvidesReaction(const std::shared_ptr<NUClear::threading::Reaction>& reaction_,
-                         const std::type_index& type_,
-                         const ProviderClassification& classification_)
-            : reaction(reaction_), type(type_), classification(classification_) {}
+        ProvideReaction(std::shared_ptr<NUClear::threading::Reaction> reaction_,
+                        const std::type_index& type_,
+                        const ProviderClassification& classification_)
+            : reaction(std::move(reaction_)), type(type_), classification(classification_) {}
 
         /// The reaction for this Provider
         std::shared_ptr<NUClear::threading::Reaction> reaction;
         /// The data type that this Provider services
         std::type_index type;
-        /// The action type that this Provider is using (normal, entering, leaving)
+        /// The action type that this Provider is using
         ProviderClassification classification;
     };
 
     /**
-     * Message used to tell the Director about a new When condition on a Provider
+     * Message used to tell the behaviour system about a new When condition on a Provider
      */
     struct WhenExpression {
 
         /**
-         * Constructs a new WhenExpression object to send to the Director
+         * Constructs a new WhenExpression object to send to the behaviour system
          *
          * @param reaction_     the reaction this when condition is for
          * @param type_         the enum type that this when condition is monitoring
@@ -81,13 +82,17 @@ namespace extension::behaviour::commands {
          * @param current_      a function that will get the current state of the reaction
          * @param binder_       a function that can be used to bind a reaction that monitors when the state changes
          */
-        WhenExpression(const std::shared_ptr<NUClear::threading::Reaction>& reaction_,
+        WhenExpression(std::shared_ptr<NUClear::threading::Reaction> reaction_,
                        const std::type_index& type_,
                        std::function<bool(const int&)> validator_,
                        std::function<int()> current_,
                        std::function<NUClear::threading::ReactionHandle(NUClear::Reactor&,
                                                                         std::function<void(const int&)>)> binder_)
-            : reaction(reaction_), type(type_), validator(validator_), current(current_), binder(binder_) {}
+            : reaction(std::move(reaction_))
+            , type(type_)
+            , validator(std::move(validator_))
+            , current(std::move(current_))
+            , binder(std::move(binder_)) {}
 
         /// The Provider reaction that is contingent on this when condition
         std::shared_ptr<NUClear::threading::Reaction> reaction;
@@ -102,21 +107,21 @@ namespace extension::behaviour::commands {
     };
 
     /**
-     * Message used to tell the Director about a new Causing relationship for this Provider
+     * Message used to tell the behaviour system about a new Causing relationship for this Provider
      */
     struct CausingExpression {
 
         /**
-         * Construct a new Causing Expression object to send to the Director
+         * Construct a new Causing Expression object to send to the behaviour system
          *
-         * @param reaction          the reaction this causing condition is for
-         * @param type              the enum type that this causing condition is going to manipulate
-         * @param resulting_state   the state the enum will be in once the causing has succeeded
+         * @param reaction_         the reaction this causing condition is for
+         * @param type_             the enum type that this causing condition is going to manipulate
+         * @param resulting_state_  the state the enum will be in once the causing has succeeded
          */
-        CausingExpression(const std::shared_ptr<NUClear::threading::Reaction>& reaction,
-                          const std::type_index& type,
-                          const int& resulting_state)
-            : reaction(reaction), type(type), resulting_state(resulting_state) {}
+        CausingExpression(std::shared_ptr<NUClear::threading::Reaction> reaction_,
+                          const std::type_index& type_,
+                          const int& resulting_state_)
+            : reaction(std::move(reaction_)), type(type_), resulting_state(resulting_state_) {}
         /// The Provider reaction that will cause this state
         std::shared_ptr<NUClear::threading::Reaction> reaction;
         /// The enum type that this `When` expression claims to manipulate
@@ -126,18 +131,37 @@ namespace extension::behaviour::commands {
     };
 
     /**
-     * Message to tell the Director that a Provider task has finished executing
+     * Message used to tell the behaviour system about a new Needs relationship on a Provider
+     */
+    struct NeedsExpression {
+
+        /**
+         * Construct a new Needs Expression object to send to the behaviour system
+         *
+         * @param reaction_         the reaction this needs relationship is for
+         * @param type_             the provider type that this needs relationship is referring to
+         */
+        NeedsExpression(std::shared_ptr<NUClear::threading::Reaction> reaction_, const std::type_index& type_)
+            : reaction(std::move(reaction_)), type(type_) {}
+        /// The Provider reaction that has this relationship
+        std::shared_ptr<NUClear::threading::Reaction> reaction;
+        /// The provider type that this needs relationship is referring to
+        std::type_index type;
+    };
+
+    /**
+     * Message to tell the behaviour system that a Provider task has finished executing
      */
     struct ProviderDone {
 
         /**
          * @brief Construct a new Provider Done object
          *
-         * @param requester_id      the reaction_id of the NUClear reaction that finished executing
-         * @param requester_task_id the reaction_task_id of the NUClear reaction task that finished executing
+         * @param requester_id_      the reaction_id of the NUClear reaction that finished executing
+         * @param requester_task_id_ the reaction_task_id of the NUClear reaction task that finished executing
          */
-        ProviderDone(const uint64_t& requester_id, const uint64_t& requester_task_id)
-            : requester_id(requester_id), requester_task_id(requester_task_id) {}
+        ProviderDone(const uint64_t& requester_id_, const uint64_t& requester_task_id_)
+            : requester_id(requester_id_), requester_task_id(requester_task_id_) {}
 
         /// The reaction_id of the Provider that finished
         uint64_t requester_id;
@@ -146,37 +170,37 @@ namespace extension::behaviour::commands {
     };
 
     /**
-     * A task message that is to be sent to the Director for execution
+     * A task message that is to be sent to the behaviour system for execution
      */
-    struct DirectorTask {
+    struct BehaviourTask {
 
         /**
-         * Construct a new Task object to send to the Director
+         * Construct a new Task object to send to the behaviour system
          *
-         * @param type                  the type that this task is for
-         * @param requester_id          the id of the reaction that emitted this task
-         * @param requester_task_id     the task_id of the reaction task that emitted this
-         * @param data                  the task data to be sent to the provider
-         * @param name                  a string name for this task for use in debugging
-         * @param priority              the priority that this task is to run with
-         * @param optional              whether this task is optional or not
+         * @param type_                 the type that this task is for
+         * @param requester_id_         the id of the reaction that emitted this task
+         * @param requester_task_id_    the task_id of the reaction task that emitted this
+         * @param data_                 the task data to be sent to the provider
+         * @param name_                 a string name for this task for use in debugging
+         * @param priority_             the priority that this task is to run with
+         * @param optional_             whether this task is optional or not
          */
-        DirectorTask(const std::type_index& type_,
-                     const uint64_t& requester_id_,
-                     const uint64_t& requester_task_id_,
-                     std::shared_ptr<void> data_,
-                     const std::string& name_,
-                     const int& priority_,
-                     const bool& optional_)
+        BehaviourTask(const std::type_index& type_,
+                      const uint64_t& requester_id_,
+                      const uint64_t& requester_task_id_,
+                      std::shared_ptr<void> data_,
+                      std::string name_,
+                      const int& priority_,
+                      const bool& optional_)
             : type(type_)
             , requester_id(requester_id_)
             , requester_task_id(requester_task_id_)
             , data(std::move(data_))
-            , name(name_)
+            , name(std::move(name_))
             , priority(priority_)
             , optional(optional_) {}
 
-        /// The Provider type this Director task is for
+        /// The Provider type this task is for
         std::type_index type;
         /// The reaction id of the requester (could be the id of a Provider)
         uint64_t requester_id;

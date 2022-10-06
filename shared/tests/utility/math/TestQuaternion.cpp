@@ -24,6 +24,7 @@
 
 #include "utility/math/quaternion.hpp"
 
+
 static const std::array<Eigen::Quaterniond, 200> Q = {
     Eigen::Quaterniond(0.812886533020004, -0.185088524394760, -0.548059268662397, -0.0677403912398385),
     Eigen::Quaterniond(-0.214630848051777, 0.688974792966896, 0.151003411000866, -0.675607359038444),

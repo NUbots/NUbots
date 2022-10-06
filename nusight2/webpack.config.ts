@@ -67,7 +67,12 @@ export function getClientConfig({
             {
               loader: 'css-loader',
               options: {
-                modules: true,
+                modules: {
+                  // Enable CSS modules for files matching *.module.css
+                  // See https://github.com/webpack-contrib/css-loader#auto
+                  auto: true,
+                  localIdentName: '[local]_[hash:base64:5]',
+                },
                 sourceMap: !isProduction,
                 importLoaders: 1,
               },
@@ -76,18 +81,15 @@ export function getClientConfig({
               loader: 'postcss-loader',
               options: {
                 postcssOptions: {
-                  plugins: [
-                    'postcss-import',
-                    'postcss-url',
-                  ],
+                  plugins: ['postcss-import', 'postcss-url'],
                 },
               },
             },
           ],
         },
         /*
-        External libraries generally do not support css modules so the selector mangling will break external components.
-        This separate simplified loader is used for anything within the node_modules folder instead.
+        Separate simplified loader for CSS files within the node_modules folder.
+        No CSS modules (to avoid name mangling) and no import() or url() processing.
         */
         {
           test: /\.css$/,
@@ -134,9 +136,11 @@ export function getClientConfig({
     },
     plugins: [
       new CopyWebpackPlugin({ patterns: [{ from: 'assets', context }] }),
-      isProduction ? new MiniCssExtractPlugin({
-        filename: 'styles.css',
-      }) : undefined,
+      isProduction
+        ? new MiniCssExtractPlugin({
+            filename: 'styles.css',
+          })
+        : undefined,
       new HtmlWebpackPlugin({
         template: 'client/index.ejs',
         title: 'NUsight2',

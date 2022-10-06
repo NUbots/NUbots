@@ -27,14 +27,14 @@ namespace module::motion {
 
     private:
         /// Current subsumption ID key to access motors.
-        size_t subsumptionId = 1;
+        size_t subsumption_id = 1;
 
         // Reaction handle for the main update loop, disabling when not moving will save unnecessary CPU
         ReactionHandle update_handle{};
         ReactionHandle imu_reaction{};
 
-        void calculateJointGoals();
-        [[nodiscard]] float getTimeDelta();
+        void calculate_joint_goals();
+        [[nodiscard]] float get_time_delta();
         [[nodiscard]] std::unique_ptr<message::behaviour::ServoCommands> motion(
             const std::vector<std::pair<utility::input::ServoID, float>>& joints);
 
@@ -67,11 +67,6 @@ namespace module::motion {
         QuinticWalkEngine walk_engine{};
 
         message::motion::KinematicsModel kinematicsModel{};
-
-        Eigen::Vector3f trunk_pos  = Eigen::Vector3f::Zero();
-        Eigen::Vector3f trunk_axis = Eigen::Vector3f::Zero();
-        Eigen::Vector3f foot_pos   = Eigen::Vector3f::Zero();
-        Eigen::Vector3f foot_axis  = Eigen::Vector3f::Zero();
     };
 }  // namespace module::motion
 

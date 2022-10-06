@@ -25,13 +25,21 @@
 namespace module::behaviour::skills {
 
     /**
-     * Executes a getup script if the robot falls over.
+     * Executes stand script
      *
      * @author Josiah Walker
      */
     class Stand : public NUClear::Reactor {
     private:
-        const size_t id;
+        /// @brief The id registered in the subsumption system for this module
+        const size_t subsumption_id;
+
+        /// @brief Stores configuration values
+        struct Config {
+            Config() = default;
+            /// @brief Stand priority in the subsumption system
+            float stand_priority = 0.0f;
+        } cfg;
 
     public:
         explicit Stand(std::unique_ptr<NUClear::Environment> environment);

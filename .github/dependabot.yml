@@ -2,14 +2,14 @@
 version: 2
 updates:
   # Required fields are `package-ecosystem`, `directory`, and `schedule.interval`
-  # Package ecosystem for yarn is npm
-  - package-ecosystem: npm
-    directory: /nusight2
+
+  # Maintain dependencies for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
     labels:
       - "-Dependencies"
-      - "P-NUsight2"
-      - "G-DevTools"
+      - "G-DevOps-QA"
     reviewers:
-      - "NUbots/nusight"
+      - "NUbots/Active/Devops"
     schedule:
-      interval: "monthly" # Checks on the first day of each month
+      interval: "daily"

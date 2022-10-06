@@ -89,7 +89,7 @@ namespace utility::motion {
         // Calculate our D error and I error
         Eigen::Quaternion<float> differential = lastErrorQuaternion.inverse() * errorQuaternion;
 
-        // TODO: LEARN HOW TO COMPUTE THE INTEGRAL TERM CORRECTLY
+        // TODO(MotionTeam): LEARN HOW TO COMPUTE THE INTEGRAL TERM CORRECTLY
         // footGoalErrorSum = footGoalErrorSum.slerp(goalQuaternion * footGoalErrorSum, 1.0/90.0);
 
         // Apply the PID gains
