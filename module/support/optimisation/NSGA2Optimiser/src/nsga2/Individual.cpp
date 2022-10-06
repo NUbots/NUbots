@@ -34,8 +34,10 @@ namespace nsga2 {
         constr.resize(config.constraints, 0);
     }
 
-    void Individual::Initialize(const int& _id) {
+    void Individual::Initialize(const int& _id) {  // My entry point to init my parent pop to the one I want
         id = _id;
+        NUClear::log<NUClear::INFO>("ID", id);
+
         if (id == 0) {
             // First individual gets real vars from config
             // initialise real vars
@@ -54,6 +56,10 @@ namespace nsga2 {
             for (int j = 0; j < config.binBits[i]; j++) {
                 gene[i][j] = config.randGen->Realu() <= 0.5 ? 0 : 1;
             }
+        }
+
+        for (auto r : reals) {
+            NUClear::log<NUClear::INFO>("Init Vars", r);
         }
     }
 

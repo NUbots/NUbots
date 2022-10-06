@@ -43,9 +43,6 @@ namespace module {
                 }
 
                 if ((int) evaluator->simTime % 10000 == 0) {
-                    // Stop robot
-                    evaluator->emit(std::make_unique<WalkCommand>(subsumptionID, Eigen::Vector3d(0.0, 0.0, 0.0)));
-
                     processRoundEnd();
                     pathNo++;
                     processNextPath();
@@ -88,8 +85,8 @@ namespace module {
                     theta  = 0.0;
                     return t;
                 }
-                auto dta = std::fabs(initialRobotPosition.x() - robotPosition.x());
-                auto dtb = std::fabs(initialRobotPosition.y() - robotPosition.y());
+                auto dta = std::fabs(robotPosition.x() - initialRobotPosition.x());
+                auto dtb = std::fabs(robotPosition.y() - initialRobotPosition.y());
 
                 initialRobotPosition.x() = robotPosition.x();
                 initialRobotPosition.y() = robotPosition.y();

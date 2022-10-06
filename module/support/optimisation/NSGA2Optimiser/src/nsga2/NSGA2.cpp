@@ -113,12 +113,12 @@ namespace nsga2 {
 
         NUClear::log<NUClear::INFO>("Parent Pop", parentPop->GetSize());
 
-        for (auto b : binLimits) {  //= binBits.begin(); bin != binBits.end(); ++bin) {
-                                    // for (auto i : b) {
-            NUClear::log<NUClear::INFO>("Bin bit 1", b.first);
-            NUClear::log<NUClear::INFO>("Bin bit 2", b.second);
-            //}
-            // NUClear::log<NUClear::INFO>("Bin bit", b);
+        for (auto b : binBits) {
+            NUClear::log<NUClear::INFO>("Bin Bits", b);
+        }
+
+        for (auto r : initialRealVars) {
+            NUClear::log<NUClear::INFO>("Init Vars", r);
         }
 
 

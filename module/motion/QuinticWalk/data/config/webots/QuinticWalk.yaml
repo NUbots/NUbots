@@ -95,10 +95,10 @@ walk:
 max_step:
   # Maximal step length in X
   # (in m, [0:1])
-  x: 0.3
+  x: 0.2
   # Maximal step length in Y
   # (in m, [0:1])
-  y: 0.3
+  y: 0.2
   # Maximal step turn in yaw
   # (in rad, [0:1.5])
   z: 0.1
@@ -127,5 +127,5 @@ arms:
   left_shoulder_pitch: 2.25
   right_shoulder_roll: -0.176
   left_shoulder_roll: 0.176
-  right_elbow: -1.0
-  left_elbow: -1.0
+  right_elbow: -1.8
+  left_elbow: -1.8

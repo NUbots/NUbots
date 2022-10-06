@@ -57,6 +57,8 @@ namespace nsga2 {
         int popSize;
         int generations;
 
+        bool suppliedPop = false;  // added tso I can add parent pop
+
     private:
         int realVars             = -1;
         int binVars              = -1;

@@ -60,7 +60,7 @@ namespace nsga2 {
         void Merge(const Population& _pop1, const Population& _pop2);
         void Report(std::ostream& _os, int currentGen) const;
 
-        std::vector<Individual> inds;
+        std::vector<Individual> inds;  // Got to extend class
 
         std::vector<std::vector<int>> fronts = {};
 
