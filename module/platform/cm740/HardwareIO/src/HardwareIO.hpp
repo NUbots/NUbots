@@ -59,7 +59,7 @@ namespace module::platform::cm740 {
             //  0x00, 0xRR, 0xGG, 0xBB
             message::platform::RawSensors::HeadLED head_LED = {0x0000FF00};
             message::platform::RawSensors::EyeLED eye_LED   = {0x000000FF};
-        };
+        } cm740_state;
 
         /// @brief Configuration values
         struct Config {
