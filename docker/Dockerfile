@@ -187,6 +187,9 @@ RUN install-from-source-with-patches https://gitlab.com/libeigen/eigen/-/archive
     /usr/local/package/deprecated-copy.patch \
     /usr/local/package/cxx17-overalign.patch --
 
+# Eigen3
+RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
+
 # tcmalloc
 RUN install-from-source \
     https://github.com/gperftools/gperftools/releases/download/gperftools-2.7/gperftools-2.7.tar.gz \
@@ -285,22 +288,11 @@ RUN install-from-source https://github.com/ysims/VisualMesh/archive/1c8d08b8d93a
 RUN install-header-from-source https://github.com/nlohmann/json/releases/download/v3.10.5/json.hpp
 
 #######################################
-### ADD NEW PROGRAMS/LIBRARIES HERE ###
-#######################################
-
-
-#######################################
 # Visual SLAM
 #######################################
 # Mesa, glew - Pangolin dependencies.
 RUN install-package mesa
 RUN install-package glew
-# Pangolin - ORB-SLAM2 dependency.
-RUN install-from-source https://github.com/stevenlovegrove/Pangolin/archive/refs/tags/v0.6.tar.gz \
-    -DBUILD_PANGOLIN_EIGEN=OFF \
-    -DBUILD_EXAMPLES=OFF
-# Eigen3
-RUN install-from-source https://gitlab.com/libeigen/eigen/-/archive/3.4.0/eigen-3.4.0.tar.gz
 # OpenCV contrib - ORB-SLAM2 dependency.
 RUN download-and-extract https://github.com/opencv/opencv_contrib/archive/refs/tags/3.4.15.tar.gz
 # OpenCV - ORB-SLAM2 dependency.
@@ -308,9 +300,14 @@ RUN install-from-source https://github.com/opencv/opencv/archive/refs/tags/3.4.1
     -DOPENCV_EXTRA_MODULES_PATH="/opencv_contrib-3.4.15/modules" \
     -DWITH_GTK_2_X=ON
 RUN sudo rm -r opencv_contrib-3.4.15
+# Pangolin - ORB-SLAM2 dependency.
+RUN install-from-source https://github.com/stevenlovegrove/Pangolin/archive/refs/tags/v0.8.tar.gz\
+    -DBUILD_PANGOLIN_EIGEN=OFF \
+    -DBUILD_EXAMPLES=OFF
+
 #######################################
-
-
+### ADD NEW PROGRAMS/LIBRARIES HERE ###
+#######################################
 
 # Install python libraries
 RUN pip install \
