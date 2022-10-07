@@ -2,7 +2,7 @@
 
 ## Description
 
-This module is responsible for communicating with the NUgus robot's CM740 controller.
+This module is responsible for communicating with a CM740 controller.
 
 ## Usage
 
@@ -13,10 +13,12 @@ aborted.
 This module reads the current status of the CM740 90 times per second and
 emits it as a `message::platform::RawSensors` object. This includes the CM740 error
 code, LEDs, buttons, voltage, accelerometer, gyroscope, left and right
-force-sensing resistors and each servo. Darwin robots have head and eye LEDs which are referred to in this module and can be read from the CM740, however the NUgus robot does not utilise this capability.
+force-sensing resistors and each servo. Darwin robots have head and eye LEDs which are
+referred to in this module and can be read from the CM740,
+however the NUgus robot does not utilise this capability.
 
-Emit a `message::platform::RawSensors::EyeLED` or `message::platform::RawSensors::HeadLED` with a colour to
-give instructions to the CM740 to change the eye or head LED colour.
+Emit a `message::platform::RawSensors::EyeLED` or `message::platform::RawSensors::HeadLED`
+with a colour to give instructions to the CM740 to change the eye or head LED colour.
 
 To control the servos, use `message::motion::ServoTarget`. You may
 emit these commands individually or emit several at once in a `message::motion::ServoTargets`.

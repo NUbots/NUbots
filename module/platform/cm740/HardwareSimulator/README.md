@@ -2,7 +2,7 @@
 
 ## Description
 
-This module simulates the CM740 subcontroller and connected sensors from the NUgus' real hardware.
+This module simulates a CM740 subcontroller and connected sensors.
 
 ## Usage
 
