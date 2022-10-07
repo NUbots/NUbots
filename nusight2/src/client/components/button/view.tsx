@@ -2,7 +2,7 @@ import classNames from 'classnames'
 import React from 'react'
 import { ReactNode } from 'react'
 
-import styles from './styles.css'
+import styles from './style.module.css'
 
 export type ButtonProps = {
   type?: 'normal' | 'primary'

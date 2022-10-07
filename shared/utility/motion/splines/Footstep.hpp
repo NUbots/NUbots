@@ -26,7 +26,7 @@ namespace utility::motion::splines {
         /**
          * Set the lateral foot distance parameters
          */
-        constexpr void setFootDistance(const float& foot_distance_) {
+        constexpr void set_foot_distance(const float& foot_distance_) {
             foot_distance = foot_distance_;
         }
         [[nodiscard]] constexpr float getFootDistance() const {
@@ -44,21 +44,21 @@ namespace utility::motion::splines {
         /**
          * Current support foot
          */
-        [[nodiscard]] constexpr bool isLeftSupport() const {
+        [[nodiscard]] constexpr bool is_left_support() const {
             return is_left_support_foot;
         }
 
         /**
          * Starting position of current flying foot in support foot frame
          */
-        [[nodiscard]] const Eigen::Vector3f& getLast() const {
+        [[nodiscard]] const Eigen::Vector3f& get_last() const {
             return support_to_last;
         }
 
         /**
          * Target pose of current flying foot in support foot frame
          */
-        [[nodiscard]] const Eigen::Vector3f& getNext() const {
+        [[nodiscard]] const Eigen::Vector3f& get_next() const {
             return support_to_next;
         }
 
@@ -89,7 +89,7 @@ namespace utility::motion::splines {
          * Zero vector means in place walking.
          * Special handle of lateral and turn step to avoid foot collision.
          */
-        void stepFromOrders(const Eigen::Vector3f& diff);
+        void step_from_orders(const Eigen::Vector3f& diff);
 
     private:
         /**
