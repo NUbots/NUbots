@@ -55,10 +55,10 @@ namespace module::platform::cm740 {
         float p_gain = 0.0f;
 
         struct CM740State {
-            message::platform::RawSensors::LEDPanel ledPanel = {false, false, false};
+            message::platform::RawSensors::LEDPanel led_panel = {false, false, false};
             //  0x00, 0xRR, 0xGG, 0xBB
-            message::platform::RawSensors::HeadLED headLED = {0x0000FF00};
-            message::platform::RawSensors::EyeLED eyeLED   = {0x000000FF};
+            message::platform::RawSensors::HeadLED head_LED = {0x0000FF00};
+            message::platform::RawSensors::EyeLED eye_LED   = {0x000000FF};
         };
 
         /// @brief Configuration values
