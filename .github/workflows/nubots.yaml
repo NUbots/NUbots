@@ -142,7 +142,7 @@ jobs:
         run: mkdir -p ../build
 
       - name: Configure the code
-        run: ./b configure -- -DBUILD_TESTS=ON -DCI_BUILD=ON
+        run: ./b configure -- -DBUILD_TESTS=ON # -DCI_BUILD=ON
 
       - name: Build the code
         run: ./b build
