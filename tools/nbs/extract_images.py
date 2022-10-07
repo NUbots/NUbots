@@ -9,7 +9,6 @@ import numpy as np
 import tensorflow as tf
 import yaml
 from tqdm import tqdm
-from wand.image import Image
 
 from utility.nbs import LinearDecoder
 
@@ -49,8 +48,6 @@ def process_image(packet, output):
         "{}_{:012d}.jpg".format(packet.msg.name, int(packet.msg.timestamp.seconds * 1e9 + packet.msg.timestamp.nanos)),
     )
     cv2.imwrite(file_name, img)
-    # Hacky! Image saved above has strange behaviour
-    Image(filename=file_name).convert("jpg").save(filename=file_name)
 
 
 def process_metadata(packet, output):
