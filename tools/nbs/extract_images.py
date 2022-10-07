@@ -74,7 +74,14 @@ def process_metadata(packet, output):
     focal_length = packet.msg.lens.focal_length * width
 
     # Get the Hwc matrix
-    Hoc = np.linalg.inv(packet.msg.Hcw)
+    Hcw = [
+        [packet.msg.Hcw.x.x, packet.msg.Hcw.y.x, packet.msg.Hcw.z.x, packet.msg.Hcw.t.x],
+        [packet.msg.Hcw.x.y, packet.msg.Hcw.y.y, packet.msg.Hcw.z.y, packet.msg.Hcw.t.y],
+        [packet.msg.Hcw.x.z, packet.msg.Hcw.y.z, packet.msg.Hcw.z.z, packet.msg.Hcw.t.z],
+        [packet.msg.Hcw.x.t, packet.msg.Hcw.y.t, packet.msg.Hcw.z.t, packet.msg.Hcw.t.t],
+    ]
+
+    Hoc = np.ndarray.tolist(np.linalg.inv(Hcw))
 
     camera_data = {
         "projection": projection,
