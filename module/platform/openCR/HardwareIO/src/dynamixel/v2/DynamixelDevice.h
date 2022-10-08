@@ -1,12 +1,11 @@
 #ifndef MODULE_PLATFORM_NUGUS_DYNAMIXELDEVICE_H
 #define MODULE_PLATFORM_NUGUS_DYNAMIXELDEVICE_H
 
-namespace module {
-namespace platform {
+namespace module::platform::openCR {
     namespace nugus {
         class DynamixelDevice {};
     }  // namespace nugus
-}  // namespace platform
-}  // namespace module
+
+}  // namespace module::platform::openCR
 
 #endif  // MODULE_PLATFORM_NUGUS_DYNAMIXELDEVICE_H

@@ -5,11 +5,11 @@
 #include <nuclear>
 
 #include "NUgus.hpp"
+#include "dynamixel/v2/StatusReturn.hpp"
 
-#include "message/platform/nugus/Sensors.hpp
-#include "message/platform/nugus/StatusReturn.hpp"
+#include "message/platform/RawSensors.hpp"
 
-#include "utility/io/uart.h"
+#include "utility/io/uart.hpp"
 
 namespace module::platform::openCR {
 

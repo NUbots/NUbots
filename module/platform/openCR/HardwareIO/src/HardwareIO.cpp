@@ -4,12 +4,12 @@
 
 #include "dynamixel/v2/Dynamixel.hpp"
 
-#include "extension/Configuration.h"
+#include "extension/Configuration.hpp"
 
-#include "message/motion/ServoTarget.h"
+#include "message/motion/ServoTarget.hpp"
 
-#include "utility/math/angle.h"
-#include "utility/support/yaml_expression.h"
+#include "utility/math/angle.hpp"
+#include "utility/support/yaml_expression.hpp"
 
 namespace module::platform::openCR {
 
