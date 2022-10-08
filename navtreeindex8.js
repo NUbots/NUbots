@@ -1,7 +1,5 @@
 var NAVTREEINDEX8 =
 {
-"structmodule_1_1extension_1_1StateUpdate.html#a14c8851da07f29c7f18592f3e5429b84":[1,0,2,1,3,2],
-"structmodule_1_1extension_1_1StateUpdate.html#a5ae3bfce027fe7031776783761f8780e":[1,0,2,1,3,3],
 "structmodule_1_1extension_1_1StateUpdate.html#a6f87c3f0352902b5b9c382675009e717":[1,0,2,1,3,1],
 "structmodule_1_1extension_1_1StateUpdate.html#ac6b7348dfcd3f0df22f963259ccc2939":[1,0,2,1,3,0],
 "structmodule_1_1extension_1_1provider_1_1Provider.html":[1,0,2,1,0,0],
@@ -249,5 +247,7 @@ var NAVTREEINDEX8 =
 "structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#aee25e8f1d8bc0abf2ddc1a0036ee71ee":[1,0,2,2,1,0,7],
 "structmodule_1_1input_1_1gamecontroller_1_1GameControllerPacket.html#af4cae3d0c443f0cf19c781a35a6569d8":[1,0,2,2,1,0,4],
 "structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html":[1,0,2,2,1,1],
-"structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html#a13341653821760b5b7768a7637f58e1d":[1,0,2,2,1,1,2]
+"structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html#a13341653821760b5b7768a7637f58e1d":[1,0,2,2,1,1,2],
+"structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html#a451f21f9e2be26065233df8a7ba2e2d1":[1,0,2,2,1,1,3],
+"structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html#a670c53eb15981282b63b1af58536b006":[1,0,2,2,1,1,1]
 };

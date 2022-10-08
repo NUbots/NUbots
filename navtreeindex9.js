@@ -1,7 +1,5 @@
 var NAVTREEINDEX9 =
 {
-"structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html#a451f21f9e2be26065233df8a7ba2e2d1":[1,0,2,2,1,1,3],
-"structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html#a670c53eb15981282b63b1af58536b006":[1,0,2,2,1,1,1],
 "structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html#aa03b772c50cc1b707c8ff39a7021d243":[1,0,2,2,1,1,4],
 "structmodule_1_1input_1_1gamecontroller_1_1GameControllerReplyPacket.html#ab2ad5ebed46cc3f8d916e08b1c328581":[1,0,2,2,1,1,0],
 "structmodule_1_1input_1_1gamecontroller_1_1Robot.html":[1,0,2,2,1,2],
@@ -249,5 +247,7 @@ var NAVTREEINDEX9 =
 "structmodule_1_1platform_1_1cm740_1_1Convert.html#ade0a6d26a0963f523674a297055c95e1":[1,0,2,7,0,0,17],
 "structmodule_1_1platform_1_1cm740_1_1Convert.html#ae151e7a824da9b1948d5cf9b389168b4":[1,0,2,7,0,0,15],
 "structmodule_1_1platform_1_1cm740_1_1Convert.html#ae18c2554fbe5ac3e2f7bb4ad1c50752d":[1,0,2,7,0,0,18],
-"structmodule_1_1platform_1_1cm740_1_1Convert.html#af0ef1347a95f06fb7289f3d656a3354c":[1,0,2,7,0,0,20]
+"structmodule_1_1platform_1_1cm740_1_1Convert.html#af0ef1347a95f06fb7289f3d656a3354c":[1,0,2,7,0,0,20],
+"structmodule_1_1platform_1_1cm740_1_1Convert.html#af432e5ec63583a8a7307be8b59f44b01":[1,0,2,7,0,0,0],
+"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1Config.html":[1,0,2,7,0,1,0]
 };

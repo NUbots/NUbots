@@ -124,49 +124,96 @@ $(document).ready(function(){initNavTree('structmodule_1_1platform_1_1cm740_1_1H
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a437626fbb77baf06dec7faff3cf7eb15"><td class="memItemLeft" align="right" valign="top"><a id="a437626fbb77baf06dec7faff3cf7eb15"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>dGain</b> = 0</td></tr>
-<tr class="separator:a437626fbb77baf06dec7faff3cf7eb15"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abf3ae6c98392ff3207b971a5ef6c19b6"><td class="memItemLeft" align="right" valign="top"><a id="abf3ae6c98392ff3207b971a5ef6c19b6"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#abf3ae6c98392ff3207b971a5ef6c19b6">d_gain</a> = 0.0f</td></tr>
+<tr class="memdesc:abf3ae6c98392ff3207b971a5ef6c19b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Derivative gain. Cached value that is never read. <br /></td></tr>
+<tr class="separator:abf3ae6c98392ff3207b971a5ef6c19b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa7daedb49178f28e2becdd1a717e2fbf"><td class="memItemLeft" align="right" valign="top"><a id="aa7daedb49178f28e2becdd1a717e2fbf"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>dirty</b> = false</td></tr>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#aa7daedb49178f28e2becdd1a717e2fbf">dirty</a> = false</td></tr>
+<tr class="memdesc:aa7daedb49178f28e2becdd1a717e2fbf"><td class="mdescLeft">&#160;</td><td class="mdescRight">True if new values should be written to the hardware. <br /></td></tr>
 <tr class="separator:aa7daedb49178f28e2becdd1a717e2fbf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4612df68469fe27e6113f71304e117f8"><td class="memItemLeft" align="right" valign="top"><a id="a4612df68469fe27e6113f71304e117f8"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>goalPosition</b> = 0</td></tr>
-<tr class="separator:a4612df68469fe27e6113f71304e117f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad4326ba512b7e98886c5f3ca19f806ef"><td class="memItemLeft" align="right" valign="top"><a id="ad4326ba512b7e98886c5f3ca19f806ef"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>iGain</b> = 0</td></tr>
-<tr class="separator:ad4326ba512b7e98886c5f3ca19f806ef"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae556953f0d460341726d6760f8125741"><td class="memItemLeft" align="right" valign="top"><a id="ae556953f0d460341726d6760f8125741"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#ae556953f0d460341726d6760f8125741">goal_position</a> = 0.0f</td></tr>
+<tr class="memdesc:ae556953f0d460341726d6760f8125741"><td class="mdescLeft">&#160;</td><td class="mdescRight">Position the servo is attempting to reach. Cached value that is never read. <br /></td></tr>
+<tr class="separator:ae556953f0d460341726d6760f8125741"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a82fa0b6d859f30ead78e3031743f8536"><td class="memItemLeft" align="right" valign="top"><a id="a82fa0b6d859f30ead78e3031743f8536"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a82fa0b6d859f30ead78e3031743f8536">i_gain</a> = 0.0f</td></tr>
+<tr class="memdesc:a82fa0b6d859f30ead78e3031743f8536"><td class="mdescLeft">&#160;</td><td class="mdescRight">Integral gain. Cached value that is never read. <br /></td></tr>
+<tr class="separator:a82fa0b6d859f30ead78e3031743f8536"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3cd2fb57cf40f4287e00b10cfa46a241"><td class="memItemLeft" align="right" valign="top"><a id="a3cd2fb57cf40f4287e00b10cfa46a241"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>load</b> = 0</td></tr>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a3cd2fb57cf40f4287e00b10cfa46a241">load</a> = 0.0f</td></tr>
+<tr class="memdesc:a3cd2fb57cf40f4287e00b10cfa46a241"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current load of the servo. Simulated or read. <br /></td></tr>
 <tr class="separator:a3cd2fb57cf40f4287e00b10cfa46a241"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a02b92a0dc3a2f726b902d374871472b4"><td class="memItemLeft" align="right" valign="top"><a id="a02b92a0dc3a2f726b902d374871472b4"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>movingSpeed</b> = 0</td></tr>
-<tr class="separator:a02b92a0dc3a2f726b902d374871472b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a87af03325495526807dd2ed8befe0d3b"><td class="memItemLeft" align="right" valign="top"><a id="a87af03325495526807dd2ed8befe0d3b"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>pGain</b> = 32.0 / 255.0</td></tr>
-<tr class="separator:a87af03325495526807dd2ed8befe0d3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a44a195c6faba0a58747ca93bf0f9019f"><td class="memItemLeft" align="right" valign="top"><a id="a44a195c6faba0a58747ca93bf0f9019f"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>presentPosition</b> = 0</td></tr>
-<tr class="separator:a44a195c6faba0a58747ca93bf0f9019f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a18a81be239168a3fd4f78ca6fd539c41"><td class="memItemLeft" align="right" valign="top"><a id="a18a81be239168a3fd4f78ca6fd539c41"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>presentSpeed</b> = 0</td></tr>
-<tr class="separator:a18a81be239168a3fd4f78ca6fd539c41"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad57b4ab8cdcdbcd6d8bf520f6bdf72be"><td class="memItemLeft" align="right" valign="top"><a id="ad57b4ab8cdcdbcd6d8bf520f6bdf72be"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>simulated</b> = false</td></tr>
+<tr class="memitem:a78415d5d3fb5506fe268cfcede93dc4b"><td class="memItemLeft" align="right" valign="top"><a id="a78415d5d3fb5506fe268cfcede93dc4b"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a78415d5d3fb5506fe268cfcede93dc4b">moving_speed</a> = 0.0f</td></tr>
+<tr class="memdesc:a78415d5d3fb5506fe268cfcede93dc4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Speed of the servo. Cached value that is never read. <br /></td></tr>
+<tr class="separator:a78415d5d3fb5506fe268cfcede93dc4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abe2321af640c336c431c5325ed6b8390"><td class="memItemLeft" align="right" valign="top"><a id="abe2321af640c336c431c5325ed6b8390"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#abe2321af640c336c431c5325ed6b8390">p_gain</a> = 32.0 / 255.0</td></tr>
+<tr class="memdesc:abe2321af640c336c431c5325ed6b8390"><td class="mdescLeft">&#160;</td><td class="mdescRight">Proportional gain. Cached value that is never read. <br /></td></tr>
+<tr class="separator:abe2321af640c336c431c5325ed6b8390"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5d883e5d9c598457223171dafd5ea226"><td class="memItemLeft" align="right" valign="top"><a id="a5d883e5d9c598457223171dafd5ea226"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a5d883e5d9c598457223171dafd5ea226">present_position</a> = 0.0f</td></tr>
+<tr class="memdesc:a5d883e5d9c598457223171dafd5ea226"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current angle position of the servo. Simulated or read. <br /></td></tr>
+<tr class="separator:a5d883e5d9c598457223171dafd5ea226"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab50915d881e0830589dda379b9120d82"><td class="memItemLeft" align="right" valign="top"><a id="ab50915d881e0830589dda379b9120d82"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#ab50915d881e0830589dda379b9120d82">present_speed</a> = 0.0f</td></tr>
+<tr class="memdesc:ab50915d881e0830589dda379b9120d82"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current speed of the servo. Simulated or read. <br /></td></tr>
+<tr class="separator:ab50915d881e0830589dda379b9120d82"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad57b4ab8cdcdbcd6d8bf520f6bdf72be"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#ad57b4ab8cdcdbcd6d8bf520f6bdf72be">simulated</a> = false</td></tr>
+<tr class="memdesc:ad57b4ab8cdcdbcd6d8bf520f6bdf72be"><td class="mdescLeft">&#160;</td><td class="mdescRight">True if servo positions are simulated.  <a href="structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#ad57b4ab8cdcdbcd6d8bf520f6bdf72be">More...</a><br /></td></tr>
 <tr class="separator:ad57b4ab8cdcdbcd6d8bf520f6bdf72be"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a42907cd8a0fb656a6ee70060494a92dc"><td class="memItemLeft" align="right" valign="top"><a id="a42907cd8a0fb656a6ee70060494a92dc"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>temperature</b> = 40</td></tr>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a42907cd8a0fb656a6ee70060494a92dc">temperature</a> = 40.0f</td></tr>
+<tr class="memdesc:a42907cd8a0fb656a6ee70060494a92dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current temperature of the servo. Simulated or read. <br /></td></tr>
 <tr class="separator:a42907cd8a0fb656a6ee70060494a92dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a65b05bfaa259cd9d93d54893358d4a3e"><td class="memItemLeft" align="right" valign="top"><a id="a65b05bfaa259cd9d93d54893358d4a3e"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>torque</b> = 0</td></tr>
+<tr class="memitem:a65b05bfaa259cd9d93d54893358d4a3e"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a65b05bfaa259cd9d93d54893358d4a3e">torque</a> = 0.0f</td></tr>
+<tr class="memdesc:a65b05bfaa259cd9d93d54893358d4a3e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Torque of the servo. Cached value that is never read.  <a href="structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a65b05bfaa259cd9d93d54893358d4a3e">More...</a><br /></td></tr>
 <tr class="separator:a65b05bfaa259cd9d93d54893358d4a3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a31c89ee5a3bb20b11c6f7cdae19cf142"><td class="memItemLeft" align="right" valign="top"><a id="a31c89ee5a3bb20b11c6f7cdae19cf142"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>torqueEnabled</b> = true</td></tr>
-<tr class="separator:a31c89ee5a3bb20b11c6f7cdae19cf142"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a80ef8c4beddc8203855e3703d8f5ea54"><td class="memItemLeft" align="right" valign="top"><a id="a80ef8c4beddc8203855e3703d8f5ea54"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a80ef8c4beddc8203855e3703d8f5ea54">torque_enabled</a> = true</td></tr>
+<tr class="memdesc:a80ef8c4beddc8203855e3703d8f5ea54"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the servo torque is enabled. <br /></td></tr>
+<tr class="separator:a80ef8c4beddc8203855e3703d8f5ea54"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a90209359f716235067496858024812e8"><td class="memItemLeft" align="right" valign="top"><a id="a90209359f716235067496858024812e8"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>voltage</b> = 10</td></tr>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a90209359f716235067496858024812e8">voltage</a> = 10.0f</td></tr>
+<tr class="memdesc:a90209359f716235067496858024812e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Current voltage of the servo. Simulated or read. <br /></td></tr>
 <tr class="separator:a90209359f716235067496858024812e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Member Data Documentation</h2>
+<a id="ad57b4ab8cdcdbcd6d8bf520f6bdf72be"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad57b4ab8cdcdbcd6d8bf520f6bdf72be">&#9670;&nbsp;</a></span>simulated</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool module::platform::cm740::HardwareIO::ServoState::simulated = false</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>True if servo positions are simulated. </p>
+<p>Note that commands can still be written to the hardware. </p>
+
+</div>
+</div>
+<a id="a65b05bfaa259cd9d93d54893358d4a3e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a65b05bfaa259cd9d93d54893358d4a3e">&#9670;&nbsp;</a></span>torque</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float module::platform::cm740::HardwareIO::ServoState::torque = 0.0f</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Torque of the servo. Cached value that is never read. </p>
+<p>Ranges from 0.0 to 1.0. </p>
+
+</div>
+</div>
 <hr/>The documentation for this struct was generated from the following file:<ul>
 <li>module/platform/cm740/HardwareIO/src/<a class="el" href="HardwareIO_8hpp_source.html">HardwareIO.hpp</a></li>
 </ul>
@@ -176,7 +223,7 @@ float&#160;</td><td class="memItemRight" valign="bottom"><b>voltage</b> = 10</td
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>platform</b></li><li class="navelem"><b>cm740</b></li><li class="navelem"><a class="el" href="classmodule_1_1platform_1_1cm740_1_1HardwareIO.html">HardwareIO</a></li><li class="navelem"><a class="el" href="structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html">ServoState</a></li>
-    <li class="footer">Generated on Wed Oct 5 2022 20:03:51 for NUbots by
+    <li class="footer">Generated on Sat Oct 8 2022 23:55:52 for NUbots by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.17 </li>
   </ul>

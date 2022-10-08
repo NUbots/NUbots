@@ -1,7 +1,5 @@
 var NAVTREEINDEX7 =
 {
-"structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_1_1Target_01_4.html#a8de6f3cdccbf967754ce05f942d7239b":[1,0,6,3,1],
-"structextension_1_1Configuration.html":[1,0,1,1],
 "structextension_1_1Configuration.html#a0faa67f622bb745b2d2d112f2cceb218":[1,0,1,1,16],
 "structextension_1_1Configuration.html#a11df3dec8525314497274648822138df":[1,0,1,1,4],
 "structextension_1_1Configuration.html#a13f3b33d0a59edfbd0d5902840ff5956":[1,0,1,1,24],
@@ -249,5 +247,7 @@ var NAVTREEINDEX7 =
 "structmodule_1_1extension_1_1FileWatcher_1_1ReactionMap.html":[1,0,2,1,2,2],
 "structmodule_1_1extension_1_1FileWatcher_1_1ReactionMap.html#aa244c5c3a7c1607ec94feb747c50ac36":[1,0,2,1,2,2,1],
 "structmodule_1_1extension_1_1FileWatcher_1_1ReactionMap.html#ac0ad77dce953ee6748b11ab83e4b272b":[1,0,2,1,2,2,0],
-"structmodule_1_1extension_1_1StateUpdate.html":[1,0,2,1,3]
+"structmodule_1_1extension_1_1StateUpdate.html":[1,0,2,1,3],
+"structmodule_1_1extension_1_1StateUpdate.html#a14c8851da07f29c7f18592f3e5429b84":[1,0,2,1,3,2],
+"structmodule_1_1extension_1_1StateUpdate.html#a5ae3bfce027fe7031776783761f8780e":[1,0,2,1,3,3]
 };

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.8.17"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>NUbots: module::platform::cm740::HardwareIO::CM740State Struct Reference</title>
+<title>NUbots: module::platform::cm740::HardwareIO::LEDState Struct Reference</title>
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
 <script type="text/javascript" src="dynsections.js"></script>
@@ -95,7 +95,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:cf05388f2679ee054f2beb29a391d25f4e673ac3&amp;dn=gpl-2.0.txt GPL-v2 */
-$(document).ready(function(){initNavTree('structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1CM740State.html',''); initResizable(); });
+$(document).ready(function(){initNavTree('structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1LEDState.html',''); initResizable(); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -116,25 +116,33 @@ $(document).ready(function(){initNavTree('structmodule_1_1platform_1_1cm740_1_1H
 <div class="header">
   <div class="summary">
 <a href="#pub-attribs">Public Attributes</a> &#124;
-<a href="structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1CM740State-members.html">List of all members</a>  </div>
+<a href="structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1LEDState-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">module::platform::cm740::HardwareIO::CM740State Struct Reference</div>  </div>
+<div class="title">module::platform::cm740::HardwareIO::LEDState Struct Reference</div>  </div>
 </div><!--header-->
 <div class="contents">
+
+<p>State of the CM740 LEDs, including the LED panel, head LED and eye LED.  
+ <a href="structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1LEDState.html#details">More...</a></p>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a4e8404c3fb59b11163a60b1f1a81ac89"><td class="memItemLeft" align="right" valign="top"><a id="a4e8404c3fb59b11163a60b1f1a81ac89"></a>
-message::platform::RawSensors::EyeLED&#160;</td><td class="memItemRight" valign="bottom"><b>eyeLED</b> = {0x000000FF}</td></tr>
-<tr class="separator:a4e8404c3fb59b11163a60b1f1a81ac89"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aba7cbd2879413de85c60bcf62b7729b1"><td class="memItemLeft" align="right" valign="top"><a id="aba7cbd2879413de85c60bcf62b7729b1"></a>
-message::platform::RawSensors::HeadLED&#160;</td><td class="memItemRight" valign="bottom"><b>headLED</b> = {0x0000FF00}</td></tr>
-<tr class="separator:aba7cbd2879413de85c60bcf62b7729b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a381d6e4c5d95c508d0dbf97406d3c3ae"><td class="memItemLeft" align="right" valign="top"><a id="a381d6e4c5d95c508d0dbf97406d3c3ae"></a>
-message::platform::RawSensors::LEDPanel&#160;</td><td class="memItemRight" valign="bottom"><b>ledPanel</b> = {false, false, false}</td></tr>
-<tr class="separator:a381d6e4c5d95c508d0dbf97406d3c3ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a93713049d16a3b439740728ff48d1ca7"><td class="memItemLeft" align="right" valign="top"><a id="a93713049d16a3b439740728ff48d1ca7"></a>
+message::platform::RawSensors::EyeLED&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1LEDState.html#a93713049d16a3b439740728ff48d1ca7">eye_LED</a> = {0x000000FF}</td></tr>
+<tr class="memdesc:a93713049d16a3b439740728ff48d1ca7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Colour of the eye LED, of the form 0x00RRGGBB. <br /></td></tr>
+<tr class="separator:a93713049d16a3b439740728ff48d1ca7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afc4dd9c97b0d2c5dfbf2461791c3dd10"><td class="memItemLeft" align="right" valign="top"><a id="afc4dd9c97b0d2c5dfbf2461791c3dd10"></a>
+message::platform::RawSensors::HeadLED&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1LEDState.html#afc4dd9c97b0d2c5dfbf2461791c3dd10">head_LED</a> = {0x0000FF00}</td></tr>
+<tr class="memdesc:afc4dd9c97b0d2c5dfbf2461791c3dd10"><td class="mdescLeft">&#160;</td><td class="mdescRight">Colour of the head LED, of the form 0x00RRGGBB. <br /></td></tr>
+<tr class="separator:afc4dd9c97b0d2c5dfbf2461791c3dd10"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a716aacc1d3903239eb1d1d50f55c4b25"><td class="memItemLeft" align="right" valign="top"><a id="a716aacc1d3903239eb1d1d50f55c4b25"></a>
+message::platform::RawSensors::LEDPanel&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1LEDState.html#a716aacc1d3903239eb1d1d50f55c4b25">led_panel</a> = {false, false, false}</td></tr>
+<tr class="memdesc:a716aacc1d3903239eb1d1d50f55c4b25"><td class="mdescLeft">&#160;</td><td class="mdescRight">Booleans representing which of the three LED panel lights are on. <br /></td></tr>
+<tr class="separator:a716aacc1d3903239eb1d1d50f55c4b25"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-<hr/>The documentation for this struct was generated from the following file:<ul>
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>State of the CM740 LEDs, including the LED panel, head LED and eye LED. </p>
+</div><hr/>The documentation for this struct was generated from the following file:<ul>
 <li>module/platform/cm740/HardwareIO/src/<a class="el" href="HardwareIO_8hpp_source.html">HardwareIO.hpp</a></li>
 </ul>
 </div><!-- contents -->
@@ -142,8 +150,8 @@ message::platform::RawSensors::LEDPanel&#160;</td><td class="memItemRight" valig
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><b>module</b></li><li class="navelem"><b>platform</b></li><li class="navelem"><b>cm740</b></li><li class="navelem"><a class="el" href="classmodule_1_1platform_1_1cm740_1_1HardwareIO.html">HardwareIO</a></li><li class="navelem"><a class="el" href="structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1CM740State.html">CM740State</a></li>
-    <li class="footer">Generated on Wed Oct 5 2022 20:03:51 for NUbots by
+    <li class="navelem"><b>module</b></li><li class="navelem"><b>platform</b></li><li class="navelem"><b>cm740</b></li><li class="navelem"><a class="el" href="classmodule_1_1platform_1_1cm740_1_1HardwareIO.html">HardwareIO</a></li><li class="navelem"><a class="el" href="structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1LEDState.html">LEDState</a></li>
+    <li class="footer">Generated on Sat Oct 8 2022 23:55:52 for NUbots by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.17 </li>
   </ul>
