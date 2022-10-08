@@ -61,7 +61,7 @@ namespace module::platform::cm740 {
             /// @brief Colour of the head LED, of the form 0x00RRGGBB
             message::platform::RawSensors::HeadLED head_LED = {0x0000FF00};
             /// @brief Colour of the eye LED, of the form 0x00RRGGBB
-            message::platform::RawSensors::EyeLED eye_LED   = {0x000000FF};
+            message::platform::RawSensors::EyeLED eye_LED = {0x000000FF};
         } led_state;
 
         /// @brief Configuration values
