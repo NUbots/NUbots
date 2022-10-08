@@ -56,13 +56,13 @@ namespace module::platform::cm740 {
             data.cm740ErrorCode == 0xFF ? RawSensors::Error::TIMEOUT : RawSensors::Error(data.cm740ErrorCode).value;
 
         // LED Panel
-        sensors.led_panel = cm740_state.led_panel;
+        sensors.led_panel = led_state.led_panel;
 
         // Head LED
-        sensors.head_led = cm740_state.head_LED;
+        sensors.head_led = led_state.head_LED;
 
         // Eye LED
-        sensors.eye_led = cm740_state.eye_LED;
+        sensors.eye_led = led_state.eye_LED;
 
         // Buttons
         sensors.buttons.left   = Convert::getBit<0>(data.cm740.buttons);
@@ -422,7 +422,7 @@ namespace module::platform::cm740 {
         // If we get a HeadLED command then write it
         on<Trigger<RawSensors::HeadLED>>().then([this](const RawSensors::HeadLED& led) {
             // Update our internal state
-            cm740_state.head_LED = led;
+            led_state.head_LED = led;
 
             cm740.cm740.write(CM740::CM740Data::Address::LED_HEAD_L,
                               Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
@@ -433,7 +433,7 @@ namespace module::platform::cm740 {
         // If we get a EyeLED command then write it
         on<Trigger<RawSensors::EyeLED>>().then([this](const RawSensors::EyeLED& led) {
             // Update our internal state
-            cm740_state.eye_LED = led;
+            led_state.eye_LED = led;
 
             cm740.cm740.write(CM740::CM740Data::Address::LED_EYE_L,
                               Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
@@ -444,7 +444,7 @@ namespace module::platform::cm740 {
         // If we get a LEDPanel command then write it
         on<Trigger<RawSensors::LEDPanel>>().then([this](const RawSensors::LEDPanel& led) {
             // Update our internal state
-            cm740_state.led_panel = led;
+            led_state.led_panel = led;
 
             cm740.cm740.write(CM740::CM740Data::Address::LED_PANNEL,
                               ((uint8_t(led.led2) << 2) | (uint8_t(led.led3) << 1) | uint8_t((led.led4))));

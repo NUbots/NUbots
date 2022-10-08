@@ -54,12 +54,15 @@ namespace module::platform::cm740 {
         /// @brief Proportional gain of the servos.
         float p_gain = 0.0f;
 
-        struct CM740State {
+        /// @brief State of the CM740 LEDs, including the LED panel, head LED and eye LED.
+        struct LEDState {
+            /// @brief Booleans representing which of the three LED panel lights are on
             message::platform::RawSensors::LEDPanel led_panel = {false, false, false};
-            //  0x00, 0xRR, 0xGG, 0xBB
+            /// @brief Colour of the head LED, of the form 0x00RRGGBB
             message::platform::RawSensors::HeadLED head_LED = {0x0000FF00};
+            /// @brief Colour of the eye LED, of the form 0x00RRGGBB
             message::platform::RawSensors::EyeLED eye_LED   = {0x000000FF};
-        } cm740_state;
+        } led_state;
 
         /// @brief Configuration values
         struct Config {
