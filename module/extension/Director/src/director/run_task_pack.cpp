@@ -51,7 +51,7 @@ namespace module::extension {
                 w.insert(sol.blocking_groups.begin(), sol.blocking_groups.end());
 
                 for (const auto& type : w) {
-                    our_group.watch_handles.push_back(groups[type].add_watcher(task));
+                    our_group.watch_handles.push_back(groups.at(type).add_watcher(task));
                 }
             }
 
@@ -165,7 +165,7 @@ namespace module::extension {
 
         // Run each of the optional tasks but only to the level the main task ran or pushed, until that happens there is
         // no point in doing anything
-        if (run_level >= RunLevel::PUSH) {
+        if (run_level <= RunLevel::PUSH) {
             for (auto it = first_optional; it != tasks.end(); ++it) {
                 // Run each optional task in turn as it's own thing, but if the main group was pushed, we can at most
                 // push in optional

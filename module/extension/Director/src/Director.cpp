@@ -30,6 +30,7 @@ namespace module::extension {
     using ::extension::behaviour::commands::ProvideReaction;
     using ::extension::behaviour::commands::WhenExpression;
     using provider::Provider;
+    using provider::ProviderGroup;
     using Unbind = NUClear::dsl::operation::Unbind<ProvideReaction>;
 
     /**
@@ -51,8 +52,11 @@ namespace module::extension {
 
     void Director::add_provider(const ProvideReaction& provide) {
 
-        // Will create if it doesn't already exist
-        auto& group = groups[provide.type];
+        // Create if it doesn't already exist
+        if (groups.count(provide.type) == 0) {
+            groups.emplace(provide.type, ProviderGroup(provide.type));
+        }
+        auto& group = groups.at(provide.type);
 
         // Check if we already inserted this element as a Provider
         if (providers.count(provide.reaction->id) != 0) {
@@ -232,7 +236,10 @@ namespace module::extension {
                 if (providers.count(task->requester_id) == 0) {
 
                     // Create a root provider for this task if one doesn't already exist and use it
-                    auto& group = groups[task->root_type];
+                    if (groups.count(task->root_type) == 0) {
+                        groups.emplace(task->root_type, ProviderGroup(task->root_type));
+                    }
+                    auto& group = groups.at(task->root_type);
                     if (group.providers.empty()) {
                         // We subtract from unique_id_source here so that we fill numbers from the top while regular
                         // reaction_ids are filling from the bottom
@@ -306,7 +313,7 @@ namespace module::extension {
             // Sort the task pack so highest priority tasks come first
             // We sort by true priority not challenge priority since they're all the same pack
             std::sort(pack->second.begin(), pack->second.end(), [](const auto& a, const auto& b) {
-                return a->priority > b->priority;
+                return a->optional == b->optional ? a->priority > b->priority : b->optional;
             });
 
             // Emit the task pack

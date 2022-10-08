@@ -33,6 +33,8 @@ namespace module::extension::provider {
         /// A task list holds a list of tasks
         using TaskList = std::vector<std::shared_ptr<const BehaviourTask>>;
 
+        ProviderGroup(const std::type_index& type_) : type(type_) {}
+
         struct WatchHandle {
             WatchHandle(const std::function<void()>& deleter_) : deleter(deleter_) {}
 
@@ -68,6 +70,9 @@ namespace module::extension::provider {
                 }
             });
         }
+
+        /// The type that this provider group manages
+        std::type_index type;
 
         /// List of individual Providers that can service tasks for this type
         std::vector<std::shared_ptr<Provider>> providers;
