@@ -42,6 +42,10 @@ namespace {
             on<Start<SimpleTask<2>>>().then([this](const SimpleTask<2>& t) { events.push_back("start 2: " + t.msg); });
             on<Stop<SimpleTask<1>>>().then([this](const SimpleTask<1>& t) { events.push_back("stop 1: " + t.msg); });
             on<Stop<SimpleTask<2>>>().then([this](const SimpleTask<2>& t) { events.push_back("stop 2: " + t.msg); });
+            on<Start<ComplexTask<1>>>().then([this] { events.push_back("start complex 1"); });
+            on<Start<ComplexTask<2>>>().then([this] { events.push_back("start complex 2"); });
+            on<Stop<ComplexTask<1>>>().then([this] { events.push_back("stop complex 1"); });
+            on<Stop<ComplexTask<2>>>().then([this] { events.push_back("stop complex 2"); });
 
             /**************
              * TEST STEPS *
@@ -77,14 +81,17 @@ TEST_CASE("Tests that if a provider loses one of its dependent needs it stops ru
 
     std::vector<std::string> expected = {
         "requesting complex task 1",
+        "start complex 1",
         "emitting complex task 1",
         "start 1: complex 1",
         "start 2: complex 1",
         "p1: complex 1",
         "p2: complex 1",
         "requesting complex task 2",
-        "stop 2: complex 1",
+        "start complex 2",
         "emitting complex task 2",
+        "stop complex 1",
+        "stop 2: complex 1",
         "p1: complex 2",
     };
 

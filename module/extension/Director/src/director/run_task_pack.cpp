@@ -163,13 +163,22 @@ namespace module::extension {
         auto first_optional = std::find_if(tasks.begin(), tasks.end(), [](const auto& t) { return t->optional; });
         auto run_level      = run_tasks(group, TaskList(tasks.begin(), first_optional), RunLevel::OK);
 
-        // Run each of the optional tasks but only to the level the main task ran or pushed, until that happens there is
-        // no point in doing anything
+        // If we are not running normally now and weren't previously we might still have active tasks that need removing
+        if (run_level != RunLevel::OK) {
+            for (auto& t : tasks) {
+                remove_task(t);
+            }
+        }
+
+        // Run each of the optional tasks but only to the level the main task ran or pushed
         if (run_level <= RunLevel::PUSH) {
             for (auto it = first_optional; it != tasks.end(); ++it) {
-                // Run each optional task in turn as it's own thing, but if the main group was pushed, we can at most
-                // push in optional
-                run_tasks(group, TaskList({*it}), run_level);
+                // Run each optional task in turn as it's own pack
+                // but if the main group was pushed, we can at most push in optional
+                if (run_tasks(group, TaskList({*it}), run_level) != RunLevel::OK) {
+                    // If we can't run this optional task, remove it in case we were previously running it
+                    remove_task(*it);
+                }
             }
         }
 
