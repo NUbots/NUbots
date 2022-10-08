@@ -114,6 +114,8 @@ namespace module::behaviour::strategy {
                 case '4': execute_dance_move(DanceMove::OH_THRUST_L); break;
                 case '5': execute_dance_move(DanceMove::STAR_1); break;
                 case '6': execute_dance_move(DanceMove::STAR_2); break;
+                case '7': execute_dance_move(DanceMove::CROUCH_1); break;
+                case '8': execute_dance_move(DanceMove::CROUCH_2); break;
                 case 'q': quit(); return;
                 default:
                     log<NUClear::ERROR>("Unknown Command");
@@ -382,6 +384,16 @@ namespace module::behaviour::strategy {
                 emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {50}}));
                 emit(std::make_unique<ExecuteScriptByName>(subsumption_id, "Star2.yaml"));
                 log<NUClear::INFO>("star 2");
+                break;
+            case DanceMove::CROUCH_1:
+                emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {50}}));
+                emit(std::make_unique<ExecuteScriptByName>(subsumption_id, "Crouch1.yaml"));
+                log<NUClear::INFO>("crouch 1");
+                break;
+            case DanceMove::CROUCH_2:
+                emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {50}}));
+                emit(std::make_unique<ExecuteScriptByName>(subsumption_id, "Crouch2.yaml"));
+                log<NUClear::INFO>("crouch 2");
                 break;
             default: log<NUClear::ERROR>(fmt::format("Invalid dance script command")); break;
         }
