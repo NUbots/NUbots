@@ -68,6 +68,9 @@ export function getClientConfig({
               loader: 'css-loader',
               options: {
                 modules: {
+                  // Enable CSS modules for files matching *.module.css
+                  // See https://github.com/webpack-contrib/css-loader#auto
+                  auto: true,
                   localIdentName: '[local]_[hash:base64:5]',
                 },
                 sourceMap: !isProduction,
@@ -85,8 +88,8 @@ export function getClientConfig({
           ],
         },
         /*
-        External libraries generally do not support css modules so the selector mangling will break external components.
-        This separate simplified loader is used for anything within the node_modules folder instead.
+        Separate simplified loader for CSS files within the node_modules folder.
+        No CSS modules (to avoid name mangling) and no import() or url() processing.
         */
         {
           test: /\.css$/,
