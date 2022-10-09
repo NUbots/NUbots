@@ -15,16 +15,6 @@ if(BUILD_TESTS)
   enable_testing()
 endif()
 
-# Set on to prefer .a files over .so files for linking
-option(STATIC_LIBRARIES
-       "Prefer using static .a files rather than .so files. NOTE: This must be enabled from an empty build directory!"
-       OFF
-)
-
-if(STATIC_LIBRARIES)
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_STATIC_LIBRARY_SUFFIX} ${CMAKE_SHARED_LIBRARY_SUFFIX})
-endif()
-
 # We use additional modules that cmake needs to know about
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules/" "${PROJECT_SOURCE_DIR}/nuclear/cmake/Modules/")
 
@@ -38,14 +28,13 @@ set(CI_BUILD
     CACHE
       BOOL
       "This disables the effects of the CI_BUILD variable. We should remove this set() once warnings have been fixed."
-      FORCE
 )
 
-# Default to do a debug build
+# Default to do a release build
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  message(STATUS "Setting build type to 'Debug' as none was specified.")
+  message(STATUS "Setting build type to 'Release' as none was specified.")
   set(CMAKE_BUILD_TYPE
-      Debug
+      Release
       CACHE STRING "Choose the type of build." FORCE
   )
   # Set the possible values of build type for cmake-gui

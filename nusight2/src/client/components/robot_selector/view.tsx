@@ -7,7 +7,7 @@ import { RobotModel } from '../robot/model'
 import PlugIcon from './plug.svg'
 import RobotIcon from './robot.svg'
 import { RobotLabel } from './robot_label/view'
-import style from './style.css'
+import style from './style.module.css'
 
 export type RobotSelectorProps = {
   dropdownMenuPosition?: 'left' | 'right'

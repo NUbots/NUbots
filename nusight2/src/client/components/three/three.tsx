@@ -19,7 +19,7 @@ import { Camera } from 'three'
 import { debounce } from 'throttle-debounce'
 import { compose } from '../../../shared/base/compose'
 
-import styles from './styles.css'
+import styles from './style.module.css'
 
 export type Stage = { scene: Scene; camera: Camera; target?: WebGLRenderTarget }
 export type Canvas = { width: number; height: number }

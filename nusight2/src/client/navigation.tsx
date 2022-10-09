@@ -1,7 +1,6 @@
 import { ComponentType } from 'react'
 
 export type Route = {
-  exact?: boolean
   path: string
   Icon: any
   label: string
