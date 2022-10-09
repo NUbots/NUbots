@@ -82,8 +82,10 @@ namespace module::extension {
         void add_needs(const ::extension::behaviour::commands::NeedsExpression& needs);
 
         /**
-         * Compares the priorities of two director tasks and returns true if the challenger has priority over the
-         * incumbent.
+         * Compares the challenge priorities of two director tasks and returns true if the challenger has priority over
+         * the incumbent using challenge priority.
+         *
+         * i.e. incumbent < challenger
          *
          * The function requires that the challenger's precedence is strictly greater than the incumbent's.
          * This ensures that we don't change tasks unnecessarily when the priority is equal.
@@ -98,6 +100,26 @@ namespace module::extension {
          */
         [[nodiscard]] bool challenge_priority(const std::shared_ptr<BehaviourTask>& incumbent,
                                               const std::shared_ptr<BehaviourTask>& challenger);
+
+        /**
+         * Compares the direct priorities of two director tasks and returns true if the challenger has priority over the
+         * incumbent.
+         *
+         * i.e. incumbent < challenger
+         *
+         * The function requires that the challenger's precedence is strictly greater than the incumbent's.
+         * This ensures that we don't change tasks unnecessarily when the priority is equal.
+         *
+         * @param incumbent     the task to compare which is currently the active running task
+         * @param challenger    the task to compare which wants to run but is not currently running
+         *
+         * @return true     if the challenger has strictly higher priority than the incumbent
+         * @return false    if the incumbent task has equal or higher priority
+         *
+         * @throws std::runtime_error if the director's provider ancestry is broken
+         */
+        [[nodiscard]] static bool direct_priority(const std::shared_ptr<BehaviourTask>& incumbent,
+                                                  const std::shared_ptr<BehaviourTask>& challenger);
 
         /**
          * Remove the provided task from the Director.
@@ -117,8 +139,22 @@ namespace module::extension {
          * provider that created them can now run. We do this by simply trying to run them all again.
          *
          * @param group the group whose queue we want to reevaluate
+         *
+         * @return true if as a result of reevaluating we changed tasks
          */
-        void reevaluate_group(provider::ProviderGroup& group);
+        bool reevaluate_group(provider::ProviderGroup& group);
+
+        /**
+         * Runs a reevaluation on not only the passed group, but any groups that it is using
+         *
+         * It will run reevaluate_group on the passed group, and then if nothing changes in the group it will look at
+         * each of the subtasks. If a subtask is currently the active task in another group it will recursively call on
+         * that group. This will terminate once there are no more subtasks that are active in other groups or when
+         * calling reevaluate_group results in a change of the currently running task.
+         *
+         * @param group the group whose queue we want to reevaluate along with all children
+         */
+        void reevaluate_children(provider::ProviderGroup& group);
 
         /**
          * An object which holds the possible solutions to running a task.

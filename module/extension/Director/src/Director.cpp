@@ -305,9 +305,9 @@ namespace module::extension {
             }
 
             // Sort the task pack so highest priority tasks come first
-            // We sort by true priority not challenge priority since they're all the same pack
-            std::sort(pack->second.begin(), pack->second.end(), [](const auto& a, const auto& b) {
-                return a->optional == b->optional ? a->priority > b->priority : b->optional;
+            // We sort by direct priority not challenge priority since they're all the same pack
+            std::stable_sort(pack->second.rbegin(), pack->second.rend(), [](const auto& a, const auto& b) {
+                return direct_priority(a, b);
             });
 
             // Emit the task pack

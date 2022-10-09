@@ -23,7 +23,7 @@ namespace module::extension {
 
     using provider::Provider;
 
-    void Director::reevaluate_group(provider::ProviderGroup& group) {
+    bool Director::reevaluate_group(provider::ProviderGroup& group) {
 
         // We need to take a copy of the watchers before we start as reevaluting the group will alter this order
         std::vector<std::shared_ptr<BehaviourTask>> watchers = group.watchers;
@@ -62,6 +62,25 @@ namespace module::extension {
         if (group.active_provider->classification == Provider::Classification::ROOT
             || (group.active_task != nullptr && group.active_task == initial_task)) {
             run_task_pack(TaskPack(group.active_provider, group.subtasks));
+        }
+
+        return group.active_task != initial_task;
+    }
+
+    void Director::reevaluate_children(provider::ProviderGroup& group) {
+        // Reevaluate this group
+        bool changed = reevaluate_group(group);
+
+        // If the task we are working on did not change we need to look deeper
+        if (!changed) {
+            for (const auto& t : group.subtasks) {
+                auto& g = groups.at(t->type);
+
+                // Only bother if we are the active task
+                if (g.active_task == t) {
+                    reevaluate_children(g);
+                }
+            }
         }
     }
 

@@ -156,6 +156,34 @@ namespace module::extension {
             }
         }
 
+        // We need to check if we dropped our priority for a subtask we already have
+        // If so that task might get kicked out by a higher priority task
+        // Before we run the new pack we need to see if those tasks would be kicked out
+        // We do this by updating the existing tasks priority to the new priority and then reevaluating their group
+        // which will kick them out if they are no longer the preferred task or if they are it will do nothing
+        TaskList lowered_tasks;
+        for (auto& subtask : group.subtasks) {
+            // See if we have a matching task
+            auto it = std::find_if(tasks.begin(), tasks.end(), [&](const std::shared_ptr<BehaviourTask>& t) {
+                return subtask->type == t->type;
+            });
+
+            // Update the old tasks priority
+            if (it != tasks.end() && direct_priority(*it, subtask)) {
+                lowered_tasks.push_back(subtask);
+                subtask->priority = (*it)->priority;
+                subtask->optional = (*it)->optional;
+            }
+        }
+        for (const auto& t : lowered_tasks) {
+            // If we were running this task and we lowered its priority, we need to reevaluate
+            // Somewhere in the tree down there might be a task that changes
+            auto& g = groups.at(t->type);
+            if (t == g.active_task) {
+                reevaluate_children(g);
+            }
+        }
+
         // Clear all the queue handles so their destructors remove us from all of the watchers we were in
         group.watch_handles.clear();
 
