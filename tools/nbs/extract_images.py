@@ -42,7 +42,9 @@ def process_image(packet, output):
     elif fmt == fourcc("GBRG"):
         img = cv2.cvtColor(img, cv2.COLOR_BayerGB2RGB_VNG)
 
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    # Convert to BGR if the image is in RGB since OpenCV uses BGR format
+    if fmt == fourcc("RGB8") or fmt == fourcc("RGB3"):
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
 
     # Save the image
     file_name = os.path.join(
