@@ -112,7 +112,7 @@ namespace module::extension {
             // Otherwise we can use any provider that meets our needs
             else {
                 for (const auto& p : group.providers) {
-                    if (p->classification == Provider::Classification::PROVIDE) {
+                    if (p->classification == Provider::Classification::PROVIDE && p->reaction->enabled) {
                         s.options.push_back(solve_provider(p, authority, visited));
                     }
                 }
