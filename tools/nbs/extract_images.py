@@ -70,7 +70,7 @@ def process_metadata(packet, output):
     # Get lens parameters
     centre = [packet.msg.lens.centre.x, packet.msg.lens.centre.y]
     centre = [x * width for x in centre]
-    k = [packet.msg.lens.k.x / (width ** 2), packet.msg.lens.k.y / (width ** 4)]
+    k = [packet.msg.lens.k.x / (width**2), packet.msg.lens.k.y / (width**4)]
     fov = packet.msg.lens.fov
     focal_length = packet.msg.lens.focal_length * width
 
