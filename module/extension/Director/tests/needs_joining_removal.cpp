@@ -56,8 +56,8 @@ namespace {
                 emit<Task>(std::make_unique<VeryComplexTask>(), 40);
             });
             on<Trigger<Step<3>>, Priority::LOW>().then([this] {
-                events.push_back("lowering priority of complex task 1");
-                emit<Task>(std::make_unique<ComplexTask<1>>(), 30);
+                events.push_back("removing complex task 1");
+                emit<Task>(std::unique_ptr<ComplexTask<1>>(nullptr));
             });
             on<Startup>().then([this] {
                 emit(std::make_unique<Step<1>>());
@@ -69,7 +69,7 @@ namespace {
 
 }  // namespace
 
-TEST_CASE("Test that when the needs a higher task is blocked on are released, the higher task will run",
+TEST_CASE("Test that when the needs a higher task is blocked on are removed, the higher task will run",
           "[director][needs][joining]") {
 
     NUClear::PowerPlant::Configuration config;
@@ -84,7 +84,7 @@ TEST_CASE("Test that when the needs a higher task is blocked on are released, th
         "emitting tasks from complex task 1",
         "simple task - complex task 1",
         "emitting very complex task",
-        "lowering priority of complex task 1",
+        "removing complex task 1",
         "emitting tasks from very complex task",
         "emitting tasks from complex task 2",
         "simple task - complex task 2",
