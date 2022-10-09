@@ -229,76 +229,70 @@ namespace module::extension {
 
         // A task has arrived, either it's a root task so we send it off immediately, or we build up our pack for when
         // the Provider has finished executing
-        on<Trigger<BehaviourTask>, Sync<Director>>().then(
-            "Director Task",
-            [this](const std::shared_ptr<const BehaviourTask>& task) {
-                // Root level task, make the pack immediately and send it off to be executed as a root task
-                if (providers.count(task->requester_id) == 0) {
+        on<Trigger<BehaviourTask>, Sync<Director>>().then("Director Task", [this](const BehaviourTask& t) {
+            // Make our own mutable copy of the task
+            auto task = std::make_shared<BehaviourTask>(t);
 
-                    // Create a root provider for this task if one doesn't already exist and use it
-                    if (groups.count(task->root_type) == 0) {
-                        groups.emplace(task->root_type, ProviderGroup(task->root_type));
-                    }
-                    auto& group = groups.at(task->root_type);
-                    if (group.providers.empty()) {
-                        // We subtract from unique_id_source here so that we fill numbers from the top while regular
-                        // reaction_ids are filling from the bottom
-                        uint64_t unique = --unique_id_source;
-                        auto provider   = std::make_shared<Provider>(group,
-                                                                   unique,
-                                                                   Provider::Classification::ROOT,
-                                                                   task->root_type,
-                                                                   nullptr);
-                        group.providers.push_back(provider);
-                        providers.emplace(unique, provider);
-                        group.active_provider = provider;
-                    }
-                    auto root_provider = group.providers.front();
+            // Root level task, make the pack immediately and send it off to be executed as a root task
+            if (providers.count(task->requester_id) == 0) {
 
-                    // Modify the task we received to look like it came from this provider
-                    auto new_task = std::make_shared<BehaviourTask>(task->type,
-                                                                    task->root_type,
-                                                                    root_provider->id,
-                                                                    task->requester_task_id,
-                                                                    task->data,
-                                                                    task->name,
-                                                                    task->priority,
-                                                                    task->optional);
-
-                    emit(std::make_unique<TaskPack>(TaskPack(root_provider, {new_task})));
+                // Create a root provider for this task if one doesn't already exist and use it
+                if (groups.count(task->root_type) == 0) {
+                    groups.emplace(task->root_type, ProviderGroup(task->root_type));
                 }
+                auto& group = groups.at(task->root_type);
+                if (group.providers.empty()) {
+                    // We subtract from unique_id_source here so that we fill numbers from the top while regular
+                    // reaction_ids are filling from the bottom
+                    uint64_t unique = --unique_id_source;
+                    auto provider   = std::make_shared<Provider>(group,
+                                                               unique,
+                                                               Provider::Classification::ROOT,
+                                                               task->root_type,
+                                                               nullptr);
+                    group.providers.push_back(provider);
+                    providers.emplace(unique, provider);
+                    group.active_provider = provider;
+                }
+                auto root_provider = group.providers.front();
+
+                // Modify the task we received to look like it came from this provider
+                task->requester_id = root_provider->id;
+
+                emit(std::make_unique<TaskPack>(TaskPack(root_provider, {task})));
+            }
+            else {
+                auto& p = providers.at(task->requester_id);
+                auto id = p->reaction->identifier[0];
+                if (p->classification == Provider::Classification::START) {
+                    log<NUClear::WARN>("The task",
+                                       task->name,
+                                       "cannot be executed as Provider",
+                                       id,
+                                       "is a start provider.");
+                }
+                else if (p->classification == Provider::Classification::STOP) {
+                    log<NUClear::WARN>("The task",
+                                       task->name,
+                                       "cannot be executed as Provider",
+                                       id,
+                                       "is a stop provider.");
+                }
+                // Check if this Provider is active and allowed to make subtasks
+                else if (p != p->group.active_provider) {
+                    // Throw an error so the user can see what a fool they are being
+                    log<NUClear::WARN>("The task",
+                                       task->name,
+                                       "cannot be executed as the Provider",
+                                       id,
+                                       "is not active and cannot make subtasks");
+                }
+                // Everything is fine
                 else {
-                    auto& p = providers.at(task->requester_id);
-                    auto id = p->reaction->identifier[0];
-                    if (p->classification == Provider::Classification::START) {
-                        log<NUClear::WARN>("The task",
-                                           task->name,
-                                           "cannot be executed as Provider",
-                                           id,
-                                           "is a start provider.");
-                    }
-                    else if (p->classification == Provider::Classification::STOP) {
-                        log<NUClear::WARN>("The task",
-                                           task->name,
-                                           "cannot be executed as Provider",
-                                           id,
-                                           "is a stop provider.");
-                    }
-                    // Check if this Provider is active and allowed to make subtasks
-                    else if (p != p->group.active_provider) {
-                        // Throw an error so the user can see what a fool they are being
-                        log<NUClear::WARN>("The task",
-                                           task->name,
-                                           "cannot be executed as the Provider",
-                                           id,
-                                           "is not active and cannot make subtasks");
-                    }
-                    // Everything is fine
-                    else {
-                        pack_builder.emplace(task->requester_task_id, task);
-                    }
+                    pack_builder.emplace(task->requester_task_id, task);
                 }
-            });
+            }
+        });
 
         // This reaction runs when a Provider finishes to send off the task pack to the main director
         on<Trigger<ProviderDone>, Sync<Director>>().then("Package Tasks", [this](const ProviderDone& done) {

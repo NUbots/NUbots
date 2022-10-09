@@ -26,7 +26,7 @@ namespace module::extension {
     void Director::reevaluate_group(provider::ProviderGroup& group) {
 
         // We need to take a copy of the watchers before we start as reevaluting the group will alter this order
-        std::vector<std::shared_ptr<const BehaviourTask>> watchers = group.watchers;
+        std::vector<std::shared_ptr<BehaviourTask>> watchers = group.watchers;
 
         // Sort the interested parties by priority with highest first
         std::sort(watchers.begin(), watchers.end(), [this](const auto& a, const auto& b) {

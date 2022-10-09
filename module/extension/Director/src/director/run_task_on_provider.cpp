@@ -4,7 +4,7 @@ namespace module::extension {
 
     using provider::Provider;
 
-    void Director::run_task_on_provider(const std::shared_ptr<const BehaviourTask>& task,
+    void Director::run_task_on_provider(const std::shared_ptr<BehaviourTask>& task,
                                         const std::shared_ptr<provider::Provider>& provider) {
 
         // Update the active provider and task

@@ -37,7 +37,7 @@ namespace module::extension {
         /// Behaviour task
         using BehaviourTask = ::extension::behaviour::commands::BehaviourTask;
         /// A task list holds a list of tasks
-        using TaskList = std::vector<std::shared_ptr<const BehaviourTask>>;
+        using TaskList = std::vector<std::shared_ptr<BehaviourTask>>;
         /// A task pack is the result of a set of tasks emitted by a provider that should be run together
         using TaskPack = std::pair<std::shared_ptr<provider::Provider>, TaskList>;
 
@@ -96,8 +96,8 @@ namespace module::extension {
          *
          * @throws std::runtime_error if the director's provider ancestry is broken
          */
-        [[nodiscard]] bool challenge_priority(const std::shared_ptr<const BehaviourTask>& incumbent,
-                                              const std::shared_ptr<const BehaviourTask>& challenger);
+        [[nodiscard]] bool challenge_priority(const std::shared_ptr<BehaviourTask>& incumbent,
+                                              const std::shared_ptr<BehaviourTask>& challenger);
 
         /**
          * Remove the provided task from the Director.
@@ -107,7 +107,7 @@ namespace module::extension {
          *
          * @param task the task to remove from the Director
          */
-        void remove_task(const std::shared_ptr<const BehaviourTask>& task);
+        void remove_task(const std::shared_ptr<BehaviourTask>& task);
 
         /**
          * Reevaluates all of the tasks that are queued to execute on a provider group.
@@ -172,7 +172,7 @@ namespace module::extension {
          * @return
          */
         Solution::Option solve_provider(const std::shared_ptr<provider::Provider>& provider,
-                                        const std::shared_ptr<const BehaviourTask>& authority,
+                                        const std::shared_ptr<BehaviourTask>& authority,
                                         std::set<std::type_index> visited);
 
         /**
@@ -188,7 +188,7 @@ namespace module::extension {
          * @return         the set of providers that when run can meet the provided when condition
          */
         Solution solve_when(const provider::Provider::WhenCondition& when,
-                            const std::shared_ptr<const BehaviourTask>& authority,
+                            const std::shared_ptr<BehaviourTask>& authority,
                             const std::set<std::type_index>& visited);
 
         /**
@@ -202,7 +202,7 @@ namespace module::extension {
          * @return the set of possible solution options for the provider group of the passed type
          */
         Solution solve_group(const std::type_index& type,
-                             const std::shared_ptr<const BehaviourTask>& authority,
+                             const std::shared_ptr<BehaviourTask>& authority,
                              const std::set<std::type_index>& visited);
 
         /**
@@ -214,7 +214,7 @@ namespace module::extension {
          *
          * @return the set of possible solution options for this task
          */
-        Solution solve_task(const std::shared_ptr<const BehaviourTask>& task);
+        Solution solve_task(const std::shared_ptr<BehaviourTask>& task);
 
         struct OkSolution {
             OkSolution(const bool& blocked_, std::set<std::type_index>&& blocking_groups_)
@@ -246,7 +246,7 @@ namespace module::extension {
         OkSolution find_ok_solution(const Solution& requirement, const std::set<std::type_index>& used_types);
         std::vector<OkSolution> find_ok_solutions(const std::vector<Solution>& option);
 
-        void run_task_on_provider(const std::shared_ptr<const BehaviourTask>& task,
+        void run_task_on_provider(const std::shared_ptr<BehaviourTask>& task,
                                   const std::shared_ptr<provider::Provider>& provider);
 
         enum RunLevel { OK, PUSH, BLOCKED };
@@ -293,7 +293,7 @@ namespace module::extension {
 
         /// A list of reaction_task_ids to director_task objects, once the Provider has finished running it will emit
         /// all these as a pack so that the director can work out when Providers change which subtasks they emit
-        std::multimap<uint64_t, std::shared_ptr<const BehaviourTask>> pack_builder;
+        std::multimap<uint64_t, std::shared_ptr<BehaviourTask>> pack_builder;
 
     public:
         friend class InformationSource;

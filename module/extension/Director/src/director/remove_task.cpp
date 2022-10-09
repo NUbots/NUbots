@@ -25,7 +25,7 @@ namespace module::extension {
     using ::extension::behaviour::commands::BehaviourTask;
     using provider::Provider;
 
-    void Director::remove_task(const std::shared_ptr<const BehaviourTask>& task) {
+    void Director::remove_task(const std::shared_ptr<BehaviourTask>& task) {
 
         // Get the group for this task
         auto& group = groups.at(task->type);
