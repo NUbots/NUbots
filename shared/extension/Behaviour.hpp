@@ -128,7 +128,7 @@ namespace extension::behaviour {
      * @tparam expr     the function used for the comparison (e.g. std::less)
      * @tparam value    the value that the when condition is looking for
      */
-    template <typename State, template <typename> class expr, enum State::Value value>
+    template <typename State, template <typename> class expr, State::Value value>
     struct When {
 
         /**
@@ -174,7 +174,7 @@ namespace extension::behaviour {
      * @tparam State    the smart enum that this causing condition is going to manipulate
      * @tparam value    the value that will result when the causing is successful
      */
-    template <typename State, enum State::Value value>
+    template <typename State, State::Value value>
     struct Causing {
 
         /**
@@ -330,9 +330,9 @@ namespace extension::behaviour {
         using Start = ::extension::behaviour::Start<T>;
         template <typename T>
         using Stop = ::extension::behaviour::Stop<T>;
-        template <typename State, template <typename> class expr, enum State::Value value>
+        template <typename State, template <typename> class expr, State::Value value>
         using When = ::extension::behaviour::When<State, expr, value>;
-        template <typename State, enum State::Value value>
+        template <typename State, State::Value value>
         using Causing = ::extension::behaviour::Causing<State, value>;
         template <typename T>
         using Needs = ::extension::behaviour::Needs<T>;
