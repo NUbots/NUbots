@@ -1,0 +1,113 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2022 NUbots <nubots@nubots.net>
+ */
+ syntax = "proto3";
+
+ package message.motion;
+
+ import "google/protobuf/timestamp.proto";
+
+ /**
+  * @author Ysobel Sims
+  */
+
+  /// Left leg motion information including target matrix, time and gain and torque for each servo
+  message LeftLegIK {
+    /// When the command should execute
+    google.protobuf.Timestamp time = 1;
+    /// Target left foot position to torso
+    mat4 Htl = 2;
+    /// Gain and torque of each servo
+    ServoCommand.ServoState left_hip_yaw = 3;
+    ServoCommand.ServoState left_hip_roll = 4;
+    ServoCommand.ServoState left_hip_pitch = 5;
+    ServoCommand.ServoState left_knee = 6;
+    ServoCommand.ServoState left_ankle_pitch = 7;
+    ServoCommand.ServoState left_ankle_roll = 8;
+  }
+
+  /// Right leg motion information including target matrix, time and gain and torque for each servo
+  message RightLegIK {
+    /// When the command should execute
+    google.protobuf.Timestamp time = 1;
+    /// Target right foot position to torso
+    mat4 Htr = 2;
+    /// Gain and torque of each servo
+    ServoCommand.ServoState right_hip_yaw = 3;
+    ServoCommand.ServoState right_hip_roll = 4;
+    ServoCommand.ServoState right_hip_pitch = 5;
+    ServoCommand.ServoState right_knee = 6;
+    ServoCommand.ServoState right_ankle_pitch = 7;
+    ServoCommand.ServoState right_ankle_roll = 8;
+  }
+
+  /// Head motion information including look direction, time and gain and torque for each servo
+  message HeadIK {
+    /// When the command should execute
+    google.protobuf.Timestamp time = 1;
+    /// Vector for the head to look towards
+    vec3 uPCt = 2;
+    /// Gain and torque of each servo
+    ServoCommand.ServoState head_yaw = 3;
+    ServoCommand.ServoState head_pitch = 4;
+  }
+
+  /// Left leg servo command information including time, gain, torque, position
+  message LeftLeg {
+    /// Position of each servo
+    ServoCommand left_hip_yaw = 1;
+    ServoCommand left_hip_roll = 2;
+    ServoCommand left_hip_pitch = 3;
+    ServoCommand left_knee = 4;
+    ServoCommand left_ankle_pitch = 5;
+    ServoCommand left_ankle_roll = 6;
+  }
+
+  /// Right leg servo command information including time, gain, torque, position
+  message RightLeg {
+    /// Position of each servo
+    ServoCommand left_hip_yaw = 1;
+    ServoCommand left_hip_roll = 2;
+    ServoCommand left_hip_pitch = 3;
+    ServoCommand left_knee = 4;
+    ServoCommand left_ankle_pitch = 5;
+    ServoCommand left_ankle_roll = 6;
+  }
+
+  /// Left arm servo command information including time, gain, torque, position
+  message LeftArm {
+    /// Position of each servo
+    ServoCommand left_shoulder_pitch = 1;
+    ServoCommand left_shoulder_roll = 2;
+    ServoCommand left_elbow = 3;
+  }
+
+  /// Right arm servo command information including time, gain, torque, position
+  message RightArm {
+    /// Position of each servo
+    ServoCommand left_shoulder_pitch = 1;
+    ServoCommand left_shoulder_roll = 2;
+    ServoCommand left_elbow = 3;
+  }
+
+  /// Head servo command information including time, gain, torque, position
+  message Head {
+    /// Position of each servo
+    ServoCommand head_yaw = 1;
+    ServoCommand head_pitch = 2;
+  }
