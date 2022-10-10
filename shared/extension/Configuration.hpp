@@ -183,9 +183,8 @@ namespace extension {
                 return match[1].str();
             }
 
-            throw std::system_error(-1,
-                                    std::system_category(),
-                                    ("Failed to extract platform name from '" + hostname + "'."));
+            // If platform cannot be found, return empty
+            return "";
         }
 
         [[nodiscard]] Configuration operator[](const std::string& key) {
@@ -329,7 +328,7 @@ namespace NUClear::dsl {
 
                 // Bind our robot specific config file if it exists
                 const fs::path platformConfig = fs::path("config") / platform / filename;
-                if (fs::exists(platformConfig)) {
+                if (fs::exists(platformConfig) && !platform.empty()) {
                     DSLProxy<::extension::FileWatch>::bind<DSL>(reaction, platformConfig, flags);
                 }
 
@@ -374,7 +373,12 @@ namespace NUClear::dsl {
                 c.pop_back();
 
                 // Returns true if the string exists in the vector
-                auto str_exists = [&](const std::string& key) { return std::find(c.begin(), c.end(), key) != c.end(); };
+                auto str_exists = [&](const std::string& key) {
+                    if (key.empty()) {
+                        return false;
+                    }
+                    return std::find(c.begin(), c.end(), key) != c.end();
+                };
 
                 // Remove all parts of the path before and including config since we don't care about them
                 while (str_exists("config")) {
@@ -383,6 +387,7 @@ namespace NUClear::dsl {
 
                 // If it's the installation phase, and the path contains anything indicating it is not default config,
                 // then don't let the reaction run
+
                 if (watch.events == ::extension::FileWatch::Event::NO_OP
                     && (str_exists(hostname) || str_exists(platform) || str_exists(binaryName))) {
                     return false;
