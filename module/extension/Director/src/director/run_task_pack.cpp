@@ -21,6 +21,7 @@
 
 namespace module::extension {
 
+    using provider::Provider;
     using provider::ProviderGroup;
 
     Director::RunLevel Director::run_tasks(ProviderGroup& our_group, const TaskList& tasks, const RunLevel& run_level) {
@@ -146,6 +147,35 @@ namespace module::extension {
 
         const auto& provider = pack.first;
         auto& group          = provider->group;
+
+        // See if a done command was emitted
+        for (const auto& t : pack.second) {
+            if (t->type == typeid(::extension::behaviour::Done)) {
+
+                auto parent_provider = providers.at(group.active_task->requester_id);
+                auto& parent_group   = parent_provider->group;
+
+                // If it's a root provider, then we just remove the task
+                if (parent_provider->classification == Provider::Classification::ROOT) {
+                    std::cout << "Removing " << parent_group.subtasks.front() << " from "
+                              << NUClear::util::demangle(parent_group.type.name()) << std::endl;
+                    auto task = parent_group.subtasks.front();
+                    parent_group.subtasks.clear();
+                    parent_group.watch_handles.clear();
+                    remove_task(task);
+                }
+                else {
+                    run_task_on_provider(parent_group.active_task, parent_group.active_provider);
+                }
+
+                if (pack.second.size() > 1) {
+                    log<NUClear::WARN>("Done task was emitted with other tasks, the other tasks will be ignored");
+                }
+
+                // We don't do anything else on done
+                return;
+            }
+        }
 
         // Remove null data tasks from the list, this allows root tasks to be cleared
         TaskList tasks;
