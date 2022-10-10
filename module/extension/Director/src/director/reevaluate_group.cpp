@@ -64,6 +64,11 @@ namespace module::extension {
             run_task_pack(TaskPack(group.active_provider, group.subtasks));
         }
 
+        // If we aren't running any task we need to clear our watch handles
+        if (group.active_task == nullptr) {
+            group.watch_handles.clear();
+        }
+
         return group.active_task != initial_task;
     }
 
