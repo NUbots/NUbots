@@ -82,7 +82,7 @@ namespace extension {
             }
 
             // If the same file exists in this platform's per-platform config directory then load and merge
-            if (fs::exists(fs::path("config") / platform / fileName)) {
+            if (fs::exists(fs::path("config") / platform / fileName) && !platform.empty()) {
                 if (loaded) {
                     config = merge_yaml_nodes(config, YAML::LoadFile(fs::path("config") / platform / fileName));
                 }
@@ -387,7 +387,6 @@ namespace NUClear::dsl {
 
                 // If it's the installation phase, and the path contains anything indicating it is not default config,
                 // then don't let the reaction run
-
                 if (watch.events == ::extension::FileWatch::Event::NO_OP
                     && (str_exists(hostname) || str_exists(platform) || str_exists(binaryName))) {
                     return false;
