@@ -247,7 +247,7 @@ $(document).ready(function(){initNavTree('Behaviour_8hpp_source.html',''); initR
 <div class="line"><a name="l00127"></a><span class="lineno">  127</span>&#160;<span class="comment">     * @tparam expr     the function used for the comparison (e.g. std::less)</span></div>
 <div class="line"><a name="l00128"></a><span class="lineno">  128</span>&#160;<span class="comment">     * @tparam value    the value that the when condition is looking for</span></div>
 <div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;<span class="comment">     */</span></div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> State, <span class="keyword">template</span> &lt;<span class="keyword">typename</span>&gt; <span class="keyword">class </span>expr, <span class="keyword">enum</span> State::Value value&gt;</div>
+<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> State, <span class="keyword">template</span> &lt;<span class="keyword">typename</span>&gt; <span class="keyword">class </span>expr, State::Value value&gt;</div>
 <div class="line"><a name="l00131"></a><span class="lineno"><a class="line" href="structextension_1_1behaviour_1_1When.html">  131</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structextension_1_1behaviour_1_1When.html">When</a> {</div>
 <div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;<span class="comment"></span> </div>
 <div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;<span class="comment">        /**</span></div>
@@ -293,7 +293,7 @@ $(document).ready(function(){initNavTree('Behaviour_8hpp_source.html',''); initR
 <div class="line"><a name="l00173"></a><span class="lineno">  173</span>&#160;<span class="comment">     * @tparam State    the smart enum that this causing condition is going to manipulate</span></div>
 <div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;<span class="comment">     * @tparam value    the value that will result when the causing is successful</span></div>
 <div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;<span class="comment">     */</span></div>
-<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> State, enum State::Value value&gt;</div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> State, State::Value value&gt;</div>
 <div class="line"><a name="l00177"></a><span class="lineno"><a class="line" href="structextension_1_1behaviour_1_1Causing.html">  177</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structextension_1_1behaviour_1_1Causing.html">Causing</a> {</div>
 <div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;<span class="comment"></span> </div>
 <div class="line"><a name="l00179"></a><span class="lineno">  179</span>&#160;<span class="comment">        /**</span></div>
@@ -448,9 +448,9 @@ $(document).ready(function(){initNavTree('Behaviour_8hpp_source.html',''); initR
 <div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;        <span class="keyword">using</span> <a class="code" href="structextension_1_1behaviour_1_1Start.html">Start</a> = <a class="code" href="structextension_1_1behaviour_1_1Start.html">::extension::behaviour::Start&lt;T&gt;</a>;</div>
 <div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
 <div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;        <span class="keyword">using</span> <a class="code" href="structextension_1_1behaviour_1_1Stop.html">Stop</a> = <a class="code" href="structextension_1_1behaviour_1_1Stop.html">::extension::behaviour::Stop&lt;T&gt;</a>;</div>
-<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> State, <span class="keyword">template</span> &lt;<span class="keyword">typename</span>&gt; <span class="keyword">class </span>expr, <span class="keyword">enum</span> State::Value value&gt;</div>
+<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> State, <span class="keyword">template</span> &lt;<span class="keyword">typename</span>&gt; <span class="keyword">class </span>expr, State::Value value&gt;</div>
 <div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;        <span class="keyword">using</span> <a class="code" href="structextension_1_1behaviour_1_1When.html">When</a> = <a class="code" href="structextension_1_1behaviour_1_1When.html">::extension::behaviour::When&lt;State, expr, value&gt;</a>;</div>
-<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> State, enum State::Value value&gt;</div>
+<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> State, State::Value value&gt;</div>
 <div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;        <span class="keyword">using</span> <a class="code" href="structextension_1_1behaviour_1_1Causing.html">Causing</a> = <a class="code" href="structextension_1_1behaviour_1_1Causing.html">::extension::behaviour::Causing&lt;State, value&gt;</a>;</div>
 <div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;        <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;</div>
 <div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;        <span class="keyword">using</span> <a class="code" href="structextension_1_1behaviour_1_1Needs.html">Needs</a> = <a class="code" href="structextension_1_1behaviour_1_1Needs.html">::extension::behaviour::Needs&lt;T&gt;</a>;</div>
@@ -489,7 +489,7 @@ $(document).ready(function(){initNavTree('Behaviour_8hpp_source.html',''); initR
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_c23e0f9c1b229783d92a813e01cca46a.html">extension</a></li><li class="navelem"><b>Behaviour.hpp</b></li>
-    <li class="footer">Generated on Sat Oct 8 2022 23:55:52 for NUbots by
+    <li class="footer">Generated on Mon Oct 10 2022 03:33:42 for NUbots by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.17 </li>
   </ul>
