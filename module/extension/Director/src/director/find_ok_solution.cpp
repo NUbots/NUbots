@@ -8,8 +8,6 @@ namespace module::extension {
     Director::OkSolution Director::find_ok_solution(const Solution& solution,
                                                     const std::set<std::type_index>& used_types) {
 
-        // TODO not dealing with pushed solutions which is why the when related ones aren't working
-
         // We need to accumulate blocked types for options we didn't use
         // Since we search the options in order
         std::set<std::type_index> blocking_groups;

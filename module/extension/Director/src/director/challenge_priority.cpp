@@ -80,8 +80,6 @@ namespace module::extension {
                 // If there is no active task something has gone wrong with the algorithm
                 if (group.active_task == nullptr) {
                     throw std::runtime_error("Task has broken parentage");
-                    // TODO here is where you need to change things
-                    // TODO now having no active/task no provider signifies a root element
                 }
 
                 // Add this new parent we found and set t so we can loop up further
