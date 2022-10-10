@@ -85,8 +85,6 @@ namespace module::extension {
                             && providers.at(current_task->requester_id)->type
                                    == providers.at(new_task->requester_id)->type) {
 
-                            // TODO what if provider changes within the group?
-
                             run_task_on_provider(new_task, main_provider);
                         }
                         else {
@@ -221,7 +219,7 @@ namespace module::extension {
         auto first_optional = std::find_if(tasks.begin(), tasks.end(), [](const auto& t) { return t->optional; });
         auto run_level      = run_tasks(group, TaskList(tasks.begin(), first_optional), RunLevel::OK);
 
-        // If we are not running normally now and weren't previously we might still have active tasks that need removing
+        // If we are not running normally now and were previously we might still have active tasks that need removing
         if (run_level != RunLevel::OK) {
             for (auto& t : tasks) {
                 remove_task(t);
