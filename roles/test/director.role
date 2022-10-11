@@ -6,4 +6,6 @@ nuclear_role(
   network::NUClearNet
   network::NetworkForwarder
   extension::Director
+  motion::Kinematics
+  motion::ServoRequest
 )
