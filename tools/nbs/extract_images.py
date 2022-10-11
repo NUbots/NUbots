@@ -6,7 +6,6 @@ import types
 
 import cv2
 import numpy as np
-import tensorflow as tf
 import yaml
 from tqdm import tqdm
 
@@ -26,7 +25,7 @@ def register(command):
 
 
 # Gets the image and debayers if needed, then saves the image
-def process_image(packet, output):
+def process_save_image(packet, output):
     image_data = decode_image(packet.msg.data, packet.msg.format)
 
     img = image_data[0]["image"].numpy()
@@ -112,6 +111,6 @@ def run(files, output, **kwargs):
         dynamic_ncols=True,
     ):
         # Get the image and save
-        process_image(packet, output)
+        process_save_image(packet, output)
         # Get the metadata and save
         process_metadata(packet, output)
