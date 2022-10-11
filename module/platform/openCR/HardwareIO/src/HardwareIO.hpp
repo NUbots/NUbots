@@ -1,15 +1,15 @@
-#ifndef MODULE_PLATFORM_NUGUS_HARDWAREIO_H
-#define MODULE_PLATFORM_NUGUS_HARDWAREIO_H
+#ifndef MODULE_PLATFORM_NUGUS_HARDWAREIO_HRawSensors
+    #define MODULE_PLATFORM_NUGUS_HARDWAREIO_H
 
-#include <map>
-#include <nuclear>
+    #include <map>
+    #include <nuclear>
 
-#include "NUgus.hpp"
-#include "dynamixel/v2/StatusReturn.hpp"
+    #include "NUgus.hpp"
+    #include "dynamixel/v2/Dynamixel.hpp"
 
-#include "message/platform/RawSensors.hpp"
+    #include "message/platform/RawSensors.hpp"
 
-#include "utility/io/uart.hpp"
+    #include "utility/io/uart.hpp"
 
 namespace module::platform::openCR {
 
@@ -36,17 +36,17 @@ namespace module::platform::openCR {
         struct OpenCRState {
             bool dirty = false;
 
-            message::platform::nugus::Sensors::LEDPanel ledPanel = {false, false, false};
+            message::platform::RawSensors::LEDPanel ledPanel = {false, false, false};
             //  0x00, 0xRR, 0xGG, 0xBB
-            message::platform::nugus::Sensors::HeadLED headLED = {0x0000FF00};
-            message::platform::nugus::Sensors::EyeLED eyeLED   = {0x000000FF};
+            message::platform::RawSensors::HeadLED headLED = {0x0000FF00};
+            message::platform::RawSensors::EyeLED eyeLED   = {0x000000FF};
 
             // Left, middle, right
-            message::platform::nugus::Sensors::Buttons buttons = {false, false, false};
+            message::platform::RawSensors::Buttons buttons = {false, false, false};
 
             // X, Y, Z
-            message::platform::nugus::Sensors::Accelerometer acc = {0.0f, 0.0f, 0.0f};
-            message::platform::nugus::Sensors::Gyroscope gyro    = {0.0f, 0.0f, 0.0f};
+            message::platform::RawSensors::Accelerometer acc = {0.0f, 0.0f, 0.0f};
+            message::platform::RawSensors::Gyroscope gyro    = {0.0f, 0.0f, 0.0f};
 
             // Buzzer
             uint16_t buzzer = 0;
