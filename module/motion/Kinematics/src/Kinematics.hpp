@@ -1,11 +1,14 @@
 #ifndef MODULE_MOTION_KINEMATICS_HPP
 #define MODULE_MOTION_KINEMATICS_HPP
 
+#include <extension/Behaviour.hpp>
 #include <nuclear>
+
+#include "message/motion/KinematicsModel.hpp"
 
 namespace module::motion {
 
-    class Kinematics : public NUClear::Reactor {
+    class Kinematics : public extension::behaviour::BehaviourReactor {
     private:
         /// @brief Kinematics model used for calculating inverse kinematics
         message::motion::KinematicsModel kinematicsModel{};
