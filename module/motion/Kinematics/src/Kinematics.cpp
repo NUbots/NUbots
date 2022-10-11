@@ -64,7 +64,7 @@ namespace module::motion {
                 emit<Task>(std::make_unique<Done>());
                 return;
             }
-            auto servos = std::make_unique<LeftLeg>();
+            auto servos = std::make_unique<RightLeg>();
             auto joints = calculateLegJoints<double>(kinematicsModel, Eigen::Affine3d(leg_ik.Htr), LimbID::RIGHT_LEG);
 
             // The order of the servos in RightLegIK and RightLeg should be RightLeg.ID
