@@ -1,6 +1,7 @@
 #include "NUgus.hpp"
 
 #include "utility/math/angle.hpp"
+#include "utility/math/comparison.hpp"
 
 namespace module::platform::openCR {
 
@@ -149,37 +150,37 @@ namespace module::platform::openCR {
         // Range: -2047 - +2047 = -6.87792A - +6.87792A
         return int16_t(utility::math::clamp(-6.87792f, current, 6.87792f) / 0.00336f);
     }
-}
-}  // namespace nugus
-}  // namespace platformp_gain) const {
-return p_gain / 128.0f;
-}
 
-uint16_t NUgus::convertPGain(float p_gain) const {
-    return uint16_t(p_gain * 128.0f);
-}
+    float NUgus::convertPGain(uint16_t p_gain) const {
+        return float(p_gain / 128.0f);
+    }
 
-float NUgus::convertIGain(uint16_t i_gain) const {
-    return i_gain / 65536.0f;
-}
+    uint16_t NUgus::convertPGain(float p_gain) const {
+        return uint16_t(p_gain * 128.0f);
+    }
 
-uint16_t NUgus::convertIGain(float i_gain) const {
-    return uint16_t(i_gain * 65536.0f);
-}
+    float NUgus::convertIGain(uint16_t i_gain) const {
+        return i_gain / 65536.0f;
+    }
 
-float NUgus::convertDGain(uint16_t d_gain) const {
-    return d_gain / 18.0f;
-}
+    uint16_t NUgus::convertIGain(float i_gain) const {
+        return uint16_t(i_gain * 65536.0f);
+    }
 
-uint16_t NUgus::convertDGain(float d_gain) const {
-    return uint16_t(d_gain * 18.0f);
-}
+    float NUgus::convertDGain(uint16_t d_gain) const {
+        return d_gain / 18.0f;
+    }
 
-float NUgus::convertFFGain(uint16_t ff_gain) const {
-    return ff_gain / 4.0f;
-}
+    uint16_t NUgus::convertDGain(float d_gain) const {
+        return uint16_t(d_gain * 18.0f);
+    }
 
-uint16_t NUgus::convertFFGain(float ff_gain) const {
-    return uint16_t(ff_gain * 4.0f);
+    float NUgus::convertFFGain(uint16_t ff_gain) const {
+        return ff_gain / 4.0f;
+    }
+
+    uint16_t NUgus::convertFFGain(float ff_gain) const {
+        return uint16_t(ff_gain * 4.0f);
+    }
 
 }  // namespace module::platform::openCR

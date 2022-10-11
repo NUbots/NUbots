@@ -7,8 +7,6 @@
 #include "dynamixel/v2/DynamixelServo.h"
 #include "dynamixel/v2/OpenCR.h"
 
-#include "utility/math/comparison.hpp"
-
 namespace module::platform::openCR {
 
     struct MX64 : public DynamixelServo {
