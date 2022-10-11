@@ -1,6 +1,7 @@
 #ifndef MODULE_MOTION_QUINTICWALK_HPP
 #define MODULE_MOTION_QUINTICWALK_HPP
 
+#include <extension/Behaviour.hpp>
 #include <map>
 #include <memory>
 #include <nuclear>
@@ -17,7 +18,7 @@
 
 namespace module::motion {
 
-    class QuinticWalk : public NUClear::Reactor {
+    class QuinticWalk : public ::extension::behaviour::BehaviourReactor {
 
     public:
         /// @brief Called by the powerplant to build and setup the QuinticWalk reactor.

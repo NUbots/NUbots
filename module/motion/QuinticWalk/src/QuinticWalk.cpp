@@ -2,11 +2,13 @@
 
 #include <fmt/format.h>
 
+#include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/Behaviour.hpp"
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/KinematicsModel.hpp"
+#include "message/motion/LimbsIK.hpp"
 #include "message/motion/WalkCommand.hpp"
 #include "message/support/nusight/DataPoint.hpp"
 
@@ -28,6 +30,8 @@ namespace module::motion {
     using message::motion::ExecuteGetup;
     using message::motion::KillGetup;
     using message::motion::KinematicsModel;
+    using message::motion::LeftLegIK;
+    using message::motion::RightLegIK;
     using message::motion::StopCommand;
     using message::motion::WalkCommand;
 
@@ -101,7 +105,8 @@ namespace module::motion {
         config.arm_positions.emplace_back(ServoID::L_ELBOW, cfg["arms"]["left_elbow"].as<float>());
     }
 
-    QuinticWalk::QuinticWalk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
+    QuinticWalk::QuinticWalk(std::unique_ptr<NUClear::Environment> environment)
+        : BehaviourReactor(std::move(environment)) {
 
         imu_reaction = on<Trigger<Sensors>>().then([this](const Sensors& sensors) {
             Eigen::Vector3f RPY =
@@ -308,6 +313,36 @@ namespace module::motion {
 
         // Get desired transform for right foot {r}
         const Eigen::Affine3f Htr = walk_engine.get_footstep().is_left_support() ? Htf : Hts;
+
+        // ****DIRECTOR MOTION***
+        const NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
+
+        auto left_leg   = std::make_unique<LeftLegIK>();
+        auto right_leg  = std::make_unique<RightLegIK>();
+        left_leg->time  = time;
+        right_leg->time = time;
+        left_leg->Htl   = Htl.cast<double>().matrix();
+        right_leg->Htr  = Htr.cast<double>().matrix();
+        left_leg->servos.emplace_back(current_config.jointGains[ServoID::L_HIP_ROLL], 100);
+        left_leg->servos.emplace_back(current_config.jointGains[ServoID::L_HIP_PITCH], 100);
+        left_leg->servos.emplace_back(current_config.jointGains[ServoID::L_KNEE], 100);
+        left_leg->servos.emplace_back(current_config.jointGains[ServoID::L_ANKLE_PITCH], 100);
+        left_leg->servos.emplace_back(current_config.jointGains[ServoID::L_ANKLE_ROLL], 100);
+        right_leg->servos.emplace_back(current_config.jointGains[ServoID::R_HIP_ROLL], 100);
+        right_leg->servos.emplace_back(current_config.jointGains[ServoID::R_HIP_PITCH], 100);
+        right_leg->servos.emplace_back(current_config.jointGains[ServoID::R_KNEE], 100);
+        right_leg->servos.emplace_back(current_config.jointGains[ServoID::R_ANKLE_PITCH], 100);
+        right_leg->servos.emplace_back(current_config.jointGains[ServoID::R_ANKLE_ROLL], 100);
+
+
+        emit<Task>(left_leg);
+        emit<Task>(right_leg);
+
+        // google.protobuf.Timestamp time = 1;
+        // /// Target left foot position to torso
+        // mat4 Htl = 2;
+        // /// Gain and torque of each servo, in the order of ID in the LeftLeg message
+        // repeated ServoCommand.ServoState servos = 3;
 
         // Compute inverse kinematics for left and right foot
         const auto joints = calculateLegJoints<float>(kinematicsModel, Htl, Htr);
