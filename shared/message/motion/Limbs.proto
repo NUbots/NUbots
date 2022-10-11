@@ -20,20 +20,16 @@
 
  package message.motion;
 
- import "google/protobuf/timestamp.proto";
-
- /**
-  * @author Ysobel Sims
-  */
+ import "message/motion/ServoCommand.proto";
 
   /// Left leg servo command information including time, gain, torque, position
   message LeftLeg {
     enum ID {
-      LEFT_HIP_ROLL = 1;
-      LEFT_HIP_PITCH = 2;
-      LEFT_KNEE = 3;
-      LEFT_ANKLE_PITCH = 4;
-      LEFT_ANKLE_ROLL = 5;
+      LEFT_HIP_ROLL = 0;
+      LEFT_HIP_PITCH = 1;
+      LEFT_KNEE = 2;
+      LEFT_ANKLE_PITCH = 3;
+      LEFT_ANKLE_ROLL = 4;
     }
     /// Information for each servo in the left leg, in the order of ID
     repeated ServoCommand servos = 1;
@@ -42,11 +38,11 @@
   /// Right leg servo command information including time, gain, torque, position
   message RightLeg {
     enum ID {
-      RIGHT_HIP_ROLL = 1;
-      RIGHT_HIP_PITCH = 2;
-      RIGHT_KNEE = 3;
-      RIGHT_ANKLE_PITCH = 4;
-      RIGHT_ANKLE_ROLL = 5;
+      RIGHT_HIP_ROLL = 0;
+      RIGHT_HIP_PITCH = 1;
+      RIGHT_KNEE = 2;
+      RIGHT_ANKLE_PITCH = 3;
+      RIGHT_ANKLE_ROLL = 4;
     }
     /// Information for each servo in the right leg, in the order of ID
     repeated ServoCommand servos = 1;
@@ -55,9 +51,9 @@
   /// Left arm servo command information including time, gain, torque, position
   message LeftArm {
     enum ID {
-      LEFT_SHOULDER_PITCH = 1;
-      LEFT_SHOULDER_ROLL = 2;
-      LEFT_ELBOW = 3;
+      LEFT_SHOULDER_PITCH = 0;
+      LEFT_SHOULDER_ROLL = 1;
+      LEFT_ELBOW = 2;
     }
     /// Information for each servo in the left arm, in the order of ID
     repeated ServoCommand servos = 1;
@@ -66,9 +62,9 @@
   /// Right arm servo command information including time, gain, torque, position
   message RightArm {
     enum ID {
-      RIGHT_SHOULDER_PITCH = 1;
-      RIGHT_SHOULDER_ROLL = 2;
-      RIGHT_ELBOW = 3;
+      RIGHT_SHOULDER_PITCH = 0;
+      RIGHT_SHOULDER_ROLL = 1;
+      RIGHT_ELBOW = 2;
     }
     /// Information for each servo in the left arm, in the order of ID
     repeated ServoCommand servos = 1;
@@ -77,8 +73,8 @@
   /// Head servo command information including time, gain, torque, position
   message Head {
     enum ID {
-      HEAD_YAW = 1;
-      HEAD_PITCH = 2;
+      HEAD_YAW = 0;
+      HEAD_PITCH = 1;
     }
     /// Information for each servo in the left arm, in the order of ID
     repeated ServoCommand servos = 1;

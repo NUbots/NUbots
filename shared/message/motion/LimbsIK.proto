@@ -21,11 +21,10 @@
  package message.motion;
 
  import "google/protobuf/timestamp.proto";
-
- /**
-  * @author Ysobel Sims
-  */
-
+ import "message/motion/ServoCommand.proto";
+import "Matrix.proto";
+import "Vector.proto";
+ 
   /// Left leg motion information including target matrix, time and gain and torque for each servo
   message LeftLegIK {
     /// When the command should execute

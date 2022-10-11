@@ -20,11 +20,7 @@
 
  package message.motion;
 
- import "google/protobuf/timestamp.proto";
-
- /**
-  * @author Ysobel Sims
-  */
+ import "message/motion/ServoCommand.proto";
 
  message RightShoulderPitch {
      ServoCommand command = 1;

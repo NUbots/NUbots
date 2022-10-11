@@ -17,10 +17,6 @@
  * Copyright 2022 NUbots <nubots@nubots.net>
  */
 
- /**
- * @author Ysobel Sims
- */
-
 syntax = "proto3";
 
 package message.motion;
