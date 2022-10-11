@@ -24,7 +24,7 @@ namespace module::platform::openCR {
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), opencr(), nugus(), byte_wait(0), packet_wait(0), packet_queue() {
 
-        on<Configuration>("HardwareIO.yaml").then([this](const Configuration& config) {
+        on<Configuration>("HardwareIO_OpenCR.yaml").then([this](const Configuration& config) {
             // Make sure OpenCR is operating at the correct baud rate (based on config params)
             if (opencr.connected()) {
                 opencr.close();
