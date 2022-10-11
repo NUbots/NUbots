@@ -25,11 +25,12 @@
   /// Left leg servo command information including time, gain, torque, position
   message LeftLeg {
     enum ID {
-      LEFT_HIP_ROLL = 0;
-      LEFT_HIP_PITCH = 1;
-      LEFT_KNEE = 2;
-      LEFT_ANKLE_PITCH = 3;
-      LEFT_ANKLE_ROLL = 4;
+      LEFT_HIP_YAW = 0;
+      LEFT_HIP_ROLL = 1;
+      LEFT_HIP_PITCH = 2;
+      LEFT_KNEE = 3;
+      LEFT_ANKLE_PITCH = 4;
+      LEFT_ANKLE_ROLL = 5;
     }
     /// Information for each servo in the left leg, in the order of ID
     repeated ServoCommand servos = 1;
@@ -38,11 +39,12 @@
   /// Right leg servo command information including time, gain, torque, position
   message RightLeg {
     enum ID {
-      RIGHT_HIP_ROLL = 0;
-      RIGHT_HIP_PITCH = 1;
-      RIGHT_KNEE = 2;
-      RIGHT_ANKLE_PITCH = 3;
-      RIGHT_ANKLE_ROLL = 4;
+      RIGHT_HIP_YAW = 0;
+      RIGHT_HIP_ROLL = 1;
+      RIGHT_HIP_PITCH = 2;
+      RIGHT_KNEE = 3;
+      RIGHT_ANKLE_PITCH = 4;
+      RIGHT_ANKLE_ROLL = 5;
     }
     /// Information for each servo in the right leg, in the order of ID
     repeated ServoCommand servos = 1;

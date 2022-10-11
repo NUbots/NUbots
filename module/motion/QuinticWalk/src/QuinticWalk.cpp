@@ -323,11 +323,13 @@ namespace module::motion {
         right_leg->time = time;
         left_leg->Htl   = Htl.cast<double>().matrix();
         right_leg->Htr  = Htr.cast<double>().matrix();
+        left_leg->servos.emplace_back(current_config.jointGains[ServoID::L_HIP_YAW], 100);
         left_leg->servos.emplace_back(current_config.jointGains[ServoID::L_HIP_ROLL], 100);
         left_leg->servos.emplace_back(current_config.jointGains[ServoID::L_HIP_PITCH], 100);
         left_leg->servos.emplace_back(current_config.jointGains[ServoID::L_KNEE], 100);
         left_leg->servos.emplace_back(current_config.jointGains[ServoID::L_ANKLE_PITCH], 100);
         left_leg->servos.emplace_back(current_config.jointGains[ServoID::L_ANKLE_ROLL], 100);
+        right_leg->servos.emplace_back(current_config.jointGains[ServoID::R_HIP_YAW], 100);
         right_leg->servos.emplace_back(current_config.jointGains[ServoID::R_HIP_ROLL], 100);
         right_leg->servos.emplace_back(current_config.jointGains[ServoID::R_HIP_PITCH], 100);
         right_leg->servos.emplace_back(current_config.jointGains[ServoID::R_KNEE], 100);

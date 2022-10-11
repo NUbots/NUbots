@@ -39,11 +39,12 @@ namespace module::motion {
                                                      [this](const KinematicsModel& model) { kinematicsModel = model; });
 
         /// @brief Calculates left leg kinematics and makes a task for the LeftLeg servos
-        on<Provide<LeftLegIK>, Needs<LeftLeg>, Trigger<Sensors>>().then([this](const LeftLegIK& leg_ik,
-                                                                               const Sensors& /* sensors */) {
+        on<Provide<LeftLegIK>, Needs<LeftLeg>>().then([this](const LeftLegIK& leg_ik) {
             // If the time to reach the position is over, then stop requesting the position
             if (NUClear::clock::now() >= leg_ik.time) {
+                log<NUClear::DEBUG>("Done left leg IK");
                 emit<Task>(std::make_unique<Done>());
+                return;
             }
             auto servos = std::make_unique<LeftLeg>();
             auto joints = calculateLegJoints<double>(kinematicsModel, Eigen::Affine3d(leg_ik.Htl), LimbID::LEFT_LEG);
@@ -57,11 +58,11 @@ namespace module::motion {
         });
 
         /// @brief Calculates right leg kinematics and makes a task for the RightLeg servos
-        on<Provide<RightLegIK>, Needs<RightLeg>, Trigger<Sensors>>().then([this](const RightLegIK leg_ik,
-                                                                                 const Sensors& /* sensors */) {
+        on<Provide<RightLegIK>, Needs<RightLeg>>().then([this](const RightLegIK leg_ik) {
             // If the time to reach the position is over, then stop requesting the position
             if (NUClear::clock::now() >= leg_ik.time) {
                 emit<Task>(std::make_unique<Done>());
+                return;
             }
             auto servos = std::make_unique<LeftLeg>();
             auto joints = calculateLegJoints<double>(kinematicsModel, Eigen::Affine3d(leg_ik.Htr), LimbID::RIGHT_LEG);
@@ -75,22 +76,22 @@ namespace module::motion {
         });
 
         /// @brief Calculates head kinematics and makes a task for the Head servos
-        on<Provide<HeadIK>, Needs<Head>, Trigger<Sensors>>().then(
-            [this](const HeadIK head_ik, const Sensors& /* sensors */) {
-                // If the time to reach the position is over, then stop requesting the position
-                if (NUClear::clock::now() >= head_ik.time) {
-                    emit<Task>(std::make_unique<Done>());
-                }
-                auto servos = std::make_unique<Head>();
-                auto joints = calculateHeadJoints<double>(Eigen::Vector3d(head_ik.uPCt));
+        on<Provide<HeadIK>, Needs<Head>>().then([this](const HeadIK head_ik) {
+            // If the time to reach the position is over, then stop requesting the position
+            if (NUClear::clock::now() >= head_ik.time) {
+                emit<Task>(std::make_unique<Done>());
+                return;
+            }
+            auto servos = std::make_unique<Head>();
+            auto joints = calculateHeadJoints<double>(Eigen::Vector3d(head_ik.uPCt));
 
-                // The order of the servos in HeadIK and Head should be Head.ID (yaw, pitch)
-                for (long unsigned int i = 0; i < joints.size(); i++) {
-                    servos->servos.emplace_back(head_ik.time, joints[i].second, head_ik.servos[i]);
-                }
-                log<NUClear::DEBUG>("Emitting head request from a head IK provider.");
-                emit<Task>(servos);
-            });
+            // The order of the servos in HeadIK and Head should be Head.ID (yaw, pitch)
+            for (long unsigned int i = 0; i < joints.size(); i++) {
+                servos->servos.emplace_back(head_ik.time, joints[i].second, head_ik.servos[i]);
+            }
+            log<NUClear::DEBUG>("Emitting head request from a head IK provider.");
+            emit<Task>(servos);
+        });
     }
 
 }  // namespace module::motion

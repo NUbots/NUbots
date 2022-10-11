@@ -75,9 +75,8 @@ namespace module::motion {
            Needs<LeftHipPitch>,
            Needs<LeftKnee>,
            Needs<LeftAnklePitch>,
-           Needs<LeftAnkleRoll>,
-           Trigger<Sensors>>()
-            .then([this](const LeftLeg& leg, const Sensors& /* sensors */) {
+           Needs<LeftAnkleRoll>>()
+            .then([this](const LeftLeg& leg) {
                 // This is done when all of the servos are done, so check for the latest time
                 auto latest_time = NUClear::clock::now();
                 for (const auto& servo : leg.servos) {
@@ -86,10 +85,14 @@ namespace module::motion {
                     }
                 }
                 if (latest_time <= NUClear::clock::now()) {
+                    log<NUClear::DEBUG>("Left leg provider done.");
                     emit<Task>(std::make_unique<Done>());
+                    return;
                 }
 
+                log<NUClear::DEBUG>("Emitting servo requests from left leg provider.");
                 // Emit tasks for each servo
+                emit<Task>(std::make_unique<LeftHipYaw>(leg.servos[LeftLeg::ID::LEFT_HIP_YAW]));
                 emit<Task>(std::make_unique<LeftHipRoll>(leg.servos[LeftLeg::ID::LEFT_HIP_ROLL]));
                 emit<Task>(std::make_unique<LeftHipPitch>(leg.servos[LeftLeg::ID::LEFT_HIP_PITCH]));
                 emit<Task>(std::make_unique<LeftKnee>(leg.servos[LeftLeg::ID::LEFT_KNEE]));
@@ -103,9 +106,8 @@ namespace module::motion {
            Needs<RightHipPitch>,
            Needs<RightKnee>,
            Needs<RightAnklePitch>,
-           Needs<RightAnkleRoll>,
-           Trigger<Sensors>>()
-            .then([this](const RightLeg& leg, const Sensors& /* sensors */) {
+           Needs<RightAnkleRoll>>()
+            .then([this](const RightLeg& leg) {
                 // This is done when all of the servos are done, so check for the latest time
                 auto latest_time = NUClear::clock::now();
                 for (const auto& servo : leg.servos) {
@@ -115,9 +117,11 @@ namespace module::motion {
                 }
                 if (latest_time <= NUClear::clock::now()) {
                     emit<Task>(std::make_unique<Done>());
+                    return;
                 }
 
                 // Emit tasks for each servo
+                emit<Task>(std::make_unique<RightHipYaw>(leg.servos[RightLeg::ID::RIGHT_HIP_YAW]));
                 emit<Task>(std::make_unique<RightHipRoll>(leg.servos[RightLeg::ID::RIGHT_HIP_ROLL]));
                 emit<Task>(std::make_unique<RightHipPitch>(leg.servos[RightLeg::ID::RIGHT_HIP_PITCH]));
                 emit<Task>(std::make_unique<RightKnee>(leg.servos[RightLeg::ID::RIGHT_KNEE]));
@@ -125,8 +129,8 @@ namespace module::motion {
                 emit<Task>(std::make_unique<RightAnkleRoll>(leg.servos[RightLeg::ID::RIGHT_ANKLE_ROLL]));
             });
 
-        on<Provide<LeftArm>, Needs<LeftShoulderPitch>, Needs<LeftShoulderRoll>, Needs<LeftElbow>, Trigger<Sensors>>()
-            .then([this](const LeftArm& arm, const Sensors& /* sensors */) {
+        on<Provide<LeftArm>, Needs<LeftShoulderPitch>, Needs<LeftShoulderRoll>, Needs<LeftElbow>>().then(
+            [this](const LeftArm& arm) {
                 // This is done when all of the servos are done, so check for the latest time
                 auto latest_time = NUClear::clock::now();
                 for (const auto& servo : arm.servos) {
@@ -136,6 +140,7 @@ namespace module::motion {
                 }
                 if (latest_time <= NUClear::clock::now()) {
                     emit<Task>(std::make_unique<Done>());
+                    return;
                 }
 
                 // Emit tasks for each servo
@@ -144,12 +149,8 @@ namespace module::motion {
                 emit<Task>(std::make_unique<LeftElbow>(arm.servos[LeftArm::ID::LEFT_ELBOW]));
             });
 
-        on<Provide<RightArm>,
-           Needs<RightShoulderPitch>,
-           Needs<RightShoulderRoll>,
-           Needs<RightElbow>,
-           Trigger<Sensors>>()
-            .then([this](const RightArm& arm, const Sensors& /* sensors */) {
+        on<Provide<RightArm>, Needs<RightShoulderPitch>, Needs<RightShoulderRoll>, Needs<RightElbow>>().then(
+            [this](const RightArm& arm) {
                 // This is done when all of the servos are done, so check for the latest time
                 auto latest_time = NUClear::clock::now();
                 for (const auto& servo : arm.servos) {
@@ -159,6 +160,7 @@ namespace module::motion {
                 }
                 if (latest_time <= NUClear::clock::now()) {
                     emit<Task>(std::make_unique<Done>());
+                    return;
                 }
 
                 // Emit tasks for each servo
@@ -167,23 +169,23 @@ namespace module::motion {
                 emit<Task>(std::make_unique<RightElbow>(arm.servos[RightArm::ID::RIGHT_ELBOW]));
             });
 
-        on<Provide<Head>, Needs<HeadYaw>, Needs<HeadPitch>, Trigger<Sensors>>().then(
-            [this](const Head& head, const Sensors& /* sensors */) {
-                // This is done when all of the servos are done, so check for the latest time
-                auto latest_time = NUClear::clock::now();
-                for (const auto& servo : head.servos) {
-                    if (servo.time > latest_time) {
-                        latest_time = servo.time;
-                    }
+        on<Provide<Head>, Needs<HeadYaw>, Needs<HeadPitch>>().then([this](const Head& head) {
+            // This is done when all of the servos are done, so check for the latest time
+            auto latest_time = NUClear::clock::now();
+            for (const auto& servo : head.servos) {
+                if (servo.time > latest_time) {
+                    latest_time = servo.time;
                 }
-                if (latest_time <= NUClear::clock::now()) {
-                    emit<Task>(std::make_unique<Done>());
-                }
+            }
+            if (latest_time <= NUClear::clock::now()) {
+                emit<Task>(std::make_unique<Done>());
+                return;
+            }
 
-                // Emit tasks for each servo
-                emit<Task>(std::make_unique<HeadYaw>(head.servos[Head::ID::HEAD_YAW]));
-                emit<Task>(std::make_unique<HeadPitch>(head.servos[Head::ID::HEAD_PITCH]));
-            });
+            // Emit tasks for each servo
+            emit<Task>(std::make_unique<HeadYaw>(head.servos[Head::ID::HEAD_YAW]));
+            emit<Task>(std::make_unique<HeadPitch>(head.servos[Head::ID::HEAD_PITCH]));
+        });
 
 
         /// @brief Sends a right shoulder pitch servo command as a normal servo target command for the platform module
@@ -193,12 +195,13 @@ namespace module::motion {
                 // If the time to reach the position is over, then stop requesting the position
                 if (NUClear::clock::now() >= servo.command.time) {
                     emit<Task>(std::make_unique<Done>());
+                    return;
                 }
-                emit<Task>(std::make_unique<ServoTarget>(servo.command.time,
-                                                         ServoID::R_SHOULDER_PITCH,
-                                                         servo.command.position,
-                                                         servo.command.state.gain,
-                                                         servo.command.state.torque));
+                emit(std::make_unique<ServoTarget>(servo.command.time,
+                                                   ServoID::R_SHOULDER_PITCH,
+                                                   servo.command.position,
+                                                   servo.command.state.gain,
+                                                   servo.command.state.torque));
             });
 
 
@@ -209,12 +212,13 @@ namespace module::motion {
                 // If the time to reach the position is over, then stop requesting the position
                 if (NUClear::clock::now() >= servo.command.time) {
                     emit<Task>(std::make_unique<Done>());
+                    return;
                 }
-                emit<Task>(std::make_unique<ServoTarget>(servo.command.time,
-                                                         ServoID::L_SHOULDER_PITCH,
-                                                         servo.command.position,
-                                                         servo.command.state.gain,
-                                                         servo.command.state.torque));
+                emit(std::make_unique<ServoTarget>(servo.command.time,
+                                                   ServoID::L_SHOULDER_PITCH,
+                                                   servo.command.position,
+                                                   servo.command.state.gain,
+                                                   servo.command.state.torque));
             });
 
 
@@ -225,12 +229,13 @@ namespace module::motion {
                 // If the time to reach the position is over, then stop requesting the position
                 if (NUClear::clock::now() >= servo.command.time) {
                     emit<Task>(std::make_unique<Done>());
+                    return;
                 }
-                emit<Task>(std::make_unique<ServoTarget>(servo.command.time,
-                                                         ServoID::R_SHOULDER_ROLL,
-                                                         servo.command.position,
-                                                         servo.command.state.gain,
-                                                         servo.command.state.torque));
+                emit(std::make_unique<ServoTarget>(servo.command.time,
+                                                   ServoID::R_SHOULDER_ROLL,
+                                                   servo.command.position,
+                                                   servo.command.state.gain,
+                                                   servo.command.state.torque));
             });
 
         /// @brief Sends a left shoulder roll servo command as a normal servo target command for the platform module
@@ -240,12 +245,13 @@ namespace module::motion {
                 // If the time to reach the position is over, then stop requesting the position
                 if (NUClear::clock::now() >= servo.command.time) {
                     emit<Task>(std::make_unique<Done>());
+                    return;
                 }
-                emit<Task>(std::make_unique<ServoTarget>(servo.command.time,
-                                                         ServoID::L_SHOULDER_ROLL,
-                                                         servo.command.position,
-                                                         servo.command.state.gain,
-                                                         servo.command.state.torque));
+                emit(std::make_unique<ServoTarget>(servo.command.time,
+                                                   ServoID::L_SHOULDER_ROLL,
+                                                   servo.command.position,
+                                                   servo.command.state.gain,
+                                                   servo.command.state.torque));
             });
 
         /// @brief Sends a right elbow servo command as a normal servo target command for the platform module
@@ -254,12 +260,13 @@ namespace module::motion {
             // If the time to reach the position is over, then stop requesting the position
             if (NUClear::clock::now() >= servo.command.time) {
                 emit<Task>(std::make_unique<Done>());
+                return;
             }
-            emit<Task>(std::make_unique<ServoTarget>(servo.command.time,
-                                                     ServoID::R_ELBOW,
-                                                     servo.command.position,
-                                                     servo.command.state.gain,
-                                                     servo.command.state.torque));
+            emit(std::make_unique<ServoTarget>(servo.command.time,
+                                               ServoID::R_ELBOW,
+                                               servo.command.position,
+                                               servo.command.state.gain,
+                                               servo.command.state.torque));
         });
 
         /// @brief Sends a left elbow servo command as a normal servo target command for the platform module
@@ -268,12 +275,13 @@ namespace module::motion {
             // If the time to reach the position is over, then stop requesting the position
             if (NUClear::clock::now() >= servo.command.time) {
                 emit<Task>(std::make_unique<Done>());
+                return;
             }
-            emit<Task>(std::make_unique<ServoTarget>(servo.command.time,
-                                                     ServoID::L_ELBOW,
-                                                     servo.command.position,
-                                                     servo.command.state.gain,
-                                                     servo.command.state.torque));
+            emit(std::make_unique<ServoTarget>(servo.command.time,
+                                               ServoID::L_ELBOW,
+                                               servo.command.position,
+                                               servo.command.state.gain,
+                                               servo.command.state.torque));
         });
 
         /// @brief Sends a right hip yaw command as a normal servo target command for the platform module
@@ -283,12 +291,13 @@ namespace module::motion {
                 // If the time to reach the position is over, then stop requesting the position
                 if (NUClear::clock::now() >= servo.command.time) {
                     emit<Task>(std::make_unique<Done>());
+                    return;
                 }
-                emit<Task>(std::make_unique<ServoTarget>(servo.command.time,
-                                                         ServoID::R_HIP_YAW,
-                                                         servo.command.position,
-                                                         servo.command.state.gain,
-                                                         servo.command.state.torque));
+                emit(std::make_unique<ServoTarget>(servo.command.time,
+                                                   ServoID::R_HIP_YAW,
+                                                   servo.command.position,
+                                                   servo.command.state.gain,
+                                                   servo.command.state.torque));
             });
 
         /// @brief Sends a left hip yaw command as a normal servo target command for the platform module
@@ -297,12 +306,13 @@ namespace module::motion {
             // If the time to reach the position is over, then stop requesting the position
             if (NUClear::clock::now() >= servo.command.time) {
                 emit<Task>(std::make_unique<Done>());
+                return;
             }
-            emit<Task>(std::make_unique<ServoTarget>(servo.command.time,
-                                                     ServoID::L_HIP_YAW,
-                                                     servo.command.position,
-                                                     servo.command.state.gain,
-                                                     servo.command.state.torque));
+            emit(std::make_unique<ServoTarget>(servo.command.time,
+                                               ServoID::L_HIP_YAW,
+                                               servo.command.position,
+                                               servo.command.state.gain,
+                                               servo.command.state.torque));
         });
 
         /// @brief Sends a right hip roll command as a normal servo target command for the platform module
@@ -312,12 +322,13 @@ namespace module::motion {
                 // If the time to reach the position is over, then stop requesting the position
                 if (NUClear::clock::now() >= servo.command.time) {
                     emit<Task>(std::make_unique<Done>());
+                    return;
                 }
-                emit<Task>(std::make_unique<ServoTarget>(servo.command.time,
-                                                         ServoID::R_HIP_ROLL,
-                                                         servo.command.position,
-                                                         servo.command.state.gain,
-                                                         servo.command.state.torque));
+                emit(std::make_unique<ServoTarget>(servo.command.time,
+                                                   ServoID::R_HIP_ROLL,
+                                                   servo.command.position,
+                                                   servo.command.state.gain,
+                                                   servo.command.state.torque));
             });
 
         /// @brief Sends a left hip roll command as a normal servo target command for the platform module
@@ -326,13 +337,16 @@ namespace module::motion {
             [this](const LeftHipRoll& servo, const Sensors& /* sensors */) {
                 // If the time to reach the position is over, then stop requesting the position
                 if (NUClear::clock::now() >= servo.command.time) {
+                    log<NUClear::DEBUG>("Left hip roll provider done.");
                     emit<Task>(std::make_unique<Done>());
+                    return;
                 }
-                emit<Task>(std::make_unique<ServoTarget>(servo.command.time,
-                                                         ServoID::L_HIP_ROLL,
-                                                         servo.command.position,
-                                                         servo.command.state.gain,
-                                                         servo.command.state.torque));
+                log<NUClear::DEBUG>("Left hip roll emitting servo target.");
+                emit(std::make_unique<ServoTarget>(servo.command.time,
+                                                   ServoID::L_HIP_ROLL,
+                                                   servo.command.position,
+                                                   servo.command.state.gain,
+                                                   servo.command.state.torque));
             });
 
         /// @brief Sends a right hip pitch command as a normal servo target command for the platform module
@@ -342,12 +356,13 @@ namespace module::motion {
                 // If the time to reach the position is over, then stop requesting the position
                 if (NUClear::clock::now() >= servo.command.time) {
                     emit<Task>(std::make_unique<Done>());
+                    return;
                 }
-                emit<Task>(std::make_unique<ServoTarget>(servo.command.time,
-                                                         ServoID::R_HIP_PITCH,
-                                                         servo.command.position,
-                                                         servo.command.state.gain,
-                                                         servo.command.state.torque));
+                emit(std::make_unique<ServoTarget>(servo.command.time,
+                                                   ServoID::R_HIP_PITCH,
+                                                   servo.command.position,
+                                                   servo.command.state.gain,
+                                                   servo.command.state.torque));
             });
 
         /// @brief Sends a left hip pitch command as a normal servo target command for the platform module
@@ -357,12 +372,13 @@ namespace module::motion {
                 // If the time to reach the position is over, then stop requesting the position
                 if (NUClear::clock::now() >= servo.command.time) {
                     emit<Task>(std::make_unique<Done>());
+                    return;
                 }
-                emit<Task>(std::make_unique<ServoTarget>(servo.command.time,
-                                                         ServoID::L_HIP_PITCH,
-                                                         servo.command.position,
-                                                         servo.command.state.gain,
-                                                         servo.command.state.torque));
+                emit(std::make_unique<ServoTarget>(servo.command.time,
+                                                   ServoID::L_HIP_PITCH,
+                                                   servo.command.position,
+                                                   servo.command.state.gain,
+                                                   servo.command.state.torque));
             });
 
         /// @brief Sends a right knee command as a normal servo target command for the platform module
@@ -371,12 +387,13 @@ namespace module::motion {
             // If the time to reach the position is over, then stop requesting the position
             if (NUClear::clock::now() >= servo.command.time) {
                 emit<Task>(std::make_unique<Done>());
+                return;
             }
-            emit<Task>(std::make_unique<ServoTarget>(servo.command.time,
-                                                     ServoID::R_KNEE,
-                                                     servo.command.position,
-                                                     servo.command.state.gain,
-                                                     servo.command.state.torque));
+            emit(std::make_unique<ServoTarget>(servo.command.time,
+                                               ServoID::R_KNEE,
+                                               servo.command.position,
+                                               servo.command.state.gain,
+                                               servo.command.state.torque));
         });
 
         /// @brief Sends a left knee command as a normal servo target command for the platform module
@@ -385,12 +402,13 @@ namespace module::motion {
             // If the time to reach the position is over, then stop requesting the position
             if (NUClear::clock::now() >= servo.command.time) {
                 emit<Task>(std::make_unique<Done>());
+                return;
             }
-            emit<Task>(std::make_unique<ServoTarget>(servo.command.time,
-                                                     ServoID::L_KNEE,
-                                                     servo.command.position,
-                                                     servo.command.state.gain,
-                                                     servo.command.state.torque));
+            emit(std::make_unique<ServoTarget>(servo.command.time,
+                                               ServoID::L_KNEE,
+                                               servo.command.position,
+                                               servo.command.state.gain,
+                                               servo.command.state.torque));
         });
 
         /// @brief Sends a right ankle pitch command as a normal servo target command for the platform module
@@ -400,12 +418,13 @@ namespace module::motion {
                 // If the time to reach the position is over, then stop requesting the position
                 if (NUClear::clock::now() >= servo.command.time) {
                     emit<Task>(std::make_unique<Done>());
+                    return;
                 }
-                emit<Task>(std::make_unique<ServoTarget>(servo.command.time,
-                                                         ServoID::R_ANKLE_PITCH,
-                                                         servo.command.position,
-                                                         servo.command.state.gain,
-                                                         servo.command.state.torque));
+                emit(std::make_unique<ServoTarget>(servo.command.time,
+                                                   ServoID::R_ANKLE_PITCH,
+                                                   servo.command.position,
+                                                   servo.command.state.gain,
+                                                   servo.command.state.torque));
             });
 
         /// @brief Sends a left ankle pitch command as a normal servo target command for the platform module
@@ -415,12 +434,13 @@ namespace module::motion {
                 // If the time to reach the position is over, then stop requesting the position
                 if (NUClear::clock::now() >= servo.command.time) {
                     emit<Task>(std::make_unique<Done>());
+                    return;
                 }
-                emit<Task>(std::make_unique<ServoTarget>(servo.command.time,
-                                                         ServoID::L_ANKLE_PITCH,
-                                                         servo.command.position,
-                                                         servo.command.state.gain,
-                                                         servo.command.state.torque));
+                emit(std::make_unique<ServoTarget>(servo.command.time,
+                                                   ServoID::L_ANKLE_PITCH,
+                                                   servo.command.position,
+                                                   servo.command.state.gain,
+                                                   servo.command.state.torque));
             });
 
         /// @brief Sends a right ankle roll command as a normal servo target command for the platform module
@@ -430,12 +450,13 @@ namespace module::motion {
                 // If the time to reach the position is over, then stop requesting the position
                 if (NUClear::clock::now() >= servo.command.time) {
                     emit<Task>(std::make_unique<Done>());
+                    return;
                 }
-                emit<Task>(std::make_unique<ServoTarget>(servo.command.time,
-                                                         ServoID::R_ANKLE_ROLL,
-                                                         servo.command.position,
-                                                         servo.command.state.gain,
-                                                         servo.command.state.torque));
+                emit(std::make_unique<ServoTarget>(servo.command.time,
+                                                   ServoID::R_ANKLE_ROLL,
+                                                   servo.command.position,
+                                                   servo.command.state.gain,
+                                                   servo.command.state.torque));
             });
 
         /// @brief Sends a left ankle roll command as a normal servo target command for the platform module
@@ -445,12 +466,13 @@ namespace module::motion {
                 // If the time to reach the position is over, then stop requesting the position
                 if (NUClear::clock::now() >= servo.command.time) {
                     emit<Task>(std::make_unique<Done>());
+                    return;
                 }
-                emit<Task>(std::make_unique<ServoTarget>(servo.command.time,
-                                                         ServoID::L_ANKLE_ROLL,
-                                                         servo.command.position,
-                                                         servo.command.state.gain,
-                                                         servo.command.state.torque));
+                emit(std::make_unique<ServoTarget>(servo.command.time,
+                                                   ServoID::L_ANKLE_ROLL,
+                                                   servo.command.position,
+                                                   servo.command.state.gain,
+                                                   servo.command.state.torque));
             });
 
         /// @brief Sends a head yaw command as a normal servo target command for the platform module
@@ -459,12 +481,13 @@ namespace module::motion {
             // If the time to reach the position is over, then stop requesting the position
             if (NUClear::clock::now() >= servo.command.time) {
                 emit<Task>(std::make_unique<Done>());
+                return;
             }
-            emit<Task>(std::make_unique<ServoTarget>(servo.command.time,
-                                                     ServoID::HEAD_YAW,
-                                                     servo.command.position,
-                                                     servo.command.state.gain,
-                                                     servo.command.state.torque));
+            emit(std::make_unique<ServoTarget>(servo.command.time,
+                                               ServoID::HEAD_YAW,
+                                               servo.command.position,
+                                               servo.command.state.gain,
+                                               servo.command.state.torque));
         });
 
         /// @brief Sends a head pitch command as a normal servo target command for the platform module
@@ -473,12 +496,13 @@ namespace module::motion {
             // If the time to reach the position is over, then stop requesting the position
             if (NUClear::clock::now() >= servo.command.time) {
                 emit<Task>(std::make_unique<Done>());
+                return;
             }
-            emit<Task>(std::make_unique<ServoTarget>(servo.command.time,
-                                                     ServoID::HEAD_PITCH,
-                                                     servo.command.position,
-                                                     servo.command.state.gain,
-                                                     servo.command.state.torque));
+            emit(std::make_unique<ServoTarget>(servo.command.time,
+                                               ServoID::HEAD_PITCH,
+                                               servo.command.position,
+                                               servo.command.state.gain,
+                                               servo.command.state.torque));
         });
     }
 
