@@ -8,7 +8,7 @@
 
 namespace module::motion {
 
-    class Kinematics : public extension::behaviour::BehaviourReactor {
+    class Kinematics : public ::extension::behaviour::BehaviourReactor {
     private:
         /// @brief Kinematics model used for calculating inverse kinematics
         message::motion::KinematicsModel kinematicsModel{};
