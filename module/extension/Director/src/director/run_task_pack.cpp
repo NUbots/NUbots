@@ -155,8 +155,6 @@ namespace module::extension {
 
                 // If it's a root provider, then we just remove the task
                 if (parent_provider->classification == Provider::Classification::ROOT) {
-                    std::cout << "Removing " << parent_group.subtasks.front() << " from "
-                              << NUClear::util::demangle(parent_group.type.name()) << std::endl;
                     auto task = parent_group.subtasks.front();
                     parent_group.subtasks.clear();
                     parent_group.watch_handles.clear();
