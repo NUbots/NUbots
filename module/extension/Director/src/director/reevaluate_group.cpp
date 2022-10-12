@@ -43,9 +43,7 @@ namespace module::extension {
             if (t != group.active_task && challenge_priority(group.active_task, t)) {
                 // Find the provider group that requested this task and reevaluate it
                 // Maybe it's blocked on something else and that's why it's not our active task
-                auto p  = providers.at(t->requester_id);
-                auto& g = p->group;
-                reevaluate_group(g);
+                reevaluate_group(providers.at(t->requester_id)->group);
 
                 // If running this task pack claimed the active task we can stop looking
                 if (group.active_task == t) {

@@ -43,7 +43,7 @@ namespace module::extension {
             auto ok_solutions = find_ok_solutions(solutions);
 
             // Loop through the solutions and add watches for the things we want
-            for (int i = 0; i < int(tasks.size()); i++) {
+            for (int i = 0; i < int(tasks.size()); ++i) {
                 auto& task = tasks[i];
                 auto& sol  = ok_solutions[i];
 

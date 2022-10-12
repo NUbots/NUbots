@@ -17,9 +17,7 @@
  * Copyright 2022 NUbots <nubots@nubots.net>
  */
 
-#include <algorithm>
-#include <tuple>
-#include <vector>
+#include <memory>
 
 #include "Director.hpp"
 
