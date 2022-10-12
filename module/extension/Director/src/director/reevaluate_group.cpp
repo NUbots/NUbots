@@ -25,6 +25,13 @@ namespace module::extension {
 
     bool Director::reevaluate_group(provider::ProviderGroup& group) {
 
+        // If we have traversed all the way up to a root provider we just run it again
+        if (group.active_provider != nullptr
+            && group.active_provider->classification == Provider::Classification::ROOT) {
+            run_task_pack(TaskPack(group.active_provider, group.subtasks));
+            return false;
+        }
+
         // We need to take a copy of the watchers before we start as reevaluting the group will alter this order
         std::vector<std::shared_ptr<BehaviourTask>> watchers = group.watchers;
 
@@ -40,7 +47,7 @@ namespace module::extension {
         for (const auto& t : watchers) {
 
             // Check if we have the priority to override the currently active task
-            if (t != group.active_task && challenge_priority(group.active_task, t)) {
+            if (challenge_priority(group.active_task, t)) {
                 // Find the provider group that requested this task and reevaluate it
                 // Maybe it's blocked on something else and that's why it's not our active task
                 reevaluate_group(providers.at(t->requester_id)->group);
@@ -56,9 +63,7 @@ namespace module::extension {
         // state because of changes in when/needs that required this reevaluation in the first place
         // We assume that if we changed tasks because of this loop that whoever changed our task took care of running
         // the provider in this group
-        // Also if we have traversed all the way up to a root provider we just run it again
-        if (group.active_provider->classification == Provider::Classification::ROOT
-            || (group.active_task != nullptr && group.active_task == initial_task)) {
+        if (group.active_task != nullptr && group.active_task == initial_task) {
             run_task_pack(TaskPack(group.active_provider, group.subtasks));
         }
 
