@@ -6,7 +6,6 @@ find_package(NUClear REQUIRED)
 find_package(Threads REQUIRED)
 
 function(NUCLEAR_ROLE)
-
   # Store our role_modules in a sane variable
   set(role_modules ${ARGN})
 
@@ -24,7 +23,10 @@ function(NUCLEAR_ROLE)
 
   # Build our executable from the generated role
   add_executable(${role} "${role}.cpp")
+  set_target_properties(${role} PROPERTIES OUTPUT_NAME ${role_name})
+  set_target_properties(${role} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/${role_path}")
 
+  # Make it possible for the role to find all of the module includes
   target_include_directories(${role} PRIVATE "${PROJECT_SOURCE_DIR}/${NUCLEAR_MODULE_DIR}")
 
   # Link to the roles module libraries and the shared utility and extension libraries
@@ -32,11 +34,12 @@ function(NUCLEAR_ROLE)
   target_link_libraries(${role} ${role_module_targets})
   target_link_libraries(${role} NUClear::nuclear)
 
-  # Set our output directory to be bin
-  set_target_properties(${role} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/")
-
   # IDE folder
-  set_target_properties(${role} PROPERTIES FOLDER "roles/")
+  if(role_path)
+    set_target_properties(${role} PROPERTIES FOLDER "roles/${role_path}/")
+  else()
+    set_target_properties(${role} PROPERTIES FOLDER "roles/")
+  endif()
 
   # Store the used NUClear modules on the target as a property This can be used later in scripts to work out what
   # modules are used in the role

@@ -11,7 +11,7 @@ import { TreeNodeModel } from '../model'
 
 import IconChevronDown from './chevron_down.svg'
 import IconChevronRight from './chevron_right.svg'
-import style from './style.css'
+import style from './style.module.css'
 
 export interface TreeNodeProps {
   node: TreeNodeModel

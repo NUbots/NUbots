@@ -169,7 +169,7 @@ namespace utility::motion::splines {
     /**
      * Return initialized trajectories for trunk/foot ik cartesian with empty splines
      */
-    inline void trajectoriesInit(Trajectories& traj) {
+    inline void trajectories_init(Trajectories& traj) {
         if (traj.size() != 0) {
             traj.reset();
         }
@@ -195,11 +195,11 @@ namespace utility::motion::splines {
      * Compute from given spline container trajectory Cartesian trunk and foot position/velocity/acceleration
      * and assign it to given vector
      */
-    [[nodiscard]] inline Vector3fQuadruple trajectoriesTrunkFootPos(const float& t, const Trajectories& traj) {
+    [[nodiscard]] inline Vector3fQuadruple trajectories_trunk_foot_pos(const float& t, const Trajectories& traj) {
         // Compute Cartesian positions
-        const auto trunkPos  = Eigen::Vector3f(traj.get(TrajectoryTypes::TRUNK_POS_X).pos(t),
-                                              traj.get(TrajectoryTypes::TRUNK_POS_Y).pos(t),
-                                              traj.get(TrajectoryTypes::TRUNK_POS_Z).pos(t));
+        const auto trunk_pos = Eigen::Vector3f(traj.get(TrajectoryTypes::TRUNK_POS_X).pos(t),
+                                               traj.get(TrajectoryTypes::TRUNK_POS_Y).pos(t),
+                                               traj.get(TrajectoryTypes::TRUNK_POS_Z).pos(t));
         const auto trunkAxis = Eigen::Vector3f(traj.get(TrajectoryTypes::TRUNK_AXIS_X).pos(t),
                                                traj.get(TrajectoryTypes::TRUNK_AXIS_Y).pos(t),
                                                traj.get(TrajectoryTypes::TRUNK_AXIS_Z).pos(t));
@@ -209,14 +209,14 @@ namespace utility::motion::splines {
         const auto footAxis  = Eigen::Vector3f(traj.get(TrajectoryTypes::FOOT_AXIS_X).pos(t),
                                               traj.get(TrajectoryTypes::FOOT_AXIS_Y).pos(t),
                                               traj.get(TrajectoryTypes::FOOT_AXIS_Z).pos(t));
-        return {trunkPos, trunkAxis, footPos, footAxis};
+        return {trunk_pos, trunkAxis, footPos, footAxis};
     }
 
     [[nodiscard]] inline Vector3fQuadruple trajectoriesTrunkFootVel(const float& t, const Trajectories& traj) {
         // Compute Cartesian velocities
-        const auto trunkPosVel  = Eigen::Vector3f(traj.get(TrajectoryTypes::TRUNK_POS_X).vel(t),
-                                                 traj.get(TrajectoryTypes::TRUNK_POS_Y).vel(t),
-                                                 traj.get(TrajectoryTypes::TRUNK_POS_Z).vel(t));
+        const auto trunk_posVel = Eigen::Vector3f(traj.get(TrajectoryTypes::TRUNK_POS_X).vel(t),
+                                                  traj.get(TrajectoryTypes::TRUNK_POS_Y).vel(t),
+                                                  traj.get(TrajectoryTypes::TRUNK_POS_Z).vel(t));
         const auto trunkAxisVel = Eigen::Vector3f(traj.get(TrajectoryTypes::TRUNK_AXIS_X).vel(t),
                                                   traj.get(TrajectoryTypes::TRUNK_AXIS_Y).vel(t),
                                                   traj.get(TrajectoryTypes::TRUNK_AXIS_Z).vel(t));
@@ -226,14 +226,14 @@ namespace utility::motion::splines {
         const auto footAxisVel  = Eigen::Vector3f(traj.get(TrajectoryTypes::FOOT_AXIS_X).vel(t),
                                                  traj.get(TrajectoryTypes::FOOT_AXIS_Y).vel(t),
                                                  traj.get(TrajectoryTypes::FOOT_AXIS_Z).vel(t));
-        return {trunkPosVel, trunkAxisVel, footPosVel, footAxisVel};
+        return {trunk_posVel, trunkAxisVel, footPosVel, footAxisVel};
     }
 
     [[nodiscard]] inline Vector3fQuadruple trajectoriesTrunkFootAcc(const float& t, const Trajectories& traj) {
         // Compute Cartesian accelerations
-        const auto trunkPosAcc  = Eigen::Vector3f(traj.get(TrajectoryTypes::TRUNK_POS_X).acc(t),
-                                                 traj.get(TrajectoryTypes::TRUNK_POS_Y).acc(t),
-                                                 traj.get(TrajectoryTypes::TRUNK_POS_Z).acc(t));
+        const auto trunk_posAcc = Eigen::Vector3f(traj.get(TrajectoryTypes::TRUNK_POS_X).acc(t),
+                                                  traj.get(TrajectoryTypes::TRUNK_POS_Y).acc(t),
+                                                  traj.get(TrajectoryTypes::TRUNK_POS_Z).acc(t));
         const auto trunkAxisAcc = Eigen::Vector3f(traj.get(TrajectoryTypes::TRUNK_AXIS_X).acc(t),
                                                   traj.get(TrajectoryTypes::TRUNK_AXIS_Y).acc(t),
                                                   traj.get(TrajectoryTypes::TRUNK_AXIS_Z).acc(t));
@@ -243,18 +243,18 @@ namespace utility::motion::splines {
         const auto footAxisAcc  = Eigen::Vector3f(traj.get(TrajectoryTypes::FOOT_AXIS_X).acc(t),
                                                  traj.get(TrajectoryTypes::FOOT_AXIS_Y).acc(t),
                                                  traj.get(TrajectoryTypes::FOOT_AXIS_Z).acc(t));
-        return {trunkPosAcc, trunkAxisAcc, footPosAcc, footAxisAcc};
+        return {trunk_posAcc, trunkAxisAcc, footPosAcc, footAxisAcc};
     }
 
     /**
-     * @brief Computes the support foot state, evaluating double support foot and whether isLeftsupportFoot is true
+     * @brief Computes the support foot state, evaluating double support foot and whether is_left_supportFoot is true
      * at time t
      * @param t Time at which the state should be evaluated
      * @param traj The set of trajectories which are being evaluated
-     * @return std::pair<bool, bool> {isDoubleSupportFoot, isLeftSupportFoot}, as evaluated at time t
+     * @return std::pair<bool, bool> {is_double_supportFoot, is_left_supportFoot}, as evaluated at time t
      */
-    [[nodiscard]] constexpr inline std::pair<bool, bool> trajectoriesSupportFootState(const float& t,
-                                                                                      const Trajectories& traj) {
+    [[nodiscard]] constexpr inline std::pair<bool, bool> trajectories_support_foot_state(const float& t,
+                                                                                         const Trajectories& traj) {
         // Compute support foot state
         return {traj.get(TrajectoryTypes::IS_DOUBLE_SUPPORT).pos(t) >= 0.5f,
                 traj.get(TrajectoryTypes::IS_LEFT_SUPPORT_FOOT).pos(t) >= 0.5f};

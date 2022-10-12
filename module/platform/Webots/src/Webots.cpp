@@ -704,6 +704,11 @@ namespace module::platform {
             log<NUClear::TRACE>("      value:", sensor.value);
         }
 
+        if (sensor_measurements.odometry_ground_truth.exists) {
+            log<NUClear::TRACE>("  sm.odometry_ground_truth:");
+            log<NUClear::TRACE>("    Htw:\n", sensor_measurements.odometry_ground_truth.Htw);
+        }
+
         // Parse the errors and warnings from Webots and log them.
         // Note that this is where we should deal with specific messages passed in SensorMeasurements.messages.
         // Or check if those messages have specific information

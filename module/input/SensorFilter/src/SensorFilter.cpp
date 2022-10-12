@@ -27,7 +27,7 @@
 
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
-#include "utility/math/angle.hpp"
+#include "utility/math/euler.hpp"
 #include "utility/motion/ForwardKinematics.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/platform/RawSensors.hpp"
@@ -47,6 +47,7 @@ namespace module::input {
     using message::platform::RawSensors;
 
     using utility::input::ServoID;
+    using utility::math::euler::MatrixToEulerIntrinsic;
     using utility::motion::kinematics::calculateAllPositions;
     using utility::motion::kinematics::calculateCentreOfMass;
     using utility::motion::kinematics::calculateInertialTensor;
@@ -791,28 +792,27 @@ namespace module::input {
                                 Eigen::Affine3d true_Htw(input.odometry_ground_truth.Htw);
 
                                 // Determine translational distance error
-                                Eigen::Vector3d rWTt    = Hwt.inverse().translation();
-                                Eigen::Vector3d t_error = true_Htw.translation() - rWTt;
+                                Eigen::Vector3d est_rWTt   = Hwt.inverse().translation();
+                                Eigen::Vector3d true_rWTt  = true_Htw.translation();
+                                Eigen::Vector3d error_rWTt = (true_rWTt - est_rWTt).cwiseAbs();
 
                                 // Determine yaw, pitch and roll error
-                                Eigen::Matrix3d rotational_error = true_Htw.linear() * Hwt.linear();
-                                Eigen::Vector3d r_error          = rotational_error.eulerAngles(2, 1, 0);
-                                Eigen::Vector3d angles           = Hwt.linear().eulerAngles(2, 1, 0);
+                                Eigen::Vector3d true_Rtw  = MatrixToEulerIntrinsic(true_Htw.rotation());
+                                Eigen::Vector3d est_Rtw   = MatrixToEulerIntrinsic(Hwt.inverse().rotation());
+                                Eigen::Vector3d error_Rtw = (true_Rtw - est_Rtw).cwiseAbs();
 
-                                // Normalise angles and make error positive
-                                for (int i = 0; i < 3; i++) {
-                                    r_error[i] = normalizeAngle(r_error[i]);
-                                    angles[i]  = normalizeAngle(angles[i]);
-                                    t_error[i] = std::abs(t_error[i]);
-                                }
+                                double quat_rot_error = Eigen::Quaterniond(true_Htw.linear() * Hwt.linear()).w();
 
                                 // Graph translation and its error
-                                emit(graph("Htw translation (rWTt)", rWTt.x(), rWTt.y(), rWTt.z()));
-                                emit(graph("Htw translation error", t_error.x(), t_error.y(), t_error.z()));
+                                emit(graph("Htw est translation (rWTt)", est_rWTt.x(), est_rWTt.y(), est_rWTt.z()));
+                                emit(graph("Htw true translation (rWTt)", true_rWTt.x(), true_rWTt.y(), true_rWTt.z()));
+                                emit(graph("Htw translation error", error_rWTt.x(), error_rWTt.y(), error_rWTt.z()));
 
                                 // Graph angles and error
-                                emit(graph("Htw angles (yaw, pitch, roll)", angles[0], angles[1], angles[2]));
-                                emit(graph("Htw angle error (yaw, pitch, roll)", r_error[0], r_error[1], r_error[2]));
+                                emit(graph("Rtw est angles (rpy)", est_Rtw.x(), est_Rtw.y(), est_Rtw.z()));
+                                emit(graph("Rtw true angles (rpy)", true_Rtw.x(), true_Rtw.y(), true_Rtw.z()));
+                                emit(graph("Rtw error (rpy)", error_Rtw.x(), error_Rtw.y(), error_Rtw.z()));
+                                emit(graph("Quaternion rotational error", quat_rot_error));
                             }
 
                             /************************************************
@@ -828,6 +828,19 @@ namespace module::input {
                             // createRotationZ : Mat size [3x3]
                             // Rwt : Mat size [3x3]
                             sensors->Hgt = Rgt.matrix();
+                        }
+
+                        if (log_level <= NUClear::DEBUG) {
+                            const Eigen::Affine3d Htl(sensors->Htx[ServoID::L_ANKLE_ROLL]);
+                            const Eigen::Affine3d Htr(sensors->Htx[ServoID::R_ANKLE_ROLL]);
+                            Eigen::Matrix<double, 3, 3> Rtl     = Htl.linear();
+                            Eigen::Matrix<double, 3, 1> Rtl_rpy = MatrixToEulerIntrinsic(Rtl);
+                            emit(graph("Left Foot Actual Position", Htl(0, 3), Htl(1, 3), Htl(2, 3)));
+                            emit(graph("Left Foot Actual Orientation (r,p,y)", Rtl_rpy.x(), Rtl_rpy.y(), Rtl_rpy.z()));
+                            Eigen::Matrix<double, 3, 3> Rtr     = Htr.linear();
+                            Eigen::Matrix<double, 3, 1> Rtr_rpy = MatrixToEulerIntrinsic(Rtr);
+                            emit(graph("Right Foot Actual Position", Htr(0, 3), Htr(1, 3), Htr(2, 3)));
+                            emit(graph("Right Foot Actual Orientation (r,p,y)", Rtr_rpy.x(), Rtr_rpy.y(), Rtr_rpy.z()));
                         }
 
                         emit(std::move(sensors));

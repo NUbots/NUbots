@@ -2,7 +2,7 @@ import classNames from 'classnames'
 import React from 'react'
 import { ChangeEvent } from 'react'
 
-import style from './style.css'
+import style from './style.module.css'
 
 export interface SwitchProps {
   on: boolean

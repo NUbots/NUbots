@@ -10,7 +10,7 @@ import { Transform } from '../math/transform'
 import { Vector2 } from '../math/vector2'
 
 import { RendererProps } from './renderer_props'
-import style from './style.css'
+import style from './style.module.css'
 import { Group } from './svg/group'
 import { toSvgTransform } from './svg/rendering'
 
