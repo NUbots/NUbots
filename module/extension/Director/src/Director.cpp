@@ -54,13 +54,13 @@ namespace module::extension {
     void Director::add_provider(const ProvideReaction& provide) {
 
         // Create if it doesn't already exist
-        if (groups.count(provide.type) == 0) {
+        if (!groups.contains(provide.type)) {
             groups.emplace(provide.type, ProviderGroup(provide.type));
         }
         auto& group = groups.at(provide.type);
 
         // Check if we already inserted this element as a Provider
-        if (providers.count(provide.reaction->id) != 0) {
+        if (providers.contains(provide.reaction->id)) {
             throw std::runtime_error("You cannot have multiple Provider DSL words in a single on statement.");
         }
 
@@ -235,10 +235,10 @@ namespace module::extension {
             auto task = std::make_shared<BehaviourTask>(t);
 
             // Root level task, make the pack immediately and send it off to be executed as a root task
-            if (providers.count(task->requester_id) == 0) {
+            if (!providers.contains(task->requester_id)) {
 
                 // Create a root provider for this task if one doesn't already exist and use it
-                if (groups.count(task->root_type) == 0) {
+                if (!groups.contains(task->root_type)) {
                     groups.emplace(task->root_type, ProviderGroup(task->root_type));
                 }
                 auto& group = groups.at(task->root_type);

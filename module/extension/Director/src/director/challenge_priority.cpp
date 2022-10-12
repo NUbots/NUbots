@@ -66,7 +66,7 @@ namespace module::extension {
             // The task might be a root task, in which case we won't have any provider
             // In that case we set the type to nullptr_t to indicate that we are a root task
             ancestors.emplace_back(
-                providers.count(task->requester_id) != 0 ? providers.at(task->requester_id)->type : typeid(nullptr_t),
+                providers.contains(task->requester_id) ? providers.at(task->requester_id)->type : typeid(nullptr_t),
                 task->priority,
                 task->optional);
 
