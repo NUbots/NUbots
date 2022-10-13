@@ -40,13 +40,13 @@ namespace module::extension::provider {
             WatchHandle(const std::function<void()>& deleter_) : deleter(deleter_) {}
 
             WatchHandle(WatchHandle&& other) {
-                deleter       = other.deleter;
-                other.deleter = std::function<void()>();
+                deleter = std::exchange(other.deleter, std::function<void()>());
             }
 
             WatchHandle& operator=(WatchHandle&& other) {
-                deleter       = other.deleter;
-                other.deleter = std::function<void()>();
+                if (this != &other) { 
+                    deleter = std::exchange(other.deleter, std::function<void()>());
+                }
                 return *this;
             }
 
