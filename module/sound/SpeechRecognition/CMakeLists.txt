@@ -1,2 +1,3 @@
 # Build our NUClear module
-nuclear_module()
+find_package(vosk-api REQUIRED)
+nuclear_module(LIBRARIES vosk-api)

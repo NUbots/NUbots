@@ -44,8 +44,7 @@ RUN install-package \
     npm \
     yarn \
     git \
-    ncurses \
-    vosk-api
+    ncurses
 
 # Get python to look in /usr/local for packages
 RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
@@ -248,6 +247,8 @@ RUN install-meson-from-source https://github.com/AravisProject/aravis/archive/AR
 RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.42.0.tar.gz \
     -Dlibuv_buildtests=OFF \
     -DBUILD_TESTING=OFF
+
+RUN install-cmake-from-source https://github.com/alphacep/vosk-api/archive/refs/tags/v0.3.43.tar.gz
 
 # NUClear!
 RUN install-from-source https://github.com/Fastcode/NUClear/archive/f4a60c7269e277a504635a603c2890fb1a70289d.tar.gz \
