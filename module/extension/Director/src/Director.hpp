@@ -340,7 +340,7 @@ namespace module::extension {
         };
 
         /**
-         * Tries to passed tasks in the pack, but only up to the passed run level.
+         * Tries to execute tasks in the pack, but only up to the passed run level.
          *
          * The passed run level will limit what types of execution are open to us. For example, if the required pack was
          * only able to execute up to the PUSH level, then we will only execute up to the PUSH level for the optional
