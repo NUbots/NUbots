@@ -3,19 +3,19 @@
 
 #include <nuclear>
 
-namespace module {
+namespace module::sound {
 
-class SpeechRecognition : public NUClear::Reactor {
-private:
-    /// The configuration variables for this reactor
-    struct {
-    } config;
+    class SpeechRecognition : public NUClear::Reactor {
+    private:
+        /// The configuration variables for this reactor
+        struct {
+        } config;
 
-public:
-    /// @brief Called by the powerplant to build and setup the SpeechRecognition reactor.
-    explicit SpeechRecognition(std::unique_ptr<NUClear::Environment> environment);
-};
+    public:
+        /// @brief Called by the powerplant to build and setup the SpeechRecognition reactor.
+        explicit SpeechRecognition(std::unique_ptr<NUClear::Environment> environment);
+    };
 
-}  // namespace module
+}  // namespace module::sound
 
 #endif  // MODULE_SPEECHRECOGNITION_HPP

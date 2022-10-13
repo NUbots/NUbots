@@ -1,5 +1,0 @@
-		
-	//This reactor receives audiodata from emission
-	//on<Trigger<AudioData>>().then([this] (AudioData& audioData ) {
-	    // reactor code
-	//});
