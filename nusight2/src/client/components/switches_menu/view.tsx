@@ -5,7 +5,7 @@ import { dropdownContainer } from '../dropdown_container/view'
 import { Switch } from '../switch/view'
 
 import MenuIcon from './menu_icon.svg'
-import style from './style.css'
+import style from './style.module.css'
 
 export type SwitchesMenuOption = {
   label: string
