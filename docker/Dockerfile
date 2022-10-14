@@ -248,9 +248,13 @@ RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.42.0.tar
     -Dlibuv_buildtests=OFF \
     -DBUILD_TESTING=OFF
 
-RUN pacman -S sox
-RUN install-from-source https://github.com/alphacep/kaldi/archive/3f8575a1944e1eeb5864f6c13d4e0aee2f38fff3.tar.gz
-RUN install-cmake-from-source https://github.com/alphacep/vosk-api/archive/refs/tags/v0.3.43.tar.gz
+
+
+#RUN pacman -S nvcc
+#RUN install-package\
+#    sox
+#RUN install-from-source https://github.com/alphacep/kaldi/archive/3f8575a1944e1eeb5864f6c13d4e0aee2f38fff3.tar.gz
+#RUN install-cmake-from-source https://github.com/alphacep/vosk-api/archive/refs/tags/v0.3.43.tar.gz
 
 # NUClear!
 RUN install-from-source https://github.com/Fastcode/NUClear/archive/f4a60c7269e277a504635a603c2890fb1a70289d.tar.gz \
