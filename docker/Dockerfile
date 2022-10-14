@@ -248,6 +248,7 @@ RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.42.0.tar
     -Dlibuv_buildtests=OFF \
     -DBUILD_TESTING=OFF
 
+RUN pacman -S sox
 RUN install-from-source https://github.com/alphacep/kaldi/archive/3f8575a1944e1eeb5864f6c13d4e0aee2f38fff3.tar.gz
 RUN install-cmake-from-source https://github.com/alphacep/vosk-api/archive/refs/tags/v0.3.43.tar.gz
 
