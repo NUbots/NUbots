@@ -248,14 +248,6 @@ RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.42.0.tar
     -Dlibuv_buildtests=OFF \
     -DBUILD_TESTING=OFF
 
-
-
-#RUN pacman -S nvcc
-#RUN install-package\
-#    sox
-#RUN install-from-source https://github.com/alphacep/kaldi/archive/3f8575a1944e1eeb5864f6c13d4e0aee2f38fff3.tar.gz
-#RUN install-cmake-from-source https://github.com/alphacep/vosk-api/archive/refs/tags/v0.3.43.tar.gz
-
 # NUClear!
 RUN install-from-source https://github.com/Fastcode/NUClear/archive/f4a60c7269e277a504635a603c2890fb1a70289d.tar.gz \
     -DBUILD_TESTS=OFF
@@ -360,3 +352,9 @@ RUN chmod 600 /home/nubots/.ssh/id_rsa /home/nubots/.ssh/config
 RUN install -d -m 0755 /home/nubots/NUbots
 RUN install -d -m 0777 /home/nubots/build
 WORKDIR /home/nubots/NUbots
+
+#Speech Rec
+RUN sudo chmod a+rw /opt
+RUN curl -L https://raw.githubusercontent.com/NUbots/NUbots/legge/speech-rec-module-and-role/doc/ArchInstall/arch-speechrec.sh -o /opt/arch-speechrec.sh
+RUN sudo chmod a+rw /opt/arch-speechrec.sh
+RUN /bin/bash /opt/arch-speechrec.sh
