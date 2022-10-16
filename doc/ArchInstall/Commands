@@ -1,6 +1,5 @@
 !# /bin/bash
-cd ../../..
-sudo pacman -S sox --noconfirm
+sudo pacman -Sy sox --noconfirm
 sudo pacman -S subversion --noconfirm
 sudo pacman -S python --noconfirm
 sudo pacman -S python2 --noconfirm
@@ -24,3 +23,6 @@ KALDI_MKL=$KALDI_MKL KALDI_ROOT=/opt/kaldi make -j 6
 cd /opt/vosk-api/c
 make
 wget https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip
+sudo unzip vosk-model-small-en-us-0.15.zip
+sudo mv vosk-model-small-en-us-0.15 model
+
