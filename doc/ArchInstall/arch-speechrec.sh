@@ -8,7 +8,7 @@ sudo chmod a+rw /usr
 cd /usr
 git clone -b vosk --single-branch https://github.com/alphacep/kaldi
 cd /usr/kaldi/tools/
-sed -i 's:--enable-ngram-fsts:--enable-ngram-fsts --disable-bin:g' Makefile
+sed -i 's:--enable-ngram-fsts:--enable-ngram-fsts --disable-bin:g' Makefile --prefix /usr
 make -j 6 openfst cub
 extras/install_openblas_clapack.sh
 cd /usr/kaldi/src
