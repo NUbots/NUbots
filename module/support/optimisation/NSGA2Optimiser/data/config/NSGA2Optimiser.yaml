@@ -5,7 +5,7 @@ max_generations: 50
 num_objectives: 2
 num_constraints: 2
 seed: 7777777
-trial_duration_limit: 61 # number of seconds to run a single trial for
+trial_duration_limit: 30 # number of seconds to run a single trial for
 probabilities:
   real:
     # Note that simulated binary crossover (SBX) does something like mutation as well
@@ -22,7 +22,7 @@ eta:
   C: 20
   M: 20
 
-task: "multipath"
+task: "walk"
 task_config_path: "config/webots/QuinticWalk.yaml"
 
 initial_translation: [-4.0, -3.0, 0.51] # x, y, z
@@ -47,7 +47,7 @@ walk:
   trunk:
     # Height of the trunk from ground (how much we bend the knee, for the entire walk, fully standing is 0.51-ish)
     # (in m, > 0)
-    height: [0.45, 0.35, 0.5]
+    height: [0.45, 0.4, 0.5]
     # Trunk pitch orientation (how much we lean the torso forward or backward, does not change)
     # (in rad)
     pitch: [10 * pi / 180, -10 * pi / 180, 30 * pi / 180]
@@ -70,9 +70,5 @@ walk:
 
 # The following values are setting the initial values and limits for the walk engine command.
 walk_command:
-  velocity: [0.2, 0.01, 0.51]
-  rotation: [0.15, 0.1, 1.57]
-
-gravity:
-  MIN: 0.5
-  MAX: 9.2
+  velocity: [-0.2, -1.00, -0.01] #[0.2, 0.01, 1.00]
+  rotation: [0.15, -1.57, 0.1] # [0.15, 0.1, 1.57]

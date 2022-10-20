@@ -63,8 +63,8 @@ namespace module {
                 trial_duration_limit = std::chrono::seconds(currentRequest.trial_duration_limit);
 
                 // Set our walk command
-                walk_command_velocity.x() = -0.05;
-                walk_command_velocity.y() = -0.05;
+                walk_command_velocity.x() = -0.01;
+                walk_command_velocity.y() = 0.01;
                 walk_command_rotation     = currentRequest.parameters.real_params[11];
 
                 // Read the QuinticWalk config and overwrite the config parameters with the current individual's
