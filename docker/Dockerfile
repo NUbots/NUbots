@@ -354,7 +354,7 @@ RUN install -d -m 0777 /home/nubots/build
 WORKDIR /home/nubots/NUbots
 
 #Speech Rec
-RUN sudo chmod a+rw /opt
-RUN curl -L https://raw.githubusercontent.com/NUbots/NUbots/legge/speech-rec-module-and-role/doc/ArchInstall/arch-speechrec.sh -o /opt/arch-speechrec.sh
-RUN sudo chmod a+rw /opt/arch-speechrec.sh
-RUN /bin/bash /opt/arch-speechrec.sh
+RUN sudo chmod a+rw /usr
+RUN curl -L https://raw.githubusercontent.com/NUbots/NUbots/legge/speech-rec-module-and-role/doc/ArchInstall/arch-speechrec.sh -o /usr/arch-speechrec.sh
+RUN sudo chmod a+rw /usr/arch-speechrec.sh
+RUN /bin/bash /usr/arch-speechrec.sh
