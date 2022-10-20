@@ -44,6 +44,10 @@ RUN install-package \
     npm \
     yarn \
     git \
+    sox \
+    subversion \
+    python2 \
+    unzip \
     ncurses
 
 # Get python to look in /usr/local for packages
