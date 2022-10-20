@@ -1,6 +1,6 @@
 #include "SpeechRecognition.hpp"
 
-//#include <vosk_api.h>
+#include <vosk_api.h>
 
 #include "extension/Configuration.hpp"
 
