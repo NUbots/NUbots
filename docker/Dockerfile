@@ -101,7 +101,7 @@ COPY usr/local/toolchain/generate_${platform}_toolchain.py /usr/local/generate_t
 RUN python /usr/local/generate_toolchain.py --prefix /usr/local
 
 # zlib
-RUN install-from-source https://www.zlib.net/zlib-1.2.12.tar.gz
+RUN install-from-source https://www.zlib.net/zlib-1.2.13.tar.gz
 
 # LLVM and Clang
 RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-12.0.1.tar.gz \
@@ -330,7 +330,7 @@ ENV NVIDIA_DRIVER_CAPABILITIES=all
 COPY --chown=root:root etc/OpenCL/vendors/nvidia.icd /etc/OpenCL/vendors/nvidia.icd
 
 ##############################
-### SETUP THE USER ACCOUNT ###
+### SETUP THhttps://www.zlib.net/zlib-1.2.12.tar.gzE USER ACCOUNT ###
 ##############################
 
 # Setup the sudo so it can be run without a password
