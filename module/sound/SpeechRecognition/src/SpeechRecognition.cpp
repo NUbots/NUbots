@@ -21,7 +21,18 @@ namespace module::sound {
         });
 
         // This reactor receives audiodata from emission
-        on<Trigger<AudioData>>().then([this](const AudioData& audioData) { std::cout << "yolo" << std::endl; });
+        on<Trigger<AudioData>>().then([this](const AudioData& audioData) {
+            VoskModel* model           = vosk_model_new("/usr/local/src/vosk-api/c/model");
+            VoskRecognizer* recognizer = vosk_recognizer_new(model, 16000.0);
+            int final                  = vosk_recognizer_accept_waveform(recognizer,
+                                                        reinterpret_cast<const char*>(audioData.WavData.data()),
+                                                        audioData.WavData.size());
+            log<NUClear::DEBUG>(audioData.WavData.size());
+            log<NUClear::DEBUG>(final);
+            log<NUClear::DEBUG>(vosk_recognizer_result(recognizer));
+            vosk_recognizer_free(recognizer);
+            vosk_model_free(model);
+        });
     }
 
 

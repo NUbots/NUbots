@@ -21,8 +21,6 @@ cd vosk-api/src
 KALDI_ROOT=/usr/local/src/kaldi make
 sudo cp libvosk.so /usr/local/lib/libvosk.so
 sudo cp vosk_api.h /usr/local/include/vosk_api.h
-cd ../c
-make
 
 # Model
 wget https://alphacephei.com/vosk/models/vosk-model-small-en-us-0.15.zip

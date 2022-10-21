@@ -32,48 +32,40 @@ namespace module::input {
             this->config.wav_path = cfg["wav_path"].as<std::string>();  // config is the name of the struct
             std::cout << config.wav_path << std::endl;
             log<NUClear::DEBUG>(config.wav_path);
-            readWav();
         });
 
         // This reactor receives audiodata from emission
         // on<Trigger<AudioData>>().then([this] (AudioData& audioData ) {
         //  reactor code
         //});
+
+        on<Startup>().then([this]() { readWav(); });
     }
 
     void WavReader::readWav() {
         FILE* wavin;
-        char* buf = new char();
-        int nread = 0;
+        uint32_t nread = 0;
+        uint32_t size  = 0;
 
         wavin = fopen(config.wav_path.c_str(), "rb");
-        fseek(wavin, 44, SEEK_SET);
+        fseek(wavin, 40, SEEK_SET);
+        fread(&size, sizeof(uint32_t), 1, wavin);
+        log<NUClear::DEBUG>(size);
 
+        // Make it one longer for the null termination
+        auto audioData     = std::make_unique<AudioData>();
+        audioData->WavData = std::vector<uint8_t>(size);
 
-        long size = ftell(wavin);
-        rewind(wavin);
+        nread = fread(audioData->WavData.data(), sizeof(uint8_t), size, wavin);
 
-        while (!feof(wavin)) {
-            // for(int i = 0; i< 20; i++){
-            nread = fread(buf, 1, size, wavin);  // nread is the audio's chunk which has been read from the stream
-
-
-            if (nread != size) {
-                throw std::invalid_argument("received negative value");
-            }
-
-            else {
-                std::cout << "New buf created printing first 10 values of it.\n" << std::endl;
-                for (int i = 0; i < size; i++) {
-                    std::cout << buf[i];
-                }
-                std::cout << "\n";
-            }
+        if (nread != size) {
+            // TODO(Tom Legge) don't throw
+            throw std::invalid_argument("number read from wav file was not its size");
         }
 
         fclose(wavin);
 
-        auto audioData = std::make_unique<AudioData>();
+
         emit(audioData);
     }
 
