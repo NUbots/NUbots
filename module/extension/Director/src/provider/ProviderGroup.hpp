@@ -44,7 +44,7 @@ namespace module::extension::provider {
             }
 
             WatchHandle& operator=(WatchHandle&& other) {
-                if (this != &other) { 
+                if (this != &other) {
                     deleter = std::exchange(other.deleter, std::function<void()>());
                 }
                 return *this;
