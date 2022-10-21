@@ -46,9 +46,9 @@ RUN install-package \
     git \
     sox \
     subversion \
-    python2 \
     unzip \
-    ncurses
+    ncurses \
+    openblas
 
 # Get python to look in /usr/local for packages
 RUN echo $(python -c "import site; print(site.getsitepackages()[0].replace('/usr', '/usr/local'))") \
@@ -86,6 +86,31 @@ RUN python /usr/local/generate_toolchain.py --prefix /usr
 #############################################
 ### ADD NEW SYTEM PROGRAMS/LIBRARIES HERE ###
 #############################################
+
+#Speech Rec
+RUN PREFIX="/usr" install-from-source \
+    https://github.com/alphacep/openfst/archive/7dfd808194105162f20084bb4d8e4ee4b65266d5.tar.gz \
+    --enable-static \
+    --enable-shared \
+    --enable-far \
+    --enable-ngram-fsts \
+    --enable-lookahead-fsts \
+    --disable-bin \
+    --with-pic
+COPY usr/local/package/clapack.sh /usr/local/package/clapack.sh
+RUN PREFIX="/usr" /usr/local/package/clapack.sh \
+    https://github.com/alphacep/clapack/archive/0b815a85da01c384404c74a9cff0e32385cb925f.tar.gz
+COPY usr/local/package/kaldi.sh /usr/local/package/kaldi.sh
+RUN PREFIX="/usr" /usr/local/package/kaldi.sh \
+    https://github.com/alphacep/kaldi/archive/6417ac1dece94783e80dfbac0148604685d27579.tar.gz \
+    -DMATHLIB=OpenBLAS \
+    -DKALDI_BUILD_EXE=OFF \
+    -DKALDI_BUILD_TEST=OFF \
+    -DKALDI_USE_PATCH_NUMBER=OFF \
+    -DBUILD_SHARED_LIBS=ON \
+    -DKALDI_VERSION="5.5"
+RUN PREFIX="/usr" install-from-source \
+    https://github.com/alphacep/vosk-api/archive/refs/tags/v0.3.43.tar.gz
 
 ################################################
 #  _____           _      _           _        #
