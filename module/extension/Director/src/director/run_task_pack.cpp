@@ -146,6 +146,19 @@ namespace module::extension {
         const auto& provider = pack.first;
         auto& group          = provider->group;
 
+        // See if a Idle command was emitted
+        for (const auto& t : pack.second) {
+            if (t->type == typeid(::extension::behaviour::Idle)) {
+
+                if (pack.second.size() > 1) {
+                    log<NUClear::WARN>("Idle task was emitted with other tasks, the other tasks will be ignored");
+                }
+
+                // We don't do anything else on idle
+                return;
+            }
+        }
+
         // See if a done command was emitted
         for (const auto& t : pack.second) {
             if (t->type == typeid(::extension::behaviour::Done)) {
@@ -219,7 +232,7 @@ namespace module::extension {
 
         // If we are not running normally now and were previously we might still have active tasks that need removing
         if (run_level != RunLevel::OK) {
-            for (auto& t : tasks) {
+            for (auto& t : group.subtasks) {
                 remove_task(t);
             }
         }
@@ -227,11 +240,16 @@ namespace module::extension {
         // Run each of the optional tasks but only to the level the main task ran or pushed
         if (run_level <= RunLevel::PUSH) {
             for (auto it = first_optional; it != tasks.end(); ++it) {
-                // Run each optional task in turn as it's own pack
+                // Run each optional task in turn as its own pack
                 // but if the main group was pushed, we can at most push in optional
                 if (run_tasks(group, TaskList({*it}), run_level) != RunLevel::OK) {
                     // If we can't run this optional task, remove it in case we were previously running it
-                    remove_task(*it);
+                    auto original = std::find_if(group.subtasks.begin(), group.subtasks.end(), [&](const auto& t) {
+                        return t->type == (*it)->type;
+                    });
+                    if (original != group.subtasks.end()) {
+                        remove_task(*original);
+                    }
                 }
             }
         }
