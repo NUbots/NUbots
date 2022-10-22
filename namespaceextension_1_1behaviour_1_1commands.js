@@ -5,5 +5,6 @@ var namespaceextension_1_1behaviour_1_1commands =
     [ "NeedsExpression", "structextension_1_1behaviour_1_1commands_1_1NeedsExpression.html", "structextension_1_1behaviour_1_1commands_1_1NeedsExpression" ],
     [ "ProviderDone", "structextension_1_1behaviour_1_1commands_1_1ProviderDone.html", "structextension_1_1behaviour_1_1commands_1_1ProviderDone" ],
     [ "ProvideReaction", "structextension_1_1behaviour_1_1commands_1_1ProvideReaction.html", "structextension_1_1behaviour_1_1commands_1_1ProvideReaction" ],
+    [ "RootType", "structextension_1_1behaviour_1_1commands_1_1RootType.html", "structextension_1_1behaviour_1_1commands_1_1RootType" ],
     [ "WhenExpression", "structextension_1_1behaviour_1_1commands_1_1WhenExpression.html", "structextension_1_1behaviour_1_1commands_1_1WhenExpression" ]
 ];

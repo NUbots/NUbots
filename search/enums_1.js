@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['instruction_1605',['Instruction',['../classCM740_1_1CM740Interface.html#a38075c94c4e0a97e828b58986edc1921',1,'CM740::CM740Interface']]]
+  ['classification_1645',['Classification',['../structmodule_1_1extension_1_1provider_1_1Provider.html#a061433ee2dc583cfdf279b22f08df367',1,'module::extension::provider::Provider']]]
 ];

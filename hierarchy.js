@@ -42,6 +42,7 @@ var hierarchy =
     [ "extension::behaviour::commands::NeedsExpression", "structextension_1_1behaviour_1_1commands_1_1NeedsExpression.html", null ],
     [ "extension::behaviour::commands::ProviderDone", "structextension_1_1behaviour_1_1commands_1_1ProviderDone.html", null ],
     [ "extension::behaviour::commands::ProvideReaction", "structextension_1_1behaviour_1_1commands_1_1ProvideReaction.html", null ],
+    [ "extension::behaviour::commands::RootType< T >", "structextension_1_1behaviour_1_1commands_1_1RootType.html", null ],
     [ "extension::behaviour::commands::WhenExpression", "structextension_1_1behaviour_1_1commands_1_1WhenExpression.html", null ],
     [ "extension::behaviour::Done", "structextension_1_1behaviour_1_1Done.html", null ],
     [ "extension::behaviour::information::InformationSource", "classextension_1_1behaviour_1_1information_1_1InformationSource.html", [
@@ -80,6 +81,7 @@ var hierarchy =
     [ "module::behaviour::strategy::SoccerStrategy::Config", "structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html", null ],
     [ "module::behaviour::tools::ExecuteNextScript", "structmodule_1_1behaviour_1_1tools_1_1ExecuteNextScript.html", null ],
     [ "module::behaviour::tools::LockServo", "structmodule_1_1behaviour_1_1tools_1_1LockServo.html", null ],
+    [ "module::extension::Director::OkSolution", "structmodule_1_1extension_1_1Director_1_1OkSolution.html", null ],
     [ "module::extension::Director::Solution", "structmodule_1_1extension_1_1Director_1_1Solution.html", null ],
     [ "module::extension::Director::Solution::Option", "structmodule_1_1extension_1_1Director_1_1Solution_1_1Option.html", null ],
     [ "module::extension::FileWatcher::FileMap", "structmodule_1_1extension_1_1FileWatcher_1_1FileMap.html", null ],
@@ -88,6 +90,7 @@ var hierarchy =
     [ "module::extension::provider::Provider", "structmodule_1_1extension_1_1provider_1_1Provider.html", null ],
     [ "module::extension::provider::Provider::WhenCondition", "structmodule_1_1extension_1_1provider_1_1Provider_1_1WhenCondition.html", null ],
     [ "module::extension::provider::ProviderGroup", "structmodule_1_1extension_1_1provider_1_1ProviderGroup.html", null ],
+    [ "module::extension::provider::ProviderGroup::WatchHandle", "structmodule_1_1extension_1_1provider_1_1ProviderGroup_1_1WatchHandle.html", null ],
     [ "module::extension::StateUpdate", "structmodule_1_1extension_1_1StateUpdate.html", null ],
     [ "module::input::CameraContext", "structmodule_1_1input_1_1CameraContext.html", null ],
     [ "module::input::CameraContext::TimeCorrection", "structmodule_1_1input_1_1CameraContext_1_1TimeCorrection.html", null ],

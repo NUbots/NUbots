@@ -5,9 +5,9 @@ var indexSectionsWithContent =
   2: "ceu",
   3: "_abcdefghijklmnopqrstuvw~",
   4: "abcdefghiklmnopqrstuvw",
-  5: "cpt",
-  6: "aiprs",
-  7: "bops"
+  5: "bcpt",
+  6: "aciprs",
+  7: "boprs"
 };
 
 var indexSectionNames =

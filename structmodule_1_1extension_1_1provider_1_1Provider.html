@@ -116,6 +116,7 @@ $(document).ready(function(){initNavTree('structmodule_1_1extension_1_1provider_
 <div class="header">
   <div class="summary">
 <a href="#nested-classes">Classes</a> &#124;
+<a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="structmodule_1_1extension_1_1provider_1_1Provider-members.html">List of all members</a>  </div>
@@ -128,6 +129,15 @@ $(document).ready(function(){initNavTree('structmodule_1_1extension_1_1provider_
  <a href="structmodule_1_1extension_1_1provider_1_1Provider.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="Provider_8hpp_source.html">Provider.hpp</a>&gt;</code></p>
+<div class="dynheader">
+Collaboration diagram for module::extension::provider::Provider:</div>
+<div class="dyncontent">
+<div class="center"><img src="structmodule_1_1extension_1_1provider_1_1Provider__coll__graph.png" border="0" usemap="#module_1_1extension_1_1provider_1_1Provider_coll__map" alt="Collaboration graph"/></div>
+<map name="module_1_1extension_1_1provider_1_1Provider_coll__map" id="module_1_1extension_1_1provider_1_1Provider_coll__map">
+<area shape="rect" title="A Provider instance which is able to execute a specific task type." alt="" coords="19,109,169,151"/>
+<area shape="rect" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html" title=" " alt="" coords="5,5,183,47"/>
+</map>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
 Classes</h2></td></tr>
@@ -135,26 +145,39 @@ Classes</h2></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The data held by a <code>When</code> condition in order to monitor when the condition will be met, as well as to compare it to <code>Causing</code> statements to determine if those <code>Causing</code> statements would satisfy this <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html" title="A Provider instance which is able to execute a specific task type.">Provider</a>.  <a href="structmodule_1_1extension_1_1provider_1_1Provider_1_1WhenCondition.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-types"></a>
+Public Types</h2></td></tr>
+<tr class="memitem:a061433ee2dc583cfdf279b22f08df367"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html#a061433ee2dc583cfdf279b22f08df367">Classification</a> { <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html#a061433ee2dc583cfdf279b22f08df367aa626c3f67bf45c25490b1849164f16b9">Classification::PROVIDE</a> = int(::extension::behaviour::commands::ProviderClassification::PROVIDE), 
+<a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html#a061433ee2dc583cfdf279b22f08df367ab078ffd28db767c502ac367053f6e0ac">Classification::START</a> = int(::extension::behaviour::commands::ProviderClassification::START), 
+<a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html#a061433ee2dc583cfdf279b22f08df367a615a46af313786fc4e349f34118be111">Classification::STOP</a> = int(::extension::behaviour::commands::ProviderClassification::STOP), 
+<a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html#a061433ee2dc583cfdf279b22f08df367aea2adde5c377cb5e09d14b71935c6f32">Classification::ROOT</a>
+ }</td></tr>
+<tr class="separator:a061433ee2dc583cfdf279b22f08df367"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a8bf95b56824b6519fec09f1e0db8f751"><td class="memItemLeft" align="right" valign="top"><a id="a8bf95b56824b6519fec09f1e0db8f751"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>Provider</b> (const ::<a class="el" href="namespaceextension_1_1behaviour_1_1commands.html#ad14bad978610eb153678827da76ca7a4">extension::behaviour::commands::ProviderClassification</a> &amp;classification_, const std::type_index &amp;type_, std::shared_ptr&lt; NUClear::threading::Reaction &gt; reaction_)</td></tr>
-<tr class="separator:a8bf95b56824b6519fec09f1e0db8f751"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4992ac487de1f4883236ae677ad3ba6"><td class="memItemLeft" align="right" valign="top"><a id="ac4992ac487de1f4883236ae677ad3ba6"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Provider</b> (<a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html">ProviderGroup</a> &amp;group_, const uint64_t &amp;id_, const <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html#a061433ee2dc583cfdf279b22f08df367">Classification</a> &amp;classification_, const std::type_index &amp;type_, std::shared_ptr&lt; NUClear::threading::Reaction &gt; reaction_)</td></tr>
+<tr class="separator:ac4992ac487de1f4883236ae677ad3ba6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:ae7866866c1c8cc02a69fd996f9b465bd"><td class="memItemLeft" align="right" valign="top"><a id="ae7866866c1c8cc02a69fd996f9b465bd"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html#ae7866866c1c8cc02a69fd996f9b465bd">active</a> = false</td></tr>
-<tr class="memdesc:ae7866866c1c8cc02a69fd996f9b465bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">A boolean that is true if this <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html" title="A Provider instance which is able to execute a specific task type.">Provider</a> is currently active and running (can make subtasks) <br /></td></tr>
-<tr class="separator:ae7866866c1c8cc02a69fd996f9b465bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a528e562ecdaca99d14d9d9cbfa4ffc9c"><td class="memItemLeft" align="right" valign="top"><a id="a528e562ecdaca99d14d9d9cbfa4ffc9c"></a>
 std::map&lt; std::type_index, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html#a528e562ecdaca99d14d9d9cbfa4ffc9c">causing</a></td></tr>
 <tr class="memdesc:a528e562ecdaca99d14d9d9cbfa4ffc9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">A list of types and states that are caused by running this <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html" title="A Provider instance which is able to execute a specific task type.">Provider</a>. <br /></td></tr>
 <tr class="separator:a528e562ecdaca99d14d9d9cbfa4ffc9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aee3479c85b45c5dc704bdf01c75f37f5"><td class="memItemLeft" align="right" valign="top"><a id="aee3479c85b45c5dc704bdf01c75f37f5"></a>
-::<a class="el" href="namespaceextension_1_1behaviour_1_1commands.html#ad14bad978610eb153678827da76ca7a4">extension::behaviour::commands::ProviderClassification</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html#aee3479c85b45c5dc704bdf01c75f37f5">classification</a></td></tr>
-<tr class="memdesc:aee3479c85b45c5dc704bdf01c75f37f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">The classification of this <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html" title="A Provider instance which is able to execute a specific task type.">Provider</a>. <br /></td></tr>
-<tr class="separator:aee3479c85b45c5dc704bdf01c75f37f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac764bde24a8fcf4266ccda56418cd18d"><td class="memItemLeft" align="right" valign="top"><a id="ac764bde24a8fcf4266ccda56418cd18d"></a>
+<a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html#a061433ee2dc583cfdf279b22f08df367">Classification</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html#ac764bde24a8fcf4266ccda56418cd18d">classification</a></td></tr>
+<tr class="memdesc:ac764bde24a8fcf4266ccda56418cd18d"><td class="mdescLeft">&#160;</td><td class="mdescRight">The classification of this <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html" title="A Provider instance which is able to execute a specific task type.">Provider</a>. <br /></td></tr>
+<tr class="separator:ac764bde24a8fcf4266ccda56418cd18d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3764db2616dc86a0382594674f201bac"><td class="memItemLeft" align="right" valign="top"><a id="a3764db2616dc86a0382594674f201bac"></a>
+<a class="el" href="structmodule_1_1extension_1_1provider_1_1ProviderGroup.html">ProviderGroup</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html#a3764db2616dc86a0382594674f201bac">group</a></td></tr>
+<tr class="memdesc:a3764db2616dc86a0382594674f201bac"><td class="mdescLeft">&#160;</td><td class="mdescRight">The provider group this provider belongs to. <br /></td></tr>
+<tr class="separator:a3764db2616dc86a0382594674f201bac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac48005cc09275aff905400af2eb5781d"><td class="memItemLeft" align="right" valign="top"><a id="ac48005cc09275aff905400af2eb5781d"></a>
+uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html#ac48005cc09275aff905400af2eb5781d">id</a></td></tr>
+<tr class="memdesc:ac48005cc09275aff905400af2eb5781d"><td class="mdescLeft">&#160;</td><td class="mdescRight">The id for this provider. Will either be reaction-&gt;id or a generated one for root providers. <br /></td></tr>
+<tr class="separator:ac48005cc09275aff905400af2eb5781d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adea21b9dc96be5bdfc8c70504d2b2853"><td class="memItemLeft" align="right" valign="top"><a id="adea21b9dc96be5bdfc8c70504d2b2853"></a>
 std::set&lt; std::type_index &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html#adea21b9dc96be5bdfc8c70504d2b2853">needs</a></td></tr>
 <tr class="memdesc:adea21b9dc96be5bdfc8c70504d2b2853"><td class="mdescLeft">&#160;</td><td class="mdescRight">A list of provider types that this provider needs in order to run. <br /></td></tr>
@@ -174,7 +197,40 @@ std::vector&lt; std::shared_ptr&lt; <a class="el" href="structmodule_1_1extensio
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>A <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html" title="A Provider instance which is able to execute a specific task type.">Provider</a> instance which is able to execute a specific task type. </p>
-</div><hr/>The documentation for this struct was generated from the following file:<ul>
+</div><h2 class="groupheader">Member Enumeration Documentation</h2>
+<a id="a061433ee2dc583cfdf279b22f08df367"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a061433ee2dc583cfdf279b22f08df367">&#9670;&nbsp;</a></span>Classification</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html#a061433ee2dc583cfdf279b22f08df367">module::extension::provider::Provider::Classification</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">strong</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a061433ee2dc583cfdf279b22f08df367aa626c3f67bf45c25490b1849164f16b9"></a>PROVIDE&#160;</td><td class="fielddoc"><p>Provide providers are typical providers that run when given a task. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a061433ee2dc583cfdf279b22f08df367ab078ffd28db767c502ac367053f6e0ac"></a>START&#160;</td><td class="fielddoc"><p>Start providers run once when a provider group first gets a task. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a061433ee2dc583cfdf279b22f08df367a615a46af313786fc4e349f34118be111"></a>STOP&#160;</td><td class="fielddoc"><p>Stop providers run once there are no tasks running for any provider of this group. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="a061433ee2dc583cfdf279b22f08df367aea2adde5c377cb5e09d14b71935c6f32"></a>ROOT&#160;</td><td class="fielddoc"><p>A root virtual provider to use when working with root tasks. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
+<hr/>The documentation for this struct was generated from the following file:<ul>
 <li>module/extension/Director/src/provider/<a class="el" href="Provider_8hpp_source.html">Provider.hpp</a></li>
 </ul>
 </div><!-- contents -->
@@ -183,7 +239,7 @@ std::vector&lt; std::shared_ptr&lt; <a class="el" href="structmodule_1_1extensio
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>extension</b></li><li class="navelem"><b>provider</b></li><li class="navelem"><a class="el" href="structmodule_1_1extension_1_1provider_1_1Provider.html">Provider</a></li>
-    <li class="footer">Generated on Sat Oct 15 2022 00:24:50 for NUbots by
+    <li class="footer">Generated on Sat Oct 22 2022 04:52:24 for NUbots by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.17 </li>
   </ul>
