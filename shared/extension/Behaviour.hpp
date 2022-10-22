@@ -350,9 +350,9 @@ namespace extension::behaviour {
         template <typename T>
         using Uses = ::extension::behaviour::Uses<T>;
         template <typename T>
-        using Task    = ::extension::behaviour::Task<T>;
-        using Done    = ::extension::behaviour::Done;
-        using Idle    = ::extension::behaviour::Idle;
+        using Task = ::extension::behaviour::Task<T>;
+        using Done = ::extension::behaviour::Done;
+        using Idle = ::extension::behaviour::Idle;
     };
 
 }  // namespace extension::behaviour
