@@ -17,20 +17,20 @@
  * Copyright 2022 NUbots <nubots@nubots.net>
  */
 
-#include <string>
-#include <vector>
+#include <memory>
 
-namespace util {
+#include "Director.hpp"
 
-    /**
-     * @brief Using an LCS algorithm prints out the two sets of string (expected and actual) side by side to show the
-     * differences
-     *
-     * @param expected  the expected series of events
-     * @param actual    the actual series of events
-     *
-     * @return a multiline string showing a human output of the difference
-     */
-    std::string diff_string(const std::vector<std::string>& expected, const std::vector<std::string>& actual);
+#include "extension/Behaviour.hpp"
 
-}  // namespace util
+namespace module::extension {
+
+    using ::extension::behaviour::commands::BehaviourTask;
+
+    bool Director::direct_priority(const std::shared_ptr<BehaviourTask>& incumbent,
+                                   const std::shared_ptr<BehaviourTask>& challenger) {
+        return incumbent->optional == challenger->optional ? incumbent->priority < challenger->priority
+                                                           : incumbent->optional;
+    }
+
+}  // namespace module::extension
