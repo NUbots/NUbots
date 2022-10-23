@@ -64,10 +64,6 @@ namespace module::extension {
             // However, the task might be a root task, in which case we won't have any provider
             // In that case we set the type to nullptr_t to indicate that we are a root task
             std::vector<TaskPriority> ancestors;
-            ancestors.emplace_back(
-                providers.contains(task->requester_id) ? providers.at(task->requester_id)->type : typeid(nullptr_t),
-                task->priority,
-                task->optional);
 
             // Loop up through the providers until we reach a point where a task was emitted by a root provider
             for (auto t = task; providers.at(t->requester_id)->classification != Provider::Classification::ROOT;) {
