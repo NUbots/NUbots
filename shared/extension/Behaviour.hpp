@@ -14,8 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2021 NUbots <nubots@nubots.net>
+ * Copyright 2022 NUbots <nubots@nubots.net>
  */
+
 #ifndef EXTENSION_BEHAVIOUR_HPP
 #define EXTENSION_BEHAVIOUR_HPP
 
@@ -48,7 +49,7 @@ namespace extension::behaviour {
         static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
 
             // Tell the Director
-            reaction->reactor.powerplant.emit(
+            reaction->reactor.powerplant.emit<NUClear::dsl::word::emit::Direct>(
                 std::make_unique<commands::ProvideReaction>(reaction, typeid(T), classification));
 
             // Add our unbinder
@@ -82,7 +83,8 @@ namespace extension::behaviour {
         template <typename DSL>
         static inline void postcondition(NUClear::threading::ReactionTask& task) {
             // Take the task id and send it to the Director to let it know that this Provider is done
-            task.parent.reactor.emit(std::make_unique<commands::ProviderDone>(task.parent.id, task.id));
+            task.parent.reactor.emit<NUClear::dsl::word::emit::Direct>(
+                std::make_unique<commands::ProviderDone>(task.parent.id, task.id));
         }
     };
 
@@ -127,7 +129,7 @@ namespace extension::behaviour {
      * @tparam expr     the function used for the comparison (e.g. std::less)
      * @tparam value    the value that the when condition is looking for
      */
-    template <typename State, template <typename> class expr, enum State::Value value>
+    template <typename State, template <typename> class expr, State::Value value>
     struct When {
 
         /**
@@ -147,7 +149,7 @@ namespace extension::behaviour {
                 typeid(State),
                 // Function that uses expr to determine if the passed value v is valid
                 [](const int& v) -> bool { return expr<int>()(v, value); },
-                // Function that uses get to get the current state of the reaction
+                // Function that uses get to get the current state of the condition
                 [reaction]() -> int {
                     // Check if there is cached data, and if not throw an exception
                     auto ptr = NUClear::dsl::operation::CacheGet<State>::template get<DSL>(*reaction);
@@ -173,7 +175,7 @@ namespace extension::behaviour {
      * @tparam State    the smart enum that this causing condition is going to manipulate
      * @tparam value    the value that will result when the causing is successful
      */
-    template <typename State, enum State::Value value>
+    template <typename State, State::Value value>
     struct Causing {
 
         /**
@@ -292,6 +294,7 @@ namespace extension::behaviour {
             NUClear::dsl::word::emit::Direct<commands::BehaviourTask>::emit(
                 powerplant,
                 std::make_shared<commands::BehaviourTask>(typeid(T),
+                                                          typeid(commands::RootType<T>),
                                                           reaction_id,
                                                           task_id,
                                                           data,
@@ -328,9 +331,9 @@ namespace extension::behaviour {
         using Start = ::extension::behaviour::Start<T>;
         template <typename T>
         using Stop = ::extension::behaviour::Stop<T>;
-        template <typename State, template <typename> class expr, enum State::Value value>
+        template <typename State, template <typename> class expr, State::Value value>
         using When = ::extension::behaviour::When<State, expr, value>;
-        template <typename State, enum State::Value value>
+        template <typename State, State::Value value>
         using Causing = ::extension::behaviour::Causing<State, value>;
         template <typename T>
         using Needs = ::extension::behaviour::Needs<T>;

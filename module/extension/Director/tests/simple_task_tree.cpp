@@ -28,6 +28,8 @@
 namespace {
 
     struct SimpleTask {};
+
+    template <int a, int b>
     struct SubTask {};
 
     std::vector<std::string> events;
@@ -37,22 +39,37 @@ namespace {
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
             : TestBase<TestReactor>(std::move(environment)) {
 
-            on<Provide<SubTask>>().then([this] {
-                events.push_back("subtask executed");
-                emit<Task>(std::make_unique<Done>());
+            on<Provide<SimpleTask>>().then([this] {
+                // Task has been executed!
+                events.push_back("simple task executed");
+                emit<Task>(std::make_unique<SubTask<1, 0>>());
+                emit<Task>(std::make_unique<SubTask<2, 0>>());
+                emit<Task>(std::make_unique<SubTask<3, 0>>());
             });
 
-            on<Provide<SimpleTask>>().then([this] {
-                if (!executed) {
-                    // Task has been executed!
-                    executed = true;
-                    events.push_back("task executed");
-                    emit<Task>(std::make_unique<SubTask>());
-                }
-                else {
-                    events.push_back("task reexecuted");
-                }
+            on<Provide<SubTask<1, 0>>>().then([this] {
+                events.push_back("subtask 1,0 executed");
+                emit<Task>(std::make_unique<SubTask<1, 1>>());
+                emit<Task>(std::make_unique<SubTask<1, 2>>());
             });
+            on<Provide<SubTask<1, 1>>>().then([this] { events.push_back("subtask 1,1 executed"); });
+            on<Provide<SubTask<1, 2>>>().then([this] { events.push_back("subtask 1,2 executed"); });
+
+            on<Provide<SubTask<2, 0>>>().then([this] {
+                events.push_back("subtask 2,0 executed");
+                emit<Task>(std::make_unique<SubTask<2, 1>>());
+                emit<Task>(std::make_unique<SubTask<2, 2>>());
+            });
+            on<Provide<SubTask<2, 1>>>().then([this] { events.push_back("subtask 2,1 executed"); });
+            on<Provide<SubTask<2, 2>>>().then([this] { events.push_back("subtask 2,2 executed"); });
+
+            on<Provide<SubTask<3, 0>>>().then([this] {
+                events.push_back("subtask 3,0 executed");
+                emit<Task>(std::make_unique<SubTask<3, 1>>());
+                emit<Task>(std::make_unique<SubTask<3, 2>>());
+            });
+            on<Provide<SubTask<3, 1>>>().then([this] { events.push_back("subtask 3,1 executed"); });
+            on<Provide<SubTask<3, 2>>>().then([this] { events.push_back("subtask 3,2 executed"); });
 
             /**************
              * TEST STEPS *
@@ -65,12 +82,10 @@ namespace {
                 emit(std::make_unique<Step<1>>());
             });
         }
-
-        bool executed = false;
     };
 }  // namespace
 
-TEST_CASE("Test that a done task causes the parent task that emitted it to rerun", "[director][done]") {
+TEST_CASE("Test that a tree of simple tasks are executed through the director", "[director][simple]") {
 
     NUClear::PowerPlant::Configuration config;
     config.thread_count = 1;
@@ -81,9 +96,16 @@ TEST_CASE("Test that a done task causes the parent task that emitted it to rerun
 
     std::vector<std::string> expected = {
         "emitting task",
-        "task executed",
-        "subtask executed",
-        "task reexecuted",
+        "simple task executed",
+        "subtask 1,0 executed",
+        "subtask 2,0 executed",
+        "subtask 3,0 executed",
+        "subtask 1,1 executed",
+        "subtask 1,2 executed",
+        "subtask 2,1 executed",
+        "subtask 2,2 executed",
+        "subtask 3,1 executed",
+        "subtask 3,2 executed",
     };
 
     // Make an info print the diff in an easy to read way if we fail
