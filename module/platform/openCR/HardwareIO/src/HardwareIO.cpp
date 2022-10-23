@@ -14,11 +14,9 @@
 namespace module::platform::openCR {
 
     using extension::Configuration;
-
     using message::motion::ServoTarget;
     using message::platform::nugus::Sensors;
     using message::platform::nugus::StatusReturn;
-
     using utility::support::Expression;
 
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)

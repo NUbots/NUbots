@@ -1,15 +1,15 @@
-#ifndef MODULE_PLATFORM_NUGUS_HARDWAREIO_HRawSensors
-    #define MODULE_PLATFORM_NUGUS_HARDWAREIO_H
+#ifndef MODULE_PLATFORM_NUGUS_HARDWAREIO_H
+#define MODULE_PLATFORM_NUGUS_HARDWAREIO_H
 
-    #include <map>
-    #include <nuclear>
+#include <map>
+#include <nuclear>
 
-    #include "NUgus.hpp"
-    #include "dynamixel/v2/Dynamixel.hpp"
+#include "NUgus.hpp"
+#include "dynamixel/v2/Dynamixel.hpp"
 
-    #include "message/platform/RawSensors.hpp"
+#include "message/platform/RawSensors.hpp"
 
-    #include "utility/io/uart.hpp"
+#include "utility/io/uart.hpp"
 
 namespace module::platform::openCR {
 
@@ -110,9 +110,9 @@ namespace module::platform::openCR {
         /// @brief Our state for our battery
         Battery batteryState;
 
-        void processModelInformation(const message::platform::nugus::StatusReturn& packet);
-        void processOpenCRData(const message::platform::nugus::StatusReturn& packet);
-        void processServoData(const message::platform::nugus::StatusReturn& packet);
+        void processModelInformation(const message::platform::openCR::StatusReturn& packet);
+        void processOpenCRData(const message::platform::openCR::StatusReturn& packet);
+        void processServoData(const message::platform::openCR::StatusReturn& packet);
     };
 
 }  // namespace module::platform::openCR
