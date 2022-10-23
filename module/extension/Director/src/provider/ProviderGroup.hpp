@@ -14,8 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2021 NUbots <nubots@nubots.net>
+ * Copyright 2022 NUbots <nubots@nubots.net>
  */
+
 #ifndef MODULE_EXTENSION_DIRECTOR_PROVIDERGROUP_HPP
 #define MODULE_EXTENSION_DIRECTOR_PROVIDERGROUP_HPP
 
@@ -39,13 +40,13 @@ namespace module::extension::provider {
             WatchHandle(const std::function<void()>& deleter_) : deleter(deleter_) {}
 
             WatchHandle(WatchHandle&& other) {
-                deleter       = other.deleter;
-                other.deleter = std::function<void()>();
+                deleter = std::exchange(other.deleter, std::function<void()>());
             }
 
             WatchHandle& operator=(WatchHandle&& other) {
-                deleter       = other.deleter;
-                other.deleter = std::function<void()>();
+                if (this != &other) {
+                    deleter = std::exchange(other.deleter, std::function<void()>());
+                }
                 return *this;
             }
 

@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2021 NUbots <nubots@nubots.net>
+ * Copyright 2022 NUbots <nubots@nubots.net>
  */
 
 #include "Director.hpp"
@@ -78,7 +78,7 @@ namespace module::extension {
 
                 // Add an option for everyone who could provide this when condition
                 for (const auto& p : group.providers) {
-                    if (p->classification == Provider::Classification::PROVIDE && p->causing.count(when.type) != 0
+                    if (p->classification == Provider::Classification::PROVIDE && p->causing.contains(when.type)
                         && when.validator(p->causing[when.type])) {
                         // We now swap to using the running providers authority
                         s.options.push_back(solve_provider(p, group.active_task, visited));
@@ -102,7 +102,7 @@ namespace module::extension {
         s.pushed = false;
 
         // Continue building the tree recursively for all the providers that meet our needs
-        if (groups.count(type) != 0) {
+        if (groups.contains(type)) {
             auto& group = groups.at(type);
 
             // If the group is being pushed and we can't beat the priority it limits us to the provider it pushed for

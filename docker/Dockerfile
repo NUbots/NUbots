@@ -249,7 +249,7 @@ RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.42.0.tar
     -DBUILD_TESTING=OFF
 
 # NUClear!
-RUN install-from-source https://github.com/Fastcode/NUClear/archive/304ff3b5e21b5bf7ea222f5cf1adca7622036f2a.tar.gz \
+RUN install-from-source https://github.com/Fastcode/NUClear/archive/48aa321595c13ed3ba8781ffdc7f63fc70d6d427.tar.gz \
     -DBUILD_TESTS=OFF
 
 

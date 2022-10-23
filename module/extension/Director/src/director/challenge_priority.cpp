@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2021 NUbots <nubots@nubots.net>
+ * Copyright 2022 NUbots <nubots@nubots.net>
  */
 
 #include <algorithm>
@@ -60,13 +60,12 @@ namespace module::extension {
 
         // Function to get the priorities of the ancestors of this task
         auto get_ancestor_priorities = [this](const std::shared_ptr<BehaviourTask>& task) {
-            // We are our first ancestor
-            std::vector<TaskPriority> ancestors;
-
-            // The task might be a root task, in which case we won't have any provider
+            // We are our first ancestor.
+            // However, the task might be a root task, in which case we won't have any provider
             // In that case we set the type to nullptr_t to indicate that we are a root task
+            std::vector<TaskPriority> ancestors;
             ancestors.emplace_back(
-                providers.count(task->requester_id) != 0 ? providers.at(task->requester_id)->type : typeid(nullptr_t),
+                providers.contains(task->requester_id) ? providers.at(task->requester_id)->type : typeid(nullptr_t),
                 task->priority,
                 task->optional);
 

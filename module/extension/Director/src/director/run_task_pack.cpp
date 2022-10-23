@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2021 NUbots <nubots@nubots.net>
+ * Copyright 2022 NUbots <nubots@nubots.net>
  */
 
 #include "Director.hpp"
@@ -43,7 +43,7 @@ namespace module::extension {
             auto ok_solutions = find_ok_solutions(solutions);
 
             // Loop through the solutions and add watches for the things we want
-            for (int i = 0; i < int(tasks.size()); i++) {
+            for (int i = 0; i < int(tasks.size()); ++i) {
                 auto& task = tasks[i];
                 auto& sol  = ok_solutions[i];
 
@@ -155,8 +155,6 @@ namespace module::extension {
 
                 // If it's a root provider, then we just remove the task
                 if (parent_provider->classification == Provider::Classification::ROOT) {
-                    std::cout << "Removing " << parent_group.subtasks.front() << " from "
-                              << NUClear::util::demangle(parent_group.type.name()) << std::endl;
                     auto task = parent_group.subtasks.front();
                     parent_group.subtasks.clear();
                     parent_group.watch_handles.clear();

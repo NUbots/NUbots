@@ -14,8 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2021 NUbots <nubots@nubots.net>
+ * Copyright 2022 NUbots <nubots@nubots.net>
  */
+
 #ifndef MODULE_EXTENSION_DIRECTOR_HPP
 #define MODULE_EXTENSION_DIRECTOR_HPP
 
@@ -286,6 +287,107 @@ namespace module::extension {
                                   const std::shared_ptr<provider::Provider>& provider);
 
         enum RunLevel { OK, PUSH, BLOCKED };
+        RunLevel run_tasks(provider::ProviderGroup& group, const TaskList& pack, const RunLevel& run_level);
+
+        /**
+         * Represents a solution that we can run now, i.e. we can run all of the providers in this solution.
+         *
+         * Or if there is no solution that can be run now, it will return that it is blocked and which groups we wanted
+         * to run but weren't able to.
+         */
+        struct OkSolution {
+            OkSolution(const bool& blocked_, std::set<std::type_index>&& blocking_groups_)
+                : blocked(blocked_), blocking_groups(blocking_groups_) {}
+            OkSolution(const bool& blocked_,
+                       const std::shared_ptr<provider::Provider>& provider_,
+                       std::vector<std::shared_ptr<provider::Provider>>&& requirements_,
+                       std::set<std::type_index>&& used_,
+                       std::set<std::type_index>&& blocking_groups_)
+                : blocked(blocked_)
+                , provider(provider_)
+                , requirements(requirements_)
+                , used(used_)
+                , blocking_groups(blocking_groups_) {}
+
+            /// If this entire path is blocked and unusable
+            bool blocked;
+            /// The main provider that this solution is for
+            std::shared_ptr<provider::Provider> provider;
+            /// The list of providers that are needed for each of the requirements
+            std::vector<std::shared_ptr<provider::Provider>> requirements;
+            /// Which groups have been used in this solution
+            std::set<std::type_index> used;
+            /// Groups which we wanted to use but were blocked to us
+            std::set<std::type_index> blocking_groups;
+        };
+
+        /**
+         * Joins all of the requirements of an option into a single OkSolution instance.
+         *
+         * @param option        the option we are joining the requirements of
+         * @param used_types    the set of provider groups that have been used in this solution
+         *
+         * @return the OkSolution that represents the requirements of the passed option fused together
+         */
+        OkSolution find_ok_solution(const Solution::Option& option, std::set<std::type_index> used_types);
+
+        /**
+         * Finds the first available option for a solution that we can run now for this solution. Or if there is no
+         * option that can be run now, it will return that it is blocked and which groups we wanted to run but wasn't
+         * able to.
+         *
+         * @param requirement the requirement that we are searching for options we can execute
+         * @param used_types  types that have already been used higher in the solution tree that are blocked to us
+         *
+         * @return An OKSolution instance that represents a solution we can run now or a blocked solution
+         */
+        OkSolution find_ok_solution(const Solution& requirement, const std::set<std::type_index>& used_types);
+
+        /**
+         * Solves each of a series of Solutions and returns a list of OkSolutions that represents the first solution
+         * that can execute, or a blocked solution if none of the solutions can execute.
+         *
+         * @param solutions the set of solutions that we are trying to find an OkSolution for
+         *
+         * @return a list of OkSolutions that represents the first solution that can execute, or a blocked solution if
+         *         none of the solutions can execute.
+         */
+        std::vector<OkSolution> find_ok_solutions(const std::vector<Solution>& solutions);
+
+        /**
+         * Runs the passed task on the passed provider.
+         *
+         * @param task      the task we are running
+         * @param provider  the provider that we are running the task on
+         */
+        void run_task_on_provider(const std::shared_ptr<BehaviourTask>& task,
+                                  const std::shared_ptr<provider::Provider>& provider);
+
+        /**
+         * The level of solution that we can run at
+         */
+        enum RunLevel {
+            /// We can run all our tasks on providers now
+            OK,
+            /// We can't run all our tasks on providers now, but we can push to fix our requirements
+            PUSH,
+            /// We can't run all our tasks on providers now, and we can't push to fix our requirements
+            BLOCKED
+        };
+
+        /**
+         * Tries to execute tasks in the pack, but only up to the passed run level.
+         *
+         * The passed run level will limit what types of execution are open to us. For example, if the required pack was
+         * only able to execute up to the PUSH level, then we will only execute up to the PUSH level for the optional
+         * packs that come afterward.
+         *
+         * @param group     the provider group that created this pack
+         * @param pack      the pack of tasks that we are trying to execute
+         * @param run_level the level of execution that we are allowed to do
+         *
+         * @return the run level that we were able to execute up to
+         */
         RunLevel run_tasks(provider::ProviderGroup& group, const TaskList& pack, const RunLevel& run_level);
 
         /**
