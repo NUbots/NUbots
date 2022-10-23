@@ -98,12 +98,12 @@ namespace module {
             void MultiPathEvaluator::processRoundEnd() {
                 auto travelScore = processDistanceTravelled();
 
-                // if (pathNo == FWD || pathNo == BKWD || pathNo == STRFL || pathNo == STRFR) {
-                //     travelScore = 1.0 / travelScore * 20;
-                // }
-                // else if (pathNo == ROTCCW || pathNo == ROTCW) {
-                //     travelScore = 1.0 / travelScore * 5;
-                // }
+                if (pathNo == FWD || pathNo == BKWD || pathNo == STRFL || pathNo == STRFR) {
+                    travelScore = 1.0 / (travelScore * 20);
+                }
+                else if (pathNo == ROTCCW || pathNo == ROTCW) {
+                    travelScore = 1.0 / (travelScore * 5);
+                }
 
                 std::vector<double> scores = {travelScore, maxFieldPlaneSway};
 
@@ -125,14 +125,14 @@ namespace module {
                         break;
 
                     case 1:
-                        walk_command_velocity.x() = -walk_command_velocity_X;
-                        walk_command_velocity.y() = 0.0;
+                        walk_command_velocity.x() = 0.0;
+                        walk_command_velocity.y() = walk_command_velocity_Y;
                         walk_command_rotation     = 0.0;
                         break;
 
                     case 2:
-                        walk_command_velocity.x() = 0.0;
-                        walk_command_velocity.y() = walk_command_velocity_Y;
+                        walk_command_velocity.x() = -walk_command_velocity_X;
+                        walk_command_velocity.y() = 0.0;
                         walk_command_rotation     = 0.0;
                         break;
 
@@ -143,14 +143,14 @@ namespace module {
                         break;
 
                     case 4:
-                        walk_command_velocity.x() = 0.05;
-                        walk_command_velocity.y() = 0.05;
+                        walk_command_velocity.x() = 0.01;
+                        walk_command_velocity.y() = 0.01;
                         walk_command_rotation     = walk_command_Rotation;
                         break;
 
                     case 5:
-                        walk_command_velocity.x() = 0.05;
-                        walk_command_velocity.y() = -0.05;
+                        walk_command_velocity.x() = 0.01;
+                        walk_command_velocity.y() = -0.01;
                         walk_command_rotation     = -walk_command_Rotation;
                         break;
 
@@ -168,9 +168,9 @@ namespace module {
                 trial_duration_limit = std::chrono::seconds(currentRequest.trial_duration_limit);
 
                 // Set our walk command
-                walk_command_velocity_X = currentRequest.parameters.real_params[11];
-                walk_command_velocity_Y = currentRequest.parameters.real_params[11];
-                walk_command_Rotation   = currentRequest.parameters.real_params[12];
+                walk_command_velocity_X = std::abs(currentRequest.parameters.real_params[11]);
+                walk_command_velocity_Y = std::abs(currentRequest.parameters.real_params[11]);
+                walk_command_Rotation   = std::abs(currentRequest.parameters.real_params[12]);
 
                 // Read the QuinticWalk config and overwrite the config parameters with the current individual's
                 // parameters
@@ -267,27 +267,27 @@ namespace module {
                 fitnessScores->constraints                        = constraints;
                 return fitnessScores;
             }
-            // I want a pattern here passed as an arg
             std::vector<double> MultiPathEvaluator::calculateScores() {
-                auto maxSway    = 0.0;
-                auto finalScore = 0.0;
+                // auto maxSway    = 0.0;
+                auto final_score = 0.0;
 
                 for (std::vector<double> score : pathScores) {
-                    // for (auto param : params) {
-                    //     finalScore += (score.at(0) * param) + (score.at(1) * param); //For singlr objective
-                    // }
+                    for (auto param : params) {
+                        final_score += (score.at(0) * param) + (score.at(1) * param);  // For single objective
+                    }
 
-                    finalScore += score.at(0);
-                    maxSway += score.at(1);
+                    // finalScore += score.at(0);
+                    // maxSway += score.at(1);
                 }
 
                 // finalScore /= pathScores.size();
-                maxSway /= pathScores.size();
+                //  maxSway /= pathScores.size();
 
-                NUClear::log<NUClear::DEBUG>("Final Score:", finalScore);
+                NUClear::log<NUClear::DEBUG>("Final Score:", final_score);
                 return {
-                    maxSway,          // For now, we want to reduce this
-                    1.0 / finalScore  // 1/x since the NSGA2 optimiser is a minimiser
+                    final_score
+                    // maxSway,          // For now, we want to reduce this
+                    // 1.0 / finalScore  // 1/x since the NSGA2 optimiser is a minimiser
                 };
             }
 
@@ -296,11 +296,11 @@ namespace module {
                 const auto overhead = std::chrono::seconds(1);
                 double max_trial_duration =
                     (std::chrono::duration_cast<std::chrono::milliseconds>(trial_duration_limit + overhead)).count();
-                double trialDuration = simTime - trialStartTime;
+                double trial_duration = simTime - trialStartTime;
                 return {
-                    trialDuration - max_trial_duration,  // Punish for falling over, based on how long the trial took
-                                                         // (more negative is worse)
-                    0.0                                  // Second constraint unused, fixed to 0
+                    trial_duration - max_trial_duration,  // Punish for falling over, based on how long the trial took
+                                                          // (more negative is worse)
+                    0.0                                   // Second constraint unused, fixed to 0
                 };
             }
 

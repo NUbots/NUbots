@@ -1,6 +1,8 @@
 #include "MultiPathOptimiser.hpp"
 
+#include <fstream>  // ifstream
 #include <nuclear>
+#include <sstream>  //istringstream
 
 #include "nsga2/NSGA2.hpp"
 
@@ -25,6 +27,46 @@ namespace module {
 
                 // Parallel to paramInitialValues, sets the limit (min, max) of each parameter value
                 std::vector<std::pair<double, double>> paramLimits;
+
+                std::vector<std::vector<double>> data;
+                std::string input_file_name =
+                    "../NUbots/module/support/optimisation/NSGA2Optimiser/data/config/Supplied_Pop_Reals.csv";
+                std::ifstream inputFile(input_file_name);
+                int l = 0;
+
+                while (inputFile) {
+                    l++;
+                    std::string s;
+                    if (!getline(inputFile, s))
+                        break;
+                    if (s[0] != '#') {
+                        std::istringstream ss(s);
+                        std::vector<double> record;
+
+                        while (ss) {
+                            std::string line;
+                            if (!getline(ss, line, ','))
+                                break;
+                            try {
+                                record.push_back(stof(line));
+                            }
+                            catch (const std::invalid_argument e) {
+                                NUClear::log<NUClear::INFO>("NaN found in file ");
+                                e.what();
+                            }
+                        }
+
+                        data.push_back(record);
+                    }
+                }
+
+                NUClear::log<NUClear::INFO>("Data file size is", data.size());
+
+                if (!inputFile.eof()) {
+                    // cerr << "Could not read file " << inputFileName << "\n";
+                    NUClear::log<NUClear::INFO>("Could not read file", input_file_name);
+                    // std::__throw_invalid_argument("File not found.");
+                }
 
                 // Extract the initial values and limits and from config file, for all of the parameters
                 auto walk = config["walk"];
@@ -78,6 +120,7 @@ namespace module {
                 nsga2Algorithm.SetRealVariableCount(paramInitialValues.size());
                 nsga2Algorithm.SetRealVarLimits(paramLimits);
                 nsga2Algorithm.SetInitialRealVars(paramInitialValues);
+                nsga2Algorithm.SetInitialPopulationRealVars(data);
 
                 // Set configuration for binary variables
                 nsga2Algorithm.SetBinVariableCount(0);

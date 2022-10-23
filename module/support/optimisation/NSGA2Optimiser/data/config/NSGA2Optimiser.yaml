@@ -1,8 +1,8 @@
 # Larger population encourages wider search
-population_size: 40
+population_size: 52
 # More generations encourages deeper search
 max_generations: 50
-num_objectives: 2
+num_objectives: 1
 num_constraints: 2
 seed: 7777777
 trial_duration_limit: 30 # number of seconds to run a single trial for
@@ -22,7 +22,7 @@ eta:
   C: 20
   M: 20
 
-task: "walk"
+task: "multipath"
 task_config_path: "config/webots/QuinticWalk.yaml"
 
 initial_translation: [-4.0, -3.0, 0.51] # x, y, z

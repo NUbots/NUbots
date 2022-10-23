@@ -111,21 +111,29 @@ namespace nsga2 {
                                                  randGen,
                                                  initialRealVars);
 
-        NUClear::log<NUClear::INFO>("Parent Pop", parentPop->GetSize());
+        // NUClear::log<NUClear::INFO>("Parent Pop", parentPop->GetSize());
+        // int a = 0;
+        // for (auto i : parentPop->inds) {
+        //     NUClear::log<NUClear::INFO>("ind", a);
+        //     for (auto j : i.reals) {
+        //         NUClear::log<NUClear::INFO>("Real ", j);
+        //     }
+        //     a++;
+        // }
 
-        for (auto b : binBits) {
-            NUClear::log<NUClear::INFO>("Bin Bits", b);
-        }
+        // for (auto b : binBits) {
+        //     NUClear::log<NUClear::INFO>("Bin Bits", b);
+        // }
 
-        for (auto r : initialRealVars) {
-            NUClear::log<NUClear::INFO>("Init Vars", r);
-        }
+        // for (auto r : initialRealVars) {
+        //     NUClear::log<NUClear::INFO>("Init Vars", r);
+        // }
 
 
-        for (std::pair<double, double> i : realLimits) {
-            NUClear::log<NUClear::INFO>("Real limit 1", i.first);
-            NUClear::log<NUClear::INFO>("Real limit 2", i.second);
-        }
+        // for (std::pair<double, double> i : realLimits) {
+        //     NUClear::log<NUClear::INFO>("Real limit Low", i.first);
+        //     NUClear::log<NUClear::INFO>("Real limit High", i.second);
+        // }
 
         childPop = std::make_shared<Population>(popSize,
                                                 realVars,
@@ -142,7 +150,7 @@ namespace nsga2 {
                                                 randGen,
                                                 initialRealVars);
 
-        NUClear::log<NUClear::INFO>("Child Pop", childPop->GetSize());
+        // NUClear::log<NUClear::INFO>("Child Pop", childPop->GetSize());
 
         combinedPop = std::make_shared<Population>(popSize * 2,
                                                    realVars,
@@ -159,7 +167,7 @@ namespace nsga2 {
                                                    randGen,
                                                    initialRealVars);
 
-        NUClear::log<NUClear::INFO>("Combined Pop", combinedPop->GetSize());
+        // NUClear::log<NUClear::INFO>("Combined Pop", combinedPop->GetSize());
     }
 
     std::shared_ptr<Population> NSGA2::getCurrentPop() {
@@ -188,6 +196,27 @@ namespace nsga2 {
         CreateStartingPopulations();
         currentGen = 0;
         parentPop->Initialize();
+
+        // add bool sup pop... Put into a function
+        for (size_t i = 1; i < parentPop->inds.size(); i++) {
+            int n = 0;
+            for (auto& j : parentPop->inds[i].reals) {
+                // NUClear::log<NUClear::INFO>("Real first", j);
+                j = suppliedPopulationRealVars[i - 1][n];
+                // NUClear::log<NUClear::INFO>("Real second", j);
+                n++;
+            }
+        }
+
+        // int j = 0;
+        // for (auto i : parentPop->inds) {
+        //     NUClear::log<NUClear::INFO>("Ind", j);
+        //     for (auto r : i.reals) {
+        //         NUClear::log<NUClear::INFO>("Real", r);
+        //     }
+        //     j++;
+        // }
+
         parentPop->generation = currentGen;
         parentPop->SetIndividualsGeneration(currentGen);
         parentPop->Decode();
