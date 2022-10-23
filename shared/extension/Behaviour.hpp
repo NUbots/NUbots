@@ -74,7 +74,7 @@ namespace extension::behaviour {
         }
 
         /**
-         * Executes once a Provider has finished executing it's reaction so the Director knows which tasks it emitted
+         * Executes once a Provider has finished executing its reaction so the Director knows which tasks it emitted
          *
          * @tparam DSL the NUClear dsl for the on statement
          *
@@ -315,6 +315,16 @@ namespace extension::behaviour {
     struct Done {};
 
     /**
+     * This is a special task that should be emitted when a Provider doesn't want to change what it is doing.
+     * When this is emitted the director will just continue with whatever was previously emitted by this provider.
+     *
+     * ```
+     * emit<Task>(std::make_unique<Idle>());
+     * ```
+     */
+    struct Idle {};
+
+    /**
      * A reactor subtype that can be used when making a behaviour reactor.
      *
      * It exposes the additional DSL words that are added by the Behaviour DSL so they can be used without the need for
@@ -342,6 +352,7 @@ namespace extension::behaviour {
         template <typename T>
         using Task = ::extension::behaviour::Task<T>;
         using Done = ::extension::behaviour::Done;
+        using Idle = ::extension::behaviour::Idle;
     };
 
 }  // namespace extension::behaviour
