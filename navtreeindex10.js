@@ -1,5 +1,7 @@
 var NAVTREEINDEX10 =
 {
+"structmodule_1_1platform_1_1Webots_1_1CameraContext.html#ae1f6f508a18aedc1614091cc4ea22773":[1,0,2,7,1,0,1],
+"structmodule_1_1platform_1_1Webots_1_1ServoState.html":[1,0,2,7,1,1],
 "structmodule_1_1platform_1_1Webots_1_1ServoState.html#a0448d2f30960523b2b091146e7770c1d":[1,0,2,7,1,1,8],
 "structmodule_1_1platform_1_1Webots_1_1ServoState.html#a0807a9b0bdf224810542ea20f5739b6b":[1,0,2,7,1,1,5],
 "structmodule_1_1platform_1_1Webots_1_1ServoState.html#a08faa66defd9c96ea478c27fbf232561":[1,0,2,7,1,1,0],
@@ -247,7 +249,5 @@ var NAVTREEINDEX10 =
 "structutility_1_1math_1_1ransac_1_1NPartiteRansac.html#abba1ec1a83d5177613770f896525caf4":[1,0,5,4,2,0,0],
 "structutility_1_1math_1_1ransac_1_1NPartiteRansac.html#ae7dff3235ab29b308da2fa3639b71512":[1,0,5,4,2,0,3],
 "structutility_1_1math_1_1ransac_1_1Ransac.html":[1,0,5,4,2,1],
-"structutility_1_1math_1_1ransac_1_1Ransac.html#a208a03e3eb735993620ef8947f4073d3":[1,0,5,4,2,1,4],
-"structutility_1_1math_1_1ransac_1_1Ransac.html#a7c5b9a28f2d254d86d9216c2117a2ee1":[1,0,5,4,2,1,2],
-"structutility_1_1math_1_1ransac_1_1Ransac.html#a9f936e9422b8be79ffb5cfa792a3535c":[1,0,5,4,2,1,0]
+"structutility_1_1math_1_1ransac_1_1Ransac.html#a208a03e3eb735993620ef8947f4073d3":[1,0,5,4,2,1,4]
 };

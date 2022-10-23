@@ -1,5 +1,7 @@
 var NAVTREEINDEX8 =
 {
+"structmodule_1_1extension_1_1Director_1_1OkSolution.html#ac51661e5215bc8c41a54fcd4328e8723":[1,0,2,1,1,0,3],
+"structmodule_1_1extension_1_1Director_1_1OkSolution.html#af11dfaaeb505a3de2ff08c0469e1844b":[1,0,2,1,1,0,5],
 "structmodule_1_1extension_1_1Director_1_1Solution.html":[1,0,2,1,1,1],
 "structmodule_1_1extension_1_1Director_1_1Solution.html#a6ba12a246a29d9cf9b130879de902bef":[1,0,2,1,1,1,2],
 "structmodule_1_1extension_1_1Director_1_1Solution.html#abcff273d3b8e0e7613c512a6444f5609":[1,0,2,1,1,1,1],
@@ -247,7 +249,5 @@ var NAVTREEINDEX8 =
 "structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#a04b7d0caa19c049b9a772b2f65eb5bc7afb32f6b9fdcd4d907ac92aa8a7c5aa4b":[1,0,2,2,23,1,0,1],
 "structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#a178aaf225e5734e416d7c7346282f333":[1,0,2,2,23,1,4],
 "structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#a2e4dfb7197ddfa1fb7066ab618a45cee":[1,0,2,2,23,1,6],
-"structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#a99054fb36cb1e19e3a375950b8b53583":[1,0,2,2,23,1,7],
-"structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#aa59b6fbc5dd2100ee1b5abf524caafcb":[1,0,2,2,23,1,5],
-"structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#abbad14abbd63780fa3e66612d342a2be":[1,0,2,2,23,1,2]
+"structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#a99054fb36cb1e19e3a375950b8b53583":[1,0,2,2,23,1,7]
 };

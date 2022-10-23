@@ -1,5 +1,7 @@
 var NAVTREEINDEX9 =
 {
+"structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#aa59b6fbc5dd2100ee1b5abf524caafcb":[1,0,2,2,23,1,5],
+"structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#abbad14abbd63780fa3e66612d342a2be":[1,0,2,2,23,1,2],
 "structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#acaed200486d29177ff925a7a2853924d":[1,0,2,2,23,1,3],
 "structmodule_1_1input_1_1SensorFilter_1_1FootDownMethod.html#afe43c4778c0b0537d5bb6216ed996c5e":[1,0,2,2,23,1,1],
 "structmodule_1_1input_1_1SettingsFunctions.html":[1,0,2,2,24],
@@ -247,7 +249,5 @@ var NAVTREEINDEX9 =
 "structmodule_1_1platform_1_1Webots_1_1CameraContext.html":[1,0,2,7,1,0],
 "structmodule_1_1platform_1_1Webots_1_1CameraContext.html#a2ea51306b0f42ce195c47a3febff8bdc":[1,0,2,7,1,0,0],
 "structmodule_1_1platform_1_1Webots_1_1CameraContext.html#a7a3ccaea7203a58a11edb3150fd3a659":[1,0,2,7,1,0,2],
-"structmodule_1_1platform_1_1Webots_1_1CameraContext.html#aacc16712dff38c94e32ace20c9fdc177":[1,0,2,7,1,0,3],
-"structmodule_1_1platform_1_1Webots_1_1CameraContext.html#ae1f6f508a18aedc1614091cc4ea22773":[1,0,2,7,1,0,1],
-"structmodule_1_1platform_1_1Webots_1_1ServoState.html":[1,0,2,7,1,1]
+"structmodule_1_1platform_1_1Webots_1_1CameraContext.html#aacc16712dff38c94e32ace20c9fdc177":[1,0,2,7,1,0,3]
 };

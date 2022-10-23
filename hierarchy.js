@@ -45,6 +45,7 @@ var hierarchy =
     [ "extension::behaviour::commands::RootType< T >", "structextension_1_1behaviour_1_1commands_1_1RootType.html", null ],
     [ "extension::behaviour::commands::WhenExpression", "structextension_1_1behaviour_1_1commands_1_1WhenExpression.html", null ],
     [ "extension::behaviour::Done", "structextension_1_1behaviour_1_1Done.html", null ],
+    [ "extension::behaviour::Idle", "structextension_1_1behaviour_1_1Idle.html", null ],
     [ "extension::behaviour::information::InformationSource", "classextension_1_1behaviour_1_1information_1_1InformationSource.html", [
       [ "module::extension::Director", "classmodule_1_1extension_1_1Director.html", null ]
     ] ],
