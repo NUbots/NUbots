@@ -174,7 +174,7 @@ namespace module::extension {
                     remove_task(task);
                 }
                 else {
-                    // TODO check somehow if this provider is equipped to handle done
+                    // TODO(thouliston) check somehow if this provider is equipped to handle done
                     run_task_on_provider(parent_group.active_task,
                                          parent_group.active_provider,
                                          RunInfo::RunReason::SUBTASK_DONE);
