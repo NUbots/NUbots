@@ -60,9 +60,6 @@ namespace module::extension {
 
         // Function to get the priorities of the ancestors of this task
         auto get_ancestor_priorities = [this](const std::shared_ptr<BehaviourTask>& task) {
-            // We are our first ancestor.
-            // However, the task might be a root task, in which case we won't have any provider
-            // In that case we set the type to nullptr_t to indicate that we are a root task
             std::vector<TaskPriority> ancestors;
 
             // Loop up through the providers until we reach a point where a task was emitted by a root provider
