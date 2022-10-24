@@ -22,6 +22,7 @@
 
 namespace module::extension {
 
+    using ::extension::behaviour::RunInfo;
     using ::extension::behaviour::commands::BehaviourTask;
     using provider::Provider;
 
@@ -53,6 +54,7 @@ namespace module::extension {
                 for (auto& provider : group.providers) {
                     if (provider->classification == Provider::Classification::STOP) {
                         group.active_provider = provider;
+                        auto lock             = hold_run_reason(RunInfo::RunReason::STOPPED);
                         auto task             = provider->reaction->get_task();
                         if (task) {
                             task->run(std::move(task));
