@@ -5,6 +5,7 @@ var classextension_1_1behaviour_1_1BehaviourReactor =
     [ "Idle", "classextension_1_1behaviour_1_1BehaviourReactor.html#a90b86ed565ed3d1dfd5311714323b611", null ],
     [ "Needs", "classextension_1_1behaviour_1_1BehaviourReactor.html#a11ff7db6ef7c27ad993fbef780bc98c4", null ],
     [ "Provide", "classextension_1_1behaviour_1_1BehaviourReactor.html#ae322aad29122aeb742de6ff6b4950a67", null ],
+    [ "RunInfo", "classextension_1_1behaviour_1_1BehaviourReactor.html#acaf3947de0d8eb13b5cfed32b574bc52", null ],
     [ "Start", "classextension_1_1behaviour_1_1BehaviourReactor.html#ac2ed6b879ec18a39306e88ef73d2549e", null ],
     [ "Stop", "classextension_1_1behaviour_1_1BehaviourReactor.html#aea1dfde4b3a5d35b48288405bc990caf", null ],
     [ "Task", "classextension_1_1behaviour_1_1BehaviourReactor.html#a4513ce7303cfb0ce526bee9d5cf2470b", null ],

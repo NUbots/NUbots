@@ -51,6 +51,7 @@ var hierarchy =
     ] ],
     [ "extension::behaviour::Needs< Provider >", "structextension_1_1behaviour_1_1Needs.html", null ],
     [ "extension::behaviour::ProviderBase< T, classification >", "structextension_1_1behaviour_1_1ProviderBase.html", null ],
+    [ "extension::behaviour::RunInfo", "structextension_1_1behaviour_1_1RunInfo.html", null ],
     [ "extension::behaviour::Task< T >", "structextension_1_1behaviour_1_1Task.html", null ],
     [ "extension::behaviour::Uses< Provider >", "structextension_1_1behaviour_1_1Uses.html", null ],
     [ "extension::behaviour::When< State, expr, value >", "structextension_1_1behaviour_1_1When.html", null ],

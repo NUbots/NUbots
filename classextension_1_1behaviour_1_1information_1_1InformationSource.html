@@ -148,12 +148,18 @@ Collaboration diagram for extension::behaviour::information::InformationSource:<
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
+<tr class="memitem:a00224122d516fd2ddc4cbd286c29bc3d"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structextension_1_1behaviour_1_1RunInfo.html">RunInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#a00224122d516fd2ddc4cbd286c29bc3d">get_run_info</a> (const uint64_t &amp;reaction_id)</td></tr>
+<tr class="memdesc:a00224122d516fd2ddc4cbd286c29bc3d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets information about why the current task is running from the information source.  <a href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#a00224122d516fd2ddc4cbd286c29bc3d">More...</a><br /></td></tr>
+<tr class="separator:a00224122d516fd2ddc4cbd286c29bc3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ade48b09cd7c578384ed21137d17ad453"><td class="memItemLeft" align="right" valign="top">static std::shared_ptr&lt; void &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#ade48b09cd7c578384ed21137d17ad453">get_task_data</a> (const uint64_t &amp;reaction_id)</td></tr>
-<tr class="memdesc:ade48b09cd7c578384ed21137d17ad453"><td class="mdescLeft">&#160;</td><td class="mdescRight">Static method that redirects to the singleton instance providing the <a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html" title="This class is an abstract class that allows the static Behaviour DSL to access the relevant state fro...">InformationSource</a>.  <a href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#ade48b09cd7c578384ed21137d17ad453">More...</a><br /></td></tr>
+<tr class="memdesc:ade48b09cd7c578384ed21137d17ad453"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the data for the passed providers reaction id from the information source.  <a href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#ade48b09cd7c578384ed21137d17ad453">More...</a><br /></td></tr>
 <tr class="separator:ade48b09cd7c578384ed21137d17ad453"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
+<tr class="memitem:ae0a241ca949acab1dbf830f8f7f2a75f"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="structextension_1_1behaviour_1_1RunInfo.html">RunInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#ae0a241ca949acab1dbf830f8f7f2a75f">_get_run_info</a> (const uint64_t &amp;reaction_id)=0</td></tr>
+<tr class="memdesc:ae0a241ca949acab1dbf830f8f7f2a75f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal get run information.  <a href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#ae0a241ca949acab1dbf830f8f7f2a75f">More...</a><br /></td></tr>
+<tr class="separator:ae0a241ca949acab1dbf830f8f7f2a75f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a58c78909ce4539d686ca4eee8318760b"><td class="memItemLeft" align="right" valign="top">virtual std::shared_ptr&lt; void &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#a58c78909ce4539d686ca4eee8318760b">_get_task_data</a> (const uint64_t &amp;reaction_id)=0</td></tr>
 <tr class="memdesc:a58c78909ce4539d686ca4eee8318760b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Internal get task data function.  <a href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#a58c78909ce4539d686ca4eee8318760b">More...</a><br /></td></tr>
 <tr class="separator:a58c78909ce4539d686ca4eee8318760b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -169,6 +175,44 @@ static <a class="el" href="classextension_1_1behaviour_1_1information_1_1Informa
 <div class="textblock"><p>This class is an abstract class that allows the static Behaviour DSL to access the relevant state from the algorithm that is backing it. </p>
 <p>Extend this class to provide whatever information is needed for outputs in the DSL. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="ae0a241ca949acab1dbf830f8f7f2a75f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae0a241ca949acab1dbf830f8f7f2a75f">&#9670;&nbsp;</a></span>_get_run_info()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual <a class="el" href="structextension_1_1behaviour_1_1RunInfo.html">RunInfo</a> extension::behaviour::information::InformationSource::_get_run_info </td>
+          <td>(</td>
+          <td class="paramtype">const uint64_t &amp;&#160;</td>
+          <td class="paramname"><em>reaction_id</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">pure virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Internal get run information. </p>
+<p>Is overridden by the class that is acting as the information source.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">reaction_id</td><td>the reaction id of the reaction that is asking for data</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a <a class="el" href="structextension_1_1behaviour_1_1RunInfo.html" title="Provides information about how and why this provider was executed.">RunInfo</a> struct containing information about the current run </dd></dl>
+
+<p>Implemented in <a class="el" href="classmodule_1_1extension_1_1Director.html#a06c8ef9a24944778876165b8b9a49160">module::extension::Director</a>.</p>
+
+</div>
+</div>
 <a id="a58c78909ce4539d686ca4eee8318760b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a58c78909ce4539d686ca4eee8318760b">&#9670;&nbsp;</a></span>_get_task_data()</h2>
 
@@ -207,6 +251,41 @@ static <a class="el" href="classextension_1_1behaviour_1_1information_1_1Informa
 
 </div>
 </div>
+<a id="a00224122d516fd2ddc4cbd286c29bc3d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a00224122d516fd2ddc4cbd286c29bc3d">&#9670;&nbsp;</a></span>get_run_info()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="structextension_1_1behaviour_1_1RunInfo.html">RunInfo</a> extension::behaviour::information::InformationSource::get_run_info </td>
+          <td>(</td>
+          <td class="paramtype">const uint64_t &amp;&#160;</td>
+          <td class="paramname"><em>reaction_id</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Gets information about why the current task is running from the information source. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">reaction_id</td><td>the reaction id of the reaction that is asking for data</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a <a class="el" href="structextension_1_1behaviour_1_1RunInfo.html" title="Provides information about how and why this provider was executed.">RunInfo</a> struct containing information about the current run </dd></dl>
+
+</div>
+</div>
 <a id="ade48b09cd7c578384ed21137d17ad453"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ade48b09cd7c578384ed21137d17ad453">&#9670;&nbsp;</a></span>get_task_data()</h2>
 
@@ -231,7 +310,7 @@ static <a class="el" href="classextension_1_1behaviour_1_1information_1_1Informa
 </table>
 </div><div class="memdoc">
 
-<p>Static method that redirects to the singleton instance providing the <a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html" title="This class is an abstract class that allows the static Behaviour DSL to access the relevant state fro...">InformationSource</a>. </p>
+<p>Gets the data for the passed providers reaction id from the information source. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">reaction_id</td><td>the reaction id of the reaction that is asking for data</td></tr>
@@ -252,7 +331,7 @@ static <a class="el" href="classextension_1_1behaviour_1_1information_1_1Informa
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>extension</b></li><li class="navelem"><b>behaviour</b></li><li class="navelem"><b>information</b></li><li class="navelem"><a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html">InformationSource</a></li>
-    <li class="footer">Generated on Mon Oct 24 2022 22:00:08 for NUbots by
+    <li class="footer">Generated on Mon Oct 24 2022 23:27:16 for NUbots by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.17 </li>
   </ul>

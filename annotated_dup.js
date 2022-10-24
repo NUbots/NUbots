@@ -25,6 +25,7 @@ var annotated_dup =
         [ "Needs", "structextension_1_1behaviour_1_1Needs.html", "structextension_1_1behaviour_1_1Needs" ],
         [ "Provide", "structextension_1_1behaviour_1_1Provide.html", null ],
         [ "ProviderBase", "structextension_1_1behaviour_1_1ProviderBase.html", "structextension_1_1behaviour_1_1ProviderBase" ],
+        [ "RunInfo", "structextension_1_1behaviour_1_1RunInfo.html", "structextension_1_1behaviour_1_1RunInfo" ],
         [ "Start", "structextension_1_1behaviour_1_1Start.html", null ],
         [ "Stop", "structextension_1_1behaviour_1_1Stop.html", null ],
         [ "Task", "structextension_1_1behaviour_1_1Task.html", "structextension_1_1behaviour_1_1Task" ],
