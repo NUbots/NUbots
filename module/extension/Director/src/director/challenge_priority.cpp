@@ -53,38 +53,30 @@ namespace module::extension {
             return false;
         }
 
-        // A provider can always replace its own task with a new challenger
-        if (incumbent->requester_id == challenger->requester_id) {
+        // A provider of the same group can always replace its own task with a new challenger
+        if (providers.at(incumbent->requester_id)->type == providers.at(challenger->requester_id)->type) {
             return true;
         }
 
         // Function to get the priorities of the ancestors of this task
         auto get_ancestor_priorities = [this](const std::shared_ptr<BehaviourTask>& task) {
-            // We are our first ancestor.
-            // However, the task might be a root task, in which case we won't have any provider
-            // In that case we set the type to nullptr_t to indicate that we are a root task
             std::vector<TaskPriority> ancestors;
-            ancestors.emplace_back(
-                providers.contains(task->requester_id) ? providers.at(task->requester_id)->type : typeid(nullptr_t),
-                task->priority,
-                task->optional);
 
             // Loop up through the providers until we reach a point where a task was emitted by a root provider
-            for (auto t = task; providers.at(t->requester_id)->classification != Provider::Classification::ROOT;) {
+            // We recognise that we have passed a root provider when the active task is nullptr
+            auto t = task;
+            do {
+                ancestors.emplace_back(t->type, t->priority, t->optional);
+                auto p              = providers.at(t->requester_id);
+                auto classification = p->classification;
+                t                   = p->group.active_task;
 
-                // Get the provider that emitted this task, and from that the provider group
-                auto provider = providers.at(t->requester_id);
-                auto& group   = provider->group;
-
-                // If there is no active task something has gone wrong with the algorithm
-                if (group.active_task == nullptr) {
+                // Check if we reached a nullptr task but we are not a root provider
+                if (t == nullptr && classification != Provider::Classification::ROOT) {
                     throw std::runtime_error("Task has broken parentage");
                 }
+            } while (t != nullptr);
 
-                // Add this new parent we found and set t so we can loop up further
-                t = group.active_task;
-                ancestors.emplace_back(provider->type, t->priority, t->optional);
-            }
             return ancestors;
         };
 
@@ -95,9 +87,7 @@ namespace module::extension {
         // Remove all of the common ancestors
         // If one of the lists ends up empty that means that it is a direct ancestor of the other
         // If either ends up as nullptr_t that means that it is a root task and we don't remove it
-        while ((!i_p.empty() && !c_p.empty())
-               && (i_p.back().requester != typeid(nullptr_t) && c_p.back().requester != typeid(nullptr_t))
-               && (i_p.back().requester == c_p.back().requester)) {
+        while ((!i_p.empty() && !c_p.empty()) && (i_p.back().requester == c_p.back().requester)) {
             i_p.pop_back();
             c_p.pop_back();
         }
