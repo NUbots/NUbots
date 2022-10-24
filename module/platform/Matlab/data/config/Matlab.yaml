@@ -1,0 +1,10 @@
+# Controls the minimum log level that NUClear log will display
+log_level: DEBUG
+
+TCP_PORT: 10013
+
+TIMESTEP: 0.1
+
+SERVO_GAIN: 10
+
+N_SERVOS: 20
