@@ -391,7 +391,7 @@ namespace module::extension {
          *
          * @param reason the reason to hold until the lock is destroyed
          *
-         * @return a lock object that will reset the current run reason when it is destroyed
+         * @return a lock object that will reset `current_run_reason` to its default when destroyed
          */
         RunReasonLock hold_run_reason(const ::extension::behaviour::RunInfo::RunReason& reason);
 
