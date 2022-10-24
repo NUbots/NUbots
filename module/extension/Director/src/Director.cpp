@@ -208,33 +208,39 @@ namespace module::extension {
         });
 
         // Removes all the Providers for a reaction when it is unbound
-        on<Trigger<Unbind>, Sync<Director>>().then("Remove Provider", [this](const Unbind& unbind) {  //
+        on<Trigger<Unbind>>().then("Remove Provider", [this](const Unbind& unbind) {  //
+            std::lock_guard<std::recursive_mutex> lock(director_mutex);
             remove_provider(unbind.id);
         });
 
         // Add a Provider
-        on<Trigger<ProvideReaction>, Sync<Director>>().then("Add Provider", [this](const ProvideReaction& provide) {
+        on<Trigger<ProvideReaction>>().then("Add Provider", [this](const ProvideReaction& provide) {
+            std::lock_guard<std::recursive_mutex> lock(director_mutex);
             add_provider(provide);
         });
 
         // Add a when expression to this Provider
-        on<Trigger<WhenExpression>, Sync<Director>>().then("Add When", [this](const WhenExpression& when) {  //
+        on<Trigger<WhenExpression>>().then("Add When", [this](const WhenExpression& when) {  //
+            std::lock_guard<std::recursive_mutex> lock(director_mutex);
             add_when(when);
         });
 
         // Add a causing condition to this Provider
-        on<Trigger<CausingExpression>, Sync<Director>>().then("Add Causing", [this](const CausingExpression& causing) {
+        on<Trigger<CausingExpression>>().then("Add Causing", [this](const CausingExpression& causing) {
+            std::lock_guard<std::recursive_mutex> lock(director_mutex);
             add_causing(causing);
         });
 
         // Add a needs relationship to this Provider
-        on<Trigger<NeedsExpression>, Sync<Director>>().then("Add Needs", [this](const NeedsExpression& needs) {  //
+        on<Trigger<NeedsExpression>>().then("Add Needs", [this](const NeedsExpression& needs) {  //
+            std::lock_guard<std::recursive_mutex> lock(director_mutex);
             add_needs(needs);
         });
 
         // A task has arrived, either it's a root task so we send it off immediately, or we build up our pack for when
         // the Provider has finished executing
-        on<Trigger<BehaviourTask>, Sync<Director>>().then("Director Task", [this](const BehaviourTask& t) {
+        on<Trigger<BehaviourTask>>().then("Director Task", [this](const BehaviourTask& t) {
+            std::lock_guard<std::recursive_mutex> lock(director_mutex);
             // Make our own mutable copy of the task
             auto task = std::make_shared<BehaviourTask>(t);
 
@@ -300,7 +306,8 @@ namespace module::extension {
         });
 
         // This reaction runs when a Provider finishes to send off the task pack to the main director
-        on<Trigger<ProviderDone>, Sync<Director>>().then("Package Tasks", [this](const ProviderDone& done) {
+        on<Trigger<ProviderDone>>().then("Package Tasks", [this](const ProviderDone& done) {
+            std::lock_guard<std::recursive_mutex> lock(director_mutex);
             // Get all the tasks that were emitted by this provider and send it as a task pack
             auto range  = pack_builder.equal_range(done.requester_task_id);
             auto pack   = std::make_unique<TaskPack>();
@@ -323,7 +330,8 @@ namespace module::extension {
         });
 
         // A state that we were monitoring is updated, we might be able to run the task now
-        on<Trigger<StateUpdate>, Sync<Director>>().then("State Updated", [this](const StateUpdate& update) {
+        on<Trigger<StateUpdate>>().then("State Updated", [this](const StateUpdate& update) {
+            std::lock_guard<std::recursive_mutex> lock(director_mutex);
             // Get the group that had a state update
             auto p  = providers.at(update.provider_id);
             auto& g = p->group;
@@ -333,7 +341,8 @@ namespace module::extension {
         });
 
         // We have a new task pack to run
-        on<Trigger<TaskPack>, Sync<Director>>().then("Run Task Pack", [this](const TaskPack& pack) {  //
+        on<Trigger<TaskPack>>().then("Run Task Pack", [this](const TaskPack& pack) {  //
+            std::lock_guard<std::recursive_mutex> lock(director_mutex);
             run_task_pack(pack);
         });
     }

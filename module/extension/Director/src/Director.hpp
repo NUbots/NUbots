@@ -21,6 +21,7 @@
 #define MODULE_EXTENSION_DIRECTOR_HPP
 
 #include <memory>
+#include <mutex>
 #include <nuclear>
 #include <typeindex>
 #include <vector>
@@ -43,6 +44,8 @@ namespace module::extension {
         using TaskPack = std::pair<std::shared_ptr<provider::Provider>, TaskList>;
 
     private:
+        std::recursive_mutex director_mutex{};
+
         /**
          * Adds a Provider for a type
          *
