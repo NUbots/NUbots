@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2021 NUbots <nubots@nubots.net>
+ * Copyright 2022 NUbots <nubots@nubots.net>
  */
 
 #include <algorithm>
@@ -28,6 +28,7 @@
 namespace module::extension {
 
     using ::extension::behaviour::commands::BehaviourTask;
+    using provider::Provider;
 
     // Scope this struct to just this translation unit
     namespace {
@@ -41,8 +42,8 @@ namespace module::extension {
         };
     }  // namespace
 
-    bool Director::challenge_priority(const std::shared_ptr<const BehaviourTask>& incumbent,
-                                      const std::shared_ptr<const BehaviourTask>& challenger) {
+    bool Director::challenge_priority(const std::shared_ptr<BehaviourTask>& incumbent,
+                                      const std::shared_ptr<BehaviourTask>& challenger) {
 
         // If there is no incumbent the challenger wins by default
         if (incumbent == nullptr) {
@@ -58,23 +59,22 @@ namespace module::extension {
         }
 
         // Function to get the priorities of the ancestors of this task
-        auto get_ancestor_priorities = [this](const std::shared_ptr<const BehaviourTask>& task) {
-            // We are our first ancestor
-            std::vector<TaskPriority> ancestors;
-
-            // The task might be a root task, in which case we won't have any provider
+        auto get_ancestor_priorities = [this](const std::shared_ptr<BehaviourTask>& task) {
+            // We are our first ancestor.
+            // However, the task might be a root task, in which case we won't have any provider
             // In that case we set the type to nullptr_t to indicate that we are a root task
+            std::vector<TaskPriority> ancestors;
             ancestors.emplace_back(
-                providers.count(task->requester_id) != 0 ? providers[task->requester_id]->type : typeid(nullptr_t),
+                providers.contains(task->requester_id) ? providers.at(task->requester_id)->type : typeid(nullptr_t),
                 task->priority,
                 task->optional);
 
-            // Loop up through the providers until we reach a point where a task was emitted by a non provider
-            for (auto t = task; providers.count(t->requester_id) != 0;) {
+            // Loop up through the providers until we reach a point where a task was emitted by a root provider
+            for (auto t = task; providers.at(t->requester_id)->classification != Provider::Classification::ROOT;) {
 
                 // Get the provider that emitted this task, and from that the provider group
-                auto provider = providers[t->requester_id];
-                auto& group   = groups[provider->type];
+                auto provider = providers.at(t->requester_id);
+                auto& group   = provider->group;
 
                 // If there is no active task something has gone wrong with the algorithm
                 if (group.active_task == nullptr) {
@@ -106,6 +106,7 @@ namespace module::extension {
         // This can happen when we are checking tasks with a `Needs` relationship against a task higher in the tree and
         // we already own that task. In that case we say that the challenger wins because we already own it and can
         // replace it.
+        // TLDR parent beats child
         if (c_p.empty()) {
             return true;
         }

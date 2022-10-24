@@ -14,8 +14,9 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2021 NUbots <nubots@nubots.net>
+ * Copyright 2022 NUbots <nubots@nubots.net>
  */
+
 #ifndef EXTENSION_BEHAVIOUR_HPP
 #define EXTENSION_BEHAVIOUR_HPP
 
@@ -48,7 +49,7 @@ namespace extension::behaviour {
         static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
 
             // Tell the Director
-            reaction->reactor.powerplant.emit(
+            reaction->reactor.powerplant.emit<NUClear::dsl::word::emit::Direct>(
                 std::make_unique<commands::ProvideReaction>(reaction, typeid(T), classification));
 
             // Add our unbinder
@@ -73,7 +74,7 @@ namespace extension::behaviour {
         }
 
         /**
-         * Executes once a Provider has finished executing it's reaction so the Director knows which tasks it emitted
+         * Executes once a Provider has finished executing its reaction so the Director knows which tasks it emitted
          *
          * @tparam DSL the NUClear dsl for the on statement
          *
@@ -82,7 +83,8 @@ namespace extension::behaviour {
         template <typename DSL>
         static inline void postcondition(NUClear::threading::ReactionTask& task) {
             // Take the task id and send it to the Director to let it know that this Provider is done
-            task.parent.reactor.emit(std::make_unique<commands::ProviderDone>(task.parent.id, task.id));
+            task.parent.reactor.emit<NUClear::dsl::word::emit::Direct>(
+                std::make_unique<commands::ProviderDone>(task.parent.id, task.id));
         }
     };
 
@@ -147,7 +149,7 @@ namespace extension::behaviour {
                 typeid(State),
                 // Function that uses expr to determine if the passed value v is valid
                 [](const int& v) -> bool { return expr<int>()(v, value); },
-                // Function that uses get to get the current state of the reaction
+                // Function that uses get to get the current state of the condition
                 [reaction]() -> int {
                     // Check if there is cached data, and if not throw an exception
                     auto ptr = NUClear::dsl::operation::CacheGet<State>::template get<DSL>(*reaction);
@@ -292,6 +294,7 @@ namespace extension::behaviour {
             NUClear::dsl::word::emit::Direct<commands::BehaviourTask>::emit(
                 powerplant,
                 std::make_shared<commands::BehaviourTask>(typeid(T),
+                                                          typeid(commands::RootType<T>),
                                                           reaction_id,
                                                           task_id,
                                                           data,
@@ -310,6 +313,16 @@ namespace extension::behaviour {
      * ```
      */
     struct Done {};
+
+    /**
+     * This is a special task that should be emitted when a Provider doesn't want to change what it is doing.
+     * When this is emitted the director will just continue with whatever was previously emitted by this provider.
+     *
+     * ```
+     * emit<Task>(std::make_unique<Idle>());
+     * ```
+     */
+    struct Idle {};
 
     /**
      * A reactor subtype that can be used when making a behaviour reactor.
@@ -339,6 +352,7 @@ namespace extension::behaviour {
         template <typename T>
         using Task = ::extension::behaviour::Task<T>;
         using Done = ::extension::behaviour::Done;
+        using Idle = ::extension::behaviour::Idle;
     };
 
 }  // namespace extension::behaviour

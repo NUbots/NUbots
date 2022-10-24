@@ -27,11 +27,13 @@
 // Anonymous namespace to avoid name collisions
 namespace {
 
-    struct SimpleTask {};
-    struct Runner {
-        Runner(const bool& task_) : task(task_) {}
-        bool task;
+    struct SimpleTask {
+        SimpleTask(const std::string& msg_) : msg(msg_) {}
+        std::string msg;
     };
+
+    template <char id>
+    struct Runner {};
 
     std::vector<std::string> events;
 
@@ -40,44 +42,51 @@ namespace {
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
             : TestBase<TestReactor>(std::move(environment)) {
 
-            on<Start<SimpleTask>>().then([this] { events.push_back("start"); });
-            on<Provide<SimpleTask>>().then([this] { events.push_back("provide"); });
-            on<Stop<SimpleTask>>().then([this] { events.push_back("stop"); });
+            on<Provide<SimpleTask>>().then([this](const SimpleTask& t) {  //
+                events.push_back("simple task from " + t.msg);
+            });
 
-            on<Provide<Runner>>().then([this](const Runner& runner) {
-                // Emit a task to execute
-                if (runner.task) {
-                    events.push_back("running task");
-                    emit<Task>(std::make_unique<SimpleTask>());
-                }
-                else {
-                    events.push_back("removing task");
-                }
+            on<Provide<Runner<'a'>>>().then([this] {
+                events.push_back("runner a");
+                emit<Task>(std::make_unique<SimpleTask>("a"));
+            });
+
+            on<Provide<Runner<'b'>>>().then([this] {
+                events.push_back("runner b");
+                emit<Task>(std::make_unique<SimpleTask>("b"));
             });
 
             /**************
              * TEST STEPS *
              **************/
             on<Trigger<Step<1>>, Priority::LOW>().then([this] {
-                // Emit a task to execute
-                events.push_back("initiating");
-                emit<Task>(std::make_unique<Runner>(true));
+                events.push_back("starting a");
+                emit<Task>(std::make_unique<Runner<'a'>>(), 10);
             });
             on<Trigger<Step<2>>, Priority::LOW>().then([this] {
-                // Emit a null task to remove the task
-                events.push_back("finishing");
-                emit<Task>(std::make_unique<Runner>(false));
+                events.push_back("starting b");
+                emit<Task>(std::make_unique<Runner<'b'>>(), 10);
+            });
+            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
+                events.push_back("upping b priority");
+                emit<Task>(std::make_unique<Runner<'b'>>(), 20);
+            });
+            on<Trigger<Step<4>>, Priority::LOW>().then([this] {
+                events.push_back("upping a priority");
+                emit<Task>(std::make_unique<Runner<'a'>>(), 20);
             });
             on<Startup>().then([this] {
                 emit(std::make_unique<Step<1>>());
                 emit(std::make_unique<Step<2>>());
+                emit(std::make_unique<Step<3>>());
+                emit(std::make_unique<Step<4>>());
             });
         }
     };
-
 }  // namespace
 
-TEST_CASE("Test that the start and stop events fire when a provider gains/loses a task", "[director][start][stop]") {
+TEST_CASE("Test when two tasks of equal priority are emitted the one that was emitted first wins",
+          "[director][priority][equal]") {
 
     NUClear::PowerPlant::Configuration config;
     config.thread_count = 1;
@@ -87,13 +96,16 @@ TEST_CASE("Test that the start and stop events fire when a provider gains/loses 
     powerplant.start();
 
     std::vector<std::string> expected = {
-        "initiating",
-        "running task",
-        "start",
-        "provide",
-        "finishing",
-        "removing task",
-        "stop",
+        "starting a",
+        "runner a",
+        "simple task from a",
+        "starting b",
+        "runner b",
+        "upping b priority",
+        "runner b",
+        "simple task from b",
+        "upping a priority",
+        "runner a",
     };
 
     // Make an info print the diff in an easy to read way if we fail

@@ -27,11 +27,14 @@
 // Anonymous namespace to avoid name collisions
 namespace {
 
-    struct SimpleTask {};
-    struct Runner {
-        Runner(const bool& task_) : task(task_) {}
-        bool task;
+    struct SimpleTask {
+        SimpleTask(const std::string& msg_) : msg(msg_) {}
+        std::string msg;
     };
+    template <int i>
+    struct ComplexTask {};
+    struct AnotherComplexTask {};
+    struct VeryComplexTask {};
 
     std::vector<std::string> events;
 
@@ -40,44 +43,53 @@ namespace {
         explicit TestReactor(std::unique_ptr<NUClear::Environment> environment)
             : TestBase<TestReactor>(std::move(environment)) {
 
-            on<Start<SimpleTask>>().then([this] { events.push_back("start"); });
-            on<Provide<SimpleTask>>().then([this] { events.push_back("provide"); });
-            on<Stop<SimpleTask>>().then([this] { events.push_back("stop"); });
+            // Store the tasks we are given to run
+            on<Provide<SimpleTask>>().then([this](const SimpleTask& t) {  //
+                events.push_back("simple task - " + t.msg);
+            });
 
-            on<Provide<Runner>>().then([this](const Runner& runner) {
-                // Emit a task to execute
-                if (runner.task) {
-                    events.push_back("running task");
-                    emit<Task>(std::make_unique<SimpleTask>());
-                }
-                else {
-                    events.push_back("removing task");
-                }
+            on<Provide<ComplexTask<1>>, Needs<SimpleTask>>().then([this] {
+                events.push_back("emitting tasks from complex task 1");
+                emit<Task>(std::make_unique<SimpleTask>("complex task 1"));
+            });
+
+            on<Provide<ComplexTask<2>>, Needs<SimpleTask>>().then([this] {
+                events.push_back("emitting tasks from complex task 2");
+                emit<Task>(std::make_unique<SimpleTask>("complex task 2"));
+            });
+
+            on<Provide<VeryComplexTask>, Needs<ComplexTask<2>>>().then([this] {
+                events.push_back("emitting tasks from very complex task");
+                emit<Task>(std::make_unique<ComplexTask<2>>());
             });
 
             /**************
              * TEST STEPS *
              **************/
             on<Trigger<Step<1>>, Priority::LOW>().then([this] {
-                // Emit a task to execute
-                events.push_back("initiating");
-                emit<Task>(std::make_unique<Runner>(true));
+                events.push_back("emitting complex task 1");
+                emit<Task>(std::make_unique<ComplexTask<1>>(), 50);
             });
             on<Trigger<Step<2>>, Priority::LOW>().then([this] {
-                // Emit a null task to remove the task
-                events.push_back("finishing");
-                emit<Task>(std::make_unique<Runner>(false));
+                events.push_back("emitting very complex task");
+                emit<Task>(std::make_unique<VeryComplexTask>(), 40);
+            });
+            on<Trigger<Step<3>>, Priority::LOW>().then([this] {
+                events.push_back("lowering priority of complex task 1");
+                emit<Task>(std::make_unique<ComplexTask<1>>(), 30);
             });
             on<Startup>().then([this] {
                 emit(std::make_unique<Step<1>>());
                 emit(std::make_unique<Step<2>>());
+                emit(std::make_unique<Step<3>>());
             });
         }
     };
 
 }  // namespace
 
-TEST_CASE("Test that the start and stop events fire when a provider gains/loses a task", "[director][start][stop]") {
+TEST_CASE("Test that when the needs a higher task is blocked on are released, the higher task will run",
+          "[director][needs][joining][priority][!mayfail]") {
 
     NUClear::PowerPlant::Configuration config;
     config.thread_count = 1;
@@ -87,13 +99,14 @@ TEST_CASE("Test that the start and stop events fire when a provider gains/loses 
     powerplant.start();
 
     std::vector<std::string> expected = {
-        "initiating",
-        "running task",
-        "start",
-        "provide",
-        "finishing",
-        "removing task",
-        "stop",
+        "emitting complex task 1",
+        "emitting tasks from complex task 1",
+        "simple task - complex task 1",
+        "emitting very complex task",
+        "lowering priority of complex task 1",
+        "emitting tasks from very complex task",
+        "emitting tasks from complex task 2",
+        "simple task - complex task 2",
     };
 
     // Make an info print the diff in an easy to read way if we fail
