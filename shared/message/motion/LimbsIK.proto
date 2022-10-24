@@ -24,7 +24,7 @@
  import "message/motion/ServoCommand.proto";
 import "Matrix.proto";
 import "Vector.proto";
- 
+
   /// Left leg motion information including target matrix, time and gain and torque for each servo
   message LeftLegIK {
     /// When the command should execute
@@ -32,7 +32,7 @@ import "Vector.proto";
     /// Target left foot position to torso
     mat4 Htl = 2;
     /// Gain and torque of each servo, in the order of ID in the LeftLeg message
-    repeated ServoCommand.ServoState servos = 3;
+    repeated ServoState servos = 3;
   }
 
   /// Right leg motion information including target matrix, time and gain and torque for each servo
@@ -42,7 +42,7 @@ import "Vector.proto";
     /// Target right foot position to torso
     mat4 Htr = 2;
     /// Gain and torque of each servo, in the order of ID in the RightLeg message
-    repeated ServoCommand.ServoState servos = 3;
+    repeated ServoState servos = 3;
   }
 
   /// Head motion information including look direction, time and gain and torque for each servo
@@ -52,5 +52,5 @@ import "Vector.proto";
     /// Vector for the head to look towards
     vec3 uPCt = 2;  // todo: check if this is right
     /// Gain and torque of each servo, in the order of ID in the Head message
-    repeated ServoCommand.ServoState servos = 3;
+    repeated ServoState servos = 3;
   }

@@ -36,7 +36,7 @@ namespace module::motion {
     using message::motion::LeftLegIK;
     using message::motion::RightArm;
     using message::motion::RightLegIK;
-    using message::motion::ServoCommand;
+    using message::motion::ServoState;
     using message::motion::StopCommand;
     using message::motion::WalkCommand;
 
@@ -102,12 +102,12 @@ namespace module::motion {
             }
         }
 
-        config.arm_positions.emplace_back(ServoID::R_SHOULDER_PITCH, cfg["arms"]["right_shoulder_pitch"].as<float>());
-        config.arm_positions.emplace_back(ServoID::L_SHOULDER_PITCH, cfg["arms"]["left_shoulder_pitch"].as<float>());
-        config.arm_positions.emplace_back(ServoID::R_SHOULDER_ROLL, cfg["arms"]["right_shoulder_roll"].as<float>());
-        config.arm_positions.emplace_back(ServoID::L_SHOULDER_ROLL, cfg["arms"]["left_shoulder_roll"].as<float>());
-        config.arm_positions.emplace_back(ServoID::R_ELBOW, cfg["arms"]["right_elbow"].as<float>());
-        config.arm_positions.emplace_back(ServoID::L_ELBOW, cfg["arms"]["left_elbow"].as<float>());
+        config.arm_positions[ServoID::R_SHOULDER_PITCH] = cfg["arms"]["right_shoulder_pitch"].as<float>();
+        config.arm_positions[ServoID::L_SHOULDER_PITCH] = cfg["arms"]["left_shoulder_pitch"].as<float>();
+        config.arm_positions[ServoID::R_SHOULDER_ROLL]  = cfg["arms"]["right_shoulder_roll"].as<float>();
+        config.arm_positions[ServoID::L_SHOULDER_ROLL]  = cfg["arms"]["left_shoulder_roll"].as<float>();
+        config.arm_positions[ServoID::R_ELBOW]          = cfg["arms"]["right_elbow"].as<float>();
+        config.arm_positions[ServoID::L_ELBOW]          = cfg["arms"]["left_elbow"].as<float>();
     }
 
     QuinticWalk::QuinticWalk(std::unique_ptr<NUClear::Environment> environment)
@@ -343,38 +343,32 @@ namespace module::motion {
 
 
         emit<Task>(left_leg);
-        // emit<Task>(right_leg);
+        emit<Task>(right_leg);
 
 
-        // auto left_arm  = std::make_unique<LeftArm>();
-        // auto right_arm = std::make_unique<RightArm>();
-        // left_arm->servos.emplace_back(
-        //     time,
-        //     current_config.arm_positions[ServoID::L_SHOULDER_PITCH],
-        //     std::make_unique<ServoState>(current_config.jointGains[ServoID::L_SHOULDER_PITCH], 100));
-        // left_arm->servos.emplace_back(
-        //     time,
-        //     current_config.arm_positions[ServoID::L_SHOULDER_ROLL],
-        //     std::make_unique<ServoState>(current_config.jointGains[ServoID::L_SHOULDER_ROLL], 100));
-        // left_arm->servos.emplace_back(time,
-        //                               current_config.arm_positions[ServoID::L_ELBOW],
-        //                               std::make_unique<ServoState>(current_config.jointGains[ServoID::L_ELBOW],
-        //                               100));
+        auto left_arm  = std::make_unique<LeftArm>();
+        auto right_arm = std::make_unique<RightArm>();
+        left_arm->servos.emplace_back(time,
+                                      current_config.arm_positions[ServoID::L_SHOULDER_PITCH],
+                                      ServoState(current_config.jointGains[ServoID::L_SHOULDER_PITCH], 100));
+        left_arm->servos.emplace_back(time,
+                                      current_config.arm_positions[ServoID::L_SHOULDER_ROLL],
+                                      ServoState(current_config.jointGains[ServoID::L_SHOULDER_ROLL], 100));
+        left_arm->servos.emplace_back(time,
+                                      current_config.arm_positions[ServoID::L_ELBOW],
+                                      ServoState(current_config.jointGains[ServoID::L_ELBOW], 100));
 
-        // right_arm->servos.emplace_back(
-        //     time,
-        //     current_config.arm_positions[ServoID::R_SHOULDER_PITCH],
-        //     std::make_unique<ServoState>(current_config.jointGains[ServoID::R_SHOULDER_PITCH], 100));
-        // right_arm->servos.emplace_back(
-        //     time,
-        //     current_config.arm_positions[ServoID::R_SHOULDER_ROLL],
-        //     std::make_unique<ServoState>(current_config.jointGains[ServoID::R_SHOULDER_ROLL], 100));
-        // right_arm->servos.emplace_back(time,
-        //                                current_config.arm_positions[ServoID::R_ELBOW],
-        //                                std::make_unique<ServoState>(current_config.jointGains[ServoID::R_ELBOW],
-        //                                100));
-        // emit<Task>(left_arm);
-        // emit<Task>(right_arm);
+        right_arm->servos.emplace_back(time,
+                                       current_config.arm_positions[ServoID::R_SHOULDER_PITCH],
+                                       ServoState(current_config.jointGains[ServoID::R_SHOULDER_PITCH], 100));
+        right_arm->servos.emplace_back(time,
+                                       current_config.arm_positions[ServoID::R_SHOULDER_ROLL],
+                                       ServoState(current_config.jointGains[ServoID::R_SHOULDER_ROLL], 100));
+        right_arm->servos.emplace_back(time,
+                                       current_config.arm_positions[ServoID::R_ELBOW],
+                                       ServoState(current_config.jointGains[ServoID::R_ELBOW], 100));
+        emit<Task>(left_arm);
+        emit<Task>(right_arm);
 
         // google.protobuf.Timestamp time = 1;
         // /// Target left foot position to torso
@@ -417,13 +411,9 @@ namespace module::motion {
                                              100);
         }
 
-        for (const auto& joint : current_config.arm_positions) {
-            waypoints->commands.emplace_back(subsumption_id,
-                                             time,
-                                             joint.first,
-                                             joint.second,
-                                             current_config.jointGains[joint.first],
-                                             100);
+        for (const auto& [servo_id, joint] : current_config.arm_positions) {
+            waypoints->commands
+                .emplace_back(subsumption_id, time, servo_id, joint, current_config.jointGains[servo_id], 100);
         }
 
         return waypoints;

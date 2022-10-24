@@ -53,7 +53,6 @@ namespace module::motion {
             for (long unsigned int i = 0; i < joints.size(); i++) {
                 servos->servos.emplace_back(leg_ik.time, joints[i].second, leg_ik.servos[i]);
             }
-            log<NUClear::DEBUG>("Emitting left leg request from a left leg IK provider.");
             emit<Task>(servos);
         });
 
@@ -71,7 +70,6 @@ namespace module::motion {
             for (long unsigned int i = 0; i < joints.size(); i++) {
                 servos->servos.emplace_back(leg_ik.time, joints[i].second, leg_ik.servos[i]);
             }
-            log<NUClear::DEBUG>("Emitting right leg request from a right leg IK provider.");
             emit<Task>(servos);
         });
 
@@ -89,7 +87,6 @@ namespace module::motion {
             for (long unsigned int i = 0; i < joints.size(); i++) {
                 servos->servos.emplace_back(head_ik.time, joints[i].second, head_ik.servos[i]);
             }
-            log<NUClear::DEBUG>("Emitting head request from a head IK provider.");
             emit<Task>(servos);
         });
     }

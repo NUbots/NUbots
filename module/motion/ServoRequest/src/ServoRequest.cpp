@@ -90,7 +90,6 @@ namespace module::motion {
                 //     return;
                 // }
 
-                log<NUClear::DEBUG>("Emitting servo requests from left leg provider.");
                 // Emit tasks for each servo
                 emit<Task>(std::make_unique<LeftHipYaw>(leg.servos[LeftLeg::ID::LEFT_HIP_YAW]));
                 emit<Task>(std::make_unique<LeftHipRoll>(leg.servos[LeftLeg::ID::LEFT_HIP_ROLL]));
@@ -341,7 +340,6 @@ namespace module::motion {
                 //     emit<Task>(std::make_unique<Done>());
                 //     return;
                 // }
-                log<NUClear::DEBUG>("Left hip roll emitting servo target.");
                 emit(std::make_unique<ServoTarget>(servo.command.time,
                                                    ServoID::L_HIP_ROLL,
                                                    servo.command.position,

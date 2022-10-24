@@ -50,7 +50,7 @@ namespace module::motion {
             WalkingParameter params{};
 
             std::map<utility::input::ServoID, float> jointGains{};
-            std::vector<std::pair<utility::input::ServoID, float>> arm_positions{};
+            std::map<utility::input::ServoID, float> arm_positions{};
         } normal_config{}, goalie_config{};
 
         static void load_quintic_walk(const ::extension::Configuration& cfg, Config& config);

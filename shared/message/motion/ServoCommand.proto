@@ -23,14 +23,15 @@ package message.motion;
 
 import "google/protobuf/timestamp.proto";
 
+message ServoState {
+    /// Proportional gain. In proportion to the servo's position error. Gain
+    /// values are in range 0~254. K_p : p_gain / 8
+    float gain = 1;
+    /// Used to set the servo on or off. Typically either 0 (off) or 100 (on)
+    float torque = 2;
+}
+
 message ServoCommand {
-    message ServoState {
-        /// Proportional gain. In proportion to the servo's position error. Gain
-        /// values are in range 0~254. K_p : p_gain / 8
-        float gain = 1;
-        /// Used to set the servo on or off. Typically either 0 (off) or 100 (on)
-        float torque = 2;
-    }
     /// When the target was created
     google.protobuf.Timestamp time = 1;
     /// The position value of the destination. 0 to 4,095 (0xFFF) is available.
