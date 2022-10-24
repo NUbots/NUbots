@@ -1,5 +1,6 @@
 var NAVTREEINDEX7 =
 {
+"structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4.html#a2e986fc1b3f90e500bf11f41e518fa86":[1,0,6,0,1],
 "structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4.html#aa2ca74461028854bae4954718fc3783f":[1,0,6,0,0],
 "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4.html":[1,0,6,4],
 "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4.html#a838f2e8c7dcaa81cafe9b24d8cf7a7d7":[1,0,6,4,1],
@@ -248,6 +249,5 @@ var NAVTREEINDEX7 =
 "structmodule_1_1extension_1_1Director_1_1OkSolution.html#a027cf073c6972549cfd5081901646c7b":[1,0,2,1,1,0,0],
 "structmodule_1_1extension_1_1Director_1_1OkSolution.html#a233f67927bc97233c6cc7e5a8d48b7ac":[1,0,2,1,1,0,2],
 "structmodule_1_1extension_1_1Director_1_1OkSolution.html#a3185bec3e4e9736bb8f53c687c47d55f":[1,0,2,1,1,0,1],
-"structmodule_1_1extension_1_1Director_1_1OkSolution.html#a76a689447d97948ec312c3caf0af0e03":[1,0,2,1,1,0,6],
-"structmodule_1_1extension_1_1Director_1_1OkSolution.html#ab4433b10d5a372a0f657bb0551f25e5d":[1,0,2,1,1,0,4]
+"structmodule_1_1extension_1_1Director_1_1OkSolution.html#a76a689447d97948ec312c3caf0af0e03":[1,0,2,1,1,0,6]
 };

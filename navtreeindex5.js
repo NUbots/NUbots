@@ -1,5 +1,6 @@
 var NAVTREEINDEX5 =
 {
+"classutility_1_1io_1_1uart.html#ac243011d992751019819f26bde7f23dc":[1,0,5,3,0,4],
 "classutility_1_1io_1_1uart.html#adad0e0c79fc9b2f58572ba64df373769":[1,0,5,3,0,5],
 "classutility_1_1io_1_1uart.html#adf4728cbc36031cb3d14549b144b2133":[1,0,5,3,0,11],
 "classutility_1_1math_1_1filter_1_1ParticleFilter.html":[1,0,5,4,0,0],
@@ -248,6 +249,5 @@ var NAVTREEINDEX5 =
 "classutility_1_1nbs_1_1Encoder.html#afa47332567825131f4f5661520ba235c":[1,0,5,6,1,8],
 "classutility_1_1nbs_1_1Index.html":[1,0,5,6,2],
 "classutility_1_1nbs_1_1Index.html#a5d8687eca5600b6a456db886ffafd732":[1,0,5,6,2,0],
-"classutility_1_1nbs_1_1Index.html#a99da9d60d8b19e3231f24290fb774db7":[1,0,5,6,2,1],
-"classutility_1_1nbs_1_1Index.html#a9febb1350147411289ed06345ed4adbc":[1,0,5,6,2,3]
+"classutility_1_1nbs_1_1Index.html#a99da9d60d8b19e3231f24290fb774db7":[1,0,5,6,2,1]
 };

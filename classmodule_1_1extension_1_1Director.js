@@ -34,6 +34,7 @@ var classmodule_1_1extension_1_1Director =
     [ "solve_task", "classmodule_1_1extension_1_1Director.html#a628a3a685aa2f7ba16dbe7c4cb1228a6", null ],
     [ "solve_when", "classmodule_1_1extension_1_1Director.html#ae18a92c25e5fdf99e8a133f465cbe462", null ],
     [ "InformationSource", "classmodule_1_1extension_1_1Director.html#a8bb1cbbac1238620c272ee22344093e9", null ],
+    [ "director_mutex", "classmodule_1_1extension_1_1Director.html#adf79e402d0c8f9daee55f5be9ea994e9", null ],
     [ "groups", "classmodule_1_1extension_1_1Director.html#a5229764df175d487be239513c912bdf1", null ],
     [ "pack_builder", "classmodule_1_1extension_1_1Director.html#a5797114c77d8b75a962f4e19dfd0d5bd", null ],
     [ "providers", "classmodule_1_1extension_1_1Director.html#a420ddbdc1d8df6ce35e6c938e760fae4", null ],

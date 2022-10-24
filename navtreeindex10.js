@@ -1,5 +1,6 @@
 var NAVTREEINDEX10 =
 {
+"structmodule_1_1platform_1_1Webots_1_1CameraContext.html#aacc16712dff38c94e32ace20c9fdc177":[1,0,2,7,1,0,3],
 "structmodule_1_1platform_1_1Webots_1_1CameraContext.html#ae1f6f508a18aedc1614091cc4ea22773":[1,0,2,7,1,0,1],
 "structmodule_1_1platform_1_1Webots_1_1ServoState.html":[1,0,2,7,1,1],
 "structmodule_1_1platform_1_1Webots_1_1ServoState.html#a0448d2f30960523b2b091146e7770c1d":[1,0,2,7,1,1,8],
@@ -248,6 +249,5 @@ var NAVTREEINDEX10 =
 "structutility_1_1math_1_1ransac_1_1NPartiteRansac.html#ab61268591d8022034e9782a0fa2b61ab":[1,0,5,4,2,0,2],
 "structutility_1_1math_1_1ransac_1_1NPartiteRansac.html#abba1ec1a83d5177613770f896525caf4":[1,0,5,4,2,0,0],
 "structutility_1_1math_1_1ransac_1_1NPartiteRansac.html#ae7dff3235ab29b308da2fa3639b71512":[1,0,5,4,2,0,3],
-"structutility_1_1math_1_1ransac_1_1Ransac.html":[1,0,5,4,2,1],
-"structutility_1_1math_1_1ransac_1_1Ransac.html#a208a03e3eb735993620ef8947f4073d3":[1,0,5,4,2,1,4]
+"structutility_1_1math_1_1ransac_1_1Ransac.html":[1,0,5,4,2,1]
 };
