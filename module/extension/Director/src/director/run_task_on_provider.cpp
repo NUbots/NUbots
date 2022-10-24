@@ -38,7 +38,7 @@ namespace module::extension {
         if (run_start_providers) {
             for (auto& provider : group.providers) {
                 if (provider->classification == Provider::Classification::START) {
-                    // We have to swap to this as the active provdider so it can actually run
+                    // We have to swap to this as the active provider so it can actually run
                     group.active_provider = provider;
 
                     auto lock = hold_run_reason(RunInfo::RunReason::STARTED);
