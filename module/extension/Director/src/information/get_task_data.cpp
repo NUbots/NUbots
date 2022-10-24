@@ -22,6 +22,7 @@
 namespace module::extension {
 
     std::shared_ptr<void> Director::_get_task_data(const uint64_t& reaction_id) {
+        std::lock_guard<std::recursive_mutex> lock(director_mutex);
 
         // How did we get here?
         if (!providers.contains(reaction_id)) {
