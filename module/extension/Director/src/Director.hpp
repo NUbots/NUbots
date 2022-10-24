@@ -253,42 +253,6 @@ namespace module::extension {
          */
         Solution solve_task(const std::shared_ptr<BehaviourTask>& task);
 
-        struct OkSolution {
-            OkSolution(const bool& blocked_, std::set<std::type_index>&& blocking_groups_)
-                : blocked(blocked_), blocking_groups(blocking_groups_) {}
-            OkSolution(const bool& blocked_,
-                       const std::shared_ptr<provider::Provider>& provider_,
-                       std::vector<std::shared_ptr<provider::Provider>>&& requirements_,
-                       std::set<std::type_index>&& used_,
-                       std::set<std::type_index>&& blocking_groups_)
-                : blocked(blocked_)
-                , provider(provider_)
-                , requirements(requirements_)
-                , used(used_)
-                , blocking_groups(blocking_groups_) {}
-
-            /// If this entire path is blocked and unusable
-            bool blocked;
-            /// The main provider that this solution is for
-            std::shared_ptr<provider::Provider> provider;
-            /// The list of providers that are needed for each of the requirements
-            std::vector<std::shared_ptr<provider::Provider>> requirements;
-            /// Which groups have been used in this solution
-            std::set<std::type_index> used;
-            /// Groups which we wanted to use but were blocked to us
-            std::set<std::type_index> blocking_groups;
-        };
-
-        OkSolution find_ok_solution(const Solution::Option& option, std::set<std::type_index> used_types);
-        OkSolution find_ok_solution(const Solution& requirement, const std::set<std::type_index>& used_types);
-        std::vector<OkSolution> find_ok_solutions(const std::vector<Solution>& option);
-
-        void run_task_on_provider(const std::shared_ptr<BehaviourTask>& task,
-                                  const std::shared_ptr<provider::Provider>& provider);
-
-        enum RunLevel { OK, PUSH, BLOCKED };
-        RunLevel run_tasks(provider::ProviderGroup& group, const TaskList& pack, const RunLevel& run_level);
-
         /**
          * Represents a solution that we can run now, i.e. we can run all of the providers in this solution.
          *
