@@ -61,7 +61,7 @@ namespace {
     };
 }  // namespace
 
-TEST_CASE("Tests that director works when a parent is challenging its needs child", "[director][needs][challenge]") {
+TEST_CASE("Test that a parent task wins when challenging its child task", "[director][needs][challenge]") {
 
     NUClear::PowerPlant::Configuration config;
     config.thread_count = 1;
