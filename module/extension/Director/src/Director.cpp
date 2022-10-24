@@ -24,6 +24,7 @@
 namespace module::extension {
 
     using ::extension::Configuration;
+    using ::extension::behaviour::RunInfo;
     using ::extension::behaviour::commands::BehaviourTask;
     using ::extension::behaviour::commands::CausingExpression;
     using ::extension::behaviour::commands::NeedsExpression;
@@ -33,6 +34,9 @@ namespace module::extension {
     using provider::Provider;
     using provider::ProviderGroup;
     using Unbind = NUClear::dsl::operation::Unbind<ProvideReaction>;
+
+
+    thread_local RunInfo::RunReason Director::current_run_reason = RunInfo::RunReason::OTHER_TRIGGER;
 
     /**
      * This message gets emitted when a state we are monitoring is updated.
