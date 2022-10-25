@@ -5,4 +5,4 @@ matlab_priority: 3
 
 tcp_port: 10013
 
-servo_gain: 10
+servo_gain: 15

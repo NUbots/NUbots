@@ -56,6 +56,9 @@ namespace module::platform {
         /// @brief The result of creating the server
         bool server_successful = false;
 
+        /// @brief The result of receiving message from Matlab
+        bool receive_successful = false;
+
         std::array<float, n_servos> joint_values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 

@@ -152,6 +152,9 @@ namespace module::platform {
                         }
                     }
 
+                    // Update received joint values status
+                    receive_successful = true;
+
                     // Close the client socket
                     close(client_fd);
                 }
@@ -161,7 +164,7 @@ namespace module::platform {
         on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>().then([this] {
             log<NUClear::DEBUG>("HI");
             // If server successfully created, listen for joint values
-            if (server_successful) {
+            if (server_successful && receive_successful) {
                 // Create servo_commands message
                 auto servo_commands = std::make_unique<ServoCommands>();
                 servo_commands->commands.reserve(n_servos);
