@@ -31,7 +31,9 @@
 
 #include "message/behaviour/ServoCommand.hpp"
 
-#include "utility/input/ServoID.hpp"
+#include "utility/behaviour/Action.hpp"
+#include "utility/input/LimbID.hpp"
+
 
 namespace module::platform {
 
@@ -39,39 +41,136 @@ namespace module::platform {
 
     using message::behaviour::ServoCommands;
 
+    using utility::behaviour::ActionPriorities;
+    using utility::behaviour::RegisterAction;
+    using utility::input::LimbID;
     using utility::input::ServoID;
 
 
     Matlab::Matlab(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), subsumption_id(size_t(this) * size_t(this) - size_t(this)) {
+        // do a little configurating
         on<Configuration>("Matlab.yaml").then([this](const Configuration& config) {
             log_level      = config["log_level"].as<NUClear::LogLevel>();
-            cfg.tcp_port   = config["TCP_PORT"];
-            cfg.timestep   = config["TIMESTEP"];
-            cfg.servo_gain = config["SERVO_GAIN"];
-            cfg.n_servos   = config["N_SERVOS"];
+            cfg.tcp_port   = config["tcp_port"];
+            cfg.servo_gain = config["servo_gain"];
 
 
-            // Start you server
-            log<NUClear::DEBUG>("Matlab server started");
+            // Configure the server
+            address.sin_family      = AF_INET;
+            address.sin_addr.s_addr = INADDR_ANY;
+            address.sin_port        = htons(cfg.tcp_port);
+            int option              = 1;
+            uint addrlen            = sizeof(address);
 
-            std::unique_ptr<MatlabServer> robot = std::make_unique<MatlabServer>(cfg.timestep, cfg.tcp_port);
-            robot->run();
+            server_fd      = socket(AF_INET, SOCK_STREAM, 0);  // If 0, socket failed
+            int svr_opt    = setsockopt(server_fd,
+                                     SOL_SOCKET,
+                                     SO_REUSEADDR | SO_REUSEPORT,
+                                     &option,
+                                     sizeof(option));                                       // If !0, failed
+            int svr_bind   = bind(server_fd, reinterpret_cast<sockaddr*>(&address), addrlen);  // If < 0, failed
+            int svr_listen = listen(server_fd, 1);                                             // If < 0, failed
 
-            // Convert the joint values into the correct format
-            // auto waypoints = std::make_unique<ServoCommands>();
-            // waypoints->commands.reserve(cfg.n_servos);
+            if (server_fd == 0 || svr_opt != 0 || svr_bind < 0 || svr_listen < 0) {
+                log<NUClear::WARN>("Establishing Server Failed...");
+                log<NUClear::DEBUG>("server_fd: ", server_fd);
+                log<NUClear::DEBUG>("svr_opt: ", svr_opt);
+                log<NUClear::DEBUG>("svr_bind: ", svr_bind);
+                log<NUClear::DEBUG>("svr_listen: ", svr_listen);
+                log<NUClear::DEBUG>("sin_addr: ", inet_ntoa(address.sin_addr));
+            }
+            else {
+                log<NUClear::INFO>("Establishing Server Succeeded.");
+            }
+        });
 
-            // const NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(cfg.timestep);
+        emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
+            RegisterAction{subsumption_id,
+                           "Matlab",
+                           {
+                               // Limb sets required by the walk engine:
+                               std::pair<double, std::set<LimbID>>(
+                                   0,
+                                   {LimbID::LEFT_LEG, LimbID::RIGHT_LEG, LimbID::LEFT_ARM, LimbID::RIGHT_ARM}),
+                           },
+                           [this](const std::set<LimbID>& given_limbs) {
+                               // nothing
+                           },
+                           [this](const std::set<LimbID>& taken_limbs) {
+                               // nothing
+                           },
+                           [](const std::set<ServoID>& /*unused*/) {
+                               // nothing
+                           }}));
 
-            // for (const auto& joint : joints) {
-            //     waypoints->commands.emplace_back(subsumption_id, time, joint.first, joint.second, cfg.servo_gain,
-            //     100);
-            // }
 
+        // Every timestep, we want to send the current joint values to the robot
+        on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>().then([this] {
+            // Create servo_commands message
+            auto servo_commands = std::make_unique<ServoCommands>();
+            servo_commands->commands.reserve(n_servos);
+            const NUClear::clock::time_point time = NUClear::clock::now();
+
+            int addrlen   = sizeof(address);
+            int client_fd = -1;
+            // client_fd =
+            //     accept(server_fd, reinterpret_cast<sockaddr*>(&address), reinterpret_cast<socklen_t*>(&addrlen));
+
+            if (client_fd > 0) {
+                std::array<float, n_servos> joint_values;
+                char buffer[256]  = {0};
+                ssize_t valread   = read(client_fd, buffer, 256);
+                char* buf_mem_add = buffer;
+                int mem_offset    = 0;
+                uint32_t iter     = 0;
+                // Read the joint values from the matlab server
+                if (valread > 0) {
+                    while (sscanf(buf_mem_add, "%e,%n", &joint_values[iter], &mem_offset) == 1) {
+                        buf_mem_add += mem_offset;
+                        iter++;
+                    }
+                }
+
+                // Add the joint values to the servo_commands message
+                for (int i = 0; i < n_servos; i++) {
+                    servo_commands->commands
+                        .emplace_back(subsumption_id, time, servo_ids[i], joint_values[i], cfg.servo_gain, 100);
+                    log<NUClear::DEBUG>("SERVO ID ", servo_ids[i], ", Value: ", joint_values[i]);
+                }
+
+                // Emit servo commands them to system
+                emit(std::move(servo_commands));
+
+                // Update the priority in the subsumption system
+                update_priority(cfg.matlab_priority);
+
+                // Close the client socket
+                close(client_fd);
+            }
+
+            // ****** TESTING: Send random servo values ***** //
+            for (uint32_t i = 0; i < n_servos; i++) {
+                float random   = ((float) rand()) / (float) RAND_MAX;
+                float min      = -3.14;
+                float max      = 3.14;
+                float range    = max - min;
+                float rand_num = (random * range) + min;
+                servo_commands->commands.emplace_back(subsumption_id, time, i, rand_num, cfg.servo_gain, 100);
+            }
 
             // Emit them to system
+            emit(std::move(servo_commands));
+
+            // Update the priority
+            update_priority(cfg.matlab_priority);
+
+            // Close the client socket
+            close(client_fd);
         });
     }
 
+    void Matlab::update_priority(const float& priority) {
+        emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {priority}}));
+    }
 }  // namespace module::platform

@@ -1,10 +1,8 @@
 # Controls the minimum log level that NUClear log will display
 log_level: DEBUG
 
-TCP_PORT: 10013
+matlab_priority: 3
 
-TIMESTEP: 0.1
+tcp_port: 10013
 
-SERVO_GAIN: 10
-
-N_SERVOS: 20
+servo_gain: 10

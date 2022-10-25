@@ -30,24 +30,65 @@
 #include <string>
 #include <vector>
 
+#include "utility/input/ServoID.hpp"
+
 namespace module::platform {
+
+    using utility::input::ServoID;
 
     class Matlab : public NUClear::Reactor {
     private:
         /// @brief The id registered in the subsumption system for this module
         const size_t subsumption_id;
 
+        /// @brief The update frequency for requesting data from Matlab
+        static constexpr int UPDATE_FREQUENCY = 1;
+
+        /// @brief
+        int server_fd;
+
+        /// @brief
+        struct sockaddr_in address;
+
+        /// @brief Number of servos in the message from Matlab
+        static const int n_servos = 18;
+
+        /// @brief The order of servo ids in the message from Matlab
+        const std::array<ServoID, n_servos> servo_ids = {ServoID::R_ANKLE_ROLL,
+                                                         ServoID::R_ANKLE_PITCH,
+                                                         ServoID::R_KNEE,
+                                                         ServoID::R_HIP_PITCH,
+                                                         ServoID::R_HIP_ROLL,
+                                                         ServoID::R_HIP_YAW,
+                                                         ServoID::L_HIP_YAW,
+                                                         ServoID::L_HIP_ROLL,
+                                                         ServoID::L_HIP_PITCH,
+                                                         ServoID::L_KNEE,
+                                                         ServoID::L_ANKLE_PITCH,
+                                                         ServoID::L_ANKLE_ROLL,
+                                                         ServoID::R_SHOULDER_PITCH,
+                                                         ServoID::R_SHOULDER_ROLL,
+                                                         ServoID::R_ELBOW,
+                                                         ServoID::L_ELBOW,
+                                                         ServoID::L_SHOULDER_ROLL,
+                                                         ServoID::L_SHOULDER_PITCH};
+
         struct Config {
             Config() = default;
-            // port
+
+            /// @brief Port of the server
             uint16_t tcp_port;
 
-            double timestep;
-
+            /// @brief The gains for servo commands sent from Matlab
             double servo_gain;
 
-            int n_servos;
+            /// @brief The priority of the Matlab module
+            float matlab_priority;
         } cfg;
+
+        /// @brief Updates the priority of the module by emitting an ActionPriorities message
+        /// @param priority The priority used in the ActionPriorities message
+        void update_priority(const float& priority);
 
     public:
         /// @brief Called by the powerplant to build and setup the webots reactor

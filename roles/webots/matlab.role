@@ -20,15 +20,8 @@ nuclear_role(
   # Network
   network::NUClearNet
   network::PlotJuggler
-  # Motion
-  # motion::QuinticWalk
-  # motion::HeadController
-  # motion::ScriptEngine
-  # # Behaviour
-  # behaviour::Controller
-  # behaviour::skills::Getup
-  # behaviour::skills::Stand
-  # behaviour::skills::KickScript
-  # behaviour::skills::DirectWalkController
-  # behaviour::strategy::KeyboardWalk
+  # Motion motion::QuinticWalk motion::HeadController motion::ScriptEngine # Behaviour
+  behaviour::Controller
+  # behaviour::skills::Getup behaviour::skills::Stand behaviour::skills::KickScript
+  # behaviour::skills::DirectWalkController behaviour::strategy::KeyboardWalk
 )
