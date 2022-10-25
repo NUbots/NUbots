@@ -23,6 +23,33 @@
 #include <memory>
 #include <typeindex>
 
+namespace extension::behaviour {
+
+    /**
+     * Provides information about how and why this provider was executed.
+     */
+    struct RunInfo {
+        enum RunReason {
+            /// Something other than the Director caused this reaction to execute
+            OTHER_TRIGGER,
+            /// A new task has been given to this provider
+            NEW_TASK,
+            /// The provider has been started (will happen on on<Started<X>>)
+            STARTED,
+            /// The provider has been stopped (will happen on on<Stopped<X>>)
+            STOPPED,
+            /// A subtask has finished and emitted a Done message
+            SUBTASK_DONE,
+            /// Another task requires a causing from this provider and pushed it to run
+            PUSHED
+        };
+
+        /// The reason we executed
+        RunReason run_reason;
+    };
+
+}  // namespace extension::behaviour
+
 namespace extension::behaviour::information {
 
     /**
@@ -45,11 +72,21 @@ namespace extension::behaviour::information {
          */
         virtual std::shared_ptr<void> _get_task_data(const uint64_t& reaction_id) = 0;
 
+
+        /**
+         * @brief Internal get run information. Is overridden by the class that is acting as the information source.
+         *
+         * @param reaction_id the reaction id of the reaction that is asking for data
+         *
+         * @return a RunInfo struct containing information about the current run
+         */
+        virtual RunInfo _get_run_info(const uint64_t& reaction_id) = 0;
+
     public:
         virtual ~InformationSource() = default;
 
         /**
-         * @brief Static method that redirects to the singleton instance providing the InformationSource
+         * @brief Gets the data for the passed providers reaction id from the information source
          *
          * @param reaction_id the reaction id of the reaction that is asking for data
          *
@@ -57,6 +94,17 @@ namespace extension::behaviour::information {
          */
         static std::shared_ptr<void> get_task_data(const uint64_t& reaction_id) {
             return source->_get_task_data(reaction_id);
+        }
+
+        /**
+         * @brief Gets information about why the current task is running from the information source
+         *
+         * @param reaction_id the reaction id of the reaction that is asking for data
+         *
+         * @return a RunInfo struct containing information about the current run
+         */
+        static RunInfo get_run_info(const uint64_t& reaction_id) {
+            return source->_get_run_info(reaction_id);
         }
     };
 

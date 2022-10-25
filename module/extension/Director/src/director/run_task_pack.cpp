@@ -21,6 +21,7 @@
 
 namespace module::extension {
 
+    using ::extension::behaviour::RunInfo;
     using provider::Provider;
     using provider::ProviderGroup;
 
@@ -84,8 +85,7 @@ namespace module::extension {
                         if (current_task != nullptr
                             && providers.at(current_task->requester_id)->type
                                    == providers.at(new_task->requester_id)->type) {
-
-                            run_task_on_provider(new_task, main_provider);
+                            run_task_on_provider(new_task, main_provider, RunInfo::RunReason::NEW_TASK);
                         }
                         else {
                             if (current_task != nullptr) {
@@ -113,7 +113,7 @@ namespace module::extension {
                             }
 
                             // Run this specific task using this specific provider
-                            run_task_on_provider(new_task, main_provider);
+                            run_task_on_provider(new_task, main_provider, RunInfo::RunReason::NEW_TASK);
                         }
                     }
                 }
@@ -174,7 +174,10 @@ namespace module::extension {
                     remove_task(task);
                 }
                 else {
-                    run_task_on_provider(parent_group.active_task, parent_group.active_provider);
+                    // TODO(thouliston) check somehow if this provider is equipped to handle done
+                    run_task_on_provider(parent_group.active_task,
+                                         parent_group.active_provider,
+                                         RunInfo::RunReason::SUBTASK_DONE);
                 }
 
                 if (pack.second.size() > 1) {

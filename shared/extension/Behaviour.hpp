@@ -69,8 +69,12 @@ namespace extension::behaviour {
          * @return the information needed by the on statement
          */
         template <typename DSL>
-        static inline std::shared_ptr<T> get(NUClear::threading::Reaction& r) {
-            return std::static_pointer_cast<T>(information::InformationSource::get_task_data(r.id));
+        static inline std::tuple<std::shared_ptr<const T>, std::shared_ptr<const RunInfo>> get(
+            NUClear::threading::Reaction& r) {
+
+            auto run_info = std::make_shared<RunInfo>(information::InformationSource::get_run_info(r.id));
+            auto run_data = std::static_pointer_cast<T>(information::InformationSource::get_task_data(r.id));
+            return std::make_tuple(run_data, run_info);
         }
 
         /**
@@ -350,9 +354,10 @@ namespace extension::behaviour {
         template <typename T>
         using Uses = ::extension::behaviour::Uses<T>;
         template <typename T>
-        using Task = ::extension::behaviour::Task<T>;
-        using Done = ::extension::behaviour::Done;
-        using Idle = ::extension::behaviour::Idle;
+        using Task    = ::extension::behaviour::Task<T>;
+        using RunInfo = ::extension::behaviour::RunInfo;
+        using Done    = ::extension::behaviour::Done;
+        using Idle    = ::extension::behaviour::Idle;
     };
 
 }  // namespace extension::behaviour
