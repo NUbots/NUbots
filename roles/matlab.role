@@ -5,11 +5,8 @@ nuclear_role(
   # support::logging::FileLogHandler
   support::logging::ConsoleLogHandler
   # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
-  # motion::KinematicsConfiguration
-  # Support and Configuration
-  # support::configuration::GlobalConfig
-  # support::configuration::SoccerConfig
-  # NUsight
+  # motion::KinematicsConfiguration Support and Configuration support::configuration::GlobalConfig
+  # support::configuration::SoccerConfig NUsight
   network::NUClearNet
   network::NetworkForwarder
   output::Overview
@@ -20,15 +17,8 @@ nuclear_role(
   # Network
   network::NUClearNet
   network::PlotJuggler
-  # Motion
-  # motion::QuinticWalk
-  # motion::HeadController
-  # motion::ScriptEngine
-  # # Behaviour
-  # behaviour::Controller
-  # behaviour::skills::Getup
-  # behaviour::skills::Stand
-  # behaviour::skills::KickScript
-  # behaviour::skills::DirectWalkController
-  # behaviour::strategy::KeyboardWalk
+  # Motion motion::QuinticWalk motion::HeadController motion::ScriptEngine # Behaviour
+  behaviour::Controller
+  # behaviour::skills::Getup behaviour::skills::Stand behaviour::skills::KickScript
+  # behaviour::skills::DirectWalkController behaviour::strategy::KeyboardWalk
 )

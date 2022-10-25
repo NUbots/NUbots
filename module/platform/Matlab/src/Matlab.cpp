@@ -55,23 +55,22 @@ namespace module::platform {
             cfg.tcp_port   = config["tcp_port"];
             cfg.servo_gain = config["servo_gain"];
 
-
             // Configure the server
             address.sin_family      = AF_INET;
             address.sin_addr.s_addr = INADDR_ANY;
             address.sin_port        = htons(cfg.tcp_port);
             int option              = 1;
             uint addrlen            = sizeof(address);
-
-            server_fd      = socket(AF_INET, SOCK_STREAM, 0);  // If 0, socket failed
-            int svr_opt    = setsockopt(server_fd,
+            server_fd               = socket(AF_INET, SOCK_STREAM, 0);  // If 0, socket failed
+            int svr_opt             = setsockopt(server_fd,
                                      SOL_SOCKET,
                                      SO_REUSEADDR | SO_REUSEPORT,
                                      &option,
-                                     sizeof(option));                                       // If !0, failed
+                                     sizeof(option));                              // If !0, failed
             int svr_bind   = bind(server_fd, reinterpret_cast<sockaddr*>(&address), addrlen);  // If < 0, failed
             int svr_listen = listen(server_fd, 1);                                             // If < 0, failed
 
+            // Check if the server is configured correctly
             if (server_fd == 0 || svr_opt != 0 || svr_bind < 0 || svr_listen < 0) {
                 log<NUClear::WARN>("Establishing Server Failed...");
                 log<NUClear::DEBUG>("server_fd: ", server_fd);
@@ -79,9 +78,13 @@ namespace module::platform {
                 log<NUClear::DEBUG>("svr_bind: ", svr_bind);
                 log<NUClear::DEBUG>("svr_listen: ", svr_listen);
                 log<NUClear::DEBUG>("sin_addr: ", inet_ntoa(address.sin_addr));
+                // Set the connection status to false
+                server_successful = false;
             }
             else {
                 log<NUClear::INFO>("Establishing Server Succeeded.");
+                // Set the connection status to true
+                server_successful = true;
             }
         });
 
@@ -107,66 +110,79 @@ namespace module::platform {
 
         // Every timestep, we want to send the current joint values to the robot
         on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>().then([this] {
-            // Create servo_commands message
-            auto servo_commands = std::make_unique<ServoCommands>();
-            servo_commands->commands.reserve(n_servos);
-            const NUClear::clock::time_point time = NUClear::clock::now();
+            // If server successfully created, listen for joint values
+            if (server_successful) {
+                int addrlen = sizeof(address);
 
-            int addrlen   = sizeof(address);
-            int client_fd = -1;
-            // client_fd =
-            //     accept(server_fd, reinterpret_cast<sockaddr*>(&address), reinterpret_cast<socklen_t*>(&addrlen));
+                fd_set set;
+                struct timeval timeout;
+                int rv;
+                FD_ZERO(&set);           /* clear the set */
+                FD_SET(server_fd, &set); /* add our file descriptor to the set */
 
-            if (client_fd > 0) {
-                std::array<float, n_servos> joint_values;
-                char buffer[256]  = {0};
-                ssize_t valread   = read(client_fd, buffer, 256);
-                char* buf_mem_add = buffer;
-                int mem_offset    = 0;
-                uint32_t iter     = 0;
-                // Read the joint values from the matlab server
-                if (valread > 0) {
-                    while (sscanf(buf_mem_add, "%e,%n", &joint_values[iter], &mem_offset) == 1) {
-                        buf_mem_add += mem_offset;
-                        iter++;
+                timeout.tv_sec  = 1 / UPDATE_FREQUENCY;
+                timeout.tv_usec = 0;
+
+                rv = select(server_fd + 2, &set, NULL, NULL, &timeout);
+                if (rv == -1) {
+                    perror("select"); /* an error occurred */
+                    log<NUClear::WARN>("Error in select");
+                }
+                else if (rv == 0) {
+                    log<NUClear::WARN>("Timeout");
+                    // printf("timeout occurred (100 u_second) \n"); /* a timeout occurred */
+                }
+                else {
+                    int client_fd = accept(server_fd,
+                                           reinterpret_cast<sockaddr*>(&address),
+                                           reinterpret_cast<socklen_t*>(&addrlen));
+
+                    if (client_fd > 0) {
+                        char buffer[256]  = {0};
+                        ssize_t valread   = read(client_fd, buffer, 256);
+                        char* buf_mem_add = buffer;
+                        int mem_offset    = 0;
+                        uint32_t iter     = 0;
+                        // Read the joint values from the matlab server
+                        if (valread > 0) {
+                            while (sscanf(buf_mem_add, "%e,%n", &joint_values[iter], &mem_offset) == 1) {
+                                buf_mem_add += mem_offset;
+                                iter++;
+                            }
+                        }
                     }
+
+                    // Close the client socket
+                    close(client_fd);
+                }
+            }
+        });
+
+        on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>>().then([this] {
+            log<NUClear::DEBUG>("HI");
+            // If server successfully created, listen for joint values
+            if (server_successful) {
+                // Create servo_commands message
+                auto servo_commands = std::make_unique<ServoCommands>();
+                servo_commands->commands.reserve(n_servos);
+                const NUClear::clock::time_point time = NUClear::clock::now();
+
+                for (uint32_t i = 0; i < n_servos; i++) {
+                    servo_commands->commands.emplace_back(subsumption_id,
+                                                          time,
+                                                          uint32_t(servo_ids[i].value),
+                                                          joint_values[i],
+                                                          cfg.servo_gain,
+                                                          100);
+                    log<NUClear::DEBUG>("SERVO ID ", servo_ids[i].value, ", Value: ", joint_values[i]);
                 }
 
-                // Add the joint values to the servo_commands message
-                for (int i = 0; i < n_servos; i++) {
-                    servo_commands->commands
-                        .emplace_back(subsumption_id, time, servo_ids[i], joint_values[i], cfg.servo_gain, 100);
-                    log<NUClear::DEBUG>("SERVO ID ", servo_ids[i], ", Value: ", joint_values[i]);
-                }
-
-                // Emit servo commands them to system
+                // Emit them to system
                 emit(std::move(servo_commands));
 
-                // Update the priority in the subsumption system
+                // // Update the priority
                 update_priority(cfg.matlab_priority);
-
-                // Close the client socket
-                close(client_fd);
             }
-
-            // ****** TESTING: Send random servo values ***** //
-            for (uint32_t i = 0; i < n_servos; i++) {
-                float random   = ((float) rand()) / (float) RAND_MAX;
-                float min      = -3.14;
-                float max      = 3.14;
-                float range    = max - min;
-                float rand_num = (random * range) + min;
-                servo_commands->commands.emplace_back(subsumption_id, time, i, rand_num, cfg.servo_gain, 100);
-            }
-
-            // Emit them to system
-            emit(std::move(servo_commands));
-
-            // Update the priority
-            update_priority(cfg.matlab_priority);
-
-            // Close the client socket
-            close(client_fd);
         });
     }
 

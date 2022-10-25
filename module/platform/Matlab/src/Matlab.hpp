@@ -42,7 +42,7 @@ namespace module::platform {
         const size_t subsumption_id;
 
         /// @brief The update frequency for requesting data from Matlab
-        static constexpr int UPDATE_FREQUENCY = 1;
+        static constexpr int UPDATE_FREQUENCY = 25;
 
         /// @brief
         int server_fd;
@@ -52,6 +52,12 @@ namespace module::platform {
 
         /// @brief Number of servos in the message from Matlab
         static const int n_servos = 18;
+
+        /// @brief The result of creating the server
+        bool server_successful = false;
+
+        std::array<float, n_servos> joint_values = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
 
         /// @brief The order of servo ids in the message from Matlab
         const std::array<ServoID, n_servos> servo_ids = {ServoID::R_ANKLE_ROLL,
