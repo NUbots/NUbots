@@ -355,7 +355,7 @@ namespace module::input {
                         // Set our timestamp to when the data was read
                         sensors->timestamp = input.time_stamp;
 
-                        sensors->voltage = input.voltage;
+                        sensors->voltage = input.battery;
 
 
                         // This checks for an error on the platform and reports it

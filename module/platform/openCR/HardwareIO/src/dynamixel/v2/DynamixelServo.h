@@ -1,5 +1,5 @@
-#ifndef MODULE_PLATFORM_NUGUS_SERVOS_H
-#define MODULE_PLATFORM_NUGUS_SERVOS_H
+#ifndef MODULE_PLATFORM_OPENCR_SERVOS_H
+#define MODULE_PLATFORM_OPENCR_SERVOS_H
 
 #include <cstdint>
 
@@ -303,4 +303,4 @@ namespace module::platform::openCR {
     };
 }  // namespace module::platform::openCR
 
-#endif  // MODULE_PLATFORM_NUGUS_SERVOS_H
+#endif  // MODULE_PLATFORM_OPENCR_SERVOS_H

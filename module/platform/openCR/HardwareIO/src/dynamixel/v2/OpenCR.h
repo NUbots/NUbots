@@ -1,5 +1,5 @@
-#ifndef MODULE_PLATFORM_NUGUS_OPENCR_H
-#define MODULE_PLATFORM_NUGUS_OPENCR_H
+#ifndef MODULE_PLATFORM_OPENCR_OPENCR_H
+#define MODULE_PLATFORM_OPENCR_OPENCR_H
 
 #include "dynamixel/v2/DynamixelDevice.h"
 
@@ -57,4 +57,4 @@ namespace module::platform::openCR {
 
 }  // namespace module::platform::openCR
 
-#endif  // MODULE_PLATFORM_NUGUS_OPENCR_H
+#endif  // MODULE_PLATFORM_OPENCR_OPENCR_H

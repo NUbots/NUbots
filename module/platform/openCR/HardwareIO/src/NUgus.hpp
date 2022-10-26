@@ -1,5 +1,5 @@
-#ifndef MODULE_PLATFORM_NUGUS_NUGUS_H
-#define MODULE_PLATFORM_NUGUS_NUGUS_H
+#ifndef MODULE_PLATFORM_OPENCR_NUGUS_HPP
+#define MODULE_PLATFORM_OPENCR_NUGUS_HPP
 
 #include <array>
 #include <stdexcept>
@@ -210,4 +210,4 @@ namespace module::platform::openCR {
 
 }  // namespace module::platform::openCR
 
-#endif  // MODULE_PLATFORM_NUGUS_NUGUS_H
+#endif  // MODULE_PLATFOR_OPENCR_NUGUS_HPP
