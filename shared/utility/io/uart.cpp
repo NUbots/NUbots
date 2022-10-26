@@ -179,8 +179,8 @@ namespace utility::io {
     }
 
     template <typename T>
-    ssize_t uart::write(const T& buf) {
-        return ::write(fd, static_cast<void*>(&buf), sizeof(T));
+    ssize_t uart::write(const T& data) {
+        return ::write(fd, static_cast<void*>(&data), sizeof(T));
     }
 
 }  // namespace utility::io
