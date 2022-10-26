@@ -167,8 +167,20 @@ namespace utility::io {
     ssize_t uart::read(void* buf, size_t count) {
         return ::read(fd, buf, count);
     }
+
+    template <typename T>
+    ssize_t uart::read(T& data) {
+        return ::read(fd, static_cast<void*>(&data), sizeof(T));
+    }
+
     // NOLINTNEXTLINE(readability-make-member-function-const)
     ssize_t uart::write(const void* buf, size_t count) {
         return ::write(fd, buf, count);
     }
+
+    template <typename T>
+    ssize_t uart::write(const T& buf) {
+        return ::write(fd, static_cast<void*>(&buf), sizeof(T));
+    }
+
 }  // namespace utility::io

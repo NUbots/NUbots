@@ -42,14 +42,14 @@ namespace utility::io {
         /**
          * @brief We can't copy these because otherwise we might close the device twice
          */
-        uart(const uart& uart) = delete;
+        uart(const uart& uart)            = delete;
         uart& operator=(const uart& uart) = delete;
 
         /**
          * @brief Moving these will call the destructors, closing the fd before trying to use it again
          * TODO(KipHamiltons) implement an RAII fd utility, which would allow the uarts to be moved without that issue
          */
-        uart(uart&&)  = delete;
+        uart(uart&&)                 = delete;
         uart& operator=(uart&& uart) = delete;
 
 
@@ -83,6 +83,16 @@ namespace utility::io {
         ssize_t read(void* buf, size_t count);
 
         /**
+         * @brief Read from the device into a structure
+         *
+         * @param data the structure to read in to
+         *
+         * @return the number of bytes that were actually read, or -1 if fail. See ::read
+         */
+        template <typename T>
+        ssize_t read(T& data);
+
+        /**
          * @brief Write bytes to the uart
          *
          * @param buf the buffer to write bytes from
@@ -91,6 +101,16 @@ namespace utility::io {
          * @return the number of bytes that were written
          */
         ssize_t write(const void* buf, size_t count);
+
+        /**
+         * @brief Write bytes to the uart
+         *
+         * @param data the data to write
+         *
+         * @return the number of bytes that were written
+         */
+        template <typename T>
+        ssize_t write(const T& data);
 
         /**
          * @brief Open the uart for the given file descriptor. Closes any currently open file.
