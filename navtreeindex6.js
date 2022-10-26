@@ -1,5 +1,8 @@
 var NAVTREEINDEX6 =
 {
+"classutility_1_1nbs_1_1Encoder.html#a96045b0f1dbc20604bf7d9a6bcb95e95":[1,0,5,6,1,7],
+"classutility_1_1nbs_1_1Encoder.html#aa844ca136c1f1f5f49c15476d838cf93":[1,0,5,6,1,2],
+"classutility_1_1nbs_1_1Encoder.html#ac341f6230c70d84ebdad4f088267af5e":[1,0,5,6,1,10],
 "classutility_1_1nbs_1_1Encoder.html#ac3873201b2c83404d3a8af13f9f475f8":[1,0,5,6,1,12],
 "classutility_1_1nbs_1_1Encoder.html#ac58eecd768a919120f8850179d261e89":[1,0,5,6,1,1],
 "classutility_1_1nbs_1_1Encoder.html#af7ffae45ec7c9863c1c897a53fb3e08f":[1,0,5,6,1,4],
@@ -246,8 +249,5 @@ var NAVTREEINDEX6 =
 "structRoboCupGameControlReturnData.html#abbc3d8a3ac6f298388d2da7a424b2294":[1,0,10,0],
 "structRobotInfo.html":[1,0,11],
 "structRobotInfo.html#aaadaeb99268bd3143d800a0a80f6f405":[1,0,11,1],
-"structRobotInfo.html#aceb887f54b437485773bc3d80518410f":[1,0,11,0],
-"structTeamInfo.html":[1,0,12],
-"structTeamInfo.html#a23ae32f3f40eb98e7b7428e031624db3":[1,0,12,3],
-"structTeamInfo.html#a2ffe64c04593c8a1a3c00bf2c597c7e4":[1,0,12,0]
+"structRobotInfo.html#aceb887f54b437485773bc3d80518410f":[1,0,11,0]
 };

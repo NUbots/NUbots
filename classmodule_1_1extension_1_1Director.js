@@ -13,6 +13,7 @@ var classmodule_1_1extension_1_1Director =
     ] ],
     [ "Director", "classmodule_1_1extension_1_1Director.html#ab5586dc9feb7878dd9a6a6234088d8a3", null ],
     [ "~Director", "classmodule_1_1extension_1_1Director.html#abbcff4d97d5456056d4c27f1771e377e", null ],
+    [ "_get_group_info", "classmodule_1_1extension_1_1Director.html#a29c9e37d2c23e6007a46e7be79b2b33e", null ],
     [ "_get_run_info", "classmodule_1_1extension_1_1Director.html#a06c8ef9a24944778876165b8b9a49160", null ],
     [ "_get_task_data", "classmodule_1_1extension_1_1Director.html#ac75deae1643268535343886608a697ea", null ],
     [ "add_causing", "classmodule_1_1extension_1_1Director.html#ae38a0f87a58faec7521d61eb4faaae7a", null ],

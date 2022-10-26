@@ -7,6 +7,7 @@ var structmodule_1_1extension_1_1provider_1_1ProviderGroup =
     [ "add_watcher", "structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#a4e2dc4a0b177618d2fc832d4ab32fc06", null ],
     [ "active_provider", "structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#a1fea85322530391dd9a6c15e11a35175", null ],
     [ "active_task", "structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#a09bdcca390843241a0e2cf04045d7144", null ],
+    [ "done", "structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#a83ef909dbfa48407aa3e304cba7efe99", null ],
     [ "providers", "structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#ab562bc6d6d7dcd4b5b68e70b77f24ec5", null ],
     [ "pushed_provider", "structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#a00975da3996479e8cd29d9d6ad8c13ac", null ],
     [ "pushing_task", "structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#aefb477daf443445e380aef3909cfafd3", null ],

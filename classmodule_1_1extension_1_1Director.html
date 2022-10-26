@@ -180,6 +180,9 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#ab5586dc9feb7878dd9a6a6234088d8a3">Director</a> (std::unique_ptr&lt; NUClear::Environment &gt; environment)</td></tr>
 <tr class="memdesc:ab5586dc9feb7878dd9a6a6234088d8a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Called by the powerplant to build and setup the <a class="el" href="classmodule_1_1extension_1_1Director.html">Director</a> reactor. <br /></td></tr>
 <tr class="separator:ab5586dc9feb7878dd9a6a6234088d8a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a29c9e37d2c23e6007a46e7be79b2b33e"><td class="memItemLeft" align="right" valign="top">::<a class="el" href="structextension_1_1behaviour_1_1GroupInfo.html">extension::behaviour::GroupInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a29c9e37d2c23e6007a46e7be79b2b33e">_get_group_info</a> (const uint64_t &amp;reaction_id, const std::type_index &amp;type) override</td></tr>
+<tr class="memdesc:a29c9e37d2c23e6007a46e7be79b2b33e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Provides the ProviderGroup data via the InformationSource interface so it can be accessed.  <a href="classmodule_1_1extension_1_1Director.html#a29c9e37d2c23e6007a46e7be79b2b33e">More...</a><br /></td></tr>
+<tr class="separator:a29c9e37d2c23e6007a46e7be79b2b33e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a06c8ef9a24944778876165b8b9a49160"><td class="memItemLeft" align="right" valign="top">::<a class="el" href="structextension_1_1behaviour_1_1RunInfo.html">extension::behaviour::RunInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1extension_1_1Director.html#a06c8ef9a24944778876165b8b9a49160">_get_run_info</a> (const uint64_t &amp;reaction_id) override</td></tr>
 <tr class="memdesc:a06c8ef9a24944778876165b8b9a49160"><td class="mdescLeft">&#160;</td><td class="mdescRight">Provides the RunInfo data via the InformationSource interface so it can be accessed.  <a href="classmodule_1_1extension_1_1Director.html#a06c8ef9a24944778876165b8b9a49160">More...</a><br /></td></tr>
 <tr class="separator:a06c8ef9a24944778876165b8b9a49160"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -268,6 +271,9 @@ Static Private Member Functions</h2></td></tr>
 <tr class="memdesc:a5a568697d3755326763a1e24eaf87208"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compares the direct priorities of two director tasks and returns true if the challenger has priority over the incumbent.  <a href="classmodule_1_1extension_1_1Director.html#a5a568697d3755326763a1e24eaf87208">More...</a><br /></td></tr>
 <tr class="separator:a5a568697d3755326763a1e24eaf87208"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td colspan="2" onclick="javascript:toggleInherit('pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource')"><img src="closed.png" alt="-"/>&#160;Static Private Member Functions inherited from <a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html">extension::behaviour::information::InformationSource</a></td></tr>
+<tr class="memitem:a383884a6c4a6227bf56ccb4e7eb1c0c4 inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structextension_1_1behaviour_1_1GroupInfo.html">GroupInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#a383884a6c4a6227bf56ccb4e7eb1c0c4">get_group_info</a> (const uint64_t &amp;reaction_id, const std::type_index &amp;type)</td></tr>
+<tr class="memdesc:a383884a6c4a6227bf56ccb4e7eb1c0c4 inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the group info object.  <a href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#a383884a6c4a6227bf56ccb4e7eb1c0c4">More...</a><br /></td></tr>
+<tr class="separator:a383884a6c4a6227bf56ccb4e7eb1c0c4 inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a00224122d516fd2ddc4cbd286c29bc3d inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="structextension_1_1behaviour_1_1RunInfo.html">RunInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#a00224122d516fd2ddc4cbd286c29bc3d">get_run_info</a> (const uint64_t &amp;reaction_id)</td></tr>
 <tr class="memdesc:a00224122d516fd2ddc4cbd286c29bc3d inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets information about why the current task is running from the information source.  <a href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#a00224122d516fd2ddc4cbd286c29bc3d">More...</a><br /></td></tr>
 <tr class="separator:a00224122d516fd2ddc4cbd286c29bc3d inherit pub_static_methods_classextension_1_1behaviour_1_1information_1_1InformationSource"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -375,6 +381,54 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>InformationSource</b
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="a29c9e37d2c23e6007a46e7be79b2b33e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a29c9e37d2c23e6007a46e7be79b2b33e">&#9670;&nbsp;</a></span>_get_group_info()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">GroupInfo module::extension::Director::_get_group_info </td>
+          <td>(</td>
+          <td class="paramtype">const uint64_t &amp;&#160;</td>
+          <td class="paramname"><em>reaction_id</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const std::type_index &amp;&#160;</td>
+          <td class="paramname"><em>type</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Provides the ProviderGroup data via the InformationSource interface so it can be accessed. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">reaction_id</td><td>the provider reaction that is requesting its information. </td></tr>
+    <tr><td class="paramname">type</td><td>the type of provider group that is being requested</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the information about the provider group that this task is running on </dd></dl>
+
+<p>Implements <a class="el" href="classextension_1_1behaviour_1_1information_1_1InformationSource.html#a39e913eda01010135b02c6ad8c62821c">extension::behaviour::information::InformationSource</a>.</p>
+
+</div>
+</div>
 <a id="a06c8ef9a24944778876165b8b9a49160"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a06c8ef9a24944778876165b8b9a49160">&#9670;&nbsp;</a></span>_get_run_info()</h2>
 
@@ -1365,6 +1419,7 @@ false if the incumbent task has equal or higher priority</dd></dl>
 <li>module/extension/Director/src/director/run_task_pack.cpp</li>
 <li>module/extension/Director/src/director/solve.cpp</li>
 <li>module/extension/Director/src/Director.cpp</li>
+<li>module/extension/Director/src/information/get_group_info.cpp</li>
 <li>module/extension/Director/src/information/get_run_info.cpp</li>
 <li>module/extension/Director/src/information/get_task_data.cpp</li>
 </ul>
@@ -1374,7 +1429,7 @@ false if the incumbent task has equal or higher priority</dd></dl>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>extension</b></li><li class="navelem"><a class="el" href="classmodule_1_1extension_1_1Director.html">Director</a></li>
-    <li class="footer">Generated on Mon Oct 24 2022 23:27:16 for NUbots by
+    <li class="footer">Generated on Wed Oct 26 2022 03:29:40 for NUbots by
     <a href="http://www.doxygen.org/index.html">
     <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.8.17 </li>
   </ul>

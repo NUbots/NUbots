@@ -45,15 +45,17 @@ var hierarchy =
     [ "extension::behaviour::commands::RootType< T >", "structextension_1_1behaviour_1_1commands_1_1RootType.html", null ],
     [ "extension::behaviour::commands::WhenExpression", "structextension_1_1behaviour_1_1commands_1_1WhenExpression.html", null ],
     [ "extension::behaviour::Done", "structextension_1_1behaviour_1_1Done.html", null ],
+    [ "extension::behaviour::GroupInfo", "structextension_1_1behaviour_1_1GroupInfo.html", null ],
     [ "extension::behaviour::Idle", "structextension_1_1behaviour_1_1Idle.html", null ],
     [ "extension::behaviour::information::InformationSource", "classextension_1_1behaviour_1_1information_1_1InformationSource.html", [
       [ "module::extension::Director", "classmodule_1_1extension_1_1Director.html", null ]
     ] ],
-    [ "extension::behaviour::Needs< Provider >", "structextension_1_1behaviour_1_1Needs.html", null ],
     [ "extension::behaviour::ProviderBase< T, classification >", "structextension_1_1behaviour_1_1ProviderBase.html", null ],
     [ "extension::behaviour::RunInfo", "structextension_1_1behaviour_1_1RunInfo.html", null ],
     [ "extension::behaviour::Task< T >", "structextension_1_1behaviour_1_1Task.html", null ],
-    [ "extension::behaviour::Uses< Provider >", "structextension_1_1behaviour_1_1Uses.html", null ],
+    [ "extension::behaviour::Uses< Provider >", "structextension_1_1behaviour_1_1Uses.html", [
+      [ "extension::behaviour::Needs< Provider >", "structextension_1_1behaviour_1_1Needs.html", null ]
+    ] ],
     [ "extension::behaviour::When< State, expr, value >", "structextension_1_1behaviour_1_1When.html", null ],
     [ "extension::Configuration", "structextension_1_1Configuration.html", null ],
     [ "extension::ExecuteScript", "structextension_1_1ExecuteScript.html", null ],
