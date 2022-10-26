@@ -1,10 +1,8 @@
 #include "Kinematics.hpp"
 
-#include <extension/Behaviour.hpp>
-
+#include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
-#include "message/input/Sensors.hpp"
 #include "message/motion/Limbs.hpp"
 #include "message/motion/LimbsIK.hpp"
 
@@ -14,7 +12,6 @@
 namespace module::motion {
 
     using extension::Configuration;
-    using message::input::Sensors;
     using message::motion::Head;
     using message::motion::HeadIK;
     using message::motion::KinematicsModel;
@@ -39,13 +36,14 @@ namespace module::motion {
                                                      [this](const KinematicsModel& model) { kinematicsModel = model; });
 
         /// @brief Calculates left leg kinematics and makes a task for the LeftLeg servos
-        on<Provide<LeftLegIK>, Needs<LeftLeg>>().then([this](const LeftLegIK& leg_ik) {
-            // If the time to reach the position is over, then stop requesting the position
-            // if (NUClear::clock::now() >= leg_ik.time) {
-            //     log<NUClear::DEBUG>("Done left leg IK");
-            //     emit<Task>(std::make_unique<Done>());
-            //     return;
-            // }
+        on<Provide<LeftLegIK>, Needs<LeftLeg>>().then([this](const LeftLegIK& leg_ik, const Uses<LeftLeg>& leg) {
+            // If the leg is done moving, then IK is done
+            if (leg.done) {
+                // emit<Task>(std::make_unique<Done>());
+                return;
+            }
+
+            // Calculate the joint positions with IK
             auto servos = std::make_unique<LeftLeg>();
             auto joints = calculateLegJoints<double>(kinematicsModel, Eigen::Affine3d(leg_ik.Htl), LimbID::LEFT_LEG);
 
@@ -57,12 +55,14 @@ namespace module::motion {
         });
 
         /// @brief Calculates right leg kinematics and makes a task for the RightLeg servos
-        on<Provide<RightLegIK>, Needs<RightLeg>>().then([this](const RightLegIK leg_ik) {
-            // If the time to reach the position is over, then stop requesting the position
-            // if (NUClear::clock::now() >= leg_ik.time) {
-            //     emit<Task>(std::make_unique<Done>());
-            //     return;
-            // }
+        on<Provide<RightLegIK>, Needs<RightLeg>>().then([this](const RightLegIK& leg_ik, const Uses<RightLeg>& leg) {
+            // If the leg is done moving, then IK is done
+            if (leg.done) {
+                // emit<Task>(std::make_unique<Done>());
+                return;
+            }
+
+            // Calculate the joint positions with IK
             auto servos = std::make_unique<RightLeg>();
             auto joints = calculateLegJoints<double>(kinematicsModel, Eigen::Affine3d(leg_ik.Htr), LimbID::RIGHT_LEG);
 
@@ -74,12 +74,14 @@ namespace module::motion {
         });
 
         /// @brief Calculates head kinematics and makes a task for the Head servos
-        on<Provide<HeadIK>, Needs<Head>>().then([this](const HeadIK head_ik) {
-            // If the time to reach the position is over, then stop requesting the position
-            // if (NUClear::clock::now() >= head_ik.time) {
-            //     emit<Task>(std::make_unique<Done>());
-            //     return;
-            // }
+        on<Provide<HeadIK>, Needs<Head>>().then([this](const HeadIK& head_ik, const Uses<Head>& head) {
+            // If the head is done moving, then IK is done
+            if (head.done) {
+                // emit<Task>(std::make_unique<Done>());
+                return;
+            }
+
+            // Calculate the joint positions with IK
             auto servos = std::make_unique<Head>();
             auto joints = calculateHeadJoints<double>(Eigen::Vector3d(head_ik.uPCt));
 
