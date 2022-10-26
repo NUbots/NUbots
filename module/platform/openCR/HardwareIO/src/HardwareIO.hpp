@@ -1,6 +1,7 @@
 #ifndef MODULE_PLATFORM_NUGUS_HARDWAREIO_H
 #define MODULE_PLATFORM_NUGUS_HARDWAREIO_H
 
+#include <Eigen/Core>
 #include <map>
 #include <nuclear>
 
@@ -8,6 +9,7 @@
 #include "dynamixel/v2/Dynamixel.hpp"
 
 #include "message/platform/RawSensors.hpp"
+#include "message/platform/StatusReturn.hpp"
 
 #include "utility/io/uart.hpp"
 
@@ -45,8 +47,8 @@ namespace module::platform::openCR {
             message::platform::RawSensors::Buttons buttons = {false, false, false};
 
             // X, Y, Z
-            message::platform::RawSensors::Accelerometer acc = {0.0f, 0.0f, 0.0f};
-            message::platform::RawSensors::Gyroscope gyro    = {0.0f, 0.0f, 0.0f};
+            Eigen::Vector3f acc  = Eigen::Vector3f::Zero();
+            Eigen::Vector3f gyro = Eigen::Vector3f::Zero();
 
             // Buzzer
             uint16_t buzzer = 0;
@@ -110,9 +112,9 @@ namespace module::platform::openCR {
         /// @brief Our state for our battery
         Battery batteryState;
 
-        void processModelInformation(const message::platform::openCR::StatusReturn& packet);
-        void processOpenCRData(const message::platform::openCR::StatusReturn& packet);
-        void processServoData(const message::platform::openCR::StatusReturn& packet);
+        void processModelInformation(const message::platform::StatusReturn& packet);
+        void processOpenCRData(const message::platform::StatusReturn& packet);
+        void processServoData(const message::platform::StatusReturn& packet);
     };
 
 }  // namespace module::platform::openCR
