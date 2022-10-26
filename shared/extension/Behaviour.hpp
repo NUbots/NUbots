@@ -198,32 +198,6 @@ namespace extension::behaviour {
     };
 
     /**
-     * Create a Needs relationship between this provider and the provider specified by `T`.
-     *
-     * A needs relationship ensures that this provider will only run if it is able to run the provider specified by `T`.
-     * This relationship operates recursively, as if the provider specified by `T` needs another provider, this provider
-     * will only run if it will be able to obtain those providers as well.
-     *
-     * @tparam Provider the provider that this provider needs
-     */
-    template <typename Provider>
-    struct Needs {
-
-        /**
-         * Bind a needs expression in the Director.
-         *
-         * @tparam DSL the DSL from NUClear
-         *
-         * @param reaction the reaction that is having this needs condition bound to it
-         */
-        template <typename DSL>
-        static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
-            reaction->reactor.emit<NUClear::dsl::word::emit::Direct>(
-                std::make_unique<commands::NeedsExpression>(reaction, typeid(Provider)));
-        }
-    };
-
-    /**
      * Adds a Uses object to the callback to allow access to information from the context of this provider.
      *
      * The uses object provides information about what would happen if you were to emit a specific task from this
@@ -239,9 +213,44 @@ namespace extension::behaviour {
     template <typename Provider>
     struct Uses {
 
-        template <typename T = Provider>
-        static inline std::shared_ptr<Uses<T>> get(NUClear::threading::Reaction& /*r*/) {
-            // TODO(@TrentHouliston) get the data from the director from the context of this reaction
+        bool done;
+
+        template <typename DSL>
+        static inline std::shared_ptr<Uses<Provider>> get(NUClear::threading::Reaction& r) {
+
+            auto group_info = information::InformationSource::get_group_info(r.id, typeid(Provider));
+
+            auto data = std::make_shared<Uses<Provider>>();
+
+            data->done = group_info.done;
+
+            return data;
+        }
+    };
+
+    /**
+     * Create a Needs relationship between this provider and the provider specified by `T`.
+     *
+     * A needs relationship ensures that this provider will only run if it is able to run the provider specified by `T`.
+     * This relationship operates recursively, as if the provider specified by `T` needs another provider, this provider
+     * will only run if it will be able to obtain those providers as well.
+     *
+     * @tparam Provider the provider that this provider needs
+     */
+    template <typename Provider>
+    struct Needs : public Uses<Provider> {  // Needs implies uses
+
+        /**
+         * Bind a needs expression in the Director.
+         *
+         * @tparam DSL the DSL from NUClear
+         *
+         * @param reaction the reaction that is having this needs condition bound to it
+         */
+        template <typename DSL>
+        static inline void bind(const std::shared_ptr<NUClear::threading::Reaction>& reaction) {
+            reaction->reactor.emit<NUClear::dsl::word::emit::Direct>(
+                std::make_unique<commands::NeedsExpression>(reaction, typeid(Provider)));
         }
     };
 

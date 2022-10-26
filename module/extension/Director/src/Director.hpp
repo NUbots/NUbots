@@ -418,6 +418,17 @@ namespace module::extension {
          */
         ::extension::behaviour::RunInfo _get_run_info(const uint64_t& reaction_id) override;
 
+        /**
+         * Provides the ProviderGroup data via the InformationSource interface so it can be accessed
+         *
+         * @param reaction_id the provider reaction that is requesting its information.
+         * @param type        the type of provider group that is being requested
+         *
+         * @return the information about the provider group that this task is running on
+         */
+        ::extension::behaviour::GroupInfo _get_group_info(const uint64_t& reaction_id,
+                                                          const std::type_index& type) override;
+
     private:
         /// A list of Provider groups
         std::map<std::type_index, provider::ProviderGroup> groups;

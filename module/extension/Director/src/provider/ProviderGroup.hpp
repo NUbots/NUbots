@@ -78,6 +78,9 @@ namespace module::extension::provider {
         /// List of individual Providers that can service tasks for this type
         std::vector<std::shared_ptr<Provider>> providers;
 
+        /// Stores if the last thing this group did was to emit a done task
+        bool done = false;
+
         /// The current task that is running on this Provider
         std::shared_ptr<BehaviourTask> active_task;
         /// The currently active provider that is executing
