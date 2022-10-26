@@ -354,7 +354,7 @@ ENV NVIDIA_DRIVER_CAPABILITIES=all
 COPY --chown=root:root etc/OpenCL/vendors/nvidia.icd /etc/OpenCL/vendors/nvidia.icd
 
 ##############################
-### SETUP THhttps://www.zlib.net/zlib-1.2.12.tar.gzE USER ACCOUNT ###
+### SETUP THE USER ACCOUNT ###
 ##############################
 
 # Setup the sudo so it can be run without a password
@@ -380,4 +380,3 @@ RUN chmod 600 /home/nubots/.ssh/id_rsa /home/nubots/.ssh/config
 RUN install -d -m 0755 /home/nubots/NUbots
 RUN install -d -m 0777 /home/nubots/build
 WORKDIR /home/nubots/NUbots
-
