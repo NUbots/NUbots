@@ -18,7 +18,7 @@
  */
  syntax = "proto3";
 
- package message.platform.openCR;
+ package message.platform;
 
  import "google/protobuf/timestamp.proto";
 

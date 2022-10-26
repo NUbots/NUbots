@@ -210,19 +210,20 @@ namespace module::input {
                         for (uint32_t id = 0; id < 20; ++id) {
                             const auto& original = utility::platform::getRawServo(id, *s);
                             // Add the sensor values to the system properly
-                            filtered_sensors.servo.emplace_back(0,
-                                                                id,
-                                                                original.torque_enabled,
-                                                                original.p_gain,
-                                                                original.i_gain,
-                                                                original.d_gain,
-                                                                original.goal_position,
-                                                                original.moving_speed,
-                                                                original.present_position,
-                                                                original.present_speed,
-                                                                original.load,
-                                                                original.voltage,
-                                                                static_cast<float>(original.temperature));
+                            filtered_sensors.servo.emplace_back(
+                                0,
+                                id,
+                                original.torque_enabled,
+                                original.velocity_p_gain,
+                                original.velocity_i_gain,
+                                original.velocity_d_gain,
+                                original.goal_position,
+                                original.profile_velocity,
+                                original.present_position,
+                                original.present_velocity,
+                                original.present_current,  // NOTE: Not sure about this one - L.Craft
+                                original.voltage,
+                                static_cast<float>(original.temperature));
                         }
 
                         // Calculate forward kinematics
@@ -247,7 +248,7 @@ namespace module::input {
 
                     // Average time per sensor reading
                     double deltaT = std::chrono::duration_cast<std::chrono::duration<double>>(
-                                        sensors.back()->timestamp - sensors.front()->timestamp)
+                                        sensors.back()->time_stamp - sensors.front()->time_stamp)
                                         .count()
                                     / static_cast<double>(sensors.size());
 
@@ -352,7 +353,7 @@ namespace module::input {
                          ************************************************/
 
                         // Set our timestamp to when the data was read
-                        sensors->timestamp = input.timestamp;
+                        sensors->timestamp = input.time_stamp;
 
                         sensors->voltage = input.voltage;
 
@@ -391,7 +392,7 @@ namespace module::input {
                                     s << " Overheating - " << original.temperature;
                                 }
                                 if ((error & RawSensors::Error::OVERLOAD) != 0u) {
-                                    s << " Overloaded - " << original.load;
+                                    s << " Overloaded - " << original.present_current;
                                 }
                                 if ((error & RawSensors::Error::INSTRUCTION) != 0u) {
                                     s << " Bad Instruction ";
@@ -412,11 +413,11 @@ namespace module::input {
                                 sensors->servo.emplace_back(error,
                                                             id,
                                                             original.torque_enabled,
-                                                            original.p_gain,
-                                                            original.i_gain,
-                                                            original.d_gain,
+                                                            original.velocity_p_gain,
+                                                            original.velocity_i_gain,
+                                                            original.velocity_d_gain,
                                                             original.goal_position,
-                                                            original.moving_speed,
+                                                            original.profile_velocity,
                                                             previousSensors->servo[id].present_position,
                                                             previousSensors->servo[id].present_velocity,
                                                             previousSensors->servo[id].load,
@@ -429,14 +430,14 @@ namespace module::input {
                                 sensors->servo.emplace_back(error,
                                                             id,
                                                             original.torque_enabled,
-                                                            original.p_gain,
-                                                            original.i_gain,
-                                                            original.d_gain,
+                                                            original.velocity_p_gain,
+                                                            original.velocity_i_gain,
+                                                            original.velocity_d_gain,
                                                             original.goal_position,
-                                                            original.moving_speed,
+                                                            original.profile_velocity,
                                                             original.present_position,
-                                                            original.present_speed,
-                                                            original.load,
+                                                            original.present_velocity,
+                                                            original.present_current,
                                                             original.voltage,
                                                             static_cast<float>(original.temperature));
                             }
@@ -659,11 +660,12 @@ namespace module::input {
                         // Calculate our time offset from the last read then update the filter's time
                         /* using namespace std::chrono */ {
                             using namespace std::chrono;
-                            const double deltaT = std::max(
-                                duration_cast<duration<double>>(
-                                    input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp))
-                                    .count(),
-                                0.0);
+                            const double deltaT =
+                                std::max(duration_cast<duration<double>>(
+                                             input.time_stamp
+                                             - (previousSensors ? previousSensors->timestamp : input.time_stamp))
+                                             .count(),
+                                         0.0);
 
                             // Time update
                             switch (motionFilter.time(deltaT)) {

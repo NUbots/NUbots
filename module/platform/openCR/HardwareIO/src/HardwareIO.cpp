@@ -9,14 +9,15 @@
 #include "message/motion/ServoTarget.hpp"
 
 #include "utility/math/angle.hpp"
+#include "utility/math/comparison.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 namespace module::platform::openCR {
 
     using extension::Configuration;
     using message::motion::ServoTarget;
-    using message::platform::nugus::Sensors;
-    using message::platform::nugus::StatusReturn;
+    using message::platform::RawSensors;
+    using message::platform::StatusReturn;
     using utility::support::Expression;
 
     HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
@@ -179,7 +180,7 @@ namespace module::platform::openCR {
             }
         });
 
-        // This trigger gets the sensor data from the CM730
+        // This trigger gets the sensor data from the sub controller
         on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single, Priority::HIGH>().then("Hardware Loop", [this] {
             // Write out servo data
             // SYNC_WRITE (write the same memory addresses on all devices)
@@ -323,20 +324,20 @@ namespace module::platform::openCR {
         });
 
         // If we get a HeadLED command then write it
-        on<Trigger<Sensors::HeadLED>>().then([this](const Sensors::HeadLED& led) {
+        on<Trigger<RawSensors::HeadLED>>().then([this](const RawSensors::HeadLED& led) {
             // Update our internal state
             opencrState.headLED = led.RGB;
             opencrState.dirty   = true;
         });
 
         // If we get a EyeLED command then write it
-        on<Trigger<Sensors::EyeLED>>().then([this](const Sensors::EyeLED& /*led*/) {
+        on<Trigger<RawSensors::EyeLED>>().then([this](const RawSensors::EyeLED& /*led*/) {
             // Update our internal state
             // OpenCR can only use 1 RGB LED
         });
 
         // If we get a EyeLED command then write it
-        on<Trigger<Sensors::LEDPanel>>().then([this](const Sensors::LEDPanel& led) {
+        on<Trigger<RawSensors::LEDPanel>>().then([this](const RawSensors::LEDPanel& led) {
             // Update our internal state
             opencrState.ledPanel.led2 = led.led2;
             opencrState.ledPanel.led3 = led.led3;
@@ -559,9 +560,6 @@ namespace module::platform::openCR {
         opencrState.headLED = {RGB};
         opencrState.headLED = {RGB};
 
-        // Frequency of the buzzer
-        opencrState.buzzer = data.buzzer;
-
         // 00004321
         // Button_4 = Not used
         // Button Right (Reset) = 0x01
@@ -569,13 +567,21 @@ namespace module::platform::openCR {
         // Button Left = 0x04
         opencrState.buttons = {data.button & 0x04, data.button & 0x02, data.button & 0x01};
 
-        opencrState.gyro = {nugus.convertGyro(data.gyro[2]),   // X
-                            nugus.convertGyro(data.gyro[1]),   // Y
-                            nugus.convertGyro(data.gyro[0])};  // Z
+        // opencrState.gyro = {nugus.convertGyro(data.gyro[2]),   // X
+        // nugus.convertGyro(data.gyro[1]),   // Y
+        // nugus.convertGyro(data.gyro[0])};  // Z
 
-        opencrState.acc = {nugus.convertAcc(data.acc[0]),   // X
-                           nugus.convertAcc(data.acc[1]),   // Y
-                           nugus.convertAcc(data.acc[2])};  // Z
+        opencrState.gyro = Eigen::Vector3f(nugus.convertGyro(data.gyro[2]),   // X
+                                           nugus.convertGyro(data.gyro[1]),   // Y
+                                           nugus.convertGyro(data.gyro[0]));  // Z
+
+        // opencrState.acc = {nugus.convertAcc(data.acc[0]),   // X
+        //                    nugus.convertAcc(data.acc[1]),   // Y
+        //                    nugus.convertAcc(data.acc[2])};  // Z
+
+        opencrState.acc = Eigen::Vector3f(nugus.convertAcc(data.acc[0]),   // X
+                                          nugus.convertAcc(data.acc[1]),   // Y
+                                          nugus.convertAcc(data.acc[2]));  // Z
 
         opencrState.errorFlags = int(packet.error);
 
@@ -622,8 +628,8 @@ namespace module::platform::openCR {
                 ledp = {false, false, false};
                 ledr = (uint8_t(0x00) << 16) | (uint8_t(0x00) << 8) | uint8_t(0xFF);
             }
-            emit(std::make_unique<Sensors::LEDPanel>(ledp[2], ledp[1], ledp[0]));
-            emit(std::make_unique<Sensors::HeadLED>(ledr));
+            emit(std::make_unique<RawSensors::LEDPanel>(ledp[2], ledp[1], ledp[0]));
+            emit(std::make_unique<RawSensors::HeadLED>(ledr));
         }
     }
 

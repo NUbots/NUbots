@@ -22,6 +22,8 @@
 
  import "google/protobuf/timestamp.proto";
 
+ import "Vector.proto";
+
  /**
   * @author Alex Biddulph
   */
@@ -63,17 +65,17 @@
          bool right = 3;
      }
 
-     message Accelerometer {
-        float x = 1;
-        float y = 2;
-        float z = 3;
-     }
+    //  message Accelerometer {
+    //     float x = 1;
+    //     float y = 2;
+    //     float z = 3;
+    //  }
 
-     message Gyroscope {
-        float x = 1;
-        float y = 2;
-        float z = 3;
-     }
+    //  message Gyroscope {
+    //     float x = 1;
+    //     float y = 2;
+    //     float z = 3;
+    //  }
 
      /// The robot has Force Sensitive Resistors on its feet to detect whether a foot is down.
      /// There are four FSRs per foot, so this message is for one foot
@@ -101,7 +103,7 @@
         bool   torque_enabled       = 2;
         float  velocity_p_gain       = 3;
         float  velocity_i_gain       = 4;
-        float  velocity_d_ain       = 5;
+        float  velocity_d_gain       = 5;
         float  position_p_gain       = 6;
         float  position_i_gain       = 7;
         float  feed_forward_1st_Gain  = 8;
@@ -150,8 +152,8 @@
      HeadLED                   head_led          = 4;
      EyeLED                    eye_led           = 5;
      Buttons                   buttons          = 6;
-     Accelerometer             accelerometer    = 7;
-     Gyroscope                 gyroscope        = 8;
+     fvec3                     accelerometer    = 7;
+     fvec3                     gyroscope        = 8;
      Servos                    servo            = 9;
      float                     battery          = 10;
      FSRs                      fsr              = 11;
