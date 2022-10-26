@@ -76,19 +76,18 @@ namespace module::motion {
            Needs<LeftKnee>,
            Needs<LeftAnklePitch>,
            Needs<LeftAnkleRoll>>()
-            .then([this](const LeftLeg& leg) {
-                // This is done when all of the servos are done, so check for the latest time
-                // auto latest_time = NUClear::clock::now();
-                // for (const auto& servo : leg.servos) {
-                //     if (servo.time > latest_time) {
-                //         latest_time = servo.time;
-                //     }
-                // }
-                // if (latest_time <= NUClear::clock::now()) {
-                //     log<NUClear::DEBUG>("Left leg provider done.");
-                //     emit<Task>(std::make_unique<Done>());
-                //     return;
-                // }
+            .then([this](const LeftLeg& leg,
+                         const Uses<LeftHipYaw>& lhy,
+                         const Uses<LeftHipRoll>& lhr,
+                         const Uses<LeftHipPitch>& lhp,
+                         const Uses<LeftKnee>& lk,
+                         const Uses<LeftAnklePitch>& lap,
+                         const Uses<LeftAnkleRoll>& lar) {
+                // This is done when all of the servos are done, so check them all
+                if (lhy.done && lhr.done && lhp.done && lk.done && lap.done && lar.done) {
+                    // emit<Task>(std::make_unique<Done>());
+                    return;
+                }
 
                 // Emit tasks for each servo
                 emit<Task>(std::make_unique<LeftHipYaw>(leg.servos[LeftLeg::ID::LEFT_HIP_YAW]));
@@ -106,18 +105,18 @@ namespace module::motion {
            Needs<RightKnee>,
            Needs<RightAnklePitch>,
            Needs<RightAnkleRoll>>()
-            .then([this](const RightLeg& leg) {
-                // This is done when all of the servos are done, so check for the latest time
-                // auto latest_time = NUClear::clock::now();
-                // for (const auto& servo : leg.servos) {
-                //     if (servo.time > latest_time) {
-                //         latest_time = servo.time;
-                //     }
-                // }
-                // if (latest_time <= NUClear::clock::now()) {
-                //     emit<Task>(std::make_unique<Done>());
-                //     return;
-                // }
+            .then([this](const RightLeg& leg,
+                         const Uses<RightHipYaw>& rhy,
+                         const Uses<RightHipRoll>& rhr,
+                         const Uses<RightHipPitch>& rhp,
+                         const Uses<RightKnee>& rk,
+                         const Uses<RightAnklePitch>& rap,
+                         const Uses<RightAnkleRoll>& rar) {
+                // This is done when all of the servos are done, so check them all
+                if (rhy.done && rhr.done && rhp.done && rk.done && rap.done && rar.done) {
+                    // emit<Task>(std::make_unique<Done>());
+                    return;
+                }
 
                 // Emit tasks for each servo
                 emit<Task>(std::make_unique<RightHipYaw>(leg.servos[RightLeg::ID::RIGHT_HIP_YAW]));
@@ -129,18 +128,15 @@ namespace module::motion {
             });
 
         on<Provide<LeftArm>, Needs<LeftShoulderPitch>, Needs<LeftShoulderRoll>, Needs<LeftElbow>>().then(
-            [this](const LeftArm& arm) {
-                // This is done when all of the servos are done, so check for the latest time
-                // auto latest_time = NUClear::clock::now();
-                // for (const auto& servo : arm.servos) {
-                //     if (servo.time > latest_time) {
-                //         latest_time = servo.time;
-                //     }
-                // }
-                // if (latest_time <= NUClear::clock::now()) {
-                //     emit<Task>(std::make_unique<Done>());
-                //     return;
-                // }
+            [this](const LeftArm& arm,
+                   const Uses<LeftShoulderPitch>& lsp,
+                   const Uses<LeftShoulderRoll>& lsr,
+                   const Uses<LeftElbow>& le) {
+                // This is done when all of the servos are done, so check them all
+                if (lsp.done && lsr.done && le.done) {
+                    // emit<Task>(std::make_unique<Done>());
+                    return;
+                }
 
                 // Emit tasks for each servo
                 emit<Task>(std::make_unique<LeftShoulderPitch>(arm.servos[LeftArm::ID::LEFT_SHOULDER_PITCH]));
@@ -149,18 +145,15 @@ namespace module::motion {
             });
 
         on<Provide<RightArm>, Needs<RightShoulderPitch>, Needs<RightShoulderRoll>, Needs<RightElbow>>().then(
-            [this](const RightArm& arm) {
-                // This is done when all of the servos are done, so check for the latest time
-                // auto latest_time = NUClear::clock::now();
-                // for (const auto& servo : arm.servos) {
-                //     if (servo.time > latest_time) {
-                //         latest_time = servo.time;
-                //     }
-                // }
-                // if (latest_time <= NUClear::clock::now()) {
-                //     emit<Task>(std::make_unique<Done>());
-                //     return;
-                // }
+            [this](const RightArm& arm,
+                   const Uses<RightShoulderPitch>& rsp,
+                   const Uses<RightShoulderRoll>& rsr,
+                   const Uses<RightElbow>& re) {
+                // This is done when all of the servos are done, so check them all
+                if (rsp.done && rsr.done && re.done) {
+                    // emit<Task>(std::make_unique<Done>());
+                    return;
+                }
 
                 // Emit tasks for each servo
                 emit<Task>(std::make_unique<RightShoulderPitch>(arm.servos[RightArm::ID::RIGHT_SHOULDER_PITCH]));
@@ -168,23 +161,18 @@ namespace module::motion {
                 emit<Task>(std::make_unique<RightElbow>(arm.servos[RightArm::ID::RIGHT_ELBOW]));
             });
 
-        on<Provide<Head>, Needs<HeadYaw>, Needs<HeadPitch>>().then([this](const Head& head) {
-            // This is done when all of the servos are done, so check for the latest time
-            // auto latest_time = NUClear::clock::now();
-            // for (const auto& servo : head.servos) {
-            //     if (servo.time > latest_time) {
-            //         latest_time = servo.time;
-            //     }
-            // }
-            // if (latest_time <= NUClear::clock::now()) {
-            //     emit<Task>(std::make_unique<Done>());
-            //     return;
-            // }
+        on<Provide<Head>, Needs<HeadYaw>, Needs<HeadPitch>>().then(
+            [this](const Head& head, const Uses<HeadYaw>& hy, const Uses<HeadPitch>& hp) {
+                // This is done when all of the servos are done, so check them all
+                if (hy.done && hp.done) {
+                    // emit<Task>(std::make_unique<Done>());
+                    return;
+                }
 
-            // Emit tasks for each servo
-            emit<Task>(std::make_unique<HeadYaw>(head.servos[Head::ID::HEAD_YAW]));
-            emit<Task>(std::make_unique<HeadPitch>(head.servos[Head::ID::HEAD_PITCH]));
-        });
+                // Emit tasks for each servo
+                emit<Task>(std::make_unique<HeadYaw>(head.servos[Head::ID::HEAD_YAW]));
+                emit<Task>(std::make_unique<HeadPitch>(head.servos[Head::ID::HEAD_PITCH]));
+            });
 
 
         /// @brief Sends a right shoulder pitch servo command as a normal servo target command for the platform module
@@ -192,10 +180,10 @@ namespace module::motion {
         on<Provide<RightShoulderPitch>, Trigger<Sensors>>().then(
             [this](const RightShoulderPitch& servo, const Sensors& /* sensors */) {
                 // If the time to reach the position is over, then stop requesting the position
-                // if (NUClear::clock::now() >= servo.command.time) {
-                //     emit<Task>(std::make_unique<Done>());
-                //     return;
-                // }
+                if (NUClear::clock::now() >= servo.command.time) {
+                    // emit<Task>(std::make_unique<Done>());
+                    return;
+                }
                 emit(std::make_unique<ServoTarget>(servo.command.time,
                                                    ServoID::R_SHOULDER_PITCH,
                                                    servo.command.position,
@@ -209,10 +197,10 @@ namespace module::motion {
         on<Provide<LeftShoulderPitch>, Trigger<Sensors>>().then(
             [this](const LeftShoulderPitch& servo, const Sensors& /* sensors */) {
                 // If the time to reach the position is over, then stop requesting the position
-                // if (NUClear::clock::now() >= servo.command.time) {
-                //     emit<Task>(std::make_unique<Done>());
-                //     return;
-                // }
+                if (NUClear::clock::now() >= servo.command.time) {
+                    // emit<Task>(std::make_unique<Done>());
+                    return;
+                }
                 emit(std::make_unique<ServoTarget>(servo.command.time,
                                                    ServoID::L_SHOULDER_PITCH,
                                                    servo.command.position,
@@ -226,10 +214,10 @@ namespace module::motion {
         on<Provide<RightShoulderRoll>, Trigger<Sensors>>().then(
             [this](const RightShoulderRoll& servo, const Sensors& /* sensors */) {
                 // If the time to reach the position is over, then stop requesting the position
-                // if (NUClear::clock::now() >= servo.command.time) {
-                //     emit<Task>(std::make_unique<Done>());
-                //     return;
-                // }
+                if (NUClear::clock::now() >= servo.command.time) {
+                    // emit<Task>(std::make_unique<Done>());
+                    return;
+                }
                 emit(std::make_unique<ServoTarget>(servo.command.time,
                                                    ServoID::R_SHOULDER_ROLL,
                                                    servo.command.position,
@@ -242,10 +230,10 @@ namespace module::motion {
         on<Provide<LeftShoulderRoll>, Trigger<Sensors>>().then(
             [this](const LeftShoulderRoll& servo, const Sensors& /* sensors */) {
                 // If the time to reach the position is over, then stop requesting the position
-                // if (NUClear::clock::now() >= servo.command.time) {
-                //     emit<Task>(std::make_unique<Done>());
-                //     return;
-                // }
+                if (NUClear::clock::now() >= servo.command.time) {
+                    // emit<Task>(std::make_unique<Done>());
+                    return;
+                }
                 emit(std::make_unique<ServoTarget>(servo.command.time,
                                                    ServoID::L_SHOULDER_ROLL,
                                                    servo.command.position,
@@ -257,10 +245,10 @@ namespace module::motion {
         /// to use
         on<Provide<RightElbow>, Trigger<Sensors>>().then([this](const RightElbow& servo, const Sensors& /* sensors */) {
             // If the time to reach the position is over, then stop requesting the position
-            // if (NUClear::clock::now() >= servo.command.time) {
-            //     emit<Task>(std::make_unique<Done>());
-            //     return;
-            // }
+            if (NUClear::clock::now() >= servo.command.time) {
+                // emit<Task>(std::make_unique<Done>());
+                return;
+            }
             emit(std::make_unique<ServoTarget>(servo.command.time,
                                                ServoID::R_ELBOW,
                                                servo.command.position,
@@ -272,10 +260,10 @@ namespace module::motion {
         /// to use
         on<Provide<LeftElbow>, Trigger<Sensors>>().then([this](const LeftElbow& servo, const Sensors& /* sensors */) {
             // If the time to reach the position is over, then stop requesting the position
-            // if (NUClear::clock::now() >= servo.command.time) {
-            //     emit<Task>(std::make_unique<Done>());
-            //     return;
-            // }
+            if (NUClear::clock::now() >= servo.command.time) {
+                // emit<Task>(std::make_unique<Done>());
+                return;
+            }
             emit(std::make_unique<ServoTarget>(servo.command.time,
                                                ServoID::L_ELBOW,
                                                servo.command.position,
@@ -288,10 +276,10 @@ namespace module::motion {
         on<Provide<RightHipYaw>, Trigger<Sensors>>().then(
             [this](const RightHipYaw& servo, const Sensors& /* sensors */) {
                 // If the time to reach the position is over, then stop requesting the position
-                // if (NUClear::clock::now() >= servo.command.time) {
-                //     emit<Task>(std::make_unique<Done>());
-                //     return;
-                // }
+                if (NUClear::clock::now() >= servo.command.time) {
+                    // emit<Task>(std::make_unique<Done>());
+                    return;
+                }
                 emit(std::make_unique<ServoTarget>(servo.command.time,
                                                    ServoID::R_HIP_YAW,
                                                    servo.command.position,
@@ -303,10 +291,10 @@ namespace module::motion {
         /// to use
         on<Provide<LeftHipYaw>, Trigger<Sensors>>().then([this](const LeftHipYaw& servo, const Sensors& /* sensors */) {
             // If the time to reach the position is over, then stop requesting the position
-            // if (NUClear::clock::now() >= servo.command.time) {
-            //     emit<Task>(std::make_unique<Done>());
-            //     return;
-            // }
+            if (NUClear::clock::now() >= servo.command.time) {
+                // emit<Task>(std::make_unique<Done>());
+                return;
+            }
             emit(std::make_unique<ServoTarget>(servo.command.time,
                                                ServoID::L_HIP_YAW,
                                                servo.command.position,
@@ -319,10 +307,10 @@ namespace module::motion {
         on<Provide<RightHipRoll>, Trigger<Sensors>>().then(
             [this](const RightHipRoll& servo, const Sensors& /* sensors */) {
                 // If the time to reach the position is over, then stop requesting the position
-                // if (NUClear::clock::now() >= servo.command.time) {
-                //     emit<Task>(std::make_unique<Done>());
-                //     return;
-                // }
+                if (NUClear::clock::now() >= servo.command.time) {
+                    // emit<Task>(std::make_unique<Done>());
+                    return;
+                }
                 emit(std::make_unique<ServoTarget>(servo.command.time,
                                                    ServoID::R_HIP_ROLL,
                                                    servo.command.position,
@@ -335,11 +323,11 @@ namespace module::motion {
         on<Provide<LeftHipRoll>, Trigger<Sensors>>().then(
             [this](const LeftHipRoll& servo, const Sensors& /* sensors */) {
                 // If the time to reach the position is over, then stop requesting the position
-                // if (NUClear::clock::now() >= servo.command.time) {
-                //     log<NUClear::DEBUG>("Left hip roll provider done.");
-                //     emit<Task>(std::make_unique<Done>());
-                //     return;
-                // }
+                if (NUClear::clock::now() >= servo.command.time) {
+                    log<NUClear::DEBUG>("Left hip roll provider done.");
+                    // emit<Task>(std::make_unique<Done>());
+                    return;
+                }
                 emit(std::make_unique<ServoTarget>(servo.command.time,
                                                    ServoID::L_HIP_ROLL,
                                                    servo.command.position,
@@ -352,10 +340,10 @@ namespace module::motion {
         on<Provide<RightHipPitch>, Trigger<Sensors>>().then(
             [this](const RightHipPitch& servo, const Sensors& /* sensors */) {
                 // If the time to reach the position is over, then stop requesting the position
-                // if (NUClear::clock::now() >= servo.command.time) {
-                //     emit<Task>(std::make_unique<Done>());
-                //     return;
-                // }
+                if (NUClear::clock::now() >= servo.command.time) {
+                    // emit<Task>(std::make_unique<Done>());
+                    return;
+                }
                 emit(std::make_unique<ServoTarget>(servo.command.time,
                                                    ServoID::R_HIP_PITCH,
                                                    servo.command.position,
@@ -368,10 +356,10 @@ namespace module::motion {
         on<Provide<LeftHipPitch>, Trigger<Sensors>>().then(
             [this](const LeftHipPitch& servo, const Sensors& /* sensors */) {
                 // If the time to reach the position is over, then stop requesting the position
-                // if (NUClear::clock::now() >= servo.command.time) {
-                //     emit<Task>(std::make_unique<Done>());
-                //     return;
-                // }
+                if (NUClear::clock::now() >= servo.command.time) {
+                    // emit<Task>(std::make_unique<Done>());
+                    return;
+                }
                 emit(std::make_unique<ServoTarget>(servo.command.time,
                                                    ServoID::L_HIP_PITCH,
                                                    servo.command.position,
@@ -383,10 +371,10 @@ namespace module::motion {
         /// to use
         on<Provide<RightKnee>, Trigger<Sensors>>().then([this](const RightKnee& servo, const Sensors& /* sensors */) {
             // If the time to reach the position is over, then stop requesting the position
-            // if (NUClear::clock::now() >= servo.command.time) {
-            //     emit<Task>(std::make_unique<Done>());
-            //     return;
-            // }
+            if (NUClear::clock::now() >= servo.command.time) {
+                // emit<Task>(std::make_unique<Done>());
+                return;
+            }
             emit(std::make_unique<ServoTarget>(servo.command.time,
                                                ServoID::R_KNEE,
                                                servo.command.position,
@@ -398,10 +386,10 @@ namespace module::motion {
         /// to use
         on<Provide<LeftKnee>, Trigger<Sensors>>().then([this](const LeftKnee& servo, const Sensors& /* sensors */) {
             // If the time to reach the position is over, then stop requesting the position
-            // if (NUClear::clock::now() >= servo.command.time) {
-            //     emit<Task>(std::make_unique<Done>());
-            //     return;
-            // }
+            if (NUClear::clock::now() >= servo.command.time) {
+                // emit<Task>(std::make_unique<Done>());
+                return;
+            }
             emit(std::make_unique<ServoTarget>(servo.command.time,
                                                ServoID::L_KNEE,
                                                servo.command.position,
@@ -414,10 +402,10 @@ namespace module::motion {
         on<Provide<RightAnklePitch>, Trigger<Sensors>>().then(
             [this](const RightAnklePitch& servo, const Sensors& /* sensors */) {
                 // If the time to reach the position is over, then stop requesting the position
-                // if (NUClear::clock::now() >= servo.command.time) {
-                //     emit<Task>(std::make_unique<Done>());
-                //     return;
-                // }
+                if (NUClear::clock::now() >= servo.command.time) {
+                    // emit<Task>(std::make_unique<Done>());
+                    return;
+                }
                 emit(std::make_unique<ServoTarget>(servo.command.time,
                                                    ServoID::R_ANKLE_PITCH,
                                                    servo.command.position,
@@ -430,10 +418,10 @@ namespace module::motion {
         on<Provide<LeftAnklePitch>, Trigger<Sensors>>().then(
             [this](const LeftAnklePitch& servo, const Sensors& /* sensors */) {
                 // If the time to reach the position is over, then stop requesting the position
-                // if (NUClear::clock::now() >= servo.command.time) {
-                //     emit<Task>(std::make_unique<Done>());
-                //     return;
-                // }
+                if (NUClear::clock::now() >= servo.command.time) {
+                    // emit<Task>(std::make_unique<Done>());
+                    return;
+                }
                 emit(std::make_unique<ServoTarget>(servo.command.time,
                                                    ServoID::L_ANKLE_PITCH,
                                                    servo.command.position,
@@ -446,10 +434,10 @@ namespace module::motion {
         on<Provide<RightAnkleRoll>, Trigger<Sensors>>().then(
             [this](const RightAnkleRoll& servo, const Sensors& /* sensors */) {
                 // If the time to reach the position is over, then stop requesting the position
-                // if (NUClear::clock::now() >= servo.command.time) {
-                //     emit<Task>(std::make_unique<Done>());
-                //     return;
-                // }
+                if (NUClear::clock::now() >= servo.command.time) {
+                    // emit<Task>(std::make_unique<Done>());
+                    return;
+                }
                 emit(std::make_unique<ServoTarget>(servo.command.time,
                                                    ServoID::R_ANKLE_ROLL,
                                                    servo.command.position,
@@ -462,10 +450,10 @@ namespace module::motion {
         on<Provide<LeftAnkleRoll>, Trigger<Sensors>>().then(
             [this](const LeftAnkleRoll& servo, const Sensors& /* sensors */) {
                 // If the time to reach the position is over, then stop requesting the position
-                // if (NUClear::clock::now() >= servo.command.time) {
-                //     emit<Task>(std::make_unique<Done>());
-                //     return;
-                // }
+                if (NUClear::clock::now() >= servo.command.time) {
+                    // emit<Task>(std::make_unique<Done>());
+                    return;
+                }
                 emit(std::make_unique<ServoTarget>(servo.command.time,
                                                    ServoID::L_ANKLE_ROLL,
                                                    servo.command.position,
@@ -477,10 +465,10 @@ namespace module::motion {
         /// to use
         on<Provide<HeadYaw>, Trigger<Sensors>>().then([this](const HeadYaw& servo, const Sensors& /* sensors */) {
             // If the time to reach the position is over, then stop requesting the position
-            // if (NUClear::clock::now() >= servo.command.time) {
-            //     emit<Task>(std::make_unique<Done>());
-            //     return;
-            // }
+            if (NUClear::clock::now() >= servo.command.time) {
+                // emit<Task>(std::make_unique<Done>());
+                return;
+            }
             emit(std::make_unique<ServoTarget>(servo.command.time,
                                                ServoID::HEAD_YAW,
                                                servo.command.position,
@@ -492,10 +480,10 @@ namespace module::motion {
         /// to use
         on<Provide<HeadPitch>, Trigger<Sensors>>().then([this](const HeadPitch& servo, const Sensors& /* sensors */) {
             // If the time to reach the position is over, then stop requesting the position
-            // if (NUClear::clock::now() >= servo.command.time) {
-            //     emit<Task>(std::make_unique<Done>());
-            //     return;
-            // }
+            if (NUClear::clock::now() >= servo.command.time) {
+                // emit<Task>(std::make_unique<Done>());
+                return;
+            }
             emit(std::make_unique<ServoTarget>(servo.command.time,
                                                ServoID::HEAD_PITCH,
                                                servo.command.position,
