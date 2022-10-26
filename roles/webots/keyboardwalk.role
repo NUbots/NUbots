@@ -23,13 +23,8 @@ nuclear_role(
   motion::Kinematics
   motion::ServoRequest
   motion::QuinticWalk
-  # motion::HeadController
-  # motion::ScriptEngine
-  # Behaviour
-  # behaviour::Controller
-  # behaviour::skills::Getup
-  # behaviour::skills::Stand
-  # behaviour::skills::KickScript
+  # motion::HeadController motion::ScriptEngine Behaviour behaviour::Controller behaviour::skills::Getup
+  # behaviour::skills::Stand behaviour::skills::KickScript
   behaviour::skills::DirectWalkController
   behaviour::strategy::KeyboardWalk
 )
