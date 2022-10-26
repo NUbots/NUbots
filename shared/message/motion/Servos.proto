@@ -16,29 +16,31 @@
  *
  * Copyright 2022 NUbots <nubots@nubots.net>
  */
- syntax = "proto3";
+syntax = "proto3";
 
- package message.motion;
+package message.motion;
 
- import "message/motion/ServoCommand.proto";
+import "message/motion/ServoCommand.proto";
 
- message RightShoulderPitch {
-     ServoCommand command = 1;
- }
+// Message for each servo with command information
 
- message LeftShoulderPitch {
-     ServoCommand command = 1;
- }
+message RightShoulderPitch {
+    ServoCommand command = 1;
+}
 
- message RightShoulderRoll {
-     ServoCommand command = 1;
- }
+message LeftShoulderPitch {
+    ServoCommand command = 1;
+}
 
- message LeftShoulderRoll {
-     ServoCommand command = 1;
- }
+message RightShoulderRoll {
+    ServoCommand command = 1;
+}
 
- message RightElbow {
+message LeftShoulderRoll {
+    ServoCommand command = 1;
+}
+
+message RightElbow {
     ServoCommand command = 1;
 }
 

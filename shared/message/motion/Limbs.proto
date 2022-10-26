@@ -16,68 +16,68 @@
  *
  * Copyright 2022 NUbots <nubots@nubots.net>
  */
- syntax = "proto3";
+syntax = "proto3";
 
- package message.motion;
+package message.motion;
 
- import "message/motion/ServoCommand.proto";
+import "message/motion/ServoCommand.proto";
 
-  /// Left leg servo command information including time, gain, torque, position
-  message LeftLeg {
+/// Left leg servo command information including time, gain, torque, position
+message LeftLeg {
     enum ID {
-      LEFT_HIP_YAW = 0;
-      LEFT_HIP_ROLL = 1;
-      LEFT_HIP_PITCH = 2;
-      LEFT_KNEE = 3;
-      LEFT_ANKLE_PITCH = 4;
-      LEFT_ANKLE_ROLL = 5;
+        LEFT_HIP_YAW     = 0;
+        LEFT_HIP_ROLL    = 1;
+        LEFT_HIP_PITCH   = 2;
+        LEFT_KNEE        = 3;
+        LEFT_ANKLE_PITCH = 4;
+        LEFT_ANKLE_ROLL  = 5;
     }
     /// Information for each servo in the left leg, in the order of ID
     repeated ServoCommand servos = 1;
-  }
+}
 
-  /// Right leg servo command information including time, gain, torque, position
-  message RightLeg {
+/// Right leg servo command information including time, gain, torque, position
+message RightLeg {
     enum ID {
-      RIGHT_HIP_YAW = 0;
-      RIGHT_HIP_ROLL = 1;
-      RIGHT_HIP_PITCH = 2;
-      RIGHT_KNEE = 3;
-      RIGHT_ANKLE_PITCH = 4;
-      RIGHT_ANKLE_ROLL = 5;
+        RIGHT_HIP_YAW     = 0;
+        RIGHT_HIP_ROLL    = 1;
+        RIGHT_HIP_PITCH   = 2;
+        RIGHT_KNEE        = 3;
+        RIGHT_ANKLE_PITCH = 4;
+        RIGHT_ANKLE_ROLL  = 5;
     }
     /// Information for each servo in the right leg, in the order of ID
     repeated ServoCommand servos = 1;
-  }
+}
 
-  /// Left arm servo command information including time, gain, torque, position
-  message LeftArm {
+/// Left arm servo command information including time, gain, torque, position
+message LeftArm {
     enum ID {
-      LEFT_SHOULDER_PITCH = 0;
-      LEFT_SHOULDER_ROLL = 1;
-      LEFT_ELBOW = 2;
+        LEFT_SHOULDER_PITCH = 0;
+        LEFT_SHOULDER_ROLL  = 1;
+        LEFT_ELBOW          = 2;
     }
     /// Information for each servo in the left arm, in the order of ID
     repeated ServoCommand servos = 1;
-  }
+}
 
-  /// Right arm servo command information including time, gain, torque, position
-  message RightArm {
+/// Right arm servo command information including time, gain, torque, position
+message RightArm {
     enum ID {
-      RIGHT_SHOULDER_PITCH = 0;
-      RIGHT_SHOULDER_ROLL = 1;
-      RIGHT_ELBOW = 2;
+        RIGHT_SHOULDER_PITCH = 0;
+        RIGHT_SHOULDER_ROLL  = 1;
+        RIGHT_ELBOW          = 2;
     }
     /// Information for each servo in the left arm, in the order of ID
     repeated ServoCommand servos = 1;
-  }
+}
 
-  /// Head servo command information including time, gain, torque, position
-  message Head {
+/// Head servo command information including time, gain, torque, position
+message Head {
     enum ID {
-      HEAD_YAW = 0;
-      HEAD_PITCH = 1;
+        HEAD_YAW   = 0;
+        HEAD_PITCH = 1;
     }
     /// Information for each servo in the left arm, in the order of ID
     repeated ServoCommand servos = 1;
-  }
+}
