@@ -39,6 +39,7 @@ namespace module::extension {
 
             // Remove this task, we are no longer doing it
             group.active_task = nullptr;
+            group.done        = false;
 
             // Re-evaluate the group since things may now have changed
             // This may set `group.active_task` to a valid value if a new task is picked up

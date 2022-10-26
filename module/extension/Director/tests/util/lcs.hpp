@@ -25,7 +25,7 @@
 namespace util {
 
     /**
-     * @brief Longest common subsequence algorithm that returns which elements from a and b form the common subsequence.
+     * Longest common subsequence algorithm that returns which elements from a and b form the common subsequence.
      *
      * This algorithm compares two lists and finds the longest subsequence you can make that is included in both of the
      * lists. It returns a pair of bool vectors that indicate which elements are a part of the subsequence.

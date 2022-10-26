@@ -48,12 +48,19 @@ namespace extension::behaviour {
         RunReason run_reason;
     };
 
+    /**
+     * Provides information about the current state of a provider group
+     */
+    struct GroupInfo {
+        bool done;
+    };
+
 }  // namespace extension::behaviour
 
 namespace extension::behaviour::information {
 
     /**
-     * @brief This class is an abstract class that allows the static Behaviour DSL to access the relevant state from the
+     * This class is an abstract class that allows the static Behaviour DSL to access the relevant state from the
      * algorithm that is backing it.
      *
      * Extend this class to provide whatever information is needed for outputs in the DSL.
@@ -64,7 +71,7 @@ namespace extension::behaviour::information {
         static InformationSource* source;
 
         /**
-         * @brief Internal get task data function. Is overridden by the class that is acting as the information source.
+         * Internal get task data function. Is overridden by the class that is acting as the information source.
          *
          * @param reaction_id the reaction id of the reaction that is asking for data
          *
@@ -72,9 +79,8 @@ namespace extension::behaviour::information {
          */
         virtual std::shared_ptr<void> _get_task_data(const uint64_t& reaction_id) = 0;
 
-
         /**
-         * @brief Internal get run information. Is overridden by the class that is acting as the information source.
+         * Internal get run information. Is overridden by the class that is acting as the information source.
          *
          * @param reaction_id the reaction id of the reaction that is asking for data
          *
@@ -82,29 +88,51 @@ namespace extension::behaviour::information {
          */
         virtual RunInfo _get_run_info(const uint64_t& reaction_id) = 0;
 
+        /**
+         * Internal get group information. Is overridden by the class that is acting as the information source.
+         *
+         * @param reaction_id the reaction id of the reaction that is asking for data
+         * @param type the type of the provider group group to get information about
+         *
+         * @return a GroupInfo struct containing information about the current group
+         */
+        virtual GroupInfo _get_group_info(const uint64_t& reaction_id, const std::type_index& type) = 0;
+
     public:
         virtual ~InformationSource() = default;
 
         /**
-         * @brief Gets the data for the passed providers reaction id from the information source
+         * Gets the data for the passed providers reaction id from the information source
          *
          * @param reaction_id the reaction id of the reaction that is asking for data
          *
          * @return a void shared pointer to the data for this reaction
          */
-        static std::shared_ptr<void> get_task_data(const uint64_t& reaction_id) {
+        static inline std::shared_ptr<void> get_task_data(const uint64_t& reaction_id) {
             return source->_get_task_data(reaction_id);
         }
 
         /**
-         * @brief Gets information about why the current task is running from the information source
+         * Gets information about why the current task is running from the information source
          *
          * @param reaction_id the reaction id of the reaction that is asking for data
          *
          * @return a RunInfo struct containing information about the current run
          */
-        static RunInfo get_run_info(const uint64_t& reaction_id) {
+        static inline RunInfo get_run_info(const uint64_t& reaction_id) {
             return source->_get_run_info(reaction_id);
+        }
+
+        /**
+         * Get the group info object
+         *
+         * @param reaction_id the reaction id of the reaction that is asking for data
+         * @param type the type of the group to get the info for
+         *
+         * @return the group info object containing information about the requested group
+         */
+        static inline GroupInfo get_group_info(const uint64_t& reaction_id, const std::type_index& type) {
+            return source->_get_group_info(reaction_id, type);
         }
     };
 

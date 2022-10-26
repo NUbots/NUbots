@@ -163,6 +163,9 @@ namespace module::extension {
         for (const auto& t : pack.second) {
             if (t->type == typeid(::extension::behaviour::Done)) {
 
+                // This provider is now in the done state
+                provider->group.done = true;
+
                 auto parent_provider = providers.at(group.active_task->requester_id);
                 auto& parent_group   = parent_provider->group;
 
@@ -188,6 +191,9 @@ namespace module::extension {
                 return;
             }
         }
+
+        // If we get here, the provider is not done and we are running new tasks
+        provider->group.done = false;
 
         // Remove null data tasks from the list, this allows root tasks to be cleared
         TaskList tasks;
