@@ -85,7 +85,6 @@ namespace module::extension {
                         if (current_task != nullptr
                             && providers.at(current_task->requester_id)->type
                                    == providers.at(new_task->requester_id)->type) {
-                            log<NUClear::WARN>("run task on provider 1");
                             run_task_on_provider(new_task, main_provider, RunInfo::RunReason::NEW_TASK);
                         }
                         else {
@@ -114,7 +113,6 @@ namespace module::extension {
                             }
 
                             // Run this specific task using this specific provider
-                            log<NUClear::WARN>("run task on provider 2");
                             run_task_on_provider(new_task, main_provider, RunInfo::RunReason::NEW_TASK);
                         }
                     }
@@ -150,45 +148,7 @@ namespace module::extension {
 
         // Check if this Provider is active and allowed to make subtasks
         if (provider != group.active_provider) {
-            // Throw an error so the user can see what a fool they are being
-            log<NUClear::WARN>("The provider is not active and cannot start subtasks.");
             return;
-        }
-        else {
-            log<NUClear::WARN>("Provider check fine", (group.active_task == nullptr));
-        }
-
-        // if (group.active_task != nullptr) {
-        //     auto parent_provider = providers.at(group.active_task->requester_id);
-        //     auto& parent_group   = parent_provider->group;
-
-        //     // This task pack missed the memo that everyone left the party
-        //     if ((parent_group.active_task == nullptr)
-        //         && (parent_provider->classification != Provider::Classification::ROOT)) {
-        //         for (auto& t : group.subtasks) {
-        //             remove_task(t);
-        //         }
-        //         return;
-        //     }
-        // }
-
-        log<NUClear::WARN>("Running task pack for group", NUClear::util::demangle(group.type.name()));
-
-        for (const auto& t : pack.second) {
-            log<NUClear::WARN>("\tTask ", NUClear::util::demangle(t->type.name()));
-        }
-
-        log<NUClear::WARN>("****Groups*****");
-        for (const auto& [index, g] : groups) {
-            if (g.active_task != nullptr) {
-                log<NUClear::WARN>("Group",
-                                   NUClear::util::demangle(g.type.name()),
-                                   "has active task from",
-                                   NUClear::util::demangle(g.active_task->type.name()));
-            }
-            else {
-                log<NUClear::WARN>("Group", NUClear::util::demangle(g.type.name()), "has no active task");
-            }
         }
 
         // See if a Idle command was emitted
@@ -210,7 +170,6 @@ namespace module::extension {
 
                 // Queued up a done but it's not active!
                 if (group.active_task == nullptr) {
-                    log<NUClear::WARN>("Done task is not active.");
                     return;
                 }
 
@@ -229,7 +188,6 @@ namespace module::extension {
                     remove_task(task);
                 }
                 else {
-                    log<NUClear::WARN>("run task on provider 3");
                     // TODO(thouliston) check somehow if this provider is equipped to handle done
                     run_task_on_provider(parent_group.active_task,
                                          parent_group.active_provider,

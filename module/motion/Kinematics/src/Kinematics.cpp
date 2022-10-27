@@ -36,54 +36,43 @@ namespace module::motion {
                                                      [this](const KinematicsModel& model) { kinematicsModel = model; });
 
         /// @brief Calculates left leg kinematics and makes a task for the LeftLeg servos
-        on<Provide<LeftLegIK>, Needs<LeftLeg>>().then(
-            "LeftLegIK",
-            [this](const LeftLegIK& leg_ik, const RunInfo& info) {
-                log<NUClear::WARN>("Left leg IK");
-                // If the leg is done moving, then IK is done
-                if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
-                    log<NUClear::WARN>("Done on LeftLegIK");
+        on<Provide<LeftLegIK>, Needs<LeftLeg>>().then([this](const LeftLegIK& leg_ik, const RunInfo& info) {
+            // If the leg is done moving, then IK is done
+            if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
+                emit<Task>(std::make_unique<Done>());
+                return;
+            }
 
-                    emit<Task>(std::make_unique<Done>());
-                    return;
-                }
+            // Calculate the joint positions with IK
+            auto servos = std::make_unique<LeftLeg>();
+            auto joints = calculateLegJoints<double>(kinematicsModel, Eigen::Affine3d(leg_ik.Htl), LimbID::LEFT_LEG);
 
-                // Calculate the joint positions with IK
-                auto servos = std::make_unique<LeftLeg>();
-                auto joints =
-                    calculateLegJoints<double>(kinematicsModel, Eigen::Affine3d(leg_ik.Htl), LimbID::LEFT_LEG);
+            // The order of the servos in LeftLegIK and LeftLeg should be LeftLeg.ID
+            for (long unsigned int i = 0; i < joints.size(); i++) {
+                servos->servos.emplace_back(leg_ik.time, joints[i].second, leg_ik.servos[i]);
+            }
 
-                // The order of the servos in LeftLegIK and LeftLeg should be LeftLeg.ID
-                for (long unsigned int i = 0; i < joints.size(); i++) {
-                    servos->servos.emplace_back(leg_ik.time, joints[i].second, leg_ik.servos[i]);
-                }
-                log<NUClear::WARN>("Task on LeftLegIK");
-
-                emit<Task>(servos, 0, false, "LeftLeg");
-            });
+            emit<Task>(servos);
+        });
 
         /// @brief Calculates right leg kinematics and makes a task for the RightLeg servos
-        on<Provide<RightLegIK>, Needs<RightLeg>>().then(
-            "RightLegIK",
-            [this](const RightLegIK& leg_ik, const RunInfo& info) {
-                // If the leg is done moving, then IK is done
-                if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
-                    log<NUClear::WARN>("right leg ik, right leg subtask done");
-                    emit<Task>(std::make_unique<Done>());
-                    return;
-                }
+        on<Provide<RightLegIK>, Needs<RightLeg>>().then([this](const RightLegIK& leg_ik, const RunInfo& info) {
+            // If the leg is done moving, then IK is done
+            if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
+                emit<Task>(std::make_unique<Done>());
+                return;
+            }
 
-                // Calculate the joint positions with IK
-                auto servos = std::make_unique<RightLeg>();
-                auto joints =
-                    calculateLegJoints<double>(kinematicsModel, Eigen::Affine3d(leg_ik.Htr), LimbID::RIGHT_LEG);
+            // Calculate the joint positions with IK
+            auto servos = std::make_unique<RightLeg>();
+            auto joints = calculateLegJoints<double>(kinematicsModel, Eigen::Affine3d(leg_ik.Htr), LimbID::RIGHT_LEG);
 
-                // The order of the servos in RightLegIK and RightLeg should be RightLeg.ID
-                for (long unsigned int i = 0; i < joints.size(); i++) {
-                    servos->servos.emplace_back(leg_ik.time, joints[i].second, leg_ik.servos[i]);
-                }
-                emit<Task>(servos, 0, false, "RightLeg");
-            });
+            // The order of the servos in RightLegIK and RightLeg should be RightLeg.ID
+            for (long unsigned int i = 0; i < joints.size(); i++) {
+                servos->servos.emplace_back(leg_ik.time, joints[i].second, leg_ik.servos[i]);
+            }
+            emit<Task>(servos);
+        });
 
         /// @brief Calculates head kinematics and makes a task for the Head servos
         on<Provide<HeadIK>, Needs<Head>>().then([this](const HeadIK& head_ik, const RunInfo& info) {

@@ -341,7 +341,6 @@ namespace module::motion {
         right_leg->servos.emplace_back(current_config.jointGains[ServoID::R_ANKLE_PITCH], 100);
         right_leg->servos.emplace_back(current_config.jointGains[ServoID::R_ANKLE_ROLL], 100);
 
-        log<NUClear::WARN>("Root");
 
         emit<Task>(left_leg, 0, false, "quintic left leg");
         emit<Task>(right_leg, 0, false, "quintic right leg");
@@ -368,8 +367,8 @@ namespace module::motion {
         right_arm->servos.emplace_back(time,
                                        current_config.arm_positions[ServoID::R_ELBOW],
                                        ServoState(current_config.jointGains[ServoID::R_ELBOW], 100));
-        // emit<Task>(left_arm);
-        // emit<Task>(right_arm);
+        emit<Task>(left_arm);
+        emit<Task>(right_arm);
 
         // Compute inverse kinematics for left and right foot
         const auto joints = calculateLegJoints<float>(kinematicsModel, Htl, Htr);

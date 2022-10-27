@@ -76,8 +76,7 @@ namespace module::motion {
            Needs<LeftKnee>,
            Needs<LeftAnklePitch>,
            Needs<LeftAnkleRoll>>()
-            .then("LeftLeg",
-                  [this](const LeftLeg& leg,
+            .then([this](const LeftLeg& leg,
                          const RunInfo& info,
                          const Uses<LeftHipYaw>& lhy,
                          const Uses<LeftHipRoll>& lhr,
@@ -85,31 +84,24 @@ namespace module::motion {
                          const Uses<LeftKnee>& lk,
                          const Uses<LeftAnklePitch>& lap,
                          const Uses<LeftAnkleRoll>& lar) {
-                      log<NUClear::WARN>("Left leg");
-                      // This is done when all of the servos are done, so check them all
-                      if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
-                          if (lhy.done && lhr.done && lhp.done && lk.done && lap.done && lar.done) {
-                              log<NUClear::WARN>("Done on LeftLeg");
-                              emit<Task>(std::make_unique<Done>());
-                              return;
-                          }
-                          log<NUClear::WARN>("Idle on LeftLeg");
-                          emit<Task>(std::make_unique<Idle>());
-                          return;
-                      }
-                      log<NUClear::WARN>("Tasks on LeftLeg");
+                // This is done when all of the servos are done, so check them all
+                if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
+                    if (lhy.done && lhr.done && lhp.done && lk.done && lap.done && lar.done) {
+                        emit<Task>(std::make_unique<Done>());
+                        return;
+                    }
+                    emit<Task>(std::make_unique<Idle>());
+                    return;
+                }
 
-                      // Emit tasks for each servo
-                      emit<Task>(std::make_unique<LeftHipYaw>(leg.servos[LeftLeg::ID::LEFT_HIP_YAW]),
-                                 0,
-                                 false,
-                                 "LeftHipYaw");
-                      emit<Task>(std::make_unique<LeftHipRoll>(leg.servos[LeftLeg::ID::LEFT_HIP_ROLL]));
-                      emit<Task>(std::make_unique<LeftHipPitch>(leg.servos[LeftLeg::ID::LEFT_HIP_PITCH]));
-                      emit<Task>(std::make_unique<LeftKnee>(leg.servos[LeftLeg::ID::LEFT_KNEE]));
-                      emit<Task>(std::make_unique<LeftAnklePitch>(leg.servos[LeftLeg::ID::LEFT_ANKLE_PITCH]));
-                      emit<Task>(std::make_unique<LeftAnkleRoll>(leg.servos[LeftLeg::ID::LEFT_ANKLE_ROLL]));
-                  });
+                // Emit tasks for each servo
+                emit<Task>(std::make_unique<LeftHipYaw>(leg.servos[LeftLeg::ID::LEFT_HIP_YAW]));
+                emit<Task>(std::make_unique<LeftHipRoll>(leg.servos[LeftLeg::ID::LEFT_HIP_ROLL]));
+                emit<Task>(std::make_unique<LeftHipPitch>(leg.servos[LeftLeg::ID::LEFT_HIP_PITCH]));
+                emit<Task>(std::make_unique<LeftKnee>(leg.servos[LeftLeg::ID::LEFT_KNEE]));
+                emit<Task>(std::make_unique<LeftAnklePitch>(leg.servos[LeftLeg::ID::LEFT_ANKLE_PITCH]));
+                emit<Task>(std::make_unique<LeftAnkleRoll>(leg.servos[LeftLeg::ID::LEFT_ANKLE_ROLL]));
+            });
 
         on<Provide<RightLeg>,
            Needs<RightHipYaw>,
@@ -118,46 +110,32 @@ namespace module::motion {
            Needs<RightKnee>,
            Needs<RightAnklePitch>,
            Needs<RightAnkleRoll>>()
-            .then(
-                "Right leg",
-                [this](const RightLeg& leg,
-                       const RunInfo& info,
-                       const Uses<RightHipYaw>& rhy,
-                       const Uses<RightHipRoll>& rhr,
-                       const Uses<RightHipPitch>& rhp,
-                       const Uses<RightKnee>& rk,
-                       const Uses<RightAnklePitch>& rap,
-                       const Uses<RightAnkleRoll>& rar) {
-                    // This is done when all of the servos are done, so check them all
-                    if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
-                        if (rhy.done && rhr.done && rhp.done && rk.done && rap.done && rar.done) {
-                            emit<Task>(std::make_unique<Done>());
-                            return;
-                        }
-                        emit<Task>(std::make_unique<Idle>());
+            .then([this](const RightLeg& leg,
+                         const RunInfo& info,
+                         const Uses<RightHipYaw>& rhy,
+                         const Uses<RightHipRoll>& rhr,
+                         const Uses<RightHipPitch>& rhp,
+                         const Uses<RightKnee>& rk,
+                         const Uses<RightAnklePitch>& rap,
+                         const Uses<RightAnkleRoll>& rar) {
+                // This is done when all of the servos are done, so check them all
+                if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
+                    if (rhy.done && rhr.done && rhp.done && rk.done && rap.done && rar.done) {
+                        emit<Task>(std::make_unique<Done>());
                         return;
                     }
+                    emit<Task>(std::make_unique<Idle>());
+                    return;
+                }
 
-                    // Emit tasks for each servo
-                    emit<Task>(std::make_unique<RightHipYaw>(leg.servos[RightLeg::ID::RIGHT_HIP_YAW]), 0, false, "rhy");
-                    emit<Task>(std::make_unique<RightHipRoll>(leg.servos[RightLeg::ID::RIGHT_HIP_ROLL]),
-                               0,
-                               false,
-                               "rhr");
-                    emit<Task>(std::make_unique<RightHipPitch>(leg.servos[RightLeg::ID::RIGHT_HIP_PITCH]),
-                               0,
-                               false,
-                               "rhp");
-                    emit<Task>(std::make_unique<RightKnee>(leg.servos[RightLeg::ID::RIGHT_KNEE]), 0, false, "rk");
-                    emit<Task>(std::make_unique<RightAnklePitch>(leg.servos[RightLeg::ID::RIGHT_ANKLE_PITCH]),
-                               0,
-                               false,
-                               "rap");
-                    emit<Task>(std::make_unique<RightAnkleRoll>(leg.servos[RightLeg::ID::RIGHT_ANKLE_ROLL]),
-                               0,
-                               false,
-                               "rar");
-                });
+                // Emit tasks for each servo
+                emit<Task>(std::make_unique<RightHipYaw>(leg.servos[RightLeg::ID::RIGHT_HIP_YAW]));
+                emit<Task>(std::make_unique<RightHipRoll>(leg.servos[RightLeg::ID::RIGHT_HIP_ROLL]));
+                emit<Task>(std::make_unique<RightHipPitch>(leg.servos[RightLeg::ID::RIGHT_HIP_PITCH]));
+                emit<Task>(std::make_unique<RightKnee>(leg.servos[RightLeg::ID::RIGHT_KNEE]));
+                emit<Task>(std::make_unique<RightAnklePitch>(leg.servos[RightLeg::ID::RIGHT_ANKLE_PITCH]));
+                emit<Task>(std::make_unique<RightAnkleRoll>(leg.servos[RightLeg::ID::RIGHT_ANKLE_ROLL]));
+            });
 
         on<Provide<LeftArm>, Needs<LeftShoulderPitch>, Needs<LeftShoulderRoll>, Needs<LeftElbow>>().then(
             [this](const LeftArm& arm,
@@ -335,24 +313,18 @@ namespace module::motion {
 
         /// @brief Sends a left hip yaw command as a normal servo target command for the platform module
         /// to use
-        on<Provide<LeftHipYaw>, Trigger<Sensors>>().then(
-            "LeftHipYaw",
-            [this](const LeftHipYaw& servo, const Sensors& /* sensors */) {
-                log<NUClear::WARN>("Left hip yaw");
-                // If the time to reach the position is over, then stop requesting the position
-                if (NUClear::clock::now() >= servo.command.time) {
-                    log<NUClear::WARN>("Done on LeftHipYaw", servo.command.time.time_since_epoch().count());
-
-                    emit<Task>(std::make_unique<Done>());
-                    return;
-                }
-                log<NUClear::WARN>("Emit on LeftHipYaw", servo.command.time.time_since_epoch().count());
-                emit(std::make_unique<ServoTarget>(servo.command.time,
-                                                   ServoID::L_HIP_YAW,
-                                                   servo.command.position,
-                                                   servo.command.state.gain,
-                                                   servo.command.state.torque));
-            });
+        on<Provide<LeftHipYaw>, Trigger<Sensors>>().then([this](const LeftHipYaw& servo, const Sensors& /* sensors */) {
+            // If the time to reach the position is over, then stop requesting the position
+            if (NUClear::clock::now() >= servo.command.time) {
+                emit<Task>(std::make_unique<Done>());
+                return;
+            }
+            emit(std::make_unique<ServoTarget>(servo.command.time,
+                                               ServoID::L_HIP_YAW,
+                                               servo.command.position,
+                                               servo.command.state.gain,
+                                               servo.command.state.torque));
+        });
 
         /// @brief Sends a right hip roll command as a normal servo target command for the platform module
         /// to use

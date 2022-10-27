@@ -189,7 +189,6 @@ namespace module::behaviour::strategy {
                          const FieldDescription& field_description,
                          const Field& field,
                          const Ball& ball) {
-                log<NUClear::WARN>("soccer strategy");
                 try {
                     // If we're picked up, stand still
                     if (picked_up(sensors)) {
@@ -200,7 +199,6 @@ namespace module::behaviour::strategy {
                     else {
                         // Overide SoccerStrategy and force normal mode in playing phase
                         if (cfg.force_playing) {
-                            log<NUClear::WARN>("force playing");
                             normal_playing();
                         }
                         // Overide SoccerStrategy and force penalty mode in playing phase
