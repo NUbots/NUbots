@@ -146,6 +146,11 @@ namespace module::extension {
         const auto& provider = pack.first;
         auto& group          = provider->group;
 
+        // Check if this Provider is active and allowed to make subtasks
+        if (provider != group.active_provider) {
+            return;
+        }
+
         // See if a Idle command was emitted
         for (const auto& t : pack.second) {
             if (t->type == typeid(::extension::behaviour::Idle)) {
@@ -165,6 +170,11 @@ namespace module::extension {
 
                 // This provider is now in the done state
                 provider->group.done = true;
+
+                // Queued up a done but it's not active anymore!
+                if (group.active_task == nullptr) {
+                    return;
+                }
 
                 auto parent_provider = providers.at(group.active_task->requester_id);
                 auto& parent_group   = parent_provider->group;
