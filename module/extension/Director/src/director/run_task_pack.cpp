@@ -146,6 +146,11 @@ namespace module::extension {
         const auto& provider = pack.first;
         auto& group          = provider->group;
 
+        // Check if this Provider is active and allowed to make subtasks
+        if (provider != group.active_provider) {
+            return;
+        }
+
         // See if a Idle command was emitted
         for (const auto& t : pack.second) {
             if (t->type == typeid(::extension::behaviour::Idle)) {
