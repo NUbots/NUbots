@@ -9,10 +9,6 @@
 namespace module::motion {
 
     class Kinematics : public ::extension::behaviour::BehaviourReactor {
-    private:
-        /// @brief Kinematics model used for calculating inverse kinematics
-        message::motion::KinematicsModel kinematicsModel{};
-
     public:
         /// @brief Called by the powerplant to build and setup the Kinematics reactor.
         explicit Kinematics(std::unique_ptr<NUClear::Environment> environment);
