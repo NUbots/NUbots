@@ -2,15 +2,11 @@
 
 #include <fmt/format.h>
 
-#include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/Behaviour.hpp"
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/KinematicsModel.hpp"
-#include "message/motion/Limbs.hpp"
-#include "message/motion/LimbsIK.hpp"
-#include "message/motion/ServoCommand.hpp"
 #include "message/motion/WalkCommand.hpp"
 #include "message/support/nusight/DataPoint.hpp"
 
@@ -32,11 +28,6 @@ namespace module::motion {
     using message::motion::ExecuteGetup;
     using message::motion::KillGetup;
     using message::motion::KinematicsModel;
-    using message::motion::LeftArm;
-    using message::motion::LeftLegIK;
-    using message::motion::RightArm;
-    using message::motion::RightLegIK;
-    using message::motion::ServoState;
     using message::motion::StopCommand;
     using message::motion::WalkCommand;
 
@@ -102,16 +93,15 @@ namespace module::motion {
             }
         }
 
-        config.arm_positions[ServoID::R_SHOULDER_PITCH] = cfg["arms"]["right_shoulder_pitch"].as<float>();
-        config.arm_positions[ServoID::L_SHOULDER_PITCH] = cfg["arms"]["left_shoulder_pitch"].as<float>();
-        config.arm_positions[ServoID::R_SHOULDER_ROLL]  = cfg["arms"]["right_shoulder_roll"].as<float>();
-        config.arm_positions[ServoID::L_SHOULDER_ROLL]  = cfg["arms"]["left_shoulder_roll"].as<float>();
-        config.arm_positions[ServoID::R_ELBOW]          = cfg["arms"]["right_elbow"].as<float>();
-        config.arm_positions[ServoID::L_ELBOW]          = cfg["arms"]["left_elbow"].as<float>();
+        config.arm_positions.emplace_back(ServoID::R_SHOULDER_PITCH, cfg["arms"]["right_shoulder_pitch"].as<float>());
+        config.arm_positions.emplace_back(ServoID::L_SHOULDER_PITCH, cfg["arms"]["left_shoulder_pitch"].as<float>());
+        config.arm_positions.emplace_back(ServoID::R_SHOULDER_ROLL, cfg["arms"]["right_shoulder_roll"].as<float>());
+        config.arm_positions.emplace_back(ServoID::L_SHOULDER_ROLL, cfg["arms"]["left_shoulder_roll"].as<float>());
+        config.arm_positions.emplace_back(ServoID::R_ELBOW, cfg["arms"]["right_elbow"].as<float>());
+        config.arm_positions.emplace_back(ServoID::L_ELBOW, cfg["arms"]["left_elbow"].as<float>());
     }
 
-    QuinticWalk::QuinticWalk(std::unique_ptr<NUClear::Environment> environment)
-        : BehaviourReactor(std::move(environment)) {
+    QuinticWalk::QuinticWalk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         imu_reaction = on<Trigger<Sensors>>().then([this](const Sensors& sensors) {
             Eigen::Vector3f RPY =
@@ -319,57 +309,6 @@ namespace module::motion {
         // Get desired transform for right foot {r}
         const Eigen::Affine3f Htr = walk_engine.get_footstep().is_left_support() ? Htf : Hts;
 
-        // ****DIRECTOR MOTION***
-        const NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
-
-        auto left_leg   = std::make_unique<LeftLegIK>();
-        auto right_leg  = std::make_unique<RightLegIK>();
-        left_leg->time  = time;
-        right_leg->time = time;
-        left_leg->Htl   = Htl.cast<double>().matrix();
-        right_leg->Htr  = Htr.cast<double>().matrix();
-        left_leg->servos.emplace_back(current_config.jointGains[ServoID::L_HIP_YAW], 100);
-        left_leg->servos.emplace_back(current_config.jointGains[ServoID::L_HIP_ROLL], 100);
-        left_leg->servos.emplace_back(current_config.jointGains[ServoID::L_HIP_PITCH], 100);
-        left_leg->servos.emplace_back(current_config.jointGains[ServoID::L_KNEE], 100);
-        left_leg->servos.emplace_back(current_config.jointGains[ServoID::L_ANKLE_PITCH], 100);
-        left_leg->servos.emplace_back(current_config.jointGains[ServoID::L_ANKLE_ROLL], 100);
-        right_leg->servos.emplace_back(current_config.jointGains[ServoID::R_HIP_YAW], 100);
-        right_leg->servos.emplace_back(current_config.jointGains[ServoID::R_HIP_ROLL], 100);
-        right_leg->servos.emplace_back(current_config.jointGains[ServoID::R_HIP_PITCH], 100);
-        right_leg->servos.emplace_back(current_config.jointGains[ServoID::R_KNEE], 100);
-        right_leg->servos.emplace_back(current_config.jointGains[ServoID::R_ANKLE_PITCH], 100);
-        right_leg->servos.emplace_back(current_config.jointGains[ServoID::R_ANKLE_ROLL], 100);
-
-
-        emit<Task>(left_leg, 0, false, "quintic left leg");
-        emit<Task>(right_leg, 0, false, "quintic right leg");
-
-
-        auto left_arm  = std::make_unique<LeftArm>();
-        auto right_arm = std::make_unique<RightArm>();
-        left_arm->servos.emplace_back(time,
-                                      current_config.arm_positions[ServoID::L_SHOULDER_PITCH],
-                                      ServoState(current_config.jointGains[ServoID::L_SHOULDER_PITCH], 100));
-        left_arm->servos.emplace_back(time,
-                                      current_config.arm_positions[ServoID::L_SHOULDER_ROLL],
-                                      ServoState(current_config.jointGains[ServoID::L_SHOULDER_ROLL], 100));
-        left_arm->servos.emplace_back(time,
-                                      current_config.arm_positions[ServoID::L_ELBOW],
-                                      ServoState(current_config.jointGains[ServoID::L_ELBOW], 100));
-
-        right_arm->servos.emplace_back(time,
-                                       current_config.arm_positions[ServoID::R_SHOULDER_PITCH],
-                                       ServoState(current_config.jointGains[ServoID::R_SHOULDER_PITCH], 100));
-        right_arm->servos.emplace_back(time,
-                                       current_config.arm_positions[ServoID::R_SHOULDER_ROLL],
-                                       ServoState(current_config.jointGains[ServoID::R_SHOULDER_ROLL], 100));
-        right_arm->servos.emplace_back(time,
-                                       current_config.arm_positions[ServoID::R_ELBOW],
-                                       ServoState(current_config.jointGains[ServoID::R_ELBOW], 100));
-        emit<Task>(left_arm);
-        emit<Task>(right_arm);
-
         // Compute inverse kinematics for left and right foot
         const auto joints = calculateLegJoints<float>(kinematicsModel, Htl, Htr);
         auto waypoints    = motion(joints);
@@ -405,9 +344,13 @@ namespace module::motion {
                                              100);
         }
 
-        for (const auto& [servo_id, joint] : current_config.arm_positions) {
-            waypoints->commands
-                .emplace_back(subsumption_id, time, servo_id, joint, current_config.jointGains[servo_id], 100);
+        for (const auto& joint : current_config.arm_positions) {
+            waypoints->commands.emplace_back(subsumption_id,
+                                             time,
+                                             joint.first,
+                                             joint.second,
+                                             current_config.jointGains[joint.first],
+                                             100);
         }
 
         return waypoints;

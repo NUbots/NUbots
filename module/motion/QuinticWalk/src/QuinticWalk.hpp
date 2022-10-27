@@ -1,7 +1,6 @@
 #ifndef MODULE_MOTION_QUINTICWALK_HPP
 #define MODULE_MOTION_QUINTICWALK_HPP
 
-#include <extension/Behaviour.hpp>
 #include <map>
 #include <memory>
 #include <nuclear>
@@ -18,7 +17,7 @@
 
 namespace module::motion {
 
-    class QuinticWalk : public ::extension::behaviour::BehaviourReactor {
+    class QuinticWalk : public NUClear::Reactor {
 
     public:
         /// @brief Called by the powerplant to build and setup the QuinticWalk reactor.
@@ -50,7 +49,7 @@ namespace module::motion {
             WalkingParameter params{};
 
             std::map<utility::input::ServoID, float> jointGains{};
-            std::map<utility::input::ServoID, float> arm_positions{};
+            std::vector<std::pair<utility::input::ServoID, float>> arm_positions{};
         } normal_config{}, goalie_config{};
 
         static void load_quintic_walk(const ::extension::Configuration& cfg, Config& config);

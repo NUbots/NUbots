@@ -34,7 +34,6 @@ namespace module::extension {
         // Store the original task so we can use it in stops later if needed
         auto original_task = group.active_task;
 
-
         // Check if this task is the currently active task this provider is running
         if (task == group.active_task) {
 

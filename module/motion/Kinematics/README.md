@@ -1,5 +1,4 @@
-Kinematics
-==========
+# Kinematics
 
 ## Description
 
