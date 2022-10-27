@@ -83,18 +83,23 @@ message LeftKnee {
 message RightAnklePitch {
     ServoCommand command = 1;
 }
+
 message LeftAnklePitch {
     ServoCommand command = 1;
 }
+
 message RightAnkleRoll {
     ServoCommand command = 1;
 }
+
 message LeftAnkleRoll {
     ServoCommand command = 1;
 }
+
 message HeadYaw {
     ServoCommand command = 1;
 }
+
 message HeadPitch {
     ServoCommand command = 1;
 }
