@@ -23,7 +23,12 @@
     "yaml.format.printWidth": 120,
     "files.associations": {
         "*.role": "cmake",
-        ".Doxyfile": "properties"
+        ".Doxyfile": "properties",
+        "*.ipp": "cpp",
+        "string_view": "cpp",
+        "regex": "cpp",
+        "array": "cpp",
+        "string": "cpp"
     },
     "editor.codeActionsOnSave": {
         "source.organizeImports": true
