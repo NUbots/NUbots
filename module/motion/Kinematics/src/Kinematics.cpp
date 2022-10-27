@@ -49,7 +49,7 @@ namespace module::motion {
 
                 // The order of the servos in LeftLegIK and LeftLeg should be LeftLeg.ID
                 for (long unsigned int i = 0; i < joints.size(); i++) {
-                    servos->servos[i](leg_ik.time, joints[i].second, leg_ik.servos[i]);
+                    servos->servos.emplace_back(leg_ik.time, joints[i].second, leg_ik.servos[i]);
                 }
 
                 emit<Task>(servos);
@@ -71,7 +71,7 @@ namespace module::motion {
 
                 // The order of the servos in RightLegIK and RightLeg should be LegID
                 for (long unsigned int i = 0; i < joints.size(); i++) {
-                    servos->servos[i](leg_ik.time, joints[i].second, leg_ik.servos[i]);
+                    servos->servos.emplace_back(leg_ik.time, joints[i].second, leg_ik.servos[i]);
                 }
                 emit<Task>(servos);
             });
@@ -91,7 +91,7 @@ namespace module::motion {
 
                 // The order of the servos in HeadIK and Head should be HeadID (yaw, pitch)
                 for (long unsigned int i = 0; i < joints.size(); i++) {
-                    servos->servos[i](head_ik.time, joints[i].second, head_ik.servos[i]);
+                    servos->servos.emplace_back(head_ik.time, joints[i].second, head_ik.servos[i]);
                 }
                 emit<Task>(servos);
             });

@@ -34,14 +34,14 @@ enum LegID {
 
 /// Left leg servo command information including time, gain, torque, position
 message LeftLeg {
-    /// Information for each servo in the left leg
-    map<LegID, ServoCommand> servos = 1;
+    /// Information for each servo in the left leg, in order of LegID
+    repeated ServoCommand servos = 1;
 }
 
 /// Right leg servo command information including time, gain, torque, position
 message RightLeg {
-    /// Information for each servo in the right leg
-    map<LegID, ServoCommand> servos = 1;
+    /// Information for each servo in the right leg, in order of LegID
+    repeated ServoCommand servos = 1;
 }
 
 /// Enum for each servo in an arm
@@ -53,14 +53,14 @@ enum ArmID {
 
 /// Left arm servo command information including time, gain, torque, position
 message LeftArm {
-    /// Information for each servo in the left arm
-    map<ArmID, ServoCommand> servos = 1;
+    /// Information for each servo in the left arm, in order of ArmID
+    repeated ServoCommand servos = 1;
 }
 
 /// Right arm servo command information including time, gain, torque, position
 message RightArm {
-    /// Information for each servo in the right arm
-    map<ArmID, ServoCommand> servos = 1;
+    /// Information for each servo in the right arm, in order of ArmID
+    repeated ServoCommand servos = 1;
 }
 
 /// Enum for each servo in the head
@@ -71,6 +71,6 @@ enum HeadID {
 
 /// Head servo command information including time, gain, torque, position
 message Head {
-    /// Information for each servo in the head
-    map<HEadID, ServoCommand> servos = 1;
+    /// Information for each servo in the head, in order of HeadID
+    repeated ServoCommand servos = 1;
 }
