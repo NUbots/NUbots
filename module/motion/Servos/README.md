@@ -1,4 +1,4 @@
-# ServoRequest
+# Servos
 
 ## Description
 

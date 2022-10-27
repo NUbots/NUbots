@@ -17,7 +17,7 @@
  * Copyright 2022 NUbots <nubots@nubots.net>
  */
 
-#include "ServoRequest.hpp"
+#include "Servos.hpp"
 
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
@@ -61,11 +61,10 @@ namespace module::motion {
     using message::motion::ServoTarget;
     using utility::input::ServoID;
 
-    ServoRequest::ServoRequest(std::unique_ptr<NUClear::Environment> environment)
-        : BehaviourReactor(std::move(environment)) {
+    Servos::Servos(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
 
-        on<Configuration>("ServoRequest.yaml").then([this](const Configuration& cfg) {
-            // Use configuration here from file ServoRequest.yaml
+        on<Configuration>("Servos.yaml").then([this](const Configuration& cfg) {
+            // Use configuration here from file Servos.yaml
             this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
         });
 
