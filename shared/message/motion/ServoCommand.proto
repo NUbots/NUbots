@@ -32,13 +32,10 @@ message ServoState {
 }
 
 message ServoCommand {
-    /// When the target was created
+    /// The time that the servo should reach the given position
     google.protobuf.Timestamp time = 1;
-    /// The position value of the destination. 0 to 4,095 (0xFFF) is available.
-    /// The unit is 0.088 [°]. If Goal Position is out of the range, Angle Limit
-    /// Error Bit (Bit1) of Status Packet is returned as ‘1’ and Alarm is
-    /// triggered as set in Alarm LED/Shutdown
+    /// The position value of the destination in radians.
     float position = 2;
-    /// Grouped so they can be set earlier, ie before IK is calculated
+    /// Gain and torque of the servo
     ServoState state = 3;
 }
