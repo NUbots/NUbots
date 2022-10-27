@@ -57,7 +57,7 @@ namespace utility::input {
         ServoID(uint32_t const& v) : value(static_cast<Value>(v)) {}
         ServoID(uint64_t const& v) : value(static_cast<Value>(v)) {}
         ServoID(int const& v) : value(static_cast<Value>(v)) {}
-        constexpr ServoID(Value const& v) : value(v) {}
+        ServoID(Value const& v) : value(v) {}
         ServoID(std::string const& str);
 
         // Operators

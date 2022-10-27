@@ -20,7 +20,7 @@ namespace module::motion {
         /// @brief Creates a reaction that sends a given servo command as a servo target command for the platform module
         /// to use
         // TODO(ysims): add capability to be Done when the servo reaches the target position
-        template <typename Servo, ServoID ID>
+        template <typename Servo, ServoID::Value ID>
         void add_servo_provider() {
             on<Provide<Servo>, Trigger<Sensors>>().then([this](const Servo& servo) {
                 // If the time to reach the position is over, then stop requesting the position
