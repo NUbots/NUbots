@@ -25,7 +25,7 @@ import "google/protobuf/timestamp.proto";
 
 message ServoState {
     /// Proportional gain. In proportion to the servo's position error. Gain
-    /// values are in range 0~254. K_p : p_gain / 8
+    /// values are in range 0-100.
     float gain = 1;
     /// Used to set the servo on or off. Typically either 0 (off) or 100 (on)
     float torque = 2;
