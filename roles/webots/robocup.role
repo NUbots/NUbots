@@ -27,17 +27,20 @@ nuclear_role(
   localisation::BallLocalisation
   localisation::RobotParticleLocalisation
   # Behaviour
-  behaviour::Controller
-  behaviour::skills::Getup
-  behaviour::skills::KickScript
-  behaviour::skills::HeadBehaviourSoccer
-  behaviour::skills::Stand
+  extension::Director
+  motion::Kinematics
+  motion::ServoRequest
+  # behaviour::Controller
+  # behaviour::skills::Getup
+  # behaviour::skills::KickScript
+  # behaviour::skills::HeadBehaviourSoccer
+  # behaviour::skills::Stand
   behaviour::planning::SimpleWalkPathPlanner
   behaviour::strategy::SoccerStrategy
   # Motion
-  motion::ScriptEngine
+  # motion::ScriptEngine
   motion::QuinticWalk
-  motion::HeadController
+  # motion::HeadController
   # Data logger
-  support::logging::DataLogging
+  # support::logging::DataLogging
 )

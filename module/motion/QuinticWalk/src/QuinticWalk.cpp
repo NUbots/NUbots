@@ -341,9 +341,10 @@ namespace module::motion {
         right_leg->servos.emplace_back(current_config.jointGains[ServoID::R_ANKLE_PITCH], 100);
         right_leg->servos.emplace_back(current_config.jointGains[ServoID::R_ANKLE_ROLL], 100);
 
+        log<NUClear::WARN>("Root");
 
-        emit<Task>(left_leg);
-        emit<Task>(right_leg);
+        emit<Task>(left_leg, 0, false, "quintic left leg");
+        emit<Task>(right_leg, 0, false, "quintic right leg");
 
 
         auto left_arm  = std::make_unique<LeftArm>();
@@ -367,14 +368,8 @@ namespace module::motion {
         right_arm->servos.emplace_back(time,
                                        current_config.arm_positions[ServoID::R_ELBOW],
                                        ServoState(current_config.jointGains[ServoID::R_ELBOW], 100));
-        emit<Task>(left_arm);
-        emit<Task>(right_arm);
-
-        // google.protobuf.Timestamp time = 1;
-        // /// Target left foot position to torso
-        // mat4 Htl = 2;
-        // /// Gain and torque of each servo, in the order of ID in the LeftLeg message
-        // repeated ServoCommand.ServoState servos = 3;
+        // emit<Task>(left_arm);
+        // emit<Task>(right_arm);
 
         // Compute inverse kinematics for left and right foot
         const auto joints = calculateLegJoints<float>(kinematicsModel, Htl, Htr);

@@ -27,11 +27,15 @@ namespace module::extension {
     void Director::run_task_on_provider(const std::shared_ptr<BehaviourTask>& task,
                                         const std::shared_ptr<provider::Provider>& provider,
                                         const RunInfo::RunReason& run_reason) {
-
+        // If there's no provider, then this was removed by something else
+        // if (provider == nullptr) {
+        //     return;
+        // }
         // Update the active provider and task
         auto& group              = provider->group;
         bool run_start_providers = group.active_provider == nullptr;
         group.active_task        = task;
+        log<NUClear::WARN>("Run start providers", run_start_providers);
 
         // If there was no active provider, then this is the first time running this group
         // Therefore we should run the "start" providers
