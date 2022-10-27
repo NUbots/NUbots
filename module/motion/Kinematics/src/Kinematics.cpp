@@ -34,7 +34,7 @@ namespace module::motion {
         });
 
         /// @brief Calculates left leg kinematics and makes a task for the LeftLeg servos
-        on<Provide<LeftLegIK>, Needs<LeftLeg>, With<KinematicsModel>>().then(
+        on<Provide<LeftLegIK>, With<KinematicsModel>, Needs<LeftLeg>>().then(
             [this](const LeftLegIK& leg_ik, const KinematicsModel& kinematics_model, const RunInfo& info) {
                 // If the leg is done moving, then IK is done
                 if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
@@ -56,7 +56,7 @@ namespace module::motion {
             });
 
         /// @brief Calculates right leg kinematics and makes a task for the RightLeg servos
-        on<Provide<RightLegIK>, Needs<RightLeg>, With<KinematicsModel>>().then(
+        on<Provide<RightLegIK>, With<KinematicsModel>, Needs<RightLeg>>().then(
             [this](const RightLegIK& leg_ik, const KinematicsModel& kinematics_model, const RunInfo& info) {
                 // If the leg is done moving, then IK is done
                 if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
@@ -77,24 +77,23 @@ namespace module::motion {
             });
 
         /// @brief Calculates head kinematics and makes a task for the Head servos
-        on<Provide<HeadIK>, Needs<Head>, With<KinematicsModel>>().then(
-            [this](const HeadIK& head_ik, const RunInfo& info) {
-                // If the head is done moving, then IK is done
-                if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
-                    emit<Task>(std::make_unique<Done>());
-                    return;
-                }
+        on<Provide<HeadIK>, Needs<Head>>().then([this](const HeadIK& head_ik, const RunInfo& info) {
+            // If the head is done moving, then IK is done
+            if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
+                emit<Task>(std::make_unique<Done>());
+                return;
+            }
 
-                // Calculate the joint positions with IK
-                auto servos = std::make_unique<Head>();
-                auto joints = calculateHeadJoints<double>(Eigen::Vector3d(head_ik.uPCt));
+            // Calculate the joint positions with IK
+            auto servos = std::make_unique<Head>();
+            auto joints = calculateHeadJoints<double>(Eigen::Vector3d(head_ik.uPCt));
 
-                // The order of the servos in HeadIK and Head should be HeadID (yaw, pitch)
-                for (long unsigned int i = 0; i < joints.size(); i++) {
-                    servos->servos.emplace_back(head_ik.time, joints[i].second, head_ik.servos[i]);
-                }
-                emit<Task>(servos);
-            });
+            // The order of the servos in HeadIK and Head should be HeadID (yaw, pitch)
+            for (long unsigned int i = 0; i < joints.size(); i++) {
+                servos->servos.emplace_back(head_ik.time, joints[i].second, head_ik.servos[i]);
+            }
+            emit<Task>(servos);
+        });
     }
 
 }  // namespace module::motion
