@@ -33,7 +33,9 @@ namespace module::motion {
 
     using extension::Configuration;
     using message::input::Sensors;
+    using message::motion::ArmID;
     using message::motion::Head;
+    using message::motion::HeadID;
     using message::motion::HeadPitch;
     using message::motion::HeadYaw;
     using message::motion::LeftAnklePitch;
@@ -47,6 +49,7 @@ namespace module::motion {
     using message::motion::LeftLeg;
     using message::motion::LeftShoulderPitch;
     using message::motion::LeftShoulderRoll;
+    using message::motion::LegID;
     using message::motion::RightAnklePitch;
     using message::motion::RightAnkleRoll;
     using message::motion::RightArm;
@@ -94,12 +97,12 @@ namespace module::motion {
                 }
 
                 // Emit tasks for each servo
-                emit<Task>(std::make_unique<LeftHipYaw>(leg.servos[LeftLeg::ID::LEFT_HIP_YAW]));
-                emit<Task>(std::make_unique<LeftHipRoll>(leg.servos[LeftLeg::ID::LEFT_HIP_ROLL]));
-                emit<Task>(std::make_unique<LeftHipPitch>(leg.servos[LeftLeg::ID::LEFT_HIP_PITCH]));
-                emit<Task>(std::make_unique<LeftKnee>(leg.servos[LeftLeg::ID::LEFT_KNEE]));
-                emit<Task>(std::make_unique<LeftAnklePitch>(leg.servos[LeftLeg::ID::LEFT_ANKLE_PITCH]));
-                emit<Task>(std::make_unique<LeftAnkleRoll>(leg.servos[LeftLeg::ID::LEFT_ANKLE_ROLL]));
+                emit<Task>(std::make_unique<LeftHipYaw>(leg.servos[LegID::HIP_YAW]));
+                emit<Task>(std::make_unique<LeftHipRoll>(leg.servos[LegID::HIP_ROLL]));
+                emit<Task>(std::make_unique<LeftHipPitch>(leg.servos[LegID::HIP_PITCH]));
+                emit<Task>(std::make_unique<LeftKnee>(leg.servos[LegID::KNEE]));
+                emit<Task>(std::make_unique<LeftAnklePitch>(leg.servos[LegID::ANKLE_PITCH]));
+                emit<Task>(std::make_unique<LeftAnkleRoll>(leg.servos[LegID::ANKLE_ROLL]));
             });
 
         on<Provide<RightLeg>,
@@ -128,12 +131,12 @@ namespace module::motion {
                 }
 
                 // Emit tasks for each servo
-                emit<Task>(std::make_unique<RightHipYaw>(leg.servos[RightLeg::ID::RIGHT_HIP_YAW]));
-                emit<Task>(std::make_unique<RightHipRoll>(leg.servos[RightLeg::ID::RIGHT_HIP_ROLL]));
-                emit<Task>(std::make_unique<RightHipPitch>(leg.servos[RightLeg::ID::RIGHT_HIP_PITCH]));
-                emit<Task>(std::make_unique<RightKnee>(leg.servos[RightLeg::ID::RIGHT_KNEE]));
-                emit<Task>(std::make_unique<RightAnklePitch>(leg.servos[RightLeg::ID::RIGHT_ANKLE_PITCH]));
-                emit<Task>(std::make_unique<RightAnkleRoll>(leg.servos[RightLeg::ID::RIGHT_ANKLE_ROLL]));
+                emit<Task>(std::make_unique<RightHipYaw>(leg.servos[LegID::HIP_YAW]));
+                emit<Task>(std::make_unique<RightHipRoll>(leg.servos[LegID::HIP_ROLL]));
+                emit<Task>(std::make_unique<RightHipPitch>(leg.servos[LegID::HIP_PITCH]));
+                emit<Task>(std::make_unique<RightKnee>(leg.servos[LegID::KNEE]));
+                emit<Task>(std::make_unique<RightAnklePitch>(leg.servos[LegID::ANKLE_PITCH]));
+                emit<Task>(std::make_unique<RightAnkleRoll>(leg.servos[LegID::ANKLE_ROLL]));
             });
 
         on<Provide<LeftArm>, Needs<LeftShoulderPitch>, Needs<LeftShoulderRoll>, Needs<LeftElbow>>().then(
@@ -153,9 +156,9 @@ namespace module::motion {
                 }
 
                 // Emit tasks for each servo
-                emit<Task>(std::make_unique<LeftShoulderPitch>(arm.servos[LeftArm::ID::LEFT_SHOULDER_PITCH]));
-                emit<Task>(std::make_unique<LeftShoulderRoll>(arm.servos[LeftArm::ID::LEFT_SHOULDER_ROLL]));
-                emit<Task>(std::make_unique<LeftElbow>(arm.servos[LeftArm::ID::LEFT_ELBOW]));
+                emit<Task>(std::make_unique<LeftShoulderPitch>(arm.servos[ArmID::SHOULDER_PITCH]));
+                emit<Task>(std::make_unique<LeftShoulderRoll>(arm.servos[ArmID::SHOULDER_ROLL]));
+                emit<Task>(std::make_unique<LeftElbow>(arm.servos[ArmID::ELBOW]));
             });
 
         on<Provide<RightArm>, Needs<RightShoulderPitch>, Needs<RightShoulderRoll>, Needs<RightElbow>>().then(
@@ -175,9 +178,9 @@ namespace module::motion {
                 }
 
                 // Emit tasks for each servo
-                emit<Task>(std::make_unique<RightShoulderPitch>(arm.servos[RightArm::ID::RIGHT_SHOULDER_PITCH]));
-                emit<Task>(std::make_unique<RightShoulderRoll>(arm.servos[RightArm::ID::RIGHT_SHOULDER_ROLL]));
-                emit<Task>(std::make_unique<RightElbow>(arm.servos[RightArm::ID::RIGHT_ELBOW]));
+                emit<Task>(std::make_unique<RightShoulderPitch>(arm.servos[ArmID::SHOULDER_PITCH]));
+                emit<Task>(std::make_unique<RightShoulderRoll>(arm.servos[ArmID::SHOULDER_ROLL]));
+                emit<Task>(std::make_unique<RightElbow>(arm.servos[ArmID::ELBOW]));
             });
 
         on<Provide<Head>, Needs<HeadYaw>, Needs<HeadPitch>>().then(
@@ -193,8 +196,8 @@ namespace module::motion {
                 }
 
                 // Emit tasks for each servo
-                emit<Task>(std::make_unique<HeadYaw>(head.servos[Head::ID::HEAD_YAW]));
-                emit<Task>(std::make_unique<HeadPitch>(head.servos[Head::ID::HEAD_PITCH]));
+                emit<Task>(std::make_unique<HeadYaw>(head.servos[HeadID::YAW]));
+                emit<Task>(std::make_unique<HeadPitch>(head.servos[HeadID::PITCH]));
             });
 
 
