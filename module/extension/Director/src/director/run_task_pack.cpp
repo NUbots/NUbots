@@ -168,11 +168,6 @@ namespace module::extension {
         for (const auto& t : pack.second) {
             if (t->type == typeid(::extension::behaviour::Done)) {
 
-                // Queued up a done but it's not active!
-                if (group.active_task == nullptr) {
-                    return;
-                }
-
                 // This provider is now in the done state
                 provider->group.done = true;
 
