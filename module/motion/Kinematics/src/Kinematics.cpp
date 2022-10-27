@@ -35,7 +35,7 @@ namespace module::motion {
 
         /// @brief Calculates left leg kinematics and makes a task for the LeftLeg servos
         on<Provide<LeftLegIK>, With<KinematicsModel>, Needs<LeftLeg>>().then(
-            [this](const LeftLegIK& leg_ik, const KinematicsModel& kinematics_model, const RunInfo& info) {
+            [this](const LeftLegIK& leg_ik, const RunInfo& info, const KinematicsModel& kinematics_model) {
                 // If the leg is done moving, then IK is done
                 if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
                     emit<Task>(std::make_unique<Done>());
@@ -57,7 +57,7 @@ namespace module::motion {
 
         /// @brief Calculates right leg kinematics and makes a task for the RightLeg servos
         on<Provide<RightLegIK>, With<KinematicsModel>, Needs<RightLeg>>().then(
-            [this](const RightLegIK& leg_ik, const KinematicsModel& kinematics_model, const RunInfo& info) {
+            [this](const RightLegIK& leg_ik, const RunInfo& info, const KinematicsModel& kinematics_model) {
                 // If the leg is done moving, then IK is done
                 if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
                     emit<Task>(std::make_unique<Done>());
