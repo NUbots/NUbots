@@ -289,15 +289,6 @@ namespace module::extension {
                                        id,
                                        "is a stop provider.");
                 }
-                // Check if this Provider is active and allowed to make subtasks
-                else if (p != p->group.active_provider) {
-                    // Throw an error so the user can see what a fool they are being
-                    log<NUClear::WARN>("The task",
-                                       task->name,
-                                       "cannot be executed as the Provider",
-                                       id,
-                                       "is not active and cannot make subtasks");
-                }
                 // Everything is fine
                 else {
                     pack_builder.emplace(task->requester_task_id, task);

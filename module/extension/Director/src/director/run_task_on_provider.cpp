@@ -35,7 +35,6 @@ namespace module::extension {
         auto& group              = provider->group;
         bool run_start_providers = group.active_provider == nullptr;
         group.active_task        = task;
-        log<NUClear::WARN>("Run start providers", run_start_providers);
 
         // If there was no active provider, then this is the first time running this group
         // Therefore we should run the "start" providers
