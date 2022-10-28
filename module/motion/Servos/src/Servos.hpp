@@ -9,6 +9,7 @@
 #include "message/motion/ServoTarget.hpp"
 
 #include "utility/input/ServoID.hpp"
+#include "utility/motion/ServoLimbMap.hpp"
 
 namespace module::motion {
     using message::input::Sensors;
@@ -34,6 +35,33 @@ namespace module::motion {
                                                    servo.command.state.gain,
                                                    servo.command.state.torque));
             });
+        }
+
+        /// @brief Creates a reaction that takes a servo wrapper task (eg LeftLeg) and emits a task for each servo.
+        /// Emits Done when all servo tasks are Done.
+        /// @tparam Group is a servo wrapper task (eg LeftLeg)
+        /// @tparam Elements is a template pack of Servos that Group uses
+        template <typename Group, typename... Elements>
+        void add_group_provider() {
+            on<Provide<Group>, Needs<Elements>...>().then(
+                [this](const Group& group, const RunInfo& info, const Uses<Elements>... elements) {
+                    // Check if any subtask is Done
+                    if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
+                        // If every servo task is done then emit Done
+                        if ((elements.done && ...)) {
+                            emit<Task>(std::make_unique<Done>());
+                            return;
+                        }
+                        // Emit Idle if all the servos are not Done yet
+                        emit<Task>(std::make_unique<Idle>());
+                        return;
+                    }
+
+                    // Runs an emit for each servo
+                    NUClear::util::unpack((emit<Task>(std::make_unique<Elements>(
+                                               group.servos[utility::motion::ServoMap<Elements>::value])),
+                                           0)...);
+                });
         }
 
     public:

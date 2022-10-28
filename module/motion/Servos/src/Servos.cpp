@@ -67,136 +67,20 @@ namespace module::motion {
             this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
         });
 
-        on<Provide<LeftLeg>,
-           Needs<LeftHipYaw>,
-           Needs<LeftHipRoll>,
-           Needs<LeftHipPitch>,
-           Needs<LeftKnee>,
-           Needs<LeftAnklePitch>,
-           Needs<LeftAnkleRoll>>()
-            .then([this](const LeftLeg& leg,
-                         const RunInfo& info,
-                         const Uses<LeftHipYaw>& lhy,
-                         const Uses<LeftHipRoll>& lhr,
-                         const Uses<LeftHipPitch>& lhp,
-                         const Uses<LeftKnee>& lk,
-                         const Uses<LeftAnklePitch>& lap,
-                         const Uses<LeftAnkleRoll>& lar) {
-                // This is done when all of the servos are done, so check them all
-                if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
-                    if (lhy.done && lhr.done && lhp.done && lk.done && lap.done && lar.done) {
-                        emit<Task>(std::make_unique<Done>());
-                        return;
-                    }
-                    emit<Task>(std::make_unique<Idle>());
-                    return;
-                }
+        // Create providers for each limb and the head
+        add_group_provider<RightLeg,
+                           RightHipYaw,
+                           RightHipRoll,
+                           RightHipPitch,
+                           RightKnee,
+                           RightAnklePitch,
+                           RightAnkleRoll>();
+        add_group_provider<LeftLeg, LeftHipYaw, LeftHipRoll, LeftHipPitch, LeftKnee, LeftAnklePitch, LeftAnkleRoll>();
+        add_group_provider<RightArm, RightShoulderPitch, RightShoulderRoll, RightElbow>();
+        add_group_provider<LeftArm, LeftShoulderPitch, LeftShoulderRoll, LeftElbow>();
+        add_group_provider<Head, HeadYaw, HeadPitch>();
 
-                // Emit tasks for each servo
-                emit<Task>(std::make_unique<LeftHipYaw>(leg.servos[LegID::HIP_YAW]));
-                emit<Task>(std::make_unique<LeftHipRoll>(leg.servos[LegID::HIP_ROLL]));
-                emit<Task>(std::make_unique<LeftHipPitch>(leg.servos[LegID::HIP_PITCH]));
-                emit<Task>(std::make_unique<LeftKnee>(leg.servos[LegID::KNEE]));
-                emit<Task>(std::make_unique<LeftAnklePitch>(leg.servos[LegID::ANKLE_PITCH]));
-                emit<Task>(std::make_unique<LeftAnkleRoll>(leg.servos[LegID::ANKLE_ROLL]));
-            });
-
-        on<Provide<RightLeg>,
-           Needs<RightHipYaw>,
-           Needs<RightHipRoll>,
-           Needs<RightHipPitch>,
-           Needs<RightKnee>,
-           Needs<RightAnklePitch>,
-           Needs<RightAnkleRoll>>()
-            .then([this](const RightLeg& leg,
-                         const RunInfo& info,
-                         const Uses<RightHipYaw>& rhy,
-                         const Uses<RightHipRoll>& rhr,
-                         const Uses<RightHipPitch>& rhp,
-                         const Uses<RightKnee>& rk,
-                         const Uses<RightAnklePitch>& rap,
-                         const Uses<RightAnkleRoll>& rar) {
-                // This is done when all of the servos are done, so check them all
-                if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
-                    if (rhy.done && rhr.done && rhp.done && rk.done && rap.done && rar.done) {
-                        emit<Task>(std::make_unique<Done>());
-                        return;
-                    }
-                    emit<Task>(std::make_unique<Idle>());
-                    return;
-                }
-
-                // Emit tasks for each servo
-                emit<Task>(std::make_unique<RightHipYaw>(leg.servos[LegID::HIP_YAW]));
-                emit<Task>(std::make_unique<RightHipRoll>(leg.servos[LegID::HIP_ROLL]));
-                emit<Task>(std::make_unique<RightHipPitch>(leg.servos[LegID::HIP_PITCH]));
-                emit<Task>(std::make_unique<RightKnee>(leg.servos[LegID::KNEE]));
-                emit<Task>(std::make_unique<RightAnklePitch>(leg.servos[LegID::ANKLE_PITCH]));
-                emit<Task>(std::make_unique<RightAnkleRoll>(leg.servos[LegID::ANKLE_ROLL]));
-            });
-
-        on<Provide<LeftArm>, Needs<LeftShoulderPitch>, Needs<LeftShoulderRoll>, Needs<LeftElbow>>().then(
-            [this](const LeftArm& arm,
-                   const RunInfo& info,
-                   const Uses<LeftShoulderPitch>& lsp,
-                   const Uses<LeftShoulderRoll>& lsr,
-                   const Uses<LeftElbow>& le) {
-                // This is done when all of the servos are done, so check them all
-                if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
-                    if (lsp.done && lsr.done && le.done) {
-                        emit<Task>(std::make_unique<Done>());
-                        return;
-                    }
-                    emit<Task>(std::make_unique<Idle>());
-                    return;
-                }
-
-                // Emit tasks for each servo
-                emit<Task>(std::make_unique<LeftShoulderPitch>(arm.servos[ArmID::SHOULDER_PITCH]));
-                emit<Task>(std::make_unique<LeftShoulderRoll>(arm.servos[ArmID::SHOULDER_ROLL]));
-                emit<Task>(std::make_unique<LeftElbow>(arm.servos[ArmID::ELBOW]));
-            });
-
-        on<Provide<RightArm>, Needs<RightShoulderPitch>, Needs<RightShoulderRoll>, Needs<RightElbow>>().then(
-            [this](const RightArm& arm,
-                   const RunInfo& info,
-                   const Uses<RightShoulderPitch>& rsp,
-                   const Uses<RightShoulderRoll>& rsr,
-                   const Uses<RightElbow>& re) {
-                // This is done when all of the servos are done, so check them all
-                if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
-                    if (rsp.done && rsr.done && re.done) {
-                        emit<Task>(std::make_unique<Done>());
-                        return;
-                    }
-                    emit<Task>(std::make_unique<Idle>());
-                    return;
-                }
-
-                // Emit tasks for each servo
-                emit<Task>(std::make_unique<RightShoulderPitch>(arm.servos[ArmID::SHOULDER_PITCH]));
-                emit<Task>(std::make_unique<RightShoulderRoll>(arm.servos[ArmID::SHOULDER_ROLL]));
-                emit<Task>(std::make_unique<RightElbow>(arm.servos[ArmID::ELBOW]));
-            });
-
-        on<Provide<Head>, Needs<HeadYaw>, Needs<HeadPitch>>().then(
-            [this](const Head& head, const RunInfo& info, const Uses<HeadYaw>& hy, const Uses<HeadPitch>& hp) {
-                // This is done when all of the servos are done, so check them all
-                if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
-                    if (hy.done && hp.done) {
-                        emit<Task>(std::make_unique<Done>());
-                        return;
-                    }
-                    emit<Task>(std::make_unique<Idle>());
-                    return;
-                }
-
-                // Emit tasks for each servo
-                emit<Task>(std::make_unique<HeadYaw>(head.servos[HeadID::YAW]));
-                emit<Task>(std::make_unique<HeadPitch>(head.servos[HeadID::PITCH]));
-            });
-
-
+        // Create providers for each servo
         add_servo_provider<RightShoulderPitch, ServoID::Value::R_SHOULDER_PITCH>();
         add_servo_provider<LeftShoulderPitch, ServoID::Value::L_SHOULDER_PITCH>();
         add_servo_provider<RightShoulderRoll, ServoID::Value::R_SHOULDER_ROLL>();
