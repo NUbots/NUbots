@@ -119,4 +119,4 @@ namespace module::platform::openCR {
 
 }  // namespace module::platform::openCR
 
-#endif  // MODULE_PLATFORM_NUGUS_HARDWAREIO_H
+#endif  // MODULE_PLATFORM_OPENCR_HARDWAREIO_H
