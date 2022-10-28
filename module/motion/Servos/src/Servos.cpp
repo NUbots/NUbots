@@ -81,26 +81,26 @@ namespace module::motion {
         add_group_provider<Head, HeadYaw, HeadPitch>();
 
         // Create providers for each servo
-        add_servo_provider<RightShoulderPitch, ServoID::Value::R_SHOULDER_PITCH>();
-        add_servo_provider<LeftShoulderPitch, ServoID::Value::L_SHOULDER_PITCH>();
-        add_servo_provider<RightShoulderRoll, ServoID::Value::R_SHOULDER_ROLL>();
-        add_servo_provider<LeftShoulderRoll, ServoID::Value::L_SHOULDER_ROLL>();
-        add_servo_provider<RightElbow, ServoID::Value::R_ELBOW>();
-        add_servo_provider<LeftElbow, ServoID::Value::L_ELBOW>();
-        add_servo_provider<RightHipYaw, ServoID::Value::R_HIP_YAW>();
-        add_servo_provider<LeftHipYaw, ServoID::Value::L_HIP_YAW>();
-        add_servo_provider<RightHipRoll, ServoID::Value::R_HIP_ROLL>();
-        add_servo_provider<LeftHipRoll, ServoID::Value::L_HIP_ROLL>();
-        add_servo_provider<RightHipPitch, ServoID::Value::R_HIP_PITCH>();
-        add_servo_provider<LeftHipPitch, ServoID::Value::L_HIP_PITCH>();
-        add_servo_provider<RightKnee, ServoID::Value::R_KNEE>();
-        add_servo_provider<LeftKnee, ServoID::Value::L_KNEE>();
-        add_servo_provider<RightAnklePitch, ServoID::Value::R_ANKLE_PITCH>();
-        add_servo_provider<LeftAnklePitch, ServoID::Value::L_ANKLE_PITCH>();
-        add_servo_provider<RightAnkleRoll, ServoID::Value::R_ANKLE_ROLL>();
-        add_servo_provider<LeftAnkleRoll, ServoID::Value::L_ANKLE_ROLL>();
-        add_servo_provider<HeadYaw, ServoID::Value::HEAD_YAW>();
-        add_servo_provider<HeadPitch, ServoID::Value::HEAD_PITCH>();
+        add_servo_provider<RightShoulderPitch, ServoID::R_SHOULDER_PITCH>();
+        add_servo_provider<LeftShoulderPitch, ServoID::L_SHOULDER_PITCH>();
+        add_servo_provider<RightShoulderRoll, ServoID::R_SHOULDER_ROLL>();
+        add_servo_provider<LeftShoulderRoll, ServoID::L_SHOULDER_ROLL>();
+        add_servo_provider<RightElbow, ServoID::R_ELBOW>();
+        add_servo_provider<LeftElbow, ServoID::L_ELBOW>();
+        add_servo_provider<RightHipYaw, ServoID::R_HIP_YAW>();
+        add_servo_provider<LeftHipYaw, ServoID::L_HIP_YAW>();
+        add_servo_provider<RightHipRoll, ServoID::R_HIP_ROLL>();
+        add_servo_provider<LeftHipRoll, ServoID::L_HIP_ROLL>();
+        add_servo_provider<RightHipPitch, ServoID::R_HIP_PITCH>();
+        add_servo_provider<LeftHipPitch, ServoID::L_HIP_PITCH>();
+        add_servo_provider<RightKnee, ServoID::R_KNEE>();
+        add_servo_provider<LeftKnee, ServoID::L_KNEE>();
+        add_servo_provider<RightAnklePitch, ServoID::R_ANKLE_PITCH>();
+        add_servo_provider<LeftAnklePitch, ServoID::L_ANKLE_PITCH>();
+        add_servo_provider<RightAnkleRoll, ServoID::R_ANKLE_ROLL>();
+        add_servo_provider<LeftAnkleRoll, ServoID::L_ANKLE_ROLL>();
+        add_servo_provider<HeadYaw, ServoID::HEAD_YAW>();
+        add_servo_provider<HeadPitch, ServoID::HEAD_PITCH>();
     }
 
 }  // namespace module::motion
