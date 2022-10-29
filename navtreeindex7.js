@@ -1,5 +1,11 @@
 var NAVTREEINDEX7 =
 {
+"structRoboCupGameControlReturnData.html#a5973a89cb2bfb4c2064fd288377eb700":[1,0,10,2],
+"structRoboCupGameControlReturnData.html#ab312e59ab0c085a4fbf3357820d8febf":[1,0,10,4],
+"structRoboCupGameControlReturnData.html#abbc3d8a3ac6f298388d2da7a424b2294":[1,0,10,0],
+"structRobotInfo.html":[1,0,11],
+"structRobotInfo.html#aaadaeb99268bd3143d800a0a80f6f405":[1,0,11,1],
+"structRobotInfo.html#aceb887f54b437485773bc3d80518410f":[1,0,11,0],
 "structTeamInfo.html":[1,0,12],
 "structTeamInfo.html#a23ae32f3f40eb98e7b7428e031624db3":[1,0,12,3],
 "structTeamInfo.html#a2ffe64c04593c8a1a3c00bf2c597c7e4":[1,0,12,0],
@@ -243,11 +249,5 @@ var NAVTREEINDEX7 =
 "structmodule_1_1behaviour_1_1skills_1_1Nod_1_1Config.html#aff6e294c1190b2f3a6621c38254f2e99":[1,0,2,0,1,11,0,1],
 "structmodule_1_1behaviour_1_1skills_1_1Stand_1_1Config.html":[1,0,2,0,1,12,0],
 "structmodule_1_1behaviour_1_1skills_1_1Stand_1_1Config.html#a421d326fe4542a31c652825b5266e8cd":[1,0,2,0,1,12,0,0],
-"structmodule_1_1behaviour_1_1skills_1_1Stand_1_1Config.html#a85612ad805acdb1264c39607db1f0ee9":[1,0,2,0,1,12,0,1],
-"structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html":[1,0,2,0,2,2,0],
-"structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html#a08559dc2e09626bdf0c44ce23b4ae02e":[1,0,2,0,2,2,0,3],
-"structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html#a099dc099e9fcda23130ee343a4a5fe25":[1,0,2,0,2,2,0,12],
-"structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html#a1b26a3b2c209636a4d79fe7fdf1eb83a":[1,0,2,0,2,2,0,0],
-"structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html#a2c043a8043e5d31401fd661ded8479fc":[1,0,2,0,2,2,0,14],
-"structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html#a3c69bf048f32557a611fc3ec23931dae":[1,0,2,0,2,2,0,10]
+"structmodule_1_1behaviour_1_1skills_1_1Stand_1_1Config.html#a85612ad805acdb1264c39607db1f0ee9":[1,0,2,0,1,12,0,1]
 };

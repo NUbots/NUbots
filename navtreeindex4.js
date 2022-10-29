@@ -1,9 +1,15 @@
 var NAVTREEINDEX4 =
 {
-"classmodule_1_1motion_1_1SixDOFFrame.html#a567bb6b1440ffd406a7e575ad53837b8":[1,0,2,4,13,0],
-"classmodule_1_1motion_1_1SixDOFFrame.html#aac793054f52d2113f6fb8fa19bde41cc":[1,0,2,4,13,4],
-"classmodule_1_1motion_1_1SixDOFFrame.html#ab71c1292d305e6484cb17729e785f047":[1,0,2,4,13,2],
-"classmodule_1_1motion_1_1SixDOFFrame.html#ac9066928d074e44068c8347ba8122bac":[1,0,2,4,13,3],
+"classmodule_1_1motion_1_1SixDOFFootController.html#ae2188a2774ff024a93121f9ec138b3d5":[1,0,2,4,14,16],
+"classmodule_1_1motion_1_1SixDOFFootController.html#ae2fccacd6e7093f98cf88eb3bd9d12ac":[1,0,2,4,14,15],
+"classmodule_1_1motion_1_1SixDOFFootController.html#af70a7db29003448efcc8289f70d729b3":[1,0,2,4,14,21],
+"classmodule_1_1motion_1_1SixDOFFootController.html#afc04bbe19fe2d1889149c800d4a742c1":[1,0,2,4,14,6],
+"classmodule_1_1motion_1_1SixDOFFrame.html":[1,0,2,4,15],
+"classmodule_1_1motion_1_1SixDOFFrame.html#a3fdd81fd8d5fbb51886c337774ed56ff":[1,0,2,4,15,1],
+"classmodule_1_1motion_1_1SixDOFFrame.html#a567bb6b1440ffd406a7e575ad53837b8":[1,0,2,4,15,0],
+"classmodule_1_1motion_1_1SixDOFFrame.html#aac793054f52d2113f6fb8fa19bde41cc":[1,0,2,4,15,4],
+"classmodule_1_1motion_1_1SixDOFFrame.html#ab71c1292d305e6484cb17729e785f047":[1,0,2,4,15,2],
+"classmodule_1_1motion_1_1SixDOFFrame.html#ac9066928d074e44068c8347ba8122bac":[1,0,2,4,15,3],
 "classmodule_1_1network_1_1NUClearNet.html":[1,0,2,5,1],
 "classmodule_1_1network_1_1NUClearNet.html#a7ca7f8d938afaafe6f17c2c4c4397306":[1,0,2,5,1,0],
 "classmodule_1_1network_1_1NetworkForwarder.html":[1,0,2,5,0],
@@ -243,11 +249,5 @@ var NAVTREEINDEX4 =
 "classmodule_1_1vision_1_1visualmesh_1_1VisualMeshRunner.html#a2ebfa50667febc1b2195da44675af34b":[1,0,2,10,0,4,4],
 "classmodule_1_1vision_1_1visualmesh_1_1VisualMeshRunner.html#a65859edf549c30cd3f2b14ec955ac18d":[1,0,2,10,0,4,1],
 "classmodule_1_1vision_1_1visualmesh_1_1VisualMeshRunner.html#a8320466e4e0ebba9651ed2cd66afc165":[1,0,2,10,0,4,0],
-"classmodule_1_1vision_1_1visualmesh_1_1VisualMeshRunner.html#a83a36439b02d18cceaa6e1c8e486adba":[1,0,2,10,0,4,2],
-"classmodule_1_1vision_1_1visualmesh_1_1VisualMeshRunner.html#af4c689caa4c25dcaa32792d51b9fdfa8":[1,0,2,10,0,4,5],
-"classutility_1_1io_1_1uart.html":[1,0,5,3,0],
-"classutility_1_1io_1_1uart.html#a191683ecb6d0e0c828b5e77f7b9063c5":[1,0,5,3,0,7],
-"classutility_1_1io_1_1uart.html#a228598d0165d9952402efded6e1a3e05":[1,0,5,3,0,6],
-"classutility_1_1io_1_1uart.html#a234ce99884102680eb4e26ab7dbb12c7":[1,0,5,3,0,16],
-"classutility_1_1io_1_1uart.html#a28face5c2423de44135feff13a911302":[1,0,5,3,0,15]
+"classmodule_1_1vision_1_1visualmesh_1_1VisualMeshRunner.html#a83a36439b02d18cceaa6e1c8e486adba":[1,0,2,10,0,4,2]
 };

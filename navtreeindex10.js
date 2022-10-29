@@ -1,5 +1,11 @@
 var NAVTREEINDEX10 =
 {
+"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOI.html#a3869a9792c120f7afc921ec62ff2ce97":[1,0,2,6,0,1,1,0,5,0],
+"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOI.html#a6e469010cb2f768d90ddbf64df3b88ce":[1,0,2,6,0,1,1,0,5,1],
+"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html":[1,0,2,6,0,1,1,0,6],
+"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a1c0155eee15dc1ce48d67d7ab4d6db41":[1,0,2,6,0,1,1,0,6,12],
+"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a1fb2f3e8d1873b9f2a87c33ef35835b7":[1,0,2,6,0,1,1,0,6,1],
+"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a292244234a93b1db7f39c7199e712b24":[1,0,2,6,0,1,1,0,6,5],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a5334ae274a6a66182e6009cf5bb5d77f":[1,0,2,6,0,1,1,0,6,9],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a593894b9b1273206736f8cd246fe2326":[1,0,2,6,0,1,1,0,6,6],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Colour.html#a66093d64a2f4ec744ff4d1a5c8782f7c":[1,0,2,6,0,1,1,0,6,2],
@@ -243,11 +249,5 @@ var NAVTREEINDEX10 =
 "structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daadf736b0ca4db7aca821213e536bfddc8":[1,0,5,2,1,0,7],
 "structutility_1_1input_1_1ServoID.html#a216a85e71044cfad7c3d83ba60a026daaf0c2e9714e33aa60d589d3b703aa8b8b":[1,0,5,2,1,0,18],
 "structutility_1_1input_1_1ServoID.html#a268edf3adc760b92bd099ce955f84525":[1,0,5,2,1,20],
-"structutility_1_1input_1_1ServoID.html#a2f6a77ba7a6f53e32a6bf6ffda977ec8":[1,0,5,2,1,27],
-"structutility_1_1input_1_1ServoID.html#a4940c7f00fc50ac721ed7bcd1c12a7ba":[1,0,5,2,1,7],
-"structutility_1_1input_1_1ServoID.html#a5bb1982d97f9476432169705b04e379c":[1,0,5,2,1,5],
-"structutility_1_1input_1_1ServoID.html#a5e2dc4c9843a7980f52afe638ca14905":[1,0,5,2,1,14],
-"structutility_1_1input_1_1ServoID.html#a64925a9ce37f599c9a1c18789ca4d41a":[1,0,5,2,1,4],
-"structutility_1_1input_1_1ServoID.html#a69f57bf78853e92faf4a13561c9e987e":[1,0,5,2,1,8],
-"structutility_1_1input_1_1ServoID.html#a6cd4ede4baac487e614653d791f7365e":[1,0,5,2,1,3]
+"structutility_1_1input_1_1ServoID.html#a2f6a77ba7a6f53e32a6bf6ffda977ec8":[1,0,5,2,1,27]
 };
