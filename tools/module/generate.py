@@ -151,13 +151,15 @@ def generate_cpp(parts):
 def generate_readme(parts):
     template = textwrap.dedent(
         """\
-        {className}
-        {classNameTitle}
+        # {className}
 
         ## Description
 
 
         ## Usage
+
+
+        ## Consumes
 
 
         ## Emits
@@ -168,9 +170,7 @@ def generate_readme(parts):
         """
     )
 
-    return template.format(
-        className=parts[-1], classNameTitle=len(parts[-1]) * "=", closeNamespace="\n".join(["}" for x in parts[:-1]])
-    )
+    return template.format(className=parts[-1])
 
 
 def generate_test(parts):
