@@ -96,13 +96,16 @@ def generate_header(parts):
 
         #include <nuclear>
 
+        #include "extension/Behaviour.hpp"
+
         namespace {namespace} {{
 
-        class {className} : public NUClear::Reactor {{
+        class {className} : public ::extension::behaviour::BehaviourReactor {{
         private:
-            /// The configuration variables for this reactor
-            struct {{
-            }} config;
+            /// @brief Stores configuration values
+            struct Config {{
+                Config() = default;
+            }} cfg;
 
         public:
             /// @brief Called by the powerplant to build and setup the {className} reactor.
@@ -127,17 +130,18 @@ def generate_cpp(parts):
         """\
         #include "{className}.hpp"
 
+        #include "extension/Behaviour.hpp"
         #include "extension/Configuration.hpp"
 
         namespace {namespace} {{
 
         using extension::Configuration;
 
-        {className}::{className}(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)), config{{}} {{
+        {className}::{className}(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {{
 
-            on<Configuration>("{className}.yaml").then([this](const Configuration& cfg) {{
+            on<Configuration>("{className}.yaml").then([this](const Configuration& config) {{
                 // Use configuration here from file {className}.yaml
-                this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
+                this->log_level = config["log_level"].as<NUClear::LogLevel>();
             }});
         }}
 
