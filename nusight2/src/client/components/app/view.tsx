@@ -1,13 +1,14 @@
 import { Component } from 'react'
+import { Suspense } from 'react'
 import React from 'react'
-import { Switch } from 'react-router'
+import { Routes } from 'react-router'
 import { Route } from 'react-router'
 import { BrowserRouter } from 'react-router-dom'
 
 import { NavigationConfiguration } from '../../navigation'
 import { NavigationView } from '../navigation/view'
 
-import style from './style.css'
+import style from './style.module.css'
 
 export class AppView extends Component<{ nav: NavigationConfiguration }> {
   render() {
@@ -17,18 +18,15 @@ export class AppView extends Component<{ nav: NavigationConfiguration }> {
           <NavigationView nav={this.props.nav} />
           <div className={style.app__container}>
             <div className={style.app__content}>
-              <Switch>
-                {...this.props.nav
-                  .getRoutes()
-                  .map(config => (
-                    <Route
-                      key={config.path}
-                      exact={config.exact}
-                      path={config.path}
-                      component={config.Content}
-                    />
-                  ))}
-              </Switch>
+              <Suspense fallback={<div>Loading...</div>}>
+                <Routes>
+                  {...this.props.nav
+                    .getRoutes()
+                    .map(config => (
+                      <Route key={config.path} path={config.path} element={<config.Content />} />
+                    ))}
+                </Routes>
+              </Suspense>
             </div>
           </div>
         </div>

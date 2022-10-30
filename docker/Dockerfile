@@ -291,6 +291,9 @@ RUN install-from-source https://github.com/Fastcode/VisualMesh/archive/refs/tags
     -DBUILD_EXAMPLES=OFF \
     -DBUILD_OPENCL_ENGINE=ON
 
+# JSON for modern C++ (https://github.com/nlohmann/json)
+RUN install-header-from-source https://github.com/nlohmann/json/releases/download/v3.10.5/json.hpp
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################

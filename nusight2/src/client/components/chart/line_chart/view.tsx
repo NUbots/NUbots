@@ -9,7 +9,7 @@ import { ChartModel } from '../model'
 
 import { LineChartController } from './controller'
 import { LineChartModel } from './model'
-import style from './style.css'
+import style from './style.module.css'
 import { LineChartViewModel } from './view_model'
 
 export type LineChartProps = {}
