@@ -4,24 +4,23 @@
 #include <nuclear>
 #include <system_error>
 
-#include "extension/TCPConnection.hpp"
+#include "utility/tcp/Connection.hpp"
 
 namespace extension::TCP {
 struct Send {
 private:
     using NUClear::util::serialise;
-    template <typename DataType>
-    static inline void send_it(DataType* data, uint32_t size, fd_t fd){
+    static inline void send_it(void* data, uint32_t size, fd_t fd){
         const uint32_t n_size = htonl(size);
 
         if(fd < 0){
             throw std::system_error(network_errno, std::system_category(), "The fd passed in was bad");
         }
-        if(::send(fd, n_size, sizeof(size_t), 0) != sizeof(size_t)){
-            throw std::system_error(network_errno, std::system_category(), "Error sending");
+        if(::send(fd, &n_size, sizeof(size_t), 0) != sizeof(size_t)){
+            throw std::system_error(network_errno, std::system_category(), "Error sending size");
         }
         if(::send(fd, data, size, 0) != size){
-            throw std::system_error(network_errno, std::system_category(), "Error sending");
+            throw std::system_error(network_errno, std::system_category(), "Error sending data");
         }
     }
 public:
