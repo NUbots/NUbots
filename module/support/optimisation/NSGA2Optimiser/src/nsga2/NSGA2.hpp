@@ -42,7 +42,8 @@ namespace nsga2 {
         void SetBinVarLimits(const std::vector<std::pair<double, double>>& _binLimits) { binLimits = _binLimits; }
         void SetInitialRealVars(const std::vector<double>& _initRealVars) { initialRealVars = _initRealVars; }
         void SetInitialPopulationRealVars(const std::vector<std::vector<double>>& _suppliedPopulationRealVars)
-                                                { suppliedPopulationRealVars = _suppliedPopulationRealVars;} // MINE
+                                                { suppliedPopulationRealVars = _suppliedPopulationRealVars;}
+        void setSuppliedPop(const bool& _supplied_pop) {supplied_pop = _supplied_pop;}
         // clang-format on
 
         std::shared_ptr<Population> getCurrentPop();
@@ -58,8 +59,6 @@ namespace nsga2 {
         int currentGen;
         int popSize;
         int generations;
-
-        bool suppliedPop = false;  // added so I can add parent pop
 
     private:
         int realVars             = -1;
@@ -79,6 +78,7 @@ namespace nsga2 {
         std::vector<std::pair<double, double>> realLimits = {};
         std::vector<std::pair<double, double>> binLimits  = {};
         // Added for an intial population
+        bool supplied_pop = false;
         std::vector<std::vector<double>> suppliedPopulationRealVars;
 
         std::shared_ptr<Population> parentPop      = nullptr;

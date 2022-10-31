@@ -50,7 +50,7 @@ namespace module {
                             try {
                                 record.push_back(stof(line));
                             }
-                            catch (const std::invalid_argument e) {
+                            catch (const std::invalid_argument& e) {
                                 NUClear::log<NUClear::INFO>("NaN found in file ");
                                 e.what();
                             }
@@ -114,6 +114,7 @@ namespace module {
 
                 quintic_walk_path    = config["task_config_path"].as<std::string>();
                 trial_duration_limit = config["trial_duration_limit"].as<int>();
+                //supplied
 
                 // Set configuration for real variables
                 NUClear::log<NUClear::INFO>("Real Var Count: ", paramInitialValues.size());
@@ -121,6 +122,7 @@ namespace module {
                 nsga2Algorithm.SetRealVarLimits(paramLimits);
                 nsga2Algorithm.SetInitialRealVars(paramInitialValues);
                 nsga2Algorithm.SetInitialPopulationRealVars(data);
+                nsga2Algorithm.setSuppliedPop(true);
 
                 // Set configuration for binary variables
                 nsga2Algorithm.SetBinVariableCount(0);
