@@ -33,7 +33,7 @@ namespace  utility::TCP {
 
         // Prevent shallow copies
         Connection(const Connection&) = delete;
-        Connection operator=(const Connection&) = delete;
+        Connection& operator=(const Connection&) = delete;
         // Move the file descriptor
         Connection(Connection&& o){
             remote = o.remote;
@@ -41,7 +41,7 @@ namespace  utility::TCP {
             fd = o.fd;
             o.fd = 0;
         }
-        Connection operator=(Connection&& o){
+        Connection& operator=(Connection&& o){
             remote = o.remote;
             local = o.local;
             fd = o.fd;
