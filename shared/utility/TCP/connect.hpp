@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "utility/tcp/Connection.hpp"
-namespace  utility::TCP {
+namespace utility::TCP {
 
     /**
      * @brief Connects to a tcp server
@@ -17,7 +17,7 @@ namespace  utility::TCP {
      * @param server_port The port of the server
      * @return The details of the connection
      */
-    static inline Connection connect(const std::string server_address, const std::string server_port){
+    static inline Connection connect(const std::string server_address, const std::string server_port) {
         // Hints for the connection type
         addrinfo hints{};
         memset(&hints, 0, sizeof(addrinfo));  // Defaults on what we do not explicitly set
@@ -29,11 +29,12 @@ namespace  utility::TCP {
 
         const int error = getaddrinfo(server_address.c_str(), server_port.c_str(), &hints, &address);
         if (error != 0) {
-            throw std::system_error(network_errno, std::system_category(),
+            throw std::system_error(network_errno,
+                                    std::system_category(),
                                     fmt::format("Cannot resolve server name: {}. Error {}. Error code {}",
-                                            server_address,
-                                            gai_strerror(error),
-                                            error));
+                                                server_address,
+                                                gai_strerror(error),
+                                                error));
         }
 
         // Loop through the linked list of potential options for connecting. In order of best to worst.
@@ -59,10 +60,12 @@ namespace  utility::TCP {
                         connected_port = ntohs(std::reinterpret_cast<*sockaddr_in6>(addr_ptr->ai_addr)->sin6_port);
                         break;
                     default:
-                        throw std::system_error(network_errno, std::system_category(), "Socket Address faimily was not AF_INET or AF_INET6");
+                        throw std::system_error(network_errno,
+                                                std::system_category(),
+                                                "Socket Address faimily was not AF_INET or AF_INET6");
                 }
                 freeaddrinfo(address);
-                return Connection(fd, connected_addr,);
+                return Connection(fd, connected_addr, );
             }
             // Connection was not successful
             close(fd);
@@ -70,8 +73,10 @@ namespace  utility::TCP {
 
         // No connection was successful
         freeaddrinfo(address);
-        throw std::system_error(network_errno, std::system_category(), fmt::format("Cannot connect to server: {}:{}", server_address, server_port));
+        throw std::system_error(network_errno,
+                                std::system_category(),
+                                fmt::format("Cannot connect to server: {}:{}", server_address, server_port));
     }
-}
+}  // namespace utility::TCP
 
-#endif // UTILITY_TCP_Connect_HPP
+#endif  // UTILITY_TCP_Connect_HPP
