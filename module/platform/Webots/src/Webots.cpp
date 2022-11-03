@@ -534,7 +534,7 @@ namespace module::platform {
                             emit<extension::TCP::SEND>(actuator_requests, fd);
                         }
                         catch (std::system_error&) {
-                            log<NUClear::DEBUG>(e.what())
+                            log<NUClear::DEBUG>(e.what());
                         };
                         log<NUClear::TRACE>("Sending actuator request.");
                     }

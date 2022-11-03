@@ -1,6 +1,7 @@
 #ifndef UTILITY_TCP_Connect_HPP
 #define UTILITY_TCP_Connect_HPP
 
+#include <fmt/format.h>
 #include <nuclear>
 #include <string>
 #include <system_error>
