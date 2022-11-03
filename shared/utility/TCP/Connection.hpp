@@ -19,7 +19,13 @@ namespace utility::TCP {
             return fd != 0;
         }
 
-        Connection(fd_t fd_, in6_addr remote_address, in_port_t remote_port) : fd(fd_) {
+        [[nodiscard]] fd_t release() {
+            fd_t tmp_fd = fd;
+            fd          = 0;
+            return tmp_fd;
+        }
+
+        Connection(const fd_t fd_, const in6_addr remote_address, const in_port_t remote_port) : fd(fd_) {
             remote.address = remote_address;
             remote.port    = remote_port;
         }
