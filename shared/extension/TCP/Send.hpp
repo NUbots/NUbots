@@ -5,12 +5,20 @@
 #include <nuclear>
 #include <system_error>
 
-#include "utility/tcp/Connection.hpp"
+#include "utility/TCP/Connection.hpp"
 
 namespace extension::TCP {
+    using NUClear::fd_t;
+    using NUClear::util::serialise::Serialise;
+    using utility::TCP::Connection;
+    /**
+     * @brief
+     *
+     * @tparam DataType The type of data
+     */
+    template <typename DataType>
     struct Send {
     private:
-        using NUClear::util::serialise;
         /**
          * @brief Sends data, with its size, to a socket
          *
@@ -42,13 +50,11 @@ namespace extension::TCP {
         /**
          * @brief Sends a message, with its size, to a TCP connection
          *
-         * @tparam DataType The type of data
          * @param pp Here for api
          * @param data The data to send
          * @param size The number of bytes of data
          * @param fd The TCP connection
          */
-        template <typename DataType>
         static inline void emit(NUClear::PowerPlant&, std::shared_ptr<DataType> data, uint32_t size, fd_t fd) {
             send_it(data.get(), size, fd);
         }
@@ -56,27 +62,23 @@ namespace extension::TCP {
         /**
          * @brief Serialise and send a message, with its size, to a TCP connection
          *
-         * @tparam DataType The type of data
          * @param pp Here for api
          * @param data The data to serialise and send
          * @param fd The TCP connection
          */
-        template <typename DataType>
-        static inline void emit(NUClear::PowerPlant& pp, std::shared_ptr<DataType> data, fd_t fd) {
-            auto s_data = serialise::Serialise::serialise(data.get());
-            emit(pp, s_data.data(), s_data.size(), fd);
+        static inline void emit(NUClear::PowerPlant&, std::shared_ptr<DataType> data, fd_t fd) {
+            auto s_data = Serialise<DataType>::serialise(*data);
+            send_it(s_data.data(), s_data.size(), fd);
         }
 
         /**
          * @brief Send a message, with its size, to a TCP connection
          *
-         * @tparam DataType The type of data
          * @param pp Here for api
          * @param data The data to send
          * @param size The number of bytes of data
          * @param connection The TCP connection
          */
-        template <typename DataType>
         static inline void emit(NUClear::PowerPlant& pp,
                                 std::shared_ptr<DataType> data,
                                 uint32_t size,
@@ -87,12 +89,10 @@ namespace extension::TCP {
         /**
          * @brief Serialise and send a message, with its size, to a TCP connection
          *
-         * @tparam DataType The type of data
          * @param pp Here for api
          * @param data The data to serialise and send
          * @param connection The TCP connection
          */
-        template <typename DataType>
         static inline void emit(NUClear::PowerPlant& pp, std::shared_ptr<DataType> data, Connection connection) {
             emit(pp, data, connection.fd);
         }

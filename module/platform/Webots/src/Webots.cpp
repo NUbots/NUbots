@@ -26,7 +26,7 @@
 #include "clock/clock.hpp"
 
 #include "extension/Configuration.hpp"
-#include "extension/TCP/send.hpp"
+#include "extension/TCP/Send.hpp"
 
 #include "message/input/Image.hpp"
 #include "message/input/Sensors.hpp"
@@ -531,9 +531,9 @@ namespace module::platform {
                     // Only send actuator requests if we are connected to the controller
                     if (connection_active) {
                         try {
-                            emit<extension::TCP::SEND>(actuator_requests, fd);
+                            emit<extension::TCP::Send>(std::make_unique<ActuatorRequests>(actuator_requests), fd);
                         }
-                        catch (std::system_error&) {
+                        catch (std::system_error& e) {
                             log<NUClear::DEBUG>(e.what());
                         };
                         log<NUClear::TRACE>("Sending actuator request.");

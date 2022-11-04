@@ -2,8 +2,10 @@
 #define UTILITY_TCP_Connection_HPP
 
 namespace utility::TCP {
+    using NUClear::fd_t;
     ///@brief An RAII object for connection to a server
     struct Connection {
+
         struct {
             in6_addr address;
             in_port_t port;
@@ -66,6 +68,7 @@ namespace utility::TCP {
             local  = o.local;
             fd     = o.fd;
             o.fd   = 0;
+            return *this;
         }
     };
 }  // namespace utility::TCP
