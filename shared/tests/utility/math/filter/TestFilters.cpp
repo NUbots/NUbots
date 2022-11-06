@@ -267,9 +267,9 @@ TEST_CASE("Test the KalmanFilter", "[utility][math][filter][KalmanFilter]") {
     }
     double average_error = total_error / N;
 
-    std::cout << "The total error is: " << total_error << std::endl;
-    std::cout << "The average error is: " << average_error << std::endl;
-    std::cout << "The final state is: " << kalman_filter.get_state().transpose() << std::endl;
+    INFO("The total error is: " << total_error);
+    INFO("The average error is: " << average_error);
+    INFO("The final state is: " << kalman_filter.get_state().transpose());
 
     REQUIRE(average_error < 1e-2);
 }
