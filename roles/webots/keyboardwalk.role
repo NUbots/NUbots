@@ -8,6 +8,11 @@ nuclear_role(
   # Support and Configuration
   support::configuration::GlobalConfig
   support::configuration::SoccerConfig
+  # NUsight
+  network::NUClearNet
+  network::NetworkForwarder
+  output::Overview
+  # Platform
   input::SensorFilter
   platform::Webots
   # Network
