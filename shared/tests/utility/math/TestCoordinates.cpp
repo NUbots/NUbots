@@ -93,11 +93,11 @@ SCENARIO("Cartesian coordinates can be converted to spherical coordinates", "[ut
 SCENARIO("Spherical coordinates can be converted to cartesian coordinates", "[utility][math][coordinates]") {
     GIVEN("A set of spherical coordinates and a set of expected values") {
         // spherical input
-        static const std::array<Eigen::Vector3d, 210> spher_coords =
-            resolve_expression<Eigen::Vector3d, 210>(test_values["spherical_input"]);
+        static const std::vector<Eigen::Vector3d> spher_coords =
+            resolve_expression<Eigen::Vector3d>(test_values["spherical_input"]);
         // spher to cart results
-        static const std::array<Eigen::Vector3d, 210> spher_to_cart_expected =
-            resolve_expression<Eigen::Vector3d, 210>(test_values["spherical_to_cartesian_results"]);
+        static const std::vector<Eigen::Vector3d> spher_to_cart_expected =
+            resolve_expression<Eigen::Vector3d>(test_values["spherical_to_cartesian_results"]);
         for (size_t i = 0; i < spher_coords.size(); i++) {
             WHEN("Spherical coordinates are converted to cartesian coordinates") {
                 static const Eigen::Vector3d result = sphericalToCartesian(spher_coords.at(i));
