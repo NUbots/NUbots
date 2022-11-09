@@ -7,29 +7,25 @@
   "files.trimTrailingWhitespace": true,
   "files.eol": "\n",
   "cSpell.language": "en-GB",
-  "editor.rulers": [120],
+  "editor.rulers": [
+      120
+  ],
   "protoc": {
-    "options": ["-I${workspaceFolder}/nuclear/message/proto"]
+      "options": [
+          "-I${workspaceFolder}/nuclear/message/proto"
+      ]
   },
   "python.formatting.provider": "black",
   "python.analysis.extraPaths": [
-    "${workspaceFolder}/tools",
-    "${workspaceFolder}/nuclear"
+      "${workspaceFolder}/tools",
+      "${workspaceFolder}/nuclear"
   ],
   "yaml.format.printWidth": 120,
   "files.associations": {
-    "*.role": "cmake",
-    ".Doxyfile": "properties",
-    "array": "cpp",
-    "hash_map": "cpp",
-    "hash_set": "cpp",
-    "bitset": "cpp",
-    "string_view": "cpp",
-    "initializer_list": "cpp",
-    "regex": "cpp",
-    "utility": "cpp"
+      "*.role": "cmake",
+      ".Doxyfile": "properties"
   },
   "editor.codeActionsOnSave": {
-    "source.organizeImports": true
+      "source.organizeImports": true
   }
 }
