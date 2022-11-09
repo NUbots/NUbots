@@ -49,11 +49,11 @@ static const YAML::Node test_values = YAML::LoadFile("tests/CoordinateTests.yaml
 SCENARIO("Cartesian coordinates can be converted to spherical coordinates", "[utility][math][coordinates]") {
     GIVEN("A set of cartesian coordinates and a set of expected values") {
         // cart input
-        static const std::array<Eigen::Vector3d, 200> cart_coords =
-            resolve_expression<Eigen::Vector3d, 200>(test_values["cartesian_input"]);
+        static const std::vector<Eigen::Vector3d> cart_coords =
+            resolve_expression<Eigen::Vector3d>(test_values["cartesian_input"]);
         // cart to spher results
-        static const std::array<Eigen::Vector3d, 200> cart_to_spher_expected =
-            resolve_expression<Eigen::Vector3d, 200>(test_values["cart_to_spherical_results"]);
+        static const std::vector<Eigen::Vector3d> cart_to_spher_expected =
+            resolve_expression<Eigen::Vector3d>(test_values["cart_to_spherical_results"]);
         for (size_t i = 0; i < cart_coords.size(); i++) {
             WHEN("Cartesian coordinates are converted to spherical coordinates") {
                 static const Eigen::Vector3d result = cartesianToSpherical(cart_coords.at(i));
