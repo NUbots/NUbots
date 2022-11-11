@@ -40,9 +40,6 @@ RUN install-package \
     ninja \
     cmake \
     meson \
-    nodejs-lts-fermium \
-    npm \
-    yarn \
     git \
     ncurses
 
@@ -313,11 +310,21 @@ RUN install-package \
     clinfo \
     doxygen
 
+# Install packages for nusight
+RUN install-package \
+    nodejs \
+    npm \
+    yarn
+
 # Install formatters as last step so if they change the image is easy to update
 RUN pip install --upgrade \
     cmake-format==0.6.13 \
     isort==5.7.0 \
     black==22.3.0
+
+RUN npm install -g \
+    prettier@2.7.1 \
+    eslint@8.27.0
 
 # Enable all the driver capabilities so we can use OpenCL in the container
 ENV NVIDIA_DRIVER_CAPABILITIES=all
