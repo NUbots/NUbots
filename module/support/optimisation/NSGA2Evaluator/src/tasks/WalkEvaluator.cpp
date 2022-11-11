@@ -66,10 +66,12 @@ namespace module {
                 // Read the QuinticWalk config and overwrite the config parameters with the current individual's
                 // parameters
                 YAML::Node walk_config = YAML::LoadFile(currentRequest.task_config_path);
-                // NUClear::log<NUClear::INFO>("CurrentConfigPath", currentRequest.task_config_path);
+                NUClear::log<NUClear::INFO>("CurrentConfigPath", currentRequest.task_config_path);
 
+                // YAML::Node eval_config = YAML::LoadFile(currentRequest.task_config_path);
+                // NUClear::log<NUClear::INFO>("CurrentConfigPath", currentRequest.task_config_path);
                 // //     //auto min = config["MIN"].as<double>();
-                // NUClear::log<NUClear::INFO>("MAX", gravityMax);
+                // NUClear::log<NUClear::INFO>("MAX", currentRequest.gravityMax);
                 // NUClear::log<NUClear::INFO>("Min", gravityMin);
 
                 // The mapping of parameters depends on how the config file was read by the optimiser

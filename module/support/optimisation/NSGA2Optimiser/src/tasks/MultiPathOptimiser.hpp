@@ -23,6 +23,7 @@ namespace module {
                 std::unique_ptr<NSGA2EvaluationRequest> MakeEvaluationRequest(const int id,
                                                                               const int generation,
                                                                               std::vector<double> reals);
+                std::vector<std::vector<double>> readInPopulationFile(const std::string flie_name);
 
             private:
                 int trial_duration_limit;

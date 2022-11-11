@@ -28,45 +28,18 @@ namespace module {
                 // Parallel to paramInitialValues, sets the limit (min, max) of each parameter value
                 std::vector<std::pair<double, double>> paramLimits;
 
-                std::vector<std::vector<double>> data;
+                std::vector<std::vector<double>> population_data;
+
+
                 std::string input_file_name =
                     "../NUbots/module/support/optimisation/NSGA2Optimiser/data/config/Supplied_Pop_Reals.csv";
-                std::ifstream inputFile(input_file_name);
-                int l = 0;
+                
+                population_data = readInPopulationFile(input_file_name);
+                NUClear::log<NUClear::INFO>("Data file size is", population_data.size());
 
-                while (inputFile) {
-                    l++;
-                    std::string s;
-                    if (!getline(inputFile, s))
-                        break;
-                    if (s[0] != '#') {
-                        std::istringstream ss(s);
-                        std::vector<double> record;
+                
 
-                        while (ss) {
-                            std::string line;
-                            if (!getline(ss, line, ','))
-                                break;
-                            try {
-                                record.push_back(stof(line));
-                            }
-                            catch (const std::invalid_argument& e) {
-                                NUClear::log<NUClear::INFO>("NaN found in file ");
-                                e.what();
-                            }
-                        }
-
-                        data.push_back(record);
-                    }
-                }
-
-                NUClear::log<NUClear::INFO>("Data file size is", data.size());
-
-                if (!inputFile.eof()) {
-                    // cerr << "Could not read file " << inputFileName << "\n";
-                    NUClear::log<NUClear::INFO>("Could not read file", input_file_name);
-                    // std::__throw_invalid_argument("File not found.");
-                }
+                //bool supp_pop = 
 
                 // Extract the initial values and limits and from config file, for all of the parameters
                 auto walk = config["walk"];
@@ -121,7 +94,7 @@ namespace module {
                 nsga2Algorithm.SetRealVariableCount(paramInitialValues.size());
                 nsga2Algorithm.SetRealVarLimits(paramLimits);
                 nsga2Algorithm.SetInitialRealVars(paramInitialValues);
-                nsga2Algorithm.SetInitialPopulationRealVars(data);
+                nsga2Algorithm.SetInitialPopulationRealVars(population_data);
                 nsga2Algorithm.setSuppliedPop(true);
 
                 // Set configuration for binary variables
@@ -143,6 +116,46 @@ namespace module {
                 // Add the individual's parameters to the message
                 request->parameters.real_params = reals;
                 return request;
+            }
+
+            std::vector<std::vector<double>> MultiPathOptimiser::readInPopulationFile(const std::string file_name) {
+                std::vector<std::vector<double>> data;
+                std::ifstream inputFile(file_name);
+                int l = 0;
+
+                while (inputFile) {
+                    l++;
+                    std::string s;
+                    if (!getline(inputFile, s))
+                        break;
+                    if (s[0] != '#') {
+                        std::istringstream ss(s);
+                        std::vector<double> record;
+
+                        while (ss) {
+                            std::string line;
+                            if (!getline(ss, line, ','))
+                                break;
+                            try {
+                                record.push_back(stof(line));
+                            }
+                            catch (const std::invalid_argument& e) {
+                                NUClear::log<NUClear::INFO>("NaN found in file ");
+                                e.what();
+                            }
+                        }
+
+                        data.push_back(record);
+                    }
+                }
+
+                if (!inputFile.eof()) {
+                    // cerr << "Could not read file " << inputFileName << "\n";
+                    NUClear::log<NUClear::INFO>("Could not read file", file_name);
+                    // std::__throw_invalid_argument("File not found.");
+                }
+
+                return data;
             }
 
         }  // namespace optimisation

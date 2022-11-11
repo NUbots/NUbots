@@ -1,11 +1,11 @@
 # Larger population encourages wider search
-population_size: 60
+population_size: 12
 # More generations encourages deeper search
-max_generations: 50
+max_generations: 5
 num_objectives: 1
 num_constraints: 2
 seed: 7777777
-trial_duration_limit: 65 # number of seconds to run a single trial for
+trial_duration_limit: 30 # number of seconds to run a single trial for
 probabilities:
   real:
     # Note that simulated binary crossover (SBX) does something like mutation as well
@@ -22,12 +22,13 @@ eta:
   C: 20
   M: 20
 
-task: "multipath"
+task: "walk"
 task_config_path: "config/webots/QuinticWalk.yaml"
+eval_config_path: "NSGA2Evaluator/config/NSGA2Evaluator.yaml"
 
 # Only for multipath
-task_supplied_pop: "true"
-task_supplied_pop_file: 
+task_supplied_pop: "false"
+task_supplied_pop_file: "config/Supplied_Pop_reals.csv"
 
 initial_translation: [-4.0, -3.0, 0.51] # x, y, z
 intial_rotation: [0, 0, 1, 0] # x, y, z, angle (rads)
@@ -74,5 +75,5 @@ walk:
 
 # The following values are setting the initial values and limits for the walk engine command.
 walk_command:
-  velocity: [0.2, 0.01, 1.00] # [-0.2, -1.00, -0.01]
+  velocity: [-0.2, -1.00, -0.01] # [0.2, 0.01, 1.00] 
   rotation: [0.15, -1.57, 0.1] # [0.15, 0.1, 1.57]
