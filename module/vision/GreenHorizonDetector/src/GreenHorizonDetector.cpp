@@ -159,9 +159,7 @@ namespace module::vision {
                 msg->class_map = mesh.class_map;
 
                 if (mesh.vision_ground_truth.exists) {
-                    msg->vision_ground_truth.exists = true;
-                    msg->vision_ground_truth.rBWw   = mesh.vision_ground_truth.rBWw;
-                    msg->vision_ground_truth.rFWw   = mesh.vision_ground_truth.rFWw;
+                    msg->vision_ground_truth = mesh.vision_ground_truth;
                 }
 
                 // Find the convex hull of the cluster

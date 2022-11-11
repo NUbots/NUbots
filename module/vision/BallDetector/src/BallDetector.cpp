@@ -332,11 +332,20 @@ namespace module::vision {
 
                         const Eigen::Vector3f rBCc = Hcw * horizon.vision_ground_truth.rBWw;
 
-                        Eigen::Vector3f ball_position = uBCw * projection_distance;
-                        Eigen::Vector3f ball_error    = ball_position - rBCc;
+                        Eigen::Vector3f ball_position_projection = uBCw * projection_distance;
+                        Eigen::Vector3f ball_position_angular    = uBCw * angular_distance;
+                        Eigen::Vector3f ball_error_projection    = (ball_position_projection - rBCc).cwiseAbs();
+                        Eigen::Vector3f ball_error_angular       = (ball_position_angular - rBCc).cwiseAbs();
 
-                        emit(graph("rBCc", rBCc.x(), rBCc.y(), rBCc.z()));
-                        emit(graph("Ball error", ball_error.x(), ball_error.y(), ball_error.z()));
+                        emit(graph("True rBCc", rBCc.x(), rBCc.y(), rBCc.z()));
+                        emit(graph("Angular Distance Ball error",
+                                   ball_error_projection.x(),
+                                   ball_error_projection.y(),
+                                   ball_error_projection.z()));
+                        emit(graph("Projection Distance Ball error",
+                                   ball_error_angular.x(),
+                                   ball_error_angular.y(),
+                                   ball_error_angular.z()));
                     }
                 }
 

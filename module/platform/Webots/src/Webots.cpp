@@ -846,9 +846,7 @@ namespace module::platform {
 
             // If we got ground truth data, send it through with the sensors
             if (sensor_measurements.vision_ground_truth.exists) {
-                image->vision_ground_truth.exists = true;
-                image->vision_ground_truth.rBWw   = sensor_measurements.vision_ground_truth.rBWw;
-                image->vision_ground_truth.rFWw   = sensor_measurements.vision_ground_truth.rFWw;
+                image->vision_ground_truth = sensor_measurements.vision_ground_truth;
             }
             emit(image);
         }
