@@ -214,11 +214,17 @@ namespace module {
                 save_file_stream << YAML::Dump(walk_config);
                 save_file_stream.close();
 
+                    // Get constant variables
+                YAML::Node eval_config = YAML::LoadFile("config/NSGA2Evaluator.yaml");
+
+                gravity_Max = eval_config["gravity"]["MAX"].as<float>();
+                gravity_Min = eval_config["gravity"]["MIN"].as<float>();
+
                 // Set up param array for normalisiation
                 for (unsigned int i = 0; i < sizeof(params) / sizeof(params[0]); i++) {
                     params[i] = currentRequest.parameters.real_params[i];
                 }
-                for (const double& num : params) {
+                for (const auto& num : params) {
                     NUClear::log<NUClear::DEBUG>("value of param: ", num);
                 }
             }
@@ -316,8 +322,8 @@ namespace module {
                 bool fallen        = false;
                 auto accelerometer = sensors.accelerometer;
 
-                if ((std::fabs(accelerometer.x()) > 9.2 || std::fabs(accelerometer.y()) > 9.2)
-                    && std::fabs(accelerometer.z()) < 0.5) {
+                if ((std::fabs(accelerometer.x()) > gravity_Max || std::fabs(accelerometer.y()) > gravity_Max)
+                    && std::fabs(accelerometer.z()) < gravity_Min) {
                     NUClear::log<NUClear::DEBUG>("Fallen!");
                     NUClear::log<NUClear::DEBUG>("acc at fall (x y z):",
                                                  std::fabs(accelerometer.x()),

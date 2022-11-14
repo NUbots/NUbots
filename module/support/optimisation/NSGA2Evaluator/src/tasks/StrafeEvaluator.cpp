@@ -101,6 +101,12 @@ namespace module {
                                                            currentRequest.task));
                 save_file_stream << YAML::Dump(walk_config);
                 save_file_stream.close();
+
+                    // Get constant variables
+                YAML::Node eval_config = YAML::LoadFile("config/NSGA2Evaluator.yaml");
+
+                gravity_Max = eval_config["gravity"]["MAX"].as<float>();
+                gravity_Min = eval_config["gravity"]["MIN"].as<float>();
             }
 
             void StrafeEvaluator::resetSimulation() {
@@ -112,7 +118,7 @@ namespace module {
             }
 
             void StrafeEvaluator::evaluatingState(size_t subsumptionId, NSGA2Evaluator* evaluator) {
-                NUClear::log<NUClear::DEBUG>(fmt::format("Trialling with walk command: ({} {}) {}",
+                NUClear::log<NUClear::DEBUG>(fmt::format("Trialling with walk command: ({}, {}) {}",
                                                          walk_command_velocity.x(),
                                                          walk_command_velocity.y(),
                                                          walk_command_rotation));
@@ -178,8 +184,8 @@ namespace module {
                 bool fallen        = false;
                 auto accelerometer = sensors.accelerometer;
 
-                if ((std::fabs(accelerometer.x()) > 9.2 || std::fabs(accelerometer.y()) > 9.2)
-                    && std::fabs(accelerometer.z()) < 0.5) {
+                if ((std::fabs(accelerometer.x()) > gravity_Max || std::fabs(accelerometer.y()) > gravity_Max)
+                    && std::fabs(accelerometer.z()) < gravity_Min) {
                     NUClear::log<NUClear::DEBUG>("Fallen!");
                     NUClear::log<NUClear::DEBUG>("acc at fall (x y z):",
                                                  std::fabs(accelerometer.x()),

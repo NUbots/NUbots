@@ -68,12 +68,6 @@ namespace module {
                 YAML::Node walk_config = YAML::LoadFile(currentRequest.task_config_path);
                 NUClear::log<NUClear::INFO>("CurrentConfigPath", currentRequest.task_config_path);
 
-                // YAML::Node eval_config = YAML::LoadFile(currentRequest.task_config_path);
-                // NUClear::log<NUClear::INFO>("CurrentConfigPath", currentRequest.task_config_path);
-                // //     //auto min = config["MIN"].as<double>();
-                // NUClear::log<NUClear::INFO>("MAX", currentRequest.gravityMax);
-                // NUClear::log<NUClear::INFO>("Min", gravityMin);
-
                 // The mapping of parameters depends on how the config file was read by the optimiser
                 auto walk                    = walk_config["walk"];
                 walk["freq"]                 = currentRequest.parameters.real_params[0];
@@ -112,10 +106,11 @@ namespace module {
                 save_file_stream << YAML::Dump(walk_config);
                 save_file_stream.close();
 
-                // YAML::Node eval_config = YAML::LoadFile("config/NSGA2Evaluator.yaml");
+                    // Get constant variables
+                YAML::Node eval_config = YAML::LoadFile("config/NSGA2Evaluator.yaml");
 
-                // gravityMax = eval_config["gravity"]["MAX"].as<float>();
-                // gravityMin = eval_config["gravity"]["MIN"].as<float>();
+                gravity_Max = eval_config["gravity"]["MAX"].as<float>();
+                gravity_Min = eval_config["gravity"]["MIN"].as<float>();
             }
 
             void WalkEvaluator::resetSimulation() {
@@ -127,7 +122,7 @@ namespace module {
             }
 
             void WalkEvaluator::evaluatingState(size_t subsumptionId, NSGA2Evaluator* evaluator) {
-                NUClear::log<NUClear::DEBUG>(fmt::format("Trialling with walk command: ({} {}) {}",
+                NUClear::log<NUClear::DEBUG>(fmt::format("Trialling with walk command: ({}, {}) {}",
                                                          walk_command_velocity.x(),
                                                          walk_command_velocity.y(),
                                                          walk_command_rotation));
@@ -193,8 +188,8 @@ namespace module {
                 bool fallen        = false;
                 auto accelerometer = sensors.accelerometer;
 
-                if ((std::fabs(accelerometer.x()) > gravityMax || std::fabs(accelerometer.y()) > gravityMax)
-                    && std::fabs(accelerometer.z()) < gravityMin) {
+                if ((std::fabs(accelerometer.x()) > gravity_Max || std::fabs(accelerometer.y()) > gravity_Max)
+                    && std::fabs(accelerometer.z()) < gravity_Min) {
                     NUClear::log<NUClear::DEBUG>("Fallen!");
                     NUClear::log<NUClear::DEBUG>("acc at fall (x y z):",
                                                  std::fabs(accelerometer.x()),

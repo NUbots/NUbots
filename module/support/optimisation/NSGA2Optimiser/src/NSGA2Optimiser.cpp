@@ -54,29 +54,30 @@ namespace module {
                     nsga2Algorithm.SetEtaM(config["eta"]["M"].as<double>());
                     nsga2Algorithm.SetSeed(config["seed"].as<int>());
 
-                    auto taskType = config["task"].as<std::string>();
-                    if (taskType == "walk") {
+                    auto task_type = config["task"].as<std::string>();
+
+                    if (task_type == "walk") {
                         log<NUClear::INFO>("Task type is Walk");
                         task = std::make_unique<WalkOptimiser>();
                     }
-                    else if (taskType == "strafe") {
+                    else if (task_type == "strafe") {
                         log<NUClear::INFO>("Task type is Strafe");
                         task = std::make_unique<StrafeOptimiser>();
                     }
-                    else if (taskType == "rotation") {
+                    else if (task_type == "rotation") {
                         log<NUClear::INFO>("Task type is Rotate");
                         task = std::make_unique<RotationOptimiser>();
                     }
-                    else if (taskType == "stand") {
-                        log<NUClear::INFO>("Task type is Stand");
-                        task = std::make_unique<StandOptimiser>();
-                    }
-                    else if (taskType == "multipath") {
+                    else if (task_type == "multipath") {
                         log<NUClear::INFO>("Task type is Multipath");
                         task = std::make_unique<MultiPathOptimiser>();
                     }
+                    else if (task_type == "stand") {
+                        log<NUClear::INFO>("Task type is Stand");
+                        task = std::make_unique<StandOptimiser>();
+                    }
                     else {
-                        log<NUClear::ERROR>("Unrecognised optimiser task", taskType);
+                        log<NUClear::ERROR>("Unrecognised optimiser task", task_type);
                         powerplant.shutdown();
                     }
                     task->SetupNSGA2(config, nsga2Algorithm);

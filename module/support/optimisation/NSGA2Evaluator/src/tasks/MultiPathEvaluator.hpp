@@ -75,11 +75,14 @@ namespace module {
                 int pathNo  = 0;
                 int roundNo = 0;
 
-                // std::array<std::vector<double>, 6> pathScores;
                 std::vector<std::vector<double>> pathScores;
-                std::array<double, 11> params;
+                std::array<double, 13> params;
 
                 size_t subsumptionID = 0;
+
+                /// @brief Configuration Min and Max values
+                float gravity_Max = 0.0;
+                float gravity_Min = 0.0;
             };
 
         }  // namespace optimisation

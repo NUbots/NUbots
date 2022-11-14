@@ -62,6 +62,10 @@ namespace module {
                 double omega   = 0.0;
                 double deltaT  = 0.0;
                 double oldTime = 0.0;
+
+                /// @brief Configuration Min and Max values
+                float gravity_Max = 0.0;
+                float gravity_Min = 0.0;
             };
 
         }  // namespace optimisation

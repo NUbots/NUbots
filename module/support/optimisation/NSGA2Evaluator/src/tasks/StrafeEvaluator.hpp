@@ -57,6 +57,10 @@ namespace module {
 
                 /// @brief The walk command rotation.
                 double walk_command_rotation = 0.0;
+
+                /// @brief Configuration Min and Max values
+                float gravity_Max = 0.0;
+                float gravity_Min = 0.0;
             };
 
         }  // namespace optimisation

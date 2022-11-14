@@ -59,16 +59,7 @@ namespace module {
 
             NSGA2Evaluator::NSGA2Evaluator(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
-
-                on<Configuration>("NSGA2Evaluator.yaml").then([this](const Configuration& config) {
                     log<NUClear::INFO>("Setting up NSGA2 walk path evaluator");
-                    //log<NUClear::INFO>("Config", config);
-                    auto gravityMax = config["gravity"]["MAX"].as<double>();
-                    auto gravityMin = config["gravity"]["MIN"].as<double>();
-                    //auto min = config["MIN"].as<double>();
-                    log<NUClear::INFO>("G-Max", gravityMax);
-                    log<NUClear::INFO>("G-Min", gravityMin);
-                });
 
                 emit<Scope::DIRECT>(std::make_unique<RegisterAction>(RegisterAction{
                     subsumptionId,
@@ -238,6 +229,7 @@ namespace module {
             /// @brief Handle the SETTING_UP_TRIAL state
             void NSGA2Evaluator::SettingUpTrial() {
                 log<NUClear::DEBUG>("SettingUpTrial");
+
                 generation = lastEvalRequestMsg.generation;
                 individual = lastEvalRequestMsg.id;
 
@@ -280,15 +272,14 @@ namespace module {
             /// @brief Handle the EVALUATING state
             void NSGA2Evaluator::Evaluating(NSGA2Evaluator::Event event) {
                 log<NUClear::DEBUG>("Evaluating");
+
                 if (event == Event::ResetDone) {
-                    if (lastEvalRequestMsg.task == "walk" || lastEvalRequestMsg.task == "stand"
-                        || lastEvalRequestMsg.task == "strafe" || lastEvalRequestMsg.task == "rotation") {
+                    if (lastEvalRequestMsg.task == "walk"     || 
+                        lastEvalRequestMsg.task == "stand"    ||
+                        lastEvalRequestMsg.task == "strafe"   || 
+                        lastEvalRequestMsg.task == "rotation" ||
+                        lastEvalRequestMsg.task == "multipath") {
                         task->evaluatingState(subsumptionId, this);
-                    }
-                    else if (lastEvalRequestMsg.task == "multipath") {
-                        // task = std::make_unique<WalkEvaluator>();
-                        task->evaluatingState(subsumptionId, this);
-                        // log<NUClear::ERROR>("Multipath event:", event);
                     }
                     else {
                         log<NUClear::ERROR>("Unhandled task type:", lastEvalRequestMsg.task);
