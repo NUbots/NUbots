@@ -1,0 +1,76 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2022 NUbots <nubots@nubots.net>
+ */
+syntax = "proto3";
+
+package message.motion;
+
+import "message/motion/ServoCommand.proto";
+
+/// Enum for each servo in a leg
+enum LegID {
+    HIP_YAW     = 0;
+    HIP_ROLL    = 1;
+    HIP_PITCH   = 2;
+    KNEE        = 3;
+    ANKLE_PITCH = 4;
+    ANKLE_ROLL  = 5;
+}
+
+/// Left leg servo command information including time, gain, torque, position
+message LeftLeg {
+    /// Information for each servo in the left leg, in order of LegID
+    repeated ServoCommand servos = 1;
+}
+
+/// Right leg servo command information including time, gain, torque, position
+message RightLeg {
+    /// Information for each servo in the right leg, in order of LegID
+    repeated ServoCommand servos = 1;
+}
+
+/// Enum for each servo in an arm
+enum ArmID {
+    SHOULDER_PITCH = 0;
+    SHOULDER_ROLL  = 1;
+    ELBOW          = 2;
+}
+
+/// Left arm servo command information including time, gain, torque, position
+message LeftArm {
+    /// Information for each servo in the left arm, in order of ArmID
+    repeated ServoCommand servos = 1;
+}
+
+/// Right arm servo command information including time, gain, torque, position
+message RightArm {
+    /// Information for each servo in the right arm, in order of ArmID
+    repeated ServoCommand servos = 1;
+}
+
+/// Enum for each servo in the head
+enum HeadID {
+    YAW   = 0;
+    PITCH = 1;
+}
+
+/// Head servo command information including time, gain, torque, position
+message Head {
+    /// Information for each servo in the head, in order of HeadID
+    repeated ServoCommand servos = 1;
+}

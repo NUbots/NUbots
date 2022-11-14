@@ -1,3 +1,22 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2022 NUbots <nubots@nubots.net>
+ */
+
 #include <catch.hpp>
 #include <nuclear>
 
@@ -56,8 +75,8 @@ namespace {
                 emit<Task>(std::make_unique<VeryComplexTask>(), 40);
             });
             on<Trigger<Step<3>>, Priority::LOW>().then([this] {
-                events.push_back("lowering priority of complex task 1");
-                emit<Task>(std::unique_ptr<ComplexTask<1>>(nullptr), 30);
+                events.push_back("removing complex task 1");
+                emit<Task>(std::unique_ptr<ComplexTask<1>>(nullptr));
             });
             on<Startup>().then([this] {
                 emit(std::make_unique<Step<1>>());
@@ -69,8 +88,8 @@ namespace {
 
 }  // namespace
 
-TEST_CASE("Test that when the needs a higher task is blocked on are released, the higher task will run",
-          "[director][needs][!mayfail]") {
+TEST_CASE("Test that when the needs a higher task is blocked on are removed, the higher task will run",
+          "[director][needs][joining][removal]") {
 
     NUClear::PowerPlant::Configuration config;
     config.thread_count = 1;
@@ -84,7 +103,7 @@ TEST_CASE("Test that when the needs a higher task is blocked on are released, th
         "emitting tasks from complex task 1",
         "simple task - complex task 1",
         "emitting very complex task",
-        "lowering priority of complex task 1",
+        "removing complex task 1",
         "emitting tasks from very complex task",
         "emitting tasks from complex task 2",
         "simple task - complex task 2",
