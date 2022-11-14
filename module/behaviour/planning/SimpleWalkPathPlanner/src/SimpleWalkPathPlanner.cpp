@@ -148,16 +148,11 @@ namespace module::behaviour::planning {
         // If ball exists...
         if (ball) {
             // Obtain the unit vector to ball in torso space and scale by cfg.forward_speed
+            Eigen::Vector3f rBTt         = ball->rBTt;
+            Eigen::Vector3f walk_command = cfg.forward_speed * (rBTt.normalized());
 
-            auto T_rBTt = ball->rBTt;
-
-            // TODO(BehaviourTeam): Magic Offset Value :( Must match soccer strategy
-            T_rBTt.y() += 0.05;
-
-            Eigen::Vector3f walk_command = cfg.forward_speed * (T_rBTt.normalized());
-
-            // Overide the z component of walk_command with angular velocity, which is just the angular displacement to
-            // ball, saturated with value cfg.max_turn_speed float
+            // Set the angular velocity component of the walk_command with the angular displacement and saturate with
+            // value cfg.max_turn_speed
             walk_command.z() = utility::math::clamp(cfg.min_turn_speed,
                                                     std::atan2(walk_command.y(), walk_command.x()),
                                                     cfg.max_turn_speed);
@@ -171,7 +166,7 @@ namespace module::behaviour::planning {
     }
 
     void SimpleWalkPathPlanner::rotate_on_spot(bool clockwise) {
-
+        // Determine the direction of rotation
         int sign = clockwise ? -1 : 1;
 
         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(
