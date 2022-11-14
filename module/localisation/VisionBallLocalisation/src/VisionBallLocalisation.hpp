@@ -16,8 +16,8 @@ namespace module::localisation {
     class VisionBallLocalisation : public NUClear::Reactor {
     private:
         struct Config {
-            Config() = default;
-
+            Config()               = default;
+            float smoothing_factor = 0.0f;
         } cfg;
 
         /// @brief Current estimate of cartesian ball position

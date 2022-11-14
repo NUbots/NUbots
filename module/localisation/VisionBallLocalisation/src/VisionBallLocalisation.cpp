@@ -35,8 +35,9 @@ namespace module::localisation {
         using message::localisation::FilteredBall;
         using utility::math::coordinates::reciprocalSphericalToCartesian;
 
-        on<Configuration>("VisionBallLocalisation.yaml").then([this](const Configuration& cfg) {
-            log_level = cfg["log_level"].as<NUClear::LogLevel>();
+        on<Configuration>("VisionBallLocalisation.yaml").then([this](const Configuration& config) {
+            log_level            = config["log_level"].as<NUClear::LogLevel>();
+            cfg.smoothing_factor = config["smoothing_factor"].as<float>();
         });
 
         /* To run whenever a ball has been detected */
@@ -63,9 +64,8 @@ namespace module::localisation {
                     }
                 }
 
-                // TODO: Apply exponential filter to rBTt
-                float smoothing_factor = 0.1;
-                filtered_rBTt          = smoothing_factor * rBTt + (1 - smoothing_factor) * filtered_rBTt;
+                // Apply exponential filter to rBTt
+                filtered_rBTt = cfg.smoothing_factor * rBTt + (1 - cfg.smoothing_factor) * filtered_rBTt;
 
                 if (log_level <= NUClear::DEBUG) {
                     emit(graph("rBTt: ", rBTt.x(), rBTt.y(), rBTt.z()));
