@@ -61,9 +61,7 @@ namespace module::behaviour::skills {
 
         on<Configuration>("HeadBehaviourSoccer.yaml")
             .then("Head Behaviour Soccer Config", [this](const Configuration& config) {
-                log_level = config["log_level"].as<NUClear::LogLevel>();
-                // search_timeout           = config["search_timeout"].as<float>();
-                // fixation_time        = config["fixation_time"].as<float>();
+                log_level          = config["log_level"].as<NUClear::LogLevel>();
                 cfg.search_timeout = duration_cast<NUClear::clock::duration>(
                     std::chrono::duration<double>(config["search_timeout"].as<double>()));
                 cfg.fixation_time = config["fixation_time"].as<float>();
@@ -74,8 +72,6 @@ namespace module::behaviour::skills {
                 }
             });
 
-
-        // TODO(BehaviourTeam): remove this horrible code
         // Check to see if we are currently in the process of getting up.
         on<Trigger<ExecuteGetup>>().then([this] { is_getting_up = true; });
 
