@@ -130,6 +130,12 @@ namespace module::input {
         // Read frame number
         mocap->frame_number = ReadData<uint32_t>::read(ptr, version);
 
+        std::cout << "Frame Number: " << mocap->frame_number << std::endl;
+
+        uint32_t nMarkerSets = ReadData<uint32_t>::read(ptr, version);
+
+        std::cout << "Number of Marker Sets: " << nMarkerSets << std::endl;
+
         // Read the markersets
         mocap->marker_sets = ReadData<std::vector<MotionCapture::MarkerSet>>::read(ptr, version);
 
@@ -315,22 +321,31 @@ namespace module::input {
         const char* ptr = &packet.data;
 
         uint32_t nModels = ReadData<uint32_t>::read(ptr, version);
+        log<NUClear::INFO>("Number of Models is: ", nModels);
 
         for (uint32_t i = 0; i < nModels; ++i) {
             // Read the type
             uint32_t type = ReadData<uint32_t>::read(ptr, version);
 
+            log<NUClear::WARN>("TYPE IS: ", type);
+
             // Parse the correct type
             switch (type) {
                 // Marker Set
                 case 0: {
-                    MarkerSetModel m        = ReadData<MarkerSetModel>::read(ptr, version);
+                    MarkerSetModel m = ReadData<MarkerSetModel>::read(ptr, version);
+
+                    std::cout << "Market Set Name: " << m.name << std::endl;
+
                     markerSetModels[m.name] = m;
                 } break;
 
                 // Rigid Body
                 case 1: {
-                    RigidBodyModel m      = ReadData<RigidBodyModel>::read(ptr, version);
+                    RigidBodyModel m = ReadData<RigidBodyModel>::read(ptr, version);
+                    std::cout << "RigidBody ID: " << m.id << std::endl;
+                    std::cout << "RigidBody Name: " << m.name << std::endl;
+                    std::cout << "RigidBody Offset: " << m.offset << std::endl;
                     rigidBodyModels[m.id] = m;
                 } break;
 
@@ -408,13 +423,25 @@ namespace module::input {
 
         // Work out it's type
         switch (packet.type) {
-            case Packet::Type::PING_RESPONSE: processPing(packet); break;
+            case Packet::Type::PING_RESPONSE:
+                log<NUClear::WARN>("IT IS A PING RESPONSE");
+                processPing(packet);
+                break;
 
-            case Packet::Type::RESPONSE: processResponse(packet); break;
+            case Packet::Type::RESPONSE:
+                log<NUClear::WARN>("IT IS A RESPONSE");
+                processResponse(packet);
+                break;
 
-            case Packet::Type::MODEL_DEF: processModel(packet); break;
+            case Packet::Type::MODEL_DEF:
+                log<NUClear::WARN>("IT IS A MODEL DEF");
+                processModel(packet);
+                break;
 
-            case Packet::Type::FRAME_OF_DATA: processFrame(packet); break;
+            case Packet::Type::FRAME_OF_DATA:
+                log<NUClear::WARN>("IT IS A FRAME OF DATA");
+                processFrame(packet);
+                break;
 
             case Packet::Type::UNRECOGNIZED_REQUEST:
                 log<NUClear::ERROR>("An unrecognized request was made to the NatNet server");

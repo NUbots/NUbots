@@ -151,7 +151,8 @@ namespace module::input {
 
             RigidBody rigidBody;
 
-            rigidBody.id       = ReadData<uint32_t>::read(ptr, version);
+            rigidBody.id = ReadData<uint32_t>::read(ptr, version);
+            std::cout << "Frame Rigid Body ID: " << rigidBody.id << std::endl;
             rigidBody.position = ReadData<Eigen::Matrix<float, 3, 1>>::read(ptr, version);
             rigidBody.rotation = ReadData<Eigen::Matrix<float, 4, 1>>::read(ptr, version);
             rigidBody.markers  = ReadData<std::vector<Marker>>::read(ptr, version);
@@ -246,6 +247,13 @@ namespace module::input {
             m.id       = ReadData<uint32_t>::read(ptr, version);
             m.parentId = ReadData<uint32_t>::read(ptr, version);
             m.offset   = ReadData<Eigen::Matrix<float, 3, 1>>::read(ptr, version);
+
+            uint32_t nMarkers = ReadData<uint32_t>::read(ptr, version);
+            std::cout << "Number of Markers: " << nMarkers << std::endl;
+
+            ptr += nMarkers * 3 * sizeof(float);
+            ptr += nMarkers * sizeof(int);
+
             return m;
         }
     };
