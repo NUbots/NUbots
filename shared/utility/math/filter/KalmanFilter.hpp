@@ -29,19 +29,19 @@ namespace utility::math::filter {
     class KalmanFilter {
     private:
         // @brief The continuous time state transition model
-        const Eigen::Matrix<Scalar, n_states, n_states> A;
+        Eigen::Matrix<Scalar, n_states, n_states> A;
 
         // @brief The continuous time input model
-        const Eigen::Matrix<Scalar, n_states, n_inputs> B;
+        Eigen::Matrix<Scalar, n_states, n_inputs> B;
 
         // @brief The measurement model
-        const Eigen::Matrix<Scalar, n_outputs, n_states> C;
+        Eigen::Matrix<Scalar, n_outputs, n_states> C;
 
         // @brief The process noise covariance matrix
-        const Eigen::Matrix<Scalar, n_states, n_states> Q;
+        Eigen::Matrix<Scalar, n_states, n_states> Q;
 
         // @brief The measurement noise covariance matrix
-        const Eigen::Matrix<Scalar, n_outputs, n_outputs> R;
+        Eigen::Matrix<Scalar, n_outputs, n_outputs> R;
 
         // @brief The filters current state estimate
         Eigen::Matrix<Scalar, n_states, 1> x = Eigen::Matrix<Scalar, n_states, 1>::Zero();
@@ -112,14 +112,34 @@ namespace utility::math::filter {
             Eigen::Matrix<Scalar, n_outputs, n_outputs> R = Eigen::Matrix<Scalar, n_outputs, n_outputs>::Identity())
             : A(A), B(B), C(C), Q(Q), R(R) {}
 
+        /**
+         * @brief Updates the filter with new model matrices
+         * @param A The continuous time state transition matrix
+         * @param b The continuous time input matrix
+         * @param C The measurement model
+         * @param Q The process noise covariance matrix
+         * @param R The measurement noise covariance matrix
+         */
+        void update_model(Eigen::Matrix<Scalar, n_states, n_states> A_,
+                          Eigen::Matrix<Scalar, n_states, n_inputs> B_,
+                          Eigen::Matrix<Scalar, n_outputs, n_states> C_,
+                          Eigen::Matrix<Scalar, n_states, n_states> Q_,
+                          Eigen::Matrix<Scalar, n_outputs, n_outputs> R_) {
+            A = A_;
+            B = B_;
+            C = C_;
+            Q = Q_;
+            R = R_;
+        }
 
         /**
          * @brief Initialise the filter with the given initial state and covariance
          * @param initial_state The initial state
          * @param initial_covariance The initial state covariance
          */
-        void init(const Eigen::Matrix<Scalar, n_states, 1>& initial_state,
-                  const Eigen::Matrix<Scalar, n_states, n_states>& initial_covariance) {
+        void init(const Eigen::Matrix<Scalar, n_states, 1>& initial_state = Eigen::Matrix<Scalar, n_states, 1>::Zero(),
+                  const Eigen::Matrix<Scalar, n_states, n_states>& initial_covariance =
+                      Eigen::Matrix<Scalar, n_states, n_states>::Identity()) {
             x = initial_state;
             P = initial_covariance;
         }
