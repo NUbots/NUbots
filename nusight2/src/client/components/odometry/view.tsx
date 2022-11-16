@@ -7,7 +7,7 @@ import { RobotSelectorSingle } from '../robot_selector_single/view'
 import { OdometryController } from './controller'
 import { OdometryModel } from './model'
 import { OdometryVisualizer } from './odometry_visualizer/view'
-import styles from './styles.css'
+import styles from './style.module.css'
 
 @observer
 export class OdometryView extends React.Component<{

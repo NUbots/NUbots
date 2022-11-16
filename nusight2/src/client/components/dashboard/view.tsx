@@ -9,12 +9,12 @@ import { DashboardModel } from './model'
 import { DashboardNetwork } from './network'
 import { RobotPanel } from './robot_panel/view'
 import { RobotPanelViewModel } from './robot_panel/view_model'
-import style from './style.css'
+import style from './style.module.css'
 
 export type DashboardProps = {
   controller: DashboardController
   Field: ComponentType
-  menu: ComponentType<PropsWithChildren>
+  Menu: ComponentType<PropsWithChildren>
   model: DashboardModel
   network: DashboardNetwork
 }
@@ -26,7 +26,7 @@ export class Dashboard extends Component<DashboardProps> {
   }
 
   render() {
-    const { menu: Menu, model } = this.props
+    const { Menu, model } = this.props
     const showPanels = model.robots.some(robot => robot.enabled)
     const Field = this.props.Field
     return (
