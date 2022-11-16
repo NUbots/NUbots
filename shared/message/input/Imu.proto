@@ -1,0 +1,41 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2013 NUbots <nubots@nubots.net>
+ */
+
+syntax = "proto3";
+
+package message.input;
+
+import "google/protobuf/timestamp.proto";
+import "Matrix.proto";
+// import "Neutron.proto";
+import "Vector.proto";
+
+message Imu {
+    /// When the data were taken/captured
+    google.protobuf.Timestamp timestamp = 1;
+    /// The values are between 0 and 1023, representing a value between -4g and 4g
+    /// => 512 = 0g. Is {x, y, z} acceleration
+    vec3 accelerometer = 2;
+    /// The values are between 0 and 1023, represent a value between -500 degrees
+    /// per second and 500 degrees per second.
+    /// => 512 = 0 degrees per second. Is {x, y, z} angular velocity
+    vec3 gyroscope = 3;
+    /// Affine3d transform from odometry (world) space to the robot (torso) space.
+    mat4 Htw = 4;
+}
