@@ -64,7 +64,7 @@ namespace module::localisation {
                 }
 
                 // Apply exponential filter to rBTt
-                filtered_rBTt = cfg.smoothing_factor * rBTt + (1 - cfg.smoothing_factor) * filtered_rBTt;
+                filtered_rBTt = cfg.smoothing_factor * rBTt + (1.0 - cfg.smoothing_factor) * filtered_rBTt;
 
                 if (log_level <= NUClear::DEBUG) {
                     emit(graph("rBTt: ", rBTt.x(), rBTt.y(), rBTt.z()));
