@@ -94,9 +94,11 @@ namespace module::behaviour::planning {
 
         /// @brief Walk directly towards the ball relative to the robot based on the latest VisionBall ball position
         /// measurement
+        /// @param ball The latest FilteredBall message which contains the ball position
         void vision_walk_path(const std::shared_ptr<const FilteredBall>& ball);
 
         /// @brief Rotate on the spot
+        /// @param clockwise True if rotation command clockwise, false if rotation command anticlockwise
         void rotate_on_spot(bool clockwise);
 
         /// @brief rotate_around_ball

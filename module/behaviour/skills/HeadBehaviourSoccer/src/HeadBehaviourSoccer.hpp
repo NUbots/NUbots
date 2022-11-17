@@ -38,24 +38,23 @@ namespace module::behaviour::skills {
             /// @brief Walk path planner priority in the subsumption system
             // Time before starting to search for ball after its lost
             NUClear::clock::duration search_timeout{};
-            // Time lingering at each position in lost ballsearch
+            /// @brief Time lingering at each position in lost ballsearch
             float fixation_time = 0.0f;
             float pitch_offset  = 0.0f;
-            // List of positions for search
+            /// @brief List of positions for search
             std::vector<Eigen::Vector2d> search_positions;
         } cfg;
 
-        // Index in the list of search positions
+        /// @brief Index in the list of search positions
         long unsigned int search_idx = 0;
 
-        // Flag for if the robot is currently getting up
+        /// @brief Flag for if the robot is currently getting up
         bool is_getting_up = false;
 
-        // Time between last search position transition
+        /// @brief  Time since last search position transition
         NUClear::clock::time_point search_last_moved = NUClear::clock::now();
 
-
-        // Time since last ball seen
+        /// @brief Time since last ball seen
         NUClear::clock::time_point ball_last_measured = NUClear::clock::now();
 
     public:
