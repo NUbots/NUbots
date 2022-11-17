@@ -68,7 +68,7 @@ namespace extension::TCP {
          */
         static inline void emit(NUClear::PowerPlant&, std::shared_ptr<DataType> data, fd_t fd) {
             auto s_data = Serialise<DataType>::serialise(*data);
-            send_it(s_data.data(), s_data.size(), fd);
+            send_it(s_data.data(), s_data.size() * sizeof(DataType), fd);
         }
 
         /**
