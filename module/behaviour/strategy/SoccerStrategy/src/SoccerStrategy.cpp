@@ -432,8 +432,6 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::play(const std::shared_ptr<const FilteredBall>& ball) {
-        // Log ball distance
-        NUClear::log<NUClear::DEBUG>("Ball distance: ", ball->distance);
         if (ball && ball->distance < cfg.kicking_distance_threshold
             && ball->absolute_yaw_angle < cfg.kicking_angle_threshold) {
             // We are in range, lets kick
