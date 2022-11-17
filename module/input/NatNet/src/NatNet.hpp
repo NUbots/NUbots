@@ -58,7 +58,8 @@ namespace module::input {
             std::string name{};
             uint32_t id{0};
             uint32_t parentId{0};
-            Eigen::Vector3f offset = Eigen::Vector3f::Zero();
+            Eigen::Vector3f offset   = Eigen::Vector3f::Zero();
+            Eigen::Vector3f rotation = Eigen::Vector3f::Zero();
         };
 
         struct SkeletonModel {

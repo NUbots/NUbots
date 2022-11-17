@@ -136,8 +136,14 @@ namespace module::input {
 
         std::cout << "Number of Marker Sets: " << nMarkerSets << std::endl;
 
-        // Read the markersets
-        mocap->marker_sets = ReadData<std::vector<MotionCapture::MarkerSet>>::read(ptr, version);
+        for (uint32_t i = 0; i != nMarkerSets; i++) {
+            // TODO: this needs to be stored, but it is being read correctly
+            // Something like:
+            //  mocap->markerset =
+            ReadData<MotionCapture::MarkerSet>::read(ptr, version);
+        }
+
+        std::cout << "Marker Sets read " << std::endl;
 
         // Read the free floating markers
         auto freeMarkers = ReadData<std::vector<Eigen::Vector3f>>::read(ptr, version);
@@ -151,8 +157,15 @@ namespace module::input {
             mocap->markers.push_back(marker);
         }
 
+        // uint32_t rigidbody_count = ReadData<uint32_t>::read(ptr, version);
+
+        // std::cout << "Rigid Body Count: " << rigidbody_count << std::endl;
+
+        // for (uint32_t i = 0; i != rigidbody_count; i++) {
         // Read the Rigid Bodies
         mocap->rigid_bodies = ReadData<std::vector<MotionCapture::RigidBody>>::read(ptr, version);
+        std::cout << "RigidBody Read" << std::endl;
+        // }
 
         // Read the skeletons
         if (version >= 0x02010000) {
@@ -207,6 +220,8 @@ namespace module::input {
                 // Stop processing
                 return;
             }
+
+            // Should probably be saving the informaion of the frame here
         }
 
         for (auto& rigidBody : mocap->rigid_bodies) {
@@ -346,6 +361,7 @@ namespace module::input {
                     std::cout << "RigidBody ID: " << m.id << std::endl;
                     std::cout << "RigidBody Name: " << m.name << std::endl;
                     std::cout << "RigidBody Offset: " << m.offset << std::endl;
+                    std::cout << "Rigidbody Rotation: " << m.rotation << std::endl;
                     rigidBodyModels[m.id] = m;
                 } break;
 
@@ -417,31 +433,24 @@ namespace module::input {
 
 
     void NatNet::process(const std::vector<char>& input) {
-
         // Get our packet
         const Packet& packet = *reinterpret_cast<const Packet*>(input.data());
 
+        // std::stringstream ss;
+        // for (const auto& c : input) {
+        //     ss << std::setw(2) << std::setfill('0') << std::hex << int(c);
+        // }
+        // NUClear::log(ss.str());
+
         // Work out it's type
         switch (packet.type) {
-            case Packet::Type::PING_RESPONSE:
-                log<NUClear::WARN>("IT IS A PING RESPONSE");
-                processPing(packet);
-                break;
+            case Packet::Type::PING_RESPONSE: processPing(packet); break;
 
-            case Packet::Type::RESPONSE:
-                log<NUClear::WARN>("IT IS A RESPONSE");
-                processResponse(packet);
-                break;
+            case Packet::Type::RESPONSE: processResponse(packet); break;
 
-            case Packet::Type::MODEL_DEF:
-                log<NUClear::WARN>("IT IS A MODEL DEF");
-                processModel(packet);
-                break;
+            case Packet::Type::MODEL_DEF: processModel(packet); break;
 
-            case Packet::Type::FRAME_OF_DATA:
-                log<NUClear::WARN>("IT IS A FRAME OF DATA");
-                processFrame(packet);
-                break;
+            case Packet::Type::FRAME_OF_DATA: processFrame(packet); break;
 
             case Packet::Type::UNRECOGNIZED_REQUEST:
                 log<NUClear::ERROR>("An unrecognized request was made to the NatNet server");

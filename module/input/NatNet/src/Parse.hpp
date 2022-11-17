@@ -154,10 +154,14 @@ namespace module::input {
             rigidBody.id = ReadData<uint32_t>::read(ptr, version);
             std::cout << "Frame Rigid Body ID: " << rigidBody.id << std::endl;
             rigidBody.position = ReadData<Eigen::Matrix<float, 3, 1>>::read(ptr, version);
+            std::cout << "Pos: \n" << rigidBody.position << std::endl;
             rigidBody.rotation = ReadData<Eigen::Matrix<float, 4, 1>>::read(ptr, version);
-            rigidBody.markers  = ReadData<std::vector<Marker>>::read(ptr, version);
+            std::cout << "Ori: \n" << rigidBody.rotation << std::endl;
 
             // Version specific information
+            if (version < 0x03000000) {
+                rigidBody.markers = ReadData<std::vector<Marker>>::read(ptr, version);
+            }
             rigidBody.error = version >= 0x02000000 ? ReadData<float>::read(ptr, version) : -1;
             rigidBody.tracking_valid =
                 version >= 0x02060000 ? (ReadData<short>::read(ptr, version) & 0x01) == 0x01 : true;
