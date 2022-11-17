@@ -34,6 +34,7 @@ message MotionCapture {
         uint32 id       = 1;
         fvec3  position = 2;
         float  size     = 3;
+        uint32 modelId = 4;
     }
 
     message MarkerSet {

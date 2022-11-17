@@ -132,20 +132,11 @@ namespace module::input {
 
         std::cout << "Frame Number: " << mocap->frame_number << std::endl;
 
-        uint32_t nMarkerSets = ReadData<uint32_t>::read(ptr, version);
-
-        std::cout << "Number of Marker Sets: " << nMarkerSets << std::endl;
-
-        for (uint32_t i = 0; i != nMarkerSets; i++) {
-            // TODO: this needs to be stored, but it is being read correctly
-            // Something like:
-            //  mocap->markerset =
-            ReadData<MotionCapture::MarkerSet>::read(ptr, version);
-        }
+        mocap->marker_sets = ReadData<std::vector<MotionCapture::MarkerSet>>::read(ptr, version);
 
         std::cout << "Marker Sets read " << std::endl;
 
-        // Read the free floating markers
+        // Read the free floating markers but don't process them
         auto freeMarkers = ReadData<std::vector<Eigen::Vector3f>>::read(ptr, version);
         mocap->markers.reserve(freeMarkers.size());
         // Build markers
@@ -157,15 +148,8 @@ namespace module::input {
             mocap->markers.push_back(marker);
         }
 
-        // uint32_t rigidbody_count = ReadData<uint32_t>::read(ptr, version);
-
-        // std::cout << "Rigid Body Count: " << rigidbody_count << std::endl;
-
-        // for (uint32_t i = 0; i != rigidbody_count; i++) {
         // Read the Rigid Bodies
         mocap->rigid_bodies = ReadData<std::vector<MotionCapture::RigidBody>>::read(ptr, version);
-        std::cout << "RigidBody Read" << std::endl;
-        // }
 
         // Read the skeletons
         if (version >= 0x02010000) {
