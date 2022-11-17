@@ -24,7 +24,7 @@ nuclear_role(
   vision::GoalDetector
   vision::BallDetector
   # Localisation
-  localisation::VisionBallLocalisation
+  localisation::BallFilter
   localisation::RobotParticleLocalisation
   # Behaviour
   behaviour::Controller

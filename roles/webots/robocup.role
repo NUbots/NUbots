@@ -11,6 +11,7 @@ nuclear_role(
   support::configuration::GlobalConfig
   network::NUClearNet
   network::NetworkForwarder
+  network::PlotJuggler
   support::configuration::SoccerConfig
   # input
   input::GameController
@@ -24,7 +25,7 @@ nuclear_role(
   vision::BallDetector
   output::ImageCompressor
   # Localisation
-  localisation::VisionBallLocalisation
+  localisation::BallFilter
   localisation::RobotParticleLocalisation
   # Behaviour
   behaviour::Controller

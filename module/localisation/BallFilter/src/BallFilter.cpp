@@ -1,4 +1,4 @@
-#include "VisionBallLocalisation.hpp"
+#include "BallFilter.hpp"
 
 #include <Eigen/Geometry>
 #include <chrono>
@@ -29,13 +29,12 @@ namespace module::localisation {
     using utility::nusight::graph;
     using utility::support::Expression;
 
-    VisionBallLocalisation::VisionBallLocalisation(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)) {
+    BallFilter::BallFilter(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         using message::localisation::FilteredBall;
         using utility::math::coordinates::reciprocalSphericalToCartesian;
 
-        on<Configuration>("VisionBallLocalisation.yaml").then([this](const Configuration& config) {
+        on<Configuration>("BallFilter.yaml").then([this](const Configuration& config) {
             log_level            = config["log_level"].as<NUClear::LogLevel>();
             cfg.smoothing_factor = config["smoothing_factor"].as<float>();
         });
@@ -86,7 +85,7 @@ namespace module::localisation {
             }
         });
     }
-    float VisionBallLocalisation::get_distance(Eigen::Matrix<float, 3, 1> v) {
+    float BallFilter::get_distance(Eigen::Matrix<float, 3, 1> v) {
         return std::sqrt(std::pow(v.x(), 2) + std::pow(v.y(), 2));
     }
 
