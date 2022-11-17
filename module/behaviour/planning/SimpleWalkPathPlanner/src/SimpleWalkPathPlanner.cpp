@@ -29,7 +29,6 @@
 #include "message/input/Sensors.hpp"
 #include "message/localisation/FilteredBall.hpp"
 #include "message/motion/WalkCommand.hpp"
-#include "message/vision/Ball.hpp"
 
 #include "utility/behaviour/Action.hpp"
 #include "utility/behaviour/MotionCommand.hpp"
@@ -53,7 +52,6 @@ namespace module::behaviour::planning {
     using message::motion::WalkCommand;
     using message::motion::WalkStopped;
 
-    using VisionBalls  = message::vision::Balls;
     using FilteredBall = message::localisation::FilteredBall;
 
     using utility::behaviour::ActionPriorities;

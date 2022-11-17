@@ -63,7 +63,6 @@ namespace module::behaviour::strategy {
             int walk_to_ready_time           = 0;
             float kicking_distance_threshold = 0.0f;
             float kicking_angle_threshold    = 0.0f;
-            float rBTt_smoothing_factor      = 0.0f;
         } cfg;
 
         /// @brief Flag to determine whether the ball is on the left or right side of the robot

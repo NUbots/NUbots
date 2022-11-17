@@ -26,7 +26,6 @@
 #include "message/localisation/FilteredBall.hpp"
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/HeadCommand.hpp"
-#include "message/vision/Ball.hpp"
 
 #include "utility/math/coordinates.hpp"
 #include "utility/support/yaml_expression.hpp"
@@ -39,7 +38,6 @@ namespace module::behaviour::skills {
     using message::motion::ExecuteGetup;
     using message::motion::HeadCommand;
     using message::motion::KillGetup;
-    using VisionBalls  = message::vision::Balls;
     using FilteredBall = message::localisation::FilteredBall;
 
 
