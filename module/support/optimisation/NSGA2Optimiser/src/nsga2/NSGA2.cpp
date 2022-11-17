@@ -173,8 +173,7 @@ namespace nsga2 {
             std::vector<double> reals;
             for (size_t i = 1; i < parentPop->inds.size(); i++) {
                 reals = parentPop->inds[i].reals;
-                for (size_t j = 0; j < reals.size(); j++) { // parentPop->inds[i].reals.size(); j++){
-                    //parentPop->inds[i].reals[j] = suppliedPopulationRealVars[i][j];
+                for (size_t j = 0; j < reals.size(); j++) { 
                     reals[j] = suppliedPopulationRealVars[i][j];
                 }
                 parentPop->inds[i].reals = reals;
