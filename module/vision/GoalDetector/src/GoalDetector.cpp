@@ -372,6 +372,208 @@ namespace module::vision {
                         }
                     }
 
+                    auto calc_error = [&](const Eigen::Vector3f& post1, const Eigen::Vector3f& post2) {
+                        return std::sqrt((post1.x() - post2.x()) * (post1.x() - post2.x()))
+                               + ((post1.y() - post2.y()) * (post1.y() - post2.y()))
+                               + ((post1.z() - post2.z()) * (post1.z() - post2.z()));
+                    };
+
+                    if (horizon.vision_ground_truth.exists) {
+
+                        log<NUClear::DEBUG>("*************************************");
+
+                        Eigen::Affine3f Hcw(horizon.Hcw.cast<float>());
+
+                        Eigen::Vector3f rFWw = horizon.vision_ground_truth.rFWw;
+
+                        // log<NUClear::DEBUG>(fmt::format("rGWw = x:{}, y:{}, z:{}", rGWw.x(), rGWw.y(), rGWw.z()));
+
+                        Eigen::Vector3f rGWw_own_l(
+                            rFWw.x() - (field.dimensions.field_length / 2),
+                            rFWw.y() - (field.dimensions.goal_width / 2) - (field.dimensions.goalpost_width / 2),
+                            rFWw.z());
+
+                        Eigen::Vector3f rGWw_own_r(
+                            rFWw.x() - (field.dimensions.field_length / 2),
+                            rFWw.y() + (field.dimensions.goal_width / 2) + (field.dimensions.goalpost_width / 2),
+                            rFWw.z());
+
+                        Eigen::Vector3f rGWw_opp_l(
+                            rFWw.x() + (field.dimensions.field_length / 2),
+                            rFWw.y() + (field.dimensions.goal_width / 2) + (field.dimensions.goalpost_width / 2),
+                            rFWw.z());
+
+                        Eigen::Vector3f rGWw_opp_r(
+                            rFWw.x() + (field.dimensions.field_length / 2),
+                            rFWw.y() - (field.dimensions.goal_width / 2) - (field.dimensions.goalpost_width / 2),
+                            rFWw.z());
+
+                        log<NUClear::DEBUG>(fmt::format("field_length:{}, goal_width:{}",
+                                                        field.dimensions.field_length,
+                                                        field.dimensions.goal_width));
+
+                        // rGWw_opp_l = rFWw + field.goalpost_opp_l<2, 1>.cast<float>();
+                        //  Eigen::Vector3f rGWw_opp_r = rFWw + field.goalpost_opp_r;
+
+                        // Eigen::Vector3f rGWw_top = rGWw;
+                        // rGWw_top.z() += field.dimensions.goal_crossbar_height;
+
+                        // const Eigen::Vector3f rGCc     = (Hcw * rGWw).normalized();
+                        // const Eigen::Vector3f rGCc_top = Hcw * rGWw_top;
+
+                        Eigen::Vector3f rGCc_own_l = (Hcw * rGWw_own_l).normalized();
+                        Eigen::Vector3f rGCc_own_r = (Hcw * rGWw_own_r).normalized();
+                        Eigen::Vector3f rGCc_opp_l = (Hcw * rGWw_opp_l).normalized();
+                        Eigen::Vector3f rGCc_opp_r = (Hcw * rGWw_opp_r).normalized();
+
+                        log<NUClear::DEBUG>(fmt::format("rGCc_own_l = x:{}, y:{}, z:{}",
+                                                        rGCc_own_l.x(),
+                                                        rGCc_own_l.y(),
+                                                        rGCc_own_l.z()));
+                        log<NUClear::DEBUG>(fmt::format("rGCc_own_r = x:{}, y:{}, z:{}",
+                                                        rGCc_own_r.x(),
+                                                        rGCc_own_r.y(),
+                                                        rGCc_own_r.z()));
+                        log<NUClear::DEBUG>(fmt::format("rGCc_opp_l = x:{}, y:{}, z:{}",
+                                                        rGCc_opp_l.x(),
+                                                        rGCc_opp_l.y(),
+                                                        rGCc_opp_l.z()));
+                        log<NUClear::DEBUG>(fmt::format("rGCc_opp_r = x:{}, y:{}, z:{}",
+                                                        rGCc_opp_r.x(),
+                                                        rGCc_opp_r.y(),
+                                                        rGCc_opp_r.z()));
+
+
+                        int bad_posts               = 0;
+                        float avg_error             = 0;
+                        Eigen::Vector3f avg_error3f = Eigen::Vector3f::Zero();
+
+                        for (auto it = goals->goals.begin(); it != goals->goals.end(); it = std::next(it)) {
+
+                            bool valid            = false;
+                            float min_error       = 1;
+                            Eigen::Vector3f error = Eigen::Vector3f::Zero();
+
+                            float dist_own_l = calc_error(it->post.bottom, rGCc_own_l);
+                            float dist_own_r = calc_error(it->post.bottom, rGCc_own_r);
+                            float dist_opp_l = calc_error(it->post.bottom, rGCc_opp_l);
+                            float dist_opp_r = calc_error(it->post.bottom, rGCc_opp_r);
+
+                            float variance = 0.025;
+
+                            if (dist_own_l < variance) {
+                                valid = true;
+                                if (dist_own_l < min_error) {
+                                    min_error = dist_own_l;
+                                    error     = it->post.bottom - rGCc_own_l;
+                                }
+                            }
+                            if (dist_own_r < variance) {
+                                valid = true;
+                                if (dist_own_r < min_error) {
+                                    min_error = dist_own_r;
+                                    error     = it->post.bottom - rGCc_own_r;
+                                }
+                            }
+                            if (dist_opp_l < variance) {
+                                valid = true;
+                                if (dist_opp_l < min_error) {
+                                    min_error = dist_opp_l;
+                                    error     = it->post.bottom - rGCc_opp_l;
+                                }
+                            }
+                            if (dist_opp_r < variance) {
+                                valid = true;
+                                if (dist_opp_r < min_error) {
+                                    min_error = dist_opp_r;
+                                    error     = it->post.bottom - rGCc_opp_r;
+                                }
+                            }
+
+                            if (min_error < 1) {
+                                avg_error += min_error;
+                                avg_error3f += error;
+                            }
+
+                            avg_error += min_error;
+                            avg_error3f.x() += std::abs(error.x());
+                            avg_error3f.y() += std::abs(error.y());
+                            avg_error3f.z() += std::abs(error.z());
+
+                            log<NUClear::DEBUG>(fmt::format("avg_error3f x:{}, y:{}, z:{}",
+                                                            avg_error3f.x(),
+                                                            avg_error3f.y(),
+                                                            avg_error3f.z()));
+
+                            /*
+                            log<NUClear::DEBUG>(
+                                fmt::format("Distance on.l:{}", calc_error(it->post.bottom, rGCc_own_l)));
+                            log<NUClear::DEBUG>(
+                                fmt::format("Distance on.r:{}", calc_error(it->post.bottom, rGCc_own_r)));
+                            log<NUClear::DEBUG>(
+                                fmt::format("Distance op.l:{}", calc_error(it->post.bottom, rGCc_opp_l)));
+                            log<NUClear::DEBUG>(
+                                fmt::format("Distance op.r:{}", calc_error(it->post.bottom, rGCc_opp_r)));
+                            */
+
+                            if (!valid) {
+                                bad_posts++;
+                            }
+
+                            /*
+                            float dist = std::sqrt(
+                                ((it->post.bottom.x() - rGCc_own_l.x()) * (it->post.bottom.x() - rGCc_own_l.x()))
+                                + ((it->post.bottom.y() - rGCc_own_l.y()) * (it->post.bottom.y() - rGCc_own_l.y()))
+                                + ((it->post.bottom.z() - rGCc_own_l.z()) * (it->post.bottom.z() - rGCc_own_l.z())));
+                            */
+
+
+                            /*
+                            if (std::sqrt(
+                                    ((it->post.bottom.x() - rGCc_own_l.x()) * (it->post.bottom.x() - rGCc_own_l.x()))
+                                    + ((it->post.bottom.y() - rGCc_own_l.y()) * (it->post.bottom.y() - rGCc_own_l.y()))
+                                    + ((it->post.bottom.z() - rGCc_own_l.z())
+                                       * (it->post.bottom.z() - rGCc_own_l.z())))> 0.25 )
+                            */
+                        }
+
+                        log<NUClear::DEBUG>(fmt::format("Bad Posts:{}", bad_posts));
+
+                        if (goals->goals.size() > bad_posts) {
+                            avg_error   = (avg_error / ((goals->goals.size() - bad_posts)));
+                            avg_error3f = (avg_error3f / ((goals->goals.size() - bad_posts)));
+                        }
+
+                        log<NUClear::DEBUG>(fmt::format("Average Error:{}", avg_error));
+                        log<NUClear::DEBUG>(fmt::format("Average Error x:{}, y:{}, z:{}",
+                                                        avg_error3f.x(),
+                                                        avg_error3f.y(),
+                                                        avg_error3f.z()));
+
+
+                        /*
+                        log<NUClear::DEBUG>(fmt::format("rGCc_opp_l = x:{}, y:{}, z:{}",
+                        rGCc_opp_l.x(),
+                        rGCc_opp_l.y(),
+                        rGCc_opp_l.z()));
+                         */
+
+                        /*
+                        log<NUClear::DEBUG>(fmt::format("rGCc = x:{}, y:{}, z:{}", rGCc.x(), rGCc.y(), rGCc.z()));
+                        log<NUClear::DEBUG>(
+                            fmt::format("rGCc_top = x:{}, y:{}, z:{}", rGCc_top.x(), rGCc_top.y(), rGCc_top.z()));
+                        log<NUClear::DEBUG>("*************************************");
+                        */
+                        /*
+                        Eigen::Vector3f ball_position = uBCw * projection_distance;
+                        Eigen::Vector3f ball_error    = ball_position - rBCc;
+
+                        emit(graph("rBCc", rBCc.x(), rBCc.y(), rBCc.z()));
+                        emit(graph("Ball error", ball_error.x(), ball_error.y(), ball_error.z()));
+                        */
+                    }
+
+
                     log<NUClear::DEBUG>(fmt::format("Found {} goal posts", goals->goals.size()));
 
                     emit(std::move(goals));
