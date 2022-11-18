@@ -14,10 +14,10 @@ def register(command):
 
     # Module subcommands
     command.add_argument("path", metavar="path", help="a path to the new module (from the module directory)")
+    command.add_argument("--director", action="store_true", help="generates a module as a Director behaviour module")
 
 
 def run(path, **kwargs):
-
     # We use the default "module" directory for modules
     module_path = "module"
 
@@ -62,11 +62,11 @@ def run(path, **kwargs):
         print("\t", os.path.join(src_path, "README.md"))
 
     with open(os.path.join(src_path, "{}.hpp".format(module_name)), "w") as output:
-        output.write(generate_header(parts))
+        output.write(generate_header(parts, kwargs["director"]))
         print("\t", os.path.join(src_path, "{}.hpp".format(module_name)))
 
     with open(os.path.join(src_path, "{}.cpp".format(module_name)), "w") as output:
-        output.write(generate_cpp(parts))
+        output.write(generate_cpp(parts, kwargs["director"]))
         print("\t", os.path.join(src_path, "{}.cpp".format(module_name)))
 
     with open(os.path.join(tests_path, "{}.cpp".format(module_name)), "w") as output:
@@ -88,35 +88,61 @@ def generate_cmake(parts):
     )
 
 
-def generate_header(parts):
-    template = textwrap.dedent(
-        """\
-        #ifndef {define}
-        #define {define}
+def generate_header(parts, director):
+    if director:
+        template = textwrap.dedent(
+            """\
+            #ifndef {define}
+            #define {define}
 
-        #include <nuclear>
+            #include <nuclear>
 
-        #include "extension/Behaviour.hpp"
+            #include "extension/Behaviour.hpp"
 
-        namespace {namespace} {{
+            namespace {namespace} {{
 
-        class {className} : public ::extension::behaviour::BehaviourReactor {{
-        private:
-            /// @brief Stores configuration values
-            struct Config {{
-                Config() = default;
-            }} cfg;
+            class {className} : public ::extension::behaviour::BehaviourReactor {{
+            private:
+                /// @brief Stores configuration values
+                struct Config {{
+                }} cfg;
 
-        public:
-            /// @brief Called by the powerplant to build and setup the {className} reactor.
-            explicit {className}(std::unique_ptr<NUClear::Environment> environment);
-        }};
+            public:
+                /// @brief Called by the powerplant to build and setup the {className} reactor.
+                explicit {className}(std::unique_ptr<NUClear::Environment> environment);
+            }};
 
-        }}  // namespace {namespace}
+            }}  // namespace {namespace}
 
-        #endif  // {define}
-        """
-    )
+            #endif  // {define}
+            """
+        )
+    else:
+        template = textwrap.dedent(
+            """\
+            #ifndef {define}
+            #define {define}
+
+            #include <nuclear>
+
+            namespace {namespace} {{
+
+            class {className} : public NUClear::Reactor {{
+            private:
+                /// @brief Stores configuration values
+                struct Config {{
+                }} cfg;
+
+            public:
+                /// @brief Called by the powerplant to build and setup the {className} reactor.
+                explicit {className}(std::unique_ptr<NUClear::Environment> environment);
+            }};
+
+            }}  // namespace {namespace}
+
+            #endif  // {define}
+            """
+        )
 
     return template.format(
         define="{}_HPP".format("_".join([p.upper() for p in parts])),
@@ -125,29 +151,52 @@ def generate_header(parts):
     )
 
 
-def generate_cpp(parts):
-    template = textwrap.dedent(
-        """\
-        #include "{className}.hpp"
+def generate_cpp(parts, director):
+    if director:
+        template = textwrap.dedent(
+            """\
+            #include "{className}.hpp"
 
-        #include "extension/Behaviour.hpp"
-        #include "extension/Configuration.hpp"
+            #include "extension/Behaviour.hpp"
+            #include "extension/Configuration.hpp"
 
-        namespace {namespace} {{
+            namespace {namespace} {{
 
-        using extension::Configuration;
+            using extension::Configuration;
 
-        {className}::{className}(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {{
+            {className}::{className}(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {{
 
-            on<Configuration>("{className}.yaml").then([this](const Configuration& config) {{
-                // Use configuration here from file {className}.yaml
-                this->log_level = config["log_level"].as<NUClear::LogLevel>();
-            }});
-        }}
+                on<Configuration>("{className}.yaml").then([this](const Configuration& config) {{
+                    // Use configuration here from file {className}.yaml
+                    this->log_level = config["log_level"].as<NUClear::LogLevel>();
+                }});
+            }}
 
-        }}  // namespace {namespace}
-        """
-    )
+            }}  // namespace {namespace}
+            """
+        )
+    else:
+        template = textwrap.dedent(
+            """\
+            #include "{className}.hpp"
+
+            #include "extension/Configuration.hpp"
+
+            namespace {namespace} {{
+
+            using extension::Configuration;
+
+            {className}::{className}(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {{
+
+                on<Configuration>("{className}.yaml").then([this](const Configuration& config) {{
+                    // Use configuration here from file {className}.yaml
+                    this->log_level = config["log_level"].as<NUClear::LogLevel>();
+                }});
+            }}
+
+            }}  // namespace {namespace}
+            """
+        )
 
     return template.format(className=parts[-1], namespace="::".join([x for x in parts[:-1]]))
 
