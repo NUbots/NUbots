@@ -12,5 +12,5 @@ nuclear_role(
   platform::cm740::HardwareSimulator
   input::SensorFilter
   input::NatNet
-  support::logging::DataPlayback
+  support::logging::DataLogging
 )
