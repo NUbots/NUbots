@@ -398,7 +398,7 @@ namespace module::input {
         for (const auto& cfg : config["settings"]) {
             auto key = cfg.first.as<std::string>();
 
-            // Skip the region keys as we handle them above
+            // Skip the region keys as we handle them above and packet size we handle that below
             if (key == "Width" || key == "Height" || key == "OffsetX" || key == "OffsetY" || key == "PacketSize") {
                 continue;
             }
