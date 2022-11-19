@@ -81,22 +81,18 @@ namespace module::motion {
 
             on<Provide<Sequence>, Needs<Group>, With<Count<Sequence>>>().then(
                 [this](const Sequence& sequence, const RunInfo& info, const Count<Sequence>& count) {
-                    log<NUClear::WARN>("sequence");
                     // If the user gave us nothing then we are done
                     if (sequence.pack.empty()) {
-                        log<NUClear::WARN>("empty");
                         emit<Task>(std::make_unique<Done>());
                     }
                     // If this is a new task, run the first pack of servos and increment the counter
                     else if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
-                        log<NUClear::WARN>("new task");
                         emit<Task>(std::make_unique<Group>(sequence.pack[0]));
                         emit<Scope::DIRECT>(std::make_unique<Count<Sequence>>(1));
                     }
                     // If the subtask is done, we are done if it is the last servo pack, otherwise use the count to
                     // determine the current pack to emit
                     else if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
-                        log<NUClear::WARN>("done", sequence.pack.size(), count.count);
                         if (sequence.pack.size() < count.count) {
                             emit<Task>(std::make_unique<Done>());
                         }
