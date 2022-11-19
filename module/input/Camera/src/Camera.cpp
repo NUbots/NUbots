@@ -78,11 +78,11 @@ namespace module::input {
                 context->reactor.emit<NUClear::dsl::word::emit::Watchdog>(
                     NUClear::dsl::word::emit::ServiceWatchdog<Camera>(std::string(context->name)));
 
-                int width       = 0;
-                int height      = 0;
-                size_t buffSize = 0;
+                int width        = 0;
+                int height       = 0;
+                size_t data_size = 0;
                 arv_buffer_get_image_region(buffer, nullptr, nullptr, &width, &height);
-                const auto* buff = reinterpret_cast<const uint8_t*>(arv_buffer_get_data(buffer, &buffSize));
+                const auto* data_buffer = reinterpret_cast<const uint8_t*>(arv_buffer_get_data(buffer, &data_size));
 
                 auto& timesync = context->time;
 
@@ -158,7 +158,7 @@ namespace module::input {
                 msg->format     = context->fourcc;
                 msg->dimensions = Eigen::Matrix<unsigned int, 2, 1>(width, height);
                 // TODO(trent) use an std::vector here to avoid the copy
-                msg->data.insert(msg->data.end(), buff, buff + buffSize);
+                msg->data.insert(msg->data.end(), data_buffer, data_buffer + data_size);
                 msg->id        = context->id;
                 msg->name      = context->name;
                 msg->timestamp = NUClear::clock::time_point(nanoseconds(ts));
