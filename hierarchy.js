@@ -16,7 +16,6 @@ var hierarchy =
     [ "utility::strutil::ANSISGR< ANSICode::MAGENTA >", "structutility_1_1strutil_1_1ANSISGR.html", null ],
     [ "utility::strutil::ANSISGR< ANSICode::RED >", "structutility_1_1strutil_1_1ANSISGR.html", null ],
     [ "utility::strutil::ANSISGR< ANSICode::YELLOW >", "structutility_1_1strutil_1_1ANSISGR.html", null ],
-    [ "module::localisation::BallModel< double >", "classmodule_1_1localisation_1_1BallModel.html", null ],
     [ "CM740::BulkReadResults", "structCM740_1_1BulkReadResults.html", null ],
     [ "CM740::CM740", "classCM740_1_1CM740.html", null ],
     [ "CM740::CM740Interface", "classCM740_1_1CM740Interface.html", [
@@ -211,11 +210,10 @@ var hierarchy =
     [ "module::vision::visualmesh::VisualMeshModelConfig", "structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig.html", null ],
     [ "module::vision::visualmesh::VisualMeshResults", "structmodule_1_1vision_1_1visualmesh_1_1VisualMeshResults.html", null ],
     [ "module::vision::visualmesh::VisualMeshRunner", "classmodule_1_1vision_1_1visualmesh_1_1VisualMeshRunner.html", null ],
-    [ "module::input::MotionModel< double >", "classmodule_1_1input_1_1MotionModel.html", null ],
     [ "NUClear::dsl::operation::DSLProxy<::extension::Configuration >", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Configuration_01_4.html", null ],
     [ "NUClear::dsl::operation::DSLProxy<::extension::FileWatch >", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1FileWatch_01_4.html", null ],
     [ "NUClear::dsl::operation::DSLProxy<::extension::Script >", "structNUClear_1_1dsl_1_1operation_1_1DSLProxy_3_1_1extension_1_1Script_01_4.html", null ],
-    [ "Reactor", null, [
+    [ "NUClear::Reactor", null, [
       [ "extension::behaviour::BehaviourReactor", "classextension_1_1behaviour_1_1BehaviourReactor.html", [
         [ "module::motion::Kinematics", "classmodule_1_1motion_1_1Kinematics.html", null ],
         [ "module::motion::Servos", "classmodule_1_1motion_1_1Servos.html", null ]
@@ -252,25 +250,25 @@ var hierarchy =
       [ "module::motion::KinematicsConfiguration", "classmodule_1_1motion_1_1KinematicsConfiguration.html", null ],
       [ "module::motion::QuinticWalk", "classmodule_1_1motion_1_1QuinticWalk.html", null ],
       [ "module::motion::ScriptEngine", "classmodule_1_1motion_1_1ScriptEngine.html", null ],
-      [ "module::network::NetworkForwarder", "classmodule_1_1network_1_1NetworkForwarder.html", null ],
       [ "module::network::NUClearNet", "classmodule_1_1network_1_1NUClearNet.html", null ],
+      [ "module::network::NetworkForwarder", "classmodule_1_1network_1_1NetworkForwarder.html", null ],
       [ "module::network::PlotJuggler", "classmodule_1_1network_1_1PlotJuggler.html", null ],
-      [ "module::output::eSpeak", "classmodule_1_1output_1_1eSpeak.html", null ],
       [ "module::output::ImageCompressor", "classmodule_1_1output_1_1ImageCompressor.html", null ],
       [ "module::output::Overview", "classmodule_1_1output_1_1Overview.html", null ],
+      [ "module::output::eSpeak", "classmodule_1_1output_1_1eSpeak.html", null ],
+      [ "module::platform::Webots", "classmodule_1_1platform_1_1Webots.html", null ],
       [ "module::platform::cm740::HardwareIO", "classmodule_1_1platform_1_1cm740_1_1HardwareIO.html", null ],
       [ "module::platform::cm740::HardwareSimulator", "classmodule_1_1platform_1_1cm740_1_1HardwareSimulator.html", null ],
-      [ "module::platform::Webots", "classmodule_1_1platform_1_1Webots.html", null ],
+      [ "module::support::LocalisationSimulator", "classmodule_1_1support_1_1LocalisationSimulator.html", null ],
+      [ "module::support::NUsightHarness", "classmodule_1_1support_1_1NUsightHarness.html", null ],
+      [ "module::support::ReactionTimer", "classmodule_1_1support_1_1ReactionTimer.html", null ],
+      [ "module::support::SignalCatcher", "classmodule_1_1support_1_1SignalCatcher.html", null ],
       [ "module::support::configuration::GlobalConfig", "classmodule_1_1support_1_1configuration_1_1GlobalConfig.html", null ],
       [ "module::support::configuration::SoccerConfig", "classmodule_1_1support_1_1configuration_1_1SoccerConfig.html", null ],
-      [ "module::support::LocalisationSimulator", "classmodule_1_1support_1_1LocalisationSimulator.html", null ],
       [ "module::support::logging::ConsoleLogHandler", "classmodule_1_1support_1_1logging_1_1ConsoleLogHandler.html", null ],
       [ "module::support::logging::DataLogging", "classmodule_1_1support_1_1logging_1_1DataLogging.html", null ],
       [ "module::support::logging::DataPlayback", "classmodule_1_1support_1_1logging_1_1DataPlayback.html", null ],
       [ "module::support::logging::FileLogHandler", "classmodule_1_1support_1_1logging_1_1FileLogHandler.html", null ],
-      [ "module::support::NUsightHarness", "classmodule_1_1support_1_1NUsightHarness.html", null ],
-      [ "module::support::ReactionTimer", "classmodule_1_1support_1_1ReactionTimer.html", null ],
-      [ "module::support::SignalCatcher", "classmodule_1_1support_1_1SignalCatcher.html", null ],
       [ "module::tools::FirmwareInstaller", "classmodule_1_1tools_1_1FirmwareInstaller.html", null ],
       [ "module::tools::SystemConfiguration", "classmodule_1_1tools_1_1SystemConfiguration.html", null ],
       [ "module::vision::BallDetector", "classmodule_1_1vision_1_1BallDetector.html", null ],
@@ -292,15 +290,14 @@ var hierarchy =
     [ "RoboCupGameControlData", "structRoboCupGameControlData.html", null ],
     [ "RoboCupGameControlReturnData", "structRoboCupGameControlReturnData.html", null ],
     [ "RobotInfo", "structRobotInfo.html", null ],
-    [ "module::localisation::RobotModel< double >", "classmodule_1_1localisation_1_1RobotModel.html", null ],
-    [ "error_category", null, [
+    [ "std::error_category", null, [
       [ "module::output::compressor::vaapi::cl::opencl_error_category_t", "classmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__error__category__t.html", null ],
       [ "module::output::compressor::vaapi::vaapi_error_category_t", "classmodule_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__category__t.html", null ]
     ] ],
-    [ "shared_ptr", null, [
+    [ "std::shared_ptr", null, [
       [ "module::output::compressor::vaapi::cl::opencl_wrapper< T >", "structmodule_1_1output_1_1compressor_1_1vaapi_1_1cl_1_1opencl__wrapper.html", null ]
     ] ],
-    [ "true_type", null, [
+    [ "std::true_type", null, [
       [ "NUClear::dsl::trait::is_transient< std::shared_ptr<::extension::Configuration > >", "structNUClear_1_1dsl_1_1trait_1_1is__transient_3_01std_1_1shared__ptr_3_1_1extension_1_1Configuration_01_4_01_4.html", null ],
       [ "NUClear::dsl::trait::is_transient< std::shared_ptr<::extension::Script > >", "structNUClear_1_1dsl_1_1trait_1_1is__transient_3_01std_1_1shared__ptr_3_1_1extension_1_1Script_01_4_01_4.html", null ],
       [ "NUClear::dsl::trait::is_transient<::extension::FileWatch >", "structNUClear_1_1dsl_1_1trait_1_1is__transient_3_1_1extension_1_1FileWatch_01_4.html", null ],

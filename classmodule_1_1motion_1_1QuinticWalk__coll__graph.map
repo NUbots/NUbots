@@ -1,6 +1,6 @@
 <map id="module::motion::QuinticWalk" name="module::motion::QuinticWalk">
 <area shape="rect" id="node1" title=" " alt="" coords="747,93,957,120"/>
-<area shape="rect" id="node2" title=" " alt="" coords="440,5,512,32"/>
+<area shape="rect" id="node2" title=" " alt="" coords="409,5,543,32"/>
 <area shape="rect" id="node3" title=" " alt="" coords="409,56,543,83"/>
 <area shape="rect" id="node4" href="$classmodule_1_1motion_1_1QuinticWalkEngine.html" title="QuinticWalkEngine." alt="" coords="371,181,581,222"/>
 <area shape="rect" id="node5" href="$structmodule_1_1motion_1_1WalkingParameter.html" title=" " alt="" coords="5,139,257,165"/>

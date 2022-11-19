@@ -1,24 +1,26 @@
 /*
-@licstart  The following is the entire license notice for the
-JavaScript code in this file.
+ @licstart  The following is the entire license notice for the JavaScript code in this file.
 
-Copyright (C) 1997-2019 by Dimitri van Heesch
+ The MIT License (MIT)
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of version 2 of the GNU General Public License as published by
-the Free Software Foundation
+ Copyright (C) 1997-2020 by Dimitri van Heesch
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software
+ and associated documentation files (the "Software"), to deal in the Software without restriction,
+ including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
 
-You should have received a copy of the GNU General Public License along
-with this program; if not, write to the Free Software Foundation, Inc.,
-51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ The above copyright notice and this permission notice shall be included in all copies or
+ substantial portions of the Software.
 
-@licend  The above is the entire license notice
-for the JavaScript code in this file
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+ BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+ @licend  The above is the entire license notice for the JavaScript code in this file
 */
 var NAVTREE =
 [
@@ -50,19 +52,21 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-".html",
-"classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61eaa2e1864b6f066cc17283ddb86d51ed27",
-"classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a25d060ca737c4adc8a69d77bbebc5cab",
-"classmodule_1_1input_1_1decompressor_1_1turbojpeg_1_1Decompressor.html#a3350d6a4b883b2c33bdf5d1316bfd314",
-"classmodule_1_1motion_1_1SixDOFFootController.html#ae2188a2774ff024a93121f9ec138b3d5",
-"classmodule_1_1vision_1_1visualmesh_1_1VisualMeshRunner.html#af4c689caa4c25dcaa32792d51b9fdfa8",
-"classutility_1_1nbs_1_1Encoder.html#a036a7fd33cd0c7436ae13874fa7215e1",
-"structRoboCupGameControlReturnData.html#a5973a89cb2bfb4c2064fd288377eb700",
-"structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html",
-"structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Mean.html#a3674abdbbfa02e15090c80d9c55982f2",
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOI.html#a3869a9792c120f7afc921ec62ff2ce97",
-"structutility_1_1input_1_1ServoID.html#a4940c7f00fc50ac721ed7bcd1c12a7ba",
-"structutility_1_1vision_1_1Colour.html#a7ac41dc4ad5e7b1717789e60e4623d5ba1d7abe9720f748580591ec01e6b9a553"
+"Action_8hpp.html#aa2c2b0b91b7e566e5acd49bdaee5cb92",
+"VisualMeshRunner_8cpp.html#ac6dd1b77c596f43d1d89421cc12ea376",
+"classCM740_1_1UART.html#ad71339ff8cafcd6f58f4b7bff9f482c5",
+"classmodule_1_1behaviour_1_1tools_1_1ScriptTuner.html#a2701c5cca8ca1670ebe2c41ac20a793a",
+"classmodule_1_1localisation_1_1BallModel.html#aee0a418ab6eb505fd0c9a8b6d0f3eba7",
+"classmodule_1_1output_1_1compressor_1_1turbojpeg_1_1Compressor.html",
+"classutility_1_1math_1_1filter_1_1ParticleFilter.html#aea8480fb9c6f0eff82cd1e007cae660b",
+"comparison_8hpp.html#a53798321a4aaa57c3cadeb43d56dcc6d",
+"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9ea0dcedd91f47ab8ee1c14345124f55b8d",
+"structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4.html#aa61b4c1ce809a016b1776c7d90f1999e",
+"structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html#ac3f68bfaab2eb714928d9e1cb07ae569",
+"structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Noise_1_1Process.html#a936d17f3f4b5c157964e21bea47bd096",
+"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOS__Monochrome.html#a8bd831c11c8736012a25a33a267cd1c6",
+"structutility_1_1input_1_1ServoID.html#ae288a8918d32fbcb246a1d7940d90935",
+"structutility_1_1vision_1_1Pixel.html#a07aa97c9a002dd7597c64ceb69cc83b6"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

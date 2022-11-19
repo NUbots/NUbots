@@ -1,7 +1,14 @@
 var annotated_dup =
 [
     [ "CM740", null, [
-      [ "Types", "namespaceCM740_1_1Types.html", "namespaceCM740_1_1Types" ],
+      [ "Types", "namespaceCM740_1_1Types.html", [
+        [ "Accelerometer", "structCM740_1_1Types_1_1Accelerometer.html", "structCM740_1_1Types_1_1Accelerometer" ],
+        [ "CM740Data", "structCM740_1_1Types_1_1CM740Data.html", "structCM740_1_1Types_1_1CM740Data" ],
+        [ "FSRData", "structCM740_1_1Types_1_1FSRData.html", "structCM740_1_1Types_1_1FSRData" ],
+        [ "Gyro", "structCM740_1_1Types_1_1Gyro.html", "structCM740_1_1Types_1_1Gyro" ],
+        [ "ServoData", "structCM740_1_1Types_1_1ServoData.html", "structCM740_1_1Types_1_1ServoData" ],
+        [ "ServoValues", "structCM740_1_1Types_1_1ServoValues.html", "structCM740_1_1Types_1_1ServoValues" ]
+      ] ],
       [ "BulkReadResults", "structCM740_1_1BulkReadResults.html", "structCM740_1_1BulkReadResults" ],
       [ "CM740", "classCM740_1_1CM740.html", "classCM740_1_1CM740" ],
       [ "CM740Data", "classCM740_1_1CM740Data.html", "classCM740_1_1CM740Data" ],
@@ -14,7 +21,15 @@ var annotated_dup =
     ] ],
     [ "extension", null, [
       [ "behaviour", null, [
-        [ "commands", "namespaceextension_1_1behaviour_1_1commands.html", "namespaceextension_1_1behaviour_1_1commands" ],
+        [ "commands", "namespaceextension_1_1behaviour_1_1commands.html", [
+          [ "BehaviourTask", "structextension_1_1behaviour_1_1commands_1_1BehaviourTask.html", "structextension_1_1behaviour_1_1commands_1_1BehaviourTask" ],
+          [ "CausingExpression", "structextension_1_1behaviour_1_1commands_1_1CausingExpression.html", "structextension_1_1behaviour_1_1commands_1_1CausingExpression" ],
+          [ "NeedsExpression", "structextension_1_1behaviour_1_1commands_1_1NeedsExpression.html", "structextension_1_1behaviour_1_1commands_1_1NeedsExpression" ],
+          [ "ProviderDone", "structextension_1_1behaviour_1_1commands_1_1ProviderDone.html", "structextension_1_1behaviour_1_1commands_1_1ProviderDone" ],
+          [ "ProvideReaction", "structextension_1_1behaviour_1_1commands_1_1ProvideReaction.html", "structextension_1_1behaviour_1_1commands_1_1ProvideReaction" ],
+          [ "RootType", "structextension_1_1behaviour_1_1commands_1_1RootType.html", "structextension_1_1behaviour_1_1commands_1_1RootType" ],
+          [ "WhenExpression", "structextension_1_1behaviour_1_1commands_1_1WhenExpression.html", "structextension_1_1behaviour_1_1commands_1_1WhenExpression" ]
+        ] ],
         [ "information", null, [
           [ "InformationSource", "classextension_1_1behaviour_1_1information_1_1InformationSource.html", "classextension_1_1behaviour_1_1information_1_1InformationSource" ]
         ] ],
@@ -347,7 +362,12 @@ var annotated_dup =
         [ "Index", "classutility_1_1nbs_1_1Index.html", "classutility_1_1nbs_1_1Index" ],
         [ "IndexItem", "structutility_1_1nbs_1_1IndexItem.html", "structutility_1_1nbs_1_1IndexItem" ]
       ] ],
-      [ "strutil", "namespaceutility_1_1strutil.html", "namespaceutility_1_1strutil" ],
+      [ "strutil", "namespaceutility_1_1strutil.html", [
+        [ "ANSISGR", "structutility_1_1strutil_1_1ANSISGR.html", [
+          [ "Apply", "structutility_1_1strutil_1_1ANSISGR_1_1Apply.html", "structutility_1_1strutil_1_1ANSISGR_1_1Apply" ]
+        ] ],
+        [ "Colour", "structutility_1_1strutil_1_1Colour.html", "structutility_1_1strutil_1_1Colour" ]
+      ] ],
       [ "support", null, [
         [ "evil", null, [
           [ "StackFrame", "structutility_1_1support_1_1evil_1_1StackFrame.html", "structutility_1_1support_1_1evil_1_1StackFrame" ]

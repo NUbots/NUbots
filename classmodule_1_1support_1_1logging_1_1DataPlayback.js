@@ -1,9 +1,6 @@
 var classmodule_1_1support_1_1logging_1_1DataPlayback =
 [
     [ "Player", "structmodule_1_1support_1_1logging_1_1DataPlayback_1_1Player.html", "structmodule_1_1support_1_1logging_1_1DataPlayback_1_1Player" ],
-    [ "SHUTDOWN_ON_END", "classmodule_1_1support_1_1logging_1_1DataPlayback.html#a314574642d64b6ed0b3ce22ab8781632ae79bf99266256213d41418748afc1463", null ],
-    [ "STOP_ON_END", "classmodule_1_1support_1_1logging_1_1DataPlayback.html#a314574642d64b6ed0b3ce22ab8781632a53696c2cec067fbeaef9d2dfe5706562", null ],
-    [ "LOOP_ON_END", "classmodule_1_1support_1_1logging_1_1DataPlayback.html#a314574642d64b6ed0b3ce22ab8781632a13c6b399095558a80077f998afad6972", null ],
     [ "DataPlayback", "classmodule_1_1support_1_1logging_1_1DataPlayback.html#a5f890307185b64f98f4656674caa63df", null ],
     [ "add_player", "classmodule_1_1support_1_1logging_1_1DataPlayback.html#afdf0655c0bb4152acc2d8ac919315702", null ],
     [ "register_players", "classmodule_1_1support_1_1logging_1_1DataPlayback.html#a3b42599b5ebada4a64c3d1b4ecfbf2e1", null ],

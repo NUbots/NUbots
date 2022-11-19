@@ -1,4 +1,4 @@
 <map id="module::input::GameController" name="module::input::GameController">
 <area shape="rect" id="node1" title="Monitors the match Game Controller." alt="" coords="5,80,228,107"/>
-<area shape="rect" id="node2" title=" " alt="" coords="81,5,153,32"/>
+<area shape="rect" id="node2" title=" " alt="" coords="49,5,184,32"/>
 </map>

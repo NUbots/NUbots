@@ -1,14 +1,14 @@
 var searchData=
 [
-  ['activate_5frecorder_1172',['activate_recorder',['../classmodule_1_1support_1_1logging_1_1DataLogging.html#a85d29f6693d75c7a401fbb9ac1de86ce',1,'module::support::logging::DataLogging']]],
-  ['add_1173',['add',['../classutility_1_1motion_1_1splines_1_1SplineContainer.html#a8276f8aa74014c55d368ba429bf066ea',1,'utility::motion::splines::SplineContainer']]],
-  ['add_5fcausing_1174',['add_causing',['../classmodule_1_1extension_1_1Director.html#ae38a0f87a58faec7521d61eb4faaae7a',1,'module::extension::Director']]],
-  ['add_5fgroup_5fprovider_1175',['add_group_provider',['../classmodule_1_1motion_1_1Servos.html#a649c48ad1d20370df59b430fe1ca6314',1,'module::motion::Servos']]],
-  ['add_5fneeds_1176',['add_needs',['../classmodule_1_1extension_1_1Director.html#aaa959f154ca485d8bb435b898ecb3223',1,'module::extension::Director']]],
-  ['add_5fprovider_1177',['add_provider',['../classmodule_1_1extension_1_1Director.html#a194487bb54ff0df9fb6dfd687b8f80f6',1,'module::extension::Director']]],
-  ['add_5fservo_5fprovider_1178',['add_servo_provider',['../classmodule_1_1motion_1_1Servos.html#a4c54fb9bc3a55cc7e6d6aa1a64809a58',1,'module::motion::Servos']]],
-  ['add_5fwhen_1179',['add_when',['../classmodule_1_1extension_1_1Director.html#a0f5fe71a8de8e8282b0a2774e6249e43',1,'module::extension::Director']]],
-  ['addpart_1180',['addPart',['../classutility_1_1motion_1_1splines_1_1Spline.html#a6ccaf9d75b6e9a09db782c62b56c35d8',1,'utility::motion::splines::Spline']]],
-  ['addpoint_1181',['addPoint',['../classutility_1_1motion_1_1splines_1_1SmoothSpline.html#ab86a4c9d098ed9e13d286a44b324b2db',1,'utility::motion::splines::SmoothSpline']]],
-  ['angledistance_1182',['angleDistance',['../namespaceutility_1_1math_1_1angle.html#a8e107d590603f317a7749498f7976599',1,'utility::math::angle']]]
+  ['activate_5frecorder_1206',['activate_recorder',['../classmodule_1_1support_1_1logging_1_1DataLogging.html#a85d29f6693d75c7a401fbb9ac1de86ce',1,'module::support::logging::DataLogging']]],
+  ['add_1207',['add',['../classutility_1_1motion_1_1splines_1_1SplineContainer.html#a8276f8aa74014c55d368ba429bf066ea',1,'utility::motion::splines::SplineContainer']]],
+  ['add_5fcausing_1208',['add_causing',['../classmodule_1_1extension_1_1Director.html#ae38a0f87a58faec7521d61eb4faaae7a',1,'module::extension::Director']]],
+  ['add_5fgroup_5fprovider_1209',['add_group_provider',['../classmodule_1_1motion_1_1Servos.html#a649c48ad1d20370df59b430fe1ca6314',1,'module::motion::Servos']]],
+  ['add_5fneeds_1210',['add_needs',['../classmodule_1_1extension_1_1Director.html#aaa959f154ca485d8bb435b898ecb3223',1,'module::extension::Director']]],
+  ['add_5fprovider_1211',['add_provider',['../classmodule_1_1extension_1_1Director.html#a194487bb54ff0df9fb6dfd687b8f80f6',1,'module::extension::Director']]],
+  ['add_5fservo_5fprovider_1212',['add_servo_provider',['../classmodule_1_1motion_1_1Servos.html#a4c54fb9bc3a55cc7e6d6aa1a64809a58',1,'module::motion::Servos']]],
+  ['add_5fwhen_1213',['add_when',['../classmodule_1_1extension_1_1Director.html#a0f5fe71a8de8e8282b0a2774e6249e43',1,'module::extension::Director']]],
+  ['addpart_1214',['addPart',['../classutility_1_1motion_1_1splines_1_1Spline.html#a6ccaf9d75b6e9a09db782c62b56c35d8',1,'utility::motion::splines::Spline']]],
+  ['addpoint_1215',['addPoint',['../classutility_1_1motion_1_1splines_1_1SmoothSpline.html#ab86a4c9d098ed9e13d286a44b324b2db',1,'utility::motion::splines::SmoothSpline']]],
+  ['angledistance_1216',['angleDistance',['../namespaceutility_1_1math_1_1angle.html#a8e107d590603f317a7749498f7976599',1,'utility::math::angle']]]
 ];
