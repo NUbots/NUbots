@@ -4,9 +4,7 @@
   "image": "nubots:generic",
   "workspaceMount": "type=bind,consistency=delegated,src=${localWorkspaceFolder},dst=/home/nubots/NUbots",
   "workspaceFolder": "/home/nubots/NUbots",
-  "mounts": [
-    "type=volume,src=nubots_generic_build,dst=/home/nubots/build,consistency=delegated"
-  ],
+  "mounts": ["type=volume,src=nubots_generic_build,dst=/home/nubots/build,consistency=delegated"],
   "extensions": [
     "ms-vscode.cpptools",
     "twxs.cmake",

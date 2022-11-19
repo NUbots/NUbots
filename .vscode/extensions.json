@@ -1,16 +1,16 @@
 {
-    "recommendations": [
-        "ms-vscode.cpptools",
-        "twxs.cmake",
-        "ms-vscode.cmake-tools",
-        "cheshirekow.cmake-format",
-        "ms-azuretools.vscode-docker",
-        "galarius.vscode-opencl",
-        "ms-python.python",
-        "ms-vscode-remote.remote-containers",
-        "zxh404.vscode-proto3",
-        "redhat.vscode-yaml",
-        "dpkristensen-garmin.udev-rules",
-        "hangxingliu.vscode-systemd-support"
-    ]
+  "recommendations": [
+    "ms-vscode.cpptools",
+    "twxs.cmake",
+    "ms-vscode.cmake-tools",
+    "cheshirekow.cmake-format",
+    "ms-azuretools.vscode-docker",
+    "galarius.vscode-opencl",
+    "ms-python.python",
+    "ms-vscode-remote.remote-containers",
+    "zxh404.vscode-proto3",
+    "redhat.vscode-yaml",
+    "dpkristensen-garmin.udev-rules",
+    "hangxingliu.vscode-systemd-support"
+  ]
 }
