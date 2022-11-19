@@ -83,8 +83,8 @@ namespace module::behaviour::skills {
                 if (!is_getting_up) {
                     if (ball && NUClear::clock::now() - ball->time_of_measurement < cfg.search_timeout) {
                         // We can see the ball, lets look at it
-                        Eigen::Vector3d rBCc   = reciprocalSphericalToCartesian(ball->srBCc.cast<double>());
-                        Eigen::Vector2d angles = screenAngularFromObjectDirection(rBCc);
+                        Eigen::Vector3d rBCc                 = ball->rBCc.cast<double>();
+                        Eigen::Vector2d angles               = screenAngularFromObjectDirection(rBCc);
                         std::unique_ptr<HeadCommand> command = std::make_unique<HeadCommand>();
                         command->yaw                         = angles[0];
                         command->pitch                       = angles[1] + cfg.pitch_offset;

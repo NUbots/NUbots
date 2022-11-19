@@ -18,7 +18,7 @@ namespace module::localisation {
         } cfg;
 
         /// @brief Current estimate of cartesian ball position
-        Eigen::Vector3f filtered_rBTt = Eigen::Vector3f(1.0, 0.0, 0.0);
+        Eigen::Vector3f filtered_rBCc = Eigen::Vector3f(1.0, 0.0, 0.0);
 
         /// @brief Get distance to ball in x-y plane
         float get_distance(Eigen::Matrix<float, 3, 1> v);

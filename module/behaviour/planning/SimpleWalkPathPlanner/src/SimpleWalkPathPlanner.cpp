@@ -146,8 +146,8 @@ namespace module::behaviour::planning {
         // If ball exists...
         if (ball) {
             // Obtain the unit vector to ball in torso space and scale by cfg.forward_speed
-            Eigen::Vector3f rBTt         = ball->rBTt;
-            Eigen::Vector3f walk_command = cfg.forward_speed * (rBTt.normalized());
+            Eigen::Vector3f uBTt         = ball->rBTt.normalized();
+            Eigen::Vector3f walk_command = cfg.forward_speed * (uBTt);
 
             // Set the angular velocity component of the walk_command with the angular displacement and saturate with
             // value cfg.max_turn_speed

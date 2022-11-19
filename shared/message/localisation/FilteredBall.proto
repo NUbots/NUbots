@@ -24,14 +24,14 @@ import "Vector.proto";
 import "google/protobuf/timestamp.proto";
 
 message FilteredBall {
-    /// Ball's cartesian position measured in torso space {t}
+    /// Ball's filtered cartesian position measured in torso space {t}
     fvec3 rBTt = 1;
+
+    /// Ball's filtered cartesian position measured in camera space {t}
+    fvec3 rBCc = 2;
+
     /// Time the ball measurement was taken
-    google.protobuf.Timestamp time_of_measurement = 2;
-    /// Distance to ball in x-y plane in torso space {t}
-    float distance = 3;
-    /// Absolute yaw angle to ball in torso space {t}
-    float absolute_yaw_angle = 4;
-    /// Spherical Reciprocal Coordinates (1/distance, phi, theta) in camera space {t}
-    fvec3 srBCc = 5;
+    google.protobuf.Timestamp time_of_measurement = 3;
+
+
 }

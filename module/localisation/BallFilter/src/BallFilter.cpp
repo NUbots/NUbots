@@ -43,50 +43,41 @@ namespace module::localisation {
         on<Trigger<VisionBalls>, With<Sensors>>().then([this](const VisionBalls& balls, const Sensors& sensors) {
             if (balls.balls.size() > 0) {
 
-                // Get the transform from camera {c} to torso space {t}
-                Eigen::Affine3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
-
                 // Get the first vision ball measurement and treat it as the closest measurement to our estimate
-                Eigen::Vector3f srBCc = balls.balls[0].measurements[0].srBCc.cast<float>();
-                Eigen::Vector3f rBCc  = reciprocalSphericalToCartesian(srBCc);
-                Eigen::Vector3f rBTt  = Htc * rBCc;
-                float lowest_distance = get_distance(rBTt - filtered_rBTt);
+                Eigen::Vector3f rBCc =
+                    reciprocalSphericalToCartesian(balls.balls[0].measurements[0].srBCc.cast<float>());
+                float lowest_distance = (rBCc - filtered_rBCc).norm();
 
                 // Loop through all our ball measurements and find the closest measurement to our current estimate
                 for (const auto& ball : balls.balls) {
-                    rBCc = reciprocalSphericalToCartesian(ball.measurements[0].srBCc.cast<float>());
-                    Eigen::Vector3f temp_rBTt = Htc * rBCc;
-                    if (get_distance(temp_rBTt - filtered_rBTt) < lowest_distance) {
-                        lowest_distance = get_distance(temp_rBTt - filtered_rBTt);
-                        rBTt            = temp_rBTt;
-                        srBCc           = ball.measurements[0].srBCc.cast<float>();
+                    Eigen::Vector3f temp_rBCc =
+                        reciprocalSphericalToCartesian(ball.measurements[0].srBCc.cast<float>());
+                    if ((temp_rBCc - filtered_rBCc).norm() < lowest_distance) {
+                        lowest_distance = (temp_rBCc - filtered_rBCc).norm();
+                        rBCc            = temp_rBCc;
                     }
                 }
 
-                // Apply exponential filter to rBTt
-                filtered_rBTt = cfg.smoothing_factor * rBTt + (1 - cfg.smoothing_factor) * filtered_rBTt;
-
-                if (log_level <= NUClear::DEBUG) {
-                    emit(graph("rBTt: ", rBTt.x(), rBTt.y(), rBTt.z()));
-                    emit(graph("filtered_rBTt: ", filtered_rBTt.x(), filtered_rBTt.y(), filtered_rBTt.z()));
-                    log<NUClear::DEBUG>("rBTt: ", rBTt.transpose());
-                    log<NUClear::DEBUG>("filtered_rBTt: ", filtered_rBTt.transpose());
-                }
+                // Apply exponential filter to rBCc
+                filtered_rBCc = cfg.smoothing_factor * rBCc + (1 - cfg.smoothing_factor) * filtered_rBCc;
 
                 // Generate message and emit
-                auto ball                 = std::make_unique<FilteredBall>();
-                ball->rBTt                = filtered_rBTt;
-                ball->srBCc               = srBCc;
+                auto ball = std::make_unique<FilteredBall>();
+                Eigen::Affine3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
+                ball->rBTt                = Htc * filtered_rBCc;
+                ball->rBCc                = filtered_rBCc;
                 ball->time_of_measurement = NUClear::clock::now();
-                ball->distance            = get_distance(filtered_rBTt);
-                float absolute_yaw_angle  = std::abs(std::atan2(filtered_rBTt.y(), filtered_rBTt.x()));
-                ball->absolute_yaw_angle  = absolute_yaw_angle;
+
+                if (log_level <= NUClear::DEBUG) {
+                    emit(graph("rBCc: ", filtered_rBCc.x(), filtered_rBCc.y(), filtered_rBCc.z()));
+                    emit(graph("rBTt: ", ball->rBTt.x(), ball->rBTt.y(), ball->rBTt.z()));
+                    log<NUClear::DEBUG>("rBCc: ", filtered_rBCc.transpose());
+                    log<NUClear::DEBUG>("rBTt: ", ball->rBTt.transpose());
+                }
+
                 emit(ball);
             }
         });
-    }
-    float BallFilter::get_distance(Eigen::Matrix<float, 3, 1> v) {
-        return std::sqrt(std::pow(v.x(), 2) + std::pow(v.y(), 2));
     }
 
 }  // namespace module::localisation

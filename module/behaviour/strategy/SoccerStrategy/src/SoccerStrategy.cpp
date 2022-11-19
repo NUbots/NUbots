@@ -356,7 +356,7 @@ namespace module::behaviour::strategy {
             current_state = Behaviour::State::PENALISED;
         }
         else {
-            if (ball && cfg.is_goalie && ball->distance > cfg.goalie_max_ball_distance) {
+            if (ball && cfg.is_goalie && ball->rBTt.norm() > cfg.goalie_max_ball_distance) {
                 // We are goalie and the ball is too far away, stand still
                 stand_still();
                 current_state = Behaviour::State::SEARCH_FOR_BALL;
@@ -432,8 +432,9 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::play(const std::shared_ptr<const FilteredBall>& ball) {
-        if (ball && ball->distance < cfg.kicking_distance_threshold
-            && ball->absolute_yaw_angle < cfg.kicking_angle_threshold) {
+        float absolute_yaw_angle = std::abs(std::atan2(ball->rBTt.y(), ball->rBTt.x()));
+        if (ball && (ball->rBTt).norm() < cfg.kicking_distance_threshold
+            && absolute_yaw_angle < cfg.kicking_angle_threshold) {
             // We are in range, lets kick
             emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
         }
