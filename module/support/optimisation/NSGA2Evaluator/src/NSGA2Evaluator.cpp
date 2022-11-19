@@ -82,42 +82,42 @@ namespace module {
 
                 // Handle a state transition event
                 on<Trigger<Event>, Sync<NSGA2Evaluator>>().then([this](const Event& event) {
-                    State oldState = currentState;
-                    State newState = HandleTransition(currentState, event);
+                    State old_state = current_state;
+                    State new_state = HandleTransition(current_state, event);
 
-                    log<NUClear::DEBUG>("transitioning on", event, ", from state", oldState, "to state", newState);
+                    log<NUClear::DEBUG>("transitioning on", event, ", from state", old_state, "to state", new_state);
 
-                    switch (newState) {
+                    switch (new_state) {
                         case State::WAITING_FOR_REQUEST:
-                            currentState = newState;
+                            current_state = new_state;
                             WaitingForRequest();
                             break;
                         case State::SETTING_UP_TRIAL:
-                            currentState = newState;
+                            current_state = new_state;
                             SettingUpTrial();
                             break;
                         case State::RESETTING_SIMULATION:
-                            currentState = newState;
+                            current_state = new_state;
                             ResettingSimulation();
                             break;
                         case State::EVALUATING:
-                            currentState = newState;
+                            current_state = new_state;
                             Evaluating(event);
                             break;
                         case State::TERMINATING_EARLY:
-                            currentState = newState;
+                            current_state = new_state;
                             TerminatingEarly();
                             break;
                         case State::TERMINATING_GRACEFULLY:
-                            currentState = newState;
+                            current_state = new_state;
                             TerminatingGracefully();
                             break;
                         case State::FINISHED:
-                            currentState = newState;
+                            current_state = new_state;
                             Finished();
                             break;
                         default:
-                            log<NUClear::WARN>("Unable to transition to unknown state from", currentState, "on", event);
+                            log<NUClear::WARN>("Unable to transition to unknown state from", current_state, "on", event);
                     }
                 });
 
@@ -135,7 +135,7 @@ namespace module {
                 });
 
                 on<Trigger<RawSensorsMsg>, Single>().then([this](const RawSensorsMsg& sensors) {
-                    if (currentState == State::EVALUATING) {
+                    if (current_state == State::EVALUATING) {
                         task->processRawSensorMsg(sensors, this);
                     }
                 });
@@ -160,15 +160,15 @@ namespace module {
 
                 on<Trigger<OptimisationRobotPosition>, Single>().then(
                     [this](const OptimisationRobotPosition& position) {
-                        if (currentState == State::EVALUATING) {
+                        if (current_state == State::EVALUATING) {
                             task->processOptimisationRobotPosition(position);
                         }
-                    });
+                });
             }
 
-            NSGA2Evaluator::State NSGA2Evaluator::HandleTransition(NSGA2Evaluator::State currentState,
+            NSGA2Evaluator::State NSGA2Evaluator::HandleTransition(NSGA2Evaluator::State current_state,
                                                                    NSGA2Evaluator::Event event) {
-                switch (currentState) {
+                switch (current_state) {
                     case State::WAITING_FOR_REQUEST:
                         switch (event) {
                             case Event::EvaluateRequest: return State::SETTING_UP_TRIAL;

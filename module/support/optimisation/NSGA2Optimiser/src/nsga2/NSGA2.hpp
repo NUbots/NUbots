@@ -15,7 +15,7 @@
 namespace nsga2 {
     class NSGA2 {
     public:
-        NSGA2() : randGen(std::make_shared<RandomGenerator<>>()) {}
+        NSGA2() : rand_gen(std::make_shared<RandomGenerator<>>()) {}
 
         bool InitializeFirstGeneration();
         void CompleteGenerationAndAdvance();
@@ -23,68 +23,68 @@ namespace nsga2 {
         bool HasMetOptimisationTerminalCondition();
 
         // clang-format off
-        void SetSeed(const int& _seed) { randGen->SetSeed(_seed); }
-        void SetRealVariableCount(const int& _realVars) { realVars = _realVars; }
-        void SetBinVariableCount(const int& _binVars) { binVars = _binVars; }
-        void SetObjectiveCount(const int& _objectives) { objectives = _objectives; }
-        void SetContraintCount(const int& _constraints) { constraints = _constraints; }
-        void SetPopulationSize(const int& _popSize) { popSize = _popSize; }
+        void SetSeed(const int& _seed) { rand_gen->SetSeed(_seed); }
+        void SetRealVariableCount(const int& real_vars_) { real_vars = real_vars_; }
+        void SetBinVariableCount(const int& bin_vars_) { bin_vars = bin_vars_; }
+        void SetObjectiveCount(const int& objectives_) { objectives = objectives_; }
+        void SetContraintCount(const int& constraints_) { constraints = constraints_; }
+        void SetPopulationSize(const int& pop_size_) { pop_size = pop_size_; }
         void SetTargetGenerations(const int& _generations) { generations = _generations; }
-        void SetRealCrossoverProbability(const double& _realCrossProb) { realCrossProb = _realCrossProb; }
-        void SetBinCrossoverProbability(const double& _binCrossProb) { binCrossProb = _binCrossProb; }
-        void SetRealMutationProbability(const double& _realMutProb) { realMutProb = _realMutProb; }
-        void SetBinMutationProbability(const double& _binMutProb) { binMutProb = _binMutProb; }
-        void SetEtaC(const double& _etaC) { etaC = _etaC; }
-        void SetEtaM(const double& _etaM) { etaM = _etaM; }
-        void SetEpsC(const double& _epsC) { epsC = _epsC; }
-        void SetBitCount(const std::vector<int>& _binBits) { binBits = _binBits; }
-        void SetRealVarLimits(const std::vector<std::pair<double, double>>& _realLimits) { realLimits = _realLimits; }
-        void SetBinVarLimits(const std::vector<std::pair<double, double>>& _binLimits) { binLimits = _binLimits; }
-        void SetInitialRealVars(const std::vector<double>& _initRealVars) { initialRealVars = _initRealVars; }
-        void SetInitialPopulationRealVars(const std::vector<std::vector<double>>& _suppliedPopulationRealVars)
-                                                { suppliedPopulationRealVars = _suppliedPopulationRealVars;}
-        void setSuppliedPop(const bool& _supplied_pop) {supplied_pop = _supplied_pop;}
+        void SetRealCrossoverProbability(const double& real_cross_prob_) { real_cross_prob = real_cross_prob_; }
+        void SetBinCrossoverProbability(const double& bin_cross_prob_) { bin_cross_prob = bin_cross_prob_; }
+        void SetRealMutationProbability(const double& real_mut_prob_) { real_mut_prob = real_mut_prob_; }
+        void SetBinMutationProbability(const double& bin_mut_prob_) { bin_mut_prob = bin_mut_prob_; }
+        void SetEtaC(const double& etaC_) { etaC = etaC_; }
+        void SetEtaM(const double& etaM_) { etaM = etaM_; }
+        void SetEpsC(const double& epsC_) { epsC = epsC_; }
+        void SetBitCount(const std::vector<int>& bin_bits_) { bin_bits = bin_bits_; }
+        void SetRealVarLimits(const std::vector<std::pair<double, double>>& real_limits_) { real_limits = real_limits_; }
+        void SetBinVarLimits(const std::vector<std::pair<double, double>>& bin_limits_) { bin_limits = bin_limits_; }
+        void SetInitialRealVars(const std::vector<double>& init_real_vars_) { initial_real_vars = init_real_vars_; }
+        void SetInitialPopulationRealVars(const std::vector<std::vector<double>>& supplied_population_real_vars_)
+                                                { supplied_population_real_vars = supplied_population_real_vars_;}
+        void setSuppliedPop(const bool& supplied_pop_) {supplied_pop = supplied_pop_;}
         // clang-format on
 
         std::shared_ptr<Population> getCurrentPop();
 
-        bool crowdObj      = true;
-        int reportCount    = 0;
-        int binMutCount    = 0;
-        int realMutCount   = 0;
-        int binCrossCount  = 0;
-        int realCrossCount = 0;
-        int bitLength      = 0;
+        bool crowd_obj       = true;
+        int report_count     = 0;
+        int bin_mut_count    = 0;
+        int real_mut_count   = 0;
+        int bin_cross_count  = 0;
+        int real_cross_count = 0;
+        int bit_length       = 0;
 
-        int currentGen;
-        int popSize;
+        int current_gen;
+        int pop_size;
         int generations;
 
     private:
-        int realVars             = -1;
-        int binVars              = -1;
+        int real_vars            = -1;
+        int bin_vars             = -1;
         int objectives           = -1;
         int constraints          = -1;
-        double realCrossProb     = -1.0;
-        double binCrossProb      = -1.0;
-        double realMutProb       = -1.0;
-        double binMutProb        = -1.0;
+        double real_cross_prob   = -1.0;
+        double bin_cross_prob    = -1.0;
+        double real_mut_prob     = -1.0;
+        double bin_mut_prob      = -1.0;
         double etaC              = -1.0;
         double etaM              = -1.0;
         double epsC              = std::numeric_limits<double>::epsilon();
-        std::vector<int> binBits = {};
-        std::vector<double> initialRealVars;
-        bool randomInitialize                             = {};
-        std::vector<std::pair<double, double>> realLimits = {};
-        std::vector<std::pair<double, double>> binLimits  = {};
+        std::vector<int> bin_bits = {};
+        std::vector<double> initial_real_vars;
+        bool random_initialize                             = {};
+        std::vector<std::pair<double, double>> real_limits = {};
+        std::vector<std::pair<double, double>> bin_limits  = {};
         // Added for an intial population
         bool supplied_pop = false;
-        std::vector<std::vector<double>> suppliedPopulationRealVars;
+        std::vector<std::vector<double>> supplied_population_real_vars;
 
-        std::shared_ptr<Population> parentPop      = nullptr;
-        std::shared_ptr<Population> childPop       = nullptr;
-        std::shared_ptr<Population> combinedPop    = nullptr;
-        std::shared_ptr<RandomGenerator<>> randGen = nullptr;
+        std::shared_ptr<Population> parent_pop      = nullptr;
+        std::shared_ptr<Population> child_pop       = nullptr;
+        std::shared_ptr<Population> combined_pop    = nullptr;
+        std::shared_ptr<RandomGenerator<>> rand_gen = nullptr;
 
         // Output file streams
         std::ofstream initial_pop_file;
