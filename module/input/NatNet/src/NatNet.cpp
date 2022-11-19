@@ -130,11 +130,7 @@ namespace module::input {
         // Read frame number
         mocap->frame_number = ReadData<uint32_t>::read(ptr, version);
 
-        std::cout << "Frame Number: " << mocap->frame_number << std::endl;
-
         mocap->marker_sets = ReadData<std::vector<MotionCapture::MarkerSet>>::read(ptr, version);
-
-        std::cout << "Marker Sets read " << std::endl;
 
         // Read the free floating markers but don't process them
         auto freeMarkers = ReadData<std::vector<Eigen::Vector3f>>::read(ptr, version);
@@ -320,32 +316,22 @@ namespace module::input {
         const char* ptr = &packet.data;
 
         uint32_t nModels = ReadData<uint32_t>::read(ptr, version);
-        log<NUClear::INFO>("Number of Models is: ", nModels);
 
         for (uint32_t i = 0; i < nModels; ++i) {
             // Read the type
             uint32_t type = ReadData<uint32_t>::read(ptr, version);
 
-            log<NUClear::WARN>("TYPE IS: ", type);
-
             // Parse the correct type
             switch (type) {
                 // Marker Set
                 case 0: {
-                    MarkerSetModel m = ReadData<MarkerSetModel>::read(ptr, version);
-
-                    std::cout << "Market Set Name: " << m.name << std::endl;
-
+                    MarkerSetModel m        = ReadData<MarkerSetModel>::read(ptr, version);
                     markerSetModels[m.name] = m;
                 } break;
 
                 // Rigid Body
                 case 1: {
-                    RigidBodyModel m = ReadData<RigidBodyModel>::read(ptr, version);
-                    std::cout << "RigidBody ID: " << m.id << std::endl;
-                    std::cout << "RigidBody Name: " << m.name << std::endl;
-                    std::cout << "RigidBody Offset: " << m.offset << std::endl;
-                    std::cout << "Rigidbody Rotation: " << m.rotation << std::endl;
+                    RigidBodyModel m      = ReadData<RigidBodyModel>::read(ptr, version);
                     rigidBodyModels[m.id] = m;
                 } break;
 
