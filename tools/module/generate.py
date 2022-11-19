@@ -17,7 +17,7 @@ def register(command):
     command.add_argument("--director", action="store_true", help="generates a module as a Director behaviour module")
 
 
-def run(path, **kwargs):
+def run(path, director, **kwargs):
     # We use the default "module" directory for modules
     module_path = "module"
 
@@ -62,11 +62,11 @@ def run(path, **kwargs):
         print("\t", os.path.join(src_path, "README.md"))
 
     with open(os.path.join(src_path, "{}.hpp".format(module_name)), "w") as output:
-        output.write(generate_header(parts, kwargs["director"]))
+        output.write(generate_header(parts, director))
         print("\t", os.path.join(src_path, "{}.hpp".format(module_name)))
 
     with open(os.path.join(src_path, "{}.cpp".format(module_name)), "w") as output:
-        output.write(generate_cpp(parts, kwargs["director"]))
+        output.write(generate_cpp(parts, director))
         print("\t", os.path.join(src_path, "{}.cpp".format(module_name)))
 
     with open(os.path.join(tests_path, "{}.cpp".format(module_name)), "w") as output:
@@ -89,60 +89,64 @@ def generate_cmake(parts):
 
 
 def generate_header(parts, director):
+    director_template = textwrap.dedent(
+        """\
+        #ifndef {define}
+        #define {define}
+
+        #include <nuclear>
+
+        #include "extension/Behaviour.hpp"
+
+        namespace {namespace} {{
+
+        class {className} : public ::extension::behaviour::BehaviourReactor {{
+        private:
+            /// @brief Stores configuration values
+            struct Config {{
+            }} cfg;
+
+        public:
+            /// @brief Called by the powerplant to build and setup the {className} reactor.
+            explicit {className}(std::unique_ptr<NUClear::Environment> environment);
+        }};
+
+        }}  // namespace {namespace}
+
+        #endif  // {define}
+        """
+    )
+
+    normal_template = textwrap.dedent(
+        """\
+        #ifndef {define}
+        #define {define}
+
+        #include <nuclear>
+
+        namespace {namespace} {{
+
+        class {className} : public NUClear::Reactor {{
+        private:
+            /// @brief Stores configuration values
+            struct Config {{
+            }} cfg;
+
+        public:
+            /// @brief Called by the powerplant to build and setup the {className} reactor.
+            explicit {className}(std::unique_ptr<NUClear::Environment> environment);
+        }};
+
+        }}  // namespace {namespace}
+
+        #endif  // {define}
+        """
+    )
+
     if director:
-        template = textwrap.dedent(
-            """\
-            #ifndef {define}
-            #define {define}
-
-            #include <nuclear>
-
-            #include "extension/Behaviour.hpp"
-
-            namespace {namespace} {{
-
-            class {className} : public ::extension::behaviour::BehaviourReactor {{
-            private:
-                /// @brief Stores configuration values
-                struct Config {{
-                }} cfg;
-
-            public:
-                /// @brief Called by the powerplant to build and setup the {className} reactor.
-                explicit {className}(std::unique_ptr<NUClear::Environment> environment);
-            }};
-
-            }}  // namespace {namespace}
-
-            #endif  // {define}
-            """
-        )
+        template = director_template
     else:
-        template = textwrap.dedent(
-            """\
-            #ifndef {define}
-            #define {define}
-
-            #include <nuclear>
-
-            namespace {namespace} {{
-
-            class {className} : public NUClear::Reactor {{
-            private:
-                /// @brief Stores configuration values
-                struct Config {{
-                }} cfg;
-
-            public:
-                /// @brief Called by the powerplant to build and setup the {className} reactor.
-                explicit {className}(std::unique_ptr<NUClear::Environment> environment);
-            }};
-
-            }}  // namespace {namespace}
-
-            #endif  // {define}
-            """
-        )
+        template = normal_template
 
     return template.format(
         define="{}_HPP".format("_".join([p.upper() for p in parts])),
@@ -152,51 +156,54 @@ def generate_header(parts, director):
 
 
 def generate_cpp(parts, director):
+    director_template = textwrap.dedent(
+        """\
+        #include "{className}.hpp"
+
+        #include "extension/Behaviour.hpp"
+        #include "extension/Configuration.hpp"
+
+        namespace {namespace} {{
+
+        using extension::Configuration;
+
+        {className}::{className}(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {{
+
+            on<Configuration>("{className}.yaml").then([this](const Configuration& config) {{
+                // Use configuration here from file {className}.yaml
+                this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            }});
+        }}
+
+        }}  // namespace {namespace}
+        """
+    )
+    normal_template = textwrap.dedent(
+        """\
+        #include "{className}.hpp"
+
+        #include "extension/Configuration.hpp"
+
+        namespace {namespace} {{
+
+        using extension::Configuration;
+
+        {className}::{className}(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {{
+
+            on<Configuration>("{className}.yaml").then([this](const Configuration& config) {{
+                // Use configuration here from file {className}.yaml
+                this->log_level = config["log_level"].as<NUClear::LogLevel>();
+            }});
+        }}
+
+        }}  // namespace {namespace}
+        """
+    )
+
     if director:
-        template = textwrap.dedent(
-            """\
-            #include "{className}.hpp"
-
-            #include "extension/Behaviour.hpp"
-            #include "extension/Configuration.hpp"
-
-            namespace {namespace} {{
-
-            using extension::Configuration;
-
-            {className}::{className}(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {{
-
-                on<Configuration>("{className}.yaml").then([this](const Configuration& config) {{
-                    // Use configuration here from file {className}.yaml
-                    this->log_level = config["log_level"].as<NUClear::LogLevel>();
-                }});
-            }}
-
-            }}  // namespace {namespace}
-            """
-        )
+        template = director_template
     else:
-        template = textwrap.dedent(
-            """\
-            #include "{className}.hpp"
-
-            #include "extension/Configuration.hpp"
-
-            namespace {namespace} {{
-
-            using extension::Configuration;
-
-            {className}::{className}(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {{
-
-                on<Configuration>("{className}.yaml").then([this](const Configuration& config) {{
-                    // Use configuration here from file {className}.yaml
-                    this->log_level = config["log_level"].as<NUClear::LogLevel>();
-                }});
-            }}
-
-            }}  // namespace {namespace}
-            """
-        )
+        template = normal_template
 
     return template.format(className=parts[-1], namespace="::".join([x for x in parts[:-1]]))
 
