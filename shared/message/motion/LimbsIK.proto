@@ -31,8 +31,8 @@ message LeftLegIK {
     google.protobuf.Timestamp time = 1;
     /// Target left foot position to torso
     mat4 Htl = 2;
-    /// Gain and torque of each servo, in the order of Limbs.LegID
-    repeated ServoState servos = 3;
+    /// Gain and torque of each servo, with the key corresponding to ServoID
+    map<uint32,ServoState> servos = 3;
 }
 
 /// Right leg motion information including target matrix, time and gain and torque for each servo
@@ -41,8 +41,8 @@ message RightLegIK {
     google.protobuf.Timestamp time = 1;
     /// Target right foot position to torso
     mat4 Htr = 2;
-    /// Gain and torque of each servo, in the order of Limbs.LegID
-    repeated ServoState servos = 3;
+    /// Gain and torque of each servo, with the key corresponding to ServoID
+    map<uint32,ServoState> servos = 3;
 }
 
 /// Head motion information including look direction, time and gain and torque for each servo
@@ -51,6 +51,6 @@ message HeadIK {
     google.protobuf.Timestamp time = 1;
     /// Vector for the head to look towards (camera to point in torso space)
     vec3 uPCt = 2;
-    /// Gain and torque of each servo, in the order of Limbs.HeadID
-    repeated ServoState servos = 3;
+    /// Gain and torque of each servo, with the key corresponding to ServoID
+    map<uint32,ServoState> servos = 3;
 }
