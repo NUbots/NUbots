@@ -1,4 +1,5 @@
 Things the PR does go here
+
 - these can be bullet
 - points like this
 - if you like
@@ -6,6 +7,7 @@ Things the PR does go here
 ### Pre-PR Checklist:
 
 Have you
+
 - [ ] Updated NUbook if necessary (add link to NUbook PR here)
 - [ ] Added/updated tests for your changes, including regression tests for bug fixes
 - [ ] Updated relevant module READMEs
