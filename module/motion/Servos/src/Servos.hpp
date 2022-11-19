@@ -65,10 +65,13 @@ namespace module::motion {
                 });
         }
 
+        /// @brief Keeps track of which Group in the Sequence in add_sequence_provider should be emitted next
+        /// @tparam Sequence Used to have unique counts for each Sequence Provider.
         template <typename Sequence>
         struct Count {
             long unsigned int count = 0;
         };
+
         /// @brief Creates a reaction that takes a vector of servo wrapper tasks (eg LeftLegs) and emits each servo
         /// wrapper task after the previous one is Done. Emits Done when the last group is Done.
         /// @tparam Sequence is a vector of servo wrapper tasks (eg LeftLegSequence)
