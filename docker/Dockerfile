@@ -13,7 +13,7 @@
 FROM archlinux:base-devel-20220710.0.67642
 
 # ↓↓↓ UPDATE MIRRORS HERE ↓↓↓
-RUN echo -e "Server=http://host.docker.internal:7878/\$repo/os/\$arch\nServer=https://archive.archlinux.org/repos/2022/07/10/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
+RUN echo -e "Server=https://archive.archlinux.org/repos/2021/08/29/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
 # If you ever update the mirror date, search the repository for UPDATE MIRRORS HERE to find all the places where the URL
 # needs to be altered.
 
@@ -102,7 +102,7 @@ RUN --mount=type=bind,source=usr/local/toolchain,target=/usr/local/toolchain \
     python /usr/local/toolchain/generate_${platform}_toolchain.py --prefix ${prefix}
 
 # zlib
-RUN install-from-source https://www.zlib.net/zlib-1.2.12.tar.gz
+RUN install-from-source https://github.com/madler/zlib/releases/download/v1.2.13/zlib-1.2.13.tar.gz
 
 # LLVM and Clang
 RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-14.0.6.tar.gz \
@@ -323,11 +323,21 @@ RUN install-package \
     clinfo \
     doxygen
 
+# Install packages for nusight
+RUN install-package \
+    nodejs \
+    npm \
+    yarn
+
 # Install formatters as last step so if they change the image is easy to update
 RUN pip install --upgrade \
     cmake-format==0.6.13 \
     isort==5.10.1 \
     black==22.6.0
+
+RUN npm install -g \
+    prettier@2.7.1 \
+    eslint@8.27.0
 
 # Enable all the driver capabilities so we can use OpenCL in the container
 ENV NVIDIA_DRIVER_CAPABILITIES=all
