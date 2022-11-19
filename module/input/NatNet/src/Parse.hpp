@@ -127,8 +127,7 @@ namespace module::input {
 
             MarkerSet set;
 
-            set.name = ReadData<std::string>::read(ptr, version);
-            NUClear::log(set.name);
+            set.name              = ReadData<std::string>::read(ptr, version);
             auto markersPositions = ReadData<std::vector<Eigen::Matrix<float, 3, 1>>>::read(ptr, version);
             set.markers.reserve(markersPositions.size());
 
@@ -189,12 +188,9 @@ namespace module::input {
 
             LabeledMarker marker;
 
-            marker.marker.id = ReadData<uint32_t>::read(ptr, version);
-            NUClear::log(marker.marker.id);
+            marker.marker.id       = ReadData<uint32_t>::read(ptr, version);
             marker.marker.position = ReadData<Eigen::Matrix<float, 3, 1>>::read(ptr, version);
-            NUClear::log(marker.marker.position);
-            marker.marker.size = ReadData<float>::read(ptr, version);
-            NUClear::log(marker.marker.size);
+            marker.marker.size     = ReadData<float>::read(ptr, version);
 
             if (version >= 0x02060000) {
                 short params              = ReadData<short>::read(ptr, version);
