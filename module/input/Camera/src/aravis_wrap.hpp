@@ -20,7 +20,7 @@ namespace module::input::arv {
     }
 
     template <typename ArvFunction, typename... Arguments>
-    inline auto wrap_return(ArvFunction&& arv_function, Arguments&&... args) {
+    [[nodiscard]] inline auto wrap_return(ArvFunction&& arv_function, Arguments&&... args) {
         GError* error = nullptr;
         auto value    = arv_function(std::forward<Arguments>(args)..., &error);
         if (error != nullptr) {
