@@ -25,7 +25,7 @@ import "message/motion/ServoCommand.proto";
 /// Left leg servo command information including time, gain, torque, position
 message LeftLeg {
     /// Information for each servo in the left leg, with the key corresponding to ServoID
-    map<uint32,ServoCommand> servos = 1;
+    map<uint32, ServoCommand> servos = 1;
 }
 message LeftLegSequence {
     repeated LeftLeg pack = 1;
@@ -34,7 +34,7 @@ message LeftLegSequence {
 /// Right leg servo command information including time, gain, torque, position
 message RightLeg {
     /// Information for each servo in the right leg, with the key corresponding to ServoID
-    map<uint32,ServoCommand> servos = 1;
+    map<uint32, ServoCommand> servos = 1;
 }
 message RightLegSequence {
     repeated RightLeg pack = 1;
@@ -43,7 +43,7 @@ message RightLegSequence {
 /// Right and left leg servo command information including time, gain, torque, position
 message Legs {
     /// Information for each servo in the legs, with the key corresponding to ServoID
-    map<uint32,ServoCommand> servos = 1;
+    map<uint32, ServoCommand> servos = 1;
 }
 message LegsSequence {
     repeated Legs pack = 1;
@@ -52,7 +52,7 @@ message LegsSequence {
 /// Left arm servo command information including time, gain, torque, position
 message LeftArm {
     /// Information for each servo in the left arm, with the key corresponding to ServoID
-    map<uint32,ServoCommand> servos = 1;
+    map<uint32, ServoCommand> servos = 1;
 }
 message LeftArmSequence {
     repeated LeftArm pack = 1;
@@ -61,7 +61,7 @@ message LeftArmSequence {
 /// Right arm servo command information including time, gain, torque, position
 message RightArm {
     /// Information for each servo in the right arm, with the key corresponding to ServoID
-    map<uint32,ServoCommand> servos = 1;
+    map<uint32, ServoCommand> servos = 1;
 }
 message RightArmSequence {
     repeated RightArm pack = 1;
@@ -70,7 +70,7 @@ message RightArmSequence {
 /// Left and right arm servo command information including time, gain, torque, position
 message Arms {
     /// Information for each servo in the arms, with the key corresponding to ServoID
-    map<uint32,ServoCommand> servos = 1;
+    map<uint32, ServoCommand> servos = 1;
 }
 message ArmsSequence {
     repeated Arms pack = 1;
@@ -79,7 +79,7 @@ message ArmsSequence {
 /// Left and right arm and leg servo command information including time, gain, torque, position
 message Limbs {
     /// Information for each servo in the arms and legs, with the key corresponding to ServoID
-    map<uint32,ServoCommand> servos = 1;
+    map<uint32, ServoCommand> servos = 1;
 }
 message LimbsSequence {
     repeated Limbs pack = 1;
@@ -88,7 +88,7 @@ message LimbsSequence {
 /// Head servo command information including time, gain, torque, position
 message Head {
     /// Information for each servo in the head, with the key corresponding to ServoID
-    map<uint32,ServoCommand> servos = 1;
+    map<uint32, ServoCommand> servos = 1;
 }
 message HeadSequence {
     repeated Head pack = 1;
@@ -97,7 +97,7 @@ message HeadSequence {
 /// Arms, legs and head servo command information including time, gain, torque, position
 message Body {
     /// Information for each servo in the body, with the key corresponding to ServoID
-    map<uint32,ServoCommand> servos = 1;
+    map<uint32, ServoCommand> servos = 1;
 }
 message BodySequence {
     repeated Body pack = 1;
