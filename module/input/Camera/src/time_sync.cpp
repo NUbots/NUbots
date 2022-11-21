@@ -1,15 +1,27 @@
 #include "time_sync.hpp"
 
-extern "C" {
 #include <aravis-0.8/arv.h>
-}
 
 #include "aravis_wrap.hpp"
+#include "settings.hpp"
 
 namespace module::input {
 
     CameraContext::TimeCorrection sync_clocks(ArvDevice* device) {
-        using namespace std::chrono;
+        using namespace std::chrono;  // NOLINT(google-build-using-namespace) fine in function scope
+
+        // Check that camera supports ptp
+        auto* feature = arv_device_get_feature(device, "GevIEEE1588");
+        if (feature != nullptr) {
+            // Turn ptp on
+            set_setting(reinterpret_cast<ArvGcBoolean*>(feature), true);
+
+            CameraContext::TimeCorrection output{};
+            output.type   = CameraContext::TimeCorrection::PTP;
+            output.offset = 0;
+            return output;
+        }
+
         struct Sample {
             int64_t local;
             int64_t cam;
@@ -19,7 +31,7 @@ namespace module::input {
         // This is what we return if we can't work out the timestamp offset now
         // Note that all these times are measured in nanoseconds
         CameraContext::TimeCorrection output{};
-        output.live   = true;
+        output.type   = CameraContext::TimeCorrection::LIVE;
         output.offset = 0;
         output.kf.p   = 10e6 * 10e6;    // Initial stddev of about 10 milliseconds
         output.kf.r   = 500e3 * 500e3;  // Standard deviation of about 500 microseconds
@@ -47,9 +59,8 @@ namespace module::input {
         }
 
         for (auto& s : samples) {
-            // Get the time before and after sending the command. We know neither are correct and it's likely
-            // somewhere in the middle that the actual latching took place. Therefore take the average of the two to
-            // get closer.
+            // Get the time before and after sending the command. We know neither are correct and it's likely somewhere
+            // in the middle that the actual latching took place. Therefore take the average of the two to get closer.
             try {
 
                 NUClear::clock::time_point t1 = NUClear::clock::now();
@@ -93,16 +104,17 @@ namespace module::input {
         }
         // Check if the total time that elapsed on the device vs the local computer is reasonable
         double accuracy = double(std::min(local_total, cam_total)) / double(std::max(local_total, cam_total));
-        if (accuracy > 0.95) {
-            output.live                       = false;
+        if (accuracy > 0.95 && n_samples > 0) {
+            output.type                       = CameraContext::TimeCorrection::LATCHED;
             output.offset                     = delta / n_samples;
             output.drift.cam_at_calibration   = samples.front().cam;
             output.drift.local_at_calibration = samples.front().local;
             // Set a value to recalibrate if our error accumulates too much
             output.drift.max_clock_drift = 0;
             output.drift.over_time_count = 0;
-            return output;
         }
+
         return output;
     }
+
 }  // namespace module::input

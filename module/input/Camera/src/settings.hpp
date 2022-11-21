@@ -1,15 +1,14 @@
 #ifndef MODULE_INPUT_CAMERA_SETTINGS_HPP
 #define MODULE_INPUT_CAMERA_SETTINGS_HPP
 
+#include <aravis-0.8/arv.h>
 #include <fmt/format.h>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 
-extern "C" {
-#include <aravis-0.8/arv.h>
-}
-
 namespace module::input {
+
     template <typename T>
     struct SettingsFunctions;
 
@@ -40,11 +39,7 @@ namespace module::input {
             return true;
         }
         static std::string unit(ArvGcInteger* setting) {
-            GError* error = nullptr;
-            const char* u = arv_gc_integer_get_unit(setting, &error);
-            if (error != nullptr) {
-                g_error_free(error);
-            }
+            const char* u = arv_gc_integer_get_unit(setting);
             return u == nullptr ? "" : u;
         }
     };
@@ -76,11 +71,7 @@ namespace module::input {
             return true;
         }
         static std::string unit(ArvGcFloat* setting) {
-            GError* error = nullptr;
-            const char* u = arv_gc_float_get_unit(setting, &error);
-            if (error != nullptr) {
-                g_error_free(error);
-            }
+            const char* u = arv_gc_float_get_unit(setting);
             return u == nullptr ? "" : u;
         }
     };
@@ -93,10 +84,10 @@ namespace module::input {
         static void write(ArvGcBoolean* setting, const bool& v, GError** error) {
             arv_gc_boolean_set_value(setting, static_cast<gboolean>(v), error);
         }
-        static bool valid(ArvGcBoolean* /* setting */, const bool& /* error */) {
+        static bool valid(ArvGcBoolean* /*unused*/, const bool& /*unused*/) {
             return true;
         }
-        static std::string unit(ArvGcBoolean* /* setting */) {
+        static std::string unit(ArvGcBoolean* /*unused*/) {
             return "";
         }
     };
@@ -113,7 +104,7 @@ namespace module::input {
         static bool valid(ArvGcEnumeration* setting, const std::string& v) {
             GError* error       = nullptr;
             unsigned int len    = 0;
-            const char** values = arv_gc_enumeration_get_available_string_values(setting, &len, &error);
+            const char** values = arv_gc_enumeration_dup_available_string_values(setting, &len, &error);
             if (error != nullptr) {
                 g_error_free(error);
                 error = nullptr;
@@ -138,7 +129,7 @@ namespace module::input {
 
             return true;
         }
-        static std::string unit(ArvGcEnumeration* /* setting */) {
+        static std::string unit(ArvGcEnumeration* /*unused*/) {
             return "";
         }
     };
@@ -149,7 +140,7 @@ namespace module::input {
 
         // Get our current value
         auto current = SettingsFunctions<T>::read(setting, &error);
-        if (error) {
+        if (error != nullptr) {
             std::string msg = fmt::format("Failed to read the current value: \"{}\"", error->message);
             g_error_free(error);
             throw std::runtime_error(msg);
@@ -160,7 +151,7 @@ namespace module::input {
 
         // Check if this feature is locked
         bool locked = arv_gc_feature_node_is_locked(reinterpret_cast<ArvGcFeatureNode*>(setting), &error);
-        if (error) {
+        if (error != nullptr) {
             g_error_free(error);
             error = nullptr;
         }
@@ -174,7 +165,7 @@ namespace module::input {
 
             if (SettingsFunctions<T>::valid(setting, std::forward<U>(value))) {
                 SettingsFunctions<T>::write(setting, std::forward<U>(value), &error);
-                if (error) {
+                if (error != nullptr) {
                     std::string msg = fmt::format("Failed changing from {0}{2} to {1}{2}: \"{3}\"",
                                                   current,
                                                   value,
@@ -183,11 +174,14 @@ namespace module::input {
                     g_error_free(error);
                     throw std::runtime_error(msg);
                 }
+
                 return fmt::format("changed {0}{2} to {1}{2}", current, value, unit);
             }
         }
+
         return "";
     }
+
 }  // namespace module::input
 
 #endif  // MODULE_INPUT_CAMERA_SETTINGS_HPP
