@@ -69,10 +69,43 @@ namespace module::input {
             std::map<uint32_t, RigidBodyModel> boneModels;
         };
 
+        struct ForcePlateModel {
+            ForcePlateModel() = default;
+            std::string name{};
+            uint32_t id{0};
+            uint32_t width{0};
+            uint32_t length{0};
+            Eigen::Vector3f origin = Eigen::Vector3f::Zero();
+            Eigen::Matrix<uint32_t, 12,12> calibrationMatrix;
+            Eigen::Matrix<uint32_t, 4,3> corners;
+            uint32_t plateType{0};
+            uint32_t channelType{0};
+            uint32_t nChannels{0};
+        };
+
+        struct DeviceModel {
+            DeviceModel() = default;
+            std::string name{};
+            uint32_t id{0};
+            std::string serialNo{};
+            uint32_t iDeviceType{0};
+            uint32_t iChannelDataType{0};
+            uint32_t nChannels{0};
+        };
+
+        struct CameraModel{
+            CameraModel() = default;
+            std::string name;
+            Eigen::Vector3f position = Eigen::Vector3f::Zero();
+            Eigen::Vector3f orientation = Eigen::Vector3f::Zero();
+        };
+
         // Models we are using
         std::map<std::string, MarkerSetModel> markerSetModels;
         std::map<uint32_t, RigidBodyModel> rigidBodyModels;
         std::map<uint32_t, SkeletonModel> skeletonModels;
+        std::map<uint32_t, ForcePlateModel> forcePlateModels;
+        std::map<uint32_t, DeviceModel> deviceModels;
 
         // The version of NatNet we are running with
         uint32_t remote  = 0;

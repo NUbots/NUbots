@@ -130,9 +130,10 @@ namespace module::input {
         // Read frame number
         mocap->frame_number = ReadData<uint32_t>::read(ptr, version);
 
+        //Read the Markersets
         mocap->marker_sets = ReadData<std::vector<MotionCapture::MarkerSet>>::read(ptr, version);
 
-        // Read the free floating markers but don't process them
+        // Read the free floating markers
         auto freeMarkers = ReadData<std::vector<Eigen::Vector3f>>::read(ptr, version);
         mocap->markers.reserve(freeMarkers.size());
         // Build markers
@@ -200,8 +201,6 @@ namespace module::input {
                 // Stop processing
                 return;
             }
-
-            // Should probably be saving the informaion of the frame here
         }
 
         for (auto& rigidBody : mocap->rigid_bodies) {
@@ -340,6 +339,26 @@ namespace module::input {
                     SkeletonModel m      = ReadData<SkeletonModel>::read(ptr, version);
                     skeletonModels[m.id] = m;
                 } break;
+
+                //Force Plate
+                case 3:{
+                    ForcePlateModel m      = ReadData<ForcePlateModel>::read(ptr, version);
+                    forcePlateModels[m.id] = m;
+                    break;
+                }
+
+                //Device
+                case 4:{
+                    DeviceModel m      = ReadData<DeviceModel>::read(ptr,version);
+                    deviceModels[m.id] = m;
+                    break;
+                }
+
+                //Camera
+                case 5:{
+                    ReadData<CameraModel>::read(ptr,version);
+                    break;
+                }
 
                 // Bad packet
                 default: {

@@ -34,7 +34,10 @@ message MotionCapture {
         uint32 id       = 1;
         fvec3  position = 2;
         float  size     = 3;
+<<<<<<< Updated upstream
         uint32 model_id = 4;
+=======
+>>>>>>> Stashed changes
     }
 
     message MarkerSet {

@@ -197,14 +197,13 @@ namespace module::input {
                 marker.occluded           = (params & 0x01) == 0x01;
                 marker.point_cloud_solved = (params & 0x02) == 0x02;
                 marker.model_solved       = (params & 0x04) == 0x04;
+                float residual = ReadData<uint32_t>::read(ptr, version);
             }
             else {
                 marker.occluded           = false;
                 marker.point_cloud_solved = false;
                 marker.model_solved       = false;
             }
-
-            float residual = ReadData<uint32_t>::read(ptr, version);
 
             return marker;
         }
@@ -276,6 +275,72 @@ namespace module::input {
             }
 
             return m;
+        }
+    };
+
+    // Read ForcePlate Models
+    template<>
+    struct ReadData<NatNet::ForcePlateModel>{
+        static inline NatNet::ForcePlateModel read (const char*& ptr, const uint32_t version){
+
+            NatNet::ForcePlateModel m;
+            if(version >= 0x03000000){
+                m.id = ReadData<uint32_t>::read(ptr,version);
+                m.name = ReadData<std::string>::read(ptr,version);
+                m.width = ReadData<uint32_t>::read(ptr,version);
+                m.length = ReadData<uint32_t>::read(ptr,version);
+                m.origin = ReadData<Eigen::Matrix<float, 3, 1>>::read(ptr, version);
+                m.calibrationMatrix = ReadData<Eigen::Matrix<uint32_t, 12, 12>>::read(ptr, version);
+                m.corners = ReadData<Eigen::Matrix<uint32_t, 4, 3>>::read(ptr, version);
+                m.plateType = ReadData<uint32_t>::read(ptr,version);
+                m.channelType = ReadData<uint32_t>::read(ptr,version);
+                m.nChannels = ReadData<uint32_t>::read(ptr,version);
+                for (uint32_t n = 1; n < m.nChannels; n++){
+                    ReadData<std::string>::read(ptr,version);
+                }
+            }
+
+            return m;
+        }
+    };
+
+    //Read Device Models
+    template<>
+    struct ReadData<NatNet::DeviceModel>{
+        static inline NatNet::DeviceModel read (const char*& ptr, const uint32_t version){
+
+            NatNet::DeviceModel m;
+            if(version >= 0x03000000){
+                m.id = ReadData<uint32_t>::read(ptr,version);
+                m.name = ReadData<std::string>::read(ptr,version);
+                m.serialNo = ReadData<std::string>::read(ptr,version);
+                m.iDeviceType = ReadData<uint32_t>::read(ptr,version);
+                m.iChannelDataType = ReadData<uint32_t>::read(ptr,version);
+                m.nChannels = ReadData<uint32_t>::read(ptr,version);
+                for (uint32_t n = 1; n < m.nChannels; n++){
+                        ReadData<std::string>::read(ptr,version);
+                }
+
+            }
+
+            return m;
+        }
+    };
+
+    //Read Camera Models
+    template<>
+    struct ReadData<NatNet::CameraModel>{
+        static inline NatNet::CameraModel read (const char*& ptr, const uint32_t version){
+
+            NatNet::CameraModel m;
+            if(version >= 0x03000000){
+                m.name = ReadData<std::string>::read(ptr,version);
+                m.position = ReadData<Eigen::Matrix<float, 3, 1>>::read(ptr, version);
+                m.orientation = ReadData<Eigen::Matrix<float, 3, 1>>::read(ptr, version);
+            }
+
+            return m;
+
         }
     };
 }  // namespace module::input
