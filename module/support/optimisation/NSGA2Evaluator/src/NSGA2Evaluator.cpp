@@ -85,7 +85,7 @@ namespace module {
                     State old_state = current_state;
                     State new_state = HandleTransition(current_state, event);
 
-                    log<NUClear::DEBUG>("transitioning on", event, ", from state", old_state, "to state", new_state);
+                    log<NUClear::DEBUG>("Transitioning on", event, ", from state", old_state, "to state", new_state);
 
                     switch (new_state) {
                         case State::WAITING_FOR_REQUEST:
@@ -170,51 +170,48 @@ namespace module {
                                                                    NSGA2Evaluator::Event event) {
                 switch (current_state) {
                     case State::WAITING_FOR_REQUEST:
-                        switch (event) {
-                            case Event::EvaluateRequest: return State::SETTING_UP_TRIAL;
-                            case Event::CheckReady: return State::WAITING_FOR_REQUEST;
-                            case Event::TerminateEvaluation: return State::FINISHED;
-                            default: return State::UNKNOWN;
-                        }
+                        return TransitionEvents(event);
+
                     case State::SETTING_UP_TRIAL:
-                        switch (event) {
-                            case Event::TrialSetupDone: return State::RESETTING_SIMULATION;
-                            case Event::TerminateEvaluation: return State::FINISHED;
-                            default: return State::UNKNOWN;
-                        }
+                        return TransitionEvents(event);
+
                     case State::RESETTING_SIMULATION:
-                        switch (event) {
-                            case Event::ResetDone: return State::EVALUATING;
-                            case Event::TerminateEvaluation: return State::FINISHED;
-                            default: return State::UNKNOWN;
-                        }
+                        return TransitionEvents(event);
+
                     case State::EVALUATING:
-                        switch (event) {
-                            case Event::TerminateEarly: return State::TERMINATING_EARLY;
-                            case Event::TrialCompleted: return State::TERMINATING_GRACEFULLY;
-                            case Event::TerminateEvaluation: return State::FINISHED;
-                            default: return State::UNKNOWN;
-                        }
+                        return TransitionEvents(event);
+
                     case State::TERMINATING_EARLY:
-                        switch (event) {
-                            case Event::FitnessScoresSent: return State::WAITING_FOR_REQUEST;
-                            case Event::TerminateEvaluation: return State::FINISHED;
-                            default: return State::UNKNOWN;
-                        }
+                        return TransitionEvents(event);
+
                     case State::TERMINATING_GRACEFULLY:
-                        switch (event) {
-                            case Event::FitnessScoresSent: return State::WAITING_FOR_REQUEST;
-                            case Event::TerminateEvaluation: return State::FINISHED;
-                            default: return State::UNKNOWN;
-                        }
+                        return TransitionEvents(event);
+
                     case State::FINISHED:
-                        switch (event) {
-                            // Arguably this should return FINISHED regardless of event, unless we want to be able to
-                            // reset
-                            case Event::FitnessScoresSent: return State::FINISHED;
-                            case Event::TerminateEvaluation: return State::FINISHED;
-                            default: return State::UNKNOWN;
+                        // Arguably this should return FINISHED regardless of event, unless we want to be able to
+                        // reset
+                        if (event == Event::FitnessScoresSent) {
+                            return State::FINISHED;
                         }
+                        else {
+                            return TransitionEvents(event);
+                        }
+
+                    default: return State::UNKNOWN;
+                }
+            }
+
+            NSGA2Evaluator::State NSGA2Evaluator::TransitionEvents(NSGA2Evaluator::Event event) {
+                switch (event) {
+                    case Event::EvaluateRequest     : return State::SETTING_UP_TRIAL;
+                    case Event::CheckReady          : return State::WAITING_FOR_REQUEST;
+                    case Event::TerminateEvaluation : return State::FINISHED;
+                    case Event::TrialSetupDone      : return State::RESETTING_SIMULATION;
+                    case Event::ResetDone           : return State::EVALUATING;
+                    case Event::TerminateEarly      : return State::TERMINATING_EARLY;
+                    case Event::TrialCompleted      : return State::TERMINATING_GRACEFULLY;
+                    case Event::FitnessScoresSent   : return State::WAITING_FOR_REQUEST;
+
                     default: return State::UNKNOWN;
                 }
             }

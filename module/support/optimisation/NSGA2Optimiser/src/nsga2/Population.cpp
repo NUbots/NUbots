@@ -3,36 +3,36 @@
 #include <nuclear>
 
 namespace nsga2 {
-    Population::Population(const int& _size,
-                           const int& _realVars,
-                           const int& _binVars,
-                           const int& _constraints,
-                           const std::vector<int>& _binBits,
-                           const std::vector<std::pair<double, double>>& _realLimits,
-                           const std::vector<std::pair<double, double>>& _binLimits,
-                           const int& _objectives,
-                           const double& _realMutProb,
-                           const double& _binMutProb,
-                           const double& _etaM,
-                           const double& _epsC,
-                           std::shared_ptr<RandomGenerator<>> _randGen,
-                           const std::vector<double>& _initialRealVars)
-        : indConfig({_realVars,
-                     _realLimits,
-                     _realMutProb,
-                     _binVars,
-                     _binBits,
-                     _binLimits,
-                     _binMutProb,
-                     _objectives,
-                     _constraints,
-                     _etaM,
-                     _epsC,
-                     _randGen,
-                     _initialRealVars})
-        , size(_size) {
+    Population::Population(const int& size_,
+                           const int& realVars_,
+                           const int& binVars_,
+                           const int& constraints_,
+                           const std::vector<int>& binBits_,
+                           const std::vector<std::pair<double, double>>& realLimits_,
+                           const std::vector<std::pair<double, double>>& binLimits_,
+                           const int& objectives_,
+                           const double& realMutProb_,
+                           const double& binMutProb_,
+                           const double& etaM_,
+                           const double& epsC_,
+                           std::shared_ptr<RandomGenerator<>> randGen_,
+                           const std::vector<double>& initialRealVars_)
+        : indConfig({realVars_,
+                     realLimits_,
+                     realMutProb_,
+                     binVars_,
+                     binBits_,
+                     binLimits_,
+                     binMutProb_,
+                     objectives_,
+                     constraints_,
+                     etaM_,
+                     epsC_,
+                     randGen_,
+                     initialRealVars_})
+        , size(size_) {
 
-        for (int i = 0; i < _size; i++) {
+        for (int i = 0; i < size_; i++) {
             inds.emplace_back(indConfig);
         }
     }
@@ -48,9 +48,9 @@ namespace nsga2 {
         }
     }
 
-    void Population::SetIndividualsGeneration(const int _generation) {
+    void Population::SetIndividualsGeneration(const int generation_) {
         for (auto& ind : inds) {
-            ind.generation = _generation;
+            ind.generation = generation_;
         }
     }
 
@@ -83,10 +83,10 @@ namespace nsga2 {
     }
 
     void Population::SetEvaluationResults(const int& _id,
-                                          const std::vector<double>& _objScore,
-                                          const std::vector<double>& _constraints) {
-        inds[_id].objScore = _objScore;
-        inds[_id].constr   = _constraints;
+                                          const std::vector<double>& obj_score_,
+                                          const std::vector<double>& constraints_) {
+        inds[_id].objScore = obj_score_;
+        inds[_id].constr   = constraints_;
         inds[_id].CheckConstraints();
     }
 
@@ -158,8 +158,8 @@ namespace nsga2 {
 
     // Calculate how close the next nearest solution is. Boundary solutions have infinite distance.
     // This allows us to prioritise boundary solutions over solutions crowded together.
-    void Population::CrowdingDistance(const int& _frontIndex) {
-        std::vector<int>& F          = fronts[_frontIndex];
+    void Population::CrowdingDistance(const int& frontIndex_) {
+        std::vector<int>& F          = fronts[frontIndex_];
         const std::size_t front_size = F.size();
         if (front_size == 0) {
             return;  // Don't do anything with an empty front
@@ -191,14 +191,14 @@ namespace nsga2 {
         }
     }
 
-    void Population::Merge(const Population& _pop1, const Population& _pop2) {
-        if (GetSize() < _pop1.GetSize() + _pop2.GetSize()) {
+    void Population::Merge(const Population& pop1_, const Population& pop2_) {
+        if (GetSize() < pop1_.GetSize() + pop2_.GetSize()) {
             NUClear::log<NUClear::WARN>("Merge: target population not big enough");
-            inds.reserve(_pop1.GetSize() + _pop2.GetSize());
+            inds.reserve(pop1_.GetSize() + pop2_.GetSize());
         }
 
-        std::copy(_pop1.inds.begin(), _pop1.inds.end(), inds.begin());
-        std::copy(_pop2.inds.begin(), _pop2.inds.end(), inds.begin() + _pop1.GetSize());
+        std::copy(pop1_.inds.begin(), pop1_.inds.end(), inds.begin());
+        std::copy(pop2_.inds.begin(), pop2_.inds.end(), inds.begin() + pop1_.GetSize());
     }
 
 

@@ -97,6 +97,8 @@ namespace module {
                 /// @brief Get the next state to transition to given the current state and an event
                 State HandleTransition(State current_state, Event event);
 
+                State TransitionEvents(NSGA2Evaluator::Event event);
+
                 /// @brief Handle the WAITING_FOR_REQUEST state
                 void WaitingForRequest();
 
