@@ -412,17 +412,22 @@ namespace module::platform {
         });
 
         on<Trigger<OptimisationCommand>>().then([this](const OptimisationCommand& msg) {
-            if (msg.command == OptimisationCommand::CommandType::RESET_WORLD) {
-                // Set the reset world flag to send the reset command to webots with the next ActuatorRequests
-                reset_simulation_world = true;
-            }
-            else if (msg.command == OptimisationCommand::CommandType::RESET_TIME) {
-                // Set the reset flag to send the reset command to webots with the next ActuatorRequests
-                reset_simulation_time = true;
-            }
-            else if (msg.command == OptimisationCommand::CommandType::TERMINATE) {
-                // Set the termination flag to send the terminate command to webots with the next ActuatorRequests
-                terminate_simulation = true;
+            const int msg_command = msg.command;
+            switch (msg_command) {
+                case OptimisationCommand::CommandType::RESET_WORLD  :
+                    // Set the reset world flag to send the reset command to webots with the next ActuatorRequests
+                    reset_simulation_world = true;
+                break;
+
+                case OptimisationCommand::CommandType::RESET_TIME   :
+                    // Set the reset flag to send the reset command to webots with the next ActuatorRequests
+                    reset_simulation_time = true;
+                break;
+
+                case OptimisationCommand::CommandType::TERMINATE    :
+                    // Set the termination flag to send the terminate command to webots with the next ActuatorRequests
+                    terminate_simulation = true;
+                break;
             }
         });
     }

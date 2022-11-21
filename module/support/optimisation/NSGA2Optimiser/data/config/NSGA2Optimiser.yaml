@@ -24,11 +24,10 @@ eta:
 
 task: "walk"
 task_config_path: "config/webots/QuinticWalk.yaml"
-eval_config_path: "NSGA2Evaluator/config/NSGA2Evaluator.yaml"
 
 # Only for multipath
 task_supplied_pop: "false"
-task_supplied_pop_file: "config/Supplied_Pop_reals.csv"
+task_supplied_pop_file: ""
 
 initial_translation: [-4.0, -3.0, 0.51] # x, y, z
 intial_rotation: [0, 0, 1, 0] # x, y, z, angle (rads)
@@ -75,5 +74,5 @@ walk:
 
 # The following values are setting the initial values and limits for the walk engine command.
 walk_command:
-  velocity: [-0.2, -1.00, -0.01] # [0.2, 0.01, 1.00] 
+  velocity: [0.2, 0.01, 1.00] #  [-0.2, -1.00, -0.01]
   rotation: [0.15, -1.57, 0.1] # [0.15, 0.1, 1.57]

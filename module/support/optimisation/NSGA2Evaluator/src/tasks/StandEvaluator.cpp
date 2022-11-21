@@ -31,17 +31,17 @@ namespace module {
             using utility::support::Expression;
 
             void StandEvaluator::processRawSensorMsg(const RawSensors& sensors, NSGA2Evaluator* evaluator) {
-                double simTime = evaluator->simTime;
-                simTime++;
+                double sim_time = evaluator->sim_time;
+                sim_time++;
 
                 updateMaxFieldPlaneSway(sensors);
                 current_sensors = sensors;
             }
 
             void StandEvaluator::processOptimisationRobotPosition(const OptimisationRobotPosition& position) {
-                robotPosition.x() = position.value.X;
-                robotPosition.y() = position.value.Y;
-                robotPosition.z() = position.value.Z;
+                robot_position.x() = position.value.X;
+                robot_position.y() = position.value.Y;
+                robot_position.z() = position.value.Z;
             }
 
             void StandEvaluator::setUpTrial(const NSGA2EvaluationRequest& currentRequest) {
@@ -64,9 +64,9 @@ namespace module {
 
             void StandEvaluator::resetSimulation() {
                 // Reset our local state
-                trialStartTime    = 0.0;
-                robotPosition     = Eigen::Vector3d::Zero();
-                maxFieldPlaneSway = 0.0;
+                trial_start_time     = 0.0;
+                robot_position       = Eigen::Vector3d::Zero();
+                max_field_plane_sway = 0.0;
             }
 
             void StandEvaluator::evaluatingState(size_t subsumptionId, NSGA2Evaluator* evaluator) {
@@ -77,30 +77,30 @@ namespace module {
             }
 
             std::unique_ptr<NSGA2FitnessScores> StandEvaluator::calculateFitnessScores(bool earlyTermination,
-                                                                                       double simTime,
+                                                                                       double sim_time,
                                                                                        int generation,
                                                                                        int individual) {
-                double trialDuration = simTime - trialStartTime;
-                auto scores          = calculateScores(trialDuration);
-                auto constraints = earlyTermination ? calculateConstraints() : calculateConstraints(); 
+                double trial_duration = sim_time - trial_start_time;
+                auto scores          = calculateScores(trial_duration);
+                auto constraints = earlyTermination ? calculateConstraints() : calculateConstraints();
 
-                NUClear::log<NUClear::DEBUG>("Trial ran for", trialDuration);
+                NUClear::log<NUClear::DEBUG>("Trial ran for", trial_duration);
                 NUClear::log<NUClear::DEBUG>("SendFitnessScores for generation", generation, "individual", individual);
                 NUClear::log<NUClear::DEBUG>("    scores:", scores[0], scores[1]);
                 NUClear::log<NUClear::DEBUG>("    constraints:", constraints[0], constraints[1]);
 
                 // Create the fitness scores message based on the given results and emit it back to the Optimiser
-                std::unique_ptr<NSGA2FitnessScores> fitnessScores = std::make_unique<NSGA2FitnessScores>();
-                fitnessScores->id                                 = individual;
-                fitnessScores->generation                         = generation;
-                fitnessScores->objScore                           = scores;
-                fitnessScores->constraints                        = constraints;
-                return fitnessScores;
+                std::unique_ptr<NSGA2FitnessScores> fitness_scores = std::make_unique<NSGA2FitnessScores>();
+                fitness_scores->id                                 = individual;
+                fitness_scores->generation                         = generation;
+                fitness_scores->obj_score                          = scores;
+                fitness_scores->constraints                        = constraints;
+                return fitness_scores;
             }
 
-            std::vector<double> StandEvaluator::calculateScores(double trialDuration) {
-                return {maxFieldPlaneSway,  // For now, we want to reduce this
-                        trialDuration};
+            std::vector<double> StandEvaluator::calculateScores(double trial_duration) {
+                return {max_field_plane_sway,  // For now, we want to reduce this
+                        trial_duration};
             }
 
             std::vector<double> StandEvaluator::calculateConstraints() {
@@ -149,9 +149,9 @@ namespace module {
                 auto accelerometer = sensors.accelerometer;
 
                 // Calculate the robot sway along the field plane (left/right, forward/backward)
-                double fieldPlaneSway = std::pow(std::pow(accelerometer.x(), 2) + std::pow(accelerometer.y(), 2), 0.5);
-                if (fieldPlaneSway > maxFieldPlaneSway) {
-                    maxFieldPlaneSway = fieldPlaneSway;
+                double field_plane_sway = std::pow(std::pow(accelerometer.x(), 2) + std::pow(accelerometer.y(), 2), 0.5);
+                if (field_plane_sway > max_field_plane_sway) {
+                    max_field_plane_sway = field_plane_sway;
                 }
             }
 

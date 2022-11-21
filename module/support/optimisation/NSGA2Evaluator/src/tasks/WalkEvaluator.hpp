@@ -27,13 +27,13 @@ namespace module {
                 void resetSimulation();
                 void evaluatingState(size_t subsumptionId, NSGA2Evaluator* evaluator);
                 std::unique_ptr<NSGA2FitnessScores> calculateFitnessScores(bool earlyTermination,
-                                                                           double simTime,
+                                                                           double sim_time,
                                                                            int generation,
                                                                            int individual);
 
                 // Task-specific functions
                 std::vector<double> calculateScores();
-                std::vector<double> calculateConstraints(double simTime);
+                std::vector<double> calculateConstraints(double sim_time);
                 std::vector<double> constraintsNotViolated();
                 bool checkForFall(const RawSensors& sensors);
                 void updateMaxFieldPlaneSway(const RawSensors& sensors);
@@ -41,16 +41,16 @@ namespace module {
 
             private:
                 /// @brief Robot state for this evaluation, used during fitness and constraint calculation
-                bool initialPositionSet              = false;
-                Eigen::Vector3d initialRobotPosition = Eigen::Vector3d::Zero();
-                Eigen::Vector3d robotPosition        = Eigen::Vector3d::Zero();
-                double maxFieldPlaneSway             = 0.0;
+                bool initial_position_set              = false;
+                Eigen::Vector3d initial_robot_position = Eigen::Vector3d::Zero();
+                Eigen::Vector3d robot_position         = Eigen::Vector3d::Zero();
+                double max_field_plane_sway            = 0.0;
 
                 /// @brief The amount of time to run a single trial, in seconds.
                 std::chrono::seconds trial_duration_limit = std::chrono::seconds(0);
 
                 /// @brief Keep track of when the trial started
-                double trialStartTime = 0.0;
+                double trial_start_time = 0.0;
 
                 /// @brief The walk command velocity.
                 Eigen::Vector2d walk_command_velocity = Eigen::Vector2d(0.0, 0.0);

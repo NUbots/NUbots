@@ -124,11 +124,11 @@ namespace module {
                 });
 
                 on<Trigger<NSGA2FitnessScores>, Single>().then([this](const NSGA2FitnessScores& scores) {
-                    log<NUClear::DEBUG>("Got evaluation fitness scores", scores.objScore[0], scores.objScore[1]);
+                    log<NUClear::DEBUG>("Got evaluation fitness scores", scores.obj_score[0], scores.obj_score[1]);
 
                     // Tell the algorithm the evaluation scores for this individual
                     nsga2Algorithm.getCurrentPop()->SetEvaluationResults(scores.id,
-                                                                         scores.objScore,
+                                                                         scores.obj_score,
                                                                          scores.constraints);
 
                     if (nsga2Algorithm.getCurrentPop()->AreAllEvaluated()) {

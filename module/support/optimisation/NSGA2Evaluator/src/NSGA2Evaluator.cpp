@@ -58,7 +58,7 @@ namespace module {
 
             NSGA2Evaluator::NSGA2Evaluator(std::unique_ptr<NUClear::Environment> environment)
                 : Reactor(std::move(environment)), subsumptionId(size_t(this) * size_t(this) - size_t(this)) {
-                    log<NUClear::INFO>("Setting up NSGA2 walk path evaluator");
+                    log<NUClear::INFO>("Setting up the NSGA2 evaluator");
 
                 emit<Scope::DIRECT>(std::make_unique<RegisterAction>(RegisterAction{
                     subsumptionId,
@@ -146,7 +146,7 @@ namespace module {
                 });
 
                 on<Trigger<WebotsTimeUpdate>, Single>().then(
-                    [this](const WebotsTimeUpdate& update) { simTime = update.sim_time; });
+                    [this](const WebotsTimeUpdate& update) { sim_time = update.sim_time; });
 
                 on<Trigger<NSGA2Terminate>, Single>().then([this]() {
                     // NSGA2Terminate is emitted when we've finished all generations and all individuals
@@ -270,9 +270,9 @@ namespace module {
                 log<NUClear::DEBUG>("Evaluating");
 
                 if (event == Event::ResetDone) {
-                    if (lastEvalRequestMsg.task == "walk"    || 
+                    if (lastEvalRequestMsg.task == "walk"    ||
                         lastEvalRequestMsg.task == "stand"   ||
-                        lastEvalRequestMsg.task == "strafe"  || 
+                        lastEvalRequestMsg.task == "strafe"  ||
                         lastEvalRequestMsg.task == "rotation") {
                         task->evaluatingState(subsumptionId, this);
                     }
@@ -286,7 +286,7 @@ namespace module {
                                                              const std::chrono::seconds delay_time) {
                 // Prepare the trial expired message
                 std::unique_ptr<NSGA2TrialExpired> message = std::make_unique<NSGA2TrialExpired>();
-                message->time_started                      = simTime;
+                message->time_started                      = sim_time;
                 message->generation                        = generation;
                 message->individual                        = individual;
                 message->trial_stage                       = trial_stage;
@@ -302,9 +302,9 @@ namespace module {
 
                 // Send a zero walk command to stop walking
                 emit(std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(0.0, 0.0, 0.0)));
-                bool earlyTermination = true;
-                auto fitnessScores    = task->calculateFitnessScores(earlyTermination, simTime, generation, individual);
-                emit(fitnessScores);
+                bool early_termination = true;
+                auto fitness_scores    = task->calculateFitnessScores(early_termination, sim_time, generation, individual);
+                emit(fitness_scores);
 
                 emit(std::make_unique<Event>(Event::FitnessScoresSent));  // Go back to waiting for the next request
             }
@@ -315,9 +315,9 @@ namespace module {
 
                 // Send a zero walk command to stop walking
                 emit(std::make_unique<WalkCommand>(subsumptionId, Eigen::Vector3d(0.0, 0.0, 0.0)));
-                bool earlyTermination = false;
-                auto fitnessScores    = task->calculateFitnessScores(earlyTermination, simTime, generation, individual);
-                emit(fitnessScores);
+                bool early_termination = false;
+                auto fitness_scores    = task->calculateFitnessScores(early_termination, sim_time, generation, individual);
+                emit(fitness_scores);
 
                 emit(std::make_unique<Event>(Event::FitnessScoresSent));  // Go back to waiting for the next request
             }

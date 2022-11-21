@@ -56,7 +56,7 @@ namespace module {
                 };
 
                 /// @brief The current simulation time
-                double simTime = 0.0;
+                double sim_time = 0.0;
 
             private:
                 std::unique_ptr<EvaluatorTask> task;

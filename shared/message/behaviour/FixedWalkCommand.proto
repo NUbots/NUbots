@@ -24,19 +24,19 @@ import "google/protobuf/duration.proto";
 import "Vector.proto";
 
 message FixedWalkFinished {}
-message WalkConfigSaved {}
+message walk_configSaved {}
 message CancelFixedWalk {}
 
 message WalkOptimiserCommand {
-    string walkConfig = 1;
+    string walk_config = 1;
 }
 
 message FixedWalkCommand {
     message WalkSegment {
         vec2                     direction                 = 1;
-        double                   curvePeriod               = 2;
-        double                   normalisedVelocity        = 3;
-        double                   normalisedAngularVelocity = 4;
+        double                   curve_period               = 2;
+        double                   normalised_velocity        = 3;
+        double                   normalised_angular_velocity = 4;
         google.protobuf.Duration duration                  = 5;
     };
 
