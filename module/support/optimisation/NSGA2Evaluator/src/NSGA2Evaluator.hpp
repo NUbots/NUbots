@@ -92,10 +92,10 @@ namespace module {
                 std::vector<double> ConstraintsNotViolated();
 
                 /// @brief The current state of the evaluation
-                State currentState = State::WAITING_FOR_REQUEST;
+                State current_state = State::WAITING_FOR_REQUEST;
 
                 /// @brief Get the next state to transition to given the current state and an event
-                State HandleTransition(State currentState, Event event);
+                State HandleTransition(State current_state, Event event);
 
                 /// @brief Handle the WAITING_FOR_REQUEST state
                 void WaitingForRequest();
