@@ -206,7 +206,6 @@ namespace module::input {
 
             float residual = ReadData<uint32_t>::read(ptr, version);
 
-
             return marker;
         }
     };
