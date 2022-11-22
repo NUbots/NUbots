@@ -219,18 +219,18 @@ namespace module::motion {
             // Update orders
             current_orders = orders;
         });
-
+        // STOP
         on<Trigger<EnableWalkEngineCommand>>().then([this](const EnableWalkEngineCommand& command) {
             subsumption_id = command.subsumption_id;
             walk_engine.reset();
             update_handle.enable();
         });
-
+        // START
         on<Trigger<DisableWalkEngineCommand>>().then([this](const DisableWalkEngineCommand& command) {
             subsumption_id = command.subsumption_id;
             update_handle.disable();
         });
-
+        // MAIN LOOP
         update_handle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single>().then([this]() {
             const float dt = get_time_delta();
 
