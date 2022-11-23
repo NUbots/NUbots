@@ -581,10 +581,10 @@ var namespaces_dup =
             [ "BuildEngine", "structmodule_1_1vision_1_1visualmesh_1_1generate__runner_1_1BuildEngine.html", null ],
             [ "BuildEngine<::visualmesh::engine::cpu::Engine, Scalar >", "structmodule_1_1vision_1_1visualmesh_1_1generate__runner_1_1BuildEngine_3_1_1visualmesh_1_1engin3a4d06ab9f1aca0a3451fe14a035002a.html", "structmodule_1_1vision_1_1visualmesh_1_1generate__runner_1_1BuildEngine_3_1_1visualmesh_1_1engin3a4d06ab9f1aca0a3451fe14a035002a" ],
             [ "BuildEngine<::visualmesh::engine::opencl::Engine, Scalar >", "structmodule_1_1vision_1_1visualmesh_1_1generate__runner_1_1BuildEngine_3_1_1visualmesh_1_1enginf686d48a39f2134786a409c084d63bbf.html", "structmodule_1_1vision_1_1visualmesh_1_1generate__runner_1_1BuildEngine_3_1_1visualmesh_1_1enginf686d48a39f2134786a409c084d63bbf" ],
-            [ "engine", "VisualMeshRunner_8cpp.html#a1c08626674be6b5af4eefa773b1e1890", null ],
-            [ "geometry", "VisualMeshRunner_8cpp.html#ac6dd1b77c596f43d1d89421cc12ea376", null ],
-            [ "model", "VisualMeshRunner_8cpp.html#afe774e7cf5f130f3d48bb471247361bd", null ],
-            [ "runner", "VisualMeshRunner_8cpp.html#afdfbbe779f6e74b7913a4d3dff808854", null ]
+            [ "engine", "VisualMeshRunner_8cpp.html#a8439cd14b8801bafeb3165af8d20c5c3", null ],
+            [ "geometry", "VisualMeshRunner_8cpp.html#a7aab69bd8034eb2c0ec9079af53bee61", null ],
+            [ "model", "VisualMeshRunner_8cpp.html#aba896e714c3b008bd15a63c709a60a7a", null ],
+            [ "runner", "VisualMeshRunner_8cpp.html#a10d5fc24186b0b4eeb2752783730eea2", null ]
           ] ],
           [ "LoadedModel", "structmodule_1_1vision_1_1visualmesh_1_1LoadedModel.html", "structmodule_1_1vision_1_1visualmesh_1_1LoadedModel" ],
           [ "VisualMeshModelConfig", "structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig.html", "structmodule_1_1vision_1_1visualmesh_1_1VisualMeshModelConfig" ],
@@ -628,11 +628,11 @@ var namespaces_dup =
         [ "LimbID", "Action_8hpp.html#ac679ce55897954cb2e800bad7c07a644", null ],
         [ "ServoID", "Action_8hpp.html#aa2c2b0b91b7e566e5acd49bdaee5cb92", null ],
         [ "BallApproach", "MotionCommand_8hpp.html#af94157544a37827f215160c7da31de01", null ],
-        [ "DirectCommand", "MotionCommand_8hpp.html#a4f9a39c2e779c2c7febbda709fac7b5e", null ],
+        [ "DirectCommand", "MotionCommand_8hpp.html#af3b996a8915abc56a23cb48166adb35b", null ],
         [ "RotateOnSpot", "MotionCommand_8hpp.html#a04c788298ad17fe02aa43ada703b5e0c", null ],
         [ "StandStill", "MotionCommand_8hpp.html#a30f5e54a1fc9d8b87f1133b16ad36b3d", null ],
         [ "WalkToReady", "MotionCommand_8hpp.html#acbc11eafcab111be58b08247f0d82c76", null ],
-        [ "WalkToState", "MotionCommand_8hpp.html#ad42404f23f8f8633ced65852ca335431", null ]
+        [ "WalkToState", "MotionCommand_8hpp.html#aa604d9051589dd2894a481050073e413", null ]
       ] ],
       [ "clock", null, [
         [ "ClockData", "structutility_1_1clock_1_1ClockData.html", "structutility_1_1clock_1_1ClockData" ],
@@ -667,9 +667,9 @@ var namespaces_dup =
         [ "uart", "classutility_1_1io_1_1uart.html", "classutility_1_1io_1_1uart" ]
       ] ],
       [ "localisation", null, [
-        [ "fieldStateToTransform3D", "localisation_2transform_8hpp.html#a5b3091367f8b2cc3103c1d430cfee1ab", null ],
-        [ "projectTo2D", "localisation_2transform_8hpp.html#ac90e3775a1dab8065ff11274f5ba4c7f", null ],
-        [ "transform3DToFieldState", "localisation_2transform_8hpp.html#a51bc710f6d5fe3981c3553a16e6e5d83", null ]
+        [ "fieldStateToTransform3D", "localisation_2transform_8hpp.html#abb0125f61147f697f00261ee45d95269", null ],
+        [ "projectTo2D", "localisation_2transform_8hpp.html#a63c225b1c23698df01c9ebab0ea56e65", null ],
+        [ "transform3DToFieldState", "localisation_2transform_8hpp.html#a2a5f3d2557d8e9a7bf4c8bc0f57b9271", null ]
       ] ],
       [ "math", null, [
         [ "angle", "namespaceutility_1_1math_1_1angle.html", [
@@ -742,20 +742,20 @@ var namespaces_dup =
           [ "MultivariateNormal", "structutility_1_1math_1_1stats_1_1MultivariateNormal.html", "structutility_1_1math_1_1stats_1_1MultivariateNormal" ]
         ] ],
         [ "transform", "namespaceutility_1_1math_1_1transform.html", [
-          [ "angle", "namespaceutility_1_1math_1_1transform.html#ab44991061a6a746347655f15ba3c1e69", null ],
-          [ "interpolate", "namespaceutility_1_1math_1_1transform.html#a5446d8ec59fd8dbc77fdadcbe38fa5ad", null ],
-          [ "interpolate", "namespaceutility_1_1math_1_1transform.html#aa481731135417dc4bba41bd36de82154", null ],
-          [ "localToWorld", "namespaceutility_1_1math_1_1transform.html#a788fa0af68d5bb16e073a4fbbd5ce749", null ],
-          [ "lookAt", "namespaceutility_1_1math_1_1transform.html#a85356d237e81db4a9b672df282e85150", null ],
-          [ "rotateLocal", "namespaceutility_1_1math_1_1transform.html#a8c2ba02a03d53e95845c03596b50cd5a", null ],
-          [ "rotateX", "namespaceutility_1_1math_1_1transform.html#a3c2b091933e91c0d0ad8ca4926189f95", null ],
-          [ "rotateXLocal", "namespaceutility_1_1math_1_1transform.html#a47a6da4e8ceac650112e7f0c7a55223d", null ],
-          [ "rotateY", "namespaceutility_1_1math_1_1transform.html#a98458d812c801fa84b4d2a869abe25ac", null ],
-          [ "rotateYLocal", "namespaceutility_1_1math_1_1transform.html#a7effac81a9ecb5f302f757ba789fbff0", null ],
-          [ "rotateZ", "namespaceutility_1_1math_1_1transform.html#a9b73df71cf27a775eed6b0b596ab4872", null ],
-          [ "rotateZLocal", "namespaceutility_1_1math_1_1transform.html#a1c49428b9aa27de95f05e64b84059bb4", null ],
-          [ "twoD_to_threeD", "namespaceutility_1_1math_1_1transform.html#a8968d3725f47c7781ec35e8ba948168f", null ],
-          [ "worldToLocal", "namespaceutility_1_1math_1_1transform.html#a4ac08fb90e8381aa943277550208d1d7", null ]
+          [ "angle", "namespaceutility_1_1math_1_1transform.html#af1243f5dc0b8e9acb053d94666693811", null ],
+          [ "interpolate", "namespaceutility_1_1math_1_1transform.html#a570f34d3a440a0d27bd263ee27aaaf2f", null ],
+          [ "interpolate", "namespaceutility_1_1math_1_1transform.html#a8e5762e5960b52e9a1aa616a3fa8436e", null ],
+          [ "localToWorld", "namespaceutility_1_1math_1_1transform.html#a8aa0f0d18a5cd403e8bd0ed8f1a7929d", null ],
+          [ "lookAt", "namespaceutility_1_1math_1_1transform.html#a1bf3f9ddf6a2f2fa29a50e8a464fd908", null ],
+          [ "rotateLocal", "namespaceutility_1_1math_1_1transform.html#a049d212f8e832a8bc87a17ed9e064900", null ],
+          [ "rotateX", "namespaceutility_1_1math_1_1transform.html#a03f4a2671876b42aa12ff665393edf62", null ],
+          [ "rotateXLocal", "namespaceutility_1_1math_1_1transform.html#a4df024a3387c3a1f98094a589f0c8990", null ],
+          [ "rotateY", "namespaceutility_1_1math_1_1transform.html#ae87fad7afdaf6ef73279c73777670a19", null ],
+          [ "rotateYLocal", "namespaceutility_1_1math_1_1transform.html#ab340fa269247e3af31d81722856ea9dd", null ],
+          [ "rotateZ", "namespaceutility_1_1math_1_1transform.html#af7042c608073e606812c834636b88935", null ],
+          [ "rotateZLocal", "namespaceutility_1_1math_1_1transform.html#a8f6b4ab18a19c9baf5ef08a55d0be9f8", null ],
+          [ "twoD_to_threeD", "namespaceutility_1_1math_1_1transform.html#ac9da093581caa203d2264bb8333ce918", null ],
+          [ "worldToLocal", "namespaceutility_1_1math_1_1transform.html#a8374becde152a0733a6aefac4c599d0e", null ]
         ] ],
         [ "almost_equal", "comparison_8hpp.html#a2796da1263a4946e38169a472eddcb04", null ],
         [ "clamp", "comparison_8hpp.html#aa24753b9ed1dfd45ca002ec042964392", null ],
@@ -765,19 +765,19 @@ var namespaces_dup =
       ] ],
       [ "motion", null, [
         [ "kinematics", null, [
-          [ "calculateAllPositions", "ForwardKinematics_8hpp.html#a5c4d447c0673f92d43cf13e473cfe968", null ],
-          [ "calculateArmJointPosition", "ForwardKinematics_8hpp.html#adb42ea010d3d6e75dfebab97b6fef74f", null ],
+          [ "calculateAllPositions", "ForwardKinematics_8hpp.html#a1c8fc80736617245b8b9b2e14496caa0", null ],
+          [ "calculateArmJointPosition", "ForwardKinematics_8hpp.html#a26c66d5093632e3bd5754bc1b9424f5c", null ],
           [ "calculateCentreOfMass", "ForwardKinematics_8hpp.html#a14c7f84a9eb56acde689625bcc8e57a2", null ],
           [ "calculateGroundSpace", "ForwardKinematics_8hpp.html#a3cd1978058b4c83070b114e4889dcb7a", null ],
-          [ "calculateHeadJointPosition", "ForwardKinematics_8hpp.html#ade56dbda4cdf78974102e62693a589ee", null ],
-          [ "calculateHeadJointPosition", "ForwardKinematics_8hpp.html#aa8ff281bfa93236067af353926a353c4", null ],
+          [ "calculateHeadJointPosition", "ForwardKinematics_8hpp.html#a5b310d51933faeea8116880aa2d4a7cc", null ],
+          [ "calculateHeadJointPosition", "ForwardKinematics_8hpp.html#a8695cc9ac628b453f50ccc9fb5f600c1", null ],
           [ "calculateHeadJoints", "InverseKinematics_8hpp.html#a22ae56d59e135643fce8a3fa55bf5654", null ],
           [ "calculateInertialTensor", "ForwardKinematics_8hpp.html#aa7bb0974dd660c322ba9fb83260754d9", null ],
-          [ "calculateLegJointPosition", "ForwardKinematics_8hpp.html#a1b3118b8d3a663a5be466e40e00a086d", null ],
-          [ "calculateLegJoints", "InverseKinematics_8hpp.html#a78743ddb1df23780236c2783a5207c1b", null ],
-          [ "calculateLegJoints", "InverseKinematics_8hpp.html#ad8a64dd443b179a6c0014c0166d47c79", null ],
-          [ "calculatePosition", "ForwardKinematics_8hpp.html#ad4cad73f13b82ceacdda9aae27c50513", null ],
-          [ "calculateRobotToIMU", "ForwardKinematics_8hpp.html#aa3bb6d4723fb1d2075865dc4bbe62359", null ]
+          [ "calculateLegJointPosition", "ForwardKinematics_8hpp.html#a79983b9a692879a1433b2a24fde6ad02", null ],
+          [ "calculateLegJoints", "InverseKinematics_8hpp.html#aebc5db549ce53bb43c6d49ce9b591c5f", null ],
+          [ "calculateLegJoints", "InverseKinematics_8hpp.html#a25ec26d436af83cce4c8f29be874c377", null ],
+          [ "calculatePosition", "ForwardKinematics_8hpp.html#ab0312fd8c3bed5d7fdca61a2729e83b6", null ],
+          [ "calculateRobotToIMU", "ForwardKinematics_8hpp.html#a0c0ab8a3d43d5322d2a8f5b91e01be70", null ]
         ] ],
         [ "splines", null, [
           [ "Combination", "classutility_1_1motion_1_1splines_1_1Combination.html", "classutility_1_1motion_1_1splines_1_1Combination" ],

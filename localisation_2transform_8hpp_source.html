@@ -197,31 +197,31 @@ $(document).ready(function(){initNavTree('localisation_2transform_8hpp_source.ht
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="keyword">namespace </span>utility::localisation {</div>
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160; </div>
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;    <span class="comment">// Transforms the field state (x,y,theta) to the correct transform Hfw : World -&gt; Field</span></div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;    <span class="keyword">inline</span> Eigen::Affine3d fieldStateToTransform3D(<span class="keyword">const</span> Eigen::Vector3d&amp; state) {</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;        Eigen::Affine3d Hfw;</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;    <span class="keyword">inline</span> Eigen::Isometry3d fieldStateToTransform3D(<span class="keyword">const</span> Eigen::Vector3d&amp; state) {</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;        Eigen::Isometry3d Hfw;</div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;        Hfw.translation() = Eigen::Vector3d(state.x(), state.y(), 0.0);</div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;        Hfw.linear()      = Eigen::AngleAxisd(state.z(), Eigen::Vector3d::UnitZ()).toRotationMatrix();</div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;        <span class="keywordflow">return</span> Hfw;</div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;    }</div>
 <div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160; </div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    <span class="keyword">inline</span> Eigen::Affine2d projectTo2D(<span class="keyword">const</span> Eigen::Affine3d&amp; m,</div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;                                       <span class="keyword">const</span> Eigen::Vector3d&amp; yawAxis,</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;                                       <span class="keyword">const</span> Eigen::Vector3d&amp; forwardAxis) {</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;        Eigen::Affine2d result;</div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;    <span class="keyword">inline</span> Eigen::Isometry2d projectTo2D(<span class="keyword">const</span> Eigen::Isometry3d&amp; m,</div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;                                         <span class="keyword">const</span> Eigen::Vector3d&amp; yawAxis,</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;                                         <span class="keyword">const</span> Eigen::Vector3d&amp; forwardAxis) {</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;        Eigen::Isometry2d result;</div>
 <div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160; </div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        <span class="comment">// Translation</span></div>
 <div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        <span class="keyword">const</span> Eigen::Vector3d orthoForwardAxis = yawAxis.cross(forwardAxis.cross(yawAxis)).normalized();</div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        <span class="keyword">const</span> Eigen::Vector3d r                = m.translation();</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        Eigen::Affine3d newSpaceToWorld(Eigen::Affine3d::Identity());</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        Eigen::Isometry3d newSpaceToWorld(Eigen::Isometry3d::Identity());</div>
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        newSpaceToWorld.linear().leftCols&lt;1&gt;()    = orthoForwardAxis;</div>
 <div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        newSpaceToWorld.linear().middleCols&lt;1&gt;(1) = yawAxis.cross(orthoForwardAxis);</div>
 <div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        newSpaceToWorld.linear().rightCols&lt;1&gt;()   = yawAxis;</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        <span class="keyword">const</span> Eigen::Affine3d worldToNewSpace(newSpaceToWorld.inverse());</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;        <span class="keyword">const</span> Eigen::Isometry3d worldToNewSpace(newSpaceToWorld.inverse());</div>
 <div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;        Eigen::Vector3d rNewSpace = worldToNewSpace * r;</div>
 <div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        result.translation()      = rNewSpace.head&lt;2&gt;();</div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160; </div>
 <div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        <span class="comment">// Rotation</span></div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        Eigen::Affine3d rot(m);</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        Eigen::Isometry3d rot(m);</div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        rot.translation() = Eigen::Vector3d::Zero();</div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        <span class="keyword">const</span> Eigen::Vector3d x(rot.linear().leftCols&lt;1&gt;());</div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;        <span class="keyword">const</span> Eigen::Vector3d xNew(worldToNewSpace * x);</div>
@@ -232,7 +232,7 @@ $(document).ready(function(){initNavTree('localisation_2transform_8hpp_source.ht
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    }</div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160; </div>
 <div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;    <span class="comment">// Transforms the transform</span></div>
-<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    <span class="keyword">inline</span> Eigen::Affine2d transform3DToFieldState(<span class="keyword">const</span> Eigen::Affine3d&amp; m) {</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;    <span class="keyword">inline</span> Eigen::Isometry2d transform3DToFieldState(<span class="keyword">const</span> Eigen::Isometry3d&amp; m) {</div>
 <div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        <span class="keywordflow">return</span> projectTo2D(m, Eigen::Vector3d::UnitZ(), Eigen::Vector3d::UnitX());</div>
 <div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    }</div>
 <div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160; </div>
@@ -245,7 +245,7 @@ $(document).ready(function(){initNavTree('localisation_2transform_8hpp_source.ht
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_38bed732d55f0866e6135bc645f051b9.html">localisation</a></li><li class="navelem"><b>transform.hpp</b></li>
-    <li class="footer">Generated on Sun Nov 20 2022 09:27:22 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Nov 23 2022 07:44:16 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

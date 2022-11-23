@@ -227,7 +227,7 @@ $(document).ready(function(){initNavTree('InverseKinematics_8hpp_source.html',''
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Scalar&gt;</div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    [[nodiscard]] std::vector&lt;std::pair&lt;ServoID, Scalar&gt;&gt; calculateLegJoints(</div>
 <div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        <span class="keyword">const</span> message::motion::KinematicsModel&amp; model,</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        <span class="keyword">const</span> Eigen::Transform&lt;Scalar, 3, Eigen::Affine&gt;&amp; target_,</div>
+<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        <span class="keyword">const</span> Eigen::Transform&lt;Scalar, 3, Eigen::Isometry&gt;&amp; target_,</div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        <span class="keyword">const</span> LimbID&amp; limb) {</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        <span class="keyword">const</span> Scalar LENGTH_BETWEEN_LEGS             = model.leg.LENGTH_BETWEEN_LEGS;</div>
 <div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;        <span class="keyword">const</span> Scalar DISTANCE_FROM_BODY_TO_HIP_JOINT = model.leg.HIP_OFFSET_Z;</div>
@@ -245,7 +245,7 @@ $(document).ready(function(){initNavTree('InverseKinematics_8hpp_source.html',''
 <div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;        Scalar ankleRoll  = 0;</div>
 <div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160; </div>
 <div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;        <span class="comment">// Correct for input referencing the bottom of the foot</span></div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        Eigen::Transform&lt;Scalar, 3, Eigen::Affine&gt; target(target_);</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;        Eigen::Transform&lt;Scalar, 3, Eigen::Isometry&gt; target(target_);</div>
 <div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;        target = target.translate(Eigen::Matrix&lt;Scalar, 3, 1&gt;(0.0, 0.0, model.leg.FOOT_HEIGHT));</div>
 <div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160; </div>
 <div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;        <span class="comment">// Tci = transformation (not necessarily homogeneous) from input coordinates to calculation coordinates</span></div>
@@ -378,8 +378,8 @@ $(document).ready(function(){initNavTree('InverseKinematics_8hpp_source.html',''
 <div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Scalar&gt;</div>
 <div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;    [[nodiscard]] std::vector&lt;std::pair&lt;ServoID, Scalar&gt;&gt; calculateLegJoints(</div>
 <div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;        <span class="keyword">const</span> message::motion::KinematicsModel&amp; model,</div>
-<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;        <span class="keyword">const</span> Eigen::Transform&lt;Scalar, 3, Eigen::Affine&gt;&amp; leftTarget,</div>
-<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;        <span class="keyword">const</span> Eigen::Transform&lt;Scalar, 3, Eigen::Affine&gt;&amp; rightTarget) {</div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;        <span class="keyword">const</span> Eigen::Transform&lt;Scalar, 3, Eigen::Isometry&gt;&amp; leftTarget,</div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;        <span class="keyword">const</span> Eigen::Transform&lt;Scalar, 3, Eigen::Isometry&gt;&amp; rightTarget) {</div>
 <div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;        <span class="keyword">auto</span> joints  = calculateLegJoints&lt;Scalar&gt;(model, leftTarget, LimbID::LEFT_LEG);</div>
 <div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;        <span class="keyword">auto</span> joints2 = calculateLegJoints&lt;Scalar&gt;(model, rightTarget, LimbID::RIGHT_LEG);</div>
 <div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;        joints.insert(joints.end(), joints2.begin(), joints2.end());</div>
@@ -406,7 +406,7 @@ $(document).ready(function(){initNavTree('InverseKinematics_8hpp_source.html',''
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_08bb7c416e2dab45627cac1664f6768a.html">motion</a></li><li class="navelem"><b>InverseKinematics.hpp</b></li>
-    <li class="footer">Generated on Sun Nov 20 2022 09:27:22 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Nov 23 2022 07:44:16 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

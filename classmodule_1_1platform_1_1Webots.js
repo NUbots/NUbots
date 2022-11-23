@@ -16,7 +16,7 @@ var classmodule_1_1platform_1_1Webots =
     [ "current_sim_time", "classmodule_1_1platform_1_1Webots.html#a1ec94ff048e0cdf4b613818df78b7376", null ],
     [ "error_io", "classmodule_1_1platform_1_1Webots.html#a82791865473327c6ce3bfcbf32410a9c", null ],
     [ "fd", "classmodule_1_1platform_1_1Webots.html#aff6bcefaac9f9579110d8fc9c8c1ce23", null ],
-    [ "Hwps", "classmodule_1_1platform_1_1Webots.html#a22142f31af1cf08ffe9305d603ca4ff2", null ],
+    [ "Hwps", "classmodule_1_1platform_1_1Webots.html#aa4d3e2c26c8e343a3d4a3fbe613882d2", null ],
     [ "max_fsr_value", "classmodule_1_1platform_1_1Webots.html#ab263cfa504f8d99df9f0bd300a3a1884", null ],
     [ "max_velocity_mx106", "classmodule_1_1platform_1_1Webots.html#aad0693c9bfdd70ac070dc20336b379ce", null ],
     [ "max_velocity_mx64", "classmodule_1_1platform_1_1Webots.html#a9e8f0bf61ebcd6053881bcebe7b6db83", null ],

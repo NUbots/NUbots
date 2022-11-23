@@ -214,13 +214,13 @@ $(document).ready(function(){initNavTree('ForwardKinematics_8hpp_source.html',''
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;    <span class="keyword">using</span> <a class="code" href="structutility_1_1input_1_1ServoID.html">utility::input::ServoID</a>;</div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160; </div>
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160; </div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    [[nodiscard]] <span class="keyword">inline</span> std::map&lt;ServoID, Eigen::Affine3d&gt; calculateHeadJointPosition(<span class="keyword">const</span> KinematicsModel&amp; model,</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;                                                                                       <span class="keyword">const</span> <span class="keywordtype">float</span>&amp; HEAD_PITCH,</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;                                                                                       <span class="keyword">const</span> <span class="keywordtype">float</span>&amp; HEAD_YAW,</div>
-<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;                                                                                       <span class="keyword">const</span> ServoID&amp; servoID) {</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        std::map&lt;ServoID, Eigen::Affine3d&gt; positions{};</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;    [[nodiscard]] <span class="keyword">inline</span> std::map&lt;ServoID, Eigen::Isometry3d&gt; calculateHeadJointPosition(<span class="keyword">const</span> KinematicsModel&amp; model,</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;                                                                                         <span class="keyword">const</span> <span class="keywordtype">float</span>&amp; HEAD_PITCH,</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;                                                                                         <span class="keyword">const</span> <span class="keywordtype">float</span>&amp; HEAD_YAW,</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;                                                                                         <span class="keyword">const</span> ServoID&amp; servoID) {</div>
+<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        std::map&lt;ServoID, Eigen::Isometry3d&gt; positions{};</div>
 <div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160; </div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        Eigen::Affine3d runningTransform = Eigen::Affine3d::Identity();</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        Eigen::Isometry3d runningTransform = Eigen::Isometry3d::Identity();</div>
 <div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        <span class="keyword">const</span> Eigen::Vector3d NECK_POS(model.head.NECK_BASE_POS_FROM_ORIGIN_X,</div>
 <div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;                                       model.head.NECK_BASE_POS_FROM_ORIGIN_Y,</div>
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;                                       model.head.NECK_BASE_POS_FROM_ORIGIN_Z);</div>
@@ -253,9 +253,9 @@ $(document).ready(function(){initNavTree('ForwardKinematics_8hpp_source.html',''
 <div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;        <span class="keywordflow">return</span> positions;</div>
 <div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;    }</div>
 <div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160; </div>
-<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    [[nodiscard]] <span class="keyword">inline</span> std::map&lt;ServoID, Eigen::Affine3d&gt; calculateHeadJointPosition(<span class="keyword">const</span> KinematicsModel&amp; model,</div>
-<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;                                                                                       <span class="keyword">const</span> Sensors&amp; sensors,</div>
-<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;                                                                                       <span class="keyword">const</span> ServoID&amp; servoID) {</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    [[nodiscard]] <span class="keyword">inline</span> std::map&lt;ServoID, Eigen::Isometry3d&gt; calculateHeadJointPosition(<span class="keyword">const</span> KinematicsModel&amp; model,</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;                                                                                         <span class="keyword">const</span> Sensors&amp; sensors,</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;                                                                                         <span class="keyword">const</span> ServoID&amp; servoID) {</div>
 <div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;        <span class="keywordflow">return</span> calculateHeadJointPosition(model,</div>
 <div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;                                          sensors.servo[<span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(ServoID::HEAD_PITCH)].present_position,</div>
 <div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;                                          sensors.servo[<span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(ServoID::HEAD_YAW)].present_position,</div>
@@ -268,12 +268,12 @@ $(document).ready(function(){initNavTree('ForwardKinematics_8hpp_source.html',''
 <div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;<span class="comment"></span> </div>
 <div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;<span class="comment">        The basis &#39;faces&#39; down its x axis.</span></div>
 <div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;<span class="comment">    */</span></div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;    [[nodiscard]] <span class="keyword">inline</span> std::map&lt;ServoID, Eigen::Affine3d&gt; calculateLegJointPosition(<span class="keyword">const</span> KinematicsModel&amp; model,</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;                                                                                      <span class="keyword">const</span> Sensors&amp; sensors,</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;                                                                                      <span class="keyword">const</span> ServoID&amp; servoID,</div>
-<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;                                                                                      <span class="keyword">const</span> BodySide&amp; isLeft) {</div>
-<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;        std::map&lt;ServoID, Eigen::Affine3d&gt; positions{};</div>
-<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;        Eigen::Affine3d runningTransform = Eigen::Affine3d::Identity();</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;    [[nodiscard]] <span class="keyword">inline</span> std::map&lt;ServoID, Eigen::Isometry3d&gt; calculateLegJointPosition(<span class="keyword">const</span> KinematicsModel&amp; model,</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;                                                                                        <span class="keyword">const</span> Sensors&amp; sensors,</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;                                                                                        <span class="keyword">const</span> ServoID&amp; servoID,</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;                                                                                        <span class="keyword">const</span> BodySide&amp; isLeft) {</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;        std::map&lt;ServoID, Eigen::Isometry3d&gt; positions{};</div>
+<div class="line"><a name="l00104"></a><span class="lineno">  104</span>&#160;        Eigen::Isometry3d runningTransform = Eigen::Isometry3d::Identity();</div>
 <div class="line"><a name="l00105"></a><span class="lineno">  105</span>&#160;        <span class="comment">// Variables to mask left and right leg differences:</span></div>
 <div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;        ServoID HIP_YAW;</div>
 <div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;        ServoID HIP_ROLL;</div>
@@ -378,12 +378,12 @@ $(document).ready(function(){initNavTree('ForwardKinematics_8hpp_source.html',''
 <div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;<span class="comment"></span> </div>
 <div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;<span class="comment">        The basis &#39;faces&#39; down its x axis.</span></div>
 <div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;<span class="comment">    */</span></div>
-<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;    [[nodiscard]] <span class="keyword">inline</span> std::map&lt;ServoID, Eigen::Affine3d&gt; calculateArmJointPosition(<span class="keyword">const</span> KinematicsModel&amp; model,</div>
-<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;                                                                                      <span class="keyword">const</span> Sensors&amp; sensors,</div>
-<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;                                                                                      <span class="keyword">const</span> ServoID&amp; servoID,</div>
-<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;                                                                                      <span class="keyword">const</span> BodySide&amp; isLeft) {</div>
-<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;        std::map&lt;ServoID, Eigen::Affine3d&gt; positions{};</div>
-<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;        Eigen::Affine3d runningTransform = Eigen::Affine3d::Identity();</div>
+<div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;    [[nodiscard]] <span class="keyword">inline</span> std::map&lt;ServoID, Eigen::Isometry3d&gt; calculateArmJointPosition(<span class="keyword">const</span> KinematicsModel&amp; model,</div>
+<div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;                                                                                        <span class="keyword">const</span> Sensors&amp; sensors,</div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;                                                                                        <span class="keyword">const</span> ServoID&amp; servoID,</div>
+<div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;                                                                                        <span class="keyword">const</span> BodySide&amp; isLeft) {</div>
+<div class="line"><a name="l00213"></a><span class="lineno">  213</span>&#160;        std::map&lt;ServoID, Eigen::Isometry3d&gt; positions{};</div>
+<div class="line"><a name="l00214"></a><span class="lineno">  214</span>&#160;        Eigen::Isometry3d runningTransform = Eigen::Isometry3d::Identity();</div>
 <div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;        <span class="comment">// Variables to mask left and right differences:</span></div>
 <div class="line"><a name="l00216"></a><span class="lineno">  216</span>&#160;        ServoID SHOULDER_PITCH;</div>
 <div class="line"><a name="l00217"></a><span class="lineno">  217</span>&#160;        ServoID SHOULDER_ROLL;</div>
@@ -451,9 +451,9 @@ $(document).ready(function(){initNavTree('ForwardKinematics_8hpp_source.html',''
 <div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;<span class="comment"></span> </div>
 <div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;<span class="comment">    /*! @brief</span></div>
 <div class="line"><a name="l00281"></a><span class="lineno">  281</span>&#160;<span class="comment">     */</span></div>
-<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;    [[nodiscard]] <span class="keyword">inline</span> std::map&lt;ServoID, Eigen::Affine3d&gt; calculatePosition(<span class="keyword">const</span> KinematicsModel&amp; model,</div>
-<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;                                                                              <span class="keyword">const</span> Sensors&amp; sensors,</div>
-<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;                                                                              <span class="keyword">const</span> ServoID&amp; servoID) {</div>
+<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;    [[nodiscard]] <span class="keyword">inline</span> std::map&lt;ServoID, Eigen::Isometry3d&gt; calculatePosition(<span class="keyword">const</span> KinematicsModel&amp; model,</div>
+<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;                                                                                <span class="keyword">const</span> Sensors&amp; sensors,</div>
+<div class="line"><a name="l00284"></a><span class="lineno">  284</span>&#160;                                                                                <span class="keyword">const</span> ServoID&amp; servoID) {</div>
 <div class="line"><a name="l00285"></a><span class="lineno">  285</span>&#160;        <span class="keywordflow">switch</span> (servoID.value) {</div>
 <div class="line"><a name="l00286"></a><span class="lineno">  286</span>&#160;            <span class="keywordflow">case</span> ServoID::HEAD_YAW:</div>
 <div class="line"><a name="l00287"></a><span class="lineno">  287</span>&#160;            <span class="keywordflow">case</span> ServoID::HEAD_PITCH: <span class="keywordflow">return</span> calculateHeadJointPosition(model, sensors, servoID);</div>
@@ -475,13 +475,13 @@ $(document).ready(function(){initNavTree('ForwardKinematics_8hpp_source.html',''
 <div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;            <span class="keywordflow">case</span> ServoID::L_KNEE:</div>
 <div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;            <span class="keywordflow">case</span> ServoID::L_ANKLE_PITCH:</div>
 <div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;            <span class="keywordflow">case</span> ServoID::L_ANKLE_ROLL: <span class="keywordflow">return</span> calculateLegJointPosition(model, sensors, servoID, BodySide::LEFT);</div>
-<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;            <span class="keywordflow">default</span>: <span class="keywordflow">return</span> std::map&lt;ServoID, Eigen::Affine3d&gt;();</div>
+<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;            <span class="keywordflow">default</span>: <span class="keywordflow">return</span> std::map&lt;ServoID, Eigen::Isometry3d&gt;();</div>
 <div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;        }</div>
 <div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;    }</div>
 <div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160; </div>
-<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;    [[nodiscard]] <span class="keyword">inline</span> std::map&lt;ServoID, Eigen::Affine3d&gt; calculateAllPositions(<span class="keyword">const</span> KinematicsModel&amp; model,</div>
-<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;                                                                                  <span class="keyword">const</span> Sensors&amp; sensors) {</div>
-<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;        std::map&lt;ServoID, Eigen::Affine3d&gt; result{};</div>
+<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;    [[nodiscard]] <span class="keyword">inline</span> std::map&lt;ServoID, Eigen::Isometry3d&gt; calculateAllPositions(<span class="keyword">const</span> KinematicsModel&amp; model,</div>
+<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;                                                                                    <span class="keyword">const</span> Sensors&amp; sensors) {</div>
+<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;        std::map&lt;ServoID, Eigen::Isometry3d&gt; result{};</div>
 <div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;        <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; r : calculatePosition(model, sensors, ServoID::L_ANKLE_ROLL)) {</div>
 <div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;            result[r.first] = r.second;</div>
 <div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;        }</div>
@@ -646,7 +646,7 @@ $(document).ready(function(){initNavTree('ForwardKinematics_8hpp_source.html',''
 <div class="line"><a name="l00474"></a><span class="lineno">  474</span>&#160;        <span class="keywordflow">return</span> inertia_tensor;</div>
 <div class="line"><a name="l00475"></a><span class="lineno">  475</span>&#160;    }  <span class="comment">// namespace kinematics</span></div>
 <div class="line"><a name="l00476"></a><span class="lineno">  476</span>&#160; </div>
-<div class="line"><a name="l00477"></a><span class="lineno">  477</span>&#160;    [[nodiscard]] <span class="keyword">inline</span> Eigen::Matrix2d calculateRobotToIMU(<span class="keyword">const</span> Eigen::Affine3d&amp; orientation) {</div>
+<div class="line"><a name="l00477"></a><span class="lineno">  477</span>&#160;    [[nodiscard]] <span class="keyword">inline</span> Eigen::Matrix2d calculateRobotToIMU(<span class="keyword">const</span> Eigen::Isometry3d&amp; orientation) {</div>
 <div class="line"><a name="l00478"></a><span class="lineno">  478</span>&#160;        <span class="keyword">const</span> Eigen::Vector3d xRobotImu  = orientation.rotation().topRows&lt;1&gt;();</div>
 <div class="line"><a name="l00479"></a><span class="lineno">  479</span>&#160;        <span class="keyword">const</span> Eigen::Vector2d projXRobot = xRobotImu.head&lt;2&gt;().normalized();</div>
 <div class="line"><a name="l00480"></a><span class="lineno">  480</span>&#160;        <span class="keyword">const</span> Eigen::Vector2d projYRobot = Eigen::Vector2d(-projXRobot.y(), projXRobot.x());</div>
@@ -693,7 +693,7 @@ $(document).ready(function(){initNavTree('ForwardKinematics_8hpp_source.html',''
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_08bb7c416e2dab45627cac1664f6768a.html">motion</a></li><li class="navelem"><b>ForwardKinematics.hpp</b></li>
-    <li class="footer">Generated on Sun Nov 20 2022 09:27:22 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Wed Nov 23 2022 07:44:16 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
