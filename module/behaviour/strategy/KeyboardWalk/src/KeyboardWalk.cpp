@@ -28,6 +28,7 @@
 #include "message/behaviour/MotionCommand.hpp"
 #include "message/motion/HeadCommand.hpp"
 #include "message/motion/KickCommand.hpp"
+#include "message/motion/WalkCommand.hpp"
 
 #include "utility/behaviour/MotionCommand.hpp"
 #include "utility/input/LimbID.hpp"
@@ -335,7 +336,8 @@ namespace module::behaviour::strategy {
             Eigen::Affine2d affineParameter;
             affineParameter.linear()      = Eigen::Rotation2Dd(rotation).toRotationMatrix();
             affineParameter.translation() = Eigen::Vector2d(velocity.x(), velocity.y());
-            emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(affineParameter)));
+            // emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(affineParameter)));
+            emit<Task>(std::make_unique<WalkCommand>(Eigen::Vector3f(velocity.x(), velocity.y(), rotation)))
         }
 
         auto head_command         = std::make_unique<HeadCommand>();
