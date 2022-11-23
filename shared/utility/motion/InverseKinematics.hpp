@@ -55,7 +55,7 @@ namespace utility::motion::kinematics {
     template <typename Scalar>
     [[nodiscard]] std::vector<std::pair<ServoID, Scalar>> calculateLegJoints(
         const message::motion::KinematicsModel& model,
-        const Eigen::Transform<Scalar, 3, Eigen::Affine>& target_,
+        const Eigen::Transform<Scalar, 3, Eigen::Isometry>& target_,
         const LimbID& limb) {
         const Scalar LENGTH_BETWEEN_LEGS             = model.leg.LENGTH_BETWEEN_LEGS;
         const Scalar DISTANCE_FROM_BODY_TO_HIP_JOINT = model.leg.HIP_OFFSET_Z;
@@ -73,7 +73,7 @@ namespace utility::motion::kinematics {
         Scalar ankleRoll  = 0;
 
         // Correct for input referencing the bottom of the foot
-        Eigen::Transform<Scalar, 3, Eigen::Affine> target(target_);
+        Eigen::Transform<Scalar, 3, Eigen::Isometry> target(target_);
         target = target.translate(Eigen::Matrix<Scalar, 3, 1>(0.0, 0.0, model.leg.FOOT_HEIGHT));
 
         // Tci = transformation (not necessarily homogeneous) from input coordinates to calculation coordinates
@@ -206,8 +206,8 @@ namespace utility::motion::kinematics {
     template <typename Scalar>
     [[nodiscard]] std::vector<std::pair<ServoID, Scalar>> calculateLegJoints(
         const message::motion::KinematicsModel& model,
-        const Eigen::Transform<Scalar, 3, Eigen::Affine>& leftTarget,
-        const Eigen::Transform<Scalar, 3, Eigen::Affine>& rightTarget) {
+        const Eigen::Transform<Scalar, 3, Eigen::Isometry>& leftTarget,
+        const Eigen::Transform<Scalar, 3, Eigen::Isometry>& rightTarget) {
         auto joints  = calculateLegJoints<Scalar>(model, leftTarget, LimbID::LEFT_LEG);
         auto joints2 = calculateLegJoints<Scalar>(model, rightTarget, LimbID::RIGHT_LEG);
         joints.insert(joints.end(), joints2.begin(), joints2.end());
