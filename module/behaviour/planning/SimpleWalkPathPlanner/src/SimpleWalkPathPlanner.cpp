@@ -115,7 +115,7 @@ namespace module::behaviour::planning {
                 Eigen::Vector3f rBCc =
                     reciprocalSphericalToCartesian(balls.balls[0].measurements[0].srBCc.cast<float>());
                 // Transform the vision ball measurement into torso space
-                Eigen::Affine3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
+                Eigen::Isometry3f Htc(sensors.Htw.cast<float>() * balls.Hcw.inverse().cast<float>());
                 rBTt = Htc * rBCc;
             }
         });

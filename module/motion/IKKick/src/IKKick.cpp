@@ -117,8 +117,8 @@ namespace module::motion {
 
 
                 // 4x4 homogeneous transform matrices for left foot and right foot relative to torso
-                Eigen::Affine3d leftFoot(sensors.Htx[ServoID::L_ANKLE_ROLL]);
-                Eigen::Affine3d rightFoot(sensors.Htx[ServoID::R_ANKLE_ROLL]);
+                Eigen::Isometry3d leftFoot(sensors.Htx[ServoID::L_ANKLE_ROLL]);
+                Eigen::Isometry3d rightFoot(sensors.Htx[ServoID::R_ANKLE_ROLL]);
 
                 // Work out which of our feet are going to be the support foot
                 // Store the support foot and kick foot
@@ -129,10 +129,10 @@ namespace module::motion {
                     supportFoot = LimbID::RIGHT_LEG;
                 }
 
-                Eigen::Affine3d torsoPose =
+                Eigen::Isometry3d torsoPose =
                     (supportFoot == LimbID::LEFT_LEG) ? leftFoot.inverse() : rightFoot.inverse();
 
-                Eigen::Affine3d Htg = Eigen::Affine3d(sensors.Hgt).inverse();
+                Eigen::Isometry3d Htg = Eigen::Isometry3d(sensors.Hgt).inverse();
 
                 // Put the ball position from vision into torso coordinates by transforming the command target
                 Eigen::Vector3d targetTorso = Htg * command.target;
@@ -187,13 +187,13 @@ namespace module::motion {
 
                 // Do things based on current state
 
-                Eigen::Affine3d kickFootGoal;
-                Eigen::Affine3d supportFootGoal;
+                Eigen::Isometry3d kickFootGoal;
+                Eigen::Isometry3d supportFootGoal;
 
                 // Move torso over support foot
                 if (balancer.isRunning()) {
-                    Eigen::Affine3d supportFootPose = balancer.getFootPose(sensors);
-                    supportFootGoal                 = supportFootPose;
+                    Eigen::Isometry3d supportFootPose = balancer.getFootPose(sensors);
+                    supportFootGoal                   = supportFootPose;
                     kickFootGoal =
                         supportFootPose.translate(Eigen::Vector3d(0, negativeIfKickRight * foot_separation, 0));
                 }
@@ -204,7 +204,7 @@ namespace module::motion {
                 }
 
                 // Balance based on the IMU
-                Eigen::Affine3f supportFootGoalFloat(supportFootGoal.cast<float>());
+                Eigen::Isometry3f supportFootGoalFloat(supportFootGoal.cast<float>());
                 if (feedback_active) {
                     feedbackBalancer.balance(kinematicsModel, supportFootGoalFloat, supportFoot, sensors);
                 }

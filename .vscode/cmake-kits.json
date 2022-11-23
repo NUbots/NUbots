@@ -1,0 +1,14 @@
+[
+  {
+    "name": "NUbots",
+    "toolchainFile": "/usr/local/toolchain.cmake",
+    "compilers": {
+      "C": "/usr/bin/gcc",
+      "CXX": "/usr/bin/g++"
+    },
+    "cmakeSettings": {
+      "CMAKE_C_COMPILER_LAUNCHER": "/usr/bin/ccache",
+      "CMAKE_CXX_COMPILER_LAUNCHER": "/usr/bin/ccache"
+    }
+  }
+]

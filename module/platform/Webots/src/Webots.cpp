@@ -305,9 +305,9 @@ namespace module::platform {
                                       })));
 
             // Get torso to head, and torso to world
-            Eigen::Affine3d Htp(sensors.Htx[ServoID::HEAD_PITCH]);
-            Eigen::Affine3d Htw(sensors.Htw);
-            Eigen::Affine3d Hwp = Htw.inverse() * Htp;
+            Eigen::Isometry3d Htp(sensors.Htx[ServoID::HEAD_PITCH]);
+            Eigen::Isometry3d Htw(sensors.Htw);
+            Eigen::Isometry3d Hwp = Htw.inverse() * Htp;
 
             Hwps.emplace_back(sensors.timestamp, Hwp);
         });
@@ -807,18 +807,18 @@ namespace module::platform {
             image->id        = camera_context[camera.name].id;
             image->timestamp = NUClear::clock::time_point(std::chrono::nanoseconds(sensor_measurements.time));
 
-            Eigen::Affine3d Hcw;
+            Eigen::Isometry3d Hcw;
 
             /* Mutex Scope */ {
                 std::lock_guard<std::mutex> lock(sensors_mutex);
 
-                const Eigen::Affine3d& Hpc = camera_context[camera.name].Hpc;
-                Eigen::Affine3d Hwp        = Eigen::Affine3d::Identity();
+                const Eigen::Isometry3d& Hpc = camera_context[camera.name].Hpc;
+                Eigen::Isometry3d Hwp        = Eigen::Isometry3d::Identity();
                 if (!Hwps.empty()) {
                     // Find the first time that is not less than the target time
                     auto Hwp_it = std::lower_bound(Hwps.begin(),
                                                    Hwps.end(),
-                                                   std::make_pair(image->timestamp, Eigen::Affine3d::Identity()),
+                                                   std::make_pair(image->timestamp, Eigen::Isometry3d::Identity()),
                                                    [](const auto& a, const auto& b) { return a.first < b.first; });
 
                     if (Hwp_it == Hwps.end()) {
@@ -838,7 +838,7 @@ namespace module::platform {
                     }
                 }
 
-                Hcw = Eigen::Affine3d(Hwp * Hpc).inverse();
+                Hcw = Eigen::Isometry3d(Hwp * Hpc).inverse();
             }
 
             image->lens = camera_context[camera.name].lens;
