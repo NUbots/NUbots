@@ -108,19 +108,19 @@ namespace module::behaviour::planning {
 
                 // Compute target in robot coords
                 // Eigen::Vector3d kickTarget = Eigen::Vector3d::UnitX(); //Kick forwards
-                Eigen::Affine2d position(field.position);
-                Eigen::Affine3d Hfw;
+                Eigen::Isometry2d position(field.position);
+                Eigen::Isometry3d Hfw;
                 Hfw.translation() = Eigen::Vector3d(position.translation().x(), position.translation().y(), 0);
                 Hfw.linear() =
                     Eigen::AngleAxisd(Eigen::Rotation2Dd(position.rotation()).angle(), Eigen::Vector3d::UnitZ())
                         .toRotationMatrix();
 
-                Eigen::Affine3d Htw(sensors.Htw);
+                Eigen::Isometry3d Htw(sensors.Htw);
                 Eigen::Vector3d ballPosition =
                     Htw * Eigen::Vector3d(ball.position.x(), ball.position.y(), fd.ball_radius);
 
                 // Transform target from field to torso space
-                Eigen::Affine3d Htf        = Htw * Hfw.inverse();
+                Eigen::Isometry3d Htf      = Htw * Hfw.inverse();
                 Eigen::Vector3d kickTarget = Htf * Eigen::Vector3d(kickPlan.target.x(), kickPlan.target.y(), 0.0);
                 float KickAngle            = std::fabs(std::atan2(kickTarget.y(), kickTarget.x()));
 

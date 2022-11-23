@@ -52,7 +52,7 @@ message Image {
     uint32                    id         = 4;
     string                    name       = 5;
     google.protobuf.Timestamp timestamp  = 6;
-    /// World to camera Affine3D transform
+    /// World to camera Isometry3d transform
     mat4 Hcw  = 7;
     Lens lens = 8;
 }
