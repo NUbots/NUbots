@@ -169,24 +169,12 @@ namespace module {
             NSGA2Evaluator::State NSGA2Evaluator::HandleTransition(NSGA2Evaluator::State current_state,
                                                                    NSGA2Evaluator::Event event) {
                 switch (current_state) {
-                    case State::WAITING_FOR_REQUEST:
-                        return TransitionEvents(event);
-
-                    case State::SETTING_UP_TRIAL:
-                        return TransitionEvents(event);
-
-                    case State::RESETTING_SIMULATION:
-                        return TransitionEvents(event);
-
-                    case State::EVALUATING:
-                        return TransitionEvents(event);
-
-                    case State::TERMINATING_EARLY:
-                        return TransitionEvents(event);
-
-                    case State::TERMINATING_GRACEFULLY:
-                        return TransitionEvents(event);
-
+                    case State::WAITING_FOR_REQUEST         : return TransitionEvents(event);
+                    case State::SETTING_UP_TRIAL            : return TransitionEvents(event);
+                    case State::RESETTING_SIMULATION        : return TransitionEvents(event);
+                    case State::EVALUATING                  : return TransitionEvents(event);
+                    case State::TERMINATING_EARLY           : return TransitionEvents(event);
+                    case State::TERMINATING_GRACEFULLY      : return TransitionEvents(event);
                     case State::FINISHED:
                         // Arguably this should return FINISHED regardless of event, unless we want to be able to
                         // reset
