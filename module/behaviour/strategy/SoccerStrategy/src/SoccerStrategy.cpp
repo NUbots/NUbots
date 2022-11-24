@@ -467,7 +467,7 @@ namespace module::behaviour::strategy {
         const float error           = 0.05;
         const float buffer          = error + 2.0f * field_description.ball_radius;          // 15cm
         const float y_take_over_box = field_description.dimensions.goal_width / 2 - buffer;  // 90-15 = 75cm
-        Eigen::Affine2d position(field.position);
+        Eigen::Isometry2d position(field.position);
         const float x_robot = position.translation().x();
         const float y_robot = position.translation().y();
         Eigen::Vector2d new_target{};
@@ -496,7 +496,7 @@ namespace module::behaviour::strategy {
 
         if (time_since_ball_seen < cfg.goalie_command_timeout) {
 
-            Eigen::Affine2d position(field.position);
+            Eigen::Isometry2d position(field.position);
             const float field_bearing = Eigen::Rotation2Dd(position.rotation()).angle();
             const int sign_bearing    = field_bearing > 0 ? 1 : -1;
             const float rotation_speed =
@@ -509,7 +509,7 @@ namespace module::behaviour::strategy {
                 * std::fmin(std::fabs(cfg.goalie_translation_speed_factor * ball.position[1]),
                             cfg.goalie_max_translation_speed);
 
-            Eigen::Affine2d cmd{};
+            Eigen::Isometry2d cmd{};
             cmd.linear()      = Eigen::Rotation2Dd(rotation_speed).matrix();
             cmd.translation() = Eigen::Vector2d::Zero();
             motion_command    = std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(cmd));
@@ -519,7 +519,7 @@ namespace module::behaviour::strategy {
         }
         else {
             motion_command =
-                std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(Eigen::Affine2d::Identity()));
+                std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(Eigen::Isometry2d::Identity()));
         }
         emit(std::move(motion_command));
     }
