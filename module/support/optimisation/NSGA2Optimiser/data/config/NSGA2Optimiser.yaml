@@ -1,5 +1,5 @@
 # Larger population encourages wider search
-population_size: 12
+population_size: 4
 # More generations encourages deeper search
 max_generations: 5
 num_objectives: 1
@@ -51,10 +51,10 @@ walk:
   trunk:
     # Height of the trunk from ground (how much we bend the knee, for the entire walk, fully standing is 0.51-ish)
     # (in m, > 0)
-    height: [0.6, 0.4, 0.6]
+    height: [0.5, 0.4, 0.6]
     # Trunk pitch orientation (how much we lean the torso forward or backward, does not change)
     # (in rad)
-    pitch: [10 * pi / 180, -10 * pi / 180, 30 * pi / 180]
+    pitch: [15 * pi / 180, -10 * pi / 180, 30 * pi / 180]
     # Trunk forward offset (how much we offset the trunk forward or backward lean when walking)
     # (in m)
     x_offset: [0.03, -0.05, 0.05]
@@ -74,5 +74,5 @@ walk:
 
 # The following values are setting the initial values and limits for the walk engine command.
 walk_command:
-  velocity: [0.2, 0.01, 1.00] #  [-0.2, -1.00, -0.01]
+  velocity: [1.0, 0.01, 2.00] #  [-0.2, -1.00, -0.01]
   rotation: [0.15, -1.57, 0.1] # [0.15, 0.1, 1.57]
