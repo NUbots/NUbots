@@ -26,6 +26,20 @@
 namespace module::input {
 
     class NatNet : public NUClear::Reactor {
+    private:
+        /// @brief Stores configuration values
+        struct Config {
+            Config() = default;
+            /// @brief Motive Multicast Address
+            std::string multicast_address = "";
+            /// @brief UDP Command port for communicating with motive
+            uint32_t command_port = 0;
+            /// @brief UDP Data port for communicating with motive
+            uint32_t data_port = 0;
+            /// @brief Dump packets configuraton settings
+            bool dump_packets = false;
+        } cfg;
+
     public:
         struct Packet {
             enum class Type : uint16_t {
@@ -60,6 +74,7 @@ namespace module::input {
             uint32_t parentId{0};
             Eigen::Vector3f offset   = Eigen::Vector3f::Zero();
             Eigen::Vector3f rotation = Eigen::Vector3f::Zero();
+            std::vector<std::string> markerNames;
         };
 
         struct SkeletonModel {
@@ -76,11 +91,11 @@ namespace module::input {
             uint32_t width{0};
             uint32_t length{0};
             Eigen::Vector3f origin = Eigen::Vector3f::Zero();
-            Eigen::Matrix<uint32_t, 12,12> calibrationMatrix;
-            Eigen::Matrix<uint32_t, 4,3> corners;
+            Eigen::Matrix<uint32_t, 12, 12> calibrationMatrix;
+            Eigen::Matrix<uint32_t, 4, 3> corners;
             uint32_t plateType{0};
             uint32_t channelType{0};
-            uint32_t nChannels{0};
+            uint32_t Channels{0};
         };
 
         struct DeviceModel {
@@ -88,16 +103,16 @@ namespace module::input {
             std::string name{};
             uint32_t id{0};
             std::string serialNo{};
-            uint32_t iDeviceType{0};
-            uint32_t iChannelDataType{0};
-            uint32_t nChannels{0};
+            uint32_t DeviceType{0};
+            uint32_t ChannelDataType{0};
+            uint32_t Channels{0};
         };
 
-        struct CameraModel{
+        struct CameraModel {
             CameraModel() = default;
             std::string name;
-            Eigen::Vector3f position = Eigen::Vector3f::Zero();
-            Eigen::Vector3f orientation = Eigen::Vector3f::Zero();
+            Eigen::Vector3f position    = Eigen::Vector3f::Zero();
+            Eigen::Vector4f orientation = Eigen::Vector4f::Zero();
         };
 
         // Models we are using
@@ -111,9 +126,6 @@ namespace module::input {
         uint32_t remote  = 0;
         uint32_t version = 0;
 
-        uint16_t commandPort         = 0;
-        uint16_t dataPort            = 0;
-        std::string multicastAddress = "";
         ReactionHandle commandHandle;
         ReactionHandle dataHandle;
         int commandFd = 0;
