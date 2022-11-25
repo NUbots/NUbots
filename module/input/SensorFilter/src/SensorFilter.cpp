@@ -54,8 +54,6 @@ namespace module::input {
     using utility::nusight::graph;
     using utility::support::Expression;
 
-    using utility::math::angle::normalizeAngle;
-
     std::string makeErrorString(const std::string& src, uint errorCode) {
         std::stringstream s;
 

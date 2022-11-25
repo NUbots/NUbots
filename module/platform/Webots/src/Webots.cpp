@@ -844,7 +844,7 @@ namespace module::platform {
             image->lens = camera_context[camera.name].lens;
             image->Hcw  = Hcw.matrix();
 
-            // If we got ground truth data, send it through with the sensors
+            // If we got ground truth data, send it through with the image
             if (sensor_measurements.vision_ground_truth.exists) {
                 image->vision_ground_truth = sensor_measurements.vision_ground_truth;
             }
