@@ -142,7 +142,7 @@ namespace module::vision {
                 balls->Hcw       = horizon.Hcw;        // world to camera transform at the time the image was taken
 
                 // World to camera transform, to be used in for loop below
-                const Eigen::Affine3f Hcw(horizon.Hcw.cast<float>());
+                const Eigen::Isometry3f Hcw(horizon.Hcw.cast<float>());
 
                 // CHECK EACH CLUSTER FOR VALID BALL
                 for (auto& cluster : clusters) {

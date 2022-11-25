@@ -1,14 +1,9 @@
-FileLogHandler
-==============
+# FileLogHandler
 
 ## Description
 
-
 ## Usage
-
 
 ## Emits
 
-
 ## Dependencies
-

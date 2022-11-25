@@ -74,9 +74,10 @@ TEST_CASE("Test the Head kinematics", "[utility][motion][kinematics][head]") {
         }
 
         // Do our forward kinematics
-        Eigen::Affine3d Htc = utility::motion::kinematics::calculatePosition(kinematics_model,
-                                                                             sensors,
-                                                                             ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
+        Eigen::Isometry3d Htc =
+            utility::motion::kinematics::calculatePosition(kinematics_model,
+                                                           sensors,
+                                                           ServoID::HEAD_PITCH)[ServoID::HEAD_PITCH];
 
         // Check that our vector that forward kinematics finds is close to what is expected
         REQUIRE(double(Htc(0, 0) - camera_vector[0]) == Approx(0.0).margin(ERROR_THRESHOLD));
@@ -89,12 +90,12 @@ TEST_CASE("Test the Leg kinematics", "[utility][motion][kinematics][leg]") {
     for (int i = 0; i < ITERATIONS; ++i) {
 
         // Make a random camera vector
-        Eigen::Affine3d ik_request = Eigen::Affine3d::Identity();
-        Eigen::Vector3d rotation   = Eigen::Vector3d::Random() * 2.0 * M_PI;
-        ik_request                 = ik_request.rotate(Eigen::AngleAxisd(rotation.x(), Eigen::Vector3d::UnitX()));
-        ik_request                 = ik_request.rotate(Eigen::AngleAxisd(rotation.y(), Eigen::Vector3d::UnitY()));
-        ik_request                 = ik_request.rotate(Eigen::AngleAxisd(rotation.z(), Eigen::Vector3d::UnitZ()));
-        ik_request.translation()   = ((Eigen::Vector3d::Random() + Eigen::Vector3d::Ones()) * 0.5)
+        Eigen::Isometry3d ik_request = Eigen::Isometry3d::Identity();
+        Eigen::Vector3d rotation     = Eigen::Vector3d::Random() * 2.0 * M_PI;
+        ik_request                   = ik_request.rotate(Eigen::AngleAxisd(rotation.x(), Eigen::Vector3d::UnitX()));
+        ik_request                   = ik_request.rotate(Eigen::AngleAxisd(rotation.y(), Eigen::Vector3d::UnitY()));
+        ik_request                   = ik_request.rotate(Eigen::AngleAxisd(rotation.z(), Eigen::Vector3d::UnitZ()));
+        ik_request.translation()     = ((Eigen::Vector3d::Random() + Eigen::Vector3d::Ones()) * 0.5)
                                        .cwiseProduct(Eigen::Vector3d(0.03, 0.03, 0.10));
 
         INFO("Testing with the random transform, \n" << ik_request.matrix());
@@ -125,11 +126,11 @@ TEST_CASE("Test the Leg kinematics", "[utility][motion][kinematics][leg]") {
         }
 
         INFO("Calculating forward kinematics");
-        Eigen::Affine3d left_foot_position =
+        Eigen::Isometry3d left_foot_position =
             utility::motion::kinematics::calculatePosition(kinematics_model,
                                                            sensors,
                                                            ServoID::L_ANKLE_ROLL)[ServoID::L_ANKLE_ROLL];
-        Eigen::Affine3d right_foot_position =
+        Eigen::Isometry3d right_foot_position =
             utility::motion::kinematics::calculatePosition(kinematics_model,
                                                            sensors,
                                                            ServoID::R_ANKLE_ROLL)[ServoID::R_ANKLE_ROLL];
