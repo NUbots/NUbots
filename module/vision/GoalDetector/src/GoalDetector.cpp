@@ -443,10 +443,12 @@ namespace module::vision {
                                                         rGCc_opp_r.y(),
                                                         rGCc_opp_r.z()));
 
-
                         int bad_posts               = 0;
                         float avg_error             = 0;
                         Eigen::Vector3f avg_error3f = Eigen::Vector3f::Zero();
+
+                        float total_error             = 0;
+                        Eigen::Vector3f total_error3f = Eigen::Vector3f::Zero();
 
                         for (auto it = goals->goals.begin(); it != goals->goals.end(); it = std::next(it)) {
 
@@ -461,49 +463,54 @@ namespace module::vision {
 
                             float variance = 0.025;
 
-                            if (dist_own_l < variance) {
+                            if (dist_own_l < variance || dist_own_r < variance || dist_opp_l < variance
+                                || dist_opp_r < variance) {
                                 valid = true;
-                                if (dist_own_l < min_error) {
-                                    min_error = dist_own_l;
-                                    error     = it->post.bottom - rGCc_own_l;
-                                }
-                            }
-                            if (dist_own_r < variance) {
-                                valid = true;
-                                if (dist_own_r < min_error) {
-                                    min_error = dist_own_r;
-                                    error     = it->post.bottom - rGCc_own_r;
-                                }
-                            }
-                            if (dist_opp_l < variance) {
-                                valid = true;
-                                if (dist_opp_l < min_error) {
-                                    min_error = dist_opp_l;
-                                    error     = it->post.bottom - rGCc_opp_l;
-                                }
-                            }
-                            if (dist_opp_r < variance) {
-                                valid = true;
-                                if (dist_opp_r < min_error) {
-                                    min_error = dist_opp_r;
-                                    error     = it->post.bottom - rGCc_opp_r;
-                                }
                             }
 
-                            if (min_error < 1) {
+                            if (dist_own_l < min_error) {
+                                min_error = dist_own_l;
+                                error     = it->post.bottom - rGCc_own_l;
+                            }
+                            if (dist_own_r < min_error) {
+                                min_error = dist_own_r;
+                                error     = it->post.bottom - rGCc_own_r;
+                            }
+                            if (dist_opp_l < min_error) {
+                                min_error = dist_opp_l;
+                                error     = it->post.bottom - rGCc_opp_l;
+                            }
+                            if (dist_opp_r < min_error) {
+                                min_error = dist_opp_r;
+                                error     = it->post.bottom - rGCc_opp_r;
+                            }
+
+                            if (valid) {
                                 avg_error += min_error;
                                 avg_error3f += error;
+                                avg_error3f.x() += std::abs(error.x());
+                                avg_error3f.y() += std::abs(error.y());
+                                avg_error3f.z() += std::abs(error.z());
                             }
 
-                            avg_error += min_error;
-                            avg_error3f.x() += std::abs(error.x());
-                            avg_error3f.y() += std::abs(error.y());
-                            avg_error3f.z() += std::abs(error.z());
+                            total_error += min_error;
+                            total_error3f += error;
+                            // total_error3f =
+                            //   Eigen::Vector3f(std::abs(error.x(), std::abs(error.y()), std::abs(error.z())));
+                            total_error3f.x() += std::abs(error.x());
+                            total_error3f.y() += std::abs(error.y());
+                            total_error3f.z() += std::abs(error.z());
 
-                            log<NUClear::DEBUG>(fmt::format("avg_error3f x:{}, y:{}, z:{}",
+                            log<NUClear::DEBUG>(fmt::format("avg_error3f sum x:{}, y:{}, z:{}",
                                                             avg_error3f.x(),
                                                             avg_error3f.y(),
                                                             avg_error3f.z()));
+
+
+                            log<NUClear::DEBUG>(fmt::format("total_error3f sum x:{}, y:{}, z:{}",
+                                                            total_error3f.x(),
+                                                            total_error3f.y(),
+                                                            total_error3f.z()));
 
                             /*
                             log<NUClear::DEBUG>(
@@ -544,11 +551,21 @@ namespace module::vision {
                             avg_error3f = (avg_error3f / ((goals->goals.size() - bad_posts)));
                         }
 
+                        total_error   = (total_error / (goals->goals.size()));
+                        total_error3f = (total_error3f / (goals->goals.size()));
+
                         log<NUClear::DEBUG>(fmt::format("Average Error:{}", avg_error));
                         log<NUClear::DEBUG>(fmt::format("Average Error x:{}, y:{}, z:{}",
                                                         avg_error3f.x(),
                                                         avg_error3f.y(),
                                                         avg_error3f.z()));
+
+
+                        log<NUClear::DEBUG>(fmt::format("Total Error:{}", total_error));
+                        log<NUClear::DEBUG>(fmt::format("Total Error x:{}, y:{}, z:{}",
+                                                        total_error3f.x(),
+                                                        total_error3f.y(),
+                                                        total_error3f.z()));
 
 
                         /*
