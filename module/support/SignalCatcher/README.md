@@ -1,5 +1,4 @@
-Signal Catcher
-==============
+# Signal Catcher
 
 ## Description
 
@@ -14,4 +13,3 @@ the program) it immediately exits the program with return code 1.
 
 If SIGSEGV (segmentation fault) is received, SignalCatcher throws a
 `message::SegmentationFault` exception.
-

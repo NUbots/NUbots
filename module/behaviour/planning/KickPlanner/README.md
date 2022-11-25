@@ -1,13 +1,9 @@
-Kick Planner
-============
+# Kick Planner
 
 ## Description
 
-
 ## Usage
 
-
 ## Emits
-
 
 ## Dependencies
