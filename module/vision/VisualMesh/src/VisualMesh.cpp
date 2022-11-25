@@ -84,6 +84,10 @@ namespace module::vision {
                                 msg->classifications = std::move(result.classifications);
                                 msg->class_map       = runner.class_map;
 
+                                if (image.vision_ground_truth.exists) {
+                                    msg->vision_ground_truth = image.vision_ground_truth;
+                                }
+
                                 // Emit the inference
                                 emit(msg);
                             }
