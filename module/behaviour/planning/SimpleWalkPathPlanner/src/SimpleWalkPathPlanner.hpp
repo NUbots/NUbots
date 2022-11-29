@@ -79,8 +79,8 @@ namespace module::behaviour::planning {
             float rotate_around_ball_speed_x = 0;
             /// @brief rotate_around_ball side velocity
             float rotate_around_ball_speed_y = 0;
-
-
+            /// @brief ball y offset
+            float ball_y_offset = 0;
         } cfg;
 
         /// @brief Stores the latest MotionCommand

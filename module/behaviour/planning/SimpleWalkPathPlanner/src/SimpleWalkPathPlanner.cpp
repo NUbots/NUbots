@@ -77,6 +77,7 @@ namespace module::behaviour::planning {
             cfg.walk_to_ready_speed_y      = config["walk_to_ready_speed_y"].as<float>();
             cfg.walk_to_ready_rotation     = config["walk_to_ready_rotation"].as<float>();
             cfg.walk_path_planner_priority = config["walk_path_planner_priority"].as<float>();
+            cfg.ball_y_offset              = config["ball_y_offset"].as<float>();
         });
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
@@ -145,8 +146,11 @@ namespace module::behaviour::planning {
     void SimpleWalkPathPlanner::vision_walk_path(const std::shared_ptr<const FilteredBall>& ball) {
         // If ball exists...
         if (ball) {
-            // Obtain the unit vector to ball in torso space and scale by cfg.forward_speed
-            Eigen::Vector3f uBTt         = ball->rBTt.normalized();
+            Eigen::Vector3f rBTt = ball->rBTt.cast<float>();
+            // Add a offset to the ball position to avoid walking at the ball directly such that the robot can kick
+            rBTt.y() = rBTt.y() + cfg.ball_y_offset;
+            // Obtain the unit vector to desired target in torso space and scale by cfg.forward_speed
+            Eigen::Vector3f uBTt         = rBTt.normalized();
             Eigen::Vector3f walk_command = cfg.forward_speed * (uBTt);
 
             // Set the angular velocity component of the walk_command with the angular displacement and saturate with

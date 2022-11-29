@@ -13,4 +13,4 @@ search_timeout: 4.5
 fixation_time: 2
 
 # Added pitch offset to ball tracking
-pitch_offset: -1
+pitch_offset: -0.5

@@ -23,3 +23,6 @@ rotate_around_ball_speed_y: -0.4
 walk_to_ready_speed_x: 0.1
 walk_to_ready_speed_y: 0.05
 walk_to_ready_rotation: 0.4
+
+# Y - Offset for ball position such that ball is approached with foot behind ball
+ball_y_offset: 0.1
