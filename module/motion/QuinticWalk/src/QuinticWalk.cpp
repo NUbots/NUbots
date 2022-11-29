@@ -220,18 +220,25 @@ namespace module::motion {
             current_orders = orders;
         });
 
-        // START
-        on<Provide<EnableWalkEngineCommand>>().then([this](const EnableWalkEngineCommand& command) {
-            subsumption_id = command.subsumption_id;
+        // OLD START
+        // on<Provide<EnableWalkEngineCommand>>().then([this](const EnableWalkEngineCommand& command) {
+        //     subsumption_id = command.subsumption_id;
+        //     walk_engine.reset();
+        //     update_handle.enable();
+        // });
+
+        on<Start<WalkCommand>>().then([this] {
             walk_engine.reset();
             update_handle.enable();
         });
 
-        // STOP
-        on<Provide<DisableWalkEngineCommand>>().then([this](const DisableWalkEngineCommand& command) {
-            subsumption_id = command.subsumption_id;
-            update_handle.disable();
-        });
+        // OLD STOP
+        // on<Provide<DisableWalkEngineCommand>>().then([this](const DisableWalkEngineCommand& command) {
+        //     subsumption_id = command.subsumption_id;
+        //     update_handle.disable();
+        // });
+
+        on<Stop<WalkCommand>>().then([this] { update_handle.disable(); });
 
         // MAIN LOOP
         update_handle =
