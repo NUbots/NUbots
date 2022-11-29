@@ -1,3 +1,8 @@
+log_level: WARN
+
+# Priority in subsumption system
+head_controller_priority: 5
+
 #Servo controller parameters
 head_motors:
   gain: 10.0
@@ -6,5 +11,5 @@ head_motors:
 initial:
   yaw: 0
   pitch: 0
-#Gain for controller to reduce look judder and oscillation
-p_gain: 0.1
+# Smoothing factor for goal angle to reduce look judder and oscillation, https://en.wikipedia.org/wiki/Exponential_smoothing
+smoothing_factor: 0.1
