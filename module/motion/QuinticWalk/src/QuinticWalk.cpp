@@ -219,36 +219,36 @@ namespace module::motion {
             // Update orders
             current_orders = orders;
         });
+
         // START
-        // on<Provide<EnableWalkEngineCommand>>()
-        on<Trigger<EnableWalkEngineCommand>>().then([this](const EnableWalkEngineCommand& command) {
+        on<Provide<EnableWalkEngineCommand>>().then([this](const EnableWalkEngineCommand& command) {
             subsumption_id = command.subsumption_id;
             walk_engine.reset();
             update_handle.enable();
         });
+
         // STOP
-        // on<Provide<DisableWalkEngineCommand>>()
-        on<Trigger<DisableWalkEngineCommand>>().then([this](const DisableWalkEngineCommand& command) {
+        on<Provide<DisableWalkEngineCommand>>().then([this](const DisableWalkEngineCommand& command) {
             subsumption_id = command.subsumption_id;
             update_handle.disable();
         });
+
         // MAIN LOOP
-        // on<Provide<Walk>, Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>()
-        update_handle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single>().then([this]() {
-            const float dt = get_time_delta();
-
-            if (falling) {
-                // We are falling, reset walk engine
-                walk_engine.reset();
-            }
-            else {
-
-                // see if the walk engine has new goals for us
-                if (walk_engine.update_state(dt, current_orders)) {
-                    calculate_joint_goals();
+        update_handle =
+            on<Provide<WalkCommand>, Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single>().then([this]() {
+                const float dt = get_time_delta();
+                if (falling) {
+                    // We are falling, reset walk engine
+                    walk_engine.reset();
                 }
-            }
-        });
+                else {
+
+                    // see if the walk engine has new goals for us
+                    if (walk_engine.update_state(dt, current_orders)) {
+                        calculate_joint_goals();
+                    }
+                }
+            });
     }
 
     float QuinticWalk::get_time_delta() {
