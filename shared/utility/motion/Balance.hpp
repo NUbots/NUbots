@@ -30,7 +30,7 @@
 
 #include "utility/input/LimbID.hpp"
 #include "utility/math/matrix/transform.hpp"
-//#include "utility/input/ServoID.hpp"
+// #include "utility/input/ServoID.hpp"
 
 namespace utility::motion {
 
@@ -65,7 +65,7 @@ namespace utility::motion {
         Balancer() = default;
         void configure(const YAML::Node& config);
         void balance(const message::motion::KinematicsModel& model,
-                     Eigen::Affine3f& footToTorso,
+                     Eigen::Isometry3f& footToTorso,
                      const utility::input::LimbID& leg,
                      const message::input::Sensors& sensors);
     };
