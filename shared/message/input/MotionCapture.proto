@@ -76,6 +76,9 @@ message MotionCapture {
         bool   point_cloud_solved = 3;
         bool   model_solved       = 4;
         uint32 err                = 5;
+        bool   has_model          = 6;
+        bool   unlabeled          = 7;
+        bool   active_marker      = 8;
     }
 
     /// Each bone within a skeleton can be subject to position,
@@ -95,6 +98,11 @@ message MotionCapture {
         /// change over time
         repeated Channel channels = 2;
     }
+
+    message Device {
+        uint32           id       = 1;
+        repeated Channel channels = 2;
+    }
     uint32 frame_number = 1;
     float  latency      = 2;
     /// Encoded timestamp - 0 := the first timecode. hour:minute:second:frame
@@ -104,7 +112,7 @@ message MotionCapture {
     uint32 timecode_sub            = 4;
     double natnet_timestamp        = 5;
     double mid_exposure_timestamp  = 6;
-    double data_recieved_timestamp = 7;
+    double data_received_timestamp = 7;
     double transmit_timestamp      = 8;
     /// Whether or not this frame is to be recorded
     bool                   recording              = 9;
@@ -115,4 +123,5 @@ message MotionCapture {
     repeated Skeleton      skeletons              = 14;
     repeated LabeledMarker labeled_markers        = 15;
     repeated ForcePlate    force_plates           = 16;
+    repeated Device        devices                = 17;
 }
