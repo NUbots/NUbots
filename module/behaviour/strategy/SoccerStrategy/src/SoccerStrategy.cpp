@@ -433,7 +433,8 @@ namespace module::behaviour::strategy {
 
     void SoccerStrategy::play(const std::shared_ptr<const FilteredBall>& ball) {
         float absolute_yaw_angle = std::abs(std::atan2(ball->rBTt.y(), ball->rBTt.x()));
-        if (ball && (ball->rBTt).norm() < cfg.kicking_distance_threshold
+        float distance_to_ball   = ball->rBTt.head(2).norm();
+        if (ball && distance_to_ball < cfg.kicking_distance_threshold
             && absolute_yaw_angle < cfg.kicking_angle_threshold) {
             // We are in range, lets kick
             emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
@@ -441,6 +442,10 @@ namespace module::behaviour::strategy {
         else {
             // Request walk planner to walk to the ball
             emit(std::make_unique<MotionCommand>(utility::behaviour::BallApproach()));
+        }
+
+        if (log_level <= NUClear::DEBUG) {
+            log<NUClear::DEBUG>("Distance to ball: ", distance_to_ball);
         }
     }
 
