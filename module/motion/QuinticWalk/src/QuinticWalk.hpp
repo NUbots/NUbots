@@ -8,6 +8,7 @@
 
 #include "WalkEngine.hpp"
 
+#include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/ServoCommand.hpp"
@@ -17,7 +18,7 @@
 
 namespace module::motion {
 
-    class QuinticWalk : public NUClear::Reactor {
+    class QuinticWalk : public ::extension::behaviour::BehaviourReactor {
 
     public:
         /// @brief Called by the powerplant to build and setup the QuinticWalk reactor.

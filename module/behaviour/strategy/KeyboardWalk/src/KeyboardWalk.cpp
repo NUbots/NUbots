@@ -25,6 +25,8 @@
 #include <fmt/format.h>
 #include <fmt/ostream.h>
 
+#include "extension/Behaviour.hpp"
+
 #include "message/behaviour/MotionCommand.hpp"
 #include "message/motion/HeadCommand.hpp"
 #include "message/motion/KickCommand.hpp"
@@ -39,6 +41,9 @@ namespace module::behaviour::strategy {
     using message::motion::HeadCommand;
     using NUClear::message::LogMessage;
     using LimbID = utility::input::LimbID;
+    using extension::behaviour::Task;
+    using message::motion::NewWalkCommand;
+    using message::motion::WalkCommand;
 
     void quit() {
         endwin();
@@ -337,7 +342,7 @@ namespace module::behaviour::strategy {
             affineParameter.linear()      = Eigen::Rotation2Dd(rotation).toRotationMatrix();
             affineParameter.translation() = Eigen::Vector2d(velocity.x(), velocity.y());
             // emit(std::make_unique<MotionCommand>(utility::behaviour::DirectCommand(affineParameter)));
-            emit<Task>(std::make_unique<WalkCommand>(Eigen::Vector3f(velocity.x(), velocity.y(), rotation)))
+            emit<Task>(std::make_unique<NewWalkCommand>(Eigen::Vector3d(velocity.x(), velocity.y(), rotation)));
         }
 
         auto head_command         = std::make_unique<HeadCommand>();
