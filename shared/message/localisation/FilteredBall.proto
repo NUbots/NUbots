@@ -32,6 +32,4 @@ message FilteredBall {
 
     /// Time the ball measurement was taken
     google.protobuf.Timestamp time_of_measurement = 3;
-
-
 }
