@@ -7,6 +7,7 @@
 #include "message/behaviour/Behaviour.hpp"
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/KinematicsModel.hpp"
+#include "message/motion/LimbsIK.hpp"
 #include "message/motion/WalkCommand.hpp"
 #include "message/support/nusight/DataPoint.hpp"
 
@@ -28,6 +29,9 @@ namespace module::motion {
     using message::motion::ExecuteGetup;
     using message::motion::KillGetup;
     using message::motion::KinematicsModel;
+    using message::motion::LeftLegIK;
+    using message::motion::NewWalkCommand;
+    using message::motion::RightLegIK;
     using message::motion::StopCommand;
     using message::motion::WalkCommand;
 
@@ -262,21 +266,26 @@ namespace module::motion {
         // });
 
         // NEW MAIN LOOP
-        update_handle =
-            on<Provide<WalkCommand>, Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single>().then([this] {
-                const float dt = get_time_delta();
-                if (falling) {
-                    // We are falling, reset walk engine
-                    walk_engine.reset();
-                }
-                else {
-
-                    // see if the walk engine has new goals for us
-                    if (walk_engine.update_state(dt, current_orders)) {
-                        calculate_joint_goals();
-                    }
-                }
-            });
+        update_handle = on<Provide<NewWalkCommand>,
+                           Needs<LeftLegIK>,
+                           Needs<RightLegIK>,
+                           Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
+                           Single>()
+                            .then([this] {
+                                const float dt = get_time_delta();
+                                if (falling) {
+                                    // We are falling, reset walk engine
+                                    walk_engine.reset();
+                                    // NOTE: emit?
+                                }
+                                else {
+                                    // see if the walk engine has new goals for us
+                                    if (walk_engine.update_state(dt, current_orders)) {
+                                        calculate_joint_goals();
+                                        // NOTE: emit.
+                                    }
+                                }
+                            });
     }
 
     float QuinticWalk::get_time_delta() {
