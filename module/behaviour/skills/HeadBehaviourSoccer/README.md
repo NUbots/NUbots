@@ -1,5 +1,4 @@
-HeadBehaviourSoccer
-=============
+# HeadBehaviourSoccer
 
 ## Description
 
@@ -17,8 +16,8 @@ Include this module to allow the robot to focus on a ball or search for a ball i
 
 ## Emits
 
-* `message::motion::HeadCommand` instructs the head to move to desired angle
+- `message::motion::HeadCommand` instructs the head to move to desired angle
 
 ## Dependencies
 
-* `Eigen`
+- `Eigen`
