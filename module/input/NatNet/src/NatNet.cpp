@@ -132,7 +132,7 @@ namespace module::input {
         // Read frame number
         mocap->frame_number = ReadData<uint32_t>::read(ptr, version);
 
-        // Read the Markersets
+        // Read the MarkerSets
         mocap->marker_sets = ReadData<std::vector<MotionCapture::MarkerSet>>::read(ptr, version);
 
         // Read the free floating markers
@@ -330,7 +330,7 @@ namespace module::input {
     }
 
     void NatNet::process_model(const Packet& packet) {
-
+        std::stringstream ss;
         log<NUClear::INFO>("Updating model definitions");
 
         // Our pointer as we move through the data
@@ -376,8 +376,10 @@ namespace module::input {
 
                 // Camera
                 case 5: {
-                    CameraModel m = ReadData<CameraModel>::read(ptr, version);
-                    camera_model  = m;
+                    static uint32_t n = 0;
+                    CameraModel m     = ReadData<CameraModel>::read(ptr, version);
+                    camera_models[n]  = m;
+                    n++;
                 } break;
 
                 // Bad packet
@@ -396,7 +398,7 @@ namespace module::input {
         const char* nat_net_version = app_version + 4;
 
         // Update our version number
-        version = ntohl(*reinterpret_cast<const char*>(nat_net_version));
+        version = ntohl(*reinterpret_cast<const uint32_t*>(nat_net_version));
         // Make our app version a string (removing trailing 0 version numbers)
         std::string str_app_version = std::to_string(int(app_version[0]))
                                       + (app_version[1] == 0 ? "" : "." + std::to_string(app_version[1]))
@@ -410,9 +412,9 @@ namespace module::input {
                                       + (nat_net_version[3] == 0 ? "" : "." + std::to_string(nat_net_version[3]));
 
         // Make our remote into an IP
-        std::string str_remote = std::to_string((remote >> 24) & 0xFF) + "." + std::to_string((remote >> 16) & 0xFF)
-                                 + "." + std::to_string((remote >> 8) & 0xFF) + "."
-                                 + std::to_string((remote >> 0) & 0xFF);
+        std::array<char, INET_ADDRSTRLEN> str{};
+        inet_ntop(AF_INET, &remote, str.data(), str.size());
+        std::string str_remote = str.data();
 
         log<NUClear::INFO>(
             fmt::format("Connected to {} ({} {}) over NatNet {}", str_remote, name, str_app_version, str_nat_version));
