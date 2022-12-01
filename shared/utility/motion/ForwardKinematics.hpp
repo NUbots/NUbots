@@ -42,13 +42,13 @@ namespace utility::motion::kinematics {
     using utility::input::ServoID;
 
 
-    [[nodiscard]] inline std::map<ServoID, Eigen::Affine3d> calculateHeadJointPosition(const KinematicsModel& model,
-                                                                                       const float& HEAD_PITCH,
-                                                                                       const float& HEAD_YAW,
-                                                                                       const ServoID& servoID) {
-        std::map<ServoID, Eigen::Affine3d> positions{};
+    [[nodiscard]] inline std::map<ServoID, Eigen::Isometry3d> calculateHeadJointPosition(const KinematicsModel& model,
+                                                                                         const float& HEAD_PITCH,
+                                                                                         const float& HEAD_YAW,
+                                                                                         const ServoID& servoID) {
+        std::map<ServoID, Eigen::Isometry3d> positions{};
 
-        Eigen::Affine3d runningTransform = Eigen::Affine3d::Identity();
+        Eigen::Isometry3d runningTransform = Eigen::Isometry3d::Identity();
         const Eigen::Vector3d NECK_POS(model.head.NECK_BASE_POS_FROM_ORIGIN_X,
                                        model.head.NECK_BASE_POS_FROM_ORIGIN_Y,
                                        model.head.NECK_BASE_POS_FROM_ORIGIN_Z);
@@ -81,9 +81,9 @@ namespace utility::motion::kinematics {
         return positions;
     }
 
-    [[nodiscard]] inline std::map<ServoID, Eigen::Affine3d> calculateHeadJointPosition(const KinematicsModel& model,
-                                                                                       const Sensors& sensors,
-                                                                                       const ServoID& servoID) {
+    [[nodiscard]] inline std::map<ServoID, Eigen::Isometry3d> calculateHeadJointPosition(const KinematicsModel& model,
+                                                                                         const Sensors& sensors,
+                                                                                         const ServoID& servoID) {
         return calculateHeadJointPosition(model,
                                           sensors.servo[static_cast<int>(ServoID::HEAD_PITCH)].present_position,
                                           sensors.servo[static_cast<int>(ServoID::HEAD_YAW)].present_position,
@@ -96,12 +96,12 @@ namespace utility::motion::kinematics {
 
         The basis 'faces' down its x axis.
     */
-    [[nodiscard]] inline std::map<ServoID, Eigen::Affine3d> calculateLegJointPosition(const KinematicsModel& model,
-                                                                                      const Sensors& sensors,
-                                                                                      const ServoID& servoID,
-                                                                                      const BodySide& isLeft) {
-        std::map<ServoID, Eigen::Affine3d> positions{};
-        Eigen::Affine3d runningTransform = Eigen::Affine3d::Identity();
+    [[nodiscard]] inline std::map<ServoID, Eigen::Isometry3d> calculateLegJointPosition(const KinematicsModel& model,
+                                                                                        const Sensors& sensors,
+                                                                                        const ServoID& servoID,
+                                                                                        const BodySide& isLeft) {
+        std::map<ServoID, Eigen::Isometry3d> positions{};
+        Eigen::Isometry3d runningTransform = Eigen::Isometry3d::Identity();
         // Variables to mask left and right leg differences:
         ServoID HIP_YAW;
         ServoID HIP_ROLL;
@@ -206,12 +206,12 @@ namespace utility::motion::kinematics {
 
         The basis 'faces' down its x axis.
     */
-    [[nodiscard]] inline std::map<ServoID, Eigen::Affine3d> calculateArmJointPosition(const KinematicsModel& model,
-                                                                                      const Sensors& sensors,
-                                                                                      const ServoID& servoID,
-                                                                                      const BodySide& isLeft) {
-        std::map<ServoID, Eigen::Affine3d> positions{};
-        Eigen::Affine3d runningTransform = Eigen::Affine3d::Identity();
+    [[nodiscard]] inline std::map<ServoID, Eigen::Isometry3d> calculateArmJointPosition(const KinematicsModel& model,
+                                                                                        const Sensors& sensors,
+                                                                                        const ServoID& servoID,
+                                                                                        const BodySide& isLeft) {
+        std::map<ServoID, Eigen::Isometry3d> positions{};
+        Eigen::Isometry3d runningTransform = Eigen::Isometry3d::Identity();
         // Variables to mask left and right differences:
         ServoID SHOULDER_PITCH;
         ServoID SHOULDER_ROLL;
@@ -279,9 +279,9 @@ namespace utility::motion::kinematics {
 
     /*! @brief
      */
-    [[nodiscard]] inline std::map<ServoID, Eigen::Affine3d> calculatePosition(const KinematicsModel& model,
-                                                                              const Sensors& sensors,
-                                                                              const ServoID& servoID) {
+    [[nodiscard]] inline std::map<ServoID, Eigen::Isometry3d> calculatePosition(const KinematicsModel& model,
+                                                                                const Sensors& sensors,
+                                                                                const ServoID& servoID) {
         switch (servoID.value) {
             case ServoID::HEAD_YAW:
             case ServoID::HEAD_PITCH: return calculateHeadJointPosition(model, sensors, servoID);
@@ -303,13 +303,13 @@ namespace utility::motion::kinematics {
             case ServoID::L_KNEE:
             case ServoID::L_ANKLE_PITCH:
             case ServoID::L_ANKLE_ROLL: return calculateLegJointPosition(model, sensors, servoID, BodySide::LEFT);
-            default: return std::map<ServoID, Eigen::Affine3d>();
+            default: return std::map<ServoID, Eigen::Isometry3d>();
         }
     }
 
-    [[nodiscard]] inline std::map<ServoID, Eigen::Affine3d> calculateAllPositions(const KinematicsModel& model,
-                                                                                  const Sensors& sensors) {
-        std::map<ServoID, Eigen::Affine3d> result{};
+    [[nodiscard]] inline std::map<ServoID, Eigen::Isometry3d> calculateAllPositions(const KinematicsModel& model,
+                                                                                    const Sensors& sensors) {
+        std::map<ServoID, Eigen::Isometry3d> result{};
         for (const auto& r : calculatePosition(model, sensors, ServoID::L_ANKLE_ROLL)) {
             result[r.first] = r.second;
         }
@@ -474,7 +474,7 @@ namespace utility::motion::kinematics {
         return inertia_tensor;
     }  // namespace kinematics
 
-    [[nodiscard]] inline Eigen::Matrix2d calculateRobotToIMU(const Eigen::Affine3d& orientation) {
+    [[nodiscard]] inline Eigen::Matrix2d calculateRobotToIMU(const Eigen::Isometry3d& orientation) {
         const Eigen::Vector3d xRobotImu  = orientation.rotation().topRows<1>();
         const Eigen::Vector2d projXRobot = xRobotImu.head<2>().normalized();
         const Eigen::Vector2d projYRobot = Eigen::Vector2d(-projXRobot.y(), projXRobot.x());

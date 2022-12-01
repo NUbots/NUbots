@@ -104,7 +104,7 @@ message Sensors {
     /// per second and 500 degrees per second.
     /// => 512 = 0 degrees per second. Is {x, y, z} angular velocity
     vec3 gyroscope = 3;
-    /// Affine3d transform from odometry (world) space to the robot (torso) space.
+    /// Isometry3d transform from odometry (world) space to the robot (torso) space.
     /// It measures the world in robot space
     mat4 Htw = 4;
     /// Set of force sensitive resistors. Used to sense if a foot is on the ground

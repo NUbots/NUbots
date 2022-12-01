@@ -59,7 +59,7 @@ namespace module::vision {
                     if (!runner.active->exchange(true)) {
 
                         // Extract the camera position now that we need it
-                        Eigen::Affine3d Hcw(image.Hcw);
+                        Eigen::Isometry3d Hcw(image.Hcw);
 
                         std::exception_ptr eptr;
                         try {
