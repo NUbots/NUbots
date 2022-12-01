@@ -15,6 +15,11 @@ nuclear_role(
   # Platform
   input::SensorFilter
   platform::Webots
+  # Vision
+  vision::VisualMesh
+  vision::GreenHorizonDetector
+  vision::GoalDetector
+  vision::BallDetector
   # Network
   network::NUClearNet
   network::PlotJuggler

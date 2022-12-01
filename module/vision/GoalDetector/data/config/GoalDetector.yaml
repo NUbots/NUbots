@@ -10,3 +10,5 @@ use_median: false                     # Use median rather than mean when determi
                                       # post edges
 max_goal_distance: 12                 # maximum distance that a goal may be from the robot to be a real goal,
                                       # measured as diagonal of the field (furthest two points)
+max_benchmark_error: 0.025            # Maximum error before a goal is declared a bad fit in the benchmarking tool.
+                                      # measured in metres (the vectors are normalised)
