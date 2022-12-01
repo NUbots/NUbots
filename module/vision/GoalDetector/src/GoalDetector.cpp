@@ -436,30 +436,28 @@ namespace module::vision {
 
                             if (dist_own_l < min_error) {
                                 min_error = dist_own_l;
-                                error     = it->post.bottom - rGCc_own_l;
+                                error     = (it->post.bottom - rGCc_own_l).cwiseAbs();
                             }
                             if (dist_own_r < min_error) {
                                 min_error = dist_own_r;
-                                error     = it->post.bottom - rGCc_own_r;
+                                error     = (it->post.bottom - rGCc_own_r).cwiseAbs();
                             }
                             if (dist_opp_l < min_error) {
                                 min_error = dist_opp_l;
-                                error     = it->post.bottom - rGCc_opp_l;
+                                error     = (it->post.bottom - rGCc_opp_l).cwiseAbs();
                             }
                             if (dist_opp_r < min_error) {
                                 min_error = dist_opp_r;
-                                error     = it->post.bottom - rGCc_opp_r;
+                                error     = (it->post.bottom - rGCc_opp_r).cwiseAbs();
                             }
 
                             if (good_post) {
                                 goal_error += min_error;
-                                goal_error3f =
-                                    Eigen::Vector3f(std::abs(error.x()), std::abs(error.y()), std::abs(error.z()));
+                                goal_error3f = error;
                             }
 
                             goal_error_bad += min_error;
-                            goal_error3f_bad =
-                                Eigen::Vector3f(std::abs(error.x()), std::abs(error.y()), std::abs(error.z()));
+                            goal_error3f_bad = error;
 
                             if (!good_post) {
                                 bad_posts++;
