@@ -17,8 +17,8 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULES_BEHAVIOUR_PLANNERS_SIMPLEWALKPATHPLANNER_HPP
-#define MODULES_BEHAVIOUR_PLANNERS_SIMPLEWALKPATHPLANNER_HPP
+#ifndef MODULES_BEHAVIOUR_PLANNERS_WALKPATHPLANNER_HPP
+#define MODULES_BEHAVIOUR_PLANNERS_WALKPATHPLANNER_HPP
 
 #include <Eigen/Core>
 #include <cmath>
@@ -48,7 +48,7 @@ namespace module::behaviour::planning {
      * Creates various walk path plans
      *
      */
-    class SimpleWalkPathPlanner : public NUClear::Reactor {
+    class WalkPathPlanner : public NUClear::Reactor {
     private:
         /// @brief Stores configuration values
         struct Config {
@@ -89,6 +89,9 @@ namespace module::behaviour::planning {
         /// @brief The id registered in the subsumption system for this module
         const size_t subsumption_id;
 
+        /// @brief The current speed of the walk command
+        float current_speed = 0;
+
         /// @brief Walk using the walk command from a direct motion command.
         void walk_directly();
 
@@ -113,8 +116,8 @@ namespace module::behaviour::planning {
         void update_priority(const float& priority);
 
     public:
-        explicit SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);
+        explicit WalkPathPlanner(std::unique_ptr<NUClear::Environment> environment);
     };
 }  // namespace module::behaviour::planning
 
-#endif  // MODULES_BEHAVIOUR_PLANNERS_SIMPLEWALKPATHPLANNER_HPP
+#endif  // MODULES_BEHAVIOUR_PLANNERS_WALKPATHPLANNER_HPP

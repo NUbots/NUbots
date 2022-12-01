@@ -17,7 +17,7 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#include "SimpleWalkPathPlanner.hpp"
+#include "WalkPathPlanner.hpp"
 
 #include <Eigen/Geometry>
 #include <cmath>
@@ -62,10 +62,10 @@ namespace module::behaviour::planning {
     using utility::math::coordinates::sphericalToCartesian;
 
 
-    SimpleWalkPathPlanner::SimpleWalkPathPlanner(std::unique_ptr<NUClear::Environment> environment)
+    WalkPathPlanner::WalkPathPlanner(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)), subsumption_id(size_t(this) * size_t(this) - size_t(this)) {
 
-        on<Configuration>("SimpleWalkPathPlanner.yaml").then([this](const Configuration& config) {
+        on<Configuration>("WalkPathPlanner.yaml").then([this](const Configuration& config) {
             log_level                      = config["log_level"].as<NUClear::LogLevel>();
             cfg.max_turn_speed             = config["max_turn_speed"].as<float>();
             cfg.min_turn_speed             = config["min_turn_speed"].as<float>();
@@ -79,6 +79,10 @@ namespace module::behaviour::planning {
             cfg.walk_path_planner_priority = config["walk_path_planner_priority"].as<float>();
             cfg.ball_y_offset              = config["ball_y_offset"].as<float>();
         });
+
+        // ON start set our current walk command speed to 0
+        on<Startup>().then([this] { current_speed = 0; });
+
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
             RegisterAction{subsumption_id,
@@ -105,10 +109,13 @@ namespace module::behaviour::planning {
                                // nothing
                            }}));
 
-        on<Trigger<WalkStopped>>().then([this] { update_priority(0); });
+        on<Trigger<WalkStopped>>().then([this] {
+            current_speed = 0;
+            update_priority(0);
+        });
 
         // TODO(BehaviourTeam): Freq should be equal to the main loop in soccer strategy.
-        on<Every<30, Per<std::chrono::seconds>>, Optional<With<FilteredBall>>, Sync<SimpleWalkPathPlanner>>().then(
+        on<Every<30, Per<std::chrono::seconds>>, Optional<With<FilteredBall>>, Sync<WalkPathPlanner>>().then(
             [this](const std::shared_ptr<const FilteredBall>& ball) {
                 switch (static_cast<int>(latest_command.type.value)) {
                     case message::behaviour::MotionCommand::Type::STAND_STILL:
@@ -134,24 +141,40 @@ namespace module::behaviour::planning {
             });
 
         // Save the plan cmd into latest_command
-        on<Trigger<MotionCommand>, Sync<SimpleWalkPathPlanner>>().then(
+        on<Trigger<MotionCommand>, Sync<WalkPathPlanner>>().then(
             [this](const MotionCommand& cmd) { latest_command = cmd; });
     }
 
-    void SimpleWalkPathPlanner::walk_directly() {
+    void WalkPathPlanner::walk_directly() {
         emit(std::move(std::make_unique<WalkCommand>(subsumption_id, latest_command.walk_command)));
         update_priority(cfg.walk_path_planner_priority);
     }
 
-    void SimpleWalkPathPlanner::vision_walk_path(const std::shared_ptr<const FilteredBall>& ball) {
+    void WalkPathPlanner::vision_walk_path(const std::shared_ptr<const FilteredBall>& ball) {
         // If ball exists...
         if (ball) {
             Eigen::Vector3f rBTt = ball->rBTt.cast<float>();
             // Add a offset to the ball position to avoid walking at the ball directly such that the robot can kick
             rBTt.y() = rBTt.y() + cfg.ball_y_offset;
             // Obtain the unit vector to desired target in torso space and scale by cfg.forward_speed
-            Eigen::Vector3f uBTt         = rBTt.normalized();
-            Eigen::Vector3f walk_command = cfg.forward_speed * (uBTt);
+            Eigen::Vector3f uBTt = rBTt.normalized();
+            float increment      = 0.01;
+
+
+            // If getting close to the ball, begin to slow down
+            if (rBTt.head(2).norm() < 1) {
+                current_speed = cfg.forward_speed * rBTt.head(2).norm();
+            }
+            else {
+                current_speed += increment;
+                current_speed = std::min(current_speed, cfg.forward_speed);
+            }
+
+            // log the current speed
+            log<NUClear::DEBUG>("rBTt.head(2).norm(): ", rBTt.head(2).norm());
+            log<NUClear::DEBUG>("Current speed: ", current_speed);
+
+            Eigen::Vector3f walk_command = current_speed * (uBTt);
 
             // Set the angular velocity component of the walk_command with the angular displacement and saturate with
             // value cfg.max_turn_speed
@@ -167,7 +190,7 @@ namespace module::behaviour::planning {
         }
     }
 
-    void SimpleWalkPathPlanner::rotate_on_spot(bool clockwise) {
+    void WalkPathPlanner::rotate_on_spot(bool clockwise) {
         // Determine the direction of rotation
         int sign = clockwise ? -1 : 1;
 
@@ -179,7 +202,7 @@ namespace module::behaviour::planning {
         update_priority(cfg.walk_path_planner_priority);
     }
 
-    void SimpleWalkPathPlanner::rotate_around_ball() {
+    void WalkPathPlanner::rotate_around_ball() {
 
         std::unique_ptr<WalkCommand> command =
             std::make_unique<WalkCommand>(subsumption_id,
@@ -191,7 +214,7 @@ namespace module::behaviour::planning {
         update_priority(cfg.walk_path_planner_priority);
     }
 
-    void SimpleWalkPathPlanner::walk_to_ready() {
+    void WalkPathPlanner::walk_to_ready() {
 
         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(
             subsumption_id,
@@ -201,7 +224,7 @@ namespace module::behaviour::planning {
         update_priority(cfg.walk_path_planner_priority);
     }
 
-    void SimpleWalkPathPlanner::update_priority(const float& priority) {
+    void WalkPathPlanner::update_priority(const float& priority) {
         emit(std::make_unique<ActionPriorities>(ActionPriorities{subsumption_id, {priority}}));
     }
 

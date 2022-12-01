@@ -33,7 +33,7 @@ nuclear_role(
   behaviour::skills::KickScript
   behaviour::skills::HeadBehaviourSoccer
   behaviour::skills::Stand
-  behaviour::planning::SimpleWalkPathPlanner
+  behaviour::planning::WalkPathPlanner
   behaviour::strategy::SoccerStrategy
   # Motion
   motion::ScriptEngine
