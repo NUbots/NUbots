@@ -167,6 +167,7 @@ $(document).ready(function(){initNavTree('classmodule_1_1behaviour_1_1skills_1_1
 
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classmodule_1_1behaviour_1_1skills_1_1HeadBehaviourSoccer-members.html">List of all members</a>  </div>
@@ -193,11 +194,18 @@ Collaboration diagram for module::behaviour::skills::HeadBehaviourSoccer:</div>
 <div class="dyncontent">
 <div class="center"><img src="classmodule_1_1behaviour_1_1skills_1_1HeadBehaviourSoccer__coll__graph.png" border="0" usemap="#amodule_1_1behaviour_1_1skills_1_1HeadBehaviourSoccer_coll__map" alt="Collaboration graph"/></div>
 <map name="amodule_1_1behaviour_1_1skills_1_1HeadBehaviourSoccer_coll__map" id="amodule_1_1behaviour_1_1skills_1_1HeadBehaviourSoccer_coll__map">
-<area shape="rect" title="Executes a HeadBehaviourSoccer action." alt="" coords="5,80,212,121"/>
-<area shape="rect" title=" " alt="" coords="41,5,176,32"/>
+<area shape="rect" title="Executes a HeadBehaviourSoccer action." alt="" coords="67,124,273,165"/>
+<area shape="rect" title=" " alt="" coords="5,20,140,47"/>
+<area shape="rect" href="structmodule_1_1behaviour_1_1skills_1_1HeadBehaviourSoccer_1_1Config.html" title="Stores configuration values." alt="" coords="164,5,371,61"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1behaviour_1_1skills_1_1HeadBehaviourSoccer_1_1Config.html">Config</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores configuration values.  <a href="structmodule_1_1behaviour_1_1skills_1_1HeadBehaviourSoccer_1_1Config.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a1f28365e3a3b2417d6fb246910520af7"><td class="memItemLeft" align="right" valign="top"><a id="a1f28365e3a3b2417d6fb246910520af7"></a>
@@ -206,30 +214,25 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr class="memitem:ae94f6452f681fb078f0af7a739f034b8"><td class="memItemLeft" align="right" valign="top"><a id="ae94f6452f681fb078f0af7a739f034b8"></a>
-NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><b>ballLastMeasured</b> = NUClear::clock::now()</td></tr>
-<tr class="separator:ae94f6452f681fb078f0af7a739f034b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9506ec9e26f8ec548959ca6d9402b0f0"><td class="memItemLeft" align="right" valign="top"><a id="a9506ec9e26f8ec548959ca6d9402b0f0"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>fixation_time_ms</b> = 0.0f</td></tr>
-<tr class="separator:a9506ec9e26f8ec548959ca6d9402b0f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a56ef5c389cd4c7c900ed721a329572e0"><td class="memItemLeft" align="right" valign="top"><a id="a56ef5c389cd4c7c900ed721a329572e0"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>isGettingUp</b> = false</td></tr>
-<tr class="separator:a56ef5c389cd4c7c900ed721a329572e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa75fe96db27aab077c2d7d4f7fdef6d3"><td class="memItemLeft" align="right" valign="top"><a id="aa75fe96db27aab077c2d7d4f7fdef6d3"></a>
-Eigen::Vector3d&#160;</td><td class="memItemRight" valign="bottom"><b>rBCc</b> = Eigen::Vector3d::Zero()</td></tr>
-<tr class="separator:aa75fe96db27aab077c2d7d4f7fdef6d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae6ede8589c91194c923262df4b0838bd"><td class="memItemLeft" align="right" valign="top"><a id="ae6ede8589c91194c923262df4b0838bd"></a>
-std::vector&lt; Eigen::Vector2d &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>search_positions</b></td></tr>
-<tr class="separator:ae6ede8589c91194c923262df4b0838bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac606b228657cfd3bc309504c740970c2"><td class="memItemLeft" align="right" valign="top"><a id="ac606b228657cfd3bc309504c740970c2"></a>
-float&#160;</td><td class="memItemRight" valign="bottom"><b>search_timeout_ms</b> = 0.0f</td></tr>
-<tr class="separator:ac606b228657cfd3bc309504c740970c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a85ccb42e34e3f2b621b288a451f343ba"><td class="memItemLeft" align="right" valign="top"><a id="a85ccb42e34e3f2b621b288a451f343ba"></a>
-long unsigned int&#160;</td><td class="memItemRight" valign="bottom"><b>searchIdx</b> = 0</td></tr>
-<tr class="separator:a85ccb42e34e3f2b621b288a451f343ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a16be4d90f314c44365c61eea22a69f9c"><td class="memItemLeft" align="right" valign="top"><a id="a16be4d90f314c44365c61eea22a69f9c"></a>
-NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><b>searchLastMoved</b> = NUClear::clock::now()</td></tr>
-<tr class="separator:a16be4d90f314c44365c61eea22a69f9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba4954b18ddbd8b4ea7e8eb9e901166b"><td class="memItemLeft" align="right" valign="top"><a id="aba4954b18ddbd8b4ea7e8eb9e901166b"></a>
+NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1skills_1_1HeadBehaviourSoccer.html#aba4954b18ddbd8b4ea7e8eb9e901166b">ball_last_measured</a> = NUClear::clock::now()</td></tr>
+<tr class="memdesc:aba4954b18ddbd8b4ea7e8eb9e901166b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Time since last ball seen. <br /></td></tr>
+<tr class="separator:aba4954b18ddbd8b4ea7e8eb9e901166b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abdbf10f0b4105563b6feca890a4ee29c"><td class="memItemLeft" align="right" valign="top"><a id="abdbf10f0b4105563b6feca890a4ee29c"></a>
+struct <a class="el" href="structmodule_1_1behaviour_1_1skills_1_1HeadBehaviourSoccer_1_1Config.html">module::behaviour::skills::HeadBehaviourSoccer::Config</a>&#160;</td><td class="memItemRight" valign="bottom"><b>cfg</b></td></tr>
+<tr class="separator:abdbf10f0b4105563b6feca890a4ee29c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab05296f846a530d600e8a7b999ef7763"><td class="memItemLeft" align="right" valign="top"><a id="ab05296f846a530d600e8a7b999ef7763"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1skills_1_1HeadBehaviourSoccer.html#ab05296f846a530d600e8a7b999ef7763">is_getting_up</a> = false</td></tr>
+<tr class="memdesc:ab05296f846a530d600e8a7b999ef7763"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag for if the robot is currently getting up. <br /></td></tr>
+<tr class="separator:ab05296f846a530d600e8a7b999ef7763"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad8141fc0d3b3012a396d64889c5fa5fb"><td class="memItemLeft" align="right" valign="top"><a id="ad8141fc0d3b3012a396d64889c5fa5fb"></a>
+long unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1skills_1_1HeadBehaviourSoccer.html#ad8141fc0d3b3012a396d64889c5fa5fb">search_idx</a> = 0</td></tr>
+<tr class="memdesc:ad8141fc0d3b3012a396d64889c5fa5fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Index in the list of search positions. <br /></td></tr>
+<tr class="separator:ad8141fc0d3b3012a396d64889c5fa5fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a40d38ecd25c3203335eab076d426c08b"><td class="memItemLeft" align="right" valign="top"><a id="a40d38ecd25c3203335eab076d426c08b"></a>
+NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1skills_1_1HeadBehaviourSoccer.html#a40d38ecd25c3203335eab076d426c08b">search_last_moved</a> = NUClear::clock::now()</td></tr>
+<tr class="memdesc:a40d38ecd25c3203335eab076d426c08b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Time since last search position transition. <br /></td></tr>
+<tr class="separator:a40d38ecd25c3203335eab076d426c08b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Executes a <a class="el" href="classmodule_1_1behaviour_1_1skills_1_1HeadBehaviourSoccer.html" title="Executes a HeadBehaviourSoccer action.">HeadBehaviourSoccer</a> action. </p>
@@ -244,7 +247,7 @@ NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><b
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>behaviour</b></li><li class="navelem"><b>skills</b></li><li class="navelem"><a class="el" href="classmodule_1_1behaviour_1_1skills_1_1HeadBehaviourSoccer.html">HeadBehaviourSoccer</a></li>
-    <li class="footer">Generated on Mon Nov 28 2022 22:31:17 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Thu Dec 1 2022 02:40:47 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

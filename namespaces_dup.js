@@ -79,11 +79,12 @@ var namespaces_dup =
         [ "planning", null, [
           [ "KickPlanner", "classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html", "classmodule_1_1behaviour_1_1planning_1_1KickPlanner" ],
           [ "SimpleWalkPathPlanner", "classmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner.html", "classmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner" ],
+          [ "FilteredBall", "SimpleWalkPathPlanner_8cpp.html#a6431375dde63e4a3887ef0678e9f92a4", null ],
           [ "KickType", "KickPlanner_8cpp.html#a77ce7f359ee342116a6129934e9ffe9c", null ],
           [ "PenaltyReason", "KickPlanner_8cpp.html#adbd31b53341649234480b001a93c7e79", null ],
           [ "Phase", "KickPlanner_8cpp.html#aa5b1713757eb54288a24d4f49696ed1a", null ],
           [ "VisionBall", "KickPlanner_8cpp.html#a8d725356b9d4d1a658f23e6b261b2d0c", null ],
-          [ "VisionBalls", "KickPlanner_8cpp.html#ad0b544452061dec081ccd54c4350a3df", null ]
+          [ "VisionBalls", "KickPlanner_8cpp.html#ae704620d768f5038531cdebeea5af674", null ]
         ] ],
         [ "skills", null, [
           [ "DirectWalkController", "classmodule_1_1behaviour_1_1skills_1_1DirectWalkController.html", "classmodule_1_1behaviour_1_1skills_1_1DirectWalkController" ],
@@ -99,23 +100,22 @@ var namespaces_dup =
           [ "KillFalling", "structmodule_1_1behaviour_1_1skills_1_1KillFalling.html", null ],
           [ "Nod", "classmodule_1_1behaviour_1_1skills_1_1Nod.html", "classmodule_1_1behaviour_1_1skills_1_1Nod" ],
           [ "Stand", "classmodule_1_1behaviour_1_1skills_1_1Stand.html", "classmodule_1_1behaviour_1_1skills_1_1Stand" ],
+          [ "FilteredBall", "HeadBehaviourSoccer_8cpp.html#a72632f60a6c00a0a9dff651cd87c883d", null ],
           [ "LimbID", "DirectWalkController_8cpp.html#a4b39d1fbd3ce1cdf8d80f5e8f10e7710", null ],
           [ "ServoID", "DirectWalkController_8cpp.html#a3e2e3b6303ff82786fac995c78cd1a9e", null ],
-          [ "VisionBalls", "HeadBehaviourSoccer_8cpp.html#a86d27dec5505a889cea3ce5fc3e2c46e", null ],
           [ "screenAngularFromObjectDirection", "HeadBehaviourSoccer_8cpp.html#a735073bf28a0e9dbba961cc45dc1ecab", null ]
         ] ],
         [ "strategy", null, [
           [ "KeyboardWalk", "classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html", "classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk" ],
           [ "PS3Walk", "classmodule_1_1behaviour_1_1strategy_1_1PS3Walk.html", "classmodule_1_1behaviour_1_1strategy_1_1PS3Walk" ],
           [ "SoccerStrategy", "classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html", "classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy" ],
+          [ "FilteredBall", "SoccerStrategy_8cpp.html#a188d9f5c8624f945069490b50e6a7e9f", null ],
           [ "GameMode", "SoccerStrategy_8cpp.html#a8fad8ed963c6dad1e02f4eb0a96a6585", null ],
           [ "KickOffTeam", "SoccerStrategy_8cpp.html#a6935be65b3388ffcac2b66aabb7372f3", null ],
-          [ "KickType", "SoccerStrategy_8cpp.html#af2ee382dc2b57bb0d9e00698bc9d792a", null ],
-          [ "LimbID", "KeyboardWalk_8cpp.html#a1f4a6735ee336fba86afb929b7af0934", null ],
+          [ "LimbID", "KeyboardWalk_8cpp.html#aea4d2d941460a64845429cc8997b0588", null ],
           [ "Penalisation", "SoccerStrategy_8cpp.html#a71c4805a25c5691864b93a873effe6ae", null ],
           [ "Phase", "SoccerStrategy_8cpp.html#a62d1de9b84b1d9915dd8d5c2c7446610", null ],
           [ "Unpenalisation", "SoccerStrategy_8cpp.html#a7f6b91188f8d0311dccba44e4b564898", null ],
-          [ "VisionBalls", "SoccerStrategy_8cpp.html#a0ed14a9ca4f21504d603bdc7dfb4d76e", null ],
           [ "VisionGoals", "SoccerStrategy_8cpp.html#a710c97c9bf8d73d8e7892d5467c10ba1", null ],
           [ "LogColours", "KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9", [
             [ "TRACE_COLOURS", "KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9a03edadf0bc773fb94b4f5301fb3586b6", null ],
@@ -298,12 +298,16 @@ var namespaces_dup =
         [ "TRANSFER_OFFSET_OBSERVE_TIME", "Camera_8cpp.html#ac248d5d3941892924ca670ecfdfe26a5", null ]
       ] ],
       [ "localisation", null, [
+        [ "BallFilter", "classmodule_1_1localisation_1_1BallFilter.html", "classmodule_1_1localisation_1_1BallFilter" ],
         [ "BallLocalisation", "classmodule_1_1localisation_1_1BallLocalisation.html", "classmodule_1_1localisation_1_1BallLocalisation" ],
         [ "BallModel", "classmodule_1_1localisation_1_1BallModel.html", "classmodule_1_1localisation_1_1BallModel" ],
         [ "OdometryLocalisation", "classmodule_1_1localisation_1_1OdometryLocalisation.html", "classmodule_1_1localisation_1_1OdometryLocalisation" ],
         [ "RobotModel", "classmodule_1_1localisation_1_1RobotModel.html", "classmodule_1_1localisation_1_1RobotModel" ],
         [ "RobotParticleLocalisation", "classmodule_1_1localisation_1_1RobotParticleLocalisation.html", "classmodule_1_1localisation_1_1RobotParticleLocalisation" ],
+        [ "FilteredBall", "BallFilter_8cpp.html#a4ad6316274fd8f0b673332247c525d36", null ],
         [ "ServoID", "BallLocalisation_8cpp.html#a30ca8dc5cb71d23c52deccbee5bb9dd9", null ],
+        [ "VisionBall", "BallFilter_8cpp.html#a7378478e3724029be976cb9a4af37da3", null ],
+        [ "VisionBalls", "BallFilter_8cpp.html#a75b0c243bdcaff95c805732e436e2f2d", null ],
         [ "VisionGoal", "RobotParticleLocalisation_8cpp.html#a555e4584b906d95add31b8b4f7e0b068", null ],
         [ "VisionGoals", "RobotParticleLocalisation_8cpp.html#aad0bb3dc95ad54474ec44e2ee759aa03", null ]
       ] ],
@@ -629,7 +633,8 @@ var namespaces_dup =
         [ "ServoID", "Action_8hpp.html#aa2c2b0b91b7e566e5acd49bdaee5cb92", null ],
         [ "BallApproach", "MotionCommand_8hpp.html#af94157544a37827f215160c7da31de01", null ],
         [ "DirectCommand", "MotionCommand_8hpp.html#af3b996a8915abc56a23cb48166adb35b", null ],
-        [ "RotateOnSpot", "MotionCommand_8hpp.html#a04c788298ad17fe02aa43ada703b5e0c", null ],
+        [ "RotateAroundBall", "MotionCommand_8hpp.html#afb264826c35af8f259d1e858182f89b2", null ],
+        [ "RotateOnSpot", "MotionCommand_8hpp.html#acf6be81e6b742a2d1ce292aae86aac6e", null ],
         [ "StandStill", "MotionCommand_8hpp.html#a30f5e54a1fc9d8b87f1133b16ad36b3d", null ],
         [ "WalkToReady", "MotionCommand_8hpp.html#acbc11eafcab111be58b08247f0d82c76", null ],
         [ "WalkToState", "MotionCommand_8hpp.html#aa604d9051589dd2894a481050073e413", null ]

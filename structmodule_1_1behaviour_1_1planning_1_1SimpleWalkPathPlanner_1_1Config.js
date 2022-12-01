@@ -1,9 +1,13 @@
 var structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config =
 [
     [ "Config", "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a6b97786321aa7a60f27425c48e3b4f5c", null ],
+    [ "ball_y_offset", "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a7fc402b6f828ed0f7db4d3878f6435c4", null ],
     [ "forward_speed", "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a89ab9776e39eda743e785a45e8c90271", null ],
     [ "max_turn_speed", "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a11bf2fcfd6c9598b75af09a4a2e2cfc9", null ],
     [ "min_turn_speed", "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#aaafa64396de020925e9cad5406da92a4", null ],
+    [ "rotate_around_ball_speed", "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#ae0c634004e70f819edd45cac77ed9c4a", null ],
+    [ "rotate_around_ball_speed_x", "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#ab93efbb93f0e3222b1d3c117f9c32bb0", null ],
+    [ "rotate_around_ball_speed_y", "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a8de56d8ac15a3b593d8485786c3a2e3c", null ],
     [ "rotate_speed", "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a06b64edcdc1a7339e0513016f098eefd", null ],
     [ "rotate_speed_x", "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a61d981bbaaad5a8b7b5e7c5155fa9a2e", null ],
     [ "rotate_speed_y", "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a223be8f3f8922d59ab3660bdcc16397b", null ],

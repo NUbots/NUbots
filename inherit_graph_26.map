@@ -1,7 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
 <area shape="rect" id="node1" href="$classextension_1_1behaviour_1_1information_1_1InformationSource.html" title="This class is an abstract class that allows the static Behaviour DSL to access the relevant state fro..." alt="" coords="5,5,240,47"/>
 <area shape="rect" id="node2" href="$classmodule_1_1extension_1_1Director.html" title=" " alt="" coords="340,5,491,47"/>
-<area shape="rect" id="node3" title=" " alt="" coords="55,1774,190,1801"/>
+<area shape="rect" id="node3" title=" " alt="" coords="55,1814,190,1841"/>
 <area shape="rect" id="node4" href="$classextension_1_1behaviour_1_1BehaviourReactor.html" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="336,71,495,112"/>
 <area shape="rect" id="node7" href="$classmodule_1_1behaviour_1_1Controller.html" title="Controls which of the behaviours are able to access motors." alt="" coords="339,136,491,177"/>
 <area shape="rect" id="node8" href="$classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html" title=" " alt="" coords="334,201,497,243"/>
@@ -26,39 +26,40 @@
 <area shape="rect" id="node27" href="$classmodule_1_1input_1_1ImageDecompressor.html" title=" " alt="" coords="288,1399,543,1426"/>
 <area shape="rect" id="node28" href="$classmodule_1_1input_1_1NatNet.html" title=" " alt="" coords="332,1450,499,1477"/>
 <area shape="rect" id="node29" href="$classmodule_1_1input_1_1SensorFilter.html" title=" " alt="" coords="317,1501,514,1527"/>
-<area shape="rect" id="node30" href="$classmodule_1_1localisation_1_1BallLocalisation.html" title=" " alt="" coords="338,1552,493,1593"/>
-<area shape="rect" id="node31" href="$classmodule_1_1localisation_1_1OdometryLocalisation.html" title=" " alt="" coords="329,1617,502,1659"/>
-<area shape="rect" id="node32" href="$classmodule_1_1localisation_1_1RobotParticleLocalisation.html" title=" " alt="" coords="318,1683,513,1724"/>
-<area shape="rect" id="node33" href="$classmodule_1_1motion_1_1HeadController.html" title="Executes a HeadController action." alt="" coords="300,1749,531,1775"/>
-<area shape="rect" id="node34" href="$classmodule_1_1motion_1_1IKKick.html" title=" " alt="" coords="328,1799,503,1826"/>
-<area shape="rect" id="node35" href="$classmodule_1_1motion_1_1KinematicsConfiguration.html" title=" " alt="" coords="312,1851,519,1892"/>
-<area shape="rect" id="node36" href="$classmodule_1_1motion_1_1QuinticWalk.html" title=" " alt="" coords="310,1917,521,1943"/>
-<area shape="rect" id="node37" href="$classmodule_1_1motion_1_1ScriptEngine.html" title="Executes scripts as a series of waypoints." alt="" coords="308,1967,523,1994"/>
-<area shape="rect" id="node38" href="$classmodule_1_1network_1_1NUClearNet.html" title=" " alt="" coords="307,2018,524,2045"/>
-<area shape="rect" id="node39" href="$classmodule_1_1network_1_1NetworkForwarder.html" title=" " alt="" coords="318,2069,513,2111"/>
-<area shape="rect" id="node40" href="$classmodule_1_1network_1_1PlotJuggler.html" title=" " alt="" coords="310,2135,521,2162"/>
-<area shape="rect" id="node41" href="$classmodule_1_1output_1_1ImageCompressor.html" title=" " alt="" coords="291,2186,539,2213"/>
-<area shape="rect" id="node42" href="$classmodule_1_1output_1_1Overview.html" title=" " alt="" coords="320,2237,511,2263"/>
-<area shape="rect" id="node43" href="$classmodule_1_1output_1_1eSpeak.html" title="Takes strings given to it and plays them using text to speech." alt="" coords="327,2287,504,2314"/>
-<area shape="rect" id="node44" href="$classmodule_1_1platform_1_1Webots.html" title=" " alt="" coords="320,2338,511,2365"/>
-<area shape="rect" id="node45" href="$classmodule_1_1platform_1_1cm740_1_1HardwareIO.html" title="This NUClear Reactor is responsible for reading in the data from the CM740 and emitting it to the res..." alt="" coords="322,2389,509,2431"/>
-<area shape="rect" id="node46" href="$classmodule_1_1platform_1_1cm740_1_1HardwareSimulator.html" title="This NUClear Reactor is responsible for reading in the data for the CM740 Platform and emitting it to..." alt="" coords="322,2455,509,2496"/>
-<area shape="rect" id="node47" href="$classmodule_1_1support_1_1LocalisationSimulator.html" title=" " alt="" coords="308,2520,523,2561"/>
-<area shape="rect" id="node48" href="$classmodule_1_1support_1_1NUsightHarness.html" title=" " alt="" coords="321,2585,509,2627"/>
-<area shape="rect" id="node49" href="$classmodule_1_1support_1_1ReactionTimer.html" title=" " alt="" coords="319,2651,512,2692"/>
-<area shape="rect" id="node50" href="$classmodule_1_1support_1_1SignalCatcher.html" title="Handles OS interrupt signals." alt="" coords="302,2717,529,2743"/>
-<area shape="rect" id="node51" href="$classmodule_1_1support_1_1configuration_1_1GlobalConfig.html" title=" " alt="" coords="305,2768,526,2809"/>
-<area shape="rect" id="node52" href="$classmodule_1_1support_1_1configuration_1_1SoccerConfig.html" title=" " alt="" coords="305,2833,526,2875"/>
-<area shape="rect" id="node53" href="$classmodule_1_1support_1_1logging_1_1ConsoleLogHandler.html" title="Handles the logging of log messages to the console in a thread safe manner." alt="" coords="323,2899,507,2940"/>
-<area shape="rect" id="node54" href="$classmodule_1_1support_1_1logging_1_1DataLogging.html" title=" " alt="" coords="323,2964,507,3005"/>
-<area shape="rect" id="node55" href="$classmodule_1_1support_1_1logging_1_1DataPlayback.html" title=" " alt="" coords="323,3029,507,3071"/>
-<area shape="rect" id="node56" href="$classmodule_1_1support_1_1logging_1_1FileLogHandler.html" title=" " alt="" coords="323,3095,507,3136"/>
-<area shape="rect" id="node57" href="$classmodule_1_1tools_1_1FirmwareInstaller.html" title=" " alt="" coords="299,3161,532,3187"/>
-<area shape="rect" id="node58" href="$classmodule_1_1tools_1_1SystemConfiguration.html" title=" " alt="" coords="288,3211,543,3238"/>
-<area shape="rect" id="node59" href="$classmodule_1_1vision_1_1BallDetector.html" title=" " alt="" coords="312,3262,519,3289"/>
-<area shape="rect" id="node60" href="$classmodule_1_1vision_1_1GoalDetector.html" title=" " alt="" coords="309,3313,521,3339"/>
-<area shape="rect" id="node61" href="$classmodule_1_1vision_1_1GreenHorizonDetector.html" title=" " alt="" coords="308,3364,523,3405"/>
-<area shape="rect" id="node62" href="$classmodule_1_1vision_1_1VisualMesh.html" title=" " alt="" coords="315,3430,516,3457"/>
+<area shape="rect" id="node30" href="$classmodule_1_1localisation_1_1BallFilter.html" title=" " alt="" coords="338,1552,493,1593"/>
+<area shape="rect" id="node31" href="$classmodule_1_1localisation_1_1BallLocalisation.html" title=" " alt="" coords="338,1617,493,1659"/>
+<area shape="rect" id="node32" href="$classmodule_1_1localisation_1_1OdometryLocalisation.html" title=" " alt="" coords="329,1683,502,1724"/>
+<area shape="rect" id="node33" href="$classmodule_1_1localisation_1_1RobotParticleLocalisation.html" title=" " alt="" coords="318,1748,513,1789"/>
+<area shape="rect" id="node34" href="$classmodule_1_1motion_1_1HeadController.html" title="Executes a HeadController action." alt="" coords="300,1814,531,1841"/>
+<area shape="rect" id="node35" href="$classmodule_1_1motion_1_1IKKick.html" title=" " alt="" coords="328,1865,503,1891"/>
+<area shape="rect" id="node36" href="$classmodule_1_1motion_1_1KinematicsConfiguration.html" title=" " alt="" coords="312,1916,519,1957"/>
+<area shape="rect" id="node37" href="$classmodule_1_1motion_1_1QuinticWalk.html" title=" " alt="" coords="310,1982,521,2009"/>
+<area shape="rect" id="node38" href="$classmodule_1_1motion_1_1ScriptEngine.html" title="Executes scripts as a series of waypoints." alt="" coords="308,2033,523,2059"/>
+<area shape="rect" id="node39" href="$classmodule_1_1network_1_1NUClearNet.html" title=" " alt="" coords="307,2083,524,2110"/>
+<area shape="rect" id="node40" href="$classmodule_1_1network_1_1NetworkForwarder.html" title=" " alt="" coords="318,2135,513,2176"/>
+<area shape="rect" id="node41" href="$classmodule_1_1network_1_1PlotJuggler.html" title=" " alt="" coords="310,2201,521,2227"/>
+<area shape="rect" id="node42" href="$classmodule_1_1output_1_1ImageCompressor.html" title=" " alt="" coords="291,2251,539,2278"/>
+<area shape="rect" id="node43" href="$classmodule_1_1output_1_1Overview.html" title=" " alt="" coords="320,2302,511,2329"/>
+<area shape="rect" id="node44" href="$classmodule_1_1output_1_1eSpeak.html" title="Takes strings given to it and plays them using text to speech." alt="" coords="327,2353,504,2379"/>
+<area shape="rect" id="node45" href="$classmodule_1_1platform_1_1Webots.html" title=" " alt="" coords="320,2403,511,2430"/>
+<area shape="rect" id="node46" href="$classmodule_1_1platform_1_1cm740_1_1HardwareIO.html" title="This NUClear Reactor is responsible for reading in the data from the CM740 and emitting it to the res..." alt="" coords="322,2455,509,2496"/>
+<area shape="rect" id="node47" href="$classmodule_1_1platform_1_1cm740_1_1HardwareSimulator.html" title="This NUClear Reactor is responsible for reading in the data for the CM740 Platform and emitting it to..." alt="" coords="322,2520,509,2561"/>
+<area shape="rect" id="node48" href="$classmodule_1_1support_1_1LocalisationSimulator.html" title=" " alt="" coords="308,2585,523,2627"/>
+<area shape="rect" id="node49" href="$classmodule_1_1support_1_1NUsightHarness.html" title=" " alt="" coords="321,2651,509,2692"/>
+<area shape="rect" id="node50" href="$classmodule_1_1support_1_1ReactionTimer.html" title=" " alt="" coords="319,2716,512,2757"/>
+<area shape="rect" id="node51" href="$classmodule_1_1support_1_1SignalCatcher.html" title="Handles OS interrupt signals." alt="" coords="302,2782,529,2809"/>
+<area shape="rect" id="node52" href="$classmodule_1_1support_1_1configuration_1_1GlobalConfig.html" title=" " alt="" coords="305,2833,526,2875"/>
+<area shape="rect" id="node53" href="$classmodule_1_1support_1_1configuration_1_1SoccerConfig.html" title=" " alt="" coords="305,2899,526,2940"/>
+<area shape="rect" id="node54" href="$classmodule_1_1support_1_1logging_1_1ConsoleLogHandler.html" title="Handles the logging of log messages to the console in a thread safe manner." alt="" coords="323,2964,507,3005"/>
+<area shape="rect" id="node55" href="$classmodule_1_1support_1_1logging_1_1DataLogging.html" title=" " alt="" coords="323,3029,507,3071"/>
+<area shape="rect" id="node56" href="$classmodule_1_1support_1_1logging_1_1DataPlayback.html" title=" " alt="" coords="323,3095,507,3136"/>
+<area shape="rect" id="node57" href="$classmodule_1_1support_1_1logging_1_1FileLogHandler.html" title=" " alt="" coords="323,3160,507,3201"/>
+<area shape="rect" id="node58" href="$classmodule_1_1tools_1_1FirmwareInstaller.html" title=" " alt="" coords="299,3226,532,3253"/>
+<area shape="rect" id="node59" href="$classmodule_1_1tools_1_1SystemConfiguration.html" title=" " alt="" coords="288,3277,543,3303"/>
+<area shape="rect" id="node60" href="$classmodule_1_1vision_1_1BallDetector.html" title=" " alt="" coords="312,3327,519,3354"/>
+<area shape="rect" id="node61" href="$classmodule_1_1vision_1_1GoalDetector.html" title=" " alt="" coords="309,3378,521,3405"/>
+<area shape="rect" id="node62" href="$classmodule_1_1vision_1_1GreenHorizonDetector.html" title=" " alt="" coords="308,3429,523,3471"/>
+<area shape="rect" id="node63" href="$classmodule_1_1vision_1_1VisualMesh.html" title=" " alt="" coords="315,3495,516,3522"/>
 <area shape="rect" id="node5" href="$classmodule_1_1motion_1_1Kinematics.html" title=" " alt="" coords="591,53,797,79"/>
 <area shape="rect" id="node6" href="$classmodule_1_1motion_1_1Servos.html" title=" " alt="" coords="605,103,783,130"/>
 </map>

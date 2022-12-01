@@ -170,7 +170,6 @@ $(document).ready(function(){initNavTree('classmodule_1_1behaviour_1_1strategy_1
 <a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pri-methods">Private Member Functions</a> &#124;
-<a href="#pri-static-methods">Static Private Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy-members.html">List of all members</a>  </div>
   <div class="headertitle">
@@ -210,22 +209,18 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
-<tr class="memitem:a589ebc2ba68fb489a77f93e2af59128b"><td class="memItemLeft" align="right" valign="top"><a id="a589ebc2ba68fb489a77f93e2af59128b"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a589ebc2ba68fb489a77f93e2af59128b">find</a> ()</td></tr>
-<tr class="memdesc:a589ebc2ba68fb489a77f93e2af59128b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Playing behaviour when ball is lost, currently just rotate on spot. <br /></td></tr>
-<tr class="separator:a589ebc2ba68fb489a77f93e2af59128b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5cfc91dbf6450635b165f250e02f3619"><td class="memItemLeft" align="right" valign="top"><a id="a5cfc91dbf6450635b165f250e02f3619"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a5cfc91dbf6450635b165f250e02f3619">goalie_walk</a> (const message::localisation::Field &amp;field, const message::localisation::Ball &amp;ball)</td></tr>
-<tr class="memdesc:a5cfc91dbf6450635b165f250e02f3619"><td class="mdescLeft">&#160;</td><td class="mdescRight">Goalie playing behaviour. <br /></td></tr>
-<tr class="separator:a5cfc91dbf6450635b165f250e02f3619"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a11b55fd02349fa6841bc0f5373780a4e"><td class="memItemLeft" align="right" valign="top"><a id="a11b55fd02349fa6841bc0f5373780a4e"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a11b55fd02349fa6841bc0f5373780a4e">find</a> (const std::shared_ptr&lt; const FilteredBall &gt; &amp;ball)</td></tr>
+<tr class="memdesc:a11b55fd02349fa6841bc0f5373780a4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Playing behaviour when ball is lost, currently just rotate on spot. <br /></td></tr>
+<tr class="separator:a11b55fd02349fa6841bc0f5373780a4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6b56b51cedfe96d962fd80e0dbb3019d"><td class="memItemLeft" align="right" valign="top"><a id="a6b56b51cedfe96d962fd80e0dbb3019d"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a6b56b51cedfe96d962fd80e0dbb3019d">initial_localisation_reset</a> ()</td></tr>
 <tr class="memdesc:a6b56b51cedfe96d962fd80e0dbb3019d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resets ball localisation for use in initial phase of normal mode. <br /></td></tr>
 <tr class="separator:a6b56b51cedfe96d962fd80e0dbb3019d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a95a9e4de68f3dd0a514b96cf9a2b1fd0"><td class="memItemLeft" align="right" valign="top"><a id="a95a9e4de68f3dd0a514b96cf9a2b1fd0"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a95a9e4de68f3dd0a514b96cf9a2b1fd0">normal</a> (const message::input::GameState &amp;game_state, const message::input::GameState::Data::Phase &amp;phase)</td></tr>
-<tr class="memdesc:a95a9e4de68f3dd0a514b96cf9a2b1fd0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Normal mode state machine, used to decide what phase behaviour to use. <br /></td></tr>
-<tr class="separator:a95a9e4de68f3dd0a514b96cf9a2b1fd0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ed97d2a3e03cf681a3f646284b332a4"><td class="memItemLeft" align="right" valign="top"><a id="a0ed97d2a3e03cf681a3f646284b332a4"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a0ed97d2a3e03cf681a3f646284b332a4">normal</a> (const message::input::GameState &amp;game_state, const message::input::GameState::Data::Phase &amp;phase, const std::shared_ptr&lt; const FilteredBall &gt; &amp;ball)</td></tr>
+<tr class="memdesc:a0ed97d2a3e03cf681a3f646284b332a4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Normal mode state machine, used to decide what phase behaviour to use. <br /></td></tr>
+<tr class="separator:a0ed97d2a3e03cf681a3f646284b332a4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae632f26b2b2f20f962f7b7a95b3892fd"><td class="memItemLeft" align="right" valign="top"><a id="ae632f26b2b2f20f962f7b7a95b3892fd"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#ae632f26b2b2f20f962f7b7a95b3892fd">normal_finished</a> ()</td></tr>
 <tr class="memdesc:ae632f26b2b2f20f962f7b7a95b3892fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Normal mode, finished phase behaviour/strategy. <br /></td></tr>
@@ -234,10 +229,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a430fd3d09a7126c373f4a4986b0f1aa8">normal_initial</a> ()</td></tr>
 <tr class="memdesc:a430fd3d09a7126c373f4a4986b0f1aa8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Normal mode, initial phase behaviour/strategy. <br /></td></tr>
 <tr class="separator:a430fd3d09a7126c373f4a4986b0f1aa8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aac31c6d83fde1a744029ee13c365f6b4"><td class="memItemLeft" align="right" valign="top"><a id="aac31c6d83fde1a744029ee13c365f6b4"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#aac31c6d83fde1a744029ee13c365f6b4">normal_playing</a> ()</td></tr>
-<tr class="memdesc:aac31c6d83fde1a744029ee13c365f6b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Normal mode, playing phase behaviour/strategy. <br /></td></tr>
-<tr class="separator:aac31c6d83fde1a744029ee13c365f6b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aca46f3b4192a109a83da15adb92a6211"><td class="memItemLeft" align="right" valign="top"><a id="aca46f3b4192a109a83da15adb92a6211"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#aca46f3b4192a109a83da15adb92a6211">normal_playing</a> (const std::shared_ptr&lt; const FilteredBall &gt; &amp;ball)</td></tr>
+<tr class="memdesc:aca46f3b4192a109a83da15adb92a6211"><td class="mdescLeft">&#160;</td><td class="mdescRight">Normal mode, playing phase behaviour/strategy. <br /></td></tr>
+<tr class="separator:aca46f3b4192a109a83da15adb92a6211"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeb241db4d2444c4b406a4acb85468976"><td class="memItemLeft" align="right" valign="top"><a id="aeb241db4d2444c4b406a4acb85468976"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#aeb241db4d2444c4b406a4acb85468976">normal_ready</a> (const message::input::GameState &amp;game_state)</td></tr>
 <tr class="memdesc:aeb241db4d2444c4b406a4acb85468976"><td class="mdescLeft">&#160;</td><td class="mdescRight">Normal mode, ready phase behaviour/strategy. <br /></td></tr>
@@ -254,10 +249,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a7c373ea6c4baf7b9ad0434e307bc6b83">penalised</a> () const</td></tr>
 <tr class="memdesc:a7c373ea6c4baf7b9ad0434e307bc6b83"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines if robot is currently penalised. <br /></td></tr>
 <tr class="separator:a7c373ea6c4baf7b9ad0434e307bc6b83"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0887b23074b02ee7a08ff7699a834956"><td class="memItemLeft" align="right" valign="top"><a id="a0887b23074b02ee7a08ff7699a834956"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a0887b23074b02ee7a08ff7699a834956">penalty_shootout</a> (const message::input::GameState::Data::Phase &amp;phase, const message::support::FieldDescription &amp;field_description, const message::localisation::Field &amp;field, const message::localisation::Ball &amp;ball)</td></tr>
-<tr class="memdesc:a0887b23074b02ee7a08ff7699a834956"><td class="mdescLeft">&#160;</td><td class="mdescRight">Penalty mode state machine, used to decide what phase behaviour to use. <br /></td></tr>
-<tr class="separator:a0887b23074b02ee7a08ff7699a834956"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b934a9b29e044669ed0007da4307d39"><td class="memItemLeft" align="right" valign="top"><a id="a5b934a9b29e044669ed0007da4307d39"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a5b934a9b29e044669ed0007da4307d39">penalty_shootout</a> (const message::input::GameState::Data::Phase &amp;phase, const std::shared_ptr&lt; const FilteredBall &gt; &amp;ball)</td></tr>
+<tr class="memdesc:a5b934a9b29e044669ed0007da4307d39"><td class="mdescLeft">&#160;</td><td class="mdescRight">Penalty mode state machine, used to decide what phase behaviour to use. <br /></td></tr>
+<tr class="separator:a5b934a9b29e044669ed0007da4307d39"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a417009e8e79634c5f031cf1ac6ff0d77"><td class="memItemLeft" align="right" valign="top"><a id="a417009e8e79634c5f031cf1ac6ff0d77"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a417009e8e79634c5f031cf1ac6ff0d77">penalty_shootout_finished</a> ()</td></tr>
 <tr class="memdesc:a417009e8e79634c5f031cf1ac6ff0d77"><td class="mdescLeft">&#160;</td><td class="mdescRight">Penalty mode, finished phase behaviour/strategy. <br /></td></tr>
@@ -266,22 +261,22 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#aa93f334db3a3460d131d57f911ab9944">penalty_shootout_initial</a> ()</td></tr>
 <tr class="memdesc:aa93f334db3a3460d131d57f911ab9944"><td class="mdescLeft">&#160;</td><td class="mdescRight">Penalty mode, initial phase behaviour/strategy. <br /></td></tr>
 <tr class="separator:aa93f334db3a3460d131d57f911ab9944"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af9743985629bcc4f5dd444115750f6f7"><td class="memItemLeft" align="right" valign="top"><a id="af9743985629bcc4f5dd444115750f6f7"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#af9743985629bcc4f5dd444115750f6f7">penalty_shootout_localisation_reset</a> (const message::support::FieldDescription &amp;field_description)</td></tr>
-<tr class="memdesc:af9743985629bcc4f5dd444115750f6f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resets robot and ball localisation for use in initial phase of penalty mode. <br /></td></tr>
-<tr class="separator:af9743985629bcc4f5dd444115750f6f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac9ad146ed51a40cac208683bf8507e70"><td class="memItemLeft" align="right" valign="top"><a id="ac9ad146ed51a40cac208683bf8507e70"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#ac9ad146ed51a40cac208683bf8507e70">penalty_shootout_playing</a> (const message::localisation::Field &amp;field, const message::localisation::Ball &amp;ball)</td></tr>
-<tr class="memdesc:ac9ad146ed51a40cac208683bf8507e70"><td class="mdescLeft">&#160;</td><td class="mdescRight">Penalty mode, playing phase behaviour/strategy. <br /></td></tr>
-<tr class="separator:ac9ad146ed51a40cac208683bf8507e70"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeeb5e65dd7e7fa83e53f634520175e8e"><td class="memItemLeft" align="right" valign="top"><a id="aeeb5e65dd7e7fa83e53f634520175e8e"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#aeeb5e65dd7e7fa83e53f634520175e8e">penalty_shootout_localisation_reset</a> ()</td></tr>
+<tr class="memdesc:aeeb5e65dd7e7fa83e53f634520175e8e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resets robot and ball localisation for use in initial phase of penalty mode. <br /></td></tr>
+<tr class="separator:aeeb5e65dd7e7fa83e53f634520175e8e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad5233c46229ec03366d3c1acbe25dc81"><td class="memItemLeft" align="right" valign="top"><a id="ad5233c46229ec03366d3c1acbe25dc81"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#ad5233c46229ec03366d3c1acbe25dc81">penalty_shootout_playing</a> (const std::shared_ptr&lt; const FilteredBall &gt; &amp;ball)</td></tr>
+<tr class="memdesc:ad5233c46229ec03366d3c1acbe25dc81"><td class="mdescLeft">&#160;</td><td class="mdescRight">Penalty mode, playing phase behaviour/strategy. <br /></td></tr>
+<tr class="separator:ad5233c46229ec03366d3c1acbe25dc81"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaec52983c0731627ec71243b03e88462"><td class="memItemLeft" align="right" valign="top"><a id="aaec52983c0731627ec71243b03e88462"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#aaec52983c0731627ec71243b03e88462">penalty_shootout_ready</a> ()</td></tr>
 <tr class="memdesc:aaec52983c0731627ec71243b03e88462"><td class="mdescLeft">&#160;</td><td class="mdescRight">Penalty mode, ready phase behaviour/strategy. <br /></td></tr>
 <tr class="separator:aaec52983c0731627ec71243b03e88462"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a38131d416e1884f0322ce2ee84149cb1"><td class="memItemLeft" align="right" valign="top"><a id="a38131d416e1884f0322ce2ee84149cb1"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a38131d416e1884f0322ce2ee84149cb1">penalty_shootout_set</a> (const message::support::FieldDescription &amp;field_description)</td></tr>
-<tr class="memdesc:a38131d416e1884f0322ce2ee84149cb1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Penalty mode, set phase behaviour/strategy. <br /></td></tr>
-<tr class="separator:a38131d416e1884f0322ce2ee84149cb1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1b8c73f5426b8e3a7de6b908b39030c6"><td class="memItemLeft" align="right" valign="top"><a id="a1b8c73f5426b8e3a7de6b908b39030c6"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a1b8c73f5426b8e3a7de6b908b39030c6">penalty_shootout_set</a> ()</td></tr>
+<tr class="memdesc:a1b8c73f5426b8e3a7de6b908b39030c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Penalty mode, set phase behaviour/strategy. <br /></td></tr>
+<tr class="separator:a1b8c73f5426b8e3a7de6b908b39030c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1acb03f359983cc6b58f6a352b1046db"><td class="memItemLeft" align="right" valign="top"><a id="a1acb03f359983cc6b58f6a352b1046db"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a1acb03f359983cc6b58f6a352b1046db">penalty_shootout_timeout</a> ()</td></tr>
 <tr class="memdesc:a1acb03f359983cc6b58f6a352b1046db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Penalty mode, timeout phase behaviour/strategy. <br /></td></tr>
@@ -290,10 +285,10 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a7685388ed6eaf7f919b6d90442a12ffc">picked_up</a> (const message::input::Sensors &amp;sensors) const</td></tr>
 <tr class="memdesc:a7685388ed6eaf7f919b6d90442a12ffc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines if robot is currently picked up based on foot down sensors. <br /></td></tr>
 <tr class="separator:a7685388ed6eaf7f919b6d90442a12ffc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6c053f58fd4b8a47075b554d397ed31d"><td class="memItemLeft" align="right" valign="top"><a id="a6c053f58fd4b8a47075b554d397ed31d"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a6c053f58fd4b8a47075b554d397ed31d">play</a> ()</td></tr>
-<tr class="memdesc:a6c053f58fd4b8a47075b554d397ed31d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Playing behaviour when ball is visible, currently just walks to the ball. <br /></td></tr>
-<tr class="separator:a6c053f58fd4b8a47075b554d397ed31d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a99deeb94693b50ec35d8bf980459ed2e"><td class="memItemLeft" align="right" valign="top"><a id="a99deeb94693b50ec35d8bf980459ed2e"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a99deeb94693b50ec35d8bf980459ed2e">play</a> (const std::shared_ptr&lt; const FilteredBall &gt; &amp;ball)</td></tr>
+<tr class="memdesc:a99deeb94693b50ec35d8bf980459ed2e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Playing behaviour when ball is visible, currently just walks to the ball. <br /></td></tr>
+<tr class="separator:a99deeb94693b50ec35d8bf980459ed2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a365dfdb3d6044713241dc44c0ee87e98"><td class="memItemLeft" align="right" valign="top"><a id="a365dfdb3d6044713241dc44c0ee87e98"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a365dfdb3d6044713241dc44c0ee87e98">stand_still</a> ()</td></tr>
 <tr class="memdesc:a365dfdb3d6044713241dc44c0ee87e98"><td class="mdescLeft">&#160;</td><td class="mdescRight">Makes the robot stand still. <br /></td></tr>
@@ -303,34 +298,27 @@ void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memdesc:a1f622fa251388a2d8bd93addeabe67a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resets ball localisation for use after we are unpenalised. <br /></td></tr>
 <tr class="separator:a1f622fa251388a2d8bd93addeabe67a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-static-methods"></a>
-Static Private Member Functions</h2></td></tr>
-<tr class="memitem:ae7d9655bb180b4389134cee28b009363"><td class="memItemLeft" align="right" valign="top"><a id="ae7d9655bb180b4389134cee28b009363"></a>
-static Eigen::Vector2d&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#ae7d9655bb180b4389134cee28b009363">get_kick_plan</a> (const message::localisation::Field &amp;field, const message::support::FieldDescription &amp;field_description)</td></tr>
-<tr class="memdesc:ae7d9655bb180b4389134cee28b009363"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generated a kick plan on localisation updates. <br /></td></tr>
-<tr class="separator:ae7d9655bb180b4389134cee28b009363"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
 <tr class="memitem:a25d060ca737c4adc8a69d77bbebc5cab"><td class="memItemLeft" align="right" valign="top"><a id="a25d060ca737c4adc8a69d77bbebc5cab"></a>
 NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a25d060ca737c4adc8a69d77bbebc5cab">ball_last_measured</a> = NUClear::clock::now() - std::chrono::seconds(6000)</td></tr>
 <tr class="memdesc:a25d060ca737c4adc8a69d77bbebc5cab"><td class="mdescLeft">&#160;</td><td class="mdescRight">The time since the last ball was measured. <br /></td></tr>
 <tr class="separator:a25d060ca737c4adc8a69d77bbebc5cab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb2037e213c75e4fc32ecc4e2aa2cdc1"><td class="memItemLeft" align="right" valign="top"><a id="adb2037e213c75e4fc32ecc4e2aa2cdc1"></a>
+float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#adb2037e213c75e4fc32ecc4e2aa2cdc1">ball_lost_clockwise</a> = true</td></tr>
+<tr class="memdesc:adb2037e213c75e4fc32ecc4e2aa2cdc1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Flag to determine whether the ball is on the left or right side of the robot. <br /></td></tr>
+<tr class="separator:adb2037e213c75e4fc32ecc4e2aa2cdc1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a06de45e1874859b2a71a9dccdd851d50"><td class="memItemLeft" align="right" valign="top"><a id="a06de45e1874859b2a71a9dccdd851d50"></a>
 struct <a class="el" href="structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html">module::behaviour::strategy::SoccerStrategy::Config</a>&#160;</td><td class="memItemRight" valign="bottom"><b>cfg</b></td></tr>
 <tr class="separator:a06de45e1874859b2a71a9dccdd851d50"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6b14cb0874880286dfce7e84b8b7862f"><td class="memItemLeft" align="right" valign="top"><a id="a6b14cb0874880286dfce7e84b8b7862f"></a>
-message::behaviour::Behaviour::State&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a6b14cb0874880286dfce7e84b8b7862f">currentState</a> = message::behaviour::Behaviour::State::INIT</td></tr>
-<tr class="memdesc:a6b14cb0874880286dfce7e84b8b7862f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores which behaviour state the robot is in. <br /></td></tr>
-<tr class="separator:a6b14cb0874880286dfce7e84b8b7862f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a297b2ba91612f7951ae6e11e32013638"><td class="memItemLeft" align="right" valign="top"><a id="a297b2ba91612f7951ae6e11e32013638"></a>
+message::behaviour::Behaviour::State&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a297b2ba91612f7951ae6e11e32013638">current_state</a> = message::behaviour::Behaviour::State::INIT</td></tr>
+<tr class="memdesc:a297b2ba91612f7951ae6e11e32013638"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores which behaviour state the robot is in. <br /></td></tr>
+<tr class="separator:a297b2ba91612f7951ae6e11e32013638"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a69c490f5a0a189cf403540a69fb189bb"><td class="memItemLeft" align="right" valign="top"><a id="a69c490f5a0a189cf403540a69fb189bb"></a>
 NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a69c490f5a0a189cf403540a69fb189bb">goal_last_measured</a></td></tr>
 <tr class="memdesc:a69c490f5a0a189cf403540a69fb189bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">The time since the last goal was measured. <br /></td></tr>
 <tr class="separator:a69c490f5a0a189cf403540a69fb189bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2341aa974be155a6fd423ee2bb4b81e4"><td class="memItemLeft" align="right" valign="top"><a id="a2341aa974be155a6fd423ee2bb4b81e4"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a2341aa974be155a6fd423ee2bb4b81e4">has_kicked</a> = false</td></tr>
-<tr class="memdesc:a2341aa974be155a6fd423ee2bb4b81e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bool to indicate if the robot has finished kicking in penalty shootout. <br /></td></tr>
-<tr class="separator:a2341aa974be155a6fd423ee2bb4b81e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0f08366d2259f3fd120b29c8334baa99"><td class="memItemLeft" align="right" valign="top"><a id="a0f08366d2259f3fd120b29c8334baa99"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a0f08366d2259f3fd120b29c8334baa99">is_getting_up</a> = false</td></tr>
 <tr class="memdesc:a0f08366d2259f3fd120b29c8334baa99"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bool to indicate if the robot is currently getting up. <br /></td></tr>
@@ -342,10 +330,10 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="clas
 <tr class="memitem:a9652f86f1f770449a50bce0340f33db3"><td class="memItemLeft" align="right" valign="top"><a id="a9652f86f1f770449a50bce0340f33db3"></a>
 message::behaviour::KickPlan::KickType&#160;</td><td class="memItemRight" valign="bottom"><b>kick_type</b> {}</td></tr>
 <tr class="separator:a9652f86f1f770449a50bce0340f33db3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa6ee3e54da2f6d3e1053a8151de9e68d"><td class="memItemLeft" align="right" valign="top"><a id="aa6ee3e54da2f6d3e1053a8151de9e68d"></a>
-message::behaviour::Behaviour::State&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#aa6ee3e54da2f6d3e1053a8151de9e68d">previousState</a> = message::behaviour::Behaviour::State::INIT</td></tr>
-<tr class="memdesc:aa6ee3e54da2f6d3e1053a8151de9e68d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores which behaviour state the robot was previosuly in. <br /></td></tr>
-<tr class="separator:aa6ee3e54da2f6d3e1053a8151de9e68d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f7da692b3197359b0ef4ac3edcf0a9f"><td class="memItemLeft" align="right" valign="top"><a id="a0f7da692b3197359b0ef4ac3edcf0a9f"></a>
+message::behaviour::Behaviour::State&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#a0f7da692b3197359b0ef4ac3edcf0a9f">previous_state</a> = message::behaviour::Behaviour::State::INIT</td></tr>
+<tr class="memdesc:a0f7da692b3197359b0ef4ac3edcf0a9f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores which behaviour state the robot was previosuly in. <br /></td></tr>
+<tr class="separator:a0f7da692b3197359b0ef4ac3edcf0a9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa03a7b3351b7e2bf842d613a0ec2576a"><td class="memItemLeft" align="right" valign="top"><a id="aa03a7b3351b7e2bf842d613a0ec2576a"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html#aa03a7b3351b7e2bf842d613a0ec2576a">reset_in_initial</a> = true</td></tr>
 <tr class="memdesc:aa03a7b3351b7e2bf842d613a0ec2576a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Bool to indicate if we want to reset localisation in initial phase. <br /></td></tr>
@@ -377,7 +365,7 @@ message::input::GameEvents::Context&#160;</td><td class="memItemRight" valign="b
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>behaviour</b></li><li class="navelem"><b>strategy</b></li><li class="navelem"><a class="el" href="classmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy.html">SoccerStrategy</a></li>
-    <li class="footer">Generated on Mon Nov 28 2022 22:31:17 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Thu Dec 1 2022 02:40:47 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
