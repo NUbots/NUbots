@@ -1,14 +1,9 @@
-NatNet
-======
+# NatNet
 
 ## Description
 
-
 ## Usage
-
 
 ## Emits
 
-
 ## Dependencies
-

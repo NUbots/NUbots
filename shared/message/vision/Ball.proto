@@ -58,7 +58,7 @@ message Balls {
     uint32 id = 1;
     /// When the image was taken that this measurement is derived from
     google.protobuf.Timestamp timestamp = 2;
-    /// Affine3d transform from world space to camera space at the time that the image was taken
+    /// Isometry3d transform from world space to camera space at the time that the image was taken
     mat4 Hcw = 3;
     /// Could be empty, if there were no balls detected in the image
     repeated Ball balls = 4;
