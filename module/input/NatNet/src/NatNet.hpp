@@ -122,13 +122,13 @@ namespace module::input {
         };
 
         // Models we are using
-        std::map<std::string, MarkerSetModel> marker_set_models;
-        std::map<uint32_t, RigidBodyModel> rigid_body_models;
-        std::map<uint32_t, SkeletonModel> skeleton_models;
-        std::map<uint32_t, ForcePlateModel> force_plate_models;
-        std::map<uint32_t, DeviceModel> device_models;
-        /// @brief Camera model number in motive is not associated with key number
-        std::map<uint32_t, CameraModel> camera_models;
+        std::map<std::string, MarkerSetModel> marker_set_models = {};
+        std::map<uint32_t, RigidBodyModel> rigid_body_models    = {};
+        std::map<uint32_t, SkeletonModel> skeleton_models       = {};
+        std::map<uint32_t, ForcePlateModel> force_plate_models  = {};
+        std::map<uint32_t, DeviceModel> device_models           = {};
+        /// @brief Camera model number in motive is not associated with map key number
+        std::map<uint32_t, CameraModel> camera_models = {};
 
         // The version of NatNet we are running with
         uint32_t remote  = 0;
