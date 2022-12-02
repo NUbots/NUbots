@@ -55,8 +55,14 @@ namespace module::behaviour::planning {
             Config() = default;
             /// @brief Walk path planner priority in the subsumption system
             float walk_path_planner_priority = 0;
-            /// @brief Walk command velocity for walking to ball
-            float forward_speed = 0;
+            /// @brief Maximum walk command velocity for walking to ball
+            float max_forward_speed = 0;
+            /// @brief Minimum walk command velocity for walking to ball
+            float min_forward_speed = 0;
+            /// @brief Crude acceleration, the maximum increment/decrease in walk command velocity per update
+            float acceleration = 0;
+            /// @brief Region around ball to begin decelerating in
+            float ball_approach_radius = 0;
             /// @brief Maximum angular velocity command for walking to ball
             float max_turn_speed = 0;
             /// @brief Minimum angular velocity command for walking to ball
@@ -90,7 +96,10 @@ namespace module::behaviour::planning {
         const size_t subsumption_id;
 
         /// @brief The current speed of the walk command
-        float current_speed = 0;
+        float speed = 0;
+
+        /// @brief The current state of the walk engine
+        bool walk_engine_active = false;
 
         /// @brief Walk using the walk command from a direct motion command.
         void walk_directly();

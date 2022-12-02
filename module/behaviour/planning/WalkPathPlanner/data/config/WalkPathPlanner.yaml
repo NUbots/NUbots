@@ -1,13 +1,15 @@
-log_level: DEBUG
+log_level: WARN
 
 # Priority in subsumption system
 walk_path_planner_priority: 3
 
 # General playing tuning values for approaching ball
-forward_speed: 0.0125
-side_speed: 0.01
+max_forward_speed: 0.02
+min_forward_speed: 0.01
 max_turn_speed: 0.15
 min_turn_speed: -0.15
+acceleration: 0.005 # maximum increment in walk command velocity
+ball_approach_radius: 1 # region around ball to begin decelerating
 
 # Rotate on the spot tuning values
 rotate_speed: 0.2

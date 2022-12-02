@@ -69,7 +69,10 @@ namespace module::behaviour::planning {
             log_level                      = config["log_level"].as<NUClear::LogLevel>();
             cfg.max_turn_speed             = config["max_turn_speed"].as<float>();
             cfg.min_turn_speed             = config["min_turn_speed"].as<float>();
-            cfg.forward_speed              = config["forward_speed"].as<float>();
+            cfg.max_forward_speed          = config["max_forward_speed"].as<float>();
+            cfg.min_forward_speed          = config["min_forward_speed"].as<float>();
+            cfg.acceleration               = config["acceleration"].as<float>();
+            cfg.ball_approach_radius       = config["ball_approach_radius"].as<float>();
             cfg.rotate_speed_x             = config["rotate_speed_x"].as<float>();
             cfg.rotate_speed_y             = config["rotate_speed_y"].as<float>();
             cfg.rotate_speed               = config["rotate_speed"].as<float>();
@@ -81,7 +84,7 @@ namespace module::behaviour::planning {
         });
 
         // ON start set our current walk command speed to 0
-        on<Startup>().then([this] { current_speed = 0; });
+        on<Startup>().then([this] { speed = 0; });
 
 
         emit<Scope::INITIALIZE>(std::make_unique<RegisterAction>(
@@ -110,9 +113,25 @@ namespace module::behaviour::planning {
                            }}));
 
         on<Trigger<WalkStopped>>().then([this] {
-            current_speed = 0;
+            NUClear::log<NUClear::DEBUG>("Walk stopped");
+            walk_engine_active = false;
+            // reset the current speed to 0
+            speed = 0;
             update_priority(0);
         });
+        on<Trigger<DisableWalkEngineCommand>>().then([this] {
+            NUClear::log<NUClear::DEBUG>("Walk disabled");
+            walk_engine_active = false;
+            // reset the current speed to 0
+            speed = 0;
+        });
+        on<Trigger<EnableWalkEngineCommand>>().then([this] {
+            NUClear::log<NUClear::DEBUG>("Walk started");
+            walk_engine_active = true;
+            // reset the current speed to 0
+            speed = 0;
+        });
+
 
         // TODO(BehaviourTeam): Freq should be equal to the main loop in soccer strategy.
         on<Every<30, Per<std::chrono::seconds>>, Optional<With<FilteredBall>>, Sync<WalkPathPlanner>>().then(
@@ -152,45 +171,49 @@ namespace module::behaviour::planning {
 
     void WalkPathPlanner::vision_walk_path(const std::shared_ptr<const FilteredBall>& ball) {
         // If ball exists...
-        if (ball) {
-            Eigen::Vector3f rBTt = ball->rBTt.cast<float>();
+        if (ball && walk_engine_active) {
             // Add a offset to the ball position to avoid walking at the ball directly such that the robot can kick
-            rBTt.y() = rBTt.y() + cfg.ball_y_offset;
-            // Obtain the unit vector to desired target in torso space and scale by cfg.forward_speed
+            Eigen::Vector3f rBTt = ball->rBTt.cast<float>();
+            rBTt.y()             = rBTt.y() + cfg.ball_y_offset;
+
+            // Obtain the unit vector to desired target in torso space
             Eigen::Vector3f uBTt = rBTt.normalized();
-            float increment      = 0.01;
 
-
-            // If getting close to the ball, begin to slow down
-            if (rBTt.head(2).norm() < 1) {
-                current_speed = cfg.forward_speed * rBTt.head(2).norm();
+            // If robot getting close to the ball, begin to decelerate to minimum speed
+            if (rBTt.head(2).norm() < cfg.ball_approach_radius) {
+                speed -= cfg.acceleration;
+                speed = std::max(speed, cfg.min_forward_speed);
             }
             else {
-                current_speed += increment;
-                current_speed = std::min(current_speed, cfg.forward_speed);
+                // If robot is far away from the ball, accelerate to max speed
+                speed += cfg.acceleration;
+                speed = std::min(speed, cfg.max_forward_speed);
             }
 
-            // log the current speed
-            log<NUClear::DEBUG>("rBTt.head(2).norm(): ", rBTt.head(2).norm());
-            log<NUClear::DEBUG>("Current speed: ", current_speed);
 
-            Eigen::Vector3f walk_command = current_speed * (uBTt);
+            Eigen::Vector3f walk_command = speed * uBTt;
 
             // Set the angular velocity component of the walk_command with the angular displacement and saturate with
-            // value cfg.max_turn_speed
+            // limits
             walk_command.z() = utility::math::clamp(cfg.min_turn_speed,
                                                     std::atan2(walk_command.y(), walk_command.x()),
                                                     cfg.max_turn_speed);
-
             std::unique_ptr<WalkCommand> command =
                 std::make_unique<WalkCommand>(subsumption_id, walk_command.cast<double>());
 
             emit(std::move(command));
             update_priority(cfg.walk_path_planner_priority);
+            if (log_level <= NUClear::DEBUG) {
+                // Log the current speed and distance to ball
+                log<NUClear::DEBUG>("Distance to ball: ", rBTt.head(2).norm());
+                log<NUClear::DEBUG>("Current speed: ", speed);
+            }
         }
     }
 
     void WalkPathPlanner::rotate_on_spot(bool clockwise) {
+        // Reset the normal walking speed to 0 when rotating on spot
+        speed = 0;
         // Determine the direction of rotation
         int sign = clockwise ? -1 : 1;
 
@@ -215,6 +238,8 @@ namespace module::behaviour::planning {
     }
 
     void WalkPathPlanner::walk_to_ready() {
+        // Reset the normal walking speed to 0 when walking to ready
+        speed = 0;
 
         std::unique_ptr<WalkCommand> command = std::make_unique<WalkCommand>(
             subsumption_id,
