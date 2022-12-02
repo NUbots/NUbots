@@ -22,7 +22,7 @@ localisation_interval: 30
 localisation_duration: 5
 
 # Enables forced game mode and phase if set to true
-force_playing: true
+force_playing: false
 force_penalty_shootout: false
 
 # Time to walk forward in ready (in seconds)
