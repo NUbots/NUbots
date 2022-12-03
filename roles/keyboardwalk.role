@@ -13,6 +13,8 @@ nuclear_role(
   # Hardware Interface
   platform::cm740::HardwareIO
   input::SensorFilter
+  # Director
+  extension::Director
   # Motion
   motion::QuinticWalk
   motion::ScriptEngine
@@ -24,5 +26,4 @@ nuclear_role(
   behaviour::skills::KickScript
   behaviour::skills::DirectWalkController
   behaviour::strategy::KeyboardWalk
-  extension::Director
 )
