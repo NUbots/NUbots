@@ -31,7 +31,7 @@ namespace module::motion {
         size_t subsumption_id = 1;
 
         // Reaction handle for the main update loop, disabling when not moving will save unnecessary CPU
-        ReactionHandle update_handle{};
+        // ReactionHandle update_handle{};
         ReactionHandle imu_reaction{};
 
         void calculate_joint_goals();

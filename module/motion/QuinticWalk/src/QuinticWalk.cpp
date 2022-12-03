@@ -24,15 +24,12 @@ namespace module::motion {
     using message::behaviour::Behaviour;
     using message::behaviour::ServoCommands;
     using message::input::Sensors;
-    using message::motion::DisableWalkEngineCommand;
     using message::motion::EnableWalkEngineCommand;
-    using message::motion::ExecuteGetup;
-    using message::motion::KillGetup;
     using message::motion::KinematicsModel;
     using message::motion::LeftLegIK;
-    using message::motion::NewWalkCommand;
     using message::motion::RightLegIK;
     using message::motion::StopCommand;
+    using message::motion::Walk;
     using message::motion::WalkCommand;
 
     using utility::input::ServoID;
@@ -170,6 +167,7 @@ namespace module::motion {
             imu_reaction.enable(current_config.imu_active);
         });
 
+        // TODO: Move into Provide
         on<Startup, Trigger<KinematicsModel>>().then("Update Kinematics Model", [this](const KinematicsModel& model) {
             kinematicsModel = model;
             first_run       = true;
@@ -180,15 +178,13 @@ namespace module::motion {
             walk_engine.reset();
         });
 
-        on<Trigger<ExecuteGetup>>().then([this]() { falling = true; });
+        // TODO: Remove?
+        //  on<Trigger<StopCommand>>().then([this](const StopCommand& walkCommand) {
+        //      subsumption_id = walkCommand.subsumption_id;
+        //      current_orders.setZero();
+        //  });
 
-        on<Trigger<KillGetup>>().then([this]() { falling = false; });
-
-        on<Trigger<StopCommand>>().then([this](const StopCommand& walkCommand) {
-            subsumption_id = walkCommand.subsumption_id;
-            current_orders.setZero();
-        });
-
+        // TODO: Move this into Provide. Remove subsumption stuff
         on<Trigger<WalkCommand>>().then([this](const WalkCommand& walkCommand) {
             subsumption_id = walkCommand.subsumption_id;
 
@@ -225,67 +221,33 @@ namespace module::motion {
             current_orders = orders;
         });
 
-        // OLD START
-        on<Trigger<EnableWalkEngineCommand>>().then([this](const EnableWalkEngineCommand& command) {
-            subsumption_id = command.subsumption_id;
-            walk_engine.reset();
-            update_handle.enable();
-        });
-
         // NEW START
-        // on<Start<WalkCommand>>().then([this] {
-        //     walk_engine.reset();
-        //     update_handle.enable();
-        // });
-
-        // OLD STOP
-        on<Trigger<DisableWalkEngineCommand>>().then([this](const DisableWalkEngineCommand& command) {
-            subsumption_id = command.subsumption_id;
-            update_handle.disable();
+        on<Start<Walk>>().then([this] {
+            // walk_engine.reset();
+            // update_handle.enable();
         });
-
-        // NEW STOP
-        //  on<Stop<WalkCommand>>().then([this] { update_handle.disable(); });
-
-
-        // OLD  MAIN LOOP
-        // update_handle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single>().then([this]() {
-        //     const float dt = get_time_delta();
-
-        //     if (falling) {
-        //         // We are falling, reset walk engine
-        //         walk_engine.reset();
-        //     }
-        //     else {
-
-        //         // see if the walk engine has new goals for us
-        //         if (walk_engine.update_state(dt, current_orders)) {
-        //             calculate_joint_goals();
-        //         }
-        //     }
-        // });
 
         // NEW MAIN LOOP
-        update_handle = on<Provide<NewWalkCommand>,
-                           Needs<LeftLegIK>,
-                           Needs<RightLegIK>,
-                           Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
-                           Single>()
-                            .then([this] {
-                                const float dt = get_time_delta();
-                                if (falling) {
-                                    // We are falling, reset walk engine
-                                    walk_engine.reset();
-                                    // NOTE: emit?
-                                }
-                                else {
-                                    // see if the walk engine has new goals for us
-                                    if (walk_engine.update_state(dt, current_orders)) {
-                                        calculate_joint_goals();
-                                        // NOTE: emit.
-                                    }
-                                }
-                            });
+        on<Provide<Walk>,
+           Needs<LeftLegIK>,
+           Needs<RightLegIK>,
+           Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
+           Single>()
+            .then([this] {
+                const float dt = get_time_delta();
+                if (falling) {
+                    // We are falling, reset walk engine
+                    walk_engine.reset();
+                    // NOTE: emit?
+                }
+                else {
+                    // see if the walk engine has new goals for us
+                    if (walk_engine.update_state(dt, current_orders)) {
+                        calculate_joint_goals();
+                        // NOTE: emit.
+                    }
+                }
+            });
     }
 
     float QuinticWalk::get_time_delta() {
