@@ -14,14 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2022 NUbots <nubots@nubots.net>
  */
 
 #ifndef MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_HPP
 #define MODULES_BEHAVIOUR_PLANNING_KICKPLANNER_HPP
 
-#include "message/input/Sensors.hpp"
-#include "message/motion/KickCommand.hpp"
 namespace module::behaviour::planning {
 
     class KickPlanner : public NUClear::Reactor {
@@ -30,11 +28,27 @@ namespace module::behaviour::planning {
         explicit KickPlanner(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        [[nodiscard]] bool kickValid(const Eigen::Vector3d& ballPos) const;
-        bool forcePlaying = false;
-        message::motion::KickPlannerConfig cfg{};
-        NUClear::clock::time_point ballLastSeen{std::chrono::seconds(0)};
-        NUClear::clock::time_point lastTimeValid{NUClear::clock::now()};
+        /// @brief Determines if the robot should kick based on the ball position.
+        /// @param ball_pos The position of the ball in torso space.
+        /// @return True if the robot should kick, false otherwise.
+        [[nodiscard]] bool kick_valid(const Eigen::Vector3d& ball_pos) const;
+
+        /// @brief Stores configuration values
+        struct Config {
+            float max_ball_distance        = 0.0;
+            float kick_corridor_width      = 0.0;
+            float seconds_not_seen_limit   = 0.0;
+            float kick_forward_angle_limit = 0.0;
+        } cfg;
+
+        /// @brief Whether the robot is in a play state regardless of the GameController state
+        bool force_playing = false;
+
+        /// @brief Last time the ball was detected by the vision system
+        NUClear::clock::time_point ball_last_seen{std::chrono::seconds(0)};
+
+        /// @brief Last time the ball was detected in a position where a kick would likely be successful
+        NUClear::clock::time_point last_time_valid{NUClear::clock::now()};
     };
 }  // namespace module::behaviour::planning
 
