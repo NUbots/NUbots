@@ -178,73 +178,122 @@ namespace module::motion {
             walk_engine.reset();
         });
 
-        // TODO: Remove?
-        //  on<Trigger<StopCommand>>().then([this](const StopCommand& walkCommand) {
-        //      subsumption_id = walkCommand.subsumption_id;
-        //      current_orders.setZero();
-        //  });
-
-        // TODO: Move this into Provide. Remove subsumption stuff
-        on<Trigger<WalkCommand>>().then([this](const WalkCommand& walkCommand) {
-            subsumption_id = walkCommand.subsumption_id;
-
-            // the engine expects orders in [m] not [m/s]. We have to compute by dividing by step frequency which is
-            // a double step factor 2 since the order distance is only for a single step, not double step
-            const float factor             = (1.0f / (current_config.params.freq)) * 0.5f;
-            const Eigen::Vector3f& command = walkCommand.command.cast<float>() * factor;
-
-            // Clamp velocity command
-            Eigen::Vector3f orders =
-                command.array().max(-current_config.max_step.array()).min(current_config.max_step.array()).matrix();
-
-            // translational orders (x+y) should not exceed combined limit. scale if necessary
-            if (current_config.max_step_xy != 0) {
-                float scaling_factor = 1.0f / std::max(1.0f, (orders.x() + orders.y()) / current_config.max_step_xy);
-                orders.cwiseProduct(Eigen::Vector3f(scaling_factor, scaling_factor, 1.0f));
-            }
-
-            // warn user that speed was limited
-            if (command.x() != orders.x() || command.y() != orders.y() || command.z() != orders.z()) {
-                log<NUClear::WARN>(
-                    fmt::format("Speed command was x: {} y: {} z: {} xy: {} but maximum is x: {} y: {} z: {} xy: {}",
-                                command.x(),
-                                command.y(),
-                                command.z(),
-                                command.x() + command.y(),
-                                current_config.max_step.x() / factor,
-                                current_config.max_step.y() / factor,
-                                current_config.max_step.z() / factor,
-                                current_config.max_step_xy / factor));
-            }
-
-            // Update orders
-            current_orders = orders;
-        });
-
         // NEW START
         on<Start<Walk>>().then([this] {
             // walk_engine.reset();
             // update_handle.enable();
         });
 
-        // NEW MAIN LOOP
+        // NEW MAIN LOOP - Calculates joint goals and emits....
         on<Provide<Walk>,
            Needs<LeftLegIK>,
            Needs<RightLegIK>,
+           Needs<RightArm>,
+           Needs<LeftArm>,
            Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>,
-           Single>()
+           Single>(const Walk walk)
             .then([this] {
-                const float dt = get_time_delta();
-                if (falling) {
-                    // We are falling, reset walk engine
-                    walk_engine.reset();
-                    // NOTE: emit?
+                // ****The function formally known as on<Trigger<WalkCommand>>.then([this](const WalkCommand&
+                // walkCommand)****
+
+                // the engine expects orders in [m] not [m/s]. We have to compute by dividing by step frequency which is
+                // a double step factor 2 since the order distance is only for a single step, not double step
+                const float factor             = (1.0f / (current_config.params.freq)) * 0.5f;
+                const Eigen::Vector3f& command = walkCommand.command.cast<float>() * factor;
+
+                // Clamp velocity command
+                Eigen::Vector3f orders =
+                    command.array().max(-current_config.max_step.array()).min(current_config.max_step.array()).matrix();
+
+                // translational orders (x+y) should not exceed combined limit. scale if necessary
+                if (current_config.max_step_xy != 0) {
+                    float scaling_factor =
+                        1.0f / std::max(1.0f, (orders.x() + orders.y()) / current_config.max_step_xy);
+                    orders.cwiseProduct(Eigen::Vector3f(scaling_factor, scaling_factor, 1.0f));
                 }
-                else {
-                    // see if the walk engine has new goals for us
-                    if (walk_engine.update_state(dt, current_orders)) {
-                        calculate_joint_goals();
-                        // NOTE: emit.
+
+                // warn user that speed was limited
+                if (command.x() != orders.x() || command.y() != orders.y() || command.z() != orders.z()) {
+                    log<NUClear::WARN>(fmt::format(
+                        "Speed command was x: {} y: {} z: {} xy: {} but maximum is x: {} y: {} z: {} xy: {}",
+                        command.x(),
+                        command.y(),
+                        command.z(),
+                        command.x() + command.y(),
+                        current_config.max_step.x() / factor,
+                        current_config.max_step.y() / factor,
+                        current_config.max_step.z() / factor,
+                        current_config.max_step_xy / factor));
+                }
+
+                // Update orders
+                current_orders = orders;  // Is this redundant? - L.Craft
+
+                // TODO: Add description of this block. ****Formerly Main Walking loop***
+                const float dt = get_time_delta();
+                // see if the walk engine has new goals for us
+                if (walk_engine.update_state(dt, current_orders)) {
+
+                    // ****The function formerly known as calculate_joint_goals (Maybe move back to a function)****
+                    // Position of trunk {t} relative to support foot {s}
+                    Eigen::Vector3f rTSs = Eigen::Vector3f::Zero();
+                    // Euler angles [Roll, Pitch, Yaw] of trunk {t} relative to support foot {s}
+                    Eigen::Vector3f thetaST = Eigen::Vector3f::Zero();
+                    // Position of flying foot {f} relative to support foot {s}
+                    Eigen::Vector3f rFSs = Eigen::Vector3f::Zero();
+                    // Euler angles [Roll, Pitch, Yaw] of flying foot {f} relative to support foot {s}
+                    Eigen::Vector3f thetaSF = Eigen::Vector3f::Zero();
+
+                    // Read the cartesian positions and orientations for trunk and fly foot
+                    std::tie(rTSs, thetaST, rFSs, thetaSF, is_left_support) = walk_engine.compute_cartesian_position();
+
+                    // Change goals from support foot based coordinate system to trunk based coordinate system
+                    // Trunk {t} from support foot {s}
+                    Eigen::Affine3f Hst;
+                    Hst.linear()      = EulerIntrinsicToMatrix(thetaST);
+                    Hst.translation() = rTSs;
+
+                    // Flying foot {f} from support foot {s}
+                    Eigen::Affine3f Hsf;
+                    Hsf.linear()      = EulerIntrinsicToMatrix(thetaSF);
+                    Hsf.translation() = rFSs;
+
+                    // Support foot {s} from trunk {t}
+                    const Eigen::Affine3f Hts = Hst.inverse();
+
+                    // Flying foot {f} from trunk {t}
+                    const Eigen::Affine3f Htf = Hts * Hsf;
+
+                    // Get desired transform for left foot {l}
+                    const Eigen::Affine3f Htl = walk_engine.get_footstep().is_left_support() ? Hts : Htf;
+
+                    // Get desired transform for right foot {r}
+                    const Eigen::Affine3f Htr = walk_engine.get_footstep().is_left_support() ? Htf : Hts;
+
+                    // ****ARM STUFF****
+                    // emit
+                    // emit leftlegik, rightlegik, leftarm, rightarm
+                    // emit();
+
+                    // NOTE: Below is now done in the kinematics provider
+
+                    //  Compute inverse kinematics for left and right foot
+                    //  const auto joints = calculateLegJoints<float>(kinematicsModel, Htl, Htr);
+                    //  auto waypoints    = motion(joints);
+                    //  emit(std::move(waypoints));
+
+                    // Plot graphs of desired trajectories
+                    if (log_level <= NUClear::DEBUG) {
+                        Eigen::Vector3f thetaTL = MatrixToEulerIntrinsic(Htl.linear());
+                        emit(graph("Left foot desired position (x,y,z)", Htl(0, 3), Htl(1, 3), Htl(2, 3)));
+                        emit(graph("Left foot desired orientation (r,p,y)", thetaTL.x(), thetaTL.y(), thetaTL.z()));
+
+                        Eigen::Vector3f thetaTR = MatrixToEulerIntrinsic(Htr.linear());
+                        emit(graph("Right foot desired position (x,y,z)", Htr(0, 3), Htr(1, 3), Htr(2, 3)));
+                        emit(graph("Right foot desired orientation (r,p,y)", thetaTR.x(), thetaTR.y(), thetaTR.z()));
+
+                        emit(graph("Trunk desired position (x,y,z)", Hst(0, 3), Hst(1, 3), Hst(2, 3)));
+                        emit(graph("Trunk desired orientation (r,p,y)", thetaST.x(), thetaST.y(), thetaST.z()));
                     }
                 }
             });
@@ -271,66 +320,8 @@ namespace module::motion {
         return dt;
     }
 
-    /*
-    This method computes the next motor goals and publishes them.
-    */
-    void QuinticWalk::calculate_joint_goals() {
 
-        // Position of trunk {t} relative to support foot {s}
-        Eigen::Vector3f rTSs = Eigen::Vector3f::Zero();
-        // Euler angles [Roll, Pitch, Yaw] of trunk {t} relative to support foot {s}
-        Eigen::Vector3f thetaST = Eigen::Vector3f::Zero();
-        // Position of flying foot {f} relative to support foot {s}
-        Eigen::Vector3f rFSs = Eigen::Vector3f::Zero();
-        // Euler angles [Roll, Pitch, Yaw] of flying foot {f} relative to support foot {s}
-        Eigen::Vector3f thetaSF = Eigen::Vector3f::Zero();
-
-        // Read the cartesian positions and orientations for trunk and fly foot
-        std::tie(rTSs, thetaST, rFSs, thetaSF, is_left_support) = walk_engine.compute_cartesian_position();
-
-        // Change goals from support foot based coordinate system to trunk based coordinate system
-        // Trunk {t} from support foot {s}
-        Eigen::Affine3f Hst;
-        Hst.linear()      = EulerIntrinsicToMatrix(thetaST);
-        Hst.translation() = rTSs;
-
-        // Flying foot {f} from support foot {s}
-        Eigen::Affine3f Hsf;
-        Hsf.linear()      = EulerIntrinsicToMatrix(thetaSF);
-        Hsf.translation() = rFSs;
-
-        // Support foot {s} from trunk {t}
-        const Eigen::Affine3f Hts = Hst.inverse();
-
-        // Flying foot {f} from trunk {t}
-        const Eigen::Affine3f Htf = Hts * Hsf;
-
-        // Get desired transform for left foot {l}
-        const Eigen::Affine3f Htl = walk_engine.get_footstep().is_left_support() ? Hts : Htf;
-
-        // Get desired transform for right foot {r}
-        const Eigen::Affine3f Htr = walk_engine.get_footstep().is_left_support() ? Htf : Hts;
-
-        // Compute inverse kinematics for left and right foot
-        const auto joints = calculateLegJoints<float>(kinematicsModel, Htl, Htr);
-        auto waypoints    = motion(joints);
-        emit(std::move(waypoints));
-
-        // Plot graphs of desired trajectories
-        if (log_level <= NUClear::DEBUG) {
-            Eigen::Vector3f thetaTL = MatrixToEulerIntrinsic(Htl.linear());
-            emit(graph("Left foot desired position (x,y,z)", Htl(0, 3), Htl(1, 3), Htl(2, 3)));
-            emit(graph("Left foot desired orientation (r,p,y)", thetaTL.x(), thetaTL.y(), thetaTL.z()));
-
-            Eigen::Vector3f thetaTR = MatrixToEulerIntrinsic(Htr.linear());
-            emit(graph("Right foot desired position (x,y,z)", Htr(0, 3), Htr(1, 3), Htr(2, 3)));
-            emit(graph("Right foot desired orientation (r,p,y)", thetaTR.x(), thetaTR.y(), thetaTR.z()));
-
-            emit(graph("Trunk desired position (x,y,z)", Hst(0, 3), Hst(1, 3), Hst(2, 3)));
-            emit(graph("Trunk desired orientation (r,p,y)", thetaST.x(), thetaST.y(), thetaST.z()));
-        }
-    }
-
+    // NOTE: Arms
     std::unique_ptr<ServoCommands> QuinticWalk::motion(const std::vector<std::pair<ServoID, float>>& joints) {
         auto waypoints = std::make_unique<ServoCommands>();
         waypoints->commands.reserve(joints.size() + current_config.arm_positions.size());
