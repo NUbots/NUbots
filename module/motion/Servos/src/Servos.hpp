@@ -66,6 +66,7 @@ namespace module::motion {
         }
 
         /// @brief Keeps track of which Group in the Sequence in add_sequence_provider should be emitted next
+        /// @details Should be used carefully and may be bug-prone.
         /// @tparam Sequence Used to have unique counts for each Sequence Provider.
         template <typename Sequence>
         struct Count {
@@ -85,23 +86,23 @@ namespace module::motion {
             on<Provide<Sequence>, Needs<Group>, With<Count<Sequence>>>().then(
                 [this](const Sequence& sequence, const RunInfo& info, const Count<Sequence>& count) {
                     // If the user gave us nothing then we are done
-                    if (sequence.pack.empty()) {
+                    if (sequence.frames.empty()) {
                         emit<Task>(std::make_unique<Done>());
                     }
                     // If this is a new task, run the first pack of servos and increment the counter
                     else if (info.run_reason == RunInfo::RunReason::NEW_TASK) {
-                        emit<Task>(std::make_unique<Group>(sequence.pack[0]));
+                        emit<Task>(std::make_unique<Group>(sequence.frames[0]));
                         emit<Scope::DIRECT>(std::make_unique<Count<Sequence>>(1));
                     }
-                    // If the subtask is done, we are done if it is the last servo pack, otherwise use the count to
-                    // determine the current pack to emit
+                    // If the subtask is done, we are done if it is the last servo frames, otherwise use the count to
+                    // determine the current frame to emit
                     else if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
-                        if (sequence.pack.size() < count.count) {
-                            emit<Task>(std::make_unique<Done>());
+                        if (count.count < sequence.frames.size()) {
+                            emit<Task>(std::make_unique<Group>(sequence.frames[count.count]));
+                            emit<Scope::DIRECT>(std::make_unique<Count<Sequence>>(count.count + 1));
                         }
                         else {
-                            emit<Task>(std::make_unique<Group>(sequence.pack[count.count]));
-                            emit<Scope::DIRECT>(std::make_unique<Count<Sequence>>(count.count + 1));
+                            emit<Task>(std::make_unique<Done>());
                         }
                     }
                     // Any other run reason shouldn't happen

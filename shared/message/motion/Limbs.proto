@@ -28,7 +28,7 @@ message LeftLeg {
     map<uint32, ServoCommand> servos = 1;
 }
 message LeftLegSequence {
-    repeated LeftLeg pack = 1;
+    repeated LeftLeg frames = 1;
 }
 
 /// Right leg servo command information including time, gain, torque, position
@@ -37,7 +37,7 @@ message RightLeg {
     map<uint32, ServoCommand> servos = 1;
 }
 message RightLegSequence {
-    repeated RightLeg pack = 1;
+    repeated RightLeg frames = 1;
 }
 
 /// Right and left leg servo command information including time, gain, torque, position
@@ -46,7 +46,7 @@ message Legs {
     map<uint32, ServoCommand> servos = 1;
 }
 message LegsSequence {
-    repeated Legs pack = 1;
+    repeated Legs frames = 1;
 }
 
 /// Left arm servo command information including time, gain, torque, position
@@ -55,7 +55,7 @@ message LeftArm {
     map<uint32, ServoCommand> servos = 1;
 }
 message LeftArmSequence {
-    repeated LeftArm pack = 1;
+    repeated LeftArm frames = 1;
 }
 
 /// Right arm servo command information including time, gain, torque, position
@@ -64,7 +64,7 @@ message RightArm {
     map<uint32, ServoCommand> servos = 1;
 }
 message RightArmSequence {
-    repeated RightArm pack = 1;
+    repeated RightArm frames = 1;
 }
 
 /// Left and right arm servo command information including time, gain, torque, position
@@ -73,7 +73,7 @@ message Arms {
     map<uint32, ServoCommand> servos = 1;
 }
 message ArmsSequence {
-    repeated Arms pack = 1;
+    repeated Arms frames = 1;
 }
 
 /// Left and right arm and leg servo command information including time, gain, torque, position
@@ -82,7 +82,7 @@ message Limbs {
     map<uint32, ServoCommand> servos = 1;
 }
 message LimbsSequence {
-    repeated Limbs pack = 1;
+    repeated Limbs frames = 1;
 }
 
 /// Head servo command information including time, gain, torque, position
@@ -91,7 +91,7 @@ message Head {
     map<uint32, ServoCommand> servos = 1;
 }
 message HeadSequence {
-    repeated Head pack = 1;
+    repeated Head frames = 1;
 }
 
 /// Arms, legs and head servo command information including time, gain, torque, position
@@ -100,5 +100,5 @@ message Body {
     map<uint32, ServoCommand> servos = 1;
 }
 message BodySequence {
-    repeated Body pack = 1;
+    repeated Body frames = 1;
 }
