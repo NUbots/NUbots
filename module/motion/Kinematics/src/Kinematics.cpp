@@ -53,10 +53,6 @@ namespace module::motion {
                         ServoCommand(leg_ik.time, joint.second, leg_ik.servos.at(joint.first));
                 }
 
-                // The servos are mapped to ServoIDs
-                for (long unsigned int i = 0; i < joints.size(); i++) {
-                }
-
                 emit<Task>(servos);
             });
 
