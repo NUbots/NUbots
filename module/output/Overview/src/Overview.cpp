@@ -86,14 +86,14 @@ namespace module::output {
 
                 if (sensors) {
                     // Get our world transform
-                    Eigen::Affine3d Htw(sensors->Htw);
+                    Eigen::Isometry3d Htw(sensors->Htw);
 
                     // If we have field information
                     if (field) {
                         // Transform the field state into Hfw
-                        Eigen::Affine3d Hfw;
+                        Eigen::Isometry3d Hfw;
 
-                        Eigen::Affine2d position(field->position);
+                        Eigen::Isometry2d position(field->position);
                         Hfw.translation() = Eigen::Vector3d(position.translation().x(), position.translation().y(), 0);
 
                         // Rotate field-position.rotation().angle() radians about the Z-axis
@@ -102,8 +102,8 @@ namespace module::output {
                                 .toRotationMatrix();
 
                         // Get our torso in field space
-                        Eigen::Affine3d Hft  = Hfw * Htw.inverse();
-                        Eigen::Vector3d rTFf = Hft.translation();
+                        Eigen::Isometry3d Hft = Hfw * Htw.inverse();
+                        Eigen::Vector3d rTFf  = Hft.translation();
 
                         // Store our position from field to torso
                         msg->robot_position =

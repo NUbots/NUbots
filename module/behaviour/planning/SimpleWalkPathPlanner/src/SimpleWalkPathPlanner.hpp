@@ -27,6 +27,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/behaviour/MotionCommand.hpp"
+#include "message/localisation/FilteredBall.hpp"
 #include "message/motion/WalkCommand.hpp"
 
 #include "utility/behaviour/MotionCommand.hpp"
@@ -36,6 +37,8 @@ namespace module::behaviour::planning {
     // using namespace message;
 
     using message::behaviour::MotionCommand;
+
+    using FilteredBall = message::localisation::FilteredBall;
 
 
     /**
@@ -70,6 +73,14 @@ namespace module::behaviour::planning {
             float walk_to_ready_speed_y = 0;
             /// @brief Walk to ready walk command angular velocity
             float walk_to_ready_rotation = 0;
+            /// @brief rotate_around_ball command angular velocity
+            float rotate_around_ball_speed = 0;
+            /// @brief rotate_around_ball forward velocity
+            float rotate_around_ball_speed_x = 0;
+            /// @brief rotate_around_ball side velocity
+            float rotate_around_ball_speed_y = 0;
+            /// @brief ball y offset
+            float ball_y_offset = 0;
         } cfg;
 
         /// @brief Stores the latest MotionCommand
@@ -78,18 +89,20 @@ namespace module::behaviour::planning {
         /// @brief The id registered in the subsumption system for this module
         const size_t subsumption_id;
 
-        /// @brief Stores the position of the last ball seen
-        Eigen::Vector3f rBTt = Eigen::Vector3f(1.0, 0.0, 0.0);
-
         /// @brief Walk using the walk command from a direct motion command.
         void walk_directly();
 
         /// @brief Walk directly towards the ball relative to the robot based on the latest VisionBall ball position
         /// measurement
-        void vision_walk_path();
+        /// @param ball The latest FilteredBall message which contains the ball position
+        void vision_walk_path(const std::shared_ptr<const FilteredBall>& ball);
 
         /// @brief Rotate on the spot
-        void rotate_on_spot();
+        /// @param clockwise True if rotation command clockwise, false if rotation command anticlockwise
+        void rotate_on_spot(bool clockwise);
+
+        /// @brief rotate_around_ball
+        void rotate_around_ball();
 
         /// @brief Configured to emit a walk command that results in robot being in desired position after the ready
         /// phase

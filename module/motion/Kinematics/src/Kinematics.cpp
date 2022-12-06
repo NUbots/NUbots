@@ -46,7 +46,7 @@ namespace module::motion {
                 // Calculate the joint positions with IK
                 auto servos = std::make_unique<LeftLeg>();
                 auto joints =
-                    calculateLegJoints<double>(kinematics_model, Eigen::Affine3d(leg_ik.Htl), LimbID::LEFT_LEG);
+                    calculateLegJoints<double>(kinematics_model, Eigen::Isometry3d(leg_ik.Htl), LimbID::LEFT_LEG);
 
                 for (const auto& joint : joints) {
                     servos->servos[joint.first] =
@@ -72,7 +72,7 @@ namespace module::motion {
                 // Calculate the joint positions with IK
                 auto servos = std::make_unique<RightLeg>();
                 auto joints =
-                    calculateLegJoints<double>(kinematics_model, Eigen::Affine3d(leg_ik.Htr), LimbID::RIGHT_LEG);
+                    calculateLegJoints<double>(kinematics_model, Eigen::Isometry3d(leg_ik.Htr), LimbID::RIGHT_LEG);
 
                 for (const auto& joint : joints) {
                     servos->servos[joint.first] =

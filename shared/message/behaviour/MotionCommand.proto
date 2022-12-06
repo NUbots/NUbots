@@ -39,6 +39,8 @@ message MotionCommand {
         ROTATE_ON_SPOT = 4;
         /// Walks to ready position
         WALK_TO_READY = 5;
+        /// Rotates around ball
+        ROTATE_AROUND_BALL = 6;
     }
     /// The type of this motion command
     Type type = 1;
@@ -48,4 +50,6 @@ message MotionCommand {
     vec2 kick_target = 3;
     /// Required data for DirectCommand command
     vec3 walk_command = 4;
+    /// Required data for RotateOnSpot command
+    bool clockwise = 5;
 }
