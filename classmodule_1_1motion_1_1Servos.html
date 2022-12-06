@@ -167,6 +167,7 @@ $(document).ready(function(){initNavTree('classmodule_1_1motion_1_1Servos.html',
 
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="classmodule_1_1motion_1_1Servos-members.html">List of all members</a>  </div>
@@ -195,6 +196,12 @@ Collaboration diagram for module::motion::Servos:</div>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1motion_1_1Servos_1_1Count.html">Count</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Keeps track of which Group in the Sequence in add_sequence_provider should be emitted next.  <a href="structmodule_1_1motion_1_1Servos_1_1Count.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ade40987cc36a9c97a78815f4a203a866"><td class="memItemLeft" align="right" valign="top"><a id="ade40987cc36a9c97a78815f4a203a866"></a>
@@ -208,6 +215,10 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:a649c48ad1d20370df59b430fe1ca6314"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classmodule_1_1motion_1_1Servos.html#a649c48ad1d20370df59b430fe1ca6314">add_group_provider</a> ()</td></tr>
 <tr class="memdesc:a649c48ad1d20370df59b430fe1ca6314"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a reaction that takes a servo wrapper task (eg LeftLeg) and emits a task for each servo. Emits Done when all servo tasks are Done.  <a href="classmodule_1_1motion_1_1Servos.html#a649c48ad1d20370df59b430fe1ca6314">More...</a><br /></td></tr>
 <tr class="separator:a649c48ad1d20370df59b430fe1ca6314"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a542094f2f75d4cd086f38ef71276f271"><td class="memTemplParams" colspan="2">template&lt;typename Sequence , typename Group &gt; </td></tr>
+<tr class="memitem:a542094f2f75d4cd086f38ef71276f271"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classmodule_1_1motion_1_1Servos.html#a542094f2f75d4cd086f38ef71276f271">add_sequence_provider</a> ()</td></tr>
+<tr class="memdesc:a542094f2f75d4cd086f38ef71276f271"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a reaction that takes a vector of servo wrapper tasks (eg LeftLegs) and emits each servo wrapper task after the previous one is Done. Emits Done when the last group is Done.  <a href="classmodule_1_1motion_1_1Servos.html#a542094f2f75d4cd086f38ef71276f271">More...</a><br /></td></tr>
+<tr class="separator:a542094f2f75d4cd086f38ef71276f271"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4c54fb9bc3a55cc7e6d6aa1a64809a58"><td class="memTemplParams" colspan="2"><a id="a4c54fb9bc3a55cc7e6d6aa1a64809a58"></a>
 template&lt;typename Servo , ServoID::Value ID&gt; </td></tr>
 <tr class="memitem:a4c54fb9bc3a55cc7e6d6aa1a64809a58"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="classmodule_1_1motion_1_1Servos.html#a4c54fb9bc3a55cc7e6d6aa1a64809a58">add_servo_provider</a> ()</td></tr>
@@ -296,6 +307,42 @@ template&lt;typename Group , typename... Elements&gt; </div>
 
 </div>
 </div>
+<a id="a542094f2f75d4cd086f38ef71276f271"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a542094f2f75d4cd086f38ef71276f271">&#9670;&nbsp;</a></span>add_sequence_provider()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Sequence , typename Group &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void module::motion::Servos::add_sequence_provider </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Creates a reaction that takes a vector of servo wrapper tasks (eg LeftLegs) and emits each servo wrapper task after the previous one is Done. Emits Done when the last group is Done. </p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">Sequence</td><td>is a vector of servo wrapper tasks (eg LeftLegSequence) </td></tr>
+    <tr><td class="paramname">Group</td><td>is a servo wrapper task (eg LeftLeg) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>module/motion/Servos/src/<a class="el" href="Servos_8hpp_source.html">Servos.hpp</a></li>
 <li>module/motion/Servos/src/Servos.cpp</li>
@@ -306,7 +353,7 @@ template&lt;typename Group , typename... Elements&gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>motion</b></li><li class="navelem"><a class="el" href="classmodule_1_1motion_1_1Servos.html">Servos</a></li>
-    <li class="footer">Generated on Sun Dec 4 2022 21:36:08 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Tue Dec 6 2022 23:38:15 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

@@ -162,6 +162,7 @@ var hierarchy =
     [ "module::motion::HeadController::Config", "structmodule_1_1motion_1_1HeadController_1_1Config.html", null ],
     [ "module::motion::QuinticWalk::Config", "structmodule_1_1motion_1_1QuinticWalk_1_1Config.html", null ],
     [ "module::motion::QuinticWalkEngine", "classmodule_1_1motion_1_1QuinticWalkEngine.html", null ],
+    [ "module::motion::Servos::Count< Sequence >", "structmodule_1_1motion_1_1Servos_1_1Count.html", null ],
     [ "module::motion::SixDOFFootController", "classmodule_1_1motion_1_1SixDOFFootController.html", [
       [ "module::motion::KickBalancer", "classmodule_1_1motion_1_1KickBalancer.html", null ],
       [ "module::motion::Kicker", "classmodule_1_1motion_1_1Kicker.html", null ]

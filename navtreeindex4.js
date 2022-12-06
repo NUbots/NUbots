@@ -187,9 +187,10 @@ var NAVTREEINDEX4 =
 "classmodule_1_1motion_1_1ScriptEngine.html#a215d225cd0b62180acacf9e7815e8fe1":[1,0,2,4,12,1],
 "classmodule_1_1motion_1_1ScriptEngine.html#ab3301ed9b6bc3a77a71fdd397c0b00ff":[1,0,2,4,12,0],
 "classmodule_1_1motion_1_1Servos.html":[1,0,2,4,13],
-"classmodule_1_1motion_1_1Servos.html#a4c54fb9bc3a55cc7e6d6aa1a64809a58":[1,0,2,4,13,2],
-"classmodule_1_1motion_1_1Servos.html#a649c48ad1d20370df59b430fe1ca6314":[1,0,2,4,13,1],
-"classmodule_1_1motion_1_1Servos.html#ade40987cc36a9c97a78815f4a203a866":[1,0,2,4,13,0],
+"classmodule_1_1motion_1_1Servos.html#a4c54fb9bc3a55cc7e6d6aa1a64809a58":[1,0,2,4,13,4],
+"classmodule_1_1motion_1_1Servos.html#a542094f2f75d4cd086f38ef71276f271":[1,0,2,4,13,3],
+"classmodule_1_1motion_1_1Servos.html#a649c48ad1d20370df59b430fe1ca6314":[1,0,2,4,13,2],
+"classmodule_1_1motion_1_1Servos.html#ade40987cc36a9c97a78815f4a203a866":[1,0,2,4,13,1],
 "classmodule_1_1motion_1_1SixDOFFootController.html":[1,0,2,4,14],
 "classmodule_1_1motion_1_1SixDOFFootController.html#a1561d52b26c87766387ebcacac2d0c77":[1,0,2,4,14,14],
 "classmodule_1_1motion_1_1SixDOFFootController.html#a19d26ea9c6105906a34ad223d8c1c5c0":[1,0,2,4,14,23],
@@ -248,6 +249,5 @@ var NAVTREEINDEX4 =
 "classmodule_1_1output_1_1Overview.html":[1,0,2,6,3],
 "classmodule_1_1output_1_1Overview.html#a2cf3f00ec0c2ff27f67eaae7760ecdf5":[1,0,2,6,3,1],
 "classmodule_1_1output_1_1Overview.html#a338e246fa08309483ed4473bc1a259f0":[1,0,2,6,3,3],
-"classmodule_1_1output_1_1Overview.html#a8d72cb9a643ca69b385b8108be2feb10":[1,0,2,6,3,0],
-"classmodule_1_1output_1_1Overview.html#a90d4e1ee64c9bb7657e25f698924d48c":[1,0,2,6,3,2]
+"classmodule_1_1output_1_1Overview.html#a8d72cb9a643ca69b385b8108be2feb10":[1,0,2,6,3,0]
 };

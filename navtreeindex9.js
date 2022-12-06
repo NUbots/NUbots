@@ -1,5 +1,6 @@
 var NAVTREEINDEX9 =
 {
+"structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4.html":[1,0,6,0],
 "structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4.html#a2e986fc1b3f90e500bf11f41e518fa86":[1,0,6,0,1],
 "structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4.html#aa2ca74461028854bae4954718fc3783f":[1,0,6,0,0],
 "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4.html":[1,0,6,4],
@@ -248,6 +249,5 @@ var NAVTREEINDEX9 =
 "structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html#a08559dc2e09626bdf0c44ce23b4ae02e":[1,0,2,0,2,2,0,3],
 "structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html#a099dc099e9fcda23130ee343a4a5fe25":[1,0,2,0,2,2,0,13],
 "structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html#a0be18e5362e0744b7ebd92f4886a7e87":[1,0,2,0,2,2,0,17],
-"structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html#a1b26a3b2c209636a4d79fe7fdf1eb83a":[1,0,2,0,2,2,0,0],
-"structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html#a2c043a8043e5d31401fd661ded8479fc":[1,0,2,0,2,2,0,15]
+"structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html#a1b26a3b2c209636a4d79fe7fdf1eb83a":[1,0,2,0,2,2,0,0]
 };
