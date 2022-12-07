@@ -330,15 +330,7 @@ namespace module::input {
     }
 
     void NatNet::process_model(const Packet& packet) {
-        // Remove old definitions
-        marker_set_models.clear();
-        rigid_body_models.clear();
-        skeleton_models.clear();
-        force_plate_models.clear();
-        device_models.clear();
-        camera_models.clear();
 
-        std::stringstream ss;
         log<NUClear::INFO>("Updating model definitions");
 
         // Our pointer as we move through the data
