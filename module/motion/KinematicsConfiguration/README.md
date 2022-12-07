@@ -1,14 +1,9 @@
-KinematicsModel
-===============
+# KinematicsModel
 
 ## Description
 
-
 ## Usage
-
 
 ## Emits
 
-
 ## Dependencies
-

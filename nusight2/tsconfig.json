@@ -14,20 +14,9 @@
     "removeComments": true,
     "strict": true,
     "outDir": "dist",
-    "lib": [
-      "ESNext",
-      "dom",
-      "webworker"
-    ],
-    "typeRoots": [
-      "./node_modules/@types",
-      "./typings"
-    ]
+    "lib": ["ESNext", "dom", "webworker"],
+    "typeRoots": ["./node_modules/@types", "./typings"]
   },
-  "include": [
-    "./src/**/*"
-  ],
-  "exclude": [
-    "**/tests/**/*"
-  ]
+  "include": ["./src/**/*"],
+  "exclude": ["**/tests/**/*"]
 }
