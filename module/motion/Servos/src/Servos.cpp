@@ -30,32 +30,42 @@
 namespace module::motion {
 
     using extension::Configuration;
-    using message::motion::ArmID;
+    using message::motion::Arms;
+    using message::motion::ArmsSequence;
+    using message::motion::Body;
+    using message::motion::BodySequence;
     using message::motion::Head;
-    using message::motion::HeadID;
     using message::motion::HeadPitch;
+    using message::motion::HeadSequence;
     using message::motion::HeadYaw;
     using message::motion::LeftAnklePitch;
     using message::motion::LeftAnkleRoll;
     using message::motion::LeftArm;
+    using message::motion::LeftArmSequence;
     using message::motion::LeftElbow;
     using message::motion::LeftHipPitch;
     using message::motion::LeftHipRoll;
     using message::motion::LeftHipYaw;
     using message::motion::LeftKnee;
     using message::motion::LeftLeg;
+    using message::motion::LeftLegSequence;
     using message::motion::LeftShoulderPitch;
     using message::motion::LeftShoulderRoll;
-    using message::motion::LegID;
+    using message::motion::Legs;
+    using message::motion::LegsSequence;
+    using message::motion::Limbs;
+    using message::motion::LimbsSequence;
     using message::motion::RightAnklePitch;
     using message::motion::RightAnkleRoll;
     using message::motion::RightArm;
+    using message::motion::RightArmSequence;
     using message::motion::RightElbow;
     using message::motion::RightHipPitch;
     using message::motion::RightHipRoll;
     using message::motion::RightHipYaw;
     using message::motion::RightKnee;
     using message::motion::RightLeg;
+    using message::motion::RightLegSequence;
     using message::motion::RightShoulderPitch;
     using message::motion::RightShoulderRoll;
     using utility::input::ServoID;
@@ -66,19 +76,6 @@ namespace module::motion {
             // Use configuration here from file Servos.yaml
             this->log_level = cfg["log_level"].as<NUClear::LogLevel>();
         });
-
-        // Create providers for each limb and the head
-        add_group_provider<RightLeg,
-                           RightHipYaw,
-                           RightHipRoll,
-                           RightHipPitch,
-                           RightKnee,
-                           RightAnklePitch,
-                           RightAnkleRoll>();
-        add_group_provider<LeftLeg, LeftHipYaw, LeftHipRoll, LeftHipPitch, LeftKnee, LeftAnklePitch, LeftAnkleRoll>();
-        add_group_provider<RightArm, RightShoulderPitch, RightShoulderRoll, RightElbow>();
-        add_group_provider<LeftArm, LeftShoulderPitch, LeftShoulderRoll, LeftElbow>();
-        add_group_provider<Head, HeadYaw, HeadPitch>();
 
         // Create providers for each servo
         add_servo_provider<RightShoulderPitch, ServoID::R_SHOULDER_PITCH>();
@@ -101,6 +98,92 @@ namespace module::motion {
         add_servo_provider<LeftAnkleRoll, ServoID::L_ANKLE_ROLL>();
         add_servo_provider<HeadYaw, ServoID::HEAD_YAW>();
         add_servo_provider<HeadPitch, ServoID::HEAD_PITCH>();
+
+        // Create providers for each limb and the head
+        add_group_provider<RightLeg,
+                           RightHipYaw,
+                           RightHipRoll,
+                           RightHipPitch,
+                           RightKnee,
+                           RightAnklePitch,
+                           RightAnkleRoll>();
+        add_group_provider<LeftLeg, LeftHipYaw, LeftHipRoll, LeftHipPitch, LeftKnee, LeftAnklePitch, LeftAnkleRoll>();
+        add_group_provider<RightArm, RightShoulderPitch, RightShoulderRoll, RightElbow>();
+        add_group_provider<LeftArm, LeftShoulderPitch, LeftShoulderRoll, LeftElbow>();
+        add_group_provider<Head, HeadYaw, HeadPitch>();
+
+        // Create providers for each limb/head grouping
+        add_group_provider<Body,
+                           LeftHipYaw,
+                           LeftHipRoll,
+                           LeftHipPitch,
+                           LeftKnee,
+                           LeftAnklePitch,
+                           LeftAnkleRoll,
+                           RightHipYaw,
+                           RightHipRoll,
+                           RightHipPitch,
+                           RightKnee,
+                           RightAnklePitch,
+                           RightAnkleRoll,
+                           RightShoulderPitch,
+                           RightShoulderRoll,
+                           RightElbow,
+                           LeftShoulderPitch,
+                           LeftShoulderRoll,
+                           LeftElbow,
+                           HeadYaw,
+                           HeadPitch>();
+        add_group_provider<Limbs,
+                           LeftHipYaw,
+                           LeftHipRoll,
+                           LeftHipPitch,
+                           LeftKnee,
+                           LeftAnklePitch,
+                           LeftAnkleRoll,
+                           RightHipYaw,
+                           RightHipRoll,
+                           RightHipPitch,
+                           RightKnee,
+                           RightAnklePitch,
+                           RightAnkleRoll,
+                           RightShoulderPitch,
+                           RightShoulderRoll,
+                           RightElbow,
+                           LeftShoulderPitch,
+                           LeftShoulderRoll,
+                           LeftElbow>();
+        add_group_provider<Legs,
+                           LeftHipYaw,
+                           LeftHipRoll,
+                           LeftHipPitch,
+                           LeftKnee,
+                           LeftAnklePitch,
+                           LeftAnkleRoll,
+                           RightHipYaw,
+                           RightHipRoll,
+                           RightHipPitch,
+                           RightKnee,
+                           RightAnklePitch,
+                           RightAnkleRoll>();
+        add_group_provider<Arms,
+                           RightShoulderPitch,
+                           RightShoulderRoll,
+                           RightElbow,
+                           LeftShoulderPitch,
+                           LeftShoulderRoll,
+                           LeftElbow>();
+
+        // Sequences of servos
+        add_sequence_provider<BodySequence, Body>();
+        add_sequence_provider<LimbsSequence, Limbs>();
+        add_sequence_provider<RightLegSequence, RightLeg>();
+        add_sequence_provider<LeftLegSequence, LeftLeg>();
+        add_sequence_provider<LegsSequence, Legs>();
+        add_sequence_provider<RightArmSequence, RightArm>();
+        add_sequence_provider<LeftArmSequence, LeftArm>();
+        add_sequence_provider<ArmsSequence, Arms>();
+        add_sequence_provider<HeadSequence, Head>();
     }
 
 }  // namespace module::motion
