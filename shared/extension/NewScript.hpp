@@ -32,7 +32,7 @@ namespace extension::director {
             Target(Target&& other) noexcept
                 : id(other.id), position(other.position), gain(other.gain), torque(other.torque) {}
             Target& operator=(const Target& other) = default;
-            Target& operator=(Target&& other) noexcept {
+            Target& operator                       =(Target&& other) noexcept {
                 id       = other.id;
                 position = other.position;
                 gain     = other.gain;
