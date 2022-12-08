@@ -92,7 +92,8 @@ namespace {
 
 }  // namespace
 
-TEST_CASE("Testing some stuff", "[director][needs][watcher][removal]") {
+TEST_CASE("Tests a waiting task can take over subtasks of another task that is being removed",
+          "[director][needs][watcher][removal]") {
 
     NUClear::PowerPlant::Configuration config;
     config.thread_count = 1;
