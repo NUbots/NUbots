@@ -1,6 +1,5 @@
 var NAVTREEINDEX7 =
 {
-"clock_8cpp.html#acc90412747e3582b7c210c3999af25ac":[0,0,5,1,1],
 "clock_8cpp.html#adca9c04254e1704be4e85278a7d0ced9":[0,0,5,1,5],
 "clock_8hpp.html#ac97f5461ef949723188525c4a74f45be":[0,0,5,1,4],
 "comparison_8hpp.html#a098b470ecc0b66d7d74a43f11d3e424a":[0,0,5,6,11],
@@ -37,8 +36,8 @@ var NAVTREEINDEX7 =
 "functions_enum.html":[1,3,4],
 "functions_eval.html":[1,3,5],
 "functions_f.html":[1,3,0,6],
-"functions_func.html":[1,3,1],
 "functions_func.html":[1,3,1,0],
+"functions_func.html":[1,3,1],
 "functions_func_a.html":[1,3,1,1],
 "functions_func_b.html":[1,3,1,2],
 "functions_func_c.html":[1,3,1,3],
@@ -249,5 +248,6 @@ var NAVTREEINDEX7 =
 "namespaceutility_1_1strutil.html#afeea08f5ddfb3ec4431ad63ecfb46161":[0,0,5,11,5],
 "opencl__context__for__display_8cpp.html#a910ae5f5473dcb1c5b8b223430425799":[0,0,2,6,0,1,0,12],
 "opencl__error__category_8cpp.html#a9534d7027b2548c84ae872164fc5d6a7":[0,0,2,6,0,1,0,9],
-"opencl__error__category_8cpp.html#ad016e94aa1971c854d2a8a15d07a8fb5":[0,0,2,6,0,1,0,13]
+"opencl__error__category_8cpp.html#ad016e94aa1971c854d2a8a15d07a8fb5":[0,0,2,6,0,1,0,13],
+"opencl__error__category_8hpp.html#aac27e307e49930357a3a0fbf9682ac9e":[0,0,2,6,0,1,0,8]
 };

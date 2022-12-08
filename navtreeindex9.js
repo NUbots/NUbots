@@ -1,6 +1,5 @@
 var NAVTREEINDEX9 =
 {
-"structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4.html":[1,0,6,0],
 "structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4.html#a2e986fc1b3f90e500bf11f41e518fa86":[1,0,6,0,1],
 "structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4.html#aa2ca74461028854bae4954718fc3783f":[1,0,6,0,0],
 "structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4.html":[1,0,6,4],
@@ -200,6 +199,11 @@ var NAVTREEINDEX9 =
 "structmodule_1_1behaviour_1_1RequestItem.html#ac0272f9565325e963deb8f5287b49e0f":[1,0,2,0,6,4],
 "structmodule_1_1behaviour_1_1RequestItem.html#adc4f639ff6c9cfb0daa4d774355a2d00":[1,0,2,0,6,2],
 "structmodule_1_1behaviour_1_1RequestItem.html#aeb2af235cb95a8ee7e32863372347c5f":[1,0,2,0,6,0],
+"structmodule_1_1behaviour_1_1planning_1_1KickPlanner_1_1Config.html":[1,0,2,0,0,0,0],
+"structmodule_1_1behaviour_1_1planning_1_1KickPlanner_1_1Config.html#a0f97081ec2ec8f071f233e8d1c992e57":[1,0,2,0,0,0,0,2],
+"structmodule_1_1behaviour_1_1planning_1_1KickPlanner_1_1Config.html#a39e2e4883a9e0e701cf1ba335a47fbb3":[1,0,2,0,0,0,0,3],
+"structmodule_1_1behaviour_1_1planning_1_1KickPlanner_1_1Config.html#a3bc665f82734ee593cc3b7b764029453":[1,0,2,0,0,0,0,1],
+"structmodule_1_1behaviour_1_1planning_1_1KickPlanner_1_1Config.html#a3e3f2fa7ce5e0263a09f06e129ff9da6":[1,0,2,0,0,0,0,0],
 "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html":[1,0,2,0,0,1,0],
 "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a06b64edcdc1a7339e0513016f098eefd":[1,0,2,0,0,1,0,8],
 "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a11bf2fcfd6c9598b75af09a4a2e2cfc9":[1,0,2,0,0,1,0,3],
@@ -245,9 +249,5 @@ var NAVTREEINDEX9 =
 "structmodule_1_1behaviour_1_1skills_1_1Stand_1_1Config.html":[1,0,2,0,1,12,0],
 "structmodule_1_1behaviour_1_1skills_1_1Stand_1_1Config.html#a421d326fe4542a31c652825b5266e8cd":[1,0,2,0,1,12,0,0],
 "structmodule_1_1behaviour_1_1skills_1_1Stand_1_1Config.html#a85612ad805acdb1264c39607db1f0ee9":[1,0,2,0,1,12,0,1],
-"structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html":[1,0,2,0,2,2,0],
-"structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html#a08559dc2e09626bdf0c44ce23b4ae02e":[1,0,2,0,2,2,0,3],
-"structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html#a099dc099e9fcda23130ee343a4a5fe25":[1,0,2,0,2,2,0,13],
-"structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html#a0be18e5362e0744b7ebd92f4886a7e87":[1,0,2,0,2,2,0,17],
-"structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html#a1b26a3b2c209636a4d79fe7fdf1eb83a":[1,0,2,0,2,2,0,0]
+"structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html":[1,0,2,0,2,2,0]
 };

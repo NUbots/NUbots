@@ -167,6 +167,7 @@ $(document).ready(function(){initNavTree('classmodule_1_1behaviour_1_1planning_1
 
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
@@ -189,12 +190,18 @@ Collaboration diagram for module::behaviour::planning::KickPlanner:</div>
 <div class="dyncontent">
 <div class="center"><img src="classmodule_1_1behaviour_1_1planning_1_1KickPlanner__coll__graph.png" border="0" usemap="#amodule_1_1behaviour_1_1planning_1_1KickPlanner_coll__map" alt="Collaboration graph"/></div>
 <map name="amodule_1_1behaviour_1_1planning_1_1KickPlanner_coll__map" id="amodule_1_1behaviour_1_1planning_1_1KickPlanner_coll__map">
-<area shape="rect" title=" " alt="" coords="71,95,234,136"/>
-<area shape="rect" title=" " alt="" coords="5,5,140,32"/>
-<area shape="rect" title=" " alt="" coords="164,5,304,32"/>
+<area shape="rect" title=" " alt="" coords="78,124,241,165"/>
+<area shape="rect" title=" " alt="" coords="5,20,140,47"/>
+<area shape="rect" href="structmodule_1_1behaviour_1_1planning_1_1KickPlanner_1_1Config.html" title="Stores configuration values." alt="" coords="165,5,327,61"/>
 </map>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structmodule_1_1behaviour_1_1planning_1_1KickPlanner_1_1Config.html">Config</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Stores configuration values.  <a href="structmodule_1_1behaviour_1_1planning_1_1KickPlanner_1_1Config.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a3690813d0c18e4b0a43bafc2672c9f3f"><td class="memItemLeft" align="right" valign="top"><a id="a3690813d0c18e4b0a43bafc2672c9f3f"></a>
@@ -204,25 +211,64 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
-<tr class="memitem:af53e281debd67f48dba67e66594314e0"><td class="memItemLeft" align="right" valign="top"><a id="af53e281debd67f48dba67e66594314e0"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>kickValid</b> (const Eigen::Vector3d &amp;ballPos) const</td></tr>
-<tr class="separator:af53e281debd67f48dba67e66594314e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8b95dd9814702cd013c0823714639183"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html#a8b95dd9814702cd013c0823714639183">kick_valid</a> (const Eigen::Vector3d &amp;ball_pos) const</td></tr>
+<tr class="memdesc:a8b95dd9814702cd013c0823714639183"><td class="mdescLeft">&#160;</td><td class="mdescRight">Determines if the robot should kick based on the ball position.  <a href="classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html#a8b95dd9814702cd013c0823714639183">More...</a><br /></td></tr>
+<tr class="separator:a8b95dd9814702cd013c0823714639183"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
-<tr class="memitem:a37fc8f739903f1d10d5b6974487bca32"><td class="memItemLeft" align="right" valign="top"><a id="a37fc8f739903f1d10d5b6974487bca32"></a>
-NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><b>ballLastSeen</b> {std::chrono::seconds(0)}</td></tr>
-<tr class="separator:a37fc8f739903f1d10d5b6974487bca32"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aca0d18634a00709f7e3f20c249965ad4"><td class="memItemLeft" align="right" valign="top"><a id="aca0d18634a00709f7e3f20c249965ad4"></a>
-message::motion::KickPlannerConfig&#160;</td><td class="memItemRight" valign="bottom"><b>cfg</b> {}</td></tr>
-<tr class="separator:aca0d18634a00709f7e3f20c249965ad4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a23b62cff18081a92d10aa64357785c44"><td class="memItemLeft" align="right" valign="top"><a id="a23b62cff18081a92d10aa64357785c44"></a>
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>forcePlaying</b> = false</td></tr>
-<tr class="separator:a23b62cff18081a92d10aa64357785c44"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acaccb8cc547e04e8f16ccee7927511cb"><td class="memItemLeft" align="right" valign="top"><a id="acaccb8cc547e04e8f16ccee7927511cb"></a>
-NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><b>lastTimeValid</b> {NUClear::clock::now()}</td></tr>
-<tr class="separator:acaccb8cc547e04e8f16ccee7927511cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7c7ba878c75d2b690d450b8a266386a7"><td class="memItemLeft" align="right" valign="top"><a id="a7c7ba878c75d2b690d450b8a266386a7"></a>
+NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html#a7c7ba878c75d2b690d450b8a266386a7">ball_last_seen</a> {std::chrono::seconds(0)}</td></tr>
+<tr class="memdesc:a7c7ba878c75d2b690d450b8a266386a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Last time the ball was detected by the vision system. <br /></td></tr>
+<tr class="separator:a7c7ba878c75d2b690d450b8a266386a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a107b74d6260384492cec9ee879fcbd1f"><td class="memItemLeft" align="right" valign="top"><a id="a107b74d6260384492cec9ee879fcbd1f"></a>
+struct <a class="el" href="structmodule_1_1behaviour_1_1planning_1_1KickPlanner_1_1Config.html">module::behaviour::planning::KickPlanner::Config</a>&#160;</td><td class="memItemRight" valign="bottom"><b>cfg</b></td></tr>
+<tr class="separator:a107b74d6260384492cec9ee879fcbd1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a50d1c0a0200b22c054c277c9a4ecb2c2"><td class="memItemLeft" align="right" valign="top"><a id="a50d1c0a0200b22c054c277c9a4ecb2c2"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html#a50d1c0a0200b22c054c277c9a4ecb2c2">force_playing</a> = false</td></tr>
+<tr class="memdesc:a50d1c0a0200b22c054c277c9a4ecb2c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Whether the robot is in a play state regardless of the GameController state. <br /></td></tr>
+<tr class="separator:a50d1c0a0200b22c054c277c9a4ecb2c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a008515e654aea8a1c418c3ac9f17d0c1"><td class="memItemLeft" align="right" valign="top"><a id="a008515e654aea8a1c418c3ac9f17d0c1"></a>
+NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html#a008515e654aea8a1c418c3ac9f17d0c1">last_time_valid</a> {NUClear::clock::now()}</td></tr>
+<tr class="memdesc:a008515e654aea8a1c418c3ac9f17d0c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Last time the ball was detected in a position where a kick would likely be successful. <br /></td></tr>
+<tr class="separator:a008515e654aea8a1c418c3ac9f17d0c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a8b95dd9814702cd013c0823714639183"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8b95dd9814702cd013c0823714639183">&#9670;&nbsp;</a></span>kick_valid()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool module::behaviour::planning::KickPlanner::kick_valid </td>
+          <td>(</td>
+          <td class="paramtype">const Eigen::Vector3d &amp;&#160;</td>
+          <td class="paramname"><em>ball_pos</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Determines if the robot should kick based on the ball position. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">ball_pos</td><td>The position of the ball in torso space. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if the robot should kick, false otherwise. </dd></dl>
+
+</div>
+</div>
 <hr/>The documentation for this class was generated from the following files:<ul>
 <li>module/behaviour/planning/KickPlanner/src/<a class="el" href="KickPlanner_8hpp_source.html">KickPlanner.hpp</a></li>
 <li>module/behaviour/planning/KickPlanner/src/KickPlanner.cpp</li>
@@ -233,7 +279,7 @@ NUClear::clock::time_point&#160;</td><td class="memItemRight" valign="bottom"><b
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>module</b></li><li class="navelem"><b>behaviour</b></li><li class="navelem"><b>planning</b></li><li class="navelem"><a class="el" href="classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html">KickPlanner</a></li>
-    <li class="footer">Generated on Tue Dec 6 2022 23:38:15 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Thu Dec 8 2022 22:14:21 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

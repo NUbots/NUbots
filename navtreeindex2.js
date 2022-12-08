@@ -1,6 +1,5 @@
 var NAVTREEINDEX2 =
 {
-"classCM740_1_1UART.html#ab2433ab6bfdbeff94de9744b030e027f":[1,0,0,9,10],
 "classCM740_1_1UART.html#ab92f17338deef684c7dc21cbdacae533":[1,0,0,9,16],
 "classCM740_1_1UART.html#ad2beba534212d7bb4c73dc02f35bbee1":[1,0,0,9,17],
 "classCM740_1_1UART.html#ad30e00e1763c86aa7f14be0ecdc3ca9e":[1,0,0,9,1],
@@ -71,12 +70,12 @@ var NAVTREEINDEX2 =
 "classmodule_1_1behaviour_1_1Controller.html#ac0830b6fad8f381c99db222695f91f85":[1,0,2,0,4,2],
 "classmodule_1_1behaviour_1_1Controller.html#af3a104bb41d6efa006ac1a87d701d0ce":[1,0,2,0,4,1],
 "classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html":[1,0,2,0,0,0],
-"classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html#a23b62cff18081a92d10aa64357785c44":[1,0,2,0,0,0,4],
-"classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html#a3690813d0c18e4b0a43bafc2672c9f3f":[1,0,2,0,0,0,0],
-"classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html#a37fc8f739903f1d10d5b6974487bca32":[1,0,2,0,0,0,2],
-"classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html#aca0d18634a00709f7e3f20c249965ad4":[1,0,2,0,0,0,3],
-"classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html#acaccb8cc547e04e8f16ccee7927511cb":[1,0,2,0,0,0,5],
-"classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html#af53e281debd67f48dba67e66594314e0":[1,0,2,0,0,0,1],
+"classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html#a008515e654aea8a1c418c3ac9f17d0c1":[1,0,2,0,0,0,6],
+"classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html#a107b74d6260384492cec9ee879fcbd1f":[1,0,2,0,0,0,4],
+"classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html#a3690813d0c18e4b0a43bafc2672c9f3f":[1,0,2,0,0,0,1],
+"classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html#a50d1c0a0200b22c054c277c9a4ecb2c2":[1,0,2,0,0,0,5],
+"classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html#a7c7ba878c75d2b690d450b8a266386a7":[1,0,2,0,0,0,3],
+"classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html#a8b95dd9814702cd013c0823714639183":[1,0,2,0,0,0,2],
 "classmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner.html":[1,0,2,0,0,1],
 "classmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner.html#a23a38cb0a22e62d8f0c8c354338794b4":[1,0,2,0,0,1,5],
 "classmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner.html#a2e7587210092f18b5c53fe60f46d5bda":[1,0,2,0,0,1,10],
@@ -249,5 +248,6 @@ var NAVTREEINDEX2 =
 "classmodule_1_1behaviour_1_1tools_1_1ScriptTuner.html#a0f7294bf0185a6104a8b6f536d965597":[1,0,2,0,3,3,2],
 "classmodule_1_1behaviour_1_1tools_1_1ScriptTuner.html#a11f2d688320c32ca9b3193de88ef42d5":[1,0,2,0,3,3,13],
 "classmodule_1_1behaviour_1_1tools_1_1ScriptTuner.html#a25c06bad0ee83807a630826815ab03f2":[1,0,2,0,3,3,11],
-"classmodule_1_1behaviour_1_1tools_1_1ScriptTuner.html#a2701c5cca8ca1670ebe2c41ac20a793a":[1,0,2,0,3,3,9]
+"classmodule_1_1behaviour_1_1tools_1_1ScriptTuner.html#a2701c5cca8ca1670ebe2c41ac20a793a":[1,0,2,0,3,3,9],
+"classmodule_1_1behaviour_1_1tools_1_1ScriptTuner.html#a2c44719241502b24d60ece68b340890d":[1,0,2,0,3,3,20]
 };

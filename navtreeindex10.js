@@ -1,5 +1,9 @@
 var NAVTREEINDEX10 =
 {
+"structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html#a08559dc2e09626bdf0c44ce23b4ae02e":[1,0,2,0,2,2,0,3],
+"structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html#a099dc099e9fcda23130ee343a4a5fe25":[1,0,2,0,2,2,0,13],
+"structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html#a0be18e5362e0744b7ebd92f4886a7e87":[1,0,2,0,2,2,0,17],
+"structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html#a1b26a3b2c209636a4d79fe7fdf1eb83a":[1,0,2,0,2,2,0,0],
 "structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html#a2c043a8043e5d31401fd661ded8479fc":[1,0,2,0,2,2,0,15],
 "structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html#a3c69bf048f32557a611fc3ec23931dae":[1,0,2,0,2,2,0,11],
 "structmodule_1_1behaviour_1_1strategy_1_1SoccerStrategy_1_1Config.html#a4e6024a103d0b0ff43798983b57699d2":[1,0,2,0,2,2,0,19],
@@ -245,9 +249,5 @@ var NAVTREEINDEX10 =
 "structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Covariance.html#a20ea309e8612cc111201cc3108cf2fed":[1,0,2,2,23,0,2,0,0,0],
 "structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Covariance.html#a4f3bcb01fa3fea0438e066233bce13a0":[1,0,2,2,23,0,2,0,0,2],
 "structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Covariance.html#a6999fed4a18a5f55fbfcefcec3a9fd15":[1,0,2,2,23,0,2,0,0,3],
-"structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Covariance.html#a964ecb25e7bc013144d84e045f200dc2":[1,0,2,2,23,0,2,0,0,1],
-"structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Covariance.html#aba933f8db5a901dcf1a0a8ef9012d3a7":[1,0,2,2,23,0,2,0,0,4],
-"structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Mean.html":[1,0,2,2,23,0,2,0,1],
-"structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Mean.html#a3674abdbbfa02e15090c80d9c55982f2":[1,0,2,2,23,0,2,0,1,1],
-"structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Mean.html#a3f967463cbce527a8f5cd44073e3b805":[1,0,2,2,23,0,2,0,1,2]
+"structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Covariance.html#a964ecb25e7bc013144d84e045f200dc2":[1,0,2,2,23,0,2,0,0,1]
 };

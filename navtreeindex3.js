@@ -1,6 +1,5 @@
 var NAVTREEINDEX3 =
 {
-"classmodule_1_1behaviour_1_1tools_1_1ScriptTuner.html#a2c44719241502b24d60ece68b340890d":[1,0,2,0,3,3,20],
 "classmodule_1_1behaviour_1_1tools_1_1ScriptTuner.html#a46c0bb4db1e134035cc5ab8271b54f1e":[1,0,2,0,3,3,27],
 "classmodule_1_1behaviour_1_1tools_1_1ScriptTuner.html#a5827765dd5ee768a9c741867f08ef0f6":[1,0,2,0,3,3,1],
 "classmodule_1_1behaviour_1_1tools_1_1ScriptTuner.html#a5b429df0d6625066b0845e5e8c948506":[1,0,2,0,3,3,16],
@@ -249,5 +248,6 @@ var NAVTREEINDEX3 =
 "classmodule_1_1localisation_1_1BallModel.html#a93bd0e086fad27d2ffa968d7ea7b2400":[1,0,2,3,2,13],
 "classmodule_1_1localisation_1_1BallModel.html#a9a8abe047b8c9dbd6ccd60c2cefc7b4a":[1,0,2,3,2,5],
 "classmodule_1_1localisation_1_1BallModel.html#aa7dfff8a4aae4b26be9b9504bf7e699c":[1,0,2,3,2,11],
-"classmodule_1_1localisation_1_1BallModel.html#ab4685659132d9d2da03a619c44225e10":[1,0,2,3,2,3]
+"classmodule_1_1localisation_1_1BallModel.html#ab4685659132d9d2da03a619c44225e10":[1,0,2,3,2,3],
+"classmodule_1_1localisation_1_1BallModel.html#ab5dd839d6ebb7872af0aa46e5d1a2065":[1,0,2,3,2,16]
 };

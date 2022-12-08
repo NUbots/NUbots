@@ -1,5 +1,9 @@
 var NAVTREEINDEX11 =
 {
+"structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Covariance.html#aba933f8db5a901dcf1a0a8ef9012d3a7":[1,0,2,2,23,0,2,0,0,4],
+"structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Mean.html":[1,0,2,2,23,0,2,0,1],
+"structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Mean.html#a3674abdbbfa02e15090c80d9c55982f2":[1,0,2,2,23,0,2,0,1,1],
+"structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Mean.html#a3f967463cbce527a8f5cd44073e3b805":[1,0,2,2,23,0,2,0,1,2],
 "structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Mean.html#a91f7972762a6af29f06aa5c8f9e25e84":[1,0,2,2,23,0,2,0,1,3],
 "structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Mean.html#ab09f4a9ef9aec96ba865df73fa26f92b":[1,0,2,2,23,0,2,0,1,4],
 "structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Mean.html#aef88a536b277c85a0e8228de08608217":[1,0,2,2,23,0,2,0,1,0],
@@ -245,9 +249,5 @@ var NAVTREEINDEX11 =
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Monochrome.html#a1ac7e8bfde8f28f33bfcef1f138113ce":[1,0,2,6,0,1,1,0,4,3],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Monochrome.html#a295383d269ed9296189731b493e2938a":[1,0,2,6,0,1,1,0,4,5],
 "structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Monochrome.html#a2d59dcb6a87c86d56b808e443d075a61":[1,0,2,6,0,1,1,0,4,1],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Monochrome.html#a509846afacc43bc493d3a76f64f891fe":[1,0,2,6,0,1,1,0,4,8],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Monochrome.html#a6884a23c14a75da7650666901a9b3cda":[1,0,2,6,0,1,1,0,4,2],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Monochrome.html#a6cf150237538039a0e3c27f614d6d884":[1,0,2,6,0,1,1,0,4,0],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Monochrome.html#aa02bf4bece75d8395e44d1fd6af3c0f6":[1,0,2,6,0,1,1,0,4,6],
-"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Monochrome.html#ac333cba627c2b60cd3d623ee1ff4e3ac":[1,0,2,6,0,1,1,0,4,7]
+"structmodule_1_1output_1_1compressor_1_1vaapi_1_1operation_1_1markers_1_1SOF0__Monochrome.html#a509846afacc43bc493d3a76f64f891fe":[1,0,2,6,0,1,1,0,4,8]
 };

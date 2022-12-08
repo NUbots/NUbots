@@ -132,10 +132,9 @@ var NAVTREEINDEX0 =
 "KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9aa8d1b69a587431c229b8ccdabd630a3f":[0,0,2,0,2,11,4],
 "KeyboardWalk_8hpp.html#af2fe743e6f614a0e65f39f45102360a9aabaeda8c8c137f659606924c7e40f2d5":[0,0,2,0,2,11,1],
 "KickPlanner_8cpp.html#a77ce7f359ee342116a6129934e9ffe9c":[0,0,2,0,0,3],
-"KickPlanner_8cpp.html#a8d725356b9d4d1a658f23e6b261b2d0c":[0,0,2,0,0,6],
 "KickPlanner_8cpp.html#aa5b1713757eb54288a24d4f49696ed1a":[0,0,2,0,0,5],
 "KickPlanner_8cpp.html#adbd31b53341649234480b001a93c7e79":[0,0,2,0,0,4],
-"KickPlanner_8cpp.html#ae704620d768f5038531cdebeea5af674":[0,0,2,0,0,7],
+"KickPlanner_8cpp.html#ae704620d768f5038531cdebeea5af674":[0,0,2,0,0,6],
 "LimbID_8cpp.html#aa0c047925696e66fd1f5d098c744e133":[0,0,5,3,2],
 "LimbID_8cpp.html#accc0ac967dfb1eea992099c6d2ada892":[0,0,5,3,3],
 "MotionCommand_8hpp.html#a30f5e54a1fc9d8b87f1133b16ad36b3d":[0,0,5,0,10],
@@ -249,5 +248,6 @@ var NAVTREEINDEX0 =
 "Vision_8hpp.html#ae92e4aa86a8915b98ca63cf3c73d5d46":[0,0,5,14,65],
 "Vision_8hpp.html#af01eb8b8a6b004c4b8907800b69da152":[0,0,5,14,4],
 "Vision_8hpp.html#af01eb8b8a6b004c4b8907800b69da152a79cba1185463850dedba31f172f1dc5b":[0,0,5,14,4,2],
-"Vision_8hpp.html#af01eb8b8a6b004c4b8907800b69da152a9d5ed678fe57bcca610140957afab571":[0,0,5,14,4,3]
+"Vision_8hpp.html#af01eb8b8a6b004c4b8907800b69da152a9d5ed678fe57bcca610140957afab571":[0,0,5,14,4,3],
+"Vision_8hpp.html#af01eb8b8a6b004c4b8907800b69da152ae1e1d3d40573127e9ee0480caf1283d6":[0,0,5,14,4,0]
 };

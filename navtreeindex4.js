@@ -1,6 +1,5 @@
 var NAVTREEINDEX4 =
 {
-"classmodule_1_1localisation_1_1BallModel.html#ab5dd839d6ebb7872af0aa46e5d1a2065":[1,0,2,3,2,16],
 "classmodule_1_1localisation_1_1BallModel.html#abcde4d2070a49eaac2748d33689f9ffd":[1,0,2,3,2,1],
 "classmodule_1_1localisation_1_1BallModel.html#ac7113e963b520b3bc6fd1588e7be977f":[1,0,2,3,2,10],
 "classmodule_1_1localisation_1_1BallModel.html#ae677463493bc3fae481ca281f472293e":[1,0,2,3,2,9],
@@ -249,5 +248,6 @@ var NAVTREEINDEX4 =
 "classmodule_1_1output_1_1Overview.html":[1,0,2,6,3],
 "classmodule_1_1output_1_1Overview.html#a2cf3f00ec0c2ff27f67eaae7760ecdf5":[1,0,2,6,3,1],
 "classmodule_1_1output_1_1Overview.html#a338e246fa08309483ed4473bc1a259f0":[1,0,2,6,3,3],
-"classmodule_1_1output_1_1Overview.html#a8d72cb9a643ca69b385b8108be2feb10":[1,0,2,6,3,0]
+"classmodule_1_1output_1_1Overview.html#a8d72cb9a643ca69b385b8108be2feb10":[1,0,2,6,3,0],
+"classmodule_1_1output_1_1Overview.html#a90d4e1ee64c9bb7657e25f698924d48c":[1,0,2,6,3,2]
 };

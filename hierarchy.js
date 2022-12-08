@@ -67,6 +67,7 @@ var hierarchy =
     [ "extension::Script::Frame::Target", "structextension_1_1Script_1_1Frame_1_1Target.html", null ],
     [ "Joystick", "classJoystick.html", null ],
     [ "JoystickEvent", "classJoystickEvent.html", null ],
+    [ "module::behaviour::planning::KickPlanner::Config", "structmodule_1_1behaviour_1_1planning_1_1KickPlanner_1_1Config.html", null ],
     [ "module::behaviour::planning::SimpleWalkPathPlanner::Config", "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html", null ],
     [ "module::behaviour::Request", "structmodule_1_1behaviour_1_1Request.html", null ],
     [ "module::behaviour::RequestItem", "structmodule_1_1behaviour_1_1RequestItem.html", null ],

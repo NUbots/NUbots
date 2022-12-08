@@ -83,7 +83,6 @@ var namespaces_dup =
           [ "KickType", "KickPlanner_8cpp.html#a77ce7f359ee342116a6129934e9ffe9c", null ],
           [ "PenaltyReason", "KickPlanner_8cpp.html#adbd31b53341649234480b001a93c7e79", null ],
           [ "Phase", "KickPlanner_8cpp.html#aa5b1713757eb54288a24d4f49696ed1a", null ],
-          [ "VisionBall", "KickPlanner_8cpp.html#a8d725356b9d4d1a658f23e6b261b2d0c", null ],
           [ "VisionBalls", "KickPlanner_8cpp.html#ae704620d768f5038531cdebeea5af674", null ]
         ] ],
         [ "skills", null, [
