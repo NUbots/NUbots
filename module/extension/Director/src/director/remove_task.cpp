@@ -39,7 +39,6 @@ namespace module::extension {
 
             // Remove this task, we are no longer doing it
             group.active_task = nullptr;
-            group.zombie      = true;
             group.done        = false;
 
             // Re-evaluate the group since things may now have changed
@@ -49,6 +48,9 @@ namespace module::extension {
             // If nothing in the queue updated the active task to a new task we are now idle
             // That also means we need to remove any subtasks this group had recursively
             if (group.active_task == nullptr) {
+
+                // We are now a zombie, we are dead but we are still in the tree
+                group.zombie = true;
 
                 // Run the Stop reactions for this provider group since it is no longer running
                 // First we restore the original task so we have data for the stop reaction
