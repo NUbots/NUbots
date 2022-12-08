@@ -27,13 +27,18 @@
 // Anonymous namespace to avoid name collisions
 namespace {
 
+    struct PrimaryTask {};
+    struct SecondaryTask {};
+
+    struct SubTask {
+        SubTask(const std::string& msg_) : msg(msg_) {}
+        std::string msg;
+    };
+
+    template <int i>
     struct SimpleTask {
         SimpleTask(const std::string& msg_) : msg(msg_) {}
         std::string msg;
-    };
-    template <int i>
-    struct ComplexTask {
-        int is_done;
     };
 
     std::vector<std::string> events;
@@ -44,43 +49,44 @@ namespace {
             : TestBase<TestReactor>(std::move(environment)) {
 
             // Store the tasks we are given to run
-            on<Provide<SimpleTask>>().then([this](const SimpleTask& t) {  //
-                events.push_back("simple task - " + t.msg);
+            on<Provide<SimpleTask<1>>>().then([this](const SimpleTask<1>& t) {  //
+                events.push_back("simple task 1 from " + t.msg);
+            });
+            on<Provide<SimpleTask<2>>>().then([this](const SimpleTask<2>& t) {  //
+                events.push_back("simple task 2 from " + t.msg);
             });
 
-            on<Provide<ComplexTask<1>>, Needs<ComplexTask<2>>, Needs<ComplexTask<3>>>().then([this]() {
-                events.push_back("emitting tasks from complex task 1");
-                emit<Task>(std::make_unique<ComplexTask<2>>());
-                emit<Task>(std::make_unique<ComplexTask<3>>());
+            on<Provide<PrimaryTask>, SimpleTask<2>, Needs<SubTask>>().then([this]() {
+                events.push_back("emitting from primary task");
+                emit<Task>(std::make_unique<SimpleTask<2>>("primary task"));
+                emit<Task>(std::make_unique<SubTask>("primary task"));
             });
 
-            on<Provide<ComplexTask<2>>>().then([this] { events.push_back("emitting from complex task 2"); });
-
-            on<Provide<ComplexTask<3>>, Needs<SimpleTask>>().then([this] {
-                events.push_back("emitting tasks from complex task 3");
-                emit<Task>(std::make_unique<SimpleTask>("complex task 1"));
+            on<Provide<SubTask>, Needs<SimpleTask<1>>>().then([this](const SubTask& t) {
+                events.push_back("emitting from subtask");
+                emit<Task>(std::make_unique<SimpleTask<1>>(t.msg));
             });
 
-            on<Provide<ComplexTask<4>>, Needs<ComplexTask<2>>, Needs<SimpleTask>>().then([this] {
-                events.push_back("emitting tasks from complex task 4");
-                emit<Task>(std::make_unique<ComplexTask<2>>());
-                emit<Task>(std::make_unique<SimpleTask>("complex task 4"));
+            on<Provide<SecondaryTask>, Needs<SimpleTask<1>>, Needs<SimpleTask<2>>>().then([this] {
+                events.push_back("emitting from secondary task");
+                emit<Task>(std::make_unique<SimpleTask<1>>("secondary task"));
+                emit<Task>(std::make_unique<SimpleTask<2>>("secondary task"));
             });
 
             /**************
              * TEST STEPS *
              **************/
             on<Trigger<Step<1>>, Priority::LOW>().then([this] {
-                events.push_back("emitting complex task 1");
-                emit<Task>(std::make_unique<ComplexTask<1>>(0));
+                events.push_back("emitting primary task");
+                emit<Task>(std::make_unique<PrimaryTask>());
             });
             on<Trigger<Step<2>>, Priority::LOW>().then([this] {
-                events.push_back("emitting complex task 4");
-                emit<Task>(std::make_unique<ComplexTask<4>>());
+                events.push_back("emitting secondary task");
+                emit<Task>(std::make_unique<SecondaryTask>());
             });
             on<Trigger<Step<3>>, Priority::LOW>().then([this] {
-                events.push_back("emitting complex task 1 nullptr");
-                emit<Task>(std::unique_ptr<ComplexTask<1>>(nullptr));
+                events.push_back("removing primary task");
+                emit<Task>(std::unique_ptr<PrimaryTask>(nullptr));
             });
             on<Startup>().then([this] {
                 emit(std::make_unique<Step<1>>());
@@ -102,16 +108,18 @@ TEST_CASE("Tests a waiting task can take over subtasks of another task that is b
     powerplant.install<TestReactor>();
     powerplant.start();
 
-    std::vector<std::string> expected = {"emitting complex task 1",
-                                         "emitting tasks from complex task 1",
-                                         "emitting from complex task 2",
-                                         "emitting tasks from complex task 3",
-                                         "simple task - complex task 1",
-                                         "emitting complex task 4",
-                                         "emitting complex task 1 nullptr",
-                                         "emitting tasks from complex task 4",
-                                         "emitting from complex task 2",
-                                         "simple task - complex task 4"};
+    std::vector<std::string> expected = {
+        "emitting primary task",
+        "emitting from primary task",
+        "simple task 2 from primary task",
+        "emitting from subtask",
+        "simple task 1 from primary task",
+        "emitting secondary task",
+        "removing primary task",
+        "emitting from secondary task",
+        "simple task 1 from secondary task",
+        "simple task 2 from secondary task",
+    };
 
     // Make an info print the diff in an easy to read way if we fail
     INFO(util::diff_string(expected, events));
