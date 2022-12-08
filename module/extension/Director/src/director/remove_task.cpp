@@ -39,6 +39,7 @@ namespace module::extension {
 
             // Remove this task, we are no longer doing it
             group.active_task = nullptr;
+            group.zombie      = true;
             group.done        = false;
 
             // Re-evaluate the group since things may now have changed
@@ -76,6 +77,9 @@ namespace module::extension {
                 for (const auto& t : group.subtasks) {
                     remove_task(t);
                 }
+
+                // After we have removed all our subtasks we are no longer a zombie, we are just dead
+                group.zombie = false;
 
                 // We now have no subtasks
                 group.subtasks.clear();
