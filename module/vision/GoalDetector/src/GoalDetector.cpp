@@ -376,9 +376,7 @@ namespace module::vision {
                     }
 
                     auto calc_error = [&](const Eigen::Vector3f& post1, const Eigen::Vector3f& post2) {
-                        return std::sqrt((post1.x() - post2.x()) * (post1.x() - post2.x()))
-                               + ((post1.y() - post2.y()) * (post1.y() - post2.y()))
-                               + ((post1.z() - post2.z()) * (post1.z() - post2.z()));
+                        return (post1 - post2).norm();
                     };
 
                     if (horizon.vision_ground_truth.exists) {
@@ -411,17 +409,16 @@ namespace module::vision {
                         const Eigen::Vector3f rGCc_opp_l = (Hcw * rGWw_opp_l).normalized();
                         const Eigen::Vector3f rGCc_opp_r = (Hcw * rGWw_opp_r).normalized();
 
-                        const float variance             = 0.025;
                         int bad_posts                    = 0;
-                        float goal_error                 = 0;
+                        float goal_error                 = 0.0;
                         Eigen::Vector3f goal_error3f     = Eigen::Vector3f::Zero();
-                        float goal_error_bad             = 0;
+                        float goal_error_bad             = 0.0;
                         Eigen::Vector3f goal_error3f_bad = Eigen::Vector3f::Zero();
 
                         for (auto it = goals->goals.begin(); it != goals->goals.end(); it = std::next(it)) {
 
                             bool good_post        = false;
-                            float min_error       = 1;
+                            float min_error       = 1.0;
                             Eigen::Vector3f error = Eigen::Vector3f::Zero();
 
                             const float dist_own_l = calc_error(it->post.bottom, rGCc_own_l);
@@ -429,8 +426,8 @@ namespace module::vision {
                             const float dist_opp_l = calc_error(it->post.bottom, rGCc_opp_l);
                             const float dist_opp_r = calc_error(it->post.bottom, rGCc_opp_r);
 
-                            if (dist_own_l < variance || dist_own_r < variance || dist_opp_l < variance
-                                || dist_opp_r < variance) {
+                            if (dist_own_l < config.max_benchmark_error || dist_own_r < config.max_benchmark_error
+                                || dist_opp_l < config.max_benchmark_error || dist_opp_r < config.max_benchmark_error) {
                                 good_post = true;
                             }
 
@@ -464,8 +461,6 @@ namespace module::vision {
                             }
                         }
 
-                        // log<NUClear::DEBUG>(fmt::format("Bad Posts:{}", bad_posts));
-
                         if (goals->goals.size() > bad_posts) {
                             goal_error   = (goal_error / ((goals->goals.size() - bad_posts)));
                             goal_error3f = (goal_error3f / ((goals->goals.size() - bad_posts)));
@@ -473,20 +468,6 @@ namespace module::vision {
 
                         goal_error_bad   = (goal_error_bad / (goals->goals.size()));
                         goal_error3f_bad = (goal_error3f_bad / (goals->goals.size()));
-
-                        /*
-                        log<NUClear::DEBUG>(fmt::format("Average Error:{}", goal_error));
-                        log<NUClear::DEBUG>(fmt::format("Average Error x:{}, y:{}, z:{}",
-                                                        goal_error3f.x(),
-                                                        goal_error3f.y(),
-                                                        goal_error3f.z()));
-
-
-                        log<NUClear::DEBUG>(fmt::format("Total Error:{}", goal_error_bad));
-                        log<NUClear::DEBUG>(fmt::format("Total Error x:{}, y:{}, z:{}",
-                                                        goal_error3f_bad.x(),
-                                                        goal_error3f_bad.y(),
-                                                        goal_error3f_bad.z()));*/
 
                         emit(graph("Vector Goal Error without Bad Goals",
                                    goal_error3f.x(),
