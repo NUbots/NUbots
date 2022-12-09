@@ -1,4 +1,5 @@
 <map id="module::input::NatNet" name="module::input::NatNet">
-<area shape="rect" id="node1" title=" " alt="" coords="5,80,172,107"/>
-<area shape="rect" id="node2" title=" " alt="" coords="21,5,156,32"/>
+<area shape="rect" id="node1" title=" " alt="" coords="76,109,243,136"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,13,140,39"/>
+<area shape="rect" id="node3" href="$structmodule_1_1input_1_1NatNet_1_1Config.html" title="Stores configuration values." alt="" coords="164,5,331,47"/>
 </map>
