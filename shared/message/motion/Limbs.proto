@@ -22,55 +22,83 @@ package message.motion;
 
 import "message/motion/ServoCommand.proto";
 
-/// Enum for each servo in a leg
-enum LegID {
-    HIP_YAW     = 0;
-    HIP_ROLL    = 1;
-    HIP_PITCH   = 2;
-    KNEE        = 3;
-    ANKLE_PITCH = 4;
-    ANKLE_ROLL  = 5;
-}
-
 /// Left leg servo command information including time, gain, torque, position
 message LeftLeg {
-    /// Information for each servo in the left leg, in order of LegID
-    repeated ServoCommand servos = 1;
+    /// Information for each servo in the left leg, with the key corresponding to ServoID
+    map<uint32, ServoCommand> servos = 1;
+}
+message LeftLegSequence {
+    repeated LeftLeg frames = 1;
 }
 
 /// Right leg servo command information including time, gain, torque, position
 message RightLeg {
-    /// Information for each servo in the right leg, in order of LegID
-    repeated ServoCommand servos = 1;
+    /// Information for each servo in the right leg, with the key corresponding to ServoID
+    map<uint32, ServoCommand> servos = 1;
+}
+message RightLegSequence {
+    repeated RightLeg frames = 1;
 }
 
-/// Enum for each servo in an arm
-enum ArmID {
-    SHOULDER_PITCH = 0;
-    SHOULDER_ROLL  = 1;
-    ELBOW          = 2;
+/// Right and left leg servo command information including time, gain, torque, position
+message Legs {
+    /// Information for each servo in the legs, with the key corresponding to ServoID
+    map<uint32, ServoCommand> servos = 1;
+}
+message LegsSequence {
+    repeated Legs frames = 1;
 }
 
 /// Left arm servo command information including time, gain, torque, position
 message LeftArm {
-    /// Information for each servo in the left arm, in order of ArmID
-    repeated ServoCommand servos = 1;
+    /// Information for each servo in the left arm, with the key corresponding to ServoID
+    map<uint32, ServoCommand> servos = 1;
+}
+message LeftArmSequence {
+    repeated LeftArm frames = 1;
 }
 
 /// Right arm servo command information including time, gain, torque, position
 message RightArm {
-    /// Information for each servo in the right arm, in order of ArmID
-    repeated ServoCommand servos = 1;
+    /// Information for each servo in the right arm, with the key corresponding to ServoID
+    map<uint32, ServoCommand> servos = 1;
+}
+message RightArmSequence {
+    repeated RightArm frames = 1;
 }
 
-/// Enum for each servo in the head
-enum HeadID {
-    YAW   = 0;
-    PITCH = 1;
+/// Left and right arm servo command information including time, gain, torque, position
+message Arms {
+    /// Information for each servo in the arms, with the key corresponding to ServoID
+    map<uint32, ServoCommand> servos = 1;
+}
+message ArmsSequence {
+    repeated Arms frames = 1;
+}
+
+/// Left and right arm and leg servo command information including time, gain, torque, position
+message Limbs {
+    /// Information for each servo in the arms and legs, with the key corresponding to ServoID
+    map<uint32, ServoCommand> servos = 1;
+}
+message LimbsSequence {
+    repeated Limbs frames = 1;
 }
 
 /// Head servo command information including time, gain, torque, position
 message Head {
-    /// Information for each servo in the head, in order of HeadID
-    repeated ServoCommand servos = 1;
+    /// Information for each servo in the head, with the key corresponding to ServoID
+    map<uint32, ServoCommand> servos = 1;
+}
+message HeadSequence {
+    repeated Head frames = 1;
+}
+
+/// Arms, legs and head servo command information including time, gain, torque, position
+message Body {
+    /// Information for each servo in the body, with the key corresponding to ServoID
+    map<uint32, ServoCommand> servos = 1;
+}
+message BodySequence {
+    repeated Body frames = 1;
 }
