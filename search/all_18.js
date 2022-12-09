@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['_7ejoystick_875',['~Joystick',['../classJoystick.html#a23429c0470e1a32b8de61e1ad7c251c1',1,'Joystick']]],
-  ['_7euart_876',['~uart',['../classutility_1_1io_1_1uart.html#adad0e0c79fc9b2f58572ba64df373769',1,'utility::io::uart']]]
+  ['zombie_872',['zombie',['../structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#a4eba4c9d90445f3549d8d91091a40756',1,'module::extension::provider::ProviderGroup']]]
 ];

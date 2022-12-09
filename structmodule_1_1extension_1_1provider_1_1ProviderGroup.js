@@ -14,5 +14,6 @@ var structmodule_1_1extension_1_1provider_1_1ProviderGroup =
     [ "subtasks", "structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#af6e2baab8d1eea9e4f4449970611e70d", null ],
     [ "type", "structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#a2eeb182720d17d1b3a4bc662eb734200", null ],
     [ "watch_handles", "structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#a05fb2be0ea426bd957c3f1564b41d235", null ],
-    [ "watchers", "structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#ae5d385284de63d3d20bd95e664941fb8", null ]
+    [ "watchers", "structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#ae5d385284de63d3d20bd95e664941fb8", null ],
+    [ "zombie", "structmodule_1_1extension_1_1provider_1_1ProviderGroup.html#a4eba4c9d90445f3549d8d91091a40756", null ]
 ];
