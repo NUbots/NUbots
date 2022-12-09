@@ -75,6 +75,10 @@ message MotionCapture {
         bool   occluded           = 2;
         bool   point_cloud_solved = 3;
         bool   model_solved       = 4;
+        uint32 err                = 5;
+        bool   has_model          = 6;
+        bool   unlabeled          = 7;
+        bool   active_marker      = 8;
     }
 
     /// Each bone within a skeleton can be subject to position,
@@ -94,21 +98,30 @@ message MotionCapture {
         /// change over time
         repeated Channel channels = 2;
     }
+
+    message Device {
+        uint32           id       = 1;
+        repeated Channel channels = 2;
+    }
     uint32 frame_number = 1;
     float  latency      = 2;
     /// Encoded timestamp - 0 := the first timecode. hour:minute:second:frame
     /// bytes, in binary coded decimal see
     /// https://en.wikipedia.org/wiki/SMPTE_timecode
-    uint32 timecode         = 3;
-    uint32 timecode_sub     = 4;
-    double natnet_timestamp = 5;
+    uint32 timecode                = 3;
+    uint32 timecode_sub            = 4;
+    double natnet_timestamp        = 5;
+    double mid_exposure_timestamp  = 6;
+    double data_received_timestamp = 7;
+    double transmit_timestamp      = 8;
     /// Whether or not this frame is to be recorded
-    bool                   recording              = 6;
-    bool                   tracked_models_changed = 7;
-    repeated MarkerSet     marker_sets            = 8;
-    repeated Marker        markers                = 9;
-    repeated RigidBody     rigid_bodies           = 10;
-    repeated Skeleton      skeletons              = 11;
-    repeated LabeledMarker labeled_markers        = 12;
-    repeated ForcePlate    force_plates           = 13;
+    bool                   recording              = 9;
+    bool                   tracked_models_changed = 10;
+    repeated MarkerSet     marker_sets            = 11;
+    repeated Marker        markers                = 12;
+    repeated RigidBody     rigid_bodies           = 13;
+    repeated Skeleton      skeletons              = 14;
+    repeated LabeledMarker labeled_markers        = 15;
+    repeated ForcePlate    force_plates           = 16;
+    repeated Device        devices                = 17;
 }
