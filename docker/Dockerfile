@@ -321,7 +321,7 @@ RUN pip install --upgrade \
     cmake-format==0.6.13 \
     isort==5.7.0 \
     black==22.3.0 \
-    licenceheader==0.8.8
+    licenceheaders==0.8.8
 
 RUN npm install -g \
     prettier@2.7.1 \
