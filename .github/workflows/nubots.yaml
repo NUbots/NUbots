@@ -153,6 +153,9 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Code
         uses: actions/checkout@v3
+        # Need to fetch everything in order to know when files were added/updated
+        with:
+          fetch-depth: 0
 
       - name: Check formatting
         run: ./b format --check --all --verbose
