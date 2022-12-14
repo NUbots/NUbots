@@ -5,6 +5,7 @@
 
 #include "message/motion/Limbs.hpp"
 #include "message/motion/LimbsIK.hpp"
+#include "message/motion/ServoCommand.hpp"
 
 #include "utility/input/LimbID.hpp"
 #include "utility/motion/InverseKinematics.hpp"
@@ -13,14 +14,14 @@ namespace module::motion {
 
     using extension::Configuration;
     using message::motion::Head;
-    using message::motion::HeadID;
     using message::motion::HeadIK;
     using message::motion::KinematicsModel;
     using message::motion::LeftLeg;
     using message::motion::LeftLegIK;
-    using message::motion::LegID;
     using message::motion::RightLeg;
     using message::motion::RightLegIK;
+    using message::motion::ServoCommand;
+    using message::motion::ServoState;
     using utility::input::LimbID;
     using utility::motion::kinematics::calculateHeadJoints;
     using utility::motion::kinematics::calculateLegJoints;
@@ -45,11 +46,11 @@ namespace module::motion {
                 // Calculate the joint positions with IK
                 auto servos = std::make_unique<LeftLeg>();
                 auto joints =
-                    calculateLegJoints<double>(kinematics_model, Eigen::Affine3d(leg_ik.Htl), LimbID::LEFT_LEG);
+                    calculateLegJoints<double>(kinematics_model, Eigen::Isometry3d(leg_ik.Htl), LimbID::LEFT_LEG);
 
-                // The order of the servos in LeftLegIK and LeftLeg should be LeftLeg.ID
-                for (long unsigned int i = 0; i < joints.size(); i++) {
-                    servos->servos.emplace_back(leg_ik.time, joints[i].second, leg_ik.servos[i]);
+                for (const auto& joint : joints) {
+                    servos->servos[joint.first] =
+                        ServoCommand(leg_ik.time, joint.second, leg_ik.servos.at(joint.first));
                 }
 
                 emit<Task>(servos);
@@ -67,12 +68,13 @@ namespace module::motion {
                 // Calculate the joint positions with IK
                 auto servos = std::make_unique<RightLeg>();
                 auto joints =
-                    calculateLegJoints<double>(kinematics_model, Eigen::Affine3d(leg_ik.Htr), LimbID::RIGHT_LEG);
+                    calculateLegJoints<double>(kinematics_model, Eigen::Isometry3d(leg_ik.Htr), LimbID::RIGHT_LEG);
 
-                // The order of the servos in RightLegIK and RightLeg should be LegID
-                for (long unsigned int i = 0; i < joints.size(); i++) {
-                    servos->servos.emplace_back(leg_ik.time, joints[i].second, leg_ik.servos[i]);
+                for (const auto& joint : joints) {
+                    servos->servos[joint.first] =
+                        ServoCommand(leg_ik.time, joint.second, leg_ik.servos.at(joint.first));
                 }
+
                 emit<Task>(servos);
             });
 
@@ -88,10 +90,10 @@ namespace module::motion {
             auto servos = std::make_unique<Head>();
             auto joints = calculateHeadJoints<double>(Eigen::Vector3d(head_ik.uPCt));
 
-            // The order of the servos in HeadIK and Head should be HeadID (yaw, pitch)
-            for (long unsigned int i = 0; i < joints.size(); i++) {
-                servos->servos.emplace_back(head_ik.time, joints[i].second, head_ik.servos[i]);
+            for (const auto& joint : joints) {
+                servos->servos[joint.first] = ServoCommand(head_ik.time, joint.second, head_ik.servos.at(joint.first));
             }
+
             emit<Task>(servos);
         });
     }

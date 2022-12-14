@@ -49,6 +49,9 @@ namespace module::extension {
             // That also means we need to remove any subtasks this group had recursively
             if (group.active_task == nullptr) {
 
+                // We are now a zombie, we are dead but we are still in the tree
+                group.zombie = true;
+
                 // Run the Stop reactions for this provider group since it is no longer running
                 // First we restore the original task so we have data for the stop reaction
                 group.active_task = original_task;
@@ -76,6 +79,9 @@ namespace module::extension {
                 for (const auto& t : group.subtasks) {
                     remove_task(t);
                 }
+
+                // After we have removed all our subtasks we are no longer a zombie, we are just dead
+                group.zombie = false;
 
                 // We now have no subtasks
                 group.subtasks.clear();
