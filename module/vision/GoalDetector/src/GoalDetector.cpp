@@ -379,30 +379,24 @@ namespace module::vision {
                         return (post1 - post2).norm();
                     };
 
+                    auto calc_goal_pos = [&](const Eigen::Vector3f& rFWw, const int& x_sign, const int& y_sign) {
+                        return Eigen::Vector3f(
+                            rFWw.x() + (field.dimensions.field_length / 2 * x_sign),
+                            rFWw.y()
+                                + (((field.dimensions.goal_width / 2) + (field.dimensions.goalpost_width / 2))
+                                   * y_sign),
+                            rFWw.z());
+                    };
+
                     if (horizon.vision_ground_truth.exists) {
 
                         const Eigen::Affine3f Hcw(horizon.Hcw.cast<float>());
                         const Eigen::Vector3f rFWw = horizon.vision_ground_truth.rFWw;
 
-                        const Eigen::Vector3f rGWw_own_l(
-                            rFWw.x() - (field.dimensions.field_length / 2),
-                            rFWw.y() - (field.dimensions.goal_width / 2) - (field.dimensions.goalpost_width / 2),
-                            rFWw.z());
-
-                        const Eigen::Vector3f rGWw_own_r(
-                            rFWw.x() - (field.dimensions.field_length / 2),
-                            rFWw.y() + (field.dimensions.goal_width / 2) + (field.dimensions.goalpost_width / 2),
-                            rFWw.z());
-
-                        const Eigen::Vector3f rGWw_opp_l(
-                            rFWw.x() + (field.dimensions.field_length / 2),
-                            rFWw.y() + (field.dimensions.goal_width / 2) + (field.dimensions.goalpost_width / 2),
-                            rFWw.z());
-
-                        const Eigen::Vector3f rGWw_opp_r(
-                            rFWw.x() + (field.dimensions.field_length / 2),
-                            rFWw.y() - (field.dimensions.goal_width / 2) - (field.dimensions.goalpost_width / 2),
-                            rFWw.z());
+                        const Eigen::Vector3f rGWw_own_l = calc_goal_pos(rFWw, -1, -1);
+                        const Eigen::Vector3f rGWw_own_r = calc_goal_pos(rFWw, -1, +1);
+                        const Eigen::Vector3f rGWw_opp_l = calc_goal_pos(rFWw, +1, +1);
+                        const Eigen::Vector3f rGWw_opp_r = calc_goal_pos(rFWw, +1, -1);
 
                         const Eigen::Vector3f rGCc_own_l = (Hcw * rGWw_own_l).normalized();
                         const Eigen::Vector3f rGCc_own_r = (Hcw * rGWw_own_r).normalized();
