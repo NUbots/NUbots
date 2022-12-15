@@ -25,7 +25,7 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/motion/ServoTarget.hpp"
+#include "message/actuation/ServoTarget.hpp"
 #include "message/platform/RawSensors.hpp"
 
 #include "utility/math/angle.hpp"
@@ -36,8 +36,8 @@
 namespace module::platform::cm740 {
 
     using extension::Configuration;
-    using message::motion::ServoTarget;
-    using message::motion::ServoTargets;
+    using message::actuation::ServoTarget;
+    using message::actuation::ServoTargets;
     using message::platform::RawSensors;
     using utility::support::Expression;
 

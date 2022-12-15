@@ -19,7 +19,7 @@
 
 syntax = "proto3";
 
-package message.motion;
+package message.actuation;
 
 import "google/protobuf/timestamp.proto";
 

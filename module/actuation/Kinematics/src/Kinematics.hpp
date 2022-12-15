@@ -1,12 +1,12 @@
-#ifndef MODULE_MOTION_KINEMATICS_HPP
-#define MODULE_MOTION_KINEMATICS_HPP
+#ifndef MODULE_ACTUATION_KINEMATICS_HPP
+#define MODULE_ACTUATION_KINEMATICS_HPP
 
 #include <extension/Behaviour.hpp>
 #include <nuclear>
 
-#include "message/motion/KinematicsModel.hpp"
+#include "message/actuation/KinematicsModel.hpp"
 
-namespace module::motion {
+namespace module::actuation {
 
     class Kinematics : public ::extension::behaviour::BehaviourReactor {
     public:
@@ -14,6 +14,6 @@ namespace module::motion {
         explicit Kinematics(std::unique_ptr<NUClear::Environment> environment);
     };
 
-}  // namespace module::motion
+}  // namespace module::actuation
 
-#endif  // MODULE_MOTION_KINEMATICS_HPP
+#endif  // MODULE_ACTUATION_KINEMATICS_HPP

@@ -18,9 +18,9 @@
  */
 syntax = "proto3";
 
-package message.motion;
+package message.actuation;
 
-import "message/motion/ServoCommand.proto";
+import "message/actuation/ServoCommand.proto";
 
 /// Left leg servo command information including time, gain, torque, position
 message LeftLeg {

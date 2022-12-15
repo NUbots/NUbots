@@ -27,9 +27,9 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/ServoTarget.hpp"
 #include "message/input/Image.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/motion/ServoTarget.hpp"
 #include "message/output/CompressedImage.hpp"
 #include "message/platform/RawSensors.hpp"
 #include "message/platform/webots/messages.hpp"
@@ -54,10 +54,10 @@ extern "C" {
 namespace module::platform {
 
     using extension::Configuration;
+    using message::actuation::ServoTarget;
+    using message::actuation::ServoTargets;
     using message::input::Image;
     using message::input::Sensors;
-    using message::motion::ServoTarget;
-    using message::motion::ServoTargets;
     using message::platform::RawSensors;
     using message::platform::ResetWebotsServos;
 
