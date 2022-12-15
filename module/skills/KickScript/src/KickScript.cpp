@@ -16,7 +16,6 @@ namespace module::skills {
     using extension::behaviour::ScriptRequest;
     using message::motion::LimbsSequence;
     using message::skills::Kick;
-    using message::skills::KickType;
     using utility::input::LimbID;
 
     KickScript::KickScript(std::unique_ptr<NUClear::Environment> environment)
@@ -39,15 +38,6 @@ namespace module::skills {
                 return;
             }
 
-            // Execute the penalty kick if the type is PENALTY
-            if (kick.type == KickType::PENALTY) {
-                // TODO: Make a penalty kick
-                emit<Script>(std::make_unique<LimbsSequence>(),
-                             std::vector<ScriptRequest>{{"Stand.yaml"}, {"KickLeft.yaml"}, {"Stand.yaml"}});
-                return;
-            }
-
-            // Otherwise do a normal kick
             if (kick.leg == LimbID::RIGHT_LEG) {
                 emit<Script>(std::make_unique<LimbsSequence>(),
                              std::vector<ScriptRequest>{{"Stand.yaml"}, {"KickRight.yaml"}, {"Stand.yaml"}});

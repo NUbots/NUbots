@@ -22,14 +22,7 @@ package message.skills;
 
 import "Vector.proto";
 
-enum KickType {
-    NORMAL  = 0;
-    PENALTY = 1;
-}
-
 message Kick {
-    /// Normal or penalty kick
-    KickType type = 1;
     /// Leg to kick with
     uint32 leg = 2;
     /// The point to kick
