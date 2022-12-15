@@ -4,15 +4,15 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/KinematicsModel.hpp"
 #include "message/behaviour/Behaviour.hpp"
 #include "message/motion/GetupCommand.hpp"
-#include "message/motion/KinematicsModel.hpp"
 #include "message/motion/WalkCommand.hpp"
 #include "message/support/nusight/DataPoint.hpp"
 
+#include "utility/actuation/InverseKinematics.hpp"
 #include "utility/math/comparison.hpp"
 #include "utility/math/euler.hpp"
-#include "utility/motion/InverseKinematics.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
@@ -20,6 +20,7 @@ namespace module::motion {
 
     using extension::Configuration;
 
+    using message::actuation::KinematicsModel;
     using message::behaviour::Behaviour;
     using message::behaviour::ServoCommands;
     using message::input::Sensors;
@@ -27,14 +28,13 @@ namespace module::motion {
     using message::motion::EnableWalkEngineCommand;
     using message::motion::ExecuteGetup;
     using message::motion::KillGetup;
-    using message::motion::KinematicsModel;
     using message::motion::StopCommand;
     using message::motion::WalkCommand;
 
+    using utility::actuation::kinematics::calculateLegJoints;
     using utility::input::ServoID;
     using utility::math::euler::EulerIntrinsicToMatrix;
     using utility::math::euler::MatrixToEulerIntrinsic;
-    using utility::motion::kinematics::calculateLegJoints;
     using utility::nusight::graph;
     using utility::support::Expression;
 

@@ -18,9 +18,9 @@
  */
 syntax = "proto3";
 
-package message.motion;
+package message.actuation;
 
-import "message/motion/ServoCommand.proto";
+import "message/actuation/ServoCommand.proto";
 
 // Message for each servo with command information
 

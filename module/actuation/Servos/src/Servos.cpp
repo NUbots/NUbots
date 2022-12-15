@@ -22,52 +22,52 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
-#include "message/motion/Limbs.hpp"
-#include "message/motion/Servos.hpp"
+#include "message/actuation/Limbs.hpp"
+#include "message/actuation/Servos.hpp"
 
 #include "utility/input/ServoID.hpp"
 
-namespace module::motion {
+namespace module::actuation {
 
     using extension::Configuration;
-    using message::motion::Arms;
-    using message::motion::ArmsSequence;
-    using message::motion::Body;
-    using message::motion::BodySequence;
-    using message::motion::Head;
-    using message::motion::HeadPitch;
-    using message::motion::HeadSequence;
-    using message::motion::HeadYaw;
-    using message::motion::LeftAnklePitch;
-    using message::motion::LeftAnkleRoll;
-    using message::motion::LeftArm;
-    using message::motion::LeftArmSequence;
-    using message::motion::LeftElbow;
-    using message::motion::LeftHipPitch;
-    using message::motion::LeftHipRoll;
-    using message::motion::LeftHipYaw;
-    using message::motion::LeftKnee;
-    using message::motion::LeftLeg;
-    using message::motion::LeftLegSequence;
-    using message::motion::LeftShoulderPitch;
-    using message::motion::LeftShoulderRoll;
-    using message::motion::Legs;
-    using message::motion::LegsSequence;
-    using message::motion::Limbs;
-    using message::motion::LimbsSequence;
-    using message::motion::RightAnklePitch;
-    using message::motion::RightAnkleRoll;
-    using message::motion::RightArm;
-    using message::motion::RightArmSequence;
-    using message::motion::RightElbow;
-    using message::motion::RightHipPitch;
-    using message::motion::RightHipRoll;
-    using message::motion::RightHipYaw;
-    using message::motion::RightKnee;
-    using message::motion::RightLeg;
-    using message::motion::RightLegSequence;
-    using message::motion::RightShoulderPitch;
-    using message::motion::RightShoulderRoll;
+    using message::actuation::Arms;
+    using message::actuation::ArmsSequence;
+    using message::actuation::Body;
+    using message::actuation::BodySequence;
+    using message::actuation::Head;
+    using message::actuation::HeadPitch;
+    using message::actuation::HeadSequence;
+    using message::actuation::HeadYaw;
+    using message::actuation::LeftAnklePitch;
+    using message::actuation::LeftAnkleRoll;
+    using message::actuation::LeftArm;
+    using message::actuation::LeftArmSequence;
+    using message::actuation::LeftElbow;
+    using message::actuation::LeftHipPitch;
+    using message::actuation::LeftHipRoll;
+    using message::actuation::LeftHipYaw;
+    using message::actuation::LeftKnee;
+    using message::actuation::LeftLeg;
+    using message::actuation::LeftLegSequence;
+    using message::actuation::LeftShoulderPitch;
+    using message::actuation::LeftShoulderRoll;
+    using message::actuation::Legs;
+    using message::actuation::LegsSequence;
+    using message::actuation::Limbs;
+    using message::actuation::LimbsSequence;
+    using message::actuation::RightAnklePitch;
+    using message::actuation::RightAnkleRoll;
+    using message::actuation::RightArm;
+    using message::actuation::RightArmSequence;
+    using message::actuation::RightElbow;
+    using message::actuation::RightHipPitch;
+    using message::actuation::RightHipRoll;
+    using message::actuation::RightHipYaw;
+    using message::actuation::RightKnee;
+    using message::actuation::RightLeg;
+    using message::actuation::RightLegSequence;
+    using message::actuation::RightShoulderPitch;
+    using message::actuation::RightShoulderRoll;
     using utility::input::ServoID;
 
     Servos::Servos(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
@@ -186,4 +186,4 @@ namespace module::motion {
         add_sequence_provider<HeadSequence, Head>();
     }
 
-}  // namespace module::motion
+}  // namespace module::actuation

@@ -5,7 +5,7 @@ nuclear_role(
   support::logging::ConsoleLogHandler
   extension::FileWatcher
   # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
-  motion::KinematicsConfiguration
+  actuation::KinematicsConfiguration
   # Support
   network::NUClearNet
   network::NetworkForwarder

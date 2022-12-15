@@ -3,28 +3,28 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
-#include "message/motion/Limbs.hpp"
-#include "message/motion/LimbsIK.hpp"
-#include "message/motion/ServoCommand.hpp"
+#include "message/actuation/Limbs.hpp"
+#include "message/actuation/LimbsIK.hpp"
+#include "message/actuation/ServoCommand.hpp"
 
+#include "utility/actuation/InverseKinematics.hpp"
 #include "utility/input/LimbID.hpp"
-#include "utility/motion/InverseKinematics.hpp"
 
-namespace module::motion {
+namespace module::actuation {
 
     using extension::Configuration;
-    using message::motion::Head;
-    using message::motion::HeadIK;
-    using message::motion::KinematicsModel;
-    using message::motion::LeftLeg;
-    using message::motion::LeftLegIK;
-    using message::motion::RightLeg;
-    using message::motion::RightLegIK;
-    using message::motion::ServoCommand;
-    using message::motion::ServoState;
+    using message::actuation::Head;
+    using message::actuation::HeadIK;
+    using message::actuation::KinematicsModel;
+    using message::actuation::LeftLeg;
+    using message::actuation::LeftLegIK;
+    using message::actuation::RightLeg;
+    using message::actuation::RightLegIK;
+    using message::actuation::ServoCommand;
+    using message::actuation::ServoState;
+    using utility::actuation::kinematics::calculateHeadJoints;
+    using utility::actuation::kinematics::calculateLegJoints;
     using utility::input::LimbID;
-    using utility::motion::kinematics::calculateHeadJoints;
-    using utility::motion::kinematics::calculateLegJoints;
 
     Kinematics::Kinematics(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
@@ -98,4 +98,4 @@ namespace module::motion {
         });
     }
 
-}  // namespace module::motion
+}  // namespace module::actuation
