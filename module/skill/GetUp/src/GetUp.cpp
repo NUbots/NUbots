@@ -5,18 +5,18 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/Limbs.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/motion/Limbs.hpp"
 #include "message/skill/GetUp.hpp"
 
 namespace module::skill {
 
     using extension::Configuration;
     using extension::behaviour::Script;
+    using message::actuation::BodySequence;
     using message::behaviour::state::Stability;
     using message::input::Sensors;
-    using message::motion::BodySequence;
     using GetUpTask = message::skill::GetUp;
 
     GetUp::GetUp(std::unique_ptr<NUClear::Environment> environment) : BehaviourReactor(std::move(environment)) {
