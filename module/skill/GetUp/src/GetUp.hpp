@@ -12,11 +12,17 @@ namespace module::skill {
     private:
         /// @brief Stores configuration values
         struct Config {
+            /// @brief Script sequence to run when getting from lying on the front to standing
             std::vector<::extension::behaviour::ScriptRequest> getup_front;
+            /// @brief Script sequence to run when getting from lying on the back to standing
             std::vector<::extension::behaviour::ScriptRequest> getup_back;
+            /// @brief Script sequence to run when getting from lying on the right to standing
             std::vector<::extension::behaviour::ScriptRequest> getup_right;
+            /// @brief Script sequence to run when getting from lying on the left to standing
             std::vector<::extension::behaviour::ScriptRequest> getup_left;
+            /// @brief Script sequence to run when already upright
             std::vector<::extension::behaviour::ScriptRequest> getup_upright;
+            /// @brief Script sequence to run when told to get up while upside down
             std::vector<::extension::behaviour::ScriptRequest> getup_inverted;
         } cfg;
 
