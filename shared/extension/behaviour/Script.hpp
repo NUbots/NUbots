@@ -21,6 +21,7 @@ namespace extension::behaviour {
     using message::motion::ServoState;
     using utility::input::ServoID;
 
+    /// @brief One Script to run, with name of the script and a duration modifier to speed up or slow down the Script
     struct ScriptRequest {
         std::string name;
         float duration_modifier{1.0};
@@ -103,14 +104,12 @@ namespace extension::behaviour {
             }
         }
 
-        /// @brief Creates sequences of servos from the script file given, which is emitted as a Task.
+        /// @brief Creates sequences of servos from the script files given, which is emitted as a Task.
         /// @tparam DataType The message type containing a sequence of servo positions.
         /// @param powerplant The main NUClear powerplant
         /// @param msg DataType message which will be filled with sequences of servos and emitted as a Task.
-        /// @param script Filename of the script
-        /// @param start When the script should start executing. Default is now.
-        /// @param duration_modifier Modifies the speed the script is executed at, as a multiplier of each Frame's
-        /// duration.
+        /// @param scripts Sequence of scripts to run
+        /// @param start When the first script should start executing. Default is now.
         static void emit(NUClear::PowerPlant& powerplant,
                          std::shared_ptr<Sequence> msg,
                          std::vector<ScriptRequest> scripts,
