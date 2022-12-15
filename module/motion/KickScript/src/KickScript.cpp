@@ -3,9 +3,14 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
+#include "message/motion/Kick.hpp"
+#include "message/motion/Limbs.hpp"
+
 namespace module::motion {
 
     using extension::Configuration;
+    using message::motion::Kick;
+    using message::motion::LimbsSequence;
 
     KickScript::KickScript(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
@@ -21,24 +26,27 @@ namespace module::motion {
                 emit<Task>(std::make_unique<Done>());
                 return;
             }
-
-            LimbID leg = kick_command->leg;
+            // If it isn't a new task, don't do anything
+            if (info.run_reason == RunInfo::RunReason::IDLE) {
+                return;
+            }
 
             // Execute the penalty kick if the type is PENALTY
             if (kick->type == KickCommandType::PENALTY) {
-                emit<Script>(std::make_unique<ExecuteScriptByName>("KickPenalty.yaml"));
+                // TODO: Make a penalty kick
+                emit<Script>(std::make_unique<LimbsSequence>(),
+                             std::vector<ScriptRequest>{{"Stand.yaml"}, {"KickLeft.yaml"}, {"Stand.yaml"}});
+                return;
             }
-            else {
-                if (leg == LimbID::RIGHT_LEG) {
-                    emit(std::make_unique<ExecuteScriptByName>(
-                        subsumption_id,
-                        std::vector<std::string>({"Stand.yaml", "KickRight.yaml", "Stand.yaml"})));
-                }
-                else {  // LEFT_LEG
-                    emit(std::make_unique<ExecuteScriptByName>(
-                        subsumption_id,
-                        std::vector<std::string>({"Stand.yaml", "KickLeft.yaml", "Stand.yaml"})));
-                }
+
+            // Otherwise do a normal kick
+            if (kick_command->leg == LimbID::RIGHT_LEG) {
+                emit<Script>(std::make_unique<LimbsSequence>(),
+                             std::vector<ScriptRequest>{{"Stand.yaml"}, {"KickLeft.yaml"}, {"Stand.yaml"}});
+            }
+            else {  // LEFT_LEG
+                emit<Script>(std::make_unique<LimbsSequence>(),
+                             std::vector<ScriptRequest>{{"Stand.yaml"}, {"KickLeft.yaml"}, {"Stand.yaml"}});
             }
         });
     }
