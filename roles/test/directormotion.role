@@ -8,4 +8,5 @@ nuclear_role(
   # Servos
   motion::Kinematics
   motion::Servos
+  planning::FailureManagement
 )
