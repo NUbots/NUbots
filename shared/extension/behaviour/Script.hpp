@@ -1,3 +1,6 @@
+#ifndef EXTENSION_BEHAVIOUR_SCRIPT_HPP
+#define EXTENSION_BEHAVIOUR_SCRIPT_HPP
+
 #include <nuclear>
 #include <regex>
 #include <yaml-cpp/yaml.h>
@@ -20,6 +23,12 @@ namespace extension::behaviour {
     using message::motion::ServoCommand;
     using message::motion::ServoState;
     using utility::input::ServoID;
+
+    /// @brief One Script to run, with name of the script and a duration modifier to speed up or slow down the Script
+    struct ScriptRequest {
+        std::string name;
+        float duration_modifier{1.0};
+    };
 
     // One frame of a script
     struct Frame {
@@ -98,42 +107,55 @@ namespace extension::behaviour {
             }
         }
 
-        /// @brief Creates sequences of servos from the script file given, which is emitted as a Task.
-        /// @tparam DataType The message type containing a sequence of servo positions.
+        /// @brief Creates sequences of servos from the script files given, which is emitted as a Task.
         /// @param powerplant The main NUClear powerplant
-        /// @param msg DataType message which will be filled with sequences of servos and emitted as a Task.
-        /// @param script Filename of the script
-        /// @param start When the script should start executing. Default is now.
-        /// @param duration_modifier Modifies the speed the script is executed at, as a multiplier of each Frame's
-        /// duration.
+        /// @param msg Sequence message which will be filled with sequences of servos and emitted as a Task.
+        /// @param scripts Sequence of scripts to run
+        /// @param start When the first script should start executing. Default is now.
         static void emit(NUClear::PowerPlant& powerplant,
                          std::shared_ptr<Sequence> msg,
-                         const std::string& script,
-                         const NUClear::clock::time_point& start = NUClear::clock::now(),
-                         const float& duration_modifier          = 1.0) {
-            // Load the script to a vector of Frame structs
-            auto frames = load(script).as<std::vector<Frame>>();
-            // time will be incremented through each frame
+                         std::vector<ScriptRequest> scripts,
+                         const NUClear::clock::time_point& start = NUClear::clock::now()) {
+            // First script begins at start time
             auto time = start;
-            // Loop over the frames and add them as sequences of servos into the Sequence message
-            for (const auto& frame : frames) {
-                // This frame should finish after frame.duration time has passed
-                // A duraction modifier can be used to change the speed of the script
-                time += std::chrono::duration_cast<NUClear::clock::time_point::duration>(frame.duration
-                                                                                         * duration_modifier);
 
-                // Add the servos in the frame to a map
-                std::map<uint32_t, ServoCommand> servos{};
-                for (const auto& target : frame.targets) {
-                    servos[target.id] = ServoCommand(time, target.position, ServoState(target.gain, target.torque));
+            // Loop through all given scripts and add to the Sequence Task
+            for (const auto& script : scripts) {
+                // Load the script to a vector of Frame structs
+                auto frames = load(script.name).as<std::vector<Frame>>();
+                // time will be incremented through each frame
+                // Loop over the frames and add them as sequences of servos into the Sequence message
+                for (const auto& frame : frames) {
+                    // This frame should finish after frame.duration time has passed
+                    // A duraction modifier can be used to change the speed of the script
+                    time += std::chrono::duration_cast<NUClear::clock::time_point::duration>(
+                        frame.duration * script.duration_modifier);
+
+                    // Add the servos in the frame to a map
+                    std::map<uint32_t, ServoCommand> servos{};
+                    for (const auto& target : frame.targets) {
+                        servos[target.id] = ServoCommand(time, target.position, ServoState(target.gain, target.torque));
+                    }
+
+                    // Add the map to the pack. This represents one sequence of servos.
+                    msg->frames.emplace_back(servos);
                 }
-
-                // Add the map to the pack. This represents one sequence of servos.
-                msg->pack.emplace_back(servos);
             }
 
             // Emit the sequence of servos as a Task
             ::extension::behaviour::Task<Sequence>::emit(powerplant, msg);
+        }
+
+        /// @brief Emits a single ScriptRequest which is then sent through to the multi Script version above
+        /// @param powerplant The main NUClear powerplant
+        /// @param msg Sequence message which will be filled with sequences of servos and emitted as a Task.
+        /// @param script Script to run
+        /// @param start When the script should start executing. Default is now.
+        static void emit(NUClear::PowerPlant& powerplant,
+                         std::shared_ptr<Sequence> msg,
+                         ScriptRequest script,
+                         const NUClear::clock::time_point& start = NUClear::clock::now()) {
+            emit(powerplant, msg, std::vector<ScriptRequest>{script}, start);
         }
     };
 }  // namespace extension::behaviour
@@ -141,11 +163,11 @@ namespace extension::behaviour {
 // Functionality for reading in scripts
 namespace YAML {
     template <>
-    struct convert<::director::extension::Frame::Target> {
+    struct convert<::extension::behaviour::Frame::Target> {
         /// @brief Encodes a Target as a YAML Node
         /// @param rhs The Target to convert to a YAML Node
         /// @return A YAML Node of the Target
-        static inline Node encode(const ::director::extension::Frame::Target& rhs) {
+        static inline Node encode(const ::extension::behaviour::Frame::Target& rhs) {
             Node node;
 
             node["id"]       = static_cast<std::string>(rhs.id);
@@ -159,7 +181,7 @@ namespace YAML {
         /// @param node The YAML Node to decode
         /// @param rhs A Target where the YAML Node information will be placed
         /// @return True if decoding was successful, false otherwise
-        static inline bool decode(const Node& node, ::director::extension::Frame::Target& rhs) {
+        static inline bool decode(const Node& node, ::extension::behaviour::Frame::Target& rhs) {
             // Try to read and save the target information
             try {
                 rhs = {node["id"].as<std::string>(),
@@ -185,11 +207,11 @@ namespace YAML {
     };
 
     template <>
-    struct convert<::director::extension::Frame> {
+    struct convert<::extension::behaviour::Frame> {
         /// @brief Encodes a Frame as a YAML Node
         /// @param rhs The Frame to convert to a YAML Node
         /// @return A YAML Node of the Frame
-        static inline Node encode(const ::director::extension::Frame& rhs) {
+        static inline Node encode(const ::extension::behaviour::Frame& rhs) {
             Node node;
 
             node["duration"] = std::chrono::duration_cast<std::chrono::milliseconds>(rhs.duration).count();
@@ -202,12 +224,12 @@ namespace YAML {
         /// @param node The YAML Node to decode
         /// @param rhs A Frame where the YAML Node information will be placed
         /// @return True if decoding was successful, false otherwise
-        static inline bool decode(const Node& node, ::director::extension::Frame& rhs) {
+        static inline bool decode(const Node& node, ::extension::behaviour::Frame& rhs) {
             try {
                 int millis = node["duration"].as<int>();
                 std::chrono::milliseconds duration(millis);
 
-                auto targets = node["targets"].as<std::vector<::director::extension::Frame::Target>>();
+                auto targets = node["targets"].as<std::vector<::extension::behaviour::Frame::Target>>();
                 rhs          = {duration, targets};
             }
             catch (const YAML::Exception& e) {
@@ -227,12 +249,12 @@ namespace YAML {
         }
     };
 
-    template <>
-    struct convert<::director::extension::Script> {
+    template <typename Sequence>
+    struct convert<::extension::behaviour::Script<Sequence>> {
         /// @brief Encodes a Script as a YAML Node
         /// @param rhs The Script to convert to a YAML Node
         /// @return A YAML Node of the Script
-        static inline Node encode(const ::director::extension::Script& rhs) {
+        static inline Node encode(const ::extension::behaviour::Script<Sequence>& rhs) {
             Node node;
 
             node = rhs.frames;
@@ -244,9 +266,9 @@ namespace YAML {
         /// @param node The YAML Node to decode
         /// @param rhs A Script where the YAML Node information will be placed
         /// @return True if decoding was successful, false otherwise
-        static inline bool decode(const Node& node, ::director::extension::Script& rhs) {
+        static inline bool decode(const Node& node, ::extension::behaviour::Script<Sequence>& rhs) {
             try {
-                auto frames = node.as<std::vector<::director::extension::Script::Frame>>();
+                auto frames = node.as<std::vector<::extension::behaviour::Frame>>();
                 rhs         = {frames};
             }
             catch (const YAML::Exception& e) {
@@ -266,3 +288,5 @@ namespace YAML {
         }
     };
 }  // namespace YAML
+
+#endif
