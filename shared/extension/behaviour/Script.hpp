@@ -1,3 +1,6 @@
+#ifndef EXTENSION_BEHAVIOUR_SCRIPT_HPP
+#define EXTENSION_BEHAVIOUR_SCRIPT_HPP
+
 #include <nuclear>
 #include <regex>
 #include <yaml-cpp/yaml.h>
@@ -274,3 +277,5 @@ namespace YAML {
         }
     };
 }  // namespace YAML
+
+#endif
