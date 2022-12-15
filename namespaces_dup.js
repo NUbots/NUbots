@@ -44,26 +44,7 @@ var namespaces_dup =
       [ "calculateChecksum", "UART_8cpp.html#a92808ba5e8f839a4d595ad774f568e35", null ]
     ] ],
     [ "extension", null, [
-      [ "behaviour", null, [
-        [ "commands", "namespaceextension_1_1behaviour_1_1commands.html", "namespaceextension_1_1behaviour_1_1commands" ],
-        [ "information", null, [
-          [ "InformationSource", "classextension_1_1behaviour_1_1information_1_1InformationSource.html", "classextension_1_1behaviour_1_1information_1_1InformationSource" ]
-        ] ],
-        [ "BehaviourReactor", "classextension_1_1behaviour_1_1BehaviourReactor.html", "classextension_1_1behaviour_1_1BehaviourReactor" ],
-        [ "Causing", "structextension_1_1behaviour_1_1Causing.html", "structextension_1_1behaviour_1_1Causing" ],
-        [ "Done", "structextension_1_1behaviour_1_1Done.html", null ],
-        [ "GroupInfo", "structextension_1_1behaviour_1_1GroupInfo.html", "structextension_1_1behaviour_1_1GroupInfo" ],
-        [ "Idle", "structextension_1_1behaviour_1_1Idle.html", null ],
-        [ "Needs", "structextension_1_1behaviour_1_1Needs.html", "structextension_1_1behaviour_1_1Needs" ],
-        [ "Provide", "structextension_1_1behaviour_1_1Provide.html", null ],
-        [ "ProviderBase", "structextension_1_1behaviour_1_1ProviderBase.html", "structextension_1_1behaviour_1_1ProviderBase" ],
-        [ "RunInfo", "structextension_1_1behaviour_1_1RunInfo.html", "structextension_1_1behaviour_1_1RunInfo" ],
-        [ "Start", "structextension_1_1behaviour_1_1Start.html", null ],
-        [ "Stop", "structextension_1_1behaviour_1_1Stop.html", null ],
-        [ "Task", "structextension_1_1behaviour_1_1Task.html", "structextension_1_1behaviour_1_1Task" ],
-        [ "Uses", "structextension_1_1behaviour_1_1Uses.html", "structextension_1_1behaviour_1_1Uses" ],
-        [ "When", "structextension_1_1behaviour_1_1When.html", "structextension_1_1behaviour_1_1When" ]
-      ] ],
+      [ "behaviour", "namespaceextension_1_1behaviour.html", "namespaceextension_1_1behaviour" ],
       [ "Configuration", "structextension_1_1Configuration.html", "structextension_1_1Configuration" ],
       [ "ExecuteScript", "structextension_1_1ExecuteScript.html", "structextension_1_1ExecuteScript" ],
       [ "ExecuteScriptByName", "structextension_1_1ExecuteScriptByName.html", "structextension_1_1ExecuteScriptByName" ],
@@ -983,6 +964,9 @@ var namespaces_dup =
     ] ],
     [ "YAML", null, [
       [ "convert< utility::support::Expression >", "structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4.html", "structYAML_1_1convert_3_01utility_1_1support_1_1Expression_01_4" ],
+      [ "convert<::director::extension::Frame >", "structYAML_1_1convert_3_1_1director_1_1extension_1_1Frame_01_4.html", "structYAML_1_1convert_3_1_1director_1_1extension_1_1Frame_01_4" ],
+      [ "convert<::director::extension::Frame::Target >", "structYAML_1_1convert_3_1_1director_1_1extension_1_1Frame_1_1Target_01_4.html", "structYAML_1_1convert_3_1_1director_1_1extension_1_1Frame_1_1Target_01_4" ],
+      [ "convert<::director::extension::Script >", "structYAML_1_1convert_3_1_1director_1_1extension_1_1Script_01_4.html", "structYAML_1_1convert_3_1_1director_1_1extension_1_1Script_01_4" ],
       [ "convert<::extension::Script >", "structYAML_1_1convert_3_1_1extension_1_1Script_01_4.html", "structYAML_1_1convert_3_1_1extension_1_1Script_01_4" ],
       [ "convert<::extension::Script::Frame >", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_01_4.html", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_01_4" ],
       [ "convert<::extension::Script::Frame::Target >", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_1_1Target_01_4.html", "structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_1_1Target_01_4" ],

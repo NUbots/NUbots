@@ -1,0 +1,4 @@
+<map id="extension::behaviour::Frame::Target" name="extension::behaviour::Frame::Target">
+<area shape="rect" id="node1" title="Servo targets for each active servo in the frame." alt="" coords="5,95,164,136"/>
+<area shape="rect" id="node2" href="$structutility_1_1input_1_1ServoID.html" title=" " alt="" coords="5,5,164,32"/>
+</map>
