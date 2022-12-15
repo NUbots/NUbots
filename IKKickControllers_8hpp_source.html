@@ -198,8 +198,8 @@ $(document).ready(function(){initNavTree('IKKickControllers_8hpp_source.html',''
 <div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160; </div>
 <div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="preprocessor">#include &quot;extension/Configuration.hpp&quot;</span></div>
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160; </div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="preprocessor">#include &quot;message/input/Sensors.hpp&quot;</span></div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">#include &quot;message/motion/KinematicsModel.hpp&quot;</span></div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="preprocessor">#include &quot;message/actuation/KinematicsModel.hpp&quot;</span></div>
+<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;<span class="preprocessor">#include &quot;message/input/Sensors.hpp&quot;</span></div>
 <div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160; </div>
 <div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor">#include &quot;utility/input/LimbID.hpp&quot;</span></div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;<span class="preprocessor">#include &quot;utility/input/ServoID.hpp&quot;</span></div>
@@ -302,11 +302,11 @@ $(document).ready(function(){initNavTree('IKKickControllers_8hpp_source.html',''
 <div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;            , motionStartTime() {}</div>
 <div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;        <span class="keyword">virtual</span> ~<a class="code" href="classmodule_1_1motion_1_1SixDOFFootController.html">SixDOFFootController</a>() = <span class="keywordflow">default</span>;</div>
 <div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160; </div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> computeStartMotion(<span class="keyword">const</span> message::motion::KinematicsModel&amp; kinematicsModel,</div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> computeStartMotion(<span class="keyword">const</span> message::actuation::KinematicsModel&amp; kinematicsModel,</div>
 <div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;                                        <span class="keyword">const</span> message::input::Sensors&amp; sensors) = 0;</div>
 <div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> computeStopMotion(<span class="keyword">const</span> message::input::Sensors&amp; sensors)  = 0;</div>
 <div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160; </div>
-<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;        <span class="keywordtype">void</span> start(<span class="keyword">const</span> message::motion::KinematicsModel&amp; kinematicsModel, <span class="keyword">const</span> message::input::Sensors&amp; sensors) {</div>
+<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;        <span class="keywordtype">void</span> start(<span class="keyword">const</span> message::actuation::KinematicsModel&amp; kinematicsModel, <span class="keyword">const</span> message::input::Sensors&amp; sensors) {</div>
 <div class="line"><a name="l00138"></a><span class="lineno">  138</span>&#160;            <span class="keywordflow">if</span> (stage == MotionStage::READY) {</div>
 <div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;                anim.reset();</div>
 <div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;                stage           = MotionStage::RUNNING;</div>
@@ -409,7 +409,7 @@ $(document).ready(function(){initNavTree('IKKickControllers_8hpp_source.html',''
 <div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160; </div>
 <div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;    <span class="keyword">public</span>:</div>
 <div class="line"><a name="l00239"></a><span class="lineno">  239</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> configure(const ::extension::Configuration&amp; config);</div>
-<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> computeStartMotion(<span class="keyword">const</span> message::motion::KinematicsModel&amp; kinematicsModel,</div>
+<div class="line"><a name="l00240"></a><span class="lineno">  240</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> computeStartMotion(<span class="keyword">const</span> message::actuation::KinematicsModel&amp; kinematicsModel,</div>
 <div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;                                        <span class="keyword">const</span> message::input::Sensors&amp; sensors);</div>
 <div class="line"><a name="l00242"></a><span class="lineno">  242</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> computeStopMotion(<span class="keyword">const</span> message::input::Sensors&amp; sensors);</div>
 <div class="line"><a name="l00243"></a><span class="lineno">  243</span>&#160;    };</div>
@@ -443,7 +443,7 @@ $(document).ready(function(){initNavTree('IKKickControllers_8hpp_source.html',''
 <div class="line"><a name="l00271"></a><span class="lineno">  271</span>&#160;            , lift_before_windup_duration(0.0f) {}</div>
 <div class="line"><a name="l00272"></a><span class="lineno">  272</span>&#160; </div>
 <div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> configure(const ::extension::Configuration&amp; config);</div>
-<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> computeStartMotion(<span class="keyword">const</span> message::motion::KinematicsModel&amp; kinematicsModel,</div>
+<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> computeStartMotion(<span class="keyword">const</span> message::actuation::KinematicsModel&amp; kinematicsModel,</div>
 <div class="line"><a name="l00275"></a><span class="lineno">  275</span>&#160;                                        <span class="keyword">const</span> message::input::Sensors&amp; sensors);</div>
 <div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;        <span class="keyword">virtual</span> <span class="keywordtype">void</span> computeStopMotion(<span class="keyword">const</span> message::input::Sensors&amp; sensors);</div>
 <div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;    };</div>
@@ -463,7 +463,7 @@ $(document).ready(function(){initNavTree('IKKickControllers_8hpp_source.html',''
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_a7b0466279106ea0b8f86f609f621680.html">module</a></li><li class="navelem"><a class="el" href="dir_e6610ba406ce43768f763e29ef940f72.html">motion</a></li><li class="navelem"><a class="el" href="dir_f877959cb10c2d46889dac0147cfeea2.html">IKKick</a></li><li class="navelem"><a class="el" href="dir_da8c9b5e1dcb1f29a4a1e7c550dc86c3.html">src</a></li><li class="navelem"><b>IKKickControllers.hpp</b></li>
-    <li class="footer">Generated on Thu Dec 15 2022 08:34:23 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Thu Dec 15 2022 22:39:06 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

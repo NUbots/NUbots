@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=11" />
     <meta name="generator" content="Doxygen 1.9.1" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>NUbots: shared/utility/motion/InverseKinematics.hpp Source File</title>
+    <title>NUbots: shared/utility/actuation/InverseKinematics.hpp Source File</title>
     <link href="tabs.css" rel="stylesheet" type="text/css" />
     <script type="text/javascript" src="jquery.js"></script>
     <script type="text/javascript" src="dynsections.js"></script>
@@ -189,8 +189,8 @@ $(document).ready(function(){initNavTree('InverseKinematics_8hpp_source.html',''
 <div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;<span class="comment"> * Copyright 2013 NUbots &lt;nubots@nubots.net&gt;</span></div>
 <div class="line"><a name="l00018"></a><span class="lineno">   18</span>&#160;<span class="comment"> */</span></div>
 <div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160; </div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="preprocessor">#ifndef UTILITY_MOTION_INVERSEKINEMATICS_HPP</span></div>
-<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="preprocessor">#define UTILITY_MOTION_INVERSEKINEMATICS_HPP</span></div>
+<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;<span class="preprocessor">#ifndef UTILITY_ACTUATION_INVERSEKINEMATICS_HPP</span></div>
+<div class="line"><a name="l00021"></a><span class="lineno">   21</span>&#160;<span class="preprocessor">#define UTILITY_ACTUATION_INVERSEKINEMATICS_HPP</span></div>
 <div class="line"><a name="l00022"></a><span class="lineno">   22</span>&#160; </div>
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;<span class="preprocessor">#include &lt;Eigen/Core&gt;</span></div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="preprocessor">#include &lt;Eigen/Geometry&gt;</span></div>
@@ -200,17 +200,17 @@ $(document).ready(function(){initNavTree('InverseKinematics_8hpp_source.html',''
 <div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="preprocessor">#include &lt;nuclear&gt;</span></div>
 <div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;<span class="preprocessor">#include &lt;vector&gt;</span></div>
 <div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160; </div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#include &quot;message/input/Sensors.hpp&quot;</span></div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor">#include &quot;message/motion/KinematicsModel.hpp&quot;</span></div>
+<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;<span class="preprocessor">#include &quot;message/actuation/KinematicsModel.hpp&quot;</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;<span class="preprocessor">#include &quot;message/input/Sensors.hpp&quot;</span></div>
 <div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160; </div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="preprocessor">#include &quot;utility/behaviour/Action.hpp&quot;</span></div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="preprocessor">#include &quot;utility/input/LimbID.hpp&quot;</span></div>
-<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="preprocessor">#include &quot;utility/input/ServoID.hpp&quot;</span></div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="preprocessor">#include &quot;utility/math/angle.hpp&quot;</span></div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="preprocessor">#include &quot;utility/math/coordinates.hpp&quot;</span></div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="preprocessor">#include &quot;utility/motion/ForwardKinematics.hpp&quot;</span></div>
+<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;<span class="preprocessor">#include &quot;utility/actuation/ForwardKinematics.hpp&quot;</span></div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;<span class="preprocessor">#include &quot;utility/behaviour/Action.hpp&quot;</span></div>
+<div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;<span class="preprocessor">#include &quot;utility/input/LimbID.hpp&quot;</span></div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;<span class="preprocessor">#include &quot;utility/input/ServoID.hpp&quot;</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;<span class="preprocessor">#include &quot;utility/math/angle.hpp&quot;</span></div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;<span class="preprocessor">#include &quot;utility/math/coordinates.hpp&quot;</span></div>
 <div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160; </div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="keyword">namespace </span>utility::motion::kinematics {</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;<span class="keyword">namespace </span>utility::actuation::kinematics {</div>
 <div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160; </div>
 <div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;    <span class="keyword">using</span> <a class="code" href="structutility_1_1input_1_1LimbID.html">utility::input::LimbID</a>;</div>
 <div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;    <span class="keyword">using</span> <a class="code" href="structutility_1_1input_1_1ServoID.html">utility::input::ServoID</a>;</div>
@@ -226,7 +226,7 @@ $(document).ready(function(){initNavTree('InverseKinematics_8hpp_source.html',''
 <div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;<span class="comment">    */</span></div>
 <div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Scalar&gt;</div>
 <div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    [[nodiscard]] std::vector&lt;std::pair&lt;ServoID, Scalar&gt;&gt; calculateLegJoints(</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        <span class="keyword">const</span> message::motion::KinematicsModel&amp; model,</div>
+<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;        <span class="keyword">const</span> message::actuation::KinematicsModel&amp; model,</div>
 <div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;        <span class="keyword">const</span> Eigen::Transform&lt;Scalar, 3, Eigen::Isometry&gt;&amp; target_,</div>
 <div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;        <span class="keyword">const</span> LimbID&amp; limb) {</div>
 <div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;        <span class="keyword">const</span> Scalar LENGTH_BETWEEN_LEGS             = model.leg.LENGTH_BETWEEN_LEGS;</div>
@@ -377,7 +377,7 @@ $(document).ready(function(){initNavTree('InverseKinematics_8hpp_source.html',''
 <div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160; </div>
 <div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> Scalar&gt;</div>
 <div class="line"><a name="l00207"></a><span class="lineno">  207</span>&#160;    [[nodiscard]] std::vector&lt;std::pair&lt;ServoID, Scalar&gt;&gt; calculateLegJoints(</div>
-<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;        <span class="keyword">const</span> message::motion::KinematicsModel&amp; model,</div>
+<div class="line"><a name="l00208"></a><span class="lineno">  208</span>&#160;        <span class="keyword">const</span> message::actuation::KinematicsModel&amp; model,</div>
 <div class="line"><a name="l00209"></a><span class="lineno">  209</span>&#160;        <span class="keyword">const</span> Eigen::Transform&lt;Scalar, 3, Eigen::Isometry&gt;&amp; leftTarget,</div>
 <div class="line"><a name="l00210"></a><span class="lineno">  210</span>&#160;        <span class="keyword">const</span> Eigen::Transform&lt;Scalar, 3, Eigen::Isometry&gt;&amp; rightTarget) {</div>
 <div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;        <span class="keyword">auto</span> joints  = calculateLegJoints&lt;Scalar&gt;(model, leftTarget, LimbID::LEFT_LEG);</div>
@@ -395,9 +395,9 @@ $(document).ready(function(){initNavTree('InverseKinematics_8hpp_source.html',''
 <div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;                                          std::sqrt(cameraUnitVector.x() * cameraUnitVector.x()</div>
 <div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;                                                    + cameraUnitVector.y() * cameraUnitVector.y())))};</div>
 <div class="line"><a name="l00225"></a><span class="lineno">  225</span>&#160;    }</div>
-<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;}  <span class="comment">// namespace utility::motion::kinematics</span></div>
+<div class="line"><a name="l00226"></a><span class="lineno">  226</span>&#160;}  <span class="comment">// namespace utility::actuation::kinematics</span></div>
 <div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160; </div>
-<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// UTILITY_MOTION_INVERSEKINEMATICS_HPP</span></div>
+<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;<span class="preprocessor">#endif  </span><span class="comment">// UTILITY_ACTUATION_INVERSEKINEMATICS_HPP</span></div>
 <div class="ttc" id="astructutility_1_1input_1_1LimbID_html"><div class="ttname"><a href="structutility_1_1input_1_1LimbID.html">utility::input::LimbID</a></div><div class="ttdef"><b>Definition:</b> LimbID.hpp:32</div></div>
 <div class="ttc" id="astructutility_1_1input_1_1ServoID_html"><div class="ttname"><a href="structutility_1_1input_1_1ServoID.html">utility::input::ServoID</a></div><div class="ttdef"><b>Definition:</b> ServoID.hpp:28</div></div>
 </div><!-- fragment --></div><!-- contents -->
@@ -405,8 +405,8 @@ $(document).ready(function(){initNavTree('InverseKinematics_8hpp_source.html',''
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_08bb7c416e2dab45627cac1664f6768a.html">motion</a></li><li class="navelem"><b>InverseKinematics.hpp</b></li>
-    <li class="footer">Generated on Thu Dec 15 2022 08:34:23 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="navelem"><a class="el" href="dir_9982052f7ce695d12571567315b2fafa.html">shared</a></li><li class="navelem"><a class="el" href="dir_d499556e56f9bb48a718ab4ccb1fa0c8.html">utility</a></li><li class="navelem"><a class="el" href="dir_ebe4d294e48fe1f1cf6641e795602b38.html">actuation</a></li><li class="navelem"><b>InverseKinematics.hpp</b></li>
+    <li class="footer">Generated on Thu Dec 15 2022 22:39:06 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>

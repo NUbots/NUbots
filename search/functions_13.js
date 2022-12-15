@@ -3,7 +3,7 @@ var searchData=
   ['sample_1469',['sample',['../structutility_1_1math_1_1stats_1_1MultivariateNormal.html#a42c978511447fd2dd87c2835f6b72c3e',1,'utility::math::stats::MultivariateNormal::sample()'],['../classJoystick.html#a515c52e2aafa03e7943c0dbd1c64cd7f',1,'Joystick::sample()']]],
   ['selftest_1470',['selfTest',['../classCM740_1_1CM740.html#a8e835a1944c4314c1ba9eb2efa47c4e0',1,'CM740::CM740']]],
   ['sendrawcommand_1471',['sendRawCommand',['../classCM740_1_1CM740.html#abcc432a5111e5f0363ff501787b3227e',1,'CM740::CM740']]],
-  ['servos_1472',['Servos',['../classmodule_1_1motion_1_1Servos.html#ade40987cc36a9c97a78815f4a203a866',1,'module::motion::Servos']]],
+  ['servos_1472',['Servos',['../classmodule_1_1actuation_1_1Servos.html#abfa121239d608757f862197e300bba26',1,'module::actuation::Servos']]],
   ['set_1473',['set',['../classutility_1_1math_1_1geometry_1_1Quad.html#ae0584f43a9d87176070d15994f8bb5d3',1,'utility::math::geometry::Quad::set(const Scalar &amp;left, const Scalar &amp;top, const Scalar &amp;right, const Scalar &amp;bottom)'],['../classutility_1_1math_1_1geometry_1_1Quad.html#aebaa773056ea3f3e16362b2f3367beab',1,'utility::math::geometry::Quad::set(const T &amp;bottomLeft, const T &amp;topLeft, const T &amp;topRight, const T &amp;bottomRight)']]],
   ['set_5fbaud_1474',['set_baud',['../classutility_1_1io_1_1uart.html#aa692a36f0b648bd70a44d72848ae6d5d',1,'utility::io::uart']]],
   ['set_5ffoot_5fdistance_1475',['set_foot_distance',['../classutility_1_1motion_1_1splines_1_1Footstep.html#ad5d8d9e665d128a0179dc2d305fd33f1',1,'utility::motion::splines::Footstep']]],

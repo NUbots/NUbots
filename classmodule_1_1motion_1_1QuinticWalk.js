@@ -14,7 +14,7 @@ var classmodule_1_1motion_1_1QuinticWalk =
     [ "goalie_config", "classmodule_1_1motion_1_1QuinticWalk.html#a2c4771bbf7c1ebd0161e12a7b709bdab", null ],
     [ "imu_reaction", "classmodule_1_1motion_1_1QuinticWalk.html#a0f1bc9e1a94e15f158b68b288d7777ea", null ],
     [ "is_left_support", "classmodule_1_1motion_1_1QuinticWalk.html#a77c61078d1207cb0493fc2164b2b5dae", null ],
-    [ "kinematicsModel", "classmodule_1_1motion_1_1QuinticWalk.html#a14913705b5ac302dbddf60b7a8247dc5", null ],
+    [ "kinematicsModel", "classmodule_1_1motion_1_1QuinticWalk.html#ac68d1866f2f504bceeef8ab55092a6c4", null ],
     [ "last_update_time", "classmodule_1_1motion_1_1QuinticWalk.html#af224d18881837b596ee6925cd8cce4dc", null ],
     [ "normal_config", "classmodule_1_1motion_1_1QuinticWalk.html#ae7b8482047f25ccbf4b7d9f8a9ddb96a", null ],
     [ "subsumption_id", "classmodule_1_1motion_1_1QuinticWalk.html#a3062c39f5d65d9460979d297b368096b", null ],

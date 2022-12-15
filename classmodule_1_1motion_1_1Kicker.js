@@ -1,7 +1,7 @@
 var classmodule_1_1motion_1_1Kicker =
 [
     [ "Kicker", "classmodule_1_1motion_1_1Kicker.html#a8c3152148b924125c7c2188a1ccd419f", null ],
-    [ "computeStartMotion", "classmodule_1_1motion_1_1Kicker.html#ae800714bf72aec3a9cae4b7baf201e9b", null ],
+    [ "computeStartMotion", "classmodule_1_1motion_1_1Kicker.html#a292f8deb7641ea709b90ad0da158e534", null ],
     [ "computeStopMotion", "classmodule_1_1motion_1_1Kicker.html#aece8d1c9e961e045802211f1521c4575", null ],
     [ "configure", "classmodule_1_1motion_1_1Kicker.html#a626ac20e49e10425302b2b0a4cefa1c1", null ],
     [ "follow_through", "classmodule_1_1motion_1_1Kicker.html#aab24e457de3bbfdc3b760b163cf0f07f", null ],

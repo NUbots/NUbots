@@ -56,6 +56,11 @@ var namespaces_dup =
       [ "operator+", "Script_8hpp.html#a16765e7ef6a14c78ee0b454ddd05be0f", null ]
     ] ],
     [ "module", null, [
+      [ "actuation", null, [
+        [ "Kinematics", "classmodule_1_1actuation_1_1Kinematics.html", "classmodule_1_1actuation_1_1Kinematics" ],
+        [ "KinematicsConfiguration", "classmodule_1_1actuation_1_1KinematicsConfiguration.html", "classmodule_1_1actuation_1_1KinematicsConfiguration" ],
+        [ "Servos", "classmodule_1_1actuation_1_1Servos.html", "classmodule_1_1actuation_1_1Servos" ]
+      ] ],
       [ "behaviour", null, [
         [ "planning", null, [
           [ "KickPlanner", "classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html", "classmodule_1_1behaviour_1_1planning_1_1KickPlanner" ],
@@ -305,12 +310,9 @@ var namespaces_dup =
         [ "IKKick", "classmodule_1_1motion_1_1IKKick.html", "classmodule_1_1motion_1_1IKKick" ],
         [ "KickBalancer", "classmodule_1_1motion_1_1KickBalancer.html", "classmodule_1_1motion_1_1KickBalancer" ],
         [ "Kicker", "classmodule_1_1motion_1_1Kicker.html", "classmodule_1_1motion_1_1Kicker" ],
-        [ "Kinematics", "classmodule_1_1motion_1_1Kinematics.html", "classmodule_1_1motion_1_1Kinematics" ],
-        [ "KinematicsConfiguration", "classmodule_1_1motion_1_1KinematicsConfiguration.html", "classmodule_1_1motion_1_1KinematicsConfiguration" ],
         [ "QuinticWalk", "classmodule_1_1motion_1_1QuinticWalk.html", "classmodule_1_1motion_1_1QuinticWalk" ],
         [ "QuinticWalkEngine", "classmodule_1_1motion_1_1QuinticWalkEngine.html", "classmodule_1_1motion_1_1QuinticWalkEngine" ],
         [ "ScriptEngine", "classmodule_1_1motion_1_1ScriptEngine.html", "classmodule_1_1motion_1_1ScriptEngine" ],
-        [ "Servos", "classmodule_1_1motion_1_1Servos.html", "classmodule_1_1motion_1_1Servos" ],
         [ "SixDOFFootController", "classmodule_1_1motion_1_1SixDOFFootController.html", "classmodule_1_1motion_1_1SixDOFFootController" ],
         [ "SixDOFFrame", "classmodule_1_1motion_1_1SixDOFFrame.html", "classmodule_1_1motion_1_1SixDOFFrame" ],
         [ "WalkingParameter", "structmodule_1_1motion_1_1WalkingParameter.html", "structmodule_1_1motion_1_1WalkingParameter" ],
@@ -609,6 +611,44 @@ var namespaces_dup =
       [ "is_error_condition_enum< module::output::compressor::vaapi::vaapi_error_code >", "structstd_1_1is__error__condition__enum_3_01module_1_1output_1_1compressor_1_1vaapi_1_1vaapi__error__code_01_4.html", null ]
     ] ],
     [ "utility", null, [
+      [ "actuation", null, [
+        [ "kinematics", null, [
+          [ "calculateAllPositions", "ForwardKinematics_8hpp.html#a84e2c61ae7d6b3651408b04e1a1e9e51", null ],
+          [ "calculateArmJointPosition", "ForwardKinematics_8hpp.html#acaa0c37a4b94cc4ee1adda38d59a7ef4", null ],
+          [ "calculateCentreOfMass", "ForwardKinematics_8hpp.html#a7fb2148a3a02cc01cb2e045e5bbd386d", null ],
+          [ "calculateGroundSpace", "ForwardKinematics_8hpp.html#a6f1629195e306fb51055d3f6dfcd3f60", null ],
+          [ "calculateHeadJointPosition", "ForwardKinematics_8hpp.html#acafb13dd600b679a2a8b134382d9e809", null ],
+          [ "calculateHeadJointPosition", "ForwardKinematics_8hpp.html#aeacfb8e0ab7120fe8e077e5fec1defe8", null ],
+          [ "calculateHeadJoints", "InverseKinematics_8hpp.html#a674110bbbef5e47fbaa2cef846afbe7d", null ],
+          [ "calculateInertialTensor", "ForwardKinematics_8hpp.html#a8f700e315a0133e6e775249064467147", null ],
+          [ "calculateLegJointPosition", "ForwardKinematics_8hpp.html#aab331e0e4b1dbea659cc77d4e7e6d4b6", null ],
+          [ "calculateLegJoints", "InverseKinematics_8hpp.html#a7f5ddd1c744524901a443783780aa370", null ],
+          [ "calculateLegJoints", "InverseKinematics_8hpp.html#a1eb67657baa287d241436d88039ea785", null ],
+          [ "calculatePosition", "ForwardKinematics_8hpp.html#adb9bea25d11c7f7e0eded49ac6cecfdd", null ],
+          [ "calculateRobotToIMU", "ForwardKinematics_8hpp.html#a68be5789fb33da4e7d44df7f9b79cfb3", null ]
+        ] ],
+        [ "ServoMap", "structutility_1_1actuation_1_1ServoMap.html", null ],
+        [ "ServoMap< HeadPitch >", "structutility_1_1actuation_1_1ServoMap_3_01HeadPitch_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01HeadPitch_01_4" ],
+        [ "ServoMap< HeadYaw >", "structutility_1_1actuation_1_1ServoMap_3_01HeadYaw_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01HeadYaw_01_4" ],
+        [ "ServoMap< LeftAnklePitch >", "structutility_1_1actuation_1_1ServoMap_3_01LeftAnklePitch_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01LeftAnklePitch_01_4" ],
+        [ "ServoMap< LeftAnkleRoll >", "structutility_1_1actuation_1_1ServoMap_3_01LeftAnkleRoll_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01LeftAnkleRoll_01_4" ],
+        [ "ServoMap< LeftElbow >", "structutility_1_1actuation_1_1ServoMap_3_01LeftElbow_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01LeftElbow_01_4" ],
+        [ "ServoMap< LeftHipPitch >", "structutility_1_1actuation_1_1ServoMap_3_01LeftHipPitch_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01LeftHipPitch_01_4" ],
+        [ "ServoMap< LeftHipRoll >", "structutility_1_1actuation_1_1ServoMap_3_01LeftHipRoll_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01LeftHipRoll_01_4" ],
+        [ "ServoMap< LeftHipYaw >", "structutility_1_1actuation_1_1ServoMap_3_01LeftHipYaw_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01LeftHipYaw_01_4" ],
+        [ "ServoMap< LeftKnee >", "structutility_1_1actuation_1_1ServoMap_3_01LeftKnee_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01LeftKnee_01_4" ],
+        [ "ServoMap< LeftShoulderPitch >", "structutility_1_1actuation_1_1ServoMap_3_01LeftShoulderPitch_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01LeftShoulderPitch_01_4" ],
+        [ "ServoMap< LeftShoulderRoll >", "structutility_1_1actuation_1_1ServoMap_3_01LeftShoulderRoll_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01LeftShoulderRoll_01_4" ],
+        [ "ServoMap< RightAnklePitch >", "structutility_1_1actuation_1_1ServoMap_3_01RightAnklePitch_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightAnklePitch_01_4" ],
+        [ "ServoMap< RightAnkleRoll >", "structutility_1_1actuation_1_1ServoMap_3_01RightAnkleRoll_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightAnkleRoll_01_4" ],
+        [ "ServoMap< RightElbow >", "structutility_1_1actuation_1_1ServoMap_3_01RightElbow_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightElbow_01_4" ],
+        [ "ServoMap< RightHipPitch >", "structutility_1_1actuation_1_1ServoMap_3_01RightHipPitch_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightHipPitch_01_4" ],
+        [ "ServoMap< RightHipRoll >", "structutility_1_1actuation_1_1ServoMap_3_01RightHipRoll_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightHipRoll_01_4" ],
+        [ "ServoMap< RightHipYaw >", "structutility_1_1actuation_1_1ServoMap_3_01RightHipYaw_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightHipYaw_01_4" ],
+        [ "ServoMap< RightKnee >", "structutility_1_1actuation_1_1ServoMap_3_01RightKnee_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightKnee_01_4" ],
+        [ "ServoMap< RightShoulderPitch >", "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderPitch_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderPitch_01_4" ],
+        [ "ServoMap< RightShoulderRoll >", "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderRoll_01_4.html", "structutility_1_1actuation_1_1ServoMap_3_01RightShoulderRoll_01_4" ]
+      ] ],
       [ "behaviour", null, [
         [ "ActionKill", "structutility_1_1behaviour_1_1ActionKill.html", "structutility_1_1behaviour_1_1ActionKill" ],
         [ "ActionPriorities", "structutility_1_1behaviour_1_1ActionPriorities.html", "structutility_1_1behaviour_1_1ActionPriorities" ],
@@ -754,21 +794,6 @@ var namespaces_dup =
         [ "sgn", "comparison_8hpp.html#a53798321a4aaa57c3cadeb43d56dcc6d", null ]
       ] ],
       [ "motion", null, [
-        [ "kinematics", null, [
-          [ "calculateAllPositions", "ForwardKinematics_8hpp.html#a1c8fc80736617245b8b9b2e14496caa0", null ],
-          [ "calculateArmJointPosition", "ForwardKinematics_8hpp.html#a26c66d5093632e3bd5754bc1b9424f5c", null ],
-          [ "calculateCentreOfMass", "ForwardKinematics_8hpp.html#a14c7f84a9eb56acde689625bcc8e57a2", null ],
-          [ "calculateGroundSpace", "ForwardKinematics_8hpp.html#a3cd1978058b4c83070b114e4889dcb7a", null ],
-          [ "calculateHeadJointPosition", "ForwardKinematics_8hpp.html#a5b310d51933faeea8116880aa2d4a7cc", null ],
-          [ "calculateHeadJointPosition", "ForwardKinematics_8hpp.html#a8695cc9ac628b453f50ccc9fb5f600c1", null ],
-          [ "calculateHeadJoints", "InverseKinematics_8hpp.html#a22ae56d59e135643fce8a3fa55bf5654", null ],
-          [ "calculateInertialTensor", "ForwardKinematics_8hpp.html#aa7bb0974dd660c322ba9fb83260754d9", null ],
-          [ "calculateLegJointPosition", "ForwardKinematics_8hpp.html#a79983b9a692879a1433b2a24fde6ad02", null ],
-          [ "calculateLegJoints", "InverseKinematics_8hpp.html#aebc5db549ce53bb43c6d49ce9b591c5f", null ],
-          [ "calculateLegJoints", "InverseKinematics_8hpp.html#a25ec26d436af83cce4c8f29be874c377", null ],
-          [ "calculatePosition", "ForwardKinematics_8hpp.html#ab0312fd8c3bed5d7fdca61a2729e83b6", null ],
-          [ "calculateRobotToIMU", "ForwardKinematics_8hpp.html#a0c0ab8a3d43d5322d2a8f5b91e01be70", null ]
-        ] ],
         [ "splines", null, [
           [ "Combination", "classutility_1_1motion_1_1splines_1_1Combination.html", "classutility_1_1motion_1_1splines_1_1Combination" ],
           [ "Footstep", "classutility_1_1motion_1_1splines_1_1Footstep.html", "classutility_1_1motion_1_1splines_1_1Footstep" ],
@@ -789,27 +814,6 @@ var namespaces_dup =
           [ "trajectoriesTrunkFootVel", "TrajectoryUtils_8hpp.html#a4900dbba8900d90675b9c6aeec5ea7d4", null ]
         ] ],
         [ "Balancer", "classutility_1_1motion_1_1Balancer.html", "classutility_1_1motion_1_1Balancer" ],
-        [ "ServoMap", "structutility_1_1motion_1_1ServoMap.html", null ],
-        [ "ServoMap< HeadPitch >", "structutility_1_1motion_1_1ServoMap_3_01HeadPitch_01_4.html", "structutility_1_1motion_1_1ServoMap_3_01HeadPitch_01_4" ],
-        [ "ServoMap< HeadYaw >", "structutility_1_1motion_1_1ServoMap_3_01HeadYaw_01_4.html", "structutility_1_1motion_1_1ServoMap_3_01HeadYaw_01_4" ],
-        [ "ServoMap< LeftAnklePitch >", "structutility_1_1motion_1_1ServoMap_3_01LeftAnklePitch_01_4.html", "structutility_1_1motion_1_1ServoMap_3_01LeftAnklePitch_01_4" ],
-        [ "ServoMap< LeftAnkleRoll >", "structutility_1_1motion_1_1ServoMap_3_01LeftAnkleRoll_01_4.html", "structutility_1_1motion_1_1ServoMap_3_01LeftAnkleRoll_01_4" ],
-        [ "ServoMap< LeftElbow >", "structutility_1_1motion_1_1ServoMap_3_01LeftElbow_01_4.html", "structutility_1_1motion_1_1ServoMap_3_01LeftElbow_01_4" ],
-        [ "ServoMap< LeftHipPitch >", "structutility_1_1motion_1_1ServoMap_3_01LeftHipPitch_01_4.html", "structutility_1_1motion_1_1ServoMap_3_01LeftHipPitch_01_4" ],
-        [ "ServoMap< LeftHipRoll >", "structutility_1_1motion_1_1ServoMap_3_01LeftHipRoll_01_4.html", "structutility_1_1motion_1_1ServoMap_3_01LeftHipRoll_01_4" ],
-        [ "ServoMap< LeftHipYaw >", "structutility_1_1motion_1_1ServoMap_3_01LeftHipYaw_01_4.html", "structutility_1_1motion_1_1ServoMap_3_01LeftHipYaw_01_4" ],
-        [ "ServoMap< LeftKnee >", "structutility_1_1motion_1_1ServoMap_3_01LeftKnee_01_4.html", "structutility_1_1motion_1_1ServoMap_3_01LeftKnee_01_4" ],
-        [ "ServoMap< LeftShoulderPitch >", "structutility_1_1motion_1_1ServoMap_3_01LeftShoulderPitch_01_4.html", "structutility_1_1motion_1_1ServoMap_3_01LeftShoulderPitch_01_4" ],
-        [ "ServoMap< LeftShoulderRoll >", "structutility_1_1motion_1_1ServoMap_3_01LeftShoulderRoll_01_4.html", "structutility_1_1motion_1_1ServoMap_3_01LeftShoulderRoll_01_4" ],
-        [ "ServoMap< RightAnklePitch >", "structutility_1_1motion_1_1ServoMap_3_01RightAnklePitch_01_4.html", "structutility_1_1motion_1_1ServoMap_3_01RightAnklePitch_01_4" ],
-        [ "ServoMap< RightAnkleRoll >", "structutility_1_1motion_1_1ServoMap_3_01RightAnkleRoll_01_4.html", "structutility_1_1motion_1_1ServoMap_3_01RightAnkleRoll_01_4" ],
-        [ "ServoMap< RightElbow >", "structutility_1_1motion_1_1ServoMap_3_01RightElbow_01_4.html", "structutility_1_1motion_1_1ServoMap_3_01RightElbow_01_4" ],
-        [ "ServoMap< RightHipPitch >", "structutility_1_1motion_1_1ServoMap_3_01RightHipPitch_01_4.html", "structutility_1_1motion_1_1ServoMap_3_01RightHipPitch_01_4" ],
-        [ "ServoMap< RightHipRoll >", "structutility_1_1motion_1_1ServoMap_3_01RightHipRoll_01_4.html", "structutility_1_1motion_1_1ServoMap_3_01RightHipRoll_01_4" ],
-        [ "ServoMap< RightHipYaw >", "structutility_1_1motion_1_1ServoMap_3_01RightHipYaw_01_4.html", "structutility_1_1motion_1_1ServoMap_3_01RightHipYaw_01_4" ],
-        [ "ServoMap< RightKnee >", "structutility_1_1motion_1_1ServoMap_3_01RightKnee_01_4.html", "structutility_1_1motion_1_1ServoMap_3_01RightKnee_01_4" ],
-        [ "ServoMap< RightShoulderPitch >", "structutility_1_1motion_1_1ServoMap_3_01RightShoulderPitch_01_4.html", "structutility_1_1motion_1_1ServoMap_3_01RightShoulderPitch_01_4" ],
-        [ "ServoMap< RightShoulderRoll >", "structutility_1_1motion_1_1ServoMap_3_01RightShoulderRoll_01_4.html", "structutility_1_1motion_1_1ServoMap_3_01RightShoulderRoll_01_4" ],
         [ "LimbID", "Balance_8cpp.html#a28c1d9a56af71ecba96a88e15459e1d6", null ]
       ] ],
       [ "nbs", null, [

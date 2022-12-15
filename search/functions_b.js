@@ -4,6 +4,6 @@ var searchData=
   ['kick_5fvalid_1380',['kick_valid',['../classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html#a8b95dd9814702cd013c0823714639183',1,'module::behaviour::planning::KickPlanner']]],
   ['kickplanner_1381',['KickPlanner',['../classmodule_1_1behaviour_1_1planning_1_1KickPlanner.html#a3690813d0c18e4b0a43bafc2672c9f3f',1,'module::behaviour::planning::KickPlanner']]],
   ['kickscript_1382',['KickScript',['../classmodule_1_1behaviour_1_1skills_1_1KickScript.html#a0c381f2bc5b7ea7077b8d96c3e42f1cf',1,'module::behaviour::skills::KickScript']]],
-  ['kinematics_1383',['Kinematics',['../classmodule_1_1motion_1_1Kinematics.html#a9d162932d1e40fc3fa81021b899e25eb',1,'module::motion::Kinematics']]],
-  ['kinematicsconfiguration_1384',['KinematicsConfiguration',['../classmodule_1_1motion_1_1KinematicsConfiguration.html#a73cae73732ef2296349a1a332b1adc71',1,'module::motion::KinematicsConfiguration']]]
+  ['kinematics_1383',['Kinematics',['../classmodule_1_1actuation_1_1Kinematics.html#a5c06e39205a7d8dc320a1831accc528b',1,'module::actuation::Kinematics']]],
+  ['kinematicsconfiguration_1384',['KinematicsConfiguration',['../classmodule_1_1actuation_1_1KinematicsConfiguration.html#ad3550710fcf8c0e371b4b896f56d0f2d',1,'module::actuation::KinematicsConfiguration']]]
 ];

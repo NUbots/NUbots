@@ -29,6 +29,6 @@ var searchData=
   ['convert_3c_3a_3aextension_3a_3ascript_3a_3aframe_20_3e_965',['convert&lt;::extension::Script::Frame &gt;',['../structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_01_4.html',1,'YAML']]],
   ['convert_3c_3a_3aextension_3a_3ascript_3a_3aframe_3a_3atarget_20_3e_966',['convert&lt;::extension::Script::Frame::Target &gt;',['../structYAML_1_1convert_3_1_1extension_1_1Script_1_1Frame_1_1Target_01_4.html',1,'YAML']]],
   ['convert_3c_3a_3anuclear_3a_3aloglevel_20_3e_967',['convert&lt;::NUClear::LogLevel &gt;',['../structYAML_1_1convert_3_1_1NUClear_1_1LogLevel_01_4.html',1,'YAML']]],
-  ['count_968',['Count',['../structmodule_1_1motion_1_1Servos_1_1Count.html',1,'module::motion::Servos']]],
+  ['count_968',['Count',['../structmodule_1_1actuation_1_1Servos_1_1Count.html',1,'module::actuation::Servos']]],
   ['covariance_969',['Covariance',['../structmodule_1_1input_1_1SensorFilter_1_1Config_1_1MotionFilter_1_1Initial_1_1Covariance.html',1,'module::input::SensorFilter::Config::MotionFilter::Initial']]]
 ];

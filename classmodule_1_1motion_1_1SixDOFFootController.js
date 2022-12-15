@@ -2,7 +2,7 @@ var classmodule_1_1motion_1_1SixDOFFootController =
 [
     [ "SixDOFFootController", "classmodule_1_1motion_1_1SixDOFFootController.html#a9055015d188f4a4c1e9078a989203514", null ],
     [ "~SixDOFFootController", "classmodule_1_1motion_1_1SixDOFFootController.html#a58e4f8f2a537a355556225d448738949", null ],
-    [ "computeStartMotion", "classmodule_1_1motion_1_1SixDOFFootController.html#a441c0d27b02f302088068a6bf11ae9d0", null ],
+    [ "computeStartMotion", "classmodule_1_1motion_1_1SixDOFFootController.html#a8925af65e9883be2e3d4267d841eb2b8", null ],
     [ "computeStopMotion", "classmodule_1_1motion_1_1SixDOFFootController.html#aa17bad9fc8c2993904df2d6e3c1f21c7", null ],
     [ "configure", "classmodule_1_1motion_1_1SixDOFFootController.html#abd547309977a8f1c6f0a1b5eb9971137", null ],
     [ "getFootPose", "classmodule_1_1motion_1_1SixDOFFootController.html#a77297d6e83909e1a032419a1d4a84bb9", null ],
@@ -12,7 +12,7 @@ var classmodule_1_1motion_1_1SixDOFFootController =
     [ "isStable", "classmodule_1_1motion_1_1SixDOFFootController.html#a806597279a218de6df3c5c78993fc0f8", null ],
     [ "reset", "classmodule_1_1motion_1_1SixDOFFootController.html#a51bbbff9fa004b90786d82d78c99b3c2", null ],
     [ "setKickParameters", "classmodule_1_1motion_1_1SixDOFFootController.html#a7a8ba928840fbd2ac69a572ab4c0dc2d", null ],
-    [ "start", "classmodule_1_1motion_1_1SixDOFFootController.html#add0675d1b4173d340be3271e0b205bc5", null ],
+    [ "start", "classmodule_1_1motion_1_1SixDOFFootController.html#aac6df09ee989f27a84bcb76babc5393b", null ],
     [ "stop", "classmodule_1_1motion_1_1SixDOFFootController.html#abc5c94e2a88100cff823d36a57c387d6", null ],
     [ "anim", "classmodule_1_1motion_1_1SixDOFFootController.html#a1561d52b26c87766387ebcacac2d0c77", null ],
     [ "ballPosition", "classmodule_1_1motion_1_1SixDOFFootController.html#ae2fccacd6e7093f98cf88eb3bd9d12ac", null ],

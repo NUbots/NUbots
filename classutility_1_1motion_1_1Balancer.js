@@ -1,7 +1,7 @@
 var classutility_1_1motion_1_1Balancer =
 [
     [ "Balancer", "classutility_1_1motion_1_1Balancer.html#ad0860fdcd1fadc80eb50616a2db668a8", null ],
-    [ "balance", "classutility_1_1motion_1_1Balancer.html#af3739d3e50c412829c6ca2279d683ffc", null ],
+    [ "balance", "classutility_1_1motion_1_1Balancer.html#a80202d1ccb6439ff2eb3273dbb5c123e", null ],
     [ "configure", "classutility_1_1motion_1_1Balancer.html#a10c1e94c3a921b676a2c99b16af01ac6", null ],
     [ "ankleRotationScale", "classutility_1_1motion_1_1Balancer.html#a5480cd327c4a31ebcada3b2b75990562", null ],
     [ "dPitch", "classutility_1_1motion_1_1Balancer.html#a2199ac1ac8dcf916beb0434cedf9f9c1", null ],
