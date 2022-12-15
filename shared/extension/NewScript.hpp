@@ -25,20 +25,6 @@ namespace extension::director {
     struct Frame {
         /// @brief Servo targets for each active servo in the frame
         struct Target {
-            Target() = default;
-            Target(const ServoID& servo, float pos, float gain, float torque)
-                : id(servo), position(pos), gain(gain), torque(torque) {}
-            Target(const Target& other) = default;
-            Target(Target&& other) noexcept
-                : id(other.id), position(other.position), gain(other.gain), torque(other.torque) {}
-            Target& operator=(const Target& other) = default;
-            Target& operator                       =(Target&& other) noexcept {
-                id       = other.id;
-                position = other.position;
-                gain     = other.gain;
-                torque   = other.torque;
-                return *this;
-            }
 
             /// @brief The servo ID that this target is for; see ServoID.hpp
             ServoID id;
@@ -50,12 +36,9 @@ namespace extension::director {
             float torque{0.0f};
         };
 
-        Frame() : duration() {}
-        Frame(const NUClear::clock::duration& dur, std::vector<Target> targets)
-            : duration(dur), targets(std::move(targets)) {}
 
         /// @brief The time it should take for the servos to move to their targets
-        NUClear::clock::duration duration;
+        NUClear::clock::duration duration{};
         /// @brief Target position of servos for this frame
         std::vector<Target> targets;
     };
