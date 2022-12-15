@@ -146,6 +146,19 @@ namespace extension::behaviour {
             // Emit the sequence of servos as a Task
             ::extension::behaviour::Task<Sequence>::emit(powerplant, msg);
         }
+
+        /// @brief Creates sequences of servos from the script files given, which is emitted as a Task.
+        /// @tparam DataType The message type containing a sequence of servo positions.
+        /// @param powerplant The main NUClear powerplant
+        /// @param msg DataType message which will be filled with sequences of servos and emitted as a Task.
+        /// @param scripts Sequence of scripts to run
+        /// @param start When the first script should start executing. Default is now.
+        static void emit(NUClear::PowerPlant& powerplant,
+                         std::shared_ptr<Sequence> msg,
+                         ScriptRequest script,
+                         const NUClear::clock::time_point& start = NUClear::clock::now()) {
+            emit(powerplant, msg, std::vector<ScriptRequest>{script}, start);
+        }
     };
 }  // namespace extension::behaviour
 
