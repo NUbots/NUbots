@@ -6,7 +6,7 @@
 #include "message/motion/Kick.hpp"
 #include "message/motion/Limbs.hpp"
 
-namespace module::motion {
+namespace module::skills {
 
     using extension::Configuration;
     using message::motion::Kick;
@@ -32,7 +32,7 @@ namespace module::motion {
             }
 
             // Execute the penalty kick if the type is PENALTY
-            if (kick->type == KickCommandType::PENALTY) {
+            if (kick.type == KickType::PENALTY) {
                 // TODO: Make a penalty kick
                 emit<Script>(std::make_unique<LimbsSequence>(),
                              std::vector<ScriptRequest>{{"Stand.yaml"}, {"KickLeft.yaml"}, {"Stand.yaml"}});
@@ -40,7 +40,7 @@ namespace module::motion {
             }
 
             // Otherwise do a normal kick
-            if (kick_command->leg == LimbID::RIGHT_LEG) {
+            if (kick.leg == LimbID::RIGHT_LEG) {
                 emit<Script>(std::make_unique<LimbsSequence>(),
                              std::vector<ScriptRequest>{{"Stand.yaml"}, {"KickLeft.yaml"}, {"Stand.yaml"}});
             }
@@ -51,4 +51,4 @@ namespace module::motion {
         });
     }
 
-}  // namespace module::motion
+}  // namespace module::skills

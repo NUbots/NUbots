@@ -1,11 +1,11 @@
-#ifndef MODULE_MOTION_KICKSCRIPT_HPP
-#define MODULE_MOTION_KICKSCRIPT_HPP
+#ifndef MODULE_SKILLS_KICKSCRIPT_HPP
+#define MODULE_SKILLS_KICKSCRIPT_HPP
 
 #include <nuclear>
 
 #include "extension/Behaviour.hpp"
 
-namespace module::motion {
+namespace module::skills {
 
     class KickScript : public ::extension::behaviour::BehaviourReactor {
     public:
@@ -13,6 +13,6 @@ namespace module::motion {
         explicit KickScript(std::unique_ptr<NUClear::Environment> environment);
     };
 
-}  // namespace module::motion
+}  // namespace module::skills
 
-#endif  // MODULE_MOTION_KICKSCRIPT_HPP
+#endif  // MODULE_SKILLS_KICKSCRIPT_HPP
