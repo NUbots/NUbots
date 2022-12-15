@@ -17,36 +17,36 @@
  * Copyright 2022 NUbots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_MOTION_SERVOMAP_HPP
-#define UTILITY_MOTION_SERVOMAP_HPP
+#ifndef UTILITY_ACTUATION_SERVOMAP_HPP
+#define UTILITY_ACTUATION_SERVOMAP_HPP
 
-#include "message/motion/Limbs.hpp"
-#include "message/motion/Servos.hpp"
+#include "message/actuation/Limbs.hpp"
+#include "message/actuation/Servos.hpp"
 
 #include "utility/input/ServoID.hpp"
 
-namespace utility::motion {
+namespace utility::actuation {
 
-    using message::motion::HeadPitch;
-    using message::motion::HeadYaw;
-    using message::motion::LeftAnklePitch;
-    using message::motion::LeftAnkleRoll;
-    using message::motion::LeftElbow;
-    using message::motion::LeftHipPitch;
-    using message::motion::LeftHipRoll;
-    using message::motion::LeftHipYaw;
-    using message::motion::LeftKnee;
-    using message::motion::LeftShoulderPitch;
-    using message::motion::LeftShoulderRoll;
-    using message::motion::RightAnklePitch;
-    using message::motion::RightAnkleRoll;
-    using message::motion::RightElbow;
-    using message::motion::RightHipPitch;
-    using message::motion::RightHipRoll;
-    using message::motion::RightHipYaw;
-    using message::motion::RightKnee;
-    using message::motion::RightShoulderPitch;
-    using message::motion::RightShoulderRoll;
+    using message::actuation::HeadPitch;
+    using message::actuation::HeadYaw;
+    using message::actuation::LeftAnklePitch;
+    using message::actuation::LeftAnkleRoll;
+    using message::actuation::LeftElbow;
+    using message::actuation::LeftHipPitch;
+    using message::actuation::LeftHipRoll;
+    using message::actuation::LeftHipYaw;
+    using message::actuation::LeftKnee;
+    using message::actuation::LeftShoulderPitch;
+    using message::actuation::LeftShoulderRoll;
+    using message::actuation::RightAnklePitch;
+    using message::actuation::RightAnkleRoll;
+    using message::actuation::RightElbow;
+    using message::actuation::RightHipPitch;
+    using message::actuation::RightHipRoll;
+    using message::actuation::RightHipYaw;
+    using message::actuation::RightKnee;
+    using message::actuation::RightShoulderPitch;
+    using message::actuation::RightShoulderRoll;
     using utility::input::ServoID;
 
     template <typename Servo>
@@ -74,6 +74,6 @@ namespace utility::motion {
         template <> struct ServoMap<HeadPitch> { static constexpr ServoID::Value value = ServoID::HEAD_PITCH; };
     // clang-format on
 
-}  // namespace utility::motion
+}  // namespace utility::actuation
 
-#endif  // UTILITY_MOTION_SERVOMAP_HPP
+#endif  // UTILITY_ACTUATION_SERVOMAP_HPP

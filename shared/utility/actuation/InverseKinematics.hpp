@@ -17,8 +17,8 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_MOTION_INVERSEKINEMATICS_HPP
-#define UTILITY_MOTION_INVERSEKINEMATICS_HPP
+#ifndef UTILITY_ACTUATION_INVERSEKINEMATICS_HPP
+#define UTILITY_ACTUATION_INVERSEKINEMATICS_HPP
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
@@ -28,17 +28,17 @@
 #include <nuclear>
 #include <vector>
 
+#include "message/actuation/KinematicsModel.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/motion/KinematicsModel.hpp"
 
+#include "utility/actuation/ForwardKinematics.hpp"
 #include "utility/behaviour/Action.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 #include "utility/math/coordinates.hpp"
-#include "utility/motion/ForwardKinematics.hpp"
 
-namespace utility::motion::kinematics {
+namespace utility::actuation::kinematics {
 
     using utility::input::LimbID;
     using utility::input::ServoID;
@@ -54,7 +54,7 @@ namespace utility::motion::kinematics {
     */
     template <typename Scalar>
     [[nodiscard]] std::vector<std::pair<ServoID, Scalar>> calculateLegJoints(
-        const message::motion::KinematicsModel& model,
+        const message::actuation::KinematicsModel& model,
         const Eigen::Transform<Scalar, 3, Eigen::Isometry>& target_,
         const LimbID& limb) {
         const Scalar LENGTH_BETWEEN_LEGS             = model.leg.LENGTH_BETWEEN_LEGS;
@@ -205,7 +205,7 @@ namespace utility::motion::kinematics {
 
     template <typename Scalar>
     [[nodiscard]] std::vector<std::pair<ServoID, Scalar>> calculateLegJoints(
-        const message::motion::KinematicsModel& model,
+        const message::actuation::KinematicsModel& model,
         const Eigen::Transform<Scalar, 3, Eigen::Isometry>& leftTarget,
         const Eigen::Transform<Scalar, 3, Eigen::Isometry>& rightTarget) {
         auto joints  = calculateLegJoints<Scalar>(model, leftTarget, LimbID::LEFT_LEG);
@@ -223,6 +223,6 @@ namespace utility::motion::kinematics {
                                           std::sqrt(cameraUnitVector.x() * cameraUnitVector.x()
                                                     + cameraUnitVector.y() * cameraUnitVector.y())))};
     }
-}  // namespace utility::motion::kinematics
+}  // namespace utility::actuation::kinematics
 
-#endif  // UTILITY_MOTION_INVERSEKINEMATICS_HPP
+#endif  // UTILITY_ACTUATION_INVERSEKINEMATICS_HPP

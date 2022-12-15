@@ -21,18 +21,18 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/KinematicsModel.hpp"
 #include "message/behaviour/KickPlan.hpp"
 #include "message/behaviour/ServoCommand.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/motion/KickCommand.hpp"
-#include "message/motion/KinematicsModel.hpp"
 #include "message/motion/WalkCommand.hpp"
 #include "message/support/FieldDescription.hpp"
 
+#include "utility/actuation/InverseKinematics.hpp"
 #include "utility/behaviour/Action.hpp"
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
-#include "utility/motion/InverseKinematics.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 
 namespace module::motion {
@@ -49,12 +49,12 @@ namespace module::motion {
     using message::motion::KickFinished;
     using message::motion::StopCommand;
     using KickType = message::behaviour::KickPlan::KickType;
-    using message::motion::KinematicsModel;
+    using message::actuation::KinematicsModel;
     using message::support::FieldDescription;
 
+    using utility::actuation::kinematics::calculateLegJoints;
     using utility::behaviour::ActionPriorities;
     using utility::behaviour::RegisterAction;
-    using utility::motion::kinematics::calculateLegJoints;
     using utility::nusight::graph;
 
     struct ExecuteKick {};

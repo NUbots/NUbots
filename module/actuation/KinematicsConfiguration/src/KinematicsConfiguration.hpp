@@ -17,8 +17,8 @@
  * Copyright 2015 NUbots <nubots@nubots.net>
  */
 
-#ifndef MODULE_MOTION_KINEMATICSCONFIGURATION_HPP
-#define MODULE_MOTION_KINEMATICSCONFIGURATION_HPP
+#ifndef MODULE_ACTUATION_KINEMATICSCONFIGURATION_HPP
+#define MODULE_ACTUATION_KINEMATICSCONFIGURATION_HPP
 
 #include <Eigen/Core>
 #include <nuclear>
@@ -26,9 +26,9 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/motion/KinematicsModel.hpp"
+#include "message/actuation/KinematicsModel.hpp"
 
-namespace module::motion {
+namespace module::actuation {
 
     class KinematicsConfiguration : public NUClear::Reactor {
 
@@ -37,13 +37,14 @@ namespace module::motion {
         explicit KinematicsConfiguration(std::unique_ptr<NUClear::Environment> environment);
 
     private:
-        static void configure(message::motion::KinematicsModel& model, const ::extension::Configuration& objNugusModel);
-        static void configureLeg(message::motion::KinematicsModel& model, const YAML::Node& objLeg);
-        static void configureHead(message::motion::KinematicsModel& model, const YAML::Node& objHead);
-        static void configureArm(message::motion::KinematicsModel& model, const YAML::Node& objArm);
-        static void configureMassModel(message::motion::KinematicsModel& model, const YAML::Node& objMassModel);
-        static void configureTensorModel(message::motion::KinematicsModel& model, const YAML::Node& objTensorModel);
+        static void configure(message::actuation::KinematicsModel& model,
+                              const ::extension::Configuration& objNugusModel);
+        static void configureLeg(message::actuation::KinematicsModel& model, const YAML::Node& objLeg);
+        static void configureHead(message::actuation::KinematicsModel& model, const YAML::Node& objHead);
+        static void configureArm(message::actuation::KinematicsModel& model, const YAML::Node& objArm);
+        static void configureMassModel(message::actuation::KinematicsModel& model, const YAML::Node& objMassModel);
+        static void configureTensorModel(message::actuation::KinematicsModel& model, const YAML::Node& objTensorModel);
     };
-}  // namespace module::motion
+}  // namespace module::actuation
 
-#endif  // MODULE_MOTION_KINEMATICSCONFIGURATION_HPP
+#endif  // MODULE_ACTUATION_KINEMATICSCONFIGURATION_HPP
