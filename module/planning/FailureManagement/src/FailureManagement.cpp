@@ -2,14 +2,24 @@
 
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
+#include "extension/behaviour/Script.hpp"
 
-#include "message/behaviour/State.hpp"
+#include "message/behaviour/state/Stability.hpp"
 #include "message/input/Sensors.hpp"
+#include "message/motion/Limbs.hpp"
 #include "message/planning/Recover.hpp"
+
+#include "utility/support/yaml_expression.hpp"
 
 namespace module::planning {
 
     using extension::Configuration;
+    using extension::behaviour::Script;
+    using message::behaviour::state::Stability;
+    using message::input::Sensors;
+    using message::motion::Body;
+    using message::planning::Recover;
+    using utility::support::Expression;
 
     enum class State { STABLE, UNSTABLE, FALLING };
 
@@ -24,18 +34,22 @@ namespace module::planning {
             // Use configuration here from file FailureManagement.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            cfg.gyro.mag.mean       = config["gyro"]["mag"]["mean"].as<Expression>();
-            cfg.gyro.mag.unstable   = config["gyro"]["mag"]["unstable"].as<Expression>();
-            cfg.gyro.mag.falling    = config["gyro"]["mag"]["falling"].as<Expression>();
-            cfg.gyro.mag.smoothing  = config["gyro"]["mag"]["smoothing"].as<Expression>();
-            cfg.acc.mag.mean        = config["accelerometer"]["mag"]["mean"].as<Expression>();
-            cfg.acc.mag.unstable    = config["accelerometer"]["mag"]["unstable"].as<Expression>();
-            cfg.acc.mag.falling     = config["accelerometer"]["mag"]["falling"].as<Expression>();
-            cfg.acc.mag.smoothing   = config["accelerometer"]["mag"]["smoothing"].as<Expression>();
-            cfg.acc.angle.unstable  = config["accelerometer"]["angle"]["unstable"].as<Expression>();
-            cfg.acc.angle.falling   = config["accelerometer"]["angle"]["falling"].as<Expression>();
-            cfg.acc.angle.smoothing = config["accelerometer"]["angle"]["smoothing"].as<Expression>();
+            cfg.falling.gyro.mag.mean       = config["gyro"]["mag"]["mean"].as<Expression>();
+            cfg.falling.gyro.mag.unstable   = config["gyro"]["mag"]["unstable"].as<Expression>();
+            cfg.falling.gyro.mag.falling    = config["gyro"]["mag"]["falling"].as<Expression>();
+            cfg.falling.gyro.mag.smoothing  = config["gyro"]["mag"]["smoothing"].as<Expression>();
+            cfg.falling.acc.mag.mean        = config["accelerometer"]["mag"]["mean"].as<Expression>();
+            cfg.falling.acc.mag.unstable    = config["accelerometer"]["mag"]["unstable"].as<Expression>();
+            cfg.falling.acc.mag.falling     = config["accelerometer"]["mag"]["falling"].as<Expression>();
+            cfg.falling.acc.mag.smoothing   = config["accelerometer"]["mag"]["smoothing"].as<Expression>();
+            cfg.falling.acc.angle.mean      = config["accelerometer"]["angle"]["mean"].as<Expression>();
+            cfg.falling.acc.angle.unstable  = config["accelerometer"]["angle"]["unstable"].as<Expression>();
+            cfg.falling.acc.angle.falling   = config["accelerometer"]["angle"]["falling"].as<Expression>();
+            cfg.falling.acc.angle.smoothing = config["accelerometer"]["angle"]["smoothing"].as<Expression>();
+
             cfg.getup.angle         = config["getup"]["angle"].as<Expression>();
+            cfg.getup.gyro_recovery = config["getup"]["gyro_recovery"].as<Expression>();
+            cfg.getup.acc_recovery  = config["getup"]["acc_recovery"].as<Expression>();
         });
 
         on<Provide<Recover>, Trigger<Sensors>>().then([this](const RunInfo& info, const Sensors& sensors) {
@@ -44,15 +58,16 @@ namespace module::planning {
                     // OTHER_TRIGGER means we ran because of a sensors update
 
                     // Smooth the values we use to determine if we are falling
-                    gyro.mag  = smooth(gyro.mag,  // Sum of roll and pitch rotation
-                                      std::abs(sensors.gyro.x()) + std::abs(sensors.gyro.y() - cfg.gyro.mag.mean),
-                                      cfg.gyro.mag.smoothing);
-                    acc.mag   = smooth(acc.mag,  // Magnitude of the acceleration vector without gravity
-                                     std::abs(sensors.accelerometer.norm() - cfg.acc.mag.mean),
-                                     cfg.acc.mag.smoothing);
-                    acc.angle = smooth(acc.angle,  // Angle of the acceleration vector
+                    gyro.mag = smooth(
+                        gyro.mag,
+                        std::abs(sensors.gyroscope.x()) + std::abs(sensors.gyroscope.y() - cfg.falling.gyro.mag.mean),
+                        cfg.falling.gyro.mag.smoothing);
+                    acc.mag   = smooth(acc.mag,
+                                     std::abs(sensors.accelerometer.norm() - cfg.falling.acc.mag.mean),
+                                     cfg.falling.acc.mag.smoothing);
+                    acc.angle = smooth(acc.angle,
                                        1.0 - std::abs(sensors.accelerometer.normalized().z()),
-                                       cfg.acc.angle.smoothing);
+                                       cfg.falling.acc.angle.smoothing);
 
                     // If we are getting up we ignore what's going on until we are done
                     if (getting_up) {
@@ -61,15 +76,15 @@ namespace module::planning {
                     else {
 
                         // Check if we are stable according to each sensor
-                        State gyro_mag_state  = gyro.mag < cfg.gyro.mag.unstable  ? State::STABLE
-                                                : gyro.mag < cfg.gyro.mag.falling ? State::UNSTABLE
-                                                                                  : State::FALLING;
-                        State acc_mag_state   = acc.mag < cfg.acc.mag.unstable  ? State::STABLE
-                                                : acc.mag < cfg.acc.mag.falling ? State::UNSTABLE
-                                                                                : State::FALLING;
-                        State acc_angle_state = acc.angle < cfg.acc.angle.unstable  ? State::STABLE
-                                                : acc.angle < cfg.acc.angle.falling ? State::UNSTABLE
-                                                                                    : State::FALLING;
+                        State gyro_mag_state  = gyro.mag < cfg.falling.gyro.mag.unstable  ? State::STABLE
+                                                : gyro.mag < cfg.falling.gyro.mag.falling ? State::UNSTABLE
+                                                                                          : State::FALLING;
+                        State acc_mag_state   = acc.mag < cfg.falling.acc.mag.unstable  ? State::STABLE
+                                                : acc.mag < cfg.falling.acc.mag.falling ? State::UNSTABLE
+                                                                                        : State::FALLING;
+                        State acc_angle_state = acc.angle < cfg.falling.acc.angle.unstable  ? State::STABLE
+                                                : acc.angle < cfg.falling.acc.angle.falling ? State::UNSTABLE
+                                                                                            : State::FALLING;
 
                         // Falling if at least two of the three checks are unstable or if any one of them is falling
                         bool falling = (gyro_mag_state == State::FALLING || acc_mag_state == State::FALLING
@@ -85,7 +100,7 @@ namespace module::planning {
                             emit<Script>(std::make_unique<Body>(), "Relax.yaml");
                         }
                         // We can get up if all our sensors are in the recovery range and we are lying down
-                        else if (gyro.mag < cfg.gyro.mag.recovery && acc.mag < cfg.acc.mag.recovery
+                        else if (gyro.mag < cfg.getup.gyro_recovery && acc.mag < cfg.getup.acc_recovery
                                  && acc.angle < cfg.getup.angle) {
 
                             emit(std::make_unique<Stability>(Stability::FALLEN));
@@ -128,6 +143,8 @@ namespace module::planning {
                         emit<Task>(std::make_unique<Idle>());
                     }
                 } break;
+                // We don't care about other run reasons
+                default: emit<Task>(std::make_unique<Idle>()); break;
             }
         });
     }

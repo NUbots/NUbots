@@ -19,8 +19,8 @@ falling:
       unstable: 1.0
       falling: 2.0
     angle:
-      mean: 0.0
       smoothing: 0.9
+      mean: 0.0
       unstable: 0.0
       falling: 0.0
 

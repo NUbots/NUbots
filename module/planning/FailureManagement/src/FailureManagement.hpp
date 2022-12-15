@@ -11,19 +11,35 @@ namespace module::planning {
     private:
         /// @brief Stores configuration values
         struct Config {
-            struct falling {
+            struct {
                 struct {
-                    double recovery;
-                    double unstable;
-                    double falling;
-                } gyroscope;
+                    struct {
+                        double mean;
+                        double unstable;
+                        double falling;
+                        double smoothing;
+                    } mag;
+                } gyro;
                 struct {
-                    double mean;
-                    double recovery;
-                    double unstable;
-                    double falling;
-                } accelerometer;
-            }
+                    struct {
+                        double mean;
+                        double unstable;
+                        double falling;
+                        double smoothing;
+                    } mag;
+                    struct {
+                        double mean;
+                        double unstable;
+                        double falling;
+                        double smoothing;
+                    } angle;
+                } acc;
+            } falling;
+            struct {
+                double angle;
+                double gyro_recovery;
+                double acc_recovery;
+            } getup;
         } cfg;
 
     public:
