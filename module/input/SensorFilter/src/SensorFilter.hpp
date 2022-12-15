@@ -27,7 +27,7 @@
 #include "MotionModel.hpp"
 #include "VirtualLoadSensor.hpp"
 
-#include "message/motion/KinematicsModel.hpp"
+#include "message/actuation/KinematicsModel.hpp"
 
 #include "utility/math/filter/UKF.hpp"
 

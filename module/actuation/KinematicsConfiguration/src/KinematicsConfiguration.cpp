@@ -21,14 +21,14 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/motion/KinematicsModel.hpp"
+#include "message/actuation/KinematicsModel.hpp"
 
 #include "utility/support/yaml_expression.hpp"
 
-namespace module::motion {
+namespace module::actuation {
 
     using extension::Configuration;
-    using message::motion::KinematicsModel;
+    using message::actuation::KinematicsModel;
     using utility::support::Expression;
 
 
@@ -156,4 +156,4 @@ namespace module::motion {
         model.tensor_model.ankle_block = objTensorModel["particles"]["ankle_block"].as<Expression>();
         model.tensor_model.foot        = objTensorModel["particles"]["foot"].as<Expression>();
     }
-}  // namespace module::motion
+}  // namespace module::actuation

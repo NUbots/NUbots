@@ -17,27 +17,27 @@
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
 
-#ifndef UTILITY_MOTION_FORWARDKINEMATICS_HPP
-#define UTILITY_MOTION_FORWARDKINEMATICS_HPP
+#ifndef UTILITY_ACTUATION_FORWARDKINEMATICS_HPP
+#define UTILITY_ACTUATION_FORWARDKINEMATICS_HPP
 
 #include <Eigen/Geometry>
 #include <cmath>
 #include <nuclear>
 #include <vector>
 
+#include "message/actuation/BodySide.hpp"
+#include "message/actuation/KinematicsModel.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/motion/BodySide.hpp"
-#include "message/motion/KinematicsModel.hpp"
 
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/angle.hpp"
 
-namespace utility::motion::kinematics {
+namespace utility::actuation::kinematics {
 
+    using message::actuation::BodySide;
+    using message::actuation::KinematicsModel;
     using message::input::Sensors;
-    using message::motion::BodySide;
-    using message::motion::KinematicsModel;
     using utility::input::LimbID;
     using utility::input::ServoID;
 
@@ -331,7 +331,7 @@ namespace utility::motion::kinematics {
     /*! @brief Adds up the mass vectors stored in the robot model and normalises the resulting position
         @return [x_com, y_com, z_com, total_mass] relative to the torso basis
     */
-    [[nodiscard]] inline Eigen::Vector4d calculateCentreOfMass(const message::motion::KinematicsModel& model,
+    [[nodiscard]] inline Eigen::Vector4d calculateCentreOfMass(const message::actuation::KinematicsModel& model,
                                                                const std::array<Eigen::Matrix4d, 20>& Htx) {
 
         // Convenience function to transform particle-space CoM to torso-space CoM
@@ -388,7 +388,7 @@ namespace utility::motion::kinematics {
                  [xy, yy, yz],
                  [xz, yz, zz]]
     */
-    [[nodiscard]] inline Eigen::Matrix3d calculateInertialTensor(const message::motion::KinematicsModel& model,
+    [[nodiscard]] inline Eigen::Matrix3d calculateInertialTensor(const message::actuation::KinematicsModel& model,
                                                                  const std::array<Eigen::Matrix4d, 20>& Htx) {
 
         // Convenience function to transform particle-space inertial tensors to torso-space inertial tensor
@@ -510,6 +510,6 @@ namespace utility::motion::kinematics {
 
         return Htg;
     }
-}  // namespace utility::motion::kinematics
+}  // namespace utility::actuation::kinematics
 
-#endif  // UTILITY_MOTION_FORWARDKINEMATICS_HPP
+#endif  // UTILITY_ACTUATION_FORWARDKINEMATICS_HPP

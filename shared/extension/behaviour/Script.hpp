@@ -7,7 +7,7 @@
 
 #include "extension/Behaviour.hpp"
 
-#include "message/motion/ServoCommand.hpp"
+#include "message/actuation/ServoCommand.hpp"
 
 #include "utility/file/fileutil.hpp"
 #include "utility/input/ServoID.hpp"
@@ -20,8 +20,8 @@
 
 namespace extension::behaviour {
 
-    using message::motion::ServoCommand;
-    using message::motion::ServoState;
+    using message::actuation::ServoCommand;
+    using message::actuation::ServoState;
     using utility::input::ServoID;
 
     /// @brief One Script to run, with name of the script and a duration modifier to speed up or slow down the Script

@@ -26,8 +26,8 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/ServoTarget.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/motion/ServoTarget.hpp"
 #include "message/platform/RawSensors.hpp"
 
 #include "utility/input/ServoID.hpp"
@@ -40,9 +40,9 @@ namespace module::platform::cm740 {
 
     using extension::Configuration;
 
+    using message::actuation::ServoTarget;
+    using message::actuation::ServoTargets;
     using message::input::Sensors;
-    using message::motion::ServoTarget;
-    using message::motion::ServoTargets;
     using message::platform::RawSensors;
 
     using utility::input::ServoID;

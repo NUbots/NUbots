@@ -5,15 +5,15 @@
 
 #include "extension/Behaviour.hpp"
 
+#include "message/actuation/ServoTarget.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/motion/ServoTarget.hpp"
 
+#include "utility/actuation/ServoMap.hpp"
 #include "utility/input/ServoID.hpp"
-#include "utility/motion/ServoMap.hpp"
 
-namespace module::motion {
+namespace module::actuation {
+    using message::actuation::ServoTarget;
     using message::input::Sensors;
-    using message::motion::ServoTarget;
     using utility::input::ServoID;
 
     class Servos : public ::extension::behaviour::BehaviourReactor {
@@ -60,7 +60,7 @@ namespace module::motion {
 
                     // Runs an emit for each servo
                     NUClear::util::unpack((emit<Task>(std::make_unique<Elements>(
-                                               group.servos.at(utility::motion::ServoMap<Elements>::value))),
+                                               group.servos.at(utility::actuation::ServoMap<Elements>::value))),
                                            0)...);
                 });
         }
@@ -117,6 +117,6 @@ namespace module::motion {
         explicit Servos(std::unique_ptr<NUClear::Environment> environment);
     };
 
-}  // namespace module::motion
+}  // namespace module::actuation
 
 #endif  // MODULE_MOTION_SERVOS_HPP
