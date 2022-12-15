@@ -78,19 +78,19 @@ namespace extension::behaviour {
         /// @throws Runtime error when the script doesn't exist.
         static YAML::Node load(const std::string& script) {
             // Set paths to the script files.
-            auto hostname     = utility::support::getHostname();
-            auto robotPath    = "scripts/" + hostname + "/" + script;
-            auto platformPath = "scripts/" + get_platform(hostname) + "/" + script;
+            auto hostname      = utility::support::getHostname();
+            auto robot_path    = "scripts/" + hostname + "/" + script;
+            auto platform_path = "scripts/" + get_platform(hostname) + "/" + script;
 
             // Try getting the robot-specific script first
-            if (utility::file::exists(robotPath)) {
+            if (utility::file::exists(robot_path)) {
                 NUClear::log<NUClear::INFO>("Parsing robot specific script:", script);
-                return YAML::LoadFile(robotPath);
+                return YAML::LoadFile(robot_path);
             }
             // If there was no robot-specific script, then get the platform-specific script
-            else if (utility::file::exists(platformPath)) {
+            else if (utility::file::exists(platform_path)) {
                 NUClear::log<NUClear::INFO>("Parsing default platform script:", script);
-                return YAML::LoadFile(platformPath);
+                return YAML::LoadFile(platform_path);
             }
             // The script doesn't exist, tell the user
             else {
