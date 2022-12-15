@@ -76,7 +76,7 @@ namespace extension::behaviour {
         /// @param script The name of the script to run.
         /// @return The script contents in the form off a YAML node
         /// @throws Runtime error when the script doesn't exist.
-        static YAML::Node load_script(const std::string& script) {
+        static YAML::Node load(const std::string& script) {
             // Set paths to the script files.
             auto hostname     = utility::support::getHostname();
             auto robotPath    = "scripts/" + hostname + "/" + script;
@@ -112,7 +112,7 @@ namespace extension::behaviour {
                          const NUClear::clock::time_point& start = NUClear::clock::now(),
                          const float& duration_modifier          = 1.0) {
             // Load the script to a vector of Frame structs
-            auto frames = load_script(script).as<std::vector<Frame>>();
+            auto frames = load(script).as<std::vector<Frame>>();
             // time will be incremented through each frame
             auto time = start;
             // Loop over the frames and add them as sequences of servos into the Sequence message
