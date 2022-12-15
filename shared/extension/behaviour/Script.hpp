@@ -15,7 +15,7 @@
  * @author Ysobel Sims
  */
 
-namespace extension::director {
+namespace extension::behaviour {
 
     using message::motion::ServoCommand;
     using message::motion::ServoState;
@@ -136,7 +136,7 @@ namespace extension::director {
             ::extension::behaviour::Task<Sequence>::emit(powerplant, msg);
         }
     };
-}  // namespace extension::director
+}  // namespace extension::behaviour
 
 // Functionality for reading in scripts
 namespace YAML {
