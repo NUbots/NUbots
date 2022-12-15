@@ -1,0 +1,28 @@
+# Controls the minimum log level that NUClear log will display
+log_level: DEBUG
+
+# The configuration for determining if we are falling is based on three different measurable properties
+# If any of them are in the "falling" range or 2/3 are in "unstable" we consider ourselves falling
+falling:
+  gyroscope:
+    # Measures the sum of rotation rates in the roll and pitch directions
+    magnitude:
+      mean: 0.0
+      smoothing: 0.9
+      unstable: 0.5
+      falling: 1.0
+
+  accelerometer:
+    magnitude:
+      mean: 9.8 # The expected value for the accelerometer at rest
+      smoothing: 0.9
+      unstable: 1.0
+      falling: 2.0
+    angle:
+      mean: 0.0
+      smoothing: 0.9
+      unstable: 0.0
+      falling: 0.0
+
+getup:
+  angle: 45 * pi / 180
