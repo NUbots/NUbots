@@ -51,7 +51,7 @@ namespace extension::behaviour {
         /// @param hostname The hostname of the device the program is running on.
         /// @return The platform name.
         /// @throws System error when the platform cannot be extracted from the hostname.
-        static inline std::string getPlatform(const std::string& hostname) {
+        static inline std::string get_platform(const std::string& hostname) {
             // It is assumed that all hostnames are in the format <platform name><robot number>,
             // such that the regular expression
             // [a-z]+[0-9]+?
@@ -80,7 +80,7 @@ namespace extension::behaviour {
             // Set paths to the script files.
             auto hostname     = utility::support::getHostname();
             auto robotPath    = "scripts/" + hostname + "/" + script;
-            auto platformPath = "scripts/" + getPlatform(hostname) + "/" + script;
+            auto platformPath = "scripts/" + get_platform(hostname) + "/" + script;
 
             // Try getting the robot-specific script first
             if (utility::file::exists(robotPath)) {
