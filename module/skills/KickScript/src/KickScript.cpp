@@ -4,7 +4,7 @@
 #include "extension/Configuration.hpp"
 #include "extension/behaviour/Script.hpp"
 
-#include "message/motion/Limbs.hpp"
+#include "message/actuation/Limbs.hpp"
 #include "message/skills/Kick.hpp"
 
 #include "utility/input/LimbID.hpp"
@@ -14,7 +14,7 @@ namespace module::skills {
     using extension::Configuration;
     using extension::behaviour::Script;
     using extension::behaviour::ScriptRequest;
-    using message::motion::LimbsSequence;
+    using message::actuation::LimbsSequence;
     using message::skills::Kick;
     using utility::input::LimbID;
 
