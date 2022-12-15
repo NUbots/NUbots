@@ -16,25 +16,25 @@
  *
  * Copyright 2022 NUbots <nubots@nubots.net>
  */
- syntax = "proto3";
+syntax = "proto3";
 
- package message.skills;
+package message.skills;
 
- import "Vector.proto";
+import "Vector.proto";
 
- enum KickType {
-     NORMAL  = 0;
-     PENALTY = 1;
- }
+enum KickType {
+    NORMAL  = 0;
+    PENALTY = 1;
+}
 
- message Kick {
-     /// Normal or penalty kick
-     KickType type = 1;
-     /// Leg to kick with
-     uint32 leg = 2;
-     /// The point to kick
-     vec3 target = 3;
-     /// The direction to kick in, with the magnitude of the vector
-     /// corresponding to the force of the kick
-     vec3 direction = 4;
- }
+message Kick {
+    /// Normal or penalty kick
+    KickType type = 1;
+    /// Leg to kick with
+    uint32 leg = 2;
+    /// The point to kick
+    vec3 target = 3;
+    /// The direction to kick in, with the magnitude of the vector
+    /// corresponding to the force of the kick
+    vec3 direction = 4;
+}
