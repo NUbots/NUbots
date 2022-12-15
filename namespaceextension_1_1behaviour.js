@@ -15,6 +15,7 @@ var namespaceextension_1_1behaviour =
     [ "ProviderBase", "structextension_1_1behaviour_1_1ProviderBase.html", "structextension_1_1behaviour_1_1ProviderBase" ],
     [ "RunInfo", "structextension_1_1behaviour_1_1RunInfo.html", "structextension_1_1behaviour_1_1RunInfo" ],
     [ "Script", "structextension_1_1behaviour_1_1Script.html", "structextension_1_1behaviour_1_1Script" ],
+    [ "ScriptRequest", "structextension_1_1behaviour_1_1ScriptRequest.html", "structextension_1_1behaviour_1_1ScriptRequest" ],
     [ "Start", "structextension_1_1behaviour_1_1Start.html", null ],
     [ "Stop", "structextension_1_1behaviour_1_1Stop.html", null ],
     [ "Task", "structextension_1_1behaviour_1_1Task.html", "structextension_1_1behaviour_1_1Task" ],

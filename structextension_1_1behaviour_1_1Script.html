@@ -177,9 +177,12 @@ $(document).ready(function(){initNavTree('structextension_1_1behaviour_1_1Script
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:acfec7e8fe2ab9b8d03da10eb5fc3ea78"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1Script.html#acfec7e8fe2ab9b8d03da10eb5fc3ea78">emit</a> (NUClear::PowerPlant &amp;powerplant, std::shared_ptr&lt; Sequence &gt; msg, const std::string &amp;script, const NUClear::clock::time_point &amp;start=NUClear::clock::now(), const float &amp;duration_modifier=1.0)</td></tr>
-<tr class="memdesc:acfec7e8fe2ab9b8d03da10eb5fc3ea78"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates sequences of servos from the script file given, which is emitted as a <a class="el" href="structextension_1_1behaviour_1_1Task.html" title="A Task to be executed by the director and a priority with which to execute this task.">Task</a>.  <a href="structextension_1_1behaviour_1_1Script.html#acfec7e8fe2ab9b8d03da10eb5fc3ea78">More...</a><br /></td></tr>
-<tr class="separator:acfec7e8fe2ab9b8d03da10eb5fc3ea78"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa26c3048eb9539ff304ddcb87905c61c"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1Script.html#aa26c3048eb9539ff304ddcb87905c61c">emit</a> (NUClear::PowerPlant &amp;powerplant, std::shared_ptr&lt; Sequence &gt; msg, <a class="el" href="structextension_1_1behaviour_1_1ScriptRequest.html">ScriptRequest</a> script, const NUClear::clock::time_point &amp;start=NUClear::clock::now())</td></tr>
+<tr class="memdesc:aa26c3048eb9539ff304ddcb87905c61c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Emits a single <a class="el" href="structextension_1_1behaviour_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip...">ScriptRequest</a> which is then sent through to the multi <a class="el" href="structextension_1_1behaviour_1_1Script.html">Script</a> version above.  <a href="structextension_1_1behaviour_1_1Script.html#aa26c3048eb9539ff304ddcb87905c61c">More...</a><br /></td></tr>
+<tr class="separator:aa26c3048eb9539ff304ddcb87905c61c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0cb7284e4df30db3bbecbd68224081bd"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1Script.html#a0cb7284e4df30db3bbecbd68224081bd">emit</a> (NUClear::PowerPlant &amp;powerplant, std::shared_ptr&lt; Sequence &gt; msg, std::vector&lt; <a class="el" href="structextension_1_1behaviour_1_1ScriptRequest.html">ScriptRequest</a> &gt; scripts, const NUClear::clock::time_point &amp;start=NUClear::clock::now())</td></tr>
+<tr class="memdesc:a0cb7284e4df30db3bbecbd68224081bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates sequences of servos from the script files given, which is emitted as a <a class="el" href="structextension_1_1behaviour_1_1Task.html" title="A Task to be executed by the director and a priority with which to execute this task.">Task</a>.  <a href="structextension_1_1behaviour_1_1Script.html#a0cb7284e4df30db3bbecbd68224081bd">More...</a><br /></td></tr>
+<tr class="separator:a0cb7284e4df30db3bbecbd68224081bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abdab1ef0e5c56030857da725bc7e89f9"><td class="memItemLeft" align="right" valign="top">static std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="structextension_1_1behaviour_1_1Script.html#abdab1ef0e5c56030857da725bc7e89f9">get_platform</a> (const std::string &amp;hostname)</td></tr>
 <tr class="memdesc:abdab1ef0e5c56030857da725bc7e89f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Assumes the hostname is of the form &lt;platform_name&gt;&lt;robot_number&gt; and returns &lt;platform_name&gt;.  <a href="structextension_1_1behaviour_1_1Script.html#abdab1ef0e5c56030857da725bc7e89f9">More...</a><br /></td></tr>
 <tr class="separator:abdab1ef0e5c56030857da725bc7e89f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -194,8 +197,8 @@ std::vector&lt; <a class="el" href="structextension_1_1behaviour_1_1Frame.html">
 <tr class="separator:a0ae73ca291875b1434202967ac495bcf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="acfec7e8fe2ab9b8d03da10eb5fc3ea78"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#acfec7e8fe2ab9b8d03da10eb5fc3ea78">&#9670;&nbsp;</a></span>emit()</h2>
+<a id="aa26c3048eb9539ff304ddcb87905c61c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa26c3048eb9539ff304ddcb87905c61c">&#9670;&nbsp;</a></span>emit() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -220,20 +223,14 @@ template&lt;typename Sequence &gt; </div>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramtype"><a class="el" href="structextension_1_1behaviour_1_1ScriptRequest.html">ScriptRequest</a>&#160;</td>
           <td class="paramname"><em>script</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const NUClear::clock::time_point &amp;&#160;</td>
-          <td class="paramname"><em>start</em> = <code>NUClear::clock::now()</code>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const float &amp;&#160;</td>
-          <td class="paramname"><em>duration_modifier</em> = <code>1.0</code>&#160;</td>
+          <td class="paramname"><em>start</em> = <code>NUClear::clock::now()</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -248,20 +245,74 @@ template&lt;typename Sequence &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Creates sequences of servos from the script file given, which is emitted as a <a class="el" href="structextension_1_1behaviour_1_1Task.html" title="A Task to be executed by the director and a priority with which to execute this task.">Task</a>. </p>
-<dl class="tparams"><dt>Template Parameters</dt><dd>
-  <table class="tparams">
-    <tr><td class="paramname">DataType</td><td>The message type containing a sequence of servo positions. </td></tr>
-  </table>
-  </dd>
-</dl>
+<p>Emits a single <a class="el" href="structextension_1_1behaviour_1_1ScriptRequest.html" title="One Script to run, with name of the script and a duration modifier to speed up or slow down the Scrip...">ScriptRequest</a> which is then sent through to the multi <a class="el" href="structextension_1_1behaviour_1_1Script.html">Script</a> version above. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">powerplant</td><td>The main NUClear powerplant </td></tr>
-    <tr><td class="paramname">msg</td><td>DataType message which will be filled with sequences of servos and emitted as a <a class="el" href="structextension_1_1behaviour_1_1Task.html" title="A Task to be executed by the director and a priority with which to execute this task.">Task</a>. </td></tr>
-    <tr><td class="paramname">script</td><td>Filename of the script </td></tr>
+    <tr><td class="paramname">msg</td><td>Sequence message which will be filled with sequences of servos and emitted as a <a class="el" href="structextension_1_1behaviour_1_1Task.html" title="A Task to be executed by the director and a priority with which to execute this task.">Task</a>. </td></tr>
+    <tr><td class="paramname">script</td><td><a class="el" href="structextension_1_1behaviour_1_1Script.html">Script</a> to run </td></tr>
     <tr><td class="paramname">start</td><td><a class="el" href="structextension_1_1behaviour_1_1When.html" title="Limit access to this Provider unless a condition is true.">When</a> the script should start executing. Default is now. </td></tr>
-    <tr><td class="paramname">duration_modifier</td><td>Modifies the speed the script is executed at, as a multiplier of each <a class="el" href="structextension_1_1behaviour_1_1Frame.html">Frame</a>'s duration. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a0cb7284e4df30db3bbecbd68224081bd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0cb7284e4df30db3bbecbd68224081bd">&#9670;&nbsp;</a></span>emit() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Sequence &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void <a class="el" href="structextension_1_1behaviour_1_1Script.html">extension::behaviour::Script</a>&lt; Sequence &gt;::emit </td>
+          <td>(</td>
+          <td class="paramtype">NUClear::PowerPlant &amp;&#160;</td>
+          <td class="paramname"><em>powerplant</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::shared_ptr&lt; Sequence &gt;&#160;</td>
+          <td class="paramname"><em>msg</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; <a class="el" href="structextension_1_1behaviour_1_1ScriptRequest.html">ScriptRequest</a> &gt;&#160;</td>
+          <td class="paramname"><em>scripts</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const NUClear::clock::time_point &amp;&#160;</td>
+          <td class="paramname"><em>start</em> = <code>NUClear::clock::now()</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Creates sequences of servos from the script files given, which is emitted as a <a class="el" href="structextension_1_1behaviour_1_1Task.html" title="A Task to be executed by the director and a priority with which to execute this task.">Task</a>. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">powerplant</td><td>The main NUClear powerplant </td></tr>
+    <tr><td class="paramname">msg</td><td>Sequence message which will be filled with sequences of servos and emitted as a <a class="el" href="structextension_1_1behaviour_1_1Task.html" title="A Task to be executed by the director and a priority with which to execute this task.">Task</a>. </td></tr>
+    <tr><td class="paramname">scripts</td><td>Sequence of scripts to run </td></tr>
+    <tr><td class="paramname">start</td><td><a class="el" href="structextension_1_1behaviour_1_1When.html" title="Limit access to this Provider unless a condition is true.">When</a> the first script should start executing. Default is now. </td></tr>
   </table>
   </dd>
 </dl>
@@ -363,7 +414,7 @@ template&lt;typename Sequence &gt; </div>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><b>extension</b></li><li class="navelem"><a class="el" href="namespaceextension_1_1behaviour.html">behaviour</a></li><li class="navelem"><a class="el" href="structextension_1_1behaviour_1_1Script.html">Script</a></li>
-    <li class="footer">Generated on Thu Dec 15 2022 01:57:18 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
+    <li class="footer">Generated on Thu Dec 15 2022 08:34:23 for NUbots by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.9.1 </li>
   </ul>
 </div>
 </body>
