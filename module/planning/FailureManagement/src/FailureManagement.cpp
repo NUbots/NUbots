@@ -15,9 +15,10 @@ namespace module::planning {
 
     using extension::Configuration;
     using extension::behaviour::Script;
+    using extension::behaviour::ScriptRequest;
     using message::behaviour::state::Stability;
     using message::input::Sensors;
-    using message::motion::Body;
+    using message::motion::BodySequence;
     using message::planning::Recover;
     using utility::support::Expression;
 
@@ -34,18 +35,18 @@ namespace module::planning {
             // Use configuration here from file FailureManagement.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            cfg.falling.gyro.mag.mean       = config["gyro"]["mag"]["mean"].as<Expression>();
-            cfg.falling.gyro.mag.unstable   = config["gyro"]["mag"]["unstable"].as<Expression>();
-            cfg.falling.gyro.mag.falling    = config["gyro"]["mag"]["falling"].as<Expression>();
-            cfg.falling.gyro.mag.smoothing  = config["gyro"]["mag"]["smoothing"].as<Expression>();
-            cfg.falling.acc.mag.mean        = config["accelerometer"]["mag"]["mean"].as<Expression>();
-            cfg.falling.acc.mag.unstable    = config["accelerometer"]["mag"]["unstable"].as<Expression>();
-            cfg.falling.acc.mag.falling     = config["accelerometer"]["mag"]["falling"].as<Expression>();
-            cfg.falling.acc.mag.smoothing   = config["accelerometer"]["mag"]["smoothing"].as<Expression>();
-            cfg.falling.acc.angle.mean      = config["accelerometer"]["angle"]["mean"].as<Expression>();
-            cfg.falling.acc.angle.unstable  = config["accelerometer"]["angle"]["unstable"].as<Expression>();
-            cfg.falling.acc.angle.falling   = config["accelerometer"]["angle"]["falling"].as<Expression>();
-            cfg.falling.acc.angle.smoothing = config["accelerometer"]["angle"]["smoothing"].as<Expression>();
+            cfg.falling.gyro.mag.mean       = config["falling"]["gyro"]["mag"]["mean"].as<Expression>();
+            cfg.falling.gyro.mag.unstable   = config["falling"]["gyro"]["mag"]["unstable"].as<Expression>();
+            cfg.falling.gyro.mag.falling    = config["falling"]["gyro"]["mag"]["falling"].as<Expression>();
+            cfg.falling.gyro.mag.smoothing  = config["falling"]["gyro"]["mag"]["smoothing"].as<Expression>();
+            cfg.falling.acc.mag.mean        = config["falling"]["acc"]["mag"]["mean"].as<Expression>();
+            cfg.falling.acc.mag.unstable    = config["falling"]["acc"]["mag"]["unstable"].as<Expression>();
+            cfg.falling.acc.mag.falling     = config["falling"]["acc"]["mag"]["falling"].as<Expression>();
+            cfg.falling.acc.mag.smoothing   = config["falling"]["acc"]["mag"]["smoothing"].as<Expression>();
+            cfg.falling.acc.angle.mean      = config["falling"]["acc"]["angle"]["mean"].as<Expression>();
+            cfg.falling.acc.angle.unstable  = config["falling"]["acc"]["angle"]["unstable"].as<Expression>();
+            cfg.falling.acc.angle.falling   = config["falling"]["acc"]["angle"]["falling"].as<Expression>();
+            cfg.falling.acc.angle.smoothing = config["falling"]["acc"]["angle"]["smoothing"].as<Expression>();
 
             cfg.getup.angle         = config["getup"]["angle"].as<Expression>();
             cfg.getup.gyro_recovery = config["getup"]["gyro_recovery"].as<Expression>();
@@ -56,17 +57,18 @@ namespace module::planning {
             switch (info.run_reason) {
                 case RunInfo::OTHER_TRIGGER: {
                     // OTHER_TRIGGER means we ran because of a sensors update
+                    auto& a = sensors.accelerometer;
+                    auto& g = sensors.gyroscope;
 
                     // Smooth the values we use to determine if we are falling
-                    gyro.mag = smooth(
-                        gyro.mag,
-                        std::abs(sensors.gyroscope.x()) + std::abs(sensors.gyroscope.y() - cfg.falling.gyro.mag.mean),
-                        cfg.falling.gyro.mag.smoothing);
-                    acc.mag   = smooth(acc.mag,
-                                     std::abs(sensors.accelerometer.norm() - cfg.falling.acc.mag.mean),
+                    gyro.mag  = smooth(gyro.mag,
+                                      std::abs(std::abs(g.x()) + std::abs(g.y()) - cfg.falling.gyro.mag.mean),
+                                      cfg.falling.gyro.mag.smoothing);
+                    acc.mag   = smooth(acc.mag,  //
+                                     std::abs(a.norm() - cfg.falling.acc.mag.mean),
                                      cfg.falling.acc.mag.smoothing);
                     acc.angle = smooth(acc.angle,
-                                       1.0 - std::abs(sensors.accelerometer.normalized().z()),
+                                       std::abs(1.0 - std::abs(a.normalized().z()) - cfg.falling.acc.angle.mean),
                                        cfg.falling.acc.angle.smoothing);
 
                     // If we are getting up we ignore what's going on until we are done
@@ -97,37 +99,37 @@ namespace module::planning {
                         if (falling) {
                             // TODO emit stability falling
                             emit(std::make_unique<Stability>(Stability::FALLING));
-                            emit<Script>(std::make_unique<Body>(), "Relax.yaml");
+                            emit<Script>(std::make_unique<BodySequence>(), ScriptRequest{"Relax.yaml"});
                         }
                         // We can get up if all our sensors are in the recovery range and we are lying down
                         else if (gyro.mag < cfg.getup.gyro_recovery && acc.mag < cfg.getup.acc_recovery
                                  && acc.angle < cfg.getup.angle) {
 
+                            // I've fallen
+                            getting_up = true;
                             emit(std::make_unique<Stability>(Stability::FALLEN));
+
                             // Now we work out which way we are facing, splitting into four quadrants
                             // using the accelerometer to get the four diagonals
                             bool a = sensors.accelerometer.x() > sensors.accelerometer.y();
                             bool b = sensors.accelerometer.x() > -sensors.accelerometer.y();
 
-                            getting_up = true;
                             if (a && b) {
-                                emit<Script>(std::make_unique<Body>(), "GetUpFront.yaml");
+                                emit<Script>(std::make_unique<BodySequence>(), ScriptRequest{"GetUpFront.yaml"});
                             }
                             else if (a && !b) {
                                 // TODO not sure if this is the right way to roll
-                                emit<Script>(std::make_unique<Body>(), "RollLeft.yaml");
+                                emit<Script>(std::make_unique<BodySequence>(), ScriptRequest{"RollLeft.yaml"});
                             }
                             else if (!a && b) {
                                 // TODO not sure if this is the right way to roll
-                                emit<Script>(std::make_unique<Body>(), "RollRight.yaml");
+                                emit<Script>(std::make_unique<BodySequence>(), ScriptRequest{"RollRight.yaml"});
                             }
                             else if (!a && !b) {
-                                emit<Script>(std::make_unique<Body>(), "GetUpBack.yaml");
+                                emit<Script>(std::make_unique<BodySequence>(), ScriptRequest{"GetUpBack.yaml"});
                             }
                         }
                     }
-
-
                 } break;
                 case RunInfo::SUBTASK_DONE: {
                     // SUBTASK_DONE means the script we executed finished running
