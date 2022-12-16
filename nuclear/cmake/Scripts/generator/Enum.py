@@ -39,6 +39,8 @@ class Enum:
                 }};
                 Value value{{Value::{default_value}}};
 
+                static constexpr size_t MAX_VALUE = {max_value};
+
                 // Constructors
                 {name}();
 
@@ -103,9 +105,7 @@ class Enum:
                 else {{ throw std::runtime_error("String " + str + " did not match any enum for {name}"); }}
             }}
 
-            {fqn}::{name}({protobuf_name} const& p) {{
-                value = static_cast<Value>(p);
-            }}
+            {fqn}::{name}({protobuf_name} const& p) : value(static_cast<Value>(p)) {{}}
 
             bool {fqn}::operator <({name} const& other) const {{
                 return value < other.value;
@@ -226,6 +226,7 @@ class Enum:
                 protobuf_name="::".join((".protobuf" + self.fqn).split(".")),
                 values=values,
                 default_value=default_value,
+                max_value=max([v[1] for v in self.values]),
             ),
             impl_template.format(
                 fqn="::".join(self.fqn.split(".")),

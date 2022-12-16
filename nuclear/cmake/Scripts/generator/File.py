@@ -33,7 +33,7 @@ class File:
         enum_impls = "\n\n".join([e[1] for e in enums])
         enum_python = "\n\n".join([e[2] for e in enums])
 
-        # Generate our enums c++
+        # Generate our messages c++
         messages = [m.generate_cpp() for m in self.messages]
         message_headers = indent("\n\n".join([m[0] for m in messages]))
         message_impls = "\n\n".join([m[1] for m in messages])
@@ -57,12 +57,16 @@ class File:
         # We use a dirty hack here of putting a priority on each header
         # to make the includes be in a better order
         for d in self.dependencies:
-            if d in ["Vector.proto", "Matrix.proto"]:
-                includes.add('4"message/conversion/proto_matrix.hpp"')
+            if d in [
+                "Vector.proto",
+                "Matrix.proto",
+                "Transform.proto",
+                "google/protobuf/timestamp.proto",
+                "google/protobuf/duration.proto",
+            ]:
+                includes.add('4"message/conversion/proto_conversion.hpp"')
             elif d in ["Neutron.proto"]:
                 pass  # We don't need to do anything for these ones
-            elif d in ["google/protobuf/timestamp.proto", "google/protobuf/duration.proto"]:
-                includes.add('4"message/conversion/proto_time.hpp"')
             else:
                 includes.add('4"{}"'.format(d[:-6] + ".hpp"))
 

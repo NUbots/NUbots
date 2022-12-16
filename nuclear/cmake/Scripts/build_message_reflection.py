@@ -61,16 +61,12 @@ if __name__ == "__main__":
         """\
         #ifndef MESSAGE_REFLECTION_HPP
         #define MESSAGE_REFLECTION_HPP
-
         #include <cstdint>
         #include <memory>
         #include <string>
         #include <vector>
-
         {includes}
-
         namespace message::reflection {{
-
             template <template <typename> class Reflector>
             std::unique_ptr<Reflector<void>> from_hash(const uint64_t& hash) {{
                 switch (hash) {{
@@ -78,9 +74,7 @@ if __name__ == "__main__":
                     default: throw std::runtime_error("Unknown message type with hash " + std::to_string(hash));
                 }}
             }}
-
         }}  // namespace message::reflection
-
         #endif  // MESSAGE_REFLECTION_HPP
         """
     ).format(includes=includes, cases=indent(cases, 12))

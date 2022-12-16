@@ -90,3 +90,7 @@ add_subdirectory("roles")
 
 # Add the subdirectory for module This must be after roles as roles determines which modules to build
 add_subdirectory("module")
+
+if(BUILD_TESTS)
+  add_subdirectory(tests)
+endif(BUILD_TESTS)
