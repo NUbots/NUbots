@@ -1,0 +1,18 @@
+# Controls the minimum log level that NUClear log will display
+log_level: DEBUG
+
+gyro_mag:
+  mean: 0.0
+  smoothing: 0.9
+  unstable: 0.5
+  falling: 1.0
+acc_mag:
+  mean: 9.8 # The expected value for the accelerometer at rest
+  smoothing: 0.9
+  unstable: 1.0
+  falling: 2.0
+acc_angle:
+  smoothing: 0.9
+  mean: 0.0
+  unstable: 0.0
+  falling: 0.0
