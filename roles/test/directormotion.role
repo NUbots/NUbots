@@ -9,5 +9,5 @@ nuclear_role(
   actuation::Kinematics
   actuation::Servos
   # Skills
-  skills::KickScript
+  skill::KickScript
 )
