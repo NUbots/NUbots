@@ -8,7 +8,6 @@
 #include "message/behaviour/state/Stability.hpp"
 #include "message/input/Sensors.hpp"
 #include "message/planning/PlanFallingRelax.hpp"
-#include "message/skill/GetUp.hpp"
 
 #include "utility/support/yaml_expression.hpp"
 
