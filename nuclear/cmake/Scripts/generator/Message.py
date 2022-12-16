@@ -109,7 +109,6 @@ class Message:
 
         return (rule_of_five.format(name=self.name, warning=raw_pointer_warning if raw_pointer else ""), "")
 
-
     def generate_protobuf_constructor(self):
 
         # Fully qualified c++ name
@@ -224,8 +223,10 @@ class Message:
                             lines.append(indent("{0}[i] = proto.{1}(i);".format(v.name, v.name.lower()), 8))
                             lines.append(indent("}"))
                         else:
-                            member_inits.append(
-                                "{0}(std::begin(proto.{1}()), std::end(proto.{1}()))".format(v.name, v.name.lower())
+                            lines.append(
+                                "{0}.insert(std::end({0}), std::begin(proto.{1}()), std::end(proto.{1}()));".format(
+                                    v.name, v.name.lower()
+                                )
                             )
 
                 elif v.one_of:
@@ -282,33 +283,25 @@ class Message:
 
                 else:
                     if v.bytes_type:
-                        member_inits.append(
-                            "{0}(std::begin(proto.{1}()), std::end(proto.{1}()))".format(v.name, v.name.lower())
+                        lines.append(
+                            "{0}.insert(std::end({0}), std::begin(proto.{1}()), std::end(proto.{1}()));".format(
+                                v.name, v.name.lower()
+                            )
                         )
 
                     elif v.special_cpp_type:
-                        member_inits.append(
-                            "{0}(message::conversion::convert<{1}>(proto.{2}()))".format(
+                        lines.append(
+                            "{0} = message::conversion::convert<{1}>(proto.{2}());".format(
                                 v.name, v.cpp_type, v.name.lower()
                             )
                         )
 
                     else:  # Basic and other types are handled the same
-                        member_inits.append("{}(proto.{}())".format(v.name, v.name.lower()))
+                        lines.append(indent("{} = proto.{}();".format(v.name, v.name.lower())))
 
             lines.append("}")
 
-            lines[0] = lines[0].format(
-                cpp_fqn=cpp_fqn,
-                cpp_name=self.name,
-                proto_name=protobuf_name,
-                member_init=": {}".format(", ".join(member_inits)) if len(member_inits) > 0 else "",
-            )
-
-            return (
-                "{}(const {}& proto);".format(self.name, protobuf_name),
-                "\n".join(lines),
-            )
+            return ("{}(const {}& proto);".format(self.name, protobuf_name), "\n".join(lines))
 
     def generate_protobuf_converter(self):
 
@@ -322,7 +315,7 @@ class Message:
         if not self.fields:
             return (
                 "operator {0}() const;".format(protobuf_name),
-                "{0}::operator {1}() const {{\n    return {{}};\n}}".format(cpp_fqn, protobuf_name),
+                "{0}::operator {1}() const {{\n return {1}();\n}}".format(cpp_fqn, protobuf_name),
             )
         else:
             lines = [
