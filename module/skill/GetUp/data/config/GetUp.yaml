@@ -18,5 +18,5 @@ scripts:
     - "RollRight.yaml"
     - "GetUpFront.yaml"
     - "Stand.yaml"
-  getup_inverted:
+  getup_upside_down:
     - "Relax.yaml"

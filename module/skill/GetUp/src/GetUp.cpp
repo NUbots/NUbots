@@ -50,9 +50,9 @@ namespace module::skill {
                 cfg.getup_upright.push_back(extension::behaviour::ScriptRequest(s));
             }
 
-            cfg.getup_inverted.clear();
-            for (const auto& s : config["scripts"]["getup_inverted"].as<std::vector<std::string>>()) {
-                cfg.getup_inverted.push_back(extension::behaviour::ScriptRequest(s));
+            cfg.getup_upside_down.clear();
+            for (const auto& s : config["scripts"]["getup_upside_down"].as<std::vector<std::string>>()) {
+                cfg.getup_upside_down.push_back(extension::behaviour::ScriptRequest(s));
             }
         });
 
@@ -84,7 +84,7 @@ namespace module::skill {
                         // torso z is mostly world z
                         bool upright = (uZTw.z() >= uZTw.x() && uZTw.z() >= uZTw.y());
                         // torso z is mostly world -z
-                        bool inverted = (uZTw.z() <= uZTw.x() && uZTw.z() <= uZTw.y());
+                        bool upside_down = (uZTw.z() <= uZTw.x() && uZTw.z() <= uZTw.y());
 
                         if (on_front) {
                             log<NUClear::INFO>("Getting up from front");
@@ -106,9 +106,9 @@ namespace module::skill {
                             log<NUClear::INFO>("Getting up from upright");
                             emit<Script>(std::make_unique<BodySequence>(), cfg.getup_upright);
                         }
-                        else if (inverted) {
-                            log<NUClear::INFO>("Getting up from inverted");
-                            emit<Script>(std::make_unique<BodySequence>(), cfg.getup_inverted);
+                        else if (upside_down) {
+                            log<NUClear::INFO>("Getting up from upside_down");
+                            emit<Script>(std::make_unique<BodySequence>(), cfg.getup_upside_down);
                         }
 
                     } break;

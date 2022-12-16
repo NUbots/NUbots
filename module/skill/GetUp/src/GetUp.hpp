@@ -23,7 +23,7 @@ namespace module::skill {
             /// @brief Script sequence to run when already upright
             std::vector<::extension::behaviour::ScriptRequest> getup_upright;
             /// @brief Script sequence to run when told to get up while upside down
-            std::vector<::extension::behaviour::ScriptRequest> getup_inverted;
+            std::vector<::extension::behaviour::ScriptRequest> getup_upside_down;
         } cfg;
 
     public:
