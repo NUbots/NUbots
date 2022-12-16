@@ -4,6 +4,7 @@
 
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
+#include "extension/behaviour/Script.hpp"
 
 #include "message/actuation/Limbs.hpp"
 #include "message/behaviour/state/Stability.hpp"
