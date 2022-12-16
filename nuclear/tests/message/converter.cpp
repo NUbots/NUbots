@@ -610,16 +610,6 @@ PbMessageTest construct_pb_message(const NUClear::clock::time_point& tp) {
     set_mat15(msg.mutable_umat15(), 1u);
     set_mat16(msg.mutable_umat16(), 1u);
 
-    // Populate quaternions
-    // set_quat(msg.mutable_quat(), 1.0);
-    // set_quat(msg.mutable_fquat(), 1.0f);
-
-    // Populate isometries
-    // set_mat3(msg.mutable_iso2(), 1.0);
-    // set_mat3(msg.mutable_fiso2(), 1.0f);
-    // set_mat4(msg.mutable_iso3(), 1.0);
-    // set_mat4(msg.mutable_fiso3(), 1.0f);
-
     return msg;
 }
 
@@ -715,16 +705,6 @@ MessageTest construct_message(const NUClear::clock::time_point& tp) {
     set(msg.mat16); set(msg.fmat16); set(msg.imat16); set(msg.umat16);
     // clang-format on
 
-    // Populate quaternions
-    // set(msg.quat.coeffs());
-    // set(msg.fquat.coeffs());
-
-    // Populate isometries
-    // set(msg.iso2.matrix());
-    // set(msg.fiso2.matrix());
-    // set(msg.iso3.matrix());
-    // set(msg.fiso3.matrix());
-
     return msg;
 }
 
@@ -749,16 +729,6 @@ SCENARIO("Conversion from protobuf message to Neutron is consistent", "[nuclear]
         WHEN("A neutron message is converted to a protobuf") {
             auto msg = PbMessageTest(nt_msg);
             THEN("they are equal") {
-                // INFO(fmt::format("{}.{} == {}.{}",
-                //                  pb_msg.timestamp().seconds(),
-                //                  pb_msg.timestamp().nanos(),
-                //                  msg.timestamp().seconds(),
-                //                  msg.timestamp().nanos()));
-                // INFO(fmt::format("{}.{} == {}.{}",
-                //                  pb_msg.duration().seconds(),
-                //                  pb_msg.duration().nanos(),
-                //                  msg.duration().seconds(),
-                //                  msg.duration().nanos()));
                 REQUIRE((pb_msg.timestamp().seconds() == msg.timestamp().seconds()
                          && pb_msg.timestamp().nanos() == msg.timestamp().nanos()));
                 REQUIRE((pb_msg.duration().seconds() == msg.duration().seconds()
@@ -778,12 +748,6 @@ SCENARIO("Conversion from protobuf message to Neutron is consistent", "[nuclear]
                 REQUIRE(pb_msg.b() == msg.b());
                 REQUIRE(pb_msg.s() == msg.s());
                 REQUIRE(pb_msg.bytes() == msg.bytes());
-                // REQUIRE(check_mat3(pb_msg.iso2(), msg.iso2()));
-                // REQUIRE(check_mat3(pb_msg.fiso2(), msg.fiso2()));
-                // REQUIRE(check_mat4(pb_msg.iso3(), msg.iso3()));
-                // REQUIRE(check_mat4(pb_msg.fiso3(), msg.fiso3()));
-                // REQUIRE(check_quat(pb_msg.quat(), msg.quat()));
-                // REQUIRE(check_quat(pb_msg.fquat(), msg.fquat()));
                 REQUIRE(check_vec(pb_msg.vec(), msg.vec()));
                 REQUIRE(check_vec(pb_msg.fvec(), msg.fvec()));
                 REQUIRE(check_vec(pb_msg.ivec(), msg.ivec()));

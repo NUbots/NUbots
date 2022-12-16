@@ -23,20 +23,17 @@ class Message:
                 Field.map_types["{}.{}".format(self.fqn, n.name)] = (Field(n.field[0], self), Field(n.field[1], self))
 
         self.fields = []
-        FIELD_ONEOF_INDEX = "oneof_index"
         for f in m.field:
-            # Field is not a oneof
-            if not f.HasField(FIELD_ONEOF_INDEX):
+            # All fields that are not a part of oneof
+            if not f.HasField("oneof_index"):
                 self.fields.append(Field(f, self))
-            else:
-                # Field is part of a oneof. Find all fields that are part of the same oneof
-                oneof_fields = [v for v in m.field if v.HasField(FIELD_ONEOF_INDEX) and v.oneof_index == f.oneof_index]
 
-                # Create and add the oneof but only once when the first field is encountered for this oneof
-                if oneof_fields.index(f) == 0:
-                    oneof_name = m.oneof_decl[f.oneof_index].name
-                    self.fields.append(OneOfField(oneof_name, oneof_fields, self))
-                    self.submessages.append(OneOfType(oneof_name, oneof_fields, self))
+            # Fields that are a part of oneof
+            elif [v for v in m.field if v.oneof_index == f.oneof_index].index(f) == 0:
+                oneof_fields = [v for v in m.field if v.oneof_index == f.oneof_index]
+                oneof_name = m.oneof_decl[f.oneof_index].name
+                self.fields.append(OneOfField(oneof_name, oneof_fields, self))
+                self.submessages.append(OneOfType(oneof_name, oneof_fields, self))
 
     def generate_default_constructor(self):
 
@@ -45,14 +42,14 @@ class Message:
 
         # If we are empty it's easy
         if not self.fields:
-            return ("{}();".format(self.name), "{}::{}() = default;".format(cpp_fqn, self.name))
+            return ("{}();".format(self.name), "{}::{}() {{}}".format(cpp_fqn, self.name))
         else:
             # Basic types are const reference and others are copy/moved
             field_list = []
             default_field_list = []
             field_set = []
             for v in self.fields:
-                # Work out if we should be copying a const reference or moving a trivial type
+                # Work out if we should be copying a trivial type from a const reference or moving a more complicated type
                 if v.trivially_copyable:
                     field_list.append("{} const& {}".format(v.cpp_type, v.name))
                     field_set.append("{0}({0})".format(v.name))
@@ -80,8 +77,8 @@ class Message:
         # If we are empty it's easy
         if not self.fields:
             return (
-                "bool operator== (const {}& /*other*/) const;".format(self.name),
-                "bool {}::operator== (const {}& /*other*/) const {{ return true; }}".format(cpp_fqn, self.name),
+                "bool operator== (const {}&) const;".format(self.name),
+                "bool {}::operator== (const {}&) const {{ return true; }}".format(cpp_fqn, self.name),
             )
         else:
             equality_test = " && ".join(["{0} == other.{0}".format(v.name) for v in self.fields])
@@ -112,6 +109,7 @@ class Message:
 
         return (rule_of_five.format(name=self.name, warning=raw_pointer_warning if raw_pointer else ""), "")
 
+
     def generate_protobuf_constructor(self):
 
         # Fully qualified c++ name
@@ -123,16 +121,14 @@ class Message:
         # If we are empty it's easy
         if not self.fields:
             return (
-                "{}(const {}& /*proto*/);".format(self.name, protobuf_name),
-                "{}::{}(const {}& /*proto*/) {{}}".format(cpp_fqn, self.name, protobuf_name),
+                "{}(const {}&);".format(self.name, protobuf_name),
+                "{}::{}(const {}&) {{}}".format(cpp_fqn, self.name, protobuf_name),
             )
         else:
-            lines = ["{cpp_fqn}::{cpp_name}(const {proto_name}& proto) {member_init} {{"]
+            lines = ["{}::{}(const {}& proto) {{".format(cpp_fqn, self.name, protobuf_name)]
 
-            member_inits = []
             for v in self.fields:
                 if v.pointer:
-                    member_inits.append("{}(nullptr)".format(v.name))
                     print("TODO HANDLE POINTER CASES")
 
                 elif v.map_type:

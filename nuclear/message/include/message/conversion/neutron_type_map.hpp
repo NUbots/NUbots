@@ -161,12 +161,6 @@ namespace message::conversion {
     template <> struct NeutronTypeMap<::message::conversion::math::fmat>   { using type = DynamicMatrix; };
     template <> struct NeutronTypeMap<::message::conversion::math::imat>   { using type = DynamicMatrix; };
     template <> struct NeutronTypeMap<::message::conversion::math::umat>   { using type = DynamicMatrix; };
-    template <> struct NeutronTypeMap<::message::conversion::math::iso2>   { using type = Isometry; };
-    template <> struct NeutronTypeMap<::message::conversion::math::fiso2>  { using type = Isometry; };
-    template <> struct NeutronTypeMap<::message::conversion::math::iso3>   { using type = Isometry; };
-    template <> struct NeutronTypeMap<::message::conversion::math::fiso3>  { using type = Isometry; };
-    template <> struct NeutronTypeMap<::message::conversion::math::quat>   { using type = Quaternion; };
-    template <> struct NeutronTypeMap<::message::conversion::math::fquat>  { using type = Quaternion; };
     template <> struct NeutronTypeMap<NUClear::clock::time_point>          { using type = Chrono; };
     template <> struct NeutronTypeMap<NUClear::clock::duration>            { using type = Chrono; };
     // clang-format on
