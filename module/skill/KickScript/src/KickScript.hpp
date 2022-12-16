@@ -5,7 +5,7 @@
 
 #include "extension/Behaviour.hpp"
 
-namespace module::skills {
+namespace module::skill {
 
     class KickScript : public ::extension::behaviour::BehaviourReactor {
     public:
@@ -13,6 +13,6 @@ namespace module::skills {
         explicit KickScript(std::unique_ptr<NUClear::Environment> environment);
     };
 
-}  // namespace module::skills
+}  // namespace module::skill
 
 #endif  // MODULE_SKILL_KICKSCRIPT_HPP
