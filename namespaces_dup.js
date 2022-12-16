@@ -529,6 +529,9 @@ var namespaces_dup =
         [ "translate_id_servo", "Webots_8cpp.html#a81eded8b344d72482e2c16f89c1d4a34", null ],
         [ "translate_servo_id", "Webots_8cpp.html#a1d4e4a88a95e5fdb202c96cdf68dcd61", null ]
       ] ],
+      [ "skill", null, [
+        [ "KickScript", "classmodule_1_1skill_1_1KickScript.html", "classmodule_1_1skill_1_1KickScript" ]
+      ] ],
       [ "support", null, [
         [ "configuration", null, [
           [ "GlobalConfig", "classmodule_1_1support_1_1configuration_1_1GlobalConfig.html", "classmodule_1_1support_1_1configuration_1_1GlobalConfig" ],

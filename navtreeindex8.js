@@ -1,5 +1,7 @@
 var NAVTREEINDEX8 =
 {
+"namespaceutility_1_1strutil.html#abdfcbe0d6e6ebb07da4a04e0b9f17716":[0,0,5,12,3],
+"namespaceutility_1_1strutil.html#ac1b32a7892ea64d8857d4082b8f7782c":[0,0,5,12,9],
 "namespaceutility_1_1strutil.html#afeea08f5ddfb3ec4431ad63ecfb46161":[0,0,5,12,5],
 "opencl__context__for__display_8cpp.html#a910ae5f5473dcb1c5b8b223430425799":[0,0,2,7,0,1,0,12],
 "opencl__error__category_8cpp.html#a9534d7027b2548c84ae872164fc5d6a7":[0,0,2,7,0,1,0,9],
@@ -114,7 +116,7 @@ var NAVTREEINDEX8 =
 "quaternion_8hpp.html#a125dc8461b108045bb8763abaf1019ff":[0,0,5,7,5,0],
 "quaternion_8hpp.html#a85b29996c0d776de35dc74b241911f20":[0,0,5,7,5,1],
 "quaternion_8hpp.html#ab77fdf01cc1ef83f3be36c92f8d9cf77":[0,0,5,7,5,2],
-"read__packet_8cpp.html#a9db67cc6effeec8f75133c6a2577838e":[0,0,2,9,1,6],
+"read__packet_8cpp.html#a9db67cc6effeec8f75133c6a2577838e":[0,0,2,10,1,6],
 "resample_8hpp.html#ad303838c627903439887c863cc1ef49a":[0,0,5,7,7,0,4],
 "residual_8hpp.html#a3666903fbc2bb877aac34c9574b99fdb":[0,0,5,7,7,0,5],
 "settings_8hpp.html#aa996f3b2aa7af423b56622644f3c00fe":[0,0,2,3,57],
@@ -247,7 +249,5 @@ var NAVTREEINDEX8 =
 "structRobotInfo.html#aceb887f54b437485773bc3d80518410f":[1,0,11,0],
 "structTeamInfo.html":[1,0,12],
 "structTeamInfo.html#a23ae32f3f40eb98e7b7428e031624db3":[1,0,12,3],
-"structTeamInfo.html#a2ffe64c04593c8a1a3c00bf2c597c7e4":[1,0,12,0],
-"structTeamInfo.html#a3a93aa47d8fa5139ab63728dd4129c4a":[1,0,12,1],
-"structTeamInfo.html#aaae0f9b84b1c881608753b68f3cd8215":[1,0,12,5]
+"structTeamInfo.html#a2ffe64c04593c8a1a3c00bf2c597c7e4":[1,0,12,0]
 };

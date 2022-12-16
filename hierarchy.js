@@ -233,7 +233,8 @@ var hierarchy =
     [ "NUClear::Reactor", null, [
       [ "extension::behaviour::BehaviourReactor", "classextension_1_1behaviour_1_1BehaviourReactor.html", [
         [ "module::actuation::Kinematics", "classmodule_1_1actuation_1_1Kinematics.html", null ],
-        [ "module::actuation::Servos", "classmodule_1_1actuation_1_1Servos.html", null ]
+        [ "module::actuation::Servos", "classmodule_1_1actuation_1_1Servos.html", null ],
+        [ "module::skill::KickScript", "classmodule_1_1skill_1_1KickScript.html", null ]
       ] ],
       [ "module::actuation::KinematicsConfiguration", "classmodule_1_1actuation_1_1KinematicsConfiguration.html", null ],
       [ "module::behaviour::Controller", "classmodule_1_1behaviour_1_1Controller.html", null ],

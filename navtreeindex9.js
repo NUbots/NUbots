@@ -1,5 +1,7 @@
 var NAVTREEINDEX9 =
 {
+"structTeamInfo.html#a3a93aa47d8fa5139ab63728dd4129c4a":[1,0,12,1],
+"structTeamInfo.html#aaae0f9b84b1c881608753b68f3cd8215":[1,0,12,5],
 "structTeamInfo.html#abf35d779f912074069aa21c85599c6d1":[1,0,12,2],
 "structTeamInfo.html#ad0aaa8c3eecc89d099caf01e691ae722":[1,0,12,4],
 "structTeamInfo.html#ad865334a6932d7625935743e6a9593f7":[1,0,12,7],
@@ -247,7 +249,5 @@ var NAVTREEINDEX9 =
 "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a61d981bbaaad5a8b7b5e7c5155fa9a2e":[1,0,2,1,0,1,0,9],
 "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a6b97786321aa7a60f27425c48e3b4f5c":[1,0,2,1,0,1,0,0],
 "structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a7fc402b6f828ed0f7db4d3878f6435c4":[1,0,2,1,0,1,0,1],
-"structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a89ab9776e39eda743e785a45e8c90271":[1,0,2,1,0,1,0,2],
-"structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a8de56d8ac15a3b593d8485786c3a2e3c":[1,0,2,1,0,1,0,7],
-"structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#aaafa64396de020925e9cad5406da92a4":[1,0,2,1,0,1,0,4]
+"structmodule_1_1behaviour_1_1planning_1_1SimpleWalkPathPlanner_1_1Config.html#a89ab9776e39eda743e785a45e8c90271":[1,0,2,1,0,1,0,2]
 };

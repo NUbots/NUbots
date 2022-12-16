@@ -1,6 +1,7 @@
 <map id="extension::behaviour::BehaviourReactor" name="extension::behaviour::BehaviourReactor">
-<area shape="rect" id="node1" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="85,80,244,121"/>
+<area shape="rect" id="node1" title="A reactor subtype that can be used when making a behaviour reactor." alt="" coords="172,80,331,121"/>
 <area shape="rect" id="node3" href="$classmodule_1_1actuation_1_1Kinematics.html" title=" " alt="" coords="5,169,153,211"/>
 <area shape="rect" id="node4" href="$classmodule_1_1actuation_1_1Servos.html" title=" " alt="" coords="177,169,325,211"/>
-<area shape="rect" id="node2" title=" " alt="" coords="97,5,232,32"/>
+<area shape="rect" id="node5" href="$classmodule_1_1skill_1_1KickScript.html" title=" " alt="" coords="350,177,529,203"/>
+<area shape="rect" id="node2" title=" " alt="" coords="184,5,319,32"/>
 </map>

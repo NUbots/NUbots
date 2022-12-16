@@ -235,6 +235,9 @@ var annotated_dup =
         ] ],
         [ "Webots", "classmodule_1_1platform_1_1Webots.html", "classmodule_1_1platform_1_1Webots" ]
       ] ],
+      [ "skill", null, [
+        [ "KickScript", "classmodule_1_1skill_1_1KickScript.html", "classmodule_1_1skill_1_1KickScript" ]
+      ] ],
       [ "support", null, [
         [ "configuration", null, [
           [ "GlobalConfig", "classmodule_1_1support_1_1configuration_1_1GlobalConfig.html", "classmodule_1_1support_1_1configuration_1_1GlobalConfig" ],
