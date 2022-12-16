@@ -29,6 +29,7 @@ find_package(Eigen3 REQUIRED)
 # Build the builtin protocol buffers as normal
 foreach(proto ${builtin_protobufs})
 
+  # NAME_WE: File name with neither the directory nor the longest extension
   get_filename_component(file_we ${proto} NAME_WE)
 
   add_custom_command(
@@ -56,7 +57,8 @@ foreach(proto ${message_protobufs})
     BUILTIN_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}"
   )
 
-  # Compute the generated target name
+  # * Compute the generated target name
+  # * NAME_WE: File name with neither the directory nor the longest extension
   file(RELATIVE_PATH output_path ${message_parent_dir} ${proto})
   get_filename_component(output_path ${output_path} DIRECTORY)
   get_filename_component(file_we ${proto} NAME_WE)

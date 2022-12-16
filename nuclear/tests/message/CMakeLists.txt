@@ -7,7 +7,8 @@ GenerateNeutron(
   BUILTIN_OUTPUT_DIR "${PROJECT_BINARY_DIR}/nuclear/message"
 )
 
-# Compute the generated target name
+# * Compute the generated target name
+# * NAME_WE: File name with neither the directory nor the longest extension
 file(RELATIVE_PATH output_path ${CMAKE_CURRENT_SOURCE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/MessageTest.proto")
 get_filename_component(output_path ${output_path} DIRECTORY)
 get_filename_component(file_we "${CMAKE_CURRENT_SOURCE_DIR}/MessageTest.proto" NAME_WE)
