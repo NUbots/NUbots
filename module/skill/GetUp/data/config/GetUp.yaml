@@ -3,20 +3,20 @@ log_level: DEBUG
 
 scripts:
   getup_upright:
-   - "Stand.yaml"
+    - "Stand.yaml"
   getup_front:
-   - "GetUpFront.yaml"
-   - "Stand.yaml"
+    - "GetUpFront.yaml"
+    - "Stand.yaml"
   getup_back:
-   - "GetUpBack.yaml"
-   - "Stand.yaml"
+    - "GetUpBack.yaml"
+    - "Stand.yaml"
   getup_left:
-   - "RollLeft.yaml"
-   - "GetUpFront.yaml"
-   - "Stand.yaml"
+    - "RollLeft.yaml"
+    - "GetUpFront.yaml"
+    - "Stand.yaml"
   getup_right:
-   - "RollRight.yaml"
-   - "GetUpFront.yaml"
-   - "Stand.yaml"
+    - "RollRight.yaml"
+    - "GetUpFront.yaml"
+    - "Stand.yaml"
   getup_inverted:
-   - "Relax.yaml"
+    - "Relax.yaml"
