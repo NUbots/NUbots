@@ -8,4 +8,6 @@ nuclear_role(
   # Servos
   actuation::Kinematics
   actuation::Servos
+  skill::GetUp
+  planning::GetUpPlanner
 )
