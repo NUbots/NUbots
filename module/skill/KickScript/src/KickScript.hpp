@@ -1,5 +1,5 @@
-#ifndef MODULE_SKILLS_KICKSCRIPT_HPP
-#define MODULE_SKILLS_KICKSCRIPT_HPP
+#ifndef MODULE_SKILL_KICKSCRIPT_HPP
+#define MODULE_SKILL_KICKSCRIPT_HPP
 
 #include <nuclear>
 
@@ -15,4 +15,4 @@ namespace module::skills {
 
 }  // namespace module::skills
 
-#endif  // MODULE_SKILLS_KICKSCRIPT_HPP
+#endif  // MODULE_SKILL_KICKSCRIPT_HPP

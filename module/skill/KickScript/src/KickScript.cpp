@@ -5,17 +5,17 @@
 #include "extension/behaviour/Script.hpp"
 
 #include "message/actuation/Limbs.hpp"
-#include "message/skills/Kick.hpp"
+#include "message/skill/Kick.hpp"
 
 #include "utility/input/LimbID.hpp"
 
-namespace module::skills {
+namespace module::skill {
 
     using extension::Configuration;
     using extension::behaviour::Script;
     using extension::behaviour::ScriptRequest;
     using message::actuation::LimbsSequence;
-    using message::skills::Kick;
+    using message::skill::Kick;
     using utility::input::LimbID;
 
     KickScript::KickScript(std::unique_ptr<NUClear::Environment> environment)
@@ -49,4 +49,4 @@ namespace module::skills {
         });
     }
 
-}  // namespace module::skills
+}  // namespace module::skill
