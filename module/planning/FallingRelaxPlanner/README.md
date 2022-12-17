@@ -7,13 +7,13 @@ This is done to prevent damage when the robot impacts the ground, hopefully savi
 
 ## Usage
 
-Emit a `message::plan::PlanFallingRelax` as a Task.
+Emit a `message::plan::RelaxWhenFalling` as a Task.
 Make sure that it has a lower challenge priority than the GetUp, otherwise it may trigger in the middle of the getup resulting in an infinite loop of falling and half getting up.
 
 ## Consumes
 
 - `message::input::Sensors` to determine when the robot is actively falling over
-- `message::plan::PlanFallingRelax` as a Task to activate this module to for the robot falling over
+- `message::plan::RelaxWhenFalling` as a Task to activate this module allowing it to relax when the robot is falling over
 
 ## Emits
 

@@ -21,7 +21,7 @@ syntax = "proto3";
 package message.planning;
 
 /**
- * Emit a PlanFallingRelax Task in order to tell the FallingRelaxPlanner to start monitoring the robot's state and if it
- * decides that the robot is falling over, relax all the servos to prevent damage.
+ * Emit a RelaxWhenFalling Task in order to tell the planner to start monitoring the robot's state and if it decides
+ * that the robot is falling over, relax all the servos to prevent damage.
  */
-message PlanFallingRelax {}
+message RelaxWhenFalling {}

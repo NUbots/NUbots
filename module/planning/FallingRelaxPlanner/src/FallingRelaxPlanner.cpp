@@ -7,7 +7,7 @@
 #include "message/actuation/Limbs.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/planning/PlanFallingRelax.hpp"
+#include "message/planning/RelaxWhenFalling.hpp"
 
 #include "utility/support/yaml_expression.hpp"
 
@@ -19,7 +19,7 @@ namespace module::planning {
     using message::actuation::BodySequence;
     using message::behaviour::state::Stability;
     using message::input::Sensors;
-    using message::planning::PlanFallingRelax;
+    using message::planning::RelaxWhenFalling;
     using utility::support::Expression;
 
     double smooth(double value, double new_value, double alpha) {
@@ -56,7 +56,7 @@ namespace module::planning {
             cfg.acc_angle.smoothing = config["acc_angle"]["smoothing"].as<Expression>();
         });
 
-        on<Provide<PlanFallingRelax>, Trigger<Sensors>>().then([this](const RunInfo& info, const Sensors& sensors) {
+        on<Provide<RelaxWhenFalling>, Trigger<Sensors>>().then([this](const RunInfo& info, const Sensors& sensors) {
             // OTHER_TRIGGER means we ran because of a sensors update
             if (info.run_reason == RunInfo::OTHER_TRIGGER) {
                 auto& a = sensors.accelerometer;
