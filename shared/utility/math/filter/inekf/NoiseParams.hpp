@@ -10,14 +10,15 @@
  *  @brief  Header file for Invariant EKF noise parameter class
  *  @date   September 25, 2018
  **/
-#ifndef NOISEPARAMS_H
-#define NOISEPARAMS_H 
+#ifndef UTILITY_MATH_FILTER_INEKF_NOISEPARAMS_HPP
+#define UTILITY_MATH_FILTER_INEKF_NOISEPARAMS_HPP
+
 #include <Eigen/Dense>
 #include <iostream>
 
-namespace inekf {
+namespace utility::math::filter::inekf {
 
-class NoiseParams {
+    class NoiseParams {
 
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -29,7 +30,7 @@ class NoiseParams {
 
         void setAccelerometerNoise(double std);
         void setAccelerometerNoise(const Eigen::Vector3d& std);
-        void setAccelerometerNoise(const Eigen::Matrix3d& cov);  
+        void setAccelerometerNoise(const Eigen::Matrix3d& cov);
 
         void setGyroscopeBiasNoise(double std);
         void setGyroscopeBiasNoise(const Eigen::Vector3d& std);
@@ -37,7 +38,7 @@ class NoiseParams {
 
         void setAccelerometerBiasNoise(double std);
         void setAccelerometerBiasNoise(const Eigen::Vector3d& std);
-        void setAccelerometerBiasNoise(const Eigen::Matrix3d& cov);  
+        void setAccelerometerBiasNoise(const Eigen::Matrix3d& cov);
 
         void setLandmarkNoise(double std);
         void setLandmarkNoise(const Eigen::Vector3d& std);
@@ -54,7 +55,7 @@ class NoiseParams {
         Eigen::Matrix3d getLandmarkCov();
         Eigen::Matrix3d getContactCov();
 
-        friend std::ostream& operator<<(std::ostream& os, const NoiseParams& p);  
+        friend std::ostream& operator<<(std::ostream& os, const NoiseParams& p);
 
     private:
         Eigen::Matrix3d Qg_;
@@ -63,7 +64,7 @@ class NoiseParams {
         Eigen::Matrix3d Qba_;
         Eigen::Matrix3d Ql_;
         Eigen::Matrix3d Qc_;
-};
+    };
 
-} // end inekf namespace
-#endif 
+}  // namespace utility::math::filter::inekf
+#endif

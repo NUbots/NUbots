@@ -11,17 +11,19 @@
  *  @date   September 25, 2018
  **/
 
-#ifndef ROBOTSTATE_H
-#define ROBOTSTATE_H 
+#ifndef UTILITY_MATH_FILTER_INEKF_ROBOTSTATE_HPP
+#define UTILITY_MATH_FILTER_INEKF_ROBOTSTATE_HPP
+
 #include <Eigen/Dense>
 #include <iostream>
+
 #if INEKF_USE_MUTEX
-#include <mutex>
+    #include <mutex>
 #endif
 
-namespace inekf {
+namespace utility::math::filter::inekf {
 
-class RobotState {
+    class RobotState {
 
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -29,12 +31,12 @@ class RobotState {
         RobotState(const Eigen::MatrixXd& X);
         RobotState(const Eigen::MatrixXd& X, const Eigen::VectorXd& Theta);
         RobotState(const Eigen::MatrixXd& X, const Eigen::VectorXd& Theta, const Eigen::MatrixXd& P);
-        
+
 #if INEKF_USE_MUTEX
         // RobotState(RobotState&& other); // Move initialization
-        RobotState(const RobotState& other); // Copy initialization
+        RobotState(const RobotState& other);  // Copy initialization
         // RobotState& operator=(RobotState&& other); // Move assignment
-        RobotState& operator=(const RobotState& other); // Copy assignment
+        RobotState& operator=(const RobotState& other);  // Copy assignment
 #endif
 
         const Eigen::MatrixXd getX();
@@ -60,7 +62,7 @@ class RobotState {
 
         void copyDiagX(int n, Eigen::MatrixXd& BigX);
 
-        friend std::ostream& operator<<(std::ostream& os, const RobotState& s);  
+        friend std::ostream& operator<<(std::ostream& os, const RobotState& s);
 
     private:
         Eigen::MatrixXd X_;
@@ -69,9 +71,7 @@ class RobotState {
 #if INEKF_USE_MUTEX
         mutable std::mutex mutex_;
 #endif
+    };
 
-};
-
-} // end inekf namespace
-#endif 
-
+}  // namespace utility::math::filter::inekf
+#endif
