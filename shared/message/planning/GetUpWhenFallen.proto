@@ -21,7 +21,7 @@ syntax = "proto3";
 package message.planning;
 
 /**
- * Emit a PlanGetUp Task in order to tell the GetUpPlanner to start monitoring the robot's state and get it up if it
- * falls.
+ * Emit a GetUpWhenFallen Task in order to tell the GetUpPlanner to start monitoring the robot's state and get it up if
+ * it falls.
  */
-message PlanGetUp {}
+message GetUpWhenFallen {}

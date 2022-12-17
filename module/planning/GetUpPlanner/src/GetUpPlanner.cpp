@@ -4,7 +4,7 @@
 #include "extension/Configuration.hpp"
 
 #include "message/input/Sensors.hpp"
-#include "message/planning/PlanGetUp.hpp"
+#include "message/planning/GetUpWhenFallen.hpp"
 #include "message/skill/GetUp.hpp"
 
 #include "utility/support/yaml_expression.hpp"
@@ -13,7 +13,7 @@ namespace module::planning {
 
     using extension::Configuration;
     using message::input::Sensors;
-    using message::planning::PlanGetUp;
+    using message::planning::GetUpWhenFallen;
     using message::skill::GetUp;
     using utility::support::Expression;
 
@@ -30,7 +30,7 @@ namespace module::planning {
             cfg.acc       = config["acc"].as<Expression>();
         });
 
-        on<Provide<PlanGetUp>, Trigger<Sensors>>().then([this](const RunInfo& info, const Sensors& sensors) {
+        on<Provide<GetUpWhenFallen>, Trigger<Sensors>>().then([this](const RunInfo& info, const Sensors& sensors) {
             // Other trigger means we got a new sensors object
             if (info.run_reason == RunInfo::OTHER_TRIGGER) {
                 // Calculate our recovery values
@@ -64,7 +64,7 @@ namespace module::planning {
         });
 
         // If we are interrupted make sure we know we are no longer getting up
-        on<Stop<PlanGetUp>>().then([this] { getting_up = false; });
+        on<Stop<GetUpWhenFallen>>().then([this] { getting_up = false; });
     }
 
 }  // namespace module::planning
