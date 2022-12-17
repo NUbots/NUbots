@@ -8,5 +8,8 @@ nuclear_role(
   # Servos
   actuation::Kinematics
   actuation::Servos
+  # Skills
+  skill::KickScript
+  # Planners
   planning::FallingRelaxPlanner
 )
