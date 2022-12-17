@@ -21,11 +21,7 @@
     "ecmaVersion": 2018,
     "sourceType": "module"
   },
-  "plugins": [
-    "prettier",
-    "react",
-    "@typescript-eslint"
-  ],
+  "plugins": ["prettier", "react", "@typescript-eslint"],
   "settings": {
     "react": {
       "version": "detect"
@@ -35,11 +31,15 @@
     "prettier/prettier": "error",
     "react/display-name": 0,
     "no-unused-vars": "off",
-    "@typescript-eslint/no-unused-vars": ["error", {
-      "vars": "all",
-      "args": "after-used",
-      "ignoreRestSiblings": false
-    }],
+    "react/no-unknown-property": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "vars": "all",
+        "args": "after-used",
+        "ignoreRestSiblings": false
+      }
+    ],
     "@typescript-eslint/member-delimiter-style": [
       "error",
       {
@@ -54,21 +54,9 @@
       }
     ],
     "indent": "off",
-    "linebreak-style": [
-      "error",
-      "unix"
-    ],
-    "quotes": [
-      "error",
-      "single"
-    ],
-    "semi": [
-      "error",
-      "never"
-    ],
-    "arrow-parens": [
-      "error",
-      "as-needed"
-    ]
+    "linebreak-style": ["error", "unix"],
+    "quotes": ["error", "single"],
+    "semi": ["error", "never"],
+    "arrow-parens": ["error", "as-needed"]
   }
 }

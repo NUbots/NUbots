@@ -1,7 +1,6 @@
 {
   "name": "NUsight2",
-  "scripts": {
-  },
+  "scripts": {},
   "env": {
     "NODE_ENV": {
       "value": "production",
@@ -14,9 +13,7 @@
       "size": "free"
     }
   },
-  "addons": [
-
-  ],
+  "addons": [],
   "buildpacks": [
     {
       "url": "https://github.com/heroku/heroku-buildpack-nodejs"

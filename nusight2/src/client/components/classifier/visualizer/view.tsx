@@ -8,7 +8,7 @@ import { Three } from '../../three/three'
 
 import { VisualizerController } from './controller'
 import { VisualizerModel } from './model'
-import styles from './styles.css'
+import styles from './style.module.css'
 import { VisualizerViewModel } from './view_model'
 
 @observer

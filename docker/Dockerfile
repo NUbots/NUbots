@@ -13,7 +13,7 @@
 FROM archlinux:base-20210829.0.32635
 
 # ↓↓↓ UPDATE MIRRORS HERE ↓↓↓
-RUN echo -e "Server=http://host.docker.internal:7878/\$repo/os/\$arch\nServer=https://archive.archlinux.org/repos/2021/08/29/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
+RUN echo -e "Server=https://archive.archlinux.org/repos/2021/08/29/\$repo/os/\$arch" | tee /etc/pacman.d/mirrorlist
 # If you ever update the mirror date, search the repository for UPDATE MIRRORS HERE to find all the places where the URL
 # needs to be altered.
 
@@ -40,9 +40,6 @@ RUN install-package \
     ninja \
     cmake \
     meson \
-    nodejs-lts-fermium \
-    npm \
-    yarn \
     git \
     ncurses
 
@@ -97,7 +94,7 @@ COPY usr/local/toolchain/generate_${platform}_toolchain.py /usr/local/generate_t
 RUN python /usr/local/generate_toolchain.py --prefix /usr/local
 
 # zlib
-RUN install-from-source https://www.zlib.net/zlib-1.2.12.tar.gz
+RUN install-from-source https://github.com/madler/zlib/releases/download/v1.2.13/zlib-1.2.13.tar.gz
 
 # LLVM and Clang
 RUN BUILD_FILE_DIR='llvm' install-cmake-from-source https://github.com/llvm/llvm-project/archive/llvmorg-12.0.1.tar.gz \
@@ -249,7 +246,7 @@ RUN install-cmake-from-source https://github.com/libuv/libuv/archive/v1.42.0.tar
     -DBUILD_TESTING=OFF
 
 # NUClear!
-RUN install-from-source https://github.com/Fastcode/NUClear/archive/f4a60c7269e277a504635a603c2890fb1a70289d.tar.gz \
+RUN install-from-source https://github.com/Fastcode/NUClear/archive/48aa321595c13ed3ba8781ffdc7f63fc70d6d427.tar.gz \
     -DBUILD_TESTS=OFF
 
 
@@ -281,6 +278,9 @@ RUN install-from-source https://github.com/ysims/VisualMesh/archive/1c8d08b8d93a
     -DBUILD_EXAMPLES=OFF \
     -DBUILD_OPENCL_ENGINE=ON
 
+# JSON for modern C++ (https://github.com/nlohmann/json)
+RUN install-header-from-source https://github.com/nlohmann/json/releases/download/v3.10.5/json.hpp
+
 #######################################
 ### ADD NEW PROGRAMS/LIBRARIES HERE ###
 #######################################
@@ -310,11 +310,21 @@ RUN install-package \
     clinfo \
     doxygen
 
+# Install packages for nusight
+RUN install-package \
+    nodejs \
+    npm \
+    yarn
+
 # Install formatters as last step so if they change the image is easy to update
 RUN pip install --upgrade \
     cmake-format==0.6.13 \
     isort==5.7.0 \
     black==22.3.0
+
+RUN npm install -g \
+    prettier@2.7.1 \
+    eslint@8.27.0
 
 # Enable all the driver capabilities so we can use OpenCL in the container
 ENV NVIDIA_DRIVER_CAPABILITIES=all

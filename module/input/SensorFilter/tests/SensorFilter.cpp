@@ -30,14 +30,14 @@
 
 #include "MotionModel.hpp"
 
+#include "message/actuation/BodySide.hpp"
+#include "message/actuation/KinematicsModel.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/motion/BodySide.hpp"
-#include "message/motion/KinematicsModel.hpp"
 
+#include "utility/actuation/ForwardKinematics.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/filter/UKF.hpp"
 #include "utility/math/quaternion.hpp"
-#include "utility/motion/ForwardKinematics.hpp"
 #include "utility/support/yaml_expression.hpp"
 
 using module::input::MotionModel;

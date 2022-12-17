@@ -9,7 +9,7 @@ import { StatusIndicator } from '../status_indicator/view'
 import DropdownIcon from './dropdown.svg'
 import { formatSI } from './format-si'
 import { RobotLabelModel } from './model'
-import style from './style.css'
+import style from './style.module.css'
 
 export type RobotLabelProps = {
   robot: RobotModel
