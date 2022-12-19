@@ -32,7 +32,7 @@
 
 #include "VanDerPolModel.hpp"
 
-#include "utility/math/filter/InEKF.h"
+#include "utility/math/filter/InEKF.hpp"
 #include "utility/math/filter/ParticleFilter.hpp"
 #include "utility/math/filter/UKF.hpp"
 #include "utility/strutil/strutil.hpp"
