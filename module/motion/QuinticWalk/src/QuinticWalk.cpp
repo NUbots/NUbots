@@ -185,8 +185,8 @@ namespace module::motion {
         });
 
         // NEW MAIN LOOP - Calculates joint goals and emits....
-        on<Provide<Walk>, Needs<LeftLegIK>, Needs<RightLegIK>, Needs<RightArm>, Needs<LeftArm>, Single>(const Walk walk)
-            .then([this] {
+        on < Provide<Walk>, Needs<LeftLegIK>, Needs<RightLegIK>, Causing<Stability::STANDING>,
+            Trigger<Sensors>(const Walk walk).then([this] {
                 // ****The function formally known as on<Trigger<WalkCommand>>.then([this](const WalkCommand&
                 // walkCommand)****
 
@@ -225,7 +225,7 @@ namespace module::motion {
                 const float dt = get_time_delta();
                 // see if the walk engine has new goals for us
                 if (walk_engine.update_state(dt, current_orders)) {
-                    calculateJointGoals();
+                    calculateJointGoals();  // NOTE: Make this return, and emit from here
                 }
             });
     }
@@ -311,7 +311,7 @@ namespace module::motion {
         }
     }
 
-    // NOTE: Arms
+    // NOTE: Move into calculate_joint_goals
     std::unique_ptr<ServoCommands> QuinticWalk::motion(const std::vector<std::pair<ServoID, float>>& joints) {
         auto waypoints = std::make_unique<ServoCommands>();
         waypoints->commands.reserve(joints.size() + current_config.arm_positions.size());
