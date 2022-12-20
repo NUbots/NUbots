@@ -258,13 +258,6 @@ TEST_CASE("Test the InEKF", "[utility][math][filter][InEKF]") {
     const std::vector<Eigen::Matrix<double, 6, 6>> covariances =
         resolve_expression<Eigen::Matrix<double, 6, 6>>(config["measurements"]["covariance"]);
 
-    // Should be able to remove these later
-    Eigen::Matrix<double, 6, 1> imu_measurement      = Eigen::Matrix<double, 6, 1>::Zero();
-    Eigen::Matrix<double, 6, 1> imu_measurement_prev = Eigen::Matrix<double, 6, 1>::Zero();
-
-    double t      = 0.0;
-    double t_prev = 0.0;
-
     // Use each set of measurements in the filter
     for (long unsigned int i = 0; i < times.size(); i++) {
         // IMU DATA
