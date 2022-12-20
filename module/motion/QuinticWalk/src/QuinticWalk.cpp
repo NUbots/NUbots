@@ -6,6 +6,7 @@
 
 #include "message/actuation/KinematicsModel.hpp"
 #include "message/behaviour/Behaviour.hpp"
+#include "message/behaviour/state/Stability.hpp"
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/KinematicsModel.hpp"
 #include "message/motion/LimbsIK.hpp"
@@ -25,9 +26,9 @@ namespace module::motion {
     using message::actuation::KinematicsModel;
     using message::actuation::ServoCommand;
     using message::behaviour::Behaviour;
+    using message::behaviour::state::Stability;
     using message::input::Sensors;
     using message::motion::EnableWalkEngineCommand;
-    using message::motion::KinematicsModel;
     using message::motion::LeftLegIK;
     using message::motion::RightLegIK;
     using message::motion::StopCommand;
@@ -169,7 +170,7 @@ namespace module::motion {
             imu_reaction.enable(current_config.imu_active);
         });
 
-        // TODO: Move into Provide
+        // TODO: Move into Provide?
         on<Startup, Trigger<KinematicsModel>>().then("Update Kinematics Model", [this](const KinematicsModel& model) {
             kinematicsModel = model;
             first_run       = true;
@@ -187,15 +188,16 @@ namespace module::motion {
         });
 
         // NEW MAIN LOOP - Calculates joint goals and emits....
-        on < Provide<Walk>, Needs<LeftLegIK>, Needs<RightLegIK>, Causing<Stability::STANDING>,
-            Trigger<Sensors>(const Walk walk).then([this] {
+        on<Provide<Walk>, Needs<LeftLegIK>, Needs<RightLegIK>, Causing<Stability::STANDING>, Trigger<Sensors>>(
+            const Walk walk)
+            .then([this] {
                 // ****The function formally known as on<Trigger<WalkCommand>>.then([this](const WalkCommand&
                 // walkCommand)****
 
                 // the engine expects orders in [m] not [m/s]. We have to compute by dividing by step frequency which is
                 // a double step factor 2 since the order distance is only for a single step, not double step
                 const float factor             = (1.0f / (current_config.params.freq)) * 0.5f;
-                const Eigen::Vector3f& command = walkCommand.command.cast<float>() * factor;
+                const Eigen::Vector3f& command = walk.velocity_target.cast<float>() * factor;
 
                 // Clamp velocity command
                 cyrrent_orders =
@@ -226,8 +228,15 @@ namespace module::motion {
                 // TODO: Add description of this block. ****Formerly Main Walking loop***
                 const float dt = get_time_delta();
                 // see if the walk engine has new goals for us
-                if (walk_engine.update_state(dt, current_orders)) {
-                    calculateJointGoals();  // NOTE: Make this return, and emit from here
+                // NOTE: Falling check - Get stability info from Stability.proto - LC
+                if (Stability::Value::FALLING) {
+                    // TODO: Something
+                }
+                else {
+                    if (walk_engine.update_state(dt, current_orders)) {
+                        std::unique_ptr<ServoCommand> joint_goals = calculateJointGoals();
+                        emit(std::move(joint_goals));
+                    }
                 }
             });
     }
@@ -254,9 +263,9 @@ namespace module::motion {
         return dt;
     }
 
-    std::unique_ptr<ServoCommand> QuinticWalk::calculateJointGoals() {
+    ServoCommand QuinticWalk::calculateJointGoals() {
         /*
-        This method computes the next motor goals and publishes them.
+        This method computes the next motor goals and returns a ServoCommand.
         */
         auto setRPY = [&](const float& roll, const float& pitch, const float& yaw) {
             const float halfYaw   = yaw * 0.5f;
@@ -303,13 +312,14 @@ namespace module::motion {
 
         // Compute inverse kinematics for left and right foot
         const auto joints = calculateLegJoints<float>(kinematicsModel, Htl, Htr);
-        // **** NOTE: Next block comes from motion function -LC
+        // NOTE: Next block comes from motion function -LC
+        // TODO: Make this a new servo command type - LC
         auto waypoints = std::make_unique<ServoCommand>();
         waypoints->commands.reserve(joints.size() + current_config.arm_positions.size());
 
         const NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
-        // TODO: Change to new style of servo command
-        // NOTE: Does this need a ServoCommands like the old proto?
+
+        // NOTE: Does this need a ServoCommands message like the old proto? -LC
         for (const auto& joint : joints) {
             waypoints->commands.emplace_back(subsumption_id,
                                              time,
@@ -327,7 +337,6 @@ namespace module::motion {
                                              current_config.jointGains[joint.first],
                                              100);
         }
-        // emit(std::move(waypoints));
 
         // Plot graphs of desired trajectories
         if (log_level <= NUClear::DEBUG) {
