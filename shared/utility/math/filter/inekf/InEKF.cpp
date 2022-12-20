@@ -40,6 +40,11 @@ namespace utility::math::filter::inekf {
         noise_params = p;
     }
 
+    // Sets the filter's state
+    void InEKF::set_state(RobotState s) {
+        state = s;
+    }
+
     // Set the filter's prior (static) landmarks
     void InEKF::set_prior_landmarks(const map_int_vec3d& pl) {
         prior_landmarks = pl;

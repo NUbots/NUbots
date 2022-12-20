@@ -29,10 +29,10 @@
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
 #include "utility/math/euler.hpp"
+#include "utility/math/filter/inekf/InEKF.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/platform/RawSensors.hpp"
 #include "utility/support/yaml_expression.hpp"
-
 namespace module::input {
 
     using extension::Configuration;
@@ -53,6 +53,7 @@ namespace module::input {
     using utility::math::euler::MatrixToEulerIntrinsic;
     using utility::nusight::graph;
     using utility::support::Expression;
+
 
     std::string makeErrorString(const std::string& src, uint errorCode) {
         std::stringstream s;
@@ -111,7 +112,7 @@ namespace module::input {
             config.inekf.initial_gyro_bias   = cfg["inekf"]["initial"]["gyro_bias"].as<Expression>();
             config.inekf.initial_acc_bias    = cfg["inekf"]["initial"]["acc_bias"].as<Expression>();
 
-            utility::math::filter::inekf::RobotState initial_state();
+            utility::math::filter::inekf::RobotState initial_state{};
             initial_state.set_rotation(config.inekf.initial_orientation);
             initial_state.set_velocity(config.inekf.initial_velocity);
             initial_state.set_position(config.inekf.initial_position);
@@ -582,7 +583,7 @@ namespace module::input {
                                         // how much our torso has moved in the last time step in torso space We need to
                                         // rotate this into world space to update our current Torso CoM position
                                         const Eigen::Quaterniond& Rwt =
-                                            MotionModel<double>::StateVec(motionFilter.get()).Rwt;
+                                            Eigen::Quaterniond(filter.get_state().get_rotation());
                                         const Eigen::Vector3d rMFt_update = current_rMFt - rMFt[side];
                                         const Eigen::Quaterniond q(
                                             Eigen::Vector4d(rMFt_update.x(), rMFt_update.y(), rMFt_update.z(), 0.0));

@@ -1,4 +1,4 @@
-log_level: ERROR
+log_level: WARN
 
 buttons:
   debounce_threshold: 7
@@ -19,7 +19,7 @@ inekf:
   initial_state:
     orientation: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
     velocity: [0.0, 0.0, 0.0]
-    position: [0.0, 0.0, 0.0]
+    position: [0.0, 0.0, 0.5]
     gyro_bias: [0.0, 0.0, 0.0]
     acc_bias: [0.0, 0.0, 0.0]
   noise:

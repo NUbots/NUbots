@@ -29,7 +29,7 @@
 
 #include "message/actuation/KinematicsModel.hpp"
 
-#include "utility/math/filter/UKF.hpp"
+#include "utility/math/filter/inekf/InEKF.hpp"
 
 
 namespace module::input {
@@ -80,7 +80,7 @@ namespace module::input {
 
         struct Config {
             struct InEKF {
-                Eigen::Quaternion<double> initial_orientation{};
+                Eigen::Matrix3d initial_orientation{};
                 Eigen::Vector3d initial_velocity{};
                 Eigen::Vector3d initial_position{};
                 Eigen::Vector3d initial_gyro_bias{};
