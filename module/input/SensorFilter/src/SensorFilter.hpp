@@ -42,7 +42,7 @@ namespace module::input {
     public:
         explicit SensorFilter(std::unique_ptr<NUClear::Environment> environment);
 
-        utility::math::filter::UKF<double, MotionModel> motionFilter{};
+        utility::math::filter::inekf::InEKF filter{};
 
         struct FootDownMethod {
             enum Value { UNKNOWN = 0, Z_HEIGHT = 1, LOAD = 2, FSR = 3 };
@@ -77,49 +77,20 @@ namespace module::input {
                 }
             }
         };
+
         struct Config {
-            Config() = default;
-
-            struct MotionFilter {
-                MotionFilter() = default;
-
-                Eigen::Vector3d velocityDecay = Eigen::Vector3d::Zero();
-
-                struct Noise {
-                    Noise() = default;
-                    struct Measurement {
-                        Eigen::Matrix3d accelerometer          = Eigen::Matrix3d::Zero();
-                        Eigen::Matrix3d accelerometerMagnitude = Eigen::Matrix3d::Zero();
-                        Eigen::Matrix3d gyroscope              = Eigen::Matrix3d::Zero();
-                        Eigen::Matrix3d flatFootOdometry       = Eigen::Matrix3d::Zero();
-                        Eigen::Matrix4d flatFootOrientation    = Eigen::Matrix4d::Zero();
-                    } measurement{};
-                    struct Process {
-                        Eigen::Vector3d position           = Eigen::Vector3d::Zero();
-                        Eigen::Vector3d velocity           = Eigen::Vector3d::Zero();
-                        Eigen::Vector4d rotation           = Eigen::Vector4d::Zero();
-                        Eigen::Vector3d rotationalVelocity = Eigen::Vector3d::Zero();
-                        Eigen::Vector3d gyroscopeBias      = Eigen::Vector3d::Zero();
-                    } process{};
-                } noise{};
-                struct Initial {
-                    Initial() = default;
-                    struct Mean {
-                        Eigen::Vector3d position           = Eigen::Vector3d::Zero();
-                        Eigen::Vector3d velocity           = Eigen::Vector3d::Zero();
-                        Eigen::Vector4d rotation           = Eigen::Vector4d::Zero();
-                        Eigen::Vector3d rotationalVelocity = Eigen::Vector3d::Zero();
-                        Eigen::Vector3d gyroscopeBias      = Eigen::Vector3d::Zero();
-                    } mean{};
-                    struct Covariance {
-                        Eigen::Vector3d position           = Eigen::Vector3d::Zero();
-                        Eigen::Vector3d velocity           = Eigen::Vector3d::Zero();
-                        Eigen::Vector4d rotation           = Eigen::Vector4d::Zero();
-                        Eigen::Vector3d rotationalVelocity = Eigen::Vector3d::Zero();
-                        Eigen::Vector3d gyroscopeBias      = Eigen::Vector3d::Zero();
-                    } covariance{};
-                } initial{};
-            } motionFilter{};
+            struct InEKF {
+                Eigen::Quaternion<double> initial_orientation{};
+                Eigen::Vector3d initial_velocity{};
+                Eigen::Vector3d initial_position{};
+                Eigen::Vector3d initial_gyro_bias{};
+                Eigen::Vector3d initial_acc_bias{};
+                double noise_gyro         = 0.0;
+                double noise_acc          = 0.0;
+                double noise_gyro_bias    = 0.0;
+                double noise_acc_bias     = 0.0;
+                double noise_foot_sensors = 0.0;
+            } inekf{};
 
             struct Button {
                 Button()              = default;

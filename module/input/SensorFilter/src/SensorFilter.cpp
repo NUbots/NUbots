@@ -61,7 +61,6 @@ namespace module::input {
         s << src;
         s << ":";
 
-
         if ((errorCode & RawSensors::Error::INPUT_VOLTAGE) != 0u) {
             s << " Input Voltage ";
         }
@@ -104,83 +103,40 @@ namespace module::input {
             }
             config.footDown.set_method(method, thresholds);
 
-            // Motion filter config
-            // Set velocity decay
-            config.motionFilter.velocityDecay = cfg["motion_filter"]["update"]["velocity_decay"].as<Expression>();
-            motionFilter.model.timeUpdateVelocityDecay = config.motionFilter.velocityDecay;
+            // SET INITIAL PARAMETERS FOR THE INEKF
 
-            // Set our measurement noises
-            config.motionFilter.noise.measurement.accelerometer =
-                Eigen::Vector3d(cfg["motion_filter"]["noise"]["measurement"]["accelerometer"].as<Expression>())
-                    .asDiagonal();
-            config.motionFilter.noise.measurement.accelerometerMagnitude =
-                Eigen::Vector3d(
-                    cfg["motion_filter"]["noise"]["measurement"]["accelerometer_magnitude"].as<Expression>())
-                    .asDiagonal();
-            config.motionFilter.noise.measurement.gyroscope =
-                Eigen::Vector3d(cfg["motion_filter"]["noise"]["measurement"]["gyroscope"].as<Expression>())
-                    .asDiagonal();
-            config.motionFilter.noise.measurement.flatFootOdometry =
-                Eigen::Vector3d(cfg["motion_filter"]["noise"]["measurement"]["flat_foot_odometry"].as<Expression>())
-                    .asDiagonal();
-            config.motionFilter.noise.measurement.flatFootOrientation =
-                Eigen::Vector4d(cfg["motion_filter"]["noise"]["measurement"]["flat_foot_orientation"].as<Expression>())
-                    .asDiagonal();
+            config.inekf.initial_orientation = cfg["inekf"]["initial"]["orientation"].as<Expression>();
+            config.inekf.initial_velocity    = cfg["inekf"]["initial"]["velocity"].as<Expression>();
+            config.inekf.initial_position    = cfg["inekf"]["initial"]["position"].as<Expression>();
+            config.inekf.initial_gyro_bias   = cfg["inekf"]["initial"]["gyro_bias"].as<Expression>();
+            config.inekf.initial_acc_bias    = cfg["inekf"]["initial"]["acc_bias"].as<Expression>();
 
-            // Set our process noises
-            config.motionFilter.noise.process.position =
-                cfg["motion_filter"]["noise"]["process"]["position"].as<Expression>();
-            config.motionFilter.noise.process.velocity =
-                cfg["motion_filter"]["noise"]["process"]["velocity"].as<Expression>();
-            config.motionFilter.noise.process.rotation =
-                cfg["motion_filter"]["noise"]["process"]["rotation"].as<Expression>();
-            config.motionFilter.noise.process.rotationalVelocity =
-                cfg["motion_filter"]["noise"]["process"]["rotational_velocity"].as<Expression>();
+            utility::math::filter::inekf::RobotState initial_state();
+            initial_state.set_rotation(config.inekf.initial_orientation);
+            initial_state.set_velocity(config.inekf.initial_velocity);
+            initial_state.set_position(config.inekf.initial_position);
+            initial_state.set_gyroscope_bias(config.inekf.initial_gyro_bias);
+            initial_state.set_accelerometer_bias(config.inekf.initial_acc_bias);
 
-            // Set our motion model's process noise
-            MotionModel<double>::StateVec process_noise;
-            process_noise.rTWw               = config.motionFilter.noise.process.position;
-            process_noise.vTw                = config.motionFilter.noise.process.velocity;
-            process_noise.Rwt                = config.motionFilter.noise.process.rotation;
-            process_noise.omegaTTt           = config.motionFilter.noise.process.rotationalVelocity;
-            motionFilter.model.process_noise = process_noise;
+            filter.set_state(initial_state);
 
-            // Set our initial means
-            config.motionFilter.initial.mean.position =
-                cfg["motion_filter"]["initial"]["mean"]["position"].as<Expression>();
-            config.motionFilter.initial.mean.velocity =
-                cfg["motion_filter"]["initial"]["mean"]["velocity"].as<Expression>();
-            config.motionFilter.initial.mean.rotation =
-                cfg["motion_filter"]["initial"]["mean"]["rotation"].as<Expression>();
-            config.motionFilter.initial.mean.rotationalVelocity =
-                cfg["motion_filter"]["initial"]["mean"]["rotational_velocity"].as<Expression>();
+            // SET NOISE PARAMETERS FOR THE INEKF
+            config.inekf.noise_gyro         = cfg["inekf"]["noise"]["gyro"].as<double>();
+            config.inekf.noise_acc          = cfg["inekf"]["noise"]["acc"].as<double>();
+            config.inekf.noise_gyro_bias    = cfg["inekf"]["noise"]["gyro_bias"].as<double>();
+            config.inekf.noise_acc_bias     = cfg["inekf"]["noise"]["acc_bias"].as<double>();
+            config.inekf.noise_foot_sensors = cfg["inekf"]["noise"]["foot_sensors"].as<double>();
 
-            // Set out initial covariance
-            config.motionFilter.initial.covariance.position =
-                cfg["motion_filter"]["initial"]["covariance"]["position"].as<Expression>();
-            config.motionFilter.initial.covariance.velocity =
-                cfg["motion_filter"]["initial"]["covariance"]["velocity"].as<Expression>();
-            config.motionFilter.initial.covariance.rotation =
-                cfg["motion_filter"]["initial"]["covariance"]["rotation"].as<Expression>();
-            config.motionFilter.initial.covariance.rotationalVelocity =
-                cfg["motion_filter"]["initial"]["covariance"]["rotational_velocity"].as<Expression>();
+            utility::math::filter::inekf::NoiseParams noise_params(config.inekf.noise_gyro,
+                                                                   config.inekf.noise_acc,
+                                                                   config.inekf.noise_gyro_bias,
+                                                                   config.inekf.noise_acc_bias,
+                                                                   config.inekf.noise_foot_sensors);
 
-            // Set our initial state with the config means and covariances, flagging the filter to reset it
-            MotionModel<double>::StateVec mean;
-            mean.rTWw     = config.motionFilter.initial.mean.position;
-            mean.vTw      = config.motionFilter.initial.mean.velocity;
-            mean.Rwt      = config.motionFilter.initial.mean.rotation;
-            mean.omegaTTt = config.motionFilter.initial.mean.rotationalVelocity;
-
-            MotionModel<double>::StateVec covariance;
-            covariance.rTWw     = config.motionFilter.initial.covariance.position;
-            covariance.vTw      = config.motionFilter.initial.covariance.velocity;
-            covariance.Rwt      = config.motionFilter.initial.covariance.rotation;
-            covariance.omegaTTt = config.motionFilter.initial.covariance.rotationalVelocity;
-            motionFilter.set_state(mean.getStateVec(), covariance.asDiagonal());
+            filter.set_noise_params(noise_params);
 
             // Set our initial position
-            rTWw = cfg["motion_filter"]["initial"]["mean"]["position"].as<Expression>();
+            rTWw = cfg["inekf"]["initial"]["position"].as<Expression>();
 
             // Don't filter any sensors until we have initialised the filter
             update_loop.disable();
@@ -255,43 +211,6 @@ namespace module::input {
                     // Rotating from torso acceleration vector to world z vector ===> this makes it Rwt and not Rtw
                     Eigen::Quaterniond Rwt = Eigen::Quaterniond::FromTwoVectors(acc, Eigen::Vector3d::UnitZ());
                     Rwt.normalize();
-
-                    MotionModel<double>::StateVec mean;
-                    // Rotate rMFt (Foot to Torso CoM) into world space
-                    mean.rTWw = Rwt.toRotationMatrix() * rMFt;
-                    // Remove gravity from accelerometer average and integrate to get velocity
-                    mean.vTw = (acc - (Rwt.conjugate() * Eigen::Quaterniond(0.0, 0.0, 0.0, G) * Rwt).vec()) * deltaT;
-                    mean.Rwt = Rwt;
-                    mean.omegaTTt = gyro;
-
-                    MotionModel<double>::StateVec covariance;
-                    covariance.rTWw     = config.motionFilter.initial.covariance.position;
-                    covariance.vTw      = config.motionFilter.initial.covariance.velocity;
-                    covariance.Rwt      = config.motionFilter.initial.covariance.rotation;
-                    covariance.omegaTTt = config.motionFilter.initial.covariance.rotationalVelocity;
-
-                    // We have finished resetting the filter now
-                    switch (motionFilter.reset(mean.getStateVec(), covariance.asDiagonal())) {
-                        case Eigen::Success:
-                            log<NUClear::INFO>("Motion Model UKF has been reset");
-                            reset_filter.store(false);
-                            update_loop.enable();
-                            break;
-                        case Eigen::NumericalIssue:
-                            log<NUClear::WARN>(
-                                "Cholesky decomposition failed. The provided data did not satisfy the "
-                                "prerequisites.");
-                            break;
-                        case Eigen::NoConvergence:
-                            log<NUClear::WARN>("Cholesky decomposition failed. Iterative procedure did not converge.");
-                            break;
-                        case Eigen::InvalidInput:
-                            log<NUClear::WARN>(
-                                "Cholesky decomposition failed. The inputs are invalid, or the algorithm has been "
-                                "improperly called. When assertions are enabled, such errors trigger an assert.");
-                            break;
-                        default: log<NUClear::WARN>("Cholesky decomposition failed. Some other reason."); break;
-                    }
                 }
 
                 int leftCount   = 0;
@@ -592,129 +511,36 @@ namespace module::input {
                          *             Motion (IMU+Odometry)            *
                          ************************************************/
 
-                        // Gyroscope measurement update
-                        motionFilter.measure(sensors->gyroscope,
-                                             config.motionFilter.noise.measurement.gyroscope,
-                                             MeasurementType::GYROSCOPE());
+                        // Time for filter
+                        using namespace std::chrono;
+                        const double deltaT = std::max(
+                            duration_cast<duration<double>>(
+                                input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp))
+                                .count(),
+                            0.0);
 
-                        // Calculate accelerometer noise factor
-                        Eigen::Matrix3d acc_noise =
-                            config.motionFilter.noise.measurement.accelerometer
-                            // Add noise which is proportional to the square of how much we are moving, minus gravity
-                            // This means that the more we're accelerating, the noisier we think the measurements are
-                            + ((sensors->accelerometer.norm() - std::abs(G))
-                               * (sensors->accelerometer.norm() - std::abs(G)))
-                                  * config.motionFilter.noise.measurement.accelerometerMagnitude;
+                        // IMU data for filter
+                        Eigen::Vector3d gyro = previousSensors ? previousSensors->gyroscope : Eigen::Vector3d::Zero();
+                        Eigen::Vector3d acc =
+                            previousSensors ? previousSensors->accelerometer : Eigen::Vector3d::Zero();
 
-                        // Accelerometer measurement update
-                        motionFilter.measure(sensors->accelerometer, acc_noise, MeasurementType::ACCELEROMETER());
+                        filter.propagate(gyro, acc, deltaT);
 
-                        // This loop calculates the Hwf transform for feet if they have just hit the ground. If they
-                        // have not just hit the ground, it uses the previous Hwf value. This assumes that once the foot
-                        // hits the ground, it doesn't move at all i.e. we're ASSUMING the foot cannot slip/slide
-                        for (const auto& side : {BodySide::LEFT, BodySide::RIGHT}) {
-                            bool foot_down      = sensors->feet[side].down;
-                            bool prev_foot_down = previous_foot_down[side];
-                            Eigen::Isometry3d Htf(
-                                sensors->Htx[side == BodySide::LEFT ? ServoID::L_ANKLE_ROLL : ServoID::R_ANKLE_ROLL]);
+                        // Contact data for filter
+                        filter.set_contacts({{0, feet_down[BodySide::RIGHT]}, {1, feet_down[BodySide::LEFT]}});
 
-                            // If this side's foot is down, and it was not down at the previous time step, then we
-                            // calculate our new footlanding_Hwf value, because our foot has just landed
-                            if (foot_down && !prev_foot_down) {
-                                const MotionModel<double>::StateVec filterState =
-                                    MotionModel<double>::StateVec(motionFilter.get());
-                                Eigen::Isometry3d Hwt;
-                                Hwt.linear()      = filterState.Rwt.toRotationMatrix();
-                                Hwt.translation() = filterState.rTWw;
+                        // Kinematics data for filter
+                        utility::math::filter::inekf::kinematics measured_kinematics;
+                        measured_kinematics.emplace_back(
+                            utility::math::filter::inekf::KinematicPose{0,
+                                                                        Htr.matrix(),
+                                                                        Eigen::Matrix<double, 6, 6>::Zero()});
+                        measured_kinematics.emplace_back(
+                            utility::math::filter::inekf::KinematicPose{1,
+                                                                        Htl.matrix(),
+                                                                        Eigen::Matrix<double, 6, 6>::Zero()});
+                        filter.correct_kinematics(measured_kinematics);
 
-                                // Htg is intended to be such that the "foot down" position is where the foot would be
-                                // if it were flat, even if it's not flat when first touches the ground. As the foot
-                                // flattens, it's meant to becomes true. This means that even if the foot hits the
-                                // ground at an angle, it doesn't store that angled position as the footlanding_Hwf, but
-                                // instead stores the position that foot would be if/when it becomes flat on the ground
-                                Eigen::Isometry3d Htg(utility::actuation::kinematics::calculateGroundSpace(Htf, Hwt));
-
-                                footlanding_Hwf[side]                   = Hwt * Htg;
-                                footlanding_Hwf[side].translation().z() = 0.0;
-
-                                // Store the current foot down state for next time
-                                previous_foot_down[side] = true;
-                            }
-                            // This sides foot is down, but it didn't hit the ground this time step
-                            else if (foot_down && prev_foot_down) {
-                                // Use stored Hwf and Htf to calculate Hwt
-                                Eigen::Isometry3d footlanding_Hwt = footlanding_Hwf[side] * Htf.inverse();
-
-                                // do a foot based position update
-                                motionFilter.measure(Eigen::Vector3d(footlanding_Hwt.translation()),
-                                                     config.motionFilter.noise.measurement.flatFootOdometry,
-                                                     MeasurementType::FLAT_FOOT_ODOMETRY());
-
-                                // do a foot based orientation update
-                                Eigen::Quaterniond Rwt(footlanding_Hwt.linear());
-                                motionFilter.measure(Rwt.coeffs(),
-                                                     config.motionFilter.noise.measurement.flatFootOrientation,
-                                                     MeasurementType::FLAT_FOOT_ORIENTATION());
-                            }
-                            // Otherwise this side's foot is off the ground, so we make sure that for the next time
-                            // step, we know that this time step, the foot was off the ground
-                            else if (!foot_down) {
-                                previous_foot_down[side] = false;
-                            }
-
-                            // Note that the Hwf is set, even if the foot is not down. This means that moving feet in
-                            // the air will have an Hwf associated with them which is the transform from when that foot
-                            // last hit the ground
-                            sensors->feet[side].Hwf = footlanding_Hwf[side].matrix();
-                        }
-
-                        // Calculate our time offset from the last read then update the filter's time
-                        /* using namespace std::chrono */ {
-                            using namespace std::chrono;
-                            const double deltaT = std::max(
-                                duration_cast<duration<double>>(
-                                    input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp))
-                                    .count(),
-                                0.0);
-
-                            // Time update
-                            switch (motionFilter.time(deltaT)) {
-                                // If we succeeded doing the time update, we don't have to reset the filter
-                                case Eigen::Success: break;
-                                // Otherwise, we log the error and set the flag to reset the filter
-                                case Eigen::NumericalIssue:
-                                    log<NUClear::WARN>(
-                                        "Cholesky decomposition failed. The provided data did not satisfy the "
-                                        "prerequisites.");
-                                    // Disable the sensor update loop to reset the filter post cholesky
-                                    update_loop.disable();
-                                    reset_filter.store(true);
-                                    break;
-                                case Eigen::NoConvergence:
-                                    log<NUClear::WARN>(
-                                        "Cholesky decomposition failed. Iterative procedure did not converge.");
-                                    // Disable the sensor update loop to reset the filter post cholesky
-                                    update_loop.disable();
-                                    reset_filter.store(true);
-                                    break;
-                                case Eigen::InvalidInput:
-                                    log<NUClear::WARN>(
-                                        "Cholesky decomposition failed. The inputs are invalid, or the algorithm has "
-                                        "been "
-                                        "improperly called. When assertions are enabled, such errors trigger an "
-                                        "assert.");
-                                    // Disable the sensor update loop to reset the filter post cholesky
-                                    update_loop.disable();
-                                    reset_filter.store(true);
-                                    break;
-                                default:
-                                    log<NUClear::WARN>("Cholesky decomposition failed. Some other reason.");
-                                    // Disable the sensor update loop to reset the filter post cholesky
-                                    update_loop.disable();
-                                    reset_filter.store(true);
-                                    break;
-                            }
-                        }
 
                         // Filter is not reliable, just use previous sensors
                         if (reset_filter.load()) {
@@ -776,13 +602,10 @@ namespace module::input {
                             /************************************************
                              *       Construct Odometry Output (Htw)        *
                              ************************************************/
-                            // Gives us the quaternion representation
-                            const auto o = MotionModel<double>::StateVec(motionFilter.get());
-
                             // Map from world to torso coordinates (Rtw)
                             Eigen::Isometry3d Hwt;
-                            Hwt.linear()      = o.Rwt.toRotationMatrix();
-                            Hwt.translation() = o.rTWw;
+                            Hwt.linear()      = filter.get_state().get_rotation();
+                            Hwt.translation() = filter.get_state().get_position();
                             sensors->Htw      = Hwt.inverse().matrix();
 
                             // If there is ground truth data, determine the error in the odometry calculation

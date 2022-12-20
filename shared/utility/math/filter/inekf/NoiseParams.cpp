@@ -26,6 +26,15 @@ namespace utility::math::filter::inekf {
         set_contact_noise(0.1);
     }
 
+    NoiseParams::NoiseParams(double gyro_noise, double acc_noise, double gyro_bias, double acc_bias, double contact) {
+        set_gyroscope_noise(gyro_noise);
+        set_accelerometer_noise(acc_noise);
+        set_gyroscope_bias_noise(gyro_bias);
+        set_accelerometer_bias_noise(acc_bias);
+        set_landmark_noise(0.0);
+        set_contact_noise(contact);
+    }
+
     void NoiseParams::set_gyroscope_noise(double std) {
         Qg_ = std * std * Eigen::Matrix3d::Identity();
     }

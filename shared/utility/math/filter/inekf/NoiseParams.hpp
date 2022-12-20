@@ -23,6 +23,7 @@ namespace utility::math::filter::inekf {
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         NoiseParams();
+        NoiseParams(double gyro_noise, double acc_noise, double gyro_bias, double acc_bias, double contact);
 
         void set_gyroscope_noise(double std);
         void set_gyroscope_noise(const Eigen::Vector3d& std);
