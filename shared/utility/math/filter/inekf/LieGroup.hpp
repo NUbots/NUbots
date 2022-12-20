@@ -22,9 +22,9 @@ namespace utility::math::filter::inekf {
     extern const double TOLERANCE;
 
     Eigen::Matrix3d skew(const Eigen::Vector3d& v);
-    Eigen::Matrix3d Exp_SO3(const Eigen::Vector3d& w);
-    Eigen::MatrixXd Exp_SEK3(const Eigen::VectorXd& v);
-    Eigen::MatrixXd Adjoint_SEK3(const Eigen::MatrixXd& X);
+    Eigen::Matrix3d exp_so3(const Eigen::Vector3d& w);
+    Eigen::MatrixXd exp_sek3(const Eigen::VectorXd& v);
+    Eigen::MatrixXd adjoint_sek3(const Eigen::MatrixXd& X);
 
 }  // namespace utility::math::filter::inekf
 #endif

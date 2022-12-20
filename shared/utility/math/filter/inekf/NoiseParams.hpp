@@ -24,36 +24,36 @@ namespace utility::math::filter::inekf {
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         NoiseParams();
 
-        void setGyroscopeNoise(double std);
-        void setGyroscopeNoise(const Eigen::Vector3d& std);
-        void setGyroscopeNoise(const Eigen::Matrix3d& cov);
+        void set_gyroscope_noise(double std);
+        void set_gyroscope_noise(const Eigen::Vector3d& std);
+        void set_gyroscope_noise(const Eigen::Matrix3d& cov);
 
-        void setAccelerometerNoise(double std);
-        void setAccelerometerNoise(const Eigen::Vector3d& std);
-        void setAccelerometerNoise(const Eigen::Matrix3d& cov);
+        void set_accelerometer_noise(double std);
+        void set_accelerometer_noise(const Eigen::Vector3d& std);
+        void set_accelerometer_noise(const Eigen::Matrix3d& cov);
 
-        void setGyroscopeBiasNoise(double std);
-        void setGyroscopeBiasNoise(const Eigen::Vector3d& std);
-        void setGyroscopeBiasNoise(const Eigen::Matrix3d& cov);
+        void set_gyroscope_bias_noise(double std);
+        void set_gyroscope_bias_noise(const Eigen::Vector3d& std);
+        void set_gyroscope_bias_noise(const Eigen::Matrix3d& cov);
 
-        void setAccelerometerBiasNoise(double std);
-        void setAccelerometerBiasNoise(const Eigen::Vector3d& std);
-        void setAccelerometerBiasNoise(const Eigen::Matrix3d& cov);
+        void set_accelerometer_bias_noise(double std);
+        void set_accelerometer_bias_noise(const Eigen::Vector3d& std);
+        void set_accelerometer_bias_noise(const Eigen::Matrix3d& cov);
 
-        void setLandmarkNoise(double std);
-        void setLandmarkNoise(const Eigen::Vector3d& std);
-        void setLandmarkNoise(const Eigen::Matrix3d& cov);
+        void set_landmark_noise(double std);
+        void set_landmark_noise(const Eigen::Vector3d& std);
+        void set_landmark_noise(const Eigen::Matrix3d& cov);
 
-        void setContactNoise(double std);
-        void setContactNoise(const Eigen::Vector3d& std);
-        void setContactNoise(const Eigen::Matrix3d& cov);
+        void set_contact_noise(double std);
+        void set_contact_noise(const Eigen::Vector3d& std);
+        void set_contact_noise(const Eigen::Matrix3d& cov);
 
-        Eigen::Matrix3d getGyroscopeCov();
-        Eigen::Matrix3d getAccelerometerCov();
-        Eigen::Matrix3d getGyroscopeBiasCov();
-        Eigen::Matrix3d getAccelerometerBiasCov();
-        Eigen::Matrix3d getLandmarkCov();
-        Eigen::Matrix3d getContactCov();
+        Eigen::Matrix3d get_gyroscope_cov();
+        Eigen::Matrix3d get_accelerometer_cov();
+        Eigen::Matrix3d get_gyroscope_bias_cov();
+        Eigen::Matrix3d get_accelerometer_bias_cov();
+        Eigen::Matrix3d get_landmark_cov();
+        Eigen::Matrix3d get_contact_cov();
 
         friend std::ostream& operator<<(std::ostream& os, const NoiseParams& p);
 

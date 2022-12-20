@@ -26,82 +26,82 @@ namespace utility::math::filter::inekf {
         setContactNoise(0.1);
     }
 
-    void NoiseParams::setGyroscopeNoise(double std) {
+    void NoiseParams::set_gyroscope_noise(double std) {
         Qg_ = std * std * Eigen::Matrix3d::Identity();
     }
-    void NoiseParams::setGyroscopeNoise(const Eigen::Vector3d& std) {
+    void NoiseParams::set_gyroscope_noise(const Eigen::Vector3d& std) {
         Qg_ << std(0) * std(0), 0, 0, 0, std(1) * std(1), 0, 0, 0, std(2) * std(2);
     }
-    void NoiseParams::setGyroscopeNoise(const Eigen::Matrix3d& cov) {
+    void NoiseParams::set_gyroscope_noise(const Eigen::Matrix3d& cov) {
         Qg_ = cov;
     }
 
-    void NoiseParams::setAccelerometerNoise(double std) {
+    void NoiseParams::set_accelerometer_noise(double std) {
         Qa_ = std * std * Eigen::Matrix3d::Identity();
     }
-    void NoiseParams::setAccelerometerNoise(const Eigen::Vector3d& std) {
+    void NoiseParams::set_accelerometer_noise(const Eigen::Vector3d& std) {
         Qa_ << std(0) * std(0), 0, 0, 0, std(1) * std(1), 0, 0, 0, std(2) * std(2);
     }
-    void NoiseParams::setAccelerometerNoise(const Eigen::Matrix3d& cov) {
+    void NoiseParams::set_accelerometer_noise(const Eigen::Matrix3d& cov) {
         Qa_ = cov;
     }
 
-    void NoiseParams::setGyroscopeBiasNoise(double std) {
+    void NoiseParams::set_gyroscope_bias_noise(double std) {
         Qbg_ = std * std * Eigen::Matrix3d::Identity();
     }
-    void NoiseParams::setGyroscopeBiasNoise(const Eigen::Vector3d& std) {
+    void NoiseParams::set_gyroscope_bias_noise(const Eigen::Vector3d& std) {
         Qbg_ << std(0) * std(0), 0, 0, 0, std(1) * std(1), 0, 0, 0, std(2) * std(2);
     }
-    void NoiseParams::setGyroscopeBiasNoise(const Eigen::Matrix3d& cov) {
+    void NoiseParams::set_gyroscope_bias_noise(const Eigen::Matrix3d& cov) {
         Qbg_ = cov;
     }
 
-    void NoiseParams::setAccelerometerBiasNoise(double std) {
+    void NoiseParams::set_accelerometer_bias_noise(double std) {
         Qba_ = std * std * Eigen::Matrix3d::Identity();
     }
-    void NoiseParams::setAccelerometerBiasNoise(const Eigen::Vector3d& std) {
+    void NoiseParams::set_accelerometer_bias_noise(const Eigen::Vector3d& std) {
         Qba_ << std(0) * std(0), 0, 0, 0, std(1) * std(1), 0, 0, 0, std(2) * std(2);
     }
-    void NoiseParams::setAccelerometerBiasNoise(const Eigen::Matrix3d& cov) {
+    void NoiseParams::set_accelerometer_bias_noise(const Eigen::Matrix3d& cov) {
         Qba_ = cov;
     }
 
-    void NoiseParams::setLandmarkNoise(double std) {
+    void NoiseParams::set_landmark_noise(double std) {
         Ql_ = std * std * Eigen::Matrix3d::Identity();
     }
-    void NoiseParams::setLandmarkNoise(const Eigen::Vector3d& std) {
+    void NoiseParams::set_landmark_noise(const Eigen::Vector3d& std) {
         Ql_ << std(0) * std(0), 0, 0, 0, std(1) * std(1), 0, 0, 0, std(2) * std(2);
     }
-    void NoiseParams::setLandmarkNoise(const Eigen::Matrix3d& cov) {
+    void NoiseParams::set_landmark_noise(const Eigen::Matrix3d& cov) {
         Ql_ = cov;
     }
 
-    void NoiseParams::setContactNoise(double std) {
+    void NoiseParams::set_contact_noise(double std) {
         Qc_ = std * std * Eigen::Matrix3d::Identity();
     }
-    void NoiseParams::setContactNoise(const Eigen::Vector3d& std) {
+    void NoiseParams::set_contact_noise(const Eigen::Vector3d& std) {
         Qc_ << std(0) * std(0), 0, 0, 0, std(1) * std(1), 0, 0, 0, std(2) * std(2);
     }
-    void NoiseParams::setContactNoise(const Eigen::Matrix3d& cov) {
+    void NoiseParams::set_contact_noise(const Eigen::Matrix3d& cov) {
         Qc_ = cov;
     }
 
-    Eigen::Matrix3d NoiseParams::getGyroscopeCov() {
+    Eigen::Matrix3d NoiseParams::get_gyroscope_cov() {
         return Qg_;
     }
-    Eigen::Matrix3d NoiseParams::getAccelerometerCov() {
+    Eigen::Matrix3d NoiseParams::get_accelerometer_cov() {
         return Qa_;
     }
-    Eigen::Matrix3d NoiseParams::getGyroscopeBiasCov() {
+    Eigen::Matrix3d NoiseParams::get_gyroscope_bias_cov() {
         return Qbg_;
     }
-    Eigen::Matrix3d NoiseParams::getAccelerometerBiasCov() {
+    Eigen::Matrix3d NoiseParams::get_accelerometer_bias_cov() {
         return Qba_;
     }
-    Eigen::Matrix3d NoiseParams::getLandmarkCov() {
+    Eigen::Matrix3d NoiseParams::get_landmark_cov() {
         return Ql_;
     }
-    Eigen::Matrix3d NoiseParams::getContactCov() {
+    Eigen::Matrix3d NoiseParams::get_contact_cov() {
         return Qc_;
     }
 

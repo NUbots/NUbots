@@ -30,56 +30,53 @@
 
 namespace utility::math::filter::inekf {
 
-    class Kinematics {
-    public:
+    struct KinematicPose {
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-        Kinematics(int id_in, Eigen::Matrix4d pose_in, Eigen::Matrix<double, 6, 6> covariance_in)
-            : id(id_in), pose(pose_in), covariance(covariance_in) {}
-
-        int id;
-        Eigen::Matrix4d pose;
-        Eigen::Matrix<double, 6, 6> covariance;
+        int id                                 = 0;
+        Eigen::Matrix4d pose                   = Eigen::Matrix4d::Identity();
+        Eigen::Matrix<double, 6, 6> covariance = Eigen::Matrix<double, 6, 6>::Identity();
     };
 
-    class Landmark {
-    public:
+    struct Landmark {
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-        Landmark(int id_in, Eigen::Vector3d position_in) : id(id_in), position(position_in) {}
-
-        int id;
-        Eigen::Vector3d position;
+        int id                   = 0;
+        Eigen::Vector3d position = Eigen::Vector3d::Zero();
     };
 
-    typedef std::
-        map<int, Eigen::Vector3d, std::less<int>, Eigen::aligned_allocator<std::pair<const int, Eigen::Vector3d>>>
-            mapIntVector3d;
-    typedef std::map<int,
-                     Eigen::Vector3d,
-                     std::less<int>,
-                     Eigen::aligned_allocator<std::pair<const int, Eigen::Vector3d>>>::iterator mapIntVector3dIterator;
-    typedef std::vector<Landmark, Eigen::aligned_allocator<Landmark>> vectorLandmarks;
-    typedef std::vector<Landmark, Eigen::aligned_allocator<Landmark>>::const_iterator vectorLandmarksIterator;
-    typedef std::vector<Kinematics, Eigen::aligned_allocator<Kinematics>> vectorKinematics;
-    typedef std::vector<Kinematics, Eigen::aligned_allocator<Kinematics>>::const_iterator vectorKinematicsIterator;
+    using eigen_pair_int_vec3d = Eigen::aligned_allocator<std::pair<const int, Eigen::Vector3d>>;
 
-    class Observation {
+    typedef std::map<int, Eigen::Vector3d, std::less<int>, eigen_pair_int_vec3d> map_int_vec3d;
+    typedef std::map<int, Eigen::Vector3d, std::less<int>, eigen_pair_int_vec3d>::iterator map_int_vec3d_it;
 
-    public:
+    typedef std::vector<Landmark, Eigen::aligned_allocator<Landmark>> landmarks;
+    typedef std::vector<Landmark, Eigen::aligned_allocator<Landmark>>::const_iterator landmarks_it;
+
+    typedef std::vector<KinematicPose, Eigen::aligned_allocator<KinematicPose>> kinematics;
+    typedef std::vector<KinematicPose, Eigen::aligned_allocator<KinematicPose>>::const_iterator kinematics_it;
+
+    struct Observation {
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
-        Observation(Eigen::VectorXd& Y,
-                    Eigen::VectorXd& b,
-                    Eigen::MatrixXd& H,
-                    Eigen::MatrixXd& N,
-                    Eigen::MatrixXd& PI);
-        bool empty();
 
-        Eigen::VectorXd Y;
-        Eigen::VectorXd b;
-        Eigen::MatrixXd H;
-        Eigen::MatrixXd N;
-        Eigen::MatrixXd PI;
+        Eigen::VectorXd Y  = Eigen::VectorXd::Zero();
+        Eigen::VectorXd b  = Eigen::VectorXd::Zero();
+        Eigen::MatrixXd H  = Eigen::MatrixXd::Identity();
+        Eigen::MatrixXd N  = Eigen::MatrixXd::Identity();
+        Eigen::MatrixXd PI = Eigen::MatrixXd::Identity();
 
-        friend std::ostream& operator<<(std::ostream& os, const Observation& o);
+        bool empty() {
+            return Y.rows() == 0;
+        }
+
+        friend std::ostream& operator<<(std::ostream& os, const Observation& o) {
+            os << "---------- Observation ------------" << std::endl;
+            os << "Y:\n" << o.Y << std::endl << std::endl;
+            os << "b:\n" << o.b << std::endl << std::endl;
+            os << "H:\n" << o.H << std::endl << std::endl;
+            os << "N:\n" << o.N << std::endl << std::endl;
+            os << "PI:\n" << o.PI << std::endl;
+            os << "-----------------------------------";
+            return os;
+        }
     };
 
 
@@ -88,38 +85,32 @@ namespace utility::math::filter::inekf {
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
         InEKF();
-        InEKF(NoiseParams params);
-        InEKF(RobotState state);
         InEKF(RobotState state, NoiseParams params);
 
-        RobotState getState();
-        NoiseParams getNoiseParams();
-        mapIntVector3d getPriorLandmarks();
-        std::map<int, int> getEstimatedLandmarks();
-        std::map<int, bool> getContacts();
-        std::map<int, int> getEstimatedContactPositions();
-        void setState(RobotState state);
-        void setNoiseParams(NoiseParams params);
-        void setPriorLandmarks(const mapIntVector3d& prior_landmarks);
-        void setContacts(std::vector<std::pair<int, bool>> contacts);
+        RobotState get_state();
+        NoiseParams get_noise_params();
+        map_int_vec3d get_prior_landmarks();
+        std::map<int, int> get_estimated_landmarks();
+        std::map<int, bool> get_contacts();
+        std::map<int, int> get_estimated_contact_positions();
+        void set_state(RobotState state);
+        void set_noise_params(NoiseParams params);
+        void set_prior_landmarks(const map_int_vec3d& prior_landmarks);
+        void set_contacts(std::vector<std::pair<int, bool>> contacts);
 
-        void Propagate(const Eigen::Matrix<double, 6, 1>& m, double dt);
-        void Correct(const Observation& obs);
-        void CorrectLandmarks(const vectorLandmarks& measured_landmarks);
-        void CorrectKinematics(const vectorKinematics& measured_kinematics);
+        void propagate(const Eigen::Matrix<double, 6, 1>& m, double dt);
+        void correct(const Observation& obs);
+        void correct_landmarks(const landmarks& measured_landmarks);
+        void correct_kinematics(const kinematics& measured_kinematics);
 
     private:
-        RobotState state_;
-        NoiseParams noise_params_;
-        const Eigen::Vector3d g_;  // Gravity
-        mapIntVector3d prior_landmarks_;
-        std::map<int, int> estimated_landmarks_;
-        std::map<int, bool> contacts_;
-        std::map<int, int> estimated_contact_positions_;
-#if INEKF_USE_MUTEX
-        std::mutex estimated_contacts_mutex_;
-        std::mutex estimated_landmarks_mutex_;
-#endif
+        RobotState state{};
+        NoiseParams noise_params{};
+        const Eigen::Vector3d gravity{0.0, 0.0, 0.98};
+        map_int_vec3d prior_landmarks{};
+        std::map<int, int> estimated_landmarks{};
+        std::map<int, bool> contacts{};
+        std::map<int, int> estimated_contact_positions{};
     };
 
 }  // namespace utility::math::filter::inekf

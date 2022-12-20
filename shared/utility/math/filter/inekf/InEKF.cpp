@@ -15,101 +15,51 @@
 
 namespace utility::math::filter::inekf {
 
-    void removeRowAndColumn(Eigen::MatrixXd& M, int index);
+    void remove_row_and_column(Eigen::MatrixXd& M, int index) {
+        unsigned int dim_X = M.cols();
 
-    // ------------ Observation -------------
-    // Default constructor
-    Observation::Observation(Eigen::VectorXd& Y,
-                             Eigen::VectorXd& b,
-                             Eigen::MatrixXd& H,
-                             Eigen::MatrixXd& N,
-                             Eigen::MatrixXd& PI)
-        : Y(Y), b(b), H(H), N(N), PI(PI) {}
-
-    // Check if empty
-    bool Observation::empty() {
-        return Y.rows() == 0;
-    }
-
-    std::ostream& operator<<(std::ostream& os, const Observation& o) {
-        os << "---------- Observation ------------" << std::endl;
-        os << "Y:\n" << o.Y << std::endl << std::endl;
-        os << "b:\n" << o.b << std::endl << std::endl;
-        os << "H:\n" << o.H << std::endl << std::endl;
-        os << "N:\n" << o.N << std::endl << std::endl;
-        os << "PI:\n" << o.PI << std::endl;
-        os << "-----------------------------------";
-        return os;
+        M.block(index, 0, dim_X - index - 1, dim_X) = M.bottomRows(dim_X - index - 1).eval();
+        M.block(0, index, dim_X, dim_X - index - 1) = M.rightCols(dim_X - index - 1).eval();
+        M.conservativeResize(dim_X - 1, dim_X - 1);
     }
 
     // ------------ InEKF -------------
     // Default constructor
-    InEKF::InEKF() : g_((Eigen::VectorXd(3) << 0, 0, -9.81).finished()) {}
-
-    // Constructor with noise params
-    InEKF::InEKF(NoiseParams params) : g_((Eigen::VectorXd(3) << 0, 0, -9.81).finished()), noise_params_(params) {}
-
-    // Constructor with initial state
-    InEKF::InEKF(RobotState state) : g_((Eigen::VectorXd(3) << 0, 0, -9.81).finished()), state_(state) {}
+    InEKF::InEKF() {}
 
     // Constructor with initial state and noise params
-    InEKF::InEKF(RobotState state, NoiseParams params)
-        : g_((Eigen::VectorXd(3) << 0, 0, -9.81).finished()), state_(state), noise_params_(params) {}
+    InEKF::InEKF(RobotState s, NoiseParams p) : state(s), noise_params(p) {}
 
     // Return robot's current state
-    RobotState InEKF::getState() {
-        return state_;
-    }
-
-    // Sets the robot's current state
-    void InEKF::setState(RobotState state) {
-        state_ = state;
-    }
-
-    // Return noise params
-    NoiseParams InEKF::getNoiseParams() {
-        return noise_params_;
+    RobotState InEKF::get_state() {
+        return state;
     }
 
     // Sets the filter's noise parameters
-    void InEKF::setNoiseParams(NoiseParams params) {
-        noise_params_ = params;
-    }
-
-    // Return filter's prior (static) landmarks
-    mapIntVector3d InEKF::getPriorLandmarks() {
-        return prior_landmarks_;
+    void InEKF::set_noise_params(NoiseParams p) {
+        noise_params = p;
     }
 
     // Set the filter's prior (static) landmarks
-    void InEKF::setPriorLandmarks(const mapIntVector3d& prior_landmarks) {
-        prior_landmarks_ = prior_landmarks;
+    void InEKF::set_prior_landmarks(const map_int_vec3d& pl) {
+        prior_landmarks = pl;
     }
 
     // Return filter's estimated landmarks
-    std::map<int, int> InEKF::getEstimatedLandmarks() {
-#if INEKF_USE_MUTEX
-        lock_guard<mutex> mlock(estimated_landmarks_mutex_);
-#endif
-        return estimated_landmarks_;
+    std::map<int, int> InEKF::get_estimated_landmarks() {
+        return estimated_landmarks;
     }
 
     // Return filter's estimated landmarks
-    std::map<int, int> InEKF::getEstimatedContactPositions() {
-#if INEKF_USE_MUTEX
-        lock_guard<mutex> mlock(estimated_contacts_mutex_);
-#endif
-        return estimated_contact_positions_;
+    std::map<int, int> InEKF::get_estimated_contact_positions() {
+        return estimated_contact_positions;
     }
 
     // Set the filter's contact state
-    void InEKF::setContacts(std::vector<std::pair<int, bool>> contacts) {
-#if INEKF_USE_MUTEX
-        lock_guard<mutex> mlock(estimated_contacts_mutex_);
-#endif
+    void InEKF::set_contacts(std::vector<std::pair<int, bool>> c) {
         // Insert new measured contact states
-        for (std::vector<std::pair<int, bool>>::iterator it = contacts.begin(); it != contacts.end(); ++it) {
-            std::pair<std::map<int, bool>::iterator, bool> ret = contacts_.insert(*it);
+        for (std::vector<std::pair<int, bool>>::iterator it = c.begin(); it != c.end(); ++it) {
+            std::pair<std::map<int, bool>::iterator, bool> ret = contacts.insert(*it);
             // If contact is already in the map, replace with new value
             if (ret.second == false) {
                 ret.first->second = it->second;
@@ -118,84 +68,75 @@ namespace utility::math::filter::inekf {
         return;
     }
 
-    // Return the filter's contact state
-    std::map<int, bool> InEKF::getContacts() {
-#if INEKF_USE_MUTEX
-        lock_guard<mutex> mlock(estimated_contacts_mutex_);
-#endif
-        return contacts_;
-    }
-
-
     // InEKF Propagation - Inertial Data
-    void InEKF::Propagate(const Eigen::Matrix<double, 6, 1>& m, double dt) {
+    void InEKF::propagate(const Eigen::Vector3d& gyro, const Eigen::Vector3d& acc, double dt) {
 
-        Eigen::Vector3d w = m.head(3) - state_.getGyroscopeBias();      // Angular Velocity
-        Eigen::Vector3d a = m.tail(3) - state_.getAccelerometerBias();  // Linear Acceleration
+        Eigen::Vector3d w = gyro - state.get_gyroscope_bias();     // Angular Velocity
+        Eigen::Vector3d a = acc - state.get_accelerometer_bias();  // Linear Acceleration
 
-        Eigen::MatrixXd X = state_.getX();
-        Eigen::MatrixXd P = state_.getP();
+        Eigen::MatrixXd X = state.get_X();
+        Eigen::MatrixXd P = state.get_P();
 
         // Extract State
-        Eigen::Matrix3d R = state_.getRotation();
-        Eigen::Vector3d v = state_.getVelocity();
-        Eigen::Vector3d p = state_.getPosition();
+        Eigen::Matrix3d R = state.get_rotation();
+        Eigen::Vector3d v = state.get_velocity();
+        Eigen::Vector3d p = state.get_position();
 
         // Strapdown IMU motion model
         Eigen::Vector3d phi    = w * dt;
-        Eigen::Matrix3d R_pred = R * Exp_SO3(phi);
-        Eigen::Vector3d v_pred = v + (R * a + g_) * dt;
-        Eigen::Vector3d p_pred = p + v * dt + 0.5 * (R * a + g_) * dt * dt;
+        Eigen::Matrix3d R_pred = R * exp_SO3(phi);
+        Eigen::Vector3d v_pred = v + (R * a + g) * dt;
+        Eigen::Vector3d p_pred = p + v * dt + 0.5 * (R * a + g) * dt * dt;
 
         // Set new state (bias has constant dynamics)
-        state_.setRotation(R_pred);
-        state_.setVelocity(v_pred);
-        state_.setPosition(p_pred);
+        state.set_rotation(R_pred);
+        state.set_velocity(v_pred);
+        state.set_position(p_pred);
 
         // ---- Linearized invariant error dynamics -----
-        int dimX          = state_.dimX();
-        int dimP          = state_.dimP();
-        int dimTheta      = state_.dimTheta();
-        Eigen::MatrixXd A = Eigen::MatrixXd::Zero(dimP, dimP);
+        int dim_X         = state.dim_X();
+        int dim_P         = state.dim_P();
+        int dim_theta     = state.dim_Theta();
+        Eigen::MatrixXd A = Eigen::MatrixXd::Zero(dim_P, dim_P);
         // Inertial terms
         A.block<3, 3>(3, 0) =
-            skew(g_);  // TODO: Efficiency could be improved by not computing the constant terms every time
+            skew(g);  // TODO: Efficiency could be improved by not computing the constant terms every time
         A.block<3, 3>(6, 3) = Eigen::Matrix3d::Identity();
         // Bias terms
-        A.block<3, 3>(0, dimP - dimTheta)     = -R;
-        A.block<3, 3>(3, dimP - dimTheta + 3) = -R;
-        for (int i = 3; i < dimX; ++i) {
-            A.block<3, 3>(3 * i - 6, dimP - dimTheta) = -skew(X.block<3, 1>(0, i)) * R;
+        A.block<3, 3>(0, dim_P - dim_theta)     = -R;
+        A.block<3, 3>(3, dim_P - dim_theta + 3) = -R;
+        for (int i = 3; i < dim_X; ++i) {
+            A.block<3, 3>(3 * i - 6, dim_P - dim_theta) = -skew(X.block<3, 1>(0, i)) * R;
         }
 
         // Noise terms
-        Eigen::MatrixXd Qk   = Eigen::MatrixXd::Zero(dimP, dimP);  // Landmark noise terms will remain zero
-        Qk.block<3, 3>(0, 0) = noise_params_.getGyroscopeCov();
-        Qk.block<3, 3>(3, 3) = noise_params_.getAccelerometerCov();
-        for (std::map<int, int>::iterator it = estimated_contact_positions_.begin();
-             it != estimated_contact_positions_.end();
+        Eigen::MatrixXd Qk   = Eigen::MatrixXd::Zero(dim_P, dim_P);  // Landmark noise terms will remain zero
+        Qk.block<3, 3>(0, 0) = noise_params.getGyroscopeCov();
+        Qk.block<3, 3>(3, 3) = noise_params.getAccelerometerCov();
+        for (std::map<int, int>::iterator it = estimated_contact_positions.begin();
+             it != estimated_contact_positions.end();
              ++it) {
             Qk.block<3, 3>(3 + 3 * (it->second - 3), 3 + 3 * (it->second - 3)) =
-                noise_params_.getContactCov();  // Contact noise terms
+                noise_params.getContactCov();  // Contact noise terms
         }
-        Qk.block<3, 3>(dimP - dimTheta, dimP - dimTheta)         = noise_params_.getGyroscopeBiasCov();
-        Qk.block<3, 3>(dimP - dimTheta + 3, dimP - dimTheta + 3) = noise_params_.getAccelerometerBiasCov();
+        Qk.block<3, 3>(dim_P - dim_theta, dim_P - dim_theta)         = noise_params.getGyroscopeBiasCov();
+        Qk.block<3, 3>(dim_P - dim_theta + 3, dim_P - dim_theta + 3) = noise_params.getAccelerometerBiasCov();
 
         // Discretization
-        Eigen::MatrixXd I = Eigen::MatrixXd::Identity(dimP, dimP);
+        Eigen::MatrixXd I = Eigen::MatrixXd::Identity(dim_P, dim_P);
         Eigen::MatrixXd Phi =
             I + A * dt;  // Fast approximation of exp(A*dt). TODO: explore using the full exp() instead
-        Eigen::MatrixXd Adj                               = I;
-        Adj.block(0, 0, dimP - dimTheta, dimP - dimTheta) = Adjoint_SEK3(X);  // Approx 200 microseconds
-        Eigen::MatrixXd PhiAdj                            = Phi * Adj;
-        Eigen::MatrixXd Qk_hat                            = PhiAdj * Qk * PhiAdj.transpose()
+        Eigen::MatrixXd Adj                                   = I;
+        Adj.block(0, 0, dim_P - dim_theta, dim_P - dim_theta) = Adjoint_SEK3(X);  // Approx 200 microseconds
+        Eigen::MatrixXd PhiAdj                                = Phi * Adj;
+        Eigen::MatrixXd Qk_hat                                = PhiAdj * Qk * PhiAdj.transpose()
                                  * dt;  // Approximated discretized noise matrix (faster by 400 microseconds)
 
         // Propagate Covariance
         Eigen::MatrixXd P_pred = Phi * P * Phi.transpose() + Qk_hat;
 
         // Set new covariance
-        state_.setP(P_pred);
+        state.setP(P_pred);
 
         return;
     }
@@ -203,50 +144,47 @@ namespace utility::math::filter::inekf {
     // Correct State: Right-Invariant Observation
     void InEKF::Correct(const Observation& obs) {
         // Compute Kalman Gain
-        Eigen::MatrixXd P   = state_.getP();
+        Eigen::MatrixXd P   = state.getP();
         Eigen::MatrixXd PHT = P * obs.H.transpose();
         Eigen::MatrixXd S   = obs.H * PHT + obs.N;
         Eigen::MatrixXd K   = PHT * S.inverse();
 
         // Copy X along the diagonals if more than one measurement
         Eigen::MatrixXd BigX;
-        state_.copyDiagX(obs.Y.rows() / state_.dimX(), BigX);
+        state.copyDiagX(obs.Y.rows() / state.dim_X(), BigX);
 
         // Compute correction terms
         Eigen::MatrixXd Z      = BigX * obs.Y - obs.b;
         Eigen::VectorXd delta  = K * obs.PI * Z;
-        Eigen::MatrixXd dX     = Exp_SEK3(delta.segment(0, delta.rows() - state_.dimTheta()));
-        Eigen::VectorXd dTheta = delta.segment(delta.rows() - state_.dimTheta(), state_.dimTheta());
+        Eigen::MatrixXd dX     = Exp_SEK3(delta.segment(0, delta.rows() - state.dim_theta()));
+        Eigen::VectorXd dTheta = delta.segment(delta.rows() - state.dim_theta(), state.dim_theta());
 
         // Update state
-        Eigen::MatrixXd X_new     = dX * state_.getX();  // Right-Invariant Update
-        Eigen::VectorXd Theta_new = state_.getTheta() + dTheta;
-        state_.setX(X_new);
-        state_.setTheta(Theta_new);
+        Eigen::MatrixXd X_new     = dX * state.getX();  // Right-Invariant Update
+        Eigen::VectorXd Theta_new = state.getTheta() + dTheta;
+        state.setX(X_new);
+        state.setTheta(Theta_new);
 
         // Update Covariance
-        Eigen::MatrixXd IKH   = Eigen::MatrixXd::Identity(state_.dimP(), state_.dimP()) - K * obs.H;
+        Eigen::MatrixXd IKH   = Eigen::MatrixXd::Identity(state.dim_P(), state.dim_P()) - K * obs.H;
         Eigen::MatrixXd P_new = IKH * P * IKH.transpose() + K * obs.N * K.transpose();  // Joseph update form
 
-        state_.setP(P_new);
+        state.setP(P_new);
     }
 
     // Create Observation from vector of landmark measurements
-    void InEKF::CorrectLandmarks(const vectorLandmarks& measured_landmarks) {
-#if INEKF_USE_MUTEX
-        lock_guard<mutex> mlock(estimated_landmarks_mutex_);
-#endif
+    void InEKF::correct_landmarks(const landmarks& measured_landmarks) {
         Eigen::VectorXd Y;
         Eigen::VectorXd b;
         Eigen::MatrixXd H;
         Eigen::MatrixXd N;
         Eigen::MatrixXd PI;
 
-        Eigen::Matrix3d R = state_.getRotation();
+        Eigen::Matrix3d R = state.get_rotation();
         vectorLandmarks new_landmarks;
         std::vector<int> used_landmark_ids;
 
-        for (vectorLandmarksIterator it = measured_landmarks.begin(); it != measured_landmarks.end(); ++it) {
+        for (landmarks_it it = measured_landmarks.begin(); it != measured_landmarks.end(); ++it) {
             // Detect and skip if an ID is not unique (this would cause singularity issues in InEKF::Correct)
             if (find(used_landmark_ids.begin(), used_landmark_ids.end(), it->id) != used_landmark_ids.end()) {
                 std::cout << "Duplicate landmark ID detected! Skipping measurement.\n";
@@ -257,95 +195,94 @@ namespace utility::math::filter::inekf {
             }
 
             // See if we can find id in prior_landmarks or estimated_landmarks
-            mapIntVector3dIterator it_prior           = prior_landmarks_.find(it->id);
-            std::map<int, int>::iterator it_estimated = estimated_landmarks_.find(it->id);
+            map_int_vec3d_it it_prior                 = prior_landmarks_.find(it->id);
+            std::map<int, int>::iterator it_estimated = estimated_landmarks.find(it->id);
             if (it_prior != prior_landmarks_.end()) {
                 // Found in prior landmark set
-                int dimX = state_.dimX();
-                int dimP = state_.dimP();
-                int startIndex;
+                int dim_X = state.dim_X();
+                int dim_P = state.dim_P();
+                int start_index;
 
                 // Fill out Y
-                startIndex = Y.rows();
-                Y.conservativeResize(startIndex + dimX, Eigen::NoChange);
-                Y.segment(startIndex, dimX) = Eigen::VectorXd::Zero(dimX);
-                Y.segment(startIndex, 3)    = it->position;  // p_bl
-                Y(startIndex + 4)           = 1;
+                start_index = Y.rows();
+                Y.conservativeResize(start_index + dim_X, Eigen::NoChange);
+                Y.segment(start_index, dim_X) = Eigen::VectorXd::Zero(dim_X);
+                Y.segment(start_index, 3)     = it->position;  // p_bl
+                Y(start_index + 4)            = 1;
 
                 // Fill out b
-                startIndex = b.rows();
-                b.conservativeResize(startIndex + dimX, Eigen::NoChange);
-                b.segment(startIndex, dimX) = Eigen::VectorXd::Zero(dimX);
-                b.segment(startIndex, 3)    = it_prior->second;  // p_wl
-                b(startIndex + 4)           = 1;
+                start_index = b.rows();
+                b.conservativeResize(start_index + dim_X, Eigen::NoChange);
+                b.segment(start_index, dim_X) = Eigen::VectorXd::Zero(dim_X);
+                b.segment(start_index, 3)     = it_prior->second;  // p_wl
+                b(start_index + 4)            = 1;
 
                 // Fill out H
-                startIndex = H.rows();
-                H.conservativeResize(startIndex + 3, dimP);
-                H.block(startIndex, 0, 3, dimP) = Eigen::MatrixXd::Zero(3, dimP);
-                H.block(startIndex, 0, 3, 3)    = skew(it_prior->second);        // skew(p_wl)
-                H.block(startIndex, 6, 3, 3)    = -Eigen::Matrix3d::Identity();  // -I
+                start_index = H.rows();
+                H.conservativeResize(start_index + 3, dim_P);
+                H.block(start_index, 0, 3, dim_P) = Eigen::MatrixXd::Zero(3, dim_P);
+                H.block(start_index, 0, 3, 3)     = skew(it_prior->second);        // skew(p_wl)
+                H.block(start_index, 6, 3, 3)     = -Eigen::Matrix3d::Identity();  // -I
 
                 // Fill out N
-                startIndex = N.rows();
-                N.conservativeResize(startIndex + 3, startIndex + 3);
-                N.block(startIndex, 0, 3, startIndex) = Eigen::MatrixXd::Zero(3, startIndex);
-                N.block(0, startIndex, startIndex, 3) = Eigen::MatrixXd::Zero(startIndex, 3);
-                N.block(startIndex, startIndex, 3, 3) = R * noise_params_.getLandmarkCov() * R.transpose();
+                start_index = N.rows();
+                N.conservativeResize(start_index + 3, start_index + 3);
+                N.block(start_index, 0, 3, start_index) = Eigen::MatrixXd::Zero(3, start_index);
+                N.block(0, start_index, start_index, 3) = Eigen::MatrixXd::Zero(start_index, 3);
+                N.block(start_index, start_index, 3, 3) = R * noise_params.getLandmarkCov() * R.transpose();
 
                 // Fill out PI
-                startIndex      = PI.rows();
-                int startIndex2 = PI.cols();
-                PI.conservativeResize(startIndex + 3, startIndex2 + dimX);
-                PI.block(startIndex, 0, 3, startIndex2)    = Eigen::MatrixXd::Zero(3, startIndex2);
-                PI.block(0, startIndex2, startIndex, dimX) = Eigen::MatrixXd::Zero(startIndex, dimX);
-                PI.block(startIndex, startIndex2, 3, dimX) = Eigen::MatrixXd::Zero(3, dimX);
-                PI.block(startIndex, startIndex2, 3, 3)    = Eigen::Matrix3d::Identity();
+                start_index      = PI.rows();
+                int start_index2 = PI.cols();
+                PI.conservativeResize(start_index + 3, start_index2 + dim_X);
+                PI.block(start_index, 0, 3, start_index2)     = Eigen::MatrixXd::Zero(3, start_index2);
+                PI.block(0, start_index2, start_index, dim_X) = Eigen::MatrixXd::Zero(start_index, dim_X);
+                PI.block(start_index, start_index2, 3, dim_X) = Eigen::MatrixXd::Zero(3, dim_X);
+                PI.block(start_index, start_index2, 3, 3)     = Eigen::Matrix3d::Identity();
             }
-            else if (it_estimated != estimated_landmarks_.end()) {
-                ;
+            else if (it_estimated != estimated_landmarks.end()) {
                 // Found in estimated landmark set
-                int dimX = state_.dimX();
-                int dimP = state_.dimP();
-                int startIndex;
+                int dim_X = state.dim_X();
+                int dim_P = state.dim_P();
+                int start_index;
 
                 // Fill out Y
-                startIndex = Y.rows();
-                Y.conservativeResize(startIndex + dimX, Eigen::NoChange);
-                Y.segment(startIndex, dimX)          = Eigen::VectorXd::Zero(dimX);
-                Y.segment(startIndex, 3)             = it->position;  // p_bl
-                Y(startIndex + 4)                    = 1;
-                Y(startIndex + it_estimated->second) = -1;
+                start_index = Y.rows();
+                Y.conservativeResize(start_index + dim_X, Eigen::NoChange);
+                Y.segment(start_index, dim_X)         = Eigen::VectorXd::Zero(dim_X);
+                Y.segment(start_index, 3)             = it->position;  // p_bl
+                Y(start_index + 4)                    = 1;
+                Y(start_index + it_estimated->second) = -1;
 
                 // Fill out b
-                startIndex = b.rows();
-                b.conservativeResize(startIndex + dimX, Eigen::NoChange);
-                b.segment(startIndex, dimX)          = Eigen::VectorXd::Zero(dimX);
-                b(startIndex + 4)                    = 1;
-                b(startIndex + it_estimated->second) = -1;
+                start_index = b.rows();
+                b.conservativeResize(start_index + dim_X, Eigen::NoChange);
+                b.segment(start_index, dim_X)         = Eigen::VectorXd::Zero(dim_X);
+                b(start_index + 4)                    = 1;
+                b(start_index + it_estimated->second) = -1;
 
                 // Fill out H
-                startIndex = H.rows();
-                H.conservativeResize(startIndex + 3, dimP);
-                H.block(startIndex, 0, 3, dimP)                         = Eigen::MatrixXd::Zero(3, dimP);
-                H.block(startIndex, 6, 3, 3)                            = -Eigen::Matrix3d::Identity();  // -I
-                H.block(startIndex, 3 * it_estimated->second - 6, 3, 3) = Eigen::Matrix3d::Identity();   // I
+                start_index = H.rows();
+                H.conservativeResize(start_index + 3, dim_P);
+                H.block(start_index, 0, 3, dim_P)                        = Eigen::MatrixXd::Zero(3, dim_P);
+                H.block(start_index, 6, 3, 3)                            = -Eigen::Matrix3d::Identity();  // -I
+                H.block(start_index, 3 * it_estimated->second - 6, 3, 3) = Eigen::Matrix3d::Identity();   // I
 
                 // Fill out N
-                startIndex = N.rows();
-                N.conservativeResize(startIndex + 3, startIndex + 3);
-                N.block(startIndex, 0, 3, startIndex) = Eigen::MatrixXd::Zero(3, startIndex);
-                N.block(0, startIndex, startIndex, 3) = Eigen::MatrixXd::Zero(startIndex, 3);
-                N.block(startIndex, startIndex, 3, 3) = R * noise_params_.getLandmarkCov() * R.transpose();
+                start_index = N.rows();
+                N.conservativeResize(start_index + 3, start_index + 3);
+                N.block(start_index, 0, 3, start_index) = Eigen::MatrixXd::Zero(3, start_index);
+                N.block(0, start_index, start_index, 3) = Eigen::MatrixXd::Zero(start_index, 3);
+                N.block(start_index, start_index, 3, 3) = R * noise_params.getLandmarkCov() * R.transpose();
 
                 // Fill out PI
-                startIndex      = PI.rows();
-                int startIndex2 = PI.cols();
-                PI.conservativeResize(startIndex + 3, startIndex2 + dimX);
-                PI.block(startIndex, 0, 3, startIndex2)    = Eigen::MatrixXd::Zero(3, startIndex2);
-                PI.block(0, startIndex2, startIndex, dimX) = Eigen::MatrixXd::Zero(startIndex, dimX);
-                PI.block(startIndex, startIndex2, 3, dimX) = Eigen::MatrixXd::Zero(3, dimX);
-                PI.block(startIndex, startIndex2, 3, 3)    = Eigen::Matrix3d::Identity();
+                start_index      = PI.rows();
+                int start_index2 = PI.cols();
+                PI.conservativeResize(start_index + 3, start_index2 + dim_X);
+                PI.block(start_index, 0, 3, start_index2)     = Eigen::MatrixXd::Zero(3, start_index2);
+                PI.block(0, start_index2, start_index, dim_X) = Eigen::MatrixXd::Zero(start_index, dim_X);
+                PI.block(start_index, start_index2, 3, dim_X) = Eigen::MatrixXd::Zero(3, dim_X);
+                PI.block(start_index, start_index2, 3, 3)     = Eigen::Matrix3d::Identity();
             }
             else {
                 // First time landmark as been detected (add to list for later state augmentation)
@@ -361,61 +298,58 @@ namespace utility::math::filter::inekf {
 
         // Augment state with newly detected landmarks
         if (new_landmarks.size() > 0) {
-            Eigen::MatrixXd X_aug = state_.getX();
-            Eigen::MatrixXd P_aug = state_.getP();
-            Eigen::Vector3d p     = state_.getPosition();
+            Eigen::MatrixXd X_aug = state.getX();
+            Eigen::MatrixXd P_aug = state.getP();
+            Eigen::Vector3d p     = state.getPosition();
             for (vectorLandmarksIterator it = new_landmarks.begin(); it != new_landmarks.end(); ++it) {
                 // Initialize new landmark mean
-                int startIndex = X_aug.rows();
-                X_aug.conservativeResize(startIndex + 1, startIndex + 1);
-                X_aug.block(startIndex, 0, 1, startIndex) = Eigen::MatrixXd::Zero(1, startIndex);
-                X_aug.block(0, startIndex, startIndex, 1) = Eigen::MatrixXd::Zero(startIndex, 1);
-                X_aug(startIndex, startIndex)             = 1;
-                X_aug.block(0, startIndex, 3, 1)          = p + R * it->position;
+                int start_index = X_aug.rows();
+                X_aug.conservativeResize(start_index + 1, start_index + 1);
+                X_aug.block(start_index, 0, 1, start_index) = Eigen::MatrixXd::Zero(1, start_index);
+                X_aug.block(0, start_index, start_index, 1) = Eigen::MatrixXd::Zero(start_index, 1);
+                X_aug(start_index, start_index)             = 1;
+                X_aug.block(0, start_index, 3, 1)           = p + R * it->position;
 
                 // Initialize new landmark covariance - TODO:speed up
-                Eigen::MatrixXd F = Eigen::MatrixXd::Zero(state_.dimP() + 3, state_.dimP());
-                F.block(0, 0, state_.dimP() - state_.dimTheta(), state_.dimP() - state_.dimTheta()) =
-                    Eigen::MatrixXd::Identity(state_.dimP() - state_.dimTheta(),
-                                              state_.dimP() - state_.dimTheta());                   // for old X
-                F.block(state_.dimP() - state_.dimTheta(), 6, 3, 3) = Eigen::Matrix3d::Identity();  // for new landmark
-                F.block(state_.dimP() - state_.dimTheta() + 3,
-                        state_.dimP() - state_.dimTheta(),
-                        state_.dimTheta(),
-                        state_.dimTheta()) =
-                    Eigen::MatrixXd::Identity(state_.dimTheta(), state_.dimTheta());  // for theta
+                Eigen::MatrixXd F = Eigen::MatrixXd::Zero(state.dim_P() + 3, state.dim_P());
+                F.block(0, 0, state.dim_P() - state.dim_theta(), state.dim_P() - state.dim_theta()) =
+                    Eigen::MatrixXd::Identity(state.dim_P() - state.dim_theta(),
+                                              state.dim_P() - state.dim_theta());                   // for old X
+                F.block(state.dim_P() - state.dim_theta(), 6, 3, 3) = Eigen::Matrix3d::Identity();  // for new landmark
+                F.block(state.dim_P() - state.dim_theta() + 3,
+                        state.dim_P() - state.dim_theta(),
+                        state.dim_theta(),
+                        state.dim_theta()) =
+                    Eigen::MatrixXd::Identity(state.dim_theta(), state.dim_theta());  // for theta
                 Eigen::MatrixXd G                                  = Eigen::MatrixXd::Zero(F.rows(), 3);
-                G.block(G.rows() - state_.dimTheta() - 3, 0, 3, 3) = R;
-                P_aug = (F * P_aug * F.transpose() + G * noise_params_.getLandmarkCov() * G.transpose()).eval();
+                G.block(G.rows() - state.dim_theta() - 3, 0, 3, 3) = R;
+                P_aug = (F * P_aug * F.transpose() + G * noise_params.get_landmark_cov() * G.transpose()).eval();
 
                 // Update state and covariance
-                state_.setX(X_aug);
-                state_.setP(P_aug);
+                state.setX(X_aug);
+                state.setP(P_aug);
 
                 // Add to list of estimated landmarks
-                estimated_landmarks_.insert(std::pair<int, int>(it->id, startIndex));
+                estimated_landmarks.insert(std::pair<int, int>(it->id, start_index));
             }
         }
         return;
     }
 
     // Correct state using kinematics measured between imu and contact point
-    void InEKF::CorrectKinematics(const vectorKinematics& measured_kinematics) {
-#if INEKF_USE_MUTEX
-        lock_guard<mutex> mlock(estimated_contacts_mutex_);
-#endif
+    void InEKF::correct_kinematics(const kinematics& measured_kinematics) {
         Eigen::VectorXd Y;
         Eigen::VectorXd b;
         Eigen::MatrixXd H;
         Eigen::MatrixXd N;
         Eigen::MatrixXd PI;
 
-        Eigen::Matrix3d R = state_.getRotation();
+        Eigen::Matrix3d R = state.get_rotation();
         std::vector<std::pair<int, int>> remove_contacts;
-        vectorKinematics new_contacts;
+        kinematics new_contacts;
         std::vector<int> used_contact_ids;
 
-        for (vectorKinematicsIterator it = measured_kinematics.begin(); it != measured_kinematics.end(); ++it) {
+        for (kinematics_it it = measured_kinematics.begin(); it != measured_kinematics.end(); ++it) {
             // Detect and skip if an ID is not unique (this would cause singularity issues in InEKF::Correct)
             if (find(used_contact_ids.begin(), used_contact_ids.end(), it->id) != used_contact_ids.end()) {
                 std::cout << "Duplicate contact ID detected! Skipping measurement.\n";
@@ -433,8 +367,8 @@ namespace utility::math::filter::inekf {
             bool contact_indicated = it_contact->second;
 
             // See if we can find id estimated_contact_positions
-            std::map<int, int>::iterator it_estimated = estimated_contact_positions_.find(it->id);
-            bool found                                = it_estimated != estimated_contact_positions_.end();
+            std::map<int, int>::iterator it_estimated = estimated_contact_positions.find(it->id);
+            bool found                                = it_estimated != estimated_contact_positions.end();
 
             // If contact is not indicated and id is found in estimated_contacts_, then remove state
             if (!contact_indicated && found) {
@@ -447,47 +381,47 @@ namespace utility::math::filter::inekf {
                 // If contact is indicated and id is found in estimated_contacts_, then correct using kinematics
             }
             else if (contact_indicated && found) {
-                int dimX = state_.dimX();
-                int dimP = state_.dimP();
-                int startIndex;
+                int dim_X = state.dim_X();
+                int dim_P = state.dim_P();
+                int start_index;
 
                 // Fill out Y
-                startIndex = Y.rows();
-                Y.conservativeResize(startIndex + dimX, Eigen::NoChange);
-                Y.segment(startIndex, dimX)          = Eigen::VectorXd::Zero(dimX);
-                Y.segment(startIndex, 3)             = it->pose.block<3, 1>(0, 3);  // p_bc
-                Y(startIndex + 4)                    = 1;
-                Y(startIndex + it_estimated->second) = -1;
+                start_index = Y.rows();
+                Y.conservativeResize(start_index + dim_X, Eigen::NoChange);
+                Y.segment(start_index, dim_X)         = Eigen::VectorXd::Zero(dim_X);
+                Y.segment(start_index, 3)             = it->pose.block<3, 1>(0, 3);  // p_bc
+                Y(start_index + 4)                    = 1;
+                Y(start_index + it_estimated->second) = -1;
 
                 // Fill out b
-                startIndex = b.rows();
-                b.conservativeResize(startIndex + dimX, Eigen::NoChange);
-                b.segment(startIndex, dimX)          = Eigen::VectorXd::Zero(dimX);
-                b(startIndex + 4)                    = 1;
-                b(startIndex + it_estimated->second) = -1;
+                start_index = b.rows();
+                b.conservativeResize(start_index + dim_X, Eigen::NoChange);
+                b.segment(start_index, dim_X)         = Eigen::VectorXd::Zero(dim_X);
+                b(start_index + 4)                    = 1;
+                b(start_index + it_estimated->second) = -1;
 
                 // Fill out H
-                startIndex = H.rows();
-                H.conservativeResize(startIndex + 3, dimP);
-                H.block(startIndex, 0, 3, dimP)                         = Eigen::MatrixXd::Zero(3, dimP);
-                H.block(startIndex, 6, 3, 3)                            = -Eigen::Matrix3d::Identity();  // -I
-                H.block(startIndex, 3 * it_estimated->second - 6, 3, 3) = Eigen::Matrix3d::Identity();   // I
+                start_index = H.rows();
+                H.conservativeResize(start_index + 3, dim_P);
+                H.block(start_index, 0, 3, dim_P)                        = Eigen::MatrixXd::Zero(3, dim_P);
+                H.block(start_index, 6, 3, 3)                            = -Eigen::Matrix3d::Identity();  // -I
+                H.block(start_index, 3 * it_estimated->second - 6, 3, 3) = Eigen::Matrix3d::Identity();   // I
 
                 // Fill out N
-                startIndex = N.rows();
-                N.conservativeResize(startIndex + 3, startIndex + 3);
-                N.block(startIndex, 0, 3, startIndex) = Eigen::MatrixXd::Zero(3, startIndex);
-                N.block(0, startIndex, startIndex, 3) = Eigen::MatrixXd::Zero(startIndex, 3);
-                N.block(startIndex, startIndex, 3, 3) = R * it->covariance.block<3, 3>(3, 3) * R.transpose();
+                start_index = N.rows();
+                N.conservativeResize(start_index + 3, start_index + 3);
+                N.block(start_index, 0, 3, start_index) = Eigen::MatrixXd::Zero(3, start_index);
+                N.block(0, start_index, start_index, 3) = Eigen::MatrixXd::Zero(start_index, 3);
+                N.block(start_index, start_index, 3, 3) = R * it->covariance.block<3, 3>(3, 3) * R.transpose();
 
                 // Fill out PI
-                startIndex      = PI.rows();
-                int startIndex2 = PI.cols();
-                PI.conservativeResize(startIndex + 3, startIndex2 + dimX);
-                PI.block(startIndex, 0, 3, startIndex2)    = Eigen::MatrixXd::Zero(3, startIndex2);
-                PI.block(0, startIndex2, startIndex, dimX) = Eigen::MatrixXd::Zero(startIndex, dimX);
-                PI.block(startIndex, startIndex2, 3, dimX) = Eigen::MatrixXd::Zero(3, dimX);
-                PI.block(startIndex, startIndex2, 3, 3)    = Eigen::Matrix3d::Identity();
+                start_index      = PI.rows();
+                int start_index2 = PI.cols();
+                PI.conservativeResize(start_index + 3, start_index2 + dim_X);
+                PI.block(start_index, 0, 3, start_index2)     = Eigen::MatrixXd::Zero(3, start_index2);
+                PI.block(0, start_index2, start_index, dim_X) = Eigen::MatrixXd::Zero(start_index, dim_X);
+                PI.block(start_index, start_index2, 3, dim_X) = Eigen::MatrixXd::Zero(3, dim_X);
+                PI.block(start_index, start_index2, 3, 3)     = Eigen::Matrix3d::Identity();
 
                 //  If contact is not indicated and id is found in estimated_contacts_, then skip
             }
@@ -504,30 +438,30 @@ namespace utility::math::filter::inekf {
 
         // Remove contacts from state
         if (remove_contacts.size() > 0) {
-            Eigen::MatrixXd X_rem = state_.getX();
-            Eigen::MatrixXd P_rem = state_.getP();
+            Eigen::MatrixXd X_rem = state.getX();
+            Eigen::MatrixXd P_rem = state.getP();
             for (std::vector<std::pair<int, int>>::iterator it = remove_contacts.begin(); it != remove_contacts.end();
                  ++it) {
                 // Remove from list of estimated contact positions
-                estimated_contact_positions_.erase(it->first);
+                estimated_contact_positions.erase(it->first);
 
                 // Remove row and column from X
-                removeRowAndColumn(X_rem, it->second);
+                remove_row_and_column(X_rem, it->second);
 
                 // Remove 3 rows and columns from P
-                int startIndex = 3 + 3 * (it->second - 3);
-                removeRowAndColumn(P_rem, startIndex);  // TODO: Make more efficient
-                removeRowAndColumn(P_rem, startIndex);  // TODO: Make more efficient
-                removeRowAndColumn(P_rem, startIndex);  // TODO: Make more efficient
+                int start_index = 3 + 3 * (it->second - 3);
+                remove_row_and_column(P_rem, start_index);  // TODO: Make more efficient
+                remove_row_and_column(P_rem, start_index);  // TODO: Make more efficient
+                remove_row_and_column(P_rem, start_index);  // TODO: Make more efficient
 
                 // Update all indices for estimated_landmarks and estimated_contact_positions
-                for (std::map<int, int>::iterator it2 = estimated_landmarks_.begin(); it2 != estimated_landmarks_.end();
+                for (std::map<int, int>::iterator it2 = estimated_landmarks.begin(); it2 != estimated_landmarks.end();
                      ++it2) {
                     if (it2->second > it->second)
                         it2->second -= 1;
                 }
-                for (std::map<int, int>::iterator it2 = estimated_contact_positions_.begin();
-                     it2 != estimated_contact_positions_.end();
+                for (std::map<int, int>::iterator it2 = estimated_contact_positions.begin();
+                     it2 != estimated_contact_positions.end();
                      ++it2) {
                     if (it2->second > it->second)
                         it2->second -= 1;
@@ -540,60 +474,52 @@ namespace utility::math::filter::inekf {
                 }
 
                 // Update state and covariance
-                state_.setX(X_rem);
-                state_.setP(P_rem);
+                state.setX(X_rem);
+                state.setP(P_rem);
             }
         }
 
 
         // Augment state with newly detected contacts
         if (new_contacts.size() > 0) {
-            Eigen::MatrixXd X_aug = state_.getX();
-            Eigen::MatrixXd P_aug = state_.getP();
-            Eigen::Vector3d p     = state_.getPosition();
+            Eigen::MatrixXd X_aug = state.getX();
+            Eigen::MatrixXd P_aug = state.getP();
+            Eigen::Vector3d p     = state.get_position();
             for (vectorKinematicsIterator it = new_contacts.begin(); it != new_contacts.end(); ++it) {
                 // Initialize new landmark mean
-                int startIndex = X_aug.rows();
-                X_aug.conservativeResize(startIndex + 1, startIndex + 1);
-                X_aug.block(startIndex, 0, 1, startIndex) = Eigen::MatrixXd::Zero(1, startIndex);
-                X_aug.block(0, startIndex, startIndex, 1) = Eigen::MatrixXd::Zero(startIndex, 1);
-                X_aug(startIndex, startIndex)             = 1;
-                X_aug.block(0, startIndex, 3, 1)          = p + R * it->pose.block<3, 1>(0, 3);
+                int start_index = X_aug.rows();
+                X_aug.conservativeResize(start_index + 1, start_index + 1);
+                X_aug.block(start_index, 0, 1, start_index) = Eigen::MatrixXd::Zero(1, start_index);
+                X_aug.block(0, start_index, start_index, 1) = Eigen::MatrixXd::Zero(start_index, 1);
+                X_aug(start_index, start_index)             = 1;
+                X_aug.block(0, start_index, 3, 1)           = p + R * it->pose.block<3, 1>(0, 3);
 
                 // Initialize new landmark covariance - TODO:speed up
-                Eigen::MatrixXd F = Eigen::MatrixXd::Zero(state_.dimP() + 3, state_.dimP());
-                F.block(0, 0, state_.dimP() - state_.dimTheta(), state_.dimP() - state_.dimTheta()) =
-                    Eigen::MatrixXd::Identity(state_.dimP() - state_.dimTheta(),
-                                              state_.dimP() - state_.dimTheta());                   // for old X
-                F.block(state_.dimP() - state_.dimTheta(), 6, 3, 3) = Eigen::Matrix3d::Identity();  // for new landmark
-                F.block(state_.dimP() - state_.dimTheta() + 3,
-                        state_.dimP() - state_.dimTheta(),
-                        state_.dimTheta(),
-                        state_.dimTheta()) =
-                    Eigen::MatrixXd::Identity(state_.dimTheta(), state_.dimTheta());  // for theta
+                Eigen::MatrixXd F = Eigen::MatrixXd::Zero(state.dim_P() + 3, state.dim_P());
+                F.block(0, 0, state.dim_P() - state.dim_theta(), state.dim_P() - state.dim_theta()) =
+                    Eigen::MatrixXd::Identity(state.dim_P() - state.dim_theta(),
+                                              state.dim_P() - state.dim_theta());                   // for old X
+                F.block(state.dim_P() - state.dim_theta(), 6, 3, 3) = Eigen::Matrix3d::Identity();  // for new landmark
+                F.block(state.dim_P() - state.dim_theta() + 3,
+                        state.dim_P() - state.dim_theta(),
+                        state.dim_theta(),
+                        state.dim_theta()) =
+                    Eigen::MatrixXd::Identity(state.dim_theta(), state.dim_theta());  // for theta
                 Eigen::MatrixXd G                                  = Eigen::MatrixXd::Zero(F.rows(), 3);
-                G.block(G.rows() - state_.dimTheta() - 3, 0, 3, 3) = R;
+                G.block(G.rows() - state.dim_theta() - 3, 0, 3, 3) = R;
                 P_aug = (F * P_aug * F.transpose() + G * it->covariance.block<3, 3>(3, 3) * G.transpose()).eval();
 
                 // Update state and covariance
-                state_.setX(X_aug);
-                state_.setP(P_aug);
+                state.setX(X_aug);
+                state.setP(P_aug);
 
                 // Add to list of estimated contact positions
-                estimated_contact_positions_.insert(std::pair<int, int>(it->id, startIndex));
+                estimated_contact_positions.insert(std::pair<int, int>(it->id, start_index));
             }
         }
 
         return;
     }
 
-
-    void removeRowAndColumn(Eigen::MatrixXd& M, int index) {
-        unsigned int dimX = M.cols();
-
-        M.block(index, 0, dimX - index - 1, dimX) = M.bottomRows(dimX - index - 1).eval();
-        M.block(0, index, dimX, dimX - index - 1) = M.rightCols(dimX - index - 1).eval();
-        M.conservativeResize(dimX - 1, dimX - 1);
-    }
 
 }  // namespace utility::math::filter::inekf
