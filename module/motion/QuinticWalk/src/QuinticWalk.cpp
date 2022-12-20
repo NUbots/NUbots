@@ -11,6 +11,7 @@
 #include "message/motion/LimbsIK.hpp"
 #include "message/motion/WalkCommand.hpp"
 #include "message/support/nusight/DataPoint.hpp"
+
 #include "utility/actuation/InverseKinematics.hpp"
 #include "utility/math/comparison.hpp"
 #include "utility/math/euler.hpp"
@@ -22,8 +23,8 @@ namespace module::motion {
     using extension::Configuration;
 
     using message::actuation::KinematicsModel;
+    using message::actuation::ServoCommand;
     using message::behaviour::Behaviour;
-    using message::behaviour::ServoCommands;
     using message::input::Sensors;
     using message::motion::EnableWalkEngineCommand;
     using message::motion::KinematicsModel;
@@ -253,7 +254,7 @@ namespace module::motion {
         return dt;
     }
 
-    void QuinticWalk::calculateJointGoals() {
+    std::unique_ptr<ServoCommand> QuinticWalk::calculateJointGoals() {
         /*
         This method computes the next motor goals and publishes them.
         */
@@ -302,30 +303,13 @@ namespace module::motion {
 
         // Compute inverse kinematics for left and right foot
         const auto joints = calculateLegJoints<float>(kinematicsModel, Htl, Htr);
-        auto waypoints    = motion(joints);
-        emit(std::move(waypoints));
-        // Plot graphs of desired trajectories
-        if (log_level <= NUClear::DEBUG) {
-            Eigen::Vector3f thetaTL = MatrixToEulerIntrinsic(Htl.linear());
-            emit(graph("Left foot desired position (x,y,z)", Htl(0, 3), Htl(1, 3), Htl(2, 3)));
-            emit(graph("Left foot desired orientation (r,p,y)", thetaTL.x(), thetaTL.y(), thetaTL.z()));
-
-            Eigen::Vector3f thetaTR = MatrixToEulerIntrinsic(Htr.linear());
-            emit(graph("Right foot desired position (x,y,z)", Htr(0, 3), Htr(1, 3), Htr(2, 3)));
-            emit(graph("Right foot desired orientation (r,p,y)", thetaTR.x(), thetaTR.y(), thetaTR.z()));
-
-            emit(graph("Trunk desired position (x,y,z)", Hst(0, 3), Hst(1, 3), Hst(2, 3)));
-            emit(graph("Trunk desired orientation (r,p,y)", thetaST.x(), thetaST.y(), thetaST.z()));
-        }
-    }
-
-    // NOTE: Move into calculate_joint_goals
-    std::unique_ptr<ServoCommands> QuinticWalk::motion(const std::vector<std::pair<ServoID, float>>& joints) {
-        auto waypoints = std::make_unique<ServoCommands>();
+        // **** NOTE: Next block comes from motion function -LC
+        auto waypoints = std::make_unique<ServoCommand>();
         waypoints->commands.reserve(joints.size() + current_config.arm_positions.size());
 
         const NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
-
+        // TODO: Change to new style of servo command
+        // NOTE: Does this need a ServoCommands like the old proto?
         for (const auto& joint : joints) {
             waypoints->commands.emplace_back(subsumption_id,
                                              time,
@@ -343,7 +327,50 @@ namespace module::motion {
                                              current_config.jointGains[joint.first],
                                              100);
         }
+        // emit(std::move(waypoints));
 
+        // Plot graphs of desired trajectories
+        if (log_level <= NUClear::DEBUG) {
+            Eigen::Vector3f thetaTL = MatrixToEulerIntrinsic(Htl.linear());
+            emit(graph("Left foot desired position (x,y,z)", Htl(0, 3), Htl(1, 3), Htl(2, 3)));
+            emit(graph("Left foot desired orientation (r,p,y)", thetaTL.x(), thetaTL.y(), thetaTL.z()));
+
+            Eigen::Vector3f thetaTR = MatrixToEulerIntrinsic(Htr.linear());
+            emit(graph("Right foot desired position (x,y,z)", Htr(0, 3), Htr(1, 3), Htr(2, 3)));
+            emit(graph("Right foot desired orientation (r,p,y)", thetaTR.x(), thetaTR.y(), thetaTR.z()));
+
+            emit(graph("Trunk desired position (x,y,z)", Hst(0, 3), Hst(1, 3), Hst(2, 3)));
+            emit(graph("Trunk desired orientation (r,p,y)", thetaST.x(), thetaST.y(), thetaST.z()));
+        }
         return waypoints;
     }
+
+    // NOTE: Move into calculate_joint_goals
+    // DEPRECATED - LC
+    // std::unique_ptr<ServoCommands> QuinticWalk::motion(const std::vector<std::pair<ServoID, float>>& joints) {
+    //     auto waypoints = std::make_unique<ServoCommands>();
+    //     waypoints->commands.reserve(joints.size() + current_config.arm_positions.size());
+
+    //     const NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
+
+    //     for (const auto& joint : joints) {
+    //         waypoints->commands.emplace_back(subsumption_id,
+    //                                          time,
+    //                                          joint.first,
+    //                                          joint.second,
+    //                                          current_config.jointGains[joint.first],
+    //                                          100);
+    //     }
+
+    //     for (const auto& joint : current_config.arm_positions) {
+    //         waypoints->commands.emplace_back(subsumption_id,
+    //                                          time,
+    //                                          joint.first,
+    //                                          joint.second,
+    //                                          current_config.jointGains[joint.first],
+    //                                          100);
+    //     }
+
+    //     return waypoints;
+    // }
 }  // namespace module::motion
