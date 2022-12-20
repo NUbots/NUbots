@@ -8,7 +8,7 @@ namespace module::localisation {
 
     class OdometryLocalisation : public NUClear::Reactor {
     private:
-        Eigen::Affine2d localisationOffset;
+        Eigen::Isometry2d localisationOffset;
 
     public:
         /// @brief Called by the powerplant to build and setup the OdometryLocalisation reactor.

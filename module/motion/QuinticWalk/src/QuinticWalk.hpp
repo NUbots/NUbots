@@ -11,8 +11,8 @@
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/KinematicsModel.hpp"
 #include "message/behaviour/ServoCommand.hpp"
-#include "message/motion/KinematicsModel.hpp"
 
 #include "utility/input/ServoID.hpp"
 
@@ -67,7 +67,7 @@ namespace module::motion {
 
         QuinticWalkEngine walk_engine{};
 
-        message::motion::KinematicsModel kinematicsModel{};
+        message::actuation::KinematicsModel kinematicsModel{};
     };
 }  // namespace module::motion
 

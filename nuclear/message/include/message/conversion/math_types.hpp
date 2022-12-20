@@ -2,6 +2,7 @@
 #define MESSAGE_CONVERSION_MATRIX_TYPES_HPP
 
 #include <Eigen/Core>
+#include <Eigen/Geometry>
 
 namespace message::conversion::math {
 

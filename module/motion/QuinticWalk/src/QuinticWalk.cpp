@@ -4,16 +4,16 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/KinematicsModel.hpp"
 #include "message/behaviour/Behaviour.hpp"
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/KinematicsModel.hpp"
 #include "message/motion/LimbsIK.hpp"
 #include "message/motion/WalkCommand.hpp"
 #include "message/support/nusight/DataPoint.hpp"
-
+#include "utility/actuation/InverseKinematics.hpp"
 #include "utility/math/comparison.hpp"
 #include "utility/math/euler.hpp"
-#include "utility/motion/InverseKinematics.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
@@ -21,6 +21,7 @@ namespace module::motion {
 
     using extension::Configuration;
 
+    using message::actuation::KinematicsModel;
     using message::behaviour::Behaviour;
     using message::behaviour::ServoCommands;
     using message::input::Sensors;
@@ -32,10 +33,10 @@ namespace module::motion {
     using message::motion::Walk;
     using message::motion::WalkCommand;
 
+    using utility::actuation::kinematics::calculateLegJoints;
     using utility::input::ServoID;
     using utility::math::euler::EulerIntrinsicToMatrix;
     using utility::math::euler::MatrixToEulerIntrinsic;
-    using utility::motion::kinematics::calculateLegJoints;
     using utility::nusight::graph;
     using utility::support::Expression;
 
@@ -277,24 +278,31 @@ namespace module::motion {
         std::tie(trunk_pos, trunk_axis, foot_pos, foot_axis, is_left_support) = walk_engine.computeCartesianPosition();
 
         // Change goals from support foot based coordinate system to trunk based coordinate system
-        Eigen::Affine3f Hst;  // trunk_to_support_foot_goal
-        Hst.linear()      = setRPY(trunk_axis.x(), trunk_axis.y(), trunk_axis.z()).transpose();
-        Hst.translation() = -Hst.rotation() * trunk_pos;
+        // Trunk {t} from support foot {s}
+        Eigen::Isometry3f Hst;
+        Hst.linear()      = EulerIntrinsicToMatrix(thetaST);
+        Hst.translation() = rTSs;
 
-        Eigen::Affine3f Hfs;  // support_to_flying_foot
-        Hfs.linear()      = setRPY(foot_axis.x(), foot_axis.y(), foot_axis.z());
-        Hfs.translation() = foot_pos;
+        // Flying foot {f} from support foot {s}
+        Eigen::Isometry3f Hsf;
+        Hsf.linear()      = EulerIntrinsicToMatrix(thetaSF);
+        Hsf.translation() = rFSs;
 
-        const Eigen::Affine3f Hft = Hfs * Hst;  // trunk_to_flying_foot_goal
+        // Support foot {s} from trunk {t}
+        const Eigen::Isometry3f Hts = Hst.inverse();
 
-        // Calculate leg joints
-        const Eigen::Matrix4f left_foot  = walk_engine.getFootstep().isLeftSupport() ? Hst.matrix() : Hft.matrix();
-        const Eigen::Matrix4f right_foot = walk_engine.getFootstep().isLeftSupport() ? Hft.matrix() : Hst.matrix();
+        // Flying foot {f} from trunk {t}
+        const Eigen::Isometry3f Htf = Hts * Hsf;
 
-        const auto joints =
-            calculateLegJoints<float>(kinematicsModel, Eigen::Affine3f(left_foot), Eigen::Affine3f(right_foot));
+        // Get desired transform for left foot {l}
+        const Eigen::Isometry3f Htl = walk_engine.get_footstep().is_left_support() ? Hts : Htf;
 
-        auto waypoints = motion(joints);
+        // Get desired transform for right foot {r}
+        const Eigen::Isometry3f Htr = walk_engine.get_footstep().is_left_support() ? Htf : Hts;
+
+        // Compute inverse kinematics for left and right foot
+        const auto joints = calculateLegJoints<float>(kinematicsModel, Htl, Htr);
+        auto waypoints    = motion(joints);
         emit(std::move(waypoints));
         // Plot graphs of desired trajectories
         if (log_level <= NUClear::DEBUG) {
