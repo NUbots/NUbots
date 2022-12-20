@@ -145,7 +145,14 @@ class Message:
 
                     elif v.type[1].special_cpp_type:
                         lines.append(indent("for (const auto& v : proto.{}()) {{".format(v.name.lower())))
-                        lines.append(indent("message::conversion::convert({}[v.first], v.second);".format(v.name), 8))
+                        lines.append(
+                            indent(
+                                "{0}[v.first] = message::conversion::convert<{1}>(v.second);".format(
+                                    v.name, v.cpp_type
+                                ),
+                                8,
+                            )
+                        )
                         lines.append(indent("}"))
 
                     else:  # Basic and other types are handled the same
@@ -161,7 +168,7 @@ class Message:
                 elif v.repeated:
                     if v.bytes_type:
                         lines.append(indent("{0}.resize(proto.{0}_size());".format(v.name.lower())))
-                        lines.append(indent("for (size_t i = 0; i < {0}.size(); ++i) {{".format(v.name)))
+                        lines.append(indent("for (int i = 0; i < int({0}.size()); ++i) {{".format(v.name)))
                         lines.append(
                             indent(
                                 "{0}[i].insert(std::end({0}[i]), std::begin(proto.{1}(i)), std::end(proto.{1}(i)));".format(
@@ -183,8 +190,8 @@ class Message:
                             )
                             lines.append(
                                 indent(
-                                    "message::conversion::convert({0}[i], proto.{1}(i));".format(
-                                        v.name, v.name.lower()
+                                    "{0}[i] = message::conversion::convert<{1}::value_type>(proto.{2}(i));".format(
+                                        v.name, v.cpp_type, v.name.lower()
                                     ),
                                     8,
                                 )
@@ -193,11 +200,11 @@ class Message:
                         else:
                             # Add the top of our for loop for the repeated field
                             lines.append(indent("{0}.resize(proto.{1}_size());".format(v.name, v.name.lower())))
-                            lines.append(indent("for (size_t i = 0; i < {0}.size(); ++i) {{".format(v.name)))
+                            lines.append(indent("for (int i = 0; i < int({0}.size()); ++i) {{".format(v.name)))
                             lines.append(
                                 indent(
-                                    "message::conversion::convert({0}[i], proto.{1}(i));".format(
-                                        v.name, v.name.lower()
+                                    "{0}[i] = message::conversion::convert<{1}::value_type>(proto.{2}(i));".format(
+                                        v.name, v.cpp_type, v.name.lower()
                                     ),
                                     8,
                                 )
@@ -217,10 +224,8 @@ class Message:
                             lines.append(indent("}"))
                         else:
                             lines.append(
-                                indent(
-                                    "{0}.insert(std::end({0}), std::begin(proto.{1}()), std::end(proto.{1}()));".format(
-                                        v.name, v.name.lower()
-                                    )
+                                "{0}.insert(std::end({0}), std::begin(proto.{1}()), std::end(proto.{1}()));".format(
+                                    v.name, v.name.lower()
                                 )
                             )
 
@@ -252,11 +257,12 @@ class Message:
                                     dedent(
                                         """\
                                         {0}.{1} = {2};
-                                        message::conversion::convert({0}.{1}, proto.{3}());""".format(
+                                        {0}.{1} = message::conversion::convert<{4}>(proto.{3}());""".format(
                                             v.name,
                                             oneof_field.name,
                                             oneof_field.default_value,
                                             oneof_field.name.lower(),
+                                            v.cpp_name,
                                         )
                                     ),
                                     12,
@@ -278,16 +284,16 @@ class Message:
                 else:
                     if v.bytes_type:
                         lines.append(
-                            indent(
-                                "{0}.insert(std::end({0}), std::begin(proto.{1}()), std::end(proto.{1}()));".format(
-                                    v.name, v.name.lower()
-                                )
+                            "{0}.insert(std::end({0}), std::begin(proto.{1}()), std::end(proto.{1}()));".format(
+                                v.name, v.name.lower()
                             )
                         )
 
                     elif v.special_cpp_type:
                         lines.append(
-                            indent("message::conversion::convert({}, proto.{}());".format(v.name, v.name.lower()))
+                            "{0} = message::conversion::convert<{1}>(proto.{2}());".format(
+                                v.name, v.cpp_type, v.name.lower()
+                            )
                         )
 
                     else:  # Basic and other types are handled the same
@@ -309,7 +315,7 @@ class Message:
         if not self.fields:
             return (
                 "operator {0}() const;".format(protobuf_name),
-                "{0}::operator {1}() const {{\n    return {1}();\n}}".format(cpp_fqn, protobuf_name),
+                "{0}::operator {1}() const {{\n return {1}();\n}}".format(cpp_fqn, protobuf_name),
             )
         else:
             lines = [
@@ -338,8 +344,8 @@ class Message:
                     elif v.type[1].special_cpp_type:
                         lines.append(
                             indent(
-                                "message::conversion::convert((*proto.mutable_{}())[v.first], v.second);".format(
-                                    v.name.lower()
+                                "(*proto.mutable_{0}())[v.first] = message::conversion::convert<{1}>(v.second);".format(
+                                    v.name.lower(), v.cpp_type
                                 ),
                                 8,
                             )
@@ -359,7 +365,12 @@ class Message:
                         )
                     elif v.special_cpp_type:
                         lines.append(
-                            indent("message::conversion::convert(*proto.add_{}(), v);".format(v.name.lower()), 8)
+                            indent(
+                                "*proto.add_{0}() = message::conversion::convert<{1}::value_type>(v);".format(
+                                    v.name.lower(), v.cpp_type
+                                ),
+                                8,
+                            )
                         )
                     elif v.basic:
                         lines.append(indent("proto.add_{}(v);".format(v.name.lower()), 8))
@@ -385,8 +396,8 @@ class Message:
                         elif oneof_field.special_cpp_type:
                             lines.append(
                                 indent(
-                                    "message::conversion::convert(*proto.mutable_{0}(), {1}.{2}.get());".format(
-                                        oneof_field.name.lower(), v.name, oneof_field.name
+                                    "*proto.mutable_{0}() = message::conversion::convert<{1}>({2}.{3}.get());".format(
+                                        oneof_field.name.lower(), v.cpp_type, v.name, oneof_field.name
                                     ),
                                     12,
                                 )
@@ -427,7 +438,9 @@ class Message:
                     elif v.special_cpp_type:
                         lines.append(
                             indent(
-                                "message::conversion::convert(*proto.mutable_{}(), {});".format(v.name.lower(), v.name)
+                                "*proto.mutable_{0}() = message::conversion::convert<{1}>({2});".format(
+                                    v.name.lower(), v.cpp_type, v.name
+                                )
                             )
                         )
                     elif v.basic:
