@@ -519,11 +519,7 @@ namespace module::input {
                             0.0);
 
                         // IMU data for filter
-                        Eigen::Vector3d gyro = previousSensors ? previousSensors->gyroscope : Eigen::Vector3d::Zero();
-                        Eigen::Vector3d acc =
-                            previousSensors ? previousSensors->accelerometer : Eigen::Vector3d::Zero();
-
-                        filter.propagate(gyro, acc, deltaT);
+                        filter.propagate(sensors->gyroscope, sensors->accelerometer, deltaT);
 
                         // Contact data for filter
                         filter.set_contacts(std::vector<std::pair<int, bool>>{{0, sensors->feet[BodySide::RIGHT].down},
