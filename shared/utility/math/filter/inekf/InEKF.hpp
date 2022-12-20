@@ -101,7 +101,7 @@ namespace utility::math::filter::inekf {
     private:
         RobotState state{};
         NoiseParams noise_params{};
-        const Eigen::Vector3d gravity{0.0, 0.0, 0.98};
+        const Eigen::Vector3d gravity{0.0, 0.0, -9.81};
         map_int_vec3d prior_landmarks{};
         std::map<int, int> estimated_landmarks{};
         std::map<int, bool> contacts{};

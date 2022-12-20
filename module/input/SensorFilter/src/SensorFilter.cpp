@@ -106,11 +106,11 @@ namespace module::input {
 
             // SET INITIAL PARAMETERS FOR THE INEKF
 
-            config.inekf.initial_orientation = cfg["inekf"]["initial"]["orientation"].as<Expression>();
-            config.inekf.initial_velocity    = cfg["inekf"]["initial"]["velocity"].as<Expression>();
-            config.inekf.initial_position    = cfg["inekf"]["initial"]["position"].as<Expression>();
-            config.inekf.initial_gyro_bias   = cfg["inekf"]["initial"]["gyro_bias"].as<Expression>();
-            config.inekf.initial_acc_bias    = cfg["inekf"]["initial"]["acc_bias"].as<Expression>();
+            config.inekf.initial_orientation = cfg["inekf"]["initial_state"]["orientation"].as<Expression>();
+            config.inekf.initial_velocity    = cfg["inekf"]["initial_state"]["velocity"].as<Expression>();
+            config.inekf.initial_position    = cfg["inekf"]["initial_state"]["position"].as<Expression>();
+            config.inekf.initial_gyro_bias   = cfg["inekf"]["initial_state"]["gyro_bias"].as<Expression>();
+            config.inekf.initial_acc_bias    = cfg["inekf"]["initial_state"]["acc_bias"].as<Expression>();
 
             utility::math::filter::inekf::RobotState initial_state{};
             initial_state.set_rotation(config.inekf.initial_orientation);
@@ -137,11 +137,11 @@ namespace module::input {
             filter.set_noise_params(noise_params);
 
             // Set our initial position
-            rTWw = cfg["inekf"]["initial"]["position"].as<Expression>();
+            rTWw = config.inekf.initial_position;
 
             // Don't filter any sensors until we have initialised the filter
-            update_loop.disable();
-            reset_filter.store(true);
+            update_loop.enable();
+            reset_filter.store(false);
         });
 
         on<Configuration>("FootDownNetwork.yaml").then([this](const Configuration& config) {
@@ -202,11 +202,11 @@ namespace module::input {
                     gyro /= static_cast<double>(sensors.size());
                     rMFt /= static_cast<double>(sensors.size());
 
-                    // Average time per sensor reading
-                    double deltaT = std::chrono::duration_cast<std::chrono::duration<double>>(
-                                        sensors.back()->timestamp - sensors.front()->timestamp)
-                                        .count()
-                                    / static_cast<double>(sensors.size());
+                    // // Average time per sensor reading
+                    // double deltaT = std::chrono::duration_cast<std::chrono::duration<double>>(
+                    //                     sensors.back()->timestamp - sensors.front()->timestamp)
+                    //                     .count()
+                    //                 / static_cast<double>(sensors.size());
 
                     // Find the rotation from the average accelerometer reading to world UnitZ
                     // Rotating from torso acceleration vector to world z vector ===> this makes it Rwt and not Rtw
@@ -266,7 +266,6 @@ namespace module::input {
                            const std::shared_ptr<const Sensors>& previousSensors,
                            const KinematicsModel& kinematicsModel) {
                         auto sensors = std::make_unique<Sensors>();
-
                         /************************************************
                          *                 Raw Sensors                  *
                          ************************************************/
@@ -367,7 +366,7 @@ namespace module::input {
                          ************************************************/
 
                         // We assume that the accelerometer and gyroscope are oriented to conform with the standard
-                        // coordinate system x-axis out the front of the robot y-axis to the left z-axis up
+                        // coordinate system: x-axis out the front of the robot, y-axis to the left, z-axis up
                         //
                         // For the accelerometer the orientation should be as follows
                         // x axis reports a +1g acceleration when robot is laying on its back
@@ -513,9 +512,8 @@ namespace module::input {
                          ************************************************/
 
                         // Time for filter
-                        using namespace std::chrono;
                         const double deltaT = std::max(
-                            duration_cast<duration<double>>(
+                            std::chrono::duration_cast<std::chrono::duration<double>>(
                                 input.timestamp - (previousSensors ? previousSensors->timestamp : input.timestamp))
                                 .count(),
                             0.0);
@@ -528,17 +526,18 @@ namespace module::input {
                         filter.propagate(gyro, acc, deltaT);
 
                         // Contact data for filter
-                        filter.set_contacts({{0, feet_down[BodySide::RIGHT]}, {1, feet_down[BodySide::LEFT]}});
+                        filter.set_contacts(std::vector<std::pair<int, bool>>{{0, sensors->feet[BodySide::RIGHT].down},
+                                                                              {1, sensors->feet[BodySide::LEFT].down}});
 
                         // Kinematics data for filter
                         utility::math::filter::inekf::kinematics measured_kinematics;
                         measured_kinematics.emplace_back(
                             utility::math::filter::inekf::KinematicPose{0,
-                                                                        Htr.matrix(),
+                                                                        Htr.inverse().matrix(),
                                                                         Eigen::Matrix<double, 6, 6>::Zero()});
                         measured_kinematics.emplace_back(
                             utility::math::filter::inekf::KinematicPose{1,
-                                                                        Htl.matrix(),
+                                                                        Htl.inverse().matrix(),
                                                                         Eigen::Matrix<double, 6, 6>::Zero()});
                         filter.correct_kinematics(measured_kinematics);
 
@@ -668,6 +667,6 @@ namespace module::input {
 
                         emit(std::move(sensors));
                     })
-                .disable();
+                .enable();
     }
 }  // namespace module::input

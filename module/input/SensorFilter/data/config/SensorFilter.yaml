@@ -17,7 +17,10 @@ foot_down:
 
 inekf:
   initial_state:
-    orientation: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+    orientation:
+      - [1.0, 0.0, 0.0]
+      - [0.0, 1.0, 0.0]
+      - [0.0, 0.0, 1.0]
     velocity: [0.0, 0.0, 0.0]
     position: [0.0, 0.0, 0.5]
     gyro_bias: [0.0, 0.0, 0.0]
@@ -27,4 +30,4 @@ inekf:
     acc: 0.1
     gyro_bias: 0.00001
     acc_bias: 0.0001
-    contact: 0.01
+    foot_sensors: 0.01

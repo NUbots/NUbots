@@ -12,7 +12,10 @@ foot_down:
 
 inekf:
   initial_state:
-    orientation: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+    orientation:
+      - [1.0, 0.0, 0.0]
+      - [0.0, 1.0, 0.0]
+      - [0.0, 0.0, 1.0]
     velocity: [0.0, 0.0, 0.0]
     position: [0.0, 0.0, 0.5]
     gyro_bias: [0.0, 0.0, 0.0]
