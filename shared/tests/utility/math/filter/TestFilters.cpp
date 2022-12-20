@@ -224,26 +224,24 @@ TEST_CASE("Test the InEKF", "[utility][math][filter][InEKF]") {
     utility::math::filter::inekf::RobotState initial_state;
 
     // Set initial state values
-    initial_state.setRotation(config["initial_state"]["orientation"].as<Expression>());
-    initial_state.setVelocity(config["initial_state"]["velocity"].as<Expression>());
-    initial_state.setPosition(config["initial_state"]["position"].as<Expression>());
-    initial_state.setGyroscopeBias(config["initial_state"]["gyro_bias"].as<Expression>());
-    initial_state.setAccelerometerBias(config["initial_state"]["acc_bias"].as<Expression>());
+    initial_state.set_rotation(config["initial_state"]["orientation"].as<Expression>());
+    initial_state.set_velocity(config["initial_state"]["velocity"].as<Expression>());
+    initial_state.set_position(config["initial_state"]["position"].as<Expression>());
+    initial_state.set_gyroscope_bias(config["initial_state"]["gyro_bias"].as<Expression>());
+    initial_state.set_accelerometer_bias(config["initial_state"]["acc_bias"].as<Expression>());
 
     // Initialize state covariance
     utility::math::filter::inekf::NoiseParams noise_params;
-    noise_params.setGyroscopeNoise(config["noise"]["gyro"].as<double>());
-    noise_params.setAccelerometerNoise(config["noise"]["acc"].as<double>());
-    noise_params.setGyroscopeBiasNoise(config["noise"]["gyro_bias"].as<double>());
-    noise_params.setAccelerometerBiasNoise(config["noise"]["acc_bias"].as<double>());
-    noise_params.setContactNoise(config["noise"]["contact"].as<double>());
+    noise_params.set_gyroscope_noise(config["noise"]["gyro"].as<double>());
+    noise_params.set_accelerometer_noise(config["noise"]["acc"].as<double>());
+    noise_params.set_gyroscope_bias_noise(config["noise"]["gyro_bias"].as<double>());
+    noise_params.set_accelerometer_bias_noise(config["noise"]["acc_bias"].as<double>());
+    noise_params.set_contact_noise(config["noise"]["contact"].as<double>());
 
     // Initialize filter
     utility::math::filter::inekf::InEKF filter(initial_state, noise_params);
-    INFO("Noise parameters are initialized to:");
-    INFO(filter.getNoiseParams());
     INFO("Robot's state is initialized to:");
-    INFO(filter.getState());
+    INFO(filter.get_state());
 
     // Get data from yaml file
     const std::vector<double> times = resolve_expression<double>(config["measurements"]["time"]);
@@ -253,12 +251,12 @@ TEST_CASE("Test the InEKF", "[utility][math][filter][InEKF]") {
         resolve_expression<Eigen::Vector3d>(config["measurements"]["accelerometer"]);
     const std::vector<Eigen::Vector2i> force_sensors =
         resolve_expression<Eigen::Vector2i>(config["measurements"]["force_sensors"]);
-    const std::vector<Eigen::Quaternion<double>> quaternions =
-        resolve_expression<Eigen::Quaternion<double>>(config["measurements"]["kinematics_quaternion"]);
+    const std::vector<Eigen::Vector4d> quaternions =
+        resolve_expression<Eigen::Vector4d>(config["measurements"]["kinematics_quaternion"]);
     const std::vector<Eigen::Vector3d> positions =
         resolve_expression<Eigen::Vector3d>(config["measurements"]["kinematics_position"]);
-    const std::vector<Eigen::Matrix<6, 6, double>> covariances =
-        resolve_expression<Eigen::Matrix<6, 6, double>>(config["measurements"]["covariance"]);
+    const std::vector<Eigen::Matrix<double, 6, 6>> covariances =
+        resolve_expression<Eigen::Matrix<double, 6, 6>>(config["measurements"]["covariance"]);
 
     // Should be able to remove these later
     Eigen::Matrix<double, 6, 1> imu_measurement      = Eigen::Matrix<double, 6, 1>::Zero();
@@ -268,7 +266,7 @@ TEST_CASE("Test the InEKF", "[utility][math][filter][InEKF]") {
     double t_prev = 0.0;
 
     // Use each set of measurements in the filter
-    for (int i = 0; i < times.size(); i++) {
+    for (long unsigned int i = 0; i < times.size(); i++) {
         // IMU DATA
         // Get the time difference between this run and the previous run
         double dt = i == 0 ? times[i] : times[i] - times[i - 1];
@@ -289,17 +287,27 @@ TEST_CASE("Test the InEKF", "[utility][math][filter][InEKF]") {
 
         // KINEMATICS DATA
         // There are two sets, one for each leg
-        utility::math::filter::inekf::vector_kinematics measured_kinematics;
+        utility::math::filter::inekf::kinematics measured_kinematics;
 
         Eigen::Isometry3d pose_right;
-        pose_right.rotation()    = quaternions[i * 2].toRotationMatrix();
+        pose_right.linear() = Eigen::Quaternion<double>(quaternions[i * 2][0],
+                                                        quaternions[i * 2][1],
+                                                        quaternions[i * 2][2],
+                                                        quaternions[i * 2][3])
+                                  .toRotationMatrix();
         pose_right.translation() = positions[i * 2];
-        measured_kinematics.emplace_back(0, pose_right, covariances[i * 2]);
+        measured_kinematics.emplace_back(
+            utility::math::filter::inekf::KinematicPose{0, pose_right.matrix(), covariances[i * 2]});
 
         Eigen::Isometry3d pose_left;
-        pose_left.rotation()    = quaternions[(i * 2) + 1].toRotationMatrix();
+        pose_left.linear() = Eigen::Quaternion<double>(quaternions[(i * 2) + 1][0],
+                                                       quaternions[(i * 2) + 1][1],
+                                                       quaternions[(i * 2) + 1][2],
+                                                       quaternions[(i * 2) + 1][3])
+                                 .toRotationMatrix();
         pose_left.translation() = positions[(i * 2) + 1];
-        measured_kinematics.emplace_back(1, pose_left, covariances[(i * 2) + 1]);
+        measured_kinematics.emplace_back(
+            utility::math::filter::inekf::KinematicPose{1, pose_left.matrix(), covariances[(i * 2) + 1]});
 
         // Correct state using kinematic measurements
         filter.correct_kinematics(measured_kinematics);
@@ -315,7 +323,7 @@ TEST_CASE("Test the InEKF", "[utility][math][filter][InEKF]") {
 
     // Print the time and average time
     INFO("Total time [microseconds] : " << duration.count());
-    INFO("Total time average [microseconds] : " << duration.count() / time.size());
+    INFO("Total time average [microseconds] : " << duration.count() / times.size());
 
     REQUIRE(10 == 0);
 }

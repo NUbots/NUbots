@@ -39,10 +39,10 @@ namespace utility::math::filter::inekf {
         const Eigen::Vector3d get_velocity();
         const Eigen::Vector3d get_position();
         const Eigen::Vector3d get_gyroscope_bias();
-        const Eigen::Vector3d getA_accelerometer_bias();
-        const int dim_X();
-        const int dim_theta();
-        const int dim_P();
+        const Eigen::Vector3d get_accelerometer_bias();
+        int dim_X();
+        int dim_theta();
+        int dim_P();
 
         void set_X(const Eigen::MatrixXd& X);
         void set_P(const Eigen::MatrixXd& P);
@@ -59,7 +59,7 @@ namespace utility::math::filter::inekf {
 
     private:
         Eigen::MatrixXd X;
-        Eigen::VectorXd theta;
+        Eigen::VectorXd Theta;
         Eigen::MatrixXd P;
     };
 

@@ -18,12 +18,12 @@ namespace utility::math::filter::inekf {
     // ------------ NoiseParams -------------
     // Default Constructor
     NoiseParams::NoiseParams() {
-        setGyroscopeNoise(0.01);
-        setAccelerometerNoise(0.1);
-        setGyroscopeBiasNoise(0.00001);
-        setAccelerometerBiasNoise(0.0001);
-        setLandmarkNoise(0.1);
-        setContactNoise(0.1);
+        set_gyroscope_noise(0.01);
+        set_accelerometer_noise(0.1);
+        set_gyroscope_bias_noise(0.00001);
+        set_accelerometer_bias_noise(0.0001);
+        set_landmark_noise(0.1);
+        set_contact_noise(0.1);
     }
 
     void NoiseParams::set_gyroscope_noise(double std) {

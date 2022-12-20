@@ -19,9 +19,9 @@ namespace utility::math::filter::inekf {
 
     // Default constructor
     RobotState::RobotState()
-        : X_(Eigen::MatrixXd::Identity(5, 5))
-        , Theta_(Eigen::MatrixXd::Zero(6, 1))
-        , P_(Eigen::MatrixXd::Identity(15, 15)) {}
+        : X(Eigen::MatrixXd::Identity(5, 5))
+        , Theta(Eigen::MatrixXd::Zero(6, 1))
+        , P(Eigen::MatrixXd::Identity(15, 15)) {}
     // Initialize with X
     RobotState::RobotState(const Eigen::MatrixXd& x) : X(x), Theta(Eigen::MatrixXd::Zero(6, 1)) {
         P = Eigen::MatrixXd::Identity(3 * this->dim_X() + this->dim_theta() - 6,
@@ -30,7 +30,7 @@ namespace utility::math::filter::inekf {
     // Initialize with X and Theta
     RobotState::RobotState(const Eigen::MatrixXd& x, const Eigen::VectorXd& t) : X(x), Theta(t) {
         P = Eigen::MatrixXd::Identity(3 * this->dim_X() + this->dim_theta() - 6,
-                                      3 * this->dim_X() + this->dim_Theta() - 6);
+                                      3 * this->dim_X() + this->dim_theta() - 6);
     }
     // Initialize with X, Theta and P
     RobotState::RobotState(const Eigen::MatrixXd& x, const Eigen::VectorXd& t, const Eigen::MatrixXd& p)
@@ -61,13 +61,13 @@ namespace utility::math::filter::inekf {
     const Eigen::Vector3d RobotState::get_accelerometer_bias() {
         return Theta.tail(3);
     }
-    const int RobotState::dim_X() {
+    int RobotState::dim_X() {
         return X.cols();
     }
-    const int RobotState::dim_theta() {
+    int RobotState::dim_theta() {
         return Theta.rows();
     }
-    const int RobotState::dim_P() {
+    int RobotState::dim_P() {
         return P.cols();
     }
 
@@ -90,10 +90,10 @@ namespace utility::math::filter::inekf {
         X.block<3, 1>(0, 4) = p;
     }
     void RobotState::set_gyroscope_bias(const Eigen::Vector3d& bg) {
-        Theta_.head(3) = bg;
+        Theta.head(3) = bg;
     }
     void RobotState::set_accelerometer_bias(const Eigen::Vector3d& ba) {
-        Theta_.tail(3) = ba;
+        Theta.tail(3) = ba;
     }
 
 

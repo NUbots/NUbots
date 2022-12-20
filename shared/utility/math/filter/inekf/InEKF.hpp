@@ -20,10 +20,6 @@
 #include <map>
 #include <vector>
 
-#if INEKF_USE_MUTEX
-    #include <mutex>
-#endif
-
 #include "LieGroup.hpp"
 #include "NoiseParams.hpp"
 #include "RobotState.hpp"
@@ -57,11 +53,11 @@ namespace utility::math::filter::inekf {
     struct Observation {
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-        Eigen::VectorXd Y  = Eigen::VectorXd::Zero();
-        Eigen::VectorXd b  = Eigen::VectorXd::Zero();
-        Eigen::MatrixXd H  = Eigen::MatrixXd::Identity();
-        Eigen::MatrixXd N  = Eigen::MatrixXd::Identity();
-        Eigen::MatrixXd PI = Eigen::MatrixXd::Identity();
+        Eigen::VectorXd Y;
+        Eigen::VectorXd b;
+        Eigen::MatrixXd H;
+        Eigen::MatrixXd N;
+        Eigen::MatrixXd PI;
 
         bool empty() {
             return Y.rows() == 0;
@@ -88,7 +84,6 @@ namespace utility::math::filter::inekf {
         InEKF(RobotState state, NoiseParams params);
 
         RobotState get_state();
-        NoiseParams get_noise_params();
         map_int_vec3d get_prior_landmarks();
         std::map<int, int> get_estimated_landmarks();
         std::map<int, bool> get_contacts();
@@ -98,7 +93,7 @@ namespace utility::math::filter::inekf {
         void set_prior_landmarks(const map_int_vec3d& prior_landmarks);
         void set_contacts(std::vector<std::pair<int, bool>> contacts);
 
-        void propagate(const Eigen::Matrix<double, 6, 1>& m, double dt);
+        void propagate(const Eigen::Vector3d& gyro, const Eigen::Vector3d& acc, double dt);
         void correct(const Observation& obs);
         void correct_landmarks(const landmarks& measured_landmarks);
         void correct_kinematics(const kinematics& measured_kinematics);
