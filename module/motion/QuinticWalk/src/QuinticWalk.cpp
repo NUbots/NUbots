@@ -294,13 +294,6 @@ namespace module::motion {
         // Get desired transform for right foot {r}
         const Eigen::Isometry3f Htr = walk_engine.get_footstep().is_left_support() ? Htf : Hts;
 
-        // Compute inverse kinematics for left and right foot
-        // const auto joints = calculateLegJoints<float>(kinematicsModel, Htl, Htr);
-        // // NOTE: Next block comes from motion function -LC
-        // // TODO: Make this a new servo command type - LC
-        // auto waypoints = std::make_unique<ServoCommand>();
-        // waypoints->commands.reserve(joints.size() + current_config.arm_positions.size());
-
         // ****DIRECTOR MOTION***
         const NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
 
