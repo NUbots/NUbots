@@ -228,15 +228,9 @@ namespace module::motion {
                 // TODO: Add description of this block. ****Formerly Main Walking loop***
                 const float dt = get_time_delta();
                 // see if the walk engine has new goals for us
-                // NOTE: Falling check - Get stability info from Stability.proto - LC
-                if (Stability::Value::FALLING) {
-                    // TODO: Something
-                }
-                else {
-                    if (walk_engine.update_state(dt, current_orders)) {
-                        std::unique_ptr<ServoCommand> joint_goals = calculateJointGoals();
-                        emit(std::move(joint_goals));
-                    }
+                if (walk_engine.update_state(dt, current_orders)) {
+                    std::unique_ptr<ServoCommand> joint_goals = calculateJointGoals();
+                    emit(std::move(joint_goals));
                 }
             });
     }
