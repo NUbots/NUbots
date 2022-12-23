@@ -31,4 +31,4 @@ accelerometer_angle:
   # The angle of the accelerometer (from upright 0) at which the robot is considered unstable
   unstable: 45 * pi / 180.0
   # The angle of the accelerometer (from upright 0) at which the robot is considered falling
-  falling:  45 * pi / 180.0
+  falling: 45 * pi / 180.0
