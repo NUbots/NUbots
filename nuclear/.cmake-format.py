@@ -21,6 +21,7 @@ with section("parse"):
         "nuclear_module": {
             "kwargs": {"LANGUAGE": "1", "INCLUDES": "*", "LIBRARIES": "*", "SOURCES": "*", "DATA_FILES": "*"}
         },
+        "GenerateNeutron": {"kwargs": {"PROTO": "1", "PARENT_DIR": "1", "BUILTIN_DIR": "1", "BUILTIN_OUTPUT_DIR": "1"}},
     }
 
     # Specify variable tags.
