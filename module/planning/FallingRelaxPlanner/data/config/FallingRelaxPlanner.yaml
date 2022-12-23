@@ -19,9 +19,9 @@ acceleromter_magnitude:
   # The mean value to subtract from the raw reading
   # Use g to make it the value of acceleration due to gravity
   mean: 9.8
-  # The magnitude of the acceleromter at which the robot is considered unstable
+  # The magnitude of the accelerometer at which the robot is considered unstable
   unstable: 1.0
-  # The magnitude of the acceleromter at which the robot is considered falling
+  # The magnitude of the accelerometer at which the robot is considered falling
   falling: 2.0
 accelerometer_angle:
   # The smoothing factor for the exponential filter
