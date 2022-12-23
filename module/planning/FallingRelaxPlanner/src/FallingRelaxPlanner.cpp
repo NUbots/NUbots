@@ -42,18 +42,18 @@ namespace module::planning {
         on<Configuration>("FallingRelaxPlanner.yaml").then([this](const Configuration& config) {
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
 
-            cfg.gyro_mag.mean       = config["gyro_mag"]["mean"].as<Expression>();
-            cfg.gyro_mag.unstable   = config["gyro_mag"]["unstable"].as<Expression>();
-            cfg.gyro_mag.falling    = config["gyro_mag"]["falling"].as<Expression>();
-            cfg.gyro_mag.smoothing  = config["gyro_mag"]["smoothing"].as<Expression>();
-            cfg.acc_mag.mean        = config["acc_mag"]["mean"].as<Expression>();
-            cfg.acc_mag.unstable    = config["acc_mag"]["unstable"].as<Expression>();
-            cfg.acc_mag.falling     = config["acc_mag"]["falling"].as<Expression>();
-            cfg.acc_mag.smoothing   = config["acc_mag"]["smoothing"].as<Expression>();
-            cfg.acc_angle.mean      = config["acc_angle"]["mean"].as<Expression>();
-            cfg.acc_angle.unstable  = config["acc_angle"]["unstable"].as<Expression>();
-            cfg.acc_angle.falling   = config["acc_angle"]["falling"].as<Expression>();
-            cfg.acc_angle.smoothing = config["acc_angle"]["smoothing"].as<Expression>();
+            cfg.gyro_mag.mean       = config["gyroscope_magnitude"]["mean"].as<Expression>();
+            cfg.gyro_mag.unstable   = config["gyroscope_magnitude"]["unstable"].as<Expression>();
+            cfg.gyro_mag.falling    = config["gyroscope_magnitude"]["falling"].as<Expression>();
+            cfg.gyro_mag.smoothing  = config["gyroscope_magnitude"]["smoothing"].as<Expression>();
+            cfg.acc_mag.mean        = config["accelerometer_magnitude"]["mean"].as<Expression>();
+            cfg.acc_mag.unstable    = config["accelerometer_magnitude"]["unstable"].as<Expression>();
+            cfg.acc_mag.falling     = config["accelerometer_magnitude"]["falling"].as<Expression>();
+            cfg.acc_mag.smoothing   = config["accelerometer_magnitude"]["smoothing"].as<Expression>();
+            cfg.acc_angle.mean      = config["accelerometer_angle"]["mean"].as<Expression>();
+            cfg.acc_angle.unstable  = config["accelerometer_angle"]["unstable"].as<Expression>();
+            cfg.acc_angle.falling   = config["accelerometer_angle"]["falling"].as<Expression>();
+            cfg.acc_angle.smoothing = config["accelerometer_angle"]["smoothing"].as<Expression>();
         });
 
         on<Provide<RelaxWhenFalling>, Trigger<Sensors>>().then([this](const RunInfo& info, const Sensors& sensors) {
