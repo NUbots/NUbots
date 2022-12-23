@@ -1,0 +1,6 @@
+# Controls the minimum log level that NUClear log will display
+log_level: DEBUG
+# Each time the Ping Pong messages are sent, a count is incremented and the increment is of the following size
+increment: 2
+receive_port: 8011
+send_port: 8011
