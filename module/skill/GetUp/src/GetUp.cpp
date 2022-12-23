@@ -73,10 +73,10 @@ namespace module::skill {
 
                         // Split into six cases (think faces of a cube) to work out which getup script we should run
 
-                        // torso x is mostly world z
-                        bool on_front = (uXTw.z() >= uXTw.x() && uXTw.z() >= uXTw.y());
                         // torso x is mostly world -z
-                        bool on_back = (uXTw.z() <= uXTw.x() && uXTw.z() <= uXTw.y());
+                        bool on_front = (uXTw.z() <= uXTw.x() && uXTw.z() <= uXTw.y());
+                        // torso x is mostly world z
+                        bool on_back = (uXTw.z() >= uXTw.x() && uXTw.z() >= uXTw.y());
                         // torso y is mostly world z
                         bool on_right = (uYTw.z() >= uYTw.x() && uYTw.z() >= uYTw.y());
                         // torso y is mostly world -z
