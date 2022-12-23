@@ -10,4 +10,6 @@ nuclear_role(
   actuation::Servos
   # Skills
   skill::KickScript
+  # Planning
+  planning::PlanKick
 )

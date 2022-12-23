@@ -1,2 +1,15 @@
 # Controls the minimum log level that NUClear log will display
 log_level: DEBUG
+
+# Maximum distance of the ball required to kick the ball (in metres)
+ball_distance_threshold: 0.35
+# Maximum angle of the ball from the torso's x-axis required to kick the ball (in radians), both clockwise and anticlockwise
+ball_angle_threshold: 0.5
+
+# Whether to require aligning with the target
+align: false
+# Maximum angle of the target from the torso's x-axis required to kick the ball (in radians), both clockwise and anticlockwise
+target_angle_threshold: 0.5
+
+# "left", "right" or "auto". Left will only kick with the left leg, right only with the right, and auto will determine the leg from the ball position
+kick_leg: "auto"
