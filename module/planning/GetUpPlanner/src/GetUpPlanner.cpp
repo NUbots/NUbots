@@ -54,6 +54,7 @@ namespace module::planning {
 
             // If we have been at recovery levels for long enough we can trigger a getup
             if (!getting_up && recovery_frames > cfg.count) {
+                getting_up = true;
                 // Emit a getup
                 emit<Task>(std::make_unique<GetUp>());
             }
