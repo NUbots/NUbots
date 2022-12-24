@@ -6,13 +6,15 @@ import sys
 
 from google.protobuf.descriptor_pb2 import FieldOptions, FileDescriptorSet
 
-# Add our cwd to the path so we can import generated python protobufs
+# Add the NEUTRON_BUILTIN_DIR to the path so we can import the generated builtin protobufs
 # And extend our options with our Neutron protobuf
-sys.path.append(os.path.join(os.getcwd(), "..", "python"))
+# If this environment variable is not set we default to our cwd
+# The "builtin" protobufs are the ones found in nuclear/message/proto so NEUTRON_BUILTIN_DIR should be set to path
+# where the generated python protobuf files are stored
+builtin_dir = os.environ.get("NEUTRON_BUILTIN_DIR", os.path.join(os.getcwd(), ".."))
+sys.path.append(os.path.join(builtin_dir, "python"))
 from Neutron_pb2 import PointerType, array_size, pointer  # isort:skip
 
-FieldOptions.RegisterExtension(pointer)
-FieldOptions.RegisterExtension(array_size)
 PointerType = dict(PointerType.items())
 
 
@@ -51,7 +53,7 @@ class Field:
             # and the default default for that field
             type_info = {
                 f.TYPE_DOUBLE: ("double", "0.0"),
-                f.TYPE_FLOAT: ("float", "0.0"),
+                f.TYPE_FLOAT: ("float", "0.0f"),
                 f.TYPE_INT64: ("int64", "0"),
                 f.TYPE_UINT64: ("uint64", "0"),
                 f.TYPE_INT32: ("int32", "0"),
@@ -72,6 +74,8 @@ class Field:
 
         if self.type == ".google.protobuf.Timestamp":
             self.default_value = "NUClear::clock::now()"
+        elif self.type == ".google.protobuf.Duration":
+            self.default_value = "NUClear::clock::duration(0)"
 
         # If we are repeated or a pointer our default is changed
         if self.repeated:
