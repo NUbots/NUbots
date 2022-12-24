@@ -39,7 +39,8 @@ namespace module::actuation {
         }
 
         /// @brief Creates a reaction that takes a servo wrapper task (eg LeftLeg) and emits a task for each servo.
-        /// Emits Done when all servo tasks are Done.
+        /// Emits Done when all servo tasks are Done. If individual servos in that wrapper task were not provided, then
+        /// it ignores them.
         /// @tparam Group is a servo wrapper task (eg LeftLeg)
         /// @tparam Elements is a template pack of Servos that Group uses
         template <typename Group, typename... Elements>
@@ -48,8 +49,10 @@ namespace module::actuation {
                 [this](const Group& group, const RunInfo& info, const Uses<Elements>... elements) {
                     // Check if any subtask is Done
                     if (info.run_reason == RunInfo::RunReason::SUBTASK_DONE) {
-                        // If every servo task is done then emit Done
-                        if ((elements.done && ...)) {
+                        // If every servo task is done then emit Done (ignore servos that weren't included in the Task
+                        // message)
+                        if (((!group.servos.contains(utility::actuation::ServoMap<Elements>::value) || elements.done)
+                             && ...)) {
                             emit<Task>(std::make_unique<Done>());
                             return;
                         }
@@ -58,10 +61,21 @@ namespace module::actuation {
                         return;
                     }
 
-                    // Runs an emit for each servo
-                    NUClear::util::unpack((emit<Task>(std::make_unique<Elements>(
-                                               group.servos.at(utility::actuation::ServoMap<Elements>::value))),
-                                           0)...);
+                    (
+                        // Runs an emit for each servo, if that servo was included in the map
+                        [&] {
+                            // Check if the Task includes this servo
+                            if (group.servos.contains(utility::actuation::ServoMap<Elements>::value)) {
+                                // Emit a Task for the servo if the map contains a value for it
+                                emit<Task>(std::make_unique<Elements>(
+                                    group.servos.at(utility::actuation::ServoMap<Elements>::value)));
+                            }
+                            else {  // if a servo was not filled in the map for this group, log it
+                                log<NUClear::DEBUG>("Requested a servo group Task but did not provide values for servo",
+                                                    utility::actuation::ServoMap<Elements>::value);
+                            }
+                        }(),
+                        ...);
                 });
         }
 
