@@ -5,11 +5,10 @@
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/KinematicsModel.hpp"
+#include "message/actuation/LimbsIK.hpp"
 #include "message/behaviour/Behaviour.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/motion/GetupCommand.hpp"
-#include "message/motion/KinematicsModel.hpp"
-#include "message/motion/LimbsIK.hpp"
 #include "message/motion/WalkCommand.hpp"
 #include "message/support/nusight/DataPoint.hpp"
 
@@ -24,6 +23,7 @@ namespace module::motion {
     using extension::Configuration;
 
     using message::actuation::KinematicsModel;
+    using message::actuation::LimbsIK;
     using message::actuation::ServoCommand;
     using message::behaviour::Behaviour;
     using message::behaviour::state::Stability;
@@ -174,10 +174,10 @@ namespace module::motion {
             walk_engine.reset();
         });
 
-        // NEW START
+        // NEW START: Runs every time the Walk provider starts (wasn't running)
         on<Start<Walk>>().then([this] {
-            // walk_engine.reset();
-            // update_handle.enable();
+            walk_engine.reset();
+            update_handle.enable();
             if (behaviour == Behaviour::State::GOALIE_WALK) {
                 current_config = goalie_config;
             }
