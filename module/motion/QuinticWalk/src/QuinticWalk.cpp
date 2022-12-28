@@ -157,20 +157,13 @@ namespace module::motion {
         on<Trigger<Behaviour::State>>().then("Switching walk state", [this](const Behaviour::State& behaviour) {
             imu_reaction.enable(false);
 
-            if (behaviour == Behaviour::State::GOALIE_WALK) {
-                current_config = goalie_config;
-            }
-            else {
-                current_config = normal_config;
-            }
-
             // Send these parameters to the walk engine
             walk_engine.set_parameters(current_config.params);
 
             imu_reaction.enable(current_config.imu_active);
         });
 
-        // TODO: Move into Provide?
+        // TODO: Move into Provide or Start?
         on<Startup, Trigger<KinematicsModel>>().then("Update Kinematics Model", [this](const KinematicsModel& model) {
             kinematicsModel = model;
             first_run       = true;
@@ -185,6 +178,12 @@ namespace module::motion {
         on<Start<Walk>>().then([this] {
             // walk_engine.reset();
             // update_handle.enable();
+            if (behaviour == Behaviour::State::GOALIE_WALK) {
+                current_config = goalie_config;
+            }
+            else {
+                current_config = normal_config;
+            }
         });
 
         // NEW MAIN LOOP - Calculates joint goals and emits....

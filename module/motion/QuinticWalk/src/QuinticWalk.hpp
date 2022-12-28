@@ -27,9 +27,6 @@ namespace module::motion {
         static constexpr int UPDATE_FREQUENCY = 200;
 
     private:
-        /// Current subsumption ID key to access motors.
-        size_t subsumption_id = 1;
-
         // Reaction handle for the main update loop, disabling when not moving will save unnecessary CPU
         // ReactionHandle update_handle{};
         ReactionHandle imu_reaction{};
