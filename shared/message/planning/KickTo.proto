@@ -16,13 +16,13 @@
  *
  * Copyright 2022 NUbots <nubots@nubots.net>
  */
- syntax = "proto3";
+syntax = "proto3";
 
- package message.planning;
+package message.planning;
 
- import "Vector.proto";
+import "Vector.proto";
 
 message KickTo {
     /// Torso to point to kick to in torso space
     fvec3 rPTt = 1;
- }
+}
