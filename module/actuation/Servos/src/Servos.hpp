@@ -71,7 +71,7 @@ namespace module::actuation {
                                     group.servos.at(utility::actuation::ServoMap<Elements>::value)));
                             }
                             else {  // if a servo was not filled in the map for this group, log it
-                                log<NUClear::DEBUG>("Requested a servo group Task but did not provide values for servo",
+                                log<NUClear::TRACE>("Requested a servo group Task but did not provide values for servo",
                                                     utility::actuation::ServoMap<Elements>::value);
                             }
                         }(),
