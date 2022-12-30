@@ -2,7 +2,7 @@
 
 ## Description
 
-The module plans when to kick the ball, using information about the position of the ball relative to the robot and where the robot would like to kick to.
+The module plans when to kick the ball, using information about the position of the ball relative to the robot and where the robot would like to kick to. It only uses recent ball measurements.
 
 It checks
 
