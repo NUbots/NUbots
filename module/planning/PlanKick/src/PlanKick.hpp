@@ -11,12 +11,16 @@ namespace module::planning {
     private:
         /// @brief Stores configuration values
         struct Config {
+            float timeout_threshold       = 0.0;
             float ball_distance_threshold = 0.0;
             float ball_angle_threshold    = 0.0;
             bool align                    = false;
             float target_angle_threshold  = 0.0;
             std::string kick_leg          = "";
         } cfg;
+
+        /// @brief True if a Kick task has been requested, false otherwise. Resets to false when the Kick task is Done.
+        bool kicking = false;
 
     public:
         /// @brief Called by the powerplant to build and setup the PlanKick reactor.

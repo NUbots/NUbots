@@ -21,7 +21,7 @@ namespace module::skill {
     KickScript::KickScript(std::unique_ptr<NUClear::Environment> environment)
         : BehaviourReactor(std::move(environment)) {
 
-        on<Configuration>("KickScript.yaml").then([this](const Configuration& config) {
+        on<Configuration>("kickscript.yaml").then([this](const Configuration& config) {
             // Use configuration here from file KickScript.yaml
             this->log_level = config["log_level"].as<NUClear::LogLevel>();
         });
