@@ -227,6 +227,9 @@ var annotated_dup =
         [ "ImageCompressor", "classmodule_1_1output_1_1ImageCompressor.html", "classmodule_1_1output_1_1ImageCompressor" ],
         [ "Overview", "classmodule_1_1output_1_1Overview.html", "classmodule_1_1output_1_1Overview" ]
       ] ],
+      [ "planning", null, [
+        [ "GetUpPlanner", "classmodule_1_1planning_1_1GetUpPlanner.html", "classmodule_1_1planning_1_1GetUpPlanner" ]
+      ] ],
       [ "platform", null, [
         [ "cm740", null, [
           [ "Convert", "structmodule_1_1platform_1_1cm740_1_1Convert.html", "structmodule_1_1platform_1_1cm740_1_1Convert" ],

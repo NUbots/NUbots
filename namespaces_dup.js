@@ -517,6 +517,9 @@ var namespaces_dup =
         [ "VisionGoals", "Overview_8cpp.html#aba734fef1c0eaba5fbddfba831e79d69", null ],
         [ "compressed_fourcc", "ImageCompressor_8cpp.html#afa7b1154bdb52d97496fec4212007474", null ]
       ] ],
+      [ "planning", null, [
+        [ "GetUpPlanner", "classmodule_1_1planning_1_1GetUpPlanner.html", "classmodule_1_1planning_1_1GetUpPlanner" ]
+      ] ],
       [ "platform", null, [
         [ "cm740", null, [
           [ "Convert", "structmodule_1_1platform_1_1cm740_1_1Convert.html", "structmodule_1_1platform_1_1cm740_1_1Convert" ],
