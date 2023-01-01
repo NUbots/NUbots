@@ -1,10 +1,11 @@
-webots
-======
+# webots
 
 ## Description
+
 A module to connect to Webots controllers and exchange protobuf messages with them.
 
 ## Usage
+
 Add the ip for the computer running Webots, and the port the controller is listening on. For Robocup the port determines
 which player this robot is.
 
@@ -15,8 +16,10 @@ this repositiory. If you disconnect or need to restart the world, stop the role 
 the world in webots and run the role with the same `./b` command as above.
 
 ## Emits
+
 platform::RawSensors
 output::CompressedImage
 
 ## Dependencies
+
 Configuration

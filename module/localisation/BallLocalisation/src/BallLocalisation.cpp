@@ -136,7 +136,8 @@ namespace module::localisation {
                 // Otherwise reset balls to the [0, 0] field position
                 else {
                     // Set the filter state to the field origin relative to us
-                    filter.set_state(Eigen::Affine2d(field.position).translation(), config.start_variance.asDiagonal());
+                    filter.set_state(Eigen::Isometry2d(field.position).translation(),
+                                     config.start_variance.asDiagonal());
                 }
             });
     }

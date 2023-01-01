@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2013 NUbots <nubots@nubots.net>
+ * Copyright 2022 NUbots <nubots@nubots.net>
  */
 syntax = "proto3";
 
@@ -48,20 +48,6 @@ message KickScriptCommand {
     /// Leg to kick with
     uint32          leg  = 1;
     KickCommandType type = 2;
-}
-
-message KickPlannerConfig {
-    /// Maximum distance the ball can be from the robot while preparing to kick,
-    /// in metres
-    float max_ball_distance = 1;
-    /// Used to determine how far apart (laterally) the ball center and foot
-    /// center are allowed to be while still allowing a kick to happen
-    float kick_corridor_width = 2;
-    /// How many seconds without vision until the robot decides to not kick
-    float seconds_not_seen_limit = 3;
-    /// The maximum angle away from the forward axis of the robot that the robot will attempt a kick.
-    /// If the kick is too far to the side, it may be discarded
-    float kick_forward_angle_limit = 4;
 }
 
 message KickFinished {}
