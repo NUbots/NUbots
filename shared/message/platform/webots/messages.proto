@@ -21,6 +21,9 @@ syntax = "proto3";
 
 package message.platform.webots;
 
+import "Matrix.proto";
+import "Vector.proto";
+
 // Copy of cyberbotics/webots projects/samples/contests/robocup/controllers/player/messages.proto
 
 
@@ -83,6 +86,22 @@ message Message {
     string      text         = 2;
 }
 
+/// NUbots specific data sent from our own controllers rather than the official RoboCup Webots controller
+message OdometryGroundTruth {
+    /// Indicates if this message exists
+    bool exists = 1;
+    /// Isometry3d transform from odometry (world) space to the robot (torso) space.
+    /// It measures the world in robot space
+    mat4 Htw = 2;
+}
+
+message VisionGroundTruth {
+    /// Indicates if this message exists
+    bool exists = 1;
+    /// Vector from the world to the ball in world space.
+    fvec3 rBWw = 2;
+}
+
 message SensorMeasurements {
     // simulation time stamp at which the measurements were performed expressed in [ms] from the start of the connection
     uint32 time = 1;
@@ -97,6 +116,9 @@ message SensorMeasurements {
     repeated Force6DMeasurement        force6ds         = 9;
     repeated GyroMeasurement           gyros            = 10;
     repeated PositionSensorMeasurement position_sensors = 11;
+    // NUbots-specific data. Set to 100 in case other data is added in by the RoboCup TC
+    OdometryGroundTruth odometry_ground_truth = 100;
+    VisionGroundTruth   vision_ground_truth   = 101;
 }
 
 message MotorPosition {

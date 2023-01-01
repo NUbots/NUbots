@@ -1,5 +1,4 @@
 import React from 'react'
-import { StatelessComponent } from 'react'
 
 import { TreeModel } from './model'
 import { TreeNodeModel } from './model'
@@ -12,7 +11,7 @@ export type CheckboxTreeProps = {
   onExpand?(node: TreeNodeModel): void
 }
 
-export const CheckboxTree: StatelessComponent<CheckboxTreeProps> = (props: CheckboxTreeProps) => {
+export const CheckboxTree = (props: CheckboxTreeProps) => {
   return (
     <div>
       {props.model.nodes.map((node, i) => (

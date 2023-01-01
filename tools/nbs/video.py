@@ -38,7 +38,6 @@ def process_frame(item):
     data = decode_image(item["data"], item["format"])
 
     return {
-        "bytes_read": item["bytes_read"],
         "timestamp": item["timestamp"],
         "data": [
             {"image": d["image"].numpy(), "name": "{}{}".format(item["camera_name"], d["name"]), "fourcc": d["fourcc"]}

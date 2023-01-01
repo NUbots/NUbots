@@ -26,8 +26,8 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/ServoTarget.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/motion/ServoTarget.hpp"
 #include "message/platform/RawSensors.hpp"
 
 #include "utility/input/ServoID.hpp"
@@ -40,9 +40,9 @@ namespace module::platform::cm740 {
 
     using extension::Configuration;
 
+    using message::actuation::ServoTarget;
+    using message::actuation::ServoTargets;
     using message::input::Sensors;
-    using message::motion::ServoTarget;
-    using message::motion::ServoTargets;
     using message::platform::RawSensors;
 
     using utility::input::ServoID;
@@ -157,8 +157,8 @@ namespace module::platform::cm740 {
         on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Optional<With<Sensors>>, Single>().then(
             [this](const std::shared_ptr<const Sensors>& previousSensors) {
                 if (previousSensors) {
-                    Eigen::Affine3d Hf_rt(previousSensors->Htx[ServoID::R_ANKLE_ROLL]);
-                    Eigen::Affine3d Hf_lt(previousSensors->Htx[ServoID::L_ANKLE_ROLL]);
+                    Eigen::Isometry3d Hf_rt(previousSensors->Htx[ServoID::R_ANKLE_ROLL]);
+                    Eigen::Isometry3d Hf_lt(previousSensors->Htx[ServoID::L_ANKLE_ROLL]);
                     Eigen::Vector3d torsoFromRightFoot = -Hf_rt.rotation().transpose() * Hf_rt.translation();
                     Eigen::Vector3d torsoFromLeftFoot  = -Hf_lt.rotation().transpose() * Hf_lt.translation();
 
