@@ -11,4 +11,6 @@ nuclear_role(
   # Skills
   skill::KickScript
   skill::GetUp
+  # Planners
+  planning::GetUpPlanner
 )
