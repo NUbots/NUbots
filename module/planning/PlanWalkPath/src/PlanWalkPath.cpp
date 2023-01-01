@@ -31,8 +31,12 @@ namespace module::planning {
 
         // Path to walk to a particular point
         on<Provide<WalkTo>, Needs<Walk>>().then([this](const WalkTo& walk_to) {
+            // Get the point and zero out the z position since we are walking along the ground and want to scale the
+            // velocity in the xy plane
+            Eigen::Vector3f walk_command = walk_to.rPTt;
+            walk_command.z()             = 0.0;
             // Obtain the unit vector to desired target in torso space and scale by cfg.speed
-            Eigen::Vector2f walk_command = walk_to.rPTt.normalized() * cfg.speed;
+            walk_command = walk_command.normalized() * cfg.speed;
 
             // Set the angular velocity component of the walk_command with the angular displacement and saturate with
             // value cfg.max_turn_speed
@@ -40,7 +44,6 @@ namespace module::planning {
                                                     std::atan2(walk_command.y(), walk_command.x()),
                                                     cfg.max_turn_speed);
 
-            // Emit the Walk Task
             emit<Task>(std::make_unique<Walk>(walk_command));
         });
 
@@ -52,12 +55,12 @@ namespace module::planning {
             int sign = pivot.clockwise ? -1 : 1;
 
             // Pivoting on the spot
-            if (pivot.rPTt == Eigen::Vector2f::Zero()) {
-                emit<Task>(std::make_unique<Walk>(Eigen::Vector3d(0.0, 0.0, sign * cfg.pivot_speed)));
+            if (pivot.rPTt == Eigen::Vector3f::Zero()) {
+                emit<Task>(std::make_unique<Walk>(Eigen::Vector3f(0.0, 0.0, sign * cfg.pivot_speed)));
             }
             else {  // must be pivoting around the ball - assume it is directly in front
                 emit<Task>(std::make_unique<Walk>(
-                    Eigen::Vector3d(0.0, -sign * cfg.pivot_around_ball_y, sign * cfg.pivot_speed)));
+                    Eigen::Vector3f(0.0, -sign * cfg.pivot_ball_speed_y, sign * cfg.pivot_speed)));
             }
         });
 

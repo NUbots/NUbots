@@ -24,13 +24,13 @@
 
  /// Plan a path to walk to the specified point
  message WalkTo {
-    fvec2 rPTt = 1;
+    fvec3 rPTt = 1;
  }
 
  /// Pivot around something - can refer to pivoting around a ball to align with the desired kick direction, or pivoting on the spot
  message Pivot {
     /// The point to pivot around, relative to the torso
-    fvec2 rPTt = 1;
+    fvec3 rPTt = 1;
     /// Direction to pivot in
     bool clockwise = 2;
  }
