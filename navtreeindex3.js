@@ -1,5 +1,6 @@
 var NAVTREEINDEX3 =
 {
+"classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html#ad93660eaf2777479f395b024e207912b":[1,0,2,1,2,0,30],
 "classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html#adda97f4bb77ebb866714b7ed1c8c282e":[1,0,2,1,2,0,22],
 "classmodule_1_1behaviour_1_1strategy_1_1KeyboardWalk.html#ae74a62fc96cbff97f61273d7412988a7":[1,0,2,1,2,0,25],
 "classmodule_1_1behaviour_1_1strategy_1_1PS3Walk.html":[1,0,2,1,2,1],
@@ -248,6 +249,5 @@ var NAVTREEINDEX3 =
 "classmodule_1_1input_1_1NatNet.html#a603e954e3e07545715df15cb6b56ceeb":[1,0,2,3,9,17],
 "classmodule_1_1input_1_1NatNet.html#a626a71eb147b7afcc2ac392d3a03bdb8":[1,0,2,3,9,21],
 "classmodule_1_1input_1_1NatNet.html#a6d73d66e0e1b06656ff0835a7ab8ac76":[1,0,2,3,9,19],
-"classmodule_1_1input_1_1NatNet.html#a88064bf494fd71f4bf113b90fa11a61b":[1,0,2,3,9,26],
-"classmodule_1_1input_1_1NatNet.html#a94ba4249111b56326234f1fca07cca88":[1,0,2,3,9,13]
+"classmodule_1_1input_1_1NatNet.html#a88064bf494fd71f4bf113b90fa11a61b":[1,0,2,3,9,26]
 };

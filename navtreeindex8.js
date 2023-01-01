@@ -1,5 +1,9 @@
 var NAVTREEINDEX8 =
 {
+"namespaces.html":[0,0],
+"namespaceutility_1_1file.html":[0,0,5,3],
+"namespaceutility_1_1file.html#a085c3adcef0a3168d1adeb6e2cb6f29c":[0,0,5,3,1],
+"namespaceutility_1_1file.html#a10216a048f9880b4d86974843f1a778a":[0,0,5,3,0],
 "namespaceutility_1_1file.html#a14fa72f78f809085ebcd6bc65b6a4ef8":[0,0,5,3,7],
 "namespaceutility_1_1file.html#a3108b0499107292c1fb7b54b51e2a540":[0,0,5,3,6],
 "namespaceutility_1_1file.html#a4f9f5fb6dd3cb2af578607edb6ff8b39":[0,0,5,3,5],
@@ -245,9 +249,5 @@ var NAVTREEINDEX8 =
 "structCM740_1_1Types_1_1Accelerometer.html":[1,0,0,0,0],
 "structCM740_1_1Types_1_1Accelerometer.html#a0524a23f9867d5e844a0296268f3ed9a":[1,0,0,0,0,3],
 "structCM740_1_1Types_1_1Accelerometer.html#a32a11acf78442483b3ad8b6893b470d6":[1,0,0,0,0,2],
-"structCM740_1_1Types_1_1Accelerometer.html#ac4cfba12b59b62c3f008679205a876e3":[1,0,0,0,0,1],
-"structCM740_1_1Types_1_1Accelerometer.html#af77ff27677af267e4709aa06597fbd6d":[1,0,0,0,0,0],
-"structCM740_1_1Types_1_1CM740Data.html":[1,0,0,0,1],
-"structCM740_1_1Types_1_1CM740Data.html#a06531549824921666a9c2310f505ad01":[1,0,0,0,1,5],
-"structCM740_1_1Types_1_1CM740Data.html#a101b307aadda1a022d68eacd6f827fcd":[1,0,0,0,1,1]
+"structCM740_1_1Types_1_1Accelerometer.html#ac4cfba12b59b62c3f008679205a876e3":[1,0,0,0,0,1]
 };

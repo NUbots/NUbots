@@ -214,6 +214,7 @@ var hierarchy =
     [ "module::platform::cm740::HardwareSimulator::NoiseConfig", "structmodule_1_1platform_1_1cm740_1_1HardwareSimulator_1_1NoiseConfig.html", null ],
     [ "module::platform::Webots::CameraContext", "structmodule_1_1platform_1_1Webots_1_1CameraContext.html", null ],
     [ "module::platform::Webots::ServoState", "structmodule_1_1platform_1_1Webots_1_1ServoState.html", null ],
+    [ "module::skill::GetUp::Config", "structmodule_1_1skill_1_1GetUp_1_1Config.html", null ],
     [ "module::support::logging::DataLogging::DataLog", "structmodule_1_1support_1_1logging_1_1DataLogging_1_1DataLog.html", null ],
     [ "module::support::logging::DataPlayback::Player", "structmodule_1_1support_1_1logging_1_1DataPlayback_1_1Player.html", null ],
     [ "module::support::logging::Packet", "structmodule_1_1support_1_1logging_1_1Packet.html", null ],
@@ -234,6 +235,7 @@ var hierarchy =
       [ "extension::behaviour::BehaviourReactor", "classextension_1_1behaviour_1_1BehaviourReactor.html", [
         [ "module::actuation::Kinematics", "classmodule_1_1actuation_1_1Kinematics.html", null ],
         [ "module::actuation::Servos", "classmodule_1_1actuation_1_1Servos.html", null ],
+        [ "module::skill::GetUp", "classmodule_1_1skill_1_1GetUp.html", null ],
         [ "module::skill::KickScript", "classmodule_1_1skill_1_1KickScript.html", null ]
       ] ],
       [ "module::actuation::KinematicsConfiguration", "classmodule_1_1actuation_1_1KinematicsConfiguration.html", null ],

@@ -1,5 +1,9 @@
 var NAVTREEINDEX12 =
 {
+"structmodule_1_1input_1_1gamecontroller_1_1Team.html#abe2b25b6158254047e1112238403a0fa":[1,0,2,3,1,3,0],
+"structmodule_1_1input_1_1gamecontroller_1_1Team.html#ad6fd832c93987f9451e8d1608f946798":[1,0,2,3,1,3,7],
+"structmodule_1_1input_1_1gamecontroller_1_1Team.html#ae26000b5aef378a11eeae2c5150aab1c":[1,0,2,3,1,3,8],
+"structmodule_1_1localisation_1_1BallFilter_1_1Config.html":[1,0,2,4,0,0],
 "structmodule_1_1localisation_1_1BallFilter_1_1Config.html#a3f8f0b3a47252a2a8e35d9a13ae5a61f":[1,0,2,4,0,0,1],
 "structmodule_1_1localisation_1_1BallFilter_1_1Config.html#abcbcd69f8968009c604a176a922025ea":[1,0,2,4,0,0,0],
 "structmodule_1_1localisation_1_1BallModel_1_1MeasurementType.html":[1,0,2,4,2,0],
@@ -245,9 +249,5 @@ var NAVTREEINDEX12 =
 "structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1LEDState.html#a93713049d16a3b439740728ff48d1ca7":[1,0,2,8,0,1,1,0],
 "structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1LEDState.html#afc4dd9c97b0d2c5dfbf2461791c3dd10":[1,0,2,8,0,1,1,1],
 "structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html":[1,0,2,8,0,1,2],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a3cd2fb57cf40f4287e00b10cfa46a241":[1,0,2,8,0,1,2,4],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a42907cd8a0fb656a6ee70060494a92dc":[1,0,2,8,0,1,2,10],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a5d883e5d9c598457223171dafd5ea226":[1,0,2,8,0,1,2,7],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a65b05bfaa259cd9d93d54893358d4a3e":[1,0,2,8,0,1,2,11],
-"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a78415d5d3fb5506fe268cfcede93dc4b":[1,0,2,8,0,1,2,5]
+"structmodule_1_1platform_1_1cm740_1_1HardwareIO_1_1ServoState.html#a3cd2fb57cf40f4287e00b10cfa46a241":[1,0,2,8,0,1,2,4]
 };

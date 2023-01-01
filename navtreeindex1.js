@@ -1,5 +1,6 @@
 var NAVTREEINDEX1 =
 {
+"SignalCatcher_8cpp.html#ac4665c66619fdbf2137e02f4c9202e9c":[0,0,2,10,9],
 "SimpleWalkPathPlanner_8cpp.html#a6431375dde63e4a3887ef0678e9f92a4":[0,0,2,1,0,2],
 "SoccerConfig_8cpp.html#a7f6678cf6f5a11639b758d6838dcb15f":[0,0,2,10,0,2],
 "SoccerConfig_8cpp.html#ad9a14703c3bcb93d99ed3f1058337aca":[0,0,2,10,0,3],
@@ -248,6 +249,5 @@ var NAVTREEINDEX1 =
 "classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea0ffba7acbff1cc5abac1bd249d2af0cb":[1,0,0,8,0,20],
 "classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea1108899ef8915bc113e0d9278d80f858":[1,0,0,8,0,24],
 "classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea1d604cdcd93da931a7b52055d52af69d":[1,0,0,8,0,67],
-"classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea24fd0f06d5ae510f9c3186bca1111fbd":[1,0,0,8,0,46],
-"classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea280d840b114570a3c6fd6c335698a15e":[1,0,0,8,0,47]
+"classCM740_1_1Servo.html#a7e99f37bd627d213ca36b74f771ae61ea24fd0f06d5ae510f9c3186bca1111fbd":[1,0,0,8,0,46]
 };

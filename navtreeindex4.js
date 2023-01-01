@@ -1,5 +1,6 @@
 var NAVTREEINDEX4 =
 {
+"classmodule_1_1input_1_1NatNet.html#a94ba4249111b56326234f1fca07cca88":[1,0,2,3,9,13],
 "classmodule_1_1input_1_1NatNet.html#a9557e8295d54c52590790a9b2e76a410":[1,0,2,3,9,25],
 "classmodule_1_1input_1_1NatNet.html#aae4553bb114c1aa6f31497fa9d95fd98":[1,0,2,3,9,28],
 "classmodule_1_1input_1_1NatNet.html#abb19bfa3257394f86e4d3c8a93dd8a25":[1,0,2,3,9,10],
@@ -248,6 +249,5 @@ var NAVTREEINDEX4 =
 "classmodule_1_1motion_1_1QuinticWalkEngine.html#a97d7e4c3a8cff6eb891de9f4fb5cc3bd":[1,0,2,5,9,16],
 "classmodule_1_1motion_1_1QuinticWalkEngine.html#a97df07db2114d72b54b19991fd2e7120":[1,0,2,5,9,38],
 "classmodule_1_1motion_1_1QuinticWalkEngine.html#aa3798e302df7716813a8ec98b0ffd415":[1,0,2,5,9,6],
-"classmodule_1_1motion_1_1QuinticWalkEngine.html#aac8b563c106e58293e74c17417e3a90d":[1,0,2,5,9,31],
-"classmodule_1_1motion_1_1QuinticWalkEngine.html#aad98cbb9374271534761d120e144af0a":[1,0,2,5,9,19]
+"classmodule_1_1motion_1_1QuinticWalkEngine.html#aac8b563c106e58293e74c17417e3a90d":[1,0,2,5,9,31]
 };
