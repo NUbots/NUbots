@@ -228,12 +228,15 @@ namespace module::motion {
             if (walk_engine.update_state(dt, current_orders)) {
                 calculateJointGoals();
             }
-            // TODO: Emit standing state
         });
 
-        // Stand Reaction - NOTE: This is wrong.
-        on<Provide<Walk>, Needs<LeftLegIK>, Needs<RightLegIK>, Causing<Stability::STANDING>>().then(
-            [this] { emit<Script>("Stand.yaml"); });
+        // Stand Reaction -
+        on<Provide<Walk>, Needs<LeftLegIK>, Needs<RightLegIK>, Causing<Stability::STANDING>>().then([this] {
+            if (walk_engine.getState() == WalkEngineState::IDLE) {
+                // Stability = standing
+            }
+            current_orders.setZero();
+        });
     }
 
 
