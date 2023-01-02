@@ -187,50 +187,52 @@ namespace module::motion {
         });
 
         // NEW MAIN LOOP - Calculates joint goals and emits....
-        on<Provide<Walk>, Needs<LeftLegIK>, Needs<RightLegIK>, Causing<Stability::STANDING>, Trigger<Sensors>>(
-            const Walk walk)
-            .then([this] {
-                // ****The function formally known as on<Trigger<WalkCommand>>.then([this](const WalkCommand&
-                // walkCommand)****
+        on<Provide<Walk>, Needs<LeftLegIK>, Needs<RightLegIK>, Trigger<Sensors>>(const Walk walk).then([this] {
+            // ****The function formally known as on<Trigger<WalkCommand>>.then([this](const WalkCommand&
+            // walkCommand)****
 
-                // the engine expects orders in [m] not [m/s]. We have to compute by dividing by step frequency which is
-                // a double step factor 2 since the order distance is only for a single step, not double step
-                const float factor             = (1.0f / (current_config.params.freq)) * 0.5f;
-                const Eigen::Vector3f& command = walk.velocity_target.cast<float>() * factor;
+            // the engine expects orders in [m] not [m/s]. We have to compute by dividing by step frequency which is
+            // a double step factor 2 since the order distance is only for a single step, not double step
+            const float factor             = (1.0f / (current_config.params.freq)) * 0.5f;
+            const Eigen::Vector3f& command = walk.velocity_target.cast<float>() * factor;
 
-                // Clamp velocity command
-                cyrrent_orders =
-                    command.array().max(-current_config.max_step.array()).min(current_config.max_step.array()).matrix();
+            // Clamp velocity command
+            cyrrent_orders =
+                command.array().max(-current_config.max_step.array()).min(current_config.max_step.array()).matrix();
 
-                // translational orders (x+y) should not exceed combined limit. scale if necessary
-                if (current_config.max_step_xy != 0) {
-                    float scaling_factor =
-                        1.0f / std::max(1.0f, (current_orders.x() + current_orders.y()) / current_config.max_step_xy);
-                    current_orders.cwiseProduct(Eigen::Vector3f(scaling_factor, scaling_factor, 1.0f));
-                }
+            // translational orders (x+y) should not exceed combined limit. scale if necessary
+            if (current_config.max_step_xy != 0) {
+                float scaling_factor =
+                    1.0f / std::max(1.0f, (current_orders.x() + current_orders.y()) / current_config.max_step_xy);
+                current_orders.cwiseProduct(Eigen::Vector3f(scaling_factor, scaling_factor, 1.0f));
+            }
 
-                // warn user that speed was limited
-                if (command.x() != current_orders.x() || command.y() != current_orders.y()
-                    || command.z() != current_orders.z()) {
-                    log<NUClear::WARN>(fmt::format(
-                        "Speed command was x: {} y: {} z: {} xy: {} but maximum is x: {} y: {} z: {} xy: {}",
-                        command.x(),
-                        command.y(),
-                        command.z(),
-                        command.x() + command.y(),
-                        current_config.max_step.x() / factor,
-                        current_config.max_step.y() / factor,
-                        current_config.max_step.z() / factor,
-                        current_config.max_step_xy / factor));
-                }
+            // warn user that speed was limited
+            if (command.x() != current_orders.x() || command.y() != current_orders.y()
+                || command.z() != current_orders.z()) {
+                log<NUClear::WARN>(
+                    fmt::format("Speed command was x: {} y: {} z: {} xy: {} but maximum is x: {} y: {} z: {} xy: {}",
+                                command.x(),
+                                command.y(),
+                                command.z(),
+                                command.x() + command.y(),
+                                current_config.max_step.x() / factor,
+                                current_config.max_step.y() / factor,
+                                current_config.max_step.z() / factor,
+                                current_config.max_step_xy / factor));
+            }
 
-                // TODO: Add description of this block. ****Formerly Main Walking loop***
-                const float dt = get_time_delta();
-                // see if the walk engine has new goals for us
-                if (walk_engine.update_state(dt, current_orders)) {
-                    calculateJointGoals();
-                }
-            });
+            // TODO: Add description of this block. ****Formerly Main Walking loop***
+            const float dt = get_time_delta();
+            // see if the walk engine has new goals for us
+            if (walk_engine.update_state(dt, current_orders)) {
+                calculateJointGoals();
+            }
+        });
+
+        // Stand Reaction
+        on<Provide<Walk>, Needs<LeftLegIK>, Needs<RightLegIK>, Causing<Stability::STANDING>>().then(
+            [this] { emit<Script>("Stand.yaml"); });
     }
 
 
