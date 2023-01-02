@@ -232,7 +232,7 @@ namespace module::motion {
 
         // Stand Reaction -
         on<Provide<Walk>, Needs<LeftLegIK>, Needs<RightLegIK>, Causing<Stability::STANDING>>().then([this] {
-            if (walk_engine.getState() == WalkEngineState::IDLE) {
+            if (walk_engine.get_state() == WalkEngineState::IDLE) {
                 // Stability = standing
             }
             current_orders.setZero();
