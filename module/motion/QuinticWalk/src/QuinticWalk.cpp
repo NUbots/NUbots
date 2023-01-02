@@ -197,7 +197,7 @@ namespace module::motion {
             const Eigen::Vector3f& command = walk.velocity_target.cast<float>() * factor;
 
             // Clamp velocity command
-            cyrrent_orders =
+            current_orders =
                 command.array().max(-current_config.max_step.array()).min(current_config.max_step.array()).matrix();
 
             // translational orders (x+y) should not exceed combined limit. scale if necessary
@@ -228,9 +228,10 @@ namespace module::motion {
             if (walk_engine.update_state(dt, current_orders)) {
                 calculateJointGoals();
             }
+            // TODO: Emit standing state
         });
 
-        // Stand Reaction
+        // Stand Reaction - NOTE: This is wrong.
         on<Provide<Walk>, Needs<LeftLegIK>, Needs<RightLegIK>, Causing<Stability::STANDING>>().then(
             [this] { emit<Script>("Stand.yaml"); });
     }
