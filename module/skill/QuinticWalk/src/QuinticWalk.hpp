@@ -1,5 +1,5 @@
-#ifndef MODULE_MOTION_QUINTICWALK_HPP
-#define MODULE_MOTION_QUINTICWALK_HPP
+#ifndef MODULE_SKILL_QUINTICWALK_HPP
+#define MODULE_SKILL_QUINTICWALK_HPP
 
 #include <map>
 #include <memory>
@@ -16,7 +16,7 @@
 
 #include "utility/input/ServoID.hpp"
 
-namespace module::motion {
+namespace module::skill {
 
     class QuinticWalk : public ::extension::behaviour::BehaviourReactor {
 
@@ -66,6 +66,6 @@ namespace module::motion {
 
         message::actuation::KinematicsModel kinematicsModel{};
     };
-}  // namespace module::motion
+}  // namespace module::skill
 
-#endif  // MODULE_MOTION_QUINTICWALK_HPP
+#endif  // MODULE_SKILL_QUINTICWALK_HPP

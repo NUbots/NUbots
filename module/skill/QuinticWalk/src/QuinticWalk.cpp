@@ -18,7 +18,7 @@
 #include "utility/nusight/NUhelpers.hpp"
 #include "utility/support/yaml_expression.hpp"
 
-namespace module::motion {
+namespace module::skill {
 
     using extension::Configuration;
 
@@ -370,4 +370,4 @@ namespace module::motion {
         }
     }
 
-}  // namespace module::motion
+}  // namespace module::skill
