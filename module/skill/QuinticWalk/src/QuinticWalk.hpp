@@ -13,6 +13,7 @@
 
 #include "message/actuation/KinematicsModel.hpp"
 #include "message/behaviour/ServoCommand.hpp"
+#include "message/behaviour/state/Stability.hpp"
 
 #include "utility/input/ServoID.hpp"
 
@@ -59,6 +60,9 @@ namespace module::skill {
         bool is_left_support           = true;
         bool falling                   = false;
         bool first_run                 = true;
+
+        /// @brief Stores which stability state the robot is in
+        message::behaviour::state::Stability current_stability_state = message::behaviour::state::Stability::STATIC;
 
         NUClear::clock::time_point last_update_time{};
 
