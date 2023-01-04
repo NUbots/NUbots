@@ -237,7 +237,7 @@ namespace module::skill {
             walk_engine.update_state(dt, current_orders);
             // Check if we are in the IDLE state
             if (walk_engine.get_state() == WalkEngineState::IDLE) {
-                current_stability_state = STANDING;
+                current_stability_state = Stability::STANDING;
             }
             calculateJointGoals();
         });
