@@ -53,8 +53,10 @@ namespace module::skill {
 
         static void load_quintic_walk(const ::extension::Configuration& cfg, Config& config);
 
+        /// @brief Stores the walking config
         Config& current_config = normal_config;
-        bool first_config      = true;
+
+        bool first_config = true;
 
         Eigen::Vector3f current_orders = Eigen::Vector3f::Zero();
         bool is_left_support           = true;
