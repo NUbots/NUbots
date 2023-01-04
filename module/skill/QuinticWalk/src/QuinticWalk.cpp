@@ -229,12 +229,17 @@ namespace module::skill {
             }
         });
 
-        // Stand Reaction -
+        // Stand Reaction - Set walk_engine commands to zero, check walk_engine state, Set stability state
         on<Provide<Walk>, Needs<LeftLegIK>, Needs<RightLegIK>, Causing<Stability::STANDING>>().then([this] {
-            if (walk_engine.get_state() == WalkEngineState::IDLE) {
-                // Stability = standing
-            }
+            // Stop the walk engine
+            const float dt = get_time_delta();
             current_orders.setZero();
+            walk_engine.update_state(dt, current_orders);
+            // Check if we are in the IDLE state
+            if (walk_engine.get_state() == WalkEngineState::IDLE) {
+                current_stability_state = STANDING;
+            }
+            calculateJointGoals();
         });
     }
 
