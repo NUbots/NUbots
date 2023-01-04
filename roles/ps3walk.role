@@ -16,6 +16,11 @@ nuclear_role(
   input::Camera
   platform::cm740::HardwareIO
   input::SensorFilter
+
+  # NOTE: skill::QuinticWalk uses the Director, motion::QuinticWalk is the old system
+
+  # Skill
+  # skill::QuinticWalk
   # Motion
   motion::QuinticWalk
   motion::ScriptEngine
