@@ -9,7 +9,7 @@
 #include "message/behaviour/Behaviour.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/motion/GetupCommand.hpp"
-#include "message/motion/WalkCommand.hpp"
+#include "message/skill/Walk.hpp"
 #include "message/support/nusight/DataPoint.hpp"
 
 #include "utility/actuation/InverseKinematics.hpp"
@@ -32,8 +32,7 @@ namespace module::motion {
     using message::motion::LeftLegIK;
     using message::motion::RightLegIK;
     using message::motion::StopCommand;
-    using message::motion::Walk;
-    using message::motion::WalkCommand;
+    using message::skill::Walk;
 
     using utility::actuation::kinematics::calculateLegJoints;
     using utility::input::ServoID;
