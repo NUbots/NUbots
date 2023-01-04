@@ -206,7 +206,7 @@ namespace module::motion {
          */
         void reset();
 
-        [[nodiscard]] constexpr WalkEngineState get_state() {
+        [[nodiscard]] constexpr WalkEngineState getState() {
             return engine_state;
         }
 

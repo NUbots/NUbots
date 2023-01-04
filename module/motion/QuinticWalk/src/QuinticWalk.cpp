@@ -5,11 +5,9 @@
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/KinematicsModel.hpp"
-#include "message/actuation/LimbsIK.hpp"
 #include "message/behaviour/Behaviour.hpp"
-#include "message/behaviour/state/Stability.hpp"
 #include "message/motion/GetupCommand.hpp"
-#include "message/skill/Walk.hpp"
+#include "message/motion/WalkCommand.hpp"
 #include "message/support/nusight/DataPoint.hpp"
 
 #include "utility/actuation/InverseKinematics.hpp"
@@ -23,16 +21,15 @@ namespace module::motion {
     using extension::Configuration;
 
     using message::actuation::KinematicsModel;
-    using message::actuation::LimbsIK;
-    using message::actuation::ServoCommand;
     using message::behaviour::Behaviour;
-    using message::behaviour::state::Stability;
+    using message::behaviour::ServoCommands;
     using message::input::Sensors;
+    using message::motion::DisableWalkEngineCommand;
     using message::motion::EnableWalkEngineCommand;
-    using message::motion::LeftLegIK;
-    using message::motion::RightLegIK;
+    using message::motion::ExecuteGetup;
+    using message::motion::KillGetup;
     using message::motion::StopCommand;
-    using message::skill::Walk;
+    using message::motion::WalkCommand;
 
     using utility::actuation::kinematics::calculateLegJoints;
     using utility::input::ServoID;
@@ -104,8 +101,7 @@ namespace module::motion {
         config.arm_positions.emplace_back(ServoID::L_ELBOW, cfg["arms"]["left_elbow"].as<float>());
     }
 
-    QuinticWalk::QuinticWalk(std::unique_ptr<NUClear::Environment> environment)
-        : BehaviourReactor(std::move(environment)) {
+    QuinticWalk::QuinticWalk(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         imu_reaction = on<Trigger<Sensors>>().then([this](const Sensors& sensors) {
             Eigen::Vector3f RPY =
@@ -156,13 +152,19 @@ namespace module::motion {
         on<Trigger<Behaviour::State>>().then("Switching walk state", [this](const Behaviour::State& behaviour) {
             imu_reaction.enable(false);
 
+            if (behaviour == Behaviour::State::GOALIE_WALK) {
+                current_config = goalie_config;
+            }
+            else {
+                current_config = normal_config;
+            }
+
             // Send these parameters to the walk engine
             walk_engine.set_parameters(current_config.params);
 
             imu_reaction.enable(current_config.imu_active);
         });
 
-        // TODO: Move into Provide or Start?
         on<Startup, Trigger<KinematicsModel>>().then("Update Kinematics Model", [this](const KinematicsModel& model) {
             kinematicsModel = model;
             first_run       = true;
@@ -173,42 +175,35 @@ namespace module::motion {
             walk_engine.reset();
         });
 
-        // NEW START: Runs every time the Walk provider starts (wasn't running)
-        on<Start<Walk>>().then([this] {
-            walk_engine.reset();
-            update_handle.enable();
-            if (behaviour == Behaviour::State::GOALIE_WALK) {
-                current_config = goalie_config;
-            }
-            else {
-                current_config = normal_config;
-            }
+        on<Trigger<ExecuteGetup>>().then([this]() { falling = true; });
+
+        on<Trigger<KillGetup>>().then([this]() { falling = false; });
+
+        on<Trigger<StopCommand>>().then([this](const StopCommand& walkCommand) {
+            subsumption_id = walkCommand.subsumption_id;
+            current_orders.setZero();
         });
 
-        // NEW MAIN LOOP - Calculates joint goals and emits....
-        on<Provide<Walk>, Needs<LeftLegIK>, Needs<RightLegIK>, Trigger<Sensors>>(const Walk walk).then([this] {
-            // ****The function formally known as on<Trigger<WalkCommand>>.then([this](const WalkCommand&
-            // walkCommand)****
+        on<Trigger<WalkCommand>>().then([this](const WalkCommand& walkCommand) {
+            subsumption_id = walkCommand.subsumption_id;
 
             // the engine expects orders in [m] not [m/s]. We have to compute by dividing by step frequency which is
             // a double step factor 2 since the order distance is only for a single step, not double step
             const float factor             = (1.0f / (current_config.params.freq)) * 0.5f;
-            const Eigen::Vector3f& command = walk.velocity_target.cast<float>() * factor;
+            const Eigen::Vector3f& command = walkCommand.command.cast<float>() * factor;
 
             // Clamp velocity command
-            current_orders =
+            Eigen::Vector3f orders =
                 command.array().max(-current_config.max_step.array()).min(current_config.max_step.array()).matrix();
 
             // translational orders (x+y) should not exceed combined limit. scale if necessary
             if (current_config.max_step_xy != 0) {
-                float scaling_factor =
-                    1.0f / std::max(1.0f, (current_orders.x() + current_orders.y()) / current_config.max_step_xy);
-                current_orders.cwiseProduct(Eigen::Vector3f(scaling_factor, scaling_factor, 1.0f));
+                float scaling_factor = 1.0f / std::max(1.0f, (orders.x() + orders.y()) / current_config.max_step_xy);
+                orders.cwiseProduct(Eigen::Vector3f(scaling_factor, scaling_factor, 1.0f));
             }
 
             // warn user that speed was limited
-            if (command.x() != current_orders.x() || command.y() != current_orders.y()
-                || command.z() != current_orders.z()) {
+            if (command.x() != orders.x() || command.y() != orders.y() || command.z() != orders.z()) {
                 log<NUClear::WARN>(
                     fmt::format("Speed command was x: {} y: {} z: {} xy: {} but maximum is x: {} y: {} z: {} xy: {}",
                                 command.x(),
@@ -221,23 +216,37 @@ namespace module::motion {
                                 current_config.max_step_xy / factor));
             }
 
-            // TODO: Add description of this block. ****Formerly Main Walking loop***
-            const float dt = get_time_delta();
-            // see if the walk engine has new goals for us
-            if (walk_engine.update_state(dt, current_orders)) {
-                calculateJointGoals();
-            }
+            // Update orders
+            current_orders = orders;
         });
 
-        // Stand Reaction -
-        on<Provide<Walk>, Needs<LeftLegIK>, Needs<RightLegIK>, Causing<Stability::STANDING>>().then([this] {
-            if (walk_engine.get_state() == WalkEngineState::IDLE) {
-                // Stability = standing
+        on<Trigger<EnableWalkEngineCommand>>().then([this](const EnableWalkEngineCommand& command) {
+            subsumption_id = command.subsumption_id;
+            walk_engine.reset();
+            update_handle.enable();
+        });
+
+        on<Trigger<DisableWalkEngineCommand>>().then([this](const DisableWalkEngineCommand& command) {
+            subsumption_id = command.subsumption_id;
+            update_handle.disable();
+        });
+
+        update_handle = on<Every<UPDATE_FREQUENCY, Per<std::chrono::seconds>>, Single>().then([this]() {
+            const float dt = get_time_delta();
+
+            if (falling) {
+                // We are falling, reset walk engine
+                walk_engine.reset();
             }
-            current_orders.setZero();
+            else {
+
+                // see if the walk engine has new goals for us
+                if (walk_engine.update_state(dt, current_orders)) {
+                    calculate_joint_goals();
+                }
+            }
         });
     }
-
 
     float QuinticWalk::get_time_delta() {
         // compute time delta depended if we are currently in simulation or reality
@@ -260,10 +269,11 @@ namespace module::motion {
         return dt;
     }
 
-    void QuinticWalk::calculateJointGoals() {
-        /*
-        This method computes the next motor goals and emits limb tasks.
-        */
+    /*
+    This method computes the next motor goals and publishes them.
+    */
+    void QuinticWalk::calculate_joint_goals() {
+
         // Position of trunk {t} relative to support foot {s}
         Eigen::Vector3f rTSs = Eigen::Vector3f::Zero();
         // Euler angles [Roll, Pitch, Yaw] of trunk {t} relative to support foot {s}
@@ -272,8 +282,9 @@ namespace module::motion {
         Eigen::Vector3f rFSs = Eigen::Vector3f::Zero();
         // Euler angles [Roll, Pitch, Yaw] of flying foot {f} relative to support foot {s}
         Eigen::Vector3f thetaSF = Eigen::Vector3f::Zero();
+
         // Read the cartesian positions and orientations for trunk and fly foot
-        std::tie(trunk_pos, trunk_axis, foot_pos, foot_axis, is_left_support) = walk_engine.computeCartesianPosition();
+        std::tie(rTSs, thetaST, rFSs, thetaSF, is_left_support) = walk_engine.compute_cartesian_position();
 
         // Change goals from support foot based coordinate system to trunk based coordinate system
         // Trunk {t} from support foot {s}
@@ -298,62 +309,10 @@ namespace module::motion {
         // Get desired transform for right foot {r}
         const Eigen::Isometry3f Htr = walk_engine.get_footstep().is_left_support() ? Htf : Hts;
 
-        // ****DIRECTOR MOTION***
-        const NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
-
-        // Legs
-        auto left_leg                             = std::make_unique<LeftLegIK>();
-        auto right_leg                            = std::make_unique<RightLegIK>();
-        left_leg->time                            = time;
-        right_leg->time                           = time;
-        left_leg->Htl                             = Htl.cast<double>().matrix();
-        right_leg->Htr                            = Htr.cast<double>().matrix();
-        left_leg->servos[ServoID::L_HIP_YAW]      = ServoState(current_config.jointGains[ServoID::L_HIP_YAW], 100);
-        left_leg->servos[ServoID::L_HIP_ROLL]     = ServoState(current_config.jointGains[ServoID::L_HIP_ROLL], 100);
-        left_leg->servos[ServoID::L_HIP_PITCH]    = ServoState(current_config.jointGains[ServoID::L_HIP_PITCH], 100);
-        left_leg->servos[ServoID::L_KNEE]         = ServoState(current_config.jointGains[ServoID::L_KNEE], 100);
-        left_leg->servos[ServoID::L_ANKLE_PITCH]  = ServoState(current_config.jointGains[ServoID::L_ANKLE_PITCH], 100);
-        left_leg->servos[ServoID::L_ANKLE_ROLL]   = ServoState(current_config.jointGains[ServoID::L_ANKLE_ROLL], 100);
-        right_leg->servos[ServoID::R_HIP_YAW]     = ServoState(current_config.jointGains[ServoID::R_HIP_YAW], 100);
-        right_leg->servos[ServoID::R_HIP_ROLL]    = ServoState(current_config.jointGains[ServoID::R_HIP_ROLL], 100);
-        right_leg->servos[ServoID::R_HIP_PITCH]   = ServoState(current_config.jointGains[ServoID::R_HIP_PITCH], 100);
-        right_leg->servos[ServoID::R_KNEE]        = ServoState(current_config.jointGains[ServoID::R_KNEE], 100);
-        right_leg->servos[ServoID::R_ANKLE_PITCH] = ServoState(current_config.jointGains[ServoID::R_ANKLE_PITCH], 100);
-        right_leg->servos[ServoID::R_ANKLE_ROLL]  = ServoState(current_config.jointGains[ServoID::R_ANKLE_ROLL], 100);
-
-
-        emit<Task>(left_leg, 0, false, "quintic left leg");
-        emit<Task>(right_leg, 0, false, "quintic right leg");
-
-        // Arms
-        auto left_arm  = std::make_unique<LeftArm>();
-        auto right_arm = std::make_unique<RightArm>();
-        left_arm->servos[ServoID::L_SHOULDER_PITCH] =
-            ServoCommand(time,
-                         current_config.arm_positions[ServoID::L_SHOULDER_PITCH],
-                         ServoState(current_config.jointGains[ServoID::L_SHOULDER_PITCH], 100));
-        left_arm->servos[ServoID::L_SHOULDER_ROLL] =
-            ServoCommand(time,
-                         current_config.arm_positions[ServoID::L_SHOULDER_ROLL],
-                         ServoState(current_config.jointGains[ServoID::L_SHOULDER_ROLL], 100));
-        left_arm->servos[ServoID::L_ELBOW] = ServoCommand(time,
-                                                          current_config.arm_positions[ServoID::L_ELBOW],
-                                                          ServoState(current_config.jointGains[ServoID::L_ELBOW], 100));
-
-        right_arm->servos[ServoID::R_SHOULDER_PITCH] =
-            ServoCommand(time,
-                         current_config.arm_positions[ServoID::R_SHOULDER_PITCH],
-                         ServoState(current_config.jointGains[ServoID::R_SHOULDER_PITCH], 100));
-        right_arm->servos[ServoID::R_SHOULDER_ROLL] =
-            ServoCommand(time,
-                         current_config.arm_positions[ServoID::R_SHOULDER_ROLL],
-                         ServoState(current_config.jointGains[ServoID::R_SHOULDER_ROLL], 100));
-        right_arm->servos[ServoID::R_ELBOW] =
-            ServoCommand(time,
-                         current_config.arm_positions[ServoID::R_ELBOW],
-                         ServoState(current_config.jointGains[ServoID::R_ELBOW], 100));
-        emit<Task>(left_arm);
-        emit<Task>(right_arm);
+        // Compute inverse kinematics for left and right foot
+        const auto joints = calculateLegJoints<float>(kinematicsModel, Htl, Htr);
+        auto waypoints    = motion(joints);
+        emit(std::move(waypoints));
 
         // Plot graphs of desired trajectories
         if (log_level <= NUClear::DEBUG) {
@@ -370,4 +329,30 @@ namespace module::motion {
         }
     }
 
+    std::unique_ptr<ServoCommands> QuinticWalk::motion(const std::vector<std::pair<ServoID, float>>& joints) {
+        auto waypoints = std::make_unique<ServoCommands>();
+        waypoints->commands.reserve(joints.size() + current_config.arm_positions.size());
+
+        const NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
+
+        for (const auto& joint : joints) {
+            waypoints->commands.emplace_back(subsumption_id,
+                                             time,
+                                             joint.first,
+                                             joint.second,
+                                             current_config.jointGains[joint.first],
+                                             100);
+        }
+
+        for (const auto& joint : current_config.arm_positions) {
+            waypoints->commands.emplace_back(subsumption_id,
+                                             time,
+                                             joint.first,
+                                             joint.second,
+                                             current_config.jointGains[joint.first],
+                                             100);
+        }
+
+        return waypoints;
+    }
 }  // namespace module::motion

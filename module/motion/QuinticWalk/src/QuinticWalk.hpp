@@ -8,7 +8,6 @@
 
 #include "WalkEngine.hpp"
 
-#include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/KinematicsModel.hpp"
@@ -18,7 +17,7 @@
 
 namespace module::motion {
 
-    class QuinticWalk : public ::extension::behaviour::BehaviourReactor {
+    class QuinticWalk : public NUClear::Reactor {
 
     public:
         /// @brief Called by the powerplant to build and setup the QuinticWalk reactor.
@@ -27,8 +26,11 @@ namespace module::motion {
         static constexpr int UPDATE_FREQUENCY = 200;
 
     private:
+        /// Current subsumption ID key to access motors.
+        size_t subsumption_id = 1;
+
         // Reaction handle for the main update loop, disabling when not moving will save unnecessary CPU
-        // ReactionHandle update_handle{};
+        ReactionHandle update_handle{};
         ReactionHandle imu_reaction{};
 
         void calculate_joint_goals();
