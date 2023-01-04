@@ -1,3 +1,4 @@
+# TODO: Update this README for Director - L.C
 # QuinticWalk
 
 ## Description
