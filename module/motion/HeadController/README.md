@@ -17,7 +17,7 @@ The final goal angle is clamped based on the maximum/minium pitch and yaw of the
 
 - `message::motion::HeadCommand` command containing desired angles, smoothing flag and reference frame information
 - `message::input::Sensors` contains information to map desired angles into robot frame from world frame
-- `message::motion::KinematicsModel` contains maximum and minimum values for head pitch/yaw
+- `message::actuation::KinematicsModel` contains maximum and minimum values for head pitch/yaw
 
 ## Emits
 

@@ -24,6 +24,7 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/BodySide.hpp"
 #include "message/behaviour/MotionCommand.hpp"
 #include "message/behaviour/Nod.hpp"
 #include "message/input/GameEvents.hpp"
@@ -31,7 +32,6 @@
 #include "message/localisation/FilteredBall.hpp"
 #include "message/localisation/ResetBallHypotheses.hpp"
 #include "message/localisation/ResetRobotHypotheses.hpp"
-#include "message/motion/BodySide.hpp"
 #include "message/motion/GetupCommand.hpp"
 #include "message/motion/KickCommand.hpp"
 #include "message/platform/RawSensors.hpp"
@@ -60,12 +60,12 @@ namespace module::behaviour::strategy {
     using Penalisation   = message::input::GameEvents::Penalisation;
     using Unpenalisation = message::input::GameEvents::Unpenalisation;
     using GameMode       = message::input::GameState::Data::Mode;
+    using message::actuation::BodySide;
     using message::input::Sensors;
     using message::localisation::Ball;
     using message::localisation::Field;
     using message::localisation::ResetBallHypotheses;
     using message::localisation::ResetRobotHypotheses;
-    using message::motion::BodySide;
     using message::motion::ExecuteGetup;
     using message::motion::KickCommandType;
     using message::motion::KickScriptCommand;

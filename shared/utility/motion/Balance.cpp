@@ -18,14 +18,14 @@
  */
 #include "Balance.hpp"
 
-#include "message/motion/KinematicsModel.hpp"
+#include "message/actuation/KinematicsModel.hpp"
 
 namespace utility::motion {
 
     using LimbID = utility::input::LimbID;
     // using ServoID = utility::input::ServoID;
+    using message::actuation::KinematicsModel;
     using message::input::Sensors;
-    using message::motion::KinematicsModel;
 
     void Balancer::configure(const YAML::Node& config) {
         rotationPGain = config["angle_gain"]["p"].as<float>();

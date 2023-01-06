@@ -71,9 +71,16 @@ namespace module::extension {
                 auto classification = p->classification;
                 t                   = p->group.active_task;
 
-                // Check if we reached a nullptr task but we are not a root provider
-                if (t == nullptr && classification != Provider::Classification::ROOT) {
-                    throw std::runtime_error("Task has broken parentage");
+                // Check if we reached a nullptr task but we are not a root provider or a zombie
+                if (t == nullptr) {
+                    if (p->group.zombie) {
+                        // Add an ancestor that is the lowest possible priority and optional
+                        // Anyone can beat up a zombie, I mean, it's just a bunch of rotting flesh
+                        ancestors.emplace_back(p->group.type, std::numeric_limits<int>::min(), true);
+                    }
+                    else if (classification != Provider::Classification::ROOT) {
+                        throw std::runtime_error("Task has broken parentage");
+                    }
                 }
             } while (t != nullptr);
 
