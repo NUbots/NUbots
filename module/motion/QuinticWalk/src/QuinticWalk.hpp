@@ -6,14 +6,13 @@
 #include <nuclear>
 #include <vector>
 
-#include "WalkEngine.hpp"
-
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/KinematicsModel.hpp"
 #include "message/behaviour/ServoCommand.hpp"
 
 #include "utility/input/ServoID.hpp"
+#include "utility/motion/WalkEngine.hpp"
 
 namespace module::motion {
 
@@ -46,7 +45,7 @@ namespace module::motion {
             float imu_pitch_threshold = 0.0f;
             float imu_roll_threshold  = 0.0f;
 
-            WalkingParameter params{};
+            module::motion::WalkingParameter params{};
 
             std::map<utility::input::ServoID, float> jointGains{};
             std::vector<std::pair<utility::input::ServoID, float>> arm_positions{};

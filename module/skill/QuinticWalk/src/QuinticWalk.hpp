@@ -6,8 +6,6 @@
 #include <nuclear>
 #include <vector>
 
-#include "WalkEngine.hpp"
-
 #include "extension/Behaviour.hpp"
 #include "extension/Configuration.hpp"
 
@@ -16,6 +14,7 @@
 #include "message/behaviour/state/Stability.hpp"
 
 #include "utility/input/ServoID.hpp"
+#include "utility/motion/WalkEngine.hpp"
 
 namespace module::skill {
 
@@ -45,7 +44,7 @@ namespace module::skill {
             float imu_pitch_threshold = 0.0f;
             float imu_roll_threshold  = 0.0f;
 
-            WalkingParameter params{};
+            module::motion::WalkingParameter params{};
 
             std::map<utility::input::ServoID, float> jointGains{};
             std::vector<std::pair<utility::input::ServoID, float>> arm_positions{};
@@ -68,7 +67,7 @@ namespace module::skill {
 
         NUClear::clock::time_point last_update_time{};
 
-        QuinticWalkEngine walk_engine{};
+        module::motion::QuinticWalkEngine walk_engine{};
 
         message::actuation::KinematicsModel kinematicsModel{};
     };
