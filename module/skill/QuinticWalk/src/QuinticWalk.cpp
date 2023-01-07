@@ -238,7 +238,7 @@ namespace module::skill {
             // Check if we are in the IDLE state
             if (walk_engine.get_state() == WalkEngineState::IDLE) {
                 current_stability_state = Stability::STANDING;
-                emit(std::make_unique<Stability::STANDING>(current_stability_state));
+                emit(std::make_unique<Stability>(current_stability_state));
             }
             calculateJointGoals();
         });
