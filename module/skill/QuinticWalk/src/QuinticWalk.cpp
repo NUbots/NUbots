@@ -174,9 +174,8 @@ namespace module::skill {
         });
 
         // NEW START: Runs every time the Walk provider starts (wasn't running)
-        on<Start<Walk>>().then([this] {
+        on<Start<Walk>>(const Behaviour::State& behaviour).then([this] {
             walk_engine.reset();
-            update_handle.enable();
             if (behaviour == Behaviour::State::GOALIE_WALK) {
                 current_config = goalie_config;
             }
@@ -225,7 +224,7 @@ namespace module::skill {
             const float dt = get_time_delta();
             // see if the walk engine has new goals for us
             if (walk_engine.update_state(dt, current_orders)) {
-                calculateJointGoals();
+                calculate_joint_goals();
             }
         });
 
@@ -240,7 +239,7 @@ namespace module::skill {
                 current_stability_state = Stability::STANDING;
                 emit(std::make_unique<Stability::STANDING>(current_stability_state));
             }
-            calculateJointGoals();
+            calculate_joint_goals();
         });
     }
 
@@ -266,7 +265,7 @@ namespace module::skill {
         return dt;
     }
 
-    void QuinticWalk::calculateJointGoals() {
+    void QuinticWalk::calculate_joint_goals() {
         /*
         This method computes the next motor goals and emits limb tasks.
         */
