@@ -356,6 +356,7 @@ namespace module::behaviour::strategy {
             current_state = Behaviour::State::PENALISED;
         }
         else {
+            //This will be where I make changes, Need to talk to liam about his ideas and how to tune.
             if (ball && cfg.is_goalie && ball->rBTt.norm() > cfg.goalie_max_ball_distance) {
                 // We are goalie and the ball is too far away, stand still
                 stand_still();
