@@ -97,10 +97,12 @@ def register(command):
 
 
 def get_cmake_flags(roles_to_build):
-    roles_dir = os.path.join(b.project_dir, "roles")
-    roles_glob = os.path.join(roles_dir, "*.role")
 
-    available_roles = [Path(role_path).stem for role_path in glob.glob(roles_glob)]
+    available_roles = []
+    for dirpath, _, fnames in os.walk("roles"):  # iterate over the roles directory and all subdirectories
+        for f in fnames:  # iterate over all the files in the directory
+            if f.endswith(".role"):  # check that the file is a role file
+                available_roles.append(os.path.join(dirpath, f))  # add the role file to our list
 
     # Ensure that all the roles requested are available
     for role in roles_to_build:
