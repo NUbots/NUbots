@@ -363,11 +363,11 @@ namespace module::behaviour::strategy {
                 // current_state = Behaviour::State::GOALIE_WALK;
             }
             else if ( ball && cfg.is_goalie && ball->rBTt.norm() < cfg.goalie_max_ball_distance) {
-                //We are goalie and the ball is close enough for defensive action
-                //TODO: Figure out which direction the ball is from the robot
-                //Trigger fall script to fall in that direction.
+                // We are goalie and the ball is close enough for defensive action
+                // TODO: Figure out which direction the ball is from the robot, change the following code to dive in relevant direction
+                 emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
 
-                //After fall, stand and return to position
+                // After dive, Player should attempt to stand immediatey.
             }
             else if (ball && NUClear::clock::now() - ball->time_of_measurement < cfg.ball_last_seen_max_time) {
                 // We are not goalie or the ball is close enough, request walk planner to walk to the ball if
