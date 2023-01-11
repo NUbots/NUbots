@@ -87,6 +87,14 @@ namespace module::tools {
                         showDeviceMenu();
                     }
 
+                    else if (input == "OPENCR") {
+                        selected_device  = OPENCR;
+                        selected_battery = NO_BATTERY;
+                        menu_state       = DEVICE_MENU;  // This will change when we implement this feature.
+                        std::cout << "Not yet implemented, please use Arduino IDE to flash firmware" << std::endl;
+                        showDeviceMenu();
+                    }
+
                     else if (input == "QUIT") {
                         selected_device  = NO_DEVICE;
                         selected_battery = NO_BATTERY;
@@ -104,6 +112,7 @@ namespace module::tools {
                     break;
 
                 case BATTERY_MENU:
+                    // TODO once OpenCR fw added, include check that battery type selected is valid
                     if (input == "1") {
                         selected_battery = BATTERY3;
                         menu_state       = NO_MENU;
@@ -286,6 +295,7 @@ namespace module::tools {
         std::cout << "\tType \"CM730\" to flash CM730 firmware." << std::endl;
         std::cout << "\tType \"CM740\" to flash CM740 firmware." << std::endl;
         std::cout << "\tType \"DYNXL\" to flash Dynamixel firmware." << std::endl;
+        std::cout << "\tType \"OPENCR\" to flash OpenCR firmware." << std::endl;
         std::cout << "\tType \"QUIT\" to quit." << std::endl;
         std::cout << "Choice: " << std::flush;
     }
