@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+from glob import glob
 
 from termcolor import cprint
 
@@ -25,17 +26,17 @@ def register(command):
         help="Run the specified program using valgrind",
     )
 
-    roles = []
-    for dirpath, _, fnames in os.walk("roles"):  # iterate over the roles directory and all subdirectories
-        for f in fnames:  # iterate over all the files in the directory
-            if f.endswith(".role"):  # check that the file is a role file
-                roles.append(f[0:-5])  # add the role file to our list
+    # Find all role files
+    fnames = glob(os.path.join("roles", "**", "*.role"), recursive=True)
+    # Strip roles/ and .role from file paths
+    roles = [f[6:-5] for f in fnames]
 
     command.add_argument("role", help="The role to run", choices=roles)
+    command.add_argument("args", nargs="*", help="Any arguments that should be used for the execution")
 
 
 @run_on_docker
-def run(role, use_gdb, use_valgrind, **kwargs):
+def run(role, args, use_gdb, use_valgrind, **kwargs):
 
     # Check to see if ASan was enabled
     use_asan = b.cmake_cache["USE_ASAN"] == "ON"
@@ -106,4 +107,4 @@ def run(role, use_gdb, use_valgrind, **kwargs):
 
     # Run the command
     pty = WrapPty()
-    exit(pty.spawn(cmd, env))
+    exit(pty.spawn(cmd + args, env))
