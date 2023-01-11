@@ -50,7 +50,7 @@ def run(role, args, use_gdb, use_valgrind, **kwargs):
     # Change into the build directory
     os.chdir(os.path.join(b.project_dir, "..", "build"))
 
-    # Add 'bin/` to the command (first argument)
+    # Path to the binary being run starting at bin/
     binary = os.path.join("bin", role)
 
     # Get current environment
