@@ -127,7 +127,7 @@ if(BUILD_TESTS)
 endif()
 
 # Allow selection of subcontroller for conditional build
-set(SUBCONTROLLER "OpenCR" CACHE STRING "Select what subcontroller to build for" FORCE)
+set(SUBCONTROLLER "OPENCR" CACHE STRING "Select what subcontroller to build for" FORCE)
 # Set the possible values of subcontroller for cmake-gui
 set_property(CACHE SUBCONTROLLER PROPERTY STRINGS "OPENCR" "CM740" "NUSENSE")
 
