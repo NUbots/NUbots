@@ -99,7 +99,7 @@ def register(command):
 def get_cmake_flags(roles_to_build):
 
     # Find all available roles
-    available_roles = available_roles = glob(os.path.join("roles", "**", "*.role"), recursive=True)
+    available_roles = glob(os.path.join("roles", "**", "*.role"), recursive=True)
 
     # Ensure that all the roles requested are available
     for role in roles_to_build:
