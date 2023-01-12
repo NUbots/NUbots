@@ -362,10 +362,12 @@ namespace module::behaviour::strategy {
                 current_state = Behaviour::State::SEARCH_FOR_BALL;
                 // current_state = Behaviour::State::GOALIE_WALK;
             }
-            else if ( ball && cfg.is_goalie && ball->rBTt.norm() < cfg.goalie_max_ball_distance) {
+            else if (ball && cfg.is_goalie && ball->rBTt.norm() < cfg.goalie_max_ball_distance) {
                 // We are goalie and the ball is close enough for defensive action
-                // TODO: Figure out which direction the ball is from the robot, change the following code to dive in relevant direction
-                 emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
+                dive(ball);
+                // TODO: Figure out which direction the ball is from the robot, change the following code to dive in
+                // relevant direction
+
 
                 // After dive, Player should attempt to stand immediatey.
             }
@@ -435,6 +437,17 @@ namespace module::behaviour::strategy {
         }
         else {
             emit(std::make_unique<MotionCommand>(utility::behaviour::RotateOnSpot(false)));
+        }
+    }
+
+    void SoccerStrategy::dive(const std::shared_ptr<const FilteredBall>& ball) {
+        float yaw_angle = std::atan2(ball->rBTt.y(), ball->rBTt.x());
+        // TODO: Change to dive when available
+        if (yaw_angle < 0) {
+            emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
+        }
+        else {
+            emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
         }
     }
 
