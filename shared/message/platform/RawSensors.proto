@@ -16,54 +16,54 @@
  *
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
- syntax = "proto3";
+syntax = "proto3";
 
- package message.platform;
+package message.platform;
 
- import "google/protobuf/timestamp.proto";
+import "google/protobuf/timestamp.proto";
 
- import "Vector.proto";
+import "Vector.proto";
 
- /**
-  * @author Alex Biddulph
-  */
- message RawSensors {
-     /// Set of error flags/statuses.
-     /// bitmask values.
-     enum Error {
-         OK            = 0;  // not really a flag but the lack of any other flag
-         INPUT_VOLTAGE = 1;
-         ANGLE_LIMIT   = 2;
-         OVERHEATING   = 4;
-         RANGE         = 8;
-         CHECKSUM      = 16;
-         OVERLOAD      = 32;
-         INSTRUCTION   = 64;
-         CORRUPT_DATA  = 128;
-         TIMEOUT       = 256;
-     }
+/**
+ * @author Alex Biddulph
+ */
+message RawSensors {
+    /// Set of error flags/statuses.
+    /// bitmask values.
+    enum Error {
+        OK            = 0;  // not really a flag but the lack of any other flag
+        INPUT_VOLTAGE = 1;
+        ANGLE_LIMIT   = 2;
+        OVERHEATING   = 4;
+        RANGE         = 8;
+        CHECKSUM      = 16;
+        OVERLOAD      = 32;
+        INSTRUCTION   = 64;
+        CORRUPT_DATA  = 128;
+        TIMEOUT       = 256;
+    }
 
-     message LEDPanel {
-         bool led2 = 1;
-         bool led3 = 2;
-         bool led4 = 3;
-     }
+    message LEDPanel {
+        bool led2 = 1;
+        bool led3 = 2;
+        bool led4 = 3;
+    }
 
-     message HeadLED {
-         /// Encode as 0x00 0xRR 0xGG 0xBB
-         uint32 RGB = 1;
-     }
+    message HeadLED {
+        /// Encode as 0x00 0xRR 0xGG 0xBB
+        uint32 RGB = 1;
+    }
 
-     message EyeLED {
-         /// Encode as 0x00 0xRR 0xGG 0xBB
-         uint32 RGB = 1;
-     }
+    message EyeLED {
+        /// Encode as 0x00 0xRR 0xGG 0xBB
+        uint32 RGB = 1;
+    }
 
-     message Buttons {
-         bool left   = 1;
-         bool middle = 2;
-         bool right = 3;
-     }
+    message Buttons {
+        bool left   = 1;
+        bool middle = 2;
+        bool right  = 3;
+    }
 
     //  message Accelerometer {
     //     float x = 1;
@@ -77,53 +77,53 @@
     //     float z = 3;
     //  }
 
-     /// The robot has Force Sensitive Resistors on its feet to detect whether a foot is down.
-     /// There are four FSRs per foot, so this message is for one foot
-     message FSR {
-         float  fsr1        = 1;
-         float  fsr2        = 2;
-         float  fsr3        = 3;
-         float  fsr4        = 4;
-         float  centre_x    = 5;
-         float  centre_y    = 6;
-         uint32 error_flags = 7;
-     }
+    /// The robot has Force Sensitive Resistors on its feet to detect whether a foot is down.
+    /// There are four FSRs per foot, so this message is for one foot
+    message FSR {
+        float  fsr1        = 1;
+        float  fsr2        = 2;
+        float  fsr3        = 3;
+        float  fsr4        = 4;
+        float  centre_x    = 5;
+        float  centre_y    = 6;
+        uint32 error_flags = 7;
+    }
 
-     message FSRs {
-         /// Left foot
-         FSR left = 1;
-         /// Right foot
-         FSR right = 2;
-     }
+    message FSRs {
+        /// Left foot
+        FSR left = 1;
+        /// Right foot
+        FSR right = 2;
+    }
 
-     /// Full set of information to use a given servo.
-     /// Ref: https://emanual.robotis.com/docs/en/dxl/mx/mx-64/ ; https://emanual.robotis.com/docs/en/dxl/mx/mx-106/
-     message Servo {
-        uint32 error_flags          = 1;
-        bool   torque_enabled       = 2;
+    /// Full set of information to use a given servo.
+    /// Ref: https://emanual.robotis.com/docs/en/dxl/mx/mx-64/ ; https://emanual.robotis.com/docs/en/dxl/mx/mx-106/
+    message Servo {
+        uint32 error_flags           = 1;
+        bool   torque_enabled        = 2;
         float  velocity_p_gain       = 3;
         float  velocity_i_gain       = 4;
         float  velocity_d_gain       = 5;
         float  position_p_gain       = 6;
         float  position_i_gain       = 7;
-        float  feed_forward_1st_Gain  = 8;
-        float  feed_forward_2nd_Gain  = 9;
-        float  present_PWM          = 10;
-        float  present_current      = 11;
-        float  present_velocity     = 12;
-        float  present_position     = 13;
-        float  goal_PWM             = 14;
-        float  goal_current         = 15;
-        float  goal_velocity        = 16;
-        float  goal_position        = 17;
-        float  voltage             = 18;
-        float  temperature         = 19;
-        float  profile_acceleration = 20;
-        float  profile_velocity     = 21;
-     };
+        float  feed_forward_1st_Gain = 8;
+        float  feed_forward_2nd_Gain = 9;
+        float  present_PWM           = 10;
+        float  present_current       = 11;
+        float  present_velocity      = 12;
+        float  present_position      = 13;
+        float  goal_PWM              = 14;
+        float  goal_current          = 15;
+        float  goal_velocity         = 16;
+        float  goal_position         = 17;
+        float  voltage               = 18;
+        float  temperature           = 19;
+        float  profile_acceleration  = 20;
+        float  profile_velocity      = 21;
+    };
 
-     /// Set of all the servos on the robot
-     message Servos {
+    /// Set of all the servos on the robot
+    message Servos {
         Servo r_shoulder_pitch = 1;
         Servo l_shoulder_pitch = 2;
         Servo r_shoulder_roll  = 3;
@@ -144,28 +144,28 @@
         Servo l_ankle_roll     = 18;
         Servo head_pan         = 19;
         Servo head_tilt        = 20;
-     }
+    }
 
-     google.protobuf.Timestamp time_stamp        = 1;        // Timestamp when our data were taken
-     uint32                    platform_error_flags = 2;
-     LEDPanel                  led_panel         = 3;
-     HeadLED                   head_led          = 4;
-     EyeLED                    eye_led           = 5;
-     Buttons                   buttons          = 6;
-     fvec3                     accelerometer    = 7;
-     fvec3                     gyroscope        = 8;
-     Servos                    servo            = 9;
-     float                     battery          = 10;
-     FSRs                      fsr              = 11;
- }
+    google.protobuf.Timestamp time_stamp           = 1;  // Timestamp when our data were taken
+    uint32                    platform_error_flags = 2;
+    LEDPanel                  led_panel            = 3;
+    HeadLED                   head_led             = 4;
+    EyeLED                    eye_led              = 5;
+    Buttons                   buttons              = 6;
+    fvec3                     accelerometer        = 7;
+    fvec3                     gyroscope            = 8;
+    Servos                    servo                = 9;
+    float                     battery              = 10;
+    FSRs                      fsr                  = 11;
+}
 
- message ButtonLeftDown {}
+message ButtonLeftDown {}
 
- message ButtonLeftUp {}
+message ButtonLeftUp {}
 
- message ButtonMiddleDown {}
+message ButtonMiddleDown {}
 
- message ButtonMiddleUp {}
+message ButtonMiddleUp {}
 
- // Reset sensors and servo targets in Webots
- message ResetWebotsServos {}
+// Reset sensors and servo targets in Webots
+message ResetWebotsServos {}
