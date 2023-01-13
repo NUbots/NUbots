@@ -27,7 +27,7 @@ def register(command):
     )
 
     # Find all role files
-    fnames = glob(os.path.join("roles", "**", "*.role"), recursive=True)
+    fnames = glob(os.path.join(b.project_dir, "roles", "**", "*.role"), recursive=True)
     # Strip roles/ and .role from file paths
     roles = [f[6:-5] for f in fnames]
 
