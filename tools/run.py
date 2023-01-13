@@ -29,7 +29,7 @@ def register(command):
     # Find all role files
     fnames = glob(os.path.join(b.project_dir, "roles", "**", "*.role"), recursive=True)
     # Strip roles/ and .role from file paths
-    roles = [f[6:-5] for f in fnames]
+    roles = [os.path.splitext(f.replace(os.path.join(b.project_dir, "roles", ""), ""))[0] for f in fnames]
 
     command.add_argument("role", help="The role to run", choices=roles)
     command.add_argument("args", nargs="*", help="Any arguments that should be used for the execution")
