@@ -391,10 +391,13 @@ namespace module::vision {
                                        const GreenHorizon& horizon,
                                        std::unique_ptr<Goals>& goals) {
 
+
+        // Calculate error for detected goals using groundtruth
         auto calc_error = [&](const Eigen::Vector3f& post1, const Eigen::Vector3f& post2) {
             return (post1 - post2).norm();
         };
 
+        // Calculate goal post positons using field dimensions
         auto calc_goal_pos = [&](const Eigen::Vector3f& rFWw, const int& x_sign, const int& y_sign) {
             return Eigen::Vector3f(
                 rFWw.x() + (field.dimensions.field_length / 2 * x_sign),
@@ -405,11 +408,13 @@ namespace module::vision {
         const Eigen::Affine3f Hcw(horizon.Hcw.cast<float>());
         const Eigen::Vector3f rFWw = horizon.vision_ground_truth.rFWw;
 
+        // Get both goal posts for both teams
         const Eigen::Vector3f rGWw_own_l = calc_goal_pos(rFWw, -1, -1);
         const Eigen::Vector3f rGWw_own_r = calc_goal_pos(rFWw, -1, +1);
         const Eigen::Vector3f rGWw_opp_l = calc_goal_pos(rFWw, +1, +1);
         const Eigen::Vector3f rGWw_opp_r = calc_goal_pos(rFWw, +1, -1);
 
+        // Transform goal post positions into camera space
         const Eigen::Vector3f rGCc_own_l = (Hcw * rGWw_own_l).normalized();
         const Eigen::Vector3f rGCc_own_r = (Hcw * rGWw_own_r).normalized();
         const Eigen::Vector3f rGCc_opp_l = (Hcw * rGWw_opp_l).normalized();
@@ -421,6 +426,7 @@ namespace module::vision {
         float goal_error_bad             = 0.0;
         Eigen::Vector3f goal_error3f_bad = Eigen::Vector3f::Zero();
 
+        // Loop through all detected goal posts
         for (auto it = goals->goals.begin(); it != goals->goals.end(); it = std::next(it)) {
 
             bool good_post        = false;
@@ -432,11 +438,14 @@ namespace module::vision {
             const float dist_opp_l = calc_error(it->post.bottom, rGCc_opp_l);
             const float dist_opp_r = calc_error(it->post.bottom, rGCc_opp_r);
 
+            // If a detected post has less error than the max_benchmark_error set in the yaml file,
+            // we says it is a good post.
             if (dist_own_l < config.max_benchmark_error || dist_own_r < config.max_benchmark_error
                 || dist_opp_l < config.max_benchmark_error || dist_opp_r < config.max_benchmark_error) {
                 good_post = true;
             }
 
+            // Record error for the posts closest match
             if (dist_own_l < min_error) {
                 min_error = dist_own_l;
                 error     = (it->post.bottom - rGCc_own_l).cwiseAbs();
@@ -467,6 +476,7 @@ namespace module::vision {
             }
         }
 
+        // Avoid dividing by 0
         if (goals->goals.size() > bad_posts) {
             goal_error   = (goal_error / ((goals->goals.size() - bad_posts)));
             goal_error3f = (goal_error3f / ((goals->goals.size() - bad_posts)));
