@@ -22,25 +22,6 @@ package message.skill;
 
 import "Vector.proto";
 
-message WalkStarted {}
-
-message WalkStopped {}
-
-message StopCommand {
-    /// Reservation identifier for servo control
-    uint64 subsumption_id = 1;
-}
-
 message Walk {
-    vec3 velocity_target = 1;
-}
-
-message EnableWalkEngineCommand {
-    /// Reservation identifier for servo control
-    uint64 subsumption_id = 1;
-}
-
-message DisableWalkEngineCommand {
-    /// Reservation identifier for servo control
-    uint64 subsumption_id = 1;
+    fvec3 velocity_target = 1;
 }

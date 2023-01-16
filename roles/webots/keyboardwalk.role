@@ -18,17 +18,18 @@ nuclear_role(
   # Network
   network::NUClearNet
   network::PlotJuggler
-
+  # Servos
+  actuation::Kinematics
+  actuation::Servos
   # NOTE: skill::QuinticWalk uses the Director, motion::QuinticWalk is the old system
-
   # Skill
   skill::QuinticWalk
-  # Motion
-  # motion::QuinticWalk
+  # Motion motion::QuinticWalk
   motion::HeadController
   motion::ScriptEngine
-  # Behaviour
-  behaviour::Controller
+  # Director
+  extension::Director
+  # Behaviour behaviour::Controller
   behaviour::skills::Getup
   behaviour::skills::Stand
   behaviour::skills::KickScript

@@ -44,7 +44,7 @@ namespace module::skill {
             float imu_pitch_threshold = 0.0f;
             float imu_roll_threshold  = 0.0f;
 
-            module::motion::WalkingParameter params{};
+            utility::motion::WalkingParameter params{};
 
             std::map<utility::input::ServoID, float> jointGains{};
             std::vector<std::pair<utility::input::ServoID, float>> arm_positions{};
@@ -62,12 +62,9 @@ namespace module::skill {
         bool falling                   = false;
         bool first_run                 = true;
 
-        /// @brief Stores which stability state the robot is in
-        message::behaviour::state::Stability current_stability_state = message::behaviour::state::Stability::STATIC;
-
         NUClear::clock::time_point last_update_time{};
 
-        module::motion::QuinticWalkEngine walk_engine{};
+        utility::motion::QuinticWalkEngine walk_engine{};
 
         message::actuation::KinematicsModel kinematicsModel{};
     };

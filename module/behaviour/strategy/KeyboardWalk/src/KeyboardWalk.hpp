@@ -32,6 +32,8 @@
 
 #include <nuclear>
 
+#include "extension/Behaviour.hpp"
+
 #include "utility/input/LimbID.hpp"
 
 namespace module::behaviour::strategy {
@@ -45,7 +47,7 @@ namespace module::behaviour::strategy {
         FATAL_COLOURS = 6
     };
 
-    class KeyboardWalk : public NUClear::Reactor {
+    class KeyboardWalk : public ::extension::behaviour::BehaviourReactor {
     private:
         static constexpr const float DIFF     = 0.01f;
         static constexpr const float ROT_DIFF = 0.1f;

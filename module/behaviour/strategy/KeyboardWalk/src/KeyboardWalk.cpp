@@ -51,7 +51,7 @@ namespace module::behaviour::strategy {
     }
 
     KeyboardWalk::KeyboardWalk(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), velocity(Eigen::Vector2f::Zero()) {
+        : BehaviourReactor(std::move(environment)), velocity(Eigen::Vector2f::Zero()) {
 
         // Ensure UTF-8 is enabled
         std::setlocale(LC_ALL, "en_US.UTF-8");

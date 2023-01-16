@@ -5,7 +5,9 @@
 #include "extension/Configuration.hpp"
 
 #include "message/actuation/KinematicsModel.hpp"
+#include "message/actuation/Limbs.hpp"
 #include "message/actuation/LimbsIK.hpp"
+#include "message/actuation/ServoCommand.hpp"
 #include "message/behaviour/Behaviour.hpp"
 #include "message/behaviour/state/Stability.hpp"
 #include "message/motion/GetupCommand.hpp"
@@ -23,23 +25,26 @@ namespace module::skill {
     using extension::Configuration;
 
     using message::actuation::KinematicsModel;
-    using message::actuation::LimbsIK;
+    using message::actuation::LeftLegIK;
+    using message::actuation::RightLegIK;
     using message::actuation::ServoCommand;
     using message::behaviour::Behaviour;
     using message::behaviour::state::Stability;
     using message::input::Sensors;
-    using message::motion::EnableWalkEngineCommand;
-    using message::motion::LeftLegIK;
-    using message::motion::RightLegIK;
-    using message::motion::StopCommand;
     using message::skill::Walk;
 
+    using message::actuation::LeftArm;
+    using message::actuation::RightArm;
+    using message::actuation::ServoState;
+    using message::behaviour::state::Stability;
     using utility::actuation::kinematics::calculateLegJoints;
     using utility::input::ServoID;
     using utility::math::euler::EulerIntrinsicToMatrix;
     using utility::math::euler::MatrixToEulerIntrinsic;
+    using utility::motion::WalkEngineState;
     using utility::nusight::graph;
     using utility::support::Expression;
+
 
     /**
      * @brief loads the configuration from cfg into config
@@ -153,15 +158,6 @@ namespace module::skill {
             load_quintic_walk(cfg, goalie_config);
         });
 
-        on<Trigger<Behaviour::State>>().then("Switching walk state", [this](const Behaviour::State& behaviour) {
-            imu_reaction.enable(false);
-
-            // Send these parameters to the walk engine
-            walk_engine.set_parameters(current_config.params);
-
-            imu_reaction.enable(current_config.imu_active);
-        });
-
         // TODO: Move into Provide or Start?
         on<Startup, Trigger<KinematicsModel>>().then("Update Kinematics Model", [this](const KinematicsModel& model) {
             kinematicsModel = model;
@@ -174,7 +170,7 @@ namespace module::skill {
         });
 
         // NEW START: Runs every time the Walk provider starts (wasn't running)
-        on<Start<Walk>>(const Behaviour::State& behaviour).then([this] {
+        on<Start<Walk>, With<Behaviour::State>>().then([this](const Behaviour::State& behaviour) {
             walk_engine.reset();
             if (behaviour == Behaviour::State::GOALIE_WALK) {
                 current_config = goalie_config;
@@ -184,11 +180,17 @@ namespace module::skill {
             }
         });
 
+        on<Stop<Walk>>().then([this] {
+            const float dt = get_time_delta();
+            current_orders.setZero();
+            walk_engine.update_state(dt, current_orders);
+        });
+
         // NEW MAIN LOOP - Calculates joint goals and emits....
-        on<Provide<Walk>, Needs<LeftLegIK>, Needs<RightLegIK>, Trigger<Sensors>>(const Walk walk).then([this] {
+        on<Provide<Walk>, Needs<LeftLegIK>, Needs<RightLegIK>, Trigger<Sensors>>().then([this](const Walk walk) {
             // ****The function formally known as on<Trigger<WalkCommand>>.then([this](const WalkCommand&
             // walkCommand)****
-
+            emit(std::make_unique<Stability>(Stability::DYNAMIC));
             // the engine expects orders in [m] not [m/s]. We have to compute by dividing by step frequency which is
             // a double step factor 2 since the order distance is only for a single step, not double step
             const float factor             = (1.0f / (current_config.params.freq)) * 0.5f;
@@ -229,15 +231,14 @@ namespace module::skill {
         });
 
         // Stand Reaction - Set walk_engine commands to zero, check walk_engine state, Set stability state
-        on<Provide<Walk>, Needs<LeftLegIK>, Needs<RightLegIK>, Causing<Stability::STANDING>>().then([this] {
+        on<Provide<Walk>, Needs<LeftLegIK>, Needs<RightLegIK>, Causing<Stability, Stability::STANDING>>().then([this] {
             // Stop the walk engine
             const float dt = get_time_delta();
             current_orders.setZero();
             walk_engine.update_state(dt, current_orders);
             // Check if we are in the IDLE state
             if (walk_engine.get_state() == WalkEngineState::IDLE) {
-                current_stability_state = Stability::STANDING;
-                emit(std::make_unique<Stability>(current_stability_state));
+                emit(std::make_unique<Stability>(Stability::STANDING));
             }
             calculate_joint_goals();
         });
@@ -278,7 +279,7 @@ namespace module::skill {
         // Euler angles [Roll, Pitch, Yaw] of flying foot {f} relative to support foot {s}
         Eigen::Vector3f thetaSF = Eigen::Vector3f::Zero();
         // Read the cartesian positions and orientations for trunk and fly foot
-        std::tie(trunk_pos, trunk_axis, foot_pos, foot_axis, is_left_support) = walk_engine.computeCartesianPosition();
+        std::tie(rTSs, thetaST, rFSs, thetaSF, is_left_support) = walk_engine.compute_cartesian_position();
 
         // Change goals from support foot based coordinate system to trunk based coordinate system
         // Trunk {t} from support foot {s}
@@ -306,7 +307,8 @@ namespace module::skill {
         // ****DIRECTOR MOTION***
         const NUClear::clock::time_point time = NUClear::clock::now() + Per<std::chrono::seconds>(UPDATE_FREQUENCY);
 
-        // Legs
+        // TODO: Change below to a loop
+        //  Legs
         auto left_leg                             = std::make_unique<LeftLegIK>();
         auto right_leg                            = std::make_unique<RightLegIK>();
         left_leg->time                            = time;
@@ -335,27 +337,27 @@ namespace module::skill {
         auto right_arm = std::make_unique<RightArm>();
         left_arm->servos[ServoID::L_SHOULDER_PITCH] =
             ServoCommand(time,
-                         current_config.arm_positions[ServoID::L_SHOULDER_PITCH],
+                         current_config.arm_positions[ServoID::L_SHOULDER_PITCH].second,
                          ServoState(current_config.jointGains[ServoID::L_SHOULDER_PITCH], 100));
         left_arm->servos[ServoID::L_SHOULDER_ROLL] =
             ServoCommand(time,
-                         current_config.arm_positions[ServoID::L_SHOULDER_ROLL],
+                         current_config.arm_positions[ServoID::L_SHOULDER_ROLL].second,
                          ServoState(current_config.jointGains[ServoID::L_SHOULDER_ROLL], 100));
         left_arm->servos[ServoID::L_ELBOW] = ServoCommand(time,
-                                                          current_config.arm_positions[ServoID::L_ELBOW],
+                                                          current_config.arm_positions[ServoID::L_ELBOW].second,
                                                           ServoState(current_config.jointGains[ServoID::L_ELBOW], 100));
 
         right_arm->servos[ServoID::R_SHOULDER_PITCH] =
             ServoCommand(time,
-                         current_config.arm_positions[ServoID::R_SHOULDER_PITCH],
+                         current_config.arm_positions[ServoID::R_SHOULDER_PITCH].second,
                          ServoState(current_config.jointGains[ServoID::R_SHOULDER_PITCH], 100));
         right_arm->servos[ServoID::R_SHOULDER_ROLL] =
             ServoCommand(time,
-                         current_config.arm_positions[ServoID::R_SHOULDER_ROLL],
+                         current_config.arm_positions[ServoID::R_SHOULDER_ROLL].second,
                          ServoState(current_config.jointGains[ServoID::R_SHOULDER_ROLL], 100));
         right_arm->servos[ServoID::R_ELBOW] =
             ServoCommand(time,
-                         current_config.arm_positions[ServoID::R_ELBOW],
+                         current_config.arm_positions[ServoID::R_ELBOW].second,
                          ServoState(current_config.jointGains[ServoID::R_ELBOW], 100));
         emit<Task>(left_arm);
         emit<Task>(right_arm);

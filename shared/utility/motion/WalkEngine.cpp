@@ -13,7 +13,7 @@ https://github.com/Rhoban/model/
 #include "utility/math/angle.hpp"
 #include "utility/math/euler.hpp"
 
-namespace module::motion {
+namespace utility::motion {
 
     QuinticWalkEngine::QuinticWalkEngine() {
         trajectories_init(trajs);
@@ -617,4 +617,4 @@ namespace module::motion {
     }
 
 
-}  // namespace module::motion
+}  // namespace utility::motion
