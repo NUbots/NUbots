@@ -6,6 +6,11 @@ nuclear_role(
   # Director
   extension::Director
   # Servos
-  motion::Kinematics
-  motion::Servos
+  actuation::Kinematics
+  actuation::Servos
+  # Skills
+  skill::KickScript
+  skill::GetUp
+  # Planners
+  planning::GetUpPlanner
 )

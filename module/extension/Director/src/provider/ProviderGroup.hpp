@@ -81,6 +81,9 @@ namespace module::extension::provider {
         /// Stores if the last thing this group did was to emit a done task
         bool done = false;
 
+        /// Stores if this group is in the process of being deleted and should be considered dead for challenges
+        bool zombie = false;
+
         /// The current task that is running on this Provider
         std::shared_ptr<BehaviourTask> active_task;
         /// The currently active provider that is executing
