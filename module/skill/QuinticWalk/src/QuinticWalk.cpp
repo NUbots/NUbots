@@ -178,6 +178,10 @@ namespace module::skill {
             else {
                 current_config = normal_config;
             }
+            // Send these parameters to the walk engine
+            walk_engine.set_parameters(current_config.params);
+
+            imu_reaction.enable(current_config.imu_active);
         });
 
         on<Stop<Walk>>().then([this] {
