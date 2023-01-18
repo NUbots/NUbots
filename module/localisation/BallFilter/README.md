@@ -3,7 +3,7 @@
 ## Description
 
 This module takes in a list of vision balls, uses the ball measurement closest to our current estimate and applies a
-rudimentary exponential filter to the measurement.
+kalman filter to the measurements.
 
 ## Usage
 

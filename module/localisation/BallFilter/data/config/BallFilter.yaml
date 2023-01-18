@@ -1,5 +1,9 @@
 # Controls the minimum log level that NUClear log will display
 log_level: WARN
 
-# Smoothing factor used in exponential filter on ball position
-smoothing_factor: 0.2
+filter:
+  initial_state:
+    state: [0.0, 0.0, 0.0]
+    covariance: 1e-3
+  process_noise: 1e-3
+  measurement_noise: 1e-3
