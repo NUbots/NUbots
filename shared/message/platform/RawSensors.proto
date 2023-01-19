@@ -26,12 +26,13 @@ import "google/protobuf/timestamp.proto";
 import "Vector.proto";
 
 /**
- * @author Trent Houliston
+ * @author Alex Biddulph
  */
 message RawSensors {
     /// Set of error flags/statuses.
     /// bitmask values.
-    /// See https://emanual.robotis.com/docs/en/dxl/protocol1/#protocol
+
+    // TODO update to protocol2 error bits (all different)
     enum Error {
         OK            = 0;  // not really a flag but the lack of any other flag
         INPUT_VOLTAGE = 1;
@@ -44,23 +45,41 @@ message RawSensors {
         CORRUPT_DATA  = 128;
         TIMEOUT       = 256;
     }
+
     message LEDPanel {
         bool led2 = 1;
         bool led3 = 2;
         bool led4 = 3;
     }
+
     message HeadLED {
         /// Encode as 0x00 0xRR 0xGG 0xBB
         uint32 RGB = 1;
     }
+
     message EyeLED {
         /// Encode as 0x00 0xRR 0xGG 0xBB
         uint32 RGB = 1;
     }
+
     message Buttons {
         bool left   = 1;
         bool middle = 2;
+        bool right  = 3;
     }
+
+    //  message Accelerometer {
+    //     float x = 1;
+    //     float y = 2;
+    //     float z = 3;
+    //  }
+
+    //  message Gyroscope {
+    //     float x = 1;
+    //     float y = 2;
+    //     float z = 3;
+    //  }
+
     /// The robot has Force Sensitive Resistors on its feet to detect whether a foot is down.
     /// There are four FSRs per foot, so this message is for one foot
     message FSR {
@@ -72,12 +91,14 @@ message RawSensors {
         float  centre_y    = 6;
         uint32 error_flags = 7;
     }
+
     message FSRs {
         /// Left foot
         FSR left = 1;
         /// Right foot
         FSR right = 2;
     }
+
     /// Full set of information to use a given servo.
     /// Ref: https://emanual.robotis.com/docs/en/dxl/mx/mx-64/ ; https://emanual.robotis.com/docs/en/dxl/mx/mx-106/
     message Servo {
@@ -116,6 +137,32 @@ message RawSensors {
         /// In degrees Celsius
         float temperature = 13;
     };
+
+    // Full set on information to use for X-series servos
+    // message ServoX {
+    //     uint32 error_flags           = 1;
+    //     bool   torque_enabled        = 2;
+    //     float  velocity_p_gain       = 3;
+    //     float  velocity_i_gain       = 4;
+    //     float  velocity_d_gain       = 5;
+    //     float  position_p_gain       = 6;
+    //     float  position_i_gain       = 7;
+    //     float  feed_forward_1st_Gain = 8;
+    //     float  feed_forward_2nd_Gain = 9;
+    //     float  present_PWM           = 10;
+    //     float  present_current       = 11;
+    //     float  present_velocity      = 12;
+    //     float  present_position      = 13;
+    //     float  goal_PWM              = 14;
+    //     float  goal_current          = 15;
+    //     float  goal_velocity         = 16;
+    //     float  goal_position         = 17;
+    //     float  voltage               = 18;
+    //     float  temperature           = 19;
+    //     float  profile_acceleration  = 20;
+    //     float  profile_velocity      = 21;
+    // };
+
     /// Set of all the servos on the robot
     message Servos {
         Servo r_shoulder_pitch = 1;
