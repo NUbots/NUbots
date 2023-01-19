@@ -16,36 +16,36 @@
  *
  * Copyright 2013 NUbots <nubots@nubots.net>
  */
- syntax = "proto3";
+syntax = "proto3";
 
- package message.platform;
+package message.platform;
 
- import "google/protobuf/timestamp.proto";
+import "google/protobuf/timestamp.proto";
 
- /**
-  * Represents a status return packet from a dynamixel device
-  *
-  * @author Alex Biddulph
-  */
- message StatusReturn {
-     /// Error values
-     enum CommandError {
-         NO_ERROR          = 0;
-         RESULT_FAIL       = 1;
-         INSTRUCTION_ERROR = 2;
-         CRC_ERROR         = 3;
-         RANGE_ERROR       = 4;
-         LENGTH_ERROR      = 5;
-         LIMIT_ERROR       = 6;
-         ACCESS_ERROR      = 7;
-     }
+/**
+ * Represents a status return packet from a dynamixel device
+ *
+ * @author Alex Biddulph
+ */
+message StatusReturn {
+    /// Error values
+    enum CommandError {
+        NO_ERROR          = 0;
+        RESULT_FAIL       = 1;
+        INSTRUCTION_ERROR = 2;
+        CRC_ERROR         = 3;
+        RANGE_ERROR       = 4;
+        LENGTH_ERROR      = 5;
+        LIMIT_ERROR       = 6;
+        ACCESS_ERROR      = 7;
+    }
 
-     int32                     magic       = 1;  /// Magic number that heads up every packet
-     int32                     id          = 2;  /// The ID of the device that we are communicating with
-     int32                     length      = 3;  /// The total length of the data packet (4 plus the size of data)
-     int32                     instruction = 4;  /// Will always be Instruction::STATUS_RETURN
-     CommandError              error       = 5;  /// Error value
-     bytes                     data        = 6;  /// Expected return data
-     int32                     checksum    = 7;  /// Our checksum for this command
-     google.protobuf.Timestamp timestamp   = 8;
- }
+    int32                     magic       = 1;  /// Magic number that heads up every packet
+    int32                     id          = 2;  /// The ID of the device that we are communicating with
+    int32                     length      = 3;  /// The total length of the data packet (4 plus the size of data)
+    int32                     instruction = 4;  /// Will always be Instruction::STATUS_RETURN
+    CommandError              error       = 5;  /// Error value
+    bytes                     data        = 6;  /// Expected return data
+    int32                     checksum    = 7;  /// Our checksum for this command
+    google.protobuf.Timestamp timestamp   = 8;
+}
