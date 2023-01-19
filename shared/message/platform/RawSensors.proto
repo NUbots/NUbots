@@ -33,6 +33,10 @@ message RawSensors {
     /// bitmask values.
 
     // TODO update to protocol2 error bits (all different)
+    // changes errors entirely which also influences error handling in SensorFilter
+    // new error flags already in StatusReturn.proto - was something planned with this?
+    // Maybe add different error handling based on hardware and packet handling errors
+    // separately?
     enum Error {
         OK            = 0;  // not really a flag but the lack of any other flag
         INPUT_VOLTAGE = 1;
@@ -68,17 +72,17 @@ message RawSensors {
         bool right  = 3;
     }
 
-    //  message Accelerometer {
-    //     float x = 1;
-    //     float y = 2;
-    //     float z = 3;
-    //  }
+     message Accelerometer {
+        float x = 1;
+        float y = 2;
+        float z = 3;
+     }
 
-    //  message Gyroscope {
-    //     float x = 1;
-    //     float y = 2;
-    //     float z = 3;
-    //  }
+     message Gyroscope {
+        float x = 1;
+        float y = 2;
+        float z = 3;
+     }
 
     /// The robot has Force Sensitive Resistors on its feet to detect whether a foot is down.
     /// There are four FSRs per foot, so this message is for one foot
