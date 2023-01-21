@@ -22,7 +22,7 @@ accelerometer_magnitude:
   # The magnitude of the accelerometer at which the robot is considered unstable
   unstable: 1.0
   # The magnitude of the accelerometer at which the robot is considered falling
-  falling: 2.0
+  falling: 3.0
 accelerometer_angle:
   # The smoothing factor for the exponential filter
   smoothing: 0.9
