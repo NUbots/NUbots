@@ -1,0 +1,56 @@
+/*
+ * This file is part of the NUbots Codebase.
+ *
+ * The NUbots Codebase is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * The NUbots Codebase is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * Copyright 2022 NUbots <nubots@nubots.net>
+ */
+syntax = "proto3";
+
+package message.actuation;
+
+import "google/protobuf/timestamp.proto";
+import "message/actuation/ServoCommand.proto";
+import "Matrix.proto";
+import "Vector.proto";
+
+/// Left leg motion information including target matrix, time and gain and torque for each servo
+message LeftLegIK {
+    /// When the command should execute
+    google.protobuf.Timestamp time = 1;
+    /// Target left foot position to torso
+    mat4 Htl = 2;
+    /// Gain and torque of each servo, with the key corresponding to ServoID
+    map<uint32, ServoState> servos = 3;
+}
+
+/// Right leg motion information including target matrix, time and gain and torque for each servo
+message RightLegIK {
+    /// When the command should execute
+    google.protobuf.Timestamp time = 1;
+    /// Target right foot position to torso
+    mat4 Htr = 2;
+    /// Gain and torque of each servo, with the key corresponding to ServoID
+    map<uint32, ServoState> servos = 3;
+}
+
+/// Head motion information including look direction, time and gain and torque for each servo
+message HeadIK {
+    /// When the command should execute
+    google.protobuf.Timestamp time = 1;
+    /// Vector for the head to look towards (camera to point in torso space)
+    vec3 uPCt = 2;
+    /// Gain and torque of each servo, with the key corresponding to ServoID
+    map<uint32, ServoState> servos = 3;
+}

@@ -1,5 +1,8 @@
-cmake_minimum_required(VERSION 3.19)
+cmake_minimum_required(VERSION 3.20)
 project(NUbots)
+
+# The GENERATED source file property is now visible in all directories
+cmake_policy(SET CMP0118 NEW)
 
 # ~~~
 # This is needed so we can link in the custom clock object library to the message and utility libraries
@@ -28,14 +31,13 @@ set(CI_BUILD
     CACHE
       BOOL
       "This disables the effects of the CI_BUILD variable. We should remove this set() once warnings have been fixed."
-      FORCE
 )
 
-# Default to do a debug build
+# Default to do a release build
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  message(STATUS "Setting build type to 'Debug' as none was specified.")
+  message(STATUS "Setting build type to 'Release' as none was specified.")
   set(CMAKE_BUILD_TYPE
-      Debug
+      Release
       CACHE STRING "Choose the type of build." FORCE
   )
   # Set the possible values of build type for cmake-gui

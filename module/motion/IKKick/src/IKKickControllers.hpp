@@ -26,8 +26,8 @@
 
 #include "extension/Configuration.hpp"
 
+#include "message/actuation/KinematicsModel.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/motion/KinematicsModel.hpp"
 
 #include "utility/input/LimbID.hpp"
 #include "utility/input/ServoID.hpp"
@@ -49,15 +49,15 @@ namespace module::motion {
         // };
         // InterpolationType interpolation = LINEAR;
     public:
-        Eigen::Affine3d pose;
+        Eigen::Isometry3d pose;
         float duration;
         SixDOFFrame() : pose(), duration(0.0f) {}
-        SixDOFFrame(Eigen::Affine3d pose_, float duration_) : pose(pose_), duration(duration_) {}
+        SixDOFFrame(Eigen::Isometry3d pose_, float duration_) : pose(pose_), duration(duration_) {}
         SixDOFFrame(const YAML::Node& config) : SixDOFFrame() {
             duration                    = config["duration"].as<float>();
             Eigen::Vector3d pos         = config["pos"].as<Expression>();
             Eigen::Vector3d orientation = config["orientation"].as<Expression>();
-            pose                        = Eigen::Affine3d::Identity();
+            pose                        = Eigen::Isometry3d::Identity();
             pose.rotate(Eigen::AngleAxisd(orientation.x(), Eigen::Vector3d::UnitX()));
             pose.rotate(Eigen::AngleAxisd(orientation.y(), Eigen::Vector3d::UnitY()));
             pose.rotate(Eigen::AngleAxisd(orientation.z(), Eigen::Vector3d::UnitZ()));
@@ -72,7 +72,7 @@ namespace module::motion {
         std::vector<SixDOFFrame> frames;
         int i = 0;
         Animator() : frames() {
-            frames.push_back(SixDOFFrame{Eigen::Affine3d::Identity(), 0});
+            frames.push_back(SixDOFFrame{Eigen::Isometry3d::Identity(), 0});
         }
         Animator(const std::vector<SixDOFFrame>& frames_) : frames(frames_) {}
         int clampPrev(int k) const {
@@ -130,11 +130,11 @@ namespace module::motion {
             , motionStartTime() {}
         virtual ~SixDOFFootController() = default;
 
-        virtual void computeStartMotion(const message::motion::KinematicsModel& kinematicsModel,
+        virtual void computeStartMotion(const message::actuation::KinematicsModel& kinematicsModel,
                                         const message::input::Sensors& sensors) = 0;
         virtual void computeStopMotion(const message::input::Sensors& sensors)  = 0;
 
-        void start(const message::motion::KinematicsModel& kinematicsModel, const message::input::Sensors& sensors) {
+        void start(const message::actuation::KinematicsModel& kinematicsModel, const message::input::Sensors& sensors) {
             if (stage == MotionStage::READY) {
                 anim.reset();
                 stage           = MotionStage::RUNNING;
@@ -179,15 +179,15 @@ namespace module::motion {
             reset();
         }
 
-        Eigen::Affine3d getTorsoPose(const message::input::Sensors& sensors) {
+        Eigen::Isometry3d getTorsoPose(const message::input::Sensors& sensors) {
             // Find position vector from support foot to torso in support foot coordinates.
             return ((supportFoot == utility::input::LimbID::LEFT_LEG)
-                        ? Eigen::Affine3d(sensors.Htx[utility::input::ServoID::L_ANKLE_ROLL])
-                        : Eigen::Affine3d(sensors.Htx[utility::input::ServoID::R_ANKLE_ROLL]));
+                        ? Eigen::Isometry3d(sensors.Htx[utility::input::ServoID::L_ANKLE_ROLL])
+                        : Eigen::Isometry3d(sensors.Htx[utility::input::ServoID::R_ANKLE_ROLL]));
         }
 
-        Eigen::Affine3d getFootPose(const message::input::Sensors& sensors) {
-            auto result = Eigen::Affine3d::Identity();
+        Eigen::Isometry3d getFootPose(const message::input::Sensors& sensors) {
+            auto result = Eigen::Isometry3d::Identity();
             if (stage == MotionStage::RUNNING || stage == MotionStage::STOPPING) {
 
                 double elapsedTime =
@@ -237,7 +237,7 @@ namespace module::motion {
 
     public:
         virtual void configure(const ::extension::Configuration& config);
-        virtual void computeStartMotion(const message::motion::KinematicsModel& kinematicsModel,
+        virtual void computeStartMotion(const message::actuation::KinematicsModel& kinematicsModel,
                                         const message::input::Sensors& sensors);
         virtual void computeStopMotion(const message::input::Sensors& sensors);
     };
@@ -271,7 +271,7 @@ namespace module::motion {
             , lift_before_windup_duration(0.0f) {}
 
         virtual void configure(const ::extension::Configuration& config);
-        virtual void computeStartMotion(const message::motion::KinematicsModel& kinematicsModel,
+        virtual void computeStartMotion(const message::actuation::KinematicsModel& kinematicsModel,
                                         const message::input::Sensors& sensors);
         virtual void computeStopMotion(const message::input::Sensors& sensors);
     };

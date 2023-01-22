@@ -25,7 +25,7 @@
 
 #include "extension/Configuration.hpp"
 
-#include "message/motion/ServoTarget.hpp"
+#include "message/actuation/ServoTarget.hpp"
 #include "message/platform/RawSensors.hpp"
 
 #include "utility/math/angle.hpp"
@@ -36,8 +36,8 @@
 namespace module::platform::cm740 {
 
     using extension::Configuration;
-    using message::motion::ServoTarget;
-    using message::motion::ServoTargets;
+    using message::actuation::ServoTarget;
+    using message::actuation::ServoTargets;
     using message::platform::RawSensors;
     using utility::support::Expression;
 
@@ -56,13 +56,13 @@ namespace module::platform::cm740 {
             data.cm740ErrorCode == 0xFF ? RawSensors::Error::TIMEOUT : RawSensors::Error(data.cm740ErrorCode).value;
 
         // LED Panel
-        sensors.led_panel = cm740State.ledPanel;
+        sensors.led_panel = led_state.led_panel;
 
         // Head LED
-        sensors.head_led = cm740State.headLED;
+        sensors.head_led = led_state.head_LED;
 
         // Eye LED
-        sensors.eye_led = cm740State.eyeLED;
+        sensors.eye_led = led_state.eye_LED;
 
         // Buttons
         sensors.buttons.left   = Convert::getBit<0>(data.cm740.buttons);
@@ -71,7 +71,7 @@ namespace module::platform::cm740 {
         // Voltage (in volts)
         sensors.voltage = Convert::voltage(data.cm740.voltage);
 
-        if (sensors.voltage <= chargedVoltage) {
+        if (sensors.voltage <= cfg.battery.charged_voltage) {
             sensors.platform_error_flags &= ~RawSensors::Error::INPUT_VOLTAGE;
         }
 
@@ -143,51 +143,51 @@ namespace module::platform::cm740 {
 
 
             // Booleans
-            servo.torque_enabled = servoState[i].torqueEnabled;
+            servo.torque_enabled = servo_state[i].torque_enabled;
 
             // Gain
-            servo.p_gain = servoState[i].pGain;
-            servo.i_gain = servoState[i].iGain;
-            servo.d_gain = servoState[i].dGain;
+            servo.p_gain = servo_state[i].p_gain;
+            servo.i_gain = servo_state[i].i_gain;
+            servo.d_gain = servo_state[i].d_gain;
 
             // Torque
-            servo.torque = servoState[i].torque;
+            servo.torque = servo_state[i].torque;
 
             // Targets
-            servo.goal_position = servoState[i].goalPosition;
-            servo.moving_speed  = servoState[i].movingSpeed;
+            servo.goal_position = servo_state[i].goal_position;
+            servo.moving_speed  = servo_state[i].moving_speed;
 
             // If we are faking this hardware, simulate its motion
-            if (servoState[i].simulated) {
+            if (servo_state[i].simulated) {
                 // Work out how fast we should be moving
                 // 5.236 == 50 rpm which is similar to the max speed of the servos
-                float movingSpeed =
-                    (servoState[i].movingSpeed == 0 ? 5.236 : servoState[i].movingSpeed) / UPDATE_FREQUENCY;
+                float moving_speed =
+                    (servo_state[i].moving_speed == 0 ? 5.236 : servo_state[i].moving_speed) / UPDATE_FREQUENCY;
 
                 // Get our offset for this servo and apply it
                 // The values are now between -pi and pi around the servos axis
                 auto offset  = Convert::SERVO_OFFSET[i];
-                auto present = utility::math::angle::normalizeAngle(servoState[i].presentPosition - offset);
-                auto goal    = utility::math::angle::normalizeAngle(servoState[i].goalPosition - offset);
+                auto present = utility::math::angle::normalizeAngle(servo_state[i].present_position - offset);
+                auto goal    = utility::math::angle::normalizeAngle(servo_state[i].goal_position - offset);
 
                 // We have reached our destination
-                if (std::abs(present - goal) < movingSpeed) {
-                    servoState[i].presentPosition = servoState[i].goalPosition;
-                    servoState[i].presentSpeed    = 0;
+                if (std::abs(present - goal) < moving_speed) {
+                    servo_state[i].present_position = servo_state[i].goal_position;
+                    servo_state[i].present_speed    = 0;
                 }
                 // We have to move towards our destination at moving speed
                 else {
-                    servoState[i].presentPosition = utility::math::angle::normalizeAngle(
-                        (present + movingSpeed * (goal > present ? 1 : -1)) + offset);
-                    servoState[i].presentSpeed = servoState[i].movingSpeed;
+                    servo_state[i].present_position = utility::math::angle::normalizeAngle(
+                        (present + moving_speed * (goal > present ? 1 : -1)) + offset);
+                    servo_state[i].present_speed = servo_state[i].moving_speed;
                 }
 
                 // Store our simulated values
-                servo.present_position = servoState[i].presentPosition;
-                servo.present_speed    = servoState[i].goalPosition;
-                servo.load             = servoState[i].load;
-                servo.voltage          = servoState[i].voltage;
-                servo.temperature      = servoState[i].temperature;
+                servo.present_position = servo_state[i].present_position;
+                servo.present_speed    = servo_state[i].goal_position;
+                servo.load             = servo_state[i].load;
+                servo.voltage          = servo_state[i].voltage;
+                servo.temperature      = servo_state[i].temperature;
             }
 
             // If we are using real data, get it from the packet
@@ -206,7 +206,7 @@ namespace module::platform::cm740 {
                 servo.temperature = Convert::temperature(data.servos[i].temperature);
 
                 // Clear Overvoltage flag if current voltage is greater than maximum expected voltage
-                if (servo.voltage <= chargedVoltage) {
+                if (servo.voltage <= cfg.battery.charged_voltage) {
                     servo.error_flags &= ~RawSensors::Error::INPUT_VOLTAGE;
                 }
             }
@@ -214,8 +214,7 @@ namespace module::platform::cm740 {
         return sensors;
     }
 
-    HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment)
-        : Reactor(std::move(environment)), cm740("/dev/CM740"), chargedVoltage(0.0f), flatVoltage(0.0f) {
+    HardwareIO::HardwareIO(std::unique_ptr<NUClear::Environment> environment) : Reactor(std::move(environment)) {
 
         on<Startup>().then("HardwareIO Startup", [this] {
             auto CM740Model   = cm740.cm740.read<uint16_t>(CM740::CM740Data::Address::MODEL_NUMBER_L);
@@ -235,11 +234,12 @@ namespace module::platform::cm740 {
             for (size_t i = 0; i < config["servos"].config.size(); ++i) {
                 Convert::SERVO_OFFSET[i]    = config["servos"][i]["offset"].as<Expression>();
                 Convert::SERVO_DIRECTION[i] = config["servos"][i]["direction"].as<Expression>();
-                servoState[i].simulated     = config["servos"][i]["simulated"].as<bool>();
+                servo_state[i].simulated    = config["servos"][i]["simulated"].as<bool>();
             }
 
-            chargedVoltage = config["battery"]["charged_voltage"].as<float>();
-            flatVoltage    = config["battery"]["flat_voltage"].as<float>();
+            cfg.battery.charged_voltage = config["battery"]["charged_voltage"].as<float>();
+            cfg.battery.nominal_voltage = config["battery"]["nominal_voltage"].as<float>();
+            cfg.battery.flat_voltage    = config["battery"]["flat_voltage"].as<float>();
         });
 
         // This trigger gets the sensor data from the CM740
@@ -255,46 +255,46 @@ namespace module::platform::cm740 {
                                             CM740::Servo::Address::D_GAIN,
                                             0x0A};
 
-            for (uint i = 0; i < servoState.size(); ++i) {
+            for (uint i = 0; i < servo_state.size(); ++i) {
 
-                if (servoState[i].dirty) {
+                if (servo_state[i].dirty) {
 
                     // Clear our dirty flag
-                    servoState[i].dirty = false;
+                    servo_state[i].dirty = false;
 
                     // If our torque should be disabled then we disable our torque
-                    if (servoState[i].torqueEnabled
-                        && (std::isnan(servoState[i].goalPosition) || servoState[i].torque == 0)) {
-                        servoState[i].torqueEnabled = false;
+                    if (servo_state[i].torque_enabled
+                        && (std::isnan(servo_state[i].goal_position) || servo_state[i].torque == 0)) {
+                        servo_state[i].torque_enabled = false;
                         cm740[i + 1].write(CM740::Servo::Address::TORQUE_ENABLE, false);
                     }
                     else {
                         // If our torque was disabled but is now enabled
-                        if (!servoState[i].torqueEnabled && !std::isnan(servoState[i].goalPosition)
-                            && servoState[i].torque != 0) {
-                            servoState[i].torqueEnabled = true;
+                        if (!servo_state[i].torque_enabled && !std::isnan(servo_state[i].goal_position)
+                            && servo_state[i].torque != 0) {
+                            servo_state[i].torque_enabled = true;
                             cm740[i + 1].write(CM740::Servo::Address::TORQUE_ENABLE, true);
                         }
 
                         // Get our goal position and speed
-                        uint16_t goal_position = Convert::servoPositionInverse(i, servoState[i].goalPosition);
-                        uint16_t movingSpeed   = Convert::servoSpeedInverse(servoState[i].movingSpeed);
-                        uint16_t torque        = Convert::torqueLimitInverse(servoState[i].torque);
+                        uint16_t goal_position = Convert::servoPositionInverse(i, servo_state[i].goal_position);
+                        uint16_t moving_speed  = Convert::servoSpeedInverse(servo_state[i].moving_speed);
+                        uint16_t torque        = Convert::torqueLimitInverse(servo_state[i].torque);
 
                         // Add to our sync write command
                         command.insert(command.end(),
                                        {
                                            uint8_t(i + 1),
-                                           Convert::gainInverse(servoState[i].dGain),  // D Gain
-                                           Convert::gainInverse(servoState[i].iGain),  // I Gain
-                                           Convert::gainInverse(servoState[i].pGain),  // P Gain
-                                           0,                                          // Reserved
-                                           uint8_t(0xFF & goal_position),              // Goal Position L
-                                           uint8_t(0xFF & (goal_position >> 8)),       // Goal Position H
-                                           uint8_t(0xFF & movingSpeed),                // Goal Speed L
-                                           uint8_t(0xFF & (movingSpeed >> 8)),         // Goal Speed H
-                                           uint8_t(0xFF & torque),                     // Torque Limit L
-                                           uint8_t(0xFF & (torque >> 8))               // Torque Limit H
+                                           Convert::gainInverse(servo_state[i].d_gain),  // D Gain
+                                           Convert::gainInverse(servo_state[i].i_gain),  // I Gain
+                                           Convert::gainInverse(servo_state[i].p_gain),  // P Gain
+                                           0,                                            // Reserved
+                                           uint8_t(0xFF & goal_position),                // Goal Position L
+                                           uint8_t(0xFF & (goal_position >> 8)),         // Goal Position H
+                                           uint8_t(0xFF & moving_speed),                 // Goal Speed L
+                                           uint8_t(0xFF & (moving_speed >> 8)),          // Goal Speed H
+                                           uint8_t(0xFF & torque),                       // Torque Limit L
+                                           uint8_t(0xFF & (torque >> 8))                 // Torque Limit H
                                        });
                     }
                 }
@@ -319,7 +319,9 @@ namespace module::platform::cm740 {
             *sensors = parseSensors(data);
 
             // Work out a battery charged percentage
-            sensors->voltage = std::max(0.0f, (sensors->voltage - flatVoltage) / (chargedVoltage - flatVoltage));
+            sensors->voltage = std::max(0.0f,
+                                        (sensors->voltage - cfg.battery.flat_voltage)
+                                            / (cfg.battery.charged_voltage - cfg.battery.flat_voltage));
 
             // cm740 leds to display battery voltage
             uint32_t ledl            = 0;
@@ -389,37 +391,38 @@ namespace module::platform::cm740 {
                 }
 
                 // Update our internal state
-                if (servoState[command.id].pGain != command.gain || servoState[command.id].iGain != command.gain * 0
-                    || servoState[command.id].dGain != command.gain * 0 || servoState[command.id].movingSpeed != speed
-                    || servoState[command.id].goalPosition != command.position
-                    || servoState[command.id].torque != command.torque) {
+                if (servo_state[command.id].p_gain != command.gain || servo_state[command.id].i_gain != command.gain * 0
+                    || servo_state[command.id].d_gain != command.gain * 0
+                    || servo_state[command.id].moving_speed != speed
+                    || servo_state[command.id].goal_position != command.position
+                    || servo_state[command.id].torque != command.torque) {
 
-                    servoState[command.id].dirty = true;
+                    servo_state[command.id].dirty = true;
 
-                    servoState[command.id].pGain        = command.gain;
-                    servoState[command.id].iGain        = command.gain * 0;
-                    servoState[command.id].dGain        = command.gain * 0;
-                    servoState[command.id].movingSpeed  = speed;
-                    servoState[command.id].goalPosition = command.position;
+                    servo_state[command.id].p_gain        = command.gain;
+                    servo_state[command.id].i_gain        = command.gain * 0;
+                    servo_state[command.id].d_gain        = command.gain * 0;
+                    servo_state[command.id].moving_speed  = speed;
+                    servo_state[command.id].goal_position = command.position;
 
-                    servoState[command.id].torque       = command.torque;
-                    servoState[uint(command.id)].torque = command.torque;
+                    servo_state[command.id].torque       = command.torque;
+                    servo_state[uint(command.id)].torque = command.torque;
                 }
             }
         });
 
         on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
-            auto commandList = std::make_unique<ServoTargets>();
-            commandList->targets.push_back(command);
+            auto command_list = std::make_unique<ServoTargets>();
+            command_list->targets.push_back(command);
 
             // Emit it so it's captured by the reaction above
-            emit<Scope::DIRECT>(commandList);
+            emit<Scope::DIRECT>(command_list);
         });
 
         // If we get a HeadLED command then write it
         on<Trigger<RawSensors::HeadLED>>().then([this](const RawSensors::HeadLED& led) {
             // Update our internal state
-            cm740State.headLED = led;
+            led_state.head_LED = led;
 
             cm740.cm740.write(CM740::CM740Data::Address::LED_HEAD_L,
                               Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
@@ -430,7 +433,7 @@ namespace module::platform::cm740 {
         // If we get a EyeLED command then write it
         on<Trigger<RawSensors::EyeLED>>().then([this](const RawSensors::EyeLED& led) {
             // Update our internal state
-            cm740State.eyeLED = led;
+            led_state.eye_LED = led;
 
             cm740.cm740.write(CM740::CM740Data::Address::LED_EYE_L,
                               Convert::colourLEDInverse(static_cast<uint8_t>((led.RGB & 0x00FF0000) >> 24),
@@ -438,10 +441,10 @@ namespace module::platform::cm740 {
                                                         static_cast<uint8_t>(led.RGB & 0x000000FF)));
         });
 
-        // If we get a EyeLED command then write it
+        // If we get a LEDPanel command then write it
         on<Trigger<RawSensors::LEDPanel>>().then([this](const RawSensors::LEDPanel& led) {
             // Update our internal state
-            cm740State.ledPanel = led;
+            led_state.led_panel = led;
 
             cm740.cm740.write(CM740::CM740Data::Address::LED_PANNEL,
                               ((uint8_t(led.led2) << 2) | (uint8_t(led.led3) << 1) | uint8_t((led.led4))));

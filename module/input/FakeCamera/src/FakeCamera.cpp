@@ -98,7 +98,7 @@ namespace module::input {
 
                     // Convert Hoc from lens file to Hcw. We are assuming that the observation plane corresponds to the
                     // world
-                    const Eigen::Affine3d Hoc(Eigen::Matrix4d(lens["Hoc"].as<Expression>()));
+                    const Eigen::Isometry3d Hoc(Eigen::Matrix4d(lens["Hoc"].as<Expression>()));
                     msg->Hcw = Hoc.inverse().matrix();
 
                     // Set image properties

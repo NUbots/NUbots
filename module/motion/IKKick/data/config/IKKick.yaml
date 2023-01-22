@@ -1,4 +1,3 @@
-
 kick_priority: 30
 execution_priority: 40
 
@@ -47,23 +46,21 @@ kick:
 
 kick_frames:
   servo_angle_threshold: 0.1
-# note that some of the following config is overwritten by planning processes
+  # note that some of the following config is overwritten by planning processes
   lift_foot:
-  #Note: pos does nothing
-    pos: [-0.05,0,0.05]
-    orientation: [0,0,0]
+    #Note: pos does nothing
+    pos: [-0.05, 0, 0.05]
+    orientation: [0, 0, 0]
     duration: 0.1
 
   kick:
     #Note: pos and duration do nothing
-    pos: [0,0,0]
-    orientation: [0,0,0]
+    pos: [0, 0, 0]
+    orientation: [0, 0, 0]
     duration: 0.1
 
   place_foot:
-  #This transform WILL entirely define the foot placement after kicking
-    pos: [0,0.02,0.02]
-    orientation: [0,0,0]
+    #This transform WILL entirely define the foot placement after kicking
+    pos: [0, 0.02, 0.02]
+    orientation: [0, 0, 0]
     duration: 0.3
-
-

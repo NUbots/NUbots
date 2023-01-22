@@ -3,7 +3,5 @@
     "module": "commonjs"
   },
   "extends": "./tsconfig.json",
-  "include": [
-    "./src/**/*"
-  ]
+  "include": ["./src/**/*"]
 }

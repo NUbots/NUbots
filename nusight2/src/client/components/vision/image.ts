@@ -1,6 +1,6 @@
 import { IComputedValue } from 'mobx'
 
-export type Image = DataImage | ElementImage
+export type Image = DataImage | ElementOrBitmapImage
 
 interface BaseImage {
   width: number
@@ -10,12 +10,12 @@ interface BaseImage {
 
 export interface DataImage extends BaseImage {
   type: 'data'
-  data: IComputedValue<Uint8Array>
+  image: IComputedValue<Uint8Array>
 }
 
-export interface ElementImage extends BaseImage {
-  type: 'element'
-  element: HTMLImageElement
+export interface ElementOrBitmapImage extends BaseImage {
+  type: 'element-or-bitmap'
+  image: HTMLImageElement | ImageBitmap
 }
 
 export enum ImageFormat {
