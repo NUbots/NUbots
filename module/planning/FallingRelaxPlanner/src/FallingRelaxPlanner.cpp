@@ -94,6 +94,19 @@ namespace module::planning {
                 // We are falling
                 if (falling) {
                     // We are falling! Relax the limbs!
+                    log<NUClear::INFO>("Falling:",
+                                       "Gyroscope Magnitude:",
+                                       gyro_mag_state == State::FALLING    ? "FALLING"
+                                       : gyro_mag_state == State::UNSTABLE ? "UNSTABLE"
+                                                                           : "STABLE",
+                                       "Accelerometer Magnitude:",
+                                       acc_mag_state == State::FALLING    ? "FALLING"
+                                       : acc_mag_state == State::UNSTABLE ? "UNSTABLE"
+                                                                          : "STABLE",
+                                       "Accelerometer Angle:",
+                                       acc_angle_state == State::FALLING    ? "FALLING"
+                                       : acc_angle_state == State::UNSTABLE ? "UNSTABLE"
+                                                                            : "STABLE");
                     emit(std::make_unique<Stability>(Stability::FALLING));
                     emit<Script>(std::make_unique<BodySequence>(), ScriptRequest{"Relax.yaml"});
                 }
