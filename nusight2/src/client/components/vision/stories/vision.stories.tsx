@@ -61,10 +61,10 @@ fullscreen(storiesOf('components.vision.layout', module)).add('renders', () => {
         id: 1,
         name: 'Camera #1',
         image: {
-          type: 'element',
+          type: 'element-or-bitmap',
           width: 320,
           height: 240,
-          element: {} as HTMLImageElement,
+          image: {} as HTMLImageElement,
           format: ImageFormat.JPEG,
         },
         params: new CameraParams({
@@ -79,10 +79,10 @@ fullscreen(storiesOf('components.vision.layout', module)).add('renders', () => {
         id: 2,
         name: 'Camera #2',
         image: {
-          type: 'element',
+          type: 'element-or-bitmap',
           width: 320,
           height: 240,
-          element: {} as HTMLImageElement,
+          image: {} as HTMLImageElement,
           format: ImageFormat.JPEG,
         },
         params: new CameraParams({

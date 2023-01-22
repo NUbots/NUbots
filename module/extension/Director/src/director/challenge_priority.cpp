@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with the NUbots Codebase.  If not, see <http://www.gnu.org/licenses/>.
  *
- * Copyright 2021 NUbots <nubots@nubots.net>
+ * Copyright 2022 NUbots <nubots@nubots.net>
  */
 
 #include <algorithm>
@@ -28,6 +28,7 @@
 namespace module::extension {
 
     using ::extension::behaviour::commands::BehaviourTask;
+    using provider::Provider;
 
     // Scope this struct to just this translation unit
     namespace {
@@ -41,8 +42,8 @@ namespace module::extension {
         };
     }  // namespace
 
-    bool Director::challenge_priority(const std::shared_ptr<const BehaviourTask>& incumbent,
-                                      const std::shared_ptr<const BehaviourTask>& challenger) {
+    bool Director::challenge_priority(const std::shared_ptr<BehaviourTask>& incumbent,
+                                      const std::shared_ptr<BehaviourTask>& challenger) {
 
         // If there is no incumbent the challenger wins by default
         if (incumbent == nullptr) {
@@ -52,39 +53,37 @@ namespace module::extension {
             return false;
         }
 
-        // A provider can always replace its own task with a new challenger
-        if (incumbent->requester_id == challenger->requester_id) {
+        // A provider of the same group can always replace its own task with a new challenger
+        if (providers.at(incumbent->requester_id)->type == providers.at(challenger->requester_id)->type) {
             return true;
         }
 
         // Function to get the priorities of the ancestors of this task
-        auto get_ancestor_priorities = [this](const std::shared_ptr<const BehaviourTask>& task) {
-            // We are our first ancestor
+        auto get_ancestor_priorities = [this](const std::shared_ptr<BehaviourTask>& task) {
             std::vector<TaskPriority> ancestors;
 
-            // The task might be a root task, in which case we won't have any provider
-            // In that case we set the type to nullptr_t to indicate that we are a root task
-            ancestors.emplace_back(
-                providers.count(task->requester_id) != 0 ? providers[task->requester_id]->type : typeid(nullptr_t),
-                task->priority,
-                task->optional);
+            // Loop up through the providers until we reach a point where a task was emitted by a root provider
+            // We recognise that we have passed a root provider when the active task is nullptr
+            auto t = task;
+            do {
+                ancestors.emplace_back(t->type, t->priority, t->optional);
+                auto p              = providers.at(t->requester_id);
+                auto classification = p->classification;
+                t                   = p->group.active_task;
 
-            // Loop up through the providers until we reach a point where a task was emitted by a non provider
-            for (auto t = task; providers.count(t->requester_id) != 0;) {
-
-                // Get the provider that emitted this task, and from that the provider group
-                auto provider = providers[t->requester_id];
-                auto& group   = groups[provider->type];
-
-                // If there is no active task something has gone wrong with the algorithm
-                if (group.active_task == nullptr) {
-                    throw std::runtime_error("Task has broken parentage");
+                // Check if we reached a nullptr task but we are not a root provider or a zombie
+                if (t == nullptr) {
+                    if (p->group.zombie) {
+                        // Add an ancestor that is the lowest possible priority and optional
+                        // Anyone can beat up a zombie, I mean, it's just a bunch of rotting flesh
+                        ancestors.emplace_back(p->group.type, std::numeric_limits<int>::min(), true);
+                    }
+                    else if (classification != Provider::Classification::ROOT) {
+                        throw std::runtime_error("Task has broken parentage");
+                    }
                 }
+            } while (t != nullptr);
 
-                // Add this new parent we found and set t so we can loop up further
-                t = group.active_task;
-                ancestors.emplace_back(provider->type, t->priority, t->optional);
-            }
             return ancestors;
         };
 
@@ -95,9 +94,7 @@ namespace module::extension {
         // Remove all of the common ancestors
         // If one of the lists ends up empty that means that it is a direct ancestor of the other
         // If either ends up as nullptr_t that means that it is a root task and we don't remove it
-        while ((!i_p.empty() && !c_p.empty())
-               && (i_p.back().requester != typeid(nullptr_t) && c_p.back().requester != typeid(nullptr_t))
-               && (i_p.back().requester == c_p.back().requester)) {
+        while ((!i_p.empty() && !c_p.empty()) && (i_p.back().requester == c_p.back().requester)) {
             i_p.pop_back();
             c_p.pop_back();
         }
@@ -106,6 +103,7 @@ namespace module::extension {
         // This can happen when we are checking tasks with a `Needs` relationship against a task higher in the tree and
         // we already own that task. In that case we say that the challenger wins because we already own it and can
         // replace it.
+        // TLDR parent beats child
         if (c_p.empty()) {
             return true;
         }

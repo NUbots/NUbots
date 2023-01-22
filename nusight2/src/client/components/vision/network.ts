@@ -41,7 +41,7 @@ export class VisionNetwork {
     const { id, name, dimensions, format, data, Hcw } = image
     const { projection, focalLength, centre, k } = image.lens!
 
-    const element = await jpegBufferToImage(data)
+    const bitmap = await jpegBufferToBitmap(data)
 
     runInAction(() => {
       const camera = robot.cameras.get(id)
@@ -50,10 +50,10 @@ export class VisionNetwork {
         id: id,
         name,
         image: {
-          type: 'element',
+          type: 'element-or-bitmap',
+          image: bitmap,
           width: dimensions?.x!,
           height: dimensions?.y!,
-          element,
           format: getImageFormat(format),
         },
         params: new CameraParams({
@@ -146,20 +146,11 @@ export class VisionNetwork {
   }
 }
 
-async function jpegBufferToImage(buffer: ArrayBuffer): Promise<HTMLImageElement> {
+async function jpegBufferToBitmap(buffer: ArrayBuffer): Promise<ImageBitmap> {
   const blob = new Blob([buffer], { type: 'image/jpeg' })
-  const url = window.URL.createObjectURL(blob)
-  const image = await loadImage(url)
-  window.URL.revokeObjectURL(url)
-  return image
-}
-
-async function loadImage(url: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const image = new Image()
-    image.onload = () => resolve(image)
-    image.onerror = () => reject()
-    image.src = url
+  return createImageBitmap(blob, {
+    colorSpaceConversion: 'none',
+    premultiplyAlpha: 'none',
   })
 }
 

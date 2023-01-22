@@ -25,12 +25,11 @@
 #include <nuclear>
 #include <yaml-cpp/yaml.h>
 
+#include "message/actuation/KinematicsModel.hpp"
 #include "message/input/Sensors.hpp"
-#include "message/motion/KinematicsModel.hpp"
 
 #include "utility/input/LimbID.hpp"
 #include "utility/math/matrix/transform.hpp"
-//#include "utility/input/ServoID.hpp"
 
 namespace utility::motion {
 
@@ -64,8 +63,8 @@ namespace utility::motion {
     public:
         Balancer() = default;
         void configure(const YAML::Node& config);
-        void balance(const message::motion::KinematicsModel& model,
-                     Eigen::Affine3f& footToTorso,
+        void balance(const message::actuation::KinematicsModel& model,
+                     Eigen::Isometry3f& footToTorso,
                      const utility::input::LimbID& leg,
                      const message::input::Sensors& sensors);
     };
