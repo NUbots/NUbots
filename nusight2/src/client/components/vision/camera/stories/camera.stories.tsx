@@ -19,13 +19,11 @@ import { Projection } from '../model'
 import { CameraModel } from '../model'
 import { CameraView } from '../view'
 
-storiesOf('components.vision.camera', module)
-  .addDecorator(fullscreen)
-  .add('vision objects', () => {
-    const box = observable<{ model: CameraModel | undefined }>({ model: undefined })
-    fakeCameraModel().then(model => (box.model = model))
-    return <Observer>{() => <>{box.model ? <CameraView model={box.model} /> : null}</>}</Observer>
-  })
+fullscreen(storiesOf('components.vision.camera', module)).add('vision objects', () => {
+  const box = observable<{ model: CameraModel | undefined }>({ model: undefined })
+  fakeCameraModel().then(model => (box.model = model))
+  return <Observer>{() => <>{box.model ? <CameraView model={box.model} /> : null}</>}</Observer>
+})
 
 async function fakeCameraModel(): Promise<CameraModel> {
   const image = await loadImageElement(imageUrl, ImageFormat.JPEG)
