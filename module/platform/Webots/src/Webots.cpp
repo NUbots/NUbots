@@ -794,6 +794,7 @@ namespace module::platform {
             emit(sensor_data);
         }
 
+
         for (const auto& camera : sensor_measurements.cameras) {
             // Convert the incoming image so we can emit it to the PowerPlant.
             auto image =
