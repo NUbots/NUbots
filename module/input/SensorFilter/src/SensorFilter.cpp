@@ -54,6 +54,8 @@ namespace module::input {
     using utility::nusight::graph;
     using utility::support::Expression;
 
+    /// @todo Update error handling to protocol v2
+    /// @see RawSensors.proto, StatusReturn.proto
     std::string makeErrorString(const std::string& src, uint errorCode) {
         std::stringstream s;
 

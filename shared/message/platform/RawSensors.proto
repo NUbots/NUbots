@@ -32,11 +32,12 @@ message RawSensors {
     /// Set of error flags/statuses.
     /// bitmask values.
 
-    // TODO update to protocol2 error bits (all different)
-    // changes errors entirely which also influences error handling in SensorFilter
-    // new error flags already in StatusReturn.proto - was something planned with this?
-    // Maybe add different error handling based on hardware and packet handling errors
-    // separately?
+    /// @todo  update to protocol2 error bits (all different)
+    /// changes errors entirely which also influences error handling in SensorFilter
+    /// new error flags already in StatusReturn.proto - was something planned with this?
+    /// Maybe add different error handling based on hardware and packet handling errors
+    /// separately?
+    /// @see SensorFilter.cpp, StatusReturn.proto
     enum Error {
         OK            = 0;  // not really a flag but the lack of any other flag
         INPUT_VOLTAGE = 1;
