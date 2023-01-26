@@ -644,4 +644,34 @@ namespace module::platform::openCR {
         servoState[packet.id].temperature     = nugus.convertTemperature(data.presentTemperature);
     }
 
+    /**
+     * @brief Creates a RawSensors message based on the current recorded states from the other processes.
+     */
+    RawSensors HardwareIO::constructSensors() {
+        RawSensors sensors;
+
+        // Timestamp when this message was created (data itsself could be old)
+        sensors.time_stamp = NUClear::clock::now();
+
+        /* OpenCR data */
+        sensors.platform_error_flags = RawSensors::Error::OK;
+        /// @todo Add proper error handling to translate new errors into rawsensors errors, using
+        /// opencrState.errorFlags.errorNumber
+        sensors.led_panel     = opencrState.ledPanel;
+        sensors.head_led      = opencrState.headLED;
+        sensors.eye_led       = opencrState.eyeLED;
+        sensors.buttons       = opencrState.buttons;
+        sensors.accelerometer = opencrState.acc;
+        sensors.gyroscope     = opencrState.gyro;
+
+        /* Battery data */
+        sensors.battery = batteryState.currentVoltage;
+
+        /* Servos data */
+        /// @todo fill this in next, see cm740 for how it was done before
+
+        /* FSRs data */
+        /// @todo ask whats going on with this not being included
+    }
+
 }  // namespace module::platform::openCR
