@@ -207,6 +207,15 @@ namespace module::platform::openCR {
     };
 #pragma pack(pop)  // Stop bitpacking our results
 
+    // Document indirect addresses for
+    enum DynamixelIdirectData {
+        SERVO_READ_ADDRESS     = MX64::Address::INDIRECT_ADDRESS_1_L,
+        SERVO_READ_LOCATION    = MX64::Address::INDIRECT_DATA_1,
+        SERVO_WRITE_ADDRESS_1  = MX64::Adress::INDIRECT_ADDRESS_18_L,
+        SERVO_WRITE_ADDRESS_2  = MX64::Adress::INDIRECT_ADDRESS_29_L,
+        SERVO_WRITE_LOCATION_1 = MX64::Adress::INDIRECT_DATA_18,
+        SERVO_WRITE_LOCATION_2 = MX64::Adress::INDIRECT_DATA_29,
+    }
 
 }  // namespace module::platform::openCR
 

@@ -114,9 +114,8 @@ namespace module::platform::openCR {
                      uint16_t(MX64::Address::PRESENT_TEMPERATURE)});
             }
 
-            opencr.write(dynamixel::v2::SyncWriteCommand<std::array<uint16_t, 17>, 20>(
-                uint16_t(MX64::Address::INDIRECT_ADDRESS_1_L),
-                read_data));
+            opencr.write(
+                dynamixel::v2::SyncWriteCommand<std::array<uint16_t, 17>, 20>(uint16_t(SERVO_READ_ADDRESS), read_data));
 
             // Set up indirect addressing for write addresses
             std::array<dynamixel::v2::SyncWriteData<std::array<uint16_t, 11>>, 20> write_data1;
@@ -165,12 +164,10 @@ namespace module::platform::openCR {
                      uint16_t(MX64::Address::GOAL_POSITION_H)});
             }
 
-            opencr.write(dynamixel::v2::SyncWriteCommand<std::array<uint16_t, 11>, 20>(
-                uint16_t(MX64::Address::INDIRECT_ADDRESS_18_L),
-                write_data1));
-            opencr.write(dynamixel::v2::SyncWriteCommand<std::array<uint16_t, 24>, 20>(
-                uint16_t(MX64::Address::INDIRECT_ADDRESS_29_L),
-                write_data2));
+            opencr.write(dynamixel::v2::SyncWriteCommand<std::array<uint16_t, 11>, 20>(uint16_t(SERVO_WRITE_ADDRESS_1),
+                                                                                       write_data1));
+            opencr.write(dynamixel::v2::SyncWriteCommand<std::array<uint16_t, 24>, 20>(uint16_t(SERVO_WRITE_ADDRESS_2),
+                                                                                       write_data2));
         });
 
         on<Shutdown>().then("HardwareIO Startup", [this] {
@@ -232,12 +229,12 @@ namespace module::platform::openCR {
                     data2[i].data.goalPosition        = nugus.convertPosition(i, servoState[i].goalPosition);
                 }
 
-                opencr.write(dynamixel::v2::SyncWriteCommand<DynamixelServoWriteDataPart1, 20>(
-                    uint16_t(MX64::Address::INDIRECT_DATA_18),
-                    data1));
-                opencr.write(dynamixel::v2::SyncWriteCommand<DynamixelServoWriteDataPart2, 20>(
-                    uint16_t(MX64::Address::INDIRECT_DATA_29),
-                    data2));
+                opencr.write(
+                    dynamixel::v2::SyncWriteCommand<DynamixelServoWriteDataPart1, 20>(uint16_t(SERVO_WRITE_LOCATION_1),
+                                                                                      data1));
+                opencr.write(
+                    dynamixel::v2::SyncWriteCommand<DynamixelServoWriteDataPart2, 20>(uint16_t(SERVO_WRITE_LOCATION_2),
+                                                                                      data2));
             }
 
             // Write out OpenCR data
@@ -266,7 +263,7 @@ namespace module::platform::openCR {
             for (int i = 0; i < 20; ++i) {
                 packet_queue[i].push_back(PacketTypes::SERVO_DATA);
             }
-            opencr.write(dynamixel::v2::SyncReadCommand<20>(uint16_t(MX64::Address::INDIRECT_DATA_1),
+            opencr.write(dynamixel::v2::SyncReadCommand<20>(uint16_t(SERVO_READ_LOCATION),
                                                             sizeof(DynamixelServoReadData),
                                                             nugus.servo_ids()));
 
