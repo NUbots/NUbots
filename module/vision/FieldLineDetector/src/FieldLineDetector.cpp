@@ -33,11 +33,9 @@ namespace module::vision {
 
             this->config.confidence_threshold = cfg["confidence_threshold"].as<float>();
             this->config.cluster_points       = cfg["cluster_points"].as<int>();
-            std::cout << "HELLO" << std::endl;
         });
 
         on<Trigger<GreenHorizon>, Buffer<2>>().then("Field Line Detector", [this](const GreenHorizon& horizon) {
-            std::cout << "TRIGGER" << std::endl;
             // Convenience variables
             const auto& cls        = horizon.mesh->classifications;
             const auto& neighbours = horizon.mesh->neighbourhood;
@@ -90,8 +88,6 @@ namespace module::vision {
                 }
             }
 
-            std::cout << "RUNNING" << std::endl;
-            log<NUClear::DEBUG>(lines);
             emit(lines);
         });
     }

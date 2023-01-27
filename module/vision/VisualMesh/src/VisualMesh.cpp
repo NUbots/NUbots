@@ -48,7 +48,6 @@ namespace module::vision {
         });
 
         on<Trigger<Image>>().then([this](const Image& image) {
-            std::cout << "ON IMAGE" << std::endl;
             // Check we have a network for this camera
             auto it = engines.find(image.name);
             if (it != engines.end()) {
