@@ -12,6 +12,7 @@ nuclear_role(
   network::NUClearNet
   network::NetworkForwarder
   output::Overview
+  output::ImageCompressor
   # Platform
   input::SensorFilter
   platform::Webots
@@ -27,6 +28,7 @@ nuclear_role(
   vision::GreenHorizonDetector
   vision::GoalDetector
   vision::BallDetector
+  vision::FieldLineDetector
   output::ImageCompressor
   # Localisation
   localisation::BallFilter
