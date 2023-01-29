@@ -72,6 +72,10 @@ message FieldDescription {
         double center_circle_diameter = 16;
 
         double border_strip_min_width = 17;
+
+        double penalty_area_length = 18;
+
+        double penalty_area_width = 19;
     }
     /// @see Law 2
     double ball_radius = 1;
