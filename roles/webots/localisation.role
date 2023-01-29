@@ -33,7 +33,6 @@ nuclear_role(
   output::ImageCompressor
   # Localisation
   localisation::BallFilter
-  localisation::RobotParticleLocalisation
   localisation::Localisation
   # Behaviour
   behaviour::Controller
@@ -41,5 +40,5 @@ nuclear_role(
   behaviour::skills::Stand
   behaviour::skills::KickScript
   behaviour::skills::DirectWalkController
-  # behaviour::strategy::KeyboardWalk
+  behaviour::strategy::KeyboardWalk
 )

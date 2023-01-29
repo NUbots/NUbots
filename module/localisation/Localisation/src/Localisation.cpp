@@ -13,6 +13,14 @@ namespace module::localisation {
     using VisionGoals = message::vision::Goals;
     using message::support::FieldDescription;
     using VisionLines = message::vision::FieldLines;
+    using message::localisation::Field;
+    using message::motion::DisableWalkEngineCommand;
+    using message::motion::EnableWalkEngineCommand;
+    using message::motion::ExecuteGetup;
+    using message::motion::KillGetup;
+    using message::motion::StopCommand;
+    using message::motion::WalkCommand;
+
 
     using utility::math::coordinates::cartesianToPolar;
     using utility::math::coordinates::reciprocalSphericalToCartesian;
@@ -128,12 +136,74 @@ namespace module::localisation {
             file << fieldline_map.map;
             // Close the file
             file.close();
+
+            // Initialise the particle filter
+            state = Eigen::Vector3d::Zero();
+
+            // Set the update times to now
+            last_time_update_time        = NUClear::clock::now();
+            last_measurement_update_time = NUClear::clock::now();
         });
 
-        on<Every<TIME_UPDATE_FREQUENCY, Per<std::chrono::seconds>>>().then("Time Update", [this]() {
-            /* Perform time update */
+        on<Trigger<WalkCommand>>().then([this](const WalkCommand& wc) {
+            walk_engine_enabled = true;
+            walk_command        = wc.command;
+            log<NUClear::INFO>("Walk command received: ",
+                               walk_command.x(),
+                               ", ",
+                               walk_command.y(),
+                               ", ",
+                               walk_command.z());
+        });
 
-            // TODO: One option here is to just use our walk command * dt as our motion model with a tunable parameter
+        on<Trigger<EnableWalkEngineCommand>>().then([this](const EnableWalkEngineCommand& command) {
+            walk_engine_enabled     = true;
+            const auto current_time = NUClear::clock::now();
+            last_time_update_time   = current_time;
+        });
+
+        on<Trigger<DisableWalkEngineCommand>>().then(
+            [this](const DisableWalkEngineCommand& command) { walk_engine_enabled = false; });
+
+        on<Trigger<StopCommand>>().then([this](const StopCommand& command) {
+            walk_command        = Eigen::Vector3d::Zero();
+            walk_engine_enabled = false;
+            log<NUClear::INFO>("Stop command received");
+        });
+
+        on<Trigger<ExecuteGetup>>().then([this]() { falling = true; });
+
+        on<Trigger<KillGetup>>().then([this]() { falling = false; });
+
+        /* Perform time update */
+        on<Every<TIME_UPDATE_FREQUENCY, Per<std::chrono::seconds>>>().then("Time Update", [this]() {
+            if (walk_engine_enabled && !falling) {
+                // Calculate the time since the last time update
+                using namespace std::chrono;
+                const auto current_time = NUClear::clock::now();
+                const double dt         = duration_cast<duration<double>>(current_time - last_time_update_time).count();
+                log<NUClear::DEBUG>("Time since last time update: ", dt);
+                last_time_update_time = current_time;
+
+                double delta_x     = walk_command.x() * dt;
+                double delta_y     = walk_command.y() * dt;
+                double delta_theta = walk_command.z() * dt;
+
+                state.x() = state.x() + delta_x * cos(state.z() + delta_theta) - delta_y * sin(state.z() + delta_theta);
+                state.y() = state.y() + delta_y * cos(state.z() + delta_theta) + delta_x * sin(state.z() + delta_theta);
+                state.z() = state.z() + delta_theta;
+
+                // Build and emit the field message
+                auto field(std::make_unique<Field>());
+                Eigen::Isometry2d position(Eigen::Isometry2d::Identity());
+                position.translation() = Eigen::Vector2d(state.x(), state.y());
+                position.linear()      = Eigen::Rotation2Dd(state.z()).toRotationMatrix();
+                field->position        = position.matrix();
+
+                log<NUClear::DEBUG>("State: ", state.x(), ", ", state.y(), ", ", state.z());
+                emit(graph("State", state.x(), state.y(), state.z()));
+                emit(field);
+            }
         });
 
         on<Trigger<VisionLines>, With<FieldDescription>>().then(

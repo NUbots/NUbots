@@ -6,6 +6,9 @@
 #include "Map.hpp"
 
 #include "message/input/Sensors.hpp"
+#include "message/localisation/Field.hpp"
+#include "message/motion/GetupCommand.hpp"
+#include "message/motion/WalkCommand.hpp"
 #include "message/support/FieldDescription.hpp"
 #include "message/support/nusight/DataPoint.hpp"
 #include "message/vision/FieldLines.hpp"
@@ -28,7 +31,20 @@ namespace module::localisation {
 
         static constexpr int TIME_UPDATE_FREQUENCY = 10;
 
+        /// @brief The occupancy grid map of the field lines
         Map fieldline_map;
+
+        /// @brief The current walk command (dx, dy, dtheta)
+        Eigen::Matrix<double, 3, 1> walk_command;
+
+        /// @brief The state (x,y,theta) of the robot
+        Eigen::Matrix<double, 3, 1> state = Eigen::Matrix<double, 3, 1>::Zero();
+
+        /// @brief Status of walk engine
+        bool walk_engine_enabled = false;
+
+        /// @brief Status of if the robot is falling
+        bool falling = false;
 
     public:
         /// @brief Called by the powerplant to build and setup the Localisation reactor.
