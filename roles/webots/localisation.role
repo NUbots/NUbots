@@ -3,6 +3,7 @@ nuclear_role(
   # and without it many roles do not run support::SignalCatcher
   extension::FileWatcher
   support::logging::FileLogHandler
+  support::logging::ConsoleLogHandler
   # This must come first as it emits config which many roles depend on (e.g. SensorFilter, WalkEngine)
   actuation::KinematicsConfiguration
   # Support and Configuration
@@ -40,5 +41,5 @@ nuclear_role(
   behaviour::skills::Stand
   behaviour::skills::KickScript
   behaviour::skills::DirectWalkController
-  behaviour::strategy::KeyboardWalk
+  # behaviour::strategy::KeyboardWalk
 )
