@@ -121,6 +121,9 @@ namespace module::behaviour::strategy {
         /// @brief Playing behaviour when ball is visible, currently just walks to the ball
         void play(const std::shared_ptr<const FilteredBall>& ball);
 
+        /// @brief Playing behaviour when the ball is visible, dives to prevent a goal
+        void dive(const std::shared_ptr<const FilteredBall>& ball);
+
         /// @brief Playing behaviour when ball is lost, currently just rotate on spot
         void find(const std::shared_ptr<const FilteredBall>& ball);
 

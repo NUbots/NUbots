@@ -23,8 +23,10 @@
 #include <cmath>
 
 #include "extension/Configuration.hpp"
+#include "extension/Script.hpp"
 
 #include "message/actuation/BodySide.hpp"
+#include "message/behaviour/Dive.hpp"
 #include "message/behaviour/MotionCommand.hpp"
 #include "message/behaviour/Nod.hpp"
 #include "message/input/GameEvents.hpp"
@@ -51,6 +53,7 @@ namespace module::behaviour::strategy {
     using extension::Configuration;
 
     using message::behaviour::Behaviour;
+    using message::behaviour::Dive;
     using message::behaviour::MotionCommand;
     using message::behaviour::Nod;
     using message::input::GameEvents;
@@ -85,6 +88,10 @@ namespace module::behaviour::strategy {
     using utility::support::Expression;
 
     using utility::support::Expression;
+
+    using extension::ExecuteScript;
+    using extension::ExecuteScriptByName;
+    using extension::Script;
 
     SoccerStrategy::SoccerStrategy(std::unique_ptr<NUClear::Environment> environment)
         : Reactor(std::move(environment)) {
@@ -365,11 +372,6 @@ namespace module::behaviour::strategy {
             else if (ball && cfg.is_goalie && ball->rBTt.norm() < cfg.goalie_max_ball_distance) {
                 // We are goalie and the ball is close enough for defensive action
                 dive(ball);
-                // TODO: Figure out which direction the ball is from the robot, change the following code to dive in
-                // relevant direction
-
-
-                // After dive, Player should attempt to stand immediatey.
             }
             else if (ball && NUClear::clock::now() - ball->time_of_measurement < cfg.ball_last_seen_max_time) {
                 // We are not goalie or the ball is close enough, request walk planner to walk to the ball if
@@ -432,6 +434,7 @@ namespace module::behaviour::strategy {
     }
 
     void SoccerStrategy::find(const std::shared_ptr<const FilteredBall>& ball) {
+        log<NUClear::WARN>("Here");
         if (ball && ball->rBTt.y() < 0.0) {
             emit(std::make_unique<MotionCommand>(utility::behaviour::RotateOnSpot(true)));
         }
@@ -442,12 +445,14 @@ namespace module::behaviour::strategy {
 
     void SoccerStrategy::dive(const std::shared_ptr<const FilteredBall>& ball) {
         float yaw_angle = std::atan2(ball->rBTt.y(), ball->rBTt.x());
-        // TODO: Change to dive when available
+        log<NUClear::WARN>(yaw_angle);
         if (yaw_angle < 0) {
-            emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
+            log<NUClear::WARN>("LEFT");
+            emit(std::make_unique<Dive>(true));
         }
         else {
-            emit(std::make_unique<KickScriptCommand>(LimbID::RIGHT_LEG, KickCommandType::NORMAL));
+            log<NUClear::WARN>("RIGHT");
+            emit(std::make_unique<Dive>(false));
         }
     }
 
