@@ -1,16 +1,13 @@
 import React from 'react'
+import { StoryApi } from '@storybook/addons'
+import { StoryFnReactReturnType } from '@storybook/react/dist/ts3.9/client/preview/types'
 
-import style from './fullscreen.css'
+export function fullscreenDecorator(story: () => JSX.Element) {
+  return <div style={{ width: '100vw', height: '100vh' }}>{story()}</div>
+}
 
-export function fullscreen(story: () => JSX.Element) {
-  return (
-    <div className={style.fullscreen}>
-      {
-        // This is an inline <style> and not in `fullscreen.css` as that would make it apply globally
-        // to all stories, due to the way we build and extract the styles from CSS files.
-      }
-      <style>{'body { margin: 0; padding: 0; }'}</style>
-      {story()}
-    </div>
-  )
+export function fullscreen(stories: StoryApi<StoryFnReactReturnType>) {
+  stories.addParameters({ layout: 'fullscreen' })
+  stories.addDecorator(fullscreenDecorator)
+  return stories
 }

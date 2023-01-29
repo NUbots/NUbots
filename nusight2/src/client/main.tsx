@@ -16,6 +16,8 @@ import { installVisualMesh } from './components/visual_mesh/install'
 import { NavigationConfiguration } from './navigation'
 import { NUsightNetwork } from './network/nusight_network'
 
+import './main.css'
+
 const nav = NavigationConfiguration.of()
 const appModel = AppModel.of()
 const nusightNetwork = NUsightNetwork.of(appModel)
