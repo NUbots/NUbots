@@ -81,6 +81,18 @@ namespace utility::math::coordinates {
         return cartesianCoordinates;
     }
 
+    template <typename T, typename U = typename T::Scalar>
+    [[nodiscard]] inline Eigen::Matrix<U, 2, 1> cartesianToPolar(const Eigen::MatrixBase<T>& cartesianCoordinates) {
+        const U x = cartesianCoordinates.x();
+        const U y = cartesianCoordinates.y();
+        Eigen::Matrix<U, 2, 1> result;
+
+        result.x() = std::sqrt(x * x + y * y);  // r
+        result.y() = std::atan2(y, x);          // theta
+
+        return result;
+    }
+
 }  // namespace utility::math::coordinates
 
 
