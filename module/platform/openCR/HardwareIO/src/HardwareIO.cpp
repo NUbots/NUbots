@@ -398,7 +398,8 @@ namespace module::platform::openCR {
                 msg->id          = response[4];
                 msg->length      = packet_length;
                 msg->instruction = response[7];
-                msg->error       = response[8];
+                msg->alert       = (response[8] >> 7) & 1;   // select alert flag in MSB
+                msg->error       = response[8] & ~(1 << 7);  // remove alert flag to get error number
                 std::copy(response.begin() + 9, response.begin() + packet_length - 4, std::back_inserter(msg->data));
                 msg->checksum  = (response[response.size() - 1] << 8) | response[response.size() - 2];
                 msg->timestamp = NUClear::clock::now();
@@ -585,7 +586,7 @@ namespace module::platform::openCR {
                                           nugus.convertAcc(data.acc[2]));  // Z
 
         // Command send/receive errors only
-        opencrState.errorFlags.byte = uint8_t(packet.error);
+        opencsState.alertFlag = bool(packet.alert) opencrState.errorNumber = uint8_t(packet.error);
 
         // Work out a battery charged percentage
         batteryState.currentVoltage = nugus.convertVoltage(data.voltage);
