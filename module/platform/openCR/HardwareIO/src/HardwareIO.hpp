@@ -54,13 +54,8 @@ namespace module::platform::openCR {
             uint16_t buzzer = 0;
 
             // Error status
-            union errorFlags {
-                struct {
-                    uint8_t alertFlag   = 0 : 1;
-                    message::platform::StatusReturn::CommandError errorNumber = 0 : 7;
-                },
-                    uint8_t byte;  // To set/access all at once
-            }
+            uint8_t alertFlag   = 0 : 1;
+            uint8_t errorNumber = 0 : 7;
         };
 
         struct Battery {
