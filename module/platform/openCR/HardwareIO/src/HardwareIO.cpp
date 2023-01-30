@@ -660,7 +660,7 @@ namespace module::platform::openCR {
         /* OpenCR data */
         sensors.platform_error_flags = RawSensors::Error::OK;
         /// @todo Add proper error handling to translate new errors into rawsensors errors, using
-        /// opencrState.errorFlags.errorNumber
+        /// opencrState.errorFlags.errorNumber and opencrState.errorFlags.alertFlag
         sensors.led_panel     = opencrState.ledPanel;
         sensors.head_led      = opencrState.headLED;
         sensors.eye_led       = opencrState.eyeLED;
