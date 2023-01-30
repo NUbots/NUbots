@@ -15,7 +15,8 @@
 namespace module::platform::openCR {
 
     using extension::Configuration;
-    using message::motion::ServoTarget;
+    using message::actuation::ServoTarget;
+    using message::actuation::ServoTargets;
     using message::platform::RawSensors;
     using message::platform::StatusReturn;
     using utility::support::Expression;
@@ -281,11 +282,9 @@ namespace module::platform::openCR {
             // TODO: Find a way to gather received data and combine into a Sensors message for emitting
         });
 
-        /// @todo cm740 HardwareIO does this with ServoTargets instead. check if this is wroth changing.
-        // This trigger writes the servo positions to the hardware
-        on<Trigger<std::vector<ServoTarget>>>().then([this](const std::vector<ServoTarget>& commands) {
+        on<Trigger<ServoTargets>>().then([this](const ServoTargets& commands) {
             // Loop through each of our commands and update servo state information accordingly
-            for (const auto& command : commands) {
+            for (const auto& command : commands.targets) {
                 float diff = utility::math::angle::difference(command.position, servoState[command.id].presentPosition);
                 NUClear::clock::duration duration = command.time - NUClear::clock::now();
 
@@ -317,7 +316,7 @@ namespace module::platform::openCR {
         });
 
         on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
-            auto commandList = std::make_unique<std::vector<ServoTarget>>();
+            auto commandList = std::make_unique<ServoTargets>();
             commandList->push_back(command);
 
             // Emit it so it's captured by the reaction above
@@ -550,7 +549,7 @@ namespace module::platform::openCR {
         // LED_1 = 0x01
         // LED_2 = 0x02
         // LED_3 = 0x04
-        opencrState.ledPanel = {data.led & 0x01, data.led & 0x02, data.led & 0x04};
+        opencrState.ledPanel = {bool(data.led & 0x01), bool(data.led & 0x02), bool(data.led & 0x04)};
 
         // 0BBBBBGG GGGRRRRR
         // R = 0x001F
@@ -567,7 +566,7 @@ namespace module::platform::openCR {
         // Button Right (Reset) = 0x01
         // Button Middle = 0x02
         // Button Left = 0x04
-        opencrState.buttons = {data.button & 0x04, data.button & 0x02, data.button & 0x01};
+        opencrState.buttons = {bool(data.button & 0x04), bool(data.button & 0x02), bool(data.button & 0x01)};
 
         // opencrState.gyro = {nugus.convertGyro(data.gyro[2]),   // X
         // nugus.convertGyro(data.gyro[1]),   // Y
@@ -586,7 +585,8 @@ namespace module::platform::openCR {
                                           nugus.convertAcc(data.acc[2]));  // Z
 
         // Command send/receive errors only
-        opencsState.alertFlag = bool(packet.alert) opencrState.errorNumber = uint8_t(packet.error);
+        opencrState.alertFlag   = bool(packet.alert);
+        opencrState.errorNumber = uint8_t(packet.error);
 
         // Work out a battery charged percentage
         batteryState.currentVoltage = nugus.convertVoltage(data.voltage);

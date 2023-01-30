@@ -116,7 +116,7 @@ namespace module::platform::openCR {
         void processModelInformation(const message::platform::StatusReturn& packet);
         void processOpenCRData(const message::platform::StatusReturn& packet);
         void processServoData(const message::platform::StatusReturn& packet);
-        RawSensors constructSensors();
+        message::platform::RawSensors constructSensors();
     };
 
 }  // namespace module::platform::openCR
