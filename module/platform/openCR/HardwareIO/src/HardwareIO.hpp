@@ -54,8 +54,8 @@ namespace module::platform::openCR {
             uint16_t buzzer = 0;
 
             // Error status
-            uint8_t alertFlag   = 0 : 1;
-            uint8_t errorNumber = 0 : 7;
+            bool alertFlag      = 0;
+            uint8_t errorNumber = 0;
         };
 
         struct Battery {
