@@ -16,7 +16,7 @@ namespace module::localisation {
          * @param length The new length of the map
          */
         void resize(int width, int length) {
-            map.resize(length, width);
+            map.resize(width, length);
             map.setZero();
         }
 

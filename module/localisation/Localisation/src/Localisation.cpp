@@ -13,6 +13,7 @@ namespace module::localisation {
     using VisionGoals = message::vision::Goals;
     using message::support::FieldDescription;
     using VisionLines = message::vision::FieldLines;
+    using message::input::Sensors;
     using message::localisation::Field;
     using message::motion::DisableWalkEngineCommand;
     using message::motion::EnableWalkEngineCommand;
@@ -20,6 +21,7 @@ namespace module::localisation {
     using message::motion::KillGetup;
     using message::motion::StopCommand;
     using message::motion::WalkCommand;
+    using utility::input::ServoID;
 
 
     using utility::math::coordinates::cartesianToPolar;
@@ -137,12 +139,34 @@ namespace module::localisation {
             // Close the file
             file.close();
 
+            // For all points in the map with an occupancy value of 1, display them on graph
+            for (int i = 0; i < fieldline_map.map.rows(); i++) {
+                for (int j = 0; j < fieldline_map.map.cols(); j++) {
+                    if (fieldline_map.map(i, j) == 1) {
+                        emit(graph("Fieldline Map", i, j));
+                    }
+                }
+            }
+
             // Initialise the particle filter
             state = Eigen::Vector3d::Zero();
 
             // Set the update times to now
             last_time_update_time        = NUClear::clock::now();
             last_measurement_update_time = NUClear::clock::now();
+
+            // Testing
+            Eigen::Vector2d test_observation((fd.dimensions.field_width / 2) - 1, 0.0);
+            Eigen::Vector3d test_state(1.0, 1.0, M_PI_4);
+
+            // Test the observation relative function
+            Eigen::Vector2i cell = observation_relative(test_state, test_observation);
+            log("map.rows(), map.cols(): ", fieldline_map.map.rows(), ", ", fieldline_map.map.cols());
+            log<NUClear::INFO>("Cell on the map", cell.x(), ", ", cell.y());
+            log<NUClear::INFO>("Value: ", fieldline_map.map(cell.x(), cell.y()));
+
+            double occupancy = get_occupancy(cell);
+            log<NUClear::INFO>("Occupancy: ", occupancy);
         });
 
         on<Trigger<WalkCommand>>().then([this](const WalkCommand& wc) {
@@ -206,22 +230,35 @@ namespace module::localisation {
             }
         });
 
-        on<Trigger<VisionLines>, With<FieldDescription>>().then(
+        on<Trigger<VisionLines>, With<FieldDescription>, With<Sensors>>().then(
             "Vision Lines",
-            [this](const VisionLines& line_points, const FieldDescription& fd) {
+            [this](const VisionLines& line_points, const FieldDescription& fd, const Sensors& sensors) {
                 /* Perform measurement correction */
+                Eigen::Isometry3d Htw = Eigen::Isometry3d(sensors.Htw.cast<double>());
+                Eigen::Isometry3d Htf = Eigen::Isometry3d(sensors.Htx[ServoID::L_ANKLE_ROLL].cast<double>());
+                // Set the rotation from torso to foot to be the identity
+                Htf.linear() = Eigen::Matrix3d::Identity();
+
+                Eigen::Isometry3d Hwf = Htw.inverse() * Htf;
 
                 // Identify the line points on the field
+                Eigen::Vector3d test_state(0.0, 0.0, 0.0);
+                std::vector<Eigen::Vector2d> field_point_observations;
                 for (auto point : line_points.points) {
                     Eigen::Isometry3d Hcw = Eigen::Isometry3d(line_points.Hcw.cast<double>());
-                    auto rPCw             = ray2cartesian(point.cast<double>(), Hcw);
-                    emit(graph("Field points:", rPCw.x(), rPCw.y(), rPCw.z()));
-                    auto polar = cartesianToPolar(rPCw.head(2));
-                    emit(graph("Field points polar:", polar.x(), polar.y()));
+                    auto uPCw             = point.cast<double>();
+                    auto rPCc             = ray2cartesian(uPCw, Hcw, Hwf);
+                    emit(graph("Field points:", rPCc.x(), rPCc.y(), rPCc.z()));
+
+                    field_point_observations.push_back(Eigen::Vector2d(rPCc.x(), rPCc.y()));
+                    auto cell = observation_relative(test_state, Eigen::Vector2d(rPCc.x(), rPCc.y()));
+                    emit(graph("Observation points:", cell.x(), cell.y()));
                 }
+
                 // TODO: Figure out how to incorporate these points into a measurement model.
-                // Grid map?
-                // Visual Mesh type grid map
+
+                double particle_weight = calculate_weight(test_state, field_point_observations);
+                log<NUClear::INFO>("Particle weight: ", particle_weight);
 
                 // Plug into particle filter
 
@@ -229,16 +266,65 @@ namespace module::localisation {
             });
     }
 
-    /// @brief Converts a ray from the camera to a point on the field
-    /// @param uPCc ray from the camera to the field point
+    /// @brief Converts a unit vector of point from the camera in world space to a (x,y) point relative to the robot on
+    /// the field plane
+    /// @param uPCw unit vector from the camera to the field point in world space
     /// @param Hcw the camera to world transform
-    /// @return the field point in world coordinates
-    Eigen::Vector3d Localisation::ray2cartesian(Eigen::Vector3d uPCc, Eigen::Isometry3d Hcw) {
-        // Calculate the position of the field point relative to the robot
-        auto Hwc  = Hcw.inverse();
-        auto rWCw = -Hwc.translation();
-        auto rPCw = uPCc * (rWCw.z() / uPCc.z());
-        return rPCw;
+    /// @return the field point relative to the robot
+    Eigen::Vector3d Localisation::ray2cartesian(Eigen::Vector3d uPCw, Eigen::Isometry3d Hcw, Eigen::Isometry3d Hwf) {
+
+        auto Hwc             = Hcw.inverse();
+        auto Hfw             = Hwf.inverse();
+        auto Hfc             = Hfw * Hwc;
+        Eigen::Vector3d rPCw = uPCw * (-Hwc.translation().z() / uPCw.z());
+        Eigen::Vector3d rPFf = Hfw * rPCw;
+
+        return rPFf;
     }
+
+
+    double Localisation::get_occupancy(const Eigen::Vector2i observation) {
+        if (observation.x() < 0 || observation.x() >= fieldline_map.map.cols() || observation.y() < 0
+            || observation.y() >= fieldline_map.map.rows()) {
+            return 0;
+        }
+        else {
+            return fieldline_map.map(observation.x(), observation.y());
+        }
+    }
+
+    Eigen::Vector2i Localisation::observation_relative(const Eigen::Matrix<double, 3, 1> particle,
+                                                       const Eigen::Vector2d observation) {
+        double c = cos(particle(2));
+        double s = sin(particle(2));
+
+        // Calculate the position of observation relative to the field [m]
+        double x_field = observation(0) * c - observation(1) * s + particle(0);
+        double y_field = observation(0) * s + observation(1) * c + particle(1);
+
+        // Get the associated position in the map
+        int x_map = fieldline_map.map.rows() / 2 - std::round(y_field / cfg.grid_size);
+        int y_map = fieldline_map.map.cols() / 2 + std::round(x_field / cfg.grid_size);
+
+        return Eigen::Vector2i(x_map, y_map);
+    }
+
+    /// @brief Get the weight of a particle given a set of observations
+    double Localisation::calculate_weight(const Eigen::Matrix<double, 3, 1> particle,
+                                          const std::vector<Eigen::Vector2d>& observations) {
+        double weight = 0;
+        for (auto observation : observations) {
+            // Get the position of the observation in the map for this particle
+            Eigen::Vector2i map_position = observation_relative(particle, observation);
+
+            // Get the occupancy of the observation
+            double occupancy = get_occupancy(map_position);
+
+            // Add the occupancy to the weight of the particle
+            weight += occupancy;
+        }
+        return weight;
+    }
+
 
 }  // namespace module::localisation
