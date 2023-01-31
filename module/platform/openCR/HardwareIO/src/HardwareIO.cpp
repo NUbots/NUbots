@@ -666,6 +666,81 @@ namespace module::platform::openCR {
 
         /* Servos data */
         /// @todo fill this in next, see cm740 for how it was done before
+        for (int i = 0; i < 20; i++) {
+            // Get a reference to the servo we are populating
+            RawSensors::Servo& servo = utility::platform::getRawServo(i, sensors);
+
+
+            // Booleans
+            servo.torque_enabled = servoState[i].torqueEnabled;
+
+            // Gain
+            // RawSensors only takes PID but the v2 protocol has more options
+            // so we assing the velocity gain to the sensor message
+            servo.p_gain = servoState[i].velocityPGain;
+            servo.i_gain = servoState[i].velocityIGain;
+            servo.d_gain = servoState[i].velocityDGain;
+
+            // Torque
+            // The v2 protocol doesn't really have an equivalent for this to we
+            // just zero it until we find a better replacement.
+            /// @todo Fill the torque field with something appropriate.
+            /// Condsider https://emanual.robotis.com/docs/en/dxl/mx/mx-64-2/#pwm-limit36
+            servo.torque = NULL;
+
+            // Targets
+            servo.goal_position = servoState[i].goalPosition;
+            servo.moving_speed  = servoState[i].presentVelocity;
+
+
+            ////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////
+            /// @todo when you're in next Dex:
+            /// You were up to here. Fix the case for each variable and keep
+            /// converting the cm740 logic to openCR.
+            /// Also check to see if torque and torqueEnable is actually used
+            /// in the codebase. Ysobel said it might be in sensorfilter.
+            ////////////////////////////////////////////////////////////////////
+            ////////////////////////////////////////////////////////////////////
+
+
+            // If we are faking this hardware, simulate its motion
+            if (servo_state[i].simulated) {
+                // Work out how fast we should be moving
+                // 5.236 == 50 rpm which is similar to the max speed of the servos
+                float moving_speed =
+                    (servo_state[i].moving_speed == 0 ? 5.236 : servo_state[i].moving_speed) / UPDATE_FREQUENCY;
+
+                // Get our offset for this servo and apply it
+                // The values are now between -pi and pi around the servos axis
+                auto offset  = Convert::SERVO_OFFSET[i];
+                auto present = utility::math::angle::normalizeAngle(servo_state[i].present_position - offset);
+                auto goal    = utility::math::angle::normalizeAngle(servo_state[i].goal_position - offset);
+
+                // We have reached our destination
+                if (std::abs(present - goal) < moving_speed) {
+                    servo_state[i].present_position = servo_state[i].goal_position;
+                    servo_state[i].present_speed    = 0;
+                }
+                // We have to move towards our destination at moving speed
+                else {
+                    servo_state[i].present_position = utility::math::angle::normalizeAngle(
+                        (present + moving_speed * (goal > present ? 1 : -1)) + offset);
+                    servo_state[i].present_speed = servo_state[i].moving_speed;
+                }
+
+                // Store our simulated values
+                servo.present_position = servo_state[i].present_position;
+                servo.present_speed    = servo_state[i].goal_position;
+                servo.load             = servo_state[i].load;
+                servo.voltage          = servo_state[i].voltage;
+                servo.temperature      = servo_state[i].temperature;
+            }
+
+            // If we are using real data, get it from the packet
+            else {
+            }
+        }
 
         /* FSRs data */
         /// @todo ask whats going on with this not being included
