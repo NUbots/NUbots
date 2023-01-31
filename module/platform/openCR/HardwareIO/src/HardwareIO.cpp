@@ -317,7 +317,7 @@ namespace module::platform::openCR {
 
         on<Trigger<ServoTarget>>().then([this](const ServoTarget& command) {
             auto commandList = std::make_unique<ServoTargets>();
-            commandList->push_back(command);
+            commandList->targets.push_back(command);
 
             // Emit it so it's captured by the reaction above
             emit<Scope::DIRECT>(std::move(commandList));
@@ -555,10 +555,10 @@ namespace module::platform::openCR {
         // R = 0x001F
         // G = 0x02E0
         // B = 0x7C00
-        uint32_t RGB = uint8_t(data.rgbLed & 0x001F) << 16;
-        RGB |= uint8_t(data.rgbLed & 0x02E0) << 8;
-        RGB |= uint8_t(data.rgbLed & 0x7C00);
-        opencrState.headLED = {RGB};
+        uint32_t RGB = 0;
+        RGB |= uint8_t(data.rgbLed & 0x001F) << 16;  // R
+        RGB |= uint8_t(data.rgbLed & 0x02E0) << 8;   // G
+        RGB |= uint8_t(data.rgbLed & 0x7C00);        // B
         opencrState.headLED = {RGB};
 
         // 00004321
@@ -568,17 +568,9 @@ namespace module::platform::openCR {
         // Button Left = 0x04
         opencrState.buttons = {bool(data.button & 0x04), bool(data.button & 0x02), bool(data.button & 0x01)};
 
-        // opencrState.gyro = {nugus.convertGyro(data.gyro[2]),   // X
-        // nugus.convertGyro(data.gyro[1]),   // Y
-        // nugus.convertGyro(data.gyro[0])};  // Z
-
         opencrState.gyro = Eigen::Vector3f(nugus.convertGyro(data.gyro[2]),   // X
                                            nugus.convertGyro(data.gyro[1]),   // Y
                                            nugus.convertGyro(data.gyro[0]));  // Z
-
-        // opencrState.acc = {nugus.convertAcc(data.acc[0]),   // X
-        //                    nugus.convertAcc(data.acc[1]),   // Y
-        //                    nugus.convertAcc(data.acc[2])};  // Z
 
         opencrState.acc = Eigen::Vector3f(nugus.convertAcc(data.acc[0]),   // X
                                           nugus.convertAcc(data.acc[1]),   // Y
@@ -677,6 +669,8 @@ namespace module::platform::openCR {
 
         /* FSRs data */
         /// @todo ask whats going on with this not being included
+
+        return sensors;
     }
 
 }  // namespace module::platform::openCR
