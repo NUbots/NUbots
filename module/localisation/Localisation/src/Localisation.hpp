@@ -16,9 +16,21 @@
 
 #include "utility/input/ServoID.hpp"
 #include "utility/math/coordinates.hpp"
+#include "utility/math/stats/multivariate.hpp"
+#include "utility/math/stats/resample/multinomial.hpp"
+#include "utility/math/stats/resample/resample.hpp"
+#include "utility/math/stats/resample/residual.hpp"
+#include "utility/math/stats/resample/stratified.hpp"
+#include "utility/math/stats/resample/systematic.hpp"
 #include "utility/nusight/NUhelpers.hpp"
 
 namespace module::localisation {
+
+    // Particle struct
+    struct Particle {
+        Eigen::Matrix<double, 3, 1> state;
+        double weight;
+    };
 
     class Localisation : public NUClear::Reactor {
     private:
@@ -41,11 +53,16 @@ namespace module::localisation {
         /// @brief The state (x,y,theta) of the robot
         Eigen::Matrix<double, 3, 1> state = Eigen::Matrix<double, 3, 1>::Zero();
 
+        /// @brief The covariance matrix of the robot's state
+        Eigen::Matrix<double, 3, 3> covariance = 0.005 * Eigen::Matrix<double, 3, 3>::Identity();
+
         /// @brief Status of walk engine
         bool walk_engine_enabled = false;
 
         /// @brief Status of if the robot is falling
         bool falling = false;
+
+        int num_particles = 100;
 
     public:
         /// @brief Called by the powerplant to build and setup the Localisation reactor.

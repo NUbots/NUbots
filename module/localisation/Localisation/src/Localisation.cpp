@@ -21,11 +21,11 @@ namespace module::localisation {
     using message::motion::KillGetup;
     using message::motion::StopCommand;
     using message::motion::WalkCommand;
+
     using utility::input::ServoID;
-
-
     using utility::math::coordinates::cartesianToPolar;
     using utility::math::coordinates::reciprocalSphericalToCartesian;
+    using utility::math::stats::MultivariateNormal;
     using utility::nusight::graph;
 
 
@@ -148,7 +148,6 @@ namespace module::localisation {
                 }
             }
 
-            // Initialise the particle filter
             state = Eigen::Vector3d::Zero();
 
             // Set the update times to now
@@ -157,15 +156,15 @@ namespace module::localisation {
 
             // Testing
             Eigen::Vector2d test_observation((fd.dimensions.field_width / 2) - 1, 0.0);
-            Eigen::Vector3d test_state(1.0, 1.0, M_PI_4);
+            Eigen::Vector3d test_state(0, 0, 0);
 
             // Test the observation relative function
             Eigen::Vector2i cell = observation_relative(test_state, test_observation);
+            double occupancy     = get_occupancy(cell);
+
             log("map.rows(), map.cols(): ", fieldline_map.map.rows(), ", ", fieldline_map.map.cols());
             log<NUClear::INFO>("Cell on the map", cell.x(), ", ", cell.y());
             log<NUClear::INFO>("Value: ", fieldline_map.map(cell.x(), cell.y()));
-
-            double occupancy = get_occupancy(cell);
             log<NUClear::INFO>("Occupancy: ", occupancy);
         });
 
@@ -248,20 +247,49 @@ namespace module::localisation {
                     Eigen::Isometry3d Hcw = Eigen::Isometry3d(line_points.Hcw.cast<double>());
                     auto uPCw             = point.cast<double>();
                     auto rPCc             = ray2cartesian(uPCw, Hcw, Hwf);
-                    emit(graph("Field points:", rPCc.x(), rPCc.y(), rPCc.z()));
-
                     field_point_observations.push_back(Eigen::Vector2d(rPCc.x(), rPCc.y()));
                     auto cell = observation_relative(test_state, Eigen::Vector2d(rPCc.x(), rPCc.y()));
-                    emit(graph("Observation points:", cell.x(), cell.y()));
+                    emit(graph("Observation points [m]:", rPCc.x(), rPCc.y(), rPCc.z()));
+                    emit(graph("Observation points on map [x,y]:", cell.x(), cell.y()));
+                }
+                // Sample particles from the current distribution
+                std::vector<Particle> particles;
+                MultivariateNormal<double, 3> multivariate(state, covariance);
+
+                for (int i = 0; i < num_particles; i++) {
+                    Particle p;
+                    p.state = multivariate.sample();
+                    // Calculate the weight the particle
+                    p.weight = calculate_weight(p.state, field_point_observations);
+
+                    for (int j = 0; j < field_point_observations.size(); j++) {
+                        auto cell_i = observation_relative(p.state, field_point_observations[j]);
+                        emit(graph("Observation points particle " + std::to_string(i), cell_i.x(), cell_i.y()));
+                    }
+                    auto particle_cell = observation_relative(p.state, Eigen::Vector2d(0.0, 0.0));
+                    emit(graph("Particle " + std::to_string(i), particle_cell.x(), particle_cell.y()));
+                    particles.push_back(p);
                 }
 
-                // TODO: Figure out how to incorporate these points into a measurement model.
+                // TODO: Implement with PaticleFilter.hpp
 
-                double particle_weight = calculate_weight(test_state, field_point_observations);
-                log<NUClear::INFO>("Particle weight: ", particle_weight);
+                // Sort the particles by weight
+                std::sort(particles.begin(), particles.end(), [](const Particle& a, const Particle& b) {
+                    return a.weight > b.weight;
+                });
+                // Print the best particle
+                log<NUClear::INFO>("Best particle: ",
+                                   particles[0].state.x(),
+                                   ", ",
+                                   particles[0].state.y(),
+                                   ", ",
+                                   particles[0].state.z(),
+                                   " with weight: ",
+                                   particles[0].weight);
 
-                // Plug into particle filter
-
+                state              = particles[0].state;
+                auto particle_cell = observation_relative(state, Eigen::Vector2d(0.0, 0.0));
+                emit(graph("Best particle", particle_cell.x(), particle_cell.y()));
                 // Profit.
             });
     }
@@ -273,13 +301,20 @@ namespace module::localisation {
     /// @return the field point relative to the robot
     Eigen::Vector3d Localisation::ray2cartesian(Eigen::Vector3d uPCw, Eigen::Isometry3d Hcw, Eigen::Isometry3d Hwf) {
 
-        auto Hwc             = Hcw.inverse();
-        auto Hfw             = Hwf.inverse();
-        auto Hfc             = Hfw * Hwc;
-        Eigen::Vector3d rPCw = uPCw * (-Hwc.translation().z() / uPCw.z());
-        Eigen::Vector3d rPFf = Hfw * rPCw;
+        auto Hwc = Hcw.inverse();
+        auto Hfw = Hwf.inverse();
+        auto Hfc = Hfw * Hwc;
+        // log<NUClear::DEBUG>("uPCw: ", uPCw.transpose());
+        // log<NUClear::DEBUG>("Hwc.translation().z(): ", Hwc.translation().z());
+        // log<NUClear::DEBUG>("Scalar: ", Hwc.translation().z() / uPCw.z());
 
-        return rPFf;
+        Eigen::Vector3d rPCw = uPCw * std::abs(Hwc.translation().z() / uPCw.z());
+        Eigen::Vector3d rPCf = Hcw.linear() * rPCw;
+        // log<NUClear::DEBUG>("Hwf: ", Hwf.translation().transpose());
+        // log<NUClear::DEBUG>("Hwf rpy: ", Hwf.rotation().eulerAngles(0, 1, 2).transpose());
+        // log<NUClear::DEBUG>("rPFf: ", rPFf.transpose());
+
+        return rPCw;
     }
 
 
