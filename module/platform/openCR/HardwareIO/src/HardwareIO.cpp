@@ -693,52 +693,56 @@ namespace module::platform::openCR {
             servo.moving_speed  = servoState[i].presentVelocity;
 
 
-            ////////////////////////////////////////////////////////////////////
-            ////////////////////////////////////////////////////////////////////
-            /// @todo when you're in next Dex:
-            /// You were up to here. Fix the case for each variable and keep
-            /// converting the cm740 logic to openCR.
-            /// Also check to see if torque and torqueEnable is actually used
-            /// in the codebase. Ysobel said it might be in sensorfilter.
-            ////////////////////////////////////////////////////////////////////
-            ////////////////////////////////////////////////////////////////////
-
-
             // If we are faking this hardware, simulate its motion
-            if (servo_state[i].simulated) {
+            if (servoState[i].simulated) {
                 // Work out how fast we should be moving
                 // 5.236 == 50 rpm which is similar to the max speed of the servos
-                float moving_speed =
-                    (servo_state[i].moving_speed == 0 ? 5.236 : servo_state[i].moving_speed) / UPDATE_FREQUENCY;
+                float movingSpeed =
+                    (servoState[i].presentVelocity == 0 ? 5.236 : servoState[i].presentVelocity) / UPDATE_FREQUENCY;
 
                 // Get our offset for this servo and apply it
                 // The values are now between -pi and pi around the servos axis
-                auto offset  = Convert::SERVO_OFFSET[i];
-                auto present = utility::math::angle::normalizeAngle(servo_state[i].present_position - offset);
-                auto goal    = utility::math::angle::normalizeAngle(servo_state[i].goal_position - offset);
+                auto offset  = nugus.servo_offset[i];
+                auto present = utility::math::angle::normalizeAngle(servoState[i].presentPosition - offset);
+                auto goal    = utility::math::angle::normalizeAngle(servoState[i].goalPosition - offset);
 
                 // We have reached our destination
-                if (std::abs(present - goal) < moving_speed) {
-                    servo_state[i].present_position = servo_state[i].goal_position;
-                    servo_state[i].present_speed    = 0;
+                if (std::abs(present - goal) < movingSpeed) {
+                    servoState[i].presentPosition = servoState[i].goalPosition;
+                    servoState[i].presentVelocity = 0;
                 }
                 // We have to move towards our destination at moving speed
                 else {
-                    servo_state[i].present_position = utility::math::angle::normalizeAngle(
-                        (present + moving_speed * (goal > present ? 1 : -1)) + offset);
-                    servo_state[i].present_speed = servo_state[i].moving_speed;
+                    servoState[i].presentPosition = utility::math::angle::normalizeAngle(
+                        (present + movingSpeed * (goal > present ? 1 : -1)) + offset);
+                    servoState[i].presentVelocity = movingSpeed;
                 }
 
                 // Store our simulated values
-                servo.present_position = servo_state[i].present_position;
-                servo.present_speed    = servo_state[i].goal_position;
-                servo.load             = servo_state[i].load;
-                servo.voltage          = servo_state[i].voltage;
-                servo.temperature      = servo_state[i].temperature;
+                servo.present_position = servoState[i].presentPosition;
+                servo.present_speed    = servoState[i].goalPosition;
+                servo.load             = NULL;  // doesn't exist in v2 protocol
+                servo.voltage          = servoState[i].voltage;
+                servo.temperature      = servoState[i].temperature;
             }
 
             // If we are using real data, get it from the packet
             else {
+                // Error code
+                servo.error_flags = servoState[i].errorFlags;
+
+                // Present Data
+                servo.present_position = nugus.convertPosition(i, servoState[i].presentPosition);
+                servo.present_speed    = nugus.convertVelocity(i, servoState[i].presentSpeed);
+
+                // Diagnostic Information
+                servo.voltage     = nugus.convertVoltage(servoState[i].voltage);
+                servo.temperature = nugus.convertTemperature(servoState[i].temperature);
+
+                // Clear Overvoltage flag if current voltage is greater than maximum expected voltage
+                if (servo.voltage <= batteryState.chargedVoltage) {
+                    servo.error_flags &= ~RawSensors::Error::INPUT_VOLTAGE;
+                }
             }
         }
 
